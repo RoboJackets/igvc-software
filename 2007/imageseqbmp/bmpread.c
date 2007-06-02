@@ -11,11 +11,17 @@ int ImageLoad(char *filename, Image *image) {
     unsigned short int planes;          // number of planes in image (must be 1) 
     unsigned short int bpp;             // number of bits per pixel (must be 24)
     char temp;                          // temporary color storage for bgr-rgb conversion.
+    
+    int rowSize;
+    char* rowData;
+    int x, y;
+    char* off1;
+    char* off2;
 
     // make sure the file is there.
     if ((file = fopen(filename, "rb"))==NULL)
     {
-	printf("File Not Found : %s\n",filename);
+	//printf("File Not Found : %s\n",filename);
 	return 0;
     }
     
@@ -72,11 +78,26 @@ int ImageLoad(char *filename, Image *image) {
 	return 0;
     }
 
-    for (i=0;i<size;i+=3) { // reverse all of the colors. (bgr -> rgb)
+	// reverse all of the colors. (bgr -> rgb)
+    for (i=0;i<size;i+=3) {
 	temp = image->data[i];
 	image->data[i] = image->data[i+2];
 	image->data[i+2] = temp;
     }
+    
+    // reverse all of the rows so that rows are in top->bottom order
+    rowSize = image->sizeX*3;
+    rowData = malloc(rowSize);
+    if (rowData == NULL) return 0;
+    off1 = image->data;
+    off2 = image->data + (image->sizeY-1)*rowSize;
+    for (y=0; y<image->sizeY/2; y++, off1 += rowSize, off2 -= rowSize) {
+    	// swap rows off1 and off2
+        memcpy(rowData, off1, rowSize);
+        memcpy(off1, off2, rowSize);
+        memcpy(off2, rowData, rowSize);
+    }
+    free(rowData);
     
     // we're done.
     return 1;
