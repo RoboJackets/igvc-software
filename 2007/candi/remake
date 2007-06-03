@@ -1,0 +1,11 @@
+#!/bin/sh
+qmake-qt4 -project \
+		-o candi.pro \
+		CONFIG+=debug \
+		LIBS+="-lplayercore -lltdl -lpthread -lplayerc++ -lplayerc -lm -lplayerxdr -lplayererror" \
+		INCLUDEPATH+="/usr/local/include/player-2.0/" \
+	-after \
+		DEPENDPATH-="transform/GenPoints" \
+		SOURCES-="transform/GenPoints/genpoints.c"
+
+qmake-qt4 -makefile
