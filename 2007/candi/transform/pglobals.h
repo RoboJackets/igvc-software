@@ -15,8 +15,10 @@
  *****************/
 
 #define FINAL_SCALE_FACTOR .69	/* Put final image in proper units (empirically determined) */
-#define HFOV (.8602)             //.8602 empirical value ~=49 degrees
-#define VFOV (HFOV*420/648)
+#define HFOV (.8602)             //.8602 empirical value ~=49 degrees (in radians)
+#define VFOV (HFOV*480/648)		// adjust for non-square NTSC pixels [648 == 720*(9/10)]	
+	//(HFOV*420/648)
+
 #define SCALE_FREE_FOCAL_LENGTH  (1/HFOV)	//actually 1.16252ish
 #define TEX_DIM (1024)				/* Power of 2 > TRANSFORM_INPUT_WIDTH */
 #define ASPECT_RATIO (3/2)			/* MUST be >1 */
@@ -30,16 +32,22 @@
 #define TRANSFORM_INPUT_DIVISOR 10
 
 /* Defines the width/height of the output images from the perspective transform */
-#define TRANSFORM_OUTPUT_WIDTH 900
-#define TRANSFORM_OUTPUT_HEIGHT 600
-#define OUTPUT_SCALE_FACTOR =.1//remove and multiply in with FSF for marginal speed boost
+// NOTE: the width should be divisible by 4 for grayscale and black&white views to work
+// NOTE: the aspect ratio of the output should match the aspect ratio of the input
+#define TRANSFORM_OUTPUT_WIDTH 456 //900
+#define TRANSFORM_OUTPUT_HEIGHT 304 //600
+//#define OUTPUT_SCALE_FACTOR =.1//remove and multiply in with FSF for marginal speed boost
 
 /************************
  *    Input Variables   *
  ************************/
  
-/*   Camera Info Vars
- * USE_AUX_CAM_SENSORS must be defined for the camera info to work as inputs*/
+/* 
+ * Camera Info Vars
+ * 
+ * USE_AUX_CAM_SENSORS must be defined for the camera info to work as inputs
+ */
+//#define USE_AUX_CAM_SENSORS
 extern volatile double CAM_HEIGHT;					
 extern volatile double CAM_X_ROTATION; 
 extern volatile double CAM_Y_ROTATION;

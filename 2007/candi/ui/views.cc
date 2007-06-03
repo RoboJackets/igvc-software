@@ -17,6 +17,9 @@ VisColorView testView = VisColorView("Debug", &visTestViewContent);
 VisColorView whiteDetectionCalibrationView = VisColorView("Calibrate: Color - White: General", &visWhiteDetectionCalibration);
 VisColorView whiteConditionView = VisColorView("Calibrate: Color - White: Conditions", &visWhiteCondition);
 
+// Same as "rawView", but with identified barrels boxed
+VisColorView barrelView = VisColorView("Barrels", &visBarrels);
+
 VisBlackAndWhiteView orangeView = VisBlackAndWhiteView("Color - Orange", &pixelIsOrange);
 VisBlackAndWhiteView whiteView = VisBlackAndWhiteView("Color - White", &pixelIsWhite);
 //VisBlackAndWhiteView yellowView = VisBlackAndWhiteView("Color - Yellow", &pixelIsYellow);
@@ -28,6 +31,3 @@ VisGrayView HSBBrightness = VisGrayView("HSB - Brightness", &visHSBBrightness);
 VisGrayView HSLHue = VisGrayView("HSL - Hue", &visHSLHue);
 VisGrayView HSLSaturation = VisGrayView("HSL - Saturation", &visHSLSaturation);
 VisGrayView HSLLightness = VisGrayView("HSL - Lightness", &visHSLLightness);
-
-// Same as "rawView", but with identified barrels boxed
-VisColorView barrelView = VisColorView("Barrels", &visBarrels);

@@ -22,8 +22,8 @@ void VideoView::draw(QPainter &p)
 {
 	QImage image = createImage();
 	{
-		// Fill background with black
-		p.fillRect(p.window(), Qt::black);
+		// Fill background with solid color
+		p.fillRect(p.window(), Qt::darkGray);	// Qt::black
 		
 		// Draw the image
 		p.drawImage(0, 0, image);
@@ -80,6 +80,13 @@ QImage GrayscaleView::createImage()
 	this->prepareToCreateImage();
 	
 	if (image && width && height) {
+		if ((long(image) % 4) != 0) {
+			printf("GrayscaleView: image is not 4-byte aligned\n");
+		}
+		if ((width % 4) != 0) {
+			printf("GrayscaleView: width of %d is not divisible by 4!\n", (int) width);
+		}
+		
 		QImage im = QImage(
 			(uchar*) image,
 			width, height,
@@ -138,6 +145,13 @@ QImage BlackAndWhiteView::createImage()
 		if (sizeof(bool) != sizeof(uchar)) {
 			printf("BlackAndWhiteView: sizeof(bool) != sizeof(uchar)!\n");
 			return QImage();
+		}
+		
+		if ((long(image) % 4) != 0) {
+			printf("BlackAndWhiteView: image is not 4-byte aligned\n");
+		}
+		if ((width % 4) != 0) {
+			printf("BlackAndWhiteView: width of %d is not divisible by 4!\n", (int) width);
 		}
 		
 		QImage im = QImage(
