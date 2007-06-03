@@ -1,0 +1,7 @@
+
+0-17:none
+18,19,20,21:width
+22,23,24,25:height
+26,27:bit planes(should be 1)
+28,29:bits per pixel
+54+:data
