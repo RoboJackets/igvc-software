@@ -1,5 +1,5 @@
 #include "PCamera.h"
-#include "../transform/pglobals_extern.h"
+#include "transform/pglobals_extern.h"
 #include <GL/gl.h>
 
 /*static*/ PCamera PCamera::INSTANCE;

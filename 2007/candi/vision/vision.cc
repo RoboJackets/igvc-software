@@ -50,6 +50,8 @@ void visFrame()
 			Camera::current->unlock();
 		}
 		
+		printf("DEBUG: visFrame\n");
+		
 		/* Do vision processing */
 		{
 			/* Precalculate commonly used information */
@@ -77,7 +79,7 @@ void visFrame()
 					/*
 					u8 curHue = (u8) ((hueTimeCounter / 1) % 256);
 					//printf("DEBUG: curHue=%d\n", (int) curHue);
-					//visCreateWhiteCalibrationViewUsingHue( curHue );
+					visCreateWhiteCalibrationViewUsingHue( curHue );
 					*/
 					
 					/*
