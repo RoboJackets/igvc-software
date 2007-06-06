@@ -1,11 +1,27 @@
 #!/bin/sh
+
+if test -f transform/GenPoints/getsurf.c ; then
+	# The surface matrix has been compiled successfully
+	echo "(The surface matrix was already compiled)"
+else
+	# Compile the surface matrix
+	echo "Compiling the surface matrix..."
+	cd transform/GenPoints/ ; make ; ./genpoints ; cd ../..
+fi
+
+echo "Creating: candi.pro"
 qmake-qt4 -project \
 		-o candi.pro \
 		CONFIG+=debug \
-		LIBS+="-lplayercore -lltdl -lpthread -lplayerc++ -lplayerc -lm -lplayerxdr -lplayererror" \
+		LIBS+="-L /usr/local/lib -lplayercore -lltdl -lpthread -lplayerc++ -lplayerc -lm -lplayerxdr -lplayererror" \
+		LIBS+="-lGL" \
+		LIBS+="-lglut" \
 		INCLUDEPATH+="/usr/local/include/player-2.0/" \
 	-after \
 		DEPENDPATH-="transform/GenPoints" \
 		SOURCES-="transform/GenPoints/genpoints.c"
 
+echo "Creating: Makefile"
 qmake-qt4 -makefile
+
+echo "Type 'make' to compile everything"
