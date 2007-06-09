@@ -2,6 +2,7 @@
 #include "vision_color.h"
 #include "vision_barrels.h"
 #include "vision_navigation.h"
+#include "vision/vision_line_blobber.h"
 
 #include "Camera.h"
 #include "Pixel.h"
@@ -50,20 +51,21 @@ void visFrame()
 			Camera::current->unlock();
 		}
 		
-		printf("DEBUG: visFrame\n");
-		
 		/* Do vision processing */
 		{
 			/* Precalculate commonly used information */
 			visClassifyPixelsByColor();
 			
 			/* Fast debugging views */
+			visCreateRedMinusGreenView();
 			visCreateHSBViews();		// depends on visClassifyPixelsByColor()
 			visCreateHSLViews();		// depends on visClassifyPixelsByColor()
 			
 			/* Execute primary analyses */
 			visFindBarrels();		// depends on visClassifyPixelsByColor()
 			visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
+			
+			//visBlobLines();
 			
 			/* Slow debugging views */
 			{

@@ -7,9 +7,6 @@
 #include "vision/Pixel.h"
 #include "ui/VideoView.h"
 
-static Buffer2D<Pixel> visRedSquareView;
-static VisColorView redSquareView = VisColorView("DEBUG: Red Square View", &visRedSquareView);
-
 // -----------------------------------------------------------------
 
 #include "transform/transform.h"
@@ -35,13 +32,7 @@ MainWindow *mainWindow;
 int main(int argc, char **argv) {
 	QApplication app(argc, argv);
 	mainWindow = new MainWindow();
-	
-	// Create red square view
-	visRedSquareView.resize(50,50);
-	for (int i=0, n=visRedSquareView.numElements(); i<n; i++) {
-		visRedSquareView[i] = Pixel(255,0,0);
-	}
-	
+		
 	// Start the thread that takes in data from the camera,
 	// transforms it, and hands off the data for vision processing.
 	pthread_t transformThread;

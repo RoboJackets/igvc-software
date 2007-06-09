@@ -45,7 +45,9 @@ const int HUD_PADDING_FROM_CORNER = 5;
  * when little orange-pixel noise is present */
 // XXX: chosen default value is arbitrary; subsequent adjustment recommended
 float barrelEdgeNoiseTolerance =
-	/*new FloatFilterParam("Barrel Edge - Noise Tolerance", 0.00f, 0.50f,*/ 0.07f;
+	/*new FloatFilterParam("Barrel Edge - Noise Tolerance", 0.00f, 0.50f,*/ 0.15f; //0.07f;
+
+#define GROW_WIDTH_TO_COMPENSATE_FOR_BARREL_EDGE_NOISE_FILTER 1
 
 /* higher values allow longer gaps between orange/white stripes,
  * tolerate larger highlights on the barrel,
@@ -98,7 +100,7 @@ IntervalEdgeToBarrelSidesAlgorithm chosenIntervalEdgeToBarrelSidesAlgorithm = IE
  * lower values tolerate fewer crazy intervals but give better results on average;
  * NOTE: If you set this to 0.00f, the percentile mode acts the same as the min-max mode.
  */
-float intervalEdgeVariationTolerance = 0.10f;
+float intervalEdgeVariationTolerance = 0.50f; //0.10f;
 
 // ### ALGORITHM ###
 
@@ -324,8 +326,28 @@ void visFindBarrels(void) {
 				}
 				}
 				
+				// Grow the detected barrel sides by approximately the amount
+				// that was lost during the barrel-edge-noise-tolerance calculation
+				if (GROW_WIDTH_TO_COMPENSATE_FOR_BARREL_EDGE_NOISE_FILTER) {
+					//bigWidth*(1 - 2*barrelEdgeNoiseTolerance) == smallWidth
+					
+					int smallWidth = rightBarrelEdgeX - leftBarrelEdgeX + 1;
+					int bigWidth = smallWidth/(1 - 2*barrelEdgeNoiseTolerance);
+					int lengthToGrowSides = (bigWidth-smallWidth)/2;
+					//printf("DEBUG: lengthToGrowSides=%d\n", lengthToGrowSides);
+					
+					#define min(a,b) (((a)<(b)) ? (a) : (b))
+					#define max(a,b) (((a)>(b)) ? (a) : (b))
+					leftBarrelEdgeX = max(leftBarrelEdgeX - lengthToGrowSides, 0);
+					rightBarrelEdgeX = min(rightBarrelEdgeX + lengthToGrowSides, width-1);
+				}
 				
 				int barrelWidth = rightBarrelEdgeX - leftBarrelEdgeX + 1;
+				
+				// Put dots at the bottom left and right corners of the potential barrel
+				g.setColor(BARREL_BOUND_COLOR);
+				g.drawPixel(leftBarrelEdgeX, lowerBarrelEdgeY);
+				g.drawPixel(rightBarrelEdgeX, lowerBarrelEdgeY);
 				
 				/*
 				 * Locate the upper edge of the barrel

@@ -7,7 +7,8 @@
 #include "ptypes.h"
 #include "pglobals.h"
 #include "vision/PCamera.h"
-#include "vision/vision.h"
+#include "vision/vision.h"				// for visFrame
+#include "vision/vision_navigation.h"	// for autonomousModeMotorOutput
 #include "main.h"
 
 // ---------------------------------------------------------------------------------
@@ -49,9 +50,6 @@ extern "C" void ConnectToRobot(char *hostname, int port) {
 	curFrame.height=0;
 	curFrame.data=NULL;
 	GetNextFrame();
-	
-	// Tell 'visFrame' to use this camera as input
-	Camera::current = &PCamera::INSTANCE;
 }
 
 extern "C" Image* GetNextFrame() {
@@ -77,13 +75,22 @@ void resizeImage(uint width, uint height) {
 }
 
 extern "C" void ProcessTransformedFrame(void) {
+	// Do vision processing on the transformed frame
+	Camera::current = &PCamera::INSTANCE;
 	PCamera::INSTANCE.update();
 	visFrame();
+	
+	// Drive the motors using the heading found by the navigation algorithm
+	SetMotorOutput(autonomousModeMotorOutput);
+	
+	// Refresh the main view
 	mainWindow->updateVideoView();
 }
 
 void SetMotorOutput(MotorOutput motorOutput) {
 	if (motors != NULL) {
-		motors->SetSpeed((double) motorOutput.leftSpeed, (double) motorOutput.rightSpeed);
+		motors->SetSpeed(
+			(double) motorOutput.leftSpeed*2,		// output: -255 to 255
+			(double) motorOutput.rightSpeed*2);		// output: -255 to 255
 	}
 }

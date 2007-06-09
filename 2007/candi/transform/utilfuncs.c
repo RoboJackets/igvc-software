@@ -1,6 +1,8 @@
 
 #include <stdlib.h>
-#include <GL/glut.h> 	// these two header files are needed to compile a program in OpenGL with GLUT
+#include <sys/time.h>
+#include <GL/glut.h> 	// needed for GLUT
+#include <stdlib.h>
 #include <stdio.h>      // Header file for standard file i/o.
 
 
@@ -154,7 +156,7 @@ long long currentTimeMillis() {
    long long t;
    struct timeval tv;
 
-   gettimeofday(&tv, 0);
+   gettimeofday(&tv, (struct timezone*)NULL);
 
    t = tv.tv_sec;
    t = (t *1000) + (tv.tv_usec/1000);

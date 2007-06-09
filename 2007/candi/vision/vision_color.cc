@@ -19,7 +19,7 @@ const int ORANGE_PIXEL_DETECTION_THRESHOLD =
 /* lower values look for cleaner (less dirty) white */
 // >=90 for low-light conditions
 const int WHITE_PIXEL_SATURATION_THRESHOLD =
-	/*new IntFilterParam("White Pixel Saturation - Threshold (Low)", 0, 255,*/ 50; //50;
+	/*new IntFilterParam("White Pixel Saturation - Threshold (Low)", 0, 255,*/ 85; //50;
 
 /* HSB only: higher values look for brighter white */
 // >=40 to eliminate black
@@ -58,6 +58,9 @@ Buffer2D<bool> pixelIsWhite;
 // public
 Buffer2D<Pixel> visWhiteDetectionCalibration;
 Buffer2D<Pixel> visWhiteCondition;
+
+// public
+Buffer2D<unsigned char> visRedMinusGreen;
 
 // public
 Buffer2D<u8> visHSBHue;
@@ -284,16 +287,29 @@ void visCreateWhiteConditionView(void)
 			if (condition2) {
 				curColor = Pixel(255,255,255);	// white
 			} else {
+				// passes saturation, but brightness/lightness too low
 				curColor = Pixel(255,0,0);	// red
 			}
 		} else {
 			if (condition2) {
+				// passed brightness/lightness, but saturation too high
 				curColor = Pixel(0,0,255);	// blue
 			} else {
 				curColor = Pixel(0,0,0);	// black
 			}
 		}
-		
+	}
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+void visCreateRedMinusGreenView(void) {
+	visRedMinusGreen.resizeToMatch(visRaw);
+	
+	for (int i=0, n=visRaw.numElements(); i<n; i++) {
+		Pixel p = visRaw[i];
+		int value = p.red - p.green;	// -255 to 255
+		visRedMinusGreen[i] = value/2 + 128;
 	}
 }
 
