@@ -2,13 +2,13 @@
  * This class emulates Java's Graphics class.
  * 
  * The class performs all graphics operations on the
- * Buffer2D<Pixel> that it is passed upon construction.
+ * Buffer2D<bool> that it is passed upon construction.
  */
 
-#ifndef _GRAPHICS_H_
-#define _GRAPHICS_H_
+#ifndef _GRAPHICS_BW_H_
+#define _GRAPHICS_BW_H_
 
-#include "Pixel.h"
+
 #include "Buffer2D.h"
 #include "Point2D.h"
 #include "vision_util.h"
@@ -16,21 +16,21 @@
 #include <stdlib.h>			// abs
 #include <QVector>
 
-class Graphics
+class GraphicsBW
 {
 private:
-	Buffer2D<Pixel>* buffer;
-	Pixel color;
+	Buffer2D<bool>* buffer;
+	bool color;
 	
 public:
-	Graphics(Buffer2D<Pixel>* buffer) {
+	GraphicsBW(Buffer2D<bool>* buffer) {
 		this->buffer = buffer;
-		this->color = Pixel(0, 0, 0);	// black
+		this->color = 0;	// black
 	}
 	
 	// ### STATE ###
 	
-	void setColor(const Pixel& color) {
+	void setColor(bool color) {
 		this->color = color;
 	}
 	
@@ -110,7 +110,7 @@ public:
 		int x1=L.a.x;	int y1=L.a.y;
 		int x2=L.b.x;	int y2=L.b.y;
 		
-		drawLine(x1, y1, x2, y2);
+		drawLine(x1, x2, y1, y2);
 	}
 	
 	// Calculates the points that would be used in drawing a line

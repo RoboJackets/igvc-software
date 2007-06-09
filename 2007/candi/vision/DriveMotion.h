@@ -5,8 +5,8 @@
 
 // These calibration constants affect the way a
 //     DriveMotion is converted to a MotorOutput.
-#define THRUST_POWER 1.00	// drive at max power when thrust is maximum
-#define SWIVEL_POWER 1.50
+#define THRUST_POWER 1.00*.25	// drive at max power when thrust is maximum
+#define SWIVEL_POWER 0.50*.25
 
 /**
  * Describes a conceptual motion/movement that the robot can perform.

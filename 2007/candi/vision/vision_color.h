@@ -13,6 +13,8 @@ extern Buffer2D<bool> pixelIsWhite;
 extern Buffer2D<Pixel> visWhiteDetectionCalibration;
 extern Buffer2D<Pixel> visWhiteCondition;
 
+extern Buffer2D<unsigned char> visRedMinusGreen;
+
 extern Buffer2D<u8> visHSBHue;
 extern Buffer2D<u8> visHSBSaturation;
 extern Buffer2D<u8> visHSBBrightness;
@@ -52,6 +54,8 @@ void visCreateWhiteCalibrationViewUsingColor(Pixel protoColor);
 void visCreateWhiteCalibrationViewUsingHue(u8 protoHue);
 
 void visCreateWhiteConditionView(void);
+
+void visCreateRedMinusGreenView(void);
 
 // DEBUG
 void visCreateHSLColorSpaceView(u8 protoHue);

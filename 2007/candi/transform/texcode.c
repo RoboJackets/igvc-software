@@ -17,7 +17,7 @@ void NextFrame(void) {
 			TRYANOTHERONE:
 			im2 = (Image*) GetNextFrame();	//camera data
 			if( ((im2->width)!=IWIDTH) || ((im2->height)!=IHEIGHT) ){		//do they not match?
-				printf("\nWidth and height wrong x%d!!!\nW:%d  H:%d\n",++count,im2->width,im2->height);
+				printf("\nWidth and height wrong x%d!!!\nW:%d  H:%d\n",++count,(int)im2->width,(int)im2->height);
 				goto TRYANOTHERONE;
 			}
 		#else

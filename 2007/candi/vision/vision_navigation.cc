@@ -3,6 +3,7 @@
 #include "vision.h"
 #include "vision_color.h"      // for pixelIsOrange, pixelIsWhite
 #include "vision_barrels.h"	// for visAnnotateBarrelBounds
+#include "vision_line_blobber.h"
 #include "Graphics.h"
 #include "Point2D.h"
 #include "DriveMotion.h"
@@ -379,7 +380,7 @@ void visPlotNavigationParams(void) {
 				abs(thrustExtent));
 			
 			/* Draw the left/right wheel speed bars along the left and right of the view */
-			g.setColor(Pixel(0, 0, 0));	// black
+			g.setColor(Pixel(255-30, 255-30, 255-30));	// light grey
 			g.fillRect_rational(
 				DRIVE_BAR_THICKNESS,
 				(leftSpeedExtent < 0) ? halfHeight : (halfHeight - leftSpeedExtent),
@@ -391,6 +392,12 @@ void visPlotNavigationParams(void) {
 				DRIVE_BAR_THICKNESS,
 				abs(rightSpeedExtent));
 		}
+	}
+	
+	//DEBUG: lines from blobber drawn in red
+	g.setColor(Pixel(200, 0, 0));	// dark red
+	for(int i=0;i<numwhitelines;i++){
+		g.drawLine(whitelines[i]);
 	}
 }
 

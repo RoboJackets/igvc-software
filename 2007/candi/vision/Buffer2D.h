@@ -110,14 +110,10 @@ public:
 	// Resizes this buffer to be the same size as the specified buffer
 	// (if it wasn't already the same size).
 	// 
-	// NOTE: Unfortunately, due to inherent limitations in the use of C++ templates,
-	//       you can't use this function to resize a buffer to
-	//       match the size of another buffer whose elements
-	//       are of a *different* type.
-	// 
 	// Returns TRUE if the buffer was resized, or
 	//         FALSE if the new size was the same as the old size.
-	bool resizeToMatch(Buffer2D<E>& buffer) {
+	template<class F>
+	bool resizeToMatch(Buffer2D<F>& buffer) {
 		return this->resize(buffer.width, buffer.height);
 	}
 	
