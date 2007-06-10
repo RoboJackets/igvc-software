@@ -25,8 +25,9 @@ VisColorView barrelView = VisColorView("Barrels", &visBarrels);
 
 VisBlackAndWhiteView orangeView = VisBlackAndWhiteView("Color - Orange", &pixelIsOrange);
 VisBlackAndWhiteView whiteView = VisBlackAndWhiteView("Color - White", &pixelIsWhite);
-VisBlackAndWhiteView paulView = VisBlackAndWhiteView("PAUL BLOB!!", &paulBlob);
 //VisBlackAndWhiteView yellowView = VisBlackAndWhiteView("Color - Yellow", &pixelIsYellow);
+
+VisColorView paulView = VisColorView("PAUL BLOB!!", &paulBlob);
 
 VisGrayView HSBHue = VisGrayView("HSB - Hue", &visHSBHue);
 VisGrayView HSBSaturation = VisGrayView("HSB - Saturation", &visHSBSaturation);

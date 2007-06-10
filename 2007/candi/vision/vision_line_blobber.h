@@ -4,9 +4,9 @@
 
 #include "Point2D.h"
 #include "Buffer2D.h"
+#include "Pixel.h"
 #include "Line.h"
 
-extern Buffer2D<bool> pixelIsWhite;
 #define MAX_N_LINES 20
 #define MIN_LINE_BLOB_POINTS 200
 #define MAX_LINE_GAP_PIXELS 5
@@ -24,7 +24,7 @@ extern Line<int> dashedlines[];		//lines where I think the dashed lines should c
 extern int numdashedlines;			//number of dashed lines
 
 /* Not Thread Safe */
-extern Buffer2D<bool> paulBlob;
+extern Buffer2D<Pixel> paulBlob;
 void visBlobLines(void);	
 
 #endif //_VISION_LINE_BLOBBER_H_
