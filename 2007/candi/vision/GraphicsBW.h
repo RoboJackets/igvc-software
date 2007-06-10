@@ -110,7 +110,7 @@ public:
 		int x1=L.a.x;	int y1=L.a.y;
 		int x2=L.b.x;	int y2=L.b.y;
 		
-		drawLine(x1, x2, y1, y2);
+		drawLine(x1, y1, x2, y2);
 	}
 	
 	// Calculates the points that would be used in drawing a line

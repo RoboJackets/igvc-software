@@ -1,6 +1,7 @@
 #include "vision_line_blobber.h"
-#include "GraphicsBW.h"
-#include "vision_color.h"      //for pixelIsWhite
+#include "Graphics.h"
+#include "vision.h"				// for visRaw
+#include "vision_color.h"		// for pixelIsWhite
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -25,7 +26,7 @@ int numdashedlines=0;					//number of lines in the line array
 
 //internal use
 static Buffer2D<bool> img;
-Buffer2D<bool> paulBlob;			// XXX: debug output
+Buffer2D<Pixel> paulBlob;			// XXX: debug output
 
 static int w;
 static int h;
@@ -42,6 +43,12 @@ void visBlobLines(){
 	numwhitelines=0;
 	w=img.width;
 	h=img.height;
+	
+	// Black out the edges to avoid buffer overruns in subsequent code
+	for (int x=0; x<w; x++) img[x] = 0;
+	for (int x=0, off=(h-1)*w; x<w; x++) img[off] = 0;
+	for (int y=0, off=0; y<h; y++, off+=w) img[off] = 0;
+	for (int y=0, off=w-1; y<h; y++, off+=w) img[off] = 0;
 	
 	for(int x=0;x<w;x++){
 		for(int y=0;y<h;y++) {
@@ -65,16 +72,20 @@ void visBlobLines(){
 				
 		}
 	}
-	figureDashes();
-	//draw blob view
-	paulBlob.copyFrom(img);
 	
-	GraphicsBW g(&paulBlob);
-	g.setColor(1);
+	//figureDashes();
+	
+	// Draw blob view
+	paulBlob.copyFrom(visRaw);
+	
+	Graphics g(&paulBlob);
+	g.setColor(Pixel(200, 0, 0));	// dark red
 	for(int i=0;i<numwhitelines;i++){
-		g.drawLine(whitelines[i]);
+		Line<int> curLine = whitelines[i];
+		for (int dx=-1; dx<=1; dx++) {
+			g.drawLine(curLine.a.x + dx, curLine.a.y, curLine.b.x + dx, curLine.b.y);
+		}
 	}
-	
 }
 
 void findat(int x,int y) {
@@ -164,7 +175,7 @@ void findat(int x,int y) {
 		
 		//printf("\n%d,%d",np,cp);
 		if (np>=plsz-8){				//in danger of running out of memory next pass
-			printf("too big");
+			printf("too many white pixels - ignoring blob\n");
 			break;				// we have selected ~1/8 of the image!
 		}
 	}
@@ -231,7 +242,7 @@ static int findlowestleftline(){
 	Point2D<int> lowestleftlinept(0,0); //<-worst case
 	
 	for(int i=0;i<numwhitelines;i++){
-		if(wl[i].a.x<w/2||wl[i].a.x<w/2){
+		if(wl[i].a.x<w/2||wl[i].b.x<w/2){
 			if(wl[i].a.y > lowestleftlinept.y){
 				lowestleftlineindex=i;
 				lowestleftlinept=wl[i].a;
@@ -257,7 +268,7 @@ static int findlowestrightline(){
 	Point2D<int> lowestrightlinept(0,0); //<-worst case
 	
 	for(int i=0;i<numwhitelines;i++){
-		if(wl[i].a.x<w/2||wl[i].a.x<w/2){
+		if(wl[i].a.x<w/2||wl[i].b.x<w/2){
 			if(wl[i].a.y > lowestrightlinept.y){
 				lowestrightlineindex=i;
 				lowestrightlinept=wl[i].a;
@@ -302,15 +313,18 @@ void findangles(double* angle){
 static void figureDashes() {
 	#define sqr(x) ((x)*(x))
 	#define dist(p1, p2) (sqr(p1.x-p2.x) + sqr(p1.y-p2.y))
+	
 	//first, do we need them?
 	findlowestleftline();
 	findlowestrightline();
+	
 	bool haveleft, haveright;
 	Line<int> lowleft, lowright;
 	if(haveleft=(findlowestleftline()!=-1))
 		lowleft=whitelines[findlowestleftline()];
 	if (haveright=(findlowestrightline()!=-1))
 		lowright=whitelines[findlowestrightline()];
+	
 	double angle[numlines];
 	bool lgood=0;
 	bool rgood=0;
