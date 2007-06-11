@@ -55,13 +55,13 @@ ISR(TIMER0_OVF_vect)
 		{
 			LED1 = ON;
 			LED2 = OFF;
-			controlMode = AUTONOMOUS_MODE;
+			controlMode = NAVIGATION_MODE;
 		}
 		else
 		{
 			LED1 = OFF;
 			LED2 = ON;
-			controlMode = NAVIGATION_MODE;
+			controlMode = AUTONOMOUS_MODE;
 		}
 	}
 	else

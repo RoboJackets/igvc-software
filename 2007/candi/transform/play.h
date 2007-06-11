@@ -11,17 +11,12 @@
 extern "C" {
 #endif
 
-void ConnectToRobot(char *hostname, int port);
+void ConnectToRobot();
 Image* GetNextFrame(void);
 void ProcessTransformedFrame(void);
 
 #if __cplusplus
 }
-#endif
-
-/* --- Public C++ Functions --- */
-#if __cplusplus
-void SetMotorOutput(MotorOutput motorOutput);
 #endif
 
 #endif

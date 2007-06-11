@@ -53,6 +53,12 @@ public:
 			this->y * scalar);
 	}
 	
+	Point2D operator/(N scalar) {
+		return Point2D(
+			this->x / scalar,
+			this->y / scalar);
+	}
+	
 	bool operator==(const Point2D& other) {
 		return (this->x == other.x) && (this->y == other.y);
 	}

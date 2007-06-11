@@ -1,5 +1,6 @@
 #include "vision_color.h"
 
+#include "vision_line_blobber.h"
 #include "vision.h"
 #include "vision_util.h"	// for HSB, HSL
 #include <math.h>		// for sqrt
@@ -29,7 +30,7 @@ const int WHITE_PIXEL_BRIGHTNESS_THRESHOLD =
 /* HSL only: higher values look for brighter white */
 // >=40 to eliminate black
 const int WHITE_PIXEL_LIGHTNESS_THRESHOLD =
-	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 160; //140; //100; //60;
+	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 140; //160; //140; //100; //60;
 
 
 const Pixel ORANGE_PIXEL_ANNOTATION_COLOR = Pixel(255, 128, 0);		// bright orange
@@ -123,6 +124,14 @@ void visClassifyPixelsByColor(void) {
 		//pixelIsYellow[i] = pixelIsYellow_calc(i);
 	}
 	
+	// Filter out white pixels that are not connected to
+	// at least one other white pixel that is surrounded by other white pixels
+	visBlobLines();
+	for (int i=0, n=pixelIsWhite.numElements(); i<n; i++) {
+		pixelIsWhite[i] &= !whiteFilterMask[i];
+	}
+	
+#if 0
 	/*
 	 * Apply a noise filter to white detection
 	 */
@@ -151,6 +160,7 @@ void visClassifyPixelsByColor(void) {
 			}
 		}
 	}
+#endif
 }
 
 void visAnnotatePixelColors(Buffer2D<Pixel>& imageToAnnotate) {

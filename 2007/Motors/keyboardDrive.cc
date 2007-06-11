@@ -6,7 +6,9 @@ int main(int argc, char *argv[])
 	using namespace PlayerCc;
 
 	PlayerClient	robot("localhost");
+	printf("connected to robot\n");
 	Position2dProxy	pp(&robot,0);
+	printf("connected to motors\n");
 
 	for(;;)
 	{

@@ -65,7 +65,7 @@ void visFrame()
 			visFindBarrels();		// depends on visClassifyPixelsByColor()
 			visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
 			
-			visBlobLines();
+			
 			
 			/* Slow debugging views */
 			{

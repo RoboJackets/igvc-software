@@ -8,7 +8,7 @@
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
 /* Various values for formatting data to be communicated with the motor controller */
-#define ERROR_MASK		0x3c
+#define ERROR_MASK			0x3c
 #define ERROR_OFFSET		2
 #define CONTROL_MODE_MASK	0xc0
 #define CONTROL_MODE_OFFSET	6
@@ -16,8 +16,8 @@
 #define LEFT_DIR_OFFSET		0
 #define RIGHT_DIR_MASK		0x02
 #define RIGHT_DIR_OFFSET	1
-#define FORWARD			1
-#define REVERSE			0
+#define FORWARD				0
+#define REVERSE				1
 
 /* Posible errors recieved from the motor controller*/
 enum {
@@ -309,8 +309,8 @@ int motors::move(void)
 
 int motors::set_motors(player_position2d_cmd_vel_t stVelocity)
 {
-	printf("LeftVel command: %f\n", stVelocity.vel.px);
-	printf("RightVel command: %f\n\n", stVelocity.vel.pa);
+	//printf("LeftVel command: %f\n", stVelocity.vel.px);
+	//printf("RightVel command: %f\n\n", stVelocity.vel.pa);
 
 	/* Scale the motor velocities, limit them to vaild values, and store them in the
 	 * correct form to transmit to the motor controller.
