@@ -1,9 +1,11 @@
 #include "joystick.h"
+#include <math.h>
 
 #define DEAD_ZONE		10
 #define JOYSTICK_OFFSET		128
 
-#define min(a,b) (((a)<(b)) ? (a) : (b))
+#define min(a,b)	(((a)<(b)) ? (a) : (b))
+#define sign(a)		( ((a)>0) ? 1 : ( ((a)<0) ? -1 : 0 ) )
 
 /* Acesses the H.O. byte values of the two ADC channels X_AXIS and Y_AXIS
  *	shifts them by the value in JOYSTICK_OFFSET and converts them to motor
@@ -27,8 +29,8 @@ inline MOTORSTATES_T get_speed_from_joystick(void)
 	if (abs(yAxis) < DEAD_ZONE){ yAxis = 0; }
 
 	/* Calculate drive outputs */
-	leftVelocity = yAxis + xAxis;
-	rightVelocity = yAxis - xAxis;
+	leftVelocity = yAxis + 3 * sign(xAxis) * sqrt(abs(xAxis));
+	rightVelocity = yAxis - 3 * sign(xAxis) * sqrt(abs(xAxis));
 
 	/* Limit drive velcocities to vaild values and convert them to drive speeds and directions */
 	MOTORSTATES_T motorStates;

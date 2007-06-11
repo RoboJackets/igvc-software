@@ -103,8 +103,8 @@ inline void debounce_buttons(void);
 void set_motors(MOTORSTATES_T motorStates);
 
 /* Motor directions */
-#define FORWARD		1
-#define REVERSE		0
+#define FORWARD		0
+#define REVERSE		1
 
 /* Use these functions to send and recieve bytes over the serial port.
  *	If you want something to send strings, avr-libc has a 
