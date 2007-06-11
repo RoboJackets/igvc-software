@@ -8,6 +8,7 @@
 #include "Point2D.h"
 #include "DriveMotion.h"
 #include <math.h>		// for trig functions, M_PI
+#include "hw/hw.h"		// for GetLaserRangeAtBearing
 
 // ### FORWARD REFERENCES (C/C++ SPECIFIC) ###
 
@@ -203,6 +204,22 @@ void visPlotNavigationParams(void) {
 					g.drawPixel(curPoint.x, curPoint.y);
 				}
 			}
+		}
+		
+		// Get the range to any obstacle that intersects the nav-path
+		#define MAX_EXPECTED_RANGE 4.25
+		double range = GetLaserRangeAtBearing(-deg2rad(90 - navPath_angle(pathID)));
+		if (range != -1) {
+			if (range > MAX_EXPECTED_RANGE) range = MAX_EXPECTED_RANGE;
+			
+			Point2D<double> obstaclePos = 
+				navPath_start(pathID) + 
+				(navPath_end(pathID)-navPath_start(pathID)) * range/MAX_EXPECTED_RANGE;
+			
+			g.setColor(Pixel(0, 255, 0));	// green
+			g.fillRect_rational(
+				(int) obstaclePos.x-2, (int) obstaclePos.y-2,
+				5, 5);
 		}
 	}
 	if (PRINT_DANGER_VALUES) {
@@ -416,7 +433,7 @@ Point2D<double> navPath_vector(int pathID) {
 	double deg = navPath_angle(pathID);
 	double rad = deg2rad(deg);
 	
-	double radius = ((double) visRaw.width) / 2;
+	double radius = 0.75 * ((double) visRaw.width) / 2;
 	return
 		Point2D<double>(
 			 radius*cos(rad),

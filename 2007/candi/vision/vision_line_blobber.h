@@ -25,7 +25,9 @@ extern int numdashedlines;			//number of dashed lines
 
 /* Not Thread Safe */
 extern Buffer2D<Pixel> paulBlob;
-void visBlobLines(void);	
+extern Buffer2D<bool> whiteFilterMask;
+
+void visBlobLines(void);
 
 #endif //_VISION_LINE_BLOBBER_H_
 

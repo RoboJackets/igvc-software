@@ -26,7 +26,8 @@ int numdashedlines=0;					//number of lines in the line array
 
 //internal use
 static Buffer2D<bool> img;
-Buffer2D<Pixel> paulBlob;			// XXX: debug output
+Buffer2D<bool> whiteFilterMask;
+Buffer2D<Pixel> paulBlob;
 
 static int w;
 static int h;
@@ -74,10 +75,11 @@ void visBlobLines(){
 	}
 	
 	//figureDashes();
-	
+	whiteFilterMask.copyFrom(img);
 	// Draw blob view
-	paulBlob.copyFrom(visRaw);
 	
+	
+	paulBlob.copyFrom(visRaw);
 	Graphics g(&paulBlob);
 	g.setColor(Pixel(200, 0, 0));	// dark red
 	for(int i=0;i<numwhitelines;i++){

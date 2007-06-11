@@ -4,11 +4,7 @@
 #define PaulModeGo
 #include "env.h"
 
-
-
-
 #define ESCAPE 27
-#define DEFAULT_PORT 6665	// PlayerCc::PLAYER_PORTNUM
 
 void keyPressed(unsigned char key, int x, int y);
 void LoadNextFrame(void);
@@ -170,10 +166,7 @@ void transform(int argc, char** argv)
 
 int transform_main(int argc, char** argv)
 {
-	int nargs = argc-1;	
-	char *hostname = (nargs >= 1) ? argv[1] : "localhost";
-	int port = (nargs >= 2) ? atoi(argv[2]) : DEFAULT_PORT;
-	ConnectToRobot(hostname, port);
+	ConnectToRobot();
 	transform(argc, argv);
 	
 	return 0;
