@@ -70,9 +70,9 @@ void set_motors(MOTORSTATES_T motorStates)
 	 *	If the direction is forward, the PWM is inverted.
 	 */
 	OCR1AH = 0;
-	OCR1AL = (motorStates.leftDir == FORWARD) ? (255 - motorStates.leftSpeed) : (motorStates.leftSpeed);
+	OCR1AL = (motorStates.leftDir == FORWARD) ? (motorStates.leftSpeed) : (255 - motorStates.leftSpeed);
 	OCR1BH = 0;
-	OCR1BL = (motorStates.rightDir == FORWARD) ? (255 - motorStates.rightSpeed) : (motorStates.rightSpeed);
+	OCR1BL = (motorStates.rightDir == FORWARD) ? (motorStates.rightSpeed) : (255 - motorStates.rightSpeed);
 
 	/* Set the enable line to flip the H-bridge to the correct direction */
 	MOTOR_DIR_A = motorStates.leftDir;
@@ -139,51 +139,6 @@ uint8_t adc_value(uint8_t channel)
 	/* Return the result of the conversion */
 	return(ADCH);
 }
-
-#if 0
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-volatile uint8_t u8ButtonStates;
-
-
-void debounce_buttons(void)
-{
-	static uint8_t u8Count1, u8Count2;
-
-	/* Button 1 */
-	if (BUTTON1_RAW)
-	{
-		/* Button is pressed: indicate immediately */
-		u8ButtonStates |= 1;
-		u8Count1 = DEBOUNCE_COUNT;
-	} else {
-		/* Button is released: Wait for several contiguous samples before changing the flag */
-		if (u8Count1 == 0)
-		{
-			u8ButtonStates &= ~1;
-		} else {
-			u8Count1--;
-		}
-	}
-
-	/* Button 2 */
-	if (BUTTON2_RAW)
-	{
-		/* Button is pressed: indicate immediately */
-		u8ButtonStates |= 2;
-		u8Count2 = DEBOUNCE_COUNT;
-	} else {
-		/* Button is released: Wait for several contiguous samples before changing the flag */
-		if (u8Count2 == 0)
-		{
-			u8ButtonStates &= ~2;
-		} else {
-			u8Count2--;
-		}
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#endif
 
 /* These define how to access a button or switch */
 uint8_t button1RawValue(void){ return( IO_BYTE(&PINB).bit_5); }

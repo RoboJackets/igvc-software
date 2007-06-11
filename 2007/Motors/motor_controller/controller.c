@@ -7,6 +7,8 @@
 #include "joystick.h"
 #include "types.h"
 
+#define HEARTBEAT_COUNT	50
+
 //TODO:
 // change default safetyMode
 // fix button debounce count
@@ -19,6 +21,7 @@ MOTORSTATES_T motorStates;
 uint8_t lastButton1State;
 uint8_t volatile controlMode;
 uint8_t volatile safetyMode;
+uint8_t volatile heartbeatCounter;
 
 /* This is called when INT0 (PROG) is on the rising edge of a signal */
 ISR(INT0_vect)
@@ -30,6 +33,7 @@ ISR(INT0_vect)
 		MOTORSTATES_T tempMS;
 		if(!(error = get_speed_from_uart(&tempMS)))
 		{
+			heartbeatCounter = HEARTBEAT_COUNT;
 			motorStates = tempMS;
 			set_motors(motorStates);
 		}
@@ -119,6 +123,13 @@ ISR(TIMER0_OVF_vect)
 		/* Update the motor states based on the joystick position */
 		motorStates = get_speed_from_joystick();
 		set_motors(motorStates);
+		heartbeatCounter = HEARTBEAT_COUNT;
+	}
+	heartbeatCounter--;
+	if(heartbeatCounter)
+	{
+		motorStates = (MOTORSTATES_T){0, 0, FORWARD, FORWARD};
+		set_motors(motorStates);
 	}
 }
 
@@ -129,6 +140,7 @@ int main(void)
 	controlMode = JOYSTICK_MODE;
 	safetyMode = DRIVE_MODE;
 	motorStates = (MOTORSTATES_T){0, 0, FORWARD, FORWARD};
+	heartbeatCounter = HEARTBEAT_COUNT;
 	hardware_init();
 
 	for(;;)
