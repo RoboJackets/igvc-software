@@ -1,0 +1,22 @@
+#SRCS=
+SRCS=vision_barrels.cc vision.cc vision_color.cc\
+	Buffer2D.cc vision_navigation.cc vision_util.cc
+
+
+OBJS=vision_barrels.o vision.o vision_color.o\
+	Buffer2D.o vision_navigation.o vision_util.o
+
+#OBJS=vision_barrels.o vision.o vision_color.o\
+#	vision_navigation.o vision_util.o
+
+
+all : build
+	
+
+
+.SUFFIXES: .c .cpp .cc
+.cc.o:
+	$(CXX) -c $*.cc -I/usr/include/qt3/ -o $*.o
+
+build : $(OBJS)
+

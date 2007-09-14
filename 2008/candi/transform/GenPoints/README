@@ -1,0 +1,11 @@
+This program regenerates the 'getsurf.c' and 'getsurf.o' files used
+by the 'transform' module, given the size of the input images
+that the 'transform' module is expected to encounter.
+
+How to Use:
+1. Modify the 'getpoints(W,H,D)' line in the 'main' function
+   of 'genpoints.c' to have the correct width and height values.
+2. Run 'make'.
+3. Run './genpoints'.
+
+This program was written by Paul Foster.
