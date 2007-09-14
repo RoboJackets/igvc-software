@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Generates the 'Makefile' from 'config.pro'
+qmake -unix -o Makefile config.pro

@@ -1,0 +1,14 @@
+Include Tree:
+
+#include "env.h"        //monolithic
+|
+|-->#include "pcall.h"
+|	|-->#include "play.h"
+|	|-->#include "PjMat.h"
+|	|-->#include "utilfuncs.h"
+|	|-->#include "texcode.h"
+|
+|-->#include "pglobals.h"
+|-->#include "ptypes.h"
+|
+|-->#include "texcode.c"

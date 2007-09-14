@@ -1,0 +1,13 @@
+#ifndef utilfunc_h
+#define utilfunc_h
+
+
+int ImageLoad(char *filename, Image *image);
+
+void LoadGLTextures();
+void drawRose(void);
+inline unsigned long long nanotime(void);
+long long currentTimeMillis();
+#define max(a,b) ((a>b)?a:b)
+#define min(a,b) ((a<b)?a:b)
+#endif
