@@ -6,45 +6,19 @@
 
 #include <libplayercore/playercore.h>
 #include <unistd.h>		// for usleep()
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <sys/poll.h>
 
-// FIXME: dv1394 is officially deprecated.  It should be replaced when rawiso becomes available.
-#include "dv1394.h"
+// XXX: create a separate header file and include it instead
+#include "cameradv1394driver.cc"
 
-#include "dv/frame.cc"
-
-// -----------------------------------------------------------------------
-
-// This defines whether to expect NTSC frames [TRUE]
-// or PAL frames [FALSE] from the DV camera.
-// (Our DV camera appears to be NTSC.)
-#define DV_IS_NTSC TRUE
-
-#if DV_IS_NTSC
-	#define DV1394_FRAME_SIZE DV1394_NTSC_FRAME_SIZE
-#else
-	#define DV1394_FRAME_SIZE DV1394_PAL_FRAME_SIZE
-#endif
-
-// -----------------------------------------------------------------------
-
-typedef struct dv_decoder_s dv_decoder_t;
-
-// -----------------------------------------------------------------------
-
-class CameraDV1394 : public Driver {
+class CameraDV1394_Player : public Driver {
 public:
-	CameraDV1394(ConfigFile* cf, int section);
-	~CameraDV1394();
+	CameraDV1394_Player(ConfigFile* cf, int section);
+	~CameraDV1394_Player();
 	
 	int Setup();
 	int Shutdown();
 
 private:
-	void Resize(int width, int height);
 	void GrabFrame();
 	void SendData();
 
@@ -57,18 +31,9 @@ public:
 private:
 	// Main function for device thread.
 	virtual void Main();
-	
-	// This is the path of the camera device in the filesystem.
-	const char* camDeviceFilepath;
-	
-	bool valid;
-	Frame curFrame;
-	int camDevice;
-	int numFrames;
-	unsigned char *map;
-	struct dv1394_status status;
-	unsigned char *rgb;
-	
+
+	// The actual camera driver
+	CameraDV1394* driver;	
 	// Data to send to server
 	player_camera_data_t data;
 };
@@ -77,77 +42,29 @@ private:
 #pragma mark -
 
 /** Reads options from the configuration file and does any pre-Setup() setup. */
-CameraDV1394::CameraDV1394(ConfigFile* cf, int section)
+CameraDV1394_Player::CameraDV1394_Player(ConfigFile* cf, int section)
 	: Driver(
 		cf, section,
 		true,							// new commands DO override old ones
 		PLAYER_MSGQUEUE_DEFAULT_MAXLEN,	// incoming message queue is as long as possible
-		PLAYER_CAMERA_CODE),			// interface ID; see <libplayercore/player.h> for standard interfaces
-	  valid(false),
-	  curFrame(DV1394_FRAME_SIZE)
-{
+		PLAYER_CAMERA_CODE)			// interface ID; see <libplayercore/player.h> for standard interfaces
+{	
 	/* Read options from the config file */
-	this->camDeviceFilepath = cf->ReadString(section, "device", "/dev/dv1394");
+	const char* camDeviceFilepath = cf->ReadString(section, "device", "/dev/dv1394");
+	
+	// Create the real driver
+	this->driver = new CameraDV1394(camDeviceFilepath);
 }
 
-CameraDV1394::~CameraDV1394() {
-	// Nothing to uninit
+CameraDV1394_Player::~CameraDV1394_Player() {
+	delete this->driver;
 }
 
 /** Set up the device. Return 0 if things go well, and -1 otherwise. */
-int CameraDV1394::Setup() {
-	// (The primary setup code is automatically executed when
-	//  the "curFrame" instance variable is initialized
-	//  and its constructor is invoked.)
-	if (!curFrame.IsValid()) {
-		// An error occurred while interfacing with the camera
-		fprintf(stderr, "DVCamera: Error while interfacing with the DV camera\n");
+int CameraDV1394_Player::Setup() {
+	// Connect to the camera
+	if (!driver->Connect())
 		return -1;
-	}
-	
-	// Open the firewire camera device, with mode open read write
-	camDevice = open(camDeviceFilepath, O_RDWR);
-	if (camDevice < 0)
-	{
-		fprintf(stderr, "DVCamera: Can't open %s\n", camDeviceFilepath);
-		return -1;
-	}
-	
-	// (don't know why this is the case, but Kino agrees)
-	numFrames = DV1394_MAX_FRAMES / 4;
-	
-	//init params are {API Version, ISO channel, number of frames, PAL/NTSC, packet header, packet, "presentation time" offset}
-	// KINO: *always* uses PAL (see ieee1394io.cc)
-	struct dv1394_init init = {DV1394_API_VERSION, 63, numFrames, DV1394_NTSC, 0, 0, 0};
-	if (ioctl(camDevice, DV1394_INIT, &init))
-	{
-		fprintf(stderr, "DVCamera: dv1394 init failed\n");
-		return -1;
-	}
-
-	// Request that the DV camera begin sending us frames
-	if (ioctl(camDevice, DV1394_START_RECEIVE, NULL))
-	{
-		fprintf(stderr, "DVCamera: Can't start capture\n");
-		return -1;
-	}
-	
-	// Map the device's frame buffer into memory
-	// KINO: does this *before* requesting that the camera begin sending frames
-	map = (unsigned char *) mmap(
-		NULL,
-		DV1394_FRAME_SIZE * numFrames,
-		PROT_READ | PROT_WRITE,
-		MAP_SHARED,
-		camDevice,
-		0);
-	if (map == MAP_FAILED)
-	{
-		fprintf(stderr, "DVCamera: mmap failed. Is the NTSC/PAL setting correct?\n");
-		return -1;
-	}
-
-	valid = true;
 	
 	// Start the device thread; spawns a new thread and executes
 	// Main(), which contains the main loop for the driver.
@@ -157,19 +74,13 @@ int CameraDV1394::Setup() {
 }
 
 /** Shutdown the device. */
-int CameraDV1394::Shutdown() {
-	if (map)
-		munmap(map, DV1394_FRAME_SIZE * numFrames);
-	if (camDevice >= 0)
-		close(camDevice);
-	// (The primary cleanup code is automatically executed when
-	//  the "curFrame" instance variable is disposed
-	//  and its destructor is invoked.)
+int CameraDV1394_Player::Shutdown() {
+	bool wasConnected = driver->IsConnected();	
 	
-	if (rgb)
-		delete[] rgb;
+	// Disconnect from the camera
+	driver->Disconnect();
 	
-	if (this->valid) {
+	if (wasConnected) {
 		// Stop and join the driver thread
 		StopThread();
 	}
@@ -178,102 +89,33 @@ int CameraDV1394::Shutdown() {
 }
 
 /** Processes incoming messages. */
-int CameraDV1394::ProcessMessage(MessageQueue* resp_queue,
-                               player_msghdr* hdr,
-                               void* data)
+int CameraDV1394_Player::ProcessMessage(MessageQueue* resp_queue,
+                                        player_msghdr* hdr,
+                                        void* data)
 {
 	// We don't currently support any messages
 	
 	return -1;
 }
 
-void CameraDV1394::Resize(int width, int height)
+void CameraDV1394_Player::GrabFrame()
 {
-	static int lastWidth = -1, lastHeight = -1;
-	if ((width == lastWidth) && (height == lastHeight))
-		return;
-	lastWidth = width;
-	lastHeight = height;
+	int width = driver->GetFrameWidth();
+	int height = driver->GetFrameHeight();
+	unsigned char* frameData = driver->GrabFrame();
 	
-	if (rgb)
-		delete[] rgb;
-	
-	rgb = new unsigned char[width * height * 3];
-}
-
-void CameraDV1394::GrabFrame()
-{
-	int err;
-	struct pollfd pfd;
-
-	// Wait for a frame
-	pfd.fd = camDevice;
-	pfd.events = POLLIN | POLLERR | POLLHUP;
-	while ((err = poll(&pfd, 1, 200)) < 0)
-	{
-		if (err != EAGAIN)
-		{
-			fprintf(stderr, "DVCamera: poll failed\n");
-			return;
-		}
-	}
-
-	if (ioctl(camDevice, DV1394_RECEIVE_FRAMES, 1))
-	{
-		fprintf(stderr, "DVCamera: DV1394_RECEIVE_FRAMES failed\n");
-		return;
-	}
-
-	if (ioctl(camDevice, DV1394_GET_STATUS, &status))
-	{
-		fprintf(stderr, "DVCamera: DV1394_GET_STATUS failed\n");
-		return;
-	}
-	if ( status.dropped_frames > 0 )
-	{
-		printf("DVCamera: dv1394 reported %d dropped frames.\n", status.dropped_frames);
-	}
-	
-	// Find the oldest frame in the camera's ringbuffer
-	// XXX: is there a reason we're reading the *oldest* frame
-	//      instead of the *newest* frame?
-	//int lastFrameID = status.first_clear_frame;
-	int lastFrameID = status.active_frame - 1;
-	if (lastFrameID < 0)
-		lastFrameID = numFrames - 1;
-	
-	// Calculate the offset to the frame's data
-	unsigned char *frameData = map + (lastFrameID * DV1394_FRAME_SIZE);
-	
-	// Update the Frame object to access the current frame's buffer
-	curFrame.data = frameData;
-	
-	// We got a full frame
-	curFrame.bytesInFrame = curFrame.GetFrameSize( );
-	
-	// Parse the frame's header
-	curFrame.ExtractHeader();
-	
-	if (DV_IS_NTSC != (!curFrame.IsPAL())) {
-		printf("DVCamera: WARNING: frame is not in the expected format (NTSC/PAL)\n");
-	}
-	
-	// Update the size of the camera buffer
-	Resize(curFrame.GetWidth(), curFrame.GetHeight());
-	
-	// Decode DV to RGB
-	curFrame.ExtractRGB(rgb);
+	if (frameData == NULL) return;
 	
 	// Format the image data so that Player can understand it
 	this->data.bpp = 24;
 	this->data.format = PLAYER_CAMERA_FORMAT_RGB888;
-	this->data.image_count = curFrame.GetWidth() * curFrame.GetHeight() * 3;
-	this->data.width = curFrame.GetWidth();
-	this->data.height = curFrame.GetHeight();
-	memcpy(this->data.image, rgb, this->data.image_count);
+	this->data.image_count = width * height * 3;
+	this->data.width = width;
+	this->data.height = height;
+	memcpy(this->data.image, frameData, this->data.image_count);
 }
 
-void CameraDV1394::SendData()
+void CameraDV1394_Player::SendData()
 {	
 	// Work out the data size
 	size_t size = sizeof(this->data) - sizeof(this->data.image) + this->data.image_count;
@@ -284,7 +126,7 @@ void CameraDV1394::SendData()
 }
 
 /** Main function for the thread that runs the device. */
-void CameraDV1394::Main()
+void CameraDV1394_Player::Main()
 {
 	for (;;) {
 		// Terminate if this thread has been cancelled
@@ -308,18 +150,18 @@ void CameraDV1394::Main()
 
 // Factory creation function. This function is given as an argument when
 // the driver is added to the driver table.
-Driver* CameraDV1394_Init(ConfigFile* cf, int section) {
+Driver* CameraDV1394_Player_Init(ConfigFile* cf, int section) {
 	// Create and return a new instance of this driver
-	return (Driver*) new CameraDV1394(cf, section);
+	return (Driver*) new CameraDV1394_Player(cf, section);
 }
 
 // Registers the driver in the driver table. Called from the
 // player_driver_init function that the loader looks for.
-int CameraDV1394_Register(DriverTable* table) {
-	table->AddDriver("cameradv1394", CameraDV1394_Init);
+int CameraDV1394_Player_Register(DriverTable* table) {
+	table->AddDriver("cameradv1394", CameraDV1394_Player_Init);
 	return 0;
 }
 
 extern "C" int player_driver_init(DriverTable* table) {
-	return CameraDV1394_Register(table);
+	return CameraDV1394_Player_Register(table);
 }
