@@ -146,11 +146,16 @@ void drawRose(void){
 }	
 inline unsigned long long nanotime(void)
 {
+#ifdef __i386__
      unsigned long long val;
      //asm( "statements" : output_registers : input_registers : clobbered_registers);
      //or _asm_ )"statements" : output_registers : input_registers : clobbered_registers);
     __asm__ __volatile__("rdtsc" : "=A" (val) : );
      return(val);
+#else
+	// This is architecture-independent but provides low granularity
+	return 1000*currentTimeMicros();
+#endif
 }
 long long currentTimeMillis() {
    long long t;
@@ -159,7 +164,18 @@ long long currentTimeMillis() {
    gettimeofday(&tv, (struct timezone*)NULL);
 
    t = tv.tv_sec;
-   t = (t *1000) + (tv.tv_usec/1000);
+   t = (t * 1000) + (tv.tv_usec/1000);
+
+   return t;
+}
+long long currentTimeMicros() {
+   long long t;
+   struct timeval tv;
+
+   gettimeofday(&tv, (struct timezone*)NULL);
+
+   t = tv.tv_sec;
+   t = (t * 1000 * 1000) + (tv.tv_usec);
 
    return t;
 }
