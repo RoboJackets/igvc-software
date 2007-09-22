@@ -44,18 +44,18 @@ typedef enum{
 //	fix PID
 //	change names
 
-Driver* motors::motors_Init(ConfigFile* cf, int section)
+Driver* Motors_Player::Motors_Player_Init(ConfigFile* cf, int section)
 {
-	return( (Driver*)(new motors(cf, section)) );
+	return( (Driver*)(new Motors_Player(cf, section)) );
 }
 
-void motors::motors_Register(DriverTable* table)
+void Motors_Player::Motors_Player_Register(DriverTable* table)
 {
-	table->AddDriver("motors",  motors_Init);
+	table->AddDriver("motors",  Motors_Player_Init);
 	return;
 }
 
-motors::motors(ConfigFile* cf, int section) 
+Motors_Player::Motors_Player(ConfigFile* cf, int section) 
  : Driver(cf, section, TRUE, PLAYER_MSGQUEUE_DEFAULT_MAXLEN, PLAYER_POSITION2D_CODE)
 {
 	/* Reset the file descriptor for the serial port */	fdMotor = -1;
@@ -69,7 +69,7 @@ motors::motors(ConfigFile* cf, int section)
 	//dMaxSpeed
 	//dMaxAccel
 
-	/* Only recieve messages related to controlling the motors */
+	/* Only recieve messages related to controlling the Motors_Player */
 	//SetFilter();
 
 	/* Sets PLAYER_POSITION2D_CMD_POS messages (commands to move to a position)
@@ -81,21 +81,21 @@ motors::motors(ConfigFile* cf, int section)
 	return;
 }
 
-int motors::Setup()
+int Motors_Player::Setup()
 {
 	if(SetupSerial()){ return(-1); }
 	StartThread();
 	return(0);
 }
 
-int motors::Shutdown()
+int Motors_Player::Shutdown()
 {
 	StopThread();
 	if(ShutdownSerial()){ return(-1); }
 	return(0);
 }
 
-int motors::ProcessMessage(MessageQueue* resp_queue, player_msghdr* hdr, void* data) 
+int Motors_Player::ProcessMessage(MessageQueue* resp_queue, player_msghdr* hdr, void* data) 
 {
 	if(hdr->type == PLAYER_MSGTYPE_REQ)
 	{
@@ -174,7 +174,7 @@ int motors::ProcessMessage(MessageQueue* resp_queue, player_msghdr* hdr, void* d
 		return(-1);
 }
 
-void motors::Main()
+void Motors_Player::Main()
 {
 	for(;;)
 	{
@@ -186,7 +186,7 @@ void motors::Main()
 	}
 }
 
-int motors::SetupSerial()
+int Motors_Player::SetupSerial()
 {
 	/* Open serial port with the specified flags
 	 * O_RDWR - for reading and writing
@@ -236,7 +236,7 @@ int motors::SetupSerial()
 	return(0);
 }
 
-int motors::ShutdownSerial()
+int Motors_Player::ShutdownSerial()
 {
 	if(close(fdMotor) < 0)
 	{
@@ -248,7 +248,7 @@ int motors::ShutdownSerial()
 	return(0);
 }
 
-int motors::set_pid(player_position2d_speed_pid_req_t *data)
+int Motors_Player::set_pid(player_position2d_speed_pid_req_t *data)
 {
 	pGain = data->kp;
 	iGain = data->ki;
@@ -256,7 +256,7 @@ int motors::set_pid(player_position2d_speed_pid_req_t *data)
 	return(0);
 }
 
-int motors::move(void)
+int Motors_Player::move(void)
 {
 #ifdef _WOOT__MOVE_IS_GOOD_
 	POSTION_T dIState, dDState, output; // intialize these
@@ -307,7 +307,7 @@ int motors::move(void)
  *	with the transmission.
  */
 
-int motors::set_motors(player_position2d_cmd_vel_t stVelocity)
+int Motors_Player::set_motors(player_position2d_cmd_vel_t stVelocity)
 {
 	//printf("LeftVel command: %f\n", stVelocity.vel.px);
 	//printf("RightVel command: %f\n\n", stVelocity.vel.pa);
@@ -336,7 +336,7 @@ int motors::set_motors(player_position2d_cmd_vel_t stVelocity)
 	return( get_motor_states() );
 }
 
-int motors::set_motors(player_position2d_power_config_t stPower)
+int Motors_Player::set_motors(player_position2d_power_config_t stPower)
 {
 	#if 0 // To be used once position commands are accepted
 	if(stPower.state == false)
@@ -352,7 +352,7 @@ int motors::set_motors(player_position2d_power_config_t stPower)
 	return(0);
 }
 
-int motors::get_motor_states(void)
+int Motors_Player::get_motor_states(void)
 {
 	/* Flush any old data in the read buffer */
 	tcflush(fdMotor, TCIFLUSH);
@@ -429,18 +429,18 @@ int change_velocity_mode(player_position2d_velocity_mode_config_t data)
 	return(0);
 }
 
-int motors::set_position_mode(player_position2d_position_mode_req_t data)
+int Motors_Player::set_position_mode(player_position2d_position_mode_req_t data)
 {
 	return(0);
 }
 
-int motors::set_max_move_param(player_position2d_speed_prof_req_t data)
+int Motors_Player::set_max_move_param(player_position2d_speed_prof_req_t data)
 {
 	return(0);
 }
 
 
-int motors::queqe_position(player_position2d_cmd_pos_t stPosition)
+int Motors_Player::queqe_position(player_position2d_cmd_pos_t stPosition)
 {
 	return(0);
 }
@@ -453,7 +453,7 @@ extern "C" {
 	int player_driver_init(DriverTable* table)
 	{
 		puts("motors driver initializing");
-		motors::motors_Register(table);
+		Motors_Player::Motors_Player_Register(table);
 		puts("motors driver done");
 		return(0);
 	}

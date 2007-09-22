@@ -26,17 +26,17 @@ typedef struct _motor_states_
 } MOTOR_STATES_T;
 
 /* The driver class */
-class motors: public Driver
+class Motors_Player: public Driver
 {
 	public:
 		/* Initialization function */
-		static Driver* motors_Init(ConfigFile* cf, int section);
+		static Driver* Motors_Player_Init(ConfigFile* cf, int section);
 
 		/* Driver registration function */
-		static void motors_Register(DriverTable* table);
+		static void Motors_Player_Register(DriverTable* table);
 
 		/* Constructor */
-		motors(ConfigFile* cf, int section);
+		Motors_Player(ConfigFile* cf, int section);
 
 		/* Called when the driver is started and closed respectively */
 		virtual int Setup();
