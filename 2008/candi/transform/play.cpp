@@ -9,7 +9,7 @@
 #include "vision/PCamera.h"
 #include "vision/vision.h"				// for visFrame
 #include "vision/vision_navigation.h"	// for autonomousModeMotorOutput
-#include "main.h"
+#include "main.h"						// for mainWindow
 
 // ---------------------------------------------------------------------------------
 // Player code

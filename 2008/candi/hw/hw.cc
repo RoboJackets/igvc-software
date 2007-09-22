@@ -52,11 +52,14 @@ void UpdateSensors() {
 
 static PlayerClient* GetLocalRC() {
 	if (localRC == NULL && (isInitialConnect || SUPPORT_PLUG_AND_PLAY)) {
+		printf("Connecting to local robot controller... ");
+		fflush(stdout);
 		try {
 			localRC = new PlayerClient("localhost", PLAYER_PORTNUM);
 			localRC->SetDataMode(PLAYER_DATAMODE_PULL);
-			printf("Connected to local robot controller.\n");
+			printf("ok\n");
 		} catch (PlayerError e) {
+			printf("error\n");
 			if (isInitialConnect) {
 				printf("ERROR: Unable to connect to local robot controller:\n");
 				printf("       %s\n", (char*) e.GetErrorStr().c_str());
@@ -68,16 +71,21 @@ static PlayerClient* GetLocalRC() {
 
 static PlayerClient* GetRemoteRC() {
 	if (remoteRC == NULL && (isInitialConnect || SUPPORT_PLUG_AND_PLAY)) {
+#if LOOK_FOR_REMOTE_RC
+		printf("Connecting to remote robot controller... ");
+		fflush(stdout);
 		try {
 			remoteRC = new PlayerClient("192.168.10.100", PLAYER_PORTNUM);
 			remoteRC->SetDataMode(PLAYER_DATAMODE_PULL);
-			printf("Connected to remote robot controller.\n");
+			printf("ok\n");
 		} catch (PlayerError e) {
+			printf("error\n");
 			if (isInitialConnect) {
 				printf("ERROR: Unable to connect to remote robot controller:\n");
 				printf("       %s\n", (char*) e.GetErrorStr().c_str());
 			}
 		}
+#endif
 	}
 	return remoteRC;
 }
@@ -170,6 +178,7 @@ Image* GetCameraFrame() {
 		resizeImage(camera->GetWidth(), camera->GetHeight());
 		camera->GetImage(curFrame.data);
 	}
+	
 	return &curFrame;
 }
 
