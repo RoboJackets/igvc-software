@@ -7,6 +7,8 @@
 // Whether or not to keep looking for devices after the initial connect.
 #define SUPPORT_PLUG_AND_PLAY 0
 
+#define LOOK_FOR_REMOTE_RC 0
+
 void InitHW();
 void UpdateSensors();
 
