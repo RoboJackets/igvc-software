@@ -32,13 +32,15 @@ enum data_cid{
 
 
 struct ModInfoResp {
-	char module_type[4],
-	char firmware_version[4]
+	char module_type[4];
+	char firmware_version[4];
 };
 
-class CompassDriver(){
-	compassDriver(compassData data);
-	~compassDriver();
+
+
+class CompassDriver{
+	CompassDriver(compassData data);
+	~CompassDriver();
 
 	GetModInfo(void);
 	GetData(void);
@@ -54,15 +56,15 @@ class CompassDriver(){
 
 	short int dataresponsetype;
 
+};
+
+
+
+CompassDriver::CompassDriver(){
+
 }
 
-
-
-compassDriver::compassDriver(){
-
-}
-
-~compassDriver::compassDriver{
+CompassDriver::~CompassDriver(){
 
 }
 CompassDriver::GetCalData(){
@@ -75,8 +77,9 @@ CompassDriver::CompassSend(uint_8 * data, size){
 	senddata[0] = sync_flag;
 	senddata[size+1] = terminator;
 	for(int i=0;i<size; i++){
-		senddate[i+1] = data[i];
+		senddata[i+1] = data[i];
 	}
+	spiSend(senddata, size+2);
 }
 
 ModInfoResp CompassDriver::GetModInfo(void){
