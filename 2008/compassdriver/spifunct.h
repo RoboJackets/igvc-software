@@ -1,9 +1,9 @@
 
 
-spiSend(uint_8 * data, size){
+int spiSend(uint_8 * data, int size){
 return(0);
 }
-spiGet(uint_8 * dataresp, size){
+int spiGet(uint_8 * dataresp, int size){
 return(0);
 }
 
