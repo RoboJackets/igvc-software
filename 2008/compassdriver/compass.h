@@ -1,8 +1,8 @@
-typedef unsigned char uint_8;
-typedef signed long int sint_32;//defining this like this becuase i'm not sure if a long int is 4 bytes or not, so can change later
+/*typedef unsigned char uint_8;
+typedef signed long int sint_32;//defining this like this becuase i'm not sure if a long int is 4 bytes or not, so can change later*/
 //#include <systypes.h>
-//no errors reporting from anything yet, need to decide big of little endian, set in config and driver
-//functions known incomplete: CompassDriver, ~CompassDriver, spiSend, spiGet, GetModInfo, GetData, SetDataComponents, SetConfig, GetConfig, SaveConfig, StartCal, StopCal, GetCalData, SetCalData
+//no errors reporting from anything yet, need to decide big of little endian, set in config and driver -- right now assuming little endian
+//functions known incomplete: CompassDriver, ~CompassDriver, spiSend, spiGet, GetModInfo, GetData, SetDataComponents, SetConfig, GetConfig, SaveConfig, StartCal, StopCal, GetCalData, SetCalData, float2bytes, bytes2foat
 
 
 
@@ -91,7 +91,7 @@ class CompassDriver{
 	int CompassSend_uint8(uint_8 command);//send single uint8
 	ModInfoResp GetModInfo(void);
 	uint_8 * GetData(uint_8 * dataresppoint);
-	int SetDataComponents(short int resptype);
+	int SetDataComponents(bool * resptype);
 	int SetConfig(uint_8 config_id, uint_8);//this needs to be able to accept bool, uint_8, and Float32, but i think it will take just bytes
 	uint_8 GetConfig(uint_8 config_id);
 	int SaveConfig(void);
@@ -100,6 +100,8 @@ class CompassDriver{
 	CalDataResp GetCalData(void);
 	int SetCalData(CalDataResp caldata);
 	
+	//short int dataresponsetype;
+	bool * dataresponsetype;
 
 	//bool dataresponsemask[9];//bools in order of dataresponsetype above
 	};
@@ -161,7 +163,7 @@ ModInfoResp CompassDriver::GetModInfo(void){
 }*/
 
 
-CompassDriver::SetDataComponents(bool * resptype){
+int CompassDriver::SetDataComponents(bool * resptype){
         int j = 0;
         for(int i=0; i<0; i++){
                 if (resptype[i]){
@@ -194,6 +196,24 @@ uint_8 * CompassDriver::GetData(uint_8 * dataresppoint){
 	spiGet(dataresp, j+2);
 
 	//dataresppoint = dataresp;//is this the right way??
+/*	for(int i=1;i<j+1;i++){//this needs to be converted and sorted
+		if(dataresp[i] == XRaw){
+
+		if(dataresp[i] == YRaw){
+			dataresppoint.YRaw = foo;
+		}
+		if(dataresp[i] == XCal)
+		if(dataresp[i] == YCal
+		if(dataresp[i] == Heading)
+		if(dataresp[i] == Magnitude)
+		if(dataresp[i] == Temperature)
+		if(dataresp[i] == Distortion)
+		if(dataresp[i] == CalStatus)
+
+	}*/
+
+
+
 	return(dataresppoint);//pointer to response including the sync_flag and terminator
 }
 
@@ -238,11 +258,17 @@ CalDataResp CompassDriver::GetCalData(void){
 
 	//reply = resp;//need to properly sort the incoming data into a structure (this is wrong).  ignore first byte, then put groups of the next four corrctly
 
-reply.XOffset = resp[4]*2^24 + resp[3]*2^16 + resp[2]*2^8 + resp[1];//give it bytes 1-4, assuming little endian
-reply.YOffset = resp[8]*2^24 + resp[7]*2^16 + resp[6]*2^8 + resp[5];//give it bytes 5-8, assuming little endian
-reply.XGain = resp[12]*2^24 + resp[11]*2^16 + resp[10]*2^8 + resp[9];//give it bytes 9-12, assuming little endian
-reply.YGain = resp[16]*2^24 + resp[15]*2^16 + resp[14]*2^8 + resp[13];//give it bytes 13-16, assuming little endian;
+//bool temp[i];
+
+reply.XOffset = bytes2sint32LE(&resp[1]);//needs to pass pointer, so prefix with '&'
+reply.YOffset = bytes2sint32LE(&resp[5]);
+reply.XGain = bytes2sint32LE(&resp[9]);
+reply.YGain = bytes2sint32LE(&resp[13]);
+
 reply.phi;//white paper says Float32, is that what this is?
+
+//(resp[17] + resp[18]*2^8 + ((resp[19] << 1)/2)*2^16) * 2^(((resp[20] >> 7) * 2^7) + ((resp[21] << 1)/2)*2^8)) * ((resp[21] >> 7) * 2^7)//big endian, the mantissa is simply multiplied instead of being 1.mantissa
+
 reply.CalibrationMagnitude;//white paper says Float32, is that what this is?
 return(reply);
 }
