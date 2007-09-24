@@ -12,19 +12,24 @@ typedef signed long int sint_32;//defining this like this becuase i'm not sure i
 
 
 int main(void){
-uint_8 foo[30] = {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff};
+//testing correct endianndess
+
+uint_8 array[6] = {0xC2, 0xed, 0x40, 0x00, 0x07, 0x00};
+uint_8 * outarray;
+
+//bytes2sint32LE(&array[0]);
+printf("\nLE 0x B4C4, human C4B4 bytes to sint32: %X\n",bytes2sint32LE(&array[0]));
+
+outarray = sint32_bytesLE(500000);
+printf("this should be {32,161,7,0): {%u,%u,%u,%u}\n", outarray[0], outarray[1], outarray[2], outarray[3]);
 
 
-printf("\nbytes2sint32LE: %li\n",bytes2sint32LE(&foo[0]));
+printf("bytes to float:-118.625 %f\n",bytes2floatLE(&array[0]));
 
 
-uint_8 * sint32sint_test1 = sint32_bytesLE(504003);
-printf("\nsint32_bytesLE: {%li,%li,%li,%li}\n",sint32sint_test1[0],sint32sint_test1[1],sint32sint_test1[2],sint32sint_test1[3]);
+outarray = float2bytesLE(-118.625);
+printf("0xC2, 0xed, 0x40, 0x00: {%X,%X,%X,%X}\n", outarray[0], outarray[1], outarray[2], outarray[3]);
+//compassData foo = CompassDriver.GetData();
 
-
-sint_32 sint_test= 504003;
-uint_8 * array = sint32_bytesLE(sint_test);
-printf("\n%u, %u, %u, %u\n",array[0],array[1],array[2],array[3]);
-//printf("\n%li\n",(foo[4])+((foo[3]) << 8)+((foo[2]) << 16)+((foo[1]) << 24));
 }
 
