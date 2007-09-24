@@ -40,5 +40,17 @@ outarray[5] = temp[2];
 outarray[6] = temp[3];
 
 printf("0xC2, 0xed, 0x40, 0x00: {%X,%X,%X,%X}\n", outarray[3], outarray[4], outarray[5], outarray[6]);*/
+CalDataResp test;
+test.ByteCount = 0xFF;
+test.XOffset = 0xFF;
+test.YOffset = 0xFF;
+test.XGain = 0xFF;
+test.YGain = 0xFF;
+test.phi = 0xFF;
+test.CalibrationMagnitude = 0xFF;
+
+CompassDriver testdriver(5);
+testdriver.SetCalData(test);
+
 }
 

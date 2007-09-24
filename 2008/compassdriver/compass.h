@@ -90,7 +90,7 @@ class CompassDriver{
 	int datalength;
 	int datapackcount;
 	public:
-	CompassDriver();
+	CompassDriver(int foo);
 	~CompassDriver();
 
 	int CompassSend(uint_8 * data, int size);//send uint8 pointer, and size of array
@@ -110,13 +110,13 @@ class CompassDriver{
 
 int CompassDriver::CompassSend(uint_8 * data, int size){
 
-	uint_8 senddata[2+size];
+	uint_8 senddata[size+1];//this is really two longer
 	senddata[0] = sync_flag;
 	senddata[size+1] = terminator;
-	for(int i=0;i<size; i++){
+	for(int i=0;i<=size; i++){
 		senddata[i+1] = data[i];
 	}
-	spiSend(senddata, size+2);//send data wrapped with sync_flag and terminator
+	spiSend(senddata, size+1);//send data wrapped with sync_flag and terminator
 return(0);
 }
 
@@ -128,8 +128,8 @@ int CompassDriver::CompassSend_uint8(uint_8 command){
 	spiSend(senddata, 3);//send command (single uint_8) wrapped with sync_flag and terminator
 }
 
-CompassDriver::CompassDriver(){
-printf("constructed");
+CompassDriver::CompassDriver(int foo){
+//printf("constructed");
 }
 
 CompassDriver::~CompassDriver(){
@@ -152,7 +152,7 @@ int CompassDriver::SetDataComponents(short int datatypewanted){//input type of d
 	} datawantedunion;
 
 	datawantedunion.si = datatypewanted;
-	uint_8 data[11];//max size of config + config count + command, excluding header (compassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
+	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
 	
 
 
@@ -249,13 +249,14 @@ int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval){
 			data[3] = configval[1];
 			data[4] = configval[2];
 			data[5] = configval[3];
-		spiSend(data,5);
+		CompassSend(data,5);
 	}
 	else{
 		uint_8 data[3];
 		data[0] = set_config;
 		data[1] = config_id;
-		spiSend(data,3);
+		data[3] = configval[0];
+		CompassSend(data,3);
 	}
 return(0);
 }
@@ -312,7 +313,7 @@ int CompassDriver::SetCalData(CalDataResp caldata){
 	uint_8 data[26];
 
 	data[0] = set_cal_data;//set command
-	data[1] = 24;//set count
+	data[1] = 24;//set byte count
 
 	uint_8 * temp;
 	temp = sint32_bytesLE(caldata.XOffset);
@@ -351,7 +352,7 @@ int CompassDriver::SetCalData(CalDataResp caldata){
 		data[24] = temp[2];
 		data[25] = temp[3];
 
-	spiSend(data,26);
+	CompassSend(data,26);
 return(0);
 
 }
