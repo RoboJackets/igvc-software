@@ -1,8 +1,8 @@
 
 
 int spiSend(uint_8 * data, int size){
-for(int i=0; i>=size;i++){
-printf("%X",data[i]);
+for(int i=0; i<=size;i++){
+printf("packet %i = %X\n",i,data[i]);
 }
 return(0);
 }
