@@ -1,7 +1,7 @@
 
 
 int spiSend(uint_8 * data, int size){
-for(int i=0; i<=size;i++){
+for(int i=0; i<size;i++){
 printf("packet %i = %X\n",i,data[i]);
 }
 return(0);
@@ -72,4 +72,9 @@ uint_8 * float2bytesLE(float input){//lsb returned first (0=sign; 1-8=exponent;9
 
 	uint_8 output[4] = {out1, out2, out3, out4};
 	return(output);
+}
+
+bool checkbitset(short int foo, int i){//from http://www.cs.umd.edu/class/spring2003/cmsc311/Notes/BitOp/bitI.html
+	short int mask = 1 << i;
+	return(mask & foo);
 }

@@ -49,8 +49,14 @@ test.YGain = 0xFF;
 test.phi = 0xFF;
 test.CalibrationMagnitude = 0xFF;
 
-CompassDriver testdriver(5);
-testdriver.SetCalData(test);
+CompassDriver testdriver(7);
+//testdriver.SetCalData(test);
+
+compassData testgetdata;
+testdriver.SetDataComponents(63);
+testgetdata = testdriver.GetData(outarray);
+
+printf("%li",testgetdata.XRaw);
 
 }
 
