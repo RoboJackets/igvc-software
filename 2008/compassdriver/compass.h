@@ -110,13 +110,13 @@ class CompassDriver{
 
 int CompassDriver::CompassSend(uint_8 * data, int size){
 
-	uint_8 senddata[size+1];//this is really two longer
+	uint_8 senddata[size+2];//this is really two longer
 	senddata[0] = sync_flag;
 	senddata[size+1] = terminator;
-	for(int i=0;i<=size; i++){
+	for(int i=0;i<size; i++){
 		senddata[i+1] = data[i];
 	}
-	spiSend(senddata, size+1);//send data wrapped with sync_flag and terminator
+	spiSend(senddata, size+2);//send data wrapped with sync_flag and terminator
 return(0);
 }
 
@@ -146,12 +146,12 @@ ModInfoResp CompassDriver::GetModInfo(void){
 }
 
 int CompassDriver::SetDataComponents(short int datatypewanted){//input type of data to get, in form of 
-        union shortint_byte{
+       /* union shortint_byte{
 		short int si;
 		bool b[16];
-	} datawantedunion;
+	} datawantedunion;//crap.  bools are a byte long...
 
-	datawantedunion.si = datatypewanted;
+	datawantedunion.si = datatypewanted;*/
 	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
 	
 
@@ -164,15 +164,16 @@ int CompassDriver::SetDataComponents(short int datatypewanted){//input type of d
 	datalength = 0;
 	int j = 2;
 	for(int i=0;i<10;i++){
-		if (datawantedunion.b[i]){
+		if (checkbitset(datatypewanted,i)){
 			data[j] = dataresponsetype[i];
 			j++;
 			datapackcount +=1;//used te check getdata got correct num of packs
 			datalength += (dataresponsetypelength[i] + 1);//datalength = length of package + 1 header per package
 		}
+
 	}
 	data[0] = set_data_components;//command to set data to recive
-	data[1] = j-1;//count of data we expect
+	data[1] = datapackcount;//count of data we expect
 	
         CompassSend(data, j);
         return(0);
