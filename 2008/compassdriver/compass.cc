@@ -4,20 +4,20 @@ typedef signed long int sint_32;//defining this like this becuase i'm not sure i
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-
-#include "spifunct.h"
-//#include "compass.h"
 #include <cstdlib>
 #include <cstdio>
+#include "spifunct.h"
+#include "compass.h"
+
 
 
 int main(void){
 //testing correct endianndess
 
 uint_8 array[6] = {0xC2, 0xed, 0x40, 0x00, 0x07, 0x00};
-uint_8 * outarray;
-
-//bytes2sint32LE(&array[0]);
+uint_8 outarray[10];
+uint_8 * temp;
+/*//bytes2sint32LE(&array[0]);
 printf("\nLE 0x B4C4, human C4B4 bytes to sint32: %X\n",bytes2sint32LE(&array[0]));
 
 outarray = sint32_bytesLE(500000);
@@ -29,7 +29,16 @@ printf("bytes to float:-118.625 %f\n",bytes2floatLE(&array[0]));
 
 outarray = float2bytesLE(-118.625);
 printf("0xC2, 0xed, 0x40, 0x00: {%X,%X,%X,%X}\n", outarray[0], outarray[1], outarray[2], outarray[3]);
-//compassData foo = CompassDriver.GetData();
+//compassData foo = CompassDriver.GetData();*/
 
+
+/*temp = float2bytesLE(-118.625);
+
+outarray[3] = temp[0];
+outarray[4] = temp[1];
+outarray[5] = temp[2];
+outarray[6] = temp[3];
+
+printf("0xC2, 0xed, 0x40, 0x00: {%X,%X,%X,%X}\n", outarray[3], outarray[4], outarray[5], outarray[6]);*/
 }
 
