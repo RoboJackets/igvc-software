@@ -191,8 +191,10 @@ compassData CompassDriver::GetData(uint_8 * dataresppoint){
 		compassData datarespstruct;
 		//currently ignoring count, use to verify correct num of data packs comming  (ie dataresp[1] == headers in data length (excluding data))
 		int i = 3;//first data type packet is byte 4 (3 in array)
+	
 
 		if(dataresp[2] == datapackcount){
+		for(int j = 0;j<datapackcount;j++){
 			if(dataresp[i] == XRaw){
 				datarespstruct.XRaw = bytes2sint32LE(&dataresp[i+1]);
 			i += 5;//go forward 5 bytes to next data header
@@ -229,12 +231,13 @@ compassData CompassDriver::GetData(uint_8 * dataresppoint){
 				datarespstruct.CalStatus = dataresp[i+1];
 				i += 2;
 			}
+		}
 		//if used as compassData foo = GetData, then members accessed how??
 	return(datarespstruct);
 	}
-else{
-//return(-1);//pack count header from wire did not match datapackcount set when config sent.  Maybe retry/resend/query the config?
-}
+	//else{
+	//return(-1);//pack count header from wire did not match datapackcount set when config sent.  Maybe retry/resend/query the config?
+	//}
 
 }
 
@@ -285,9 +288,9 @@ int CompassDriver::StartCal(void){
 }
 
 int CompassDriver::StopCal(void){
-uint_8 data = stop_cal;
-CompassSend_uint8(data);
-return(0);//need to SaveConfig for this to be permanent
+	uint_8 data = stop_cal;
+	CompassSend_uint8(data);
+	return(0);//need to SaveConfig for this to be permanent
 }
 
 CalDataResp CompassDriver::GetCalData(void){
@@ -297,17 +300,17 @@ CalDataResp CompassDriver::GetCalData(void){
 	uint_8 resp[28];//is this right? needs to be total length of cal data from device.  (4 x sint_32, 2 x float32) = 24 bytes, + count + sync + term + cal_data_resp
 	spiGet(resp, 28);//getting array pf bytes from compass
 
-//sorting and converting bytes
-//if(resp[2] == 24){//can add this to see of header is correct
-reply.XOffset = bytes2sint32LE(&resp[3]);//needs to pass pointer, so prefix with '&'
-reply.YOffset = bytes2sint32LE(&resp[7]);
-reply.XGain = bytes2sint32LE(&resp[11]);
-reply.YGain = bytes2sint32LE(&resp[15]);
-reply.phi = bytes2floatLE(&resp[19]);
-reply.CalibrationMagnitude = bytes2floatLE(&resp[23]);
+	//sorting and converting bytes
+	//if(resp[2] == 24){//can add this to see of header is correct
+	reply.XOffset = bytes2sint32LE(&resp[3]);//needs to pass pointer, so prefix with '&'
+	reply.YOffset = bytes2sint32LE(&resp[7]);
+	reply.XGain = bytes2sint32LE(&resp[11]);
+	reply.YGain = bytes2sint32LE(&resp[15]);
+	reply.phi = bytes2floatLE(&resp[19]);
+	reply.CalibrationMagnitude = bytes2floatLE(&resp[23]);
 
-//return structure
-return(reply);
+	//return structure
+	return(reply);
 }
 
 int CompassDriver::SetCalData(CalDataResp caldata){
@@ -354,7 +357,7 @@ int CompassDriver::SetCalData(CalDataResp caldata){
 		data[25] = temp[3];
 
 	CompassSend(data,26);
-return(0);
+	return(0);
 
 }
 

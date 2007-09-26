@@ -1,13 +1,17 @@
 
 
 int spiSend(uint_8 * data, int size){
-for(int i=0; i<size;i++){
-printf("packet %i = %X\n",i,data[i]);
+	for(int i=0; i<size;i++){
+		printf("packet %i = %X\n",i,data[i]);
+	}
+	return(0);
 }
-return(0);
-}
+
 int spiGet(uint_8 * dataresp, int size){
-return(0);
+	for(int i=0; i<size;i++){
+		dataresp[i] = 0;
+	}
+	return(0);
 }
 
 sint_32 bytes2sint32LE(uint_8 * array){//give it pointer to least signifiacant byte first (little endian)
