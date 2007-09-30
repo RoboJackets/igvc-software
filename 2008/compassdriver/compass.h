@@ -13,8 +13,6 @@ SetConfig, GetConfig, SaveConfig, StartCal, StopCal, need to check endianness of
 
 //#include "spifunct.h"
 
-
-
 enum CommandCodes {
 	sync_flag = 0xAA,
 	terminator = 0x00,
@@ -57,8 +55,8 @@ enum Data_Cid{
 
 
 struct ModInfoResp {
-	char module_type[4];
-	char firmware_version[4];
+	char module_type[5];//four chars read from compass + null char i add later
+	char firmware_version[5];
 };
 
 struct CalDataResp {
@@ -83,12 +81,15 @@ struct compassData{//all posible values of data compass sends when asked Distort
 	uint_8 CalStatus;
 };
 
+
+
 //const uint_8 dataresponsetype[9] = {XRaw, YRaw, XCal, YCal, Heading, Magnitude, Temperature, Distortion, CalStatus};
 
 class CompassDriver{
 	private:
 	int datalength;
 	int datapackcount;
+	
 	public:
 	CompassDriver(int foo);
 	~CompassDriver();
@@ -96,16 +97,17 @@ class CompassDriver{
 	int CompassSend(uint_8 * data, int size);//send uint8 pointer, and size of array
 	int CompassSend_uint8(uint_8 command);//send single uint8
 	ModInfoResp GetModInfo(void);
-	compassData GetData(uint_8 * dataresppoint);
+	compassData GetData(void);
 	int SetDataComponents(short int datatypewanted);
 	int SetConfig(uint_8 config_id, uint_8 * convigval);//this needs to be able to accept bool, uint_8, and Float32, but i think it will take just bytes
-	uint_8 GetConfig(uint_8 config_id);
+	uint_8 * GetConfig(uint_8 config_id);
 	int SaveConfig(void);
 	int StartCal(void);
 	int StopCal(void);
 	CalDataResp GetCalData(void);
 	int SetCalData(CalDataResp caldata);
-		
+	
+	
 	};
 
 int CompassDriver::CompassSend(uint_8 * data, int size){
@@ -129,7 +131,7 @@ int CompassDriver::CompassSend_uint8(uint_8 command){
 }
 
 CompassDriver::CompassDriver(int foo){
-//printf("constructed");
+//do stuff like initialize and load config
 }
 
 CompassDriver::~CompassDriver(){
@@ -141,18 +143,20 @@ ModInfoResp CompassDriver::GetModInfo(void){
 	CompassSend_uint8(data);
 	uint_8 resp[10];
 	spiGet(resp, 10);
-	ModInfoResp reply = {resp[1], resp[5]};//syntax???
+	ModInfoResp reply;
+		for(int i = 2;i<6;i++){
+			reply.module_type[i-2] = uint_82char2(&resp[i]);//get 2-6 of info into modtype
+		}
+			reply.module_type[4] = '\0';//appends nul char
+		for(int i = 6;i<10;i++){
+			reply.firmware_version[i-6] = uint_82char2(&resp[i]);
+		}		
+		reply.firmware_version[4] = '\0';
 	return(reply);
 }
 
 int CompassDriver::SetDataComponents(short int datatypewanted){//input type of data to get, in form of 
-       /* union shortint_byte{
-		short int si;
-		bool b[16];
-	} datawantedunion;//crap.  bools are a byte long...
-
-	datawantedunion.si = datatypewanted;*/
-	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
+ 	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
 	
 
 
@@ -180,7 +184,7 @@ int CompassDriver::SetDataComponents(short int datatypewanted){//input type of d
 }
 
 
-compassData CompassDriver::GetData(uint_8 * dataresppoint){
+compassData CompassDriver::GetData(void){
 	uint_8 data = get_data;
 	CompassSend_uint8(data);//send command to request data
 
@@ -253,7 +257,7 @@ int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval){
 			data[3] = configval[1];
 			data[4] = configval[2];
 			data[5] = configval[3];
-		CompassSend(data,5);
+		CompassSend(data,6);
 	}
 	else{
 		uint_8 data[3];
@@ -265,13 +269,25 @@ int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval){
 return(0);
 }
 
-uint_8 CompassDriver::GetConfig(uint_8 config_id){
-	uint_8 data = config_id;
-	CompassSend_uint8(config_id);
+uint_8 * CompassDriver::GetConfig(uint_8 config_id){
+	uint_8 data[2];
+	data[0] = get_config;
+	data[1] = config_id;
+	CompassSend(data, 2);
 
-	uint_8 resp[3];
-	spiGet(resp, 3);
-	return(resp[2]);//returns the second element, assuming it is a byte.  if the compass returns a bool, it just a byte equal to 1?  the specs show the data field as bytes.
+	if (config_id == declination){
+		uint_8 resp[8];
+		spiGet(resp, 8);
+
+		uint_8 out[4] = {resp[3],resp[4],resp[5],resp[6]};
+		return(out);//returns the second element, assuming it is a byte.
+	}
+	else{
+		uint_8 resp[5];
+		spiGet(resp, 5);
+		return(&resp[4]);//returns the second element, assuming it is a byte.
+	}
+	
 }
 
 int CompassDriver::SaveConfig(void){
