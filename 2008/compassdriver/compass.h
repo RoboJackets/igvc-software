@@ -1,3 +1,6 @@
+#ifndef COMPASS_H
+#define COMPASS_H
+
 /*typedef unsigned char uint_8;
 typedef signed long int sint_32;//defining this like this becuase i'm not sure if a long int is 4 bytes or not, so can change later*/
 //#include <systypes.h>
@@ -11,7 +14,7 @@ SetConfig, GetConfig, SaveConfig, StartCal, StopCal, need to check endianness of
 
 //#include <> // spiSend(* data, int size)
 
-//#include "spifunct.h"
+#include "spifunct.h"
 
 enum CommandCodes {
 	sync_flag = 0xAA,
@@ -377,3 +380,4 @@ int CompassDriver::SetCalData(CalDataResp caldata){
 
 }
 
+#endif //COMPASS_H

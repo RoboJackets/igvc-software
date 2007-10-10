@@ -1,3 +1,6 @@
+#ifndef SPIFUNCT_H
+#define SPIFUNCT_H
+
 sint_32 bytes2sint32LE(uint_8 * array){//give it pointer to least signifiacant byte first (little endian)
 	
 	union sint_32_uint_8{
@@ -165,3 +168,4 @@ int spiGet(uint_8 * dataresp, int size){
 	return(0);
 }
 
+#endif // SPIFUNCT_H
