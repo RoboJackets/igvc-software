@@ -30,7 +30,7 @@
   *			int TEX_DIM=[power of 2 greater than width and greater than height]
   *			double ASPECT_RATIO			//MUST be >1 
   */
-void genpoints(int width, int height,int divisor);
+void genpoints(int divisor);
 
 #endif
 
