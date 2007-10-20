@@ -16,6 +16,10 @@
 
 #define FINAL_SCALE_FACTOR .69	/* Put final image in proper units (empirically determined) */
 #define HFOV (.8602)             //.8602 empirical value ~=49 degrees (in radians)
+   /* D-1 NTSC uses 720x486
+    * Square NTSC uses 648/486 
+    * The camera uses D-1 NTSC 
+   */
 #define VFOV (HFOV*480/648)		// adjust for non-square NTSC pixels [648 == 720*(9/10)]	
 	//(HFOV*420/648)
 
