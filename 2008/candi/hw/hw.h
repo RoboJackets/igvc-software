@@ -12,6 +12,12 @@
 void InitHW();
 void UpdateSensors();
 
+/**
+ * Blocks until a new image from the camera is available and then returns it.
+ * <p>
+ * The returned image is stored in a static buffer,
+ * so users do not need to (and should not) deallocate it.
+ */
 Image* GetCameraFrame();
 
 void SetMotorOutput(MotorOutput motorOutput);

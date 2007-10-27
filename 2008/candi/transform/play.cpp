@@ -24,7 +24,6 @@ extern "C" Image* GetNextFrame() {
 	UpdateSensors();
 	
 	Image* nextFrame = GetCameraFrame();
-	usleep(10);			// don't hog the processor
 	return nextFrame;
 }
 
