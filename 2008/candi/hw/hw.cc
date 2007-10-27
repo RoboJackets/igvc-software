@@ -175,6 +175,20 @@ Image* GetCameraFrame() {
 	if (camera == NULL) {
 		resizeImage(0,0);
 	} else {
+		/* Block until we have a new camera image */
+#if 1
+		// XXX: This function is non-standard. It needs to be added to the official
+		//      Player codebase at some point.
+		while (!camera->HasNewImage()) {
+			UpdateSensors();
+		}
+#else
+		// XXX: This function is non-standard. It needs to be added to the official
+		//      Player codebase at some point.
+		camera->WaitForImage();		// blocks until a new camera image has been received
+#endif
+		
+		/* Get the camera image */
 		resizeImage(camera->GetWidth(), camera->GetHeight());
 		camera->GetImage(curFrame.data);
 	}

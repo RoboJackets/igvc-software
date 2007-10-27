@@ -29,30 +29,18 @@ void display ()
 		
   	glFlush (); // makes sure commands are executed immediately
   	
-	//drawRose();
+	/*
+	drawRose();
   	glFlush ();
+  	*/
+  	
 	glutSwapBuffers();
 	   
 	glFinish();
 	
-	/*
-	glReadPixels(	0				,			//GLint x,
-			     	0				,			//GLint y,
-			     	OWIDTH			,			//GLsizei width,
-			     	OHEIGHT			,			//GLsizei height,
-			     	GL_RGB			,			//GLenum format,
-			     	GL_UNSIGNED_BYTE,			//GLenum type,
-			     	out.data	);				//GLvoid *pixels
-	*/
-	
 	//tvar=nanotime()-tvar;
 	//tvararr[tvarindex++]=tvar;
 	ProcessTransformedFrame();
-}
-
-void go(){
-	for(;;)
-		display();
 }
 
 /* The function called whenever a key is pressed. */
@@ -159,7 +147,7 @@ void transform(int argc, char** argv)
 	mainwindow=glutCreateWindow ("Transform"); // sets the window title        
 	init (); // calls the init() function above
 	glutDisplayFunc (display); // uses the function called 'display' for displaying 
-	glutIdleFunc(display);      
+	glutIdleFunc(display);
 	glutKeyboardFunc(&keyPressed);
 	glutMainLoop (); // will execute OpenGL functions continuously if window left up
 }
