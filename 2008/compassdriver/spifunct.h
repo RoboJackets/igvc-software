@@ -1,11 +1,23 @@
 #ifndef SPIFUNCT_H
 #define SPIFUNCT_H
 
+#include "types.h"
+//#include "peekpoke.h"
+
+//these were included in button.c, don't know if we need them
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+
+
+
 sint_32 bytes2sint32LE(uint_8 * array){//give it pointer to least signifiacant byte first (little endian)
 	
 	union sint_32_uint_8{
-	sint_32 sint32;
-	uint_8 uint8[4];
+		sint_32 sint32;
+		uint_8 uint8[4];
 	} outputunion;
 	
 	outputunion.uint8[0] = array[0];//lsb
@@ -18,8 +30,8 @@ sint_32 bytes2sint32LE(uint_8 * array){//give it pointer to least signifiacant b
 
 uint_8 * sint32_bytesLE(sint_32 input){//give it sint_32, returns pointer to byte array, lsb first (little endian)
 	union sint_32_uint_8{
-	sint_32 sint32;
-	uint_8 uint8[4];
+		sint_32 sint32;
+		uint_8 uint8[4];
 	} inputunion;
 	
 	inputunion.sint32 = input;
@@ -36,7 +48,7 @@ uint_8 * sint32_bytesLE(sint_32 input){//give it sint_32, returns pointer to byt
 float bytes2floatLE(uint_8 * array){
 union float_uint_8{
 	float flt;
-	uint_8 uint8[4];
+		uint_8 uint8[4];
 	} outputunion;
 		
 	outputunion.uint8[0] = array[3];//haven't checked lsb order, but result seems correct
@@ -51,7 +63,7 @@ uint_8 * float2bytesLE(float input){//lsb returned first (0=sign; 1-8=exponent;9
 	
 	union float_uint_8{
 	float flt;
-	uint_8 uint8[4];
+		uint_8 uint8[4];
 	} inputunion;
 
 	inputunion.flt = input;
@@ -75,7 +87,6 @@ uint_8 char2uint_8(char foo){
 		uint_8 uint8;
 		char chr;
 		}out;
-	//out.chr = foo[0];
 	out.chr = foo;
 	return(out.uint8);
 }
@@ -90,82 +101,114 @@ char uint_82char2(uint_8 * foo){
 }
 
 
-//uint_8 lastcommand;//for debug
-
-int spiSend(uint_8 * data, int size){
-	/*printf("sending:\n");
-	for(int i=0; i<size;i++){
-		printf("\tpacket %i = %X\n",i,data[i]);
+int CompassDriver::spiSend(uint_8 * data, int size){
+	spi_status_register status;
+	status = spigetstatus();
+	
+	while(!(status.bits.transmit_empty_interrupt_flag)){
+	//wait for the send buffer to clear -- more than likly a better way to do this
 	}
-	lastcommand = data[1];*/
+	
+	for(int i=0; i < size; i++){
+		*datareg = data[i];
+	}
+	return(0);
+}
+
+spi_status_register CompassDriver::spigetstatus(){
+	spi_status_register statusval;
+	statusval.byte = *statusreg;
+	return(statusval);
+}
+
+int CompassDriver::spiGet(uint_8 * dataresp, int size){
+	spi_status_register status;
+	status = spigetstatus();
+	
+	while(!(status.bits.interrupt_flag)){
+	//wait for new data -- more than likly a better way to do this
+	}
+	
+	for(int i=0; i < size; i++){
+		dataresp[i] = *datareg;
+	}
 	return(0);
 }
 
 
 
-int spiGet(uint_8 * dataresp, int size){
-	//for debug -- depends on commented out global debug var above
-	/*if (lastcommand == get_mod_info){
-		//uint_8 dataresp[11];
-		dataresp[0] = sync_flag;
-		dataresp[1] = mod_info_resp;
-		dataresp[2] = char2uint_8('V');
-		dataresp[3] = char2uint_8('2');
-		dataresp[4] = char2uint_8('X');
-		dataresp[5] = char2uint_8('e');
-		dataresp[6] = char2uint_8('V');
-		dataresp[7] = char2uint_8('2');
-		dataresp[8] = char2uint_8('0');
-		dataresp[9] = char2uint_8('1');
-		dataresp[10] = terminator;
-	}
+int CompassDriver::spiinit(){
+	//volatile unsigned int ctrlreg1, ctrlreg2, datareg, statusreg, clockprescalereg, interuptclearreg;//this is now in the class
+	unsigned char *start;
+	int fd = open("/dev/mem", O_RDWR|O_SYNC);
+	start = (unsigned char*)mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0x80840000);//this doesn't need to be cast from void in the example -- is this correct?
+
+	//name the dio registers -- direct from button.c -- do i want these to be pointers?  the poke func expects an address
+	volatile unsigned int *PEDR, *PEDDR, *PBDR, *PBDDR, *GPIOBDB;	
+	PBDR = (unsigned int *)(start + 0x04);     // port b
+	PBDDR = (unsigned int *)(start + 0x14);    // port b direction register
+	PEDR = (unsigned int *)(start + 0x20);     // port e data
+	PEDDR = (unsigned int *)(start + 0x24);    // port e direction register
+	GPIOBDB = (unsigned int *)(start + 0xC4);  // debounce on port b
+
+	*PBDDR = 0xf0;			      // upper nibble output, lower nibble input
+	*PEDDR = 0xff;			     // all output (just 2 bits)
+	*GPIOBDB = 0x01;			      // enable debounce on bit 0
 	
-	if (lastcommand == get_data){
-	dataresp[0] = sync_flag;
-	dataresp[1] = data_resp;
-	dataresp[2] = 2;//compcount
-	dataresp[3] = XRaw;
 
-	uint_8 * temp = sint32_bytesLE(500);
-		dataresp[4] = temp[0];
-		dataresp[5] = temp[1];
-		dataresp[6] = temp[2];
-		dataresp[7] = temp[3];
-	dataresp[8] = YRaw;
-	temp = sint32_bytesLE(500);
-		dataresp[9] = temp[0];
-		dataresp[10] = temp[1];
-		dataresp[11] = temp[2];
-		dataresp[12] = temp[3];
-	dataresp[13] = terminator;
+	//name the spi registers -- these are the ones for the ts-7200
+	ctrlreg0 = (unsigned int *)(start);
+	ctrlreg1 = (unsigned int *)(start + 0x60004);
+	datareg = (unsigned int *)(start + 0x6008);
+	statusreg = (unsigned int *)(start + 0x600C);
+	clockprescalereg = (unsigned int *)(start + 0x6010);
+	interuptclearreg = (unsigned int *)(start + 0x6014);
+	
+	//set config
+	spi_control_0 spicntr0;
+	spi_control_1 spicntr1;
+	spi_baud_rate spibaudrt;
+	spi_status_register spistatus;
 
-	printf("reciveing:\n");
-	}
+	spicntr0.bits.interupt_enable=0;
+	spicntr0.bits.sytem_enable=1;
+	spicntr0.bits.transmit_interrupt_enable=0;
+	spicntr0.bits.mode_select=1;
+	spicntr0.bits.clock_polarity=0;
+	spicntr0.bits.clock_phase=0;
+	spicntr0.bits.slave_select_out_enable=0;
+	spicntr0.bits.LSB_first=1;
 
-	if(lastcommand == get_config){
-		dataresp[0] = sync_flag;
-		dataresp[1] = config_resp;
-		dataresp[2] = true_north;
-		dataresp[3] = false;
-		dataresp[4] = terminator;
-		
-	}
+	spicntr1.bits.MODFEN=1;
+	spicntr1.bits.BIDROE=1;
+	spicntr1.bits.SPISWAI=1;
+	spicntr1.bits.SPC0=0;
+	
+	//spibaudrt.baud_rate_preselect=;
+	//spibaudrt.baud_rate_select=;
+	
 
-	if(lastcommand == get_cal_data){
-		dataresp[0] = sync_flag;
-		dataresp[1] = cal_data_resp;
-		dataresp[2] = 24;
-			for(int i =3;i<27;i++){
-				dataresp[i] = 0;
-			}
-		dataresp[27] = terminator;
-		
-	}
+	//load config -- use poke, or just directly '='?
+	//poke8(clockprescalereg, spibaudrate);//verify that this is the right register before the test.  i'm lazy right now
+	//poke8(ctrlreg0, spicntr1);
+	//poke8(ctrlreg1, spicntr0);
 
-	for(int i=0; i<size;i++){
-		printf("\tpacket %i = %X\n",i,dataresp[i]);
-	}*/
-	return(0);
+	//*clockprescalereg = spibaudrate;//verify register
+	*ctrlreg1 = spicntr1.byte;
+	*ctrlreg0 = spicntr0.byte;
+
+
+/*now, should it be a matter of knowing when to peek and poke? and what to set the clock too?
+	use pwm clock func from xdio example*/
+
+//startPWM()
+
+//return memory?? does this do all?
+//close(fd);//moved to spioff
+}
+
+int CompassDriver::spioff(){
+	//close(fd);//will this work across scope like this?
 }
 
 #endif // SPIFUNCT_H
