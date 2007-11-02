@@ -6,99 +6,36 @@ typedef signed long int sint_32;//defining this like this becuase i'm not sure i
 //#include <systypes.h>
 /*no errors reporting from anything yet, need to decide big of little endian,
  set in config and driver -- right now assuming little endian*/
-/*functions known incomplete: CompassDriver, ~CompassDriver, spiSend, spiGet, GetModInfo, GetData, SetDataComponents,
+/*functions known incomplete: CompassDriver, ~CompassDriver, CompassDriver::spiSend, CompassDriver::spiGet, GetModInfo, GetData, SetDataComponents,
 SetConfig, GetConfig, SaveConfig, StartCal, StopCal, need to check endianness of float2bytes and bytes2foat*/
 
 //setcaldata, getcaldata, getdata,setconfig
 
 
-//#include <> // spiSend(* data, int size)
-
-#include "spifunct.h"
-
-enum CommandCodes {
-	sync_flag = 0xAA,
-	terminator = 0x00,
-	get_mod_info = 0x01,
-	set_data_components = 0x03,
-	get_data = 0x04,
-	set_config = 0x06,
-	get_config = 0x07,
-	save_config = 0x09,
-	start_cal = 0x0A,
-	stop_cal = 0x0B,
-	get_cal_data = 0x0C,
-	set_cal_data = 0x0E};
-
-enum CompassResponse{
-	mod_info_resp = 0x02,
-	data_resp = 0x05,
-	config_resp = 0x08,
-	cal_data_resp = 0x0D};
-
-enum Config_Id{
-	declination = 0x01,
-	true_north = 0x02,
-	casamplefreq = 0x03,
-	samplefreq = 0x04,
-	period = 0x05,
-	bigendian = 0x06,
-	dampingsize = 0x07};
-
-enum Data_Cid{
-	XRaw = 0x01,
-	YRaw = 0x02,
-	XCal = 0x03,
-	YCal = 0x04,
-	Heading = 0x05,
-	Magnitude = 0x06,
-	Temperature = 0x07,
-	Distortion = 0x08,
-	CalStatus = 0x09};
+#include "types.h"
 
 
-struct ModInfoResp {
-	char module_type[5];//four chars read from compass + null char i add later
-	char firmware_version[5];
-};
-
-struct CalDataResp {
-	uint_8 ByteCount;
-	sint_32 XOffset;
-	sint_32 YOffset;
-	sint_32 XGain;
-	sint_32 YGain;
-	float phi;
-	float CalibrationMagnitude;
-};
-
-struct compassData{//all posible values of data compass sends when asked Distortion and Calstatus are said to be bools, but i think they are read a byte at a time, so should work as uint_8's.
-	sint_32 XRaw;
-	sint_32 YRaw;
-	float XCal;
-	float YCal;
-	float Heading;
-	float Magnitude;
-	float Temperature;
-	uint_8 Distortion;
-	uint_8 CalStatus;
-};
-
-
-
-//const uint_8 dataresponsetype[9] = {XRaw, YRaw, XCal, YCal, Heading, Magnitude, Temperature, Distortion, CalStatus};
 
 class CompassDriver{
-	private:
-	int datalength;
-	int datapackcount;
+	private://do these need to be static?
+	 int datalength;
+	 int datapackcount;
+	
+	 volatile unsigned int *ctrlreg0, *ctrlreg1, *datareg, *statusreg, *clockprescalereg, *interuptclearreg;//so member functions can accses the registers
+	 int fd;
+
+	int spiinit();
+	int spioff();
+	spi_status_register spigetstatus();
+	int spiSend(uint_8 * data, int size);
+	int spiGet(uint_8 * dataresp, int size);
 	
 	public:
 	CompassDriver(int foo);
 	~CompassDriver();
 
-	int CompassSend(uint_8 * data, int size);//send uint8 pointer, and size of array
-	int CompassSend_uint8(uint_8 command);//send single uint8
+	int CompassSend(uint_8 * data, int size);
+	//int CompassSend_uint8(uint_8 command);//marked for removal
 	ModInfoResp GetModInfo(void);
 	compassData GetData(void);
 	int SetDataComponents(short int datatypewanted);
@@ -109,43 +46,44 @@ class CompassDriver{
 	int StopCal(void);
 	CalDataResp GetCalData(void);
 	int SetCalData(CalDataResp caldata);
-	
-	
-	};
+};
+
+
+#include "spifunct.h"
 
 int CompassDriver::CompassSend(uint_8 * data, int size){
 
-	uint_8 senddata[size+2];//this is really two longer
+	uint_8 senddata[size+2];
 	senddata[0] = sync_flag;
 	senddata[size+1] = terminator;
 	for(int i=0;i<size; i++){
 		senddata[i+1] = data[i];
 	}
-	spiSend(senddata, size+2);//send data wrapped with sync_flag and terminator
-return(0);
+	CompassDriver::spiSend(senddata, size+2);//send data wrapped with sync_flag and terminator
+	return(0);
 }
 
-int CompassDriver::CompassSend_uint8(uint_8 command){
+/*int CompassDriver::CompassSend_uint8(uint_8 command){
 	uint_8 senddata[3];
 	senddata[0] = sync_flag;
 	senddata[1] = command;
 	senddata[2] = terminator;
-	spiSend(senddata, 3);//send command (single uint_8) wrapped with sync_flag and terminator
-}
+	CompassDriver::spiSend(senddata, 3);//send command (single uint_8) wrapped with sync_flag and terminator
+}*/
 
 CompassDriver::CompassDriver(int foo){
-//do stuff like initialize and load config
+	//CompassDriver::spiinit();
 }
 
 CompassDriver::~CompassDriver(){
-
+	//CompassDriver::spioff();
 }
-
+	
 ModInfoResp CompassDriver::GetModInfo(void){
 	uint_8 data = get_mod_info;
-	CompassSend_uint8(data);
+	CompassSend(&data,1);
 	uint_8 resp[10];
-	spiGet(resp, 10);
+	CompassDriver::spiGet(resp, 10);
 	ModInfoResp reply;
 		for(int i = 2;i<6;i++){
 			reply.module_type[i-2] = uint_82char2(&resp[i]);//get 2-6 of info into modtype
@@ -153,13 +91,13 @@ ModInfoResp CompassDriver::GetModInfo(void){
 			reply.module_type[4] = '\0';//appends nul char
 		for(int i = 6;i<10;i++){
 			reply.firmware_version[i-6] = uint_82char2(&resp[i]);
-		}		
+		}	       
 		reply.firmware_version[4] = '\0';
 	return(reply);
 }
 
 int CompassDriver::SetDataComponents(short int datatypewanted){//input type of data to get, in form of 
- 	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
+	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
 	
 
 
@@ -174,7 +112,7 @@ int CompassDriver::SetDataComponents(short int datatypewanted){//input type of d
 		if (checkbitset(datatypewanted,i)){
 			data[j] = dataresponsetype[i];
 			j++;
-			datapackcount +=1;//used te check getdata got correct num of packs
+			datapackcount +=1;//used te check getdata got correct num of packs later
 			datalength += (dataresponsetypelength[i] + 1);//datalength = length of package + 1 header per package
 		}
 
@@ -182,17 +120,17 @@ int CompassDriver::SetDataComponents(short int datatypewanted){//input type of d
 	data[0] = set_data_components;//command to set data to recive
 	data[1] = datapackcount;//count of data we expect
 	
-        CompassSend(data, j);
-        return(0);
+	CompassSend(data, j);
+	return(0);
 }
 
 
 compassData CompassDriver::GetData(void){
 	uint_8 data = get_data;
-	CompassSend_uint8(data);//send command to request data
+	CompassSend(&data,1);//send command to request data
 
 	uint_8 dataresp[datalength+4];//we will be getting datalength + sync + data_resp + count + term
-	spiGet(dataresp, datalength+4);
+	CompassDriver::spiGet(dataresp, datalength+4);
 		
 
 		compassData datarespstruct;
@@ -255,7 +193,6 @@ int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval){
 		uint_8 data[6];
 		data[0] = set_config;
 		data[1] = config_id;
-		//temp = sint32_bytesLE(configval);
 			data[2] = configval[0];
 			data[3] = configval[1];
 			data[4] = configval[2];
@@ -280,14 +217,14 @@ uint_8 * CompassDriver::GetConfig(uint_8 config_id){
 
 	if (config_id == declination){
 		uint_8 resp[8];
-		spiGet(resp, 8);
+		CompassDriver::spiGet(resp, 8);
 
 		uint_8 out[4] = {resp[3],resp[4],resp[5],resp[6]};
 		return(out);//returns the second element, assuming it is a byte.
 	}
 	else{
 		uint_8 resp[5];
-		spiGet(resp, 5);
+		CompassDriver::spiGet(resp, 5);
 		return(&resp[4]);//returns the second element, assuming it is a byte.
 	}
 	
@@ -295,29 +232,29 @@ uint_8 * CompassDriver::GetConfig(uint_8 config_id){
 
 int CompassDriver::SaveConfig(void){
 	uint_8 data = save_config;
-	CompassSend_uint8(data);
+	CompassSend(&data,1);
 	return(0);
 }
 
 int CompassDriver::StartCal(void){
 	uint_8 data = start_cal;
-	CompassSend_uint8(data);
+	CompassSend(&data,1);
 	return(0);//something about wanting to read XRaw and YRaw??? needs to be set before this is run
 
 }
 
 int CompassDriver::StopCal(void){
 	uint_8 data = stop_cal;
-	CompassSend_uint8(data);
+	CompassSend(&data,1);
 	return(0);//need to SaveConfig for this to be permanent
 }
 
 CalDataResp CompassDriver::GetCalData(void){
 	uint_8 data = get_cal_data;
-	CompassSend_uint8(data);
-	CalDataResp reply;//define reply as structure of cal data resp
+	CompassSend(&data,1);
+	CalDataResp reply;
 	uint_8 resp[28];//is this right? needs to be total length of cal data from device.  (4 x sint_32, 2 x float32) = 24 bytes, + count + sync + term + cal_data_resp
-	spiGet(resp, 28);//getting array pf bytes from compass
+	CompassDriver::spiGet(resp, 28);//getting array pf bytes from compass
 
 	//sorting and converting bytes
 	//if(resp[2] == 24){//can add this to see of header is correct
@@ -335,8 +272,8 @@ CalDataResp CompassDriver::GetCalData(void){
 int CompassDriver::SetCalData(CalDataResp caldata){
 	uint_8 data[26];
 
-	data[0] = set_cal_data;//set command
-	data[1] = 24;//set byte count
+	data[0] = set_cal_data;//command
+	data[1] = 24;//byte count
 
 	uint_8 * temp;
 	temp = sint32_bytesLE(caldata.XOffset);
@@ -381,3 +318,4 @@ int CompassDriver::SetCalData(CalDataResp caldata){
 }
 
 #endif //COMPASS_H
+
