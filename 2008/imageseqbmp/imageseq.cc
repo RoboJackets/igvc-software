@@ -209,7 +209,7 @@ void ImageSeq::Main()
 
     // Write new camera data
     this->WriteData();
-    this->frame++;          
+    this->frame++;
   }
   return;
 }
