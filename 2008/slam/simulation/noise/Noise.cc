@@ -1,0 +1,3 @@
+#include "Noise.h"
+
+Noise::
