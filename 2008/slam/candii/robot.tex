@@ -1,0 +1,38 @@
+\documentclass{report}
+\usepackage{amsmath}
+\begin{document}
+
+must acount torque and force for:
+motors
+friction (at wheels)
+drag (from grass and from air)
+gravity
+
+might do this from a different center of motion \\
+change this so everything is a vector \\
+\begin{gather*}
+\tau _{w} - \tau _{Fr} = I_{w} \alpha _{w} \\
+\tau _{robot} = I_{robot} \alpha _{robot} = \tau _{rw} + \tau _{lw} - \tau _{drag} \\
+= (d_{r} F_{rFr} \sin (\theta _{r}) + (d_{r} \times \tau _{rFr-rot})) - (d_{l} F_{lFr} \sin (\theta _{l}) + (d_{l} \times \tau _{lFr-rot})) - ? \\
+F_{robot} = m_{robot} a_{robot} = F_{rFr} + F_{lFr} + F_{gravity} - F_{drag} \\
+\end{gather*}
+where \\
+$\tau _{w}$ is the torque resulting from the motor at the wheel \\
+$\tau _{Fr}$ is the torque due to friction between the wheel and ground \\
+$I_{w}$ is the angular momentum of the wheel \\
+$\alpha _{w}$ is the angular acelleration of the wheel \\
+
+Friction: \\
+in the direction of wheel torque (must include gravity if at an angle) - level to ground \\
+perp to previous \\
+rotational perp to the wheel (like when you spin a coin) \\
+
+Drag: \\
+due to grass (does this affect wheel speed?) \\
+due to atmosphere \\
+
+Degrees of Freedom:
+6 at center of robot
+2 for each wheel (rotation + movement of suspension)
+3 for the ball (ignoring the movement of the ball in its holder)
+\end{document}

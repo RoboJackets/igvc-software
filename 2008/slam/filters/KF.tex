@@ -1,0 +1,191 @@
+%{
+This is a simple Kalman Filter for robotics
+
+
+It uses the model:
+
+  $x_k = A_{k-1} x_{k-1} + B_k u_k + w_{k-1}$
+  $z_k = H_k x_k + v_k$
+
+where
+  x is the state vector
+  u is the control vector
+  z is the measurement vector
+  w and v are the process and measurement noises
+    p(w_k) ~ N(0,Q_k)
+    p(v_k) ~ N(0,R_k)
+  A is the process model
+  B is the control model
+  H is the measurement model
+
+To estimate x, it recursively calculates
+
+Prediction:
+  $\hat{x}^-_k = A_{k-1} \hat{x}_{k-1} + B_k u_k$
+  $\hat{P}^-_k = A_{k-1} P_{k-1} A^T_{k-1}  +  Q_{k-1}$ 
+    - should this be A_k instead?
+
+Correction:
+  $\hat{x}_k  =  \hat{x}^-_k + K_k ( z_k - H_k \hat{x}^-_k )$
+  $K_k = P^-_k H^T_k ( H_k P^-_k H^T_k + R_k )^(-1)$
+  $P_k = ( I - K_k H_k ) P^-_k$
+
+where
+  $\hat{x}^-$ is the a priori state vector estimate
+  $\hat{x}$ is the posterior state vector estimate
+  K is the kalman gain, which minimizes P_k when
+    p(w_k) = N(0,Q_k)
+    p(v_k) = N(0,R_k)
+%}
+
+
+%{
+For this robot:
+x_k = [
+        x     - latitude
+        y     - longitude
+        theta - orientaion
+        x'    - the rest are the derivitives of the previous
+        y'
+        theta'
+      ]
+
+u_k = [
+        L' - left wheel speed
+        R' - right wheel speed
+      ]
+
+z_k = [
+        x       - latitude from GPS 
+        y       - longitude from GPS
+        theta   - orientaion from compass
+        l       - left wheel encoder value (given as the change in position)
+        r       - right wheel encoder value (given as the change in position)
+      ]
+%}
+
+
+% Set x_0 and P_0
+x = 0;
+P = ;
+
+% Set R and Q
+%{
+For this robot:
+  p(w_k) = p(w) = N(0,R)
+  p(v_k) = p(v) =  N(0,Q)
+
+with
+  R = 
+  Q = 
+%}
+
+
+% Simulation data (may deviate from the models)
+x_M = ; % actual model of the system
+u_M = ; % actual controls of the system
+
+w_M = ; % process noise of simulated data
+v_M = ; % measurement noise of simulated data
+
+n = 100; % number of states
+deltaT = ; %time between samples
+z_M = ;
+
+for k = 1:n
+
+  %
+  % Prediction
+  %
+  
+  % Get the controls for state k
+  u = u_M(k);
+  
+  % Calculate \hat{x}^-_k and P^-_k
+  xPre = A * x + B * u;
+  PPre = A * P * A  +  Q;
+  
+  
+  %
+  % Correction
+  %
+  
+  % Get the measurements at state k
+  z = z_M(k) ;
+    
+  % Find the models at state k
+  A = A_M(deltaT(k));
+  B = B_M(deltaT(k));
+  H = H_M(deltaT(k));
+  
+  % Calculate \hat{x}_k and P_k
+  K = PPre * H' * (H * PPre * H' + R)^(-1);
+  x =  xPre + K * (z - H * xPre);
+  P = (I - K * H) * PPre;
+  
+  % Store the relevant values for analysis
+  
+end
+
+
+
+
+% World Model
+function ans = A_M(deltaT)
+  ans = [ 1 0 0 deltaT 0 0; \
+          0 1 0 0 deltaT 0; \
+          0 0 1 0 0 deltaT; \
+          0 0 0 1 0 0     ; \
+          0 0 0 0 1 0     ; \
+          0 0 0 0 0 1      ];
+
+% Control Model
+function ans = B_M(x, deltaT
+  %{
+  For a differential drive robot with no slipping,
+  
+    $v = r(L' + R')/2$
+    $w = r(L' - R')/d$
+    
+  where
+    v is the translational velocity
+    w is the angular velocity
+    r is the radius of the wheels
+    d is the diameter of the wheel base
+    L' and R' are the left and right angular wheel speeds
+    
+    $x' = v cos(\theta)$
+    $y' = v sin(\theta)$
+    ${\theta}' = w$
+    
+    
+    This also assumes that the velocities are constant over one state.
+  %}
+  % XX
+  r = ;
+  d = ;
+  theta = x(3);
+  f_r = r *[cos(theta)/2; \
+            sin(theta)/2; \
+            1/d;             ];
+  f_l = f_r .* [1;1;-1];
+  ans =  [ f_l * deltaT, f_r * deltaT;
+           f_l         , f_r          ];
+          
+  
+% Measurement Model
+function ans = H_M()
+  %{
+    $L' = \frac{2v + d \cdot w}{2r}$
+    $R' = \frac{2v - d \cdot w}{2r}$
+    $v = \sqrt{{x'}^2 + {y'}^2}$
+    $w = {\theta}'$
+    
+    $L' = \frac{1}{2r}[2 \sqrt{{x'}^2 + {y'}^2}+ d \cdot {\theta}']$
+    $l =\Delta{L} \approx \Delta{t} \cdot L' = \frac{\Delta{t}}{2r}[2 \sqrt{(x')^2 + (y')^2}+ d \cdot {\theta}'}]$
+    
+  %}
+  ans = [ 1 0 0 0 0 0;
+          0 1 0 0 0 0;
+          0 0 1 0 0 0;
+          

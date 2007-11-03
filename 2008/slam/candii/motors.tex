@@ -1,0 +1,36 @@
+\documentclass{report}
+\usepackage{amsmath}
+\begin{document}
+
+\begin{gather*}
+V_{back} = k w \\
+I = \frac{1}{R} (V_{s} - V_{back}) = \frac{1}{R} (V_{s} - k w) \\
+I  = \frac{k}{R} \left( \frac{V_{s}}{k} - w \right) \\
+P = \tau \times w (is this the right power?) = I V_{back} D = I k w D \\
+\tau = I k D \\
+\tau = \frac{k^2}{R} \left( \frac{V_{s}}{k} - w \right) D \\
+\tau _{w} = \tau - \tau _{fr} \\
+\end{gather*}
+
+where: \\
+$V_s$ is the supplied voltage \\
+I is the supplied current \\
+$V_{back}$ is the counter-EMF from the motor \\
+P is the power supplied by the motor \\
+$\tau$ is the torque of the motor \\
+$\tau _{fr}$ is the torque of the friction due to the drive train \\
+$ \tau _{w} $ is the torque resulting from the motor at the wheel \\
+w is the angular speed of the motor \\
+D is the duty cycle \\
+R is the resistance of the motor \\
+
+Note: above assumes that the power supply is a current source - i.e. when $D = 0$ and $\tau > 0$, $V_s > 0$ \\
+
+Constants:
+\begin{gather*}
+\frac{RPM}{\tau} = -0.157, \frac{A}{\tau} = 0.1291 \\
+\frac{A}{RPM} = -0.8223, \ \frac{V_{back}}{RPM} = 0.093976 \\
+31.7142 in-lbf of friction \\
+\end{gather*}
+
+\end{document}
