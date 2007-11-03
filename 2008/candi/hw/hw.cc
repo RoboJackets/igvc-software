@@ -185,7 +185,7 @@ Image* GetCameraFrame() {
 #else
 		// XXX: This function is non-standard. It needs to be added to the official
 		//      Player codebase at some point.
-		camera->WaitForImage();		// blocks until a new camera image has been received
+		camera->WaitForNewImage();		// blocks until a new camera image has been received
 #endif
 		
 		/* Get the camera image */
