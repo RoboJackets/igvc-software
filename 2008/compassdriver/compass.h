@@ -18,12 +18,14 @@ SetConfig, GetConfig, SaveConfig, StartCal, StopCal, need to check endianness of
 
 class CompassDriver{
 	private://do these need to be static?
-	 int datalength;
-	 int datapackcount;
+	//for future sanity checking	
+	int datalength;
+	int datapackcount;
+	uint_8 lastcommand;
 	
-	 volatile unsigned int *ctrlreg0, *ctrlreg1, *datareg, *statusreg, *clockprescalereg, *interuptclearreg;//so member functions can accses the registers
-	 int fd;
-
+	//where the mmap'ed spiregisters are
+	volatile unsigned int *ctrlreg0, *ctrlreg1, *datareg, *statusreg, *clockprescalereg, *interuptclearreg;//so member functions can accses the registers
+	//spi functions
 	int spiinit();
 	int spioff();
 	spi_status_register spigetstatus();
@@ -49,8 +51,8 @@ class CompassDriver{
 };
 
 
-#include "spifunct.h"
-
+//#include "spifunct.h"
+#include "spifunct.h.debug"
 int CompassDriver::CompassSend(uint_8 * data, int size){
 
 	uint_8 senddata[size+2];
@@ -138,52 +140,50 @@ compassData CompassDriver::GetData(void){
 		int i = 3;//first data type packet is byte 4 (3 in array)
 	
 
-		if(dataresp[2] == datapackcount){
-		for(int j = 0;j<datapackcount;j++){
-			if(dataresp[i] == XRaw){
-				datarespstruct.XRaw = bytes2sint32LE(&dataresp[i+1]);
-			i += 5;//go forward 5 bytes to next data header
+		if(dataresp[2] == datapackcount){//check for the number of bytes we expect to get
+			for(int j = 0;j<datapackcount;j++){
+				if(dataresp[i] == XRaw){
+					datarespstruct.XRaw = bytes2sint32LE(&dataresp[i+1]);
+				i += 5;//go forward 5 bytes to next data header
+				}
+				if(dataresp[i] == YRaw){
+					datarespstruct.YRaw = bytes2sint32LE(&dataresp[i+1]);
+					i += 5;
+				}
+				if(dataresp[i] == XCal){
+					datarespstruct.XCal = bytes2floatLE(&dataresp[i+1]);
+					i += 5;
+				}
+				if(dataresp[i] == YCal){
+					datarespstruct.YCal = bytes2floatLE(&dataresp[i+1]);
+					i += 5;
+				}
+				if(dataresp[i] == Heading){
+					datarespstruct.Heading = bytes2floatLE(&dataresp[i+1]);//degrees			
+					i += 5;
+				}
+				if(dataresp[i] == Magnitude){
+					datarespstruct.Magnitude = bytes2floatLE(&dataresp[i+1]);
+					i +=5;
+				}
+				if(dataresp[i] == Temperature){
+					datarespstruct.Temperature = bytes2floatLE(&dataresp[i+1]);//Celsius
+					i += 5;
+				}
+				if(dataresp[i] == Distortion){
+					datarespstruct.Distortion = dataresp[i+1];//says bool, but guessing send bytes at a time
+					i += 2;
+				}
+				if(dataresp[i] == CalStatus){
+					datarespstruct.CalStatus = dataresp[i+1];
+					i += 2;
+				}
 			}
-			if(dataresp[i] == YRaw){
-				datarespstruct.YRaw = bytes2sint32LE(&dataresp[i+1]);
-				i += 5;
-			}
-			if(dataresp[i] == XCal){
-				datarespstruct.XCal = bytes2floatLE(&dataresp[i+1]);
-				i += 5;
-			}
-			if(dataresp[i] == YCal){
-				datarespstruct.YCal = bytes2floatLE(&dataresp[i+1]);
-				i += 5;
-			}
-			if(dataresp[i] == Heading){
-				datarespstruct.Heading = bytes2floatLE(&dataresp[i+1]);//degrees			
-				i += 5;
-			}
-			if(dataresp[i] == Magnitude){
-				datarespstruct.Magnitude = bytes2floatLE(&dataresp[i+1]);
-				i +=5;
-			}
-			if(dataresp[i] == Temperature){
-				datarespstruct.Temperature = bytes2floatLE(&dataresp[i+1]);//Celsius
-				i += 5;
-			}
-			if(dataresp[i] == Distortion){
-				datarespstruct.Distortion = dataresp[i+1];//says bool, but guessing send bytes at a time
-				i += 2;
-			}
-			if(dataresp[i] == CalStatus){
-				datarespstruct.CalStatus = dataresp[i+1];
-				i += 2;
-			}
-		}
-		//if used as compassData foo = GetData, then members accessed how??
+		//else{//we didn't recive the right number of bytes
+			//handle the error
+		//}
 	return(datarespstruct);
 	}
-	//else{
-	//return(-1);//pack count header from wire did not match datapackcount set when config sent.  Maybe retry/resend/query the config?
-	//}
-
 }
 
 int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval){
