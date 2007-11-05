@@ -92,22 +92,6 @@ char uint_82char2(uint_8 * foo){
 }
 
 
-uint_8 lastcommand;//for debug
-
-
-/*class SpiFuncs{
-	private:
-		//int spiinit();
-		//spi_status_regester spigetstatus();
-		//static volatile unsigned int ctrlreg1, ctrlreg2, datareg, statusreg, clockprescalereg, interuptclearreg;//so member functions can accses the registers
-		//static int fd;
-	//public:
-		//SpiFuncs();
-		//~SpiFuncs();
-		int spiSend(uint_8 * data, int size);
-		int spiGet(uint_8 * dataresp, int size);
-};*/
-
 int CompassDriver::spiSend(uint_8 * data, int size){
         printf("sending:\n");
         for(int i=0; i<size;i++){

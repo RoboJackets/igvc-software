@@ -5,6 +5,7 @@
 //#include "peekpoke.h"
 
 //these were included in button.c, don't know if we need them
+//the spi pins are on the dio header
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -105,34 +106,34 @@ int CompassDriver::spiSend(uint_8 * data, int size){
 	spi_status_register status;
 	status = spigetstatus();
 	
-	while(!(status.bits.transmit_empty_interrupt_flag)){
-	//wait for the send buffer to clear -- more than likly a better way to do this
-	}
-	
 	for(int i=0; i < size; i++){
+		while(!(status.bits.transmit_empty_interrupt_flag)){
+			//wait for the send buffer to clear -- more than likly a better way to do this
+		}
 		*datareg = data[i];
 	}
 	return(0);
 }
 
-spi_status_register CompassDriver::spigetstatus(){
-	spi_status_register statusval;
-	statusval.byte = *statusreg;
-	return(statusval);
-}
 
 int CompassDriver::spiGet(uint_8 * dataresp, int size){
 	spi_status_register status;
 	status = spigetstatus();
-	
-	while(!(status.bits.interrupt_flag)){
-	//wait for new data -- more than likly a better way to do this
-	}
-	
+	//should i load 0x00 into the send buffer before i recive?
 	for(int i=0; i < size; i++){
+		while(!(status.bits.interrupt_flag)){
+			//wait for new data -- more than likly a better way to do this
+		}
 		dataresp[i] = *datareg;
 	}
 	return(0);
+}
+
+
+spi_status_register CompassDriver::spigetstatus(){
+	spi_status_register statusval;
+	statusval.byte = *statusreg;
+	return(statusval);
 }
 
 
@@ -144,7 +145,8 @@ int CompassDriver::spiinit(){
 	start = (unsigned char*)mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0x80840000);//this doesn't need to be cast from void in the example -- is this correct?
 
 	//name the dio registers -- direct from button.c -- do i want these to be pointers?  the poke func expects an address
-	volatile unsigned int *PEDR, *PEDDR, *PBDR, *PBDDR, *GPIOBDB;	
+	volatile unsigned int *PEDR, *PEDDR, *PBDR, *PBDDR, *GPIOBDB;
+	//these registers are for the ts-7200 dio pins, do i really need these? they are in the spi example, but the spi pins are elsewhere...
 	PBDR = (unsigned int *)(start + 0x04);     // port b
 	PBDDR = (unsigned int *)(start + 0x14);    // port b direction register
 	PEDR = (unsigned int *)(start + 0x20);     // port e data
@@ -156,14 +158,17 @@ int CompassDriver::spiinit(){
 	*GPIOBDB = 0x01;			      // enable debounce on bit 0
 	
 
-	//name the spi registers -- these are the ones for the ts-7200
-	ctrlreg0 = (unsigned int *)(start);
-	ctrlreg1 = (unsigned int *)(start + 0x60004);
+	//name the spi registers -- these are the ones for the ts-7200, change <strike>if</strike> when we get docs for the board
+	ctrlreg0 = (unsigned int *)(start + 0x6000);
+	ctrlreg1 = (unsigned int *)(start + 0x6004);
 	datareg = (unsigned int *)(start + 0x6008);
 	statusreg = (unsigned int *)(start + 0x600C);
 	clockprescalereg = (unsigned int *)(start + 0x6010);
 	interuptclearreg = (unsigned int *)(start + 0x6014);
 	
+	//	
+	close(fd);//is this the right place?
+
 	//set config
 	spi_control_0 spicntr0;
 	spi_control_1 spicntr1;
@@ -197,18 +202,10 @@ int CompassDriver::spiinit(){
 	*ctrlreg1 = spicntr1.byte;
 	*ctrlreg0 = spicntr0.byte;
 
-
-/*now, should it be a matter of knowing when to peek and poke? and what to set the clock too?
-	use pwm clock func from xdio example*/
-
-//startPWM()
-
-//return memory?? does this do all?
-//close(fd);//moved to spioff
 }
 
 int CompassDriver::spioff(){
-	//close(fd);//will this work across scope like this?
+	//close(fd);//will this work across scope like this? -- in the example this is right after the dio pins are named, moved there
 }
 
 #endif // SPIFUNCT_H
