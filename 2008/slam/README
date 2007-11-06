@@ -2,22 +2,4 @@ TODO: write this ...
 
 Dependencies:
 	FLENS - used for matrix operations
-	FFTW - used for simualtion and analysis of noise
-
-Desired Features:
-	Display maps and paths
-	 - can play, record, and replay sensor data from many sources (JAUS, file, etc.)
-	 - maps and paths can be estimated with filters or opened from file
-	  -- built in map editor
-	 - can simulate sensor data based on a given map (allows you to edit things like noise)
-	 - multiple filters can be run at once with attributes that are selected
-	  -- have a bar on the side that you can create new filter profiles and edit properties
-	 - can show and compare data about the performace of filters (i.e. state estimate, covarance of data, speed, etc.)
-	 - can run with or without gui (writen so it is fast enough to be used in real applications)
-	 - designed to be modular so it can be used with something higher level that controls what filters are being used
-	  -- maybe the high-level thing can talk to it through JAUS
-	 - save configuration
-
-
-	Stociatistic(sp) filtering toolbox
-	 - seperates class hierarcy from implementation
+	GNU Scientific Library (GSL) - used for random number generation and fft (note: this isn't the fastest of libraries for the things it does, however that is okay because it is only used for simulation and analysis)
