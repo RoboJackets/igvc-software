@@ -37,10 +37,9 @@ class CompassDriver{
 	~CompassDriver();
 
 	int CompassSend(uint_8 * data, int size);
-	//int CompassSend_uint8(uint_8 command);//marked for removal
 	ModInfoResp GetModInfo(void);
 	compassData GetData(void);
-	int SetDataComponents(short int datatypewanted);
+	int SetDataComponents(DataRespType datatypewanted);
 	int SetConfig(uint_8 config_id, uint_8 * convigval);//this needs to be able to accept bool, uint_8, and Float32, but i think it will take just bytes
 	uint_8 * GetConfig(uint_8 config_id);
 	int SaveConfig(void);
@@ -65,14 +64,6 @@ int CompassDriver::CompassSend(uint_8 * data, int size){
 	return(0);
 }
 
-/*int CompassDriver::CompassSend_uint8(uint_8 command){
-	uint_8 senddata[3];
-	senddata[0] = sync_flag;
-	senddata[1] = command;
-	senddata[2] = terminator;
-	CompassDriver::spiSend(senddata, 3);//send command (single uint_8) wrapped with sync_flag and terminator
-}*/
-
 CompassDriver::CompassDriver(int foo){
 	//CompassDriver::spiinit();
 }
@@ -88,9 +79,9 @@ ModInfoResp CompassDriver::GetModInfo(void){
 	CompassDriver::spiGet(resp, 10);
 	ModInfoResp reply;
 		for(int i = 2;i<6;i++){
-			reply.module_type[i-2] = uint_82char2(&resp[i]);//get 2-6 of info into modtype
+			reply.module_type[i-2] = uint_82char2(&resp[i]);
 		}
-			reply.module_type[4] = '\0';//appends nul char
+			reply.module_type[4] = '\0';//probably usefull
 		for(int i = 6;i<10;i++){
 			reply.firmware_version[i-6] = uint_82char2(&resp[i]);
 		}	       
@@ -98,20 +89,30 @@ ModInfoResp CompassDriver::GetModInfo(void){
 	return(reply);
 }
 
-int CompassDriver::SetDataComponents(short int datatypewanted){//input type of data to get, in form of 
+int CompassDriver::SetDataComponents(DataRespType datatypewanted){//input type of data to get, bitfield is named in types.h
 	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
 	
 
 
 	//Generate data stream, and set private "datalength" to length of data to expect
-	//datawantedunion.b = {0,1,0,1,0,1,0,1,1}//datawanted should be 65408 for all, to 0 for none
-	const uint_8 dataresponsetype[9] = {XRaw, YRaw, XCal, YCal, Heading, Magnitude, Temperature, Distortion, CalStatus};
-	const uint_8 dataresponsetypelength[9] = {4, 4, 4, 4, 4, 4, 4, 1, 1};//number of bytes above are
+	//const uint_8 dataresponsetype[9] = {XRaw, YRaw, XCal, YCal, Heading, Magnitude, Temperature, Distortion, CalStatus};//moved to types.h
+	//const uint_8 dataresponsetypelength[9] = {4, 4, 4, 4, 4, 4, 4, 1, 1};//number of bytes data is
 	datapackcount = 0;//reset to zero
 	datalength = 0;
 	int j = 2;
+
+	/*for(int i=0;i<10;i++){//can't something like this work?
+		if (datatypewanted.bits[i]){
+			data[j] = dataresponsetype[i];
+			j++;
+			datapackcount +=1;//used te check getdata got correct num of packs later
+			datalength += (dataresponsetypelength[i] + 1);//datalength = length of package + 1 header per package
+		}
+
+	}*/
+
 	for(int i=0;i<10;i++){
-		if (checkbitset(datatypewanted,i)){
+		if (checkbitset(datatypewanted.sint,i)){
 			data[j] = dataresponsetype[i];
 			j++;
 			datapackcount +=1;//used te check getdata got correct num of packs later
@@ -129,17 +130,15 @@ int CompassDriver::SetDataComponents(short int datatypewanted){//input type of d
 
 compassData CompassDriver::GetData(void){
 	uint_8 data = get_data;
-	CompassSend(&data,1);//send command to request data
+	CompassSend(&data,1);
 
 	uint_8 dataresp[datalength+4];//we will be getting datalength + sync + data_resp + count + term
 	CompassDriver::spiGet(dataresp, datalength+4);
 		
 
 		compassData datarespstruct;
-		//currently ignoring count, use to verify correct num of data packs comming  (ie dataresp[1] == headers in data length (excluding data))
 		int i = 3;//first data type packet is byte 4 (3 in array)
 	
-
 		if(dataresp[2] == datapackcount){//check for the number of bytes we expect to get
 			for(int j = 0;j<datapackcount;j++){
 				if(dataresp[i] == XRaw){
@@ -257,16 +256,16 @@ CalDataResp CompassDriver::GetCalData(void){
 	CompassDriver::spiGet(resp, 28);//getting array pf bytes from compass
 
 	//sorting and converting bytes
-	//if(resp[2] == 24){//can add this to see of header is correct
-	reply.XOffset = bytes2sint32LE(&resp[3]);//needs to pass pointer, so prefix with '&'
-	reply.YOffset = bytes2sint32LE(&resp[7]);
-	reply.XGain = bytes2sint32LE(&resp[11]);
-	reply.YGain = bytes2sint32LE(&resp[15]);
-	reply.phi = bytes2floatLE(&resp[19]);
-	reply.CalibrationMagnitude = bytes2floatLE(&resp[23]);
-
-	//return structure
-	return(reply);
+	//if(resp[2] == 24){//can add this to see if header is correct
+		reply.XOffset = bytes2sint32LE(&resp[3]);//needs to pass pointer, so prefix with '&'
+		reply.YOffset = bytes2sint32LE(&resp[7]);
+		reply.XGain = bytes2sint32LE(&resp[11]);
+		reply.YGain = bytes2sint32LE(&resp[15]);
+		reply.phi = bytes2floatLE(&resp[19]);
+		reply.CalibrationMagnitude = bytes2floatLE(&resp[23]);
+	//}
+	
+	return(reply);//return structure
 }
 
 int CompassDriver::SetCalData(CalDataResp caldata){
@@ -275,7 +274,7 @@ int CompassDriver::SetCalData(CalDataResp caldata){
 	data[0] = set_cal_data;//command
 	data[1] = 24;//byte count
 
-	uint_8 * temp;
+	uint_8 * temp;//is it ok to have an array of indeterminate length? i get errors when i do uint_8 temp[4]
 	temp = sint32_bytesLE(caldata.XOffset);
 		data[2] = temp[0];
 		data[3] = temp[1];
