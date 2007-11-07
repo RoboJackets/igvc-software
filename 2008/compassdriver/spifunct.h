@@ -107,7 +107,7 @@ int CompassDriver::spiSend(uint_8 * data, int size){
 	status = spigetstatus();
 	
 	for(int i=0; i < size; i++){
-		while(!(status.bits.transmit_empty_interrupt_flag)){
+		while(!(status.transmit_empty_interrupt_flag)){
 			//wait for the send buffer to clear -- more than likly a better way to do this
 		}
 		*datareg = data[i];
@@ -121,7 +121,7 @@ int CompassDriver::spiGet(uint_8 * dataresp, int size){
 	status = spigetstatus();
 	//should i load 0x00 into the send buffer before i recive?
 	for(int i=0; i < size; i++){
-		while(!(status.bits.interrupt_flag)){
+		while(!(status.interrupt_flag)){
 			//wait for new data -- more than likly a better way to do this
 		}
 		dataresp[i] = *datareg;
@@ -175,19 +175,19 @@ int CompassDriver::spiinit(){
 	spi_baud_rate spibaudrt;
 	spi_status_register spistatus;
 
-	spicntr0.bits.interupt_enable=0;
-	spicntr0.bits.sytem_enable=1;
-	spicntr0.bits.transmit_interrupt_enable=0;
-	spicntr0.bits.mode_select=1;
-	spicntr0.bits.clock_polarity=0;
-	spicntr0.bits.clock_phase=0;
-	spicntr0.bits.slave_select_out_enable=0;
-	spicntr0.bits.LSB_first=1;
+	spicntr0.interupt_enable=0;
+	spicntr0.sytem_enable=1;
+	spicntr0.transmit_interrupt_enable=0;
+	spicntr0.mode_select=1;
+	spicntr0.clock_polarity=0;
+	spicntr0.clock_phase=0;
+	spicntr0.slave_select_out_enable=0;
+	spicntr0.LSB_first=1;
 
-	spicntr1.bits.MODFEN=1;
-	spicntr1.bits.BIDROE=1;
-	spicntr1.bits.SPISWAI=1;
-	spicntr1.bits.SPC0=0;
+	spicntr1.MODFEN=1;
+	spicntr1.BIDROE=1;
+	spicntr1.SPISWAI=1;
+	spicntr1.SPC0=0;
 	
 	//spibaudrt.baud_rate_preselect=;
 	//spibaudrt.baud_rate_select=;
