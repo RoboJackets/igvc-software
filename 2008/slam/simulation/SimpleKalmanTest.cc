@@ -2,10 +2,14 @@
 #include <flens/flens.h>
 //#include "test.h"
 #include "KalmanFilter.h"
+#include "Gnuplot.h"
 
+using namespace flens;
+using namespace gnuplot;
 
 int main(void) {
 
+#if 0
 	int k = 10000;
 
 	LinModel stateModel(2,2);
@@ -63,9 +67,25 @@ int main(void) {
 		CovarianceArray(i).resize(2,2);
 		CovarianceArray(i) = testFilter.covariance();
 	}
-
+#endif
 	//plot
 
+
+	DenseVector<Array<double> > y(10);
+	y = 1, 3, 5, 6, 7, 7, 4, 3, 2, 1;
+
+	/*for(int i = 1; i < k; i++) {
+		y(i).resize(2);
+		y(i) = x(i+1) - StateEstimateArray(i);
+		y1(i) = y(1)(1);
+	}*/
+
+	Gnuplot plotter;
+	plotter.execute("plot 'test.dat' using linespoints\n" "pause mouse");
+	//plotter.plot(y);
+
+
+#if 0
 	// is there a better way to do this?
 	ofstream commandFile;
 	commandFile.open("test.p");
@@ -83,6 +103,7 @@ int main(void) {
 	dataFile.close();
 
 	system("gnuplot test.p");
+#endif
 
 	return(0);
 }

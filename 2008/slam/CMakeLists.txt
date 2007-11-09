@@ -1,4 +1,4 @@
-add_project (SLAM)
+project (SLAM)
 
 add_subdirectory (candii)
 add_subdirectory (filters)
