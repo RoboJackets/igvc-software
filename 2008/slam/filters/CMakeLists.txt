@@ -1,5 +1,5 @@
-#include_directories (${slam_SOURCE_DIR}/models)
-#link_directories (${slam_BINARY_DIR}/models)
+#include_directories (${SLAM_SOURCE_DIR}/models)
+#link_directories (${SLAM_BINARY_DIR}/models)
 
 add_library(Filters KalmanFilter.cc)
 

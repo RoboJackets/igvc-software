@@ -11,9 +11,13 @@ template<typename E>
 class Noise {
 public:
 	/* Constructor */
-	//Noise();
+	Noise(int size, pdf<E> dist, fdf freq);
+
+	//operator //return entire distrubtion
+	operator() (int index); // return a single value
+
 private:
-	
+	DenseVector<Array<E> > values;
 };
 
 #endif /* NOISE_H */
