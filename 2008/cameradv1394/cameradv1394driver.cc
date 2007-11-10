@@ -76,6 +76,10 @@ CameraDV1394::CameraDV1394(const char* camDeviceFilepath)
 	  curFrame(DV1394_FRAME_SIZE)
 {
 	this->camDeviceFilepath = camDeviceFilepath;
+	
+	this->camDevice = -1;
+	this->map = NULL;
+	this->rgb = NULL;
 }
 
 CameraDV1394::~CameraDV1394() {
