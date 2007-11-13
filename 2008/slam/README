@@ -1,5 +1,17 @@
-TODO: write this ...
+This library provides an implementation of SLAM for mobile robots.
+
+Directories:
+	bin -- Used for cmake and make generated files.
+	candii --
+	doc --
+	filters --
+	pdf --
+	plot --
+	simulation --
+	test --
 
 Dependencies:
-	FLENS - used for matrix operations
-	GNU Scientific Library (GSL) - used for random number generation and fft (note: this isn't the fastest of libraries for the things it does, however that is okay because it is only used for simulation and analysis)
+	FLENS -- used for vector and matrix operations
+	GNU Scientific Library (GSL) -- used for random number generation and probablity density functions
+	FFTW -- used for discrete fourier transforms
+	gnuplot -- used to plot data

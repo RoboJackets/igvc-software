@@ -13,6 +13,61 @@ Gnuplot::Gnuplot(void)
     _initialize();
 }
 
+
+#if 0
+The fmt argument, if present is interpreted as follows. If fmt is missing, the default gnuplot line style is assumed.
+
+`-'
+    Set lines plot style (default). 
+`.'
+    Set dots plot style. 
+`@'
+    Set points plot style. 
+`-@'
+    Set linespoints plot style. 
+`^'
+    Set impulses plot style. 
+`L'
+    Set steps plot style. 
+`#'
+    Set boxes plot style. 
+`~'
+    Set errorbars plot style. 
+`#~'
+    Set boxerrorbars plot style. 
+`n'
+    Interpreted as the plot color if n is an integer in the range 1 to 6. 
+`nm'
+    If nm is a two digit integer and m is an integer in the range 1 to 6, m is interpreted as the point style. This is only valid in combination with the @ or -@ specifiers. 
+`c'
+    If c is one of "r", "g", "b", "m", "c", or "w", it is interpreted as the plot color (red, green, blue, magenta, cyan, or white). 
+`+'
+`*'
+`o'
+`x'
+    Used in combination with the points or linespoints styles, set the point style. 
+
+The color line styles have the following meanings on terminals that support color.
+
+Number  Gnuplot colors  (lines)points style
+  1       red                   *
+  2       green                 +
+  3       blue                  o
+  4       magenta               x
+  5       cyan                house
+  6       brown            there exists
+
+Here are some plot examples:
+
+plot (x, y, "@12", x, y2, x, y3, "4", x, y4, "+")
+
+This command will plot y with points of type 2 (displayed as `+') and color 1 (red), y2 with lines, y3 with lines of color 4 (magenta) and y4 with points displayed as `+'.
+
+plot (b, "*")
+
+This command will plot the data in the variable b will be plotted with points displayed as `*'. 
+#endif
+
 void
 Gnuplot::plot(const flens::DenseVector<Array<double> > &y)
 {
