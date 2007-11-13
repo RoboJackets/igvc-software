@@ -1,4 +1,5 @@
 #include "KalmanFilter.h"
+#include <flens/inv.h>
 
 //TODO: check that sizes are equal when they are set
 
@@ -24,50 +25,36 @@ KalmanFilter::KalmanFilter(
 /**/
 // FLENS blows
 // TODO: explain the necessity of the temporary objects
-void KalmanFilter::update(control u, measurement z) {
+void KalmanFilter::update(control u, measurement z, double deltaT) {
 
 	GEMatrix tempM1(size, size);
 	GEMatrix tempM2(size, size);
 	/* Prediction */
 
 	// mu = A * mu + B * u
-	DVector tempV = A * mu;
-	mu = tempV + B * u;
+	DVector tempV = A(deltaT) * mu;
+	mu = tempV + B(deltaT) * u;
 
 	// Sigma = A * Sigma * transpose(A) + R
-	tempM1 = Sigma * transpose(A);
-	Sigma = A * tempM1 + R;
+	tempM1 = Sigma * transpose(A(deltaT));
+	Sigma = A(deltaT) * tempM1 + R;
 
 	/* Measurement Update */
 
 	// K = Sigma * transpose(C) * inv(C * Sigma * transpose(C) + Q)
-	// This should be done using the inv() FLENS function, which hasn't been implemented yet.
-	// This hacked version that uses (almost) direct LAPACK calls could be made faster by
-	// using trs instead of tri.
-	tempM1 = C * Sigma;
-	tempM2 = tempM1 * transpose(C) + Q;
-	PermutationMatrix p(size);
-	int info = trf(tempM2,p);
-	if(info) {
-		printf("Error in KalmanFilter::update -- trs - info = %d\n", info);
-		// what should be done here?
-		//return;
-	}
-	info = tri(tempM2,p);
-	if(info) {
-		printf("Error in KalmanFilter::update -- tri - info = %d\n", info);
-		//return;
-	}
+	tempM1 = C(deltaT) * Sigma;
+	tempM2 = tempM1 * transpose(C(deltaT)) + Q;
+	tempM1 = inv(tempM2);
 	GEMatrix K(size, size);
-	K = Sigma * transpose(C);
-	K = K * tempM2;
+	K = Sigma * transpose(C(deltaT));
+	K = K * tempM1;
 
 	//mu = mu + K * (z - C * mu);
-	tempV = z - C * mu;
+	tempV = z - C(deltaT) * mu;
 	mu = mu + K * tempV;
 
-	//Sigma = (I - K * C) * Sigma;
-	tempM1 = I - K * C;
+	//Sigma = (I - K * C(deltaT)) * Sigma;
+	tempM1 = I - K * C(deltaT);
 	tempM2 = tempM1 * Sigma;
 	Sigma = tempM2;
 

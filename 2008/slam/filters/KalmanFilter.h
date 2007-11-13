@@ -3,10 +3,8 @@
 
 /* TODO:
  *	use SPMatrices
- *	write a debug macro that checks the value of info
- *	make this use a model class
+ *	make this use a pdf class
  *  make this inherit from a general filter class
- *	make this use a Probablity distrubtion class
  *  modifiy this to take multiple element types at a time (e.g. double and boolian values)
  */
 
@@ -18,11 +16,13 @@
 using namespace flens;
 using namespace std;
 
-// these should be moved somewhere else
-typedef GeMatrix<FullStorage<double,ColMajor> > GEMatrix, LinModel, CovMatrix, IdenMatrix; /*for testing*/
+// these should be moved inside the class
+typedef GeMatrix<FullStorage<double,ColMajor> > GEMatrix, CovMatrix, IdenMatrix; /*for testing*/
 typedef SpMatrix<PackedStorage<double,ColMajor,Upper> > SPMatrix;
 typedef DenseVector<Array<double> > DVector, control, measurement, StateVector;
 typedef DenseVector<Array<int> > PermutationMatrix;
+
+typedef GEMatrix(*LinModel)(double); //this isn't a very good way to do this
 
 //template<typename E>
 class KalmanFilter {
@@ -35,7 +35,7 @@ public:
 
 	/**/
 	// could split this into two function
-	void update(control u, measurement z);
+	void update(control u, measurement z, double deltaT);
 
 	/* Accessors */
 	StateVector stateEstimate(void);
@@ -52,11 +52,9 @@ private:
 	CovMatrix Sigma;
 
 	// Models
-	/*LinModel A;		// State Model
+	LinModel A;		// State Model
 	LinModel B;		// Control Modelp(2)
-	LinModel C;		// Measurement Model*/
-	//for testing
-	GEMatrix A, B, C;
+	LinModel C;		// Measurement Model
 
 	// Noise -- these might be moved inside of the models
 	CovMatrix R;	// Process Noise Covariance
