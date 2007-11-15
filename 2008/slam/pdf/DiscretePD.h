@@ -6,24 +6,26 @@ class DiscreteBase : PDF {
 	
 }
 
+//static getDiscretePDfromPDF
+
 /** Repesents a single- or multi-dimentional discrete probablity density function.
  *	It can handle discrete variables or sampled continous variables.
  *	It can handle a uniform or variable sampling period.
  */
 template<typename E>
-class DiscretePDF : PDF {
+class DiscretePD : PDF {
 public:
 	typedef DenseVector<Array<E> > DEVector;
 	typedef DenseVector<Array<DEVector> > DDEVector;
 
 	/* Constructors */
-	DiscretePDF(int size); //DiscretePDF(DenseVector<Array<int> > size);
+	DiscretePD(int size); //DiscretePD(DenseVector<Array<int> > size);
 
-	DiscretePDF(DenseVector<Array<Probability> prob);
+	DiscretePD(DenseVector<Array<Probability> prob);
 
-	DiscretePDF(E minVal, E maxVal, DenseVector<Array<Probability> prob);
+	DiscretePD(E minVal, E maxVal, DenseVector<Array<Probability> prob);
 
-	DiscretePDF(DEVector ranges, inclusivity = all, DenseVector<Array<Probability> prob);
+	DiscretePD(DEVector ranges, inclusivity = all, DenseVector<Array<Probability> prob);
 
 	/* Access a value */
 	Probability operator() (E value); //Probability operator() (DEVector value);
@@ -45,6 +47,8 @@ private:
 
 	void rescale();
 }
+
+#include "Discrete.tcc"
 
 #endif /* DISCRETE_H */
 

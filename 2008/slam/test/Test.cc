@@ -12,6 +12,8 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 
+#include "NormalPD.h"
+//#include "NormalPD.cc"
 #include "Gnuplot.h"
 
 #define REAL(z,i) ((z)[2*(i)])
@@ -25,7 +27,15 @@ typedef GeMatrix<FullStorage<double,ColMajor> >  GEMatrix;
 typedef SpMatrix<PackedStorage<double,ColMajor,Upper> >  SPMatrix;
 typedef DenseVector<Array<double> > DEVector;
 
-
+#if 0
+template<typename E>
+class GEMatrix : public GeMatrix<FullStorage<E,ColMajor> > {
+public:
+	using GeMatrix<FullStorage<E,ColMajor> >::operator=;
+	GEMatrix(...) : GeMatrix<FullStorage<E,ColMajor> >(...) {;}
+};
+//sizeof(GEMatrix) - sizeof(GeMatrix)
+#endif
 
 int main(void) {
 
@@ -50,14 +60,20 @@ int main(void) {
 #if 0
 	DEVector x(2);
 	DEVector y(2);
-	GEMatrix A(2);
+	GEMatrix A(2,2);
+	//SPMatrix A(2);
 
 	x = 2, 1;
 	A = 1, 2,
 		2, 4;
+	//A(1,1) = 1;
+	//A(1,2) = 2;
+	//A(2,2) = 4;
 	cout << "x = " << x << endl;
 	cout << "A = " << A << endl;
 
+	cout << "x.length() = " << x.length() << endl;
+	cout << "A.dim() = " << A.rows() << endl;
 	y = A * x;
 	cout << "y = " << y << endl;
 	cout << "x = " << x << endl;
@@ -65,9 +81,7 @@ int main(void) {
 	double z = x * y;
 	cout << "z = " << z << endl;
 #endif
+
 	return(0);
 }
-
-
-
 

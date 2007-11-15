@@ -4,7 +4,6 @@
 //TODO: check that sizes are equal when they are set
 
 
-/* Constructor */
 KalmanFilter::KalmanFilter(
 	StateVector muInital, CovMatrix SigmaInital,
 	LinModel stateModel, LinModel controlModel, LinModel measurementModel,
@@ -22,13 +21,30 @@ KalmanFilter::KalmanFilter(
 	}
 }
 
-/**/
+KalmanFilter::KalmanFilter(
+	NormalPD<double> initalStateBelief,
+	LinModel stateModel, LinModel controlModel, LinModel measurementModel,
+	CovMatrix processNoise, CovMatrix measurementNoise)
+:
+	mu(initalStateBelief.mean()), Sigma(initalStateBelief.var()),
+	A(stateModel), B(controlModel), C(measurementModel),
+	R(processNoise), Q(measurementNoise),
+	I(processNoise.numRows(),processNoise.numRows()) {
+	//really crappy way to do an identity matrix
+	size = processNoise.numRows();
+	for(int i = 1; i <= size; i++)
+	{
+		I(i,i) = 1;
+	}
+}
+
+
 // FLENS blows
 // TODO: explain the necessity of the temporary objects
 void KalmanFilter::update(control u, measurement z, double deltaT) {
 
-	GEMatrix tempM1(size, size);
-	GEMatrix tempM2(size, size);
+	CovMatrix tempM1(size, size);
+	CovMatrix tempM2(size, size);
 	/* Prediction */
 
 	// mu = A * mu + B * u
@@ -61,7 +77,7 @@ void KalmanFilter::update(control u, measurement z, double deltaT) {
 	return;
 }
 
-/* Accessors */
+
 StateVector KalmanFilter::stateEstimate(void) {
 	return(mu);
 }

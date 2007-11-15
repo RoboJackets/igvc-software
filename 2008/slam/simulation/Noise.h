@@ -7,6 +7,8 @@
 using namespace flens;
 using namespace std;
 
+// is going to be deleted pretty soon
+
 template<typename E>
 class Noise {
 public:

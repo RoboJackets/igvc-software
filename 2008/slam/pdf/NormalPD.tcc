@@ -1,36 +1,37 @@
-#include "Normal.h"
 #include <flens/inv.h>
 
 //this is horrific
 
 template<typename E> NormalPD<E>::NormalPD(MeanVector mu, CovMatrix sigma) :
 	mu(mu), sigma(sigma) {
-	assert(mu.length() == sigma.dim());
+	assert(mu.length() == sigma.numRows());
 }
 
-template<typename E> typename NormalPD<E>::MeanVector NormalPD<E>::mean() {
+template<typename E> typename NormalPD<E>::MeanVector NormalPD<E>::mean(void) {
 	return(mu);
 }
 
-template<typename E> typename NormalPD<E>::CovMatrix NormalPD<E>::var() {
+template<typename E> typename NormalPD<E>::CovMatrix NormalPD<E>::var(void) {
 	return(sigma);
 }
 
-
-template<typename E> Probability NormalPDF<E>::operator() (E value) {
+#if 0
+template<typename E> Probability NormalPD<E>::pdf(E value) {
 	return( gsl_ran_gaussian_pdf((value + NormalPD<E>::mu),NormalPD<E>::sigma) );
 }
 
 
-template<typename E> Probability NormalCDF<E>::operator() (E value) {
+template<typename E> Probability NormalPD<E>::cdf(E value) {
 	return( gsl_cdf_gaussian_P((value + NormalPD<E>::mu),NormalPD<E>::sigma) );
 }
 
-template<typename E> E NormalCDF<E>::operator() (Probability prob) {
+template<typename E> E NormalPD<E>::icdf(Probability prob) {
 	return( gsl_cdf_gaussian_Qinv(prob,NormalPD<E>::sigma) - NormalPD<E>::mu );
 }
+#endif
 
 #if 0
+	// compute the pdf
 	CovMatrix tempM(sigma.dim());
 	MeanVector tempV1(mu.length);
 	MeanVector tempV2(mu.length);
