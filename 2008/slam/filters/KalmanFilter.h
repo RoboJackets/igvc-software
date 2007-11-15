@@ -10,7 +10,9 @@
 
 //#include "BayesianFilter.h"
 #include <flens/flens.h>
-//#include "GaussianPD.h"
+// why doesn't the cmake path work?
+//#include "/home/paul/svn/igvc/2008/slam/pdf/NormalPD.h"
+#include "NormalPD.h"
 //#include "IdenMatrix.h"
 
 using namespace flens;
@@ -27,11 +29,16 @@ typedef GEMatrix(*LinModel)(double); //this isn't a very good way to do this
 //template<typename E>
 class KalmanFilter {
 public:
-	/* Constructor */
+	/* Constructors */
 	KalmanFilter(
 		StateVector muInital, CovMatrix SigmaInital,
 		LinModel stateModel, LinModel controlModel, LinModel measurementModel,
-		CovMatrix processNoise, CovMatrix measureNoise);
+		CovMatrix processNoise, CovMatrix measurementNoise);
+
+	KalmanFilter(
+		NormalPD<double> initalStateBelief,
+		LinModel stateModel, LinModel controlModel, LinModel measurementModel,
+		CovMatrix processNoise, CovMatrix measurementNoise);
 
 	/**/
 	// could split this into two function

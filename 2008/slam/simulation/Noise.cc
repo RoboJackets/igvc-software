@@ -24,8 +24,6 @@ Noise::Noise(int size) :
 
 	/* Free the generator */
 	gsl_rng_free(r);
-
-	return;
 }
 
 //XX
@@ -48,20 +46,15 @@ Noise::Noise(int size, pdf<E> dist) :
 
 	/* Free the generator */
 	gsl_rng_free(r);
-
-	return;
 }
 
 
 Noise::Noise(int size, DenseVector<Array<fftw_complex> > freq) :
 	values(size) {
-
 	/* Compute the inverse fourier transform of the distrubtion */
 	fftw_plan p = fftw_plan_dft_c2r_1d(size, freq.data(), values.data(), FFTW_ESTIMATE);
 	fftw_execute(p);
 	fftw_destroy_plan(p);
-
-	return;
 }
 
 E operator() (int index) {
