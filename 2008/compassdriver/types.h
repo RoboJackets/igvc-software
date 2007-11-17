@@ -80,7 +80,7 @@ const uint_8 dataresponsetype[9] = {XRaw, YRaw, XCal, YCal, Heading, Magnitude, 
 const uint_8 dataresponsetypelength[9] = {4, 4, 4, 4, 4, 4, 4, 1, 1};//number of bytes data is
 
 union DataRespType{
-	struct {
+	struct {//is there a way to acces this like an array, ie datarespvar.bits[2]?
 		short int XRaw:1;
 		short int YRaw:1;
 		short int XCal:1;
@@ -91,7 +91,7 @@ union DataRespType{
 		short int Distortion:1;
 		short int CalStatus:1;
 		short int :7;
-	}bits;//used so for loop can scroll through
+	};
 	short int sint;
 
 };

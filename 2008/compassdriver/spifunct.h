@@ -170,10 +170,10 @@ int CompassDriver::spiinit(){
 	close(fd);//is this the right place?
 
 	//set config
-	spi_control_0 spicntr0;
-	spi_control_1 spicntr1;
-	spi_baud_rate spibaudrt;
-	spi_status_register spistatus;
+	spi_control_0 spicntr0 = {0};
+	spi_control_1 spicntr1 = {0};
+	spi_baud_rate spibaudrt = {0};
+	spi_status_register spistatus = {0};
 
 	spicntr0.interupt_enable=0;
 	spicntr0.sytem_enable=1;
