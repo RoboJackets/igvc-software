@@ -25,6 +25,7 @@ class CompassDriver{
 	
 	//where the mmap'ed spiregisters are
 	volatile unsigned int *ctrlreg0, *ctrlreg1, *datareg, *statusreg, *clockprescalereg, *interuptclearreg;//so member functions can accses the registers
+	
 	//spi functions
 	int spiinit();
 	int spioff();
