@@ -1,5 +1,4 @@
 
 
-add_library(Gnuplot Gnuplot.cc)
-
-target_link_libraries(Gnuplot flens)
+#add_library(Gnuplot Gnuplot.cc)
+#target_link_libraries(Gnuplot flens)

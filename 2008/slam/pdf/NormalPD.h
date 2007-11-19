@@ -6,10 +6,8 @@
 
 using namespace flens;
 
-// add functions for single dimention case
-
 template<typename E>
-class NormalPD {//: public PD<E> {
+class NormalPD : public PD<E> {
 public:
 
 	typedef DenseVector<Array<E> > MeanVector;
@@ -17,10 +15,9 @@ public:
 	typedef GeMatrix<FullStorage<E,ColMajor> > CovMatrix;
 
 	/* Constructors */
-	//NormalPD();
+	//NormalPD(int size);
 	NormalPD(MeanVector mu, CovMatrix sigma);
 
-	int foo (void);
 	/* Find the mean */
 	MeanVector mean(void);
 
@@ -46,26 +43,6 @@ private:
 };
 
 #include "NormalPD.tcc"
-
-#if 0
-template<typename E>
-class NormalPDF : public NormalPD<E> { //, PDF {
-public:
-	typedef DenseVector<Array<E> > MeanVector;
-	typedef SpMatrix<PackedStorage<E,ColMajor,Upper> > CovMatrix;
-
-
-};
-
-template<typename E>
-class NormalCDF : public NormalPD<E> { //, CDF {
-public:
-	typedef DenseVector<Array<E> > MeanVector;
-	typedef SpMatrix<PackedStorage<E,ColMajor,Upper> > CovMatrix;
-
-
-};
-#endif
 
 #endif /* NORMAL_H */
 

@@ -6,11 +6,10 @@
 
 
 using namespace flens;
-using namespace gnuplot;
 
 GEMatrix stateModel(double deltaT){
 	GEMatrix A(2,2);
-	A = 1, 0,
+	A = 1, deltaT,
 		0, 1;
 	return(A);
 }
@@ -42,9 +41,11 @@ int main(void) {
 
 	DenseVector<Array<control> > x(k);
 	control temp(2);
+	double A = 1;
+	double w = .1;
 	for(int i = 1; i <= k; i++) {
-		temp = sin(.1 * double(i)),
-				cos(.5 * double(i)); // it would be nicer if there were a direct way to do this
+		// it would be nicer if there were a direct way to do this
+		temp = A * sin(w * double(i)), A * w * cos(w * double(i));
 		x(i) = temp;
 	}
 	DenseVector<Array<control> > u(k);
@@ -53,7 +54,6 @@ int main(void) {
 	}
 	DenseVector<Array<measurement> > z(k);
 	for(int i = 1; i <= k; i++) {
-		z(i).resize(2);
 		z(i) =  x(i);
 	}
 
@@ -70,8 +70,9 @@ int main(void) {
 	DenseVector<Array<StateVector> > StateEstimateArray(k);
 	DenseVector<Array<CovMatrix> >  CovarianceArray(k);
 
+	double deltaT = 1/10;
 	for(int i = 1; i < k; i++) {
-		testFilter.update(u(i), z(i), 1);
+		testFilter.update(u(i), z(i), deltaT);
 		StateEstimateArray(i) = testFilter.stateEstimate();
 		CovarianceArray(i) = testFilter.covariance();
 	}
@@ -85,7 +86,6 @@ int main(void) {
 	}
 
 	Gnuplot plotter;
-	//plotter.execute("plot 'test.dat' using linespoints");
 	plotter.plot(y);
 
 	return(0);

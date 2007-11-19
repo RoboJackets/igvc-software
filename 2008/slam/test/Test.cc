@@ -21,25 +21,45 @@
 
 using namespace std;
 using namespace flens;
-using namespace gnuplot;
 
 typedef GeMatrix<FullStorage<double,ColMajor> >  GEMatrix;
 typedef SpMatrix<PackedStorage<double,ColMajor,Upper> >  SPMatrix;
 typedef DenseVector<Array<double> > DEVector;
 
-#if 0
-template<typename E>
-class GEMatrix : public GeMatrix<FullStorage<E,ColMajor> > {
-public:
-	using GeMatrix<FullStorage<E,ColMajor> >::operator=;
-	GEMatrix(...) : GeMatrix<FullStorage<E,ColMajor> >(...) {;}
-};
-//sizeof(GEMatrix) - sizeof(GeMatrix)
-#endif
+typedef DenseVector<Array<double> > MeanVector;
+typedef GeMatrix<FullStorage<double,ColMajor> > CovMatrix;
 
 int main(void) {
 
 
+	DEVector y(10);
+	y = 1, 3, 5, 7, 2, 3, 4, 9, 5, 0;
+	Gnuplot windowA;
+	windowA.plot(y);
+	windowA.title("Woot");
+	windowA.xlabel("x");
+	windowA.axis(-1, 11);
+
+#if 0
+	N = 2;
+	MeanVector mu(N);
+	CovMatrix sigma(N,N);
+	mu = 0, 0;
+	sigma = 1, 0,
+			0, 1;
+
+	DenseVector<Array<Probability> > result(N);
+	CovMatrix tempM(N);
+	MeanVector tempV1(N);
+	MeanVector tempV2(N);
+	E tempVal;
+
+	tempM = inv(sigma);
+	tempV1 = value - mu;
+	tempV2 = tempM * tempV1;
+	tempVal = tempV1 * tempV2;
+	result = (1/(pow((2*M_PI),(N/2))*sqrt(det(sigma)))) * exp(-tempVal/2);
+#endif
 
 #if 0
 	int size = 1000;
@@ -55,31 +75,6 @@ int main(void) {
 
 	Gnuplot plotter;
 	plotter.plot(out);
-#endif
-
-#if 0
-	DEVector x(2);
-	DEVector y(2);
-	GEMatrix A(2,2);
-	//SPMatrix A(2);
-
-	x = 2, 1;
-	A = 1, 2,
-		2, 4;
-	//A(1,1) = 1;
-	//A(1,2) = 2;
-	//A(2,2) = 4;
-	cout << "x = " << x << endl;
-	cout << "A = " << A << endl;
-
-	cout << "x.length() = " << x.length() << endl;
-	cout << "A.dim() = " << A.rows() << endl;
-	y = A * x;
-	cout << "y = " << y << endl;
-	cout << "x = " << x << endl;
-
-	double z = x * y;
-	cout << "z = " << z << endl;
 #endif
 
 	return(0);

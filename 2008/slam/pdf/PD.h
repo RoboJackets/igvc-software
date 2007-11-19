@@ -6,39 +6,19 @@
 using namespace flens;
 
 // this should go somewhere else
-typedef double Probability;	// should have a range of [0,1]
-
-#if 0
-enum {
-	linear, //additive
-	nonlinear // two ways to be nonlinear: x = A*y + z.^2 or x = A*y.*z
-	//exponential
-} linearity;
-// Conditional
-	//PD(int numConditionals, ...); // type, linearity of each conditional
-
-/* Set the conditional relationship */
-
-
-	// Conditional
-	//Probability operator() (E value);
-#endif
+typedef double Probability;	// range of [0,1]
 
 /**
- * Represents a general proablity distribution function.
- *	It can represent both continuous and discrete distributions. Continuous variables can
- *	either be linear or nonlinear.  Discrete distributions can ave either a constant sampling
- *	period or a variable one.
- *	It can handle marginal, conditional, and (hopefully in the future) joint probablities.
+ * Abstract representation of a marginal proablity distribution.
  *	
  */
 
 // it would really cool to do this with a varatic template (will be part of C++0x),
 // that way conditional types could be specified at compile time
-// it would also be neat to add symbolic relationships (could be implemented with expression templates)
 
+// it would also be nicer to make a GEMatrix a template typedef (also part of C++0x)
 
-// Single or Multi-dimension?
+// should add functions for single dimention case
 template<typename E>
 class PD {
 public:
@@ -47,19 +27,19 @@ public:
 	typedef GeMatrix<FullStorage<E,ColMajor> > CovMatrix;
 
 	/* Access a value from the probability density function */
-	virtual Probability pdf(E value);
+	virtual DenseVector<Array<Probability> > pdf(DenseVector<Array<E> > value) = 0;
 
 	/* Access a value from the cumulative density function */
-	virtual Probability cdf(E value);
+	virtual DenseVector<Array<Probability> > cdf(DenseVector<Array<E> > value) = 0;
 
 	/* Access an inverse value from the cumulative density function */
-	virtual E icdf(Probability prob);
+	virtual DenseVector<Array<E> > icdf(DenseVector<Array<Probability> > prob) = 0;
 
 	/* Find the mean */
-	virtual MeanVector mean(void); //maybe change this to expected value
+	virtual MeanVector mean(void) = 0; //maybe change this to expected value
 
 	/* Find the variance */
-	virtual CovMatrix var(void);
+	virtual CovMatrix var(void) = 0;
 
 	/* Generate a signal base on the probablity distrubtion */
 	virtual DEVector genSignal(int size);
@@ -71,7 +51,7 @@ private:
 	//int dimension;
 
 	/* Prevent instantiation */
-	//PD(void);
+	PD(void);
 };
 
 #include "PD.tcc"
