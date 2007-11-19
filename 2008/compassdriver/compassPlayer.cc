@@ -1,8 +1,11 @@
 //the parts of the 1-d interface i need
 
-#include <libplayercore/playercore.h>
-#include <unistd.h>		// for usleep()
 
+//g++ -I /usr/local/include/player-2.0/ compassPlayer.cc
+//#include <player-2.0/libplayercore/playercore.h>
+#include <player-2.0/libplayercore/playercore.h>
+#include <unistd.h>		// for usleep()
+#include <math.h>		//for M_PI
 
 
 #include "compass.h"
@@ -100,9 +103,10 @@ int Compass_Player::ProcessMessage(MessageQueue* resp_queue, player_msghdr* hdr,
 		data = driver->GetData();
 
 		if(data.Heading != -1){//-1 indicates error
-			this->playerdata.pos = ((data.Heading)*3.14/180);//player expects rad, compass gives degrees -- is there a better way/is this really what i want to do?.
+			this->playerdata.pos = ((data.Heading)*M_PI/180);//player expects rad, compass gives degrees -- is there a better way/is this really what i want to do?.
 			size_t size = sizeof(this->playerdata);
 			Publish(this->device_addr, NULL, PLAYER_MSGTYPE_DATA, PLAYER_POSITION1D_DATA_STATE, reinterpret_cast<void*>(&this->playerdata), size, NULL);
+
 			return(0);
 		}
 		else{
