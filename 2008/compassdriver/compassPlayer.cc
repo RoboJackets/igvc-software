@@ -27,25 +27,34 @@ class Compass_Player : public Driver {
 		// The actual compass driver
 		CompassDriver* driver;	
 		// Data to send to server
-		player_position1d_data data;
-}
+		//player_position1d_data playerdata = {0};
+		player_position1d_data playerdata;
+};
 
-Compass_Player::Compass_Player(ConfigFile* cf, int section)
-	: Driver(
+Compass_Player::Compass_Player(ConfigFile* cf, int section): Driver(
 		cf, section,
 		true,							// new commands DO override old ones
 		PLAYER_MSGQUEUE_DEFAULT_MAXLEN,	// incoming message queue is as long as possible
-		PLAYER_CAMERA_CODE)			// interface ID; see <libplayercore/player.h> for standard interfaces
+		PLAYER_POSITION1D_CODE)			// interface ID; see <libplayercore/player.h> for standard interfaces
 {	
 	/* Read options from the config file */
 	ConfigData configdata = {0};
-	configdata.declination.flt  = cf->ReadFloat(section, "declination", DEFAULT_DECLINATION);
+	/*configdata.declination.flt  = cf->ReadFloat(section, "declination", DEFAULT_DECLINATION);
 	configdata.truenorth = cf->ReadByte(section, "truenorth", DEFAULT_TRUE_NORTH);
 	configdata.calsamplefreq = cf->ReadByte(section,"calsamplefreq", DEFAULT_CALSAMPLE_FREQ);
 	configdata.samplefreq = cf->ReadByte(section,"samplefreq", DEFAULT_SAMPLE_FREQ);
 	configdata.period = cf->ReadByte(section,"period", DEFAULT_PERIOD);
 	configdata.bigendian = cf->ReadByte(section, "bigendian", DEFAULT_BIG_ENDIAN);
-	configdata.dampingsize= cf->ReadByte(section,"dampingsize", DEFAULT_DAMPING_SIZE);
+	configdata.dampingsize= cf->ReadByte(section,"dampingsize", DEFAULT_DAMPING_SIZE);*/
+
+	configdata.declination.flt  = cf->ReadFloat(section, "declination", DEFAULT_DECLINATION);
+	configdata.truenorth = (uint_8)cf->ReadInt(section, "truenorth", DEFAULT_TRUE_NORTH);//cast form int to uint_8
+	configdata.calsamplefreq = (uint_8)cf->ReadInt(section,"calsamplefreq", DEFAULT_CALSAMPLE_FREQ);
+	configdata.samplefreq = (uint_8)cf->ReadInt(section,"samplefreq", DEFAULT_SAMPLE_FREQ);
+	configdata.period = (uint_8)cf->ReadInt(section,"period", DEFAULT_PERIOD);
+	configdata.bigendian = (uint_8)cf->ReadInt(section, "bigendian", DEFAULT_BIG_ENDIAN);
+	configdata.dampingsize= (uint_8)cf->ReadInt(section,"dampingsize", DEFAULT_DAMPING_SIZE);
+
 
 	DataRespType dataresptype = {0};
 	dataresptype.XRaw = cf->ReadBool(section, "XRaw", DEFAULT_XRAW);
@@ -62,6 +71,9 @@ Compass_Player::Compass_Player(ConfigFile* cf, int section)
 	this->driver = new CompassDriver(configdata, dataresptype);
 }
 
+Compass_Player::~Compass_Player(){
+	delete this->driver;
+}
 int Compass_Player::Setup(){
 	//the real driver constructor loaded config, or we could set the config and requested data types here instead
 	StartThread();
@@ -82,14 +94,15 @@ int Compass_Player::ProcessMessage(MessageQueue* resp_queue, player_msghdr* hdr,
 					device_addr) )
 	{
 		// TODO: implement
-		player_position1d_data playerdata = {0};
+		//player_position1d_data playerdata = {0};
 		compassData data = {0};
+		//playerdata = {0};
 		data = driver->GetData();
 
-		if(data.Heading != -1){
-			playerdata.pos = ((data.Heading)*3.14/180);//player expects rad, compass gives degrees -- is there a better way/is this really what i want to do?.
-			size_t size = sizeof(playerdata);
-			Publish(this->device_addr, NULL, PLAYER_MSGTYPE_DATA, PLAYER_POSITION1D_DATA_STATE, /*data*/, size, NULL);
+		if(data.Heading != -1){//-1 indicates error
+			this->playerdata.pos = ((data.Heading)*3.14/180);//player expects rad, compass gives degrees -- is there a better way/is this really what i want to do?.
+			size_t size = sizeof(this->playerdata);
+			Publish(this->device_addr, NULL, PLAYER_MSGTYPE_DATA, PLAYER_POSITION1D_DATA_STATE, reinterpret_cast<void*>(&this->playerdata), size, NULL);
 			return(0);
 		}
 		else{
