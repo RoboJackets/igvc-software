@@ -13,6 +13,16 @@ typedef signed long int sint_32;//defining this like this becuase i'm not sure i
 #define DEFAULT_BIG_ENDIAN 0
 #define DEFAULT_DAMPING_SIZE  1
 
+//defualt types
+#define DEFAULT_XRAW 0
+#define DEFAULT_YRAW 0
+#define DEFAULT_XCAL 0
+#define DEFAULT_YCAL 0
+#define DEFAULT_HEADING 1
+#define DEFAULT_MAGNITUDE 1
+#define DEFAULT_TEMPERATURE 0
+#define DEFAULT_DISTORTION 1
+#define DEFAULT_CALSTATUS 1
 
 enum CommandCodes {
 	sync_flag = 0xAA,

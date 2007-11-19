@@ -23,15 +23,19 @@ testcaldata.YGain = 0xFF;
 testcaldata.phi = 0xFF;
 testcaldata.CalibrationMagnitude = 0xFF;
 
-CompassDriver testdriver(7);
+
 //testdriver.GetModInfo();//works
 
 DataRespType dataformat = {0};//need to declare equal to zero
-//dataformat.sint = 0;//needs to be cleared first (or do it as done above
 dataformat.XRaw = 1;
 dataformat.YRaw = 1;
-testdriver.SetDataComponents(dataformat);//works
+dataformat.Distortion = 1;
+//
 
+ConfigData configdata = {0};
+CompassDriver testdriver(configdata, dataformat);
+
+//testdriver.SetDataComponents(dataformat);//works
 /*compassData testgetdata;
 testgetdata = testdriver.GetData();//seems to work
 printf("\n\nXRaw: %li",testgetdata.XRaw);
@@ -50,6 +54,6 @@ testdriver.SetConfig(true_north, test);*/
 //testcaldata = testdriver.GetCalData();
 //printf("%i",test.YOffset);
 
-testdriver.SetCalData(testcaldata);//works
+//testdriver.SetCalData(testcaldata);//works
 }
 

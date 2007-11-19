@@ -13,7 +13,7 @@ SetConfig, GetConfig, SaveConfig, StartCal, StopCal, need to check endianness of
 
 
 #include "types.h"
-
+#include <cstdio>
 
 
 class CompassDriver{
@@ -34,7 +34,7 @@ class CompassDriver{
 	int spiGet(uint_8 * dataresp, int size);
 	
 	public:
-	CompassDriver(int foo);
+	CompassDriver(ConfigData configdata, DataRespType respdata);
 	~CompassDriver();
 
 	int CompassSend(uint_8 * data, int size);
@@ -66,9 +66,15 @@ int CompassDriver::CompassSend(uint_8 * data, int size){
 	return(0);
 }
 
-CompassDriver::CompassDriver(int foo){
+CompassDriver::CompassDriver(ConfigData configdata, DataRespType respdata){
 	//CompassDriver::spiinit();
-	//SetAllConfig(ConfigData data);
+	printf("seting config -- constructor\n");
+	SetAllConfig(configdata);
+	printf("done seting config -- constructor\n");
+	printf("setting data componets -- constructor\n");
+	SetDataComponents(respdata);
+	printf("done setting data componets -- constructor\n");
+	
 }
 
 int CompassDriver::SetAllConfig(ConfigData configdata){
