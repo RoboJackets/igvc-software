@@ -48,6 +48,7 @@ class CompassDriver{
 	int StopCal(void);
 	CalDataResp GetCalData(void);
 	int SetCalData(CalDataResp caldata);
+	int SetAllConfig(ConfigData configdata);
 };
 
 
@@ -67,6 +68,17 @@ int CompassDriver::CompassSend(uint_8 * data, int size){
 
 CompassDriver::CompassDriver(int foo){
 	//CompassDriver::spiinit();
+	//SetAllConfig(ConfigData data);
+}
+
+int CompassDriver::SetAllConfig(ConfigData configdata){
+	SetConfig(declination, &configdata.declination.byte);
+	SetConfig(true_north, &configdata.truenorth);
+	SetConfig(calsamplefreq, &configdata.calsamplefreq);
+	SetConfig(samplefreq, &configdata.samplefreq);
+	SetConfig(period, &configdata.period);
+	SetConfig(bigendian, &configdata.bigendian);
+	SetConfig(dampingsize, &configdata.dampingsize);
 }
 
 CompassDriver::~CompassDriver(){

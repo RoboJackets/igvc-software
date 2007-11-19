@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstdio>
 //#include "spifunct.h.debug"
+#include "types.h"
 #include "compass.h"
 
 

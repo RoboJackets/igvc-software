@@ -4,6 +4,16 @@
 typedef unsigned char uint_8;
 typedef signed long int sint_32;//defining this like this becuase i'm not sure if a long int is 4 bytes or not, so can change later
 
+//default configuration
+#define DEFAULT_DECLINATION 0
+#define DEFAULT_TRUE_NORTH 1
+#define DEFAULT_CALSAMPLE_FREQ 8
+#define DEFAULT_SAMPLE_FREQ 0
+#define DEFAULT_PERIOD 5
+#define DEFAULT_BIG_ENDIAN 0
+#define DEFAULT_DAMPING_SIZE  1
+
+
 enum CommandCodes {
 	sync_flag = 0xAA,
 	terminator = 0x00,
@@ -29,7 +39,7 @@ enum CompassResponse{
 enum Config_Id{
 	declination = 0x01,
 	true_north = 0x02,
-	casamplefreq = 0x03,
+	calsamplefreq = 0x03,
 	samplefreq = 0x04,
 	period = 0x05,
 	bigendian = 0x06,
@@ -94,6 +104,18 @@ union DataRespType{
 	};
 	short int sint;
 
+};
+struct ConfigData{
+	union {
+		float flt;
+		uint_8 byte;
+	} declination;
+	uint_8 truenorth;//supp to be bool
+	uint_8 calsamplefreq;
+	uint_8 samplefreq;
+	uint_8 period;
+	uint_8 bigendian;//supp to be bool
+	uint_8 dampingsize;
 };
 
 
