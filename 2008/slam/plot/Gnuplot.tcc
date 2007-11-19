@@ -1,33 +1,161 @@
-#include <cmath>
+#include <cassert>
+#include <sys/wait.h>
 
-namespace gnuplot {
-
-template <typename T>
-void
-Gnuplot::spy(const SparseSymmetricMatrix<CRS<T> > &A, double tolerance)
-{
-	_command << "unset xtics; unset ytics; " << std::endl;
-    _command << "plot "
-                "[ 0 : " << A.numCols()+1 << " ] " 
-                "[ 0 : " << A.numRows()+1 << " ] "
-                " '-' notitle ";
-    if (A.numRows()>=1024) {
-	    _command << "with dots ";
-	} else {
-		_command << "with points ";
-	}
-	_command << options.str() << std::endl;
- 	
-	typename SparseSymmetricMatrix<CRS<T> >::const_iterator it = A.begin();
-	for (; it!=A.end(); ++it) {
-		if (std::abs(it->second) >= tolerance) {
-			_command << it->first.second << " " << A.numRows()-it->first.first+1 << std::endl;
-			_command << it->first.first  << " " << A.numRows()-it->first.second+1 << std::endl;
-		}
-    }
-    _command << "e" << std::endl;
-    options.str("");
-    _flush();
+Gnuplot::Gnuplot(void) {
+	Hold = OFF;
+	gnuplotFD = popen(GNUPLOT_CMD,"w");
+	assert(gnuplotFD);
+	plotCommand.str("");
+	setCommand.str("");
+	setCommand << GNUPLOT_DEFAULT_SET << endl;
 }
 
-} // namespace gnuplot
+//////////////////////
+// #ifdef FLENS
+template<typename T>
+void Gnuplot::plot(const DenseVector<Array<T> > &y) {
+	plot<T>(y.length(), y.data());
+	return;
+}
+//////////////////////
+
+template<typename T>
+void Gnuplot::plot(int length, const T *x, const T *y, const T *z) {
+	if( Hold == ON ) {
+		if(subplotingOn) {
+			; // set the orgin and size
+		}
+	} else {
+		plotCommand.str("");
+		setCommand << "reset;" << GNUPLOT_DEFAULT_SET << endl;
+		if(subplotingOn) {
+			//setCommand << << endl; // redo the set orgin and set size
+		}
+	}
+	plotCommand << "plot '-' w linespoints" << endl; // << ranges << options;
+
+	assert(x);
+	assert(length > 0);
+
+	if( y ) {
+		if( z ) {
+			for(int i = 0; i < length; i++) {
+				plotCommand << x[i] << "\t" << y[i] << "\t" << z[i] << endl;
+			}
+		} else {
+			for(int i = 0; i < length; i++) {
+				plotCommand << x[i] << "\t" << y[i] << endl;
+			}
+		}
+	} else {
+		for( int i = 0; i < length; i++) {
+			plotCommand << x[i] << endl;
+		}
+	}
+	plotCommand << "e" << endl;
+	//cout << plotCommand.str() << endl;
+	execute(setCommand);
+	setCommand.str("");
+	execute(plotCommand);
+
+	return;
+}
+
+void Gnuplot::axis(double xMin, double xMax) {
+	setCommand << "set xrange [" << xMin << ":" << xMax << "]; clear;" << endl;
+	execute(setCommand);
+	setCommand.str("");
+	execute(plotCommand);
+	return;
+}
+
+void Gnuplot::axis(double xMin, double xMax, double yMin, double yMax) {
+	setCommand << "set xrange [" << xMin << ":" << xMax << "];";
+	setCommand << "set yrange [" << yMin << ":" << yMax << "]; clear;" << endl;
+	execute(setCommand);
+	setCommand.str("");
+	execute(plotCommand);
+	return;
+}
+
+void Gnuplot::axis(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax) {
+	setCommand << "set xrange [" << xMin << ":" << xMax << "];";
+	setCommand << "set yrange [" << yMin << ":" << yMax << "];";
+	setCommand << "set zrange [" << zMin << ":" << zMax << "]; clear;" << endl;
+	execute(setCommand);
+	setCommand.str("");
+	execute(plotCommand);
+	return;
+}
+
+void Gnuplot::title(string title) {
+	setCommand << "set title '" << title << "'; clear;" << endl;
+	execute(setCommand);
+	setCommand.str("");
+	//if(plotCommand.str() != "") {
+		execute(plotCommand);
+	/*} else {
+		plot [][0:1] 2;
+	}*/
+	return;
+}
+
+void Gnuplot::xlabel(string label) {
+	setCommand << "set xlabel '" << label << "'; clear;" << endl;
+	execute(setCommand);
+	setCommand.str("");
+	execute(plotCommand);
+	return;
+}
+
+void Gnuplot::ylabel(string label) {
+	setCommand << "set ylabel '" << label << "'; clear;" << endl;
+	execute(setCommand);
+	setCommand.str("");
+	execute(plotCommand);
+	return;
+}
+
+void Gnuplot::zlabel(string label) {
+	setCommand << "set zlabel '" << label << "'; clear;" << endl;
+	execute(setCommand);
+	setCommand.str("");
+	execute(plotCommand);
+	return;
+}
+#if 0
+void subplot(int numRows, int numCols, int index) {
+	if(subplotingOn) {
+		setCommand << "set multiplot;" << endl;
+		subplotingOn = true;
+	}
+
+	origin = ;
+	size = ;
+
+}
+#endif
+void Gnuplot::hold(HoldType value) {
+	if( (value == ON) && (Hold = OFF) ) {
+		if(!subplotingOn) {
+			setCommand << "set multiplot;" << endl;
+		}
+	} else if ( (value == OFF) && (Hold = ON) ) {
+		if(!subplotingOn) {
+			setCommand << "unset multiplot;" << endl;
+		}
+	}
+
+	execute(setCommand);
+	setCommand.str("");
+	Hold = value;
+	return;
+}
+
+void Gnuplot::execute(const stringstream &command) {
+	assert(gnuplotFD);
+	fprintf(gnuplotFD, "%s\n", command.str().c_str()); 
+	fflush(gnuplotFD);
+	return;
+}
+

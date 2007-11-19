@@ -5,104 +5,68 @@
 #include <sstream>
 #include <string>
 
-/*#include <flens/crs.h> 
-#include <flens/densevector.h>
-#include <flens/fullstorage.h>
-#include <flens/generalmatrix.h>
-#include <flens/sparsematrix.h>
-#include <flens/storage.h>*/
-
+//make this work with or without flens
 #include <flens/flens.h>
 
-namespace gnuplot {
+#define GNUPLOT_CMD			"gnuplot -persist"
+#define GNUPLOT_DEFAULT_SET	"set mouse; unset key;"
 
-#ifndef MACOS
-#    define DEFAULT_TERMINAL "x11"
-#    define GNUPLOT_CMD "gnuplot -persist"
-#else
-#    define DEFAULT_TERMINAL "aqua"
-#    define GNUPLOT_CMD "/usr/local/bin/gnuplot -persist"
-#endif
-
+using namespace std;
 using namespace flens;
 
-class Gnuplot
-{
-    public:
-        Gnuplot();
-        
-        void
-        plot(const DenseVector<Array<double> > &y);
-
-        void
-        plot(const DenseVector<Array<double> > &x, 
-             const DenseVector<Array<double> > &y);
-
-        void
-        plot(const DenseVector<Array<double> > &x, 
-             const DenseVector<Array<double> > &y, 
-             const DenseVector<Array<double> > &z);
-             
-        void
-        execute(const std::string &command);
-
-        void
-        writeData(const double *x, int length, int strideX = 1);
-        
-        void
-        writeData(const double *x, const double *y, int length, 
-                  int strideX = 1, int strideY = 1);
-        
-        void
-        writeData(const double *x, const double *y, const double *z, 
-                 int length, int strideX = 1, int strideY = 1, int strideZ = 1);
-                   
-        void
-        setTerminal(const std::string &terminal = DEFAULT_TERMINAL);
-        
-        void
-        setOutput(const std::string &filename);
-
-        template <typename T>
-            void
-            spy(const SparseSymmetricMatrix<CRS<T> > &A, 
-                double tolerance=1e-15);
-                
-        void
-        holdOn();
-        
-        void
-        holdOff();
-            
-        std::stringstream options;
-        std::stringstream ranges;
-        std::stringstream set;
-                
-    private:
-        // not allowed!
-        Gnuplot(const Gnuplot &rhs);
-
-        // not allowed!        
-        Gnuplot &
-        operator=(const Gnuplot &rhs);
-
-        void
-        _initialize();
-        
-        void
-        _flush();
-
-        FILE *_fd;
-        
-        
-        std::stringstream _command;
-        std::stringstream _data;
-        bool _holdOn;
-		bool _output;
-		std::string _outputFile;
+enum HoldType {
+	OFF,
+	ON
+	//ALL
+	//SOME
 };
 
-} // namespace gnuplot
+class PlotData;
+
+class Gnuplot {
+public:
+	Gnuplot();
+
+	template<typename T>
+	void plot(const DenseVector<Array<T> > &y);
+
+	template<typename T>
+	void plot(int length, const T *x, const T *y = 0, const T *z = 0);
+
+	//void replot(const DenseVector<Array<double> > &y); // appends stuff to the last plot
+
+	void axis(double xMin, double xMax);
+	void axis(double xMin, double xMax, double yMin, double yMax);
+	void axis(double xMin, double xMax, double yMin, double yMax, double zMin, double zMax);
+	void title(string title);
+	void xlabel(string label);
+	void ylabel(string label);
+	void zlabel(string label);
+
+	//void gset();
+	//void gshow();
+
+	void hold(HoldType value);
+                
+private:
+	/* Prevent instantiation */
+	Gnuplot(const Gnuplot &rhs);
+
+	/* Prevent assignment */       
+	Gnuplot & operator=(const Gnuplot &rhs);
+
+	void execute(const stringstream &command);
+
+	FILE *gnuplotFD;
+
+	//origin;
+	//size;
+
+	stringstream setCommand;
+	stringstream plotCommand;
+	HoldType Hold;
+	bool subplotingOn;
+};
 
 #include "Gnuplot.tcc"
 

@@ -1,26 +1,19 @@
+#include <gsl/gsl_rng.h>
+
 // use a Tausworthe random number generator
 #define RNG gsl_rng_taus
 
 #if 0
-PD::virtual Probability pdf(E value) {
-}
-
-PD::virtual Probability cdf(E value) {
-}
-
-PD::virtual E icdf(Probability prob) {
-}
-
-PD::virtual MeanVector mean(void) {
+template<typename E> typename PD::MeanVector PD::mean(void) {
 	// Integrate the pdf over an appropriate range
 }
 
-PD::virtual CovMatrix var(void) {
+template<typename E> typename PD::CovMatrix PD::var(void) {
 }
+#endif
 
-
-PD::virtual DEVector genSignal(int size) {
-	DEVector(size) values;
+template<typename E> typename PD<E>::DEVector PD<E>::genSignal(int size) {
+	DEVector values(size);
 
 	/* Create an instance of a random number generator */
 	gsl_rng *r = gsl_rng_alloc( RNG );
@@ -36,7 +29,6 @@ PD::virtual DEVector genSignal(int size) {
 	/* Free the generator */
 	gsl_rng_free(r);
 
-	return();
+	return(values);
 }
-#endif
 

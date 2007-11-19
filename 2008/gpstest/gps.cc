@@ -4,7 +4,7 @@ static PlayerCc::PlayerClient *robot;
 static PlayerCc::GpsProxy *gps;
 
 int main(int argc, char** argv) {
-	char* hostname = "localhost";
+	char* hostname = "192.168.1.149";
 	int port = 6665;
 	
 	robot = new PlayerCc::PlayerClient(hostname, port);
