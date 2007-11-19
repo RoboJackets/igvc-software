@@ -2,6 +2,8 @@
 #define SPIFUNCT_H
 
 
+#include <cstdio>
+
 
 sint_32 bytes2sint32LE(uint_8 * array){//give it pointer to least signifiacant byte first (little endian)
 	
