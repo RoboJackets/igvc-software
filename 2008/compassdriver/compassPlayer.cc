@@ -1,9 +1,6 @@
-//the parts of the 1-d interface i need
-
-
 //g++ -I /usr/local/include/player-2.0/ compassPlayer.cc
 //#include <player-2.0/libplayercore/playercore.h>
-#include <player-2.0/libplayercore/playercore.h>
+#include <libplayercore/playercore.h>
 #include <unistd.h>		// for usleep()
 #include <math.h>		//for M_PI
 
