@@ -1,0 +1,9 @@
+CXX         = g++
+CXXFLAGS   += -Wall -g -O3 -fPIC
+INCDIRS    += -I.
+DYLIB_EXT   = so
+CXXDYLIB    = -shared
+LDFLAGS    += -llapack -L /usr/lib/atlas -lblas
+ifdef STIP
+CXXFLAGS += -DSTIP
+endif

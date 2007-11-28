@@ -1,0 +1,19 @@
+ifndef FLENS_HOME 
+export FLENS_HOME = $(PWD)
+endif
+
+PREFIX = /usr/local/
+
+LIBDIRS  = flens
+EXECDIRS = tutorials examples tests
+SUBDIRS = $(LIBDIRS) $(EXECDIRS)
+INCDIRS = -I $(FLENS_HOME)
+
+# some shell commands
+RM     = rm -f
+RMDIR  = rm -f -r
+MKDIR  = mkdir -p
+MAKE   = make
+SILENT = @
+
+include $(FLENS_HOME)/config
