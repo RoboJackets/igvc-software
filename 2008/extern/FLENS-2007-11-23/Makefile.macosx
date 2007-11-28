@@ -1,0 +1,102 @@
+################################################################################
+# FLENS: source files, library name
+FLENS_SRCDIR         = flens
+FLENS_SOURCEFILES    = $(wildcard $(FLENS_SRCDIR)/*.cc)
+FLENS_OBJECTFILES    = $(patsubst %.cc,%.o,$(FLENS_SOURCEFILES))
+FLENS_LINK           = -framework vecLib
+
+FLENS_LIB   = libflens.dylib
+
+# C++ Compiler, compile flags,...
+#CXX         = g++
+CXX         = gfilt
+
+# opt-mode
+CXXFLAGS    = -Wall -O3 -DNDEBUG -funroll-loops -floop-optimize -falign-loops
+
+# debug-mode
+#CXXFLAGS    = -Wall -p -g -O3 -funroll-loops -floop-optimize -falign-loops
+
+INCLUDE     = -I. -I /System/Library/Frameworks/vecLib.framework/Headers/
+CXXDYLIB    = -dynamiclib
+#CXXDYLIB    = -shared
+
+# examples
+EXAMPLES_SRCDIR      = examples
+EXAMPLES_SOURCEFILES = $(wildcard $(EXAMPLES_SRCDIR)/*.cc)
+EXAMPLES_OBJECTFILES = $(patsubst %.cc,%.o,$(EXAMPLES_SOURCEFILES))
+EXAMPLES_TARGETS     = $(patsubst %.cc,%,$(EXAMPLES_SOURCEFILES))
+EXAMPLES_LINK        = -p -L. -lflens -lpardiso_GNU_MACOSX32 -bind_at_load -framework vecLib
+
+# scifi
+SCIFI_SRCDIR      = scifi
+SCIFI_SOURCEFILES = $(wildcard $(SCIFI_SRCDIR)/*.cc)
+SCIFI_OBJECTFILES = $(patsubst %.cc,%.o,$(SCIFI_SOURCEFILES))
+SCIFI_TARGETS     = $(patsubst %.cc,%,$(SCIFI_SOURCEFILES))
+SCIFI_LINK        = -p -L. -lflens -bind_at_load -framework vecLib
+
+# fem
+FEM_SRCDIR      = fem
+FEM_SOURCEFILES = $(wildcard $(FEM_SRCDIR)/*.cc)
+FEM_OBJECTFILES = $(patsubst %.cc,%.o,$(FEM_SOURCEFILES))
+FEM_TARGETS     = fem/example fem/create_mesh
+FEM_LINK        = fem/fem.o -p -L. -lflens -lpardiso_GNU_MACOSX32 -bind_at_load -framework vecLib
+
+
+# some shell commands
+RM     = rm -f
+RMDIR  = rm -f -r
+MKDIR  = mkdir -p
+
+# documentation
+TEX 				= pdflatex
+DOC_SRCDIR 			= doc
+DOC_TARGET			= flensdoc.pdf
+DOC_MAINDOC			= flensdoc.tex
+DOC_SOURCEFILES		= $(wildcard $(DOC_SRCDIR)/*.tex)
+DOC_TOCLEAN			= $(wildcard $(DOC_SRCDIR)/*.aux) \
+					  $(wildcard $(DOC_SRCDIR)/*.log) \
+					  $(wildcard $(DOC_SRCDIR)/*.out) \
+					  $(wildcard $(DOC_SRCDIR)/*.idx) \
+					  $(wildcard $(DOC_SRCDIR)/*.ilg) \
+					  $(wildcard $(DOC_SRCDIR)/*.pdf) \
+					  $(wildcard $(DOC_SRCDIR)/*.ind) \
+					  $(wildcard $(DOC_SRCDIR)/*.toc)
+
+################################################################################
+
+all: $(FLENS_LIB) $(EXAMPLES_TARGETS) $(FEM_TARGETS) $(SCIFI_TARGETS)
+
+%.o : %.cc
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -o $@ -c $<
+
+$(FLENS_LIB) : $(FLENS_OBJECTFILES)
+	@echo
+	@echo "create FLENS library:"
+	$(CXX) $(CXXDYLIB) -o $(FLENS_LIB) $(FLENS_OBJECTFILES) $(FLENS_LINK)
+	
+$(EXAMPLES_TARGETS): % : %.o
+	@echo
+	@echo "create FLENS example:"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(EXAMPLES_LINK)
+
+$(SCIFI_TARGETS): % : %.o
+	@echo
+	@echo "create FLENS scifi:"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(SCIFI_LINK)
+
+$(FEM_TARGETS): % : %.o fem/fem.o
+	@echo
+	@echo "create FEM example:"
+	$(CXX) $(CXXFLAGS) -o $@ $< $(FEM_LINK)
+	
+
+clean:
+	$(RM) $(FLENS_OBJECTFILES)
+	$(RM) $(FLENS_LIB)
+	$(RM) $(EXAMPLES_OBJECTFILES)
+	$(RM) $(EXAMPLES_TARGETS)
+	$(RM) $(DOC_TOCLEAN)
+	$(RM) $(FEM_TARGETS)
+
+################################################################################
