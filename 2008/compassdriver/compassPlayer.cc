@@ -89,15 +89,11 @@ int Compass_Player::Shutdown(){
 
 int Compass_Player::ProcessMessage(MessageQueue* resp_queue, player_msghdr* hdr, void* data){
 	if( Message::MatchMessage(hdr,
-					PLAYER_MSGTYPE_REQ,
-					PLAYER_POSITION1D_DATA_STATE,
-					device_addr) )
+	                          PLAYER_MSGTYPE_REQ,
+	                          PLAYER_POSITION1D_DATA_STATE,
+	                          device_addr) )
 	{
-		// TODO: implement
-		//player_position1d_data playerdata = {0};
-		compassData data = {0};
-		//playerdata = {0};
-		data = driver->GetData();
+		compassData data = driver->GetData();
 
 		if(data.Heading != -1){//-1 indicates error
 			this->playerdata.pos = ((data.Heading)*M_PI/180);//player expects rad, compass gives degrees -- is there a better way/is this really what i want to do?.
