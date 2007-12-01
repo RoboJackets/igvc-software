@@ -2,12 +2,12 @@
 #include <cstdlib>
 #include <cstdio>
 //#include "spifunct.h.debug"
-#include "types.h"
-#include "compass.h"
+#include "compassTypes.h"
+#include "CompassDriver.h"
 
 
 
-int main(void){
+int main(void) {
 //testing correct endianndess
 
 uint_8 array[6] = {0xC2, 0xed, 0x40, 0x00, 0x07, 0x00};

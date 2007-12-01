@@ -1,12 +1,12 @@
-//g++ -I /usr/local/include/player-2.0/ compassPlayer.cc
+//g++ -I /usr/local/include/player-2.0/ Compass_Player.cc
 //#include <player-2.0/libplayercore/playercore.h>
 #include <libplayercore/playercore.h>
 #include <unistd.h>		// for usleep()
 #include <math.h>		//for M_PI
 
 
-#include "compass.h"
-#include "types.h"
+#include "CompassDriver.h"
+#include "compassTypes.h"
 
 class Compass_Player : public Driver {
 	public:
@@ -71,23 +71,23 @@ Compass_Player::Compass_Player(ConfigFile* cf, int section): Driver(
 	this->driver = new CompassDriver(configdata, dataresptype);
 }
 
-Compass_Player::~Compass_Player(){
+Compass_Player::~Compass_Player() {
 	delete this->driver;
 }
-int Compass_Player::Setup(){
+int Compass_Player::Setup() {
 	//the real driver constructor loaded config, or we could set the config and requested data types here instead
 	StartThread();
 	
 	return 0;
 }
 
-int Compass_Player::Shutdown(){
+int Compass_Player::Shutdown() {
 	//
 	StopThread();
 	return 0;
 }
 
-int Compass_Player::ProcessMessage(MessageQueue* resp_queue, player_msghdr* hdr, void* data){
+int Compass_Player::ProcessMessage(MessageQueue* resp_queue, player_msghdr* hdr, void* data) {
 	if( Message::MatchMessage(hdr,
 	                          PLAYER_MSGTYPE_REQ,
 	                          PLAYER_POSITION1D_DATA_STATE,
@@ -95,14 +95,14 @@ int Compass_Player::ProcessMessage(MessageQueue* resp_queue, player_msghdr* hdr,
 	{
 		compassData data = driver->GetData();
 
-		if(data.Heading != -1){//-1 indicates error
+		if(data.Heading != -1) {//-1 indicates error
 			this->playerdata.pos = ((data.Heading)*M_PI/180);//player expects rad, compass gives degrees -- is there a better way/is this really what i want to do?.
 			size_t size = sizeof(this->playerdata);
 			Publish(this->device_addr, NULL, PLAYER_MSGTYPE_DATA, PLAYER_POSITION1D_DATA_STATE, reinterpret_cast<void*>(&this->playerdata), size, NULL);
 
 			return(0);
 		}
-		else{
+		else {
 			return(-1);
 		}
 		
@@ -113,7 +113,7 @@ int Compass_Player::ProcessMessage(MessageQueue* resp_queue, player_msghdr* hdr,
 	}
 }
 
-void Compass_Player::Main(){
+void Compass_Player::Main() {
 	for (;;) {
 		// Terminate if this thread has been cancelled
 		pthread_testcancel();
