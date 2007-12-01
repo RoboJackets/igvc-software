@@ -1,8 +1,8 @@
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef COMPASS_TYPES_H
+#define COMPASS_TYPES_H
 
 typedef unsigned char uint_8;
-typedef signed long int sint_32;//defining this like this becuase i'm not sure if a long int is 4 bytes or not, so can change later
+typedef signed int sint_32;
 
 //default configuration
 #define DEFAULT_DECLINATION 0
@@ -175,4 +175,4 @@ union spi_status_register {
 	};
 	unsigned char byte;
 };
-#endif //TYPES_H
+#endif //COMPASS_TYPES_H

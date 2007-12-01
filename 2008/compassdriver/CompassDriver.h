@@ -1,5 +1,5 @@
-#ifndef COMPASS_H
-#define COMPASS_H
+#ifndef COMPASS_DRIVER_H
+#define COMPASS_DRIVER_H
 
 /*typedef unsigned char uint_8;
 typedef signed long int sint_32;//defining this like this becuase i'm not sure if a long int is 4 bytes or not, so can change later*/
@@ -335,5 +335,5 @@ int CompassDriver::SetCalData(CalDataResp caldata) {
 
 }
 
-#endif //COMPASS_H
+#endif //COMPASS_DRIVER_H
 
