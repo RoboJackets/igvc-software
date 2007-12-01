@@ -39,14 +39,14 @@ enum CommandCodes {
 	set_cal_data = 0x0E
 };
 
-enum CompassResponse{
+enum CompassResponse {
 	mod_info_resp = 0x02,
 	data_resp = 0x05,
 	config_resp = 0x08,
 	cal_data_resp = 0x0D
 };
 
-enum Config_Id{
+enum Config_Id {
 	declination = 0x01,
 	true_north = 0x02,
 	calsamplefreq = 0x03,
@@ -56,7 +56,7 @@ enum Config_Id{
 	dampingsize = 0x07
 };
 
-enum Data_Cid{
+enum Data_Cid {
 	XRaw = 0x01,
 	YRaw = 0x02,
 	XCal = 0x03,
@@ -84,7 +84,7 @@ struct CalDataResp {
 	float CalibrationMagnitude;
 };
 
-struct compassData{//all posible types the compass can sends. when asked Distortion and Calstatus are suposed to be bools, but i think they are read a byte at a time, so should work as uint_8's.
+struct compassData {//all posible types the compass can sends. when asked Distortion and Calstatus are suposed to be bools, but i think they are read a byte at a time, so should work as uint_8's.
 	sint_32 XRaw;
 	sint_32 YRaw;
 	float XCal;
@@ -99,7 +99,7 @@ struct compassData{//all posible types the compass can sends. when asked Distort
 const uint_8 dataresponsetype[9] = {XRaw, YRaw, XCal, YCal, Heading, Magnitude, Temperature, Distortion, CalStatus};//used so for loop can scroll through union
 const uint_8 dataresponsetypelength[9] = {4, 4, 4, 4, 4, 4, 4, 1, 1};//number of bytes data is
 
-union DataRespType{
+union DataRespType {
 	struct {//is there a way to acces this like an array, ie datarespvar.bits[2]?
 		short int XRaw:1;
 		short int YRaw:1;
@@ -115,7 +115,7 @@ union DataRespType{
 	short int sint;
 
 };
-struct ConfigData{
+struct ConfigData {
 	union {
 		float flt;
 		uint_8 byte;
@@ -129,7 +129,7 @@ struct ConfigData{
 };
 
 
-union spi_control_0{
+union spi_control_0 {
 	struct {
 		unsigned char interupt_enable:1;//0 = disable
 		unsigned char sytem_enable:1;//0 = disable
@@ -142,7 +142,7 @@ union spi_control_0{
 	};
 	unsigned char byte;
 };
-union spi_control_1{
+union spi_control_1 {
 	struct {
 		unsigned char :3;//offest 3
 		unsigned char MODFEN:1;//0 = slave select is unused, 1 = slave select used w/ fault detection
@@ -154,7 +154,7 @@ union spi_control_1{
 	unsigned char byte;
 };
 
-union spi_baud_rate{
+union spi_baud_rate {
 	struct {
 		unsigned char :1;
 		unsigned char baud_rate_preselect:3;
@@ -165,7 +165,7 @@ union spi_baud_rate{
 
 };
 
-union spi_status_register{
+union spi_status_register {
 	struct {
 		unsigned char interrupt_flag:1;//1 = new data is in data register.  clear bu reading this and then reading the data register
 		unsigned char :1;

@@ -1,22 +1,22 @@
 #ifndef SPIFUNCT_H
 #define SPIFUNCT_H
 
-#include "types.h"
+#include "compassTypes.h"
 //#include "peekpoke.h"
 
 //these were included in button.c, don't know if we need them
 //the spi pins are on the dio header
 
 #include <unistd.h>
-#include <sys/types.h>
+#include <sys/compassTypes.h>
 #include <sys/mman.h>
 #include <fcntl.h>
 
 
 
-sint_32 bytes2sint32LE(uint_8 * array){//give it pointer to least signifiacant byte first (little endian)
+sint_32 bytes2sint32LE(uint_8 * array) {//give it pointer to least signifiacant byte first (little endian)
 	
-	union sint_32_uint_8{
+	union sint_32_uint_8 {
 		sint_32 sint32;
 		uint_8 uint8[4];
 	} outputunion;
@@ -29,8 +29,8 @@ sint_32 bytes2sint32LE(uint_8 * array){//give it pointer to least signifiacant b
 	return( outputunion.sint32 );
 }
 
-uint_8 * sint32_bytesLE(sint_32 input){//give it sint_32, returns pointer to byte array, lsb first (little endian)
-	union sint_32_uint_8{
+uint_8 * sint32_bytesLE(sint_32 input) {//give it sint_32, returns pointer to byte array, lsb first (little endian)
+	union sint_32_uint_8 {
 		sint_32 sint32;
 		uint_8 uint8[4];
 	} inputunion;
@@ -46,8 +46,8 @@ uint_8 * sint32_bytesLE(sint_32 input){//give it sint_32, returns pointer to byt
 	return(output);
 }
 
-float bytes2floatLE(uint_8 * array){
-union float_uint_8{
+float bytes2floatLE(uint_8 * array) {
+union float_uint_8 {
 	float flt;
 		uint_8 uint8[4];
 	} outputunion;
@@ -60,9 +60,9 @@ union float_uint_8{
 	return(outputunion.flt);
 }
 
-uint_8 * float2bytesLE(float input){//lsb returned first (0=sign; 1-8=exponent;9-31=mantissa) -- this works, but don't know about order
+uint_8 * float2bytesLE(float input) {//lsb returned first (0=sign; 1-8=exponent;9-31=mantissa) -- this works, but don't know about order
 	
-	union float_uint_8{
+	union float_uint_8 {
 	float flt;
 		uint_8 uint8[4];
 	} inputunion;
@@ -78,13 +78,13 @@ uint_8 * float2bytesLE(float input){//lsb returned first (0=sign; 1-8=exponent;9
 	return(output);
 }
 
-bool checkbitset(short int foo, int i){//from http://www.cs.umd.edu/class/spring2003/cmsc311/Notes/BitOp/bitI.html
+bool checkbitset(short int foo, int i) {//from http://www.cs.umd.edu/class/spring2003/cmsc311/Notes/BitOp/bitI.html
 	short int mask = 1 << i;
 	return(mask & foo);
 }
 
-uint_8 char2uint_8(char foo){
-	union char2uint8{
+uint_8 char2uint_8(char foo) {
+	union char2uint8 {
 		uint_8 uint8;
 		char chr;
 		}out;
@@ -92,8 +92,8 @@ uint_8 char2uint_8(char foo){
 	return(out.uint8);
 }
 
-char uint_82char2(uint_8 * foo){
-	union char2uint8{
+char uint_82char2(uint_8 * foo) {
+	union char2uint8 {
 		uint_8 uint8;
 		char chr;
 		}out;
@@ -102,12 +102,12 @@ char uint_82char2(uint_8 * foo){
 }
 
 
-int CompassDriver::spiSend(uint_8 * data, int size){
+int CompassDriver::spiSend(uint_8 * data, int size) {
 	spi_status_register status;
 	status = spigetstatus();
 	
-	for(int i=0; i < size; i++){
-		while(!(status.transmit_empty_interrupt_flag)){
+	for(int i=0; i < size; i++) {
+		while(!(status.transmit_empty_interrupt_flag)) {
 			//wait for the send buffer to clear -- more than likly a better way to do this
 		}
 		*datareg = data[i];
@@ -116,12 +116,12 @@ int CompassDriver::spiSend(uint_8 * data, int size){
 }
 
 
-int CompassDriver::spiGet(uint_8 * dataresp, int size){
+int CompassDriver::spiGet(uint_8 * dataresp, int size) {
 	spi_status_register status;
 	status = spigetstatus();
 	//should i load 0x00 into the send buffer before i recive?
-	for(int i=0; i < size; i++){
-		while(!(status.interrupt_flag)){
+	for(int i=0; i < size; i++) {
+		while(!(status.interrupt_flag)) {
 			//wait for new data -- more than likly a better way to do this
 		}
 		dataresp[i] = *datareg;
@@ -130,7 +130,7 @@ int CompassDriver::spiGet(uint_8 * dataresp, int size){
 }
 
 
-spi_status_register CompassDriver::spigetstatus(){
+spi_status_register CompassDriver::spigetstatus() {
 	spi_status_register statusval;
 	statusval.byte = *statusreg;
 	return(statusval);
@@ -138,7 +138,7 @@ spi_status_register CompassDriver::spigetstatus(){
 
 
 
-int CompassDriver::spiinit(){
+int CompassDriver::spiinit() {
 	//volatile unsigned int ctrlreg1, ctrlreg2, datareg, statusreg, clockprescalereg, interuptclearreg;//this is now in the class
 	unsigned char *start;
 	int fd = open("/dev/mem", O_RDWR|O_SYNC);
@@ -204,7 +204,7 @@ int CompassDriver::spiinit(){
 
 }
 
-int CompassDriver::spioff(){
+int CompassDriver::spioff() {
 	//close(fd);//will this work across scope like this? -- in the example this is right after the dio pins are named, moved there
 }
 
