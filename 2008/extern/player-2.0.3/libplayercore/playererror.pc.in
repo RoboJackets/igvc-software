@@ -1,0 +1,12 @@
+# DO NOT edit playererror.pc; edit playererror.pc.in instead
+
+prefix=@prefix@
+
+# this gives access to the player header files for compiling plugins
+
+Name: playererror
+Description: Player error reporting library - part of the Player/Stage Project
+Version: @VERSION@
+Requires: 
+Libs: -L${prefix}/lib -lplayererror
+Cflags: -I${prefix}/include/player-2.0
