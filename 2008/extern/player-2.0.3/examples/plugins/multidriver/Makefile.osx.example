@@ -1,0 +1,13 @@
+# Desc: Example plugin makefile
+# CVS: $Id: Makefile.osx.example,v 1.1 2005/08/20 17:36:30 gerkey Exp $
+
+all: libexampledriver.dylib
+
+%.o: %.cc
+	$(CXX) `pkg-config --cflags playercore` -Wall -g3 -dynamiclib -c $<
+
+libexampledriver.dylib: exampledriver.o
+	$(CXX) -bundle -flat_namespace -undefined suppress -o $@ $<
+
+clean:
+	rm -f *.o *.dylib

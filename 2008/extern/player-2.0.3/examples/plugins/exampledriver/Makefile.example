@@ -1,0 +1,13 @@
+# Desc: Example plugin makefile
+# CVS: $Id: Makefile.example,v 1.6 2005/08/17 23:55:59 gerkey Exp $
+
+all: libexampledriver.so
+
+%.o: %.cc
+	$(CXX) -Wall -fpic -g3 `pkg-config --cflags playercore` -c $<
+
+libexampledriver.so: exampledriver.o
+	$(CXX) -shared -nostartfiles -o $@ $<
+
+clean:
+	rm -f *.o *.so
