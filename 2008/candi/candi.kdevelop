@@ -15,7 +15,7 @@
     <absoluteprojectpath>false</absoluteprojectpath>
     <description/>
     <defaultencoding/>
-    <versioncontrol/>
+    <versioncontrol>kdevsubversion</versioncontrol>
   </general>
   <kdevfileview>
     <groups>
@@ -29,6 +29,7 @@
     <tree>
       <hidepatterns>*.o,*.lo,CVS</hidepatterns>
       <hidenonprojectfiles>false</hidenonprojectfiles>
+      <showvcsfields>false</showvcsfields>
     </tree>
   </kdevfileview>
   <kdevdoctreeview>
@@ -95,7 +96,7 @@
       <designerintegration>ExternalDesigner</designerintegration>
       <root>/usr/share/qt3</root>
       <qmake>/usr/bin/qmake</qmake>
-      <designer></designer>
+      <designer>/usr/bin/designer-qt4</designer>
       <designerpluginpaths/>
     </qt>
     <codecompletion>
@@ -154,7 +155,7 @@
       <mainprogram>/home/chris/igvcsvn/candi/candi</mainprogram>
       <programargs/>
       <globaldebugarguments/>
-      <globalcwd>/home/chris/igvcsvn/candi</globalcwd>
+      <globalcwd>/home/chris/igvcsvn/candi/</globalcwd>
       <useglobalprogram>true</useglobalprogram>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
@@ -181,7 +182,19 @@
   <cppsupportpart>
     <filetemplates>
       <interfacesuffix>.h</interfacesuffix>
-      <implementationsuffix>.cc</implementationsuffix>
+      <implementationsuffix>.cc,.c,.cpp</implementationsuffix>
     </filetemplates>
   </cppsupportpart>
+  <kdevdocumentation>
+    <projectdoc>
+      <docsystem/>
+      <docurl/>
+      <usermanualurl/>
+    </projectdoc>
+  </kdevdocumentation>
+  <ctagspart>
+    <customArguments/>
+    <customTagfilePath>/home/chris/igvcsvn/candi/tags</customTagfilePath>
+    <activeTagsFiles/>
+  </ctagspart>
 </kdevelop>
