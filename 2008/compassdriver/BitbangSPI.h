@@ -71,7 +71,6 @@ class BitbangSPI{
 		//volatile unsigned int *dio_in, *dio_out;
 		volatile struct dio_pins *dioblock_in;
 		volatile struct dio_pins *dioblock_out;
-		unsigned char *base;
 		int fd_dev_mem;
 
 	public:
@@ -83,8 +82,9 @@ class BitbangSPI{
 
 BitbangSPI::BitbangSPI(){
 	fd_dev_mem = open("/dev/mem", O_RDWR|O_SYNC);
-
-	base = mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);
+	unsigned char *base;
+	//base = mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);//this worked before without casting as (unsigned char *).  what changed? -- does c++ not auto cast from void? plain C did.
+	base = (unsigned char *) mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);
 	
 	//dio_in = (base + INPUT_OFFSET);  // dio in block
 	//dio_out = (base + OUTPUT_OFFSET);  // dio out block
