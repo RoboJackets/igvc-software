@@ -16,23 +16,15 @@ SetConfig, GetConfig, SaveConfig, StartCal, StopCal, need to check endianness of
 #include "BitbangSPI.h"
 #include <cstdio>
 
-
 class CompassDriver {
 	private://do these need to be static?
+
 		//for future sanity checking	
 		int datalength;
 		int datapackcount;
-		uint_8 lastcommand;
+		//uint_8 lastcommand;//moved to spidriver
 	
-		//where the mmap'ed spiregisters are
-		//volatile unsigned int *ctrlreg0, *ctrlreg1, *datareg, *statusreg, *clockprescalereg, *interuptclearreg;//so member functions can accses the registers
-	
-		//spi functionss32_u8
-		//int spiinit();
-		//int spioff();
-		//spi_status_register spigetstatus();
-		//int spiSend(uint_8 * data, int size);
-		//int spiGet(uint_8 * dataresp, int size);
+		//spi driver instance
 		BitbangSPI spidriver;
 	
 	public:
@@ -54,8 +46,6 @@ class CompassDriver {
 };
 
 
-//#include "spifunct.h"
-//#include "spifunct.h.debug"
 int CompassDriver::CompassSend(uint_8 * data, int size) {
 
 	uint_8 senddata[size+2];
@@ -288,10 +278,17 @@ uint_8 * CompassDriver::GetConfig(uint_8 config_id) {
 	data[1] = config_id;
 	CompassSend(data, 2);
 
+	float_u8 tempflt;
 	if (config_id == declination) {
 		uint_8 resp[8];
 		spidriver.spiGet(resp, 8);
 
+
+		//tempflt.u8[0] = resp[3];
+		//tempflt.u8[1] = resp[4];
+		//tempflt.u8[2] = resp[5];
+		//tempflt.u8[3] = resp[6];
+		//return(tempflt.flt);//this won't work because the func can't return a u8 and a float -- right? maybe dump to a struct and return that
 		uint_8 out[4] = {resp[3],resp[4],resp[5],resp[6]};
 		return(out);//returns the second element
 	}
