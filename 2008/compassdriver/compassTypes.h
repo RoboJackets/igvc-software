@@ -142,7 +142,8 @@ struct ConfigData {
 	uint_8 dampingsize;
 };
 
-
+//marked for removal -- no spi hardware
+/*
 union spi_control_0 {
 	struct {
 		unsigned char interupt_enable:1;//0 = disable
@@ -189,4 +190,5 @@ union spi_status_register {
 	};
 	unsigned char byte;
 };
+*/
 #endif //COMPASS_TYPES_H
