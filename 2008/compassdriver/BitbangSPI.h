@@ -1,3 +1,6 @@
+#ifndef BITBANG_SPI_H
+#define BITBANG_SPI_H
+
 #include<unistd.h>
 #include<sys/types.h>
 #include<sys/mman.h>
@@ -28,7 +31,7 @@
 //figure out good sleep mechanism
 #define PAUSE usleep(100)
 
-typedef unsigned short uint_8;
+typedef unsigned char uint_8;
 
 /*union u8_bits {
 	struct{
@@ -37,21 +40,29 @@ typedef unsigned short uint_8;
 	uint_8 u8;
 };*/
 
+#define spi_ss pin1
+#define spi_frame pin6
+#define spi_miso pin10
+#define spi_mosi pin12
+#define spi_clock pin14
+
 struct dio_pins{
-	unsigned spi_ss:1;
+	unsigned pin1:1;
 	unsigned pin2:1;
 	unsigned pin3:1;
-	unsigned pin4:1;
+	unsigned pin4:1;//always input
 	unsigned pin5:1;
-	unsigned spi_frame:1;
+	unsigned pin6:1;
 	unsigned pin7:1;
 	unsigned pin8:1;
 	unsigned pin9:1;
-	unsigned spi_miso:1;
+	unsigned pin10:1;
 	unsigned pin11:1;
-	unsigned spi_mosi:1;
+	unsigned pin12:1;
 	unsigned pin13:1;
-	unsigned spi_clock:1;
+	unsigned pin14:1;
+	unsigned pin15:1;
+	unsigned pin16:1;
 };
 
 
@@ -66,9 +77,8 @@ class BitbangSPI{
 	public:
 		BitbangSPI();
 		~BitbangSPI();
-
-		int senddata(uint_8 data);
-		uint_8 getdata();
+		int spiSend(uint_8 * data, int size);
+		int spiGet(uint_8 * dataresp, int size);
 };
 
 BitbangSPI::BitbangSPI(){
@@ -97,31 +107,34 @@ BitbangSPI::~BitbangSPI(){
 	close(fd_dev_mem);
 }
 
-int BitbangSPI::senddata(uint_8 data) {
+int BitbangSPI::spiSend(uint_8 * data, int size) {
 
 	//u8_bits	bitfield;
 	//bitfield.u8 = data;
 	
 
 	int i = 0;
+	int byte = 0;
 	//*dio_out = 0;//make sure all off?
 	dioblock_out->spi_ss = 0;//pull low to make compass listen
 	dioblock_out->spi_clock = 0;//clock low
 	PAUSE;
-	for (i=0;i<8;i++){
+	for(byte = 0;byte < size; byte++){
+		for (i=0;i<8;i++){
 
-		dioblock_out->spi_clock = 1;//clock high
-		PAUSE;
+			dioblock_out->spi_clock = 1;//clock high
+			PAUSE;
 
-		if((data >> i) & 1){//if data bit set
-			dioblock_out->spi_clock = 0;//clock low
-			dioblock_out->spi_mosi = 1;//set data out high -- this doesn't have to change untill the next time the clock is pulled low
-			PAUSE;
-		}
-		else{
-			dioblock_out->spi_mosi = 0;
-			dioblock_out->spi_clock = 0;//clock low
-			PAUSE;
+			if((data[byte] >> i) & 1){//if data bit set (in current byte)
+				dioblock_out->spi_clock = 0;//clock low
+				dioblock_out->spi_mosi = 1;//set data out high -- this doesn't have to change untill the next time the clock is pulled low
+				PAUSE;
+			}
+			else{
+				dioblock_out->spi_mosi = 0;
+				dioblock_out->spi_clock = 0;//clock low
+				PAUSE;
+			}
 		}
 	}
 	//dioblock_out->spi_clock = 0;// the clock should be low
@@ -130,29 +143,34 @@ int BitbangSPI::senddata(uint_8 data) {
 }
 
 
-uint_8 BitbangSPI::getdata(){
-	int i =0;
+int BitbangSPI::spiGet(uint_8 * dataresp, int size){
+	int i = 0;
+	int byte = 0;
 
 	uint_8 data = 0;
 	dioblock_out->spi_ss = 0;//pull low to make compass send?
 	dioblock_out->spi_clock = 0;//clock low
 	PAUSE;
-	for(i=0;i<8;i++){
-		dioblock_out->spi_clock = 1;//clock high
-		PAUSE;
-		
-		//data.bits[i] = ~(*dio_in >> SPI_MISO) & 1;//check MISO line
-		data |= dioblock_in->spi_miso;
-		data <<= 1;//shifting correct?
 
-		dioblock_out->spi_clock = 0;//clock low
-		PAUSE;
+	for(byte = 0;byte < size; byte++){
+		for(i=0;i<8;i++){
+			dioblock_out->spi_clock = 1;//clock high
+			PAUSE;
+		
+			//data.bits[i] = ~(*dio_in >> SPI_MISO) & 1;//check MISO line
+			data |= dioblock_in->spi_miso;
+			data <<= 1;//shifting correct?
+
+			dioblock_out->spi_clock = 0;//clock low
+			PAUSE;
+		}
+	dataresp[byte] = data;
 	}
+	
 	//dioblock_out->spi_clock = 0;// the clock should be low
 	dioblock_out->spi_ss = 1;//will this make the compass not send untill slave line pulled low again?
-	return(data);
+	return(0);
 }
-
 
 /**dio_out ^= SPI_SS;//turn on slave select now?
 	*dio_out ^= SPI_CLK;
@@ -169,3 +187,4 @@ uint_8 BitbangSPI::getdata(){
 	}
 */
 
+#endif //BITBANG_SPI_H

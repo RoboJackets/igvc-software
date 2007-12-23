@@ -13,47 +13,49 @@ SetConfig, GetConfig, SaveConfig, StartCal, StopCal, need to check endianness of
 
 
 #include "compassTypes.h"
+#include "BitbangSPI.h"
 #include <cstdio>
 
 
 class CompassDriver {
 	private://do these need to be static?
-	//for future sanity checking	
-	int datalength;
-	int datapackcount;
-	uint_8 lastcommand;
+		//for future sanity checking	
+		int datalength;
+		int datapackcount;
+		uint_8 lastcommand;
 	
-	//where the mmap'ed spiregisters are
-	volatile unsigned int *ctrlreg0, *ctrlreg1, *datareg, *statusreg, *clockprescalereg, *interuptclearreg;//so member functions can accses the registers
+		//where the mmap'ed spiregisters are
+		//volatile unsigned int *ctrlreg0, *ctrlreg1, *datareg, *statusreg, *clockprescalereg, *interuptclearreg;//so member functions can accses the registers
 	
-	//spi functions
-	int spiinit();
-	int spioff();
-	spi_status_register spigetstatus();
-	int spiSend(uint_8 * data, int size);
-	int spiGet(uint_8 * dataresp, int size);
+		//spi functionss32_u8
+		//int spiinit();
+		//int spioff();
+		//spi_status_register spigetstatus();
+		//int spiSend(uint_8 * data, int size);
+		//int spiGet(uint_8 * dataresp, int size);
+		BitbangSPI spidriver;
 	
 	public:
-	CompassDriver(ConfigData configdata, DataRespType respdata);
-	~CompassDriver();
+		CompassDriver(ConfigData configdata, DataRespType respdata);
+		~CompassDriver();
 
-	int CompassSend(uint_8 * data, int size);
-	ModInfoResp GetModInfo(void);
-	compassData GetData(void);
-	int SetDataComponents(DataRespType datatypewanted);
-	int SetConfig(uint_8 config_id, uint_8 * convigval);//this needs to be able to accept bool, uint_8, and Float32, but i think it will take just bytes
-	uint_8 * GetConfig(uint_8 config_id);
-	int SaveConfig(void);
-	int StartCal(void);
-	int StopCal(void);
-	CalDataResp GetCalData(void);
-	int SetCalData(CalDataResp caldata);
-	int SetAllConfig(ConfigData configdata);
+		int CompassSend(uint_8 * data, int size);
+		ModInfoResp GetModInfo(void);
+		compassData GetData(void);
+		int SetDataComponents(DataRespType datatypewanted);
+		int SetConfig(uint_8 config_id, uint_8 * convigval);//this needs to be able to accept bool, uint_8, and Float32, but i think it will take just bytes
+		uint_8 * GetConfig(uint_8 config_id);
+		int SaveConfig(void);
+		int StartCal(void);
+		int StopCal(void);
+		CalDataResp GetCalData(void);
+		int SetCalData(CalDataResp caldata);
+		int SetAllConfig(ConfigData configdata);
 };
 
 
 //#include "spifunct.h"
-#include "spifunct.h.debug"
+//#include "spifunct.h.debug"
 int CompassDriver::CompassSend(uint_8 * data, int size) {
 
 	uint_8 senddata[size+2];
@@ -62,7 +64,7 @@ int CompassDriver::CompassSend(uint_8 * data, int size) {
 	for(int i=0;i<size; i++) {
 		senddata[i+1] = data[i];
 	}
-	CompassDriver::spiSend(senddata, size+2);//send data wrapped with sync_flag and terminator
+	spidriver.spiSend(senddata, size+2);//send data wrapped with sync_flag and terminator
 	return(0);
 }
 
@@ -92,21 +94,34 @@ CompassDriver::~CompassDriver() {
 }
 	
 ModInfoResp CompassDriver::GetModInfo(void) {
+	char_u8 tempchr;
 	uint_8 data = get_mod_info;
 	CompassSend(&data,1);
 	uint_8 resp[10];
-	CompassDriver::spiGet(resp, 10);
+	spidriver.spiGet(resp, 10);
 	ModInfoResp reply;
 		for(int i = 2;i<6;i++) {
-			reply.module_type[i-2] = uint_82char2(&resp[i]);
+			tempchr.u8 = resp[i];
+			reply.module_type[i-2] = tempchr.chr;
+			//reply.module_type[i-2] = uint_82char2(&resp[i]);
 		}
-			reply.module_type[4] = '\0';//probably usefull
+		reply.module_type[4] = '\0';//probably usefull
+		
 		for(int i = 6;i<10;i++) {
-			reply.firmware_version[i-6] = uint_82char2(&resp[i]);
+			tempchr.u8 = resp[i];
+			reply.firmware_version[i-6] = tempchr.chr;
+			//reply.firmware_version[i-6] = uint_82char2(&resp[i]);
 		}	       
 		reply.firmware_version[4] = '\0';
 	return(reply);
 }
+
+//code needs to be rewritten so this can be removed
+bool checkbitset(short int foo, int i){//from http://www.cs.umd.edu/class/spring2003/cmsc311/Notes/BitOp/bitI.html
+	short int mask = 1 << i;
+	return(mask & foo);
+}
+//
 
 int CompassDriver::SetDataComponents(DataRespType datatypewanted) {//input type of data to get, bitfield is named in compassTypes.h
 	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
@@ -152,40 +167,80 @@ compassData CompassDriver::GetData(void) {
 	CompassSend(&data,1);
 
 	uint_8 dataresp[datalength+4];//we will be getting datalength + sync + data_resp + count + term
-	CompassDriver::spiGet(dataresp, datalength+4);
+	spidriver.spiGet(dataresp, datalength+4);
 		
 
 		compassData datarespstruct;
 		int i = 3;//first data type packet is byte 4 (3 in array)
-	
+		
+
+		float_u8 tempflt;
+		s32_u8 temps32;
+
 		if(dataresp[2] == datapackcount) {//check for the number of bytes we expect to get
 			for(int j = 0;j<datapackcount;j++) {
 				if(dataresp[i] == XRaw) {
-					datarespstruct.XRaw = bytes2sint32LE(&dataresp[i+1]);
-				i += 5;//go forward 5 bytes to next data header
+					//datarespstruct.XRaw = bytes2sint32LE(&dataresp[i+1]);
+					temps32.u8[0] = dataresp[i+1];
+					temps32.u8[1] = dataresp[i+2];
+					temps32.u8[2] = dataresp[i+3];
+					temps32.u8[3] = dataresp[i+4];
+					datarespstruct.XRaw = temps32.s32;
+
+					i += 5;//go forward 5 bytes to next data header
 				}
 				if(dataresp[i] == YRaw) {
-					datarespstruct.YRaw = bytes2sint32LE(&dataresp[i+1]);
+					//datarespstruct.YRaw = bytes2sint32LE(&dataresp[i+1]);
+					temps32.u8[0] = dataresp[i+1];
+					temps32.u8[1] = dataresp[i+2];
+					temps32.u8[2] = dataresp[i+3];
+					temps32.u8[3] = dataresp[i+4];
+					datarespstruct.YRaw = temps32.s32;
 					i += 5;
 				}
 				if(dataresp[i] == XCal) {
-					datarespstruct.XCal = bytes2floatLE(&dataresp[i+1]);
+					//datarespstruct.XCal = bytes2floatLE(&dataresp[i+1]);
+					tempflt.u8[0] = dataresp[i+1];
+					tempflt.u8[1] = dataresp[i+2];
+					tempflt.u8[2] = dataresp[i+3];
+					tempflt.u8[3] = dataresp[i+4];
+					datarespstruct.XCal = tempflt.flt;
 					i += 5;
 				}
 				if(dataresp[i] == YCal) {
-					datarespstruct.YCal = bytes2floatLE(&dataresp[i+1]);
+					//datarespstruct.YCal = bytes2floatLE(&dataresp[i+1]);
+					tempflt.u8[0] = dataresp[i+1];
+					tempflt.u8[1] = dataresp[i+2];
+					tempflt.u8[2] = dataresp[i+3];
+					tempflt.u8[3] = dataresp[i+4];
+					datarespstruct.YCal = tempflt.flt;
 					i += 5;
 				}
 				if(dataresp[i] == Heading) {
-					datarespstruct.Heading = bytes2floatLE(&dataresp[i+1]);//degrees			
+					//datarespstruct.Heading = bytes2floatLE(&dataresp[i+1]);//degrees			
+					tempflt.u8[0] = dataresp[i+1];
+					tempflt.u8[1] = dataresp[i+2];
+					tempflt.u8[2] = dataresp[i+3];
+					tempflt.u8[3] = dataresp[i+4];
+					datarespstruct.Heading = tempflt.flt;
 					i += 5;
 				}
 				if(dataresp[i] == Magnitude) {
-					datarespstruct.Magnitude = bytes2floatLE(&dataresp[i+1]);
+					//datarespstruct.Magnitude = bytes2floatLE(&dataresp[i+1]);
+					tempflt.u8[0] = dataresp[i+1];
+					tempflt.u8[1] = dataresp[i+2];
+					tempflt.u8[2] = dataresp[i+3];
+					tempflt.u8[3] = dataresp[i+4];
+					datarespstruct.Magnitude = tempflt.flt;					
 					i +=5;
 				}
 				if(dataresp[i] == Temperature) {
-					datarespstruct.Temperature = bytes2floatLE(&dataresp[i+1]);//Celsius
+					//datarespstruct.Temperature = bytes2floatLE(&dataresp[i+1]);//Celsius
+					tempflt.u8[0] = dataresp[i+1];
+					tempflt.u8[1] = dataresp[i+2];
+					tempflt.u8[2] = dataresp[i+3];
+					tempflt.u8[3] = dataresp[i+4];
+					datarespstruct.Temperature = tempflt.flt;
 					i += 5;
 				}
 				if(dataresp[i] == Distortion) {
@@ -235,14 +290,14 @@ uint_8 * CompassDriver::GetConfig(uint_8 config_id) {
 
 	if (config_id == declination) {
 		uint_8 resp[8];
-		CompassDriver::spiGet(resp, 8);
+		spidriver.spiGet(resp, 8);
 
 		uint_8 out[4] = {resp[3],resp[4],resp[5],resp[6]};
-		return(out);//returns the second element, assuming it is a byte.
+		return(out);//returns the second element
 	}
 	else {
 		uint_8 resp[5];
-		CompassDriver::spiGet(resp, 5);
+		spidriver.spiGet(resp, 5);
 		return(&resp[4]);//returns the second element, assuming it is a byte.
 	}
 	
@@ -272,16 +327,49 @@ CalDataResp CompassDriver::GetCalData(void) {
 	CompassSend(&data,1);
 	CalDataResp reply;
 	uint_8 resp[28];//is this right? needs to be total length of cal data from device.  (4 x sint_32, 2 x float32) = 24 bytes, + count + sync + term + cal_data_resp
-	CompassDriver::spiGet(resp, 28);//getting array pf bytes from compass
+	spidriver.spiGet(resp, 28);//getting array pf bytes from compass
 
+
+	float_u8 tempflt;
+	s32_u8 temps32;
 	//sorting and converting bytes
 	//if(resp[2] == 24) {//can add this to see if header is correct
-		reply.XOffset = bytes2sint32LE(&resp[3]);//needs to pass pointer, so prefix with '&'
-		reply.YOffset = bytes2sint32LE(&resp[7]);
-		reply.XGain = bytes2sint32LE(&resp[11]);
-		reply.YGain = bytes2sint32LE(&resp[15]);
-		reply.phi = bytes2floatLE(&resp[19]);
-		reply.CalibrationMagnitude = bytes2floatLE(&resp[23]);
+		temps32.u8[0] = resp[3];
+		temps32.u8[1] = resp[4];
+		temps32.u8[2] = resp[5];
+		temps32.u8[3] = resp[6];
+		reply.XOffset = temps32.s32;
+		//reply.XOffset = bytes2sint32LE(&resp[3]);//needs to pass pointer, so prefix with '&'
+		temps32.u8[0] = resp[7];
+		temps32.u8[1] = resp[8];
+		temps32.u8[2] = resp[9];
+		temps32.u8[3] = resp[10];
+		reply.YOffset = temps32.s32;
+		//reply.YOffset = bytes2sint32LE(&resp[7]);
+		temps32.u8[0] = resp[11];
+		temps32.u8[1] = resp[12];
+		temps32.u8[2] = resp[13];
+		temps32.u8[3] = resp[14];
+		reply.XGain = temps32.s32;
+		//reply.XGain = bytes2sint32LE(&resp[11]);
+		temps32.u8[0] = resp[15];
+		temps32.u8[1] = resp[16];
+		temps32.u8[2] = resp[17];
+		temps32.u8[3] = resp[18];
+		reply.YGain = temps32.s32;
+		//reply.YGain = bytes2sint32LE(&resp[15]);
+		tempflt.u8[0] = resp[19];
+		tempflt.u8[1] = resp[20];
+		tempflt.u8[2] = resp[21];
+		tempflt.u8[3] = resp[22];
+		reply.phi = tempflt.flt;
+		//reply.phi = bytes2floatLE(&resp[19]);
+		tempflt.u8[0] = resp[23];
+		tempflt.u8[1] = resp[24];
+		tempflt.u8[2] = resp[25];
+		tempflt.u8[3] = resp[26];
+		reply.CalibrationMagnitude = tempflt.flt;
+		//reply.CalibrationMagnitude = bytes2floatLE(&resp[23]);
 	//}
 	
 	return(reply);//return structure
@@ -293,42 +381,45 @@ int CompassDriver::SetCalData(CalDataResp caldata) {
 	data[0] = set_cal_data;//command
 	data[1] = 24;//byte count
 
-	uint_8 * temp;//is it ok to have an array of indeterminate length? i get errors when i do uint_8 temp[4]
-	temp = sint32_bytesLE(caldata.XOffset);
-		data[2] = temp[0];
-		data[3] = temp[1];
-		data[4] = temp[2];
-		data[5] = temp[3];
+	//uint_8 * temp;//is it ok to have an array of indeterminate length? i get errors when i do uint_8 temp[4]
 	
-	temp = sint32_bytesLE(caldata.YOffset);
-		data[6] = temp[0];
-		data[7] = temp[1];
-		data[8] = temp[2];
-		data[9] = temp[3];
+	float_u8 tempflt;
+	s32_u8 temps32;
+	temps32.s32 = caldata.XOffset;
+		data[2] = temps32.u8[0];
+		data[3] = temps32.u8[1];
+		data[4] = temps32.u8[2];
+		data[5] = temps32.u8[3];
+	
+	temps32.s32 = caldata.YOffset;
+		data[6] = temps32.u8[0];
+		data[7] = temps32.u8[1];
+		data[8] = temps32.u8[2];
+		data[9] = temps32.u8[3];
 
-	temp = sint32_bytesLE(caldata.XGain);
-		data[10] = temp[0];
-		data[11] = temp[1];
-		data[12] = temp[2];
-		data[13] = temp[3];
+	temps32.s32 = caldata.XGain;
+		data[10] = temps32.u8[0];
+		data[11] = temps32.u8[1];
+		data[12] = temps32.u8[2];
+		data[13] = temps32.u8[3];
 
-	temp = sint32_bytesLE(caldata.YGain);
-		data[14] = temp[0];
-		data[15] = temp[1];
-		data[16] = temp[2];
-		data[17] = temp[3];
+	temps32.s32 = caldata.YGain;
+		data[14] = temps32.u8[0];
+		data[15] = temps32.u8[1];
+		data[16] = temps32.u8[2];
+		data[17] = temps32.u8[3];
 
-	temp = float2bytesLE(caldata.phi);
-		data[18] = temp[0];
-		data[19] = temp[1];
-		data[20] = temp[2];
-		data[21] = temp[3];
+	tempflt.flt = caldata.phi;
+		data[18] = tempflt.u8[0];
+		data[19] = tempflt.u8[1];
+		data[20] = tempflt.u8[2];
+		data[21] = tempflt.u8[3];
 
-	temp = float2bytesLE(caldata.CalibrationMagnitude);
-		data[22] = temp[0];
-		data[23] = temp[1];
-		data[24] = temp[2];
-		data[25] = temp[3];
+	tempflt.flt = caldata.CalibrationMagnitude;
+		data[22] = tempflt.u8[0];
+		data[23] = tempflt.u8[1];
+		data[24] = tempflt.u8[2];
+		data[25] = tempflt.u8[3];
 
 	CompassSend(data,26);
 	return(0);
