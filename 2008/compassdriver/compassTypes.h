@@ -68,6 +68,20 @@ enum Data_Cid {
 	CalStatus = 0x09
 };
 
+typedef union s32_u8{
+		sint_32 s32;
+		uint_8 u8[4];
+	};
+
+typedef	union float_u8{
+		float flt;
+		uint_8 u8[4];
+	};
+
+typedef union char_u8{
+		uint_8 u8;
+		char chr;
+	};
 
 struct ModInfoResp {
 	char module_type[5];//four chars read from compass + null char i add later

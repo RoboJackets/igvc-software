@@ -169,7 +169,7 @@ int CompassDriver::spiinit() {
 	//	
 	close(fd);//is this the right place?
 
-	//set config
+	//set config -- do we want this hardcoded or in external config?
 	spi_control_0 spicntr0 = {0};
 	spi_control_1 spicntr1 = {0};
 	spi_baud_rate spibaudrt = {0};
