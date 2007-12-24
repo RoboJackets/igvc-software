@@ -10,7 +10,8 @@
 #include<unistd.h>
 
 //debug opts
-#define PRINT_TO_SCREEN
+#define PRINT_TO_SCREEN_Rx
+#define PRINT_TO_SCREEN_Tx
 #define NO_SPI
 #define FAKE_RESP
 
@@ -38,13 +39,6 @@
 
 //this is defined in another header -- is that bad?
 typedef unsigned char uint_8;
-
-/*union u8_bits {
-	struct{
-		uint_8 bit:1;
-	};
-	uint_8 u8;
-};*/
 
 #define spi_ss pin1
 #define spi_frame pin6
@@ -113,6 +107,7 @@ BitbangSPI::BitbangSPI(){
 
 BitbangSPI::~BitbangSPI(){
 	//dio_out = 0;  // set to off -- do this different
+	printf("Bitbang spi destructor\n");
 #ifndef NO_SPI
 	close(fd_dev_mem);
 #endif
@@ -122,15 +117,14 @@ int BitbangSPI::spiSend(uint_8 * data, int size) {
 	
 	BitbangSPI::lastcommand = data[1];
 
-	int i = 0;
-	int byte = 0;
 #ifndef NO_SPI
+
 	//*dio_out = 0;//make sure all off?	
 	dioblock_out->spi_ss = 0;//pull low to make compass listen
 	dioblock_out->spi_clock = 0;//clock low
 	PAUSE;
-	for(byte = 0;byte < size; byte++){
-		for (i=0;i<8;i++){
+	for(int byte = 0;byte < size; byte++){
+		for (int i=0;i<8;i++){
 
 			dioblock_out->spi_clock = 1;//clock high
 			PAUSE;
@@ -150,7 +144,7 @@ int BitbangSPI::spiSend(uint_8 * data, int size) {
 	//dioblock_out->spi_clock = 0;// the clock should be low
 	dioblock_out->spi_ss = 1;//will this make the compass not send untill slave line pulled low again?
 #endif
-	#ifdef PRINT_TO_SCREEN
+	#ifdef PRINT_TO_SCREEN_Tx
 		printf("sent:\n");
 		for(int i=0; i<size;i++){
 			printf("\tpacket %i = %X\n",i,data[i]);
@@ -161,16 +155,15 @@ int BitbangSPI::spiSend(uint_8 * data, int size) {
 
 
 int BitbangSPI::spiGet(uint_8 * dataresp, int size){
-	int i = 0;
-	int byte = 0;
 #ifndef NO_SPI
 	uint_8 data = 0;
 	dioblock_out->spi_ss = 0;//pull low to make compass send?
 	dioblock_out->spi_clock = 0;//clock low
+	dioblock_out->spi_mosi = 0;//supposed to send 0x00 when revieving
 	PAUSE;
 
-	for(byte = 0;byte < size; byte++){
-		for(i=0;i<8;i++){
+	for(int byte = 0;byte < size; byte++){
+		for(int i=0;i<8;i++){
 			dioblock_out->spi_clock = 1;//clock high
 			PAUSE;
 		
@@ -183,16 +176,6 @@ int BitbangSPI::spiGet(uint_8 * dataresp, int size){
 		}
 	dataresp[byte] = data;
 	}
-#endif
-	#ifdef PRINT_TO_SCREEN
-		printf("received:\n");
-		for(int i=0; i<size;i++){
-			printf("\tpacket %i = %X\n",i,dataresp[i]);
-		}
-	#endif
-
-
-#ifndef NO_SPI
 	//dioblock_out->spi_clock = 0;// the clock should be low
 	dioblock_out->spi_ss = 1;//will this make the compass not send untill slave line pulled low again?
 #endif
@@ -204,28 +187,20 @@ int BitbangSPI::spiGet(uint_8 * dataresp, int size){
 		//uint_8 dataresp[11];
 		dataresp[0] = sync_flag;
 		dataresp[1] = mod_info_resp;
-		//dataresp[2] = char2uint_8('V');
 		tempchr.chr = 'V';
 		dataresp[2] = tempchr.u8;
-		//dataresp[3] = char2uint_8('2');
 		tempchr.chr = '2';
 		dataresp[3] = tempchr.u8;
-		//dataresp[4] = char2uint_8('X');
 		tempchr.chr = 'X';
 		dataresp[4] = tempchr.u8;
-		//dataresp[5] = char2uint_8('e');
 		tempchr.chr = 'e';
 		dataresp[5] = tempchr.u8;
-		//dataresp[6] = char2uint_8('V');
 		tempchr.chr = 'V';
 		dataresp[6] = tempchr.u8;
-		//dataresp[7] = char2uint_8('2');
 		tempchr.chr = '2';
 		dataresp[7] = tempchr.u8;
-		//dataresp[8] = char2uint_8('0');
 		tempchr.chr = '0';
 		dataresp[8] = tempchr.u8;
-		//dataresp[9] = char2uint_8('1');
 		tempchr.chr = '1';
 		dataresp[9] = tempchr.u8;
 		dataresp[10] = terminator;
@@ -249,6 +224,7 @@ int BitbangSPI::spiGet(uint_8 * dataresp, int size){
  		       dataresp[10] = temps32.u8[1];
  		       dataresp[11] = temps32.u8[2];
  		       dataresp[12] = temps32.u8[3];
+
 		dataresp[13] = terminator;
 	}
 
@@ -272,22 +248,15 @@ int BitbangSPI::spiGet(uint_8 * dataresp, int size){
 		
 	}
 #endif
+
+#ifdef PRINT_TO_SCREEN_Rx
+	printf("received:\n");
+	for(int i=0; i<size;i++){
+		printf("\tpacket %i = %X\n",i,dataresp[i]);
+	}
+#endif
+
 	return(0);
 }
-
-/**dio_out ^= SPI_SS;//turn on slave select now?
-	*dio_out ^= SPI_CLK;
-	for(i=0;1<8;1++) {
-		*dio_out ^= SPI_CLK;//clock low
-		PAUSE;
-		if(bitfield.bits(i){
-			*dio_out ^= SPI_MOSI;//out
-		}
-		//when do i turn off the output pin?
-		usleep(n);//sleep till clock off
-		*dio_out ^= SPI_CLK;//clock off?
-		usleep(n);//sleep till next cycle
-	}
-*/
 
 #endif //BITBANG_SPI_H

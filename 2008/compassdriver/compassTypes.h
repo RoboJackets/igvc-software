@@ -130,10 +130,7 @@ union DataRespType {
 
 };
 struct ConfigData {
-	union {
-		float flt;
-		uint_8 byte;
-	} declination;
+	float declination;
 	uint_8 truenorth;//supp to be bool
 	uint_8 calsamplefreq;
 	uint_8 samplefreq;
@@ -142,53 +139,4 @@ struct ConfigData {
 	uint_8 dampingsize;
 };
 
-//marked for removal -- no spi hardware
-/*
-union spi_control_0 {
-	struct {
-		unsigned char interupt_enable:1;//0 = disable
-		unsigned char sytem_enable:1;//0 = disable
-		unsigned char transmit_interrupt_enable:1;// 0 = disable
-		unsigned char mode_select:1;// 0 = slave; 1= master
-		unsigned char clock_polarity:1;//we want this = 0 (low = idle)
-		unsigned char clock_phase:1;//0 = sample on odd edge (which i think we do)
-		unsigned char slave_select_out_enable:1;//allow the slave select pin as output?? prob = 0
-		unsigned char LSB_first:1;// 0 = msb first, 1= lsb first
-	};
-	unsigned char byte;
-};
-union spi_control_1 {
-	struct {
-		unsigned char :3;//offest 3
-		unsigned char MODFEN:1;//0 = slave select is unused, 1 = slave select used w/ fault detection
-		unsigned char BIDROE:1;//enables output buffer
-		unsigned char :1;//offset 1
-		unsigned char SPISWAI:1;//stops clock signal while in wait mode
-		unsigned char SPC0:1;//allows bidirectional transfer on MOSI pin. 0 = both MOSI and MISO are used
-	};
-	unsigned char byte;
-};
-
-union spi_baud_rate {
-	struct {
-		unsigned char :1;
-		unsigned char baud_rate_preselect:3;
-		unsigned char :1;
-		unsigned char baud_rate_select:3;
-	};//see freescale paper for details
-	unsigned char byte;
-
-};
-
-union spi_status_register {
-	struct {
-		unsigned char interrupt_flag:1;//1 = new data is in data register.  clear bu reading this and then reading the data register
-		unsigned char :1;
-		unsigned char transmit_empty_interrupt_flag:1;//transmit data register empty. to clear read this =1, then write to the data register
-		unsigned char mode_fault_flag:1;//if modfen was set above, this will be oneif a fault was found
-		unsigned char :4;
-	};
-	unsigned char byte;
-};
-*/
 #endif //COMPASS_TYPES_H

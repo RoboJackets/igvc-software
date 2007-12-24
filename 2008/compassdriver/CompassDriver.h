@@ -36,13 +36,14 @@ class CompassDriver {
 		compassData GetData(void);
 		int SetDataComponents(DataRespType datatypewanted);
 		int SetConfig(uint_8 config_id, uint_8 * convigval);//this needs to be able to accept bool, uint_8, and Float32, but i think it will take just bytes
-		uint_8 * GetConfig(uint_8 config_id);
+		//uint_8 * GetConfig(uint_8 config_id);//removed in favor of GetAllConfig
 		int SaveConfig(void);
 		int StartCal(void);
 		int StopCal(void);
 		CalDataResp GetCalData(void);
 		int SetCalData(CalDataResp caldata);
 		int SetAllConfig(ConfigData configdata);
+		ConfigData GetAllConfig(uint_8 config_id);
 };
 
 
@@ -70,7 +71,10 @@ CompassDriver::CompassDriver(ConfigData configdata, DataRespType respdata) {
 }
 
 int CompassDriver::SetAllConfig(ConfigData configdata) {
-	SetConfig(declination, &configdata.declination.byte);
+	float_u8 tempflt;
+	tempflt.flt = configdata.declination;
+
+	SetConfig(declination, tempflt.u8);
 	SetConfig(true_north, &configdata.truenorth);
 	SetConfig(calsamplefreq, &configdata.calsamplefreq);
 	SetConfig(samplefreq, &configdata.samplefreq);
@@ -80,15 +84,17 @@ int CompassDriver::SetAllConfig(ConfigData configdata) {
 }
 
 CompassDriver::~CompassDriver() {
+	printf("CompassDriver destructor\n");
 	//CompassDriver::spioff();
+	//delete spidriver;
 }
 	
 ModInfoResp CompassDriver::GetModInfo(void) {
 	char_u8 tempchr;
 	uint_8 data = get_mod_info;
 	CompassSend(&data,1);
-	uint_8 resp[10];
-	spidriver.spiGet(resp, 10);
+	uint_8 resp[11];
+	spidriver.spiGet(resp, 11);
 	ModInfoResp reply;
 		for(int i = 2;i<6;i++) {
 			tempchr.u8 = resp[i];
@@ -168,7 +174,7 @@ compassData CompassDriver::GetData(void) {
 		s32_u8 temps32;
 
 		if(dataresp[2] == datapackcount) {//check for the number of bytes we expect to get
-			for(int j = 0;j<datapackcount;j++) {
+			for(int j = 0; j < datapackcount; j++) {
 				if(dataresp[i] == XRaw) {
 					//datarespstruct.XRaw = bytes2sint32LE(&dataresp[i+1]);
 					temps32.u8[0] = dataresp[i+1];
@@ -250,7 +256,7 @@ compassData CompassDriver::GetData(void) {
 }
 
 int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval) {
-	uint_8 * temp;
+	//uint_8 * temp;
 	
 	if (config_id == declination) {
 		uint_8 data[6];
@@ -272,6 +278,69 @@ int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval) {
 return(0);
 }
 
+ConfigData CompassDriver::GetAllConfig(uint_8 config_id) {
+
+	ConfigData rxconfigdata;
+	uint_8 data[2];
+	float_u8 tempflt;
+	for(uint_8 config_id = 1; config_id < 8; config_id++){
+		data[0] = get_config;
+		data[1] = config_id;
+		CompassSend(data, 2);
+
+		switch (config_id) {
+			case declination: {
+				uint_8 resp[8];
+				spidriver.spiGet(resp, 8);
+
+				tempflt.u8[0] = resp[3];
+				tempflt.u8[1] = resp[4];
+				tempflt.u8[2] = resp[5];
+				tempflt.u8[3] = resp[6];
+				rxconfigdata.declination = tempflt.flt;
+				break;
+			}
+			case true_north: {
+				uint_8 resp[5];
+				spidriver.spiGet(resp, 5);
+				rxconfigdata.truenorth = resp[4];
+				break;
+			}
+			case calsamplefreq: {
+				uint_8 resp[5];
+				spidriver.spiGet(resp, 5);
+				rxconfigdata.calsamplefreq = resp[4];
+				break;
+			}
+			case samplefreq: {
+				uint_8 resp[5];
+				spidriver.spiGet(resp, 5);
+				rxconfigdata.samplefreq = resp[4];
+				break;
+			}
+			case period: {
+				uint_8 resp[5];
+				spidriver.spiGet(resp, 5);
+				rxconfigdata.period = resp[4];
+				break;
+			}
+			case bigendian: {
+				uint_8 resp[5];
+				spidriver.spiGet(resp, 5);
+				rxconfigdata.bigendian = resp[4];
+				break;
+			}
+			case dampingsize: {
+				uint_8 resp[5];
+				spidriver.spiGet(resp, 5);
+				rxconfigdata.dampingsize = resp[4];
+				break;
+			}
+		}
+	}
+	return(rxconfigdata);
+}
+/*
 uint_8 * CompassDriver::GetConfig(uint_8 config_id) {
 	uint_8 data[2];
 	data[0] = get_config;
@@ -299,6 +368,7 @@ uint_8 * CompassDriver::GetConfig(uint_8 config_id) {
 	}
 	
 }
+*/
 
 int CompassDriver::SaveConfig(void) {
 	uint_8 data = save_config;
