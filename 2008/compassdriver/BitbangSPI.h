@@ -119,7 +119,7 @@ int BitbangSPI::spiSend(uint_8 * data, int size) {
 
 #ifndef NO_SPI
 
-	//*dio_out = 0;//make sure all off?	
+	//*dio_out = 0;//make sure all off?
 	dioblock_out->spi_ss = 0;//pull low to make compass listen
 	dioblock_out->spi_clock = 0;//clock low
 	PAUSE;
@@ -213,17 +213,17 @@ int BitbangSPI::spiGet(uint_8 * dataresp, int size){
        
 		dataresp[3] = XRaw;
 		temps32.s32 = 500;
- 		       dataresp[4] = temps32.u8[0];
- 		       dataresp[5] = temps32.u8[1];
- 		       dataresp[6] = temps32.u8[2];
- 		       dataresp[7] = temps32.u8[3];
+		       dataresp[4] = temps32.u8[0];
+		       dataresp[5] = temps32.u8[1];
+		       dataresp[6] = temps32.u8[2];
+		       dataresp[7] = temps32.u8[3];
 	
 		dataresp[8] = YRaw;
 		temps32.s32 = 500;
- 		       dataresp[9] = temps32.u8[0];
- 		       dataresp[10] = temps32.u8[1];
- 		       dataresp[11] = temps32.u8[2];
- 		       dataresp[12] = temps32.u8[3];
+		       dataresp[9] = temps32.u8[0];
+		       dataresp[10] = temps32.u8[1];
+		       dataresp[11] = temps32.u8[2];
+		       dataresp[12] = temps32.u8[3];
 
 		dataresp[13] = terminator;
 	}
