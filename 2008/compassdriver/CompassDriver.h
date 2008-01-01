@@ -1,13 +1,10 @@
 #ifndef COMPASS_DRIVER_H
 #define COMPASS_DRIVER_H
 
-/*typedef unsigned char uint_8;
-typedef signed long int sint_32;//defining this like this becuase i'm not sure if a long int is 4 bytes or not, so can change later*/
-//#include <syscompassTypes.h>
 /*no errors reporting from anything yet, need to decide big of little endian,
  set in config and driver -- right now assuming little endian*/
 /*functions known incomplete: CompassDriver, ~CompassDriver, CompassDriver::spiSend, CompassDriver::spiGet, GetModInfo, GetData, SetDataComponents,
-SetConfig, GetConfig, SaveConfig, StartCal, StopCal, need to check endianness of float2bytes and bytes2foat*/
+SetConfig, GetConfig, SaveConfig, StartCal, StopCal, need to check if endianness matters*/
 
 //setcaldata, getcaldata, getdata,setconfig
 
@@ -16,15 +13,18 @@ SetConfig, GetConfig, SaveConfig, StartCal, StopCal, need to check endianness of
 #include "BitbangSPI.h"
 #include <cstdio>
 
+//debug opts -- not set yet
+//#define DEBUG_MESG
+
 class CompassDriver {
 	private://do these need to be static?
 
-		//for future sanity checking	
+		//for future sanity checking
 		int datalength;
 		int datapackcount;
 		//uint_8 lastcommand;//moved to spidriver
 	
-		//spi driver instance
+		//spi driver instance -- should dynamic allocation be done instead, like in the player driver?
 		BitbangSPI spidriver;
 	
 	public:
@@ -99,14 +99,12 @@ ModInfoResp CompassDriver::GetModInfo(void) {
 		for(int i = 2;i<6;i++) {
 			tempchr.u8 = resp[i];
 			reply.module_type[i-2] = tempchr.chr;
-			//reply.module_type[i-2] = uint_82char2(&resp[i]);
 		}
 		reply.module_type[4] = '\0';//probably usefull
 		
 		for(int i = 6;i<10;i++) {
 			tempchr.u8 = resp[i];
 			reply.firmware_version[i-6] = tempchr.chr;
-			//reply.firmware_version[i-6] = uint_82char2(&resp[i]);
 		}	       
 		reply.firmware_version[4] = '\0';
 	return(reply);
@@ -166,97 +164,110 @@ compassData CompassDriver::GetData(void) {
 	spidriver.spiGet(dataresp, datalength+4);
 		
 
-		compassData datarespstruct;
-		int i = 3;//first data type packet is byte 4 (3 in array)
-		
+	compassData datarespstruct;
+	int i = 3;//first data type packet is byte 4 (3 in array)
 
-		float_u8 tempflt;
-		s32_u8 temps32;
+	
+	float_u8 tempflt;
+	s32_u8 temps32;
 
-		if(dataresp[2] == datapackcount) {//check for the number of bytes we expect to get
-			for(int j = 0; j < datapackcount; j++) {
-				if(dataresp[i] == XRaw) {
-					//datarespstruct.XRaw = bytes2sint32LE(&dataresp[i+1]);
+	if(dataresp[2] == datapackcount) {//check for the number of bytes we expect to get
+		for(int j = 0; j < datapackcount; j++) {
+
+//could do a switch/case instead -- better?				
+/*			switch(dataresp[i]){
+				case XRaw:{
 					temps32.u8[0] = dataresp[i+1];
 					temps32.u8[1] = dataresp[i+2];
 					temps32.u8[2] = dataresp[i+3];
 					temps32.u8[3] = dataresp[i+4];
 					datarespstruct.XRaw = temps32.s32;
-
 					i += 5;//go forward 5 bytes to next data header
-				}
-				if(dataresp[i] == YRaw) {
-					//datarespstruct.YRaw = bytes2sint32LE(&dataresp[i+1]);
-					temps32.u8[0] = dataresp[i+1];
-					temps32.u8[1] = dataresp[i+2];
-					temps32.u8[2] = dataresp[i+3];
-					temps32.u8[3] = dataresp[i+4];
-					datarespstruct.YRaw = temps32.s32;
-					i += 5;
-				}
-				if(dataresp[i] == XCal) {
-					//datarespstruct.XCal = bytes2floatLE(&dataresp[i+1]);
-					tempflt.u8[0] = dataresp[i+1];
-					tempflt.u8[1] = dataresp[i+2];
-					tempflt.u8[2] = dataresp[i+3];
-					tempflt.u8[3] = dataresp[i+4];
-					datarespstruct.XCal = tempflt.flt;
-					i += 5;
-				}
-				if(dataresp[i] == YCal) {
-					//datarespstruct.YCal = bytes2floatLE(&dataresp[i+1]);
-					tempflt.u8[0] = dataresp[i+1];
-					tempflt.u8[1] = dataresp[i+2];
-					tempflt.u8[2] = dataresp[i+3];
-					tempflt.u8[3] = dataresp[i+4];
-					datarespstruct.YCal = tempflt.flt;
-					i += 5;
-				}
-				if(dataresp[i] == Heading) {
-					//datarespstruct.Heading = bytes2floatLE(&dataresp[i+1]);//degrees			
-					tempflt.u8[0] = dataresp[i+1];
-					tempflt.u8[1] = dataresp[i+2];
-					tempflt.u8[2] = dataresp[i+3];
-					tempflt.u8[3] = dataresp[i+4];
-					datarespstruct.Heading = tempflt.flt;
-					i += 5;
-				}
-				if(dataresp[i] == Magnitude) {
-					//datarespstruct.Magnitude = bytes2floatLE(&dataresp[i+1]);
-					tempflt.u8[0] = dataresp[i+1];
-					tempflt.u8[1] = dataresp[i+2];
-					tempflt.u8[2] = dataresp[i+3];
-					tempflt.u8[3] = dataresp[i+4];
-					datarespstruct.Magnitude = tempflt.flt;					
-					i +=5;
-				}
-				if(dataresp[i] == Temperature) {
-					//datarespstruct.Temperature = bytes2floatLE(&dataresp[i+1]);//Celsius
-					tempflt.u8[0] = dataresp[i+1];
-					tempflt.u8[1] = dataresp[i+2];
-					tempflt.u8[2] = dataresp[i+3];
-					tempflt.u8[3] = dataresp[i+4];
-					datarespstruct.Temperature = tempflt.flt;
-					i += 5;
-				}
-				if(dataresp[i] == Distortion) {
-					datarespstruct.Distortion = dataresp[i+1];//says bool, but guessing send bytes at a time
-					i += 2;
-				}
-				if(dataresp[i] == CalStatus) {
-					datarespstruct.CalStatus = dataresp[i+1];
-					i += 2;
+					break;
 				}
 			}
-		//else {//we didn't recive the right number of bytes
-			//handle the error
-		//}
-	return(datarespstruct);
-	}
+*/
+			if(dataresp[i] == XRaw) {
+				temps32.u8[0] = dataresp[i+1];
+				temps32.u8[1] = dataresp[i+2];
+				temps32.u8[2] = dataresp[i+3];
+				temps32.u8[3] = dataresp[i+4];
+				datarespstruct.XRaw = temps32.s32;
+				i += 5;//go forward 5 bytes to next data header
+			}
+			else if(dataresp[i] == YRaw) {
+				temps32.u8[0] = dataresp[i+1];
+				temps32.u8[1] = dataresp[i+2];
+				temps32.u8[2] = dataresp[i+3];
+				temps32.u8[3] = dataresp[i+4];
+				datarespstruct.YRaw = temps32.s32;
+				i += 5;
+			}
+			else if(dataresp[i] == XCal) {
+				tempflt.u8[0] = dataresp[i+1];
+				tempflt.u8[1] = dataresp[i+2];
+				tempflt.u8[2] = dataresp[i+3];
+				tempflt.u8[3] = dataresp[i+4];
+				datarespstruct.XCal = tempflt.flt;
+				i += 5;
+			}
+			else if(dataresp[i] == YCal) {
+				tempflt.u8[0] = dataresp[i+1];
+				tempflt.u8[1] = dataresp[i+2];
+				tempflt.u8[2] = dataresp[i+3];
+				tempflt.u8[3] = dataresp[i+4];
+				datarespstruct.YCal = tempflt.flt;
+				i += 5;
+			}
+			else if(dataresp[i] == Heading) {
+				tempflt.u8[0] = dataresp[i+1];
+				tempflt.u8[1] = dataresp[i+2];
+				tempflt.u8[2] = dataresp[i+3];
+				tempflt.u8[3] = dataresp[i+4];
+				datarespstruct.Heading = tempflt.flt;
+				i += 5;
+			}
+			else if(dataresp[i] == Magnitude) {
+				tempflt.u8[0] = dataresp[i+1];
+				tempflt.u8[1] = dataresp[i+2];
+				tempflt.u8[2] = dataresp[i+3];
+				tempflt.u8[3] = dataresp[i+4];
+				datarespstruct.Magnitude = tempflt.flt;
+				i +=5;
+			}
+			else if(dataresp[i] == Temperature) {
+				tempflt.u8[0] = dataresp[i+1];
+				tempflt.u8[1] = dataresp[i+2];
+				tempflt.u8[2] = dataresp[i+3];
+				tempflt.u8[3] = dataresp[i+4];
+				datarespstruct.Temperature = tempflt.flt;
+				i += 5;
+			}
+			else if(dataresp[i] == Distortion) {
+				datarespstruct.Distortion = dataresp[i+1];//says bool, but guessing send bytes at a time
+				i += 2;
+			}
+			else if(dataresp[i] == CalStatus) {
+				datarespstruct.CalStatus = dataresp[i+1];
+				i += 2;
+			}
+			//else {
+				//handle the error somehow (data type bit didn't match)
+				//printf("data recieve error");
+				//return(error);
+			//}
+		}//end for loop
+
+		return(datarespstruct);
+
+	}//end if block
+	//else {//we didn't recieve the right number of bytes
+		//handle the error
+		//return(error);
+	//}
 }
 
 int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval) {
-	//uint_8 * temp;
 	
 	if (config_id == declination) {
 		uint_8 data[6];
@@ -275,7 +286,8 @@ int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval) {
 		data[3] = configval[0];
 		CompassSend(data,3);
 	}
-return(0);
+
+	return(0);
 }
 
 ConfigData CompassDriver::GetAllConfig(uint_8 config_id) {
@@ -406,37 +418,41 @@ CalDataResp CompassDriver::GetCalData(void) {
 		temps32.u8[2] = resp[5];
 		temps32.u8[3] = resp[6];
 		reply.XOffset = temps32.s32;
-		//reply.XOffset = bytes2sint32LE(&resp[3]);//needs to pass pointer, so prefix with '&'
+
 		temps32.u8[0] = resp[7];
 		temps32.u8[1] = resp[8];
 		temps32.u8[2] = resp[9];
 		temps32.u8[3] = resp[10];
 		reply.YOffset = temps32.s32;
-		//reply.YOffset = bytes2sint32LE(&resp[7]);
+
 		temps32.u8[0] = resp[11];
 		temps32.u8[1] = resp[12];
 		temps32.u8[2] = resp[13];
 		temps32.u8[3] = resp[14];
 		reply.XGain = temps32.s32;
-		//reply.XGain = bytes2sint32LE(&resp[11]);
+
 		temps32.u8[0] = resp[15];
 		temps32.u8[1] = resp[16];
 		temps32.u8[2] = resp[17];
 		temps32.u8[3] = resp[18];
 		reply.YGain = temps32.s32;
-		//reply.YGain = bytes2sint32LE(&resp[15]);
+
 		tempflt.u8[0] = resp[19];
 		tempflt.u8[1] = resp[20];
 		tempflt.u8[2] = resp[21];
 		tempflt.u8[3] = resp[22];
 		reply.phi = tempflt.flt;
-		//reply.phi = bytes2floatLE(&resp[19]);
+
 		tempflt.u8[0] = resp[23];
 		tempflt.u8[1] = resp[24];
 		tempflt.u8[2] = resp[25];
 		tempflt.u8[3] = resp[26];
 		reply.CalibrationMagnitude = tempflt.flt;
-		//reply.CalibrationMagnitude = bytes2floatLE(&resp[23]);
+
+	//}
+	//else{
+		//handle error
+		//return(error);
 	//}
 	
 	return(reply);//return structure
@@ -448,8 +464,6 @@ int CompassDriver::SetCalData(CalDataResp caldata) {
 	data[0] = set_cal_data;//command
 	data[1] = 24;//byte count
 
-	//uint_8 * temp;//is it ok to have an array of indeterminate length? i get errors when i do uint_8 temp[4]
-	
 	float_u8 tempflt;
 	s32_u8 temps32;
 	temps32.s32 = caldata.XOffset;
