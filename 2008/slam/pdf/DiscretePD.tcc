@@ -8,7 +8,7 @@ DiscretePD::DiscretePD(DenseVector<Array<Probability> prob) :
 	
 }
 
-DiscretePD::DiscretePD(E minVal, E maxVal, DenseVector<Array<Probability> prob) :
+DiscretePD::DiscretePD(E minVal, E maxVal, DenseVector<Array<E> prob) :
 	bins(prob) {
 	
 }
@@ -27,18 +27,3 @@ Probability DiscretePD::operator() (E value) {
 	return();
 }
 
-
-#if 0
-DiscretePD::void convert(DEVector values, bool scaleValues = true) {
-
-	for(int i = 0; i < values.length; i++) {
-		++bins( floor(values(i) / stride) );
-	}
-
-	if(scaleValues) {
-		for(int i = 0; i < bins.length; i++) {
-			dist(i) /= (double)values.length;
-		}
-	}
-}
-#endif

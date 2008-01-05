@@ -14,15 +14,15 @@ template<typename E> typename NormalPD<E>::CovMatrix NormalPD<E>::var(void) {
 }
 #if 0
 template<typename E> DenseVector<Array<Probability> > NormalPD<E>::pdf(DenseVector<Array<E> > value) {
-	return( );
+	return();
 }
 
 template<typename E> DenseVector<Array<Probability> > NormalPD<E>::cdf(DenseVector<Array<E> > value) {
-	return(  );
+	return();
 }
 
 template<typename E> DenseVector<Array<E> > NormalPD<E>::icdf(DenseVector<Array<Probability> > prob) {
-	return(  );
+	return();
 }
 
 //single dimentional only

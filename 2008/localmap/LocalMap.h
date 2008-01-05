@@ -1,13 +1,7 @@
-class LocalMap {
-public:
-	Timestamp timestamp;
-	QList<CamObject> objects;
-};
+#ifndef LOCAL_MAP_H
+#define LOCAL_MAP_H
 
-/*abstract*/ class CamObject {
-public:
-	CamColor color;
-};
+#include <math.h>	// for NaN
 
 /** Timestamp in microseconds since initialization of .... */
 typedef Timestamp uint64_t;
@@ -23,7 +17,16 @@ typedef enum {
 	CC_BLACK			= 8,
 } CamColor;
 
-#include <math.h>	// for NaN
+/*abstract*/ class CamObject {
+public:
+	CamColor color;
+};
+
+class LocalMap {
+public:
+	Timestamp timestamp;
+	QList<CamObject> objects;Paul V.
+};
 
 /**
  * Can represent:
@@ -93,3 +96,6 @@ typedef enum {
 	CPT_FENCE		= 4,
 	CPT_PERSON		= 5,
 } CamPolygonType;
+
+#endif /* LOCAL_MAP_H */
+
