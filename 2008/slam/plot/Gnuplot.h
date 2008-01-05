@@ -27,11 +27,24 @@ class Gnuplot {
 public:
 	Gnuplot();
 
+
+
 	template<typename T>
 	void plot(const DenseVector<Array<T> > &y);
 
 	template<typename T>
-	void plot(int length, const T *x, const T *y = 0, const T *z = 0);
+	void plot(const DenseVector<Array<T> > &x, const DenseVector<Array<T> > &y);
+
+	template<typename T>
+	void plot(const DenseVector<Array<T> > &x, const DenseVector<Array<T> > &y, const DenseVector<Array<T> > &z);
+
+
+
+	template<typename T>
+	void plot(int length, const T *x, const T *y = 0);
+
+	template<typename T>
+	void mesh(int length, const T *x, const T *y, const T *z);
 
 	//void replot(const DenseVector<Array<double> > &y); // appends stuff to the last plot
 

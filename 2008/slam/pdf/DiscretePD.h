@@ -1,19 +1,16 @@
 #ifndef DISCRETE_H
 #define DISCRETE_H
 
-template<typename E>
-class DiscreteBase : PDF {
-	
-}
-
 //static getDiscretePDfromPDF
 
 /** Repesents a single- or multi-dimentional discrete probablity density function.
  *	It can handle discrete variables or sampled continous variables.
  *	It can handle a uniform or variable sampling period.
  */
+
+// single dim only
 template<typename E>
-class DiscretePD : PDF {
+class DiscretePD {
 public:
 	typedef DenseVector<Array<E> > DEVector;
 	typedef DenseVector<Array<DEVector> > DDEVector;
@@ -23,9 +20,9 @@ public:
 
 	DiscretePD(DenseVector<Array<Probability> prob);
 
-	DiscretePD(E minVal, E maxVal, DenseVector<Array<Probability> prob);
+	DiscretePD(E minVal, E maxVal, DenseVector<Array<E> value);
 
-	DiscretePD(DEVector ranges, inclusivity = all, DenseVector<Array<Probability> prob);
+	DiscretePD(DEVector ranges, DenseVector<Array<E> value);
 
 	/* Access a value */
 	Probability operator() (E value); //Probability operator() (DEVector value);
@@ -33,19 +30,13 @@ public:
 	/* Assign values */
 	//operator= (Probability val, bool rescale = true)
 
-	/* Convert  */
-	//convert(DEVector values, bool scaleValues = true);
-	//convert(DenseVector<Array<int> > size, DDEVector values);
-
 	/* Change the size */
 	//resize(int newSize);
 
 private:
-	DenseVector<Array<Probability> > bins;
-	E stride;
-	double scale;
 
-	void rescale();
+
+	//void rescale();
 }
 
 #include "Discrete.tcc"

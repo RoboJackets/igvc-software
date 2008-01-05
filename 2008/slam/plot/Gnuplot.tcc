@@ -17,10 +17,25 @@ void Gnuplot::plot(const DenseVector<Array<T> > &y) {
 	plot<T>(y.length(), y.data());
 	return;
 }
+
+template<typename T>
+void Gnuplot::plot(const DenseVector<Array<T> > &x, const DenseVector<Array<T> > &y) {
+	assert(x.length() == y.length());
+	plot<T>(x.length(), x.data(), y.data());
+	return;
+}
+
+template<typename T>
+void Gnuplot::plot(const DenseVector<Array<T> > &x, const DenseVector<Array<T> > &y, const DenseVector<Array<T> > &z) {
+	assert(x.length() == y.length());
+	assert(x.length() == z.length());
+	mesh<T>(x.length(), x.data(), y.data(), z.data());
+	return;
+}
 //////////////////////
 
 template<typename T>
-void Gnuplot::plot(int length, const T *x, const T *y, const T *z) {
+void Gnuplot::plot(int length, const T *x, const T *y) {
 	if( Hold == ON ) {
 		if(subplotingOn) {
 			; // set the orgin and size
@@ -34,24 +49,51 @@ void Gnuplot::plot(int length, const T *x, const T *y, const T *z) {
 	}
 	plotCommand << "plot '-' w linespoints" << endl; // << ranges << options;
 
-	assert(x);
 	assert(length > 0);
+	assert(x);
 
 	if( y ) {
-		if( z ) {
-			for(int i = 0; i < length; i++) {
-				plotCommand << x[i] << "\t" << y[i] << "\t" << z[i] << endl;
-			}
-		} else {
-			for(int i = 0; i < length; i++) {
-				plotCommand << x[i] << "\t" << y[i] << endl;
-			}
+		for(int i = 0; i < length; i++) {
+			plotCommand << x[i] << "\t" << y[i] << endl;
 		}
 	} else {
-		for( int i = 0; i < length; i++) {
+		for(int i = 0; i < length; i++) {
 			plotCommand << x[i] << endl;
 		}
 	}
+	plotCommand << "e" << endl;
+	//cout << plotCommand.str() << endl;
+	execute(setCommand);
+	setCommand.str("");
+	execute(plotCommand);
+
+	return;
+}
+
+template<typename T>
+void Gnuplot::mesh(int length, const T *x, const T *y, const T *z) {
+	if( Hold == ON ) {
+		if(subplotingOn) {
+			; // set the orgin and size
+		}
+	} else {
+		plotCommand.str("");
+		setCommand << "reset;" << GNUPLOT_DEFAULT_SET << endl;
+		if(subplotingOn) {
+			//setCommand << << endl; // redo the set orgin and set size
+		}
+	}
+	plotCommand << "splot '-' w linespoints" << endl; // << ranges << options;
+
+	assert(length > 0);
+	assert(x);
+	assert(y);
+	assert(z);
+
+	for(int i = 0; i < length; i++) {
+		plotCommand << x[i] << "\t" << y[i] << "\t" << z[i] << endl;
+	}
+
 	plotCommand << "e" << endl;
 	//cout << plotCommand.str() << endl;
 	execute(setCommand);
