@@ -24,9 +24,9 @@ testcaldata.CalibrationMagnitude = 0xFF;
 
 //testdriver.GetModInfo();//works
 
-DataRespType dataformat = {0};//need to declare equal to zero
-dataformat.XRaw = 1;
-dataformat.YRaw = 1;
+DataTypeReq dataformat = {0};//need to declare equal to zero
+dataformat.xraw = 1;
+dataformat.yraw = 1;
 //dataformat.Distortion = 1;
 //
 

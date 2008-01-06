@@ -110,9 +110,10 @@ struct compassData {//all posible types the compass can sends. when asked Distor
 	uint_8 CalStatus;
 };
 
-const uint_8 dataresponsetype[9] = {XRaw, YRaw, XCal, YCal, Heading, Magnitude, Temperature, Distortion, CalStatus};//used so for loop can scroll through union
-const uint_8 dataresponsetypelength[9] = {4, 4, 4, 4, 4, 4, 4, 1, 1};//number of bytes data is
+//const uint_8 dataresponsetype[9] = {XRaw, YRaw, XCal, YCal, Heading, Magnitude, Temperature, Distortion, CalStatus};//used so for loop can scroll through union
+//const uint_8 dataresponsetypelength[9] = {4, 4, 4, 4, 4, 4, 4, 1, 1};//number of bytes data is
 
+/*
 union DataRespType {
 	struct {//is there a way to acces this like an array, ie datarespvar.bits[2]?
 		short int XRaw:1;
@@ -129,6 +130,8 @@ union DataRespType {
 	short int sint;
 
 };
+*/
+
 struct ConfigData {
 	float declination;
 	uint_8 truenorth;//supp to be bool
@@ -137,6 +140,19 @@ struct ConfigData {
 	uint_8 period;
 	uint_8 bigendian;//supp to be bool
 	uint_8 dampingsize;
+};
+
+struct DataTypeReq {
+		unsigned short int xraw:1;
+		unsigned short int yraw:1;
+		unsigned short int xcal:1;
+		unsigned short int ycal:1;
+		unsigned short int heading:1;
+		unsigned short int magnitude:1;
+		unsigned short int temperature:1;
+		unsigned short int distortion:1;
+		unsigned short int calstatus:1;
+		unsigned short int :7;
 };
 
 #endif //COMPASS_TYPES_H
