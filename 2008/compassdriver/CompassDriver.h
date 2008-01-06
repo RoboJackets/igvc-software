@@ -28,13 +28,15 @@ class CompassDriver {
 		BitbangSPI spidriver;
 	
 	public:
-		CompassDriver(ConfigData configdata, DataRespType respdata);
+		//CompassDriver(ConfigData configdata, DataRespType respdata);
+		CompassDriver(ConfigData configdata, DataTypeReq respdata);
 		~CompassDriver();
 
 		int CompassSend(uint_8 * data, int size);
 		ModInfoResp GetModInfo(void);
 		compassData GetData(void);
-		int SetDataComponents(DataRespType datatypewanted);
+		//int SetDataComponents(DataRespType datatypewanted);
+		int SetDataComponents(DataTypeReq datatypewanted);
 		int SetConfig(uint_8 config_id, uint_8 * convigval);//this needs to be able to accept bool, uint_8, and Float32, but i think it will take just bytes
 		//uint_8 * GetConfig(uint_8 config_id);//removed in favor of GetAllConfig
 		int SaveConfig(void);
@@ -59,7 +61,7 @@ int CompassDriver::CompassSend(uint_8 * data, int size) {
 	return(0);
 }
 
-CompassDriver::CompassDriver(ConfigData configdata, DataRespType respdata) {
+CompassDriver::CompassDriver(ConfigData configdata, DataTypeReq respdata) {
 	//CompassDriver::spiinit();
 	printf("seting config -- constructor\n");
 	SetAllConfig(configdata);
@@ -110,13 +112,84 @@ ModInfoResp CompassDriver::GetModInfo(void) {
 	return(reply);
 }
 
+/*
 //code needs to be rewritten so this can be removed
 bool checkbitset(short int foo, int i){//from http://www.cs.umd.edu/class/spring2003/cmsc311/Notes/BitOp/bitI.html
 	short int mask = 1 << i;
 	return(mask & foo);
 }
 //
+*/
 
+int CompassDriver::SetDataComponents(DataTypeReq datatypewanted) {
+	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
+	
+	CompassDriver::datapackcount = 0;
+	CompassDriver::datalength = 0;
+	int j = 2;
+
+	if(datatypewanted.xraw){
+		data[j] = XRaw;
+		j++;
+		datapackcount += 1;//number of data types expected
+		datalength += (4 + 1);//length of data + byte label
+	}
+	if(datatypewanted.yraw){
+		data[j] = YRaw;
+		j++;
+		datapackcount += 1;
+		datalength += (4 + 1);
+	}
+	if(datatypewanted.xcal){
+		data[j] = XCal;
+		j++;
+		datapackcount += 1;
+		datalength += (4 + 1);
+	}
+	if(datatypewanted.ycal){
+		data[j] = YCal;
+		j++;
+		datapackcount += 1;
+		datalength += (4 + 1);
+	}
+	if(datatypewanted.heading){
+		data[j] = Heading;
+		j++;
+		datapackcount += 1;
+		datalength += (4 + 1);
+	}
+	if(datatypewanted.magnitude){
+		data[j] = Magnitude;
+		j++;
+		datapackcount += 1;
+		datalength += (4 + 1);
+	}
+	if(datatypewanted.temperature){
+		data[j] = Temperature;
+		j++;
+		datapackcount += 1;
+		datalength += (4 + 1);
+	}
+	if(datatypewanted.distortion){
+		data[j] = Distortion;
+		j++;
+		datapackcount += 1;
+		datalength += (1 + 1);
+	}
+	if(datatypewanted.calstatus){
+		data[j] = CalStatus;
+		j++;
+		datapackcount += 1;
+		datalength += (1 + 1);
+	}
+
+	data[0] = set_data_components;//command to set data to recive
+	data[1] = datapackcount;//count of data we expect
+	
+	CompassSend(data, j);
+	return(0);
+}
+/*
 int CompassDriver::SetDataComponents(DataRespType datatypewanted) {//input type of data to get, bitfield is named in compassTypes.h
 	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
 	
@@ -129,15 +202,6 @@ int CompassDriver::SetDataComponents(DataRespType datatypewanted) {//input type 
 	datalength = 0;
 	int j = 2;
 
-	/*for(int i=0;i<10;i++) {//can't something like this work?
-		if (datatypewanted.bits[i]) {
-			data[j] = dataresponsetype[i];
-			j++;
-			datapackcount +=1;//used te check getdata got correct num of packs later
-			datalength += (dataresponsetypelength[i] + 1);//datalength = length of package + 1 header per package
-		}
-
-	}*/
 
 	for(int i=0;i<10;i++) {
 		if (checkbitset(datatypewanted.sint,i)) {
@@ -154,7 +218,7 @@ int CompassDriver::SetDataComponents(DataRespType datatypewanted) {//input type 
 	CompassSend(data, j);
 	return(0);
 }
-
+*/
 
 compassData CompassDriver::GetData(void) {
 	uint_8 data = get_data;
@@ -251,20 +315,20 @@ compassData CompassDriver::GetData(void) {
 				datarespstruct.CalStatus = dataresp[i+1];
 				i += 2;
 			}
-			//else {
+			else {
 				//handle the error somehow (data type bit didn't match)
-				//printf("data recieve error");
-				//return(error);
-			//}
+				printf("unknown data type sent\n");
+				return(datarespstruct);
+			}
 		}//end for loop
 
 		return(datarespstruct);
 
 	}//end if block
-	//else {//we didn't recieve the right number of bytes
-		//handle the error
-		//return(error);
-	//}
+	else {//we didn't recieve the right number of bytes
+		printf("wrong number of bytes sent");
+		return(datarespstruct);
+	}
 }
 
 int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval) {

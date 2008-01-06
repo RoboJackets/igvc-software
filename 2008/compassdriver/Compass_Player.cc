@@ -47,25 +47,25 @@ Compass_Player::Compass_Player(ConfigFile* cf, int section): Driver(
 	configdata.bigendian = cf->ReadByte(section, "bigendian", DEFAULT_BIG_ENDIAN);
 	configdata.dampingsize= cf->ReadByte(section,"dampingsize", DEFAULT_DAMPING_SIZE);*/
 
-	configdata.declination.flt  = cf->ReadFloat(section, "declination", DEFAULT_DECLINATION);
-	configdata.truenorth = (uint_8)cf->ReadInt(section, "truenorth", DEFAULT_TRUE_NORTH);//cast form int to uint_8
-	configdata.calsamplefreq = (uint_8)cf->ReadInt(section,"calsamplefreq", DEFAULT_CALSAMPLE_FREQ);
-	configdata.samplefreq = (uint_8)cf->ReadInt(section,"samplefreq", DEFAULT_SAMPLE_FREQ);
-	configdata.period = (uint_8)cf->ReadInt(section,"period", DEFAULT_PERIOD);
-	configdata.bigendian = (uint_8)cf->ReadInt(section, "bigendian", DEFAULT_BIG_ENDIAN);
-	configdata.dampingsize= (uint_8)cf->ReadInt(section,"dampingsize", DEFAULT_DAMPING_SIZE);
+	configdata.declination.flt  = cf->ReadFloat(section, "Declination", DEFAULT_DECLINATION);
+	configdata.truenorth = (uint_8)cf->ReadInt(section, "TrueNorth", DEFAULT_TRUE_NORTH);//cast from int to uint_8
+	configdata.calsamplefreq = (uint_8)cf->ReadInt(section,"CalSampleFreq", DEFAULT_CALSAMPLE_FREQ);
+	configdata.samplefreq = (uint_8)cf->ReadInt(section,"SampleFreq", DEFAULT_SAMPLE_FREQ);
+	configdata.period = (uint_8)cf->ReadInt(section,"Period", DEFAULT_PERIOD);
+	configdata.bigendian = (uint_8)cf->ReadInt(section, "BigEndian", DEFAULT_BIG_ENDIAN);
+	configdata.dampingsize= (uint_8)cf->ReadInt(section,"DampingDize", DEFAULT_DAMPING_SIZE);
 
 
 	DataRespType dataresptype = {0};
-	dataresptype.XRaw = cf->ReadBool(section, "XRaw", DEFAULT_XRAW);
-	dataresptype.YRaw = cf->ReadBool(section, "YRaw", DEFAULT_YRAW);
-	dataresptype.XCal = cf->ReadBool(section, "XCal", DEFAULT_XCAL);
-	dataresptype.YCal = cf->ReadBool(section, "YCal", DEFAULT_YCAL);
-	dataresptype.Heading = cf->ReadBool(section, "Heading", DEFAULT_HEADING);
-	dataresptype.Magnitude = cf->ReadBool(section, "Magnitude", DEFAULT_MAGNITUDE);
-	dataresptype.Temperature = cf->ReadBool(section, "Temperature", DEFAULT_TEMPERATURE);
-	dataresptype.Distortion = cf->ReadBool(section, "Distortion", DEFAULT_DISTORTION);
-	dataresptype.CalStatus = cf->ReadBool(section, "CalStatus", DEFAULT_CALSTATUS);
+	dataresptype.xraw = cf->ReadBool(section, "XRaw", DEFAULT_XRAW);
+	dataresptype.yraw = cf->ReadBool(section, "YRaw", DEFAULT_YRAW);
+	dataresptype.xcal = cf->ReadBool(section, "XCal", DEFAULT_XCAL);
+	dataresptype.ycal = cf->ReadBool(section, "YCal", DEFAULT_YCAL);
+	dataresptype.heading = cf->ReadBool(section, "Heading", DEFAULT_HEADING);
+	dataresptype.magnitude = cf->ReadBool(section, "Magnitude", DEFAULT_MAGNITUDE);
+	dataresptype.temperature = cf->ReadBool(section, "Temperature", DEFAULT_TEMPERATURE);
+	dataresptype.distortion = cf->ReadBool(section, "Distortion", DEFAULT_DISTORTION);
+	dataresptype.calstatus = cf->ReadBool(section, "CalStatus", DEFAULT_CALSTATUS);
 	
 	// Create the real driver
 	this->driver = new CompassDriver(configdata, dataresptype);
