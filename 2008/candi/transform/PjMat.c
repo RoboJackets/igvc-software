@@ -9,7 +9,7 @@
 #ifndef USE_AUX_CAM_SENSORS
 //volatile double u=.4;volatile double v=.4;	// hfov/2 and vfov/2 respectively
 volatile double h=1;					// height of camera
-volatile double x=-3.14159/2+.2; volatile double y=03.14159;volatile  double z=3.14159;	//euler rotations about given axes
+volatile double x=-M_PI/2+1.25; volatile double y=M_PI;volatile  double z=M_PI;	//euler rotations about given axes
 #else
 #	include "PjDefs.c"
 #endif
@@ -121,6 +121,14 @@ void findmaxview(GLdouble* n){
 	xscale=(maxx-minx)/2; 
 	translateX=minx+xscale;
 	translateY=miny+yscale;
+	
+	//start of region of interest code
+	yscale=yscale/2;
+	xscale=xscale/2;
+	//translateX=minx+xscale;
+	translateY=miny+3*yscale;
+	//end roi code
+	
 #	undef xtran	
 #	undef ytran	
 #	undef yi
