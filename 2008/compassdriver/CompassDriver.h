@@ -94,8 +94,10 @@ CompassDriver::~CompassDriver() {
 ModInfoResp CompassDriver::GetModInfo(void) {
 	char_u8 tempchr;
 	uint_8 data = get_mod_info;
-	CompassSend(&data,1);
 	uint_8 resp[11];
+
+	CompassSend(&data,1);
+	//maybe a delay here?
 	spidriver.spiGet(resp, 11);
 	ModInfoResp reply;
 		for(int i = 2;i<6;i++) {
