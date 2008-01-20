@@ -142,7 +142,7 @@ ImageSeq::ImageSeq(ConfigFile *cf, int section)
   this->rate = cf->ReadFloat(section, "rate", 10);
 
   // Format string
-  this->pattern = cf->ReadString(section, "pattern", "image_%06d.pnm");
+  this->pattern = cf->ReadString(section, "pattern", "image_%08d.pnm");
 
   this->loop = cf->ReadInt(section, "loop", 0);
 
