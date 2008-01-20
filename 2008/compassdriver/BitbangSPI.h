@@ -1,6 +1,8 @@
 #ifndef BITBANG_SPI_H
 #define BITBANG_SPI_H
 
+//some of this came from some website i now lost, and is modeled after TS's tempSensor.c
+
 #include<unistd.h>
 #include<sys/types.h>
 #include<sys/mman.h>
@@ -12,8 +14,8 @@
 //debug opts
 #define PRINT_TO_SCREEN_Rx
 #define PRINT_TO_SCREEN_Tx
-#define NO_SPI
-#define FAKE_RESP
+//#define NO_SPI
+//#define FAKE_RESP
 
 /*
 //pin 14
@@ -34,7 +36,7 @@
 #define INPUT_OFFSET 0x4
 #define OUTPUT_OFFSET 0x8
 
-//figure out good sleep mechanism
+//figure out good sleep mechanism -- ts-7800 has a microsecond clock availble at 0xE8000040
 #define PAUSE usleep(100)
 
 //this is defined in another header -- is that bad?
@@ -50,7 +52,7 @@ struct dio_pins{
 	unsigned pin1:1;
 	unsigned pin2:1;
 	unsigned pin3:1;
-	unsigned pin4:1;//always input
+	unsigned pin4:1;//always input?
 	unsigned pin5:1;
 	unsigned pin6:1;
 	unsigned pin7:1;
@@ -84,6 +86,9 @@ class BitbangSPI{
 BitbangSPI::BitbangSPI(){
 #ifndef NO_SPI 
 	fd_dev_mem = open("/dev/mem", O_RDWR|O_SYNC);
+		if(fd_dev_mem == -1) { 
+			printf("failed to open /dev/mem\n");
+		}
 	unsigned char *base;
 	//base = mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);//this worked before without casting as (unsigned char *).  what changed? -- does c++ not auto cast from void? plain C did.
 	base = (unsigned char *) mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);
