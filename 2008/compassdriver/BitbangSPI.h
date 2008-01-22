@@ -65,6 +65,9 @@ struct dio_pins{
 	unsigned pin14:1;
 	unsigned pin15:1;
 	unsigned pin16:1;
+	unsigned:14;
+	unsigned greenled:1;
+	unsigned:1;
 };
 
 
