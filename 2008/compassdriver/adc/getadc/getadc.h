@@ -41,7 +41,8 @@ class GetADC{
 
 		//avoid malloc
 		unsigned int sramout[1024];
-		unsigned float sram_volt_out[1024];
+		//unsigned float sram_volt_out[1024];
+		float sram_volt_out[1024];
 };
 
 GetADC::GetADC(){
@@ -110,21 +111,13 @@ int GetADC::getdata(int * chanin, int length){
 //EWD: Implement this in a more elegant way. That is write out all FF's then print values as they are available.
 //2KSPS => a new sample is available every 500uS
 	usleep(1500000);
-	for(i=0;i<1024;i++) {
-		printf("0x%x\n", sram[i]);//raw
-	}
 
 	for(i=0;i<1024;i++) {
-		printf("converted: %x\n", (sram[i] * AVR_VREF)/1024);//converted
-	}
-
-	for(i=0;i<1024;i++) {
-		sramout[i] = sram[i];
-		sram_volt_out[i] = ((AVR_VREF * sram[i])/1024);
+		GetADC::sramout[i] = sram[i];
+		GetADC::sram_volt_out[i] = ((AVR_VREF * sram[i])/1024);
 	}
 
 	return(0);
-	//return(sramout);//this is a public memeber now
 }
 
 void inline GetADC::twi_write(unsigned char dat) {
