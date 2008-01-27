@@ -8,7 +8,7 @@ when #1=0, the variable being written to is "leftMotorSpeed"
 when #1=1, the variable being written to is "rightMotorSpeed"
 when #1=2, the variable being written to is "softEStop"
 
-leftMotorSpeed and rightMotorSpeed can have values between 0 and 255 inclusive. a value of 127 stops the motors. positive values spin the motors forward. negative values spin the motors in reverse.
+leftMotorSpeed and rightMotorSpeed can have values between 0 and 255 inclusive. a value of 128 stops the motors. positive values spin the motors forward. negative values spin the motors in reverse.
 
 setting softEStop to anything other than 0 makes the motors stop moving until it is cleared.
 */
