@@ -60,9 +60,9 @@ union dio_pins{
 		unsigned pin14:1;
 		unsigned pin15:1;
 		unsigned pin16:1;
-		unsigned:14;
+		unsigned:14;//lcd pins
 		unsigned greenled:1;
-		unsigned:1;
+		unsigned:1;//temp sensor select
 	};
 	unsigned bytes;
 };
@@ -78,19 +78,19 @@ class DIO_basic{
 		volatile dio_pins *dioblock_in;
 		volatile dio_pins *dioblock_out;
 
-		volatile unsigned *dio_in
+		volatile unsigned *dio_in;
 		volatile unsigned *dio_out;
 
 };
 
 DIO_basic::DIO_basic(){
 	fd_dev_mem = open("/dev/mem", O_RDWR|O_SYNC);
-	unsigned char *base;
-	base = (unsigned char *) mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);
+	unsigned int *base;
+	base = (unsigned int *) mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);
 
 	dio_in = (volatile unsigned *) (base + INPUT_OFFSET);//cast as struct
 	dio_out = (volatile unsigned *) (base + OUTPUT_OFFSET);
-	
+
 	dioblock_in = (volatile dio_pins *) (base + INPUT_OFFSET);//cast as struct
 	dioblock_out = (volatile dio_pins *) (base + OUTPUT_OFFSET);
 
