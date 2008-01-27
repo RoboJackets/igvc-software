@@ -25,7 +25,7 @@ int main(void){
 
 //	for(int i = 0; i < 1000; i++){
 
-	diodriver.dioblock_in->pin13 = 1;//set as output
+	//diodriver.dioblock_in->pin13 = 1;//set as output
 	while(1){
 		diodriver.dioblock_out->pin13 = 1;
 		//diodriver.dioblock_out->greenled = 1;

@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 	*dio_in = 0;
 
 while(1){
-	*dio |= 0xFFFFFFFF;//write crap
+	*dio |= 0xFFFFFFFF;
 	usleep(1000);
 	*dio = 0; // &  ~(1 << 16);
 	usleep(1000);
