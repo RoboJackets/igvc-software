@@ -17,6 +17,7 @@
 //this is defined in another header -- is that bad?
 typedef unsigned char uint_8;
 
+/*
 typedef struct dio_pins{
 	unsigned pin1:1;
 	unsigned pin2:1;
@@ -38,8 +39,9 @@ typedef struct dio_pins{
 	unsigned greenled:1;
 	unsigned:1;
 };
+*/
 
-/*
+
 union dio_pins{
 	struct {
 		unsigned pin1:1;
@@ -64,7 +66,7 @@ union dio_pins{
 	};
 	unsigned bytes;
 };
-*/
+
 
 class DIO_basic{
 	private:
@@ -73,28 +75,30 @@ class DIO_basic{
 	public:
 		DIO_basic();
 		~DIO_basic();
-		//volatile struct dio_pins *dioblock_in;
-		//volatile struct dio_pins *dioblock_out;
-
 		volatile dio_pins *dioblock_in;
 		volatile dio_pins *dioblock_out;
+
+		volatile unsigned *dio_in
+		volatile unsigned *dio_out;
+
 };
 
 DIO_basic::DIO_basic(){
 	fd_dev_mem = open("/dev/mem", O_RDWR|O_SYNC);
 	unsigned char *base;
-	//base = mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);//this worked before without casting as (unsigned char *).  what changed? -- does c++ not auto cast from void? plain C did.
 	base = (unsigned char *) mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);
+
+	dio_in = (volatile unsigned *) (base + INPUT_OFFSET);//cast as struct
+	dio_out = (volatile unsigned *) (base + OUTPUT_OFFSET);
 	
+	dioblock_in = (volatile dio_pins *) (base + INPUT_OFFSET);//cast as struct
+	dioblock_out = (volatile dio_pins *) (base + OUTPUT_OFFSET);
 
-//	dioblock_in = (struct dio_pins *) (base + INPUT_OFFSET);//cast as struct
-//	dioblock_out = (struct dio_pins *) (base + OUTPUT_OFFSET);
-
-
+/*
 	dioblock_in = (dio_pins *) (base + INPUT_OFFSET);//cast as struct
 	dioblock_out = (dio_pins *) (base + OUTPUT_OFFSET);
-
-	//dioblock_in->bytes = 0;
+*/
+	dioblock_in->bytes = 0;
 
 }
 

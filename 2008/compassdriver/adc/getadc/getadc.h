@@ -114,7 +114,8 @@ int GetADC::getdata(int * chanin, int length){
 
 	for(i=0;i<1024;i++) {
 		GetADC::sramout[i] = sram[i];
-		GetADC::sram_volt_out[i] = ((AVR_VREF * sram[i])/1024);
+		GetADC::sram_volt_out[i] = ( (AVR_VREF * sram[i])/1024 );
+		//GetADC::sram_volt_out[i] = ( (AVR_VREF * (float )sram[i])/1024 );
 	}
 
 	return(0);
