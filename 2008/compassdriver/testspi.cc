@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "BitbangSPI.h"
+#include "BitbangSPI_magic.h"
 #include "compassTypes.h"
 
 int main(void){
