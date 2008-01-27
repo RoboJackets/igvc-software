@@ -91,14 +91,14 @@ DIO_basic::DIO_basic(){
 	dio_in = (volatile unsigned *) (base + INPUT_OFFSET);//cast as struct
 	dio_out = (volatile unsigned *) (base + OUTPUT_OFFSET);
 
-	dioblock_in = (volatile dio_pins *) (base + INPUT_OFFSET);//cast as struct
-	dioblock_out = (volatile dio_pins *) (base + OUTPUT_OFFSET);
+	dioblock_in = (dio_pins *) (base + INPUT_OFFSET);//cast as struct
+	dioblock_out = (dio_pins *) (base + OUTPUT_OFFSET);
 
 /*
 	dioblock_in = (dio_pins *) (base + INPUT_OFFSET);//cast as struct
 	dioblock_out = (dio_pins *) (base + OUTPUT_OFFSET);
 */
-	dioblock_in->bytes = 0;
+	//dioblock_in->bytes = 0;
 
 }
 
