@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 	pthread_create(&transformThread, NULL, transform_main_caller, transformThreadArgs);
 	
 	// XXX: Wait for the "transform" window to open
-	usleep(5000 * 100);		// 5000 ms
+	usleep(5000 * 100);		// 500 ms
 	
 	// Show the main window and run the UI thread
 	mainWindow->show();
