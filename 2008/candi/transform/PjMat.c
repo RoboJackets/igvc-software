@@ -66,7 +66,7 @@ void setPjMat(){
 
 void findmaxview(GLdouble* n){
 	GLdouble maxx,minx,maxy,miny;
-	GLdouble ly,ry,ty,by,try,tly,bry,bly; //define the principal maximum values
+	GLdouble ly,ry,ty,by,_try,tly,bry,bly; //define the principal maximum values
 	GLdouble lx,rx,tx,bx,trx,tlx,brx,blx; //define the principal maximum values
 	//XXX:xi,yi should really be calculated by Genpoints and written as a variable,but now i don't have time
 #	define xi (.96)
@@ -87,7 +87,7 @@ void findmaxview(GLdouble* n){
 	by=(-n[5]*yi+n[13])/(-n[7]*yi+n[15]);
 	
 	trx=(n[0]*xi+n[4]*yi+n[12])/(n[3]*xi+n[7]*yi+n[15]);
-	try=(n[1]*xi+n[5]*yi+n[13])/(n[3]*xi+n[7]*yi+n[15]);
+	_try=(n[1]*xi+n[5]*yi+n[13])/(n[3]*xi+n[7]*yi+n[15]);
 	
 	tlx=(-n[0]*xi+n[4]*yi+n[12])/(-n[3]*xi+n[7]*yi+n[15]);
 	tly=(-n[1]*xi+n[5]*yi+n[13])/(-n[3]*xi+n[7]*yi+n[15]);
@@ -99,11 +99,11 @@ void findmaxview(GLdouble* n){
 	bly=(-n[1]*xi-n[5]*yi+n[13])/(-n[3]*xi-n[7]*yi+n[15]);
 	/****** 8-Neighbors *********/
 	maxy=max(max(max(max(max(max(max(					\
-			ly,ry),ty),by),try),tly),bry),bly);
+			ly,ry),ty),by),_try),tly),bry),bly);
 	maxx=max(max(max(max(max(max(max(					\
 			lx,rx),tx),bx),trx),tlx),brx),blx);
 	miny=min(min(min(min(min(min(min(					\
-			ly,ry),ty),by),try),tly),bry),bly);
+			ly,ry),ty),by),_try),tly),bry),bly);
 	minx=min(min(min(min(min(min(min(					\
 			lx,rx),tx),bx),trx),tlx),brx),blx);
 			

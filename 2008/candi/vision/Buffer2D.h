@@ -36,10 +36,10 @@ private:
 	}
 	
 public:
-	~Buffer2D<E>() {
+//	~Buffer2D<E>() {
 		// Make sure the data buffer (if one existed) is deallocated
-		this->resize(0,0);
-	}
+//		this->resize(0,0);
+//	}
 	
 	// ### ACCESSORS ###
 public:

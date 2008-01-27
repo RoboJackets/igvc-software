@@ -21,7 +21,7 @@ public:
 		this->y = y;
 	}
 	
-	~Point2D<N>() {}
+	//~Point2D<N>() {}
 	
 	Point2D operator+(Point2D other) {
 		return Point2D(
