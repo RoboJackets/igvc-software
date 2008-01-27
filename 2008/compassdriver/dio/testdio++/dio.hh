@@ -59,9 +59,9 @@ union dio_pins{
 		unsigned pin14:1;
 		unsigned pin15:1;
 		unsigned pin16:1;
-		unsigned:14;
+		unsigned:14;//lcd pins
 		unsigned greenled:1;
-		unsigned:1;
+		unsigned:1;//temp sensor select
 	};
 	unsigned bytes;
 };

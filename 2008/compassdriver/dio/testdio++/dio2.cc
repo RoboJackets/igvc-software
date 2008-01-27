@@ -1,4 +1,4 @@
-#include "dio.hh"
+#include "dio2.hh"
 
 #include<unistd.h>
 #include<sys/types.h>
@@ -33,6 +33,13 @@ int main(void){
 		diodriver.dioblock_out->pin13 = 0;
 		WAIT;
 	}
-
+/*
+	while(1){
+		diodriver.*dio_out = 1 << 13;
+		WAIT;
+		diodriver.*dio_out = 0;
+		WAIT;
+	}
+*/
 	return(0);
 }
