@@ -12,8 +12,8 @@
 #include<unistd.h>
 
 //debug opts
-#define PRINT_TO_SCREEN_Rx
-#define PRINT_TO_SCREEN_Tx
+//#define PRINT_TO_SCREEN_Rx
+//#define PRINT_TO_SCREEN_Tx
 //#define NO_SPI
 //#define FAKE_RESP
 
@@ -65,9 +65,9 @@ struct dio_pins{
 	unsigned pin14:1;
 	unsigned pin15:1;
 	unsigned pin16:1;
-	unsigned:14;
+	unsigned:14;//lcd pins
 	unsigned greenled:1;
-	unsigned:1;
+	unsigned:1;//temp sensor select
 };
 
 
@@ -92,9 +92,9 @@ BitbangSPI::BitbangSPI(){
 		if(fd_dev_mem == -1) { 
 			printf("failed to open /dev/mem\n");
 		}
-	unsigned char *base;
+	unsigned int *base;
 	//base = mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);//this worked before without casting as (unsigned char *).  what changed? -- does c++ not auto cast from void? plain C did.
-	base = (unsigned char *) mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);
+	base = (unsigned int *) mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);
 	
 	//dio_in = (base + INPUT_OFFSET);  // dio in block
 	//dio_out = (base + OUTPUT_OFFSET);  // dio out block
