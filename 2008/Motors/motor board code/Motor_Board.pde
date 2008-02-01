@@ -132,37 +132,32 @@ void setMotors()
   unsigned char tempSpeed;
   /*if ((softEStop==0)&&(hardEStop==0))
   {*/
-  if (softEStop==0)
+  if (softEStop<>0)
   {
-    if (leftMotorSpeed >= ZERO_SPEED)
-    {
-      digitalWrite(LEFT_MOTOR_DIR_PIN, FORWARD);
-      tempSpeed = leftMotorSpeed - ZERO_SPEED;
-      analogWrite(LEFT_MOTOR_PWM_PIN, tempSpeed);
-    }
-    else
-    {
-      digitalWrite(LEFT_MOTOR_DIR_PIN, BACKWARD);
-      analogWrite(LEFT_MOTOR_PWM_PIN, leftMotorSpeed);
-    }
-    if (rightMotorSpeed >= ZERO_SPEED)
-    {
-      digitalWrite(RIGHT_MOTOR_DIR_PIN, FORWARD);
-      tempSpeed = rightMotorSpeed - ZERO_SPEED;
-      analogWrite(RIGHT_MOTOR_PWM_PIN, tempSpeed);
-    }
-    else
-    {
-      digitalWrite(RIGHT_MOTOR_DIR_PIN, BACKWARD);
-      analogWrite(RIGHT_MOTOR_PWM_PIN, leftMotorSpeed);
-    }
+    leftMotorSpeed=ZEROSPEED;
+    rightMotorSpeed=ZEROSPEED;
+  }
+  if (leftMotorSpeed >= ZERO_SPEED)
+  {
+    digitalWrite(LEFT_MOTOR_DIR_PIN, FORWARD);
+    tempSpeed = leftMotorSpeed - ZERO_SPEED;
+    analogWrite(LEFT_MOTOR_PWM_PIN, tempSpeed);
   }
   else
   {
-      digitalWrite(LEFT_MOTOR_DIR_PIN, FORWARD);
-      analogWrite(LEFT_MOTOR_PWM_PIN, ZERO_SPEED);
-      digitalWrite(RIGHT_MOTOR_DIR_PIN, FORWARD);
-      analogWrite(RIGHT_MOTOR_PWM_PIN, ZERO_SPEED);
+    digitalWrite(LEFT_MOTOR_DIR_PIN, BACKWARD);
+    analogWrite(LEFT_MOTOR_PWM_PIN, leftMotorSpeed);
+  }
+  if (rightMotorSpeed >= ZERO_SPEED)
+  {
+    digitalWrite(RIGHT_MOTOR_DIR_PIN, FORWARD);
+    tempSpeed = rightMotorSpeed - ZERO_SPEED;
+    analogWrite(RIGHT_MOTOR_PWM_PIN, tempSpeed);
+  }
+  else
+  {
+    digitalWrite(RIGHT_MOTOR_DIR_PIN, BACKWARD);
+    analogWrite(RIGHT_MOTOR_PWM_PIN, leftMotorSpeed);
   }
 }
 
