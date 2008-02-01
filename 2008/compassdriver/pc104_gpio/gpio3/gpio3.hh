@@ -20,7 +20,7 @@
 
 union gpio_a_block {
 	struct {
-		unsigned pin0:1;
+		unsigned pin0:1;//nearest to com/usb/ethernet ports
 		unsigned pin1:1;
 		unsigned pin2:1;
 		unsigned pin3:1;
@@ -51,7 +51,7 @@ union gpio_a_block {
 		unsigned pin28:1;
 		unsigned pin29:1;
 		unsigned pin30:1;
-		unsigned :1;//ground
+		unsigned :1;//pin 32 is ground
 	};
 	unsigned uint32;
 };
@@ -85,7 +85,7 @@ class GPIO {
 		volatile gpio_a_mux_block * gpio_a_mux;
 		
 		GPIO(void);
-		//~GPIO(void);
+		~GPIO(void);
 
 };
 
@@ -107,11 +107,14 @@ GPIO::GPIO(void){
 
 	close(fd);
 }
-/*
+
 GPIO::~GPIO(void){
+	gpio_a_data->uint32 = 0;
+	gpio_a_direction->uint32 = 0;//which way is output?
+	gpio_a_mux->uint32 = 0;//set pc104_A pins 1-32 to gpio
 
 }
-*/
+
 
 
 #endif //GPIO3_HH
