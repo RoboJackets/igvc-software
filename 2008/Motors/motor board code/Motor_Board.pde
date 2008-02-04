@@ -1,28 +1,28 @@
 //DIGITAL PINS
   //MOTOR PINS
-#define LEFT_MOTOR_PWM_PIN 10
+#define LEFT_MOTOR_PWM_PIN 6
 #define LEFT_MOTOR_DIR_PIN 12
 #define RIGHT_MOTOR_PWM_PIN 11
 #define RIGHT_MOTOR_DIR_PIN 13
   //SWITCH PINS
-#define HARD_E_STOP_PIN 5
-#define AUTO_MAN_PIN 6  //switch b/w autonomous and manual control
-#define PATH_NAV_PIN 7  //switch between the path and nav contests
+#define HARD_E_STOP_PIN 7
+#define AUTO_MAN_PIN 8  //switch b/w autonomous and manual control
+#define PATH_NAV_PIN 9  //switch between the path and nav contests
 
 //ANALOG PINS
   //HALL PINS
-#define LOGIC_HALL_PIN 1  //logic current draw
-#define RIGHT_HALL_PIN 2  //monitor right motor current draw
-#define LEFT_HALL_PIN 3  //monitor left motor current draw
+#define LOGIC_HALL_PIN 2  //logic current draw
+#define RIGHT_HALL_PIN 3  //monitor right motor current draw
+#define LEFT_HALL_PIN 4  //monitor left motor current draw
   //VOLTAGE PINS
-#define LOGIC_BATTERY_VOLTAGE_PIN 4
-#define MOTOR_BATTERY_VOLTAGE_PIN 5
+#define LOGIC_BATTERY_VOLTAGE_PIN 5
+#define MOTOR_BATTERY_VOLTAGE_PIN 6
 
 //CONSTANTS
   //MOTOR CONSTANTS
-#define FORWARD HIGH
-#define BACKWARD LOW
-#define ZERO_SPEED 256
+#define FORWARD LOW
+#define BACKWARD HIGH
+#define ZERO_SPEED 127
 
 //VARIABLES
   //MOTOR VARIABLES
@@ -50,6 +50,9 @@ unsigned char autoMan;
 
 void setup()
 {
+  //PWM TEST STUFF
+  
+  
   //open the serial port
   Serial.begin(9600);
   
@@ -132,32 +135,36 @@ void setMotors()
   unsigned char tempSpeed;
   /*if ((softEStop==0)&&(hardEStop==0))
   {*/
-  if (softEStop<>0)
+  if (softEStop)
   {
-    leftMotorSpeed=ZEROSPEED;
-    rightMotorSpeed=ZEROSPEED;
+    leftMotorSpeed=ZERO_SPEED;
+    rightMotorSpeed=ZERO_SPEED;
   }
   if (leftMotorSpeed >= ZERO_SPEED)
   {
     digitalWrite(LEFT_MOTOR_DIR_PIN, FORWARD);
     tempSpeed = leftMotorSpeed - ZERO_SPEED;
+    tempSpeed=tempSpeed*2;
     analogWrite(LEFT_MOTOR_PWM_PIN, tempSpeed);
   }
   else
   {
     digitalWrite(LEFT_MOTOR_DIR_PIN, BACKWARD);
-    analogWrite(LEFT_MOTOR_PWM_PIN, leftMotorSpeed);
+    tempSpeed=leftMotorSpeed*2;
+    analogWrite(LEFT_MOTOR_PWM_PIN, tempSpeed);
   }
   if (rightMotorSpeed >= ZERO_SPEED)
   {
     digitalWrite(RIGHT_MOTOR_DIR_PIN, FORWARD);
     tempSpeed = rightMotorSpeed - ZERO_SPEED;
+    tempSpeed=tempSpeed*2;
     analogWrite(RIGHT_MOTOR_PWM_PIN, tempSpeed);
   }
   else
   {
     digitalWrite(RIGHT_MOTOR_DIR_PIN, BACKWARD);
-    analogWrite(RIGHT_MOTOR_PWM_PIN, leftMotorSpeed);
+    tempSpeed=rightMotorSpeed*2;
+    analogWrite(RIGHT_MOTOR_PWM_PIN, rightMotorSpeed);
   }
 }
 
@@ -166,10 +173,10 @@ void setVariable(int num, int val)
   switch (num)
   {
     case 0:
-      leftMotorSpeed=val*2;
+      leftMotorSpeed=val;
     break;
     case 1:
-      rightMotorSpeed=val*2;
+      rightMotorSpeed=val;
     break;
     case 2:
       softEStop=val;
@@ -180,9 +187,20 @@ void setVariable(int num, int val)
 
 void serialDump()
 {
-  Serial.print(hardEStop);
-  Serial.print(autoMan);
-  Serial.print(pathNav);
+  /*Serial.print(20, BYTE);
+  Serial.print(20, BYTE);
+  Serial.print(20, BYTE);
+  Serial.print(20, BYTE);
+  Serial.print(20, BYTE);
+  Serial.print(20, BYTE);
+  Serial.print(20, BYTE);
+  Serial.print(20, BYTE);
+  Serial.print(20, BYTE);
+  Serial.print(20, BYTE);
+  Serial.print(20, BYTE);*/
+  Serial.print(hardEStop, BYTE);
+  Serial.print(autoMan, BYTE);
+  Serial.print(pathNav, BYTE);
   serialIntegerPrint(leftHall);
   serialIntegerPrint(rightHall);
   serialIntegerPrint(logicBatteryVoltage);
@@ -202,7 +220,7 @@ void serialIntegerPrint(int INTEGER)
 {
   unsigned char tempByte;
   tempByte=MSByte(INTEGER);
-  Serial.print(tempByte,BYTE);
+  Serial.print(tempByte, BYTE);
   tempByte=LSByte(INTEGER);
-  Serial.print(tempByte,BYTE);
+  Serial.print(tempByte, BYTE);
 }
