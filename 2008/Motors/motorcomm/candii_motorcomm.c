@@ -10,7 +10,7 @@ when #1=2, the variable being written to is "softEStop"
 
 leftMotorSpeed and rightMotorSpeed can have values between 0 and 255 inclusive. a value of 128 stops the motors. positive values spin the motors forward. negative values spin the motors in reverse.
 
-setting softEStop to anything other than 0 makes the motors stop moving until it is cleared.
+setting softEStop to anything other than 0 makes the motors stop moving and sets their speed to 127 (stopped.)
 */
 
 #include "candii_serial.h"
@@ -51,12 +51,23 @@ int main(int argc, char *argv[]) {
 		{
 			printf("serialport_write: Write error %d: %s\n", (int) errno, (char*) strerror(errno));
 		}
-	
+
+		printf("sizeof(reply): %d \n", sizeof(reply));
 		if (readFully(fd, &reply, sizeof(reply)))
 		{
 			printf("serialport_read: Read error %d: %s\n", (int) errno, (char*) strerror(errno));
 		}
-		printf("%c \n", (char)reply.HWESTOP);
+		printf("HWESTOP %d \n", (char)reply.HWESTOP);
+		printf("AUTOMAN %d \n", (char)reply.AUTOMAN);
+		printf("PATHNAV %d \n", (char)reply.PATHNAV);
+		printf("CURRENTLEFT1 %d \n", (char)reply.CURRENTLEFT1);
+		printf("CURRENTLEFT2 %d \n", (char)reply.CURRENTLEFT2);
+		printf("CURRENTRIGHT1 %d \n", (char)reply.CURRENTRIGHT1);
+		printf("CURRENTRIGHT2 %d \n", (char)reply.CURRENTRIGHT2);
+		printf("LOGICBATT1 %d \n", (char)reply.LOGICBATT1);
+		printf("LOGICBATT2 %d \n", (char)reply.LOGICBATT2);
+		printf("MOTORBATT1 %d \n", (char)reply.MOTORBATT1);
+		printf("MOTORBATT2 %d \n", (char)reply.MOTORBATT2);
 	}
 	if (argv[1][0]=='w')
 	{

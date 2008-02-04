@@ -31,7 +31,14 @@ int main(int argc, char *argv[]) {
 		printf("Failed to open joystick!\n");
 	}
 	done=0;
-	SDL_PollEvent(&event);//clear out any bad data
+	for (i=1;i<20;i++) {
+		SDL_PollEvent(&event);//clear out any bad data
+		/*leftAnalogX = 0;
+		leftAnalogY = 0;
+		rightAnalogX = 0;
+		rightAnalogY = 0;*/
+	}
+	
 	//setup ends
 	//main loop starts:
 	while ( ! done ) {
