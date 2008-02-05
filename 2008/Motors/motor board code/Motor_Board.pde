@@ -22,7 +22,7 @@
   //MOTOR CONSTANTS
 #define FORWARD LOW
 #define BACKWARD HIGH
-#define ZERO_SPEED 127
+#define ZERO_SPEED 128
 
 //VARIABLES
   //MOTOR VARIABLES
@@ -51,7 +51,8 @@ unsigned char autoMan;
 void setup()
 {
   //PWM TEST STUFF
-  
+  TCCR2 |= (1<<CS20);
+  TCCR2 &= ~(1<<CS21 | 1<<CS22);
   
   //open the serial port
   Serial.begin(9600);
