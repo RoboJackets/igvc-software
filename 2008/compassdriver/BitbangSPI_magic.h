@@ -138,8 +138,8 @@ BitbangSPI::BitbangSPI(){
 	//dio_in = (base + INPUT_OFFSET);  // dio in block
 	//dio_out = (base + OUTPUT_OFFSET);  // dio out block
 
-	dioblock_in = (dio_pins *) (base + INPUT_OFFSET);//cast as struct
-	dioblock_out = (dio_pins *) (base + OUTPUT_OFFSET);
+	dioblock_in = (volatile dio_pins *) (base + INPUT_OFFSET);//cast as struct
+	dioblock_out = (volatile dio_pins *) (base + OUTPUT_OFFSET);
 
 
 	//init the pins
@@ -205,15 +205,25 @@ int BitbangSPI::spiGet(uint_8 * dataresp, int size){
 	dioblock_out->bytes &= spi_mosi_off;//supposed to send 0x00 when revieving
 	PAUSE;
 
-	for(int byte = 0;byte < size; byte++){
-		for(int i=0;i<8;i++){
+	for(int byte = 0; byte < size; byte++){
+
+		datatemp = 0;
+		data = 0;
+		
+		for(int i = 0; i < 8; i++){
 			dioblock_out->bytes = spi_clock_on;//clock high
 			PAUSE;
 		
 			//data.bits[i] = ~(*dio_in >> SPI_MISO) & 1;//check MISO line
-			datatemp = dioblock_in->bytes;		
-			datatemp >>= 10; //spi_miso
-			data |= (datatemp && 1);
+			//datatemp = dioblock_in->bytes;
+			//datatemp >>= 10; //spi_miso
+
+			//data |= (datatemp & 1);
+
+			data |= ((dioblock_in->bytes >> 10) & 1);
+			printf("data byte %d: %X\n",byte, data);
+			printf("pins_in: %X\n",dioblock_in->bytes);
+			printf("pins_out: %X\n\n",dioblock_out->bytes);
 			//data |= dioblock_in->spi_miso;
 			data <<= 1;//shifting correct?
 
