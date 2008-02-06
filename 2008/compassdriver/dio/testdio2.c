@@ -15,7 +15,7 @@ int main(int argc, char **argv)
    int fd = open("/dev/mem", O_RDWR|O_SYNC);
 
    start = mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0xe8000000);
-        dio =  (unsigned int *)(start + 0x8);  // dio 1
+        dio_out =  (unsigned int *)(start + 0x8);  // dio 1
         dio_in = (unsigned int *)(start + 0x4);
 
         *dio_in = 0;
@@ -23,9 +23,9 @@ int main(int argc, char **argv)
 
 while(1){
         //*dio |= 0xFFFFFFFF;
-        *dio |= 1 << 5;
+        *dio_out |= 1 << 0;
         usleep(1000);
-        *dio = 0; // &  ~(1 << 16);
+        *dio_out = 0; // &  ~(1 << 16);
         usleep(1000);
 }
 

@@ -13,7 +13,7 @@ int main(void){
 	data_out[2] = terminator;
 
 	spidriver.spiSend(data_out, 3);
-	spidriver.spiGet(data_in, 10);
+	spidriver.spiGet(data_in, 11);
 
 	
 	char_u8 tempchr;
