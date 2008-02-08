@@ -12,10 +12,10 @@
 #include<unistd.h>
 
 //debug opts
-#define PRINT_TO_SCREEN_Rx
-#define PRINT_TO_SCREEN_Tx
-
-
+//#define PRINT_TO_SCREEN_Rx
+//#define PRINT_TO_SCREEN_Tx
+//#define NO_SPI
+//#define FAKE_RESP
 
 /*
 //pin 14
@@ -48,44 +48,6 @@ typedef unsigned char uint_8;
 #define spi_mosi pin12
 #define spi_clock pin14
 
-
-#define spi_ss_on 1 << 0
-#define spi_frame_on 1 << 6
-#define spi_miso_on 1 << 10
-#define spi_mosi_on 1 << 12
-#define spi_clock_on 1 << 14
-
-#define spi_ss_off ~(1 << 0)
-#define spi_frame_off ~(1 << 6)
-#define spi_miso_off ~(1 << 10)
-#define spi_mosi_off ~(1 << 12)
-#define spi_clock_off ~(1 << 14)
-
-
-/*
-struct dio_pins{
-	unsigned pin1:1;
-	unsigned pin2:1;
-	unsigned pin3:1;
-	unsigned pin4:1;//always input?
-	unsigned pin5:1;
-	unsigned pin6:1;
-	unsigned pin7:1;
-	unsigned pin8:1;
-	unsigned pin9:1;
-	unsigned pin10:1;
-	unsigned pin11:1;
-	unsigned pin12:1;
-	unsigned pin13:1;
-	unsigned pin14:1;
-	unsigned pin15:1;
-	unsigned pin16:1;
-	unsigned:14;
-	unsigned greenled:1;
-	unsigned:1;
-};
-*/
-
 typedef union {
 	struct {
 		unsigned pin1:1;
@@ -111,6 +73,7 @@ typedef union {
 	unsigned bytes;
 } dio_pins;
 
+
 class BitbangSPI{
 	private:
 		//volatile unsigned int *dio_in, *dio_out;
@@ -127,13 +90,14 @@ class BitbangSPI{
 };
 
 BitbangSPI::BitbangSPI(){
+#ifndef NO_SPI 
 	fd_dev_mem = open("/dev/mem", O_RDWR|O_SYNC);
 		if(fd_dev_mem == -1) { 
 			printf("failed to open /dev/mem\n");
 		}
-	unsigned char *base;
+	unsigned int *base;
 	//base = mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);//this worked before without casting as (unsigned char *).  what changed? -- does c++ not auto cast from void? plain C did.
-	base = (unsigned char *) mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);
+	base = (unsigned int *) mmap(0, getpagesize(), PROT_READ|PROT_WRITE, MAP_SHARED, fd_dev_mem, SYSCONT_BASE);
 	
 	//dio_in = (base + INPUT_OFFSET);  // dio in block
 	//dio_out = (base + OUTPUT_OFFSET);  // dio out block
@@ -143,49 +107,54 @@ BitbangSPI::BitbangSPI(){
 
 
 	//init the pins
-	dioblock_out->bytes |= spi_ss_on;
-	dioblock_out->bytes &= spi_mosi_off;
-	dioblock_out->bytes &= spi_frame_off;
-	dioblock_out->bytes &= spi_clock_off;
+	dioblock_out->spi_ss = 1;
+	dioblock_out->spi_mosi = 0;
+	dioblock_out->spi_frame = 0;
+	dioblock_out->spi_clock = 0;
 	//dio_in = 0;  // init to off -- this probly doesn't do anything
 	//dio_out = 0;  // init to off -- do this somewhere else now
+#endif
 }
 
 BitbangSPI::~BitbangSPI(){
 	//dio_out = 0;  // set to off -- do this different
 	printf("Bitbang spi destructor\n");
+#ifndef NO_SPI
 	close(fd_dev_mem);
+#endif
 }
 
 int BitbangSPI::spiSend(uint_8 * data, int size) {
 	
 	BitbangSPI::lastcommand = data[1];
 
+#ifndef NO_SPI
+
 	//*dio_out = 0;//make sure all off?
-	dioblock_out->bytes &= spi_ss_off;//pull low to make compass listen
-	dioblock_out->bytes &= spi_clock_off;//clock low
+	dioblock_out->spi_ss = 0;//pull low to make compass listen
+	dioblock_out->spi_clock = 0;//clock low
 	PAUSE;
 	for(int byte = 0;byte < size; byte++){
 		for (int i=0;i<8;i++){
 
-			dioblock_out->bytes = spi_clock_on;//clock high
+			dioblock_out->spi_clock = 1;//clock high
 			PAUSE;
 
 			if((data[byte] >> i) & 1){//if data bit set (in current byte)
-				dioblock_out->bytes &= spi_clock_off;//clock low
-				dioblock_out->bytes |= spi_mosi_on;//set data out high -- this doesn't have to change untill the next time the clock is pulled low
+				dioblock_out->spi_clock = 0;//clock low
+				dioblock_out->spi_mosi = 1;//set data out high -- this doesn't have to change untill the next time the clock is pulled low
 				PAUSE;
 			}
 			else{
-				dioblock_out->bytes &= spi_mosi_off;
-				dioblock_out->bytes &= spi_clock_off;//clock low
+				dioblock_out->spi_mosi = 0;
+				dioblock_out->spi_clock = 0;//clock low
 				PAUSE;
 			}
 		}
 	}
 	//dioblock_out->spi_clock = 0;// the clock should be low
-	dioblock_out->bytes |= spi_ss_on;//will this make the compass not send untill slave line pulled low again?
-
+	dioblock_out->spi_ss = 1;//will this make the compass not send untill slave line pulled low again?
+#endif
 	#ifdef PRINT_TO_SCREEN_Tx
 		printf("sent:\n");
 		for(int i=0; i<size;i++){
@@ -220,8 +189,7 @@ int BitbangSPI::spiGet(uint_8 * dataresp, int size){
 
 			//data |= (datatemp & 1);
 
-			//data |= ((dioblock_in->bytes >> 10) & 1);
-			data |= dioblock_in->spi_miso;
+			data |= ((dioblock_in->bytes >> 10) & 1);
 			printf("data byte %d: %X\n",byte, data);
 			printf("pins_in: %X\n",dioblock_in->bytes);
 			printf("pins_out: %X\n\n",dioblock_out->bytes);
@@ -246,5 +214,6 @@ int BitbangSPI::spiGet(uint_8 * dataresp, int size){
 
 	return(0);
 }
+
 
 #endif //BITBANG_SPI_H
