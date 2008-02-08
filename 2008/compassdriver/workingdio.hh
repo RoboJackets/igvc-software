@@ -28,13 +28,13 @@
 
 //this is defined in another header -- is that bad?
 typedef unsigned char uint_8;
-/*
+
 #define spi_ss pin1
 #define spi_frame pin6
 #define spi_miso pin10
 #define spi_mosi pin12
 #define spi_clock pin14
-*/
+
 
 #define spi_ss_on 1 << 0
 #define spi_frame_on 1 << 6
@@ -50,7 +50,7 @@ typedef unsigned char uint_8;
 
 
 
-union dio_pins{
+typedef union {
 	struct {
 		unsigned pin1:1;
 		unsigned pin2:1;
@@ -73,7 +73,7 @@ union dio_pins{
 		unsigned:1;//temp sensor select
 	};
 	unsigned bytes;
-};
+} dio_pins;
 
 class BitbangSPI{
 	public:
