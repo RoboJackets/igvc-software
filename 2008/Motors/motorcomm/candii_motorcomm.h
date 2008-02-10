@@ -1,13 +1,11 @@
-#ifndef _CANDII_MOTORCOMM_H_
-#define _CANDII_MOTORCOMM_H_
+#ifndef CANDII_MOTORCOMM_H
+#define CANDII_MOTORCOMM_H
 
+#include <termios.h>  // for speed_t
+#include <stdbool.h>  // for bool
 
+bool readFully(int fd, void* buf, size_t numBytes);
+bool writeFully(int fd, void* buf, size_t numBytes);
+int serialport_init(const char* serialport, speed_t baud);
 
-
-
-
-
-
-
-
-#endif /* _CANDII_MOTORCOMM_H_ */
+#endif /* CANDII_MOTORCOMM_H */
