@@ -7,7 +7,7 @@
 #include <getopt.h>
 #include <stdbool.h>
 
-#include "candii_motorcomm.h"
+#include "motors.h"
 
 // ### PRIVATE FUNCTION PROTOTYPES ###
 
