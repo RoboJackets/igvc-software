@@ -1,25 +1,7 @@
-/*Added command line arguments
-when executing the following line at the command line prompt, an 'r' is sent over the serial connection to the arduino and the arduino dumps its data back in response
-candii_motorcomm r
-in order to write to a variable on the arduino, type the foloowing line into the command prompt. replace #1 with the number of the variable that you wish to write to, and replace #2 with the value you wish to write to that variable.
-candii_motorcomm w #1 #2
-
-when #1=0, the variable being written to is "leftMotorSpeed"
-when #1=1, the variable being written to is "rightMotorSpeed"
-when #1=2, the variable being written to is "softEStop"
-
-leftMotorSpeed and rightMotorSpeed can have values between 0 and 255 inclusive. a value of 128 stops the motors. positive values spin the motors forward. negative values spin the motors in reverse.
-
-setting softEStop to anything other than 0 makes the motors stop moving and sets their speed to 127 (stopped.)
-*/
-
-#include <stdio.h>    /* Standard input/output definitions */
-#include <stdlib.h> 
 #include <stdint.h>   /* Standard types */
 #include <string.h>   /* String function definitions */
 #include <unistd.h>   /* UNIX standard function definitions */
 #include <fcntl.h>    /* File control definitions */
-#include <errno.h>    /* Error number definitions */
 #include <termios.h>  /* POSIX terminal control definitions */
 #include <sys/ioctl.h>
 #include <getopt.h>
@@ -27,71 +9,85 @@ setting softEStop to anything other than 0 makes the motors stop moving and sets
 
 #include "candii_motorcomm.h"
 
+// ### PRIVATE FUNCTION PROTOTYPES ###
+
+bool readFully(int fd, void* buf, size_t numBytes);
+bool writeFully(int fd, void* buf, size_t numBytes);
+int serialport_init(const char* serialport, speed_t baud);
+
+// ### PUBLIC FUNCTIONS: MOTORS API ###
+
 #define WAIT_TIME 20 //Used for setting VTIME, each tick is 0.1 s
 #define BAUD B9600  //Serial baudrate
 #define DEFAULT_SERIAL "/dev/ttyUSB0"
 
-//The structure arduino_motor_reply_t defines and receives data that is read from the arduino-based motor control board.
+static int arduino_fd;
 
-typedef struct {
-	uint8_t HWESTOP; //0 if Hardware Estop is untriggered, 1 if it is
-	uint8_t AUTOMAN; //0 if the robot is operating in autonomous mode, 1 if manual control is active
-	uint8_t PATHNAV; //0 if the robot is in autonomous path following mode, 1 if the robot is in autonomous waypoint navigation mode
-	uint8_t CURRENTLEFT1; //Upper byte of the left motor current sensor's 10 bit reading
-	uint8_t CURRENTLEFT2; //Lower byte of the left motor current sensor's 10 bit reading
-	uint8_t CURRENTRIGHT1; //Upper byte of the right motor current sensor's 10 bit reading
-	uint8_t CURRENTRIGHT2; //Lower byte of the right motor current sensor's 10 bit reading
-	uint8_t LOGICBATT1; //Upper byte of the logic battery system's voltage 10 bit reading
-	uint8_t LOGICBATT2; //Lower byte of the logic battery system's voltage 10 bit reading
-	uint8_t MOTORBATT1; //Upper byte of the motor battery system's voltage 10 bit reading
-	uint8_t MOTORBATT2; //Lower byte of the motor battery system's voltage 10 bit reading
-} arduino_motor_reply_t;
-
-
-int main(int argc, char *argv[]) {
-	int fd = 0;
-
-	arduino_motor_reply_t reply;
-	ssize_t numWritten;
-	fd = serialport_init(DEFAULT_SERIAL, BAUD);
-
-	if (argv[1][0]=='r')
-	{
-		if (writeFully(fd, "r", 1))
-		{
-			printf("serialport_write: Write error %d: %s\n", (int) errno, (char*) strerror(errno));
-		}
-
-		printf("sizeof(reply): %d \n", sizeof(reply));
-		if (readFully(fd, &reply, sizeof(reply)))
-		{
-			printf("serialport_read: Read error %d: %s\n", (int) errno, (char*) strerror(errno));
-		}
-		printf("HWESTOP %d \n", (int) reply.HWESTOP);
-		printf("AUTOMAN %d \n", (int) reply.AUTOMAN);
-		printf("PATHNAV %d \n", (int) reply.PATHNAV);
-		printf("CURRENTLEFT1 %d \n", (int) reply.CURRENTLEFT1);
-		printf("CURRENTLEFT2 %d \n", (int) reply.CURRENTLEFT2);
-		printf("CURRENTRIGHT1 %d \n", (int) reply.CURRENTRIGHT1);
-		printf("CURRENTRIGHT2 %d \n", (int) reply.CURRENTRIGHT2);
-		printf("LOGICBATT1 %d \n", (int) reply.LOGICBATT1);
-		printf("LOGICBATT2 %d \n", (int) reply.LOGICBATT2);
-		printf("MOTORBATT1 %d \n", (int) reply.MOTORBATT1);
-		printf("MOTORBATT2 %d \n", (int) reply.MOTORBATT2);
-	}
-	if (argv[1][0]=='w')
-	{
-		char variableName = (char) atoi(argv[2]);
-		char variableValue = (char) atoi(argv[3]);
-		char buf[3] = {'w',variableName,variableValue};
-		if (writeFully(fd, buf, sizeof(buf)))
-		{
-			printf("serialport_write: Write error %d: %s\n", (int) errno, (char*) strerror(errno));
-		}
-	}
-
-	close(fd);
+/**
+ * Opens a connection to the motors.
+ * 
+ * @return			<tt>true</tt> if the connection to the motors could not be opened;
+ * 					<tt>false</tt> if successful.
+ * @author David Foster
+ */
+bool motors_open(void) {
+	arduino_fd = serialport_init(DEFAULT_SERIAL, BAUD);
+	return (arduino_fd == -1);
 }
+
+/**
+ * Closes the connection to the motors.
+ * 
+ * @author David Foster
+ */
+void motors_close(void) {
+	if (arduino_fd == -1) return;
+	close(arduino_fd);
+}
+
+/**
+ * Reads the status of the motor controller.
+ * 
+ * @param status	OUT: the motor controller's status.
+ * @return			<tt>true</tt> if an error occurs;
+ * 					<tt>false</tt> if successful.
+ *					More detailed information can be obtained by querying
+ *					<tt>errno</tt> and <tt>strerror(errno)</tt>.
+ * @author David Foster
+ */
+bool motors_getStatus(motor_reply_t *status) {
+	if (arduino_fd == -1) return false;
+	
+	if (writeFully(arduino_fd, "r", 1))
+		return true;
+	
+	if (readFully(arduino_fd, status, sizeof(*status)))
+		return true;
+	
+	return false;
+}
+
+/**
+ * Set the specified variable in the motor controller to the specified value.
+ * 
+ * @param var		the variable to change.
+ * @param value		the new value for the variable.
+ * @return			<tt>true</tt> if an error occurs;
+ * 					<tt>false</tt> if successful.
+ *					More detailed information can be obtained by querying
+ *					<tt>errno</tt> and <tt>strerror(errno)</tt>.
+ * @author David Foster
+ */
+bool motors_setVar(motor_var_t var, char value) {
+	if (arduino_fd == -1) return false;
+	
+	char buf[3] = {'w',var,value};
+	if (writeFully(arduino_fd, buf, sizeof(buf)))
+		return true;
+	return false;
+}
+
+// ### PRIVATE FUNCTIONS: SERIAL API ###
 
 /**
  * Write exactly <tt>numBytes</tt> bytes to file <tt>fd</tt>
@@ -208,31 +204,3 @@ int serialport_init(const char* serialport, speed_t baud) {
 
 	return fd;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
