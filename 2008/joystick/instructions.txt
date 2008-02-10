@@ -1,8 +1,0 @@
-1) extract sdl archive
-2) cd to extracted sdl folder
-3) ./configure
-4) make
-5) make install
-6) make clean
-7) cd to joystick folder
-8) make
