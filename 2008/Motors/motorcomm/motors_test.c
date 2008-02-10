@@ -1,20 +1,20 @@
 /*
  * When executing the following line at the command line prompt, an 'r' is sent over the serial connection to the arduino and the arduino dumps its data back in response
  * 
- *     candii_motorcomm r
+ *     motors_test r
  * 
  * In order to write to a variable on the arduino, type the following line into the command prompt.
  * Replace #1 with the number of the variable that you wish to write to, and replace #2 with the
  * value you wish to write to that variable.
  * 
- *     candii_motorcomm w #1 #2
+ *     motors_test w #1 #2
  * 
  */
 
 #include <stdio.h>    /* Standard input/output definitions */
 #include <errno.h>    /* Error number definitions */
 
-#include "candii_motorcomm.h"
+#include "motors.h"
 
 int main(int argc, char *argv[]) {
 	motor_reply_t reply;

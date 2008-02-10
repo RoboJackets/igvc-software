@@ -1,5 +1,5 @@
-#ifndef CANDII_MOTORCOMM_H
-#define CANDII_MOTORCOMM_H
+#ifndef MOTORS_H
+#define MOTORS_H
 
 #include <stdlib.h>
 #include <termios.h>  // for speed_t
@@ -40,4 +40,4 @@ void motors_close(void);
 bool motors_getStatus(motor_reply_t *status);
 bool motors_setVar(motor_var_t var, char value);
 
-#endif /* CANDII_MOTORCOMM_H */
+#endif /* MOTORS_H */
