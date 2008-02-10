@@ -13,9 +13,19 @@ leftMotorSpeed and rightMotorSpeed can have values between 0 and 255 inclusive. 
 setting softEStop to anything other than 0 makes the motors stop moving and sets their speed to 127 (stopped.)
 */
 
-#include "candii_serial.h"
+#include <stdio.h>    /* Standard input/output definitions */
+#include <stdlib.h> 
+#include <stdint.h>   /* Standard types */
+#include <string.h>   /* String function definitions */
+#include <unistd.h>   /* UNIX standard function definitions */
+#include <fcntl.h>    /* File control definitions */
+#include <errno.h>    /* Error number definitions */
+#include <termios.h>  /* POSIX terminal control definitions */
+#include <sys/ioctl.h>
+#include <getopt.h>
+#include <stdbool.h>
+
 #include "candii_motorcomm.h"
-#include <stdio.h>
 
 #define WAIT_TIME 20 //Used for setting VTIME, each tick is 0.1 s
 #define BAUD B9600  //Serial baudrate
@@ -57,34 +67,28 @@ int main(int argc, char *argv[]) {
 		{
 			printf("serialport_read: Read error %d: %s\n", (int) errno, (char*) strerror(errno));
 		}
-		printf("HWESTOP %d \n", (char)reply.HWESTOP);
-		printf("AUTOMAN %d \n", (char)reply.AUTOMAN);
-		printf("PATHNAV %d \n", (char)reply.PATHNAV);
-		printf("CURRENTLEFT1 %d \n", (char)reply.CURRENTLEFT1);
-		printf("CURRENTLEFT2 %d \n", (char)reply.CURRENTLEFT2);
-		printf("CURRENTRIGHT1 %d \n", (char)reply.CURRENTRIGHT1);
-		printf("CURRENTRIGHT2 %d \n", (char)reply.CURRENTRIGHT2);
-		printf("LOGICBATT1 %d \n", (char)reply.LOGICBATT1);
-		printf("LOGICBATT2 %d \n", (char)reply.LOGICBATT2);
-		printf("MOTORBATT1 %d \n", (char)reply.MOTORBATT1);
-		printf("MOTORBATT2 %d \n", (char)reply.MOTORBATT2);
+		printf("HWESTOP %d \n", (int) reply.HWESTOP);
+		printf("AUTOMAN %d \n", (int) reply.AUTOMAN);
+		printf("PATHNAV %d \n", (int) reply.PATHNAV);
+		printf("CURRENTLEFT1 %d \n", (int) reply.CURRENTLEFT1);
+		printf("CURRENTLEFT2 %d \n", (int) reply.CURRENTLEFT2);
+		printf("CURRENTRIGHT1 %d \n", (int) reply.CURRENTRIGHT1);
+		printf("CURRENTRIGHT2 %d \n", (int) reply.CURRENTRIGHT2);
+		printf("LOGICBATT1 %d \n", (int) reply.LOGICBATT1);
+		printf("LOGICBATT2 %d \n", (int) reply.LOGICBATT2);
+		printf("MOTORBATT1 %d \n", (int) reply.MOTORBATT1);
+		printf("MOTORBATT2 %d \n", (int) reply.MOTORBATT2);
 	}
 	if (argv[1][0]=='w')
 	{
-		int variableName = -1;
-		int variableValue = -1;
-		char buf[3];
-		variableName = atoi(argv[2]);
-		variableValue = atoi(argv[3]);
-		buf[0]='w';
-		buf[1]=variableName;
-		buf[2]=variableValue;
+		char variableName = (char) atoi(argv[2]);
+		char variableValue = (char) atoi(argv[3]);
+		char buf[3] = {'w',variableName,variableValue};
 		if (writeFully(fd, buf, sizeof(buf)))
 		{
 			printf("serialport_write: Write error %d: %s\n", (int) errno, (char*) strerror(errno));
 		}
 	}
-	
 
 	close(fd);
 }
@@ -157,8 +161,7 @@ bool readFully(int fd, void* buf, size_t numBytes) {
  * 					
  * @author Logan Snow
  */
-
-int serialport_init(const char* serialport, int baud) {
+int serialport_init(const char* serialport, speed_t baud) {
 	struct termios toptions;
 	int fd;
 	
@@ -175,8 +178,6 @@ int serialport_init(const char* serialport, int baud) {
 		perror("serialport_init: Couldn't get term attributes");
 		return -1;
 	}
-	speed_t brate = baud; // let you override switch below if needed
-
 	
     cfsetispeed(&toptions, baud);
 	cfsetospeed(&toptions, baud);
