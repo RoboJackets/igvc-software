@@ -190,6 +190,7 @@ int BitbangSPI::spiGet(uint_8 * dataresp, int size){
 			//data |= (datatemp & 1);
 
 			data |= ((dioblock_in->bytes >> 10) & 1);
+			//data |= dioblock_in->spi_miso
 			printf("data byte %d: %X\n",byte, data);
 			printf("pins_in: %X\n",dioblock_in->bytes);
 			printf("pins_out: %X\n\n",dioblock_out->bytes);
