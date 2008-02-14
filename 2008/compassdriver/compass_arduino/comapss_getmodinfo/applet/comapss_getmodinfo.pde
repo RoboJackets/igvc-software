@@ -82,6 +82,5 @@ unsigned char datatemp[11];
 		Serial.print("\n");
 	}
 	Serial.print("\n");
-        delay(5000);
+        delay(10);
 }
-
