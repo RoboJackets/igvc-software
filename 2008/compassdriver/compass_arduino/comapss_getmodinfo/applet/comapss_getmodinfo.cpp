@@ -1,3 +1,4 @@
+#include "WProgram.h"
 int SPI_SS = 10;
 int SPI_CLK = 11;
 int SPI_MISO = 12;
@@ -83,5 +84,17 @@ unsigned char datatemp[11];
 	}
 	Serial.print("\n");
         delay(5000);
+}
+
+int main(void)
+{
+	init();
+
+	setup();
+    
+	for (;;)
+		loop();
+        
+	return 0;
 }
 
