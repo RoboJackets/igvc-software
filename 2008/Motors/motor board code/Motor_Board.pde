@@ -1,6 +1,17 @@
+
+#define ATMEGA168
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <avr/signal.h>
+#include <avr/delay.h>
+#include <stdio.h>
+#include <stdarg.h>
+
+
 //DIGITAL PINS
   //MOTOR PINS
-#define LEFT_MOTOR_PWM_PIN 6
+#define LEFT_MOTOR_PWM_PIN 3
 #define LEFT_MOTOR_DIR_PIN 12
 #define RIGHT_MOTOR_PWM_PIN 11
 #define RIGHT_MOTOR_DIR_PIN 13
@@ -23,6 +34,7 @@
 #define FORWARD LOW
 #define BACKWARD HIGH
 #define ZERO_SPEED 128
+
 
 //VARIABLES
   //MOTOR VARIABLES
@@ -51,8 +63,19 @@ unsigned char autoMan;
 void setup()
 {
   //PWM TEST STUFF
-  TCCR2 |= (1<<CS20);
-  TCCR2 &= ~(1<<CS21 | 1<<CS22);
+//  sbi(TCCR2A,WGM20);
+  //TCCR2A |= (1<<WGM20);
+  //TCCR2A |= (1<<WGM21);
+  TCCR2B |= (1<<CS20);
+  TCCR2B &= ~(1<<CS21);
+  TCCR2B &= ~(1<<CS22);
+/*  TCCR2B |= (1<<CS20);
+  TCCR2B &= ~(1<<CS21);
+  TCCR2B &= ~(1<<CS22);*/
+  
+  //TCCR2A &= ~(1<<CS20);
+  //TCCR2A &= ~(1<<CS21);
+  //TCCR2A &= ~(1<<CS22);
   
   //open the serial port
   Serial.begin(9600);
