@@ -3,6 +3,8 @@ int SPI_CLK = 11;
 int SPI_MISO = 12;
 int SPI_MOSI = 13;
 
+int SPI_SYNC = 14;//this clears the compass's comm buffer
+
 unsigned char command[3] = {0xAA, 0x01, 0x00};
 
 /*
@@ -18,10 +20,15 @@ void setup(){
 	pinMode(SPI_CLK, OUTPUT);
 	pinMode(SPI_MOSI, OUTPUT);
 	pinMode(SPI_MISO, INPUT);
+	pinMode(SPI_SYNC, OUTPUT);
 
 	digitalWrite(SPI_SS, HIGH);
 	digitalWrite(SPI_CLK, LOW);
 	digitalWrite(SPI_MOSI, LOW);
+	digitalWrite(SPI_SYNC, HIGH);
+delayMicroseconds(100);
+	digitalWrite(SPI_SYNC, LOW);
+
 }
 
 void loop(){
