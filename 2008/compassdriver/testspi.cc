@@ -19,21 +19,26 @@ int main(void){
 	char_u8 tempchr;
 	ModInfoResp moduleversion;
 
-		for(int i = 2;i<6;i++) {
-			tempchr.u8 = data_in[i];
-			moduleversion.module_type[i-2] = tempchr.chr;
-		}
-		moduleversion.module_type[4] = '\0';//probably usefull
-		
-		for(int i = 6;i<10;i++) {
-			tempchr.u8 = data_in[i];
-			moduleversion.firmware_version[i-6] = tempchr.chr;
-		}	       
-		moduleversion.firmware_version[4] = '\0';
+	memcpy(moduleversion.module_type, data_in+2, 4);
+	moduleversion.module_type[4] = '\0';
+	/*
+	for(int i = 2;i<6;i++) {
+		tempchr.u8 = data_in[i];
+		moduleversion.module_type[i-2] = tempchr.chr;
+	}
+	moduleversion.module_type[4] = '\0';//probably usefull
+	*/
+	
+	memcpy(moduleversion.firmware_version, data_in+6, 4);
+	moduleversion.firmware_version[4] = '\0';	
+	/*
+	for(int i = 6;i<10;i++) {
+		tempchr.u8 = data_in[i];
+		moduleversion.firmware_version[i-6] = tempchr.chr;
+	}	       
+	moduleversion.firmware_version[4] = '\0';
+	*/
 
 	printf("module type:\t%s\n", moduleversion.module_type);
 	printf("firmware version:\t%s\n",moduleversion.firmware_version);
-
-	
-
 }
