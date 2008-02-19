@@ -1,8 +1,9 @@
-#include "WProgram.h"
 int SPI_SS = 10;
 int SPI_CLK = 11;
 int SPI_MISO = 12;
 int SPI_MOSI = 13;
+
+int SPI_SYNC = 8;//this clears the compass's comm buffer
 
 unsigned char command[3] = {0xAA, 0x01, 0x00};
 
@@ -19,21 +20,26 @@ void setup(){
 	pinMode(SPI_CLK, OUTPUT);
 	pinMode(SPI_MOSI, OUTPUT);
 	pinMode(SPI_MISO, INPUT);
+	pinMode(SPI_SYNC, OUTPUT);
 
-	digitalWrite(SPI_SS, HIGH);
+	digitalWrite(SPI_SS, LOW);
 	digitalWrite(SPI_CLK, LOW);
 	digitalWrite(SPI_MOSI, LOW);
+	digitalWrite(SPI_SYNC, HIGH);
+delayMicroseconds(100);
+	digitalWrite(SPI_SYNC, LOW);
+
 }
 
 void loop(){
 //start main code
 unsigned char datain[11];
-	digitalWrite(SPI_SS, LOW);
+	digitalWrite(SPI_SS, HIGH);
 	//delayMicroseconds(100);//delay 100us before starting clock
 
 //send command
 	for(int byte = 0; byte < 3; byte++){
-		/*for(int bit = 0; bit < 8; bit++){
+/*		for(int bit = 0; bit < 8; bit++){
 			if((command[byte] >> bit) & 1){//this is sending little endian -- lsb first
 				digitalWrite(SPI_CLK, HIGH);
 				digitalWrite(SPI_MOSI, HIGH);
@@ -46,9 +52,9 @@ unsigned char datain[11];
 			}
 			digitalWrite(SPI_CLK, LOW);
 			delayMicroseconds(50);//wait the appropriate amount to make this a 2khz signal (or shorter, max 3.6864 Mhz)
-		}*/
-
-		shiftOut(SPI_MOSI, SPI_CLK, MSBFIRST, command[byte]);//how fast does this run?
+		}
+*/
+		shiftOut(SPI_MOSI, SPI_CLK, LSBFIRST, command[byte]);//how fast does this run?
 	}
 //
 
@@ -70,7 +76,7 @@ unsigned char datatemp[11];
 		}
 	}
 	
-	digitalWrite(SPI_SS, HIGH);
+	digitalWrite(SPI_SS, LOW);
 
 	
 
@@ -85,16 +91,3 @@ unsigned char datatemp[11];
 	Serial.print("\n");
         delay(5000);
 }
-
-int main(void)
-{
-	init();
-
-	setup();
-    
-	for (;;)
-		loop();
-        
-	return 0;
-}
-
