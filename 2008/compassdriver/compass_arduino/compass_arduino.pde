@@ -1,13 +1,20 @@
-typedef unsigned char uint_8
+//need to decide how to instruct compass of config, and need to set DATA_LENGTH approp.
+
+//maybe reload config every time arduino starts?
+
+//how does the world want to request and get the data off the arduino?
+
+#include compassTypes.h
+#include compassFunctions.h
+
+#define DATA_LENGTH ??
+#define DATA_FRAME_COUNT ??
 
 int SPI_SS = 10;
 int SPI_CLK = 11;
 int SPI_MISO = 12;
 int SPI_MOSI = 13;
-
 int SPI_SYNC = 8;//this clears the compass's comm buffer
-
-#include compassTypes.h
 
 void setup(){
 	Serial.begin(9600);
@@ -30,39 +37,6 @@ void loop(){
 	getCommand();
 }
 
-void compassSend(uint_8 * dataout, int length){
-	for(int frame = 0; frame < length; frame++){
-		for(int bit = 0; bit < 8; bit++){
-			digitalWrite(SPI_CLK, HIGH);
-			if((command[frame] >> bit) & 1){//this is sending little endian -- lsb first
-				digitalWrite(SPI_MOSI, HIGH);
-			}
-			else{
-				digitalWrite(SPI_MOSI, LOW);
-			}
-			delayMicroseconds(50);//wait the appropriate amount to make this a 2khz signal (or shorter, max 3.6864 Mhz)
-			digitalWrite(SPI_CLK, LOW);
-			delayMicroseconds(50);//wait the appropriate amount to make this a 2khz signal (or shorter, max 3.6864 Mhz)
-		}
-		//shiftOut(SPI_MOSI, SPI_CLK, LSBFIRST, command[frame]);//how fast does this run?
-	}
-}
-
-void compassGet(uint_8 * datain, int length){
-	digitalWrite(SPI_MOSI, LOW);//transmit zero whilst receiving
-	for(int frame = 0; frame < length; frame++){
-		for(int bit = 0; bit < 8; bit++){//this is rec little endian
-			digitalWrite(SPI_CLK, HIGH);
-			//delayMicroseconds(10);//delay of 10us before data is sent
-
-			datatemp[frame] |= digitalRead(SPI_MISO);
-			datatemp[frame] <<= 1;
-			
-			digitalWrite(SPI_CLK, LOW);
-			delayMicroseconds(50);//wait the appropriate amount to make this a 2khz signal (or shorter, max 3.6864 Mhz)
-		}
-	}
-}
 
 int getCommand(){
 	while(Serial.available < 1){}//wait here while no data
@@ -75,43 +49,32 @@ int getCommand(){
 			break;
 		case 'b':
 			//setData();
+			//incomingByte = Serial.read();
+			//change of mind -- lets just hardcode the setup -- parsing is too much of a pain
+			break;
 		case 'c':
-			//getData();
+			getData();
+			break;
+		case 'd':
+			setConfig();//again, hardcode
+			break;
+		case 'e':
+			startCal();		
+			break;
+		case 'f':
+			stopCal();
+			break;
+		case 'g':
+			getCalData();
+			break;
+		case 'h':
+			setDataComponents();//hardcode
+			break;
 		default:
-			//
+			//explode.
+			break;
 	}
-
-/*
-	if (incomingByte == 'a'){//need to figure out an interface
-		getmodinfo();
-	}
-	else if (incomingByte == 'b') {
-		//setdata();
-	}
-	else if (incomingByte == 'c') {
-		//getdata();
-	}
-	
-*/
 	
 }
 
 
-void getmodinfo(){
-	uint_8 command[3] = {sync_flag, get_mod_info, terminator};
-	uint_8 answer[11];
-
-	compassSend(data, 3);
-
-	compassGet(answer, 11);
-
-	for(int i = 2; i < 6; i++){
-		Serial.print(answer[i], BYTE);
-	}
-		Serial.print('\n');
-	for(int i = 6; i < 10; i++){
-		Serial.print(answer[i], BYTE);
-	}
-	
-	//return();
-}
