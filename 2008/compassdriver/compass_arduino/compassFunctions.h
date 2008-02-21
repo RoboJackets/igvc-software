@@ -1,4 +1,17 @@
-void compassSend(uint_8 * dataout, int length){
+compassSend(uint_8 * data, int size) {
+
+	uint_8 senddata[size+2];
+	senddata[0] = sync_flag;
+	senddata[size+1] = terminator;
+	for(int i=0;i<size; i++) {
+		senddata[i+1] = data[i];
+	}
+	spiSend(senddata, size+2);//send data wrapped with sync_flag and terminator
+	return(0);
+}
+
+
+void spiSend(uint_8 * dataout, int length){
 	for(int frame = 0; frame < length; frame++){
 		for(int bit = 0; bit < 8; bit++){
 			digitalWrite(SPI_CLK, HIGH);
@@ -34,10 +47,10 @@ void compassGet(uint_8 * datain, int length){
 
 
 void getmodinfo(){
-	uint_8 command[3] = {sync_flag, get_mod_info, terminator};
+	uint_8 command = get_mod_info;
 	uint_8 answer[11];
 
-	compassSend(command, 3);
+	compassSend(&command, 1);
 
 	compassGet(answer, 11);
 
@@ -55,7 +68,7 @@ void getmodinfo(){
 //how should this send the data, just print over serial instead of returning struct?
 void getData(void) {
 	uint_8 data = get_data;
-	CompassSend(&data,1);
+	compassSend(&data,1);
 
 	uint_8 dataresp[DATA_LENGTH + 4];//we will be getting DATA_LENGTH + sync + data_resp + count + term
 	spidriver.spiGet(dataresp, DATA_LENGTH + 4);
@@ -163,14 +176,14 @@ int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval) {
 			data[3] = configval[1];
 			data[4] = configval[2];
 			data[5] = configval[3];
-		CompassSend(data,6);
+		compassSend(data,6);
 	}
 	else {
 		uint_8 data[3];
 		data[0] = set_config;
 		data[1] = config_id;
 		data[3] = configval[0];
-		CompassSend(data,3);
+		compassSend(data,3);
 	}
 
 	return(0);
@@ -179,20 +192,20 @@ int CompassDriver::SetConfig(uint_8 config_id, uint_8 * configval) {
 
 int CompassDriver::StartCal(void) {
 	uint_8 data = start_cal;
-	CompassSend(&data,1);
+	compassSend(&data,1);
 	return(0);//something about wanting to read XRaw and YRaw??? needs to be set before this is run
 
 }
 
 int CompassDriver::StopCal(void) {
 	uint_8 data = stop_cal;
-	CompassSend(&data,1);
+	compassSend(&data,1);
 	return(0);//need to SaveConfig for this to be permanent
 }
 
 CalDataResp CompassDriver::GetCalData(void) {
 	uint_8 data = get_cal_data;
-	CompassSend(&data,1);
+	compassSend(&data,1);
 	CalDataResp reply;
 	uint_8 resp[28];//is this right? needs to be total length of cal data from device.  (4 x sint_32, 2 x float32) = 24 bytes, + count + sync + term + cal_data_resp
 	spidriver.spiGet(resp, 28);//getting array pf bytes from compass
@@ -249,7 +262,7 @@ CalDataResp CompassDriver::GetCalData(void) {
 
 
 int CompassDriver::SetDataComponents(DataTypeReq datatypewanted) {
-	uint_8 data[11];//max size of config + config count + command, excluding header (CompassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
+	uint_8 data[11];//max size of config + config count + command, excluding header (compassSend adds it).  the number of bits sent is determind by j, so the unused bits should be ignored
 	
 	CompassDriver::datapackcount = 0;
 	CompassDriver::datalength = 0;
@@ -313,6 +326,6 @@ int CompassDriver::SetDataComponents(DataTypeReq datatypewanted) {
 	data[0] = set_data_components;//command to set data to recive
 	data[1] = datapackcount;//count of data we expect
 	
-	CompassSend(data, j);
+	compassSend(data, j);
 	return(0);
 }
