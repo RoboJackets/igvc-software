@@ -30,7 +30,7 @@ typedef enum {
 	MV_RIGHT_MOTOR_SPEED	= 1,
 	/**
 	 * Setting softEStop to anything other than 0 makes the motors stop moving and
-	 * sets their speed to 127 (stopped).
+	 * sets their speed to 128 (stopped).
 	 */
 	MV_SOFT_ESTOP			= 2,
 } motor_var_t;
