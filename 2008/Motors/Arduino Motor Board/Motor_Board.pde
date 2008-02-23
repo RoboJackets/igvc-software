@@ -62,20 +62,10 @@ unsigned char autoMan;
 
 void setup()
 {
-  //PWM TEST STUFF
-//  sbi(TCCR2A,WGM20);
-  //TCCR2A |= (1<<WGM20);
-  //TCCR2A |= (1<<WGM21);
+  //Fix the PWM freq so it is over 20k Hz.
   TCCR2B |= (1<<CS20);
   TCCR2B &= ~(1<<CS21);
   TCCR2B &= ~(1<<CS22);
-/*  TCCR2B |= (1<<CS20);
-  TCCR2B &= ~(1<<CS21);
-  TCCR2B &= ~(1<<CS22);*/
-  
-  //TCCR2A &= ~(1<<CS20);
-  //TCCR2A &= ~(1<<CS21);
-  //TCCR2A &= ~(1<<CS22);
   
   //open the serial port
   Serial.begin(9600);
