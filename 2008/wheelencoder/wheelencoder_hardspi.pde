@@ -1,9 +1,4 @@
 
-//the encoder sends at a max of 50khz, what does the arduino run at? it might be 16Mhz/128 ~ 125khz ...
-
-
-
-
 #define SPI_MOSI 11//MOSI
 #define SPI_MISO 12//MISO 
 #define SPI_CLK	13//sck
@@ -18,9 +13,11 @@ void setup(){
 	pinMode(SPI_CLK, OUTPUT);
 	pinMode(SPI_SS, OUTPUT);
 	digitalWrite(SPI_SS, HIGH); //disable device 
-	
+
+	//the encoder sends at a max of 50khz, arduino at default clock runs spi at minimum 250khz	
+	//set the system clock prescaler to 8 so spi_clock ~ 40khz
 	CLKPR = (1<<CLKPCE);
-	CLKPR = (1<<CLKPS1)|(1<<CLKPS0);//set the system clock slower so spi_clock is 40khz
+	CLKPR = (1<<CLKPS1)|(1<<CLKPS0);
 
 	SPSR ^= ~(1);//disable double speed
 	
