@@ -19,6 +19,9 @@ void setup(){
 	pinMode(SPI_SS, OUTPUT);
 	digitalWrite(SPI_SS, HIGH); //disable device 
 	
+	CLKPR = (1<<CLKPCE);
+	CLKPR = (1<<CLKPS1)|(1<<CLKPS0);//set the system clock so spi_clock is 40khz
+
 	SPSR ^= ~(1);//disable double speed
 	
 	SPCR = 0;
