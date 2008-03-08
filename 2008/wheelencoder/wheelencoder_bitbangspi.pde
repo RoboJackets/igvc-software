@@ -45,37 +45,42 @@ unsigned int getPostion(){
 }
 
 unsigned int getTime(){
-	unsigned int time
+	unsigned int time;
 	//TCNT1 is a 16 bit timer/counter ~ pg 121
-	time = TCNT1L;//how often does this tick?
+	time = TCNT1L;//how often does this tick? does it tick with clk_cpu
 	time |= TCNT1H << 8;
 	return(time);
 }
 
 void loop(){
-	//start main code
 
-	unsigned long t1 = millis();
+	unsigned long t1 = getTime();
 	
-	unsigned int p1 = getPostion();
-	//p1
-
-	//p2
-
+	unsigned int p1 = getTime();
 	unsigned int p2 = getPostion();
       
-	unsigned long t2 = millis();
+	unsigned long t2 = getTime();
 
 
 
 	//Serial.print("received: ");
-	Serial.println("dp");
-	Serial.println(p2 - p1, DEC);
-	Serial.println("dt");
-	if(t2 > t1){
-		Serial.println(t2 - t1, DEC);
+//	Serial.println("dp");
+//	Serial.println(p2 - p1, DEC);
+//	Serial.println("dt");
+
+	float velocity;
+	if((t2 > t1) && (p2 > p1)){
+  		velocity = ((p2 - p1) * TWO_PI / 512) / ((t2 - t1)/F_CPU);
 	}
-	else{
-		Serial.println((t2+65536) - t1);
+	else if((t2 < t1) && (p2 > p1)){
+  		velocity = ((p2 - p1) * TWO_PI / 512) / (((t2+65536) - t1)/F_CPU);
 	}
+	else if((t2 > t1) && (p2 < p1)){
+  		velocity = (((p2+512) - p1) * TWO_PI / 512) / ((t2 - t1)/F_CPU);
+	}
+	else if((t2 < t1) && (p2 < p1)){
+  		velocity = (((p2+512) - p1) * TWO_PI / 512) / (((t2+65536) - t1)/F_CPU);
+  		
+	}
+	Serial.println(velocity, DEC);
 }
