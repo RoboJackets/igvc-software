@@ -4,21 +4,23 @@ int SPI_MISO = 12;
 
 
 void setup(){
-
 	pinMode(SPI_SS, OUTPUT);
 	pinMode(SPI_CLK, OUTPUT);
 	pinMode(SPI_MISO, INPUT);
 
 	digitalWrite(SPI_SS, HIGH);
 	digitalWrite(SPI_CLK, LOW);
-        Serial.begin(9600);
+	
+	TCCR1A = 0;//set to counter mode
+	//TCCR1B = (1<<CS12)|(1<<CS10);// clk1o/1024 table on pg134
+	TCCR1B = (1<<CS10);// no prescale clk1o/1
+
+	Serial.begin(9600);
 }
 
-void loop(){
-	//start main code
+unsigned int getPostion(){
 	unsigned int datatemp;
-	int t1 = millis();
-	
+
 	digitalWrite(SPI_SS, LOW);
 	delayMicroseconds(100);//delay 100us before starting clock
 
@@ -30,19 +32,50 @@ void loop(){
 		datatemp <<= 1;
 			
 		digitalWrite(SPI_CLK, LOW);
-		delayMicroseconds(50);//wait the appropriate amount to make this a 2khz signal (or shorter, encoder take 1khz through 50khz)
+		delayMicroseconds(50);//wait the appropriate amount to make this a 2khz signal (or shorter, encoder does 1khz through 50khz)
 	}
 	digitalWrite(SPI_SS, HIGH);
 	
-        delayMicroseconds(50);//the last bit is held for 50us
-        delay(1);
-      
-	int t2 = millis();
+	delayMicroseconds(50);//the last bit is held for 50us
+	delay(1);//data only refreshed every 1 ms
+
 	unsigned int dataout = (((datatemp >> 13) & 1) << 8) | (((datatemp >> 12) & 1) << 7) | (((datatemp >> 11) & 1) << 6) | (((datatemp >> 10) & 1) << 5) | (((datatemp >> 9) & 1) << 4) | (((datatemp >> 8) & 1) << 3) | (((datatemp >> 2) & 2) << 2) | (((datatemp >> 1) & 1) << 1) | (datatemp & 1);
+
+	return(dataout);
+}
+
+unsigned int getTime(){
+	unsigned int time
+	//TCNT1 is a 16 bit timer/counter ~ pg 121
+	time = TCNT1L;//how often does this tick?
+	time |= TCNT1H << 8;
+	return(time);
+}
+
+void loop(){
+	//start main code
+
+	unsigned long t1 = millis();
+	
+	unsigned int p1 = getPostion();
+	//p1
+
+	//p2
+
+	unsigned int p2 = getPostion();
+      
+	unsigned long t2 = millis();
+
 
 
 	//Serial.print("received: ");
-	Serial.println(dataout, DEC);
-	Serial.println(t2-t1,DEC);
-        delay(100);
+	Serial.println("dp");
+	Serial.println(p2 - p1, DEC);
+	Serial.println("dt");
+	if(t2 > t1){
+		Serial.println(t2 - t1, DEC);
+	}
+	else{
+		Serial.println((t2+65536) - t1);
+	}
 }

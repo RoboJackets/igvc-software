@@ -17,52 +17,66 @@
 #define SERIALPORT "/dev/ttyUSB0"
 #define BAUD B9600
 
-#define DT 100
+//#define DT 100
+
+void readToNewline(int fd, char * buff, int maxlen){
+	int i = 0;
+	do{
+		readFully(fd, &buff[i], 1);
+		i++;
+	}while((strncmp(&buff[i],"\n",1) != 0) && (i < maxlen));
+}
 
 int main(void){
 	char buffer[6] = {0};
-	char char_buff;
-	char a = 'a';
+	//char char_buff;
+	//char a = 'a';
 	int fd = serialport_init(SERIALPORT, BAUD);
 	
-	int p1,p2;
-	struct timeval t1,t2;
-	struct timezone *tz;
+	int dp;
+	int dt;
+	//struct timezone *tz;
 	float velocity;
 	
 	while(1){
-		//writeFully(fd, &a, 1);
-		//usleep(200);		
 				
-		//gettimeofday(&t1, &tz);
-		
-		readFully(fd, &buffer, 5);
-		if(buffer[0] = "p"){
-			p1 = atoi(buffer);
+		readToNewline(fd, buffer, 2);
+		if( strncmp(buffer,"dp",2) == 0){
+			readToNewline(fd, buffer, 5);
+			dp = atoi(buffer);
 		}
+		else if( strncmp(buffer,"dt",2) == 0){
+			readToNewline(fd, buffer, 5);
+			dt = atoi(buffer);
+		}		
 		else{
-			t1 = atoi(buffer);
+			printf("broke");
+			readFully(fd, buffer, 1);
 		}
 
-		readFully(fd, &buffer, 5);
-		if(buffer[0] = "p"){
-			p2 = atoi(buffer);
+		readToNewline(fd, buffer, 2);
+		if( strncmp(buffer,"dp",2) == 0 ){
+			readToNewline(fd, buffer, 5);
+			dp = atoi(buffer);
 		}
+		else if( strncmp(buffer,"dt",2) == 0){
+			readToNewline(fd, buffer, 5);
+			dt = atoi(buffer);
+		}		
 		else{
-			t2 = atoi(buffer);
-		}
-		
-
-		//gettimeofday(&t2, &tz);
-		
-		//velocity = (v2 - v1) / (t2.tv_usec - t1.tv_usec) * 1000;
-		velocity = (p2 - p1) * ((2* M_PI)/512) / DT;
-		printf("%d\n", velocity);
-		//printf("time %d\n",(t2.tv_usec - t1.tv_usec));
+			printf("broke");
+			readFully(fd, buffer, 1);
 		}
 
-		//printf("%s\n",buffer);
+		velocity = (dp) * ((2* M_PI)/512) / dt*1000;
+		printf("dp: %d\tdt: %d\tvel: %d\n", dp, dt, velocity);
 
+		
+		/*
+		readFully(fd, buffer, 5);
+		printf("%s\n",buffer);
+		*/
+	}
 	return(0);
 }
 
