@@ -68,7 +68,7 @@ void loop(){
 	delay(10);
 	getPosition(&t2, &p2);
    
-	double dp, dt;
+	float dp, dt;
 	if(p2 >= p1){
   		dp = p2 - p1;
 	}
@@ -82,7 +82,7 @@ void loop(){
 		dt = (t2 + 65536) - t1;
   	}
 
-	double velocity = (dp) / (dt) * RAD_ENCODERTICK * COUNTER_RATE;
+	float velocity = (dp) / (dt) * RAD_ENCODERTICK * COUNTER_RATE;
 
 	char strbuff[32];
 	Serial.print("ang vel(rad/s): ");
