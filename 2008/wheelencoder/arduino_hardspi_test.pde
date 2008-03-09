@@ -19,10 +19,7 @@ void setup(){
 	SPSR ^= ~(1);//disable double speed
 	
 	SPCR = 0;
-	SPCR = (1<<SPE) | (1<<MSTR) | (1<<CPHA) | (1<<SPR1) | (1<<SPR0);//enable spi, set master, set sample clock on trailing edge, slowest speed (250khz); (implicit: clock idle low, MSB first)
-	//SPCR = (1<<SPE)|(1<<MSTR);
-
-	Serial.begin(9600);	
+	SPCR = (1<<SPE) | (1<<MSTR) | (1<<CPHA) | (1<<SPR1) | (1<<SPR0);//enable spi, set master, set sample clock on trailing edge, slowest speed (250khz); (implicit: clock idle low, MSB first)	
 }
 
 //verbatim from eeprom tutorial
