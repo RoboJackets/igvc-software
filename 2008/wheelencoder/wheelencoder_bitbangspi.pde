@@ -68,9 +68,6 @@ void loop(){
 	delay(10);
 	getPosition(&t2, &p2);
    
-   p1 = 1;
-   p2 = 2;
-   
 	double dp, dt;
 	if(p2 >= p1){
   		dp = p2 - p1;
