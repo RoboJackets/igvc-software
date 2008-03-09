@@ -1,0 +1,100 @@
+#!/usr/bin/make -f
+
+DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+ifeq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+CFLAGS		?= -O2 -Wall -g
+else
+CFLAGS		?= -O0 -Wall -g
+endif
+
+export DEB_HOST_GNU_TYPE DEB_BUILD_GNU_TYPE CFLAGS
+
+
+majorname	= $(shell grep library_names src/libraw1394.la \
+			| cut -d"'" -f 2 | cut -d" " -f 2)
+fullversionname	= $(shell grep library_names src/libraw1394.la \
+			| cut -d"'" -f 2 | cut -d" " -f 1)
+major 		= $(shell echo $(majorname) | cut -d"." -f 3)
+
+libraw		= libraw1394-$(major)
+source-version	= $(shell dpkg-parsechangelog | grep ^Version | cut -d" " -f 2)
+
+autoclean-files:
+	echo $@ >$@
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	./configure $(confflags) --prefix=/usr --mandir=\$${prefix}/share/man \
+		--infodir=\$${prefix}/share/info
+	$(MAKE)
+	$(MAKE) -C doc libraw1394.pdf
+
+	touch build-stamp
+
+clean: autoclean-files
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+
+	-$(MAKE) distclean
+
+	dh_clean
+	xargs <autoclean-files rm -f
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	$(MAKE) install DESTDIR=`pwd`/debian/tmp
+
+binary-indep: build install
+# Nothing to do here
+
+binary-arch: build install autoclean-files
+	dh_testdir
+	dh_testroot
+
+	dh_movefiles -p$(libraw)		\
+		usr/lib/$(majorname)		\
+		usr/lib/$(fullversionname)
+
+	dh_movefiles -plibraw1394-dev		\
+		usr/bin/testlibraw		\
+		usr/include/libraw1394		\
+		usr/lib				\
+		usr/share/aclocal		\
+		usr/share/man
+
+	echo >>autoclean-files			\
+		debian/substvars		\
+		debian/shlibs.local
+
+	echo "soversion=$(major)" >>debian/substvars
+
+	for i in postinst templates config; do				\
+		echo >>autoclean-files debian/$(libraw).$$i;		\
+		cp debian/libraw1394.$$i.in debian/$(libraw).$$i;	\
+	done
+
+	dh_installdocs
+	dh_installchangelogs
+	dh_strip
+	dh_compress
+	dh_link
+	dh_fixperms
+	dh_makeshlibs
+	dh_installdebconf
+	dh_installdeb
+	dh_shlibdeps -L $(libraw) -l debian/$(libraw)/usr/lib
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

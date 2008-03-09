@@ -1,0 +1,1703 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>SeqCtlDemoForm</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>SeqCtlDemoForm</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>449</width>
+            <height>664</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Sequence Control Demo</string>
+    </property>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>discardPushButton</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>370</x>
+                <y>610</y>
+                <width>70</width>
+                <height>30</height>
+            </rect>
+        </property>
+        <property name="focusPolicy">
+            <enum>TabFocus</enum>
+        </property>
+        <property name="text">
+            <string>Discard</string>
+        </property>
+        <property name="autoDefault">
+            <bool>false</bool>
+        </property>
+        <property name="toolTip" stdset="0">
+            <string>Discard all Changes</string>
+        </property>
+        <property name="whatsThis" stdset="0">
+            <string>Discard all Changes</string>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>UpdateUIPushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>180</x>
+                <y>610</y>
+                <width>90</width>
+                <height>30</height>
+            </rect>
+        </property>
+        <property name="focusPolicy">
+            <enum>TabFocus</enum>
+        </property>
+        <property name="acceptDrops">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Update UI</string>
+        </property>
+        <property name="autoDefault">
+            <bool>false</bool>
+        </property>
+        <property name="toolTip" stdset="0">
+            <string>Rescan Values from Camera</string>
+        </property>
+        <property name="whatsThis" stdset="0">
+            <string>Rescan Values from Camera</string>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>cancelPushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>90</x>
+                <y>610</y>
+                <width>70</width>
+                <height>30</height>
+            </rect>
+        </property>
+        <property name="focusPolicy">
+            <enum>TabFocus</enum>
+        </property>
+        <property name="text">
+            <string>Cancel</string>
+        </property>
+        <property name="autoDefault">
+            <bool>false</bool>
+        </property>
+        <property name="toolTip" stdset="0">
+            <string>Reject all Changes and close Dialog</string>
+        </property>
+        <property name="whatsThis" stdset="0">
+            <string>Reject all Changes and close Dialog</string>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>okPushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>610</y>
+                <width>70</width>
+                <height>30</height>
+            </rect>
+        </property>
+        <property name="focusPolicy">
+            <enum>TabFocus</enum>
+        </property>
+        <property name="text">
+            <string>OK</string>
+        </property>
+        <property name="autoDefault">
+            <bool>false</bool>
+        </property>
+        <property name="toolTip" stdset="0">
+            <string>Accept all Changes and close Dialog</string>
+        </property>
+        <property name="whatsThis" stdset="0">
+            <string>Accept all Changes and close Dialog</string>
+        </property>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>seqCtlGroupBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>430</y>
+                <width>430</width>
+                <height>170</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Sequence Control</string>
+        </property>
+        <widget class="Line">
+            <property name="name">
+                <cstring>line1_2</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>20</x>
+                    <y>100</y>
+                    <width>390</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="frameShape">
+                <enum>HLine</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Sunken</enum>
+            </property>
+            <property name="orientation">
+                <enum>Horizontal</enum>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>textLabel3</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>130</x>
+                    <y>20</y>
+                    <width>110</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Seq. Length:</string>
+            </property>
+        </widget>
+        <widget class="QCheckBox">
+            <property name="name">
+                <cstring>seqCtlEnableCheckBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>30</x>
+                    <y>20</y>
+                    <width>90</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Enable</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Enable Sequence-Control</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Sequence-Control</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>seqCtlApplyPushButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>30</x>
+                    <y>70</y>
+                    <width>90</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Apply</string>
+            </property>
+            <property name="autoDefault">
+                <bool>false</bool>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Apply Parameters</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Apply Parameters</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>textLabel2</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>140</x>
+                    <y>70</y>
+                    <width>100</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Image No.:</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>seqCtlStopPushButton</cstring>
+            </property>
+            <property name="enabled">
+                <bool>true</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>170</x>
+                    <y>120</y>
+                    <width>90</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Stop</string>
+            </property>
+            <property name="autoDefault">
+                <bool>false</bool>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Stop Sequence</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Stop Sequence</string>
+            </property>
+        </widget>
+        <widget class="QSpinBox">
+            <property name="name">
+                <cstring>seqCtlLengthSpinBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>240</x>
+                    <y>20</y>
+                    <width>70</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="maxValue">
+                <number>255</number>
+            </property>
+            <property name="minValue">
+                <number>1</number>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Sequence-Length</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Sequence-Length</string>
+            </property>
+        </widget>
+        <widget class="QSpinBox">
+            <property name="name">
+                <cstring>seqCtlImgNoSpinBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>240</x>
+                    <y>70</y>
+                    <width>70</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="buttonSymbols">
+                <enum>UpDownArrows</enum>
+            </property>
+            <property name="maxValue">
+                <number>255</number>
+            </property>
+            <property name="minValue">
+                <number>1</number>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Sequence-Image-No.</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Sequence-Image-No.</string>
+            </property>
+        </widget>
+        <widget class="QCheckBox">
+            <property name="name">
+                <cstring>seqCtlAutoIncCheckBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>320</x>
+                    <y>70</y>
+                    <width>100</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Auto Inc.</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Auto Inc. Image-No.</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Auto Inc. Image-No.</string>
+            </property>
+        </widget>
+        <widget class="QCheckBox">
+            <property name="name">
+                <cstring>seqCtlAutoRewindCheckBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>320</x>
+                    <y>120</y>
+                    <width>100</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Loop</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Enable / Disable Loop-Play</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Enable / Disable Loop-Play</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>seqCtlRunPushButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>30</x>
+                    <y>120</y>
+                    <width>90</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Run</string>
+            </property>
+            <property name="autoDefault">
+                <bool>false</bool>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Start Sequence</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Start Sequence</string>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>applyPushButton</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>290</x>
+                <y>610</y>
+                <width>70</width>
+                <height>30</height>
+            </rect>
+        </property>
+        <property name="focusPolicy">
+            <enum>TabFocus</enum>
+        </property>
+        <property name="text">
+            <string>Apply</string>
+        </property>
+        <property name="autoDefault">
+            <bool>false</bool>
+        </property>
+        <property name="toolTip" stdset="0">
+            <string>Apply all Changes</string>
+        </property>
+        <property name="whatsThis" stdset="0">
+            <string>Apply all Changes</string>
+        </property>
+    </widget>
+    <widget class="QTabWidget">
+        <property name="name">
+            <cstring>seqCtlTabWidget</cstring>
+        </property>
+        <property name="enabled">
+            <bool>true</bool>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>10</y>
+                <width>430</width>
+                <height>420</height>
+            </rect>
+        </property>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>tab</cstring>
+            </property>
+            <attribute name="title">
+                <string>Shutter/Gain Demo</string>
+            </attribute>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>gainGroupBox</cstring>
+                </property>
+                <property name="enabled">
+                    <bool>true</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>410</width>
+                        <height>70</height>
+                    </rect>
+                </property>
+                <property name="title">
+                    <string>Gain</string>
+                </property>
+                <widget class="QCheckBox">
+                    <property name="name">
+                        <cstring>gainOnCheckBox</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>200</x>
+                            <y>30</y>
+                            <width>50</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>On</string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Enable / Disable Gain</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Enable / Disable Gain</string>
+                    </property>
+                </widget>
+                <widget class="QCheckBox">
+                    <property name="name">
+                        <cstring>gainAutoModeCheckBox</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>250</x>
+                            <y>30</y>
+                            <width>60</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Auto</string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Auto-Gain</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Auto-Gain</string>
+                    </property>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>gainOnePushPushButton</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>320</x>
+                            <y>30</y>
+                            <width>80</width>
+                            <height>28</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>OnePush</string>
+                    </property>
+                    <property name="autoDefault">
+                        <bool>false</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>One-Time-Auto-Gain</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>One-Time-Auto-Gain</string>
+                    </property>
+                </widget>
+                <widget class="QSpinBox">
+                    <property name="name">
+                        <cstring>gainSpinBox</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>120</x>
+                            <y>30</y>
+                            <width>70</width>
+                            <height>25</height>
+                        </rect>
+                    </property>
+                    <property name="suffix">
+                        <string></string>
+                    </property>
+                    <property name="maxValue">
+                        <number>100</number>
+                    </property>
+                    <property name="value">
+                        <number>0</number>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Circuit Gain</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Circuit Gain</string>
+                    </property>
+                </widget>
+                <widget class="QSlider">
+                    <property name="name">
+                        <cstring>gainSlider</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>20</x>
+                            <y>30</y>
+                            <width>90</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="tickmarks">
+                        <enum>NoMarks</enum>
+                    </property>
+                    <property name="tickInterval">
+                        <number>5</number>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Circuit Gain</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Circuit Gain</string>
+                    </property>
+                </widget>
+            </widget>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>exposureTimeGroupBox</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>80</y>
+                        <width>410</width>
+                        <height>300</height>
+                    </rect>
+                </property>
+                <property name="font">
+                    <font>
+                    </font>
+                </property>
+                <property name="title">
+                    <string>Exposure Time</string>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel2_2</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>20</x>
+                            <y>230</y>
+                            <width>120</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Exposure Time:</string>
+                    </property>
+                </widget>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel5</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>20</x>
+                            <y>160</y>
+                            <width>130</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Shutter-Formula:</string>
+                    </property>
+                </widget>
+                <widget class="QGroupBox">
+                    <property name="name">
+                        <cstring>shutterGroupBox</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>20</y>
+                            <width>390</width>
+                            <height>120</height>
+                        </rect>
+                    </property>
+                    <property name="frameShape">
+                        <enum>NoFrame</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Plain</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>0</number>
+                    </property>
+                    <property name="title">
+                        <string></string>
+                    </property>
+                    <property name="flat">
+                        <bool>true</bool>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel1_3</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>230</x>
+                                <y>80</y>
+                                <width>50</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Offset:</string>
+                        </property>
+                    </widget>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel3_2</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>80</y>
+                                <width>80</width>
+                                <height>23</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Timebase:</string>
+                        </property>
+                    </widget>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel7</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>10</y>
+                                <width>100</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Std. Shutter:</string>
+                        </property>
+                    </widget>
+                    <widget class="QCheckBox">
+                        <property name="name">
+                            <cstring>shutterSpeedOnCheckBox</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>220</x>
+                                <y>20</y>
+                                <width>50</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>On</string>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Enable / Disable Std. Shutter</string>
+                        </property>
+                        <property name="whatsThis" stdset="0">
+                            <string>Enable / Disable Std. Shutter</string>
+                        </property>
+                    </widget>
+                    <widget class="QPushButton">
+                        <property name="name">
+                            <cstring>shutterSpeedOnePushPushButton</cstring>
+                        </property>
+                        <property name="enabled">
+                            <bool>true</bool>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>300</x>
+                                <y>30</y>
+                                <width>80</width>
+                                <height>30</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>OnePush</string>
+                        </property>
+                        <property name="autoDefault">
+                            <bool>false</bool>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>One-Time-Auto-Shutter</string>
+                        </property>
+                        <property name="whatsThis" stdset="0">
+                            <string>One-Time-Auto-Shutter</string>
+                        </property>
+                    </widget>
+                    <widget class="QCheckBox">
+                        <property name="name">
+                            <cstring>shutterSpeedAutoModeCheckBox</cstring>
+                        </property>
+                        <property name="enabled">
+                            <bool>true</bool>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>220</x>
+                                <y>50</y>
+                                <width>60</width>
+                                <height>20</height>
+                            </rect>
+                        </property>
+                        <property name="text">
+                            <string>Auto</string>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Auto-Std.-Shutter</string>
+                        </property>
+                        <property name="whatsThis" stdset="0">
+                            <string>Auto-Std.-Shutter</string>
+                        </property>
+                    </widget>
+                    <widget class="QSlider">
+                        <property name="name">
+                            <cstring>shutterSpeedSlider</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>10</x>
+                                <y>40</y>
+                                <width>90</width>
+                                <height>24</height>
+                            </rect>
+                        </property>
+                        <property name="value">
+                            <number>1</number>
+                        </property>
+                        <property name="orientation">
+                            <enum>Horizontal</enum>
+                        </property>
+                        <property name="tickmarks">
+                            <enum>NoMarks</enum>
+                        </property>
+                        <property name="tickInterval">
+                            <number>5</number>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Standard Integration Time</string>
+                        </property>
+                        <property name="whatsThis" stdset="0">
+                            <string>Standard Integration Time</string>
+                        </property>
+                    </widget>
+                    <widget class="QSpinBox">
+                        <property name="name">
+                            <cstring>shutterSpeedSpinBox</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>110</x>
+                                <y>40</y>
+                                <width>80</width>
+                                <height>25</height>
+                            </rect>
+                        </property>
+                        <property name="suffix">
+                            <string>us</string>
+                        </property>
+                        <property name="value">
+                            <number>1</number>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Standard Integration Time</string>
+                        </property>
+                        <property name="whatsThis" stdset="0">
+                            <string>Standard Integration Time</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>timebaseLineEdit</cstring>
+                        </property>
+                        <property name="enabled">
+                            <bool>true</bool>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>100</x>
+                                <y>80</y>
+                                <width>90</width>
+                                <height>30</height>
+                            </rect>
+                        </property>
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Timebase-Value</string>
+                        </property>
+                        <property name="whatsThis" stdset="0">
+                            <string>Timebase-Value</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>offsetLineEdit</cstring>
+                        </property>
+                        <property name="enabled">
+                            <bool>true</bool>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>290</x>
+                                <y>80</y>
+                                <width>90</width>
+                                <height>27</height>
+                            </rect>
+                        </property>
+                        <property name="readOnly">
+                            <bool>true</bool>
+                        </property>
+                        <property name="toolTip" stdset="0">
+                            <string>Camera-specific Integration Time Offset</string>
+                        </property>
+                        <property name="whatsThis" stdset="0">
+                            <string>Camera-specific Integration Time Offset</string>
+                        </property>
+                    </widget>
+                </widget>
+                <widget class="Line">
+                    <property name="name">
+                        <cstring>line1</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>140</y>
+                            <width>390</width>
+                            <height>20</height>
+                        </rect>
+                    </property>
+                    <property name="frameShape">
+                        <enum>HLine</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Sunken</enum>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>shutterFormulaLineEdit</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>40</x>
+                            <y>190</y>
+                            <width>320</width>
+                            <height>30</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Std. Shutter Value * Timebase + Offset</string>
+                    </property>
+                    <property name="readOnly">
+                        <bool>true</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Integration-Time Formula</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Integration-Time Formula</string>
+                    </property>
+                </widget>
+                <widget class="QLineEdit">
+                    <property name="name">
+                        <cstring>expTimeLineEdit</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>80</x>
+                            <y>260</y>
+                            <width>160</width>
+                            <height>27</height>
+                        </rect>
+                    </property>
+                    <property name="readOnly">
+                        <bool>true</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Real Exposure-Time</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Real Exposure-Time</string>
+                    </property>
+                </widget>
+            </widget>
+        </widget>
+        <widget class="QWidget">
+            <property name="name">
+                <cstring>tab</cstring>
+            </property>
+            <attribute name="title">
+                <string>Partial Image Demo</string>
+            </attribute>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>f7AOIWarningTextLabel</cstring>
+                </property>
+                <property name="enabled">
+                    <bool>false</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>410</width>
+                        <height>50</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>This Demo is only available if the camera is using
+Format 7 - 'Partial Image' !</string>
+                </property>
+            </widget>
+            <widget class="QGroupBox">
+                <property name="name">
+                    <cstring>f7AOIGroupBox</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>70</y>
+                        <width>410</width>
+                        <height>210</height>
+                    </rect>
+                </property>
+                <property name="title">
+                    <string>Area Of Interest</string>
+                </property>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel1_4</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>20</y>
+                            <width>50</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Size:</string>
+                    </property>
+                </widget>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel2_3</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>10</x>
+                            <y>110</y>
+                            <width>80</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Position:</string>
+                    </property>
+                </widget>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel6_2</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>20</x>
+                            <y>50</y>
+                            <width>50</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Width:</string>
+                    </property>
+                </widget>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel8_2</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>20</x>
+                            <y>80</y>
+                            <width>50</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Height:</string>
+                    </property>
+                </widget>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel7_2</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>20</x>
+                            <y>140</y>
+                            <width>64</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>X:</string>
+                    </property>
+                </widget>
+                <widget class="QLabel">
+                    <property name="name">
+                        <cstring>textLabel9_2</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>20</x>
+                            <y>170</y>
+                            <width>64</width>
+                            <height>23</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Y:</string>
+                    </property>
+                </widget>
+                <widget class="QSlider">
+                    <property name="name">
+                        <cstring>f7AOIHeightSlider</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>90</x>
+                            <y>80</y>
+                            <width>90</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>AOI Height</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>AOI Height</string>
+                    </property>
+                </widget>
+                <widget class="QSpinBox">
+                    <property name="name">
+                        <cstring>f7AOIHeightSpinBox</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>190</x>
+                            <y>80</y>
+                            <width>70</width>
+                            <height>25</height>
+                        </rect>
+                    </property>
+                    <property name="suffix">
+                        <string></string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>AOI Height</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>AOI Height</string>
+                    </property>
+                </widget>
+                <widget class="QSlider">
+                    <property name="name">
+                        <cstring>f7AOIXSlider</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>90</x>
+                            <y>140</y>
+                            <width>90</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="maxValue">
+                        <number>99</number>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>AOI X-Position</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>AOI X-Position</string>
+                    </property>
+                </widget>
+                <widget class="QSpinBox">
+                    <property name="name">
+                        <cstring>f7AOIXSpinBox</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>190</x>
+                            <y>140</y>
+                            <width>70</width>
+                            <height>25</height>
+                        </rect>
+                    </property>
+                    <property name="suffix">
+                        <string></string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>AOI X-Position</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>AOI X-Position</string>
+                    </property>
+                </widget>
+                <widget class="QSlider">
+                    <property name="name">
+                        <cstring>f7AOIYSlider</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>90</x>
+                            <y>170</y>
+                            <width>90</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>AOI Y-Position</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>AOI Y-Position</string>
+                    </property>
+                </widget>
+                <widget class="QSpinBox">
+                    <property name="name">
+                        <cstring>f7AOIYSpinBox</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>190</x>
+                            <y>170</y>
+                            <width>70</width>
+                            <height>25</height>
+                        </rect>
+                    </property>
+                    <property name="suffix">
+                        <string></string>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>AOI Y-Position</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>AOI Y-Position</string>
+                    </property>
+                </widget>
+                <widget class="QFrame">
+                    <property name="name">
+                        <cstring>f7AOIImageFrame</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>false</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>280</x>
+                            <y>50</y>
+                            <width>110</width>
+                            <height>80</height>
+                        </rect>
+                    </property>
+                    <property name="frameShape">
+                        <enum>StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                        <enum>Plain</enum>
+                    </property>
+                    <property name="lineWidth">
+                        <number>3</number>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Area of Interest</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Area of Interest</string>
+                    </property>
+                    <widget class="QFrame">
+                        <property name="name">
+                            <cstring>f7AOISectorFrame</cstring>
+                        </property>
+                        <property name="geometry">
+                            <rect>
+                                <x>3</x>
+                                <y>3</y>
+                                <width>104</width>
+                                <height>74</height>
+                            </rect>
+                        </property>
+                        <property name="paletteForegroundColor">
+                            <color>
+                                <red>255</red>
+                                <green>0</green>
+                                <blue>0</blue>
+                            </color>
+                        </property>
+                        <property name="frameShape">
+                            <enum>StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                            <enum>Plain</enum>
+                        </property>
+                    </widget>
+                </widget>
+                <widget class="QPushButton">
+                    <property name="name">
+                        <cstring>f7MaxPushButton</cstring>
+                    </property>
+                    <property name="enabled">
+                        <bool>true</bool>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>290</x>
+                            <y>150</y>
+                            <width>90</width>
+                            <height>30</height>
+                        </rect>
+                    </property>
+                    <property name="text">
+                        <string>Maximize</string>
+                    </property>
+                    <property name="autoDefault">
+                        <bool>false</bool>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>Set max. Dimensions</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>Set max. Dimensions</string>
+                    </property>
+                </widget>
+                <widget class="QSpinBox">
+                    <property name="name">
+                        <cstring>f7AOIWidthSpinBox</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>190</x>
+                            <y>50</y>
+                            <width>70</width>
+                            <height>25</height>
+                        </rect>
+                    </property>
+                    <property name="suffix">
+                        <string></string>
+                    </property>
+                    <property name="lineStep">
+                        <number>5</number>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>AOI Width</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>AOI Width</string>
+                    </property>
+                </widget>
+                <widget class="QSlider">
+                    <property name="name">
+                        <cstring>f7AOIWidthSlider</cstring>
+                    </property>
+                    <property name="geometry">
+                        <rect>
+                            <x>90</x>
+                            <y>50</y>
+                            <width>90</width>
+                            <height>24</height>
+                        </rect>
+                    </property>
+                    <property name="orientation">
+                        <enum>Horizontal</enum>
+                    </property>
+                    <property name="toolTip" stdset="0">
+                        <string>AOI Width</string>
+                    </property>
+                    <property name="whatsThis" stdset="0">
+                        <string>AOI Width</string>
+                    </property>
+                </widget>
+            </widget>
+        </widget>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>okPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>exitAccept()</slot>
+    </connection>
+    <connection>
+        <sender>gainSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>gainSpinBoxChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>gainSlider</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>gainSliderChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>gainOnCheckBox</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>gainOnChecked(bool)</slot>
+    </connection>
+    <connection>
+        <sender>f7AOIWidthSlider</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>f7AOIWidthSliderChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>f7AOIWidthSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>f7AOIWidthSpinBoxChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>f7AOIHeightSlider</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>f7AOIHeightSliderChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>f7AOIHeightSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>f7AOIHeightSpinBoxChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>f7AOIXSlider</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>f7AOIXSliderChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>f7AOIXSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>f7AOIXSpinBoxChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>f7AOIYSlider</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>f7AOIYSliderChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>f7AOIYSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>f7YSpinBoxChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>f7MaxPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>f7AOIMaximize()</slot>
+    </connection>
+    <connection>
+        <sender>shutterSpeedSlider</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>shutterSpeedSliderChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>shutterSpeedSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>shutterSpeedSpinBoxChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>shutterSpeedOnCheckBox</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>shutterSpeedOnChecked(bool)</slot>
+    </connection>
+    <connection>
+        <sender>gainOnePushPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>gainOnePushActivated()</slot>
+    </connection>
+    <connection>
+        <sender>shutterSpeedOnePushPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>shutterSpeedOnePushActivated()</slot>
+    </connection>
+    <connection>
+        <sender>gainAutoModeCheckBox</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>gainAutoChecked(bool)</slot>
+    </connection>
+    <connection>
+        <sender>shutterSpeedAutoModeCheckBox</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>shutterSpeedAutoChecked(bool)</slot>
+    </connection>
+    <connection>
+        <sender>cancelPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>exitReject()</slot>
+    </connection>
+    <connection>
+        <sender>UpdateUIPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>updateUI()</slot>
+    </connection>
+    <connection>
+        <sender>applyPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>featuresApply()</slot>
+    </connection>
+    <connection>
+        <sender>discardPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>featuresDiscard()</slot>
+    </connection>
+    <connection>
+        <sender>seqCtlEnableCheckBox</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>seqCtlEnableChecked(bool)</slot>
+    </connection>
+    <connection>
+        <sender>seqCtlLengthSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>seqCtlLengthChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>seqCtlImgNoSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>seqCtlImgNoChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>seqCtlApplyPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>seqCtlApply()</slot>
+    </connection>
+    <connection>
+        <sender>seqCtlRunPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>seqCtlPlay()</slot>
+    </connection>
+    <connection>
+        <sender>seqCtlStopPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SeqCtlDemoForm</receiver>
+        <slot>seqCtlStop()</slot>
+    </connection>
+</connections>
+<tabstops>
+    <tabstop>seqCtlTabWidget</tabstop>
+    <tabstop>gainSlider</tabstop>
+    <tabstop>gainSpinBox</tabstop>
+    <tabstop>gainOnCheckBox</tabstop>
+    <tabstop>gainAutoModeCheckBox</tabstop>
+    <tabstop>gainOnePushPushButton</tabstop>
+    <tabstop>shutterSpeedSlider</tabstop>
+    <tabstop>shutterSpeedSpinBox</tabstop>
+    <tabstop>shutterSpeedOnCheckBox</tabstop>
+    <tabstop>shutterSpeedAutoModeCheckBox</tabstop>
+    <tabstop>shutterSpeedOnePushPushButton</tabstop>
+    <tabstop>timebaseLineEdit</tabstop>
+    <tabstop>offsetLineEdit</tabstop>
+    <tabstop>shutterFormulaLineEdit</tabstop>
+    <tabstop>expTimeLineEdit</tabstop>
+    <tabstop>f7AOIWidthSlider</tabstop>
+    <tabstop>f7AOIWidthSpinBox</tabstop>
+    <tabstop>f7AOIHeightSlider</tabstop>
+    <tabstop>f7AOIHeightSpinBox</tabstop>
+    <tabstop>f7AOIXSlider</tabstop>
+    <tabstop>f7AOIXSpinBox</tabstop>
+    <tabstop>f7AOIYSlider</tabstop>
+    <tabstop>f7AOIYSpinBox</tabstop>
+    <tabstop>f7MaxPushButton</tabstop>
+    <tabstop>seqCtlEnableCheckBox</tabstop>
+    <tabstop>seqCtlLengthSpinBox</tabstop>
+    <tabstop>seqCtlApplyPushButton</tabstop>
+    <tabstop>seqCtlImgNoSpinBox</tabstop>
+    <tabstop>seqCtlAutoIncCheckBox</tabstop>
+    <tabstop>seqCtlStopPushButton</tabstop>
+    <tabstop>seqCtlRunPushButton</tabstop>
+    <tabstop>seqCtlAutoRewindCheckBox</tabstop>
+    <tabstop>okPushButton</tabstop>
+    <tabstop>cancelPushButton</tabstop>
+    <tabstop>UpdateUIPushButton</tabstop>
+    <tabstop>applyPushButton</tabstop>
+    <tabstop>discardPushButton</tabstop>
+</tabstops>
+<includes>
+    <include location="local" impldecl="in implementation">CamWindow.h</include>
+    <include location="local" impldecl="in declaration">DC1394.h</include>
+    <include location="local" impldecl="in declaration">F7UpdateNotifyEvent.h</include>
+    <include location="local" impldecl="in declaration">F7NotifyData.h</include>
+    <include location="local" impldecl="in declaration">qapplication.h</include>
+    <include location="local" impldecl="in declaration">AdjustmentsCloseEvent.h</include>
+    <include location="local" impldecl="in declaration">qfocusdata.h</include>
+    <include location="local" impldecl="in declaration">qmessagebox.h</include>
+    <include location="local" impldecl="in declaration">messagelogger.h</include>
+    <include location="local" impldecl="in declaration">seqCtlElement.h</include>
+    <include location="local" impldecl="in implementation">seqctldemoform.ui.h</include>
+</includes>
+<variables>
+    <variable>bool initialized;</variable>
+    <variable>DC1394 *dc1394;</variable>
+    <variable>unsigned int id;</variable>
+    <variable>bool f7Changed;</variable>
+    <variable>bool absolute;</variable>
+    <variable>QWidget *parent;</variable>
+    <variable>bool f7CorrectValue;</variable>
+    <variable>bool updateF7UI;</variable>
+    <variable>dc1394_feature_set featureSet;</variable>
+    <variable>bool videoRunning;</variable>
+    <variable>bool initSeq;</variable>
+    <variable>bool seqComplete;</variable>
+    <variable>bool autoInc;</variable>
+    <variable>unsigned int imgCount;</variable>
+    <variable>unsigned int sequenceLength;</variable>
+    <variable>MessageLogger *logger;</variable>
+    <variable>seqElement sequence[256];</variable>
+</variables>
+<slots>
+    <slot>initSeqCtl( QWidget * cw, DC1394 * dc, int i, bool absControl, MessageLogger * ml )</slot>
+    <slot>show()</slot>
+    <slot>closeEvent( QCloseEvent * e )</slot>
+    <slot>updateUI()</slot>
+    <slot>updateGain( dc1394_feature_info featureInfo )</slot>
+    <slot>updateShutter( dc1394_feature_info featureInfo )</slot>
+    <slot>updateF7()</slot>
+    <slot>enableUpdateF7()</slot>
+    <slot>disableF7()</slot>
+    <slot>updateF7AOI()</slot>
+    <slot>updateSeqCtl()</slot>
+    <slot>exitAccept()</slot>
+    <slot>exitReject()</slot>
+    <slot>featuresApply()</slot>
+    <slot>featuresDiscard()</slot>
+    <slot>gainSliderChanged( int newValue )</slot>
+    <slot>gainSpinBoxChanged( int newValue )</slot>
+    <slot>gainOnChecked( bool newValue )</slot>
+    <slot>gainAutoChecked( bool enable )</slot>
+    <slot>gainOnePushActivated()</slot>
+    <slot>shutterSpeedSliderChanged( int newValue )</slot>
+    <slot>shutterSpeedSpinBoxChanged( int newValue )</slot>
+    <slot>shutterSpeedOnChecked( bool newValue )</slot>
+    <slot>shutterSpeedAutoChecked( bool enable )</slot>
+    <slot>shutterSpeedOnePushActivated()</slot>
+    <slot>f7AOIWidthSliderChanged( int newValue )</slot>
+    <slot>f7AOIWidthSpinBoxChanged( int newValue )</slot>
+    <slot>f7AOIHeightSliderChanged( int newValue )</slot>
+    <slot>f7AOIHeightSpinBoxChanged( int newValue )</slot>
+    <slot>f7AOIXSliderChanged( int newValue )</slot>
+    <slot>f7AOIXSpinBoxChanged( int newValue )</slot>
+    <slot>f7AOIYSliderChanged( int newValue )</slot>
+    <slot>f7YSpinBoxChanged( int newValue )</slot>
+    <slot>f7AOIMaximize()</slot>
+    <slot>seqCtlEnableChecked( bool newState )</slot>
+    <slot>seqCtlLengthChanged( int newValue )</slot>
+    <slot>seqCtlImgNoChanged( int newValue )</slot>
+    <slot>seqCtlApply()</slot>
+    <slot>seqCtlPlay()</slot>
+    <slot>seqCtlStop()</slot>
+</slots>
+<functions>
+    <function access="private" specifier="non virtual">init()</function>
+</functions>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>
