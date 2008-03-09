@@ -1,0 +1,821 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>SIODemoForm</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>SIODemoForm</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>328</width>
+            <height>647</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>SIO-Demo</string>
+    </property>
+    <widget class="QButtonGroup">
+        <property name="name">
+            <cstring>transmitButtonGroup</cstring>
+        </property>
+        <property name="enabled">
+            <bool>true</bool>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>300</y>
+                <width>310</width>
+                <height>290</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Transmit</string>
+        </property>
+        <widget class="Line">
+            <property name="name">
+                <cstring>line9</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>20</x>
+                    <y>140</y>
+                    <width>270</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="frameShape">
+                <enum>HLine</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Sunken</enum>
+            </property>
+            <property name="orientation">
+                <enum>Horizontal</enum>
+            </property>
+        </widget>
+        <widget class="Line">
+            <property name="name">
+                <cstring>line10</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>20</x>
+                    <y>230</y>
+                    <width>270</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="frameShape">
+                <enum>HLine</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Sunken</enum>
+            </property>
+            <property name="orientation">
+                <enum>Horizontal</enum>
+            </property>
+        </widget>
+        <widget class="QButtonGroup">
+            <property name="name">
+                <cstring>singleTransmissionButtonGroup</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>40</x>
+                    <y>50</y>
+                    <width>250</width>
+                    <height>90</height>
+                </rect>
+            </property>
+            <property name="frameShape">
+                <enum>NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Plain</enum>
+            </property>
+            <property name="title">
+                <string></string>
+            </property>
+            <widget class="QRadioButton">
+                <property name="name">
+                    <cstring>responseByteRadioButton</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>10</y>
+                        <width>100</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Byte:</string>
+                </property>
+                <property name="checked">
+                    <bool>true</bool>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Byte-Transmission</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>Byte-Transmission</string>
+                </property>
+            </widget>
+            <widget class="QSpinBox">
+                <property name="name">
+                    <cstring>responseByteSpinBox</cstring>
+                </property>
+                <property name="enabled">
+                    <bool>true</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>120</x>
+                        <y>10</y>
+                        <width>70</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="maxValue">
+                    <number>255</number>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Byte (dec.) to transmit</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>Byte (dec.) to transmit</string>
+                </property>
+            </widget>
+            <widget class="QRadioButton">
+                <property name="name">
+                    <cstring>responseCharRadioButton</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>10</x>
+                        <y>50</y>
+                        <width>97</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Character:</string>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Character-Transmission</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>Character-Transmission</string>
+                </property>
+            </widget>
+            <widget class="QLineEdit">
+                <property name="name">
+                    <cstring>responseCharLineEdit</cstring>
+                </property>
+                <property name="enabled">
+                    <bool>false</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>120</x>
+                        <y>50</y>
+                        <width>30</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="maxLength">
+                    <number>1</number>
+                </property>
+                <property name="readOnly">
+                    <bool>false</bool>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Character to transmit</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>Character to transmit</string>
+                </property>
+            </widget>
+        </widget>
+        <widget class="QRadioButton">
+            <property name="name">
+                <cstring>singleTransmissionRadioButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>250</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Single Byte Transmission</string>
+            </property>
+            <property name="checked">
+                <bool>true</bool>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Single Byte Transmission</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Single Byte Transmission</string>
+            </property>
+        </widget>
+        <widget class="QRadioButton">
+            <property name="name">
+                <cstring>fileTransmissionRadioButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>160</y>
+                    <width>230</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Data Transmission from file</string>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Transmit Data from file</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Transmit Data from file</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>loadDataPushButton</cstring>
+            </property>
+            <property name="enabled">
+                <bool>false</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>100</x>
+                    <y>200</y>
+                    <width>110</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Load Data...</string>
+            </property>
+            <property name="autoDefault">
+                <bool>false</bool>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Select File to transmit</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Select File to transmit</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>transmitPushButton</cstring>
+            </property>
+            <property name="enabled">
+                <bool>true</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>110</x>
+                    <y>250</y>
+                    <width>90</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Transmit</string>
+            </property>
+            <property name="autoDefault">
+                <bool>false</bool>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Transmit Data</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Transmit Data</string>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>closePushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>120</x>
+                <y>600</y>
+                <width>90</width>
+                <height>30</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Close</string>
+        </property>
+        <property name="autoDefault">
+            <bool>false</bool>
+        </property>
+        <property name="toolTip" stdset="0">
+            <string>Close Window</string>
+        </property>
+        <property name="whatsThis" stdset="0">
+            <string>Close Window</string>
+        </property>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>receiveGroupBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>10</y>
+                <width>310</width>
+                <height>290</height>
+            </rect>
+        </property>
+        <property name="frameShape">
+            <enum>GroupBoxPanel</enum>
+        </property>
+        <property name="frameShadow">
+            <enum>Sunken</enum>
+        </property>
+        <property name="title">
+            <string>Receive</string>
+        </property>
+        <widget class="QFrame">
+            <property name="name">
+                <cstring>adjustmentsFrame</cstring>
+            </property>
+            <property name="enabled">
+                <bool>true</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>290</width>
+                    <height>90</height>
+                </rect>
+            </property>
+            <property name="frameShape">
+                <enum>NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Plain</enum>
+            </property>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel31</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>0</x>
+                        <y>50</y>
+                        <width>60</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Timeout:</string>
+                </property>
+            </widget>
+            <widget class="QLabel">
+                <property name="name">
+                    <cstring>textLabel27</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>60</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Number:</string>
+                </property>
+            </widget>
+            <widget class="QSpinBox">
+                <property name="name">
+                    <cstring>byteNoSpinBox</cstring>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>80</x>
+                        <y>0</y>
+                        <width>100</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="suffix">
+                    <string> bytes</string>
+                </property>
+                <property name="maxValue">
+                    <number>255</number>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>No of expected bytes</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>No of expected bytes</string>
+                </property>
+            </widget>
+            <widget class="QCheckBox">
+                <property name="name">
+                    <cstring>unknownCheckBox</cstring>
+                </property>
+                <property name="enabled">
+                    <bool>true</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>190</x>
+                        <y>0</y>
+                        <width>90</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>unknown</string>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>unlimited No of bytes expected</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>unlimited No of bytes expected</string>
+                </property>
+            </widget>
+            <widget class="QSpinBox">
+                <property name="name">
+                    <cstring>timeoutSpinBox</cstring>
+                </property>
+                <property name="enabled">
+                    <bool>false</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>80</x>
+                        <y>50</y>
+                        <width>70</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="suffix">
+                    <string>s</string>
+                </property>
+                <property name="maxValue">
+                    <number>20</number>
+                </property>
+                <property name="minValue">
+                    <number>1</number>
+                </property>
+                <property name="value">
+                    <number>1</number>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>Time-limit for data to come</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>Time-limit for data to come</string>
+                </property>
+            </widget>
+            <widget class="QCheckBox">
+                <property name="name">
+                    <cstring>endlessCheckBox</cstring>
+                </property>
+                <property name="enabled">
+                    <bool>false</bool>
+                </property>
+                <property name="geometry">
+                    <rect>
+                        <x>180</x>
+                        <y>50</y>
+                        <width>80</width>
+                        <height>30</height>
+                    </rect>
+                </property>
+                <property name="text">
+                    <string>Endless</string>
+                </property>
+                <property name="toolTip" stdset="0">
+                    <string>No time-limit for waiting on bytes</string>
+                </property>
+                <property name="whatsThis" stdset="0">
+                    <string>No time-limit for waiting on bytes</string>
+                </property>
+            </widget>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>stopPushButton</cstring>
+            </property>
+            <property name="enabled">
+                <bool>false</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>100</x>
+                    <y>240</y>
+                    <width>80</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Stop</string>
+            </property>
+            <property name="autoDefault">
+                <bool>false</bool>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Interrupt waiting</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Interrupt waiting</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>receivePushButton</cstring>
+            </property>
+            <property name="enabled">
+                <bool>false</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>240</y>
+                    <width>80</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Read</string>
+            </property>
+            <property name="autoDefault">
+                <bool>false</bool>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Wait for data</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Wait for data</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>clearPushButton</cstring>
+            </property>
+            <property name="enabled">
+                <bool>false</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>170</y>
+                    <width>80</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Clear</string>
+            </property>
+            <property name="autoDefault">
+                <bool>false</bool>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Clear Data</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Clear Data</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>saveAsPushButton</cstring>
+            </property>
+            <property name="enabled">
+                <bool>false</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>200</x>
+                    <y>240</y>
+                    <width>90</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Save As...</string>
+            </property>
+            <property name="autoDefault">
+                <bool>false</bool>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Select file for received data</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Select file for received data</string>
+            </property>
+        </widget>
+        <widget class="QTextEdit">
+            <property name="name">
+                <cstring>receivedDataTextEdit</cstring>
+            </property>
+            <property name="enabled">
+                <bool>true</bool>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>120</x>
+                    <y>120</y>
+                    <width>140</width>
+                    <height>100</height>
+                </rect>
+            </property>
+            <property name="toolTip" stdset="0">
+                <string>Received Data</string>
+            </property>
+            <property name="whatsThis" stdset="0">
+                <string>Received Data</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>textLabel29</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>60</x>
+                    <y>120</y>
+                    <width>50</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Data:</string>
+            </property>
+        </widget>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>closePushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>accept()</slot>
+    </connection>
+    <connection>
+        <sender>byteNoSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>byteNoSpinBoxChanged(int)</slot>
+    </connection>
+    <connection>
+        <sender>receivePushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>receive()</slot>
+    </connection>
+    <connection>
+        <sender>saveAsPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>saveAsSelected()</slot>
+    </connection>
+    <connection>
+        <sender>endlessCheckBox</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>endlessChecked(bool)</slot>
+    </connection>
+    <connection>
+        <sender>unknownCheckBox</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>unknownChecked(bool)</slot>
+    </connection>
+    <connection>
+        <sender>stopPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>stopReading()</slot>
+    </connection>
+    <connection>
+        <sender>clearPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>clearText()</slot>
+    </connection>
+    <connection>
+        <sender>responseByteRadioButton</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>byteSelected(bool)</slot>
+    </connection>
+    <connection>
+        <sender>responseCharRadioButton</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>charSelected(bool)</slot>
+    </connection>
+    <connection>
+        <sender>loadDataPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>loadTransmissionFile()</slot>
+    </connection>
+    <connection>
+        <sender>singleTransmissionRadioButton</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>singleByteTransmission(bool)</slot>
+    </connection>
+    <connection>
+        <sender>fileTransmissionRadioButton</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>fileTransmission(bool)</slot>
+    </connection>
+    <connection>
+        <sender>transmitPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>SIODemoForm</receiver>
+        <slot>transmit()</slot>
+    </connection>
+</connections>
+<tabstops>
+    <tabstop>byteNoSpinBox</tabstop>
+    <tabstop>timeoutSpinBox</tabstop>
+    <tabstop>unknownCheckBox</tabstop>
+    <tabstop>endlessCheckBox</tabstop>
+    <tabstop>clearPushButton</tabstop>
+    <tabstop>receivePushButton</tabstop>
+    <tabstop>stopPushButton</tabstop>
+    <tabstop>saveAsPushButton</tabstop>
+    <tabstop>singleTransmissionRadioButton</tabstop>
+    <tabstop>responseByteRadioButton</tabstop>
+    <tabstop>responseByteSpinBox</tabstop>
+    <tabstop>responseCharLineEdit</tabstop>
+    <tabstop>loadDataPushButton</tabstop>
+    <tabstop>transmitPushButton</tabstop>
+    <tabstop>closePushButton</tabstop>
+    <tabstop>receivedDataTextEdit</tabstop>
+</tabstops>
+<includes>
+    <include location="local" impldecl="in declaration">DC1394.h</include>
+    <include location="local" impldecl="in declaration">qapplication.h</include>
+    <include location="local" impldecl="in declaration">qmessagebox.h</include>
+    <include location="local" impldecl="in declaration">qfile.h</include>
+    <include location="local" impldecl="in declaration">qfiledialog.h</include>
+    <include location="local" impldecl="in declaration">messagelogger.h</include>
+    <include location="local" impldecl="in implementation">siodemoform.ui.h</include>
+</includes>
+<variables>
+    <variable>QWidget *parent;</variable>
+    <variable>bool updateUI;</variable>
+    <variable>MessageLogger *logger;</variable>
+    <variable>unsigned int id;</variable>
+    <variable>DC1394 *dc1394;</variable>
+    <variable>char buffer[4];</variable>
+    <variable>int readCount;</variable>
+    <variable>bool stop;</variable>
+    <variable>unsigned int receiveCount;</variable>
+    <variable>QByteArray fileContents;</variable>
+</variables>
+<slots>
+    <slot>initForm( QWidget * p, DC1394 * dc, unsigned int i, MessageLogger * ml )</slot>
+    <slot>byteNoSpinBoxChanged( int number )</slot>
+    <slot>receive()</slot>
+    <slot>saveAsSelected()</slot>
+    <slot>transmit()</slot>
+    <slot>endlessChecked( bool endless )</slot>
+    <slot>unknownChecked( bool unknown )</slot>
+    <slot>accept()</slot>
+    <slot>reject()</slot>
+    <slot returnType="bool">readData()</slot>
+    <slot>stopReading()</slot>
+    <slot>disableUIControls()</slot>
+    <slot>enableUIControls()</slot>
+    <slot>clearText()</slot>
+    <slot>byteSelected( bool enabled )</slot>
+    <slot>charSelected( bool enabled )</slot>
+    <slot>loadTransmissionFile()</slot>
+    <slot>singleByteTransmission( bool enabled )</slot>
+    <slot>fileTransmission( bool enabled )</slot>
+</slots>
+<functions>
+    <function access="private" specifier="non virtual">init()</function>
+    <function returnType="bool">prepareSIO( bool read )</function>
+    <function returnType="bool">waitForDataAvailability()</function>
+    <function returnType="bool">waitForData()</function>
+</functions>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

@@ -1,0 +1,82 @@
+Version 1.2.0:
+- added constants useful for ARM: transaction and response return codes.
+- added raw1394_bandwidth_modify() and raw1394_channel_modify().
+
+Version 1.1.0:
+- added ability to specify the isochronous receive mode in the new
+  rawiso (raw1394_iso_*) API. Therefore, the signature of 
+  raw1394_iso_recv_init() changed, and likewise, the libtool/.so version
+  numbers changed to reflect a new interface that is not backwards compatible!
+- added raw1394_arm_set_buf() and raw1394_arm_get_buf() functions.
+- added raw1394_new_handle_on_port() to make initialization simpler.
+- make versioning consistent and updated. 1.0.0 was reported by pkg-config in 
+  0.10 series; hence, 1.1.0 in this release.
+- removed outdated, bogus "linking required only" version symbols in 
+  version.c - use pkg-config now.
+- dropped libraw1394.m4 - use pkg-config now.
+- added RPM spec file.
+- deprecate old isochronous API.
+- move API comment documentation to header and reformat header comments as
+  kernel-doc (use linux/scripts/kernel-doc to extract and format them).
+- updated tools/dumpiso and tools/sendiso to new isochronous API.
+
+Version 0.10:
+
+- merged in the rawiso branch
+- add sendiso and dumpiso tools with man files
+- fix wrong error mapping on local transactions in raw1394_errcode_to_errno().
+- added comment headers for most exported functions
+- merged in weihs branch which brings new functionality including address
+  range mapping, reading and writing configROM images, additional bus reset
+  handling, and others.
+
+Version 0.9:
+
+- error reporting reworked to be more C library style; functions affected are
+  mainly raw1394_read(), raw1394_write(), raw1394_lock;
+  Source incompatibility!  Parts need to be adapted in application code, but
+  it's well worth it.
+- the generation number is not unconditionally updated on bus reset in the event
+  loop anymore, the new function raw1394_update_generation() has to be used
+  (unless the default bus reset handler is used) so that transactions won't fail
+- iso handlers used to get the iso header quadlet in host endian, now they get
+  it in big endian like the rest of the packet for consistency
+- testlibraw gets installed now, man page also included
+- (not yet complete) documentation in Docbook format included
+- libraw1394.m4 autoconf macro added
+
+Version 0.8:
+
+- added libraw1394/ieee1394.h with useful defines (especially ack and rcodes)
+- function to query isochronous resource manager ID
+- functions for isochronous sending
+- new raw1394_reset_bus() function to reset the bus
+
+Version 0.7:
+
+- added support for environments where the kernel runs in 64 bit mode whereas
+  user space runs in 32 bit mode
+- fixed lock transaction to actually return the required response; these
+  functions are actually useful now, prototypes for raw1394_start_lock and
+  raw1394_lock changed
+- a void pointer can now be stored as user data with a handle
+
+Version 0.6:
+
+- FCP monitoring added
+- not really libraw1394 news: the subsystem doesn't swap data anymore,
+  everything is to be kept big endian now on all architectures
+
+Version 0.5:
+
+- there are now separate iso handlers for each channel
+
+Version 0.4:
+
+- isochronous receive support
+
+Version 0.3:
+
+- first release of new libraw1394 for new raw1394 driver
+- supports 1394 async reads/writes
+- maintainer: Andreas Bombe <andreas.bombe@munich.netsurf.de>

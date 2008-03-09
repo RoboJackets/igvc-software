@@ -1,0 +1,38 @@
+.TH dumpiso 1 "libraw1394 @VERSION@" "" "Linux IEEE 1394"
+.SH NAME
+dumpiso \- dump IEEE 1394 isochronous channel packets
+.SH SYNOPSIS
+.B dumpiso
+[ \fIoptions\fR ] [ \fIFILE\fR ]
+.SH DESCRIPTION
+dumpiso listens on a selected range of channels and dumps all received
+packets into the file \fIFILE\fR or, if not given, to standard output.
+While dumping, the current number of received packets is written to
+standard error and updated with every packet.
+.PP
+It uses a simple file format for the dumps which is described in
+\fBisodump\fR(5).  The dumped packets can be sent out again with
+\fBsendiso\fR(1).
+.SH OPTIONS
+.TP
+.B -c\fR,\fB --channels=\fICHANNELS
+Sets the channels to listen on.  \fICHANNELS\fR can be either a single
+number, in which case this is the only channel to listen on, or a
+range of channels in the form X-Y.  Channel numbers can range from 0
+to 63.  You can give this option multiple times, new channels are
+added to the list of already set channels.  Defaults to all channels.
+.TP
+.B -p\fR,\fB --port=\fIPORT
+Choose port \fIPORT\fR for receiving.  A port is a 1394 card or chip
+and represents one connected bus, therefore this is only relevant when
+you have multiple of these.  Defaults to 0.
+.TP
+.B -h\fR,\fB --help
+Show help text and exit.
+.SH BUGS
+None known.
+.SH SEE ALSO
+.B sendiso\fR(1),
+.B isodump\fR(5)
+.SH AUTHOR
+Andreas Bombe <aeb@debian.org>

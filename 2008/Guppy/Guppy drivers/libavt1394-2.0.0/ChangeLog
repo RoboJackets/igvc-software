@@ -1,0 +1,371 @@
+'changelog' for 'avt1394'
+-------------------------
+
+
+# 21.09.04 - 1st changes of Menukas initial implementation (Georg)
+
+- unified 'indentation'
+
+- '#include "dc1394_internal.h"' moved from 'avt1394.h' to 'avt1394.c'.
+	This is done, because the internal dc1394 declarations are only
+	necessary for compiling the avt1394-library (not for usage!).
+	Furthermore, the internal dc1394 header (dc1394_internal.h) is
+	not installed with the dc1394-library (nor is it even made public).
+	With this change the avt1394-library can be used with just having the
+	standard 'libdc1394' installed.
+
+- deleted '#define AVT1394_RS232_BASE' line from the header, because the
+	base address for this (all (?)) features should not be constant,
+	but read out from the respective camera.
+
+- corrected the 'AVT_BAUD_115200' enum-definition in the header from 11520 to the
+	correct value of 115200
+
+- changed internal function name 'avt1394_check_on_off()' to 'avt1394_check_availability()'
+	for making the intention of this function more obvious. It checks the 'Presence_inq'
+	bit in the register value that is given as a parameter and returns if the feature
+	is currently available.
+
+- changed all '*en_dis*' function names to '*enable*'.
+	This is done, because each function has a bool parameter for determining the
+	state (enabled / disabled). So, if that parameter is set to 'false' (or, better
+	yet 'DC1394_FALSE') it implicits that the feature will be disabled!
+	Furthermore, e.g. 'avt1394_enable_sequence()' names the function a bit more obvious
+	than 'avt1394_en_dis_sequence()'.
+
+- added 'avt1394_<get|set>_extended_shutter()'
+	These functions read / set the EXTD_SHUTTER register.
+
+- changed 'avt1394_<get|set>_exposure_time()' to set the time in usec
+	The 'set'-function sets a combination of the TIMEBASE and SHUTTER register,
+	(after subtraction of the offset) if, and only if this will lead to an exact value.
+	It uses the EXTD_SHUTTER register otherwise.
+	The only difference between 'avt1394_get_extended_shutter()' and 'avt1394_get_exposure_time()'
+	is that the latter adds the camera-specific offset, while the former only returns the
+	register-value.
+
+- added a 'dc1394bool_t' parameter 'pValid' to 'avt1394_get_exposure_time()'
+	This value indicates, if the EXTD_SHUTTER was available for reading
+	(TRUE), or not (FALSE). In the latter case, the value can only be 'guessed',
+	because the TIMEBASE register can be changed without any influence of
+	the 'real' exposure-time!
+
+- added parameter 'on' to 'avt1394_get_hdr_info()'
+	Until now this function returned 'DC1394_FAILURE' if the feature was
+	present, but not enabled.
+	Now it returns (in a further parameter) the state of the feature (on / off).
+	This is done, because the feature does not necessarily be enabled for returning
+	useful values.
+
+- deleted parameter 'pActiveKnee' from 'avt1394_get_hdr_info()'
+	because this parameter is WRITE-ONLY.
+
+- changed 'avt1394_get_hdr_info()' so that the kneepoint values are only taken from the
+	register if the respective kneepoint is available - else it's set to 0.
+	If no kneepoints are available, the function returns 'DC1394_FAILURE'.
+
+- deleted parameter 'nMaxKnee' from 'avt1394_set_knee_values()'
+	This is done, because the number of available kneepoints is READ-ONLY and therefore
+	if cannot be changed. The parameter 'nActiveKnee' reflects the number of kneepoints
+	to set.
+
+- changed the behaviour of 'avt1394_enable_hdr_mode()'
+	so that it's now just a switch for this feature. Therefore it takes a boolean
+	parameter for switching this feature on / off.
+
+- deleted 'avt1394_disable_hdr_mode()'
+	because the above mentioned 'avt1394_enable_hdr_mode()' function takes this functionality.
+
+- added 'avt1394_set_knee_values_percent()'
+	to set the kneepoints with respect to the current Shutter value. It takes the same
+	parameters as 'avt1394_set_knee_values()' except that the values have to be given
+	in percent.
+
+- changed 1st entry in 'avt_dsnu_blemisch_t' from 'bDSNU' to 'bType' for a better indication
+	of the intention of that value. Also some new defines 'AVT_DSNU' and 'AVT_BLEMISH' are
+	available for conveniently setting that parameter.
+
+- added 'AVT_ON_OFF_MASK' ('internally' - i.e., not available through the public header) for
+	conveniently masking the ON_OFF Flag in the register. These flags are always placed
+	on bit 6 in the respective registers.
+
+- added 'on' parameter to 'avt1394_get_dsnu_blemish()' which contains the current state of
+	the feature.
+
+- changed 'avt1394_set_dsnu_blemish()' so that the ON_OFF flag is not influenced by this
+	function.
+
+- merged 'avt1394_enable_dsnu_blemish()' and 'avt_disable_dsnu_blemish()' into one function
+	named 'avt1394_enable_dsnu_blemish()'. This function takes two parameters to enable /
+	disable the DSNU / Blemish feature, respectively. The values of these two features
+	can be read / set by 'avt1394_get_dsnu_blemish()' and 'avt1394_set_dsnu_blemish()'
+	respectively.
+
+- added 'avt1394_set_dsnu_blemish()' to change the values of the respective feature, except
+	the ON_OFF flag, which is handled by 'avt_enable_dsnu_blemish()' only.
+
+- added a further parameter to 'avt1394_get_dsnu_blemish()' for reflecting the current state
+	of the feature (ON / OFF).
+
+- changed the names 'avt1394_get_auto_shutter()' and 'avt1394_set_auto_shutter()' to
+	'avt1394_get_auto_shutter_limits()' and 'avt1394_set_auto_shutter_limits()', to
+	better reflect the intention of these functions.
+
+- changed the names 'avt1394_get_auto_gain()' and 'avt1394_set_auto_gain()' to
+	'avt1394_get_auto_gain_limits()' and 'avt1394_set_auto_gain_limits()', to
+	better reflect the intention of these functions.
+
+- 'morphed' 'avt1394_get_image_area()', 'avt1394_enable_auto_func()' and 'avt1394_disable_auto_func()'
+	to 'avt1394_get_auto_aoi_dimension()', 'avt1394_set_auto_aoi_dimensions()',
+	'avt1394_enable_auto_aoi()' and 'avt1394_enable_auto_aoi_area()', which have the following
+	functionality:
+	avt1394_get_auto_aoi_dimensions() - returns all values related to this feature
+	avt1394_set_auto_aoi_dimensions() - changes the current dimension values
+	avt1394_enable_auto_aoi()	  - enables / disables the feature (ON_OFF)
+	avt1394_enable_auto_aoi_area()    - sets / resets the 'show work area' flag of the register
+
+- renamed 'avt1394_get_trigger_delay()' with 'avt1394_get_adv_trigger_delay()' according to
+	the values that are inquired by this function.
+	Also a further parameter 'on' reflects the current state of the feature.
+
+- 'morphed' 'avt1394_enable_trigger_delay()' and 'avt1394_disable_trigger_delay()'  to
+	'avt1394_set_adv_trigger_delay()' and 'avt1394_enable_adv_trigger_delay()'
+	with the following functionality:
+	avt1394_set_adv_trigger_delay()    - sets the new value to the register
+	avt1394_enable_adv_trigger_delay() - enables / disables this feature (ON_OFF)
+
+- moved some constants and the declaration of the 'dc1394_camerahandle' structure
+	into 'avt1394.c' for removing the dependencies to 'dc1394_internal.h'
+	which is not publically available. The structure just declarates some
+	information about the camera, which is mainly the 'ccr_base'. It is
+	read via 'raw1394_get_user_data()' and not very likely to change.(Btw.,
+	these informations are IIDC1394-specific and not 'libdc1394'-specific!)
+
+- minor changes (some issues that appeared after compiling with '-Wall')
+	The code should now be somewhat like 'warning-free' ;-), with one exception.
+	There are 'None-ISO-C90-conform' 'long long integers' used, which come from the
+	'libdc1394' (detected with the compiler-option '-pedantic')!
+
+- changed 'float'-parameters of 'avt1394_set_knee_values()' and 'avt1394_set_knee_values_percent()'
+	This is done, because the camera uses only 'integer' values.
+	(Interestingly, the 'float's were assigned to 'unsigned integer' variables, but the
+	 compiler did not complain this issue (not even with the options '-Wall -pedantic')! :-()
+
+- changed the LUT-routines. Now the following routines are available:
+	'avt1394_get_lut_info()' - added a parameter for getting the state of this feature (ON_OFF)
+	'avt1394_select_lut()' - for selection of the LUT
+	'avt1394_get_lut_selection()' - for reading out the current selection
+	'avt1394_enable_lut()' - a 'dc1394bool_t' parameter now selects if this feature
+		should be enabled or disabled
+
+- changed the routines for the control of the 'IntEna' signal of the cameras HiRose-Jack
+	(pin 6 per default)
+	The following routines are now available:
+	'avt1394_get_int_delay()' - reading out the current delay value and state (ON_OFF)
+	'avt1394_set_int_delay()' - changing the delay time
+	'avt1394_enable_int_delay()' - enable / disable this feature
+
+
+- for 'Shading Correction' are now available:
+	'avt1394_get_shading_info()' - returns all available parameters of the feature
+	'avt1394_get_max_shading_image_size()' - (was 'avt1394_get_shading_max_image()')
+	'avt1394_show_shading_image()' - sets the corresponding bit to show / hide the current
+		shading image
+	'avt1394_load_shading()' - loads a new shading image via GPDataBuffer
+	'avt1394_enable_shading()' - enables / disables the whole shading feature
+	'avt1394_build_shading_image()' - starts (and controls) the building of a new shading image
+
+- split 'avt1394_reset_io_decoder_counter()' from 'avt1394_enable_io_decoder()'
+	for a better separation of enabling / disabling the feature from resetting the
+	position counter. Because the flag is 'auto-reset', there is no corresponding
+	parameter or setting-function available!
+
+- changed name 'avt1394_enable_color_corrn()' to 'avt1394_enable_color_corr()'...
+
+- added 'avt1349_get_color_corr_state()' and 'avt1394_get_mirror_image_state()'
+	which returns the current state (ON / OFF) of the respective feature
+
+- changed 'avt1394_set_test_image()' to accept '0' as a valid parameter for disabling
+	the test-image.
+
+
+# 14.10.04 - Minor changes (Georg)
+
+- changed 'avt1394_build_shading_correction()', so that the correct value will be returned.
+	Furthermore the 'Wait'-Loop has been removed, because of external 'waiting' in independend
+	intervals.
+
+- changed the name of the 3rd parameter of 'avt1394_get_lut_info()' from 'pLut' to 'pMaxLutNo',
+	because this parameter gives the maximum available number of LUTs implemented in a camera.
+
+
+# 18.10.04 - Minor changes (Georg)
+
+- fixed return-value-problem of 'avt1394_get_extended_shutter()'
+
+
+# 20.10.04 - Function added (Georg)
+
+- made 'avt1394_get_shutter_offset()' public, for getting the camera-specific shutter-offset
+
+
+
+# 08.11.04 - Minor changes and corrections (Georg)
+
+- corrected 'avt1394_get_test_image()'
+	Fixed the problem with the value of 'pActive'.
+
+- changed the value of 'pPresent', so that the 'bit-order' is now as expected.
+	I.e. bit 0 of 'pPresent' stands for the Test-Image 1, bit 1 for Test-Image 2 and so on.
+
+
+# 10.11.04 - Added functionality
+
+- added 'avt1394_get_active_knees()'
+	Because of ambiguous information from the manual, the 'number of active kneepoints'
+	parameter, withdrawn from 'avt1394_get_hdr_info()', can now be read with
+	'avt1394_get_active_knees()'.
+
+
+# 16.11.04 - Serial Interface modification
+
+- renamed 'avt1394_get_serialdata()' to 'avt1394_get_serial_data()'
+	according to 'avt1394_send_serial_data()'.
+
+
+# 14.01.04 - Funktion corrections
+
+- 'avt1394_get_auto_shutter_limits' and 'avt1394_set_auto_shutter_limits'
+	corrected.
+
+# 03.02.05 - Incremental decoder (Dolphin Series) functions completed
+
+- added the facility for reading out 'IO_DECODER_VAL'-'CMP_VALUE' to 'avt1394_get_io_decoder()'
+
+
+# 07.02.05 - Changed 'sequence-control-interface'
+
+- splitted some functions according to their usability
+- added some functionality that was not implemented yet
+
+	
+# 13.02.05 - GPDataBuffer problems solved
+
+- corrected implementation (index-range) of (internal) function
+	'avt1394_write_gpdata()', because of a 'glibc'-error concerning
+	'malloc()' / 'free()' ('double free or corruption')
+
+
+# 16.02.05 - Extended 'Shading Correction' implementation
+
+- added 'avt1394_set_shading_grab_count()' for changing the grab count value without
+	building a shading correction image
+
+
+# 18.02.05 - Added facility for reading out GPDataBuffer
+
+- added internal functions 'avt1394_read_gpdata()' and 'AvtGPGetCameraControlRegister()',
+	and public available function 'avt1394_read_shading()' for reading the cameras
+	shading-image
+
+
+# 23.02.05 - Bug-Fixing
+
+- fixed some functions concerning 'GPDataBuffer' and 'Shading Correction'
+	(i.e., mainly 'reimplemented' some stuff) - ! Interface changed !
+
+
+# 16.03.05 - Feature Changed
+
+- added an 'autoInc' parameter to 'avt1394_apply_seq_param()', because the 'AutoIncrement'
+	flag must be set in conjunction to the 'ApplyParameter' flag of the 'SEQUENCE_PARAM'
+	register.
+
+
+# 23.03.05 - Added Changes from Ulf-Erik Walter
+
+- modified 'avt1394_get_camera_id()' for accepting new camera models
+- added some new camera-ids to 'avt1394.h'
+
+
+# 24.03.05 - Added some new features and extensions respecitvely
+
+- added 'avt1394_get_exposure_offset()' for reading this offset from the 'TIMEBASE' register
+- changed 'avt1394_get_shutter_offset()' to use the offset from the TIMEBASE register if
+	available
+- added 'avt1394_soft_reset()' and 'avt1394_get_soft_reset_delay()' for supporting the
+	SOFT RESET feature
+- added 'avt1394_high_snr_enable()', 'avt1394_get_high_snr_info()' and
+	'avt1394_set_high_snr_grab_count()' for supporting the HIGH SNR feature
+
+
+# 30.03.05 - Minor Corrections
+
+- modified (i.e. corrected) 'AvtDCGetCameraControlRegister()', 'AvtGetCameraControlRegister()'
+	and 'AvtSetCameraControlRegister()' (and all the stuff related to these functions -
+	i.e. nearly the whole library :-()
+- removed empty functions for reading a LUT from the camera, because this is not possible
+	and the empty function bodies don't make that much sense...
+- changed I/O-related functions (mainly for testing purposes)
+
+
+# 11.04.05 - Minor Corrections
+
+- corrected 'avt1394_set_knee_values()'
+	the setting of the 'number of kneepoints' was erroneous (i.e. it was impossilbe to
+	decrement the value)
+
+
+# 13.04.05 - Minor Corrections
+
+- corrected 'avt1394_get_dsnu_blemish()' and 'avt1394_enable_dsnu_blemish()' because the original
+	implementation concerning 'ON_OFF' flag reflected the (erroneous) documentation.
+	In the documentation the DSNU-'ON_OFF'-flag was mentioned to be inverted to the other
+	'ON_OFF'-flags. This was a mistake, which is now corrected in the library-impementation.
+
+
+# 03.06.05 - Minor Corrections
+
+- changed 'SoftReset' implementation
+	now 4 functions are available 'avt1394_delayed_soft_reset()' which sets the delay and
+	resets the camera, 'avt1394_soft_reset()' which only initiates the 'SoftReset' while
+	using the current delay value, 'avt1394_get_soft_reset_delay()' which returns the current
+	delay, and 'av1394_set_soft_reset_delay()' which changes the delay only.
+
+
+# 05.06.05 - Exported direct register access routines
+
+- 'exported' 'AvtGetCameraControlRegister()', 'AvtDCGetCameraControlRegister()',
+	'AvtSetCameraControlRegister()', and 'AvtDCSetCameraControlRegister()' for
+	directly accessing and manipulating the camera control registers.
+	Note: The '...DC...()' functions are used for accessing the standard registers,
+	while the others have to be used to access the AVT-specific functions!
+	Note also: These functions and the usage will change in future, so be carefull
+	using them!
+
+	
+# 08.06.05 - Corrected DSNU/Blemish-Implementation
+
+- because only 'DSNU' replaces 'FPN-correction' (see documentation), the 'FPN correction' bit
+	in the 'ADV_INQ_1' register seems to reflects only the availability of 'DSNU' (and
+	not 'Blemish', as expected in the initial implementation by Menuka).
+	The availability of 'Blemish' can only be tested with the 'Presence_Inq' bit in the
+	'BLEMISH_CONTROL' register. This has now been corrected in the respective
+	library-functions!
+
+# 15.06.05 - Minor Corrections
+
+- changed some internals concerning SIO functions (e.g., renamed '*_STAUS_*' to '*_STATUS_*')
+
+# 20.06.05 - Minor Corrections
+
+- changed SIO functions for first checking the 'Opt_Function_Inq' SIO bit!
+
+
+# 01.07.06 - Minor Corrections
+
+- corrected the implementation of 'avt1394_send_serial_data()'.
+	It didn't work because the contents of a variable was overwritten
+	before using it.
+
+	
