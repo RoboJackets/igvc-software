@@ -1,9 +1,10 @@
-int SPI_SS = 10;
-int SPI_CLK = 11;
-int SPI_MISO = 12;
+#define SPI_SS 10
+#define SPI_CLK 11
+#define SPI_MISO 12
 
 
 void setup(){
+	Serial.begin(19200);
 
 	pinMode(SPI_SS, OUTPUT);
 	pinMode(SPI_CLK, OUTPUT);
@@ -32,13 +33,11 @@ unsigned int datatemp;
 		}
 	digitalWrite(SPI_SS, HIGH);
 	delayMicroseconds(50);//the last bit is held for 50us
+        delayMicroseconds(1000);//data only refreshed every 1 ms
 
 	unsigned int dataout = (((datatemp >> 13) & 1) << 8) | (((datatemp >> 12) & 1) << 7) | (((datatemp >> 11) & 1) << 6) | (((datatemp >> 10) & 1) << 5) | (((datatemp >> 9) & 1) << 4) | (((datatemp >> 8) & 1) << 3) | (((datatemp >> 2) & 2) << 2) | (((datatemp >> 1) & 1) << 1) | (datatemp & 1);
 
-        Serial.begin(9600);
-	Serial.print("received: ");
-	Serial.print(dataout, DEC);
-	Serial.print("\n");
-        delay(500);
+	Serial.print("rec: ");
+	Serial.println(dataout, DEC);
 }
 
