@@ -60,7 +60,8 @@ void getPosition(unsigned int * time, unsigned int * position){
 	digitalWrite(SPI_SS, HIGH);
 	
 	delayMicroseconds(50);//the last bit is held for 50us
-	delay(1);//data only refreshed every 1 ms
+        delayMicroseconds(1000);//data only refreshed every 1 ms
+	//delay(1);//data only refreshed every 1 ms
 
 	*position = (((datatemp >> 13) & 1) << 8) | (((datatemp >> 12) & 1) << 7) | (((datatemp >> 11) & 1) << 6) | (((datatemp >> 10) & 1) << 5) | (((datatemp >> 9) & 1) << 4) | (((datatemp >> 8) & 1) << 3) | (((datatemp >> 2) & 2) << 2) | (((datatemp >> 1) & 1) << 1) | (datatemp & 1);
 }
@@ -87,9 +88,10 @@ void loop(){
 //lastp2 = p2;
 //}while( ((p1 == lastp1) && (p2 != lastp2)) || ((p2 == lastp2) && (p1 != lastp1)) );
 
+
 	unsigned int dt;
         int dp;
-	if( (p2 > p1) && ( (p1+512) - p2 < 100) ){
+	if( (p2 > p1) && ( (p1+512) - p2 < 300) ){//instead of all this, compute both ways and pick the last magnitude
                 dp = -1*((p1 + 512) - p2);
         }
         else if(p2 >= p1){
