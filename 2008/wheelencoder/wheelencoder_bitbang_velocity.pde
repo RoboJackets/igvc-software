@@ -1,9 +1,9 @@
 #include <stdio.h>
 
 #define RADIUS .005
-#define COUNTER_SCALER 64
-#define COUNTER_RATE F_CPU/COUNTER_SCALER
-#define RAD_ENCODERTICK TWO_PI/512
+#define COUNTER_SCALER (64)
+#define COUNTER_RATE (F_CPU/COUNTER_SCALER)
+#define RAD_ENCODERTICK (TWO_PI/512)
 
 #define SPI_SS 10
 #define SPI_CLK 11
@@ -24,6 +24,7 @@ void setup(){
 	//TCCR1B = (1<<CS12)|(1<<CS10);// clk1o/1024 table on pg134
 	//TCCR1B = (1<<CS10);// no prescale clk1o/1
 	TCCR1B = (1<<CS11)|(1<<CS10);//clkio/64
+
 
 	Serial.begin(9600);
 
@@ -71,34 +72,34 @@ void loop(){
 //do{
  
 	getPosition(&t1, &p1);
-	delay(10);
+	//delay(10);
 	getPosition(&t2, &p2);
  
-  
-   if(( p1 == 0) && (lastp1 != 0)){
+  /*
+   if(( p1 == 0) && (lastp1 != 0)){//this is supposed to fix the random zero reawds but seems to cause other problems 
     p1 = lastp1;
    }
    if(( p2 == 0) && (lastp2 != 0)){
     p2 = lastp2;
    }
-
-lastp1 = p1;
-lastp2 = p2;
+*/
+//lastp1 = p1;
+//lastp2 = p2;
 //}while( ((p1 == lastp1) && (p2 != lastp2)) || ((p2 == lastp2) && (p1 != lastp1)) );
 
-
-	float dp, dt;
-	if( (p2 > p1) && (p2 - p1 > 300) ){
-                dp = (p1 + 512) - p2;
+	unsigned int dt;
+        int dp;
+	if( (p2 > p1) && ( (p1+512) - p2 < 100) ){
+                dp = -1*((p1 + 512) - p2);
         }
         else if(p2 >= p1){
   		dp = p2 - p1;
 	}
 	else if( (p2 < p1) && ( (p1 - p2) > 300) ){
-  		dp = (p2 + 512) - p1;
+  		dp = ( p2 + 512 ) - p1;
 	}
 	else if((p2 < p1)){
-  		dp = (float)p2 - (float)p1;
+  		dp = p2 - p1;
 	}
 	
 
@@ -106,10 +107,10 @@ lastp2 = p2;
 		dt = t2 - t1;
 	}
 	else if(t2 < t1){
-		dt = (t2 + 65536) - t1;
+		dt = ( t2 + 65536 ) - t1;
   	}
 
-	float velocity = (dp) / (dt) * RAD_ENCODERTICK * COUNTER_RATE;
+	float velocity = ( (float)dp) / ( (float)dt) * RAD_ENCODERTICK * COUNTER_RATE;
 
 	char strbuff[32];
 	Serial.print("ang vel(rad/s): ");
@@ -118,13 +119,16 @@ lastp2 = p2;
 	Serial.print(p1, DEC);
 	Serial.print("\tp2: ");
 	Serial.print(p2, DEC);
+        Serial.print("\tdp: ");
+        Serial.print(dp, DEC);
 	Serial.print("\tt1: ");
 	Serial.print(t1, DEC);
 	Serial.print("\tt2: ");
 	Serial.print(t2, DEC);
+        Serial.print("\tdt: ");
+        Serial.print(dt, DEC);
 	Serial.print("\tdt(s): ");
-	Serial.print(dtostrf(dt * COUNTER_SCALER/F_CPU, 2, 5, strbuff));
+	Serial.print(dtostrf( (float)dt / COUNTER_RATE, 2, 5, strbuff));
 	Serial.print("\n");
-//delay(500);
 }
 
