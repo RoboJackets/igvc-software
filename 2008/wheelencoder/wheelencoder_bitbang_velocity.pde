@@ -1,4 +1,4 @@
-#define RADIUS .005
+//#define RADIUS .005
 #define COUNTER_SCALER (64)
 #define COUNTER_RATE (F_CPU/COUNTER_SCALER)
 #define RAD_ENCODERTICK (TWO_PI/512)
@@ -93,7 +93,7 @@ void loop(){
 //}while( ((p1 == lastp1) && (p2 != lastp2)) || ((p2 == lastp2) && (p1 != lastp1)) );
 
 
-	if( (p2 > p1) && ( (p1+512) - p2 < 300) ){//instead of all this, compute both ways and pick the last magnitude
+	if( (p2 > p1) && ( (p1+512) - p2 < 300) ){
                 dp = -1*((p1 + 512) - p2);
         }
         else if(p2 >= p1){
