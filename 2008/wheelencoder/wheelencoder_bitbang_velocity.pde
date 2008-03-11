@@ -63,7 +63,7 @@ void getPosition(unsigned int * time, unsigned int * position){
 	digitalWrite(SPI_SS, HIGH);
 	
 	delayMicroseconds(50);//the last bit is held for 50us
-        delayMicroseconds(1000);//data only refreshed every 1 ms -- note: delay(1) is way off for a 1 ms wait, seems to be only good to about max 200us
+	delayMicroseconds(1000);//data only refreshed every 1 ms -- note: delay(1) is way off for a 1 ms wait, seems to be only good to about max 200us
 
 	*position = (((datatemp >> 13) & 1) << 8) | (((datatemp >> 12) & 1) << 7) | (((datatemp >> 11) & 1) << 6) | (((datatemp >> 10) & 1) << 5) | (((datatemp >> 9) & 1) << 4) | (((datatemp >> 8) & 1) << 3) | (((datatemp >> 2) & 2) << 2) | (((datatemp >> 1) & 1) << 1) | (datatemp & 1);
 }
@@ -71,7 +71,7 @@ void getPosition(unsigned int * time, unsigned int * position){
 void loop(){
 	unsigned int t1,t2,p1,p2;
 	unsigned int dt;
-        int dp;	
+	int dp;	
 	char strbuff[32] = {0};
 
 //do{
@@ -81,7 +81,7 @@ void loop(){
 	getPosition(&t2, &p2);
  
   /*
-   if(( p1 == 0) && (lastp1 != 0)){//this is supposed to fix the random zero reawds but seems to cause other problems 
+   if(( p1 == 0) && (lastp1 != 0)){//this is supposed to fix the random zero reads but seems to cause other problems 
     p1 = lastp1;
    }
    if(( p2 == 0) && (lastp2 != 0)){
@@ -93,13 +93,13 @@ void loop(){
 //}while( ((p1 == lastp1) && (p2 != lastp2)) || ((p2 == lastp2) && (p1 != lastp1)) );
 
 
-	if( (p2 > p1) && ( (p1+512) - p2 < 300) ){
-                dp = -1*((p1 + 512) - p2);
-        }
-        else if(p2 >= p1){
+	if( (p2 > p1) && ( ((p1+512) - p2) < 256) ){
+		dp = -1*((p1 + 512) - p2);
+	}
+       else if(p2 >= p1){
   		dp = p2 - p1;
 	}
-	else if( (p2 < p1) && ( (p1 - p2) > 300) ){
+	else if( (p2 < p1) && ( (p1 - p2) > 256) ){
   		dp = ( p2 + 512 ) - p1;
 	}
 	else if((p2 < p1)){
@@ -107,7 +107,7 @@ void loop(){
 	}
 	
 
-        if(t2 >= t1){
+	if(t2 >= t1){
 		dt = t2 - t1;
 	}
 	else if(t2 < t1){
@@ -123,14 +123,14 @@ void loop(){
 	Serial.print(p1, DEC);
 	Serial.print("\tp2: ");
 	Serial.print(p2, DEC);
-        Serial.print("\tdp: ");
-        Serial.print(dp, DEC);
+	Serial.print("\tdp: ");
+	Serial.print(dp, DEC);
 	Serial.print("\tt1: ");
 	Serial.print(t1, DEC);
 	Serial.print("\tt2: ");
 	Serial.print(t2, DEC);
-        Serial.print("\tdt: ");
-        Serial.print(dt, DEC);
+	Serial.print("\tdt: ");
+	Serial.print(dt, DEC);
 	Serial.print("\tdt(s): ");
 	Serial.println(dtostrf( (float)dt / COUNTER_RATE, 2, 5, strbuff));
 }
