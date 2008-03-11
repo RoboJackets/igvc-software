@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #define RADIUS .005
 #define COUNTER_SCALER (64)
 #define COUNTER_RATE (F_CPU/COUNTER_SCALER)
@@ -12,7 +10,11 @@
 unsigned int lastp1;
 unsigned int lastp2;
 
+
+
 void setup(){
+	Serial.begin(19200);
+
 	pinMode(SPI_SS, OUTPUT);
 	pinMode(SPI_CLK, OUTPUT);
 	pinMode(SPI_MISO, INPUT);
@@ -25,9 +27,6 @@ void setup(){
 	//TCCR1B = (1<<CS10);// no prescale clk1o/1
 	TCCR1B = (1<<CS11)|(1<<CS10);//clkio/64
 
-
-	Serial.begin(9600);
-
 	lastp1 = 0;
 	lastp2 = 0;
 }
@@ -35,9 +34,14 @@ void setup(){
 unsigned int getTime(){
 	unsigned int time;
 	//TCNT1 is a 16 bit timer/counter ~ pg 121
-	time = TCNT1L;//how often does this tick? does it tick with clk_cpu
+	time = TCNT1L;//how often does this tick? does it tick with clk_cpu -- tested, should be true. haven't read doc though.
 	time |= TCNT1H << 8;
 	return(time);
+}
+
+void resetTime(){
+	TCNT1H = 0;
+	TCNT1L = 0;
 }
 
 void getPosition(unsigned int * time, unsigned int * position){
@@ -55,20 +59,22 @@ void getPosition(unsigned int * time, unsigned int * position){
 		datatemp <<= 1;
 			
 		digitalWrite(SPI_CLK, LOW);
-		delayMicroseconds(50);//wait the appropriate amount to make this a 2khz signal (or shorter, encoder does 1khz through 50khz)
+		delayMicroseconds(50);//wait the appropriate amount to make this a 20khz signal (encoder goes to 50khz)
 	}
 	digitalWrite(SPI_SS, HIGH);
 	
 	delayMicroseconds(50);//the last bit is held for 50us
-        delayMicroseconds(1000);//data only refreshed every 1 ms
-	//delay(1);//data only refreshed every 1 ms
+        delayMicroseconds(1000);//data only refreshed every 1 ms -- note: delay(1) is way off for a 1 ms wait, seems to be only good to about max 200us
 
 	*position = (((datatemp >> 13) & 1) << 8) | (((datatemp >> 12) & 1) << 7) | (((datatemp >> 11) & 1) << 6) | (((datatemp >> 10) & 1) << 5) | (((datatemp >> 9) & 1) << 4) | (((datatemp >> 8) & 1) << 3) | (((datatemp >> 2) & 2) << 2) | (((datatemp >> 1) & 1) << 1) | (datatemp & 1);
 }
 
 
 void loop(){
-	unsigned int t1,t2,p1,p2;	
+	unsigned int t1,t2,p1,p2;
+	unsigned int dt;
+        int dp;	
+	char strbuff[32] = {0};
 
 //do{
  
@@ -89,8 +95,6 @@ void loop(){
 //}while( ((p1 == lastp1) && (p2 != lastp2)) || ((p2 == lastp2) && (p1 != lastp1)) );
 
 
-	unsigned int dt;
-        int dp;
 	if( (p2 > p1) && ( (p1+512) - p2 < 300) ){//instead of all this, compute both ways and pick the last magnitude
                 dp = -1*((p1 + 512) - p2);
         }
@@ -114,7 +118,7 @@ void loop(){
 
 	float velocity = ( (float)dp) / ( (float)dt) * RAD_ENCODERTICK * COUNTER_RATE;
 
-	char strbuff[32];
+	
 	Serial.print("ang vel(rad/s): ");
 	Serial.print(dtostrf(velocity, 2, 3, strbuff));
 	Serial.print("\tp1: ");
@@ -130,7 +134,6 @@ void loop(){
         Serial.print("\tdt: ");
         Serial.print(dt, DEC);
 	Serial.print("\tdt(s): ");
-	Serial.print(dtostrf( (float)dt / COUNTER_RATE, 2, 5, strbuff));
-	Serial.print("\n");
+	Serial.println(dtostrf( (float)dt / COUNTER_RATE, 2, 5, strbuff));
 }
 
