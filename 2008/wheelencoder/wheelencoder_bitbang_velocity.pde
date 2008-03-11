@@ -11,7 +11,6 @@ unsigned int lastp1;
 unsigned int lastp2;
 
 
-
 void setup(){
 	Serial.begin(19200);
 
@@ -34,7 +33,7 @@ void setup(){
 unsigned int getTime(){
 	unsigned int time;
 	//TCNT1 is a 16 bit timer/counter ~ pg 121
-	time = TCNT1L;//how often does this tick? does it tick with clk_cpu -- tested, should be true. haven't read doc though.
+	time = TCNT1L;//how often does this tick? tests say clkio = F_CPU. haven't read doc though.
 	time |= TCNT1H << 8;
 	return(time);
 }
@@ -68,7 +67,6 @@ void getPosition(unsigned int * time, unsigned int * position){
 
 	*position = (((datatemp >> 13) & 1) << 8) | (((datatemp >> 12) & 1) << 7) | (((datatemp >> 11) & 1) << 6) | (((datatemp >> 10) & 1) << 5) | (((datatemp >> 9) & 1) << 4) | (((datatemp >> 8) & 1) << 3) | (((datatemp >> 2) & 2) << 2) | (((datatemp >> 1) & 1) << 1) | (datatemp & 1);
 }
-
 
 void loop(){
 	unsigned int t1,t2,p1,p2;
