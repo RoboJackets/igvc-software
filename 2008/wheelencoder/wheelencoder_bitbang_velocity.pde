@@ -9,8 +9,8 @@
 #define SPI_CLK 11
 #define SPI_MISO 12
 
-float lastp1, lastp2;
-
+unsigned int lastp1;
+unsigned int lastp2;
 
 void setup(){
 	pinMode(SPI_SS, OUTPUT);
@@ -28,8 +28,8 @@ void setup(){
 
 	Serial.begin(9600);
 
-float lastp1 = 0;
-float lastp2 = 0;
+	lastp1 = 0;
+	lastp2 = 0;
 }
 
 unsigned int getTime(){
