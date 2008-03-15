@@ -1,0 +1,30 @@
+.TH testlibraw 1 "libraw1394 @VERSION@" "" "Linux IEEE 1394"
+.SH NAME
+testlibraw \- run basic functionality tests on libraw1394
+.SH SYNOPSIS
+.B testlibraw
+.SH DESCRIPTION
+testlibraw attaches to the Linux IEEE 1394 subsystem through libraw1394 and
+tries to read data from all connected nodes.  It therefore acts as a check that:
+.IP *
+libraw1394 is installed correctly
+.IP *
+the IEEE 1394 subsystem is loaded in the kernel and of a supported version
+.IP *
+libraw1394 and kernel side raw1394 can communicate
+.IP *
+connected nodes can be reached and do respond.
+.PP
+The read transactions are of a form that all powered up nodes conforming to the
+IEEE 1394 standard have to be able to respond to.
+.PP
+The source of this program also acts as a demonstration of libraw1394
+programming, including initialization, transactions and the event loop.
+.SH EXAMPLE RUN
+FIXME: insert example here
+.SH BUGS
+None known.
+.SH SEE ALSO
+http://linux1394.sourceforge.net/
+.SH AUTHOR
+Andreas Bombe <aeb@debian.org>

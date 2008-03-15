@@ -1,0 +1,775 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>mainForm</class>
+<widget class="QMainWindow">
+    <property name="name">
+        <cstring>mainForm</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>676</width>
+            <height>545</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>CC1394</string>
+    </property>
+</widget>
+<menubar>
+    <property name="name">
+        <cstring>mainMenuBar</cstring>
+    </property>
+    <property name="defaultUp">
+        <bool>false</bool>
+    </property>
+    <item text="&amp;File" name="fileMenu">
+        <action name="fileOpenAction"/>
+        <action name="fileSaveAction"/>
+        <action name="fileSaveAsAction"/>
+        <separator/>
+        <action name="fileLog_MessagesAction"/>
+        <action name="fileMessage_LoggerAction"/>
+        <separator/>
+        <action name="fileExitAction"/>
+    </item>
+    <item text="Cameras" name="Cameras">
+        <action name="camerasISO_SpeedAction"/>
+        <separator/>
+        <action name="camerasReScan_CamerasAction"/>
+        <separator/>
+        <action name="camerasOpen_All_CamerasAction"/>
+        <action name="camerasClose_All_CamerasAction"/>
+        <separator/>
+        <action name="camerasTileAction"/>
+        <action name="camerasCascadeAction"/>
+        <separator/>
+    </item>
+    <item text="Format" name="Format">
+    </item>
+    <item text="Resolution" name="Resolution">
+    </item>
+    <item text="Framerate" name="Framerate">
+    </item>
+    <item text="Color-Coding" name="Color_Coding">
+    </item>
+    <item text="Adjustments" name="Adjustments">
+        <action name="adjustmentsAbsolute_ControlAction"/>
+        <separator/>
+        <action name="adjustmentsPicture_ControlAction"/>
+        <action name="adjustmentsSequence_ControlAction"/>
+        <action name="adjustmentsI_O3Action"/>
+        <separator/>
+        <action name="adjustmentsDirect_Register_ManipulationAction"/>
+        <separator/>
+        <action name="adjustmentsFactory_SettingsAction"/>
+    </item>
+    <item text="&amp;Help" name="helpMenu">
+        <action name="helpCamera_InfosAction"/>
+        <separator/>
+        <action name="helpContentsAction"/>
+        <action name="helpIndexAction"/>
+        <separator/>
+        <action name="helpAboutAction"/>
+    </item>
+</menubar>
+<toolbars>
+    <toolbar dock="2">
+        <property name="name">
+            <cstring>toolBar</cstring>
+        </property>
+        <property name="label">
+            <string>Tools</string>
+        </property>
+        <action name="fileOpenAction"/>
+        <action name="fileSaveAction"/>
+    </toolbar>
+</toolbars>
+<actions>
+    <action>
+        <property name="name">
+            <cstring>fileNewAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>filenew</iconset>
+        </property>
+        <property name="text">
+            <string>New</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;New</string>
+        </property>
+        <property name="accel">
+            <string>Ctrl+N</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileOpenAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="iconSet">
+            <iconset>fileopen</iconset>
+        </property>
+        <property name="text">
+            <string>&amp;Open Config...</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Open Config...</string>
+        </property>
+        <property name="toolTip">
+            <string>Open Config...</string>
+        </property>
+        <property name="accel">
+            <string>Ctrl+O</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileSaveAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="iconSet">
+            <iconset>filesave</iconset>
+        </property>
+        <property name="text">
+            <string>Save</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Save Config</string>
+        </property>
+        <property name="toolTip">
+            <string>Save Config</string>
+        </property>
+        <property name="whatsThis">
+            <string>Save current configuration</string>
+        </property>
+        <property name="accel">
+            <string>Ctrl+S</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileSaveAsAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Save Config As</string>
+        </property>
+        <property name="menuText">
+            <string>Save Config &amp;As...</string>
+        </property>
+        <property name="whatsThis">
+            <string>Save current configuration with a new name</string>
+        </property>
+        <property name="accel">
+            <string></string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>filePrintAction</cstring>
+        </property>
+        <property name="iconSet">
+            <iconset>print</iconset>
+        </property>
+        <property name="text">
+            <string>Print</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Print...</string>
+        </property>
+        <property name="accel">
+            <string>Ctrl+P</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileExitAction</cstring>
+        </property>
+        <property name="text">
+            <string>Exit</string>
+        </property>
+        <property name="menuText">
+            <string>E&amp;xit</string>
+        </property>
+        <property name="accel">
+            <string></string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>helpContentsAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Contents</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Contents...</string>
+        </property>
+        <property name="accel">
+            <string></string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>helpIndexAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Index</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;Index...</string>
+        </property>
+        <property name="accel">
+            <string></string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>helpAboutAction</cstring>
+        </property>
+        <property name="text">
+            <string>&amp;About...</string>
+        </property>
+        <property name="menuText">
+            <string>&amp;About...</string>
+        </property>
+        <property name="accel">
+            <string></string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>camerasClose_All_CamerasAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Close All Cameras</string>
+        </property>
+        <property name="menuText">
+            <string>Close All Cameras</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>camerasOpen_All_CamerasAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Open All Cameras</string>
+        </property>
+        <property name="menuText">
+            <string>Open All Cameras</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>camerasRescan_CamerasAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>(Re)Scan Cameras</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>Action</cstring>
+        </property>
+        <property name="text">
+            <string></string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>camerasIEEE1394_PortAction</cstring>
+        </property>
+        <property name="on">
+            <bool>false</bool>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>IEEE1394-Port...</string>
+        </property>
+        <property name="menuText">
+            <string>IEEE1394-Port...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>camerasReScan_CamerasAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>true</bool>
+        </property>
+        <property name="text">
+            <string>(Re)Scan Cameras</string>
+        </property>
+        <property name="menuText">
+            <string>(Re)Scan Cameras</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>camerasOpen_Selected_CameraAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Open Selected Camera</string>
+        </property>
+        <property name="menuText">
+            <string>Open Selected Camera</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>adjustmentsPicture_ControlAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Picture Control...</string>
+        </property>
+        <property name="menuText">
+            <string>Picture Control...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>adjustmentsFormat_7_ControlAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Format 7 Control...</string>
+        </property>
+        <property name="menuText">
+            <string>Format 7 Control...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>camerasISO_SpeedAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>ISO-Speed...</string>
+        </property>
+        <property name="menuText">
+            <string>ISO-Speed...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>Action_2</cstring>
+        </property>
+        <property name="text">
+            <string></string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>adjustmentsAbsolute_ControlAction</cstring>
+        </property>
+        <property name="toggleAction">
+            <bool>true</bool>
+        </property>
+        <property name="on">
+            <bool>false</bool>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Absolute Control...</string>
+        </property>
+        <property name="menuText">
+            <string>Absolute Control...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>camerasTileAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Tile</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>camerasCascadeAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Cascade</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>adjustmentsCamera_InfosAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Camera Infos...</string>
+        </property>
+        <property name="menuText">
+            <string>Camera Infos...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>adjustmentsFactory_SettingsAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Factory Settings...</string>
+        </property>
+        <property name="menuText">
+            <string>Factory Settings...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>helpCamera_InfosAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Camera Infos...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>adjustmentsSequence_ControlAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Sequence Control Demo...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileMessage_LoggerAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Message Logger...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>fileLog_MessagesAction</cstring>
+        </property>
+        <property name="toggleAction">
+            <bool>true</bool>
+        </property>
+        <property name="text">
+            <string>Log Messages</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>adjustmentsDirect_Register_ManipulationAction</cstring>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Direct Register Manipulation...</string>
+        </property>
+        <property name="menuText">
+            <string>Direct Register Manipulation...</string>
+        </property>
+    </action>
+    <action>
+        <property name="name">
+            <cstring>adjustmentsI_O3Action</cstring>
+        </property>
+        <property name="toggleAction">
+            <bool>true</bool>
+        </property>
+        <property name="enabled">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>I/O 3</string>
+        </property>
+    </action>
+</actions>
+<connections>
+    <connection>
+        <sender>fileOpenAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>fileOpen()</slot>
+    </connection>
+    <connection>
+        <sender>fileSaveAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>fileSave()</slot>
+    </connection>
+    <connection>
+        <sender>fileSaveAsAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>fileSaveAs()</slot>
+    </connection>
+    <connection>
+        <sender>filePrintAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>filePrint()</slot>
+    </connection>
+    <connection>
+        <sender>fileExitAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>fileExit()</slot>
+    </connection>
+    <connection>
+        <sender>helpIndexAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>helpIndex()</slot>
+    </connection>
+    <connection>
+        <sender>helpContentsAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>helpContents()</slot>
+    </connection>
+    <connection>
+        <sender>camerasClose_All_CamerasAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>closeAllCameras()</slot>
+    </connection>
+    <connection>
+        <sender>camerasOpen_All_CamerasAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>openAllCameras()</slot>
+    </connection>
+    <connection>
+        <sender>helpAboutAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>aboutSlot()</slot>
+    </connection>
+    <connection>
+        <sender>adjustmentsPicture_ControlAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>pictureControl()</slot>
+    </connection>
+    <connection>
+        <sender>adjustmentsAbsolute_ControlAction</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>mainForm</receiver>
+        <slot>adjustmentsAbsolute_ControlAction_toggled(bool)</slot>
+    </connection>
+    <connection>
+        <sender>camerasCascadeAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>cascadeCameraWindows()</slot>
+    </connection>
+    <connection>
+        <sender>camerasTileAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>tileCameraWindows()</slot>
+    </connection>
+    <connection>
+        <sender>adjustmentsCamera_InfosAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>cameraInfos()</slot>
+    </connection>
+    <connection>
+        <sender>camerasReScan_CamerasAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>rescanCameras()</slot>
+    </connection>
+    <connection>
+        <sender>helpCamera_InfosAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>cameraInfos()</slot>
+    </connection>
+    <connection>
+        <sender>adjustmentsFactory_SettingsAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>cameraReset()</slot>
+    </connection>
+    <connection>
+        <sender>adjustmentsSequence_ControlAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>seqCtlDemo()</slot>
+    </connection>
+    <connection>
+        <sender>fileMessage_LoggerAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>fileMessageLogger()</slot>
+    </connection>
+    <connection>
+        <sender>camerasISO_SpeedAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>changeISOSpeed()</slot>
+    </connection>
+    <connection>
+        <sender>fileLog_MessagesAction</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>mainForm</receiver>
+        <slot>enableMessageLogging(bool)</slot>
+    </connection>
+    <connection>
+        <sender>adjustmentsDirect_Register_ManipulationAction</sender>
+        <signal>activated()</signal>
+        <receiver>mainForm</receiver>
+        <slot>directRegisterManipulation()</slot>
+    </connection>
+    <connection>
+        <sender>adjustmentsI_O3Action</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>mainForm</receiver>
+        <slot>io3(bool)</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in implementation">qapplication.h</include>
+    <include location="local" impldecl="in implementation">CamWindowCloseEvent.h</include>
+    <include location="local" impldecl="in implementation">libdc1394/dc1394_control.h</include>
+    <include location="local" impldecl="in declaration">DC1394.h</include>
+    <include location="local" impldecl="in declaration">qimage.h</include>
+    <include location="local" impldecl="in declaration">videoPanel.h</include>
+    <include location="local" impldecl="in declaration">constants.h</include>
+    <include location="local" impldecl="in declaration">CamWindow.h</include>
+    <include location="local" impldecl="in declaration">qworkspace.h</include>
+    <include location="local" impldecl="in declaration">qmessagebox.h</include>
+    <include location="local" impldecl="in declaration">qfiledialog.h</include>
+    <include location="local" impldecl="in declaration">qfile.h</include>
+    <include location="local" impldecl="in declaration">CustomEvents.h</include>
+    <include location="local" impldecl="in declaration">version.h</include>
+    <include location="local" impldecl="in declaration">messagelogger.h</include>
+    <include location="local" impldecl="in implementation">mainform.ui.h</include>
+</includes>
+<variables>
+    <variable>MessageLogger logger;</variable>
+    <variable>bool closeForce;</variable>
+    <variable>int selectedColorCodingItemID;</variable>
+    <variable>quadlet_t supportedModes[MAX_CAMERAS][NUM_FORMATS];</variable>
+    <variable>quadlet_t supportedFormats[MAX_CAMERAS];</variable>
+    <variable>bool cameraOpen[MAX_CAMERAS];</variable>
+    <variable>int selectedCameraItemID;</variable>
+    <variable>QWorkspace *workspace;</variable>
+    <variable>CamWindow *cw[MAX_CAMERAS];</variable>
+    <variable>unsigned int openCameras;</variable>
+    <variable>int selectedFormatItemID;</variable>
+    <variable>int selectedResItemID;</variable>
+    <variable>unsigned int camCount;</variable>
+    <variable>int selectedFpsItemID;</variable>
+    <variable>DC1394 *dc1394;</variable>
+    <variable>quadlet_t supportedFramerates[MAX_CAMERAS][NUM_FORMATS][8];</variable>
+    <variable>bool loggingEnabled;</variable>
+</variables>
+<slots>
+    <slot>fileOpen()</slot>
+    <slot>fileSave()</slot>
+    <slot>fileSaveAs()</slot>
+    <slot>filePrint()</slot>
+    <slot>fileExit()</slot>
+    <slot>helpIndex()</slot>
+    <slot>helpContents()</slot>
+    <slot>initFormatMenu( int f )</slot>
+    <slot>initColorCodingMenu( unsigned int camID )</slot>
+    <slot>initResolutionMenu( unsigned int id, int m )</slot>
+    <slot>initF0ResMenu( int mode )</slot>
+    <slot>initF1ResMenu( int mode )</slot>
+    <slot>initF2ResMenu( int mode )</slot>
+    <slot>initF7ResMenu( unsigned int id, int mode )</slot>
+    <slot>disableUIControl()</slot>
+    <slot>enableUIControl()</slot>
+    <slot>quit()</slot>
+    <slot>customEvent( QCustomEvent * e )</slot>
+    <slot>closeEvent( QCloseEvent * e )</slot>
+    <slot>closeAllCameras()</slot>
+    <slot>openAllCameras()</slot>
+    <slot>tileCameraWindows()</slot>
+    <slot>cascadeCameraWindows()</slot>
+    <slot>fpsActivated( int id )</slot>
+    <slot>cCActivated( int id )</slot>
+    <slot>formatActivated( int id )</slot>
+    <slot>resActivated( int id )</slot>
+    <slot>aboutSlot()</slot>
+    <slot>selectCamera( int id )</slot>
+    <slot>windowActivated( QWidget * w )</slot>
+    <slot>pictureControl()</slot>
+    <slot>adjustmentsAbsolute_ControlAction_toggled( bool newValue )</slot>
+    <slot>cameraInfos()</slot>
+    <slot>cameraReset()</slot>
+    <slot>rescanCameras()</slot>
+    <slot>rescanBus()</slot>
+    <slot>seqCtlDemo()</slot>
+    <slot>fileMessageLogger()</slot>
+    <slot>changeISOSpeed()</slot>
+    <slot>enableMessageLogging( bool enable )</slot>
+    <slot>directRegisterManipulation()</slot>
+    <slot>io3( bool io3 )</slot>
+</slots>
+<functions>
+    <function returnType="bool">openCameraWindow( int id )</function>
+    <function access="protected">initFramerateMenu( int frate )</function>
+    <function access="private" specifier="non virtual">init()</function>
+    <function returnType="bool">initCameras()</function>
+    <function access="protected">getCameraParameters( unsigned int id )</function>
+</functions>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

@@ -1,0 +1,35 @@
+.TH isodump 5 "isodump v1" "libraw1394 @VERSION@" "Linux IEEE 1394"
+.SH NAME
+isodump \- format of IEEE 1394 isochronous packets dump file
+.SH DESCRIPTION
+The isodump format stores a series of IEEE 1394 isochronous stream
+packets (possibly from multiple channels), including their headers.
+Its main use is as the output format of \fBdumpiso\fR(1) and the input
+format of \fBsendiso\fR(1).
+.PP
+The 32 byte header starts at offset 0 with the string "1394 isodump
+v1" followed by a zero byte.  The next 8 bytes form a 64 bit big
+endian integer, which represents a bit mask of the channels that were
+dumped.  A set bit at position (1 << x) signifies that channel x was
+being listened on.  The following 8 bytes are set to zero.
+.PP
+The iso packets follow the header and are appended to the data stream
+in the order they were received.  The packets consist of the header
+quadlet as originally received and the data quadlets following
+directly.  The CRC quadlets after header and data do not appear and
+everything is in big endian, as seen on the bus.
+.PP
+There is no further framing of the packets in the format, packet
+boundaries can be found by looking at the data size field in the
+header quadlet of each packet.  The data size field appears in the
+most significant 16 bits of the header quadlet, contain the size in
+bytes (the actual packet is padded to a multiple of four bytes) and do
+not include the header packet.
+.SH COMPATIBILITY
+This format was introduced with the iso send and dump tools
+distributed with libraw1394.  No one else uses it so far.
+.SH SEE ALSO
+.B sendiso\fR(1),
+.B dumpiso\fR(1)
+.SH AUTHOR
+Andreas Bombe <aeb@debian.org>
