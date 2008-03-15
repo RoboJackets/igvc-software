@@ -3,19 +3,19 @@
 <KDevPrjSession>
  <DocsAndViews NumberOfDocuments="5" >
   <Doc0 NumberOfViews="1" URL="file:///home/chris/Desktop/igvcsvn2/candi/main.cpp" >
-   <View0 Encoding="" line="13" Type="Source" />
+   <View0 Encoding="" line="21" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/chris/Desktop/igvcsvn2/candi/vision/types.h" >
-   <View0 Encoding="" line="0" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/chris/Desktop/igvcsvn2/candi/transform/transform.c" >
+   <View0 Encoding="" line="115" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/chris/Desktop/igvcsvn2/candi/ui_viewer.h" >
-   <View0 Encoding="" line="0" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/chris/Desktop/igvcsvn2/candi/transform/texcode.h" >
+   <View0 Encoding="" line="4" Type="Source" />
   </Doc2>
-  <Doc3 NumberOfViews="1" URL="file:///home/chris/Desktop/igvcsvn2/candi/transform/transform.c" >
-   <View0 Encoding="" line="0" Type="Source" />
+  <Doc3 NumberOfViews="1" URL="file:///home/chris/Desktop/igvcsvn2/candi/transform/texcode.c" >
+   <View0 Encoding="" line="44" Type="Source" />
   </Doc3>
-  <Doc4 NumberOfViews="1" URL="file:///home/chris/Desktop/igvcsvn2/candi/transform/texcode.c" >
-   <View0 Encoding="" line="22" Type="Source" />
+  <Doc4 NumberOfViews="1" URL="file:///home/chris/Desktop/igvcsvn2/candi/transform/GenPoints/getsurf.c" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc4>
  </DocsAndViews>
  <pluginList>
