@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
     /*---------------------------------------------------------------------
      *  output elapsed time
      *---------------------------------------------------------------------*/
-    elapsed_time = (float)(times(&tms_buf) - start_time) / CLK_TCK;
+    elapsed_time = (float)(times(&tms_buf) - start_time) / CLOCKS_PER_SEC;
     printf( "got frame %d. elapsed time: %g sec ==> %g frames/second\n",
             i, elapsed_time, (float)i / elapsed_time);
   }
