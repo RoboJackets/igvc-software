@@ -19,7 +19,7 @@ void packin(Image* im2);
 void NextFrame(void) {
 	
 	Image* im2=malloc(sizeof(Image));
-		 ImageLoad("test.bmp", im2);	//camera data
+		 ImageLoad("1.bmp", im2);	//camera data
 	
 		//packin(im2);
 		
