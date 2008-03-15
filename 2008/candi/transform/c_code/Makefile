@@ -7,7 +7,7 @@
 LCFLAGS =  -L  -lGL -lglut   -o transform
 CFLAGS = 
 INCLUDES = 
-SOURCES=curtain.c texcode.c transform.c utilfuncs.c 
+#SOURCES=curtain.c texcode.c transform.c utilfuncs.c 
 TARGETS=curtain.o texcode.o transform.o utilfuncs.o
 #COMPILE  =curtain.c image.h Makefile Makefile~ test.bmp texcode.c texcode.c~ texcode.h transform.c transform.c~ transform.o utilfuncs.c 
 OUTPUT_OPTION=-c
@@ -18,6 +18,7 @@ libs = ${GLLIBS} # Cygwin or Mingw
 EXEEXT=.exe # Cygwin or Mingww
 
 linux: $(TARGETS)
+	make $(TARGETS)
 	gcc transform.c -c 
 	g++ $(TARGETS) $(LCFLAGS)
 
