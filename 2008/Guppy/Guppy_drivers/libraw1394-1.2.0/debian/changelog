@@ -1,0 +1,68 @@
+libraw1394 (0.10.1-1) unstable; urgency=low
+
+  * New upstream.
+  * Fix debconf stuff. Device gets created correctly now. Closes: #212394
+
+ -- Ben Collins <bcollins@debian.org>  Fri, 26 Sep 2003 09:33:52 -0400
+
+libraw1394 (0.10.0-1) unstable; urgency=low
+
+  * Maintainer changed to me (BenC). Taking over maintainership upstream and
+    in Debian.
+  * Lots of new stuff, new upstream.
+
+ -- Ben Collins <bcollins@debian.org>  Sat, 12 Jul 2003 20:39:39 -0400
+
+libraw1394 (0.9.0-3) unstable; urgency=low
+
+  * Move to debhelper V3.
+  * Add debconf support.
+
+ -- Andreas Bombe <aeb@debian.org>  Thu, 28 Jun 2001 14:01:37 +0200
+
+libraw1394 (0.9.0-2) unstable; urgency=low
+
+  * Fix postinst of shared library package so that it does not fail over
+    the question to create /dev/raw1394 if input is connected to /dev/null
+    (makes autobuilders happy).
+
+ -- Andreas Bombe <aeb@debian.org>  Sun, 17 Jun 2001 01:16:53 +0200
+
+libraw1394 (0.9.0-1) unstable; urgency=low
+
+  * Maintainer email address changed to my debian.org account.
+  * Changed to debianized source format, using Debian revision.
+  * New release adds testlibraw program (with man page) and programmer's
+    documentation, all in libraw1394-dev.
+  * Made sure that current config.{guess,sub} files are in the sources
+    (closes: #95078).
+
+ -- Andreas Bombe <aeb@debian.org>  Fri, 25 May 2001 00:03:24 +0200
+
+libraw1394 (0.8.2) unstable; urgency=low
+
+  * Create device file in /dev instead of / (closes: #81158).
+
+ -- Andreas Bombe <bombe@informatik.tu-muenchen.de>  Thu,  4 Jan 2001 02:37:57 +0100
+
+libraw1394 (0.8.1) unstable; urgency=low
+
+  * Use and require makedev (>= 2.3.1-49) which includes /dev/raw1394
+    (still supports potato by setting a variable during debian build).
+
+ -- Andreas Bombe <bombe@informatik.tu-muenchen.de>  Mon, 11 Dec 2000 02:26:34 +0100
+
+libraw1394 (0.8) unstable; urgency=low
+
+  * New libraw1394 release.
+  * ldconfig is done in postinst (now lintian clean).
+  * /dev/raw1394 is created if it doesn't exist.
+
+ -- Andreas Bombe <andreas.bombe@munich.netsurf.de>  Fri, 24 Nov 2000 02:06:08 +0100
+
+libraw1394 (0.7) unstable; urgency=low
+
+  * First unofficial Debian release.
+
+ -- Andreas Bombe <andreas.bombe@munich.netsurf.de>  Sun, 10 Sep 2000 03:28:50 +0200
+

@@ -1,0 +1,5432 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook V3.1//EN"[]>
+
+<book>
+  <bookinfo>
+
+    <title>libraw1394</title>
+    <subtitle>version 1.2.0</subtitle>
+
+    <copyright>
+      <year>2001-2004</year>
+      <holder>Andreas Bombe, Dan Maas, Manfred Weihs, and Christian Toegel</holder>
+    </copyright>
+
+  </bookinfo>
+
+  <toc></toc>
+
+  <chapter id="introduction">
+    <title>Introduction</title>
+
+    <para>
+      The Linux kernel's IEEE 1394 subsystem provides access to the raw 1394 bus
+      through the raw1394 module.  This includes the standard 1394 transactions
+      (read, write, lock) on the active side, isochronous stream receiving and
+      sending and dumps of data written to the FCP_COMMAND and FCP_RESPONSE
+      registers.  raw1394 uses a character device to communicate to user
+      programs using a special protocol.
+    </para>
+
+    <para>
+      libraw1394 was created with the intent to hide that protocol from
+      applications so that
+      <orderedlist numeration="arabic">
+	<listitem>
+	  <para>
+	    the protocol has to be implemented correctly only once.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    all work can be done using easy to understand functions instead of
+	    handling a complicated command structure.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    only libraw1394 has to be changed when raw1394's interface changes.
+	  </para>
+	</listitem>
+      </orderedlist>
+    </para>
+
+    <para>
+      To fully achieve the goals (especially 3) libraw1394 is distributed under
+      the LGPL (Lesser General Public License - see file COPYING.LIB for more
+      information.) to allow linking with any program, be it open source or
+      binary only.  The requirements are that the libraw1394 part can be
+      replaced (relinked) with another version of the library and that changes
+      to libraw1394 itself fall under LGPL again.  Refer to the LGPL text for
+      details.
+    </para>
+  </chapter>
+
+  <chapter id="intro1394">
+    <title>Short Introduction into IEEE 1394</title>
+
+    <para>
+      IEEE 1394 in fact defines two types of hardware implementations for this
+      bus system, cable and backplane.  The only one described here and
+      supported by the Linux subsystem is the cable implementation.  Most people
+      not familiar with the standard probably don't even know that there is
+      something else than the 1394 cable specification.
+    </para>
+
+    <para>
+      If you are familiar with CSR architectures (as defined in IEEE 1212
+      (FIXME?)), then you already know most of 1394, which is a CSR
+      implementation.
+    </para>
+
+    <sect1>
+      <title>Bus Structure</title>
+
+      <para>
+	The basic data structures defined in the standard and used in this
+	document are the quadlet (32 bit quantity) and the octlet (64 bit
+	quantity) and blocks (any quantity of bytes).  The bus byte ordering is
+	big endian.  A transmission can be sent at one of multiple possible
+	speeds, which are 100, 200 and 400 Mbit/s for the currently mostly used
+	IEEE 1394a spec and up to 3.2 Gbit/s in the recently finalized 1394.b
+	standard (these speeds are also referred to as S100, S200, ...).
+      </para>
+
+      <para>
+	A 1394 bus consists of up to 64 nodes (with multiple buses possibly
+	being connected, but that is outside of the scope of this document and
+	not completely standardized yet), each having a local address space with
+	48 bit wide addressing.  Each node is addressed with a 16 bit address,
+	which is further divided into a 10 bit bus ID and a 6 bit local node ID.
+	The highest value for both is a special value.  Bus ID equal to 1023
+	means "local bus" (the bus the node is connected to), node ID equal to
+	63 means "all nodes" (broadcast).
+      </para>
+
+      <para>
+	The whole bus can thus be seen as a linear 64 bit address space by
+	concatenating the node address (most significant bits) and and node
+	address (least significant bits).  libraw1394 treats them separately in
+	function arguments to save the application some fiddling with the bits.
+	The node IDs are completely dynamic and determined during the bus reset.
+      </para>
+
+      <para>
+	Unlike other buses there aren't many transactions or commands defined,
+	higher level commands are defined in terms of addresses accessed instead
+	of separate transaction types (comparable to memory mapped registers in
+	hardware).  The 1394 transactions are:
+
+	<itemizedlist>
+	  <listitem>
+	    <para>read (quadlets and blocks)</para>
+	  </listitem>
+	  <listitem>
+	    <para>write (quadlets and blocks)</para>
+	  </listitem>
+	  <listitem>
+	    <para>lock (some atomic modifications)</para>
+	  </listitem>
+	</itemizedlist>
+
+	There is also the isochronous transaction (the above three are called
+	asynchronous transactions), which is a broadcast stream with guaranteed
+	bandwidth.  It doesn't contain any address but is distinguished by a 6
+	bit channel number.
+      </para>
+
+      <para>
+	The bus view is only logical, physically it consists of many
+	point-to-point connections between nodes with every node forwarding data
+	it receives to every other port which is capable of the speed the
+	transaction is sent at (thus a S200 node in the path between two S400
+	nodes would limit their communication speed to S200).  It forms a tree
+	structure with all but one node having a parent and a number of
+	children.  One node is the root node and has no parents.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Bus Reset</title>
+      
+      <para>
+	A bus reset occurs whenever the state of any node changes (including
+	addition and removal of nodes).  At the beginning a root node is chosen,
+	then the tree identification determines for every node which port is
+	connected to a parent, child or nothing.  Then the SelfID phase begins.
+	The root node sends a SelfID grant on its first port connected to a
+	child.  If that is not a leaf node, it will itself forward the grant to
+	its first child.  When a leaf node gets a grant, it will pick the lowest
+	node ID not yet in use (starting with 0) and send out a SelfID packet
+	with its node ID and more information, then acknowledge the SelfID grant
+	to its parent, which will send a grant to its next child until it
+	configured all its children, then pick a node ID itself, send SelfID
+	packet and ack to parent.
+      </para>
+
+      <para>
+	After bus reset the used node IDs are in a sequential range with no
+	holes starting from 0 with the root node having the highest ID.  This
+	also means that node IDs can change for many or all nodes with the
+	insertion of a new node or moving the role of root to another node.  In
+	libraw1394 all transactions are tagged automatically with a generation
+	number which is increased in every bus reset and transactions with an
+	obsolete generation will fail in order to avoid targetting the wrong
+	node.  Nodes have to be identified in a different way than their
+	volatile node IDs, namely by reading their globally unique ID (GUID)
+	contained in the configuration ROM.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Transactions</title>
+
+      <para>
+	The packets transmitted on the bus are acknowledged by the receiving end
+	unless they are broadcast packets (broadcast writes and isochronous
+	packets).  The acknowledge code contains an error code, which either
+	signifies error, success or packet pending.  In the first two cases the
+	transaction completes, in the last a response packet will follow at a
+	later time from the targetted node to the source node (this is called a
+	split transaction).  Only writes can succeed and complete in the ack
+	code, reads and locks require a response.  Error and packet pending can
+	happen for every transaction.  The response packets contain a response
+	code (rcode) which signifies success or type of error.
+      </para>
+
+      <para>
+	For read and write there are two different types, quadlet and block.
+	The quadlet types have all their payload (exactly one quadlet) in the
+	packet header, the block types have a variable length data block
+	appended to the header.  Programs using libraw1394 don't have to care
+	about that, quadlet transactions are automatically used when the data
+	length is 4 bytes and block transactions otherwise.
+      </para>
+
+      <para>
+	The lock transaction has several extended transaction codes defined
+	which choose the atomic operation to perform, the most used being the
+	compare-and-swap (code 0x2).  The transaction passes the data value and
+	(depending on the operation) the arg value to the target node and
+	returns the old value at the target address, but only when the
+	transaction does not have an error.  All three values are of the same
+	size, either one quadlet or one octlet.
+      </para>
+
+      <para>
+	In the compare-and-swap case, the data value is written to the target
+	address if the old value is identical to the arg value.  The old value
+	is returned in any case and can be used to find out whether the swap
+	succeeded by repeating the compare locally.  Compare-and-swap
+	is useful for avoiding race conditions when accessing the same
+	address from multiple nodes.  For example, isochronous resource
+	allocation is done using compare-and-swap, as described below.  Since
+	the old value is always returned, it more efficient to do the first
+	attempt with the reset value of the target register as arg instead of
+	reading it first.  Repeat with the returned old value as new arg value
+	if it didn't succeed.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Bus Management</title>
+
+      <para>
+	There are three basic bus service nodes defined in IEEE 1394 (higher
+	level protocols may define more): cycle master, isochronous resource
+	manager and bus manager.  These positions are contended for in and
+	shortly after the bus reset and may all be taken by a single node.  A
+	node does not have to support being any of those but if it is bus
+	manager capable it also has to be iso manager capable, if it is iso
+	manager capable it also has to be cycle master capable.
+      </para>
+
+      <para>
+	The cycle master sends 8000 cycle start packets per second, which
+	initiate an iso cycle.  Without that, no isochronous transmission is
+	possible.  Only the root node is allowed to be cycle master, if it is
+	not capable then no iso transmissions can occur (and the iso or bus
+	manager have to select another node to become root and initiate a bus
+	reset).
+      </para>
+
+      <para>
+	The isochronous resource manager is the central point where channel and
+	bandwidth allocations are stored.  A bit in the SelfID shows whether a
+	node is iso manager capable or not, the iso manager capable node with
+	the highest ID wins the position after a bus reset.  Apart from
+	containing allocation registers, this one doesn't do much.  Only if
+	there is no bus manager, it may determine a cycle master capable node to
+	become root and initiate a bus reset.
+      </para>
+
+      <para>
+	The bus manager has more responsibilities: power management (calculate
+	power provision and consumption on the bus and turn on disabled nodes if
+	enough power is available), bus optimization (calculate an effective gap
+	count, optimize the topology by selecting a better positioned node for
+	root) and some registers relevant to topology (topology map containing
+	the SelfIDs of the last reset and a speed map, which is obsoleted in
+	IEEE 1394a).  The bus manager capable nodes contend for the role by
+	doing a lock transaction on the bus manager ID register in the iso
+	manager, the first to successfully complete the transaction wins the
+	role.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Isochronous Transmissions</title>
+
+      <para>
+	Nodes can allocate a channel and bandwidth for isochronous transmissions
+	at the iso manager to broadcast timing critical data (e.g. multimedia
+	streams) on the bus.  However these transmissions are unreliable, there
+	is no guarantee that every packet reaches the intended recipients (the
+	software and hardware involved also take iso packets a bit more
+	lightly).  After a cycle start packet, the isochronous cycle begins and
+	every node can transmit iso packets, however only one packet per channel
+	is allowed.  As soon as a gap of a certain length appears (i.e. no node
+	sends anymore), the iso cycle ends and the rest of the time until the
+	next cycle start is reserved for asynchronous packets.
+      </para>
+
+      <para>
+	The channel register on the iso manager consists of 64 bits, each of
+	which signifies one channel.  A channel can be allocated by any node by
+	doing a compare-swap lock request with the new bitmask.  Likewise the
+	bandwidth can be allocated by doing a lock request with the new value.
+	The bandwidth register contains the remaining time available for every
+	iso cycle.  Since you allocate time, the maximum data you are allowed to
+	put into an iso packet depends on the speed you will send at.
+      </para>
+
+      <para>
+	On every bus reset, the resource registers are resetted to their initial
+	values (all channels free, all bandwidth minus some amount set aside for
+	asynchronous communication available), this has to happen since the
+	isochronous manager may have moved to another node.  Isochronous
+	transmissions may continue with the old allocations for a certain
+	(FIXME) amount of time.  During that time, the nodes have to reallocate
+	their resources and no new allocations are allowed to occur.  Only after
+	this period new allocations may be done, this avoids nodes losing their
+	allocations over a bus reset.
+      </para>
+
+      <para>
+	libraw1394 does not provide special functions for allocating iso
+	resources nor does it clean up after programs when they exit.  Protocols
+	exist that require the first node to use some resources to allocate it
+	and then leave it for the last node using it to deallocate it.  This may
+	be different nodes, so automatic behaviour would be very undesirable in
+	these cases.
+      </para>
+	</sect1>
+
+  </chapter>
+
+  <chapter id="general">
+    <title>Data Structures and Program Flow</title>
+
+    <sect1>
+      <title>Overview</title>
+      
+      <para>
+	The 1394 subsystem in Linux is divided into the classical
+	three layers, like most other interface subsystems in Linux.
+	The in-kernel subsystem consists of the ieee1394 core, which
+	provides basic services like handling of the 1394 protocol
+	(converting the abstract transactions into packets and back),
+	collecting information about bus and nodes and providing some
+	services to the bus that are required to be available for
+	standards conformant nodes (e.g. CSR registers).  Below that
+	are the hardware drivers, which handle converting packets and
+	bus events to and from hardware accesses on specific 1394
+	chipsets.
+      </para>
+
+      <para>
+	Above the core are the highlevel drivers, which use the services
+	provided by the core to implement protocols for certain devices and act
+	as drivers to these.  raw1394 is one such driver, however it is not
+	specialized to handle one kind of device but is designed to accept
+	commands from user space to do any transaction wanted (as far as
+	possible from current core design).  Using raw1394, normal applications
+	can access 1394 nodes on the bus and it is not neccessary to write
+	kernel code just for that.
+      </para>
+
+      <para>
+	raw1394 communicates to user space like most device drivers do, through
+	device files in /dev.  It uses a defined protocol on that device, but
+	applications don't have to and should not care about that.  All of this
+	is taken care of by libraw1394, which provides a set of functions that
+	convert to and from raw1394 protocol packets and are a lot easier to
+	handle than that underlying protocol.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Handles</title>
+
+      <para>
+	The handle presented to the application for using libraw1394 is the
+	raw1394handle_t, an opaque data structure (which means you don't need to
+	know its internals).  The handle (and with it a connection to the kernel
+	side of raw1394) is obtained using
+	<function>raw1394_new_handle()</function>.  Insufficient permissions to
+	access the kernel driver will result in failure of this function, among
+	other possibilities of failure.
+      </para>
+
+      <para>
+	While initializing the handle, a certain order of function calls have to
+	be obeyed or undefined results will occur.  This order reflects the
+	various states of initialization to be done:
+      </para>
+
+      <para>
+	<orderedlist>
+	  <listitem>
+	    <para><function>raw1394_new_handle()</function></para>
+	  </listitem>
+	  <listitem>
+	    <para><function>raw1394_get_port_info()</function></para>
+	  </listitem>
+	  <listitem>
+	    <para><function>raw1394_set_port()</function></para>
+	  </listitem>
+	</orderedlist>
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Ports</title>
+
+      <para>
+	A computer may have multiple 1394 buses connected by having multiple
+	1394 chips.  Each of these is called a port, and the handle has to be
+	connected to one port before it can be used for anything.  Even if no
+	nodes are connected to the chip in question, it forms a complete bus
+	(with just one node, itself).
+      </para>
+
+      <para>
+	A list of available ports together with some information about it (name
+	of the hardware, number of connected nodes) is available via
+	<function>raw1394_get_port_info()</function>, which is to be called
+	right after getting a fresh handle.  The user should be presented with a
+	choice of available ports if there is more than one.  It may be good
+	practice to do that even if there is only one port, since that may
+	result from a normally configured port just not being available, making
+	it confusing to be dropped right into the application attached to a port
+	without a choice and notion of anything going wrong.
+      </para>
+
+      <para>
+	The choice of port is then reported using
+	<function>raw1394_set_port()</function>.  If this function fails and
+	<symbol>errno</symbol> is set to <symbol>ESTALE</symbol>, then
+	something has changed about the ports (port was added or removed)
+	between getting the port info and trying to set a port.  It is
+	required that the current port list is fetched (presenting the user
+	with the choice again) and setting the port is retried with the new
+	data.
+      </para>
+
+      <para>
+	After a successful <function>raw1394_set_port()</function>, the get and
+	set port functions must not be used anymore on this handle.  Undefined
+	results occur if you do so.  To make up for this, all the other
+	functions are allowed now.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>The Event Loop</title>
+
+      <para>
+	All commands in libraw1394 are asynchronous, with some
+	synchronous wrapper functions for some types of transactions.
+	This means that there are two streams of data, one going into
+	raw1394 and one coming out.  With this design you can send out
+	multiple transactions without having to wait for the response
+	before you can continue (sending out other transactions, for
+	example).  The responses and other events (like bus resets and
+	received isochronous packets) are queued, and you can get them
+	with <function>raw1394_loop_iterate()</function> or
+	<function>raw1394_loop_iterate_timeout()</function> (which
+	always returns after a user-specified timeout if no
+	raw1394 event has occurred).
+      </para>
+
+      <para>
+	This forms an event loop you may already know from similar systems like
+	GUI toolkits.  <function>raw1394_loop_iterate()</function> gets one
+	message from the event queue in raw1394, processes it with the
+	configured callback functions and returns the value returned by the
+	callback (so you can signal to the main loop from your callback; the
+	standard callbacks all return 0).  It normally blocks when there are no
+	events and always processes only one event.  If you are only receiving
+	broadcast events like isochronous packets you thus have to set up a loop
+	continuously calling the iterate function to get your callbacks called.
+      </para>
+
+      <para>
+	Often it is necessary to have multiple event loops and combine
+	them, e.g. if your application uses a GUI toolkit which also
+	has its own event loop.  In that case you can use
+	<function>raw1394_get_fd()</function> to get the file
+	descriptor used for this handle by libraw1394.  The fd can be
+	used to for <function>select()</function> or
+	<function>poll()</function> calls together with the other
+	loop's fd. (Most toolkits, like GTK and Qt, have special APIs
+	for integrating file descriptors into their own event loops).
+      </para>
+
+      <para>
+        If using <function>poll()</function>, you must test for
+	<symbol>POLLIN</symbol> and <symbol>POLLPRI</symbol>
+	events. If using <function>select()</function>, you must test
+	for both read and exception activity.
+      </para>
+
+      <para> If any of these conditions trigger, you should then call
+        <function>raw1394_loop_iterate()</function> to pick up the
+        event. <function>raw1394_loop_iterate()</function> is
+        guaranteed not to block when called immediately after select()
+        or poll() indicates activity.  After the first call you
+        continue the main event loop.  If more events wait, the
+        <function>select()</function>/<function>poll()</function> will
+        immediately return again.
+      </para>
+
+      <para>
+	You can also use the fd to set the <symbol>O_NONBLOCK</symbol> flag with
+	<function>fcntl()</function>.  After that, the iterate function will not
+	block anymore but fail with <symbol>errno</symbol> set to
+	<symbol>EAGAIN</symbol> if no events wait.  These are the only legal
+	uses for the fd returned by <function>raw1394_get_fd()</function>.
+      </para>
+
+      <para>
+	There are some functions which provide a synchronous wrapper for
+	transactions, note that these will call
+	<function>raw1394_loop_iterate()</function> continuously until their
+	transaction is completed, thus having implicit callback invocations
+	during their execution.  The standard transaction functions have names
+	of the form <function>raw1394_start_xxx</function>, the synchronous
+	wrappers are called <function>raw1394_xxx</function>.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Handlers</title>
+
+      <para>
+	There are a number of handlers which can be set using the appropriate
+	function as described in the function reference and which libraw1394
+	will call during a <function>raw1394_loop_iterate()</function>.  These
+	are:
+
+	<itemizedlist>
+	  <listitem>
+	    <para>tag handler (called for completed commands)</para>
+	  </listitem>
+	  <listitem>
+	    <para>bus reset handler (called when a bus reset happens)</para>
+	  </listitem>
+	  <listitem>
+	    <para>iso handler (called when an iso packet is received)
+	    (deprecated by the new iso API)</para>
+	  </listitem>
+	  <listitem>
+	    <para>fcp handler (called when a FCP command or response is
+	    received)</para>
+	  </listitem>
+	</itemizedlist>
+
+	The bus reset handler is always called, the tag handler for every
+	command that completes, the iso handler and fcp handler are only called
+	when the application chooses to receive these packets.  Handlers return
+	an integer value which is passed on by
+	<function>raw1394_loop_iterate()</function> (only one handler is called
+	per invocation), <constant>0</constant> is returned without a handler in
+	place.
+      </para>
+
+      <para>
+	The tag handler case is a bit special since the default handler is
+	actually doing something.  Every command that you start can be given an
+	unsigned long tag which is passed untouched to the tag handler when the
+	event loop sees a completed command.  The default handler expects this
+	value to be a pointer to a <structname>raw1394_reqhandle</structname>
+	structure, which contains a data pointer and its own callback function
+	pointer.  The callback gets the untouched data pointer and error code as
+	arguments.  If you want to use tags that are not
+	<structname>raw1394_reqhandle</structname> pointers you have to set up
+	your own tag handler.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Generation Numbers</title>
+
+      <para>
+	libraw1394 and the kernel code use generation numbers to identify the
+	current bus configuration and increment those on every configuration
+	change.  The most important generation number is stored per connected
+	1394 bus and incremented on every bus reset.  There is another number
+	managed by raw1394 which identifies global changes (like a complete port
+	being added or removed), which is used for the
+	<function>raw1394_set_port()</function> function to make sure you don't
+	use stale port numbers.  This is done transparently to you.
+      </para>
+
+      <para>
+	The bus generation number is more relevant for your work.  Since nodes
+	can change IDs with every bus reset, it is very likely that you don't
+	want to send a packet you constructed with the old ID before you noticed
+	the bus reset.  This does not apply to isochronous transmissions, since
+	they are broadcast and do not depend on bus configuration.  Therefore
+	every packet is automatically tagged with the expected generation
+	number, and it will fail to send if that does not match the number
+	managed in the kernel for the port in question.
+      </para>
+
+      <para>
+	You get the current generation number through the bus reset handler.  If
+	you don't set a custom bus reset handler, the default handler will
+	update the generation number automatically.  If you set your own
+	handler, you can update the generation number to be used through
+	<function>raw1394_update_generation()</function> directly in the handler
+	or later.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Error and Success Codes</title>
+
+      <para>
+	libraw1394 returns the ack/rcode pair in most transaction cases.  The
+	rcode is undefined in cases where the ack code is not equal to
+	<symbol>ack_pending</symbol>.  This is stored in a type
+	<type>raw1394_errcode_t</type>, from which the ack and rcode parts can
+	be extracted using two macros.
+      </para>
+
+      <para>
+	With the function <function>raw1394_errcode_to_errno()</function> it is
+	possible to convert this to an errno number that conveys roughly the
+	same meaning.  Many developers will find that easier to handle.  This is
+	done automatically for the synchronous read/write/lock wrapper
+	functions, i.e. they return 0 for success and a negative value for
+	failure, in which case they also set the <symbol>errno</symbol> variable
+	to the appropriate code.  The raw ack/rcode pair can then still be
+	retrieved using <function>raw1394_get_errcode()</function>.
+      </para>
+    </sect1>
+
+  </chapter>
+
+  <chapter id="isochronous">
+    <title>Isochronous Transmission and Reception</title>
+
+    <sect1>
+      <title>Overview</title>
+      <para>
+        Isochronous operations involve sending or receiving a constant
+        stream of packets at a fixed rate of 8KHz. Unlike raw1394's
+        asynchronous API, where you "push" packets to raw1394
+        functions at your leisure, the isochronous API is based around
+        a "pull" model. During isochronous transmission or reception,
+        raw1394 informs your application when a packet must be sent or
+        received. You must fulfill these requests in a timely manner
+        to avoid breaking the constant stream of isochronous packets.
+      </para>
+      <para>
+        A raw1394 handle may be associated with one isochronous
+        stream, either transmitting or receiving (but not both at the
+        same time). To transmit or receive more than one stream
+        simultaneously, you must create more than one raw1394 handle.
+      </para>
+    </sect1>
+
+    <sect1>
+
+      <title>Initialization</title>
+
+        <para>
+	  When a raw1394 handle is first created, no isochronous
+	  stream is assocated with it. To begin isochronous
+	  operations, call either
+	  <function>raw1394_iso_xmit_init()</function> (transmission) or
+	  <function>raw1394_iso_recv_init()</function>
+	  (reception). The parameters to these functions are as follows:
+        </para>
+
+	<para>
+	  <symbol>handler</symbol> is your function for queueing
+	  packets to be sent (transmission) or processing received
+	  packets (reception).
+	</para>
+
+	<para>
+          <symbol>buf_packets</symbol> is the number of packets that
+          will be buffered at the kernel level. A larger packet buffer
+          will be more forgiving of IRQ and application latency,
+          however it will consume more kernel memory. For most
+          applications, it is sufficient to buffer 2000-16000 packets
+          (0.25 seconds to 2.0 seconds maximum latency).
+	</para>
+	
+	<para>
+	  <symbol>max_packet_size</symbol> is the size, in bytes, of
+	  the largest isochronous packet you intend to handle. This
+	  size does not include the isochronous header but it does
+	  include the CIP header specified by many isochronous
+	  protocols.
+	</para>
+
+	<para>
+	  <symbol>channel</symbol> is the isochronous channel on which
+	  you wish to receive or transmit. (currently there is no
+	  facility for multi-channel transmission or reception).
+       </para>
+
+       <para>
+         <symbol>speed</symbol> is the isochronous speed at which you
+         wish to operate. Possible values are
+         <symbol>RAW1394_ISO_SPEED_100</symbol>, 
+		 <symbol>RAW1394_ISO_SPEED_200</symbol>, and
+         <symbol>RAW1394_ISO_SPEED_400</symbol>.
+       </para>
+
+       <para>
+         <symbol>irq_interval</symbol> is the maximum latency of the
+         kernel buffer, in packets. (To avoid excessive IRQ rates, the
+         low-level drivers only trigger an interrupt every
+         irq_interval packets). Pass -1 to receive a default value
+         that should be suitable for most applications.
+       </para>
+	   
+       <para>
+         <symbol>mode</symbol> for <function>raw1394_iso_recv_init()</function>
+         sets whether to use packet-per-buffer or buffer-fill receive mode.
+		 Possible values are <symbol>RAW1394_DMA_DEFAULT</symbol> (bufferfill 
+		 on ohci1394), <symbol>RAW1394_DMA_BUFFERFILL</symbol>, and 
+		 <symbol>RAW1394_DMA_PACKET_PER_BUFFER</symbol>.
+       </para>
+
+       <para>
+         If <function>raw1394_iso_xmit/recv_init()</function> retuns
+         successfully, then you may start isochronous operations. You
+         may not call
+         <function>raw1394_iso_xmit/recv_init()</function> again on
+         the same handle without first shutting down the isochronous
+         operation with <function>raw1394_iso_shutdown()</function>.
+       </para>
+
+       <para>
+         Note that <function>raw1394_iso_xmit_init()</function> and
+	 <function>raw1394_iso_recv_init()</function> involve
+	 potentially time-consuming operations like allocating kernel
+	 and device resources. If you intend to transmit or receive
+	 several isochronous streams simultaneously, it is advisable
+	 to initialize all streams before starting any packet
+	 transmission or reception.
+       </para>
+
+    </sect1>
+
+    <sect1>
+
+      <title>Stopping and Starting</title>
+
+        <para>
+	  Once the isochronous operation has been initialized, you may
+	  start and stop packet transmission with
+	  <function>raw1394_iso_xmit/recv_start()</function> and
+	  <function>raw1394_iso_stop()</function>. It is legal to call
+	  these as many times as you want, and it is permissible to
+	  start an already-started stream or stop an already-stopped
+	  stream. Packets that have been queued for transmission or
+	  reception will remain queued when the operation is stopped.
+        </para>
+
+	<para>
+	  <function>raw1394_iso_xmit/recv_start()</function> allow you
+	  to specify on which isochronous cycle number to start
+	  transmitting or receiving packets. Pass -1 to start
+	  immediately. This parameter is ignored if isochronous
+	  transmission or reception is already in progress.
+	</para>
+
+	<para>
+	  <function>raw1394_iso_xmit_start()</function> has an
+	  additional parameter, <symbol>prebuffer_packets</symbol>,
+	  which specifies how many packets to queue up before starting
+	  transmission. Possible values range from zero (start
+	  transmission immediately after the first packet is queued)
+	  up to the total number of packets in the buffer.
+	</para>
+
+	<para>
+	  Once the isochronous operation has started, you must
+	  repeatedly call <function>raw1394_loop_iterate()</function>
+	  as usual to drive packet processing.
+	</para>
+
+    </sect1>
+
+    <sect1>
+
+      <title>Receiving Packets</title>
+
+        <para>
+          Raw1394 maintains a fixed-size ringbuffer of packets in
+	  kernel memory. The buffer is filled by the low-level driver
+	  as it receives packets from the bus. It is your
+	  application's job to process each packet, after which the
+	  buffer space it occupied can be re-used for future packets.
+        </para>
+
+        <para>
+	  The isochronous receive handler you provided will be called
+	  from <function>raw1394_loop_iterate()</function> after each
+	  packet is received. Your handler is passed a pointer to the
+	  first byte of the packet's data payload, plus the packet's
+	  length in bytes (not counting the isochronous header), the
+	  cycle number at which it was received, the channel on which
+	  it was received, and the "tag" and "sy" fields from the
+	  isochronous header. Note that the packet is at this point
+	  still in the kernel's receive buffer, so the data pointer is
+	  only valid until the receive handler returns. You must make
+	  a copy of the packet's data if you want to keep it.
+	</para>
+
+	<para>
+	  The receive handler is also passed a "packet(s) dropped"
+	  flag. If this flag is nonzero, it means that one or more
+	  incoming packets have been dropped since the last call to
+	  your handler (usually this is because the kernel buffer has
+	  completely filled up with packets or a bus reset has
+	  occurred).
+	</para>
+
+    </sect1>
+
+     <sect1>
+
+      <title>Transmitting Packets</title>
+
+        <para>
+          Similar to reception, raw1394 maintains a fixed-size
+	  ringbuffer of packets in kernel memory. The buffer is filled
+	  by your application as it queues packets to be sent. The
+	  buffer is drained by the hardware driver as it transmits
+	  packets on the 1394 bus.
+        </para>
+
+        <para>
+	  The isochronous transmit handler you provided will be called
+	  from <function>raw1394_loop_iterate()</function> whenever
+	  there is space in the buffer to queue another packet. The
+	  handler is passed a pointer to the first byte of the buffer
+	  space for the packet's data payload, pointers to words
+	  containing the data length in bytes (not counting the
+	  isochronous header), "tag" and "sy" fields, and the
+	  isochronous cycle number at which this packet will be
+	  transmitted. The handler must write the packet's data
+	  payload into the supplied buffer space, and set the values
+	  pointed to by "len", "tag", and "sy" to the appropriate
+	  values. The handler is permitted to write any number of data
+	  bytes, up and including to the value of
+	  <symbol>max_packet_size</symbol> passed to
+	  <function>raw1394_iso_xmit_init()</function>.
+	</para>
+
+	<para>
+	 Note: If you passed -1 as the starting cycle to
+	 <function>raw1394_iso_xmit_init()</function>, the cycle
+	 number provided to your handler will be incorrect until after
+	 one buffer's worth of packets have been transmitted.
+	</para>
+
+	<para>
+	  The transmit handler is also passed a "packet(s) dropped"
+	  flag. If this flag is nonzero, it means that one or more
+	  outgoing packets have been dropped since the last call to
+	  your handler (usually this is because the kernel buffer has
+	  gone completely empty or a bus reset has occurred).
+	</para>
+
+    </sect1>
+
+     <sect1>
+
+      <title>Shutting down</title>
+
+        <para>
+	  When the isochronous operation has finished, call
+	  <function>raw1394_iso_shutdown()</function> to release all
+	  associated resources. If you don't call this function
+	  explicitly, it will be called automatically when the raw1394
+	  handle is destroyed.
+	</para>
+
+    </sect1>
+
+  </chapter>
+
+  <chapter id="functions">
+    <title>Function Reference</title>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-xmit-init">raw1394_iso_xmit_init</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_xmit_init</refname>
+ <refpurpose>
+   initialize isochronous transmission
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_xmit_init </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>raw1394_iso_xmit_handler_t <parameter>handler</parameter></paramdef>
+   <paramdef>unsigned int <parameter>buf_packets</parameter></paramdef>
+   <paramdef>unsigned int <parameter>max_packet_size</parameter></paramdef>
+   <paramdef>unsigned char <parameter>channel</parameter></paramdef>
+   <paramdef>enum raw1394_iso_speed <parameter>speed</parameter></paramdef>
+   <paramdef>int <parameter>irq_interval</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>handler</parameter></term>
+   <listitem>
+    <para>
+      handler function for queueing packets
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>buf_packets</parameter></term>
+   <listitem>
+    <para>
+      number of isochronous packets to buffer
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>max_packet_size</parameter></term>
+   <listitem>
+    <para>
+      largest packet you need to handle, in bytes
+     (not including the isochronous header)
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      isochronous channel on which to transmit
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>speed</parameter></term>
+   <listitem>
+    <para>
+      speed at which to transmit
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>irq_interval</parameter></term>
+   <listitem>
+    <para>
+      maximum latency of wake-ups, in packets (-1 if you don't care)
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Allocates all user and kernel resources necessary for isochronous transmission.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-recv-init">raw1394_iso_recv_init</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_recv_init</refname>
+ <refpurpose>
+      initialize isochronous reception
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_recv_init </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>raw1394_iso_recv_handler_t <parameter>handler</parameter></paramdef>
+   <paramdef>unsigned int <parameter>buf_packets</parameter></paramdef>
+   <paramdef>unsigned int <parameter>max_packet_size</parameter></paramdef>
+   <paramdef>unsigned char <parameter>channel</parameter></paramdef>
+   <paramdef>enum raw1394_iso_dma_recv_mode <parameter>mode</parameter></paramdef>
+   <paramdef>int <parameter>irq_interval</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>handler</parameter></term>
+   <listitem>
+    <para>
+      handler function for receiving packets
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>buf_packets</parameter></term>
+   <listitem>
+    <para>
+      number of isochronous packets to buffer
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>max_packet_size</parameter></term>
+   <listitem>
+    <para>
+      largest packet you need to handle, in bytes (not including
+     the isochronous header)
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      isochronous channel to receive
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>mode</parameter></term>
+   <listitem>
+    <para>
+      bufferfill or packet per buffer mode
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>irq_interval</parameter></term>
+   <listitem>
+    <para>
+      maximum latency of wake-ups, in packets
+     (-1 if you don't care)
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Allocates all user and kernel resources necessary for isochronous reception.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-multichannel-recv-init">raw1394_iso_multichannel_recv_init</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_multichannel_recv_init</refname>
+ <refpurpose>
+      initialize multi-channel iso reception
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_multichannel_recv_init </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>raw1394_iso_recv_handler_t <parameter>handler</parameter></paramdef>
+   <paramdef>unsigned int <parameter>buf_packets</parameter></paramdef>
+   <paramdef>unsigned int <parameter>max_packet_size</parameter></paramdef>
+   <paramdef>int <parameter>irq_interval</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>handler</parameter></term>
+   <listitem>
+    <para>
+      handler function for receiving packets
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>buf_packets</parameter></term>
+   <listitem>
+    <para>
+      number of isochronous packets to buffer
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>max_packet_size</parameter></term>
+   <listitem>
+    <para>
+      largest packet you need to handle, in bytes (not including
+     the isochronous header)
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>irq_interval</parameter></term>
+   <listitem>
+    <para>
+      maximum latency of wake-ups, in packets (-1 if you don't care)
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Allocates all user and kernel resources necessary for isochronous reception.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-recv-listen-channel">raw1394_iso_recv_listen_channel</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_recv_listen_channel</refname>
+ <refpurpose>
+      listen to a specific channel in multi-channel mode
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_recv_listen_channel </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned char <parameter>channel</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      the channel to start listening
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   listen/unlisten on a specific channel (multi-channel mode ONLY)
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-recv-unlisten-channel">raw1394_iso_recv_unlisten_channel</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_recv_unlisten_channel</refname>
+ <refpurpose>
+      stop listening  to a specific channel in multi-channel mode
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_recv_unlisten_channel </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned char <parameter>channel</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      the channel to stop listening to
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-recv-set-channel-mask">raw1394_iso_recv_set_channel_mask</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_recv_set_channel_mask</refname>
+ <refpurpose>
+      listen or unlisten to a whole bunch of channels at once
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_recv_set_channel_mask </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>u_int64_t <parameter>mask</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>mask</parameter></term>
+   <listitem>
+    <para>
+      64-bit mask of channels, 1 means listen, 0 means unlisten,
+     channel 0 is LSB, channel 63 is MSB
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   for multi-channel reception mode only
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success, -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-xmit-start">raw1394_iso_xmit_start</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_xmit_start</refname>
+ <refpurpose>
+      begin isochronous transmission
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_xmit_start </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>int <parameter>start_on_cycle</parameter></paramdef>
+   <paramdef>int <parameter>prebuffer_packets</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>start_on_cycle</parameter></term>
+   <listitem>
+    <para>
+      isochronous cycle number on which to start 
+     (-1 if you don't care)
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>prebuffer_packets</parameter></term>
+   <listitem>
+    <para>
+      number of packets to queue up before starting transmission
+     (-1 if you don't care)
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-recv-start">raw1394_iso_recv_start</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_recv_start</refname>
+ <refpurpose>
+      begin isochronous reception
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_recv_start </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>int <parameter>start_on_cycle</parameter></paramdef>
+   <paramdef>int <parameter>tag_mask</parameter></paramdef>
+   <paramdef>int <parameter>sync</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>start_on_cycle</parameter></term>
+   <listitem>
+    <para>
+      isochronous cycle number on which to start 
+     (-1 if you don't care)
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag_mask</parameter></term>
+   <listitem>
+    <para>
+      mask of tag fields to match (-1 to receive all packets)
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>sync</parameter></term>
+   <listitem>
+    <para>
+      not used, reserved for future implementation
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-xmit-write">raw1394_iso_xmit_write</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_xmit_write</refname>
+ <refpurpose>
+      alternative blocking-write API for ISO transmission
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_xmit_write </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned char * <parameter>data</parameter></paramdef>
+   <paramdef>unsigned int <parameter>len</parameter></paramdef>
+   <paramdef>unsigned char <parameter>tag</parameter></paramdef>
+   <paramdef>unsigned char <parameter>sy</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      pointer to packet data buffer
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>len</parameter></term>
+   <listitem>
+    <para>
+      length of packet, in bytes
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+      tag field
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>sy</parameter></term>
+   <listitem>
+    <para>
+      sync field
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   <function>write</function> style API - do NOT use this if you have set an xmit_handler
+   if buffer is full, waits for more space UNLESS the file descriptor is
+   set to non-blocking, in which case <function>xmit_write</function> will return -1 with
+   errno = EAGAIN
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-xmit-sync">raw1394_iso_xmit_sync</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_xmit_sync</refname>
+ <refpurpose>
+      wait until all queued packets have been sent
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_xmit_sync </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-recv-flush">raw1394_iso_recv_flush</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_recv_flush</refname>
+ <refpurpose>
+      flush all already received iso packets from kernel into user space
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_recv_flush </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   If you specified an irq_interval &gt; 1 in
+   iso_recv_init, you won't be notified for every single iso packet, but
+   for groups of them. Now e.g. if irq_interval is 100, and you were just
+   notified about iso packets and after them only 20 more packets arrived,
+   no notification will be generated (20 &lt; 100). In the case that you know
+   that there should be more packets at this moment, you can call this
+   function and all iso packets which are already received by the kernel
+   will be flushed out to user space.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-stop">raw1394_iso_stop</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_stop</refname>
+ <refpurpose>
+      halt isochronous transmission or reception
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>void <function>raw1394_iso_stop </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-shutdown">raw1394_iso_shutdown</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_shutdown</refname>
+ <refpurpose>
+      clean up and deallocate all resources for isochronous transmission or reception
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>void <function>raw1394_iso_shutdown </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-get-errcode">raw1394_get_errcode</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_get_errcode</refname>
+ <refpurpose>
+      return error code of async transaction
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>raw1394_errcode_t <function>raw1394_get_errcode </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Some macros are available to extract information from the error code,
+   <function>raw1394_errcode_to_errno</function> can be used to convert it to an errno number of
+   roughly the same meaning.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the error code of the last <function>raw1394_read</function>, <function>raw1394_write</function>,
+   <function>raw1394_lock</function> or <function>raw1394_iso_write</function>.  The error code is either an internal
+   error (i.e. not a bus error) or a combination of acknowledge code and
+   response code, as appropriate.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-errcode-to-errno">raw1394_errcode_to_errno</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_errcode_to_errno</refname>
+ <refpurpose>
+      convert libraw1394 errcode to errno
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_errcode_to_errno </function></funcdef>
+   <paramdef>raw1394_errcode_t <parameter>errcode</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>errcode</parameter></term>
+   <listitem>
+    <para>
+      the error code to convert
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   The error code as retrieved by <function>raw1394_get_errcode</function> is converted into a
+   roughly equivalent errno number and returned.  <constant>0xdead</constant> is returned for an
+   illegal errcode.
+   </para><para>
+
+   It is intended to be used to decide what to do (retry, give up, report error)
+   for those programs that aren't interested in details, since these get lost in
+   the conversion.  However the returned errnos are equivalent in source code
+   meaning only, the associated text of e.g. <function>perror</function> is not necessarily
+   meaningful.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    <constant>EAGAIN</constant> (retrying might succeed, also generation number
+   mismatch), <constant>EREMOTEIO</constant> (other node had internal problems), <constant>EPERM</constant> (operation
+   not allowed on this address, e.g. write on read-only location), <constant>EINVAL</constant>
+   (invalid argument) and <constant>EFAULT</constant> (invalid pointer).
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-new-handle">raw1394_new_handle</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_new_handle</refname>
+ <refpurpose>
+      create new handle
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>raw1394handle_t <function>raw1394_new_handle </function></funcdef>
+   <paramdef> <parameter>void</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>void</parameter></term>
+   <listitem>
+    <para>
+     no arguments
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   </para><para>
+
+   Creates and returns a new handle which can (after being set up) control one
+   port.  It is not allowed to use the same handle in multiple threads or forked
+   processes.  It is allowed to create and use multiple handles, however.  Use
+   one handle per thread which needs it in the multithreaded case.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the created handle or <constant>NULL</constant> when initialization fails. In the latter
+   case errno either contains some OS specific error code or <constant>0</constant> if the error is
+   that libraw1394 and raw1394 don't support each other's protocol versions.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-destroy-handle">raw1394_destroy_handle</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_destroy_handle</refname>
+ <refpurpose>
+      deallocate handle
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>void <function>raw1394_destroy_handle </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      handle to deallocate
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Closes connection with raw1394 on this handle and deallocates everything
+   associated with it.  It is safe to pass <constant>NULL</constant> as handle, nothing is done in
+   this case.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-new-handle-on-port">raw1394_new_handle_on_port</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_new_handle_on_port</refname>
+ <refpurpose>
+      create a new handle and bind it to a port
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>raw1394handle_t <function>raw1394_new_handle_on_port </function></funcdef>
+   <paramdef>int <parameter>port</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>port</parameter></term>
+   <listitem>
+    <para>
+      port to connect to (same as argument to <function>raw1394_set_port</function>)
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Same as <function>raw1394_new_handle</function>, but also binds the handle to the
+   specified 1394 port. Equivalent to <function>raw1394_new_handle</function> followed by
+   <function>raw1394_get_port_info</function> and <function>raw1394_set_port</function>. Useful for
+   command-line programs that already know what port they want. If
+   <function>raw1394_set_port</function> returns ESTALE, retries automatically.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the new handle on success or NULL on failure
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-busreset-notify">raw1394_busreset_notify</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_busreset_notify</refname>
+ <refpurpose>
+      Switch off/on busreset-notification for handle
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_busreset_notify </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>int <parameter>off_on_switch</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>off_on_switch</parameter></term>
+   <listitem>
+    <para>
+      RAW1394_NOTIFY_OFF or RAW1394_NOTIFY_ON
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-get-fd">raw1394_get_fd</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_get_fd</refname>
+ <refpurpose>
+      get the communication file descriptor
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_get_fd </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This can be used for <function>select</function>/<function>poll</function> calls if you wait on other fds or can be
+   integrated into another event loop (e.g. from a GUI application framework).
+   It can also be used to set/remove the O_NONBLOCK flag using <function>fcntl</function> to modify
+   the blocking behaviour in <function>raw1394_loop_iterate</function>.  It must not be used for
+   anything else.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the fd used for communication with the raw1394 kernel module.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-set-userdata">raw1394_set_userdata</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_set_userdata</refname>
+ <refpurpose>
+      associate user data with a handle
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>void <function>raw1394_set_userdata </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>void * <parameter>data</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      user data (pointer)
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Allows to associate one void pointer with a handle.  libraw1394 does not care
+   about the data, it just stores it in the handle allowing it to be retrieved
+   at any time with <function>raw1394_get_userdata</function>.  This can be useful when multiple
+   handles are used, so that callbacks can identify the handle.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-get-userdata">raw1394_get_userdata</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_get_userdata</refname>
+ <refpurpose>
+      retrieve user data from handle
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>void * <function>raw1394_get_userdata </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the user data pointer associated with the handle using
+   <function>raw1394_set_userdata</function>.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-get-local-id">raw1394_get_local_id</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_get_local_id</refname>
+ <refpurpose>
+      get node ID of the current port
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>nodeid_t <function>raw1394_get_local_id </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the node ID of the local node connected to which the handle is
+   connected.  This value can change with every bus reset.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-get-irm-id">raw1394_get_irm_id</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_get_irm_id</refname>
+ <refpurpose>
+      get node ID of isochronous resource manager
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>nodeid_t <function>raw1394_get_irm_id </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the node ID of the isochronous resource manager of the bus the handle
+   is connected to.  This value may change with every bus reset.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-get-nodecount">raw1394_get_nodecount</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_get_nodecount</refname>
+ <refpurpose>
+      get number of nodes on the bus
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_get_nodecount </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Since the root node always has
+   the highest node ID, this number can be used to determine that ID (it's
+   LOCAL_BUS|(count-1)).
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the number of nodes on the bus to which the handle is connected.
+   This value can change with every bus reset.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-get-port-info">raw1394_get_port_info</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_get_port_info</refname>
+ <refpurpose>
+      get information about available ports
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_get_port_info </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>struct raw1394_portinfo * <parameter>pinf</parameter></paramdef>
+   <paramdef>int <parameter>maxports</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>pinf</parameter></term>
+   <listitem>
+    <para>
+      pointer to an array of struct raw1394_portinfo
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>maxports</parameter></term>
+   <listitem>
+    <para>
+      number of elements in <parameter>pinf</parameter>
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Before you can set which port to use, you have to use this function to find
+   out which ports exist.
+   </para><para>
+
+   If your program is interactive, you should present the user with this list to
+   let them decide which port to use if there is more than one.  A
+   non-interactive program (and probably interactive ones, too) should provide a
+   command line option to choose the port. If <parameter>maxports</parameter> is <constant>0</constant>, <parameter>pinf</parameter> can be
+   <constant>NULL</constant>, too.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the number of ports and writes information about them into <parameter>pinf</parameter>, but
+   not into more than <parameter>maxports</parameter> elements.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-set-port">raw1394_set_port</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_set_port</refname>
+ <refpurpose>
+      choose port for handle
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_set_port </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>int <parameter>port</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>port</parameter></term>
+   <listitem>
+    <para>
+      port to connect to (corresponds to index of struct raw1394_portinfo)
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This function connects the handle to the port given (as queried with
+   <function>raw1394_get_port_info</function>).  If successful, <function>raw1394_get_port_info</function> and
+   <function>raw1394_set_port</function> are not allowed to be called afterwards on this handle.
+   To make up for this, all the other functions (those handling asynchronous and
+   isochronous transmissions) can now be called.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    <constant>0</constant> for success or -1 for failure with errno set appropriately.  A
+   possible failure mode is with errno = <constant>ESTALE</constant>, in this case the configuration
+   has changed since the call to <function>raw1394_get_port_info</function> and it has to be called
+   again to update your view of the available ports.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-reset-bus">raw1394_reset_bus</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_reset_bus</refname>
+ <refpurpose>
+      initiate bus reset
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_reset_bus </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This function initiates a bus reset on the connected port.  Usually this is
+   not necessary and should be avoided, this function is here for low level bus
+   control and debugging.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    <constant>0</constant> for success or -1 for failure with errno set appropriately
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-reset-bus-new">raw1394_reset_bus_new</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_reset_bus_new</refname>
+ <refpurpose>
+      Reset the connected bus (with certain type). 
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_reset_bus_new </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>int <parameter>type</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>type</parameter></term>
+   <listitem>
+    <para>
+      RAW1394_SHORT_RESET or RAW1394_LONG_RESET
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    <constant>0</constant> for success or -1 for failure 
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-loop-iterate">raw1394_loop_iterate</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_loop_iterate</refname>
+ <refpurpose>
+      get and process one event message
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_loop_iterate </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Get one new message through handle and process it with the registered message
+   handler. Note that some other library functions may call this function 
+   multiple times to wait for their completion, some handler return values may 
+   get lost if you use these.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    <constant>-1</constant> for an error or the return value of
+   the handler which got executed. The default handlers always return zero.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-set-bus-reset-handler">raw1394_set_bus_reset_handler</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_set_bus_reset_handler</refname>
+ <refpurpose>
+      set bus reset handler
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>bus_reset_handler_t <function>raw1394_set_bus_reset_handler </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>bus_reset_handler_t <parameter>new_h</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>new_h</parameter></term>
+   <listitem>
+    <para>
+      pointer to new handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Sets the handler to be called on every bus reset to <parameter>new_h</parameter>.
+   The default handler just calls <function>raw1394_update_generation</function>.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the old handler
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-get-generation">raw1394_get_generation</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_get_generation</refname>
+ <refpurpose>
+      get generation number of handle
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>unsigned int <function>raw1394_get_generation </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   The generation number is incremented on every bus reset, and every transaction
+   started by raw1394 is tagged with the stored generation number.  If these
+   don't match, the transaction will abort with an error.
+   The generation number of the handle is not automatically updated,
+   <function>raw1394_update_generation</function> has to be used for this.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the generation number associated with the handle 
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-update-generation">raw1394_update_generation</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_update_generation</refname>
+ <refpurpose>
+      set generation number of handle
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>void <function>raw1394_update_generation </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>generation</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>generation</parameter></term>
+   <listitem>
+    <para>
+      new generation number
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This function sets the generation number of the handle to <parameter>gen</parameter>.  All requests
+   that apply to a single node ID are tagged with this number and abort with an
+   error if that is different from the generation number kept in the kernel.
+   This avoids acting on the wrong node which may have changed its ID in a bus
+   reset.
+   </para><para>
+
+   You should call this within your bus reset handler with an incremented value.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-set-tag-handler">raw1394_set_tag_handler</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_set_tag_handler</refname>
+ <refpurpose>
+      set request completion handler
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>tag_handler_t <function>raw1394_set_tag_handler </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>tag_handler_t <parameter>new_h</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>new_h</parameter></term>
+   <listitem>
+    <para>
+      pointer to new handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Sets the handler to be called whenever a request completes to <parameter>new_h</parameter>.
+   The default handler interprets the tag as a pointer
+   to a &amp;struct raw1394_reqhandle and calls the callback in there.
+   </para><para>
+
+   Care must be taken when replacing the tag handler and calling the synchronous
+   versions of the transaction functions (i.e. <function>raw1394_read</function>, <function>raw1394_write</function>,
+   <function>raw1394_lock</function>, <function>raw1394_iso_write</function>) since these do pass pointers to &amp;struct
+   raw1394_reqhandle as the tag and expect the callback to be invoked.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the old handler
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-set-arm-tag-handler">raw1394_set_arm_tag_handler</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_set_arm_tag_handler</refname>
+ <refpurpose>
+      set the async request handler
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>arm_tag_handler_t <function>raw1394_set_arm_tag_handler </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>arm_tag_handler_t <parameter>new_h</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>new_h</parameter></term>
+   <listitem>
+    <para>
+      pointer to new handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Set the handler that will be called when an async read/write/lock arm_request
+   arrived. The default action is to call the arm_callback in the 
+   raw1394_arm_reqhandle pointed to by arm_tag.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    old handler
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-set-fcp-handler">raw1394_set_fcp_handler</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_set_fcp_handler</refname>
+ <refpurpose>
+      set FCP handler
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>fcp_handler_t <function>raw1394_set_fcp_handler </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>fcp_handler_t <parameter>new_h</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>new_h</parameter></term>
+   <listitem>
+    <para>
+      pointer to new handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Function Control Protocol is defined in IEC 61883-1.
+   </para><para>
+
+   Sets the handler to be called when either FCP command or FCP response
+   registers get written to <parameter>new_h</parameter>.  The default handler does nothing.
+   In order to actually get FCP events, you have to enable it with
+   <function>raw1394_start_fcp_listen</function> and can stop it with <function>raw1394_stop_fcp_listen</function>.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    the old handler
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-int">int</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>int</refname>
+ <refpurpose>
+      This is the general request handler
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>typedef <function>int </function></funcdef>
+   <paramdef>* <parameter>req_callback_t</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>req_callback_t</parameter></term>
+   <listitem>
+    <para>
+      This is the general request handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   It is used by the default tag handler
+   when a request completes, it calls the callback and passes it the data
+   pointer and the error code of the request.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-int">int</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>int</refname>
+ <refpurpose>
+      This is the general arm-request handle
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>typedef <function>int </function></funcdef>
+   <paramdef>* <parameter>arm_req_callback_t</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>arm_req_callback_t</parameter></term>
+   <listitem>
+    <para>
+      This is the general arm-request handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   (arm = address range mapping)
+   It is used by the default arm-tag handler when a request has been 
+   received, it calls the arm_callback.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-arm-register">raw1394_arm_register</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_arm_register</refname>
+ <refpurpose>
+      register an AddressRangeMapping
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_arm_register </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>start</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>byte_t * <parameter>initial_value</parameter></paramdef>
+   <paramdef>octlet_t <parameter>arm_tag</parameter></paramdef>
+   <paramdef>arm_options_t <parameter>access_rights</parameter></paramdef>
+   <paramdef>arm_options_t <parameter>notification_options</parameter></paramdef>
+   <paramdef>arm_options_t <parameter>client_transactions</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>start</parameter></term>
+   <listitem>
+    <para>
+                 identifies addressrange
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+                identifies addressrange
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>initial_value</parameter></term>
+   <listitem>
+    <para>
+         pointer to buffer containing (if necessary) initial value
+     NULL means undefined
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>arm_tag</parameter></term>
+   <listitem>
+    <para>
+               identifier for arm_tag_handler 
+     (usually pointer to raw1394_arm_reqhandle)
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>access_rights</parameter></term>
+   <listitem>
+    <para>
+         access-rights for registered addressrange handled 
+     by kernel-part. Value is one or more binary or of the 
+     following flags - ARM_READ, ARM_WRITE, ARM_LOCK
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>notification_options</parameter></term>
+   <listitem>
+    <para>
+      identifies for which type of request you want
+     to be notified. Value is one or more binary or of the 
+     following flags - ARM_READ, ARM_WRITE, ARM_LOCK
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>client_transactions</parameter></term>
+   <listitem>
+    <para>
+      identifies for which type of request you want
+     to handle the request by the client application.
+     for those requests no response will be generated, but
+     has to be generated by the application.
+     Value is one or more binary or of the 
+     following flags - ARM_READ, ARM_WRITE, ARM_LOCK
+     For each bit set here, notification_options and
+     access_rights will be ignored.
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   ARM = Adress Range Mapping
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-arm-unregister">raw1394_arm_unregister</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_arm_unregister</refname>
+ <refpurpose>
+      unregister an AddressRangeMapping
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_arm_unregister </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>start</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>start</parameter></term>
+   <listitem>
+    <para>
+                 identifies addressrange for unregistering 
+     (value of start have to be the same value 
+     used for registering this adressrange)
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-arm-set-buf">raw1394_arm_set_buf</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_arm_set_buf</refname>
+ <refpurpose>
+      set the buffer of an AdressRangeMapping
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_arm_set_buf </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>start</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>void * <parameter>buf</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>start</parameter></term>
+   <listitem>
+    <para>
+      identifies addressrange
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      identifies addressrange
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>buf</parameter></term>
+   <listitem>
+    <para>
+      pointer to buffer
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This function copies <parameter>length</parameter> bytes from user memory area <parameter>buf</parameter>
+   to one ARM block in kernel memory area
+   with start offset <parameter>start</parameter>.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-arm-get-buf">raw1394_arm_get_buf</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_arm_get_buf</refname>
+ <refpurpose>
+      get the buffer of an AdressRangeMapping
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_arm_get_buf </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>start</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>void * <parameter>buf</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>start</parameter></term>
+   <listitem>
+    <para>
+      identifies addressrange
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      identifies addressrange
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>buf</parameter></term>
+   <listitem>
+    <para>
+      pointer to buffer
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This function copies <parameter>length</parameter> bytes from one
+   ARM block in kernel memory area with start offset <parameter>start</parameter>
+   to user memory area <parameter>buf</parameter>
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-echo-request">raw1394_echo_request</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_echo_request</refname>
+ <refpurpose>
+      send an echo request to the driver
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_echo_request </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>quadlet_t <parameter>data</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+                   arbitrary data; raw1394_loop_iterate will return it
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   the driver then send back the
+   same request. raw1394_loop_iterate will return data as return value,
+   when it processes the echo. 
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-wake-up">raw1394_wake_up</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_wake_up</refname>
+ <refpurpose>
+      wake up raw1394_loop_iterate
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_wake_up </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   (or a blocking read from the device
+   file). actually this calls raw1394_echo_request with 0 as data. 
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-phy-packet-write">raw1394_phy_packet_write</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_phy_packet_write</refname>
+ <refpurpose>
+      send physical request
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_phy_packet_write </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>quadlet_t <parameter>data</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      the contents of the packet
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   examples of physical requests are linkon, physicalconfigurationpacket, etc.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-phy-packet-write">raw1394_start_phy_packet_write</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_phy_packet_write</refname>
+ <refpurpose>
+      initiate sending a physical request
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_phy_packet_write </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>quadlet_t <parameter>data</parameter></paramdef>
+   <paramdef>unsigned long <parameter>tag</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      the contents of the packet
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+      data to identify the request to completion handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   examples of physical requests are linkon, physicalconfigurationpacket, etc.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-read">raw1394_start_read</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_read</refname>
+ <refpurpose>
+      initiate a read transaction
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_read </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeid_t <parameter>node</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>addr</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>buffer</parameter></paramdef>
+   <paramdef>unsigned long <parameter>tag</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>node</parameter></term>
+   <listitem>
+    <para>
+      target node
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>addr</parameter></term>
+   <listitem>
+    <para>
+      address to read from
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      amount of data to read
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>buffer</parameter></term>
+   <listitem>
+    <para>
+      pointer to buffer where data will be saved
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+      data to identify the request to completion handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This function starts the specified read request. If
+   <parameter>length</parameter> is <constant>4</constant> a quadlet read is initiated and a block read otherwise.
+   </para><para>
+
+   The transaction is only started, no success of the transaction is implied
+   with a successful return of this function.  When the transaction completes, a
+   <function>raw1394_loop_iterate</function> will call the tag handler and pass it the tag and
+   error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
+   that uniquely identifies this transaction (e.g. a struct pointer casted to
+   unsigned long).
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-write">raw1394_start_write</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_write</refname>
+ <refpurpose>
+      initiate a write transaction
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_write </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeid_t <parameter>node</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>addr</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>data</parameter></paramdef>
+   <paramdef>unsigned long <parameter>tag</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>node</parameter></term>
+   <listitem>
+    <para>
+      target node
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>addr</parameter></term>
+   <listitem>
+    <para>
+      address to write to
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      amount of data to write
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      pointer to data to be sent
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+      data to identify the request to completion handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This function starts the specified write request. If
+   <parameter>length</parameter> is <constant>4</constant> a quadlet write is initiated and a block write otherwise.
+   </para><para>
+
+   The transaction is only started, no success of the transaction is implied
+   with a successful return of this function.  When the transaction completes, a
+   <function>raw1394_loop_iterate</function> will call the tag handler and pass it the tag and
+   error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
+   that uniquely identifies this transaction (e.g. a struct pointer casted to
+   unsigned long).
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-lock">raw1394_start_lock</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_lock</refname>
+ <refpurpose>
+      initiate a 32-bit compare-swap lock transaction
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_lock </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeid_t <parameter>node</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>addr</parameter></paramdef>
+   <paramdef>unsigned int <parameter>extcode</parameter></paramdef>
+   <paramdef>quadlet_t <parameter>data</parameter></paramdef>
+   <paramdef>quadlet_t <parameter>arg</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>result</parameter></paramdef>
+   <paramdef>unsigned long <parameter>tag</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>node</parameter></term>
+   <listitem>
+    <para>
+      target node
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>addr</parameter></term>
+   <listitem>
+    <para>
+      address to read from
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>extcode</parameter></term>
+   <listitem>
+    <para>
+      extended transaction code determining the lock operation
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      data part of lock parameters
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>arg</parameter></term>
+   <listitem>
+    <para>
+      arg part of lock parameters
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>result</parameter></term>
+   <listitem>
+    <para>
+      address where return value will be written
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+      data to identify the request to completion handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This function starts the specified lock request.
+   The transaction is only started, no success of the transaction is implied
+   with a successful return of this function.  When the transaction completes, a
+   <function>raw1394_loop_iterate</function> will call the tag handler and pass it the tag and
+   error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
+   that uniquely identifies this transaction (e.g. a struct pointer casted to
+   unsigned long).
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-lock64">raw1394_start_lock64</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_lock64</refname>
+ <refpurpose>
+      initiate a 64-bit compare-swap lock transaction
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_lock64 </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeid_t <parameter>node</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>addr</parameter></paramdef>
+   <paramdef>unsigned int <parameter>extcode</parameter></paramdef>
+   <paramdef>octlet_t <parameter>data</parameter></paramdef>
+   <paramdef>octlet_t <parameter>arg</parameter></paramdef>
+   <paramdef>octlet_t * <parameter>result</parameter></paramdef>
+   <paramdef>unsigned long <parameter>tag</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>node</parameter></term>
+   <listitem>
+    <para>
+      target node
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>addr</parameter></term>
+   <listitem>
+    <para>
+      address to read from
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>extcode</parameter></term>
+   <listitem>
+    <para>
+      extended transaction code determining the lock operation
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      data part of lock parameters
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>arg</parameter></term>
+   <listitem>
+    <para>
+      arg part of lock parameters
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>result</parameter></term>
+   <listitem>
+    <para>
+      address where return value will be written
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+      data to identify the request to completion handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This function starts the specified lock request.
+   The transaction is only started, no success of the transaction is implied
+   with a successful return of this function.  When the transaction completes, a
+   <function>raw1394_loop_iterate</function> will call the tag handler and pass it the tag and
+   error code of the transaction.  <parameter>tag</parameter> should therefore be set to something
+   that uniquely identifies this transaction (e.g. a struct pointer casted to
+   unsigned long).
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-async-stream">raw1394_start_async_stream</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_async_stream</refname>
+ <refpurpose>
+      initiate asynchronous stream
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_async_stream </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>channel</parameter></paramdef>
+   <paramdef>unsigned int <parameter>tag</parameter></paramdef>
+   <paramdef>unsigned int <parameter>sy</parameter></paramdef>
+   <paramdef>unsigned int <parameter>speed</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>data</parameter></paramdef>
+   <paramdef>unsigned long <parameter>rawtag</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      the isochronous channel number to send on
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+      data to be put into packet's tag field
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>sy</parameter></term>
+   <listitem>
+    <para>
+      data to be put into packet's sy field
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>speed</parameter></term>
+   <listitem>
+    <para>
+      speed at which to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      amount of data to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      pointer to data to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>rawtag</parameter></term>
+   <listitem>
+    <para>
+      data to identify the request to completion handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Passes custom tag.  Use pointer to raw1394_reqhandle if you use the standard
+   tag handler.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-async-send">raw1394_start_async_send</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_async_send</refname>
+ <refpurpose>
+      send an asynchronous packet
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_async_send </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>size_t <parameter>header_length</parameter></paramdef>
+   <paramdef>unsigned int <parameter>expect_response</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>data</parameter></paramdef>
+   <paramdef>unsigned long <parameter>rawtag</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      the amount of quadlets of data to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>header_length</parameter></term>
+   <listitem>
+    <para>
+      the number of quadlets in the header
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>expect_response</parameter></term>
+   <listitem>
+    <para>
+      indicate with a 0 or 1 whether to receive a completion event
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      pointer to data to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>rawtag</parameter></term>
+   <listitem>
+    <para>
+      data to identify the request to completion handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This starts sending an arbitrary async packet. It gets an array of quadlets 
+   consisting of header and data (without CRC in between). Header information 
+   is always in machine byte order, data (data block as well as quadlet data 
+   in a read response for data quadlet) shall be in big endian byte order. 
+   expect_response indicates, if we expect a response (i.e. if we will get the 
+   tag back after the packet was sent or after a response arrived). length is 
+   the length of the complete packet (header_length + length of the data block).
+   The main purpose of this function is to send responses for incoming 
+   transactions, that are handled by the application.
+   Do not use that function, unless you really know, what you do! Sending 
+   corrupt packet may lead to weird results.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-read">raw1394_read</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_read</refname>
+ <refpurpose>
+      send async read request to a node and wait for response.
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_read </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeid_t <parameter>node</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>addr</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>buffer</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>node</parameter></term>
+   <listitem>
+    <para>
+      target node
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>addr</parameter></term>
+   <listitem>
+    <para>
+      address to read from
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      amount of data to read in quadlets
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>buffer</parameter></term>
+   <listitem>
+    <para>
+      pointer to buffer where data will be saved
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This does the complete transaction and will return when it's finished.  It
+   will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
+   handlers called will be therefore lost.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-write">raw1394_write</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_write</refname>
+ <refpurpose>
+      send async write request to a node and wait for response.
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_write </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeid_t <parameter>node</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>addr</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>data</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>node</parameter></term>
+   <listitem>
+    <para>
+      target node
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>addr</parameter></term>
+   <listitem>
+    <para>
+      address to write to
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      amount of data to write in quadlets
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      pointer to data to be sent
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This does the complete transaction and will return when it's finished.  It
+   will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
+   handlers called will be therefore lost.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-lock">raw1394_lock</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_lock</refname>
+ <refpurpose>
+      send 32-bit compare-swap lock request and wait for response.
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_lock </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeid_t <parameter>node</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>addr</parameter></paramdef>
+   <paramdef>unsigned int <parameter>extcode</parameter></paramdef>
+   <paramdef>quadlet_t <parameter>data</parameter></paramdef>
+   <paramdef>quadlet_t <parameter>arg</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>result</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>node</parameter></term>
+   <listitem>
+    <para>
+      target node
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>addr</parameter></term>
+   <listitem>
+    <para>
+      address to read from
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>extcode</parameter></term>
+   <listitem>
+    <para>
+      extended transaction code determining the lock operation
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      data part of lock parameters
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>arg</parameter></term>
+   <listitem>
+    <para>
+      arg part of lock parameters
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>result</parameter></term>
+   <listitem>
+    <para>
+      address where return value will be written
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This does the complete transaction and will return when it's finished.  It
+   will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
+   handlers called will be therefore lost.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-lock64">raw1394_lock64</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_lock64</refname>
+ <refpurpose>
+      send 64-bit compare-swap lock request and wait for response.
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_lock64 </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>nodeid_t <parameter>node</parameter></paramdef>
+   <paramdef>nodeaddr_t <parameter>addr</parameter></paramdef>
+   <paramdef>unsigned int <parameter>extcode</parameter></paramdef>
+   <paramdef>octlet_t <parameter>data</parameter></paramdef>
+   <paramdef>octlet_t <parameter>arg</parameter></paramdef>
+   <paramdef>octlet_t * <parameter>result</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>node</parameter></term>
+   <listitem>
+    <para>
+      target node
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>addr</parameter></term>
+   <listitem>
+    <para>
+      address to read from
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>extcode</parameter></term>
+   <listitem>
+    <para>
+      extended transaction code determining the lock operation
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      data part of lock parameters
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>arg</parameter></term>
+   <listitem>
+    <para>
+      arg part of lock parameters
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>result</parameter></term>
+   <listitem>
+    <para>
+      address where return value will be written
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   This does the complete transaction and will return when it's finished.  It
+   will call <function>raw1394_loop_iterate</function> as often as necessary, return values of
+   handlers called will be therefore lost.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-async-stream">raw1394_async_stream</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_async_stream</refname>
+ <refpurpose>
+   </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_async_stream </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>channel</parameter></paramdef>
+   <paramdef>unsigned int <parameter>tag</parameter></paramdef>
+   <paramdef>unsigned int <parameter>sy</parameter></paramdef>
+   <paramdef>unsigned int <parameter>speed</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>data</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      the isochronous channel number to send on
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+      data to be put into packet's tag field
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>sy</parameter></term>
+   <listitem>
+    <para>
+      data to be put into packet's sy field
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>speed</parameter></term>
+   <listitem>
+    <para>
+      speed at which to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      amount of data to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      pointer to data to send
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-async-send">raw1394_async_send</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_async_send</refname>
+ <refpurpose>
+   </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_async_send </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>size_t <parameter>header_length</parameter></paramdef>
+   <paramdef>unsigned int <parameter>expect_response</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>data</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      the amount of quadlets of data to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>header_length</parameter></term>
+   <listitem>
+    <para>
+      the number of quadlets in the header
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>expect_response</parameter></term>
+   <listitem>
+    <para>
+      indicate with a 0 or 1 whether to receive a completion event
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      pointer to data to send
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-fcp-listen">raw1394_start_fcp_listen</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_fcp_listen</refname>
+ <refpurpose>
+      enable reception of FCP events
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_fcp_listen </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   FCP = Function Control Protocol (see IEC 61883-1)
+   Enables the reception of FCP events (writes to the FCP_COMMAND or
+   FCP_RESPONSE address ranges) on <parameter>handle</parameter>.  FCP requests are then passed to the
+   callback specified with <function>raw1394_set_fcp_handler</function>.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-stop-fcp-listen">raw1394_stop_fcp_listen</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_stop_fcp_listen</refname>
+ <refpurpose>
+      disable reception of FCP events
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_stop_fcp_listen </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Stops the reception of FCP events (writes to the FCP_COMMAND or
+   FCP_RESPONSE address ranges) on <parameter>handle</parameter>.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    0 on success or -1 on failure (sets errno)
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-get-libversion">raw1394_get_libversion</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_get_libversion</refname>
+ <refpurpose>
+      Returns the version string
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>const char * <function>raw1394_get_libversion </function></funcdef>
+   <paramdef> <parameter>void</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>void</parameter></term>
+   <listitem>
+    <para>
+     no arguments
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   </para><para>
+
+   Instead, typically, one uses 'pkg-config --mod-version libraw1394'
+   Might be useful for an application.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    a pointer to a string containing the version number
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-update-config-rom">raw1394_update_config_rom</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_update_config_rom</refname>
+ <refpurpose>
+      updates the configuration ROM of a host
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_update_config_rom </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>const quadlet_t         * <parameter>new_rom</parameter></paramdef>
+   <paramdef>size_t <parameter>size</parameter></paramdef>
+   <paramdef>unsigned char <parameter>rom_version</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>new_rom</parameter></term>
+   <listitem>
+    <para>
+      a pointer to the new ROM image
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>size</parameter></term>
+   <listitem>
+    <para>
+      the size of the new ROM image in quadlets
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>rom_version</parameter></term>
+   <listitem>
+    <para>
+      the version numer of the current version, not the new
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   <parameter>rom_version</parameter> must be the current
+   version, otherwise it will fail with return value -1. 
+ </para>
+</refsect1>
+<refsect1>
+ <title>Returns</title>
+ <para>
+    -1 (failure) if the version is incorrect, 
+   -2 (failure) if the new rom version is too big, or
+   0 for success
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-get-config-rom">raw1394_get_config_rom</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_get_config_rom</refname>
+ <refpurpose>
+      reads the current version of the configuration ROM of a host
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_get_config_rom </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>buffer</parameter></paramdef>
+   <paramdef>size_t <parameter>buffersize</parameter></paramdef>
+   <paramdef>size_t * <parameter>rom_size</parameter></paramdef>
+   <paramdef>unsigned char * <parameter>rom_version</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>buffer</parameter></term>
+   <listitem>
+    <para>
+      the memory address at which to store the copy of the ROM
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>buffersize</parameter></term>
+   <listitem>
+    <para>
+      is the size of the buffer, <parameter>rom_size</parameter>
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>rom_size</parameter></term>
+   <listitem>
+    <para>
+      upon successful return, contains the size of the ROM
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>rom_version</parameter></term>
+   <listitem>
+    <para>
+      upon successful return, contains the version of the rom
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   returns the size of the current rom image. <parameter>rom_version</parameter> is the
+   version number of the fetched rom.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Return</title>
+ <para>
+    -1 (failure) if the buffer was too small or 0 for success
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-bandwidth-modify">raw1394_bandwidth_modify</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_bandwidth_modify</refname>
+ <refpurpose>
+      allocate or release bandwidth
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_bandwidth_modify </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>bandwidth</parameter></paramdef>
+   <paramdef>enum raw1394_modify_mode <parameter>mode</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      a libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>bandwidth</parameter></term>
+   <listitem>
+    <para>
+      IEEE 1394 Bandwidth Alloction Units
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>mode</parameter></term>
+   <listitem>
+    <para>
+      whether to allocate or free
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Communicates with the isochronous resource manager.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Return</title>
+ <para>
+   -1 for failure, 0 for success
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-channel-modify">raw1394_channel_modify</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_channel_modify</refname>
+ <refpurpose>
+      allocate or release isochronous channel
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_channel_modify </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>channel</parameter></paramdef>
+   <paramdef>enum raw1394_modify_mode <parameter>mode</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      a libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      isochronous channel
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>mode</parameter></term>
+   <listitem>
+    <para>
+      whether to allocate or free
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   Communicates with the isochronous resource manager.
+ </para>
+</refsect1>
+<refsect1>
+ <title>Return</title>
+ <para>
+   -1 for failure, 0 for success
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-int">int</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>int</refname>
+ <refpurpose>
+      DEPRECATED
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>typedef <function>int </function></funcdef>
+   <paramdef>* <parameter>iso_handler_t</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>iso_handler_t</parameter></term>
+   <listitem>
+    <para>
+     -- undescribed --
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   DEPRECATED
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-set-iso-handler">raw1394_set_iso_handler</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_set_iso_handler</refname>
+ <refpurpose>
+      set isochronous packet handler (DEPRECATED)
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>iso_handler_t <function>raw1394_set_iso_handler </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>channel</parameter></paramdef>
+   <paramdef>iso_handler_t <parameter>new_h</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+     -- undescribed --
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>new_h</parameter></term>
+   <listitem>
+    <para>
+      pointer to new handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   DEPRECATED
+   </para><para>
+
+   Sets the handler to be called when an isochronous packet is received to
+   <parameter>new_h</parameter> and returns the old handler.  The default handler does nothing.
+   </para><para>
+
+   In order to actually get iso packet events, receiving on a specific channel
+   first has to be enabled with <function>raw1394_start_iso_rcv</function> and can be stopped again
+   with <function>raw1394_stop_iso_rcv</function>.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-iso-rcv">raw1394_start_iso_rcv</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_iso_rcv</refname>
+ <refpurpose>
+      enable isochronous receiving (DEPRECATED)
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_iso_rcv </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>channel</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      channel number to start receiving on
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   DEPRECATED
+   </para><para>
+
+   Enables the reception of isochronous packets in <parameter>channel</parameter> on <parameter>handle</parameter>.
+   Isochronous packets are then passed to the callback specified with
+   <function>raw1394_set_iso_handler</function>.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-stop-iso-rcv">raw1394_stop_iso_rcv</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_stop_iso_rcv</refname>
+ <refpurpose>
+      stop isochronous receiving (DEPRECATED)
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_stop_iso_rcv </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>channel</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      channel to stop receiving on
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   DEPRECATED
+   </para><para>
+
+   Stops the reception of isochronous packets in <parameter>channel</parameter> on <parameter>handle</parameter>.
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-start-iso-write">raw1394_start_iso_write</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_start_iso_write</refname>
+ <refpurpose>
+      initiate an isochronous packet write (DEPRECATED)
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_start_iso_write </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>channel</parameter></paramdef>
+   <paramdef>unsigned int <parameter>tag</parameter></paramdef>
+   <paramdef>unsigned int <parameter>sy</parameter></paramdef>
+   <paramdef>unsigned int <parameter>speed</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>data</parameter></paramdef>
+   <paramdef>unsigned long <parameter>rawtag</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+      channel number on which to send on
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+      data to be put into packet's tag field
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>sy</parameter></term>
+   <listitem>
+    <para>
+      data to be put into packet's sy field
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>speed</parameter></term>
+   <listitem>
+    <para>
+      speed at which to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+      amount of data to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+      pointer to data to send
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>rawtag</parameter></term>
+   <listitem>
+    <para>
+      data to identify the request to completion handler
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   DEPRECATED
+   </para><para>
+
+   This function starts the specified isochronous packet transmission and
+   returns <constant>0</constant> for success and a negative number for an error, in which case
+   errno will be set.
+   </para><para>
+
+   When the send completes, a <function>raw1394_loop_iterate</function> will call the tag handler
+   and pass it the tag and error code of the transaction.  <parameter>tag</parameter> should therefore
+   be set to something that uniquely identifies this transaction (e.g. a struct
+   pointer casted to unsigned long).
+   </para><para>
+
+   Isochronous packets are automatically
+ </para>
+</refsect1>
+</refentry>
+
+<refentry>
+<refmeta>
+<refentrytitle><phrase id="API-raw1394-iso-write">raw1394_iso_write</phrase></refentrytitle>
+</refmeta>
+<refnamediv>
+ <refname>raw1394_iso_write</refname>
+ <refpurpose>
+      DEPRECATED
+ </refpurpose>
+</refnamediv>
+<refsynopsisdiv>
+ <title>Synopsis</title>
+  <funcsynopsis><funcprototype>
+   <funcdef>int <function>raw1394_iso_write </function></funcdef>
+   <paramdef>raw1394handle_t <parameter>handle</parameter></paramdef>
+   <paramdef>unsigned int <parameter>channel</parameter></paramdef>
+   <paramdef>unsigned int <parameter>tag</parameter></paramdef>
+   <paramdef>unsigned int <parameter>sy</parameter></paramdef>
+   <paramdef>unsigned int <parameter>speed</parameter></paramdef>
+   <paramdef>size_t <parameter>length</parameter></paramdef>
+   <paramdef>quadlet_t * <parameter>data</parameter></paramdef>
+  </funcprototype></funcsynopsis>
+</refsynopsisdiv>
+<refsect1>
+ <title>Arguments</title>
+ <variablelist>
+  <varlistentry>
+   <term><parameter>handle</parameter></term>
+   <listitem>
+    <para>
+      libraw1394 handle
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>channel</parameter></term>
+   <listitem>
+    <para>
+     -- undescribed --
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>tag</parameter></term>
+   <listitem>
+    <para>
+     -- undescribed --
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>sy</parameter></term>
+   <listitem>
+    <para>
+     -- undescribed --
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>speed</parameter></term>
+   <listitem>
+    <para>
+     -- undescribed --
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>length</parameter></term>
+   <listitem>
+    <para>
+     -- undescribed --
+    </para>
+   </listitem>
+  </varlistentry>
+  <varlistentry>
+   <term><parameter>data</parameter></term>
+   <listitem>
+    <para>
+     -- undescribed --
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</refsect1>
+<refsect1>
+ <title>Description</title>
+ <para>
+   DEPRECATED
+ </para>
+</refsect1>
+</refentry>
+
+  </chapter>
+
+</book>

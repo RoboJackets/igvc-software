@@ -1,0 +1,681 @@
+------------------------------------------------------------------------
+r154 | ddennedy | 2005-02-16 11:54:58 -0500 (Wed, 16 Feb 2005) | 1 line
+
+add functions for allocating and releasing bandwidth and channels
+------------------------------------------------------------------------
+r152 | ddennedy | 2004-11-26 11:30:44 -0500 (Fri, 26 Nov 2004) | 1 line
+
+add comment about assumptions made in raw1394_get_port_info
+------------------------------------------------------------------------
+r151 | ddennedy | 2004-11-25 13:46:29 -0500 (Thu, 25 Nov 2004) | 1 line
+
+apply patch from Matthias Hanel to fix uninitialized buffer and remove unncessary (and logically impossible) copy in get_port_info
+------------------------------------------------------------------------
+r150 | ddennedy | 2004-11-25 13:01:57 -0500 (Thu, 25 Nov 2004) | 1 line
+
+improve reference documentation
+------------------------------------------------------------------------
+r149 | ddennedy | 2004-11-19 23:56:36 -0500 (Fri, 19 Nov 2004) | 1 line
+
+pkgconfig include path should not contain libraw1394
+------------------------------------------------------------------------
+r148 | ddennedy | 2004-11-18 21:15:15 -0500 (Thu, 18 Nov 2004) | 1 line
+
+bump version of isodump file
+------------------------------------------------------------------------
+r147 | ddennedy | 2004-11-18 00:24:13 -0500 (Thu, 18 Nov 2004) | 1 line
+
+port iso examples to rawiso API
+------------------------------------------------------------------------
+r146 | ddennedy | 2004-11-10 22:49:07 -0500 (Wed, 10 Nov 2004) | 1 line
+
+fix version and copyright in docs
+------------------------------------------------------------------------
+r145 | ddennedy | 2004-11-10 22:31:20 -0500 (Wed, 10 Nov 2004) | 1 line
+
+remove m4, remove -O2 from CFLAGS
+------------------------------------------------------------------------
+r144 | ddennedy | 2004-11-10 22:19:09 -0500 (Wed, 10 Nov 2004) | 1 line
+
+reorganize and update documentation; fix compiler warning
+------------------------------------------------------------------------
+r143 | ddennedy | 2004-10-30 21:06:20 -0400 (Sat, 30 Oct 2004) | 1 line
+
+revert kernel protocol version
+------------------------------------------------------------------------
+r142 | ddennedy | 2004-10-30 20:52:28 -0400 (Sat, 30 Oct 2004) | 1 line
+
+fix make dist without doc
+------------------------------------------------------------------------
+r141 | ddennedy | 2004-10-30 18:56:25 -0400 (Sat, 30 Oct 2004) | 1 line
+
+nother doc update
+------------------------------------------------------------------------
+r140 | ddennedy | 2004-10-30 18:49:27 -0400 (Sat, 30 Oct 2004) | 1 line
+
+bump versions, build fixes, and doc updates
+------------------------------------------------------------------------
+r139 | bencollins | 2003-12-08 20:47:45 -0500 (Mon, 08 Dec 2003) | 2 lines
+
+Patch from Jim Radford. Other half of packet_per_buffer ABI cleanup.
+
+------------------------------------------------------------------------
+r138 | bencollins | 2003-11-20 10:47:03 -0500 (Thu, 20 Nov 2003) | 3 lines
+
+Patch from Alexander Neundorf to support differing ISO rx modes. Currently
+supported only by OHCI.
+
+------------------------------------------------------------------------
+r137 | weihs | 2003-11-09 14:46:20 -0500 (Sun, 09 Nov 2003) | 2 lines
+
+sync with driver
+(addition of functions raw1394_arm_get_buf raw1394_arm_set_buf to get and set buffers of mapped address ranges)
+------------------------------------------------------------------------
+r136 | weihs | 2003-11-09 14:44:11 -0500 (Sun, 09 Nov 2003) | 1 line
+
+sync with driver version of this file
+------------------------------------------------------------------------
+r135 | bencollins | 2003-10-07 09:28:07 -0400 (Tue, 07 Oct 2003) | 2 lines
+
+Patch from Alexander Neundorf to add proto for raw1394_iso_recv_flush()
+
+------------------------------------------------------------------------
+r133 | bencollins | 2003-09-26 09:55:47 -0400 (Fri, 26 Sep 2003) | 2 lines
+
+Update for new version, 0.10.1.
+
+------------------------------------------------------------------------
+r132 | bencollins | 2003-09-26 09:51:31 -0400 (Fri, 26 Sep 2003) | 2 lines
+
+Fixup async_stream to use same local req variable for reentrancy.
+
+------------------------------------------------------------------------
+r131 | bencollins | 2003-09-26 09:35:59 -0400 (Fri, 26 Sep 2003) | 2 lines
+
+Fix postinst so device node gets created.
+
+------------------------------------------------------------------------
+r130 | bencollins | 2003-09-10 22:47:22 -0400 (Wed, 10 Sep 2003) | 2 lines
+
+Async stream support from Jim Radford.
+
+------------------------------------------------------------------------
+r129 | bencollins | 2003-07-22 11:02:12 -0400 (Tue, 22 Jul 2003) | 2 lines
+
+Increase so maj/age so account for new recv-flush call.
+
+------------------------------------------------------------------------
+r128 | bencollins | 2003-07-22 10:54:19 -0400 (Tue, 22 Jul 2003) | 3 lines
+
+Patch from Stephen Tiedemann to allow reentrancy in raw1394's usage of
+raw1394_request's.
+
+------------------------------------------------------------------------
+r127 | bencollins | 2003-07-17 13:33:39 -0400 (Thu, 17 Jul 2003) | 4 lines
+
+Patch from Dan Maas to add raw1394_iso_recv_flush() call to API, using the
+RAW1394_IOC_ISO_RECV_FLUSH ioctl. Updated the ieee1394-ioctl.h file
+aswell.
+
+------------------------------------------------------------------------
+r126 | bencollins | 2003-07-17 13:28:56 -0400 (Thu, 17 Jul 2003) | 2 lines
+
+pkg-config support from Kristian Hogsberg.
+
+------------------------------------------------------------------------
+r125 | bencollins | 2003-07-17 13:26:09 -0400 (Thu, 17 Jul 2003) | 4 lines
+
+Remove trailing whitespace, which automake chokes on.
+
+Patch from Manish Singh.
+
+------------------------------------------------------------------------
+r124 | bencollins | 2003-07-13 01:34:30 -0400 (Sun, 13 Jul 2003) | 2 lines
+
+Fixed section for -dev package.
+
+------------------------------------------------------------------------
+r121 | bencollins | 2003-07-12 21:45:05 -0400 (Sat, 12 Jul 2003) | 1 line
+
+Re-add the pdf build
+------------------------------------------------------------------------
+r120 | bencollins | 2003-07-12 21:40:37 -0400 (Sat, 12 Jul 2003) | 2 lines
+
+Update Debian files.
+
+------------------------------------------------------------------------
+r119 | bencollins | 2003-07-12 21:37:14 -0400 (Sat, 12 Jul 2003) | 1 line
+
+Ok, the Debian package was way out of sync with upstream
+------------------------------------------------------------------------
+r117 | bencollins | 2003-07-12 21:27:13 -0400 (Sat, 12 Jul 2003) | 3 lines
+
+Ooops...libtool works a bit different than I thought, but atleast it works
+like it is supposed to.
+
+------------------------------------------------------------------------
+r114 | bencollins | 2003-07-12 21:12:19 -0400 (Sat, 12 Jul 2003) | 2 lines
+
+Generate and install the pdf in the Debian package.
+
+------------------------------------------------------------------------
+r113 | bencollins | 2003-07-12 21:10:35 -0400 (Sat, 12 Jul 2003) | 2 lines
+
+Don't run configure at the end of autogen.sh. Also, remove autom4te.cache.
+
+------------------------------------------------------------------------
+r112 | bencollins | 2003-07-12 21:01:13 -0400 (Sat, 12 Jul 2003) | 1 line
+
+Update Debian maintainer
+------------------------------------------------------------------------
+r111 | bencollins | 2003-07-12 20:52:39 -0400 (Sat, 12 Jul 2003) | 2 lines
+
+Update Debian changelog.
+
+------------------------------------------------------------------------
+r110 | bencollins | 2003-07-12 20:52:28 -0400 (Sat, 12 Jul 2003) | 3 lines
+
+File doesn't really seem needed. The NEWS file gives a good overview, and
+the svn log is more than verbose enough for info seekers.
+
+------------------------------------------------------------------------
+r109 | bencollins | 2003-07-12 20:49:54 -0400 (Sat, 12 Jul 2003) | 2 lines
+
+Fix compiler warnings.
+
+------------------------------------------------------------------------
+r108 | bencollins | 2003-07-12 20:26:14 -0400 (Sat, 12 Jul 2003) | 2 lines
+
+Updates from 0.10.0 release.
+
+------------------------------------------------------------------------
+r107 | ddennedy | 2003-04-23 00:31:28 -0400 (Wed, 23 Apr 2003) | 1 line
+
+add libtoolize to bootstrap
+------------------------------------------------------------------------
+r106 | ddennedy | 2003-04-21 13:01:41 -0400 (Mon, 21 Apr 2003) | 1 line
+
+added Dan Maas' rawiso docs
+------------------------------------------------------------------------
+r105 | dmaas | 2003-04-07 18:23:20 -0400 (Mon, 07 Apr 2003) | 1 line
+
+new_handle_on_port() error path fix from Jim Radford
+------------------------------------------------------------------------
+r104 | dmaas | 2003-03-26 17:48:46 -0500 (Wed, 26 Mar 2003) | 1 line
+
+add raw1394_new_handle_on_port() convenience function
+------------------------------------------------------------------------
+r103 | bencollins | 2003-02-21 23:31:28 -0500 (Fri, 21 Feb 2003) | 2 lines
+
+Updates for new rawiso ioctl interface.
+
+------------------------------------------------------------------------
+r102 | dmaas | 2003-01-15 08:14:47 -0500 (Wed, 15 Jan 2003) | 1 line
+
+add iso_xmit_sync() and iso_xmit_write(); clean up iso handling a bit
+------------------------------------------------------------------------
+r101 | dmaas | 2003-01-15 01:36:19 -0500 (Wed, 15 Jan 2003) | 1 line
+
+implement tag matching for rawiso reception
+------------------------------------------------------------------------
+r100 | dmaas | 2003-01-05 23:08:00 -0500 (Sun, 05 Jan 2003) | 1 line
+
+back out previous commit - don't drop the legacy API just yet
+------------------------------------------------------------------------
+r99 | dmaas | 2003-01-05 15:58:19 -0500 (Sun, 05 Jan 2003) | 1 line
+
+emulate legacy ISO reception API on top of new rawiso API
+------------------------------------------------------------------------
+r98 | dmaas | 2002-12-23 22:01:11 -0500 (Mon, 23 Dec 2002) | 3 lines
+
+update iso API for multi-channel reception and new packet buffer layout
+
+
+------------------------------------------------------------------------
+r97 | anonymous | 2002-12-20 02:37:47 -0500 (Fri, 20 Dec 2002) | 1 line
+
+oops, irq_interval needs to be signed
+------------------------------------------------------------------------
+r96 | anonymous | 2002-12-20 02:26:18 -0500 (Fri, 20 Dec 2002) | 1 line
+
+dmaas - renamed exported arm definitions into the raw1394_ namespace; brought kernel-raw1394.h back in sync with the kernel version
+------------------------------------------------------------------------
+r95 | dmaas | 2002-12-16 00:11:45 -0500 (Mon, 16 Dec 2002) | 11 lines
+
+rawiso updates:
+- changed return type of rawiso xmit/recv handlers from int to
+  enum raw1394_iso_disposition
+
+- added an ioctl (RAW1394_ISO_QUEUE_ACTIVITY) to force an ISO_ACTIVITY
+  event into the queue. This is needed for handling RAW1394_ISO_DEFER,
+  to kick us out of the next read() instead of sleeping forever.
+
+- removed references to "8-byte" isochronous header - this is an
+  OHCI-specific implementation detail
+
+------------------------------------------------------------------------
+r94 | ddennedy | 2002-11-18 10:30:52 -0500 (Mon, 18 Nov 2002) | 1 line
+
+fix cplusplus extern C block
+------------------------------------------------------------------------
+r93 | ddennedy | 2002-11-18 02:40:21 -0500 (Mon, 18 Nov 2002) | 1 line
+
+merged rawiso branch
+------------------------------------------------------------------------
+r86 | ddennedy | 2002-10-23 17:22:22 -0400 (Wed, 23 Oct 2002) | 1 line
+
+added missing arm.c from weihs branch
+------------------------------------------------------------------------
+r84 | ddennedy | 2002-10-23 17:18:49 -0400 (Wed, 23 Oct 2002) | 1 line
+
+merged weihs branch
+------------------------------------------------------------------------
+r82 | aeb | 2002-10-13 19:59:46 -0400 (Sun, 13 Oct 2002) | 5 lines
+
+configure.ac:
+- Move configure.in to configure.ac (for autoconf 2.50+).
+- Set CFLAGS to "-Wall -O2" only if not in environment already.
+- Set package version to 1.0.0 already.
+
+------------------------------------------------------------------------
+r81 | aeb | 2002-10-13 18:54:49 -0400 (Sun, 13 Oct 2002) | 2 lines
+
+Add kernel-doc style documentation headers for most exported functions.
+
+------------------------------------------------------------------------
+r80 | aeb | 2002-10-07 21:52:45 -0400 (Mon, 07 Oct 2002) | 3 lines
+
+Set the executable flags for autogen.sh and debian/rules that were lost in the
+CVS to SVN conversion.
+
+------------------------------------------------------------------------
+r73 | aeb | 2001-08-01 08:30:48 -0400 (Wed, 01 Aug 2001) | 2 lines
+
+Add raw1394_get_local_id, _irm_id, _nodecount refentry.
+
+------------------------------------------------------------------------
+r72 | aeb | 2001-07-08 20:27:09 -0400 (Sun, 08 Jul 2001) | 4 lines
+
+Reworked some paragraphs.
+Added chapters on generation numbers and error codes.
+Added some function reference entries.
+
+------------------------------------------------------------------------
+r71 | aeb | 2001-06-27 11:29:07 -0400 (Wed, 27 Jun 2001) | 2 lines
+
+Modify info in Debian package copyright file a bit.
+
+------------------------------------------------------------------------
+r70 | aeb | 2001-06-27 08:14:20 -0400 (Wed, 27 Jun 2001) | 2 lines
+
+Fix wrong error mapping in raw1394_error_to_errno() on local transactions.
+
+------------------------------------------------------------------------
+r69 | aeb | 2001-06-17 11:19:20 -0400 (Sun, 17 Jun 2001) | 5 lines
+
+debian: Let postinst continue even if input is /dev/null.
+debian: 0.9.0-2 release for the above.
+Fix mixed up sections for isodump man file in doc/Makefile.am and
+ configure.in.
+
+------------------------------------------------------------------------
+r68 | aeb | 2001-06-11 07:23:00 -0400 (Mon, 11 Jun 2001) | 2 lines
+
+Added man page describing format of the iso dump file.
+
+------------------------------------------------------------------------
+r67 | aeb | 2001-06-08 14:25:31 -0400 (Fri, 08 Jun 2001) | 2 lines
+
+Forgot to add dumpiso and sendiso man pages to repository, fixed.
+
+------------------------------------------------------------------------
+r66 | aeb | 2001-06-07 20:31:12 -0400 (Thu, 07 Jun 2001) | 4 lines
+
+Moved testlibraw.c from src to tools directory.
+Added sendiso and dumpiso programs in tools directory.
+Added man pages for sendiso and dumpiso in doc directory.
+
+------------------------------------------------------------------------
+r65 | aeb | 2001-05-30 06:54:25 -0400 (Wed, 30 May 2001) | 2 lines
+
+debian: Remove a now useless substvar.
+
+------------------------------------------------------------------------
+r64 | aeb | 2001-05-28 12:13:48 -0400 (Mon, 28 May 2001) | 4 lines
+
+debian: Make shlibs file versioned.
+debian: Remove local shlib dependency kludge and replace with -l option for
+ dh_shlibdeps.
+
+------------------------------------------------------------------------
+r63 | aeb | 2001-05-24 21:02:22 -0400 (Thu, 24 May 2001) | 2 lines
+
+Revert move of HTML directory from libraw1394 to libraw1394.html
+
+------------------------------------------------------------------------
+r62 | aeb | 2001-05-24 20:44:14 -0400 (Thu, 24 May 2001) | 2 lines
+
+Revert move of HTML directory from libraw1394 to libraw1394.html
+
+------------------------------------------------------------------------
+r61 | aeb | 2001-05-24 18:10:45 -0400 (Thu, 24 May 2001) | 3 lines
+
+Move HTML formatted documentation subdir from libraw1394 to libraw1394.html.
+Update Debian control files to generate version 0.9.0-1 package.
+
+------------------------------------------------------------------------
+r60 | aeb | 2001-05-13 21:05:58 -0400 (Sun, 13 May 2001) | 5 lines
+
+Handle generation number is not automatically advanced with bus reset.
+Function raw1394_update_generation() added for manual update.
+Bus reset handler get current generation number as argument.
+Default bus reset handler calls raw1394_update_generation().
+
+------------------------------------------------------------------------
+r59 | aeb | 2001-05-13 20:57:05 -0400 (Sun, 13 May 2001) | 2 lines
+
+Fix macros so that they actually work.
+
+------------------------------------------------------------------------
+r58 | aeb | 2001-05-06 20:03:03 -0400 (Sun, 06 May 2001) | 4 lines
+
+Fix Makefile.am to include libraw1394.m4 in distribution.
+Update NEWS.
+Some Debian packaging updates.
+
+------------------------------------------------------------------------
+r57 | aeb | 2001-03-20 21:00:03 -0500 (Tue, 20 Mar 2001) | 2 lines
+
+Store returned generation count after setting of port.
+
+------------------------------------------------------------------------
+r56 | aeb | 2001-02-28 11:24:38 -0500 (Wed, 28 Feb 2001) | 3 lines
+
+Install libraw1394.am.
+Fix wording in message when /dev/raw1394 not found.
+
+------------------------------------------------------------------------
+r55 | aeb | 2001-02-27 20:21:15 -0500 (Tue, 27 Feb 2001) | 3 lines
+
+testlibraw gets installed now.
+Added man page for testlibraw.
+
+------------------------------------------------------------------------
+r54 | aeb | 2001-02-27 18:44:08 -0500 (Tue, 27 Feb 2001) | 2 lines
+
+Let received iso header be big endian, to be consistent.
+
+------------------------------------------------------------------------
+r53 | aeb | 2001-02-04 21:38:03 -0500 (Sun, 04 Feb 2001) | 3 lines
+
+Add libraw1394 autoconf macro (not yet complete).
+Add functions and symbols to let macro determine version.
+
+------------------------------------------------------------------------
+r52 | aeb | 2001-01-31 18:38:15 -0500 (Wed, 31 Jan 2001) | 2 lines
+
+Put 'extern "C"' for C++ back in.
+
+------------------------------------------------------------------------
+r51 | aeb | 2001-01-26 21:28:29 -0500 (Fri, 26 Jan 2001) | 2 lines
+
+Adapted testlibraw to new style error handling.
+
+------------------------------------------------------------------------
+r50 | aeb | 2001-01-18 20:19:04 -0500 (Thu, 18 Jan 2001) | 2 lines
+
+Fix building errors.c.
+
+------------------------------------------------------------------------
+r49 | aeb | 2001-01-18 20:11:48 -0500 (Thu, 18 Jan 2001) | 2 lines
+
+First implementation of new error reporting API.
+
+------------------------------------------------------------------------
+r48 | aeb | 2001-01-03 21:06:30 -0500 (Wed, 03 Jan 2001) | 2 lines
+
+Fix misplaced device file in Debian installation.
+
+------------------------------------------------------------------------
+r47 | aeb | 2000-12-11 19:28:06 -0500 (Mon, 11 Dec 2000) | 4 lines
+
+Debian scripts use makedev (>=2.3.1-49) in postinst by default now.
+Postinst script using mknod added as alternative.
+Revision bumped up to 0.8.1.
+
+------------------------------------------------------------------------
+r46 | aeb | 2000-11-24 21:05:35 -0500 (Fri, 24 Nov 2000) | 4 lines
+
+Fix postinst ldconfig.
+Fix device file creation.
+Install NEWS and README as documentation in the dev package.
+
+------------------------------------------------------------------------
+r45 | aeb | 2000-11-24 20:58:34 -0500 (Fri, 24 Nov 2000) | 2 lines
+
+Add some information about return values.
+
+------------------------------------------------------------------------
+r44 | aeb | 2000-11-23 20:11:24 -0500 (Thu, 23 Nov 2000) | 2 lines
+
+Bump up version numbers for release.
+
+------------------------------------------------------------------------
+r43 | aeb | 2000-11-23 20:03:43 -0500 (Thu, 23 Nov 2000) | 2 lines
+
+Added libraw1394.postinst.in to list of distributed files.
+
+------------------------------------------------------------------------
+r42 | aeb | 2000-11-23 17:55:47 -0500 (Thu, 23 Nov 2000) | 2 lines
+
+Add ldconfig in deb postinst for Debian policy conformance.
+
+------------------------------------------------------------------------
+r41 | aeb | 2000-11-23 12:42:12 -0500 (Thu, 23 Nov 2000) | 2 lines
+
+Removed acconfig.h, which wasn't needed for some time.
+
+------------------------------------------------------------------------
+r40 | aeb | 2000-11-22 18:12:56 -0500 (Wed, 22 Nov 2000) | 2 lines
+
+Added ieee1394.h header.
+
+------------------------------------------------------------------------
+r39 | aeb | 2000-09-13 19:24:53 -0400 (Wed, 13 Sep 2000) | 2 lines
+
+Fix raw1394_start_iso_write() which uses wrong variable.
+
+------------------------------------------------------------------------
+r38 | aeb | 2000-09-10 18:18:49 -0400 (Sun, 10 Sep 2000) | 2 lines
+
+Work around compiler warnings for int/ptr casts.
+
+------------------------------------------------------------------------
+r37 | aeb | 2000-09-09 22:10:08 -0400 (Sat, 09 Sep 2000) | 2 lines
+
+Added control files for Debian packages.
+
+------------------------------------------------------------------------
+r36 | aeb | 2000-09-01 11:15:57 -0400 (Fri, 01 Sep 2000) | 2 lines
+
+Added missing prototypes for iso send functions.
+
+------------------------------------------------------------------------
+r35 | aeb | 2000-08-07 20:29:08 -0400 (Mon, 07 Aug 2000) | 2 lines
+
+Added raw1394_get_irm_id().
+
+------------------------------------------------------------------------
+r34 | aeb | 2000-08-05 22:44:00 -0400 (Sat, 05 Aug 2000) | 2 lines
+
+Added support for isochronous sending.
+
+------------------------------------------------------------------------
+r33 | aeb | 2000-07-05 16:40:51 -0400 (Wed, 05 Jul 2000) | 2 lines
+
+Added raw1394_reset_bus() call.
+
+------------------------------------------------------------------------
+r32 | aeb | 2000-06-22 12:22:00 -0400 (Thu, 22 Jun 2000) | 3 lines
+
+- Set library version info in configure.in, use in src/Makefile.am.
+- Enable compiler warnings.
+
+------------------------------------------------------------------------
+r31 | aeb | 2000-06-15 18:28:22 -0400 (Thu, 15 Jun 2000) | 2 lines
+
+Update libtool version number.
+
+------------------------------------------------------------------------
+r30 | aeb | 2000-06-14 11:01:42 -0400 (Wed, 14 Jun 2000) | 2 lines
+
+Added copyright headers.
+
+------------------------------------------------------------------------
+r29 | aeb | 2000-06-11 13:48:43 -0400 (Sun, 11 Jun 2000) | 2 lines
+
+Added explicit AC_PROG_INSTALL call.
+
+------------------------------------------------------------------------
+r28 | aeb | 2000-06-09 09:02:13 -0400 (Fri, 09 Jun 2000) | 2 lines
+
+Fix size of error field.
+
+------------------------------------------------------------------------
+r27 | aeb | 2000-06-02 13:03:00 -0400 (Fri, 02 Jun 2000) | 2 lines
+
+Modified support for 32/64 bit environments, control struct fields have fixed size now.
+
+------------------------------------------------------------------------
+r26 | aeb | 2000-05-28 17:00:56 -0400 (Sun, 28 May 2000) | 2 lines
+
+Added support for environments with 64 bit kernel and 32 bit userland.
+
+------------------------------------------------------------------------
+r25 | aeb | 2000-04-26 21:09:52 -0400 (Wed, 26 Apr 2000) | 2 lines
+
+Fixed missing setting of ext code in raw1394_start_lock()
+
+------------------------------------------------------------------------
+r24 | aeb | 2000-04-14 20:33:26 -0400 (Fri, 14 Apr 2000) | 2 lines
+
+Fixed lock transaction to actually return response value.
+
+------------------------------------------------------------------------
+r23 | aeb | 2000-04-12 19:27:26 -0400 (Wed, 12 Apr 2000) | 2 lines
+
+Add userdata functions as news.
+
+------------------------------------------------------------------------
+r22 | aeb | 2000-04-05 18:41:31 -0400 (Wed, 05 Apr 2000) | 2 lines
+
+Add userdata functions.
+
+------------------------------------------------------------------------
+r21 | aeb | 2000-03-17 23:13:00 -0500 (Fri, 17 Mar 2000) | 2 lines
+
+Bump version number to 0.6.
+
+------------------------------------------------------------------------
+r20 | aeb | 2000-03-17 23:05:48 -0500 (Fri, 17 Mar 2000) | 2 lines
+
+Mention byte order change.
+
+------------------------------------------------------------------------
+r19 | aeb | 2000-03-17 23:00:35 -0500 (Fri, 17 Mar 2000) | 2 lines
+
+Mention SourceForge home.
+
+------------------------------------------------------------------------
+r18 | aeb | 2000-03-17 21:14:43 -0500 (Fri, 17 Mar 2000) | 2 lines
+
+Add script to generate Makefiles from bare CVS checkout.
+
+------------------------------------------------------------------------
+r17 | aeb | 2000-03-16 21:15:23 -0500 (Thu, 16 Mar 2000) | 2 lines
+
+Version++ and age++ for libtool version info.
+
+------------------------------------------------------------------------
+r16 | aeb | 2000-03-16 17:32:49 -0500 (Thu, 16 Mar 2000) | 3 lines
+
+- Added FCP monitoring entry
+- Added old 0.5 news
+
+------------------------------------------------------------------------
+r15 | aeb | 2000-03-16 17:22:05 -0500 (Thu, 16 Mar 2000) | 2 lines
+
+Added FCP monitoring test.
+
+------------------------------------------------------------------------
+r14 | aeb | 2000-03-16 16:22:28 -0500 (Thu, 16 Mar 2000) | 2 lines
+
+Use correct typedef in my_tag_handler().
+
+------------------------------------------------------------------------
+r13 | aeb | 2000-03-15 22:59:53 -0500 (Wed, 15 Mar 2000) | 2 lines
+
+Fix spelign of raw1394_set_fcp_handler().
+
+------------------------------------------------------------------------
+r12 | aeb | 2000-03-15 22:40:52 -0500 (Wed, 15 Mar 2000) | 2 lines
+
+Added FCP listen functionality.
+
+------------------------------------------------------------------------
+r11 | aeb | 2000-03-15 22:16:18 -0500 (Wed, 15 Mar 2000) | 2 lines
+
+Removed obsolete AC_PROG_RANLIB.
+
+------------------------------------------------------------------------
+r10 | aeb | 2000-03-11 23:08:48 -0500 (Sat, 11 Mar 2000) | 2 lines
+
+Ensure this ends up in distributions.
+
+------------------------------------------------------------------------
+r9 | aeb | 2000-03-11 22:59:45 -0500 (Sat, 11 Mar 2000) | 2 lines
+
+Renamed 'new' args to 'new_h' for C++ compatibility.
+
+------------------------------------------------------------------------
+r8 | abombe | 2000-02-06 11:49:29 -0500 (Sun, 06 Feb 2000) | 2 lines
+
+Version changed to 0.5
+
+------------------------------------------------------------------------
+r7 | abombe | 2000-02-06 10:10:14 -0500 (Sun, 06 Feb 2000) | 2 lines
+
+Added lock transaction.
+
+------------------------------------------------------------------------
+r6 | abombe | 2000-02-04 18:20:17 -0500 (Fri, 04 Feb 2000) | 2 lines
+
+Changed iso rcv handling to separate handlers per channel.
+
+------------------------------------------------------------------------
+r5 | abombe | 2000-01-02 16:55:08 -0500 (Sun, 02 Jan 2000) | 2 lines
+
+Added dev target to Makefile
+
+------------------------------------------------------------------------
+r4 | abombe | 1999-12-29 17:24:32 -0500 (Wed, 29 Dec 1999) | 2 lines
+
+Added isochronous I/O support
+
+------------------------------------------------------------------------
+r3 | abombe | 1999-12-18 11:02:15 -0500 (Sat, 18 Dec 1999) | 3 lines
+
+- Added FCP register addresses
+- Added #ifdef for multiple inclusion
+
+------------------------------------------------------------------------
+r2 | abombe | 1999-12-15 17:31:20 -0500 (Wed, 15 Dec 1999) | 2 lines
+
+Added prototypes for async write functions
+
+------------------------------------------------------------------------
+r1 | abombe | 1999-12-02 18:07:38 -0500 (Thu, 02 Dec 1999) | 2 lines
+
+Initial revision
+
+------------------------------------------------------------------------

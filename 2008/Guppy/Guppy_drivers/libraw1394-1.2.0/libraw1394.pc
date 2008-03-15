@@ -1,0 +1,10 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libraw1394
+Description: Interface library for the Linux IEEE1394 drivers.
+Version: 1.2.0
+Libs: -L${libdir} -lraw1394
+Cflags: -I${includedir}

@@ -1,0 +1,9 @@
+The maintainer of this package is also the upstream maintainer of libraw1394.
+
+This package was downloaded from
+http://www.linux1394.org/files/libraw1394/libraw1394-0.10.1.tar.bz2
+
+Copyright:
+
+libraw1394 is licensed under the LGPL, version 2.1 or later, a copy of which can
+be found on your Debian system under /usr/share/common-licenses/LGPL.

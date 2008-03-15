@@ -1,0 +1,33 @@
+Source: libraw1394
+Section: libs
+Priority: optional
+Maintainer: Ben Collins <bcollins@debian.org>
+Standards-Version: 3.5.6.0
+Build-Depends: debhelper (>= 3.0.0), docbook-utils
+Uploaders: Andreas Bombe <aeb@debian.org>, Ben Collins <bcollins@debian.org>
+
+Package: libraw1394-dev
+Architecture: any
+Section: libdevel
+Depends: libc6-dev, ${shlibs:Depends}
+Description: library for direct access to IEEE 1394 bus - development files
+ libraw1394 is the only supported interface to the kernel side raw1394
+ of the Linux IEEE-1394 subsystem, which provides direct access to the
+ connected 1394 buses to user space.  Through libraw1394/raw1394,
+ applications can directly send to and receive from other nodes without
+ requiring a kernel driver for the protocol in question.
+ .
+ This package contains the include files and static library for
+ libraw1394, as well as the testlibraw program and programmer's
+ documentation.
+
+Package: libraw1394-5
+Architecture: any
+Section: libs
+Depends: debconf, makedev (>= 2.3.1-49), ${shlibs:Depends}
+Description: library for direct access to IEEE 1394 bus (aka FireWire)
+ libraw1394 is the only supported interface to the kernel side raw1394
+ of the Linux IEEE-1394 subsystem, which provides direct access to the
+ connected 1394 buses to user space.  Through libraw1394/raw1394,
+ applications can directly send to and receive from other nodes without
+ requiring a kernel driver for the protocol in question.

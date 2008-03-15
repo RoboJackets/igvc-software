@@ -1,0 +1,63 @@
+
+				   libraw1394
+				   ==========
+
+1. About libraw1394
+
+	libraw1394 is the only supported interface to the kernel side raw1394 of
+the Linux IEEE-1394 subsystem, which provides direct access to the connected
+1394 buses to user space.  Through libraw1394/raw1394, applications can directly
+send to and receive from other nodes without requiring a kernel driver for the
+protocol in question.
+
+	The reason for making a library the interface to the kernel is to avoid
+a program dependancy on the kernel version, which would hinder development and
+optimization of raw1394.  If development changed the protocol and made it
+incompatible with previous versions only the libraw1394 has to be upgraded to
+match the kernel version (instead of all applications).
+
+
+2. Copyleft
+
+	libraw1394 itself is licensed under the Lesser General Public License
+(short LGPL, see file COPYING.LIB in the source distribution).  Other files in
+the source archives not belonging to but being part of the build procedure of
+libraw1394 are under their own licenses, as stated at the top of the individual
+files.
+
+
+3. API documentation
+
+	Finally there is something, in the doc subdirectory.  The file is
+libraw1394.sgml (it's Docbook format), and there are preformatted PostScript and
+HTML available.  This documentation is not complete yet.
+
+
+4. Multithreading
+
+	This library should be multithreadable with the restriction that one
+raw1394handle_t may be used only within a single thread.  Multiple threads
+operating on the same handle would royally mess up the kernel-user protocol.
+Simply use separate handles for each thread in which you need to use libraw1394.
+
+
+5. Pkg-config
+
+	The library comes with a pkg-config .pc file, so you can check for
+libraw1394 and its version in your configure script.  For example, here is how 
+to use the autoconf macro:
+
+PKG_CHECK_MODULES(LIBRAW1394, libraw1394 >= 1.1.0)
+
+	This macro sets the variables LIBRAW1394_CFLAGS and LIBRAW1394_LIBS.  You 
+have to include those into your build variables so that the build process 
+correctly links with libraw1394.
+
+
+6. Maintainer
+
+	Maintainer of libraw1394 is currently Dan Dennedy.  Send 
+suggestions, bug reports and fixes to linux1394-devel@lists.sourceforge.net.  
+See the file AUTHORS for a complete list of contributors to libraw1394.
+
+Visit http://www.linux1394.org/ for more information or to see what is new.
