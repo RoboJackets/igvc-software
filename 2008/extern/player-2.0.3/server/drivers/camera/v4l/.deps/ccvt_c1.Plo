@@ -1,3 +1,0 @@
-ccvt_c1.lo ccvt_c1.o: ccvt_c1.c ccvt.h
-
-ccvt.h:
