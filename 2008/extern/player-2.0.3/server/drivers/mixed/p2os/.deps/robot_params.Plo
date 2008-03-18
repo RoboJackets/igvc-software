@@ -1,3 +1,0 @@
-robot_params.lo robot_params.o: robot_params.cc robot_params.h
-
-robot_params.h:
