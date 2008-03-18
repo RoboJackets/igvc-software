@@ -5,10 +5,10 @@
 #include <stdio.h>      // Header file for standard file i/o.
 #include "utilfuncs.h"
 #include "texcode.h"
-
+#include "getwhim.h"
 
 Image* im3;			//texture data
-#ifdef paulpedantic
+#ifdef paulpedantic3
 int count;
 #endif
 long long avga,avgb,n;
@@ -20,10 +20,10 @@ void NextFrame(void) {
 	
 	Image* im2=malloc(sizeof(Image));
 		 ImageLoad("1.bmp", im2);	//camera data
-	
+		im3->data=getwhim(im2);
 		//packin(im2);
 		
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, im2->width, im2->height, 0, GL_RGB, GL_UNSIGNED_BYTE, im2->data);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, im2->width, im2->height, 0, GL_RGB, GL_UNSIGNED_BYTE, im3->data);
 	
 }
 /*
