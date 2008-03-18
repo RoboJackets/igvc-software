@@ -24,7 +24,8 @@ void display ()
 	
 	//tvar=nanotime();
 	//printf("hi");
-	glClear (GL_COLOR_BUFFER_BIT);                                             
+	glClear (GL_COLOR_BUFFER_BIT);  
+	NextFrame();                                           
 
 	//glColor(.5,.5,.5);
 	glBegin(GL_QUADS);

@@ -1,10 +1,10 @@
-
+#include "stdio.h"
 #include "image.h"
 #include "Buffer2D.h"
 #include "PixelRGB.h"
 #include "getwhim.h"
 
-
+int numruns=0;
 extern "C" char * getwhim(Image* im){
 
 	Buffer2D<PixelRGB> whim=*(new Buffer2D<PixelRGB>());
@@ -33,8 +33,9 @@ extern "C" char * getwhim(Image* im){
 				
 	}
 	
+	numruns++;
 	
-	
+	printf("frame: %d\n",numruns);
 	
 	
 	
