@@ -64,11 +64,10 @@ public:
 		return this->data[index];
 	}
 	
-	// Returns the address of the element at the specified location.
-	// (The location is NOT bound-checked.)
-	E* at(int x, int y) {
-		return &data[y*width + x];
+	E& at(int x, int y) {
+		return this->data[y*width + x];
 	}
+	
 	// Returns the address of the first (leftmost) element on the specified row.
 	// (The row index is NOT bound-checked.)
 	E* atRow(int y);
