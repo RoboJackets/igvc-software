@@ -14,3 +14,11 @@ Buffer2D<PixelRGB>* imageAsBuffer2D(Image* img) {
 	buf->data = (PixelRGB*)img->data; 
 	return buf;
 }
+
+Buffer2D<PixelRGB> imageAsStaticBuffer2D(Image* img) {
+	Buffer2D<PixelRGB> buf = Buffer2D<PixelRGB>();
+	buf.width = img->width;
+	buf.height = img->height;
+	buf.data = (PixelRGB*)img->data; 
+	return buf;
+}

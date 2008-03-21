@@ -4,6 +4,8 @@
 #include "utilfuncs.h"
 #include "texcode.h"
 #include "screenio.h"
+#include "blackmain.h"
+
 
 #define ESCAPE 27
 
@@ -26,7 +28,7 @@ void display ()
 	//tvar=nanotime();
 	//printf("hi");
 	glClear (GL_COLOR_BUFFER_BIT);  
-	NextFrame();                                           
+	blackmain();                                           
 
 	//glColor(.5,.5,.5);
 	glBegin(GL_QUADS);
