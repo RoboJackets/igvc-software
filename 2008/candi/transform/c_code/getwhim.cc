@@ -4,10 +4,12 @@
 #include "PixelRGB.h"
 #include "getwhim.h"
 
+
+Buffer2D<PixelRGB> whim;
+
+
 int numruns=0;
 extern "C" char * getwhim(Image* im){
-
-//	Buffer2D<PixelRGB> whim=*(new Buffer2D<PixelRGB>()); //whim needs to be a member variabile
 
 	int r,g,b,orn;
 	char R,G,B;

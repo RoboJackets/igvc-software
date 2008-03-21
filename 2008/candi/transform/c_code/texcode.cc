@@ -6,6 +6,7 @@
 #include "utilfuncs.h"
 #include "texcode.h"
 #include "getwhim.h"
+#include "screenio.h"
 
 Image* im3;			//texture data
 #ifdef paulpedantic3
@@ -18,8 +19,8 @@ void packin(Image* im2);
 
 void NextFrame(void) {
 	
-	Image* im2=malloc(sizeof(Image));
-		 ImageLoad("1.bmp", im2);	//camera data
+		Image* im2 = new Image;
+		ImageLoad("1.bmp", im2);	//camera data
 		im3->data=getwhim(im2);
 		//packin(im2);
 		
@@ -54,7 +55,7 @@ void texinit(void){
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // scale linearly when image bigger than texture
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	im3=malloc(sizeof(Image));
+	im3= new Image;
 	im3->width=OWIDTH;
 	im3->height=OHEIGHT;
     im3->data=(char*)malloc(OWIDTH*OHEIGHT*3);
