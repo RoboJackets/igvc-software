@@ -3,6 +3,7 @@
 #include <stdio.h>      // Header file for standard file i/o.
 #include "utilfuncs.h"
 #include "texcode.h"
+#include "screenio.h"
 
 #define ESCAPE 27
 
@@ -122,6 +123,7 @@ void keyPressed(unsigned char key, int x, int y)
 
 void init ()
 {
+	screeninit();
 	texinit();
 	//LoadGLTextures();					// Load The Texture(s) 
     glEnable(GL_TEXTURE_2D);			// Enable Texture Mapping
