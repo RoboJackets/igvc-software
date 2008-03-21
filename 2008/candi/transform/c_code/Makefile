@@ -4,10 +4,11 @@
 
 #CFLAGS = -O2 -mno-cygwin # For Mingw
 #CFLAGS =  -O3 -lglut32 -lglu32 -lopengl32 
-LCFLAGS =  -L  -lGL -lglut
-CFLAGS = 
+LCFLAGS =  -g -L  -lGL -lglut
+CXXFLAGS = -g
+CFLAGS = -g
 INCLUDES = 
-LDLIBS = -L  -lGL -lglut
+LDLIBS = -g -L  -lGL -lglut
 #SOURCES=curtain.c texcode.c transform.c utilfuncs.c 
 #TARGETS=curtain.o texcode.o transform.o utilfuncs.o
 TARGETS=`echo *.c|sed 's/\.c/\.o/g'` `echo *.cc|sed 's/\.cc/\.o/g'`
