@@ -9,8 +9,6 @@ extern "C" {
 #endif
 char * getwhim(Image* im);
 
-//member variable
-Buffer2D<PixelRGB> whim;
 
 #if __cplusplus
 }

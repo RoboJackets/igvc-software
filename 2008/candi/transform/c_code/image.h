@@ -5,7 +5,7 @@
 typedef struct Image_struct {
     unsigned long width;	// sizeX
     unsigned long height;	// sizeY
-    unsigned char *data;
+    /*unsigned*/ char *data;
 } Image;
 
 #endif

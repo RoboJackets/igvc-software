@@ -123,7 +123,6 @@ void keyPressed(unsigned char key, int x, int y)
 
 void init ()
 {
-	screeninit();
 	texinit();
 	//LoadGLTextures();					// Load The Texture(s) 
     glEnable(GL_TEXTURE_2D);			// Enable Texture Mapping
