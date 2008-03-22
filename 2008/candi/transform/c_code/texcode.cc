@@ -47,7 +47,6 @@ void packin(Image* im2){
 void texinit(void){
 	glGenTextures(1, (GLuint*)&texture[0]);
     glBindTexture(GL_TEXTURE_2D, texture[0]);   // 2d texture (x and y size)
-
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // scale linearly when image bigger than texture
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	im3=(Image*)malloc(sizeof(Image));
