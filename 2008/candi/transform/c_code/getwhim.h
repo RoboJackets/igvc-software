@@ -8,7 +8,7 @@
 
 typedef  Buffer2D<PixelRGB> b2drgb;
 
-b2drgb& getwhim(b2drgb& im);
+void getwhim(b2drgb& im, b2drgb& whim);
 
 
 

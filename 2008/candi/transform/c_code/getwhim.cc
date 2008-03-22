@@ -4,12 +4,9 @@
 #include "PixelRGB.h"
 #include "getwhim.h"
 
-//typedef  Buffer2D<PixelRGB> b2drgb;
-static Buffer2D<PixelRGB> whim;
-
 
 int numruns=0;
-b2drgb& getwhim(b2drgb& im){
+void getwhim(b2drgb& im, b2drgb& whim){
 
 	int r,g,b,orn;
 	char R,G,B;
@@ -39,10 +36,4 @@ b2drgb& getwhim(b2drgb& im){
 	numruns++;
 	
 	printf("frame: %d\n",numruns);
-	
-	
-	
-	return whim;
-
-
 }
