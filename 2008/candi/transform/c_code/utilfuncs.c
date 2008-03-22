@@ -92,6 +92,8 @@ int ImageLoad(char *filename, Image *image) {
 	image->data[i+2] = temp;
     }
     
+    //close file
+    fclose(file);
     // we're done.
     return 1;
 }

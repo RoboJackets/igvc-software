@@ -2,37 +2,37 @@
 #include "image.h"
 #include "Buffer2D.h"
 #include "PixelRGB.h"
-#include "getwhim.h"
+#include "getorim.h"
 
 
-static Buffer2D<PixelRGB> whim;
+static Buffer2D<PixelRGB> orim;
 
 
 static int numruns=0;
-b2drgb& getwhim(b2drgb& im){
+b2drgb& getorim(b2drgb& im){
 
 	int r,g,b,orn;
 	char R,G,B;
-	whim.copyFrom(im);
+	orim.copyFrom(im);
 	for(int i=0;i<(im.width)*(im.height);i++){
-		r=whim[i].r;
-		g=whim[i].g;
-		b=whim[i].b;
+		r=orim[i].r;
+		g=orim[i].g;
+		b=orim[i].b;
 		orn=r-b;
 		
 		// Clear out image
-		whim[i].r=0;
-		whim[i].g=0;
-		whim[i].b=0;
+		orim[i].r=0;
+		orim[i].g=0;
+		orim[i].b=0;
 		R=G=B=0;
 		
-		if(g!=0 && 256*b/g>171 && b>102 && 256*g/(r+b)<154){
+		if(g<r-20){
 			R=255;
 		}
 			
-		whim[i].r=R;
-		whim[i].g=G;
-		whim[i].b=B;
+		orim[i].r=R;
+		orim[i].g=G;
+		orim[i].b=B;
 				
 	}
 	
@@ -42,7 +42,7 @@ b2drgb& getwhim(b2drgb& im){
 	
 	
 	
-	return whim;
+	return orim;
 
 
 }
