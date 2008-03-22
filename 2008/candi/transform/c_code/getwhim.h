@@ -4,11 +4,10 @@
 #include "PixelRGB.h"
 
 
-/* --- Public C Functions --- */
 
 typedef  Buffer2D<PixelRGB> b2drgb;
 
-void getwhim(b2drgb& im, b2drgb& whim);
+b2drgb& getwhim(b2drgb& im);
 
 
 
