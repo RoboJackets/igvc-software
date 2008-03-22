@@ -15,35 +15,12 @@ int count;
 long long avga,avgb,n;
 extern void* memcpy(void*,const void*,size_t);
 
-void packin(Image* im2);
-
+/* put screen into graphics card*/
 void NextFrame(void) {
-
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, screen->width, screen->height, 0, GL_RGB, GL_UNSIGNED_BYTE, screen->data);
-	
-}
-/*
-void packinold(Image* im2){
-	int x,y;
-	for(x=0;x<im2->width;x++){
-			for(y=0;y<im2->height;y++){
-				im3->data[(x+(y)*TEX_DIM)*3]=im2->data[(x+y*IWIDTH)*3];//accordioning is due to wrong width, recompile with good globals
-				im3->data[(x+(y)*TEX_DIM)*3+1]=im2->data[(x+y*IWIDTH)*3+1];
-				im3->data[(x+(y)*TEX_DIM)*3+2]=im2->data[(x+y*IWIDTH)*3+2];
-			}
-		}
 }
 
-void packin(Image* im2){
-	int y;
-	#define IROWCH IWIDTH*3
-	#define OROWCH TEX_DIM*3
-	for(y=0;y<IHEIGHT;y++){
-				memcpy((void*)(im3->data+y*OROWCH),(const void*)(im2->data+y*IROWCH),(size_t)IROWCH);
-			}
-	#undef IROWCH
-	#undef OROWCH
-}*/
+/* Init textures & image buffer */
 void texinit(void){
 	glGenTextures(1, (GLuint*)&texture[0]);
     glBindTexture(GL_TEXTURE_2D, texture[0]);   // 2d texture (x and y size)
@@ -56,15 +33,10 @@ void texinit(void){
 	#ifdef paulpedantic
 	count=0;
 	#endif
-	
-	//NextFrame();
-	//debug
 	avga=0;
 	avgb=0;
 	n=0;
 }
-
-
 
 
 
