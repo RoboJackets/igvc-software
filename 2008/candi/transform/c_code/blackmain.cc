@@ -8,8 +8,8 @@ extern "C"{
 }
 
 static Image * infr1=new Image;
-static Buffer2D<PixelRGB> fr1;
-static b2drgb whim;
+static Buffer2D<PixelRGB> fr1,whim;
+
 
 
 extern "C" void blackmain(){
@@ -18,9 +18,7 @@ extern "C" void blackmain(){
 
 	fr1.copyFrom(infr1->width,infr1->height,(PixelRGB*)infr1->data);
 
-	getwhim(fr1, whim);
-
+	whim=getwhim(fr1);
 	screen=&whim;
-
 	NextFrame();
 }
