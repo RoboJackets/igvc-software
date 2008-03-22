@@ -3,7 +3,7 @@
 
 void NextFrame(void);
 void texinit(void);
-int texture[1];
+
 #define OWIDTH 720
 #define OHEIGHT 480
 

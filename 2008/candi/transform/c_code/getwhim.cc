@@ -4,17 +4,17 @@
 #include "PixelRGB.h"
 #include "getwhim.h"
 
-
-Buffer2D<PixelRGB> whim;
+//typedef  Buffer2D<PixelRGB> b2drgb;
+static Buffer2D<PixelRGB> whim;
 
 
 int numruns=0;
-extern "C" char * getwhim(Image* im){
+b2drgb& getwhim(b2drgb& im){
 
 	int r,g,b,orn;
 	char R,G,B;
-	whim.copyFrom(im->width,im->height,(PixelRGB *)im->data);
-	for(int i=0;i<(im->width)*(im->height);i++){
+	whim.copyFrom(im);
+	for(int i=0;i<(im.width)*(im.height);i++){
 		r=whim[i].r;
 		g=whim[i].g;
 		b=whim[i].b;
@@ -42,7 +42,7 @@ extern "C" char * getwhim(Image* im){
 	
 	
 	
-	return (char *)whim.data;
+	return whim;
 
 
 }

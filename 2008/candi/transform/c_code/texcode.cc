@@ -7,7 +7,7 @@
 #include "texcode.h"
 #include "getwhim.h"
 #include "screenio.h"
-
+static int texture[1];
 Image* im3;			//texture data
 #ifdef paulpedantic3
 int count;
@@ -19,8 +19,7 @@ void packin(Image* im2);
 
 void NextFrame(void) {
 
-		
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, screen0->width, screen0->height, 0, GL_RGB, GL_UNSIGNED_BYTE, screen0->data);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, screen->width, screen->height, 0, GL_RGB, GL_UNSIGNED_BYTE, screen->data);
 	
 }
 /*
@@ -51,7 +50,7 @@ void texinit(void){
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // scale linearly when image bigger than texture
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	im3=malloc(sizeof(Image));
+	im3=(Image*)malloc(sizeof(Image));
 	im3->width=OWIDTH;
 	im3->height=OHEIGHT;
     im3->data=(char*)malloc(OWIDTH*OHEIGHT*3);
@@ -59,7 +58,7 @@ void texinit(void){
 	count=0;
 	#endif
 	
-	NextFrame();
+	//NextFrame();
 	//debug
 	avga=0;
 	avgb=0;

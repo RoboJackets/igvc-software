@@ -90,7 +90,7 @@ void keyPressed(unsigned char key, int x, int y)
 	    }
 	if (key == 's') //save raw data
 	    { 
-		    out.data=malloc(OWIDTH*OHEIGHT*sizeof(char)*3);
+		    out.data=(char*)malloc(OWIDTH*OHEIGHT*sizeof(char)*3);
 		    glReadPixels(	0				,		//GLint x,
 			     			0				,		//GLint y,
 			     			OWIDTH			,		//GLsizei width,
@@ -148,7 +148,7 @@ void init ()
 	glOrtho (.0, 720., 0, 480., -10.0, 10.0);
 	out.width = OWIDTH;
 	out.height = OHEIGHT;
-	out.data = malloc(OWIDTH * OHEIGHT * 4);
+	out.data = (char*)malloc(OWIDTH * OHEIGHT * 4);
 }
 
 int main(int argc, char** argv)

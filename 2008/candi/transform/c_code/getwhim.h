@@ -1,17 +1,15 @@
 #ifndef getwhim_h
 #define getwhim_h
-
+#include "Buffer2D.h"
+#include "PixelRGB.h"
 
 
 /* --- Public C Functions --- */
-#if __cplusplus
-extern "C" {
-#endif
-char * getwhim(Image* im);
+
+typedef  Buffer2D<PixelRGB> b2drgb;
+
+b2drgb& getwhim(b2drgb& im);
 
 
-#if __cplusplus
-}
-#endif
 
 #endif
