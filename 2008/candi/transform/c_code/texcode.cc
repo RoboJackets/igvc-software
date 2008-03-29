@@ -13,23 +13,23 @@ Image* im3;			//texture data
 int count;
 #endif
 long long avga,avgb,n;
-extern void* memcpy(void*,const void*,size_t);
+extern void* memcpy (void*,const void*,size_t);
 
 /* put screen into graphics card*/
-void NextFrame(void) {
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, screen->width, screen->height, 0, GL_RGB, GL_UNSIGNED_BYTE, screen->data);
+void NextFrame (void) {
+	glTexImage2D (GL_TEXTURE_2D, 0, 3, screen->width, screen->height, 0, GL_RGB, GL_UNSIGNED_BYTE, screen->data);
 }
 
 /* Init textures & image buffer */
-void texinit(void){
-	glGenTextures(1, (GLuint*)&texture[0]);
-    glBindTexture(GL_TEXTURE_2D, texture[0]);   // 2d texture (x and y size)
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // scale linearly when image bigger than texture
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	im3=(Image*)malloc(sizeof(Image));
+void texinit (void) {
+	glGenTextures (1, (GLuint*) &texture[0]);
+	glBindTexture (GL_TEXTURE_2D, texture[0]);  // 2d texture (x and y size)
+	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // scale linearly when image bigger than texture
+	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	im3= (Image*) malloc (sizeof (Image));
 	im3->width=OWIDTH;
 	im3->height=OHEIGHT;
-    im3->data=(char*)malloc(OWIDTH*OHEIGHT*3);
+	im3->data= (char*) malloc (OWIDTH*OHEIGHT*3);
 	#ifdef paulpedantic
 	count=0;
 	#endif
