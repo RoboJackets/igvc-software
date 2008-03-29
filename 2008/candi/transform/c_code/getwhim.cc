@@ -28,6 +28,8 @@ b2drgb& getwhim (b2drgb& im) {
 
 		if (g!=0 && b>102 && 256*b/g>171 && 256*g/ (r+b) <154) {
 			R=255;
+			G=255;
+			B=255;
 		}
 
 		whim[i].r=R;
