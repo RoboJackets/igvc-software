@@ -3,7 +3,7 @@
 // ### ACCESSORS ###
 
 template<class E>
-E* Buffer2D<E>::atRow(int y) {
+E* Buffer2D<E>::atRow (int y) {
 	return &data[y*width];
 }
 

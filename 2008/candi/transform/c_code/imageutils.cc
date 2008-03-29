@@ -7,18 +7,18 @@
  * data array is shared.
  */
 
-Buffer2D<PixelRGB>* imageAsBuffer2D(Image* img) {
+Buffer2D<PixelRGB>* imageAsBuffer2D (Image* img) {
 	Buffer2D<PixelRGB>* buf = new Buffer2D<PixelRGB>(); //Creates new buffer as alias for the input, be carefull to free when done
 	buf->width = img->width;
 	buf->height = img->height;
-	buf->data = (PixelRGB*)img->data; 
+	buf->data = (PixelRGB*) img->data;
 	return buf;
 }
 
-Buffer2D<PixelRGB> imageAsStaticBuffer2D(Image* img) {
+Buffer2D<PixelRGB> imageAsStaticBuffer2D (Image* img) {
 	Buffer2D<PixelRGB> buf = Buffer2D<PixelRGB>();
 	buf.width = img->width;
 	buf.height = img->height;
-	buf.data = (PixelRGB*)img->data; 
+	buf.data = (PixelRGB*) img->data;
 	return buf;
 }

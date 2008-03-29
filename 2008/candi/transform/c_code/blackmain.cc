@@ -5,7 +5,7 @@
 #include "getorim.h"
 #include <stdio.h>
 #include <stdlib.h>
-extern "C"{
+extern "C" {
 #include "utilfuncs.h"
 }
 
@@ -14,19 +14,21 @@ static Buffer2D<PixelRGB> fr1,whim,orim;
 
 
 
-extern "C" void blackmain(){
-	
+extern "C" void blackmain() {
+
 	/* get image */
-	ImageLoad("1.bmp", infr1);
-	fr1.copyFrom(infr1->width,infr1->height,(PixelRGB*)infr1->data);
-	free(infr1->data);					//don't leak memory!
+	ImageLoad ("1.bmp", infr1);
+	fr1.copyFrom (infr1->width,infr1->height, (PixelRGB*) infr1->data);
+	free (infr1->data);					//don't leak memory!
 
 	/* process */
-	orim=getorim(fr1);
-	whim=getwhim(fr1);
-	
+	orim=getorim (fr1);
+	whim=getwhim (fr1);
+
 	/* put image into screen */
 	screen=&whim;
 	/* put screen into graphics card*/
 	NextFrame();
+	
 }
+

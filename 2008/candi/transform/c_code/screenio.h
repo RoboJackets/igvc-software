@@ -6,21 +6,12 @@ extern Image* screen0;
 #if __cplusplus
 	#include "Buffer2D.h"
 	#include "PixelRGB.h"
-
 	extern Buffer2D<PixelRGB>* screen;
-
 	extern "C" {
-
 #endif
-
-void screeninit(void);
-
-
-
-
-
-
+	void screeninit (void);
 #if __cplusplus
-	}
+}
 #endif
+
 #endif
