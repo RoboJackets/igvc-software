@@ -28,6 +28,8 @@ b2drgb& getorim (b2drgb& im) {
 
 		if (g<r-20) {
 			R=255;
+			G=255;
+			B=255;
 		}
 
 		orim[i].r=R;
