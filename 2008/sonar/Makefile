@@ -1,5 +1,5 @@
 all:
-	gcc -o sonar sonar.c
+	gcc -o sonar_test sonar_test.c sonar.c
 	
 clean:
 	rm *.o
