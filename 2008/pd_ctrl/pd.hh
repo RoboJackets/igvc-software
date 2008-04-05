@@ -2,6 +2,7 @@
 #define PD_HH
 
 #include "misc.hh"
+#include "arduino_comm.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -41,7 +42,6 @@ float newPD(PDstatus * pd_state){
 	float D = pd_state->Dgain * (err - pd_state->preverr) / (dt);
 	pd_state->preverr = err;
 
-
 	pd_state->current_vel += (P + D);//update signal
 	return(pd_state->current_vel);
 }
@@ -56,7 +56,7 @@ float getLinVel_R(PDstatus * pd_state){
 
 
 void PDupdateLin(PDstatus * pd_state){
-	float error, newsignal;
+	//float error, newsignal;
 
 	if(pd_state->isRight){
 		getLinVel_R(pd_state);
@@ -65,7 +65,6 @@ void PDupdateLin(PDstatus * pd_state){
 		getLinVel_L(pd_state);
 	}
 
-	//error = getError(pd_state);
 	newPD(pd_state);
 	gettimeofday(&pd_state->t1, NULL);
 }
