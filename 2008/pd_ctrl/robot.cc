@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <cmath>
+//#include <cmath>
 #include <unistd.h>
 
 #include "pd.hh"
