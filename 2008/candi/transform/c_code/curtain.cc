@@ -46,6 +46,7 @@ void dialate1D (Buffer2D<bool>& arr) {
 		else
 			boolarr[ii] = 0;
 	}	
+	boolarr[0]=boolarr[buffLength-1]=0;
 	memcpy(arr.data, boolarr.data, sizeof(bool)*buffLength);
 }
 
@@ -73,7 +74,7 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whim, Buffer2D<PixelRGB>& orim) {
 		
 		/*quit if there is no more orange*/
 		if(orangeIndex == -1){
-			isOrange == false;
+			isOrange = false;
 			break;
 		}
 		
@@ -181,19 +182,17 @@ Buffer2D<bool>* cutout(int x,int y,Buffer2D<bool>& img) {
 }
 
 
-void dropperFlopper (Buffer2D<bool> orln,) {
+void dropperFlopper (Buffer2D<bool>& orim,Buffer2D<bool>& whim, Buffer2D<bool>& dstim,int line) {
 	int ii;
-	int buffLength = arr->width * arr->height;
-
-	/*if current pos or neighbor pos is 1, then current pos is 1*/
-	for(ii = 1; ii < buffLength-1; ii++){
-		if(arr[ii-1] || arr[ii] || arr[ii+1){
-			boolarr[ii] = 1;
-		}
-		else
-			boolarr[ii] = 0;
+	Buffer2D<bool> curln = orim.getLine(line);
+	Buffer2D<bool> nxtln = whim.getLine(line+1);
+	Buffer2D<bool> dstln = dstim.getLine(line+1);
+	int buffLength = curln.width * curln.height;
+	
+	/*and the current line with the next one for dropping in*/
+	for(ii = 0; ii < buffLength; ii++){
+			dstln[ii] = curln[ii] && nxtln[ii] ;
 	}	
-	memcpy(arr.data, boolarr.data, sizeof(bool)*buffLength);
 }
 
 
