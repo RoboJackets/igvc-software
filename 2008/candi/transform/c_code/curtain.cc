@@ -7,20 +7,33 @@ static Buffer2D<PixelRGB> barim;
 static Buffer2D<bool> boolimg;
 static Buffer2D<bool> boolarr;
 
-void RGBtoBool (Buffer2D<PixelRGB> img,Buffer2D<PixelRGB>& dst) {
+void booltoRGB (Buffer2D<bool>& img, Buffer2D<PixelRGB>& dst){
+	int ii;
+	int buffLength = dst->width * dst->height;
+
+	/*standard reverse boolean conversion*/
+	for(ii = 0; ii < buffLength; ii++){
+		if(img)
+			dst[ii].r = dst[ii].g = dst[ii].b = 1;
+		else
+			dst[ii].r = dst[ii].g = dst[ii].b = 0;
+	}	
+}
+
+void RGBtoBool (Buffer2D<PixelRGB>& img, Buffer2D<bool>& dst) {
 	int ii;
 	int buffLength = img->width * img->height;
 
 	/*standard boolean conversion*/
 	for(ii = 0; ii < buffLength; ii++){
 		if(img[ii].r > 0 || img[ii].g > 0 || img[ii].b > 0)
-			dst[ii] == 1;
+			dst[ii] = 1;
 		else
-			dst[ii] == 0;
+			dst[ii] = 0;
 	}
 }
 
-void dialate1D (Buffer2D<bool> arr) {
+void dialate1D (Buffer2D<bool>& arr) {
 	int ii;
 	int buffLength = arr->width * arr->height;
 
@@ -35,7 +48,7 @@ void dialate1D (Buffer2D<bool> arr) {
 	memcpy(arr.data, boolarr.data, sizeof(bool)*buffLength);
 }
 
-b2drgb& curtain (Buffer2D<PixelRGB> whim, Buffer2D<PixelRGB> orim) {
+b2drgb& curtain (Buffer2D<PixelRGB>& whim, Buffer2D<PixelRGB>& orim) {
 	
 	int ii = 0;
 	int orangeIndex = 0;
@@ -43,7 +56,7 @@ b2drgb& curtain (Buffer2D<PixelRGB> whim, Buffer2D<PixelRGB> orim) {
 	bool isOrange = true;
 	
 	/*get boolean orange image*/
-	boolim = RGBtoBool(orim);
+	RGBtoBool(orim, boolimg);
 	
 	/*loop untill no more orange pixels*/
 	while(isOrange){
@@ -51,7 +64,7 @@ b2drgb& curtain (Buffer2D<PixelRGB> whim, Buffer2D<PixelRGB> orim) {
 		/*locate first index of first orange pixel*/
 		orangeIndex = -1;
 		for(ii = 0; ii < buffLength; ii++){
-			if(boolim){
+			if(boolimg){
 				orangeIndex = ii;
 				break;
 			}
