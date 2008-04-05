@@ -1,10 +1,6 @@
-//use modes 4,5,6 & up for testing
-//mode 4:				manual simultaneous ping
-//mode 5:				manual ping sweep (lo->hi)
-//mode 6:				manual ping sweep (hi->lo)
-//mode 0xE0-0xFE:		manual single ping of sensor #mode
 
-#include <stdio.h>   /* Standard types */
+#include <stdio.h>    /* Standard input/output definitions */
+
 #include <stdint.h>   /* Standard types */
 #include <string.h>   /* String function definitions */
 #include <unistd.h>   /* UNIX standard function definitions */
@@ -14,9 +10,9 @@
 #include <getopt.h>
 #include <stdbool.h>
 
-#include <stdlib.h>
-#include <termios.h>  // for speed_t
-#include <stdbool.h>  // for bool
+#include "motors.h"
+
+char sonarStatus[22];
 
 // ### PRIVATE FUNCTION PROTOTYPES ###
 
@@ -29,43 +25,96 @@ int serialport_init(const char* serialport, speed_t baud);
 #define WAIT_TIME 20 //Used for setting VTIME, each tick is 0.1 s
 #define BAUD B9600  //Serial baudrate
 #define DEFAULT_SERIAL "/dev/ttyUSB0"
-
+char serialAddress[]="/dev/ttyUSB0";
 static int arduino_fd;
 
-int main()
-{
-	char command[10];
-	unsigned char commandVal;
-	unsigned char rawReadings[22];
-	int readings[11];
+/**
+ * Opens a connection to the sonar.
+ * 
+ * @return			<tt>true</tt> if the connection to the sonar could not be opened;
+ * 					<tt>false</tt> if successful.
+ */
+bool sonar_open(void) {
 	int i;
-	printf("0xE0	0xE2	0xE4	0xE6	0xE8	0xEA	0xEC	0xEE	0xF0	0xF2	0xF4\n", commandVal);
-	printf("=	=	=	=	=	=	=	=	=	=	=\n", commandVal);
-	printf("224	226	228	230	232	234	236	238	240	242	244\n", commandVal);
-	
-	arduino_fd = serialport_init(DEFAULT_SERIAL, BAUD);
-	if (arduino_fd == -1)
-	{
-		return -1;
+	for (i=0;i<10;i++)
+	{	
+		printf("trying port #%d\n", (int) i);
+		serialAddress[11]=i+'0';
+		arduino_fd = serialport_init(serialAddress, BAUD);
+		if (arduino_fd == -1)
+		{
+			printf("no module\n");
+			//retry//no module found
+		}
+		else
+		{
+			unsigned char reply;
+			writeFully(arduino_fd, "i", 1);
+			readFully(arduino_fd, &reply, sizeof(reply));
+			if (reply=='s')
+			{
+				printf("DONE!!\n");
+				break;
+			}
+			else
+			{
+				printf("wrong module\n");
+				//retry//wrong module found
+			}
+		}
 	}
-	
-	printf("mode: ");
-	fgets(command,10,stdin);
-	commandVal=atoi(command);
-	printf("Executing mode %d\n", (int)commandVal);
-	
-	writeFully(arduino_fd, &commandVal, 1);
-	sleep(1);
-	readFully(arduino_fd, rawReadings, 22);
-	
-	for (i=0;i<11;i++)
-	{
-		readings[i] = (rawReadings[2*i]<<8) | (rawReadings[2*i+1]);
-	}
-	printf("%d	%d	%d	%d\n\n\n",(int)rawReadings[0],(int)rawReadings[1],(int)rawReadings[2],(int)rawReadings[3]);
-	printf("%d	%d	%d	%d	%d	%d	%d	%d	%d	%d	%d\n\n\n",readings[0],readings[1],readings[2],readings[3],readings[4],readings[5],readings[6],readings[7],readings[8],readings[9],readings[10]);
+	return (arduino_fd == -1);
+}
+
+/**
+ * Closes the connection to the sonar.
+ * 
+ * @author David Foster
+ */
+void motors_close(void) {
+	if (arduino_fd == -1) return;
 	close(arduino_fd);
-	return 0;
+}
+
+/**
+ * Reads the status of the motor controller.
+ * 
+ * @param status	OUT: the motor controller's status.
+ * @return			<tt>true</tt> if an error occurs;
+ * 					<tt>false</tt> if successful.
+ *					More detailed information can be obtained by querying
+ *					<tt>errno</tt> and <tt>strerror(errno)</tt>.
+ */
+bool sonar_getStatus(unsigned char *status) {
+	if (arduino_fd == -1) return false;
+	
+	if (writeFully(arduino_fd, "r", 1))
+		return true;
+	
+	if (readFully(arduino_fd, status, 22*sizeof(status)))
+		return true;
+	
+	return false;
+}
+
+/**
+ * Set the specified variable in the motor controller to the specified value.
+ * 
+ * @param var		the variable to change.
+ * @param value		the new value for the variable.
+ * @return			<tt>true</tt> if an error occurs;
+ * 					<tt>false<writeFully(arduino_fd, "r", 1)/tt> if successful.
+ *					More detailed information can be obtained by querying
+ *					<tt>errno</tt> and <tt>strerror(errno)</tt>.
+ * @author David Foster
+ */
+bool sonar_setMode(2) {
+	if (arduino_fd == -1) return false;
+	
+	char buf[2] = {'w',mode};
+	if (writeFully(arduino_fd, buf, sizeof(buf)))
+		return true;
+	return false;
 }
 
 // ### PRIVATE FUNCTIONS: SERIAL API ###
