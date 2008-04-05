@@ -67,11 +67,13 @@ int main(void){
 	pd_left->target_vel = TARGET_L_VEL;
 	pd_left->isRight = FALSE;
 
-	getTime(&reckon->t1);
-	getTime(&pd_right->t1);
-	getTime(&pd_left->t1);
+	gettimeofday(&reckon->t1, NULL);
+	gettimeofday(&pd_right->t1, NULL);
+	gettimeofday(&pd_left->t1, NULL);
+
 	usleep(1000);
-printf("rv: %f\tlv: %f\n", pd_right->current_vel, pd_left->current_vel);
+	printf("rv: %f\tlv: %f\n", pd_right->current_vel, pd_left->current_vel);
+
 	while(1){
 	//for(int i = 0; i < 1*10000; i++){
 		PDupdateLin(pd_right);

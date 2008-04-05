@@ -2,10 +2,6 @@
 #define MISC_HH
 #include <sys/time.h>
 
-void getTime(struct timeval * time){
-	gettimeofday(time, NULL);
-}
-
 
 //from glibc-doc
 /* Subtract the `struct timeval' values X and Y,
