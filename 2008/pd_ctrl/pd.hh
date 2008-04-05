@@ -21,12 +21,14 @@ typedef struct {
 		bool isRight;
 } PDstatus;
 
-float getError(PDstatus * pd_state){
-	return(pd_state->target_vel - pd_state->current_vel);
-}
+//float getError(PDstatus * pd_state){
+//	return(pd_state->target_vel - pd_state->current_vel);
+//}
 
-float newPD(PDstatus * pd_state, float err){
+float newPD(PDstatus * pd_state){
 	gettimeofday(&pd_state->t2, NULL);
+
+	float err = pd_state->target_vel - pd_state->current_vel;
 
 	double dt = calcdt(pd_state->t1, pd_state->t2);
 
@@ -59,9 +61,8 @@ void PDupdateLin(PDstatus * pd_state){
 		getLinVel_L(pd_state);
 	}
 
-	error = getError(pd_state);
-	newsignal = newPD(pd_state, error);
-
+	//error = getError(pd_state);
+	newPD(pd_state);
 	gettimeofday(&pd_state->t1, NULL);
 }
 
