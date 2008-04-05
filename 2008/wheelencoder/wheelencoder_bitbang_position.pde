@@ -4,7 +4,7 @@
 
 
 void setup(){
-	Serial.begin(19200);
+	Serial.begin(9600);
 
 	pinMode(SPI_SS, OUTPUT);
 	pinMode(SPI_CLK, OUTPUT);
@@ -39,5 +39,6 @@ unsigned int datatemp;
 
 	Serial.print("rec: ");
 	Serial.println(dataout, DEC);
+        //delay(10);
 }
 
