@@ -61,23 +61,21 @@ float findSpeedRatio_90(ddrn * reckon){
 	return(v_left_over_v_right);
 }
 */
-
-float findSpeedRatio_Rot(ddrn * reckon, float face_angle){
-	
-	//return(v_left_over_v_right);
-}
-
+/*
 double radiusofcircle(double r_t, double th_t){
 	double radius = (r_t) / (2 * sin(th_t));
 	return(radius);
 }
-
+*/
 double findSpeedRatio(ddrn * reckon){
 	
 	double len = hypotf( (reckon->x_t - reckon->x) , (reckon->y_t - reckon->y) );
 	double deg = atan( (reckon->x_t - reckon->x) / (reckon->y_t - reckon->y) );
 
-	double r = radiusofcircle( len, deg );
+	//double r = radiusofcircle( len, deg );
+
+	double r = (len) / (2 * sin(deg));
+	
 	double vl_vr = (2*r - b) / (2*r + b);
 	
 	return(vl_vr);
