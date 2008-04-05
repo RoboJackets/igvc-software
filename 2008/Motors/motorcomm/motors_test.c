@@ -10,16 +10,29 @@
  *     motors_test w #1 #2
  * 
  */
+ //variable 0 is left motor speed
+ //variable 1 is right motor speed
+ //variable 2 is soft estop
 
 #include <stdio.h>    /* Standard input/output definitions */
 #include <errno.h>    /* Error number definitions */
 
+#include <stdint.h>   /* Standard types */
+#include <string.h>   /* String function definitions */
+#include <unistd.h>   /* UNIX standard function definitions */
+#include <fcntl.h>    /* File control definitions */
+#include <termios.h>  /* POSIX terminal control definitions */
+#include <sys/ioctl.h>
+#include <getopt.h>
+#include <stdbool.h>
 #include "motors.h"
 
 int main(int argc, char *argv[]) {
 	motor_reply_t reply;
 	
+	//if (motors_open())
 	motors_open();
+	//{
 
 	if (argv[1][0]=='r')
 	{
@@ -50,4 +63,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	motors_close();
+	//}
 }
+
