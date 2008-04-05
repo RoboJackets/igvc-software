@@ -1,3 +1,5 @@
+#include <stdio.h>    /* Standard input/output definitions */
+
 #include <stdint.h>   /* Standard types */
 #include <string.h>   /* String function definitions */
 #include <unistd.h>   /* UNIX standard function definitions */
@@ -20,7 +22,7 @@ int serialport_init(const char* serialport, speed_t baud);
 #define WAIT_TIME 20 //Used for setting VTIME, each tick is 0.1 s
 #define BAUD B9600  //Serial baudrate
 #define DEFAULT_SERIAL "/dev/ttyUSB0"
-
+char serialAddress[]="/dev/ttyUSB0";
 static int arduino_fd;
 
 /**
@@ -28,10 +30,38 @@ static int arduino_fd;
  * 
  * @return			<tt>true</tt> if the connection to the motors could not be opened;
  * 					<tt>false</tt> if successful.
- * @author David Foster
+ * @author David Foster & Kurt Tomlinson
  */
 bool motors_open(void) {
-	arduino_fd = serialport_init(DEFAULT_SERIAL, BAUD);
+	int i;
+	for (i=0;i<10;i++)
+	{	
+		printf("trying port #%d\n", (int) i);
+
+		serialAddress[11]=i+'0';
+		arduino_fd = serialport_init(serialAddress, BAUD);
+		if (arduino_fd == -1)
+		{
+			//printf("no module\n");
+			//retry//no module found
+		}
+		else
+		{
+			unsigned char reply;
+			writeFully(arduino_fd, "i", 1);
+			readFully(arduino_fd, &reply, sizeof(reply));
+			if (reply=='m')
+			{
+				//printf("DONE!!\n");
+				break;
+			}
+			else
+			{
+				//printf("wrong module\n");
+				//retry//wrong module found
+			}
+		}
+	}
 	return (arduino_fd == -1);
 }
 
@@ -73,7 +103,7 @@ bool motors_getStatus(motor_reply_t *status) {
  * @param var		the variable to change.
  * @param value		the new value for the variable.
  * @return			<tt>true</tt> if an error occurs;
- * 					<tt>false</tt> if successful.
+ * 					<tt>false<writeFully(arduino_fd, "r", 1)/tt> if successful.
  *					More detailed information can be obtained by querying
  *					<tt>errno</tt> and <tt>strerror(errno)</tt>.
  * @author David Foster
