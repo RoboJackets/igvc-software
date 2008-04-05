@@ -19,6 +19,10 @@ typedef double Probability;	// range of [0,1]
 // it would also be nicer to make a GEMatrix a template typedef (also part of C++0x)
 
 // should add functions for single dimention case
+
+// TODO:
+//	get rid of dimention template argument
+
 template<typename E>
 class PD {
 public:

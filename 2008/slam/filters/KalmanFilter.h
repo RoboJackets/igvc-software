@@ -10,8 +10,6 @@
 
 //#include "BayesianFilter.h"
 #include <flens/flens.h>
-// why doesn't the cmake path work?
-//#include "/home/paul/svn/igvc/2008/slam/pdf/NormalPD.h"
 #include "NormalPD.h"
 //#include "IdenMatrix.h"
 
