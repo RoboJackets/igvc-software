@@ -7,6 +7,30 @@
 /*
  * Utility class that represents a resizable 2D matrix of elements.
  */
+ 
+/* Signature:
+ * 	template<class E>
+ *	class Buffer2D {
+ 
+ 	public:
+ 		E* data;
+		int width;
+		int height;
+	### CONSTRUCTORS ###
+		Buffer2D<E>();
+		Buffer2D<E> (int width, int height);
+	### FUNCTIONS ###
+	int 	numElements	();
+	E 		get 		(int x, int y) ;
+	void	set 		(int x, int y, E newElement) ;
+	E& 		operator[] 	(int index) ;
+	E& 		at 				(int x, int y) ;
+	bool 	resize (int width, int height) ;
+	bool 	resizeToMatch (Buffer2D<F>& buffer) ;
+	bool 	copyFrom (Buffer2D<E>& buffer) ;
+	bool 	copyFrom (int width, int height, E* data) ;
+
+*/
 template<class E>
 class Buffer2D {
 //private:

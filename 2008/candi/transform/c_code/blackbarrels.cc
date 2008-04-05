@@ -5,10 +5,9 @@
 #include "texcode.h"
 #include "screenio.h"
 #include "blackmain.h"
+#include "blackglobals.h"
 
 #define ESCAPE 27
-#define OWIDTH 720
-#define OHEIGHT 480
 
 void keyPressed (unsigned char key, int x, int y);
 int mainwindow;
