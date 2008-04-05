@@ -179,3 +179,5 @@ Buffer2D<bool>* cutout(int x,int y,Buffer2D<bool>& img) {
 	}
 	return &cr;
 }
+
+
