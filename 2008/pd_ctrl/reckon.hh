@@ -25,7 +25,7 @@ typedef struct{
 } ddrn;
 
 void deadReckon(ddrn * reckon, float v_left, float v_right){
-	getTime(&(reckon->t2));
+	gettimeofday(&(reckon->t2), NULL);
 
 	reckon->lastdt = calcdt(reckon->t1, reckon->t2);
 
@@ -42,7 +42,7 @@ void deadReckon(ddrn * reckon, float v_left, float v_right){
 //	reckon->x = reckon->x_0 + ( r ) * ( sin( (v_right - v_left)*(reckon->t)/b + reckon->th_0 ) - sin(reckon->th_0) );
 
 
-	getTime(&(reckon->t1));
+	gettimeofday(&(reckon->t1), NULL);
 }
 
 float getTargetHeading(ddrn * reckon){

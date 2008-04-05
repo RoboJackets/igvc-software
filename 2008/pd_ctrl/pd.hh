@@ -3,8 +3,6 @@
 
 #include "misc.hh"
 
-typedef int BOOL;
-
 #define TRUE 1
 #define FALSE 0
 
@@ -20,7 +18,7 @@ typedef struct {
 		float current_vel;
 		float target_vel;
 
-		BOOL isRight;
+		bool isRight;
 } PDstatus;
 
 float getError(PDstatus * pd_state){
@@ -28,7 +26,7 @@ float getError(PDstatus * pd_state){
 }
 
 float newPD(PDstatus * pd_state, float err){
-	getTime(&pd_state->t2);
+	gettimeofday(&pd_state->t2, NULL);
 
 	double dt = calcdt(pd_state->t1, pd_state->t2);
 
@@ -64,7 +62,7 @@ void PDupdateLin(PDstatus * pd_state){
 	error = getError(pd_state);
 	newsignal = newPD(pd_state, error);
 
-	getTime(&pd_state->t1);
+	gettimeofday(&pd_state->t1, NULL);
 }
 
 int updateMotors(PDstatus * pd_left, PDstatus * pd_right){
