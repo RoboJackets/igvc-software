@@ -2,6 +2,7 @@
 #include "blackglobals.h"
 #include "Point2D.h"
 #include <string.h>
+#include <stdlib.h>
 
 static Buffer2D<PixelRGB> barim;
 static Buffer2D<bool> boolimg;
@@ -9,11 +10,11 @@ static Buffer2D<bool> boolarr;
 
 void booltoRGB (Buffer2D<bool>& img, Buffer2D<PixelRGB>& dst){
 	int ii;
-	int buffLength = dst->width * dst->height;
+	int buffLength = dst.width * dst.height;
 
 	/*standard reverse boolean conversion*/
 	for(ii = 0; ii < buffLength; ii++){
-		if(img)
+		if(img[ii])
 			dst[ii].r = dst[ii].g = dst[ii].b = 1;
 		else
 			dst[ii].r = dst[ii].g = dst[ii].b = 0;
@@ -22,7 +23,7 @@ void booltoRGB (Buffer2D<bool>& img, Buffer2D<PixelRGB>& dst){
 
 void RGBtoBool (Buffer2D<PixelRGB>& img, Buffer2D<bool>& dst) {
 	int ii;
-	int buffLength = img->width * img->height;
+	int buffLength = img.width * img.height;
 
 	/*standard boolean conversion*/
 	for(ii = 0; ii < buffLength; ii++){
@@ -35,11 +36,11 @@ void RGBtoBool (Buffer2D<PixelRGB>& img, Buffer2D<bool>& dst) {
 
 void dialate1D (Buffer2D<bool>& arr) {
 	int ii;
-	int buffLength = arr->width * arr->height;
+	int buffLength = arr.width * arr.height;
 
 	/*if current pos or neighbor pos is 1, then current pos is 1*/
 	for(ii = 1; ii < buffLength-1; ii++){
-		if(arr[ii-1] || arr[ii] || arr[ii+1){
+		if(arr[ii-1] || arr[ii] || arr[ii+1]){
 			boolarr[ii] = 1;
 		}
 		else
@@ -52,7 +53,7 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whim, Buffer2D<PixelRGB>& orim) {
 	
 	int ii = 0;
 	int orangeIndex = 0;
-	int buffLength = orim->width * orim->height;
+	int buffLength = orim.width * orim.height;
 	bool isOrange = true;
 	
 	/*get boolean orange image*/
@@ -64,7 +65,7 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whim, Buffer2D<PixelRGB>& orim) {
 		/*locate first index of first orange pixel*/
 		orangeIndex = -1;
 		for(ii = 0; ii < buffLength; ii++){
-			if(boolimg){
+			if(boolimg[ii]){
 				orangeIndex = ii;
 				break;
 			}
@@ -96,27 +97,28 @@ Buffer2D<bool>* cutout(int x,int y,Buffer2D<bool>& img) {
 	Point2D<int> xmin(x, y);
 	Point2D<int> ymax(x, y);
 	Point2D<int> ymin(x, y);
-	const int w=img.width;
-	//const int h=img.height;
+	const int width = img.width;
+	const int height = img.height;
+	const int numElem = img.numElements();
 	
-	if (img.numElements()!=cr.numElements()) {
-		plst = new Point2D<int>[img.numElements()];
-		plsz = img.numElements();
+	if (numElem != cr.numElements()) {
+		plst = new Point2D<int>[numElem];
+		plsz = numElem;
 		cr.resizeToMatch (img) ;
 	}
 	
 	//fill cr with 0's
-		// Free old data buffer (if one was allocated)
-		if (cr.data != NULL) {
-			delete[] cr.data;
-		}
+	// Free old data buffer (if one was allocated)
+	if (cr.data != NULL) {
+		delete[] cr.data;
+	}
 
-		// Allocate new data buffer (if width & height are non-zero)
-		if ( (img.width != 0) && (img.height != 0)) {
-			cr.data = (bool*)malloc(sizeof(bool)*width * height);
-		} else {
-			cr.data = NULL;
-		}
+	// Allocate new data buffer (if width & height are non-zero)
+	if ( (width != 0) && (height != 0)) {
+		cr.data = (bool*)malloc(sizeof(bool) * width * height);
+	} else {
+		cr.data = NULL;
+	}
 		
 	// lets cut!
 	int cp=0;		//current point index
@@ -125,7 +127,7 @@ Buffer2D<bool>* cutout(int x,int y,Buffer2D<bool>& img) {
 	plst[cp].x=x;	//read in initial point
 	plst[cp].y=y;
 	
-	img.data[plst[cp].x+plst[cp].y*w]=0;		//clear initial point
+	img.data[plst[cp].x+plst[cp].y*width]=0;		//clear initial point
 	for(;cp<np;cp++){						//run till out of points
 		//clear and record 4 neighbors
 		{
@@ -135,8 +137,8 @@ Buffer2D<bool>* cutout(int x,int y,Buffer2D<bool>& img) {
 			
 			//white top
 			{
-				if(img.data[cx+(cy+1)*w]){
-					img.data[cx+(cy+1)*w]=0;	//clear it
+				if(img.data[cx+(cy+1)*width]){
+					img.data[cx+(cy+1)*width]=0;	//clear it
 					plst[np].y=cy+1;			//add to found list
 					plst[np].x=cx;
 					np++;
@@ -144,8 +146,8 @@ Buffer2D<bool>* cutout(int x,int y,Buffer2D<bool>& img) {
 			}
 			//white right
 			{
-				if(img.data[cx+1+(cy)*w]){		
-					img.data[cx+1+(cy)*w]=0;	//clear it
+				if(img.data[cx+1+(cy)*width]){		
+					img.data[cx+1+(cy)*width]=0;	//clear it
 					plst[np].y=cy;			//add to found list
 					plst[np].x=cx+1;
 					np++;
@@ -153,8 +155,8 @@ Buffer2D<bool>* cutout(int x,int y,Buffer2D<bool>& img) {
 			}
 			//white bottom
 			{
-				if(img.data[cx+(cy-1)*w]){
-					img.data[cx+(cy-1)*w]=0;	//clear it
+				if(img.data[cx+(cy-1)*width]){
+					img.data[cx+(cy-1)*width]=0;	//clear it
 					plst[np].y=cy-1;			//add to found list
 					plst[np].x=cx;
 					np++;
@@ -162,8 +164,8 @@ Buffer2D<bool>* cutout(int x,int y,Buffer2D<bool>& img) {
 			}
 			//white left
 			{
-				if(img.data[cx-1+(cy)*w]){		
-					img.data[cx-1+(cy)*w]=0;	//clear it
+				if(img.data[cx-1+(cy)*width]){		
+					img.data[cx-1+(cy)*width]=0;	//clear it
 					plst[np].y=cy;			//add to found list
 					plst[np].x=cx-1;
 					np++;
@@ -173,7 +175,7 @@ Buffer2D<bool>* cutout(int x,int y,Buffer2D<bool>& img) {
 	}
 	//pump out region to cr
 	for(;cp<np;cp++){
-		cr.data[plst[cp].x+plst[cp].y*w]=0;
+		cr.data[plst[cp].x+plst[cp].y*width]=0;
 	}
 	return &cr;
 }
