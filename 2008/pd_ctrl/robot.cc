@@ -6,14 +6,17 @@
 #include "misc.hh"
 #include "reckon.hh"
 
-#define P_GAIN_LIN .01
-#define D_GAIN_LIN .001
+#define P_GAIN_LIN_L .01
+#define D_GAIN_LIN_L .001
+
+#define P_GAIN_LIN_R .01
+#define D_GAIN_LIN_R .001
 
 #define INITIAL_R_VEL 0
 //#define TARGET_R_VEL .3
 
 #define INITIAL_L_VEL 0
-#define TARGET_L_VEL 1
+#define TARGET_L_VEL 3
 
 
 #define INITIAL_X 0
@@ -53,15 +56,15 @@ int main(void){
 
 
 
-	pd_right->Pgain = P_GAIN_LIN;
-	pd_right->Dgain = D_GAIN_LIN;
+	pd_right->Pgain = P_GAIN_LIN_R;
+	pd_right->Dgain = D_GAIN_LIN_R;
 	pd_right->preverr = 0;
 	pd_right->current_vel = INITIAL_R_VEL;
 	pd_right->target_vel = TARGET_L_VEL * ratio;
 	pd_right->isRight = TRUE;
 
-	pd_left->Pgain = P_GAIN_LIN;
-	pd_left->Dgain = D_GAIN_LIN;
+	pd_left->Pgain = P_GAIN_LIN_L;
+	pd_left->Dgain = D_GAIN_LIN_L;
 	pd_left->preverr = 0;
 	pd_left->current_vel = INITIAL_L_VEL;
 	pd_left->target_vel = TARGET_L_VEL;
