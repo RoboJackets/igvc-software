@@ -26,8 +26,8 @@ void setup(){
 	//TCCR1B = (1<<CS10);// no prescale clk1o/1
 	TCCR1B = (1<<CS11)|(1<<CS10);//clkio/64
 
-	lastp1 = 0;
-	lastp2 = 0;
+//	lastp1 = 0;
+//	lastp2 = 0;
 }
 
 unsigned int getTime(){
@@ -77,7 +77,7 @@ void loop(){
 //do{
  
 	getPosition(&t1, &p1);
-	//delay(10);
+	delay(10);
 	getPosition(&t2, &p2);
  
   /*
