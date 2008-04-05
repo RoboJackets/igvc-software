@@ -32,6 +32,10 @@ float newPD(PDstatus * pd_state){
 
 	double dt = calcdt(pd_state->t1, pd_state->t2);
 
+	if(dt == 0){
+		return(pd_state->current_vel);
+	}
+
 	float P = pd_state->Pgain * err;
 
 	float D = pd_state->Dgain * (err - pd_state->preverr) / (dt);
