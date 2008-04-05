@@ -7,7 +7,7 @@
 using namespace flens;
 
 template<typename E>
-class NormalPD : public PD<E> {
+class NormalPD { //: public PD<E> {
 public:
 
 	typedef DenseVector<Array<E> > MeanVector;
