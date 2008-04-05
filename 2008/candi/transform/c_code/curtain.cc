@@ -11,7 +11,7 @@ static Buffer2D<bool> orim;
 static Buffer2D<bool> whim;
 static Buffer2D<PixelRGB> barimout;
 Buffer2D<bool>& clear(Buffer2D<bool>& im);
-void dropperFlopper (Buffer2D<bool>& cr,Buffer2D<bool>& whim, Buffer2D<bool>& dstim,int line);
+void dropperFlopper (Buffer2D<bool>& cr,Buffer2D<bool>& orim,Buffer2D<bool>& whim, Buffer2D<bool>& dstim,int line);
 
 void booltoRGB (Buffer2D<bool>& img, Buffer2D<PixelRGB>& dst){
 	int ii;
@@ -69,9 +69,8 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 	/*get boolean images*/
 	RGBtoBool(orimin, orim);
 	RGBtoBool(whimin, whim);
-	barim.resizeToMatch (orim);
+	barim.copyFrom(orim);
 	barimout.resize(orim.width,orim.height);
-	clear(barim);
 	
 	/*loop untill no more orange pixels*/
 	while(isOrange){
@@ -102,7 +101,7 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 			dilate1D(*thisln);
 			delete thisln;
 			//dilate1D(cr.getLine(y));
-			dropperFlopper(cr,whim,barim,y);
+			dropperFlopper(cr,orim,whim,barim,y);
 		}
 	
 
@@ -203,23 +202,31 @@ Buffer2D<bool>& cutout(int idx,Buffer2D<bool>& img) {
 }
 
 
-void dropperFlopper (Buffer2D<bool>& cr,Buffer2D<bool>& whim, Buffer2D<bool>& dstim,int line) {
-	int ii;
+void dropperFlopper (Buffer2D<bool>& cr,Buffer2D<bool>& orim,Buffer2D<bool>& whim, Buffer2D<bool>& dstim,int line) {
+	
 	Buffer2D<bool>& curln 	= *cr.	getLine(line	);
 	Buffer2D<bool>& nxtcrln = *cr.	getLine(line+1	);
 	Buffer2D<bool>& nxtwhln = *whim.getLine(line+1	);
 	Buffer2D<bool>& dstln 	= *dstim.getLine(line+1	);
+	Buffer2D<bool>& orln 	= *orim.getLine(line+1	);
 	int buffLength = curln.width * curln.height;
+	int ii;
 	
 	/*and the current line with the next one for dropping in*/
 	for(ii = 0; ii < buffLength; ii++){
-			nxtcrln[ii] = ( curln[ii] && nxtwhln[ii] ) || nxtcrln[ii] ;
-			dstln[ii] = nxtcrln[ii] || dstln[ii] ;
-	}	
+		if(curln[ii]){
+			if(nxtwhln[ii]){
+				nxtcrln[ii] = 1 ;
+				dstln[ii] = 1 ;
+				
+			}
+		}
+	}	 
 	delete &curln;
 	delete &nxtcrln;
 	delete &nxtwhln;
 	delete &dstln;
+	delete &orln;
 }
 
 Buffer2D<bool>& clear(Buffer2D<bool>& im){
