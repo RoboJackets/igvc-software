@@ -181,3 +181,21 @@ Buffer2D<bool>* cutout(int x,int y,Buffer2D<bool>& img) {
 }
 
 
+void dropperFlopper (Buffer2D<bool> orln,) {
+	int ii;
+	int buffLength = arr->width * arr->height;
+
+	/*if current pos or neighbor pos is 1, then current pos is 1*/
+	for(ii = 1; ii < buffLength-1; ii++){
+		if(arr[ii-1] || arr[ii] || arr[ii+1){
+			boolarr[ii] = 1;
+		}
+		else
+			boolarr[ii] = 0;
+	}	
+	memcpy(arr.data, boolarr.data, sizeof(bool)*buffLength);
+}
+
+
+
+

@@ -151,6 +151,16 @@ class Buffer2D {
 			memcpy (this->data, data, sizeof (E) * this->numElements());
 			return didResize;
 		}
+		
+		//returns an alias to the line of this image
+		Buffer2D<E>& getLine(int y){
+			Buffer2D<E>* line=new Buffer2D<E>();
+			
+			line->resize(this->width,1);
+			free(line->data);//free the useless line we just allocated
+			line->data=&this->at(0,y);
+			return *line;
+		}
 };
 
 #endif
