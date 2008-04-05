@@ -18,7 +18,7 @@ static Buffer2D<PixelRGB> fr1,whim,orim,barim;
 extern "C" void blackmain() {
 	
 	/* get image */
-	ImageLoad ("1.bmp", infr1);
+	ImageLoad ("12.bmp", infr1);
 	fr1.copyFrom (infr1->width,infr1->height, (PixelRGB*) infr1->data);
 	free (infr1->data);					//don't leak memory!
 

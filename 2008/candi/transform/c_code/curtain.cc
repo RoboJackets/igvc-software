@@ -3,6 +3,8 @@
 #include "Point2D.h"
 #include <string.h>
 #include <stdlib.h>
+#include "screenio.h" //for debugging
+#include "texcode.h"
 
 static Buffer2D<bool> barim;
 static Buffer2D<bool> orim;
@@ -18,7 +20,7 @@ void booltoRGB (Buffer2D<bool>& img, Buffer2D<PixelRGB>& dst){
 	/*standard reverse boolean conversion*/
 	for(ii = 0; ii < buffLength; ii++){
 		if(img[ii])
-			dst[ii].r = dst[ii].g = dst[ii].b = 1;
+			dst[ii].r = dst[ii].g = dst[ii].b = 255;
 		else
 			dst[ii].r = dst[ii].g = dst[ii].b = 0;
 	}	
@@ -91,12 +93,15 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 		
 		//cut the found region out to cr from orim
 		Buffer2D<bool> cr=cutout(orangeIndex,orim);
-		
-		for(int y=0; y<cr.height-1; y++){
-			//Buffer2D<bool> thisln=cr.getLine(y);
-			//dilate1D(thisln);
-			//delete thisln;
-			dilate1D(cr.getLine(y));
+		/*uncomment to debug first cr
+		booltoRGB(cr,barimout);
+		break;
+		*/
+		for(int y=0; y < cr.height-1; y++){
+			Buffer2D<bool>* thisln = cr.getLine(y);
+			dilate1D(*thisln);
+			delete thisln;
+			//dilate1D(cr.getLine(y));
 			dropperFlopper(cr,whim,barim,y);
 		}
 	
@@ -104,8 +109,9 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 		
 		
 	}//end while
-
-
+	//XXX
+	//booltoRGB(cr,barimout);
+	//\XXX
 	booltoRGB(barim,barimout);
 	return barimout;
 }
@@ -189,26 +195,31 @@ Buffer2D<bool>& cutout(int idx,Buffer2D<bool>& img) {
 		}
 	}
 	//pump out region to cr
-	for(;cp<np;cp++){
-		cr.data[plst[cp].x+plst[cp].y*width]=0;
+	for(cp=0;cp<np;cp++){
+		cr.data[plst[cp].x+plst[cp].y*width]=1;
 	}
+	//printf("points : %d\n",np);
 	return cr;
 }
 
 
 void dropperFlopper (Buffer2D<bool>& cr,Buffer2D<bool>& whim, Buffer2D<bool>& dstim,int line) {
 	int ii;
-	Buffer2D<bool> curln 	= cr.	getLine(line	);
-	Buffer2D<bool> nxtcrln 	= cr.	getLine(line+1	);
-	Buffer2D<bool> nxtwhln 	= whim.	getLine(line+1	);
-	Buffer2D<bool> dstln 	= dstim.getLine(line+1	);
+	Buffer2D<bool>& curln 	= *cr.	getLine(line	);
+	Buffer2D<bool>& nxtcrln = *cr.	getLine(line+1	);
+	Buffer2D<bool>& nxtwhln = *whim.getLine(line+1	);
+	Buffer2D<bool>& dstln 	= *dstim.getLine(line+1	);
 	int buffLength = curln.width * curln.height;
 	
 	/*and the current line with the next one for dropping in*/
 	for(ii = 0; ii < buffLength; ii++){
-			dstln[ii] = curln[ii] && nxtwhln[ii] ;
-			nxtcrln[ii]=dstln[ii];
+			nxtcrln[ii] = ( curln[ii] && nxtwhln[ii] ) || nxtcrln[ii] ;
+			dstln[ii] = nxtcrln[ii] || dstln[ii] ;
 	}	
+	delete &curln;
+	delete &nxtcrln;
+	delete &nxtwhln;
+	delete &dstln;
 }
 
 Buffer2D<bool>& clear(Buffer2D<bool>& im){
