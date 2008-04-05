@@ -20,15 +20,16 @@
 		Buffer2D<E>();
 		Buffer2D<E> (int width, int height);
 	### FUNCTIONS ###
-	int 	numElements	();
-	E 		get 		(int x, int y) ;
-	void	set 		(int x, int y, E newElement) ;
-	E& 		operator[] 	(int index) ;
-	E& 		at 				(int x, int y) ;
-	bool 	resize (int width, int height) ;
-	bool 	resizeToMatch (Buffer2D<F>& buffer) ;
-	bool 	copyFrom (Buffer2D<E>& buffer) ;
-	bool 	copyFrom (int width, int height, E* data) ;
+	int 			numElements		();
+	E 				get 			(int x, int y) ;
+	void			set 			(int x, int y, E newElement) ;
+	E& 				operator[] 		(int index) ;
+	E& 				at 				(int x, int y) ;
+	bool 			resize 			(int width, int height) ;
+	bool 			resizeToMatch 	(Buffer2D<F>& buffer) ;
+	bool 			copyFrom 		(Buffer2D<E>& buffer) ;
+	bool 			copyFrom 		(int width, int height, E* data) ;
+	Buffer2D<E>& 	getLine			(int y)
 
 */
 template<class E>
@@ -154,12 +155,12 @@ class Buffer2D {
 		
 		//returns an alias to the line of this image
 		Buffer2D<E>& getLine(int y){
-			Buffer2D<E>* line=new Buffer2D<E>();
+			Buffer2D<E> line;
 			
-			line->resize(this->width,1);
-			free(line->data);//free the useless line we just allocated
-			line->data=&this->at(0,y);
-			return *line;
+			line.resize(this->width,1);
+			free(line.data);//free the useless line we just allocated
+			line.data=&this->at(0,y);
+			return line;
 		}
 };
 
