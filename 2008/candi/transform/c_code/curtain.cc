@@ -1,28 +1,26 @@
 #include "curtain.h"
 #include "blackglobals.h"
 #include "Point2D.h"
-
+#include <string.h>
 
 static Buffer2D<PixelRGB> barim;
 static Buffer2D<bool> boolimg;
 static Buffer2D<bool> boolarr;
 
-b2dbool& RGBtoBool (Buffer2D<PixelRGB> img) {
+void RGBtoBool (Buffer2D<PixelRGB> img,Buffer2D<PixelRGB>& dst) {
 	int ii;
 	int buffLength = img->width * img->height;
 
 	/*standard boolean conversion*/
 	for(ii = 0; ii < buffLength; ii++){
 		if(img[ii].r > 0 || img[ii].g > 0 || img[ii].b > 0)
-			boolim[ii] == 1;
+			dst[ii] == 1;
 		else
-			boolim[ii] == 0;
+			dst[ii] == 0;
 	}
-	
-	return boolim;
 }
 
-b2dbool& dialate1D (Buffer2D<bool> arr) {
+void dialate1D (Buffer2D<bool> arr) {
 	int ii;
 	int buffLength = arr->width * arr->height;
 
@@ -34,8 +32,7 @@ b2dbool& dialate1D (Buffer2D<bool> arr) {
 		else
 			boolarr[ii] = 0;
 	}	
-	
-	return boolarr;
+	memcpy(arr.data, boolarr.data, sizeof(bool)*buffLength);
 }
 
 b2drgb& curtain (Buffer2D<PixelRGB> whim, Buffer2D<PixelRGB> orim) {
