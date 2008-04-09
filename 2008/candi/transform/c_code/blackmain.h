@@ -5,11 +5,10 @@
 
 /* --- Public C Functions --- */
 #if __cplusplus
-extern "C" {
 #endif
 	void blackmain (void);
 #if __cplusplus
-}
+
 #endif
 
 #endif

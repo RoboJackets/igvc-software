@@ -7,6 +7,7 @@
 #include "texcode.h"
 #include "getwhim.h"
 #include "screenio.h"
+#include "blackglobals.h"
 static int texture[1];
 Image* im3;			//texture data
 #ifdef paulpedantic3

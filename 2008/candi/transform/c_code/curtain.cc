@@ -58,7 +58,7 @@ void dilate1D (Buffer2D<bool>& arr) {
 	memcpy(arr.data, boolarr.data, sizeof(bool)*buffLength);
 }
 
-b2drgb& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
+b2drgb curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 	
 	int ii = 0;
 	int orangeIndex = 0;
@@ -66,6 +66,7 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 	bool isOrange = true;
 	orim.resize(orimin.width,orimin.height);
 	whim.resizeToMatch (orim);
+	
 	/*get boolean images*/
 	RGBtoBool(orimin, orim);
 	RGBtoBool(whimin, whim);
@@ -73,11 +74,12 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 	barimout.resize(orim.width,orim.height);
 	
 	/*loop untill no more orange pixels*/
+	ii = 0;
 	while(isOrange){
 	
 		/*locate first index of first orange pixel*/
 		orangeIndex = -1;
-		for(ii = 0; ii < buffLength; ii++){
+		for(; ii < buffLength; ii++){
 			if(orim[ii]){
 				orangeIndex = ii;
 				break;
@@ -94,13 +96,11 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 		Buffer2D<bool> cr=cutout(orangeIndex,orim);
 		/*uncomment to debug first cr
 		booltoRGB(cr,barimout);
-		break;
-		*/
+		break;*/
 		for(int y=0; y < cr.height-1; y++){
 			Buffer2D<bool>* thisln = cr.getLine(y);
 			dilate1D(*thisln);
 			delete thisln;
-			//dilate1D(cr.getLine(y));
 			dropperFlopper(cr,orim,whim,barim,y);
 		}
 	
@@ -108,9 +108,7 @@ b2drgb& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 		
 		
 	}//end while
-	//XXX
-	//booltoRGB(cr,barimout);
-	//\XXX
+	
 	booltoRGB(barim,barimout);
 	return barimout;
 }
