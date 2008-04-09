@@ -153,7 +153,7 @@ class Buffer2D {
 		//
 		// Returns TRUE if the buffer was shrunk, or
 		//         FALSE if the new size was the same as the old size.
-		/*bool shrink (int width, int height) {
+		bool shrink (int width, int height) {
 			// Abort if the new size is the same as the old size
 			if ( (this->width == width) && (this->height == height)) {
 				return FALSE;
@@ -162,7 +162,7 @@ class Buffer2D {
 			// Allocate new data buffer (if width & height are non-zero)
 			if ( (width != 0) && (height != 0)) {
 				p  = this->data;
-				pn = new E[width * height];
+				//pn = new E[width * height];
 			} else {
 				// Free old data buffer (if one was allocated)
 				if (this->data != NULL) {
@@ -182,11 +182,11 @@ class Buffer2D {
 			
 			for(ync=0, yc=0; ync<=hl; ync+=wn, yc+=yinc){
 				for(xn=0, x=0; xn<wn; xn++, x+=xinc){
-					pn[ync+xn]=p[yc+x];
+					p[ync+xn]=p[yc+x];
 				}
 			}
-			delete[] p;
-			this.data=pn;
+			//delete[] p;
+			//this.data=pn;
 			
 			
 			
@@ -196,7 +196,7 @@ class Buffer2D {
 			this->width = width;
 			this->height = height;
 			return TRUE;
-		}*/
+		}
 		
 		
 		
@@ -224,6 +224,44 @@ class Buffer2D {
 			line->data=&this->at(0,y);
 			return line;
 		}
+		
+		// ### SPECIALIZED ###
+		Buffer2D<PixelRGB> toRGB(){
+			int ii;
+			int buffLength = this->numElements();
+			Buffer2D<E> img=*this;
+			Buffer2D<PixelRGB> dst;
+			dst.resizeToMatch(img);
+			//standard reverse boolean conversion
+			for(ii = 0; ii < buffLength; ii++){
+				if(img[ii])
+					dst[ii].r = dst[ii].g = dst[ii].b = 255;
+				else
+					dst[ii].r = dst[ii].g = dst[ii].b = 0;
+			}	
+			Buffer2D<PixelRGB>* out=new Buffer2D<PixelRGB>;
+			*out=dst;
+			return dst;
+		}
+		
+		Buffer2D<bool> toBool(){
+			int ii;
+			int buffLength = this->numElements();
+			Buffer2D<E> img=*this;
+			Buffer2D<bool> dst;
+			dst.resizeToMatch(img);
+			//standard boolean conversion
+			for(ii = 0; ii < buffLength; ii++){
+				if(img[ii].r > 0 || img[ii].g > 0 || img[ii].b > 0)
+					dst[ii] = 1;
+				else
+					dst[ii] = 0;
+			}
+			Buffer2D<bool>* out=new Buffer2D<bool>;
+			*out=dst;
+			return dst;
+		}
+		
 };
 
 
@@ -246,8 +284,7 @@ class Buffer2D {
 
 
 
-
-
+/*
 template<>
 class Buffer2D <PixelRGB>{
 //private:
@@ -365,7 +402,6 @@ class Buffer2D <PixelRGB>{
 		//
 		// Returns TRUE if the buffer was shrunk, or
 		//         FALSE if the new size was the same as the old size.
-		//bool shrink (int width, int height) {return true;}
 		
 		
 		bool shrink (int width, int height) {
@@ -378,7 +414,7 @@ class Buffer2D <PixelRGB>{
 			// Allocate new data buffer (if width & height are non-zero)
 			if ( (width != 0) && (height != 0)) {
 				p  = this->data;
-				pn = new PixelRGB[(width * height)];
+				//pn = new PixelRGB[(width * height)];
 			} else {
 				// Free old data buffer (if one was allocated)
 				if (this->data != NULL) {
@@ -398,12 +434,11 @@ class Buffer2D <PixelRGB>{
 			
 			for(ync=0, yc=0; ync<=hl; ync+=wn, yc+=yinc){
 				for(xn=0, x=0; xn<wn; xn++, x+=xinc){
-					pn[ync+xn]=p[yc+x];
+					p[ync+xn]=p[yc+x];
 				}
 			}
 			//delete[] p;
-			free(p);
-			this->data=pn;
+			//this->data=pn;
 			// Update width and height to new ones
 			this->width = width;
 			this->height = height;
@@ -434,8 +469,240 @@ class Buffer2D <PixelRGB>{
 			line->data=&this->at(0,y);
 			return line;
 		}
-};
+		
+		// ### SPECIALIZED ###
+		Buffer2D<bool> toBool(){
+			int ii;
+			int buffLength = this->numElements();
+			Buffer2D<PixelRGB>& img=*this;
+			Buffer2D<bool>& dst=*(new Buffer2D<bool>);
+			dst.resizeToMatch(img);
+			/*standard boolean conversion/
+			for(ii = 0; ii < buffLength; ii++){
+				if(img[ii].r > 0 || img[ii].g > 0 || img[ii].b > 0)
+					dst[ii] = 1;
+				else
+					dst[ii] = 0;
+			}
+			return dst;
+		}
+};*/
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*template<>
+class Buffer2D <bool>{
+//private:
+	public:
+		bool* data;
+		int width;
+		int height;
+
+		// ### INIT ###
+	public:
+		Buffer2D<bool>() {
+			this->init (0, 0);
+		}
+
+		Buffer2D<bool> (int width, int height) {
+			this->init (width, height);
+		}
+
+	private:
+		void init (int width, int height) {
+			this->data = NULL;
+			this->width = 0;
+			this->height = 0;
+
+			this->resize (width, height);
+		}
+
+	public:
+//	~Buffer2D<bool>() {
+		// Make sure the data buffer (if one existed) is deallocated
+//		this->resize(0,0);
+//	}
+
+		// ### ACCESSORS ###
+	public:
+		//bool* data() { return this->data; }
+		//int width() { return this->width; }
+		//int height() { return this->height; }
+		int numElements() { return this->width * this->height; }
+
+		// Returns the element at the specified location.
+		// (The location is NOT bound-checked.)
+		bool get (int x, int y) {
+			return (this->at (x,y));
+		}
+
+		// Changes the element at the specified location.
+		// (The location is NOT bound-checked.)
+		void set (int x, int y, bool newElement) {
+			(this->at (x,y)) = newElement;
+		}
+
+		bool& operator[] (int index) {
+			return this->data[index];
+		}
+
+		bool& at (int x, int y) {
+			return this->data[y*width + x];
+		}
+
+		// Returns the address of the first (leftmost) element on the specified row.
+		// (The row index is NOT bound-checked.)
+		bool* atRow (int y);
+
+		// ### OPERATIONS ###
+
+		// Resizes this buffer (if the specified new size is different than the old size).
+		// If width or height is 0, then no new buffer will be allocated.
+		// If the resize is successful and a new buffer is allocated,
+		// the contents of the new buffer are undefined.
+		//
+		// Returns TRUE if the buffer was resized, or
+		//         FALSE if the new size was the same as the old size.
+		bool resize (int width, int height) {
+			// Abort if the new size is the same as the old size
+			if ( (this->width == width) && (this->height == height)) {
+				return FALSE;
+			}
+
+			// Update width and height
+			this->width = width;
+			this->height = height;
+
+			// Free old data buffer (if one was allocated)
+			if (this->data != NULL) {
+				delete[] this->data;
+			}
+
+			// Allocate new data buffer (if width & height are non-zero)
+			if ( (width != 0) && (height != 0)) {
+				this->data = new bool[width * height];
+			} else {
+				this->data = NULL;
+			}
+
+			return TRUE;
+		}
+
+		// Resizes this buffer to be the same size as the specified buffer
+		// (if it wasn't already the same size).
+		//
+		// Returns TRUE if the buffer was resized, or
+		//         FALSE if the new size was the same as the old size.
+		template<class F>
+		bool resizeToMatch (Buffer2D<F>& buffer) {
+			return this->resize (buffer.width, buffer.height);
+		}
+		
+		// Shrinks this buffer and its contents (if the specified new size is
+		// different than the old size).
+		// If width or height is 0, then no new buffer will be allocated.
+		// If the shrink is successful and a new buffer is allocated,
+		// the contents of the new buffer are (roughly) the nearest neighbor
+		// interpolation of the contents of the original .
+		//
+		// Returns TRUE if the buffer was shrunk, or
+		//         FALSE if the new size was the same as the old size.
+		
+		
+		bool shrink (int width, int height) {
+			// Abort if the new size is the same as the old size
+			if ( (this->width == width) && (this->height == height)) {
+				return FALSE;
+			}
+			bool* p;
+			bool* pn;
+			// Allocate new data buffer (if width & height are non-zero)
+			if ( (width != 0) && (height != 0)) {
+				p  = this->data;
+				//pn = new bool[(width * height)];
+			} else {
+				// Free old data buffer (if one was allocated)
+				if (this->data != NULL) {
+					delete[] this->data;
+				}
+				this->data = NULL;
+				return TRUE;
+			}
+			int w,h,wn,hn,hl,xinc,yinc,ync,yc,xn,x;
+			w=this->width;
+			h=this->height;
+			wn=width;
+			hn=height;
+			hl=(hn-1)*wn;
+			xinc=w/wn;
+			yinc=h/hn*w;
+			
+			for(ync=0, yc=0; ync<=hl; ync+=wn, yc+=yinc){
+				for(xn=0, x=0; xn<wn; xn++, x+=xinc){
+					p[ync+xn]=p[yc+x];
+				}
+			}
+			//delete[] p;
+			//this->data=pn;
+			// Update width and height to new ones
+			this->width = width;
+			this->height = height;
+			return TRUE;
+		}
+		
+		
+		
+		// Copies the data from the specified buffer, resizing if necessary.
+		//
+		// Returns TRUE if the buffer was resized, or
+		//         FALSE if the new size was the same as the old size.
+		bool copyFrom (Buffer2D<bool>& buffer) {
+			return this->copyFrom (buffer.width, buffer.height, buffer.data);
+		}
+		bool copyFrom (int width, int height, bool* data) {
+			bool didResize = this->resize (width, height);
+			memcpy (this->data, data, sizeof (bool) * this->numElements());
+			return didResize;
+		}
+		
+		//returns an alias to the line of this image
+		Buffer2D<bool>* getLine(int y){
+			Buffer2D<bool>* line=new Buffer2D<bool>;
+			
+			line->resize(this->width,1);
+			delete (line->data);//free the useless line we just allocated
+			line->data=&this->at(0,y);
+			return line;
+		}
+		
+		// ### SPECIALIZED ###
+		Buffer2D<bool> toRGB(){
+			int ii;
+			int buffLength = this->numElements();
+			Buffer2D<bool>& img=*this;
+			Buffer2D<PixelRGB>& dst=*(new Buffer2D<PixelRGB>);
+			dst.resizeToMatch(img);
+			/*standard reverse boolean conversion/
+			for(ii = 0; ii < buffLength; ii++){
+				if(img[ii])
+					dst[ii].r = dst[ii].g = dst[ii].b = 255;
+				else
+					dst[ii].r = dst[ii].g = dst[ii].b = 0;
+			}	
+			return dst;
+		}
+};*/
 
 
 

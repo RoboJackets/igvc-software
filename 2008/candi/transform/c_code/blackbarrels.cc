@@ -85,12 +85,12 @@ void keyPressed (unsigned char key, int x, int y) {
 		/* exit the program...normal termination. */
 		exit (0);
 	}
-
+if( key=='d'){
 	/* if any key is pressed, kill everything */
 	/* shut down our window */
 	glutDestroyWindow (mainwindow);
 	/* exit the program...normal termination. */
-	exit (0);
+	exit (0);}
 }
 
 void init_gl () {
