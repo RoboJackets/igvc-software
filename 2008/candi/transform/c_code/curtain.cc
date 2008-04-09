@@ -57,7 +57,8 @@ void dilate1D (Buffer2D<bool>& arr) {
 	boolarr[0]=boolarr[buffLength-1]=0;
 	memcpy(arr.data, boolarr.data, sizeof(bool)*buffLength);
 }
-
+static int debugnum=1;
+static int debugrun=1;
 b2drgb curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 	
 	int ii = 0;
@@ -94,9 +95,14 @@ b2drgb curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 		
 		//cut the found region out to cr from orim
 		Buffer2D<bool> cr=cutout(orangeIndex,orim);
-		/*uncomment to debug first cr
-		booltoRGB(cr,barimout);
-		break;*/
+		debugrun--;
+		if(debugrun==0){
+			//uncomment to debug first cr
+			debugnum++;
+			debugrun=debugnum;
+			booltoRGB(barim,barimout);
+			break;
+		}
 		for(int y=0; y < cr.height-1; y++){
 			Buffer2D<bool>* thisln = cr.getLine(y);
 			dilate1D(*thisln);
@@ -109,7 +115,7 @@ b2drgb curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 		
 	}//end while
 	
-	booltoRGB(barim,barimout);
+	//booltoRGB(barim,barimout);
 	return barimout;
 }
 
@@ -200,31 +206,23 @@ Buffer2D<bool>& cutout(int idx,Buffer2D<bool>& img) {
 }
 
 
-void dropperFlopper (Buffer2D<bool>& cr,Buffer2D<bool>& orim,Buffer2D<bool>& whim, Buffer2D<bool>& dstim,int line) {
-	
-	Buffer2D<bool>& curln 	= *cr.	getLine(line	);
-	Buffer2D<bool>& nxtcrln = *cr.	getLine(line+1	);
-	Buffer2D<bool>& nxtwhln = *whim.getLine(line+1	);
-	Buffer2D<bool>& dstln 	= *dstim.getLine(line+1	);
-	Buffer2D<bool>& orln 	= *orim.getLine(line+1	);
-	int buffLength = curln.width * curln.height;
-	int ii;
+void dropperFlopper (Buffer2D<bool>& cr,Buffer2D<bool>& orim,Buffer2D<bool>& whim, Buffer2D<bool>& dstim,int y) {
+	int buffLength = cr.width;
+	int w=buffLength;
+	int ii,yc,ync;
+	yc=w*y;
+	ync=w*(y+1);
 	
 	/*and the current line with the next one for dropping in*/
 	for(ii = 0; ii < buffLength; ii++){
-		if(curln[ii]){
-			if(nxtwhln[ii]){
-				nxtcrln[ii] = 1 ;
-				dstln[ii] = 1 ;
+		if(cr[yc+ii]){
+			if(whim[ync+ii]){
+				cr[ync+ii] = 1 ;
+				dstim[ync+ii] = 1 ;
 				
 			}
-		}
+		}//yyu7ferdwsxcvgmnipokjpokemr.pauluffffsfuingyourferocioushandswithviciousqualitiespoofferociociyt
 	}	 
-	delete &curln;
-	delete &nxtcrln;
-	delete &nxtwhln;
-	delete &dstln;
-	delete &orln;
 }
 
 Buffer2D<bool>& clear(Buffer2D<bool>& im){

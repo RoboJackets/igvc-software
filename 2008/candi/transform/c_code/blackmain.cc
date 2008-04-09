@@ -29,8 +29,12 @@ void blackmain() {
 	/* process */
 	orim = getorim (fr1);
 	whim = getwhim (fr1);
+	printf("here\n");
+	//Buffer2D<bool> test=orim.toBool();
+	//Buffer2D<PixelRGB> test2=test.toRGB();
 	long long t1=currentTimeMicros();
 	barim = curtain (whim, orim);
+	printf("here2\n");
 	double diff=currentTimeMicros()-t1;
 	printf("framerate: %f\n",1.0/diff*1000000.0);
     //barim=fr1;
