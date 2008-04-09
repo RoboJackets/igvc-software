@@ -4,7 +4,4 @@
 void NextFrame (void);
 void texinit (void);
 
-#define OWIDTH 720
-#define OHEIGHT 480
-
 #endif

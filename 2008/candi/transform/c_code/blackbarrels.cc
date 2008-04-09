@@ -6,6 +6,9 @@
 #include "screenio.h"
 #include "blackmain.h"
 #include "blackglobals.h"
+extern "C"{
+#include "bmpwrite.h"
+}
 
 #define ESCAPE 27
 
@@ -56,12 +59,12 @@ void keyPressed (unsigned char key, int x, int y) {
 
 	/* If 's' is pressed, save everything, then kill everyting. */
 	if (key == 's') { //save raw data
-		out.data= (char*) malloc (OWIDTH*OHEIGHT*sizeof (char) *3);
+		out.data= (char*) malloc (OWIDTH*OHEIGHT*sizeof (char) *4);
 		glReadPixels (0				,		//GLint x,
 		              0				,		//GLint y,
 		              OWIDTH			,		//GLsizei width,
 		              OHEIGHT			,		//GLsizei height,
-		              GL_BGRA			,		//GLenum format,
+		              GL_RGB			,		//GLenum format,
 		              GL_UNSIGNED_BYTE,		//GLenum type,
 		              out.data);			//GLvoid *pixels
 		/* write data */
@@ -69,6 +72,12 @@ void keyPressed (unsigned char key, int x, int y) {
 		for (xx=0;xx<OHEIGHT*OWIDTH*3;xx++) {
 			fprintf (outp,"%c",* (out.data+xx));
 		}
+		
+		write_bmp("bob.bmp", OWIDTH, OHEIGHT, (char *)out.data);
+		
+		
+		
+		
 		fclose (outp);
 		/* shut down our window */
 		free (out.data);
@@ -86,7 +95,7 @@ void keyPressed (unsigned char key, int x, int y) {
 
 void init_gl () {
 	glutInitDisplayMode (GLUT_DOUBLE| GLUT_RGB); // certain settings
-	glutInitWindowSize (OWIDTH, OHEIGHT); // sets wize in pixels (horizontal and vertical)
+	glutInitWindowSize (OWIDTH, OHEIGHT); // sets size in pixels (horizontal and vertical)
 	glutInitWindowPosition (10, 10); // upper left corner position
 	mainwindow=glutCreateWindow ("Transform"); // sets the window title
 	
@@ -99,7 +108,7 @@ void init_gl () {
 	glMatrixMode (GL_PROJECTION);		// Specify matrix used
 	//glLoadMatrixd(getPjMat());		// apply planar perspective transform
 	//glLoadIdentity ();				// make sure OpenGL doesn't f*ck with my results
-	glOrtho (.0, 720., 0, 480., -10.0, 10.0);	// creating othogonal mapping matrix
+	glOrtho (.0, OWIDTH, 0, OHEIGHT, -10.0, 10.0);	// creating othogonal mapping matrix
 	out.width = OWIDTH;							// sets up display canvas
 	out.height = OHEIGHT;						// sets up display canvas
 	out.data = (char*) malloc (OWIDTH * OHEIGHT * 4);	// sets up display canvas

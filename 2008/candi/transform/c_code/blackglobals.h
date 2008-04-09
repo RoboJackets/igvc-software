@@ -1,6 +1,6 @@
 #ifndef blackglobals_h
 #define blackglobals_h
-#define OWIDTH 720
-#define OHEIGHT 480
+#define OWIDTH 160
+#define OHEIGHT 120
 
 #endif

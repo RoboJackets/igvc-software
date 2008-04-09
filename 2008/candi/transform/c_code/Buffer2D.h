@@ -3,9 +3,12 @@
 
 #include "types.h"	// for NULL
 #include <string.h>		// for memcpy
+#include "PixelRGB.h"
+#include <stdlib.h>
 
 /*
  * Utility class that represents a resizable 2D matrix of elements.
+ * Contains specialization for PixelRGB form.
  */
  
 /* Signature:
@@ -74,6 +77,7 @@ class Buffer2D {
 
 		// Returns the element at the specified location.
 		// (The location is NOT bound-checked.)
+		// Paul: I suspect this and set may break if used
 		E get (int x, int y) {
 			return * (this->at (x,y));
 		}
@@ -139,6 +143,63 @@ class Buffer2D {
 		bool resizeToMatch (Buffer2D<F>& buffer) {
 			return this->resize (buffer.width, buffer.height);
 		}
+		
+		// Shrinks this buffer and its contents (if the specified new size is
+		// different than the old size).
+		// If width or height is 0, then no new buffer will be allocated.
+		// If the shrink is successful and a new buffer is allocated,
+		// the contents of the new buffer are (roughly) the nearest neighbor
+		// interpolation of the contents of the original .
+		//
+		// Returns TRUE if the buffer was shrunk, or
+		//         FALSE if the new size was the same as the old size.
+		/*bool shrink (int width, int height) {
+			// Abort if the new size is the same as the old size
+			if ( (this->width == width) && (this->height == height)) {
+				return FALSE;
+			}
+			E* p,pn;
+			// Allocate new data buffer (if width & height are non-zero)
+			if ( (width != 0) && (height != 0)) {
+				p  = this->data;
+				pn = new E[width * height];
+			} else {
+				// Free old data buffer (if one was allocated)
+				if (this->data != NULL) {
+					delete[] this->data;
+				}
+				this->data = NULL;
+				return TRUE;
+			}
+			int w,h,wn,hn,hl,xinc,yinc,ync,yc,xn,x;
+			w=this->width;
+			h=this->height;
+			wn=width;
+			hn=height;
+			hl=(hn-1)*wn;
+			xinc=w/wn;
+			yinc=h/hn*w;
+			
+			for(ync=0, yc=0; ync<=hl; ync+=wn, yc+=yinc){
+				for(xn=0, x=0; xn<wn; xn++, x+=xinc){
+					pn[ync+xn]=p[yc+x];
+				}
+			}
+			delete[] p;
+			this.data=pn;
+			
+			
+			
+			
+			
+			// Update width and height to new ones
+			this->width = width;
+			this->height = height;
+			return TRUE;
+		}*/
+		
+		
+		
 
 		// Copies the data from the specified buffer, resizing if necessary.
 		//
@@ -147,6 +208,7 @@ class Buffer2D {
 		bool copyFrom (Buffer2D<E>& buffer) {
 			return this->copyFrom (buffer.width, buffer.height, buffer.data);
 		}
+		
 		bool copyFrom (int width, int height, E* data) {
 			bool didResize = this->resize (width, height);
 			memcpy (this->data, data, sizeof (E) * this->numElements());
@@ -158,10 +220,223 @@ class Buffer2D {
 			Buffer2D<E>* line=new Buffer2D<E>;
 			
 			line->resize(this->width,1);
-			free(line->data);//free the useless line we just allocated
+			delete (line->data);//free the useless line we just allocated
 			line->data=&this->at(0,y);
 			return line;
 		}
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+template<>
+class Buffer2D <PixelRGB>{
+//private:
+	public:
+		PixelRGB* data;
+		int width;
+		int height;
+
+		// ### INIT ###
+	public:
+		Buffer2D<PixelRGB>() {
+			this->init (0, 0);
+		}
+
+		Buffer2D<PixelRGB> (int width, int height) {
+			this->init (width, height);
+		}
+
+	private:
+		void init (int width, int height) {
+			this->data = NULL;
+			this->width = 0;
+			this->height = 0;
+
+			this->resize (width, height);
+		}
+
+	public:
+//	~Buffer2D<PixelRGB>() {
+		// Make sure the data buffer (if one existed) is deallocated
+//		this->resize(0,0);
+//	}
+
+		// ### ACCESSORS ###
+	public:
+		//PixelRGB* data() { return this->data; }
+		//int width() { return this->width; }
+		//int height() { return this->height; }
+		int numElements() { return this->width * this->height; }
+
+		// Returns the element at the specified location.
+		// (The location is NOT bound-checked.)
+		PixelRGB get (int x, int y) {
+			return (this->at (x,y));
+		}
+
+		// Changes the element at the specified location.
+		// (The location is NOT bound-checked.)
+		void set (int x, int y, PixelRGB newElement) {
+			(this->at (x,y)) = newElement;
+		}
+
+		PixelRGB& operator[] (int index) {
+			return this->data[index];
+		}
+
+		PixelRGB& at (int x, int y) {
+			return this->data[y*width + x];
+		}
+
+		// Returns the address of the first (leftmost) element on the specified row.
+		// (The row index is NOT bound-checked.)
+		PixelRGB* atRow (int y);
+
+		// ### OPERATIONS ###
+
+		// Resizes this buffer (if the specified new size is different than the old size).
+		// If width or height is 0, then no new buffer will be allocated.
+		// If the resize is successful and a new buffer is allocated,
+		// the contents of the new buffer are undefined.
+		//
+		// Returns TRUE if the buffer was resized, or
+		//         FALSE if the new size was the same as the old size.
+		bool resize (int width, int height) {
+			// Abort if the new size is the same as the old size
+			if ( (this->width == width) && (this->height == height)) {
+				return FALSE;
+			}
+
+			// Update width and height
+			this->width = width;
+			this->height = height;
+
+			// Free old data buffer (if one was allocated)
+			if (this->data != NULL) {
+				delete[] this->data;
+			}
+
+			// Allocate new data buffer (if width & height are non-zero)
+			if ( (width != 0) && (height != 0)) {
+				this->data = new PixelRGB[width * height];
+			} else {
+				this->data = NULL;
+			}
+
+			return TRUE;
+		}
+
+		// Resizes this buffer to be the same size as the specified buffer
+		// (if it wasn't already the same size).
+		//
+		// Returns TRUE if the buffer was resized, or
+		//         FALSE if the new size was the same as the old size.
+		template<class F>
+		bool resizeToMatch (Buffer2D<F>& buffer) {
+			return this->resize (buffer.width, buffer.height);
+		}
+		
+		// Shrinks this buffer and its contents (if the specified new size is
+		// different than the old size).
+		// If width or height is 0, then no new buffer will be allocated.
+		// If the shrink is successful and a new buffer is allocated,
+		// the contents of the new buffer are (roughly) the nearest neighbor
+		// interpolation of the contents of the original .
+		//
+		// Returns TRUE if the buffer was shrunk, or
+		//         FALSE if the new size was the same as the old size.
+		//bool shrink (int width, int height) {return true;}
+		
+		
+		bool shrink (int width, int height) {
+			// Abort if the new size is the same as the old size
+			if ( (this->width == width) && (this->height == height)) {
+				return FALSE;
+			}
+			PixelRGB* p;
+			PixelRGB* pn;
+			// Allocate new data buffer (if width & height are non-zero)
+			if ( (width != 0) && (height != 0)) {
+				p  = this->data;
+				pn = new PixelRGB[(width * height)];
+			} else {
+				// Free old data buffer (if one was allocated)
+				if (this->data != NULL) {
+					delete[] this->data;
+				}
+				this->data = NULL;
+				return TRUE;
+			}
+			int w,h,wn,hn,hl,xinc,yinc,ync,yc,xn,x;
+			w=this->width;
+			h=this->height;
+			wn=width;
+			hn=height;
+			hl=(hn-1)*wn;
+			xinc=w/wn;
+			yinc=h/hn*w;
+			
+			for(ync=0, yc=0; ync<=hl; ync+=wn, yc+=yinc){
+				for(xn=0, x=0; xn<wn; xn++, x+=xinc){
+					pn[ync+xn]=p[yc+x];
+				}
+			}
+			//delete[] p;
+			free(p);
+			this->data=pn;
+			// Update width and height to new ones
+			this->width = width;
+			this->height = height;
+			return TRUE;
+		}
+		
+		
+		
+		// Copies the data from the specified buffer, resizing if necessary.
+		//
+		// Returns TRUE if the buffer was resized, or
+		//         FALSE if the new size was the same as the old size.
+		bool copyFrom (Buffer2D<PixelRGB>& buffer) {
+			return this->copyFrom (buffer.width, buffer.height, buffer.data);
+		}
+		bool copyFrom (int width, int height, PixelRGB* data) {
+			bool didResize = this->resize (width, height);
+			memcpy (this->data, data, sizeof (PixelRGB) * this->numElements());
+			return didResize;
+		}
+		
+		//returns an alias to the line of this image
+		Buffer2D<PixelRGB>* getLine(int y){
+			Buffer2D<PixelRGB>* line=new Buffer2D<PixelRGB>;
+			
+			line->resize(this->width,1);
+			delete (line->data);//free the useless line we just allocated
+			line->data=&this->at(0,y);
+			return line;
+		}
+};
+
+
+
 
 #endif
