@@ -48,3 +48,15 @@ void RGBtoBool (Buffer2D<PixelRGB>& img, Buffer2D<bool>& dst) {
 			dst[ii] = 0;
 	}
 }
+
+//Does an inverse mask operation on the rgb image
+void blackout (Buffer2D<bool>& mask, Buffer2D<PixelRGB>& img) {
+	int ii;
+	int buffLength = img.numElements();
+
+	for(ii = 0; ii < buffLength; ii++){
+		if(mask[ii]){
+			img[ii].r = img[ii].g = img[ii].b = 0;
+		}
+	}	
+}

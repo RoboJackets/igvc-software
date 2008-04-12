@@ -39,13 +39,13 @@ void display () {
 	glEnd();
 
 	/* prepare image buffer */
-	glFlush (); // makes sure commands are executed immediately
+	//glFlush (); // makes sure commands are executed immediately
 
 	/* double buffering */
 	glutSwapBuffers();
 
 	/* finish image buffer */
-	glFinish();
+	//glFinish();
 
 }
 
