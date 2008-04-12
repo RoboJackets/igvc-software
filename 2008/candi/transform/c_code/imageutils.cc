@@ -22,3 +22,29 @@ Buffer2D<PixelRGB> imageAsStaticBuffer2D (Image* img) {
 	buf.data = (PixelRGB*) img->data;
 	return buf;
 }
+
+void booltoRGB (Buffer2D<bool>& img, Buffer2D<PixelRGB>& dst){
+	int ii;
+	int buffLength = dst.width * dst.height;
+
+	/*standard reverse boolean conversion*/
+	for(ii = 0; ii < buffLength; ii++){
+		if(img[ii])
+			dst[ii].r = dst[ii].g = dst[ii].b = 255;
+		else
+			dst[ii].r = dst[ii].g = dst[ii].b = 0;
+	}	
+}
+
+void RGBtoBool (Buffer2D<PixelRGB>& img, Buffer2D<bool>& dst) {
+	int ii;
+	int buffLength = img.width * img.height;
+
+	/*standard boolean conversion*/
+	for(ii = 0; ii < buffLength; ii++){
+		if(img[ii].r > 0 || img[ii].g > 0 || img[ii].b > 0)
+			dst[ii] = 1;
+		else
+			dst[ii] = 0;
+	}
+}

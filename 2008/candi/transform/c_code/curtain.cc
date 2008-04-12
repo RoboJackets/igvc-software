@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "screenio.h" //for debugging
 #include "texcode.h"
+#include "imageutils.h"
 
 static Buffer2D<bool> barim;
 static Buffer2D<bool> orim;
@@ -12,33 +13,6 @@ static Buffer2D<bool> whim;
 static Buffer2D<PixelRGB> barimout;
 Buffer2D<bool>& clear(Buffer2D<bool>& im);
 void dropperFlopper (Buffer2D<bool>& cr,Buffer2D<bool>& orim,Buffer2D<bool>& whim, Buffer2D<bool>& dstim,int line);
-
-void booltoRGB (Buffer2D<bool>& img, Buffer2D<PixelRGB>& dst){
-	int ii;
-	int buffLength = dst.width * dst.height;
-
-	/*standard reverse boolean conversion*/
-	for(ii = 0; ii < buffLength; ii++){
-		if(img[ii])
-			dst[ii].r = dst[ii].g = dst[ii].b = 255;
-		else
-			dst[ii].r = dst[ii].g = dst[ii].b = 0;
-	}	
-}
-
-void RGBtoBool (Buffer2D<PixelRGB>& img, Buffer2D<bool>& dst) {
-	int ii;
-	int buffLength = img.width * img.height;
-
-	/*standard boolean conversion*/
-	for(ii = 0; ii < buffLength; ii++){
-		if(img[ii].r > 0 || img[ii].g > 0 || img[ii].b > 0)
-			dst[ii] = 1;
-		else
-			dst[ii] = 0;
-	}
-}
-
 
 //dialates the line IN PLACE
 void dilate1D (Buffer2D<bool>& arr) {
