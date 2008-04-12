@@ -33,7 +33,7 @@ void dilate1D (Buffer2D<bool>& arr) {
 }
 static int debugnum=1;
 static int debugrun=1;
-b2drgb curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
+Buffer2D<bool>& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 	
 	int ii = 0;
 	int orangeIndex = 0;
@@ -46,7 +46,7 @@ b2drgb curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 	RGBtoBool(orimin, orim);
 	RGBtoBool(whimin, whim);
 	barim.copyFrom(orim);
-	barimout.resize(orim.width,orim.height);
+	//barimout.resize(orim.width,orim.height);
 	
 	/*loop untill no more orange pixels*/
 	ii = 0;
@@ -64,33 +64,35 @@ b2drgb curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin) {
 		/*quit if there is no more orange*/
 		if(orangeIndex == -1){
 			isOrange = false;
+			debugnum=1;
+			debugrun=1;
 			break;
 		}
 		
 		//cut the found region out to cr from orim
 		Buffer2D<bool> cr=cutout(orangeIndex,orim);
-		debugrun--;
-		if(debugrun==0){
-			//uncomment to debug first cr
-			debugnum++;
-			debugrun=debugnum;
-			booltoRGB(barim,barimout);
-			break;
-		}
+		
 		for(int y=0; y < cr.height-1; y++){
 			Buffer2D<bool>* thisln = cr.getLine(y);
 			dilate1D(*thisln);
 			delete thisln;
 			dropperFlopper(cr,orim,whim,barim,y);
 		}
-	
+		debugrun--;
+		if(debugrun==0){
+			//uncomment to debug first cr
+			debugnum++;
+			debugrun=debugnum;
+			break;
+		}
+		
 
 		
 		
 	}//end while
 	
 	//booltoRGB(barim,barimout);
-	return barimout;
+	return barim;
 }
 
 Buffer2D<bool>& cutout(int idx,Buffer2D<bool>& img) {
@@ -201,7 +203,7 @@ void dropperFlopper (Buffer2D<bool>& cr,Buffer2D<bool>& orim,Buffer2D<bool>& whi
 				dstim[ync+ii] = 1 ;
 				
 			}
-		}//yyu7ferdwsxcvgmnipokjpokemr.pauluffffsfuingyourferocioushandswithviciousqualitiespoofferociociyt
+		}
 	}	 
 }
 
