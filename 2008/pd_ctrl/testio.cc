@@ -35,17 +35,18 @@ int main(void){
 	int arduino_fd = serialport_init(SERIALPORT, BAUD);
 	assert(arduino_fd != -1);
 	char p[2] = "p";
+	char f[2] = "f";
 	
 	while(1){
-	if(writeFully(arduino_fd, p, 1)){
+	if(writeFully(arduino_fd, f, 1)){
 			//readToNewline(arduino_fd, buffer, 8);
-			readFully(arduino_fd, buffer, 6);
+			readFully(arduino_fd, buffer, 4);
 			printf("rec %s\n", buffer);
 		}
 		else{
 			printf("write failed\n");
 			//readToNewline(arduino_fd, buffer, 8);
-			readFully(arduino_fd, buffer, 6);
+			readFully(arduino_fd, buffer, 4);
 			printf("%s\n", buffer);
 
 		}
