@@ -145,9 +145,8 @@ Buffer2D<bool>& cutout(int idx,Buffer2D<bool>& img) {
 	// lets cut!
 	int cp=0;		//current point index
 	int np=1;		//num points so far found, starts with 1
+	
 	//read in initial point
-	
-	
 	plst[cp].x=x;	
 	plst[cp].y=y;
 	
@@ -158,11 +157,15 @@ Buffer2D<bool>& cutout(int idx,Buffer2D<bool>& img) {
 			//cache base x and y (hopefully in registers)			 
 				int cx=plst[cp].x;
 				int cy=plst[cp].y;
+				
+			//variable for index
+				int index = 0;
 			
 			//white top
 			{
-				if(img.data[cx+(cy+1)*width]){
-					img.data[cx+(cy+1)*width]=0;	//clear it
+				index = cx+(cy+1)*width;
+				if(img.data[index]){
+					img.data[index]=0;	//clear it
 					plst[np].y=cy+1;			//add to found list
 					plst[np].x=cx;
 					np++;
@@ -170,8 +173,9 @@ Buffer2D<bool>& cutout(int idx,Buffer2D<bool>& img) {
 			}
 			//white right
 			{
-				if(img.data[cx+1+(cy)*width]){		
-					img.data[cx+1+(cy)*width]=0;	//clear it
+				index = cx+1+(cy)*width;
+				if(img.data[index]){		
+					img.data[index]=0;	//clear it
 					plst[np].y=cy;			//add to found list
 					plst[np].x=cx+1;
 					np++;
@@ -179,8 +183,9 @@ Buffer2D<bool>& cutout(int idx,Buffer2D<bool>& img) {
 			}
 			//white bottom
 			{
-				if(img.data[cx+(cy-1)*width]){
-					img.data[cx+(cy-1)*width]=0;	//clear it
+				index = cx+(cy-1)*width;
+				if(img.data[index]){
+					img.data[index]=0;	//clear it
 					plst[np].y=cy-1;			//add to found list
 					plst[np].x=cx;
 					np++;
@@ -188,8 +193,9 @@ Buffer2D<bool>& cutout(int idx,Buffer2D<bool>& img) {
 			}
 			//white left
 			{
-				if(img.data[cx-1+(cy)*width]){		
-					img.data[cx-1+(cy)*width]=0;	//clear it
+				index = cx-1+(cy)*width;
+				if(img.data[index]){		
+					img.data[index]=0;	//clear it
 					plst[np].y=cy;			//add to found list
 					plst[np].x=cx-1;
 					np++;
