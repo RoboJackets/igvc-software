@@ -15,6 +15,8 @@ b2drgb& getwhim (b2drgb& im) {
 	char R,G,B;
 	whim.copyFrom (im);
 	for (int i=0;i< (im.width) * (im.height);i++) {
+		
+		//get pixel data
 		r=whim[i].r;
 		g=whim[i].g;
 		b=whim[i].b;
@@ -26,12 +28,14 @@ b2drgb& getwhim (b2drgb& im) {
 		whim[i].b=0;
 		R=G=B=0;
 
+		//thresholding
 		if (g!=0 && b>102 && 256*b/g>171 && 256*g/ (r+b) <154) {
 			R=255;
 			G=255;
 			B=255;
 		}
 
+		//update image
 		whim[i].r=R;
 		whim[i].g=G;
 		whim[i].b=B;
@@ -39,7 +43,7 @@ b2drgb& getwhim (b2drgb& im) {
 
 	numruns++;
 
-	printf ("frame: %d\n",numruns);
+	//printf ("frame: %d\n",numruns);
 
 	return whim;
 }

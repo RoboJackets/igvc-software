@@ -15,6 +15,8 @@ b2drgb& getorim (b2drgb& im) {
 	char R,G,B;
 	orim.copyFrom (im);
 	for (int i=0;i< (im.width) * (im.height);i++) {
+		
+		//get pixel data
 		r=orim[i].r;
 		g=orim[i].g;
 		b=orim[i].b;
@@ -26,12 +28,14 @@ b2drgb& getorim (b2drgb& im) {
 		orim[i].b=0;
 		R=G=B=0;
 
+		//thresholding
 		if (g<r-20) {
 			R=255;
 			G=255;
 			B=255;
 		}
 
+		//update image
 		orim[i].r=R;
 		orim[i].g=G;
 		orim[i].b=B;
@@ -39,7 +43,7 @@ b2drgb& getorim (b2drgb& im) {
 
 	numruns++;
 
-	printf ("frame: %d\n",numruns);
+	//printf ("frame: %d\n",numruns);
 
 	return orim;
 }
