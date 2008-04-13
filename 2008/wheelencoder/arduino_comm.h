@@ -1,3 +1,10 @@
+#ifndef ARDUINO_COMM_HH
+#define ARDUINO_COMM_HH
+
+#include <fcntl.h>    /* File control definitions */
+#include <termios.h>  /* POSIX terminal control definitions */
+
+
 #define WAIT_TIME 20 //Used for setting VTIME, each tick is 0.1 s
 
 /**
@@ -115,3 +122,5 @@ int serialport_init(const char* serialport, speed_t baud) {
 
 	return fd;
 }
+
+#endif //ARDUINO_COMM_HH
