@@ -33,7 +33,7 @@ void setup(){
 unsigned int getTime(){
 	unsigned int time;
 	//TCNT1 is a 16 bit timer/counter ~ pg 121
-	time = TCNT1L;//how often does this tick? tests say clkio = F_CPU. haven't read doc though.
+	time = TCNT1L;//how often does this tick? tests say clkio = F_CPU.
 	time |= TCNT1H << 8;
 	return(time);
 }

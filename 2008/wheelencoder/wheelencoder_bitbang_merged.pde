@@ -27,7 +27,7 @@ void setup(){
 unsigned int getTime(){
 	unsigned int time;
 	//TCNT1 is a 16 bit timer/counter ~ pg 121
-	time = TCNT1L;//how often does this tick? tests say clkio = F_CPU. haven't read doc though.
+	time = TCNT1L;//how often does this tick? tests say clkio = F_CPU.
 	time |= TCNT1H << 8;
 	return(time);
 }
@@ -37,7 +37,7 @@ void resetTime(){
 	TCNT1L = 0;
 }
 
-void getPosition(unsigned int * time, unsigned int * position){
+void getPosition(unsigned int * time, unsigned int * position){//should interupts be disabled in this func?
 	unsigned int datatemp;
 
 	digitalWrite(SPI_SS, LOW);

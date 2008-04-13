@@ -2,7 +2,7 @@
 #define PD_HH
 
 #include "misc.hh"
-#include "arduino_comm.h"
+//#include "arduino_comm.h"
 
 #define TRUE 1
 #define FALSE 0
