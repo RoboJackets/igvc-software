@@ -78,15 +78,15 @@ Buffer2D<bool>& curtain (Buffer2D<PixelRGB>& whimin, Buffer2D<PixelRGB>& orimin)
 			delete thisln;
 			dropperFlopper(cr,orim,whim,barim,y);
 		}
+		
+		
+		//demomode
 		debugrun--;
 		if(debugrun==0){
-			//uncomment to debug first cr
 			debugnum++;
 			debugrun=debugnum;
 			break;
 		}
-		
-
 		
 		
 	}//end while
