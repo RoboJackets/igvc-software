@@ -144,6 +144,51 @@ class Buffer2D {
 			return this->resize (buffer.width, buffer.height);
 		}
 		
+		bool shrink(int f) {
+			if ( f==1) {
+				return FALSE;
+			}
+			int w,h,wn,hn,x,yc,xn,ync,hl,ycinc;
+			E* p=this->data;
+			w=this->width;
+			h=this->height;
+			wn=w/f;
+			hn=h/f;
+			hl=h*w;
+			ycinc=f*w;
+			E* pn=new E[wn*hn];
+			if ( (wn != 0) && (hn != 0)) {
+				p  = this->data;
+			} else {
+				// Free old data buffer (if one was allocated)
+				if (this->data != NULL) {
+					delete[] this->data;
+				}
+				this->data = NULL;
+				return TRUE;
+			}
+			printf("wn=%d hn=%d \n",wn,hn,p);
+
+			for(yc=0,ync=0; yc<hl; yc+=ycinc,ync+=wn){
+				for(x=0,xn=0; x<w; x+=f,xn++){
+					pn[xn+ync]=p[x+yc];
+				}
+			}
+			
+			/*for(yc=(f-1),ync=0; yc<h; yc+=f,ync++){
+				for(x=f-1,xn=0; x<w; x+=f,xn++){
+					p[xn+ync*wn]=p[x+yc*w];
+				}
+			}*/
+			
+			this->data=pn;
+			delete p;
+			this->width = wn;
+			this->height = hn;
+			return TRUE;
+		}
+		
+		
 		// Shrinks this buffer and its contents (if the specified new size is
 		// different than the old size).
 		// If width or height is 0, then no new buffer will be allocated.
@@ -153,7 +198,8 @@ class Buffer2D {
 		//
 		// Returns TRUE if the buffer was shrunk, or
 		//         FALSE if the new size was the same as the old size.
-		bool shrink (int width, int height) {
+		// DEPRICATED!
+		bool shrinkto (int width, int height) {
 			// Abort if the new size is the same as the old size
 			if ( (this->width == width) && (this->height == height)) {
 				return FALSE;
