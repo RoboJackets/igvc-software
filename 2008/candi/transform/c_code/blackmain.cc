@@ -22,6 +22,7 @@ void blackmain() {
 	
 	/* get image */
 	//fr1=new Buffer2D<PixelRGB>;
+	long long t1=currentTimeMicros();
 	ImageLoad ("12.bmp", infr1);
 	fr1.copyFrom (infr1->width,infr1->height, (PixelRGB*) infr1->data);
 	free (infr1->data);					//don't leak memory!
@@ -29,19 +30,21 @@ void blackmain() {
 	/* process */
 	orim = getorim (fr1);
 	whim = getwhim (fr1);
-	//printf("here\n");
 	//Buffer2D<bool> test=orim.toBool();
 	//Buffer2D<PixelRGB> test2=test.toRGB();
-	long long t1=currentTimeMicros();
+	
 	blackout(curtain (whim, orim),fr1);
 	//barim = fr1;
-	//printf("here2\n");
-	double diff=currentTimeMicros()-t1;
-	printf("framerate: %.2f\n",1.0/diff*1000000.0);
+
     barim.copyFrom(fr1);
+    barim.grow(5);
 	/* put image into screen */
 	screen = &barim;
 	/* put screen into graphics card*/
+	
+	double diff=currentTimeMicros()-t1;
+	printf("framerate: %.2f\n",1.0/diff*1000000.0);
+	
 	NextFrame();
 	//delete fr1;
 }

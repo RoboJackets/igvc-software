@@ -182,6 +182,40 @@ class Buffer2D {
 		}
 		
 		
+		bool grow(int f) {
+			E* p;
+			E* pn;
+			int rowsize1,rowsize2,n1,n2,numel1,i,roff1,roff2,forwardroff,next_segment_row_off;
+			rowsize1=this->width;
+			numel1=this->numElements();
+			rowsize2=f*rowsize1;
+			p= (this->data);
+			pn=new E[numel1*f*f];
+			
+			
+			
+			for(roff1=roff2=0;roff1<numel1;){
+				for(n1=0,n2=0;n2<rowsize2;n1++){
+					for(i=0;i<f;i++,n2++){
+						pn[roff2+n2]=p[roff1+n1];
+					}
+				}
+				next_segment_row_off=roff2+rowsize2*f;
+				for(forwardroff=roff2+rowsize2; 
+					forwardroff<next_segment_row_off;
+					forwardroff+=rowsize2){
+						memcpy((void*)&(pn[forwardroff]),(void*)&(pn[roff2]),rowsize2*sizeof(E));
+					}
+				roff1+=rowsize1;
+				roff2=next_segment_row_off;
+			}
+			this->data=pn;
+			this->width=rowsize2;
+			this->height=this->height*f;
+			delete p;
+		}
+		
+		
 		// Shrinks this buffer and its contents (if the specified new size is
 		// different than the old size).
 		// If width or height is 0, then no new buffer will be allocated.
