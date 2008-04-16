@@ -156,7 +156,7 @@ class Buffer2D {
 			hn=h/f;
 			hl=h*w;
 			ycinc=f*w;
-			E* pn=new E[wn*hn];
+			//E* pn=new E[wn*hn];
 			if ( (wn != 0) && (hn != 0)) {
 				p  = this->data;
 			} else {
@@ -167,22 +167,15 @@ class Buffer2D {
 				this->data = NULL;
 				return TRUE;
 			}
-			printf("wn=%d hn=%d \n",wn,hn,p);
 
-			for(yc=0,ync=0; yc<hl; yc+=ycinc,ync+=wn){
-				for(x=0,xn=0; x<w; x+=f,xn++){
-					pn[xn+ync]=p[x+yc];
+			for(yc=(f-1)*w,ync=0; yc<hl; yc+=ycinc,ync+=wn){
+				for(x=f-1,xn=0; x<w; x+=f,xn++){
+					p[xn+ync]=p[x+yc];
 				}
 			}
-			
-			/*for(yc=(f-1),ync=0; yc<h; yc+=f,ync++){
-				for(x=f-1,xn=0; x<w; x+=f,xn++){
-					p[xn+ync*wn]=p[x+yc*w];
-				}
-			}*/
-			
-			this->data=pn;
-			delete p;
+						
+			//this->data=pn;
+			//delete p;
 			this->width = wn;
 			this->height = hn;
 			return TRUE;
