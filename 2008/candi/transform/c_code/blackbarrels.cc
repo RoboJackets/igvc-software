@@ -90,6 +90,7 @@ if( key=='d'){
 	/* shut down our window */
 	glutDestroyWindow (mainwindow);
 	/* exit the program...normal termination. */
+	free (out.data);
 	exit (0);}
 }
 

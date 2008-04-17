@@ -27,6 +27,7 @@ void blackmain() {
 	ImageLoad ("12.bmp", infr1);
 	fr1.copyFrom (infr1->width,infr1->height, (PixelRGB*) infr1->data);
 	free (infr1->data);					//don't leak memory!
+	
 	fr2.copyFrom(fr1);
 	fr2.shrink(5);
 	

@@ -144,11 +144,13 @@ class Buffer2D {
 			return this->resize (buffer.width, buffer.height);
 		}
 		
+		/** Shrinks this image in place by a factor of <tt>f</tt>. */
 		bool shrink(int f) {
 			if ( f==1) {
 				return FALSE;
 			}
-			int w,h,wn,hn,x,yc,xn,ync,hl,ycinc;
+			
+			int w,h,wn,hn,x,yc,xn,ync,hl,ycinc,pick;
 			E* p=this->data;
 			w=this->width;
 			h=this->height;
@@ -156,26 +158,19 @@ class Buffer2D {
 			hn=h/f;
 			hl=h*w;
 			ycinc=f*w;
-			//E* pn=new E[wn*hn];
-			if ( (wn != 0) && (hn != 0)) {
-				p  = this->data;
-			} else {
-				// Free old data buffer (if one was allocated)
-				if (this->data != NULL) {
-					delete[] this->data;
-				}
-				this->data = NULL;
+			pick=f/2;
+			
+			if ( (wn == 0) || (hn == 0)) {
+				this->resize(wn,hn);	// will delete data buffer
 				return TRUE;
 			}
-
-			for(yc=(f-1)*w,ync=0; yc<hl; yc+=ycinc,ync+=wn){
-				for(x=f-1,xn=0; x<w; x+=f,xn++){
+			
+			for(yc=pick*w,ync=0; yc<hl; yc+=ycinc,ync+=wn){
+				for(x=pick,xn=0; x<w; x+=f,xn++){
 					p[xn+ync]=p[x+yc];
 				}
 			}
 						
-			//this->data=pn;
-			//delete p;
 			this->width = wn;
 			this->height = hn;
 			return TRUE;
@@ -212,7 +207,7 @@ class Buffer2D {
 			this->data=pn;
 			this->width=rowsize2;
 			this->height=this->height*f;
-			delete p;
+			delete []p;
 			return TRUE;
 		}
 		
@@ -294,7 +289,7 @@ class Buffer2D {
 			Buffer2D<E>* line=new Buffer2D<E>;
 			
 			line->resize(this->width,1);
-			delete (line->data);//free the useless line we just allocated
+			delete[] (line->data);//free the useless line we just allocated
 			line->data=&this->at(0,y);
 			return line;
 		}

@@ -126,6 +126,14 @@ Buffer2D<bool>& cutout(int idx,Buffer2D<bool>& img) {
 	plst[cp].x=x;	
 	plst[cp].y=y;
 	
+	//put black borders on
+	for(int i=0;i<height;i++){
+		img[i*width]=0;
+		img[(i+1)*width-1]=0;
+	}
+	memset((void*)&(img[0]),0,width*sizeof(bool));
+	memset((void*)&(img[(height-1)*width]),0,width*sizeof(bool));
+	
 	img.data[plst[cp].x+plst[cp].y*width]=0;		//clear initial point
 	for(;cp<np;cp++){						//run till out of points
 		//clear and record 4 neighbors
@@ -207,17 +215,9 @@ void dropperFlopper (Buffer2D<bool>& cr,Buffer2D<bool>& orim,Buffer2D<bool>& whi
 	}	 
 }
 
-Buffer2D<bool>& clear(Buffer2D<bool>& im){
-	// Free old data buffer (if one was allocated)
+Buffer2D<bool>& clear(Buffer2D<bool>& im){	
 	if (im.data != NULL) {
-		delete[] im.data;
-	}
-
-	// Allocate new data buffer (if width & height are non-zero)
-	if ( (im.width != 0) && (im.height != 0)) {
-		im.data = (bool*)calloc(im.width * im.height,sizeof(bool));
-	} else {
-		im.data = NULL;
+		memset(im.data, 0, sizeof(bool)*(im.width * im.height));
 	}
 }
 
