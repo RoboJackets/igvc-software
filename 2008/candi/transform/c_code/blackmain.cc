@@ -13,7 +13,8 @@ extern "C" {
 
 
 static Image * infr1=new Image;
-static Buffer2D<PixelRGB> whim,orim,fr1,barim;
+static Buffer2D<PixelRGB> whim,orim,fr1,barim,fr2;
+Buffer2D<bool> mask;
 //static Buffer2D<PixelRGB> * fr1;
 //static Buffer2D<PixelRGB> * barim;
 
@@ -26,18 +27,19 @@ void blackmain() {
 	ImageLoad ("12.bmp", infr1);
 	fr1.copyFrom (infr1->width,infr1->height, (PixelRGB*) infr1->data);
 	free (infr1->data);					//don't leak memory!
-	fr1.shrink(5);
-	/* process */
-	orim = getorim (fr1);
-	whim = getwhim (fr1);
-	//Buffer2D<bool> test=orim.toBool();
-	//Buffer2D<PixelRGB> test2=test.toRGB();
+	fr2.copyFrom(fr1);
+	fr2.shrink(5);
 	
-	blackout(curtain (whim, orim),fr1);
+	/* process */
+	orim = getorim (fr2);
+	whim = getwhim (fr2);
+	mask.copyFrom(curtain (whim, orim));
+	//Buffer2D<PixelRGB> test2=test.toRGB();
+	mask.grow(5);
+	blackout(mask,fr1);
 	//barim = fr1;
 
     barim.copyFrom(fr1);
-    barim.grow(5);
 	/* put image into screen */
 	screen = &barim;
 	/* put screen into graphics card*/
