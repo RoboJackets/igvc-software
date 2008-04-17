@@ -213,6 +213,7 @@ class Buffer2D {
 			this->width=rowsize2;
 			this->height=this->height*f;
 			delete p;
+			return TRUE;
 		}
 		
 		
