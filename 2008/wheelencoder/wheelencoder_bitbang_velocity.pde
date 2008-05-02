@@ -1,4 +1,3 @@
-//#define RADIUS .005
 #define COUNTER_SCALER (64)
 #define COUNTER_RATE (F_CPU/COUNTER_SCALER)
 #define RAD_ENCODERTICK (TWO_PI/512)
@@ -6,9 +5,6 @@
 #define SPI_SS 10
 #define SPI_CLK 11
 #define SPI_MISO 12
-
-unsigned int lastp1;
-unsigned int lastp2;
 
 
 void setup(){
@@ -26,8 +22,6 @@ void setup(){
 	//TCCR1B = (1<<CS10);// no prescale clk1o/1
 	TCCR1B = (1<<CS11)|(1<<CS10);//clkio/64
 
-//	lastp1 = 0;
-//	lastp2 = 0;
 }
 
 unsigned int getTime(){
@@ -58,12 +52,12 @@ void getPosition(unsigned int * time, unsigned int * position){
 		datatemp <<= 1;
 			
 		digitalWrite(SPI_CLK, LOW);
-		delayMicroseconds(50);//wait the appropriate amount to make this a 20khz signal (encoder goes to 50khz)
+		delayMicroseconds(50);//wait to make this a 20khz signal (encoder goes to 50khz)
 	}
 	digitalWrite(SPI_SS, HIGH);
 	
 	delayMicroseconds(50);//the last bit is held for 50us
-	delayMicroseconds(1000);//data only refreshed every 1 ms -- note: delay(1) is way off for a 1 ms wait, seems to be only accurate to about max 200us
+	delayMicroseconds(1000);//data only refreshed every 1 ms -- note: delay(1) is inaccurate for a 1 ms wait, seems to be only accurate to about max 200us
 
 	*position = (((datatemp >> 13) & 1) << 8) | (((datatemp >> 12) & 1) << 7) | (((datatemp >> 11) & 1) << 6) | (((datatemp >> 10) & 1) << 5) | (((datatemp >> 9) & 1) << 4) | (((datatemp >> 8) & 1) << 3) | (((datatemp >> 2) & 2) << 2) | (((datatemp >> 1) & 1) << 1) | (datatemp & 1);
 }
@@ -74,24 +68,11 @@ void loop(){
 	int dp;	
 	char strbuff[32] = {0};
 
-//do{
- 
+
 	getPosition(&t1, &p1);
 	delay(10);
 	getPosition(&t2, &p2);
  
-  /*
-   if(( p1 == 0) && (lastp1 != 0)){//this is supposed to fix the random zero reads but seems to cause other problems 
-    p1 = lastp1;
-   }
-   if(( p2 == 0) && (lastp2 != 0)){
-    p2 = lastp2;
-   }
-*/
-//lastp1 = p1;
-//lastp2 = p2;
-//}while( ((p1 == lastp1) && (p2 != lastp2)) || ((p2 == lastp2) && (p1 != lastp1)) );
-
 
 	if( (p2 > p1) && ( ((p1+512) - p2) < 256) ){
 		dp = -1*((p1 + 512) - p2);
@@ -115,10 +96,9 @@ void loop(){
   	}
 
 	float velocity = ( (float)dp) / ( (float)dt) * RAD_ENCODERTICK * COUNTER_RATE;
-
 	
 	Serial.print("ang vel(rad/s): ");
-	Serial.print(dtostrf(velocity, 2, 3, strbuff));
+	Serial.print( dtostrf(velocity, 2, 3, strbuff) );
 	Serial.print("\tp1: ");
 	Serial.print(p1, DEC);
 	Serial.print("\tp2: ");
@@ -132,6 +112,6 @@ void loop(){
 	Serial.print("\tdt: ");
 	Serial.print(dt, DEC);
 	Serial.print("\tdt(s): ");
-	Serial.println(dtostrf( (float)dt / COUNTER_RATE, 2, 5, strbuff));
+	Serial.println( dtostrf( (float)dt / COUNTER_RATE, 2, 5, strbuff) );
 }
 
