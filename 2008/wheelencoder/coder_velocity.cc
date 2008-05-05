@@ -1,82 +1,39 @@
-#include <stdlib.h>
-#include <stdint.h>   /* Standard types */
-#include <string.h>   /* String function definitions */
 #include <unistd.h>   /* UNIX standard function definitions */
-#include <fcntl.h>    /* File control definitions */
-#include <termios.h>  /* POSIX terminal control definitions */
-#include <sys/ioctl.h>
-#include <getopt.h>
-#include <stdbool.h>
 #include <cstdio>    /* Standard input/output definitions */
 #include <errno.h>    /* Error number definitions */
-#include <time.h>
+#include <assert.h>
 #include <cmath>
 
 #include "arduino_comm.h"
+#include "arduino_readnum.h"
 
 #define SERIALPORT "/dev/ttyUSB0"
 #define BAUD B9600
 
 //#define DT 100
 
-void readToNewline(int fd, char * buff, int maxlen){
-	int i = 0;
-	do{
-		readFully(fd, &buff[i], 1);
-		i++;
-	}while((strncmp(&buff[i],"\n",1) != 0) && (i < maxlen));
-}
+#define COUNTER_SCALER (64)
+#define F_CPU (16000000)
+#define COUNTER_RATE (F_CPU/COUNTER_SCALER)
+#define RAD_ENCODERTICK ( (2*M_PI)/512 )
 
 int main(void){
 	char buffer[6] = {0};
-	//char char_buff;
-	//char a = 'a';
-	int fd = serialport_init(SERIALPORT, BAUD);
+	char v[2] = "v";
+	char t[2] = "t";
+	char p[2] = "p";
+	int arduino_fd = serialport_init(SERIALPORT, BAUD);
 	
-	int dp;
-	int dt;
-	//struct timezone *tz;
+	unsigned short int dp, dt;
 	float velocity;
-	
-	while(1){
-				
-		readToNewline(fd, buffer, 2);
-		if( strncmp(buffer,"dp",2) == 0){
-			readToNewline(fd, buffer, 5);
-			dp = atoi(buffer);
-		}
-		else if( strncmp(buffer,"dt",2) == 0){
-			readToNewline(fd, buffer, 5);
-			dt = atoi(buffer);
-		}		
-		else{
-			printf("broke");
-			readFully(fd, buffer, 1);
-		}
 
-		readToNewline(fd, buffer, 2);
-		if( strncmp(buffer,"dp",2) == 0 ){
-			readToNewline(fd, buffer, 5);
-			dp = atoi(buffer);
-		}
-		else if( strncmp(buffer,"dt",2) == 0){
-			readToNewline(fd, buffer, 5);
-			dt = atoi(buffer);
-		}		
-		else{
-			printf("broke");
-			readFully(fd, buffer, 1);
-		}
+	writeFully(arduino_fd, v, 1);
+	dt = readUint16(arduino_fd, t, buffer);
+	dp = readUint16(arduino_fd, p, buffer);
 
-		velocity = (dp) * ((2* M_PI)/512) / dt*1000;
-		printf("dp: %d\tdt: %d\tvel: %d\n", dp, dt, velocity);
+	velocity = ( (float)dp) / ( (float)dt) * RAD_ENCODERTICK * COUNTER_RATE;
+	printf("dp: %d\tdt: %d\tvel: %d\n", dp, dt, velocity);
 
-		
-		/*
-		readFully(fd, buffer, 5);
-		printf("%s\n",buffer);
-		*/
-	}
 	return(0);
 }
 
