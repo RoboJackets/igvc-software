@@ -1,19 +1,6 @@
-//#include <cstdlib>
-//#include <stdint.h>   /* Standard types */
-//#include <string.h>   /* String function definitions */
 #include <unistd.h>   /* UNIX standard function definitions */
-//#include <fcntl.h>    /* File control definitions */
-//#include <termios.h>  /* POSIX terminal control definitions */
-//#include <sys/ioctl.h>
-//#include <getopt.h>
-//#include <stdbool.h>
 #include <cstdio>    /* Standard input/output definitions */
-#include <errno.h>    /* Error number definitions */
-//#include <time.h>
-//#include <cmath>
-//#include <iostream>
-
-#include <assert.h>
+#include <cassert>
 
 #include "arduino_comm.h"
 #include "arduino_readnum.h"
