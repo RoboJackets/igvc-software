@@ -1,6 +1,7 @@
 #include <cstdio>
 //#include <cmath>
 #include <unistd.h>
+#include <cassert>
 
 #include "pd.hh"
 #include "misc.hh"
@@ -26,6 +27,10 @@
 #define TARGET_X 10
 #define TARGET_Y 20
 
+#define SERIALPORT_LEFT "/dev/ttyUSB0"
+#define SERIALPORT_RIGHT "/dev/ttyUSB0"
+#define BAUD B9600
+
 int main(void){
 	float ratio, v_left, v_right;
 
@@ -34,6 +39,11 @@ int main(void){
 	ddrn * reckon = new(ddrn);
 	PDstatus * pd_right = new(PDstatus);
 	PDstatus * pd_left = new(PDstatus);
+
+	int arduino_fd_l = serialport_init(SERIALPORT_LEFT, BAUD);
+	assert(arduino_fd_l != -1);
+	int arduino_fd_r = serialport_init(SERIALPORT_RIGHT, BAUD);
+	assert(arduino_fd_r != -1);
 
 
 	reckon->x_0 = INITIAL_X;
@@ -62,6 +72,7 @@ int main(void){
 	pd_right->current_vel = INITIAL_R_VEL;
 	pd_right->target_vel = TARGET_L_VEL * ratio;
 	pd_right->isRight = TRUE;
+	pd_right->arduino_fd = arduino_fd_r;
 
 	pd_left->Pgain = P_GAIN_LIN_L;
 	pd_left->Dgain = D_GAIN_LIN_L;
@@ -69,6 +80,7 @@ int main(void){
 	pd_left->current_vel = INITIAL_L_VEL;
 	pd_left->target_vel = TARGET_L_VEL;
 	pd_left->isRight = FALSE;
+	pd_left->arduino_fd = arduino_fd_l;
 
 	gettimeofday(&reckon->t1, NULL);
 	gettimeofday(&pd_right->t1, NULL);
