@@ -33,11 +33,18 @@ void deadReckon(ddrn * reckon, float v_left, float v_right){
 		
 	float r = ( b*(v_right + v_left) ) / ( 2*(v_left - v_right) );
 
-	reckon->th = reckon->th_0 + (v_left - v_right)*reckon->t / b;
+//non const vel -- not working
+	//reckon->th += (v_left - v_right)*reckon->lastdt / b;	
+	//reckon->y -= ( r ) * ( cos( (v_left - v_right)*(reckon->lastdt)/b + reckon->th_0 ) - cos(reckon->th_0) );
+	//reckon->x += ( r ) * ( sin( (v_left - v_right)*(reckon->lastdt)/b + reckon->th_0 ) - sin(reckon->th_0) );
 
+
+//works with const vel
+	reckon->th = reckon->th_0 + (v_left - v_right)*reckon->t / b;	
 	reckon->y = reckon->y_0 - ( r ) * ( cos( (v_left - v_right)*(reckon->t)/b + reckon->th_0 ) - cos(reckon->th_0) );
 	reckon->x = reckon->x_0 + ( r ) * ( sin( (v_left - v_right)*(reckon->t)/b + reckon->th_0 ) - sin(reckon->th_0) );
 
+//oldest
 //	reckon->y = reckon->y_0 - ( r ) * ( cos( (v_right - v_left)*(reckon->t)/b + reckon->th_0 ) - cos(reckon->th_0) );
 //	reckon->x = reckon->x_0 + ( r ) * ( sin( (v_right - v_left)*(reckon->t)/b + reckon->th_0 ) - sin(reckon->th_0) );
 

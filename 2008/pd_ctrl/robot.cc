@@ -88,7 +88,7 @@ int main(void){
 		
 		deadReckon(reckon, pd_right->current_vel, pd_left->current_vel);
 
-		printf("t: %f\tx: %f\ty: %f\tth: %f\trv: %f\tlv: %f\n", (float)reckon->t, (float)reckon->x, (float)reckon->y, (float)reckon->th, (float)pd_right->current_vel, (float)pd_left->current_vel);
+		printf("t: %f\tdt: %f\tx: %f\ty: %f\tth: %f\trv: %f\tlv: %f\n", (float)reckon->t, (float)reckon->lastdt, (float)reckon->x, (float)reckon->y, (float)reckon->th, (float)pd_right->current_vel, (float)pd_left->current_vel);
 
 		//printf("rv: %f\tlv: %f\n", pd_right->current_vel, pd_left->current_vel);
 		//printf("%f\t%f\n",reckon->x, reckon->y);
