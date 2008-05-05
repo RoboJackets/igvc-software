@@ -30,6 +30,13 @@ void readToNewline(int fd, char * buff, int maxlen){
 	buff[i] = '\0';
 }
 
+typedef unsigned char byte;
+
+union fb{
+	float f;
+	byte b[4];
+};
+
 int main(void){
 	char buffer[10] = {0};
 	int arduino_fd = serialport_init(SERIALPORT, BAUD);
@@ -37,11 +44,21 @@ int main(void){
 	char p[2] = "p";
 	char f[2] = "f";
 	
+	fb unfb;
+
 	while(1){
 	if(writeFully(arduino_fd, f, 1)){
 			//readToNewline(arduino_fd, buffer, 8);
 			readFully(arduino_fd, buffer, 4);
 			printf("rec %s\n", buffer);
+			
+				unfb.b[0] = (byte) buffer[0];
+				unfb.b[1] = (byte) buffer[1];
+				unfb.b[2] = (byte) buffer[2];
+				unfb.b[3] = (byte) buffer[3];
+
+	printf("restruct %f\n",unfb.f);
+
 		}
 		else{
 			printf("write failed\n");
