@@ -2,10 +2,17 @@
 #define PD_HH
 
 #include "misc.hh"
-//#include "arduino_comm.h"
+#include "arduino_comm.h"
+#include "arduino_readnum.h"
+#include <cmath>
 
 #define TRUE 1
 #define FALSE 0
+
+#define COUNTER_SCALER (64)
+#define F_CPU (16000000)
+#define COUNTER_RATE (F_CPU/COUNTER_SCALER)
+#define RAD_ENCODERTICK ( (2*M_PI)/512 )
 
 typedef struct {
 	public:
@@ -20,6 +27,8 @@ typedef struct {
 		float target_vel;
 
 		bool isRight;
+
+		int arduino_fd;
 } PDstatus;
 
 //float getError(PDstatus * pd_state){
@@ -46,24 +55,49 @@ float newPD(PDstatus * pd_state){
 	return(pd_state->current_vel);
 }
 
+float getVel(int arduino_fd){
+	unsigned short int dp, dt;
+	float velocity;
+
+	char buffer[6] = {0};
+	char v[2] = "v";
+	char t[2] = "t";
+	char p[2] = "p";
+
+	writeFully(arduino_fd, v, 1);
+	dt = readUint16(arduino_fd, t, buffer);
+	dp = readUint16(arduino_fd, p, buffer);
+
+	velocity = ( (float)dp) / ( (float)dt) * RAD_ENCODERTICK * COUNTER_RATE;
+
+	return(velocity);
+
+	//printf("dp: %d\tdt: %d\tvel: %d\n", dp, dt, velocity);
+}
+/*
 float getLinVel_L(PDstatus * pd_state){
+
+getVel(PDstatus);
 	return(pd_state->current_vel);//replace with code to find real vel
 }
 
 float getLinVel_R(PDstatus * pd_state){
 	return(pd_state->current_vel);//replace with code to find real vel
 }
-
+*/
 
 void PDupdateLin(PDstatus * pd_state){
 	//float error, newsignal;
-
+/*
 	if(pd_state->isRight){
 		getLinVel_R(pd_state);
 	}
 	else{
 		getLinVel_L(pd_state);
 	}
+*/
+
+	pd_state->current_vel = getVel(pd_state->arduino_fd);
 
 	newPD(pd_state);
 	gettimeofday(&pd_state->t1, NULL);
