@@ -1,3 +1,5 @@
+// send a 'v' to take a velocity reading, then 't' for a uint16 delta time to be sent, and 'p' for a sint16 of the number of positions the encoder changed.  p and t need to be sent before velocity can be remeasured.  baudrate is 9600, and a 'v' reading will take about .012s to clear before output can be sent (can change to min ~.002).
+
 //#define RADIUS .005
 #define COUNTER_SCALER (64)
 #define COUNTER_RATE (F_CPU/COUNTER_SCALER)
@@ -143,6 +145,9 @@ Serial.println(dt, DEC);
 				}
 			}
 		}
+		//else{//handle didn't receive a 'v'
+
+		//}
 	}
 //Serial.println("loop restart");
 }
