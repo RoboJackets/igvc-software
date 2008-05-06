@@ -56,7 +56,8 @@ float newPD(PDstatus * pd_state){
 }
 
 float getVel(int arduino_fd){
-	unsigned short int dp, dt;
+	unsigned short int dt;
+	short int dp;
 	float velocity;
 
 	char buffer[6] = {0};
@@ -66,7 +67,7 @@ float getVel(int arduino_fd){
 
 	writeFully(arduino_fd, v, 1);
 	dt = readUint16(arduino_fd, t, buffer);
-	dp = readUint16(arduino_fd, p, buffer);
+	dp = readSint16(arduino_fd, p, buffer);
 
 	velocity = ( (float)dp) / ( (float)dt) * RAD_ENCODERTICK * COUNTER_RATE;
 

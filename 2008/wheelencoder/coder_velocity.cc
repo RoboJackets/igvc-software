@@ -24,12 +24,13 @@ int main(void){
 	char p[2] = "p";
 	int arduino_fd = serialport_init(SERIALPORT, BAUD);
 	
-	unsigned short int dp, dt;
+	unsigned short int dt;
+	short int dp;
 	float velocity;
 
 	writeFully(arduino_fd, v, 1);
 	dt = readUint16(arduino_fd, t, buffer);
-	dp = readUint16(arduino_fd, p, buffer);
+	dp = readSint16(arduino_fd, p, buffer);
 
 	velocity = ( (float)dp) / ( (float)dt) * RAD_ENCODERTICK * COUNTER_RATE;
 	printf("dp: %d\tdt: %d\tvel: %d\n", dp, dt, velocity);
