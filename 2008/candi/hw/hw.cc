@@ -167,7 +167,7 @@ static void resizeImage(uint width, uint height) {
 	
 	if (curFrame.data) free(curFrame.data);
 	if (width != 0 || height != 0)
-		curFrame.data = (unsigned char *) malloc(width*height*3);
+		curFrame.data = (char *) malloc(width*height*3);
 }
 
 Image* GetCameraFrame() {
@@ -190,7 +190,7 @@ Image* GetCameraFrame() {
 		
 		/* Get the camera image */
 		resizeImage(camera->GetWidth(), camera->GetHeight());
-		camera->GetImage(curFrame.data);
+		camera->GetImage((uint8_t*) curFrame.data);
 	}
 	
 	return &curFrame;
@@ -217,7 +217,7 @@ double GetLaserRangeAtBearing(double bearing) {
 	LaserProxy* laser = GetLaser();
 	if (laser == NULL) return -1;
 	
-	uint aIndex = (uint) ((bearing - laser->GetMinAngle()) / laser->GetScanRes());
-	if ((aIndex < 0) || (aIndex >= laser->GetCount())) return -1;
+	long aIndex = (long) ((bearing - laser->GetMinAngle()) / laser->GetScanRes());
+	if ((aIndex < 0) || (aIndex >= (long) laser->GetCount())) return -1;
 	return laser->GetRange(aIndex);
 }

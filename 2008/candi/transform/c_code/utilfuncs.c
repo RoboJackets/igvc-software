@@ -105,33 +105,33 @@ void LoadGLTextures() {
 	// allocate space for texture
 	image1 = (Image *) malloc (sizeof (Image));
 	if (image1 == NULL) {
-		printf ("Error allocating space for image");
-		exit (0);
+		printf("Error allocating space for image");
+		exit(0);
 	}
 
 	if (!ImageLoad ("pic.bmp", image1)) {
-		exit (1);
+		exit(1);
 	}
 
 	// Create Texture
-	glGenTextures (1, &texture[0]);
-	glBindTexture (GL_TEXTURE_2D, texture[0]);  // 2d texture (x and y size)
+	glGenTextures(1, &texture[0]);
+	glBindTexture(GL_TEXTURE_2D, texture[0]);  // 2d texture (x and y size)
 
-	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // scale linearly when image bigger than texture
-	glTexParameteri (GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR); // scale linearly from mipmaps when image smaller than texture
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // scale linearly when image bigger than texture
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR); // scale linearly from mipmaps when image smaller than texture
 
 	// 2d texture, level of detail 0 (normal), 3 components (red, green, blue), x size from image, y size from image,
 	// border 0 (normal), rgb color data, unsigned byte data, and finally the data itself.
-	glTexImage2D (GL_TEXTURE_2D, 0, 3, image1->width, image1->height, 0, GL_RGB, GL_UNSIGNED_BYTE, image1->data);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, image1->width, image1->height, 0, GL_RGB, GL_UNSIGNED_BYTE, image1->data);
 }
 
 void drawRose (void) {
 
 	glPushMatrix();
-	glLoadIdentity ();
-	glMatrixMode (GL_MODELVIEW);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glLoadIdentity ();
+	glLoadIdentity();
 	glColor3f (1,.2,.2);//xrose
 	glRectd (1.0,.01,.98,-.01);
 	glColor3f (1,1,1);
