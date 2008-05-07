@@ -1,0 +1,22 @@
+!!FP1.0
+# cgc version 1.5.0022, build date Aug 16 2007 15:46:09
+# command line args: -profile fp30
+# source file: pshader.cg
+#vendor NVIDIA Corporation
+#version 1.5.0.22
+#profile fp30
+#program main
+#semantic main.texture : TEXUNIT0
+#var float4 IN.color : $vin.COLOR0 :  : 0 : 0
+#var float3 IN.texcoord : $vin.TEXCOORD0 : TEX0 : 0 : 1
+#var float3 IN.lightdist : $vin.TEXCOORD1 :  : 0 : 0
+#var sampler2DSHADOW texture : TEXUNIT0 : texunit 0 : 1 : 1
+#var float4 outcolor : $vout.COLOR0 : COL : -1 : 1
+TEX   R0, f[TEX0], TEX0, 2D;
+ADDR  R0.w, R0.x, -R0.y;
+MOVR  o[COLR].xyz, R0;
+SGTRC HC.x, R0.w, {0.2};
+MOVR  o[COLR].xyz(NE.x), {0.30000001, 1}.xxyw;
+MOVR  o[COLR].w, {1}.x;
+END
+# 6 instructions, 1 R-regs, 0 H-regs

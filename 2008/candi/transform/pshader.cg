@@ -1,0 +1,82 @@
+/*
+ * Copyright (C) 2004 Josh A. Beam
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *   1. Redistributions of source code must retain the above copyright
+ *      notice, this list of conditions and the following disclaimer.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+struct pixel_in {
+	float4 in color : COLOR0;
+	float3 in texcoord : TEXCOORD0;
+	float3  in lightdist : TEXCOORD1;
+};
+
+/*struct pixel_out {
+	out float4 color : COLOR0;
+};*/
+out float4 outcolor:COLOR0;
+/*
+//texture comes from the TEXUNIT0 stream and is usually the same
+pixel_out
+main(pixel_in IN, uniform sampler2D texture : TEXUNIT0)
+{
+	struct pixel_out OUT;
+//
+	float4 orcol={1.0,.5,0,1};
+	float4 mycolor = tex2D(texture, IN.texcoord);
+	float orness = mycolor.r-mycolor.g;
+	//OUT.color=orness>.2?orcol:color;
+	
+	//float4 mycolor=tex2D(texture, IN.texcoord);
+	//float3 myout=mycolor.xyz;
+	pixel_outty BOB;
+	BOB.color.a=1.0;
+	BOB.color.rgba =	  tex2Dproj(texture, IN.texcoord);
+	float4 jack=BOB.color.rgba;
+	
+	//OUT.color = jack;
+
+	return OUT=(pixel_out)BOB;
+}
+*/
+void main(pixel_in IN, uniform sampler2D texture : TEXUNIT0)
+{
+	struct pixel_out OUT;
+//
+	float4 orcol={.3,.3,1,1};
+	float4 mycolor;
+	mycolor = tex2D(texture, IN.texcoord);
+	float orness;
+	orness= mycolor.r-mycolor.g;
+	float4 outprecol=orness>.2?orcol:mycolor;
+	outprecol.a=1;
+	/*
+	//float4 mycolor=tex2D(texture, IN.texcoord);
+	//float3 myout=mycolor.xyz;
+	pixel_outty BOB;
+	BOB.color.a=1.0;
+	BOB.color.rgba =	  tex2Dproj(texture, IN.texcoord);
+	float4 jack=BOB.color.rgba;
+	
+	//OUT.color = jack;*/
+
+	outcolor=outprecol;
+}
