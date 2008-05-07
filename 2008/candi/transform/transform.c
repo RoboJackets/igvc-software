@@ -34,7 +34,7 @@ void display ()
   	glFlush ();
   	*/
   	
-	glutSwapBuffers();
+	//glutSwapBuffers();
 	   
 	glFinish();
 	

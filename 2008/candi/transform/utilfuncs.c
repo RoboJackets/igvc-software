@@ -4,6 +4,7 @@
 #include <GL/glut.h> 	// needed for GLUT
 #include <stdlib.h>
 #include <stdio.h>      // Header file for standard file i/o.
+#include "utilfuncs.h"
 
 
 /* floats for x rotation, y rotation, z rotation */
@@ -24,8 +25,7 @@ int ImageLoad(char *filename, Image *image) {
     char temp;                          // temporary color storage for bgr-rgb conversion.
 
     // make sure the file is there.
-    if ((file = fopen(filename, "rb"))==NULL)
-    {
+    if ((file = fopen(filename, "rb"))==NULL){
 	printf("File Not Found : %s\n",filename);
 	return 0;
     }
@@ -91,6 +91,8 @@ int ImageLoad(char *filename, Image *image) {
 	image->data[i+2] = temp;
     }
     
+    //close file
+	fclose (file);
     // we're done.
     return 1;
 }
@@ -144,8 +146,7 @@ void drawRose(void){
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 }	
-inline unsigned long long nanotime(void)
-{
+inline unsigned long long nanotime(void){
 #ifdef __i386__
      unsigned long long val;
      //asm( "statements" : output_registers : input_registers : clobbered_registers);

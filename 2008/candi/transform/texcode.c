@@ -1,6 +1,10 @@
 #ifndef texcode_c
 #define texcode_c
 
+#include "shadercalls.h"
+#include "blackbarrels_unit/blackmain.h"
+
+
 Image* im3;			//texture data
 #ifdef paulpedantic
 int count;
@@ -18,16 +22,19 @@ void NextFrame(void) {
 			im2 = (Image*) GetNextFrame();	//camera data
 			if( ((im2->width)!=IWIDTH) || ((im2->height)!=IHEIGHT) ){		//do they not match?
 				printf("\nWidth and height wrong x%d!!!\nW:%d  H:%d\n",++count,(int)im2->width,(int)im2->height);
-				//goto TRYANOTHERONE;
+				goto TRYANOTHERONE;
 				return;
 			}
 		#else
 			im2 = (Image*) GetNextFrame();	//camera data
 		#endif
-	
-		packin(im2);
+		getBlackedImage(im2,im2);
+		packin(im2);//packs data into 2^n texture block
+		
 		
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, im3->width, im3->height, 0, GL_RGB, GL_UNSIGNED_BYTE, im3->data);
+	glEnable(GL_FRAGMENT_PROGRAM_ARB);
+	my_glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, shader_num);
 	
 }
 
@@ -57,7 +64,7 @@ void texinit(void){
     glBindTexture(GL_TEXTURE_2D, texture[0]);   // 2d texture (x and y size)
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // scale linearly when image bigger than texture
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	im3=malloc(sizeof(Image));
 	im3->width=TEX_DIM;
 	im3->height=TEX_DIM;
@@ -65,6 +72,7 @@ void texinit(void){
 	#ifdef paulpedantic
 	count=0;
 	#endif
+	shader_init();
 	
 	NextFrame();
 	//debug
