@@ -60,14 +60,16 @@ float getVel(int arduino_fd){
 	short int dp;
 	float velocity;
 
-	char buffer[6] = {0};
+	//char buffer[6] = {0};
 	char v[2] = "v";
 	char t[2] = "t";
 	char p[2] = "p";
 
 	writeFully(arduino_fd, v, 1);
-	dt = readUint16(arduino_fd, t, buffer);
-	dp = readSint16(arduino_fd, p, buffer);
+//	dt = readUint16(arduino_fd, t, buffer);
+//	dp = readSint16(arduino_fd, p, buffer);
+	dt = readUint16(arduino_fd, t);
+	dp = readSint16(arduino_fd, p);
 
 	velocity = ( (float)dp) / ( (float)dt) * RAD_ENCODERTICK * COUNTER_RATE;
 
