@@ -47,6 +47,28 @@ void loop(){
 				Serial.print(byteptr[3], BYTE);
 				break;
 				}
+			case 'x':
+				{
+				Serial.print("rec x");
+				while(Serial.available() < 2){
+
+				}
+				if(Serial.available() >= 2){
+					int sint;
+					byte* sintptr = (byte*) &sint;
+					byte incomdata[2];
+					for(int i = 0; i < 2; i++){
+						incomdata[i] = Serial.read();
+						sintptr[i] = incomdata[i];
+					}
+					Serial.print("sint: ");
+					Serial.println(sint,DEC);
+				}
+				else{
+					Serial.print("not enough bytes to convert");
+				}
+				break;
+				}
 		}
 	}
 
