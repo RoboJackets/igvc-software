@@ -118,7 +118,7 @@ Serial.println(dt, DEC);
 //dt = 500;
 //dp = 5;
 
-			//send 4 bytes, two for a uint16 dt, two for a uint16 dp
+			//send 4 bytes, two for a uint16 dt, two for a uint16 dp.  need to read both for loop to clear.
 			while( (Tx_dp == false) || (Tx_dt == false) ){
 				if( Serial.available() > 0 ){
 					incomByte = Serial.read();
@@ -140,6 +140,10 @@ Serial.println(dt, DEC);
 							Serial.print(bytebuff[0], BYTE);
 							Serial.print(bytebuff[1], BYTE);
 							Tx_dp = true;
+							break;
+						case 'c'://clear
+							Tx_dt = TRUE;
+							Tx_dp = TRUE;
 							break;
 					}
 				}
