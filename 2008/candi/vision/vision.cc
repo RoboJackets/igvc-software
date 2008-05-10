@@ -62,7 +62,7 @@ void visFrame()
 			visCreateHSLViews();		// depends on visClassifyPixelsByColor()
 			
 			/* Execute primary analyses */
-			visFindBarrels();		// depends on visClassifyPixelsByColor()
+			//visFindBarrels();		// depends on visClassifyPixelsByColor()
 			visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
 			
 			
@@ -75,8 +75,8 @@ void visFrame()
 				{
 					//visCreateWhiteCalibrationViewFromColor(Pixel(0, 255, 0));	// green
 					
-					static unsigned long hueTimeCounter = 0;
-					hueTimeCounter++;
+					//static unsigned long hueTimeCounter = 0;
+					//hueTimeCounter++;
 					
 					/*
 					u8 curHue = (u8) ((hueTimeCounter / 1) % 256);
@@ -99,8 +99,8 @@ void visFrame()
 			//printf("DEBUG: H=%d, S=%d, L=%d\n", debug_yellow.hue, debug_yellow.saturation, debug_yellow.lightness);
 			
 			// TEMPORARY: Annotate pixel colors only
-			visTestViewContent.copyFrom(visRaw);
-			visAnnotatePixelColors(visTestViewContent);
+			//visTestViewContent.copyFrom(visRaw);
+			//visAnnotatePixelColors(visTestViewContent);
 		}
 	}
 visFrame_exit:

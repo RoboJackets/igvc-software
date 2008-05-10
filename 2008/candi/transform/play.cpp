@@ -31,7 +31,7 @@ extern "C" void ProcessTransformedFrame(void) {
 	// Do vision processing on the transformed frame
 	Camera::current = &PCamera::INSTANCE;
 	PCamera::INSTANCE.update();
-	visFrame();
+	visFrame();//drive robot
 	
 	// Drive the motors using the heading found by the navigation algorithm
 	SetMotorOutput(autonomousModeMotorOutput);
