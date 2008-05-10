@@ -107,7 +107,7 @@ void visPlotNavigationParams(void) {
 	//       when computing the danger map
 	//       (in particular, use it to distinguish white barrel stripes
 	//        from white lines on the field)
-	visAnnotateBarrelBounds(visNavigationParams, false);
+	//visAnnotateBarrelBounds(visNavigationParams, false);
 	
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	static int pathDanger[NAV_PATH__NUM];
