@@ -23,10 +23,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+//cgc -o shader.pso -profile fp30 pshader.cg
+
 struct pixel_in {
 	float4 in color : COLOR0;
 	float3 in texcoord : TEXCOORD0;
-	float3  in lightdist : TEXCOORD1;
+	//float3  in lightdist : TEXCOORD1;
 };
 
 /*struct pixel_out {
@@ -61,13 +63,17 @@ void main(pixel_in IN, uniform sampler2D texture : TEXUNIT0)
 {
 	struct pixel_out OUT;
 //
-	float4 orcol={.3,.3,1,1};
+	float4 orcol={1,.5,0,1};
+	float4 sandcol={0,1,0,1};
 	float4 mycolor;
 	mycolor = tex2D(texture, IN.texcoord);
 	float orness;
 	orness= mycolor.r-mycolor.g;
-	float4 outprecol=orness>.2?orcol:mycolor;
-	outprecol.a=1;
+	//recolor if orange
+	//float4 outprecol=orness>.2?orcol:mycolor;
+	float4 outprecol=orness>.01?(orness>.2?orcol:sandcol):mycolor;
+	
+	//outprecol.a=1;
 	/*
 	//float4 mycolor=tex2D(texture, IN.texcoord);
 	//float3 myout=mycolor.xyz;
@@ -77,6 +83,5 @@ void main(pixel_in IN, uniform sampler2D texture : TEXUNIT0)
 	float4 jack=BOB.color.rgba;
 	
 	//OUT.color = jack;*/
-
 	outcolor=outprecol;
 }

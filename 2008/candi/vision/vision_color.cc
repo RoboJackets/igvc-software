@@ -18,9 +18,9 @@ const int ORANGE_PIXEL_DETECTION_THRESHOLD =
 	/*new IntFilterParam("Orange Pixels (Red-Green) - Threshold (High)", -255, 255,*/ 30;
 
 /* lower values look for cleaner (less dirty) white */
-// >=90 for low-light conditions
+// >=90 for low-light conditions     bigger->more red
 const int WHITE_PIXEL_SATURATION_THRESHOLD =
-	/*new IntFilterParam("White Pixel Saturation - Threshold (Low)", 0, 255,*/ 85; //50;
+	/*new IntFilterParam("White Pixel Saturation - Threshold (Low)", 0, 255,*/ 90;//85; //50;
 
 /* HSB only: higher values look for brighter white */
 // >=40 to eliminate black
@@ -28,9 +28,9 @@ const int WHITE_PIXEL_BRIGHTNESS_THRESHOLD =
 	/*new IntFilterParam("White Pixel Brightness - Threshold (High)", 0, 255,*/ 100; //60;
 
 /* HSL only: higher values look for brighter white */
-// >=40 to eliminate black
+// >=40 to eliminate black   bigger->less blue
 const int WHITE_PIXEL_LIGHTNESS_THRESHOLD =
-	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 140; //160; //140; //100; //60;
+	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 150; //140; //100; //60;
 
 
 const Pixel ORANGE_PIXEL_ANNOTATION_COLOR = Pixel(255, 128, 0);		// bright orange
