@@ -17,11 +17,21 @@ static Buffer2D<PixelRGB> The_Processed_Image;
 
 namespace blackbarrels{
 	static Image * infr1=new Image;
-	static Buffer2D<PixelRGB> whim,orim,fr1,barim,fr2;
-	static Buffer2D<bool> mask;
+	static Buffer2D<PixelRGB> whim,orim,whimd,orimd,fr1,flip,barim,fr2;
+	static Buffer2D<bool> mask,maskd,maskd2;
 }
 
 extern "C" void getBlackedImage(Image* infr2,Image* imout){
+	
+	static long long lasttime=0;
+	static long long thistime=0;
+	thistime=currentTimeMicros();
+	printf("Framerate: %.4lg\n",1000000.0/((double)(thistime-lasttime)));
+	lasttime=thistime;
+	
+	
+	
+	
 	fr1.copyFrom (infr2->width,infr2->height, (PixelRGB*) infr2->data);
 	blackmain();
 	imout->width	=The_Processed_Image.width;
@@ -38,7 +48,6 @@ namespace blackbarrels{
 void blackmain() {
 	
 	/* get image */
-	long long t1=currentTimeMicros();
 	//ImageLoad ("12.bmp", infr1);
 	//fr1.copyFrom (infr1->width,infr1->height, (PixelRGB*) infr1->data);
 	//free (infr1->data);					//don't leak memory!
@@ -61,19 +70,22 @@ void blackmain() {
 	
 	/* process */
 	orim = getorim (fr2);
+	orim.flipud(orimd);
 	whim = getwhim (fr2);
+	whim.flipud(whimd);
 	mask.copyFrom(curtain (whim, orim));
+	maskd.copyFrom(curtain (whimd, orimd));
+	maskd.flipud(maskd2);
+	booland(mask,maskd2);
 	//Buffer2D<PixelRGB> test2=test.toRGB();
 	mask.grow(5);
-	blackout(mask,fr1);
+	orangeout(mask,fr1);
 
     //barim.copyFrom(fr1);
 	/* put image into screen */
 	//screen = &barim;
 	/* put screen into graphics card*/
 	
-	double diff=currentTimeMicros()-t1;
-	printf("framerate: %.2f\n",1.0/diff*1000000.0);
 	
 	//NextFrame();
 	The_Processed_Image.copyFrom(fr1);

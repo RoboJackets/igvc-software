@@ -11,6 +11,7 @@ fi
 
 echo "Creating: candi.pro"
 shopt -s extglob
+echo $CFLAGS
 qmake-qt4 -project \
 		-o candi.pro \
 		CONFIG+=debug \
@@ -23,7 +24,7 @@ qmake-qt4 -project \
 		DEPENDPATH-="transform/c_code" \
 		`./remove-sources transform/c_code/*.+(c|cc|cpp|h)` \
 		SOURCES-="transform/GenPoints/genpoints.c" \
-		SOURCES-="transform/GenPoints/genpoints_old.c"
+		SOURCES-="transform/GenPoints/genpoints_old.c" 
 
 echo "Creating: Makefile"
 qmake-qt4 -makefile

@@ -90,7 +90,8 @@ void visPlotNavigationParams(void) {
 	{
 		// Annotate standard colors
 		visAnnotatePixelColors(visNavigationParams);
-		
+		/*DEPRECATED due to barrels now being identified before the transform phase
+					and this code relies on it happening in vision_barrels
 		// Annotate white specially:
 		// 1. white barrel stripes -> light gray (custom)
 		// 2. white lines -> pure white (the default)
@@ -98,7 +99,7 @@ void visPlotNavigationParams(void) {
 			if (pixelIsWhite[i] && pixelIsWithinBarrel[i]) {
 				visNavigationParams[i] = WHITE_BARREL_STRIPE_PIXEL_ANNOTATION_COLOR;
 			}
-		}
+		}*///end deprecated region
 	}
 	
 	// Annotate the navigation output image
@@ -141,13 +142,20 @@ void visPlotNavigationParams(void) {
 				
 				if (g.contains(curPoint.x, curPoint.y)) {
 					if (pixelIsWhite.get(curPoint.x, curPoint.y)) {
+						/*DEPRECATED due to barrels now being identified before the transform phase
+						and this code relies on it happening in vision_barrels
+						
 						if (pixelIsWithinBarrel.get(curPoint.x, curPoint.y)) {
 							// Barrel: White stripe
 							curPixelDanger += DANGER_PER_BARREL_PIXEL;
 						} else {
 							// Line: White
 							curPixelDanger += DANGER_PER_LINE_PIXEL;
-						}
+						}*///end deprecated region
+						
+						/*REPLACEMENT*/
+						curPixelDanger += DANGER_PER_LINE_PIXEL;
+						/**///end replacement
 					} else if (pixelIsOrange.get(curPoint.x, curPoint.y)) {
 						// Barrel: Orange stripe
 						curPixelDanger += DANGER_PER_BARREL_PIXEL;

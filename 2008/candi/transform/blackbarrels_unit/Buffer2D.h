@@ -4,7 +4,7 @@
 #include "types.h"	// for NULL
 #include <string.h>		// for memcpy
 #include "PixelRGB.h"
-#include <stdlib.h>
+//#include <stdlib.h>
 namespace blackbarrels{
 
 /*
@@ -211,8 +211,30 @@ class Buffer2D {
 			delete []p;
 			return TRUE;
 		}
-		
-		
+		/*
+		bool flipud(){
+			int w=this->width;
+			int length=this.numElements;
+			Buffer2D<E> t;
+			for(int i=0;i<length;i++){
+				memcpy((void*)
+			
+			}
+		}*/
+		bool flipud(Buffer2D<E>& out){
+			int w=this->width;
+			out.resizeToMatch((*this));
+
+			int length=this->numElements();
+			Buffer2D<E> t;
+			size_t size=w*sizeof(E);
+			//int u,d;
+			for(int u=0,d=length-w; u<length; u+=w,d-=w){
+				memcpy((void*)&(out[d]),(void*)&((*this)[u]),size);
+				memcpy((void*)&(out[u]),(void*)&((*this)[d]),size);
+			}
+			return TRUE;
+		}
 		// Shrinks this buffer and its contents (if the specified new size is
 		// different than the old size).
 		// If width or height is 0, then no new buffer will be allocated.

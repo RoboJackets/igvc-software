@@ -49,7 +49,13 @@ void RGBtoBool (Buffer2D<PixelRGB>& img, Buffer2D<bool>& dst) {
 			dst[ii] = 0;
 	}
 }
-
+void booland(Buffer2D<bool>& img1,Buffer2D<bool>& img2){
+	int len=img1.numElements();
+	img1.resizeToMatch(img2);
+	for(int i=0;i<len;i++){
+		img1[i]=img1[i] && img2[i];
+	}
+}
 //Does an inverse mask operation on the rgb image
 void blackout (Buffer2D<bool>& mask, Buffer2D<PixelRGB>& img) {
 	int ii;
@@ -58,6 +64,18 @@ void blackout (Buffer2D<bool>& mask, Buffer2D<PixelRGB>& img) {
 	for(ii = 0; ii < buffLength; ii++){
 		if(mask[ii]){
 			img[ii].r = img[ii].g = img[ii].b = 0;
+		}
+	}	
+}
+void orangeout (Buffer2D<bool>& mask, Buffer2D<PixelRGB>& img) {
+	int ii;
+	int buffLength = img.numElements();
+	
+	for(ii = 0; ii < buffLength; ii++){
+		if(mask[ii]){
+			img[ii].r = 255;
+			img[ii].g = 127;
+			img[ii].b = 0;
 		}
 	}	
 }

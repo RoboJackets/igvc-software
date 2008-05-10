@@ -39,6 +39,10 @@ typedef struct _PixelRGB {
 		signed int fadeOffset_sint = deltaChannel_sint * curStep_sint / maxStep_sint;
 		return (u8) (srcChannel_sint + fadeOffset_sint);
 	}
+	_PixelRGB operator& (_PixelRGB p2) {
+		_PixelRGB out(this->r& p2.r,this->g& p2.g,this->b& p2.b);
+			return out;
+		}
 } PixelRGB;
 }
 #endif // _PIXEL_H_
