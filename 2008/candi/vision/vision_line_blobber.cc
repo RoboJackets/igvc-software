@@ -91,14 +91,16 @@ void visBlobLines(){
 }
 
 void findat(int x,int y) {
+	
+	
 	static Point2D<int>* plst=0;		// pixel list
 	static int plsz=0;					// pixel list size
-	
+
 	Point2D<int> xmax(x, y);
 	Point2D<int> xmin(x, y);
 	Point2D<int> ymax(x, y);
 	Point2D<int> ymin(x, y);
-	const int w=img.width;
+	const int width = img.width;
 	//const int h=img.height;
 	
 	if (img.numElements()/8 != plsz) {
@@ -110,24 +112,30 @@ void findat(int x,int y) {
 	int cp=0;		//current point index
 	int np=1;		//num points so far found, starts with 1
 	
-	plst[cp].x=x;	//read in initial point
+	//read in initial point
+	plst[cp].x=x;	
 	plst[cp].y=y;
 	
-	img.data[plst[cp].x+plst[cp].y*w]=0;		//clear initial point
+	img.data[plst[cp].x+plst[cp].y*width]=0;		//clear initial point
 	for(;cp<np;cp++){						//run till out of points
 		//clear and record 4 neighbors
 		{
 			//cache base x and y (hopefully in registers)			 
 				int cx=plst[cp].x;
 				int cy=plst[cp].y;
+
+				
+			//variable for index
+				int index = 0;
 			
 			//white top
 			{
-				if(img.data[cx+(cy+1)*w]){
-					img.data[cx+(cy+1)*w]=0;	//clear it
+				index = cx+(cy+1)*width;
+				if(img.data[index]){
+					img.data[index]=0;	//clear it
 					if(cy+1>ymax.y){				//could be new ymax,store if so
-					 ymax.y=cy+1;
-					 ymax.x=cx;	
+						ymax.y=cy+1;
+						ymax.x=cx;	
 					}
 					plst[np].y=cy+1;			//add to found list
 					plst[np].x=cx;
@@ -136,11 +144,12 @@ void findat(int x,int y) {
 			}
 			//white right
 			{
-				if(img.data[cx+1+(cy)*w]){		
-					img.data[cx+1+(cy)*w]=0;	//clear it
+				index = cx+1+(cy)*width;
+				if(img.data[index]){		
+					img.data[index]=0;	//clear it
 					if(cx+1>xmax.x){				//could be new xmax,store if so
-					 xmax.y=cy;
-					 xmax.x=cx+1;
+						xmax.y=cy;
+						xmax.x=cx+1;
 					}	
 					plst[np].y=cy;			//add to found list
 					plst[np].x=cx+1;
@@ -149,11 +158,12 @@ void findat(int x,int y) {
 			}
 			//white bottom
 			{
-				if(img.data[cx+(cy-1)*w]){
-					img.data[cx+(cy-1)*w]=0;	//clear it
+				index = cx+(cy-1)*width;
+				if(img.data[index]){
+					img.data[index]=0;	//clear it
 					if(cy-1<ymin.y){	//could be new ymin,store if so
-					 ymin.y=cy-1;
-					 ymin.x=cx;	
+						ymin.y=cy-1;
+						ymin.x=cx;	
 					}
 					plst[np].y=cy-1;			//add to found list
 					plst[np].x=cx;
@@ -162,11 +172,12 @@ void findat(int x,int y) {
 			}
 			//white left
 			{
-				if(img.data[cx-1+(cy)*w]){		
-					img.data[cx-1+(cy)*w]=0;	//clear it
+				index = cx-1+(cy)*width;
+				if(img.data[index]){		
+					img.data[index]=0;	//clear it
 					if(cx-1<xmin.x){	//could be new xmin,store if so
-					 xmax.y=cy;
-					 xmax.x=cx-1;
+						xmax.y=cy;
+						xmax.x=cx-1;
 					}	
 					plst[np].y=cy;			//add to found list
 					plst[np].x=cx-1;
