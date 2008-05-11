@@ -63,6 +63,8 @@ void visFrame()
 			
 			/* Execute primary analyses */
 			//visFindBarrels();		// depends on visClassifyPixelsByColor()
+
+			//drive robot
 			visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
 			
 			
@@ -103,7 +105,7 @@ void visFrame()
 			//visAnnotatePixelColors(visTestViewContent);
 		}
 	}
-visFrame_exit:
+	visFrame_exit:
 	// Unlock the vision mutex.
 	// This must always be done before this function returns.
 	visMutexUnlock();

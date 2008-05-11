@@ -131,36 +131,36 @@ void visClassifyPixelsByColor(void) {
 		pixelIsWhite[i] &= !whiteFilterMask[i];
 	}
 	
-#if 0
-	/*
-	 * Apply a noise filter to white detection
-	 */
-	// XXX: unhack me please!
-	#define img pixelIsWhiteTemp
-	int w = pixelIsWhite.width;
-	int h = pixelIsWhite.height;
-	pixelIsWhiteTemp.copyFrom(pixelIsWhite);
-	for(int x=1;x<w-1;x++){
-		for(int y=1;y<h-1;y++) {
-			/*eight neighbor check					*/
-			/*done in order of best short circuit	*/
-			if(img.data[x+y*w]&&				
-				img.data[x+1+y*w]&&				
-				img.data[x-1+y*w]&&		
-				img.data[x+(y+1)*w]&&	
-				img.data[x+1+(y+1)*w]&&	
-				img.data[x-1+(y+1)*w]&&	
-				img.data[x+(y-1)*w]&&	
-				img.data[x+1+(y-1)*w]&&	
-				img.data[x-1+(y-1)*w])
-			{
-				pixelIsWhite.data[x+y*w] = 1;
-			} else {
-				pixelIsWhite.data[x+y*w] = 0;
+	#if 0
+		/*
+		 * Apply a noise filter to white detection
+		 */
+		// XXX: unhack me please!
+		#define img pixelIsWhiteTemp
+		int w = pixelIsWhite.width;
+		int h = pixelIsWhite.height;
+		pixelIsWhiteTemp.copyFrom(pixelIsWhite);
+		for(int x=1;x<w-1;x++){
+			for(int y=1;y<h-1;y++) {
+				/*eight neighbor check					*/
+				/*done in order of best short circuit	*/
+				if(img.data[x+y*w]&&				
+					img.data[x+1+y*w]&&				
+					img.data[x-1+y*w]&&		
+					img.data[x+(y+1)*w]&&	
+					img.data[x+1+(y+1)*w]&&	
+					img.data[x-1+(y+1)*w]&&	
+					img.data[x+(y-1)*w]&&	
+					img.data[x+1+(y-1)*w]&&	
+					img.data[x-1+(y-1)*w])
+				{
+					pixelIsWhite.data[x+y*w] = 1;
+				} else {
+					pixelIsWhite.data[x+y*w] = 0;
+				}
 			}
 		}
-	}
-#endif
+	#endif
 }
 
 void visAnnotatePixelColors(Buffer2D<Pixel>& imageToAnnotate) {
