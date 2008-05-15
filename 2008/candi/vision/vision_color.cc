@@ -56,6 +56,8 @@ Buffer2D<bool> pixelIsOrange;
 Buffer2D<bool> pixelIsWhite;
 //Buffer2D<bool> pixelIsYellow;
 
+
+
 // public
 Buffer2D<Pixel> visWhiteDetectionCalibration;
 Buffer2D<Pixel> visWhiteCondition;
@@ -86,12 +88,31 @@ inline bool pixelIsWhite_calc_condition1(int off);
 inline bool pixelIsWhite_calc_condition2(int off);
 //bool pixelIsYellow_calc(int off);
 
-
+Buffer2D<bool> pixelIsWhiteTemp;
 bool pixelIsYellow_calcFromHSL(HSL hsl);
 
 // ------------------------------------------------------------------------
+void visGenPath();
+Buffer2D<bool> visPathView;
+// ------------------------------------------------------------------------
 
-Buffer2D<bool> pixelIsWhiteTemp;
+
+void visGenPath(void){
+	int width = visRaw.width;
+	int height = visRaw.height;
+	int good = 0;
+	visPathView.resize(width, height);
+	for(int y = 0; y < height; y++){
+	
+		for(int x = 0; x < width; x++){
+			
+		}//x
+	
+	}//y
+	
+	
+}//visGenPath
+
 
 // public
 void visClassifyPixelsByColor(void) {
@@ -405,3 +426,6 @@ bool pixelIsYellow_calcFromHSL(HSL hsl) {
 	bool looksLikeYellow = (distFromYellow < YELLOW_PIXEL_TARGET_RADIUS);
 	return looksLikeYellow;
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+

@@ -17,7 +17,7 @@ long long tvararr[256];
 unsigned char tvarindex=0;
 void display ()
 {
-	long long tvar2;
+	//long long tvar2;
 	//glLoadMatrixd(getPjMat());
 	
 	//tvar=nanotime();
@@ -47,9 +47,9 @@ void display ()
 void keyPressed(unsigned char key, int x, int y) 
 {
 	int xx=0;
-	int yy=0;
-	int c=0;
-	double avg=0;
+	//int yy=0;
+	//int c=0;
+	//double avg=0;
 	FILE *outp;
 	
     /* avoid thrashing this procedure */
