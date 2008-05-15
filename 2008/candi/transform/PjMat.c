@@ -21,7 +21,7 @@ void findmaxview();
 GLdouble m[16];
 
 void setPjMat(){
-	int i;
+	//int i;
 	double tu,tv;					
 	double sx,sy,sz,cx,cy,cz;
 	//double translateX, translateY; 
