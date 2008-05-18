@@ -88,12 +88,14 @@ void visBlobLines(){
 		Line<int> curLine = whitelines[i];
 		lengthX=(curLine.a.x-curLine.b.x);
 		lengthY=(curLine.a.y-curLine.b.y);
+		lengthX*=2;
+		lengthY*=2;
 		for (int dx=-1; dx<=1; dx++) {
 			g.drawLine(curLine.a.x + dx - lengthX, curLine.a.y - lengthY, curLine.b.x + dx + lengthX, curLine.b.y + lengthY);
 		}
 	}
 	static int filenum=0;
-	g.saveAs("testsave/","blob",filenum);
+	//g.saveAs("testsave/","blob",filenum);
 	filenum++;
 }
 
