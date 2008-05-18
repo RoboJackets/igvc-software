@@ -161,11 +161,11 @@ void visPlotNavigationParams(void) {
 						curPixelDanger += DANGER_PER_BARREL_PIXEL;
 					} else {
 						// Nothing special: Probably grass
-						curPixelDanger += 0;
+						//curPixelDanger += 0;
 					}
 				} else {
 					// Offscreen: Probably grass
-					curPixelDanger += 0;
+					//curPixelDanger += 0;
 				}
 			}
 			
