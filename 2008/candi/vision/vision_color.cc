@@ -105,7 +105,7 @@ void visGenPath(void){
 	//visPathView.copyFrom(paulBlob);
 	Pixel p;
 	for(int x = 0; x < width; x++){
-
+		good = 1;
 		for(int y = 0; y < height; y++){
 		
 			if(good){
