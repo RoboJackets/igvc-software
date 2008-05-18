@@ -332,7 +332,7 @@ void visFindBarrels(void) {
 					//bigWidth*(1 - 2*barrelEdgeNoiseTolerance) == smallWidth
 					
 					int smallWidth = rightBarrelEdgeX - leftBarrelEdgeX + 1;
-					int bigWidth = smallWidth/(1 - 2*barrelEdgeNoiseTolerance);
+					int bigWidth = (int)(smallWidth/(1 - 2*barrelEdgeNoiseTolerance));
 					int lengthToGrowSides = (bigWidth-smallWidth)/2;
 					//printf("DEBUG: lengthToGrowSides=%d\n", lengthToGrowSides);
 					

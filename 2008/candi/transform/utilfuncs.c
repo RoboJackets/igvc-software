@@ -1,5 +1,6 @@
 
 #include <stdlib.h>
+#include <time.h>
 #include <sys/time.h>
 #include <GL/glut.h> 	// needed for GLUT
 #include <stdlib.h>
@@ -13,6 +14,8 @@ float xrot, yrot, zrot;
 /* storage for one texture  */
 int texture[1];
 
+long long ROBOT_CORE_START_TIME;		//start time of core in usec
+char* RUN_TIME_STR="00.00.00.00.00.00";	//time code for this run
 
 // quick and dirty bitmap loader...for 24 bit bitmaps with 1 plane only.  
 // See http://www.dcs.ed.ac.uk/~mxr/gfx/2d/BMP.txt for more info.
@@ -179,4 +182,29 @@ long long currentTimeMicros() {
    t = (t * 1000 * 1000) + (tv.tv_usec);
 
    return t;
+}
+
+
+
+char * getTimeStr(){
+	time_t tsec;
+	struct tm t;
+	char *c;
+	c=malloc(19*sizeof(char));
+	tsec=time((time_t *)0);
+	localtime_r(&tsec,&t);
+	sprintf(c,"%.2d.%.2d.%.2d.%.2d.%.2d.%.2d",t.tm_year-100,t.tm_mon,t.tm_mday,t.tm_hour,t.tm_min,t.tm_sec);
+	return c;
+}
+
+long long CORE_TIME(){
+   return currentTimeMicros()-ROBOT_CORE_START_TIME;
+}
+
+void START_CORE_TIME(){
+	ROBOT_CORE_START_TIME=currentTimeMicros();
+	RUN_TIME_STR=getTimeStr();
+}
+void SET_CORE_TIME(long long usec){
+	ROBOT_CORE_START_TIME=currentTimeMicros()-usec;
 }
