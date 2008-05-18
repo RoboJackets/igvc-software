@@ -82,10 +82,14 @@ void visBlobLines(){
 	paulBlob.copyFrom(visRaw);
 	Graphics g(&paulBlob);
 	g.setColor(Pixel(200, 0, 0));	// dark red
+	int lengthX=0; 	//to extend the line by its length
+	int lengthY=0;	//
 	for(int i=0;i<numwhitelines;i++){
 		Line<int> curLine = whitelines[i];
+		lengthX=(curLine.a.x-curLine.b.x);
+		lengthY=(curLine.a.y-curLine.b.y);
 		for (int dx=-1; dx<=1; dx++) {
-			g.drawLine(curLine.a.x + dx, curLine.a.y, curLine.b.x + dx, curLine.b.y);
+			g.drawLine(curLine.a.x + dx - lengthX, curLine.a.y - lengthY, curLine.b.x + dx + lengthX, curLine.b.y + lengthY);
 		}
 	}
 	static int filenum=0;
