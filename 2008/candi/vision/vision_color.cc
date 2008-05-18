@@ -30,7 +30,7 @@ const int WHITE_PIXEL_BRIGHTNESS_THRESHOLD =
 /* HSL only: higher values look for brighter white */
 // >=40 to eliminate black   bigger->less blue
 const int WHITE_PIXEL_LIGHTNESS_THRESHOLD =
-	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 140; //140; //100; //60;
+	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 120; //140; //100; //60;
 
 
 const Pixel ORANGE_PIXEL_ANNOTATION_COLOR = Pixel(255, 128, 0);		// bright orange
@@ -101,6 +101,7 @@ void visGenPath(void){
 	int width = visRaw.width;
 	int height = visRaw.height;
 	int good = 1;
+	int black=0;
 	visPathView.resize(width, height);
 
 	Pixel p;
@@ -110,6 +111,8 @@ void visGenPath(void){
 	for(int x = 0; x < width; x++){
 	
 		good = 1;
+		black = 6;
+		
 		for(int y = height-1; y >=0 ; y--){
 		
 			p = paulBlob.get(x,y);
@@ -129,8 +132,8 @@ void visGenPath(void){
 					visPathView.set(x,y,p2);	
 				}
 				// black from transform
-				else if ( (y>5) && p.red==0 && p.green==0 && p.blue==0){
-					good = 0;
+				else if (p.red==0 && p.green==0 && p.blue==0){
+					black--;
 					p2.red=p2.green=p2.blue=0;
 					visPathView.set(x,y,p2);						
 				}
@@ -145,19 +148,15 @@ void visGenPath(void){
 			}
 			// skip to top
 			else{
-				// black from transform
-				if(p.red==0 && p.green==0 && p.blue==0){
-					good = 1;
-					p2.red=p2.green=0;
-					p2.blue=255;
-					visPathView.set(x,y,p2);
-					
-				}
-				else{
+				if(black<=0){ // not all transform black is totally black
+					black=6;
+					good=1;
+				}else{
 					good=0;
 					p2.red=p2.green=p2.blue=0;
 					visPathView.set(x,y,p2);				
 				}
+
 			}
 			
 		}//y
@@ -243,17 +242,20 @@ void visClassifyPixelsByColor(void) {
 }
 
 void visAnnotatePixelColors(Buffer2D<Pixel>& imageToAnnotate) {
+	bool isOrange,isWhite,isAmbiguous;
+	int numColorsPixelClassifiedAs;
+
 	for (int i=0, n=imageToAnnotate.numElements(); i<n; i++) {
-		bool isOrange = pixelIsOrange[i];
-		bool isWhite = pixelIsWhite[i];
+		isOrange = pixelIsOrange[i];
+		isWhite = pixelIsWhite[i];
 		//bool isYellow = pixelIsYellow[i];
 		
-		int numColorsPixelClassifiedAs = 0;
+		numColorsPixelClassifiedAs = 0;
 		if (isOrange) numColorsPixelClassifiedAs++;
 		if (isWhite) numColorsPixelClassifiedAs++;
 		//if (isYellow) numColorsPixelClassifiedAs++;
 		
-		bool isAmbiguous = (numColorsPixelClassifiedAs >= 2);
+		isAmbiguous = (numColorsPixelClassifiedAs >= 2);
 		if (isAmbiguous) {
 			imageToAnnotate[i] = AMBIGUOUS_PIXEL_ANNOTATION_COLOR;
 		} else {
@@ -356,6 +358,9 @@ void visCreateHSLColorSpaceView(u8 protoHue) {
 	u8 maxSaturation = (u8) 255; //WHITE_PIXEL_SATURATION_THRESHOLD;
 	u8 minLightness = (u8) 0; //WHITE_PIXEL_BRIGHTNESS_THRESHOLD;
 	u8 maxLightness = (u8) 255;
+	
+	bool looksLikeYellow;
+	
 	for (int y=0; y<height; y++) {
 		u8 curLightness = Pixel::fadeBetween(
 			minLightness, maxLightness,
@@ -366,7 +371,7 @@ void visCreateHSLColorSpaceView(u8 protoHue) {
 				minSaturation, maxSaturation,
 				x, width-1);
 			
-			bool looksLikeYellow = pixelIsYellow_calcFromHSL(
+			looksLikeYellow = pixelIsYellow_calcFromHSL(
 				HSL(protoHue, curSaturation, curLightness));
 			
 			Pixel curColor = HSLtoRGB(HSL(protoHue, curSaturation, curLightness));
@@ -398,9 +403,11 @@ void visCreateWhiteConditionView(void)
 {
 	visWhiteCondition.resizeToMatch(visRaw);
 	
+	bool condition1,condition2;
+	
 	for (int i=0, n=visRaw.numElements(); i<n; i++) {
-		bool condition1 = pixelIsWhite_calc_condition1(i);
-		bool condition2 = pixelIsWhite_calc_condition2(i);
+		condition1 = pixelIsWhite_calc_condition1(i);
+		condition2 = pixelIsWhite_calc_condition2(i);
 		
 		Pixel& curColor = visWhiteCondition[i];
 		if (condition1) {
@@ -425,10 +432,10 @@ void visCreateWhiteConditionView(void)
 
 void visCreateRedMinusGreenView(void) {
 	visRedMinusGreen.resizeToMatch(visRaw);
-	
+	int value;
 	for (int i=0, n=visRaw.numElements(); i<n; i++) {
 		Pixel p = visRaw[i];
-		int value = p.red - p.green;	// -255 to 255
+		value = p.red - p.green;	// -255 to 255
 		visRedMinusGreen[i] = value/2 + 128;
 	}
 }
