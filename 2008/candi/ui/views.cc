@@ -13,15 +13,15 @@ VisColorView navigationParamsView = VisColorView("Navigation Params", &visNaviga
 VisColorView rawView = VisColorView("Raw", &visRaw);
 
 // Debugging view
-VisColorView testView = VisColorView("Debug", &visTestViewContent);
+//VisColorView testView = VisColorView("Debug", &visTestViewContent);
 
 VisColorView whiteDetectionCalibrationView = VisColorView("Calibrate: Color - White: General", &visWhiteDetectionCalibration);
-VisColorView whiteConditionView = VisColorView("Calibrate: Color - White: Conditions", &visWhiteCondition);
+//VisColorView whiteConditionView = VisColorView("Calibrate: Color - White: Conditions", &visWhiteCondition);
 
 VisGrayView redMinusGreenView = VisGrayView("Red-Green", &visRedMinusGreen);
 
 // Same as "rawView", but with identified barrels boxed
-VisColorView barrelView = VisColorView("Barrels", &visBarrels);
+//VisColorView barrelView = VisColorView("Barrels", &visBarrels);
 
 VisBlackAndWhiteView orangeView = VisBlackAndWhiteView("Color - Orange", &pixelIsOrange);
 VisBlackAndWhiteView whiteView = VisBlackAndWhiteView("Color - White", &pixelIsWhite);
