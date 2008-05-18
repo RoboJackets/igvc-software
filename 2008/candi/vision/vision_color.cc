@@ -120,11 +120,11 @@ void visGenPath(void){
 					good = 0;
 				}
 				// orange from shader
-				else if (p.red==255 && p.green==127 && p.blue==0){
+				else if (p.red==255 && p.green==128 && p.blue==0){
 					good = 0;
 				}
 				// sand from shader
-				else if (p.red==0 && p.green==127 && p.blue==0){
+				else if (p.red==0 && p.green==255 && p.blue==0){
 					good = 0;
 				}
 				// probably good
