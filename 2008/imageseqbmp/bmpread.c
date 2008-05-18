@@ -17,7 +17,13 @@ int ImageLoad(char *filename, Image *image) {
     int x, y;
     char* off1;
     char* off2;
-
+	
+	//free old data
+	if(image.data){
+	free(image.data);
+	}
+	
+	
     // make sure the file is there.
     if ((file = fopen(filename, "rb"))==NULL)
     {

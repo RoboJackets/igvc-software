@@ -18,7 +18,7 @@ Line<int> whitelines[MAX_N_LINES];		//array of the white lines we've found
 int numwhitelines=0;					//number of lines in the line array
 #define numlines numwhitelines
 
-Line<int> inferredlines[MAX_N_LINES];	//array of the white lines we've found
+Line<int> inferredlines[MAX_N_LINES];	//array of the white lines we've made up
 int numinferredlines=0;					//number of lines in the line array
 
 Line<int> dashedlines[MAX_N_LINES];		//array of the white lines we've found
@@ -88,6 +88,9 @@ void visBlobLines(){
 			g.drawLine(curLine.a.x + dx, curLine.a.y, curLine.b.x + dx, curLine.b.y);
 		}
 	}
+	static int filenum=0;
+	g.saveAs("testsave/","blob",filenum);
+	filenum++;
 }
 
 void findat(int x,int y) {
@@ -281,7 +284,7 @@ static int findlowestrightline(){
 	Point2D<int> lowestrightlinept(0,0); //<-worst case
 	
 	for(int i=0;i<numwhitelines;i++){
-		if(wl[i].a.x<w/2||wl[i].b.x<w/2){
+		if(wl[i].a.x>w/2||wl[i].b.x>w/2){
 			if(wl[i].a.y > lowestrightlinept.y){
 				lowestrightlineindex=i;
 				lowestrightlinept=wl[i].a;

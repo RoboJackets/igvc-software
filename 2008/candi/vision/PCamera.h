@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Pixel.h"
 #include "Buffer2D.h"
+#include "transform/blackbarrels_unit/PixelRGB.h"
 #include <qstring.h>
 
 class PCamera: public Camera
@@ -24,8 +25,10 @@ public:
 	Pixel *getRGB();
 
 	void update();
+	void writeFrameToDisk();
 
 protected:
 	Buffer2D<Pixel> frame;
+	Buffer2D<blackbarrels::PixelRGB> frameToWrite;
 };
 #endif // _P_CAMERA_H_

@@ -43,13 +43,6 @@ struct BMPHeader
                              are important */
 };
 
-int
-read_bmp(const char *filename, int *width, int *height, unsigned char **rgb)
-{
-    fprintf(stderr, "Sorry, reading of .bmp files isn't supported yet.\n");
-    return(0);
-}
-
 int 
 write_bmp(const char *filename, int width, int height, char *rgb)
 {

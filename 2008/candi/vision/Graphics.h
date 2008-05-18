@@ -13,8 +13,10 @@
 #include "Point2D.h"
 #include "vision_util.h"
 #include "Line.h"
+#include "transform/blackbarrels_unit/bmpwrite.h"
 #include <stdlib.h>			// abs
 #include <QVector>
+
 
 class Graphics
 {
@@ -32,6 +34,31 @@ public:
 	
 	void setColor(const Pixel& color) {
 		this->color = color;
+	}
+	// ### FILE OPS ###
+	
+	bool saveAs(char * location, char * name, int number){
+		char path[1000];
+		char numstr[10];
+		char* rgb;
+		char* bgr0=(char*)buffer->data;
+		
+		path[0]=0;
+		strcat(path,location);
+		strcat(path,name);
+		sprintf(numstr,"%.6d",number);
+		strcat(path, numstr);
+		strcat(path, ".bmp");
+		const int limit=buffer->numElements()*3;
+		rgb=(char*)malloc(sizeof(char)*limit);
+		for(int offi=0,offo=0; offo<limit;offi+=4,offo+=3){
+			rgb[offo  ] = bgr0[offi+2];
+			rgb[offo+1] = bgr0[offi+1];
+			rgb[offo+2] = bgr0[offi  ];
+		}
+		
+		write_bmp(path, buffer->width, buffer->height, rgb);
+		free(rgb);
 	}
 	
 	// ### DRAWING ###
