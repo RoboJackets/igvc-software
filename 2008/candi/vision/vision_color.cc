@@ -102,44 +102,62 @@ void visGenPath(void){
 	int height = visRaw.height;
 	int good = 1;
 	visPathView.resize(width, height);
-	//visPathView.copyFrom(paulBlob);
+
 	Pixel p;
+	Pixel p2;
 	
-	//scan up in columns; white = path; black = bad
+	// scan up in columns; white = path; black = bad
 	for(int x = 0; x < width; x++){
 	
 		good = 1;
 		for(int y = height-1; y >=0 ; y--){
 		
+			p = paulBlob.get(x,y);
+		
 			if(good){
-	
-				p = paulBlob.get(x,y);
 			
 				// 200: from vision line blobber
 				if (p.red==200 && p.green==0 && p.blue==0){
 					good = 0;
+					p2.red=p2.green=p2.blue=0;
+					visPathView.set(x,y,p2);	
 				}
 				// orange from shader
 				else if (p.red==255 && p.green==128 && p.blue==0){
 					good = 0;
+					p2.red=p2.green=p2.blue=0;
+					visPathView.set(x,y,p2);	
 				}
-				// sand from shader
-				else if (p.red==0 && p.green==255 && p.blue==0){
+				// black from transform
+				else if ( (y>5) && p.red==0 && p.green==0 && p.blue==0){
 					good = 0;
+					p2.red=p2.green=p2.blue=0;
+					visPathView.set(x,y,p2);						
 				}
 				// probably good
 				else{
-					p.red=p.green=p.blue=255;
-					visPathView.set(x,y,p);
+					p2.red=p2.green=p2.blue=255;
+					visPathView.set(x,y,p2);
+					good=1;
 				}
 				
 				
 			}
-			//skip to top
+			// skip to top
 			else{
-				good=0;
-				p.red=p.green=p.blue=0;
-				visPathView.set(x,y,p);				
+				// black from transform
+				if(p.red==0 && p.green==0 && p.blue==0){
+					good = 1;
+					p2.red=p2.green=0;
+					p2.blue=255;
+					visPathView.set(x,y,p2);
+					
+				}
+				else{
+					good=0;
+					p2.red=p2.green=p2.blue=0;
+					visPathView.set(x,y,p2);				
+				}
 			}
 			
 		}//y
