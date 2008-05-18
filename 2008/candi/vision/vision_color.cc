@@ -104,9 +104,12 @@ void visGenPath(void){
 	visPathView.resize(width, height);
 	//visPathView.copyFrom(paulBlob);
 	Pixel p;
+	
+	//scan up in columns; white = path; black = bad
 	for(int x = 0; x < width; x++){
+	
 		good = 1;
-		for(int y = 0; y < height; y++){
+		for(int y = height-1; y >=0 ; y--){
 		
 			if(good){
 	
