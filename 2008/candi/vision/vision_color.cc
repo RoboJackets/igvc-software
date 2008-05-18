@@ -93,22 +93,55 @@ bool pixelIsYellow_calcFromHSL(HSL hsl);
 
 // ------------------------------------------------------------------------
 void visGenPath();
-Buffer2D<bool> visPathView;
+Buffer2D<Pixel> visPathView;
 // ------------------------------------------------------------------------
 
 
 void visGenPath(void){
 	int width = visRaw.width;
 	int height = visRaw.height;
-	int good = 0;
+	int good = 1;
 	visPathView.resize(width, height);
-	for(int y = 0; y < height; y++){
+	//visPathView.copyFrom(paulBlob);
+	Pixel p;
+	for(int x = 0; x < width; x++){
+
+		for(int y = 0; y < height; y++){
+		
+			if(good){
 	
-		for(int x = 0; x < width; x++){
+				p = paulBlob.get(x,y);
 			
-		}//x
+				// 200: from vision line blobber
+				if (p.red==200 && p.green==0 && p.blue==0){
+					good = 0;
+				}
+				// orange from shader
+				else if (p.red==255 && p.green==127 && p.blue==0){
+					good = 0;
+				}
+				// sand from shader
+				else if (p.red==0 && p.green==127 && p.blue==0){
+					good = 0;
+				}
+				// probably good
+				else{
+					p.red=p.green=p.blue=255;
+					visPathView.set(x,y,p);
+				}
+				
+				
+			}
+			//skip to top
+			else{
+				good=0;
+				p.red=p.green=p.blue=0;
+				visPathView.set(x,y,p);				
+			}
+			
+		}//y
 	
-	}//y
+	}//x
 	
 	
 }//visGenPath
@@ -182,6 +215,10 @@ void visClassifyPixelsByColor(void) {
 			}
 		}
 	#endif
+	
+	//create CHRIS PLAN VIEW
+	visGenPath();
+	
 }
 
 void visAnnotatePixelColors(Buffer2D<Pixel>& imageToAnnotate) {

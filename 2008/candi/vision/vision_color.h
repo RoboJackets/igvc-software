@@ -23,6 +23,11 @@ extern Buffer2D<u8> visHSLHue;
 extern Buffer2D<u8> visHSLSaturation;
 extern Buffer2D<u8> visHSLLightness;
 
+//---------
+extern void visGenPath();
+extern Buffer2D<Pixel> visPathView;
+//---------
+
 /**
  * Determines which pixels in 'visRaw' are orange, white, yellow, or some
  * combination of multiple colors.
