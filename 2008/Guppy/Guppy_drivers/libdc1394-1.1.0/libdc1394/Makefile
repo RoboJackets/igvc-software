@@ -13,7 +13,7 @@
 # the libdc1394_control itself
 
 
-SHELL = /bin/bash
+SHELL = /bin/sh
 
 srcdir = .
 top_srcdir = ..
@@ -42,9 +42,9 @@ pkgincludedir = $(includedir)/libdc1394
 
 top_builddir = ..
 
-ACLOCAL = /home/chris/Desktop/igvcsvn2/Guppy/Guppy_drivers/libdc1394-1.1.0/missing aclocal-1.4
+ACLOCAL = aclocal-1.4
 AUTOCONF = autoconf
-AUTOMAKE = /home/chris/Desktop/igvcsvn2/Guppy/Guppy_drivers/libdc1394-1.1.0/missing automake-1.4
+AUTOMAKE = automake-1.4
 AUTOHEADER = autoheader
 
 INSTALL = /usr/bin/install -c
@@ -78,7 +78,7 @@ LIB = @LIB@
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LN_S = ln -s
 LTLIB = @LTLIB@
-MAKEINFO = /home/chris/Desktop/igvcsvn2/Guppy/Guppy_drivers/libdc1394-1.1.0/missing makeinfo
+MAKEINFO = /home/robo/svn/2008/Guppy/Guppy_drivers/libdc1394-1.1.0/missing makeinfo
 OBJDUMP = @OBJDUMP@
 OBJEXT = o
 PACKAGE = libdc1394
