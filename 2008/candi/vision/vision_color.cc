@@ -136,6 +136,12 @@ void visGenPath(void){
 					p2.red=p2.green=p2.blue=0;
 					visPathView.set(x,y,p2);	
 				}
+				// black from transform
+				else if (p.red==0 && p.green==0 && p.blue==0){
+					black--;
+					p2.red=p2.green=p2.blue=0;
+					visPathView.set(x,y,p2);						
+				}				
 				// probably good
 				else{
 					p2.red=p2.green=p2.blue=255;
@@ -206,6 +212,10 @@ int checkPaulBlobPixel(int x, int y){
 	// orange from shader
 	else if (p.red==255 && p.green==128 && p.blue==0){
 		good = 0;	
+	}
+	// black from transform
+	else if (p.red==0 && p.green==0 && p.blue==0){
+		good = 0;					
 	}
 	// probably good
 	else{
