@@ -3,7 +3,6 @@
 # 
 # The plugin may include *.cc or *.c source files.
 #
-
 CC = gcc
 CXX = g++
 CXXLD = g++
