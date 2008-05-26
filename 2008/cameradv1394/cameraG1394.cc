@@ -1,19 +1,18 @@
 /*
  * This code is based on:
- *     player-2.0.3/server/drivers/laser/urglaserdriver.cc
- *     player-2.0.3/server/drivers/camera/1394/camera1394.cc
+ 		the cameradv1394 folder
  */
 
 #include <libplayercore/playercore.h>
 #include <unistd.h>		// for usleep()
 
 // XXX: create a separate header file and include it instead
-#include "cameradv1394driver.cc"
+#include "cameraG1394driver.cc"
 
-class CameraDV1394_Player : public Driver {
+class CameraG1394_Player : public Driver {
 public:
-	CameraDV1394_Player(ConfigFile* cf, int section);
-	~CameraDV1394_Player();
+	CameraG1394_Player(ConfigFile* cf, int section);
+	~CameraG1394_Player();
 	
 	int Setup();
 	int Shutdown();
@@ -33,7 +32,7 @@ private:
 	virtual void Main();
 
 	// The actual camera driver
-	CameraDV1394* driver;	
+	CameraG1394* driver;	
 	// Data to send to server
 	player_camera_data_t data;
 };
@@ -42,7 +41,7 @@ private:
 #pragma mark -
 
 /** Reads options from the configuration file and does any pre-Setup() setup. */
-CameraDV1394_Player::CameraDV1394_Player(ConfigFile* cf, int section)
+CameraG1394_Player::CameraG1394_Player(ConfigFile* cf, int section)
 	: Driver(
 		cf, section,
 		true,							// new commands DO override old ones
@@ -50,18 +49,18 @@ CameraDV1394_Player::CameraDV1394_Player(ConfigFile* cf, int section)
 		PLAYER_CAMERA_CODE)			// interface ID; see <libplayercore/player.h> for standard interfaces
 {	
 	/* Read options from the config file */
-	const char* camDeviceFilepath = cf->ReadString(section, "device", "/dev/dv1394");
+	const char* camDeviceFilepath = cf->ReadString(section, "device", "/dev/video1394/0");
 	
 	// Create the real driver
-	this->driver = new CameraDV1394(camDeviceFilepath);
+	this->driver = new CameraG1394(camDeviceFilepath);
 }
 
-CameraDV1394_Player::~CameraDV1394_Player() {
+CameraG1394_Player::~CameraG1394_Player() {
 	delete this->driver;
 }
 
 /** Set up the device. Return 0 if things go well, and -1 otherwise. */
-int CameraDV1394_Player::Setup() {
+int CameraG1394_Player::Setup() {
 	// Connect to the camera
 	if (!driver->Connect())
 		return -1;
@@ -74,7 +73,7 @@ int CameraDV1394_Player::Setup() {
 }
 
 /** Shutdown the device. */
-int CameraDV1394_Player::Shutdown() {
+int CameraG1394_Player::Shutdown() {
 	bool wasConnected = driver->IsConnected();	
 	
 	// Disconnect from the camera
@@ -89,7 +88,7 @@ int CameraDV1394_Player::Shutdown() {
 }
 
 /** Processes incoming messages. */
-int CameraDV1394_Player::ProcessMessage(MessageQueue* resp_queue,
+int CameraG1394_Player::ProcessMessage(MessageQueue* resp_queue,
                                         player_msghdr* hdr,
                                         void* data)
 {
@@ -98,7 +97,7 @@ int CameraDV1394_Player::ProcessMessage(MessageQueue* resp_queue,
 	return -1;
 }
 
-void CameraDV1394_Player::GrabFrame()
+void CameraG1394_Player::GrabFrame()
 {
 	int width = driver->GetFrameWidth();
 	int height = driver->GetFrameHeight();
@@ -115,7 +114,7 @@ void CameraDV1394_Player::GrabFrame()
 	memcpy(this->data.image, frameData, this->data.image_count);
 }
 
-void CameraDV1394_Player::SendData()
+void CameraG1394_Player::SendData()
 {	
 	// Work out the data size
 	size_t size = sizeof(this->data) - sizeof(this->data.image) + this->data.image_count;
@@ -126,7 +125,7 @@ void CameraDV1394_Player::SendData()
 }
 
 /** Main function for the thread that runs the device. */
-void CameraDV1394_Player::Main()
+void CameraG1394_Player::Main()
 {
 	for (;;) {
 		// Terminate if this thread has been cancelled
@@ -150,18 +149,18 @@ void CameraDV1394_Player::Main()
 
 // Factory creation function. This function is given as an argument when
 // the driver is added to the driver table.
-Driver* CameraDV1394_Player_Init(ConfigFile* cf, int section) {
+Driver* CameraG1394_Player_Init(ConfigFile* cf, int section) {
 	// Create and return a new instance of this driver
-	return (Driver*) new CameraDV1394_Player(cf, section);
+	return (Driver*) new CameraG1394_Player(cf, section);
 }
 
 // Registers the driver in the driver table. Called from the
 // player_driver_init function that the loader looks for.
-int CameraDV1394_Player_Register(DriverTable* table) {
-	table->AddDriver("cameradv1394", CameraDV1394_Player_Init);
+int CameraG1394_Player_Register(DriverTable* table) {
+	table->AddDriver("CameraG1394", CameraG1394_Player_Init);
 	return 0;
 }
 
 extern "C" int player_driver_init(DriverTable* table) {
-	return CameraDV1394_Player_Register(table);
+	return CameraG1394_Player_Register(table);
 }
