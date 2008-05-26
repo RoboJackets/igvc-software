@@ -101,7 +101,7 @@ void scanFillRight(int middleX, int y, int goodFirst, int end);
 
 // ------------------------------------------------------------------------
 
-/*
+/*		//old old old
 void visGenPath(void){
 	int width = visRaw.width;
 	int height = visRaw.height;
@@ -226,7 +226,7 @@ int checkPaulBlobPixel(int x, int y){
 }
 
 /*this function scans from the center of the paulBlob image to end
-	checking for good bad pixels, setting the visPathView image accordingly */
+	checking for good / bad pixels, setting the visPathView image accordingly */
 void scanFillLeft(int middleX, int y, int goodFirst, int end){
 	int x=middleX;	
 	int good;
@@ -293,7 +293,7 @@ void scanFillLeft(int middleX, int y, int goodFirst, int end){
 	}
 }
 /*this function scans from the center of the paulBlob image to end
-	checking for good bad pixels, setting the visPathView image accordingly */
+	checking for good / bad pixels, setting the visPathView image accordingly */
 void scanFillRight(int middleX, int y, int goodFirst, int end){
 	int x=middleX;	
 	int good;
@@ -324,7 +324,7 @@ void scanFillRight(int middleX, int y, int goodFirst, int end){
 	}
 	else {		//starting pixel is bad
 		good=2;
-		for(;x>=0;x--){	//scan left and check
+		for(;x>=0;x--){	//scan right and check
 			if(good==2){	//in bad spot, check for good spot
 				if(checkPaulBlobPixel(x,y)){
 					//set good

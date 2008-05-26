@@ -19,8 +19,8 @@ int ImageLoad(char *filename, Image *image) {
     char* off2;
 	
 	//free old data
-	if(image.data){
-	free(image.data);
+	if(image->data){
+	free(image->data);
 	}
 	
 	

@@ -281,6 +281,11 @@ public:
 
 template <class input_t, class output_t> class SrcAudioResample : public AudioResample<input_t, output_t>
 {
+private:
+	SRC_STATE *state;
+	SRC_DATA data;
+	float input_buffer[ BUFFER_LEN ];
+	float output_buffer[ BUFFER_LEN ];
 public:
 	SrcAudioResample( int converter ) : AudioResample<input_t,output_t>( 0 )
 	{
@@ -327,11 +332,7 @@ public:
 		src_float_to_short_array( output_buffer, this->output, data.output_frames_gen * channels );
 	}
 
-private:
-	SRC_STATE *state;
-	SRC_DATA data;
-	float input_buffer[ BUFFER_LEN ];
-	float output_buffer[ BUFFER_LEN ];
+
 };
 
 template <class input_t, class output_t> class AudioResampleFactory
