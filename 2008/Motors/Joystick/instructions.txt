@@ -1,3 +1,5 @@
+NOTE: you should use a package instead of installing this manually if you can.
+
 1) extract sdl archive
 2) cd to extracted sdl folder
 3) ./configure
