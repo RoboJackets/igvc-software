@@ -1,17 +1,15 @@
-#$CC = gcc
-#$(CC_FLAGS) = -Wall 
-#joystick joystick.c
-
-srcdir  = .
-
+TARGET	= joystick
 CC      = gcc
-EXE	= 
 CFLAGS  = -g -O2 -I/usr/local/include/SDL -D_GNU_SOURCE=1 -D_REENTRANT -DHAVE_OPENGL
-LIBS	=  -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread
+LDFLAGS	= -L/usr/local/lib -Wl,-rpath,/usr/local/lib -lSDL -lpthread
 
-all:
-
-	gcc -o joystick ./joystick.c $(CFLAGS) $(LIBS)
+all: $(TARGET)
 	
 clean:
-	rm *.o
+	rm $(TARGET) *.o *.so
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
+
+$(TARGET): $(TARGET).o
+	$(CC) $(LDFLAGS) $^ -o $@

@@ -1,4 +1,5 @@
-#include <SDL.h>
+//#include <SDL.h> //why can't gcc find this
+#include "/usr/include/SDL/SDL.h"
 #include <pthread.h>
 #include <errno.h>
 #include <stdio.h>		// for printf in main()
@@ -165,3 +166,4 @@ int main(int argc, char *argv[]) {
 	
 	return 0;
 }
+

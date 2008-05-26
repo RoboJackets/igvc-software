@@ -1,4 +1,4 @@
-NOTE: you should use a package instead of installing this manually if you can.
+NOTE: you should use the libsdl1.2-dev package (or something similar) instead of installing this manually if you can.
 
 1) extract sdl archive
 2) cd to extracted sdl folder
