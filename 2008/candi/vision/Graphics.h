@@ -57,8 +57,11 @@ public:
 			rgb[offo+2] = bgr0[offi  ];
 		}
 		
-		write_bmp(path, buffer->width, buffer->height, rgb);
+		if(!write_bmp(path, buffer->width, buffer->height, rgb)){
+			return 1;
+		}
 		free(rgb);
+		return 0;
 	}
 	
 	// ### DRAWING ###

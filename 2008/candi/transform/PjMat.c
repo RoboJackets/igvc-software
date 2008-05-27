@@ -30,26 +30,10 @@ void setPjMat(){
 	sx=sin(x);	sy=sin(y);	sz=sin(z);
 	cx=cos(x);	cy=cos(y);	cz=cos(z);
 	
-	//translateX = -h*sy/(sx*cy);
-	//translateY = -h*cx/sx;
-	
-	//new shiny matrix
-	//translating to 0,0 
-	/*GLdouble n[16]={cy*cz*tu,-cy*sz*tv,0,sy,\
-					(sx*sz-cx*cz*sy)*tu,(cx*sy*sz+cz*sx)*tv,0,cx*cy,\
-					0,0,0,0,\
-					((cx*cx)*(cz*cz)*sy-cx*cz*sx*((sy*sy)+1)*sz+(sx*sx*(sz*sz)-1)*sy)*tu/(h*(cx*sy*sz+cz*sx)),(sx*sy*sz-cx*cz)*tv/h,0,cy*sx/h};
-	*/
-	//nontranslating
-	/*GLdouble n[16]={cy*cz*tu,-cy*sz*tv,0,0,\
-					(sx*sz-cx*cz*sy)*tu,(cx*sy*sz+cz*sx)*tv,0,0,\
-					0,0,0,0,\
-					((cx*cx)*(cz*cz)*sy-cx*cz*sx*((sy*sy)+1)*sz+(sx*sx*(sz*sz)-1)*sy)*tu/(h*(cx*sy*sz+cz*sx)),(sx*sy*sz-cx*cz)*tv/h,0,1};*/
 	GLdouble n[16]={cy*cz*tu,(sx*sz-cx*cz*sy)*tu,0,((cx*cx)*(cz*cz)*sy-cx*cz*sx*((sy*sy)+1)*sz+(sx*sx*(sz*sz)-1)*sy)*tu/(h*(cx*sy*sz+cz*sx)),\
 					-cy*sz*tv,(cx*sy*sz+cz*sx)*tv,0,(sx*sy*sz-cx*cz)*tv/h,\
 					0,0,0,0,\
 					sy,cx*cy,0,cy*sx/h};
-	//xscale=max(abs(n[0]*IWIDTH),abs(n[4]*IHEIGHT));
 	findmaxview(&n[0]);
 	glLoadIdentity ();
 	glOrtho (-xscale, xscale, -yscale, yscale, -10.0, 10.0);
