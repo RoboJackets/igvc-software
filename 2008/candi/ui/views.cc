@@ -16,7 +16,7 @@ VisColorView rawView = VisColorView("Raw", &visRaw);
 //VisColorView testView = VisColorView("Debug", &visTestViewContent);
 
 VisColorView whiteDetectionCalibrationView = VisColorView("Calibrate: Color - White: General", &visWhiteDetectionCalibration);
-//VisColorView whiteConditionView = VisColorView("Calibrate: Color - White: Conditions", &visWhiteCondition);
+VisColorView whiteConditionView = VisColorView("Calibrate: Color - White: Conditions", &visWhiteCondition);
 
 VisGrayView redMinusGreenView = VisGrayView("Red-Green", &visRedMinusGreen);
 

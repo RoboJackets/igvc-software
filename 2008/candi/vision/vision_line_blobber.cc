@@ -81,6 +81,7 @@ void visBlobLines(){
 	
 	paulBlob.copyFrom(visRaw);
 	Graphics g(&paulBlob);
+	Graphics v(&visRaw);
 	g.setColor(Pixel(200, 0, 0));	// dark red
 	int lengthX=0; 	//to extend the line by its length
 	int lengthY=0;	//
@@ -96,6 +97,7 @@ void visBlobLines(){
 	}
 	static int filenum=0;
 	//g.saveAs("testsave/","blob",filenum);
+	//v.saveAs("testsave/","visraw",filenum);
 	filenum++;
 }
 

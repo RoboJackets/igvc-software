@@ -193,12 +193,13 @@ int main(int argc, char *argv[])
   /*-----------------------------------------------------------------------
    *  setup capture
    *-----------------------------------------------------------------------*/
+   printf("Setting up capture......\n");
   if (dc1394_setup_capture(handle, camera.node,
                            0, /* channel */ 
                            FORMAT_VGA_NONCOMPRESSED,
-                           MODE_640x480_RGB,
+                           MODE_640x480_MONO,
                            SPEED_400,
-                           FRAMERATE_7_5,
+                           FRAMERATE_15,
                            &camera)!=DC1394_SUCCESS) 
   {
     fprintf( stderr,"unable to setup camera-\n"
@@ -214,6 +215,7 @@ int main(int argc, char *argv[])
   /*-----------------------------------------------------------------------
    *  have the camera start sending us data
    *-----------------------------------------------------------------------*/
+   printf("Starting data stream......\n");
   if (dc1394_start_iso_transmission(handle,camera.node)
       !=DC1394_SUCCESS) 
   {
@@ -226,17 +228,21 @@ int main(int argc, char *argv[])
   /*-----------------------------------------------------------------------
    *  capture one frame
    *-----------------------------------------------------------------------*/
+   printf("Reading Frame......\n");
   if (dc1394_single_capture(handle,&camera)!=DC1394_SUCCESS) 
   {
     fprintf( stderr, "unable to capture a frame\n");
     dc1394_release_camera(handle,&camera);
     dc1394_destroy_handle(handle);
     exit(1);
+  }else{
+    printf("Success.\n");
   }
 
  /*-----------------------------------------------------------------------
    *  save image as 'Image.pgm'
    *-----------------------------------------------------------------------*/
+  printf("Saving......\n");
   imagefile=fopen(g_filename, "w");
 
   if( imagefile == NULL)

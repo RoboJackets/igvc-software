@@ -157,7 +157,7 @@ Driver* CameraG1394_Player_Init(ConfigFile* cf, int section) {
 // Registers the driver in the driver table. Called from the
 // player_driver_init function that the loader looks for.
 int CameraG1394_Player_Register(DriverTable* table) {
-	table->AddDriver("CameraG1394", CameraG1394_Player_Init);
+	table->AddDriver("cameraG1394", CameraG1394_Player_Init);
 	return 0;
 }
 

@@ -30,7 +30,7 @@ const int WHITE_PIXEL_BRIGHTNESS_THRESHOLD =
 /* HSL only: higher values look for brighter white */
 // >=40 to eliminate black   bigger->less blue
 const int WHITE_PIXEL_LIGHTNESS_THRESHOLD =
-	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 120; //140; //100; //60;
+	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 130; //140; //100; //60;
 
 
 const Pixel ORANGE_PIXEL_ANNOTATION_COLOR = Pixel(255, 128, 0);		// bright orange
