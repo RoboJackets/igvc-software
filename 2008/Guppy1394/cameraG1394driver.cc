@@ -94,7 +94,7 @@ CameraG1394::CameraG1394(const char* camDeviceFilepath)
 	
 
 	///////
-	initG();
+	//initG();
 
 	///////
 	
@@ -213,9 +213,9 @@ bool CameraG1394::initG(){
   if (dc1394_setup_capture(handle, camera.node,
                            0, /* channel */ 
                            FORMAT_VGA_NONCOMPRESSED,
-                           MODE_640x480_RGB,
+                           MODE_640x480_MONO,
                            SPEED_400,
-                           FRAMERATE_7_5,
+                           FRAMERATE_15,
                            &camera)!=DC1394_SUCCESS) 
   {
     fprintf( stderr,"unable to setup camera-\n"

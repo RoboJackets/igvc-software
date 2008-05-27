@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
                            FORMAT_VGA_NONCOMPRESSED,
                            MODE_640x480_MONO,
                            SPEED_400,
-                           FRAMERATE_7_5,
+                           FRAMERATE_15,/*we do not support 7.5!!*/
                            &camera)!=DC1394_SUCCESS) 
   {
     fprintf( stderr,"unable to setup camera-\n"
