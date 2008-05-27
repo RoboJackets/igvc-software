@@ -24,6 +24,15 @@ public:
 		this->b = l.b;
 	}
 	
+	//conversion constructor
+	template<class E>
+	Line<N>(const Line<E>& l) {
+		this->a.x = (N)l.a.x;
+		this->a.y = (N)l.a.y;
+		this->b.x = (N)l.b.x;
+		this->b.y = (N)l.b.y;
+	}
+	
 	Line<N>(Point2D<N> a, Point2D<N> b) {
 		this->a = a;
 		this->b = b;

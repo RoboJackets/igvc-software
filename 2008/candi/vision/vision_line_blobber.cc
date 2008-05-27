@@ -24,6 +24,9 @@ int numinferredlines=0;					//number of lines in the line array
 Line<int> dashedlines[MAX_N_LINES];		//array of the white lines we've found
 int numdashedlines=0;					//number of lines in the line array
 
+// Defines how much to extend the lines we have found to fill dashes
+static const double LINE_EXTENSION_FACTOR=1.0;
+
 //internal use
 static Buffer2D<bool> img;
 Buffer2D<bool> whiteFilterMask;
@@ -36,6 +39,7 @@ static void findat(int x,int y);
 static void figureDashes();
 static int findlowestleftline();
 static int findlowestrightline();
+static void extendlines();
 
 // functions!
 void visBlobLines(){
@@ -44,7 +48,7 @@ void visBlobLines(){
 	numwhitelines=0;
 	w=img.width;
 	h=img.height;
-	
+	printf("hi");
 	// Black out the edges to avoid buffer overruns in subsequent code
 	for (int x=0; x<w; x++) img[x] = 0;
 	for (int x=0, off=(h-1)*w; x<w; x++) img[off] = 0;
@@ -83,16 +87,18 @@ void visBlobLines(){
 	Graphics g(&paulBlob);
 	Graphics v(&visRaw);
 	g.setColor(Pixel(200, 0, 0));	// dark red
-	int lengthX=0; 	//to extend the line by its length
-	int lengthY=0;	//
 	for(int i=0;i<numwhitelines;i++){
 		Line<int> curLine = whitelines[i];
-		lengthX=(curLine.a.x-curLine.b.x);
-		lengthY=(curLine.a.y-curLine.b.y);
-		lengthX*=2;
-		lengthY*=2;
 		for (int dx=-1; dx<=1; dx++) {
-			g.drawLine(curLine.a.x + dx - lengthX, curLine.a.y - lengthY, curLine.b.x + dx + lengthX, curLine.b.y + lengthY);
+			g.drawLine(curLine.a.x + dx, curLine.a.y, curLine.b.x + dx, curLine.b.y);
+		}
+	}
+	extendlines();
+	g.setColor(Pixel(255, 0, 255));//violent violet
+	for(int i=0;i<numinferredlines;i++){
+		Line<int> curLine = inferredlines[i];
+		for (int dx=-1; dx<=1; dx++) {
+			g.drawLine(curLine.a.x + dx, curLine.a.y, curLine.b.x + dx, curLine.b.y);
 		}
 	}
 	static int filenum=0;
@@ -256,6 +262,152 @@ void findat(int x,int y) {
 	//put this here to be thread safe(ie. it doesn't exist till it's done)
 	numwhitelines++;
 }
+
+static void clampend(Line<double>& l);//prototypes
+static bool boundscheck(Line<int>& l);
+
+static void extendlines(){
+	#define wl whitelines
+	double dx,dy;
+	numinferredlines=0;
+	
+	for(int i=0;i<numwhitelines;i++){
+		Line<double> l(whitelines[i]);
+		Line<double> nl1;
+		Line<double> nl2;
+		
+		dx=(l.b.x-l.a.x);
+		dy=(l.b.y-l.a.y);
+		dx*=LINE_EXTENSION_FACTOR;
+		dy*=LINE_EXTENSION_FACTOR;
+		
+		nl1.a=l.b;
+		nl1.b.x=nl1.a.x+dx;
+		nl1.b.y=nl1.a.y+dy;
+		clampend(nl1);
+		
+		Line<int> InferredLineCandidate(nl1);
+		boundscheck(InferredLineCandidate);
+		if(	(InferredLineCandidate.a.x!=InferredLineCandidate.b.x) ||
+			(InferredLineCandidate.a.y!=InferredLineCandidate.b.y) &&
+			(numinferredlines<MAX_N_LINES))
+		{
+			inferredlines[numinferredlines]=InferredLineCandidate;
+			numinferredlines++;
+		}
+			
+		nl2.a=l.a;
+		nl2.b.x=nl2.a.x-dx;
+		nl2.b.y=nl2.a.y-dy;
+		clampend(nl2);
+		
+		InferredLineCandidate=nl2;
+		boundscheck(InferredLineCandidate);
+		if(	(InferredLineCandidate.a.x!=InferredLineCandidate.b.x) ||
+			(InferredLineCandidate.a.y!=InferredLineCandidate.b.y) &&
+			(numinferredlines<MAX_N_LINES))
+		{
+			inferredlines[numinferredlines]=InferredLineCandidate;
+			numinferredlines++;
+		}
+	}
+	#undef wl 
+}
+	//shortens a line's 'b' end until it is in the image(but only the 'b' end)
+	static void clampend(Line<double>& l){
+		#define dx (l.b.x-l.a.x)
+		#define dy (l.b.y-l.a.y)
+		//left
+		if(l.b.x<0){
+			//we know dx!=0 because otherwise we would have an illegal 'a.x' as well 
+			l.b.y=l.a.y-(l.a.x*dy)/dx;
+			l.b.x=0;
+		}
+		//bottom
+		if(l.b.y<0){
+			//we know dy!=0 because otherwise we would have an illegal 'a.y' as well 
+			l.b.x=l.a.x-(l.a.y*dx)/dy;
+			l.b.y=0;
+		}
+		//right
+		if(l.b.x>=w){
+			//we know dx!=0 because otherwise we would have an illegal 'a.x' as well 
+			l.b.y=l.a.y+dy*((w-1)-l.a.x)/dx;
+			l.b.x=w-1;
+		}
+		//top
+		if(l.b.y>=h){
+			//we know dy!=0 because otherwise we would have an illegal 'a.y' as well 
+			l.b.x=l.a.x+dx*((h-1)-l.a.y)/dy;
+			l.b.y=h-1;
+		}
+		#undef dx
+		#undef dy	
+	}
+	
+	//check that line is still in image
+	//take emergency measures if not
+	//returns 0 on success
+	static bool boundscheck(Line<int>& l){
+		if(l.b.x<0){
+			l.b.x=0;
+			printf("WARNING! %s Line %d: A line went out of bounds (x<0)!\n"\
+						"\tFailsafe corrective measures were taken.\n",\
+					__FILE__,__LINE__);
+			return 1;
+		}
+		if(l.b.y<0){
+			l.b.y=0;
+			printf("WARNING! %s Line %d: A line went out of bounds (y<0)!\n"\
+						"\tFailsafe corrective measures were taken.\n",\
+					__FILE__,__LINE__);
+			return 1;
+		}
+		if(l.b.x>=w){
+			l.b.x=w-1;
+			printf("WARNING! %s Line %d: A line went out of bounds (x>=w)!\n"\
+						"\tFailsafe corrective measures were taken.\n",\
+					__FILE__,__LINE__);
+			return 1;
+		}
+		if(l.b.y>=h){
+			l.b.y=h-1;
+			printf("WARNING! %s Line %d: A line went out of bounds (y>=h)!\n"\
+						"\tFailsafe corrective measures were taken.\n",\
+					__FILE__,__LINE__);
+			return 1;
+		}
+		//check other side 
+		if(l.a.x<0){
+			l.a.x=0;
+			printf("WARNING! %s Line %d: A line went out of bounds (x<0)!\n"\
+						"\tFailsafe corrective measures were taken.\n",\
+					__FILE__,__LINE__);
+			return 1;
+		}
+		if(l.a.y<0){
+			l.a.y=0;
+			printf("WARNING! %s Line %d: A line went out of bounds (y<0)!\n"\
+						"\tFailsafe corrective measures were taken.\n",\
+					__FILE__,__LINE__);
+			return 1;
+		}
+		if(l.a.x>=w){
+			l.a.x=w-1;
+			printf("WARNING! %s Line %d: A line went out of bounds (x>=w)!\n"\
+						"\tFailsafe corrective measures were taken.\n",\
+					__FILE__,__LINE__);
+			return 1;
+		}
+		if(l.a.y>=h){
+			l.a.y=h-1;
+			printf("WARNING! %s Line %d: A line went out of bounds (y>=h)!\n"\
+						"\tFailsafe corrective measures were taken.\n",\
+					__FILE__,__LINE__);
+			return 1;
+		} 
+		return 0;
+	}
 
 static int findlowestleftline(){
 	#define wl whitelines
