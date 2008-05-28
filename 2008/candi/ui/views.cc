@@ -4,6 +4,7 @@
 #include "vision/vision_navigation.h"
 #include "vision/vision_color.h"
 #include "vision/vision_line_blobber.h"
+#include "vision/vision_path.h"
 
 // Same as "rawView", but with a graphics representation of the
 // current navigation parameters superimposed

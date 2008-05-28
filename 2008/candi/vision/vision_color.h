@@ -24,8 +24,7 @@ extern Buffer2D<u8> visHSLSaturation;
 extern Buffer2D<u8> visHSLLightness;
 
 //---------
-extern void visGenPath();
-extern Buffer2D<Pixel> visPathView;
+
 //---------
 
 /**
