@@ -141,7 +141,7 @@ void init ()
 void transform(int argc, char** argv)
 {
 	glutInit (&argc, argv); // initialization      
-	glutInitDisplayMode (GLUT_DOUBLE| GLUT_RGB); // certain settings 
+	glutInitDisplayMode (GLUT_SINGLE| GLUT_RGB); // certain settings 
 	glutInitWindowSize (OWIDTH, OHEIGHT); // sets wize in pixels (horizontal and vertical)
 	glutInitWindowPosition (10, 10); // upper left corner position
 	mainwindow=glutCreateWindow ("Transform"); // sets the window title        

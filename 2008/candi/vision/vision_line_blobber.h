@@ -7,7 +7,7 @@
 #include "Pixel.h"
 #include "Line.h"
 
-#define MAX_N_LINES 20
+#define MAX_N_LINES 50
 #define MIN_LINE_BLOB_POINTS 200
 #define MAX_LINE_GAP_PIXELS 5
 #define MAX_SCHLUNKING_DISTANCE (.017*pixelIsWhite.height) //see note 1

@@ -205,10 +205,18 @@ int checkPaulBlobPixel(int x, int y){
 	int good;
 	Pixel p = paulBlob.get(x,y);
 
-	// 200: from vision line blobber
-	if (p.red==200 && p.green==0 && p.blue==0){
+	// red: from vision line blobber
+	//if (p.red==200 && p.green==0 && p.blue==0){
+	//	good = 0;	
+	//}
+	// white: from vision line blobber
+	if (p.red==255 && p.green==255 && p.blue==255){
 		good = 0;	
-	}
+	}	
+	// purple: from shader
+	else if (p.red==255 && p.green==0 && p.blue==255){
+		good = 0;	
+	}	
 	// orange from shader
 	else if (p.red==255 && p.green==128 && p.blue==0){
 		good = 0;	
@@ -395,9 +403,7 @@ void visClassifyPixelsByColor(void) {
 	// Filter out white pixels that are not connected to
 	// at least one other white pixel that is surrounded by other white pixels
 	visBlobLines();
-	for (int i=0, n=pixelIsWhite.numElements(); i<n; i++) {
-		pixelIsWhite[i] &= !whiteFilterMask[i];
-	}
+
 	
 	#if 0
 		/*

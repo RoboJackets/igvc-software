@@ -40,6 +40,7 @@ static void figureDashes();
 static int findlowestleftline();
 static int findlowestrightline();
 static void extendlines();
+static bool boundscheck(Line<int>& l);
 
 // functions!
 void visBlobLines(){
@@ -48,12 +49,17 @@ void visBlobLines(){
 	numwhitelines=0;
 	w=img.width;
 	h=img.height;
-	printf("hi");
 	// Black out the edges to avoid buffer overruns in subsequent code
-	for (int x=0; x<w; x++) img[x] = 0;
-	for (int x=0, off=(h-1)*w; x<w; x++) img[off] = 0;
+	for (int x=0; x<w; x++) img[x] = 0;//bottom
+	for (int x=0, off=(h-2)*w; x<w; x++) img[off+x] = 0;//top
 	for (int y=0, off=0; y<h; y++, off+=w) img[off] = 0;
 	for (int y=0, off=w-1; y<h; y++, off+=w) img[off] = 0;
+	//remove me:
+	for (int x=0; x<w; x++) pixelIsWhite[x] = 0;//bottom
+	for (int x=0, off=(h-2)*w; x<w; x++) pixelIsWhite[off+x] = 0;//top
+	for (int y=0, off=0; y<h; y++, off+=w) pixelIsWhite[off] = 0;
+	for (int y=0, off=w-1; y<h; y++, off+=w) pixelIsWhite[off] = 0;
+	
 	
 	for(int x=0;x<w;x++){
 		for(int y=0;y<h;y++) {
@@ -83,6 +89,7 @@ void visBlobLines(){
 	// Draw blob view
 	
 	
+	
 	paulBlob.copyFrom(visRaw);
 	Graphics g(&paulBlob);
 	Graphics v(&visRaw);
@@ -97,9 +104,20 @@ void visBlobLines(){
 	g.setColor(Pixel(255, 0, 255));//violent violet
 	for(int i=0;i<numinferredlines;i++){
 		Line<int> curLine = inferredlines[i];
+		boundscheck(curLine);
 		for (int dx=-1; dx<=1; dx++) {
 			g.drawLine(curLine.a.x + dx, curLine.a.y, curLine.b.x + dx, curLine.b.y);
 		}
+	}
+	for (int i=0, n=pixelIsWhite.numElements(); i<n; i++) {
+		if(pixelIsWhite[i]&&!whiteFilterMask[i]){
+			paulBlob[i].red=255;
+			paulBlob[i].green=255;
+			paulBlob[i].blue=255;
+		}else{
+			pixelIsWhite[i] =0;
+		}
+		
 	}
 	static int filenum=0;
 	//g.saveAs("testsave/","blob",filenum);
@@ -264,7 +282,7 @@ void findat(int x,int y) {
 }
 
 static void clampend(Line<double>& l);//prototypes
-static bool boundscheck(Line<int>& l);
+
 
 static void extendlines(){
 	#define wl whitelines
@@ -275,7 +293,9 @@ static void extendlines(){
 		Line<double> l(whitelines[i]);
 		Line<double> nl1;
 		Line<double> nl2;
-		
+		if(boundscheck(whitelines[i])){
+			printf("Error! Incoming line is not entirely in image! Halting extension algorithm.\n");
+		}
 		dx=(l.b.x-l.a.x);
 		dy=(l.b.y-l.a.y);
 		dx*=LINE_EXTENSION_FACTOR;
@@ -287,9 +307,12 @@ static void extendlines(){
 		clampend(nl1);
 		
 		Line<int> InferredLineCandidate(nl1);
-		boundscheck(InferredLineCandidate);
-		if(	(InferredLineCandidate.a.x!=InferredLineCandidate.b.x) ||
-			(InferredLineCandidate.a.y!=InferredLineCandidate.b.y) &&
+		if(boundscheck(InferredLineCandidate)){
+			printf("Error! Inferred line is not entirely in image! Halting extension algorithm.\n"\
+					"Line %d\n",__LINE__);
+		}
+		if(	((InferredLineCandidate.a.x!=InferredLineCandidate.b.x) ||
+			(InferredLineCandidate.a.y!=InferredLineCandidate.b.y)) &&
 			(numinferredlines<MAX_N_LINES))
 		{
 			inferredlines[numinferredlines]=InferredLineCandidate;
@@ -302,9 +325,12 @@ static void extendlines(){
 		clampend(nl2);
 		
 		InferredLineCandidate=nl2;
-		boundscheck(InferredLineCandidate);
-		if(	(InferredLineCandidate.a.x!=InferredLineCandidate.b.x) ||
-			(InferredLineCandidate.a.y!=InferredLineCandidate.b.y) &&
+		if(boundscheck(InferredLineCandidate)){
+			printf("Error! Inferred line is not entirely in image! Halting extension algorithm.\n"\
+					"Line %d\n",__LINE__);
+		}
+		if(	((InferredLineCandidate.a.x!=InferredLineCandidate.b.x) ||
+			(InferredLineCandidate.a.y!=InferredLineCandidate.b.y)) &&
 			(numinferredlines<MAX_N_LINES))
 		{
 			inferredlines[numinferredlines]=InferredLineCandidate;
