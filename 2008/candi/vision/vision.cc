@@ -3,6 +3,8 @@
 #include "vision_barrels.h"
 #include "vision_navigation.h"
 #include "vision/vision_line_blobber.h"
+#include "vision/vision_path.h"
+
 
 #include "Camera.h"
 #include "Pixel.h"
@@ -23,8 +25,10 @@ Buffer2D<Pixel> visTestViewContent;
 
 // ### MAIN VISION PROCESSING ###
 
-// DEBUG
 #include "vision_util.h"
+
+#define closenessThresh 90 //pixels from bottom
+Point2D<int> goal;
 
 // Performs all vision processing.
 // 
@@ -54,55 +58,40 @@ void visFrame()
 		/* Do vision processing */
 		{
 			/* Precalculate commonly used information */
+			// generate all useful views (lines / path)
 			visClassifyPixelsByColor();
 			
-			/* Fast debugging views */
-			visCreateRedMinusGreenView();
-			visCreateHSBViews();		// depends on visClassifyPixelsByColor()
-			visCreateHSLViews();		// depends on visClassifyPixelsByColor()
 			
-			/* Execute primary analyses */
-			//visFindBarrels();		// depends on visClassifyPixelsByColor()
+			/* get path plan view */
+			// depends on visClassifyPixelsByColor()!!
+			visGenPath();
+			
 
-			//drive robot
-			visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
-			
-			
-			
-			/* Slow debugging views */
-			{
-				
-				// PERF: This view significantly reduces framerate!
-				//       (35 fps -> 20 fps)
-				{
-					//visCreateWhiteCalibrationViewFromColor(Pixel(0, 255, 0));	// green
-					
-					//static unsigned long hueTimeCounter = 0;
-					//hueTimeCounter++;
-					
-					/*
-					u8 curHue = (u8) ((hueTimeCounter / 1) % 256);
-					//printf("DEBUG: curHue=%d\n", (int) curHue);
-					visCreateWhiteCalibrationViewUsingHue( curHue );
-					*/
-					
-					/*
-					u8 curHue = (u8) ((hueTimeCounter / 1) % 100);
-					visCreateHSLColorSpaceView( curHue );	// PERF: 35 fps -> 20 fps
-					*/
-				}
-				
-				visCreateWhiteConditionView();
-				
-				//visTestRGBtoHSLConversions();
+			/*	find next goal for robot, and decide whether to use
+				path planning, or sweeping lines mode 
+				for driving motors 	*/
+				// depends on visClassifyPixelsByColor()!!
+			goal.y=0;//for now
+			if(goal.y>closenessThresh){
+				//drive robot with path planning
+											
+			}
+			else{
+				//drive robot with close vision only
+				visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
 			}
 			
-			//HSL debug_yellow = RGBtoHSL(Pixel(255, 255, 0));
-			//printf("DEBUG: H=%d, S=%d, L=%d\n", debug_yellow.hue, debug_yellow.saturation, debug_yellow.lightness);
 			
-			// TEMPORARY: Annotate pixel colors only
-			//visTestViewContent.copyFrom(visRaw);
-			//visAnnotatePixelColors(visTestViewContent);
+			/*  debugging views */
+			{
+				/* Fast debugging views */
+				visCreateRedMinusGreenView();
+				visCreateHSBViews();		// depends on visClassifyPixelsByColor()
+				visCreateHSLViews();		// depends on visClassifyPixelsByColor()
+				/* Slow debugging views */
+				visCreateWhiteConditionView();
+			}
+
 		}
 	}
 	visFrame_exit:
