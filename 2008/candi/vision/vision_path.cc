@@ -7,6 +7,9 @@
 #include <math.h>		// for sqrt
 #include <stdlib.h>		// for abs
 
+#define robotWidth 24 //pixels wide
+
+
 void visGenPath();
 Buffer2D<Pixel> visPathView;
 int checkPaulBlobPixel(int x, int y);
@@ -207,5 +210,25 @@ void scanFillRight(int middleX, int y, int goodFirst, int end){
 		}		
 	}
 }
+
+
+
+Point2D<int> robotWidthScan(){
+	Point2D<int> goal;
+	int height = visRaw.height;
+	
+	
+	/* 	scan from bottom center of image upward,
+		checking to see if the width of the robod can progress 
+		any further up the image, sliding left/right as needed
+	*/
+	
+	
+	
+	// return center of the scan's final location
+	return goal;
+}
+
+
 
 
