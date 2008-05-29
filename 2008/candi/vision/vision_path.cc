@@ -7,11 +7,11 @@
 #include <math.h>		// for sqrt
 #include <stdlib.h>		// for abs
 
-#define robotWidth 24 //pixels wide
+#define ROBOT_WIDTH 24 //pixels wide
 
 
 void visGenPath();
-Buffer2D<Pixel> visPathView;
+Buffer2D<bool> visPathView;
 int checkPaulBlobPixel(int x, int y);
 void scanFillLeft(int middleX, int y, int goodFirst, int end);
 void scanFillRight(int middleX, int y, int goodFirst, int end);
@@ -81,7 +81,7 @@ int checkPaulBlobPixel(int x, int y){
 void scanFillLeft(int middleX, int y, int goodFirst, int end){
 	int x=middleX;	
 	int good;
-	Pixel p2;
+
 	
 	if (goodFirst){		//starting pixel is good
 		good=1;
@@ -89,20 +89,17 @@ void scanFillLeft(int middleX, int y, int goodFirst, int end){
 			if(good){
 				if(checkPaulBlobPixel(x,y)){
 					//set good
-					p2.red=p2.green=p2.blue=255;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,1);
 				}
 				else{
 					//set bad
 					good=0;
-					p2.red=p2.green=p2.blue=0;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,0);
 				}
 			}
 			else{		//all the rest are bad
 				//set bad 
-				p2.red=p2.green=p2.blue=0;
-				visPathView.set(x,y,p2);
+				visPathView.set(x,y,0);
 			}
 		}
 	}
@@ -113,32 +110,27 @@ void scanFillLeft(int middleX, int y, int goodFirst, int end){
 				if(checkPaulBlobPixel(x,y)){
 					//set good
 					good=1;
-					p2.red=p2.green=p2.blue=255;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,1);
 				}
 				else{
 					//set bad
-					p2.red=p2.green=p2.blue=0;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,0);
 				}
 			}
 			else if (good==1){	//a good spot appeared, check for bad again
 				if(checkPaulBlobPixel(x,y)){
 					//set good
-					p2.red=p2.green=p2.blue=255;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,1);
 					}
 				else{
 					//set bad
 					good=0;
-					p2.red=p2.green=p2.blue=0;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,0);
 				} 
 			}
 			else{ //all the rest are bad
 				//set bad
-				p2.red=p2.green=p2.blue=0;
-				visPathView.set(x,y,p2);
+				visPathView.set(x,y,0);
 			}
 		}		
 	}
@@ -156,20 +148,17 @@ void scanFillRight(int middleX, int y, int goodFirst, int end){
 			if(good){
 				if(checkPaulBlobPixel(x,y)){
 					//set good
-					p2.red=p2.green=p2.blue=255;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,1);
 				}
 				else{
 					//set bad
 					good=0;
-					p2.red=p2.green=p2.blue=0;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,1);
 				}
 			}
 			else{		//all the rest are bad
 				//set bad 
-				p2.red=p2.green=p2.blue=0;
-				visPathView.set(x,y,p2);
+				visPathView.set(x,y,0);
 			}
 		}
 	}
@@ -180,32 +169,27 @@ void scanFillRight(int middleX, int y, int goodFirst, int end){
 				if(checkPaulBlobPixel(x,y)){
 					//set good
 					good=1;
-					p2.red=p2.green=p2.blue=255;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,1);
 				}
 				else{
 					//set bad
-					p2.red=p2.green=p2.blue=0;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,0);
 				}
 			}
 			else if (good==1){	//a good spot appeared, check for bad again
 				if(checkPaulBlobPixel(x,y)){
 					//set good
-					p2.red=p2.green=p2.blue=255;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,1);
 					}
 				else{
 					//set bad
 					good=0;
-					p2.red=p2.green=p2.blue=0;
-					visPathView.set(x,y,p2);
+					visPathView.set(x,y,0);
 				} 
 			}
 			else{ //all the rest are bad
 				//set bad
-				p2.red=p2.green=p2.blue=0;
-				visPathView.set(x,y,p2);
+				visPathView.set(x,y,0);
 			}
 		}		
 	}
@@ -215,17 +199,83 @@ void scanFillRight(int middleX, int y, int goodFirst, int end){
 
 Point2D<int> robotWidthScan(){
 	Point2D<int> goal;
+	int width = visRaw.width;
 	int height = visRaw.height;
+	int center = width/2;
+	int startx = center - ROBOT_WIDTH/2;
+	int endx = startx + ROBOT_WIDTH;
+	int y = height-1;
+	int x = startx;
+	int half = ROBOT_WIDTH/2;
 	
+	goal.x=-1;
+	goal.y=-1;
 	
 	/* 	scan from bottom center of image upward,
 		checking to see if the width of the robod can progress 
 		any further up the image, sliding left/right as needed
 	*/
+	for( ; y >=0 ; y--){
+		
+		//check left
+		for(x=startx; x<width-ROBOT_WIDTH; x++){
+			if(!visPathView.get(x,y)){
+				x++;	//slide right
+			}
+			else{
+				goal.x = x+half;
+				goal.y = y;
+				break;				
+			}
+		}
+		if(visPathView.get(x+ROBOT_WIDTH,y)&&visPathView.get(x+half,y))
+			continue;	//stop if we fit
+			
+		//check right
+		for(x=endx; x>=0; x--){
+			if(!visPathView.get(x,y)){
+				x--;	//slide left
+			}
+			else{
+				goal.x = x-half;
+				goal.y = y;
+				break;				
+			}
+		}		
+		if(visPathView.get(x-ROBOT_WIDTH,y)&&visPathView.get(x-half,y))
+			continue;	//stop if we fit		
+		else
+			break;		//we dont fit left or right
+
+		
+	}
 	
+	//sanity check goal
+	if(goal.x==-1||goal.y==-1){
+		//not good
+	}
+	else{
+		//found goal
+		if(!visPathView.get(goal.x,goal.y)){
+			goal.x=goal.y=-1;	//not good
+		}
+		else{
+			//good
+			//flip y coordinate
+			goal.y=height-goal.y;
+		}
+	}
+
 	
-	
+	//debug
+	Graphics g(&visRaw);
+	g.setColor(Pixel(200, 0, 0));	// dark red
+	g.drawLine(center,height-1,goal.x,goal.y);
+	/////
+
+
 	// return center of the scan's final location
+	// return -1 on error
 	return goal;
 }
 
