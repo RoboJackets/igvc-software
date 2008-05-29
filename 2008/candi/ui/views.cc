@@ -29,7 +29,7 @@ VisBlackAndWhiteView whiteView = VisBlackAndWhiteView("Color - White", &pixelIsW
 //VisBlackAndWhiteView yellowView = VisBlackAndWhiteView("Color - Yellow", &pixelIsYellow);
 
 VisColorView paulView = VisColorView("PAUL BLOB!!", &paulBlob);
-VisColorView chrisView = VisColorView("Chris Path!!", &visPathView);
+VisBlackAndWhiteView chrisView = VisBlackAndWhiteView("Chris Path", &visPathView);
 
 VisGrayView HSBHue = VisGrayView("HSB - Hue", &visHSBHue);
 VisGrayView HSBSaturation = VisGrayView("HSB - Saturation", &visHSBSaturation);

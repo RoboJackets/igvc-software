@@ -71,9 +71,12 @@ void visFrame()
 				path planning, or sweeping lines mode 
 				for driving motors 	*/
 				// depends on visClassifyPixelsByColor()!!
-			goal = robotWidthScan();
+			goal = robotWidthScan();	// returns -1 on error
 			if(goal.y>closenessThresh){
 				//drive robot with path planning
+
+					//remove me
+					visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
 											
 			}
 			else{
