@@ -217,7 +217,7 @@ Point2D<int> robotWidthScan(){
 	*/
 	for( ; y >=0 ; y--){
 		
-		//check left
+		//check left,move right
 		for(x=startx; x<width-ROBOT_WIDTH; x++){
 			if(!visPathView.get(x,y)){
 				x++;	//slide right
@@ -228,11 +228,15 @@ Point2D<int> robotWidthScan(){
 				break;				
 			}
 		}
-		if(visPathView.get(x+ROBOT_WIDTH,y)&&visPathView.get(x+half,y))
+		if(visPathView.get(x+ROBOT_WIDTH,y)&&visPathView.get(x+half,y)){
+			startx=x;
+			endx=startx+ROBOT_WIDTH;
+			paulBlob.set(x,y,Pixel(200,0,0));
 			continue;	//stop if we fit
+		}
 			
-		//check right
-		for(x=endx; x>=0; x--){
+		//check right,move left
+		for(x=endx-1; x>=0; x--){
 			if(!visPathView.get(x,y)){
 				x--;	//slide left
 			}
@@ -242,8 +246,12 @@ Point2D<int> robotWidthScan(){
 				break;				
 			}
 		}		
-		if(visPathView.get(x-ROBOT_WIDTH,y)&&visPathView.get(x-half,y))
+		if(visPathView.get(x-ROBOT_WIDTH,y)&&visPathView.get(x-half,y)){
+			startx=x-ROBOT_WIDTH;
+			endx=x;
+			paulBlob.set(x,y,Pixel(0,0,200));
 			continue;	//stop if we fit		
+		}
 		else
 			break;		//we dont fit left or right
 
@@ -260,19 +268,20 @@ Point2D<int> robotWidthScan(){
 			goal.x=goal.y=-1;	//not good
 		}
 		else{
+		
+			//debug/////////
+			Graphics g(&paulBlob);
+			g.setColor(Pixel(20, 20, 20));	//dark
+			g.drawLine(center,height-1,goal.x,goal.y);
+			g.drawLine(goal.x-half,goal.y,goal.x+half,goal.y);
+			////////////////
+		
 			//good
 			//flip y coordinate
 			goal.y=height-goal.y;
 		}
+
 	}
-
-	
-	//debug
-	Graphics g(&visRaw);
-	g.setColor(Pixel(200, 0, 0));	// dark red
-	g.drawLine(center,height-1,goal.x,goal.y);
-	/////
-
 
 	// return center of the scan's final location
 	// return -1 on error
