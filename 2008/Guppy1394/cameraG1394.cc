@@ -108,6 +108,8 @@ void CameraG1394_Player::GrabFrame()
 	// Format the image data so that Player can understand it
 	this->data.bpp = 24;
 	this->data.format = PLAYER_CAMERA_FORMAT_RGB888;
+	//this->data.bpp = 8;
+	//this->data.format = PLAYER_CAMERA_FORMAT_MONO8;
 	this->data.image_count = width * height * 3;
 	this->data.width = width;
 	this->data.height = height;

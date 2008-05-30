@@ -23,7 +23,7 @@ void display ()
 	//tvar=nanotime();
 	NextFrame();
 	setPjMat();
-	glClear (GL_COLOR_BUFFER_BIT);                                             
+	//glClear (GL_COLOR_BUFFER_BIT);                                             
 	
 	tsurf();   //made surface external to speed compiling, recompile if needed
 		
@@ -136,6 +136,7 @@ void init ()
 	out.width = OWIDTH;
 	out.height = OHEIGHT;
 	out.data = malloc(OWIDTH * OHEIGHT * 4);
+	glClear (GL_COLOR_BUFFER_BIT);
 }
 
 void transform(int argc, char** argv)
@@ -143,7 +144,7 @@ void transform(int argc, char** argv)
 	glutInit (&argc, argv); // initialization      
 	glutInitDisplayMode (GLUT_SINGLE| GLUT_RGB); // certain settings 
 	glutInitWindowSize (OWIDTH, OHEIGHT); // sets wize in pixels (horizontal and vertical)
-	glutInitWindowPosition (10, 10); // upper left corner position
+	glutInitWindowPosition (800, 400); // upper left corner position
 	mainwindow=glutCreateWindow ("Transform"); // sets the window title        
 	init (); // calls the init() function above
 	glutDisplayFunc (display); // uses the function called 'display' for displaying 

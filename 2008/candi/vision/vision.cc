@@ -27,7 +27,7 @@ Buffer2D<Pixel> visTestViewContent;
 
 #include "vision_util.h"
 
-#define closenessThresh 90 //pixels from bottom
+#define closenessThresh 100 //pixels from bottom
 Point2D<int> goal;
 
 // Performs all vision processing.
@@ -66,6 +66,10 @@ void visFrame()
 			// depends on visClassifyPixelsByColor()!!
 			visGenPath();
 			
+			/* init drawing of navigation colors,
+				done here so visPathControlMorots can
+				draw to this image too */
+			visNavigationParams.copyFrom(visRaw);			
 
 			/*	find next goal for robot, and decide whether to use
 				path planning, or sweeping lines mode 
@@ -74,14 +78,16 @@ void visFrame()
 			goal = robotWidthScan();	// returns -1 on error
 			if(goal.y>closenessThresh){
 				//drive robot with path planning
-
+				visPathControlMotors(goal);
 					//remove me
-					visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
+					//visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
 											
 			}
 			else{
 				//drive robot with close vision only
 				visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
+					//remove me
+					//visPathControlMotors(goal);
 			}
 			
 			

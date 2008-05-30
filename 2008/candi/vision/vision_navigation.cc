@@ -6,8 +6,8 @@
 #include "vision_line_blobber.h"
 #include "Graphics.h"
 #include "Point2D.h"
-#include "DriveMotion.h"
-#include <math.h>		// for trig functions, M_PI
+
+//#include <math.h>		// for trig functions, M_PI
 #include "hw/hw.h"		// for GetLaserRangeAtBearing
 
 // ### FORWARD REFERENCES (C/C++ SPECIFIC) ###
@@ -22,40 +22,7 @@ double navPath_angle(int pathID);
 
 Pixel navPath_color(int pathDanger);
 
-// ### PARAMETERS ###
 
-// Number of paths that are assessed between the starting/ending angles
-// 1 <= NAV_PATH__NUM
-const int NAV_PATH__NUM = 30;
-
-// Defines the "view/navigation cone", which is where the set of
-// considered navigation paths is taken from.
-const double NAV_PATH__VIEW_CONE__OFFSET = 50.0; //30;<-without-transform
-const double NAV_PATH__VIEW_CONE__START_ANGLE = 0.0 + NAV_PATH__VIEW_CONE__OFFSET;	// >= 0.0
-const double NAV_PATH__VIEW_CONE__END_ANGLE = 180.0 - NAV_PATH__VIEW_CONE__OFFSET;	// <= 180.0
-
-const double NAV_PATH__VIEW_CONE__DELTA_ANGLE = NAV_PATH__VIEW_CONE__END_ANGLE - NAV_PATH__VIEW_CONE__START_ANGLE;
-const double NAV_PATH__VIEW_CONE__SPACING = NAV_PATH__VIEW_CONE__DELTA_ANGLE / (NAV_PATH__NUM-1);
-
-// XXX: Controls how many pixels *near* a path-pixel are searched for dangerous pixels
-// 0 <= NAV_PATH__PATH_SEARCH_GIRTH
-const int NAV_PATH__PATH_SEARCH_GIRTH = 5;
-
-// (do not change without reason!)
-const int NAV_PATH__CENTER_PATH_ID = (int) round((90.0 - NAV_PATH__VIEW_CONE__START_ANGLE) / NAV_PATH__VIEW_CONE__SPACING);
-
-// Proportional to the lengths of the paths (in image space)
-const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 0.85; //1.00;<-without-transform		/* > 0.0 */
-
-// Amount of danger posed by a single barrel-pixel
-const int DANGER_PER_BARREL_PIXEL = 1;
-// Amount of danger posed by a single line-pixel
-const int DANGER_PER_LINE_PIXEL = 4;
-
-// Path danger values higher than this will be clipped to this value
-const int MAX_PATH_DANGER = 50;					// >= 0
-
-const int NAV_PATH__DANGER_SMOOTHING__RADIUS = 5;		// >= 0
 
 // ---------------------------------------------------------
 
@@ -91,28 +58,13 @@ void visPlotNavigationParams(void) {
 	{
 		// Annotate standard colors
 		visAnnotatePixelColors(visNavigationParams);
-		/*DEPRECATED due to barrels now being identified before the transform phase
-					and this code relies on it happening in vision_barrels
-		// Annotate white specially:
-		// 1. white barrel stripes -> light gray (custom)
-		// 2. white lines -> pure white (the default)
-		for (int i=0, n=visNavigationParams.numElements(); i<n; i++) {
-			if (pixelIsWhite[i] && pixelIsWithinBarrel[i]) {
-				visNavigationParams[i] = WHITE_BARREL_STRIPE_PIXEL_ANNOTATION_COLOR;
-			}
-		}*///end deprecated region
 	}
 	
-	// Annotate the navigation output image
-	// with the bounds of identified barrels
-	// TODO: actually make use of barrel bound information
-	//       when computing the danger map
-	//       (in particular, use it to distinguish white barrel stripes
-	//        from white lines on the field)
-	//visAnnotateBarrelBounds(visNavigationParams, false);
 	
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	static int pathDanger[NAV_PATH__NUM];
+	int curPixelDanger = 0;
+	int curPathDanger = 0;
 	for (int pathID=0; pathID<NAV_PATH__NUM; pathID++) {
 		// Calculate path parameters
 		Point2D<double> pathStart = navPath_start(pathID);
@@ -128,14 +80,14 @@ void visPlotNavigationParams(void) {
 		// Calculate the danger value for the path
 		// along with the danger contributions of all
 		// the pixels in the path
-		int curPathDanger = 0;
+		curPathDanger = 0;
 		uchar pixelDanger[pathPoints.count()];
 		for (uint j=0, n2=pathPoints.count(); j<n2; j++) {
 			Point2D<int> curPathPoint = pathPoints[j];
 			
 			// Calculate the danger contribution of the current
 			// path-pixel to the path danger
-			int curPixelDanger = 0;
+			curPixelDanger = 0;
 			for (int delta=-NAV_PATH__PATH_SEARCH_GIRTH; delta<=NAV_PATH__PATH_SEARCH_GIRTH; delta++) {
 				// (XXX: Consider *nearby* pixels as different fragments of the path-pixel)
 				Point2D<int> curPoint = pathPoints[j];
@@ -249,18 +201,20 @@ void visPlotNavigationParams(void) {
 		}
 		
 		// Smooth interior
+		int sumOfNearbyDangers = 0;
+		int avgOfNearbyDangers;
 		for (int curPath_id = NAV_PATH__DANGER_SMOOTHING__RADIUS;
 		     curPath_id < (NAV_PATH__NUM - NAV_PATH__DANGER_SMOOTHING__RADIUS + 1);
 		     curPath_id++)
 		{
-			int sumOfNearbyDangers = 0;
+			sumOfNearbyDangers = 0;
 			for (int delta = -NAV_PATH__DANGER_SMOOTHING__RADIUS;
 			     delta < NAV_PATH__DANGER_SMOOTHING__RADIUS;
 			     delta++)
 			{
 				sumOfNearbyDangers += pathDanger[curPath_id + delta];
 			}
-			int avgOfNearbyDangers = sumOfNearbyDangers / (NAV_PATH__DANGER_SMOOTHING__RADIUS*2 + 1);
+			avgOfNearbyDangers = sumOfNearbyDangers / (NAV_PATH__DANGER_SMOOTHING__RADIUS*2 + 1);
 			
 			smoothedPathDangers[curPath_id] = avgOfNearbyDangers;
 		}
@@ -290,13 +244,14 @@ void visPlotNavigationParams(void) {
 		{
 			int bestPath_danger = pathDanger[bestPath_id];
 			int bestPath_distanceFromCenter = abs(NAV_PATH__CENTER_PATH_ID - bestPath_id);
+			int curPath_danger;
+			int curPath_distanceFromCenter;
 			for (int curPath_id=1; curPath_id<NAV_PATH__NUM; curPath_id++) {
-				int curPath_danger = pathDanger[curPath_id];
-				int curPath_distanceFromCenter = abs(NAV_PATH__CENTER_PATH_ID - curPath_id);
+				curPath_danger = pathDanger[curPath_id];
+				curPath_distanceFromCenter = abs(NAV_PATH__CENTER_PATH_ID - curPath_id);
 				
 				if (curPath_danger < bestPath_danger) {
 					bestPath_danger = curPath_danger;
-					
 					bestPath_id = curPath_id;
 					bestPath_distanceFromCenter = curPath_distanceFromCenter;
 				} else if (curPath_danger == bestPath_danger) {
@@ -348,6 +303,8 @@ void visPlotNavigationParams(void) {
 				nav_swivel = -128;
 			if (nav_swivel > 127)
 				nav_swivel = 127;
+			
+			//printf("bestPath_id %d	nav_swivel %d\n",bestPath_id,nav_swivel);	
 			
 			/*
 			// TODO: make thrust inversely proportional to the danger value of the best path
@@ -406,7 +363,7 @@ void visPlotNavigationParams(void) {
 				abs(thrustExtent));
 			
 			/* Draw the left/right wheel speed bars along the left and right of the view */
-			g.setColor(Pixel(255-30, 255-30, 255-30));	// light grey
+			g.setColor(Pixel(225, 225, 225));	// light grey
 			g.fillRect_rational(
 				DRIVE_BAR_THICKNESS,
 				(leftSpeedExtent < 0) ? halfHeight : (halfHeight - leftSpeedExtent),

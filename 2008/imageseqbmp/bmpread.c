@@ -21,6 +21,7 @@ int ImageLoad(char *filename, Image *image) {
 	//free old data
 	if(image->data){
 	free(image->data);
+	image->data=NULL;
 	}
 	
 	

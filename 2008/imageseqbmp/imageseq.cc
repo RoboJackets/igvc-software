@@ -142,7 +142,7 @@ ImageSeq::ImageSeq(ConfigFile *cf, int section)
   this->rate = cf->ReadFloat(section, "rate", 10);
 
   // Format string
-  this->pattern = cf->ReadString(section, "pattern", "image_%08d.pnm");
+  this->pattern = cf->ReadString(section, "pattern", "image_%06d.bmp");
 
   this->loop = cf->ReadInt(section, "loop", 0);
 
@@ -223,7 +223,7 @@ int ImageSeq::LoadImage(const char *filename)
   char *src;
   uint8_t *dst;
   Image image;
-  
+  image.data=NULL;
   // Load image; currently forces the image to mono
 
   if (!ImageLoad((char *) filename, &image)) {

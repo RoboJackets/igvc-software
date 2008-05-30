@@ -102,7 +102,7 @@ CameraG1394::CameraG1394(const char* camDeviceFilepath)
 }
 
 CameraG1394::~CameraG1394() {
-	// Nothing to uninit
+	Disconnect();
 }
 
 // from grab_color_image.c example
