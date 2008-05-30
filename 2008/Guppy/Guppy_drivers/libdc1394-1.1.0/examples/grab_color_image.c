@@ -197,7 +197,8 @@ int main(int argc, char *argv[])
   if (dc1394_setup_capture(handle, camera.node,
                            0, /* channel */ 
                            FORMAT_VGA_NONCOMPRESSED,
-                           MODE_640x480_MONO,
+                           //MODE_640x480_MONO,
+                           MODE_648x480_RGB
                            SPEED_400,
                            FRAMERATE_15,
                            &camera)!=DC1394_SUCCESS) 

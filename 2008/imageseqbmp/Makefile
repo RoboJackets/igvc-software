@@ -12,8 +12,8 @@ INSTALL_DIR = /tmp
 OUTPUT = libimageseqbmpplugin.la
 
 all:
-	$(LIBTOOL) --mode=compile $(CC) -c $(PLAYER_CFLAGS) *.c
-	$(LIBTOOL) --mode=compile $(CXX) -c $(PLAYER_CFLAGS) *.cc
+	$(LIBTOOL) --mode=compile $(CC) -c -g $(PLAYER_CFLAGS) *.c
+	$(LIBTOOL) --mode=compile $(CXX) -c -g $(PLAYER_CFLAGS) *.cc
 	$(LIBTOOL) --mode=link $(CXXLD) -rpath $(INSTALL_DIR) -module -export-dynamic -version-info 0:0:0 *.lo -o $(OUTPUT)
 
 clean:

@@ -6,6 +6,9 @@
 #include "vision/vision_line_blobber.h"
 #include "vision/vision_path.h"
 
+//temporarily bring to default view
+VisColorView paulView2 = VisColorView("PAUL BLOB2!!", &paulBlob);
+
 // Same as "rawView", but with a graphics representation of the
 // current navigation parameters superimposed
 VisColorView navigationParamsView = VisColorView("Navigation Params", &visNavigationParams);

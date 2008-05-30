@@ -10,6 +10,7 @@ extern void visGenPath();
 extern Buffer2D<bool> visPathView;
 
 Point2D<int> robotWidthScan();
+void visPathControlMotors(Point2D<int> goal);
 
 
 #endif
