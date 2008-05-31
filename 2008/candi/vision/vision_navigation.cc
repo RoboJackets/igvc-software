@@ -6,6 +6,7 @@
 #include "vision_line_blobber.h"
 #include "Graphics.h"
 #include "Point2D.h"
+#include <stdio.h>
 
 //#include <math.h>		// for trig functions, M_PI
 #include "hw/hw.h"		// for GetLaserRangeAtBearing
@@ -50,7 +51,8 @@ void visPlotNavigationParams(void) {
 	// Initialize the navigation-param view with the raw camera image
 	// (so that we can annotate on top of it)
 	Graphics g(&visNavigationParams);
-	visNavigationParams.copyFrom(visRaw);
+	//visNavigationParams.copyFrom(visRaw);
+	visNavigationParams.copyFrom(paulBlob);
 	
 	// Annotate the colors of the pixels in the raw camera image
 	// (since the danger map that navigation relys on is generated

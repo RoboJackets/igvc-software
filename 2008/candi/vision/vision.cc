@@ -4,7 +4,7 @@
 #include "vision_navigation.h"
 #include "vision/vision_line_blobber.h"
 #include "vision/vision_path.h"
-
+#include "pathplan/pathplan.h"
 
 #include "Camera.h"
 #include "Pixel.h"
@@ -27,7 +27,7 @@ Buffer2D<Pixel> visTestViewContent;
 
 #include "vision_util.h"
 
-#define closenessThresh 100 //pixels from bottom
+#define closenessThresh 80 //pixels from bottom
 Point2D<int> goal;
 
 // Performs all vision processing.
@@ -76,8 +76,24 @@ void visFrame()
 				for driving motors 	*/
 				// depends on visClassifyPixelsByColor()!!
 			goal = robotWidthScan();	// returns -1 on error
-			if(goal.y>closenessThresh){
-				//drive robot with path planning
+			if(goal.y<visRaw.height-closenessThresh){
+				//TODO: make the offsets given not hardcoded
+/*				unsigned char * temp=(unsigned char *)visPathView.data;
+				navigate(	temp, 				\
+							visPathView.width, 								\
+							visPathView.height,								\
+							visPathView.width/2-21, 						\
+							visPathView.height-45, 							\
+							goal.x, 										\
+							goal.y);
+				printf("width %d height %d	start(%d,%d)	goal(%d,%d)\n",\
+							visPathView.width, 								\
+							visPathView.height,								\
+							visPathView.width/2-21, 						\
+							visPathView.height-45, 							\
+							goal.x, 										\
+							goal.y);
+*/				//drive robot with path planning
 				visPathControlMotors(goal);
 					//remove me
 					//visPlotNavigationParams();	// depends on visClassifyPixelsByColor()

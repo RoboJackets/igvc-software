@@ -7,7 +7,7 @@
 #include "vision/vision_path.h"
 
 //temporarily bring to default view
-VisColorView paulView2 = VisColorView("PAUL BLOB2!!", &paulBlob);
+//VisColorView paulView2 = VisColorView("PAUL BLOB2!!", &paulBlob);
 
 // Same as "rawView", but with a graphics representation of the
 // current navigation parameters superimposed

@@ -32,8 +32,8 @@ public:
 	/** Converts this DriveMotion into a MotorOutput that (hopefully) performs that motion. */
 	MotorOutput toMotorOutput() {
 		return MotorOutput(
-			minmax((int) (THRUST_POWER*thrust + SWIVEL_POWER*swivel), -128, 127),
-			minmax((int) (THRUST_POWER*thrust - SWIVEL_POWER*swivel), -128, 127));
+			minmax((int) -(THRUST_POWER*thrust + SWIVEL_POWER*swivel), -128, 127),
+			minmax((int) -(THRUST_POWER*thrust - SWIVEL_POWER*swivel), -128, 127));
 	}
 	
 private:

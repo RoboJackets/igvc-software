@@ -24,7 +24,7 @@ const int NAV_PATH__NUM = 30;
 
 // Defines the "view/navigation cone", which is where the set of
 // considered navigation paths is taken from.
-const double NAV_PATH__VIEW_CONE__OFFSET = 50.0; //30;<-without-transform
+const double NAV_PATH__VIEW_CONE__OFFSET = 45.0; //30;<-without-transform
 const double NAV_PATH__VIEW_CONE__START_ANGLE = 0.0 + NAV_PATH__VIEW_CONE__OFFSET;	// >= 0.0
 const double NAV_PATH__VIEW_CONE__END_ANGLE = 180.0 - NAV_PATH__VIEW_CONE__OFFSET;	// <= 180.0
 
@@ -39,7 +39,7 @@ const int NAV_PATH__PATH_SEARCH_GIRTH = 5;
 const int NAV_PATH__CENTER_PATH_ID = (int) round((90.0 - NAV_PATH__VIEW_CONE__START_ANGLE) / NAV_PATH__VIEW_CONE__SPACING);
 
 // Proportional to the lengths of the paths (in image space)
-const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 0.85; //1.00;<-without-transform		/* > 0.0 */
+const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 0.70; //1.00;<-without-transform		/* > 0.0 */
 
 // Amount of danger posed by a single barrel-pixel
 const int DANGER_PER_BARREL_PIXEL = 1;

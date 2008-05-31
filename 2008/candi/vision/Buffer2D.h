@@ -67,6 +67,10 @@ public:
 	// Returns the address of the element at the specified location.
 	// (The location is NOT bound-checked.)
 	E* at(int x, int y) {
+		if(x<0) x=0;
+		if(x>=width) x=width-1;
+		if(y<0) y=0;
+		if(y>=height) y=height-1;
 		return &data[y*width + x];
 	}
 	// Returns the address of the first (leftmost) element on the specified row.
