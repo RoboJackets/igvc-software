@@ -51,18 +51,21 @@ void visBlobLines(){
 	h=img.height;
 	// Black out the edges to avoid buffer overruns in subsequent code
 	for (int x=0; x<w; x++) img[x] = 0;//bottom
-	for (int x=0, off=(h-2)*w; x<w; x++) img[off+x] = 0;//top
+	for (int x=0, off=(h-1)*w; x<w; x++) img[off+x] = 0;//top
 	for (int y=0, off=0; y<h; y++, off+=w) img[off] = 0;
+	//for (int y=0, off=1; y<h; y++, off+=w) img[off] = 0;
 	for (int y=0, off=w-1; y<h; y++, off+=w) img[off] = 0;
+	//for (int y=0, off=w-2; y<h; y++, off+=w) img[off] = 0;
 	//remove me:
 	for (int x=0; x<w; x++) pixelIsWhite[x] = 0;//bottom
 	for (int x=0, off=(h-2)*w; x<w; x++) pixelIsWhite[off+x] = 0;//top
 	for (int y=0, off=0; y<h; y++, off+=w) pixelIsWhite[off] = 0;
 	for (int y=0, off=w-1; y<h; y++, off+=w) pixelIsWhite[off] = 0;
 	
-	
-	for(int x=0;x<w;x++){
-		for(int y=0;y<h;y++) {
+	int wr=w-1;
+	int hr=h-1;
+	for(int x=1;x<wr;x++){
+		for(int y=1;y<hr;y++) {
 			/*eight neighbor check					*/
 			/*done in order of best short circuit	*/
 			if(img.data[x+y*w]&&				
@@ -101,7 +104,7 @@ void visBlobLines(){
 		}
 	}
 	extendlines();
-	g.setColor(Pixel(255, 0, 255));//violent violet
+	g.setColor(Pixel(255, 255, 255));//white for extended lines
 	for(int i=0;i<numinferredlines;i++){
 		Line<int> curLine = inferredlines[i];
 		boundscheck(curLine);

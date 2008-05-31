@@ -32,7 +32,7 @@ void visGenPath(void){
 	int blackout = 0;
 	
 	// scan bottom to top in rows; white = path; black = bad	
-	for(int y = height-1; y >=0 ; y--){
+	for(int y = height-2; y >0 ; y--){
 		if(checkPaulBlobPixel(x,y)){	//check starting point in middle
 			goodFirst=1;
 		}
@@ -43,8 +43,8 @@ void visGenPath(void){
 		
 
 		//scan left then right & generate visPathView image
-		scanFillLeft (x,y,goodFirst,0    ,blackout);
-		scanFillRight(x,y,goodFirst,width,blackout);		
+		scanFillLeft (x,y,goodFirst,0      ,blackout);
+		scanFillRight(x,y,goodFirst,width-1,blackout);		
 
 			
 	}//y
@@ -67,9 +67,9 @@ int checkPaulBlobPixel(int x, int y){
 		good = 0;	
 	}	
 	// purple: from shader
-	else if (p.red==255 && p.green==0 && p.blue==255){
-		good = 0;	
-	}	
+	//else if (p.red==255 && p.green==0 && p.blue==255){
+	//	good = 0;	
+	//}	
 	// orange from shader
 	else if (p.red==255 && p.green==128 && p.blue==0){
 		good = 0;	
@@ -122,7 +122,7 @@ void scanFillLeft(int middleX, int y, int goodFirst, int end, int blackout){
 	}
 	else {		//starting pixel is bad
 		good=2;
-		for(;x>=0;x--){	//scan left and check
+		for(;x>=end;x--){	//scan left and check
 			if(good==2){	//in bad spot, check for good spot
 				if(checkPaulBlobPixel(x,y)){
 					//set good
@@ -188,7 +188,7 @@ void scanFillRight(int middleX, int y, int goodFirst, int end, int blackout){
 	}
 	else {		//starting pixel is bad
 		good=2;
-		for(;x>=0;x--){	//scan right and check
+		for(;x<end;x++){	//scan right and check
 			if(good==2){	//in bad spot, check for good spot
 				if(checkPaulBlobPixel(x,y)){
 					//set good
@@ -229,10 +229,11 @@ Point2D<int> robotWidthScan(){
 	int center = width/2;
 	int startx = center - ROBOT_WIDTH/2;
 	int endx = startx + ROBOT_WIDTH;
-	int y = height-1;
+	int y = height-3;
 	int x = startx;
 	int half = ROBOT_WIDTH/2;
 	int i;
+	
 	
 	// return -1 on failure
 	goal.x=-1;
@@ -243,11 +244,11 @@ Point2D<int> robotWidthScan(){
 		checking to see if the width of the robot can progress 
 		any further up the image, sliding left/right as needed
 	*/
-	for( ; y >=0 ; y-- ){
+	for( ; y >0 ; y-- ){
 		
 		//check left, move right
-		for(x=startx; x<width-ROBOT_WIDTH; x++){
-			if(!visPathView.get(x,y) || !visPathView.get(x+width,y) ){
+		for(x=startx; x<width-ROBOT_WIDTH-1; x++){
+			if(!visPathView.get(x,y) || !visPathView.get(x+half,y) ){
 				x++;	//slide right
 				startx=x;
 				endx=x+ROBOT_WIDTH;
@@ -259,7 +260,7 @@ Point2D<int> robotWidthScan(){
 			}
 		}
 
-		for( i = x-1; i<=x+ROBOT_WIDTH; i++){ //scan along width to not cross over boundary
+		for( i = startx; i<endx; i++){ //scan along width to not cross over boundary
 			if(!visPathView.get(i,y)){
 				break;
 			}
@@ -269,14 +270,14 @@ Point2D<int> robotWidthScan(){
 				//paulBlob.set(i,y,Pixel(0,0,255));
 			}
 		}
-		if(i>x+ROBOT_WIDTH){
+		if(i>=endx){
 			//success, keep going up
 			continue;
 		}
 				
 		//check right, move left
-		for(x=endx; x>=0+ROBOT_WIDTH; x--){
-			if(!visPathView.get(x,y)  || !visPathView.get(x-width,y) ){
+		for(x=endx; x>0+ROBOT_WIDTH; x--){
+			if(!visPathView.get(x,y)  || !visPathView.get(x-half,y) ){
 				x--;	//slide left
 				startx=x-ROBOT_WIDTH;
 				endx=x;
@@ -287,7 +288,7 @@ Point2D<int> robotWidthScan(){
 				break;				
 			}
 		}	
-		for( i = x+1; i>=x-ROBOT_WIDTH; i--){ //scan along width to not cross over boundary
+		for( i = endx; i>startx; i--){ //scan along width to not cross over boundary
 			if(!visPathView.get(i,y)){
 				break;
 			}
@@ -297,7 +298,7 @@ Point2D<int> robotWidthScan(){
 				//paulBlob.set(i,y,Pixel(0,0,185));
 			}
 		}
-		if(i<x-ROBOT_WIDTH){
+		if(i<=startx){
 			//success, keep going up
 			continue;
 		}	
@@ -327,7 +328,7 @@ Point2D<int> robotWidthScan(){
 		
 			//good
 			//flip y coordinate for path planning
-			goal.y=height-goal.y;
+			//goal.y=height-goal.y;
 		}
 	}
 
