@@ -32,7 +32,7 @@ void visGenPath(void){
 	int blackout = 0;
 	
 	// scan bottom to top in rows; white = path; black = bad	
-	for(int y = height-2; y >0 ; y--){
+	for(int y = height-3; y >0 ; y--){
 		if(checkPaulBlobPixel(x,y)){	//check starting point in middle
 			goodFirst=1;
 		}
@@ -346,6 +346,7 @@ void visPathControlMotors(Point2D<int> goal){
 	Graphics g(&visNavigationParams);
 	//Graphics g(&paulBlob);
 	//visNavigationParams.copyFrom(visRaw); //copyFrom now called in vision.cc
+	//visNavigationParams.copyFrom(paulBlob); //
 	
 	// Annotate the colors of the pixels in the raw camera image
 	// (since the danger map that navigation relys on is generated
@@ -389,7 +390,7 @@ void visPathControlMotors(Point2D<int> goal){
 
 		//printf("goal id %d	nav swivel %d\n",bestPath_id,nav_swivel);		
 		
-		int nav_thrust = 127;// = 127;
+		int nav_thrust = 177;// = 127;
 		
 		nav_driveMotion = DriveMotion(nav_thrust, nav_swivel);
 		nav_motorOutput = nav_driveMotion.toMotorOutput();

@@ -55,28 +55,49 @@ void visFrame()
 			Camera::current->unlock();
 		}
 		
+
+		
 		/* Do vision processing */
 		{
 			/* Precalculate commonly used information */
 			// generate all useful views (lines / path)
 			visClassifyPixelsByColor();
+
+			/*  needed debugging views */
+			{
+				/* Fast debugging views */
+				visCreateRedMinusGreenView();
+				visCreateHSBViews();		// depends on visClassifyPixelsByColor()
+				visCreateHSLViews();		// depends on visClassifyPixelsByColor()
+				/* Slow debugging views */
+				visCreateWhiteConditionView();
+			}			
 			
+			// use debugging views to correct image 
+			// requires hsl/hsb images
+			//processRamps();
+			
+			//use paulBlob to segment colored barrels
+			//also modify paulBlob by setting all barrels found to orange
+			blankColredBarrels();
+			
+			 updatePixelColors();
 			
 			/* get path plan view */
 			// depends on visClassifyPixelsByColor()!!
 			visGenPath();
-			
+		
 			/* init drawing of navigation colors,
 				done here so visPathControlMorots can
 				draw to this image too */
-			visNavigationParams.copyFrom(visRaw);			
+			visNavigationParams.copyFrom(paulBlob);			
 
 			/*	find next goal for robot, and decide whether to use
 				path planning, or sweeping lines mode 
 				for driving motors 	*/
 				// depends on visClassifyPixelsByColor()!!
 			goal = robotWidthScan();	// returns -1 on error
-			if(goal.y<visRaw.height-closenessThresh){
+			if(goal.y!=-1 && goal.y<visRaw.height-closenessThresh){
 				//TODO: make the offsets given not hardcoded
 /*				unsigned char * temp=(unsigned char *)visPathView.data;
 				navigate(	temp, 				\
@@ -107,15 +128,7 @@ void visFrame()
 			}
 			
 			
-			/*  debugging views */
-			{
-				/* Fast debugging views */
-				visCreateRedMinusGreenView();
-				visCreateHSBViews();		// depends on visClassifyPixelsByColor()
-				visCreateHSLViews();		// depends on visClassifyPixelsByColor()
-				/* Slow debugging views */
-				visCreateWhiteConditionView();
-			}
+
 
 		}
 	}
