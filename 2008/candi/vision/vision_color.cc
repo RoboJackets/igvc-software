@@ -20,7 +20,7 @@ const int ORANGE_PIXEL_DETECTION_THRESHOLD =
 /* lower values look for cleaner (less dirty) white */
 // >=90 for low-light conditions     bigger->more red
 const int WHITE_PIXEL_SATURATION_THRESHOLD =
-	/*new IntFilterParam("White Pixel Saturation - Threshold (Low)", 0, 255,*/ 70;//85; //50;
+	/*new IntFilterParam("White Pixel Saturation - Threshold (Low)", 0, 255,*/ 70; //70;//85; //50;
 
 /* HSB only: higher values look for brighter white */
 // >=40 to eliminate black
@@ -30,7 +30,7 @@ const int WHITE_PIXEL_BRIGHTNESS_THRESHOLD =
 /* HSL only: higher values look for brighter white */
 // >=40 to eliminate black   bigger->less blue
 const int WHITE_PIXEL_LIGHTNESS_THRESHOLD =
-	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 170; //140; //100; //60;
+	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 170; //170; //140; //100; //60;
 
 
 const Pixel ORANGE_PIXEL_ANNOTATION_COLOR = Pixel(255, 128, 0);		// bright orange
@@ -97,10 +97,10 @@ bool pixelIsYellow_calcFromHSL(HSL hsl);
 
 void blankColredBarrels(){
 	Pixel p;
-	Pixel newp;
+	Pixel newp,newp2;
 	
 	newp.red=255; newp.green=128; newp.blue=0; //orange from shader
-	//newp.red=0; newp.green=0; newp.blue=0; //black for testing
+	newp2.red=0; newp2.green=0; newp2.blue=0; //black for testing
 	
 	for (int i=0, n=visRaw.numElements(); i<n; i++) {
 		p = paulBlob[i];
@@ -116,41 +116,36 @@ void blankColredBarrels(){
 		if( (p.red!=200 && p.blue<p.red) && (p.red>p.green) && (abs(p.green-p.blue)<10) ){
 			paulBlob[i]=newp;
 		}
-		// gray / black
+		// gray / black, but not white
 		if(  (abs(p.green-p.red)<10) && (abs(p.green-p.blue)<10) && (abs(p.red-p.blue)<10) ){
 			if(p.green!=255&&p.blue!=255&&p.red!=255)
 				paulBlob[i]=newp;
 		}
 		// neon green, but not shader green
-		if((p.green!=255) && (p.green>245) && (p.green>p.red) && (p.green>p.blue) && (p.blue<50) ){
-			paulBlob[i]=newp;
+		if( (p.green>245) && (p.green>p.red) && (p.green>p.blue) && (p.red>p.blue) && (p.blue<65) ){
+			if( (p.green==255)&&(p.red==0)&&(p.blue==0)){
+				//shader green
+			}
+			else{
+				paulBlob[i]=newp;
+			}
 		}
-		
-		
 		
 	}
 }
 
 
-/*
-void processRamps(void){
-	//fix paul blob view for ramps (they show up white, = bad)
-	Pixel pb;
-	int huethresh = 85;
-	int brightthresh = 180;
-	for (int i=0, n=visRaw.numElements(); i<n; i++) {
-		pb = paulBlob[i];
-		if(visHSLHue[i]>huethresh && visHSBBrightness[i]<brightthresh  && pb.red==255){
-			pb.red=pb.blue=0;
-			pb.green=255;
-			paulBlob[i]=pb;
-		}
-	}
-	
-}
-*/
 
+//this is called to update paulBlob
 void updatePixelColors(void){
+	/* 
+	 * Calculate the "orangeness", saturation, and brightness of each pixel:
+	 * > pixelOrangeness(PIXEL) = PIXEL.red - PIXEL.green
+	 * > pixelHSB = RGBtoHSB(PIXEL)
+	 * 
+	 * These values are used when determining the pixel's categorical color
+	 * (orange, yelow, white, or a mix).
+	 */
 pixelOrangeness.resize(visRaw.width, visRaw.height);
 	pixelHSB       .resize(visRaw.width, visRaw.height);
 	pixelHSL       .resize(visRaw.width, visRaw.height);

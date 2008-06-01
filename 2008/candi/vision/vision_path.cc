@@ -32,6 +32,7 @@ void visGenPath(void){
 	int blackout = 0;
 	
 	// scan bottom to top in rows; white = path; black = bad	
+	// skip the bottom few pixels, due to transform noise
 	for(int y = height-3; y >0 ; y--){
 		if(checkPaulBlobPixel(x,y)){	//check starting point in middle
 			goodFirst=1;

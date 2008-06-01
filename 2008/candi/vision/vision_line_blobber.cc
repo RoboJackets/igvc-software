@@ -112,11 +112,13 @@ void visBlobLines(){
 			g.drawLine(curLine.a.x + dx, curLine.a.y, curLine.b.x + dx, curLine.b.y);
 		}
 	}
+	//filter out noise
 	for (int i=0, n=pixelIsWhite.numElements(); i<n; i++) {
 		if(pixelIsWhite[i]&&!whiteFilterMask[i]){
 			paulBlob[i].red=255;
 			paulBlob[i].green=255;
 			paulBlob[i].blue=255;
+
 		}else{
 			pixelIsWhite[i] =0;
 		}
