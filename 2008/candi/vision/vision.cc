@@ -61,6 +61,7 @@ void visFrame()
 		{
 			/* Precalculate commonly used information */
 			// generate all useful views (lines / path)
+			// all vision functions depend on this one !!!!!!!!!!!!!!
 			visClassifyPixelsByColor();
 
 			/*  needed debugging views */
@@ -73,19 +74,20 @@ void visFrame()
 				visCreateWhiteConditionView();
 			}			
 			
-			// use debugging views to correct image 
-			// requires hsl/hsb images
-			//processRamps();
-			
-			//use paulBlob to segment colored barrels
-			//also modify paulBlob by setting all barrels found to orange
-			blankColredBarrels();
-			
-			 updatePixelColors();
-			
-			/* get path plan view */
-			// depends on visClassifyPixelsByColor()!!
-			visGenPath();
+			/* essential pre-processing for visNavigationParams */
+			{
+				//use paulBlob to segment colored barrels
+				//also modify paulBlob by setting all barrels found to orange
+				blankColredBarrels();
+				
+				//this is called to update paulBlob, so visNavigationParams
+				// can be annotated correctly
+				updatePixelColors();
+				
+				/* get path plan view */
+				// depends on visClassifyPixelsByColor()!!
+				visGenPath();
+			}
 		
 			/* init drawing of navigation colors,
 				done here so visPathControlMorots can
@@ -115,9 +117,9 @@ void visFrame()
 							goal.x, 										\
 							goal.y);
 */				//drive robot with path planning
-				visPathControlMotors(goal);
+				//visPathControlMotors(goal);
 					//remove me
-					//visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
+					visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
 											
 			}
 			else{
