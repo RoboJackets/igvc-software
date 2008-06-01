@@ -20,17 +20,17 @@ const int ORANGE_PIXEL_DETECTION_THRESHOLD =
 /* lower values look for cleaner (less dirty) white */
 // >=90 for low-light conditions     bigger->more red
 const int WHITE_PIXEL_SATURATION_THRESHOLD =
-	/*new IntFilterParam("White Pixel Saturation - Threshold (Low)", 0, 255,*/ 75;//85; //50;
+	/*new IntFilterParam("White Pixel Saturation - Threshold (Low)", 0, 255,*/ 70;//85; //50;
 
 /* HSB only: higher values look for brighter white */
 // >=40 to eliminate black
 const int WHITE_PIXEL_BRIGHTNESS_THRESHOLD =
-	/*new IntFilterParam("White Pixel Brightness - Threshold (High)", 0, 255,*/ 100; //60;
+	/*new IntFilterParam("White Pixel Brightness - Threshold (High)", 0, 255,*/ 100; //100; //60;
 
 /* HSL only: higher values look for brighter white */
 // >=40 to eliminate black   bigger->less blue
 const int WHITE_PIXEL_LIGHTNESS_THRESHOLD =
-	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 130; //140; //100; //60;
+	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 170; //140; //100; //60;
 
 
 const Pixel ORANGE_PIXEL_ANNOTATION_COLOR = Pixel(255, 128, 0);		// bright orange
@@ -95,6 +95,83 @@ bool pixelIsYellow_calcFromHSL(HSL hsl);
 
 // ------------------------------------------------------------------------
 
+void blankColredBarrels(){
+	Pixel p;
+	Pixel newp;
+	
+	newp.red=255; newp.green=128; newp.blue=0; //orange from shader
+	//newp.red=0; newp.green=0; newp.blue=0; //black for testing
+	
+	for (int i=0, n=visRaw.numElements(); i<n; i++) {
+		p = paulBlob[i];
+		// yellow
+		if( (p.blue<50) && (p.red>230) && (p.green<p.red) ){
+			paulBlob[i]=newp;
+		}
+		// blue
+		if( (p.blue>p.red) && (p.blue>p.green) &&  (abs(p.green-p.red)<15) ){ 
+			paulBlob[i]=newp;
+		}
+		// red , check for drawing red lines (200,0,0)
+		if( (p.red!=200 && p.blue<p.red) && (p.red>p.green) && (abs(p.green-p.blue)<10) ){
+			paulBlob[i]=newp;
+		}
+		// gray / black
+		if(  (abs(p.green-p.red)<10) && (abs(p.green-p.blue)<10) && (abs(p.red-p.blue)<10) ){
+			if(p.green!=255&&p.blue!=255&&p.red!=255)
+				paulBlob[i]=newp;
+		}
+		// neon green, but not shader green
+		if((p.green!=255) && (p.green>245) && (p.green>p.red) && (p.green>p.blue) && (p.blue<50) ){
+			paulBlob[i]=newp;
+		}
+		
+		
+		
+	}
+}
+
+
+/*
+void processRamps(void){
+	//fix paul blob view for ramps (they show up white, = bad)
+	Pixel pb;
+	int huethresh = 85;
+	int brightthresh = 180;
+	for (int i=0, n=visRaw.numElements(); i<n; i++) {
+		pb = paulBlob[i];
+		if(visHSLHue[i]>huethresh && visHSBBrightness[i]<brightthresh  && pb.red==255){
+			pb.red=pb.blue=0;
+			pb.green=255;
+			paulBlob[i]=pb;
+		}
+	}
+	
+}
+*/
+
+void updatePixelColors(void){
+pixelOrangeness.resize(visRaw.width, visRaw.height);
+	pixelHSB       .resize(visRaw.width, visRaw.height);
+	pixelHSL       .resize(visRaw.width, visRaw.height);
+	for (int i=0, n=visRaw.numElements(); i<n; i++) {
+		pixelOrangeness.data[i] = paulBlob[i].red - paulBlob[i].green;
+		pixelHSB[i] = RGBtoHSB(paulBlob[i]);
+		pixelHSL[i] = RGBtoHSL(paulBlob[i]);
+	}
+	
+	/*
+	 * Categorize the pixels by color.
+	`*/
+	pixelIsOrange.resize(visRaw.width, visRaw.height);
+	pixelIsWhite.resize(visRaw.width, visRaw.height);
+	//pixelIsYellow.resize(visRaw.width, visRaw.height);
+	for (int i=0, n=visRaw.numElements(); i<n; i++) {
+		pixelIsOrange[i] = pixelIsOrange_calc(i);
+		pixelIsWhite[i] = pixelIsWhite_calc(i);
+		//pixelIsYellow[i] = pixelIsYellow_calc(i);
+	}
+}
 
 // public
 void visClassifyPixelsByColor(void) {
@@ -126,6 +203,8 @@ void visClassifyPixelsByColor(void) {
 		pixelIsWhite[i] = pixelIsWhite_calc(i);
 		//pixelIsYellow[i] = pixelIsYellow_calc(i);
 	}
+	
+
 	
 	// Filter out white pixels that are not connected to
 	// at least one other white pixel that is surrounded by other white pixels

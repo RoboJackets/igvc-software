@@ -70,5 +70,9 @@ void visTestRGBtoHSLConversions(void);
 void visCreateHSBViews(void);
 void visCreateHSLViews(void);
 
+//void processRamps(void);
+
+void blankColredBarrels();
+void updatePixelColors(void);
 
 #endif

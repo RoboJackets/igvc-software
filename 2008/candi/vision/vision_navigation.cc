@@ -52,7 +52,7 @@ void visPlotNavigationParams(void) {
 	// (so that we can annotate on top of it)
 	Graphics g(&visNavigationParams);
 	//visNavigationParams.copyFrom(visRaw);
-	visNavigationParams.copyFrom(paulBlob);
+	//visNavigationParams.copyFrom(paulBlob);
 	
 	// Annotate the colors of the pixels in the raw camera image
 	// (since the danger map that navigation relys on is generated
@@ -315,7 +315,8 @@ void visPlotNavigationParams(void) {
 			*/
 			
 			// TODO: document thrust strategy
-			int nav_thrust = 127 * (MAX_PATH_DANGER - pathDanger[bestPath_id])/MAX_PATH_DANGER;
+//			int nav_thrust = 127 * (MAX_PATH_DANGER - pathDanger[bestPath_id])/MAX_PATH_DANGER;
+			int nav_thrust = 147 * (MAX_PATH_DANGER - pathDanger[bestPath_id])/MAX_PATH_DANGER;	
 			
 			nav_driveMotion = DriveMotion(nav_thrust, nav_swivel);
 			nav_motorOutput = nav_driveMotion.toMotorOutput();

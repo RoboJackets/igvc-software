@@ -44,7 +44,7 @@ const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 0.70; //1.00;<-without-transfo
 // Amount of danger posed by a single barrel-pixel
 const int DANGER_PER_BARREL_PIXEL = 1;
 // Amount of danger posed by a single line-pixel
-const int DANGER_PER_LINE_PIXEL =5;// 4;
+const int DANGER_PER_LINE_PIXEL =3;// 4;
 
 // Path danger values higher than this will be clipped to this value
 const int MAX_PATH_DANGER = 50;					// >= 0

@@ -91,11 +91,11 @@ void visBlobLines(){
 	whiteFilterMask.copyFrom(img);
 	// Draw blob view
 	
-	
+
 	
 	paulBlob.copyFrom(visRaw);
 	Graphics g(&paulBlob);
-	Graphics v(&visRaw);
+	//Graphics v(&visRaw);
 	g.setColor(Pixel(200, 0, 0));	// dark red
 	for(int i=0;i<numwhitelines;i++){
 		Line<int> curLine = whitelines[i];
