@@ -113,7 +113,7 @@ void blankColredBarrels(){
 			paulBlob[i]=newp;
 		}
 		// red , check for drawing red lines (200,0,0)
-		if( (p.red!=200 && p.blue<p.red) && (p.red>p.green) && (abs(p.green-p.blue)<10) ){
+		if( (p.red!=200) && (p.blue<p.red) && (p.red>p.green) && (abs(p.green-p.blue)<10) ){
 			paulBlob[i]=newp;
 		}
 		// gray / black, but not white

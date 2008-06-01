@@ -100,23 +100,32 @@ void visFrame()
 				// depends on visClassifyPixelsByColor()!!
 			goal = robotWidthScan();	// returns -1 on error
 			if(goal.y!=-1 && goal.y<visRaw.height-closenessThresh){
-				//TODO: make the offsets given not hardcoded
-/*				unsigned char * temp=(unsigned char *)visPathView.data;
-				navigate(	temp, 				\
-							visPathView.width, 								\
-							visPathView.height,								\
-							visPathView.width/2-21, 						\
-							visPathView.height-45, 							\
-							goal.x, 										\
+/*
+				printf("width %d height %d	start(%d,%d)	goal(%d,%d)\n",
+							visPathView.width, 								
+							visPathView.height,								
+							visPathView.width/2, 							
+							visPathView.height-ROBOT_WIDTH, 							
+							goal.x, 										
 							goal.y);
-				printf("width %d height %d	start(%d,%d)	goal(%d,%d)\n",\
-							visPathView.width, 								\
-							visPathView.height,								\
-							visPathView.width/2-21, 						\
-							visPathView.height-45, 							\
-							goal.x, 										\
-							goal.y);
-*/				//drive robot with path planning
+							
+				unsigned char * temp=(unsigned char *)visPathView.data;
+				navigate(	temp, 				
+							visPathView.width, 								
+							visPathView.height,								
+							visPathView.width/2, 							
+							visPathView.height-ROBOT_WIDTH, 							
+							goal.x, 										
+							goal.y,
+							30,
+							ROBOT_WIDTH,
+							ROBOT_WIDTH);
+							
+				printf("new goal(%d,%d)\n",							
+							goal.x, 										
+							goal.y);				
+*/							
+				//drive robot with path planning
 				//visPathControlMotors(goal);
 					//remove me
 					visPlotNavigationParams();	// depends on visClassifyPixelsByColor()

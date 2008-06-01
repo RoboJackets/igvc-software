@@ -78,19 +78,34 @@ int writeTxt(const char *filename,int *array,int size){
 	 return 1;
 
 }
-int writeTest(const char *filename,unsigned char *image,int xsize,int ysize){
+int writeCost(const char *filename,int *image,int xsize,int ysize){
 	FILE *file;
 	
 	if (!(file=fopen(filename,"w"))) return 0;
 	
 	for(int j = 0 ; j < ysize ; j++){
 		for(int i = 0 ; i < xsize ; i++){
-			fprintf(file,"%d ",image[j*ysize+i]);
+			fprintf(file,"%3d\t",image[j*xsize+i]);
 		}
 		fprintf(file,"\n");
 	}
 	 fclose(file);
 	 return 1;
 	
-
 }
+int writeDist(const char *filename,float *image,int xsize,int ysize){
+	FILE *file;
+	
+	if (!(file=fopen(filename,"w"))) return 0;
+	
+	for(int j = 0 ; j < ysize ; j++){
+		for(int i = 0 ; i < xsize ; i++){
+			fprintf(file,"%d ",(int)image[j*xsize+i]);
+		}
+		fprintf(file,"\n");
+	}
+	 fclose(file);
+	 return 1;
+	
+}
+

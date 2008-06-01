@@ -9,7 +9,7 @@
 #include <math.h>		// for sqrt
 #include <stdlib.h>		// for abs
 
-#define ROBOT_WIDTH 24 //pixels wide
+
 
 
 void visGenPath();

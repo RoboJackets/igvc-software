@@ -27,25 +27,31 @@ public:
 		x = 0;
 		y = 0;
 	}
-   virtual void setLocation(int x, int y){
+   void setLocation(int x, int y){
 		this->x = x;
 		this->y = y;
 	}
-	virtual int isValidLocation(unsigned char *image, int xsize, int ysize){
+   int isValidLocation(unsigned char *image, int xsize, int ysize){
 
 		for(int i =0 ; i < size; i++){
 			stepX = this->x + (outline[i])->x;
 			stepY = this->y + (outline[i])->y;
 			
-			if (stepX < 0 || stepX >= xsize){ return 0; }
-			if (stepY < 0 || stepY >= ysize){ return 0; }
+//			if (stepX < 0 || stepX >= xsize){ return 0; }
+//			if (stepY < 0 || stepY >= ysize){ return 0; }
+
+			if (stepX < 0 ) stepX=0;
+			if (stepX >= xsize) stepX=xsize-1;
+			if (stepY < 0 ) stepY=0;
+			if (stepY >= ysize) stepY=ysize-1;	
+
 			loc = stepY*xsize + stepX;
 			
 			if (image[loc]==0)  { return 0;}
 		}
 		return 1;
 	}
-	virtual void drawOutline(unsigned char *image, int xsize, int ysize){
+   void drawOutline(unsigned char *image, int xsize, int ysize){
 
 		for(int i =0 ; i < size; i++){
 			loc = (int)rint(this->y + (outline[i])->y)*xsize + rint(this->x + (outline[i])->x);	
@@ -86,45 +92,6 @@ public:
 	inline float radians(float x) {return x*(float)(PI/180);}
 };
 
-
-class triangle : public shape{
-
-public:
-	float length;
-
-public:
-	triangle(){ length = 0;}
-	
-	void setLength(float length){
-
-		float stepX, stepY,phi;
-		int counter;
-
-		outline = new pixel*[(int)length*15]; 
-		
-		counter = 0;
-		stepX = 0;
-		stepY = 0;
-		phi = 0;
-
-		addtoOutline(stepX,stepY,length,phi,outline,counter);
-
-		stepX += length*cos(radians(phi));
-		stepY += length*sin(radians(phi));
-		phi+=120;
-
-		addtoOutline(stepX,stepY,length,phi,outline,counter);
-
-		stepX += length*cos(radians(phi));
-		stepY += length*sin(radians(phi));
-		phi+=120;
-
-		addtoOutline(stepX,stepY,length,phi,outline,counter);
-			
-		size = counter;
-	}
-};
-
 class rectangle : public shape{
 
 public:
@@ -140,8 +107,8 @@ public:
 		outline = new pixel*[(int)width*(int)height*50]; 
 
 		counter = 0;
-		stepX = 0;
-		stepY = 0;
+		stepX = -rint(width/2);
+		stepY = -rint(height/2);
 		length = width;
 		phi = 0;
 			
