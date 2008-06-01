@@ -81,15 +81,16 @@ class maxheap : public staticheap {
 };
 
 
-#define X 1
-#define Y xsize
+#define X (1)
+#define Y (xsize)
 
 enum {XPOS=1,XNEG=2,XBOTH=3, YPOS=4,YNEG=8,YBOTH=12};
 enum {NEW=0, ACTIVE=1, DONE=2};
 
 inline float min(float a,float b) {return a<=b ? a : b;}
 
-float solve(int i,int j,int xsize,int ysize,int *status,float *dist) {
+float solve(int i,int j,int xsize,int ysize,int *status,float *dist, int *costMap) {
+  
   float xnhbr,ynhbr;                //Distance values at neighbors
   float sum,diff;                   //Used in solving quadratic equation
   int nbhd=0;                       //Neighborhood bits
@@ -113,25 +114,53 @@ float solve(int i,int j,int xsize,int ysize,int *status,float *dist) {
   }
 
   //Determine which neighbor distance values to use in each direction
-
+  int loc;
   switch (nbhd&XBOTH) {  //Distance to use for x-neighbor
-    case XBOTH: xnhbr=min(dist[p-X],dist[p+X]); break;
-    case XNEG:  xnhbr=dist[p-X];                break;
-    case XPOS:  xnhbr=dist[p+X];                break;
+    case XBOTH: 
+    	if (dist[p-X] < dist[p+X] ){
+    		xnhbr = dist[p-X];
+    		loc = p-X;
+    	}
+		xnhbr = dist[p+X];
+		loc = p+X;
+    break;
+    
+    case XNEG:  xnhbr=dist[p-X]; loc = p-X;  break;
+    case XPOS:  xnhbr=dist[p+X]; loc = p+X;  break;
   }
+  
   switch (nbhd&YBOTH) {  //Distance to use for y-neighbor
-    case YBOTH: ynhbr=min(dist[p-Y],dist[p+Y]); break;
-    case YNEG:  ynhbr=dist[p-Y];                break;
-    case YPOS:  ynhbr=dist[p+Y];                break;
+  case YBOTH: 
+  	if (dist[p-Y] < dist[p+Y] ){
+  		ynhbr = dist[p-Y];
+  		loc = p-Y;
+  	}
+		ynhbr = dist[p+Y];
+		loc = p+Y;
+  break;
+    case YNEG:  ynhbr=dist[p-Y]; loc = p-Y;  break;
+    case YPOS:  ynhbr=dist[p+Y]; loc = p+Y;  break;
   }
 
   //Solve for distance at current point based on available neighbor values
 
-  if      (!(nbhd&XBOTH)) newdist=ynhbr+1.0;
-  else if (!(nbhd&YBOTH)) newdist=xnhbr+1.0;
+  if (!(nbhd&XBOTH))  newdist=ynhbr+ costMap[loc]; //costMap[loc];
+  else if (!(nbhd&YBOTH)) {newdist=xnhbr+ costMap[loc]; }
   else {
+	  
+	if(nbhd==10)      loc = p - X - Y;
+	else if(nbhd==9)  loc = p + X - Y; 
+	else if(nbhd==5)  loc = p + X + Y;
+	else if(nbhd==6)  loc = p - X + Y;
+		
     sum=xnhbr+ynhbr; diff=xnhbr-ynhbr; diff*=diff;
-    newdist=(sum+sqrt(2.0-diff))/2.0;
+    newdist=(sum+sqrt((2.0*(int)costMap[loc])-diff))/2.0;
+    if(newdist!=newdist) {
+    	if(ynhbr <= xnhbr)
+    		newdist = ynhbr+costMap[loc];
+    	else
+    		newdist = xnhbr+costMap[loc];
+    }
   }
 
   //Make sure new distance is less than old distance (else return old distance)
@@ -144,7 +173,7 @@ float solve(int i,int j,int xsize,int ysize,int *status,float *dist) {
   (s->setLocation(i,j), s->isValidLocation(obst,xsize,ysize))
 
 void computeDistances(
- unsigned char *obst,shape *s,int dest,float *dist,int xsize,int ysize
+ unsigned char *obst,shape *s,int dest,float *dist,int xsize,int ysize, int *costMap
 )
 //obst = binary input obstacle array (xsize by ysize)
 //dist = output array of distances (xsize by ysize)
@@ -181,32 +210,75 @@ void computeDistances(
 
     //Update -X neighbor
     if (i>0 && status[q=p-X]!=DONE && VALID_LOCATION(i-1,j)) {
-      dist[q]=solve(i-1,j,xsize,ysize,status,dist);
+      dist[q]=solve(i-1,j,xsize,ysize,status,dist, costMap);
       if (status[q]==NEW) {status[q]=ACTIVE; heap.push(q);}
       else heap.upheap(bckptr[q]);
     }
 
     //Update +X neighbor
     if (i<xsize-1 && status[q=p+X]!=DONE && VALID_LOCATION(i+1,j)) {
-      dist[q]=solve(i+1,j,xsize,ysize,status,dist);
+      dist[q]=solve(i+1,j,xsize,ysize,status,dist, costMap);
       if (status[q]==NEW) {status[q]=ACTIVE; heap.push(q);}
       else heap.upheap(bckptr[q]);
     }
 
     //Update -Y neighbor
     if (j>0 && status[q=p-Y]!=DONE && VALID_LOCATION(i,j-1)) {
-      dist[q]=solve(i,j-1,xsize,ysize,status,dist);
+      dist[q]=solve(i,j-1,xsize,ysize,status,dist, costMap);
       if (status[q]==NEW) {status[q]=ACTIVE; heap.push(q);}
       else heap.upheap(bckptr[q]);
     }
 
     //Update +Y neighbor
     if (j<ysize-1 && status[q=p+Y]!=DONE && VALID_LOCATION(i,j+1)) {
-      dist[q]=solve(i,j+1,xsize,ysize,status,dist);
+      dist[q]=solve(i,j+1,xsize,ysize,status,dist,costMap);
       if (status[q]==NEW) {status[q]=ACTIVE; heap.push(q);}
       else heap.upheap(bckptr[q]);
     }
   }
 
   delete[] status; delete[] bckptr;
+}
+
+void CreatePotentialfield(int *costMap, int xsize, int ysize, int gridsize, int maxd){
+	
+	int d=maxd, dnext;
+	int x,y,dx,dy;
+	for (int i = 0 ; i < gridsize; i++){
+		if (costMap[i]==0)  costMap[i]=d;
+		else costMap[i]=1;
+
+	}
+	
+	
+	while(d>0){
+		for(int i = 0; i < gridsize; i++){
+			if (costMap[i]==d){
+				// dnext = rint(d/1.1)-1;
+				  dnext = d-1;
+				 y=i/xsize; 
+				 x=i-y*xsize;
+				
+			     //Update +Y neighbor
+				 dy = (i+xsize)/xsize;
+				 dx = (i+xsize)-dy*xsize;
+			     if ((x==dx) && (i+xsize < gridsize) && (costMap[i+xsize] < d)) costMap[i+xsize]=dnext; 
+
+				 //Update -Y neighbor
+				 dy = (i-xsize)/xsize;
+				 dx = (i-xsize)-dy*xsize;
+			     if ((x==dx) && (i-xsize > 0) && (costMap[i-xsize] < d))  costMap[i-xsize]=dnext;  
+				 
+				 //Update -X neighbor
+				 dy = (i-1)/xsize;
+			     if ((y==dy) && (i-1 > 0) && (costMap[i-1] < d)) costMap[i-1]=dnext;  
+			     
+			     //Update +X neighbor
+				 dy = (i+1)/xsize;
+			     if ((y==dy) && (i+ 1 < gridsize) && (costMap[i+1] < d))  costMap[i+1]=dnext; 
+			}	
+		}
+		
+		d=dnext;
+	}
 }

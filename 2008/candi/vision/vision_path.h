@@ -12,5 +12,7 @@ extern Buffer2D<bool> visPathView;
 Point2D<int> robotWidthScan();
 void visPathControlMotors(Point2D<int> goal);
 
+#define ROBOT_WIDTH 24 //pixels wide
+
 
 #endif

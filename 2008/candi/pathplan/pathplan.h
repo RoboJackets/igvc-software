@@ -1,7 +1,4 @@
-#ifndef PATHPLAN_H
-#define PATHPLAN_H
-
-//#include <stdlib.h>      //Included for function exit()
+#include <stdlib.h>      //Included for function exit()
 #include <fstream>       //Included for ifstream class
 #include <iostream>      //Included for ostream class (cout)
 #include "shape.h"
@@ -15,7 +12,8 @@ inline float rint(float x) {return float((int)(x+.5));}
 
 int writePGM(const char *filename,unsigned char *image,int xsize,int ysize);
 int writeTxt(const char *filename,int *array,int size);
-int writeTest(const char *filename,unsigned char *image,int xsize,int ysize);
+int writeCost(const char *filename,int *image,int xsize,int ysize);
+int writeDist(const char *filename,float *image,int xsize,int ysize);
 
 //Declaration of function to compute total costs to destination shape in 3D grid
 //----------------------------------------------------------------------------
@@ -25,32 +23,27 @@ int writeTest(const char *filename,unsigned char *image,int xsize,int ysize);
 //dest = grid index of destination location (where cost = 0)
 
 void computeDistances(
- unsigned char *obst,shape *s,int dest,float *cost,int xsize,int ysize
+ unsigned char *obst,shape *s,int dest,float *dist,int xsize,int ysize, int *costMap
 );
-//Read rectangle parameters (width,height) from file and pass them to object
-void readAndSetRectangleParams(rectangle *myrect, int width, int height) {
-  myrect->setParams(width,height);
-}
 
-int navigate(unsigned char *&image,int xsize, int ysize, int xstart,int ystart,int xend, int yend){
+void CreatePotentialfield(int *costMap, int xsize, int ysize, int gridsize, int maxd);
+
+int navigate(unsigned char *image,int xsize, int ysize, int xstart,int ystart,int &xend, int &yend, int scaredD, int widthRobo, int heightRobo){
 		
-  //Paramters
-  int widthRobo = 10;
-  int heightRobo = 10;
-  /////////
-  
-  unsigned char *costMap;
+  int *costMap;
   int gridsize=xsize*ysize;     //Total number of pixels in the grid
-  costMap = new unsigned char[gridsize];
+  costMap = new int [gridsize];
   
-  for (int p=0; p<gridsize; p++) {costMap[p]=image[p];}
+  for (int p=0; p<gridsize; p++) {costMap[p]=(int)image[p];}
+  
+  CreatePotentialfield(costMap, xsize, ysize, gridsize,scaredD);
 
   //Shape Rect  
   rectangle myrect;
   shape *myshape;  //Base pointer to one of the above 3 derived shape objects
   myshape=&myrect; 
-  readAndSetRectangleParams(&myrect, widthRobo, heightRobo); 
-  
+  myrect.setParams(widthRobo,heightRobo);
+ 
   //Set starting location and draw starting shape outline
   int p1 = xstart+xsize*ystart; //Starting point
   myshape->setLocation(xstart,ystart);
@@ -59,7 +52,7 @@ int navigate(unsigned char *&image,int xsize, int ysize, int xstart,int ystart,i
     myshape->drawOutline(image,xsize,ysize);      //Draw starting shape
   } else {
     cout << "Illegal start location." << endl;
- return 0;
+    //exit(1);
   }
 
   //Set destination location and draw starting shape outline
@@ -70,23 +63,29 @@ int navigate(unsigned char *&image,int xsize, int ysize, int xstart,int ystart,i
     myshape->drawOutline(image,xsize,ysize);      //Draw destination shape
   } else {
     cout << "Illegal destination." << endl;
-    return 0;
+    //exit(1);
   }
+  
+  int startP = p1;
+  int endP = p2;
 
   //Compute total cost (distance) function at allowable (x,y,theta) locations
 
   float *cost=new float[gridsize];               //Allocate array for cost
   for (int p=0; p<gridsize; p++) cost[p]=gridsize; //Initialize cost values
 
-  computeDistances(image,myshape,p2,cost,xsize,ysize);
+  computeDistances(image,myshape,p2,cost,xsize,ysize,costMap);
 
   //Move shape from starting point to destination via the optimal path
 
   int steps=0;
   int sizeC = -1;
   int sizeV = -1;
+  int sizeP = -1;
   int *coord = new int[1000];
+  for (int i = 0; i<1000; i++) coord[i]=xstart/2;//default to center
   int *vect = new int[500];
+  int *ptracker = new int[225];
   
   int X=1, Y=xsize;   //Offsets needed to move by one pixel
   int oldY = p1/Y;
@@ -98,6 +97,7 @@ int navigate(unsigned char *&image,int xsize, int ysize, int xstart,int ystart,i
   do {
     p1=p2;                                   //Move p1 to smallest neighbor p2
     int j=p1/Y, i=p1-j*Y;  //indeces of current point
+    ptracker[++sizeP] = p1;
     coord[++sizeC] = i;
     coord[++sizeC] = j;
     
@@ -119,10 +119,9 @@ int navigate(unsigned char *&image,int xsize, int ysize, int xstart,int ystart,i
 
     //Get index of smallest neigbhor p2 to the current point p1
     float val=cost[p1];
-
+    if (j>0       && cost[p1-Y]<val) {val=cost[p1-Y]; p2=p1-Y;}
     if (i>0       && cost[p1-X]<val) {val=cost[p1-X]; p2=p1-X;}
     if (i<xsize-1 && cost[p1+X]<val) {val=cost[p1+X]; p2=p1+X;}
-    if (j>0       && cost[p1-Y]<val) {val=cost[p1-Y]; p2=p1-Y;}
     if (j<ysize-1 && cost[p1+Y]<val) {val=cost[p1+Y]; p2=p1+Y;}
 
  
@@ -138,8 +137,28 @@ int navigate(unsigned char *&image,int xsize, int ysize, int xstart,int ystart,i
   if (!writeTxt("vectors.txt",vect,sizeV))
     cout << "Unable to write vect txt file: " << endl;
   //Write test text file
-  if (!writeTest("test.txt",costMap,xsize,ysize))
+  costMap[startP] = 100000;
+  costMap[endP] = 100000;
+  for(int i = 0; i < sizeP; i++){
+	  costMap[ptracker[i]]=0;
+  }
+  if (!writeCost("costMap.txt",costMap,xsize,ysize))
     cout << "Unable to write test file: " << endl;
+  //Write dist text file
+  cost[startP] = 100000;
+  cost[endP] = 100000;
+  if (!writeDist("dist.txt",cost,xsize,ysize))
+    cout << "Unable to write test dist file: " << endl;
+
+
+  // Update input goal to new goal
+  // use a coordinate about 60 steps out
+  int future = 60; // must be even number
+  int gx = coord[future];
+  int gy = coord[future+1];
+  xend = gx;
+  yend = gy;
+
 
   //Deallocate memory
 
@@ -151,4 +170,3 @@ int navigate(unsigned char *&image,int xsize, int ysize, int xstart,int ystart,i
 
   return 1;
 }
-#endif
