@@ -70,8 +70,8 @@ void main(pixel_in IN, uniform sampler2D texture : TEXUNIT0)
 	float orness;
 	orness= mycolor.r-mycolor.g;
 	//recolor if orange
-	//float4 outprecol=orness>.2?orcol:mycolor;
-	float4 outprecol=orness>.01?(orness>.2?orcol:sandcol):mycolor;
+	float4 outprecol=orness>.2?orcol:mycolor;
+	//float4 outprecol=orness>.01?(orness>.2?orcol:sandcol):mycolor;
 	
 	//outprecol.a=1;
 	/*

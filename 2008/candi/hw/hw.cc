@@ -134,10 +134,10 @@ static Position2dProxy* GetMotors() {
 
 static LaserProxy* GetLaser() {
 	if (laser == NULL && (isInitialConnect || SUPPORT_PLUG_AND_PLAY)) {
-		PlayerClient* remoteRC = GetRemoteRC();
-		if (remoteRC != NULL) {
+		PlayerClient* localRC = GetLocalRC();
+		if (localRC != NULL) {
 			try {
-				laser = new LaserProxy(remoteRC,0);				// use laser:0
+				laser = new LaserProxy(localRC,0);				// use laser:0
 				printf("Connected to LIDAR.\n");
 			} catch (PlayerError e) {
 				if (isInitialConnect) {

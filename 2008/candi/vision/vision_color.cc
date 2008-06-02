@@ -8,6 +8,20 @@
 
 // ------------------------------------------------------------------------
 
+//=========================================
+
+/* lower values look for cleaner (less dirty) white */
+// >=90 for low-light conditions     bigger->more red
+const int WHITE_PIXEL_SATURATION_THRESHOLD =
+	/*new IntFilterParam("White Pixel Saturation - Threshold (Low)", 0, 255,*/ 60; //70;//85; //50;
+
+/* HSL only: higher values look for brighter white */
+// >=40 to eliminate black   bigger->less blue
+const int WHITE_PIXEL_LIGHTNESS_THRESHOLD =
+	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 165; //170; //140; //100; //60;
+
+//======================================
+
 // If 0, HSB.brightness is used to detect white
 // If 1, HSL.lightness is used instead
 #define USE_LIGHTNESS_INSTEAD_OF_BRIGHTNESS 1
@@ -15,22 +29,14 @@
 /* higher values look for brighter orange */
 // XXX: chosen default value is arbitrary; subsequent adjustment recommended
 const int ORANGE_PIXEL_DETECTION_THRESHOLD =
-	/*new IntFilterParam("Orange Pixels (Red-Green) - Threshold (High)", -255, 255,*/ 30;
-
-/* lower values look for cleaner (less dirty) white */
-// >=90 for low-light conditions     bigger->more red
-const int WHITE_PIXEL_SATURATION_THRESHOLD =
-	/*new IntFilterParam("White Pixel Saturation - Threshold (Low)", 0, 255,*/ 70; //70;//85; //50;
-
+	/*new IntFilterParam("Orange Pixels (Red-Green) - Threshold (High)", -255, 255,*/ 30;	
+	
 /* HSB only: higher values look for brighter white */
 // >=40 to eliminate black
 const int WHITE_PIXEL_BRIGHTNESS_THRESHOLD =
 	/*new IntFilterParam("White Pixel Brightness - Threshold (High)", 0, 255,*/ 100; //100; //60;
 
-/* HSL only: higher values look for brighter white */
-// >=40 to eliminate black   bigger->less blue
-const int WHITE_PIXEL_LIGHTNESS_THRESHOLD =
-	/*new IntFilterParam("White Pixel Lightness - Threshold (High)", 0, 255,*/ 170; //170; //140; //100; //60;
+
 
 
 const Pixel ORANGE_PIXEL_ANNOTATION_COLOR = Pixel(255, 128, 0);		// bright orange
@@ -96,7 +102,7 @@ bool pixelIsYellow_calcFromHSL(HSL hsl);
 // ------------------------------------------------------------------------
 
 void blankColredBarrels(){
-	Pixel p;
+	Pixel p,p2;
 	Pixel newp,newp2;
 	
 	newp.red=255; newp.green=128; newp.blue=0; //orange from shader
@@ -104,31 +110,33 @@ void blankColredBarrels(){
 	
 	for (int i=0, n=visRaw.numElements(); i<n; i++) {
 		p = paulBlob[i];
-		// yellow
-		if( (p.blue<50) && (p.red>230) && (p.green<p.red) ){
+		// yellow,  and also orange from shader
+		if( (p.red>(3*p.blue)) && (p.green<p.red) && (p.red>p.green) && (p.blue<p.green) ){
 			paulBlob[i]=newp;
 		}
 		// blue
-		if( (p.blue>p.red) && (p.blue>p.green) &&  (abs(p.green-p.red)<15) ){ 
+		if( (p.blue>p.red) && (p.blue>p.green) &&  (abs(p.green-p.red)<12) ){ 
 			paulBlob[i]=newp;
 		}
 		// red , check for drawing red lines (200,0,0)
-		if( (p.red!=200) && (p.blue<p.red) && (p.red>p.green) && (abs(p.green-p.blue)<10) ){
+		if( (p.red!=200) && (p.blue<p.red) && (p.red>p.green) && (abs(p.green-p.blue)<12) ){
 			paulBlob[i]=newp;
 		}
 		// gray / black, but not white
-		if(  (abs(p.green-p.red)<10) && (abs(p.green-p.blue)<10) && (abs(p.red-p.blue)<10) ){
-			if(p.green!=255&&p.blue!=255&&p.red!=255)
+		if(  (abs(p.green-p.red)<12) && (abs(p.green-p.blue)<12) && (abs(p.red-p.blue)<12) ){
+			if(p.green!=255&&p.blue!=255&&p.red!=255){
+				//not white
 				paulBlob[i]=newp;
+			}
 		}
 		// neon green, but not shader green
-		if( (p.green>245) && (p.green>p.red) && (p.green>p.blue) && (p.red>p.blue) && (p.blue<65) ){
-			if( (p.green==255)&&(p.red==0)&&(p.blue==0)){
+		if( (p.green>205) && (p.green>p.red) && (p.green>p.blue) && (p.red>p.blue) ){//&& (p.blue<65) ){
+			//if( (p.green==255)&&(p.red==0)&&(p.blue==0)){
 				//shader green
-			}
-			else{
+			//}
+			//else{
 				paulBlob[i]=newp;
-			}
+			//}
 		}
 		
 	}
