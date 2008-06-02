@@ -22,6 +22,7 @@ Buffer2D<Pixel> visRaw;
 
 // Auxilary testing view (for debugging purposes)
 Buffer2D<Pixel> visTestViewContent;
+Buffer2D<bool> pathPlanImage;
 
 // ### MAIN VISION PROCESSING ###
 
@@ -88,52 +89,78 @@ void visFrame()
 				// depends on visClassifyPixelsByColor()!!
 				visGenPath();
 			}
+
+			
+					//visAnnotatePixelColors(paulBlob);	
 		
 			/* init drawing of navigation colors,
 				done here so visPathControlMorots can
 				draw to this image too */
-			visNavigationParams.copyFrom(paulBlob);			
+			visNavigationParams.copyFrom(paulBlob);	
+			
+	
 
 			/*	find next goal for robot, and decide whether to use
 				path planning, or sweeping lines mode 
 				for driving motors 	*/
 				// depends on visClassifyPixelsByColor()!!
 			goal = robotWidthScan();	// returns -1 on error
-			if(goal.y!=-1 && goal.y<visRaw.height-closenessThresh){
-/*
+			
+			//goal.y=-1;//remove me = for testing
+			
+			if(goal.y!=-1 && goal.y<visRaw.height-closenessThresh && goal.y>10){
+				/*
 				printf("width %d height %d	start(%d,%d)	goal(%d,%d)\n",
 							visPathView.width, 								
 							visPathView.height,								
 							visPathView.width/2, 							
-							visPathView.height-ROBOT_WIDTH, 							
+							visPathView.height-ROBOT_WIDTH/2, 							
 							goal.x, 										
-							goal.y);
-							
+							goal.y+ROBOT_WIDTH);
+				*/			
 				unsigned char * temp=(unsigned char *)visPathView.data;
-				navigate(	temp, 				
+				//convert
+				for(int i = 0 ; i< visPathView.width*visPathView.height; i++){
+					if (visPathView[i]==0) temp[i]==0;
+					else temp[i]=255;
+				}
+				goal.y+=ROBOT_WIDTH;
+				
+				//path plan! returns 0 on error
+				if(navigate(	temp, 				
 							visPathView.width, 								
 							visPathView.height,								
 							visPathView.width/2, 							
-							visPathView.height-ROBOT_WIDTH, 							
+							visPathView.height-ROBOT_WIDTH/2, 							
 							goal.x, 										
 							goal.y,
 							30,
-							ROBOT_WIDTH,
-							ROBOT_WIDTH);
-							
-				printf("new goal(%d,%d)\n",							
+							11,//ROBOT_WIDTH,
+							11)//ROBOT_WIDTH);
+					){
+						//drive robot with path planning
+						visPathControlMotors(goal);
+						
+							//remove me
+							//visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
+						/*
+						printf("new goal(%d,%d)\n",							
 							goal.x, 										
-							goal.y);				
-*/							
-				//drive robot with path planning
-				//visPathControlMotors(goal);
-					//remove me
+							goal.y);
+						*/	
+				}	
+				else{		
+					//drive robot with close vision only
 					visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
+					
+						printf("error in path planning \n");
+				}
 											
 			}
 			else{
 				//drive robot with close vision only
 				visPlotNavigationParams();	// depends on visClassifyPixelsByColor()
+				
 					//remove me
 					//visPathControlMotors(goal);
 			}

@@ -30,6 +30,7 @@ void CreatePotentialfield(int *costMap, int xsize, int ysize, int gridsize, int 
 
 int navigate(unsigned char *image,int xsize, int ysize, int xstart,int ystart,int &xend, int &yend, int scaredD, int widthRobo, int heightRobo){
 		
+		
   int *costMap;
   int gridsize=xsize*ysize;     //Total number of pixels in the grid
   costMap = new int [gridsize];
@@ -53,6 +54,7 @@ int navigate(unsigned char *image,int xsize, int ysize, int xstart,int ystart,in
   } else {
     cout << "Illegal start location." << endl;
     //exit(1);
+    return 0;
   }
 
   //Set destination location and draw starting shape outline
@@ -64,6 +66,7 @@ int navigate(unsigned char *image,int xsize, int ysize, int xstart,int ystart,in
   } else {
     cout << "Illegal destination." << endl;
     //exit(1);
+    return 0;
   }
   
   int startP = p1;
@@ -76,6 +79,7 @@ int navigate(unsigned char *image,int xsize, int ysize, int xstart,int ystart,in
 
   computeDistances(image,myshape,p2,cost,xsize,ysize,costMap);
 
+
   //Move shape from starting point to destination via the optimal path
 
   int steps=0;
@@ -84,8 +88,8 @@ int navigate(unsigned char *image,int xsize, int ysize, int xstart,int ystart,in
   int sizeP = -1;
   int *coord = new int[1000];
   for (int i = 0; i<1000; i++) coord[i]=xstart/2;//default to center
-  int *vect = new int[500];
-  int *ptracker = new int[225];
+  int *vect = new int[1000];
+  int *ptracker = new int[1000];
   
   int X=1, Y=xsize;   //Offsets needed to move by one pixel
   int oldY = p1/Y;
@@ -126,7 +130,7 @@ int navigate(unsigned char *image,int xsize, int ysize, int xstart,int ystart,in
 
  
   } while (p1!=p2);
-
+/*
   //Write output image
   if (!writePGM("output.pgm",image,xsize,ysize))
     cout << "Unable to write output image: " << endl;
@@ -149,11 +153,11 @@ int navigate(unsigned char *image,int xsize, int ysize, int xstart,int ystart,in
   cost[endP] = 100000;
   if (!writeDist("dist.txt",cost,xsize,ysize))
     cout << "Unable to write test dist file: " << endl;
-
+*/
 
   // Update input goal to new goal
   // use a coordinate about 60 steps out
-  int future = 60; // must be even number
+  int future =60; // must be even number and less than closenessThresh
   int gx = coord[future];
   int gy = coord[future+1];
   xend = gx;
@@ -167,6 +171,7 @@ int navigate(unsigned char *image,int xsize, int ysize, int xstart,int ystart,in
   delete[] coord;
   delete[] vect;
   delete[] costMap;
+  delete[] ptracker;
 
   return 1;
 }

@@ -100,7 +100,7 @@ int writeDist(const char *filename,float *image,int xsize,int ysize){
 	
 	for(int j = 0 ; j < ysize ; j++){
 		for(int i = 0 ; i < xsize ; i++){
-			fprintf(file,"%d ",(int)image[j*xsize+i]);
+			fprintf(file,"%7d ",(int)image[j*xsize+i]);
 		}
 		fprintf(file,"\n");
 	}

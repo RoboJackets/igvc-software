@@ -37,6 +37,7 @@ const Pixel DANGEROUS_PIXEL_COLOR = Pixel(0, 0, 255);		// blue
 const Pixel WHITE_BARREL_STRIPE_PIXEL_ANNOTATION_COLOR = 
 	Pixel(255 * 3/4, 255 * 3/4, 255 * 3/4);		// light gray
 
+const Pixel LIDAR_PIXEL_COLOR = Pixel(255, 0, 255);		// purple
 
 // ### ALGORITHM ###
 
@@ -90,6 +91,7 @@ void visPlotNavigationParams(void) {
 			// Calculate the danger contribution of the current
 			// path-pixel to the path danger
 			curPixelDanger = 0;
+			int passedwhiteline=0;
 			for (int delta=-NAV_PATH__PATH_SEARCH_GIRTH; delta<=NAV_PATH__PATH_SEARCH_GIRTH; delta++) {
 				// (XXX: Consider *nearby* pixels as different fragments of the path-pixel)
 				Point2D<int> curPoint = pathPoints[j];
@@ -107,10 +109,14 @@ void visPlotNavigationParams(void) {
 							// Line: White
 							curPixelDanger += DANGER_PER_LINE_PIXEL;
 						}*///end deprecated region
-						
+					
 						/*REPLACEMENT*/
-						curPixelDanger += DANGER_PER_LINE_PIXEL;
+						//curPixelDanger += DANGER_PER_LINE_PIXEL;
 						/**///end replacement
+				
+							//check if we cross a white line, and ignore a white barrels
+							passedwhiteline++;
+							
 					} else if (pixelIsOrange.get(curPoint.x, curPoint.y)) {
 						// Barrel: Orange stripe
 						curPixelDanger += DANGER_PER_BARREL_PIXEL;
@@ -118,6 +124,10 @@ void visPlotNavigationParams(void) {
 						// Nothing special: Probably grass
 						//curPixelDanger += 0;
 					}
+					
+					//check if we cross a white line, and ignore a white barrels
+					if(passedwhiteline>0&&passedwhiteline<12) curPixelDanger += DANGER_PER_LINE_PIXEL;
+					
 				} else {
 					// Offscreen: Probably grass
 					//curPixelDanger += 0;
@@ -130,6 +140,13 @@ void visPlotNavigationParams(void) {
 			pixelDanger[j] = curPixelDanger;
 			curPathDanger += curPixelDanger;
 		}
+		
+		
+		//==== weight outer yellow lines more scary than inner ==========//
+		int weight = abs(NAV_PATH__CENTER_PATH_ID-pathID)/(NAV_PATH__NUM);
+		curPathDanger += weight;
+		
+		
 		if (curPathDanger > MAX_PATH_DANGER) {
 			// Clip high danger values to be no higher than MAX_PATH_DANGER
 			curPathDanger = MAX_PATH_DANGER;
@@ -179,7 +196,8 @@ void visPlotNavigationParams(void) {
 				navPath_start(pathID) + 
 				(navPath_end(pathID)-navPath_start(pathID)) * range/MAX_EXPECTED_RANGE;
 			
-			g.setColor(Pixel(0, 255, 0));	// green
+			//g.setColor(Pixel(0, 255, 0));	// green
+			g.setColor(LIDAR_PIXEL_COLOR);	// purple
 			g.fillRect_rational(
 				(int) obstaclePos.x-2, (int) obstaclePos.y-2,
 				5, 5);

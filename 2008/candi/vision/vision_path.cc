@@ -330,6 +330,29 @@ Point2D<int> robotWidthScan(){
 			//good
 			//flip y coordinate for path planning
 			//goal.y=height-goal.y;
+			
+			//test writing out image
+/*			//=====
+			      unsigned char *temp =  new unsigned char[visPathView.width*visPathView.height];
+			      for(int i = 0 ; i< visPathView.width*visPathView.height; i++){
+			      		if (visPathView[i]==0) temp[i]==0;
+			      		else temp[i]=255;
+
+			      }
+				  FILE *file;
+				  //Open output file for writing
+				  if (!(file=fopen("chris_path.pgm","w"))) printf("error writing chris_path.pgm");
+				  //Write PGM header
+				  fprintf(file,"P5\n");
+				  fprintf(file,"# CREATOR: pgmio.C Rev: 11/04/01\n");
+				  fprintf(file,"%d %d\n",visPathView.width,visPathView.height);
+				  fprintf(file,"255\n");
+				  //Write image data to file
+				  fwrite(temp,sizeof(unsigned char),visPathView.width*visPathView.height,file);
+					delete[] temp;
+				  //Close file and return
+				  fclose(file);
+*/			//=====
 		}
 	}
 

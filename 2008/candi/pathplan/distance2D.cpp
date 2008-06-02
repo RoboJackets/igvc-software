@@ -242,7 +242,8 @@ void computeDistances(
 
 void CreatePotentialfield(int *costMap, int xsize, int ysize, int gridsize, int maxd){
 	
-	int d=maxd, dnext;
+	int d=maxd;
+	int dnext;
 	int x,y,dx,dy;
 	for (int i = 0 ; i < gridsize; i++){
 		if (costMap[i]==0)  costMap[i]=d;
@@ -253,9 +254,10 @@ void CreatePotentialfield(int *costMap, int xsize, int ysize, int gridsize, int 
 	
 	while(d>0){
 		for(int i = 0; i < gridsize; i++){
+		dnext = d-1;
 			if (costMap[i]==d){
-				// dnext = rint(d/1.1)-1;
-				  dnext = d-1;
+				
+				 
 				 y=i/xsize; 
 				 x=i-y*xsize;
 				

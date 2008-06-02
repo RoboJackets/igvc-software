@@ -25,7 +25,7 @@ Line<int> dashedlines[MAX_N_LINES];		//array of the white lines we've found
 int numdashedlines=0;					//number of lines in the line array
 
 // Defines how much to extend the lines we have found to fill dashes
-static const double LINE_EXTENSION_FACTOR=1.0;
+static const double LINE_EXTENSION_FACTOR = 0.6;//1.0;
 
 //internal use
 static Buffer2D<bool> img;
@@ -229,7 +229,8 @@ void findat(int x,int y) {
 		//printf("\n%d,%d",np,cp);
 		if (np>=plsz-8){				//in danger of running out of memory next pass
 			printf("too many white pixels - ignoring blob\n");
-			break;				// we have selected ~1/8 of the image!
+			return;
+			//break;				// we have selected ~1/8 of the image!
 		}
 	}
 	//we have a line candidate!
