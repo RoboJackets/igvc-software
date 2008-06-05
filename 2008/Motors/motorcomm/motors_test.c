@@ -42,14 +42,12 @@ int main(int argc, char *argv[]) {
 			printf("HWESTOP %d\n", (int) reply.HWESTOP);
 			printf("AUTOMAN %d\n", (int) reply.AUTOMAN);
 			printf("PATHNAV %d\n", (int) reply.PATHNAV);
-			printf("CURRENTLEFT1 %d\n", (int) reply.CURRENTLEFT1);
-			printf("CURRENTLEFT2 %d\n", (int) reply.CURRENTLEFT2);
-			printf("CURRENTRIGHT1 %d\n", (int) reply.CURRENTRIGHT1);
-			printf("CURRENTRIGHT2 %d\n", (int) reply.CURRENTRIGHT2);
-			printf("LOGICBATT1 %d\n", (int) reply.LOGICBATT1);
-			printf("LOGICBATT2 %d\n", (int) reply.LOGICBATT2);
-			printf("MOTORBATT1 %d\n", (int) reply.MOTORBATT1);
-			printf("MOTORBATT2 %d\n", (int) reply.MOTORBATT2);
+			printf("CURRENTLEFT %d\n", ( ((int)reply.CURRENTLEFT1)<<8) | ((int)reply.CURRENTLEFT2) );
+			printf("CURRENTRIGHT %d\n", ( ((int)reply.CURRENTRIGHT1)<<8) | ((int)reply.CURRENTRIGHT2) );
+			printf("LOGICBATT %d\n", ( ((int)reply.LOGICBATT1)<<8) | ((int)reply.LOGICBATT2) );
+			printf("MOTORBATT %d\n", ( ((int)reply.MOTORBATT1)<<8) | ((int)reply.MOTORBATT2) );
+			printf("LEFTMOTORSPEED %d\n", ( ((int)reply.LEFTMOTORSPEED1)<<8) | ((int)reply.LEFTMOTORSPEED2) );
+			printf("RIGHTMOTORSPEED %d\n", ( ((int)reply.RIGHTMOTORSPEED1)<<8) | ((int)reply.RIGHTMOTORSPEED2) );
 		}
 	}
 	if (argv[1][0]=='w')
