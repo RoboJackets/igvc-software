@@ -38,11 +38,10 @@ bool motors_open(void) {
 	{	
 		printf("trying port #%d\n", (int) i);
 
-		serialAddress[11]=i+'0';
 		arduino_fd = serialport_init(serialAddress, BAUD);
 		if (arduino_fd == -1)
 		{
-			//printf("no module\n");
+			printf("no module\n");
 			//retry//no module found
 		}
 		else
@@ -52,12 +51,12 @@ bool motors_open(void) {
 			readFully(arduino_fd, &reply, sizeof(reply));
 			if (reply=='m')
 			{
-				//printf("DONE!!\n");
+				printf("DONE!!\n");
 				break;
 			}
 			else
 			{
-				//printf("wrong module\n");
+				printf("wrong module\n");
 				//retry//wrong module found
 			}
 		}

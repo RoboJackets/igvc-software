@@ -18,6 +18,10 @@ typedef struct {
 	uint8_t LOGICBATT2; //Lower byte of the logic battery system's voltage 10 bit reading
 	uint8_t MOTORBATT1; //Upper byte of the motor battery system's voltage 10 bit reading
 	uint8_t MOTORBATT2; //Lower byte of the motor battery system's voltage 10 bit reading
+	uint8_t LEFTMOTORSPEED1; //Upper byte of the left motor battery speed 10 bit reading
+	uint8_t LEFTMOTORSPEED2; //Lower byte of the left motor battery speed 10 bit reading
+	uint8_t RIGHTMOTORSPEED1; //Upper byte of the right motor battery speed 10 bit reading
+	uint8_t RIGHTMOTORSPEED2; //Lower byte of the right motor battery speed 10 bit reading
 } motor_reply_t;
 
 typedef enum {
