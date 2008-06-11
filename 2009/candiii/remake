@@ -1,0 +1,22 @@
+#!/bin/bash
+
+
+echo ""
+echo "Creating: candi.pro"
+shopt -s extglob
+echo $CFLAGS
+qmake-qt4 -project \
+		-o candi.pro \
+		CONFIG+=debug \
+		LIBS+="-L /usr/local/lib  -lltdl -lpthread  -lm" \
+		LIBS+="-lGL" \
+		LIBS+="-lglut" \
+		LIBS+="-lcv -lcvaux -lhighgui	" \
+		INCLUDEPATH+="/usr/include/opencv" 
+
+
+echo "Creating: Makefile"
+qmake-qt4 -makefile
+
+echo "Type 'make' to compile everything"
+echo ""
