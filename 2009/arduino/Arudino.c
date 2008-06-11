@@ -25,15 +25,12 @@
 struct data{
 };
 
-/* VARIABLES */
-/* SERIAL */
-int incomingByte = 0;
-
 void setup(void) {
 	/* open the serial port */
 	Serial.begin(9600);
 	
 	/* set the pin modes */
+	//// add your pins here ////
 }
 
 void loop(void) {
@@ -44,7 +41,7 @@ void loop(void) {
 
 void readSerial(void) {
 	if (Serial.available() > 0) {
-		incomingByte = Serial.read();
+		int incomingByte = Serial.read();
 		if (incomingByte == 'r') {
 			sendStatus();
 		} else if (incomingByte == 'w') {
