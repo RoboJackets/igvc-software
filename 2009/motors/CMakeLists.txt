@@ -1,0 +1,9 @@
+project (MotorEncoders)
+
+add_library (MotorEncoders MotorEncoders.cc)
+
+add_library (ArduinoInterface ArduinoInterface.cc)
+
+add_executable (MotorEncodersTest MotorEncodersTest.cc)
+
+target_link_libraries (MotorEncodersTest MotorEncoders ArduinoInterface)
