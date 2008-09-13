@@ -8,11 +8,15 @@ echo $CFLAGS
 qmake-qt4 -project \
 		-o candi.pro \
 		CONFIG+=debug \
-		LIBS+="-L /usr/local/lib  -lltdl -lpthread  -lm" \
+		QT+=xml \
+		LIBS+="-L /usr/local/lib  -lltdl -lpthread -lm"  \
 		LIBS+="-lGL" \
+		LIBS+="-ldc1394" \
 		LIBS+="-lglut" \
 		LIBS+="-lcv -lcvaux -lhighgui	" \
-		INCLUDEPATH+="/usr/include/opencv" 
+		INCLUDEPATH+="/usr/include/opencv" \
+		INCLUDEPATH+="/usr/local/include/opencv" \
+		INCLUDEPATH+="/usr/include/qt4/Qt"
 
 
 echo "Creating: Makefile"
