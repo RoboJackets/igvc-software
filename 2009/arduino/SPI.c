@@ -75,7 +75,7 @@ bool SPITransfer(void* outdata, void* indata, unsigned int numBytes){
 		while (!(SPSR & (1<<SPIF))) // Wait the end of the transmission
 		{
 		};
-		indata[i] SPDR;// return the received byte
+		indata[i] = SPDR;// return the received byte
 	}
 }
 
