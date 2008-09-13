@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Config>
+
+	<auto_gain_and_shutter>0<auto_gain_and_shutter>
+
+	<gain>32</gain>
+	<shutter>2048</shutter>
+	<gamma>0</gamma>
+	
+	<red>523</red>
+	<blue>646</blue>
+					
+	<satThresh>60</satThresh>
+	<hueThresh>20</hueThresh>
+
+</Config>
