@@ -1,0 +1,12 @@
+Dependencies for compiling 2009 candiii robot:
+
+opencv libraries
+qt4 libraries (all qt4 stuff to be safe)
+libtool
+g++
+glut libraries
+libdc1394  (SourceForge)
+libraw1394 (SourceForge)
+boost
+
+
