@@ -69,3 +69,13 @@ bool SPIReadBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, in
 bool SPISendBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, int clockPin) {
 }
 
+bool SPITransfer(void* outdata, void* indata, unsigned int numBytes){
+	for(int i = 0; i < numBytes; i++){
+		SPDR = outdata[i];	// Start the transmission
+		while (!(SPSR & (1<<SPIF))) // Wait the end of the transmission
+		{
+		};
+		indata[i] SPDR;// return the received byte
+	}
+}
+
