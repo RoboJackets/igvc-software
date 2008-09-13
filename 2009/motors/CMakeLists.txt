@@ -1,6 +1,6 @@
 add_library (MotorEncoders MotorEncoders.cc)
 
-add_definitions(-I${Candi_SOURCE_DIR}/arduino)
+include_directories(${Candi_SOURCE_DIR}/arduino)
 
 add_executable (MotorEncodersTest MotorEncodersTest.cc)
 
