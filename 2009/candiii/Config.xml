@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Comment -->
+<!--  -->
+
+<Config>
+
+	<!-- Guppy Misc Settings -->
+	<gain>32</gain>
+	<shutter>2048</shutter>
+	<gamma>0</gamma>
+
+	<!-- Guppy White Balance Settings -->	
+	<red>523</red>
+	<blue>646</blue>
+
+	<!-- Vision Processing Settings -->
+	<satThresh>60</satThresh> <!-- higher => more noise -->
+	<hueThresh>20</hueThresh> <!-- higher => more noise -->
+
+</Config>
