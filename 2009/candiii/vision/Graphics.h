@@ -2,81 +2,43 @@
  * This class emulates Java's Graphics class.
  * 
  * The class performs all graphics operations on the
- * Buffer2D<Pixel> that it is passed upon construction.
+ * IplImage that it is passed upon construction.
  */
 
 #ifndef _GRAPHICS_H_
 #define _GRAPHICS_H_
 
-#include "Pixel.h"
-#include "Buffer2D.h"
+#include "image_buffers.h"
 #include "Point2D.h"
-#include "Line.h"
 #include <stdlib.h>			// abs
 #include <QVector>
+
+
+int Math_min(int n1, int n2) { return (n1 < n2) ? n1 : n2; }
+int Math_max(int n1, int n2) { return (n1 > n2) ? n1 : n2; }
+
 
 
 class Graphics
 {
 private:
-	Buffer2D<Pixel>* buffer;
-	Pixel color;
+	IplImage* buffer;
+	CvScalar color;
 	
 public:
-	Graphics(Buffer2D<Pixel>* buffer) {
+	Graphics(IplImage* buffer) {
 		this->buffer = buffer;
-		this->color = Pixel(0, 0, 0);	// black
+		color = CV_RGB(0,0,0); //default to black
 	}
 	
-	// ### STATE ###
-	
-	void setColor(const Pixel& color) {
+	void setColor(const CvScalar color) {
 		this->color = color;
 	}
-	// ### FILE OPS ###
-	
-	bool saveAs(char * location, char * name, int number){
-		char path[1000];
-		char numstr[10];
-		char* rgb;
-		char* bgr0=(char*)buffer->data;
-		
-		path[0]=0;
-		strcat(path,location);
-		strcat(path,name);
-		sprintf(numstr,"%.6d",number);
-		strcat(path, numstr);
-		strcat(path, ".bmp");
-		const int limit=buffer->numElements()*3;
-		rgb=(char*)malloc(sizeof(char)*limit);
-		for(int offi=0,offo=0; offo<limit;offi+=4,offo+=3){
-			rgb[offo  ] = bgr0[offi+2];
-			rgb[offo+1] = bgr0[offi+1];
-			rgb[offo+2] = bgr0[offi  ];
-		}
-		
-		if(!write_bmp(path, buffer->width, buffer->height, rgb)){
-			return 1;
-		}
-		free(rgb);
-		return 0;
-	}
-	
-	// ### DRAWING ###
-	
-	void drawRect(int x, int y, int widthMinusOne, int heightMinusOne) {
-		int xMax = x + widthMinusOne;
-		int yMax = y + heightMinusOne;
-		
-		// Draw top edge
-		drawHorizLine(y, x, xMax);
-		// Draw bottom edge
-		drawHorizLine(yMax, x, xMax);
-		
-		// Draw left edge
-		drawVertLine(x, y, yMax);
-		// Draw right edge
-		drawVertLine(xMax, y, yMax);
+
+	void drawRect(int x, int y, int width, int height) {
+		int xMax = x + width;
+		int yMax = y + height;
+		cvRectangle( buffer, cvPoint(x,y), cvPoint(xMax,yMax), color, 1, 8, 0 );
 	}
 	
 	void drawRect_rational(int x, int y, int width, int height) {
@@ -84,74 +46,46 @@ public:
 	}
 	
 	void fillRect_rational(int x, int y, int width, int height) {
-		if (width <= 0) return;
-		
-		int xMax = x+width-1;
-		for (int i=height; i>0; i--, y++) {
-			drawHorizLine(y, x, xMax);
-		}
+		int xMax = x + width;
+		int yMax = y + height;
+		cvRectangle( buffer, cvPoint(x,y), cvPoint(xMax,yMax), color, CV_FILLED, 8, 0 );
 	}
 	
 	void drawHorizLine(int y, int x1, int x2) {
-		// Check bounds and limit if necessary
-		if ((y < 0) || (y >= buffer->height)) return;
-		if (x1 < 0) x1 = 0;
-		if (x2 >= buffer->width) x2 = buffer->width-1;
-		
-		for (int curX=x1; curX<=x2; curX++) {
-			buffer->set(curX, y, this->color);
-		}
+		cvLine( buffer, cvPoint(x1,y), cvPoint(x2,y), color, 1, 8, 0 );
 	}
 
 	void drawVertLine(int x, int y1, int y2) {
-		// Check bounds and limit if necessary
-		if ((x < 0) || (x >= buffer->width)) return;
-		if (y1 < 0) y1 = 0;
-		if (y2 >= buffer->height) y2 = buffer->height-1;
-		
-		for (int curY=y1; curY<=y2; curY++) {
-			buffer->set(x, curY, this->color);
-		}
-	}
-	
-	void drawPixel(int x, int y) {
-		// Check bounds
-		if (!this->contains(x, y)) return;
-		
-		buffer->set(x, y, this->color);
+		cvLine( buffer, cvPoint(x,y1), cvPoint(x,y2), color, 1, 8, 0 );
 	}
 	
 	void drawLine(int x1, int y1, int x2, int y2) {
-		int deltaX = x2-x1;
-		int deltaY = y2-y1;
-		
-		int stepMax = Math_max(abs(deltaX), abs(deltaY)) + 1;
-		for (int i=0; i<=stepMax; i++) {
-			drawPixel(
-				x1 + (deltaX * i/stepMax),
-				y1 + (deltaY * i/stepMax));
-		}
+		cvLine( buffer, cvPoint(x1,y1), cvPoint(x2,y2), color, 1, 8, 0 );
 	}
-	
-	template<class N>
-	void drawLine(Line<N> L) {
-		int x1=L.a.x;	int y1=L.a.y;
-		int x2=L.b.x;	int y2=L.b.y;
-		
-		drawLine(x1, y1, x2, y2);
+
+	void drawPixel(int x, int y) {
+		cvLine( buffer, cvPoint(x,y), cvPoint(x,y), color, 1, 8, 0 );
 	}
+
+//	template<class N>
+//	void drawLine(Line<N> L) {
+//		int x1=L.a.x;	int y1=L.a.y;
+//		int x2=L.b.x;	int y2=L.b.y;
+//		
+//		drawLine(x1, y1, x2, y2);
+//	}
 	
 	// Calculates the points that would be used in drawing a line
 	// from (x1, y1) to (x2, y2) and appends them to 'outLinePixels'.
 	static void calculatePointsInLine(int x1, int y1, int x2, int y2, QVector< Point2D<int> >* outLinePixels) {
-		int deltaX = x2-x1;
-		int deltaY = y2-y1;
+		int deltaX = x2 - x1;
+		int deltaY = y2 - y1;
 		
 		int stepMax = Math_max(abs(deltaX), abs(deltaY)) + 1;
 		for (int i=0; i<=stepMax; i++) {
 			outLinePixels->append(Point2D<int>(
 				x1 + (deltaX * i/stepMax),
-				y1 + (deltaY * i/stepMax)));
+				(y1 + (deltaY * i/stepMax))));
 		}
 	}
 	
