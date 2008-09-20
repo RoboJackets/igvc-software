@@ -1,0 +1,29 @@
+TODO:
+ - change this to some other document format
+
+
+Part Selection Justification
+Accelerometer
+The cheapest. Adjustable sensitivity.
+Compass
+The cheapest.
+Note: this output has an offset which is determined in code by comparing the normal and inverted signal (see Honeywell AN212).  It would be better to use the offset straps to feed in the opposite of the offset (requires a DAC).  The offset straps can also be used for callibration.
+
+
+
+
+
+
+Value calc
+compass s/r mosfets - similar to an213
+-40 to 125 degrees Celcius
+min R @ 25C = 1.5
+max R @ 25C = 3 ohms
+(-40C - 25C) * (3300 ppm/C) * (3 ohms) = -0.64 ohms
+min R = 1.5 - 0.64 = 0.86 ohms
+(125C - 25C) * (4100 ppm/C) * (3 ohms) = 1.23 ohms
+max R = 3 + 1.23 = 4.23 ohms
+min current = 0.8 amps
+max current = 8 amps
+min voltage = (min current) * (max R) = 3.384
+max voltage = (max current) * (min R) = 6.88

@@ -1,0 +1,61 @@
+microcontroller
+ - required features
+ - - 12-16 bit ADC
+ - - enough processing power/ram/flash
+ - - - need to figure this out
+ - - open development tools
+ - price
+ - extra features
+ - power usage
+ 
+Filtering/Callibration
+ - propagation delay / unknown sample time
+ - estimate parameters online or offline?
+ - - determine parameters using a scripted test
+ - - Least squares, maximum likelyhood, kalman/particle filter etc.
+
+Sensors
+ - quantization error
+ - contant bias
+ - white noise
+ - bias stabity
+ - scale factor error
+ - alignment error
+ - nonlinearity
+ - does GPS mounting direction matter
+ - temperature dependence
+ - humiditiy and pressure dependence(?)
+ - coupled noise
+
+Gyro/Accelerometer
+ - gravity
+ - Coriolis force
+
+Compass
+ - hard and soft iron compensation
+ - world magnetic model 
+ - changing magnetic fields from other electronics or magnetic objects
+
+GPS
+ - DGPS
+ - - could get it from internet
+ - other beacons (i.e. radio, cell phone, etc)
+
+Implementaion
+ - can GPS signal be corrected manually?
+ - how important is teperature sensor position on board?
+
+ - buy (sample) parts for board
+ - design schematic
+
+ - can GPS can get power from DB9?
+ - does GPS mounting direction matter?
+ - must level shift 2nd gryo from 3V to 5V
+ - allow sensors to be turned off
+
+Future
+ - - use distributed processing so data can be interated with vision/LIDAR in slam (information filter?)
+ - integrate GPS into board
+ - add a barometer and other sensors
+ - battery power/backup (?) (could be used to store callibration data)
+
