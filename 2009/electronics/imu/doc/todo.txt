@@ -1,14 +1,17 @@
+use Polarized pins
+look at digital accel
+	wiimote
+	openmoko
+
 hardware
-- what is best for each priorites?
-- - cost vs performance vs size 
-- decide which way to program
-- add oscillator?
-- add jtag header
-- add connector for gps
-- choose adc pins
 - add voltage regulator
 - - powered from multiple sources (dc jack, usb, battery)
 - - USB Overcurrent Protection
+- decide which way to program
+- add oscillator
+- add jtag header
+- add connector for gps
+- choose adc pins
 - add reverse voltage protection
 - add decoupling caps
 - calculate values for mag s/r components
