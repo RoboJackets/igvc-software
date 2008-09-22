@@ -1,6 +1,39 @@
 TODO:
  - change this to some other document format
+use Polarized pins
+look at digital accel
+	wiimote
+	openmoko
 
+hardware
+- USB Overcurrent Protection
+- decide which way to program
+- add oscillator
+- add jtag header
+- add connector for gps
+- choose adc pins
+- add reverse voltage protection
+- add decoupling caps
+- calculate values for mag s/r components
+- add backup battery
+- add leds
+- software reset?
+- change discrete components to packages
+- - only if cheaper or more compact
+- think about adding gyros
+- make schematic look different than sparkfun
+
+software
+- store parameters in flash
+- use rtc
+- allow option to send covariance to do distributed filtering
+
+
+
+
+
+Specs
+- Power consumption
 
 Part Selection Justification
 Accelerometer
@@ -8,10 +41,6 @@ The cheapest. Adjustable sensitivity.
 Compass
 The cheapest.
 Note: this output has an offset which is determined in code by comparing the normal and inverted signal (see Honeywell AN212).  It would be better to use the offset straps to feed in the opposite of the offset (requires a DAC).  The offset straps can also be used for callibration.
-
-
-
-
 
 
 Value calc
@@ -27,3 +56,70 @@ min current = 0.8 amps
 max current = 8 amps
 min voltage = (min current) * (max R) = 3.384
 max voltage = (max current) * (min R) = 6.88
+
+
+
+
+Design Considerations
+microcontroller
+ - required features
+ - - 12-16 bit ADC
+ - - enough processing power/ram/flash
+ - - - need to figure this out
+ - - open development tools
+ - price
+ - extra features
+ - power usage
+ 
+Filtering/Callibration
+ - propagation delay / unknown sample time
+ - estimate parameters online or offline?
+ - - determine parameters using a scripted test
+ - - Least squares, maximum likelyhood, kalman/particle filter etc.
+
+Sensors
+ - quantization error
+ - contant bias
+ - white noise
+ - bias stabity
+ - scale factor error
+ - alignment error
+ - nonlinearity
+ - does GPS mounting direction matter
+ - temperature dependence
+ - humiditiy and pressure dependence(?)
+ - coupled noise
+
+Gyro/Accelerometer
+ - gravity
+ - Coriolis force
+
+Compass
+ - hard and soft iron compensation
+ - world magnetic model 
+ - changing magnetic fields from other electronics or magnetic objects
+
+GPS
+ - DGPS
+ - - could get it from internet
+ - other beacons (i.e. radio, cell phone, etc)
+
+Implementaion
+ - can GPS signal be corrected manually?
+ - how important is teperature sensor position on board?
+
+ - buy (sample) parts for board
+ - design schematic
+
+ - can GPS can get power from DB9?
+ - does GPS mounting direction matter?
+ - must level shift 2nd gryo from 3V to 5V
+ - allow sensors to be turned off
+
+Future
+ - use distributed processing so data can be interated with vision/LIDAR in slam (information filter?)
+ - integrate GPS into board
+ - add a barometer and/or other sensors
+ - extended-use battery
+- make more energy efficient by disabling things when they are not in use
+- add other interfaces (ethernet, can, etc.)
