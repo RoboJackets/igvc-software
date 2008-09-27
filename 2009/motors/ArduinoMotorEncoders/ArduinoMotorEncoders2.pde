@@ -46,6 +46,7 @@ long sendtimestamp;
 int interog_dl = 100;
 int sendMode = PULL;
 int sendType = DTICK;
+long packetnum;
 
 void setup(void) {
 	/* open the serial port */
@@ -209,6 +210,7 @@ void sendStatus() {
 	//serialPrintBytes(&(current.leftMotorTick), sizeof(int));  // only 9 bits are used
 	//serialPrintBytes(&(current.rightMotorTick), sizeof(int));
 	//serialPrintBytes(&heading, sizeof(double));
+	//serialPrintBytes(packetnum, sizeof(long));
 	if(sendData == SEND_DTICK){
 		serialPrintBytes(dl, sizeof(int));
 		serialPrintBytes(dr, sizeof(int));
@@ -217,6 +219,7 @@ void sendStatus() {
 	else if(sendData == SEND_CURRENT){
 
 	}
+	//packetnum++;
 	//serialPrintBytes(&(current.time), sizeof(int));
 }
 

@@ -42,7 +42,7 @@ double MotorEncoders::getHeading(void) {
 	return(MotorEncoders::heading);
 }
 
-double getRotVel(void){
+double MotorEncoders::getRotVel(void){
 	deltas data = MotorEncoders::getDeltas();
 
 	double dt = deltas.dt / COUNTER_RATE
@@ -61,9 +61,16 @@ bool MotorEncoders::setHeading(double heading) {
 }
 
 bool MotorEncoders::setFunc(int mode){
-	setVar(RET_T, &mode, sizeof(int));
+	return( setVar(RET_T, &mode, sizeof(int)) );
 }
 
 bool MotorEncoders::setSendMode(int mode){
-	setVar(PUSHPULL, &mode, sizeof(int));
+	return( setVar(PUSHPULL, &mode, sizeof(int)) );
+}
+
+bool MotorEncoders::setSendMode(int mode, int int_rt){
+	bool a = setVar(PUSHPULL, &mode, sizeof(int));
+	bool b = setVar(INTEROG_DL, &int_rt, sizeof(int);
+
+	return(a && b);
 }
