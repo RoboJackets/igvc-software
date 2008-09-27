@@ -34,6 +34,7 @@ class MotorEncoders: ArduinoInterface {
 
 		/**/
 		bool setHeading(double heading);
+
 	private:
 		int comm_mode;
 		int func;
