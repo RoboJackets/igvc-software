@@ -92,14 +92,15 @@ void visProcessFrame(Point2D<int>& goal) {
 		 * y = forward speed / range = (0,255)
 		 */
 		{
-			// remember, goal is in 320x240 coordinates
-			
-			// rotation
-			goal.x = (visCvPath->width/2 - goal.x) * (128) / (visCvPath->width) * -1;
+			/* remember, goal is in 320x240 coordinates */
+
+			// rotation (0 = go straight)
+			goal.x = (visCvPath->width/2 - goal.x) * (128) / (visCvPath->width ) * -1.3;
 			// fwd 
-			goal.y = (visCvPath->height - goal.y) * (256) / (visCvPath->height); 
+			goal.y = (visCvPath->height  - goal.y) * (256) / (visCvPath->height); 
 		}
-		printf("goal x y = %d %d \n",goal.x,goal.y);
+		
+		printf("heading: rot: %d 	fwd: %d \n",goal.x,goal.y);
 
     }
 
