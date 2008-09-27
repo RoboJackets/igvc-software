@@ -12,14 +12,18 @@
 int satThreshold;
 int hueThreshold;
 //int goalx,goaly;
-Point2D<int> goal;
+//Point2D<int> goal;
+	// goal set by robotWidthScan()
+	Point2D<int> goal_far;
+	// goal set by visSweeperLines()
+	Point2D<int> goal_near;
 
 // -----------------------------------------------------------------------------
 
 
 
 /* Performs ALL vision processing. */
-void visProcessFrame() {
+void visProcessFrame(Point2D<int>& goal) {
 
     /* Abort if there is no image. */
     if ( visCvRaw->imageData==NULL ) {
@@ -37,40 +41,65 @@ void visProcessFrame() {
         //GetRGBChannels();
         GetHSVChannels();
 
-        /* threshold saturation */
+        /* threshold saturation
+         * (320x240) */
         cvSmooth(visCvSaturation, visCvSaturation);
         ThresholdImage(visCvSaturation, visCvSaturation, satThreshold);
         cvDilate(visCvSaturation, visCvSaturation, NULL, 1);
 
-        /* threshold hue */
+        /* threshold hue 
+         * (320x240) */
         cvSmooth(visCvHue, visCvHue);
         ThresholdImage(visCvHue, visCvHue, hueThreshold);
         cvDilate(visCvHue, visCvHue, NULL, 1);
 
-        /* or the images together */
+        /* or the images together 
+         * (320x240) */
         cvOr(visCvSaturation, visCvHue, visCvThresh);
         cvDilate(visCvThresh, visCvThresh, NULL, 1);
 
-        /* make white=good & black=bad */
+        /* make white=good & black=bad 
+         * (320x240) */
         cvNot(visCvThresh, visCvThresh);
 
-        /* generate path image, with white=path & black=bad */
+        /* generate path image, with white=path & black=bad 
+         * (320x240) */
         visGenPath(visCvThresh);
 
 
-        /* find next goal for robot by scanning up visCvPath Image,
-         * and set the goal */
-        robotWidthScan(visCvPath,goal.x,goal.y);	// returns -1 on error
+        /* find next goal for robot by scanning up visCvPath Image, and set the goal. 
+         * (320x240) */
+        robotWidthScan(visCvPath,goal_far.x,goal_far.y);	// returns -1 on error
 
         /* sent goal to planner to get the 'planned' next goal */
-        if(goal.y!=-1){
+        if(goal_far.y != -1){
         	//visPlanPath(visCvPath, goalx, goaly);	// TODO: THIS IS SO SLOW
         }
 
-		/* setup navigation line that sweep across screen 
-		 * and update goal */
-		visSweeperLines(goal);
+		/* setup navigation line that sweep across screen and update goal. */
+		visSweeperLines(goal_near);
 
+		/* update return goal
+		 * NOTE: goal is in the frame of 320x240 !! */		
+		if(goal_far.y >= visCvPath->height/2){
+			goal = goal_near;	// can't see very far
+		}else{
+			goal = goal_far;	// can see far off
+		}
+		
+		/* convert goal to heading:
+		 * x = rotational speed / range = (-128,127)
+		 * y = forward speed / range = (0,255)
+		 */
+		{
+			// remember, goal is in 320x240 coordinates
+			
+			// rotation
+			goal.x = (visCvPath->width/2 - goal.x) * (128) / (visCvPath->width) * -1;
+			// fwd 
+			goal.y = (visCvPath->height - goal.y) * (256) / (visCvPath->height); 
+		}
+		printf("goal x y = %d %d \n",goal.x,goal.y);
 
     }
 

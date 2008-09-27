@@ -37,10 +37,8 @@ void keyboardFunc(unsigned char key, int x, int y) { // handles keyboard button 
     	saveRawVideo = 1-saveRawVideo;
     	printf("video file \n");
     	break;
-
     default:
         break;
-
     }
 }
 /*******************************************/
@@ -173,7 +171,7 @@ void Robot::processFunc() {
 
 
     /* Perform vision processing. */
-    visProcessFrame();
+    visProcessFrame(heading);
 
     /* Make decision */
 

@@ -11,6 +11,7 @@
 #include "GuppyCam.h"
 #include <stdlib.h>
 #include "highgui.h"
+#include "Point2D.h"
 
 /* Determines camera compatability.
  * Also, this must be set to 0 to load videos via command line. */
@@ -75,7 +76,10 @@ public:
 	CvVideoWriter* cvVideoWriter;
 	void createVideoWriter();
 
-
+	// heading set by visProcessFrame()
+	// heading.x = rotational speed
+	// heading.y = forward speed
+	Point2D<int> heading;
 
 };
 
