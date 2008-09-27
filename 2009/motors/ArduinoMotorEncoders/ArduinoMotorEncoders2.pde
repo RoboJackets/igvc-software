@@ -91,7 +91,7 @@ void calcDelta(void){
 		dt = (current.time - previous.time)
 	}
 	else{
-		dt = (((long)current.time + 65536) - previous.time)
+		dt =  ( ((long)current.time) + 65536) - previous.time
 	}
 }
 
