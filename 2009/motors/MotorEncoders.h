@@ -12,22 +12,16 @@ class MotorEncoders: ArduinoInterface {
 		//TODO: change these to char arrays
 
 		//http://sig9.com/articles/gcc-packed-structures
-		//__attribute__((__packed__)) typedef struct { short leftTick; short righttTick; float heading; /*unsigned short time;*/ } reply_t;
-		typedef struct { short leftTick; short righttTick; float heading; /*unsigned short time;*/ } reply_t;
-		typedef struct { short leftTick; short righttTick; unsigned short time; /*unsigned short time;*/ } deltas;
+		__attribute__((__packed__)) typedef struct { short dl; short dr; unsigned short dt; /*unsigned short time;*/ } reply_t;
+		typedef struct { double heading; double linVel; double rotVel } state_t;
+		typedef struct { short dl; short dr; unsigned short dt; /*unsigned short time;*/ } deltas;
 		
 		/* Constructor */
 		MotorEncoders(void);
 
 		reply_t getInfo(void); //TODO: get rid of this
 
-		//int getDeltaTick(void);
-		//double getDeltaTime(void);
-
 		deltas getDeltas(void);
-
-		//int getLeftTick(void);
-		//int getRightTick(void);
 
 		/* Gets the current global heading in radians */
 		double getHeading(void);
@@ -42,10 +36,10 @@ class MotorEncoders: ArduinoInterface {
 		bool setHeading(double heading);
 	private:
 		int comm_mode;
-		int ret_mode;
+		int func;
 		double heading;
 		bool setSendMode(int mode);
-		bool setRetMode(int ret);
+		bool setFunc(int ret);
 };
 
 #endif /* MOTOR_ENCODERS_H */

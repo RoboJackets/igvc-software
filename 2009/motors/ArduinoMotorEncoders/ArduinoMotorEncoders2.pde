@@ -68,6 +68,8 @@ void setup(void) {
 	//TCCR1B = (1<<CS12)|(1<<CS10);// clk1o/1024 table on pg134
 	//TCCR1B = (1<<CS10);// no prescale clk1o/1
 	TCCR1B = (1<<CS11)|(1<<CS10);//clkio/64
+	
+	sendtimestamp = millis();
 }
 
 void loop(void) {
@@ -76,11 +78,8 @@ void loop(void) {
 	previous = current;
 	readMotorEncoders(&current);
 
-	calcDelta(dl, dr, dt);
+	calcDelta();
 
-//	calcHeading();
-	//calcLinVel();
-	//calcRotVel();
 	readSerial();
 }
 
