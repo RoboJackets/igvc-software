@@ -17,6 +17,6 @@
 // Enums for data settings
 enum var_t { PUSHPULL, RET_T, INTEROG_DL};//interogdl - miliseconds
 enum send_t {PUSH = 0, PULL};
-enum ret_t { SEND_DTICK, SEND_CURRENT };
+enum func_t { SEND_DTICK, SEND_CURRENT };
 
 #endif //ENCODER_DEFINES_H_
