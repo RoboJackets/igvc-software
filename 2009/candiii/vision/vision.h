@@ -1,7 +1,7 @@
 #ifndef _VISION_H_
 #define _VISION_H_
 
-
+#include "Point2D.h"
 
 /*
  * This file contains the robot's primary vision processing code main function.
@@ -11,8 +11,7 @@
 
 
 // This is called each frame to do vision processing
-void visProcessFrame();
-
+void visProcessFrame(Point2D<int>& goal);
 
 // loads the thresholds for vision processing from the xml config file
 void LoadVisionXML();

@@ -339,12 +339,12 @@ void scanFillRight(IplImage* img, int middleX, int y, int goodFirst, int end, in
  */
 void robotWidthScan(IplImage* img, int& goalx, int& goaly) {
 
-    int width = img->width;
-    int height = img->height;
-    int center = width/2;
+    //int width = img->width;
+    //int height = img->height;
+    int center = img->width/2;
     int startx = center - ROBOT_WIDTH/2;
     int endx = startx + ROBOT_WIDTH;
-    int y = height-6;
+    int y = img->height-PIXEL_SKIP;
     int x = startx;
     int half = ROBOT_WIDTH/2;
     int i;
@@ -360,7 +360,7 @@ void robotWidthScan(IplImage* img, int& goalx, int& goaly) {
     for ( ; y >= PIXEL_SKIP ; y-- ) {
 
         //check left, move right
-        for (x=startx; x<width-ROBOT_WIDTH-1; x++) {
+        for (x=startx; x<img->width-ROBOT_WIDTH-1; x++) {
             if (!checkPixel(img,x,y)|| !checkPixel(img,x+half,y) ) {
                 x++;	//slide right
                 startx=x;
@@ -429,7 +429,7 @@ void robotWidthScan(IplImage* img, int& goalx, int& goaly) {
             //cvLine(visCvDebug, cvPoint(center,height-2), cvPoint(goalx,goaly), (CV_RGB(0,0,0)), 2, 8, 0);
             //cvLine(visCvDebug, cvPoint(goalx-half,goaly), cvPoint(goalx+half,goaly), (CV_RGB(0,0,0)), 2, 8, 0);
 			// visCvPath=320x240 //
-            cvLine(visCvDebug, cvPoint(center*2,height*2-2), 	cvPoint(goalx*2,goaly*2), 		 (CV_RGB(0,0,0)), 2, 8, 0);
+            cvLine(visCvDebug, cvPoint(center*2,img->height*2-2), 	cvPoint(goalx*2,goaly*2), 		 (CV_RGB(0,0,0)), 2, 8, 0);
             cvLine(visCvDebug, cvPoint((goalx-half)*2,goaly*2), cvPoint((goalx+half)*2,goaly*2), (CV_RGB(0,0,0)), 2, 8, 0);
             //========================//
 
@@ -689,9 +689,10 @@ void visSweeperLines(Point2D<int>& goal){
 					((int) bestPath_end.x) + deltaX, (int) bestPath_end.y);
 			}
 			
-			/* Update goal */
-			goal.x = (int)bestPath_end.x;
-			goal.y = (int)bestPath_end.y;
+			/* Update goal 
+			 * (convert to 320x240 frame) */
+			goal.x = (int)bestPath_end.x/2;
+			goal.y = (int)bestPath_end.y/2;
 			//printf("goal(%d,%d) \n",goal.x,goal.y);
 		}
 	
