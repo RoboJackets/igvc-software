@@ -8,6 +8,7 @@
 #include <stdarg.h>
 
 #include "EncoderDefines.h"
+#include "EncoderFunc.h"
 
 /* PIN DEFINITIONS */
 /** SPI **/
@@ -42,10 +43,10 @@ struct motorEncoderData current = {}; // TODO: rename these
 struct motorEncoderData previous = {};
 //double heading = 0;
 // Settings
-long sendtimestamp;
+long lastsendtime;
 int interog_dl = 100;
 int sendMode = PULL;
-int sendType = DTICK;
+int sendType = SEND_DTICK;
 long packetnum;
 
 void setup(void) {
@@ -70,7 +71,7 @@ void setup(void) {
 	//TCCR1B = (1<<CS10);// no prescale clk1o/1
 	TCCR1B = (1<<CS11)|(1<<CS10);//clkio/64
 	
-	sendtimestamp = millis();
+	lastsendtime = millis();
 }
 
 void loop(void) {
@@ -89,10 +90,10 @@ void calcDelta(void){
 	dr = delta(current.rightMotorTick, previous.rightMotorTick, 100, TOTAL_ENCODER_TICKS - 1, RIGHT_MOTOR_ENCODER_DIRECTION);
 
 	if( current.time > previous.time ){
-		dt = (current.time - previous.time)
+		dt = (current.time - previous.time);
 	}
 	else{
-		dt =  ( ((long)current.time) + 65536) - previous.time
+		dt =  ( ((long)current.time) + 65536) - previous.time;
 	}
 }
 
@@ -161,7 +162,7 @@ void readSerial(void) {
 		incomingByte = Serial.read();
 		if (incomingByte == 'r') {
 			sendStatus();
-			return();//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
+			return;//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
 		} else if (incomingByte == 'w') {
 			while (Serial.available()<2){}  // TODO: add timeout
 			int variableNumber = Serial.read();
@@ -189,7 +190,7 @@ void setVariable(int num, int val) {
 			sendMode = val;
 			break;
 		case RET_T:
-			sendData = val;
+			sendType = val;
 			break;
 		case INTEROG_DL:
 //TODO: keep val in sensible boundaries
@@ -211,12 +212,12 @@ void sendStatus() {
 	//serialPrintBytes(&(current.rightMotorTick), sizeof(int));
 	//serialPrintBytes(&heading, sizeof(double));
 	//serialPrintBytes(packetnum, sizeof(long));
-	if(sendData == SEND_DTICK){
-		serialPrintBytes(dl, sizeof(int));
-		serialPrintBytes(dr, sizeof(int));
-		serialPrintBytes(dt, sizeof(unsigned int));
+	if(sendType == SEND_DTICK){
+		serialPrintBytes(&dl, sizeof(int));
+		serialPrintBytes(&dr, sizeof(int));
+		serialPrintBytes(&dt, sizeof(unsigned int));
 	}
-	else if(sendData == SEND_CURRENT){
+	else if(sendType == SEND_CURRENT){
 
 	}
 	//packetnum++;
