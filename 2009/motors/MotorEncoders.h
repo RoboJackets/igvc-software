@@ -32,14 +32,19 @@ class MotorEncoders: ArduinoInterface {
 		/* Get rotational velocity in radians per s */
 		double getRotVel(void);
 
-		/**/
+		/* Set global heading */
 		bool setHeading(double heading);
+
+		/* set to Push or Pull mode*/
+		bool setSendMode(int mode);
+
+		/* set to Push or Pull mode, set interogation rate (delay between data in ms)*/
+		bool setSendMode(int mode, int int_rts);
 
 	private:
 		int comm_mode;
 		int func;
 		double heading;
-		bool setSendMode(int mode);
 		bool setFunc(int ret);
 };
 

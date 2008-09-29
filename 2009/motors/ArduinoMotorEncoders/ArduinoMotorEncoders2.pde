@@ -12,9 +12,9 @@
 
 /* PIN DEFINITIONS */
 /** SPI **/
-#define SPI_MOSI 						/*13*/
-#define SPI_MISO						7/*12*/
-#define SPI_CLK							6/*11*/
+#define SPI_MOSI 				/*13*/
+#define SPI_MISO				7/*12*/
+#define SPI_CLK					6/*11*/
 #define SPI_SS_LEFT_MOTOR_ENCODER		5/*10*/
 #define SPI_SS_RIGHT_MOTOR_ENCODER		4/*9*/
 #define BITBANG_SPI 1

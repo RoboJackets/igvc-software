@@ -81,10 +81,20 @@ void loop(void) {
 	previous = current;
 	readMotorEncoders(&current);
 
-	calcHeading();
+	calcDelta();
+
+//	calcHeading();
+	//calcLinVel();
+	//calcRotVel();
 	readSerial();
 }
 
+void calcDelta(){
+	int dl = delta(current.leftMotorTick, previous.leftMotorTick, 100, TOTAL_ENCODER_TICKS - 1,  LEFT_MOTOR_ENCODER_DIRECTION); 
+	int dr = delta(current.rightMotorTick, previous.rightMotorTick, 100, TOTAL_ENCODER_TICKS - 1, RIGHT_MOTOR_ENCODER_DIRECTION);
+
+	double dt = (current.time - previous.time) / COUNTER_RATE
+}
 
 void readMotorEncoders(struct motorEncoderData *data) {
 
@@ -148,6 +158,21 @@ void calcHeading(void) {
 	//serialPrintDouble(heading * 180 / (PI), 5); // in degrees
 	//Serial.print("\n");
 }
+/*
+calcRotVel(){
+	double dt = (current.time - previous.time) / COUNTER_RATE
+	int dl = delta(current.leftMotorTick, previous.leftMotorTick, 100, TOTAL_ENCODER_TICKS - 1,  LEFT_MOTOR_ENCODER_DIRECTION); 
+	int dr = delta(current.rightMotorTick, previous.rightMotorTick, 100, TOTAL_ENCODER_TICKS - 1, RIGHT_MOTOR_ENCODER_DIRECTION);
+
+	double wr = dr / dt;
+	double wl = dl / dt;
+	
+	double w = (wr - wt)*WHEEL_RADIUS/WHEEL_BASE
+}
+calcLinVel(){
+
+}
+*/
 
 // must hold: maxDiff <= maxVal
 int delta(int p2, int p1, int maxDiff, int maxVal, int dir) {
@@ -223,7 +248,10 @@ void setVariable(int num, int val) {
 void sendStatus() {
 	//serialPrintBytes(&(current.leftMotorTick), sizeof(int));  // only 9 bits are used
 	//serialPrintBytes(&(current.rightMotorTick), sizeof(int));
-	serialPrintBytes(&heading, sizeof(double));
+	//serialPrintBytes(&heading, sizeof(double));
+	serialPrintBytes(dr, sizeof(int));
+	serialPrintBytes(dl, sizeof(int));
+	serialPrintBytes(dt, sizeof(double));
 	//serialPrintBytes(&(current.time), sizeof(int));
 }
 

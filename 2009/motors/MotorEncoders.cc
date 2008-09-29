@@ -25,6 +25,7 @@ deltas MotorEncoders::getDeltas(){
 	memcpy(&deltas.dr, status+sizeof(deltas.dr), sizeof(deltas.dr));
 	memcpy(&deltas.time, status+sizeof(deltas.time), sizeof(deltas.time));
 
+	return(data);
 }
 
 double MotorEncoders::getHeading(void) {
@@ -55,7 +56,7 @@ double MotorEncoders::getRotVel(void){
 	return(w);
 }
 
-bool MotorEncoders::setHeading(double heading) {
+void MotorEncoders::setHeading(double heading) {
 	MotorEncoders::heading = heading;
 //	setVar(HEADING, &heading, sizeof(double));
 }
