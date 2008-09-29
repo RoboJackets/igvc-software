@@ -1,8 +1,10 @@
 #ifndef ENCODERFUNC_H_
 #define ENCODERFUNC_H_
 
+/* Reset TCNT1 */
 void resetTime();
 
+/* Read TCNT1 */
 unsigned int getTime();
 
 void readMotorEncoders(struct motorEncoderData *data);
