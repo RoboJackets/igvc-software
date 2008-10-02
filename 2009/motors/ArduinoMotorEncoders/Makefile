@@ -38,9 +38,9 @@
 
 TARGET = ArduinoMotorEncoders2
 INSTALL_DIR = /home/nebousuru/Desktop/arduino-0011
-#PORT = /dev/tty.usb*
-#UPLOAD_RATE = 19200
-#AVRDUDE_PROGRAMMER = stk500v1
+PORT = /dev/ttyUSB0
+UPLOAD_RATE = 19200
+AVRDUDE_PROGRAMMER = stk500v1
 MCU = atmega168
 F_CPU = 16000000
 
@@ -95,7 +95,7 @@ LDFLAGS = -lm
 # Programming support using avrdude. Settings and variables.
 AVRDUDE_PORT = $(PORT)
 AVRDUDE_WRITE_FLASH = -U flash:w:applet/$(TARGET).hex
-AVRDUDE_FLAGS = -V -F -C $(INSTALL_DIR)/hardware/tools/avr/etc/avrdude.conf \
+AVRDUDE_FLAGS = -V -F -C $(INSTALL_DIR)/hardware/tools/avrdude.conf \
 -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) \
 -b $(UPLOAD_RATE)
 

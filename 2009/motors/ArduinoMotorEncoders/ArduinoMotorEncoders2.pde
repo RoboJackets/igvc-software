@@ -49,7 +49,8 @@ int sendMode = PULL;
 int sendType = SEND_DTICK;
 long packetnum;
 
-long int current_time;
+long int global_time;
+long int arduino_time;
 
 void setup(void) {
 	/* open the serial port */
@@ -74,13 +75,9 @@ void setup(void) {
 	TCCR1B = (1<<CS11)|(1<<CS10);//clkio/64
 	
 	lastsendtime = millis();
-	current_time = millis();
-}
-
-
-
-setTime(long int sec, long int milli){
-	current_time = sec*1000 + milli;
+	global_time = millis();
+	//arduino_time = 0;
+	packetnum = 1;
 }
 
 void loop(void) {
@@ -210,13 +207,14 @@ void setVariable(int num, int val) {
 			interog_dl = val;
 			break;
 		case SETCLK:
-			long int millis;
-			byte * bptr = &millis;
+			long int mills;
+			byte * bptr = &mills;
 			bptr[0] = (byte)val;
 			bptr[1] = Serial.read();
 			bptr[2] = Serial.read();
 			bptr[3] = Serial.read();
-			current_time = millis;
+			current_time = mills;
+			arduino_time = millis();
 		default:
 			//error
 			break;
@@ -231,7 +229,11 @@ void sendStatus() {
 	//serialPrintBytes(packetnum, sizeof(long));
 
 	//send packet num
+	serialPrintBytes(&packetnum, sizeof(long))；
+	packetnum++;
 	//send time
+	long int timestamp = global_time + millis() - arduino_time;
+	serialPrintBytes(&timestamp, sizeof(long))
 	if(sendType == SEND_DTICK){
 		serialPrintBytes(&dl, sizeof(int));
 		serialPrintBytes(&dr, sizeof(int));
@@ -241,7 +243,7 @@ void sendStatus() {
 
 	}
 	//send checksum
-	//packetnum++;
+
 }
 
 void serialPrintBytes(void *data, int numBytes) {

@@ -3,6 +3,7 @@
 
 #include "ArduinoInterface.h"
 #include "EncoderDefines.h"
+#include <string>
 
 //TODO: make this use a namespace
 //TODO: make this sample regularly
@@ -12,16 +13,16 @@ class MotorEncoders: ArduinoInterface {
 		//TODO: change these to char arrays
 
 		//http://sig9.com/articles/gcc-packed-structures
-		__attribute__((__packed__)) typedef struct { short dl; short dr; unsigned short dt; /*unsigned short time;*/ } reply_t;
+		//__attribute__((__packed__)) typedef struct { long timestamp, long packetnum, short dl; short dr; unsigned short dt; /*unsigned short time;*/ } reply_t;
 		typedef struct { double heading; double linVel; double rotVel } state_t;
-		typedef struct { short dl; short dr; unsigned short dt; /*unsigned short time;*/ } deltas;
+		typedef struct { long timestamp, long packetnum, short dl; short dr; unsigned short dt; /*unsigned short time;*/ } EncoderPacket;
 		
 		/* Constructor */
 		MotorEncoders(void);
 
 		reply_t getInfo(void); //TODO: get rid of this
 
-		deltas getDeltas(void);
+		EncoderPacket getDeltas(void);
 
 		/* Gets the current global heading in radians */
 		double getHeading(void);
@@ -43,10 +44,16 @@ class MotorEncoders: ArduinoInterface {
 
 		bool setArduinoClock();
 
+		bool setLogFile(string str);
+
+		//bool setLogging(bool status);
+
 	private:
 		int comm_mode;
 		int func;
 		double heading;
+		string logfile;
+		//bool logging_on;
 		bool setFunc(int ret);
 };
 
