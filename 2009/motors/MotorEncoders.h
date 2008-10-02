@@ -41,6 +41,8 @@ class MotorEncoders: ArduinoInterface {
 		/* set to Push or Pull mode, set interogation rate (delay between data in ms)*/
 		bool setSendMode(int mode, int int_rts);
 
+		bool setArduinoClock();
+
 	private:
 		int comm_mode;
 		int func;
