@@ -49,6 +49,8 @@ int sendMode = PULL;
 int sendType = SEND_DTICK;
 long packetnum;
 
+long int current_time;
+
 void setup(void) {
 	/* open the serial port */
 	Serial.begin(9600);
@@ -72,6 +74,13 @@ void setup(void) {
 	TCCR1B = (1<<CS11)|(1<<CS10);//clkio/64
 	
 	lastsendtime = millis();
+	current_time = millis();
+}
+
+
+
+setTime(long int sec, long int milli){
+	current_time = sec*1000 + milli;
 }
 
 void loop(void) {
@@ -200,6 +209,14 @@ void setVariable(int num, int val) {
 */
 			interog_dl = val;
 			break;
+		case SETCLK:
+			long int millis;
+			byte * bptr = &millis;
+			bptr[0] = (byte)val;
+			bptr[1] = Serial.read();
+			bptr[2] = Serial.read();
+			bptr[3] = Serial.read();
+			current_time = millis;
 		default:
 			//error
 			break;
@@ -212,6 +229,9 @@ void sendStatus() {
 	//serialPrintBytes(&(current.rightMotorTick), sizeof(int));
 	//serialPrintBytes(&heading, sizeof(double));
 	//serialPrintBytes(packetnum, sizeof(long));
+
+	//send packet num
+	//send time
 	if(sendType == SEND_DTICK){
 		serialPrintBytes(&dl, sizeof(int));
 		serialPrintBytes(&dr, sizeof(int));
@@ -220,8 +240,8 @@ void sendStatus() {
 	else if(sendType == SEND_CURRENT){
 
 	}
+	//send checksum
 	//packetnum++;
-	//serialPrintBytes(&(current.time), sizeof(int));
 }
 
 void serialPrintBytes(void *data, int numBytes) {

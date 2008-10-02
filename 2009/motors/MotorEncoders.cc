@@ -1,4 +1,6 @@
 #include "./ArduinoMotorEncoders/MotorEncoders.h"
+#include <sys/time.h>
+
 
 MotorEncoders::MotorEncoders(void) : ArduinoInterface() {
 }
@@ -69,6 +71,20 @@ bool MotorEncoders::setSendMode(int mode){
 	return( setVar(PUSHPULL, &mode, sizeof(int)) );
 }
 
+bool MotorEncoders::setArduinoClock(){
+	//int time = 
+	struct timeval time;
+	struct timezone tz;
+	gettimeofday(&time, &tz);
+
+	byte[4] timedata;
+
+	long int millis = time.tv_sec*1000 + ((long int)((double)tv_usec/1000));
+
+	memcpy(timedata+4, millis, 4);
+
+	return( setVar(SETCLK1, timedata, 4 ) );
+}
 bool MotorEncoders::setSendMode(int mode, int int_rt){
 	bool a = setVar(PUSHPULL, &mode, sizeof(int));
 	bool b = setVar(INTEROG_DL, &int_rt, sizeof(int);
