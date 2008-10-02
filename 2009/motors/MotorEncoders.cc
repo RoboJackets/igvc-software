@@ -1,6 +1,6 @@
 #include "./ArduinoMotorEncoders/MotorEncoders.h"
 #include <sys/time.h>
-
+#include <string>
 
 MotorEncoders::MotorEncoders(void) : ArduinoInterface() {
 }
@@ -13,25 +13,30 @@ MotorEncoders::reply_t MotorEncoders::getInfo(void) {
 	return(status);
 }
 
-deltas MotorEncoders::getDeltas(){
-	deltas data;
+EncoderPacket MotorEncoders::getDeltas(){
+	EncoderPacket data;
+
+	long timestamp;
+	long packetnum;
 
 	if(MotorEncoders::func != SEND_DTICK){
 		MotorEncoders::setFunc(SEND_DTICK);
 		MotorEncoders::func = SEND_DTICK;
 	}
-	byte status[6];
-	getStatus(status, 6);
+	byte status[14];
+	getStatus(status, 14);
 
-	memcpy(&deltas.dl, status, sizeof(deltas.dl));
-	memcpy(&deltas.dr, status+sizeof(deltas.dr), sizeof(deltas.dr));
-	memcpy(&deltas.time, status+sizeof(deltas.time), sizeof(deltas.time));
+	memcpy(&data.timestamp, status, 4)
+	memcpy(&data.packetnum, status+4, 4)
+	memcpy(&data.dl, status+10, 2);
+	memcpy(&data.dr, status+12, 2);
+	memcpy(&data.time, status+14, 2);
 
 	return(data);
 }
 
 double MotorEncoders::getHeading(void) {
-	deltas data = MotorEncoders::getDeltas();
+	EncoderPacket data = MotorEncoders::getDeltas();
 	MotorEncoders::heading += ( ((double)(data.dr - data.dl)) * (double)RAD_PER_ENCODER_TICK * (double)WHEEL_RADIUS / (double)WHEEL_BASE );
 	while (MotorEncoders::heading >= TWO_PI) { // this could be done more effiecently
 		MotorEncoders::heading -= TWO_PI;
@@ -46,12 +51,12 @@ double MotorEncoders::getHeading(void) {
 }
 
 double MotorEncoders::getRotVel(void){
-	deltas data = MotorEncoders::getDeltas();
+	EncoderPacket data = MotorEncoders::getDeltas();
 
-	double dt = deltas.dt / COUNTER_RATE
+	double dt = data.dt / COUNTER_RATE
 
-	double wr = deltas.dr / dt;
-	double wl = deltas.dl / dt;
+	double wr = data.dr / dt;
+	double wl = data.dl / dt;
 	
 	double w = (wr - wl)*WHEEL_RADIUS/WHEEL_BASE
 
@@ -59,7 +64,7 @@ double MotorEncoders::getRotVel(void){
 }
 
 void MotorEncoders::setHeading(double heading) {
-	MotorEncoders::heading = heading;
+	this.heading = heading;
 //	setVar(HEADING, &heading, sizeof(double));
 }
 
@@ -69,6 +74,10 @@ bool MotorEncoders::setFunc(int mode){
 
 bool MotorEncoders::setSendMode(int mode){
 	return( setVar(PUSHPULL, &mode, sizeof(int)) );
+}
+
+bool MotorEncoders::setLogFile(string str){
+	this.logfile = str;
 }
 
 bool MotorEncoders::setArduinoClock(){
