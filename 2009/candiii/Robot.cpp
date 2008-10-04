@@ -147,6 +147,9 @@ void Robot::Go() {
     /* Quit if we can't initialize properly */
     if (!init())
         return;
+        
+    /* Init default view (debug=1) */
+    trackbarHandler( 1 );
 
     /*
      * Robot Loop!

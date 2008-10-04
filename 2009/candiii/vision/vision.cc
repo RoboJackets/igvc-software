@@ -33,7 +33,9 @@ void visProcessFrame(Point2D<int>& goal) {
 
     /* Do vision processing (with opencv images & vision_processing.cpp) */
     {
-
+		/* no memory leaks (cloning image) */
+		if (visCvDebug) cvReleaseImage(&visCvDebug);
+				
         /* copy raw image for debug drawing */
         visCvDebug = cvCloneImage(visCvRaw);
 
@@ -88,8 +90,8 @@ void visProcessFrame(Point2D<int>& goal) {
 		}
 		
 		/* convert goal to heading:
-		 * x = rotational speed / range = (-128,127)
-		 * y = forward speed / range = (0,255)
+		 * x = rotational speed ; range = (-128,127)
+		 * y = forward speed    ; range = (0,255)
 		 */
 		{
 			/* remember, goal is in 320x240 coordinates */
@@ -98,13 +100,17 @@ void visProcessFrame(Point2D<int>& goal) {
 			goal.x = (visCvPath->width/2 - goal.x) * (256) / (visCvPath->width ) * -1.2; // 1.2 is fudgefactor for 
 																						 // goal.x not actually going
 																						 // to full 0-320 range
-			// fwd 
+			// fwd speed 
 			goal.y = (visCvPath->height  - goal.y) * (256) / (visCvPath->height); 
+		
+			// Debug print
+			//printf("heading: rot: %d 	fwd: %d \n",goal.x,goal.y);
 		}
 		
-		printf("heading: rot: %d 	fwd: %d \n",goal.x,goal.y);
+		
 
-    }
+
+    } //end main
 
 
 
@@ -117,7 +123,7 @@ void ConvertAllImageViews(){
         switch(trackbarVal){
         	case 0:
         		cvShowImage("display", visCvRaw);
-        		break;
+        		break; 
         	case 1:
         		cvShowImage("display", visCvDebug);
         		break;
@@ -166,6 +172,8 @@ void LoadVisionXML() {
 
 /* for selecting images to display in the opencv window */
 int trackbarVal; 
+char* names[] = {"raw","debug","path","thresh","hue","sat","hsv","?","?"};
 void trackbarHandler(int pos){
 	printf("pos = %d \n", pos);
+	printf("view = %s \n", names[pos]);
 }
