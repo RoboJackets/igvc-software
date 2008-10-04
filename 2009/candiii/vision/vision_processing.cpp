@@ -522,9 +522,10 @@ void visSweeperLines(Point2D<int>& goal){
 			QVector< Point2D<int> > pathPoints;
 			Graphics::calculatePointsInLine(
 				(int) pathStart.x, (int) pathStart.y,
-				(int) pathEnd.x, (int) pathEnd.y,
-				&pathPoints);
-			
+				(int) pathEnd.x, (int) pathEnd.y,			// @ 640x480: 	maxPathEnd.x=607
+				&pathPoints);								//				minPathEnd.x=112
+				
+		
 			// Calculate the danger value for the path
 			// along with the danger contributions of all
 			// the pixels in the path
@@ -694,6 +695,8 @@ void visSweeperLines(Point2D<int>& goal){
 			goal.x = (int)bestPath_end.x/2;
 			goal.y = (int)bestPath_end.y/2;
 			//printf("goal(%d,%d) \n",goal.x,goal.y);
+				
+
 		}
 	
 	
