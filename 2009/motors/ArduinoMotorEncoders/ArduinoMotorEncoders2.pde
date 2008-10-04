@@ -43,14 +43,20 @@ struct motorEncoderData current = {}; // TODO: rename these
 struct motorEncoderData previous = {};
 //double heading = 0;
 // Settings
-long lastsendtime;
+unsigned long lastsendtime;
 int interog_dl = 100;
 int sendMode = PULL;
 int sendType = SEND_DTICK;
-long packetnum;
+long rx_packetnum;
+long tx_packetnum;
 
 long int global_time;
 long int arduino_time;
+
+
+//long unsigned int reply_dtick_packet_num[50];
+reply_dtick_t reply_dtick_packet_store[50];
+int dtick_packet_store_pos;
 
 void setup(void) {
 	/* open the serial port */
@@ -76,8 +82,10 @@ void setup(void) {
 	
 	lastsendtime = millis();
 	global_time = millis();
-	//arduino_time = 0;
-	packetnum = 1;
+	
+	rx_packetnum = 1;
+	tx_packetnum = 1;
+	dtick_packet_store_pos = 0;
 }
 
 void loop(void) {
@@ -171,11 +179,19 @@ void readSerial(void) {
 			return;//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
 		} else if (incomingByte == 'w') {
 			while (Serial.available()<2){}  // TODO: add timeout
-			int variableNumber = Serial.read();
-			int variableValue = Serial.read();
+			byte variableNumber = Serial.read();
+			byte variableValue = Serial.read();
 			setVariable(variableNumber, variableValue);
 		} else if (incomingByte == 'i') {
 			Serial.print("e");
+		} else if(incomingByte == 'p') {
+			unsigned long int packet_num;
+			byte * bptr = (byte *)&packet_num;
+			bptr[0] = Serial.read();
+			bptr[1] = Serial.read();
+			bptr[2] = Serial.read();
+			bptr[3] = Serial.read();
+			resend_packet(packet_num);
 		} else {
 			//error
 		}
@@ -190,7 +206,7 @@ void readSerial(void) {
 }
 
 //TODO: make this use an array
-void setVariable(int num, int val) {
+void setVariable(byte num, byte val) {
 	switch (num) {
 		case PUSHPULL:
 			sendMode = val;
@@ -207,14 +223,30 @@ void setVariable(int num, int val) {
 			interog_dl = val;
 			break;
 		case SETCLK:
-			long int mills;
-			byte * bptr = &mills;
-			bptr[0] = (byte)val;
+			{			
+			unsigned long int mills;
+			byte * bptr = (byte *)&mills;
+			bptr[0] = val;
 			bptr[1] = Serial.read();
 			bptr[2] = Serial.read();
 			bptr[3] = Serial.read();
-			current_time = mills;
+			global_time = mills;
 			arduino_time = millis();
+			break;
+			}
+/*
+		case RESENDPKT:
+		{
+			unsigned long int packet_num;
+			byte * bptr = (byte *)&packet_num;
+			bptr[0] = val;
+			bptr[1] = Serial.read();
+			bptr[2] = Serial.read();
+			bptr[3] = Serial.read();
+
+			resend_packet(packet_num);
+		}
+*/
 		default:
 			//error
 			break;
@@ -228,12 +260,38 @@ void sendStatus() {
 	//serialPrintBytes(&heading, sizeof(double));
 	//serialPrintBytes(packetnum, sizeof(long));
 
+	if(sendType == SEND_DTICK){
+		reply_dtick_t packet;
+		packet.timestamp =  global_time + millis() - arduino_time;
+		packet.packetnum = tx_packetnum;
+		tx_packetnum++;
+		packet.dl = dl;
+		packet.dr = dr;
+		packet.dt = dt;
+	
+		serialPrintBytes(&packet, sizeof(packet));
+
+		if(dtick_packet_store_pos < 50){
+			reply_dtick_packet_store[dtick_packet_store_pos] = packet;
+			dtick_packet_store_pos++;
+		}
+		else
+		{
+			dtick_packet_store_pos = 0;
+			reply_dtick_packet_store[dtick_packet_store_pos] = packet;
+		}
+
+	}
+	else if(sendType == SEND_CURRENT){
+
+	}
+/*
 	//send packet num
-	serialPrintBytes(&packetnum, sizeof(long))；
-	packetnum++;
+	serialPrintBytes(&tx_packetnum, sizeof(long));
+	tx_packetnum++;
 	//send time
 	long int timestamp = global_time + millis() - arduino_time;
-	serialPrintBytes(&timestamp, sizeof(long))
+	serialPrintBytes(&timestamp, sizeof(long));
 	if(sendType == SEND_DTICK){
 		serialPrintBytes(&dl, sizeof(int));
 		serialPrintBytes(&dr, sizeof(int));
@@ -242,6 +300,7 @@ void sendStatus() {
 	else if(sendType == SEND_CURRENT){
 
 	}
+*/
 	//send checksum
 
 }
@@ -299,6 +358,18 @@ int SPIReadInt(int inputPin, int slaveSelectPin, int clockPin) {
 //	#error "SPIReadInt: SPI mode not set.\n"
 //#endif
 //#endif
+}
+
+void resend_packet(long unsigned int num){
+	for(int i = 0; i < 50; i++ ){
+		if(reply_dtick_packet_store[i].packetnum == num){
+			serialPrintBytes(&reply_dtick_packet_store[i], sizeof(reply_dtick_t));
+			return;
+		}
+		//else{
+
+		//}
+	}
 }
 
 unsigned int getTime(){

@@ -15,8 +15,10 @@
 #define WHEEL_BASE		((double)28)
 
 // Enums for data settings
-enum var_t { PUSHPULL = 0, RET_T, INTEROG_DL, SETCLK};//interogdl - miliseconds
-enum send_t {PUSH = 0, PULL};
-enum func_t { SEND_DTICK = 0, SEND_CURRENT };
+enum command_t { PUSHPULL = 0, RET_T, INTEROG_DL, SETCLK, RESENDPKT};//interogdl - miliseconds
+enum opt_t {PUSH = 0, PULL, SEND_DTICK, SEND_CURRENT};
+
+// Arduino -> Laptop data packet
+typedef struct  __attribute__((__packed__)) { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } reply_dtick_t;
 
 #endif //ENCODER_DEFINES_H_
