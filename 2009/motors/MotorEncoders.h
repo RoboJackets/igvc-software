@@ -1,9 +1,11 @@
 #ifndef MOTOR_ENCODERS_H
 #define MOTOR_ENCODERS_H
 
-#include "ArduinoInterface.h"
-#include "EncoderDefines.h"
+#include "../arduino/ArduinoInterface.h"
+#include "./ArduinoMotorEncoders/EncoderDefines.h"
 #include <string>
+
+using namespace std;
 
 //TODO: make this use a namespace
 //TODO: make this sample regularly
@@ -12,17 +14,13 @@ class MotorEncoders: ArduinoInterface {
 		//TODO: move these to .cc file
 		//TODO: change these to char arrays
 
-		//http://sig9.com/articles/gcc-packed-structures
-		//__attribute__((__packed__)) typedef struct { long timestamp, long packetnum, short dl; short dr; unsigned short dt; /*unsigned short time;*/ } reply_t;
-		typedef struct { double heading; double linVel; double rotVel } state_t;
-		typedef struct { long timestamp, long packetnum, short dl; short dr; unsigned short dt; /*unsigned short time;*/ } EncoderPacket;
-		
+		//typedef struct { double heading; double linVel; double rotVel } state_t;
+		//typedef struct { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } EncoderPacket;
+		typedef struct __attribute__((__packed__)) { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } reply_t;
+		typedef struct __attribute__((__packed__)) { short command; short len; byte * arg; } command_t;
+
 		/* Constructor */
 		MotorEncoders(void);
-
-		reply_t getInfo(void); //TODO: get rid of this
-
-		EncoderPacket getDeltas(void);
 
 		/* Gets the current global heading in radians */
 		double getHeading(void);
@@ -55,6 +53,14 @@ class MotorEncoders: ArduinoInterface {
 		string logfile;
 		//bool logging_on;
 		bool setFunc(int ret);
+
+		unsigned int rx_packetnum;
+		unsigned int tx_packetnum;
+
+		reply_t getInfo(void); //TODO: get rid of this
+
+		//EncoderPacket getDeltas(void);
+
 };
 
 #endif /* MOTOR_ENCODERS_H */

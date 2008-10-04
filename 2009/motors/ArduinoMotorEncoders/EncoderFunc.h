@@ -23,5 +23,7 @@ int SPIReadInt(int inputPin, int slaveSelectPin, int clockPin);
 
 int convertMotorEncoderFormat(unsigned int data);
 
-void setVariable(int num, int val);
+void setVariable(byte num, byte val);
+
+void resend_packet(long unsigned int num);
 #endif // ENCODERFUNC_H_

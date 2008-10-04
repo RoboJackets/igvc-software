@@ -3,6 +3,10 @@
 #include <string>
 
 MotorEncoders::MotorEncoders(void) : ArduinoInterface() {
+
+	unsigned int rx_packetnum = 1;
+	unsigned int tx_packetnum = 1;
+
 }
 
 
@@ -13,6 +17,7 @@ MotorEncoders::reply_t MotorEncoders::getInfo(void) {
 	return(status);
 }
 
+/*
 EncoderPacket MotorEncoders::getDeltas(){
 	EncoderPacket data;
 
@@ -34,9 +39,11 @@ EncoderPacket MotorEncoders::getDeltas(){
 
 	return(data);
 }
+*/
 
 double MotorEncoders::getHeading(void) {
-	EncoderPacket data = MotorEncoders::getDeltas();
+	//EncoderPacket data = MotorEncoders::getDeltas();
+	reply_t data = MotorEncoders::getInfo();
 	MotorEncoders::heading += ( ((double)(data.dr - data.dl)) * (double)RAD_PER_ENCODER_TICK * (double)WHEEL_RADIUS / (double)WHEEL_BASE );
 	while (MotorEncoders::heading >= TWO_PI) { // this could be done more effiecently
 		MotorEncoders::heading -= TWO_PI;
@@ -51,7 +58,24 @@ double MotorEncoders::getHeading(void) {
 }
 
 double MotorEncoders::getRotVel(void){
-	EncoderPacket data = MotorEncoders::getDeltas();
+	//EncoderPacket data = MotorEncoders::getDeltas();
+	reply_t data = MotorEncoders::getInfo();
+
+	if(data.packetnum != rx_packetnum){
+		int trynum = 0;
+		do{		
+			resendPacket(rx_packetnum, &data, sizeof(data));
+			if(data.packetnum == rx_packetnum){
+				rx_packetnum++;
+				break;
+			}
+			trynum++;
+		}while((data.packetnum != rx_packetnum) && (trynum < 5))
+		return(NaN);
+	}
+	else{
+		rx_packetnum++;
+	}
 
 	double dt = data.dt / COUNTER_RATE
 
