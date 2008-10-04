@@ -1,0 +1,3 @@
+Ideas
+- use polarized pins
+- Regenerative Motor Braking (on motor controller, not this board)
