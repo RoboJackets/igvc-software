@@ -16,10 +16,10 @@ MotorEncoders::MotorEncoders(void) : ArduinoInterface() {
 }
 
 
-MotorEncoderFrame MotorEncoders::getInfo(void) {
-	MotorEncoderFrame status;
-	status.frame;
-	getStatus(&status.frame, sizeof(status.frame));
+reply_t MotorEncoders::getInfo(void) {
+	reply_t status;
+	status;
+	getStatus(&status, sizeof(status));
 
 	return(status);
 }
@@ -50,8 +50,8 @@ EncoderPacket MotorEncoders::getDeltas(){
 
 double MotorEncoders::getHeading(void) {
 	//EncoderPacket data = MotorEncoders::getDeltas();
-	MotorEncoderFrame data = MotorEncoders::getInfo();
-	MotorEncoders::heading += ( ((double)(data.frame.dr - data.frame.dl)) * (double)RAD_PER_ENCODER_TICK * (double)WHEEL_RADIUS / (double)WHEEL_BASE );
+	reply_t data = MotorEncoders::getInfo();
+	MotorEncoders::heading += ( ((double)(data.dr - data.dl)) * (double)RAD_PER_ENCODER_TICK * (double)WHEEL_RADIUS / (double)WHEEL_BASE );
 	while (MotorEncoders::heading >= (2*M_PI)) { // this could be done more effiecently
 		MotorEncoders::heading -= (2*M_PI);
 	}
@@ -66,7 +66,7 @@ double MotorEncoders::getHeading(void) {
 
 double MotorEncoders::getRotVel(void){
 	//EncoderPacket data = MotorEncoders::getDeltas();
-	MotorEncoderFrame data = MotorEncoders::getInfo();
+	reply_t data = MotorEncoders::getInfo();
 /*
 	if(data.packetnum != rx_packetnum){
 		int trynum = 0;
@@ -84,10 +84,10 @@ double MotorEncoders::getRotVel(void){
 		rx_packetnum++;
 	}
 */
-	double dt = data.frame.dt / COUNTER_RATE;
+	double dt = data.dt / COUNTER_RATE;
 
-	double wr = data.frame.dr / dt;
-	double wl = data.frame.dl / dt;
+	double wr = data.dr / dt;
+	double wl = data.dl / dt;
 	
 	double w = (wr - wl)*WHEEL_RADIUS/WHEEL_BASE;
 
