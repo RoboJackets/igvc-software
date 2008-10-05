@@ -6,7 +6,7 @@ using namespace std;
 
 int main(void) {
 	MotorEncoders encoders;
-	MotorEncoders::reply_t status;
+	//MotorEncoders::reply_t status;
 
 	cout << "Size of short = " << sizeof(short) << endl;
 
