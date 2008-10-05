@@ -1,3 +1,13 @@
-Ideas
+Needs
+- optoisolators
+- current adc shifting
+- headers
+- - for encoders
+- - for current sensors
+- - for OSMC
+
+Design
 - use polarized pins
+
+Future
 - Regenerative Motor Braking (on motor controller, not this board)
