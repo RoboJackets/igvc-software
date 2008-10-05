@@ -1,6 +1,12 @@
-#include "./ArduinoMotorEncoders/MotorEncoders.h"
+#include "MotorEncoders.h"
+#include <cstdlib>
 #include <sys/time.h>
-#include <string>
+#include <time.h>
+#include <sys/timex.h>
+#include <string.h>
+#include <cmath>
+
+//typedef unsigned char byte;
 
 MotorEncoders::MotorEncoders(void) : ArduinoInterface() {
 
@@ -10,9 +16,10 @@ MotorEncoders::MotorEncoders(void) : ArduinoInterface() {
 }
 
 
-MotorEncoders::reply_t MotorEncoders::getInfo(void) {
-	reply_t status;
-	getStatus(&status, sizeof(reply_t));
+MotorEncoderFrame MotorEncoders::getInfo(void) {
+	MotorEncoderFrame status;
+	status.frame;
+	getStatus(&status.frame, sizeof(status.frame));
 
 	return(status);
 }
@@ -43,14 +50,14 @@ EncoderPacket MotorEncoders::getDeltas(){
 
 double MotorEncoders::getHeading(void) {
 	//EncoderPacket data = MotorEncoders::getDeltas();
-	reply_t data = MotorEncoders::getInfo();
-	MotorEncoders::heading += ( ((double)(data.dr - data.dl)) * (double)RAD_PER_ENCODER_TICK * (double)WHEEL_RADIUS / (double)WHEEL_BASE );
-	while (MotorEncoders::heading >= TWO_PI) { // this could be done more effiecently
-		MotorEncoders::heading -= TWO_PI;
+	MotorEncoderFrame data = MotorEncoders::getInfo();
+	MotorEncoders::heading += ( ((double)(data.frame.dr - data.frame.dl)) * (double)RAD_PER_ENCODER_TICK * (double)WHEEL_RADIUS / (double)WHEEL_BASE );
+	while (MotorEncoders::heading >= (2*M_PI)) { // this could be done more effiecently
+		MotorEncoders::heading -= (2*M_PI);
 	}
 
 	while (heading < 0) {
-		MotorEncoders::heading += TWO_PI;
+		MotorEncoders::heading += (2*M_PI);
 	}
 
 
@@ -59,8 +66,8 @@ double MotorEncoders::getHeading(void) {
 
 double MotorEncoders::getRotVel(void){
 	//EncoderPacket data = MotorEncoders::getDeltas();
-	reply_t data = MotorEncoders::getInfo();
-
+	MotorEncoderFrame data = MotorEncoders::getInfo();
+/*
 	if(data.packetnum != rx_packetnum){
 		int trynum = 0;
 		do{		
@@ -76,19 +83,19 @@ double MotorEncoders::getRotVel(void){
 	else{
 		rx_packetnum++;
 	}
+*/
+	double dt = data.frame.dt / COUNTER_RATE;
 
-	double dt = data.dt / COUNTER_RATE
-
-	double wr = data.dr / dt;
-	double wl = data.dl / dt;
+	double wr = data.frame.dr / dt;
+	double wl = data.frame.dl / dt;
 	
-	double w = (wr - wl)*WHEEL_RADIUS/WHEEL_BASE
+	double w = (wr - wl)*WHEEL_RADIUS/WHEEL_BASE;
 
 	return(w);
 }
 
 void MotorEncoders::setHeading(double heading) {
-	this.heading = heading;
+	MotorEncoders::heading = heading;
 //	setVar(HEADING, &heading, sizeof(double));
 }
 
@@ -101,7 +108,7 @@ bool MotorEncoders::setSendMode(int mode){
 }
 
 bool MotorEncoders::setLogFile(string str){
-	this.logfile = str;
+	logfile = str;
 }
 
 bool MotorEncoders::setArduinoClock(){
@@ -110,17 +117,19 @@ bool MotorEncoders::setArduinoClock(){
 	struct timezone tz;
 	gettimeofday(&time, &tz);
 
-	byte[4] timedata;
+	unsigned char timedata[4];
 
-	long int millis = time.tv_sec*1000 + ((long int)((double)tv_usec/1000));
+	long int millis = time.tv_sec*1000 + ((long int)((double)time.tv_usec/1000));
 
-	memcpy(timedata+4, millis, 4);
+	memcpy(timedata, &millis, 4);
 
-	return( setVar(SETCLK1, timedata, 4 ) );
+	return( setVar(SETCLK, timedata, 4 ) );
 }
 bool MotorEncoders::setSendMode(int mode, int int_rt){
 	bool a = setVar(PUSHPULL, &mode, sizeof(int));
-	bool b = setVar(INTEROG_DL, &int_rt, sizeof(int);
+	bool b = setVar(INTEROG_DL, &int_rt, sizeof(int));
 
 	return(a && b);
 }
+
+

@@ -2,6 +2,7 @@
 #define MOTOR_ENCODERS_H
 
 #include "../arduino/ArduinoInterface.h"
+#include "MotorEncodersFrame.h"
 #include "./ArduinoMotorEncoders/EncoderDefines.h"
 #include <string>
 
@@ -16,8 +17,7 @@ class MotorEncoders: ArduinoInterface {
 
 		//typedef struct { double heading; double linVel; double rotVel } state_t;
 		//typedef struct { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } EncoderPacket;
-		typedef struct __attribute__((__packed__)) { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } reply_t;
-		typedef struct __attribute__((__packed__)) { short command; short len; byte * arg; } command_t;
+		//typedef struct __attribute__((__packed__)) { short command; short len; byte * arg; } command_t;
 
 		/* Constructor */
 		MotorEncoders(void);
@@ -32,7 +32,7 @@ class MotorEncoders: ArduinoInterface {
 		double getRotVel(void);
 
 		/* Set global heading */
-		bool setHeading(double heading);
+		void setHeading(double heading);
 
 		/* set to Push or Pull mode*/
 		bool setSendMode(int mode);
@@ -57,11 +57,12 @@ class MotorEncoders: ArduinoInterface {
 		unsigned int rx_packetnum;
 		unsigned int tx_packetnum;
 
-		reply_t getInfo(void); //TODO: get rid of this
+		MotorEncoderFrame getInfo(void); //TODO: get rid of this
 
 		//EncoderPacket getDeltas(void);
 
 };
+
 
 #endif /* MOTOR_ENCODERS_H */
 
