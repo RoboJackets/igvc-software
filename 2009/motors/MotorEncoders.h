@@ -2,11 +2,13 @@
 #define MOTOR_ENCODERS_H
 
 #include "../arduino/ArduinoInterface.h"
-#include "MotorEncodersFrame.h"
+//#include "MotorEncodersFrame.h"
 #include "./ArduinoMotorEncoders/EncoderDefines.h"
 #include <string>
 
 using namespace std;
+
+typedef struct __attribute__((__packed__)) { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } reply_t;
 
 //TODO: make this use a namespace
 //TODO: make this sample regularly
@@ -16,7 +18,8 @@ class MotorEncoders: ArduinoInterface {
 		//TODO: change these to char arrays
 
 		//typedef struct { double heading; double linVel; double rotVel } state_t;
-		//typedef struct { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } EncoderPacket;
+		//typedef struct { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } reply_t;
+		//typedef reply_t EncoderPacket;
 		//typedef struct __attribute__((__packed__)) { short command; short len; byte * arg; } command_t;
 
 		/* Constructor */
@@ -57,7 +60,7 @@ class MotorEncoders: ArduinoInterface {
 		unsigned int rx_packetnum;
 		unsigned int tx_packetnum;
 
-		MotorEncoderFrame getInfo(void); //TODO: get rid of this
+		reply_t getInfo(void); //TODO: get rid of this
 
 		//EncoderPacket getDeltas(void);
 

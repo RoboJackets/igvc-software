@@ -22,4 +22,6 @@ enum opt_t {PUSH = 0, PULL, SEND_DTICK, SEND_CURRENT};
 // Arduino -> Laptop data packet
 typedef struct  __attribute__((__packed__)) { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } reply_dtick_t;
 
+typedef struct  __attribute__((__packed__)) { long timestamp; long packetnum; short currentl; short currentr; unsigned short t; } reply_current_t;
+
 #endif //ENCODER_DEFINES_H_
