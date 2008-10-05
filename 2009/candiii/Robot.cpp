@@ -3,6 +3,7 @@
 #include "main.h"
 #include "image_buffers.h"
 #include "vision_processing.h"
+#include "PjMat.h"
 
 #include <stdlib.h>
 #include <GL/glut.h>
@@ -242,34 +243,65 @@ void Robot::updateGlutDisplay() {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_RECTANGLE_ARB);
-	    glMatrixMode(GL_PROJECTION);
-	    glLoadIdentity();
-	    gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
-	    glMatrixMode(GL_MODELVIEW);
-	    glLoadIdentity();
+    
+	    //glMatrixMode(GL_PROJECTION);
+	    //glLoadIdentity();
+	    //gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
+	    //glMatrixMode(GL_MODELVIEW);
+	    //glLoadIdentity();
+	    //glMatrixMode(GL_MODELVIEW);
+	    
+	    /* * * transform * * */
+		glLoadIdentity ();
+		glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity ();					
+		/* * * * * * * * * * */
+	
 	    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
 	    /* put data in card */
 	    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+	    
+	    /* * * transform * * */
+	    setPjMat();
+	    /* * * * * * * * * * */
+	    
 	    glBegin(GL_QUADS);
+	    
 	    	// default perspective (upside down)
 		    //glTexCoord2i(0, 0); 								glVertex2i(0, 0);
 		    //glTexCoord2i(visCvRaw->width, 0);					glVertex2i(visCvRaw->width, 0);
 		    //glTexCoord2i(visCvRaw->width, visCvRaw->height);	glVertex2i(visCvRaw->width, visCvRaw->height);
 		    //glTexCoord2i(0, visCvRaw->height);	  			glVertex2i(0, visCvRaw->height);
 			// corrected perspective (normal)
-		    glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
-		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
-		    glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
-		    glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
+		    //glTexCoord2i(0, 					visCvRaw->height);	glVertex2i(0, 				0);
+		    //glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
+		    //glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
+		    //glTexCoord2i(0, 					0); 				glVertex2i(0, 				visCvRaw->height);
+
+			/* * * transform * * */
+			glTexCoord2i(0, 				0);					glVertex3f(-1,	-1,	0);
+		    glTexCoord2i(visCvRaw->width, 	0);					glVertex3f( 1,	-1,	0);
+		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex3f( 1,   1,	0);
+		    glTexCoord2i(0, 				visCvRaw->height); 	glVertex3f(-1,	 1,	0);
+		    /* * * * * * * * * * */
+		    
 	    glEnd();
+	    
     glDisable(GL_TEXTURE_RECTANGLE_ARB);
-    
-    /* do all graphics card processing */
-    //visGlutProcessing(); 
-    
+  
     /* get data from card */
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+    //glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+    glReadPixels(	0				,	//GLint x,
+			     	0				,	//GLint y,
+			     	visCvRaw->width	,	//GLsizei width,
+			     	visCvRaw->height,	//GLsizei height,
+			     	GL_BGR			,	//GLenum format,
+			     	GL_UNSIGNED_BYTE,	//GLenum type,
+			     	visCvRaw->imageData //Image	
+			     	);
     
+    // double buffering
     glutSwapBuffers();
 
 }
