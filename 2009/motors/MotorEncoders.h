@@ -8,7 +8,7 @@
 
 using namespace std;
 
-typedef struct __attribute__((__packed__)) { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } reply_t;
+typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; short dl; short dr; unsigned short dt; } reply_t;
 
 //TODO: make this use a namespace
 //TODO: make this sample regularly
@@ -49,6 +49,8 @@ class MotorEncoders: ArduinoInterface {
 
 		//bool setLogging(bool status);
 
+		reply_t getInfo(void); //TODO: get rid of this
+
 	private:
 		int comm_mode;
 		int func;
@@ -60,7 +62,7 @@ class MotorEncoders: ArduinoInterface {
 		unsigned int rx_packetnum;
 		unsigned int tx_packetnum;
 
-		reply_t getInfo(void); //TODO: get rid of this
+
 
 		//EncoderPacket getDeltas(void);
 
