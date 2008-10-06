@@ -121,9 +121,9 @@ bool MotorEncoders::setArduinoClock(){
 
 	long int millis = time.tv_sec*1000 + ((long int)((double)time.tv_usec/1000));
 
-	memcpy(timedata, &millis, 4);
+	//memcpy(timedata, &millis, 4);
 
-	return( setVar(SETCLK, timedata, 4 ) );
+	return( setVar(SETCLK, &millis, 4 ) );
 }
 bool MotorEncoders::setSendMode(int mode, int int_rt){
 	bool a = setVar(PUSHPULL, &mode, sizeof(int));

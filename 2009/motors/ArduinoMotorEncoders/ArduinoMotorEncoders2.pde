@@ -187,6 +187,7 @@ void readSerial(void) {
 		} else if(incomingByte == 'p') {
 			unsigned long int packet_num;
 			byte * bptr = (byte *)&packet_num;
+			while (Serial.available()<4){}  // TODO: add timeout
 			bptr[0] = Serial.read();
 			bptr[1] = Serial.read();
 			bptr[2] = Serial.read();
@@ -226,6 +227,7 @@ void setVariable(byte num, byte val) {
 			{			
 			unsigned long int mills;
 			byte * bptr = (byte *)&mills;
+			while (Serial.available()<3){}  // TODO: add timeout
 			bptr[0] = val;
 			bptr[1] = Serial.read();
 			bptr[2] = Serial.read();

@@ -12,15 +12,16 @@ int main(void) {
 	cout << "size of struct = " << sizeof(reply_t) << endl;
 	while(true) {
 		//cout << "Heading = " << encoders.getHeading() << endl;
+		//encoders.setArduinoClock();
 		reply_t packet = encoders.getInfo();
-		printf("timestamp: %X\n", packet.timestamp);
-		printf("packetnum: %X\n", packet.packetnum);
-		printf("dl: %X\n", packet.dl);
-		printf("dr: %X\n", packet.dr);
-		printf("dt: %X\n", packet.dt);
+		printf("timestamp (s): %d\n", (packet.timestamp) / 1000);
+		printf("packetnum: %d\n", packet.packetnum);
+		printf("dl: %X\n", (unsigned short)packet.dl);
+		printf("dr: %X\n", (unsigned short)packet.dr);
+		printf("dt: %X\n", (unsigned short)packet.dt);
 		cout << "\n\n";
 		//status = encoders.getInfo();
 		//cout << "Heading = " << status.heading << endl;
-		usleep(300000);
+		usleep(.5*1e6);
 	}
 }
