@@ -36,6 +36,7 @@
 #
 # $Id$
 
+#TARGET = test
 TARGET = ArduinoMotorEncoders2
 INSTALL_DIR = /home/nebousuru/Desktop/arduino-0011
 PORT = /dev/ttyUSB0

@@ -20,8 +20,8 @@ enum command_t { PUSHPULL = 0, RET_T, INTEROG_DL, SETCLK, RESENDPKT};//interogdl
 enum opt_t {PUSH = 0, PULL, SEND_DTICK, SEND_CURRENT};
 
 // Arduino -> Laptop data packet
-typedef struct  __attribute__((__packed__)) { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } reply_dtick_t;
+typedef struct  __attribute__((__packed__)) { unsigned long timestamp; unsigned long packetnum; int dl; int dr; unsigned int dt; } reply_dtick_t;
 
-typedef struct  __attribute__((__packed__)) { long timestamp; long packetnum; short currentl; short currentr; unsigned short t; } reply_current_t;
+typedef struct  __attribute__((__packed__)) { unsigned long timestamp; unsigned long packetnum; int currentl; int currentr; unsigned short t; } reply_current_t;
 
 #endif //ENCODER_DEFINES_H_
