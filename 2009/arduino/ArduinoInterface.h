@@ -38,11 +38,13 @@ class ArduinoInterface {
 		int serialportInit(const char* serialport, speed_t baud);
 		bool serialFlush(int fd);
 
-		void savePacket(int packnum, size_t len, void * data);
+		void savePacket(int packnum, void * data, size_t len);
 		void deletePacket(int packnum);
-		PCdatapacket getPacket(int packnum);
+		EncoderData getPacket(int packnum);
 
-		std::list<PCdatapacket> packetlist;
+		std::list<EncoderData> packetlist;
+		int tx_num;
+		int rx_num;
 };
 
 #endif /* ARDUINO_INTERFACE_H */
