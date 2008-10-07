@@ -375,6 +375,14 @@ void resend_packet(long unsigned int num){
 
 		//}
 	}
+	reply_dtick_t packet;
+	packet.timestamp =  -1;
+	packet.packetnum = tx_packetnum;
+	tx_packetnum++;
+	packet.dl = 0x0000;
+	packet.dr = 0x0000;
+	packet.dt = 0x0000;
+	serialPrintBytes(&packet, sizeof(reply_dtick_t));
 }
 
 unsigned int getTime(){

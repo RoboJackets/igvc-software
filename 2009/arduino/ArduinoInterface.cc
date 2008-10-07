@@ -67,7 +67,7 @@ ArduinoInterface::~ArduinoInterface(void) {
 		return;
 	}
 	close(arduinoFD);
-	packetlist.clear();
+	//packetlist.clear();
 }
 
 /**
@@ -272,22 +272,16 @@ void ArduinoInterface::savePacket(int packnum, void * data, size_t len){
 		packetlist.pop_back();
 	}
 
-
 	PCdatapacket stordata;
 	stordata.packnum = packnum;
 	stordata.len = len;
-	//stordata.data = new byte[len];
-	//memcpy(stordata.data, data, len);
 
 	packetlist.push_front(stordata);
 
-	//std::list<PCdatapacket>::iterator it;
-	//it = packetlist.begin();
 	packetlist.front().data = new byte[len];
-	//it->data = 
-	//memcpy(it->data, data, len);
 	memcpy(packetlist.front().data, data, len);
 }
+
 /*
 // delete a packet with a certain number frim the list
 void ArduinoInterface::deletePacket(int packnum){
@@ -299,6 +293,7 @@ void ArduinoInterface::deletePacket(int packnum){
 		}
 	}
 }
+
 */
 //Get a packet that was set to the arduino from the list, by number
 PCdatapacket ArduinoInterface::getSavedPacket(int packnum){
@@ -312,27 +307,23 @@ PCdatapacket ArduinoInterface::getSavedPacket(int packnum){
 }
 
 //Ask the arduino to resend a numbered packet
-PCdatapacket ArduinoInterface::requestPacket(int packnum, size_t len){
-	PCdatapacket out;
-	out.packnum = packnum;
-	out.len = len;
-	out.data = NULL;
+bool ArduinoInterface::requestPacket(int packnum, PCdatapacket * packet, size_t len){
 
 	if (arduinoFD == -1) {
-		return out;
+		return false;
 	}
-	
-	//savePacket(tx_num, (void *)"p", 1);
-	//tx_num++;
-	//savePacket(tx_num, (void *)&packnum, sizof(int));
-	//tx_num++;
+	packet->len = len;
+	packet->packnum = packnum;
 
 	writeFully(arduinoFD, (void *)"p", 1) ;
 	writeFully(arduinoFD, (void *)&packnum, sizeof(int));
 		
+	if(packet->data == NULL){
+		packet->data = new byte[len];
+	}
+	readFully(arduinoFD, packet->data, len);
 
-	readFully(arduinoFD, out.data, len);
-	return out;
+	return true;
 }
 
 

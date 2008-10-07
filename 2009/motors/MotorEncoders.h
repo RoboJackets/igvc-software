@@ -12,7 +12,7 @@ using namespace std;
 
 //TODO: make this use a namespace
 //TODO: make this sample regularly
-class MotorEncoders: ArduinoInterface {
+class MotorEncoders: public ArduinoInterface {
 	public:
 		//TODO: move these to .cc file
 		//TODO: change these to char arrays
