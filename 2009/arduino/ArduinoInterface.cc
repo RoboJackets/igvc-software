@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <unistd.h>   /* UNIX standard function definitions */
 #include <fcntl.h>    /* File control definitions */
+#include <list>
+#include <string.h>
 
 #include "ArduinoInterface.h"
+#include "DataPacket.h"
 
 // TODO:	add a timeouts to serial functions
 //			add checks for disconnected arduino
@@ -13,6 +16,7 @@
 #define BAUD B9600  //Serial baudrate
 #define SERIAL_PORT "/dev/ttyUSB0"
 #define MODULE_ID 'e'
+
 
 /**
  * Opens a connection to an arduino.
@@ -245,4 +249,43 @@ bool ArduinoInterface::serialFlush(int fd) { // TODO: is there a function for th
 		return true;
 	}
 }
+
+
+void ArduinoInterface::savePacket(int packnum, size_t len, void * data){
+
+	if(packetlist.size() > 50){
+		packetlist.pop_back();
+	}
+
+
+	PCdatapacket stordata;
+	stordata.packnum = packnum;
+	stordata.len = len;
+	stordata.data = new byte[len];
+	memcpy(stordata.data, data, len);
+
+	packetlist.push_front(stordata);
+}
+
+void ArduinoInterface::deletePacket(int packnum){
+	std::list<PCdatapacket>::iterator it;
+	for(it = packetlist.begin(); it != packetlist.end(); it++){
+		if(it->packnum == packnum){
+			//delete[] it.data;
+			packetlist.erase(it);
+		}
+	}
+}
+
+PCdatapacket ArduinoInterface::getPacket(int packnum){
+	std::list<PCdatapacket>::iterator it;
+	for(it = packetlist.begin(); it != packetlist.end(); it++){
+		if(it->packnum == packnum){
+			PCdatapacket out = *it;			
+			return(out);
+		}
+	}
+}
+
+
 

@@ -20,7 +20,7 @@ void InitSPI(void) {
 }
 
 bool SPIReadBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, int clockPin) {
-//#ifdef BITBANG_SPI
+#ifdef BITBANG_SPI
 
 	/* Select the device */
 	digitalWrite(slaveSelectPin, LOW);
@@ -57,16 +57,35 @@ bool SPIReadBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, in
 	delayMicroseconds(1000);
 
 	return(data);
-//#else
-//#ifdef HARD_SPI
-	
-//#else
-//	#error "SPIReadInt: SPI mode not set.\n"
-//#endif
-//#endif
+#else
+#ifdef HARD_SPI
+	recdata[numBytes];
+	for(int i = 0; i < numBytes; i++){
+		*SPI_DATA_REG  = 0;
+		while(!(SPI_STATUS_REG << SPI_INT_FLG)){
+			;
+		}
+		recdata[i] = *SPI_DATA_REG;
+	}
+#else
+	#error "SPIReadInt: SPI mode not set.\n"
+#endif
+#endif
 }
 
 bool SPISendBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, int clockPin) {
+
+#ifdef HARD_SPI
+	//recdata[numBytes];
+	for(int i = 0; i < numBytes; i++){
+		*SPI_DATA_REG  = data[i];
+		while(!(SPI_STATUS_REG << SPI_INT_FLG)){
+			;
+		}
+		//recdata[i] = *SPI_DATA_REG;
+	}
+#endif
+
 }
 
 bool SPITransfer(void* outdata, void* indata, unsigned int numBytes){

@@ -62,8 +62,6 @@ class MotorEncoders: ArduinoInterface {
 		unsigned int rx_packetnum;
 		unsigned int tx_packetnum;
 
-
-
 		//EncoderPacket getDeltas(void);
 
 };
