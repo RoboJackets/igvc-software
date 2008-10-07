@@ -14,7 +14,8 @@ class PCdatapacket{
 		int packnum;
 		size_t len;
 		byte * data;
-		virtual ~PCdatapacket();	
+		virtual ~PCdatapacket();
+	//protected:	
 		PCdatapacket();
 };
 
