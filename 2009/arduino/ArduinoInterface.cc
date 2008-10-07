@@ -23,6 +23,10 @@
  * 
  */
 ArduinoInterface::ArduinoInterface(void) {
+
+	tx_num = 1;
+	rx_num = 1;	
+
 	/* See if anything is connected on ports USB0 through USB9 */
 	char serialAddress[] = SERIAL_PORT;
 	for (int i=0;i<10;i++) {
@@ -114,6 +118,7 @@ bool ArduinoInterface::setVar(int var, void *value, int size) {
 		buf[2+i] = ((byte *)value)[i];
 	}
 	if (writeFully(arduinoFD, buf, sizeof(buf))) {
+		savePacket(tx_num, buf, sizeof(buf));
 		return true;
 	}
 	return false;
@@ -251,24 +256,24 @@ bool ArduinoInterface::serialFlush(int fd) { // TODO: is there a function for th
 }
 
 
-void ArduinoInterface::savePacket(int packnum, size_t len, void * data){
+void ArduinoInterface::savePacket(int packnum, void * data, size_t len){
 
 	if(packetlist.size() > 50){
 		packetlist.pop_back();
 	}
 
 
-	PCdatapacket stordata;
+	EncoderData stordata;
 	stordata.packnum = packnum;
 	stordata.len = len;
-	stordata.data = new byte[len];
+	stordata.setDataPointer(new byte[len]);
 	memcpy(stordata.data, data, len);
 
 	packetlist.push_front(stordata);
 }
 
 void ArduinoInterface::deletePacket(int packnum){
-	std::list<PCdatapacket>::iterator it;
+	std::list<EncoderData>::iterator it;
 	for(it = packetlist.begin(); it != packetlist.end(); it++){
 		if(it->packnum == packnum){
 			//delete[] it.data;
@@ -277,11 +282,11 @@ void ArduinoInterface::deletePacket(int packnum){
 	}
 }
 
-PCdatapacket ArduinoInterface::getPacket(int packnum){
-	std::list<PCdatapacket>::iterator it;
+EncoderData ArduinoInterface::getPacket(int packnum){
+	std::list<EncoderData>::iterator it;
 	for(it = packetlist.begin(); it != packetlist.end(); it++){
 		if(it->packnum == packnum){
-			PCdatapacket out = *it;			
+			EncoderData out = *it;			
 			return(out);
 		}
 	}
