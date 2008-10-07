@@ -89,7 +89,7 @@ CTUNING = -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 
 CFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CSTANDARD) $(CEXTRA)
 CXXFLAGS = $(CDEFS) $(CINCS) -O$(OPT)
-#ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
+ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
 LDFLAGS = -lm
 
 
@@ -252,3 +252,27 @@ depend:
 	$(CC) -M -mmcu=$(MCU) $(CDEFS) $(CINCS) $(SRC) $(ASRC) >> $(MAKEFILE)
 
 .PHONY:	all build elf hex eep lss sym program coff extcoff clean depend applet_files sizebefore sizeafter
+
+
+# debugging-related targets
+
+ddd: gdbinit
+	ddd --debugger "avr-gdb -x $(GDBINITFILE)"
+
+gdbserver: gdbinit
+	simulavr --device $(MCU) --gdbserver
+
+gdbinit: $(GDBINITFILE)
+
+$(GDBINITFILE): $(TARGET).hex
+	@echo "file ./applet/$(TARGET).elf" > $(GDBINITFILE)
+	
+	@echo "target remote localhost:1212" \
+		                >> $(GDBINITFILE)
+	
+	@echo "load"        >> $(GDBINITFILE) 
+	@echo "break main"  >> $(GDBINITFILE)
+	@echo "continue"    >> $(GDBINITFILE)
+	@echo
+	@echo "Use 'avr-gdb -x $(GDBINITFILE)'"
+

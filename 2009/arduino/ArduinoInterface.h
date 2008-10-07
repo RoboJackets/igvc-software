@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <termios.h>  /* POSIX terminal control definitions */
+#include <list>
+#include "DataPacket.h"
 
 /** This class defines a standard interface to the arduino microcontroller boards
  *		communicating across a serial interface (rs232, USB, etc.)
@@ -35,6 +37,12 @@ class ArduinoInterface {
 		bool readFully(int fd, void* buf, size_t numBytes);
 		int serialportInit(const char* serialport, speed_t baud);
 		bool serialFlush(int fd);
+
+		void savePacket(int packnum, size_t len, void * data);
+		void deletePacket(int packnum);
+		PCdatapacket getPacket(int packnum);
+
+		std::list<PCdatapacket> packetlist;
 };
 
 #endif /* ARDUINO_INTERFACE_H */
