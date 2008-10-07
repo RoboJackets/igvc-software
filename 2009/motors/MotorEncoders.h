@@ -51,7 +51,7 @@ class MotorEncoders: ArduinoInterface {
 
 		EncoderData::reply_t getInfo(void);
 
-		EncoderData getInfo_class(void); //TODO: get rid of this
+		bool getInfo_class(EncoderData * status); //TODO: get rid of this
 
 
 

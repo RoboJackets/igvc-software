@@ -8,13 +8,14 @@ typedef unsigned char byte;
 
 class PCdatapacket{
 
-	friend class EncoderData;
+	//friend class EncoderData;
 
 	public:
 		int packnum;
 		size_t len;
 		byte * data;
 		virtual ~PCdatapacket();	
+		PCdatapacket();
 };
 
 class EncoderData : public PCdatapacket{

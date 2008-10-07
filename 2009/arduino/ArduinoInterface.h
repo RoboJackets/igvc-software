@@ -39,12 +39,14 @@ class ArduinoInterface {
 		bool serialFlush(int fd);
 
 		void savePacket(int packnum, void * data, size_t len);
-		void deletePacket(int packnum);
-		PCdatapacket getPacket(int packnum);
+		//void deletePacket(int packnum);
+		PCdatapacket getSavedPacket(int packnum);
+
+		PCdatapacket requestPacket(int packnum, size_t len);
 
 		std::list<PCdatapacket> packetlist;
 		int tx_num;
-		int rx_num;
+		//int rx_num;
 };
 
 #endif /* ARDUINO_INTERFACE_H */

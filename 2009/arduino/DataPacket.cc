@@ -1,7 +1,13 @@
 #include "DataPacket.h"
 
+PCdatapacket::PCdatapacket(){
+	data = NULL;
+}
+
 PCdatapacket::~PCdatapacket(){
-	delete[] data;
+	if(data != NULL){
+		delete[] data;
+	}
 }
 
 EncoderData::EncoderData(){
