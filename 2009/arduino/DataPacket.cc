@@ -4,8 +4,14 @@ PCdatapacket::~PCdatapacket(){
 	delete[] data;
 }
 
-void EncoderData::setDataPointer(void * ptr){
-	packet = (reply_t *)ptr;
-	data = (byte *)ptr;
+EncoderData::EncoderData(){
+	data = new byte[sizeof(reply_t)];
+	packet = (reply_t *) data;
+
 }
 
+/*
+EncoderData::~EncoderData(){
+	packet = NULL;
+}
+*/

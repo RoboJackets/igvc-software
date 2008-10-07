@@ -3,6 +3,7 @@
 #include <unistd.h>   /* UNIX standard function definitions */
 #include <fcntl.h>    /* File control definitions */
 #include <list>
+#include <iostream>
 #include <string.h>
 
 #include "ArduinoInterface.h"
@@ -67,6 +68,7 @@ ArduinoInterface::~ArduinoInterface(void) {
 		return;
 	}
 	close(arduinoFD);
+	packetlist.clear();
 }
 
 /**
@@ -83,7 +85,8 @@ bool ArduinoInterface::getStatus(void *status, int size) {
 	if (arduinoFD == -1) {
 		return false;
 	}
-
+		savePacket(tx_num, (void *)"r", 1);
+		tx_num++;
 	if (writeFully(arduinoFD, (void *)"r", 1)) {
 		return true;
 	}
@@ -117,8 +120,9 @@ bool ArduinoInterface::setVar(int var, void *value, int size) {
 	for (int i = 0; i < size; i++) {
 		buf[2+i] = ((byte *)value)[i];
 	}
-	if (writeFully(arduinoFD, buf, sizeof(buf))) {
 		savePacket(tx_num, buf, sizeof(buf));
+		tx_num++;
+	if (writeFully(arduinoFD, buf, sizeof(buf))) {
 		return true;
 	}
 	return false;
@@ -263,17 +267,20 @@ void ArduinoInterface::savePacket(int packnum, void * data, size_t len){
 	}
 
 
-	EncoderData stordata;
+	PCdatapacket stordata;
 	stordata.packnum = packnum;
 	stordata.len = len;
-	stordata.setDataPointer(new byte[len]);
+	stordata.data = new byte[len];
+	//stordata.setDataPointer(new byte[len]);
 	memcpy(stordata.data, data, len);
 
 	packetlist.push_front(stordata);
+
+	std::cout << "\npacketlist len: " << packetlist.size() << std::endl << std::endl;
 }
 
 void ArduinoInterface::deletePacket(int packnum){
-	std::list<EncoderData>::iterator it;
+	std::list<PCdatapacket>::iterator it;
 	for(it = packetlist.begin(); it != packetlist.end(); it++){
 		if(it->packnum == packnum){
 			//delete[] it.data;
@@ -282,11 +289,11 @@ void ArduinoInterface::deletePacket(int packnum){
 	}
 }
 
-EncoderData ArduinoInterface::getPacket(int packnum){
-	std::list<EncoderData>::iterator it;
+PCdatapacket ArduinoInterface::getPacket(int packnum){
+	std::list<PCdatapacket>::iterator it;
 	for(it = packetlist.begin(); it != packetlist.end(); it++){
 		if(it->packnum == packnum){
-			EncoderData out = *it;			
+			PCdatapacket out = *it;			
 			return(out);
 		}
 	}
