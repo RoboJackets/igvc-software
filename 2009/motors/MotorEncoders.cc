@@ -26,9 +26,9 @@ EncoderData::reply_t MotorEncoders::getInfo(void) {
 
 EncoderData MotorEncoders::getInfo_class(void) {
 	EncoderData status;
-	byte * data = new byte[sizeof(EncoderData::reply_t)];
-	getStatus(data, sizeof(EncoderData::reply_t));
-	status.setDataPointer(data);
+	//byte * data = new byte[sizeof(EncoderData::reply_t)];
+	getStatus(status.data, sizeof(EncoderData::reply_t));
+	//status.setDataPointer(data);
 
 	return(status);
 }

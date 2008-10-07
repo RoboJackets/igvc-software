@@ -40,9 +40,9 @@ class ArduinoInterface {
 
 		void savePacket(int packnum, void * data, size_t len);
 		void deletePacket(int packnum);
-		EncoderData getPacket(int packnum);
+		PCdatapacket getPacket(int packnum);
 
-		std::list<EncoderData> packetlist;
+		std::list<PCdatapacket> packetlist;
 		int tx_num;
 		int rx_num;
 };

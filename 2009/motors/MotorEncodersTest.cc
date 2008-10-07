@@ -13,7 +13,7 @@ int main(void) {
 
 	int packetnum = 1;
 
-	while(true) {
+	while(packetnum < 100) {
 		//cout << "Heading = " << encoders.getHeading() << endl;
 		//encoders.setArduinoClock();
 		//reply_t packet = encoders.getInfo();
