@@ -24,13 +24,14 @@ EncoderData::reply_t MotorEncoders::getInfo(void) {
 	return(status);
 }
 
-EncoderData MotorEncoders::getInfo_class(void) {
-	EncoderData status;
+bool MotorEncoders::getInfo_class(EncoderData * status) {
+	//EncoderData status;
 	//byte * data = new byte[sizeof(EncoderData::reply_t)];
-	getStatus(status.data, sizeof(EncoderData::reply_t));
+	bool ret = getStatus(status->data, sizeof(EncoderData::reply_t));
 	//status.setDataPointer(data);
 
-	return(status);
+	//return(status);
+	return(ret);
 }
 
 /*

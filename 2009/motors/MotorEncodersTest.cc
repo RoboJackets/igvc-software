@@ -17,7 +17,8 @@ int main(void) {
 		//cout << "Heading = " << encoders.getHeading() << endl;
 		//encoders.setArduinoClock();
 		//reply_t packet = encoders.getInfo();
-		EncoderData packet = encoders.getInfo_class();
+		EncoderData packet;
+		encoders.getInfo_class(&packet);
 		printf("timestamp (s): %d\n", (packet.packet->timestamp) / 1000);
 		printf("packetnum: %d\n", packet.packet->packetnum);
 
