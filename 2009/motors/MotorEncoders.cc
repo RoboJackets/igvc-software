@@ -29,7 +29,8 @@ bool MotorEncoders::getInfo_class(EncoderData * status) {
 	//byte * data = new byte[sizeof(EncoderData::reply_t)];
 	bool ret = getStatus(status->data, sizeof(EncoderData::reply_t));
 	//status.setDataPointer(data);
-
+	//status.packnum = rx_packetnum;
+	//rx_packetnum++;
 	//return(status);
 	return(ret);
 }
