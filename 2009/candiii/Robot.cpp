@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 
+
 // flag for saving video - global because of glut use
 int saveRawVideo;
 
@@ -39,6 +40,7 @@ void keyboardFunc(unsigned char key, int x, int y) { // handles keyboard button 
     	printf("video file \n");
     	break;
     default:
+    	printf("x,y %d,%d \n",x,y);
         break;
     }
 }
@@ -55,15 +57,16 @@ Robot::Robot(const char* filename) {
     // only the CVcam can load video...
 #if  USE_FIREWIRE_CAMERA
     filename=NULL;
-#endif
-
+    /* connect to the camera */
+    connectToCamera();    
+#else
     if (filename==NULL)
         /* connect to the camera */
         connectToCamera();
     else
         /* load a video */
         camera.connect(0, filename);
-        
+#endif        
 
     
 }
@@ -243,51 +246,61 @@ void Robot::updateGlutDisplay() {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_RECTANGLE_ARB);
-    
-	    //glMatrixMode(GL_PROJECTION);
-	    //glLoadIdentity();
-	    //gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
-	    //glMatrixMode(GL_MODELVIEW);
-	    //glLoadIdentity();
-	    //glMatrixMode(GL_MODELVIEW);
-	    
-	    /* * * transform * * */
+ 	{
+ 		
+#if DO_TRANSFORM
+ 	    /* * * transform * * */
 		glLoadIdentity ();
 		glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity ();					
 		/* * * * * * * * * * */
-	
+#else
+	    glMatrixMode(GL_PROJECTION);
+	    glLoadIdentity();
+	    gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
+	    glMatrixMode(GL_MODELVIEW);
+	    glLoadIdentity();
+	    glMatrixMode(GL_MODELVIEW);
+#endif	       
+
 	    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
 	    /* put data in card */
 	    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
 	    
+#if DO_TRANSFORM	    
 	    /* * * transform * * */
 	    setPjMat();
 	    /* * * * * * * * * * */
-	    
-	    glBegin(GL_QUADS);
-	    
-	    	// default perspective (upside down)
-		    //glTexCoord2i(0, 0); 								glVertex2i(0, 0);
-		    //glTexCoord2i(visCvRaw->width, 0);					glVertex2i(visCvRaw->width, 0);
-		    //glTexCoord2i(visCvRaw->width, visCvRaw->height);	glVertex2i(visCvRaw->width, visCvRaw->height);
-		    //glTexCoord2i(0, visCvRaw->height);	  			glVertex2i(0, visCvRaw->height);
-			// corrected perspective (normal)
-		    //glTexCoord2i(0, 					visCvRaw->height);	glVertex2i(0, 				0);
-		    //glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
-		    //glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
-		    //glTexCoord2i(0, 					0); 				glVertex2i(0, 				visCvRaw->height);
+#endif
 
+	    glBegin(GL_QUADS);
+		{
+			
+#if DO_TRANSFORM
 			/* * * transform * * */
 			glTexCoord2i(0, 				0);					glVertex3f(-1,	-1,	0);
 		    glTexCoord2i(visCvRaw->width, 	0);					glVertex3f( 1,	-1,	0);
 		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex3f( 1,   1,	0);
 		    glTexCoord2i(0, 				visCvRaw->height); 	glVertex3f(-1,	 1,	0);
 		    /* * * * * * * * * * */
-		    
+#else		    
+	    	// default perspective (upside down)
+		    glTexCoord2i(0,					0);					glVertex2i(0, 				0);
+		    glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, 0);
+		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, visCvRaw->height);
+		    glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				visCvRaw->height);		    
+			// corrected perspective (normal)
+//		    glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
+//		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
+//		    glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
+//		    glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
+#endif
+
+		}  
 	    glEnd();
-	    
+
+ 	}    
     glDisable(GL_TEXTURE_RECTANGLE_ARB);
   
     /* get data from card */

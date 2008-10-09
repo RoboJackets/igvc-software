@@ -33,8 +33,9 @@ int GuppyCam::isValid() {
     return camconnected;
 }
 
-void GuppyCam::GrabCvImage() {
+bool GuppyCam::GrabCvImage() {
     visCvRaw = _dcam->read_frame();
+    return true;
 }
 
 

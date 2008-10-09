@@ -13,12 +13,13 @@
 #include "highgui.h"
 #include "Point2D.h"
 
+/*===== Camera Settings ===========================================*/
 /* Determines camera compatability.
- * Also, this must be set to 0 to load videos via command line. */
+ * This must be set to 0 to load videos via command line. */
 #define USE_FIREWIRE_CAMERA 0
-
-
-
+/* flag for performing image perspective transform */
+#define DO_TRANSFORM 0
+/*=================================================================*/
 
 class Robot {
 public:

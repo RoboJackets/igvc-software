@@ -3,7 +3,7 @@
 #include "pathplan/PathPlan.h"
 #include <stdio.h>
 #include "Graphics.h"
-
+#include "Robot.h" // for DO_TRANSFORM define
 
 
 /*
@@ -13,12 +13,19 @@
  * Only IplImages should be used in this file!
  */
 
-
+ 
 /*** SweeperLines ****************************************************/
-
-// Number of paths that are assessed between the starting/ending angles
-// 1 <= NAV_PATH__NUM
-const int NAV_PATH__NUM = 29; //15; //30;
+#if DO_TRANSFORM
+	// Number of paths that are assessed between the starting/ending angles
+	const int NAV_PATH__NUM = 15; //29;		// (Number of sweeper lines) 
+	// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
+	const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 0.35; 		//1.00;<-without-transform	/* > 0.0 */
+#else
+	// Number of paths that are assessed between the starting/ending angles
+	const int NAV_PATH__NUM = 29; //15;		// (Number of sweeper lines) 
+	// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
+	const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 1.00; 		//1.00;<-without-transform	/* > 0.0 */
+#endif
 
 // Defines the "view/navigation cone", which is where the set of
 // considered navigation paths is taken from.
@@ -33,8 +40,7 @@ const double NAV_PATH__VIEW_CONE__SPACING = NAV_PATH__VIEW_CONE__DELTA_ANGLE / (
 const int NAV_PATH__PATH_SEARCH_GIRTH = 1;
 // (do not change without reason!)
 const int NAV_PATH__CENTER_PATH_ID = (int) round((90.0 - NAV_PATH__VIEW_CONE__START_ANGLE) / NAV_PATH__VIEW_CONE__SPACING);
-// Proportional to the lengths of the paths (in image space)
-const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 1.00; //0.27; //1.00;<-without-transform		/* > 0.0 */
+
 // Amount of danger posed by a single barrel-pixel
 // (everything bad is a barrel)
 const int DANGER_PER_BARREL_PIXEL = 1;
@@ -485,13 +491,6 @@ void visPlanPath(IplImage* img, int& goalx, int& goaly) {
 	
 }
 
-/*
- * 
- * 
- */
-void visGlutProcessing(){
-
-}
 
 /*
  * This function sets up navigation path lines
