@@ -33,7 +33,7 @@ public:
     int isValid();
 
     // grabs raw opencv image (into global visCvRaw)
-    void GrabCvImage();
+    bool GrabCvImage();
 
     // grabs raw image and converts it into (global) visRaw
     void GrabBuffer2DImage();

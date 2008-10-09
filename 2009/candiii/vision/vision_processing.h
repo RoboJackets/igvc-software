@@ -14,7 +14,6 @@
  * Only IplImages should be used in this file!
  */
 
-
 // splits raw image into RGB channel images
 void GetRGBChannels();
 // splits raw image into HSV channel images
@@ -34,9 +33,6 @@ int findBestX(IplImage* img, int height, int center);
 // helpers for path finding
 void robotWidthScan(IplImage* img, int& goalx, int& goaly);
 void visPlanPath(IplImage* img, int& goalx, int& goaly);
-
-// graphics card processing goes here
-void visGlutProcessing();
 
 // for sweeper lines ////
 void visSweeperLines(Point2D<int>& goal);
