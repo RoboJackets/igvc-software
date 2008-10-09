@@ -16,7 +16,7 @@ void visProcessFrame(Point2D<int>& goal);
 // loads the thresholds for vision processing from the xml config file
 void LoadVisionXML();
 
-// trackbar value determines image view to display 
+// trackbar value determines image view to display
 void ConvertAllImageViews();
 // callback for trackbar
 void trackbarHandler(int pos);
