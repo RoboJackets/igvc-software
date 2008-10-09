@@ -2,6 +2,7 @@
 
 PCdatapacket::PCdatapacket(){
 	data = NULL;
+	len = 0;
 }
 
 PCdatapacket::~PCdatapacket(){
@@ -11,9 +12,15 @@ PCdatapacket::~PCdatapacket(){
 }
 
 EncoderData::EncoderData(){
+	len = sizeof(reply_t)
 	data = new byte[sizeof(reply_t)];
 	packet = (reply_t *) data;
+}
 
+CurrentData::CurrentData(){
+	len = sizeof(reply_t)
+	data = new byte[sizeof(reply_t)];
+	packet = (reply_t *) data;
 }
 
 /*

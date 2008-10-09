@@ -14,8 +14,11 @@ class PCdatapacket{
 		int packnum;
 		size_t len;
 		byte * data;
+
+		typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; } header;
+
 		virtual ~PCdatapacket();
-	//protected:	
+	//protected:
 		PCdatapacket();
 };
 
@@ -25,6 +28,15 @@ class EncoderData : public PCdatapacket{
 
 		reply_t * packet;
 		EncoderData();
+		//~EncoderData();
+};
+
+class CurrentData : public PCdatapacket{
+	public:
+		typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; short current_l; short current_r; } reply_t;
+
+		reply_t * packet;
+		CurrentData();
 		//~EncoderData();
 };
 
