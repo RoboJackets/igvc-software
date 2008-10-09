@@ -36,11 +36,11 @@ void keyboardFunc(unsigned char key, int x, int y) { // handles keyboard button 
         glRobot->destroy(); // kill the robot;
         break;
     case 's':
-    	saveRawVideo = 1-saveRawVideo;
-    	printf("video file \n");
-    	break;
+        saveRawVideo = 1-saveRawVideo;
+        printf("video file \n");
+        break;
     default:
-    	printf("x,y %d,%d \n",x,y);
+        printf("x,y %d,%d \n",x,y);
         break;
     }
 }
@@ -58,7 +58,7 @@ Robot::Robot(const char* filename) {
 #if  USE_FIREWIRE_CAMERA
     filename=NULL;
     /* connect to the camera */
-    connectToCamera();    
+    connectToCamera();
 #else
     if (filename==NULL)
         /* connect to the camera */
@@ -66,13 +66,13 @@ Robot::Robot(const char* filename) {
     else
         /* load a video */
         camera.connect(0, filename);
-#endif        
+#endif
 
-    
+
 }
 
 Robot::~Robot() {
-	cvReleaseVideoWriter(&cvVideoWriter);
+    cvReleaseVideoWriter(&cvVideoWriter);
     destroy();
 }
 
@@ -85,38 +85,38 @@ void Robot::destroy() {
 
 int Robot::init() {
 
-	/* setup image selection bar */
-	trackbarVal = 1; // currently selected image to view (see ConvertAllImageViews() in vision.cc)
-	int numberOfViews = 10; // important!!!
-	cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
-	
+    /* setup image selection bar */
+    trackbarVal = 1; // currently selected image to view (see ConvertAllImageViews() in vision.cc)
+    int numberOfViews = 10; // important!!!
+    cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
+
     /* try to grab a frame to get image size */
-    if(!camera.GrabCvImage())
-    	return 0; // fail
-    
+    if (!camera.GrabCvImage())
+        return 0; // fail
+
     /* configure opencv display window */
     cvResizeWindow( "display", visCvRaw->width, visCvRaw->height );
     cvMoveWindow( "display", 10, 10 ); // position on screen
-    
+
     /* init all CV images here */
     {
-    	/* 3 plane images */
-	    visCvDebug	= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-	    visCvHSV 		= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-		visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
-	    
-	    /* 1 plane images */
-	    
-	    //visCvRedChannel   	= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
-	    //visCvGreenChannel	= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
-	    //visCvBlueChannel		= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
-	    
-	    /* Note: these are 320x240 & 1 plane images! */
-	    visCvHue 				= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-	    visCvSaturation	= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-	    visCvGrey 			= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-	    visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-	    visCvPath		= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        /* 3 plane images */
+        visCvDebug	= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+        visCvHSV 		= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+        visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
+
+        /* 1 plane images */
+
+        //visCvRedChannel   	= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+        //visCvGreenChannel	= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+        //visCvBlueChannel		= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+
+        /* Note: these are 320x240 & 1 plane images! */
+        visCvHue 				= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvSaturation	= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvGrey 			= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvPath		= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
     }
 
     /* load in vision settings */
@@ -124,7 +124,7 @@ int Robot::init() {
 
     /* set cleanup on exit */
     atexit(Robot::destroy);
-    
+
     /* init video writer */
     createVideoWriter();
 
@@ -142,8 +142,8 @@ void Robot::Go() {
         return;
 
     /* Try to grab a frame to get image size */
-    if(!camera.GrabCvImage())
-    	return;
+    if (!camera.GrabCvImage())
+        return;
 
     /* Setup video card processing */
     initGlut();
@@ -151,14 +151,14 @@ void Robot::Go() {
     /* Quit if we can't initialize properly */
     if (!init())
         return;
-        
+
     /* Init default view (debug=1) */
     trackbarHandler( 1 );
 
     /*
      * Robot Loop!
      */
-    glutMainLoop(); // runs processFunc() 
+    glutMainLoop(); // runs processFunc()
 
 }
 
@@ -167,10 +167,11 @@ void Robot::processFunc() {
      * This function should be just simple function calls.
      */
 
-    /* Get raw image */;
+    /* Get raw image */
+    ;
     camera.GrabCvImage();
-    
-    
+
+
     /* Shove raw image into graphics card for some processing on the card */
     updateGlutDisplay();
 
@@ -184,16 +185,16 @@ void Robot::processFunc() {
 
 
     /* Update displays */
-	ConvertAllImageViews(); // display views based on trackbar position
+    ConvertAllImageViews(); // display views based on trackbar position
 
     /* Drive Robot via motor commands (GO!) */
 
 
-	
-	/* Save raw image last */
-	if(saveRawVideo){
-		cvWriteFrame(cvVideoWriter,visCvRaw);
-	}
+
+    /* Save raw image last */
+    if (saveRawVideo) {
+        cvWriteFrame(cvVideoWriter,visCvRaw);
+    }
 
 
 }
@@ -217,7 +218,7 @@ void Robot::connectToCamera() {
 
 void Robot::initGlut() {
 
-	// dummy args
+    // dummy args
     int argc = 1;
     char** argv;
 
@@ -246,100 +247,107 @@ void Robot::updateGlutDisplay() {
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_LIGHTING);
     glEnable(GL_TEXTURE_RECTANGLE_ARB);
- 	{
- 		
-#if DO_TRANSFORM
- 	    /* * * transform * * */
-		glLoadIdentity ();
-		glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity ();					
-		/* * * * * * * * * * */
-#else
-	    glMatrixMode(GL_PROJECTION);
-	    glLoadIdentity();
-	    gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
-	    glMatrixMode(GL_MODELVIEW);
-	    glLoadIdentity();
-	    glMatrixMode(GL_MODELVIEW);
-#endif	       
+    {
 
-	    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
-	    /* put data in card */
-	    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-	    
-#if DO_TRANSFORM	    
-	    /* * * transform * * */
-	    setPjMat();
-	    /* * * * * * * * * * */
+#if DO_TRANSFORM
+        /* * * transform * * */
+        glLoadIdentity ();
+        glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity ();
+        /* * * * * * * * * * */
+#else
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
 #endif
 
-	    glBegin(GL_QUADS);
-		{
-			
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+        /* put data in card */
+        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+
 #if DO_TRANSFORM
-			/* * * transform * * */
-			glTexCoord2i(0, 				0);					glVertex3f(-1,	-1,	0);
-		    glTexCoord2i(visCvRaw->width, 	0);					glVertex3f( 1,	-1,	0);
-		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex3f( 1,   1,	0);
-		    glTexCoord2i(0, 				visCvRaw->height); 	glVertex3f(-1,	 1,	0);
-		    /* * * * * * * * * * */
-#else		    
-	    	// default perspective (upside down)
-		    glTexCoord2i(0,					0);					glVertex2i(0, 				0);
-		    glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, 0);
-		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, visCvRaw->height);
-		    glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				visCvRaw->height);		    
-			// corrected perspective (normal)
+        /* * * transform * * */
+        setPjMat();
+        /* * * * * * * * * * */
+#endif
+
+        glBegin(GL_QUADS);
+        {
+
+#if DO_TRANSFORM
+            /* * * transform * * */
+            glTexCoord2i(0, 				0);
+            glVertex3f(-1,	-1,	0);
+            glTexCoord2i(visCvRaw->width, 	0);
+            glVertex3f( 1,	-1,	0);
+            glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+            glVertex3f( 1,   1,	0);
+            glTexCoord2i(0, 				visCvRaw->height);
+            glVertex3f(-1,	 1,	0);
+            /* * * * * * * * * * */
+#else
+            // default perspective (upside down)
+            glTexCoord2i(0,					0);
+            glVertex2i(0, 				0);
+            glTexCoord2i(visCvRaw->width, 	0);
+            glVertex2i(visCvRaw->width, 0);
+            glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+            glVertex2i(visCvRaw->width, visCvRaw->height);
+            glTexCoord2i(0, 				visCvRaw->height);
+            glVertex2i(0, 				visCvRaw->height);
+            // corrected perspective (normal)
 //		    glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
 //		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
 //		    glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
 //		    glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
 #endif
 
-		}  
-	    glEnd();
+        }
+        glEnd();
 
- 	}    
+    }
     glDisable(GL_TEXTURE_RECTANGLE_ARB);
-  
+
     /* get data from card */
     //glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
     glReadPixels(	0				,	//GLint x,
-			     	0				,	//GLint y,
-			     	visCvRaw->width	,	//GLsizei width,
-			     	visCvRaw->height,	//GLsizei height,
-			     	GL_BGR			,	//GLenum format,
-			     	GL_UNSIGNED_BYTE,	//GLenum type,
-			     	visCvRaw->imageData //Image	
-			     	);
-    
+                  0				,	//GLint y,
+                  visCvRaw->width	,	//GLsizei width,
+                  visCvRaw->height,	//GLsizei height,
+                  GL_BGR			,	//GLenum format,
+                  GL_UNSIGNED_BYTE,	//GLenum type,
+                  visCvRaw->imageData //Image
+                );
+
     // double buffering
     glutSwapBuffers();
 
 }
 
-void Robot::createVideoWriter()
-{
-	cvVideoWriter = 0;
-	int isColor = 1;
-	int fps     = 10;  // or 30
-	int frameW  = visCvRaw->width; // 
-	int frameH  = visCvRaw->height; // 
-	
-	/*	Other possible codec codes:
-		CV_FOURCC('P','I','M','1')    = MPEG-1 codec
-		CV_FOURCC('M','J','P','G')    = motion-jpeg codec (does not work well)
-		CV_FOURCC('M', 'P', '4', '2') = MPEG-4.2 codec
-		CV_FOURCC('D', 'I', 'V', '3') = MPEG-4.3 codec
-		CV_FOURCC('D', 'I', 'V', 'X') = MPEG-4 codec
-		CV_FOURCC('U', '2', '6', '3') = H263 codec
-		CV_FOURCC('I', '2', '6', '3') = H263I codec
-		CV_FOURCC('F', 'L', 'V', '1') = FLV1 codec
-	*/
-	cvVideoWriter=cvCreateVideoWriter("video_out.avi",CV_FOURCC('P','I','M','1'),
-	                           fps,cvSize(frameW,frameH),isColor);
-                           
+void Robot::createVideoWriter() {
+    cvVideoWriter = 0;
+    int isColor = 1;
+    int fps     = 10;  // or 30
+    int frameW  = visCvRaw->width; //
+    int frameH  = visCvRaw->height; //
+
+    /*	Other possible codec codes:
+    	CV_FOURCC('P','I','M','1')    = MPEG-1 codec
+    	CV_FOURCC('M','J','P','G')    = motion-jpeg codec (does not work well)
+    	CV_FOURCC('M', 'P', '4', '2') = MPEG-4.2 codec
+    	CV_FOURCC('D', 'I', 'V', '3') = MPEG-4.3 codec
+    	CV_FOURCC('D', 'I', 'V', 'X') = MPEG-4 codec
+    	CV_FOURCC('U', '2', '6', '3') = H263 codec
+    	CV_FOURCC('I', '2', '6', '3') = H263I codec
+    	CV_FOURCC('F', 'L', 'V', '1') = FLV1 codec
+    */
+    cvVideoWriter=cvCreateVideoWriter("video_out.avi",CV_FOURCC('P','I','M','1'),
+                                      fps,cvSize(frameW,frameH),isColor);
+
 }
 
 

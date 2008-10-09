@@ -72,15 +72,15 @@ public:
     void connectToCamera();
 
 
-	
-	// structure for saving video
-	CvVideoWriter* cvVideoWriter;
-	void createVideoWriter();
 
-	// heading set by visProcessFrame()
-	// heading.x = rotational speed
-	// heading.y = forward speed
-	Point2D<int> heading;
+    // structure for saving video
+    CvVideoWriter* cvVideoWriter;
+    void createVideoWriter();
+
+    // heading set by visProcessFrame()
+    // heading.x = rotational speed
+    // heading.y = forward speed
+    Point2D<int> heading;
 
 };
 

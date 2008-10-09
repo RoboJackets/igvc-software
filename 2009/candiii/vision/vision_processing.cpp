@@ -13,18 +13,18 @@
  * Only IplImages should be used in this file!
  */
 
- 
+
 /*** SweeperLines ****************************************************/
 #if DO_TRANSFORM
-	// Number of paths that are assessed between the starting/ending angles
-	const int NAV_PATH__NUM = 15; //29;		// (Number of sweeper lines) 
-	// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
-	const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 0.35; 		//1.00;<-without-transform	/* > 0.0 */
+// Number of paths that are assessed between the starting/ending angles
+const int NAV_PATH__NUM = 15; //29;		// (Number of sweeper lines)
+// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
+const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 0.35; 		//1.00;<-without-transform	/* > 0.0 */
 #else
-	// Number of paths that are assessed between the starting/ending angles
-	const int NAV_PATH__NUM = 29; //15;		// (Number of sweeper lines) 
-	// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
-	const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 1.00; 		//1.00;<-without-transform	/* > 0.0 */
+// Number of paths that are assessed between the starting/ending angles
+const int NAV_PATH__NUM = 29; //15;		// (Number of sweeper lines)
+// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
+const double NAV_PATH__VIEW_DISTANCE_MULTIPLIER = 1.00; 		//1.00;<-without-transform	/* > 0.0 */
 #endif
 
 // Defines the "view/navigation cone", which is where the set of
@@ -177,7 +177,7 @@ int checkPixel(IplImage* img, int x, int y) {
 
     // check: black = bad
     if ( !val ) {
-    	// check for noise
+        // check for noise
         if ( !(img->imageData[ (y-PIXEL_SKIP)*img->width+x ]) )
             good = 0;
         else
@@ -428,13 +428,13 @@ void robotWidthScan(IplImage* img, int& goalx, int& goaly) {
             goalx=goaly=-1;	//not good, error in scanning
         } else {
 
-			/* GOAL! */
+            /* GOAL! */
 
             //=== debug: show goal ===//
             // visCvPath=640x480 //
             //cvLine(visCvDebug, cvPoint(center,height-2), cvPoint(goalx,goaly), (CV_RGB(0,0,0)), 2, 8, 0);
             //cvLine(visCvDebug, cvPoint(goalx-half,goaly), cvPoint(goalx+half,goaly), (CV_RGB(0,0,0)), 2, 8, 0);
-			// visCvPath=320x240 //
+            // visCvPath=320x240 //
             cvLine(visCvDebug, cvPoint(center*2,img->height*2-2), 	cvPoint(goalx*2,goaly*2), 		 (CV_RGB(0,0,0)), 2, 8, 0);
             cvLine(visCvDebug, cvPoint((goalx-half)*2,goaly*2), cvPoint((goalx+half)*2,goaly*2), (CV_RGB(0,0,0)), 2, 8, 0);
             //========================//
@@ -448,8 +448,8 @@ void robotWidthScan(IplImage* img, int& goalx, int& goaly) {
 }
 
 /*
- * 
- * 
+ *
+ *
  */
 void visPlanPath(IplImage* img, int& goalx, int& goaly) {
     int width = img->width;
@@ -458,10 +458,10 @@ void visPlanPath(IplImage* img, int& goalx, int& goaly) {
 
     unsigned char * temp=(unsigned char *) img->imageData;
     //convert
-	for(int i = 0 ; i< width*height; i++){
-		if (img->imageData[i]==0) temp[i]=0;
-		else temp[i]=255;
-	}
+    for (int i = 0 ; i< width*height; i++) {
+        if (img->imageData[i]==0) temp[i]=0;
+        else temp[i]=255;
+    }
     goaly+=ROBOT_WIDTH;
 
     //path plan! returns 0 on error
@@ -487,266 +487,263 @@ void visPlanPath(IplImage* img, int& goalx, int& goaly) {
     //cvLine(visCvDebug, cvPoint( center	,height-2), cvPoint(goalx,goaly), (CV_RGB(255,255,255)), 2, 8, 0);
     // visCvPath=320x240 //
     cvLine(visCvDebug, cvPoint(center*2,height*2-2), cvPoint(goalx*2,goaly*2), (CV_RGB(255,255,255)), 2, 8, 0);
-	//========================//
-	
+    //========================//
+
 }
 
 
 /*
  * This function sets up navigation path lines
  * (sweeping out from the bottom center of the image)
- * and scans those lines 
- * (in the visCvPath image) 
+ * and scans those lines
+ * (in the visCvPath image)
  * to see if we're on path or not.
- * 
+ *
  * The goal point passed in is set/updated in this function
  */
-void visSweeperLines(Point2D<int>& goal){
-	
-	Graphics g_path(visCvPath);
-	Graphics g_draw(visCvDebug);
-	
-	static int pathDanger[NAV_PATH__NUM];
-	int curPixelDanger = 0;
-	int curPathDanger = 0;
+void visSweeperLines(Point2D<int>& goal) {
 
-	/* Compute and draw all navigation paths we are considering (and do other actions) */
-	{
-		for (int pathID=0; pathID<NAV_PATH__NUM; pathID++) {
-			// Calculate path parameters
-			Point2D<double> pathStart = navPath_start(pathID);
-			Point2D<double> pathEnd = navPath_end(pathID);
-			
-			// Calculate the set of points in the path
-			QVector< Point2D<int> > pathPoints;
-			Graphics::calculatePointsInLine(
-				(int) pathStart.x, (int) pathStart.y,
-				(int) pathEnd.x, (int) pathEnd.y,			// @ 640x480: 	maxPathEnd.x=607
-				&pathPoints);								//				minPathEnd.x=112
-				
-		
-			// Calculate the danger value for the path
-			// along with the danger contributions of all
-			// the pixels in the path
-			curPathDanger = 0;
-			uchar pixelDanger[pathPoints.count()];
-			for (uint j=0, n2=pathPoints.count(); j<n2; j++) {
-				//Point2D<int> curPathPoint = pathPoints[j];
-				
-				// Calculate the danger contribution of the current
-				// path-pixel to the path danger
-				curPixelDanger = 0;
-				//int passedwhiteline=0;
-				for (int delta=-NAV_PATH__PATH_SEARCH_GIRTH; delta<=NAV_PATH__PATH_SEARCH_GIRTH; delta++) {
-					// (XXX: Consider *nearby* pixels as different fragments of the path-pixel)
-					Point2D<int> curPoint = pathPoints[j];
-					curPoint.x += delta;
-	
-					// check path image (half size) for black=bad
-					if (visCvPath->imageData[curPoint.y/2*visCvPath->width+curPoint.x/2]==0) {
-						// everything bad is a barrel
-						curPixelDanger += DANGER_PER_BARREL_PIXEL;
-					} else {
-						// Nothing special: Probably grass
-						//curPixelDanger += 0;
-					}
-	
-				}
-				
-				// Compensate for considering *nearby* pixels
-				curPixelDanger /= ((NAV_PATH__PATH_SEARCH_GIRTH*2) + 1);
-				pixelDanger[j] = curPixelDanger;
-				curPathDanger += curPixelDanger;
-			}
-			
-			//==== weight outer path lines more scary than inner ==========//
-			int weight = abs(NAV_PATH__CENTER_PATH_ID-pathID)/(NAV_PATH__NUM);
-			curPathDanger += weight;
-			
-			// Clip high danger values to be no higher than MAX_PATH_DANGER
-			if (curPathDanger > MAX_PATH_DANGER) {
-				curPathDanger = MAX_PATH_DANGER;
-			}
-			pathDanger[pathID] = curPathDanger;
-			
-			//if (PRINT_DANGER_VALUES) {
-			//	printf("PATH #%d: %d\n", (int) pathID, (int) curPathDanger);
-			//}
-			
-			// Draw the body of the path using a color that is determined from the path's danger value
-			g_draw.setColor(navPath_color(curPathDanger));
-			g_draw.drawLine(
-				(int) pathStart.x, (int) pathStart.y,
-				(int) pathEnd.x, (int) pathEnd.y);
-			
-			g_draw.setColor(DANGEROUS_PIXEL_COLOR);
-			// Hilight the "dangerous" pixels in the path
-			// (that contributed to the path's total danger value)
-			for (uint j=0, n2=pathPoints.count(); j<n2; j++) {
-				uchar curPixelDanger = pixelDanger[j];
-				if (curPixelDanger != 0) {
-					Point2D<int> curPoint = pathPoints[j];
-					
-					// Color the pixel either thickly/thinly,
-					// depending on how dangerous it is
-					if (curPixelDanger > DANGER_PER_BARREL_PIXEL) {	// maximum danger
-						g_draw.drawRect_rational(
-							curPoint.x, curPoint.y,
-							2, 2);
-					} else {
-						g_draw.drawPixel(curPoint.x, curPoint.y);
-					}
-				}
-			}
-		}	
-	}
-	/* 
-	 * Apply smoothing to the path danger values so that paths
-	 * that are *near* dangerous paths are also considered to
-	 * be dangerous
-	 */
-	{
-		static int smoothedPathDangers[NAV_PATH__NUM];
-		
-		// Copy first edge	
-		for (int curPath_id = 0; curPath_id < NAV_PATH__DANGER_SMOOTHING__RADIUS; curPath_id++) {
-			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
-		}
-		
-		// Smooth interior
-		int sumOfNearbyDangers = 0;
-		int avgOfNearbyDangers;
-		for (int curPath_id = NAV_PATH__DANGER_SMOOTHING__RADIUS;
-		     curPath_id < (NAV_PATH__NUM - NAV_PATH__DANGER_SMOOTHING__RADIUS + 1);
-		     curPath_id++)
-		{
-			sumOfNearbyDangers = 0;
-			for (int delta = -NAV_PATH__DANGER_SMOOTHING__RADIUS;
-			     delta < NAV_PATH__DANGER_SMOOTHING__RADIUS;
-			     delta++)
-			{
-				sumOfNearbyDangers += pathDanger[curPath_id + delta];
-			}
-			avgOfNearbyDangers = sumOfNearbyDangers / (NAV_PATH__DANGER_SMOOTHING__RADIUS*2 + 1);
-			
-			smoothedPathDangers[curPath_id] = avgOfNearbyDangers;
-		}
-		
-		// Copy second edge
-		for (int curPath_id = (NAV_PATH__NUM - NAV_PATH__DANGER_SMOOTHING__RADIUS);
-		     curPath_id < NAV_PATH__NUM;
-		     curPath_id++)
-		{
-			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
-		}
-		
-		// Transfer smoothed dangers back to primary danger buffer
-		for (int curPath_id=0; curPath_id<NAV_PATH__NUM; curPath_id++) {
-			pathDanger[curPath_id] = smoothedPathDangers[curPath_id];
-		}
-	}
-	
-	/* Pick a path with a low danger-value to follow */
-	{
-		/*
-		 * Find the path with the lowest danger value.
-		 * If there are multiple such paths, pick the that is closest to the center
-		 * (i.e., pick the path that points the most straight upward)
-		 */
-		int bestPath_id = 0;
-		{
-			int bestPath_danger = pathDanger[bestPath_id];
-			int bestPath_distanceFromCenter = abs(NAV_PATH__CENTER_PATH_ID - bestPath_id);
-			int curPath_danger;
-			int curPath_distanceFromCenter;
-			for (int curPath_id=0; curPath_id<NAV_PATH__NUM; curPath_id++) {
-				curPath_danger = pathDanger[curPath_id];
-				curPath_distanceFromCenter = abs(NAV_PATH__CENTER_PATH_ID - curPath_id);
-				
-				if (curPath_danger < bestPath_danger) {
-					bestPath_danger = curPath_danger;
-					bestPath_id = curPath_id;
-					bestPath_distanceFromCenter = curPath_distanceFromCenter;
-				} else if (curPath_danger == bestPath_danger) {
-					if (curPath_distanceFromCenter < bestPath_distanceFromCenter) {
-						bestPath_id = curPath_id;
-						bestPath_distanceFromCenter = curPath_distanceFromCenter;
-					}
-				}
-			}
-		}
-		
-		/* Hilight the path that was picked */
-		{
-			g_draw.setColor(navPath_color(pathDanger[bestPath_id]));
-			
-			// Redraw the path, but much more thickly (in order to hilight it)
-			Point2D<double> bestPath_start = navPath_start(bestPath_id);
-			Point2D<double> bestPath_end = navPath_end(bestPath_id);
-			for (int deltaX = -1; deltaX <= 1; deltaX++) {
-				g_draw.drawLine(
-					((int) bestPath_start.x) + deltaX, (int) bestPath_start.y,
-					((int) bestPath_end.x) + deltaX, (int) bestPath_end.y);
-			}
-			
-			/* Update goal 
-			 * (convert to 320x240 frame) */
-			goal.x = (int)bestPath_end.x/2;
-			goal.y = (int)bestPath_end.y/2;
-			//printf("goal(%d,%d) \n",goal.x,goal.y);
-				
+    Graphics g_path(visCvPath);
+    Graphics g_draw(visCvDebug);
 
-		}
-	
-	
-	
-		// drive motors
-		// display motor output
-		
-	}	
-	
+    static int pathDanger[NAV_PATH__NUM];
+    int curPixelDanger = 0;
+    int curPathDanger = 0;
+
+    /* Compute and draw all navigation paths we are considering (and do other actions) */
+    {
+        for (int pathID=0; pathID<NAV_PATH__NUM; pathID++) {
+            // Calculate path parameters
+            Point2D<double> pathStart = navPath_start(pathID);
+            Point2D<double> pathEnd = navPath_end(pathID);
+
+            // Calculate the set of points in the path
+            QVector< Point2D<int> > pathPoints;
+            Graphics::calculatePointsInLine(
+                (int) pathStart.x, (int) pathStart.y,
+                (int) pathEnd.x, (int) pathEnd.y,			// @ 640x480: 	maxPathEnd.x=607
+                &pathPoints);								//				minPathEnd.x=112
+
+
+            // Calculate the danger value for the path
+            // along with the danger contributions of all
+            // the pixels in the path
+            curPathDanger = 0;
+            uchar pixelDanger[pathPoints.count()];
+            for (uint j=0, n2=pathPoints.count(); j<n2; j++) {
+                //Point2D<int> curPathPoint = pathPoints[j];
+
+                // Calculate the danger contribution of the current
+                // path-pixel to the path danger
+                curPixelDanger = 0;
+                //int passedwhiteline=0;
+                for (int delta=-NAV_PATH__PATH_SEARCH_GIRTH; delta<=NAV_PATH__PATH_SEARCH_GIRTH; delta++) {
+                    // (XXX: Consider *nearby* pixels as different fragments of the path-pixel)
+                    Point2D<int> curPoint = pathPoints[j];
+                    curPoint.x += delta;
+
+                    // check path image (half size) for black=bad
+                    if (visCvPath->imageData[curPoint.y/2*visCvPath->width+curPoint.x/2]==0) {
+                        // everything bad is a barrel
+                        curPixelDanger += DANGER_PER_BARREL_PIXEL;
+                    } else {
+                        // Nothing special: Probably grass
+                        //curPixelDanger += 0;
+                    }
+
+                }
+
+                // Compensate for considering *nearby* pixels
+                curPixelDanger /= ((NAV_PATH__PATH_SEARCH_GIRTH*2) + 1);
+                pixelDanger[j] = curPixelDanger;
+                curPathDanger += curPixelDanger;
+            }
+
+            //==== weight outer path lines more scary than inner ==========//
+            int weight = abs(NAV_PATH__CENTER_PATH_ID-pathID)/(NAV_PATH__NUM);
+            curPathDanger += weight;
+
+            // Clip high danger values to be no higher than MAX_PATH_DANGER
+            if (curPathDanger > MAX_PATH_DANGER) {
+                curPathDanger = MAX_PATH_DANGER;
+            }
+            pathDanger[pathID] = curPathDanger;
+
+            //if (PRINT_DANGER_VALUES) {
+            //	printf("PATH #%d: %d\n", (int) pathID, (int) curPathDanger);
+            //}
+
+            // Draw the body of the path using a color that is determined from the path's danger value
+            g_draw.setColor(navPath_color(curPathDanger));
+            g_draw.drawLine(
+                (int) pathStart.x, (int) pathStart.y,
+                (int) pathEnd.x, (int) pathEnd.y);
+
+            g_draw.setColor(DANGEROUS_PIXEL_COLOR);
+            // Hilight the "dangerous" pixels in the path
+            // (that contributed to the path's total danger value)
+            for (uint j=0, n2=pathPoints.count(); j<n2; j++) {
+                uchar curPixelDanger = pixelDanger[j];
+                if (curPixelDanger != 0) {
+                    Point2D<int> curPoint = pathPoints[j];
+
+                    // Color the pixel either thickly/thinly,
+                    // depending on how dangerous it is
+                    if (curPixelDanger > DANGER_PER_BARREL_PIXEL) {	// maximum danger
+                        g_draw.drawRect_rational(
+                            curPoint.x, curPoint.y,
+                            2, 2);
+                    } else {
+                        g_draw.drawPixel(curPoint.x, curPoint.y);
+                    }
+                }
+            }
+        }
+    }
+    /*
+     * Apply smoothing to the path danger values so that paths
+     * that are *near* dangerous paths are also considered to
+     * be dangerous
+     */
+    {
+        static int smoothedPathDangers[NAV_PATH__NUM];
+
+        // Copy first edge
+        for (int curPath_id = 0; curPath_id < NAV_PATH__DANGER_SMOOTHING__RADIUS; curPath_id++) {
+            smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
+        }
+
+        // Smooth interior
+        int sumOfNearbyDangers = 0;
+        int avgOfNearbyDangers;
+        for (int curPath_id = NAV_PATH__DANGER_SMOOTHING__RADIUS;
+                curPath_id < (NAV_PATH__NUM - NAV_PATH__DANGER_SMOOTHING__RADIUS + 1);
+                curPath_id++) {
+            sumOfNearbyDangers = 0;
+            for (int delta = -NAV_PATH__DANGER_SMOOTHING__RADIUS;
+                    delta < NAV_PATH__DANGER_SMOOTHING__RADIUS;
+                    delta++) {
+                sumOfNearbyDangers += pathDanger[curPath_id + delta];
+            }
+            avgOfNearbyDangers = sumOfNearbyDangers / (NAV_PATH__DANGER_SMOOTHING__RADIUS*2 + 1);
+
+            smoothedPathDangers[curPath_id] = avgOfNearbyDangers;
+        }
+
+        // Copy second edge
+        for (int curPath_id = (NAV_PATH__NUM - NAV_PATH__DANGER_SMOOTHING__RADIUS);
+                curPath_id < NAV_PATH__NUM;
+                curPath_id++) {
+            smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
+        }
+
+        // Transfer smoothed dangers back to primary danger buffer
+        for (int curPath_id=0; curPath_id<NAV_PATH__NUM; curPath_id++) {
+            pathDanger[curPath_id] = smoothedPathDangers[curPath_id];
+        }
+    }
+
+    /* Pick a path with a low danger-value to follow */
+    {
+        /*
+         * Find the path with the lowest danger value.
+         * If there are multiple such paths, pick the that is closest to the center
+         * (i.e., pick the path that points the most straight upward)
+         */
+        int bestPath_id = 0;
+        {
+            int bestPath_danger = pathDanger[bestPath_id];
+            int bestPath_distanceFromCenter = abs(NAV_PATH__CENTER_PATH_ID - bestPath_id);
+            int curPath_danger;
+            int curPath_distanceFromCenter;
+            for (int curPath_id=0; curPath_id<NAV_PATH__NUM; curPath_id++) {
+                curPath_danger = pathDanger[curPath_id];
+                curPath_distanceFromCenter = abs(NAV_PATH__CENTER_PATH_ID - curPath_id);
+
+                if (curPath_danger < bestPath_danger) {
+                    bestPath_danger = curPath_danger;
+                    bestPath_id = curPath_id;
+                    bestPath_distanceFromCenter = curPath_distanceFromCenter;
+                } else if (curPath_danger == bestPath_danger) {
+                    if (curPath_distanceFromCenter < bestPath_distanceFromCenter) {
+                        bestPath_id = curPath_id;
+                        bestPath_distanceFromCenter = curPath_distanceFromCenter;
+                    }
+                }
+            }
+        }
+
+        /* Hilight the path that was picked */
+        {
+            g_draw.setColor(navPath_color(pathDanger[bestPath_id]));
+
+            // Redraw the path, but much more thickly (in order to hilight it)
+            Point2D<double> bestPath_start = navPath_start(bestPath_id);
+            Point2D<double> bestPath_end = navPath_end(bestPath_id);
+            for (int deltaX = -1; deltaX <= 1; deltaX++) {
+                g_draw.drawLine(
+                    ((int) bestPath_start.x) + deltaX, (int) bestPath_start.y,
+                    ((int) bestPath_end.x) + deltaX, (int) bestPath_end.y);
+            }
+
+            /* Update goal
+             * (convert to 320x240 frame) */
+            goal.x = (int)bestPath_end.x/2;
+            goal.y = (int)bestPath_end.y/2;
+            //printf("goal(%d,%d) \n",goal.x,goal.y);
+
+
+        }
+
+
+
+        // drive motors
+        // display motor output
+
+    }
+
 }
 
 
 // Converts a measurement in degrees to radians.
 double deg2rad(double degrees) {
-	return degrees * M_PI / 180.0;
+    return degrees * M_PI / 180.0;
 }
 
 Point2D<double> navPath_start(int pathID) {
-	return Point2D<double>(
-		(visCvRaw->width / 2) + (NAV_PATH__CENTER_PATH_ID-pathID),
-		visCvRaw->height - PIXEL_SKIP -1
-		);
+    return Point2D<double>(
+               (visCvRaw->width / 2) + (NAV_PATH__CENTER_PATH_ID-pathID),
+               visCvRaw->height - PIXEL_SKIP -1
+           );
 }
 
 Point2D<double> navPath_vector(int pathID) {
-	double deg = navPath_angle(pathID);
-	double rad = deg2rad(deg);
-	
-	double radius = 0.75 * ((double) visCvRaw->width) / 2;
-	return
-		Point2D<double>(
-			 radius*cos(rad),
-			-radius*sin(rad))	// computer y-axis is inverse of math y-axis
-		* NAV_PATH__VIEW_DISTANCE_MULTIPLIER;	
+    double deg = navPath_angle(pathID);
+    double rad = deg2rad(deg);
+
+    double radius = 0.75 * ((double) visCvRaw->width) / 2;
+    return
+        Point2D<double>(
+            radius*cos(rad),
+            -radius*sin(rad))	// computer y-axis is inverse of math y-axis
+        * NAV_PATH__VIEW_DISTANCE_MULTIPLIER;
 }
 
 Point2D<double> navPath_end(int pathID) {
-	return navPath_start(pathID) + navPath_vector(pathID);
+    return navPath_start(pathID) + navPath_vector(pathID);
 }
 
 // result is in degrees
 double navPath_angle(int pathID) {
-	return 
-		NAV_PATH__VIEW_CONE__START_ANGLE +
-		(pathID * NAV_PATH__VIEW_CONE__SPACING);
+    return
+        NAV_PATH__VIEW_CONE__START_ANGLE +
+        (pathID * NAV_PATH__VIEW_CONE__SPACING);
 }
 
 CvScalar navPath_color(int pathDanger) {
-	return cvScalar(
-		0, 0,
-		(pathDanger / (double)MAX_PATH_DANGER) * 255);
+    return cvScalar(
+               0, 0,
+               (pathDanger / (double)MAX_PATH_DANGER) * 255);
 }
 
 
