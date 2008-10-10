@@ -12,13 +12,13 @@
 #include <stdlib.h>
 #include "highgui.h"
 #include "Point2D.h"
+#include "vision.h"
 
 /*===== Camera Settings ===========================================*/
 /* Determines camera compatability.
  * This must be set to 0 to load videos via command line. */
 #define USE_FIREWIRE_CAMERA 0
-/* flag for performing image perspective transform */
-#define DO_TRANSFORM 1
+
 /*=================================================================*/
 
 class Robot {
@@ -46,6 +46,9 @@ public:
     CVcam camera;
 #endif
 
+	/* the vision processing object */
+	Vision vp;
+	
     // initializes various things before main loop (mainly CV images)
     int init();
 
@@ -71,7 +74,8 @@ public:
     // connects to the camera (USB or 1394)
     void connectToCamera();
 
-
+	// view to display
+	int trackbarVal;
 
     // structure for saving video
     CvVideoWriter* cvVideoWriter;
