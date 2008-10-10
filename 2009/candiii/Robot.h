@@ -18,7 +18,7 @@
  * This must be set to 0 to load videos via command line. */
 #define USE_FIREWIRE_CAMERA 0
 /* flag for performing image perspective transform */
-#define DO_TRANSFORM 0
+#define DO_TRANSFORM 1
 /*=================================================================*/
 
 class Robot {

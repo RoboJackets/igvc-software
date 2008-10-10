@@ -87,6 +87,7 @@ void visProcessFrame(Point2D<int>& goal) {
             goal = goal_near;	// can't see very far
         } else {
             goal = goal_far;	// can see far off
+            goal.x = visCvPath->width - goal.x;
         }
 
         /* convert goal to heading:
@@ -97,14 +98,13 @@ void visProcessFrame(Point2D<int>& goal) {
             /* remember, goal is in 320x240 coordinates */
 
             // rotation (0 = go straight)
-            goal.x = (visCvPath->width/2 - goal.x) * (256) / (visCvPath->width ) * -1.2; // 1.2 is fudgefactor for
-            // goal.x not actually going
-            // to full 0-320 range
+            goal.x = (visCvPath->width/2 - goal.x) * (256) / (visCvPath->width) ; 
+            
             // fwd speed
             goal.y = (visCvPath->height  - goal.y) * (256) / (visCvPath->height);
 
             // Debug print
-            //printf("heading: rot: %d 	fwd: %d \n",goal.x,goal.y);
+            printf("heading: rot: %d 	fwd: %d \n",goal.x,goal.y);
         }
 
 
