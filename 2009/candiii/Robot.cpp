@@ -2,17 +2,15 @@
 #include "vision.h"
 #include "main.h"
 #include "image_buffers.h"
-#include "vision_processing.h"
 #include "PjMat.h"
-
 #include <stdlib.h>
 #include <GL/glut.h>
 
 
+
 // flag for saving video - global because of glut use
 int saveRawVideo;
-
-/* GLUT callbacks and functions ***********************/
+/*********** GLUT callbacks and functions ***********************/
 pthread_t Robot::robotThread; // for pthread_create
 Robot* glRobot; // for glut
 static GLuint cameraImageTextureID; // for glut
@@ -44,13 +42,20 @@ void keyboardFunc(unsigned char key, int x, int y) { // handles keyboard button 
         break;
     }
 }
-/*******************************************/
+/*****************************************************/
+
+/********** CV window callback stuff *****************/
+/* display view names */
+const char* names[] = {"raw","debug","path","thresh","hue","sat","hsv","?","?"};
+// callback for trackbar
+/* for selecting images to display in the opencv window */
+void trackbarHandler(int pos) {
+    printf("pos = %d \n", pos);
+    printf("view = %s \n", names[pos]);
+}
+/*****************************************************/
 
 
-//Robot::Robot() {
-//    /* connect to the camera */
-//    connectToCamera();
-//}
 
 Robot::Robot(const char* filename) {
 
@@ -119,8 +124,7 @@ int Robot::init() {
         visCvPath		= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
     }
 
-    /* load in vision settings */
-    LoadVisionXML(); // in vision.cc
+
 
     /* set cleanup on exit */
     atexit(Robot::destroy);
@@ -179,13 +183,13 @@ void Robot::processFunc() {
 
 
     /* Perform vision processing. */
-    visProcessFrame(heading);
+    vp.visProcessFrame(heading);
 
     /* Make decision */
 
 
     /* Update displays */
-    ConvertAllImageViews(); // display views based on trackbar position
+    vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
     /* Drive Robot via motor commands (GO!) */
 
