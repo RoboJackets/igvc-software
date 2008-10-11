@@ -56,9 +56,8 @@ void trackbarHandler(int pos) {
 /*****************************************************/
 
 
-
+// constructor
 Robot::Robot(const char* filename) {
-
     // only the CVcam can load video...
 #if  USE_FIREWIRE_CAMERA
     filename=NULL;
@@ -72,8 +71,6 @@ Robot::Robot(const char* filename) {
         /* load a video */
         camera.connect(0, filename);
 #endif
-
-
 }
 
 Robot::~Robot() {
@@ -105,26 +102,18 @@ int Robot::init() {
 
     /* init all CV images here */
     {
-        /* 3 plane images */
+        /* 3 plane images (640x480) */
         visCvDebug	= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
         visCvHSV 		= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
         visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
 
-        /* 1 plane images */
-
-        //visCvRedChannel   	= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
-        //visCvGreenChannel	= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
-        //visCvBlueChannel		= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
-
-        /* Note: these are 320x240 & 1 plane images! */
+        /* Note: these 1 plane images are 320x240 !! */
         visCvHue 				= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
         visCvSaturation	= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
         visCvGrey 			= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
         visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
         visCvPath		= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
     }
-
-
 
     /* set cleanup on exit */
     atexit(Robot::destroy);
@@ -166,34 +155,34 @@ void Robot::Go() {
 
 }
 
+/* 
+ * The main processing function
+ */
 void Robot::processFunc() {
     /*
      * This function should be just simple function calls.
      */
 
     /* Get raw image */
-    ;
     camera.GrabCvImage();
-
 
     /* Shove raw image into graphics card for some processing on the card */
     updateGlutDisplay();
 
     /* Get sensor information */
-
+	//TODO
 
     /* Perform vision processing. */
     vp.visProcessFrame(heading);
 
     /* Make decision */
-
+	//TODO
 
     /* Update displays */
     vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
     /* Drive Robot via motor commands (GO!) */
-
-
+	//TODO
 
     /* Save raw image last */
     if (saveRawVideo) {
@@ -226,13 +215,14 @@ void Robot::initGlut() {
     int argc = 1;
     char** argv;
 
+	// initialization
     glutInit(&argc, argv);
     glutInitWindowSize(visCvRaw->width, visCvRaw->height);
-    glutInitWindowPosition(800, 480); // position on screen
+    glutInitWindowPosition(800, 480); 				// position on screen
     glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
     glutwindow = glutCreateWindow("Transform");
     glutDisplayFunc(robot_process_function_caller); // the function glutMainLoop() runs
-    glutIdleFunc(idleFunc);
+    glutIdleFunc(idleFunc);							// refreshes the glut window
     glutKeyboardFunc(keyboardFunc);
     glEnable(GL_TEXTURE_RECTANGLE_ARB);
     glGenTextures(1, &cameraImageTextureID);
@@ -253,36 +243,36 @@ void Robot::updateGlutDisplay() {
     glEnable(GL_TEXTURE_RECTANGLE_ARB);
     {
 
-#if DO_TRANSFORM
+	if( vp.DO_TRANSFORM ) {
         /* * * transform * * */
         glLoadIdentity ();
         glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity ();
         /* * * * * * * * * * */
-#else
+	}else{
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
-#endif
+	}
 
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
         /* put data in card */
         glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
 
-#if DO_TRANSFORM
+	if( vp.DO_TRANSFORM ) {
         /* * * transform * * */
         setPjMat();
         /* * * * * * * * * * */
-#endif
+	}
 
         glBegin(GL_QUADS);
         {
 
-#if DO_TRANSFORM
+	if( vp.DO_TRANSFORM ) {
             /* * * transform * * */
             glTexCoord2i(0, 				0);
             glVertex3f(-1,	-1,	0);
@@ -293,7 +283,7 @@ void Robot::updateGlutDisplay() {
             glTexCoord2i(0, 				visCvRaw->height);
             glVertex3f(-1,	 1,	0);
             /* * * * * * * * * * */
-#else
+	}else{
             // default perspective (upside down)
             glTexCoord2i(0,					0);
             glVertex2i(0, 				0);
@@ -308,7 +298,7 @@ void Robot::updateGlutDisplay() {
 //		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
 //		    glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
 //		    glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
-#endif
+	}
 
         }
         glEnd();
@@ -318,14 +308,14 @@ void Robot::updateGlutDisplay() {
 
     /* get data from card */
     //glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-    glReadPixels(	0				,	//GLint x,
-                  0				,	//GLint y,
-                  visCvRaw->width	,	//GLsizei width,
-                  visCvRaw->height,	//GLsizei height,
-                  GL_BGR			,	//GLenum format,
-                  GL_UNSIGNED_BYTE,	//GLenum type,
-                  visCvRaw->imageData //Image
-                );
+    glReadPixels(0				,	//GLint x,
+                 0				,	//GLint y,
+                 visCvRaw->width	,	//GLsizei width,
+                 visCvRaw->height,	//GLsizei height,
+                 GL_BGR			,	//GLenum format,
+                 GL_UNSIGNED_BYTE,	//GLenum type,
+                 visCvRaw->imageData //Image
+               	);
 
     // double buffering
     glutSwapBuffers();
@@ -336,9 +326,8 @@ void Robot::createVideoWriter() {
     cvVideoWriter = 0;
     int isColor = 1;
     int fps     = 10;  // or 30
-    int frameW  = visCvRaw->width; //
-    int frameH  = visCvRaw->height; //
-
+    int frameW  = visCvRaw->width;
+    int frameH  = visCvRaw->height;
     /*	Other possible codec codes:
     	CV_FOURCC('P','I','M','1')    = MPEG-1 codec
     	CV_FOURCC('M','J','P','G')    = motion-jpeg codec (does not work well)
@@ -351,7 +340,6 @@ void Robot::createVideoWriter() {
     */
     cvVideoWriter=cvCreateVideoWriter("video_out.avi",CV_FOURCC('P','I','M','1'),
                                       fps,cvSize(frameW,frameH),isColor);
-
 }
 
 
