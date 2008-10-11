@@ -314,7 +314,8 @@ void Robot::updateGlutDisplay() {
                  visCvRaw->height,	//GLsizei height,
                  GL_BGR			,	//GLenum format,
                  GL_UNSIGNED_BYTE,	//GLenum type,
-                 visCvRaw->imageData //Image
+                 //visCvRaw->imageData //Image
+                 visCvDebug->imageData //Image
                	);
 
     // double buffering
