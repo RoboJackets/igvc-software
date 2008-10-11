@@ -41,10 +41,10 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
     /* Do vision processing */
     {
         /* no memory leaks (cloning image) */
-        if (visCvDebug) cvReleaseImage(&visCvDebug);
+        //if (visCvDebug) cvReleaseImage(&visCvDebug);
 
         /* copy raw image for debug drawing */
-        visCvDebug = cvCloneImage(visCvRaw);
+        //visCvDebug = cvCloneImage(visCvRaw);
 
         /* split images into channels */
         //GetRGBChannels();
@@ -870,7 +870,7 @@ void Vision::GetRGBChannels() {
 
 void Vision::GetHSVChannels() {
     // calculate HSV - Hue Saturation Value(Greyscale)
-    cvCvtColor(visCvRaw, visCvHSV, CV_BGR2HSV);
+    cvCvtColor(visCvDebug, visCvHSV, CV_BGR2HSV);
     // shrink !!
     cvResize(visCvHSV, visCvHSVSmall, CV_INTER_LINEAR);
     // hsv
