@@ -16,7 +16,9 @@ qmake-qt4 -project \
 		LIBS+="-lcv -lcvaux -lhighgui	" \
 		INCLUDEPATH+="/usr/include/opencv" \
 		INCLUDEPATH+="/usr/local/include/opencv" \
-		INCLUDEPATH+="/usr/include/qt4/Qt"
+		INCLUDEPATH+="/usr/include/qt4/Qt" \
+		-after \
+		`./remove-sources logging/*.+(c|cc|cpp|h)` \
 
 
 echo "Creating: Makefile"
