@@ -9,6 +9,7 @@
 	<gain>32</gain>
 	<shutter>2048</shutter>
 	<gamma>0</gamma>
+	<auto_gain_and_shutter>0<auto_gain_and_shutter>
 
 	<!-- Guppy White Balance Settings -->	
 	<red>523</red>

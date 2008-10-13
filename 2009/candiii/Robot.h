@@ -46,9 +46,9 @@ public:
     CVcam camera;
 #endif
 
-	/* the vision processing object */
-	Vision vp;
-	
+    /* the vision processing object */
+    Vision vp;
+
     // initializes various things before main loop (mainly CV images)
     int init();
 
@@ -74,8 +74,8 @@ public:
     // connects to the camera (USB or 1394)
     void connectToCamera();
 
-	// view to display
-	int trackbarVal;
+    // view to display
+    int trackbarVal;
 
     // structure for saving video
     CvVideoWriter* cvVideoWriter;

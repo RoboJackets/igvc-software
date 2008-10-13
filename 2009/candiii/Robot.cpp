@@ -155,13 +155,19 @@ void Robot::Go() {
 
 }
 
-/* 
+/*
  * The main processing function
  */
 void Robot::processFunc() {
     /*
      * This function should be just simple function calls.
      */
+     
+    /*
+     * Heading Format:
+     * x = rotational speed ; range = (-128,127)
+     * y = forward speed    ; range = (0,255)
+     */     
 
     /* Get raw image */
     camera.GrabCvImage();
@@ -170,19 +176,19 @@ void Robot::processFunc() {
     updateGlutDisplay();
 
     /* Get sensor information */
-	//TODO
+    //TODO
 
     /* Perform vision processing. */
     vp.visProcessFrame(heading);
 
     /* Make decision */
-	//TODO
+    //TODO
 
     /* Update displays */
     vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
     /* Drive Robot via motor commands (GO!) */
-	//TODO
+    //TODO
 
     /* Save raw image last */
     if (saveRawVideo) {
@@ -215,7 +221,7 @@ void Robot::initGlut() {
     int argc = 1;
     char** argv;
 
-	// initialization
+    // initialization
     glutInit(&argc, argv);
     glutInitWindowSize(visCvRaw->width, visCvRaw->height);
     glutInitWindowPosition(800, 480); 				// position on screen
@@ -243,62 +249,62 @@ void Robot::updateGlutDisplay() {
     glEnable(GL_TEXTURE_RECTANGLE_ARB);
     {
 
-	if( vp.DO_TRANSFORM ) {
-        /* * * transform * * */
-        glLoadIdentity ();
-        glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity ();
-        /* * * * * * * * * * */
-	}else{
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        glMatrixMode(GL_MODELVIEW);
-	}
+        if ( vp.DO_TRANSFORM ) {
+            /* * * transform * * */
+            glLoadIdentity ();
+            glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity ();
+            /* * * * * * * * * * */
+        } else {
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW);
+        }
 
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
         /* put data in card */
         glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
 
-	if( vp.DO_TRANSFORM ) {
-        /* * * transform * * */
-        setPjMat();
-        /* * * * * * * * * * */
-	}
+        if ( vp.DO_TRANSFORM ) {
+            /* * * transform * * */
+            setPjMat();
+            /* * * * * * * * * * */
+        }
 
         glBegin(GL_QUADS);
         {
 
-	if( vp.DO_TRANSFORM ) {
-            /* * * transform * * */
-            glTexCoord2i(0, 				0);
-            glVertex3f(-1,	-1,	0);
-            glTexCoord2i(visCvRaw->width, 	0);
-            glVertex3f( 1,	-1,	0);
-            glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
-            glVertex3f( 1,   1,	0);
-            glTexCoord2i(0, 				visCvRaw->height);
-            glVertex3f(-1,	 1,	0);
-            /* * * * * * * * * * */
-	}else{
-            // default perspective (upside down)
-            glTexCoord2i(0,					0);
-            glVertex2i(0, 				0);
-            glTexCoord2i(visCvRaw->width, 	0);
-            glVertex2i(visCvRaw->width, 0);
-            glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
-            glVertex2i(visCvRaw->width, visCvRaw->height);
-            glTexCoord2i(0, 				visCvRaw->height);
-            glVertex2i(0, 				visCvRaw->height);
-            // corrected perspective (normal)
+            if ( vp.DO_TRANSFORM ) {
+                /* * * transform * * */
+                glTexCoord2i(0, 				0);
+                glVertex3f(-1,	-1,	0);
+                glTexCoord2i(visCvRaw->width, 	0);
+                glVertex3f( 1,	-1,	0);
+                glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+                glVertex3f( 1,   1,	0);
+                glTexCoord2i(0, 				visCvRaw->height);
+                glVertex3f(-1,	 1,	0);
+                /* * * * * * * * * * */
+            } else {
+                // default perspective (upside down)
+                glTexCoord2i(0,					0);
+                glVertex2i(0, 				0);
+                glTexCoord2i(visCvRaw->width, 	0);
+                glVertex2i(visCvRaw->width, 0);
+                glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+                glVertex2i(visCvRaw->width, visCvRaw->height);
+                glTexCoord2i(0, 				visCvRaw->height);
+                glVertex2i(0, 				visCvRaw->height);
+                // corrected perspective (normal)
 //		    glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
 //		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
 //		    glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
 //		    glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
-	}
+            }
 
         }
         glEnd();
@@ -316,7 +322,7 @@ void Robot::updateGlutDisplay() {
                  GL_UNSIGNED_BYTE,	//GLenum type,
                  //visCvRaw->imageData //Image
                  visCvDebug->imageData //Image
-               	);
+                );
 
     // double buffering
     glutSwapBuffers();
