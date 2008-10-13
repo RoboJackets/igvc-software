@@ -241,94 +241,133 @@ void Robot::initGlut() {
 
 }
 
+
+
 void Robot::updateGlutDisplay() {
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glEnable(GL_TEXTURE_RECTANGLE_ARB);
-    {
+	if(vp.DO_TRANSFORM)
+	{
+		/* perspective transform */
+	
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_LIGHTING);
+		glEnable(GL_TEXTURE_RECTANGLE_ARB);
+		{
 
-        if ( vp.DO_TRANSFORM ) {
-            /* * * transform * * */
-            glLoadIdentity ();
-            glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity ();
-            /* * * * * * * * * * */
-        } else {
-            glMatrixMode(GL_PROJECTION);
-            glLoadIdentity();
-            gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
-            glMatrixMode(GL_MODELVIEW);
-            glLoadIdentity();
-            glMatrixMode(GL_MODELVIEW);
-        }
+			/* * * transform * * */
+			glLoadIdentity ();
+			glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity ();
+			/* * * * * * * * * * */
 
-        glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
-        /* put data in card */
-        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+			/* put data in card */
+			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
 
-        if ( vp.DO_TRANSFORM ) {
-            /* * * transform * * */
-            setPjMat();
-            /* * * * * * * * * * */
-        }
+			/* * * transform * * */
+			setPjMat();
+			/* * * * * * * * * * */
 
-        glBegin(GL_QUADS);
-        {
+			glBegin(GL_QUADS);
+			{
 
-            if ( vp.DO_TRANSFORM ) {
-                /* * * transform * * */
-                glTexCoord2i(0, 				0);
-                glVertex3f(-1,	-1,	0);
-                glTexCoord2i(visCvRaw->width, 	0);
-                glVertex3f( 1,	-1,	0);
-                glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
-                glVertex3f( 1,   1,	0);
-                glTexCoord2i(0, 				visCvRaw->height);
-                glVertex3f(-1,	 1,	0);
-                /* * * * * * * * * * */
-            } else {
-                // default perspective (upside down)
-                glTexCoord2i(0,					0);
-                glVertex2i(0, 				0);
-                glTexCoord2i(visCvRaw->width, 	0);
-                glVertex2i(visCvRaw->width, 0);
-                glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
-                glVertex2i(visCvRaw->width, visCvRaw->height);
-                glTexCoord2i(0, 				visCvRaw->height);
-                glVertex2i(0, 				visCvRaw->height);
-                // corrected perspective (normal)
-//		    glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
-//		    glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
-//		    glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
-//		    glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
-            }
+				/* * * transform * * */
+				glTexCoord2i(0, 				0);
+				glVertex3f(-1,	-1,	0);
+				glTexCoord2i(visCvRaw->width, 	0);
+				glVertex3f( 1,	-1,	0);
+				glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+				glVertex3f( 1,   1,	0);
+				glTexCoord2i(0, 				visCvRaw->height);
+				glVertex3f(-1,	 1,	0);
+				/* * * * * * * * * * */
 
-        }
-        glEnd();
+			}
+			glEnd();
 
-    }
-    glDisable(GL_TEXTURE_RECTANGLE_ARB);
+		}
+		glDisable(GL_TEXTURE_RECTANGLE_ARB);
 
-    /* get data from card */
-    //glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-    glReadPixels(0				,	//GLint x,
-                 0				,	//GLint y,
-                 visCvRaw->width	,	//GLsizei width,
-                 visCvRaw->height,	//GLsizei height,
-                 GL_BGR			,	//GLenum format,
-                 GL_UNSIGNED_BYTE,	//GLenum type,
-                 //visCvRaw->imageData //Image
-                 visCvDebug->imageData //Image
-                );
+		/* get data from card */
+		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+		glReadPixels(	0				,	//GLint x,
+						0				,	//GLint y,
+						visCvRaw->width	,	//GLsizei width,
+						visCvRaw->height,	//GLsizei height,
+						GL_BGR			,	//GLenum format,
+						GL_UNSIGNED_BYTE,	//GLenum type,
+						//visCvRaw->imageData //Image
+						visCvDebug->imageData //Image
+						);
 
-    // double buffering
-    glutSwapBuffers();
+		// double buffering
+		glutSwapBuffers();
 
-}
+	}
+	else
+	{
+		/* no transformation */
 
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_LIGHTING);
+		glEnable(GL_TEXTURE_RECTANGLE_ARB);
+		{
+
+			glMatrixMode(GL_PROJECTION);
+			glLoadIdentity();
+			gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
+			glMatrixMode(GL_MODELVIEW);
+			glLoadIdentity();
+			glMatrixMode(GL_MODELVIEW);
+			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+			/* put data in card */
+			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+			glBegin(GL_QUADS);
+			{
+
+				// default perspective (upside down)
+				glTexCoord2i(0,					0);
+				glVertex2i(0, 				0);
+				glTexCoord2i(visCvRaw->width, 	0);
+				glVertex2i(visCvRaw->width, 0);
+				glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+				glVertex2i(visCvRaw->width, visCvRaw->height);
+				glTexCoord2i(0, 				visCvRaw->height);
+				glVertex2i(0, 				visCvRaw->height);
+				// corrected perspective (normal)
+				//glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
+				//glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
+				//glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
+				//glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
+
+			}
+			glEnd();
+
+		}
+		glDisable(GL_TEXTURE_RECTANGLE_ARB);
+
+		/* get data from card */
+		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+		glReadPixels(	0				,	//GLint x,
+						0				,	//GLint y,
+						visCvRaw->width	,	//GLsizei width,
+						visCvRaw->height,	//GLsizei height,
+						GL_BGR			,	//GLenum format,
+						GL_UNSIGNED_BYTE,	//GLenum type,
+						//visCvRaw->imageData //Image
+						visCvDebug->imageData //Image
+						);
+
+		// double buffering
+		glutSwapBuffers();
+	}
+
+} // end update glut 
+ 
+ 
 void Robot::createVideoWriter() {
     cvVideoWriter = 0;
     int isColor = 1;
