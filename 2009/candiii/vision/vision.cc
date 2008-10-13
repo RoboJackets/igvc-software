@@ -21,14 +21,14 @@
 
 
 Vision::Vision() {
-	init();
+    init();
 }
-Vision::~Vision() { 
-	
+Vision::~Vision() {
+
 }
 
-/* 
- * Performs ALL vision processing. 
+/*
+ * Performs ALL vision processing.
  */
 void Vision::visProcessFrame(Point2D<int>& goal) {
 
@@ -103,7 +103,7 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
         {
             /* remember, goal is in 320x240 coordinates */
             // rotation (0 = go straight)
-            goal.x = (visCvPath->width/2 - goal.x) * (256) / (visCvPath->width ); 
+            goal.x = (visCvPath->width/2 - goal.x) * (256) / (visCvPath->width );
             // fwd speed
             goal.y = (visCvPath->height  - goal.y) * (256) / (visCvPath->height);
             // Debug print
@@ -116,44 +116,44 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
 
 void Vision::init() {
     /* load in vision settings */
-    LoadVisionXMLSettings(); 
-	   
-	/*** SweeperLines ****************************************************/
-	if( DO_TRANSFORM ) {
-		// Number of paths that are assessed between the starting/ending angles
-		nav_path__num = 15; //29;		// (Number of sweeper lines)
-		// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
-		nav_path__view_distance_multiplier = 0.35; 		//1.00;<-without-transform	/* > 0.0 */
-	} else {
-		// Number of paths that are assessed between the starting/ending angles
-		nav_path__num = 29; //15;		// (Number of sweeper lines)
-		// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
-		nav_path__view_distance_multiplier = 1.00; 		//1.00;<-without-transform	/* > 0.0 */
-	}
-	// Defines the "view/navigation cone", which is where the set of
-	// considered navigation paths is taken from.
-	nav_path__view_cone__offset = 30; //23.0; //30;<-without-transform
-	nav_path__view_cone__start_angle = 0.0 + nav_path__view_cone__offset;	// >= 0.0
-	nav_path__view_cone__end_angle = 180.0 - nav_path__view_cone__offset;	// <= 180.0
-	nav_path__view_cone__delta_angle = nav_path__view_cone__end_angle - nav_path__view_cone__start_angle;
-	nav_path__view_cone__spacing = nav_path__view_cone__delta_angle / (nav_path__num-1);
-	// XXX: Controls how many pixels *near* a path-pixel are searched for dangerous pixels
-	// 0 <= nav_path__path_search_girth
-	nav_path__path_search_girth = 1;
-	// (do not change without reason!)
-	nav_path__center_path_id = (int) round((90.0 - nav_path__view_cone__start_angle) / nav_path__view_cone__spacing);
-	// Amount of danger posed by a single barrel-pixel
-	// (everything bad is a barrel)
-	danger_per_barrel_pixel = 1;
-	// Path danger values higher than this will be clipped to this value
-	max_path_danger = 50;					// >= 0
-	nav_path__danger_smoothing_radius = 5;		// >= 0
-	// colors
-	min_path_danger_color = CV_RGB(255, 255, 0);		// yellow
-	max_path_danger_color = CV_RGB(0, 0, 0);		// black
-	dangerous_pixel_color = CV_RGB(0, 0, 255);		// blue
-	/**********************************************************************************/    
-    
+    LoadVisionXMLSettings();
+
+    /*** SweeperLines ****************************************************/
+    if ( DO_TRANSFORM ) {
+        // Number of paths that are assessed between the starting/ending angles
+        nav_path__num = 15; //29;		// (Number of sweeper lines)
+        // Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
+        nav_path__view_distance_multiplier = 0.35; 		//1.00;<-without-transform	/* > 0.0 */
+    } else {
+        // Number of paths that are assessed between the starting/ending angles
+        nav_path__num = 29; //15;		// (Number of sweeper lines)
+        // Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
+        nav_path__view_distance_multiplier = 1.00; 		//1.00;<-without-transform	/* > 0.0 */
+    }
+    // Defines the "view/navigation cone", which is where the set of
+    // considered navigation paths is taken from.
+    nav_path__view_cone__offset = 30; //23.0; //30;<-without-transform
+    nav_path__view_cone__start_angle = 0.0 + nav_path__view_cone__offset;	// >= 0.0
+    nav_path__view_cone__end_angle = 180.0 - nav_path__view_cone__offset;	// <= 180.0
+    nav_path__view_cone__delta_angle = nav_path__view_cone__end_angle - nav_path__view_cone__start_angle;
+    nav_path__view_cone__spacing = nav_path__view_cone__delta_angle / (nav_path__num-1);
+    // XXX: Controls how many pixels *near* a path-pixel are searched for dangerous pixels
+    // 0 <= nav_path__path_search_girth
+    nav_path__path_search_girth = 1;
+    // (do not change without reason!)
+    nav_path__center_path_id = (int) round((90.0 - nav_path__view_cone__start_angle) / nav_path__view_cone__spacing);
+    // Amount of danger posed by a single barrel-pixel
+    // (everything bad is a barrel)
+    danger_per_barrel_pixel = 1;
+    // Path danger values higher than this will be clipped to this value
+    max_path_danger = 50;					// >= 0
+    nav_path__danger_smoothing_radius = 5;		// >= 0
+    // colors
+    min_path_danger_color = CV_RGB(255, 255, 0);		// yellow
+    max_path_danger_color = CV_RGB(0, 0, 0);		// black
+    dangerous_pixel_color = CV_RGB(0, 0, 255);		// blue
+    /**********************************************************************************/
+
 }
 
 /*
@@ -348,17 +348,17 @@ void Vision::visSweeperLines(Point2D<int>& goal) {
              * (convert to 320x240 frame) */
             goal.x = (bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
             goal.y = (int)bestPath_end.y/2;
-           
+
             //printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
 
         }
 
-		// DO IN MAIN:
+        // DO IN MAIN:
         // 	drive motors
         // 	display motor output
 
     }
-    
+
 }
 
 /*
@@ -463,7 +463,7 @@ void Vision::robotWidthScan(IplImage* img, int& goalx, int& goaly) {
         }
     }
 
-	// IMPLICITLY:
+    // IMPLICITLY:
     // 	return goalx,goaly,
     // 	or set -1 on error
 
@@ -769,9 +769,9 @@ double Vision::deg2rad(double degrees) {
 
 Point2D<double> Vision::navPath_start(int pathID) {
     return Point2D<double>(
-				(visCvRaw->width / 2) + (nav_path__center_path_id-pathID),
-				visCvRaw->height - PIXEL_SKIP -1
-				);
+               (visCvRaw->width / 2) + (nav_path__center_path_id-pathID),
+               visCvRaw->height - PIXEL_SKIP -1
+           );
 }
 
 Point2D<double> Vision::navPath_vector(int pathID) {
@@ -779,9 +779,9 @@ Point2D<double> Vision::navPath_vector(int pathID) {
     double rad = deg2rad(deg);
     double radius = 0.75 * ((double) visCvRaw->width) / 2;
     return Point2D<double>(
-	           radius*cos(rad),
-	           -radius*sin(rad))	// computer y-axis is inverse of math y-axis
-	           * nav_path__view_distance_multiplier;	
+               radius*cos(rad),
+               -radius*sin(rad))	// computer y-axis is inverse of math y-axis
+           * nav_path__view_distance_multiplier;
 }
 
 Point2D<double> Vision::navPath_end(int pathID) {
@@ -791,7 +791,7 @@ Point2D<double> Vision::navPath_end(int pathID) {
 // result is in degrees
 double Vision::navPath_angle(int pathID) {
     return  nav_path__view_cone__start_angle +
-        	(pathID * nav_path__view_cone__spacing);
+            (pathID * nav_path__view_cone__spacing);
 }
 
 CvScalar Vision::navPath_color(int pathDanger) {
@@ -836,31 +836,31 @@ void Vision::ConvertAllImageViews(int trackbarVal) {
 }
 
 void Vision::LoadVisionXMLSettings() {
-	/* load xml file */
+    /* load xml file */
     XmlConfiguration cfg("Config.xml");
 
-	/* load settings */
-	{
-    	satThreshold = cfg.getInt("satThresh");
-    	hueThreshold = cfg.getInt("hueThresh");
-		DO_TRANSFORM = cfg.getInt("doTransform");	
-	}
-	
-	/* test */
-	{
-	    if (satThreshold==-1 || hueThreshold==-1){
-	        printf("ERROR: Vision settings NOT loaded! Using DEFAULTS \n");
-	        {   
-	        	satThreshold = 60;
-	        	hueThreshold = 20;
-	        	DO_TRANSFORM =  1;
-	        }	        
-	    }else{
-	        printf("Vision settings loaded \n");
-	    }
-	    //printf("thresholds: sat %d  hue %d \n",satThreshold,hueThreshold);	
-	}
-	
+    /* load settings */
+    {
+        satThreshold = cfg.getInt("satThresh");
+        hueThreshold = cfg.getInt("hueThresh");
+        DO_TRANSFORM = cfg.getInt("doTransform");
+    }
+
+    /* test */
+    {
+        if (satThreshold==-1 || hueThreshold==-1) {
+            printf("ERROR: Vision settings NOT loaded! Using DEFAULTS \n");
+            {
+                satThreshold = 60;
+                hueThreshold = 20;
+                DO_TRANSFORM =  1;
+            }
+        } else {
+            printf("Vision settings loaded \n");
+        }
+        //printf("thresholds: sat %d  hue %d \n",satThreshold,hueThreshold);
+    }
+
 }
 
 void Vision::GetRGBChannels() {
