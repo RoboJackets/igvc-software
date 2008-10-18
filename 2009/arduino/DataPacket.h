@@ -16,22 +16,19 @@ class PCdatapacket{
 		byte * data;
 
 		typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; } header_t;
-
+		typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; char command; } command_t;
 		virtual ~PCdatapacket();
 	//protected:
 		PCdatapacket();
 };
 
-template <class T> 
+template <typename T> 
 class ArduinoCommand : public PCdatapacket{
 	public:
 		//typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; char command; } command_t;
 		T * packet;
-		//ArduinoCommand();
-
 
 		ArduinoCommand();
-
 };
 
 class EncoderData : public PCdatapacket{
