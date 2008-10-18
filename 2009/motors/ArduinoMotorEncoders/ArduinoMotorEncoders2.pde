@@ -173,7 +173,9 @@ int convertMotorEncoderFormat(unsigned int data) {
 
 void readSerial(void) {
 	if (Serial.available() > 0) {
+
 		incomingByte = Serial.read();
+
 		if (incomingByte == 'r') {
 			sendStatus();
 			return;//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
@@ -206,6 +208,52 @@ void readSerial(void) {
 	}
 }
 
+/*
+void readSerial(void) {
+	//if (Serial.available() > 0) {
+	if (Serial.available() > sizeof(command_t) ) {
+		command_t incompacket;
+		byte * bptr = (byte *) &incompacket;
+		
+		while (Serial.available() < sizeof(command_t)) {}// TODO: add timeout
+
+		for(int i = 0; i < sizeof(command_t); i++){
+			//incomingByte = Serial.read();
+			bptr[i] = Serial.read();
+		}
+		if (incompacket.command == 'r') {
+			sendStatus();
+			return;//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
+		} else if (incompacket.command == 'w') {
+			while (Serial.available()<2){}  // TODO: add timeout
+			byte variableNumber = Serial.read();
+			byte variableValue = Serial.read();
+			setVariable(variableNumber, variableValue);
+		} else if (incompacket.command == 'i') {
+			Serial.print("e");
+		} else if(incompacket.command == 'p') {
+			unsigned long int packet_num;
+			byte * bptr = (byte *)&packet_num;
+			while (Serial.available()<4){}  // TODO: add timeout
+			bptr[0] = Serial.read();
+			bptr[1] = Serial.read();
+			bptr[2] = Serial.read();
+			bptr[3] = Serial.read();
+			resend_packet(packet_num);
+		} else {
+			//error
+			Serial.print("error");
+		}
+	}
+	
+	if(sendMode == PUSH){
+		if(millis() < (lastsendtime + interog_dl)){//auto send timer expired
+			sendStatus();
+			lastsendtime = millis();
+		}
+	}
+}
+*/
 //TODO: make this use an array
 void setVariable(byte num, byte val) {
 	switch (num) {
