@@ -170,7 +170,7 @@ int convertMotorEncoderFormat(unsigned int data) {
 		return( (data & 0x0007) | ((data & 0x3F00) >> 5) );
 	}
 }
-
+/*
 void readSerial(void) {
 	if (Serial.available() > 0) {
 
@@ -207,31 +207,47 @@ void readSerial(void) {
 		}
 	}
 }
+*/
 
-/*
 void readSerial(void) {
-	//if (Serial.available() > 0) {
-	if (Serial.available() > sizeof(command_t) ) {
-		command_t incompacket;
-		byte * bptr = (byte *) &incompacket;
-		
-		while (Serial.available() < sizeof(command_t)) {}// TODO: add timeout
+	if (Serial.available() > 0) {
+		while (Serial.available()<9){}// TODO: add timeout
+			byte * bptr;
+			long int intimestamp, inpacketnum;
+			bptr = (byte *)&intimestamp;
+			bptr[0] = Serial.read();
+			bptr[1] = Serial.read();
+			bptr[2] = Serial.read();
+			bptr[3] = Serial.read();
 
-		for(int i = 0; i < sizeof(command_t); i++){
-			//incomingByte = Serial.read();
-			bptr[i] = Serial.read();
-		}
-		if (incompacket.command == 'r') {
+			bptr = (byte *)&inpacketnum;
+			bptr[0] = Serial.read();
+			bptr[1] = Serial.read();
+			bptr[2] = Serial.read();
+			bptr[3] = Serial.read();
+
+		incomingByte = Serial.read();
+
+		if (incomingByte == 'r') {
 			sendStatus();
 			return;//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
-		} else if (incompacket.command == 'w') {
+
+		} else if (incomingByte == 'w') {
 			while (Serial.available()<2){}  // TODO: add timeout
 			byte variableNumber = Serial.read();
 			byte variableValue = Serial.read();
 			setVariable(variableNumber, variableValue);
-		} else if (incompacket.command == 'i') {
-			Serial.print("e");
-		} else if(incompacket.command == 'p') {
+
+		} else if (incomingByte == 'i') {
+			long int timestamp =  global_time + millis() - arduino_time;
+			unsigned long int packetnum = tx_packetnum;
+			tx_packetnum++;
+			serialPrintBytes(&timestamp, sizeof(long));
+			serialPrintBytes(&packetnum, sizeof(long));
+			Serial.print('e');
+
+		} else if(incomingByte == 'p') {
+			//long int timestamp =  global_time + millis() - arduino_time;
 			unsigned long int packet_num;
 			byte * bptr = (byte *)&packet_num;
 			while (Serial.available()<4){}  // TODO: add timeout
@@ -240,9 +256,9 @@ void readSerial(void) {
 			bptr[2] = Serial.read();
 			bptr[3] = Serial.read();
 			resend_packet(packet_num);
+
 		} else {
 			//error
-			Serial.print("error");
 		}
 	}
 	
@@ -253,7 +269,7 @@ void readSerial(void) {
 		}
 	}
 }
-*/
+
 //TODO: make this use an array
 void setVariable(byte num, byte val) {
 	switch (num) {
@@ -424,7 +440,7 @@ void resend_packet(long unsigned int num){
 		//}
 	}
 	reply_dtick_t packet;
-	packet.timestamp =  -1;
+	packet.timestamp =  0xFFFFFFFF;
 	packet.packetnum = tx_packetnum;
 	tx_packetnum++;
 	packet.dl = 0x0000;
