@@ -12,8 +12,7 @@ int main(void) {
 	cout << "size of struct = " << (sizeof(EncoderData::reply_t)) << endl;
 
 	//int exp_packetnum = 1;
-	int i = 0;
-	while(i < 10) {
+	for(int i = 0; i < 10; i++){
 		//cout << "Heading = " << encoders.getHeading() << endl;
 		//encoders.setArduinoClock();
 		//reply_t packet = encoders.getInfo();
@@ -37,7 +36,7 @@ int main(void) {
 		//cout << "Heading = " << status.heading << endl;
 		usleep(.005*1e6);
 	}
-
+/*
 	PCdatapacket pk;
 	((ArduinoInterface)encoders).requestPacket(8, &pk, sizeof(EncoderData::reply_t));
 	EncoderData::reply_t * parseddata = (EncoderData::reply_t *) pk.data;
@@ -47,5 +46,5 @@ int main(void) {
 	printf("dl: %X\n", (unsigned short)parseddata->dl);
 	printf("dr: %X\n", (unsigned short)parseddata->dr);
 	printf("dt: %X\n", (unsigned short)parseddata->dt);
-
+*/
 }
