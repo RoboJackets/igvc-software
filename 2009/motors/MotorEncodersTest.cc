@@ -11,9 +11,9 @@ int main(void) {
 	cout << "Size of short = " << sizeof(short) << endl;
 	cout << "size of struct = " << (sizeof(EncoderData::reply_t)) << endl;
 
-	int exp_packetnum = 1;
-
-	while(exp_packetnum < 10) {
+	//int exp_packetnum = 1;
+	int i = 0;
+	while(i < 10) {
 		//cout << "Heading = " << encoders.getHeading() << endl;
 		//encoders.setArduinoClock();
 		//reply_t packet = encoders.getInfo();
@@ -21,14 +21,14 @@ int main(void) {
 		encoders.getInfo_class(&packet);
 		printf("timestamp (s): %d\n", (packet.packet->timestamp) / 1000);
 		printf("packetnum: %d\n", packet.packet->packetnum);
-
+/*
 		if(exp_packetnum != packet.packet->packetnum){
 			cout << "dropped packet" << endl;
 			//exit(0);
 			return -1;
 		}
 		exp_packetnum++;
-
+*/
 		printf("dl: %X\n", (unsigned short)packet.packet->dl);
 		printf("dr: %X\n", (unsigned short)packet.packet->dr);
 		printf("dt: %X\n", (unsigned short)packet.packet->dt);
