@@ -4,4 +4,4 @@ include_directories(${Candi_SOURCE_DIR}/arduino)
 
 add_executable (MotorEncodersTest MotorEncodersTest.cc)
 
-target_link_libraries (MotorEncodersTest MotorEncoders ArduinoInterface)
+target_link_libraries (MotorEncodersTest MotorEncoders ArduinoInterface DataPacket)
