@@ -21,6 +21,8 @@ class PCdatapacket{
 		virtual ~PCdatapacket();
 	//protected:
 		PCdatapacket();
+
+		friend std::ostream& operator<<(std::ostream& output, const PCdatapacket& pk);
 };
 
 class EncoderData : public PCdatapacket{
@@ -30,6 +32,8 @@ class EncoderData : public PCdatapacket{
 		reply_t * packet;
 		EncoderData();
 		//~EncoderData();
+
+		friend std::ostream& operator<<(std::ostream& output, const EncoderData& epk);
 };
 
 class CurrentData : public PCdatapacket{
@@ -39,6 +43,8 @@ class CurrentData : public PCdatapacket{
 		reply_t * packet;
 		CurrentData();
 		//~EncoderData();
+
+		friend std::ostream& operator<<(std::ostream& output, const CurrentData& cpk);
 };
 
 #endif
