@@ -4,6 +4,12 @@
 #include <fcntl.h>    /* File control definitions */
 #include <list>
 #include <string.h>
+#include <iostream>
+
+// Time Functions
+#include <sys/time.h>
+#include <time.h>
+#include <sys/timex.h>
 
 #include "ArduinoInterface.h"
 #include "DataPacket.h"
@@ -13,6 +19,7 @@
 //			add error reporting
 
 #define WAIT_TIME 20 //Used for setting VTIME, each tick is 0.1 s
+//#define WAIT_TIME 1 //Used for setting VTIME, each tick is 0.1 s
 #define BAUD B9600  //Serial baudrate
 #define SERIAL_PORT "/dev/ttyUSB0"
 #define MODULE_ID 'e'
@@ -25,7 +32,7 @@
 ArduinoInterface::ArduinoInterface(void) {
 
 	tx_num = 1;
-	//rx_num = 1;	
+	rx_num = 1;	
 
 	/* See if anything is connected on ports USB0 through USB9 */
 	char serialAddress[] = SERIAL_PORT;
@@ -40,15 +47,29 @@ ArduinoInterface::ArduinoInterface(void) {
 		}
 		else {
 			/* Check which arduino is connected to the port */
-			byte reply;
-			writeFully(arduinoFD, (void *)"i", 1);
-			readFully(arduinoFD, &reply, sizeof(reply));
-			printf("found module %c, ", reply);
-			if (reply=='e') { //might want to use more than one byte for identifcation
+			//byte reply;
+			printf("module found.\n");
+			ArduinoCommand<PCdatapacket::command_t> idpk;
+			idpk.packet->packetnum = tx_num;
+			//idpk.packet->timestamp = getTime();
+			idpk.packet->command = 'i';
+			//writeFully(arduinoFD, (void *)"i", 1);
+			writeFully(arduinoFD, idpk.packet, sizeof(PCdatapacket::command_t));
+
+			ArduinoCommand<PCdatapacket::command_t> idpk_ret;
+			//readFully(arduinoFD, idpk.packet, sizeof(PCdatapacket::command_t));
+			if( readFully(arduinoFD, idpk_ret.packet, sizeof(PCdatapacket::command_t)) ){
+				std::cout << "module comm error -- could not ID arduino on port #" << i << "\n";
+				continue;
+				//exit(1);
+			}
+			
+			if (idpk_ret.packet->command=='e') { //might want to use more than one byte for identifcation
 				printf("correct module.\n");
 				break;
 			} else {
 				printf("wrong module.\n");
+				printf("found module %c, \n", idpk.packet->command);
 			}
 		}
 	}
@@ -88,10 +109,20 @@ bool ArduinoInterface::getStatus(void *status, int size) {
 	//savePacket(tx_num, (void *)"r", 1);
 	//tx_num++;
 	
-	if (writeFully(arduinoFD, (void *)"r", 1)) {
+	ArduinoCommand<PCdatapacket::command_t> statpk;
+	statpk.packet->packetnum = tx_num;
+	//statpk.packet->timestamp = getTime();
+	statpk.packet->command = 'r';
+
+	if (writeFully(arduinoFD, statpk.packet, sizeof(PCdatapacket::command_t))) {
 		return true;
 	}
 
+/*
+	if (writeFully(arduinoFD, (void *)"r", 1)) {
+		return true;
+	}
+*/
 	if (readFully(arduinoFD, status, size)) {
 		return true;
 	}
@@ -122,9 +153,6 @@ bool ArduinoInterface::setVar(int var, void *value, int size) {
 		buf[2+i] = ((byte *)value)[i];
 	}
 	
-	//savePacket(tx_num, buf, sizeof(buf));
-	//tx_num++;
-
 	if (writeFully(arduinoFD, buf, sizeof(buf))) {
 		return true;
 	}
@@ -187,6 +215,26 @@ bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes) {
 		numLeft -= numRead;
 		dst += numRead;
 	}
+
+
+	PCdatapacket::header_t header;
+	//header = (void *) dst;
+	memcpy(&header, buf, sizeof(PCdatapacket::header_t));
+
+	if(header.timestamp == ((unsigned int)-1)){
+		std::cout << "packet error (probably packet not in cache)" << std::endl;
+		return true;
+	}
+
+	if(header.packetnum != rx_num){
+		std::cout << "packet #" << rx_num << " dropped. (recieved # "<< header.packetnum << ") Requesting..." << std::endl;
+		if(requestPacket(rx_num, buf, numBytes)){
+			return true;
+		}
+	}
+
+	rx_num++;
+
 	return false;
 }
 
@@ -283,7 +331,7 @@ void ArduinoInterface::savePacket(int packnum, void * data, size_t len){
 }
 
 /*
-// delete a packet with a certain number frim the list
+// delete a packet with a certain number from the list
 void ArduinoInterface::deletePacket(int packnum){
 	std::list<PCdatapacket>::iterator it;
 	for(it = packetlist.begin(); it != packetlist.end(); it++){
@@ -307,6 +355,31 @@ PCdatapacket ArduinoInterface::getSavedPacket(int packnum){
 }
 
 //Ask the arduino to resend a numbered packet
+bool ArduinoInterface::requestPacket(int packnum, void * packet, size_t len){
+
+	if (arduinoFD == -1) {
+		return false;
+	}
+
+	ArduinoCommand<PCdatapacket::command_t> pk;
+	pk.packet->packetnum = tx_num;
+	//idpk.packet->timestamp = getTime();
+	pk.packet->command = 'p';
+	writeFully(arduinoFD, pk.packet, sizeof(PCdatapacket::command_t));
+
+//	writeFully(arduinoFD, (void *)"p", 1) ;
+	writeFully(arduinoFD, (void *)&packnum, sizeof(int));
+	/*	
+	if(packet->data == NULL){
+		packet->data = new byte[len];
+	}
+	*/
+	readFully(arduinoFD, packet, len);
+
+	return true;
+}
+
+//Ask the arduino to resend a numbered packet
 bool ArduinoInterface::requestPacket(int packnum, PCdatapacket * packet, size_t len){
 
 	if (arduinoFD == -1) {
@@ -321,10 +394,19 @@ bool ArduinoInterface::requestPacket(int packnum, PCdatapacket * packet, size_t 
 	if(packet->data == NULL){
 		packet->data = new byte[len];
 	}
-	readFully(arduinoFD, packet->data, len);
 
-	return true;
+	return ( readFully(arduinoFD, packet->data, len) );
 }
 
+long int getTime(){
+	struct timeval time;
+	struct timezone tz;
+	gettimeofday(&time, &tz);
 
+	unsigned char timedata[4];
+
+	long int millis = time.tv_sec*1000 + ((long int)((double)time.tv_usec/1000));
+
+	return(millis);
+}
 

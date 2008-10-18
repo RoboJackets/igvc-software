@@ -27,7 +27,7 @@ class ArduinoInterface {
 		virtual ~ArduinoInterface(void);
 
 		bool requestPacket(int packnum,  PCdatapacket * packet, size_t len);
-
+		bool requestPacket(int packnum, void * packet, size_t len);
 	protected:
 		/* Constructor - declaired protected to prevent direct instantiation */
 		ArduinoInterface(void);
@@ -43,12 +43,12 @@ class ArduinoInterface {
 		void savePacket(int packnum, void * data, size_t len);
 		//void deletePacket(int packnum);
 		PCdatapacket getSavedPacket(int packnum);
-
+		long int getTime();
 		//PCdatapacket requestPacket(int packnum, size_t len);
 
 		std::list<PCdatapacket> packetlist;
 		int tx_num;
-		//int rx_num;
+		int rx_num;
 };
 
 #endif /* ARDUINO_INTERFACE_H */
