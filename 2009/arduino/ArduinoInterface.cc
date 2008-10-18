@@ -12,7 +12,8 @@
 #include <sys/timex.h>
 
 #include "ArduinoInterface.h"
-#include "DataPacket.h"
+#include "DataPacket.hpp"
+#include "DataPacket2.hpp"
 
 // TODO:	add a timeouts to serial functions
 //			add checks for disconnected arduino
@@ -51,14 +52,14 @@ ArduinoInterface::ArduinoInterface(void) {
 			printf("module found.\n");
 			ArduinoCommand<PCdatapacket::command_t> idpk;
 			idpk.packet->packetnum = tx_num;
-			//idpk.packet->timestamp = getTime();
+			idpk.packet->timestamp = getTime();
 			idpk.packet->command = 'i';
 			//writeFully(arduinoFD, (void *)"i", 1);
 			writeFully(arduinoFD, idpk.packet, sizeof(PCdatapacket::command_t));
 
 			ArduinoCommand<PCdatapacket::command_t> idpk_ret;
 			//readFully(arduinoFD, idpk.packet, sizeof(PCdatapacket::command_t));
-			if( readFully(arduinoFD, idpk_ret.packet, sizeof(PCdatapacket::command_t)) ){
+			if( readFully(arduinoFD, idpk_ret.packet, sizeof(PCdatapacket::command_t), true) ){
 				std::cout << "module comm error -- could not ID arduino on port #" << i << "\n";
 				continue;
 				//exit(1);
@@ -111,7 +112,7 @@ bool ArduinoInterface::getStatus(void *status, int size) {
 	
 	ArduinoCommand<PCdatapacket::command_t> statpk;
 	statpk.packet->packetnum = tx_num;
-	//statpk.packet->timestamp = getTime();
+	statpk.packet->timestamp = getTime();
 	statpk.packet->command = 'r';
 
 	if (writeFully(arduinoFD, statpk.packet, sizeof(PCdatapacket::command_t))) {
@@ -123,7 +124,7 @@ bool ArduinoInterface::getStatus(void *status, int size) {
 		return true;
 	}
 */
-	if (readFully(arduinoFD, status, size)) {
+	if (readFully(arduinoFD, status, size, true)) {
 		return true;
 	}
 
@@ -201,7 +202,7 @@ bool ArduinoInterface::writeFully(int fd, void* buf, size_t numBytes) {
  * @return			<tt>true</tt> if an error occurs;
  * 					<tt>false</tt> if successful.
  */
-bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes) {
+bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes, bool chkpknum) {
 	char* dst = (char*) buf;
 	size_t numLeft = numBytes;
 	ssize_t numRead;
@@ -216,7 +217,6 @@ bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes) {
 		dst += numRead;
 	}
 
-
 	PCdatapacket::header_t header;
 	//header = (void *) dst;
 	memcpy(&header, buf, sizeof(PCdatapacket::header_t));
@@ -226,10 +226,12 @@ bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes) {
 		return true;
 	}
 
-	if(header.packetnum != rx_num){
-		std::cout << "packet #" << rx_num << " dropped. (recieved # "<< header.packetnum << ") Requesting..." << std::endl;
-		if(requestPacket(rx_num, buf, numBytes)){
-			return true;
+	if(chkpknum){
+		if(header.packetnum != rx_num){
+			std::cout << "packet #" << rx_num << " dropped. (recieved # "<< header.packetnum << ") Requesting..." << std::endl;
+			if(requestPacket(rx_num, buf, numBytes)){
+				return true;
+			}
 		}
 	}
 
@@ -363,7 +365,7 @@ bool ArduinoInterface::requestPacket(int packnum, void * packet, size_t len){
 
 	ArduinoCommand<PCdatapacket::command_t> pk;
 	pk.packet->packetnum = tx_num;
-	//idpk.packet->timestamp = getTime();
+	pk.packet->timestamp = getTime();
 	pk.packet->command = 'p';
 	writeFully(arduinoFD, pk.packet, sizeof(PCdatapacket::command_t));
 
@@ -374,11 +376,11 @@ bool ArduinoInterface::requestPacket(int packnum, void * packet, size_t len){
 		packet->data = new byte[len];
 	}
 	*/
-	readFully(arduinoFD, packet, len);
+	return( readFully(arduinoFD, packet, len, false) );
 
-	return true;
+	//return true;
 }
-
+/*
 //Ask the arduino to resend a numbered packet
 bool ArduinoInterface::requestPacket(int packnum, PCdatapacket * packet, size_t len){
 
@@ -397,16 +399,25 @@ bool ArduinoInterface::requestPacket(int packnum, PCdatapacket * packet, size_t 
 
 	return ( readFully(arduinoFD, packet->data, len) );
 }
-
-long int getTime(){
+*/
+unsigned int ArduinoInterface::getTime(){
 	struct timeval time;
-	struct timezone tz;
-	gettimeofday(&time, &tz);
-
-	unsigned char timedata[4];
-
-	long int millis = time.tv_sec*1000 + ((long int)((double)time.tv_usec/1000));
+	//struct timezone tz;
+	//gettimeofday(&time, &tz);
+	gettimeofday(&time, NULL);
+	unsigned int millis = time.tv_sec*1000 + ((long int)((double)time.tv_usec/1000));
 
 	return(millis);
+}
+
+bool ArduinoInterface::setArduinoClock(){
+	unsigned int time = getTime();
+	ArduinoCommand<PCdatapacket::setint_t> pk;
+	pk.packet->timestamp = time;
+	pk.packet->packetnum = tx_num;
+	pk.packet->command = 'w';
+	pk.packet->var = time;
+
+	writeFully(arduinoFD, pk.data, sizeof(PCdatapacket::setint_t));
 }
 

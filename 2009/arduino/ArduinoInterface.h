@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <termios.h>  /* POSIX terminal control definitions */
 #include <list>
-#include "DataPacket.h"
+#include "DataPacket.hpp"
 
 /** This class defines a standard interface to the arduino microcontroller boards
  *		communicating across a serial interface (rs232, USB, etc.)
@@ -26,8 +26,12 @@ class ArduinoInterface {
 		/* Destructor */
 		virtual ~ArduinoInterface(void);
 
-		bool requestPacket(int packnum,  PCdatapacket * packet, size_t len);
+		//bool requestPacket(int packnum,  PCdatapacket * packet, size_t len);
 		bool requestPacket(int packnum, void * packet, size_t len);
+
+		
+		bool setArduinoClock();
+
 	protected:
 		/* Constructor - declaired protected to prevent direct instantiation */
 		ArduinoInterface(void);
@@ -36,14 +40,14 @@ class ArduinoInterface {
 		/* Private serial interface */
 		int arduinoFD;
 		bool writeFully(int fd, void* buf, size_t numBytes);
-		bool readFully(int fd, void* buf, size_t numBytes);
+		bool readFully(int fd, void* buf, size_t numBytes, bool chkpknum);
 		int serialportInit(const char* serialport, speed_t baud);
 		bool serialFlush(int fd);
 
 		void savePacket(int packnum, void * data, size_t len);
 		//void deletePacket(int packnum);
 		PCdatapacket getSavedPacket(int packnum);
-		long int getTime();
+		unsigned int getTime();
 		//PCdatapacket requestPacket(int packnum, size_t len);
 
 		std::list<PCdatapacket> packetlist;
