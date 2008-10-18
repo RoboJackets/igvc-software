@@ -19,8 +19,8 @@ int main(void) {
 		//reply_t packet = encoders.getInfo();
 		EncoderData packet;
 		encoders.getInfo_class(&packet);
-		printf("timestamp (s): %d\n", (packet.packet->timestamp) / 1000);
-		printf("packetnum: %d\n", packet.packet->packetnum);
+		//printf("timestamp (s): %d\n", (packet.packet->timestamp) / 1000);
+		//printf("packetnum: %d\n", packet.packet->packetnum);
 /*
 		if(exp_packetnum != packet.packet->packetnum){
 			cout << "dropped packet" << endl;
@@ -29,10 +29,13 @@ int main(void) {
 		}
 		exp_packetnum++;
 */
-		printf("dl: %X\n", (unsigned short)packet.packet->dl);
-		printf("dr: %X\n", (unsigned short)packet.packet->dr);
-		printf("dt: %X\n", (unsigned short)packet.packet->dt);
+		//printf("dl: %X\n", (unsigned short)packet.packet->dl);
+		//printf("dr: %X\n", (unsigned short)packet.packet->dr);
+		//printf("dt: %X\n", (unsigned short)packet.packet->dt);
 		cout << "\n\n";
+
+		cout << packet << "\n\n";
+
 		//status = encoders.getInfo();
 		//cout << "Heading = " << status.heading << endl;
 		usleep(.005*1e6);
