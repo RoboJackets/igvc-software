@@ -23,11 +23,18 @@ CurrentData::CurrentData(){
 	packet = (reply_t *) data;
 }
 
-template <class T> 
+template <typename T> 
 ArduinoCommand<T>::ArduinoCommand(){
 	len = sizeof(T);
 	data = new byte[sizeof(T)];
 	packet = (T *) data;
+}
+
+template <>
+ArduinoCommand<PCdatapacket::command_t>::ArduinoCommand(){
+	len = sizeof(PCdatapacket::command_t);
+	data = new byte[sizeof(PCdatapacket::command_t)];
+	packet = (PCdatapacket::command_t *) data;
 }
 
 /*
