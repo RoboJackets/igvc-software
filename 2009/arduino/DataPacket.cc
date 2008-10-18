@@ -12,15 +12,22 @@ PCdatapacket::~PCdatapacket(){
 }
 
 EncoderData::EncoderData(){
-	len = sizeof(reply_t)
+	len = sizeof(reply_t);
 	data = new byte[sizeof(reply_t)];
 	packet = (reply_t *) data;
 }
 
 CurrentData::CurrentData(){
-	len = sizeof(reply_t)
+	len = sizeof(reply_t);
 	data = new byte[sizeof(reply_t)];
 	packet = (reply_t *) data;
+}
+
+template <class T> 
+ArduinoCommand<T>::ArduinoCommand(){
+	len = sizeof(T);
+	data = new byte[sizeof(T)];
+	packet = (T *) data;
 }
 
 /*
