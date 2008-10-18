@@ -1,4 +1,4 @@
-#include "DataPacket.h"
+#include "DataPacket.hpp"
 
 PCdatapacket::PCdatapacket(){
 	data = NULL;
@@ -13,23 +13,17 @@ PCdatapacket::~PCdatapacket(){
 
 EncoderData::EncoderData(){
 	len = sizeof(reply_t);
-	data = new byte[sizeof(reply_t)];
+	data = new byte[len];
 	packet = (reply_t *) data;
 }
 
 CurrentData::CurrentData(){
 	len = sizeof(reply_t);
-	data = new byte[sizeof(reply_t)];
+	data = new byte[len];
 	packet = (reply_t *) data;
 }
 
-template <typename T> 
-ArduinoCommand<T>::ArduinoCommand(){
-	len = sizeof(T);
-	data = new byte[sizeof(T)];
-	packet = (T *) data;
-}
-
+/*
 template <>
 ArduinoCommand<PCdatapacket::command_t>::ArduinoCommand(){
 	len = sizeof(PCdatapacket::command_t);
@@ -37,8 +31,17 @@ ArduinoCommand<PCdatapacket::command_t>::ArduinoCommand(){
 	packet = (PCdatapacket::command_t *) data;
 }
 
+
+template <>
+ArduinoCommand<PCdatapacket::setint_t>::ArduinoCommand(){
+	len = sizeof(PCdatapacket::setint_t);
+	data = new byte[sizeof(PCdatapacket::setint_t)];
+	packet = (PCdatapacket::setint_t *) data;
+}
+*/
 /*
 EncoderData::~EncoderData(){
 	packet = NULL;
 }
 */
+
