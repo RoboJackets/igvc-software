@@ -16,7 +16,8 @@ using namespace std;
 #include "urg_laser.h"
 
 
-
+////////////////////////////////////////////////////////////////////////////////
+// TEST Header
 class URGLaserDriver {
 public:
 
@@ -53,7 +54,7 @@ URGLaserDriver::URGLaserDriver()
 	Readings = new urg_laser_readings_t;
 
 	UseSerial=false;
-	BaudRate = 115200; // 011100001000000000
+	BaudRate = B115200; 
 	Port = "/dev/ttyACM0";
 	
     return;
@@ -74,8 +75,7 @@ int URGLaserDriver::Setup() {
 		return -1;
 	}
 
- 	Main();
-
+ 	Main(); // doesn't return
 
     return(0);
 }
@@ -84,11 +84,7 @@ int URGLaserDriver::Setup() {
 ////////////////////////////////////////////////////////////////////////////////
 // Shutdown the device
 int URGLaserDriver::Shutdown() {
-
- 
-
   Laser.Close();
-
   return(0);
 }
 
@@ -108,17 +104,20 @@ void URGLaserDriver::Main()
 	for(;;)	{
 
 		// update device data
-		int r = Laser.GetReadings(Readings);
+		int r = Laser.GetReadings(Readings, min_i, max_i);
 		
 		// check for data
-		if( r )	printf("readings error: %d \n",r);
+		if( r )
+		{
+			printf("readings error: %d \n",r);
+		}
 		else
 		{
 
 			for (int i = 0; i < ranges_count; ++i)
 			{
-				//ranges[i] = Readings->Readings[i+min_i] < 20 ? (4095) : (Readings->Readings[i+min_i]);
-				//ranges[i]/=1000;
+				ranges[i] = Readings->Readings[i+min_i] < 20 ? (4095) : (Readings->Readings[i+min_i]);
+				ranges[i]/=1000;
 				ranges[i] = Readings->Readings[i+min_i];
 			}
 		
@@ -139,6 +138,7 @@ void URGLaserDriver::Main()
 
 int main(){
 	URGLaserDriver L;
-	L.Setup();
+	L.Shutdown();	// ensure no prev traces
+	L.Setup();		// doesn't return
 }
 
