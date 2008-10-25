@@ -1,13 +1,22 @@
-Needs
-- optoisolators
-- current adc shifting
-- headers
-- - for encoders
-- - for current sensors
-- - for OSMC
+TODO
+check schematic
+calculate component values for analog isolator
+add decoupling caps
+
+Parts list
+optoisolators
+- MOCD213-M  x  3
+	2 channel optocoupler with transistor output.  Any kind of optocoupler can be used for the digital signals.  The part I picked was the cheapest I could find.
+- HCNR200/1
+	Analog optocoupler for measuring battery voltages.
+headers
+- for arduino 
+- for OSMC
+- for encoders
+- for current sensors
 
 Design
-- use polarized pins
+- use polarized connectors
 
 Future
 - Regenerative Motor Braking (on motor controller, not this board)
