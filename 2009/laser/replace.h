@@ -8,7 +8,7 @@
 
 
 #if HAVE_CONFIG_H
-  #include <config.h>
+#include <config.h>
 #endif
 
 /* Compatibility definitions for System V `poll' interface.
@@ -35,64 +35,63 @@ extern "C" {
 #endif
 
 #if !HAVE_POLL
-/* Event types that can be polled for.  These bits may be set in `events'
-   to indicate the interesting event types; they will appear in `revents'
-   to indicate the status of the file descriptor.  */
+    /* Event types that can be polled for.  These bits may be set in `events'
+       to indicate the interesting event types; they will appear in `revents'
+       to indicate the status of the file descriptor.  */
 #define POLLIN          01              /* There is data to read.  */
 #define POLLPRI         02              /* There is urgent data to read.  */
 #define POLLOUT         04              /* Writing now will not block.  */
 
-/* Some aliases.  */
+    /* Some aliases.  */
 #define POLLWRNORM      POLLOUT
 #define POLLRDNORM      POLLIN
 #define POLLRDBAND      POLLPRI
 
-/* Event types always implicitly polled for.  These bits need not be set in
-   `events', but they will appear in `revents' to indicate the status of
-   the file descriptor.  */
+    /* Event types always implicitly polled for.  These bits need not be set in
+       `events', but they will appear in `revents' to indicate the status of
+       the file descriptor.  */
 #define POLLERR         010             /* Error condition.  */
 #define POLLHUP         020             /* Hung up.  */
 #define POLLNVAL        040             /* Invalid polling request.  */
 
-/* Canonical number of polling requests to read in at a time in poll.  */
+    /* Canonical number of polling requests to read in at a time in poll.  */
 #define NPOLLFILE       30
 
-/* Data structure describing a polling request.  */
-struct pollfd
-  {
-    int fd;			/* File descriptor to poll.  */
-    short int events;		/* Types of events poller cares about.  */
-    short int revents;		/* Types of events that actually occurred.  */
-  };
+    /* Data structure describing a polling request.  */
+    struct pollfd {
+        int fd;			/* File descriptor to poll.  */
+        short int events;		/* Types of events poller cares about.  */
+        short int revents;		/* Types of events that actually occurred.  */
+    };
 
 
-/* Poll the file descriptors described by the NFDS structures starting at
-   FDS.  If TIMEOUT is nonzero and not -1, allow TIMEOUT milliseconds for
-   an event to occur; if TIMEOUT is -1, block until an event occurs.
-   Returns the number of file descriptors with events, zero if timed out,
-   or -1 for errors.  */
-int poll (struct pollfd *fds, unsigned long int nfds, int timeout);
+    /* Poll the file descriptors described by the NFDS structures starting at
+       FDS.  If TIMEOUT is nonzero and not -1, allow TIMEOUT milliseconds for
+       an event to occur; if TIMEOUT is -1, block until an event occurs.
+       Returns the number of file descriptors with events, zero if timed out,
+       or -1 for errors.  */
+    int poll (struct pollfd *fds, unsigned long int nfds, int timeout);
 #else
 #include <sys/poll.h>  /* for poll(2) */
 #endif // !HAVE_POLL
 
 #if !HAVE_DIRNAME
-  char * dirname (char *path);
+    char * dirname (char *path);
 #else
-  #include <libgen.h> // for dirname(3)
+#include <libgen.h> // for dirname(3)
 #endif // !HAVE_DIRNAME
 
 #if !HAVE_CFMAKERAW
-  #include <termios.h>
-  void cfmakeraw (struct termios *t);
+#include <termios.h>
+    void cfmakeraw (struct termios *t);
 #endif // !HAVE_CFMAKERAW
 
 #if !HAVE_ROUND
-  double round (double x);
+    double round (double x);
 #endif // !HAVE_ROUND
 
 #if NEED_COMPRESSBOUND
-  unsigned long compressBound (unsigned long sourceLen);
+    unsigned long compressBound (unsigned long sourceLen);
 #endif // NEED_COMPRESSBOUND
 
 #ifdef __cplusplus
