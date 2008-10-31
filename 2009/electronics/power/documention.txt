@@ -1,0 +1,3 @@
+Ideas
+- integrated battery charger
+- switch to turn off

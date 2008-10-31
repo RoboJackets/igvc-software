@@ -1,0 +1,185 @@
+\documentclass[a4paper,10pt]{report}
+\usepackage{amsmath}
+
+% Title Page
+\title{Positioning}
+\author{Paul Varnell}
+
+
+\begin{document}
+\maketitle
+
+\chapter{Introduction}
+
+\chapter{Filtering}
+add sanity checks on filter inputs and outputs \\
+include delays in system model \\
+
+
+
+	Thoughts:
+controls don't always cause noise, measurements don't always reduce noise
+
+Probablity distrubution isn't a one-to-one function like spectrum is. Is there a transform that has probablity information and some other information, making it one-to-one.
+
+a new paridigm: combines the probablistic approach with learning of the models (behavior based learning? - like humans)
+ - i.e. you give it a starting model (with covariance) and it figures out what the model should acutally be
+ - learning could also change what type of probablistic model is being used (i.e. this landmark has a huge amount of noise, so it must be moving)
+ - hidden Markov model (?)
+
+what do you do if you have multiple equations for one state variable (i.e. current)
+
+
+	TODO:
+make something that dectects stalls and slipping (compare torque vs wheel speed)
+make as set of partially automated test that get a calibrate some of the models (i.e. gps, friction)
+
+	CouldDO:
+reactive driving (takes slip and drag into account) (low down to speed up when slipping)
+
+	CanDO?
+better way to estimate integrals
+ - a paticle-like filter that uses curves instead of points (Simpson's rule, splines?)
+ - explict solution for some non-gausian distrubtion
+distributed filtering
+account for random sample times
+account for dependent noise
+account for saturation of sensors
+
+allow for measurments to come indepenently from one another and at irregular intervals
+ - this is very important for us because the sampling rates of the sensors are so varied
+ - semi-Markov process (?)
+
+\section{State Estimation}
+The state of the system represents all of the relevant information that x.  Since this system is focused on positioning (change word), the state is the position, velocity, and acceleration of the robot at a particular time.
+\begin{gather*}
+x_{k} = \begin{bmatrix} d \\ \theta \\ v \\ \omega \\ a \\ \alpha \end{bmatrix}
+\end{gather*}
+
+\section{Kalman Filter}
+It uses the model: \\
+ \\
+  $x_k = A_{k-1} x_{k-1} + B_k u_k + w_{k-1}$ \\
+  $z_k = H_k x_k + v_k$ \\
+ \\
+where \\
+  x is the state vector \\
+  u is the control vector \\
+  z is the measurement vector \\
+  w and v are the process and measurement noises \\
+    $p(w_k) ~ N(0,Q_k)$ \\
+    $p(v_k) ~ N(0,R_k)$ \\
+  A is the process model \\
+  B is the control model \\
+  H is the measurement model \\
+ \\
+To estimate x, it recursively calculates \\
+ \\
+Prediction: \\
+  $\hat{x}^-_k = A_{k-1} \hat{x}_{k-1} + B_k u_k$ \\
+  $\hat{P}^-_k = A_{k-1} P_{k-1} A^T_{k-1}  +  Q_{k-1}$  \\
+    should this be $A_k$ instead? \\
+ \\
+Correction: \\
+  $\hat{x}_k  =  \hat{x}^-_k + K_k ( z_k - H_k \hat{x}^-_k )$ \\
+  $K_k = P^-_k H^T_k ( H_k P^-_k H^T_k + R_k )^(-1)$ \\
+  $P_k = ( I - K_k H_k ) P^-_k$ \\
+ \\
+where \\
+  $\hat{x}^-$ is the a priori state vector estimate \\
+  $\hat{x}$ is the posterior state vector estimate \\
+  K is the kalman gain, which minimizes $P_k$ when \\
+    $p(w_k) = N(0,Q_k)$ \\
+    $p(v_k) = N(0,R_k)$ \\
+
+\section{Particle Filter}
+
+\chapter{Candi}
+\section{Sensors}
+
+\section{State Model}
+must acount for: \\
+motors power \\
+friction (at wheels and ball) \\
+drag (from grass and from air) \\
+gravity \\
+\\
+\begin{gather*}
+\tau _{w} - \tau _{Fr} = I_{w} \alpha _{w} \\
+\tau _{robot} = I_{robot} \alpha _{robot} = \tau _{rw} + \tau _{lw} - \tau _{drag} \\
+= (d_{r} F_{rFr} \sin (\theta _{r}) + (d_{r} \times \tau _{rFr-rot})) - (d_{l} F_{lFr} \sin (\theta _{l}) + (d_{l} \times \tau _{lFr-rot})) - ? \\
+F_{robot} = m_{robot} a_{robot} = F_{rFr} + F_{lFr} + F_{gravity} - F_{drag} \\
+\end{gather*}
+where \\
+$\tau _{w}$ is the torque resulting from the motor at the wheel \\
+$\tau _{Fr}$ is the torque due to friction between the wheel and ground \\
+$I_{w}$ is the angular momentum of the wheel \\
+$\alpha _{w}$ is the angular acelleration of the wheel \\
+
+\section{Measurement Models}
+TODO: account for nonlinear effects
+\subsection{GPS}
+correct for latitude/longitude/altitude
+
+
+\subsection{Accelerometers and Gyroscopes}
+TODO: fix
+\begin{gather*}
+z_{i} = vector \\
+\dot{\xi} = Ad_{g^{o}_{i}} \dot{\xi_{o}} \\
+ = \begin{bmatrix} R^{o}_{i} & J  d^{o}_{i} \\ 0 & 1 \end{bmatrix} \begin{bmatrix} v_{o} \\ \omega_{o} \end{bmatrix}
+\end{gather*}
+\subsection{Magnometers}
+
+\subsection{Motor Encoders and Currents}
+model wrong \\
+- motor intertial \\
+- nonlinear effects \\
+-- saturation \\
+-- threshold \\
+\\
+\begin{gather*}
+V_{back} = k w \\
+I = \frac{1}{R} (V_{s} - V_{back}) = \frac{1}{R} (V_{s} - k w) \\
+P = \tau \times w \\
+P = I V_{back} D = I k w D \\
+\tau = I k D \\
+\tau = \frac{K}{R} \left( V_{s} - k w \right) D \\
+\tau _{w} = \tau - \tau _{fr} \\
+\end{gather*}
+
+check to make sure P is the right power\\
+\\
+where: \\
+$V_s$ is the supplied voltage \\
+I is the supplied current \\
+$V_{back}$ is the counter-EMF from the motor \\
+P is the power supplied by the motor \\
+$\tau$ is the torque of the motor \\
+$\tau _{fr}$ is the torque of the friction due to the drive train \\
+$ \tau _{w} $ is the torque resulting from the motor at the wheel \\
+w is the angular speed of the motor \\
+D is the duty cycle \\
+R is the resistance of the motor \\
+
+Note: above assumes that the power supply is a current source - i.e. when $D = 0$ and $\tau > 0$, $V_s > 0$ \\
+
+Constants:
+\begin{gather*}
+\frac{RPM}{\tau} = -0.157, \frac{A}{\tau} = 0.1291 \\
+\frac{A}{RPM} = -0.8223, \ \frac{V_{back}}{RPM} = 0.093976 \\
+31.7142 in-lbf of friction \\
+\end{gather*}
+
+\section{Control Model}
+
+\section{Noise Models}
+
+\subsection{Outliers}
+
+\appendix
+\chapter{Derivations}
+\section{Kalman Filter}
+\section{Particle Filter}
+
+\end{document}
