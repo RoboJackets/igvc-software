@@ -1,3 +1,10 @@
+Voltages
+- arduinos
+- usb hub
+- laptops
+- lidar
+- camera
+
 Ideas
 - integrated battery charger
 - switch to turn off
