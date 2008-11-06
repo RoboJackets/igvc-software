@@ -12,7 +12,7 @@ sudo apt-get --yes install libqt4-core libqt4-xml qt4-dev-tools
 echo "boost"
 sudo apt-get --yes install libboost1.35-dev
 
-echo "glut"
+echo "glut" # more opengl stuff is needed - will put here soon
 sudo apt-get --yes install libglut-dev
 
 echo "libtool"
