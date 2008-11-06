@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# feel free to add to this script when you encounter missing libs/files
+echo "installing candi dependencies this may take a while..."
+
+echo "opencv"
+sudo apt-get --yes install libcv1 libcvaux1 libhighgui1 libcv-dev
+
+echo "QT"
+sudo apt-get --yes install libqt4-core libqt4-xml qt4-dev-tools
+
+echo "boost"
+sudo apt-get --yes install libboost1.35-dev
+
+echo "glut"
+sudo apt-get --yes install libglut-dev
+
+echo "libtool"
+sudo apt-get --yes install libtool
+
+echo "g++"
+sudo apt-get --yes install g++-4.3
+
+echo "done"
+echo
+

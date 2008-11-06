@@ -1,5 +1,5 @@
 #include "PathPlan.h"
-
+#include <cstring>
 
 
 PathPlan::PathPlan() {
