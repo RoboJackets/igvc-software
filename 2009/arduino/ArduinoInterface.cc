@@ -3,6 +3,7 @@
 #include <unistd.h>   /* UNIX standard function definitions */
 #include <fcntl.h>    /* File control definitions */
 #include <iostream>
+#include <cstring>//for memcpy
 
 #include <sys/time.h>
 #include <time.h>
@@ -55,6 +56,7 @@ ArduinoInterface::ArduinoInterface(void) {
 			printf("found module %c\n", reply);
 			if (reply=='e') { //might want to use more than one byte for identifcation
 				printf("correct module.\n");
+				setArduinoTime();
 				break;
 			} else {
 				printf("wrong module.\n");
@@ -317,7 +319,9 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void *
 	//Get the Response
 	DataPacket pk_rx;
 	byte * headerloc = (byte *)&(pk_rx.header);
-	readFully(arduinoFD, headerloc, PACKET_HEADER_SIZE);
+	//readFully(arduinoFD, headerloc, PACKET_HEADER_SIZE);
+	readFully(arduinoFD, &(pk_rx.header), PACKET_HEADER_SIZE);
+	std::cout << "timestamp: " << pk_rx.header.timestamp << std::endl;
 	rx_num++;
 /*
 	if(pk_rx.header.packetnum != rx_num){
@@ -348,7 +352,7 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void *
 		}
 	}
 */
-	if(pk_rx.header.size <= size_rx){
+	if( (pk_rx.header.size > 0) && (pk_rx.header.size <= size_rx)){
 		pk_rx.data = new byte[pk_rx.header.size];
 		readFully(arduinoFD, pk_rx.data, pk_rx.header.size);
 		memcpy(data_rx, pk_rx.data, pk_rx.header.size);
