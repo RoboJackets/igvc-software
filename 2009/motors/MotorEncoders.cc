@@ -10,24 +10,24 @@ typedef unsigned char byte;
 
 MotorEncoders::MotorEncoders(void) : ArduinoInterface() {
 
-	unsigned int rx_packetnum = 1;
-	unsigned int tx_packetnum = 1;
+	//unsigned int rx_packetnum = 1;
+	//unsigned int tx_packetnum = 1;
 
 }
 
 
-EncoderData::reply_t MotorEncoders::getInfo(void) {
-	EncoderData::reply_t status;
+DataPacket::encoder_reply_t MotorEncoders::getInfo(void) {
+	DataPacket::encoder_reply_t status;
 	
 	getStatus(&status, sizeof(status));
 
 	return(status);
 }
 
-bool MotorEncoders::getInfo_class(EncoderData * status) {
+bool MotorEncoders::getInfo_class(DataPacket * status) {
 	//EncoderData status;
-	//byte * data = new byte[sizeof(EncoderData::reply_t)];
-	bool ret = getStatus(status->data, sizeof(EncoderData::reply_t));
+	status->data = new byte[sizeof(DataPacket::encoder_reply_t)];
+	bool ret = getStatus(status->data, sizeof(DataPacket::encoder_reply_t));
 	//status.setDataPointer(data);
 	//status.packnum = rx_packetnum;
 	//rx_packetnum++;
@@ -61,7 +61,7 @@ EncoderPacket MotorEncoders::getDeltas(){
 
 double MotorEncoders::getHeading(void) {
 	//EncoderPacket data = MotorEncoders::getDeltas();
-	EncoderData::reply_t data = MotorEncoders::getInfo();
+	DataPacket::encoder_reply_t data = MotorEncoders::getInfo();
 	MotorEncoders::heading += ( ((double)(data.dr - data.dl)) * (double)RAD_PER_ENCODER_TICK * (double)WHEEL_RADIUS / (double)WHEEL_BASE );
 	while (MotorEncoders::heading >= (2*M_PI)) { // this could be done more effiecently
 		MotorEncoders::heading -= (2*M_PI);
@@ -77,7 +77,7 @@ double MotorEncoders::getHeading(void) {
 
 double MotorEncoders::getRotVel(void){
 	//EncoderPacket data = MotorEncoders::getDeltas();
-	EncoderData::reply_t data = MotorEncoders::getInfo();
+	DataPacket::encoder_reply_t data = MotorEncoders::getInfo();
 /*
 	if(data.packetnum != rx_packetnum){
 		int trynum = 0;

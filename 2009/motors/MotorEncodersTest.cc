@@ -9,50 +9,57 @@ int main(void) {
 	//MotorEncoders::reply_t status;
 
 	cout << "Size of short = " << sizeof(short) << endl;
-	cout << "size of struct = " << (sizeof(EncoderData::reply_t)) << endl;
+	cout << "Size of header = " << sizeof(DataPacket::header_t) << endl;
+	cout << "size of struct = " << (sizeof(DataPacket::encoder_reply_t)) << endl;
 
 	//int exp_packetnum = 1;
 	int i;
-	for( i = 0; i < 100; i++){
+	for( i = 0; i < 10; i++){
 		//cout << "Heading = " << encoders.getHeading() << endl;
 		//encoders.setArduinoClock();
 		//reply_t packet = encoders.getInfo();
-		EncoderData packet;
+
+		DataPacket packet;
 		encoders.getInfo_class(&packet);
+
+		DataPacket::encoder_reply_t parsed_data;
+		memcpy(&parsed_data, packet.data, sizeof(DataPacket::encoder_reply_t));
+
+		//DataPacket::encoder_reply_t data = encoders.getInfo();
 		//printf("timestamp (s): %d\n", (packet.packet->timestamp) / 1000);
 		//printf("packetnum: %d\n", packet.packet->packetnum);
-/*
-		if(exp_packetnum != packet.packet->packetnum){
-			cout << "dropped packet" << endl;
-			//exit(0);
-			return -1;
-		}
-		exp_packetnum++;
-*/
-		//printf("dl: %X\n", (unsigned short)packet.packet->dl);
-		//printf("dr: %X\n", (unsigned short)packet.packet->dr);
-		//printf("dt: %X\n", (unsigned short)packet.packet->dt);
+
+		printf("dl: %X\n", (unsigned short)parsed_data.dl);
+		printf("dr: %X\n", (unsigned short)parsed_data.dr);
+		printf("dt: %X\n", (unsigned short)parsed_data.dt);
 		cout << "\n\n";
 
-		cout << packet << "\n\n";
+		//cout << parsed_data << "\n\n";
+
+		//for(int i = 0; i < sizeof(DataPacket::header_t); i++){
+		//	printf("%X",  ((byte*)(&packet.header))[i]);
+		//}
+		for(int i = 0; i < sizeof(DataPacket::encoder_reply_t); i++){
+			//printf("%X",  ((byte*)(&parsed_data))[i]);
+			printf("%X", packet.data[i] );
+		}
 
 		//status = encoders.getInfo();
 		//cout << "Heading = " << status.heading << endl;
 		usleep(.005*1e6);
 	}
+/*
+	DataPacket pk;
+	pk = ((ArduinoInterface)encoders).arduinoResendPacket(i-8);
 
-	//PCdatapacket pk;
-	byte * pk = new byte[sizeof(EncoderData::reply_t)];
-	//((ArduinoInterface)encoders).requestPacket(8, &pk, sizeof(EncoderData::reply_t));
-	((ArduinoInterface)encoders).requestPacket(i-10, pk, sizeof(EncoderData::reply_t));
-	//EncoderData::reply_t * parseddata = (EncoderData::reply_t *) pk.data;
-	EncoderData::reply_t * parseddata = (EncoderData::reply_t *) pk;
-	printf("timestamp (s): %d\n", (parseddata->timestamp) / 1000);
-	printf("packetnum: %d\n", parseddata->packetnum);
+	DataPacket::encoder_reply_t parsed_data;
+	memcpy(&parsed_data, pk.data, sizeof(DataPacket::encoder_reply_t));
+	//printf("timestamp (s): %d\n", (parseddata->timestamp) / 1000);
+	//printf("packetnum: %d\n", parseddata->packetnum);
 
-	printf("dl: %X\n", (unsigned short)parseddata->dl);
-	printf("dr: %X\n", (unsigned short)parseddata->dr);
-	printf("dt: %X\n", (unsigned short)parseddata->dt);
-
-	delete[] pk;
+	printf("dl: %X\n", (unsigned short)parsed_data.dl);
+	printf("dr: %X\n", (unsigned short)parsed_data.dr);
+	printf("dt: %X\n", (unsigned short)parsed_data.dt);
+*/
+	//delete[] pk;
 }

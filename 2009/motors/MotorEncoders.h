@@ -49,9 +49,9 @@ class MotorEncoders: public ArduinoInterface {
 
 		//bool setLogging(bool status);
 
-		EncoderData::reply_t getInfo(void);
+		DataPacket::encoder_reply_t getInfo(void);
 
-		bool getInfo_class(EncoderData * status); //TODO: get rid of this
+		bool getInfo_class(DataPacket * status); //TODO: get rid of this
 
 
 
@@ -63,8 +63,8 @@ class MotorEncoders: public ArduinoInterface {
 		//bool logging_on;
 		bool setFunc(int ret);
 
-		unsigned int rx_packetnum;
-		unsigned int tx_packetnum;
+		//unsigned int rx_packetnum;
+		//unsigned int tx_packetnum;
 
 		//EncoderPacket getDeltas(void);
 
