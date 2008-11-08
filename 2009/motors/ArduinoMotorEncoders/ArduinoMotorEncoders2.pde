@@ -9,6 +9,7 @@
 //#include <stdio.h>
 //#include <stdarg.h>
 
+#include "../../arduino/ArduinoCmds.hpp"
 #include "EncoderDefines.h"
 #include "EncoderFunc.h"
 
