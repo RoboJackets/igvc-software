@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <termios.h>  /* POSIX terminal control definitions */
 #include <list>
+
 #include "DataPacket.hpp"
 
 /** This class defines a standard interface to the arduino microcontroller boards
@@ -17,6 +18,8 @@ typedef unsigned char byte;
 
 class ArduinoInterface {
 	public:
+		bool sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx);
+
 		/* Retrieve all of the state variables in the arduino */
 		bool getStatus(void *status, int size); // TODO: can this be a reference?
 
@@ -26,12 +29,6 @@ class ArduinoInterface {
 		/* Destructor */
 		virtual ~ArduinoInterface(void);
 
-		//bool requestPacket(int packnum,  PCdatapacket * packet, size_t len);
-		bool requestPacket(int packnum, void * packet, size_t len);
-
-		
-		bool setArduinoClock();
-
 	protected:
 		/* Constructor - declaired protected to prevent direct instantiation */
 		ArduinoInterface(void);
@@ -40,19 +37,17 @@ class ArduinoInterface {
 		/* Private serial interface */
 		int arduinoFD;
 		bool writeFully(int fd, void* buf, size_t numBytes);
-		bool readFully(int fd, void* buf, size_t numBytes, bool chkpknum);
+		bool readFully(int fd, void* buf, size_t numBytes);
 		int serialportInit(const char* serialport, speed_t baud);
 		bool serialFlush(int fd);
 
-		void savePacket(int packnum, void * data, size_t len);
-		//void deletePacket(int packnum);
-		PCdatapacket getSavedPacket(int packnum);
-		unsigned int getTime();
-		//PCdatapacket requestPacket(int packnum, size_t len);
-
-		std::list<PCdatapacket> packetlist;
-		int tx_num;
+		std::list<DataPacket*> tx_packet_list;
 		int rx_num;
+		int tx_num;
+		void savePacket(DataPacket* pk);
+		DataPacket* getSavedPacket(int packnum);
+		public: DataPacket arduinoResendPacket(int pknum);
+		unsigned int getTime();
 };
 
 #endif /* ARDUINO_INTERFACE_H */
