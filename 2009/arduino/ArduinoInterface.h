@@ -19,6 +19,7 @@ typedef unsigned char byte;
 class ArduinoInterface {
 	public:
 		bool sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx);
+		//bool sendCommand(char cmd, void * data_tx, int size_tx, DataPacket * pk_rx, size_t maxlen);
 
 		/* Retrieve all of the state variables in the arduino */
 		bool getStatus(void *status, int size); // TODO: can this be a reference?
@@ -48,6 +49,7 @@ class ArduinoInterface {
 		DataPacket* getSavedPacket(int packnum);
 		public: DataPacket arduinoResendPacket(int pknum);
 		unsigned int getTime();
+		bool setArduinoTime();
 };
 
 #endif /* ARDUINO_INTERFACE_H */
