@@ -231,11 +231,14 @@ void readSerial(void) {
 		for(int i = 0; i < PACKET_HEADER_SIZE; i++){
 			headerptr[i] = Serial.read();
 		}
+/*
 		if(header.size > 0){
 			for(int i = 0; i < header.size; i++){
 				Serial.read();
 			}
 		}
+*/
+
 /*
 		if(header.packetnum != rx_num){
 			
@@ -261,6 +264,13 @@ void readSerial(void) {
 				byte variableNumber = Serial.read();
 				byte variableValue = Serial.read();
 				setVariable(variableNumber, variableValue);
+
+				header_t headerOut;
+				headerOut.timestamp =  global_time + millis() - arduino_time;
+				headerOut.packetnum = tx_packetnum;
+				headerOut.cmd = 'w';
+				headerOut.size = 0;
+				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 				break;
 			}
 			case 'i':
@@ -355,7 +365,7 @@ void setVariable(byte num, byte val) {
 			//error
 			break;
 	}
-	Serial.println(num);  //TODO: check for errors
+	//Serial.println(num);  //TODO: check for errors
 }
 
 void sendStatus() {
