@@ -14,7 +14,7 @@ int main(void) {
 
 	//int exp_packetnum = 1;
 	int i;
-	for( i = 0; i < 10; i++){
+	for( i = 0; i < 100; i++){
 		//cout << "Heading = " << encoders.getHeading() << endl;
 		//encoders.setArduinoClock();
 		//reply_t packet = encoders.getInfo();
@@ -29,12 +29,10 @@ int main(void) {
 		//printf("timestamp (s): %d\n", (packet.packet->timestamp) / 1000);
 		//printf("packetnum: %d\n", packet.packet->packetnum);
 
-		printf("dl: %X\n", (unsigned short)parsed_data.dl);
-		printf("dr: %X\n", (unsigned short)parsed_data.dr);
-		printf("dt: %X\n", (unsigned short)parsed_data.dt);
-		cout << "\n\n";
-
-		//cout << parsed_data << "\n\n";
+		//printf("dl: %X\n", (unsigned short)parsed_data.dl);
+		//printf("dr: %X\n", (unsigned short)parsed_data.dr);
+		//printf("dt: %X\n", (unsigned)parsed_data.dt);
+		cout << parsed_data << "\n\n";
 
 		//for(int i = 0; i < sizeof(DataPacket::header_t); i++){
 		//	printf("%X",  ((byte*)(&packet.header))[i]);
@@ -43,7 +41,7 @@ int main(void) {
 			//printf("%X",  ((byte*)(&parsed_data))[i]);
 			printf("%X", packet.data[i] );
 		}
-
+		cout << "\n\n";
 		//status = encoders.getInfo();
 		//cout << "Heading = " << status.heading << endl;
 		usleep(.005*1e6);

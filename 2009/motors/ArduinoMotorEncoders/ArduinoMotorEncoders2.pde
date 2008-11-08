@@ -317,19 +317,26 @@ void readSerial(void) {
 void setVariable(byte num, byte val) {
 	switch (num) {
 		case PUSHPULL:
+			{
 			sendMode = val;
 			break;
+			}
 		case RET_T:
+			{
 			sendType = val;
 			break;
+			}
 		case INTEROG_DL:
-//TODO: keep val in sensible boundaries
-/*			if(val < XXX){
+			{
+			//TODO: keep val in sensible boundaries
+			/*			
+			if(val < XXX){
 				val = XXX;
 			}
-*/
+			*/
 			interog_dl = val;
 			break;
+			}
 		case SETCLK:
 			{			
 			unsigned long int mills;
@@ -343,19 +350,6 @@ void setVariable(byte num, byte val) {
 			arduino_time = millis();
 			break;
 			}
-/*
-		case RESENDPKT:
-		{
-			unsigned long int packet_num;
-			byte * bptr = (byte *)&packet_num;
-			bptr[0] = val;
-			bptr[1] = Serial.read();
-			bptr[2] = Serial.read();
-			bptr[3] = Serial.read();
-
-			resend_packet(packet_num);
-		}
-*/
 		default:
 			//error
 			break;
