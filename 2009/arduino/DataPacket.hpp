@@ -1,50 +1,50 @@
-#ifndef DATA_PACKET_H_
-#define DATA_PACKET_H_
+#ifndef DATAPACKET_HPP_
+#define DATAPACKET_HPP_
 
+#include <cstdlib>
 #include <iostream>
-#include <string>
+//length in bytes of header
+#define PACKET_HEADER_SIZE 10
+
+#define PACKET_ERROR_CMD 0xFF
+
+//1 byte commands, laptop -> arduino
+#define ARDUINO_GETSTATUS_CMD 'r'
+#define ARDUINO_SETVAR_CMD 'w'
+#define ARDUINO_ID_CMD 'i'
+#define ARDUINO_RSND_PK_CMD 'p'
+
+//1 byte commands/response arduino -> laptop
+#define ARDUINO_ERROR 0xFF
+#define ARDUINO_GETSTATUS_RESP 'r'
+#define ARDUINO_SETVAR_RESP 'w'
+#define ARDUINO_ID_RESP 'i'
+#define ARDUINO_RSND_PK_RESP 'p'
 
 typedef unsigned char byte;
 
-class PCdatapacket{
+enum ARDUINO_ERROR_STATUS { DROPPED_PACKET, REQUESTED_PACKET_OUT_OF_RANGE };
 
-	//friend class EncoderData;
-
+class DataPacket{
 	public:
-		int packnum;
-		size_t len;
-		byte * data;
 
-		typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; } header_t;
-		typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; char command; } command_t;
-		typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; char command; unsigned int var; } setint_t;
-		virtual ~PCdatapacket();
-	//protected:
-		PCdatapacket();
+	//Header types
+	typedef struct __attribute__((__packed__)) { int timestamp; int packetnum; byte cmd; byte size; } header_t;
 
-		friend std::ostream& operator<<(std::ostream& output, const PCdatapacket& pk);
+	//Data types
+	typedef struct __attribute__((__packed__)) { int errnum; byte * msg; } error_pk_t;
+	typedef struct __attribute__((__packed__)) { short dl; short dr; unsigned int dt;} encoder_reply_t;
+
+
+	header_t header;
+	byte * data;
+	//size_t datalen;
+
+	DataPacket();
+	~DataPacket();
 };
 
-class EncoderData : public PCdatapacket{
-	public:
-		typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; short dl; short dr; unsigned short dt; } reply_t;
+std::ostream& operator<<(std::ostream& output, DataPacket pk);
+std::ostream& operator<<(std::ostream& output, DataPacket::encoder_reply_t data);
 
-		reply_t * packet;
-		EncoderData();
-		//~EncoderData();
-
-		friend std::ostream& operator<<(std::ostream& output, const EncoderData& epk);
-};
-
-class CurrentData : public PCdatapacket{
-	public:
-		typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; short current_l; short current_r; } reply_t;
-
-		reply_t * packet;
-		CurrentData();
-		//~EncoderData();
-
-		friend std::ostream& operator<<(std::ostream& output, const CurrentData& cpk);
-};
-
-#endif
+#endif //DATAPACKET_HPP_
