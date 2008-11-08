@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdio>
+#include <cstring>
 #include "MotorEncoders.h"
 #include "../arduino/DataPacket.hpp"
 using namespace std;
@@ -14,12 +15,15 @@ int main(void) {
 
 	//int exp_packetnum = 1;
 	int i;
-	for( i = 0; i < 100; i++){
+	for( i = 0; i < 10; i++){
 		//cout << "Heading = " << encoders.getHeading() << endl;
 		//encoders.setArduinoClock();
 		//reply_t packet = encoders.getInfo();
 
 		DataPacket packet;
+
+		//((ArduinoInterface)encoders).setArduinoClock();
+
 		encoders.getInfo_class(&packet);
 
 		DataPacket::encoder_reply_t parsed_data;
