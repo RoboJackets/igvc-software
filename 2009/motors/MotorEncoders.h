@@ -2,6 +2,7 @@
 #define MOTOR_ENCODERS_H
 
 #include "../arduino/ArduinoInterface.h"
+#include "../arduino/ArduinoCmds.hpp"
 //#include "MotorEncodersFrame.h"
 #include "./ArduinoMotorEncoders/EncoderDefines.h"
 #include <string>

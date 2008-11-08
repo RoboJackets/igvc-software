@@ -15,9 +15,7 @@
 #define WHEEL_RADIUS		((double)5 / (double)MOTOR_RATIO)
 #define WHEEL_BASE		((double)28)
 
-// Enums for data settings
-enum opttype_t { PUSHPULL = 0, RET_T, INTEROG_DL, SETCLK, RESENDPKT};//interogdl - miliseconds
-enum opt_t {PUSH = 0, PULL, SEND_DTICK, SEND_CURRENT};
+
 
 //length in bytes of header
 #define PACKET_HEADER_SIZE 10
