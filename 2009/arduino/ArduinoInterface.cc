@@ -8,6 +8,7 @@
 #include <time.h>
 
 #include "ArduinoInterface.h"
+#include "ArduinoCmds.hpp"
 
 // TODO:	add a timeouts to serial functions
 //			add checks for disconnected arduino
@@ -24,6 +25,11 @@
  * 
  */
 ArduinoInterface::ArduinoInterface(void) {
+
+	//Init vars
+	tx_num = 1;
+	rx_num = 1;
+	
 	/* See if anything is connected on ports USB0 through USB9 */
 	char serialAddress[] = SERIAL_PORT;
 	for (int i=0;i<10;i++) {
@@ -66,6 +72,10 @@ ArduinoInterface::ArduinoInterface(void) {
  * 
  */
 ArduinoInterface::~ArduinoInterface(void) {
+	for(std::list<DataPacket*>::iterator it = tx_packet_list.begin(); it != tx_packet_list.end(); it++){
+		delete *it;
+	}
+
 	if (arduinoFD == -1) {
 		return;
 	}
@@ -289,7 +299,9 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void *
 	pk_tx->header.cmd = cmd;
 	pk_tx->header.size = size_tx;
 
-	writeFully(arduinoFD, &(pk_tx->header), PACKET_HEADER_SIZE);
+	if(writeFully(arduinoFD, &(pk_tx->header), PACKET_HEADER_SIZE)){
+		return true;
+	}
 
 	if(pk_tx->header.size > 0) {
 		pk_tx->data = new byte[size_tx];
@@ -415,4 +427,12 @@ unsigned int ArduinoInterface::getTime(){
 	unsigned int millis = time.tv_sec*1000 + ((long int)((double)time.tv_usec/1000));
 
 	return(millis);
+}
+
+bool ArduinoInterface::setArduinoTime(){
+	byte msg[5];
+	msg[0] = SETCLK;
+	unsigned int t = getTime();
+	memcpy(msg+1, &t, sizeof(unsigned int));
+	sendCommand('w', msg, 5, NULL, 0);
 }

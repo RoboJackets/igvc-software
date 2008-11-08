@@ -6,21 +6,6 @@
 //length in bytes of header
 #define PACKET_HEADER_SIZE 10
 
-#define PACKET_ERROR_CMD 0xFF
-
-//1 byte commands, laptop -> arduino
-#define ARDUINO_GETSTATUS_CMD 'r'
-#define ARDUINO_SETVAR_CMD 'w'
-#define ARDUINO_ID_CMD 'i'
-#define ARDUINO_RSND_PK_CMD 'p'
-
-//1 byte commands/response arduino -> laptop
-#define ARDUINO_ERROR 0xFF
-#define ARDUINO_GETSTATUS_RESP 'r'
-#define ARDUINO_SETVAR_RESP 'w'
-#define ARDUINO_ID_RESP 'i'
-#define ARDUINO_RSND_PK_RESP 'p'
-
 typedef unsigned char byte;
 
 enum ARDUINO_ERROR_STATUS { DROPPED_PACKET, REQUESTED_PACKET_OUT_OF_RANGE };
