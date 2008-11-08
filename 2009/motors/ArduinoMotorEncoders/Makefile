@@ -38,11 +38,13 @@
 
 #TARGET = test
 TARGET = ArduinoMotorEncoders2
+PRG = "ArduinoMotorEncoders2"
 INSTALL_DIR = /home/nebousuru/Desktop/arduino-0011
 PORT = /dev/ttyUSB0
 UPLOAD_RATE = 19200
 AVRDUDE_PROGRAMMER = stk500v1
 MCU = atmega168
+MCU_TARGET = atmega168
 F_CPU = 16000000
 
 ############################################################################
@@ -260,12 +262,12 @@ ddd: gdbinit
 	ddd --debugger "avr-gdb -x $(GDBINITFILE)"
 
 gdbserver: gdbinit
-	simulavr --device $(MCU) --gdbserver
+	simulavr --device $(MCU_TARGET) --gdbserver
 
 gdbinit: $(GDBINITFILE)
 
-$(GDBINITFILE): $(TARGET).hex
-	@echo "file ./applet/$(TARGET).elf" > $(GDBINITFILE)
+$(GDBINITFILE): $(PRG).hex
+	@echo "file $(PRG).elf" > $(GDBINITFILE)
 	
 	@echo "target remote localhost:1212" \
 		                >> $(GDBINITFILE)
