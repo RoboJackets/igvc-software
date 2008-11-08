@@ -29,6 +29,6 @@ typedef struct __attribute__((__packed__)) { long timestamp; long packetnum; byt
 // Arduino -> Laptop data packet
 typedef struct  __attribute__((__packed__)) { int dl; int dr; unsigned long dt; } reply_dtick_t;
 
-typedef struct  __attribute__((__packed__)) { int currentl; int currentr; unsigned long t; } reply_current_t;
+typedef struct  __attribute__((__packed__)) { int currentl; int currentr; unsigned long dt; } reply_current_t;
 
 #endif //ENCODER_DEFINES_H_

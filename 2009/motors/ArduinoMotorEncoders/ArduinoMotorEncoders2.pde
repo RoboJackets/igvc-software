@@ -50,8 +50,8 @@ unsigned long lastsendtime;
 int interog_dl = 100;
 int sendMode = PULL;
 int sendType = SEND_DTICK;
-long rx_packetnum;
-long tx_packetnum;
+long rx_num;
+long tx_num;
 
 long int global_time;
 long int arduino_time;
@@ -86,8 +86,8 @@ void setup(void) {
 	lastsendtime = millis();
 	global_time = millis();
 	
-	rx_packetnum = 1;
-	tx_packetnum = 1;
+	rx_num = 1;
+	tx_num = 1;
 	dtick_packet_store_pos = 0;
 
 	Serial.flush();
@@ -231,6 +231,7 @@ void readSerial(void) {
 		for(int i = 0; i < PACKET_HEADER_SIZE; i++){
 			headerptr[i] = Serial.read();
 		}
+		rx_num++;
 /*
 		if(header.size > 0){
 			for(int i = 0; i < header.size; i++){
@@ -250,11 +251,29 @@ void readSerial(void) {
 			{
 				header_t headerOut;
 				headerOut.timestamp =  global_time + millis() - arduino_time;
-				headerOut.packetnum = tx_packetnum;
+				headerOut.packetnum = tx_num;
 				headerOut.cmd = 'r';
-				headerOut.size = sizeof(reply_dtick_t);
-				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
-				sendStatus();
+				switch(sendType){
+					case SEND_CURRENT:
+					{
+						reply_current_t msg = getCurrentStatus();
+						headerOut.size = sizeof(reply_current_t);
+
+						serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+						serialPrintBytes(&msg, headerOut.size);
+						break;
+					}
+					case SEND_DTICK:
+					{
+						reply_dtick_t msg = getEncoderStatus();
+						headerOut.size = sizeof(reply_dtick_t);
+		
+						serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+						serialPrintBytes(&msg, headerOut.size);
+						break;
+					}
+				}
+				tx_num++;
 				return;//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
 				break;
 			}
@@ -267,10 +286,11 @@ void readSerial(void) {
 
 				header_t headerOut;
 				headerOut.timestamp =  global_time + millis() - arduino_time;
-				headerOut.packetnum = tx_packetnum;
+				headerOut.packetnum = tx_num;
 				headerOut.cmd = 'w';
 				headerOut.size = 0;
 				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				tx_num++;
 				break;
 			}
 			case 'i':
@@ -278,11 +298,11 @@ void readSerial(void) {
 				//Serial.print("i am alive");
 				header_t headerOut;
 				headerOut.timestamp =  global_time + millis() - arduino_time;
-				headerOut.packetnum = tx_packetnum;
+				headerOut.packetnum = tx_num;
 				headerOut.cmd = 'i';
 				headerOut.size = 1;
 				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
-				tx_packetnum++;
+				tx_num++;
 				Serial.print('e');
 				break;
 			}
@@ -297,6 +317,7 @@ void readSerial(void) {
 				bptr[2] = Serial.read();
 				bptr[3] = Serial.read();
 				resend_packet(packet_num);
+				tx_num++;
 				break;
 			}
 			default:
@@ -368,13 +389,20 @@ void setVariable(byte num, byte val) {
 	//Serial.println(num);  //TODO: check for errors
 }
 
-void sendStatus() {
+
+reply_current_t getCurrentStatus(){
+	reply_current_t packet;
+	packet.currentl = 0xDEAD;
+	packet.currentr = 0xFACE;
+	packet.dt = 0xBEEFBEEF;
+	return(packet);
+}
+
+reply_dtick_t getEncoderStatus() {
 	//serialPrintBytes(&(current.leftMotorTick), sizeof(int));  // only 9 bits are used
 	//serialPrintBytes(&(current.rightMotorTick), sizeof(int));
 	//serialPrintBytes(&heading, sizeof(double));
-	//serialPrintBytes(packetnum, sizeof(long));
 
-	if(sendType == SEND_DTICK){
 		reply_dtick_t packet;
 		//packet.dl = dl;
 		//packet.dr = dr;
@@ -382,8 +410,10 @@ void sendStatus() {
 		packet.dl = 0xDEAD;
 		packet.dr = 0xFACE;
 		packet.dt = 0xBEEFBEEF;
-		serialPrintBytes(&packet, sizeof(reply_dtick_t));
 
+		return(packet);
+
+/*
 		if(dtick_packet_store_pos < 50){
 			reply_dtick_packet_store[dtick_packet_store_pos] = packet;
 			dtick_packet_store_pos++;
@@ -393,12 +423,7 @@ void sendStatus() {
 			dtick_packet_store_pos = 0;
 			reply_dtick_packet_store[dtick_packet_store_pos] = packet;
 		}
-
-	}
-	else if(sendType == SEND_CURRENT){
-
-	}
-
+*/
 	//send checksum
 }
 
@@ -472,7 +497,7 @@ void resend_packet(long unsigned int num){
 	reply_dtick_t packet;
 	//packet.timestamp =  0xFFFFFFFF;
 	//packet.packetnum = tx_packetnum;
-	tx_packetnum++;
+	//tx_packetnum++;
 	packet.dl = 0x0000;
 	packet.dr = 0x0000;
 	packet.dt = 0x0000;

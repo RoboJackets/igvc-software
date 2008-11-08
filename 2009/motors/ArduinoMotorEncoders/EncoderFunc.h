@@ -11,7 +11,8 @@ void readMotorEncoders(struct motorEncoderData *data);
 
 void serialPrintBytes(void *data, int numBytes);
 
-void sendStatus();
+reply_dtick_t getEncoderStatus();
+reply_current_t getCurrentStatus();
 
 void calcDelta(void);
 
