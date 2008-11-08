@@ -119,7 +119,7 @@ int Robot::init() {
     atexit(Robot::destroy);
 
     /* init video writer */
-    createVideoWriter();
+    //createVideoWriter();
 
     /* success */
     return 1;
@@ -218,7 +218,7 @@ void Robot::connectToCamera() {
 void Robot::initGlut() {
 
     // dummy args
-    int argc = 1;
+    int argc = 0;
     char** argv;
 
     // initialization
