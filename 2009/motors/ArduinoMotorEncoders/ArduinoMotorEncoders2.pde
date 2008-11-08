@@ -1,11 +1,13 @@
 #define ATMEGA168
 
+//#include "WProgram.h"
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/signal.h>
 #include <avr/delay.h>
 //#include <stdio.h>
-#include <stdarg.h>
+//#include <stdarg.h>
 
 #include "EncoderDefines.h"
 #include "EncoderFunc.h"
@@ -86,6 +88,8 @@ void setup(void) {
 	rx_packetnum = 1;
 	tx_packetnum = 1;
 	dtick_packet_store_pos = 0;
+
+	Serial.flush();
 }
 
 void loop(void) {
@@ -97,6 +101,13 @@ void loop(void) {
 	//calcDelta();
 
 	readSerial();
+/*
+	Serial.print("header len: ");
+	Serial.println(sizeof(header_t));
+	Serial.print("msg len: ");
+	Serial.println(sizeof(reply_dtick_t));
+	delay(3);
+*/
 }
 
 void calcDelta(void){
@@ -211,63 +222,95 @@ void readSerial(void) {
 
 void readSerial(void) {
 	if (Serial.available() > 0) {
-		while (Serial.available()<9){}// TODO: add timeout
-			byte * bptr;
-			long int intimestamp, inpacketnum;
-			bptr = (byte *)&intimestamp;
-			bptr[0] = Serial.read();
-			bptr[1] = Serial.read();
-			bptr[2] = Serial.read();
-			bptr[3] = Serial.read();
+		while (Serial.available() < PACKET_HEADER_SIZE){}// TODO: add timeout
+		
+		header_t header;
+		byte * headerptr = (byte*)&header;
 
-			bptr = (byte *)&inpacketnum;
-			bptr[0] = Serial.read();
-			bptr[1] = Serial.read();
-			bptr[2] = Serial.read();
-			bptr[3] = Serial.read();
-
-		incomingByte = Serial.read();
-
-		if (incomingByte == 'r') {
-			sendStatus();
-			return;//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
-
-		} else if (incomingByte == 'w') {
-			while (Serial.available()<2){}  // TODO: add timeout
-			byte variableNumber = Serial.read();
-			byte variableValue = Serial.read();
-			setVariable(variableNumber, variableValue);
-
-		} else if (incomingByte == 'i') {
-			long int timestamp =  global_time + millis() - arduino_time;
-			unsigned long int packetnum = tx_packetnum;
-			tx_packetnum++;
-			serialPrintBytes(&timestamp, sizeof(long));
-			serialPrintBytes(&packetnum, sizeof(long));
-			Serial.print('e');
-
-		} else if(incomingByte == 'p') {
-			//long int timestamp =  global_time + millis() - arduino_time;
-			unsigned long int packet_num;
-			byte * bptr = (byte *)&packet_num;
-			while (Serial.available()<4){}  // TODO: add timeout
-			bptr[0] = Serial.read();
-			bptr[1] = Serial.read();
-			bptr[2] = Serial.read();
-			bptr[3] = Serial.read();
-			resend_packet(packet_num);
-
-		} else {
-			//error
+		for(int i = 0; i < PACKET_HEADER_SIZE; i++){
+			headerptr[i] = Serial.read();
 		}
+		if(header.size > 0){
+			for(int i = 0; i < header.size; i++){
+				Serial.read();
+			}
+		}
+/*
+		if(header.packetnum != rx_num){
+			
+		}
+*/
+		switch(header.cmd){
+
+			case 'r':
+			{
+				header_t headerOut;
+				headerOut.timestamp =  global_time + millis() - arduino_time;
+				headerOut.packetnum = tx_packetnum;
+				headerOut.cmd = 'r';
+				headerOut.size = sizeof(reply_dtick_t);
+				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				sendStatus();
+				return;//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
+				break;
+			}
+			case 'w':
+			{
+				while (Serial.available()<2){}  // TODO: add timeout
+				byte variableNumber = Serial.read();
+				byte variableValue = Serial.read();
+				setVariable(variableNumber, variableValue);
+				break;
+			}
+			case 'i':
+			{
+				//Serial.print("i am alive");
+				header_t headerOut;
+				headerOut.timestamp =  global_time + millis() - arduino_time;
+				headerOut.packetnum = tx_packetnum;
+				headerOut.cmd = 'i';
+				headerOut.size = 1;
+				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				tx_packetnum++;
+				Serial.print('e');
+				break;
+			}
+			case 'p':
+			{
+				//long int timestamp =  global_time + millis() - arduino_time;
+				unsigned long int packet_num;
+				byte * bptr = (byte *)&packet_num;
+				while (Serial.available()<4){}  // TODO: add timeout
+				bptr[0] = Serial.read();
+				bptr[1] = Serial.read();
+				bptr[2] = Serial.read();
+				bptr[3] = Serial.read();
+				resend_packet(packet_num);
+				break;
+			}
+			default:
+			{
+				/*
+				header_t headerOut;
+				headerOut.timestamp =  global_time + millis() - arduino_time;
+				headerOut.packetnum = tx_packetnum;
+				headerOut.cmd = 0xFF;
+				headerOut.size = 0;
+				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				break;
+				*/				
+			}
+		}
+
 	}
-	
+	/*
 	if(sendMode == PUSH){
 		if(millis() < (lastsendtime + interog_dl)){//auto send timer expired
 			sendStatus();
 			lastsendtime = millis();
 		}
 	}
+	*/
 }
 
 //TODO: make this use an array
@@ -328,17 +371,13 @@ void sendStatus() {
 
 	if(sendType == SEND_DTICK){
 		reply_dtick_t packet;
-		packet.timestamp =  global_time + millis() - arduino_time;
-		packet.packetnum = tx_packetnum;
-		tx_packetnum++;
 		//packet.dl = dl;
 		//packet.dr = dr;
-//		packet.dt = dt;
+		//packet.dt = dt;
 		packet.dl = 0xDEAD;
 		packet.dr = 0xFACE;
-		packet.dt = 0xBEEF;
-	
-		serialPrintBytes(&packet, sizeof(packet));
+		packet.dt = 0xBEEFBEEF;
+		serialPrintBytes(&packet, sizeof(reply_dtick_t));
 
 		if(dtick_packet_store_pos < 50){
 			reply_dtick_packet_store[dtick_packet_store_pos] = packet;
@@ -354,24 +393,8 @@ void sendStatus() {
 	else if(sendType == SEND_CURRENT){
 
 	}
-/*
-	//send packet num
-	serialPrintBytes(&tx_packetnum, sizeof(long));
-	tx_packetnum++;
-	//send time
-	long int timestamp = global_time + millis() - arduino_time;
-	serialPrintBytes(&timestamp, sizeof(long));
-	if(sendType == SEND_DTICK){
-		serialPrintBytes(&dl, sizeof(int));
-		serialPrintBytes(&dr, sizeof(int));
-		serialPrintBytes(&dt, sizeof(unsigned int));
-	}
-	else if(sendType == SEND_CURRENT){
 
-	}
-*/
 	//send checksum
-
 }
 
 void serialPrintBytes(void *data, int numBytes) {
@@ -430,6 +453,7 @@ int SPIReadInt(int inputPin, int slaveSelectPin, int clockPin) {
 }
 
 void resend_packet(long unsigned int num){
+/*
 	for(int i = 0; i < 50; i++ ){
 		if(reply_dtick_packet_store[i].packetnum == num){
 			serialPrintBytes(&reply_dtick_packet_store[i], sizeof(reply_dtick_t));
@@ -439,9 +463,10 @@ void resend_packet(long unsigned int num){
 
 		//}
 	}
+*/
 	reply_dtick_t packet;
-	packet.timestamp =  0xFFFFFFFF;
-	packet.packetnum = tx_packetnum;
+	//packet.timestamp =  0xFFFFFFFF;
+	//packet.packetnum = tx_packetnum;
 	tx_packetnum++;
 	packet.dl = 0x0000;
 	packet.dr = 0x0000;
