@@ -93,7 +93,7 @@ int URGLaserDriver::Shutdown() {
 // Main function for device thread
 void URGLaserDriver::Main() {
     int min_i =0;
-    int max_i =769;
+    int max_i =768;
     int ranges_count = max_i - min_i;
     float ranges[MAX_READINGS];
 
