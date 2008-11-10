@@ -23,6 +23,9 @@
 //Header types
 typedef struct __attribute__((__packed__)) { long timestamp; long packetnum; byte cmd; byte size; } header_t;
 
+//type for packet storage
+typedef struct {header_t head; size_t len; byte * msg; } packet_t;
+
 // Arduino -> Laptop ID packet
 //typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; char command; } idpk_t;
 

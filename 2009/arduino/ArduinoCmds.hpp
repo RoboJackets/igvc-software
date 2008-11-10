@@ -20,4 +20,7 @@
 enum opttype_t { PUSHPULL = 0, RET_T, INTEROG_DL, SETCLK, RESENDPKT};//interogdl - miliseconds
 enum opt_t {PUSH = 0, PULL, SEND_DTICK, SEND_CURRENT};
 
+//enum for error
+enum error_t {PACKET_DNE = 0};
+
 #endif //ARDUINO_COMMANDS_HPP_
