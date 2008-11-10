@@ -50,9 +50,9 @@ int main(void) {
 		//cout << "Heading = " << status.heading << endl;
 		usleep(.005*1e6);
 	}
-/*
+
 	DataPacket pk;
-	pk = ((ArduinoInterface)encoders).arduinoResendPacket(i-8);
+	((ArduinoInterface)encoders).arduinoResendPacket(i-8, &pk);
 
 	DataPacket::encoder_reply_t parsed_data;
 	memcpy(&parsed_data, pk.data, sizeof(DataPacket::encoder_reply_t));
@@ -61,7 +61,7 @@ int main(void) {
 
 	printf("dl: %X\n", (unsigned short)parsed_data.dl);
 	printf("dr: %X\n", (unsigned short)parsed_data.dr);
-	printf("dt: %X\n", (unsigned short)parsed_data.dt);
-*/
+	printf("dt: %X\n", (unsigned)parsed_data.dt);
+
 	//delete[] pk;
 }

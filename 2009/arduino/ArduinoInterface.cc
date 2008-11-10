@@ -360,9 +360,7 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void *
 
 }
 
-DataPacket ArduinoInterface::arduinoResendPacket(int pknum){
-	DataPacket pk_out;
-
+void ArduinoInterface::arduinoResendPacket(int pknum, DataPacket * pk_out){
 
 	DataPacket * pk_tx = new DataPacket;
 	pk_tx->header.packetnum = tx_num;
@@ -384,20 +382,27 @@ DataPacket ArduinoInterface::arduinoResendPacket(int pknum){
 	readFully(arduinoFD, pk_rx.data, pk_rx.header.size);
 	rx_num++;
 
+	//the data packet was put in the data body of the rx packet, so make a new object to extract it to
+	//DataPacket pk_out;
+
 	switch(pk_rx.header.cmd){
 		case ARDUINO_ERROR:
 		{
+			int errormsg;
+			memcpy(&errormsg, pk_rx.data + PACKET_HEADER_SIZE, sizeof(int));
+			std::cout << "error requesting packet num " << pknum << std::endl << "got error num " << errormsg << std::endl;
 			break;
 		}
 		case ARDUINO_RSND_PK_RESP:
 		{
-			memcpy(&(pk_out.header), pk_rx.data, PACKET_HEADER_SIZE);
-			memcpy(pk_out.data, pk_rx.data + PACKET_HEADER_SIZE, pk_rx.header.size);
-			return(pk_out);
+			memcpy(&(pk_out->header), pk_rx.data, PACKET_HEADER_SIZE);
+			pk_out->data = new byte[pk_out->header.size];
+			memcpy(pk_out->data, pk_rx.data + PACKET_HEADER_SIZE, pk_out->header.size);
 			break;
 		}
 	}
-
+	std::cout << pk_out <<std::endl;
+	//return(pk_out);
 }
 
 void ArduinoInterface::savePacket(DataPacket* pk){
