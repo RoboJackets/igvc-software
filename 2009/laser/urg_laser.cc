@@ -139,10 +139,10 @@ urg_laser::ReadUntil (int fd, unsigned char *buf, int len, int timeout) {
     do {
         if (timeout >= 0) {
             if ((retval = poll (ufd, 1, timeout)) < 0) {
-                perror ("poll():");
+                printf ("poll():");
                 return (-1);
             } else if (retval == 0) {
-                puts ("Timed out on read");
+                printf ("Timed out on read");
                 return (-1);
             }
         }
@@ -153,7 +153,7 @@ urg_laser::ReadUntil (int fd, unsigned char *buf, int len, int timeout) {
 
         current += ret;
         if (current > 2 && current < len && buf[current-2] == '\n' && buf[current-1] == '\n') {
-            puts ("> E: ReadUntil: Got an end of command while waiting for more data, this is bad.\n");
+            printf ("> E: ReadUntil: Got an end of command while waiting for more data, this is bad.\n");
             return (-1);
         }
     } while (current < len);
@@ -182,7 +182,7 @@ urg_laser::ChangeBaud (int curr_baud, int new_baud, int timeout) {
     fd = fileno (laser_port);
 
     if (tcgetattr (fd, &newtio) < 0) {
-        perror ("urg_laser::ChangeBaud:tcgetattr():");
+        printf ("urg_laser::ChangeBaud:tcgetattr():");
         close (fd);
         return (-1);
     }
@@ -191,7 +191,7 @@ urg_laser::ChangeBaud (int curr_baud, int new_baud, int timeout) {
     cfsetospeed (&newtio, curr_baud);
 
     if (tcsetattr (fd, TCSAFLUSH, &newtio) < 0 ) {
-        perror ("urg_laser::ChangeBaud:tcsetattr():");
+        printf ("urg_laser::ChangeBaud:tcsetattr():");
         close (fd);
         return (-1);
     }
@@ -282,11 +282,11 @@ urg_laser::ChangeBaud (int curr_baud, int new_baud, int timeout) {
     // the response actually ends in 'LF status LF'.
     if (((len = ReadUntil (fd, buf, sizeof (buf), timeout)) < 0) ||
             (buf[15] != '0')) {
-        puts ("failed to change baud rate");
+        printf ("failed to change baud rate");
         return (-1);
     } else {
         if (tcgetattr (fd, &newtio) < 0) {
-            perror ("urg_laser::ChangeBaud:tcgetattr():");
+            printf ("urg_laser::ChangeBaud:tcgetattr():");
             close (fd);
             return (-1);
         }
@@ -294,7 +294,7 @@ urg_laser::ChangeBaud (int curr_baud, int new_baud, int timeout) {
         cfsetispeed (&newtio, new_baud);
         cfsetospeed (&newtio, new_baud);
         if (tcsetattr (fd, TCSAFLUSH, &newtio) < 0 ) {
-            perror ("urg_laser::ChangeBaud:tcsetattr():");
+            printf ("urg_laser::ChangeBaud:tcsetattr():");
             close (fd);
             return (-1);
         } else {
@@ -320,19 +320,19 @@ urg_laser::Open (const char * PortName, int use_serial, int baud) {
 
     int fd = fileno (laser_port);
     if (use_serial) {
-        puts ("Trying to connect at 19200");
+        printf ("Trying to connect at 19200");
         if (this->ChangeBaud (B19200, baud, 100) != 0) {
-            puts ("Trying to connect at 57600");
+            printf ("Trying to connect at 57600");
             if (this->ChangeBaud (B57600, baud, 100) != 0) {
-                puts ("Trying to connect at 115200");
+                printf ("Trying to connect at 115200");
                 if (this->ChangeBaud (B115200, baud, 100) != 0) {
-                    puts ("failed to connect at any baud");
+                    printf ("failed to connect at any baud");
                     close (fd);
                     return (-1);
                 }
             }
         }
-        puts ("Successfully changed baud rate");
+        printf ("Successfully changed baud rate");
     } else {
         // set up new settings
         struct termios newtio;
