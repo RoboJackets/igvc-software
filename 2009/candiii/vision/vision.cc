@@ -15,7 +15,7 @@
 // for scanning the path image /////////////////////////////////////////////////////////////
 #define BAD_PIXEL 0		// value to set path image to
 #define GOOD_PIXEL 255	// value to set path image to
-#define L_R_OFFSET 15 	// pixel spacing from center scan line up
+#define L_R_OFFSET 20 	// pixel spacing from center scan line up
 #define ROBOT_WIDTH 34 	// pixels wide
 #define PIXEL_SKIP 4 	// noise filtering threshold in checkPixel() & also top/bottom padding
 
@@ -40,11 +40,6 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
 
     /* Do vision processing */
     {
-        /* no memory leaks (cloning image) */
-        //if (visCvDebug) cvReleaseImage(&visCvDebug);
-
-        /* copy raw image for debug drawing */
-        //visCvDebug = cvCloneImage(visCvRaw);
 
         /* split images into channels */
         //GetRGBChannels();
@@ -456,8 +451,8 @@ void Vision::robotWidthScan(IplImage* img, int& goalx, int& goaly) {
             //cvLine(visCvDebug, cvPoint(center,height-2), cvPoint(goalx,goaly), (CV_RGB(0,0,0)), 2, 8, 0);
             //cvLine(visCvDebug, cvPoint(goalx-half,goaly), cvPoint(goalx+half,goaly), (CV_RGB(0,0,0)), 2, 8, 0);
             // visCvPath=320x240 //
-            cvLine(visCvDebug, cvPoint(center*2,img->height*2-2), 	cvPoint(goalx*2,goaly*2), 		 (CV_RGB(0,0,0)), 2, 8, 0);
-            cvLine(visCvDebug, cvPoint((goalx-half)*2,goaly*2), cvPoint((goalx+half)*2,goaly*2), (CV_RGB(0,0,0)), 2, 8, 0);
+            cvLine(visCvDebug, cvPoint(center*2,img->height*2-2), cvPoint(goalx*2,goaly*2)       , (CV_RGB(0,0,0)), 2, 8, 0);
+            cvLine(visCvDebug, cvPoint((goalx-half)*2,goaly*2)  , cvPoint((goalx+half)*2,goaly*2), (CV_RGB(0,0,0)), 2, 8, 0);
             //========================//
 
         }
@@ -501,7 +496,7 @@ void Vision::visGenPath(IplImage* img) {
     }//y
 
     // debug draw black line to see which column was chosen (left,center,right)
-    //cvLine(visCvThresh, cvPoint(x,1), cvPoint(x,height-2), (CV_RGB(0,0,0)), 2, 8, 0);
+    cvLine(visCvThresh, cvPoint(x,1), cvPoint(x,height-2), (CV_RGB(0,0,0)), 2, 8, 0);
 
 }//visGenPath
 
@@ -858,7 +853,7 @@ void Vision::LoadVisionXMLSettings() {
         } else {
             printf("Vision settings loaded \n");
         }
-        //printf("thresholds: sat %d  hue %d \n",satThreshold,hueThreshold);
+        printf("thresholds: sat %d  hue %d \n",satThreshold,hueThreshold);
     }
 
 }
@@ -881,4 +876,5 @@ void Vision::ThresholdImage(IplImage *src, IplImage *dst, int thresh) {
     // binary threshold
     cvThreshold(src,dst,thresh,255,CV_THRESH_BINARY_INV);
 }
+
 
