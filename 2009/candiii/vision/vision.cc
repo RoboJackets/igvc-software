@@ -151,6 +151,9 @@ void Vision::init() {
     dangerous_pixel_color = CV_RGB(0, 0, 255);		// blue
     /**********************************************************************************/
 
+    // font
+    cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2);
+
 }
 
 /*
@@ -828,24 +831,31 @@ void Vision::ConvertAllImageViews(int trackbarVal) {
 
     switch (trackbarVal) {
     case 0:
+        cvPutText(visCvRaw, "Raw", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
         cvShowImage("display", visCvRaw);
         break;
     case 1:
+        cvPutText(visCvDebug, "Debug", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
         cvShowImage("display", visCvDebug);
         break;
     case 2:
+        cvPutText(visCvPath, "Path", cvPoint(5,visCvPath->height-10), &font, CV_RGB(255,255,255));
         cvShowImage("display", visCvPath);
         break;
     case 3:
+        cvPutText(visCvThresh, "Thresh", cvPoint(5,visCvThresh->height-10), &font, CV_RGB(255,255,255));
         cvShowImage("display", visCvThresh);
         break;
     case 4:
+        cvPutText(visCvHue, "Hue", cvPoint(5,visCvHue->height-10), &font, CV_RGB(0,0,0));
         cvShowImage("display", visCvHue);
         break;
     case 5:
+        cvPutText(visCvSaturation, "Sat", cvPoint(5,visCvSaturation->height-10), &font, CV_RGB(0,0,0));
         cvShowImage("display", visCvSaturation);
         break;
     case 6:
+        cvPutText(visCvHSV, "HSV", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
         cvShowImage("display", visCvHSV);
         break;
     /* future use */

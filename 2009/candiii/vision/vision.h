@@ -103,6 +103,8 @@ public:
     // manually does color analysis that the HSV colorspace doesn't
     void preProcessColors(IplImage* img);
 
+    CvFont font;
+
 };
 
 

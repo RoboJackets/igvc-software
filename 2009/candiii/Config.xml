@@ -16,8 +16,8 @@
 	<blue>646</blue>
 
 	<!-- Vision Processing Settings -->
-	<satThresh>60</satThresh> <!-- higher => more noise -->
-	<hueThresh>20</hueThresh> <!-- higher => more noise -->
+	<satThresh>65</satThresh> <!-- higher => more noise/sensitive -->
+	<hueThresh>25</hueThresh> <!-- higher => more noise/sensitive -->
 	<doTransform>1</doTransform>
 
 </Config>
