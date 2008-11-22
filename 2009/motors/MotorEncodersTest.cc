@@ -52,18 +52,19 @@ int main(void) {
 	}
 
 	DataPacket pk;
-	((ArduinoInterface)encoders).arduinoResendPacket(i, &pk);
+	((ArduinoInterface)encoders).arduinoResendPacket(1, &pk);
 
 	DataPacket::encoder_reply_t parsed_data;
 	if (pk.data != NULL){
 		memcpy(&parsed_data, pk.data, sizeof(DataPacket::encoder_reply_t));
+		printf("dl: %X\n", (unsigned short)parsed_data.dl);
+		printf("dr: %X\n", (unsigned short)parsed_data.dr);
+		printf("dt: %X\n", (unsigned)parsed_data.dt);
 	}
 	//printf("timestamp (s): %d\n", (parseddata->timestamp) / 1000);
 	//printf("packetnum: %d\n", parseddata->packetnum);
 
-	printf("dl: %X\n", (unsigned short)parsed_data.dl);
-	printf("dr: %X\n", (unsigned short)parsed_data.dr);
-	printf("dt: %X\n", (unsigned)parsed_data.dt);
+
 
 	//delete[] pk;
 }

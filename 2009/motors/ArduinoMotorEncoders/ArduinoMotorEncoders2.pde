@@ -86,15 +86,19 @@ void setup(void) {
 	
 	lastsendtime = millis();
 	global_time = millis();
+
+	sendMode = PULL;
+	sendType = SEND_DTICK;
 	
 	rx_num = 1;
 	tx_num = 1;
 	packet_store_pos = 0;
 
 	for(int i = 0; i < 50; i++){
+		packet_store[i].head.packetnum = 0;
 		packet_store[i].msg = NULL;
 	}
-	Serial.flush();
+	//Serial.flush();
 }
 
 void loop(void) {
@@ -275,7 +279,8 @@ void readSerial(void) {
 		
 						serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 						serialPrintBytes(&msg, headerOut.size);
-						savePacket(headerOut, (byte*)&msg);
+						//savePacket(headerOut, (byte*)&msg);
+						//Serial.print('t');
 						break;
 					}
 				}
@@ -302,7 +307,6 @@ void readSerial(void) {
 			}
 			case 'i':
 			{
-				//Serial.print("i am alive");
 				header_t headerOut;
 				headerOut.timestamp =  global_time + millis() - arduino_time;
 				headerOut.packetnum = tx_num;
@@ -329,15 +333,15 @@ void readSerial(void) {
 			}
 			default:
 			{
-				/*
+				
 				header_t headerOut;
 				headerOut.timestamp =  global_time + millis() - arduino_time;
-				headerOut.packetnum = tx_packetnum;
+				headerOut.packetnum = tx_num;
 				headerOut.cmd = 0xFF;
 				headerOut.size = 0;
 				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 				break;
-				*/				
+								
 			}
 		}
 
@@ -488,7 +492,7 @@ void resend_packet(long num){
 			headerOut.timestamp = global_time + millis() - arduino_time;
 			headerOut.packetnum = tx_num;
 			headerOut.cmd = ARDUINO_RSND_PK_RESP;
-			headerOut.size = PACKET_HEADER_SIZE + PACKET_HEADER_SIZE + packet_store[i].head.size;
+			headerOut.size = PACKET_HEADER_SIZE + packet_store[i].head.size;
 			byte body[PACKET_HEADER_SIZE + packet_store[i].head.size];
 			
 			memcpy(body, &packet_store[i].head, PACKET_HEADER_SIZE);
@@ -560,9 +564,9 @@ void resetTime(){
 
 
 void savePacket(header_t head, byte * msg){
-/*
+
 	if(packet_store_pos > 49){
-		free(packet_store[0].msg);
+		//free(packet_store[0].msg);
 		packet_store_pos = 0;
 	}
 
@@ -575,5 +579,5 @@ void savePacket(header_t head, byte * msg){
 	memcpy(packet_store[packet_store_pos].msg, msg, head.size);
 
 	packet_store_pos++;
-*/
+
 }

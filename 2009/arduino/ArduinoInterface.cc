@@ -314,12 +314,9 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void *
 	savePacket(pk_tx);
 	tx_num++;
 
-	//usleep(3e6);
-
 	//Get the Response
 	DataPacket pk_rx;
 	byte * headerloc = (byte *)&(pk_rx.header);
-	//readFully(arduinoFD, headerloc, PACKET_HEADER_SIZE);
 	readFully(arduinoFD, &(pk_rx.header), PACKET_HEADER_SIZE);
 	std::cout << "timestamp: " << pk_rx.header.timestamp << std::endl;
 	rx_num++;
@@ -330,7 +327,7 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void *
 		return true;
 	}
 */
-/*
+
 	if(pk_rx.header.cmd == 0xFF ){
 		byte errorbuff[pk_rx.header.size];
 		readFully(arduinoFD, errorbuff, pk_rx.header.size);
@@ -351,7 +348,7 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void *
 			break;
 		}
 	}
-*/
+
 	if( (pk_rx.header.size > 0) && (pk_rx.header.size <= size_rx)){
 		pk_rx.data = new byte[pk_rx.header.size];
 		readFully(arduinoFD, pk_rx.data, pk_rx.header.size);
@@ -381,9 +378,6 @@ void ArduinoInterface::arduinoResendPacket(int pknum, DataPacket * pk_out){
 	pk_rx.data = new byte[pk_rx.header.size];
 	readFully(arduinoFD, pk_rx.data, pk_rx.header.size);
 	rx_num++;
-
-	//the data packet was put in the data body of the rx packet, so make a new object to extract it to
-	//DataPacket pk_out;
 
 	switch(pk_rx.header.cmd){
 		case ARDUINO_ERROR:
@@ -418,8 +412,6 @@ void ArduinoInterface::arduinoResendPacket(int pknum, DataPacket * pk_out){
 			break;
 		}
 	}
-	//std::cout << pk_out <<std::endl;
-	//return(pk_out);
 }
 
 void ArduinoInterface::savePacket(DataPacket* pk){
