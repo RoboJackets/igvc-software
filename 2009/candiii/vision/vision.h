@@ -100,6 +100,9 @@ public:
     // trackbar value determines image view to display
     void ConvertAllImageViews(int trackbarVal);
 
+    // manually does color analysis that HSV colorspace doesn't
+    void preProcessColors(IplImage* img);
+
 };
 
 
