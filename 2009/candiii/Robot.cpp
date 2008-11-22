@@ -103,16 +103,17 @@ int Robot::init() {
     /* init all CV images here */
     {
         /* 3 plane images (640x480) */
-        visCvDebug	= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-        visCvHSV 		= cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+        visCvDebug = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+        visCvHSV = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+        /* 3 plane images (320x240) */
         visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
 
         /* Note: these 1 plane images are 320x240 !! */
-        visCvHue 				= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-        visCvSaturation	= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-        visCvGrey 			= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvHue = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvSaturation = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvGrey = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
         visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-        visCvPath		= cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvPath = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
     }
 
     /* set cleanup on exit */
@@ -162,12 +163,12 @@ void Robot::processFunc() {
     /*
      * This function should be just simple function calls.
      */
-     
+
     /*
      * Heading Format:
      * x = rotational speed ; range = (-128,127)
      * y = forward speed    ; range = (0,255)
-     */     
+     */
 
     /* Get raw image */
     camera.GrabCvImage();
@@ -248,7 +249,7 @@ void Robot::updateGlutDisplay() {
 	if(vp.DO_TRANSFORM)
 	{
 		/* perspective transform */
-	
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_LIGHTING);
@@ -365,9 +366,9 @@ void Robot::updateGlutDisplay() {
 		glutSwapBuffers();
 	}
 
-} // end update glut 
- 
- 
+} // end update glut
+
+
 void Robot::createVideoWriter() {
     cvVideoWriter = 0;
     int isColor = 1;

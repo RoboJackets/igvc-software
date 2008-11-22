@@ -40,11 +40,10 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
 
     /* Do vision processing */
     {
-
+        /* fix special case colors */
         preProcessColors(visCvDebug);
 
         /* split images into channels */
-        //GetRGBChannels();
         GetHSVChannels();
 
         /* threshold saturation
@@ -112,6 +111,7 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
 }//end vision processing
 
 void Vision::init() {
+
     /* load in vision settings */
     LoadVisionXMLSettings();
 
@@ -447,15 +447,11 @@ void Vision::robotWidthScan(IplImage* img, int& goalx, int& goaly) {
         } else {
 
             /* GOAL! */
-
-            //=== debug: show goal ===//
-            // visCvPath=640x480 //
-            //cvLine(visCvDebug, cvPoint(center,height-2), cvPoint(goalx,goaly), (CV_RGB(0,0,0)), 2, 8, 0);
-            //cvLine(visCvDebug, cvPoint(goalx-half,goaly), cvPoint(goalx+half,goaly), (CV_RGB(0,0,0)), 2, 8, 0);
-            // visCvPath=320x240 //
+            //=== debug : show goal ===//
+            //=== visCvPath=320x240 ===//
             cvLine(visCvDebug, cvPoint(center*2,img->height*2-2), cvPoint(goalx*2,goaly*2)       , (CV_RGB(0,0,0)), 2, 8, 0);
             cvLine(visCvDebug, cvPoint((goalx-half)*2,goaly*2)  , cvPoint((goalx+half)*2,goaly*2), (CV_RGB(0,0,0)), 2, 8, 0);
-            //========================//
+            //=========================//
 
         }
     }
@@ -725,7 +721,7 @@ void Vision::preProcessColors(IplImage* img) {
     unsigned char red,green,blue;
 
     // pixel data loop
-    for(int i = 0; i < img->imageSize; i++){
+    for(int i = 0; i < img->imageSize-3; i+=3){
 
         // get pixel data
         blue  = img->imageData[i  ];
@@ -745,9 +741,11 @@ void Vision::preProcessColors(IplImage* img) {
 }
 
 
+
 /*
  *
  */
+
 /*
 void Vision::visPlanPath(IplImage* img, int& goalx, int& goaly) {
     int width = img->width;
@@ -825,6 +823,7 @@ CvScalar Vision::navPath_color(int pathDanger) {
                (pathDanger / (double)max_path_danger) * 255); // levels of red
 }
 
+// image display control
 void Vision::ConvertAllImageViews(int trackbarVal) {
 
     switch (trackbarVal) {
@@ -849,6 +848,7 @@ void Vision::ConvertAllImageViews(int trackbarVal) {
     case 6:
         cvShowImage("display", visCvHSV);
         break;
+    /* future use */
 //        	case 7:
 //        		cvShowImage("display", );
 //        		break;
