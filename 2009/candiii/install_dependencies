@@ -19,7 +19,7 @@ echo "libtool"
 sudo apt-get --yes install libtool
 
 echo "g++"
-sudo apt-get --yes install g++-4.3
+sudo apt-get --yes install g++
 
 echo "done"
 echo
