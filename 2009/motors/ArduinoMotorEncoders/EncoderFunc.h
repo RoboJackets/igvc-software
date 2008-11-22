@@ -26,5 +26,8 @@ int convertMotorEncoderFormat(unsigned int data);
 
 void setVariable(byte num, byte val);
 
-void resend_packet(long unsigned int num);
+void resend_packet(long num);
+
+void savePacket(header_t head, byte * msg);
+
 #endif // ENCODERFUNC_H_
