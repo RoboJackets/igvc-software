@@ -41,6 +41,8 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
     /* Do vision processing */
     {
 
+        preProcessColors(visCvDebug);
+
         /* split images into channels */
         //GetRGBChannels();
         GetHSVChannels();
@@ -714,6 +716,34 @@ void Vision::scanFillRight(IplImage* img, int middleX, int y, int goodFirst, int
         }
     }
 }
+
+/*
+ * Manually check each pixel for special cases not accounted for via HSV
+ *
+ */
+void Vision::preProcessColors(IplImage* img) {
+    unsigned char red,green,blue;
+
+    // pixel data loop
+    for(int i = 0; i < img->imageSize; i++){
+
+        // get pixel data
+        blue  = img->imageData[i  ];
+		green = img->imageData[i+1];
+		red   = img->imageData[i+2];
+
+        // check for neon green
+        if( (green>205) && (green>red) && (green>blue) && (red>blue) ){//&& (blue<65) ){
+            // make orange
+            img->imageData[i  ] = 0;
+            img->imageData[i+1] = 128;
+            img->imageData[i+2] = 255;
+        }
+
+    }// end loop
+
+}
+
 
 /*
  *
