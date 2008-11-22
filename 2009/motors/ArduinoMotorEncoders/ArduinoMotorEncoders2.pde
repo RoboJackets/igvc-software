@@ -91,6 +91,9 @@ void setup(void) {
 	tx_num = 1;
 	packet_store_pos = 0;
 
+	for(int i = 0; i < 50; i++){
+		packet_store[i].msg = NULL;
+	}
 	Serial.flush();
 }
 
@@ -262,6 +265,7 @@ void readSerial(void) {
 
 						serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 						serialPrintBytes(&msg, headerOut.size);
+						savePacket(headerOut, (byte*)&msg);
 						break;
 					}
 					case SEND_DTICK:
@@ -271,6 +275,7 @@ void readSerial(void) {
 		
 						serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 						serialPrintBytes(&msg, headerOut.size);
+						savePacket(headerOut, (byte*)&msg);
 						break;
 					}
 				}
@@ -291,6 +296,7 @@ void readSerial(void) {
 				headerOut.cmd = 'w';
 				headerOut.size = 0;
 				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				savePacket(headerOut, NULL);
 				tx_num++;
 				break;
 			}
@@ -303,13 +309,14 @@ void readSerial(void) {
 				headerOut.cmd = 'i';
 				headerOut.size = 1;
 				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				savePacket(headerOut, NULL);
 				tx_num++;
 				Serial.print('e');
 				break;
 			}
 			case 'p':
 			{
-				unsigned long int packet_num;
+				long packet_num;
 				byte * bptr = (byte *)&packet_num;
 				while (Serial.available()<4){}  // TODO: add timeout
 				bptr[0] = Serial.read();
@@ -317,7 +324,7 @@ void readSerial(void) {
 				bptr[2] = Serial.read();
 				bptr[3] = Serial.read();
 				resend_packet(packet_num);
-				//tx_num++;//this is incr i the resend packet func
+				//tx_num++;//this is incr in the resend packet func
 				break;
 			}
 			default:
@@ -469,36 +476,48 @@ int SPIReadInt(int inputPin, int slaveSelectPin, int clockPin) {
 //#endif
 }
 
-void resend_packet(long unsigned int num){
-/*
+void resend_packet(long num){
+
+	//Serial.println(tx_num);
+	//Serial.println(tx_num);
+	//Serial.println(tx_num);
+
 	for(int i = 0; i < 50; i++ ){
 		if(packet_store[i].head.packetnum == num){
-			header_t headOut;
-			headOut.timestamp = global_time + millis() - arduino_time;
-			headOut.packetnum = tx_num;
-			headOut.cmd = ARDUINO_RSND_PK_RESP
-			headOut.size = PACKET_HEADER_SIZE + PACKET_HEADER_SIZE + packet_store[i].head.size;
+			header_t headerOut;
+			headerOut.timestamp = global_time + millis() - arduino_time;
+			headerOut.packetnum = tx_num;
+			headerOut.cmd = ARDUINO_RSND_PK_RESP;
+			headerOut.size = PACKET_HEADER_SIZE + PACKET_HEADER_SIZE + packet_store[i].head.size;
+			byte body[PACKET_HEADER_SIZE + packet_store[i].head.size];
+			
+			memcpy(body, &packet_store[i].head, PACKET_HEADER_SIZE);
+			memcpy(body + PACKET_HEADER_SIZE, &packet_store[i].msg, packet_store[i].head.size);
 
-			serialPrintBytes(&headOut, PACKET_HEADER_SIZE);
+			serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 			serialPrintBytes(&packet_store[i].head, PACKET_HEADER_SIZE);
 			serialPrintBytes(&packet_store[i].msg, packet_store[i].head.size);
+			savePacket(headerOut, body);
 			tx_num++;
-			//return;
-		}
-		else{
-			header_t headOut;
-			headOut.timestamp = global_time + millis() - arduino_time;
-			headOut.packetnum = tx_num;
-			headOut.cmd = ARDUINO_ERROR
-			headOut.size = sizeof(long);
-			long msg = PACKET_DNE;
-
-			serialPrintBytes(&headOut, PACKET_HEADER_SIZE);
-			serialPrintBytes(&msg, headOut.size);
-			tx_num++;
+			return;
 		}
 	}
-*/
+
+//		else{
+	header_t headOut;
+	headOut.timestamp = global_time + millis() - arduino_time;
+	headOut.packetnum = tx_num;
+	headOut.cmd = ARDUINO_ERROR;
+	headOut.size = sizeof(long);
+	long msg = (long)REQUESTED_PACKET_OUT_OF_RANGE;
+
+
+	serialPrintBytes(&headOut, PACKET_HEADER_SIZE);
+	serialPrintBytes(&msg, headOut.size);
+	tx_num++;
+//		}
+
+/*
 	header_t headOut;
 	headOut.timestamp = global_time + millis() - arduino_time;
 	headOut.packetnum = tx_num;
@@ -523,6 +542,7 @@ void resend_packet(long unsigned int num){
 	serialPrintBytes(&fakeheadOut, PACKET_HEADER_SIZE);
 	serialPrintBytes(&msg, sizeof(reply_dtick_t));
 	tx_num++;
+*/
 }
 
 unsigned int getTime(){
@@ -540,9 +560,14 @@ void resetTime(){
 
 
 void savePacket(header_t head, byte * msg){
+/*
 	if(packet_store_pos > 49){
 		free(packet_store[0].msg);
 		packet_store_pos = 0;
+	}
+
+	if(packet_store[packet_store_pos].msg != NULL){
+		free(packet_store[packet_store_pos].msg);
 	}
 
 	packet_store[packet_store_pos].head = head;
@@ -550,4 +575,5 @@ void savePacket(header_t head, byte * msg){
 	memcpy(packet_store[packet_store_pos].msg, msg, head.size);
 
 	packet_store_pos++;
+*/
 }

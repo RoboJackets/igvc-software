@@ -389,8 +389,25 @@ void ArduinoInterface::arduinoResendPacket(int pknum, DataPacket * pk_out){
 		case ARDUINO_ERROR:
 		{
 			int errormsg;
-			memcpy(&errormsg, pk_rx.data + PACKET_HEADER_SIZE, sizeof(int));
+			memcpy(&errormsg, pk_rx.data, sizeof(int));
 			std::cout << "error requesting packet num " << pknum << std::endl << "got error num " << errormsg << std::endl;
+			switch(errormsg){
+				case DROPPED_PACKET:
+				{
+					std::cout << "dropped packet" << std::endl;
+					break;
+				}
+				case REQUESTED_PACKET_OUT_OF_RANGE:
+				{
+					std::cout << "packet not in cache" << std::endl;
+					break;
+				}
+				default:
+				{
+					std::cout << "unknown error" << std::endl;
+					break;
+				}
+			}
 			break;
 		}
 		case ARDUINO_RSND_PK_RESP:
@@ -401,7 +418,7 @@ void ArduinoInterface::arduinoResendPacket(int pknum, DataPacket * pk_out){
 			break;
 		}
 	}
-	std::cout << pk_out <<std::endl;
+	//std::cout << pk_out <<std::endl;
 	//return(pk_out);
 }
 

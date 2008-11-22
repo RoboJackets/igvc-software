@@ -8,8 +8,6 @@
 
 typedef unsigned char byte;
 
-enum ARDUINO_ERROR_STATUS { DROPPED_PACKET, REQUESTED_PACKET_OUT_OF_RANGE };
-
 class DataPacket{
 	public:
 

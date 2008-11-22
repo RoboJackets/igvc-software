@@ -21,6 +21,6 @@ enum opttype_t { PUSHPULL = 0, RET_T, INTEROG_DL, SETCLK, RESENDPKT};//interogdl
 enum opt_t {PUSH = 0, PULL, SEND_DTICK, SEND_CURRENT};
 
 //enum for error
-enum error_t {PACKET_DNE = 0};
+enum error_t {DROPPED_PACKET, REQUESTED_PACKET_OUT_OF_RANGE};
 
 #endif //ARDUINO_COMMANDS_HPP_
