@@ -724,15 +724,15 @@ void Vision::preProcessColors(IplImage* img) {
     unsigned char red,green,blue;
 
     // pixel data loop
-    for(int i = 0; i < img->imageSize-3; i+=3){
+    for (int i = 0; i < img->imageSize-3; i+=3) {
 
         // get pixel data
         blue  = img->imageData[i  ];
-		green = img->imageData[i+1];
-		red   = img->imageData[i+2];
+        green = img->imageData[i+1];
+        red   = img->imageData[i+2];
 
         // check for neon green
-        if( (green>205) && (green>red) && (green>blue) && (red>blue) ){//&& (blue<65) ){
+        if ( (green>205) && (green>red) && (green>blue) && (red>blue) ) {//&& (blue<65) ){
             // make orange
             img->imageData[i  ] = 0;
             img->imageData[i+1] = 128;
@@ -858,7 +858,7 @@ void Vision::ConvertAllImageViews(int trackbarVal) {
         cvPutText(visCvHSV, "HSV", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
         cvShowImage("display", visCvHSV);
         break;
-    /* future use */
+        /* future use */
 //        	case 7:
 //        		cvShowImage("display", );
 //        		break;
