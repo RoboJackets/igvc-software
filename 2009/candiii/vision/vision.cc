@@ -48,15 +48,17 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
 
         /* threshold saturation
          * (320x240) */
-        Normalize(visCvSaturation);
+        //Normalize(visCvSaturation);
         cvSmooth(visCvSaturation, visCvSaturation);
+        Normalize(visCvSaturation);
         ThresholdImage(visCvSaturation, visCvSaturation, satThreshold);
         cvDilate(visCvSaturation, visCvSaturation, NULL, 1);
 
         /* threshold hue
          * (320x240) */
-        Normalize(visCvHue);
+        //Normalize(visCvHue);
         cvSmooth(visCvHue, visCvHue);
+        Normalize(visCvHue);
         ThresholdImage(visCvHue, visCvHue, hueThreshold);
         cvDilate(visCvHue, visCvHue, NULL, 1);
 
@@ -90,8 +92,8 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
         if (goal_far.y >= visCvPath->height/2) {
             goal = goal_near;	// can't see very far
         } else {
-            goal = goal_far;	// can see far off
-            goal.x = visCvPath->width - goal.x;
+            goal.y = goal_far.y;	// can see far off
+            goal.x = visCvPath->width - goal_far.x; // flip sign
         }
 
         /* convert goal to heading:
