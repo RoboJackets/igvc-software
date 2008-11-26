@@ -11,16 +11,16 @@
 	<gamma>0</gamma>
 	<auto_gain_and_shutter>0</auto_gain_and_shutter>
 
-	<!-- Guppy White Balance Settings -->	
+	<!-- Guppy White Balance Settings -->
 	<red>523</red>
 	<blue>646</blue>
 
 	<!-- Vision Processing Settings -->
-	<satThresh>65</satThresh> <!-- higher => more noise/sensitivity -->
-	<hueThresh>25</hueThresh> <!-- higher => more noise/sensitivity -->
+	<satThresh>70</satThresh> <!-- higher => more noise/sensitivity -->
+	<hueThresh>35</hueThresh> <!-- higher => more noise/sensitivity -->
 	<doTransform>1</doTransform>
 	<robotWidth>30</robotWidth>
-	
+
 	<></>
 	<></>
 	<></>
