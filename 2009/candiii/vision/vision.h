@@ -103,7 +103,14 @@ public:
     // manually does color analysis that the HSV colorspace doesn't
     void preProcessColors(IplImage* img);
 
+    // for image display names
     CvFont font;
+
+    // finds min/max values in a 0-255 greyscale image and normalizes using those
+    void Normalize(IplImage* img);
+
+    // width of robot in pixels
+    int ROBOT_WIDTH;
 
 };
 

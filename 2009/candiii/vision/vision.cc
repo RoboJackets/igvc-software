@@ -16,7 +16,7 @@
 #define BAD_PIXEL 0		// value to set path image to
 #define GOOD_PIXEL 255	// value to set path image to
 #define L_R_OFFSET 20 	// pixel spacing from center scan line up
-#define ROBOT_WIDTH 34 	// pixels wide
+//#define ROBOT_WIDTH 30 	// pixels wide
 #define PIXEL_SKIP 4 	// noise filtering threshold in checkPixel() & also top/bottom padding
 
 
@@ -48,12 +48,14 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
 
         /* threshold saturation
          * (320x240) */
+        Normalize(visCvSaturation);
         cvSmooth(visCvSaturation, visCvSaturation);
         ThresholdImage(visCvSaturation, visCvSaturation, satThreshold);
         cvDilate(visCvSaturation, visCvSaturation, NULL, 1);
 
         /* threshold hue
          * (320x240) */
+        Normalize(visCvHue);
         cvSmooth(visCvHue, visCvHue);
         ThresholdImage(visCvHue, visCvHue, hueThreshold);
         cvDilate(visCvHue, visCvHue, NULL, 1);
@@ -748,7 +750,6 @@ void Vision::preProcessColors(IplImage* img) {
 /*
  *
  */
-
 /*
 void Vision::visPlanPath(IplImage* img, int& goalx, int& goaly) {
     int width = img->width;
@@ -879,6 +880,7 @@ void Vision::LoadVisionXMLSettings() {
         satThreshold = cfg.getInt("satThresh");
         hueThreshold = cfg.getInt("hueThresh");
         DO_TRANSFORM = cfg.getInt("doTransform");
+        ROBOT_WIDTH  = cfg.getInt("robotWidth");
     }
 
     /* test */
@@ -889,6 +891,7 @@ void Vision::LoadVisionXMLSettings() {
                 satThreshold = 60;
                 hueThreshold = 20;
                 DO_TRANSFORM =  1;
+                ROBOT_WIDTH  = 30;
             }
         } else {
             printf("Vision settings loaded \n");
@@ -915,6 +918,23 @@ void Vision::GetHSVChannels() {
 void Vision::ThresholdImage(IplImage *src, IplImage *dst, int thresh) {
     // binary threshold
     cvThreshold(src,dst,thresh,255,CV_THRESH_BINARY_INV);
+}
+
+/*
+ * Normalizes a 0-255 grayscale image using its min/max values
+ */
+void Vision::Normalize(IplImage* img) {
+    double min,max,scale,shift;
+    cvMinMaxLoc(img, &min, &max, NULL, NULL, NULL);
+    //scale = 255.0/(max-min);
+    if (max != min) {
+        scale = 255.0/(max-min);
+        shift = 255*(-min)/(max-min);
+    } else {
+        scale = 1.0;
+        shift = -max;
+    }
+    cvScale( img, img, scale, shift ); //Normalizes matrix to 0-255 (grayscale)
 }
 
 
