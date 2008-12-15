@@ -148,9 +148,9 @@ void Vision::init() {
     danger_per_barrel_pixel = 1;
     // Path danger values higher than this will be clipped to this value
     max_path_danger = 50;					// >= 0
-    nav_path__danger_smoothing_radius = 5;		// >= 0
+    nav_path__danger_smoothing_radius = 5;	// >= 0
     // colors
-    min_path_danger_color = CV_RGB(255, 255, 0);		// yellow
+    min_path_danger_color = CV_RGB(255, 255, 0);	// yellow
     max_path_danger_color = CV_RGB(0, 0, 0);		// black
     dangerous_pixel_color = CV_RGB(0, 0, 255);		// blue
     /**********************************************************************************/
@@ -200,10 +200,8 @@ void Vision::visSweeperLines(Point2D<int>& goal) {
             for (uint j=0, n2=pathPoints.count(); j<n2; j++) {
                 //Point2D<int> curPathPoint = pathPoints[j];
 
-                // Calculate the danger contribution of the current
-                // path-pixel to the path danger
+                // Calculate the danger contribution of the current path-pixel to the path-danger
                 curPixelDanger = 0;
-                //int passedwhiteline=0;
                 for (int delta=-nav_path__path_search_girth; delta<=nav_path__path_search_girth; delta++) {
                     // (XXX: Consider *nearby* pixels as different fragments of the path-pixel)
                     Point2D<int> curPoint = pathPoints[j];
