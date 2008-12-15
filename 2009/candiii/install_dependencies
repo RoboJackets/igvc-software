@@ -2,17 +2,27 @@
 
 # feel free to add to this script when you encounter missing libs/files
 echo "installing candi dependencies this may take a while..."
+echo "multiverse and universe repositories must be enabled!"
+
+sudo apt-get update
 
 echo "opencv"
-sudo apt-get --yes install libcv1 libcvaux1 libhighgui1 libcv-dev
+sudo apt-get --yes install libcv1
+sudo apt-get --yes install libcvaux1 
+sudo apt-get --yes install libhighgui1
+sudo apt-get --yes install libcv-dev
 
 echo "QT"
-sudo apt-get --yes install libqt4-core libqt4-xml qt4-dev-tools
+sudo apt-get --yes install libqt4-core
+sudo apt-get --yes install libqt4-xml 
+sudo apt-get --yes install libqt4-dev
+sudo apt-get --yes install qt4-dev-tools
 
 echo "boost"
 sudo apt-get --yes install libboost1.35-dev
+sudo apt-get --yes install libboost-dev
 
-echo "glut" # more opengl stuff is needed - will put here soon
+echo "glut" 
 sudo apt-get --yes install libglut-dev
 
 echo "libtool"
@@ -20,6 +30,14 @@ sudo apt-get --yes install libtool
 
 echo "g++"
 sudo apt-get --yes install g++
+
+echo "IEEE1394"
+#sudo apt-get --yes install libdc1394-dev
+#sudo apt-get --yes install libavc1394-dev
+#sudo apt-get --yes install libraw1394-dev
+#sudo apt-get --yes install ?
+echo "TODO: install ieee1394"
+
 
 echo "done"
 echo
