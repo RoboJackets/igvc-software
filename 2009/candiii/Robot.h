@@ -81,10 +81,16 @@ public:
     CvVideoWriter* cvVideoWriter;
     void createVideoWriter();
 
-    // heading set by visProcessFrame()
+    // velocity headings for robot
     // heading.x = rotational speed
     // heading.y = forward speed
-    Point2D<int> heading;
+    Point2D<int> heading_vision;
+    Point2D<int> heading_sensors;
+    Point2D<int> heading_main;
+
+    // avg heading control
+    // k = the % of new value to use
+    double k;
 
 };
 

@@ -103,11 +103,18 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
         {
             /* remember, goal is in 320x240 coordinates */
             // rotation (0 = go straight)
-            goal.x = (visCvPath->width/2 - goal.x) * (256) / (visCvPath->width );
+            goal.x = (visCvPath->width/2 - goal.x) * (255) / (visCvPath->width );
             // fwd speed
-            goal.y = (visCvPath->height  - goal.y) * (256) / (visCvPath->height);
+            goal.y = (visCvPath->height  - goal.y) * (255) / (visCvPath->height);
+
+            /* Check for errors */
+            if (goal.y==256 && goal.x==-128){
+                // prevent the robot from going crazy
+                goal.y=goal.x=0;
+            }
+
             // Debug print
-            printf("heading: rot: %d 	fwd: %d \n",goal.x,goal.y);
+            //printf("heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
         }
 
     } //end main
@@ -352,7 +359,6 @@ void Vision::visSweeperLines(Point2D<int>& goal) {
             goal.y = (int)bestPath_end.y/2;
 
             //printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
-
         }
 
         // DO IN MAIN:

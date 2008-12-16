@@ -122,6 +122,9 @@ int Robot::init() {
     /* init video writer */
     //createVideoWriter();
 
+    /* k value = the % of new value to use */
+    k = .50;
+
     /* success */
     return 1;
 }
@@ -180,7 +183,15 @@ void Robot::processFunc() {
     //TODO
 
     /* Perform vision processing. */
-    vp.visProcessFrame(heading);
+    vp.visProcessFrame(heading_vision);
+
+    /* Average speeds
+     * k = % of new value to use */
+    heading_main.x = k*heading_vision.x + (1-k)*heading_main.x;
+    heading_main.y = k*heading_vision.y + (1-k)*heading_main.y;
+    // debug print
+    printf("heading: rot: %d 	fwd: %d \n",heading_main.x,heading_main.y);
+
 
     /* Make decision */
     //TODO

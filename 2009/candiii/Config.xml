@@ -19,11 +19,13 @@
 	<satThresh>70</satThresh> <!-- higher => more noise/sensitivity -->
 	<hueThresh>35</hueThresh> <!-- higher => more noise/sensitivity -->
 	<doTransform>1</doTransform>
-	<robotWidth>30</robotWidth>
+	<robotWidth>20</robotWidth>
 
+    <!--
 	<></>
 	<></>
 	<></>
 	<></>
+	-->
 
 </Config>
