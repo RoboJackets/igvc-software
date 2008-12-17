@@ -115,6 +115,7 @@ public:
     //
     void Adapt();
     void visAdaptiveProcessing(Point2D<int>& goal);
+    void CvtPixToGoal(Point2D<int>& goal);
 
 };
 
