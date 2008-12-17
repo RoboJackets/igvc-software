@@ -105,15 +105,20 @@ int Robot::init() {
         /* 3 plane images (640x480) */
         visCvDebug = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
         visCvHSV = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+
+        /* 1 plane images (640x480) */
+        visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+
         /* 3 plane images (320x240) */
         visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
 
-        /* Note: these 1 plane images are 320x240 !! */
+        /* 1 plane images (320x240) */
         visCvHue = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
         visCvSaturation = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
         visCvGrey = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
         visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
         visCvPath = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvAdaptSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
     }
 
     /* set cleanup on exit */
@@ -184,7 +189,7 @@ void Robot::processFunc() {
 
     /* Perform vision processing. */
     //vp.visProcessFrame(heading_vision);
-    vp.Adapt(); // NEW! will optimize and combine later
+    vp.visAdaptiveProcessing(heading_vision); // NEW! will optimize and combine later
 
     /* Average speeds
      * k = % of new value to use */

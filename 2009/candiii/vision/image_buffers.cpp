@@ -19,6 +19,9 @@ IplImage* visCvThresh;
 IplImage* visCvPath;
 IplImage* visCvHSVSmall;
 
+IplImage* visCvAdapt;
+IplImage* visCvAdaptSmall;
+
 
 
 

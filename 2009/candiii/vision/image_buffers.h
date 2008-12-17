@@ -32,6 +32,8 @@ extern IplImage* visCvThresh;
 extern IplImage* visCvPath;
 extern IplImage* visCvHSVSmall;
 
+extern IplImage* visCvAdapt;
+extern IplImage* visCvAdaptSmall;
 
 
 
