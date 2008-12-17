@@ -1,0 +1,11 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libdc1394
+Description: 1394-based DC Control Library
+Version: 2.0.3
+Libs: -L${libdir} -ldc1394
+Cflags: -I${includedir}
+

@@ -19,8 +19,8 @@ sudo apt-get --yes install libqt4-dev
 sudo apt-get --yes install qt4-dev-tools
 
 echo "boost"
-sudo apt-get --yes install libboost1.35-dev
-sudo apt-get --yes install libboost-dev
+sudo apt-get --yes install libboost1.35-dev	#ubuntu 8.10
+#sudo apt-get --yes install libboost-dev		#ubuntu 8.04
 
 echo "glut" 
 sudo apt-get --yes install libglut-dev
@@ -37,6 +37,11 @@ echo "IEEE1394"
 #sudo apt-get --yes install libraw1394-dev
 #sudo apt-get --yes install ?
 echo "TODO: install ieee1394"
+cd ../libdc1394-2.0.3/
+./configure
+make
+sudo make install
+cd ../candiii
 
 
 echo "done"
