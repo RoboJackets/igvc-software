@@ -17,12 +17,12 @@
 #define GOOD_PIXEL 255	// value to set path image to
 #define L_R_OFFSET 20 	// pixel spacing from center scan line up
 //#define ROBOT_WIDTH 30 	// pixels wide
-#define PIXEL_SKIP 4 	// noise filtering threshold in checkPixel() & also top/bottom padding
+#define PIXEL_SKIP 2 	// noise filtering threshold in checkPixel()
+#define EDGE_PAD 4      // top/bottom padding
 
 
 Vision::Vision() {
     init();
-    cvNamedWindow("roi",1);
 }
 Vision::~Vision() {
 
@@ -133,7 +133,7 @@ void Vision::init() {
         // Number of paths that are assessed between the starting/ending angles
         nav_path__num = 15; //29;		// (Number of sweeper lines)
         // Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
-        nav_path__view_distance_multiplier = 0.35; 		//1.00;<-without-transform	/* > 0.0 */
+        nav_path__view_distance_multiplier = 0.30; 		//1.00;<-without-transform	/* > 0.0 */
     } else {
         // Number of paths that are assessed between the starting/ending angles
         nav_path__num = 29; //15;		// (Number of sweeper lines)
@@ -166,6 +166,9 @@ void Vision::init() {
 
     // font
     cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2);
+
+    // display roi for adaptive coloring
+    cvNamedWindow("roi",1);
 
 }
 
@@ -381,7 +384,7 @@ void Vision::robotWidthScan(IplImage* img, int& goalx, int& goaly) {
     int center = img->width/2;
     int startx = center - ROBOT_WIDTH/2;
     int endx = startx + ROBOT_WIDTH;
-    int y = img->height-PIXEL_SKIP;
+    int y = img->height-EDGE_PAD;
     int x = startx;
     int half = ROBOT_WIDTH/2;
     int i;
@@ -394,7 +397,7 @@ void Vision::robotWidthScan(IplImage* img, int& goalx, int& goaly) {
     	checking to see if the width of the robot can progress
     	any further up the image, sliding left/right as needed
     */
-    for ( ; y >= PIXEL_SKIP ; y-- ) {
+    for ( ; y >= EDGE_PAD ; y-- ) {
 
         //check left, move right
         for (x=startx; x<img->width-ROBOT_WIDTH-1; x++) {
@@ -482,7 +485,7 @@ void Vision::robotWidthScan(IplImage* img, int& goalx, int& goaly) {
  */
 void Vision::visGenPath(IplImage* img) {
     int width = img->width;
-    int height = img->height-PIXEL_SKIP; // skip noise at bottom
+    int height = img->height-EDGE_PAD; // skip noise at bottom
     int goodFirst = 1;
     int x = width/2;
     int blackout = 0;
@@ -492,7 +495,7 @@ void Vision::visGenPath(IplImage* img) {
 
     // scan bottom to top in rows; white = path; black = bad
     // skip the bottom few pixels, due to noise
-    for (int y = height; y >= PIXEL_SKIP ; y--) {
+    for (int y = height; y >= EDGE_PAD ; y--) {
         if (checkPixel(img,x,y)) {	//check starting point in middle
             goodFirst=1;
         } else {
@@ -507,7 +510,7 @@ void Vision::visGenPath(IplImage* img) {
     }//y
 
     // debug draw black line to see which column was chosen (left,center,right)
-    cvLine(visCvThresh, cvPoint(x,1), cvPoint(x,height-2), (CV_RGB(0,0,0)), 2, 8, 0);
+    //cvLine(visCvThresh, cvPoint(x,1), cvPoint(x,height-2), (CV_RGB(0,0,0)), 2, 8, 0);
 
 }//visGenPath
 
@@ -524,19 +527,19 @@ int Vision::findBestX(IplImage* img, int height, int center) {
     int y = height;
 
     // break as soon as we see an obstacle
-    for (y = height; y >= PIXEL_SKIP ; y--) {
+    for (y = height; y >= EDGE_PAD ; y--) {
         if (checkPixel(img,left,y))
             heightL++;
         else
             break;
     }
-    for (y = height; y >= PIXEL_SKIP ; y--) {
+    for (y = height; y >= EDGE_PAD ; y--) {
         if (checkPixel(img,center,y))
             heightC++;
         else
             break;
     }
-    for (y = height; y >= PIXEL_SKIP ; y--) {
+    for (y = height; y >= EDGE_PAD ; y--) {
         if (checkPixel(img,right,y))
             heightR++;
         else
@@ -805,7 +808,7 @@ double Vision::deg2rad(double degrees) {
 Point2D<double> Vision::navPath_start(int pathID) {
     return Point2D<double>(
                (visCvRaw->width / 2) + (nav_path__center_path_id-pathID),
-               visCvRaw->height - PIXEL_SKIP -1
+               visCvRaw->height - EDGE_PAD -1
            );
 }
 
@@ -867,13 +870,15 @@ void Vision::ConvertAllImageViews(int trackbarVal) {
         cvPutText(visCvHSV, "HSV", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
         cvShowImage("display", visCvHSV);
         break;
-        /* future use */
-//        	case 7:
-//        		cvShowImage("display", );
-//        		break;
-//        	case 8:
-//        		cvShowImage("display", );
-//        		break;
+
+    case 7:
+        cvShowImage("display", visCvAdapt);
+        break;
+/* future use */
+//  case 8:
+//  	cvShowImage("display", );
+//  	break;
+
     }
     cvWaitKey(10);
 
@@ -955,8 +960,8 @@ void Vision::Normalize(IplImage* img) {
 void Vision::Adapt() {
 
     #define pad 60
-    CvPoint UL = cvPoint(  visCvRaw->width/3+pad, visCvRaw->height-pad);
-    CvPoint LR = cvPoint(2*visCvRaw->width/3-pad, visCvRaw->height-10);
+    CvPoint UL = cvPoint(  visCvRaw->width/3+pad, visCvRaw->height-pad*2);
+    CvPoint LR = cvPoint(2*visCvRaw->width/3-pad, visCvRaw->height-pad/2);
     #undef pad
 
     CvRect roi;
@@ -990,27 +995,99 @@ void Vision::Adapt() {
     //printf("RGB = %d %d %d \n",red,green,blue);
 
     #define thresh 35
-    for(int i=0; i<visCvRaw->imageSize; i+=3) {
-        ab = visCvRaw->imageData[i  ];
-        ag = visCvRaw->imageData[i+1];
-        ar = visCvRaw->imageData[i+2];
+    for(int i=0; i<visCvDebug->imageSize; i+=3) {     //visCvRaw
+        ab = visCvDebug->imageData[i  ];
+        ag = visCvDebug->imageData[i+1];
+        ar = visCvDebug->imageData[i+2];
 
         if ( (abs(ab-(unsigned char)blue)<thresh) && (abs(ag-(unsigned char)green)<thresh) && (abs(ar-(unsigned char)red)<thresh) ) {
-            visCvRaw->imageData[i  ] = 188;
-            visCvRaw->imageData[i+1] = 0;
-            visCvRaw->imageData[i+2] = 0;
+            visCvAdapt->imageData[i/3] = 255;
+            //visCvAdapt->imageData[i+1] = 255;
+            //visCvAdapt->imageData[i+2] = 255;
         }
-        //else{
-        //    visCvRaw->imageData[i  ] = 0;
-        //   visCvRaw->imageData[i+1] = 0;
-        //    visCvRaw->imageData[i+2] = 178;
-        //}
+        else{
+            visCvAdapt->imageData[i/3] = 0;
+            //visCvAdapt->imageData[i+1] = 0;
+            //visCvAdapt->imageData[i+2] = 0;
+        }
     }
+
+//    for(int i=0; i<visCvRaw->imageSize; i+=3) {
+//        ab = visCvRaw->imageData[i  ];
+//        ag = visCvRaw->imageData[i+1];
+//        ar = visCvRaw->imageData[i+2];
+//
+//        if ( (abs(ab-(unsigned char)blue)<thresh) && (abs(ag-(unsigned char)green)<thresh) && (abs(ar-(unsigned char)red)<thresh) ) {
+//            visCvRaw->imageData[i  ] = 188;
+//            visCvRaw->imageData[i+1] = 0;
+//            visCvRaw->imageData[i+2] = 0;
+//        }
+//        //else{
+//        //    visCvRaw->imageData[i  ] = 0;
+//        //    visCvRaw->imageData[i+1] = 0;
+//        //    visCvRaw->imageData[i+2] = 178;
+//        //}
+//    }
     #undef thresh
 
     cvRectangle( visCvRaw, UL, LR, CV_RGB(100,0,0), 2, 8, 0);
 
     cvReleaseImage(&roi_img);
+
+}
+
+void Vision::visAdaptiveProcessing(Point2D<int>& goal) {
+
+    /* abort if there is no image. */
+    if ( visCvRaw->imageData==NULL ) {
+        printf("visCvRaw is NULL!\n");
+        return;
+    }
+
+    /* generate visCvAdapt img */
+    Adapt();
+        cvDilate(visCvAdapt, visCvAdapt, NULL, 1);
+
+    /* shrink visCvAdapt img to 320x240 */
+    cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
+        cvErode(visCvThresh, visCvThresh, NULL, 1);
+
+    /* generate visCvPath */
+    visGenPath(visCvThresh);
+
+    /* scan high in img */
+    robotWidthScan(visCvPath,goal_far.x,goal_far.y);
+
+    /* setup navigation line that sweep across screen and update goal. */
+    visSweeperLines(goal_near);
+
+    /* update return goal*/
+    if (goal_far.y >= visCvPath->height/2) {
+        goal = goal_near;	// can't see very far
+    } else {
+        goal.y = goal_far.y;	// can see far off
+        goal.x = visCvPath->width - goal_far.x; // flip sign
+    }
+
+    /* convert goal to heading:
+     * x = rotational speed ; range = (-128,127)
+     * y = forward speed    ; range = (0,255)
+     */
+    {
+        // rotation (0 = go straight)
+        goal.x = (visCvPath->width/2 - goal.x) * (255) / (visCvPath->width );
+        // fwd speed
+        goal.y = (visCvPath->height  - goal.y) * (255) / (visCvPath->height);
+
+        /* Check for errors */
+        if (goal.y==256 && goal.x==-128){
+            // prevent the robot from going crazy
+            goal.y=goal.x=0;
+        }
+
+        // Debug print
+        //printf("heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
+    }
 
 }
 

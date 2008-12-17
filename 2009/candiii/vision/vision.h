@@ -114,6 +114,7 @@ public:
 
     //
     void Adapt();
+    void visAdaptiveProcessing(Point2D<int>& goal);
 
 };
 
