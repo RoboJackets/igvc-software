@@ -22,6 +22,7 @@
 
 Vision::Vision() {
     init();
+    cvNamedWindow("roi",1);
 }
 Vision::~Vision() {
 
@@ -118,6 +119,7 @@ void Vision::visProcessFrame(Point2D<int>& goal) {
         }
 
     } //end main
+
 
 }//end vision processing
 
@@ -943,4 +945,72 @@ void Vision::Normalize(IplImage* img) {
     cvScale( img, img, scale, shift ); //Normalizes matrix to 0-255 (grayscale)
 }
 
+
+/*
+ * Setup a ROI image region in the raw image to calculate the average
+ *   red, green, blue values in that area.
+ * Use these averages to compare every pixel to check if it is
+ *   'close' to that color, and if so, highlight it.
+ */
+void Vision::Adapt() {
+
+    #define pad 60
+    CvPoint UL = cvPoint(  visCvRaw->width/3+pad, visCvRaw->height-pad);
+    CvPoint LR = cvPoint(2*visCvRaw->width/3-pad, visCvRaw->height-10);
+    #undef pad
+
+    CvRect roi;
+    roi.x = UL.x;
+    roi.y = UL.y;
+    roi.width  = LR.x-UL.x;
+    roi.height = LR.y-UL.y;
+    IplImage* roi_img = cvCreateImage( cvSize(roi.width, roi.height), IPL_DEPTH_8U, 3 );
+
+    cvSetImageROI(visCvRaw,roi);
+    cvCopy(visCvRaw,roi_img);
+    cvResetImageROI(visCvRaw);
+
+    cvShowImage( "roi" , roi_img );
+
+    int blue=0,green=0,red=0;
+    unsigned char ab,ag,ar;
+    for(int i=0; i<roi_img->imageSize; i+=3){
+        ab = roi_img->imageData[i  ];
+        ag = roi_img->imageData[i+1];
+        ar = roi_img->imageData[i+2];
+        blue += ab;
+        green+= ag;
+        red  += ar;
+    }
+    int n = roi_img->imageSize / 3;
+    blue  /= n;
+    green /= n;
+    red   /= n;
+
+    //printf("RGB = %d %d %d \n",red,green,blue);
+
+    #define thresh 35
+    for(int i=0; i<visCvRaw->imageSize; i+=3) {
+        ab = visCvRaw->imageData[i  ];
+        ag = visCvRaw->imageData[i+1];
+        ar = visCvRaw->imageData[i+2];
+
+        if ( (abs(ab-(unsigned char)blue)<thresh) && (abs(ag-(unsigned char)green)<thresh) && (abs(ar-(unsigned char)red)<thresh) ) {
+            visCvRaw->imageData[i  ] = 188;
+            visCvRaw->imageData[i+1] = 0;
+            visCvRaw->imageData[i+2] = 0;
+        }
+        //else{
+        //    visCvRaw->imageData[i  ] = 0;
+        //   visCvRaw->imageData[i+1] = 0;
+        //    visCvRaw->imageData[i+2] = 178;
+        //}
+    }
+    #undef thresh
+
+    cvRectangle( visCvRaw, UL, LR, CV_RGB(100,0,0), 2, 8, 0);
+
+    cvReleaseImage(&roi_img);
+
+}
 
