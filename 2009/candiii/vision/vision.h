@@ -112,6 +112,9 @@ public:
     // width of robot in pixels
     int ROBOT_WIDTH;
 
+    //
+    void Adapt();
+
 };
 
 
