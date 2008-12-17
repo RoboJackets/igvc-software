@@ -45,13 +45,10 @@ void keyboardFunc(unsigned char key, int x, int y) { // handles keyboard button 
 /*****************************************************/
 
 /********** CV window callback stuff *****************/
-/* display view names */
-const char* names[] = {"raw","debug","path","thresh","hue","sat","hsv","?","?"};
 // callback for trackbar
 /* for selecting images to display in the opencv window */
 void trackbarHandler(int pos) {
     printf("pos = %d \n", pos);
-    printf("view = %s \n", names[pos]);
 }
 /*****************************************************/
 
