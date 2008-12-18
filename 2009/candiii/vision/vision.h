@@ -112,10 +112,12 @@ public:
     // width of robot in pixels
     int ROBOT_WIDTH;
 
-    //
+    // for the adaptive algorithms
     void Adapt();
     void visAdaptiveProcessing(Point2D<int>& goal);
     void CvtPixToGoal(Point2D<int>& goal);
+    int adapt_maxDiff;
+    int adapt_boxPad;
 
 };
 

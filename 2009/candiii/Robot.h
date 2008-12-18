@@ -89,8 +89,11 @@ public:
     Point2D<int> heading_main;
 
     // avg heading control
-    // k = the % of new value to use
-    double k;
+    // _k = the % of new value to use
+    double _k;
+
+    // xml conf
+    void LoadXMLSettings();
 
 };
 

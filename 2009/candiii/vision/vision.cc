@@ -117,7 +117,7 @@ void Vision::init()
         // Number of paths that are assessed between the starting/ending angles
         nav_path__num = 29; //15;		// (Number of sweeper lines)
         // Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
-        nav_path__view_distance_multiplier = 1.00; 		//1.00;<-without-transform	/* > 0.0 */
+        nav_path__view_distance_multiplier = .90; 		//1.00;<-without-transform	/* > 0.0 */
     }
     // Defines the "view/navigation cone", which is where the set of
     // considered navigation paths is taken from.
@@ -148,6 +148,7 @@ void Vision::init()
 
     // display roi for adaptive coloring
     cvNamedWindow("roi",1);
+
 
 }
 
@@ -1002,6 +1003,8 @@ void Vision::LoadVisionXMLSettings()
         hueThreshold = cfg.getInt("hueThresh");
         DO_TRANSFORM = cfg.getInt("doTransform");
         ROBOT_WIDTH  = cfg.getInt("robotWidth");
+        adapt_maxDiff= cfg.getInt("maxDiff");
+        adapt_boxPad = cfg.getInt("boxPadding");
     }
 
     /* test */
@@ -1014,6 +1017,8 @@ void Vision::LoadVisionXMLSettings()
                 hueThreshold = 20;
                 DO_TRANSFORM =  1;
                 ROBOT_WIDTH  = 30;
+                adapt_maxDiff= 35;
+                adapt_boxPad = 90;
             }
         }
         else
@@ -1021,6 +1026,7 @@ void Vision::LoadVisionXMLSettings()
             printf("Vision settings loaded \n");
         }
         printf("thresholds: sat %d  hue %d \n",satThreshold,hueThreshold);
+        printf("thresholds: maxDiff %d  boxPad %d \n",adapt_maxDiff,adapt_boxPad);
     }
 
 }
@@ -1100,14 +1106,14 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
             goal.y=10;
             goal.x=0;
         }
-        else if( (visCvPath->height-goal_far.y) < 20 ) // XXX: HACK to get onto ramps & yellow bars
+        else if ( (visCvPath->height-goal_far.y) < 20 ) // XXX: HACK to get onto ramps & yellow bars
         {
             goal.y=10;
             goal.x=0;
         }
 
         // Debug print
-        printf("heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
+        //printf("heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
     }
 }
 
@@ -1121,12 +1127,18 @@ void Vision::Adapt()
 {
 
     /* define roi corners (upper-left and lower-right) */
-#define pad 100
-//    CvPoint UL = cvPoint(  visCvRaw->width/3+pad, visCvRaw->height-pad*2);
-//    CvPoint LR = cvPoint(2*visCvRaw->width/3-pad, visCvRaw->height-pad/2);
-    CvPoint UL = cvPoint(  visCvDebug->width/3+pad, visCvDebug->height-pad/3);
-    CvPoint LR = cvPoint(2*visCvDebug->width/3-pad, visCvDebug->height-pad/5);
-#undef pad
+    CvPoint UL;
+    CvPoint LR;
+    if (DO_TRANSFORM)
+    {
+        UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/3);
+        LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/5);
+    }
+    else
+    {
+        UL = cvPoint(  visCvRaw->width/3+adapt_boxPad, visCvRaw->height-adapt_boxPad*1.2);
+        LR = cvPoint(2*visCvRaw->width/3-adapt_boxPad, visCvRaw->height-adapt_boxPad/2);
+    }
 
     /* setup roi */
     CvRect roi;
@@ -1160,19 +1172,18 @@ void Vision::Adapt()
     blue  /= n;
     green /= n;
     red   /= n;
-    //printf("RGB = %d %d %d \n",red,green,blue);
 
     /* generate visCvAdapt image here!
      *  white=good ~ black=bad */
-    // TODO: add 'thresh' to xml file
-#define thresh 35
-    for (int i=0; i<visCvDebug->imageSize; i+=3)      //visCvRaw
+    for (int i=0; i<visCvDebug->imageSize; i+=3)      //was visCvRaw
     {
         ab = visCvDebug->imageData[i  ];
         ag = visCvDebug->imageData[i+1];
         ar = visCvDebug->imageData[i+2];
 
-        if ( (abs(ab-(unsigned char)blue)<thresh) && (abs(ag-(unsigned char)green)<thresh) && (abs(ar-(unsigned char)red)<thresh) )
+        if (    (abs(ab-(unsigned char)blue )<adapt_maxDiff) &&
+                (abs(ag-(unsigned char)green)<adapt_maxDiff) &&
+                (abs(ar-(unsigned char)red  )<adapt_maxDiff))
         {
             visCvAdapt->imageData[i/3] = GOOD_PIXEL;
         }
@@ -1181,7 +1192,6 @@ void Vision::Adapt()
             visCvAdapt->imageData[i/3] = BAD_PIXEL;
         }
     }
-#undef thresh
 
     /* display roi box in the image we're using */
 //    cvRectangle( visCvRaw, UL, LR, CV_RGB(100,0,0), 2, 8, 0);
