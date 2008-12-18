@@ -5,6 +5,7 @@
 #include "PjMat.h"
 #include <stdlib.h>
 #include <GL/glut.h>
+#include "XmlConfiguration.h"
 
 
 
@@ -84,8 +85,10 @@ void Robot::destroy() {
 
 int Robot::init() {
 
+    /* load xml settings - important to do first */
+    LoadXMLSettings();
+
     /* setup image selection bar */
-    trackbarVal = 1; // currently selected image to view (see ConvertAllImageViews() in vision.cc)
     int numberOfViews = 10; // important!!!
     cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
 
@@ -96,6 +99,7 @@ int Robot::init() {
     /* configure opencv display window */
     cvResizeWindow( "display", visCvRaw->width, visCvRaw->height );
     cvMoveWindow( "display", 10, 10 ); // position on screen
+    cvMoveWindow( "roi", visCvRaw->width/2-20, 60+visCvRaw->height );
 
     /* init all CV images here */
     {
@@ -124,11 +128,42 @@ int Robot::init() {
     /* init video writer */
     //createVideoWriter();
 
-    /* k value = the % of new value to use */
-    k = .50;
 
     /* success */
     return 1;
+}
+
+void Robot::LoadXMLSettings()
+{
+    /* load xml file */
+    XmlConfiguration cfg("Config.xml");
+
+    /* load settings */
+    {
+        /* k value = the % of new value to use */
+        _k = cfg.getFloat("_k");
+        /* see ConvertAllImageViews() in vision.cc */
+        trackbarVal = cfg.getInt("defaultView");
+
+    }
+
+    /* test */
+    {
+        if (_k==-1 || trackbarVal==-1)
+        {
+            printf("ERROR: Robot settings NOT loaded! Using DEFAULTS \n");
+            {
+                _k = .40;
+                trackbarVal = 1;
+            }
+        }
+        else
+        {
+            printf("Robot settings loaded \n");
+        }
+        printf("values: _k %f  view %d \n",_k,trackbarVal);
+    }
+
 }
 
 void Robot::Go() {
@@ -152,7 +187,7 @@ void Robot::Go() {
         return;
 
     /* Init default view (debug=1) */
-    trackbarHandler( 1 );
+    trackbarHandler( trackbarVal );
 
     /*
      * Robot Loop!
@@ -190,10 +225,9 @@ void Robot::processFunc() {
 
     /* Average speeds
      * k = % of new value to use */
-    if(0)
     {
-        heading_main.x = k*heading_vision.x + (1-k)*heading_main.x;
-        heading_main.y = k*heading_vision.y + (1-k)*heading_main.y;
+        heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
+        heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
         // debug print
         printf("heading: rot: %d 	fwd: %d \n",heading_main.x,heading_main.y);
     }
@@ -385,24 +419,24 @@ void Robot::updateGlutDisplay() {
 } // end update glut
 
 
-void Robot::createVideoWriter() {
-    cvVideoWriter = 0;
-    int isColor = 1;
-    int fps     = 10;  // or 30
-    int frameW  = visCvRaw->width;
-    int frameH  = visCvRaw->height;
-    /*	Other possible codec codes:
-    	CV_FOURCC('P','I','M','1')    = MPEG-1 codec
-    	CV_FOURCC('M','J','P','G')    = motion-jpeg codec (does not work well)
-    	CV_FOURCC('M', 'P', '4', '2') = MPEG-4.2 codec
-    	CV_FOURCC('D', 'I', 'V', '3') = MPEG-4.3 codec
-    	CV_FOURCC('D', 'I', 'V', 'X') = MPEG-4 codec
-    	CV_FOURCC('U', '2', '6', '3') = H263 codec
-    	CV_FOURCC('I', '2', '6', '3') = H263I codec
-    	CV_FOURCC('F', 'L', 'V', '1') = FLV1 codec
-    */
-    cvVideoWriter=cvCreateVideoWriter("video_out.avi",CV_FOURCC('P','I','M','1'),
-                                      fps,cvSize(frameW,frameH),isColor);
-}
+//void Robot::createVideoWriter() {
+//    cvVideoWriter = 0;
+//    int isColor = 1;
+//    int fps     = 10;  // or 30
+//    int frameW  = visCvRaw->width;
+//    int frameH  = visCvRaw->height;
+//    /*	Other possible codec codes:
+//    	CV_FOURCC('P','I','M','1')    = MPEG-1 codec
+//    	CV_FOURCC('M','J','P','G')    = motion-jpeg codec (does not work well)
+//    	CV_FOURCC('M', 'P', '4', '2') = MPEG-4.2 codec
+//    	CV_FOURCC('D', 'I', 'V', '3') = MPEG-4.3 codec
+//    	CV_FOURCC('D', 'I', 'V', 'X') = MPEG-4 codec
+//    	CV_FOURCC('U', '2', '6', '3') = H263 codec
+//    	CV_FOURCC('I', '2', '6', '3') = H263I codec
+//    	CV_FOURCC('F', 'L', 'V', '1') = FLV1 codec
+//    */
+//    cvVideoWriter=cvCreateVideoWriter("video_out.avi",CV_FOURCC('P','I','M','1'),
+//                                      fps,cvSize(frameW,frameH),isColor);
+//}
 
 

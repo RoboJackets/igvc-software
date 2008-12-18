@@ -18,11 +18,18 @@
 	<!-- Vision Processing Settings -->
 	<satThresh>70</satThresh> <!-- higher => more noise/sensitivity -->
 	<hueThresh>35</hueThresh> <!-- higher => more noise/sensitivity -->
-	<doTransform>1</doTransform>
 	<robotWidth>20</robotWidth>
+	<doTransform>1</doTransform>
+	<maxDiff>35</maxDiff>       <!-- higher => more noise/sensitivity -->
+	<boxPadding>90</boxPadding> <!-- changes shape of roi box -->
+
+	<!-- Robot Misc Settings -->
+	<_k>0.40</_k>
+    <defaultView>1</defaultView>
+
+
 
     <!--
-	<></>
 	<></>
 	<></>
 	<></>
