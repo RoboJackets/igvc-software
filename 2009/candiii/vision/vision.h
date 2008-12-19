@@ -119,6 +119,7 @@ public:
     void CvtPixToGoal(Point2D<int>& goal);
     int adapt_maxDiff;
     int adapt_boxPad;
+    int DO_ADAPTIVE;
 
 };
 
