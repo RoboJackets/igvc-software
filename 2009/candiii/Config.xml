@@ -20,6 +20,7 @@
 	<hueThresh>35</hueThresh> <!-- higher => more noise/sensitivity -->
 	<robotWidth>20</robotWidth>
 	<doTransform>1</doTransform>
+	<doAdaptive>0</doAdaptive>
 	<maxDiff>35</maxDiff>       <!-- higher => more noise/sensitivity -->
 	<boxPadding>100</boxPadding> <!-- changes shape of roi box -->
 

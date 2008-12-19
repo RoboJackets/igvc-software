@@ -233,8 +233,15 @@ void Robot::processFunc()
     //TODO
 
     /* Perform vision processing. */
-    //vp.visProcessFrame(heading_vision);
-    vp.visAdaptiveProcessing(heading_vision); // NEW! will optimize and combine later
+    if(vp.DO_ADAPTIVE)
+    {
+        vp.visAdaptiveProcessing(heading_vision); // NEW!
+    }
+    else
+    {
+        vp.visProcessFrame(heading_vision);
+    }
+
 
     /* Average speeds
      * k = % of new value to use */

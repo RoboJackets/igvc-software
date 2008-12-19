@@ -1005,6 +1005,7 @@ void Vision::LoadVisionXMLSettings()
         ROBOT_WIDTH  = cfg.getInt("robotWidth");
         adapt_maxDiff= cfg.getInt("maxDiff");
         adapt_boxPad = cfg.getInt("boxPadding");
+        DO_ADAPTIVE  = cfg.getInt("doAdaptive");
     }
 
     /* test */
@@ -1015,10 +1016,11 @@ void Vision::LoadVisionXMLSettings()
             {
                 satThreshold = 60;
                 hueThreshold = 20;
-                DO_TRANSFORM =  1;
+                DO_TRANSFORM = 1;
                 ROBOT_WIDTH  = 30;
                 adapt_maxDiff= 35;
                 adapt_boxPad = 100;
+                DO_ADAPTIVE  = 1;
             }
         }
         else
