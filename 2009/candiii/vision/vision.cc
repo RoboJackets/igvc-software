@@ -1018,7 +1018,7 @@ void Vision::LoadVisionXMLSettings()
                 DO_TRANSFORM =  1;
                 ROBOT_WIDTH  = 30;
                 adapt_maxDiff= 35;
-                adapt_boxPad = 90;
+                adapt_boxPad = 100;
             }
         }
         else

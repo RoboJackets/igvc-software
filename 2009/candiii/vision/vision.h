@@ -11,7 +11,8 @@
  *
  */
 
-class Vision {
+class Vision
+{
 
 public:
 

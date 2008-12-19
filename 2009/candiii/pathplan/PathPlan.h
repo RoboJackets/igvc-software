@@ -29,7 +29,7 @@ class PathPlan {
 public:
     PathPlan();
     virtual ~PathPlan();
-    
+
     void Init(int x_size, int y_size,  int widthRobo, int heightRobo);
     /* internal variables to speed things up (no re-creations in each function) */
     int* costMap;
@@ -37,7 +37,7 @@ public:
     int xsize;
     int ysize;
     rectangle myrect;
-    shape *myshape;  //Base pointer to one of the above 3 derived shape objects    
+    shape *myshape;  //Base pointer to one of the above 3 derived shape objects
     float *cost;
     int *coord;
     int *vect;

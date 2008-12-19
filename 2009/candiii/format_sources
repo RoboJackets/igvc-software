@@ -1,0 +1,18 @@
+#!/bin/sh
+
+
+echo "formatting files..."
+
+find . -name '*.cpp' -print -exec astyle {} \;
+find . -name '*.cc' -print -exec astyle {} \;
+find . -name '*.c' -print -exec astyle {} \;
+find . -name '*.h' -print -exec astyle {} \;
+
+echo "removing astyle crap..."
+
+find . -name '*.orig' -exec rm '{}' \; -print
+
+echo "done"
+
+
+
