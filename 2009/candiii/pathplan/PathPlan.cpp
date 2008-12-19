@@ -3,12 +3,12 @@
 
 
 PathPlan::PathPlan() {
-	initialized=0;
+    initialized=0;
 }
 
-PathPlan::~PathPlan() { 
-	//Deallocate memory
-;
+PathPlan::~PathPlan() {
+    //Deallocate memory
+    ;
     delete[] cost;
     delete[] coord;
     delete[] vect;
@@ -16,36 +16,36 @@ PathPlan::~PathPlan() {
     delete[] ptracker;
     delete[] status;
     delete[] bckptr;
-    
+
 }
 
-void PathPlan::Init(int x_size, int y_size,  int widthRobo, int heightRobo){
-	xsize=x_size;
-	ysize=y_size;
-	
+void PathPlan::Init(int x_size, int y_size,  int widthRobo, int heightRobo) {
+    xsize=x_size;
+    ysize=y_size;
+
     gridsize=xsize*ysize;     //Total number of pixels in the grid
     costMap = new int [gridsize];
-    
+
     myshape=&myrect;
-    myrect.setParams(widthRobo,heightRobo);    
-        
+    myrect.setParams(widthRobo,heightRobo);
+
     cost=new float[gridsize];               //Allocate array for cost
     coord = new int[1000];
     vect = new int[1000];
     ptracker = new int[1000];
 
-	status=new int[gridsize];    //Status (NEW/ACTIVE/DONE) of grid points
+    status=new int[gridsize];    //Status (NEW/ACTIVE/DONE) of grid points
     bckptr=new int[gridsize];    //Backpointers to grid points within heap
-    
-    
-     initialized=1;
-    
-    
+
+
+    initialized=1;
+
+
 }
 
 int PathPlan::navigate(unsigned char *image,int xsize, int ysize, int xstart,int ystart,int &xend, int &yend, int scaredD, int widthRobo, int heightRobo) {
 
-	if(!initialized) Init(xsize,ysize,widthRobo,heightRobo);
+    if (!initialized) Init(xsize,ysize,widthRobo,heightRobo);
 
     int p1 = xstart+xsize*ystart; //Starting point
     int p2=xend+xsize*yend; //Destination point
@@ -68,7 +68,7 @@ int PathPlan::navigate(unsigned char *image,int xsize, int ysize, int xstart,int
 
     //Set starting location and draw starting shape outline
 
-    myshape->setLocation(xstart,ystart); 
+    myshape->setLocation(xstart,ystart);
 
     if (myshape->isValidLocation(image,xsize,ysize)) {
         myshape->drawOutline(image,xsize);      //Draw starting shape
@@ -106,8 +106,8 @@ int PathPlan::navigate(unsigned char *image,int xsize, int ysize, int xstart,int
 
 
     p2=p1;     //Initialize neighbor point p2 to the starting point p1
-	int j,i;
-	float val;
+    int j,i;
+    float val;
 
     do {
         p1=p2;                                   //Move p1 to smallest neighbor p2

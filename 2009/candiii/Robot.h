@@ -21,7 +21,8 @@
 
 /*=================================================================*/
 
-class Robot {
+class Robot
+{
 public:
     // default constructor, use a camera
     Robot();

@@ -2,9 +2,10 @@
 #include "Robot.h"
 #include <QApplication>
 
-int main(int argc, char **argv) {
-	
-	(void)argc; // avoid unused variable warnings
+int main(int argc, char **argv)
+{
+
+    (void)argc; // avoid unused variable warnings
 
     /*
      * Our display window
