@@ -233,7 +233,7 @@ void Robot::processFunc()
     //TODO
 
     /* Perform vision processing. */
-    if(vp.DO_ADAPTIVE)
+    if (vp.DO_ADAPTIVE)
     {
         vp.visAdaptiveProcessing(heading_vision); // NEW!
     }
