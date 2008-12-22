@@ -1,0 +1,82 @@
+\documentclass[letterpaper,12pt,notitlepage]{report}
+
+\usepackage[latin1]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fontenc}
+\usepackage{graphicx}
+
+\begin{document}
+\title{OSMC Interface Board}
+\author{}
+\date{}
+\maketitle
+
+\subsection{TODO}
+\begin{enumerate}
+ \item finish parts
+ \item add decoupling caps
+ \item add filter for adc
+ \item check schematic
+ \item check fixed parts on layout
+ \item calculate component values for analog isolator, adc filter, and decoupling caps
+ \item final check
+ \item finish documentation - add image of schematic and layout - legal check
+\end{enumerate}
+
+\subsection{Board Description}
+
+\subsection{Pinout}
+
+\subsection{Design}
+
+Since the sampling rate for the arduino is ? the cutoff for the sampling filter was chosen to be ?, which makes the sampling rate equal to 10(?) times the maximum frequency.
+
+Optoisolators were used to seperate the two power sources.  Ground planes where used to reduce noise.
+
+\textquotedblleft The input lines of the 4081A are 'modified TTL' in that a high level signal is any voltage between 3 and 12V\textquotedblright
+
+No header for a joystick was added because there will always be a computer present.
+
+\subsection{Parts list}
+\subsubsection{Optoisolators}
+\begin{description}
+ \item[MOCD213-M] x 3
+
+2 channel optocoupler with transistor output.  Any kind of optocoupler can be used for the digital signals.  The part I picked was the cheapest I could find at the time on Digikey.
+
+ \item[HCNR200/1] x 1
+
+Analog optocoupler for measuring battery voltages.
+\end{description}
+
+\subsubsection{Headers}
+\begin{description}
+ \item[?] x 3
+
+for arduino
+
+ \item[?] x 2
+
+for OSMC
+
+ \item[?] x 2
+
+for encoders
+
+ \item[?] x 2
+
+for current sensors
+
+ \end{description}
+
+\subsection{Future}
+\begin{itemize}
+ \item DC voltage control: using PWM to control the OSMC swtiching is not as efficient as using direct DC voltages.  This could be done by adding a lowpass filter to the PWM output or by using a DAC.
+ \item Temperature sensing
+ \item Regenerative Motor Braking (not this board?)
+ \item integrate some this board's functionality into the OSMC
+\end{itemize}
+
+\end{document}
