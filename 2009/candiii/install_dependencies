@@ -1,49 +1,49 @@
 #!/bin/sh
 
 # feel free to add to this script when you encounter missing libs/files
-echo "installing candi dependencies this may take a while..."
-echo "multiverse and universe repositories must be enabled!"
+echo "installing candi dependencies this may take a while... =================="
+echo "multiverse and universe repositories must be enabled! ==================="
 
+sleep 1
+
+echo "update =================================================================="
 sudo apt-get update
 
-echo "opencv"
+echo "opencv =================================================================="
 sudo apt-get --yes install libcv1
 sudo apt-get --yes install libcvaux1 
 sudo apt-get --yes install libhighgui1
 sudo apt-get --yes install libcv-dev
 
-echo "QT"
+echo "QT ======================================================================"
 sudo apt-get --yes install libqt4-core
 sudo apt-get --yes install libqt4-xml 
 sudo apt-get --yes install libqt4-dev
 sudo apt-get --yes install qt4-dev-tools
 
-echo "boost"
+echo "boost ==================================================================="
 sudo apt-get --yes install libboost1.35-dev	#ubuntu 8.10
 #sudo apt-get --yes install libboost-dev		#ubuntu 8.04
 
-echo "glut" 
+echo "glut ====================================================================" 
 sudo apt-get --yes install libglut-dev
 
-echo "libtool"
+echo "libtool ================================================================="
 sudo apt-get --yes install libtool
 
-echo "g++"
+echo "g++ ====================================================================="
 sudo apt-get --yes install g++
 
-echo "IEEE1394"
-#sudo apt-get --yes install libdc1394-dev
-#sudo apt-get --yes install libavc1394-dev
-#sudo apt-get --yes install libraw1394-dev
-#sudo apt-get --yes install ?
-echo "TODO: install ieee1394"
+echo "IEEE1394 ================================================================"
 cd ../libdc1394-2.0.3/
 ./configure
 make
 sudo make install
 cd ../candiii
 
+echo "remake =================================================================="
+./remake 
 
-echo "done"
+echo "done ===================================================================="
 echo
 
