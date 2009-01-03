@@ -15,14 +15,18 @@
 
 \subsection{TODO}
 \begin{enumerate}
- \item finish schematic - check use MISO for SS, check for vcc loop on OSMC connetor
- \item finish parts
- \item add decoupling caps (10u, 100u)
- \item initial check
+ \item rename disable/enable
+ \item bypass caps (10u, 100u)
+ \item ground loops?
+ \item check use MISO for SS
+ \item check parts
  \item calculate component values for isolators, filters, and decoupling caps
  \item final check - trace widths, emf compatablity, ground plane penetration, etc
  \item cleanup - silkscreen
  \item finish documentation - add image of schematic and layout - legal check
+ \item look for pcb company
+ \item order samples => adjust Dikikey order
+ \item get someone else to check
 \end{enumerate}
 
 \subsection{Board Description}
@@ -31,7 +35,9 @@
 
 inverted signal?
 
-\subsection{Design}
+\subsection{Circuit Design}
+
+Consider getting some cable to connect the hall effect sensors that has a shield and internally twisted wires. Connect the shield wire to the GND of the control board only at this one point - hopefully this way any capacitive coupled noise should be conducted straight to the bypass capacitors. To protect against magnetic noise on the line, again make sure that the internal wires are twisted about each other - the power is like the input current and the signal and gnd represent the return current. The less area there is in the loop (by having them twisted as tightly as possible) the less likely this system is to pick stray magnetic fields on the cable. And of course, you can play with the capacitance value on the low pass filter. 
 
 Since the sampling rate for the arduino is ? the cutoff for the anti-aliasing filter was chosen to be ?, which makes the sampling rate equal to 10(?) times the maximum frequency.
 
@@ -41,7 +47,16 @@ This design assumes that the motors are being driven from the same source.
 
 \textquotedblleft The input lines of the 4081A are 'modified TTL' in that a high level signal is any voltage between 3 and 12V\textquotedblright
 
+The digital isolations circuits (speed, direction, and enable) are phototransisters in a common collector (buffer) configuration.  The pull-down resistors aren't strictly necessary since the pins are pulled low by OSMC, but they are kept so that the pins can be used for other boards that don't do this.
+
+
 No header for a joystick was added because there will always be a computer present.
+
+\subsection{Layout}
+
+ground planes
+
+bypass cap locations
 
 \subsection{Parts list}
 \subsubsection{Optoisolators}
@@ -78,7 +93,7 @@ for current sensors
 
 \subsection{Future}
 \begin{itemize}
- \item state of E-stop
+ \item bias battery voltage measurement
  \item joystick?
  \item DC voltage control: using PWM to control the OSMC swtiching is not as efficient as using direct DC voltages.  This could be done by adding a lowpass filter to the PWM output or by using a DAC.
  \item Temperature sensing
