@@ -3,6 +3,8 @@
 <!-- Comment -->
 <!--  -->
 
+<!-- !!! Robot.h controls use of USB vs. 1394 cameras !!! -->
+
 <Config>
 
 	<!-- Guppy Misc Settings -->
@@ -12,20 +14,20 @@
 	<auto_gain_and_shutter>0</auto_gain_and_shutter>
 
 	<!-- Guppy White Balance Settings -->
-	<red>523</red>
+	<red>528</red>
 	<blue>646</blue>
 
 	<!-- Vision Processing Settings -->
-	<satThresh>70</satThresh> <!-- higher => more noise/sensitivity -->
-	<hueThresh>35</hueThresh> <!-- higher => more noise/sensitivity -->
-	<robotWidth>20</robotWidth>
-	<doTransform>1</doTransform>
-	<doAdaptive>1</doAdaptive>
-	<maxDiff>35</maxDiff>       <!-- higher => more noise/sensitivity -->
-	<boxPadding>100</boxPadding> <!-- changes shape of roi box -->
+	<satThresh>70</satThresh>    <!-- higher => more noise/sensitivity -->
+	<hueThresh>35</hueThresh>    <!-- higher => more noise/sensitivity -->
+	<robotWidth>20</robotWidth>  <!-- lower => we can squeeze through more -->
+	<doTransform>1</doTransform> <!-- 1 => use graphics card transformations -->
+	<doAdaptive>1</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
+	<maxDiff>35</maxDiff>        <!-- higher => more noise/sensitivity for inside roi box -->
+	<boxPadding>90</boxPadding>  <!-- lower => wider box -->
 
 	<!-- Robot Misc Settings -->
-	<_k>0.40</_k>
+	<_k>0.40</_k>               <!-- lower => more smooth motor cotrol (averages new motor commands) -->
     <defaultView>1</defaultView>
 
 

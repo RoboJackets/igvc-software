@@ -1138,7 +1138,7 @@ void Vision::Adapt()
     }
     else
     {
-        UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad*1.2);
+        UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad);
         LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/2);
     }
 
@@ -1162,7 +1162,7 @@ void Vision::Adapt()
     int blue=0,green=0,red=0;
     unsigned char ab,ag,ar;
     //for (int i=0; i<roi_img->imageSize-3; i+=3)
-    for (int i=roi_img->imageSize-3; i!=0; i-=3)
+    for (int i=roi_img->imageSize-3; i>0; i-=3)
     {
         ab = roi_img->imageData[i  ];
         ag = roi_img->imageData[i+1];
@@ -1179,7 +1179,7 @@ void Vision::Adapt()
     /* generate visCvAdapt image here!
      *  white=good ~ black=bad */
     //for (int i=0; i<visCvDebug->imageSize-3; i+=3)
-    for (int i=visCvDebug->imageSize-3; i!=0; i-=3)
+    for (int i=visCvDebug->imageSize-3; i>0; i-=3)
     {
         ab = visCvDebug->imageData[i  ];
         ag = visCvDebug->imageData[i+1];
