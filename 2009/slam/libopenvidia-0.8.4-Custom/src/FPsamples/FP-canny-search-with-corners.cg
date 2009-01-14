@@ -1,0 +1,112 @@
+/**
+ * This file is part of the OpenVIDIA project at http://openvidia.sf.net
+ * Copyright (C) 2004, James Fung
+ *
+ * OpenVIDIA is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenVIDIA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenVIDIA; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ **/
+
+/**
+  this program checks the direction, then determines which pixels
+  lie in the direction of the gradient (i.e. perpendicular to a line).
+  It passes the info on if a max is found in the direction of a gradent
+  otherwise it suppresses (0's) the output.
+
+  this program also searches  for corners.
+  corners are denoted by colorO.y component output  being 1.0
+  it detects corners by setting colorO.y = 1.0, then
+     supreessing non corners (non max of local gradients)
+*/
+void FragmentProgram(
+    const uniform  float4 thresh ,
+    in float2 fptexCoord : TEXCOORD0,
+    in float2 fptexCoord1 : TEXCOORD1,
+    in float2 fptexCoord2 : TEXCOORD2,
+    in float2 fptexCoord3 : TEXCOORD3,
+    in float2 fptexCoord4 : TEXCOORD4,
+    in float2 fptexCoord5 : TEXCOORD5,
+    in float2 fptexCoord6 : TEXCOORD6,
+    in float2 fptexCoord7 : TEXCOORD7,
+    out float4 colorO       : COLOR0,
+    out float4 color1       : COLOR1,
+    in float4 wpos : WPOS,
+    const uniform samplerRECT FPE1: TEXUNIT0 )
+{
+    //magdir holds { dx, dy, mag, direct}
+    float4 magdir = texRECT(FPE1, fptexCoord);
+    float dx = magdir.x;
+    float dy = magdir.y;
+    float mag = magdir.z;
+    float dir = magdir.w;
+    float alpha = 0.5/sin(3.14159/8.0);  //eight directions on grid
+   
+    float2 offset = round( alpha.xx*magdir.xy/magdir.zz );
+
+    float4 fwdneighbour, backneighbour;
+    fwdneighbour = texRECT(FPE1, fptexCoord + offset ); 
+    backneighbour = texRECT(FPE1, fptexCoord - offset ); 
+
+    //not an edgel
+    if( fwdneighbour.z > magdir.z || backneighbour.z > magdir.z ) {  
+      colorO = float4(0.0, 1.0, dir, mag); 
+    }
+    else {
+    // is an edgel
+//      colorO = float4(1.0, 1.0, 1.0, 1.0); //white for ez viewing
+      colorO = float4(1.0, 1.0, dir, mag); //real output 
+    }
+
+    //float mythresh= 10.0;
+    if( magdir.z < thresh.x )  {
+      colorO = float4(0.0, 0.0, dir, mag); 
+    }
+
+
+    //for corners, its gradient magnitude has to be a local max
+    //suppress non corners.  
+
+    //if( magdir.z < texRECT(FPE1, fptexCoord + float2(-1.0, -1.0)).z ||
+    if( magdir.z <= texRECT(FPE1, fptexCoord5 ).z ||
+        //magdir.z < texRECT(FPE1, fptexCoord + float2( 0.0, -1.0)).z ||
+        magdir.z <= texRECT(FPE1, fptexCoord6 ).z ||
+//        magdir.z < texRECT(FPE1, fptexCoord + float2( 1.0, -1.0)).z ||
+        magdir.z <= texRECT(FPE1, fptexCoord7).z ||
+//        magdir.z < texRECT(FPE1, fptexCoord + float2(-1.0,  0.0)).z ||
+        magdir.z <= texRECT(FPE1, -fptexCoord7).z ||
+        //magdir.z < texRECT(FPE1, fptexCoord + float2( 1.0,  0.0)).z ||
+        magdir.z <= texRECT(FPE1, fptexCoord1).z ||
+        //magdir.z < texRECT(FPE1, fptexCoord + float2(-1.0,  1.0)).z ||
+        magdir.z <= texRECT(FPE1, fptexCoord4).z ||
+        //magdir.z < texRECT(FPE1, fptexCoord + float2( 0.0,  1.0)).z ||
+        magdir.z <= texRECT(FPE1, fptexCoord3).z ||
+        //magdir.z < texRECT(FPE1, fptexCoord + float2( 1.0,  1.0)).z 
+        magdir.z <= texRECT(FPE1, fptexCoord2 ).z 
+
+     ) {
+       //so this is not a corner max.
+        colorO.y = 0.0; 
+     } 
+
+    //magdir gives us: float4(dx, dy, mag, dir) when edge present,
+    // or (0.0, ... ) if no edge
+    float4 vec1 = {dx,dx,dy,1.0};
+    float4 vec2 = {dx,dy,dy,1.0};
+    color1 = vec1*vec2;
+/*
+    color1.x = dx*dx; 
+    color1.y = dx*dy;
+    color1.z = dy*dy;
+    color1.w = 1.0;
+*/
+}

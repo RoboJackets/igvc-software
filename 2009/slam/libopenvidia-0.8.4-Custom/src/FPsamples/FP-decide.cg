@@ -1,0 +1,98 @@
+/**
+ * This file is part of the OpenVIDIA project at http://openvidia.sf.net
+ * Copyright (C) 2004, James Fung
+ *
+ * OpenVIDIA is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenVIDIA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenVIDIA; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ **/
+
+/**
+  checks to see if:
+     a) edgel is present at a pixel
+     b) what the randomness of that edgel is
+
+  low randomness and edgel present suggests a line
+  high randomness and edgel present suggests a corner (or feature)
+*/
+void FragmentProgram(
+    const uniform float4 thresh ,
+    in float2 fptexCoord : TEXCOORD0,
+    in float2 fptexCoord1 : TEXCOORD1,
+    in float2 fptexCoord2 : TEXCOORD2,
+    in float2 fptexCoord3 : TEXCOORD3,
+    in float2 fptexCoord4 : TEXCOORD4,
+    in float2 fptexCoord5 : TEXCOORD5,
+    in float2 fptexCoord6 : TEXCOORD6,
+    in float2 fptexCoord7 : TEXCOORD7,
+
+    out float4 colorO       : COLOR0,
+    in float4 wpos : WPOS,
+
+    const uniform samplerRECT FPE1: TEXUNIT0 , //decision metrics
+
+    //decision metrics
+    /*float4( [0=nothing. 0.5 canny edge],
+              magnitude,
+              direction,
+              cornerness 
+     */
+    const uniform samplerRECT FPE2: TEXUNIT1 ) //canny edgles
+
+ /**canny edgels have direction in .z compoennt, magnitude in .w compoent.
+    direction:  lies in [-1.0, 1.0] from arctan below
+    magnitude:  [0, sqrt(2)*255 integer] */
+{
+    float4 decisionmetrics = texRECT(FPE1, fptexCoord);
+    float cornerness = decisionmetrics.w;
+    colorO = decisionmetrics;
+    if( cornerness < thresh.x ) {
+       //not a corner  
+       //let the corner/edge flag pass as is
+     }
+     else {
+
+    if( cornerness > texRECT(FPE1, fptexCoord5).w &&
+        cornerness >texRECT(FPE1, fptexCoord6).w &&
+        cornerness >texRECT(FPE1, fptexCoord7).w &&
+        cornerness >texRECT(FPE1, fptexCoord4 ).w &&
+        cornerness >texRECT(FPE1, fptexCoord1 ).w &&
+        cornerness >texRECT(FPE1, fptexCoord + float2( -1.0,  1.0)).w &&
+        cornerness >texRECT(FPE1, fptexCoord3).w &&
+        cornerness >texRECT(FPE1, fptexCoord2).w
+     ) {
+       //if it is a potential corner (> neighbours), check to make sure it
+       //has enough cornerness
+       //is a corner, flag .x component as 1.0
+          colorO.x = 1.0;
+       }
+       else {
+          //not a corner
+          //let the corner/edge flag pass as is
+       } 
+
+    }
+     
+    //output is:
+     //decision metrics
+    /*float4( [0=nothing. 0.5 canny edge, 1.0 corner],
+              magnitude,
+              direction,
+              cornerness
+     */
+///////     colorO.xyzw = abs(cornerness/600.0); 
+  //if(colorO.x > .9 ) colorO=1.0; else colorO=0.0;
+  //if( colorO.x > 0.2 ) colorO=float4(1.0,0.0,0.0,1.0);
+//  colorO = colorO.xxxx;
+
+}

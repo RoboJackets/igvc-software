@@ -1,0 +1,55 @@
+/**
+ * This file is part of the OpenVIDIA project at http://openvidia.sf.net
+ * Copyright (C) 2004, James Fung
+ *
+ * OpenVIDIA is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenVIDIA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenVIDIA; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ **/
+
+void FragmentProgram(
+    const uniform  float4 thresh ,
+    in float2 fptexCoord : TEXCOORD0,
+    out float4 colorO       : COLOR0,
+    in float4 wpos : WPOS,
+    const uniform samplerRECT FPE1: TEXUNIT0 )
+{
+    float4 left = { 0.0132999, 0.1080111, 0.2403623, 0.0};
+//    float4 right ={ -0.2403623, -0.0132999, -0.1080111, 0.0 };
+    float4 right ={ -0.2403623, -0.1080111, -0.0132999, 0.0 };
+
+    float4 leftcolor, rightcolor;
+    leftcolor.x = texRECT(FPE1, fptexCoord+float2(0,-3)).g; 
+    leftcolor.y = texRECT(FPE1, fptexCoord+float2(0,-2)).g; 
+    leftcolor.z = texRECT(FPE1, fptexCoord+float2(0,-1)).g; 
+    leftcolor.w = 0.0;
+    rightcolor.x = texRECT(FPE1, fptexCoord+float2(0,1)).g;
+    rightcolor.y = texRECT(FPE1, fptexCoord+float2(0,2)).g;
+    rightcolor.z = texRECT(FPE1, fptexCoord+float2(0,3)).g;
+    rightcolor.w = 0.0;
+
+    //float4 leftcolor.w = texRECT(FPE1, fptexCoord-float2(-3,0)).y; 
+/*
+    float4 leftderiv = left.xyzw*leftcolor.xyzw;
+    float4 rightderiv = right.xyzw*rightcolor.xyzw;
+    float4 color =  leftderiv+rightderiv;
+    color.rgb = color.r + color.g + color.b + color.w;
+*/
+
+     float4 color; 
+    color.rgb = dot(left,leftcolor )+dot(right,rightcolor );
+
+    color.w = 1.0;
+    //colorO = float4(0.0, 1.0, 0.0, 0.0);
+    colorO = color;
+}

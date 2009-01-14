@@ -1,0 +1,110 @@
+/**
+ * This file is part of the OpenVIDIA project at http://openvidia.sf.net
+ * Copyright (C) 2004, James Fung
+ *
+ * OpenVIDIA is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenVIDIA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenVIDIA; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ **/
+
+void FragmentProgram(
+    in float2 inCoord : TEXCOORD0,
+    in float2 quadOffset : TEXCOORD1,
+    in float2 tapsCoord : TEXCOORD2,
+    out float4 colorO       : COLOR0,
+    const uniform samplerRECT LookupTex      : TEXUNIT0 ,
+    const uniform samplerRECT OrientationTex : TEXUNIT1 ,
+    const uniform samplerRECT MagdirTex      : TEXUNIT2 ,
+    const uniform samplerRECT GaussianTex    : TEXUNIT3 )
+{
+  //0.3536, 0.7071
+  const float4x4 lclGauss = { 0.3536,  0.3536,  0.3536,  0.3536, 
+                        0.3536, 0.7071, 0.7071, 0.3536,
+                        0.3536, 0.7071, 0.7071, 0.3536,
+                        0.3536,  0.3536,  0.3536,  0.3536 };
+                        
+  float4 input;
+  int xoffset=-1;
+  int yoffset=-1;
+  float4 bins_0 = float4( 0.0, 0.0, 0.0, 0.0 );
+  float4 bins_1 = float4( 0.0, 0.0, 0.0, 0.0 ); 
+
+  float4 indexes0 = float4( 0.0, 1.0, 2.0, 3.0);
+  float4 indexes1 = float4( 4.0, 5.0, 6.0, 7.0);
+
+  float dir;
+  float theta =  texRECT( OrientationTex, inCoord ).z;
+  float2 centreCoord = texRECT( LookupTex, inCoord ).xy ;
+//centreCoord.y = 240.0-centreCoord.y;
+
+  float2 quadCoord = centreCoord + quadOffset ;
+  float2 tmp;
+  float2 newCoord;
+
+  for( xoffset = 0 ; xoffset < 4 ; xoffset++ ) {
+    for( yoffset = 0 ; yoffset < 4 ; yoffset++ ) {
+
+      tmp = tapsCoord.xy+float2(xoffset,yoffset)+float2(-8.0, -8.0); 
+      //tmp = tapsCoord.xy+float2(xoffset,yoffset);
+      newCoord.x = cos(+theta )*( tmp.x)  -
+                   sin(+theta )*( tmp.y ) ;
+      newCoord.y = sin(+theta )*( tmp.x )  +
+                   cos(+theta )*( tmp.y ) ; 
+      newCoord += centreCoord.xy;
+
+      input = texRECT( MagdirTex, newCoord );
+      input.z *= lclGauss[xoffset,yoffset].x
+               * texRECT( GaussianTex, tapsCoord +
+                      float2( (float)xoffset, (float)yoffset)  ).x ;
+
+      dir = (-theta.x /  6.2832) + 0.5 + input.y;
+      dir =  dir * 8.0;
+   
+      float4 mytmp, tmpdiff;
+
+      tmpdiff = indexes0  - dir.xxxx;
+      mytmp.xyzw = cos( (tmpdiff)*float4(0.7854,0.7854,0.7854,0.7854) );
+  
+      mytmp += float4(1.0,1.0,1.0,1.0); 
+      mytmp = mytmp*mytmp;
+      mytmp = mytmp*mytmp;
+
+      bins_0 += mytmp*input.zzzz;
+
+      float4 mytmp2, tmpdiff2;
+      tmpdiff2 = indexes1 - dir.xxxx;
+      mytmp2.xyzw = cos( (tmpdiff)*float4(0.7854,0.7854,0.7854,0.7854) );
+
+      mytmp2 += float4(1.0,1.0,1.0,1.0); 
+      mytmp2 = mytmp2*mytmp2;
+      mytmp2 = mytmp2*mytmp2;
+
+      bins_1 += mytmp2*input.zzzz;
+    }
+  }
+
+  colorO.x = pack_2half( bins_0.xy);
+  colorO.y = pack_2half( bins_0.zw);
+  colorO.z = pack_2half( bins_1.xy);
+  colorO.w = pack_2half( bins_1.zw);
+
+
+/*
+  colorO.x = pack_2half( quadOffset );
+  colorO.y = pack_2half( centreCoord  );
+  colorO.z = pack_2half( float2(3.0,4.0) );
+  colorO.w = pack_2half( float2(5.0,6.0) );
+*/
+
+
+}
