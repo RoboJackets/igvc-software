@@ -1,0 +1,89 @@
+/**
+ * This file is part of the OpenVIDIA project at http://openvidia.sf.net
+ * Copyright (C) 2004, James Fung
+ *
+ * OpenVIDIA is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenVIDIA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenVIDIA; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ **/
+
+/**
+  checks to see if:
+     a) edgel is present at a pixel
+     b) what the randomness of that edgel is
+
+  low randomness and edgel present suggests a line
+  high randomness and edgel present suggests a corner (or feature)
+*/
+void FragmentProgram(
+    const uniform  float4 thresh ,
+    in float2 fptexCoord : TEXCOORD0,
+    out float4 colorO       : COLOR0,
+    in float4 wpos : WPOS,
+/*
+    const uniform samplerRECT FPE1: TEXUNIT0 , //blurred tangents
+    const uniform samplerRECT FPE2: TEXUNIT1 ) //canny edgles
+*/
+    const uniform samplerRECT FPE1: TEXUNIT0 , //blurred tangents
+    const uniform samplerRECT FPE2: TEXUNIT1 , //canny edgles
+
+ /**canny edgels have direction in .z compoennt, magnitude in .w compoent.
+    direction:  lies in [-1.0, 1.0] from arctan below
+    magnitude:  [0, sqrt(2)*255 integer] 
+*/
+    const uniform samplerRECT FPE3: TEXUNIT2 ) //gradients
+{
+    //blurred tangents have: 
+    //colorO.x = tan_x*tan_x;
+    //colorO.y = tan_y*tan_x;
+    //colorO.z = tan_y*tan_y;
+    float epsilon = 0.0000000001;
+    //float epsilon = 0.00001;
+ 
+    float4 randomin = texRECT(FPE1, fptexCoord);
+    float4 edgel = texRECT(FPE2, fptexCoord);
+
+    float trace = randomin.x + randomin.z ; // sum of XX + YY
+    float determinant = randomin.x * randomin.z - randomin.y*randomin.y; 
+ 
+    float sep = trace * trace - 4.0*determinant;
+    if( sep < 0.0 ) sep = 0.0; //should be easier function to do this.
+    sep = sqrt(sep);
+
+    //eigenvalues
+    float lambda1 = (trace + sep)/2.0;
+    float lambda2 = (trace - sep)/2.0;
+
+    // 9.0 is sigma squared, sigma = 3 from blur
+    float directedness = (lambda1 - lambda2) / ( trace + 0.1/9.0 );
+
+    //float randomness = 2.0 * lambda2 / ( trace + 0.1/9.0 );
+    float randomness = lambda2 / ( 1.0f + 0.5f*(lambda1+lambda2) );
+    float cornerness = determinant / (trace + epsilon);
+    float k = 0.04;
+    float harriscorner = determinant - k*trace*trace;
+
+    //if little randomness, and edgel is present
+    //edgel.x is the flag from canny-search-with...  
+    //   that flags an edgel (line)
+    if( randomness < thresh.x  && any(edgel.x)  ){
+      colorO = float4(0.5, edgel.z, edgel.w, 1.0); //this line for features
+    }
+    else {
+      colorO = float4( 0.0, edgel.z, edgel.w, 1.0); 
+    }
+    //scale the output:
+    colorO.y = (colorO.y+1.0)/2.0; //scale direction from [-1,1] to [0,1]
+    colorO.z = (colorO.z)/360.6245; //scale magnitude to [0,1]
+    colorO.w = cornerness;
+}

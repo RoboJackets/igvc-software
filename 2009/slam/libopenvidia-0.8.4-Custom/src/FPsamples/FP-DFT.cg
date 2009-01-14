@@ -1,0 +1,58 @@
+void FragmentProgram(
+    in float2 fptexCoord : TEXCOORD0, //Wn
+    out float4 colorO       : COLOR0,
+    const uniform samplerRECT FPE1: TEXUNIT0 , //Wn
+    const uniform samplerRECT FPE2: TEXUNIT1 ) //Sig
+{
+  float index;
+  float2 sum = {0.0, 0.0};
+
+#ifndef DFT_FORWARD
+#ifndef DFT_REVERSE 
+    #error "Direction of DFT not defined. Specify DFT_FORWARD of DFT_REVERSE when creating the DFT object"
+#endif
+#endif
+
+#ifndef DFTN
+  #error "Size of DFT not defined. ("DFTN" not defined.)"
+#else 
+  for(index = 0.5; index < DFTN ; index++ ) {
+#endif
+
+#ifdef DFT_COLUMN_VECTOR
+    float4 sig = texRECT( FPE2, float2(fptexCoord.x, index) );
+#else
+    float4 sig = texRECT( FPE2, float2(index, fptexCoord.x )  );
+#endif
+
+    float4 Wn  = texRECT( FPE1, float2(index, fptexCoord.y)  );
+
+#ifdef DFT_FORWARD
+        //sum.xy += sig.xx*Wn.xy;
+        //sum.x = sig.x*Wn.x - sig.y*Wn.y;
+        //sum.y = sig.y*Wn.x + sig.x + Wn.y;
+        float4 tmp = sig.xyyx * Wn.xyxy;
+        tmp.y = -tmp.y;
+        sum+= tmp.xz + tmp.yw ;
+
+        // if we knew input is real only, we could save a line or two.
+        // real input
+//        sum.xy += sig.xx*Wn.xy;
+#elif defined( DFT_REVERSE)
+    //float4 tmp = sig.xyyx*float4( Wn.xy, -Wn.x, Wn.y );
+    //float4 tmp = sig.xyyx*float4( Wn.x,  Wn.y,  Wn.x, -Wn.y );
+    float4 tmp = sig.xyyx*Wn.xyxy;
+    tmp.w = -tmp.w;
+    sum += tmp.xz+tmp.yw; 
+#endif
+  }
+#ifdef DFT_FORWARD
+  colorO = sum.xyxy;
+#elif defined( DFT_REVERSE)
+ colorO = sum.xyxy/float4(DFTN, DFTN, DFTN, DFTN);
+#endif
+
+    //these lines show what the contents of the buffers actually are
+    //colorO = texRECT( FPE2, fptexCoord.yx);
+
+}

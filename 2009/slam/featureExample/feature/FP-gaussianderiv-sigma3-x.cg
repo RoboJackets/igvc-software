@@ -1,0 +1,78 @@
+/**
+ * This file is part of the OpenVIDIA project at http://openvidia.sf.net
+ * Copyright (C) 2004, James Fung
+ *
+ * OpenVIDIA is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenVIDIA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenVIDIA; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ **/
+
+void FragmentProgram(
+    const uniform  float4 thresh ,
+    in float2 fptexCoord : TEXCOORD0,
+    out float4 colorO       : COLOR0,
+    in float4 wpos : WPOS,
+    const uniform samplerRECT FPE1: TEXUNIT0 )
+{
+    //gaussian derivative filter kernel
+
+float4 filt_a = {0.00147945167871,
+                 0.00338154579437,   
+                 0.00680824842844,   
+                 0.01201560742739  };
+float4 filt_b = {0.01844873820144,
+                 0.02433346167223,  
+                 0.02692510824040,
+                 0.02369755581785  };
+float2 filt_c = {0.01399767716244,
+                 0  };
+
+    float4 sumcolor;
+    float sum;
+
+    sumcolor.x = texRECT(FPE1, fptexCoord+float2(-9,0)).g; 
+    sumcolor.y = texRECT(FPE1, fptexCoord+float2(-8,0)).g; 
+    sumcolor.z = texRECT(FPE1, fptexCoord+float2(-7,0)).g; 
+    sumcolor.w = texRECT(FPE1, fptexCoord+float2(-6,0)).g; 
+    sum = dot( filt_a, sumcolor);
+
+    sumcolor.x = texRECT(FPE1, fptexCoord+float2(-5,0)).g; 
+    sumcolor.y = texRECT(FPE1, fptexCoord+float2(-4,0)).g; 
+    sumcolor.z = texRECT(FPE1, fptexCoord+float2(-3,0)).g; 
+    sumcolor.w = texRECT(FPE1, fptexCoord+float2(-2,0)).g; 
+    sum += dot( filt_b, sumcolor);
+
+    sumcolor.x = texRECT(FPE1, fptexCoord+float2(-1,0)).g; 
+    //optim fodder 
+    sumcolor.y = texRECT(FPE1, fptexCoord+float2( 0,0)).g; 
+    sumcolor.z = 0.0;
+    sumcolor.w = 0.0;   
+    sum += dot(sumcolor.xy, filt_c);
+
+    sum += -filt_c.x*texRECT(FPE1, fptexCoord+float2( 1,0)).g; 
+
+    sumcolor.x = texRECT(FPE1, fptexCoord+float2( 5,0)).g; 
+    sumcolor.y = texRECT(FPE1, fptexCoord+float2( 4,0)).g; 
+    sumcolor.z = texRECT(FPE1, fptexCoord+float2( 3,0)).g; 
+    sumcolor.w = texRECT(FPE1, fptexCoord+float2( 2,0)).g; 
+    sum += dot( -filt_b, sumcolor);
+ 
+    sumcolor.x = texRECT(FPE1, fptexCoord+float2( 9,0)).g; 
+    sumcolor.y = texRECT(FPE1, fptexCoord+float2( 8,0)).g; 
+    sumcolor.z = texRECT(FPE1, fptexCoord+float2( 7,0)).g; 
+    sumcolor.w = texRECT(FPE1, fptexCoord+float2( 6,0)).g; 
+    sum += dot( -filt_a, sumcolor);
+
+    //colorO = float4(0.0, 1.0, 0.0, 0.0);
+    colorO.xyzw = sum.xxxx;
+}

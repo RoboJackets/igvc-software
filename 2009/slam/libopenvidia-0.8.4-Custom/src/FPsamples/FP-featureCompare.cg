@@ -1,0 +1,103 @@
+/**
+ * This file is part of the OpenVIDIA project at http://openvidia.sf.net
+ * Copyright (C) 2004, James Fung
+ *
+ * OpenVIDIA is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenVIDIA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenVIDIA; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ **/
+
+half SSD( in half4 A, in half4 B )
+{
+  half4  histoA1 , histoA2, histoB1, histoB2;
+  histoA1.xy = unpack_2half( A.x );
+  histoA1.zw = unpack_2half( A.y );
+
+  histoB1.xy = unpack_2half( B.x );
+  histoB1.zw = unpack_2half( B.y );
+  half4 diff1 = histoA1-histoB1;
+  histoA2.xy = unpack_2half( A.z );
+  histoA2.zw = unpack_2half( A.w );
+  histoB2.xy = unpack_2half( B.z );
+  histoB2.zw = unpack_2half( B.w );
+  half4 diff2 = histoA2-histoB2;
+
+
+  half sum = dot( diff1, diff1 ) + dot(diff2, diff2);
+
+  return sum;
+
+}
+
+void FragmentProgram(
+
+    in float2 inCoord : TEXCOORD0,
+    in float2 inCoord1 : TEXCOORD1,
+    in float2 inCoord2 : TEXCOORD2,
+    in float2 inCoord3 : TEXCOORD3,
+    in float2 inCoord4 : TEXCOORD4,
+    in float2 inCoord5 : TEXCOORD5,
+    in float2 inCoord6 : TEXCOORD6,
+    in float2 inCoord7 : TEXCOORD7,
+
+    out float4 colorO       : COLOR0,
+    const uniform float4 offsets, 
+    const uniform samplerRECT featureA    : TEXUNIT0 ,
+    const uniform samplerRECT featureB    : TEXUNIT1 )
+{
+  half sum = 0.0;
+  float4 histoA = texRECT( featureA, inCoord );
+  float4 histoB = texRECT( featureB, inCoord );
+
+//  float4 histoC = texRECT( featureA, inCoord1 );
+//  float4 histoD = texRECT( featureB, inCoord1 );
+
+  sum = SSD( histoA, histoB );
+/*
+
+  float4 histoE = texRECT( featureA, inCoord2 );
+  float4 histoF = texRECT( featureB, inCoord2 );
+
+  sum += SSD( histoC, histoD );
+
+  float4 histoG = texRECT( featureA, inCoord3 );
+  float4 histoH = texRECT( featureB, inCoord3 );
+
+  sum += SSD( histoE, histoF );
+
+  float4 histoI = texRECT( featureA, inCoord4 );
+  float4 histoJ = texRECT( featureB, inCoord4 );
+
+  sum += SSD( histoG, histoH );
+
+  float4 histoK = texRECT( featureA, inCoord5 );
+  float4 histoL = texRECT( featureB, inCoord5 );
+
+  sum += SSD( histoI, histoJ );
+
+  float4 histoM = texRECT( featureA, inCoord6 );
+  float4 histoN = texRECT( featureB, inCoord6 );
+
+  sum += SSD( histoK, histoL );
+
+  float4 histoO = texRECT( featureA, inCoord7 );
+  float4 histoP = texRECT( featureB, inCoord7 );
+
+  sum += SSD( histoM, histoN );
+  sum += SSD( histoO, histoP );
+
+*/
+
+  colorO = sum.xxxx;
+
+}

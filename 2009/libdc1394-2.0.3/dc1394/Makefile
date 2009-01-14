@@ -99,7 +99,7 @@ AS = as
 AUTOCONF = ${SHELL} /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3/missing --run autoconf
 AUTOHEADER = ${SHELL} /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3/missing --run autoheader
 AUTOMAKE = ${SHELL} /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3/missing --run automake-1.10
-AWK = gawk
+AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
 CFLAGS = -g -O2 -Wall -Wunused -std=gnu99

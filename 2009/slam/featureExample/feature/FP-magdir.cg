@@ -1,0 +1,49 @@
+/**
+ * This file is part of the OpenVIDIA project at http://openvidia.sf.net
+ * Copyright (C) 2004, James Fung
+ *
+ * OpenVIDIA is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenVIDIA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenVIDIA; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ **/
+
+void FragmentProgram(
+    const uniform  float4 thresh ,
+    in float2 fptexCoord : TEXCOORD0,
+    out float4 colorO       : COLOR0,
+    in float4 wpos : WPOS,
+    const uniform samplerRECT FPE1: TEXUNIT0 ,
+    const uniform samplerRECT FPE2: TEXUNIT1 )
+{
+    float dx = texRECT(FPE1, fptexCoord); // [0,1.0f]
+    float dy = texRECT(FPE2, fptexCoord);
+    float2 magvec;
+    magvec.xy = float2(dx.x, dy.x)*float(255.0).xx;
+   
+
+    float magnitude = length( magvec ); // [0, sqrt(2)*255 integer] 
+
+    float direction; // lies in [-1.0, 1.0] from arctan below
+    direction = atan2( dy.x, dx.x );
+    direction/=3.14159;
+
+    colorO.xy = magvec;
+    colorO.z = magnitude;
+    colorO.w = direction;
+  
+    if( isnan(direction) ) {
+      //colorO = float4(0.0, 0.0, 0.0, 0.0);
+      //atan bug?
+      colorO.w = 0.5*sign(dy.x);
+    }
+}

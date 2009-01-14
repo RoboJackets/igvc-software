@@ -1,0 +1,49 @@
+/**
+ * This file is part of the OpenVIDIA project at http://openvidia.sf.net
+ * Copyright (C) 2004, James Fung
+ *
+ * OpenVIDIA is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenVIDIA is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenVIDIA; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ **/
+
+void FragmentProgram(
+    in float2 inCoord : TEXCOORD0,
+    out float4 colorO       : COLOR0,
+    const uniform float4 offsets, //offsets to top left of area in question
+    const uniform samplerRECT FPE0 : TEXUNIT0 , //texturelookup coords
+    const uniform samplerRECT FPE1 : TEXUNIT1 , //dx
+    const uniform samplerRECT FPE2 : TEXUNIT2 , //dy
+    const uniform samplerRECT FPE3 : TEXUNIT3 ) //taps
+{
+  int max = 8;
+
+  float4 sum = {0.0, 0.0, 0.0, 0.0};
+  float4 tmpX, tmpY;
+
+  float2 featCoord = texRECT(FPE0, inCoord ).xy + offsets.xy;   
+
+  float2 tapsCoord = offsets.zw;
+
+  for( int xoffset = 0 ; xoffset < max ; xoffset++ ) {
+    for( int yoffset = 0 ; yoffset < max ; yoffset++ ) {
+      float2 idx = featCoord + float2( xoffset, yoffset);
+      float4 taps  = texRECT( FPE3, tapsCoord + float2(xoffset, yoffset) );
+      tmpX = texRECT( FPE1, idx  );
+      tmpY = texRECT( FPE2, idx  );
+      float2 tmp2 = {tmpX.x, tmpY.x};
+      sum.xy += tmp2.xy*taps.xx;
+    }
+  }
+   colorO = sum;
+}
