@@ -22,6 +22,8 @@
 #define SPI_SS_RIGHT_MOTOR_ENCODER		4/*9*/
 #define BITBANG_SPI 1
 
+#define NUM_PK_STORE 25
+
 //TODO:
 //	- generalize this to work for all of our code
 //	- - pull/push data, read/set one/all/several values, fixed/variable length messages
@@ -58,7 +60,7 @@ long int arduino_time;
 
 
 //long unsigned int reply_dtick_packet_num[50];
-packet_t packet_store[50];
+packet_t packet_store[NUM_PK_STORE];
 //reply_dtick_t reply_dtick_packet_store[50];
 int packet_store_pos;
 
@@ -94,7 +96,7 @@ void setup(void) {
 	tx_num = 1;
 	packet_store_pos = 0;
 
-	for(int i = 0; i < 50; i++){
+	for(int i = 0; i < (NUM_PK_STORE-1); i++){
 		packet_store[i].head.packetnum = 0;
 		packet_store[i].msg = NULL;
 	}
@@ -279,8 +281,7 @@ void readSerial(void) {
 		
 						serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 						serialPrintBytes(&msg, headerOut.size);
-						//savePacket(headerOut, (byte*)&msg);
-						//Serial.print('t');
+						savePacket(headerOut, (byte*)&msg);
 						break;
 					}
 				}
@@ -486,7 +487,7 @@ void resend_packet(long num){
 	//Serial.println(tx_num);
 	//Serial.println(tx_num);
 
-	for(int i = 0; i < 50; i++ ){
+	for(int i = 0; i < NUM_PK_STORE; i++ ){
 		if(packet_store[i].head.packetnum == num){
 			header_t headerOut;
 			headerOut.timestamp = global_time + millis() - arduino_time;
@@ -496,11 +497,11 @@ void resend_packet(long num){
 			byte body[PACKET_HEADER_SIZE + packet_store[i].head.size];
 			
 			memcpy(body, &packet_store[i].head, PACKET_HEADER_SIZE);
-			memcpy(body + PACKET_HEADER_SIZE, &packet_store[i].msg, packet_store[i].head.size);
+			memcpy(body + PACKET_HEADER_SIZE, packet_store[i].msg, packet_store[i].head.size);//&msg or msg
 
 			serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 			serialPrintBytes(&packet_store[i].head, PACKET_HEADER_SIZE);
-			serialPrintBytes(&packet_store[i].msg, packet_store[i].head.size);
+			serialPrintBytes(packet_store[i].msg, packet_store[i].head.size);
 			savePacket(headerOut, body);
 			tx_num++;
 			return;
@@ -519,34 +520,6 @@ void resend_packet(long num){
 	serialPrintBytes(&headOut, PACKET_HEADER_SIZE);
 	serialPrintBytes(&msg, headOut.size);
 	tx_num++;
-//		}
-
-/*
-	header_t headOut;
-	headOut.timestamp = global_time + millis() - arduino_time;
-	headOut.packetnum = tx_num;
-	headOut.cmd = ARDUINO_RSND_PK_RESP;
-	headOut.size = PACKET_HEADER_SIZE + sizeof(reply_dtick_t);
-	//headOut.size = 28;
-
-
-	header_t fakeheadOut;
-	fakeheadOut.timestamp = global_time + millis() - arduino_time;
-	fakeheadOut.packetnum = num;
-	fakeheadOut.cmd = 0xAA;
-	fakeheadOut.size = sizeof(reply_dtick_t);
-
-	reply_dtick_t msg;
-
-	msg.dl = 0xAAAA;
-	msg.dr = 0xABCD;
-	msg.dt = 0xFFAACCEE;
-
-	serialPrintBytes(&headOut, PACKET_HEADER_SIZE);
-	serialPrintBytes(&fakeheadOut, PACKET_HEADER_SIZE);
-	serialPrintBytes(&msg, sizeof(reply_dtick_t));
-	tx_num++;
-*/
 }
 
 unsigned int getTime(){
@@ -565,19 +538,21 @@ void resetTime(){
 
 void savePacket(header_t head, byte * msg){
 
-	if(packet_store_pos > 49){
-		//free(packet_store[0].msg);
+	if(packet_store_pos > (NUM_PK_STORE-1)){
 		packet_store_pos = 0;
 	}
 
 	if(packet_store[packet_store_pos].msg != NULL){
 		free(packet_store[packet_store_pos].msg);
+		packet_store[packet_store_pos].msg = NULL;
 	}
 
 	packet_store[packet_store_pos].head = head;
-	packet_store[packet_store_pos].msg = (byte*)malloc(head.size);
-	memcpy(packet_store[packet_store_pos].msg, msg, head.size);
 
+	if(head.size > 0){
+		packet_store[packet_store_pos].msg = (byte*)malloc(head.size);
+		memcpy(packet_store[packet_store_pos].msg, msg, head.size);
+	}
 	packet_store_pos++;
 
 }
