@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <cstring>
 //length in bytes of header
 #define PACKET_HEADER_SIZE 10
 
@@ -10,6 +11,9 @@ typedef unsigned char byte;
 
 class DataPacket{
 	public:
+
+	//copy constructor
+	DataPacket(const DataPacket& pk);
 
 	//Header types
 	typedef struct __attribute__((__packed__)) { int timestamp; int packetnum; byte cmd; byte size; } header_t;
@@ -27,7 +31,8 @@ class DataPacket{
 	~DataPacket();
 };
 
-std::ostream& operator<<(std::ostream& output, DataPacket pk);
+std::ostream& operator<<(std::ostream& output, DataPacket& pk);
+std::ostream& operator<<(std::ostream& output, DataPacket::header_t header);
 std::ostream& operator<<(std::ostream& output, DataPacket::encoder_reply_t data);
 
 #endif //DATAPACKET_HPP_
