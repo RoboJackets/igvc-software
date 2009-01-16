@@ -8,7 +8,7 @@
 
 typedef unsigned char byte;
 
-MotorEncoders::MotorEncoders(void) : ArduinoInterface() {
+MotorEncoders::MotorEncoders(void) {
 
 	//unsigned int rx_packetnum = 1;
 	//unsigned int tx_packetnum = 1;
@@ -17,17 +17,21 @@ MotorEncoders::MotorEncoders(void) : ArduinoInterface() {
 
 
 DataPacket::encoder_reply_t MotorEncoders::getInfo(void) {
-	DataPacket::encoder_reply_t status;
+	DataPacket status;
 	
-	getStatus(&status, sizeof(status));
+	arduinoInterface.getStatus(&status, sizeof(status));
 
-	return(status);
+	DataPacket::encoder_reply_t parseddata;
+
+	memcpy(&parseddata, status.data, sizeof(DataPacket::encoder_reply_t));
+
+	return(parseddata);
 }
 
-bool MotorEncoders::getInfo_class(DataPacket * status) {
+bool MotorEncoders::getInfo_class(DataPacket* out_status) {
 	//EncoderData status;
-	status->data = new byte[sizeof(DataPacket::encoder_reply_t)];
-	bool ret = getStatus(status->data, sizeof(DataPacket::encoder_reply_t));
+	//status->data = new byte[sizeof(DataPacket::encoder_reply_t)];
+	bool ret = arduinoInterface.getStatus(out_status, sizeof(DataPacket::encoder_reply_t));
 	//status.setDataPointer(data);
 	//status.packnum = rx_packetnum;
 	//rx_packetnum++;
@@ -111,11 +115,11 @@ void MotorEncoders::setHeading(double heading) {
 }
 
 bool MotorEncoders::setFunc(int mode){
-	return( setVar(RET_T, &mode, sizeof(int)) );
+	return( arduinoInterface.setVar(RET_T, &mode, sizeof(int)) );
 }
 
 bool MotorEncoders::setSendMode(int mode){
-	return( setVar(PUSHPULL, &mode, sizeof(int)) );
+	return( arduinoInterface.setVar(PUSHPULL, &mode, sizeof(int)) );
 }
 
 bool MotorEncoders::setLogFile(string str){
@@ -134,11 +138,11 @@ bool MotorEncoders::setArduinoClock(){
 
 	//memcpy(timedata, &millis, 4);
 
-	return( setVar(SETCLK, &millis, 4 ) );
+	return( arduinoInterface.setVar(SETCLK, &millis, 4 ) );
 }
 bool MotorEncoders::setSendMode(int mode, int int_rt){
-	bool a = setVar(PUSHPULL, &mode, sizeof(int));
-	bool b = setVar(INTEROG_DL, &int_rt, sizeof(int));
+	bool a = arduinoInterface.setVar(PUSHPULL, &mode, sizeof(int));
+	bool b = arduinoInterface.setVar(INTEROG_DL, &int_rt, sizeof(int));
 
 	return(a && b);
 }
