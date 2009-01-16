@@ -6,6 +6,7 @@
 #include <avr/interrupt.h>
 #include <avr/signal.h>
 #include <avr/delay.h>
+#include <avr/wdt.h>
 //#include <stdio.h>
 //#include <stdarg.h>
 
@@ -241,7 +242,7 @@ void readSerial(void) {
 		for(int i = 0; i < PACKET_HEADER_SIZE; i++){
 			headerptr[i] = Serial.read();
 		}
-		rx_num++;
+
 /*
 		if(header.size > 0){
 			for(int i = 0; i < header.size; i++){
@@ -250,14 +251,29 @@ void readSerial(void) {
 		}
 */
 
-/*
+		// we didn't get the packet we expected - reset the link, ask for the new packet and return.  the new packet will be processed whn the function is called again
 		if(header.packetnum != rx_num){
-			
+			Serial.flush();
+			header_t headerOut;
+			headerOut.timestamp =  global_time + millis() - arduino_time;
+			headerOut.packetnum = tx_num;
+			headerOut.cmd = ARDUINO_ERROR_RESP;
+			headerOut.size = 5;
+			byte body[5];
+			body[0] = DROPPED_PACKET;
+			memcpy(body+1, &rx_num, sizeof(long));
+
+			serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+			serialPrintBytes(&msg, headerOut.size);			
+			tx_num++;
 		}
-*/
+
+		// the packet was recieved so count it
+		rx_num++;
+
 		switch(header.cmd){
 
-			case 'r':
+			case ARDUINO_GETSTATUS_CMD:
 			{
 				header_t headerOut;
 				headerOut.timestamp =  global_time + millis() - arduino_time;
@@ -289,7 +305,7 @@ void readSerial(void) {
 				return;//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
 				break;
 			}
-			case 'w':
+			case ARDUINO_SETVAR_CMD:
 			{
 				while (Serial.available()<2){}  // TODO: add timeout
 				byte variableNumber = Serial.read();
@@ -306,7 +322,7 @@ void readSerial(void) {
 				tx_num++;
 				break;
 			}
-			case 'i':
+			case ARDUINO_ID_CMD:
 			{
 				header_t headerOut;
 				headerOut.timestamp =  global_time + millis() - arduino_time;
@@ -319,7 +335,7 @@ void readSerial(void) {
 				Serial.print('e');
 				break;
 			}
-			case 'p':
+			case ARDUINO_RSND_PK_CMD:
 			{
 				long packet_num;
 				byte * bptr = (byte *)&packet_num;
@@ -329,7 +345,7 @@ void readSerial(void) {
 				bptr[2] = Serial.read();
 				bptr[3] = Serial.read();
 				resend_packet(packet_num);
-				//tx_num++;//this is incr in the resend packet func
+				tx_num++;
 				break;
 			}
 			default:
@@ -338,9 +354,10 @@ void readSerial(void) {
 				header_t headerOut;
 				headerOut.timestamp =  global_time + millis() - arduino_time;
 				headerOut.packetnum = tx_num;
-				headerOut.cmd = 0xFF;
+				headerOut.cmd = ARDUINO_ERROR_RESP;
 				headerOut.size = 0;
 				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				tx_num++;
 				break;
 								
 			}
@@ -503,7 +520,6 @@ void resend_packet(long num){
 			serialPrintBytes(&packet_store[i].head, PACKET_HEADER_SIZE);
 			serialPrintBytes(packet_store[i].msg, packet_store[i].head.size);
 			savePacket(headerOut, body);
-			tx_num++;
 			return;
 		}
 	}
@@ -519,7 +535,6 @@ void resend_packet(long num){
 
 	serialPrintBytes(&headOut, PACKET_HEADER_SIZE);
 	serialPrintBytes(&msg, headOut.size);
-	tx_num++;
 }
 
 unsigned int getTime(){
@@ -555,4 +570,12 @@ void savePacket(header_t head, byte * msg){
 	}
 	packet_store_pos++;
 
+}
+
+//stolen from:
+//http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1222941939/8
+void softReset(void)
+{
+	wdt_enable(WDTO_30MS);
+	while(1) {};
 }
