@@ -1,6 +1,8 @@
 #ifndef ENCODERFUNC_H_
 #define ENCODERFUNC_H_
 
+
+
 /* Reset TCNT1 */
 void resetTime();
 
@@ -29,5 +31,7 @@ void setVariable(byte num, byte val);
 void resend_packet(long num);
 
 void savePacket(header_t head, byte * msg);
+
+void softReset(void);
 
 #endif // ENCODERFUNC_H_
