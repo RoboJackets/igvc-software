@@ -10,7 +10,7 @@
 #define ARDUINO_RSND_PK_CMD 'p'
 
 //1 byte commands/response arduino -> laptop
-#define ARDUINO_ERROR 0xFF
+#define ARDUINO_ERROR_RESP 0xFF
 #define ARDUINO_GETSTATUS_RESP 'r'
 #define ARDUINO_SETVAR_RESP 'w'
 #define ARDUINO_ID_RESP 'i'

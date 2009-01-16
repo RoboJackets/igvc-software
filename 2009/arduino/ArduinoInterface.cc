@@ -321,20 +321,24 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 	savePacket(pk_tx);
 	tx_num++;
 
-	//delete pk_tx;
 
 	//Get the Response
-	//DataPacket pk_rx;
 	byte * headerloc = (byte*) &(out_pk_rx->header);
 	readFully(arduinoFD, headerloc, PACKET_HEADER_SIZE);
 	rx_num++;
-/*
+
 	if(pk_rx.header.packetnum != rx_num){
+		DataPacket pk_rsnd;
 		serialFlush(arduinoFD);
-		arduinoResendPacket(rx_num);
-		return true;
+			if(arduinoResendPacket(rx_num, &pk_rsnd))
+			{
+				*out_pk_rx = pk_rsnd;
+			}
+			else
+			{
+				return true;
+			}
 	}
-*/
 
 	if(out_pk_rx->header.cmd == 0xFF ){
 		byte errorbuff[out_pk_rx->header.size];
@@ -429,6 +433,11 @@ bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket*& pk_out){
 		case ARDUINO_RSND_PK_RESP:
 		{
 			memcpy(&(pk_out->header), pk_rx.data, PACKET_HEADER_SIZE);
+			if(pknum != pk_out->header.packetnum)
+			{
+				return true;
+			}
+
 			pk_out->data = new byte[pk_out->header.size];
 			memcpy(pk_out->data, pk_rx.data + PACKET_HEADER_SIZE, pk_out->header.size);
 
@@ -443,8 +452,8 @@ bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket*& pk_out){
 
 			break;
 		}
-		return false;
 	}
+		return false;
 }
 
 void ArduinoInterface::savePacket(DataPacket pk){
