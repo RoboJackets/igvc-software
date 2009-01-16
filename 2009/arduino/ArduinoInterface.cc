@@ -49,12 +49,14 @@ ArduinoInterface::ArduinoInterface(void) {
 		}
 		else {
 			/* Check which arduino is connected to the port */
-			byte reply;
+			//byte reply;
+			DataPacket reply;
+			//sendCommand('i', NULL, 0, &reply, 1);
 			sendCommand('i', NULL, 0, &reply, 1);
 			//writeFully(arduinoFD, (void *)"i", 1);
 			//readFully(arduinoFD, &reply, sizeof(reply));
-			printf("found module %c\n", reply);
-			if (reply=='e') { //might want to use more than one byte for identifcation
+			printf("found module %c\n", *(reply.data));
+			if (*(reply.data)=='e') { //might want to use more than one byte for identifcation
 				printf("correct module.\n");
 				setArduinoTime();
 				break;
@@ -74,9 +76,9 @@ ArduinoInterface::ArduinoInterface(void) {
  * 
  */
 ArduinoInterface::~ArduinoInterface(void) {
-	for(std::list<DataPacket*>::iterator it = tx_packet_list.begin(); it != tx_packet_list.end(); it++){
-		delete *it;
-	}
+//	for(std::list<DataPacket*>::iterator it = tx_packet_list.begin(); it != tx_packet_list.end(); it++){
+//		delete *it;
+//	}
 
 	if (arduinoFD == -1) {
 		return;
@@ -94,15 +96,20 @@ ArduinoInterface::~ArduinoInterface(void) {
  *					More detailed information can be obtained by querying
  *					<tt>errno</tt> and <tt>strerror(errno)</tt>.
  */
-bool ArduinoInterface::getStatus(void *status, int size) {
+bool ArduinoInterface::getStatus(DataPacket * status, int size) {
 	if (arduinoFD == -1) {
 		return false;
 	}
 
-	if(sendCommand('r', NULL, 0, status, size)){
+	if(sendCommand('r', (byte*)NULL, 0, status, size)){
 		return true;
 	}
 
+/*
+	if(sendCommand('r', (byte*)NULL, 0, status, size)){
+		return true;
+	}
+*/
 /*
 	if (writeFully(arduinoFD, (void *)"r", 1)) {
 		return true;
@@ -292,33 +299,34 @@ void savePacket(DataPacket* pk){
  */
 
 
-bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx){
-
+//bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx){
+bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPacket* out_pk_rx, size_t maxlen){
 	//Send the Command
-	DataPacket * pk_tx = new DataPacket;
-	pk_tx->header.packetnum = tx_num;
-	pk_tx->header.timestamp = getTime();
-	pk_tx->header.cmd = cmd;
-	pk_tx->header.size = size_tx;
+	DataPacket pk_tx;
+	pk_tx.header.packetnum = tx_num;
+	pk_tx.header.timestamp = getTime();
+	pk_tx.header.cmd = cmd;
+	pk_tx.header.size = size_tx;
 
-	if(writeFully(arduinoFD, &(pk_tx->header), PACKET_HEADER_SIZE)){
+	if(writeFully(arduinoFD, &(pk_tx.header), PACKET_HEADER_SIZE)){
 		return true;
 	}
 
-	if(pk_tx->header.size > 0) {
-		pk_tx->data = new byte[size_tx];
-		memcpy(pk_tx->data, data_tx, size_tx);
-		writeFully(arduinoFD, pk_tx->data, pk_tx->header.size);
+	if(pk_tx.header.size > 0) {
+		pk_tx.data = new byte[size_tx];
+		memcpy(pk_tx.data, data_tx, size_tx);
+		writeFully(arduinoFD, pk_tx.data, pk_tx.header.size);
 	}
 
 	savePacket(pk_tx);
 	tx_num++;
 
+	//delete pk_tx;
+
 	//Get the Response
-	DataPacket pk_rx;
-	byte * headerloc = (byte *)&(pk_rx.header);
-	readFully(arduinoFD, &(pk_rx.header), PACKET_HEADER_SIZE);
-	std::cout << "timestamp: " << pk_rx.header.timestamp << std::endl;
+	//DataPacket pk_rx;
+	byte * headerloc = (byte*) &(out_pk_rx->header);
+	readFully(arduinoFD, headerloc, PACKET_HEADER_SIZE);
 	rx_num++;
 /*
 	if(pk_rx.header.packetnum != rx_num){
@@ -328,9 +336,9 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void *
 	}
 */
 
-	if(pk_rx.header.cmd == 0xFF ){
-		byte errorbuff[pk_rx.header.size];
-		readFully(arduinoFD, errorbuff, pk_rx.header.size);
+	if(out_pk_rx->header.cmd == 0xFF ){
+		byte errorbuff[out_pk_rx->header.size];
+		readFully(arduinoFD, errorbuff, out_pk_rx->header.size);
 		int errorcode;
 		memcpy(&errorcode, errorbuff, sizeof(int) );
 		switch(errorcode){
@@ -349,27 +357,38 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void *
 		}
 	}
 
-	if( (pk_rx.header.size > 0) && (pk_rx.header.size <= size_rx)){
-		pk_rx.data = new byte[pk_rx.header.size];
-		readFully(arduinoFD, pk_rx.data, pk_rx.header.size);
-		memcpy(data_rx, pk_rx.data, pk_rx.header.size);
+/*
+	if( out_pk_rx->header.size != maxlen )
+	{
+		std::cout << "did not recive wanted number of bytes" << std::endl;
+		return true;
+	}
+*/
+	if( (out_pk_rx->header.size > 0) && (out_pk_rx->header.size <= maxlen)){
+		out_pk_rx->data = new byte[out_pk_rx->header.size];
+		readFully(arduinoFD, out_pk_rx->data, out_pk_rx->header.size);
+		//memcpy(data_rx, pk_rx.data, pk_rx.header.size);
+		//memcpy(data_rx, out_pk_rx->data, size_rx);		
 	}
 
+	return false;
 }
 
-void ArduinoInterface::arduinoResendPacket(int pknum, DataPacket * pk_out){
 
-	DataPacket * pk_tx = new DataPacket;
-	pk_tx->header.packetnum = tx_num;
-	pk_tx->header.timestamp = getTime();
-	pk_tx->header.cmd = ARDUINO_RSND_PK_CMD;
-	pk_tx->header.size = sizeof(int);
-	pk_tx->data = new byte[pk_tx->header.size];
-	memcpy(pk_tx->data, &pknum, pk_tx->header.size);
+//true on error
+bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket*& pk_out){
+
+	DataPacket pk_tx;
+	pk_tx.header.packetnum = tx_num;
+	pk_tx.header.timestamp = getTime();
+	pk_tx.header.cmd = ARDUINO_RSND_PK_CMD;
+	pk_tx.header.size = sizeof(int);
+	pk_tx.data = new byte[pk_tx.header.size];
+	memcpy(pk_tx.data, &pknum, pk_tx.header.size);
 	savePacket(pk_tx);
 
-	writeFully(arduinoFD, &(pk_tx->header), PACKET_HEADER_SIZE);
-	writeFully(arduinoFD, pk_tx->data, pk_tx->header.size);
+	writeFully(arduinoFD, &(pk_tx.header), PACKET_HEADER_SIZE);
+	writeFully(arduinoFD, pk_tx.data, pk_tx.header.size);
 	tx_num++;
 
 	//Get the Response
@@ -379,12 +398,14 @@ void ArduinoInterface::arduinoResendPacket(int pknum, DataPacket * pk_out){
 	readFully(arduinoFD, pk_rx.data, pk_rx.header.size);
 	rx_num++;
 
+	//std::cout << "header\n" << pk_rx;
+
 	switch(pk_rx.header.cmd){
 		case ARDUINO_ERROR:
 		{
 			int errormsg;
 			memcpy(&errormsg, pk_rx.data, sizeof(int));
-			std::cout << "error requesting packet num " << pknum << std::endl << "got error num " << errormsg << std::endl;
+			std::cout << "error requesting packet num: " << pknum << std::endl << "got error num: " << errormsg << std::endl;
 			switch(errormsg){
 				case DROPPED_PACKET:
 				{
@@ -402,6 +423,7 @@ void ArduinoInterface::arduinoResendPacket(int pknum, DataPacket * pk_out){
 					break;
 				}
 			}
+			return true;
 			break;
 		}
 		case ARDUINO_RSND_PK_RESP:
@@ -409,29 +431,38 @@ void ArduinoInterface::arduinoResendPacket(int pknum, DataPacket * pk_out){
 			memcpy(&(pk_out->header), pk_rx.data, PACKET_HEADER_SIZE);
 			pk_out->data = new byte[pk_out->header.size];
 			memcpy(pk_out->data, pk_rx.data + PACKET_HEADER_SIZE, pk_out->header.size);
+
+			std::cout << "resend pk debug intern" << std::endl;
+			std::cout << "data size: " << (int) pk_out->header.size << std::endl;
+			std::cout << "dataloc: " << (int) pk_out->data << std::endl;
+
+			DataPacket::encoder_reply_t parsed_data;
+			memcpy(&parsed_data, pk_out->data, sizeof(DataPacket::encoder_reply_t));
+			std::cout << pk_out->header << std::endl;
+			std::cout << parsed_data << "\n\n";
+
 			break;
 		}
+		return false;
 	}
 }
 
-void ArduinoInterface::savePacket(DataPacket* pk){
+void ArduinoInterface::savePacket(DataPacket pk){
 	if(tx_packet_list.size() > 49){
-		std::list<DataPacket*>::iterator it;
-		it = tx_packet_list.end();
-		it--;
-		delete( (*it) );
 		tx_packet_list.pop_back();
 	}
 
-	tx_packet_list.push_front(pk);
+	DataPacket pkstore = pk;
+
+	tx_packet_list.push_front(pkstore);
 }
 
 //Get a packet that was set to the arduino from the list, by number
-DataPacket* ArduinoInterface::getSavedPacket(int packnum){
-	std::list<DataPacket*>::iterator it;
+DataPacket ArduinoInterface::getSavedPacket(int packnum){
+	std::list<DataPacket>::iterator it;
 	for(it = tx_packet_list.begin(); it != tx_packet_list.end(); it++){
-		if((*it)->header.packetnum == packnum){
-			DataPacket* out = *it;
+		if((*it).header.packetnum == packnum){
+			DataPacket out = *it;
 			return(out);
 		}
 	}
@@ -452,5 +483,8 @@ bool ArduinoInterface::setArduinoTime(){
 	msg[0] = SETCLK;
 	unsigned int t = getTime();
 	memcpy(msg+1, &t, sizeof(unsigned int));
-	sendCommand('w', msg, 5, NULL, 0);
+
+	DataPacket rx_p;
+
+	sendCommand('w', msg, 5, &rx_p, 0);
 }

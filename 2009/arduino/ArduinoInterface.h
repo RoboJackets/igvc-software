@@ -18,11 +18,11 @@ typedef unsigned char byte;
 
 class ArduinoInterface {
 	public:
-		bool sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx);
-		//bool sendCommand(char cmd, void * data_tx, int size_tx, DataPacket * pk_rx, size_t maxlen);
+		//bool sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx);
+		bool sendCommand(char cmd, void * data_tx, int size_tx, DataPacket* out_pk_rx, size_t maxlen);
 
 		/* Retrieve all of the state variables in the arduino */
-		bool getStatus(void *status, int size); // TODO: can this be a reference?
+		bool getStatus(DataPacket * status, int size); // TODO: can this be a reference?
 
 		/* Set the value of one the state variables in the arduino */
 		bool setVar(int var, void *value, int size);
@@ -30,7 +30,7 @@ class ArduinoInterface {
 		/* Destructor */
 		virtual ~ArduinoInterface(void);
 
-	protected:
+	//protected:
 		/* Constructor - declaired protected to prevent direct instantiation */
 		ArduinoInterface(void);
 
@@ -42,12 +42,12 @@ class ArduinoInterface {
 		int serialportInit(const char* serialport, speed_t baud);
 		bool serialFlush(int fd);
 
-		std::list<DataPacket*> tx_packet_list;
+		std::list<DataPacket> tx_packet_list;
 		int rx_num;
 		int tx_num;
-		void savePacket(DataPacket* pk);
-		DataPacket* getSavedPacket(int packnum);
-		public: void arduinoResendPacket(int pknum, DataPacket * pk_out);
+		void savePacket(DataPacket pk);
+		DataPacket getSavedPacket(int packnum);
+		public: bool arduinoResendPacket(int pknum, DataPacket*& pk_out);
 		unsigned int getTime();
 		bool setArduinoTime();
 };
