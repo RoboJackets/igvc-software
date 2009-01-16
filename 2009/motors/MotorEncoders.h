@@ -13,7 +13,7 @@ using namespace std;
 
 //TODO: make this use a namespace
 //TODO: make this sample regularly
-class MotorEncoders: public ArduinoInterface {
+class MotorEncoders {
 	public:
 		//TODO: move these to .cc file
 		//TODO: change these to char arrays
@@ -55,6 +55,8 @@ class MotorEncoders: public ArduinoInterface {
 		bool getInfo_class(DataPacket * status); //TODO: get rid of this
 
 
+		//public for debug only! move to private later
+		ArduinoInterface arduinoInterface;
 
 	private:
 		int comm_mode;
@@ -63,6 +65,8 @@ class MotorEncoders: public ArduinoInterface {
 		string logfile;
 		//bool logging_on;
 		bool setFunc(int ret);
+
+		
 
 		//unsigned int rx_packetnum;
 		//unsigned int tx_packetnum;
