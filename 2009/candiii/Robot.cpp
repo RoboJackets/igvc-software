@@ -120,6 +120,7 @@ int Robot::init()
 
         /* 1 plane images (640x480) */
         visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+        visCvGreyBig = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
 
         /* 3 plane images (320x240) */
         visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
