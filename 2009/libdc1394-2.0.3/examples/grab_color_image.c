@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
      *-----------------------------------------------------------------------*/
     imagefile=fopen(IMAGE_FILE_NAME, "wb");
 
-    if( imagefile == NULL) {
+    if ( imagefile == NULL) {
         perror( "Can't create output file");
         cleanup_and_exit(camera);
     }

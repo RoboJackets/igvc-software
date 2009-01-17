@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     err=dc1394_capture_setup(camera, 4, DC1394_CAPTURE_FLAGS_DEFAULT);     /* Setup capture */
 
     err=dc1394_video_set_transmission(camera, DC1394_ON);                  /* Start transmission */
-    
+
     err=dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_WAIT, &frame);/* Capture */
     DC1394_ERR_RTN(err,"Problem getting an image");
 

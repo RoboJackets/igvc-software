@@ -99,7 +99,7 @@ typedef struct {
  * Video frame structure.
  *
  * dc1394video_frame_t is the structure returned by the capture functions. It contains the captured image as well as a number of
- * information. 
+ * information.
  *
  * In general this structure should be calloc'ed so that members such as "allocated size"
  * are properly set to zero. Don't forget to free the "image" member before freeing the struct itself.
@@ -139,115 +139,115 @@ typedef struct __dc1394_video_frame
 extern "C" {
 #endif
 
-/***************************************************************************
-     Video functions: formats, framerates,...
- ***************************************************************************/
+    /***************************************************************************
+         Video functions: formats, framerates,...
+     ***************************************************************************/
 
-/**
- * Gets a list of video modes supported by the camera.
- */
-dc1394error_t dc1394_video_get_supported_modes(dc1394camera_t *camera, dc1394video_modes_t *video_modes);
+    /**
+     * Gets a list of video modes supported by the camera.
+     */
+    dc1394error_t dc1394_video_get_supported_modes(dc1394camera_t *camera, dc1394video_modes_t *video_modes);
 
-/**
- * Gets a list of supported video framerates for a given video mode. This function only works with non-scalable formats.
- */
-dc1394error_t dc1394_video_get_supported_framerates(dc1394camera_t *camera, dc1394video_mode_t video_mode, dc1394framerates_t *framerates);
+    /**
+     * Gets a list of supported video framerates for a given video mode. This function only works with non-scalable formats.
+     */
+    dc1394error_t dc1394_video_get_supported_framerates(dc1394camera_t *camera, dc1394video_mode_t video_mode, dc1394framerates_t *framerates);
 
-/**
- * Gets the current framerate. This is meaningful only if the video mode is not scalable.
- */
-dc1394error_t dc1394_video_get_framerate(dc1394camera_t *camera, dc1394framerate_t *framerate);
+    /**
+     * Gets the current framerate. This is meaningful only if the video mode is not scalable.
+     */
+    dc1394error_t dc1394_video_get_framerate(dc1394camera_t *camera, dc1394framerate_t *framerate);
 
-/**
- * Sets the current framerate. This is meaningful only if the video mode is not scalable.
- */
-dc1394error_t dc1394_video_set_framerate(dc1394camera_t *camera, dc1394framerate_t framerate);
+    /**
+     * Sets the current framerate. This is meaningful only if the video mode is not scalable.
+     */
+    dc1394error_t dc1394_video_set_framerate(dc1394camera_t *camera, dc1394framerate_t framerate);
 
-/**
- * Gets the current vide mode.
- */
-dc1394error_t dc1394_video_get_mode(dc1394camera_t *camera, dc1394video_mode_t *video_mode);
+    /**
+     * Gets the current vide mode.
+     */
+    dc1394error_t dc1394_video_get_mode(dc1394camera_t *camera, dc1394video_mode_t *video_mode);
 
-/**
- * Sets the current vide mode.
- */
-dc1394error_t dc1394_video_set_mode(dc1394camera_t *camera, dc1394video_mode_t video_mode);
+    /**
+     * Sets the current vide mode.
+     */
+    dc1394error_t dc1394_video_set_mode(dc1394camera_t *camera, dc1394video_mode_t video_mode);
 
-/**
- * Gets the current operation mode.
- */
-dc1394error_t dc1394_video_get_operation_mode(dc1394camera_t *camera, dc1394operation_mode_t *mode);
+    /**
+     * Gets the current operation mode.
+     */
+    dc1394error_t dc1394_video_get_operation_mode(dc1394camera_t *camera, dc1394operation_mode_t *mode);
 
-/**
- * Sets the current operation mode.
- */
-dc1394error_t dc1394_video_set_operation_mode(dc1394camera_t *camera, dc1394operation_mode_t mode);
+    /**
+     * Sets the current operation mode.
+     */
+    dc1394error_t dc1394_video_set_operation_mode(dc1394camera_t *camera, dc1394operation_mode_t mode);
 
-/**
- * Gets the current ISO speed.
- */
-dc1394error_t dc1394_video_get_iso_speed(dc1394camera_t *camera, dc1394speed_t *speed);
+    /**
+     * Gets the current ISO speed.
+     */
+    dc1394error_t dc1394_video_get_iso_speed(dc1394camera_t *camera, dc1394speed_t *speed);
 
-/**
- * Sets the current ISO speed. Speeds over 400Mbps require 1394B.
- */
-dc1394error_t dc1394_video_set_iso_speed(dc1394camera_t *camera, dc1394speed_t speed);
+    /**
+     * Sets the current ISO speed. Speeds over 400Mbps require 1394B.
+     */
+    dc1394error_t dc1394_video_set_iso_speed(dc1394camera_t *camera, dc1394speed_t speed);
 
-/**
- * Gets the current ISO channel
- */
-dc1394error_t dc1394_video_get_iso_channel(dc1394camera_t *camera, uint32_t * channel);
+    /**
+     * Gets the current ISO channel
+     */
+    dc1394error_t dc1394_video_get_iso_channel(dc1394camera_t *camera, uint32_t * channel);
 
-/**
- * Sets the current ISO channel
- */
-dc1394error_t dc1394_video_set_iso_channel(dc1394camera_t *camera, uint32_t channel);
+    /**
+     * Sets the current ISO channel
+     */
+    dc1394error_t dc1394_video_set_iso_channel(dc1394camera_t *camera, uint32_t channel);
 
-/**
- * Gets the current data depth, in bits. Only meaningful for 16bpp video modes (RAW16, RGB48, MONO16,...)  
- */
-dc1394error_t dc1394_video_get_data_depth(dc1394camera_t *camera, uint32_t *depth);
+    /**
+     * Gets the current data depth, in bits. Only meaningful for 16bpp video modes (RAW16, RGB48, MONO16,...)
+     */
+    dc1394error_t dc1394_video_get_data_depth(dc1394camera_t *camera, uint32_t *depth);
 
-/**
- * Starts/stops the isochronous data transmission. In other words, use this to control the image flow.
- */
-dc1394error_t dc1394_video_set_transmission(dc1394camera_t *camera, dc1394switch_t pwr);
+    /**
+     * Starts/stops the isochronous data transmission. In other words, use this to control the image flow.
+     */
+    dc1394error_t dc1394_video_set_transmission(dc1394camera_t *camera, dc1394switch_t pwr);
 
-/**
- * Gets the status of the video transmission
- */
-dc1394error_t dc1394_video_get_transmission(dc1394camera_t *camera, dc1394switch_t *pwr);
+    /**
+     * Gets the status of the video transmission
+     */
+    dc1394error_t dc1394_video_get_transmission(dc1394camera_t *camera, dc1394switch_t *pwr);
 
-/**
- * Turns one-shot mode on or off
- */
-dc1394error_t dc1394_video_set_one_shot(dc1394camera_t *camera, dc1394switch_t pwr);
+    /**
+     * Turns one-shot mode on or off
+     */
+    dc1394error_t dc1394_video_set_one_shot(dc1394camera_t *camera, dc1394switch_t pwr);
 
-/**
- * Gets the status of the one-shot mode.
- */
-dc1394error_t dc1394_video_get_one_shot(dc1394camera_t *camera, dc1394bool_t *is_on);
+    /**
+     * Gets the status of the one-shot mode.
+     */
+    dc1394error_t dc1394_video_get_one_shot(dc1394camera_t *camera, dc1394bool_t *is_on);
 
-/**
- * Turns multishot mode on or off
- */
-dc1394error_t dc1394_video_set_multi_shot(dc1394camera_t *camera, uint32_t numFrames, dc1394switch_t pwr);
+    /**
+     * Turns multishot mode on or off
+     */
+    dc1394error_t dc1394_video_set_multi_shot(dc1394camera_t *camera, uint32_t numFrames, dc1394switch_t pwr);
 
-/**
- * Gets the status of the multi-shot mode.
- */
-dc1394error_t dc1394_video_get_multi_shot(dc1394camera_t *camera, dc1394bool_t *is_on, uint32_t *numFrames);
+    /**
+     * Gets the status of the multi-shot mode.
+     */
+    dc1394error_t dc1394_video_get_multi_shot(dc1394camera_t *camera, dc1394bool_t *is_on, uint32_t *numFrames);
 
-/**
- * Gets the bandwidth usage of a camera.
- *
- * This function returns the bandwidth that is used by the camera *IF* ISO was ON.
- * The returned value is in bandwidth units. The 1394 bus has 4915 bandwidth units
- * available per cycle. Each unit corresponds to the time it takes to send one
- * quadlet at ISO speed S1600. The bandwidth usage at S400 is thus four times the
- * number of quadlets per packet. Thanks to Krisitian Hogsberg for clarifying this.
- */
-dc1394error_t dc1394_video_get_bandwidth_usage(dc1394camera_t *camera, uint32_t *bandwidth);
+    /**
+     * Gets the bandwidth usage of a camera.
+     *
+     * This function returns the bandwidth that is used by the camera *IF* ISO was ON.
+     * The returned value is in bandwidth units. The 1394 bus has 4915 bandwidth units
+     * available per cycle. Each unit corresponds to the time it takes to send one
+     * quadlet at ISO speed S1600. The bandwidth usage at S400 is thus four times the
+     * number of quadlets per packet. Thanks to Krisitian Hogsberg for clarifying this.
+     */
+    dc1394error_t dc1394_video_get_bandwidth_usage(dc1394camera_t *camera, uint32_t *bandwidth);
 
 #ifdef __cplusplus
 }

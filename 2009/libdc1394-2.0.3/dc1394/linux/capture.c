@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Camera Capture Code for Linux
- *  
+ *
  * Written by
  *   Chris Urmson <curmson@ri.cmu.edu>
  *   Damien Douxchamps <ddouxchamps@users.sf.net>
@@ -68,23 +68,23 @@ open_dma_device(platform_camera_t * craw)
     // automatic mode: try to open several usual device files.
     sprintf(filename,"/dev/video1394/%d",craw->port);
     if ( stat (filename, &statbuf) == 0 &&
-         S_ISCHR (statbuf.st_mode) &&
-         (craw->capture.dma_fd = open(filename,O_RDWR)) >= 0 ) {
+            S_ISCHR (statbuf.st_mode) &&
+            (craw->capture.dma_fd = open(filename,O_RDWR)) >= 0 ) {
         return DC1394_SUCCESS;
     }
 
     sprintf(filename,"/dev/video1394-%d",craw->port);
     if ( stat (filename, &statbuf) == 0 &&
-         S_ISCHR (statbuf.st_mode) &&
-         (craw->capture.dma_fd = open(filename,O_RDWR)) >= 0 ) {
+            S_ISCHR (statbuf.st_mode) &&
+            (craw->capture.dma_fd = open(filename,O_RDWR)) >= 0 ) {
         return DC1394_SUCCESS;
     }
 
     if (craw->port==0) {
         sprintf(filename,"/dev/video1394");
         if ( stat (filename, &statbuf) == 0 &&
-             S_ISCHR (statbuf.st_mode) &&
-             (craw->capture.dma_fd = open(filename,O_RDWR)) >= 0 ) {
+                S_ISCHR (statbuf.st_mode) &&
+                (craw->capture.dma_fd = open(filename,O_RDWR)) >= 0 ) {
             return DC1394_SUCCESS;
         }
     }
@@ -162,10 +162,10 @@ capture_linux_setup(platform_camera_t * craw, uint32_t num_dma_buffers)
         // This should be display if the user has low memory
         if (vmmap.nb_buffers * vmmap.buf_size > sysconf (_SC_PAGESIZE) * sysconf (_SC_AVPHYS_PAGES)) {
             dc1394_log_error("Unable to allocate DMA buffer.\nThe requested size (0x%ux or %ud MiB) is bigger than the available memory (0x%lux or %lud MiB).\nPlease free some memory before allocating the buffers",
-			     vmmap.nb_buffers * vmmap.buf_size,
-			     vmmap.nb_buffers * vmmap.buf_size/1048576,
-			     sysconf (_SC_PAGESIZE) * sysconf (_SC_AVPHYS_PAGES),
-			     sysconf (_SC_PAGESIZE) * sysconf (_SC_AVPHYS_PAGES)/1048576);
+                             vmmap.nb_buffers * vmmap.buf_size,
+                             vmmap.nb_buffers * vmmap.buf_size/1048576,
+                             sysconf (_SC_PAGESIZE) * sysconf (_SC_AVPHYS_PAGES),
+                             sysconf (_SC_PAGESIZE) * sysconf (_SC_AVPHYS_PAGES)/1048576);
         } else {
             // if it's not low memory, then it's the vmalloc limit.
             // VMALLOC_RESERVED not sufficient (default is 128MiB in recent kernels)
@@ -209,14 +209,14 @@ dc1394_capture_set_device_filename(dc1394camera_t* camera, char *filename)
 
 dc1394error_t
 platform_capture_setup(platform_camera_t *craw, uint32_t num_dma_buffers,
-                     uint32_t flags)
+                       uint32_t flags)
 {
     dc1394camera_t * camera = craw->camera;
     dc1394error_t err;
 
     if (flags & DC1394_CAPTURE_FLAGS_DEFAULT)
         flags = DC1394_CAPTURE_FLAGS_CHANNEL_ALLOC |
-            DC1394_CAPTURE_FLAGS_BANDWIDTH_ALLOC;
+                DC1394_CAPTURE_FLAGS_BANDWIDTH_ALLOC;
 
     // if capture is already set, abort
     if (craw->capture_is_set>0)
@@ -238,19 +238,19 @@ platform_capture_setup(platform_camera_t *craw, uint32_t num_dma_buffers,
     // allocate channel/bandwidth if requested
     if (flags & DC1394_CAPTURE_FLAGS_CHANNEL_ALLOC) {
         if (dc1394_iso_allocate_channel (camera, 0, &craw->allocated_channel)
-            != DC1394_SUCCESS)
+                != DC1394_SUCCESS)
             goto fail;
         if (dc1394_video_set_iso_channel (camera, craw->allocated_channel)
-            != DC1394_SUCCESS)
+                != DC1394_SUCCESS)
             goto fail;
     }
     if (flags & DC1394_CAPTURE_FLAGS_BANDWIDTH_ALLOC) {
         unsigned int bandwidth_usage;
         if (dc1394_video_get_bandwidth_usage (camera, &bandwidth_usage)
-            != DC1394_SUCCESS)
+                != DC1394_SUCCESS)
             goto fail;
         if (dc1394_iso_allocate_bandwidth (camera, bandwidth_usage)
-            != DC1394_SUCCESS)
+                != DC1394_SUCCESS)
             goto fail;
         craw->allocated_bandwidth = bandwidth_usage;
     }
@@ -262,7 +262,7 @@ platform_capture_setup(platform_camera_t *craw, uint32_t num_dma_buffers,
         goto fail;
 
     if (dc1394_video_get_iso_channel (camera, &craw->iso_channel)
-        != DC1394_SUCCESS)
+            != DC1394_SUCCESS)
         goto fail;
 
     // the capture_is_set flag is set inside this function:
@@ -279,16 +279,16 @@ platform_capture_setup(platform_camera_t *craw, uint32_t num_dma_buffers,
 
     return DC1394_SUCCESS;
 
- fail:
+fail:
     // free resources if they were allocated
     if (craw->allocated_channel >= 0) {
         if (dc1394_iso_release_channel (camera, craw->allocated_channel)
-            != DC1394_SUCCESS)
+                != DC1394_SUCCESS)
             dc1394_log_warning("Warning: Could not free ISO channel");
     }
     if (craw->allocated_bandwidth) {
         if (dc1394_iso_release_bandwidth (camera, craw->allocated_bandwidth)
-            != DC1394_SUCCESS)
+                != DC1394_SUCCESS)
             dc1394_log_warning("Warning: Could not free bandwidth");
     }
     craw->allocated_channel = -1;
@@ -314,7 +314,7 @@ platform_capture_stop(platform_camera_t *craw)
     if (craw->capture_is_set>0) {
         // unlisten
         if (ioctl(craw->capture.dma_fd, VIDEO1394_IOC_UNLISTEN_CHANNEL,
-                    &(craw->iso_channel)) < 0)
+                  &(craw->iso_channel)) < 0)
             return DC1394_IOCTL_FAILURE;
 
         // release
@@ -373,8 +373,8 @@ platform_capture_stop(platform_camera_t *craw)
 
 dc1394error_t
 platform_capture_dequeue (platform_camera_t * craw,
-                        dc1394capture_policy_t policy,
-                        dc1394video_frame_t **frame)
+                          dc1394capture_policy_t policy,
+                          dc1394video_frame_t **frame)
 {
     dc1394capture_t * capture = &(craw->capture);
     struct video1394_wait vwait;
@@ -403,7 +403,7 @@ platform_capture_dequeue (platform_camera_t * craw,
     default:
         while (1) {
             result=ioctl(capture->dma_fd, VIDEO1394_IOC_LISTEN_WAIT_BUFFER,
-                    &vwait);
+                         &vwait);
             if (result == 0 || errno != EINTR)
                 break;
         }
@@ -432,7 +432,7 @@ platform_capture_dequeue (platform_camera_t * craw,
 
 dc1394error_t
 platform_capture_enqueue (platform_camera_t * craw,
-                        dc1394video_frame_t * frame)
+                          dc1394video_frame_t * frame)
 {
     dc1394camera_t * camera = craw->camera;
     struct video1394_wait vwait;
@@ -463,7 +463,7 @@ platform_capture_get_fileno (platform_camera_t * craw)
 
 dc1394bool_t
 platform_capture_is_frame_corrupt (platform_camera_t * craw,
-        dc1394video_frame_t * frame)
+                                   dc1394video_frame_t * frame)
 {
     return DC1394_FALSE;
 }

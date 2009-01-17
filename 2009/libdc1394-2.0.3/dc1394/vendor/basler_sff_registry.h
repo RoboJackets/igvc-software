@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Basler Smart Feature Framework specific extensions
- * 
+ *
  * Written by Mikael Olenfalk <mikael _DOT_ olenfalk _AT_ tobii _DOT_ com>
  *
  * Copyright (C) 2006 Tobii Technology AB, Stockholm Sweden
@@ -34,26 +34,26 @@
 */
 
 typedef struct sff_feature {
-  /** human-readable name of the feature */
-  const char* name;
+    /** human-readable name of the feature */
+    const char* name;
 
-  /** the feature id */
-  dc1394basler_sff_feature_t feature_id;
+    /** the feature id */
+    dc1394basler_sff_feature_t feature_id;
 
-  /** the CSR guid used for looking up the CSR address */
-  dc1394basler_sff_guid_t csr_guid;
+    /** the CSR guid used for looking up the CSR address */
+    dc1394basler_sff_guid_t csr_guid;
 
-  /** the CHUNK guid, used for associating a chunk with a feature id */
-  dc1394basler_sff_guid_t chunk_guid;
+    /** the CHUNK guid, used for associating a chunk with a feature id */
+    dc1394basler_sff_guid_t chunk_guid;
 
-  /** whether this feature has an image chunk */
-  dc1394bool_t has_chunk;
+    /** whether this feature has an image chunk */
+    dc1394bool_t has_chunk;
 
-  /** whether this feature can be enabled by the generic dc1394_basler_sff_feature_enable() */
-  dc1394bool_t generic;
+    /** whether this feature can be enabled by the generic dc1394_basler_sff_feature_enable() */
+    dc1394bool_t generic;
 
-  /** the size of the C type in the image chunk */
-  uint32_t data_size;
+    /** the size of the C type in the image chunk */
+    uint32_t data_size;
 } sff_feature;
 
 /**

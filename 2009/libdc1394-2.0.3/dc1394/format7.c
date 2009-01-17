@@ -362,7 +362,7 @@ dc1394_format7_get_color_codings(dc1394camera_t *camera,
 
 dc1394error_t
 dc1394_format7_get_pixel_number(dc1394camera_t *camera,
-                                 dc1394video_mode_t video_mode,
+                                dc1394video_mode_t video_mode,
                                 uint32_t *pixnum)
 {
     dc1394error_t err;
@@ -513,7 +513,7 @@ dc1394_format7_set_packet_size(dc1394camera_t *camera,
 
 dc1394error_t
 dc1394_format7_get_recommended_packet_size(dc1394camera_t *camera,
-                                           dc1394video_mode_t video_mode, uint32_t *packet_size)
+        dc1394video_mode_t video_mode, uint32_t *packet_size)
 {
     dc1394error_t err;
     uint32_t value;
@@ -831,18 +831,18 @@ dc1394_format7_set_roi(dc1394camera_t *camera,
         err=dc1394_format7_get_image_position(camera, video_mode, &camera_left, &camera_top);
         DC1394_ERR_RTN(err, "Unable to query image position");
 
-        if( left == DC1394_QUERY_FROM_CAMERA)
+        if ( left == DC1394_QUERY_FROM_CAMERA)
             left = camera_left;
-        if( top == DC1394_QUERY_FROM_CAMERA)
+        if ( top == DC1394_QUERY_FROM_CAMERA)
             top = camera_top;
     }
 
     if ( width == DC1394_USE_MAX_AVAIL || height == DC1394_USE_MAX_AVAIL) {
         err=dc1394_format7_get_max_image_size(camera, video_mode, &max_width, &max_height);
         DC1394_ERR_RTN(err, "Unable to query max image size");
-        if( width == DC1394_USE_MAX_AVAIL)
+        if ( width == DC1394_USE_MAX_AVAIL)
             width  = max_width - left;
-        if( height == DC1394_USE_MAX_AVAIL)
+        if ( height == DC1394_USE_MAX_AVAIL)
             height = max_height - top;
     }
     if ((left<0)||(top<0)) {

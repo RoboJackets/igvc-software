@@ -107,9 +107,9 @@ void get_options(int argc,char *argv[])
     fps=7;
     res=0;
 
-    while(getopt_long(argc,argv,"",long_options,&option_index)>=0){
-        if(optarg){
-            switch(option_index){
+    while (getopt_long(argc,argv,"",long_options,&option_index)>=0) {
+        if (optarg) {
+            switch (option_index) {
                 /* case values must match long_options */
             case 0:
                 device_name=strdup(optarg);
@@ -122,7 +122,7 @@ void get_options(int argc,char *argv[])
                 break;
             }
         }
-        if(option_index==3){
+        if (option_index==3) {
             printf( "\n"
                     "        %s - multi-cam monitor for libdc1394 and XVideo\n\n"
                     "Usage:\n"
@@ -214,7 +214,7 @@ void display_frames()
 {
     uint32_t i;
 
-    if(!freeze && adaptor>=0){
+    if (!freeze && adaptor>=0) {
         for (i = 0; i < numCameras; i++) {
             if (!frames[i])
                 continue;
@@ -259,19 +259,19 @@ void QueryXv()
 
     XvQueryAdaptors(display,DefaultRootWindow(display),&num_adaptors,&info);
 
-    for(i=0;i<num_adaptors;i++) {
+    for (i=0;i<num_adaptors;i++) {
         formats=XvListImageFormats(display,info[i].base_id,&num_formats);
-        for(j=0;j<num_formats;j++) {
+        for (j=0;j<num_formats;j++) {
             xv_name[4]=0;
             memcpy(xv_name,&formats[j].id,4);
-            if(formats[j].id==format) {
+            if (formats[j].id==format) {
                 dc1394_log_error("using Xv format 0x%x %s %s",formats[j].id,xv_name,(formats[j].format==XvPacked)?"packed":"planar");
-                if(adaptor<0)adaptor=i;
+                if (adaptor<0)adaptor=i;
             }
         }
     }
     XFree(formats);
-    if(adaptor<0)
+    if (adaptor<0)
         dc1394_log_error("No suitable Xv adaptor found");
 
 }
@@ -310,15 +310,27 @@ int main(int argc,char *argv[])
 
     get_options(argc,argv);
     /* process options */
-    switch(fps) {
-    case 1: fps =        DC1394_FRAMERATE_1_875; break;
-    case 3: fps =        DC1394_FRAMERATE_3_75; break;
-    case 15: fps = DC1394_FRAMERATE_15; break;
-    case 30: fps = DC1394_FRAMERATE_30; break;
-    case 60: fps = DC1394_FRAMERATE_60; break;
-    default: fps = DC1394_FRAMERATE_7_5; break;
+    switch (fps) {
+    case 1:
+        fps =        DC1394_FRAMERATE_1_875;
+        break;
+    case 3:
+        fps =        DC1394_FRAMERATE_3_75;
+        break;
+    case 15:
+        fps = DC1394_FRAMERATE_15;
+        break;
+    case 30:
+        fps = DC1394_FRAMERATE_30;
+        break;
+    case 60:
+        fps = DC1394_FRAMERATE_60;
+        break;
+    default:
+        fps = DC1394_FRAMERATE_7_5;
+        break;
     }
-    switch(res) {
+    switch (res) {
     case 1:
         res = DC1394_VIDEO_MODE_640x480_YUV411;
         device_width=640;
@@ -396,7 +408,7 @@ int main(int argc,char *argv[])
         exit(-1);
     }
 
-    switch(format){
+    switch (format) {
     case XV_YV12:
         set_frame_length(device_width*device_height*3/2, numCameras);
         break;
@@ -411,7 +423,7 @@ int main(int argc,char *argv[])
 
     /* make the window */
     display=XOpenDisplay(getenv("DISPLAY"));
-    if(display==NULL) {
+    if (display==NULL) {
         dc1394_log_error("Could not open display \"%s\"",getenv("DISPLAY"));
         cleanup();
         exit(-1);
@@ -438,7 +450,7 @@ int main(int argc,char *argv[])
     gc=XCreateGC(display,window,0,&xgcv);
 
     /* main event loop */
-    while(1){
+    while (1) {
 
         for (i = 0; i < numCameras; i++) {
             if (dc1394_capture_dequeue(cameras[i], DC1394_CAPTURE_POLICY_WAIT, &frames[i])!=DC1394_SUCCESS)
@@ -448,16 +460,16 @@ int main(int argc,char *argv[])
         display_frames();
         XFlush(display);
 
-        while(XPending(display)>0){
+        while (XPending(display)>0) {
             XNextEvent(display,&xev);
-            switch(xev.type){
+            switch (xev.type) {
             case ConfigureNotify:
                 width=xev.xconfigure.width;
                 height=xev.xconfigure.height;
                 display_frames();
                 break;
             case KeyPress:
-                switch(XKeycodeToKeysym(display,xev.xkey.keycode,0)){
+                switch (XKeycodeToKeysym(display,xev.xkey.keycode,0)) {
                 case XK_q:
                 case XK_Q:
                     cleanup();

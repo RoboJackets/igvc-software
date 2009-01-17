@@ -116,7 +116,7 @@ platform_free_device_list (platform_device_list_t * d)
 
 int
 platform_device_get_config_rom (platform_device_t * device,
-    uint32_t * quads, int * num_quads)
+                                uint32_t * quads, int * num_quads)
 {
     CFTypeRef prop;
     prop = IORegistryEntryCreateCFProperty (device->node,
@@ -143,7 +143,7 @@ platform_device_get_config_rom (platform_device_t * device,
 
 platform_camera_t *
 platform_camera_new (platform_t * p, platform_device_t * device,
-    uint32_t unit_directory_offset)
+                     uint32_t unit_directory_offset)
 {
     kern_return_t res;
     platform_camera_t * camera;
@@ -152,7 +152,7 @@ platform_camera_new (platform_t * p, platform_device_t * device,
     io_object_t node;
 
     res = IORegistryEntryGetChildIterator (device->node, kIOServicePlane,
-            &iterator);
+                                           &iterator);
     if (res != KERN_SUCCESS) {
         dc1394_log_error ("Failed to iterate device's children\n");
         return NULL;
@@ -181,14 +181,14 @@ platform_camera_new (platform_t * p, platform_device_t * device,
 
         iface = NULL;
         (*plugin_interface)->QueryInterface (plugin_interface,
-                CFUUIDGetUUIDBytes (kIOFireWireDeviceInterfaceID),
-                (void**) &iface);
+                                             CFUUIDGetUUIDBytes (kIOFireWireDeviceInterfaceID),
+                                             (void**) &iface);
         IODestroyPlugInInterface (plugin_interface);
         if (!iface)
             continue;
 
         dir = (*iface)->GetConfigDirectory (iface,
-                CFUUIDGetUUIDBytes (kIOFireWireConfigDirectoryInterfaceID));
+                                            CFUUIDGetUUIDBytes (kIOFireWireConfigDirectoryInterfaceID));
         if (!dir) {
             (*iface)->Release (iface);
             continue;
@@ -218,7 +218,7 @@ platform_camera_new (platform_t * p, platform_device_t * device,
     res = (*iface)->Open (iface);
     if (res != kIOReturnSuccess) {
         dc1394_log_error ("Failed to gain exclusive access on unit (err %d)\n",
-                res);
+                          res);
         (*iface)->Release (iface);
         return NULL;
     }
@@ -239,7 +239,7 @@ void platform_camera_free (platform_camera_t * cam)
 
 void
 platform_camera_set_parent (platform_camera_t * cam,
-        dc1394camera_t * parent)
+                            dc1394camera_t * parent)
 {
     cam->camera = parent;
 }
@@ -254,7 +254,7 @@ platform_camera_print_info (platform_camera_t * camera, FILE *fd)
 
 dc1394error_t
 platform_camera_read (platform_camera_t * cam, uint64_t offset,
-    uint32_t * quads, int num_quads)
+                      uint32_t * quads, int num_quads)
 {
     IOFireWireLibDeviceRef d = cam->iface;
     FWAddress full_addr;
@@ -283,7 +283,7 @@ platform_camera_read (platform_camera_t * cam, uint64_t offset,
 
 dc1394error_t
 platform_camera_write (platform_camera_t * cam, uint64_t offset,
-    const uint32_t * quads, int num_quads)
+                       const uint32_t * quads, int num_quads)
 {
     IOFireWireLibDeviceRef d = cam->iface;
     FWAddress full_addr;
@@ -325,7 +325,7 @@ platform_reset_bus (platform_camera_t * cam)
 
 dc1394error_t
 platform_read_cycle_timer (platform_camera_t * cam,
-        uint32_t * cycle_timer, uint64_t * local_time)
+                           uint32_t * cycle_timer, uint64_t * local_time)
 {
     IOFireWireLibDeviceRef d = cam->iface;
     struct timeval tv;
@@ -346,28 +346,28 @@ platform_iso_set_persist (platform_camera_t * cam)
 
 dc1394error_t
 platform_iso_allocate_channel (platform_camera_t * cam,
-        uint64_t channels_allowed, int * channel)
+                               uint64_t channels_allowed, int * channel)
 {
     return DC1394_FUNCTION_NOT_SUPPORTED;
 }
 
 dc1394error_t
 platform_iso_release_channel (platform_camera_t * cam,
-    int channel)
+                              int channel)
 {
     return DC1394_FUNCTION_NOT_SUPPORTED;
 }
 
 dc1394error_t
 platform_iso_allocate_bandwidth (platform_camera_t * cam,
-    int bandwidth_units)
+                                 int bandwidth_units)
 {
     return DC1394_FUNCTION_NOT_SUPPORTED;
 }
 
 dc1394error_t
 platform_iso_release_bandwidth (platform_camera_t * cam,
-    int bandwidth_units)
+                                int bandwidth_units)
 {
     return DC1394_FUNCTION_NOT_SUPPORTED;
 }
@@ -387,7 +387,7 @@ platform_get_broadcast(platform_camera_t * craw, dc1394bool_t *pwr)
 
 dc1394error_t
 platform_camera_get_node(platform_camera_t *cam, uint32_t *node,
-        uint32_t * generation)
+                         uint32_t * generation)
 {
     IOFireWireLibDeviceRef d = cam->iface;
     UInt32 gen;

@@ -98,7 +98,7 @@ dc1394_get_control_registers (dc1394camera_t *camera, uint64_t offset,
         return DC1394_CAMERA_NOT_INITIALIZED;
 
     return platform_camera_read (cp->pcam,
-        camera->command_registers_base + offset, value, num_regs);
+                                 camera->command_registers_base + offset, value, num_regs);
 }
 
 dc1394error_t
@@ -111,7 +111,7 @@ dc1394_set_control_registers (dc1394camera_t *camera, uint64_t offset,
         return DC1394_CAMERA_NOT_INITIALIZED;
 
     return platform_camera_write (cp->pcam,
-        camera->command_registers_base + offset, value, num_regs);
+                                  camera->command_registers_base + offset, value, num_regs);
 }
 
 /********************************************************************************/
@@ -127,7 +127,7 @@ dc1394_get_adv_control_registers (dc1394camera_t *camera, uint64_t offset,
         return DC1394_CAMERA_NOT_INITIALIZED;
 
     return platform_camera_read (cp->pcam,
-        camera->advanced_features_csr + offset, value, num_regs);
+                                 camera->advanced_features_csr + offset, value, num_regs);
 }
 
 dc1394error_t
@@ -140,7 +140,7 @@ dc1394_set_adv_control_registers (dc1394camera_t *camera, uint64_t offset,
         return DC1394_CAMERA_NOT_INITIALIZED;
 
     return platform_camera_write (cp->pcam,
-        camera->advanced_features_csr + offset, value, num_regs);
+                                  camera->advanced_features_csr + offset, value, num_regs);
 }
 
 /********************************************************************************/
@@ -184,7 +184,7 @@ dc1394_get_format7_register(dc1394camera_t *camera, unsigned int mode, uint64_t 
     }
 
     return platform_camera_read_quad(cp->pcam,
-        camera->format7_csr[mode-DC1394_VIDEO_MODE_FORMAT7_MIN]+offset, value);
+                                     camera->format7_csr[mode-DC1394_VIDEO_MODE_FORMAT7_MIN]+offset, value);
 }
 
 
@@ -204,7 +204,7 @@ dc1394_set_format7_register(dc1394camera_t *camera, unsigned int mode, uint64_t 
     }
 
     return platform_camera_write_quad(cp->pcam,
-        camera->format7_csr[mode-DC1394_VIDEO_MODE_FORMAT7_MIN]+offset, value);
+                                      camera->format7_csr[mode-DC1394_VIDEO_MODE_FORMAT7_MIN]+offset, value);
 }
 
 /********************************************************************************/
@@ -296,7 +296,7 @@ dc1394_get_SIO_register(dc1394camera_t *camera, uint64_t offset, uint32_t *value
 {
     dc1394camera_priv_t * cp = DC1394_CAMERA_PRIV (camera);
     if (camera == NULL)
-    return DC1394_CAMERA_NOT_INITIALIZED;
+        return DC1394_CAMERA_NOT_INITIALIZED;
 
     return platform_camera_read_quad(cp->pcam, camera->SIO_control_csr+offset, value);
 }

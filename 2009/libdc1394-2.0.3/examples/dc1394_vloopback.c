@@ -83,9 +83,9 @@ char ioctlbuf[MAXIOCTL];
 /* cmdline options */
 int g_daemon = 0;
 enum v4l_modes {
-        V4L_MODE_NONE,
-        V4L_MODE_PIPE,
-        V4L_MODE_MMAP
+    V4L_MODE_NONE,
+    V4L_MODE_PIPE,
+    V4L_MODE_MMAP
 };
 enum v4l_modes g_v4l_mode = V4L_MODE_MMAP;
 char *dc_dev_name = NULL;
@@ -112,8 +112,8 @@ void get_options(int argc,char *argv[])
 {
     int option_index=0;
 
-    while(getopt_long(argc,argv,"",long_options,&option_index)>=0){
-        switch(option_index){
+    while (getopt_long(argc,argv,"",long_options,&option_index)>=0) {
+        switch (option_index) {
             /* case values must match long_options */
         case 0:
             g_daemon = 1;
@@ -213,8 +213,8 @@ void affine_scale( const unsigned char *src, int src_width, int src_height, unsi
     if ( scale_x <= 1.0 && scale_y <= 1.0 ) {
         affine_transform_scale( &affine, scale_x, scale_y );
 
-        for( j = 0; j < src_height; j++ ) {
-            for( i = 0; i < src_width; i++ ) {
+        for ( j = 0; j < src_height; j++ ) {
+            for ( i = 0; i < src_width; i++ ) {
                 x = (int) ( affine_transform_mapx( &affine, i - src_width/2, j - src_height/2 ) );
                 y = (int) ( affine_transform_mapy( &affine, i - src_width/2, j - src_height/2 ) );
                 x += dest_width/2;
@@ -232,8 +232,8 @@ void affine_scale( const unsigned char *src, int src_width, int src_height, unsi
     else if ( scale_x >= 1.0 && scale_y >= 1.0 ) {
         affine_transform_scale( &affine, 1.0/scale_x, 1.0/scale_y );
 
-        for( y = 0; y < dest_height; y++ ) {
-            for( x = 0; x < dest_width; x++ ) {
+        for ( y = 0; y < dest_height; y++ ) {
+            for ( x = 0; x < dest_width; x++ ) {
                 i = (int) ( affine_transform_mapx( &affine, x - dest_width/2, y - dest_height/2 ) );
                 j = (int) ( affine_transform_mapy( &affine, x - dest_width/2, y - dest_height/2 ) );
                 i += src_width/2;
@@ -613,206 +613,206 @@ int v4l_ioctl(unsigned long int cmd, void *arg)
     //printf("ioctl %d\n", cmd & 0xff);
     switch (cmd) {
     case VIDIOCGCAP:
-        {
-            struct video_capability *vidcap=arg;
+    {
+        struct video_capability *vidcap=arg;
 
-            sprintf(vidcap->name, "IEEE 1394 Digital Camera");
-            vidcap->type = VID_TYPE_CAPTURE | VID_TYPE_SCALES;
-            vidcap->channels = 1;
-            vidcap->audios = 0;
-            vidcap->maxwidth = MAX_WIDTH;
-            vidcap->maxheight = MAX_HEIGHT;
-            vidcap->minwidth = MIN_WIDTH;
-            vidcap->minheight = MIN_HEIGHT;
-            break;
-        }
+        sprintf(vidcap->name, "IEEE 1394 Digital Camera");
+        vidcap->type = VID_TYPE_CAPTURE | VID_TYPE_SCALES;
+        vidcap->channels = 1;
+        vidcap->audios = 0;
+        vidcap->maxwidth = MAX_WIDTH;
+        vidcap->maxheight = MAX_HEIGHT;
+        vidcap->minwidth = MIN_WIDTH;
+        vidcap->minheight = MIN_HEIGHT;
+        break;
+    }
     case VIDIOCGTUNER:
-        {
-            struct video_tuner *vidtune=arg;
+    {
+        struct video_tuner *vidtune=arg;
 
-            sprintf(vidtune->name, "IEEE 1394 Digital Camera");
-            vidtune->tuner = 0;
-            vidtune->rangelow = 0;
-            vidtune->rangehigh = 0;
-            vidtune->flags = VIDEO_TUNER_PAL | VIDEO_TUNER_NTSC;
-            vidtune->mode = g_height > 480 ? VIDEO_MODE_PAL : VIDEO_MODE_NTSC;
-            vidtune->signal = 0;
-            break;
-        }
+        sprintf(vidtune->name, "IEEE 1394 Digital Camera");
+        vidtune->tuner = 0;
+        vidtune->rangelow = 0;
+        vidtune->rangehigh = 0;
+        vidtune->flags = VIDEO_TUNER_PAL | VIDEO_TUNER_NTSC;
+        vidtune->mode = g_height > 480 ? VIDEO_MODE_PAL : VIDEO_MODE_NTSC;
+        vidtune->signal = 0;
+        break;
+    }
     case VIDIOCGCHAN:
-        {
-            struct video_channel *vidchan=arg;
+    {
+        struct video_channel *vidchan=arg;
 
-            vidchan->channel = 0;
-            vidchan->flags = 0;
-            vidchan->tuners = 0;
-            vidchan->type = VIDEO_TYPE_CAMERA;
-            strcpy(vidchan->name, "Dummy channel");
-            break;
-        }
+        vidchan->channel = 0;
+        vidchan->flags = 0;
+        vidchan->tuners = 0;
+        vidchan->type = VIDEO_TYPE_CAMERA;
+        strcpy(vidchan->name, "Dummy channel");
+        break;
+    }
     case VIDIOCGPICT:
+    {
+        struct video_picture *vidpic=arg;
+
+        /* TODO: we might be able to support these */
+        vidpic->colour = 0xffff;
+        vidpic->hue = 0xffff;
+        vidpic->brightness = 0xffff;
+        vidpic->contrast = 0xffff;
+        vidpic->whiteness = 0xffff;
+
+        vidpic->palette = g_v4l_fmt;
+        switch (g_v4l_fmt) {
+        case VIDEO_PALETTE_RGB24:
+            vidpic->depth = 24;
+            break;
+
+        case VIDEO_PALETTE_YUV422:
+        case VIDEO_PALETTE_YUV422P:
+            vidpic->depth = 16;
+            break;
+
+        case VIDEO_PALETTE_YUV420P:
+            vidpic->depth = 12;
+            break;
+
+        default:
+            return DC1394_FAILURE;
+        }
+        break;
+    }
+    case VIDIOCSPICT:
+    {
+        struct video_picture *vidpic=arg;
+
+        switch (vidpic->palette)
         {
-            struct video_picture *vidpic=arg;
+        case VIDEO_PALETTE_YUV422:
+        case VIDEO_PALETTE_YUV422P:
+        case VIDEO_PALETTE_YUV420P:
+            printf("VIDIOCSPICT: video palette set to YUV42%d%s\n",
+                   vidpic->palette == VIDEO_PALETTE_YUV420P ? 0 : 2,
+                   vidpic->palette == VIDEO_PALETTE_YUV422P ? "P" : "");
+            dc_stop();
+            g_v4l_fmt = vidpic->palette;
+            dc_start(g_v4l_fmt);
+            break;
 
-            /* TODO: we might be able to support these */
-            vidpic->colour = 0xffff;
-            vidpic->hue = 0xffff;
-            vidpic->brightness = 0xffff;
-            vidpic->contrast = 0xffff;
-            vidpic->whiteness = 0xffff;
+        case VIDEO_PALETTE_RGB24:
+            printf("VIDIOCSPICT: video palette set to RGB24\n");
+            dc_stop();
+            g_v4l_fmt = vidpic->palette;
+            dc_start(g_v4l_fmt);
+            break;
 
-            vidpic->palette = g_v4l_fmt;
-            switch (g_v4l_fmt) {
-            case VIDEO_PALETTE_RGB24:
-                vidpic->depth = 24;
-                break;
+        default:
+            printf("VIDIOCSPICT: unsupported video palette %d\n", vidpic->palette);
+            return DC1394_FAILURE;
+        }
+        break;
+    }
+    case VIDIOCCAPTURE:
+    {
+        break;
+    }
+    case VIDIOCGWIN:
+    {
+        struct video_window *vidwin=arg;
 
+        vidwin->x=0;
+        vidwin->y=0;
+        vidwin->width=g_width;
+        vidwin->height=g_height;
+        vidwin->chromakey=0;
+        vidwin->flags=0;
+        vidwin->clipcount=0;
+        break;
+    }
+    case VIDIOCSWIN:
+    {
+        struct video_window *vidwin=arg;
+
+        /* TODO: support cropping */
+
+        if (vidwin->width > MAX_WIDTH ||
+                vidwin->height > MAX_HEIGHT )
+            return DC1394_FAILURE;
+        if (vidwin->flags)
+            return DC1394_FAILURE;
+        g_width = vidwin->width;
+        g_height = vidwin->height;
+        printf("VIDIOCSWIN: size set to %dx%d\n", g_width, g_height);
+        break;
+    }
+    case VIDIOCGMBUF:
+    {
+        struct video_mbuf *vidmbuf=arg;
+        int i;
+
+        vidmbuf->size = MAX_WIDTH * MAX_HEIGHT * MAX_BPP;
+        vidmbuf->frames = V4L_BUFFERS;
+        for (i=0; i < V4L_BUFFERS; i++)
+            vidmbuf->offsets[i] = i * vidmbuf->size;
+        vidmbuf->size *= vidmbuf->frames;
+        break;
+    }
+    case VIDIOCMCAPTURE:
+    {
+        struct video_mmap *vidmmap=arg;
+
+        if ( vidmmap->format != g_v4l_fmt )
+            switch (vidmmap->format)
+            {
             case VIDEO_PALETTE_YUV422:
             case VIDEO_PALETTE_YUV422P:
-                vidpic->depth = 16;
+            case VIDEO_PALETTE_YUV420P:
+                printf("VIDIOCMCAPTURE: video palette set to YUV42%d%s\n",
+                       vidmmap->format == VIDEO_PALETTE_YUV420P ? 0 : 2,
+                       vidmmap->format == VIDEO_PALETTE_YUV422P ? "P" : "");
+                dc_stop();
+                g_v4l_fmt = vidmmap->format;
+                dc_start(g_v4l_fmt);
                 break;
 
-            case VIDEO_PALETTE_YUV420P:
-                vidpic->depth = 12;
+            case VIDEO_PALETTE_RGB24:
+                printf("VIDIOCMCAPTURE: video palette set to RGB24\n");
+                dc_stop();
+                g_v4l_fmt = vidmmap->format;
+                dc_start(g_v4l_fmt);
                 break;
 
             default:
+                printf("VIDIOCMCAPTURE: unsupported video palette %d\n", vidmmap->format);
                 return DC1394_FAILURE;
             }
-            break;
-        }
-    case VIDIOCSPICT:
-        {
-            struct video_picture *vidpic=arg;
 
-            switch (vidpic->palette)
-                {
-                case VIDEO_PALETTE_YUV422:
-                case VIDEO_PALETTE_YUV422P:
-                case VIDEO_PALETTE_YUV420P:
-                    printf("VIDIOCSPICT: video palette set to YUV42%d%s\n",
-                           vidpic->palette == VIDEO_PALETTE_YUV420P ? 0 : 2,
-                           vidpic->palette == VIDEO_PALETTE_YUV422P ? "P" : "");
-                    dc_stop();
-                    g_v4l_fmt = vidpic->palette;
-                    dc_start(g_v4l_fmt);
-                    break;
-
-                case VIDEO_PALETTE_RGB24:
-                    printf("VIDIOCSPICT: video palette set to RGB24\n");
-                    dc_stop();
-                    g_v4l_fmt = vidpic->palette;
-                    dc_start(g_v4l_fmt);
-                    break;
-
-                default:
-                    printf("VIDIOCSPICT: unsupported video palette %d\n", vidpic->palette);
-                    return DC1394_FAILURE;
-                }
-            break;
-        }
-    case VIDIOCCAPTURE:
-        {
-            break;
-        }
-    case VIDIOCGWIN:
-        {
-            struct video_window *vidwin=arg;
-
-            vidwin->x=0;
-            vidwin->y=0;
-            vidwin->width=g_width;
-            vidwin->height=g_height;
-            vidwin->chromakey=0;
-            vidwin->flags=0;
-            vidwin->clipcount=0;
-            break;
-        }
-    case VIDIOCSWIN:
-        {
-            struct video_window *vidwin=arg;
-
-            /* TODO: support cropping */
-
-            if (vidwin->width > MAX_WIDTH ||
-                vidwin->height > MAX_HEIGHT )
-                return DC1394_FAILURE;
-            if (vidwin->flags)
-                return DC1394_FAILURE;
-            g_width = vidwin->width;
-            g_height = vidwin->height;
-            printf("VIDIOCSWIN: size set to %dx%d\n", g_width, g_height);
-            break;
-        }
-    case VIDIOCGMBUF:
-        {
-            struct video_mbuf *vidmbuf=arg;
-            int i;
-
-            vidmbuf->size = MAX_WIDTH * MAX_HEIGHT * MAX_BPP;
-            vidmbuf->frames = V4L_BUFFERS;
-            for (i=0; i < V4L_BUFFERS; i++)
-                vidmbuf->offsets[i] = i * vidmbuf->size;
-            vidmbuf->size *= vidmbuf->frames;
-            break;
-        }
-    case VIDIOCMCAPTURE:
-        {
-            struct video_mmap *vidmmap=arg;
-
-            if ( vidmmap->format != g_v4l_fmt )
-                switch (vidmmap->format)
-                    {
-                    case VIDEO_PALETTE_YUV422:
-                    case VIDEO_PALETTE_YUV422P:
-                    case VIDEO_PALETTE_YUV420P:
-                        printf("VIDIOCMCAPTURE: video palette set to YUV42%d%s\n",
-                               vidmmap->format == VIDEO_PALETTE_YUV420P ? 0 : 2,
-                               vidmmap->format == VIDEO_PALETTE_YUV422P ? "P" : "");
-                        dc_stop();
-                        g_v4l_fmt = vidmmap->format;
-                        dc_start(g_v4l_fmt);
-                        break;
-
-                    case VIDEO_PALETTE_RGB24:
-                        printf("VIDIOCMCAPTURE: video palette set to RGB24\n");
-                        dc_stop();
-                        g_v4l_fmt = vidmmap->format;
-                        dc_start(g_v4l_fmt);
-                        break;
-
-                    default:
-                        printf("VIDIOCMCAPTURE: unsupported video palette %d\n", vidmmap->format);
-                        return DC1394_FAILURE;
-                    }
-
-            if (vidmmap->height > MAX_HEIGHT ||
+        if (vidmmap->height > MAX_HEIGHT ||
                 vidmmap->width > MAX_WIDTH) {
-                printf("VIDIOCMCAPTURE: invalid size %dx%d\n", vidmmap->width, vidmmap->height );
-                return DC1394_FAILURE;
-            }
-            if (vidmmap->height != g_height ||
+            printf("VIDIOCMCAPTURE: invalid size %dx%d\n", vidmmap->width, vidmmap->height );
+            return DC1394_FAILURE;
+        }
+        if (vidmmap->height != g_height ||
                 vidmmap->width != g_width) {
-                g_height = vidmmap->height;
-                g_width = vidmmap->width;
-                printf("VIDIOCMCAPTURE: new size %dx%d\n", g_width, g_height);
-            }
-            break;
+            g_height = vidmmap->height;
+            g_width = vidmmap->width;
+            printf("VIDIOCMCAPTURE: new size %dx%d\n", g_width, g_height);
         }
+        break;
+    }
     case VIDIOCSYNC:
-        {
-            struct video_mmap *vidmmap=arg;
-            if ( !capture_mmap(vidmmap->frame) ) {
-                printf("VIDIOCSYNC: failed frame %d\n", vidmmap->frame);
-                return DC1394_FAILURE;
-            }
-            break;
+    {
+        struct video_mmap *vidmmap=arg;
+        if ( !capture_mmap(vidmmap->frame) ) {
+            printf("VIDIOCSYNC: failed frame %d\n", vidmmap->frame);
+            return DC1394_FAILURE;
         }
+        break;
+    }
     default:
-        {
-            printf("ioctl %ld unhandled\n", cmd & 0xff);
-                        break;
-        }
+    {
+        printf("ioctl %ld unhandled\n", cmd & 0xff);
+        break;
+    }
     }
     return DC1394_SUCCESS;
 }

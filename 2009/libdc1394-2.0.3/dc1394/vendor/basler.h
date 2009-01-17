@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Basler Smart Feature Framework specific extensions
- * 
+ *
  * Written by Mikael Olenfalk <mikael _DOT_ olenfalk _AT_ tobii _DOT_ com>
  *
  * Copyright (C) 2006 Tobii Technology AB, Stockholm Sweden
@@ -38,55 +38,55 @@
 extern "C" {
 #endif
 
-/**
- * Tests whether the camera supports Basler SFF
- */
-dc1394error_t dc1394_basler_sff_is_available (dc1394camera_t* camera, dc1394bool_t *available);
+    /**
+     * Tests whether the camera supports Basler SFF
+     */
+    dc1394error_t dc1394_basler_sff_is_available (dc1394camera_t* camera, dc1394bool_t *available);
 
-/**
- * Tests whether the camera supports the specified SFF feature
- */
-dc1394error_t dc1394_basler_sff_feature_is_available (dc1394camera_t* camera, dc1394basler_sff_feature_t feature_id, dc1394bool_t *available);
+    /**
+     * Tests whether the camera supports the specified SFF feature
+     */
+    dc1394error_t dc1394_basler_sff_feature_is_available (dc1394camera_t* camera, dc1394basler_sff_feature_t feature_id, dc1394bool_t *available);
 
-/**
- * Enables or disables a specific feature
- */
-dc1394error_t dc1394_basler_sff_feature_enable (dc1394camera_t* camera, dc1394basler_sff_feature_t feature_id, dc1394switch_t on_off);
+    /**
+     * Enables or disables a specific feature
+     */
+    dc1394error_t dc1394_basler_sff_feature_enable (dc1394camera_t* camera, dc1394basler_sff_feature_t feature_id, dc1394switch_t on_off);
 
-/**
- * checks if a feature has been enabled
- */
-dc1394error_t dc1394_basler_sff_feature_is_enabled (dc1394camera_t* camera, dc1394basler_sff_feature_t feature_id, dc1394bool_t *is_enabled);
+    /**
+     * checks if a feature has been enabled
+     */
+    dc1394error_t dc1394_basler_sff_feature_is_enabled (dc1394camera_t* camera, dc1394basler_sff_feature_t feature_id, dc1394bool_t *is_enabled);
 
-/**
- * Checks the crc checksum of the supplied frame
- */
-dc1394bool_t dc1394_basler_sff_check_crc (const uint8_t* frame_buffer, uint32_t frame_size);
+    /**
+     * Checks the crc checksum of the supplied frame
+     */
+    dc1394bool_t dc1394_basler_sff_check_crc (const uint8_t* frame_buffer, uint32_t frame_size);
 
-/**
- * Initializes an iteration
- */
-dc1394error_t dc1394_basler_sff_chunk_iterate_init (dc1394basler_sff_t* chunk, void *frame_buffer, uint32_t frame_size, dc1394bool_t has_crc_checksum);
+    /**
+     * Initializes an iteration
+     */
+    dc1394error_t dc1394_basler_sff_chunk_iterate_init (dc1394basler_sff_t* chunk, void *frame_buffer, uint32_t frame_size, dc1394bool_t has_crc_checksum);
 
-/**
- * Iterates over the available SFF chunks in the frame buffer
- */
-dc1394error_t dc1394_basler_sff_chunk_iterate (dc1394basler_sff_t* chunk);
+    /**
+     * Iterates over the available SFF chunks in the frame buffer
+     */
+    dc1394error_t dc1394_basler_sff_chunk_iterate (dc1394basler_sff_t* chunk);
 
-/**
- * Finds a specific SFF chunk in the frame buffer
- */
-dc1394error_t dc1394_basler_sff_chunk_find (dc1394basler_sff_feature_t feature_id, void** chunk_data, void* frame_buffer, uint32_t frame_size, dc1394bool_t has_crc_checksum);
+    /**
+     * Finds a specific SFF chunk in the frame buffer
+     */
+    dc1394error_t dc1394_basler_sff_chunk_find (dc1394basler_sff_feature_t feature_id, void** chunk_data, void* frame_buffer, uint32_t frame_size, dc1394bool_t has_crc_checksum);
 
-/**
- * prints info about one feature
- */
-dc1394error_t dc1394_basler_sff_feature_print (dc1394camera_t* camera, dc1394basler_sff_feature_t feature_id, FILE *fd);
+    /**
+     * prints info about one feature
+     */
+    dc1394error_t dc1394_basler_sff_feature_print (dc1394camera_t* camera, dc1394basler_sff_feature_t feature_id, FILE *fd);
 
-/**
- * prints info about all features
- */
-dc1394error_t dc1394_basler_sff_feature_print_all (dc1394camera_t* camera, FILE *fd);
+    /**
+     * prints info about all features
+     */
+    dc1394error_t dc1394_basler_sff_feature_print_all (dc1394camera_t* camera, FILE *fd);
 
 #ifdef __cplusplus
 }

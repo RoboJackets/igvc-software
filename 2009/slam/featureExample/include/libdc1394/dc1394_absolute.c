@@ -60,13 +60,13 @@
                                                                       \
     offset+= feature * 0x04U;
 
-/**********************/ 
+/**********************/
 /* Internal functions */
 /**********************/
 
 static int
 QueryAbsoluteCSROffset(raw1394handle_t handle, nodeid_t node, int feature,
-		       quadlet_t *value)
+                       quadlet_t *value)
 {
     int retval;
     int offset;
@@ -79,11 +79,11 @@ QueryAbsoluteCSROffset(raw1394handle_t handle, nodeid_t node, int feature,
 
 static int
 GetCameraAbsoluteRegister(raw1394handle_t handle, nodeid_t node,
-			  int feature, octlet_t offset, quadlet_t *value)
+                          int feature, octlet_t offset, quadlet_t *value)
 {
     int retval, retry= MAX_RETRIES;
     quadlet_t csr;
-    
+
     if (QueryAbsoluteCSROffset(handle, node, feature, &csr) != DC1394_SUCCESS)
     {
         return DC1394_FAILURE;
@@ -92,7 +92,7 @@ GetCameraAbsoluteRegister(raw1394handle_t handle, nodeid_t node,
     csr*= 0x04UL;
 
     /* retry a few times if necessary (addition by PDJ) */
-    while(retry--)
+    while (retry--)
     {
         retval= raw1394_read(handle, 0xffc0 | node,
                              CONFIG_ROM_BASE + csr + offset, 4, value);
@@ -108,10 +108,10 @@ GetCameraAbsoluteRegister(raw1394handle_t handle, nodeid_t node,
 #endif
 
             if ( ((ack == ACK_PENDING) || (ack == ACK_LOCAL)) &&
-                 (rcode == RESP_COMPLETE) )
-            { 
+                    (rcode == RESP_COMPLETE) )
+            {
                 /* conditionally byte swap the value */
-                *value= ntohl(*value); 
+                *value= ntohl(*value);
                 return DC1394_SUCCESS;
             }
 
@@ -131,29 +131,29 @@ GetCameraAbsoluteRegister(raw1394handle_t handle, nodeid_t node,
 
         usleep(SLOW_DOWN);
     }
-    
+
     *value = ntohl(*value);
     return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 static int
 SetCameraAbsoluteRegister(raw1394handle_t handle, nodeid_t node,
-			  int feature, octlet_t offset, quadlet_t value)
+                          int feature, octlet_t offset, quadlet_t value)
 {
     int retval, retry= MAX_RETRIES;
     quadlet_t csr;
-    
+
     if (QueryAbsoluteCSROffset(handle, node, feature, &csr)!=DC1394_SUCCESS)
     {
         return DC1394_FAILURE;
     }
     csr*= 0x04UL;
-  
+
     /* conditionally byte swap the value (addition by PDJ) */
     value= htonl(value);
- 
+
     /* retry a few times if necessary (addition by PDJ) */
-    while(retry--)
+    while (retry--)
     {
         retval= raw1394_write(handle, 0xffc0 | node,
                               CONFIG_ROM_BASE + offset + csr, 4, &value);
@@ -169,13 +169,13 @@ SetCameraAbsoluteRegister(raw1394handle_t handle, nodeid_t node,
 #endif
 
             if ( ((ack == ACK_PENDING) || (ack == ACK_LOCAL) ||
-                  (ack == ACK_COMPLETE)) &&
-                 ((rcode == RESP_COMPLETE) || (rcode == RESP_SONY_HACK)) ) 
+                    (ack == ACK_COMPLETE)) &&
+                    ((rcode == RESP_COMPLETE) || (rcode == RESP_SONY_HACK)) )
             {
                 return DC1394_SUCCESS;
             }
-            
-            
+
+
         }
 #else
         if (!retval || (errno != EAGAIN))
@@ -184,10 +184,10 @@ SetCameraAbsoluteRegister(raw1394handle_t handle, nodeid_t node,
         }
 #endif /* LIBRAW1394_VERSION <= 0.8.2 */
 
- 	usleep(SLOW_DOWN);
+        usleep(SLOW_DOWN);
     }
     return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
-    
+
 }
 
 /**************************
@@ -196,23 +196,23 @@ SetCameraAbsoluteRegister(raw1394handle_t handle, nodeid_t node,
 
 int
 dc1394_query_absolute_feature_min_max(raw1394handle_t handle, nodeid_t node,
-				      unsigned int feature,
-				      float *min, float *max)
+                                      unsigned int feature,
+                                      float *min, float *max)
 {
     int retval;
-    
+
     if ( (feature > FEATURE_MAX) || (feature < FEATURE_MIN) )
     {
         return DC1394_FAILURE;
     }
-    else     
+    else
     {
         retval= GetCameraAbsoluteRegister(handle, node, feature,
-					  REG_CAMERA_ABS_MAX,
-					  (quadlet_t*)max);
+                                          REG_CAMERA_ABS_MAX,
+                                          (quadlet_t*)max);
         retval= GetCameraAbsoluteRegister(handle, node, feature,
-					  REG_CAMERA_ABS_MIN,
-					  (quadlet_t*)min);
+                                          REG_CAMERA_ABS_MIN,
+                                          (quadlet_t*)min);
     }
 
     return retval;
@@ -221,38 +221,38 @@ dc1394_query_absolute_feature_min_max(raw1394handle_t handle, nodeid_t node,
 
 int
 dc1394_query_absolute_feature_value(raw1394handle_t handle, nodeid_t node,
-				    int feature, float *value)
+                                    int feature, float *value)
 {
     int retval;
-    
+
     if ( (feature > FEATURE_MAX) || (feature < FEATURE_MIN) )
     {
         return DC1394_FAILURE;
     }
-    else     
+    else
     {
         retval= GetCameraAbsoluteRegister(handle, node, feature,
-					  REG_CAMERA_ABS_VALUE,
-					  (quadlet_t*)value);
+                                          REG_CAMERA_ABS_VALUE,
+                                          (quadlet_t*)value);
     }
 
     return retval;
 }
- 
+
 
 int
 dc1394_set_absolute_feature_value(raw1394handle_t handle, nodeid_t node,
-				  int feature, float value)
+                                  int feature, float value)
 {
-  quadlet_t tempq;
-  memcpy(&tempq,&value,4);
+    quadlet_t tempq;
+    memcpy(&tempq,&value,4);
 
-  if (SetCameraAbsoluteRegister(handle, node, feature, REG_CAMERA_ABS_VALUE,
-				tempq) != DC1394_SUCCESS)
+    if (SetCameraAbsoluteRegister(handle, node, feature, REG_CAMERA_ABS_VALUE,
+                                  tempq) != DC1394_SUCCESS)
     {
-      printf("(%s) Absolute value setting failure \n", __FILE__);
-      return DC1394_FAILURE;
+        printf("(%s) Absolute value setting failure \n", __FILE__);
+        return DC1394_FAILURE;
     }
-  return DC1394_SUCCESS;
+    return DC1394_SUCCESS;
 }
- 
+

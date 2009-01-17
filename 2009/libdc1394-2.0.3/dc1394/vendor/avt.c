@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Allied Vision Technologies (AVT) specific extensions
- * 
+ *
  * Written by Pierre MOOS <pierre.moos@gmail.com>
  *
  * Copyright (C) 2005 Inria Sophia-Antipolis
@@ -212,55 +212,55 @@ dc1394_avt_print_advanced_feature(dc1394_avt_adv_feature_info_t *adv_feature)
 {
 
     puts ("ADVANCED FEATURES SUPPORTED:");
-    if(adv_feature->MaxResolution == DC1394_TRUE) puts (" MaxResolution ");
-    if(adv_feature->TimeBase == DC1394_TRUE)         puts (" TimeBase ");
-    if(adv_feature->ExtdShutter == DC1394_TRUE)         puts (" ExtdShutter ");
-    if(adv_feature->TestImage == DC1394_TRUE)         puts (" TestImage ");
-    if(adv_feature->FrameInfo == DC1394_TRUE)         puts (" FrameInfo ");
-    if(adv_feature->Sequences == DC1394_TRUE)         puts (" Sequences ");
-    if(adv_feature->VersionInfo == DC1394_TRUE)         puts (" VersionInfo ");
+    if (adv_feature->MaxResolution == DC1394_TRUE) puts (" MaxResolution ");
+    if (adv_feature->TimeBase == DC1394_TRUE)         puts (" TimeBase ");
+    if (adv_feature->ExtdShutter == DC1394_TRUE)         puts (" ExtdShutter ");
+    if (adv_feature->TestImage == DC1394_TRUE)         puts (" TestImage ");
+    if (adv_feature->FrameInfo == DC1394_TRUE)         puts (" FrameInfo ");
+    if (adv_feature->Sequences == DC1394_TRUE)         puts (" Sequences ");
+    if (adv_feature->VersionInfo == DC1394_TRUE)         puts (" VersionInfo ");
     //ADV_INQ_1 7
-    if(adv_feature->Lookup_Tables == DC1394_TRUE)        puts (" Lookup_Tables ");
-    if(adv_feature->Shading == DC1394_TRUE)         puts (" Shading ");
-    if(adv_feature->DeferredTrans == DC1394_TRUE) puts (" DeferredTrans ");
-    if(adv_feature->HDR_Mode == DC1394_TRUE)         puts (" HDR_Mode ");
-    if(adv_feature->DSNU == DC1394_TRUE)                 puts (" DSNU ");
-    if(adv_feature->BlemishCorrection == DC1394_TRUE)                 puts (" BlemishCorrection ");
-    if(adv_feature->TriggerDelay == DC1394_TRUE)         puts (" TriggerDelay ");
-    if(adv_feature->MirrorImage == DC1394_TRUE)         puts (" MirrorImage ");
-    if(adv_feature->SoftReset == DC1394_TRUE)         puts (" SoftReset ");
-    if(adv_feature->HSNR == DC1394_TRUE)         puts (" HSNR ");
-    if(adv_feature->ColorCorrection == DC1394_TRUE)         puts (" ColorCorrection ");
-    if(adv_feature->UserProfiles == DC1394_TRUE)         puts (" UserProfiles ");
+    if (adv_feature->Lookup_Tables == DC1394_TRUE)        puts (" Lookup_Tables ");
+    if (adv_feature->Shading == DC1394_TRUE)         puts (" Shading ");
+    if (adv_feature->DeferredTrans == DC1394_TRUE) puts (" DeferredTrans ");
+    if (adv_feature->HDR_Mode == DC1394_TRUE)         puts (" HDR_Mode ");
+    if (adv_feature->DSNU == DC1394_TRUE)                 puts (" DSNU ");
+    if (adv_feature->BlemishCorrection == DC1394_TRUE)                 puts (" BlemishCorrection ");
+    if (adv_feature->TriggerDelay == DC1394_TRUE)         puts (" TriggerDelay ");
+    if (adv_feature->MirrorImage == DC1394_TRUE)         puts (" MirrorImage ");
+    if (adv_feature->SoftReset == DC1394_TRUE)         puts (" SoftReset ");
+    if (adv_feature->HSNR == DC1394_TRUE)         puts (" HSNR ");
+    if (adv_feature->ColorCorrection == DC1394_TRUE)         puts (" ColorCorrection ");
+    if (adv_feature->UserProfiles == DC1394_TRUE)         puts (" UserProfiles ");
     //ADV_INQ_1 20
-    if(adv_feature->UserSets == DC1394_TRUE)         puts (" UserSets ");
-    if(adv_feature->TimeStamp == DC1394_TRUE)         puts (" TimeStamp ");
-    if(adv_feature->FrmCntStamp == DC1394_TRUE)         puts (" FrmCntStamp ");
-    if(adv_feature->TrgCntStamp == DC1394_TRUE)         puts (" TrgCntStamp ");
+    if (adv_feature->UserSets == DC1394_TRUE)         puts (" UserSets ");
+    if (adv_feature->TimeStamp == DC1394_TRUE)         puts (" TimeStamp ");
+    if (adv_feature->FrmCntStamp == DC1394_TRUE)         puts (" FrmCntStamp ");
+    if (adv_feature->TrgCntStamp == DC1394_TRUE)         puts (" TrgCntStamp ");
     //ADV_INQ_1 25-30
-    if(adv_feature->GP_Buffer == DC1394_TRUE)         puts (" GP_Buffer ");
+    if (adv_feature->GP_Buffer == DC1394_TRUE)         puts (" GP_Buffer ");
 
 
-    if(adv_feature->Input_1 == DC1394_TRUE)        puts (" Input_1 ");
-    if(adv_feature->Input_2 == DC1394_TRUE)         puts (" Input_2 ");
+    if (adv_feature->Input_1 == DC1394_TRUE)        puts (" Input_1 ");
+    if (adv_feature->Input_2 == DC1394_TRUE)         puts (" Input_2 ");
     //ADV_INQ_2 2-7
-    if(adv_feature->Output_1 == DC1394_TRUE)         puts (" Output_1 ");
-    if(adv_feature->Output_2 == DC1394_TRUE)         puts (" Output_2 ");
-    if(adv_feature->Output_3 == DC1394_TRUE)         puts (" Output_3 ");
-    if(adv_feature->Output_4 == DC1394_TRUE)         puts (" Output_4 ");
+    if (adv_feature->Output_1 == DC1394_TRUE)         puts (" Output_1 ");
+    if (adv_feature->Output_2 == DC1394_TRUE)         puts (" Output_2 ");
+    if (adv_feature->Output_3 == DC1394_TRUE)         puts (" Output_3 ");
+    if (adv_feature->Output_4 == DC1394_TRUE)         puts (" Output_4 ");
     //ADV_INQ_2 12-15
-    if(adv_feature->IntEnaDelay == DC1394_TRUE)         puts (" IntEnaDelay ");
-    if(adv_feature->IncDecoder == DC1394_TRUE)         puts (" IncDecoder ");
+    if (adv_feature->IntEnaDelay == DC1394_TRUE)         puts (" IntEnaDelay ");
+    if (adv_feature->IncDecoder == DC1394_TRUE)         puts (" IncDecoder ");
     //ADV_INQ_2 18-31
 
-    if(adv_feature->CameraStatus == DC1394_TRUE)         puts (" CameraStatus ");
+    if (adv_feature->CameraStatus == DC1394_TRUE)         puts (" CameraStatus ");
     //ADV_INQ_3 1-3
-    if(adv_feature->AutoShutter == DC1394_TRUE)         puts (" AutoShutter ");
-    if(adv_feature->AutoGain == DC1394_TRUE)         puts (" AutoGain ");
-    if(adv_feature->AutoFunctionAOI == DC1394_TRUE)         puts (" AutoFunctionAOI ");
+    if (adv_feature->AutoShutter == DC1394_TRUE)         puts (" AutoShutter ");
+    if (adv_feature->AutoGain == DC1394_TRUE)         puts (" AutoGain ");
+    if (adv_feature->AutoFunctionAOI == DC1394_TRUE)         puts (" AutoFunctionAOI ");
     //ADV_INQ_3 7-31
 
-    if(adv_feature->HDRPike == DC1394_TRUE)         puts (" HDRPike ");
+    if (adv_feature->HDRPike == DC1394_TRUE)         puts (" HDRPike ");
     //ADV_INQ_4 1-31
 
     return DC1394_SUCCESS;

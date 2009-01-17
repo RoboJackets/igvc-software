@@ -42,7 +42,7 @@ void print_format( uint32_t format )
 {
 #define print_case(A) case A: printf(#A ""); break;
 
-    switch( format ) {
+    switch ( format ) {
         print_case(DC1394_VIDEO_MODE_160x120_YUV444);
         print_case(DC1394_VIDEO_MODE_320x240_YUV422);
         print_case(DC1394_VIDEO_MODE_640x480_YUV411);
@@ -90,7 +90,7 @@ uint32_t get_num_pixels(dc1394camera_t *camera, uint32_t format ) {
  *-----------------------------------------------------------------------*/
 void print_color_coding( uint32_t color_id )
 {
-    switch( color_id ) {
+    switch ( color_id ) {
     case DC1394_COLOR_CODING_MONO8:
         printf("MONO8");
         break;
@@ -147,7 +147,7 @@ void print_mode_info( dc1394camera_t *camera , uint32_t mode )
     DC1394_ERR(err,"Could not get frame rates");
 
     printf("Frame Rates:\n");
-    for( j = 0; j < framerates.num; j++ ) {
+    for ( j = 0; j < framerates.num; j++ ) {
         uint32_t rate = framerates.framerates[j];
         float f_rate;
         dc1394_framerate_as_float(rate,&f_rate);
@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
      *-----------------------------------------------------------------------*/
     imagefile=fopen(IMAGE_FILE_NAME, "wb");
 
-    if( imagefile == NULL) {
+    if ( imagefile == NULL) {
         perror( "Can't create '" IMAGE_FILE_NAME "'");
         cleanup_and_exit(camera);
     }

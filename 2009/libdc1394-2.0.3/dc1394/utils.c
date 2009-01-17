@@ -96,43 +96,50 @@ dc1394_get_image_size_from_video_mode(dc1394camera_t *camera, dc1394video_mode_t
     dc1394error_t err;
     uint32_t sx, sy;
 
-    switch(video_mode) {
+    switch (video_mode) {
     case DC1394_VIDEO_MODE_160x120_YUV444:
-        *w = 160;*h=120;
+        *w = 160;
+        *h=120;
         return DC1394_SUCCESS;
     case DC1394_VIDEO_MODE_320x240_YUV422:
-        *w = 320;*h=240;
+        *w = 320;
+        *h=240;
         return DC1394_SUCCESS;
     case DC1394_VIDEO_MODE_640x480_YUV411:
     case DC1394_VIDEO_MODE_640x480_YUV422:
     case DC1394_VIDEO_MODE_640x480_RGB8:
     case DC1394_VIDEO_MODE_640x480_MONO8:
     case DC1394_VIDEO_MODE_640x480_MONO16:
-        *w =640;*h=480;
+        *w =640;
+        *h=480;
         return DC1394_SUCCESS;
     case DC1394_VIDEO_MODE_800x600_YUV422:
     case DC1394_VIDEO_MODE_800x600_RGB8:
     case DC1394_VIDEO_MODE_800x600_MONO8:
     case DC1394_VIDEO_MODE_800x600_MONO16:
-        *w=800;*h=600;
+        *w=800;
+        *h=600;
         return DC1394_SUCCESS;
     case DC1394_VIDEO_MODE_1024x768_YUV422:
     case DC1394_VIDEO_MODE_1024x768_RGB8:
     case DC1394_VIDEO_MODE_1024x768_MONO8:
     case DC1394_VIDEO_MODE_1024x768_MONO16:
-        *w=1024;*h=768;
+        *w=1024;
+        *h=768;
         return DC1394_SUCCESS;
     case DC1394_VIDEO_MODE_1280x960_YUV422:
     case DC1394_VIDEO_MODE_1280x960_RGB8:
     case DC1394_VIDEO_MODE_1280x960_MONO8:
     case DC1394_VIDEO_MODE_1280x960_MONO16:
-        *w=1280;*h=960;
+        *w=1280;
+        *h=960;
         return DC1394_SUCCESS;
     case DC1394_VIDEO_MODE_1600x1200_YUV422:
     case DC1394_VIDEO_MODE_1600x1200_RGB8:
     case DC1394_VIDEO_MODE_1600x1200_MONO8:
     case DC1394_VIDEO_MODE_1600x1200_MONO16:
-        *w=1600;*h=1200;
+        *w=1600;
+        *h=1200;
         return DC1394_SUCCESS;
     case DC1394_VIDEO_MODE_FORMAT7_0:
     case DC1394_VIDEO_MODE_FORMAT7_1:
@@ -163,7 +170,7 @@ dc1394_get_image_size_from_video_mode(dc1394camera_t *camera, dc1394video_mode_t
 dc1394error_t
 dc1394_framerate_as_float(dc1394framerate_t framerate_enum, float *framerate)
 {
-    switch(framerate_enum)  {
+    switch (framerate_enum)  {
     case DC1394_FRAMERATE_1_875:
         *framerate=1.875;
         return DC1394_SUCCESS;
@@ -195,7 +202,7 @@ dc1394_framerate_as_float(dc1394framerate_t framerate_enum, float *framerate)
 dc1394error_t
 dc1394_is_color(dc1394color_coding_t color_coding, dc1394bool_t *is_color)
 {
-    switch(color_coding)  {
+    switch (color_coding)  {
     case DC1394_COLOR_CODING_MONO8:
     case DC1394_COLOR_CODING_MONO16:
     case DC1394_COLOR_CODING_MONO16S:
@@ -218,7 +225,7 @@ dc1394_is_color(dc1394color_coding_t color_coding, dc1394bool_t *is_color)
 dc1394error_t
 dc1394_get_color_coding_data_depth(dc1394color_coding_t color_coding, uint32_t * bits)
 {
-    switch(color_coding) {
+    switch (color_coding) {
     case DC1394_COLOR_CODING_MONO8:
     case DC1394_COLOR_CODING_YUV411:
     case DC1394_COLOR_CODING_YUV422:
@@ -242,7 +249,7 @@ dc1394_get_color_coding_data_depth(dc1394color_coding_t color_coding, uint32_t *
 dc1394error_t
 dc1394_get_color_coding_bit_size(dc1394color_coding_t color_coding, uint32_t* bits)
 {
-    switch(color_coding) {
+    switch (color_coding) {
     case DC1394_COLOR_CODING_MONO8:
     case DC1394_COLOR_CODING_RAW8:
         *bits=8;
@@ -274,7 +281,7 @@ dc1394_get_color_coding_from_video_mode(dc1394camera_t *camera, dc1394video_mode
     dc1394error_t err;
     dc1394color_coding_t id;
 
-    switch(video_mode) {
+    switch (video_mode) {
     case DC1394_VIDEO_MODE_160x120_YUV444:
         *color_coding=DC1394_COLOR_CODING_YUV444;
         return DC1394_SUCCESS;

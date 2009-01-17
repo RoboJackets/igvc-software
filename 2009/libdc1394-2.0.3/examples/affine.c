@@ -27,7 +27,7 @@ static inline void Multiply( affine_transform_t *this, affine_transform_t *that 
     for ( i = 0; i < 2; i ++ )
         for ( j = 0; j < 2; j ++ )
             output[ i ][ j ] = this->matrix[ i ][ 0 ] * that->matrix[ j ][ 0 ] +
-                this->matrix[ i ][ 1 ] * that->matrix[ j ][ 1 ];
+                               this->matrix[ i ][ 1 ] * that->matrix[ j ][ 1 ];
 
     this->matrix[ 0 ][ 0 ] = output[ 0 ][ 0 ];
     this->matrix[ 0 ][ 1 ] = output[ 0 ][ 1 ];

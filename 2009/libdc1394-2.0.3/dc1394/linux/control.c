@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Camera control code for Linux
- *  
+ *
  * Written by
  *   Chris Urmson <curmson@ri.cmu.edu>
  *   Damien Douxchamps <ddouxchamps@users.sf.net>
@@ -157,7 +157,7 @@ platform_free_device_list (platform_device_list_t * d)
 
 int
 platform_device_get_config_rom (platform_device_t * device,
-    uint32_t * quads, int * num_quads)
+                                uint32_t * quads, int * num_quads)
 {
     if (*num_quads > device->num_quads)
         *num_quads = device->num_quads;
@@ -203,7 +203,7 @@ void platform_camera_free (platform_camera_t * cam)
 
 void
 platform_camera_set_parent (platform_camera_t * cam,
-        dc1394camera_t * parent)
+                            dc1394camera_t * parent)
 {
     cam->camera = parent;
 }
@@ -223,7 +223,7 @@ platform_camera_read (platform_camera_t * cam, uint64_t offset, uint32_t * quads
     int i, retval, retry = DC1394_MAX_RETRIES;
 
     /* retry a few times if necessary (addition by PDJ) */
-    while(retry--)  {
+    while (retry--)  {
 #ifdef DC1394_DEBUG_LOWEST_LEVEL
         fprintf(stderr,"get %d regs at 0x%llx : ",
                 num_quads, offset + CONFIG_ROM_BASE);
@@ -242,7 +242,7 @@ platform_camera_read (platform_camera_t * cam, uint64_t offset, uint32_t * quads
         usleep(DC1394_SLOW_DOWN);
     }
 
- out:
+out:
     /* conditionally byte swap the value */
     for (i = 0; i < num_quads; i++)
         quads[i] = ntohl (quads[i]);
@@ -260,7 +260,7 @@ platform_camera_write (platform_camera_t * cam, uint64_t offset, const uint32_t 
         value[i] = htonl (quads[i]);
 
     /* retry a few times if necessary */
-    while(retry--) {
+    while (retry--) {
 #ifdef DC1394_DEBUG_LOWEST_LEVEL
         fprintf(stderr,"set %d regs at 0x%llx to value 0x%lx [...]\n",
                 num_quads, offset + CONFIG_ROM_BASE, value[0]);
@@ -394,7 +394,7 @@ platform_iso_release_bandwidth (platform_camera_t * cam, int bandwidth_units)
 
 dc1394error_t
 platform_camera_get_node(platform_camera_t *cam, uint32_t *node,
-        uint32_t * generation)
+                         uint32_t * generation)
 {
     if (node)
         *node = cam->node;

@@ -57,7 +57,7 @@ void reshape(int w, int h)
     glMatrixMode(GL_MODELVIEW);
 
     glLoadIdentity();
-	//glutPostRedisplay();
+    //glutPostRedisplay();
 }
 
 void showstats() {
@@ -103,12 +103,12 @@ void keyboard (unsigned char key, int x, int y)
     case '7':
     case '8':
     case '9':
-	//viewbuf = atoi((const char * )&key);
+        //viewbuf = atoi((const char * )&key);
         viewbuf = atoi(keystr);
         break;
 
     case 27:
-	//delete CamSource;
+        //delete CamSource;
         exit(0);
         break;
     case 'r' :  //request that new refernce scene be saved - will use the imediate next frame.
@@ -132,14 +132,14 @@ void MouseFunc( int button, int state, int x, int y)
 void render_redirect() {
 
 
-	//wait for a new frame to be captured.
+    //wait for a new frame to be captured.
     CamSource.GrabCvImage();
     dovision(); //first!!
-    
-    
+
+
     static Scene *refScene = NULL;
 
-	//Scene *newScene ;
+    //Scene *newScene ;
 
     float d =  -1.0;
 
@@ -151,22 +151,22 @@ void render_redirect() {
 
 
 
-	//lock the image data so it is not updated while we are capturing.
-	//CamSource->lock();
+    //lock the image data so it is not updated while we are capturing.
+    //CamSource->lock();
     glTexSubImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, 0,0, visCvRaw->width,visCvRaw->height,
-                    GL_BGR, GL_UNSIGNED_BYTE, 
+                    GL_BGR, GL_UNSIGNED_BYTE,
                     //visCvAdapt->imageData
                     visCvRaw->imageData
-                    );
-	//free the image data so it can be updated again.
-	//CamSource->unlock();
+                   );
+    //free the image data so it can be updated again.
+    //CamSource->unlock();
 
-	//ft->render_redirect( tex );
-	//retrieve our features into a scene,s
+    //ft->render_redirect( tex );
+    //retrieve our features into a scene,s
     Scene s;
     ft->getScene(tex,s);
 
-	//save first scene as reference.
+    //save first scene as reference.
     if ( refScene == NULL ) refScene = new Scene(s);
     else if ( refreshRefScene == true ) {
         refScene = new Scene(s);
@@ -207,21 +207,21 @@ void render_redirect() {
 
     glutSwapBuffers();
     showstats();
-    
+
 
 }
 
 int main(int argc, char *argv[] )  {
 
-	//start the camera capture
+    //start the camera capture
     if (argv[1]==NULL)
         /* connect to the camera */
         CamSource.connect();
     else
         /* load a video */
         CamSource.connect(0, argv[1]);
-	//must call right after connecting to camera
-	init();
+    //must call right after connecting to camera
+    init();
 
 
     int CaptureWidth = visCvRaw->width, CaptureHeight = visCvRaw->height;
@@ -231,25 +231,25 @@ int main(int argc, char *argv[] )  {
     height = DisplayHeight;
 
     glutInit( &argc, argv );
-    
+
     glutInitWindowSize(visCvRaw->width, visCvRaw->height);
-    glutInitWindowPosition(800, 480); 	
-    
+    glutInitWindowPosition(800, 480);
+
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_ALPHA | GLUT_DEPTH | GLUT_STENCIL);
     glutInitWindowSize(width, height );
     glutCreateWindow(argv[0]);
 
     ft = new featureTrack(visCvRaw->width,visCvRaw->height );
 
-	// make a texture
+    // make a texture
     glGenTextures(1, &tex);              // texture
     glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,  GL_REPLACE );
     glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width,visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData );
 
-	//in order to see some of the processing buffers, we need
-	// a fragment program because the floating point values wont
-	// show up on their own.  FP-basic.cg just pass texels through.
+    //in order to see some of the processing buffers, we need
+    // a fragment program because the floating point values wont
+    // show up on their own.  FP-basic.cg just pass texels through.
     cgProfile = CG_PROFILE_FP40;
     cgContext = cgCreateContext();
     basicProgram     = load_cgprogram(CG_PROFILE_FP40, "FP-basic.cg");
@@ -287,7 +287,7 @@ void drawFeatures( Scene *currentScene )
         glColor3f( 0.0, 1.0, 0.0 );
         Coords  corner;
         Coords  tmp;
-        
+
         float xoffset = -8.0;
         float yoffset = -8.0;
         tmp.set( xoffset, yoffset );
@@ -298,7 +298,7 @@ void drawFeatures( Scene *currentScene )
         glVertex3f( (it->x() + corner.first )/(float)w,
                     (it->y() + corner.second )/(float)h ,
                     -1.0 );
-                    
+
         xoffset = -8.0;
         yoffset = +8.0;
         tmp.set( xoffset, yoffset );
@@ -328,7 +328,7 @@ void drawFeatures( Scene *currentScene )
         glVertex3f( (it->x() + corner.first )/(float)w,
                     (it->y() + corner.second )/(float)h ,
                     -1.0 );
-                    
+
         xoffset = +8.0;
         yoffset = -8.0;
         tmp.set( xoffset, yoffset );
@@ -353,7 +353,7 @@ void drawMatches( Matches &bestM )
     glDisable(CG_PROFILE_FP30);
     glLineWidth(1.0);
     glColor3f( 1.0, 1.0, 0.0);
-	//if( bestM.size() >= 4  && bestP.norm() < 1.0) {
+    //if( bestM.size() >= 4  && bestP.norm() < 1.0) {
     if ( bestM.size() >= 4  ) {
         glBegin(GL_LINES);
         for ( Matches::iterator it=bestM.begin(); it != bestM.end(); it++ ) {
@@ -369,16 +369,16 @@ void drawMatches( Matches &bestM )
 
 void init()
 {
-	CamSource.GrabCvImage();
-	visCvDebug = NULL; //cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-	visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+    CamSource.GrabCvImage();
+    visCvDebug = NULL; //cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+    visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
     visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
     visCvPath = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-    visCvAdaptSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);    	
+    visCvAdaptSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
     cvNamedWindow("display",0);
     trackbarVal=1;
     int numberOfViews = 10; // important!!!
-	cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
+    cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
     cvResizeWindow( "display", visCvRaw->width, visCvRaw->height );
     cvMoveWindow( "display", 10, 10 ); // position on screen
     cvMoveWindow( "roi", visCvRaw->width/2-20, 60+visCvRaw->height );
@@ -390,17 +390,17 @@ void trackbarHandler(int pos)
 }
 void dovision()
 {
-	visCvDebug = cvCloneImage( visCvRaw );
-	vp.visAdaptiveProcessing();
-	
+    visCvDebug = cvCloneImage( visCvRaw );
+    //vp.visAdaptiveProcessing();
+
     //cvSmooth(visCvRaw, visCvRaw);
     cvErode(visCvRaw,visCvRaw,NULL,2);
     cvSmooth(visCvRaw, visCvRaw);
     //int thresh = 20;
     //cvThreshold(visCvRaw,visCvRaw, thresh, 255, CV_THRESH_BINARY );
-	
-	vp.ConvertAllImageViews(trackbarVal); 
-	cvReleaseImage(&visCvDebug);
+
+    vp.ConvertAllImageViews(trackbarVal);
+    cvReleaseImage(&visCvDebug);
 }
 
 

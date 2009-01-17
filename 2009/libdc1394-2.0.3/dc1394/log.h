@@ -202,51 +202,51 @@ typedef enum {
 extern "C" {
 #endif
 
-/**
- * dc1394_log_register_handler: register log handler for reporting error, warning or debug statements
- * Passing NULL as argument turns off this log level.
- * @param [in] log_handler: pointer to a function which takes a character string as argument
- *             type: the type of log
- * @param [in] type: message type (\a debug, \a err or \a warning)
- * @param [in] message: log message
- */
-dc1394error_t dc1394_log_register_handler(dc1394log_t type, void(*log_handler)(dc1394log_t type,
-                                          const char *message, void* user), void* user);
+    /**
+     * dc1394_log_register_handler: register log handler for reporting error, warning or debug statements
+     * Passing NULL as argument turns off this log level.
+     * @param [in] log_handler: pointer to a function which takes a character string as argument
+     *             type: the type of log
+     * @param [in] type: message type (\a debug, \a err or \a warning)
+     * @param [in] message: log message
+     */
+    dc1394error_t dc1394_log_register_handler(dc1394log_t type, void(*log_handler)(dc1394log_t type,
+            const char *message, void* user), void* user);
 
-/**
- * dc1394_log_set_default_handler: set the log handler to the default handler
- * At boot time, debug logging is OFF (handler is NULL). Using this function for the debug statements
- * will start logging of debug statements usng the default handler.
- */
-dc1394error_t dc1394_log_set_default_handler(dc1394log_t type);
+    /**
+     * dc1394_log_set_default_handler: set the log handler to the default handler
+     * At boot time, debug logging is OFF (handler is NULL). Using this function for the debug statements
+     * will start logging of debug statements usng the default handler.
+     */
+    dc1394error_t dc1394_log_set_default_handler(dc1394log_t type);
 
-/**
- * dc1394_log_error: logs a fatal error condition to the registered facility
- * This function shall be invoked if a fatal error condition is encountered.
- * The message passed as argument is delivered to the registered error reporting
- * function registered before.
- * @param [in] format,...: error message to be logged, multiple arguments allowed (printf style)
- */
-void dc1394_log_error(const char *format,...);
+    /**
+     * dc1394_log_error: logs a fatal error condition to the registered facility
+     * This function shall be invoked if a fatal error condition is encountered.
+     * The message passed as argument is delivered to the registered error reporting
+     * function registered before.
+     * @param [in] format,...: error message to be logged, multiple arguments allowed (printf style)
+     */
+    void dc1394_log_error(const char *format,...);
 
-/**
- * dc1394_log_warning: logs a nonfatal error condition to the registered facility
- * This function shall be invoked if a nonfatal error condition is encountered.
- * The message passed as argument is delivered to the registered warning reporting
- * function registered before.
- * @param [in] format,...: warning message to be logged, multiple arguments allowed (printf style)
- */
-void dc1394_log_warning(const char *format,...);
+    /**
+     * dc1394_log_warning: logs a nonfatal error condition to the registered facility
+     * This function shall be invoked if a nonfatal error condition is encountered.
+     * The message passed as argument is delivered to the registered warning reporting
+     * function registered before.
+     * @param [in] format,...: warning message to be logged, multiple arguments allowed (printf style)
+     */
+    void dc1394_log_warning(const char *format,...);
 
-/**
- * dc1394_log_debug: logs a debug statement to the registered facility
- * This function shall be invoked if a debug statement is to be logged.
- * The message passed as argument is delivered to the registered debug reporting
- * function registered before ONLY IF the environment variable DC1394_DEBUG has been set before the
- * program starts.
- * @param [in] format,...: debug statement to be logged, multiple arguments allowed (printf style)
- */
-void dc1394_log_debug(const char *format,...);
+    /**
+     * dc1394_log_debug: logs a debug statement to the registered facility
+     * This function shall be invoked if a debug statement is to be logged.
+     * The message passed as argument is delivered to the registered debug reporting
+     * function registered before ONLY IF the environment variable DC1394_DEBUG has been set before the
+     * program starts.
+     * @param [in] format,...: debug statement to be logged, multiple arguments allowed (printf style)
+     */
+    void dc1394_log_debug(const char *format,...);
 
 #ifdef __cplusplus
 }

@@ -63,8 +63,8 @@ parse_leaf (uint32_t offset, uint32_t * quads, int num_quads)
 
 static int
 identify_unit (dc1394_t * d, platform_device_t * dev, uint64_t guid,
-        uint32_t offset, uint32_t * quads, int num_quads, int unit_num,
-        uint32_t vendor_id)
+               uint32_t offset, uint32_t * quads, int num_quads, int unit_num,
+               uint32_t vendor_id)
 {
     if (offset >= num_quads)
         return -1;
@@ -95,26 +95,26 @@ identify_unit (dc1394_t * d, platform_device_t * dev, uint64_t guid,
             info.model_id = q & 0xffffff;
     }
 
-  /*
-     Note on Point Grey (PG) cameras:
-     Although not always advertised, PG cameras are 'sometimes' compatible
-     with IIDC specs. This is especially the case with PG stereo products.
-     The following modifications have been tested with a stereo head
-     (BumbleBee). Most other cameras should be compatible, please consider
-     contributing to the lib if your PG camera is not recognized.
+    /*
+       Note on Point Grey (PG) cameras:
+       Although not always advertised, PG cameras are 'sometimes' compatible
+       with IIDC specs. This is especially the case with PG stereo products.
+       The following modifications have been tested with a stereo head
+       (BumbleBee). Most other cameras should be compatible, please consider
+       contributing to the lib if your PG camera is not recognized.
 
-     PG cams sometimes have a Unit_Spec_ID of 0xB09D, instead of the
-     0xA02D of classic IIDC cameras. Also, their software revision differs.
-     I could only get a 1.14 version from my BumbleBee but other versions
-     might exist.
+       PG cams sometimes have a Unit_Spec_ID of 0xB09D, instead of the
+       0xA02D of classic IIDC cameras. Also, their software revision differs.
+       I could only get a 1.14 version from my BumbleBee but other versions
+       might exist.
 
-     As PG is regularly providing firmware updates you might also install
-     the latest one in your camera for an increased compatibility.
+       As PG is regularly providing firmware updates you might also install
+       the latest one in your camera for an increased compatibility.
 
-     Damien
+       Damien
 
-     (updated 2005-04-30)
-  */
+       (updated 2005-04-30)
+    */
 
     if ((info.unit_spec_ID != 0xA02D) &&
             (info.unit_spec_ID != 0xB09D))
@@ -133,12 +133,12 @@ identify_unit (dc1394_t * d, platform_device_t * dev, uint64_t guid,
         uint32_t q = dquads[i];
         if ((q >> 24) == 0x81)
             info.vendor = parse_leaf ((q & 0xffffff) +
-                    info.unit_dependent_directory + 1 + i,
-                    quads, num_quads);
+                                      info.unit_dependent_directory + 1 + i,
+                                      quads, num_quads);
         if ((q >> 24) == 0x82)
             info.model = parse_leaf ((q & 0xffffff) +
-                    info.unit_dependent_directory + 1 + i,
-                    quads, num_quads);
+                                     info.unit_dependent_directory + 1 + i,
+                                     quads, num_quads);
     }
 done:
     info.unit_directory = info.unit_directory * 4 + 0x400;
@@ -181,7 +181,7 @@ identify_camera (dc1394_t * d, platform_device_t * dev)
         if ((q >> 24) == 0xD1) {
             uint32_t offset = (q & 0xffffff) + 6 + i;
             identify_unit (d, dev, guid, offset, quads, num_quads, unit++,
-                    vendor_id);
+                           vendor_id);
         }
     }
     return 0;
@@ -216,7 +216,7 @@ refresh_enumeration (dc1394_t * d)
 
     d->device_list = platform_get_device_list (d->platform);
     if (!d->device_list) {
-      dc1394_log_error("Platform failed to get device list");
+        dc1394_log_error("Platform failed to get device list");
         return -1;
     }
 
@@ -232,7 +232,7 @@ dc1394error_t
 dc1394_camera_enumerate (dc1394_t * d, dc1394camera_list_t **list)
 {
     if (refresh_enumeration (d)==-1)
-	return DC1394_FAILURE;
+        return DC1394_FAILURE;
 
     dc1394camera_list_t * l;
 
@@ -246,17 +246,17 @@ dc1394_camera_enumerate (dc1394_t * d, dc1394camera_list_t **list)
 
     int i,j;
     for (i = 0; i < d->num_cameras; i++) {
-	// verify that the camera has not appeared yet.
-	for (j = 0; j < i; j++) {
-	    if ((d->cameras[i].guid==d->cameras[j].guid)&&
-		(d->cameras[i].unit==d->cameras[j].unit))
-		break;
-	}
-	if (j==i) {
-	    l->ids[i].guid = d->cameras[i].guid;
-	    l->ids[i].unit = d->cameras[i].unit;
-	    l->num++;
-	}
+        // verify that the camera has not appeared yet.
+        for (j = 0; j < i; j++) {
+            if ((d->cameras[i].guid==d->cameras[j].guid)&&
+                    (d->cameras[i].unit==d->cameras[j].unit))
+                break;
+        }
+        if (j==i) {
+            l->ids[i].guid = d->cameras[i].guid;
+            l->ids[i].unit = d->cameras[i].unit;
+            l->num++;
+        }
     }
     return DC1394_SUCCESS;
 }
