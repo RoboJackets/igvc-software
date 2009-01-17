@@ -1,0 +1,21 @@
+===ToDo_List===
+
+
+_+_Everything in mm (not cm!)
+_+_Step No and Step ID
+_+_Default Range/Gain as Vars
+_+_mm to bin - range
+_+_activate/deactivate son's
+_+_ID >> Son Addr [1 = a = E0; 2 = b = E2; 3 = c = E4]
+_+_0-15 Son's
+_+_Fix Bug - Can only have 12 Son's
+_+_Retest All Current Commands
+_+_New Autopilot Char >> '^'
+_+_Reset Inbytes
+_+_ByteSmasher
+_+_Comment
+___Readback values for individual gain, max distance, warning threshold, active/deactive status, global freq, global step total, individual step no.
+_?_Command Receipt Confirmation
+___How To / Basic Tutorial Guide
+___Comments
+___Sync Code with IGVC Conventions
