@@ -7,48 +7,54 @@ The 1BYTE string denotes a variable of one byte (0-255).
 
 Sonar Commands:
 
-Name			Char		Decimal			Description:
+Name			Char			Decimal			Description:
 
-Read All		'<'		060			-Reads first echo from all active sonar devices according to last ping.
-Ping All		'>'		062			-Pings all active sonar devices in pre-programmed sequence.
-Ping Indiv		'A' thru 'Z'	065 thru 090		-Pings individual sonar device, where 'A' represents the device with address 0xF0, 'B'
-								represents the device aith address 0xF2, 'C' represents the device with address 0xF4,
-								etc.
-Read Indiv		'a' thru 'z'	097 thru 122		-Reads first echo from individaul sonar device according to last ping, where 'a' 
-								represents the device with address 0xF0, 'b' represents the device with address 0xF2,
-								'c' represents the device with address 0xF4, etc.
-Autopilot		'^'+['0'|'1']	094+[048|049]		-Activates autopilot mode. Pings all active sonar devices in a pre-programmed sequence,
-								then reads the first echo from all active sonar devices according to the last ping. 
-								All of this is done in a continuous loop. The second value indicates whether autopilot
-								mode is to be activated ('1') or deactivated ('0').
-Set Freq		'%'+1BYTE	037+1BYTE		-Sets the step frequency of all 'auto ping' modes. This includes '>', '^', and '!'
-								commands, but does not affect the 'A' thru 'Z' command. Frequency is set by the 
-								additional 1BYTE variable and is in the value of Hz.
-Set All Gain		'&'+1BYTE	038+1BYTE		-Sets the gain value of all active sonar devices. The Gain is set by the additional 
-								1BYTE variable and can take on only the values between 1 and 31.
-Set All MRange		'|'+2BYTE	124+2BYTE		-Sets the maximum range of all active sonar devices. The Max Range is set by the
-								additional 2BYTE variable, which is in units of mm.
-Warning	Mode		'!'+['0'|'1']	033+[048|049]		-Activates warning mode. Pings all active sonar devices in a pre-programmed sequence,
-								then reads the first echo from each active sonar device according to last ping iff 
-								the value is lower than the pre-set threshold value. The second value indicates whether
-								warning mode is to be activated ('1') or deactivated ('0'). The threshold value can be
-								set with the Set Thresh command.
-Set Indiv Gain		'+'+1BYTE+1BYTE	043+1BYTE+1BYTE		-Sets the gain of an individual sonar device. The sonar device ID is specified by the
-								first 1BYTE variable. The Gain value is set by the second 1BYTE variable and can take
-								on only the values between 1 and 31.
-Set Indiv MRange	'-'+1BYTE+2BYTE	045+1BYTE+2BYTE		-Sets the maximum range of an individual sonar device. The sonar device ID is specified
-								by the first 1BYTE variable. The Max Range value is set by the next 2BYTE variable, 
-								which is in units of mm.
-Set All WarnThresh	'='+2BYTE	061+2BYTE		-Sets the threshold value for all active sonar devices. This threshold value is used in
-								Warning Mode to determine which values should be sent to the computer. The 2BYTE value
-								is used to specify the threshold value in mm.
-Set Indiv WarnThresh	'_'+1BYTE+2BYTE	095+1BYTE+2BYTE		-Sets the threshold value for an individual sonar device. This threshold value is used 
-								in Warning Mode to determine which values should be sent to the computer. The first 
-								1BYTE value is used to specify the sonar device ID. The next 2BYTE value is used to
-								specify the threshold value in mm.
-Set Total Steps		'#'+1BYTE	035+1BYTE		-Sets the total number of steps per loop cycle. The 1BYTE variable sets the total
-								number of steps variable.
-Set Indiv Step		'$'+1BYTE+1BYTE 036+1BYTE+1BYTE		-Sets the step number for an individual sonar device. The fisrt 1BYTE value specifies
-								the sonar device ID. The second 1BYTE value sets the step number. The step number 
-								corresponds to the step in the loop in which the device will ping. Set the second
-								BYTE1 to 255 to prevent the device from pinging during the loop.
+Read All		'<'			060			-Reads first echo from all active sonar devices according to last ping.
+Ping All		'>'			062			-Pings all active sonar devices in pre-programmed sequence.
+Ping Indiv		'A' thru 'Z'		065 thru 090		-Pings individual sonar device, where 'A' represents the device with address 0xF0,
+									 'B' represents the device aith address 0xF2, 'C' represents the device with
+									 address 0xF4, etc.
+Read Indiv		'a' thru 'z'		097 thru 122		-Reads first echo from individaul sonar device according to last ping, where 'a'
+									 represents the device with address 0xF0, 'b' represents the device with address
+									 0xF2, 'c' represents the device with address 0xF4, etc.
+Autopilot		'^'+['0'|'1']		094+[048|049]		-Activates autopilot mode. Pings all active sonar devices in a pre-programmed
+									 sequence, then reads the first echo from all active sonar devices according to the
+									 last ping. All of this is done in a continuous loop. The second value indicates
+									 whether autopilot mode is to be activated ('1') or deactivated ('0').
+Set Freq		'%'+1BYTE		037+1BYTE		-Sets the step frequency of all 'auto ping' modes. This includes '>', '^', and '!'
+									 commands, but does not affect the 'A' thru 'Z' command. Frequency is set by the
+									 additional 1BYTE variable and is in the value of Hz.
+Set All Gain		'&'+1BYTE		038+1BYTE		-Sets the gain value of all active sonar devices. The Gain is set by the additional
+									 1BYTE variable and can take on only the values between 1 and 31.
+Set All MRange		'|'+2BYTE		124+2BYTE		-Sets the maximum range of all active sonar devices. The Max Range is set by the
+									 additional 2BYTE variable, which is in units of mm.
+Warning	Mode		'!'+['0'|'1']		033+[048|049]		-Activates warning mode. Pings all active sonar devices in a pre-programmed
+									 sequence, then reads the first echo from each active sonar device according to
+									 last ping iff the value is lower than the pre-set threshold value. The second
+									 value indicates whether warning mode is to be activated ('1') or deactivated
+									 ('0'). The threshold value can be set with the Set Thresh command.
+Set Indiv Gain		'+'+1BYTE+1BYTE		043+1BYTE+1BYTE		-Sets the gain of an individual sonar device. The sonar device ID is specified by
+									 the first 1BYTE variable. The Gain value is set by the second 1BYTE variable and
+									 can take on only the values between 1 and 31.
+Set Indiv MRange	'-'+1BYTE+2BYTE		045+1BYTE+2BYTE		-Sets the maximum range of an individual sonar device. The sonar device ID is
+									 specified by the first 1BYTE variable. The Max Range value is set by the next
+									 2BYTE variable, which is in units of mm.
+Set All WarnThresh	'='+2BYTE		061+2BYTE		-Sets the threshold value for all active sonar devices. This threshold value is
+									 used in Warning Mode to determine which values should be sent to the computer.
+									 The 2BYTE value is used to specify the threshold value in mm.
+Set Indiv WarnThresh	'_'+1BYTE+2BYTE		095+1BYTE+2BYTE		-Sets the threshold value for an individual sonar device. This threshold value is
+									 used in Warning Mode to determine which values should be sent to the computer.
+									 The first 1BYTE value is used to specify the sonar device ID. The next 2BYTE
+									 value is used to specify the threshold value in mm.
+Set Total Steps		'#'+1BYTE		035+1BYTE		-Sets the total number of steps per loop cycle. The 1BYTE variable sets the total
+									 number of steps variable.
+Set Indiv Step		'$'+1BYTE+1BYTE 	036+1BYTE+1BYTE		-Sets the step number for an individual sonar device. The fisrt 1BYTE value
+									 specifies the sonar device ID. The second 1BYTE value sets the step number. The
+									 step number corresponds to the step in the loop in which the device will ping.
+									 Set the second BYTE1 to 255 to prevent the device from pinging during the loop.
+Set Device Active 	'@'+['0'|'1']+1BYTE	064+[048|049]+1BYTE	-Sets an individual sonar device as active/deactive. The Second Value determines
+									 whether the specified sonar device is active ('1') or deactive ('0'). The third
+									 value specifies the id of the sonar device to be acivated. Use * (042) to target
+									 all sonar devices (0-15 or E0-FF).
+Set Echo Num		'~'+1BYTE		126+1BYTE		-Sets global Echo_Num to value specified by fisrt Value. See SRF08 Datasheet for
+									 more on Echo's.
