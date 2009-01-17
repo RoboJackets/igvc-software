@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Juju backend for dc1394
- * 
+ *
  * Written by Kristian Hoegsberg <krh@bitplanet.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -235,7 +235,7 @@ _juju_await_response (platform_camera_t * cam, uint32_t * out, int num_quads)
             return -2; // retry if we get "resp_conflict_error"
         if (u.response.r.rcode != 0) {
             dc1394_log_debug ("response error, rcode 0x%x",
-                    u.response.r.rcode);
+                              u.response.r.rcode);
             return -1;
         }
         for (i = 0; i < u.response.r.length/4 && i < num_quads && out; i++)
@@ -284,7 +284,7 @@ do_transaction(platform_camera_t * cam, int tcode, uint64_t offset, const uint32
     }
 
     dc1394_log_error("Max retries for tcode 0x%x, offset %"PRIx64,
-            tcode, offset);
+                     tcode, offset);
     return DC1394_FAILURE;
 }
 
@@ -377,7 +377,7 @@ platform_get_broadcast(platform_camera_t * craw, dc1394bool_t *pwr)
 
 dc1394error_t
 platform_camera_get_node(platform_camera_t *cam, uint32_t *node,
-        uint32_t * generation)
+                         uint32_t * generation)
 {
     if (node)
         *node = cam->node_id & 0x3f;  // mask out the bus ID

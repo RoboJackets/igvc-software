@@ -199,19 +199,19 @@ int main (int argc, char **argv)
         while ((err = dc1394_basler_sff_chunk_iterate(&chunk)) == DC1394_SUCCESS) {
             switch (chunk.feature_id) {
             case DC1394_BASLER_SFF_EXTENDED_DATA_STREAM:
-                {
-                    sff_ext = (dc1394basler_sff_extended_data_stream_t*)(chunk.chunk_data);
-                    printf ("top: %04d left: %04d height: %04d width: %04d\n",
-                            sff_ext->top, sff_ext->left, sff_ext->height, sff_ext->width);
-                    break;
-                }
+            {
+                sff_ext = (dc1394basler_sff_extended_data_stream_t*)(chunk.chunk_data);
+                printf ("top: %04d left: %04d height: %04d width: %04d\n",
+                        sff_ext->top, sff_ext->left, sff_ext->height, sff_ext->width);
+                break;
+            }
             case DC1394_BASLER_SFF_DCAM_VALUES:
-                {
-                    sff_dcam = (dc1394basler_sff_dcam_values_t*)(chunk.chunk_data);
-                    printf ("gain: %04d brightness: %04d shutter: %04d\n",
-                            sff_dcam->gain_csr.value, sff_dcam->brightness_csr.value, sff_dcam->shutter_csr.value);
-                    break;
-                }
+            {
+                sff_dcam = (dc1394basler_sff_dcam_values_t*)(chunk.chunk_data);
+                printf ("gain: %04d brightness: %04d shutter: %04d\n",
+                        sff_dcam->gain_csr.value, sff_dcam->brightness_csr.value, sff_dcam->shutter_csr.value);
+                break;
+            }
             default:
                 break;
             }

@@ -14,40 +14,40 @@
 
 class UserInterface {
 public:
-  UserInterface(Fl_Window *vidwin);
-  Fl_Window *InterfaceWindow;
-  Fl_Output *FeaturesMatchedOutput;
-  Fl_Output *FeaturesFoundOutput;
-  Fl_Button *NewRefFrameButton;
+    UserInterface(Fl_Window *vidwin);
+    Fl_Window *InterfaceWindow;
+    Fl_Output *FeaturesMatchedOutput;
+    Fl_Output *FeaturesFoundOutput;
+    Fl_Button *NewRefFrameButton;
 private:
-  inline void cb_NewRefFrameButton_i(Fl_Button*, void*);
-  static void cb_NewRefFrameButton(Fl_Button*, void*);
+    inline void cb_NewRefFrameButton_i(Fl_Button*, void*);
+    static void cb_NewRefFrameButton(Fl_Button*, void*);
 public:
-  Fl_Button *SaveRefButton;
+    Fl_Button *SaveRefButton;
 private:
-  inline void cb_SaveRefButton_i(Fl_Button*, void*);
-  static void cb_SaveRefButton(Fl_Button*, void*);
+    inline void cb_SaveRefButton_i(Fl_Button*, void*);
+    static void cb_SaveRefButton(Fl_Button*, void*);
 public:
-  Fl_Input *SaveRefFilenameInput;
-  Fl_Output *StatusOutput;
-  Fl_Output *FPSOutput;
-  Fl_Input *LoadRefFilenameInput;
-  Fl_Button *LoadRefFileButton;
+    Fl_Input *SaveRefFilenameInput;
+    Fl_Output *StatusOutput;
+    Fl_Output *FPSOutput;
+    Fl_Input *LoadRefFilenameInput;
+    Fl_Button *LoadRefFileButton;
 private:
-  inline void cb_LoadRefFileButton_i(Fl_Button*, void*);
-  static void cb_LoadRefFileButton(Fl_Button*, void*);
+    inline void cb_LoadRefFileButton_i(Fl_Button*, void*);
+    static void cb_LoadRefFileButton(Fl_Button*, void*);
 public:
-  Fl_Browser *LoadedScenesBrowser;
-  Fl_Button *RemoveSceneButton;
+    Fl_Browser *LoadedScenesBrowser;
+    Fl_Button *RemoveSceneButton;
 private:
-  inline void cb_RemoveSceneButton_i(Fl_Button*, void*);
-  static void cb_RemoveSceneButton(Fl_Button*, void*);
+    inline void cb_RemoveSceneButton_i(Fl_Button*, void*);
+    static void cb_RemoveSceneButton(Fl_Button*, void*);
 public:
-  Fl_Output *MatchedToOutput;
-  Fl_Light_Button *ShowFeatures;
-  void show(int argc, char *argv[]);
+    Fl_Output *MatchedToOutput;
+    Fl_Light_Button *ShowFeatures;
+    void show(int argc, char *argv[]);
 private:
-  Fl_Window *AssociatedVidWin;
-  unsigned char *pixbuf; // pixel buffer for saving refernce images temporarily;
+    Fl_Window *AssociatedVidWin;
+    unsigned char *pixbuf; // pixel buffer for saving refernce images temporarily;
 };
 #endif

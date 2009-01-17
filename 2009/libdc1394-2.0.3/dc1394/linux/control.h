@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Camera Control headers for Linux
- *  
+ *
  * Written by Damien Douxchamps <ddouxchamps@users.sf.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -27,8 +27,8 @@
 extern "C" {
 #endif
 
-dc1394error_t
-dc1394_camera_get_linux_port(dc1394camera_t *camera, uint32_t *port);
+    dc1394error_t
+    dc1394_camera_get_linux_port(dc1394camera_t *camera, uint32_t *port);
 
 #ifdef __cplusplus
 }

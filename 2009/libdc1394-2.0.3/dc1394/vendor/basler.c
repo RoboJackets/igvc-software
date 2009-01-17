@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Basler Smart Feature Framework specific extensions
- * 
+ *
  * Written by Mikael Olenfalk <mikael _DOT_ olenfalk _AT_ tobii _DOT_ com>
  *
  * Copyright (C) 2006 Tobii Technology AB, Stockholm Sweden
@@ -70,12 +70,12 @@ get_sff_address_from_csr_guid (dc1394camera_t* camera, const dc1394basler_sff_gu
     DC1394_ERR_RTN(err, "Could not write D3 | D2 to SFF inquiry register");
 
     data = ((uint32_t)feature_guid->d4[3] << 24) | ((uint32_t)feature_guid->d4[2] << 16) |
-        ((uint32_t)feature_guid->d4[1] << 8) | feature_guid->d4[0];
+           ((uint32_t)feature_guid->d4[1] << 8) | feature_guid->d4[0];
     err = dc1394_set_adv_control_register (camera, BASLER_ADDRESS_SFF_INQUIRY + 0x8U, data);
     DC1394_ERR_RTN(err, "Could not write D4[3..0] to SFF inquiry register");
 
     data = ((uint32_t)feature_guid->d4[7] << 24) | ((uint32_t)feature_guid->d4[6] << 16) |
-        ((uint32_t)feature_guid->d4[5] << 8) | feature_guid->d4[4];
+           ((uint32_t)feature_guid->d4[5] << 8) | feature_guid->d4[4];
     err = dc1394_set_adv_control_register (camera, BASLER_ADDRESS_SFF_INQUIRY + 0xCU, data);
     DC1394_ERR_RTN(err, "Could not write D4[7..4] to SFF inquiry register");
 
@@ -303,7 +303,7 @@ dc1394_basler_sff_feature_print (dc1394camera_t* camera, dc1394basler_sff_featur
         return DC1394_FAILURE;
 
     if (camera == NULL) {
-    offline:
+offline:
         fprintf (fd,"Name      : %s\n"
                  "CSR guid  : %08x-%04x-%04x-%02x%02x%02x%02x%02x%02x%02x%02x\n",
                  feature_desc->name,
@@ -412,7 +412,7 @@ dc1394error_t dc1394_basler_sff_chunk_iterate (dc1394basler_sff_t* chunk)
         return DC1394_INVALID_ARGUMENT_VALUE;
 
     if (chunk->frame_buffer >= chunk->current_iter ||
-        chunk->current_iter - chunk->frame_buffer <= sizeof(dc1394basler_sff_chunk_tail_t))
+            chunk->current_iter - chunk->frame_buffer <= sizeof(dc1394basler_sff_chunk_tail_t))
         return DC1394_BASLER_NO_MORE_SFF_CHUNKS;
 
     /* try to extract at least one chunk tail */

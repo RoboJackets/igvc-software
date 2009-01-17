@@ -28,7 +28,9 @@
 
 #ifdef _WIN32
 #define times 0**(int*)
-struct tms {int a;};
+struct tms {
+    int a;
+};
 #else
 #include <sys/times.h>
 #endif
@@ -63,7 +65,7 @@ int main(int argc, char *argv[])
     camera = dc1394_camera_new (d, list->ids[0].guid);
     if (!camera) {
         dc1394_log_error("Failed to initialize camera with guid %"PRIx64,
-                list->ids[0].guid);
+                         list->ids[0].guid);
         return 1;
     }
     dc1394_camera_free_list (list);
@@ -119,7 +121,7 @@ int main(int argc, char *argv[])
      *-----------------------------------------------------------------------*/
     start_time = times(&tms_buf);
 
-    for( i = 0; i < grab_n_frames; ++i) {
+    for ( i = 0; i < grab_n_frames; ++i) {
         /*-----------------------------------------------------------------------
          *  capture one frame
          *-----------------------------------------------------------------------*/

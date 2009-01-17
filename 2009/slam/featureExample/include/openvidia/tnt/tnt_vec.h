@@ -39,11 +39,11 @@ namespace TNT
 */
 
 template <class T>
-class Vector 
+class Vector
 {
 
 
-  public:
+public:
 
     typedef Subscript   size_type;
     typedef         T   value_type;
@@ -54,10 +54,12 @@ class Vector
     typedef const   T*  const_iterator;
     typedef const   T&  const_reference;
 
-    Subscript lbound() const { return 1;}
- 
-  protected:
-    T* v_;                  
+    Subscript lbound() const {
+        return 1;
+    }
+
+protected:
+    T* v_;
     T* vm1_;        // pointer adjustment for optimzied 1-offset indexing
     Subscript n_;
 
@@ -75,7 +77,7 @@ class Vector
         vm1_ = v_-1;
         n_ = N;
     }
-   
+
     void copy(const T*  v)
     {
         Subscript N = n_;
@@ -99,7 +101,7 @@ class Vector
 
         for (i=0; i< N; i++)
             v_[i] = v[i];
-#endif      
+#endif
     }
 
     void set(const T& val)
@@ -116,7 +118,7 @@ class Vector
             v_[i] = val;
             v_[i+1] = val;
             v_[i+2] = val;
-            v_[i+3] = val; 
+            v_[i+3] = val;
         }
 
         for (i=N4; i< N; i++)
@@ -125,37 +127,45 @@ class Vector
 
         for (i=0; i< N; i++)
             v_[i] = val;
-        
-#endif      
+
+#endif
     }
-    
+
 
 
     void destroy()
-    {     
+    {
         /* do nothing, if no memory has been previously allocated */
         if (v_ == NULL) return ;
 
         /* if we are here, then matrix was previously allocated */
-        delete [] (v_);     
+        delete [] (v_);
 
         v_ = NULL;
         vm1_ = NULL;
     }
 
 
-  public:
+public:
 
     // access
 
-    iterator begin() { return v_;}
-    iterator end()   { return v_ + n_; }
-    const iterator begin() const { return v_;}
-    const iterator end() const  { return v_ + n_; }
+    iterator begin() {
+        return v_;
+    }
+    iterator end()   {
+        return v_ + n_;
+    }
+    const iterator begin() const {
+        return v_;
+    }
+    const iterator end() const  {
+        return v_ + n_;
+    }
 
     // destructor
 
-    ~Vector() 
+    ~Vector()
     {
         destroy();
     }
@@ -190,12 +200,12 @@ class Vector
         Subscript i;
 
         for (i=0; i<N; i++)
-                ins >> v_[i];
+            ins >> v_[i];
     }
 
 
     // methods
-    // 
+    //
     Vector<T>& newsize(Subscript N)
     {
         if (n_ == N) return *this;
@@ -226,31 +236,31 @@ class Vector
 
         return *this;
     }
-        
+
     Vector<T>& operator=(const T& scalar)
-    { 
-        set(scalar);  
+    {
+        set(scalar);
         return *this;
     }
 
-    inline Subscript dim() const 
+    inline Subscript dim() const
     {
-        return  n_; 
+        return  n_;
     }
 
-    inline Subscript size() const 
+    inline Subscript size() const
     {
-        return  n_; 
+        return  n_;
     }
 
 
     inline reference operator()(Subscript i)
-    { 
+    {
 #ifdef TNT_BOUNDS_CHECK
         assert(1<=i);
         assert(i <= n_) ;
 #endif
-        return vm1_[i]; 
+        return vm1_[i];
     }
 
     inline const_reference operator() (Subscript i) const
@@ -259,16 +269,16 @@ class Vector
         assert(1<=i);
         assert(i <= n_) ;
 #endif
-        return vm1_[i]; 
+        return vm1_[i];
     }
 
     inline reference operator[](Subscript i)
-    { 
+    {
 #ifdef TNT_BOUNDS_CHECK
         assert(0<=i);
         assert(i < n_) ;
 #endif
-        return v_[i]; 
+        return v_[i];
     }
 
     inline const_reference operator[](Subscript i) const
@@ -283,7 +293,7 @@ class Vector
 
         assert(i < n_) ;
 #endif
-        return v_[i]; 
+        return v_[i];
     }
 
 
@@ -322,7 +332,7 @@ std::istream & operator>>(std::istream &s, Vector<T> &A)
 
 
     for (Subscript i=0; i<N; i++)
-            s >>  A[i];
+        s >>  A[i];
 
 
     return s;
@@ -332,8 +342,8 @@ std::istream & operator>>(std::istream &s, Vector<T> &A)
 
 
 template <class T>
-Vector<T> operator+(const Vector<T> &A, 
-    const Vector<T> &B)
+Vector<T> operator+(const Vector<T> &A,
+                    const Vector<T> &B)
 {
     Subscript N = A.dim();
 
@@ -343,14 +353,14 @@ Vector<T> operator+(const Vector<T> &A,
     Subscript i;
 
     for (i=0; i<N; i++)
-            tmp[i] = A[i] + B[i];
+        tmp[i] = A[i] + B[i];
 
     return tmp;
 }
 
 template <class T>
-Vector<T> operator-(const Vector<T> &A, 
-    const Vector<T> &B)
+Vector<T> operator-(const Vector<T> &A,
+                    const Vector<T> &B)
 {
     Subscript N = A.dim();
 
@@ -360,14 +370,14 @@ Vector<T> operator-(const Vector<T> &A,
     Subscript i;
 
     for (i=0; i<N; i++)
-            tmp[i] = A[i] - B[i];
+        tmp[i] = A[i] - B[i];
 
     return tmp;
 }
 
 template <class T>
-Vector<T> operator*(const Vector<T> &A, 
-    const Vector<T> &B)
+Vector<T> operator*(const Vector<T> &A,
+                    const Vector<T> &B)
 {
     Subscript N = A.dim();
 
@@ -377,7 +387,7 @@ Vector<T> operator*(const Vector<T> &A,
     Subscript i;
 
     for (i=0; i<N; i++)
-            tmp[i] = A[i] * B[i];
+        tmp[i] = A[i] * B[i];
 
     return tmp;
 }

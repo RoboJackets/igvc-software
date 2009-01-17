@@ -59,7 +59,7 @@ dc1394_read_cycle_timer (dc1394camera_t * camera,
 
 dc1394error_t
 dc1394_camera_get_node (dc1394camera_t *camera, uint32_t *node,
-        uint32_t * generation)
+                        uint32_t * generation)
 {
     dc1394camera_priv_t * priv = DC1394_CAMERA_PRIV (camera);
     return platform_camera_get_node (priv->pcam, node, generation);
@@ -384,7 +384,7 @@ dc1394_feature_print(dc1394feature_info_t *f, FILE *fd)
     if (fid != DC1394_FEATURE_TRIGGER)
         fprintf(fd,"min: %d max %d\n", f->min, f->max);
 
-    switch(fid) {
+    switch (fid) {
     case DC1394_FEATURE_TRIGGER:
         fprintf(fd,"\n\tAvailableTriggerModes: ");
         if (f->trigger_modes.num==0) {
@@ -648,7 +648,7 @@ dc1394_video_get_mode(dc1394camera_t *camera, dc1394video_mode_t *mode)
     err= dc1394_get_control_register(camera, REG_CAMERA_VIDEO_MODE, &value);
     DC1394_ERR_RTN(err, "Could not get video mode");
 
-    switch(format) {
+    switch (format) {
     case DC1394_FORMAT0:
         *mode= (uint32_t)((value >> 29) & 0x7UL) + DC1394_VIDEO_MODE_FORMAT0_MIN;
         break;
@@ -684,7 +684,7 @@ dc1394_video_set_mode(dc1394camera_t *camera, dc1394video_mode_t  mode)
     err=get_format_from_mode(mode, &format);
     DC1394_ERR_RTN(err, "Invalid video mode code");
 
-    switch(format) {
+    switch (format) {
     case DC1394_FORMAT0:
         min= DC1394_VIDEO_MODE_FORMAT0_MIN;
         break;
@@ -1088,7 +1088,7 @@ dc1394_feature_whiteshading_set_value(dc1394camera_t *camera, uint32_t r_value, 
 
     curval= (curval & 0xFF000000UL) | ( ((r_value & 0xFFUL) << 16) |
                                         ((g_value & 0xFFUL) << 8) |
-                                         (b_value & 0xFFUL) );
+                                        (b_value & 0xFFUL) );
     err=dc1394_set_control_register(camera, REG_CAMERA_WHITE_SHADING, curval);
     DC1394_ERR_RTN(err, "Could not set white shading");
 
@@ -1147,7 +1147,7 @@ dc1394_external_trigger_get_supported_sources(dc1394camera_t *camera, dc1394trig
 
     sources->num=0;
     for (i = 0; i < DC1394_TRIGGER_SOURCE_NUM; i++) {
-        if (value & (0x1 << (23-i-(i>3)*3))){
+        if (value & (0x1 << (23-i-(i>3)*3))) {
             sources->sources[sources->num]=i+DC1394_TRIGGER_SOURCE_MIN;
             sources->num++;
         }
@@ -1205,8 +1205,8 @@ dc1394_feature_get_value(dc1394camera_t *camera, dc1394feature_t feature, uint32
         return DC1394_INVALID_FEATURE;
 
     if ((feature==DC1394_FEATURE_WHITE_BALANCE)||
-        (feature==DC1394_FEATURE_WHITE_SHADING)||
-        (feature==DC1394_FEATURE_TEMPERATURE)) {
+            (feature==DC1394_FEATURE_WHITE_SHADING)||
+            (feature==DC1394_FEATURE_TEMPERATURE)) {
         err=DC1394_INVALID_FEATURE;
         DC1394_ERR_RTN(err, "You should use the specific functions to read from multiple-value features");
     }
@@ -1231,8 +1231,8 @@ dc1394_feature_set_value(dc1394camera_t *camera, dc1394feature_t feature, uint32
         return DC1394_INVALID_FEATURE;
 
     if ((feature==DC1394_FEATURE_WHITE_BALANCE)||
-        (feature==DC1394_FEATURE_WHITE_SHADING)||
-        (feature==DC1394_FEATURE_TEMPERATURE)) {
+            (feature==DC1394_FEATURE_WHITE_SHADING)||
+            (feature==DC1394_FEATURE_TEMPERATURE)) {
         err=DC1394_INVALID_FEATURE;
         DC1394_ERR_RTN(err, "You should use the specific functions to write from multiple-value features");
     }
@@ -1250,31 +1250,31 @@ dc1394_feature_set_value(dc1394camera_t *camera, dc1394feature_t feature, uint32
 dc1394error_t
 dc1394_feature_is_present(dc1394camera_t *camera, dc1394feature_t feature, dc1394bool_t *value)
 {
-/*
+    /*
 
-  NOTE ON FEATURE PRESENCE DETECTION:
+      NOTE ON FEATURE PRESENCE DETECTION:
 
-  The IIDC specs have 3 locations where the feature presence is notified, at offsets 0x40X,
-  0x5XX and 0x8XX. The specs do not give any difference between the different locations,
-  leading to different interpretations by different manufacturers, or even from model to
-  model. Firmware revisions may also reflect a change in interpretation by a company. This
-  problem is acknowledged by the IIDC working group and will be resolved in IIDC 1.32.
+      The IIDC specs have 3 locations where the feature presence is notified, at offsets 0x40X,
+      0x5XX and 0x8XX. The specs do not give any difference between the different locations,
+      leading to different interpretations by different manufacturers, or even from model to
+      model. Firmware revisions may also reflect a change in interpretation by a company. This
+      problem is acknowledged by the IIDC working group and will be resolved in IIDC 1.32.
 
-  In the meantime, the policy of libdc1394 is to make an AND of the three locations to
-  determine if a feature is available or not. No other verifications is performed.
+      In the meantime, the policy of libdc1394 is to make an AND of the three locations to
+      determine if a feature is available or not. No other verifications is performed.
 
-  Some manufacturer may choose to indicate feature presence by other means, such as setting
-  a feature OFF and simultaneously disabling the capability to turn the feature ON. Another
-  technique is to disable all control means (on/off, manual, auto, absolute, etc.),
-  effectively resulting in a feature that can't be used.
+      Some manufacturer may choose to indicate feature presence by other means, such as setting
+      a feature OFF and simultaneously disabling the capability to turn the feature ON. Another
+      technique is to disable all control means (on/off, manual, auto, absolute, etc.),
+      effectively resulting in a feature that can't be used.
 
-  This kind of interpretation could be implemented in libdc1394. However, the feature may
-  still be writable even if it is not possible to use it. To allow this off-state writing,
-  the decision on whether a feature is available or not is not taking this into account.
+      This kind of interpretation could be implemented in libdc1394. However, the feature may
+      still be writable even if it is not possible to use it. To allow this off-state writing,
+      the decision on whether a feature is available or not is not taking this into account.
 
-  Damien
+      Damien
 
-  */
+      */
 
     dc1394error_t err;
     uint64_t offset;
@@ -1472,7 +1472,7 @@ dc1394_feature_get_mode(dc1394camera_t *camera, dc1394feature_t feature, dc1394f
         return DC1394_INVALID_FEATURE;
 
     if ((feature == DC1394_FEATURE_TRIGGER)||
-        (feature == DC1394_FEATURE_TRIGGER_DELAY)) {
+            (feature == DC1394_FEATURE_TRIGGER_DELAY)) {
         *mode=DC1394_FEATURE_MODE_MANUAL;
     }
 
@@ -1988,7 +1988,7 @@ dc1394_camera_new_unit (dc1394_t * d, uint64_t guid, int unit)
 
     for (i = 0; i < d->num_cameras; i++) {
         if (d->cameras[i].guid == guid &&
-            (unit < 0 || d->cameras[i].unit == unit)) {
+                (unit < 0 || d->cameras[i].unit == unit)) {
             info = d->cameras + i;
             break;
         }
@@ -2002,7 +2002,7 @@ dc1394_camera_new_unit (dc1394_t * d, uint64_t guid, int unit)
 
     /* Check to make sure the GUID still matches. */
     if (platform_camera_read_quad (pcam, 0x40C, &ghigh) < 0 ||
-        platform_camera_read_quad (pcam, 0x410, &glow) < 0)
+            platform_camera_read_quad (pcam, 0x410, &glow) < 0)
         goto fail;
 
     if (ghigh != (info->guid >> 32) || glow != (info->guid & 0xffffffff))
@@ -2019,17 +2019,17 @@ dc1394_camera_new_unit (dc1394_t * d, uint64_t guid, int unit)
         if ((quad >> 24) == 0x40)
             command_regs_base = quad & 0xffffff;
         else if ((quad >> 24) == 0x81) {
-	    /*
-	      The iSight version 1.0.3 has two 0x81 (vendor) leaves instead of a 0x81 and
-	      a 0x82 (model leaf). To go around this problem, we save the second vendor
-	      leaf as the model leaf. This is safe because if there is two 0x81 AND a 0x82,
-	      the real model leaf will overwrite the spurious second vendor string.
-	    */
-	    if (vendor_name_offset==0)
-		vendor_name_offset = offset + 4 * ((quad & 0xffffff) + i);
-	    else
-		model_name_offset = offset + 4 * ((quad & 0xffffff) + i);
-	}
+            /*
+              The iSight version 1.0.3 has two 0x81 (vendor) leaves instead of a 0x81 and
+              a 0x82 (model leaf). To go around this problem, we save the second vendor
+              leaf as the model leaf. This is safe because if there is two 0x81 AND a 0x82,
+              the real model leaf will overwrite the spurious second vendor string.
+            */
+            if (vendor_name_offset==0)
+                vendor_name_offset = offset + 4 * ((quad & 0xffffff) + i);
+            else
+                model_name_offset = offset + 4 * ((quad & 0xffffff) + i);
+        }
         else if ((quad >> 24) == 0x82)
             model_name_offset = offset + 4 * ((quad & 0xffffff) + i);
         else if ((quad >> 24) == 0x38)
@@ -2078,7 +2078,7 @@ dc1394_camera_new_unit (dc1394_t * d, uint64_t guid, int unit)
 
     return camera;
 
- fail:
+fail:
     platform_camera_free (pcam);
     return NULL;
 }

@@ -137,7 +137,7 @@ dc1394_YUV444_to_YUV422(uint8_t *restrict src, uint8_t *restrict dest, uint32_t 
             dest[j--] = y1;
             dest[j--] = (v0+v1) >> 1;
             dest[j--] = y0;
-      dest[j--] = (u0+u1) >> 1;
+            dest[j--] = (u0+u1) >> 1;
         }
         return DC1394_SUCCESS;
     default:
@@ -561,7 +561,7 @@ dc1394error_t
 dc1394_convert_to_YUV422(uint8_t *src, uint8_t *dest, uint32_t width, uint32_t height, uint32_t byte_order,
                          dc1394color_coding_t source_coding, uint32_t bits)
 {
-    switch(source_coding) {
+    switch (source_coding) {
     case DC1394_COLOR_CODING_YUV422:
         dc1394_YUV422_to_YUV422(src, dest, width, height, byte_order);
         break;
@@ -598,7 +598,7 @@ dc1394error_t
 dc1394_convert_to_MONO8(uint8_t *restrict src, uint8_t *restrict dest, uint32_t width, uint32_t height, uint32_t byte_order,
                         dc1394color_coding_t source_coding, uint32_t bits)
 {
-    switch(source_coding) {
+    switch (source_coding) {
     case DC1394_COLOR_CODING_MONO16:
         dc1394_MONO16_to_MONO8(src, dest, width, height, bits);
         break;
@@ -617,7 +617,7 @@ dc1394error_t
 dc1394_convert_to_RGB8(uint8_t *restrict src, uint8_t *restrict dest, uint32_t width, uint32_t height, uint32_t byte_order,
                        dc1394color_coding_t source_coding, uint32_t bits)
 {
-    switch(source_coding) {
+    switch (source_coding) {
     case DC1394_COLOR_CODING_RGB16:
         dc1394_RGB16_to_RGB8 (src, dest, width, height, bits);
         break;
@@ -639,8 +639,8 @@ dc1394_convert_to_RGB8(uint8_t *restrict src, uint8_t *restrict dest, uint32_t w
         dc1394_MONO16_to_RGB8 (src, dest, width, height,bits);
         break;
     case DC1394_COLOR_CODING_RGB8:
-      memcpy(dest, src, width*height*3);
-      break;
+        memcpy(dest, src, width*height*3);
+        break;
     default:
         return DC1394_FUNCTION_NOT_SUPPORTED;
     }
@@ -715,9 +715,9 @@ dc1394error_t
 dc1394_convert_frames(dc1394video_frame_t *in, dc1394video_frame_t *out)
 {
 
-    switch(out->color_coding) {
+    switch (out->color_coding) {
     case DC1394_COLOR_CODING_YUV422:
-        switch(in->color_coding) {
+        switch (in->color_coding) {
         case DC1394_COLOR_CODING_YUV422:
             Adapt_buffer_convert(in,out);
             dc1394_YUV422_to_YUV422(in->image, out->image, in->size[0], in->size[1], out->yuv_byte_order);
@@ -753,7 +753,7 @@ dc1394_convert_frames(dc1394video_frame_t *in, dc1394video_frame_t *out)
         }
         break;
     case DC1394_COLOR_CODING_MONO8:
-        switch(in->color_coding) {
+        switch (in->color_coding) {
         case DC1394_COLOR_CODING_MONO16:
             Adapt_buffer_convert(in,out);
             dc1394_MONO16_to_MONO8(in->image, out->image, in->size[0], in->size[1], in->data_depth);
@@ -767,7 +767,7 @@ dc1394_convert_frames(dc1394video_frame_t *in, dc1394video_frame_t *out)
         }
         break;
     case DC1394_COLOR_CODING_RGB8:
-        switch(in->color_coding) {
+        switch (in->color_coding) {
         case DC1394_COLOR_CODING_RGB16:
             Adapt_buffer_convert(in,out);
             dc1394_RGB16_to_RGB8 (in->image, out->image, in->size[0], in->size[1], in->data_depth);
@@ -832,7 +832,7 @@ Adapt_buffer_stereo(dc1394video_frame_t *in, dc1394video_frame_t *out)
         break;
     default:
         return DC1394_INVALID_COLOR_CODING;
-  }
+    }
 
     // keep the color filter value in all cases. if the format is not raw it will not be further used anyway
     out->color_filter=in->color_filter;
@@ -893,8 +893,8 @@ dc1394_deinterlace_stereo_frames(dc1394video_frame_t *in, dc1394video_frame_t *o
     dc1394error_t err;
 
     if ((in->color_coding==DC1394_COLOR_CODING_RAW16)||
-        (in->color_coding==DC1394_COLOR_CODING_MONO16)||
-        (in->color_coding==DC1394_COLOR_CODING_YUV422)) {
+            (in->color_coding==DC1394_COLOR_CODING_MONO16)||
+            (in->color_coding==DC1394_COLOR_CODING_YUV422)) {
         switch (method) {
         case DC1394_STEREO_METHOD_INTERLACED:
             err=Adapt_buffer_stereo(in,out);
@@ -903,7 +903,7 @@ dc1394_deinterlace_stereo_frames(dc1394video_frame_t *in, dc1394video_frame_t *o
         case DC1394_STEREO_METHOD_FIELD:
             err=Adapt_buffer_stereo(in,out);
             memcpy(out->image,in->image,out->image_bytes);
-        break;
+            break;
         }
         return DC1394_INVALID_STEREO_METHOD;
     }

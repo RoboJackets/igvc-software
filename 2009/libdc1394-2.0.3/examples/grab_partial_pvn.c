@@ -30,7 +30,9 @@
 
 #ifdef _WIN32
 #define times 0**(int*)
-struct tms {int a;};
+struct tms {
+    int a;
+};
 #else
 #include <sys/times.h>
 #endif
@@ -70,7 +72,7 @@ int main(int argn, char *argv[])
     camera = dc1394_camera_new (d, list->ids[0].guid);
     if (!camera) {
         dc1394_log_error("Failed to initialize camera with guid %"PRIx64,
-                list->ids[0].guid);
+                         list->ids[0].guid);
         return 1;
     }
     dc1394_camera_free_list (list);
@@ -109,34 +111,34 @@ int main(int argn, char *argv[])
     //sleep(10);
 
     imagefile=fopen(argv[1],"wb");
-          
+
     fprintf(imagefile,"PV5a\nWIDTH: %d\nHEIGHT: %d\nMAXVAL: 8\nFRAMERATE: 10\n",WIDTH,HEIGHT);
 
-    for(i=0; i<nimages; ++i) {
-      //int k;
-      //for (k=0;k<4;k++) { // empty buffer
-      //  err=dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_WAIT, &frame);
-      //  dc1394_capture_enqueue(camera,frame);
-      //}
-      /*-----------------------------------------------------------------------
-       *  capture one frame
-       *-----------------------------------------------------------------------*/
-      err=dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_WAIT, &frame);
-      if (err!=DC1394_SUCCESS) {
-	dc1394_log_error("unable to capture");
-	dc1394_capture_stop(camera);
-	dc1394_camera_free(camera);
-	exit(1);
-      }
-      
-      fwrite(frame->image, 1, height * width, imagefile);
-      
-      // release buffer
-      dc1394_capture_enqueue(camera,frame);
-      fprintf(stderr,"Got frame %d\n",i);
+    for (i=0; i<nimages; ++i) {
+        //int k;
+        //for (k=0;k<4;k++) { // empty buffer
+        //  err=dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_WAIT, &frame);
+        //  dc1394_capture_enqueue(camera,frame);
+        //}
+        /*-----------------------------------------------------------------------
+         *  capture one frame
+         *-----------------------------------------------------------------------*/
+        err=dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_WAIT, &frame);
+        if (err!=DC1394_SUCCESS) {
+            dc1394_log_error("unable to capture");
+            dc1394_capture_stop(camera);
+            dc1394_camera_free(camera);
+            exit(1);
+        }
+
+        fwrite(frame->image, 1, height * width, imagefile);
+
+        // release buffer
+        dc1394_capture_enqueue(camera,frame);
+        fprintf(stderr,"Got frame %d\n",i);
     }
 
-      fclose(imagefile);
+    fclose(imagefile);
     /*-----------------------------------------------------------------------
      *  stop data transmission
      *-----------------------------------------------------------------------*/

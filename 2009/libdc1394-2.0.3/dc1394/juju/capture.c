@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Juju backend for dc1394
- * 
+ *
  * Written by Kristian Hoegsberg <krh@bitplanet.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -115,7 +115,7 @@ platform_capture_setup(platform_camera_t *craw, uint32_t num_dma_buffers, uint32
 
     if (flags & DC1394_CAPTURE_FLAGS_DEFAULT)
         flags = DC1394_CAPTURE_FLAGS_CHANNEL_ALLOC |
-            DC1394_CAPTURE_FLAGS_BANDWIDTH_ALLOC;
+                DC1394_CAPTURE_FLAGS_BANDWIDTH_ALLOC;
 
     craw->flags = flags;
 
@@ -136,7 +136,7 @@ platform_capture_setup(platform_camera_t *craw, uint32_t num_dma_buffers, uint32
     // allocate channel/bandwidth if requested
     if (flags & DC1394_CAPTURE_FLAGS_CHANNEL_ALLOC) {
         dc1394_log_warning ("Warning: iso allocation not implemented yet for "
-                "juju drivers, using channel 0...");
+                            "juju drivers, using channel 0...");
         if (dc1394_video_set_iso_channel (camera, 0) != DC1394_SUCCESS)
             return DC1394_NO_ISO_CHANNEL;
     }
@@ -354,7 +354,7 @@ platform_capture_get_fileno (platform_camera_t * craw)
 
 dc1394bool_t
 platform_capture_is_frame_corrupt (platform_camera_t * craw,
-        dc1394video_frame_t * frame)
+                                   dc1394video_frame_t * frame)
 {
     return DC1394_FALSE;
 }

@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Juju backend for dc1394
- * 
+ *
  * Written by Kristian Hoegsberg <krh@bitplanet.net>
  *
  * This library is free software; you can redistribute it and/or

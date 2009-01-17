@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Pixelink (PxL) specific extensions for Multi-camera control.
- * 
+ *
  * Written by
  *     Aravind Sundaresan <a.sundaresan@gmail.com>
  *     James Sherman <shermanj@umd.edu>
@@ -133,7 +133,7 @@ dc1394_pxl_get_camera_info(dc1394camera_t *camera, dc1394_pxl_camera_info_t *cam
         return DC1394_FAILURE;
 
     uint32_t serial_num_offset, serial_num_length,
-        camera_desc_offset, camera_desc_length;
+    camera_desc_offset, camera_desc_length;
 
     dc1394_get_adv_control_register(camera, PxL_ACR_FPGA_VERSION,
                                     &(camera_info->fpga_version));
@@ -157,12 +157,12 @@ dc1394_pxl_get_camera_info(dc1394camera_t *camera, dc1394_pxl_camera_info_t *cam
 #endif
 
     serial_num_length = (serial_num_length < PxL_MAX_STRING_LENGTH)?
-        serial_num_length: PxL_MAX_STRING_LENGTH;
+                        serial_num_length: PxL_MAX_STRING_LENGTH;
     dc1394_pxl_read_n_bytes(camera, serial_num_offset, camera_info->serial_number, serial_num_length);
     camera_info->serial_number[PxL_MAX_STRING_LENGTH-1] = '\0';
 
     camera_desc_length = (camera_desc_length < PxL_MAX_STRING_LENGTH)?
-        camera_desc_length: PxL_MAX_STRING_LENGTH;
+                         camera_desc_length: PxL_MAX_STRING_LENGTH;
     dc1394_pxl_read_n_bytes(camera, camera_desc_offset, camera_info->description, camera_desc_length);
     camera_info->description[PxL_MAX_STRING_LENGTH-1] = '\0';
 
@@ -188,15 +188,15 @@ dc1394_pxl_get_adv_feature_info(dc1394camera_t *camera, dc1394_pxl_adv_feature_i
     if (name_inquiry & 0x80000000) {
         adv_feature_info->name_presence = DC1394_FALSE;
         name_length = (name_length < PxL_MAX_STRING_LENGTH)?
-            name_length: PxL_MAX_STRING_LENGTH;
+                      name_length: PxL_MAX_STRING_LENGTH;
         dc1394_pxl_read_n_bytes(camera, name_offset, adv_feature_info->name, name_length);
         adv_feature_info->name[PxL_MAX_STRING_LENGTH-1] = '\0';
     }
     else
-        {
-            adv_feature_info->name_presence = DC1394_FALSE;
-            adv_feature_info->name[0] = '\0';
-        }
+    {
+        adv_feature_info->name_presence = DC1394_FALSE;
+        adv_feature_info->name[0] = '\0';
+    }
     adv_feature_info->name_offset = name_offset;
 
     return DC1394_SUCCESS;
@@ -269,7 +269,7 @@ dc1394_pxl_get_gpio_inq(dc1394camera_t *camera, dc1394_pxl_gpio_info_t *gpio_inf
  */
 dc1394error_t
 dc1394_pxl_get_gpo_param(dc1394camera_t *camera, uint32_t gpio_id,
-        uint32_t *p1_val, uint32_t *p2_val, uint32_t *p3_val)
+                         uint32_t *p1_val, uint32_t *p2_val, uint32_t *p3_val)
 {
     dc1394error_t err;
     dc1394_pxl_gpio_info_t gpio_info;
@@ -314,9 +314,9 @@ dc1394_pxl_get_gpo_param(dc1394camera_t *camera, uint32_t gpio_id,
  */
 dc1394error_t
 dc1394_pxl_get_gpo_param_min_max(dc1394camera_t *camera, uint32_t gpio_id,
-        uint32_t *p1_val, uint32_t *p2_val, uint32_t *p3_val,
-        uint32_t *p1_min, uint32_t *p2_min, uint32_t *p3_min,
-        uint32_t *p1_max, uint32_t *p2_max, uint32_t *p3_max)
+                                 uint32_t *p1_val, uint32_t *p2_val, uint32_t *p3_val,
+                                 uint32_t *p1_min, uint32_t *p2_min, uint32_t *p3_min,
+                                 uint32_t *p1_max, uint32_t *p2_max, uint32_t *p3_max)
 {
     dc1394error_t err;
     dc1394_pxl_gpio_info_t gpio_info;
@@ -390,7 +390,7 @@ dc1394_pxl_get_gpo_param_min_max(dc1394camera_t *camera, uint32_t gpio_id,
  */
 dc1394error_t
 dc1394_pxl_set_gpo_param(dc1394camera_t *camera, uint32_t gpio_id,
-        uint32_t p1_val, uint32_t p2_val, uint32_t p3_val)
+                         uint32_t p1_val, uint32_t p2_val, uint32_t p3_val)
 {
 
     dc1394error_t err;
@@ -497,8 +497,8 @@ dc1394_pxl_print_camera_info(dc1394camera_t *camera, FILE *fd)
  */
 dc1394error_t
 dc1394_pxl_set_gpio_mode_param(dc1394camera_t *camera, uint32_t gpio_id,
-        dc1394pxl_gpio_polarity_t gpio_polarity, dc1394pxl_gpio_mode_t gpio_mode,
-        double f1_val, double f2_val, double f3_val)
+                               dc1394pxl_gpio_polarity_t gpio_polarity, dc1394pxl_gpio_mode_t gpio_mode,
+                               double f1_val, double f2_val, double f3_val)
 {
 
     dc1394error_t err;

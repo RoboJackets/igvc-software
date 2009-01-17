@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Pixelink (PxL) specific extensions for Multi-camera control.
- * 
+ *
  * Written by
  *     Aravind Sundaresan <a.sundaresan@gmail.com>
  *     James Sherman <shermanj@umd.edu>
@@ -148,74 +148,74 @@ typedef struct __dc1394_pxl_adv_feature_info_struct {
 extern "C" {
 #endif
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_convert_float32_to_quadlet(double , uint32_t *);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_convert_float32_to_quadlet(double , uint32_t *);
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_convert_uint32_to_float32(uint32_t , double *);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_convert_uint32_to_float32(uint32_t , double *);
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_get_camera_name(dc1394camera_t *, char *, uint32_t);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_get_camera_name(dc1394camera_t *, char *, uint32_t);
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_get_camera_info(dc1394camera_t *, dc1394_pxl_camera_info_t *);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_get_camera_info(dc1394camera_t *, dc1394_pxl_camera_info_t *);
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_get_camera_serial_number(dc1394camera_t *, uint32_t *);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_get_camera_serial_number(dc1394camera_t *, uint32_t *);
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_get_gpo_param(dc1394camera_t *, uint32_t, uint32_t *, uint32_t *, uint32_t *);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_get_gpo_param(dc1394camera_t *, uint32_t, uint32_t *, uint32_t *, uint32_t *);
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_get_gpo_param_min_max(dc1394camera_t *, uint32_t, uint32_t *,
-                uint32_t *, uint32_t *, uint32_t *, uint32_t *, uint32_t *,
-                uint32_t *, uint32_t *, uint32_t *);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_get_gpo_param_min_max(dc1394camera_t *, uint32_t, uint32_t *,
+                                     uint32_t *, uint32_t *, uint32_t *, uint32_t *, uint32_t *,
+                                     uint32_t *, uint32_t *, uint32_t *);
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_get_gpo_config(dc1394camera_t *, uint32_t, uint32_t *);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_get_gpo_config(dc1394camera_t *, uint32_t, uint32_t *);
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_set_gpo_config(dc1394camera_t *, uint32_t, uint32_t);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_set_gpo_config(dc1394camera_t *, uint32_t, uint32_t);
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_set_gpio_mode_param(dc1394camera_t *, uint32_t ,
-        dc1394pxl_gpio_polarity_t, dc1394pxl_gpio_mode_t, double, double, double);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_set_gpio_mode_param(dc1394camera_t *, uint32_t ,
+                                   dc1394pxl_gpio_polarity_t, dc1394pxl_gpio_mode_t, double, double, double);
 
-/**
- * No Docs
- */
-dc1394error_t
-dc1394_pxl_print_camera_info(dc1394camera_t *, FILE *fd);
+    /**
+     * No Docs
+     */
+    dc1394error_t
+    dc1394_pxl_print_camera_info(dc1394camera_t *, FILE *fd);
 
 #ifdef __cplusplus
 }

@@ -577,23 +577,23 @@ void Vision::ConvertAllImageViews(int trackbarVal)
 void Vision::LoadVisionXMLSettings()
 {
 
-            {
-                satThreshold = 60;
-                hueThreshold = 20;
-                DO_TRANSFORM = 1;
-                ROBOT_WIDTH  = 30;
-                adapt_maxDiff= 65;
-                adapt_boxPad = 80;
-                DO_ADAPTIVE  = 1;
-            }
+    {
+        satThreshold = 60;
+        hueThreshold = 20;
+        DO_TRANSFORM = 1;
+        ROBOT_WIDTH  = 30;
+        adapt_maxDiff= 65;
+        adapt_boxPad = 80;
+        DO_ADAPTIVE  = 1;
+    }
 
 
-        {
-            printf("Vision settings loaded \n");
-        }
-        printf("thresholds: sat %d  hue %d \n",satThreshold,hueThreshold);
-        printf("thresholds: maxDiff %d  boxPad %d \n",adapt_maxDiff,adapt_boxPad);
- 
+    {
+        printf("Vision settings loaded \n");
+    }
+    printf("thresholds: sat %d  hue %d \n",satThreshold,hueThreshold);
+    printf("thresholds: maxDiff %d  boxPad %d \n",adapt_maxDiff,adapt_boxPad);
+
 
 }
 
@@ -695,24 +695,24 @@ void Vision::Adapt()
                 (abs(ar-(unsigned char)red  )<adapt_maxDiff))
         {
             visCvAdapt->imageData[i/3] = GOOD_PIXEL;
-            
+
             /*********************************************************************************/
-    	    visCvRaw->imageData[i  ] = 0 ;
-    	    visCvRaw->imageData[i+1] = 0 ;
-	        visCvRaw->imageData[i+2] = 0 ;            
-            /*********************************************************************************/            
-            
+            visCvRaw->imageData[i  ] = 0 ;
+            visCvRaw->imageData[i+1] = 0 ;
+            visCvRaw->imageData[i+2] = 0 ;
+            /*********************************************************************************/
+
         }
         else
         {
-            visCvAdapt->imageData[i/3] = BAD_PIXEL;         
-            
+            visCvAdapt->imageData[i/3] = BAD_PIXEL;
+
             /*********************************************************************************/
-    	    //visCvRaw->imageData[i  ] = 255 ;
-    	    //visCvRaw->imageData[i+1] = 255 ;
-	        //visCvRaw->imageData[i+2] = 255 ;            
-            /*********************************************************************************/     
-                                      
+            //visCvRaw->imageData[i  ] = 255 ;
+            //visCvRaw->imageData[i+1] = 255 ;
+            //visCvRaw->imageData[i+2] = 255 ;
+            /*********************************************************************************/
+
         }
     }
 
@@ -759,7 +759,7 @@ void Vision::visAdaptiveProcessing()
         //visSweeperLines(goal_near);
 
         /* update return goal */
-       // CvtPixToGoal(goal);
+        // CvtPixToGoal(goal);
 
     } //end vis processing
 

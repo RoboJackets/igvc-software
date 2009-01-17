@@ -22,7 +22,7 @@
  *
  * - Uses the first camera on the bus, then setup the camera
  *   in JPEG mode (mode 7), and capture NFRAMES frames to the HDD.
- * 
+ *
  * - the image size has to be set so that the 6 sub-images,
  *   encoded in JPEG, will fit in the total RAW image size.
  *   If less than 6 frames are written you should use a larger
@@ -33,7 +33,7 @@
  * Easy adaptation include:
  * - using 1394a instead of 1394b
  * - using RAW instead of JPEG
- * 
+ *
  * For more information have a look at the format specs in
  * "Ladybug Stream File Specification" that is included in the
  * Ladybug SDK.
@@ -114,14 +114,14 @@ main(int argn, char **argv)
             for (k=0;k<4;k++) {
                 adr=0x340+(5-cam)*32+(3-k)*8;
                 jpgadr=(((unsigned int)*(frame->image+adr))<<24)+
-                    (((unsigned int)*(frame->image+adr+1))<<16)+
-                    (((unsigned int)*(frame->image+adr+2))<<8)+
-                    (((unsigned int)*(frame->image+adr+3)));
+                       (((unsigned int)*(frame->image+adr+1))<<16)+
+                       (((unsigned int)*(frame->image+adr+2))<<8)+
+                       (((unsigned int)*(frame->image+adr+3)));
                 adr+=4;
                 jpgsize=(((unsigned int)*(frame->image+adr))<<24)+
-                    (((unsigned int)*(frame->image+adr+1))<<16)+
-                    (((unsigned int)*(frame->image+adr+2))<<8)+
-                    (((unsigned int)*(frame->image+adr+3)));
+                        (((unsigned int)*(frame->image+adr+1))<<16)+
+                        (((unsigned int)*(frame->image+adr+2))<<8)+
+                        (((unsigned int)*(frame->image+adr+3)));
 
                 if (jpgsize!=0) {
                     sprintf(filename,"%s-%05d-%d-%d.jpg",BASENAME,i,cam,k);

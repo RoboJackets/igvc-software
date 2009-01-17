@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Linux specific type definitions
- *  
+ *
  * Written by
  *   Damien Douxchamps <ddouxchamps@users.sf.net>
  *   David Moore <dcm@acm.org>

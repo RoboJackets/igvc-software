@@ -32,62 +32,76 @@ using namespace ost;
 /**\brief LBuffer is basically a malloc'd buffer with an associated mutex locking access
  *
  * LBuffer is basically a malloc'd buffer with an associated
- *   mutex lock that can be checked before/locked during 
- *   reads/writes.  It has an "width/height" 
+ *   mutex lock that can be checked before/locked during
+ *   reads/writes.  It has an "width/height"
  */
 class LBuffer : public Mutex, public Thread, public Semaphore {
-  private:
+private:
     int Width, Height, ElementSz;
     void *Ptr;
-  public:
-   
-    ///Initializes a lockable buffer, of size W*H*sz (just like a malloc) 
+public:
+
+    ///Initializes a lockable buffer, of size W*H*sz (just like a malloc)
     LBuffer( int W,  ///< Width
              int H,  ///< Height
              int sz  )  ///< Size per element
     {
-      Ptr = malloc(sz*W*H); 
-      Width = (size_t)W;
-      Height = (size_t)H;
-      ElementSz = (size_t)sz ;
+        Ptr = malloc(sz*W*H);
+        Width = (size_t)W;
+        Height = (size_t)H;
+        ElementSz = (size_t)sz ;
     };
 
     ///Deletes the buffer object, and frees its associated memory.
-    ~LBuffer() { 
-      free(Ptr); 
+    ~LBuffer() {
+        free(Ptr);
     };
-    /// Lock the buffer.  Any subsequent attempts to lock it while it is 
+    /// Lock the buffer.  Any subsequent attempts to lock it while it is
     /// already locked will block.
-    void lock() { ENTER_CRITICAL; }
+    void lock() {
+        ENTER_CRITICAL;
+    }
 
-    /// Unlock the buffer. 
-    void unlock() { LEAVE_CRITICAL; }
+    /// Unlock the buffer.
+    void unlock() {
+        LEAVE_CRITICAL;
+    }
 
-    /// Return the "width" of the buffer 
-    size_t width() { return (size_t)Width; }
+    /// Return the "width" of the buffer
+    size_t width() {
+        return (size_t)Width;
+    }
 
-    /// Return the "height" of the buffer 
-    size_t height() { return (size_t)Height; }
+    /// Return the "height" of the buffer
+    size_t height() {
+        return (size_t)Height;
+    }
 
     /// Return the number of bytes of each element
-    size_t elmentsz() { return (size_t)ElementSz; }
+    size_t elmentsz() {
+        return (size_t)ElementSz;
+    }
 
     /// Return the size of the buffer (W*H*elementsz)
-    size_t size() { return (size_t)(ElementSz*Width*Height); }
+    size_t size() {
+        return (size_t)(ElementSz*Width*Height);
+    }
 
     /// Return a pointer to the associated memory
-    void *ptr() { return Ptr; }
+    void *ptr() {
+        return Ptr;
+    }
 
     /// Resize the buffer.
     int resize( int W,  ///< Width
                 int H,  ///< Height
                 int sz  )  ///< Size per element
     {
-      Ptr = realloc( Ptr, sz*W*H );
-      Width = (size_t)W;
-      Height = (size_t)H;
-      ElementSz = (size_t)sz ;
-      return (sz*W*H); 
+        Ptr = realloc( Ptr, sz*W*H );
+        Width = (size_t)W;
+        Height = (size_t)H;
+        ElementSz = (size_t)sz ;
+        return (sz*W*H);
     }
 
 };
@@ -133,17 +147,17 @@ using namespace ost;
 
 
 /** \brief Dc1394 is a class which encapsulates the libdc1394 camera
-    handling routines. 
+    handling routines.
 
 Dc1394 is a class which encapsulates the libdc1394 camera handling routines
-    It is a "Thread" class (commonc++), which means that after it is 
-    constructed, it's start() method must be called which starts 
+    It is a "Thread" class (commonc++), which means that after it is
+    constructed, it's start() method must be called which starts
     the thread running.  While dc1394 is running, it is continually
     grabbing images from a camera, and placing them in its lockable
-    buffer.  When an image is recieved from the 
-    camera, Dc1394 is locked, updated, and unlocked.  If another 
+    buffer.  When an image is recieved from the
+    camera, Dc1394 is locked, updated, and unlocked.  If another
     thread wants to use this image, it should lock, use( ptr() ), then unlock.
-   
+
     See the LBuffer class for more information.
 
   Typical usage:
@@ -155,12 +169,12 @@ Dc1394 is a class which encapsulates the libdc1394 camera handling routines
 </b>
 
   // make a texture
-  glGenTextures(1, &tex);              // texture 
+  glGenTextures(1, &tex);              // texture
   glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,  GL_REPLACE );
   glBindTexture(GL_TEXTURE_RECTANGLE_NV, tex);
   glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_RGBA, width,height, 0,
                 GL_RGB, GL_UNSIGNED_BYTE,NULL );
-<b>  
+<b>
   //start the camera capture
   CamSource.start();
 </b>
@@ -181,7 +195,7 @@ Dc1394 is a class which encapsulates the libdc1394 camera handling routines
         //free the image data so it can be updated again.
         CamSource.unlock();
 </b>
-     
+
         //use the image...
    }
  </pre>
@@ -189,45 +203,45 @@ Dc1394 is a class which encapsulates the libdc1394 camera handling routines
 //class Dc1394 : public Thread, public Mutex, public Semaphore
 //class Dc1394 : public Thread, public LBuffer, public Semaphore
 class Dc1394 : public LBuffer
-{  
- private:
-  
-  void TellRWMHeCanUseImage(int numBufs, const char *dma_bufs_[] );
-  const static int DefaultCaptureWidth=320;
-  const static int DefaultCaptureHeight=240;
-  int CaptureWidth,CaptureHeight;
+{
+private:
 
-  dc1394_cameracapture cameras[8];
-  raw1394handle_t handles[8]; // selected camera
-  nodeid_t *camera_nodes; // all nodes on bus
+    void TellRWMHeCanUseImage(int numBufs, const char *dma_bufs_[] );
+    const static int DefaultCaptureWidth=320;
+    const static int DefaultCaptureHeight=240;
+    int CaptureWidth,CaptureHeight;
 
-  int bufferUsed;
-  int numCamsToUse;
-  int numCamsUsed;
-  char *bufs[8] ; //array of adresses of the buffers where the images end up
-  bool noDMA;
-  
-  bool doOHCI();
+    dc1394_cameracapture cameras[8];
+    raw1394handle_t handles[8]; // selected camera
+    nodeid_t *camera_nodes; // all nodes on bus
+
+    int bufferUsed;
+    int numCamsToUse;
+    int numCamsUsed;
+    char *bufs[8] ; //array of adresses of the buffers where the images end up
+    bool noDMA;
+
+    bool doOHCI();
 //  void lock() { ENTER_CRITICAL; }
-//  void unlock() { LEAVE_CRITICAL; } 
-  void tellThreadDoneWithBuffer();
+//  void unlock() { LEAVE_CRITICAL; }
+    void tellThreadDoneWithBuffer();
 
-  void releaseBarrier();
-  
-  /// Start Thread.  Camera will begin capturing, writing results to 
-  /// memory at ptr().  To access image, lock() this object, use the ptr()
-  /// data, then unlock() when finished with the buffer.
-  void run(); 
- public:
-  ///The lockable LBuffer which holds the camera image data.  When accessing it,
-  /// remember to: lock(), use(), unlock()
-  //LBuffer rgb_buffer;
+    void releaseBarrier();
 
-  ///Initializes the camera capture.
-  Dc1394( int W=320, ///< desired capture width, either 320 or 640
-          int H=240  ///<desired capture height, either 240 or 480
-        );
-  ~Dc1394();
+    /// Start Thread.  Camera will begin capturing, writing results to
+    /// memory at ptr().  To access image, lock() this object, use the ptr()
+    /// data, then unlock() when finished with the buffer.
+    void run();
+public:
+    ///The lockable LBuffer which holds the camera image data.  When accessing it,
+    /// remember to: lock(), use(), unlock()
+    //LBuffer rgb_buffer;
+
+    ///Initializes the camera capture.
+    Dc1394( int W=320, ///< desired capture width, either 320 or 640
+            int H=240  ///<desired capture height, either 240 or 480
+          );
+    ~Dc1394();
 };
 
 #endif
@@ -270,14 +284,14 @@ class Dc1394 : public LBuffer
 
 
 typedef enum {
-	IO_METHOD_READ,
-	IO_METHOD_MMAP,
-	IO_METHOD_USERPTR,
+    IO_METHOD_READ,
+    IO_METHOD_MMAP,
+    IO_METHOD_USERPTR,
 } io_method;
 
 struct buffer {
-        void *                  start;
-        size_t                  length;
+    void *                  start;
+    size_t                  length;
 };
 #ifdef HAVE_PWC_DRIVER
 #  include "yuv2rgb.h"
@@ -289,49 +303,49 @@ using namespace ost;
 //class V4L1 : public Thread, public LBuffer, public Semaphore
 class V4L1 : public LBuffer
 {
- private:
-  void TellRWMHeCanUseImage(int numBufs, const char *dma_bufs_[] );
-  int bufferUsed;
-  char *dev_name;
-  io_method io;
-  int fd;
-  struct buffer *buffers;
-  struct video_mbuf v4l1_mbuf;
-  unsigned int n_buffers;
-  unsigned int current_buffernum;
-  unsigned	int format;
-  char *newimgbuf_rgb;
-  char *read_frame(void);
-  void mainloop(void);
-  void start_capturing(void);
-  void stop_capturing(void);
-  void uninit_device(void);
-  void init_mmap(void);
-  void init_read(unsigned int);
-  void init_userp(unsigned int);
-  void init_device(void);
-  void close_device(void);
-  void open_device(void);
-  void set_controls();
+private:
+    void TellRWMHeCanUseImage(int numBufs, const char *dma_bufs_[] );
+    int bufferUsed;
+    char *dev_name;
+    io_method io;
+    int fd;
+    struct buffer *buffers;
+    struct video_mbuf v4l1_mbuf;
+    unsigned int n_buffers;
+    unsigned int current_buffernum;
+    unsigned	int format;
+    char *newimgbuf_rgb;
+    char *read_frame(void);
+    void mainloop(void);
+    void start_capturing(void);
+    void stop_capturing(void);
+    void uninit_device(void);
+    void init_mmap(void);
+    void init_read(unsigned int);
+    void init_userp(unsigned int);
+    void init_device(void);
+    void close_device(void);
+    void open_device(void);
+    void set_controls();
 
 
- //protected:
-  const static int DefaultCaptureWidth=320;
-  const static int DefaultCaptureHeight=240;
-  int CaptureWidth,CaptureHeight;
-  void run();
-  void tellThreadDoneWithBuffer();
+//protected:
+    const static int DefaultCaptureWidth=320;
+    const static int DefaultCaptureHeight=240;
+    int CaptureWidth,CaptureHeight;
+    void run();
+    void tellThreadDoneWithBuffer();
 
- public:
-  V4L1(int W, int H);
-  ~V4L1();
-  // Start Thread
-  //void lock() { ENTER_CRITICAL; }
-  //void unlock() { LEAVE_CRITICAL; }
-  int getCaptureWidth();
-  int getCaptureHeight();
-  int getCaptureDepth();
-  char *bufs[8];
+public:
+    V4L1(int W, int H);
+    ~V4L1();
+    // Start Thread
+    //void lock() { ENTER_CRITICAL; }
+    //void unlock() { LEAVE_CRITICAL; }
+    int getCaptureWidth();
+    int getCaptureHeight();
+    int getCaptureDepth();
+    char *bufs[8];
 
 };
 

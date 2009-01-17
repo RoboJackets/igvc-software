@@ -38,7 +38,7 @@ dc1394_iso_set_persist (dc1394camera_t * camera)
 
 dc1394error_t
 dc1394_iso_allocate_channel (dc1394camera_t * camera,
-        uint64_t channels_allowed, int * channel)
+                             uint64_t channels_allowed, int * channel)
 {
     dc1394camera_priv_t * cpriv = DC1394_CAMERA_PRIV (camera);
     dc1394error_t err;
@@ -51,7 +51,7 @@ dc1394_iso_allocate_channel (dc1394camera_t * camera,
     }
 
     if ((err = platform_iso_allocate_channel (cpriv->pcam, channels_allowed,
-            channel)) != DC1394_SUCCESS)
+               channel)) != DC1394_SUCCESS)
         return err;
 
     cpriv->allocated_channels |= ((uint64_t)1 << *channel);

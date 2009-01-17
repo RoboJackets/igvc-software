@@ -52,29 +52,29 @@
 /* Internal functions required by two different source files */
 int
 GetCameraControlRegister(raw1394handle_t handle, nodeid_t node,
-			 octlet_t offset, quadlet_t *value);
+                         octlet_t offset, quadlet_t *value);
 
 int
 GetCameraAdvControlRegister(raw1394handle_t handle, nodeid_t node,
-			    octlet_t offset, quadlet_t *value);
+                            octlet_t offset, quadlet_t *value);
 
 int
 SetCameraAdvControlRegister(raw1394handle_t handle, nodeid_t node,
-			    octlet_t offset, quadlet_t value);
+                            octlet_t offset, quadlet_t value);
 
 int
 _dc1394_dma_basic_setup(int channel, int num_dma_buffers,
                         dc1394_cameracapture *camera);
-						
-						
+
+
 typedef struct __dc1394_camerahandle
 {
-  int       port;
-  octlet_t  ccr_base;
-  octlet_t  adv_csr;    /* Offset of registers for advanced features */
-  int       sw_version;
-  octlet_t  format7_csr[NUM_MODE_FORMAT7];
+    int       port;
+    octlet_t  ccr_base;
+    octlet_t  adv_csr;    /* Offset of registers for advanced features */
+    int       sw_version;
+    octlet_t  format7_csr[NUM_MODE_FORMAT7];
 
 } dc1394_camerahandle;
-						
+
 #endif /* _DC1394_INTERNAL_H */

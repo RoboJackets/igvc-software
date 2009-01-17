@@ -1,8 +1,8 @@
 /*
  * 1394-Based Digital Camera Control Library
- * 
+ *
  * MS Windows Support Code
- * 
+ *
  * Written by Vladimir Avdonin <vldmr@users.sf.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -110,14 +110,14 @@ static msw1394error_t GrabSelfIds(dc1394camera_t **cams, int ncams)
         }
         free(top);
     }
-    
+
     for (k=0; k<ncams; k++) {
         cam = (dc1394camera_msw_t *) cams[k];
         cam->camera.phy_delay=cam->selfid.SID_Delay+DC1394_PHY_DELAY_MIN;
         cam->camera.phy_speed=cam->selfid.SID_Speed+DC1394_ISO_SPEED_MIN;
         cam->camera.power_class=cam->selfid.SID_Power_Class+DC1394_POWER_CLASS_MIN;
     }
-    
+
     return res;
 }
 */
@@ -244,14 +244,14 @@ dc1394_find_cameras_platform(dc1394camera_t ***cameras_ptr, uint32_t* numCameras
         *cameras_ptr = NULL;
     }
     /*
- else {
+    else {
         res = GrabSelfIds(cameras, numCam);
         if (res != DC1394_SUCCESS)
             goto fail;
     }
     */
     return res;
- fail:
+fail:
     for (i=0;i<numCam;i++) {
         dc1394_camera_free(cameras[i]);
         cameras[i]=NULL;
@@ -310,7 +310,7 @@ GetCameraROMValues(dc1394camera_t *camera, uint64_t offset, uint32_t *value, uin
 #endif
         err1394 = msw1394_ReadSync(port,0xffc0 | node, offset + CONFIG_ROM_BASE, 4 * num_quads, value);
 #ifdef DC1394_DEBUG_LOWEST_LEVEL
-	fprintf(stderr,"0x%lx [...]\n", value[0]);
+        fprintf(stderr,"0x%lx [...]\n", value[0]);
 #endif
         if (err1394 == MSW1394_SUCCESS)
             break;
@@ -462,7 +462,7 @@ dc1394_free_iso_channel(dc1394camera_t *camera)
 
     if (cmsw->iso_channel_is_set == 0) {
         dc1394_log_error("no ISO channel to free");
-    return DC1394_FAILURE;
+        return DC1394_FAILURE;
     }
 
     err1394 = msw1394_ISOFreeChan(cmsw->port, cmsw->allocated_channel);
@@ -532,7 +532,7 @@ dc1394_capture_setup(dc1394camera_t *camera, uint32_t num_dma_buffers, uint32_t 
 
     if (flags & DC1394_CAPTURE_FLAGS_DEFAULT)
         flags = DC1394_CAPTURE_FLAGS_CHANNEL_ALLOC |
-            DC1394_CAPTURE_FLAGS_BANDWIDTH_ALLOC;
+                DC1394_CAPTURE_FLAGS_BANDWIDTH_ALLOC;
 
     cmsw->capture_flags=flags;
 
@@ -600,7 +600,7 @@ dc1394_capture_setup(dc1394camera_t *camera, uint32_t num_dma_buffers, uint32_t 
 
     return DC1394_SUCCESS;
 
- fail:
+fail:
     // free resources if they were allocated
     if (flags & DC1394_CAPTURE_FLAGS_CHANNEL_ALLOC) {
         if (dc1394_free_iso_channel(camera) != DC1394_SUCCESS)

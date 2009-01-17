@@ -1,8 +1,8 @@
 /*
  * 1394-Based Digital Camera Control Library
- * 
+ *
  * MS Windows Support Code
- * 
+ *
  * Written by Vladimir Avdonin <vldmr@users.sf.net>
  *
  * This library is free software; you can redistribute it and/or
@@ -84,13 +84,13 @@ static ULONG SpeedFlag(msw1394_speed_t msw1394_speed) {
 static LPVOID GetErrorText(DWORD iErr) {
     LPVOID lpMsgBuf;
     FormatMessage(
-                  FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                  FORMAT_MESSAGE_FROM_SYSTEM,
-                  NULL,
-                  iErr,
-                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-                  (LPTSTR) &lpMsgBuf,
-                  0, NULL );
+        FORMAT_MESSAGE_ALLOCATE_BUFFER |
+        FORMAT_MESSAGE_FROM_SYSTEM,
+        NULL,
+        iErr,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        (LPTSTR) &lpMsgBuf,
+        0, NULL );
     return lpMsgBuf;
 }
 
@@ -106,7 +106,7 @@ static DWORD UpdateGenCount(int iPort) {
                              sizeof(ULONG),
                              &dwBytesRet,
                              NULL
-                             );
+                           );
 
     if (dwRet) {
         gDevice[iPort].gen = GenerationCount;
@@ -138,7 +138,7 @@ BusResetThread(LPVOID lpParameter) {
                     OPEN_EXISTING,
                     FILE_FLAG_OVERLAPPED | FILE_FLAG_NO_BUFFERING,
                     NULL
-                    );
+                  );
 
     if (hDevice == INVALID_HANDLE_VALUE)
         ExitThread(0);
@@ -154,7 +154,7 @@ BusResetThread(LPVOID lpParameter) {
                          0,
                          &dwBytesRet,
                          &overLapped
-                         );
+                       );
         dwRet = GetLastError();
         // we should always return pending, if not, something's wrong...
         if (dwRet == ERROR_IO_PENDING) {
@@ -172,7 +172,7 @@ BusResetThread(LPVOID lpParameter) {
                                              sizeof(ULONG),
                                              &dwBytesRet,
                                              &overLapped
-                                             );
+                                           );
                 dwRet = WaitForSingleObject(overLapped.hEvent, INFINITE);
 
                 if (res) {
@@ -208,13 +208,13 @@ BusResetThread(LPVOID lpParameter) {
 DWORD StartBusResetThread(int iPort) {
     DWORD dwRet;
     gDevice[iPort].BusResetThread = CreateThread(
-                                                 NULL,
-                                                 0,
-                                                 BusResetThread,
-                                                 (LPVOID)iPort,
-                                                 0,
-                                                 &(gDevice[iPort].BusResetThreadID)
-                                                 );
+                                        NULL,
+                                        0,
+                                        BusResetThread,
+                                        (LPVOID)iPort,
+                                        0,
+                                        &(gDevice[iPort].BusResetThreadID)
+                                    );
 
     if (gDevice[iPort].BusResetThread == NULL) {
         dwRet = GetLastError();
@@ -271,14 +271,14 @@ msw1394error_t msw1394_Init() {
 
         hDevice =
             CreateFile(
-                       busName,
-                       GENERIC_WRITE | GENERIC_READ,
-                       FILE_SHARE_WRITE | FILE_SHARE_READ,
-                       NULL,
-                       OPEN_EXISTING,
-                       0,
-                       NULL
-                       );
+                busName,
+                GENERIC_WRITE | GENERIC_READ,
+                FILE_SHARE_WRITE | FILE_SHARE_READ,
+                NULL,
+                OPEN_EXISTING,
+                0,
+                NULL
+            );
         if (hDevice == INVALID_HANDLE_VALUE)
             break; // no more adaptors
         else
@@ -302,14 +302,14 @@ msw1394error_t msw1394_Init() {
         strncpy((char*)&pDevPnpReq->DeviceId,kWinVDev_Name,nameLen);
 
         bRes = DeviceIoControl(
-                               hDevice,
-                               IOCTL_IEEE1394_API_REQUEST,
-                               p1394ApiReq,
-                               recLen,
-                               NULL,
-                               0,
-                               &dwBytesRet,
-                               NULL);
+                   hDevice,
+                   IOCTL_IEEE1394_API_REQUEST,
+                   p1394ApiReq,
+                   recLen,
+                   NULL,
+                   0,
+                   &dwBytesRet,
+                   NULL);
 
         if (hDevice != INVALID_HANDLE_VALUE) {
             CloseHandle(hDevice);
@@ -329,7 +329,7 @@ msw1394error_t msw1394_Init() {
                                     NULL,
                                     NULL,
                                     (DIGCF_PRESENT | DIGCF_INTERFACEDEVICE)
-                                    );
+                                  );
     if (!hDevInfo)
         return ConvertError(GetLastError());
 
@@ -342,13 +342,13 @@ msw1394error_t msw1394_Init() {
         if (SetupDiEnumDeviceInterfaces(hDevInfo, 0, &guid, Port, &deviceInterfaceData)) {
             bRes =
                 SetupDiGetDeviceInterfaceDetail(
-                                                hDevInfo,
-                                                &deviceInterfaceData,
-                                                NULL,
-                                                0,
-                                                &requiredSize,
-                                                NULL
-                                                );
+                    hDevInfo,
+                    &deviceInterfaceData,
+                    NULL,
+                    0,
+                    &requiredSize,
+                    NULL
+                );
             if (!bRes) {
                 dwErr = GetLastError();
                 if (dwErr != ERROR_INSUFFICIENT_BUFFER)
@@ -363,13 +363,13 @@ msw1394error_t msw1394_Init() {
             DeviceInterfaceDetailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
             bRes =
                 SetupDiGetDeviceInterfaceDetail(
-                                                hDevInfo,
-                                                &deviceInterfaceData,
-                                                DeviceInterfaceDetailData,
-                                                requiredSize,
-                                                NULL,
-                                                NULL
-                                                );
+                    hDevInfo,
+                    &deviceInterfaceData,
+                    DeviceInterfaceDetailData,
+                    requiredSize,
+                    NULL,
+                    NULL
+                );
             if (bRes) {
                 i = strlen(DeviceInterfaceDetailData->DevicePath) + 1;
                 gDevice[Port].path = malloc(i);
@@ -386,7 +386,7 @@ msw1394error_t msw1394_Init() {
                                               OPEN_EXISTING,
                                               0,
                                               NULL
-                                              );
+                                            );
                 if (gDevice[Port].h != INVALID_HANDLE_VALUE) {
                     gNPorts++;
                     gInited = TRUE;
@@ -455,22 +455,22 @@ msw1394error_t msw1394_GetNodeCount(ULONG iPort, ULONG *oNumNodes) {
 
     dwRet =
         DeviceIoControl(
-                        gDevice[iPort].h,
-                        IOCTL_GET_LOCAL_HOST_INFORMATION,
-                        pGetLocalHostInfo,
-                        ulBufferSize,
-                        pGetLocalHostInfo,
-                        ulBufferSize,
-                        &dwBytesRet,
-                        NULL
-                        );
+            gDevice[iPort].h,
+            IOCTL_GET_LOCAL_HOST_INFORMATION,
+            pGetLocalHostInfo,
+            ulBufferSize,
+            pGetLocalHostInfo,
+            ulBufferSize,
+            &dwBytesRet,
+            NULL
+        );
 
     top = (PTOPOLOGY_MAP)(&(LocalHostInfo6->CsrDataBuffer[0]));
     n = top->TOP_Node_Count;
     LocalFree(pGetLocalHostInfo);
 
     if (dwRet == 0)
-      return ConvertError(GetLastError());
+        return ConvertError(GetLastError());
 
     *oNumNodes = n;
     return MSW1394_SUCCESS;
@@ -522,7 +522,7 @@ msw1394error_t msw1394_ResetBus(ULONG iPort) {
                                  0,
                                  &dwBytesRet,
                                  NULL
-                                 );
+                               );
     if (bres) {
         dwRet = GetLastError();
         res = ConvertError(dwRet);
@@ -555,15 +555,15 @@ msw1394error_t msw1394_GetLocalHostMap(ULONG iPort, sTOPOLOGY_MAP** oMap) {
 
     bres =
         DeviceIoControl(
-                        gDevice[iPort].h,
-                        IOCTL_GET_LOCAL_HOST_INFORMATION,
-                        pGetLocalHostInfo,
-                        ulBufferSize,
-                        pGetLocalHostInfo,
-                        ulBufferSize,
-                        &dwBytesRet,
-                        NULL
-                        );
+            gDevice[iPort].h,
+            IOCTL_GET_LOCAL_HOST_INFORMATION,
+            pGetLocalHostInfo,
+            ulBufferSize,
+            pGetLocalHostInfo,
+            ulBufferSize,
+            &dwBytesRet,
+            NULL
+        );
 
     CsrDataLength = LocalHostInfo6->CsrDataLength;
 
@@ -591,15 +591,15 @@ msw1394error_t msw1394_GetLocalHostMap(ULONG iPort, sTOPOLOGY_MAP** oMap) {
 
     bres =
         DeviceIoControl(
-                        gDevice[iPort].h,
-                        IOCTL_GET_LOCAL_HOST_INFORMATION,
-                        pGetLocalHostInfo,
-                        ulBufferSize,
-                        pGetLocalHostInfo,
-                        ulBufferSize,
-                        &dwBytesRet,
-                        NULL
-                        );
+            gDevice[iPort].h,
+            IOCTL_GET_LOCAL_HOST_INFORMATION,
+            pGetLocalHostInfo,
+            ulBufferSize,
+            pGetLocalHostInfo,
+            ulBufferSize,
+            &dwBytesRet,
+            NULL
+        );
 
     if (bres) {
         *oMap = (sTOPOLOGY_MAP*)malloc(LocalHostInfo6->CsrDataLength);
@@ -626,7 +626,7 @@ msw1394error_t msw1394_GetLocalId(ULONG iPort, USHORT* oNode) {
                              sizeof(addr),
                              &dwBytesRet,
                              NULL
-                             );
+                           );
     *oNode = (addr.NodeAddress.NA_Bus_Number<<6) | addr.NodeAddress.NA_Node_Number;
 
     if (!dwRet)
@@ -647,7 +647,7 @@ msw1394error_t msw1394_GetCycleTime(ULONG iPort, sCYCLE_TIME *oCycleTime) {
                              sizeof(CYCLE_TIME),
                              &dwBytesRet,
                              NULL
-                             );
+                           );
 
     if (!dwRet)
         res = ConvertError(GetLastError());
@@ -685,7 +685,7 @@ msw1394_ReadSync(ULONG iPort, USHORT node, ULONGLONG addr, size_t length, void *
                              ulBufferSize,
                              &dwBytesRet,
                              NULL
-                             );
+                           );
 
     if (dwRet) {
         memcpy(data,&asyncRead->Data[0],length);
@@ -729,7 +729,7 @@ msw1394error_t msw1394_WriteSync(ULONG iPort, USHORT node, ULONGLONG addr, size_
                              ulBufferSize,
                              &dwBytesRet,
                              NULL
-                             );
+                           );
 
     LocalFree(asyncWrite);
     if (dwRet)
@@ -749,15 +749,15 @@ msw1394error_t msw1394_ISOAllocChan(ULONG iPort, char *ioCh) {
 
     dwRet =
         DeviceIoControl(
-                        gDevice[iPort].h,
-                        IOCTL_ISOCH_ALLOCATE_CHANNEL,
-                        &ac,
-                        sizeof(ISOCH_ALLOCATE_CHANNEL),
-                        &ac,
-                        sizeof(ISOCH_ALLOCATE_CHANNEL),
-                        &dwBytesRet,
-                        NULL
-                        );
+            gDevice[iPort].h,
+            IOCTL_ISOCH_ALLOCATE_CHANNEL,
+            &ac,
+            sizeof(ISOCH_ALLOCATE_CHANNEL),
+            &ac,
+            sizeof(ISOCH_ALLOCATE_CHANNEL),
+            &dwBytesRet,
+            NULL
+        );
     msw1394error_t res = MSW1394_SUCCESS;
     if (!dwRet) {
         dwRet = GetLastError();
@@ -774,15 +774,15 @@ msw1394error_t msw1394_ISOFreeChan(ULONG iPort, char iCh) {
     DWORD dwRet, dwBytesRet;
     dwRet =
         DeviceIoControl(
-                        gDevice[iPort].h,
-                        IOCTL_ISOCH_FREE_CHANNEL,
-                        &nChannel,
-                        sizeof(ULONG),
-                        NULL,
-                        0,
-                        &dwBytesRet,
-                        NULL
-                        );
+            gDevice[iPort].h,
+            IOCTL_ISOCH_FREE_CHANNEL,
+            &nChannel,
+            sizeof(ULONG),
+            NULL,
+            0,
+            &dwBytesRet,
+            NULL
+        );
 
     msw1394error_t res = MSW1394_SUCCESS;
     if (!dwRet) {
@@ -809,7 +809,7 @@ msw1394error_t msw1394_ISOAllocBandwidth(int iPort, USHORT iBW, HANDLE *oBwH) {
                              sizeof(ISOCH_ALLOCATE_BANDWIDTH),
                              &dwBytesRet,
                              NULL
-                             );
+                           );
     msw1394error_t res = MSW1394_SUCCESS;
     if (dwRet)
         *oBwH = bw.hBandwidth;
@@ -834,7 +834,7 @@ msw1394error_t msw1394_ISOFreeBandwidth(int iPort, HANDLE iBwH) {
                              0,
                              &dwBytesRet,
                              NULL
-                             );
+                           );
 
     if (!dwRet) {
         dwRet = GetLastError();
@@ -854,24 +854,24 @@ static void ISORecCleanup(msw1394_ISO* ioISO) {
             FreeOverlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
             dwRet = DeviceIoControl(
-                                    ioISO->hDevice,
-                                    IOCTL_ISOCH_FREE_RESOURCES,
-                                    &(ioISO->hResource),
-                                    sizeof(HANDLE),
-                                    NULL,
-                                    0,
-                                    &dwBytesRet,
-                                    &FreeOverlapped
-                                    );
+                        ioISO->hDevice,
+                        IOCTL_ISOCH_FREE_RESOURCES,
+                        &(ioISO->hResource),
+                        sizeof(HANDLE),
+                        NULL,
+                        0,
+                        &dwBytesRet,
+                        &FreeOverlapped
+                    );
             if (! dwRet) {
                 dwRet = GetLastError();
                 if (dwRet == ERROR_IO_PENDING) {
                     dwRet = GetOverlappedResult(
-                                                ioISO->hDevice,
-                                                &FreeOverlapped,
-                                                &dwBytesRet,
-                                                TRUE
-                                                );
+                                ioISO->hDevice,
+                                &FreeOverlapped,
+                                &dwBytesRet,
+                                TRUE
+                            );
                     if (!dwRet) {
                         dwRet = GetLastError();
                         char* msg = GetErrorText(dwRet);
@@ -919,7 +919,7 @@ static void ISORecCleanup(msw1394_ISO* ioISO) {
         free(ioISO->Times);
         ioISO->Times = NULL;
     }
-    if(ioISO->FIFO != NULL) {
+    if (ioISO->FIFO != NULL) {
         free(ioISO->FIFO);
         ioISO->FIFO = NULL;
     }
@@ -945,7 +945,7 @@ msw1394error_t msw1394_ISOCaptureSetup(msw1394_ISO* ioISO) {
                     OPEN_EXISTING,
                     FILE_FLAG_OVERLAPPED,
                     NULL
-                    );
+                  );
     if (ioISO->hDevice == INVALID_HANDLE_VALUE) {
         dwRet = GetLastError();
         res = ConvertError(dwRet);
@@ -969,25 +969,25 @@ msw1394error_t msw1394_ISOCaptureSetup(msw1394_ISO* ioISO) {
 
     dwRet =
         DeviceIoControl(
-                        ioISO->hDevice,
-                        IOCTL_ISOCH_ALLOCATE_RESOURCES,
-                        &(Res),
-                        sizeof(ISOCH_ALLOCATE_RESOURCES),
-                        &(Res),
-                        sizeof(ISOCH_ALLOCATE_RESOURCES),
-                        &dwBytesRet,
-                        &AllocOverlapped
-                        );
+            ioISO->hDevice,
+            IOCTL_ISOCH_ALLOCATE_RESOURCES,
+            &(Res),
+            sizeof(ISOCH_ALLOCATE_RESOURCES),
+            &(Res),
+            sizeof(ISOCH_ALLOCATE_RESOURCES),
+            &dwBytesRet,
+            &AllocOverlapped
+        );
 
     if (! dwRet) {
         dwRet = GetLastError();
         if (dwRet == ERROR_IO_PENDING) {
             dwRet = GetOverlappedResult(
-                                        ioISO->hDevice,
-                                        &AllocOverlapped,
-                                        &dwBytesRet,
-                                        TRUE
-                                        );
+                        ioISO->hDevice,
+                        &AllocOverlapped,
+                        &dwBytesRet,
+                        TRUE
+                    );
             if (!dwRet)
                 res = ConvertError(GetLastError());
         } else
@@ -1006,10 +1006,10 @@ msw1394error_t msw1394_ISOCaptureSetup(msw1394_ISO* ioISO) {
     }
     for (i=0; i<nb; i++) {
         ioISO->Overlapped[i].hEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
-    if (ioISO->Overlapped[i].hEvent == NULL) {
-        res = ConvertError(GetLastError());
-        goto fail;
-    }
+        if (ioISO->Overlapped[i].hEvent == NULL) {
+            res = ConvertError(GetLastError());
+            goto fail;
+        }
     }
 
     ioISO->BufferMemory = (PISOCH_ATTACH_BUFFERS*)calloc(1,sizeof(PISOCH_ATTACH_BUFFERS)*nb);
@@ -1048,11 +1048,11 @@ msw1394error_t msw1394_ISOCaptureSetup(msw1394_ISO* ioISO) {
 
     for (i = 1; i < nb; i++)
         AttBuffers[i] = (PISOCH_ATTACH_BUFFERS)
-            ((char*)(AttBuffers[i-1])+bfsz);
+                        ((char*)(AttBuffers[i-1])+bfsz);
 
     for (i = 0; i < nb; i++)
         ioISO->Buffers[i] = (char*)(AttBuffers[i]) +
-            sizeof(ISOCH_ATTACH_BUFFERS);
+                            sizeof(ISOCH_ATTACH_BUFFERS);
 
     for (i = 0; i < nb; i++) {
         PISOCH_ATTACH_BUFFERS iab = AttBuffers[i];
@@ -1070,15 +1070,15 @@ msw1394error_t msw1394_ISOCaptureSetup(msw1394_ISO* ioISO) {
         ResetEvent(ioISO->Overlapped[i].hEvent);
 
         dwRet = DeviceIoControl(
-                                ioISO->hDevice,
-                                IOCTL_ISOCH_ATTACH_BUFFERS,
-                                AttBuffers[i],
-                                bfsz,
-                                AttBuffers[i],
-                                bfsz,
-                                &dwBytesRet,
-                                &(ioISO->Overlapped[i])
-                                );
+                    ioISO->hDevice,
+                    IOCTL_ISOCH_ATTACH_BUFFERS,
+                    AttBuffers[i],
+                    bfsz,
+                    AttBuffers[i],
+                    bfsz,
+                    &dwBytesRet,
+                    &(ioISO->Overlapped[i])
+                );
 
         if (!dwRet) {
             dwRet = GetLastError();
@@ -1102,25 +1102,25 @@ msw1394error_t msw1394_ISOCaptureSetup(msw1394_ISO* ioISO) {
     isochListen.StartTime.CL_CycleOffset = 0;
 
     dwRet = DeviceIoControl(
-                            ioISO->hDevice,
-                            IOCTL_ISOCH_LISTEN,
-                            &isochListen,
-                            sizeof(ISOCH_LISTEN),
-                            NULL,
-                            0,
-                            &dwBytesRet,
-                            &ListenOverlapped
-                            );
+                ioISO->hDevice,
+                IOCTL_ISOCH_LISTEN,
+                &isochListen,
+                sizeof(ISOCH_LISTEN),
+                NULL,
+                0,
+                &dwBytesRet,
+                &ListenOverlapped
+            );
 
     if (!dwRet) {
         dwRet = GetLastError();
         if (dwRet == ERROR_IO_PENDING) {
             dwRet = GetOverlappedResult(
-                                        ioISO->hDevice,
-                                        &ListenOverlapped,
-                                        &dwBytesRet,
-                                        TRUE
-                                        );
+                        ioISO->hDevice,
+                        &ListenOverlapped,
+                        &dwBytesRet,
+                        TRUE
+                    );
             if (!dwRet)
                 res = ConvertError(GetLastError());
         } else
@@ -1134,7 +1134,7 @@ msw1394error_t msw1394_ISOCaptureSetup(msw1394_ISO* ioISO) {
 
     return MSW1394_SUCCESS;
 
- fail:
+fail:
     assert(res != MSW1394_SUCCESS);
     ISORecCleanup(ioISO);
     return res;
@@ -1159,25 +1159,25 @@ msw1394error_t msw1394_ISOCaptureStop(msw1394_ISO* ioISO) {
     isochStop.fulFlags = 0;
 
     dwRet = DeviceIoControl(
-                            ioISO->hDevice,
-                            IOCTL_ISOCH_STOP,
-                            &isochStop,
-                            sizeof(ISOCH_STOP),
-                            NULL,
-                            0,
-                            &dwBytesRet,
-                            &StopOverlapped
-                            );
+                ioISO->hDevice,
+                IOCTL_ISOCH_STOP,
+                &isochStop,
+                sizeof(ISOCH_STOP),
+                NULL,
+                0,
+                &dwBytesRet,
+                &StopOverlapped
+            );
 
     if (!dwRet) {
         dwRet = GetLastError();
         if (dwRet == ERROR_IO_PENDING) {
             dwRet = GetOverlappedResult(
-                                        ioISO->hDevice,
-                                        &StopOverlapped,
-                                        &dwBytesRet,
-                                        TRUE
-                                        );
+                        ioISO->hDevice,
+                        &StopOverlapped,
+                        &dwBytesRet,
+                        TRUE
+                    );
             if (!dwRet)
                 res = ConvertError(GetLastError());
         } else
@@ -1240,15 +1240,15 @@ msw1394error_t msw1394_ISOCaptureEnqueue(msw1394_ISO* ioISO, ULONG iIdx) {
         return MSW1394_NO_MEMORY;
     ResetEvent(ioISO->Overlapped[iIdx].hEvent);
     DeviceIoControl(
-                    ioISO->hDevice,
-                    IOCTL_ISOCH_ATTACH_BUFFERS,
-                    AttBuffers[iIdx],
-                    AttBuffers[iIdx]->ulBufferSize,
-                    AttBuffers[iIdx],
-                    AttBuffers[iIdx]->ulBufferSize,
-                    &dwBytesRet,
-                    &ioISO->Overlapped[iIdx]
-                    );
+        ioISO->hDevice,
+        IOCTL_ISOCH_ATTACH_BUFFERS,
+        AttBuffers[iIdx],
+        AttBuffers[iIdx]->ulBufferSize,
+        AttBuffers[iIdx],
+        AttBuffers[iIdx]->ulBufferSize,
+        &dwBytesRet,
+        &ioISO->Overlapped[iIdx]
+    );
     if (dwRet) {
         ioISO->FIFO[(ioISO->CurrentBuffer + ioISO->QuedBuffers)%ioISO->nNumberOfBuffers] = iIdx;
         ioISO->QuedBuffers++;

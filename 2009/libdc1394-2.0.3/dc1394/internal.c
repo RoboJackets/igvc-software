@@ -79,12 +79,12 @@ get_quadlets_per_packet(dc1394video_mode_t mode, dc1394framerate_t frame_rate, u
     err=get_format_from_mode(mode, &format);
     DC1394_ERR_RTN(err,"Invalid mode ID");
 
-    switch(format) {
+    switch (format) {
     case DC1394_FORMAT0:
         mode_index= mode - DC1394_VIDEO_MODE_FORMAT0_MIN;
 
         if ( ((mode >= DC1394_VIDEO_MODE_FORMAT0_MIN) && (mode <= DC1394_VIDEO_MODE_FORMAT0_MAX)) &&
-             ((frame_rate >= DC1394_FRAMERATE_MIN) && (frame_rate <= DC1394_FRAMERATE_MAX)) ) {
+                ((frame_rate >= DC1394_FRAMERATE_MIN) && (frame_rate <= DC1394_FRAMERATE_MAX)) ) {
             *qpp=quadlets_per_packet_format_0[DC1394_FRAMERATE_NUM*mode_index+frame_rate_index];
         }
         else {
@@ -96,7 +96,7 @@ get_quadlets_per_packet(dc1394video_mode_t mode, dc1394framerate_t frame_rate, u
         mode_index= mode - DC1394_VIDEO_MODE_FORMAT1_MIN;
 
         if ( ((mode >= DC1394_VIDEO_MODE_FORMAT1_MIN) && (mode <= DC1394_VIDEO_MODE_FORMAT1_MAX)) &&
-             ((frame_rate >= DC1394_FRAMERATE_MIN) && (frame_rate <= DC1394_FRAMERATE_MAX)) ) {
+                ((frame_rate >= DC1394_FRAMERATE_MIN) && (frame_rate <= DC1394_FRAMERATE_MAX)) ) {
             *qpp=quadlets_per_packet_format_1[DC1394_FRAMERATE_NUM*mode_index+frame_rate_index];
         }
         else {
@@ -108,7 +108,7 @@ get_quadlets_per_packet(dc1394video_mode_t mode, dc1394framerate_t frame_rate, u
         mode_index= mode - DC1394_VIDEO_MODE_FORMAT2_MIN;
 
         if ( ((mode >= DC1394_VIDEO_MODE_FORMAT2_MIN) && (mode <= DC1394_VIDEO_MODE_FORMAT2_MAX)) &&
-             ((frame_rate >= DC1394_FRAMERATE_MIN) && (frame_rate <= DC1394_FRAMERATE_MAX)) ) {
+                ((frame_rate >= DC1394_FRAMERATE_MIN) && (frame_rate <= DC1394_FRAMERATE_MAX)) ) {
             *qpp=quadlets_per_packet_format_2[DC1394_FRAMERATE_NUM*mode_index+frame_rate_index];
         }
         else {
@@ -228,11 +228,11 @@ capture_basic_setup (dc1394camera_t * camera, dc1394video_frame_t * frame)
         DC1394_ERR_RTN(err, "Unable to get format 7 bytes per packet");
 
         err=dc1394_format7_get_packets_per_frame(camera, video_mode,
-                                                 &frame->packets_per_frame);
+                &frame->packets_per_frame);
         DC1394_ERR_RTN(err, "Unable to get format 7 packets per frame");
 
         err = dc1394_format7_get_image_position (camera, video_mode,
-                                                 frame->position, frame->position + 1);
+                frame->position, frame->position + 1);
         DC1394_ERR_RTN(err, "Unable to get format 7 image position");
 
         dc1394_format7_get_color_filter (camera, video_mode, &frame->color_filter);
@@ -255,7 +255,7 @@ capture_basic_setup (dc1394camera_t * camera, dc1394video_frame_t * frame)
     }
 
     if ((frame->packet_size <=0 )||
-        (frame->packets_per_frame <= 0)) {
+            (frame->packets_per_frame <= 0)) {
         return DC1394_FAILURE;
     }
 

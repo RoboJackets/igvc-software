@@ -13,10 +13,10 @@
  *
  * Robert Ficklin <rficklin@westengineering.com>
  *   - bug fixes
- * 
+ *
  * Julie Andreotti <JulieAndreotti@smarttech.com>
  *   - bug fixes
- * 
+ *
  * Ann Dang <AnnDang@smarttech.com>
  *   - bug fixes
  *
@@ -57,7 +57,7 @@
 
 
 /********************/
-/* Base ROM offsets */ 
+/* Base ROM offsets */
 /********************/
 
 #define ROM_BUS_INFO_BLOCK             0x400U
@@ -117,7 +117,7 @@
 #define REG_CAMERA_TILT                0x888U
 #define REG_CAMERA_OPTICAL_FILTER      0x88CU
 #define REG_CAMERA_CAPTURE_SIZE        0x8C0U
-#define REG_CAMERA_CAPTURE_QUALITY     0x8C4U 
+#define REG_CAMERA_CAPTURE_QUALITY     0x8C4U
 
 
 /***********************/
@@ -208,105 +208,112 @@ const char *dc1394_feature_desc[NUM_FEATURES] =
 /*
   These arrays define how many image quadlets there
   are in a packet given a mode and a frame rate
-  This is defined in the 1394 digital camera spec 
+  This is defined in the 1394 digital camera spec
 */
-const int quadlets_per_packet_format_0[56] = 
+const int quadlets_per_packet_format_0[56] =
 {
-  -1,  -1,  15,  30,  60,  120,  240,  480,
-  10,  20,  40,  80, 160,  320,  640, 1280,
-  30,  60, 120, 240, 480,  960, 1920, 3840,
-  40,  80, 160, 320, 640, 1280, 2560, 5120,
-  60, 120, 240, 480, 960, 1920, 3840, 7680,
-  20,  40,  80, 160, 320,  640, 1280, 2560,
-  40,  80, 160, 320, 640, 1280, 2560, 5120
+    -1,  -1,  15,  30,  60,  120,  240,  480,
+    10,  20,  40,  80, 160,  320,  640, 1280,
+    30,  60, 120, 240, 480,  960, 1920, 3840,
+    40,  80, 160, 320, 640, 1280, 2560, 5120,
+    60, 120, 240, 480, 960, 1920, 3840, 7680,
+    20,  40,  80, 160, 320,  640, 1280, 2560,
+    40,  80, 160, 320, 640, 1280, 2560, 5120
 };
- 
-const int quadlets_per_packet_format_1[64] = 
+
+const int quadlets_per_packet_format_1[64] =
 {
-   -1, 125, 250,  500, 1000, 2000, 4000, 8000,
-   -1,  -1, 375,  750, 1500, 3000, 6000,   -1,
-   -1,  -1, 125,  250,  500, 1000, 2000, 4000,
-   96, 192, 384,  768, 1536, 3072, 6144,   -1,
-  144, 288, 576, 1152, 2304, 4608,   -1,   -1,
-   48,  96, 192,  384,  768, 1536, 3073, 6144,
-   -1, 125, 250,  500, 1000, 2000, 4000, 8000,
-   96, 192, 384,  768, 1536, 3072, 6144,   -1
+    -1, 125, 250,  500, 1000, 2000, 4000, 8000,
+    -1,  -1, 375,  750, 1500, 3000, 6000,   -1,
+    -1,  -1, 125,  250,  500, 1000, 2000, 4000,
+    96, 192, 384,  768, 1536, 3072, 6144,   -1,
+    144, 288, 576, 1152, 2304, 4608,   -1,   -1,
+    48,  96, 192,  384,  768, 1536, 3073, 6144,
+    -1, 125, 250,  500, 1000, 2000, 4000, 8000,
+    96, 192, 384,  768, 1536, 3072, 6144,   -1
 };
- 
-const int quadlets_per_packet_format_2[64] = 
+
+const int quadlets_per_packet_format_2[64] =
 {
-  160, 320,  640, 1280, 2560, 5120,   -1,  -1,
-  240, 480,  960, 1920, 3840, 7680,   -1,  -1,
-   80, 160,  320,  640, 1280, 2560, 5120,  -1,
-  250, 500, 1000, 2000, 4000, 8000,   -1,  -1,
-  375, 750, 1500, 3000, 6000,   -1,   -1,  -1,
-  125, 250,  500, 1000, 2000, 4000, 8000,  -1,
-  160, 320,  640, 1280, 2560, 5120,   -1,  -1,
-  250, 500, 1000, 2000, 4000, 8000,   -1,  -1
+    160, 320,  640, 1280, 2560, 5120,   -1,  -1,
+    240, 480,  960, 1920, 3840, 7680,   -1,  -1,
+    80, 160,  320,  640, 1280, 2560, 5120,  -1,
+    250, 500, 1000, 2000, 4000, 8000,   -1,  -1,
+    375, 750, 1500, 3000, 6000,   -1,   -1,  -1,
+    125, 250,  500, 1000, 2000, 4000, 8000,  -1,
+    160, 320,  640, 1280, 2560, 5120,   -1,  -1,
+    250, 500, 1000, 2000, 4000, 8000,   -1,  -1
 };
-   
+
 
 /**********************/
 /* Internal functions */
 /**********************/
 
 int
-_dc1394_get_wh_from_format(int format, int mode, int *w, int *h) 
+_dc1394_get_wh_from_format(int format, int mode, int *w, int *h)
 {
 
-    switch(format) 
+    switch (format)
     {
     case FORMAT_VGA_NONCOMPRESSED:
-        switch(mode) 
+        switch (mode)
         {
         case MODE_160x120_YUV444:
-            *w = 160;*h=120;
+            *w = 160;
+            *h=120;
             return DC1394_SUCCESS;
         case MODE_320x240_YUV422:
-            *w = 320;*h=240;
+            *w = 320;
+            *h=240;
             return DC1394_SUCCESS;
         case MODE_640x480_YUV411:
         case MODE_640x480_YUV422:
         case MODE_640x480_RGB:
         case MODE_640x480_MONO:
         case MODE_640x480_MONO16:
-            *w =640;*h=480;
+            *w =640;
+            *h=480;
             return DC1394_SUCCESS;
         default:
             return DC1394_FAILURE;
         }
     case FORMAT_SVGA_NONCOMPRESSED_1:
-        switch(mode) 
+        switch (mode)
         {
         case MODE_800x600_YUV422:
         case MODE_800x600_RGB:
         case MODE_800x600_MONO:
         case MODE_800x600_MONO16:
-            *w=800;*h=600;
+            *w=800;
+            *h=600;
             return DC1394_SUCCESS;
         case MODE_1024x768_YUV422:
         case MODE_1024x768_RGB:
         case MODE_1024x768_MONO:
         case MODE_1024x768_MONO16:
-            *w=1024;*h=768;
+            *w=1024;
+            *h=768;
             return DC1394_SUCCESS;
         default:
             return DC1394_FAILURE;
         }
     case FORMAT_SVGA_NONCOMPRESSED_2:
-        switch(mode) 
+        switch (mode)
         {
         case MODE_1280x960_YUV422:
         case MODE_1280x960_RGB:
         case MODE_1280x960_MONO:
         case MODE_1280x960_MONO16:
-            *w=1280;*h=960;
+            *w=1280;
+            *h=960;
             return DC1394_SUCCESS;
         case MODE_1600x1200_YUV422:
         case MODE_1600x1200_RGB:
         case MODE_1600x1200_MONO:
         case MODE_1600x1200_MONO16:
-            *w=1600;*h=1200;
+            *w=1600;
+            *h=1200;
             return DC1394_SUCCESS;
         default:
             return DC1394_FAILURE;
@@ -316,25 +323,25 @@ _dc1394_get_wh_from_format(int format, int mode, int *w, int *h)
     }
 
 }
-	
+
 /********************************************************
  _dc1394_get_quadlets_per_packet
 
- This routine reports the number of useful image quadlets 
+ This routine reports the number of useful image quadlets
  per packet
 *********************************************************/
-int 
-_dc1394_get_quadlets_per_packet(int format, int mode, int frame_rate) 
+int
+_dc1394_get_quadlets_per_packet(int format, int mode, int frame_rate)
 {
     int mode_index, frame_rate_index= frame_rate - FRAMERATE_MIN;
 
-    switch(format) 
+    switch (format)
     {
     case FORMAT_VGA_NONCOMPRESSED:
         mode_index= mode - MODE_FORMAT0_MIN;
 
-        if ( ((mode >= MODE_FORMAT0_MIN) && (mode <= MODE_FORMAT0_MAX)) && 
-             ((frame_rate >= FRAMERATE_MIN) && (frame_rate <= FRAMERATE_MAX)) )
+        if ( ((mode >= MODE_FORMAT0_MIN) && (mode <= MODE_FORMAT0_MAX)) &&
+                ((frame_rate >= FRAMERATE_MIN) && (frame_rate <= FRAMERATE_MAX)) )
         {
             return quadlets_per_packet_format_0[NUM_FRAMERATES*mode_index+frame_rate_index];
         }
@@ -348,8 +355,8 @@ _dc1394_get_quadlets_per_packet(int format, int mode, int frame_rate)
     case FORMAT_SVGA_NONCOMPRESSED_1:
         mode_index= mode - MODE_FORMAT1_MIN;
 
-        if ( ((mode >= MODE_FORMAT1_MIN) && (mode <= MODE_FORMAT1_MAX)) && 
-             ((frame_rate >= FRAMERATE_MIN) && (frame_rate <= FRAMERATE_MAX)) )
+        if ( ((mode >= MODE_FORMAT1_MIN) && (mode <= MODE_FORMAT1_MAX)) &&
+                ((frame_rate >= FRAMERATE_MIN) && (frame_rate <= FRAMERATE_MAX)) )
         {
             return quadlets_per_packet_format_1[NUM_FRAMERATES*mode_index+frame_rate_index];
         }
@@ -363,8 +370,8 @@ _dc1394_get_quadlets_per_packet(int format, int mode, int frame_rate)
     case FORMAT_SVGA_NONCOMPRESSED_2:
         mode_index= mode - MODE_FORMAT2_MIN;
 
-        if ( ((mode >= MODE_FORMAT2_MIN) && (mode <= MODE_FORMAT2_MAX)) && 
-             ((frame_rate >= FRAMERATE_MIN) && (frame_rate <= FRAMERATE_MAX)) )
+        if ( ((mode >= MODE_FORMAT2_MIN) && (mode <= MODE_FORMAT2_MAX)) &&
+                ((frame_rate >= FRAMERATE_MIN) && (frame_rate <= FRAMERATE_MAX)) )
         {
             return quadlets_per_packet_format_2[NUM_FRAMERATES*mode_index+frame_rate_index];
         }
@@ -387,18 +394,18 @@ _dc1394_get_quadlets_per_packet(int format, int mode, int frame_rate)
 /**********************************************************
  _dc1394_quadlets_from_format
 
- This routine reports the number of quadlets that make up a 
+ This routine reports the number of quadlets that make up a
  frame given the format and mode
 ***********************************************************/
 int
-_dc1394_quadlets_from_format(int format, int mode) 
+_dc1394_quadlets_from_format(int format, int mode)
 {
 
-    switch (format) 
+    switch (format)
     {
     case FORMAT_VGA_NONCOMPRESSED:
 
-        switch(mode) 
+        switch (mode)
         {
         case MODE_160x120_YUV444:
             return 14400;   //160x120*3/4
@@ -420,9 +427,9 @@ _dc1394_quadlets_from_format(int format, int mode)
         }
 
         break;
-    case FORMAT_SVGA_NONCOMPRESSED_1: 
+    case FORMAT_SVGA_NONCOMPRESSED_1:
 
-        switch(mode) 
+        switch (mode)
         {
         case MODE_800x600_YUV422:
             return 240000;  //800x600/2
@@ -448,7 +455,7 @@ _dc1394_quadlets_from_format(int format, int mode)
         break;
     case FORMAT_SVGA_NONCOMPRESSED_2:
 
-        switch (mode) 
+        switch (mode)
         {
         case MODE_1280x960_YUV422:
             return 614400;  //1280x960/2
@@ -494,11 +501,11 @@ GetCameraROMValue(raw1394handle_t handle, nodeid_t node,
     int retval, retry= MAX_RETRIES;
 
     /* retry a few times if necessary (addition by PDJ) */
-    while(retry--) 
+    while (retry--)
     {
-      //fprintf(stderr,"get reg at 0x%llx : ", CONFIG_ROM_BASE + offset);
-      retval= raw1394_read(handle, 0xffc0 | node, CONFIG_ROM_BASE + offset, 4, value);
-      //fprintf(stderr,"0x%lx\n",*value);
+        //fprintf(stderr,"get reg at 0x%llx : ", CONFIG_ROM_BASE + offset);
+        retval= raw1394_read(handle, 0xffc0 | node, CONFIG_ROM_BASE + offset, 4, value);
+        //fprintf(stderr,"0x%lx\n",*value);
 
 #ifdef LIBRAW1394_OLD
         if (retval >= 0)
@@ -511,10 +518,10 @@ GetCameraROMValue(raw1394handle_t handle, nodeid_t node,
 #endif
 
             if ( ((ack == ACK_PENDING) || (ack == ACK_LOCAL)) &&
-                 (rcode == RESP_COMPLETE) )
-            { 
+                    (rcode == RESP_COMPLETE) )
+            {
                 /* conditionally byte swap the value */
-                *value= ntohl(*value); 
+                *value= ntohl(*value);
                 return 0;
             }
 
@@ -534,7 +541,7 @@ GetCameraROMValue(raw1394handle_t handle, nodeid_t node,
 
         usleep(SLOW_DOWN);
     }
-    
+
     *value= ntohl(*value);
     return retval;
 }
@@ -549,21 +556,21 @@ GetCameraControlRegister(raw1394handle_t handle, nodeid_t node,
 
     /* get the ccr_base address if not yet retrieved */
     if (camera != NULL) {
-      if (camera->ccr_base == 0) {
-        dc1394_camerainfo info;
-        if ( dc1394_get_camera_info(handle, node, &info) != DC1394_SUCCESS )
-	  return -1;
-      }
+        if (camera->ccr_base == 0) {
+            dc1394_camerainfo info;
+            if ( dc1394_get_camera_info(handle, node, &info) != DC1394_SUCCESS )
+                return -1;
+        }
     }
     else
-      return -1;
+        return -1;
 
     /* retry a few times if necessary (addition by PDJ) */
-    while(retry--) 
+    while (retry--)
     {
-      //fprintf(stderr,"get reg at 0x%llx : ", camera->ccr_base+offset);
-      retval= raw1394_read(handle, 0xffc0 | node, camera->ccr_base + offset, 4, value);
-      //fprintf(stderr,"0x%lx\n",*value);
+        //fprintf(stderr,"get reg at 0x%llx : ", camera->ccr_base+offset);
+        retval= raw1394_read(handle, 0xffc0 | node, camera->ccr_base + offset, 4, value);
+        //fprintf(stderr,"0x%lx\n",*value);
 
 #ifdef LIBRAW1394_OLD
         if (retval >= 0)
@@ -576,10 +583,10 @@ GetCameraControlRegister(raw1394handle_t handle, nodeid_t node,
 #endif
 
             if ( ((ack == ACK_PENDING) || (ack == ACK_LOCAL)) &&
-                 (rcode == RESP_COMPLETE) )
-            { 
+                    (rcode == RESP_COMPLETE) )
+            {
                 /* conditionally byte swap the value */
-                *value= ntohl(*value); 
+                *value= ntohl(*value);
                 return 0;
             }
 
@@ -588,8 +595,8 @@ GetCameraControlRegister(raw1394handle_t handle, nodeid_t node,
         if (!retval)
         {
             /* conditionally byte swap the value (addition by PDJ) */
-            *value= ntohl(*value);  
-            return retval; 
+            *value= ntohl(*value);
+            return retval;
         }
         else if (errno != EAGAIN)
         {
@@ -599,7 +606,7 @@ GetCameraControlRegister(raw1394handle_t handle, nodeid_t node,
 
         usleep(SLOW_DOWN);
     }
-    
+
     *value= ntohl(*value);
     return retval;
 }
@@ -614,20 +621,20 @@ SetCameraControlRegister(raw1394handle_t handle, nodeid_t node,
 
     /* get the ccr_base address if not yet retrieved */
     if (camera != NULL) {
-      if (camera->ccr_base == 0) {
-        dc1394_camerainfo info;
-        if ( dc1394_get_camera_info(handle, node, &info) != DC1394_SUCCESS )
-	  return -1;
-      }
+        if (camera->ccr_base == 0) {
+            dc1394_camerainfo info;
+            if ( dc1394_get_camera_info(handle, node, &info) != DC1394_SUCCESS )
+                return -1;
+        }
     }
     else
-      return -1;
+        return -1;
 
     /* conditionally byte swap the value (addition by PDJ) */
     value= htonl(value);
 
     /* retry a few times if necessary */
-    while(retry--)
+    while (retry--)
     {
         retval= raw1394_write(handle, 0xffc0 | node, camera->ccr_base + offset, 4,
                               &value);
@@ -643,13 +650,13 @@ SetCameraControlRegister(raw1394handle_t handle, nodeid_t node,
 #endif
 
             if ( ((ack == ACK_PENDING) || (ack == ACK_LOCAL) ||
-                  (ack == ACK_COMPLETE)) &&
-                 ((rcode == RESP_COMPLETE) || (rcode == RESP_SONY_HACK)) ) 
+                    (ack == ACK_COMPLETE)) &&
+                    ((rcode == RESP_COMPLETE) || (rcode == RESP_SONY_HACK)) )
             {
                 return 0;
             }
-            
-            
+
+
         }
 #else
         if (!retval || (errno != EAGAIN))
@@ -669,30 +676,30 @@ SetCameraControlRegister(raw1394handle_t handle, nodeid_t node,
 /********************************************************************************/
 int
 GetCameraAdvControlRegister(raw1394handle_t handle, nodeid_t node,
-                         octlet_t offset, quadlet_t *value)
+                            octlet_t offset, quadlet_t *value)
 {
     int retval, retry= MAX_RETRIES;
     dc1394_camerahandle *camera;
     quadlet_t adv_temp;
-    
-    camera = (dc1394_camerahandle*) raw1394_get_userdata( handle );
-    
-     
-    if(!camera->adv_csr)
-    {
-      if(GetCameraControlRegister(handle, node,REG_CAMERA_ADV_FEATURE_INQ, &adv_temp))
- return -1;
 
-      camera->adv_csr= adv_temp*4 + CONFIG_ROM_BASE;
+    camera = (dc1394_camerahandle*) raw1394_get_userdata( handle );
+
+
+    if (!camera->adv_csr)
+    {
+        if (GetCameraControlRegister(handle, node,REG_CAMERA_ADV_FEATURE_INQ, &adv_temp))
+            return -1;
+
+        camera->adv_csr= adv_temp*4 + CONFIG_ROM_BASE;
     }
 
     /* retry a few times if necessary (addition by PDJ) */
-    while(retry--) 
+    while (retry--)
     {
         retval= raw1394_read(handle, 0xffc0 | node, camera->adv_csr + offset,
                              4, value);
 
-/*        printf(" Get Adv debug : base = %Lux, offset = %Lux, base + offset = %Lux\n",camera->adv_csr,offset, camera->adv_csr+offset);*/
+        /*        printf(" Get Adv debug : base = %Lux, offset = %Lux, base + offset = %Lux\n",camera->adv_csr,offset, camera->adv_csr+offset);*/
 
 #ifdef LIBRAW1394_OLD
         if (retval >= 0)
@@ -705,10 +712,10 @@ GetCameraAdvControlRegister(raw1394handle_t handle, nodeid_t node,
 #endif
 
             if ( ((ack == ACK_PENDING) || (ack == ACK_LOCAL)) &&
-                 (rcode == RESP_COMPLETE) )
-            { 
+                    (rcode == RESP_COMPLETE) )
+            {
                 /* conditionally byte swap the value */
-                *value= ntohl(*value); 
+                *value= ntohl(*value);
                 return 0;
             }
 
@@ -717,8 +724,8 @@ GetCameraAdvControlRegister(raw1394handle_t handle, nodeid_t node,
         if (!retval)
         {
             /* conditionally byte swap the value (addition by PDJ) */
-            *value= ntohl(*value);  
-            return retval; 
+            *value= ntohl(*value);
+            return retval;
         }
         else if (errno != EAGAIN)
         {
@@ -728,7 +735,7 @@ GetCameraAdvControlRegister(raw1394handle_t handle, nodeid_t node,
 
         usleep(SLOW_DOWN);
     }
-    
+
     *value= ntohl(*value);
     return retval;
 }
@@ -739,31 +746,31 @@ GetCameraAdvControlRegister(raw1394handle_t handle, nodeid_t node,
 /********************************************************************************/
 int
 SetCameraAdvControlRegister(raw1394handle_t handle, nodeid_t node,
-                         octlet_t offset, quadlet_t value)
+                            octlet_t offset, quadlet_t value)
 {
     int retval, retry= MAX_RETRIES;
     dc1394_camerahandle *camera;
     quadlet_t adv_temp;
-    
-    camera = (dc1394_camerahandle*) raw1394_get_userdata( handle );
-    
-    if(!camera->adv_csr)
-    {
-      if(GetCameraControlRegister(handle, node,REG_CAMERA_ADV_FEATURE_INQ, &adv_temp))
- return -1;
 
-      camera->adv_csr= adv_temp*4 + CONFIG_ROM_BASE;
+    camera = (dc1394_camerahandle*) raw1394_get_userdata( handle );
+
+    if (!camera->adv_csr)
+    {
+        if (GetCameraControlRegister(handle, node,REG_CAMERA_ADV_FEATURE_INQ, &adv_temp))
+            return -1;
+
+        camera->adv_csr= adv_temp*4 + CONFIG_ROM_BASE;
     }
 
     /* conditionally byte swap the value (addition by PDJ) */
     value= htonl(value);
 
     /* retry a few times if necessary */
-    while(retry--)
+    while (retry--)
     {
         retval= raw1394_write(handle, 0xffc0 | node, camera->adv_csr + offset, 4,
                               &value);
-/*        printf(" Set Adv debug : base = %Lux, offset = %Lux, base + offset = %Lux\n",camera->adv_csr,offset, camera->adv_csr+offset); */
+        /*        printf(" Set Adv debug : base = %Lux, offset = %Lux, base + offset = %Lux\n",camera->adv_csr,offset, camera->adv_csr+offset); */
 #ifdef LIBRAW1394_OLD
         if (retval >= 0)
         {
@@ -775,12 +782,12 @@ SetCameraAdvControlRegister(raw1394handle_t handle, nodeid_t node,
 #endif
 
             if ( ((ack == ACK_PENDING) || (ack == ACK_LOCAL) ||
-                  (ack == ACK_COMPLETE)) &&
-                 ((rcode == RESP_COMPLETE) || (rcode == RESP_SONY_HACK)) ) 
+                    (ack == ACK_COMPLETE)) &&
+                    ((rcode == RESP_COMPLETE) || (rcode == RESP_SONY_HACK)) )
             {
                 return 0;
             }
-            
+
         }
 #else
         if (!retval || (errno != EAGAIN))
@@ -801,9 +808,9 @@ IsFeatureBitSet(quadlet_t value, unsigned int feature)
 
     if (feature >= FEATURE_ZOOM)
     {
-      if (feature >= FEATURE_CAPTURE_SIZE) {
-	feature+= 12;
-      }
+        if (feature >= FEATURE_CAPTURE_SIZE) {
+            feature+= 12;
+        }
         feature-= FEATURE_ZOOM;
     }
     else
@@ -814,12 +821,12 @@ IsFeatureBitSet(quadlet_t value, unsigned int feature)
     value&=(0x80000000UL >> feature);
 
     if (value>0)
-      return DC1394_TRUE;
+        return DC1394_TRUE;
     else
-      return DC1394_FALSE;
+        return DC1394_FALSE;
 }
 
-static int 
+static int
 SetFeatureValue(raw1394handle_t handle, nodeid_t node,
                 unsigned int feature, unsigned int value)
 {
@@ -835,7 +842,7 @@ SetFeatureValue(raw1394handle_t handle, nodeid_t node,
     }
 
     retval= SetCameraControlRegister(handle, node, offset,
-                                    (curval & 0xFFFFF000UL) |
+                                     (curval & 0xFFFFF000UL) |
                                      (value & 0xFFFUL));
     return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
@@ -860,42 +867,42 @@ GetFeatureValue(raw1394handle_t handle, nodeid_t node,
 
 static int
 GetConfigROMTaggedRegister(raw1394handle_t handle, nodeid_t node,
-			   unsigned int tag, octlet_t *offset, quadlet_t *value)
+                           unsigned int tag, octlet_t *offset, quadlet_t *value)
 {
-  unsigned int block_length;
-  int i;
+    unsigned int block_length;
+    int i;
 
-  //fprintf(stderr,"tag\n");
-  // get the block length
-  if (GetCameraROMValue(handle,node,*offset,value)<0) {
-    //fprintf(stderr,"rom probe failed for tag 0x%x\n",tag);
-    return DC1394_FAILURE;
-  }
-  
-  //fprintf(stderr,"tag\n");
-  block_length=*value>>16;
-
-  if (*offset+block_length*4>CSR_CONFIG_ROM_END) {
-    block_length=(CSR_CONFIG_ROM_END-*offset)/4;
-  }
-
-  // find the tag and return the result
-  for (i=0;i<block_length;i++) {
-    *offset+=4;
+    //fprintf(stderr,"tag\n");
+    // get the block length
     if (GetCameraROMValue(handle,node,*offset,value)<0) {
-      //fprintf(stderr,"rom probe failed for tag 0x%x\n",tag);
-      return DC1394_FAILURE;
+        //fprintf(stderr,"rom probe failed for tag 0x%x\n",tag);
+        return DC1394_FAILURE;
     }
-    else {
-      if ((*value>>24)==tag) {
-	//fprintf(stderr,"got tag 0x%x\n",tag);
-	return DC1394_SUCCESS;
-      }
-    }
-  }
 
-  //fprintf(stderr,"failed for tag 0x%x\n",tag);
-  return DC1394_FAILURE;
+    //fprintf(stderr,"tag\n");
+    block_length=*value>>16;
+
+    if (*offset+block_length*4>CSR_CONFIG_ROM_END) {
+        block_length=(CSR_CONFIG_ROM_END-*offset)/4;
+    }
+
+    // find the tag and return the result
+    for (i=0;i<block_length;i++) {
+        *offset+=4;
+        if (GetCameraROMValue(handle,node,*offset,value)<0) {
+            //fprintf(stderr,"rom probe failed for tag 0x%x\n",tag);
+            return DC1394_FAILURE;
+        }
+        else {
+            if ((*value>>24)==tag) {
+                //fprintf(stderr,"got tag 0x%x\n",tag);
+                return DC1394_SUCCESS;
+            }
+        }
+    }
+
+    //fprintf(stderr,"failed for tag 0x%x\n",tag);
+    return DC1394_FAILURE;
 
 }
 
@@ -904,14 +911,14 @@ GetConfigROMTaggedRegister(raw1394handle_t handle, nodeid_t node,
 /* External functions */
 /**********************/
 
-nodeid_t* 
+nodeid_t*
 dc1394_get_camera_nodes(raw1394handle_t handle, int *numCameras,
-                        int showCameras) 
+                        int showCameras)
 {
-    nodeid_t * nodes; 
+    nodeid_t * nodes;
     dc1394bool_t isCamera;
     int numNodes;
-    int i;  
+    int i;
     dc1394_camerainfo caminfo;
 
     numNodes= raw1394_get_nodecount(handle);
@@ -921,17 +928,17 @@ dc1394_get_camera_nodes(raw1394handle_t handle, int *numCameras,
        numNodes-1 possible camera nodes */
     nodes=(nodeid_t*)calloc(numNodes - 1, sizeof(nodeid_t));
 
-    for (i= 0; i < (numNodes - 1); i++) 
+    for (i= 0; i < (numNodes - 1); i++)
     {
         nodes[i]= DC1394_NO_CAMERA;
     }
 
-    for (i= 0; i < numNodes; i++) 
+    for (i= 0; i < numNodes; i++)
     {
-      dc1394_is_camera(handle, i, &isCamera);
+        dc1394_is_camera(handle, i, &isCamera);
 
-        if (isCamera) 
-	  {
+        if (isCamera)
+        {
             nodes[*numCameras]= i;
             (*numCameras)++;
 
@@ -939,11 +946,11 @@ dc1394_get_camera_nodes(raw1394handle_t handle, int *numCameras,
             {
 
                 if (dc1394_get_camera_info(handle, i, &caminfo)
-                    == DC1394_SUCCESS) 
+                        == DC1394_SUCCESS)
                 {
                     dc1394_print_camera_info(&caminfo);
                 }
-                else 
+                else
                 {
                     printf("Couldn't get camera info (%d)!\n", i);
                 }
@@ -952,14 +959,14 @@ dc1394_get_camera_nodes(raw1394handle_t handle, int *numCameras,
 
         }
         /*
-	  else 
+        else
         {
             printf("node %d is not a camera\n", i);
         }
-	*/
+        */
     }
 
-    return nodes; 
+    return nodes;
 }
 
 /**********************************************************************
@@ -968,15 +975,15 @@ dc1394_get_camera_nodes(raw1394handle_t handle, int *numCameras,
  This returns the available cameras on the bus.
 
  It returns the node id's in the same index as the id specified
- the ids array contains a list of the low quadlet of the unique camera 
+ the ids array contains a list of the low quadlet of the unique camera
  ids.
- Returns -1 in numCameras and NULL from the call if there is a problem, 
+ Returns -1 in numCameras and NULL from the call if there is a problem,
  otherwise the number of cameras and the nodeid_t array from the call
 ***********************************************************************/
-nodeid_t* 
-dc1394_get_sorted_camera_nodes(raw1394handle_t handle,int numIds, 
+nodeid_t*
+dc1394_get_sorted_camera_nodes(raw1394handle_t handle,int numIds,
                                int *ids, int *numCameras,
-                              int showCameras) 
+                               int showCameras)
 {
     int numNodes, i,j, uid, foundId, extraId;
     dc1394bool_t isCamera;
@@ -990,14 +997,14 @@ dc1394_get_sorted_camera_nodes(raw1394handle_t handle,int numIds,
        numNodes-1 possible camera nodes */
     nodes= (nodeid_t*)calloc(numNodes - 1, sizeof(nodeid_t));
 
-    for (i= 0; i < (numNodes - 1); i++) 
+    for (i= 0; i < (numNodes - 1); i++)
     {
-      nodes[i]= DC1394_NO_CAMERA;
-   }
+        nodes[i]= DC1394_NO_CAMERA;
+    }
 
     extraId= numIds;
 
-    for (i= 0; i < numNodes; i++) 
+    for (i= 0; i < numNodes; i++)
     {
         dc1394_is_camera(handle, i, &isCamera);
 
@@ -1011,10 +1018,10 @@ dc1394_get_sorted_camera_nodes(raw1394handle_t handle,int numIds,
             uid= caminfo.euid_64 & 0xffffffff;
             foundId= 0;
 
-            for (j= 0; j < numIds; j++) 
+            for (j= 0; j < numIds; j++)
             {
 
-                if (ids[j] == uid) 
+                if (ids[j] == uid)
                 {
                     nodes[j]= i;
                     foundId= 1;
@@ -1026,10 +1033,10 @@ dc1394_get_sorted_camera_nodes(raw1394handle_t handle,int numIds,
             /* if it isn't then we need to put it in one of the extra
                spaces- but check first to make sure we aren't overflowing
                our bounds */
-            if (foundId == 0) 
+            if (foundId == 0)
             {
 
-                if (extraId >= (numNodes-1)) 
+                if (extraId >= (numNodes-1))
                 {
                     *numCameras= -1;
                     free(nodes);
@@ -1054,8 +1061,8 @@ dc1394_get_sorted_camera_nodes(raw1394handle_t handle,int numIds,
  This creates a raw1394_handle
  If a handle can't be created, it returns NULL
 *****************************************************/
-raw1394handle_t 
-dc1394_create_handle(int port) 
+raw1394handle_t
+dc1394_create_handle(int port)
 {
     raw1394handle_t handle;
     int i;
@@ -1072,7 +1079,7 @@ dc1394_create_handle(int port)
         return NULL;
     }
 
-    if (raw1394_set_port(handle, port) < 0) 
+    if (raw1394_set_port(handle, port) < 0)
     {
 
         if (handle != NULL)
@@ -1087,7 +1094,7 @@ dc1394_create_handle(int port)
     camera->sw_version=0;
 
     for (i=0;i<NUM_MODE_FORMAT7;i++) {
-      camera->format7_csr[i]=0;
+        camera->format7_csr[i]=0;
     }
     raw1394_set_userdata( handle, (void*) camera );
 
@@ -1100,9 +1107,9 @@ dc1394_destroy_handle( raw1394handle_t handle )
     dc1394_camerahandle *camera;
 
     camera = (dc1394_camerahandle*) raw1394_get_userdata( handle );
-    if(camera) 
+    if (camera)
         free(camera);
-    if( handle != NULL )
+    if ( handle != NULL )
         raw1394_destroy_handle(handle);
 
     return DC1394_SUCCESS;
@@ -1132,25 +1139,25 @@ dc1394_is_camera(raw1394handle_t handle, nodeid_t node, dc1394bool_t *value)
     /* get the unit_directory offset */
     offset= ROM_ROOT_DIRECTORY;
     if (GetConfigROMTaggedRegister(handle, node, 0xD1, &offset, &quadval)!=DC1394_SUCCESS) {
-      *value= DC1394_FALSE;
-      return DC1394_FAILURE;
+        *value= DC1394_FALSE;
+        return DC1394_FAILURE;
     }
     else {
-      ud_offset=(quadval & 0xFFFFFFUL)*4+offset;
+        ud_offset=(quadval & 0xFFFFFFUL)*4+offset;
     }
-  
+
     /* get the unit_spec_ID (should be 0x00A02D for 1394 digital camera) */
     offset=ud_offset;
     if (GetConfigROMTaggedRegister(handle, node, 0x12, &offset, &quadval)!=DC1394_SUCCESS) {
-      *value= DC1394_FALSE;
-      return DC1394_FAILURE;
+        *value= DC1394_FALSE;
+        return DC1394_FAILURE;
     }
     else {
-      quadval&=0xFFFFFFUL;
+        quadval&=0xFFFFFFUL;
     }
 
     ptgrey=(quadval == 0x00B09DUL);
-  
+
     if ( ! ( (quadval == 0x00A02DUL) || ptgrey) )
     {
         *value= DC1394_FALSE;
@@ -1161,14 +1168,14 @@ dc1394_is_camera(raw1394handle_t handle, nodeid_t node, dc1394bool_t *value)
     /* get the unit_sw_version (should be 0x000100 - 0x000102 for 1394 digital camera) */
     /* DRD> without this check, AV/C cameras show up as well */
     if (dc1394_get_sw_version(handle,node, &version)!=DC1394_SUCCESS) {
-      *value=DC1394_FALSE;
-      return DC1394_FAILURE;
+        *value=DC1394_FALSE;
+        return DC1394_FAILURE;
     }
     else {
-      if (version!=-1)
-	*value=DC1394_TRUE;
-      else
-	*value=DC1394_FALSE;
+        if (version!=-1)
+            *value=DC1394_TRUE;
+        else
+            *value=DC1394_FALSE;
     }
 
     return DC1394_SUCCESS;
@@ -1177,128 +1184,128 @@ dc1394_is_camera(raw1394handle_t handle, nodeid_t node, dc1394bool_t *value)
 int
 dc1394_get_sw_version(raw1394handle_t handle, nodeid_t node, int *version)
 {
-  dc1394_camerahandle *camera;
-  octlet_t offset;
-  octlet_t ud_offset = 0;
-  octlet_t udd_offset = 0;
-  quadlet_t quadval = 0;
+    dc1394_camerahandle *camera;
+    octlet_t offset;
+    octlet_t ud_offset = 0;
+    octlet_t udd_offset = 0;
+    quadlet_t quadval = 0;
 
-  camera = (dc1394_camerahandle*) raw1394_get_userdata( handle );  
-  if (camera != NULL && camera->sw_version > 0) {
-    *version = camera->sw_version;
-  }
-  else {
-    
-    /* get the unit_directory offset */
-    offset= ROM_ROOT_DIRECTORY;
-    if (GetConfigROMTaggedRegister(handle, node, 0xD1, &offset, &quadval)!=DC1394_SUCCESS) {
-      *version= -1;
-      return DC1394_FAILURE;
+    camera = (dc1394_camerahandle*) raw1394_get_userdata( handle );
+    if (camera != NULL && camera->sw_version > 0) {
+        *version = camera->sw_version;
     }
     else {
-      ud_offset=(quadval & 0xFFFFFFUL)*4+offset;
+
+        /* get the unit_directory offset */
+        offset= ROM_ROOT_DIRECTORY;
+        if (GetConfigROMTaggedRegister(handle, node, 0xD1, &offset, &quadval)!=DC1394_SUCCESS) {
+            *version= -1;
+            return DC1394_FAILURE;
+        }
+        else {
+            ud_offset=(quadval & 0xFFFFFFUL)*4+offset;
+        }
+
+        /* get the unit_sw_version  */
+        offset = ud_offset;
+        if (GetConfigROMTaggedRegister(handle, node, 0x13, &offset, &quadval)!=DC1394_SUCCESS) {
+            *version = -1;
+            return DC1394_FAILURE;
+        }
+        else {
+            switch (quadval&0xFFFFFFUL) {
+            case 0x100:
+                *version=IIDC_VERSION_1_04;
+                break;
+            case 0x101:
+                *version=IIDC_VERSION_1_20;
+                break;
+            case 0x102:
+                *version=IIDC_VERSION_1_30;
+                break;
+            case 0x114:
+            case 0x800002:
+                /* get the unit_spec_ID (should be 0x00A02D for 1394 digital camera) */
+                if (GetConfigROMTaggedRegister(handle, node, 0x12, &ud_offset, &quadval)!=DC1394_SUCCESS) {
+                    *version = -1;
+                    return DC1394_FAILURE;
+                }
+                else {
+                    quadval&=0xFFFFFFUL;
+                }
+                if (quadval == 0x00B09DUL)
+                    *version=IIDC_VERSION_PTGREY;
+                else
+                    *version = -1;
+                break;
+            }
+        }
     }
-      
-    /* get the unit_sw_version  */
-    offset = ud_offset;
-    if (GetConfigROMTaggedRegister(handle, node, 0x13, &offset, &quadval)!=DC1394_SUCCESS) {
-      *version = -1;
-      return DC1394_FAILURE;
+    //fprintf(stderr,"sw version is %d\n",*version);
+    /*IIDC 1.31 check*/
+    if (*version==IIDC_VERSION_1_30) {
+
+        /* get the unit_dependent_directory offset */
+        offset= ud_offset;
+        if (GetConfigROMTaggedRegister(handle, node, 0xD4, &offset, &quadval)!=DC1394_SUCCESS) {
+            *version = -1;
+            return DC1394_FAILURE;
+        }
+        else {
+            udd_offset=(quadval & 0xFFFFFFUL)*4+offset;
+        }
+
+        if (GetConfigROMTaggedRegister(handle, node, 0x38, &udd_offset, &quadval)!=DC1394_SUCCESS) {
+            // if it fails here we return success with the most accurate version estimation: 1.30.
+            // this is because the GetConfigROMTaggedRegister will return a failure both if there is a comm
+            // problem but also if the tag is not found. In the latter case it simply means that the
+            // camera version is 1.30
+            *version=IIDC_VERSION_1_30;
+            return DC1394_SUCCESS;
+        }
+        else {
+            //fprintf(stderr,"1.3x register is 0x%x\n",quadval);
+            switch (quadval&0xFFFFFFUL) {
+            case 0x10:
+                *version=IIDC_VERSION_1_31;
+                break;
+            case 0x20:
+                *version=IIDC_VERSION_1_32;
+                break;
+            case 0x30:
+                *version=IIDC_VERSION_1_33;
+                break;
+            case 0x40:
+                *version=IIDC_VERSION_1_34;
+                break;
+            case 0x50:
+                *version=IIDC_VERSION_1_35;
+                break;
+            case 0x60:
+                *version=IIDC_VERSION_1_36;
+                break;
+            case 0x70:
+                *version=IIDC_VERSION_1_37;
+                break;
+            case 0x80:
+                *version=IIDC_VERSION_1_38;
+                break;
+            case 0x90:
+                *version=IIDC_VERSION_1_39;
+                break;
+            default:
+                *version=IIDC_VERSION_1_30;
+                break;
+            }
+        }
     }
-    else {
-      switch (quadval&0xFFFFFFUL) {
-      case 0x100:
-	*version=IIDC_VERSION_1_04;
-	break;
-      case 0x101:
-	*version=IIDC_VERSION_1_20;
-	break;
-      case 0x102:
-	*version=IIDC_VERSION_1_30;
-	break;
-      case 0x114:
-      case 0x800002:
-	/* get the unit_spec_ID (should be 0x00A02D for 1394 digital camera) */
-	if (GetConfigROMTaggedRegister(handle, node, 0x12, &ud_offset, &quadval)!=DC1394_SUCCESS) {
-	  *version = -1;
-	  return DC1394_FAILURE;
-	}
-	else {
-	  quadval&=0xFFFFFFUL;
-	}
-	if (quadval == 0x00B09DUL)
-	  *version=IIDC_VERSION_PTGREY;
-	else
-	  *version = -1;
-	break;
-      }
-    }
-  }
-  //fprintf(stderr,"sw version is %d\n",*version);
-  /*IIDC 1.31 check*/
-  if (*version==IIDC_VERSION_1_30) {
-    
-    /* get the unit_dependent_directory offset */
-    offset= ud_offset;
-    if (GetConfigROMTaggedRegister(handle, node, 0xD4, &offset, &quadval)!=DC1394_SUCCESS) {
-      *version = -1;
-      return DC1394_FAILURE;
-    }
-    else {
-      udd_offset=(quadval & 0xFFFFFFUL)*4+offset;
-    }
-    
-    if (GetConfigROMTaggedRegister(handle, node, 0x38, &udd_offset, &quadval)!=DC1394_SUCCESS) {
-      // if it fails here we return success with the most accurate version estimation: 1.30.
-      // this is because the GetConfigROMTaggedRegister will return a failure both if there is a comm
-      // problem but also if the tag is not found. In the latter case it simply means that the
-      // camera version is 1.30
-      *version=IIDC_VERSION_1_30;
-      return DC1394_SUCCESS;
-    }
-    else {
-      //fprintf(stderr,"1.3x register is 0x%x\n",quadval);
-      switch (quadval&0xFFFFFFUL) {
-      case 0x10:
-	*version=IIDC_VERSION_1_31;
-	break;
-      case 0x20:
-	*version=IIDC_VERSION_1_32;
-	break;
-      case 0x30:
-	*version=IIDC_VERSION_1_33;
-	break;
-      case 0x40:
-	*version=IIDC_VERSION_1_34;
-	break;
-      case 0x50:
-	*version=IIDC_VERSION_1_35;
-	break;
-      case 0x60:
-	*version=IIDC_VERSION_1_36;
-	break;
-      case 0x70:
-	*version=IIDC_VERSION_1_37;
-	break;
-      case 0x80:
-	*version=IIDC_VERSION_1_38;
-	break;
-      case 0x90:
-	*version=IIDC_VERSION_1_39;
-	break;
-      default:
-	*version=IIDC_VERSION_1_30;
-	break;
-      }
-    }
-  }
-  camera->sw_version=*version;
-  
-  return DC1394_SUCCESS;
+    camera->sw_version=*version;
+
+    return DC1394_SUCCESS;
 }
 
 void
-dc1394_print_camera_info(dc1394_camerainfo *info) 
+dc1394_print_camera_info(dc1394_camerainfo *info)
 {
     quadlet_t value[2];
 
@@ -1307,7 +1314,7 @@ dc1394_print_camera_info(dc1394_camerainfo *info)
     printf("CAMERA INFO\n===============\n");
     printf("Node: %x\n", info->id);
     printf("CCR_Offset: %Lux\n", info->ccr_offset);
-    //L added by tim evers 
+    //L added by tim evers
     printf("UID: 0x%08x%08x\n", value[1], value[0]);
     printf("Vendor: %s\tModel: %s\n\n", info->vendor, info->model);
     fflush(stdout);
@@ -1327,7 +1334,7 @@ dc1394_get_camera_info(raw1394handle_t handle, nodeid_t node,
     camera = (dc1394_camerahandle*) raw1394_get_userdata( handle );
 
     if ( (retval= dc1394_is_camera(handle, node, &iscamera)) !=
-         DC1394_SUCCESS )
+            DC1394_SUCCESS )
     {
 #ifdef SHOW_ERRORS
         printf("Error - this is not a camera (get_camera_info)\n");
@@ -1358,104 +1365,104 @@ dc1394_get_camera_info(raw1394handle_t handle, nodeid_t node,
     /* get the unit_directory offset */
     offset= ROM_ROOT_DIRECTORY;
     if (GetConfigROMTaggedRegister(handle, node, 0xD1, &offset, &quadval)!=DC1394_SUCCESS) {
-      return DC1394_FAILURE;
+        return DC1394_FAILURE;
     }
     else {
-      ud_offset=(quadval & 0xFFFFFFUL)*4+offset;
+        ud_offset=(quadval & 0xFFFFFFUL)*4+offset;
     }
 
     /* get the unit_dependent_directory offset */
     offset= ud_offset;
     if (GetConfigROMTaggedRegister(handle, node, 0xD4, &offset, &quadval)!=DC1394_SUCCESS) {
-      return DC1394_FAILURE;
+        return DC1394_FAILURE;
     }
     else {
-      udd_offset=(quadval & 0xFFFFFFUL)*4+offset;
+        udd_offset=(quadval & 0xFFFFFFUL)*4+offset;
     }
 
     /* now get the command_regs_base */
     offset= udd_offset;
     if (GetConfigROMTaggedRegister(handle, node, 0x40, &offset, &quadval)!=DC1394_SUCCESS) {
-      return DC1394_FAILURE;
+        return DC1394_FAILURE;
     }
     else {
-      info->ccr_offset= (octlet_t)(quadval & 0xFFFFFFUL)*4;
+        info->ccr_offset= (octlet_t)(quadval & 0xFFFFFFUL)*4;
         if (camera != NULL)
-          camera->ccr_base = CONFIG_ROM_BASE + info->ccr_offset;
+            camera->ccr_base = CONFIG_ROM_BASE + info->ccr_offset;
     }
 
     /* get the vendor_name_leaf offset (optional) */
     offset= udd_offset;
     info->vendor[0] = '\0';
     if (GetConfigROMTaggedRegister(handle, node, 0x81, &offset, &quadval)==DC1394_SUCCESS) {
-      offset=(quadval & 0xFFFFFFUL)*4+offset;
+        offset=(quadval & 0xFFFFFFUL)*4+offset;
 
-      /* read in the length of the vendor name */
-      if (GetCameraROMValue(handle, node, offset, &value[0]) < 0)
-      {
-        return DC1394_FAILURE;
-      }
-
-      len= (int)(value[0] >> 16)*4-8; /* Tim Evers corrected length value */ 
-
-      if (len > MAX_CHARS)
-      {
-          len= MAX_CHARS;
-      }
-      offset+= 12;
-      count= 0;
-
-      /* grab the vendor name */
-      while (len > 0)
-      {
-        if (GetCameraROMValue(handle, node, offset+count, &value[0]) < 0)
+        /* read in the length of the vendor name */
+        if (GetCameraROMValue(handle, node, offset, &value[0]) < 0)
         {
             return DC1394_FAILURE;
         }
-        info->vendor[count++]= (value[0] >> 24);
-        info->vendor[count++]= (value[0] >> 16) & 0xFFUL;
-        info->vendor[count++]= (value[0] >> 8) & 0xFFUL;
-        info->vendor[count++]= value[0] & 0xFFUL;
-        len-= 4;
-      }
-      info->vendor[count]= '\0';
+
+        len= (int)(value[0] >> 16)*4-8; /* Tim Evers corrected length value */
+
+        if (len > MAX_CHARS)
+        {
+            len= MAX_CHARS;
+        }
+        offset+= 12;
+        count= 0;
+
+        /* grab the vendor name */
+        while (len > 0)
+        {
+            if (GetCameraROMValue(handle, node, offset+count, &value[0]) < 0)
+            {
+                return DC1394_FAILURE;
+            }
+            info->vendor[count++]= (value[0] >> 24);
+            info->vendor[count++]= (value[0] >> 16) & 0xFFUL;
+            info->vendor[count++]= (value[0] >> 8) & 0xFFUL;
+            info->vendor[count++]= value[0] & 0xFFUL;
+            len-= 4;
+        }
+        info->vendor[count]= '\0';
     }
 
     /* get the model_name_leaf offset (optional) */
     offset= udd_offset;
     info->model[0] = '\0';
     if (GetConfigROMTaggedRegister(handle, node, 0x82, &offset, &quadval)==DC1394_SUCCESS) {
-      offset=(quadval & 0xFFFFFFUL)*4+offset;
+        offset=(quadval & 0xFFFFFFUL)*4+offset;
 
-      /* read in the length of the model name */
-      if (GetCameraROMValue(handle, node, offset, &value[0]) < 0)
-      {
-        return DC1394_FAILURE;
-      }
-
-      len= (int)(value[0] >> 16)*4-8; /* Tim Evers corrected length value */ 
-
-      if (len > MAX_CHARS)
-      {
-          len= MAX_CHARS;
-      }
-      offset+= 12;
-      count= 0;
-
-      /* grab the model name */
-      while (len > 0)
-      {
-        if (GetCameraROMValue(handle, node, offset+count, &value[0]) < 0)
+        /* read in the length of the model name */
+        if (GetCameraROMValue(handle, node, offset, &value[0]) < 0)
         {
             return DC1394_FAILURE;
         }
-        info->model[count++]= (value[0] >> 24);
-        info->model[count++]= (value[0] >> 16) & 0xFFUL;
-        info->model[count++]= (value[0] >> 8) & 0xFFUL;
-        info->model[count++]= value[0] & 0xFFUL;
-        len-= 4;
-      }
-      info->model[count]= '\0';
+
+        len= (int)(value[0] >> 16)*4-8; /* Tim Evers corrected length value */
+
+        if (len > MAX_CHARS)
+        {
+            len= MAX_CHARS;
+        }
+        offset+= 12;
+        count= 0;
+
+        /* grab the model name */
+        while (len > 0)
+        {
+            if (GetCameraROMValue(handle, node, offset+count, &value[0]) < 0)
+            {
+                return DC1394_FAILURE;
+            }
+            info->model[count++]= (value[0] >> 24);
+            info->model[count++]= (value[0] >> 16) & 0xFFUL;
+            info->model[count++]= (value[0] >> 8) & 0xFFUL;
+            info->model[count++]= value[0] & 0xFFUL;
+            len-= 4;
+        }
+        info->model[count]= '\0';
     }
 
     return DC1394_SUCCESS;
@@ -1473,7 +1480,7 @@ dc1394_get_camera_misc_info(raw1394handle_t handle, nodeid_t node,
     quadlet_t value;
 
     if (dc1394_get_iso_channel_and_speed(handle, node,
-                                         &info->iso_channel, 
+                                         &info->iso_channel,
                                          &info->iso_speed)!= DC1394_SUCCESS)
         return DC1394_FAILURE;
 
@@ -1484,38 +1491,38 @@ dc1394_get_camera_misc_info(raw1394handle_t handle, nodeid_t node,
         return DC1394_FAILURE;
 
     if (dc1394_get_video_framerate(handle, node, &info->framerate)
-        != DC1394_SUCCESS)
+            != DC1394_SUCCESS)
         return DC1394_FAILURE;
 
     if (dc1394_get_iso_status(handle, node, &info->is_iso_on)
-        != DC1394_SUCCESS)
+            != DC1394_SUCCESS)
         return DC1394_FAILURE;
 
     if (dc1394_query_basic_functionality(handle,node,&value) != DC1394_SUCCESS)
         return DC1394_FAILURE;
     else {
-      info->mem_channel_number = (value & 0x0000000F);
-      info->bmode_capable      = (value & 0x00800000) != 0;
-      info->one_shot_capable   = (value & 0x00000800) != 0;
-      info->multi_shot_capable = (value & 0x00001000) != 0;
+        info->mem_channel_number = (value & 0x0000000F);
+        info->bmode_capable      = (value & 0x00800000) != 0;
+        info->one_shot_capable   = (value & 0x00000800) != 0;
+        info->multi_shot_capable = (value & 0x00001000) != 0;
     }
 
     if (info->mem_channel_number>0) {
-      if (dc1394_get_memory_load_ch(handle, node, &info->load_channel)
-	  != DC1394_SUCCESS)
-        return DC1394_FAILURE;
-      
-      if (dc1394_get_memory_save_ch(handle, node, &info->save_channel)
-	  != DC1394_SUCCESS)
-        return DC1394_FAILURE;
+        if (dc1394_get_memory_load_ch(handle, node, &info->load_channel)
+                != DC1394_SUCCESS)
+            return DC1394_FAILURE;
+
+        if (dc1394_get_memory_save_ch(handle, node, &info->save_channel)
+                != DC1394_SUCCESS)
+            return DC1394_FAILURE;
     }
     else {
-      info->load_channel=0;
-      info->save_channel=0;
+        info->load_channel=0;
+        info->save_channel=0;
     }
 
     return DC1394_SUCCESS;
-} 
+}
 
 /*****************************************************
  dc1394_get_camera_feature_set
@@ -1525,11 +1532,11 @@ dc1394_get_camera_misc_info(raw1394handle_t handle, nodeid_t node,
 *****************************************************/
 int
 dc1394_get_camera_feature_set(raw1394handle_t handle, nodeid_t node,
-                              dc1394_feature_set *features) 
+                              dc1394_feature_set *features)
 {
     int i, j;
 
-    for (i= FEATURE_MIN, j= 0; i <= FEATURE_MAX; i++, j++) 
+    for (i= FEATURE_MIN, j= 0; i <= FEATURE_MAX; i++, j++)
     {
         features->feature[j].feature_id= i;
         dc1394_get_camera_feature(handle, node, &features->feature[j]);
@@ -1546,7 +1553,7 @@ dc1394_get_camera_feature_set(raw1394handle_t handle, nodeid_t node,
 *****************************************************/
 int
 dc1394_get_camera_feature(raw1394handle_t handle, nodeid_t node,
-                          dc1394_feature_info *feature) 
+                          dc1394_feature_info *feature)
 {
     octlet_t offset;
     quadlet_t value;
@@ -1554,11 +1561,11 @@ dc1394_get_camera_feature(raw1394handle_t handle, nodeid_t node,
 
     orig_fid= feature->feature_id;
     updated_fid= feature->feature_id;
-    
+
 
     // check presence
     if (dc1394_is_feature_present(handle, node, feature->feature_id, &(feature->available))!=DC1394_SUCCESS) {
-      return DC1394_FAILURE;
+        return DC1394_FAILURE;
     }
 
     if (feature->available == DC1394_FALSE)
@@ -1568,30 +1575,30 @@ dc1394_get_camera_feature(raw1394handle_t handle, nodeid_t node,
 
     // get capabilities
     if (dc1394_query_feature_characteristics(handle, node, feature->feature_id, &value)!=DC1394_SUCCESS) {
-      return DC1394_FAILURE;
+        return DC1394_FAILURE;
     }
 
     switch (feature->feature_id) {
     case FEATURE_TRIGGER:
-      feature->one_push= DC1394_FALSE;
-      feature->polarity_capable=
-	(value & 0x02000000UL) ? DC1394_TRUE : DC1394_FALSE;
-      feature->trigger_mode_capable_mask= ((value >> 20) & 0x0f);
-      feature->auto_capable= DC1394_FALSE;
-      feature->manual_capable= DC1394_FALSE;
-      break;
+        feature->one_push= DC1394_FALSE;
+        feature->polarity_capable=
+            (value & 0x02000000UL) ? DC1394_TRUE : DC1394_FALSE;
+        feature->trigger_mode_capable_mask= ((value >> 20) & 0x0f);
+        feature->auto_capable= DC1394_FALSE;
+        feature->manual_capable= DC1394_FALSE;
+        break;
     default:
-      feature->polarity_capable= 0;
-      feature->trigger_mode= 0;
-      feature->one_push= (value & 0x10000000UL) ? DC1394_TRUE : DC1394_FALSE;
-      feature->auto_capable=
-	(value & 0x02000000UL) ? DC1394_TRUE : DC1394_FALSE;
-      feature->manual_capable=
-	(value & 0x01000000UL) ? DC1394_TRUE : DC1394_FALSE;
-      
-      feature->min= (value & 0xFFF000UL) >> 12;
-      feature->max= (value & 0xFFFUL);
-      break;
+        feature->polarity_capable= 0;
+        feature->trigger_mode= 0;
+        feature->one_push= (value & 0x10000000UL) ? DC1394_TRUE : DC1394_FALSE;
+        feature->auto_capable=
+            (value & 0x02000000UL) ? DC1394_TRUE : DC1394_FALSE;
+        feature->manual_capable=
+            (value & 0x01000000UL) ? DC1394_TRUE : DC1394_FALSE;
+
+        feature->min= (value & 0xFFF000UL) >> 12;
+        feature->max= (value & 0xFFFUL);
+        break;
     }
 
     feature->absolute_capable=
@@ -1606,7 +1613,7 @@ dc1394_get_camera_feature(raw1394handle_t handle, nodeid_t node,
     FEATURE_TO_VALUE_OFFSET(updated_fid, offset);
 
     if (GetCameraControlRegister(handle, node, offset, &value) < 0) {
-      return DC1394_FAILURE;
+        return DC1394_FAILURE;
     }
 
     switch (feature->feature_id) {
@@ -1616,47 +1623,47 @@ dc1394_get_camera_feature(raw1394handle_t handle, nodeid_t node,
             (value & 0x01000000UL) ? DC1394_TRUE : DC1394_FALSE;
         feature->trigger_mode= (int)((value >> 14) & 0xF);
         feature->auto_active= DC1394_FALSE;
-	break;
+        break;
     case FEATURE_TRIGGER_DELAY:
         feature->one_push_active= DC1394_FALSE;
-	feature->auto_active=DC1394_FALSE;
+        feature->auto_active=DC1394_FALSE;
     default:
         feature->one_push_active=
             (value & 0x04000000UL) ? DC1394_TRUE : DC1394_FALSE;
         feature->auto_active=
             (value & 0x01000000UL) ? DC1394_TRUE : DC1394_FALSE;
         feature->trigger_polarity= DC1394_FALSE;
-	break;
+        break;
     }
 
     feature->is_on= (value & 0x02000000UL) ? DC1394_TRUE : DC1394_FALSE;
 
     switch (orig_fid) {
     case FEATURE_WHITE_BALANCE:
-      feature->RV_value= value & 0xFFFUL;
-      feature->BU_value= (value & 0xFFF000UL) >> 12;
-      break;
+        feature->RV_value= value & 0xFFFUL;
+        feature->BU_value= (value & 0xFFF000UL) >> 12;
+        break;
     case FEATURE_WHITE_SHADING:
-      feature->R_value=value & 0xFFUL;
-      feature->G_value=(value & 0xFF00UL)>>8;
-      feature->B_value=(value & 0xFF0000UL)>>16;
-      break;
+        feature->R_value=value & 0xFFUL;
+        feature->G_value=(value & 0xFF00UL)>>8;
+        feature->B_value=(value & 0xFF0000UL)>>16;
+        break;
     case FEATURE_TEMPERATURE:
-      feature->value= value & 0xFFFUL;
-      feature->target_value= value & 0xFFF000UL;
-      break;
+        feature->value= value & 0xFFFUL;
+        feature->target_value= value & 0xFFF000UL;
+        break;
     default:
-      feature->value= value & 0xFFFUL;
-      break;
+        feature->value= value & 0xFFFUL;
+        break;
     }
 
     if (feature->absolute_capable>0) {
-      dc1394_query_absolute_feature_min_max(handle, node, orig_fid,
-					    &feature->abs_min, &feature->abs_max);
-      dc1394_query_absolute_feature_value(handle, node, orig_fid,
-					  &feature->abs_value);
-      dc1394_query_absolute_control(handle, node, orig_fid,
-				    &feature->abs_control);
+        dc1394_query_absolute_feature_min_max(handle, node, orig_fid,
+                                              &feature->abs_min, &feature->abs_max);
+        dc1394_query_absolute_feature_value(handle, node, orig_fid,
+                                            &feature->abs_value);
+        dc1394_query_absolute_control(handle, node, orig_fid,
+                                      &feature->abs_control);
     }
 
     return DC1394_SUCCESS;
@@ -1668,7 +1675,7 @@ dc1394_get_camera_feature(raw1394handle_t handle, nodeid_t node,
  Displays the bounds and options of the given feature
 *****************************************************/
 void
-dc1394_print_feature(dc1394_feature_info *f) 
+dc1394_print_feature(dc1394_feature_info *f)
 {
     //char * tags[2] = {"NO","YES"};
     //char * autoMode[2] = {"Manual","Auto"};
@@ -1682,13 +1689,13 @@ dc1394_print_feature(dc1394_feature_info *f)
 
     printf("%s:\n\t", dc1394_feature_desc[fid - FEATURE_MIN]);
 
-    if (!f->available) 
+    if (!f->available)
     {
         printf("NOT AVAILABLE\n");
         return;
     }
 
-    if (f->one_push) 
+    if (f->one_push)
         printf("OP  ");
     if (f->readout_capable)
         printf("RC  ");
@@ -1702,19 +1709,19 @@ dc1394_print_feature(dc1394_feature_info *f)
         printf("ABS  ");
     printf("\n");
 
-    if (f->on_off_capable) 
+    if (f->on_off_capable)
     {
-        if (f->is_on) 
+        if (f->is_on)
             printf("\tFeature: ON  ");
         else
             printf("\tFeature: OFF  ");
     }
-    else 
+    else
     {
         printf("\t");
     }
 
-    if (f->one_push) 
+    if (f->one_push)
     {
         if (f->one_push_active)
             printf("One push: ACTIVE  ");
@@ -1722,63 +1729,63 @@ dc1394_print_feature(dc1394_feature_info *f)
             printf("One push: INACTIVE  ");
     }
 
-    if (f->auto_active) 
+    if (f->auto_active)
         printf("AUTO  ");
     else
         printf("MANUAL ");
 
-    if (fid != FEATURE_TRIGGER) 
+    if (fid != FEATURE_TRIGGER)
     {
         printf("min: %d max %d\n", f->min, f->max);
     }
-    switch(fid) {
+    switch (fid) {
     case FEATURE_TRIGGER:
-      printf("\n\tAvailableTriggerModes: ");
-      
-      if (f->trigger_mode_capable_mask & 0x08)
-	printf("0 ");
-      if (f->trigger_mode_capable_mask & 0x04)
-	printf("1 ");
-      if (f->trigger_mode_capable_mask & 0x02)
-	printf("2 ");
-      if (f->trigger_mode_capable_mask & 0x01)
-	printf("3 ");
-      if (!(f->trigger_mode_capable_mask & 0x0f))
-	printf("No modes available");
-      
-      printf("\n\tPolarity Change Capable: ");
-      
-      if (f->polarity_capable) 
-	printf("True");
-      else 
-	printf("False");
-      
-      printf("\n\tCurrent Polarity: ");
-      
-      if (f->trigger_polarity) 
-	printf("POS");
-      else 
-	printf("NEG");
-      
-      printf("\n\tcurrent mode: %d\n", f->trigger_mode);
-      break;
-    case FEATURE_WHITE_BALANCE: 
-      printf("\tB/U value: %d R/V value: %d\n", f->BU_value, f->RV_value);
-      break;
+        printf("\n\tAvailableTriggerModes: ");
+
+        if (f->trigger_mode_capable_mask & 0x08)
+            printf("0 ");
+        if (f->trigger_mode_capable_mask & 0x04)
+            printf("1 ");
+        if (f->trigger_mode_capable_mask & 0x02)
+            printf("2 ");
+        if (f->trigger_mode_capable_mask & 0x01)
+            printf("3 ");
+        if (!(f->trigger_mode_capable_mask & 0x0f))
+            printf("No modes available");
+
+        printf("\n\tPolarity Change Capable: ");
+
+        if (f->polarity_capable)
+            printf("True");
+        else
+            printf("False");
+
+        printf("\n\tCurrent Polarity: ");
+
+        if (f->trigger_polarity)
+            printf("POS");
+        else
+            printf("NEG");
+
+        printf("\n\tcurrent mode: %d\n", f->trigger_mode);
+        break;
+    case FEATURE_WHITE_BALANCE:
+        printf("\tB/U value: %d R/V value: %d\n", f->BU_value, f->RV_value);
+        break;
     case FEATURE_TEMPERATURE:
-      printf("\tTarget temp: %d Current Temp: %d\n", f->target_value, f->value);
-      break;
-    case FEATURE_WHITE_SHADING: 
-      printf("\tR value: %d G value: %d B value: %d\n", f->R_value,
-	     f->G_value, f->B_value);
-      break;
+        printf("\tTarget temp: %d Current Temp: %d\n", f->target_value, f->value);
+        break;
+    case FEATURE_WHITE_SHADING:
+        printf("\tR value: %d G value: %d B value: %d\n", f->R_value,
+               f->G_value, f->B_value);
+        break;
     default:
-      printf("\tcurrent value is: %d\n",f->value);
-      break;
+        printf("\tcurrent value is: %d\n",f->value);
+        break;
     }
     if (f->absolute_capable)
-      printf("\tabsolute settings:\n\t value: %f\n\t min: %f\n\t max: %f\n",
-         f->abs_value,f->abs_min,f->abs_max);
+        printf("\tabsolute settings:\n\t value: %f\n\t min: %f\n\t max: %f\n",
+               f->abs_value,f->abs_min,f->abs_max);
 }
 
 /*****************************************************
@@ -1787,7 +1794,7 @@ dc1394_print_feature(dc1394_feature_info *f)
  Displays the entire feature set stored in features
 *****************************************************/
 void
-dc1394_print_feature_set(dc1394_feature_set *features) 
+dc1394_print_feature_set(dc1394_feature_set *features)
 {
     int i, j;
 
@@ -1800,7 +1807,7 @@ dc1394_print_feature_set(dc1394_feature_set *features)
     printf("ABS- absolute capable\n");
     printf("==================================\n");
 
-    for (i= FEATURE_MIN, j= 0; i <= FEATURE_MAX; i++, j++) 
+    for (i= FEATURE_MIN, j= 0; i <= FEATURE_MAX; i++, j++)
     {
         dc1394_print_feature(&features->feature[j]);
     }
@@ -1851,7 +1858,7 @@ dc1394_query_supported_framerates(raw1394handle_t handle, nodeid_t node,
     int retval;
     int max_mode_for_format, min_mode_for_format;
 
-    switch(format)
+    switch (format)
     {
     case FORMAT_VGA_NONCOMPRESSED:
         min_mode_for_format= MODE_FORMAT0_MIN;
@@ -1871,7 +1878,7 @@ dc1394_query_supported_framerates(raw1394handle_t handle, nodeid_t node,
     }
 
     if ( (format > FORMAT_MAX) || (format < FORMAT_MIN) ||
-         (mode > max_mode_for_format) || (mode < min_mode_for_format) )
+            (mode > max_mode_for_format) || (mode < min_mode_for_format) )
     {
         return DC1394_FAILURE;
     }
@@ -1958,7 +1965,7 @@ dc1394_set_video_framerate(raw1394handle_t handle, nodeid_t node,
     }
 
     retval= SetCameraControlRegister(handle, node, REG_CAMERA_FRAME_RATE,
-                     (quadlet_t)(((framerate - FRAMERATE_MIN) & 0x7UL) << 29));
+                                     (quadlet_t)(((framerate - FRAMERATE_MIN) & 0x7UL) << 29));
     return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
@@ -1979,7 +1986,7 @@ dc1394_get_video_mode(raw1394handle_t handle, nodeid_t node,
 
     if (!retval) {
 
-        switch(format) {
+        switch (format) {
         case FORMAT_VGA_NONCOMPRESSED:
             *mode= (unsigned int)((value >> 29) & 0x7UL) + MODE_FORMAT0_MIN;
             break;
@@ -2015,30 +2022,30 @@ dc1394_set_video_mode(raw1394handle_t handle, nodeid_t node, unsigned int mode)
         return DC1394_FAILURE;
     }
 
-    switch(format) {
-        case FORMAT_VGA_NONCOMPRESSED:
-            min= MODE_FORMAT0_MIN;
-            max= MODE_FORMAT0_MAX;
-            break;
-        case FORMAT_SVGA_NONCOMPRESSED_1:
-            min= MODE_FORMAT1_MIN;
-            max= MODE_FORMAT1_MAX;
-            break;
-        case FORMAT_SVGA_NONCOMPRESSED_2:
-            min= MODE_FORMAT2_MIN;
-            max= MODE_FORMAT2_MAX;
-            break;
-        case FORMAT_STILL_IMAGE:
-            min= MODE_FORMAT6_MIN;
-            max= MODE_FORMAT6_MAX;
-            break;
-        case FORMAT_SCALABLE_IMAGE_SIZE:
-            min= MODE_FORMAT7_MIN;
-            max= MODE_FORMAT7_MAX;
-            break;
-        default:
-            return DC1394_FAILURE;
-            break;
+    switch (format) {
+    case FORMAT_VGA_NONCOMPRESSED:
+        min= MODE_FORMAT0_MIN;
+        max= MODE_FORMAT0_MAX;
+        break;
+    case FORMAT_SVGA_NONCOMPRESSED_1:
+        min= MODE_FORMAT1_MIN;
+        max= MODE_FORMAT1_MAX;
+        break;
+    case FORMAT_SVGA_NONCOMPRESSED_2:
+        min= MODE_FORMAT2_MIN;
+        max= MODE_FORMAT2_MAX;
+        break;
+    case FORMAT_STILL_IMAGE:
+        min= MODE_FORMAT6_MIN;
+        max= MODE_FORMAT6_MAX;
+        break;
+    case FORMAT_SCALABLE_IMAGE_SIZE:
+        min= MODE_FORMAT7_MIN;
+        max= MODE_FORMAT7_MAX;
+        break;
+    default:
+        return DC1394_FAILURE;
+        break;
     }
 
     if ( (mode < min) || (mode > max) ) {
@@ -2046,7 +2053,7 @@ dc1394_set_video_mode(raw1394handle_t handle, nodeid_t node, unsigned int mode)
     }
 
     retval= SetCameraControlRegister(handle, node, REG_CAMERA_VIDEO_MODE,
-                                    (quadlet_t)(((mode - min) & 0x7UL) << 29));
+                                     (quadlet_t)(((mode - min) & 0x7UL) << 29));
 
     return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
@@ -2077,7 +2084,7 @@ dc1394_set_video_format(raw1394handle_t handle, nodeid_t node,
     }
 
     retval= SetCameraControlRegister(handle, node, REG_CAMERA_VIDEO_FORMAT,
-                           (quadlet_t)(((format - FORMAT_MIN) & 0x7UL) << 29));
+                                     (quadlet_t)(((format - FORMAT_MIN) & 0x7UL) << 29));
     return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
@@ -2085,48 +2092,48 @@ dc1394_set_video_format(raw1394handle_t handle, nodeid_t node,
 int
 dc1394_get_operation_mode(raw1394handle_t handle, nodeid_t node, unsigned int *mode)
 {
-  quadlet_t value_inq, value;
-  int retval;
+    quadlet_t value_inq, value;
+    int retval;
 
-  retval= dc1394_query_basic_functionality(handle, node, &value_inq);
-  retval= GetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA, &value);
-  
-  if (value_inq & 0x00800000) {
-    *mode=((value & 0x00008000) >0);
-  }
-  else {
-    *mode=OPERATION_MODE_LEGACY;
-  }
-  
-  return retval;
+    retval= dc1394_query_basic_functionality(handle, node, &value_inq);
+    retval= GetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA, &value);
+
+    if (value_inq & 0x00800000) {
+        *mode=((value & 0x00008000) >0);
+    }
+    else {
+        *mode=OPERATION_MODE_LEGACY;
+    }
+
+    return retval;
 }
 
 
 int
 dc1394_set_operation_mode(raw1394handle_t handle, nodeid_t node, unsigned int mode)
 {
-  quadlet_t value_inq, value;
-  int retval;
-  
-  retval= dc1394_query_basic_functionality(handle, node, &value_inq);
-  retval= GetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA, &value);
+    quadlet_t value_inq, value;
+    int retval;
 
-  if (mode==OPERATION_MODE_LEGACY) {
-    retval= SetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA,
-				     (quadlet_t) (value & 0xFFFF7FFF));
-  }
-  else { // 1394b
-    if (value_inq & 0x00800000) { // if 1394b available
-      retval= SetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA,
-				       (quadlet_t) (value | 0x00008000));
-    }
-    else { // 1394b asked, but it is not available
-      return DC1394_FAILURE;
-    }
-  }
+    retval= dc1394_query_basic_functionality(handle, node, &value_inq);
+    retval= GetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA, &value);
 
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
-  
+    if (mode==OPERATION_MODE_LEGACY) {
+        retval= SetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA,
+                                         (quadlet_t) (value & 0xFFFF7FFF));
+    }
+    else { // 1394b
+        if (value_inq & 0x00800000) { // if 1394b available
+            retval= SetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA,
+                                             (quadlet_t) (value | 0x00008000));
+        }
+        else { // 1394b asked, but it is not available
+            return DC1394_FAILURE;
+        }
+    }
+
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+
 }
 
 
@@ -2134,59 +2141,59 @@ int
 dc1394_get_iso_channel_and_speed(raw1394handle_t handle, nodeid_t node,
                                  unsigned int *channel, unsigned int *speed)
 {
-  quadlet_t value_inq, value;
-  int retval;
-  
-  retval= dc1394_query_basic_functionality(handle, node, &value_inq);
-  retval= GetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA, &value);
-  
-  if (value_inq & 0x00800000) { // check if 1394b is available
-    if (value & 0x00008000) { //check if we are now using 1394b
-      *channel= (unsigned int)((value >> 8) & 0x3FUL);
-      *speed= (unsigned int)(value& 0x7UL);
+    quadlet_t value_inq, value;
+    int retval;
+
+    retval= dc1394_query_basic_functionality(handle, node, &value_inq);
+    retval= GetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA, &value);
+
+    if (value_inq & 0x00800000) { // check if 1394b is available
+        if (value & 0x00008000) { //check if we are now using 1394b
+            *channel= (unsigned int)((value >> 8) & 0x3FUL);
+            *speed= (unsigned int)(value& 0x7UL);
+        }
+        else { // fallback to legacy
+            *channel= (unsigned int)((value >> 28) & 0xFUL);
+            *speed= (unsigned int)((value >> 24) & 0x3UL);
+        }
     }
-    else { // fallback to legacy
-      *channel= (unsigned int)((value >> 28) & 0xFUL);
-      *speed= (unsigned int)((value >> 24) & 0x3UL);
+    else { // legacy
+        *channel= (unsigned int)((value >> 28) & 0xFUL);
+        *speed= (unsigned int)((value >> 24) & 0x3UL);
     }
-  }
-  else { // legacy
-    *channel= (unsigned int)((value >> 28) & 0xFUL);
-    *speed= (unsigned int)((value >> 24) & 0x3UL);
-  }
-  
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
 dc1394_set_iso_channel_and_speed(raw1394handle_t handle, nodeid_t node,
                                  unsigned int channel, unsigned int speed)
 {
-  quadlet_t value_inq, value;
-  int retval;
+    quadlet_t value_inq, value;
+    int retval;
 
-  retval= dc1394_query_basic_functionality(handle, node, &value_inq);
-  retval= GetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA, &value);
-  if ((value_inq & 0x00800000)&&(value & 0x00008000)) {
-    // check if 1394b is available and if we are now using 1394b
-    retval= SetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA,
-				     (quadlet_t) ( ((channel & 0x3FUL) << 8) |
-						   (speed & 0x7UL) |
-						   (0x1 << 15) ));
-  }
-  else { // fallback to legacy
-    if (speed>SPEED_400) {
-      fprintf(stderr,"(%s) line %d: an ISO speed >400Mbps was requested while the camera is in LEGACY mode\n",__FILE__,__LINE__);
-      fprintf(stderr,"              Please set the operation mode to OPERATION_MODE_1394B before asking for\n");
-      fprintf(stderr,"              1394b ISO speeds\n");
-      return DC1394_FAILURE;
+    retval= dc1394_query_basic_functionality(handle, node, &value_inq);
+    retval= GetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA, &value);
+    if ((value_inq & 0x00800000)&&(value & 0x00008000)) {
+        // check if 1394b is available and if we are now using 1394b
+        retval= SetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA,
+                                         (quadlet_t) ( ((channel & 0x3FUL) << 8) |
+                                                       (speed & 0x7UL) |
+                                                       (0x1 << 15) ));
     }
-    retval= SetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA,
-				     (quadlet_t) (((channel & 0xFUL) << 28) |
-						  ((speed & 0x3UL) << 24) ));
-  }
-  
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+    else { // fallback to legacy
+        if (speed>SPEED_400) {
+            fprintf(stderr,"(%s) line %d: an ISO speed >400Mbps was requested while the camera is in LEGACY mode\n",__FILE__,__LINE__);
+            fprintf(stderr,"              Please set the operation mode to OPERATION_MODE_1394B before asking for\n");
+            fprintf(stderr,"              1394b ISO speeds\n");
+            return DC1394_FAILURE;
+        }
+        retval= SetCameraControlRegister(handle, node, REG_CAMERA_ISO_DATA,
+                                         (quadlet_t) (((channel & 0xFUL) << 28) |
+                                                      ((speed & 0x3UL) << 24) ));
+    }
+
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
@@ -2251,24 +2258,24 @@ dc1394_unset_one_shot(raw1394handle_t handle, nodeid_t node)
 int
 dc1394_get_one_shot(raw1394handle_t handle, nodeid_t node, dc1394bool_t *is_on)
 {
- quadlet_t value;
- int retval = GetCameraControlRegister(handle, node,
+    quadlet_t value;
+    int retval = GetCameraControlRegister(handle, node,
                                           REG_CAMERA_ONE_SHOT, &value);
- *is_on = value & ON_VALUE;
- return (retval ? DC1394_FAILURE : DC1394_SUCCESS);     
+    *is_on = value & ON_VALUE;
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
 dc1394_get_multi_shot(raw1394handle_t handle, nodeid_t node, dc1394bool_t *is_on,
-		      unsigned int *numFrames)
+                      unsigned int *numFrames)
 {
- quadlet_t value;
- int retval = GetCameraControlRegister(handle, node,
+    quadlet_t value;
+    int retval = GetCameraControlRegister(handle, node,
                                           REG_CAMERA_ONE_SHOT, &value);
- *is_on = (value & (ON_VALUE>>1)) >> 30;
- *numFrames= value & 0xFFFFUL;
+    *is_on = (value & (ON_VALUE>>1)) >> 30;
+    *numFrames= value & 0xFFFFUL;
 
- return (retval ? DC1394_FAILURE : DC1394_SUCCESS);     
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
@@ -2276,7 +2283,7 @@ dc1394_set_multi_shot(raw1394handle_t handle, nodeid_t node,
                       unsigned int numFrames)
 {
     int retval= SetCameraControlRegister(handle, node, REG_CAMERA_ONE_SHOT,
-                                      (0x40000000UL | (numFrames & 0xFFFFUL)));
+                                         (0x40000000UL | (numFrames & 0xFFFFUL)));
     return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
@@ -2428,35 +2435,35 @@ int
 dc1394_set_gain(raw1394handle_t handle, nodeid_t node,
                 unsigned int gain)
 {
-  return SetFeatureValue(handle, node, FEATURE_GAIN, gain);
+    return SetFeatureValue(handle, node, FEATURE_GAIN, gain);
 }
 
 int
 dc1394_get_iris(raw1394handle_t handle, nodeid_t node,
                 unsigned int *iris)
 {
-  return GetFeatureValue(handle, node, FEATURE_IRIS, iris);
+    return GetFeatureValue(handle, node, FEATURE_IRIS, iris);
 }
 
 int
 dc1394_set_iris(raw1394handle_t handle, nodeid_t node,
                 unsigned int iris)
 {
-  return SetFeatureValue(handle, node, FEATURE_IRIS, iris);
+    return SetFeatureValue(handle, node, FEATURE_IRIS, iris);
 }
 
 int
 dc1394_get_focus(raw1394handle_t handle, nodeid_t node,
                  unsigned int *focus)
 {
-  return GetFeatureValue(handle, node, FEATURE_FOCUS, focus);
+    return GetFeatureValue(handle, node, FEATURE_FOCUS, focus);
 }
 
 int
 dc1394_set_focus(raw1394handle_t handle, nodeid_t node,
                  unsigned int focus)
 {
-  return SetFeatureValue(handle, node, FEATURE_FOCUS, focus);
+    return SetFeatureValue(handle, node, FEATURE_FOCUS, focus);
 }
 
 int
@@ -2464,104 +2471,104 @@ dc1394_get_temperature(raw1394handle_t handle, nodeid_t node,
                        unsigned int *target_temperature,
                        unsigned int *temperature)
 {
-  quadlet_t value;
-  int retval= GetCameraControlRegister(handle, node,
-				       REG_CAMERA_TEMPERATURE, &value);
-  *target_temperature= (unsigned int)((value >> 12) & 0xFFF);
-  *temperature= (unsigned int)(value & 0xFFFUL);
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+    quadlet_t value;
+    int retval= GetCameraControlRegister(handle, node,
+                                         REG_CAMERA_TEMPERATURE, &value);
+    *target_temperature= (unsigned int)((value >> 12) & 0xFFF);
+    *temperature= (unsigned int)(value & 0xFFFUL);
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
 dc1394_set_temperature(raw1394handle_t handle, nodeid_t node,
                        unsigned int target_temperature)
 {
-  int retval;
-  quadlet_t curval;
-  
-  if (GetCameraControlRegister(handle, node, REG_CAMERA_TEMPERATURE,
-			       &curval) < 0) {
-    return DC1394_FAILURE;
-  }
-  
-  curval= (curval & 0xFF000FFFUL) | ((target_temperature & 0xFFFUL) << 12);
-  retval= SetCameraControlRegister(handle, node, REG_CAMERA_TEMPERATURE,
-				   curval);
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+    int retval;
+    quadlet_t curval;
+
+    if (GetCameraControlRegister(handle, node, REG_CAMERA_TEMPERATURE,
+                                 &curval) < 0) {
+        return DC1394_FAILURE;
+    }
+
+    curval= (curval & 0xFF000FFFUL) | ((target_temperature & 0xFFFUL) << 12);
+    retval= SetCameraControlRegister(handle, node, REG_CAMERA_TEMPERATURE,
+                                     curval);
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
 dc1394_get_white_shading(raw1394handle_t handle, nodeid_t node,
                          unsigned int *r_value, unsigned int *g_value, unsigned int *b_value)
 {
-  quadlet_t value;
-  int retval= GetCameraControlRegister(handle, node,
-				       REG_CAMERA_WHITE_SHADING, &value);
-  
-  *r_value= (unsigned int)((value & 0xFF0000UL) >> 16);
-  *g_value= (unsigned int)((value & 0xFF00UL) >> 8);
-  *b_value= (unsigned int)(value & 0xFFUL);
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+    quadlet_t value;
+    int retval= GetCameraControlRegister(handle, node,
+                                         REG_CAMERA_WHITE_SHADING, &value);
+
+    *r_value= (unsigned int)((value & 0xFF0000UL) >> 16);
+    *g_value= (unsigned int)((value & 0xFF00UL) >> 8);
+    *b_value= (unsigned int)(value & 0xFFUL);
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
 dc1394_set_white_shading(raw1394handle_t handle, nodeid_t node,
-			 unsigned int r_value, unsigned int g_value, unsigned int b_value)
+                         unsigned int r_value, unsigned int g_value, unsigned int b_value)
 
 {
-  int retval;
-  quadlet_t curval;
-  
-  if (GetCameraControlRegister(handle, node, REG_CAMERA_WHITE_SHADING,
-			       &curval) < 0)
-    return DC1394_FAILURE;
-  
-  curval= (curval & 0xFF000000UL) | ( ((r_value & 0xFFUL) << 16) |
-				      ((g_value & 0xFFUL) << 8) |
-				      (b_value & 0xFFUL) );
-  retval= SetCameraControlRegister(handle, node, REG_CAMERA_WHITE_SHADING,
-				   curval);
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+    int retval;
+    quadlet_t curval;
+
+    if (GetCameraControlRegister(handle, node, REG_CAMERA_WHITE_SHADING,
+                                 &curval) < 0)
+        return DC1394_FAILURE;
+
+    curval= (curval & 0xFF000000UL) | ( ((r_value & 0xFFUL) << 16) |
+                                        ((g_value & 0xFFUL) << 8) |
+                                        (b_value & 0xFFUL) );
+    retval= SetCameraControlRegister(handle, node, REG_CAMERA_WHITE_SHADING,
+                                     curval);
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
 dc1394_get_trigger_delay(raw1394handle_t handle, nodeid_t node,
-			 unsigned int *trigger_delay)
+                         unsigned int *trigger_delay)
 {
-  return GetFeatureValue(handle, node, FEATURE_TRIGGER_DELAY, trigger_delay);
+    return GetFeatureValue(handle, node, FEATURE_TRIGGER_DELAY, trigger_delay);
 }
 
 int
 dc1394_set_trigger_delay(raw1394handle_t handle, nodeid_t node,
-			 unsigned int trigger_delay)
+                         unsigned int trigger_delay)
 {
-  return SetFeatureValue(handle, node, FEATURE_TRIGGER_DELAY, trigger_delay);
+    return SetFeatureValue(handle, node, FEATURE_TRIGGER_DELAY, trigger_delay);
 }
 
 int
 dc1394_get_frame_rate(raw1394handle_t handle, nodeid_t node,
-		      unsigned int *frame_rate)
+                      unsigned int *frame_rate)
 {
-  return GetFeatureValue(handle, node, FEATURE_FRAME_RATE, frame_rate);
+    return GetFeatureValue(handle, node, FEATURE_FRAME_RATE, frame_rate);
 }
 
 int
 dc1394_set_frame_rate(raw1394handle_t handle, nodeid_t node,
-		      unsigned int frame_rate)
+                      unsigned int frame_rate)
 {
-  return SetFeatureValue(handle, node, FEATURE_FRAME_RATE, frame_rate);
+    return SetFeatureValue(handle, node, FEATURE_FRAME_RATE, frame_rate);
 }
 
 int
 dc1394_get_trigger_mode(raw1394handle_t handle, nodeid_t node,
                         unsigned int *mode)
 {
-  quadlet_t value;
-  int retval= GetCameraControlRegister(handle, node,
-				       REG_CAMERA_TRIGGER_MODE, &value);
-  
-  *mode= (unsigned int)( ((value >> 16) & 0xFUL) ) + TRIGGER_MODE_MIN;
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+    quadlet_t value;
+    int retval= GetCameraControlRegister(handle, node,
+                                         REG_CAMERA_TRIGGER_MODE, &value);
+
+    *mode= (unsigned int)( ((value >> 16) & 0xFUL) ) + TRIGGER_MODE_MIN;
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
@@ -2636,7 +2643,7 @@ dc1394_get_optical_filter(raw1394handle_t handle, nodeid_t node,
                           unsigned int *optical_filter)
 {
     return GetFeatureValue(handle, node, FEATURE_OPTICAL_FILTER,
-                                    optical_filter);
+                           optical_filter);
 }
 
 int
@@ -2652,7 +2659,7 @@ dc1394_get_capture_size(raw1394handle_t handle, nodeid_t node,
                         unsigned int *capture_size)
 {
     return GetFeatureValue(handle, node, FEATURE_CAPTURE_SIZE,
-                                    capture_size);
+                           capture_size);
 }
 
 int
@@ -2668,7 +2675,7 @@ dc1394_get_capture_quality(raw1394handle_t handle, nodeid_t node,
                            unsigned int *capture_quality)
 {
     return GetFeatureValue(handle, node, FEATURE_CAPTURE_QUALITY,
-                                    capture_quality);
+                           capture_quality);
 }
 
 int
@@ -2703,7 +2710,7 @@ dc1394_is_feature_present(raw1394handle_t handle, nodeid_t node,
     // check feature presence in 0x404 and 0x408
     if ( (feature > FEATURE_MAX) || (feature < FEATURE_MIN) )
     {
-      return DC1394_FAILURE;
+        return DC1394_FAILURE;
     }
     else if (feature < FEATURE_ZOOM)
     {
@@ -2715,31 +2722,31 @@ dc1394_is_feature_present(raw1394handle_t handle, nodeid_t node,
     }
     if (GetCameraControlRegister(handle, node, offset, &quadval) < 0)
     {
-      return DC1394_FAILURE;
+        return DC1394_FAILURE;
     }
 
     if (IsFeatureBitSet(quadval, feature)!=DC1394_TRUE) {
-      *value=DC1394_FALSE;
-      return DC1394_SUCCESS;
+        *value=DC1394_FALSE;
+        return DC1394_SUCCESS;
     }
 
     FEATURE_TO_INQUIRY_OFFSET(feature, offset);
-    
+
     if (GetCameraControlRegister(handle, node, offset, &quadval) < 0)
-      {
-	*value=DC1394_FALSE;
-	return DC1394_FAILURE;
-      }
-    
+    {
+        *value=DC1394_FALSE;
+        return DC1394_FAILURE;
+    }
+
     if (quadval & 0x80000000UL)
-      {
-	*value= DC1394_TRUE;
-      }
+    {
+        *value= DC1394_TRUE;
+    }
     else
-      {
-	*value= DC1394_FALSE;
-      }
-    
+    {
+        *value= DC1394_FALSE;
+    }
+
     return DC1394_SUCCESS;
 }
 
@@ -3137,7 +3144,7 @@ dc1394_get_memory_save_ch(raw1394handle_t handle, nodeid_t node,
 }
 
 
-int 
+int
 dc1394_get_memory_load_ch(raw1394handle_t handle, nodeid_t node,
                           unsigned int *channel)
 {
@@ -3149,7 +3156,7 @@ dc1394_get_memory_load_ch(raw1394handle_t handle, nodeid_t node,
 }
 
 
-int 
+int
 dc1394_is_memory_save_in_operation(raw1394handle_t handle, nodeid_t node,
                                    dc1394bool_t *value)
 {
@@ -3160,7 +3167,7 @@ dc1394_is_memory_save_in_operation(raw1394handle_t handle, nodeid_t node,
     return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
-int 
+int
 dc1394_set_memory_save_ch(raw1394handle_t handle, nodeid_t node,
                           unsigned int channel)
 {
@@ -3253,41 +3260,41 @@ int
 dc1394_set_trigger_on_off(raw1394handle_t handle, nodeid_t node,
                           dc1394bool_t on_off)
 {
-  return dc1394_feature_on_off(handle, node, FEATURE_TRIGGER, on_off);
+    return dc1394_feature_on_off(handle, node, FEATURE_TRIGGER, on_off);
 }
 
 int
 dc1394_get_trigger_on_off(raw1394handle_t handle, nodeid_t node,
                           dc1394bool_t *on_off)
 {
-  return dc1394_is_feature_on(handle, node, FEATURE_TRIGGER, on_off);
+    return dc1394_is_feature_on(handle, node, FEATURE_TRIGGER, on_off);
 }
 
 int
 dc1394_set_soft_trigger(raw1394handle_t handle, nodeid_t node)
 {
-  int retval= SetCameraControlRegister(handle, node, REG_CAMERA_SOFT_TRIGGER, ON_VALUE);
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+    int retval= SetCameraControlRegister(handle, node, REG_CAMERA_SOFT_TRIGGER, ON_VALUE);
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
 dc1394_unset_soft_trigger(raw1394handle_t handle, nodeid_t node)
 {
-  int retval= SetCameraControlRegister(handle, node, REG_CAMERA_SOFT_TRIGGER, OFF_VALUE);
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+    int retval= SetCameraControlRegister(handle, node, REG_CAMERA_SOFT_TRIGGER, OFF_VALUE);
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
 dc1394_get_soft_trigger(raw1394handle_t handle, nodeid_t node, dc1394bool_t *is_on)
 {
-  quadlet_t value;
-  int retval;
-  
-  //printf("before gst\n");
-  retval = GetCameraControlRegister(handle, node, REG_CAMERA_SOFT_TRIGGER, &value);
-  //printf("after gst %x, %x\n", retval, value);
-  *is_on = value & ON_VALUE;
-  return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
+    quadlet_t value;
+    int retval;
+
+    //printf("before gst\n");
+    retval = GetCameraControlRegister(handle, node, REG_CAMERA_SOFT_TRIGGER, &value);
+    //printf("after gst %x, %x\n", retval, value);
+    *is_on = value & ON_VALUE;
+    return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
 }
 
 int
@@ -3332,17 +3339,17 @@ dc1394_absolute_setting_on_off(raw1394handle_t handle, nodeid_t node,
     }
 
     if (value && !(curval & 0x40000000UL))
-      {
+    {
         curval|= 0x40000000UL;
         retval= SetCameraControlRegister(handle, node, offset, curval);
         return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
-      }
+    }
     else if (!value && (curval & 0x40000000UL))
-      {
+    {
         curval&= 0xBFFFFFFFUL;
         retval= SetCameraControlRegister(handle, node, offset, curval);
         return (retval ? DC1394_FAILURE : DC1394_SUCCESS);
-      }
+    }
 
     return DC1394_SUCCESS;
 }
@@ -3385,65 +3392,65 @@ dc1394_has_absolute_control(raw1394handle_t handle, nodeid_t node,
 int
 dc1394_get_bandwidth_usage(raw1394handle_t handle, nodeid_t node, unsigned int *bandwidth)
 {
-  
-  unsigned int format, iso, mode, qpp, channel, speed, framerate=0;
 
-  // get camera ISO status:
-  if (dc1394_get_iso_status(handle, node, &iso)!= DC1394_SUCCESS)
-    return DC1394_FAILURE;
-  
-  if (iso==DC1394_TRUE) {
+    unsigned int format, iso, mode, qpp, channel, speed, framerate=0;
 
-    // get format and mode
-    if (dc1394_get_video_format(handle, node, &format) != DC1394_SUCCESS)
-      return DC1394_FAILURE;
-    
-    if (dc1394_get_video_mode(handle, node, &mode) != DC1394_SUCCESS)
-      return DC1394_FAILURE;
-    
-    if (format==FORMAT_SCALABLE_IMAGE_SIZE) {
-      // use the bytes per packet value:
-      if (dc1394_query_format7_byte_per_packet(handle, node, mode, &qpp) != DC1394_SUCCESS)
-	return DC1394_FAILURE;
-      qpp=qpp/4;
+    // get camera ISO status:
+    if (dc1394_get_iso_status(handle, node, &iso)!= DC1394_SUCCESS)
+        return DC1394_FAILURE;
+
+    if (iso==DC1394_TRUE) {
+
+        // get format and mode
+        if (dc1394_get_video_format(handle, node, &format) != DC1394_SUCCESS)
+            return DC1394_FAILURE;
+
+        if (dc1394_get_video_mode(handle, node, &mode) != DC1394_SUCCESS)
+            return DC1394_FAILURE;
+
+        if (format==FORMAT_SCALABLE_IMAGE_SIZE) {
+            // use the bytes per packet value:
+            if (dc1394_query_format7_byte_per_packet(handle, node, mode, &qpp) != DC1394_SUCCESS)
+                return DC1394_FAILURE;
+            qpp=qpp/4;
+        }
+        else {
+            // get the framerate:
+            if (dc1394_get_video_framerate(handle, node, &framerate) != DC1394_SUCCESS)
+                return DC1394_FAILURE;
+            qpp=_dc1394_get_quadlets_per_packet(format, mode, framerate);
+        }
+        // add the ISO header and footer:
+        qpp+=3;
+
+        // get camera ISO speed:
+        if (dc1394_get_iso_channel_and_speed(handle, node, &channel, &speed)!= DC1394_SUCCESS)
+            return DC1394_FAILURE;
+
+        //fprintf(stderr,"(%s) qpp is %d, speed is %d\n",__FILE__,qpp,speed);
+
+        // mutiply by 4 anyway because the best speed is SPEED_400 only
+        if (speed>=SPEED_1600)
+            *bandwidth = qpp >> (speed-SPEED_1600);
+        else
+            *bandwidth = qpp << (SPEED_1600-speed);
+
+        //fprintf(stderr,"(%s) bandwidth is %d\n",__FILE__, *bandwidth);
+
     }
     else {
-      // get the framerate:
-      if (dc1394_get_video_framerate(handle, node, &framerate) != DC1394_SUCCESS)
-	return DC1394_FAILURE;
-      qpp=_dc1394_get_quadlets_per_packet(format, mode, framerate); 
+        //fprintf(stderr,"(%s) iso is off\n",__FILE__);
+        *bandwidth=0;
     }
-    // add the ISO header and footer:
-    qpp+=3;
+    return DC1394_SUCCESS;
 
-    // get camera ISO speed:
-    if (dc1394_get_iso_channel_and_speed(handle, node, &channel, &speed)!= DC1394_SUCCESS)
-      return DC1394_FAILURE;
-
-    //fprintf(stderr,"(%s) qpp is %d, speed is %d\n",__FILE__,qpp,speed);
-    
-    // mutiply by 4 anyway because the best speed is SPEED_400 only
-    if (speed>=SPEED_1600)
-      *bandwidth = qpp >> (speed-SPEED_1600);
-    else
-      *bandwidth = qpp << (SPEED_1600-speed);
-
-    //fprintf(stderr,"(%s) bandwidth is %d\n",__FILE__, *bandwidth);
-    
-  }
-  else {
-    //fprintf(stderr,"(%s) iso is off\n",__FILE__);
-    *bandwidth=0;
-  }
-  return DC1394_SUCCESS;
-    
 }
 
 int
 dc1394_get_camera_port(raw1394handle_t handle)
 {
-  dc1394_camerahandle *camerahandle;
-  camerahandle=(dc1394_camerahandle*) raw1394_get_userdata(handle);
-  return(camerahandle->port);
+    dc1394_camerahandle *camerahandle;
+    camerahandle=(dc1394_camerahandle*) raw1394_get_userdata(handle);
+    return(camerahandle->port);
 
 }

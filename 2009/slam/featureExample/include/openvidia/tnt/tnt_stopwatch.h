@@ -34,62 +34,62 @@ inline static double seconds(void)
 }
 
 class Stopwatch {
-    private:
-        int running_;
-        double start_time_;
-        double total_;
+private:
+    int running_;
+    double start_time_;
+    double total_;
 
-    public:
-        inline Stopwatch();
-        inline void start();
-        inline double stop();
-		inline double read();
-		inline void resume();
-		inline int running();
+public:
+    inline Stopwatch();
+    inline void start();
+    inline double stop();
+    inline double read();
+    inline void resume();
+    inline int running();
 };
 
 inline Stopwatch::Stopwatch() : running_(0), start_time_(0.0), total_(0.0) {}
 
-void Stopwatch::start() 
+void Stopwatch::start()
 {
-	running_ = 1;
-	total_ = 0.0;
-	start_time_ = seconds();
+    running_ = 1;
+    total_ = 0.0;
+    start_time_ = seconds();
 }
 
-double Stopwatch::stop()  
+double Stopwatch::stop()
 {
-	if (running_) 
-	{
-         total_ += (seconds() - start_time_); 
-         running_ = 0;
+    if (running_)
+    {
+        total_ += (seconds() - start_time_);
+        running_ = 0;
     }
-    return total_; 
+    return total_;
 }
 
 inline void Stopwatch::resume()
 {
-	if (!running_)
-	{
-		start_time_ = seconds();
-		running_ = 1;
-	}
+    if (!running_)
+    {
+        start_time_ = seconds();
+        running_ = 1;
+    }
 }
-		
 
-inline double Stopwatch::read()   
+
+inline double Stopwatch::read()
 {
-	if (running_)
-	{
-		stop();
-		resume();
-	}
-	return total_;
+    if (running_)
+    {
+        stop();
+        resume();
+    }
+    return total_;
 }
 
 
 }
 #endif
-    
 
-            
+
+

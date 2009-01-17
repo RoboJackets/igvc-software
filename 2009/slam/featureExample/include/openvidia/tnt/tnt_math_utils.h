@@ -9,7 +9,7 @@
 namespace TNT
 {
 /**
-	@returns hypotenuse of real (non-complex) scalars a and b by 
+	@returns hypotenuse of real (non-complex) scalars a and b by
 	avoiding underflow/overflow
 	using (a * sqrt( 1 + (b/a) * (b/a))), rather than
 	sqrt(a*a + b*b).
@@ -17,14 +17,14 @@ namespace TNT
 template <class Real>
 Real hypot(const Real &a, const Real &b)
 {
-	
-	if (a== 0)
-		return abs(b);
-	else
-	{
-		Real c = b/a;
-		return abs(a) * sqrt(1 + c*c);
-	}
+
+    if (a== 0)
+        return abs(b);
+    else
+    {
+        Real c = b/a;
+        return abs(a) * sqrt(1 + c*c);
+    }
 }
 
 /**
@@ -33,7 +33,7 @@ Real hypot(const Real &a, const Real &b)
 template <class Scalar>
 Scalar min(const Scalar &a, const Scalar &b)
 {
-	return  a < b ? a : b;
+    return  a < b ? a : b;
 }
 
 /**
@@ -42,7 +42,7 @@ Scalar min(const Scalar &a, const Scalar &b)
 template <class Scalar>
 Scalar max(const Scalar &a, const Scalar &b)
 {
-	return  a > b ? a : b;
+    return  a > b ? a : b;
 }
 
 /**
@@ -51,7 +51,7 @@ Scalar max(const Scalar &a, const Scalar &b)
 template <class Real>
 Real abs(const Real &a)
 {
-	return  (a > 0 ? a : -a);
+    return  (a > 0 ? a : -a);
 }
 
 }

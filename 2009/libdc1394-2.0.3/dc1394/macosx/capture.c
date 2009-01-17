@@ -83,7 +83,7 @@ supported_channels (IOFireWireLibIsochPortRef rem_port, IOFWSpeed * maxSpeed, UI
     /* If automatic IRM allocation is turned off, we only allow the channel
      * that has been already set in the camera. */
     if (!capture->do_irm &&
-        dc1394_video_get_iso_channel (camera, &channel) == DC1394_SUCCESS) {
+            dc1394_video_get_iso_channel (camera, &channel) == DC1394_SUCCESS) {
         *chanSupported = 0x1ULL << (63-channel);
     }
     return kIOReturnSuccess;
@@ -108,7 +108,7 @@ finalize_callback (dc1394capture_t * capture)
 }
 
 #ifndef MIN
-    #define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 
 static void
@@ -152,17 +152,17 @@ callback (buffer_info * buffer, NuDCLRef dcl)
         int packet_size = capture->frames[buffer->i].packet_size;
         if ((buffer->pkts[i].status & 0x1F) != 0x11) {
             dc1394_log_warning ("packet %d had error status %x",
-                    i, buffer->pkts[i].status);
+                                i, buffer->pkts[i].status);
             corrupt = 1;
         }
         if ((buffer->pkts[i].header & 0x3) != 0 && i > 0) {
             dc1394_log_warning ("packet %d had unexpected sync (%x)",
-                    i, buffer->pkts[i].header);
+                                i, buffer->pkts[i].header);
             corrupt = 1;
         }
         if ((buffer->pkts[i].header >> 16) != packet_size) {
             dc1394_log_warning ("packet %d had wrong length (%x)",
-                    i, buffer->pkts[i].header);
+                                i, buffer->pkts[i].header);
             corrupt = 1;
         }
     }
@@ -229,9 +229,9 @@ CreateDCLProgram (platform_camera_t * craw)
     int i;
 
     databuf->length = (capture->num_frames + 1) * packet_size * ppf +
-        capture->num_frames * ppf * sizeof (packet_info);
+                      capture->num_frames * ppf * sizeof (packet_info);
     databuf->address = (IOVirtualAddress) mmap (NULL, databuf->length,
-            PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
+                       PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
     if (!databuf->address || databuf->address == (IOVirtualAddress)-1) {
         dc1394_log_error("mmap failed");
         return NULL;
@@ -239,10 +239,10 @@ CreateDCLProgram (platform_camera_t * craw)
 
     for (i = 0; i < capture->num_frames; i++) {
         IOVirtualAddress frame_address = databuf->address +
-            i * packet_size * ppf;
+                                         i * packet_size * ppf;
         IOVirtualAddress data_address = databuf->address +
-            (capture->num_frames + 1) * packet_size * ppf +
-            i * ppf * sizeof (packet_info);
+                                        (capture->num_frames + 1) * packet_size * ppf +
+                                        i * ppf * sizeof (packet_info);
         buffer_info * buffer = capture->buffers + i;
         dc1394video_frame_t * frame = capture->frames + i;
         int j;
@@ -264,7 +264,7 @@ CreateDCLProgram (platform_camera_t * craw)
         buffer->pkts = (packet_info *) data_address;
 
         dcl = (*dcl_pool)->AllocateReceivePacket (dcl_pool, NULL,
-                                                  4, 2, ranges);
+                4, 2, ranges);
         (*dcl_pool)->SetDCLWaitControl (dcl, true);
         (*dcl_pool)->SetDCLFlags (dcl, kNuDCLDynamic);
         (*dcl_pool)->SetDCLStatusPtr (dcl, &buffer->pkts[0].status);
@@ -276,7 +276,7 @@ CreateDCLProgram (platform_camera_t * craw)
             ranges[0].address = (IOVirtualAddress) &buffer->pkts[j].header;
             ranges[1].address += packet_size;
             dcl = (*dcl_pool)->AllocateReceivePacket (dcl_pool, NULL,
-                                                      4, 2, ranges);
+                    4, 2, ranges);
             (*dcl_pool)->SetDCLFlags (dcl, kNuDCLDynamic);
             (*dcl_pool)->SetDCLStatusPtr (dcl, &buffer->pkts[j].status);
             (*dcl_pool)->SetDCLTimeStampPtr (dcl, &buffer->pkts[j].timestamp);
@@ -306,9 +306,9 @@ servicing_thread (void * cam_ptr)
     IOFireWireLibDeviceRef d = craw->iface;
 
     (*d)->AddCallbackDispatcherToRunLoopForMode (d, CFRunLoopGetCurrent (),
-                                                 kCFRunLoopDefaultMode);
+            kCFRunLoopDefaultMode);
     (*d)->AddIsochCallbackDispatcherToRunLoopForMode (d, CFRunLoopGetCurrent (),
-                                                      kCFRunLoopDefaultMode);
+            kCFRunLoopDefaultMode);
 
     MPSignalSemaphore(craw->capture.thread_init_semaphore);
 
@@ -322,7 +322,7 @@ servicing_thread (void * cam_ptr)
 **************************************************************/
 dc1394error_t
 platform_capture_setup(platform_camera_t *craw, uint32_t num_dma_buffers,
-                     uint32_t flags)
+                       uint32_t flags)
 {
     dc1394capture_t * capture = &(craw->capture);
     dc1394camera_t * camera = craw->camera;
@@ -344,8 +344,8 @@ platform_capture_setup(platform_camera_t *craw, uint32_t num_dma_buffers,
 
     craw->capture.flags=flags;
     if (((flags & DC1394_CAPTURE_FLAGS_CHANNEL_ALLOC) &&
-         (flags & DC1394_CAPTURE_FLAGS_BANDWIDTH_ALLOC)) ||
-        (flags & DC1394_CAPTURE_FLAGS_DEFAULT))
+            (flags & DC1394_CAPTURE_FLAGS_BANDWIDTH_ALLOC)) ||
+            (flags & DC1394_CAPTURE_FLAGS_DEFAULT))
         craw->capture.do_irm = true;
     else if (!(flags & DC1394_CAPTURE_FLAGS_CHANNEL_ALLOC) &&
              !(flags & DC1394_CAPTURE_FLAGS_BANDWIDTH_ALLOC))
@@ -375,12 +375,12 @@ platform_capture_setup(platform_camera_t *craw, uint32_t num_dma_buffers,
     pipe (capture->notify_pipe);
 
     capture->socket = CFSocketCreateWithNative (NULL, capture->notify_pipe[0],
-                                                kCFSocketReadCallBack, socket_callback, &socket_context);
+                      kCFSocketReadCallBack, socket_callback, &socket_context);
     /* Set flags so that the underlying fd is not closed with the socket */
     CFSocketSetSocketFlags (capture->socket,
                             CFSocketGetSocketFlags (capture->socket) & ~kCFSocketCloseOnInvalidate);
     capture->socket_source = CFSocketCreateRunLoopSource (NULL,
-                                                          capture->socket, 0);
+                             capture->socket, 0);
     if (!capture->run_loop)
         dc1394_capture_schedule_with_runloop (camera,
                                               CFRunLoopGetCurrent (), kCFRunLoopDefaultMode);
@@ -600,8 +600,8 @@ platform_capture_stop(platform_camera_t *craw)
 
 dc1394error_t
 platform_capture_dequeue (platform_camera_t * craw,
-                        dc1394capture_policy_t policy,
-                        dc1394video_frame_t **frame)
+                          dc1394capture_policy_t policy,
+                          dc1394video_frame_t **frame)
 {
     dc1394capture_t * capture = &(craw->capture);
     int next = NEXT_BUFFER (capture, capture->last_dequeued);
@@ -639,7 +639,7 @@ platform_capture_dequeue (platform_camera_t * craw,
     capture->last_dequeued = next;
 
     frame_tmp->timestamp = (uint64_t) buffer->filltime.tv_sec * 1000000 +
-        buffer->filltime.tv_usec;
+                           buffer->filltime.tv_usec;
 
     *frame=frame_tmp;
 
@@ -649,7 +649,7 @@ platform_capture_dequeue (platform_camera_t * craw,
 
 dc1394error_t
 platform_capture_enqueue (platform_camera_t * craw,
-                        dc1394video_frame_t * frame)
+                          dc1394video_frame_t * frame)
 {
     dc1394capture_t * capture = &(craw->capture);
     dc1394camera_t * camera = craw->camera;
@@ -693,7 +693,7 @@ platform_capture_enqueue (platform_camera_t * craw,
 
 dc1394bool_t
 platform_capture_is_frame_corrupt (platform_camera_t * craw,
-        dc1394video_frame_t * frame)
+                                   dc1394video_frame_t * frame)
 {
     dc1394capture_t * capture = &(craw->capture);
     buffer_info * buffer = capture->buffers + frame->id;
@@ -717,7 +717,7 @@ platform_capture_get_fileno (platform_camera_t * craw)
 
 int
 dc1394_capture_schedule_with_runloop (dc1394camera_t * camera,
-        CFRunLoopRef run_loop, CFStringRef run_loop_mode)
+                                      CFRunLoopRef run_loop, CFStringRef run_loop_mode)
 {
     dc1394camera_priv_t * cpriv = DC1394_CAMERA_PRIV (camera);
     platform_camera_t * craw = cpriv->pcam;

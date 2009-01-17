@@ -95,7 +95,7 @@ typedef enum {
  * Camera structure
  *
  * This structure represents the camera in libdc1394. It contains a number of useful static information, such as model/vendor names,
- * a few capabilities, some ROM offsets, a unique identifier, etc... 
+ * a few capabilities, some ROM offsets, a unique identifier, etc...
  */
 typedef struct __dc1394_camera
 {
@@ -135,7 +135,7 @@ typedef struct __dc1394_camera
  * A unique identifier for a functional camera unit
  *
  * Since a single camera can contain several functional units (think stereo cameras), the GUID is not enough to identify an IIDC camera.
- * The unit number must also be used, hence this struct. 
+ * The unit number must also be used, hence this struct.
  */
 typedef struct
 {
@@ -146,7 +146,7 @@ typedef struct
 /**
  * A list of cameras
  *
- * Usually returned by dc1394_camera_eumerate(). 
+ * Usually returned by dc1394_camera_eumerate().
  */
 typedef struct __dc1394camera_list_t
 {
@@ -160,83 +160,83 @@ typedef struct __dc1394_t dc1394_t;
 extern "C" {
 #endif
 
-/***************************************************************************
-     General system functions
- ***************************************************************************/
+    /***************************************************************************
+         General system functions
+     ***************************************************************************/
 
-/**
- * Creates a new context in which cameras can be searched and used. This should be called before using any other libdc1394 function. 
- */
-dc1394_t* dc1394_new (void);
+    /**
+     * Creates a new context in which cameras can be searched and used. This should be called before using any other libdc1394 function.
+     */
+    dc1394_t* dc1394_new (void);
 
-/**
- * Liberates a context. Last function to use in your program. After this, no libdc1394 function can be used.
- */
-void dc1394_free (dc1394_t *dc1394);
+    /**
+     * Liberates a context. Last function to use in your program. After this, no libdc1394 function can be used.
+     */
+    void dc1394_free (dc1394_t *dc1394);
 
-/**
- * Sets and gets the broadcast flag of a camera. If the broadcast flag is set,
- * all devices on the bus will execute the command. Useful to sync ISO start
- * commands or setting a bunch of cameras at the same time. Broadcast only works
- * with identical devices (brand/model). If the devices are not identical your
- * mileage may vary. Some cameras may not answer broadcast commands at all. Also,
- * this only works with cameras on the SAME bus (IOW, the same port).
- */
-dc1394error_t dc1394_camera_set_broadcast(dc1394camera_t *camera, dc1394bool_t pwr);
-dc1394error_t dc1394_camera_get_broadcast(dc1394camera_t *camera, dc1394bool_t *pwr);
+    /**
+     * Sets and gets the broadcast flag of a camera. If the broadcast flag is set,
+     * all devices on the bus will execute the command. Useful to sync ISO start
+     * commands or setting a bunch of cameras at the same time. Broadcast only works
+     * with identical devices (brand/model). If the devices are not identical your
+     * mileage may vary. Some cameras may not answer broadcast commands at all. Also,
+     * this only works with cameras on the SAME bus (IOW, the same port).
+     */
+    dc1394error_t dc1394_camera_set_broadcast(dc1394camera_t *camera, dc1394bool_t pwr);
+    dc1394error_t dc1394_camera_get_broadcast(dc1394camera_t *camera, dc1394bool_t *pwr);
 
-/**
- * Resets the IEEE1394 bus which camera is attached to.  Calling this function is
- * "rude" to other devices because it causes them to re-enumerate on the bus and
- * may cause a temporary disruption in their current activities.  Thus, use it
- * sparingly.  Its primary use is if a program shuts down uncleanly and needs to
- * free leftover ISO channels or bandwidth.  A bus reset will free those things
- * as a side effect.
- */
-dc1394error_t dc1394_reset_bus(dc1394camera_t *camera);
-dc1394error_t dc1394_read_cycle_timer (dc1394camera_t * camera,
-        uint32_t * cycle_timer, uint64_t * local_time);
+    /**
+     * Resets the IEEE1394 bus which camera is attached to.  Calling this function is
+     * "rude" to other devices because it causes them to re-enumerate on the bus and
+     * may cause a temporary disruption in their current activities.  Thus, use it
+     * sparingly.  Its primary use is if a program shuts down uncleanly and needs to
+     * free leftover ISO channels or bandwidth.  A bus reset will free those things
+     * as a side effect.
+     */
+    dc1394error_t dc1394_reset_bus(dc1394camera_t *camera);
+    dc1394error_t dc1394_read_cycle_timer (dc1394camera_t * camera,
+                                           uint32_t * cycle_timer, uint64_t * local_time);
 
-/**
- * Gets the IEEE 1394 node ID of the camera.
- */
-dc1394error_t dc1394_camera_get_node(dc1394camera_t *camera, uint32_t *node,
-        uint32_t * generation);
+    /**
+     * Gets the IEEE 1394 node ID of the camera.
+     */
+    dc1394error_t dc1394_camera_get_node(dc1394camera_t *camera, uint32_t *node,
+                                         uint32_t * generation);
 
 
-/***************************************************************************
-     Camera functions
- ***************************************************************************/
+    /***************************************************************************
+         Camera functions
+     ***************************************************************************/
 
-/**
- * Returns the list of cameras available on the computer. If present, multiple cards will be probed
- */
-dc1394error_t dc1394_camera_enumerate(dc1394_t *dc1394, dc1394camera_list_t **list);
+    /**
+     * Returns the list of cameras available on the computer. If present, multiple cards will be probed
+     */
+    dc1394error_t dc1394_camera_enumerate(dc1394_t *dc1394, dc1394camera_list_t **list);
 
-/**
- * Frees the memory allocated in dc1394_enumerate_cameras for the camera list
- */
-void dc1394_camera_free_list(dc1394camera_list_t *list);
+    /**
+     * Frees the memory allocated in dc1394_enumerate_cameras for the camera list
+     */
+    void dc1394_camera_free_list(dc1394camera_list_t *list);
 
-/**
- * Create a new camera based on a GUID (Global Unique IDentifier)
- */
-dc1394camera_t * dc1394_camera_new(dc1394_t *dc1394, uint64_t guid);
+    /**
+     * Create a new camera based on a GUID (Global Unique IDentifier)
+     */
+    dc1394camera_t * dc1394_camera_new(dc1394_t *dc1394, uint64_t guid);
 
-/**
- * Create a new camera based on a GUID and a unit number (for multi-unit cameras)
- */
-dc1394camera_t * dc1394_camera_new_unit(dc1394_t *dc1394, uint64_t guid, int unit);
+    /**
+     * Create a new camera based on a GUID and a unit number (for multi-unit cameras)
+     */
+    dc1394camera_t * dc1394_camera_new_unit(dc1394_t *dc1394, uint64_t guid, int unit);
 
-/**
- * Frees a camera structure
- */
-void dc1394_camera_free(dc1394camera_t *camera);
+    /**
+     * Frees a camera structure
+     */
+    void dc1394_camera_free(dc1394camera_t *camera);
 
-/**
- * Print various camera information, such as GUID, vendor, model, supported IIDC specs, etc...
- */
-dc1394error_t dc1394_camera_print_info(dc1394camera_t *camera, FILE *fd);
+    /**
+     * Print various camera information, such as GUID, vendor, model, supported IIDC specs, etc...
+     */
+    dc1394error_t dc1394_camera_print_info(dc1394camera_t *camera, FILE *fd);
 
 #ifdef __cplusplus
 }

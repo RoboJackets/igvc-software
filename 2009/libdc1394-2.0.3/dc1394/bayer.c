@@ -107,13 +107,13 @@ dc1394_bayer_NearestNeighbor(const uint8_t *restrict bayer, uint8_t *restrict rg
     int width = sx;
     int height = sy;
     int blue = tile == DC1394_COLOR_FILTER_BGGR
-        || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
+               || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
     int start_with_green = tile == DC1394_COLOR_FILTER_GBRG
-        || tile == DC1394_COLOR_FILTER_GRBG;
+                           || tile == DC1394_COLOR_FILTER_GRBG;
     int i, imax, iinc;
 
     if ((tile>DC1394_COLOR_FILTER_MAX)||(tile<DC1394_COLOR_FILTER_MIN))
-      return DC1394_INVALID_COLOR_FILTER;
+        return DC1394_INVALID_COLOR_FILTER;
 
     /* add black border */
     imax = sx * sy * 3;
@@ -132,7 +132,7 @@ dc1394_bayer_NearestNeighbor(const uint8_t *restrict bayer, uint8_t *restrict rg
     height -= 1;
 
     for (; height--; bayer += bayerStep, rgb += rgbStep) {
-      //int t0, t1;
+        //int t0, t1;
         const uint8_t *bayerEnd = bayer + width;
 
         if (start_with_green) {
@@ -204,9 +204,9 @@ dc1394_bayer_Bilinear(const uint8_t *restrict bayer, uint8_t *restrict rgb, int 
        int start_with_green = tile == CV_BayerGB2BGR || tile == CV_BayerGR2BGR;
      */
     int blue = tile == DC1394_COLOR_FILTER_BGGR
-        || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
+               || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
     int start_with_green = tile == DC1394_COLOR_FILTER_GBRG
-        || tile == DC1394_COLOR_FILTER_GRBG;
+                           || tile == DC1394_COLOR_FILTER_GRBG;
 
     if ((tile>DC1394_COLOR_FILTER_MAX)||(tile<DC1394_COLOR_FILTER_MIN))
         return DC1394_INVALID_COLOR_FILTER;
@@ -303,12 +303,12 @@ dc1394_bayer_HQLinear(const uint8_t *restrict bayer, uint8_t *restrict rgb, int 
     int width = sx;
     int height = sy;
     int blue = tile == DC1394_COLOR_FILTER_BGGR
-        || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
+               || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
     int start_with_green = tile == DC1394_COLOR_FILTER_GBRG
-        || tile == DC1394_COLOR_FILTER_GRBG;
+                           || tile == DC1394_COLOR_FILTER_GRBG;
 
     if ((tile>DC1394_COLOR_FILTER_MAX)||(tile<DC1394_COLOR_FILTER_MIN))
-      return DC1394_INVALID_COLOR_FILTER;
+        return DC1394_INVALID_COLOR_FILTER;
 
     ClearBorders(rgb, sx, sy, 2);
     rgb += 2 * rgbStep + 6 + 1;
@@ -329,23 +329,23 @@ dc1394_bayer_HQLinear(const uint8_t *restrict bayer, uint8_t *restrict rgb, int 
             /* at green pixel */
             rgb[0] = bayer[bayerStep2 + 2];
             t0 = rgb[0] * 5
-                + ((bayer[bayerStep + 2] + bayer[bayerStep3 + 2]) << 2)
-                - bayer[2]
-                - bayer[bayerStep + 1]
-                - bayer[bayerStep + 3]
-                - bayer[bayerStep3 + 1]
-                - bayer[bayerStep3 + 3]
-                - bayer[bayerStep4 + 2]
-                + ((bayer[bayerStep2] + bayer[bayerStep2 + 4] + 1) >> 1);
+                 + ((bayer[bayerStep + 2] + bayer[bayerStep3 + 2]) << 2)
+                 - bayer[2]
+                 - bayer[bayerStep + 1]
+                 - bayer[bayerStep + 3]
+                 - bayer[bayerStep3 + 1]
+                 - bayer[bayerStep3 + 3]
+                 - bayer[bayerStep4 + 2]
+                 + ((bayer[bayerStep2] + bayer[bayerStep2 + 4] + 1) >> 1);
             t1 = rgb[0] * 5 +
-                ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 3]) << 2)
-                - bayer[bayerStep2]
-                - bayer[bayerStep + 1]
-                - bayer[bayerStep + 3]
-                - bayer[bayerStep3 + 1]
-                - bayer[bayerStep3 + 3]
-                - bayer[bayerStep2 + 4]
-                + ((bayer[2] + bayer[bayerStep4 + 2] + 1) >> 1);
+                 ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 3]) << 2)
+                 - bayer[bayerStep2]
+                 - bayer[bayerStep + 1]
+                 - bayer[bayerStep + 3]
+                 - bayer[bayerStep3 + 1]
+                 - bayer[bayerStep3 + 3]
+                 - bayer[bayerStep2 + 4]
+                 + ((bayer[2] + bayer[bayerStep4 + 2] + 1) >> 1);
             t0 = (t0 + 4) >> 3;
             CLIP(t0, rgb[-blue]);
             t1 = (t1 + 4) >> 3;
@@ -361,17 +361,17 @@ dc1394_bayer_HQLinear(const uint8_t *restrict bayer, uint8_t *restrict rgb, int 
                 /* R at B */
                 t0 = ((bayer[bayerStep + 1] + bayer[bayerStep + 3] +
                        bayer[bayerStep3 + 1] + bayer[bayerStep3 + 3]) << 1)
-                    -
-                    (((bayer[2] + bayer[bayerStep2] +
-                       bayer[bayerStep2 + 4] + bayer[bayerStep4 +
-                                                     2]) * 3 + 1) >> 1)
-                    + rgb[1] * 6;
+                     -
+                     (((bayer[2] + bayer[bayerStep2] +
+                        bayer[bayerStep2 + 4] + bayer[bayerStep4 +
+                                                      2]) * 3 + 1) >> 1)
+                     + rgb[1] * 6;
                 /* G at B */
                 t1 = ((bayer[bayerStep + 2] + bayer[bayerStep2 + 1] +
                        bayer[bayerStep2 + 3] + bayer[bayerStep3 + 2]) << 1)
-                    - (bayer[2] + bayer[bayerStep2] +
-                       bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
-                    + (rgb[1] << 2);
+                     - (bayer[2] + bayer[bayerStep2] +
+                        bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
+                     + (rgb[1] << 2);
                 t0 = (t0 + 4) >> 3;
                 CLIP(t0, rgb[-1]);
                 t1 = (t1 + 4) >> 3;
@@ -379,25 +379,25 @@ dc1394_bayer_HQLinear(const uint8_t *restrict bayer, uint8_t *restrict rgb, int 
                 /* at green pixel */
                 rgb[3] = bayer[bayerStep2 + 3];
                 t0 = rgb[3] * 5
-                    + ((bayer[bayerStep + 3] + bayer[bayerStep3 + 3]) << 2)
-                    - bayer[3]
-                    - bayer[bayerStep + 2]
-                    - bayer[bayerStep + 4]
-                    - bayer[bayerStep3 + 2]
-                    - bayer[bayerStep3 + 4]
-                    - bayer[bayerStep4 + 3]
-                    +
-                    ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 5] +
-                      1) >> 1);
+                     + ((bayer[bayerStep + 3] + bayer[bayerStep3 + 3]) << 2)
+                     - bayer[3]
+                     - bayer[bayerStep + 2]
+                     - bayer[bayerStep + 4]
+                     - bayer[bayerStep3 + 2]
+                     - bayer[bayerStep3 + 4]
+                     - bayer[bayerStep4 + 3]
+                     +
+                     ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 5] +
+                       1) >> 1);
                 t1 = rgb[3] * 5 +
-                    ((bayer[bayerStep2 + 2] + bayer[bayerStep2 + 4]) << 2)
-                    - bayer[bayerStep2 + 1]
-                    - bayer[bayerStep + 2]
-                    - bayer[bayerStep + 4]
-                    - bayer[bayerStep3 + 2]
-                    - bayer[bayerStep3 + 4]
-                    - bayer[bayerStep2 + 5]
-                    + ((bayer[3] + bayer[bayerStep4 + 3] + 1) >> 1);
+                     ((bayer[bayerStep2 + 2] + bayer[bayerStep2 + 4]) << 2)
+                     - bayer[bayerStep2 + 1]
+                     - bayer[bayerStep + 2]
+                     - bayer[bayerStep + 4]
+                     - bayer[bayerStep3 + 2]
+                     - bayer[bayerStep3 + 4]
+                     - bayer[bayerStep2 + 5]
+                     + ((bayer[3] + bayer[bayerStep4 + 3] + 1) >> 1);
                 t0 = (t0 + 4) >> 3;
                 CLIP(t0, rgb[2]);
                 t1 = (t1 + 4) >> 3;
@@ -410,18 +410,18 @@ dc1394_bayer_HQLinear(const uint8_t *restrict bayer, uint8_t *restrict rgb, int 
                 /* B at R */
                 t0 = ((bayer[bayerStep + 1] + bayer[bayerStep + 3] +
                        bayer[bayerStep3 + 1] + bayer[bayerStep3 + 3]) << 1)
-                    -
-                    (((bayer[2] + bayer[bayerStep2] +
-                       bayer[bayerStep2 + 4] + bayer[bayerStep4 +
-                                                     2]) * 3 + 1) >> 1)
-                    + rgb[-1] * 6;
+                     -
+                     (((bayer[2] + bayer[bayerStep2] +
+                        bayer[bayerStep2 + 4] + bayer[bayerStep4 +
+                                                      2]) * 3 + 1) >> 1)
+                     + rgb[-1] * 6;
                 /* G at R */
                 t1 = ((bayer[bayerStep + 2] + bayer[bayerStep2 + 1] +
                        bayer[bayerStep2 + 3] + bayer[bayerStep * 3 +
                                                      2]) << 1)
-                    - (bayer[2] + bayer[bayerStep2] +
-                       bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
-                    + (rgb[-1] << 2);
+                     - (bayer[2] + bayer[bayerStep2] +
+                        bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
+                     + (rgb[-1] << 2);
                 t0 = (t0 + 4) >> 3;
                 CLIP(t0, rgb[1]);
                 t1 = (t1 + 4) >> 3;
@@ -430,25 +430,25 @@ dc1394_bayer_HQLinear(const uint8_t *restrict bayer, uint8_t *restrict rgb, int 
                 /* at green pixel */
                 rgb[3] = bayer[bayerStep2 + 3];
                 t0 = rgb[3] * 5
-                    + ((bayer[bayerStep + 3] + bayer[bayerStep3 + 3]) << 2)
-                    - bayer[3]
-                    - bayer[bayerStep + 2]
-                    - bayer[bayerStep + 4]
-                    - bayer[bayerStep3 + 2]
-                    - bayer[bayerStep3 + 4]
-                    - bayer[bayerStep4 + 3]
-                    +
-                    ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 5] +
-                      1) >> 1);
+                     + ((bayer[bayerStep + 3] + bayer[bayerStep3 + 3]) << 2)
+                     - bayer[3]
+                     - bayer[bayerStep + 2]
+                     - bayer[bayerStep + 4]
+                     - bayer[bayerStep3 + 2]
+                     - bayer[bayerStep3 + 4]
+                     - bayer[bayerStep4 + 3]
+                     +
+                     ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 5] +
+                       1) >> 1);
                 t1 = rgb[3] * 5 +
-                    ((bayer[bayerStep2 + 2] + bayer[bayerStep2 + 4]) << 2)
-                    - bayer[bayerStep2 + 1]
-                    - bayer[bayerStep + 2]
-                    - bayer[bayerStep + 4]
-                    - bayer[bayerStep3 + 2]
-                    - bayer[bayerStep3 + 4]
-                    - bayer[bayerStep2 + 5]
-                    + ((bayer[3] + bayer[bayerStep4 + 3] + 1) >> 1);
+                     ((bayer[bayerStep2 + 2] + bayer[bayerStep2 + 4]) << 2)
+                     - bayer[bayerStep2 + 1]
+                     - bayer[bayerStep + 2]
+                     - bayer[bayerStep + 4]
+                     - bayer[bayerStep3 + 2]
+                     - bayer[bayerStep3 + 4]
+                     - bayer[bayerStep2 + 5]
+                     + ((bayer[3] + bayer[bayerStep4 + 3] + 1) >> 1);
                 t0 = (t0 + 4) >> 3;
                 CLIP(t0, rgb[4]);
                 t1 = (t1 + 4) >> 3;
@@ -462,17 +462,17 @@ dc1394_bayer_HQLinear(const uint8_t *restrict bayer, uint8_t *restrict rgb, int 
             /* R at B */
             t0 = ((bayer[bayerStep + 1] + bayer[bayerStep + 3] +
                    bayer[bayerStep3 + 1] + bayer[bayerStep3 + 3]) << 1)
-                -
-                (((bayer[2] + bayer[bayerStep2] +
-                   bayer[bayerStep2 + 4] + bayer[bayerStep4 +
-                                                 2]) * 3 + 1) >> 1)
-                + rgb[blue] * 6;
+                 -
+                 (((bayer[2] + bayer[bayerStep2] +
+                    bayer[bayerStep2 + 4] + bayer[bayerStep4 +
+                                                  2]) * 3 + 1) >> 1)
+                 + rgb[blue] * 6;
             /* G at B */
             t1 = (((bayer[bayerStep + 2] + bayer[bayerStep2 + 1] +
                     bayer[bayerStep2 + 3] + bayer[bayerStep3 + 2])) << 1)
-                - (bayer[2] + bayer[bayerStep2] +
-                   bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
-                + (rgb[blue] << 2);
+                 - (bayer[2] + bayer[bayerStep2] +
+                    bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
+                 + (rgb[blue] << 2);
             t0 = (t0 + 4) >> 3;
             CLIP(t0, rgb[-blue]);
             t1 = (t1 + 4) >> 3;
@@ -526,7 +526,7 @@ dc1394_bayer_Downsample(const uint8_t *restrict bayer, uint8_t *restrict rgb, in
         outB = &rgb[0];
         break;
     default:
-      return DC1394_INVALID_COLOR_FILTER;
+        return DC1394_INVALID_COLOR_FILTER;
     }
 
     switch (tile) {
@@ -571,13 +571,13 @@ dc1394_bayer_Simple(const uint8_t *restrict bayer, uint8_t *restrict rgb, int sx
     int width = sx;
     int height = sy;
     int blue = tile == DC1394_COLOR_FILTER_BGGR
-        || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
+               || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
     int start_with_green = tile == DC1394_COLOR_FILTER_GBRG
-        || tile == DC1394_COLOR_FILTER_GRBG;
+                           || tile == DC1394_COLOR_FILTER_GRBG;
     int i, imax, iinc;
 
     if ((tile>DC1394_COLOR_FILTER_MAX)||(tile<DC1394_COLOR_FILTER_MIN))
-      return DC1394_INVALID_COLOR_FILTER;
+        return DC1394_INVALID_COLOR_FILTER;
 
     /* add black border */
     imax = sx * sy * 3;
@@ -658,13 +658,13 @@ dc1394_bayer_NearestNeighbor_uint16(const uint16_t *restrict bayer, uint16_t *re
     int width = sx;
     int height = sy;
     int blue = tile == DC1394_COLOR_FILTER_BGGR
-        || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
+               || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
     int start_with_green = tile == DC1394_COLOR_FILTER_GBRG
-        || tile == DC1394_COLOR_FILTER_GRBG;
+                           || tile == DC1394_COLOR_FILTER_GRBG;
     int i, iinc, imax;
 
     if ((tile>DC1394_COLOR_FILTER_MAX)||(tile<DC1394_COLOR_FILTER_MIN))
-      return DC1394_INVALID_COLOR_FILTER;
+        return DC1394_INVALID_COLOR_FILTER;
 
     /* add black border */
     imax = sx * sy * 3;
@@ -683,7 +683,7 @@ dc1394_bayer_NearestNeighbor_uint16(const uint16_t *restrict bayer, uint16_t *re
     width -= 1;
 
     for (; height--; bayer += bayerStep, rgb += rgbStep) {
-      //int t0, t1;
+        //int t0, t1;
         const uint16_t *bayerEnd = bayer + width;
 
         if (start_with_green) {
@@ -743,12 +743,12 @@ dc1394_bayer_Bilinear_uint16(const uint16_t *restrict bayer, uint16_t *restrict 
     int width = sx;
     int height = sy;
     int blue = tile == DC1394_COLOR_FILTER_BGGR
-        || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
+               || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
     int start_with_green = tile == DC1394_COLOR_FILTER_GBRG
-        || tile == DC1394_COLOR_FILTER_GRBG;
+                           || tile == DC1394_COLOR_FILTER_GRBG;
 
     if ((tile>DC1394_COLOR_FILTER_MAX)||(tile<DC1394_COLOR_FILTER_MIN))
-      return DC1394_INVALID_COLOR_FILTER;
+        return DC1394_INVALID_COLOR_FILTER;
 
     rgb += rgbStep + 3 + 1;
     height -= 2;
@@ -855,12 +855,12 @@ dc1394_bayer_HQLinear_uint16(const uint16_t *restrict bayer, uint16_t *restrict 
        int start_with_green = tile == CV_BayerGB2BGR || tile == CV_BayerGR2BGR;
      */
     int blue = tile == DC1394_COLOR_FILTER_BGGR
-        || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
+               || tile == DC1394_COLOR_FILTER_GBRG ? -1 : 1;
     int start_with_green = tile == DC1394_COLOR_FILTER_GBRG
-        || tile == DC1394_COLOR_FILTER_GRBG;
+                           || tile == DC1394_COLOR_FILTER_GRBG;
 
     if ((tile>DC1394_COLOR_FILTER_MAX)||(tile<DC1394_COLOR_FILTER_MIN))
-      return DC1394_INVALID_COLOR_FILTER;
+        return DC1394_INVALID_COLOR_FILTER;
 
     ClearBorders_uint16(rgb, sx, sy, 2);
     rgb += 2 * rgbStep + 6 + 1;
@@ -881,23 +881,23 @@ dc1394_bayer_HQLinear_uint16(const uint16_t *restrict bayer, uint16_t *restrict 
             /* at green pixel */
             rgb[0] = bayer[bayerStep2 + 2];
             t0 = rgb[0] * 5
-                + ((bayer[bayerStep + 2] + bayer[bayerStep3 + 2]) << 2)
-                - bayer[2]
-                - bayer[bayerStep + 1]
-                - bayer[bayerStep + 3]
-                - bayer[bayerStep3 + 1]
-                - bayer[bayerStep3 + 3]
-                - bayer[bayerStep4 + 2]
-                + ((bayer[bayerStep2] + bayer[bayerStep2 + 4] + 1) >> 1);
+                 + ((bayer[bayerStep + 2] + bayer[bayerStep3 + 2]) << 2)
+                 - bayer[2]
+                 - bayer[bayerStep + 1]
+                 - bayer[bayerStep + 3]
+                 - bayer[bayerStep3 + 1]
+                 - bayer[bayerStep3 + 3]
+                 - bayer[bayerStep4 + 2]
+                 + ((bayer[bayerStep2] + bayer[bayerStep2 + 4] + 1) >> 1);
             t1 = rgb[0] * 5 +
-                ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 3]) << 2)
-                - bayer[bayerStep2]
-                - bayer[bayerStep + 1]
-                - bayer[bayerStep + 3]
-                - bayer[bayerStep3 + 1]
-                - bayer[bayerStep3 + 3]
-                - bayer[bayerStep2 + 4]
-                + ((bayer[2] + bayer[bayerStep4 + 2] + 1) >> 1);
+                 ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 3]) << 2)
+                 - bayer[bayerStep2]
+                 - bayer[bayerStep + 1]
+                 - bayer[bayerStep + 3]
+                 - bayer[bayerStep3 + 1]
+                 - bayer[bayerStep3 + 3]
+                 - bayer[bayerStep2 + 4]
+                 + ((bayer[2] + bayer[bayerStep4 + 2] + 1) >> 1);
             t0 = (t0 + 4) >> 3;
             CLIP16(t0, rgb[-blue], bits);
             t1 = (t1 + 4) >> 3;
@@ -913,18 +913,18 @@ dc1394_bayer_HQLinear_uint16(const uint16_t *restrict bayer, uint16_t *restrict 
                 /* R at B */
                 t0 = ((bayer[bayerStep + 1] + bayer[bayerStep + 3] +
                        bayer[bayerStep3 + 1] + bayer[bayerStep3 + 3]) << 1)
-                    -
-                    (((bayer[2] + bayer[bayerStep2] +
-                       bayer[bayerStep2 + 4] + bayer[bayerStep4 +
-                                                     2]) * 3 + 1) >> 1)
-                    + rgb[1] * 6;
+                     -
+                     (((bayer[2] + bayer[bayerStep2] +
+                        bayer[bayerStep2 + 4] + bayer[bayerStep4 +
+                                                      2]) * 3 + 1) >> 1)
+                     + rgb[1] * 6;
                 /* G at B */
                 t1 = ((bayer[bayerStep + 2] + bayer[bayerStep2 + 1] +
                        bayer[bayerStep2 + 3] + bayer[bayerStep * 3 +
                                                      2]) << 1)
-                    - (bayer[2] + bayer[bayerStep2] +
-                       bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
-                    + (rgb[1] << 2);
+                     - (bayer[2] + bayer[bayerStep2] +
+                        bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
+                     + (rgb[1] << 2);
                 t0 = (t0 + 4) >> 3;
                 CLIP16(t0, rgb[-1], bits);
                 t1 = (t1 + 4) >> 3;
@@ -932,25 +932,25 @@ dc1394_bayer_HQLinear_uint16(const uint16_t *restrict bayer, uint16_t *restrict 
                 /* at green pixel */
                 rgb[3] = bayer[bayerStep2 + 3];
                 t0 = rgb[3] * 5
-                    + ((bayer[bayerStep + 3] + bayer[bayerStep3 + 3]) << 2)
-                    - bayer[3]
-                    - bayer[bayerStep + 2]
-                    - bayer[bayerStep + 4]
-                    - bayer[bayerStep3 + 2]
-                    - bayer[bayerStep3 + 4]
-                    - bayer[bayerStep4 + 3]
-                    +
-                    ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 5] +
-                      1) >> 1);
+                     + ((bayer[bayerStep + 3] + bayer[bayerStep3 + 3]) << 2)
+                     - bayer[3]
+                     - bayer[bayerStep + 2]
+                     - bayer[bayerStep + 4]
+                     - bayer[bayerStep3 + 2]
+                     - bayer[bayerStep3 + 4]
+                     - bayer[bayerStep4 + 3]
+                     +
+                     ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 5] +
+                       1) >> 1);
                 t1 = rgb[3] * 5 +
-                    ((bayer[bayerStep2 + 2] + bayer[bayerStep2 + 4]) << 2)
-                    - bayer[bayerStep2 + 1]
-                    - bayer[bayerStep + 2]
-                    - bayer[bayerStep + 4]
-                    - bayer[bayerStep3 + 2]
-                    - bayer[bayerStep3 + 4]
-                    - bayer[bayerStep2 + 5]
-                    + ((bayer[3] + bayer[bayerStep4 + 3] + 1) >> 1);
+                     ((bayer[bayerStep2 + 2] + bayer[bayerStep2 + 4]) << 2)
+                     - bayer[bayerStep2 + 1]
+                     - bayer[bayerStep + 2]
+                     - bayer[bayerStep + 4]
+                     - bayer[bayerStep3 + 2]
+                     - bayer[bayerStep3 + 4]
+                     - bayer[bayerStep2 + 5]
+                     + ((bayer[3] + bayer[bayerStep4 + 3] + 1) >> 1);
                 t0 = (t0 + 4) >> 3;
                 CLIP16(t0, rgb[2], bits);
                 t1 = (t1 + 4) >> 3;
@@ -964,17 +964,17 @@ dc1394_bayer_HQLinear_uint16(const uint16_t *restrict bayer, uint16_t *restrict 
                 t0 = ((bayer[bayerStep + 1] + bayer[bayerStep + 3] +
                        bayer[bayerStep * 3 + 1] + bayer[bayerStep3 +
                                                         3]) << 1)
-                    -
-                    (((bayer[2] + bayer[bayerStep2] +
-                       bayer[bayerStep2 + 4] + bayer[bayerStep4 +
-                                                     2]) * 3 + 1) >> 1)
-                    + rgb[-1] * 6;
+                     -
+                     (((bayer[2] + bayer[bayerStep2] +
+                        bayer[bayerStep2 + 4] + bayer[bayerStep4 +
+                                                      2]) * 3 + 1) >> 1)
+                     + rgb[-1] * 6;
                 /* G at R */
                 t1 = ((bayer[bayerStep + 2] + bayer[bayerStep2 + 1] +
                        bayer[bayerStep2 + 3] + bayer[bayerStep3 + 2]) << 1)
-                    - (bayer[2] + bayer[bayerStep2] +
-                       bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
-                    + (rgb[-1] << 2);
+                     - (bayer[2] + bayer[bayerStep2] +
+                        bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
+                     + (rgb[-1] << 2);
                 t0 = (t0 + 4) >> 3;
                 CLIP16(t0, rgb[1], bits);
                 t1 = (t1 + 4) >> 3;
@@ -983,25 +983,25 @@ dc1394_bayer_HQLinear_uint16(const uint16_t *restrict bayer, uint16_t *restrict 
                 /* at green pixel */
                 rgb[3] = bayer[bayerStep2 + 3];
                 t0 = rgb[3] * 5
-                    + ((bayer[bayerStep + 3] + bayer[bayerStep3 + 3]) << 2)
-                    - bayer[3]
-                    - bayer[bayerStep + 2]
-                    - bayer[bayerStep + 4]
-                    - bayer[bayerStep3 + 2]
-                    - bayer[bayerStep3 + 4]
-                    - bayer[bayerStep4 + 3]
-                    +
-                    ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 5] +
-                      1) >> 1);
+                     + ((bayer[bayerStep + 3] + bayer[bayerStep3 + 3]) << 2)
+                     - bayer[3]
+                     - bayer[bayerStep + 2]
+                     - bayer[bayerStep + 4]
+                     - bayer[bayerStep3 + 2]
+                     - bayer[bayerStep3 + 4]
+                     - bayer[bayerStep4 + 3]
+                     +
+                     ((bayer[bayerStep2 + 1] + bayer[bayerStep2 + 5] +
+                       1) >> 1);
                 t1 = rgb[3] * 5 +
-                    ((bayer[bayerStep2 + 2] + bayer[bayerStep2 + 4]) << 2)
-                    - bayer[bayerStep2 + 1]
-                    - bayer[bayerStep + 2]
-                    - bayer[bayerStep + 4]
-                    - bayer[bayerStep3 + 2]
-                    - bayer[bayerStep3 + 4]
-                    - bayer[bayerStep2 + 5]
-                    + ((bayer[3] + bayer[bayerStep4 + 3] + 1) >> 1);
+                     ((bayer[bayerStep2 + 2] + bayer[bayerStep2 + 4]) << 2)
+                     - bayer[bayerStep2 + 1]
+                     - bayer[bayerStep + 2]
+                     - bayer[bayerStep + 4]
+                     - bayer[bayerStep3 + 2]
+                     - bayer[bayerStep3 + 4]
+                     - bayer[bayerStep2 + 5]
+                     + ((bayer[3] + bayer[bayerStep4 + 3] + 1) >> 1);
                 t0 = (t0 + 4) >> 3;
                 CLIP16(t0, rgb[4], bits);
                 t1 = (t1 + 4) >> 3;
@@ -1015,17 +1015,17 @@ dc1394_bayer_HQLinear_uint16(const uint16_t *restrict bayer, uint16_t *restrict 
             /* R at B */
             t0 = ((bayer[bayerStep + 1] + bayer[bayerStep + 3] +
                    bayer[bayerStep3 + 1] + bayer[bayerStep3 + 3]) << 1)
-                -
-                (((bayer[2] + bayer[bayerStep2] +
-                   bayer[bayerStep2 + 4] + bayer[bayerStep4 +
-                                                 2]) * 3 + 1) >> 1)
-                + rgb[blue] * 6;
+                 -
+                 (((bayer[2] + bayer[bayerStep2] +
+                    bayer[bayerStep2 + 4] + bayer[bayerStep4 +
+                                                  2]) * 3 + 1) >> 1)
+                 + rgb[blue] * 6;
             /* G at B */
             t1 = (((bayer[bayerStep + 2] + bayer[bayerStep2 + 1] +
                     bayer[bayerStep2 + 3] + bayer[bayerStep3 + 2])) << 1)
-                - (bayer[2] + bayer[bayerStep2] +
-                   bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
-                + (rgb[blue] << 2);
+                 - (bayer[2] + bayer[bayerStep2] +
+                    bayer[bayerStep2 + 4] + bayer[bayerStep4 + 2])
+                 + (rgb[blue] << 2);
             t0 = (t0 + 4) >> 3;
             CLIP16(t0, rgb[-blue], bits);
             t1 = (t1 + 4) >> 3;
@@ -1074,7 +1074,7 @@ dc1394_bayer_Downsample_uint16(const uint16_t *restrict bayer, uint16_t *restric
         outB = &rgb[0];
         break;
     default:
-      return DC1394_INVALID_COLOR_FILTER;
+        return DC1394_INVALID_COLOR_FILTER;
     }
 
     switch (tile) {
@@ -1135,7 +1135,7 @@ dc1394_bayer_Simple_uint16(const uint16_t *restrict bayer, uint16_t *restrict rg
         outB = &rgb[0];
         break;
     default:
-      return DC1394_INVALID_COLOR_FILTER;
+        return DC1394_INVALID_COLOR_FILTER;
     }
 
     switch (tile) {
@@ -1277,10 +1277,10 @@ dc1394_bayer_Simple_uint16(const uint16_t *restrict bayer, uint16_t *restrict rg
 #define SQR(x) ((x)*(x))
 #define ABS(x) (((int)(x) ^ ((int)(x) >> 31)) - ((int)(x) >> 31))
 #ifndef MIN
-  #define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif
 #ifndef MAX
-  #define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
 #endif
 #define LIM(x,min,max) MAX(min,MIN(x,max))
 #define ULIM(x,y,z) ((y) < (z) ? LIM(x,y,z) : LIM(x,z,y))
@@ -1346,7 +1346,7 @@ dc1394_bayer_VNG(const uint8_t *restrict bayer,
     /* first, use bilinear bayer decoding */
     dc1394_bayer_Bilinear(bayer, dst, sx, sy, pattern);
 
-    switch(pattern) {
+    switch (pattern) {
     case DC1394_COLOR_FILTER_BGGR:
         filters = 0x16161616;
         break;
@@ -1367,8 +1367,10 @@ dc1394_bayer_VNG(const uint8_t *restrict bayer,
         for (col=0; col < 2; col++) {
             ip = code[row][col];
             for (cp=bayervng_terms, t=0; t < 64; t++) {
-                y1 = *cp++;  x1 = *cp++;
-                y2 = *cp++;  x2 = *cp++;
+                y1 = *cp++;
+                x1 = *cp++;
+                y2 = *cp++;
+                x2 = *cp++;
                 weight = *cp++;
                 grads = *cp++;
                 color = FC(row+y1,col+x1);
@@ -1384,7 +1386,8 @@ dc1394_bayer_VNG(const uint8_t *restrict bayer,
             }
             *ip++ = INT_MAX;
             for (cp=bayervng_chood, g=0; g < 8; g++) {
-                y = *cp++;  x = *cp++;
+                y = *cp++;
+                x = *cp++;
                 *ip++ = (y*width + x) * 3;      /* [FD] */
                 color = FC(row,col);
                 if (FC(row+y,col+x) != color && FC(row+y*2,col+x*2) == color)
@@ -1473,7 +1476,7 @@ dc1394_bayer_VNG_uint16(const uint16_t *restrict bayer,
 
     dc1394_bayer_Bilinear_uint16(bayer, dst, sx, sy, pattern, bits);
 
-    switch(pattern) {
+    switch (pattern) {
     case DC1394_COLOR_FILTER_BGGR:
         filters = 0x16161616;
         break;
@@ -1494,8 +1497,10 @@ dc1394_bayer_VNG_uint16(const uint16_t *restrict bayer,
         for (col=0; col < 2; col++) {
             ip = code[row][col];
             for (cp=bayervng_terms, t=0; t < 64; t++) {
-                y1 = *cp++;  x1 = *cp++;
-                y2 = *cp++;  x2 = *cp++;
+                y1 = *cp++;
+                x1 = *cp++;
+                y2 = *cp++;
+                x2 = *cp++;
                 weight = *cp++;
                 grads = *cp++;
                 color = FC(row+y1,col+x1);
@@ -1511,7 +1516,8 @@ dc1394_bayer_VNG_uint16(const uint16_t *restrict bayer,
             }
             *ip++ = INT_MAX;
             for (cp=bayervng_chood, g=0; g < 8; g++) {
-                y = *cp++;  x = *cp++;
+                y = *cp++;
+                x = *cp++;
                 *ip++ = (y*width + x) * 3;      /* [FD] */
                 color = FC(row,col);
                 if (FC(row+y,col+x) != color && FC(row+y*2,col+x*2) == color)
@@ -1590,9 +1596,10 @@ static dc1394bool_t ahd_inited = DC1394_FALSE; /* WARNING: not multi-processor s
 #define CLIPOUT16(x,bits) LIM(x,0,((1<<bits)-1))
 
 static const double xyz_rgb[3][3] = {                        /* XYZ from RGB */
-  { 0.412453, 0.357580, 0.180423 },
-  { 0.212671, 0.715160, 0.072169 },
-  { 0.019334, 0.119193, 0.950227 } };
+    { 0.412453, 0.357580, 0.180423 },
+    { 0.212671, 0.715160, 0.072169 },
+    { 0.019334, 0.119193, 0.950227 }
+};
 static const float d65_white[3] = { 0.950456, 1, 1.088754 };
 
 static void cam_to_cielab (uint16_t cam[3], float lab[3]) /* [SA] */
@@ -1658,7 +1665,7 @@ dc1394_bayer_AHD(const uint8_t *restrict bayer,
         ahd_inited = DC1394_TRUE;
     }
 
-    switch(pattern) {
+    switch (pattern) {
     case DC1394_COLOR_FILTER_BGGR:
         filters = 0x16161616;
         break;
@@ -1775,7 +1782,7 @@ dc1394_bayer_AHD(const uint8_t *restrict bayer,
                         for (i=0; i < 4; i++)
                             if (i >> 1 == d || ldiff[d][i] <= leps)
                                 abdiff[d][i] = SQR(lab[d][tr][tc][1]-lab[d][tr][tc+dir[i]][1])
-                                    + SQR(lab[d][tr][tc][2]-lab[d][tr][tc+dir[i]][2]);
+                                               + SQR(lab[d][tr][tc][2]-lab[d][tr][tc+dir[i]][2]);
                     abeps = MIN(MAX(abdiff[0][0],abdiff[0][1]),
                                 MAX(abdiff[1][2],abdiff[1][3]));
                     for (d=0; d < 2; d++)
@@ -1832,7 +1839,7 @@ dc1394_bayer_AHD_uint16(const uint16_t *restrict bayer,
         ahd_inited = DC1394_TRUE;
     }
 
-    switch(pattern) {
+    switch (pattern) {
     case DC1394_COLOR_FILTER_BGGR:
         filters = 0x16161616;
         break;
@@ -1866,7 +1873,7 @@ dc1394_bayer_AHD_uint16(const uint16_t *restrict bayer,
         for (row=0; row < height; row++)
             for (col=0; col < width; col++) {
                 if (col==border && row >= border && row < height-border)
-        col = width-border;
+                    col = width-border;
                 memset (sum, 0, sizeof sum);
                 for (y=row-1; y != row+2; y++)
                     for (x=col-1; x != col+2; x++)
@@ -1946,7 +1953,7 @@ dc1394_bayer_AHD_uint16(const uint16_t *restrict bayer,
                         for (i=0; i < 4; i++)
                             if (i >> 1 == d || ldiff[d][i] <= leps)
                                 abdiff[d][i] = SQR(lab[d][tr][tc][1]-lab[d][tr][tc+dir[i]][1])
-                                    + SQR(lab[d][tr][tc][2]-lab[d][tr][tc+dir[i]][2]);
+                                               + SQR(lab[d][tr][tc][2]-lab[d][tr][tc+dir[i]][2]);
                     abeps = MIN(MAX(abdiff[0][0],abdiff[0][1]),
                                 MAX(abdiff[1][2],abdiff[1][3]));
                     for (d=0; d < 2; d++)
@@ -1999,7 +2006,7 @@ dc1394_bayer_decoding_8bit(const uint8_t *restrict bayer, uint8_t *restrict rgb,
         return dc1394_bayer_AHD(bayer, rgb, sx, sy, tile);
     default:
         return DC1394_INVALID_BAYER_METHOD;
-  }
+    }
 
 }
 

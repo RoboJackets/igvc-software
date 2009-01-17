@@ -30,7 +30,7 @@ namespace TNT
 	Write an array to a character outstream.  Output format is one that can
 	be read back in via the in-stream operator: one integer
 	denoting the array dimension (n), followed by n elements,
-	one per line.  
+	one per line.
 
 */
 template <class T>
@@ -41,7 +41,7 @@ std::ostream& operator<<(std::ostream &s, const Fortran_Array1D<T> &A)
     s << N << "\n";
     for (int j=1; j<=N; j++)
     {
-       s << A(j) << "\n";
+        s << A(j) << "\n";
     }
     s << "\n";
 
@@ -65,35 +65,35 @@ std::ostream& operator<<(std::ostream &s, const Fortran_Array1D<T> &A)
 template <class T>
 std::istream& operator>>(std::istream &s, Fortran_Array1D<T> &A)
 {
-	int N;
-	s >> N;
+    int N;
+    s >> N;
 
-	Fortran_Array1D<T> B(N);
-	for (int i=1; i<=N; i++)
-		s >> B(i);
-	A = B;
-	return s;
+    Fortran_Array1D<T> B(N);
+    for (int i=1; i<=N; i++)
+        s >> B(i);
+    A = B;
+    return s;
 }
 
 
 template <class T>
 Fortran_Array1D<T> operator+(const Fortran_Array1D<T> &A, const Fortran_Array1D<T> &B)
 {
-	int n = A.dim1();
+    int n = A.dim1();
 
-	if (B.dim1() != n )
-		return Fortran_Array1D<T>();
+    if (B.dim1() != n )
+        return Fortran_Array1D<T>();
 
-	else
-	{
-		Fortran_Array1D<T> C(n);
+    else
+    {
+        Fortran_Array1D<T> C(n);
 
-		for (int i=1; i<=n; i++)
-		{
-			C(i) = A(i) + B(i);
-		}
-		return C;
-	}
+        for (int i=1; i<=n; i++)
+        {
+            C(i) = A(i) + B(i);
+        }
+        return C;
+    }
 }
 
 
@@ -101,63 +101,63 @@ Fortran_Array1D<T> operator+(const Fortran_Array1D<T> &A, const Fortran_Array1D<
 template <class T>
 Fortran_Array1D<T> operator-(const Fortran_Array1D<T> &A, const Fortran_Array1D<T> &B)
 {
-	int n = A.dim1();
+    int n = A.dim1();
 
-	if (B.dim1() != n )
-		return Fortran_Array1D<T>();
+    if (B.dim1() != n )
+        return Fortran_Array1D<T>();
 
-	else
-	{
-		Fortran_Array1D<T> C(n);
+    else
+    {
+        Fortran_Array1D<T> C(n);
 
-		for (int i=1; i<=n; i++)
-		{
-			C(i) = A(i) - B(i);
-		}
-		return C;
-	}
+        for (int i=1; i<=n; i++)
+        {
+            C(i) = A(i) - B(i);
+        }
+        return C;
+    }
 }
 
 
 template <class T>
 Fortran_Array1D<T> operator*(const Fortran_Array1D<T> &A, const Fortran_Array1D<T> &B)
 {
-	int n = A.dim1();
+    int n = A.dim1();
 
-	if (B.dim1() != n )
-		return Fortran_Array1D<T>();
+    if (B.dim1() != n )
+        return Fortran_Array1D<T>();
 
-	else
-	{
-		Fortran_Array1D<T> C(n);
+    else
+    {
+        Fortran_Array1D<T> C(n);
 
-		for (int i=1; i<=n; i++)
-		{
-			C(i) = A(i) * B(i);
-		}
-		return C;
-	}
+        for (int i=1; i<=n; i++)
+        {
+            C(i) = A(i) * B(i);
+        }
+        return C;
+    }
 }
 
 
 template <class T>
 Fortran_Array1D<T> operator/(const Fortran_Array1D<T> &A, const Fortran_Array1D<T> &B)
 {
-	int n = A.dim1();
+    int n = A.dim1();
 
-	if (B.dim1() != n )
-		return Fortran_Array1D<T>();
+    if (B.dim1() != n )
+        return Fortran_Array1D<T>();
 
-	else
-	{
-		Fortran_Array1D<T> C(n);
+    else
+    {
+        Fortran_Array1D<T> C(n);
 
-		for (int i=1; i<=n; i++)
-		{
-			C(i) = A(i) / B(i);
-		}
-		return C;
-	}
+        for (int i=1; i<=n; i++)
+        {
+            C(i) = A(i) / B(i);
+        }
+        return C;
+    }
 }
 
 
@@ -171,16 +171,16 @@ Fortran_Array1D<T> operator/(const Fortran_Array1D<T> &A, const Fortran_Array1D<
 template <class T>
 Fortran_Array1D<T>&  operator+=(Fortran_Array1D<T> &A, const Fortran_Array1D<T> &B)
 {
-	int n = A.dim1();
+    int n = A.dim1();
 
-	if (B.dim1() == n)
-	{
-		for (int i=1; i<=n; i++)
-		{
-				A(i) += B(i);
-		}
-	}
-	return A;
+    if (B.dim1() == n)
+    {
+        for (int i=1; i<=n; i++)
+        {
+            A(i) += B(i);
+        }
+    }
+    return A;
 }
 
 
@@ -189,16 +189,16 @@ Fortran_Array1D<T>&  operator+=(Fortran_Array1D<T> &A, const Fortran_Array1D<T> 
 template <class T>
 Fortran_Array1D<T>&  operator-=(Fortran_Array1D<T> &A, const Fortran_Array1D<T> &B)
 {
-	int n = A.dim1();
+    int n = A.dim1();
 
-	if (B.dim1() == n)
-	{
-		for (int i=1; i<=n; i++)
-		{
-				A(i) -= B(i);
-		}
-	}
-	return A;
+    if (B.dim1() == n)
+    {
+        for (int i=1; i<=n; i++)
+        {
+            A(i) -= B(i);
+        }
+    }
+    return A;
 }
 
 
@@ -206,16 +206,16 @@ Fortran_Array1D<T>&  operator-=(Fortran_Array1D<T> &A, const Fortran_Array1D<T> 
 template <class T>
 Fortran_Array1D<T>&  operator*=(Fortran_Array1D<T> &A, const Fortran_Array1D<T> &B)
 {
-	int n = A.dim1();
+    int n = A.dim1();
 
-	if (B.dim1() == n)
-	{
-		for (int i=1; i<=n; i++)
-		{
-				A(i) *= B(i);
-		}
-	}
-	return A;
+    if (B.dim1() == n)
+    {
+        for (int i=1; i<=n; i++)
+        {
+            A(i) *= B(i);
+        }
+    }
+    return A;
 }
 
 
@@ -224,16 +224,16 @@ Fortran_Array1D<T>&  operator*=(Fortran_Array1D<T> &A, const Fortran_Array1D<T> 
 template <class T>
 Fortran_Array1D<T>&  operator/=(Fortran_Array1D<T> &A, const Fortran_Array1D<T> &B)
 {
-	int n = A.dim1();
+    int n = A.dim1();
 
-	if (B.dim1() == n)
-	{
-		for (int i=1; i<=n; i++)
-		{
-				A(i) /= B(i);
-		}
-	}
-	return A;
+    if (B.dim1() == n)
+    {
+        for (int i=1; i<=n; i++)
+        {
+            A(i) /= B(i);
+        }
+    }
+    return A;
 }
 
 

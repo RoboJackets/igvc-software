@@ -2,7 +2,7 @@
  * 1394-Based Digital Camera Control Library
  *
  * Basler Smart Feature Framework specific extensions
- * 
+ *
  * Written by Mikael Olenfalk <mikael _DOT_ olenfalk _AT_ tobii _DOT_ com>
  *
  * Copyright (C) 2006 Tobii Technology AB, Stockholm Sweden
@@ -180,8 +180,8 @@ const uint32_t sff_feature_registry_size = sizeof (sff_feature_registry) / sizeo
 const sff_feature* basler_sff_registry_find_by_id (dc1394basler_sff_feature_t feature_id)
 {
     if (feature_id < DC1394_BASLER_SFF_FEATURE_MIN ||
-        feature_id >= DC1394_BASLER_SFF_FEATURE_MAX ||
-        feature_id >= sff_feature_registry_size)
+            feature_id >= DC1394_BASLER_SFF_FEATURE_MAX ||
+            feature_id >= sff_feature_registry_size)
         return NULL;
     return &(sff_feature_registry[feature_id]);
 }
@@ -195,7 +195,7 @@ const sff_feature* basler_sff_registry_find_by_csr_guid (dc1394basler_sff_guid_t
     if (csr_guid == NULL)
         return NULL;
 
-    for(i = 0; i < sff_feature_registry_size; i++) {
+    for (i = 0; i < sff_feature_registry_size; i++) {
         if (!memcmp (&(sff_feature_registry[i].csr_guid), csr_guid, sizeof(dc1394basler_sff_guid_t)))
             return &(sff_feature_registry[i]);
     }
@@ -211,7 +211,7 @@ const sff_feature* basler_sff_registry_find_by_chunk_guid (dc1394basler_sff_guid
     if (chunk_guid == NULL)
         return NULL;
 
-    for(i = 0; i < sff_feature_registry_size; i++) {
+    for (i = 0; i < sff_feature_registry_size; i++) {
         if (!memcmp (&(sff_feature_registry[i].chunk_guid), chunk_guid, sizeof(dc1394basler_sff_guid_t)))
             return &(sff_feature_registry[i]);
     }
