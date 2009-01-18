@@ -224,14 +224,14 @@ void Robot::processFunc()
 	 * y = forward speed    ; range = (0,255)
 	 */
 
+
 	/* Get raw image */
 	camera.GrabCvImage();
+
 
 	/* Shove raw image into graphics card for some processing on the card */
 	updateGlutDisplay();
 
-	/* Get sensor information */
-	//TODO
 
 	/* Perform vision processing. */
 	if (vp.DO_ADAPTIVE)
@@ -243,30 +243,39 @@ void Robot::processFunc()
 		vp.visProcessFrame(heading_vision);
 	}
 
-
-	/* Average speeds
+	/* Average motor commands
 	 * k = % of new value to use */
-	{
-		heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
-		heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
-		// debug print
-		//printf("heading: rot: %d 	fwd: %d \n",heading_main.x,heading_main.y);
-	}
+	heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
+	heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
+	//printf("heading: rot: %d 	fwd: %d \n",heading_main.x,heading_main.y);
+
+
+	/* Get sensor information */
+	//TODO
+
+
+	/* SLAM Processing */
+	mg.genMap();
+
 
 	/* Make decision */
-	//TODO
+	//TODO:
+
 
 	/* Update displays */
 	vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
+
 	/* Drive Robot via motor commands (GO!) */
-	//TODO
+	//TODO:
+
 
 	/* Save raw image last */
 	if (saveRawVideo)
 	{
 		cvWriteFrame(cvVideoWriter,visCvRaw);
 	}
+
 
 	/* Stats */
 	printf( "framerate: %.2f \n", elapsed_time() );

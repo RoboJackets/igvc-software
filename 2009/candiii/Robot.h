@@ -14,6 +14,8 @@
 #include "Point2D.h"
 #include "vision.h"
 
+#include "mapgen.h"
+
 /*===== Camera Settings ===========================================*/
 /* Determines camera compatability.
  * This must be set to 0 to load videos via command line. */
@@ -95,6 +97,9 @@ public:
 
 	// xml conf
 	void LoadXMLSettings();
+
+	// map generator and slam processing
+	MapGen mg;
 
 };
 
