@@ -2,9 +2,7 @@
 #include <stdio.h>
 #include "XmlConfiguration.h"
 #include "image_buffers.h"
-#include "pathplan/PathPlan.h"
 #include "Graphics.h"
-
 
 /*
  * This file contains the robot's primary vision processing code main function.
@@ -12,19 +10,24 @@
  *
  */
 
-// for scanning the path image /////////////////////////////////////////////////////////////
+/* for scanning the path image */
 #define BAD_PIXEL 0		// value to set path image to
 #define GOOD_PIXEL 255	// value to set path image to
 #define L_R_OFFSET 20 	// pixel spacing from center scan line up
-//#define ROBOT_WIDTH 30 	// pixels wide
 #define PIXEL_SKIP 2 	// noise filtering threshold in checkPixel()
 #define EDGE_PAD 4      // top/bottom padding
 
-
+/*
+ *
+ */
 Vision::Vision()
 {
 	init();
 }
+
+/*
+ *
+ */
 Vision::~Vision()
 {
 
@@ -82,22 +85,20 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 		 * (320x240) */
 		robotWidthScan(visCvPath, goal_far);	// returns -1 on error
 
-		/* sent goal to planner to get the 'planned' next goal */
-		//if (goal_far.y != -1) {
-		//    //visPlanPath(visCvPath, goal_far);	// TODO: THIS IS SO SLOW
-		//}
-
-		/* setup navigation line that sweep across screen and update goal. */
+		/* setup navigation lines that sweep across the screen and updates goal. */
 		visSweeperLines(goal_near);
 
 		/* update return goal */
 		CvtPixToGoal(goal);
 
-	} //end main
+	}
 
 
 }//end vision processing
 
+/*
+ *
+ */
 void Vision::init()
 {
 
@@ -854,56 +855,17 @@ void Vision::preProcessColors(IplImage* img)
 
 }
 
-
-
 /*
- *
+ * Converts a measurement in degrees to radians.
  */
-/*
-void Vision::visPlanPath(IplImage* img, Point2D<int>& goal) {
-    int width = img->width;
-    int height = img->height;
-    int center = width/2;
-    unsigned char * temp=(unsigned char *) img->imageData;
-    //convert
-    for (int i = 0 ; i< width*height; i++) {
-        if (img->imageData[i]==0) temp[i]=0;
-        else temp[i]=255;
-    }
-    goaly+=ROBOT_WIDTH;
-    //path plan! returns 0 on error
-    if (planner.navigate( temp,					// image //int xsize, int ysize, int xstart,int ystart,int &xend, int &yend, int scaredD, int widthRobo, int heightRobo) {
-                          width,				// xsize
-                          height,				// ysize
-                          center,				// xstart
-                          height-ROBOT_WIDTH/2,	// ystart
-                          goal.x,				// xend (return value)
-                          goal.y,				// yend (return value)
-                          30,					// scaredD
-                          11,//ROBOT_WIDTH,		// widthRobo
-                          11)//ROBOT_WIDTH);	// heightRobo
-       ) {
-        //success
-    } else {
-        //fail
-        //goal.x=goal.y=-1;
-    }
-    //=== debug: show goal ===//
-    // visCvPath=640x480 //
-    //cvLine(visCvDebug, cvPoint( center	,height-2), cvPoint(goal.x,goal.y), (CV_RGB(255,255,255)), 2, 8, 0);
-    // visCvPath=320x240 //
-    cvLine(visCvDebug, cvPoint(center*2,height*2-2), cvPoint(goal.x*2,goal.y*2), (CV_RGB(255,255,255)), 2, 8, 0);
-    //========================//
-}
-*/
-
-
-// Converts a measurement in degrees to radians.
 double Vision::deg2rad(double degrees)
 {
 	return degrees * M_PI / 180.0;
 }
 
+/*
+ *
+ */
 Point2D<double> Vision::navPath_start(int pathID)
 {
 	return Point2D<double>(
@@ -912,6 +874,9 @@ Point2D<double> Vision::navPath_start(int pathID)
 	       );
 }
 
+/*
+ *
+ */
 Point2D<double> Vision::navPath_vector(int pathID)
 {
 	double deg = navPath_angle(pathID);
@@ -923,18 +888,26 @@ Point2D<double> Vision::navPath_vector(int pathID)
 	       * nav_path__view_distance_multiplier;
 }
 
+/*
+ *
+ */
 Point2D<double> Vision::navPath_end(int pathID)
 {
 	return navPath_start(pathID) + navPath_vector(pathID);
 }
 
-// result is in degrees
+/*
+ *  result is in degrees
+ */
 double Vision::navPath_angle(int pathID)
 {
 	return  nav_path__view_cone__start_angle +
 	        (pathID * nav_path__view_cone__spacing);
 }
 
+/*
+ *
+ */
 CvScalar Vision::navPath_color(int pathDanger)
 {
 	return cvScalar(
@@ -942,7 +915,9 @@ CvScalar Vision::navPath_color(int pathDanger)
 	           (pathDanger / (double)max_path_danger) * 255); // levels of red
 }
 
-// image display control
+/*
+ * image display control
+ */
 void Vision::ConvertAllImageViews(int trackbarVal)
 {
 
@@ -997,6 +972,9 @@ void Vision::ConvertAllImageViews(int trackbarVal)
 
 }
 
+/*
+ *
+ */
 void Vision::LoadVisionXMLSettings()
 {
 	/* load xml file */
@@ -1038,12 +1016,18 @@ void Vision::LoadVisionXMLSettings()
 
 }
 
+/*
+ *
+ */
 void Vision::GetRGBChannels()
 {
 	// splitt raw image into color channels
 	cvSplit(visCvRaw, visCvBlueChannel, visCvGreenChannel, visCvRedChannel, NULL);
 }
 
+/*
+ *
+ */
 void Vision::GetHSVChannels()
 {
 	// calculate HSV - Hue Saturation Value(Greyscale)
@@ -1054,6 +1038,9 @@ void Vision::GetHSVChannels()
 	cvCvtPixToPlane(visCvHSVSmall, visCvHue, visCvSaturation, visCvGrey, 0);
 }
 
+/*
+ *
+ */
 void Vision::ThresholdImage(IplImage *src, IplImage *dst, int thresh)
 {
 	// binary threshold
@@ -1240,7 +1227,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 		/* scan high in img */
 		robotWidthScan(visCvPath, goal_far);
 
-		/* setup navigation line that sweep across screen and updates goal. */
+		/* setup navigation lines that sweep across the screen and updates goal. */
 		visSweeperLines(goal_near);
 
 		/* update return goal */
@@ -1285,7 +1272,6 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 		}
 
 	}
-
 
 }
 
