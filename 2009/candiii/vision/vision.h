@@ -64,10 +64,6 @@ public:
 	CvScalar navPath_color(int pathDanger);
 	/**********************************************************************************/
 
-	// "path planner"
-	//PathPlan planner; // the navigation class object
-	//void visPlanPath(IplImage* img, Point2D<int>& goal);
-
 	// HSV thresholds
 	int satThreshold;
 	int hueThreshold;
