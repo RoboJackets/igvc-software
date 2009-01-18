@@ -25,20 +25,21 @@
  * 		Note: getInt() only goes one level deep in the tree!
  */
 
-class XmlConfiguration {
+class XmlConfiguration
+{
 public:
-    XmlConfiguration();
-    XmlConfiguration(const QString& name);
-    virtual ~XmlConfiguration();
+	XmlConfiguration();
+	XmlConfiguration(const QString& name);
+	virtual ~XmlConfiguration();
 
-    // xml document dom tree object
-    QDomDocument* domdoc;
-    // load xml file (needs .xml extension)
-    int loadFile(const QString& name);
-    // returns an integer at specified location in tree
-    int getInt(const QString& element);
-    // returns a floating point number at specified location in tree
-    float getFloat(const QString& element);
+	// xml document dom tree object
+	QDomDocument* domdoc;
+	// load xml file (needs .xml extension)
+	int loadFile(const QString& name);
+	// returns an integer at specified location in tree
+	int getInt(const QString& element);
+	// returns a floating point number at specified location in tree
+	float getFloat(const QString& element);
 
 };
 

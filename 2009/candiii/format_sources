@@ -3,10 +3,10 @@
 
 echo "formatting files..."
 
-find . -name '*.cpp' -print -exec astyle {} \;
-find . -name '*.cc' -print -exec astyle {} \;
-find . -name '*.c' -print -exec astyle {} \;
-find . -name '*.h' -print -exec astyle {} \;
+find . -name '*.cpp' -print -exec astyle --style=ansi --indent=tab {} \;
+find . -name '*.cc' -print -exec astyle --style=ansi --indent=tab {} \;
+find . -name '*.c' -print -exec astyle --style=ansi --indent=tab {} \;
+find . -name '*.h' -print -exec astyle --style=ansi --indent=tab {} \;
 
 echo "removing astyle crap..."
 
