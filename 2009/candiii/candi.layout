@@ -5,9 +5,9 @@
 		<Cursor position="628" topLine="0" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="5365" topLine="0" />
+		<Cursor position="2345" topLine="78" />
 	</File>
-	<File name="Robot.h" open="1" top="0" tabpos="3">
+	<File name="Robot.h" open="0" top="0" tabpos="3">
 		<Cursor position="448" topLine="3" />
 	</File>
 	<File name="main.cpp" open="0" top="0" tabpos="7">
@@ -19,20 +19,20 @@
 	<File name="vision/CVcam.h" open="0" top="0" tabpos="0">
 		<Cursor position="596" topLine="17" />
 	</File>
-	<File name="vision/GuppyCam.cpp" open="1" top="0" tabpos="5">
+	<File name="vision/GuppyCam.cpp" open="0" top="0" tabpos="5">
 		<Cursor position="1548" topLine="47" />
 	</File>
 	<File name="vision/PjMat.cc" open="0" top="0" tabpos="5">
 		<Cursor position="842" topLine="117" />
 	</File>
-	<File name="vision/image_buffers.cpp" open="0" top="0" tabpos="8">
-		<Cursor position="28" topLine="0" />
+	<File name="vision/image_buffers.cpp" open="1" top="0" tabpos="5">
+		<Cursor position="307" topLine="0" />
 	</File>
-	<File name="vision/image_buffers.h" open="0" top="0" tabpos="9">
-		<Cursor position="743" topLine="13" />
+	<File name="vision/image_buffers.h" open="1" top="0" tabpos="4">
+		<Cursor position="801" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="1" tabpos="4">
-		<Cursor position="37650" topLine="1240" />
+	<File name="vision/vision.cc" open="1" top="1" tabpos="3">
+		<Cursor position="36499" topLine="1202" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="3">
 		<Cursor position="2035" topLine="29" />

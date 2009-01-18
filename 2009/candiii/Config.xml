@@ -23,7 +23,7 @@
 	<robotWidth>20</robotWidth>  <!-- lower => we can squeeze through more -->
 	<doTransform>1</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>1</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
-	<maxDiff>35</maxDiff>        <!-- higher => more noise/sensitivity for inside roi box -->
+	<maxDiff>35</maxDiff>        <!-- lower => more noise/sensitivity for inside roi box -->
 	<boxPadding>90</boxPadding>  <!-- lower => wider box -->
 
 	<!-- Robot Misc Settings -->

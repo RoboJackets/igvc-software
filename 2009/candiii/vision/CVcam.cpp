@@ -3,44 +3,56 @@
 #include "image_buffers.h"
 
 
-CVcam::CVcam() {
-    capture = 0;
-    camconnected = 0;
+CVcam::CVcam()
+{
+	capture = 0;
+	camconnected = 0;
 }
 
-CVcam::~CVcam() {
-    if ( capture ) {
-        cvReleaseCapture( &capture );
-    }
+CVcam::~CVcam()
+{
+	if ( capture )
+	{
+		cvReleaseCapture( &capture );
+	}
 }
 
-int CVcam::connect(int deviceID, const char* filename) {
-    if (filename==NULL) {
-        capture = cvCaptureFromCAM( deviceID );
-    } else {
-        capture = cvCreateFileCapture( filename );
-    }
-    if (capture) {
-        camconnected=1;
-        return 1;
-    } else {
-        camconnected=0;
-        return 0;
-    }
+int CVcam::connect(int deviceID, const char* filename)
+{
+	if (filename==NULL)
+	{
+		capture = cvCaptureFromCAM( deviceID );
+	}
+	else
+	{
+		capture = cvCreateFileCapture( filename );
+	}
+	if (capture)
+	{
+		camconnected=1;
+		return 1;
+	}
+	else
+	{
+		camconnected=0;
+		return 0;
+	}
 }
 
-int CVcam::isValid() {
-    return camconnected;
+int CVcam::isValid()
+{
+	return camconnected;
 }
 
-int CVcam::GrabCvImage() {
-    if (!cvGrabFrame( capture ))
-        return 0;
+int CVcam::GrabCvImage()
+{
+	if (!cvGrabFrame( capture ))
+		return 0;
 
-    // get and set
-    visCvRaw = cvRetrieveFrame( capture );
+	// get and set
+	visCvRaw = cvRetrieveFrame( capture );
 
-    return 1;
+	return 1;
 }
 
 
@@ -73,8 +85,9 @@ int CVcam::GrabCvImage() {
 //}
 
 
-void CVcam::loadSettings() {
-    // currently no settings for USB camera
-    printf("No USB Camera settings available \n");
+void CVcam::loadSettings()
+{
+	// currently no settings for USB camera
+	printf("No USB Camera settings available \n");
 }
 
