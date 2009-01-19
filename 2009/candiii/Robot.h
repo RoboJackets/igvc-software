@@ -99,7 +99,7 @@ public:
 	void LoadXMLSettings();
 
 	// map generator and slam processing
-	MapGen mg;
+	MapGen mapper;
 
 };
 

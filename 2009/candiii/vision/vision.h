@@ -64,6 +64,11 @@ public:
 	CvScalar navPath_color(int pathDanger);
 	/**********************************************************************************/
 
+	// do vision processing using HSV thresholding (processing Method A)
+	void visHsvProcessing(Point2D<int>& goal);
+	// do vision processing using adaptive thresholding (processing Method B)
+	void visAdaptiveProcessing(Point2D<int>& goal);
+
 	// HSV thresholds
 	int satThreshold;
 	int hueThreshold;
@@ -111,7 +116,6 @@ public:
 
 	/* for the adaptive algorithms */
 	void Adapt();
-	void visAdaptiveProcessing(Point2D<int>& goal);
 	void CvtPixToGoal(Point2D<int>& goal);
 	int adapt_maxDiff;
 	int adapt_boxPad;

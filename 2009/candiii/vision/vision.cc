@@ -34,7 +34,7 @@ Vision::~Vision()
 }
 
 /*
- * Performs ALL vision processing. Method A
+ * Performs ALL vision processing. Returns updated goal/heading.
  */
 void Vision::visProcessFrame(Point2D<int>& goal)
 {
@@ -46,51 +46,14 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 		return;
 	}
 
-	/* Do vision processing */
+	/* Choose vision algorithm, and update goal.  */
+	if (DO_ADAPTIVE)
 	{
-		/* fix special case colors */
-		preProcessColors(visCvDebug);
-
-		/* split images into channels */
-		GetHSVChannels();
-
-		/* threshold saturation
-		 * (320x240) */
-		cvSmooth(visCvSaturation, visCvSaturation);
-		Normalize(visCvSaturation);
-		ThresholdImage(visCvSaturation, visCvSaturation, satThreshold);
-		cvDilate(visCvSaturation, visCvSaturation, NULL, 1);
-
-		/* threshold hue
-		 * (320x240) */
-		cvSmooth(visCvHue, visCvHue);
-		Normalize(visCvHue);
-		ThresholdImage(visCvHue, visCvHue, hueThreshold);
-		cvDilate(visCvHue, visCvHue, NULL, 1);
-
-		/* or the images together
-		 * (320x240) */
-		cvOr(visCvSaturation, visCvHue, visCvThresh);
-		cvDilate(visCvThresh, visCvThresh, NULL, 1);
-
-		/* make white=good & black=bad
-		 * (320x240) */
-		cvNot(visCvThresh, visCvThresh);
-
-		/* generate path image, with white=path & black=bad
-		 * (320x240) */
-		visGenPath(visCvThresh);
-
-		/* find next goal for robot by scanning up visCvPath Image, and set the goal.
-		 * (320x240) */
-		robotWidthScan(visCvPath, goal_far);	// returns -1 on error
-
-		/* setup navigation lines that sweep across the screen and updates goal. */
-		visSweeperLines(goal_near);
-
-		/* update return goal */
-		CvtPixToGoal(goal);
-
+		visAdaptiveProcessing(goal); // NEW!
+	}
+	else
+	{
+		visHsvProcessing(goal); // modified 2008 method
 	}
 
 
@@ -150,6 +113,57 @@ void Vision::init()
 	// display roi for adaptive coloring
 	cvNamedWindow("roi",1);
 
+
+}
+
+/*
+ * Performs ALL vision processing. Method A
+ */
+void Vision::visHsvProcessing(Point2D<int>& goal)
+{
+
+	/* fix special case colors */
+	preProcessColors(visCvDebug);
+
+	/* split images into channels */
+	GetHSVChannels();
+
+	/* threshold saturation
+	 * (320x240) */
+	cvSmooth(visCvSaturation, visCvSaturation);
+	Normalize(visCvSaturation);
+	ThresholdImage(visCvSaturation, visCvSaturation, satThreshold);
+	cvDilate(visCvSaturation, visCvSaturation, NULL, 1);
+
+	/* threshold hue
+	 * (320x240) */
+	cvSmooth(visCvHue, visCvHue);
+	Normalize(visCvHue);
+	ThresholdImage(visCvHue, visCvHue, hueThreshold);
+	cvDilate(visCvHue, visCvHue, NULL, 1);
+
+	/* or the images together
+	 * (320x240) */
+	cvOr(visCvSaturation, visCvHue, visCvThresh);
+	cvDilate(visCvThresh, visCvThresh, NULL, 1);
+
+	/* make white=good & black=bad
+	 * (320x240) */
+	cvNot(visCvThresh, visCvThresh);
+
+	/* generate path image, with white=path & black=bad
+	 * (320x240) */
+	visGenPath(visCvThresh);
+
+	/* find next goal for robot by scanning up visCvPath Image, and set the goal.
+	 * (320x240) */
+	robotWidthScan(visCvPath, goal_far);	// returns -1 on error
+
+	/* setup navigation lines that sweep across the screen and updates goal. */
+	visSweeperLines(goal_near);
+
+	/* update return goal */
+	CvtPixToGoal(goal);
 
 }
 
@@ -944,21 +958,22 @@ void Vision::ConvertAllImageViews(int trackbarVal)
 		cvShowImage("display", visCvAdapt);
 		break;
 	case 5:
-		cvPutText(visCvSaturation, "Sat", cvPoint(5,visCvSaturation->height-10), &font, CV_RGB(0,0,0));
-		cvShowImage("display", visCvSaturation);
+		cvPutText(visCvGrey, "Grey", cvPoint(5,visCvGrey->height-10), &font, CV_RGB(255,255,255));
+		cvShowImage("display", visCvGrey);
 		break;
 	case 6:
 		cvPutText(visCvHue, "Hue", cvPoint(5,visCvHue->height-10), &font, CV_RGB(0,0,0));
 		cvShowImage("display", visCvHue);
 		break;
 	case 7:
+		cvPutText(visCvSaturation, "Sat", cvPoint(5,visCvSaturation->height-10), &font, CV_RGB(0,0,0));
+		cvShowImage("display", visCvSaturation);
+		break;
+	case 8:
 		cvPutText(visCvHSV, "HSV", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
 		cvShowImage("display", visCvHSV);
 		break;
-	case 8:
-		cvPutText(visCvGrey, "grey", cvPoint(5,visCvGrey->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvGrey);
-		break;
+
 		/* future use (change value of numberOfViews) */
 //  case 9:
 //  	cvShowImage("display", );
@@ -1202,37 +1217,25 @@ void Vision::Adapt()
 void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 {
 
-	/* abort if there is no image. */
-	if ( visCvRaw->imageData==NULL )
-	{
-		printf("visCvRaw is NULL!\n");
-		return;
-	}
+	/* generate visCvAdapt img */
+	Adapt();
+	cvDilate(visCvAdapt, visCvAdapt, NULL, 1);
 
-	/* Do vision processing */
-	{
-		/* generate visCvAdapt img */
-		Adapt();
-		cvDilate(visCvAdapt, visCvAdapt, NULL, 1);
+	/* shrink visCvAdapt img to 320x240 */
+	cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
+	cvErode(visCvThresh, visCvThresh, NULL, 1);
 
-		/* shrink visCvAdapt img to 320x240 */
-		cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
-		cvErode(visCvThresh, visCvThresh, NULL, 1);
+	/* generate visCvPath */
+	visGenPath(visCvThresh);
 
-		/* generate visCvPath */
-		visGenPath(visCvThresh);
+	/* scan high in img */
+	robotWidthScan(visCvPath, goal_far);
 
-		/* scan high in img */
-		robotWidthScan(visCvPath, goal_far);
+	/* setup navigation lines that sweep across the screen and updates goal. */
+	visSweeperLines(goal_near);
 
-		/* setup navigation lines that sweep across the screen and updates goal. */
-		visSweeperLines(goal_near);
-
-		/* update return goal */
-		CvtPixToGoal(goal);
-
-	} //end vis processing
-
+	/* update return goal */
+	CvtPixToGoal(goal);
 
 }
 
