@@ -18,7 +18,7 @@ public:
 	virtual ~MapGen();
 public:
 	void genMap();
-	void getFeatures();
+	void getFeatures(CvPoint2D32f* corners);
 	void LoadXMLSettings();
 	int maxFeatures;
 	int minFeatureDistance;
