@@ -139,6 +139,8 @@ int Robot::init()
 	/* init video writer */
 	//createVideoWriter();
 
+    /* setup slam processing module */
+    mapper.init();
 
 	/* success */
 	return 1;

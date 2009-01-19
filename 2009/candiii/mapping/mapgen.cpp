@@ -6,21 +6,17 @@
 
 MapGen::MapGen()
 {
-    /* load in params */
-	LoadXMLSettings();
-	/* flag for initializing temp images for features */
-	_init_ = 0;
+
 }
 
 MapGen::~MapGen()
 {
     /* clean up */
-	if (	eig_image != NULL )
+	if (eig_image != NULL )
 	{
 		cvReleaseImage( &eig_image );
 	}
-
-	if (	temp_image != NULL )
+	if (temp_image != NULL )
 	{
 		cvReleaseImage( &temp_image );
 	}
@@ -36,25 +32,20 @@ void MapGen::genMap()
 	 * this method should only be function calls
 	 */
 
-	/* initialize images */
-	if (!_init_)
-	{
-		init();
-	}
+    /* storage for feature points */
+	CvPoint2D32f features[maxFeatures];
 
 	/* get features from the greyscaled raw image */
-	getFeatures();
+	getFeatures(features);
 
 }
 
-void MapGen::getFeatures()
+void MapGen::getFeatures(CvPoint2D32f* corners)
 {
     /* get and rezise raw image to grayscale */
 	cvCvtColor(visCvRaw, visCvGreyBig, CV_BGR2GRAY);
 	cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
 
-    /* storage for feature points */
-	CvPoint2D32f corners[maxFeatures];
 	/* accuracy level */
 	double quality = 0.01; // 0.01;
 
@@ -65,7 +56,7 @@ void MapGen::getFeatures()
 	    temp_image,  //CvArr* temp_image, workspace for the algorithm.
 	    corners,     //CvPoint2D32f* corners, contains the feature points.
 	    &maxFeatures, //int* corner_count, number feature points actually found
-	    quality,     //double quality_level, specifies the minimum quality of the features (based on the eigenvalues).
+	    quality,     //double quality_level, specifies minimum quality of the features (based on the eigenvalues).
 	    minFeatureDistance, //double min_distance, specifies the minimum Euclidean distance between features.
 	    NULL, //const CvArr* mask=NULL, "NULL" means use the entire input image.
 	    3,    //int block_size=3,
@@ -77,14 +68,19 @@ void MapGen::getFeatures()
 	 * epsilon is better than .3.  You can play with these parameters for speed vs. accuracy but these values
 	 * work pretty well in many situations. */
 	CvTermCriteria term_criteria = cvTermCriteria( CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, .3 );
+
 	/* search window half size */
 	int win_size = 8;
 
     /* enhance point precision */
-	cvFindCornerSubPix( visCvGrey, corners, maxFeatures,
-	                    cvSize(win_size,win_size), cvSize(-1,-1),
-	                    term_criteria
-	                    );
+	cvFindCornerSubPix(
+        visCvGrey,   // input image
+        corners,     // initial corners in, refined corners out
+        maxFeatures, // number of corners
+        cvSize(win_size,win_size),  // half size of search window
+        cvSize(-1,-1), // dead region, -1 means none
+        term_criteria  // criteria for terminating iterative process
+	    );
 
     /* display found features */
 	for (int i=0; i<maxFeatures; i++)
@@ -130,12 +126,13 @@ void MapGen::LoadXMLSettings()
 
 void MapGen::init()
 {
+    /* load in params */
+	LoadXMLSettings();
 
+	/* init temp images */
 	eig_image = cvCreateImage( cvGetSize(visCvGrey), 32, 1 );
 	temp_image = cvCreateImage( cvGetSize(visCvGrey), 32, 1 );
 
-
-	_init_ = 1;
 }
 
 
