@@ -6,13 +6,15 @@
 
 MapGen::MapGen()
 {
+    /* load in params */
 	LoadXMLSettings();
+	/* flag for initializing temp images for features */
 	_init_ = 0;
 }
 
 MapGen::~MapGen()
 {
-
+    /* clean up */
 	if (	eig_image != NULL )
 	{
 		cvReleaseImage( &eig_image );
@@ -47,32 +49,44 @@ void MapGen::genMap()
 
 void MapGen::getFeatures()
 {
-
+    /* get and rezise raw image to grayscale */
 	cvCvtColor(visCvRaw, visCvGreyBig, CV_BGR2GRAY);
 	cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
 
+    /* storage for feature points */
 	CvPoint2D32f corners[maxFeatures];
-	double quality = 0.01; //QUALITY; 0.01
-	int win_size = 8; //WIN_SIZE; 16
+	/* accuracy level */
+	double quality = 0.01; // 0.01;
 
+    /* extract feature points from image into 'corners' point array */
 	cvGoodFeaturesToTrack(
-	    visCvGrey,   //const CvArr* image,
-	    eig_image,   //CvArr* eig_image,
-	    temp_image,  //CvArr* temp_image,
-	    corners,     //CvPoint2D32f* corners,
-	    &maxFeatures, //int* corner_count,
-	    quality,     //double quality_level,
-	    minFeatureDistance, //double min_distance,
-	    NULL, //const CvArr* mask=NULL,
+	    visCvGrey,   //const CvArr* image, source
+	    eig_image,   //CvArr* eig_image, workspace for the algorithm.
+	    temp_image,  //CvArr* temp_image, workspace for the algorithm.
+	    corners,     //CvPoint2D32f* corners, contains the feature points.
+	    &maxFeatures, //int* corner_count, number feature points actually found
+	    quality,     //double quality_level, specifies the minimum quality of the features (based on the eigenvalues).
+	    minFeatureDistance, //double min_distance, specifies the minimum Euclidean distance between features.
+	    NULL, //const CvArr* mask=NULL, "NULL" means use the entire input image.
 	    3,    //int block_size=3,
 	    0,    //int use_harris=0,
 	    0.04  //double k=0.04
 	);
 
-	//cvFindCornerSubPix( visCvGrey, corners, count,
-	//                    cvSize(win_size,win_size), cvSize(-1,-1),
-	//                    cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03));
+	/* This termination criteria tells the algorithm to stop when it has either done 20 iterations or when
+	 * epsilon is better than .3.  You can play with these parameters for speed vs. accuracy but these values
+	 * work pretty well in many situations. */
+	CvTermCriteria term_criteria = cvTermCriteria( CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, .3 );
+	/* search window half size */
+	int win_size = 8;
 
+    /* enhance point precision */
+	cvFindCornerSubPix( visCvGrey, corners, maxFeatures,
+	                    cvSize(win_size,win_size), cvSize(-1,-1),
+	                    term_criteria
+	                    );
+
+    /* display found features */
 	for (int i=0; i<maxFeatures; i++)
 	{
 		cvRectangle(visCvGrey, cvPoint(corners[i].x-win_size/2,corners[i].y-win_size/2),
