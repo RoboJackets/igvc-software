@@ -10,13 +10,12 @@
 #include "logging/timer.h"
 
 
-// flag for saving video - global because of glut use
-int saveRawVideo;
 /*********** GLUT callbacks and functions ***********************/
 pthread_t Robot::robotThread; // for pthread_create
 Robot* glRobot; // for glut
 static GLuint cameraImageTextureID; // for glut
 int glutwindow; // for glut
+int saveRawVideo; // flag for saving video - global because of glut use
 void* robot_thread_caller(void* arg)
 {
 	saveRawVideo=0; // don't save video yet
@@ -49,7 +48,7 @@ void keyboardFunc(unsigned char key, int x, int y)   // handles keyboard button 
 		break;
 	}
 }
-/*****************************************************/
+/****************************************************************/
 
 /********** CV window callback stuff *****************/
 // callback for trackbar
@@ -234,14 +233,8 @@ void Robot::processFunc()
 
 
 	/* Perform vision processing. */
-	if (vp.DO_ADAPTIVE)
-	{
-		vp.visAdaptiveProcessing(heading_vision); // NEW!
-	}
-	else
-	{
-		vp.visProcessFrame(heading_vision);
-	}
+	vp.visProcessFrame(heading_vision);
+
 
 	/* Average motor commands
 	 * k = % of new value to use */
@@ -255,7 +248,7 @@ void Robot::processFunc()
 
 
 	/* SLAM Processing */
-	mg.genMap();
+	mapper.genMap();
 
 
 	/* Make decision */
@@ -271,10 +264,10 @@ void Robot::processFunc()
 
 
 	/* Save raw image last */
-	if (saveRawVideo)
-	{
-		cvWriteFrame(cvVideoWriter,visCvRaw);
-	}
+	//if (saveRawVideo)
+	//{
+	//	cvWriteFrame(cvVideoWriter,visCvRaw);
+	//}
 
 
 	/* Stats */
@@ -307,7 +300,6 @@ void Robot::connectToCamera()
 
 void Robot::initGlut()
 {
-
 	// dummy args
 	int argc = 0;
 	char** argv;

@@ -21,14 +21,18 @@
 	<satThresh>70</satThresh>    <!-- higher => more noise/sensitivity -->
 	<hueThresh>35</hueThresh>    <!-- higher => more noise/sensitivity -->
 	<robotWidth>20</robotWidth>  <!-- lower => we can squeeze through more -->
-	<doTransform>1</doTransform> <!-- 1 => use graphics card transformations -->
+	<doTransform>0</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>1</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
 	<maxDiff>35</maxDiff>        <!-- lower => more noise/sensitivity for inside roi box -->
 	<boxPadding>90</boxPadding>  <!-- lower => wider box -->
 
 	<!-- Robot Misc Settings -->
 	<_k>0.40</_k>               <!-- lower => more smooth motor cotrol (averages new motor commands) -->
-    <defaultView>1</defaultView>
+    <defaultView>5</defaultView>
+
+    <!-- Mapping Settings -->
+    <maxFeatures>16</maxFeatures>
+    <minFeatureDistance>10</minFeatureDistance>
 
 
 
