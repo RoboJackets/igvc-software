@@ -88,7 +88,7 @@ public:
 	void visGenPath(IplImage* img);
 
 	// helpers for visGenPath
-	int checkPixel(IplImage* img, int x, int y);
+	int checkPixel(IplImage* img, const int x, const int y);
 	void scanFillLeft(IplImage* img, int middleX, int y, int goodFirst, int end, int blackout);
 	void scanFillRight(IplImage* img, int middleX, int y, int goodFirst, int end, int blackout);
 	int findBestX(IplImage* img, int height, int center);
@@ -120,9 +120,14 @@ public:
 	int adapt_maxDiff;
 	int adapt_boxPad;
 	int DO_ADAPTIVE;
+    CvPoint UL;
+    CvPoint LR;
+    CvRect roi;
+    IplImage* roi_img;
 
 };
 
 
 #endif // _VISION_H_
+
 

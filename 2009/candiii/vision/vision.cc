@@ -22,7 +22,7 @@
  */
 Vision::Vision()
 {
-	init();
+
 }
 
 /*
@@ -30,7 +30,8 @@ Vision::Vision()
  */
 Vision::~Vision()
 {
-
+	/* no memory leaks! */
+	cvReleaseImage(&roi_img);
 }
 
 /*
@@ -113,7 +114,29 @@ void Vision::init()
 	// display roi for adaptive coloring
 	cvNamedWindow("roi",1);
 
+    /* init adaptive processing stuff */
+    {
+        /* define roi corners (upper-left and lower-right) */
+        if (DO_TRANSFORM)
+        {
+            UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/3);
+            LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/5);
+        }
+        else
+        {
+            UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad);
+            LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/2);
+        }
 
+        /* setup roi */
+        roi.x = UL.x;
+        roi.y = UL.y;
+        roi.width  = LR.x-UL.x;
+        roi.height = LR.y-UL.y;
+
+        /* create and set roi img */
+        roi_img = cvCreateImage( cvSize(roi.width, roi.height), IPL_DEPTH_8U, 3 );
+    }
 }
 
 /*
@@ -185,6 +208,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 	int pathDanger[nav_path__num];
 	int curPixelDanger = 0;
 	int curPathDanger = 0;
+	int weight = 0;
 
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	{
@@ -238,7 +262,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			int weight = abs(nav_path__center_path_id-pathID)/(nav_path__num);
+			weight = abs(nav_path__center_path_id-pathID)/(nav_path__num);
 			curPathDanger += weight;
 
 			// Clip high danger values to be no higher than max_path_danger
@@ -296,7 +320,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 
 		// Smooth interior
 		int sumOfNearbyDangers = 0;
-		int avgOfNearbyDangers;
+		int avgOfNearbyDangers = 0;
 		for (int curPath_id = nav_path__danger_smoothing_radius;
 		        curPath_id < (nav_path__num - nav_path__danger_smoothing_radius + 1);
 		        curPath_id++)
@@ -617,30 +641,36 @@ int Vision::findBestX(IplImage* img, int height, int center)
  * 		white = good/path
  * 		black = bad/obstacle
  */
-int Vision::checkPixel(IplImage* img, int x, int y)
+int Vision::checkPixel(IplImage* img, const int x, const int y)
 {
-	int good = 0;
+	//int good = 0;
 	//int index = y*img->width+x;
-
-	unsigned char val = img->imageData[y*img->width+x];
+	//unsigned char val = img->imageData[y*img->width+x];
 
 	// check: black = bad
-	if ( !val )
+	//if ( !val )
+	if(!(unsigned char)img->imageData[y*img->width+x] )
 	{
 		// check for noise
 		if ( !(img->imageData[ (y-PIXEL_SKIP)*img->width+x ]) )
-			good = 0;
+		{
+			//good = 0;
+			return 0;
+		}
 		else
-			good = 1; // just a small spot, keep going up
+		{
+			//good = 1; // just a small spot, keep going up
+            return 1;
+		}
 	}
 	// white = good
 	else
 	{
-		good = 1;
-
+		//good = 1;
+		return 1;
 	}
 
-	return good;
+	//return good;
 }
 
 /*
@@ -1134,29 +1164,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 void Vision::Adapt()
 {
 
-	/* define roi corners (upper-left and lower-right) */
-	CvPoint UL;
-	CvPoint LR;
-	if (DO_TRANSFORM)
-	{
-		UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/3);
-		LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/5);
-	}
-	else
-	{
-		UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad);
-		LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/2);
-	}
-
-	/* setup roi */
-	CvRect roi;
-	roi.x = UL.x;
-	roi.y = UL.y;
-	roi.width  = LR.x-UL.x;
-	roi.height = LR.y-UL.y;
-
-	/* create and set roi img */
-	IplImage* roi_img = cvCreateImage( cvSize(roi.width, roi.height), IPL_DEPTH_8U, 3 );
+	/* set the roi img */
 	cvSetImageROI(visCvDebug,roi);
 	cvCopy(visCvDebug,roi_img);
 	cvResetImageROI(visCvDebug);
@@ -1164,10 +1172,9 @@ void Vision::Adapt()
 	/* display roi box in separate window */
 	cvShowImage( "roi" , roi_img );
 
-	/* get average rgb values in roi */
+	/* get average rgb values inside the roi */
 	int blue=0,green=0,red=0;
 	unsigned char ab,ag,ar;
-	//for (int i=0; i<roi_img->imageSize-3; i+=3)
 	for (int i=roi_img->imageSize-3; i>0; i-=3)
 	{
 		ab = roi_img->imageData[i  ];
@@ -1184,7 +1191,6 @@ void Vision::Adapt()
 
 	/* generate visCvAdapt image here!
 	 *  white=good ~ black=bad */
-	//for (int i=0; i<visCvDebug->imageSize-3; i+=3)
 	for (int i=visCvDebug->imageSize-3; i>0; i-=3)
 	{
 		ab = visCvDebug->imageData[i  ];
@@ -1205,9 +1211,6 @@ void Vision::Adapt()
 
 	/* display roi box in the image we're using */
 	cvRectangle( visCvDebug, UL, LR, CV_RGB(100,0,0), 2, 8, 0);
-
-	/* no memory leaks! */
-	cvReleaseImage(&roi_img);
 
 }
 
