@@ -11,7 +11,7 @@ MapGen::MapGen()
 
 MapGen::~MapGen()
 {
-    /* clean up */
+	/* clean up */
 	if (eig_image != NULL )
 	{
 		cvReleaseImage( &eig_image );
@@ -32,7 +32,7 @@ void MapGen::genMap()
 	 * this method should only be function calls
 	 */
 
-    /* storage for feature points */
+	/* storage for feature points */
 	CvPoint2D32f features[maxFeatures];
 
 	/* get features from the greyscaled raw image */
@@ -42,14 +42,14 @@ void MapGen::genMap()
 
 void MapGen::getFeatures(CvPoint2D32f* corners)
 {
-    /* get and rezise raw image to grayscale */
+	/* get and rezise raw image to grayscale */
 	cvCvtColor(visCvRaw, visCvGreyBig, CV_BGR2GRAY);
 	cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
 
 	/* accuracy level */
 	double quality = 0.01; // 0.01;
 
-    /* extract feature points from image into 'corners' point array */
+	/* extract feature points from image into 'corners' point array */
 	cvGoodFeaturesToTrack(
 	    visCvGrey,   //const CvArr* image, source
 	    eig_image,   //CvArr* eig_image, workspace for the algorithm.
@@ -72,17 +72,17 @@ void MapGen::getFeatures(CvPoint2D32f* corners)
 	/* search window half size */
 	int win_size = 8;
 
-    /* enhance point precision */
+	/* enhance point precision */
 	cvFindCornerSubPix(
-        visCvGrey,   // input image
-        corners,     // initial corners in, refined corners out
-        maxFeatures, // number of corners
-        cvSize(win_size,win_size),  // half size of search window
-        cvSize(-1,-1), // dead region, -1 means none
-        term_criteria  // criteria for terminating iterative process
-	    );
+	    visCvGrey,   // input image
+	    corners,     // initial corners in, refined corners out
+	    maxFeatures, // number of corners
+	    cvSize(win_size,win_size),  // half size of search window
+	    cvSize(-1,-1), // dead region, -1 means none
+	    term_criteria  // criteria for terminating iterative process
+	);
 
-    /* display found features */
+	/* display found features */
 	for (int i=0; i<maxFeatures; i++)
 	{
 		cvRectangle(visCvGrey, cvPoint(corners[i].x-win_size/2,corners[i].y-win_size/2),
@@ -126,7 +126,7 @@ void MapGen::LoadXMLSettings()
 
 void MapGen::init()
 {
-    /* load in params */
+	/* load in params */
 	LoadXMLSettings();
 
 	/* init temp images */

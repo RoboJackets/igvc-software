@@ -113,30 +113,32 @@ void Vision::init()
 
 	// display roi for adaptive coloring
 	cvNamedWindow("roi",1);
+	// move the window for easy comparison to raw
+    cvMoveWindow( "roi", visCvRaw->width/2-20, 60+visCvRaw->height );
 
-    /* init adaptive processing stuff */
-    {
-        /* define roi corners (upper-left and lower-right) */
-        if (DO_TRANSFORM)
-        {
-            UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/3);
-            LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/5);
-        }
-        else
-        {
-            UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad);
-            LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/2);
-        }
+	/* init adaptive processing stuff */
+	{
+		/* define roi corners (upper-left and lower-right) */
+		if (DO_TRANSFORM)
+		{
+			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/3);
+			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/5);
+		}
+		else
+		{
+			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad);
+			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/2);
+		}
 
-        /* setup roi */
-        roi.x = UL.x;
-        roi.y = UL.y;
-        roi.width  = LR.x-UL.x;
-        roi.height = LR.y-UL.y;
+		/* setup roi */
+		roi.x = UL.x;
+		roi.y = UL.y;
+		roi.width  = LR.x-UL.x;
+		roi.height = LR.y-UL.y;
 
-        /* create and set roi img */
-        roi_img = cvCreateImage( cvSize(roi.width, roi.height), IPL_DEPTH_8U, 3 );
-    }
+		/* create and set roi img */
+		roi_img = cvCreateImage( cvSize(roi.width, roi.height), IPL_DEPTH_8U, 3 );
+	}
 }
 
 /*
@@ -649,7 +651,7 @@ int Vision::checkPixel(IplImage* img, const int x, const int y)
 
 	// check: black = bad
 	//if ( !val )
-	if(!(unsigned char)img->imageData[y*img->width+x] )
+	if (!(unsigned char)img->imageData[y*img->width+x] )
 	{
 		// check for noise
 		if ( !(img->imageData[ (y-PIXEL_SKIP)*img->width+x ]) )
@@ -660,7 +662,7 @@ int Vision::checkPixel(IplImage* img, const int x, const int y)
 		else
 		{
 			//good = 1; // just a small spot, keep going up
-            return 1;
+			return 1;
 		}
 	}
 	// white = good
@@ -992,11 +994,13 @@ void Vision::ConvertAllImageViews(int trackbarVal)
 		cvShowImage("display", visCvGrey);
 		break;
 	case 6:
-		cvPutText(visCvHue, "Hue", cvPoint(5,visCvHue->height-10), &font, CV_RGB(0,0,0));
+		if (DO_TRANSFORM) cvPutText(visCvHue, "Hue", cvPoint(5,visCvHue->height-10), &font, CV_RGB(0,0,0));
+		else cvPutText(visCvHue, "Hue", cvPoint(5,visCvHue->height-10), &font, CV_RGB(255,255,255));
 		cvShowImage("display", visCvHue);
 		break;
 	case 7:
-		cvPutText(visCvSaturation, "Sat", cvPoint(5,visCvSaturation->height-10), &font, CV_RGB(0,0,0));
+		if (DO_TRANSFORM) cvPutText(visCvSaturation, "Sat", cvPoint(5,visCvSaturation->height-10), &font, CV_RGB(0,0,0));
+		else cvPutText(visCvSaturation, "Sat", cvPoint(5,visCvSaturation->height-10), &font, CV_RGB(255,255,255));
 		cvShowImage("display", visCvSaturation);
 		break;
 	case 8:
@@ -1169,25 +1173,34 @@ void Vision::Adapt()
 	cvCopy(visCvDebug,roi_img);
 	cvResetImageROI(visCvDebug);
 
+
 	/* display roi box in separate window */
 	cvShowImage( "roi" , roi_img );
+
 
 	/* get average rgb values inside the roi */
 	int blue=0,green=0,red=0;
 	unsigned char ab,ag,ar;
-	for (int i=roi_img->imageSize-3; i>0; i-=3)
-	{
-		ab = roi_img->imageData[i  ];
-		ag = roi_img->imageData[i+1];
-		ar = roi_img->imageData[i+2];
-		blue += ab;
-		green+= ag;
-		red  += ar;
-	}
-	int n = roi_img->imageSize / 3;
-	blue  /= n;
-	green /= n;
-	red   /= n;
+	//OLD METHOD
+	//	for (int i=roi_img->imageSize-3; i>0; i-=3)
+	//	{
+	//		ab = roi_img->imageData[i  ];
+	//		ag = roi_img->imageData[i+1];
+	//		ar = roi_img->imageData[i+2];
+	//		blue += ab;
+	//		green+= ag;
+	//		red  += ar;
+	//	}
+	//	int n = roi_img->imageSize / 3;
+	//	blue  /= n;
+	//	green /= n;
+	//	red   /= n;
+	//NEW METHOD
+	CvScalar data = cvAvg(roi_img);
+	blue  = data.val[0];
+	green = data.val[1];
+	red   = data.val[2];
+
 
 	/* generate visCvAdapt image here!
 	 *  white=good ~ black=bad */
@@ -1208,6 +1221,7 @@ void Vision::Adapt()
 			visCvAdapt->imageData[i/3] = BAD_PIXEL;
 		}
 	}
+
 
 	/* display roi box in the image we're using */
 	cvRectangle( visCvDebug, UL, LR, CV_RGB(100,0,0), 2, 8, 0);

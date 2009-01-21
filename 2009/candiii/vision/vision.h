@@ -120,10 +120,10 @@ public:
 	int adapt_maxDiff;
 	int adapt_boxPad;
 	int DO_ADAPTIVE;
-    CvPoint UL;
-    CvPoint LR;
-    CvRect roi;
-    IplImage* roi_img;
+	CvPoint UL;
+	CvPoint LR;
+	CvRect roi;
+	IplImage* roi_img;
 
 };
 

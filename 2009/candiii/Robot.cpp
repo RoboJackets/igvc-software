@@ -109,7 +109,6 @@ int Robot::init()
 	/* configure opencv display window */
 	cvResizeWindow( "display", visCvRaw->width, visCvRaw->height );
 	cvMoveWindow( "display", 10, 10 ); // position on screen
-	cvMoveWindow( "roi", visCvRaw->width/2-20, 60+visCvRaw->height );
 
 	/* init all CV images here */
 	{
@@ -142,8 +141,8 @@ int Robot::init()
 	/* setup vision module */
 	vp.init();
 
-    /* setup slam processing module */
-    mapper.init();
+	/* setup slam processing module */
+	mapper.init();
 
 	/* success */
 	return 1;
