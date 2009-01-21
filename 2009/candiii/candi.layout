@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="0" tabpos="1">
-		<Cursor position="1259" topLine="0" />
+	<File name="Config.xml" open="1" top="0" tabpos="5">
+		<Cursor position="791" topLine="0" />
 	</File>
-	<File name="Robot.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="3955" topLine="96" />
+	<File name="Robot.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="5891" topLine="229" />
 	</File>
-	<File name="Robot.h" open="1" top="0" tabpos="2">
-		<Cursor position="448" topLine="0" />
+	<File name="Robot.h" open="1" top="0" tabpos="3">
+		<Cursor position="1365" topLine="57" />
 	</File>
 	<File name="main.cpp" open="0" top="0" tabpos="7">
 		<Cursor position="60" topLine="0" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="4">
-		<Cursor position="3270" topLine="0" />
-	</File>
-	<File name="mapping/mapgen.h" open="1" top="0" tabpos="5">
-		<Cursor position="297" topLine="0" />
+	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="2943" topLine="31" />
 	</File>
 	<File name="vision/CVcam.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="588" topLine="0" />
@@ -25,8 +22,8 @@
 	<File name="vision/CVcam.h" open="0" top="0" tabpos="0">
 		<Cursor position="596" topLine="17" />
 	</File>
-	<File name="vision/Graphics.h" open="1" top="0" tabpos="8">
-		<Cursor position="2026" topLine="0" />
+	<File name="vision/Graphics.h" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="55" />
 	</File>
 	<File name="vision/GuppyCam.cpp" open="0" top="0" tabpos="5">
 		<Cursor position="1548" topLine="47" />
@@ -40,10 +37,10 @@
 	<File name="vision/image_buffers.h" open="0" top="0" tabpos="4">
 		<Cursor position="801" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="1" tabpos="6">
-		<Cursor position="28826" topLine="1160" />
+	<File name="vision/vision.cc" open="1" top="1" tabpos="1">
+		<Cursor position="29846" topLine="1185" />
 	</File>
-	<File name="vision/vision.h" open="1" top="0" tabpos="7">
-		<Cursor position="2890" topLine="60" />
+	<File name="vision/vision.h" open="1" top="0" tabpos="4">
+		<Cursor position="603" topLine="0" />
 	</File>
 </CodeBlocks_layout_file>

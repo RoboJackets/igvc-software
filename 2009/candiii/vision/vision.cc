@@ -978,15 +978,18 @@ void Vision::ConvertAllImageViews(int trackbarVal)
 		cvShowImage("display", visCvDebug);
 		break;
 	case 2:
-		cvPutText(visCvPath, "Path", cvPoint(5,visCvPath->height-10), &font, CV_RGB(255,255,255));
+        if (!DO_TRANSFORM) cvPutText(visCvPath, "Path", cvPoint(5,visCvPath->height-10), &font, CV_RGB(0,0,0));
+		else cvPutText(visCvPath, "Path", cvPoint(5,visCvPath->height-10), &font, CV_RGB(255,255,255));
 		cvShowImage("display", visCvPath);
 		break;
 	case 3:
-		cvPutText(visCvThresh, "Thresh", cvPoint(5,visCvThresh->height-10), &font, CV_RGB(255,255,255));
+        if (!DO_TRANSFORM) cvPutText(visCvThresh, "Thresh", cvPoint(5,visCvThresh->height-10), &font, CV_RGB(0,0,0));
+		else cvPutText(visCvThresh, "Thresh", cvPoint(5,visCvThresh->height-10), &font, CV_RGB(255,255,255));
 		cvShowImage("display", visCvThresh);
 		break;
 	case 4:
-		cvPutText(visCvAdapt, "Adaptive", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
+        if (!DO_TRANSFORM) cvPutText(visCvAdapt, "Adaptive", cvPoint(5,visCvAdapt->height-10), &font, CV_RGB(0,0,0));
+		else cvPutText(visCvAdapt, "Adaptive", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
 		cvShowImage("display", visCvAdapt);
 		break;
 	case 5:
