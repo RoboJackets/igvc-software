@@ -126,7 +126,7 @@ void Vision::init()
 		}
 		else
 		{
-			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad);
+			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad+adapt_boxPad/4);
 			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/2);
 		}
 
