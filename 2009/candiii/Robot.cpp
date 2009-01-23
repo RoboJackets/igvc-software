@@ -244,7 +244,6 @@ void Robot::processFunc()
 	 * k = % of new value to use */
 	heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
 	heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
-	//printf("heading: rot: %d 	fwd: %d \n",heading_main.x,heading_main.y);
 
 
 	/* Get sensor information */
@@ -275,8 +274,12 @@ void Robot::processFunc()
 
 
 	/* Stats */
-	printf( "framerate: %.2f \n", elapsed_time() );
-	start_timer(); // called second to time entire process (except first run)
+	if(1)
+	{
+        printf( "framerate: %.2f \n", elapsed_time() );
+        start_timer(); // called second to time entire process (except first run)
+        printf("                    heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
+	}
 
 }
 
