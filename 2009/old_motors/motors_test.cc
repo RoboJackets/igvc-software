@@ -52,8 +52,6 @@ class motors {
 		/* Called when the driver is started and closed respectively */
 		int Shutdown();
 
-	//protected:
-
 		/* file descriptor of the serial port */
 		int fdMotor;
 
