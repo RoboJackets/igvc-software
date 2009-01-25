@@ -7,13 +7,13 @@ Motors_Old::Motors_Old()
     //ctor
     fdMotor = -1;
     dVelocityScale = 1;
-    SetupSerial();
+    //SetupSerial();
 }
 
 Motors_Old::~Motors_Old()
 {
     //dtor
-
+    ShutdownSerial();
 }
 
 
@@ -92,14 +92,14 @@ int Motors_Old::Shutdown()
  *	it sends back its current motor states, control mode, and any errors it had
  *	with the transmission.
  */
-int Motors_Old::set_motors(MOTOR_STATES_T stMotorStates)
+int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 {
     /* Scale the motor velocities, limit them to vaild values, and store them in the
      * correct form to transmit to the motor controller.
      * 	Alternate Title: fun with the ? operator
      */
-    int iScaledLeftVel = (int)(dVelocityScale * stMotorStates.iLeftVelocity);
-    int iScaledRightVel = (int)(dVelocityScale * stMotorStates.iRightVelocity);
+    int iScaledLeftVel = (int)(dVelocityScale * iLeftVelocity);
+    int iScaledRightVel = (int)(dVelocityScale * iRightVelocity);
     unsigned char data[3] =
     {
         (unsigned char)( (((iScaledLeftVel < 0) ? REVERSE : FORWARD) << LEFT_DIR_OFFSET) | (((iScaledRightVel < 0) ? REVERSE : FORWARD) << RIGHT_DIR_OFFSET) ),
@@ -186,8 +186,32 @@ int Motors_Old::get_motor_states(void)
     controlMode = ( u8Buff[0] & CONTROL_MODE_MASK ) >> CONTROL_MODE_OFFSET;
 
     /* Store the current motor velocities */
-    stMotorStates.iLeftVelocity = ((((u8Buff[0] & LEFT_DIR_MASK) >> LEFT_DIR_OFFSET)==FORWARD) ? 1 : -1) * (int)u8Buff[1];
-    stMotorStates.iRightVelocity = ((((u8Buff[0] & RIGHT_DIR_MASK) >> RIGHT_DIR_OFFSET)==FORWARD)? 1 : -1) * (int)u8Buff[2];
+    _iLeftVelocity = ((((u8Buff[0] & LEFT_DIR_MASK) >> LEFT_DIR_OFFSET)==FORWARD) ? 1 : -1) * (int)u8Buff[1];
+    _iRightVelocity = ((((u8Buff[0] & RIGHT_DIR_MASK) >> RIGHT_DIR_OFFSET)==FORWARD)? 1 : -1) * (int)u8Buff[2];
 
     return(0);
 }
+
+/* Set motors based on given velocity:
+ * Fwd range [0,255]
+ * Rot range [-128,127]
+ */
+int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
+{
+    if(iRotation<0)
+    {
+        /* Turn Left */
+        iRotation+=128;
+        return this->set_motors( iFwdVelocity/2 - iRotation, iFwdVelocity/2 + iRotation );
+    }
+    else
+    {
+        /* Turn Right (or go Straight) */
+        return this->set_motors( iFwdVelocity/2 + iRotation, iFwdVelocity/2 - iRotation );
+    }
+}
+
+
+
+
+

@@ -70,6 +70,12 @@
 		<Unit filename="vision/types.h" />
 		<Unit filename="vision/vision.cc" />
 		<Unit filename="vision/vision.h" />
+		<Unit filename="../old_motors/motors_old.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="../old_motors/motors_old.h">
+			<Option target="Debug" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<debugger />

@@ -39,11 +39,10 @@ enum
 
 
 /* Motor drive control */
-typedef struct _motor_states_
-{
-    int iLeftVelocity, iRightVelocity;
-} MOTOR_STATES_T;
-
+//typedef struct _motor_states_
+//{
+//    int iLeftVelocity, iRightVelocity;
+//} MOTOR_STATES_T;
 
 
 class Motors_Old
@@ -63,13 +62,16 @@ public:
     /**/
     int ShutdownSerial();
     /* Current motor velocities */
-    MOTOR_STATES_T stMotorStates;
+    //MOTOR_STATES_T stMotorStates;
+    int _iLeftVelocity;
+    int _iRightVelocity;
     /**/
     double dVelocityScale;
     /**/
     int controlMode;
     /**/
-    int set_motors(MOTOR_STATES_T stMotorStates);
+    int set_motors(int iLeftVelocity, int iRightVelocity);
+    int set_heading(int iFwdVelocity, int iRotation);
     /**/
     int get_motor_states(void);
 

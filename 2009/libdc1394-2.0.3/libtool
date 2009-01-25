@@ -44,7 +44,7 @@ available_tags=" CXX"
 
 # ### BEGIN LIBTOOL CONFIG
 
-# Libtool was configured on host v2s:
+# Libtool was configured on host i7:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/bash"
@@ -66,12 +66,12 @@ fast_install=yes
 
 # The host system.
 host_alias=
-host=x86_64-unknown-linux-gnu
+host=i686-pc-linux-gnu
 host_os=linux-gnu
 
 # The build system.
 build_alias=
-build=x86_64-unknown-linux-gnu
+build=i686-pc-linux-gnu
 build_os=linux-gnu
 
 # An echo program that does not interpret backslashes.
@@ -97,7 +97,7 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/usr/bin/ld -m elf_x86_64"
+LD="/usr/bin/ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
@@ -329,10 +329,10 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec="/usr/lib64 /lib64 /usr/local/lib64"
+sys_lib_search_path_spec="/usr/lib /lib /usr/local/lib"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/usr/lib64 /lib64 /usr/lib32/alsa-lib /usr/lib/alsa-lib /usr/local/lib /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu "
+sys_lib_dlsearch_path_spec="/usr/lib /lib /lib/i486-linux-gnu /usr/lib/i486-linux-gnu /usr/lib/alsa-lib /usr/local/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""
@@ -7312,7 +7312,7 @@ disable_libs=static
 # End:
 # ### BEGIN LIBTOOL TAG CONFIG: CXX
 
-# Libtool was configured on host v2s:
+# Libtool was configured on host i7:
 
 # Shell to use when invoking shell scripts.
 SHELL="/bin/bash"
@@ -7334,12 +7334,12 @@ fast_install=yes
 
 # The host system.
 host_alias=
-host=x86_64-unknown-linux-gnu
+host=i686-pc-linux-gnu
 host_os=linux-gnu
 
 # The build system.
 build_alias=
-build=x86_64-unknown-linux-gnu
+build=i686-pc-linux-gnu
 build_os=linux-gnu
 
 # An echo program that does not interpret backslashes.
@@ -7365,7 +7365,7 @@ with_gcc=yes
 EGREP="/bin/grep -E"
 
 # The linker used to build libraries.
-LD="/usr/bin/ld -m elf_x86_64"
+LD="/usr/bin/ld"
 
 # Whether we need hard or soft links.
 LN_S="ln -s"
@@ -7494,11 +7494,11 @@ striplib="strip --strip-unneeded"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
-predep_objects="/usr/lib/gcc/x86_64-linux-gnu/4.3.2/../../../../lib/crti.o /usr/lib/gcc/x86_64-linux-gnu/4.3.2/crtbeginS.o"
+predep_objects="/usr/lib/gcc/i486-linux-gnu/4.3.2/../../../../lib/crti.o /usr/lib/gcc/i486-linux-gnu/4.3.2/crtbeginS.o"
 
 # Dependencies to place after the objects being linked to create a
 # shared library.
-postdep_objects="/usr/lib/gcc/x86_64-linux-gnu/4.3.2/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/4.3.2/../../../../lib/crtn.o"
+postdep_objects="/usr/lib/gcc/i486-linux-gnu/4.3.2/crtendS.o /usr/lib/gcc/i486-linux-gnu/4.3.2/../../../../lib/crtn.o"
 
 # Dependencies to place before the objects being linked to create a
 # shared library.
@@ -7510,11 +7510,11 @@ postdeps="-lstdc++ -lm -lgcc_s -lc -lgcc_s"
 
 # The directories searched by this compiler when creating a shared
 # library
-compiler_lib_search_dirs="/usr/lib/gcc/x86_64-linux-gnu/4.3.2 /usr/lib/gcc/x86_64-linux-gnu/4.3.2 /usr/lib/gcc/x86_64-linux-gnu/4.3.2/../../../../lib /lib/../lib /usr/lib/../lib /usr/lib/gcc/x86_64-linux-gnu/4.3.2/../../.."
+compiler_lib_search_dirs="/usr/lib/gcc/i486-linux-gnu/4.3.2 /usr/lib/gcc/i486-linux-gnu/4.3.2 /usr/lib/gcc/i486-linux-gnu/4.3.2/../../../../lib /lib/../lib /usr/lib/../lib /usr/lib/gcc/i486-linux-gnu/4.3.2/../../.."
 
 # The library search path used internally by the compiler when linking
 # a shared library.
-compiler_lib_search_path="-L/usr/lib/gcc/x86_64-linux-gnu/4.3.2 -L/usr/lib/gcc/x86_64-linux-gnu/4.3.2 -L/usr/lib/gcc/x86_64-linux-gnu/4.3.2/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/4.3.2/../../.."
+compiler_lib_search_path="-L/usr/lib/gcc/i486-linux-gnu/4.3.2 -L/usr/lib/gcc/i486-linux-gnu/4.3.2 -L/usr/lib/gcc/i486-linux-gnu/4.3.2/../../../../lib -L/lib/../lib -L/usr/lib/../lib -L/usr/lib/gcc/i486-linux-gnu/4.3.2/../../.."
 
 # Method to check whether dependent libraries are shared objects.
 deplibs_check_method="pass_all"
@@ -7594,10 +7594,10 @@ variables_saved_for_relink="PATH LD_LIBRARY_PATH LD_RUN_PATH GCC_EXEC_PREFIX COM
 link_all_deplibs=unknown
 
 # Compile-time system search path for libraries
-sys_lib_search_path_spec="/usr/lib64 /lib64 /usr/local/lib64"
+sys_lib_search_path_spec="/usr/lib /lib /usr/local/lib"
 
 # Run-time system search path for libraries
-sys_lib_dlsearch_path_spec="/usr/lib64 /lib64 /usr/lib32/alsa-lib /usr/lib/alsa-lib /usr/local/lib /lib/x86_64-linux-gnu /usr/lib/x86_64-linux-gnu "
+sys_lib_dlsearch_path_spec="/usr/lib /lib /lib/i486-linux-gnu /usr/lib/i486-linux-gnu /usr/lib/alsa-lib /usr/local/lib "
 
 # Fix the shell variable $srcfile for the compiler.
 fix_srcfile_path=""

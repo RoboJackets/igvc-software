@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="0" tabpos="3">
+	<File name="Config.xml" open="0" top="0" tabpos="3">
 		<Cursor position="791" topLine="0" />
 	</File>
-	<File name="Robot.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="5751" topLine="203" />
+	<File name="Robot.cpp" open="0" top="0" tabpos="2">
+		<Cursor position="5323" topLine="213" />
 	</File>
 	<File name="Robot.h" open="0" top="0" tabpos="3">
-		<Cursor position="1365" topLine="57" />
+		<Cursor position="2119" topLine="54" />
 	</File>
 	<File name="main.cpp" open="0" top="0" tabpos="7">
 		<Cursor position="60" topLine="0" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="4">
+	<File name="mapping/mapgen.cpp" open="0" top="0" tabpos="4">
 		<Cursor position="2943" topLine="67" />
 	</File>
 	<File name="vision/CVcam.cpp" open="0" top="0" tabpos="0">
@@ -37,10 +37,16 @@
 	<File name="vision/image_buffers.h" open="0" top="0" tabpos="4">
 		<Cursor position="801" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="0" tabpos="1">
+	<File name="vision/vision.cc" open="0" top="0" tabpos="1">
 		<Cursor position="29846" topLine="1185" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="4">
 		<Cursor position="603" topLine="0" />
+	</File>
+	<File name="../old_motors/motors_old.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="6755" topLine="160" />
+	</File>
+	<File name="../old_motors/motors_old.h" open="0" top="0" tabpos="0">
+		<Cursor position="1542" topLine="23" />
 	</File>
 </CodeBlocks_layout_file>
