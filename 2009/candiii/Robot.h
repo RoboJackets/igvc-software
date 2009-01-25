@@ -15,6 +15,7 @@
 #include "vision.h"
 
 #include "mapgen.h"
+#include "../old_motors/motors_old.h"
 
 /*===== Camera Settings ===========================================*/
 /* Determines camera compatability.
@@ -100,6 +101,9 @@ public:
 
 	// map generator and slam processing
 	MapGen mapper;
+
+	// motor control
+	Motors_Old motors;
 
 };
 

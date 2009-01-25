@@ -10,6 +10,7 @@
 #include "logging/timer.h"
 
 
+
 /*********** GLUT callbacks and functions ***********************/
 pthread_t Robot::robotThread; // for pthread_create
 Robot* glRobot; // for glut
@@ -144,6 +145,9 @@ int Robot::init()
 	/* setup slam processing module */
 	mapper.init();
 
+	/* connect to motors */
+	motors.SetupSerial();
+
 	/* success */
 	return 1;
 }
@@ -264,6 +268,7 @@ void Robot::processFunc()
 
 	/* Drive Robot via motor commands (GO!) */
 	//TODO:
+	//motors.set_heading(heading_main.y, heading_main.x);
 
 
 	/* Save raw image last */
