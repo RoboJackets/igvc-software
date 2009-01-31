@@ -82,6 +82,7 @@ Robot::Robot(const char* filename)
 Robot::~Robot()
 {
     cvReleaseVideoWriter(&cvVideoWriter);
+    releaseAllImages();
     destroy();
 }
 
@@ -91,6 +92,44 @@ void Robot::destroy()
     glutDestroyWindow(glutwindow);
     cvDestroyAllWindows();
     exit(0);
+}
+
+void Robot::releaseAllImages()
+{
+    /* free all in image_buffers.h */
+
+    if ( visCvRaw !=NULL) cvReleaseImage(&visCvRaw );
+
+    if ( visCvDebug !=NULL) cvReleaseImage(&visCvDebug );
+
+    if ( visCvRedChannel !=NULL) cvReleaseImage(&visCvRedChannel );
+
+    if ( visCvGreenChannel !=NULL) cvReleaseImage(&visCvGreenChannel );
+
+    if ( visCvBlueChannel !=NULL) cvReleaseImage(&visCvBlueChannel );
+
+    if ( visCvHSV !=NULL) cvReleaseImage(&visCvHSV );
+
+    if ( visCvHue !=NULL) cvReleaseImage(&visCvHue );
+
+    if ( visCvSaturation !=NULL) cvReleaseImage(&visCvSaturation );
+
+    if ( visCvGrey !=NULL) cvReleaseImage(&visCvGrey );
+
+    if ( visCvThresh !=NULL) cvReleaseImage(&visCvThresh );
+
+    if ( visCvPath !=NULL) cvReleaseImage(&visCvPath );
+
+    if ( visCvHSVSmall !=NULL) cvReleaseImage(&visCvHSVSmall );
+
+    if ( visCvAdapt !=NULL) cvReleaseImage(&visCvAdapt );
+
+    if ( visCvAdaptSmall !=NULL) cvReleaseImage(&visCvAdaptSmall );
+
+    if ( visCvGreyBig !=NULL) cvReleaseImage(&visCvGreyBig );
+
+    if ( visCvRawTransform !=NULL) cvReleaseImage(&visCvRawTransform );
+
 }
 
 int Robot::init()
@@ -116,6 +155,7 @@ int Robot::init()
         /* 3 plane images (640x480) */
         visCvDebug = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
         visCvHSV = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+        visCvRawTransform = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
 
         /* 1 plane images (640x480) */
         visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
@@ -395,7 +435,8 @@ void Robot::updateGlutDisplay()
                       GL_BGR			,	//GLenum format,
                       GL_UNSIGNED_BYTE,	//GLenum type,
                       //visCvRaw->imageData //Image
-                      visCvDebug->imageData //Image
+                      //visCvDebug->imageData //Image
+                      visCvRawTransform->imageData //Image
                     );
 
         // double buffering
@@ -454,7 +495,8 @@ void Robot::updateGlutDisplay()
                       GL_BGR			,	//GLenum format,
                       GL_UNSIGNED_BYTE,	//GLenum type,
                       //visCvRaw->imageData //Image
-                      visCvDebug->imageData //Image
+                      //visCvDebug->imageData //Image
+                      visCvRawTransform->imageData //Image
                     );
 
         // double buffering
