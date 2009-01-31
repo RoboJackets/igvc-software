@@ -16,41 +16,41 @@
 class GuppyCam
 {
 public:
-	GuppyCam();
-	virtual ~GuppyCam();
+    GuppyCam();
+    virtual ~GuppyCam();
 
-	// camera objects
-	Camera::DCam *_dcam;
-	dc1394feature_t _feature;
-	dc1394camera_t *_camera;
+    // camera objects
+    Camera::DCam *_dcam;
+    dc1394feature_t _feature;
+    dc1394camera_t *_camera;
 
-	// connects to 1394 camera
-	int connect();
+    // connects to 1394 camera
+    int connect();
 
-	// flag for init capture connection
-	int camconnected;
+    // flag for init capture connection
+    int camconnected;
 
-	// returns 1 if connected to camera capture
-	int isValid();
+    // returns 1 if connected to camera capture
+    int isValid();
 
-	// grabs raw opencv image (into global visCvRaw)
-	bool GrabCvImage();
+    // grabs raw opencv image (into global visCvRaw)
+    bool GrabCvImage();
 
-	// grabs raw image and converts it into (global) visRaw
-	void GrabBuffer2DImage();
+    // grabs raw image and converts it into (global) visRaw
+    void GrabBuffer2DImage();
 
-	// camera settings
-	void setGain(int value);
-	void setShutter(int value);
-	void setGamma(int value);
-	void setWhiteBalance(uint32_t red, uint32_t blue);
+    // camera settings
+    void setGain(int value);
+    void setShutter(int value);
+    void setGamma(int value);
+    void setWhiteBalance(uint32_t red, uint32_t blue);
 
-	// sets gain and shutter to auto-adjust
-	void setAllAuto();
+    // sets gain and shutter to auto-adjust
+    void setAllAuto();
 
 
-	// loads values/settings for camera
-	void loadSettings();
+    // loads values/settings for camera
+    void loadSettings();
 
 };
 

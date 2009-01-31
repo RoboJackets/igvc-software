@@ -19,35 +19,35 @@ int glutwindow; // for glut
 int saveRawVideo; // flag for saving video - global because of glut use
 void* robot_thread_caller(void* arg)
 {
-	saveRawVideo=0; // don't save video yet
-	glRobot = (Robot*)arg; // assign pointer to static robot object for glut to use
-	static_cast<Robot*>(arg)->Go(); // start the robot
-	return NULL;
+    saveRawVideo=0; // don't save video yet
+    glRobot = (Robot*)arg; // assign pointer to static robot object for glut to use
+    static_cast<Robot*>(arg)->Go(); // start the robot
+    return NULL;
 }
 void robot_process_function_caller(void)
 {
-	glRobot->processFunc(); // for glutMainLoop
+    glRobot->processFunc(); // for glutMainLoop
 }
 void idleFunc(void)   // for refresheing glut window
 {
-	glutPostRedisplay();
+    glutPostRedisplay();
 }
 void keyboardFunc(unsigned char key, int x, int y)   // handles keyboard button presses
 {
-	switch (key)
-	{
-	case 'd':
-		printf("die! \n");
-		glRobot->destroy(); // kill the robot;
-		break;
-	case 's':
-		saveRawVideo = 1-saveRawVideo;
-		printf("video file \n");
-		break;
-	default:
-		printf("x,y %d,%d \n",x,y);
-		break;
-	}
+    switch (key)
+    {
+    case 'd':
+        printf("die! \n");
+        glRobot->destroy(); // kill the robot;
+        break;
+    case 's':
+        saveRawVideo = 1-saveRawVideo;
+        printf("video file \n");
+        break;
+    default:
+        printf("x,y %d,%d \n",x,y);
+        break;
+    }
 }
 /****************************************************************/
 
@@ -56,7 +56,7 @@ void keyboardFunc(unsigned char key, int x, int y)   // handles keyboard button 
 /* for selecting images to display in the opencv window */
 void trackbarHandler(int pos)
 {
-	printf("pos = %d \n", pos);
+    printf("pos = %d \n", pos);
 }
 /*****************************************************/
 
@@ -64,155 +64,155 @@ void trackbarHandler(int pos)
 // constructor
 Robot::Robot(const char* filename)
 {
-	// only the CVcam can load video...
+    // only the CVcam can load video...
 #if  USE_FIREWIRE_CAMERA
-	filename=NULL;
-	/* connect to the camera */
-	connectToCamera();
+    filename=NULL;
+    /* connect to the camera */
+    connectToCamera();
 #else
-	if (filename==NULL)
-		/* connect to the camera */
-		connectToCamera();
-	else
-		/* load a video */
-		camera.connect(0, filename);
+    if (filename==NULL)
+        /* connect to the camera */
+        connectToCamera();
+    else
+        /* load a video */
+        camera.connect(0, filename);
 #endif
 }
 
 Robot::~Robot()
 {
-	cvReleaseVideoWriter(&cvVideoWriter);
-	destroy();
+    cvReleaseVideoWriter(&cvVideoWriter);
+    destroy();
 }
 
 void Robot::destroy()
 {
-	/* clean up */
-	glutDestroyWindow(glutwindow);
-	cvDestroyAllWindows();
-	exit(0);
+    /* clean up */
+    glutDestroyWindow(glutwindow);
+    cvDestroyAllWindows();
+    exit(0);
 }
 
 int Robot::init()
 {
 
-	/* load xml settings - important to do first */
-	LoadXMLSettings();
+    /* load xml settings - important to do first */
+    LoadXMLSettings();
 
-	/* setup image selection bar */
-	int numberOfViews = 10; // important!!!
-	cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
+    /* setup image selection bar */
+    int numberOfViews = 10; // important!!!
+    cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
 
-	/* try to grab a frame to get image size */
-	if (!camera.GrabCvImage())
-		return 0; // fail
+    /* try to grab a frame to get image size */
+    if (!camera.GrabCvImage())
+        return 0; // fail
 
-	/* configure opencv display window */
-	cvResizeWindow( "display", visCvRaw->width, visCvRaw->height );
-	cvMoveWindow( "display", 10, 10 ); // position on screen
+    /* configure opencv display window */
+    cvResizeWindow( "display", visCvRaw->width, visCvRaw->height );
+    cvMoveWindow( "display", 10, 10 ); // position on screen
 
-	/* init all CV images here */
-	{
-		/* 3 plane images (640x480) */
-		visCvDebug = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-		visCvHSV = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+    /* init all CV images here */
+    {
+        /* 3 plane images (640x480) */
+        visCvDebug = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+        visCvHSV = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
 
-		/* 1 plane images (640x480) */
-		visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
-		visCvGreyBig = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+        /* 1 plane images (640x480) */
+        visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+        visCvGreyBig = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
 
-		/* 3 plane images (320x240) */
-		visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
+        /* 3 plane images (320x240) */
+        visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
 
-		/* 1 plane images (320x240) */
-		visCvHue = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvSaturation = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvGrey = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvPath = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvAdaptSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-	}
+        /* 1 plane images (320x240) */
+        visCvHue = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvSaturation = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvGrey = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvPath = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvAdaptSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+    }
 
-	/* set cleanup on exit */
-	atexit(Robot::destroy);
+    /* set cleanup on exit */
+    atexit(Robot::destroy);
 
-	/* init video writer */
-	//createVideoWriter();
+    /* init video writer */
+    //createVideoWriter();
 
-	/* setup vision module */
-	vp.init();
+    /* setup vision module */
+    vp.init();
 
-	/* setup slam processing module */
-	mapper.init();
+    /* setup slam processing module */
+    mapper.init();
 
-	/* connect to motors */
-	motors.SetupSerial();
+    /* connect to motors */
+    motors.SetupSerial();
 
-	/* success */
-	return 1;
+    /* success */
+    return 1;
 }
 
 void Robot::LoadXMLSettings()
 {
-	/* load xml file */
-	XmlConfiguration cfg("Config.xml");
+    /* load xml file */
+    XmlConfiguration cfg("Config.xml");
 
-	/* load settings */
-	{
-		/* k value = the % of new value to use */
-		_k = cfg.getFloat("_k");
-		/* see ConvertAllImageViews() in vision.cc */
-		trackbarVal = cfg.getInt("defaultView");
+    /* load settings */
+    {
+        /* k value = the % of new value to use */
+        _k = cfg.getFloat("_k");
+        /* see ConvertAllImageViews() in vision.cc */
+        trackbarVal = cfg.getInt("defaultView");
 
-	}
+    }
 
-	/* test */
-	{
-		if (_k==-1 || trackbarVal==-1)
-		{
-			printf("ERROR: Robot settings NOT loaded! Using DEFAULTS \n");
-			{
-				_k = .40;
-				trackbarVal = 1;
-			}
-		}
-		else
-		{
-			printf("Robot settings loaded \n");
-		}
-		printf("values: _k %f  view %d \n",_k,trackbarVal);
-	}
+    /* test */
+    {
+        if (_k==-1 || trackbarVal==-1)
+        {
+            printf("ERROR: Robot settings NOT loaded! Using DEFAULTS \n");
+            {
+                _k = .40;
+                trackbarVal = 1;
+            }
+        }
+        else
+        {
+            printf("Robot settings loaded \n");
+        }
+        printf("values: _k %f  view %d \n",_k,trackbarVal);
+    }
 
 }
 
 void Robot::Go()
 {
-	/*
-	 * This function initializes and stars the robot
-	 */
+    /*
+     * This function initializes and stars the robot
+     */
 
-	/* Quit if there is no camera */
-	if (!camera.isValid())
-		return;
+    /* Quit if there is no camera */
+    if (!camera.isValid())
+        return;
 
-	/* Try to grab a frame to get image size */
-	if (!camera.GrabCvImage())
-		return;
+    /* Try to grab a frame to get image size */
+    if (!camera.GrabCvImage())
+        return;
 
-	/* Setup video card processing */
-	initGlut();
+    /* Setup video card processing */
+    initGlut();
 
-	/* Quit if we can't initialize properly */
-	if (!init())
-		return;
+    /* Quit if we can't initialize properly */
+    if (!init())
+        return;
 
-	/* Init default view (debug=1) */
-	trackbarHandler( trackbarVal );
+    /* Init default view (debug=1) */
+    trackbarHandler( trackbarVal );
 
-	/*
-	 * Robot Loop!
-	 */
-	glutMainLoop(); // runs processFunc()
+    /*
+     * Robot Loop!
+     */
+    glutMainLoop(); // runs processFunc()
 
 }
 
@@ -221,118 +221,118 @@ void Robot::Go()
  */
 void Robot::processFunc()
 {
-	/*
-	 * This function should be just simple function calls.
-	 */
+    /*
+     * This function should be just simple function calls.
+     */
 
-	/*
-	 * Heading Format:
-	 * x = rotational speed ; range = (-128,127)
-	 * y = forward speed    ; range = (0,255)
-	 */
-
-
-	/* Get raw image */
-	camera.GrabCvImage();
+    /*
+     * Heading Format:
+     * x = rotational speed ; range = (-128,127)
+     * y = forward speed    ; range = (0,255)
+     */
 
 
-	/* Shove raw image into graphics card for some processing on the card */
-	updateGlutDisplay();
+    /* Get raw image */
+    camera.GrabCvImage();
 
 
-	/* Perform vision processing. */
-	vp.visProcessFrame(heading_vision);
+    /* Shove raw image into graphics card for some processing on the card */
+    updateGlutDisplay();
 
 
-	/* Average motor commands
-	 * k = % of new value to use */
-	heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
-	heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
+    /* Perform vision processing. */
+    vp.visProcessFrame(heading_vision);
 
 
-	/* Get sensor information */
-	//TODO
+    /* Average motor commands
+     * k = % of new value to use */
+    heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
+    heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
 
 
-	/* SLAM Processing */
-	mapper.genMap();
+    /* Get sensor information */
+    //TODO
 
 
-	/* Make decision */
-	//TODO:
+    /* SLAM Processing */
+    mapper.genMap();
 
 
-	/* Update displays */
-	vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
+    /* Make decision */
+    //TODO:
 
 
-	/* Drive Robot via motor commands (GO!) */
-	//TODO:
-	//motors.set_heading(heading_main.y, heading_main.x);
+    /* Update displays */
+    vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
 
-	/* Save raw image last */
-	//if (saveRawVideo)
-	//{
-	//	cvWriteFrame(cvVideoWriter,visCvRaw);
-	//}
+    /* Drive Robot via motor commands (GO!) */
+    //TODO:
+    //motors.set_heading(heading_main.y, heading_main.x);
 
 
-	/* Stats */
-	if(1)
-	{
+    /* Save raw image last */
+    //if (saveRawVideo)
+    //{
+    //	cvWriteFrame(cvVideoWriter,visCvRaw);
+    //}
+
+
+    /* Stats */
+    if (0)
+    {
         printf( "framerate: %.2f \n", elapsed_time() );
         start_timer(); // called second to time entire process (except first run)
         printf("                    heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
-	}
+    }
 
 }
 
 void Robot::startRobotThread(void* obj)
 {
-	sleep(1);
-	//pthread_create(&robotThread, NULL, robot_thread_caller, obj);
-	robot_thread_caller(obj);
+    sleep(1);
+    //pthread_create(&robotThread, NULL, robot_thread_caller, obj);
+    robot_thread_caller(obj);
 }
 
 void Robot::connectToCamera()
 {
-	if (!camera.connect())
-	{
-		printf("Camera connect failure \n");
-		printf("Try using sudo... \n");
-		exit(-1);
-	}
-	else
-	{
-		camera.loadSettings();
-		printf("Camera settings loaded \n");
-	}
+    if (!camera.connect())
+    {
+        printf("Camera connect failure \n");
+        printf("Try using sudo... \n");
+        exit(-1);
+    }
+    else
+    {
+        camera.loadSettings();
+        printf("Camera settings loaded \n");
+    }
 }
 
 void Robot::initGlut()
 {
-	// dummy args
-	int argc = 0;
-	char** argv;
+    // dummy args
+    int argc = 0;
+    char** argv;
 
-	// initialization
-	glutInit(&argc, argv);
-	glutInitWindowSize(visCvRaw->width, visCvRaw->height);
-	glutInitWindowPosition(800, 480); 				// position on screen
-	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
-	glutwindow = glutCreateWindow("Transform");
-	glutDisplayFunc(robot_process_function_caller); // the function glutMainLoop() runs
-	glutIdleFunc(idleFunc);							// refreshes the glut window
-	glutKeyboardFunc(keyboardFunc);
-	glEnable(GL_TEXTURE_RECTANGLE_ARB);
-	glGenTextures(1, &cameraImageTextureID);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
-	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    // initialization
+    glutInit(&argc, argv);
+    glutInitWindowSize(visCvRaw->width, visCvRaw->height);
+    glutInitWindowPosition(800, 480); 				// position on screen
+    glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
+    glutwindow = glutCreateWindow("Transform");
+    glutDisplayFunc(robot_process_function_caller); // the function glutMainLoop() runs
+    glutIdleFunc(idleFunc);							// refreshes the glut window
+    glutKeyboardFunc(keyboardFunc);
+    glEnable(GL_TEXTURE_RECTANGLE_ARB);
+    glGenTextures(1, &cameraImageTextureID);
+    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 }
 
@@ -341,125 +341,125 @@ void Robot::initGlut()
 void Robot::updateGlutDisplay()
 {
 
-	if (vp.DO_TRANSFORM)
-	{
-		/* perspective transform */
+    if (vp.DO_TRANSFORM)
+    {
+        /* perspective transform */
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
-		glEnable(GL_TEXTURE_RECTANGLE_ARB);
-		{
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_LIGHTING);
+        glEnable(GL_TEXTURE_RECTANGLE_ARB);
+        {
 
-			/* * * transform * * */
-			glLoadIdentity ();
-			glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity ();
-			/* * * * * * * * * * */
+            /* * * transform * * */
+            glLoadIdentity ();
+            glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity ();
+            /* * * * * * * * * * */
 
-			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
-			/* put data in card */
-			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+            glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+            /* put data in card */
+            glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
 
-			/* * * transform * * */
-			setPjMat();
-			/* * * * * * * * * * */
+            /* * * transform * * */
+            setPjMat();
+            /* * * * * * * * * * */
 
-			glBegin(GL_QUADS);
-			{
+            glBegin(GL_QUADS);
+            {
 
-				/* * * transform * * */
-				glTexCoord2i(0, 				0);
-				glVertex3f(-1,	-1,	0);
-				glTexCoord2i(visCvRaw->width, 	0);
-				glVertex3f( 1,	-1,	0);
-				glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
-				glVertex3f( 1,   1,	0);
-				glTexCoord2i(0, 				visCvRaw->height);
-				glVertex3f(-1,	 1,	0);
-				/* * * * * * * * * * */
+                /* * * transform * * */
+                glTexCoord2i(0, 				0);
+                glVertex3f(-1,	-1,	0);
+                glTexCoord2i(visCvRaw->width, 	0);
+                glVertex3f( 1,	-1,	0);
+                glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+                glVertex3f( 1,   1,	0);
+                glTexCoord2i(0, 				visCvRaw->height);
+                glVertex3f(-1,	 1,	0);
+                /* * * * * * * * * * */
 
-			}
-			glEnd();
+            }
+            glEnd();
 
-		}
-		glDisable(GL_TEXTURE_RECTANGLE_ARB);
+        }
+        glDisable(GL_TEXTURE_RECTANGLE_ARB);
 
-		/* get data from card */
-		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-		glReadPixels(	0				,	//GLint x,
-		              0				,	//GLint y,
-		              visCvRaw->width	,	//GLsizei width,
-		              visCvRaw->height,	//GLsizei height,
-		              GL_BGR			,	//GLenum format,
-		              GL_UNSIGNED_BYTE,	//GLenum type,
-		              //visCvRaw->imageData //Image
-		              visCvDebug->imageData //Image
-		            );
+        /* get data from card */
+        //glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+        glReadPixels(	0				,	//GLint x,
+                      0				,	//GLint y,
+                      visCvRaw->width	,	//GLsizei width,
+                      visCvRaw->height,	//GLsizei height,
+                      GL_BGR			,	//GLenum format,
+                      GL_UNSIGNED_BYTE,	//GLenum type,
+                      //visCvRaw->imageData //Image
+                      visCvDebug->imageData //Image
+                    );
 
-		// double buffering
-		glutSwapBuffers();
+        // double buffering
+        glutSwapBuffers();
 
-	}
-	else
-	{
-		/* no transformation */
+    }
+    else
+    {
+        /* no transformation */
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
-		glEnable(GL_TEXTURE_RECTANGLE_ARB);
-		{
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_LIGHTING);
+        glEnable(GL_TEXTURE_RECTANGLE_ARB);
+        {
 
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
-			gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			glMatrixMode(GL_MODELVIEW);
-			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
-			/* put data in card */
-			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-			glBegin(GL_QUADS);
-			{
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW);
+            glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+            /* put data in card */
+            glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+            glBegin(GL_QUADS);
+            {
 
-				// default perspective (upside down)
-				glTexCoord2i(0,					0);
-				glVertex2i(0, 				0);
-				glTexCoord2i(visCvRaw->width, 	0);
-				glVertex2i(visCvRaw->width, 0);
-				glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
-				glVertex2i(visCvRaw->width, visCvRaw->height);
-				glTexCoord2i(0, 				visCvRaw->height);
-				glVertex2i(0, 				visCvRaw->height);
-				// corrected perspective (normal)
-				//glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
-				//glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
-				//glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
-				//glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
+                // default perspective (upside down)
+                glTexCoord2i(0,					0);
+                glVertex2i(0, 				0);
+                glTexCoord2i(visCvRaw->width, 	0);
+                glVertex2i(visCvRaw->width, 0);
+                glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+                glVertex2i(visCvRaw->width, visCvRaw->height);
+                glTexCoord2i(0, 				visCvRaw->height);
+                glVertex2i(0, 				visCvRaw->height);
+                // corrected perspective (normal)
+                //glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
+                //glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
+                //glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
+                //glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
 
-			}
-			glEnd();
+            }
+            glEnd();
 
-		}
-		glDisable(GL_TEXTURE_RECTANGLE_ARB);
+        }
+        glDisable(GL_TEXTURE_RECTANGLE_ARB);
 
-		/* get data from card */
-		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-		glReadPixels(	0				,	//GLint x,
-		              0				,	//GLint y,
-		              visCvRaw->width	,	//GLsizei width,
-		              visCvRaw->height,	//GLsizei height,
-		              GL_BGR			,	//GLenum format,
-		              GL_UNSIGNED_BYTE,	//GLenum type,
-		              //visCvRaw->imageData //Image
-		              visCvDebug->imageData //Image
-		            );
+        /* get data from card */
+        //glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+        glReadPixels(	0				,	//GLint x,
+                      0				,	//GLint y,
+                      visCvRaw->width	,	//GLsizei width,
+                      visCvRaw->height,	//GLsizei height,
+                      GL_BGR			,	//GLenum format,
+                      GL_UNSIGNED_BYTE,	//GLenum type,
+                      //visCvRaw->imageData //Image
+                      visCvDebug->imageData //Image
+                    );
 
-		// double buffering
-		glutSwapBuffers();
-	}
+        // double buffering
+        glutSwapBuffers();
+    }
 
 } // end update glut
 
