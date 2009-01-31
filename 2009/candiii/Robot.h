@@ -56,6 +56,9 @@ public:
     // initializes various things before main loop (mainly CV images)
     int init();
 
+    // cleans up image buffers
+    void releaseAllImages();
+
     // runs the robot (loops processFunc)
     void Go();
 

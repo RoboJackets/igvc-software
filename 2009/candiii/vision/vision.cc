@@ -47,6 +47,9 @@ void Vision::visProcessFrame(Point2D<int>& goal)
         return;
     }
 
+    /* copy image to internal buffer for drawing */
+    cvCopy(visCvRawTransform,visCvDebug);
+
     /* Choose vision algorithm, and update goal.  */
     if (DO_ADAPTIVE)
     {

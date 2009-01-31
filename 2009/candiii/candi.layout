@@ -5,16 +5,16 @@
 		<Cursor position="628" topLine="0" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="5">
-		<Cursor position="6084" topLine="229" />
+		<Cursor position="1245" topLine="0" />
 	</File>
-	<File name="Robot.h" open="0" top="0" tabpos="3">
-		<Cursor position="2119" topLine="54" />
+	<File name="Robot.h" open="1" top="0" tabpos="8">
+		<Cursor position="305" topLine="0" />
 	</File>
 	<File name="main.cpp" open="0" top="0" tabpos="7">
 		<Cursor position="60" topLine="0" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="378" topLine="18" />
+	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="989" topLine="30" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="2">
 		<Cursor position="632" topLine="0" />
@@ -34,14 +34,14 @@
 	<File name="vision/PjMat.cc" open="0" top="0" tabpos="5">
 		<Cursor position="842" topLine="117" />
 	</File>
-	<File name="vision/image_buffers.cpp" open="0" top="0" tabpos="4">
-		<Cursor position="450" topLine="0" />
-	</File>
-	<File name="vision/image_buffers.h" open="0" top="0" tabpos="3">
+	<File name="vision/image_buffers.cpp" open="1" top="0" tabpos="7">
 		<Cursor position="88" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="0" tabpos="3">
-		<Cursor position="30742" topLine="333" />
+	<File name="vision/image_buffers.h" open="1" top="0" tabpos="6">
+		<Cursor position="809" topLine="0" />
+	</File>
+	<File name="vision/vision.cc" open="1" top="1" tabpos="3">
+		<Cursor position="1032" topLine="27" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="2">
 		<Cursor position="3918" topLine="94" />
