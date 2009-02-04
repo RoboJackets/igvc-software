@@ -43,6 +43,12 @@
 		<Unit filename="logging/bottime.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
+		<Unit filename="mapping/cvcorrImages.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="mapping/cvcorrImages.h">
+			<Option target="Debug" />
+		</Unit>
 		<Unit filename="mapping/mapgen.cpp">
 			<Option target="Debug" />
 		</Unit>
