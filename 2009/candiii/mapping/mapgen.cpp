@@ -80,6 +80,7 @@ int MapGen::getFeatures()
     /* returns 1 when we have matching points and can proceed,
      *  or returns 0 otherwise. */
 
+    int found;
     static int t=0;
 
     if (t==0)
@@ -87,7 +88,11 @@ int MapGen::getFeatures()
         // get first frame
 
         t++;
+
         cvCopy(visCvGrey, prev);
+
+        icvCreateFeaturePoints(prev, points1, status1);
+
         return 0; // need more frames
     }
     else
@@ -103,9 +108,7 @@ int MapGen::getFeatures()
 
         t=0;
 
-        int numcurr = icvCreateFeaturePoints(prev, points1, status1);
-
-        int found = icvFindCorrForGivenPoints(
+        found = icvFindCorrForGivenPoints(
                         prev,      /* Image 1 */
                         visCvGrey, /* Image 2 */
                         points1,
@@ -123,28 +126,6 @@ int MapGen::getFeatures()
 
             int x,y,a,b;
 
-            // draw prev image points
-//            for (int i=0; i<maxFeatures; i++)
-//            {
-//                if (cvGetReal1D(status1,i))
-//                {
-//                    x=cvmGet(points1,0,i);
-//                    y=cvmGet(points1,1,i);
-//                    cvCircle(prev, cvPoint( x,y ), 1, CV_RGB(0,255,0), 2, 8, 0);
-//                }
-//            }
-
-            // draw curr image points
-//            for (int i=0; i<maxFeatures; i++)
-//            {
-//                if (cvGetReal1D(status2,i))
-//                {
-//                    x=cvmGet(points2,0,i);
-//                    y=cvmGet(points2,1,i);
-//                    cvCircle(visCvGrey, cvPoint( x,y ), 2, CV_RGB(0,255,0), 2, 8, 0);
-//                }
-//            }
-
             // draw lines from prev to curr points in curr image
             for (int i=0; i<maxFeatures; i++)
             {
@@ -159,9 +140,8 @@ int MapGen::getFeatures()
             }
 
             // show images
-//            cvShowImage("prev",prev);
             cvShowImage("curr",visCvGrey);
-//            cvWaitKey(0);
+            //cvWaitKey(0);
         }
 
         if( found )
