@@ -14,7 +14,7 @@ int main(void) {
 
 	//int exp_packetnum = 1;
 	int i;
-	for( i = 0; i < 10000; i++){
+	for( i = 0; i < 1000; i++){
 		//cout << "Heading = " << encoders.getHeading() << endl;
 
 		DataPacket packet;
@@ -40,23 +40,22 @@ int main(void) {
 		usleep(.001*1e6);
 	}
 
-	DataPacket * pk = new DataPacket;
+	DataPacket pk;
 	encoders.arduinoInterface.arduinoResendPacket(40070, pk);
 
-	cout << *pk << endl;
+	cout << pk << endl;
 
 	std::cout << "resend pk debug extern" << std::endl;
-	std::cout << "data size: " << (int) pk->header.size << std::endl;
-	std::cout << "dataloc: " << (int) pk->data << std::endl;
+	std::cout << "data size: " << (int) pk.header.size << std::endl;
+	std::cout << "dataloc: " << (int) pk.data << std::endl;
 
-	if (pk->data != NULL){
-		if(pk->header.cmd == 'r'){
+	if (pk.data != NULL){
+		if(pk.header.cmd == 'r'){
 			DataPacket::encoder_reply_t parsed_data;
-			memcpy(&parsed_data, pk->data, sizeof(DataPacket::encoder_reply_t));
+			memcpy(&parsed_data, pk.data, sizeof(DataPacket::encoder_reply_t));
 			cout << parsed_data << "\n\n";
 		}
 	}
-	delete pk;
 
 
 
