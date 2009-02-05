@@ -325,12 +325,12 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 	//Get the Response
 	byte * headerloc = (byte*) &(out_pk_rx->header);
 	readFully(arduinoFD, headerloc, PACKET_HEADER_SIZE);
-	rx_num++;
 
-	if(pk_rx.header.packetnum != rx_num){
+	if(out_pk_rx->header.packetnum != rx_num){
+		std::cout << "dropped packet - flushing link and requesting" << std::endl;
 		DataPacket pk_rsnd;
 		serialFlush(arduinoFD);
-			if(arduinoResendPacket(rx_num, &pk_rsnd))
+			if(arduinoResendPacket(rx_num, pk_rsnd))
 			{
 				*out_pk_rx = pk_rsnd;
 			}
@@ -340,16 +340,23 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 			}
 	}
 
+	//we have succesfully read the header, incr counter
+	rx_num++;
+
+	//parse the icoming packet, test if it is an error packet
 	if(out_pk_rx->header.cmd == 0xFF ){
 		byte errorbuff[out_pk_rx->header.size];
 		readFully(arduinoFD, errorbuff, out_pk_rx->header.size);
-		int errorcode;
-		memcpy(&errorcode, errorbuff, sizeof(int) );
+		byte errorcode;
+		memcpy(&errorcode, errorbuff, 1 );
 		switch(errorcode){
 			case DROPPED_PACKET:
 			{
+				std::cout << "arduino requested dropped packet - resending" << std::endl;
 				DataPacket pk;
-				//pk = getSavedPacket();
+				int pknum;
+				memcpy(&pknum, errorbuff+1, sizeof(int) );
+				pk = getSavedPacket(pknum);
 				writeFully(arduinoFD, &(pk.header), PACKET_HEADER_SIZE);
 				writeFully(arduinoFD, pk.data, pk.header.size);
 				break;
@@ -380,7 +387,7 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 
 
 //true on error
-bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket*& pk_out){
+bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket& pk_out){
 
 	DataPacket pk_tx;
 	pk_tx.header.packetnum = tx_num;
@@ -405,7 +412,7 @@ bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket*& pk_out){
 	//std::cout << "header\n" << pk_rx;
 
 	switch(pk_rx.header.cmd){
-		case ARDUINO_ERROR:
+		case ARDUINO_ERROR_RESP:
 		{
 			int errormsg;
 			memcpy(&errormsg, pk_rx.data, sizeof(int));
@@ -432,22 +439,22 @@ bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket*& pk_out){
 		}
 		case ARDUINO_RSND_PK_RESP:
 		{
-			memcpy(&(pk_out->header), pk_rx.data, PACKET_HEADER_SIZE);
-			if(pknum != pk_out->header.packetnum)
+			memcpy(&(pk_out.header), pk_rx.data, PACKET_HEADER_SIZE);
+			if(pknum != pk_out.header.packetnum)
 			{
 				return true;
 			}
 
-			pk_out->data = new byte[pk_out->header.size];
-			memcpy(pk_out->data, pk_rx.data + PACKET_HEADER_SIZE, pk_out->header.size);
+			pk_out.data = new byte[pk_out.header.size];
+			memcpy(pk_out.data, pk_rx.data + PACKET_HEADER_SIZE, pk_out.header.size);
 
 			std::cout << "resend pk debug intern" << std::endl;
-			std::cout << "data size: " << (int) pk_out->header.size << std::endl;
-			std::cout << "dataloc: " << (int) pk_out->data << std::endl;
+			std::cout << "data size: " << (int) pk_out.header.size << std::endl;
+			std::cout << "dataloc: " << (int) pk_out.data << std::endl;
 
 			DataPacket::encoder_reply_t parsed_data;
-			memcpy(&parsed_data, pk_out->data, sizeof(DataPacket::encoder_reply_t));
-			std::cout << pk_out->header << std::endl;
+			memcpy(&parsed_data, pk_out.data, sizeof(DataPacket::encoder_reply_t));
+			std::cout << pk_out.header << std::endl;
 			std::cout << parsed_data << "\n\n";
 
 			break;
