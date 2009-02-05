@@ -40,9 +40,9 @@
 TARGET = ArduinoMotorEncoders2
 PRG = "ArduinoMotorEncoders2"
 INSTALL_DIR = /home/nebousuru/Desktop/arduino-0011
-PORT = /dev/ttyUSB0
+PORT = usb
 UPLOAD_RATE = 19200
-AVRDUDE_PROGRAMMER = stk500v1
+AVRDUDE_PROGRAMMER = dragon_isp
 MCU = atmega168
 MCU_TARGET = atmega168
 F_CPU = 16000000
@@ -66,9 +66,9 @@ MAKEFILE = Makefile
 # Debugging format.
 # Native formats for AVR-GCC's -g are stabs [default], or dwarf-2.
 # AVR (extended) COFF requires stabs, plus an avr-objcopy run.
-DEBUG = stabs
+DEBUG = dwarf-2
 
-OPT = s
+OPT = 0
 
 # Place -D or -U options here
 CDEFS = -DF_CPU=$(F_CPU)
@@ -90,7 +90,7 @@ CTUNING = -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 #CEXTRA = -Wa,-adhlns=$(<:.c=.lst)
 
 CFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CSTANDARD) $(CEXTRA)
-CXXFLAGS = $(CDEFS) $(CINCS) -O$(OPT)
+CXXFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT)
 ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
 LDFLAGS = -lm
 
@@ -259,7 +259,7 @@ depend:
 # debugging-related targets
 
 ddd: gdbinit
-	ddd --debugger "avr-gdb -x $(GDBINITFILE)"
+	ddd --debugger avr-gdb -x setup
 
 gdbserver: gdbinit
 	simulavr --device $(MCU_TARGET) --gdbserver
@@ -269,8 +269,7 @@ gdbinit: $(GDBINITFILE)
 $(GDBINITFILE): $(PRG).hex
 	@echo "file $(PRG).elf" > $(GDBINITFILE)
 	
-	@echo "target remote localhost:1212" \
-		                >> $(GDBINITFILE)
+	@echo "target remote localhost:1212" >> $(GDBINITFILE)
 	
 	@echo "load"        >> $(GDBINITFILE) 
 	@echo "break main"  >> $(GDBINITFILE)
