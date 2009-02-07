@@ -20,9 +20,9 @@
 #ifndef USE_AUX_CAM_SENSORS
 //volatile double u=.4;volatile double v=.4;	// hfov/2 and vfov/2 respectively
 volatile double h=1;					// height of camera
-volatile double x=-M_PI/2+1.25;
+volatile double x=-M_PI/2+1.25;   // 1.25 default (how much up from straight down we are, in radians)
 volatile double y=M_PI;
-volatile  double z=M_PI;	//euler rotations about given axes
+volatile double z=M_PI;	//euler rotations about given axes
 #else
 #	include "PjDefs.c"
 #endif

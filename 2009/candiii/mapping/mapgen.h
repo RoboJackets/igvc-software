@@ -43,8 +43,8 @@ public:
     IplImage* worldmap;
     void printMatrix(CvMat* matrix);
 
-CvPoint2D32f pts1[4];
-CvPoint2D32f pts2[4];
+CvPoint2D32f pts1[3];
+CvPoint2D32f pts2[3];
 
 
 
