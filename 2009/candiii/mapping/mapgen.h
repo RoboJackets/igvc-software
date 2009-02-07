@@ -36,7 +36,17 @@ public:
     CvMat* status1;
     CvMat* status2;
     IplImage* prev;
+    int processFeatures();
     /**/
+    CvMat* mat_CamToCam;
+    CvMat* mat_CamToWorld;
+    IplImage* worldmap;
+    void printMatrix(CvMat* matrix);
+
+CvPoint2D32f pts1[4];
+CvPoint2D32f pts2[4];
+
+
 
 };
 
