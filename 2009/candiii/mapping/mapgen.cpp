@@ -2,8 +2,11 @@
 #include "image_buffers.h"
 #include <stdio.h>
 #include "XmlConfiguration.h"
+#include <stdlib.h>
 
-#define DEBUG 1
+
+#define NUMFRAMESBACK 4
+
 
 MapGen::MapGen()
 {
@@ -62,15 +65,19 @@ void MapGen::genMap()
     cvCvtColor(visCvRawTransform, visCvGreyBig, CV_BGR2GRAY);
     cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
 
-    /* get features from the greyscaled raw image.
-     *  return if we don't have any */
-    if( !getFeatures() )
+    //cvSmooth(visCvGrey,visCvGrey,CV_MEDIAN,3,0,0,0);
+    //cvDilate( visCvGrey, visCvGrey, NULL, 1 );
+    //cvErode( visCvGrey, visCvGrey, NULL, 1 );
+
+    /* get matching features from 2 greyscaled raw images.
+     *  don't continue if we don't have any */
+    if ( !getFeatures() )
     {
         return;
     }
 
-    /* process features */
-    // TODO:
+    /* process features found */
+    //processFeatures(); // WORK IN PROGRESS!
 
 
 }
@@ -80,71 +87,66 @@ int MapGen::getFeatures()
     /* returns 1 when we have matching points and can proceed,
      *  or returns 0 otherwise. */
 
-    int found;
+    int found, i;
     static int t=0;
 
     if (t==0)
     {
-        // get first frame
-
         t++;
 
+        /* get first frame and its features */
         cvCopy(visCvGrey, prev);
+        found = icvCreateFeaturePoints(prev, points1, status1);
 
-        icvCreateFeaturePoints(prev, points1, status1);
+        if (found==0)
+        {
+            t--; // try again
+        }
 
         return 0; // need more frames
     }
     else
     {
-        // wait
-
         t++;
+        /* wait NUMFRAMESBACK */
     }
 
-    if (t==4)
+    if (t==NUMFRAMESBACK)
     {
-        // now match points
-
         t=0;
 
+        /* now get current frame and match features with previous */
         found = icvFindCorrForGivenPoints(
-                        prev,      /* Image 1 */
-                        visCvGrey, /* Image 2 */
-                        points1,
-                        status1,
-                        points2,
-                        status2,
-                        1,/*Use fundamental matrix to filter points */
-                        0.5);/* Threshold for good points in filter */
+                    prev,      /* Image 1 */
+                    visCvGrey, /* Image 2 */
+                    points1,
+                    status1,
+                    points2,
+                    status2,
+                    1,/*Use fundamental matrix to filter points */
+                    0.3);/* Threshold for (dist b/w) good points in filter (usually 0.5)*/
 
+        printf(" matching: %d \n",found);
 
-        /* debug display */
-        if(DEBUG)
+        int x,y,a,b;
+
+        /* draw lines from prev to curr points in curr image */
+        for (i=0; i<maxFeatures; i++)
         {
-            printf("matching: %d \n",found);
-
-            int x,y,a,b;
-
-            // draw lines from prev to curr points in curr image
-            for (int i=0; i<maxFeatures; i++)
+            if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
             {
-                if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
-                {
-                    a=cvmGet(points1,0,i);
-                    b=cvmGet(points1,1,i);
-                    x=cvmGet(points2,0,i);
-                    y=cvmGet(points2,1,i);
-                    cvLine(visCvGrey, cvPoint( x,y ), cvPoint( a,b ), CV_RGB(0,255,0), 3, 8, 0);
-                }
+                a=cvmGet(points1,0,i);
+                b=cvmGet(points1,1,i);
+                x=cvmGet(points2,0,i);
+                y=cvmGet(points2,1,i);
+                cvLine(visCvGrey, cvPoint( x,y ), cvPoint( a,b ), CV_RGB(0,0,0), 3, 8, 0);
             }
-
-            // show images
-            cvShowImage("curr",visCvGrey);
-            //cvWaitKey(0);
         }
 
-        if( found )
+        /* show image with points drawn */
+        cvShowImage("curr",visCvGrey);
+
+        if ( found )
         {
             return 1; // we have enough frames/points
         }
@@ -158,6 +160,123 @@ int MapGen::getFeatures()
 
 }
 
+int MapGen::processFeatures()
+{
+    /* WORK IN PROGRESS! */
+    /*  map each new camera frame into a world frame */
+
+    static int map=0;
+    int i;
+    int x,y,a,b;
+    int aff_count = 0;
+
+    /* get 4 matching point pairs that are close to the robot (bottom 1/3 of image)
+     *  and draw the chosen points */
+    int min = visCvGrey->height*(2.0/3.0);
+    for (i=maxFeatures-1; i>=0; i--)
+    {
+        if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
+        {
+            a=cvmGet(points1,0,i);
+            b=cvmGet(points1,1,i);
+            x=cvmGet(points2,0,i);
+            y=cvmGet(points2,1,i);
+
+            if ( (aff_count<4) && (y>min) )
+            {
+
+                cvCircle(visCvGrey, cvPoint( x,y ), 1, CV_RGB(255,255,255), 3, 8, 0);
+                cvCircle(visCvGrey, cvPoint( a,b ), 1, CV_RGB(255,255,255), 3, 8, 0);
+                pts2[aff_count].x = x;
+                pts2[aff_count].y = y;
+                pts1[aff_count].x = a;
+                pts1[aff_count].y = b;
+                aff_count++;
+            }
+        }
+    }
+
+    /* show image with points drawn */
+    cvShowImage("curr",visCvGrey);
+
+    CvMat* temp;
+    temp = cvCreateMat(2,3,CV_32FC1);
+
+    /* use the point pairs for getting the camera-camera affine transformation */
+    if (aff_count>3)
+    {
+        cvGetAffineTransform(pts2,pts1,temp);
+    }
+    else
+    {
+        return 0; // need 4 point pairs
+    }
+
+    /* copy 2x3 matrix result into 3x3 matrix */
+    cvZero(mat_CamToCam);
+    for (i=0; i<3; i++)
+    {
+        cvmSet(mat_CamToCam, 0, i, cvmGet(temp, 0 ,i) );
+        cvmSet(mat_CamToCam, 1, i, cvmGet(temp, 1 ,i) );
+    }
+    cvmSet(mat_CamToCam, 2, 2, 1);
+    cvReleaseMat(&temp);
+
+    printMatrix(mat_CamToCam);
+
+    /* continuously mulitply each new c-c matrix to get new c-w matrix,
+     *  just not on the first run */
+    if (map)
+    {
+        cvMatMul(mat_CamToWorld,mat_CamToCam,mat_CamToWorld);
+    }
+    map=1;
+
+//        cvSetReal2D( mat_CamToWorld, 0, 0, 0.1 );
+//        cvSetReal2D( mat_CamToWorld, 0, 1, 0 );
+//        cvSetReal2D( mat_CamToWorld, 1, 1, 0.1 );
+//        cvSetReal2D( mat_CamToWorld, 1, 0, 0 );
+//        cvSetReal2D( mat_CamToWorld, 2, 2, 1 );
+
+    printMatrix(mat_CamToWorld);
+
+    /* draw all the found feature points into the world map */
+//        for (i=0; i<maxFeatures; i++)
+//        {
+//            if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
+//            {
+//                x= cvmGet(mat_CamToWorld,0,0) * cvmGet(points2,0,i) +
+//                        cvmGet(mat_CamToWorld,0,1) * cvmGet(points2,1,i) +
+//                        cvmGet(mat_CamToWorld,0,2);
+//                y= cvmGet(mat_CamToWorld,1,1) * cvmGet(points2,1,i) +
+//                        cvmGet(mat_CamToWorld,1,0) * cvmGet(points2,0,i) +
+//                        cvmGet(mat_CamToWorld,1,2);
+//
+//                cvCircle(worldmap, cvPoint( x,y ), 1, CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
+//            }
+//        }
+
+    /* draw a line from the center bottom of camera frame to center top
+     *  to show the orientation of the robot in the world map */
+    x= cvmGet(mat_CamToWorld,0,0) * visCvGrey->width/2 +
+       cvmGet(mat_CamToWorld,0,1) * (visCvGrey->height-2) +
+       cvmGet(mat_CamToWorld,0,2);
+    y= cvmGet(mat_CamToWorld,1,0) * visCvGrey->width/2 +
+       cvmGet(mat_CamToWorld,1,1) * (visCvGrey->height-2) +
+       cvmGet(mat_CamToWorld,1,2);
+    a= cvmGet(mat_CamToWorld,0,0) * visCvGrey->width/2 +
+       cvmGet(mat_CamToWorld,0,1) * 1 +
+       cvmGet(mat_CamToWorld,0,2);
+    b= cvmGet(mat_CamToWorld,1,0) * visCvGrey->width/2 +
+       cvmGet(mat_CamToWorld,1,1) * 1 +
+       cvmGet(mat_CamToWorld,1,2);
+    cvLine(worldmap, cvPoint( x,y ), cvPoint( a,b ), CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
+
+    /* display world view image */
+    cvShowImage("worldmap",worldmap);
+
+    return 0;
+}
 
 /* DEPRICATED */
 //void MapGen::getFeatures()
@@ -251,6 +370,7 @@ void MapGen::init()
     points2 = cvCreateMat(2,maxFeatures,CV_32F);
     status1 = cvCreateMat(1,maxFeatures,CV_8SC1);
     status2 = cvCreateMat(1,maxFeatures,CV_8SC1);
+
     prev = cvCreateImage(cvGetSize(visCvGrey), 8, 1);
 
     cvZero(points1);
@@ -259,12 +379,50 @@ void MapGen::init()
     cvZero(status2);
 
     /* debug windows */
-    if(DEBUG)
-    {
-        //cvNamedWindow("prev");
-        cvNamedWindow("curr");
-    }
+    cvNamedWindow("curr");
+
+    //==============================================================
+
+    /* world map stuff */
+
+    int dx = 400;
+    int dy = 400;
+    worldmap = cvCreateImage( cvSize( dx*2,dy*2 ), 8, 3 );
+    cvZero(worldmap);
+
+    mat_CamToCam = cvCreateMat(3,3,CV_32F);
+    mat_CamToWorld = cvCreateMat(3,3,CV_32F);
+
+    double k = 0.1; // scale factor
+    // k  0  dx
+    // 0  k  dy
+    // 0  0  1
+    cvZero(mat_CamToWorld);
+    cvSetReal2D( mat_CamToWorld, 0, 0, k );
+    cvSetReal2D( mat_CamToWorld, 0, 2, dx );
+    cvSetReal2D( mat_CamToWorld, 1, 1, k );
+    cvSetReal2D( mat_CamToWorld, 1, 2, dy );
+    cvSetReal2D( mat_CamToWorld, 2, 2, 1 );
+
+    printMatrix(mat_CamToWorld);
+
+    //cvNamedWindow("worldmap");
+
+    //==============================================================
 
 }
 
-
+void MapGen::printMatrix(CvMat* matrix)
+{
+    printf("\n");
+    int row,col;
+    for ( row = 0; row < 3; row++ )
+    {
+        for ( col = 0; col < 3; col++ )
+        {
+            printf(" %.2f ",(double)cvmGet( matrix, row, col ));
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
