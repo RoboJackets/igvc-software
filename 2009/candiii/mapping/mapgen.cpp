@@ -139,7 +139,7 @@ int MapGen::getFeatures()
                 b=cvmGet(points1,1,i);
                 x=cvmGet(points2,0,i);
                 y=cvmGet(points2,1,i);
-                cvLine(visCvGrey, cvPoint( x,y ), cvPoint( a,b ), CV_RGB(0,0,0), 3, 8, 0);
+                cvLine(visCvGrey, cvPoint( x,y ), cvPoint( a,b ), CV_RGB(0,0,0), 2, 8, 0);
             }
         }
 
@@ -170,19 +170,19 @@ int MapGen::processFeatures()
     int x,y,a,b;
     int aff_count = 0;
 
-    /* get 4 matching point pairs that are close to the robot (bottom 1/3 of image)
+    /* get 3 matching point pairs that are close to the robot (bottom 1/3 of image)
      *  and draw the chosen points */
-    int min = visCvGrey->height*(2.0/3.0);
+    int min = visCvGrey->height * (2.0/3.0);
     for (i=maxFeatures-1; i>=0; i--)
     {
         if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
         {
             a=cvmGet(points1,0,i);
             b=cvmGet(points1,1,i);
-            x=cvmGet(points2,0,i);
-            y=cvmGet(points2,1,i);
+            x=cvmGet(points2,0,i); //most recent
+            y=cvmGet(points2,1,i); //most recent
 
-            if ( (aff_count<3) && (y>min) )
+            if ( (aff_count<3) && (y>min) /*&& (y<b)*/ )
             {
 
                 cvCircle(visCvGrey, cvPoint( x,y ), 1, CV_RGB(255,255,255), 3, 8, 0);
@@ -222,18 +222,24 @@ int MapGen::processFeatures()
     cvmSet(mat_CamToCam, 2, 2, 1);
     cvReleaseMat(&temp);
 
+    /* crude check for errors */
+    if( cvDet(mat_CamToCam) == 0 )
+    {
+        return 0; // bad matrix
+    }
 
 //    /* normalize affine transform, but not translation */
-//    CvMat* mask;
-//    mask = cvCreateMat(3,3,CV_8SC1);
-//    cvZero(mask);
-//    cvSetReal2D(mask, 0, 0, 1);
-//    cvSetReal2D(mask, 0, 1, 1);
-//    cvSetReal2D(mask, 1, 0, 1);
-//    cvSetReal2D(mask, 1, 1, 1);
-//    cvNormalize(mat_CamToCam,mat_CamToCam,1,0,CV_L2,mask);
-//    cvReleaseMat(&mask);
-
+//    {
+//        CvMat* mask;
+//        mask = cvCreateMat(3,3,CV_8SC1);
+//        cvZero(mask);
+//        cvSetReal2D(mask, 0, 0, 1);
+//        cvSetReal2D(mask, 0, 1, 1);
+//        cvSetReal2D(mask, 1, 0, 1);
+//        cvSetReal2D(mask, 1, 1, 1);
+//        cvNormalize(mat_CamToCam,mat_CamToCam,1,0,CV_L2,mask);
+//        cvReleaseMat(&mask);
+//    }
 
     printMatrix(mat_CamToCam);
 
@@ -246,21 +252,22 @@ int MapGen::processFeatures()
     map=1;
 
 
-    /* normalize affine transform, but not translation */
-    CvMat* mask;
-    mask = cvCreateMat(3,3,CV_8SC1);
-    cvZero(mask);
-    cvSetReal2D(mask, 0, 0, 1);
-    cvSetReal2D(mask, 0, 1, 1);
-    cvSetReal2D(mask, 1, 0, 1);
-    cvSetReal2D(mask, 1, 1, 1);
-    cvNormalize(mat_CamToWorld,mat_CamToWorld, 1, 0,CV_L2,mask);
-    cvReleaseMat(&mask);
-
+//    /* normalize world transform, but not translation */
+//    {
+//        CvMat* mask2;
+//        mask2 = cvCreateMat(3,3,CV_8SC1);
+//        cvZero(mask2);
+//        cvSetReal2D(mask2, 0, 0, 1);
+//        cvSetReal2D(mask2, 0, 1, 1);
+//        cvSetReal2D(mask2, 1, 0, 1);
+//        cvSetReal2D(mask2, 1, 1, 1);
+//        cvNormalize(mat_CamToWorld,mat_CamToWorld, 1, 0,CV_L2,mask2);
+//        cvReleaseMat(&mask2);
+//    }
 
     printMatrix(mat_CamToWorld);
 
-    /* draw all the found feature points into the world map */
+//    /* draw all the found feature points into the world map */
 //        for (i=0; i<maxFeatures; i++)
 //        {
 //            if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
@@ -294,6 +301,8 @@ int MapGen::processFeatures()
 
     /* display world view image */
     cvShowImage("worldmap",worldmap);
+
+   // cvWaitKey(0);
 
     return 0;
 }
