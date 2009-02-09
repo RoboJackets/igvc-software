@@ -1247,7 +1247,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 
     /* shrink visCvAdapt img to 320x240 */
     cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
-    cvErode(visCvThresh, visCvThresh, NULL, 1);
+    cvErode(visCvThresh, visCvThresh, NULL, 1); // 1 or 2
 
     /* generate visCvPath */
     visGenPath(visCvThresh);

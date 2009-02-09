@@ -42,6 +42,7 @@ public:
     CvMat* mat_CamToWorld;
     IplImage* worldmap;
     void printMatrix(CvMat* matrix);
+    int numFramesBack;
 
 CvPoint2D32f pts1[3];
 CvPoint2D32f pts2[3];
