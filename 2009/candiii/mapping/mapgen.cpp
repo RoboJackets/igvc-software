@@ -5,8 +5,6 @@
 #include <stdlib.h>
 
 
-#define NUMFRAMESBACK 5
-
 
 MapGen::MapGen()
 {
@@ -65,9 +63,18 @@ void MapGen::genMap()
     cvCvtColor(visCvRawTransform, visCvGreyBig, CV_BGR2GRAY);
     cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
 
-    //cvSmooth(visCvGrey,visCvGrey,CV_MEDIAN,3,0,0,0);
-    //cvDilate( visCvGrey, visCvGrey, NULL, 1 );
-    //cvErode( visCvGrey, visCvGrey, NULL, 1 );
+
+    /* testing image transforms for better feature extraction */
+    {
+        //cvPyrDown(visCvGreyBig,visCvGrey);
+        //cvSmooth(visCvGrey,visCvGrey,CV_MEDIAN,3,0,0,0);
+        //cvDilate( visCvGrey, visCvGrey, NULL, 3 );
+        //cvErode( visCvGrey, visCvGrey, NULL, 1 );
+        //cvSmooth(visCvGrey,visCvGrey,CV_MEDIAN,3,0,0,0);
+        //cvSobel(visCvGrey,visCvGrey, 1, 1, 3);
+        //cvLaplace( visCvGrey, visCvGrey, 3 );
+    }
+
 
     /* get matching features from 2 greyscaled raw images.
      *  don't continue if we don't have any */
@@ -77,7 +84,7 @@ void MapGen::genMap()
     }
 
     /* process features found */
-    //processFeatures(); // WORK IN PROGRESS!
+    processFeatures(); // WORK IN PROGRESS!
 
 
 }
@@ -111,7 +118,7 @@ int MapGen::getFeatures()
         /* wait NUMFRAMESBACK */
     }
 
-    if (t==NUMFRAMESBACK)
+    if (t==numFramesBack)
     {
         t=0;
 
@@ -363,6 +370,7 @@ void MapGen::LoadXMLSettings()
     {
         maxFeatures = cfg.getInt("maxFeatures");
         minFeatureDistance = cfg.getInt("minFeatureDistance");
+        numFramesBack = cfg.getInt("numFramesBack");
 
     }
 
@@ -374,6 +382,7 @@ void MapGen::LoadXMLSettings()
             {
                 maxFeatures = 64;
                 minFeatureDistance = 10;
+                numFramesBack = 4;
 
             }
         }
