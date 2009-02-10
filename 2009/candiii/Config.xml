@@ -31,9 +31,8 @@
     <defaultView>5</defaultView>
 
     <!-- Mapping Settings -->
-    <maxFeatures>24</maxFeatures>               <!-- max number for feature corners to find -->
-    <minFeatureDistance>10</minFeatureDistance> <!-- min pixel spacing in between two features -->
-    <numFramesBack>4</numFramesBack>
+    <maxFeatures>30</maxFeatures>               <!-- max number for feature corners to find -->
+    <numFramesBack>5</numFramesBack>
 
 
 

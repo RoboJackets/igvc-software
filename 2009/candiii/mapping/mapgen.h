@@ -22,7 +22,7 @@ public:
     //void getFeatures();
     void LoadXMLSettings();
     int maxFeatures;
-    int minFeatureDistance;
+
     IplImage* eig_image;
     IplImage* temp_image;
     int _init_;
