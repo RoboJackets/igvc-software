@@ -130,28 +130,71 @@ int MapGen::getFeatures()
                     status1,
                     points2,
                     status2,
-                    1,/*Use fundamental matrix to filter points */
-                    0.1);/* Threshold for (dist b/w) good points in filter (usually 0.5)*/
+                    1,/* Use fundamental matrix to filter points? */
+                    5);/* Threshold for (dist b/w) good points in filter (usually 0.5 or 1.0)*/
 
         printf(" matching: %d \n",found);
 
         int x,y,a,b;
+        int dx,dy;
+        int avgdx=0;
+        int avgdy=0;
+        int good=0;
 
         /* draw lines from prev to curr points in curr image */
         for (i=0; i<maxFeatures; i++)
         {
+            /* only look at points in both images */
             if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
             {
                 a=cvmGet(points1,0,i);
                 b=cvmGet(points1,1,i);
                 x=cvmGet(points2,0,i);
                 y=cvmGet(points2,1,i);
-                cvLine(visCvGrey, cvPoint( x,y ), cvPoint( a,b ), CV_RGB(0,0,0), 2, 8, 0);
+
+                /* don't look in the horizon */
+                if(y>visCvGrey->height/4)
+                {
+                    /* calculate slope and extend lines */
+                    dx = x-a;
+                    dy = y-b;
+                    avgdx += dx;
+                    avgdy += dy;
+                    good++;
+                    dx*=2;  // extend by X
+                    dy*=2;  // extend by X
+                    cvLine(visCvGrey, cvPoint( a-dx,b-dy ), cvPoint( x+dx,y+dy ), CV_RGB(0,0,0), 2, 8, 0);
+                }
+
+                /* draw all matches */
+                //cvLine(visCvGrey, cvPoint( a,b ), cvPoint( x,y ), CV_RGB(0,0,0), 2, 8, 0);
             }
+        }
+
+        /* draw global direction vector in center (white) */
+        if(good)
+        {
+            avgdx/=good;
+            avgdy/=good;
+            avgdx*=3;   // extend by X
+            avgdy*=3;   // extend by X
+            cvLine(visCvGrey,
+                cvPoint( visCvGrey->width/2-avgdx, visCvGrey->height/2-avgdy ),
+                cvPoint( visCvGrey->width/2+avgdx, visCvGrey->height/2+avgdy ),
+                CV_RGB(250,250,250), 3, 8, 0);
+            //printf("%d, %d \n",avgdx,avgdy);
         }
 
         /* show image with points drawn */
         cvShowImage("curr",visCvGrey);
+
+
+        /* check status */
+
+        if(avgdx==0 || avgdy==0)
+        {
+            return 0; // crappy slopes
+        }
 
         if ( found )
         {
@@ -179,9 +222,10 @@ int MapGen::processFeatures()
 
     /* get 3 matching point pairs that are close to the robot (bottom 1/3 of image)
      *  and draw the chosen points */
-    int min = visCvGrey->height * (2.0/3.0);
+    int min =  visCvGrey->height * (2.0/3.0);
     for (i=maxFeatures-1; i>=0; i--)
     {
+        /* only look at points in both images */
         if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
         {
             a=cvmGet(points1,0,i);
@@ -189,9 +233,9 @@ int MapGen::processFeatures()
             x=cvmGet(points2,0,i); //most recent
             y=cvmGet(points2,1,i); //most recent
 
+            /* gather points for affine calculation */
             if ( (aff_count<3) && (y>min) /*&& (y<b)*/ )
             {
-
                 cvCircle(visCvGrey, cvPoint( x,y ), 1, CV_RGB(255,255,255), 3, 8, 0);
                 cvCircle(visCvGrey, cvPoint( a,b ), 1, CV_RGB(255,255,255), 3, 8, 0);
                 pts2[aff_count].x = x;
@@ -311,55 +355,8 @@ int MapGen::processFeatures()
 
    // cvWaitKey(0);
 
-    return 0;
+    return 1;
 }
-
-/* DEPRICATED */
-//void MapGen::getFeatures()
-//{
-//    /* get and rezise raw image to grayscale */
-//    cvCvtColor(visCvRaw, visCvGreyBig, CV_BGR2GRAY);
-//    cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
-//    /* accuracy level */
-//    double quality = 0.01; // 0.01;
-//    /* extract feature points from image into 'corners' point array */
-//    cvGoodFeaturesToTrack(
-//        visCvGrey,   //const CvArr* image, source
-//        eig_image,   //CvArr* eig_image, workspace for the algorithm.
-//        temp_image,  //CvArr* temp_image, workspace for the algorithm.
-//        features[1],     //CvPoint2D32f* corners, contains the feature points.
-//        &maxFeatures, //int* corner_count, number feature points actually found
-//        quality,     //double quality_level, specifies minimum quality of the features (based on the eigenvalues).
-//        minFeatureDistance, //double min_distance, specifies the minimum Euclidean distance between features.
-//        NULL, //const CvArr* mask=NULL, "NULL" means use the entire input image.
-//        3,    //int block_size=3,
-//        0,    //int use_harris=0,
-//        0.04  //double k=0.04
-//    );
-//    /* This termination criteria tells the algorithm to stop when it has either done 20 iterations or when
-//     * epsilon is better than .3.  You can play with these parameters for speed vs. accuracy but these values
-//     * work pretty well in many situations. */
-//    CvTermCriteria term_criteria = cvTermCriteria( CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, .3 );
-//    /* search window half size */
-//    int win_size = 8;
-//    /* enhance point precision */
-//    cvFindCornerSubPix(
-//        visCvGrey,   // input image
-//        features[1],     // initial corners in, refined corners out
-//        maxFeatures, // number of corners
-//        cvSize(win_size,win_size),  // half size of search window
-//        cvSize(-1,-1), // dead region, -1 means none
-//        term_criteria  // criteria for terminating iterative process
-//    );
-//    /* display found features */
-//    for (int i=0; i<maxFeatures; i++)
-//    {
-//    	cvRectangle(visCvGrey, cvPoint(features[1][i].x-win_size/2,features[1][i].y-win_size/2),
-//    	            cvPoint(features[1][i].x+win_size/2,features[1][i].y+win_size/2), CV_RGB(0,255,0));
-//    	cvCircle(visCvGrey, cvPointFrom32f(features[1][i]), 1, CV_RGB(255,0,0), -1, 8, 0);
-//    }
-//}
-
 
 void MapGen::LoadXMLSettings()
 {
@@ -369,19 +366,17 @@ void MapGen::LoadXMLSettings()
     /* load settings */
     {
         maxFeatures = cfg.getInt("maxFeatures");
-        minFeatureDistance = cfg.getInt("minFeatureDistance");
         numFramesBack = cfg.getInt("numFramesBack");
 
     }
 
     /* test */
     {
-        if (maxFeatures==-1 || minFeatureDistance==-1)
+        if (maxFeatures==-1)
         {
             printf("ERROR: Mapping settings NOT loaded! Using DEFAULTS \n");
             {
                 maxFeatures = 64;
-                minFeatureDistance = 10;
                 numFramesBack = 4;
 
             }
@@ -390,7 +385,7 @@ void MapGen::LoadXMLSettings()
         {
             printf("Mapping settings loaded \n");
         }
-        printf("values: maxFeatures %d  minFeatDist %d \n", maxFeatures, minFeatureDistance);
+        printf("values: maxFeatures %d  \n", maxFeatures);
     }
 
 }
