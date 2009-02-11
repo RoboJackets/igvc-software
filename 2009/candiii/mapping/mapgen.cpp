@@ -84,7 +84,7 @@ void MapGen::genMap()
     }
 
     /* process features found */
-    processFeatures(); // WORK IN PROGRESS!
+    //processFeatures(); // WORK IN PROGRESS!
 
 
 }
@@ -131,7 +131,7 @@ int MapGen::getFeatures()
                     points2,
                     status2,
                     1,/* Use fundamental matrix to filter points? */
-                    5);/* Threshold for (dist b/w) good points in filter (usually 0.5 or 1.0)*/
+                    1);/* Threshold for (dist b/w) good points in filter (usually 0.5 or 1.0)*/
 
         printf(" matching: %d \n",found);
 

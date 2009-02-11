@@ -31,8 +31,8 @@
     <defaultView>5</defaultView>
 
     <!-- Mapping Settings -->
-    <maxFeatures>30</maxFeatures>               <!-- max number for feature corners to find -->
-    <numFramesBack>5</numFramesBack>
+    <maxFeatures>35</maxFeatures>               <!-- max number for feature corners to find -->
+    <numFramesBack>4</numFramesBack>
 
 
 
