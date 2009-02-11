@@ -144,6 +144,8 @@ int icvCreateFeaturePoints(IplImage *image, CvMat *points, CvMat *status)
     }
 
     foundNum = needNumPoints;
+//    quality = 0.01;
+//    minDist = 5;
     quality = 0.01;
     minDist = 5;
     cvGoodFeaturesToTrack(grayImage, eigImage, tmpImage, cornerPoints, &foundNum, quality, minDist);
@@ -349,12 +351,20 @@ int icvFindCorrForGivenPoints( IplImage *image1,/* Image 1 */
         }
 
         /* Define number of levels of pyramid */
+//        cvCalcOpticalFlowPyrLK( grayImage1, grayImage2,
+//                                pyrImage1, pyrImage2,
+//                                cornerPoints1, cornerPoints2,
+//                                numVisPoints, cvSize(10,10), 3,
+//                                status, errors,
+//                                cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03),
+//                                0/*CV_LKFLOW_PYR_A_READY*/ );
+
         cvCalcOpticalFlowPyrLK( grayImage1, grayImage2,
                                 pyrImage1, pyrImage2,
                                 cornerPoints1, cornerPoints2,
                                 numVisPoints, cvSize(10,10), 3,
                                 status, errors,
-                                cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.03),
+                                cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.01),
                                 0/*CV_LKFLOW_PYR_A_READY*/ );
 
 
