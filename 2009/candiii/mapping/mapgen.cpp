@@ -95,19 +95,31 @@ int MapGen::getFeatures()
      *  or returns 0 otherwise. */
 
     int found, i;
-    static int t=0;
+    static int t=0; // time state
+    static int f=1; // initialy get raw frame
 
     if (t==0)
     {
         t++;
 
-        /* get first frame and its features */
-        cvCopy(visCvGrey, prev);
+        if(f)
+        {
+            f=0;
+            /* get raw first frame */
+            cvCopy(visCvGrey, prev);
+        }
+        else
+        {
+            /* otherwise, use previous data when t==numFramesBack */
+        }
+
+        /* get its features */
         found = icvCreateFeaturePoints(prev, points1, status1);
 
         if (found==0)
         {
             t--; // try again
+            f=1;
         }
 
         return 0; // need more frames
@@ -135,6 +147,13 @@ int MapGen::getFeatures()
 
         printf(" matching: %d \n",found);
 
+        /* move current to previous */
+        if(found && !f)
+        {
+            cvCopy(visCvGrey,prev);
+        }
+
+        /* local storage */
         int x,y,a,b;
         int dx,dy;
         int avgdx=0;
@@ -161,8 +180,8 @@ int MapGen::getFeatures()
                     avgdx += dx;
                     avgdy += dy;
                     good++;
-                    dx*=2;  // extend by X
-                    dy*=2;  // extend by X
+                    dx*=1;  // extend by X
+                    dy*=1;  // extend by X
                     cvLine(visCvGrey, cvPoint( a-dx,b-dy ), cvPoint( x+dx,y+dy ), CV_RGB(0,0,0), 2, 8, 0);
                 }
 
@@ -182,14 +201,14 @@ int MapGen::getFeatures()
                 cvPoint( visCvGrey->width/2-avgdx, visCvGrey->height/2-avgdy ),
                 cvPoint( visCvGrey->width/2+avgdx, visCvGrey->height/2+avgdy ),
                 CV_RGB(250,250,250), 3, 8, 0);
-            //printf("%d, %d \n",avgdx,avgdy);
+            printf("%d, %d \n",avgdx,avgdy);
         }
 
         /* show image with points drawn */
         cvShowImage("curr",visCvGrey);
 
 
-        /* check status */
+        /* check status *********/
 
         if(avgdx==0 || avgdy==0)
         {
@@ -206,8 +225,8 @@ int MapGen::getFeatures()
         }
     }
 
-    return 0; // need more frames
 
+    return 0; // need more frames
 }
 
 int MapGen::processFeatures()
