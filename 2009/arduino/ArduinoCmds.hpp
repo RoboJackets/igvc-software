@@ -27,7 +27,7 @@ enum error_t {DROPPED_PACKET, REQUESTED_PACKET_OUT_OF_RANGE};
 
 
 //enum for sonar options
-enum sonar_opttype_t { SN_SETRNG = 0 };
+enum sonar_opttype_t { SN_SET_RNG = 0, SN_SET_FREQ, SN_SET_GAIN, SN_SET_WARN,  };
 
 
 #endif //ARDUINO_COMMANDS_HPP_
