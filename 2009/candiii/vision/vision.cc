@@ -1209,13 +1209,17 @@ void Vision::Adapt()
     red   = data.val[2];
 
 
+    unsigned char* rgbdata = (unsigned char*) visCvDebug->imageData;
     /* generate visCvAdapt image here!
      *  white=good ~ black=bad */
-    for (int i=visCvDebug->imageSize-3; i>0; i-=3)
+    //for (int i=visCvDebug->imageSize-3; i>0; i-=3)
+    for (int i=0; i<visCvDebug->imageSize-3; i+=3)
     {
-        ab = visCvDebug->imageData[i  ];
-        ag = visCvDebug->imageData[i+1];
-        ar = visCvDebug->imageData[i+2];
+        ab = *(rgbdata  );
+        ag = *(rgbdata+1);
+        ar = *(rgbdata+2);
+
+        rgbdata+=3;
 
         if (    (abs(ab-(unsigned char)blue )<adapt_maxDiff) &&
                 (abs(ag-(unsigned char)green)<adapt_maxDiff) &&
