@@ -15,16 +15,6 @@ MapGen::~MapGen()
 {
     /* clean up */
 
-    /*
-    if (eig_image != NULL )
-    {
-        cvReleaseImage( &eig_image );
-    }
-    if (temp_image != NULL )
-    {
-        cvReleaseImage( &temp_image );
-    }
-    */
 
     if (prev != NULL )
     {
@@ -46,6 +36,20 @@ MapGen::~MapGen()
     {
         cvReleaseMat( &status2 );
     }
+
+    if (mat_CamToCam != NULL )
+    {
+        cvReleaseMat( &mat_CamToCam );
+    }
+    if (mat_CamToWorld != NULL )
+    {
+        cvReleaseMat( &mat_CamToWorld );
+    }
+    if (worldmap != NULL )
+    {
+        cvReleaseImage( &worldmap );
+    }
+
 
 }
 
@@ -201,7 +205,7 @@ int MapGen::getFeatures()
                 cvPoint( visCvGrey->width/2-avgdx, visCvGrey->height/2-avgdy ),
                 cvPoint( visCvGrey->width/2+avgdx, visCvGrey->height/2+avgdy ),
                 CV_RGB(250,250,250), 3, 8, 0);
-            printf("%d, %d \n",avgdx,avgdy);
+            //printf("%d, %d \n",avgdx,avgdy);
         }
 
         /* show image with points drawn */
@@ -210,10 +214,16 @@ int MapGen::getFeatures()
 
         /* check status *********/
 
-        if(avgdx==0 || avgdy==0)
+//        if(avgdx==0 || avgdy==0)
+//        {
+//            return 0; // crappy slopes
+//        }
+        int maxd = 11;
+        if( abs(avgdx )> maxd || abs(avgdy) > maxd )
         {
             return 0; // crappy slopes
         }
+
 
         if ( found )
         {
@@ -414,9 +424,6 @@ void MapGen::init()
     /* load in params */
     LoadXMLSettings();
 
-    //features[0] = (CvPoint2D32f*)cvAlloc(maxFeatures*sizeof(features[0][0]));
-    //features[1] = (CvPoint2D32f*)cvAlloc(maxFeatures*sizeof(features[0][0]));
-
     /* init temp images and matricies */
     points1 = cvCreateMat(2,maxFeatures,CV_32F);
     points2 = cvCreateMat(2,maxFeatures,CV_32F);
@@ -478,3 +485,8 @@ void MapGen::printMatrix(CvMat* matrix)
     }
     printf("\n");
 }
+
+//void MapGen::addOrUpdateFeatures()
+//{
+//
+//}
