@@ -452,8 +452,8 @@ bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket& pk_out){
 			std::cout << "data size: " << (int) pk_out.header.size << std::endl;
 			std::cout << "dataloc: " << (int) pk_out.data << std::endl;
 
-			DataPacket::encoder_reply_t parsed_data;
-			memcpy(&parsed_data, pk_out.data, sizeof(DataPacket::encoder_reply_t));
+			encoder_reply_t parsed_data;
+			memcpy(&parsed_data, pk_out.data, sizeof(encoder_reply_t));
 			std::cout << pk_out.header << std::endl;
 			std::cout << parsed_data << "\n\n";
 
@@ -496,7 +496,7 @@ unsigned int ArduinoInterface::getTime(){
 
 bool ArduinoInterface::setArduinoTime(){
 	byte msg[5];
-	msg[0] = SETCLK;
+	msg[0] = MC_SETCLK;
 	unsigned int t = getTime();
 	memcpy(msg+1, &t, sizeof(unsigned int));
 
@@ -504,3 +504,24 @@ bool ArduinoInterface::setArduinoTime(){
 
 	sendCommand('w', msg, 5, &rx_p, 0);
 }
+
+
+//new cmd struct notes
+//arduino send pk
+//arduino ret pk
+//arduino process error
+/*
+bool ArduinoInterface::sendPacket(DataPacket pkout)
+{
+
+	savePacket(pkout);
+
+	writeFully(arduinoFD, &(pkout.header), PACKET_HEADER_SIZE);
+	if(pkout.header.size > 0)
+	{
+		writeFully(arduinoFD, pkout.data, pkout.header.size);
+	}
+	tx_num++;
+
+}
+*/
