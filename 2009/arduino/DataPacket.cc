@@ -31,7 +31,7 @@ std::ostream& operator<<(std::ostream& output, DataPacket& pk){
 	return(output);
 }
 
-std::ostream& operator<<(std::ostream& output, DataPacket::header_t header){
+std::ostream& operator<<(std::ostream& output, header_t header){
 	output << std::hex;
 	output << "timestamp: " << header.timestamp << std::endl;
 	output << std::dec;
@@ -42,7 +42,7 @@ std::ostream& operator<<(std::ostream& output, DataPacket::header_t header){
 	return(output);
 }
 
-std::ostream& operator<<(std::ostream& output, DataPacket::encoder_reply_t data){
+std::ostream& operator<<(std::ostream& output, encoder_reply_t data){
 	//output.setf(std::ios::hex);
 
 	output << std::hex;
