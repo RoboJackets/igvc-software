@@ -41,8 +41,10 @@ TARGET = ArduinoMotorEncoders2
 PRG = "ArduinoMotorEncoders2"
 INSTALL_DIR = /home/nebousuru/Desktop/arduino-0011
 PORT = usb
-UPLOAD_RATE = 19200
 AVRDUDE_PROGRAMMER = dragon_isp
+#PORT = /dev/ttyUSB0
+#AVRDUDE_PROGRAMMER = stk500v1
+UPLOAD_RATE = 19200
 MCU = atmega168
 MCU_TARGET = atmega168
 F_CPU = 16000000
@@ -68,7 +70,7 @@ MAKEFILE = Makefile
 # AVR (extended) COFF requires stabs, plus an avr-objcopy run.
 DEBUG = dwarf-2
 
-OPT = 0
+OPT = 2
 
 # Place -D or -U options here
 CDEFS = -DF_CPU=$(F_CPU)

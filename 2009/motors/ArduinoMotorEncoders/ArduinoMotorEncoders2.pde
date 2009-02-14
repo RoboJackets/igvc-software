@@ -2,14 +2,15 @@
 
 //#include "WProgram.h"
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <avr/signal.h>
-#include <avr/delay.h>
+//#include <avr/io.h>
+//#include <avr/interrupt.h>
+//#include <avr/signal.h>
+//#include <avr/delay.h>
 //#include <stdio.h>
 //#include <stdarg.h>
 
 #include "../../arduino/ArduinoCmds.hpp"
+#include "../../arduino/DataPacketStructs.hpp"
 #include "EncoderDefines.h"
 #include "EncoderFunc.h"
 
@@ -23,6 +24,8 @@
 #define BITBANG_SPI 1
 
 #define NUM_PK_STORE 25
+
+#define TIMEOUT_LENGTH_MILLIS 1000
 
 //TODO:
 //	- generalize this to work for all of our code
@@ -50,8 +53,8 @@ struct motorEncoderData previous = {};
 // Settings
 unsigned long lastsendtime;
 int interog_dl = 100;
-int sendMode = PULL;
-int sendType = SEND_DTICK;
+int sendMode = MC_PULL;
+int sendType = MC_SEND_DTICK;
 long rx_num;
 long tx_num;
 
@@ -89,8 +92,8 @@ void setup(void) {
 	lastsendtime = millis();
 	global_time = millis();
 
-	sendMode = PULL;
-	sendType = SEND_DTICK;
+	sendMode = MC_PULL;
+	sendType = MC_SEND_DTICK;
 	
 	rx_num = 1;
 	tx_num = 1;
@@ -264,7 +267,7 @@ void readSerial(void) {
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = 'r';
 				switch(sendType){
-					case SEND_CURRENT:
+					case MC_SEND_CURRENT:
 					{
 						reply_current_t msg = getCurrentStatus();
 						headerOut.size = sizeof(reply_current_t);
@@ -274,7 +277,7 @@ void readSerial(void) {
 						savePacket(headerOut, (byte*)&msg);
 						break;
 					}
-					case SEND_DTICK:
+					case MC_SEND_DTICK:
 					{
 						reply_dtick_t msg = getEncoderStatus();
 						headerOut.size = sizeof(reply_dtick_t);
@@ -332,6 +335,10 @@ void readSerial(void) {
 				//tx_num++;//this is incr in the resend packet func
 				break;
 			}
+			case 'm':
+			{
+				//set motor speed
+			}
 			default:
 			{
 				
@@ -361,17 +368,17 @@ void readSerial(void) {
 //TODO: make this use an array
 void setVariable(byte num, byte val) {
 	switch (num) {
-		case PUSHPULL:
+		case MC_PUSHPULL:
 			{
 			sendMode = val;
 			break;
 			}
-		case RET_T:
+		case MC_RET_T:
 			{
 			sendType = val;
 			break;
 			}
-		case INTEROG_DL:
+		case MC_INTEROG_DL:
 			{
 			//TODO: keep val in sensible boundaries
 			/*			
@@ -382,7 +389,7 @@ void setVariable(byte num, byte val) {
 			interog_dl = val;
 			break;
 			}
-		case SETCLK:
+		case MC_SETCLK:
 			{			
 			unsigned long int mills;
 			byte * bptr = (byte *)&mills;
@@ -557,4 +564,44 @@ void savePacket(header_t head, byte * msg){
 	}
 	packet_store_pos++;
 
+}
+
+//wait for a specifed number of bytes to be in the buffer for a certain amount of time
+//read them if they apear
+//ret false if they don't
+//msg should be array of appropriate length - code will not assign memory
+//true on success
+//false on failure
+bool serialReadBytesTimeout(int len, byte * msg)
+{
+	//Maybe return imediatly if there is no data availible
+	//Only wait if there is a partial connection
+	if(Serial.available() == 0)
+	{
+		return false;
+	}
+
+	int t1 = millis();
+
+	while( (millis() - t1) < TIMEOUT_LENGTH_MILLIS)
+	{
+		if(Serial.available() >= len)
+		{
+			/*
+			if(msg == NULL)
+			{
+				msg = (byte*)malloc(len);
+			}
+			*/
+			for(int i = 0; i < len; i++)
+			{
+				msg[i] = Serial.read();
+			}
+			return true;//we got the message
+		}
+	}
+
+	//otherwise timeout - flush link
+	Serial.flush();
+	return false;
 }

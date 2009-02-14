@@ -50,7 +50,7 @@ class MotorEncoders {
 
 		//bool setLogging(bool status);
 
-		DataPacket::encoder_reply_t getInfo(void);
+		encoder_reply_t getInfo(void);
 
 		bool getInfo_class(DataPacket * status); //TODO: get rid of this
 
