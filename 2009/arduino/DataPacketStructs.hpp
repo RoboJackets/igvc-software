@@ -2,12 +2,12 @@
 #define DataPacketStructs_H_
 
 //length of header
-#define PACKET_HEADER_SIZE 10
+#define PACKET_HEADER_SIZE 14
 
 typedef unsigned char byte;
 
 //Packet Header
-typedef struct __attribute__((__packed__)) { long timestamp; long packetnum; byte cmd; byte size; } header_t; //orig arduino - should be same as laptop
+typedef struct __attribute__((__packed__)) { long timestamp_sec; long timestamp_usec; long packetnum; byte cmd; byte size; } header_t; //orig arduino - should be same as laptop
 
 //Data types
 
@@ -26,5 +26,6 @@ typedef struct  __attribute__((__packed__)) { int currentl; int currentr; unsign
 typedef struct __attribute__((__packed__)) { char sl; char sr;} speed_set_t;
 
 //Sonar Data Frame
+typedef struct __attribute__((__packed__)) { short id; short range;} sonar_range_t; //range in milimeters
 
 #endif //DataPacketStructs_H_

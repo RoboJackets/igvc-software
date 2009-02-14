@@ -5,8 +5,6 @@
 #include <iostream>
 #include <cstring>
 #include "DataPacketStructs.hpp"
-//length in bytes of header
-#define PACKET_HEADER_SIZE 10
 
 typedef unsigned char byte;
 
