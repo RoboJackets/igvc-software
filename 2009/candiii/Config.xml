@@ -21,7 +21,7 @@
 	<satThresh>70</satThresh>    <!-- higher => more noise/sensitivity -->
 	<hueThresh>35</hueThresh>    <!-- higher => more noise/sensitivity -->
 	<robotWidth>20</robotWidth>  <!-- lower => we can squeeze through more -->
-	<doTransform>1</doTransform> <!-- 1 => use graphics card transformations -->
+	<doTransform>0</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>1</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
 	<maxDiff>40</maxDiff>        <!-- lower => more noise in thresh image -->
 	<boxPadding>100</boxPadding>  <!-- lower => wider box -->
