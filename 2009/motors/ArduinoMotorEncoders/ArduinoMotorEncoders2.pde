@@ -58,8 +58,9 @@ int sendType = MC_SEND_DTICK;
 long rx_num;
 long tx_num;
 
-long int global_time;
-long int arduino_time;
+unsigned long int global_time_sec;
+unsigned long int global_time_usec;
+long int arduino_time_millis;//millis when last global time last set
 
 
 //long unsigned int reply_dtick_packet_num[50];
@@ -90,7 +91,8 @@ void setup(void) {
 	TCCR1B = (1<<CS11)|(1<<CS10);//clkio/64
 	
 	lastsendtime = millis();
-	global_time = millis();
+	global_time_sec = 0;
+	global_time_usec = millis()*1000;
 
 	sendMode = MC_PULL;
 	sendType = MC_SEND_DTICK;
@@ -236,14 +238,20 @@ void readSerial(void) {
 
 void readSerial(void) {
 	if (Serial.available() > 0) {
-		while (Serial.available() < PACKET_HEADER_SIZE){}// TODO: add timeout
+		//while (Serial.available() < PACKET_HEADER_SIZE){}// TODO: add timeout
 		
 		header_t header;
 		byte * headerptr = (byte*)&header;
 
+		if(!serialReadBytesTimeout(PACKET_HEADER_SIZE, headerptr))
+		{
+			return;
+		}
+/*
 		for(int i = 0; i < PACKET_HEADER_SIZE; i++){
 			headerptr[i] = Serial.read();
 		}
+*/
 		rx_num++;
 /*
 		if(header.size > 0){
@@ -263,7 +271,8 @@ void readSerial(void) {
 			case 'r':
 			{
 				header_t headerOut;
-				headerOut.timestamp =  global_time + millis() - arduino_time;
+				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = 'r';
 				switch(sendType){
@@ -300,7 +309,8 @@ void readSerial(void) {
 				setVariable(variableNumber, variableValue);
 
 				header_t headerOut;
-				headerOut.timestamp =  global_time + millis() - arduino_time;
+				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = 'w';
 				headerOut.size = 0;
@@ -312,7 +322,8 @@ void readSerial(void) {
 			case 'i':
 			{
 				header_t headerOut;
-				headerOut.timestamp =  global_time + millis() - arduino_time;
+				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = 'i';
 				headerOut.size = 1;
@@ -343,7 +354,8 @@ void readSerial(void) {
 			{
 				
 				header_t headerOut;
-				headerOut.timestamp =  global_time + millis() - arduino_time;
+				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = 0xFF;
 				headerOut.size = 0;
@@ -391,15 +403,25 @@ void setVariable(byte num, byte val) {
 			}
 		case MC_SETCLK:
 			{			
-			unsigned long int mills;
-			byte * bptr = (byte *)&mills;
-			while (Serial.available()<3){}  // TODO: add timeout
+			unsigned long int sec;
+			unsigned long int usec;
+
+			while (Serial.available()<7){}  // TODO: add timeout
+			byte * bptr = (byte *)&sec;
 			bptr[0] = val;
 			bptr[1] = Serial.read();
 			bptr[2] = Serial.read();
 			bptr[3] = Serial.read();
-			global_time = mills;
-			arduino_time = millis();
+
+			bptr = (byte *)&usec;
+			bptr[0] = Serial.read();
+			bptr[1] = Serial.read();
+			bptr[2] = Serial.read();
+			bptr[3] = Serial.read();
+
+			global_time_sec = sec;
+			global_time_usec = usec;
+			arduino_time_millis = millis();
 			break;
 			}
 		default:
@@ -499,7 +521,8 @@ void resend_packet(long num){
 	for(int i = 0; i < NUM_PK_STORE; i++ ){
 		if(packet_store[i].head.packetnum == num){
 			header_t headerOut;
-			headerOut.timestamp = global_time + millis() - arduino_time;
+			headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+			headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
 			headerOut.packetnum = tx_num;
 			headerOut.cmd = ARDUINO_RSND_PK_RESP;
 			headerOut.size = PACKET_HEADER_SIZE + packet_store[i].head.size;
@@ -519,7 +542,8 @@ void resend_packet(long num){
 
 //		else{
 	header_t headOut;
-	headOut.timestamp = global_time + millis() - arduino_time;
+	headOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+	headOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
 	headOut.packetnum = tx_num;
 	headOut.cmd = ARDUINO_ERROR_RESP;
 	headOut.size = sizeof(long);
@@ -581,7 +605,7 @@ bool serialReadBytesTimeout(int len, byte * msg)
 		return false;
 	}
 
-	int t1 = millis();
+	unsigned long t1 = millis();
 
 	while( (millis() - t1) < TIMEOUT_LENGTH_MILLIS)
 	{

@@ -16,11 +16,6 @@
 #define WHEEL_BASE		((double)28)
 
 
-
-//length in bytes of header
-#define PACKET_HEADER_SIZE 10
-
-
 //type for packet storage
 typedef struct {header_t head; size_t len; byte * msg; } packet_t;
 
