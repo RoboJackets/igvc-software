@@ -157,6 +157,8 @@ int MapGen::getFeatures()
             cvCopy(visCvGrey,prev);
         }
 
+
+
         /* local storage */
         int x,y,a,b;
         int dx,dy;
@@ -263,7 +265,7 @@ int MapGen::processFeatures()
             y=cvmGet(points2,1,i); //most recent
 
             /* gather points for affine calculation */
-            if ( (aff_count<3) && (y>min) /*&& (y<b)*/ )
+            if ( (aff_count<2) && (y*2>min) /*&& (y<b)*/ &&(y!=b)&&(x!=a) )
             {
                 cvCircle(visCvGrey, cvPoint( x,y ), 1, CV_RGB(255,255,255), 3, 8, 0);
                 cvCircle(visCvGrey, cvPoint( a,b ), 1, CV_RGB(255,255,255), 3, 8, 0);
@@ -279,28 +281,38 @@ int MapGen::processFeatures()
     /* show image with points drawn */
     cvShowImage("curr",visCvGrey);
 
-    CvMat* temp;
-    temp = cvCreateMat(2,3,CV_32FC1);
+//    CvMat* temp;
+//    temp = cvCreateMat(2,3,CV_32FC1);
+//
+//    /* use the point pairs for getting the camera-camera affine transformation */
+//    if (aff_count>2)
+//    {
+//        cvGetAffineTransform(pts2,pts1,temp);
+//    }
+//    else
+//    {
+//        return 0; // need 3 point pairs
+//    }
+//
+//    /* copy 2x3 matrix result into 3x3 matrix */
+//    cvZero(mat_CamToCam);
+//    for (i=0; i<3; i++)
+//    {
+//        cvmSet(mat_CamToCam, 0, i, cvmGet(temp, 0 ,i) );
+//        cvmSet(mat_CamToCam, 1, i, cvmGet(temp, 1 ,i) );
+//    }
+//    cvmSet(mat_CamToCam, 2, 2, 1);
+//    cvReleaseMat(&temp);
 
-    /* use the point pairs for getting the camera-camera affine transformation */
-    if (aff_count>2)
+    if(aff_count>1)
     {
-        cvGetAffineTransform(pts2,pts1,temp);
+        if(! computeHomography(pts1,pts2,mat_CamToCam) )
+            return 0;
     }
     else
     {
-        return 0; // need 3 point pairs
+        return 0;
     }
-
-    /* copy 2x3 matrix result into 3x3 matrix */
-    cvZero(mat_CamToCam);
-    for (i=0; i<3; i++)
-    {
-        cvmSet(mat_CamToCam, 0, i, cvmGet(temp, 0 ,i) );
-        cvmSet(mat_CamToCam, 1, i, cvmGet(temp, 1 ,i) );
-    }
-    cvmSet(mat_CamToCam, 2, 2, 1);
-    cvReleaseMat(&temp);
 
     /* crude check for errors */
     if( cvDet(mat_CamToCam) == 0 )
@@ -382,7 +394,7 @@ int MapGen::processFeatures()
     /* display world view image */
     cvShowImage("worldmap",worldmap);
 
-   // cvWaitKey(0);
+    //cvWaitKey(0);
 
     return 1;
 }
@@ -452,7 +464,7 @@ void MapGen::init()
     mat_CamToCam = cvCreateMat(3,3,CV_32F);
     mat_CamToWorld = cvCreateMat(3,3,CV_32F);
 
-    double k = 0.1; // scale factor
+    double k = 01; // scale factor
     // k  0  dx
     // 0  k  dy
     // 0  0  1
@@ -490,3 +502,50 @@ void MapGen::printMatrix(CvMat* matrix)
 //{
 //
 //}
+
+int MapGen::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, CvMat* h)
+{
+    /*
+        | 1 b e |   | x1 |   | x2 |
+        | c 1 f | * | x2 | = | y2 |
+        | 0 0 1 |   | 1  |   | 1  |
+    */
+
+    double x1,y1,x2,y2,x3,y3,x4,y4,b,c,e,f;
+
+    x1 = p1[0].x;
+    y1 = p1[0].y;
+    x2 = p2[0].x;
+    y2 = p2[0].y;
+
+    x3 = p1[1].x;
+    y3 = p1[1].y;
+    x4 = p2[1].x;
+    y4 = p2[1].y;
+
+    b = ( x2-x4-x1+x3 ) / ( y1-y3 ) ;
+    c = ( y2-y4-y1+y3 ) / ( x1-x3 ) ;
+
+    e = ( x2+x4-x1-x3-b*(y1+y3) ) / 2 ;
+    f = ( y2+y4-y1-y3-c*(x1+x3) ) / 2 ;
+
+    cvZero(h);
+
+    cvmSet(h,0,0, 1 ); cvmSet(h,0,1, b ); cvmSet(h,0,2, e );
+    cvmSet(h,1,0, c ); cvmSet(h,1,1, 1 ); cvmSet(h,1,2, f );
+    cvmSet(h,2,0, 0 ); cvmSet(h,2,1, 0 ); cvmSet(h,2,2, 1 );
+
+    printf(" (%.2f,%.2f)-(%.2f %.2f)  (%.2f,%.2f)-(%.2f %.2f)  \n" , x1,y1,x2,y2,x3,y3,x4,y4 );
+    printf(" %.2f %.2f %.2f %.2f  \n" , b,c,e,f );
+
+    if( y1==y3 || x1==x3 ) return 0;
+    else if( abs(e)>35 || abs(f)>25 ) return 0;
+    else return 1;
+
+}
+
+
+
+
+
+
