@@ -32,7 +32,7 @@
 
     <!-- Mapping Settings -->
     <maxFeatures>35</maxFeatures>               <!-- max number for feature corners to find -->
-    <numFramesBack>4</numFramesBack>
+    <numFramesBack>5</numFramesBack>
 
 
 

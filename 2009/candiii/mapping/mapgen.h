@@ -17,20 +17,16 @@ class MapGen
 public:
     MapGen();
     virtual ~MapGen();
+
 public:
+
     void genMap();
-    //void getFeatures();
     void LoadXMLSettings();
     int maxFeatures;
-
-    IplImage* eig_image;
-    IplImage* temp_image;
     int _init_;
     void init();
-
     /**/
     int getFeatures();
-    //CvPoint2D32f* features[2];
     CvMat* points1;
     CvMat* points2;
     CvMat* status1;
@@ -43,10 +39,9 @@ public:
     IplImage* worldmap;
     void printMatrix(CvMat* matrix);
     int numFramesBack;
-
-CvPoint2D32f pts1[3];
-CvPoint2D32f pts2[3];
-
+    CvPoint2D32f pts1[3];
+    CvPoint2D32f pts2[3];
+    /**/
 
 
 };
