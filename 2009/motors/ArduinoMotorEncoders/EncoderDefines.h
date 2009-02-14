@@ -20,11 +20,13 @@
 //length in bytes of header
 #define PACKET_HEADER_SIZE 10
 
-//Header types
-typedef struct __attribute__((__packed__)) { long timestamp; long packetnum; byte cmd; byte size; } header_t;
 
 //type for packet storage
 typedef struct {header_t head; size_t len; byte * msg; } packet_t;
+
+/*
+//Header types
+typedef struct __attribute__((__packed__)) { long timestamp; long packetnum; byte cmd; byte size; } header_t;
 
 // Arduino -> Laptop ID packet
 //typedef struct __attribute__((__packed__)) { unsigned int timestamp; unsigned int packetnum; char command; } idpk_t;
@@ -33,5 +35,5 @@ typedef struct {header_t head; size_t len; byte * msg; } packet_t;
 typedef struct  __attribute__((__packed__)) { int dl; int dr; unsigned long dt; } reply_dtick_t;
 
 typedef struct  __attribute__((__packed__)) { int currentl; int currentr; unsigned long dt; } reply_current_t;
-
+*/
 #endif //ENCODER_DEFINES_H_

@@ -14,15 +14,15 @@ int main(void) {
 
 	//int exp_packetnum = 1;
 	int i;
-	for( i = 0; i < 1000; i++){
+	for( i = 0; i < 100; i++){
 		//cout << "Heading = " << encoders.getHeading() << endl;
 
 		DataPacket packet;
 
 		encoders.getInfo_class(&packet);
 
-		DataPacket::encoder_reply_t parsed_data;
-		memcpy(&parsed_data, packet.data, sizeof(DataPacket::encoder_reply_t));
+		encoder_reply_t parsed_data;
+		memcpy(&parsed_data, packet.data, sizeof(encoder_reply_t));
 
 		cout << packet;
 		cout << parsed_data << "\n\n";
@@ -41,7 +41,7 @@ int main(void) {
 	}
 
 	DataPacket pk;
-	encoders.arduinoInterface.arduinoResendPacket(40070, pk);
+	encoders.arduinoInterface.arduinoResendPacket(90, pk);
 
 	cout << pk << endl;
 
@@ -51,8 +51,8 @@ int main(void) {
 
 	if (pk.data != NULL){
 		if(pk.header.cmd == 'r'){
-			DataPacket::encoder_reply_t parsed_data;
-			memcpy(&parsed_data, pk.data, sizeof(DataPacket::encoder_reply_t));
+			encoder_reply_t parsed_data;
+			memcpy(&parsed_data, pk.data, sizeof(encoder_reply_t));
 			cout << parsed_data << "\n\n";
 		}
 	}
