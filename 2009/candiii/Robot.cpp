@@ -308,7 +308,7 @@ void Robot::processFunc()
 
 	/* Drive Robot via motor commands (GO!) */
 	//TODO:
-	//motors.set_heading(heading_main.y, heading_main.x);
+	motors.set_heading(heading_main.y, heading_main.x);
 
 
 	/* Save raw image last */
