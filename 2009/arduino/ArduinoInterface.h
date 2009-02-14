@@ -48,7 +48,7 @@ class ArduinoInterface {
 		void savePacket(DataPacket pk);
 		DataPacket getSavedPacket(int packnum);
 		public: bool arduinoResendPacket(int pknum, DataPacket& pk_out);
-		unsigned int getTime();
+		struct timeval getTime();
 		bool setArduinoTime();
 };
 

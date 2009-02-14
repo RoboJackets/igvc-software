@@ -17,6 +17,7 @@
 
 #define WAIT_TIME 20 //Used for setting VTIME, each tick is 0.1 s
 //#define WAIT_TIME 3 //Used for setting VTIME, each tick is 0.1 s
+#define MIN_BYTES_TO_RET 0 //Minimum nuber of bytes for read to return.
 #define BAUD B9600  //Serial baudrate
 #define SERIAL_PORT "/dev/ttyUSB0"
 #define MODULE_ID 'e'
@@ -193,6 +194,8 @@ bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes) {
 	char* dst = (char*) buf;
 	size_t numLeft = numBytes;
 	ssize_t numRead;
+
+	struct timeval t0 = getTime();
 	
 	while (numLeft > 0) {
 		numRead = read(fd, dst, numLeft);
@@ -202,6 +205,9 @@ bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes) {
 		
 		numLeft -= numRead;
 		dst += numRead;
+		
+		//if( (getTime() - t0) > )
+
 	}
 	return false;
 }
@@ -255,6 +261,7 @@ int ArduinoInterface::serialportInit(const char* serialport, speed_t baud) {
 	/* see: http://unixwiz.net/techtips/termios-vmin-vtime.html */
 	// Set read-timeout for reading each byte
 	toptions.c_cc[VTIME] = WAIT_TIME;
+	//toptions.c_cc[VMIN] = MIN_BYTES_TO_RET;
 	
 	if( tcsetattr(fd, TCSANOW, &toptions) < 0) {
 		//perror("serialport_init: Couldn't set term attributes");
@@ -304,7 +311,11 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 	//Send the Command
 	DataPacket pk_tx;
 	pk_tx.header.packetnum = tx_num;
-	pk_tx.header.timestamp = getTime();
+
+	struct timeval t0 = getTime();
+	pk_tx.header.timestamp_sec = t0.tv_sec;
+	pk_tx.header.timestamp_usec = t0.tv_usec;
+
 	pk_tx.header.cmd = cmd;
 	pk_tx.header.size = size_tx;
 
@@ -391,7 +402,11 @@ bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket& pk_out){
 
 	DataPacket pk_tx;
 	pk_tx.header.packetnum = tx_num;
-	pk_tx.header.timestamp = getTime();
+
+	struct timeval t0 = getTime();
+	pk_tx.header.timestamp_sec = t0.tv_sec;
+	pk_tx.header.timestamp_usec = t0.tv_usec;
+
 	pk_tx.header.cmd = ARDUINO_RSND_PK_CMD;
 	pk_tx.header.size = sizeof(int);
 	pk_tx.data = new byte[pk_tx.header.size];
@@ -484,25 +499,28 @@ DataPacket ArduinoInterface::getSavedPacket(int packnum){
 	}
 }
 
-unsigned int ArduinoInterface::getTime(){
+struct timeval ArduinoInterface::getTime(){
 	struct timeval time;
 	//struct timezone tz;
 	//gettimeofday(&time, &tz);
 	gettimeofday(&time, NULL);
-	unsigned int millis = time.tv_sec*1000 + ((long int)((double)time.tv_usec/1000));
+	//unsigned int millis = time.tv_sec*1000 + ((long int)((double)time.tv_usec/1000));
 
-	return(millis);
+	return(time);
 }
 
 bool ArduinoInterface::setArduinoTime(){
-	byte msg[5];
+	byte msg[9];
 	msg[0] = MC_SETCLK;
-	unsigned int t = getTime();
-	memcpy(msg+1, &t, sizeof(unsigned int));
+
+	struct timeval t0 = getTime();
+
+	memcpy(msg+1, &t0.tv_sec, sizeof(unsigned long));
+	memcpy(msg+5, &t0.tv_usec, sizeof(unsigned long));
 
 	DataPacket rx_p;
 
-	sendCommand('w', msg, 5, &rx_p, 0);
+	sendCommand('w', msg, 9, &rx_p, 0);
 }
 
 
