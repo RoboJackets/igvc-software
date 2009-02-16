@@ -29,7 +29,7 @@ int convertMotorEncoderFormat(unsigned int data);
 void setVariable(byte num, byte val);
 
 //resend a packet & incr the tx counter
-void resend_packet(long num);
+void resend_packet(unsigned long num);
 
 //save a packet
 void savePacket(header_t head, byte * msg);

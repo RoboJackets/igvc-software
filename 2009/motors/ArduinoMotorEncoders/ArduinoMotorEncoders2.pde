@@ -23,7 +23,7 @@
 #define SPI_SS_RIGHT_MOTOR_ENCODER		4/*9*/
 #define BITBANG_SPI 1
 
-#define NUM_PK_STORE 25
+#define NUM_PK_STORE 10
 
 #define TIMEOUT_LENGTH_MILLIS 1000
 
@@ -55,12 +55,13 @@ unsigned long lastsendtime;
 int interog_dl = 100;
 int sendMode = MC_PULL;
 int sendType = MC_SEND_DTICK;
-long rx_num;
-long tx_num;
 
-unsigned long int global_time_sec;
-unsigned long int global_time_usec;
-long int arduino_time_millis;//millis when last global time last set
+unsigned long rx_num;
+unsigned long tx_num;
+
+long global_time_sec;
+long global_time_usec;
+long arduino_time_millis;//millis when last global time last set
 
 
 //long unsigned int reply_dtick_packet_num[50];
@@ -247,11 +248,7 @@ void readSerial(void) {
 		{
 			return;
 		}
-/*
-		for(int i = 0; i < PACKET_HEADER_SIZE; i++){
-			headerptr[i] = Serial.read();
-		}
-*/
+
 		rx_num++;
 /*
 		if(header.size > 0){
@@ -268,13 +265,13 @@ void readSerial(void) {
 */
 		switch(header.cmd){
 
-			case 'r':
+			case ARDUINO_GETSTATUS_CMD:
 			{
 				header_t headerOut;
 				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
 				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
 				headerOut.packetnum = tx_num;
-				headerOut.cmd = 'r';
+				headerOut.cmd = ARDUINO_GETSTATUS_RESP;
 				switch(sendType){
 					case MC_SEND_CURRENT:
 					{
@@ -298,10 +295,14 @@ void readSerial(void) {
 					}
 				}
 				tx_num++;
+				//if((tx_num-1) != headerOut.packetnum)
+				//{
+				//	while(true){Serial.print('e');}
+				//}
 				return;//return here to keep from also pushing a packet, if PUSH is set, and the timer expired.
 				break;
 			}
-			case 'w':
+			case ARDUINO_SETVAR_CMD:
 			{
 				while (Serial.available()<2){}  // TODO: add timeout
 				byte variableNumber = Serial.read();
@@ -312,25 +313,27 @@ void readSerial(void) {
 				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
 				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
 				headerOut.packetnum = tx_num;
-				headerOut.cmd = 'w';
+				headerOut.cmd = ARDUINO_SETVAR_RESP;
 				headerOut.size = 0;
 				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 				savePacket(headerOut, NULL);
 				tx_num++;
 				break;
 			}
-			case 'i':
+			case ARDUINO_ID_CMD:
 			{
 				header_t headerOut;
 				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
 				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
 				headerOut.packetnum = tx_num;
-				headerOut.cmd = 'i';
+				headerOut.cmd = ARDUINO_ID_RESP;
 				headerOut.size = 1;
+				char msg = 'e';
 				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
-				savePacket(headerOut, NULL);
+				Serial.print(msg);
+				savePacket(headerOut, (unsigned char*)&msg);
 				tx_num++;
-				Serial.print('e');
+
 				break;
 			}
 			case 'p':
@@ -512,7 +515,7 @@ int SPIReadInt(int inputPin, int slaveSelectPin, int clockPin) {
 //#endif
 }
 
-void resend_packet(long num){
+void resend_packet(unsigned long num){
 
 	//Serial.println(tx_num);
 	//Serial.println(tx_num);
@@ -582,7 +585,7 @@ void savePacket(header_t head, byte * msg){
 
 	packet_store[packet_store_pos].head = head;
 
-	if(head.size > 0){
+	if(head.size > 0 && msg != NULL){
 		packet_store[packet_store_pos].msg = (byte*)malloc(head.size);
 		memcpy(packet_store[packet_store_pos].msg, msg, head.size);
 	}
