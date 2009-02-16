@@ -54,10 +54,13 @@ ArduinoInterface::ArduinoInterface(void) {
 			/* Check which arduino is connected to the port */
 			//byte reply;
 			DataPacket reply;
-			//sendCommand('i', NULL, 0, &reply, 1);
-			sendCommand('i', NULL, 0, &reply, 1);
-			//writeFully(arduinoFD, (void *)"i", 1);
-			//readFully(arduinoFD, &reply, sizeof(reply));
+
+			if(sendCommand('i', NULL, 0, reply))
+			{
+				std::cout << "could not communicate with arduino on link " << serialAddress << std::endl;
+				exit(-1);//handle this!
+			}
+
 			printf("found module %c\n", *(reply.data));
 			if (*(reply.data)=='e') { //might want to use more than one byte for identifcation
 				printf("correct module.\n");
@@ -99,12 +102,12 @@ ArduinoInterface::~ArduinoInterface(void) {
  *					More detailed information can be obtained by querying
  *					<tt>errno</tt> and <tt>strerror(errno)</tt>.
  */
-bool ArduinoInterface::getStatus(DataPacket * status, int size) {
+bool ArduinoInterface::getStatus(DataPacket& out_status) {
 	if (arduinoFD == -1) {
 		return false;
 	}
 
-	if(sendCommand('r', (byte*)NULL, 0, status, size)){
+	if(sendCommand('r', (byte*)NULL, 0, out_status)){
 		return true;
 	}
 
@@ -307,7 +310,7 @@ void savePacket(DataPacket* pk){
 
 
 //bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx){
-bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPacket* out_pk_rx, size_t maxlen){
+bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPacket& out_pk_rx){
 	//Send the Command
 	DataPacket pk_tx;
 	pk_tx.header.packetnum = tx_num;
@@ -319,38 +322,26 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 	pk_tx.header.cmd = cmd;
 	pk_tx.header.size = size_tx;
 
-	//if(writeFully(arduinoFD, &(pk_tx.header), PACKET_HEADER_SIZE)){
-	//	return true;
-	//}
 
-	//if(pk_tx.header.size > 0) {
-		pk_tx.data = new byte[size_tx];
-		memcpy(pk_tx.data, data_tx, size_tx);
-	//	writeFully(arduinoFD, pk_tx.data, pk_tx.header.size);
-	//}
+	pk_tx.data = new byte[size_tx];
+	memcpy(pk_tx.data, data_tx, size_tx);
+
 
 	sendPacket(pk_tx);
 
-	//savePacket(pk_tx);
-	//tx_num++;
 
+	getPacket(out_pk_rx);
 
-	//Get the Response
-	//byte * headerloc = (byte*) &(out_pk_rx->header);
-	//readFully(arduinoFD, headerloc, PACKET_HEADER_SIZE);
-
-	getPacket(*out_pk_rx);
-
-	if(out_pk_rx->header.packetnum != (rx_num-1)){
+	if(out_pk_rx.header.packetnum != (rx_num-1)){//rx_num -1 'caue rx_num is incr inside getpacket
 		std::cout << "dropped packet - rec header:" << std::endl;
-		std::cout << out_pk_rx->header << std::endl;
+		std::cout << out_pk_rx.header << std::endl;
 		std::cout << "dropped packet - flushing link and requesting" << std::endl;
 		
 		DataPacket pk_rsnd;
 		serialFlush(arduinoFD);
-			if(arduinoResendPacket(rx_num, pk_rsnd))
+			if(!arduinoResendPacket(rx_num, pk_rsnd))
 			{
-				*out_pk_rx = pk_rsnd;
+				out_pk_rx = pk_rsnd;
 			}
 			else
 			{
@@ -358,14 +349,10 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 			}
 	}
 
-	//we have succesfully read the header, incr counter
-	//rx_num++;
-
-
 	//parse the icoming packet, test if it is an error packet
-	if(out_pk_rx->header.cmd == 0xFF ){
-		byte errorbuff[out_pk_rx->header.size];
-		readFully(arduinoFD, errorbuff, out_pk_rx->header.size);
+	if(out_pk_rx.header.cmd == 0xFF ){
+		byte errorbuff[out_pk_rx.header.size];
+		readFully(arduinoFD, errorbuff, out_pk_rx.header.size);
 		byte errorcode;
 		memcpy(&errorcode, errorbuff, 1 );
 		switch(errorcode){
@@ -394,12 +381,7 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 		return true;
 	}
 */
-	if( (out_pk_rx->header.size > 0) && (out_pk_rx->header.size <= maxlen)){
-		//out_pk_rx->data = new byte[out_pk_rx->header.size];
-		//readFully(arduinoFD, out_pk_rx->data, out_pk_rx->header.size);
-		//memcpy(data_rx, pk_rx.data, pk_rx.header.size);
-		//memcpy(data_rx, out_pk_rx->data, size_rx);		
-	}
+
 
 	return false;
 }
@@ -528,7 +510,7 @@ bool ArduinoInterface::setArduinoTime(){
 
 	DataPacket rx_p;
 
-	sendCommand('w', msg, 9, &rx_p, 0);
+	sendCommand('w', msg, 9, rx_p);
 }
 
 
