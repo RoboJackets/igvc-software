@@ -41,7 +41,7 @@ int main(void) {
 	}
 
 	DataPacket pk;
-	encoders.arduinoInterface.arduinoResendPacket(90, pk);
+	encoders.arduinoInterface.arduinoResendPacket(95, pk);
 
 	cout << pk << endl;
 

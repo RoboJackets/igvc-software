@@ -52,7 +52,7 @@ class ArduinoInterface {
 		bool setArduinoTime();
 
 		bool sendPacket(DataPacket pkout);
-		bool getPacket(DataPacket& out_pk_rec);
+		bool getPacket(DataPacket& out_pk_rx);
 		bool read_TimeOut(int fd, void * buf, size_t numBytes);
 };
 
