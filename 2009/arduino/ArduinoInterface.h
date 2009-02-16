@@ -19,10 +19,10 @@ typedef unsigned char byte;
 class ArduinoInterface {
 	public:
 		//bool sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx);
-		bool sendCommand(char cmd, void * data_tx, int size_tx, DataPacket* out_pk_rx, size_t maxlen);
+		bool sendCommand(char cmd, void * data_tx, int size_tx, DataPacket& out_pk_rx);
 
 		/* Retrieve all of the state variables in the arduino */
-		bool getStatus(DataPacket * status, int size); // TODO: can this be a reference?
+		bool getStatus(DataPacket& out_status); // TODO: can this be a reference?
 
 		/* Set the value of one the state variables in the arduino */
 		bool setVar(int var, void *value, int size);

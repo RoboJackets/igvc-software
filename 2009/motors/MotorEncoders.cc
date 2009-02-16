@@ -19,7 +19,7 @@ MotorEncoders::MotorEncoders(void) {
 encoder_reply_t MotorEncoders::getInfo(void) {
 	DataPacket status;
 	
-	arduinoInterface.getStatus(&status, sizeof(status));
+	arduinoInterface.getStatus(status);
 
 	encoder_reply_t parseddata;
 
@@ -31,7 +31,7 @@ encoder_reply_t MotorEncoders::getInfo(void) {
 bool MotorEncoders::getInfo_class(DataPacket* out_status) {
 	//EncoderData status;
 	//status->data = new byte[sizeof(DataPacket::encoder_reply_t)];
-	bool ret = arduinoInterface.getStatus(out_status, sizeof(encoder_reply_t));
+	bool ret = arduinoInterface.getStatus(*out_status);
 	//status.setDataPointer(data);
 	//status.packnum = rx_packetnum;
 	//rx_packetnum++;
