@@ -36,24 +36,19 @@
 #
 # $Id$
 
-#TARGET = test
 TARGET = ArduinoMotorEncoders2
-PRG = "ArduinoMotorEncoders2"
 INSTALL_DIR = /home/nebousuru/Desktop/arduino-0011
-PORT = usb
-AVRDUDE_PROGRAMMER = dragon_isp
-#PORT = /dev/ttyUSB0
-#AVRDUDE_PROGRAMMER = stk500v1
+PORT = /dev/ttyUSB0
 UPLOAD_RATE = 19200
+AVRDUDE_PROGRAMMER = stk500v1
 MCU = atmega168
-MCU_TARGET = atmega168
 F_CPU = 16000000
 
 ############################################################################
 # Below here nothing should be changed...
 
 ARDUINO = $(INSTALL_DIR)/hardware/cores/arduino
-#AVR_TOOLS_PATH = $(INSTALL_DIR)/hardware/tools/avr/bin
+AVR_TOOLS_PATH = $(INSTALL_DIR)/hardware/tools/avr/bin
 SRC =  $(ARDUINO)/pins_arduino.c $(ARDUINO)/wiring.c \
 $(ARDUINO)/wiring_analog.c $(ARDUINO)/wiring_digital.c \
 $(ARDUINO)/wiring_pulse.c $(ARDUINO)/wiring_serial.c \
@@ -68,9 +63,9 @@ MAKEFILE = Makefile
 # Debugging format.
 # Native formats for AVR-GCC's -g are stabs [default], or dwarf-2.
 # AVR (extended) COFF requires stabs, plus an avr-objcopy run.
-DEBUG = dwarf-2
+DEBUG = stabs
 
-OPT = 2
+OPT = s
 
 # Place -D or -U options here
 CDEFS = -DF_CPU=$(F_CPU)
@@ -92,8 +87,8 @@ CTUNING = -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 #CEXTRA = -Wa,-adhlns=$(<:.c=.lst)
 
 CFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT) $(CWARN) $(CSTANDARD) $(CEXTRA)
-CXXFLAGS = $(CDEBUG) $(CDEFS) $(CINCS) -O$(OPT)
-ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
+CXXFLAGS = $(CDEFS) $(CINCS) -O$(OPT)
+#ASFLAGS = -Wa,-adhlns=$(<:.S=.lst),-gstabs 
 LDFLAGS = -lm
 
 
@@ -113,14 +108,6 @@ AR  = avr-ar
 SIZE = avr-size
 NM = avr-nm
 AVRDUDE = avrdude
-#CC = $(AVR_TOOLS_PATH)/avr-gcc
-#CXX = $(AVR_TOOLS_PATH)/avr-g++
-#OBJCOPY = $(AVR_TOOLS_PATH)/avr-objcopy
-#OBJDUMP = $(AVR_TOOLS_PATH)/avr-objdump
-#AR  = $(AVR_TOOLS_PATH)/avr-ar
-#SIZE = $(AVR_TOOLS_PATH)/avr-size
-#NM = $(AVR_TOOLS_PATH)/avr-nm
-#AVRDUDE = $(AVR_TOOLS_PATH)/avrdude
 REMOVE = rm -f
 MV = mv -f
 
@@ -256,26 +243,3 @@ depend:
 	$(CC) -M -mmcu=$(MCU) $(CDEFS) $(CINCS) $(SRC) $(ASRC) >> $(MAKEFILE)
 
 .PHONY:	all build elf hex eep lss sym program coff extcoff clean depend applet_files sizebefore sizeafter
-
-
-# debugging-related targets
-
-ddd: gdbinit
-	ddd --debugger avr-gdb -x setup
-
-gdbserver: gdbinit
-	simulavr --device $(MCU_TARGET) --gdbserver
-
-gdbinit: $(GDBINITFILE)
-
-$(GDBINITFILE): $(PRG).hex
-	@echo "file $(PRG).elf" > $(GDBINITFILE)
-	
-	@echo "target remote localhost:1212" >> $(GDBINITFILE)
-	
-	@echo "load"        >> $(GDBINITFILE) 
-	@echo "break main"  >> $(GDBINITFILE)
-	@echo "continue"    >> $(GDBINITFILE)
-	@echo
-	@echo "Use 'avr-gdb -x $(GDBINITFILE)'"
-
