@@ -336,10 +336,12 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 
 
 	//Get the Response
-	byte * headerloc = (byte*) &(out_pk_rx->header);
-	readFully(arduinoFD, headerloc, PACKET_HEADER_SIZE);
+	//byte * headerloc = (byte*) &(out_pk_rx->header);
+	//readFully(arduinoFD, headerloc, PACKET_HEADER_SIZE);
 
-	if(out_pk_rx->header.packetnum != rx_num){
+	getPacket(*out_pk_rx);
+
+	if(out_pk_rx->header.packetnum != (rx_num-1)){
 		std::cout << "dropped packet - rec header:" << std::endl;
 		std::cout << out_pk_rx->header << std::endl;
 		std::cout << "dropped packet - flushing link and requesting" << std::endl;
@@ -357,7 +359,7 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 	}
 
 	//we have succesfully read the header, incr counter
-	rx_num++;
+	//rx_num++;
 
 
 	//parse the icoming packet, test if it is an error packet
@@ -393,8 +395,8 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 	}
 */
 	if( (out_pk_rx->header.size > 0) && (out_pk_rx->header.size <= maxlen)){
-		out_pk_rx->data = new byte[out_pk_rx->header.size];
-		readFully(arduinoFD, out_pk_rx->data, out_pk_rx->header.size);
+		//out_pk_rx->data = new byte[out_pk_rx->header.size];
+		//readFully(arduinoFD, out_pk_rx->data, out_pk_rx->header.size);
 		//memcpy(data_rx, pk_rx.data, pk_rx.header.size);
 		//memcpy(data_rx, out_pk_rx->data, size_rx);		
 	}
@@ -554,6 +556,7 @@ bool ArduinoInterface::getPacket(DataPacket& out_pk_rec)
 	readFully(arduinoFD, &(out_pk_rec.header), PACKET_HEADER_SIZE);
 	if(out_pk_rec.header.size > 0)
 	{
+		out_pk_rec.data = new byte[out_pk_rec.header.size];
 		readFully(arduinoFD, out_pk_rec.data, out_pk_rec.header.size);
 	}
 	rx_num++;
