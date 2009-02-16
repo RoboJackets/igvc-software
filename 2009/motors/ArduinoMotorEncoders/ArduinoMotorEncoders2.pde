@@ -23,6 +23,7 @@
 #define SPI_SS_RIGHT_MOTOR_ENCODER		4/*9*/
 #define BITBANG_SPI 1
 
+//TODO: Move packet Storage to EEPROM
 #define NUM_PK_STORE 10
 
 #define TIMEOUT_LENGTH_MILLIS 1000
