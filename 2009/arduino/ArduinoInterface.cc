@@ -327,65 +327,23 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 	memcpy(pk_tx.data, data_tx, size_tx);
 
 
-	sendPacket(pk_tx);
-
-
-	getPacket(out_pk_rx);
-
-	if(out_pk_rx.header.packetnum != (rx_num-1)){//rx_num -1 'caue rx_num is incr inside getpacket
-		std::cout << "dropped packet - rec header:" << std::endl;
-		std::cout << out_pk_rx.header << std::endl;
-		std::cout << "dropped packet - flushing link and requesting" << std::endl;
-		
-		DataPacket pk_rsnd;
-		serialFlush(arduinoFD);
-			if(!arduinoResendPacket(rx_num, pk_rsnd))
-			{
-				out_pk_rx = pk_rsnd;
-			}
-			else
-			{
-				return true;
-			}
-	}
-
-	//parse the icoming packet, test if it is an error packet
-	if(out_pk_rx.header.cmd == 0xFF ){
-		byte errorbuff[out_pk_rx.header.size];
-		readFully(arduinoFD, errorbuff, out_pk_rx.header.size);
-		byte errorcode;
-		memcpy(&errorcode, errorbuff, 1 );
-		switch(errorcode){
-			case DROPPED_PACKET:
-			{
-				std::cout << "arduino requested dropped packet - resending" << std::endl;
-				DataPacket pk;
-				int pknum;
-				memcpy(&pknum, errorbuff+1, sizeof(int) );
-				pk = getSavedPacket(pknum);
-				writeFully(arduinoFD, &(pk.header), PACKET_HEADER_SIZE);
-				writeFully(arduinoFD, pk.data, pk.header.size);
-				break;
-			}
-			default:
-				std::cout << "unknown error in recieved packet" << std::endl;
-				return true;
-			break;
-		}
-	}
-
-/*
-	if( out_pk_rx->header.size != maxlen )
+	if(sendPacket(pk_tx))
 	{
-		std::cout << "did not recive wanted number of bytes" << std::endl;
+		std::cout << "could not send packet" << std::endl;
 		return true;
 	}
-*/
 
+
+	if(getPacket(out_pk_rx))
+	{
+		std::cout << "could not rec packet" << std::endl;
+		return true;
+	}
 
 	return false;
 }
 
+//getResponse();
 
 //true on error
 bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket& pk_out){
@@ -516,9 +474,7 @@ bool ArduinoInterface::setArduinoTime(){
 
 //new cmd struct notes
 //arduino send pk
-//arduino ret pk
-//arduino process error
-
+//true on error
 bool ArduinoInterface::sendPacket(DataPacket pkout)
 {
 
@@ -531,18 +487,65 @@ bool ArduinoInterface::sendPacket(DataPacket pkout)
 	}
 	tx_num++;
 
+	return false;
 }
 
-bool ArduinoInterface::getPacket(DataPacket& out_pk_rec)
+
+//arduino ret pk
+//arduino process error
+//true on error
+bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 {
-	readFully(arduinoFD, &(out_pk_rec.header), PACKET_HEADER_SIZE);
-	if(out_pk_rec.header.size > 0)
+	readFully(arduinoFD, &(out_pk_rx.header), PACKET_HEADER_SIZE);
+	if(out_pk_rx.header.size > 0)
 	{
-		out_pk_rec.data = new byte[out_pk_rec.header.size];
-		readFully(arduinoFD, out_pk_rec.data, out_pk_rec.header.size);
+		out_pk_rx.data = new byte[out_pk_rx.header.size];
+		readFully(arduinoFD, out_pk_rx.data, out_pk_rx.header.size);
 	}
 	rx_num++;
 
+	if(out_pk_rx.header.packetnum != (rx_num-1)){//rx_num -1 'caue rx_num is incr inside getpacket
+		std::cout << "dropped packet - rec header:" << std::endl;
+		std::cout << out_pk_rx.header << std::endl;
+		std::cout << "dropped packet - flushing link and requesting" << std::endl;
+		
+		DataPacket pk_rsnd;
+		serialFlush(arduinoFD);
+			if(!arduinoResendPacket(rx_num, pk_rsnd))
+			{
+				out_pk_rx = pk_rsnd;
+			}
+			else
+			{
+				return true;
+			}
+	}
+
+	//parse the icoming packet, test if it is an error packet
+	if(out_pk_rx.header.cmd == 0xFF ){
+		byte errorbuff[out_pk_rx.header.size];
+		readFully(arduinoFD, errorbuff, out_pk_rx.header.size);
+		byte errorcode;
+		memcpy(&errorcode, errorbuff, 1 );
+		switch(errorcode){
+			case DROPPED_PACKET:
+			{
+				std::cout << "arduino requested dropped packet - resending" << std::endl;
+				DataPacket pk;
+				int pknum;
+				memcpy(&pknum, errorbuff+1, sizeof(int) );
+				pk = getSavedPacket(pknum);
+				writeFully(arduinoFD, &(pk.header), PACKET_HEADER_SIZE);
+				writeFully(arduinoFD, pk.data, pk.header.size);
+				break;
+			}
+			default:
+				std::cout << "unknown error in recieved packet" << std::endl;
+				return true;
+			break;
+		}
+	}
+	return false;
 }
 
 bool ArduinoInterface::read_TimeOut(int fd, void * buf, size_t numBytes)
