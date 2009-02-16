@@ -4,6 +4,9 @@
 #include "XmlConfiguration.h"
 #include <stdlib.h>
 
+#include "PointParamEstimator.h"
+#include "Ransac.h"
+#include <iostream>
 
 
 MapGen::MapGen()
@@ -88,7 +91,7 @@ void MapGen::genMap()
     }
 
     /* process features found */
-    //processFeatures(); // WORK IN PROGRESS!
+    processFeatures(); // WORK IN PROGRESS!
 
 
 }
@@ -220,11 +223,11 @@ int MapGen::getFeatures()
 //        {
 //            return 0; // crappy slopes
 //        }
-        int maxd = 11;
-        if( abs(avgdx )> maxd || abs(avgdy) > maxd )
-        {
-            return 0; // crappy slopes
-        }
+//        int maxd = 11;
+//        if( abs(avgdx )> maxd || abs(avgdy) > maxd )
+//        {
+//            return 0; // crappy slopes
+//        }
 
 
         if ( found )
@@ -248,8 +251,14 @@ int MapGen::processFeatures()
 
     static int map=0;
     int i;
-    int x,y,a,b;
+    double x,y,a,b;
     int aff_count = 0;
+
+    std::vector<double> pointParameters;
+    PointParamEstimator pointEstimator(0.4);
+    matchList.clear();
+    //static const int mf = maxFeatures*2;
+    CvPoint2D32f foundpts[ maxFeatures*2 ];
 
     /* get 3 matching point pairs that are close to the robot (bottom 1/3 of image)
      *  and draw the chosen points */
@@ -264,19 +273,25 @@ int MapGen::processFeatures()
             x=cvmGet(points2,0,i); //most recent
             y=cvmGet(points2,1,i); //most recent
 
+            foundpts[i] = cvPoint2D32f(a,b);
+            foundpts[maxFeatures-1-i] = cvPoint2D32f(x,y);
+            matchList.push_back( std::pair<CvPoint2D32f,CvPoint2D32f>( foundpts[i],foundpts[maxFeatures-1-i] ) );
+
             /* gather points for affine calculation */
-            if ( (aff_count<2) && (y*2>min) /*&& (y<b)*/ &&(y!=b)&&(x!=a) )
-            {
-                cvCircle(visCvGrey, cvPoint( x,y ), 1, CV_RGB(255,255,255), 3, 8, 0);
-                cvCircle(visCvGrey, cvPoint( a,b ), 1, CV_RGB(255,255,255), 3, 8, 0);
-                pts2[aff_count].x = x;
-                pts2[aff_count].y = y;
-                pts1[aff_count].x = a;
-                pts1[aff_count].y = b;
-                aff_count++;
-            }
+//            if ( (aff_count<2) && (y*2>min) /*&& (y<b)*/ &&(y!=b)&&(x!=a) )
+//            {
+//                cvCircle(visCvGrey, cvPoint( x,y ), 1, CV_RGB(255,255,255), 3, 8, 0);
+//                cvCircle(visCvGrey, cvPoint( a,b ), 1, CV_RGB(255,255,255), 3, 8, 0);
+////                pts2[aff_count].x = x;
+////                pts2[aff_count].y = y;
+////                pts1[aff_count].x = a;
+////                pts1[aff_count].y = b;
+////                aff_count++;
+//
+//            }
         }
     }
+
 
     /* show image with points drawn */
     cvShowImage("curr",visCvGrey);
@@ -304,15 +319,35 @@ int MapGen::processFeatures()
 //    cvmSet(mat_CamToCam, 2, 2, 1);
 //    cvReleaseMat(&temp);
 
-    if(aff_count>1)
+//    if(aff_count>1)
+//    {
+//        if(! computeHomography(pts1,pts2,mat_CamToCam) )
+//            return 0;
+//    }
+//    else
+//    {
+//        return 0;
+//    }
+
+    //printV(matchList);
+
+
+       double usedData = Ransac< CvPoint2D32f ,double>::compute(
+    					pointParameters,
+                    	&pointEstimator ,
+	                    matchList,
+    	                2
+    	                );
+
+
+    cvZero(mat_CamToCam);
+    for (i=0; i<9; i++)
     {
-        if(! computeHomography(pts1,pts2,mat_CamToCam) )
-            return 0;
+        if( pointParameters.at(i) > 1000 ) return 0;
+
+        cvSetReal1D(mat_CamToCam, i, pointParameters.at(i) );
     }
-    else
-    {
-        return 0;
-    }
+
 
     /* crude check for errors */
     if( cvDet(mat_CamToCam) == 0 )
@@ -464,7 +499,7 @@ void MapGen::init()
     mat_CamToCam = cvCreateMat(3,3,CV_32F);
     mat_CamToWorld = cvCreateMat(3,3,CV_32F);
 
-    double k = 01; // scale factor
+    double k = 0.1; // scale factor
     // k  0  dx
     // 0  k  dy
     // 0  0  1
@@ -507,7 +542,7 @@ int MapGen::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, CvMat* h)
 {
     /*
         | 1 b e |   | x1 |   | x2 |
-        | c 1 f | * | x2 | = | y2 |
+        | c 1 f | * | y1 | = | y2 |
         | 0 0 1 |   | 1  |   | 1  |
     */
 
@@ -539,7 +574,7 @@ int MapGen::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, CvMat* h)
     printf(" %.2f %.2f %.2f %.2f  \n" , b,c,e,f );
 
     if( y1==y3 || x1==x3 ) return 0;
-    else if( abs(e)>35 || abs(f)>25 ) return 0;
+    //else if( abs(e)>35 || abs(f)>25 ) return 0;
     else return 1;
 
 }
