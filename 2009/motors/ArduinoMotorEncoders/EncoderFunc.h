@@ -42,4 +42,7 @@ void hangAndFlash13(void);
 
 //Send len bytes from the pointer
 bool serialReadBytesTimeout(int len, byte * msg);
+
+//gen a timestamp
+void genTimestamp(long * sec, long * usec);
 #endif // ENCODERFUNC_H_
