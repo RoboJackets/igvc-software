@@ -22,6 +22,8 @@
 #define SERIAL_PORT "/dev/ttyUSB0"
 #define MODULE_ID 'e'
 
+#define SERIAL_TIMOUT_SEC 2
+
 /**
  * Opens a connection to an arduino.
  * 
@@ -194,8 +196,6 @@ bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes) {
 	char* dst = (char*) buf;
 	size_t numLeft = numBytes;
 	ssize_t numRead;
-
-	struct timeval t0 = getTime();
 	
 	while (numLeft > 0) {
 		numRead = read(fd, dst, numLeft);
@@ -319,18 +319,20 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 	pk_tx.header.cmd = cmd;
 	pk_tx.header.size = size_tx;
 
-	if(writeFully(arduinoFD, &(pk_tx.header), PACKET_HEADER_SIZE)){
-		return true;
-	}
+	//if(writeFully(arduinoFD, &(pk_tx.header), PACKET_HEADER_SIZE)){
+	//	return true;
+	//}
 
-	if(pk_tx.header.size > 0) {
+	//if(pk_tx.header.size > 0) {
 		pk_tx.data = new byte[size_tx];
 		memcpy(pk_tx.data, data_tx, size_tx);
-		writeFully(arduinoFD, pk_tx.data, pk_tx.header.size);
-	}
+	//	writeFully(arduinoFD, pk_tx.data, pk_tx.header.size);
+	//}
 
-	savePacket(pk_tx);
-	tx_num++;
+	sendPacket(pk_tx);
+
+	//savePacket(pk_tx);
+	//tx_num++;
 
 
 	//Get the Response
@@ -338,7 +340,10 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 	readFully(arduinoFD, headerloc, PACKET_HEADER_SIZE);
 
 	if(out_pk_rx->header.packetnum != rx_num){
+		std::cout << "dropped packet - rec header:" << std::endl;
+		std::cout << out_pk_rx->header << std::endl;
 		std::cout << "dropped packet - flushing link and requesting" << std::endl;
+		
 		DataPacket pk_rsnd;
 		serialFlush(arduinoFD);
 			if(arduinoResendPacket(rx_num, pk_rsnd))
@@ -353,6 +358,7 @@ bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPa
 
 	//we have succesfully read the header, incr counter
 	rx_num++;
+
 
 	//parse the icoming packet, test if it is an error packet
 	if(out_pk_rx->header.cmd == 0xFF ){
@@ -528,7 +534,7 @@ bool ArduinoInterface::setArduinoTime(){
 //arduino send pk
 //arduino ret pk
 //arduino process error
-/*
+
 bool ArduinoInterface::sendPacket(DataPacket pkout)
 {
 
@@ -542,4 +548,40 @@ bool ArduinoInterface::sendPacket(DataPacket pkout)
 	tx_num++;
 
 }
-*/
+
+bool ArduinoInterface::getPacket(DataPacket& out_pk_rec)
+{
+	readFully(arduinoFD, &(out_pk_rec.header), PACKET_HEADER_SIZE);
+	if(out_pk_rec.header.size > 0)
+	{
+		readFully(arduinoFD, out_pk_rec.data, out_pk_rec.header.size);
+	}
+	rx_num++;
+
+}
+
+bool ArduinoInterface::read_TimeOut(int fd, void * buf, size_t numBytes)
+{
+	char* dst = (char*) buf;
+	size_t numLeft = numBytes;
+	ssize_t numRead;
+
+	struct timeval t0 = getTime();
+	
+	while ( numLeft > 0)  {
+		numRead = read(fd, dst, numLeft);
+		if (numRead < 0) {
+			return true;
+		}
+		
+		numLeft -= numRead;
+		dst += numRead;
+		
+		if( (getTime().tv_sec - t0.tv_sec) < SERIAL_TIMOUT_SEC)
+		{
+			return true;
+		}
+
+	}
+	return false;
+}
