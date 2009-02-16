@@ -21,24 +21,24 @@ DataPacket::DataPacket(const DataPacket& pk){
 }
 
 std::ostream& operator<<(std::ostream& output, DataPacket& pk){
-	output << std::hex;
+//	output << std::hex;
 	output << "timestamp sec: " << pk.header.timestamp_sec << std::endl;
 	output << "timestamp usec: " << pk.header.timestamp_usec << std::endl;
-	output << std::dec;
+//	output << std::dec;
 	output << "packetnum: " << pk.header.packetnum << std::endl;
-	output << "cmd (char): " << (char) pk.header.cmd << "\tcmd (ascii): " << (int) pk.header.cmd << std::endl;
+	output << "cmd (char): " << (char) pk.header.cmd << "\tcmd (ascii): " << (unsigned int) pk.header.cmd << std::endl;
 	output << "size: " << (int) pk.header.size << std::endl;
 
 	return(output);
 }
 
 std::ostream& operator<<(std::ostream& output, header_t header){
-	output << std::hex;
+//	output << std::hex;
 	output << "timestamp sec: " << header.timestamp_sec << std::endl;
 	output << "timestamp usec: " << header.timestamp_usec << std::endl;
-	output << std::dec;
+//	output << std::dec;
 	output << "packetnum: " << header.packetnum << std::endl;
-	output << "cmd (char): " << (char) header.cmd << "\tcmd (ascii): " << (int) header.cmd << std::endl;
+	output << "cmd (char): " << (char) header.cmd << "\tcmd (ascii): " << (unsigned int) header.cmd << std::endl;
 	output << "size: " << (int) header.size << std::endl;
 
 	return(output);

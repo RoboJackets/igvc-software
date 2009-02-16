@@ -43,13 +43,17 @@ class ArduinoInterface {
 		bool serialFlush(int fd);
 
 		std::list<DataPacket> tx_packet_list;
-		int rx_num;
-		int tx_num;
+		unsigned int rx_num;
+		unsigned int tx_num;
 		void savePacket(DataPacket pk);
 		DataPacket getSavedPacket(int packnum);
 		public: bool arduinoResendPacket(int pknum, DataPacket& pk_out);
 		struct timeval getTime();
 		bool setArduinoTime();
+
+		bool sendPacket(DataPacket pkout);
+		bool getPacket(DataPacket& out_pk_rec);
+		bool read_TimeOut(int fd, void * buf, size_t numBytes);
 };
 
 #endif /* ARDUINO_INTERFACE_H */

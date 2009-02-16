@@ -7,7 +7,7 @@
 typedef unsigned char byte;
 
 //Packet Header
-typedef struct __attribute__((__packed__)) { long timestamp_sec; long timestamp_usec; long packetnum; byte cmd; byte size; } header_t; //orig arduino - should be same as laptop
+typedef struct __attribute__((__packed__)) { long timestamp_sec; long timestamp_usec; unsigned long packetnum; byte cmd; byte size; } header_t; //orig arduino - should be same as laptop
 
 //Data types
 
