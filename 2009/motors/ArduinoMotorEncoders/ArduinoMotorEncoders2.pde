@@ -268,8 +268,9 @@ void readSerial(void) {
 			case ARDUINO_GETSTATUS_CMD:
 			{
 				header_t headerOut;
-				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
-				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
+				//headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+				//headerOut.timestamp_usec =  global_time_usec + millis()*1000 - arduino_time_millis*1000;
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = ARDUINO_GETSTATUS_RESP;
 				switch(sendType){
@@ -310,8 +311,10 @@ void readSerial(void) {
 				setVariable(variableNumber, variableValue);
 
 				header_t headerOut;
-				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
-				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+				//headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+				//headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
+
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = ARDUINO_SETVAR_RESP;
 				headerOut.size = 0;
@@ -323,8 +326,10 @@ void readSerial(void) {
 			case ARDUINO_ID_CMD:
 			{
 				header_t headerOut;
-				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
-				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+				//headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+				//headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
+
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = ARDUINO_ID_RESP;
 				headerOut.size = 1;
@@ -357,8 +362,10 @@ void readSerial(void) {
 			{
 				
 				header_t headerOut;
-				headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
-				headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+				//headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+				//headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
+
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = 0xFF;
 				headerOut.size = 0;
@@ -524,8 +531,10 @@ void resend_packet(unsigned long num){
 	for(int i = 0; i < NUM_PK_STORE; i++ ){
 		if(packet_store[i].head.packetnum == num){
 			header_t headerOut;
-			headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
-			headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+			//headerOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+			//headerOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+			genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
+
 			headerOut.packetnum = tx_num;
 			headerOut.cmd = ARDUINO_RSND_PK_RESP;
 			headerOut.size = PACKET_HEADER_SIZE + packet_store[i].head.size;
@@ -545,8 +554,10 @@ void resend_packet(unsigned long num){
 
 //		else{
 	header_t headOut;
-	headOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
-	headOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+	//headOut.timestamp_sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+	//headOut.timestamp_usec =  global_time_usec + (millis()*1000 - (millis()/1000)) - (arduino_time_millis*1000 -arduino_time_millis/1000);
+	genTimestamp(&headOut.timestamp_sec, &headOut.timestamp_usec);
+
 	headOut.packetnum = tx_num;
 	headOut.cmd = ARDUINO_ERROR_RESP;
 	headOut.size = sizeof(long);
@@ -631,4 +642,11 @@ bool serialReadBytesTimeout(int len, byte * msg)
 	//otherwise timeout - flush link
 	Serial.flush();
 	return false;
+}
+
+void genTimestamp(long * sec, long * usec)
+{
+
+	*sec =  global_time_sec + (millis()/1000) - arduino_time_millis/1000;
+	*usec = *sec - (global_time_usec + millis()*1000 - arduino_time_millis*1000);
 }
