@@ -6,6 +6,8 @@
 #include "Point2D.h"
 #include "cvcorrImages.h"
 
+#include <vector>
+
 /*
  * This file contains the robot's SLAM processing code.
  *   by: Chris McClanahan
@@ -43,6 +45,7 @@ public:
     CvPoint2D32f pts2[3];
     /**/
     int computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, CvMat* h);
+    std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > matchList;
 
 
 };

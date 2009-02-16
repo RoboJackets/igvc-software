@@ -295,7 +295,7 @@ void Robot::processFunc()
 
 
 	/* SLAM Processing */
-	//mapper.genMap();
+	mapper.genMap();
 
 
 	/* Make decision */
@@ -308,7 +308,7 @@ void Robot::processFunc()
 
 	/* Drive Robot via motor commands (GO!) */
 	//TODO:
-	motors.set_heading(heading_main.y, heading_main.x);
+	//motors.set_heading(heading_main.y, heading_main.x);
 
 
 	/* Save raw image last */
@@ -319,7 +319,7 @@ void Robot::processFunc()
 
 
 	/* Stats */
-	if (1)
+	if (0)
 	{
 		printf( "framerate: %.2f \n", elapsed_time() );
 		start_timer(); // called second to time entire process (except first run)
