@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 
-void printMatrix(CvMat* matrix)
+void printCv33Matrix(CvMat* matrix)
 {
     printf("\n");
     int row,col;
@@ -19,7 +19,10 @@ void printMatrix(CvMat* matrix)
 }
 
 
-PointParamEstimator::PointParamEstimator(double delta) : m_deltaSquared(delta*delta) {}
+PointParamEstimator::PointParamEstimator(double delta) : m_deltaSquared(delta*delta)
+{
+}
+
 /*****************************************************************************/
 /*
  */
@@ -50,9 +53,6 @@ void PointParamEstimator::estimate(std::vector< std::pair<CvPoint2D32f ,CvPoint2
 		cvReleaseMat( &homography );
 	}
 
-
-
-
 }
 /*****************************************************************************/
 /*
@@ -63,7 +63,6 @@ void PointParamEstimator::leastSquaresEstimate(std::vector< std::pair<CvPoint2D3
     parameters.clear();
     if (data.size()<2)
         return;
-
 
 	{
 		CvMat* homography = cvCreateMat(3,3,CV_32F);
@@ -85,48 +84,41 @@ void PointParamEstimator::leastSquaresEstimate(std::vector< std::pair<CvPoint2D3
 		cvReleaseMat( &homography );
 	}
 
-
 }
 /*****************************************************************************/
 /*
-
  */
 bool PointParamEstimator::agree(std::vector<double> &parameters, std::pair<CvPoint2D32f ,CvPoint2D32f >  &data)
 {
 
 	double error;
+	double x1,y1,x2,y2,x2test,y2test;
 
-	{
-		double x1,y1,x2,y2,x2test,y2test;
+	x1 = data.first.x;
+	y1 = data.first.y;
+	x2 = data.second.x;
+	y2 = data.second.y;
 
-		x1 = data.first.x;
-		y1 = data.first.y;
-		x2 = data.second.x;
-		y2 = data.second.y;
+	x2test = parameters[0]*x1 + parameters[1]*y1 + parameters[2];
+	y2test = parameters[3]*x1 + parameters[4]*y1 + parameters[5];
 
-		x2test = parameters[0]*x1 + parameters[1]*y1 + parameters[2];
-		y2test = parameters[3]*x1 + parameters[4]*y1 + parameters[5];
+//	error =  (1.0/abs(x2-x2test)+1.0/abs(y2-y2test));
+//	error =  1.0/((x2-x2test)*(x2-x2test))+1.0/((y2-y2test)*(y2-y2test));
+	error =  (abs(x2-x2test)+abs(y2-y2test));
+	if(error>0.0) error = 1.0/error;
 
-//		error =  (1.0/abs(x2-x2test)+1.0/abs(y2-y2test));
-//		error =  1.0/((x2-x2test)*(x2-x2test))+1.0/((y2-y2test)*(y2-y2test));
-		error =  (abs(x2-x2test)+abs(y2-y2test));
-		if(error>0.0) error = 1.0/error;
-
-		//printf("E  1(%.2f,%.2f) 2(%.2f %.2f)   \n" , x1,y1,x2,y2  );
-	}
-
-
+//	printf("E  1(%.2f,%.2f) 2(%.2f %.2f)   \n" , x1,y1,x2,y2  );
 //	printf("error: %.4f max: %.4f \n",error*error,m_deltaSquared);
-//    return ((error*error) < m_deltaSquared);
-	//printf("error: %.4f max: %.4f \n",error,m_deltaSquared);
+//  return ((error*error) < m_deltaSquared);
+//	printf("error: %.4f max: %.4f \n",error,m_deltaSquared);
     return ((error) < m_deltaSquared);
+
 }
 
 
-
-
 /*****************************************************************************/
-
+/*
+ */
 int PointParamEstimator::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, CvMat* h)
 {
     /*
@@ -165,10 +157,12 @@ int PointParamEstimator::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, C
 
     //printf(" 1(%.2f,%.2f) 2(%.2f %.2f) | 3(%.2f,%.2f) 4(%.2f %.2f)  \n" , x1,y1,x2,y2,x3,y3,x4,y4 );
     //printf(" b%.2f c%.2f e%.2f f%.2f  \n" , b,c,e,f );
-	//printMatrix(h);
+	//printCv33Matrix(h);
 
-    if( y1==y3 || x1==x3 ) return 0;
-    else return 1;
+    //if( y1==y3 || x1==x3 ) return 0;
+    //else return 1;
+
+    return 1;
 
 }
 

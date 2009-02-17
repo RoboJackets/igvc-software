@@ -36,15 +36,15 @@ public:
     IplImage* prev;
     int processFeatures();
     /**/
-    CvMat* mat_CamToCam;
-    CvMat* mat_CamToWorld;
+    CvMat* matCamToCam;
+    CvMat* matCamToWorld;
     IplImage* worldmap;
-    void printMatrix(CvMat* matrix);
+    void printCv33Matrix(CvMat* matrix);
     int numFramesBack;
     CvPoint2D32f pts1[3];
     CvPoint2D32f pts2[3];
     /**/
-    int computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, CvMat* h);
+    //int computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, CvMat* h);
     std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > matchList;
 
 
