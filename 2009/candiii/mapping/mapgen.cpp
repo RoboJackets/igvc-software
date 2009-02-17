@@ -181,7 +181,7 @@ int MapGen::getFeatures()
                 y=cvmGet(points2,1,i);
 
                 /* don't look in the horizon */
-                //if(y>visCvGrey->height/4)
+//                if(y>visCvGrey->height/3)
                 {
                     /* calculate slope and extend lines */
                     dx = x-a;
@@ -276,14 +276,19 @@ int MapGen::processFeatures()
             x=cvmGet(points2,0,i); //most recent
             y=cvmGet(points2,1,i); //most recent
 
-            /* gather feature matches pairs for RANSAC */
-            foundpts[i] = cvPoint2D32f(a,b);
-            foundpts[maxFeatures-1-i] = cvPoint2D32f(x,y);
-            matchList.push_back( std::pair<CvPoint2D32f,CvPoint2D32f>( foundpts[i],foundpts[maxFeatures-1-i] ) );
+            /* only consider good points (close to bottom) */
+//            if(y > visCvGrey->height/3 )
+            {
+                /* gather feature matches pairs for RANSAC */
+                foundpts[i] = cvPoint2D32f(a,b);
+                foundpts[maxFeatures-1-i] = cvPoint2D32f(x,y);
+                matchList.push_back( std::pair<CvPoint2D32f,CvPoint2D32f>( foundpts[i],foundpts[maxFeatures-1-i] ) );
+            }
 
-//            /* gather points for affine calculation */
+//            /* only consider good points */
 //            if ( (aff_count<2) && (y*2>min) /*&& (y<b)*/ &&(y!=b)&&(x!=a) )
 //            {
+//                /* gather points for affine calculation */
 //                cvCircle(visCvGrey, cvPoint( x,y ), 1, CV_RGB(255,255,255), 3, 8, 0);
 //                cvCircle(visCvGrey, cvPoint( a,b ), 1, CV_RGB(255,255,255), 3, 8, 0);
 //                pts2[aff_count].x = x;
