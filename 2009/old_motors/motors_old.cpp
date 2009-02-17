@@ -198,17 +198,22 @@ int Motors_Old::get_motor_states(void)
  */
 int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 {
-    if(iRotation<0)
-    {
-        /* Turn Left */
-        iRotation+=128;
-        return this->set_motors( iFwdVelocity/2 - iRotation, iFwdVelocity/2 + iRotation );
-    }
-    else
-    {
-        /* Turn Right (or go Straight) */
-        return this->set_motors( iFwdVelocity/2 + iRotation, iFwdVelocity/2 - iRotation );
-    }
+//    int left  = iFwdVelocity/2 + iRotation;
+//    int right = iFwdVelocity/2 - iRotation;
+
+    int left  = iFwdVelocity + iRotation;
+    int right = iFwdVelocity - iRotation;
+
+    left  = left  * MAX_OUTPUT / 255;
+    right = right * MAX_OUTPUT / 255;
+
+//    if (left  > MAX_OUTPUT) left  = MAX_OUTPUT;
+//    if (right > MAX_OUTPUT) right = MAX_OUTPUT;
+
+    //printf("L=%d R=%d \n",left,right);
+
+    return this->set_motors( left , right );
+
 }
 
 
