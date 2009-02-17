@@ -13,8 +13,8 @@
 #include "ParameterEstimator.h"
 
 
-
-void printV(std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > p)
+/* debug printing */
+void printMatchesVector(std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > p)
 {
 	for(int i=0; i<p.size(); i++)
 	{
@@ -22,7 +22,7 @@ void printV(std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > p)
 	}
 
 }
-void printV(std::vector< std::pair<CvPoint2D32f,CvPoint2D32f>* > p)
+void printMatchesVector(std::vector< std::pair<CvPoint2D32f,CvPoint2D32f>* > p)
 {
 	for(int i=0; i<p.size(); i++)
 	{
@@ -55,6 +55,8 @@ void printV(std::vector< std::pair<CvPoint2D32f,CvPoint2D32f>* > p)
  *                                   S - type of parameter (e.g. double).
  *
  * Author: Ziv Yaniv (zivy@cs.huji.ac.il)
+ *
+ * MODIFIED BY CHRIS MCCLANAHAN
  */
 template<class T, class S>
 class Ransac {
@@ -190,7 +192,7 @@ double Ransac<T,S>::compute(std::vector<S> &parameters,
             notChosen[k] = 0;
             maxIndex--;
         }
-        
+
         //get the indexes of the chosen objects so we can check that this sub-set hasn't been
         //chosen already
         for (l=0, j=0; j<numDataObjects; j++) {
@@ -303,7 +305,7 @@ void Ransac<T,S>::computeAllChoices(ParameterEstimator<T,S> *paramEstimator, std
     }
 
     //continue to recursivly generate the choice of indexes
-    int endIndex = n-k; 
+    int endIndex = n-k;
     for (int i=startIndex; i<=endIndex; i++) {
         arr[arrIndex] = i;
         computeAllChoices(paramEstimator, data, numForEstimate, bestVotes, curVotes, numVotesForBest,
@@ -331,8 +333,8 @@ void Ransac<T,S>::estimate(ParameterEstimator<T,S> *paramEstimator, std::vector<
     for (j=0; j<numForEstimate; j++)
         exactEstimateData.push_back(&(data[arr[j]]));
     paramEstimator->estimate(exactEstimateData,exactEstimateParameters);
-    
-//printV(exactEstimateData);
+
+//printMatchesVector(exactEstimateData);
 //printf("ENDTEST\n");
 
     for (j=0; j<numDataObjects; j++) {
