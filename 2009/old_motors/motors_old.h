@@ -1,7 +1,6 @@
 #ifndef MOTORS_OLD_H
 #define MOTORS_OLD_H
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +11,8 @@
 #include <sys/ioctl.h>
 #include <iostream>
 
+/* maximum output value out of 255 */
+#define MAX_OUTPUT          80
 
 #define DEFAULT_PORT		"/dev/ttyUSB0"
 

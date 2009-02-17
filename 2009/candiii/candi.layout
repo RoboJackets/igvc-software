@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="0" tabpos="7">
-		<Cursor position="1244" topLine="0" />
+	<File name="Config.xml" open="1" top="1" tabpos="7">
+		<Cursor position="629" topLine="0" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="5">
-		<Cursor position="7105" topLine="282" />
+		<Cursor position="7161" topLine="282" />
 	</File>
 	<File name="Robot.h" open="1" top="0" tabpos="8">
 		<Cursor position="1493" topLine="0" />
@@ -13,17 +13,20 @@
 	<File name="main.cpp" open="0" top="0" tabpos="7">
 		<Cursor position="60" topLine="0" />
 	</File>
+	<File name="mapping/PointParamEstimator.cpp" open="1" top="0" tabpos="13">
+		<Cursor position="3092" topLine="128" />
+	</File>
 	<File name="mapping/cvcorrImages.cpp" open="1" top="0" tabpos="3">
 		<Cursor position="34211" topLine="1000" />
 	</File>
 	<File name="mapping/cvcorrImages.h" open="1" top="0" tabpos="4">
 		<Cursor position="3770" topLine="55" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="2">
-		<Cursor position="13706" topLine="503" />
+	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="8504" topLine="333" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="1">
-		<Cursor position="753" topLine="3" />
+		<Cursor position="353" topLine="3" />
 	</File>
 	<File name="vision/CVcam.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="588" topLine="0" />
@@ -59,7 +62,7 @@
 		<Cursor position="90" topLine="0" />
 	</File>
 	<File name="../old_motors/motors_old.cpp" open="1" top="0" tabpos="11">
-		<Cursor position="386" topLine="0" />
+		<Cursor position="6874" topLine="174" />
 	</File>
 	<File name="../old_motors/motors_old.h" open="1" top="0" tabpos="12">
 		<Cursor position="291" topLine="0" />

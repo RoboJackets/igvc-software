@@ -43,6 +43,18 @@
 		<Unit filename="logging/bottime.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
+		<Unit filename="mapping/ParameterEstimator.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="mapping/PointParamEstimator.cpp">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="mapping/PointParamEstimator.h">
+			<Option target="Debug" />
+		</Unit>
+		<Unit filename="mapping/Ransac.h">
+			<Option target="Debug" />
+		</Unit>
 		<Unit filename="mapping/cvcorrImages.cpp">
 			<Option target="Debug" />
 		</Unit>
