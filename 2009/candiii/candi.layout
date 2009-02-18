@@ -13,8 +13,8 @@
 	<File name="main.cpp" open="0" top="0" tabpos="7">
 		<Cursor position="60" topLine="0" />
 	</File>
-	<File name="mapping/PointParamEstimator.cpp" open="1" top="1" tabpos="3">
-		<Cursor position="3980" topLine="129" />
+	<File name="mapping/PointParamEstimator.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="2752" topLine="81" />
 	</File>
 	<File name="mapping/Ransac.h" open="1" top="0" tabpos="4">
 		<Cursor position="1992" topLine="81" />
@@ -25,8 +25,8 @@
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
 		<Cursor position="3770" topLine="55" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="4779" topLine="161" />
+	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="2">
+		<Cursor position="12967" topLine="437" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="1">
 		<Cursor position="669" topLine="3" />
