@@ -261,7 +261,7 @@ int MapGen::processFeatures()
 
     /* for RANSAC */
     std::vector<double> pointParameters;
-    PointParamEstimator pointEstimator(0.4);
+    PointParamEstimator pointEstimator(0.3);
     matchList.clear();
     CvPoint2D32f foundpts[ maxFeatures*2 ];
 
@@ -382,6 +382,7 @@ int MapGen::processFeatures()
      *  just not on the first run */
     if (map)
     {
+        cvInv(matCamToCam,matCamToCam);
         cvMatMul(matCamToWorld,matCamToCam,matCamToWorld);
     }
     map=1;

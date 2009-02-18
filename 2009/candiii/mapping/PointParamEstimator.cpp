@@ -133,13 +133,11 @@ int PointParamEstimator::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, C
 
     double x1,y1,x2,y2,x3,y3,x4,y4,e,f,sint,cost,v1x,v1y,v2x,v2y,dt;
 
-    //v1
     x1 = p1[0].x;
     y1 = p1[0].y;
     x2 = p2[0].x;
     y2 = p2[0].y;
 
-    //v2
     x3 = p1[1].x;
     y3 = p1[1].y;
     x4 = p2[1].x;
@@ -154,27 +152,23 @@ int PointParamEstimator::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, C
     v2y = y4-y2;
 
     //dt = |v1xv2|
-    //dt = sqrt( (v1x*v2y-v2x*v1y)*(v1x*v2y-v2x*v1y) );
-    dt = sqrt( (v2x*v1y-v1x*v2y)*(v2x*v1y-v1x*v2y) );
+    dt = (v1x*v2y-v2x*v1y) ;
 
     //sintheta = dt / |v1|*|v2|
-    //sint = dt / ( sqrt(v1x*v1x+v1y*v1y)*sqrt(v2x*v2x+v2y*v2y) );
-    sint = dt / ( sqrt(v2x*v2x+v2y*v2y)*sqrt(v1x*v1x+v1y*v1y) );
+    sint = dt / ( sqrt(v1x*v1x+v1y*v1y)*sqrt(v2x*v2x+v2y*v2y) );
 
     //costheta = 1 - sintheta^2
     cost = 1 - (sint)*(sint);
 
     //translation
-    e = v2x-v1x;
-    f = v2y-v1y;
-//    e = (x2+x4-x1-x3)/2;
-//    f = (y2+y4-y1-y3)/2;
+    e = x2 - ( cost*x1 + (-sint)*y1 );
+    f = y2 - ( (sint)*x1 + cost*y1 );
 
 
     //homography
-    cvmSet(h,0,0,cost); cvmSet(h,0,1,sint); cvmSet(h,0,2, e );
-    cvmSet(h,1,0,-sint); cvmSet(h,1,1,cost); cvmSet(h,1,2, f );
-    cvmSet(h,2,0, 0   ); cvmSet(h,2,1, 0   ); cvmSet(h,2,2, 1 );
+    cvmSet(h,0,0,cost); cvmSet(h,0,1,-sint); cvmSet(h,0,2, e );
+    cvmSet(h,1,0,sint); cvmSet(h,1,1, cost); cvmSet(h,1,2, f );
+    cvmSet(h,2,0, 0  ); cvmSet(h,2,1, 0   ); cvmSet(h,2,2, 1 );
 
     //done
     return 1;
