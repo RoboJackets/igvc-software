@@ -152,15 +152,13 @@ int MapGen::getFeatures()
                     1,/* Use fundamental matrix to filter points? */
                     1);/* Threshold for (dist b/w) good points in filter (usually 0.5 or 1.0)*/
 
-        printf(" matching: %d \n",found);
+        //printf(" matching: %d \n",found);
 
         /* move current to previous */
         if(found && !f)
         {
             cvCopy(visCvGrey,prev);
         }
-
-
 
         /* local storage */
         int x,y,a,b;
@@ -189,8 +187,8 @@ int MapGen::getFeatures()
                     avgdx += dx;
                     avgdy += dy;
                     good++;
-                    //dx*=1;  // extend by X
-                    //dy*=1;  // extend by X
+
+                    /* draw good matches */
                     cvLine(visCvGrey, cvPoint( a-dx,b-dy ), cvPoint( x+dx,y+dy ), CV_RGB(0,0,0), 2, 8, 0);
                 }
 
@@ -199,18 +197,18 @@ int MapGen::getFeatures()
             }
         }
 
+        printf("  using: %d \n",good);
+
         /* draw global direction vector in center (white) */
         if(good)
         {
             avgdx/=good;
             avgdy/=good;
-            avgdx*=3;   // extend by X
-            avgdy*=3;   // extend by X
             cvLine(visCvGrey,
                 cvPoint( visCvGrey->width/2-avgdx, visCvGrey->height/2-avgdy ),
                 cvPoint( visCvGrey->width/2+avgdx, visCvGrey->height/2+avgdy ),
                 CV_RGB(250,250,250), 3, 8, 0);
-            //printf("%d, %d \n",avgdx,avgdy);
+            //printf("   adx %d ady %d\n",avgdx,avgdy);
         }
 
         /* show image with points drawn */
@@ -221,13 +219,14 @@ int MapGen::getFeatures()
 
         if(avgdx==0 || avgdy==0)
         {
-            return 0; // crappy slopes
+            return 0; // no motion
         }
 
-        int maxd = 21;
+        int maxd = 7;
         if( abs(avgdx) > maxd || abs(avgdy) > maxd )
         {
-            return 0; // crappy slopes
+            //printf("   adx %d ady %d\n",avgdx,avgdy);
+            return 0; // bumpy/noisy motion
         }
 
 
@@ -382,7 +381,7 @@ int MapGen::processFeatures()
      *  just not on the first run */
     if (map)
     {
-        cvInv(matCamToCam,matCamToCam);
+        cvInv(matCamToCam,matCamToCam); // convert h to map from curr to prev pts
         cvMatMul(matCamToWorld,matCamToCam,matCamToWorld);
     }
     map=1;
@@ -419,7 +418,7 @@ int MapGen::processFeatures()
 
     /* draw a line from the center bottom of camera frame to center top
      *  to show the orientation of the robot in the world map */
-    x= cvmGet(matCamToWorld,0,0) * visCvGrey->width/2 +
+   x= cvmGet(matCamToWorld,0,0) * visCvGrey->width/2 +
        cvmGet(matCamToWorld,0,1) * (visCvGrey->height-2) +
        cvmGet(matCamToWorld,0,2);
     y= cvmGet(matCamToWorld,1,0) * visCvGrey->width/2 +
@@ -476,7 +475,7 @@ void MapGen::init()
     matCamToCam = cvCreateMat(3,3,CV_32F);
     matCamToWorld = cvCreateMat(3,3,CV_32F);
 
-    double k = 0.1; // scale factor
+    double k = 0.3; // scale factor
     // k  0  dx
     // 0  k  dy
     // 0  0  1
@@ -513,7 +512,7 @@ void MapGen::LoadXMLSettings()
         {
             printf("ERROR: Mapping settings NOT loaded! Using DEFAULTS \n");
             {
-                maxFeatures = 64;
+                maxFeatures = 34;
                 numFramesBack = 4;
 
             }
@@ -541,48 +540,6 @@ void MapGen::printCv33Matrix(CvMat* matrix)
     }
     printf("\n");
 }
-
-
-//int MapGen::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, CvMat* h)
-//{
-//    /*
-//        | 1 b e |   | x1 |   | x2 |
-//        | c 1 f | * | y1 | = | y2 |
-//        | 0 0 1 |   | 1  |   | 1  |
-//    */
-//
-//    double x1,y1,x2,y2,x3,y3,x4,y4,b,c,e,f;
-//
-//    x1 = p1[0].x;
-//    y1 = p1[0].y;
-//    x2 = p2[0].x;
-//    y2 = p2[0].y;
-//
-//    x3 = p1[1].x;
-//    y3 = p1[1].y;
-//    x4 = p2[1].x;
-//    y4 = p2[1].y;
-//
-//    b = ( x2-x4-x1+x3 ) / ( y1-y3 ) ;
-//    c = ( y2-y4-y1+y3 ) / ( x1-x3 ) ;
-//
-//    e = ( x2+x4-x1-x3-b*(y1+y3) ) / 2 ;
-//    f = ( y2+y4-y1-y3-c*(x1+x3) ) / 2 ;
-//
-//    cvZero(h);
-//
-//    cvmSet(h,0,0, 1 ); cvmSet(h,0,1, b ); cvmSet(h,0,2, e );
-//    cvmSet(h,1,0, c ); cvmSet(h,1,1, 1 ); cvmSet(h,1,2, f );
-//    cvmSet(h,2,0, 0 ); cvmSet(h,2,1, 0 ); cvmSet(h,2,2, 1 );
-//
-//    printf(" (%.2f,%.2f)-(%.2f %.2f)  (%.2f,%.2f)-(%.2f %.2f)  \n" , x1,y1,x2,y2,x3,y3,x4,y4 );
-//    printf(" %.2f %.2f %.2f %.2f  \n" , b,c,e,f );
-//
-//    if( y1==y3 || x1==x3 ) return 0;
-//    //else if( abs(e)>35 || abs(f)>25 ) return 0;
-//    else return 1;
-//
-//}
 
 
 
