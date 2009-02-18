@@ -181,7 +181,7 @@ int MapGen::getFeatures()
                 y=cvmGet(points2,1,i);
 
                 /* don't look in the horizon */
-//                if(y>visCvGrey->height/3)
+                if(y>visCvGrey->height/3)
                 {
                     /* calculate slope and extend lines */
                     dx = x-a;
@@ -277,7 +277,7 @@ int MapGen::processFeatures()
             y=cvmGet(points2,1,i); //most recent
 
             /* only consider good points (close to bottom) */
-//            if(y > visCvGrey->height/3 )
+            if(y > visCvGrey->height/3 )
             {
                 /* gather feature matches pairs for RANSAC */
                 foundpts[i] = cvPoint2D32f(a,b);
