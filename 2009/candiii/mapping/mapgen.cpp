@@ -18,7 +18,6 @@ MapGen::~MapGen()
 {
     /* clean up */
 
-
     if (prev != NULL )
     {
         cvReleaseImage( &prev );
@@ -149,8 +148,8 @@ int MapGen::getFeatures()
                     status1,
                     points2,
                     status2,
-                    1,/* Use fundamental matrix to filter points? */
-                    1);/* Threshold for (dist b/w) good points in filter (usually 0.5 or 1.0)*/
+                    1,      /* Use fundamental matrix to filter points? */
+                    0.5);   /* Threshold for (dist b/w) good points in filter (usually 0.5 or 1.0)*/
 
         //printf(" matching: %d \n",found);
 
@@ -216,27 +215,28 @@ int MapGen::getFeatures()
 
 
         /* check status *********/
-
-        if(avgdx==0 || avgdy==0)
         {
-            return 0; // no motion
-        }
+            if(avgdx==0 || avgdy==0)
+            {
+                return 0; // no motion
+            }
 
-        int maxd = 7;
-        if( abs(avgdx) > maxd || abs(avgdy) > maxd )
-        {
-            //printf("   adx %d ady %d\n",avgdx,avgdy);
-            return 0; // bumpy/noisy motion
-        }
+            //int maxd = 7;
+            if( ( abs(avgdx) > maxFeatureShift ) || ( abs(avgdy) > maxFeatureShift ) )
+            {
+                //printf("   adx %d ady %d\n",avgdx,avgdy);
+                return 0; // bumpy/noisy motion
+            }
 
 
-        if ( found )
-        {
-            return 1; // we have enough frames/points
-        }
-        else
-        {
-            return 0; // no points matching
+            if ( found )
+            {
+                return 1; // we have enough frames/points
+            }
+            else
+            {
+                return 0; // no points matching
+            }
         }
     }
 
@@ -253,10 +253,6 @@ int MapGen::processFeatures()
     static int map=0;
     int i;
     double x,y,a,b;
-
-    /* for affine transformation matrix calculation */
-//    int aff_count = 0;
-//    int min =  visCvGrey->height * (2.0/3.0);
 
     /* for RANSAC */
     std::vector<double> pointParameters;
@@ -284,59 +280,11 @@ int MapGen::processFeatures()
                 matchList.push_back( std::pair<CvPoint2D32f,CvPoint2D32f>( foundpts[i],foundpts[maxFeatures-1-i] ) );
             }
 
-//            /* only consider good points */
-//            if ( (aff_count<2) && (y*2>min) /*&& (y<b)*/ &&(y!=b)&&(x!=a) )
-//            {
-//                /* gather points for affine calculation */
-//                cvCircle(visCvGrey, cvPoint( x,y ), 1, CV_RGB(255,255,255), 3, 8, 0);
-//                cvCircle(visCvGrey, cvPoint( a,b ), 1, CV_RGB(255,255,255), 3, 8, 0);
-//                pts2[aff_count].x = x;
-//                pts2[aff_count].y = y;
-//                pts1[aff_count].x = a;
-//                pts1[aff_count].y = b;
-//                aff_count++;
-//            }
-
         }
     }
 
     /* show image */
 //    cvShowImage("curr",visCvGrey);
-
-
-//    CvMat* temp;
-//    temp = cvCreateMat(2,3,CV_32FC1);
-//
-//    /* use the point pairs for getting the camera-camera affine transformation */
-//    if (aff_count>2)
-//    {
-//        cvGetAffineTransform(pts2,pts1,temp);
-//    }
-//    else
-//    {
-//        return 0; // need 3 point pairs
-//    }
-//
-//    /* copy 2x3 matrix result into 3x3 matrix */
-//    cvZero(matCamToCam);
-//    for (i=0; i<3; i++)
-//    {
-//        cvmSet(matCamToCam, 0, i, cvmGet(temp, 0 ,i) );
-//        cvmSet(matCamToCam, 1, i, cvmGet(temp, 1 ,i) );
-//    }
-//    cvmSet(matCamToCam, 2, 2, 1);
-//    cvReleaseMat(&temp);
-//
-//    if(aff_count>1)
-//    {
-//        if(! computeHomography(pts1,pts2,matCamToCam) )
-//            return 0;
-//    }
-//    else
-//    {
-//        return 0;
-//    }
-
 
 //    printMatchesVector(matchList);
 
@@ -364,17 +312,6 @@ int MapGen::processFeatures()
         return 0; // bad matrix
     }
 
-//    /* normalize camera transform, but not translation */
-//    {
-//        CvMat* mask;
-//        mask = cvCreateMat(3,3,CV_8SC1);
-//        cvZero(mask);
-//        cvSetReal2D(mask2, 0, 0, 1); cvSetReal2D(mask2, 0, 1, 1);
-//        cvSetReal2D(mask2, 1, 0, 1); cvSetReal2D(mask2, 1, 1, 1);
-//        cvNormalize(matCamToCam,matCamToCam,1,0,CV_L2,mask);
-//        cvReleaseMat(&mask);
-//    }
-
     printCv33Matrix(matCamToCam);
 
     /* continuously mulitply each new c-c matrix to get new c-w matrix,
@@ -385,18 +322,6 @@ int MapGen::processFeatures()
         cvMatMul(matCamToWorld,matCamToCam,matCamToWorld);
     }
     map=1;
-
-
-//    /* normalize world transform, but not translation */
-//    {
-//        CvMat* mask2;
-//        mask2 = cvCreateMat(3,3,CV_8SC1);
-//        cvZero(mask2);
-//        cvSetReal2D(mask2, 0, 0, 1); cvSetReal2D(mask2, 0, 1, 1);
-//        cvSetReal2D(mask2, 1, 0, 1); cvSetReal2D(mask2, 1, 1, 1);
-//        cvNormalize(matCamToWorld,matCamToWorld, 1, 0,CV_L2,mask2);
-//        cvReleaseMat(&mask2);
-//    }
 
     printCv33Matrix(matCamToWorld);
 
@@ -501,8 +426,9 @@ void MapGen::LoadXMLSettings()
 
     /* load settings */
     {
-        maxFeatures = cfg.getInt("maxFeatures");
+        maxFeatures   = cfg.getInt("maxFeatures");
         numFramesBack = cfg.getInt("numFramesBack");
+        maxFeatureShift = cfg.getInt("maxFeatureShift");
 
     }
 
@@ -512,8 +438,9 @@ void MapGen::LoadXMLSettings()
         {
             printf("ERROR: Mapping settings NOT loaded! Using DEFAULTS \n");
             {
-                maxFeatures = 34;
+                maxFeatures   = 34;
                 numFramesBack = 4;
+                maxFeatureShift = 9;
 
             }
         }

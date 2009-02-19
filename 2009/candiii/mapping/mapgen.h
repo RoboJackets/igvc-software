@@ -5,7 +5,6 @@
 #include <highgui.h>
 #include "Point2D.h"
 #include "cvcorrImages.h"
-
 #include <vector>
 
 /*
@@ -44,6 +43,7 @@ public:
     CvPoint2D32f pts2[3];
     /**/
     std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > matchList;
+    int maxFeatureShift;
 
 
 };
