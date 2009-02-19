@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 
+// printCv33Matrix is copied from mapgen.cpp
 void printCv33Matrix(CvMat* matrix)
 {
     printf("\n");
@@ -19,6 +20,9 @@ void printCv33Matrix(CvMat* matrix)
 }
 
 
+/*****************************************************************************/
+/*
+ */
 PointParamEstimator::PointParamEstimator(double delta) : m_deltaSquared(delta*delta)
 {
 }
@@ -33,25 +37,26 @@ void PointParamEstimator::estimate(std::vector< std::pair<CvPoint2D32f ,CvPoint2
     if (data.size()<2)
         return;
 
-	{
-		CvMat* homography = cvCreateMat(3,3,CV_32F);
+    CvMat* homography = cvCreateMat(3,3,CV_32F);
 
-		CvPoint2D32f p1[2];
-		CvPoint2D32f p2[2];
-		p1[0] = data[0]->first;
-		p1[1] = data[0]->second;
-		p2[0] = data[1]->first;
-		p2[1] = data[1]->second;
+    CvPoint2D32f p1[2]; // previous pts
+    CvPoint2D32f p2[2]; // current pts
 
-		computeHomography(p1,p2,homography);
+    p1[0] = data[0]->first;
+    p1[1] = data[0]->second;
+    p2[0] = data[1]->first;
+    p2[1] = data[1]->second;
 
-		for (int i=0; i<9; i++){
-//			parameters.push_back( homography->data.fl[i] );
-			parameters.push_back( cvGetReal1D(homography,i) );
-		}
+    // find homography from pts1 to pts2
+    computeHomography(p1,p2,homography);
 
-		cvReleaseMat( &homography );
-	}
+    // unroll CvMat into a vector for output
+    for (int i=0; i<9; i++){
+        //parameters.push_back( homography->data.fl[i] );
+        parameters.push_back( cvGetReal1D(homography,i) );
+    }
+
+    cvReleaseMat( &homography );
 
 }
 /*****************************************************************************/
@@ -64,25 +69,26 @@ void PointParamEstimator::leastSquaresEstimate(std::vector< std::pair<CvPoint2D3
     if (data.size()<2)
         return;
 
-	{
-		CvMat* homography = cvCreateMat(3,3,CV_32F);
+    CvMat* homography = cvCreateMat(3,3,CV_32F);
 
-		CvPoint2D32f p1[2];
-		CvPoint2D32f p2[2];
-		p1[0] = data[0]->first;
-		p1[1] = data[1]->first;
-		p2[0] = data[0]->second;
-		p2[1] = data[1]->second;
+    CvPoint2D32f p1[2]; // previous pts
+    CvPoint2D32f p2[2]; // current pts
 
-		computeHomography(p1,p2,homography);
+    p1[0] = data[0]->first;
+    p1[1] = data[1]->first;
+    p2[0] = data[0]->second;
+    p2[1] = data[1]->second;
 
-		for (int i=0; i<9; i++){
-//			parameters.push_back( homography->data.fl[i] );
-			parameters.push_back( cvGetReal1D(homography,i) );
-		}
+    // find homography from pts1 to pts2
+    computeHomography(p1,p2,homography);
 
-		cvReleaseMat( &homography );
-	}
+    // unroll CvMat into a vector for output
+    for (int i=0; i<9; i++){
+        //parameters.push_back( homography->data.fl[i] );
+        parameters.push_back( cvGetReal1D(homography,i) );
+    }
+
+    cvReleaseMat( &homography );
 
 }
 /*****************************************************************************/
@@ -94,23 +100,25 @@ bool PointParamEstimator::agree(std::vector<double> &parameters, std::pair<CvPoi
 	double error;
 	double x1,y1,x2,y2,x2test,y2test;
 
+    // get prev pt
 	x1 = data.first.x;
 	y1 = data.first.y;
+
+	// get curr pt
 	x2 = data.second.x;
 	y2 = data.second.y;
 
+    // project a point using input h matrix
 	x2test = parameters[0]*x1 + parameters[1]*y1 + parameters[2];
 	y2test = parameters[3]*x1 + parameters[4]*y1 + parameters[5];
 
-//	error =  (1.0/abs(x2-x2test)+1.0/abs(y2-y2test));
-//	error =  1.0/((x2-x2test)*(x2-x2test))+1.0/((y2-y2test)*(y2-y2test));
-	error =  (abs(x2-x2test)+abs(y2-y2test));
+    // see how close it is to curr point
+	error = abs(x2-x2test)+abs(y2-y2test);
+
+	// normalize error
 	if(error>0.0) error = 1.0/error;
 
-//	printf("E  1(%.2f,%.2f) 2(%.2f %.2f)   \n" , x1,y1,x2,y2  );
-//	printf("error: %.4f max: %.4f \n",error*error,m_deltaSquared);
-//  return ((error*error) < m_deltaSquared);
-//	printf("error: %.4f max: %.4f \n",error,m_deltaSquared);
+	//printf("error: %.4f max: %.4f \n",error,m_deltaSquared);
     return ((error) < m_deltaSquared);
 
 }
@@ -119,29 +127,31 @@ bool PointParamEstimator::agree(std::vector<double> &parameters, std::pair<CvPoi
 /*****************************************************************************/
 /*
  */
-int PointParamEstimator::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, CvMat* h)
+int PointParamEstimator::computeHomography(CvPoint2D32f* prev, CvPoint2D32f* curr, CvMat* h)
 {
     /*
+        compute h matrix to map from previous image to current image
+
         | cos -sin e |   | x1 |   | x2 |
         | sin cos  f | * | y1 | = | y2 |
         | 0   0    1 |   | 1  |   | 1  |
 
-         p1         p2
+         prev       curr
         (x1,y1)<==>(x2,y2)
         (x3,y3)<==>(x4,y4)
     */
 
-    double x1,y1,x2,y2,x3,y3,x4,y4,e,f,sint,cost,v1x,v1y,v2x,v2y,dt;
+    double x1,y1,x2,y2,x3,y3,x4,y4,e,f,sint,cost,v1x,v1y,v2x,v2y,delta;
 
-    x1 = p1[0].x;
-    y1 = p1[0].y;
-    x2 = p2[0].x;
-    y2 = p2[0].y;
+    x1 = prev[0].x;
+    y1 = prev[0].y;
+    x2 = curr[0].x;
+    y2 = curr[0].y;
 
-    x3 = p1[1].x;
-    y3 = p1[1].y;
-    x4 = p2[1].x;
-    y4 = p2[1].y;
+    x3 = prev[1].x;
+    y3 = prev[1].y;
+    x4 = curr[1].x;
+    y4 = curr[1].y;
 
     //v1
     v1x = x3-x1;
@@ -151,11 +161,11 @@ int PointParamEstimator::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, C
     v2x = x4-x2;
     v2y = y4-y2;
 
-    //dt = |v1xv2|
-    dt = (v1x*v2y-v2x*v1y) ;
+    //delta = |v1xv2|
+    delta = (v1x*v2y-v2x*v1y) ;
 
     //sintheta = dt / |v1|*|v2|
-    sint = dt / ( sqrt(v1x*v1x+v1y*v1y)*sqrt(v2x*v2x+v2y*v2y) );
+    sint = delta / ( sqrt(v1x*v1x+v1y*v1y)*sqrt(v2x*v2x+v2y*v2y) );
 
     //costheta = 1 - sintheta^2
     cost = 1 - (sint)*(sint);
@@ -163,7 +173,6 @@ int PointParamEstimator::computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, C
     //translation
     e = x2 - ( cost*x1 + (-sint)*y1 );
     f = y2 - ( (sint)*x1 + cost*y1 );
-
 
     //homography
     cvmSet(h,0,0,cost); cvmSet(h,0,1,-sint); cvmSet(h,0,2, e );
