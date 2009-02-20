@@ -16,34 +16,34 @@
 class MapGen
 {
 public:
-    MapGen();
-    virtual ~MapGen();
+	MapGen();
+	virtual ~MapGen();
 
 public:
 
-    void genMap();
-    void LoadXMLSettings();
-    int maxFeatures;
-    void init();
-    /**/
-    int getFeatures();
-    CvMat* points1;
-    CvMat* points2;
-    CvMat* status1;
-    CvMat* status2;
-    IplImage* prev;
-    int processFeatures();
-    /**/
-    CvMat* matCamToCam;
-    CvMat* matCamToWorld;
-    IplImage* worldmap;
-    void printCv33Matrix(CvMat* matrix);
-    int numFramesBack;
-    CvPoint2D32f pts1[3];
-    CvPoint2D32f pts2[3];
-    /**/
-    std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > matchList;
-    int maxFeatureShift;
+	void genMap();
+	void LoadXMLSettings();
+	int maxFeatures;
+	void init();
+	/**/
+	int getFeatures();
+	CvMat* points1;
+	CvMat* points2;
+	CvMat* status1;
+	CvMat* status2;
+	IplImage* prev;
+	int processFeatures();
+	/**/
+	CvMat* matCamToCam;
+	CvMat* matCamToWorld;
+	IplImage* worldmap;
+	void printCv33Matrix(CvMat* matrix);
+	int numFramesBack;
+	CvPoint2D32f pts1[3];
+	CvPoint2D32f pts2[3];
+	/**/
+	std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > matchList;
+	int maxFeatureShift;
 
 
 };
