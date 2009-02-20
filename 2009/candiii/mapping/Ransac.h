@@ -16,15 +16,16 @@
 /* debug printing */
 void printMatchesVector(std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > p)
 {
-	for (int i=0; i<p.size(); i++)
+	for (unsigned int i=0; i<p.size(); i++)
 	{
 		printf("(%.2f %.2f) (%.2f %.2f) \n",p[i].first.x,p[i].first.y,p[i].second.x,p[i].second.y);
 	}
 
 }
+/* debug printing */
 void printMatchesVector(std::vector< std::pair<CvPoint2D32f,CvPoint2D32f>* > p)
 {
-	for (int i=0; i<p.size(); i++)
+	for (unsigned int i=0; i<p.size(); i++)
 	{
 		printf("(%.2f %.2f) (%.2f %.2f) \n",p[i]->first.x,p[i]->first.y,p[i]->second.x,p[i]->second.y);
 	}
@@ -347,14 +348,9 @@ void Ransac<T,S>::estimate(ParameterEstimator<T,S> *paramEstimator, std::vector<
 	memset(curVotes,'\0',numDataObjects*sizeof(short));
 	numVotesForCur=0;
 
-//printf("TEST\n");
-
 	for (j=0; j<numForEstimate; j++)
 		exactEstimateData.push_back(&(data[arr[j]]));
 	paramEstimator->estimate(exactEstimateData,exactEstimateParameters);
-
-//printMatchesVector(exactEstimateData);
-//printf("ENDTEST\n");
 
 	for (j=0; j<numDataObjects; j++)
 	{

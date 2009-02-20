@@ -34,9 +34,9 @@
     <defaultView>05</defaultView>   <!-- gui slider bar starting value -->
 
     <!-- Mapping Settings -->
-    <maxFeatures>30</maxFeatures>           <!-- max number for feature corners to find -->
-    <numFramesBack>04</numFramesBack>       <!-- frames between matching points/features -->
-    <maxFeatureShift>7</maxFeatureShift>    <!-- max allowed feature point movement (in pixels) -->
+    <maxFeatures>40</maxFeatures>           <!-- max number for feature corners to find -->
+    <numFramesBack>03</numFramesBack>       <!-- frames between matching points/features -->
+    <maxFeatureShift>9</maxFeatureShift>    <!-- max allowed feature point movement (in pixels) -->
 
 
     <!--
