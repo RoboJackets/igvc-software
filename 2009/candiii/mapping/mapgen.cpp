@@ -174,11 +174,12 @@ int MapGen::getFeatures()
 		}
 
 		/* local storage */
+		int good=0;
 		int x,y,a,b;
 		int dx,dy;
-		int avgdx=0;
-		int avgdy=0;
-		int good=0;
+		float avgdx=0;
+		float avgdy=0;
+
 
         int min = visCvGrey->height/3;
 		/* draw lines from prev to curr points in curr image */
@@ -189,11 +190,11 @@ int MapGen::getFeatures()
 			{
 				a=cvmGet(points1,0,i);
 				b=cvmGet(points1,1,i);
-				x=cvmGet(points2,0,i);
-				y=cvmGet(points2,1,i);
+				x=cvmGet(points2,0,i); //most recent
+				y=cvmGet(points2,1,i); //most recent
 
 				/* don't look in the horizon */
-				if (y > min )
+				if ( y > min )
 				{
 					/* calculate slope and extend lines */
 					dx = x-a;
@@ -219,8 +220,8 @@ int MapGen::getFeatures()
 			avgdx/=good;
 			avgdy/=good;
 			cvLine(visCvGrey,
-			       cvPoint( visCvGrey->width/2-avgdx, visCvGrey->height/2-avgdy ),
-			       cvPoint( visCvGrey->width/2+avgdx, visCvGrey->height/2+avgdy ),
+			       cvPoint( imgHalfWidth-avgdx, imgHalfHeight-avgdy ),
+			       cvPoint( imgHalfWidth+avgdx, imgHalfHeight+avgdy ),
 			       CV_RGB(250,250,250), 3, 8, 0);
 			//printf("   adx %d ady %d\n",avgdx,avgdy);
 		}
@@ -287,7 +288,7 @@ int MapGen::processFeatures()
 			y=cvmGet(points2,1,i); //most recent
 
 			/* only add good points (close to bottom) */
-			if (y > min )
+			if ( y > min )
 			{
 				/* gather feature matches pairs for RANSAC */
 				foundpts[i] = cvPoint2D32f(a,b);
@@ -330,8 +331,8 @@ int MapGen::processFeatures()
 	 *  just not on the first run */
 	if (map)
 	{
-		cvInv(matCamToCam,matCamToCam); // convert h to map from curr to prev pts
-		cvMatMul(matCamToWorld,matCamToCam,matCamToWorld);
+		cvInv(matCamToCam,matCamToCam); // convert cam-homography to map from curr to prev pts
+		cvMatMul(matCamToWorld,matCamToCam,matCamToWorld); // map camera into world
 	}
 	map=1;
 
@@ -355,16 +356,16 @@ int MapGen::processFeatures()
 
 	/* draw a line from the center bottom of camera frame to center top
 	 *  to show the orientation of the robot in the world map */
-	x= cvmGet(matCamToWorld,0,0) * visCvGrey->width/2 +
+	x= cvmGet(matCamToWorld,0,0) * imgHalfWidth +
 	   cvmGet(matCamToWorld,0,1) * (visCvGrey->height-2) +
 	   cvmGet(matCamToWorld,0,2);
-	y= cvmGet(matCamToWorld,1,0) * visCvGrey->width/2 +
+	y= cvmGet(matCamToWorld,1,0) * imgHalfWidth +
 	   cvmGet(matCamToWorld,1,1) * (visCvGrey->height-2) +
 	   cvmGet(matCamToWorld,1,2);
-	a= cvmGet(matCamToWorld,0,0) * visCvGrey->width/2 +
+	a= cvmGet(matCamToWorld,0,0) * imgHalfWidth +
 	   cvmGet(matCamToWorld,0,1) * 1 +
 	   cvmGet(matCamToWorld,0,2);
-	b= cvmGet(matCamToWorld,1,0) * visCvGrey->width/2 +
+	b= cvmGet(matCamToWorld,1,0) * imgHalfWidth +
 	   cvmGet(matCamToWorld,1,1) * 1 +
 	   cvmGet(matCamToWorld,1,2);
 	cvLine(worldmap, cvPoint( x,y ), cvPoint( a,b ), CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
@@ -428,6 +429,10 @@ void MapGen::init()
 	cvNamedWindow("worldmap");
 
 	//==============================================================
+
+    /* saving some operations later */
+	imgHalfHeight = visCvGrey->height/2;
+	imgHalfWidth = visCvGrey->width/2;
 
 }
 

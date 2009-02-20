@@ -123,8 +123,8 @@ int icvCreateFeaturePoints(IplImage *image, CvMat *points, CvMat *status)
 
 	/* Create temporary images */
 	CV_CALL( grayImage = cvCreateImage(cvSize(w,h), 8,1) );
-	CV_CALL( eigImage   = cvCreateImage(cvSize(w,h),32,1) );
-	CV_CALL( tmpImage   = cvCreateImage(cvSize(w,h),32,1) );
+	CV_CALL( eigImage  = cvCreateImage(cvSize(w,h),32,1) );
+	CV_CALL( tmpImage  = cvCreateImage(cvSize(w,h),32,1) );
 
 	/* Create points */
 	CV_CALL( cornerPoints = (CvPoint2D32f*)cvAlloc( sizeof(CvPoint2D32f) * needNumPoints) );
@@ -157,7 +157,7 @@ int icvCreateFeaturePoints(IplImage *image, CvMat *points, CvMat *status)
 	    foundNum,       //count
 	    cvSize(5,5),    //window
 	    cvSize(-1,-1),  //zero_zone (none)
-	    cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 20, 0.05) //criteria
+	    cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 20, 0.3) //criteria
 	);
 	/****************************************************************************/
 

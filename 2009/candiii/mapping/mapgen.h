@@ -44,7 +44,8 @@ public:
 	/**/
 	std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > matchList;
 	int maxFeatureShift;
-
+    int imgHalfHeight;
+    int imgHalfWidth;
 
 };
 
