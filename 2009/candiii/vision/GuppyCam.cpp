@@ -81,7 +81,7 @@ void GuppyCam::setWhiteBalance(uint32_t red, uint32_t blue)
 void GuppyCam::setAllAuto(bool useauto)
 {
 	dc1394feature_mode_t mode;
-	if(useauto)	mode = DC1394_FEATURE_MODE_AUTO;
+	if (useauto)	mode = DC1394_FEATURE_MODE_AUTO;
 	else mode = DC1394_FEATURE_MODE_MANUAL;
 
 	_feature =  DC1394_FEATURE_SHUTTER;
@@ -125,7 +125,7 @@ void GuppyCam::loadSettings()
 	}
 	else
 	{
-	    setAllAuto(false);
+		setAllAuto(false);
 		// set values
 		setGain( gain );
 		setShutter( shutter );
@@ -133,8 +133,8 @@ void GuppyCam::loadSettings()
 		//setWhiteBalance( red, blue );
 	}
 
-    // set other values
-    setGamma( gamma );
+	// set other values
+	setGamma( gamma );
 	setWhiteBalance( red, blue );
 
 }

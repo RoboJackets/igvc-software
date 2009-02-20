@@ -36,7 +36,7 @@
     <!-- Mapping Settings -->
     <maxFeatures>30</maxFeatures>           <!-- max number for feature corners to find -->
     <numFramesBack>04</numFramesBack>       <!-- frames between matching points/features -->
-    <maxFeatureShift>8</maxFeatureShift>    <!-- max allowed feature point movement (in pixels) -->
+    <maxFeatureShift>7</maxFeatureShift>    <!-- max allowed feature point movement (in pixels) -->
 
 
     <!--
