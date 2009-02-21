@@ -14,7 +14,7 @@ int main(void) {
 
 	//int exp_packetnum = 1;
 	int i;
-	for( i = 0; i < 1e6; i++){
+	for( i = 0; i < 100; i++){
 		//cout << "Heading = " << encoders.getHeading() << endl;
 
 		DataPacket packet;
