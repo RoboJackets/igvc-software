@@ -24,7 +24,7 @@
 #define BITBANG_SPI 1
 
 //TODO: Move packet Storage to EEPROM
-#define NUM_PK_STORE 10
+#define NUM_PK_STORE 5
 
 #define TIMEOUT_LENGTH_MILLIS 1000
 
