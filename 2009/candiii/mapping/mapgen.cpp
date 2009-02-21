@@ -78,7 +78,6 @@ void MapGen::genMap()
 		//cvErode( visCvGrey, visCvGrey, NULL, 1 );
 		//cvSmooth(visCvGrey,visCvGrey,CV_MEDIAN,3,0,0,0);
 		//cvSobel(visCvGrey,visCvGrey, 1, 1, 3);
-		//cvLaplace( visCvGrey, visCvGrey, 3 );
 	}
 
 
@@ -89,10 +88,23 @@ void MapGen::genMap()
 		return;
 	}
 
-	/* process features found */
-	processFeatures(); // WORK IN PROGRESS!
+	/* process features found.
+	 *  build matches vector and run RANSAC */
+	if ( !processFeatures() )
+	{
+        return;
+    }
+
+    /* add found features to world feature list,
+     *  and plot/match all good features in the world frame */
+    if ( !genWorldmap() )
+    {
+        return;
+    }
 
 
+
+    /* end genMap() */
 }
 
 int MapGen::getFeatures()
@@ -265,7 +277,6 @@ int MapGen::processFeatures()
 	/*  map each new camera frame into a world frame */
 
 	/* storage */
-	static int map=0;
 	int i;
 	double x,y,a,b;
 
@@ -299,10 +310,12 @@ int MapGen::processFeatures()
 		}
 	}
 
-//    printMatchesVector(matchList);
+    //printMatchesVector(matchList);
 
-	/* Run RANSAC on found features */
-	//double usedData =
+
+	/*
+	 * Run RANSAC on found features
+	 */
 	Ransac<CvPoint2D32f,double>::compute(
 	    pointParameters,    // output cam-cam homography matrix
 	    &pointEstimator,    // templeted class for comparing point matches
@@ -314,10 +327,8 @@ int MapGen::processFeatures()
 	cvZero(matCamToCam);
 	for (i=0; i<9; i++)
 	{
-//		if ( pointParameters.at(i) > 1000 ) return 0; // check for an incorrect matrix
 		cvSetReal1D(matCamToCam, i, pointParameters.at(i) );
 	}
-
 
 	/* crude check for errors */
 	if ( cvDet(matCamToCam) == 0 )
@@ -326,6 +337,16 @@ int MapGen::processFeatures()
 	}
 
 	printCv33Matrix(matCamToCam);
+
+    /* continue */
+    return 1;
+}
+
+
+int MapGen::genWorldmap()
+{
+
+    static int map=0;
 
 	/* continuously mulitply each new c-c matrix to get new c-w matrix,
 	 *  just not on the first run */
@@ -354,23 +375,14 @@ int MapGen::processFeatures()
 //            }
 //        }
 
-	/* draw a line from the center bottom of camera frame to center top
+	/* draw a line from the center bottom of camera frame to center middle
 	 *  to show the orientation of the robot in the world map */
-	x= cvmGet(matCamToWorld,0,0) * imgHalfWidth +
-	   cvmGet(matCamToWorld,0,1) * (visCvGrey->height-2) +
-	   cvmGet(matCamToWorld,0,2);
-	y= cvmGet(matCamToWorld,1,0) * imgHalfWidth +
-	   cvmGet(matCamToWorld,1,1) * (visCvGrey->height-2) +
-	   cvmGet(matCamToWorld,1,2);
-	a= cvmGet(matCamToWorld,0,0) * imgHalfWidth +
-	   cvmGet(matCamToWorld,0,1) * 1 +
-	   cvmGet(matCamToWorld,0,2);
-	b= cvmGet(matCamToWorld,1,0) * imgHalfWidth +
-	   cvmGet(matCamToWorld,1,1) * 1 +
-	   cvmGet(matCamToWorld,1,2);
+    int x,y,a,b;
+    mapCamPointToWorldPoint( imgHalfWidth, imgHalfHeight, a, b); // middle center of camera frame
+    mapCamPointToWorldPoint( imgHalfWidth, visCvGrey->height-1, x, y); // bottom center of camera frame
 	cvLine(worldmap, cvPoint( x,y ), cvPoint( a,b ), CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
-	/* draw a circle denoting orientaion */
-	cvCircle(worldmap, cvPoint( x,y ), 2, /*CV_RGB(rand()%255,rand()%255,rand()%255)*/ CV_RGB(250,250,250), 2, 8, 0);
+	/* draw a circle denoting base orientaion */
+	cvCircle(worldmap, cvPoint( x,y ), 2, /*CV_RGB(rand()%255,rand()%255,rand()%255)*/ CV_RGB(255,255,255), 2, 8, 0);
 
 	/* display world view image */
 	cvShowImage("worldmap",worldmap);
@@ -485,8 +497,29 @@ void MapGen::printCv33Matrix(CvMat* matrix)
 	printf("\n");
 }
 
+void MapGen::mapCamPointToWorldPoint(CvPoint2D32f& cam, CvPoint2D32f& world)
+{
+    /* maps a point in camera frame to world frame
+     *  via cam to world homography matrix */
+	world.x = cvmGet(matCamToWorld,0,0) * cam.x +
+	          cvmGet(matCamToWorld,0,1) * cam.y +
+	          cvmGet(matCamToWorld,0,2);
+	world.y = cvmGet(matCamToWorld,1,0) * cam.x +
+	          cvmGet(matCamToWorld,1,1) * cam.y +
+	          cvmGet(matCamToWorld,1,2);
+}
 
-
+void MapGen::mapCamPointToWorldPoint(int camx, int camy, int& worldx, int& worldy)
+{
+    /* maps a point in camera frame to world frame
+     *  via cam to world homography matrix */
+	worldx =  cvmGet(matCamToWorld,0,0) * camx +
+	          cvmGet(matCamToWorld,0,1) * camy +
+	          cvmGet(matCamToWorld,0,2);
+	worldy =  cvmGet(matCamToWorld,1,0) * camx +
+	          cvmGet(matCamToWorld,1,1) * camy +
+	          cvmGet(matCamToWorld,1,2);
+}
 
 
 

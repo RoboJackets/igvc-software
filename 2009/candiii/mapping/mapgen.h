@@ -46,6 +46,9 @@ public:
 	int maxFeatureShift;
     int imgHalfHeight;
     int imgHalfWidth;
+    int genWorldmap();
+    void mapCamPointToWorldPoint(CvPoint2D32f& cam, CvPoint2D32f& world);
+    void mapCamPointToWorldPoint(int camx, int camy, int& worldx, int& worldy);
 
 };
 
