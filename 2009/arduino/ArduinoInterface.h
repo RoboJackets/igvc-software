@@ -19,10 +19,11 @@ typedef unsigned char byte;
 class ArduinoInterface {
 	public:
 		//bool sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx);
-		bool sendCommand(char cmd, void * data_tx, int size_tx, DataPacket& out_pk_rx);
+		bool sendCommand(byte cmd, void* data_tx, int size_tx);
+		bool recvCommand(byte& out_cmd, byte*& out_data_rx);// I new, you delete
 
 		/* Retrieve all of the state variables in the arduino */
-		bool getStatus(DataPacket& out_status); // TODO: can this be a reference?
+		//bool getStatus(DataPacket& out_status); // TODO: can this be a reference?
 
 		/* Set the value of one the state variables in the arduino */
 		bool setVar(int var, void *value, int size);
@@ -33,6 +34,7 @@ class ArduinoInterface {
 	//protected:
 		/* Constructor - declaired protected to prevent direct instantiation */
 		ArduinoInterface(void);
+		bool initLink(byte arduinoID);
 
 	private:
 		/* Private serial interface */

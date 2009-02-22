@@ -17,47 +17,41 @@ int main(void) {
 	for( i = 0; i < 100; i++){
 		//cout << "Heading = " << encoders.getHeading() << endl;
 
-		DataPacket packet;
+		//DataPacket packet;
 
-		encoders.getInfo_class(&packet);
+		//encoders.getInfo_class(&packet);
 
 		encoder_reply_t parsed_data;
-		memcpy(&parsed_data, packet.data, sizeof(encoder_reply_t));
-
-		cout << packet;
-		cout << parsed_data << "\n\n";
-
-		//for(int i = 0; i < sizeof(DataPacket::header_t); i++){
-		//	printf("%X",  ((byte*)(&packet.header))[i]);
-		//}
-//		for(int i = 0; i < sizeof(DataPacket::encoder_reply_t); i++){
-			//printf("%X",  ((byte*)(&parsed_data))[i]);
-			//printf("%X", packet.data[i] );
-//		}
-		cout << "\n\n";
+		if(!encoders.getInfo(parsed_data))
+		{
+			cout << parsed_data << "\n\n";
+		}
+		else
+		{
+			cout << "could not get data" << endl;
+		}
 		//status = encoders.getInfo();
 		//cout << "Heading = " << status.heading << endl;
 		usleep(.01*1e6);
 	}
 
 	DataPacket pk;
-	encoders.arduinoInterface.arduinoResendPacket(95, pk);
 
-	cout << pk << endl;
+	if(!encoders.arduinoInterface.arduinoResendPacket(98, pk))
+	{
+		cout << pk << endl;
 
-	std::cout << "resend pk debug extern" << std::endl;
-	std::cout << "data size: " << (int) pk.header.size << std::endl;
-	std::cout << "dataloc: " << (int) pk.data << std::endl;
+		std::cout << "resend pk debug extern" << std::endl;
+		std::cout << "data size: " << (int) pk.header.size << std::endl;
+		std::cout << "dataloc: " << (int) pk.data << std::endl;
 
-	if (pk.data != NULL){
-		if(pk.header.cmd == 'r'){
-			encoder_reply_t parsed_data;
-			memcpy(&parsed_data, pk.data, sizeof(encoder_reply_t));
-			cout << parsed_data << "\n\n";
+		if (pk.data != NULL){
+			if(pk.header.cmd == 'r'){
+				encoder_reply_t parsed_data;
+				memcpy(&parsed_data, pk.data, sizeof(encoder_reply_t));
+				cout << parsed_data << "\n\n";
+			}
 		}
+	
 	}
-
-
-
-	//delete[] pk;
 }

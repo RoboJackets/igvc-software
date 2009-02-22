@@ -38,9 +38,11 @@
 
 TARGET = ArduinoMotorEncoders2
 INSTALL_DIR = /home/nebousuru/Desktop/arduino-0011
-PORT = /dev/ttyUSB0
+#PORT = /dev/ttyUSB0
+PORT = usb
 UPLOAD_RATE = 19200
-AVRDUDE_PROGRAMMER = stk500v1
+#AVRDUDE_PROGRAMMER = stk500v1
+AVRDUDE_PROGRAMMER = dragon_isp
 MCU = atmega168
 F_CPU = 16000000
 

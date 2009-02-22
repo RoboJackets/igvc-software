@@ -12,26 +12,44 @@ MotorEncoders::MotorEncoders(void) {
 
 	//unsigned int rx_packetnum = 1;
 	//unsigned int tx_packetnum = 1;
-
+	arduinoInterface.initLink('e');
 }
 
-
-encoder_reply_t MotorEncoders::getInfo(void) {
+//true on error
+bool MotorEncoders::getInfo(encoder_reply_t& out_data) {
 	DataPacket status;
 	
-	arduinoInterface.getStatus(status);
+	//arduinoInterface.getStatus(status);
 
-	encoder_reply_t parseddata;
+	bool ret = arduinoInterface.sendCommand(ARDUINO_GETSTATUS_CMD, NULL, 0);
 
-	memcpy(&parseddata, status.data, sizeof(encoder_reply_t));
+	byte cmdout;
+	byte* out_data_rx = NULL;
 
-	return(parseddata);
+
+	if(!arduinoInterface.recvCommand(cmdout, out_data_rx))
+	{
+		memcpy(&out_data, out_data_rx, sizeof(encoder_reply_t));
+		delete[] out_data_rx;
+	}
+	else
+	{
+		return true;
+	}
+
+	return(false);
 }
 
-bool MotorEncoders::getInfo_class(DataPacket* out_status) {
+bool MotorEncoders::getInfo_class(byte*& out_data_rx) {
 	//EncoderData status;
 	//status->data = new byte[sizeof(DataPacket::encoder_reply_t)];
-	bool ret = arduinoInterface.getStatus(*out_status);
+	//bool ret = arduinoInterface.getStatus(*out_status);
+	bool ret = arduinoInterface.sendCommand(ARDUINO_GETSTATUS_CMD, NULL, 0);
+
+
+	byte cmdout;
+	ret &= arduinoInterface.recvCommand(cmdout, out_data_rx);
+
 	//status.setDataPointer(data);
 	//status.packnum = rx_packetnum;
 	//rx_packetnum++;
@@ -65,7 +83,8 @@ EncoderPacket MotorEncoders::getDeltas(){
 
 double MotorEncoders::getHeading(void) {
 	//EncoderPacket data = MotorEncoders::getDeltas();
-	encoder_reply_t data = MotorEncoders::getInfo();
+	encoder_reply_t data;
+	MotorEncoders::getInfo(data);
 	MotorEncoders::heading += ( ((double)(data.dr - data.dl)) * (double)RAD_PER_ENCODER_TICK * (double)WHEEL_RADIUS / (double)WHEEL_BASE );
 	while (MotorEncoders::heading >= (2*M_PI)) { // this could be done more effiecently
 		MotorEncoders::heading -= (2*M_PI);
@@ -81,7 +100,8 @@ double MotorEncoders::getHeading(void) {
 
 double MotorEncoders::getRotVel(void){
 	//EncoderPacket data = MotorEncoders::getDeltas();
-	encoder_reply_t data = MotorEncoders::getInfo();
+	encoder_reply_t data;
+	MotorEncoders::getInfo(data);
 /*
 	if(data.packetnum != rx_packetnum){
 		int trynum = 0;
