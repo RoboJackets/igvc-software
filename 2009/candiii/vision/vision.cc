@@ -1129,7 +1129,7 @@ void Vision::Normalize(IplImage* img)
 void Vision::CvtPixToGoal(Point2D<int>& goal)
 {
 
-	if (goal_far.y >= visCvPath->height/2)
+	if (goal_far.y > visCvPath->height/2)
 	{
 		goal = goal_near;	// can't see very far
 	}
@@ -1149,15 +1149,16 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 		// fwd speed
 		goal.y = (visCvPath->height  - goal.y) * (255) / (visCvPath->height);
 
+        /* Now we are using above motor ranges. */
 		/* Check for errors and prevent the robot from going crazy */
 		if ( (goal.y>=250 && goal.x<=-127) ) // necessary check
 		{
-			goal.y=10;
+			goal.y=45; // min fwd speed
 			goal.x=0;
 		}
 		else if ( (visCvPath->height-goal_far.y) < 20 ) // XXX: HACK to get onto ramps & yellow bars
 		{
-			goal.y=10;
+			goal.y=45; // min fwd speed
 			goal.x=0;
 		}
 

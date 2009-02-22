@@ -19,7 +19,7 @@ qmake-qt4 -project \
 		INCLUDEPATH+="/usr/include/qt4/Qt" \
 		INCLUDEPATH+="../old_motors" \
 		-after \
-		`./remove-sources logging/*.+(c|cc|cpp|h)` \
+		`./_remove-sources logging/*.+(c|cc|cpp|h)` \
 
 
 echo "Creating: Makefile"

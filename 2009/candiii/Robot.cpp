@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <GL/glut.h>
 #include "XmlConfiguration.h"
-
 #include "logging/timer.h"
 
 
@@ -134,7 +133,7 @@ void Robot::releaseAllImages()
 int Robot::init()
 {
 
-	/* load xml settings - important to do first */
+	/* load xml settings - important to do first! */
 	LoadXMLSettings();
 
 	/* setup image selection bar */
@@ -176,7 +175,7 @@ int Robot::init()
 	atexit(Robot::destroy);
 
 	/* init video writer */
-	//createVideoWriter();
+	//createVideoWriter();   // mising codecs?
 
 	/* setup vision module */
 	vp.init();
@@ -185,6 +184,7 @@ int Robot::init()
 	mapper.init();
 
 	/* connect to motors */
+	motors.set_max_speed(motorsMaxSpeed);
 	motors.SetupSerial();
 
 	/* success */
@@ -202,6 +202,8 @@ void Robot::LoadXMLSettings()
 		_k = cfg.getFloat("_k");
 		/* see ConvertAllImageViews() in vision.cc */
 		trackbarVal = cfg.getInt("defaultView");
+		/* 0-255 */
+		motorsMaxSpeed = cfg.getInt("motorsMaxSpeed");
 
 	}
 
@@ -213,6 +215,7 @@ void Robot::LoadXMLSettings()
 			{
 				_k = .40;
 				trackbarVal = 1;
+				motorsMaxSpeed = 100;
 			}
 		}
 		else
@@ -519,8 +522,10 @@ void Robot::updateGlutDisplay()
 //    	CV_FOURCC('I', '2', '6', '3') = H263I codec
 //    	CV_FOURCC('F', 'L', 'V', '1') = FLV1 codec
 //    */
-//    cvVideoWriter=cvCreateVideoWriter("video_out.avi",CV_FOURCC('P','I','M','1'),
+//    cvVideoWriter=cvCreateVideoWriter("video_out.avi",
+//                                        CV_FOURCC('P','I','M','1'),
 //                                      fps,cvSize(frameW,frameH),isColor);
 //}
 
+// ffmpeg-dbg lib32v4l
 

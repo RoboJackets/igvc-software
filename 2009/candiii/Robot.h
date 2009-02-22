@@ -107,6 +107,7 @@ public:
 
 	// motor control
 	Motors_Old motors;
+	int motorsMaxSpeed;//0-255
 
 };
 
