@@ -24,7 +24,7 @@
 #define BITBANG_SPI 1
 
 //TODO: Move packet Storage to EEPROM
-#define NUM_PK_STORE 5
+#define NUM_PK_STORE 10
 
 #define TIMEOUT_LENGTH_MILLIS 1000
 
@@ -65,9 +65,7 @@ long global_time_usec;
 long arduino_time_millis;//millis when last global time last set
 
 
-//long unsigned int reply_dtick_packet_num[50];
 packet_t packet_store[NUM_PK_STORE];
-//reply_dtick_t reply_dtick_packet_store[50];
 int packet_store_pos;
 
 void setup(void) {
@@ -261,7 +259,21 @@ void readSerial(void) {
 
 /*
 		if(header.packetnum != rx_num){
-			
+			Serial.flush();
+			header_t headerOut;
+			genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);						
+			headerOut.packetnum = tx_num;
+			headerOut.cmd = ARDUINO_ERROR_RESP;
+			headerOut.size = 5;
+
+			byte msg[5];
+			msg[0] = DROPPED_PACKET;
+
+			memcpy(msg+1, &rx_num, 4);
+			serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+			serialPrintBytes(msg, headerOut.size);
+			tx_num++;
+			return;
 		}
 */
 		switch(header.cmd){

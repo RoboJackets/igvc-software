@@ -20,6 +20,8 @@ class DataPacket{
 
 	DataPacket();
 	~DataPacket();
+
+	void clear();
 };
 
 std::ostream& operator<<(std::ostream& output, DataPacket& pk);

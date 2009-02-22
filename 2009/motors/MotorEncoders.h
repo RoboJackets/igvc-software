@@ -50,9 +50,9 @@ class MotorEncoders {
 
 		//bool setLogging(bool status);
 
-		encoder_reply_t getInfo(void);
+		bool getInfo(encoder_reply_t& out_data);
 
-		bool getInfo_class(DataPacket * status); //TODO: get rid of this
+		bool getInfo_class(byte*& out_data_rx); //TODO: get rid of this
 
 
 		//public for debug only! move to private later

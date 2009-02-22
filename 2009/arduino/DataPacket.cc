@@ -8,16 +8,32 @@ DataPacket::DataPacket(){
 DataPacket::~DataPacket(){
 	if(data != NULL){
 		delete[] data;
+		data = NULL;
+		header.size = 0;
 	}
 }
 
 DataPacket::DataPacket(const DataPacket& pk){
-
 	this->header = pk.header;
 	this->data = new byte[pk.header.size];
 	memcpy(this->data, pk.data, pk.header.size);
 
 	//std::cout << "copy constructor called" << std::endl;
+}
+
+void DataPacket::clear()
+{
+	header.timestamp_sec = -1;
+	header.timestamp_usec = -1;
+	header.packetnum = 0;
+	header.cmd = 0;
+	header.size = 0;
+
+	if(data != NULL){
+		delete[] data;
+		data = NULL;
+		header.size = 0;
+	}
 }
 
 std::ostream& operator<<(std::ostream& output, DataPacket& pk){

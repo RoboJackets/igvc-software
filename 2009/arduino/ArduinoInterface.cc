@@ -28,12 +28,15 @@
  * Opens a connection to an arduino.
  * 
  */
-ArduinoInterface::ArduinoInterface(void) {
+ArduinoInterface::ArduinoInterface() {
 
 	//Init vars
 	tx_num = 1;
 	rx_num = 1;
-	
+}
+
+bool ArduinoInterface::initLink(byte arduinoID)
+{
 	/* See if anything is connected on ports USB0 through USB9 */
 	char serialAddress[] = SERIAL_PORT;
 	for (int i=0;i<10;i++) {
@@ -53,16 +56,35 @@ ArduinoInterface::ArduinoInterface(void) {
 		else {
 			/* Check which arduino is connected to the port */
 			//byte reply;
-			DataPacket reply;
-
-			if(sendCommand('i', NULL, 0, reply))
+			if(sendCommand(ARDUINO_ID_CMD, NULL, 0))
 			{
-				std::cout << "could not communicate with arduino on link " << serialAddress << std::endl;
+				std::cout << "could not communicate with arduino (outbound) on link " << serialAddress << std::endl;
 				exit(-1);//handle this!
 			}
 
-			printf("found module %c\n", *(reply.data));
-			if (*(reply.data)=='e') { //might want to use more than one byte for identifcation
+			byte cmdout;
+			byte* dataout = NULL;
+			if(recvCommand(cmdout, dataout))
+			{
+				std::cout << "could not communicate with arduino (inbound) on link " << serialAddress << std::endl;
+				if(dataout != NULL){
+					delete[] dataout;
+				}
+				exit(-1);//handle this!
+			}
+
+			if(cmdout != ARDUINO_ID_CMD)
+			{
+				std::cout << "arduino responded incorectly during init on link " << serialAddress << std::endl;
+				if(dataout != NULL){
+					delete[] dataout;
+				}
+				exit(-1);//handle this!
+			}
+			byte readid = *(dataout);
+			delete[] dataout;
+			printf("found module %c\n", readid);
+			if (readid == arduinoID) { //might want to use more than one byte for identifcation
 				printf("correct module.\n");
 				setArduinoTime();
 				break;
@@ -102,6 +124,7 @@ ArduinoInterface::~ArduinoInterface(void) {
  *					More detailed information can be obtained by querying
  *					<tt>errno</tt> and <tt>strerror(errno)</tt>.
  */
+/*
 bool ArduinoInterface::getStatus(DataPacket& out_status) {
 	if (arduinoFD == -1) {
 		return false;
@@ -111,23 +134,9 @@ bool ArduinoInterface::getStatus(DataPacket& out_status) {
 		return true;
 	}
 
-/*
-	if(sendCommand('r', (byte*)NULL, 0, status, size)){
-		return true;
-	}
-*/
-/*
-	if (writeFully(arduinoFD, (void *)"r", 1)) {
-		return true;
-	}
-
-	if (readFully(arduinoFD, status, size)) {
-		return true;
-	}
-*/
 	return false;
 }
-
+*/
 /**
  * Set the specified variable in the motor controller to the specified value.
  * 
@@ -309,61 +318,13 @@ void savePacket(DataPacket* pk){
  */
 
 
-//bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx){
-bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, DataPacket& out_pk_rx){
-	//Send the Command
-	DataPacket pk_tx;
-	pk_tx.header.packetnum = tx_num;
-
-	struct timeval t0 = getTime();
-	pk_tx.header.timestamp_sec = t0.tv_sec;
-	pk_tx.header.timestamp_usec = t0.tv_usec;
-
-	pk_tx.header.cmd = cmd;
-	pk_tx.header.size = size_tx;
-
-
-	pk_tx.data = new byte[size_tx];
-	memcpy(pk_tx.data, data_tx, size_tx);
-
-
-	if(sendPacket(pk_tx))
-	{
-		std::cout << "could not send packet" << std::endl;
-		return true;
-	}
-
-
-	if(getPacket(out_pk_rx))
-	{
-		std::cout << "could not rec packet" << std::endl;
-		return true;
-	}
-
-	return false;
-}
 
 //getResponse();
 
 //true on error
 bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket& pk_out){
 
-	DataPacket pk_tx;
-	pk_tx.header.packetnum = tx_num;
-
-	struct timeval t0 = getTime();
-	pk_tx.header.timestamp_sec = t0.tv_sec;
-	pk_tx.header.timestamp_usec = t0.tv_usec;
-
-	pk_tx.header.cmd = ARDUINO_RSND_PK_CMD;
-	pk_tx.header.size = sizeof(int);
-	pk_tx.data = new byte[pk_tx.header.size];
-	memcpy(pk_tx.data, &pknum, pk_tx.header.size);
-	savePacket(pk_tx);
-
-	writeFully(arduinoFD, &(pk_tx.header), PACKET_HEADER_SIZE);
-	writeFully(arduinoFD, pk_tx.data, pk_tx.header.size);
-	tx_num++;
+	sendCommand(ARDUINO_RSND_PK_CMD, &pknum, sizeof(int));
 
 	//Get the Response
 	DataPacket pk_rx;
@@ -415,10 +376,10 @@ bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket& pk_out){
 			std::cout << "data size: " << (int) pk_out.header.size << std::endl;
 			std::cout << "dataloc: " << (int) pk_out.data << std::endl;
 
-			encoder_reply_t parsed_data;
-			memcpy(&parsed_data, pk_out.data, sizeof(encoder_reply_t));
-			std::cout << pk_out.header << std::endl;
-			std::cout << parsed_data << "\n\n";
+			//encoder_reply_t parsed_data;
+			//memcpy(&parsed_data, pk_out.data, sizeof(encoder_reply_t));
+			//std::cout << pk_out.header << std::endl;
+			//std::cout << parsed_data << "\n\n";
 
 			break;
 		}
@@ -468,7 +429,8 @@ bool ArduinoInterface::setArduinoTime(){
 
 	DataPacket rx_p;
 
-	sendCommand('w', msg, 9, rx_p);
+	sendCommand('w', msg, 9);
+	recvCommand(rx_p.header.cmd, rx_p.data);
 }
 
 
@@ -513,6 +475,7 @@ bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 		serialFlush(arduinoFD);
 			if(!arduinoResendPacket(rx_num, pk_rsnd))
 			{
+				out_pk_rx.clear();
 				out_pk_rx = pk_rsnd;
 			}
 			else
@@ -573,3 +536,52 @@ bool ArduinoInterface::read_TimeOut(int fd, void * buf, size_t numBytes)
 	}
 	return false;
 }
+
+//bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx){
+bool ArduinoInterface::sendCommand(byte cmd, void * data_tx, int size_tx){
+	//Send the Command
+	DataPacket pk_tx;
+	pk_tx.header.packetnum = tx_num;
+
+	struct timeval t0 = getTime();
+	pk_tx.header.timestamp_sec = t0.tv_sec;
+	pk_tx.header.timestamp_usec = t0.tv_usec;
+
+	pk_tx.header.cmd = cmd;
+	pk_tx.header.size = size_tx;
+
+
+	pk_tx.data = new byte[size_tx];
+	memcpy(pk_tx.data, data_tx, size_tx);
+
+
+	if(sendPacket(pk_tx))
+	{
+		std::cout << "could not send packet" << std::endl;
+		return true;
+	}
+
+	return false;
+}
+
+//true on error
+bool ArduinoInterface::recvCommand(byte& out_cmd, byte*& out_data_rx)
+{
+
+	DataPacket out_pk_rx;
+
+	if(getPacket(out_pk_rx))
+	{
+		std::cout << "could not rec packet" << std::endl;
+		return true;
+	}
+
+	out_cmd = out_pk_rx.header.cmd;
+
+	out_data_rx = new byte[out_pk_rx.header.size];
+
+	memcpy(out_data_rx, out_pk_rx.data, out_pk_rx.header.size);
+
+	return false;
+}
+
