@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="0" tabpos="6">
+	<File name="Config.xml" open="1" top="0" tabpos="7">
 		<Cursor position="1210" topLine="0" />
 	</File>
-	<File name="Robot.cpp" open="1" top="0" tabpos="4">
+	<File name="Robot.cpp" open="1" top="0" tabpos="5">
 		<Cursor position="7093" topLine="282" />
 	</File>
 	<File name="Robot.h" open="0" top="0" tabpos="8">
@@ -13,23 +13,23 @@
 	<File name="main.cpp" open="0" top="0" tabpos="7">
 		<Cursor position="60" topLine="0" />
 	</File>
-	<File name="mapping/PointParamEstimator.cpp" open="1" top="0" tabpos="2">
+	<File name="mapping/PointParamEstimator.cpp" open="1" top="0" tabpos="3">
 		<Cursor position="1317" topLine="0" />
 	</File>
-	<File name="mapping/Ransac.h" open="1" top="0" tabpos="3">
+	<File name="mapping/Ransac.h" open="1" top="0" tabpos="4">
 		<Cursor position="108" topLine="0" />
 	</File>
-	<File name="mapping/cvcorrImages.cpp" open="1" top="0" tabpos="7">
-		<Cursor position="2301" topLine="21" />
+	<File name="mapping/cvcorrImages.cpp" open="1" top="0" tabpos="8">
+		<Cursor position="2301" topLine="162" />
 	</File>
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
 		<Cursor position="3770" topLine="45" />
 	</File>
 	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="8677" topLine="342" />
+		<Cursor position="7847" topLine="358" />
 	</File>
-	<File name="mapping/mapgen.h" open="0" top="0" tabpos="1">
-		<Cursor position="444" topLine="0" />
+	<File name="mapping/mapgen.h" open="1" top="0" tabpos="2">
+		<Cursor position="993" topLine="8" />
 	</File>
 	<File name="vision/CVcam.cpp" open="0" top="0" tabpos="0">
 		<Cursor position="588" topLine="0" />
@@ -58,7 +58,7 @@
 	<File name="vision/image_buffers.h" open="0" top="0" tabpos="6">
 		<Cursor position="809" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="0" tabpos="5">
+	<File name="vision/vision.cc" open="1" top="0" tabpos="6">
 		<Cursor position="28136" topLine="81" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="5">

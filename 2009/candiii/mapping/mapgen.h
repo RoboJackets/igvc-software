@@ -44,11 +44,13 @@ public:
 	/**/
 	std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > matchList;
 	int maxFeatureShift;
-    int imgHalfHeight;
-    int imgHalfWidth;
-    int genWorldmap();
-    void mapCamPointToWorldPoint(CvPoint2D32f& cam, CvPoint2D32f& world);
-    void mapCamPointToWorldPoint(int camx, int camy, int& worldx, int& worldy);
+	int imgHalfHeight;
+	int imgHalfWidth;
+	int genWorldmap();
+	void mapCamPointToWorldPoint(CvPoint2D32f& cam, CvPoint2D32f& world);
+	void mapCamPointToWorldPoint(double camx, double camy, double& worldx, double& worldy);
+	std::vector< CvPoint3D32f > worldPoints; // z is ref count
+	void addOrUpdateWorldPoint(CvPoint3D32f wpt);
 
 };
 
