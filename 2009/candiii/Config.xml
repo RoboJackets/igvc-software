@@ -39,6 +39,11 @@
     <numFramesBack>03</numFramesBack>       <!-- frames between matching points/features -->
     <maxFeatureShift>9</maxFeatureShift>    <!-- max allowed feature point movement (in pixels) -->
 
+    <!-- ON/OFF -->
+    <doMapping>1</doMapping>
+    <useMotors>0</useMotors>
+    <doVision>1</doVision>
+
 
     <!--
 	<></>
