@@ -52,6 +52,7 @@ public:
 
 	/* the vision processing object */
 	Vision vp;
+	int doVision;
 
 	// initializes various things before main loop (mainly CV images)
 	int init();
@@ -104,10 +105,12 @@ public:
 
 	// map generator and slam processing
 	MapGen mapper;
+	int doMapping;
 
 	// motor control
 	Motors_Old motors;
 	int motorsMaxSpeed;//0-255
+	int useMotors;
 
 };
 

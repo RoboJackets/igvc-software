@@ -204,6 +204,12 @@ void Robot::LoadXMLSettings()
 		trackbarVal = cfg.getInt("defaultView");
 		/* 0-255 */
 		motorsMaxSpeed = cfg.getInt("motorsMaxSpeed");
+		/* SLAM */
+		doMapping = cfg.getInt("doMapping");
+		/* drive motors */
+		useMotors = cfg.getInt("useMotors");
+		/* vision processing */
+		doVision = cfg.getInt("doVision");
 
 	}
 
@@ -216,6 +222,9 @@ void Robot::LoadXMLSettings()
 				_k = .40;
 				trackbarVal = 1;
 				motorsMaxSpeed = 100;
+				doMapping = 0;
+				useMotors = 1;
+				doVision = 1;
 			}
 		}
 		else
@@ -283,7 +292,10 @@ void Robot::processFunc()
 
 
 	/* Perform vision processing. */
-	vp.visProcessFrame(heading_vision);
+	if(doVision)
+	{
+        vp.visProcessFrame(heading_vision);
+	}
 
 
 	/* Average motor commands
@@ -297,7 +309,10 @@ void Robot::processFunc()
 
 
 	/* SLAM Processing */
-	mapper.genMap();
+	if(doMapping)
+	{
+        mapper.genMap();
+	}
 
 
 	/* Make decision */
@@ -309,8 +324,10 @@ void Robot::processFunc()
 
 
 	/* Drive Robot via motor commands (GO!) */
-	//motors.set_heading(heading_main.y, heading_main.x);
-
+	if(useMotors)
+	{
+        motors.set_heading(heading_main.y, heading_main.x);
+	}
 
 	/* Save raw image last */
 	//if (saveRawVideo)
