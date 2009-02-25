@@ -92,19 +92,19 @@ void MapGen::genMap()
 	 *  build matches vector and run RANSAC */
 	if ( !processFeatures() )
 	{
-        return;
-    }
+		return;
+	}
 
-    /* add found features to world feature list,
-     *  and plot/match all good features in the world frame */
-    if ( !genWorldmap() )
-    {
-        return;
-    }
+	/* add found features to world feature list,
+	 *  and plot/match all good features in the world frame */
+	if ( !genWorldmap() )
+	{
+		return;
+	}
 
 
 
-    /* end genMap() */
+	/* end genMap() */
 }
 
 int MapGen::getFeatures()
@@ -149,7 +149,7 @@ int MapGen::getFeatures()
 
 		if (found < 2)
 		{
-		    // try again
+			// try again
 			t--;
 			f=1;
 		}
@@ -193,7 +193,7 @@ int MapGen::getFeatures()
 		float avgdy=0;
 
 
-        int min = visCvGrey->height/3;
+		int min = visCvGrey->height/3;
 		/* draw lines from prev to curr points in curr image */
 		for (i=0; i<maxFeatures; i++)
 		{
@@ -224,7 +224,7 @@ int MapGen::getFeatures()
 			}
 		}
 
-		printf("  using: %d \n",good);
+		//printf("  using: %d \n",good);
 
 		/* draw global direction vector in center (white) */
 		if (good)
@@ -273,8 +273,6 @@ int MapGen::getFeatures()
 
 int MapGen::processFeatures()
 {
-	/* WORK IN PROGRESS! */
-	/*  map each new camera frame into a world frame */
 
 	/* storage */
 	int i;
@@ -286,7 +284,7 @@ int MapGen::processFeatures()
 	matchList.clear();
 	CvPoint2D32f foundpts[ maxFeatures*2 ];
 
-    int min = visCvGrey->height/3;
+	int min = visCvGrey->height/3;
 	/* get matching point pairs */
 	for (i=maxFeatures-1; i>=0; i--)
 	{
@@ -310,7 +308,7 @@ int MapGen::processFeatures()
 		}
 	}
 
-    //printMatchesVector(matchList);
+	//printMatchesVector(matchList);
 
 
 	/*
@@ -336,53 +334,91 @@ int MapGen::processFeatures()
 		return 0; // bad matrix
 	}
 
-	printCv33Matrix(matCamToCam);
+	//printCv33Matrix(matCamToCam);
 
-    /* continue */
-    return 1;
+	/* continue */
+	return 1;
 }
 
 
 int MapGen::genWorldmap()
 {
 
-    static int map=0;
-
 	/* continuously mulitply each new c-c matrix to get new c-w matrix,
 	 *  just not on the first run */
-	if (map)
+	static int do_map = 0;
+	if (do_map)
 	{
 		cvInv(matCamToCam,matCamToCam); // convert cam-homography to map from curr to prev pts
 		cvMatMul(matCamToWorld,matCamToCam,matCamToWorld); // map camera into world
 	}
-	map=1;
+	else
+	{
+		do_map = 1;
+	}
 
-	printCv33Matrix(matCamToWorld);
+	//printCv33Matrix(matCamToWorld);
 
-//    /* draw all the found feature points into the world map */
-//        for (i=0; i<maxFeatures; i++)
-//        {
-//            if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
-//            {
-//                x= cvmGet(matCamToWorld,0,0) * cvmGet(points2,0,i) +
-//                        cvmGet(matCamToWorld,0,1) * cvmGet(points2,1,i) +
-//                        cvmGet(matCamToWorld,0,2);
-//                y= cvmGet(matCamToWorld,1,1) * cvmGet(points2,1,i) +
-//                        cvmGet(matCamToWorld,1,0) * cvmGet(points2,0,i) +
-//                        cvmGet(matCamToWorld,1,2);
-//
-//                cvCircle(worldmap, cvPoint( x,y ), 1, CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
-//            }
-//        }
+
+	/* landmark processing */
+	if (1)
+	{
+		double wx,wy;
+
+		/* update all the found feature points into the world map point list */
+		for (int i=0; i<maxFeatures; i++)
+		{
+			/* only matches */
+			if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
+			{
+				/* get world coordinates */
+				mapCamPointToWorldPoint( cvmGet(points2,0,i), cvmGet(points2,1,i), wx, wy );
+				/* check point with world list */
+				addOrUpdateWorldPoint( cvPoint3D32f( wx, wy, 0 ) );
+
+				//cvCircle(worldmap, cvPoint( wx,wy ), 1, CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
+			}
+		}
+
+		/* clear map */
+		cvZero(worldmap);
+
+		/* extract only features from world point list that have been seen a lot */
+		std::vector< CvPoint3D32f >::iterator iter = worldPoints.begin();
+		while (iter!=worldPoints.end())
+		{
+			/* get stable feature points */
+			if (iter->z > 5)
+			{
+				cvCircle(worldmap, cvPoint( iter->x, iter->y ), 1, CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
+			}
+			//printf("x=%.2f y=%.2f z=%.2f \n",iter->x,iter->y,iter->z);
+
+			/* allow points to expire */
+			iter->z-=.25;
+			if (iter->z < 0 ) worldPoints.erase(iter);
+			else ++iter;
+		}
+	}
+
 
 	/* draw a line from the center bottom of camera frame to center middle
 	 *  to show the orientation of the robot in the world map */
-    int x,y,a,b;
-    mapCamPointToWorldPoint( imgHalfWidth, imgHalfHeight, a, b); // middle center of camera frame
-    mapCamPointToWorldPoint( imgHalfWidth, visCvGrey->height-1, x, y); // bottom center of camera frame
-	cvLine(worldmap, cvPoint( x,y ), cvPoint( a,b ), CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
+	double x,y,a,b;
+	mapCamPointToWorldPoint( imgHalfWidth, imgHalfHeight, a, b); // middle center of camera frame
+	mapCamPointToWorldPoint( imgHalfWidth, visCvGrey->height-1, x, y); // bottom center of camera frame
+	cvLine(worldmap, cvPoint( x,y ), cvPoint( a,b ),
+	       CV_RGB(rand()%255,rand()%255,rand()%255),
+	       //CV_RGB(255,255,255),
+	       2, 8, 0);
 	/* draw a circle denoting base orientaion */
-	cvCircle(worldmap, cvPoint( x,y ), 2, /*CV_RGB(rand()%255,rand()%255,rand()%255)*/ CV_RGB(255,255,255), 2, 8, 0);
+	cvCircle(worldmap, cvPoint( x,y ), 2,
+	         //CV_RGB(rand()%255,rand()%255,rand()%255),
+	         CV_RGB(255,255,255),
+	         2, 8, 0);
+
+
+
 
 	/* display world view image */
 	cvShowImage("worldmap",worldmap);
@@ -415,17 +451,17 @@ void MapGen::init()
 
 	/* world map stuff */
 
-    /* init images and matricies */
+	/* init images and matricies */
 	int dx = 400; // center of
 	int dy = 400; //  worldmap
 	worldmap = cvCreateImage( cvSize( dx*2,dy*2 ), 8, 3 );
 	matCamToCam = cvCreateMat(3,3,CV_32F);
 	matCamToWorld = cvCreateMat(3,3,CV_32F);
 	cvZero(worldmap);
-    cvZero(matCamToCam);
+	cvZero(matCamToCam);
 	cvZero(matCamToWorld);
 
-    /* set up camera to world homography matrix */
+	/* set up camera to world homography matrix */
 	double k = 0.3; // scale factor
 	// k  0  dx
 	// 0  k  dy
@@ -437,12 +473,12 @@ void MapGen::init()
 	cvSetReal2D( matCamToWorld, 2, 2, 1 );
 	printCv33Matrix(matCamToWorld);
 
-    /* display window */
+	/* display window */
 	cvNamedWindow("worldmap");
 
 	//==============================================================
 
-    /* saving some operations later */
+	/* saving some operations later */
 	imgHalfHeight = visCvGrey->height/2;
 	imgHalfWidth = visCvGrey->width/2;
 
@@ -499,8 +535,8 @@ void MapGen::printCv33Matrix(CvMat* matrix)
 
 void MapGen::mapCamPointToWorldPoint(CvPoint2D32f& cam, CvPoint2D32f& world)
 {
-    /* maps a point in camera frame to world frame
-     *  via cam to world homography matrix */
+	/* maps a point in camera frame to world frame
+	 *  via cam to world homography matrix */
 	world.x = cvmGet(matCamToWorld,0,0) * cam.x +
 	          cvmGet(matCamToWorld,0,1) * cam.y +
 	          cvmGet(matCamToWorld,0,2);
@@ -509,10 +545,10 @@ void MapGen::mapCamPointToWorldPoint(CvPoint2D32f& cam, CvPoint2D32f& world)
 	          cvmGet(matCamToWorld,1,2);
 }
 
-void MapGen::mapCamPointToWorldPoint(int camx, int camy, int& worldx, int& worldy)
+void MapGen::mapCamPointToWorldPoint(double camx, double camy, double& worldx, double& worldy)
 {
-    /* maps a point in camera frame to world frame
-     *  via cam to world homography matrix */
+	/* maps a point in camera frame to world frame
+	 *  via cam to world homography matrix */
 	worldx =  cvmGet(matCamToWorld,0,0) * camx +
 	          cvmGet(matCamToWorld,0,1) * camy +
 	          cvmGet(matCamToWorld,0,2);
@@ -520,6 +556,47 @@ void MapGen::mapCamPointToWorldPoint(int camx, int camy, int& worldx, int& world
 	          cvmGet(matCamToWorld,1,1) * camy +
 	          cvmGet(matCamToWorld,1,2);
 }
+
+void MapGen::addOrUpdateWorldPoint(CvPoint3D32f wpt)
+{
+	/* add first point */
+	int n = worldPoints.size();
+	if (n==0)
+	{
+		worldPoints.push_back(wpt);
+		return;
+	}
+
+	/* pixel location difference threshold */
+	double thresh = 1.5;
+	int i;
+	CvPoint3D32f* curr;
+
+	/* go through list of current world points to see if new point is
+	 *  close enough to a point already seen, and increment its count */
+	for (i=0; i<n; i++)
+	{
+		curr = &worldPoints.at(i);
+		if ( (abs(curr->x-wpt.x)<thresh) && (abs(curr->y-wpt.y)<thresh) )
+		{
+			/* average point locations and update pt history */
+			curr->x = (wpt.x+curr->x)/2;
+			curr->y = (wpt.y+curr->y)/2;
+			curr->z += 1;
+			/* assume we hit the best match */
+			break;
+		}
+	}
+
+	/* if we didn't update anything, then this point is new */
+	if (i==n)
+	{
+		worldPoints.push_back(wpt);
+	}
+
+}
+
+
 
 
 

@@ -1149,7 +1149,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 		// fwd speed
 		goal.y = (visCvPath->height  - goal.y) * (255) / (visCvPath->height);
 
-        /* Now we are using above motor ranges. */
+		/* Now we are using above motor ranges. */
 		/* Check for errors and prevent the robot from going crazy */
 		if ( (goal.y>=250 && goal.x<=-127) ) // necessary check
 		{
