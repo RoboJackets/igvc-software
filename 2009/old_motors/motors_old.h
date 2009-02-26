@@ -12,7 +12,7 @@
 #include <iostream>
 
 /* maximum output value out of 255 */
-#define MAX_OUTPUT          80
+//#define MAX_OUTPUT          90
 
 #define DEFAULT_PORT		"/dev/ttyUSB0"
 
@@ -75,6 +75,9 @@ public:
     int set_heading(int iFwdVelocity, int iRotation);
     /**/
     int get_motor_states(void);
+    /**/
+    int _max_speed_;
+    void set_max_speed(int maxspeed);
 
 };
 

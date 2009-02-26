@@ -7,6 +7,7 @@ Motors_Old::Motors_Old()
     //ctor
     fdMotor = -1;
     dVelocityScale = 1;
+    _max_speed_=100;
     //SetupSerial();
 }
 
@@ -204,11 +205,11 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
     int left  = iFwdVelocity + iRotation;
     int right = iFwdVelocity - iRotation;
 
-    left  = left  * MAX_OUTPUT / 255;
-    right = right * MAX_OUTPUT / 255;
+//    left  = left  * _max_speed_ / 255;
+//    right = right * _max_speed_ / 255;
 
-//    if (left  > MAX_OUTPUT) left  = MAX_OUTPUT;
-//    if (right > MAX_OUTPUT) right = MAX_OUTPUT;
+    if (left  > _max_speed_) left  = _max_speed_;
+    if (right > _max_speed_) right = _max_speed_;
 
     //printf("L=%d R=%d \n",left,right);
 
@@ -217,6 +218,10 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 }
 
 
-
+void Motors_Old::set_max_speed(int maxspeed)
+{
+    /* 0-255 */
+    _max_speed_ = maxspeed;
+}
 
 
