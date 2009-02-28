@@ -508,6 +508,9 @@ bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 			break;
 		}
 	}
+
+	std::cout << "rec header:\n" << out_pk_rx.header << std::endl;
+
 	return false;
 }
 
