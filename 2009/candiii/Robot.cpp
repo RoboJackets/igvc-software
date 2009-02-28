@@ -292,9 +292,9 @@ void Robot::processFunc()
 
 
 	/* Perform vision processing. */
-	if(doVision)
+	if (doVision)
 	{
-        vp.visProcessFrame(heading_vision);
+		vp.visProcessFrame(heading_vision);
 	}
 
 
@@ -309,9 +309,9 @@ void Robot::processFunc()
 
 
 	/* SLAM Processing */
-	if(doMapping)
+	if (doMapping)
 	{
-        mapper.genMap();
+		mapper.genMap();
 	}
 
 
@@ -324,9 +324,9 @@ void Robot::processFunc()
 
 
 	/* Drive Robot via motor commands (GO!) */
-	if(useMotors)
+	if (useMotors)
 	{
-        motors.set_heading(heading_main.y, heading_main.x);
+		motors.set_heading(heading_main.y, heading_main.x);
 	}
 
 	/* Save raw image last */
@@ -338,7 +338,7 @@ void Robot::processFunc()
 
 	/* Stats */
 	//if (useMotors)
-	if(0)
+	if (1)
 	{
 		printf( "framerate: %.2f \n", elapsed_time() );
 		start_timer(); // called second to time entire process (except first run)

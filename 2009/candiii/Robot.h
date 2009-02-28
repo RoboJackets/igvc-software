@@ -20,7 +20,7 @@
 /*===== Camera Settings ===========================================*/
 /* Determines camera compatability.
  * This must be set to 0 to load videos via command line. */
-#define USE_FIREWIRE_CAMERA 0
+#define USE_FIREWIRE_CAMERA 1
 
 /*=================================================================*/
 
