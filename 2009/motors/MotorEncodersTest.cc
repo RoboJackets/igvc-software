@@ -43,9 +43,9 @@ int main(void) {
 	{
 		cout << pk << endl;
 
-		std::cout << "resend pk debug extern" << std::endl;
-		std::cout << "data size: " << (int) pk.header.size << std::endl;
-		std::cout << "dataloc: " << (int) pk.data << std::endl;
+		//std::cout << "resend pk debug extern" << std::endl;
+		//std::cout << "data size: " << (int) pk.header.size << std::endl;
+		//std::cout << "dataloc: " << (int) pk.data << std::endl;
 
 		if (pk.data != NULL){
 			if(pk.header.cmd == 'r'){
