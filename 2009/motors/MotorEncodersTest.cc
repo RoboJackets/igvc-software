@@ -14,7 +14,7 @@ int main(void) {
 
 	//int exp_packetnum = 1;
 	int i;
-	for( i = 0; i < 100; i++){
+	for( i = 0; i < 100000; i++){
 		//cout << "Heading = " << encoders.getHeading() << endl;
 
 		//DataPacket packet;
@@ -25,6 +25,8 @@ int main(void) {
 		if(!encoders.getInfo(parsed_data))
 		{
 			cout << parsed_data << "\n\n";
+
+			cout << "heading: " << encoders.getHeading() << endl;
 		}
 		else
 		{
@@ -32,7 +34,7 @@ int main(void) {
 		}
 		//status = encoders.getInfo();
 		//cout << "Heading = " << status.heading << endl;
-		usleep(.01*1e6);
+		usleep(.5*1e6);
 	}
 
 	DataPacket pk;

@@ -111,10 +111,10 @@ void setup(void) {
 void loop(void) {
 
 	// TODO: don't do this if data is bad
-	//previous = current;
-	//readMotorEncoders(&current);
+	previous = current;
+	readMotorEncoders(&current);
 
-	//calcDelta();
+	calcDelta();
 
 	readSerial();
 /*
@@ -190,7 +190,7 @@ int delta(int p2, int p1, int maxDiff, int maxVal, int dir) {
 int convertMotorEncoderFormat(unsigned int data) {
 	//XX: trash data does not match the spec
 	if( (data & 0x0078) | ~(data | 0x3F7F) ) {
-		Serial.print("Frame error\n");
+		//Serial.print("Frame error\n");
 		//error
 		return(0);
 	} else {
@@ -470,12 +470,12 @@ reply_dtick_t getEncoderStatus() {
 	static short test = 0;
 	test++;
 		reply_dtick_t packet;
-		//packet.dl = dl;
-		//packet.dr = dr;
-		//packet.dt = dt;
-		packet.dl = test;
-		packet.dr = 0xFACE;
-		packet.dt = 0xBEEFBEEF;
+		packet.dl = dl;
+		packet.dr = dr;
+		packet.dt = dt;
+		//packet.dl = test;
+		//packet.dr = 0xFACE;
+		//packet.dt = 0xBEEFBEEF;
 
 		return(packet);
 }
