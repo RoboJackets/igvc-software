@@ -372,9 +372,9 @@ bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket& pk_out){
 			pk_out.data = new byte[pk_out.header.size];
 			memcpy(pk_out.data, pk_rx.data + PACKET_HEADER_SIZE, pk_out.header.size);
 
-			std::cout << "resend pk debug intern" << std::endl;
-			std::cout << "data size: " << (int) pk_out.header.size << std::endl;
-			std::cout << "dataloc: " << (int) pk_out.data << std::endl;
+			//std::cout << "resend pk debug intern" << std::endl;
+			//std::cout << "data size: " << (int) pk_out.header.size << std::endl;
+			//std::cout << "dataloc: " << (int) pk_out.data << std::endl;
 
 			//encoder_reply_t parsed_data;
 			//memcpy(&parsed_data, pk_out.data, sizeof(encoder_reply_t));
@@ -465,7 +465,7 @@ bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 		readFully(arduinoFD, out_pk_rx.data, out_pk_rx.header.size);
 	}
 	rx_num++;
-
+/*
 	if(out_pk_rx.header.packetnum != (rx_num-1)){//rx_num -1 'caue rx_num is incr inside getpacket
 		std::cout << "dropped packet - rec header:" << std::endl;
 		std::cout << out_pk_rx.header << std::endl;
@@ -483,7 +483,7 @@ bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 				return true;
 			}
 	}
-
+*/
 	//parse the icoming packet, test if it is an error packet
 	if(out_pk_rx.header.cmd == 0xFF ){
 		byte errorbuff[out_pk_rx.header.size];
