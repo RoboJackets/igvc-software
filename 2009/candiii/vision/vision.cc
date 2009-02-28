@@ -1153,12 +1153,12 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 		/* Check for errors and prevent the robot from going crazy */
 		if ( (goal.y>=250 && goal.x<=-127) ) // necessary check
 		{
-			goal.y=45; // min fwd speed
+			goal.y=(DO_TRANSFORM)?40:10; // min fwd speed
 			goal.x=0;
 		}
 		else if ( (visCvPath->height-goal_far.y) < 20 ) // XXX: HACK to get onto ramps & yellow bars
 		{
-			goal.y=45; // min fwd speed
+			goal.y=(DO_TRANSFORM)?40:10; // min fwd speed
 			goal.x=0;
 		}
 

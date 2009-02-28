@@ -205,13 +205,20 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
     int left  = iFwdVelocity + iRotation;
     int right = iFwdVelocity - iRotation;
 
-//    left  = left  * _max_speed_ / 255;
-//    right = right * _max_speed_ / 255;
+    if(1)
+    {
+        // scale speed
+        left  = left  * _max_speed_ / 255;
+        right = right * _max_speed_ / 255;
+    }
+    else
+    {
+        // cap speed
+        if (left  > _max_speed_) left  = _max_speed_;
+        if (right > _max_speed_) right = _max_speed_;
+    }
 
-    if (left  > _max_speed_) left  = _max_speed_;
-    if (right > _max_speed_) right = _max_speed_;
-
-    //printf("L=%d R=%d \n",left,right);
+    printf("Motors: L=%d R=%d \n",left,right);
 
     return this->set_motors( left , right );
 
