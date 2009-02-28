@@ -1108,19 +1108,17 @@ void Vision::ThresholdImage(IplImage *src, IplImage *dst, int thresh)
  */
 void Vision::Normalize(IplImage* img)
 {
-	double min,max,scale,shift;
+	double min,max,scale;
 	cvMinMaxLoc(img, &min, &max, NULL, NULL, NULL);
 	if (max != min)
 	{
 		scale = 255.0/(max-min);
-		shift = 255*(-min)/(max-min);
 	}
 	else
 	{
 		scale = 1.0;
-		shift = -max;
 	}
-	cvScale( img, img, scale, shift ); //Normalizes matrix to 0-255 (grayscale)
+	cvScale( img, img, scale, 0 ); //Normalizes matrix to 0-255 (grayscale)
 }
 
 /*
@@ -1128,8 +1126,11 @@ void Vision::Normalize(IplImage* img)
  */
 void Vision::CvtPixToGoal(Point2D<int>& goal)
 {
+	int closeness = (DO_TRANSFORM)?
+	                visCvPath->height/2:
+	                visCvPath->height/2;  //need to play with settings
 
-	if (goal_far.y > visCvPath->height/2)
+	if ( goal_far.y > closeness ) // y is inverted - 0 is top=far
 	{
 		goal = goal_near;	// can't see very far
 	}

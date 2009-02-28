@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="1" tabpos="7">
-		<Cursor position="1751" topLine="0" />
+	<File name="Config.xml" open="1" top="0" tabpos="5">
+		<Cursor position="1734" topLine="0" />
 	</File>
-	<File name="Robot.cpp" open="1" top="0" tabpos="5">
-		<Cursor position="7785" topLine="305" />
+	<File name="Robot.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="7844" topLine="305" />
 	</File>
-	<File name="Robot.h" open="1" top="0" tabpos="9">
-		<Cursor position="1102" topLine="45" />
+	<File name="Robot.h" open="1" top="0" tabpos="6">
+		<Cursor position="1103" topLine="9" />
 	</File>
 	<File name="main.cpp" open="0" top="0" tabpos="7">
 		<Cursor position="60" topLine="0" />
 	</File>
-	<File name="mapping/PointParamEstimator.cpp" open="1" top="0" tabpos="3">
+	<File name="mapping/PointParamEstimator.cpp" open="0" top="0" tabpos="3">
 		<Cursor position="1317" topLine="0" />
 	</File>
-	<File name="mapping/Ransac.h" open="1" top="0" tabpos="4">
+	<File name="mapping/Ransac.h" open="0" top="0" tabpos="4">
 		<Cursor position="108" topLine="0" />
 	</File>
-	<File name="mapping/cvcorrImages.cpp" open="1" top="0" tabpos="8">
+	<File name="mapping/cvcorrImages.cpp" open="0" top="0" tabpos="8">
 		<Cursor position="2301" topLine="162" />
 	</File>
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
@@ -58,13 +58,13 @@
 	<File name="vision/image_buffers.h" open="0" top="0" tabpos="6">
 		<Cursor position="809" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="0" tabpos="6">
+	<File name="vision/vision.cc" open="1" top="0" tabpos="4">
 		<Cursor position="28136" topLine="1112" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="5">
 		<Cursor position="90" topLine="0" />
 	</File>
-	<File name="../old_motors/motors_old.cpp" open="0" top="0" tabpos="11">
+	<File name="../old_motors/motors_old.cpp" open="1" top="1" tabpos="7">
 		<Cursor position="6991" topLine="179" />
 	</File>
 	<File name="../old_motors/motors_old.h" open="0" top="0" tabpos="12">
