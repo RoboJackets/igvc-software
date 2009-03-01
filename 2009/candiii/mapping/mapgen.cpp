@@ -444,9 +444,6 @@ void MapGen::init()
 	cvZero(status1);
 	cvZero(status2);
 
-	/* debug window */
-	cvNamedWindow("curr");
-
 	//==============================================================
 
 	/* world map stuff */
@@ -473,9 +470,6 @@ void MapGen::init()
 	cvSetReal2D( matCamToWorld, 2, 2, 1 );
 	printCv33Matrix(matCamToWorld);
 
-	/* display window */
-	cvNamedWindow("worldmap");
-
 	//==============================================================
 
 	/* saving some operations later */
@@ -495,6 +489,13 @@ void MapGen::LoadXMLSettings()
 		numFramesBack = cfg.getInt("numFramesBack");
 		maxFeatureShift = cfg.getInt("maxFeatureShift");
 
+        /* display windows */
+        if(cfg.getInt("doMapping"))
+        {
+            cvNamedWindow("worldmap");
+            cvNamedWindow("curr");
+        }
+
 	}
 
 	/* test */
@@ -503,8 +504,8 @@ void MapGen::LoadXMLSettings()
 		{
 			printf("ERROR: Mapping settings NOT loaded! Using DEFAULTS \n");
 			{
-				maxFeatures   = 34;
-				numFramesBack = 4;
+				maxFeatures   = 40;
+				numFramesBack = 3;
 				maxFeatureShift = 9;
 
 			}
