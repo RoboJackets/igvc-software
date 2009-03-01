@@ -219,7 +219,7 @@ void Robot::LoadXMLSettings()
 		{
 			printf("ERROR: Robot settings NOT loaded! Using DEFAULTS \n");
 			{
-				_k = .40;
+				_k = .30;
 				trackbarVal = 1;
 				motorsMaxSpeed = 100;
 				doMapping = 0;
