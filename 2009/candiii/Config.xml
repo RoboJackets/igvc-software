@@ -32,7 +32,7 @@
 	<!-- Robot Misc Settings -->
 	<_k>0.150</_k>                   <!-- lower => more smooth motor cotrol (averages new motor commands) -->
     <defaultView>01</defaultView>   <!-- gui slider bar starting value -->
-    <motorsMaxSpeed>85</motorsMaxSpeed> <!-- max motor output [0-255] -->
+    <motorsMaxSpeed>80</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
     <maxFeatures>40</maxFeatures>           <!-- max number for feature corners to find -->
@@ -41,7 +41,7 @@
 
     <!-- ON/OFF -->
     <doMapping>0</doMapping>
-    <useMotors>1</useMotors>
+    <useMotors>0</useMotors>
     <doVision>1</doVision>
 
 

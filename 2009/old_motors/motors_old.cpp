@@ -199,9 +199,6 @@ int Motors_Old::get_motor_states(void)
  */
 int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 {
-//    int left  = iFwdVelocity/2 + iRotation;
-//    int right = iFwdVelocity/2 - iRotation;
-
     int left  = iFwdVelocity + iRotation ;
     int right = iFwdVelocity - iRotation ;
 
@@ -214,23 +211,17 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
     else
     {
         // cap speed
-        if (left  > _max_speed_) left  = _max_speed_;
-        if (right > _max_speed_) right = _max_speed_;
+        if (left  > _max_speed_) left  = _max_speed_ ;
+        if (right > _max_speed_) right = _max_speed_ ;
     }
 
-	if(right != 0) 
-	{
-		right += MINREQSPEED ;
-	}
-	if(left != 0) 
-	{
-		left += MINREQSPEED ;
-	}	
+    // motors don't respond until certain output is reached
+	if(right != 0) right += MINREQSPEED ;
+	if(left  != 0) left  += MINREQSPEED ;
 
     printf("Motors: L=%d R=%d \n",left,right);
 
     return this->set_motors( left , right );
-
 }
 
 

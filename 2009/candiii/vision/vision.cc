@@ -72,24 +72,30 @@ void Vision::init()
 	/* load in vision settings */
 	LoadVisionXMLSettings();
 
+
+    // XXX: temp hack
+	int before=DO_TRANSFORM;
+	DO_TRANSFORM=0;
+
+
 	/*** SweeperLines ****************************************************/
 	if ( DO_TRANSFORM )
 	{
 		// Number of paths that are assessed between the starting/ending angles
-		nav_path__num = 15; //29;		// (Number of sweeper lines)
-		// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
-		nav_path__view_distance_multiplier = 0.30; 		//1.00;<-without-transform	/* > 0.0 */
+		nav_path__num = 15; //29;		// (Number of sweeper lines - should be odd number)
+		// Proportional to the lengths of the paths (in image space)
+		nav_path__view_distance_multiplier = 0.30; 	/* > 0.0 */
 	}
 	else
 	{
 		// Number of paths that are assessed between the starting/ending angles
-		nav_path__num = 29; //15;		// (Number of sweeper lines)
-		// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
-		nav_path__view_distance_multiplier = .90; 		//1.00;<-without-transform	/* > 0.0 */
+		nav_path__num = 29; //15;		// (Number of sweeper lines - should be odd number)
+		// Proportional to the lengths of the paths (in image space)
+		nav_path__view_distance_multiplier = .90; 	/* > 0.0 */
 	}
 	// Defines the "view/navigation cone", which is where the set of
 	// considered navigation paths is taken from.
-	nav_path__view_cone__offset = 30; //23.0; //30;<-without-transform
+	nav_path__view_cone__offset = 23; //23.0; //30;
 	nav_path__view_cone__start_angle = 0.0 + nav_path__view_cone__offset;	// >= 0.0
 	nav_path__view_cone__end_angle = 180.0 - nav_path__view_cone__offset;	// <= 180.0
 	nav_path__view_cone__delta_angle = nav_path__view_cone__end_angle - nav_path__view_cone__start_angle;
@@ -129,8 +135,8 @@ void Vision::init()
 		}
 		else
 		{
-			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad+adapt_boxPad/4);
-			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/2);
+			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad+adapt_boxPad/3);
+			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/3);
 		}
 
 		/* setup roi */
@@ -142,6 +148,11 @@ void Vision::init()
 		/* create and set roi img */
 		roi_img = cvCreateImage( cvSize(roi.width, roi.height), IPL_DEPTH_8U, 3 );
 	}
+
+
+    // XXX: temp hack
+	DO_TRANSFORM=before;
+
 }
 
 /*
@@ -1132,7 +1143,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 
 	if ( goal_far.y > closeness ) // y is inverted - 0 is top=far
 	{
-		goal = goal_near;	// can't see very far	
+		goal = goal_near;	// can't see very far
 	}
 	else
 	{
@@ -1149,7 +1160,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 		goal.x = (visCvPath->width/2 - goal.x) * (255) / (visCvPath->width );
 		// fwd speed
 		goal.y = (visCvPath->height  - goal.y) * (255) / (visCvPath->height);
-		
+
 		/* Now we are using above motor ranges. */
 		/* Check for errors and prevent the robot from going crazy */
 		if ( (goal.y>=250 && goal.x<=-127) ) // necessary check
