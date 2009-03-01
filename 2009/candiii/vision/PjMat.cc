@@ -7,7 +7,7 @@
 // (how much up from 0 we are, in radians)
 // 1.25 default from 2007
 // update: current measured guppy angle is 1.0 (57deg) for 2009
-#define OFFANGLE 1.13
+#define OFFANGLE 1.13   // we will use halfway for now!
 // need to measure stuff below for guppy!
 /* *************************** */
 

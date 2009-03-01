@@ -337,8 +337,8 @@ void Robot::processFunc()
 
 
 	/* Stats */
-	//if (useMotors)
-	if (1)
+	if (useMotors)
+	//if (1)
 	{
 		printf( "framerate: %.2f \n", elapsed_time() );
 		start_timer(); // called second to time entire process (except first run)
