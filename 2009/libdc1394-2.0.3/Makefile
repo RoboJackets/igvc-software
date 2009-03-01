@@ -119,13 +119,13 @@ GZIP_ENV = --best
 distuninstallcheck_listfiles = find . -type f -print
 distcleancheck_listfiles = find . -type f -print
 pkgincludedir = $(includedir)/dc1394
-ACLOCAL = ${SHELL} /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3/missing --run aclocal-1.10
-AMTAR = ${SHELL} /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3/missing --run tar
+ACLOCAL = ${SHELL} /home/robo/svn/2009/libdc1394-2.0.3/missing --run aclocal-1.10
+AMTAR = ${SHELL} /home/robo/svn/2009/libdc1394-2.0.3/missing --run tar
 AR = ar
 AS = as
-AUTOCONF = ${SHELL} /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3/missing --run autoconf
-AUTOHEADER = ${SHELL} /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3/missing --run autoheader
-AUTOMAKE = ${SHELL} /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3/missing --run automake-1.10
+AUTOCONF = ${SHELL} /home/robo/svn/2009/libdc1394-2.0.3/missing --run autoconf
+AUTOHEADER = ${SHELL} /home/robo/svn/2009/libdc1394-2.0.3/missing --run autoheader
+AUTOMAKE = ${SHELL} /home/robo/svn/2009/libdc1394-2.0.3/missing --run automake-1.10
 AWK = mawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -145,13 +145,13 @@ DSYMUTIL =
 DX_CONFIG = Doxyfile.in
 DX_DOCDIR = doc
 DX_DOT = 
-DX_DOXYGEN = 
+DX_DOXYGEN = /usr/bin/doxygen
 DX_DVIPS = 
 DX_EGREP = 
-DX_ENV =  SRCDIR='.' PROJECT='libdc1394' DOCDIR='doc' VERSION='2.0.3' HAVE_DOT='NO' GENERATE_MAN='NO' GENERATE_RTF='NO' GENERATE_XML='NO' GENERATE_HTMLHELP='NO' GENERATE_CHI='NO' GENERATE_HTML='NO' GENERATE_LATEX='NO'
+DX_ENV =  SRCDIR='.' PROJECT='libdc1394' DOCDIR='doc' VERSION='2.0.3' PERL_PATH='/usr/bin/perl' HAVE_DOT='NO' GENERATE_MAN='NO' GENERATE_RTF='NO' GENERATE_XML='NO' GENERATE_HTMLHELP='NO' GENERATE_CHI='NO' GENERATE_HTML='NO' GENERATE_LATEX='NO'
 DX_FLAG_chi = 0
 DX_FLAG_chm = 0
-DX_FLAG_doc = 0
+DX_FLAG_doc = 1
 DX_FLAG_dot = 0
 DX_FLAG_html = 0
 DX_FLAG_man = 0
@@ -186,7 +186,7 @@ LIBS = -lm  -lraw1394
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3/missing --run makeinfo
+MAKEINFO = ${SHELL} /home/robo/svn/2009/libdc1394-2.0.3/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 NMEDIT = 
 OBJDUMP = objdump
@@ -212,10 +212,10 @@ X_CFLAGS =
 X_EXTRA_LIBS = 
 X_LIBS = 
 X_PRE_LIBS =  -lSM -lICE
-abs_builddir = /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3
-abs_srcdir = /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3
-abs_top_builddir = /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3
-abs_top_srcdir = /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3
+abs_builddir = /home/robo/svn/2009/libdc1394-2.0.3
+abs_srcdir = /home/robo/svn/2009/libdc1394-2.0.3
+abs_top_builddir = /home/robo/svn/2009/libdc1394-2.0.3
+abs_top_srcdir = /home/robo/svn/2009/libdc1394-2.0.3
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_F77 = 
@@ -245,7 +245,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = $(SHELL) /home/chris/Desktop/workspace3/2009/libdc1394-2.0.3/install-sh
+install_sh = $(SHELL) /home/robo/svn/2009/libdc1394-2.0.3/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -280,26 +280,26 @@ MAINTAINERCLEANFILES = Makefile.in aclocal.m4 configure config.h.in \
 EXTRA_DIST = libdc1394-2.pc.in Doxyfile.in
 # Doxygen part
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
-##DX_CLEAN_HTML = doc/html
-##DX_CLEAN_CHM = doc/chm
-###DX_CLEAN_CHI = doc/libdc1394.chi
-##DX_CLEAN_MAN = doc/man
-##DX_MANS = $(DX_CLEAN_MAN)/man3
-##man3_MANS = $(DX_MANS)/control.h.3 $(DX_MANS)/conversions.h.3 \
-##	$(DX_MANS)/register.h.3 $(DX_MANS)/utils.h.3
+#DX_CLEAN_HTML = doc/html
+#DX_CLEAN_CHM = doc/chm
+##DX_CLEAN_CHI = doc/libdc1394.chi
+#DX_CLEAN_MAN = doc/man
+#DX_MANS = $(DX_CLEAN_MAN)/man3
+#man3_MANS = $(DX_MANS)/control.h.3 $(DX_MANS)/conversions.h.3 \
+#	$(DX_MANS)/register.h.3 $(DX_MANS)/utils.h.3
 
-##DX_CLEAN_RTF = doc/rtf
-##DX_CLEAN_XML = doc/xml
-##DX_CLEAN_PS = doc/libdc1394.ps
-##DX_PS_GOAL = doxygen-ps
-##DX_CLEAN_PDF = doc/libdc1394.pdf
-##DX_PDF_GOAL = doxygen-pdf
-##DX_CLEAN_LATEX = doc/latex
-#DX_CLEANFILES = \
-#	doc/libdc1394.tag \
-#	-r $(DX_CLEAN_HTML) $(DX_CLEAN_CHM) $(DX_CLEAN_CHI) $(DX_CLEAN_MAN) \
-#	$(DX_CLEAN_RTF) $(DX_CLEAN_XML) $(DX_CLEAN_PS) $(DX_CLEAN_PDF) \
-#	$(DX_CLEAN_LATEX) $(DX_DOCDIR)
+#DX_CLEAN_RTF = doc/rtf
+#DX_CLEAN_XML = doc/xml
+#DX_CLEAN_PS = doc/libdc1394.ps
+#DX_PS_GOAL = doxygen-ps
+#DX_CLEAN_PDF = doc/libdc1394.pdf
+#DX_PDF_GOAL = doxygen-pdf
+#DX_CLEAN_LATEX = doc/latex
+DX_CLEANFILES = \
+	doc/libdc1394.tag \
+	-r $(DX_CLEAN_HTML) $(DX_CLEAN_CHM) $(DX_CLEAN_CHI) $(DX_CLEAN_MAN) \
+	$(DX_CLEAN_RTF) $(DX_CLEAN_XML) $(DX_CLEAN_PS) $(DX_CLEAN_PDF) \
+	$(DX_CLEAN_LATEX) $(DX_DOCDIR)
 
 # pkg-config part
 pkgconfigdir = $(libdir)/pkgconfig
@@ -828,53 +828,53 @@ uninstall-man: uninstall-man3
 	uninstall uninstall-am uninstall-man uninstall-man3 \
 	uninstall-pkgconfigDATA
 
-##$(man3_MANS): doc
+#$(man3_MANS): doc
 
-##doxygen-ps: doc/libdc1394.ps
+#doxygen-ps: doc/libdc1394.ps
 
-##doc/libdc1394.ps: doc/libdc1394.tag
-##	cd doc/latex; \
-##	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
-##	$(DX_LATEX) refman.tex; \
-##	$(MAKEINDEX_PATH) refman.idx; \
-##	$(DX_LATEX) refman.tex; \
-##	countdown=5; \
-##	while $(DX_EGREP) 'Rerun (LaTeX|to get cross-references right)' \
-##	                  refman.log > /dev/null 2>&1 \
-##	   && test $$countdown -gt 0; do \
-##	    $(DX_LATEX) refman.tex; \
-##	    countdown=`expr $$countdown - 1`; \
-##	done; \
-##	$(DX_DVIPS) -o ../libdc1394.ps refman.dvi
+#doc/libdc1394.ps: doc/libdc1394.tag
+#	cd doc/latex; \
+#	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
+#	$(DX_LATEX) refman.tex; \
+#	$(MAKEINDEX_PATH) refman.idx; \
+#	$(DX_LATEX) refman.tex; \
+#	countdown=5; \
+#	while $(DX_EGREP) 'Rerun (LaTeX|to get cross-references right)' \
+#	                  refman.log > /dev/null 2>&1 \
+#	   && test $$countdown -gt 0; do \
+#	    $(DX_LATEX) refman.tex; \
+#	    countdown=`expr $$countdown - 1`; \
+#	done; \
+#	$(DX_DVIPS) -o ../libdc1394.ps refman.dvi
 
-##doxygen-pdf: doc/libdc1394.pdf
+#doxygen-pdf: doc/libdc1394.pdf
 
-##doc/libdc1394.pdf: doc/libdc1394.tag
-##	cd doc/latex; \
-##	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
-##	$(DX_PDFLATEX) refman.tex; \
-##	$(DX_MAKEINDEX) refman.idx; \
-##	$(DX_PDFLATEX) refman.tex; \
-##	countdown=5; \
-##	while $(DX_EGREP) 'Rerun (LaTeX|to get cross-references right)' \
-##	                  refman.log > /dev/null 2>&1 \
-##	   && test $$countdown -gt 0; do \
-##	    $(DX_PDFLATEX) refman.tex; \
-##	    countdown=`expr $$countdown - 1`; \
-##	done; \
-##	mv refman.pdf ../libdc1394.pdf
+#doc/libdc1394.pdf: doc/libdc1394.tag
+#	cd doc/latex; \
+#	rm -f *.aux *.toc *.idx *.ind *.ilg *.log *.out; \
+#	$(DX_PDFLATEX) refman.tex; \
+#	$(DX_MAKEINDEX) refman.idx; \
+#	$(DX_PDFLATEX) refman.tex; \
+#	countdown=5; \
+#	while $(DX_EGREP) 'Rerun (LaTeX|to get cross-references right)' \
+#	                  refman.log > /dev/null 2>&1 \
+#	   && test $$countdown -gt 0; do \
+#	    $(DX_PDFLATEX) refman.tex; \
+#	    countdown=`expr $$countdown - 1`; \
+#	done; \
+#	mv refman.pdf ../libdc1394.pdf
 
-#.PHONY: doxygen-run doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
+.PHONY: doxygen-run doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
-#.INTERMEDIATE: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
+.INTERMEDIATE: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
-#doxygen-run: doc/libdc1394.tag
+doxygen-run: doc/libdc1394.tag
 
-#doc: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
+doc: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
-#doc/libdc1394.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
-#	rm -rf doc
-#	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
+doc/libdc1394.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
+	rm -rf doc
+	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
 
 install-exec-hook:
 	@if [ ! -c /dev/raw1394 ]; then                                 \

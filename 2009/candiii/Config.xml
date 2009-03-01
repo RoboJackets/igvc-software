@@ -30,9 +30,9 @@
 	<boxPadding>95</boxPadding>   <!-- lower => wider box -->
 
 	<!-- Robot Misc Settings -->
-	<_k>0.30</_k>                   <!-- lower => more smooth motor cotrol (averages new motor commands) -->
+	<_k>0.150</_k>                   <!-- lower => more smooth motor cotrol (averages new motor commands) -->
     <defaultView>01</defaultView>   <!-- gui slider bar starting value -->
-    <motorsMaxSpeed>75</motorsMaxSpeed> <!-- max motor output [0-255] -->
+    <motorsMaxSpeed>85</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
     <maxFeatures>40</maxFeatures>           <!-- max number for feature corners to find -->

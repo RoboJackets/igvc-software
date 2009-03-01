@@ -1132,7 +1132,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 
 	if ( goal_far.y > closeness ) // y is inverted - 0 is top=far
 	{
-		goal = goal_near;	// can't see very far
+		goal = goal_near;	// can't see very far	
 	}
 	else
 	{
@@ -1149,7 +1149,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 		goal.x = (visCvPath->width/2 - goal.x) * (255) / (visCvPath->width );
 		// fwd speed
 		goal.y = (visCvPath->height  - goal.y) * (255) / (visCvPath->height);
-
+		
 		/* Now we are using above motor ranges. */
 		/* Check for errors and prevent the robot from going crazy */
 		if ( (goal.y>=250 && goal.x<=-127) ) // necessary check

@@ -1,6 +1,6 @@
 #include "motors_old.h"
 
-
+#define MINREQSPEED 45
 
 Motors_Old::Motors_Old()
 {
@@ -202,14 +202,14 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 //    int left  = iFwdVelocity/2 + iRotation;
 //    int right = iFwdVelocity/2 - iRotation;
 
-    int left  = iFwdVelocity + iRotation;
-    int right = iFwdVelocity - iRotation;
+    int left  = iFwdVelocity + iRotation ;
+    int right = iFwdVelocity - iRotation ;
 
     if(1)
     {
         // scale speed
-        left  = left  * _max_speed_ / 255;
-        right = right * _max_speed_ / 255;
+        left  = ( left  * _max_speed_ / 255 ) ;
+        right = ( right * _max_speed_ / 255 ) ;
     }
     else
     {
@@ -217,6 +217,15 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
         if (left  > _max_speed_) left  = _max_speed_;
         if (right > _max_speed_) right = _max_speed_;
     }
+
+	if(right != 0) 
+	{
+		right += MINREQSPEED ;
+	}
+	if(left != 0) 
+	{
+		left += MINREQSPEED ;
+	}	
 
     printf("Motors: L=%d R=%d \n",left,right);
 
