@@ -210,6 +210,8 @@ void Robot::LoadXMLSettings()
 		useMotors = cfg.getInt("useMotors");
 		/* vision processing */
 		doVision = cfg.getInt("doVision");
+		/* use gl transformation */
+		doTransform = cfg.getInt("doTransform");
 
 	}
 
@@ -221,10 +223,11 @@ void Robot::LoadXMLSettings()
 			{
 				_k = .30;
 				trackbarVal = 1;
-				motorsMaxSpeed = 100;
+				motorsMaxSpeed = 80;
 				doMapping = 0;
 				useMotors = 1;
 				doVision = 1;
+				doTransform = 1;
 			}
 		}
 		else
@@ -399,7 +402,7 @@ void Robot::initGlut()
 void Robot::updateGlutDisplay()
 {
 
-	if (vp.DO_TRANSFORM)
+	if (doTransform)
 	{
 		/* perspective transform */
 

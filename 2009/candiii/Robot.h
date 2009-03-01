@@ -53,6 +53,7 @@ public:
 	/* the vision processing object */
 	Vision vp;
 	int doVision;
+	int doTransform;
 
 	// initializes various things before main loop (mainly CV images)
 	int init();

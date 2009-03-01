@@ -73,9 +73,9 @@ void Vision::init()
 	LoadVisionXMLSettings();
 
 
-    // XXX: temp hack
-	int before=DO_TRANSFORM;
-	DO_TRANSFORM=0;
+    //// XXX: temp hack
+	//int before=DO_TRANSFORM;
+	//DO_TRANSFORM=0;
 
 
 	/*** SweeperLines ****************************************************/
@@ -150,8 +150,8 @@ void Vision::init()
 	}
 
 
-    // XXX: temp hack
-	DO_TRANSFORM=before;
+    //// XXX: temp hack
+	//DO_TRANSFORM=before;
 
 }
 
@@ -1081,6 +1081,11 @@ void Vision::LoadVisionXMLSettings()
 		printf("thresholds: maxDiff %d  boxPad %d \n",adapt_maxDiff,adapt_boxPad);
 	}
 
+
+	/* temporary hack to use longer sweeperlines */
+	DO_TRANSFORM = 0;
+
+
 }
 
 /*
@@ -1137,8 +1142,8 @@ void Vision::Normalize(IplImage* img)
  */
 void Vision::CvtPixToGoal(Point2D<int>& goal)
 {
-	int closeness = (DO_TRANSFORM)?
-	                visCvPath->height/2:
+	int closeness = //(DO_TRANSFORM)?
+	                //visCvPath->height/2:
 	                visCvPath->height/2;  //need to play with settings
 
 	if ( goal_far.y > closeness ) // y is inverted - 0 is top=far
@@ -1165,12 +1170,12 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 		/* Check for errors and prevent the robot from going crazy */
 		if ( (goal.y>=250 && goal.x<=-127) ) // necessary check
 		{
-			goal.y=(DO_TRANSFORM)?40:10; // min fwd speed
+			goal.y=10; // min fwd speed
 			goal.x=0;
 		}
 		else if ( (visCvPath->height-goal_far.y) < 20 ) // XXX: HACK to get onto ramps & yellow bars
 		{
-			goal.y=(DO_TRANSFORM)?40:10; // min fwd speed
+			goal.y=10; // min fwd speed
 			goal.x=0;
 		}
 
