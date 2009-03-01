@@ -30,6 +30,7 @@ sudo apt-get --yes install libglut-dev
 
 echo "libtool ================================================================="
 sudo apt-get --yes install libtool
+sudo apt-get --yes install libmcrypt-dev
 
 echo "g++ ====================================================================="
 sudo apt-get --yes install g++
@@ -39,6 +40,7 @@ cd ../libdc1394-2.0.3/
 ./configure
 make
 sudo make install
+sudo ldconfig
 cd ../candiii
 
 echo "remake =================================================================="
