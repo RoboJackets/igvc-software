@@ -3,10 +3,16 @@
 #include <stdio.h>
 #include "XmlConfiguration.h"
 #include <stdlib.h>
-
 #include "PointParamEstimator.h"
 #include "Ransac.h"
 #include <iostream>
+
+
+// below this, new world pts are considered the same, and updated
+#define WORLDPT_PIXDIFF 1.5
+// need this many counts to be considered a stable world pt
+#define WORLDPT_MINGOODCOUNT 6
+
 
 
 MapGen::MapGen()
@@ -388,7 +394,7 @@ int MapGen::genWorldmap()
 		while (iter!=worldPoints.end())
 		{
 			/* get stable feature points */
-			if (iter->z > 5)
+			if (iter->z > WORLDPT_MINGOODCOUNT)
 			{
 				cvCircle(worldmap, cvPoint( iter->x, iter->y ), 1, CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
 			}
@@ -396,7 +402,7 @@ int MapGen::genWorldmap()
 
 			/* allow points to expire */
 			iter->z-=.25;
-			if (iter->z < 0 ) worldPoints.erase(iter);
+			if (iter->z <= .5 ) worldPoints.erase(iter);
 			else ++iter;
 		}
 	}
@@ -569,7 +575,7 @@ void MapGen::addOrUpdateWorldPoint(CvPoint3D32f wpt)
 	}
 
 	/* pixel location difference threshold */
-	double thresh = 1.5;
+	double thresh = WORLDPT_PIXDIFF ;
 	int i;
 	CvPoint3D32f* curr;
 
