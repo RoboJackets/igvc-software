@@ -6,34 +6,28 @@
 /* IMPORTANT CAM ANGLE *********/
 // (how much up from 0 we are, in radians)
 // 1.25 default from 2007
-// update: current measured guppy angle is 1.0 (57deg) for 2009
-#define OFFANGLE 1.14  // we will use halfway for now!
+// update: current measured guppy angle is 0.995 (57deg) for 2009
+#define OFFANGLE  1.14   // we will use halfway for now!
 // need to measure stuff below for guppy!
 /* *************************** */
+
+/* use roi to shift camera view down to only see bottom of image */
+#define USE_ROI 1
 
 //utility macros
 #define max(a,b) ((a>b)?a:b)
 #define min(a,b) ((a<b)?a:b)
 
-//inputs
-#define HFOV (.8602)             //.8602 empirical value ~=49 degrees (in radians)
-/* D-1 NTSC uses 720x486
- * Square NTSC uses 648/486
- * The dv camera uses D-1 NTSC
-*/
-#define VFOV (HFOV*480/648)		// adjust for non-square NTSC pixels [648 == 720*(9/10)]
+//inputs - the guppy camera uses 640x480 resolution
+#define HFOV (.8602)            //.8602 empirical value ~=49 degrees (in radians)
+#define VFOV (HFOV*0.75)		// aspect ratio == 0.75 == 480/640
 #define u (HFOV/2)
 #define v (VFOV/2)
 
-#ifndef USE_AUX_CAM_SENSORS
-//volatile double u=.4;volatile double v=.4;	// hfov/2 and vfov/2 respectively
 volatile double h = 1;	    // height of camera
-volatile double x = -M_PI/2 + OFFANGLE ;
+volatile double x = -M_PI/2+OFFANGLE; // see above
 volatile double y = M_PI;
 volatile double z = M_PI;   //euler rotations about given axes
-#else
-#	include "PjDefs.c"
-#endif
 
 int j=0;
 GLdouble xscale,yscale,translateX, translateY;
@@ -83,10 +77,12 @@ void findmaxview(GLdouble* n)
     GLdouble ly,ry,ty,by,_try,tly,bry,bly; //define the principal maximum values
     GLdouble lx,rx,tx,bx,trx,tlx,brx,blx; //define the principal maximum values
     //XXX:xi,yi should really be calculated by Genpoints and written as a variable,but now i don't have time
+
 #	define xi (.96)
 #	define yi (.85)
 #	define xtran (n[12]/n[15])
 #	define ytran (n[13]/n[15])
+
     rx=(n[0]*xi+n[12])/(n[3]*xi+n[15]);
     ry=(n[1]*xi+n[13])/(n[3]*xi+n[15]);
 
@@ -131,36 +127,29 @@ void findmaxview(GLdouble* n)
     minx=min(min(min(					\
     		lx,rx),tx),bx);*/
 
+
     yscale=(maxy-miny)/2;
     xscale=(maxx-minx)/2;
     translateX=minx+xscale;
     translateY=miny+yscale;
 
+
+#if USE_ROI
     //start of region of interest code
     yscale=yscale/2;
     xscale=xscale/2;
-    //translateX=minx+xscale;
-    translateY=miny+3*yscale;
+    //translateX=minx+xscale; // always commented out
+    translateY=miny+3.1*yscale;
     //end roi code
+#endif
+
 
 #	undef xtran
 #	undef ytran
 #	undef yi
 #	undef xi
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -185,14 +174,14 @@ GLdouble* getPjMat()
     				sy*tu/(cx*cz+sx*sy*sz),					0,		0,	cy*cz/(cx*cz+sx*sy*sz),				\
     				0,										0,		0,	0,								\
     				tu/h*(cz*sx*sy-cx*sz)/(cx*cz+sx*sy*sz),	tv/h,	0,	cy*sx/h/(cx*cz+sx*sy*sz)			\
-    					};*/
+    				};*/
     //new shiny matrix
-    /*//translating to 0,0
-    GLdouble n[16]={cy*cz*tu,-cy*sz*tv,0,sy,\
+    //translating to 0,0
+    /*GLdouble n[16]={cy*cz*tu,-cy*sz*tv,0,sy,\
     				(sx*sz-cx*cz*sy)*tu,(cx*sy*sz+cz*sx)*tv,0,cx*cy,\
     				0,0,0,0,\
-    				((cx*cx)*(cz*cz)*sy-cx*cz*sx*((sy*sy)+1)*sz+(sx*sx*(sz*sz)-1)*sy)*tu/(h*(cx*sy*sz+cz*sx)),(sx*sy*sz-cx*cz)*tv/h,0,cy*sx/h};
-    */
+    				((cx*cx)*(cz*cz)*sy-cx*cz*sx*((sy*sy)+1)*sz+(sx*sx*(sz*sz)-1)*sy)*tu/(h*(cx*sy*sz+cz*sx)),(sx*sy*sz-cx*cz)*tv/h,0,cy*sx/h
+    				};*/
     //nontranslating
     GLdouble n[16]={cy*cz*tu,-cy*sz*tv,0,0,\
                     (sx*sz-cx*cz*sy)*tu,(cx*sy*sz+cz*sx)*tv,0,0,\

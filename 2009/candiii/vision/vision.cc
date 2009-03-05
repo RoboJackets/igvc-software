@@ -73,18 +73,13 @@ void Vision::init()
 	LoadVisionXMLSettings();
 
 
-    //// XXX: temp hack
-	//int before=DO_TRANSFORM;
-	//DO_TRANSFORM=0;
-
-
 	/*** SweeperLines ****************************************************/
 	if ( DO_TRANSFORM )
 	{
 		// Number of paths that are assessed between the starting/ending angles
-		nav_path__num = 15; //29;		// (Number of sweeper lines - should be odd number)
+		nav_path__num = 21; //29;		// (Number of sweeper lines - should be odd number)
 		// Proportional to the lengths of the paths (in image space)
-		nav_path__view_distance_multiplier = 0.30; 	/* > 0.0 */
+		nav_path__view_distance_multiplier = 0.70; 	/* > 0.0 */
 	}
 	else
 	{
@@ -109,8 +104,9 @@ void Vision::init()
 	// (everything bad is a barrel)
 	danger_per_barrel_pixel = 1;
 	// Path danger values higher than this will be clipped to this value
-	max_path_danger = 50;					// >= 0
-	nav_path__danger_smoothing_radius = 5;	// >= 0
+	max_path_danger = 60;					// >= 0
+	// smoothing = paths that are *near* dangerous paths are also considered to be dangerous
+	nav_path__danger_smoothing_radius = 6;	// >= 0
 	// colors
 	min_path_danger_color = CV_RGB(255, 255, 0);	// yellow
 	max_path_danger_color = CV_RGB(0, 0, 0);		// black
@@ -131,12 +127,12 @@ void Vision::init()
 		if (DO_TRANSFORM)
 		{
 			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/3);
-			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/5);
+			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/6);
 		}
 		else
 		{
-			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad+adapt_boxPad/3);
-			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/3);
+			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/2);
+			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/5);
 		}
 
 		/* setup roi */
@@ -149,9 +145,6 @@ void Vision::init()
 		roi_img = cvCreateImage( cvSize(roi.width, roi.height), IPL_DEPTH_8U, 3 );
 	}
 
-
-    //// XXX: temp hack
-	//DO_TRANSFORM=before;
 
 }
 
@@ -1083,7 +1076,7 @@ void Vision::LoadVisionXMLSettings()
 
 
 	/* temporary hack to use longer sweeperlines */
-	DO_TRANSFORM = 0;
+	//DO_TRANSFORM = 0;
 
 
 }
@@ -1142,19 +1135,28 @@ void Vision::Normalize(IplImage* img)
  */
 void Vision::CvtPixToGoal(Point2D<int>& goal)
 {
-	int closeness = //(DO_TRANSFORM)?
-	                //visCvPath->height/2:
-	                visCvPath->height/2;  //need to play with settings
 
-	if ( goal_far.y > closeness ) // y is inverted - 0 is top=far
-	{
-		goal = goal_near;	// can't see very far
-	}
-	else
-	{
-		goal.y = goal_far.y;	// can see far off
-		goal.x = visCvPath->width - goal_far.x; // flip sign
-	}
+    int closeness = visCvPath->height/2;  //need to play with settings
+    float weight; // weight of the far goal
+
+    /* weight goals depending on how far we can see */
+    if ( goal_far.y > closeness ) // y is inverted -> 0 is top&far
+    {
+        /* can't see very far */
+        weight = 0.25;
+    }
+    else
+    {
+        /* can see far off */
+        weight = 0.75;
+    }
+
+    /* set averaged goals */
+    goal.y = weight*goal_far.y + (1-weight)*goal_near.y;
+    // (flip goal_far.x's sign)
+    goal.x = weight*(visCvPath->width-goal_far.x) + (1-weight)*goal_near.x;
+
+
 
 	/* convert goal to heading:
 	 * x = rotational speed ; range = (-128,127)
