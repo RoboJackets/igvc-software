@@ -51,6 +51,11 @@ public:
 	void mapCamPointToWorldPoint(double camx, double camy, double& worldx, double& worldy);
 	std::vector< CvPoint3D32f > worldPoints; // z is ref count
 	void addOrUpdateWorldPoint(CvPoint3D32f wpt);
+	/**/
+	int genProbabilityMap();
+	IplImage* probmap;
+	CvMat* mapx;
+	CvMat* mapy;
 
 };
 

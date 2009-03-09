@@ -103,11 +103,13 @@ void MapGen::genMap()
 
 	/* add found features to world feature list,
 	 *  and plot/match all good features in the world frame */
-	if ( !genWorldmap() )
-	{
-		return;
-	}
+//	if ( !genWorldmap() )
+//	{
+//		return;
+//	}
 
+    // TESTING
+    genProbabilityMap();
 
 
 	/* end genMap() */
@@ -198,8 +200,9 @@ int MapGen::getFeatures()
 		float avgdx=0;
 		float avgdy=0;
 
-
+        // amount of top of image to ignore
 		int min = visCvGrey->height/3;
+
 		/* draw lines from prev to curr points in curr image */
 		for (i=0; i<maxFeatures; i++)
 		{
@@ -240,7 +243,7 @@ int MapGen::getFeatures()
 			cvLine(visCvGrey,
 			       cvPoint( imgHalfWidth-avgdx, imgHalfHeight-avgdy ),
 			       cvPoint( imgHalfWidth+avgdx, imgHalfHeight+avgdy ),
-			       CV_RGB(250,250,250), 3, 8, 0);
+			       CV_RGB(255,255,255), 3, 8, 0);
 			//printf("   adx %d ady %d\n",avgdx,avgdy);
 		}
 
@@ -290,7 +293,9 @@ int MapGen::processFeatures()
 	matchList.clear();
 	CvPoint2D32f foundpts[ maxFeatures*2 ];
 
+    // amount of top of image to ignore
 	int min = visCvGrey->height/3;
+
 	/* get matching point pairs */
 	for (i=maxFeatures-1; i>=0; i--)
 	{
@@ -342,13 +347,6 @@ int MapGen::processFeatures()
 
 	//printCv33Matrix(matCamToCam);
 
-	/* continue */
-	return 1;
-}
-
-
-int MapGen::genWorldmap()
-{
 
 	/* continuously mulitply each new c-c matrix to get new c-w matrix,
 	 *  just not on the first run */
@@ -365,6 +363,13 @@ int MapGen::genWorldmap()
 
 	//printCv33Matrix(matCamToWorld);
 
+	/* continue */
+	return 1;
+}
+
+
+int MapGen::genWorldmap()
+{
 
 	/* landmark processing */
 	if (1)
@@ -401,8 +406,8 @@ int MapGen::genWorldmap()
 			//printf("x=%.2f y=%.2f z=%.2f \n",iter->x,iter->y,iter->z);
 
 			/* allow points to expire */
-			iter->z-=.25;
-			if (iter->z <= .5 ) worldPoints.erase(iter);
+			iter->z -= 0.25;
+			if (iter->z <= 0.5 ) worldPoints.erase(iter);
 			else ++iter;
 		}
 	}
@@ -465,7 +470,7 @@ void MapGen::init()
 	cvZero(matCamToWorld);
 
 	/* set up camera to world homography matrix */
-	double k = 0.3; // scale factor
+	double k = .25;//0.3; // scale factor
 	// k  0  dx
 	// 0  k  dy
 	// 0  0  1
@@ -602,6 +607,70 @@ void MapGen::addOrUpdateWorldPoint(CvPoint3D32f wpt)
 	}
 
 }
+
+int MapGen::genProbabilityMap()
+{
+    static int init2 = 0;
+
+    if(!init2)
+    {
+        cvNamedWindow("probmap");
+        int dx = 400; // center of
+        int dy = 400; //  probmap
+        probmap = cvCreateImage( cvSize( dx*2,dy*2 ), IPL_DEPTH_8U, 1 );
+        cvSet( probmap, CV_RGB(127,127,127), NULL);
+        init2 = 1;
+    }
+
+    // move toward 127
+    double tocenter;
+    double speed = 0.5;
+    for (int i=0; i<probmap->imageSize; i++)
+    {
+        tocenter = cvGetReal1D(probmap,i);
+        if(tocenter>127) cvSetReal1D(probmap,i,tocenter-speed);
+        else if(tocenter<127) cvSetReal1D(probmap,i,tocenter+speed);
+        //else continue;
+    }
+
+    // map thresh img into world, with down scaling
+    int divby = 2;
+    int pad = 5;
+    double wx,wy;
+    double badval = -1;
+    double goodval = 7;
+    double setval;
+    int x,y;
+    for(y=pad; y<visCvThresh->height-divby-pad; y+=divby)
+    {
+        for(x=pad; x<visCvThresh->width-divby-pad; x+=divby )
+        {
+
+            mapCamPointToWorldPoint((double)x,(double)y,wx,wy);
+
+            //printf("camx %d camy %d  worldx %.2f worldy %.2f \n",x,y,wx,wy);
+
+            setval = cvGetReal2D(probmap,wy,wx);
+            setval += (cvGetReal2D(visCvThresh,y,x)==0)?badval:goodval;
+
+            // printf("setval %.2f \n",setval);
+
+            if(setval>255) setval = 255;
+            else if(setval<0) setval = 0;
+            cvSetReal2D(probmap,wy,wx,setval);
+
+        }
+    }
+
+    // display
+    cvShowImage("probmap",probmap);
+
+    //cvWaitKey(0);
+
+    return 1;
+}
+
+
 
 
 
