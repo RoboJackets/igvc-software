@@ -4,8 +4,8 @@
 	<File name="Config.xml" open="1" top="0" tabpos="5">
 		<Cursor position="766" topLine="0" />
 	</File>
-	<File name="Robot.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="9512" topLine="380" />
+	<File name="Robot.cpp" open="1" top="1" tabpos="3">
+		<Cursor position="14014" topLine="507" />
 	</File>
 	<File name="Robot.h" open="1" top="0" tabpos="6">
 		<Cursor position="507" topLine="0" />
@@ -37,6 +37,9 @@
 	<File name="vision/CVcam.h" open="0" top="0" tabpos="0">
 		<Cursor position="596" topLine="17" />
 	</File>
+	<File name="vision/DCam.cpp" open="1" top="0" tabpos="11">
+		<Cursor position="0" topLine="0" />
+	</File>
 	<File name="vision/Graphics.h" open="0" top="0" tabpos="9">
 		<Cursor position="250" topLine="0" />
 	</File>
@@ -58,8 +61,8 @@
 	<File name="vision/image_buffers.h" open="0" top="0" tabpos="6">
 		<Cursor position="809" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="1" tabpos="4">
-		<Cursor position="3133" topLine="65" />
+	<File name="vision/vision.cc" open="1" top="0" tabpos="4">
+		<Cursor position="3055" topLine="89" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="5">
 		<Cursor position="90" topLine="0" />
