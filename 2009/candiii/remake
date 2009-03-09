@@ -3,13 +3,15 @@
 
 echo ""
 echo "Creating: candi.pro"
-shopt -s extglob
+shopt -s extglob 
 echo $CFLAGS
 qmake-qt4 -project \
 		-o candi.pro \
 		CONFIG+=debug \
 		QT+=xml \
-		LIBS+="-L /usr/local/lib  -lltdl -lpthread -lm"  \
+		QMAKE_CXXFLAGS+="-fopenmp" \
+		QMAKE_LFLAGS+="-fopenmp" \
+		LIBS+="-L /usr/local/lib -lltdl -lpthread -lm"  \
 		LIBS+="-lGL" \
 		LIBS+="-ldc1394" \
 		LIBS+="-lglut" \
@@ -20,6 +22,7 @@ qmake-qt4 -project \
 		INCLUDEPATH+="../old_motors" \
 		-after \
 		`./_remove-sources logging/*.+(c|cc|cpp|h)` \
+
 
 
 echo "Creating: Makefile"
