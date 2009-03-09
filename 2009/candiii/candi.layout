@@ -2,10 +2,10 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="Config.xml" open="1" top="0" tabpos="5">
-		<Cursor position="766" topLine="0" />
+		<Cursor position="930" topLine="0" />
 	</File>
-	<File name="Robot.cpp" open="1" top="1" tabpos="3">
-		<Cursor position="14014" topLine="507" />
+	<File name="Robot.cpp" open="1" top="0" tabpos="3">
+		<Cursor position="4289" topLine="126" />
 	</File>
 	<File name="Robot.h" open="1" top="0" tabpos="6">
 		<Cursor position="507" topLine="0" />
@@ -13,7 +13,7 @@
 	<File name="main.cpp" open="0" top="0" tabpos="7">
 		<Cursor position="60" topLine="0" />
 	</File>
-	<File name="mapping/PointParamEstimator.cpp" open="1" top="0" tabpos="10">
+	<File name="mapping/PointParamEstimator.cpp" open="0" top="0" tabpos="10">
 		<Cursor position="885" topLine="0" />
 	</File>
 	<File name="mapping/Ransac.h" open="0" top="0" tabpos="4">
@@ -25,19 +25,19 @@
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
 		<Cursor position="3770" topLine="45" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="5713" topLine="241" />
+	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="14360" topLine="604" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="2">
-		<Cursor position="993" topLine="3" />
+		<Cursor position="1196" topLine="8" />
 	</File>
-	<File name="vision/CVcam.cpp" open="1" top="0" tabpos="9">
+	<File name="vision/CVcam.cpp" open="0" top="0" tabpos="9">
 		<Cursor position="588" topLine="6" />
 	</File>
 	<File name="vision/CVcam.h" open="0" top="0" tabpos="0">
 		<Cursor position="596" topLine="17" />
 	</File>
-	<File name="vision/DCam.cpp" open="1" top="0" tabpos="11">
+	<File name="vision/DCam.cpp" open="0" top="0" tabpos="11">
 		<Cursor position="0" topLine="0" />
 	</File>
 	<File name="vision/Graphics.h" open="0" top="0" tabpos="9">
@@ -62,13 +62,13 @@
 		<Cursor position="809" topLine="0" />
 	</File>
 	<File name="vision/vision.cc" open="1" top="0" tabpos="4">
-		<Cursor position="3055" topLine="89" />
+		<Cursor position="3055" topLine="105" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="5">
 		<Cursor position="90" topLine="0" />
 	</File>
 	<File name="../old_motors/motors_old.cpp" open="1" top="0" tabpos="7">
-		<Cursor position="6561" topLine="186" />
+		<Cursor position="6561" topLine="182" />
 	</File>
 	<File name="../old_motors/motors_old.h" open="0" top="0" tabpos="12">
 		<Cursor position="1745" topLine="37" />
