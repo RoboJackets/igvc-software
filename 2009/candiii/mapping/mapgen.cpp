@@ -7,6 +7,7 @@
 #include "Ransac.h"
 #include <iostream>
 
+#include <omp.h>
 
 // below this, new world pts are considered the same, and updated
 #define WORLDPT_PIXDIFF 1.5
@@ -17,7 +18,6 @@
 
 MapGen::MapGen()
 {
-
 }
 
 MapGen::~MapGen()
@@ -487,6 +487,15 @@ void MapGen::init()
 	imgHalfHeight = visCvGrey->height/2;
 	imgHalfWidth = visCvGrey->width/2;
 
+	//==============================================================
+
+    /* OpenMP support */
+    // Get the number of processors in this system
+    int iCPU = omp_get_num_procs();
+    // Now set the number of threads
+    omp_set_num_threads(iCPU);
+    printf("omp num cpus %d \n", iCPU);
+
 }
 
 void MapGen::LoadXMLSettings()
@@ -620,27 +629,33 @@ int MapGen::genProbabilityMap()
         probmap = cvCreateImage( cvSize( dx*2,dy*2 ), IPL_DEPTH_8U, 1 );
         cvSet( probmap, CV_RGB(127,127,127), NULL);
         init2 = 1;
+
     }
 
-    // move toward 127
-    double tocenter;
-    double speed = 0.5;
-    for (int i=0; i<probmap->imageSize; i++)
-    {
-        tocenter = cvGetReal1D(probmap,i);
-        if(tocenter>127) cvSetReal1D(probmap,i,tocenter-speed);
-        else if(tocenter<127) cvSetReal1D(probmap,i,tocenter+speed);
-        //else continue;
-    }
+//    // move toward 127
+//    double tocenter;
+//    double speed = 1;//0.5;
+//    int i;
+//    #pragma omp parallel for private(i)
+//    for (i=0; i<probmap->imageSize; i++)
+//    {
+//        tocenter = cvGetReal1D(probmap,i);
+//        if(tocenter==127) continue;
+//        else if(tocenter>127) cvSetReal1D(probmap,i,tocenter-speed);
+//        else /*if(tocenter<127)*/ cvSetReal1D(probmap,i,tocenter+speed);
+//        //else continue;
+//    }
 
     // map thresh img into world, with down scaling
     int divby = 2;
     int pad = 5;
     double wx,wy;
-    double badval = -1;
+    double badval = -2;
     double goodval = 7;
     double setval;
     int x,y;
+
+    #pragma omp parallel for private(x,setval,wx,wy)
     for(y=pad; y<visCvThresh->height-divby-pad; y+=divby)
     {
         for(x=pad; x<visCvThresh->width-divby-pad; x+=divby )
@@ -666,6 +681,7 @@ int MapGen::genProbabilityMap()
     cvShowImage("probmap",probmap);
 
     //cvWaitKey(0);
+
 
     return 1;
 }
