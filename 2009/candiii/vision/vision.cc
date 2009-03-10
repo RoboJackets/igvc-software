@@ -4,6 +4,8 @@
 #include "image_buffers.h"
 #include "Graphics.h"
 
+#include <omp.h>
+
 /*
  * This file contains the robot's primary vision processing code main function.
  *   by: Chris McClanahan
