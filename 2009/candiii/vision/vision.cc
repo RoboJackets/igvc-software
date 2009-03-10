@@ -223,6 +223,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	{
+	    #pragma omp parallel for private(curPathDanger,curPixelDanger,weight)
 		for (int pathID=0; pathID<nav_path__num; pathID++)
 		{
 			// Calculate path parameters
@@ -592,8 +593,11 @@ void Vision::visGenPath(IplImage* img)
 		}
 
 		//scan left then right & generate visCvPath image
-		scanFillLeft  (visCvPath, x, y, goodFirst, 0      , blackout);
-		scanFillRight (visCvPath, x, y, goodFirst, width-1, blackout);
+		#pragma omp parallel
+		{
+            scanFillLeft  (visCvPath, x, y, goodFirst, 0      , blackout);
+            scanFillRight (visCvPath, x, y, goodFirst, width-1, blackout);
+		}
 
 	}//y
 
@@ -1210,21 +1214,6 @@ void Vision::Adapt()
 	/* get average rgb values inside the roi */
 	int blue=0,green=0,red=0;
 	unsigned char ab,ag,ar;
-	//OLD METHOD
-	//	for (int i=roi_img->imageSize-3; i>0; i-=3)
-	//	{
-	//		ab = roi_img->imageData[i  ];
-	//		ag = roi_img->imageData[i+1];
-	//		ar = roi_img->imageData[i+2];
-	//		blue += ab;
-	//		green+= ag;
-	//		red  += ar;
-	//	}
-	//	int n = roi_img->imageSize / 3;
-	//	blue  /= n;
-	//	green /= n;
-	//	red   /= n;
-	//NEW METHOD
 	CvScalar data = cvAvg(roi_img);
 	blue  = data.val[0];
 	green = data.val[1];
@@ -1234,7 +1223,6 @@ void Vision::Adapt()
 	unsigned char* rgbdata = (unsigned char*) visCvDebug->imageData;
 	/* generate visCvAdapt image here!
 	 *  white=good ~ black=bad */
-	//for (int i=visCvDebug->imageSize-3; i>0; i-=3)
 	for (int i=0; i<visCvDebug->imageSize-3; i+=3)
 	{
 		ab = *(rgbdata  );
