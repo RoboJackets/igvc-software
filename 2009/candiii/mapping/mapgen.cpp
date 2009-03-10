@@ -72,8 +72,10 @@ void MapGen::genMap()
 
 
 	/* get and rezise raw image to grayscale */
-	cvCvtColor(visCvRawTransform, visCvGreyBig, CV_BGR2GRAY);
-	cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
+	{
+        cvCvtColor(visCvRawTransform, visCvGreyBig, CV_BGR2GRAY);
+        cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
+	}
 
 
 	/* testing image transforms for better feature extraction */
@@ -108,8 +110,17 @@ void MapGen::genMap()
 //		return;
 //	}
 
-    // TESTING
-    genProbabilityMap();
+    /* generate a probability map of traversable area and obstacles
+     *  based on the Thresh image.
+     *   in the image:
+     *     grey  = unknown
+     *     white = traversable
+     *     black = obstacle
+     */
+    if ( !genProbabilityMap() )
+    {
+        return;
+    }
 
 
 	/* end genMap() */
@@ -153,7 +164,6 @@ int MapGen::getFeatures()
 		                cvSize(-1,-1),  //zero_zone (none)
 		                cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 20, 0.05) //criteria
 		                );*/
-
 
 		if (found < 2)
 		{
@@ -200,8 +210,6 @@ int MapGen::getFeatures()
 		float avgdx=0;
 		float avgdy=0;
 
-        // amount of top of image to ignore
-		int min = visCvGrey->height/3;
 
 		/* draw lines from prev to curr points in curr image */
 		for (i=0; i<maxFeatures; i++)
@@ -215,7 +223,7 @@ int MapGen::getFeatures()
 				y=cvmGet(points2,1,i); //most recent
 
 				/* don't look in the horizon */
-				if ( y > min )
+				if ( y > yFeatureThresh )
 				{
 					/* calculate slope and extend lines */
 					dx = x-a;
@@ -293,8 +301,6 @@ int MapGen::processFeatures()
 	matchList.clear();
 	CvPoint2D32f foundpts[ maxFeatures*2 ];
 
-    // amount of top of image to ignore
-	int min = visCvGrey->height/3;
 
 	/* get matching point pairs */
 	for (i=maxFeatures-1; i>=0; i--)
@@ -308,7 +314,7 @@ int MapGen::processFeatures()
 			y=cvmGet(points2,1,i); //most recent
 
 			/* only add good points (close to bottom) */
-			if ( y > min )
+			if ( y > yFeatureThresh )
 			{
 				/* gather feature matches pairs for RANSAC */
 				foundpts[i] = cvPoint2D32f(a,b);
@@ -429,8 +435,6 @@ int MapGen::genWorldmap()
 	         2, 8, 0);
 
 
-
-
 	/* display world view image */
 	cvShowImage("worldmap",worldmap);
 
@@ -455,13 +459,20 @@ void MapGen::init()
 	cvZero(status1);
 	cvZero(status2);
 
+	/* misc */
+	imgHalfHeight = visCvGrey->height/2;
+	imgHalfWidth  = visCvGrey->width/2;
+
+	// amount of top of image to ignore
+	yFeatureThresh = visCvGrey->height/3;
+
 	//==============================================================
 
 	/* world map stuff */
 
 	/* init images and matricies */
 	int dx = 400; // center of
-	int dy = 400; //  worldmap
+	int dy = 400; //   map
 	worldmap = cvCreateImage( cvSize( dx*2,dy*2 ), 8, 3 );
 	matCamToCam = cvCreateMat(3,3,CV_32F);
 	matCamToWorld = cvCreateMat(3,3,CV_32F);
@@ -483,13 +494,15 @@ void MapGen::init()
 
 	//==============================================================
 
-	/* saving some operations later */
-	imgHalfHeight = visCvGrey->height/2;
-	imgHalfWidth = visCvGrey->width/2;
+	/* probability map stuff */
+
+    probmap = cvCreateImage( cvSize( dx*2,dy*2 ), IPL_DEPTH_8U, 1 );
+    cvSet( probmap, CV_RGB(127,127,127), NULL);
 
 	//==============================================================
 
     /* OpenMP support */
+
     // Get the number of processors in this system
     int iCPU = omp_get_num_procs();
     // Now set the number of threads
@@ -514,6 +527,7 @@ void MapGen::LoadXMLSettings()
         {
             cvNamedWindow("worldmap");
             cvNamedWindow("curr");
+            cvNamedWindow("probmap");
         }
 
 	}
@@ -619,70 +633,64 @@ void MapGen::addOrUpdateWorldPoint(CvPoint3D32f wpt)
 
 int MapGen::genProbabilityMap()
 {
-    static int init2 = 0;
+    /* in the probablity map image:
+     *  grey  = unknown
+     *  white = traversable
+     *  black = obstacle
+     */
 
-    if(!init2)
+
+    /* slowly move all probabilities toward unknown (127) */
+    if(0)
     {
-        cvNamedWindow("probmap");
-        int dx = 400; // center of
-        int dy = 400; //  probmap
-        probmap = cvCreateImage( cvSize( dx*2,dy*2 ), IPL_DEPTH_8U, 1 );
-        cvSet( probmap, CV_RGB(127,127,127), NULL);
-        init2 = 1;
-
+        double curr;
+        double speed = 1;
+        int i;
+        #pragma omp parallel for private(curr)
+        for (i=0; i<probmap->imageSize; i++)
+        {
+            curr = cvGetReal1D(probmap,i);
+            if(curr==127) continue;
+            else if(curr>127) cvSetReal1D(probmap,i,curr-speed);
+            else /*if(curr<127)*/ cvSetReal1D(probmap,i,curr+speed);
+            //else continue;
+        }
     }
 
-//    // move toward 127
-//    double tocenter;
-//    double speed = 1;//0.5;
-//    int i;
-//    #pragma omp parallel for private(i)
-//    for (i=0; i<probmap->imageSize; i++)
-//    {
-//        tocenter = cvGetReal1D(probmap,i);
-//        if(tocenter==127) continue;
-//        else if(tocenter>127) cvSetReal1D(probmap,i,tocenter-speed);
-//        else /*if(tocenter<127)*/ cvSetReal1D(probmap,i,tocenter+speed);
-//        //else continue;
-//    }
 
-    // map thresh img into world, with down scaling
-    int divby = 2;
-    int pad = 5;
-    double wx,wy;
-    double badval = -2;
-    double goodval = 7;
+    /* down-scale the thresh img, and map it into into world,
+     *  while setting probabilities of obstacles and traversible area */
+    int divby = 2;      // image size denominator
+    int pad = 5;        // remove noise around img edges
+    double badval = -2; // rate for obstacle probability
+    double goodval = 7; // rate for travpath probability
     double setval;
+    double wx,wy;
     int x,y;
-
     #pragma omp parallel for private(x,setval,wx,wy)
     for(y=pad; y<visCvThresh->height-divby-pad; y+=divby)
     {
         for(x=pad; x<visCvThresh->width-divby-pad; x+=divby )
         {
-
+            // map pts
             mapCamPointToWorldPoint((double)x,(double)y,wx,wy);
-
-            //printf("camx %d camy %d  worldx %.2f worldy %.2f \n",x,y,wx,wy);
-
+            // get current val
             setval = cvGetReal2D(probmap,wy,wx);
+            // and add/subtract based on thresh image
             setval += (cvGetReal2D(visCvThresh,y,x)==0)?badval:goodval;
-
-            // printf("setval %.2f \n",setval);
-
+            // cap results
             if(setval>255) setval = 255;
             else if(setval<0) setval = 0;
+            // update probmap
             cvSetReal2D(probmap,wy,wx,setval);
-
         }
     }
 
     // display
     cvShowImage("probmap",probmap);
-
     //cvWaitKey(0);
 
-
+    // success
     return 1;
 }
 

@@ -2,7 +2,7 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="Config.xml" open="1" top="0" tabpos="5">
-		<Cursor position="930" topLine="0" />
+		<Cursor position="1027" topLine="0" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="3">
 		<Cursor position="4289" topLine="126" />
@@ -26,10 +26,10 @@
 		<Cursor position="3770" topLine="45" />
 	</File>
 	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="14360" topLine="604" />
+		<Cursor position="10120" topLine="440" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="2">
-		<Cursor position="1196" topLine="8" />
+		<Cursor position="850" topLine="10" />
 	</File>
 	<File name="vision/CVcam.cpp" open="0" top="0" tabpos="9">
 		<Cursor position="588" topLine="6" />
@@ -62,7 +62,7 @@
 		<Cursor position="809" topLine="0" />
 	</File>
 	<File name="vision/vision.cc" open="1" top="0" tabpos="4">
-		<Cursor position="3055" topLine="105" />
+		<Cursor position="29851" topLine="153" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="5">
 		<Cursor position="90" topLine="0" />

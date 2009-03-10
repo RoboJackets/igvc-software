@@ -41,6 +41,7 @@ public:
 	int numFramesBack;
 	CvPoint2D32f pts1[3];
 	CvPoint2D32f pts2[3];
+	int yFeatureThresh;
 	/**/
 	std::vector< std::pair<CvPoint2D32f,CvPoint2D32f> > matchList;
 	int maxFeatureShift;
