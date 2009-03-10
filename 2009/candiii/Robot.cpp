@@ -9,6 +9,9 @@
 #include "logging/timer.h"
 
 
+#define PRINTFRAMERATE 0
+
+
 /*********** GLUT callbacks and functions ***********************/
 pthread_t Robot::robotThread; // for pthread_create
 Robot* glRobot; // for glut
@@ -341,12 +344,14 @@ void Robot::processFunc()
 
 	/* Stats */
 	if (useMotors)
-	//if (1)
 	{
-		printf( "framerate: %.2f \n", elapsed_time() );
-		start_timer(); // called second to time entire process (except first run)
 		printf("                    heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
 	}
+	if (PRINTFRAMERATE)
+	{
+        printf( "framerate: %.2f \n", elapsed_time() );
+		start_timer(); // called second to time entire process (except first run)
+    }
 
 }
 

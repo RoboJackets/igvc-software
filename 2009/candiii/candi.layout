@@ -2,10 +2,10 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="Config.xml" open="1" top="0" tabpos="5">
-		<Cursor position="1027" topLine="0" />
+		<Cursor position="1726" topLine="0" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="4289" topLine="126" />
+		<Cursor position="7725" topLine="301" />
 	</File>
 	<File name="Robot.h" open="1" top="0" tabpos="6">
 		<Cursor position="507" topLine="0" />
@@ -26,7 +26,7 @@
 		<Cursor position="3770" topLine="45" />
 	</File>
 	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="10120" topLine="440" />
+		<Cursor position="10120" topLine="461" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="2">
 		<Cursor position="850" topLine="10" />
@@ -62,13 +62,13 @@
 		<Cursor position="809" topLine="0" />
 	</File>
 	<File name="vision/vision.cc" open="1" top="0" tabpos="4">
-		<Cursor position="29851" topLine="153" />
+		<Cursor position="9449" topLine="1226" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="5">
 		<Cursor position="90" topLine="0" />
 	</File>
 	<File name="../old_motors/motors_old.cpp" open="1" top="0" tabpos="7">
-		<Cursor position="6561" topLine="182" />
+		<Cursor position="6553" topLine="0" />
 	</File>
 	<File name="../old_motors/motors_old.h" open="0" top="0" tabpos="12">
 		<Cursor position="1745" topLine="37" />
