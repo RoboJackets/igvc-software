@@ -78,7 +78,7 @@ void MapGen::genMap()
 	}
 
 
-	/* testing image transforms for better feature extraction */
+	/* testing image operations for better feature extraction */
 	{
 		//cvPyrDown(visCvGreyBig,visCvGrey);
 		//cvSmooth(visCvGrey,visCvGrey,CV_MEDIAN,3,0,0,0);
@@ -677,7 +677,7 @@ int MapGen::genProbabilityMap()
             // get current val
             setval = cvGetReal2D(probmap,wy,wx);
             // and add/subtract based on thresh image
-            setval += (cvGetReal2D(visCvThresh,y,x)==0)?badval:goodval;
+            setval += (cvGetReal2D(visCvThresh /* visCvPath */ ,y,x)==0)?badval:goodval;
             // cap results
             if(setval>255) setval = 255;
             else if(setval<0) setval = 0;
