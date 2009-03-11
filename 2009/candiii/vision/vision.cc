@@ -13,11 +13,11 @@
  */
 
 /* for scanning the path image */
-#define BAD_PIXEL 0		// value to set path image to
+#define BAD_PIXEL  0	// value to set path image to
 #define GOOD_PIXEL 255	// value to set path image to
 #define L_R_OFFSET 20 	// pixel spacing from center scan line up
 #define PIXEL_SKIP 2 	// noise filtering threshold in checkPixel()
-#define EDGE_PAD 4      // top/bottom padding
+#define EDGE_PAD   4    // top/bottom padding
 
 /*
  *
@@ -81,7 +81,7 @@ void Vision::init()
 		// Number of paths that are assessed between the starting/ending angles
 		nav_path__num = 21; //29;		// (Number of sweeper lines - should be odd number)
 		// Proportional to the lengths of the paths (in image space)
-		nav_path__view_distance_multiplier = 0.70; 	/* > 0.0 */
+		nav_path__view_distance_multiplier = 0.85; 	/* > 0.0 */
 	}
 	else
 	{

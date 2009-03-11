@@ -55,8 +55,7 @@ public:
 	/**/
 	int genProbabilityMap();
 	IplImage* probmap;
-	CvMat* mapx;
-	CvMat* mapy;
+
 
 };
 
