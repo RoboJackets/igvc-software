@@ -124,6 +124,9 @@ public:
 	CvPoint LR;
 	CvRect roi;
 	IplImage* roi_img;
+	int avgR;
+	int avgG;
+	int avgB;
 
 };
 

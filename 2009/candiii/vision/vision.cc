@@ -572,7 +572,7 @@ void Vision::visGenPath(IplImage* img)
 	int width = img->width;
 	int height = img->height-EDGE_PAD; // skip noise at bottom
 	int goodFirst = 1;
-	int x = width/2;
+	int x = width/2; // default
 	int blackout = 0;
 
 	// find best column to scan up in
@@ -617,7 +617,7 @@ int Vision::findBestX(IplImage* img, int height, int center)
 	int heightL = 0;
 	int heightR = 0;
 	int heightC = 0;
-	int y = height;
+	int y;
 
 	// break as soon as we see an obstacle
 	for (y = height; y >= EDGE_PAD ; y--)
@@ -642,9 +642,9 @@ int Vision::findBestX(IplImage* img, int height, int center)
 			break;
 	}
 
-	if ( heightL > heightC && heightL > heightR )
+	if ( (heightL > heightC) && (heightL > heightR) )
 		return left;
-	else if ( heightR > heightC && heightR > heightL )
+	else if ( (heightR > heightC) && (heightR > heightL) )
 		return right;
 	else
 		return center;    // default to center
@@ -929,8 +929,7 @@ Point2D<double> Vision::navPath_start(int pathID)
 {
 	return Point2D<double>(
 	           (visCvRaw->width / 2) + (nav_path__center_path_id-pathID),
-	           visCvRaw->height - EDGE_PAD -1
-	       );
+	           visCvRaw->height - EDGE_PAD -1 );
 }
 
 /*
@@ -940,7 +939,7 @@ Point2D<double> Vision::navPath_vector(int pathID)
 {
 	double deg = navPath_angle(pathID);
 	double rad = deg2rad(deg);
-	double radius = 0.75 * ((double) visCvRaw->width) / 2;
+	double radius = 0.75 * (visCvRaw->width) / 2;
 	return Point2D<double>(
 	           radius*cos(rad),
 	           -radius*sin(rad))	// computer y-axis is inverse of math y-axis
@@ -1093,7 +1092,7 @@ void Vision::LoadVisionXMLSettings()
 void Vision::GetRGBChannels()
 {
 	// splitt raw image into color channels
-	cvSplit(visCvRaw, visCvBlueChannel, visCvGreenChannel, visCvRedChannel, NULL);
+	cvSplit(visCvRawTransform, visCvBlueChannel, visCvGreenChannel, visCvRedChannel, NULL);
 }
 
 /*
@@ -1102,7 +1101,7 @@ void Vision::GetRGBChannels()
 void Vision::GetHSVChannels()
 {
 	// calculate HSV - Hue Saturation Value(Greyscale)
-	cvCvtColor(visCvDebug, visCvHSV, CV_BGR2HSV);
+	cvCvtColor(visCvRawTransform, visCvHSV, CV_BGR2HSV);
 	// shrink !!
 	cvResize(visCvHSV, visCvHSVSmall, CV_INTER_LINEAR);
 	// hsv
@@ -1143,24 +1142,24 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 {
 
     int closeness = visCvPath->height/2;  //need to play with settings
-    float weight; // weight of the far goal
+    float farweight; // weight of the far goal
 
     /* weight goals depending on how far we can see */
     if ( goal_far.y > closeness ) // y is inverted -> 0 is top&far
     {
         /* can't see very far */
-        weight = 0.25;
+        farweight = 0.20;
     }
     else
     {
         /* can see far off */
-        weight = 0.75;
+        farweight = 0.75;
     }
 
     /* set averaged goals */
-    goal.y = weight*goal_far.y + (1-weight)*goal_near.y;
+    goal.y = farweight*goal_far.y + (1-farweight)*goal_near.y;
     // (flip goal_far.x's sign)
-    goal.x = weight*(visCvPath->width-goal_far.x) + (1-weight)*goal_near.x;
+    goal.x = farweight*(visCvPath->width-goal_far.x) + (1-farweight)*goal_near.x;
 
 
 
@@ -1202,9 +1201,9 @@ void Vision::Adapt()
 {
 
 	/* set the roi img */
-	cvSetImageROI(visCvDebug,roi);
-	cvCopy(visCvDebug,roi_img);
-	cvResetImageROI(visCvDebug);
+	cvSetImageROI(visCvRawTransform,roi);
+	cvCopy(visCvRawTransform,roi_img);
+	cvResetImageROI(visCvRawTransform);
 
 
 	/* display roi box in separate window */
@@ -1219,11 +1218,28 @@ void Vision::Adapt()
 	green = data.val[1];
 	red   = data.val[2];
 
+	/* average rgb over time */
+	static int first = 1;
+	float k = 0.05; // % of new value to use
+	if(first)
+	{
+	    first = 0;
+        avgB = blue;
+        avgG = green;
+        avgR = red;
+    }
+    else
+    {
+        avgB = blue*(k)  + avgB*(1-k);
+        avgG = green*(k) + avgG*(1-k);
+        avgR = red*(k)   + avgR*(1-k);
+    }
 
-	unsigned char* rgbdata = (unsigned char*) visCvDebug->imageData;
+
+	unsigned char* rgbdata = (unsigned char*) visCvRawTransform->imageData;
 	/* generate visCvAdapt image here!
 	 *  white=good ~ black=bad */
-	for (int i=0; i<visCvDebug->imageSize-3; i+=3)
+	for (int i=0; i<visCvRawTransform->imageSize-3; i+=3)
 	{
 		ab = *(rgbdata  );
 		ag = *(rgbdata+1);
@@ -1231,9 +1247,9 @@ void Vision::Adapt()
 
 		rgbdata+=3;
 
-		if (    (abs(ab-(unsigned char)blue )<adapt_maxDiff) &&
-		        (abs(ag-(unsigned char)green)<adapt_maxDiff) &&
-		        (abs(ar-(unsigned char)red  )<adapt_maxDiff))
+		if (    (abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&
+		        (abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
+		        (abs(ar-(unsigned char)avgR)<adapt_maxDiff))
 		{
 			visCvAdapt->imageData[i/3] = GOOD_PIXEL;
 		}
