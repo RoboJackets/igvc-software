@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="1" tabpos="5">
+	<File name="Config.xml" open="1" top="0" tabpos="5">
 		<Cursor position="1121" topLine="0" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="3">
@@ -25,8 +25,8 @@
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
 		<Cursor position="3770" topLine="45" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="207" topLine="654" />
+	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="18308" topLine="768" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="2">
 		<Cursor position="1169" topLine="14" />
