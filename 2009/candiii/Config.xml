@@ -11,6 +11,7 @@
 <Config>
 
 	<!-- Guppy Misc Settings -->
+	<useFirewireCamera>0</useFirewireCamera>
 	<gain>8</gain>
 	<shutter>8</shutter>
 	<gamma>0</gamma>
