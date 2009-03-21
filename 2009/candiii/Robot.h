@@ -20,98 +20,96 @@
 /*===== Camera Settings ===========================================*/
 /* Determines camera compatability.
  * This must be set to 0 to load videos via command line. */
-#define USE_FIREWIRE_CAMERA 0
-
+//#define USE_FIREWIRE_CAMERA 0
 /*=================================================================*/
 
 class Robot
 {
 public:
-	// default constructor, use a camera
-	Robot();
+    // default constructor, use a camera
+    Robot();
 
-	// constructor for loading a camera, or a video file
-	Robot(const char* filename);
+    // constructor for loading a camera, or a video file
+    Robot(const char* filename);
 
-	// destructor
-	virtual ~Robot();
+    // destructor
+    virtual ~Robot();
 
-	/* Cleans up any resources that were allocated
-	 * Init will have this called on atexit (stdlib.h) so the
-	 * user does not need to call this */
-	static void destroy();
+    /* Cleans up any resources that were allocated
+     * Init will have this called on atexit (stdlib.h) so the
+     * user does not need to call this */
+    static void destroy();
 
-	/* the vision source */
-#if USE_FIREWIRE_CAMERA
+    /* the vision source */
+    GuppyCam camera_firewire;
+    CVcam camera_usb;
 
-	GuppyCam camera;
-#else
+    /* the vision processing object */
+    Vision vp;
+    int doVision;
+    int doTransform;
 
-	CVcam camera;
-#endif
+    // initializes various things before main loop (mainly CV images)
+    int init();
 
-	/* the vision processing object */
-	Vision vp;
-	int doVision;
-	int doTransform;
+    // cleans up image buffers
+    void releaseAllImages();
 
-	// initializes various things before main loop (mainly CV images)
-	int init();
+    // runs the robot (loops processFunc)
+    void Go();
 
-	// cleans up image buffers
-	void releaseAllImages();
+    // MAIN LOOP
+    void processFunc();
 
-	// runs the robot (loops processFunc)
-	void Go();
+    // initializes opengl and glut
+    void initGlut();
 
-	// MAIN LOOP
-	void processFunc();
+    // refreshes glut window with raw image data
+    void updateGlutDisplay();
 
-	// initializes opengl and glut
-	void initGlut();
+    // starts the robot
+    void startRobotThread(void* obj);
 
-	// refreshes glut window with raw image data
-	void updateGlutDisplay();
+    /* the robot thread
+     * this is static so "atexit()" works */
+    static pthread_t robotThread;
 
-	// starts the robot
-	void startRobotThread(void* obj);
+    // connects to the camera (USB or 1394)
+    void connectToCamera();
+    // sorry to hack camera sorce this way...
+    int USE_FIREWIRE_CAMERA;
+    // to load a video
+    std::string videofilename;
 
-	/* the robot thread
-	 * this is static so "atexit()" works */
-	static pthread_t robotThread;
+    // view to display
+    int trackbarVal;
 
-	// connects to the camera (USB or 1394)
-	void connectToCamera();
+    // structure for saving video
+    CvVideoWriter* cvVideoWriter;
+    void createVideoWriter();
 
-	// view to display
-	int trackbarVal;
+    // velocity headings for robot
+    // heading.x = rotational speed
+    // heading.y = forward speed
+    Point2D<int> heading_vision;
+    Point2D<int> heading_sensors;
+    Point2D<int> heading_main;
 
-	// structure for saving video
-	CvVideoWriter* cvVideoWriter;
-	void createVideoWriter();
+    // avg heading control
+    // _k = the % of new value to use
+    double _k;
 
-	// velocity headings for robot
-	// heading.x = rotational speed
-	// heading.y = forward speed
-	Point2D<int> heading_vision;
-	Point2D<int> heading_sensors;
-	Point2D<int> heading_main;
+    // xml conf
+    void LoadXMLSettings();
 
-	// avg heading control
-	// _k = the % of new value to use
-	double _k;
+    // map generator and slam processing
+    MapGen mapper;
+    int doMapping;
 
-	// xml conf
-	void LoadXMLSettings();
-
-	// map generator and slam processing
-	MapGen mapper;
-	int doMapping;
-
-	// motor control
-	Motors_Old motors;
-	int motorsMaxSpeed;//0-255
-	int useMotors;
+    // motor control
+    Motors_Old motors;
+    int motorsMaxSpeed;//0-255
+    int useMotors;
 
 };
 

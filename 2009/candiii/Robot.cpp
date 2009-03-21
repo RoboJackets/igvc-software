@@ -20,35 +20,35 @@ int glutwindow; // for glut
 int saveRawVideo; // flag for saving video - global because of glut use
 void* robot_thread_caller(void* arg)
 {
-	saveRawVideo=0; // don't save video yet
-	glRobot = (Robot*)arg; // assign pointer to static robot object for glut to use
-	static_cast<Robot*>(arg)->Go(); // start the robot
-	return NULL;
+    saveRawVideo=0; // don't save video yet
+    glRobot = (Robot*)arg; // assign pointer to static robot object for glut to use
+    static_cast<Robot*>(arg)->Go(); // start the robot
+    return NULL;
 }
 void robot_process_function_caller(void)
 {
-	glRobot->processFunc(); // for glutMainLoop
+    glRobot->processFunc(); // for glutMainLoop
 }
 void idleFunc(void)   // for refresheing glut window
 {
-	glutPostRedisplay();
+    glutPostRedisplay();
 }
 void keyboardFunc(unsigned char key, int x, int y)   // handles keyboard button presses
 {
-	switch (key)
-	{
-	case 'd':
-		printf("die! \n");
-		glRobot->destroy(); // kill the robot;
-		break;
-	case 's':
-		saveRawVideo = 1-saveRawVideo;
-		printf("video file \n");
-		break;
-	default:
-		printf("x,y %d,%d \n",x,y);
-		break;
-	}
+    switch (key)
+    {
+    case 'd':
+        printf("die! \n");
+        glRobot->destroy(); // kill the robot;
+        break;
+    case 's':
+        saveRawVideo = 1-saveRawVideo;
+        printf("video file \n");
+        break;
+    default:
+        printf("x,y %d,%d \n",x,y);
+        break;
+    }
 }
 /****************************************************************/
 
@@ -57,7 +57,7 @@ void keyboardFunc(unsigned char key, int x, int y)   // handles keyboard button 
 /* for selecting images to display in the opencv window */
 void trackbarHandler(int pos)
 {
-	printf("pos = %d \n", pos);
+    printf("pos = %d \n", pos);
 }
 /*****************************************************/
 
@@ -65,211 +65,265 @@ void trackbarHandler(int pos)
 // constructor
 Robot::Robot(const char* filename)
 {
-	// only the CVcam can load video...
-#if  USE_FIREWIRE_CAMERA
-	filename=NULL;
-	/* connect to the camera */
-	connectToCamera();
-#else
-	if (filename==NULL)
-		/* connect to the camera */
-		connectToCamera();
-	else
-		/* load a video */
-		camera.connect(0, filename);
-#endif
+    /* only the CVcam can load video... */
+    if(filename!=NULL)
+        videofilename = filename;
+    else
+        videofilename = "";
+
 }
 
 Robot::~Robot()
 {
-	cvReleaseVideoWriter(&cvVideoWriter);
-	releaseAllImages();
-	destroy();
+    cvReleaseVideoWriter(&cvVideoWriter);
+    releaseAllImages();
+    destroy();
 }
 
 void Robot::destroy()
 {
-	/* clean up */
-	glutDestroyWindow(glutwindow);
-	cvDestroyAllWindows();
-	exit(0);
+    /* clean up */
+    glutDestroyWindow(glutwindow);
+    cvDestroyAllWindows();
+    exit(0);
 }
 
 void Robot::releaseAllImages()
 {
-	/* free all in image_buffers.h */
+    /* free all in image_buffers.h */
 
-	if ( visCvRaw !=NULL) cvReleaseImage(&visCvRaw );
+    if ( visCvRaw !=NULL) cvReleaseImage(&visCvRaw );
 
-	if ( visCvDebug !=NULL) cvReleaseImage(&visCvDebug );
+    if ( visCvDebug !=NULL) cvReleaseImage(&visCvDebug );
 
-	if ( visCvRedChannel !=NULL) cvReleaseImage(&visCvRedChannel );
+    if ( visCvRedChannel !=NULL) cvReleaseImage(&visCvRedChannel );
 
-	if ( visCvGreenChannel !=NULL) cvReleaseImage(&visCvGreenChannel );
+    if ( visCvGreenChannel !=NULL) cvReleaseImage(&visCvGreenChannel );
 
-	if ( visCvBlueChannel !=NULL) cvReleaseImage(&visCvBlueChannel );
+    if ( visCvBlueChannel !=NULL) cvReleaseImage(&visCvBlueChannel );
 
-	if ( visCvHSV !=NULL) cvReleaseImage(&visCvHSV );
+    if ( visCvHSV !=NULL) cvReleaseImage(&visCvHSV );
 
-	if ( visCvHue !=NULL) cvReleaseImage(&visCvHue );
+    if ( visCvHue !=NULL) cvReleaseImage(&visCvHue );
 
-	if ( visCvSaturation !=NULL) cvReleaseImage(&visCvSaturation );
+    if ( visCvSaturation !=NULL) cvReleaseImage(&visCvSaturation );
 
-	if ( visCvGrey !=NULL) cvReleaseImage(&visCvGrey );
+    if ( visCvGrey !=NULL) cvReleaseImage(&visCvGrey );
 
-	if ( visCvThresh !=NULL) cvReleaseImage(&visCvThresh );
+    if ( visCvThresh !=NULL) cvReleaseImage(&visCvThresh );
 
-	if ( visCvPath !=NULL) cvReleaseImage(&visCvPath );
+    if ( visCvPath !=NULL) cvReleaseImage(&visCvPath );
 
-	if ( visCvHSVSmall !=NULL) cvReleaseImage(&visCvHSVSmall );
+    if ( visCvHSVSmall !=NULL) cvReleaseImage(&visCvHSVSmall );
 
-	if ( visCvAdapt !=NULL) cvReleaseImage(&visCvAdapt );
+    if ( visCvAdapt !=NULL) cvReleaseImage(&visCvAdapt );
 
-	if ( visCvAdaptSmall !=NULL) cvReleaseImage(&visCvAdaptSmall );
+    if ( visCvAdaptSmall !=NULL) cvReleaseImage(&visCvAdaptSmall );
 
-	if ( visCvGreyBig !=NULL) cvReleaseImage(&visCvGreyBig );
+    if ( visCvGreyBig !=NULL) cvReleaseImage(&visCvGreyBig );
 
-	if ( visCvRawTransform !=NULL) cvReleaseImage(&visCvRawTransform );
+    if ( visCvRawTransform !=NULL) cvReleaseImage(&visCvRawTransform );
 
 }
 
 int Robot::init()
 {
 
-	/* load xml settings - important to do first! */
-	LoadXMLSettings();
+    /* load xml settings - important to do first! */
+    LoadXMLSettings();
 
-	/* setup image selection bar */
-	int numberOfViews = 10; // important!!!
-	cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
+    /* select and connect to the camera source ,
+     *   and possibly load a video */
+    if (USE_FIREWIRE_CAMERA)
+    {
+        /* connect to the camera */
+        connectToCamera();
+    }
+    else
+    {
+        if (videofilename=="")
+            /* connect to the camera */
+            connectToCamera();
+        else
+            /* load a video */
+            camera_usb.connect(0, videofilename.c_str());
+    }
 
-	/* try to grab a frame to get image size */
-	if (!camera.GrabCvImage())
-		return 0; // fail
+    /* try to grab a frame to get image size */
+    if (USE_FIREWIRE_CAMERA)
+    {
+        if (!camera_firewire.GrabCvImage())
+        {
+            return 0; // fail
+        }
+    }
+    else
+    {
+        if (!camera_usb.GrabCvImage())
+        {
+            return 0; // fail
+        }
+    }
 
-	/* configure opencv display window */
-	cvResizeWindow( "display", visCvRaw->width, visCvRaw->height );
-	cvMoveWindow( "display", 10, 10 ); // position on screen
+    /* setup image selection bar */
+    int numberOfViews = 10; // important!!!
+    cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
 
-	/* init all CV images here */
-	{
-		/* 3 plane images (640x480) */
-		visCvDebug = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-		visCvHSV = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-		visCvRawTransform = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+    /* configure opencv display window */
+    cvResizeWindow( "display", visCvRaw->width, visCvRaw->height );
+    cvMoveWindow( "display", 10, 10 ); // position on screen
 
-		/* 1 plane images (640x480) */
-		visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
-		visCvGreyBig = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+    /* init all CV images here */
+    {
+        /* 3 plane images (640x480) */
+        visCvDebug = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+        visCvHSV = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+        visCvRawTransform = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
 
-		/* 3 plane images (320x240) */
-		visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
+        /* 1 plane images (640x480) */
+        visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+        visCvGreyBig = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
 
-		/* 1 plane images (320x240) */
-		visCvHue = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvSaturation = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvGrey = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvPath = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvAdaptSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-	}
+        /* 3 plane images (320x240) */
+        visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
 
-	/* set cleanup on exit */
-	atexit(Robot::destroy);
+        /* 1 plane images (320x240) */
+        visCvHue = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvSaturation = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvGrey = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvPath = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+        visCvAdaptSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+    }
 
-	/* init video writer */
-	//createVideoWriter();   // mising codecs?
+    /* set cleanup on exit */
+    atexit(Robot::destroy);
 
-	/* setup vision module */
-	vp.init();
+    /* init video writer */
+    //createVideoWriter();   // mising codecs?
 
-	/* setup slam processing module */
-	mapper.init();
+    /* setup vision module */
+    vp.init();
 
-	/* connect to motors */
-	motors.set_max_speed(motorsMaxSpeed);
-	motors.SetupSerial();
+    /* setup slam processing module */
+    mapper.init();
 
-	/* success */
-	return 1;
+    /* connect to motors */
+    motors.set_max_speed(motorsMaxSpeed);
+    motors.SetupSerial();
+
+    /* success */
+    return 1;
 }
 
 void Robot::LoadXMLSettings()
 {
-	/* load xml file */
-	XmlConfiguration cfg("Config.xml");
+    /* load xml file */
+    XmlConfiguration cfg("Config.xml");
 
-	/* load settings */
-	{
-		/* k value = the % of new value to use */
-		_k = cfg.getFloat("_k");
-		/* see ConvertAllImageViews() in vision.cc */
-		trackbarVal = cfg.getInt("defaultView");
-		/* 0-255 */
-		motorsMaxSpeed = cfg.getInt("motorsMaxSpeed");
-		/* SLAM */
-		doMapping = cfg.getInt("doMapping");
-		/* drive motors */
-		useMotors = cfg.getInt("useMotors");
-		/* vision processing */
-		doVision = cfg.getInt("doVision");
-		/* use gl transformation */
-		doTransform = cfg.getInt("doTransform");
+    /* load settings */
+    {
+        /* k value = the % of new value to use */
+        _k = cfg.getFloat("_k");
+        /* see ConvertAllImageViews() in vision.cc */
+        trackbarVal = cfg.getInt("defaultView");
+        /* 0-255 */
+        motorsMaxSpeed = cfg.getInt("motorsMaxSpeed");
+        /* SLAM */
+        doMapping = cfg.getInt("doMapping");
+        /* drive motors */
+        useMotors = cfg.getInt("useMotors");
+        /* vision processing */
+        doVision = cfg.getInt("doVision");
+        /* use gl transformation */
+        doTransform = cfg.getInt("doTransform");
+        /* camera source */
+        USE_FIREWIRE_CAMERA = cfg.getInt("useFirewireCamera");
 
-	}
+    }
 
-	/* test */
-	{
-		if (_k==-1 || trackbarVal==-1)
-		{
-			printf("ERROR: Robot settings NOT loaded! Using DEFAULTS \n");
-			{
-				_k = .30;
-				trackbarVal = 1;
-				motorsMaxSpeed = 80;
-				doMapping = 0;
-				useMotors = 1;
-				doVision = 1;
-				doTransform = 1;
-			}
-		}
-		else
-		{
-			printf("Robot settings loaded \n");
-		}
-		printf("values: _k %f  view %d \n",_k,trackbarVal);
-	}
+    /* test */
+    {
+        if (doVision==-1 || trackbarVal==-1)
+        {
+            printf("ERROR: Robot settings NOT loaded! Using DEFAULTS \n");
+            {
+                // load defaults
+                _k = .30;
+                trackbarVal = 1;
+                motorsMaxSpeed = 80;
+                doMapping = 0;
+                useMotors = 1;
+                doVision = 1;
+                doTransform = 1;
+                USE_FIREWIRE_CAMERA = 1;
+            }
+        }
+        else
+        {
+            printf("Robot settings loaded \n");
+        }
+        printf("values: _k %f  view %d \n",_k,trackbarVal);
+    }
 
 }
 
 void Robot::Go()
 {
-	/*
-	 * This function initializes and stars the robot
-	 */
+    /*
+     * This function initializes and stars the robot
+     */
 
-	/* Quit if there is no camera */
-	if (!camera.isValid())
-		return;
+    /* Quit if we can't initialize properly */
+    if (!init())
+        return;
 
-	/* Try to grab a frame to get image size */
-	if (!camera.GrabCvImage())
-		return;
+    /* Quit if there is no camera */
+    if (USE_FIREWIRE_CAMERA)
+    {
+        if (!camera_firewire.isValid())
+        {
+            return; // fail
+        }
+    }
+    else
+    {
+        if (!camera_usb.isValid())
+        {
+            return; // fail
+        }
+    }
 
-	/* Setup video card processing */
-	initGlut();
+    /* Try to grab a frame to get image size */
+    if (USE_FIREWIRE_CAMERA)
+    {
+        if (!camera_firewire.GrabCvImage())
+        {
+            return; // fail
+        }
+    }
+    else
+    {
+        if (!camera_usb.GrabCvImage())
+        {
+            return; // fail
+        }
+    }
 
-	/* Quit if we can't initialize properly */
-	if (!init())
-		return;
+    /* Setup video card processing */
+    initGlut();
 
-	/* Init default view (debug=1) */
-	trackbarHandler( trackbarVal );
+//    /* Quit if we can't initialize properly */
+//    if (!init())
+//        return;
 
-	/*
-	 * Robot Loop!
-	 */
-	glutMainLoop(); // runs processFunc()
+    /* Init default view (debug=1) */
+    trackbarHandler( trackbarVal );
+
+    /*
+     * Robot Loop!
+     */
+    glutMainLoop(); // runs processFunc()
 
 }
 
@@ -278,127 +332,158 @@ void Robot::Go()
  */
 void Robot::processFunc()
 {
-	/*
-	 * This function should be just simple function calls.
-	 */
+    /*
+     * This function should be just simple function calls.
+     */
 
-	/*
-	 * Heading Format:
-	 * x = rotational speed ; range = (-128,127)
-	 * y = forward speed    ; range = (0,255)
-	 */
-
-
-	/* Get raw image */
-	camera.GrabCvImage();
+    /*
+     * Heading Format:
+     * x = rotational speed ; range = (-128,127)
+     * y = forward speed    ; range = (0,255)
+     */
 
 
-	/* Shove raw image into graphics card for some processing on the card */
-	updateGlutDisplay();
+    /* Get raw image */
+    if (USE_FIREWIRE_CAMERA)
+    {
+        if (!camera_firewire.GrabCvImage())
+        {
+            return; // fail
+        }
+    }
+    else
+    {
+        if (!camera_usb.GrabCvImage())
+        {
+            return; // fail
+        }
+    }
 
 
-	/* Perform vision processing. */
-	if (doVision)
-	{
-		vp.visProcessFrame(heading_vision);
-	}
+    /* Shove raw image into graphics card for some processing on the card */
+    updateGlutDisplay();
 
 
-	/* Average motor commands
-	 * k = % of new value to use */
-	heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
-	heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
+    /* Perform vision processing. */
+    if (doVision)
+    {
+        vp.visProcessFrame(heading_vision);
+    }
 
 
-	/* Get sensor information */
-	//TODO
+    /* Average motor commands
+     * k = % of new value to use */
+    heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
+    heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
 
 
-	/* SLAM Processing */
-	if (doMapping)
-	{
-		mapper.genMap();
-	}
+    /* Get sensor information */
+    //TODO
 
 
-	/* Make decision */
-	//TODO:
+    /* SLAM Processing */
+    if (doMapping)
+    {
+        mapper.genMap();
+    }
 
 
-	/* Update displays */
-	vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
+    /* Make decision */
+    //TODO:
 
 
-	/* Drive Robot via motor commands (GO!) */
-	if (useMotors)
-	{
-		motors.set_heading(heading_main.y, heading_main.x);
-	}
-
-	/* Save raw image last */
-	//if (saveRawVideo)
-	//{
-	//	cvWriteFrame(cvVideoWriter,visCvRaw);
-	//}
+    /* Update displays */
+    vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
 
-	/* Stats */
-	if (useMotors)
-	{
-		printf("                    heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
-	}
-	if (PRINTFRAMERATE)
-	{
+    /* Drive Robot via motor commands (GO!) */
+    if (useMotors)
+    {
+        motors.set_heading(heading_main.y, heading_main.x);
+    }
+
+    /* Save raw image last */
+    //if (saveRawVideo)
+    //{
+    //	cvWriteFrame(cvVideoWriter,visCvRaw);
+    //}
+
+
+    /* Stats */
+    if (useMotors)
+    {
+        printf("                    heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
+    }
+    if (PRINTFRAMERATE)
+    {
         printf( "framerate: %.2f \n", elapsed_time() );
-		start_timer(); // called second to time entire process (except first run)
+        start_timer(); // called second to time entire process (except first run)
     }
 
 }
 
 void Robot::startRobotThread(void* obj)
 {
-	sleep(.5);
-	robot_thread_caller(obj);
+    sleep(.5);
+    robot_thread_caller(obj);
 }
 
 void Robot::connectToCamera()
 {
-	if (!camera.connect())
-	{
-		printf("Camera connect failure \n");
-		printf("Try using sudo... \n");
-		exit(-1);
-	}
-	else
-	{
-		camera.loadSettings();
-		printf("Camera settings loaded \n");
-	}
+    if (USE_FIREWIRE_CAMERA)
+    {
+        if (!camera_firewire.connect())
+        {
+            printf("Camera connect failure \n");
+            printf("Try using sudo... \n");
+            exit(-1);
+        }
+        else
+        {
+            camera_firewire.loadSettings();
+            printf("Camera settings loaded \n");
+        }
+    }
+    else
+    {
+        if (!camera_usb.connect())
+        {
+            printf("Camera connect failure \n");
+            printf("Try using sudo... \n");
+            exit(-1);
+        }
+        else
+        {
+            camera_usb.loadSettings();
+            printf("Camera settings loaded \n");
+        }
+    }
+
 }
 
 void Robot::initGlut()
 {
-	// dummy args
-	int argc = 0;
-	char** argv;
+    // dummy args
+    int argc = 0;
+    char** argv;
 
-	// initialization
-	glutInit(&argc, argv);
-	glutInitWindowSize(visCvRaw->width, visCvRaw->height);
-	glutInitWindowPosition(800, 480); 				// position on screen
-	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
-	glutwindow = glutCreateWindow("Transform");
-	glutDisplayFunc(robot_process_function_caller); // the function glutMainLoop() runs
-	glutIdleFunc(idleFunc);							// refreshes the glut window
-	glutKeyboardFunc(keyboardFunc);
-	glEnable(GL_TEXTURE_RECTANGLE_ARB);
-	glGenTextures(1, &cameraImageTextureID);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
-	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    // initialization
+    glutInit(&argc, argv);
+    glutInitWindowSize(visCvRaw->width, visCvRaw->height);
+    glutInitWindowPosition(800, 480); 				// position on screen
+    glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
+    glutwindow = glutCreateWindow("Transform");
+    glutDisplayFunc(robot_process_function_caller); // the function glutMainLoop() runs
+    glutIdleFunc(idleFunc);							// refreshes the glut window
+    glutKeyboardFunc(keyboardFunc);
+    glEnable(GL_TEXTURE_RECTANGLE_ARB);
+    glGenTextures(1, &cameraImageTextureID);
+    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
 }
 
@@ -407,127 +492,127 @@ void Robot::initGlut()
 void Robot::updateGlutDisplay()
 {
 
-	if (doTransform)
-	{
-		/* perspective transform */
+    if (doTransform)
+    {
+        /* perspective transform */
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
-		glEnable(GL_TEXTURE_RECTANGLE_ARB);
-		{
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_LIGHTING);
+        glEnable(GL_TEXTURE_RECTANGLE_ARB);
+        {
 
-			/* * * transform * * */
-			glLoadIdentity ();
-			glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity ();
-			/* * * * * * * * * * */
+            /* * * transform * * */
+            glLoadIdentity ();
+            glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity ();
+            /* * * * * * * * * * */
 
-			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
-			/* put data in card */
-			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+            glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+            /* put data in card */
+            glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
 
-			/* * * transform * * */
-			setPjMat();
-			/* * * * * * * * * * */
+            /* * * transform * * */
+            setPjMat();
+            /* * * * * * * * * * */
 
-			glBegin(GL_QUADS);
-			{
+            glBegin(GL_QUADS);
+            {
 
-				/* * * transform * * */
-				glTexCoord2i(0, 				0);
-				glVertex3f(-1,	-1,	0);
-				glTexCoord2i(visCvRaw->width, 	0);
-				glVertex3f( 1,	-1,	0);
-				glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
-				glVertex3f( 1,   1,	0);
-				glTexCoord2i(0, 				visCvRaw->height);
-				glVertex3f(-1,	 1,	0);
-				/* * * * * * * * * * */
+                /* * * transform * * */
+                glTexCoord2i(0, 				0);
+                glVertex3f(-1,	-1,	0);
+                glTexCoord2i(visCvRaw->width, 	0);
+                glVertex3f( 1,	-1,	0);
+                glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+                glVertex3f( 1,   1,	0);
+                glTexCoord2i(0, 				visCvRaw->height);
+                glVertex3f(-1,	 1,	0);
+                /* * * * * * * * * * */
 
-			}
-			glEnd();
+            }
+            glEnd();
 
-		}
-		glDisable(GL_TEXTURE_RECTANGLE_ARB);
+        }
+        glDisable(GL_TEXTURE_RECTANGLE_ARB);
 
-		/* get data from card */
-		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-		glReadPixels(	0				,	//GLint x,
-		              0				,	//GLint y,
-		              visCvRaw->width	,	//GLsizei width,
-		              visCvRaw->height,	//GLsizei height,
-		              GL_BGR			,	//GLenum format,
-		              GL_UNSIGNED_BYTE,	//GLenum type,
-		              //visCvRaw->imageData //Image
-		              //visCvDebug->imageData //Image
-		              visCvRawTransform->imageData //Image
-		            );
+        /* get data from card */
+        //glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+        glReadPixels(	0				,	//GLint x,
+                      0				,	//GLint y,
+                      visCvRaw->width	,	//GLsizei width,
+                      visCvRaw->height,	//GLsizei height,
+                      GL_BGR			,	//GLenum format,
+                      GL_UNSIGNED_BYTE,	//GLenum type,
+                      //visCvRaw->imageData //Image
+                      //visCvDebug->imageData //Image
+                      visCvRawTransform->imageData //Image
+                    );
 
-		// double buffering
-		glutSwapBuffers();
+        // double buffering
+        glutSwapBuffers();
 
-	}
-	else
-	{
-		/* no transformation */
+    }
+    else
+    {
+        /* no transformation */
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
-		glEnable(GL_TEXTURE_RECTANGLE_ARB);
-		{
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_LIGHTING);
+        glEnable(GL_TEXTURE_RECTANGLE_ARB);
+        {
 
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
-			gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			glMatrixMode(GL_MODELVIEW);
-			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
-			/* put data in card */
-			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-			glBegin(GL_QUADS);
-			{
+            glMatrixMode(GL_PROJECTION);
+            glLoadIdentity();
+            gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            glMatrixMode(GL_MODELVIEW);
+            glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+            /* put data in card */
+            glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+            glBegin(GL_QUADS);
+            {
 
-				// default perspective (upside down)
-				glTexCoord2i(0,					0);
-				glVertex2i(0, 				0);
-				glTexCoord2i(visCvRaw->width, 	0);
-				glVertex2i(visCvRaw->width, 0);
-				glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
-				glVertex2i(visCvRaw->width, visCvRaw->height);
-				glTexCoord2i(0, 				visCvRaw->height);
-				glVertex2i(0, 				visCvRaw->height);
-				// corrected perspective (normal)
-				//glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
-				//glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
-				//glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
-				//glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
+                // default perspective (upside down)
+                glTexCoord2i(0,					0);
+                glVertex2i(0, 				0);
+                glTexCoord2i(visCvRaw->width, 	0);
+                glVertex2i(visCvRaw->width, 0);
+                glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+                glVertex2i(visCvRaw->width, visCvRaw->height);
+                glTexCoord2i(0, 				visCvRaw->height);
+                glVertex2i(0, 				visCvRaw->height);
+                // corrected perspective (normal)
+                //glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
+                //glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
+                //glTexCoord2i(visCvRaw->width, 	0);					glVertex2i(visCvRaw->width, visCvRaw->height);
+                //glTexCoord2i(0, 				0); 				glVertex2i(0, 				visCvRaw->height);
 
-			}
-			glEnd();
+            }
+            glEnd();
 
-		}
-		glDisable(GL_TEXTURE_RECTANGLE_ARB);
+        }
+        glDisable(GL_TEXTURE_RECTANGLE_ARB);
 
-		/* get data from card */
-		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-		glReadPixels(	0				,	//GLint x,
-		              0				,	//GLint y,
-		              visCvRaw->width	,	//GLsizei width,
-		              visCvRaw->height,	//GLsizei height,
-		              GL_BGR			,	//GLenum format,
-		              GL_UNSIGNED_BYTE,	//GLenum type,
-		              //visCvRaw->imageData //Image
-		              //visCvDebug->imageData //Image
-		              visCvRawTransform->imageData //Image
-		            );
+        /* get data from card */
+        //glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+        glReadPixels(	0				,	//GLint x,
+                      0				,	//GLint y,
+                      visCvRaw->width	,	//GLsizei width,
+                      visCvRaw->height,	//GLsizei height,
+                      GL_BGR			,	//GLenum format,
+                      GL_UNSIGNED_BYTE,	//GLenum type,
+                      //visCvRaw->imageData //Image
+                      //visCvDebug->imageData //Image
+                      visCvRawTransform->imageData //Image
+                    );
 
-		// double buffering
-		glutSwapBuffers();
-	}
+        // double buffering
+        glutSwapBuffers();
+    }
 
 } // end update glut
 
@@ -553,5 +638,4 @@ void Robot::updateGlutDisplay()
 //                                      fps,cvSize(frameW,frameH),isColor);
 //}
 
-// ffmpeg-dbg lib32v4l
 
