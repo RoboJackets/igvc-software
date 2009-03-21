@@ -271,7 +271,7 @@ void Robot::LoadXMLSettings()
 void Robot::Go()
 {
     /*
-     * This function initializes and stars the robot
+     * This function initializes and starts the robot
      */
 
     /* Quit if we can't initialize properly */
@@ -294,28 +294,8 @@ void Robot::Go()
         }
     }
 
-    /* Try to grab a frame to get image size */
-    if (USE_FIREWIRE_CAMERA)
-    {
-        if (!camera_firewire.GrabCvImage())
-        {
-            return; // fail
-        }
-    }
-    else
-    {
-        if (!camera_usb.GrabCvImage())
-        {
-            return; // fail
-        }
-    }
-
     /* Setup video card processing */
     initGlut();
-
-//    /* Quit if we can't initialize properly */
-//    if (!init())
-//        return;
 
     /* Init default view (debug=1) */
     trackbarHandler( trackbarVal );
@@ -358,6 +338,13 @@ void Robot::processFunc()
             return; // fail
         }
     }
+
+
+    /* TESTING camera image stabilization */
+//  if(!mapper.stabilize())
+//  {
+//      return; //need stable image
+//  }
 
 
     /* Shove raw image into graphics card for some processing on the card */
