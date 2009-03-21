@@ -81,7 +81,7 @@ void Vision::init()
 		// Number of paths that are assessed between the starting/ending angles
 		nav_path__num = 21; //29;		// (Number of sweeper lines - should be odd number)
 		// Proportional to the lengths of the paths (in image space)
-		nav_path__view_distance_multiplier = 0.85; 	/* > 0.0 */
+		nav_path__view_distance_multiplier = 0.75; 	/* > 0.0 */
 	}
 	else
 	{

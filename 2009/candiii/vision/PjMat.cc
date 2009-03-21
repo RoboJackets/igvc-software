@@ -12,6 +12,8 @@
 /* *************************** */
 
 /* use roi to shift camera view down to only see bottom of image */
+//  0 - if using narrow angle lens
+//  1 - if using  wide  angle lens
 #define USE_ROI 1
 
 //utility macros
