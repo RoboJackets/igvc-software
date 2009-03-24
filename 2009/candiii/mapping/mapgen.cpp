@@ -425,8 +425,8 @@ int MapGen::genWorldmap()
 	mapCamPointToWorldPoint( imgHalfWidth, imgHalfHeight, a, b); // middle center of camera frame
 	mapCamPointToWorldPoint( imgHalfWidth, visCvGrey->height-1, x, y); // bottom center of camera frame
 	cvLine(worldmap, cvPoint( x,y ), cvPoint( a,b ),
-	       CV_RGB(rand()%255,rand()%255,rand()%255),
-	       //CV_RGB(255,255,255),
+	       //CV_RGB(rand()%255,rand()%255,rand()%255),
+	       CV_RGB(255,255,255),
 	       2, 8, 0);
 	/* draw a circle denoting base orientaion */
 	cvCircle(worldmap, cvPoint( x,y ), 2,
@@ -677,7 +677,7 @@ int MapGen::genProbabilityMap()
             // get current val
             setval = cvGetReal2D(probmap,wy,wx);
             // and add/subtract based on thresh image
-            setval += (cvGetReal2D(visCvThresh /* visCvPath */ ,y,x)==0)?badval:goodval;
+            setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval;
             // cap results
             if(setval>255) setval = 255;
             else if(setval<0) setval = 0;
