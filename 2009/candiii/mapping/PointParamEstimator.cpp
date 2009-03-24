@@ -164,13 +164,13 @@ int PointParamEstimator::computeHomography(CvPoint2D32f* prev, CvPoint2D32f* cur
 	v2y = y4-y2;
 
 	//delta = |v1xv2|
-	delta = (v1x*v2y-v2x*v1y) ;
+	delta = v1x*v2y-v2x*v1y ;
 
 	//sintheta = dt / |v1|*|v2|
 	sint = delta / ( sqrt(v1x*v1x+v1y*v1y)*sqrt(v2x*v2x+v2y*v2y) );
 
-	//costheta = 1 - sintheta^2
-	cost = 1 - (sint)*(sint);
+	//costheta = sqrt ( 1 - sintheta^2 )
+	cost = sqrt(1 - (sint)*(sint));
 
 	//translation
 	e = x2 - ( cost*x1 + (-sint)*y1 );

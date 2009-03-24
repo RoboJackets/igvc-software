@@ -4,9 +4,6 @@
 <!-- Comment -->
 <!--  -->
 
-<!-- !!! Robot.h controls use of USB vs. 1394 cameras !!! -->
-<!-- !!! Robot.h controls use of USB vs. 1394 cameras !!! -->
-<!-- !!! Robot.h controls use of USB vs. 1394 cameras !!! -->
 
 <Config>
 
@@ -38,10 +35,10 @@
     <!-- Mapping Settings -->
     <maxFeatures>74</maxFeatures>           <!-- max number for feature corners to find -->
     <numFramesBack>03</numFramesBack>       <!-- frames between matching points/features -->
-    <maxFeatureShift>9</maxFeatureShift>    <!-- max allowed feature point movement (in pixels) -->
+    <maxFeatureShift>10</maxFeatureShift>    <!-- max allowed feature point movement (in pixels) -->
 
     <!-- ON/OFF -->
-    <doMapping>00</doMapping>
+    <doMapping>01</doMapping>
     <useMotors>00</useMotors>
     <doVision>001</doVision>
 
