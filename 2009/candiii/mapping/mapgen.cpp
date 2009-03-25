@@ -61,6 +61,7 @@ MapGen::~MapGen()
 
 }
 
+
 /*
  * Main function
  */
@@ -373,76 +374,6 @@ int MapGen::processFeatures()
 	return 1;
 }
 
-
-int MapGen::genWorldmap()
-{
-
-	/* landmark processing */
-	if (1)
-	{
-		double wx,wy;
-
-		/* update all the found feature points into the world map point list */
-		for (int i=0; i<maxFeatures; i++)
-		{
-			/* only matches */
-			if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
-			{
-				/* get world coordinates */
-				mapCamPointToWorldPoint( cvmGet(points2,0,i), cvmGet(points2,1,i), wx, wy );
-				/* check point with world list */
-				addOrUpdateWorldPoint( cvPoint3D32f( wx, wy, 0 ) );
-
-				//cvCircle(worldmap, cvPoint( wx,wy ), 1, CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
-			}
-		}
-
-		/* clear map */
-		cvZero(worldmap);
-
-		/* extract only features from world point list that have been seen a lot */
-		std::vector< CvPoint3D32f >::iterator iter = worldPoints.begin();
-		while (iter!=worldPoints.end())
-		{
-			/* get stable feature points */
-			if (iter->z > WORLDPT_MINGOODCOUNT)
-			{
-				cvCircle(worldmap, cvPoint( iter->x, iter->y ), 1, CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
-			}
-			//printf("x=%.2f y=%.2f z=%.2f \n",iter->x,iter->y,iter->z);
-
-			/* allow points to expire */
-			iter->z -= 0.25;
-			if (iter->z <= 0.5 ) worldPoints.erase(iter);
-			else ++iter;
-		}
-	}
-
-
-	/* draw a line from the center bottom of camera frame to center middle
-	 *  to show the orientation of the robot in the world map */
-	double x,y,a,b;
-	mapCamPointToWorldPoint( imgHalfWidth, imgHalfHeight, a, b); // middle center of camera frame
-	mapCamPointToWorldPoint( imgHalfWidth, visCvGrey->height-1, x, y); // bottom center of camera frame
-	cvLine(worldmap, cvPoint( x,y ), cvPoint( a,b ),
-	       //CV_RGB(rand()%255,rand()%255,rand()%255),
-	       CV_RGB(255,255,255),
-	       2, 8, 0);
-	/* draw a circle denoting base orientaion */
-	cvCircle(worldmap, cvPoint( x,y ), 2,
-	         //CV_RGB(rand()%255,rand()%255,rand()%255),
-	         CV_RGB(255,255,255),
-	         2, 8, 0);
-
-
-	/* display world view image */
-	cvShowImage("worldmap",worldmap);
-
-	//cvWaitKey(0);
-
-	return 1;
-}
-
 void MapGen::init()
 {
 	/* load in params */
@@ -629,6 +560,75 @@ void MapGen::addOrUpdateWorldPoint(CvPoint3D32f wpt)
 		worldPoints.push_back(wpt);
 	}
 
+}
+
+int MapGen::genWorldmap()
+{
+
+	/* landmark processing */
+	if (1)
+	{
+		double wx,wy;
+
+		/* update all the found feature points into the world map point list */
+		for (int i=0; i<maxFeatures; i++)
+		{
+			/* only matches */
+			if (cvGetReal1D(status2,i)&&cvGetReal1D(status1,i))
+			{
+				/* get world coordinates */
+				mapCamPointToWorldPoint( cvmGet(points2,0,i), cvmGet(points2,1,i), wx, wy );
+				/* check point with world list */
+				addOrUpdateWorldPoint( cvPoint3D32f( wx, wy, 0 ) );
+
+				//cvCircle(worldmap, cvPoint( wx,wy ), 1, CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
+			}
+		}
+
+		/* clear map */
+		cvZero(worldmap);
+
+		/* extract only features from world point list that have been seen a lot */
+		std::vector< CvPoint3D32f >::iterator iter = worldPoints.begin();
+		while (iter!=worldPoints.end())
+		{
+			/* get stable feature points */
+			if (iter->z > WORLDPT_MINGOODCOUNT)
+			{
+				cvCircle(worldmap, cvPoint( iter->x, iter->y ), 1, CV_RGB(rand()%255,rand()%255,rand()%255), 2, 8, 0);
+			}
+			//printf("x=%.2f y=%.2f z=%.2f \n",iter->x,iter->y,iter->z);
+
+			/* allow points to expire */
+			iter->z -= 0.25;
+			if (iter->z <= 0.5 ) worldPoints.erase(iter);
+			else ++iter;
+		}
+	}
+
+
+	/* draw a line from the center bottom of camera frame to center middle
+	 *  to show the orientation of the robot in the world map */
+	double x,y,a,b;
+	mapCamPointToWorldPoint( imgHalfWidth, imgHalfHeight, a, b); // middle center of camera frame
+	mapCamPointToWorldPoint( imgHalfWidth, visCvGrey->height-1, x, y); // bottom center of camera frame
+	cvLine(worldmap, cvPoint( x,y ), cvPoint( a,b ),
+	       //CV_RGB(rand()%255,rand()%255,rand()%255),
+	       CV_RGB(255,255,255),
+	       2, 8, 0);
+	/* draw a circle denoting base orientaion */
+	cvCircle(worldmap, cvPoint( x,y ), 2,
+	         //CV_RGB(rand()%255,rand()%255,rand()%255),
+	         CV_RGB(255,255,255),
+	         2, 8, 0);
+
+
+	/* display world view image */
+	cvShowImage("worldmap",worldmap);
+
+	//cvWaitKey(0);
+
+	return 1;
 }
 
 int MapGen::genProbabilityMap()
