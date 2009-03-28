@@ -61,22 +61,22 @@ int icvCreateFeaturePoints(IplImage *image, CvMat *points, CvMat *status);
 /* For given points1 (with pntStatus) on image1 finds corresponding points2 on image2 and set pntStatus2 for them */
 /* Returns number of corresponding points */
 int icvFindCorrForGivenPoints( IplImage *image1,/* Image 1 */
-                               IplImage *image2,/* Image 2 */
-                               CvMat *points1,
-                               CvMat *pntStatus1,
-                               CvMat *points2,
-                               CvMat *pntStatus2,
-                               int useFilter,/*Use fundamental matrix to filter points */
-                               double threshold);/* Threshold for good points in filter */
+							   IplImage *image2,/* Image 2 */
+							   CvMat *points1,
+							   CvMat *pntStatus1,
+							   CvMat *points2,
+							   CvMat *pntStatus2,
+							   int useFilter,/*Use fundamental matrix to filter points */
+							   double threshold);/* Threshold for good points in filter */
 /*-------------------------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------------------------*/
 int icvRemoveDoublePoins(   CvMat *oldPoints,/* Points on prev image */
-                            CvMat *newPoints,/* New points */
-                            CvMat *oldStatus,/* Status for old points */
-                            CvMat *newStatus,
-                            CvMat *origStatus,
-                            float threshold);/* Status for new points */
+							CvMat *newPoints,/* New points */
+							CvMat *oldStatus,/* Status for old points */
+							CvMat *newStatus,
+							CvMat *origStatus,
+							float threshold);/* Status for new points */
 
 
 void icvComputeProjectMatrix(CvMat* objPoints,CvMat* projPoints,CvMat* projMatr);
@@ -86,23 +86,23 @@ void icvComputeProjectMatrixStatus(CvMat *objPoints4D,CvMat *points2,CvMat *stat
 
 
 void icvAddNewImageToPrevious____(
-    IplImage *newImage,//Image to add
-    IplImage *oldImage,//Previous image
-    CvMat *oldPoints,// previous 2D points on prev image (some points may be not visible)
-    CvMat *oldPntStatus,//Status for each point on prev image
-    CvMat *objPoints4D,//prev 4D points
-    CvMat *newPoints,  //Points on new image corr for prev
-    CvMat *newPntStatus,// New point status for new image
-    CvMat *newFPoints2D1,//new feature points on prev image
-    CvMat *newFPoints2D2,//new feature points on new image
-    CvMat *newFPointsStatus,
-    CvMat *newProjMatr,
-    int useFilter,
-    double threshold);//New projection matrix
+	IplImage *newImage,//Image to add
+	IplImage *oldImage,//Previous image
+	CvMat *oldPoints,// previous 2D points on prev image (some points may be not visible)
+	CvMat *oldPntStatus,//Status for each point on prev image
+	CvMat *objPoints4D,//prev 4D points
+	CvMat *newPoints,  //Points on new image corr for prev
+	CvMat *newPntStatus,// New point status for new image
+	CvMat *newFPoints2D1,//new feature points on prev image
+	CvMat *newFPoints2D2,//new feature points on new image
+	CvMat *newFPointsStatus,
+	CvMat *newProjMatr,
+	int useFilter,
+	double threshold);//New projection matrix
 
 /*-------------------------------------------------------------------------------------*/
 int icvDeleteSparsInPoints(  int numImages,
-                             CvMat **points,
-                             CvMat **status,
-                             CvMat *wasStatus);/* status of previous configuration */
+							 CvMat **points,
+							 CvMat **status,
+							 CvMat *wasStatus);/* status of previous configuration */
 

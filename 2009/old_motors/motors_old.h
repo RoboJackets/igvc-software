@@ -32,10 +32,10 @@
 /* Posible errors recieved from the motor controller*/
 enum
 {
-    FRAME_ERROR = 1,
-    DATA_OVERRUN_ERROR = 2,
-    PARITY_ERROR = 4,
-    TIMEOUT_ERROR = 8,
+	FRAME_ERROR = 1,
+	DATA_OVERRUN_ERROR = 2,
+	PARITY_ERROR = 4,
+	TIMEOUT_ERROR = 8,
 };
 
 
@@ -50,34 +50,34 @@ class Motors_Old
 {
 public:
 
-    /* Constructor */
-    Motors_Old();
-    /* Destructor */
-    virtual ~Motors_Old();
-    /* Called when the driver is started and closed respectively */
-    int Shutdown();
-    /* file descriptor of the serial port */
-    int fdMotor;
-    /**/
-    int SetupSerial();
-    /**/
-    int ShutdownSerial();
-    /* Current motor velocities */
-    //MOTOR_STATES_T stMotorStates;
-    int _iLeftVelocity;
-    int _iRightVelocity;
-    /**/
-    double dVelocityScale;
-    /**/
-    int controlMode;
-    /**/
-    int set_motors(int iLeftVelocity, int iRightVelocity);
-    int set_heading(int iFwdVelocity, int iRotation);
-    /**/
-    int get_motor_states(void);
-    /**/
-    int _max_speed_;
-    void set_max_speed(int maxspeed);
+	/* Constructor */
+	Motors_Old();
+	/* Destructor */
+	virtual ~Motors_Old();
+	/* Called when the driver is started and closed respectively */
+	int Shutdown();
+	/* file descriptor of the serial port */
+	int fdMotor;
+	/**/
+	int SetupSerial();
+	/**/
+	int ShutdownSerial();
+	/* Current motor velocities */
+	//MOTOR_STATES_T stMotorStates;
+	int _iLeftVelocity;
+	int _iRightVelocity;
+	/**/
+	double dVelocityScale;
+	/**/
+	int controlMode;
+	/**/
+	int set_motors(int iLeftVelocity, int iRightVelocity);
+	int set_heading(int iFwdVelocity, int iRotation);
+	/**/
+	int get_motor_states(void);
+	/**/
+	int _max_speed_;
+	void set_max_speed(int maxspeed);
 
 };
 

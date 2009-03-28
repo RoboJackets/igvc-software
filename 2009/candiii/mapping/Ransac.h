@@ -79,11 +79,11 @@ public:
 	 * @return Returns the percentage of data used in the least squares estimate.
 	 */
 	static double compute(std::vector<S> &parameters,
-	                      ParameterEstimator<T,S> *paramEstimator ,
-	                      std::vector<std::pair<T,T> > &data,
-	                      int numForEstimate,
-	                      double desiredProbabilityForNoOutliers,
-	                      double maximalOutlierPercentage);
+						  ParameterEstimator<T,S> *paramEstimator ,
+						  std::vector<std::pair<T,T> > &data,
+						  int numForEstimate,
+						  double desiredProbabilityForNoOutliers,
+						  double maximalOutlierPercentage);
 
 
 	/**
@@ -107,18 +107,18 @@ public:
 	 *
 	 */
 	static double compute(std::vector<S> &parameters,
-	                      ParameterEstimator<T,S> *paramEstimator ,
-	                      std::vector<std::pair<T,T> > &data,
-	                      int numForEstimate);
+						  ParameterEstimator<T,S> *paramEstimator ,
+						  std::vector<std::pair<T,T> > &data,
+						  int numForEstimate);
 
 private:
 
 
 	static void computeAllChoices(ParameterEstimator<T,S> *paramEstimator, std::vector<std::pair<T,T> > &data, int numForEstimate,
-	                              short *bestVotes, short *curVotes, int &numVotesForBest, int startIndex, int n, int k, int arrIndex, int *arr);
+								  short *bestVotes, short *curVotes, int &numVotesForBest, int startIndex, int n, int k, int arrIndex, int *arr);
 
 	static void estimate(ParameterEstimator<T,S> *paramEstimator, std::vector<std::pair<T,T> > &data, int numForEstimate,
-	                     short *bestVotes, short *curVotes, int &numVotesForBest, int *arr);
+						 short *bestVotes, short *curVotes, int &numVotesForBest, int *arr);
 
 	class SubSetIndexComparator
 	{
@@ -142,11 +142,11 @@ private:
 
 template<class T, class S>
 double Ransac<T,S>::compute(std::vector<S> &parameters,
-                            ParameterEstimator<T,S> *paramEstimator ,
-                            std::vector<std::pair<T,T> > &data,
-                            int numForEstimate,
-                            double desiredProbabilityForNoOutliers,
-                            double maximalOutlierPercentage)
+							ParameterEstimator<T,S> *paramEstimator ,
+							std::vector<std::pair<T,T> > &data,
+							int numForEstimate,
+							double desiredProbabilityForNoOutliers,
+							double maximalOutlierPercentage)
 {
 	int numDataObjects = data.size();
 	//there are less data objects than the minimum required for an exact fit, or
@@ -279,9 +279,9 @@ double Ransac<T,S>::compute(std::vector<S> &parameters,
 /*****************************************************************************/
 template<class T, class S>
 double Ransac<T,S>::compute(std::vector<S> &parameters,
-                            ParameterEstimator<T,S> *paramEstimator ,
-                            std::vector<std::pair<T,T> > &data,
-                            int numForEstimate)
+							ParameterEstimator<T,S> *paramEstimator ,
+							std::vector<std::pair<T,T> > &data,
+							int numForEstimate)
 {
 	std::vector<std::pair<T,T>* > leastSquaresEstimateData;
 	int numDataObjects = data.size();
@@ -295,7 +295,7 @@ double Ransac<T,S>::compute(std::vector<S> &parameters,
 		return 0;
 
 	computeAllChoices(paramEstimator,data,numForEstimate,
-	                  bestVotes, curVotes, numVotesForBest, 0, data.size(), numForEstimate, 0, arr);
+					  bestVotes, curVotes, numVotesForBest, 0, data.size(), numForEstimate, 0, arr);
 
 	//compute the least squares estimate using the largest sub set
 	for (int j=0; j<numDataObjects; j++)
@@ -314,7 +314,7 @@ double Ransac<T,S>::compute(std::vector<S> &parameters,
 /*****************************************************************************/
 template<class T, class S>
 void Ransac<T,S>::computeAllChoices(ParameterEstimator<T,S> *paramEstimator, std::vector<std::pair<T,T> > &data, int numForEstimate,
-                                    short *bestVotes, short *curVotes, int &numVotesForBest, int startIndex, int n, int k, int arrIndex, int *arr)
+									short *bestVotes, short *curVotes, int &numVotesForBest, int startIndex, int n, int k, int arrIndex, int *arr)
 {
 	//we have a new choice of indexes
 	if (k==0)
@@ -329,14 +329,14 @@ void Ransac<T,S>::computeAllChoices(ParameterEstimator<T,S> *paramEstimator, std
 	{
 		arr[arrIndex] = i;
 		computeAllChoices(paramEstimator, data, numForEstimate, bestVotes, curVotes, numVotesForBest,
-		                  i+1, n, k-1, arrIndex+1, arr);
+						  i+1, n, k-1, arrIndex+1, arr);
 	}
 
 }
 /*****************************************************************************/
 template<class T, class S>
 void Ransac<T,S>::estimate(ParameterEstimator<T,S> *paramEstimator, std::vector<std::pair<T,T> > &data, int numForEstimate,
-                           short *bestVotes, short *curVotes, int &numVotesForBest, int *arr)
+						   short *bestVotes, short *curVotes, int &numVotesForBest, int *arr)
 {
 	std::vector<std::pair<T,T>* > exactEstimateData;
 	std::vector<S> exactEstimateParameters;

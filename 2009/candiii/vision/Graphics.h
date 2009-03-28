@@ -100,8 +100,8 @@ public:
 		for (int i=0; i<=stepMax; i++)
 		{
 			outLinePixels->append(Point2D<int>(
-			                          x1 + (deltaX * i/stepMax),
-			                          (y1 + (deltaY * i/stepMax))));
+									  x1 + (deltaX * i/stepMax),
+									  (y1 + (deltaY * i/stepMax))));
 		}
 	}
 

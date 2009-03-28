@@ -223,7 +223,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	{
-	    #pragma omp parallel for private(curPathDanger,curPixelDanger,weight)
+#pragma omp parallel for private(curPathDanger,curPixelDanger,weight)
 		for (int pathID=0; pathID<nav_path__num; pathID++)
 		{
 			// Calculate path parameters
@@ -233,9 +233,9 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 			// Calculate the set of points in the path
 			QVector< Point2D<int> > pathPoints;
 			Graphics::calculatePointsInLine(
-			    (int) pathStart.x, (int) pathStart.y,
-			    (int) pathEnd.x, (int) pathEnd.y,			// @ 640x480: 	maxPathEnd.x=607
-			    &pathPoints);								//				minPathEnd.x=112
+				(int) pathStart.x, (int) pathStart.y,
+				(int) pathEnd.x, (int) pathEnd.y,			// @ 640x480: 	maxPathEnd.x=607
+				&pathPoints);								//				minPathEnd.x=112
 
 			// Calculate the danger value for the path
 			// along with the danger contributions of all
@@ -287,8 +287,8 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 			// Draw the body of the path using a color that is determined from the path's danger value
 			g_draw.setColor(navPath_color(curPathDanger));
 			g_draw.drawLine(
-			    (int) pathStart.x, (int) pathStart.y,
-			    (int) pathEnd.x, (int) pathEnd.y);
+				(int) pathStart.x, (int) pathStart.y,
+				(int) pathEnd.x, (int) pathEnd.y);
 
 			g_draw.setColor(dangerous_pixel_color);
 			// Hilight the "dangerous" pixels in the path
@@ -305,8 +305,8 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 					if (curPixelDanger > danger_per_barrel_pixel)  	// maximum danger
 					{
 						g_draw.drawRect_rational(
-						    curPoint.x, curPoint.y,
-						    2, 2);
+							curPoint.x, curPoint.y,
+							2, 2);
 					}
 					else
 					{
@@ -334,13 +334,13 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 		int sumOfNearbyDangers = 0;
 		int avgOfNearbyDangers = 0;
 		for (int curPath_id = nav_path__danger_smoothing_radius;
-		        curPath_id < (nav_path__num - nav_path__danger_smoothing_radius + 1);
-		        curPath_id++)
+				curPath_id < (nav_path__num - nav_path__danger_smoothing_radius + 1);
+				curPath_id++)
 		{
 			sumOfNearbyDangers = 0;
 			for (int delta = -nav_path__danger_smoothing_radius;
-			        delta < nav_path__danger_smoothing_radius;
-			        delta++)
+					delta < nav_path__danger_smoothing_radius;
+					delta++)
 			{
 				sumOfNearbyDangers += pathDanger[curPath_id + delta];
 			}
@@ -351,8 +351,8 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 
 		// Copy second edge
 		for (int curPath_id = (nav_path__num - nav_path__danger_smoothing_radius);
-		        curPath_id < nav_path__num;
-		        curPath_id++)
+				curPath_id < nav_path__num;
+				curPath_id++)
 		{
 			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
 		}
@@ -409,8 +409,8 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 			for (int deltaX = -1; deltaX <= 1; deltaX++)
 			{
 				g_draw.drawLine(
-				    ((int) bestPath_start.x) + deltaX, (int) bestPath_start.y,
-				    ((int) bestPath_end.x) + deltaX, (int) bestPath_end.y);
+					((int) bestPath_start.x) + deltaX, (int) bestPath_start.y,
+					((int) bestPath_end.x) + deltaX, (int) bestPath_end.y);
 			}
 
 			/* Update goal
@@ -549,9 +549,9 @@ void Vision::robotWidthScan(IplImage* img, Point2D<int>& goal)
 			Graphics g(visCvDebug);
 			g.setColor(CV_RGB(0,0,0));
 			g.drawLine( center*2, img->height*2-2,
-			            goal.x*2, goal.y*2 );
+						goal.x*2, goal.y*2 );
 			g.drawLine( (goal.x-half)*2 ,goal.y*2,
-			            (goal.x+half)*2, goal.y*2 );
+						(goal.x+half)*2, goal.y*2 );
 			//==================================================//
 		}
 	}
@@ -593,10 +593,10 @@ void Vision::visGenPath(IplImage* img)
 		}
 
 		//scan left then right & generate visCvPath image
-		#pragma omp parallel
+#pragma omp parallel
 		{
-            scanFillLeft  (visCvPath, x, y, goodFirst, 0      , blackout);
-            scanFillRight (visCvPath, x, y, goodFirst, width-1, blackout);
+			scanFillLeft  (visCvPath, x, y, goodFirst, 0      , blackout);
+			scanFillRight (visCvPath, x, y, goodFirst, width-1, blackout);
 		}
 
 	}//y
@@ -701,7 +701,7 @@ void Vision::scanFillLeft(IplImage* img, int middleX, int y, int goodFirst, int 
 
 	if (blackout)
 	{
-		for (;x>=end;x--)  	//fill black
+		for (; x>=end; x--)  	//fill black
 		{
 			//set bad
 			index = offset+x;
@@ -713,7 +713,7 @@ void Vision::scanFillLeft(IplImage* img, int middleX, int y, int goodFirst, int 
 	if (goodFirst)  		//starting pixel is good
 	{
 		good=1;
-		for (;x>=end;x--)  	//scan left and check
+		for (; x>=end; x--)  	//scan left and check
 		{
 			if (good)
 			{
@@ -742,7 +742,7 @@ void Vision::scanFillLeft(IplImage* img, int middleX, int y, int goodFirst, int 
 	else  		//starting pixel is bad
 	{
 		good=2;
-		for (;x>=end;x--)  	//scan left and check
+		for (; x>=end; x--)  	//scan left and check
 		{
 			if (good==2)  	//in bad spot, check for good spot
 			{
@@ -799,7 +799,7 @@ void Vision::scanFillRight(IplImage* img, int middleX, int y, int goodFirst, int
 
 	if (blackout)
 	{
-		for (;x<end;x++)  	//fill black
+		for (; x<end; x++)  	//fill black
 		{
 			//set bad
 			index = offset+x;
@@ -811,7 +811,7 @@ void Vision::scanFillRight(IplImage* img, int middleX, int y, int goodFirst, int
 	if (goodFirst)  		//starting pixel is good
 	{
 		good=1;
-		for (;x<end;x++)  	//scan right and check
+		for (; x<end; x++)  	//scan right and check
 		{
 			if (good)
 			{
@@ -840,7 +840,7 @@ void Vision::scanFillRight(IplImage* img, int middleX, int y, int goodFirst, int
 	else  		//starting pixel is bad
 	{
 		good=2;
-		for (;x<end;x++)  	//scan right and check
+		for (; x<end; x++)  	//scan right and check
 		{
 			if (good==2)  	//in bad spot, check for good spot
 			{
@@ -928,8 +928,8 @@ double Vision::deg2rad(double degrees)
 Point2D<double> Vision::navPath_start(int pathID)
 {
 	return Point2D<double>(
-	           (visCvRaw->width / 2) + (nav_path__center_path_id-pathID),
-	           visCvRaw->height - EDGE_PAD -1 );
+			   (visCvRaw->width / 2) + (nav_path__center_path_id-pathID),
+			   visCvRaw->height - EDGE_PAD -1 );
 }
 
 /*
@@ -941,9 +941,9 @@ Point2D<double> Vision::navPath_vector(int pathID)
 	double rad = deg2rad(deg);
 	double radius = 0.75 * (visCvRaw->width) / 2;
 	return Point2D<double>(
-	           radius*cos(rad),
-	           -radius*sin(rad))	// computer y-axis is inverse of math y-axis
-	       * nav_path__view_distance_multiplier;
+			   radius*cos(rad),
+			   -radius*sin(rad))	// computer y-axis is inverse of math y-axis
+		   * nav_path__view_distance_multiplier;
 }
 
 /*
@@ -960,7 +960,7 @@ Point2D<double> Vision::navPath_end(int pathID)
 double Vision::navPath_angle(int pathID)
 {
 	return  nav_path__view_cone__start_angle +
-	        (pathID * nav_path__view_cone__spacing);
+			(pathID * nav_path__view_cone__spacing);
 }
 
 /*
@@ -969,8 +969,8 @@ double Vision::navPath_angle(int pathID)
 CvScalar Vision::navPath_color(int pathDanger)
 {
 	return cvScalar(
-	           0, 0,
-	           (pathDanger / (double)max_path_danger) * 255); // levels of red
+			   0, 0,
+			   (pathDanger / (double)max_path_danger) * 255); // levels of red
 }
 
 /*
@@ -1141,25 +1141,25 @@ void Vision::Normalize(IplImage* img)
 void Vision::CvtPixToGoal(Point2D<int>& goal)
 {
 
-    int closeness = visCvPath->height/2;  //need to play with settings
-    float farweight; // weight of the far goal
+	int closeness = visCvPath->height/2;  //need to play with settings
+	float farweight; // weight of the far goal
 
-    /* weight goals depending on how far we can see */
-    if ( goal_far.y > closeness ) // y is inverted -> 0 is top&far
-    {
-        /* can't see very far */
-        farweight = 0.20;
-    }
-    else
-    {
-        /* can see far off */
-        farweight = 0.75;
-    }
+	/* weight goals depending on how far we can see */
+	if ( goal_far.y > closeness ) // y is inverted -> 0 is top&far
+	{
+		/* can't see very far */
+		farweight = 0.20;
+	}
+	else
+	{
+		/* can see far off */
+		farweight = 0.75;
+	}
 
-    /* set averaged goals */
-    goal.y = farweight*goal_far.y + (1-farweight)*goal_near.y;
-    // (flip goal_far.x's sign)
-    goal.x = farweight*(visCvPath->width-goal_far.x) + (1-farweight)*goal_near.x;
+	/* set averaged goals */
+	goal.y = farweight*goal_far.y + (1-farweight)*goal_near.y;
+	// (flip goal_far.x's sign)
+	goal.x = farweight*(visCvPath->width-goal_far.x) + (1-farweight)*goal_near.x;
 
 
 
@@ -1221,19 +1221,19 @@ void Vision::Adapt()
 	/* average rgb over time */
 	static int first = 1;
 	float k = 0.05; // % of new value to use
-	if(first)
+	if (first)
 	{
-	    first = 0;
-        avgB = blue;
-        avgG = green;
-        avgR = red;
-    }
-    else
-    {
-        avgB = blue*(k)  + avgB*(1-k);
-        avgG = green*(k) + avgG*(1-k);
-        avgR = red*(k)   + avgR*(1-k);
-    }
+		first = 0;
+		avgB = blue;
+		avgG = green;
+		avgR = red;
+	}
+	else
+	{
+		avgB = blue*(k)  + avgB*(1-k);
+		avgG = green*(k) + avgG*(1-k);
+		avgR = red*(k)   + avgR*(1-k);
+	}
 
 
 	unsigned char* rgbdata = (unsigned char*) visCvRawTransform->imageData;
@@ -1248,8 +1248,8 @@ void Vision::Adapt()
 		rgbdata+=3;
 
 		if (    (abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&
-		        (abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
-		        (abs(ar-(unsigned char)avgR)<adapt_maxDiff))
+				(abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
+				(abs(ar-(unsigned char)avgR)<adapt_maxDiff))
 		{
 			visCvAdapt->imageData[i/3] = GOOD_PIXEL;
 		}
