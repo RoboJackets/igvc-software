@@ -340,13 +340,6 @@ void Robot::processFunc()
     }
 
 
-    /* TESTING camera image stabilization */
-//  if(!mapper.stabilize())
-//  {
-//      return; //need stable image
-//  }
-
-
     /* Shove raw image into graphics card for some processing on the card */
     updateGlutDisplay();
 

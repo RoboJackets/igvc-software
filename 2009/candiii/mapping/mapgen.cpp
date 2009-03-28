@@ -6,13 +6,15 @@
 #include "PointParamEstimator.h"
 #include "Ransac.h"
 #include <iostream>
-
 #include <omp.h>
 
+/* Landmark Map Settings */
+#define DO_LANDMARK_MAP 0
 // below this, new world pts are considered the same, and updated
 #define WORLDPT_PIXDIFF 1.5
 // need this many counts to be considered a stable world pt
 #define WORLDPT_MINGOODCOUNT 6
+/* End Landmark Map Settings */
 
 
 
@@ -65,7 +67,7 @@ MapGen::~MapGen()
 /*
  * Main function
  */
-void MapGen::genMap()
+int MapGen::genMap()
 {
 	/*
 	 * this method should only be function calls
@@ -94,23 +96,24 @@ void MapGen::genMap()
 	 *  don't continue if we don't have any */
 	if ( !getFeatures() )
 	{
-		return;
+		return 0;
 	}
 
 	/* process features found.
 	 *  build matches vector and run RANSAC */
 	if ( !processFeatures() )
 	{
-		return;
+		return 0;
 	}
 
+#if DO_LANDMARK_MAP
 	/* add found features to world feature list,
 	 *  and plot/match all good features in the world frame */
-//	if ( !genWorldmap() )
-//	{
-//		return;
-//	}
-
+	if ( !genLandmarkMap() )
+	{
+		return 0;
+	}
+#else
     /* generate a probability map of traversable area and obstacles
      *  based on the Thresh image.
      *   in the image:
@@ -120,11 +123,15 @@ void MapGen::genMap()
      */
     if ( !genProbabilityMap() )
     {
-        return;
+        return 0;
     }
+#endif
 
 
-	/* end genMap() */
+
+	/* end genMap() - success */
+	return 1;
+
 }
 
 int MapGen::getFeatures()
@@ -404,7 +411,7 @@ void MapGen::init()
 	/* init images and matricies */
 	int dx = 400; // center of
 	int dy = 400; //   map
-	worldmap = cvCreateImage( cvSize( dx*2,dy*2 ), 8, 3 );
+	worldmap = cvCreateImage( cvSize( dx*2,dy*2 ), IPL_DEPTH_8U, 3 );
 	matCamToCam = cvCreateMat(3,3,CV_32F);
 	matCamToWorld = cvCreateMat(3,3,CV_32F);
 	cvZero(worldmap);
@@ -562,7 +569,7 @@ void MapGen::addOrUpdateWorldPoint(CvPoint3D32f wpt)
 
 }
 
-int MapGen::genWorldmap()
+int MapGen::genLandmarkMap()
 {
 
 	/* landmark processing */
@@ -610,17 +617,22 @@ int MapGen::genWorldmap()
 	/* draw a line from the center bottom of camera frame to center middle
 	 *  to show the orientation of the robot in the world map */
 	double x,y,a,b;
-	mapCamPointToWorldPoint( imgHalfWidth, imgHalfHeight, a, b); // middle center of camera frame
+	mapCamPointToWorldPoint( imgHalfWidth, 0, a, b); // top center of camera frame
 	mapCamPointToWorldPoint( imgHalfWidth, visCvGrey->height-1, x, y); // bottom center of camera frame
-	cvLine(worldmap, cvPoint( x,y ), cvPoint( a,b ),
+    /* update current robot orientation */
+	robotBaseAt = cvPoint( x,y );
+	robotLookingAt = cvPoint( a,b );
+	/* draw a line denoting heading orientaion */
+	cvLine(worldmap, robotBaseAt, robotLookingAt,
 	       //CV_RGB(rand()%255,rand()%255,rand()%255),
 	       CV_RGB(255,255,255),
 	       2, 8, 0);
 	/* draw a circle denoting base orientaion */
-	cvCircle(worldmap, cvPoint( x,y ), 2,
+	cvCircle(worldmap, robotBaseAt, 2,
 	         //CV_RGB(rand()%255,rand()%255,rand()%255),
 	         CV_RGB(255,255,255),
 	         2, 8, 0);
+
 
 
 	/* display world view image */
@@ -686,15 +698,36 @@ int MapGen::genProbabilityMap()
         }
     }
 
-    // display
+
+    /* get robot orientation in world coordinates */
+	double a,b;
+	mapCamPointToWorldPoint(imgHalfWidth, 0, a, b); // top center of camera frame
+	mapCamPointToWorldPoint(imgHalfWidth, visCvGrey->height-1, wx, wy); // bottom center of camera frame
+    /* update current robot orientation */
+	robotBaseAt = cvPoint( wx,wy );
+	robotLookingAt = cvPoint( a,b );
+    //printf("bx=%d by=%d  lx=%d ly=%d \n",robotBaseAt.x,robotBaseAt.y,robotLookingAt.x,robotLookingAt.y);
+	cvCircle(probmap, cvPoint( wx,wy ), 1,
+	         //CV_RGB(rand()%255,rand()%255,rand()%255),
+	         CV_RGB(127,127,127),
+	         1, 8, 0);
+
+
+    /* display */
     cvShowImage("probmap",probmap);
     //cvWaitKey(0);
 
-    // success
+
+    /* success */
     return 1;
 }
 
+int MapGen::processMap()
+{
 
+
+    return 1;
+}
 
 
 
