@@ -89,6 +89,7 @@ int MapGen::genMap()
 		//cvErode( visCvGrey, visCvGrey, NULL, 1 );
 		//cvSmooth(visCvGrey,visCvGrey,CV_MEDIAN,3,0,0,0);
 		//cvSobel(visCvGrey,visCvGrey, 1, 1, 3);
+		cvEqualizeHist(visCvGrey,visCvGrey);
 	}
 
 
