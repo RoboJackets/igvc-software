@@ -8,6 +8,7 @@
 #include <iostream>
 #include <omp.h>
 
+
 /* Landmark Map Settings */
 #define DO_LANDMARK_MAP 0
 // below this, new world pts are considered the same, and updated
@@ -25,42 +26,14 @@ MapGen::MapGen()
 MapGen::~MapGen()
 {
 	/* clean up */
-
-	if (prev != NULL )
-	{
-		cvReleaseImage( &prev );
-	}
-	if (points1 != NULL )
-	{
-		cvReleaseMat( &points1 );
-	}
-	if (points2 != NULL )
-	{
-		cvReleaseMat( &points2 );
-	}
-	if (status1 != NULL )
-	{
-		cvReleaseMat( &status1 );
-	}
-	if (status2 != NULL )
-	{
-		cvReleaseMat( &status2 );
-	}
-
-	if (matCamToCam != NULL )
-	{
-		cvReleaseMat( &matCamToCam );
-	}
-	if (matCamToWorld != NULL )
-	{
-		cvReleaseMat( &matCamToWorld );
-	}
-	if (worldmap != NULL )
-	{
-		cvReleaseImage( &worldmap );
-	}
-
-
+	if (prev != NULL ) cvReleaseImage( &prev );
+	if (points1 != NULL ) cvReleaseMat( &points1 );
+	if (points2 != NULL ) cvReleaseMat( &points2 );
+	if (status1 != NULL ) cvReleaseMat( &status1 );
+	if (status2 != NULL ) cvReleaseMat( &status2 );
+	if (matCamToCam != NULL ) cvReleaseMat( &matCamToCam );
+	if (matCamToWorld != NULL ) cvReleaseMat( &matCamToWorld );
+	if (worldmap != NULL ) cvReleaseImage( &worldmap );
 }
 
 
@@ -83,7 +56,6 @@ int MapGen::genMap()
 
 	/* testing image operations for better feature extraction */
 	{
-		//cvPyrDown(visCvGreyBig,visCvGrey);
 		//cvSmooth(visCvGrey,visCvGrey,CV_MEDIAN,3,0,0,0);
 		//cvDilate( visCvGrey, visCvGrey, NULL, 3 );
 		//cvErode( visCvGrey, visCvGrey, NULL, 1 );
@@ -277,12 +249,10 @@ int MapGen::getFeatures()
 				return 0; // no motion
 			}
 
-			//int maxd = 7;
 			if ( ( avgdx > maxFeatureShift ) || ( avgdy > maxFeatureShift ) )
 			{
 				return 0; // bumpy/noisy motion
 			}
-
 
 			if ( good > 1 )
 			{
@@ -640,8 +610,6 @@ int MapGen::genLandmarkMap()
 			 CV_RGB(255,255,255),
 			 2, 8, 0);
 
-
-
 	/* display world view image */
 	cvShowImage("worldmap",worldmap);
 
@@ -724,7 +692,6 @@ int MapGen::genProbabilityMap()
 	/* display */
 	cvShowImage("probmap",probmap);
 	//cvWaitKey(0);
-
 
 	/* success */
 	return 1;
