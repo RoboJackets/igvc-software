@@ -76,8 +76,8 @@ int MapGen::genMap()
 
 	/* get and rezise raw image to grayscale */
 	{
-        cvCvtColor(visCvRawTransform, visCvGreyBig, CV_BGR2GRAY);
-        cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
+		cvCvtColor(visCvRawTransform, visCvGreyBig, CV_BGR2GRAY);
+		cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
 	}
 
 
@@ -114,17 +114,17 @@ int MapGen::genMap()
 		return 0;
 	}
 #else
-    /* generate a probability map of traversable area and obstacles
-     *  based on the Thresh image.
-     *   in the image:
-     *     grey  = unknown
-     *     white = traversable
-     *     black = obstacle
-     */
-    if ( !genProbabilityMap() )
-    {
-        return 0;
-    }
+	/* generate a probability map of traversable area and obstacles
+	*  based on the Thresh image.
+	*   in the image:
+	*     grey  = unknown
+	*     white = traversable
+	*     black = obstacle
+	*/
+	if ( !genProbabilityMap() )
+	{
+		return 0;
+	}
 #endif
 
 
@@ -194,14 +194,14 @@ int MapGen::getFeatures()
 
 		/* now get current frame and match features with previous */
 		found = icvFindCorrForGivenPoints(
-		            prev,      /* Image 1 */
-		            visCvGrey, /* Image 2 */
-		            points1,
-		            status1,
-		            points2,
-		            status2,
-		            1,      /* Use fundamental matrix to filter points? */
-		            0.5);   /* Threshold for (dist b/w) good points in filter (usually 0.5 or 1.0)*/
+					prev,      /* Image 1 */
+					visCvGrey, /* Image 2 */
+					points1,
+					status1,
+					points2,
+					status2,
+					1,      /* Use fundamental matrix to filter points? */
+					0.5);   /* Threshold for (dist b/w) good points in filter (usually 0.5 or 1.0)*/
 
 		//printf(" matching: %d \n",found);
 
@@ -257,11 +257,13 @@ int MapGen::getFeatures()
 			avgdx/=good;
 			avgdy/=good;
 			cvLine(visCvGrey,
-			       cvPoint( imgHalfWidth-avgdx, imgHalfHeight-avgdy ),
-			       cvPoint( imgHalfWidth+avgdx, imgHalfHeight+avgdy ),
-			       CV_RGB(255,255,255), 3, 8, 0);
-			//printf("   adx %d ady %d\n",avgdx,avgdy);
+				   cvPoint( imgHalfWidth-avgdx, imgHalfHeight-avgdy ),
+				   cvPoint( imgHalfWidth+avgdx, imgHalfHeight+avgdy ),
+				   CV_RGB(255,255,255), 3, 8, 0);
+			//printf("   adx %.2f ady %.2f \n",avgdx,avgdy);
 		}
+		avgdx=abs(avgdx);
+		avgdy=abs(avgdy);
 
 		/* show image with points drawn */
 		cvShowImage("curr",visCvGrey);
@@ -269,13 +271,13 @@ int MapGen::getFeatures()
 
 		/* check status *********/
 		{
-			if (avgdx==0 || avgdy==0)
+			if (avgdx<=0.05 && avgdy<=0.05)
 			{
 				return 0; // no motion
 			}
 
 			//int maxd = 7;
-			if ( ( abs(avgdx) > maxFeatureShift ) || ( abs(avgdy) > maxFeatureShift ) )
+			if ( ( avgdx > maxFeatureShift ) || ( avgdy > maxFeatureShift ) )
 			{
 				return 0; // bumpy/noisy motion
 			}
@@ -340,10 +342,10 @@ int MapGen::processFeatures()
 	 * Run RANSAC on found features
 	 */
 	Ransac<CvPoint2D32f,double>::compute(
-	    pointParameters,    // output cam-cam homography matrix
-	    &pointEstimator,    // templeted class for comparing point matches
-	    matchList,          // vector of point match pairs
-	    2                   // number of matches required to compute homography (must be 2)
+		pointParameters,    // output cam-cam homography matrix
+		&pointEstimator,    // templeted class for comparing point matches
+		matchList,          // vector of point match pairs
+		2                   // number of matches required to compute homography (must be 2)
 	);
 
 	/* put RANSAC homography matrix ouput into a CvMat */
@@ -401,8 +403,9 @@ void MapGen::init()
 	imgHalfHeight = visCvGrey->height/2;
 	imgHalfWidth  = visCvGrey->width/2;
 
-	// amount of top of image to ignore
+	/* amount of top of image to ignore */
 	yFeatureThresh = visCvGrey->height/3;
+
 
 	//==============================================================
 
@@ -434,18 +437,21 @@ void MapGen::init()
 
 	/* probability map stuff */
 
-    probmap = cvCreateImage( cvSize( dx*2,dy*2 ), IPL_DEPTH_8U, 1 );
-    cvSet( probmap, CV_RGB(127,127,127), NULL);
+	probmap = cvCreateImage( cvSize( dx*2,dy*2 ), IPL_DEPTH_8U, 1 );
+	cvSet( probmap, CV_RGB(127,127,127), NULL);
+
+	robotBaseAt = cvPoint(dx,dy);
+	robotLookingAt = cvPoint(dx,dy-2*imgHalfHeight);
 
 	//==============================================================
 
-    /* OpenMP support */
+	/* OpenMP support */
 
-    // Get the number of processors in this system
-    int iCPU = omp_get_num_procs();
-    // Now set the number of threads
-    omp_set_num_threads(iCPU);
-    printf("omp num cpus %d \n", iCPU);
+	// Get the number of processors in this system
+	int iCPU = omp_get_num_procs();
+	// Now set the number of threads
+	omp_set_num_threads(iCPU);
+	printf("omp num cpus %d \n", iCPU);
 
 }
 
@@ -460,13 +466,13 @@ void MapGen::LoadXMLSettings()
 		numFramesBack = cfg.getInt("numFramesBack");
 		maxFeatureShift = cfg.getInt("maxFeatureShift");
 
-        /* display windows */
-        if(cfg.getInt("doMapping"))
-        {
-            cvNamedWindow("worldmap");
-            cvNamedWindow("curr");
-            cvNamedWindow("probmap");
-        }
+		/* display windows */
+		if (cfg.getInt("doMapping"))
+		{
+			cvNamedWindow("worldmap");
+			cvNamedWindow("curr");
+			cvNamedWindow("probmap");
+		}
 
 	}
 
@@ -511,11 +517,11 @@ void MapGen::mapCamPointToWorldPoint(CvPoint2D32f& cam, CvPoint2D32f& world)
 	/* maps a point in camera frame to world frame
 	 *  via cam to world homography matrix */
 	world.x = cvmGet(matCamToWorld,0,0) * cam.x +
-	          cvmGet(matCamToWorld,0,1) * cam.y +
-	          cvmGet(matCamToWorld,0,2);
+			  cvmGet(matCamToWorld,0,1) * cam.y +
+			  cvmGet(matCamToWorld,0,2);
 	world.y = cvmGet(matCamToWorld,1,0) * cam.x +
-	          cvmGet(matCamToWorld,1,1) * cam.y +
-	          cvmGet(matCamToWorld,1,2);
+			  cvmGet(matCamToWorld,1,1) * cam.y +
+			  cvmGet(matCamToWorld,1,2);
 }
 
 void MapGen::mapCamPointToWorldPoint(double camx, double camy, double& worldx, double& worldy)
@@ -523,11 +529,11 @@ void MapGen::mapCamPointToWorldPoint(double camx, double camy, double& worldx, d
 	/* maps a point in camera frame to world frame
 	 *  via cam to world homography matrix */
 	worldx =  cvmGet(matCamToWorld,0,0) * camx +
-	          cvmGet(matCamToWorld,0,1) * camy +
-	          cvmGet(matCamToWorld,0,2);
+			  cvmGet(matCamToWorld,0,1) * camy +
+			  cvmGet(matCamToWorld,0,2);
 	worldy =  cvmGet(matCamToWorld,1,0) * camx +
-	          cvmGet(matCamToWorld,1,1) * camy +
-	          cvmGet(matCamToWorld,1,2);
+			  cvmGet(matCamToWorld,1,1) * camy +
+			  cvmGet(matCamToWorld,1,2);
 }
 
 void MapGen::addOrUpdateWorldPoint(CvPoint3D32f wpt)
@@ -619,19 +625,19 @@ int MapGen::genLandmarkMap()
 	double x,y,a,b;
 	mapCamPointToWorldPoint( imgHalfWidth, 0, a, b); // top center of camera frame
 	mapCamPointToWorldPoint( imgHalfWidth, visCvGrey->height-1, x, y); // bottom center of camera frame
-    /* update current robot orientation */
-	robotBaseAt = cvPoint( x,y );
-	robotLookingAt = cvPoint( a,b );
+	/* update/avg current robot orientation */
+	robotBaseAt = cvPoint( (robotBaseAt.x+x)/2, (robotBaseAt.y+y)/2 );
+	robotLookingAt = cvPoint( (robotLookingAt.x+a)/2, (robotLookingAt.y+b)/2 );
 	/* draw a line denoting heading orientaion */
 	cvLine(worldmap, robotBaseAt, robotLookingAt,
-	       //CV_RGB(rand()%255,rand()%255,rand()%255),
-	       CV_RGB(255,255,255),
-	       2, 8, 0);
+		   //CV_RGB(rand()%255,rand()%255,rand()%255),
+		   CV_RGB(255,255,255),
+		   2, 8, 0);
 	/* draw a circle denoting base orientaion */
 	cvCircle(worldmap, robotBaseAt, 2,
-	         //CV_RGB(rand()%255,rand()%255,rand()%255),
-	         CV_RGB(255,255,255),
-	         2, 8, 0);
+			 //CV_RGB(rand()%255,rand()%255,rand()%255),
+			 CV_RGB(255,255,255),
+			 2, 8, 0);
 
 
 
@@ -645,88 +651,89 @@ int MapGen::genLandmarkMap()
 
 int MapGen::genProbabilityMap()
 {
-    /* in the probablity map image:
-     *  grey  = unknown
-     *  white = traversable
-     *  black = obstacle
-     */
+	/* in the probablity map image:
+	 *  grey  = unknown
+	 *  white = traversable
+	 *  black = obstacle
+	 */
 
 
-    /* slowly move all probabilities toward unknown (127) */
-    if(0)
-    {
-        double curr;
-        double speed = 1;
-        int i;
-        #pragma omp parallel for private(curr)
-        for (i=0; i<probmap->imageSize; i++)
-        {
-            curr = cvGetReal1D(probmap,i);
-            if(curr==127) continue;
-            else if(curr>127) cvSetReal1D(probmap,i,curr-speed);
-            else /*if(curr<127)*/ cvSetReal1D(probmap,i,curr+speed);
-            //else continue;
-        }
-    }
+	/* slowly move all probabilities toward unknown (127) */
+	if (0)
+	{
+		double curr;
+		double speed = 1;
+		int i;
+#pragma omp parallel for private(curr)
+		for (i=0; i<probmap->imageSize; i++)
+		{
+			curr = cvGetReal1D(probmap,i);
+			if (curr==127) continue;
+			else if (curr>127) cvSetReal1D(probmap,i,curr-speed);
+			else /*if(curr<127)*/ cvSetReal1D(probmap,i,curr+speed);
+			//else continue;
+		}
+	}
 
 
-    /* down-scale the thresh img, and map it into into world,
-     *  while setting probabilities of obstacles and traversible area */
-    int divby = 2;      // image size denominator
-    int pad = 5;        // remove noise around img edges
-    double badval = -2; // rate for obstacle probability
-    double goodval = 7; // rate for travpath probability
-    double setval;
-    double wx,wy;
-    int x,y;
-    #pragma omp parallel for private(x,setval,wx,wy)
-    for(y=pad; y<visCvThresh->height-divby-pad; y+=divby)
-    {
-        for(x=pad; x<visCvThresh->width-divby-pad; x+=divby )
-        {
-            // map pts
-            mapCamPointToWorldPoint((double)x,(double)y,wx,wy);
-            // get current val
-            setval = cvGetReal2D(probmap,wy,wx);
-            // and add/subtract based on thresh image
-            setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval;
-            // cap results
-            if(setval>255) setval = 255;
-            else if(setval<0) setval = 0;
-            // update probmap
-            cvSetReal2D(probmap,wy,wx,setval);
-        }
-    }
+	/* down-scale the thresh img, and map it into into world,
+	 *  while setting probabilities of obstacles and traversible area */
+	int divby = 2;      // image size denominator
+	int pad = 5;        // remove noise around img edges
+	double badval = -2; // rate for obstacle probability
+	double goodval = 7; // rate for travpath probability
+	double setval;
+	double wx,wy;
+	int x,y;
+#pragma omp parallel for private(x,setval,wx,wy)
+	for (y=pad; y<visCvThresh->height-divby-pad; y+=divby)
+	{
+		for (x=pad; x<visCvThresh->width-divby-pad; x+=divby )
+		{
+			// map pts
+			mapCamPointToWorldPoint((double)x,(double)y,wx,wy);
+			// get current val
+			setval = cvGetReal2D(probmap,wy,wx);
+			// and add/subtract based on thresh image
+			setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval;
+			// cap results
+			if (setval>255) setval = 255;
+			else if (setval<0) setval = 0;
+			// update probmap
+			cvSetReal2D(probmap,wy,wx,setval);
+		}
+	}
 
 
-    /* get robot orientation in world coordinates */
+	/* get robot orientation in world coordinates */
 	double a,b;
 	mapCamPointToWorldPoint(imgHalfWidth, 0, a, b); // top center of camera frame
 	mapCamPointToWorldPoint(imgHalfWidth, visCvGrey->height-1, wx, wy); // bottom center of camera frame
-    /* update current robot orientation */
-	robotBaseAt = cvPoint( wx,wy );
-	robotLookingAt = cvPoint( a,b );
-    //printf("bx=%d by=%d  lx=%d ly=%d \n",robotBaseAt.x,robotBaseAt.y,robotLookingAt.x,robotLookingAt.y);
-	cvCircle(probmap, cvPoint( wx,wy ), 1,
-	         //CV_RGB(rand()%255,rand()%255,rand()%255),
-	         CV_RGB(127,127,127),
-	         1, 8, 0);
+	/* update/avg current robot orientation */
+	robotBaseAt = cvPoint( (robotBaseAt.x+wx)/2, (robotBaseAt.y+wy)/2 );
+	robotLookingAt = cvPoint( (robotLookingAt.x+a)/2, (robotLookingAt.y+b)/2 );
+	//printf("bx=%d by=%d  lx=%d ly=%d \n",robotBaseAt.x,robotBaseAt.y,robotLookingAt.x,robotLookingAt.y);
+	/* draw a circle denoting base orientaion */
+	cvCircle(probmap, CvPoint(robotBaseAt),
+			 1,
+			 CV_RGB(127,127,127),
+			 1, 8, 0);
 
 
-    /* display */
-    cvShowImage("probmap",probmap);
-    //cvWaitKey(0);
+	/* display */
+	cvShowImage("probmap",probmap);
+	//cvWaitKey(0);
 
 
-    /* success */
-    return 1;
+	/* success */
+	return 1;
 }
 
 int MapGen::processMap()
 {
 
 
-    return 1;
+	return 1;
 }
 
 

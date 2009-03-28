@@ -152,12 +152,12 @@ int icvCreateFeaturePoints(IplImage *image, CvMat *points, CvMat *status)
 	/****************************************************************************/
 	/* get sub-pixel accuracy */
 	cvFindCornerSubPix(
-	    grayImage,      //image
-	    cornerPoints,   //corners
-	    foundNum,       //count
-	    cvSize(5,5),    //window
-	    cvSize(-1,-1),  //zero_zone (none)
-	    cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 20, 0.3) //criteria
+		grayImage,      //image
+		cornerPoints,   //corners
+		foundNum,       //count
+		cvSize(5,5),    //window
+		cvSize(-1,-1),  //zero_zone (none)
+		cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 20, 0.3) //criteria
 	);
 	/****************************************************************************/
 
@@ -201,13 +201,13 @@ int icvCreateFeaturePoints(IplImage *image, CvMat *points, CvMat *status)
 /* For given points1 (with pntStatus) on image1 finds corresponding points2 on image2 and set pntStatus2 for them */
 /* Returns number of corresponding points */
 int icvFindCorrForGivenPoints( IplImage *image1,/* Image 1 */
-                               IplImage *image2,/* Image 2 */
-                               CvMat *points1,
-                               CvMat *pntStatus1,
-                               CvMat *points2,
-                               CvMat *pntStatus2,
-                               int useFilter,/*Use fundamental matrix to filter points */
-                               double threshold)/* Threshold for good points in filter */
+							   IplImage *image2,/* Image 2 */
+							   CvMat *points1,
+							   CvMat *pntStatus1,
+							   CvMat *points2,
+							   CvMat *pntStatus2,
+							   int useFilter,/*Use fundamental matrix to filter points */
+							   double threshold)/* Threshold for good points in filter */
 {
 	int resNumCorrPoints = 0;
 	CvPoint2D32f* cornerPoints1 = 0;
@@ -229,8 +229,8 @@ int icvFindCorrForGivenPoints( IplImage *image1,/* Image 1 */
 
 	/* Test for null pointers */
 	if ( image1     == 0 || image2     == 0 ||
-	        points1    == 0 || points2    == 0 ||
-	        pntStatus1 == 0 || pntStatus2 == 0)
+			points1    == 0 || points2    == 0 ||
+			pntStatus1 == 0 || pntStatus2 == 0)
 	{
 		CV_ERROR( CV_StsNullPtr, "Some of parameters is a NULL pointer" );
 	}
@@ -252,7 +252,7 @@ int icvFindCorrForGivenPoints( IplImage *image1,/* Image 1 */
 
 	/* Test for matrices */
 	if ( !CV_IS_MAT(points1)    || !CV_IS_MAT(points2) ||
-	        !CV_IS_MAT(pntStatus1) || !CV_IS_MAT(pntStatus2) )
+			!CV_IS_MAT(pntStatus1) || !CV_IS_MAT(pntStatus2) )
 	{
 		CV_ERROR( CV_StsUnsupportedFormat, "Input parameters (points and status) must be a matrices" );
 	}
@@ -371,12 +371,12 @@ int icvFindCorrForGivenPoints( IplImage *image1,/* Image 1 */
 //                                0/*CV_LKFLOW_PYR_A_READY*/ );
 
 		cvCalcOpticalFlowPyrLK( grayImage1, grayImage2,
-		                        pyrImage1, pyrImage2,
-		                        cornerPoints1, cornerPoints2,
-		                        numVisPoints, cvSize(10,10), 3,
-		                        status, errors,
-		                        cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.01),
-		                        0/*CV_LKFLOW_PYR_A_READY*/ );
+								pyrImage1, pyrImage2,
+								cornerPoints1, cornerPoints2,
+								numVisPoints, cvSize(10,10), 3,
+								status, errors,
+								cvTermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS,20,0.01),
+								0/*CV_LKFLOW_PYR_A_READY*/ );
 
 
 		memset(stat2,0,sizeof(uchar)*numPoints);
@@ -873,19 +873,19 @@ we must to compute
 */
 
 void icvAddNewImageToPrevious____(
-    IplImage *newImage,//Image to add
-    IplImage *oldImage,//Previous image
-    CvMat *oldPoints,// previous 2D points on prev image (some points may be not visible)
-    CvMat *oldPntStatus,//Status for each point on prev image
-    CvMat *objPoints4D,//prev 4D points
-    CvMat *newPoints,  //Points on new image corr for prev
-    CvMat *newPntStatus,// New point status for new image
-    CvMat *newFPoints2D1,//new feature points on prev image
-    CvMat *newFPoints2D2,//new feature points on new image
-    CvMat *newFPointsStatus,
-    CvMat *newProjMatr,
-    int useFilter,
-    double threshold)//New projection matrix
+	IplImage *newImage,//Image to add
+	IplImage *oldImage,//Previous image
+	CvMat *oldPoints,// previous 2D points on prev image (some points may be not visible)
+	CvMat *oldPntStatus,//Status for each point on prev image
+	CvMat *objPoints4D,//prev 4D points
+	CvMat *newPoints,  //Points on new image corr for prev
+	CvMat *newPntStatus,// New point status for new image
+	CvMat *newFPoints2D1,//new feature points on prev image
+	CvMat *newFPoints2D2,//new feature points on new image
+	CvMat *newFPointsStatus,
+	CvMat *newProjMatr,
+	int useFilter,
+	double threshold)//New projection matrix
 {
 	CvMat *points2 = 0;
 	CvMat *status = 0;
@@ -909,13 +909,13 @@ void icvAddNewImageToPrevious____(
 
 	int corrNum;
 	corrNum = icvFindCorrForGivenPoints(    oldImage,/* Image 1 */
-	                                        newImage,/* Image 2 */
-	                                        oldPoints,
-	                                        oldPntStatus,
-	                                        points2,
-	                                        status,
-	                                        useFilter,/*Use fundamental matrix to filter points */
-	                                        threshold);/* Threshold for good points in filter */
+											newImage,/* Image 2 */
+											oldPoints,
+											oldPntStatus,
+											points2,
+											status,
+											useFilter,/*Use fundamental matrix to filter points */
+											threshold);/* Threshold for good points in filter */
 
 	cvCopy(status,newPntStatus);
 	cvCopy(points2,newPoints);
@@ -937,13 +937,13 @@ void icvAddNewImageToPrevious____(
 
 		/* Find correspondence for new found points */
 		icvFindCorrForGivenPoints( newImage,/* Image 1 */
-		                           oldImage,/* Image 2 */
-		                           newFPoints2D2,
-		                           newFPointsStatus,//prev status
-		                           newFPoints2D1,
-		                           newFPointsStatusTmp,//new status
-		                           useFilter,/*Use fundamental matrix to filter points */
-		                           threshold);/* Threshold for good points in filter */
+								   oldImage,/* Image 2 */
+								   newFPoints2D2,
+								   newFPointsStatus,//prev status
+								   newFPoints2D1,
+								   newFPointsStatusTmp,//new status
+								   useFilter,/*Use fundamental matrix to filter points */
+								   threshold);/* Threshold for good points in filter */
 
 		/* We generated new points on image test for exist points */
 
@@ -952,19 +952,19 @@ void icvAddNewImageToPrevious____(
 		int origNum;
 		/* Find point of old image */
 		origNum = icvRemoveDoublePoins( oldPoints,/* Points on prev image */
-		                                newFPoints2D1,/* New points */
-		                                oldPntStatus,/* Status for old points */
-		                                newFPointsStatusTmp,
-		                                newFPointsStatusTmp,//orig status
-		                                20);/* Status for new points */
+										newFPoints2D1,/* New points */
+										oldPntStatus,/* Status for old points */
+										newFPointsStatusTmp,
+										newFPointsStatusTmp,//orig status
+										20);/* Status for new points */
 
 		/* Find double points on new image */
 		origNum = icvRemoveDoublePoins( newPoints,/* Points on prev image */
-		                                newFPoints2D2,/* New points */
-		                                newPntStatus,/* Status for old points */
-		                                newFPointsStatusTmp,
-		                                newFPointsStatusTmp,//orig status
-		                                20);/* Status for new points */
+										newFPoints2D2,/* New points */
+										newPntStatus,/* Status for old points */
+										newFPointsStatusTmp,
+										newFPointsStatusTmp,//orig status
+										20);/* Status for new points */
 
 
 
@@ -991,9 +991,9 @@ void icvAddNewImageToPrevious____(
 
 /*-------------------------------------------------------------------------------------*/
 int icvDeleteSparsInPoints(  int numImages,
-                             CvMat **points,
-                             CvMat **status,
-                             CvMat *wasStatus)/* status of previous configuration */
+							 CvMat **points,
+							 CvMat **status,
+							 CvMat *wasStatus)/* status of previous configuration */
 {
 	/* Delete points which no exist on any of images */
 	/* numImages - number of images */
@@ -1111,15 +1111,15 @@ void icvAddNewArrayPoints()
 /* Returns: 1 if new image was added good */
 /*          0 image was not added. Not enought corr points */
 int AddImageToStruct(  IplImage *newImage,//Image to add
-                       IplImage *oldImage,//Previous image
-                       CvMat *oldPoints,// previous 2D points on prev image (some points may be not visible)
-                       CvMat *oldPntStatus,//Status for each point on prev image
-                       CvMat *objPoints4D,//prev 4D points
-                       CvMat *newPntStatus,// New point status for new image
-                       CvMat *newPoints,//New corresponding points on new image
-                       CvMat *newPoints2D1,//new points on prev image
-                       CvMat *newPoints2D2,//new points on new image
-                       CvMat *newProjMatr);//New projection matrix
+					   IplImage *oldImage,//Previous image
+					   CvMat *oldPoints,// previous 2D points on prev image (some points may be not visible)
+					   CvMat *oldPntStatus,//Status for each point on prev image
+					   CvMat *objPoints4D,//prev 4D points
+					   CvMat *newPntStatus,// New point status for new image
+					   CvMat *newPoints,//New corresponding points on new image
+					   CvMat *newPoints2D1,//new points on prev image
+					   CvMat *newPoints2D2,//new points on new image
+					   CvMat *newProjMatr);//New projection matrix
 {
 
 	/* Add new image. Create new corr points */

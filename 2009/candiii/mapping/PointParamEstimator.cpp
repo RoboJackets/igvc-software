@@ -31,7 +31,7 @@ PointParamEstimator::PointParamEstimator(double delta) : m_deltaSquared(delta*de
 /*
  */
 void PointParamEstimator::estimate(std::vector< std::pair<CvPoint2D32f ,CvPoint2D32f >* > &data,
-                                   std::vector<double> &parameters)
+								   std::vector<double> &parameters)
 {
 	parameters.clear();
 	if (data.size()<2)
@@ -64,7 +64,7 @@ void PointParamEstimator::estimate(std::vector< std::pair<CvPoint2D32f ,CvPoint2
 /*
  */
 void PointParamEstimator::leastSquaresEstimate(std::vector< std::pair<CvPoint2D32f ,CvPoint2D32f >* > &data,
-        std::vector<double> &parameters)
+		std::vector<double> &parameters)
 {
 	parameters.clear();
 	if (data.size()<2)

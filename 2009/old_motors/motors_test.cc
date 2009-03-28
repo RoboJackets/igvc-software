@@ -26,7 +26,8 @@
 #define REVERSE			0
 
 /* Posible errors recieved from the motor controller*/
-enum {
+enum
+{
 	FRAME_ERROR = 1,
 	DATA_OVERRUN_ERROR = 2,
 	PARITY_ERROR = 4,
@@ -43,33 +44,34 @@ typedef struct _motor_states_
 } MOTOR_STATES_T;
 
 
-class motors {
-	public:
+class motors
+{
+public:
 
-		/* Constructor */
-		motors();
+	/* Constructor */
+	motors();
 
-		/* Called when the driver is started and closed respectively */
-		int Shutdown();
+	/* Called when the driver is started and closed respectively */
+	int Shutdown();
 
-		/* file descriptor of the serial port */
-		int fdMotor;
+	/* file descriptor of the serial port */
+	int fdMotor;
 
-		int SetupSerial();
-		int ShutdownSerial();
+	int SetupSerial();
+	int ShutdownSerial();
 
-		/* Current motor velocities */
-		MOTOR_STATES_T stMotorStates;
-		/**/
-		double dVelocityScale;
+	/* Current motor velocities */
+	MOTOR_STATES_T stMotorStates;
+	/**/
+	double dVelocityScale;
 
-		/**/
-		int controlMode;
+	/**/
+	int controlMode;
 
-		/**/
-		int set_motors(MOTOR_STATES_T stMotorStates);
-		
-		int get_motor_states(void);
+	/**/
+	int set_motors(MOTOR_STATES_T stMotorStates);
+
+	int get_motor_states(void);
 };
 
 
@@ -78,7 +80,7 @@ int main()
 {
 	motors daMotors;
 
-	for(;;)
+	for (;;)
 	{
 		MOTOR_STATES_T stMotorStates;
 		std::cout << std::endl << "Left Velocity: ";
@@ -110,7 +112,8 @@ int motors::SetupSerial()
 	 *	integrity completion (i.e. waits for the data but not meta-data to be written
 	 *	to the file before continuing execution) - this doesn't seem to work
 	 * O_NDELAY - don't wait for the DCD line to go to the space voltage
-	 */	if ((fdMotor = open(DEFAULT_PORT, O_RDWR | O_NOCTTY | O_DSYNC | O_RSYNC | O_NDELAY)) < 0)
+	 */
+	if ((fdMotor = open(DEFAULT_PORT, O_RDWR | O_NOCTTY | O_DSYNC | O_RSYNC | O_NDELAY)) < 0)
 	{
 		printf("SetupSerial(): could not open port %s, %s\n", DEFAULT_PORT, strerror(errno));
 		return(-1);
@@ -121,17 +124,17 @@ int motors::SetupSerial()
 
 	/* Get the current options for the port */
 	struct termios options;
-	if(tcgetattr(fdMotor, &options) < 0)
+	if (tcgetattr(fdMotor, &options) < 0)
 	{
 		printf("SetupSerial(): could not get the serial port options, %s\n", strerror(errno));
 		ShutdownSerial();
 		return(-1);
 	}
 
-	/* Configure the port options */	 
+	/* Configure the port options */
 	options.c_cflag |= (CREAD | CLOCAL); /* Enable the receiver and set local mode */
 	cfsetispeed(&options, B115200); /* Set 115200 baud rate */
-	cfsetospeed(&options, B115200); 
+	cfsetospeed(&options, B115200);
 	options.c_cflag &= ~PARENB; /* Set no parity */
 	options.c_cflag &= ~CSTOPB; /* Set 1 stop bit */
 	options.c_cflag &= ~CSIZE; /* Set 8 data bits */
@@ -142,7 +145,7 @@ int motors::SetupSerial()
 	options.c_oflag &= ~OPOST;
 
 	/* Flush input and output buffers and then set the new options for the port */
-	if(tcsetattr(fdMotor, TCSAFLUSH, &options) < 0 )
+	if (tcsetattr(fdMotor, TCSAFLUSH, &options) < 0 )
 	{
 		printf("SetupSerial(): could not set the serial port options, %s\n", strerror(errno));
 		ShutdownSerial();
@@ -153,7 +156,7 @@ int motors::SetupSerial()
 
 int motors::ShutdownSerial()
 {
-	if(close(fdMotor) < 0)
+	if (close(fdMotor) < 0)
 	{
 		printf("ShutdownSerial(): could not close the serial port, %s\n", strerror(errno));
 		fdMotor = -1;
@@ -167,7 +170,7 @@ int motors::Shutdown()
 {
 	return(ShutdownSerial());
 }
-/* NOTE:
+/* NOTE:
  *	When you raise the DTR line, if the motor controller is in AUTONOMOUS_MODE,
  *	it reads in any data in its uart buffer (4 bytes at most). Then, in all modes,
  *	it sends back its current motor states, control mode, and any errors it had
@@ -181,13 +184,15 @@ int motors::set_motors(MOTOR_STATES_T stMotorStates)
 	 */
 	int iScaledLeftVel = (int)(dVelocityScale * stMotorStates.iLeftVelocity);
 	int iScaledRightVel = (int)(dVelocityScale * stMotorStates.iRightVelocity);
-	unsigned char data[3] ={
+	unsigned char data[3] =
+	{
 		(unsigned char)( (((iScaledLeftVel < 0) ? REVERSE : FORWARD) << LEFT_DIR_OFFSET) | (((iScaledRightVel < 0) ? REVERSE : FORWARD) << RIGHT_DIR_OFFSET) ),
 		(unsigned char)( min(abs(iScaledLeftVel), 255) ),
-		(unsigned char)( min(abs(iScaledRightVel), 255) )  };
+		(unsigned char)( min(abs(iScaledRightVel), 255) )
+	};
 
 	/* Send the motor states to the motor controller */
-	if( write(fdMotor, data, 3) != 3 )
+	if ( write(fdMotor, data, 3) != 3 )
 	{
 		printf("set_motors(): could not write to serial port, %s\n", strerror(errno));
 		return(-1);
@@ -207,19 +212,19 @@ int motors::get_motor_states(void)
 
 	/* Set the DTR line high to intterupt the motor controller */
 	int status;
-	if(ioctl(fdMotor, TIOCMGET, &status))
+	if (ioctl(fdMotor, TIOCMGET, &status))
 	{
 		printf("get_motor_states(): could not get serial port status, %s\n", strerror(errno));
 		return(-1);
 	}
 	status |= TIOCM_DTR;
-	if(ioctl(fdMotor, TIOCMSET, &status))
+	if (ioctl(fdMotor, TIOCMSET, &status))
 	{
 		printf("get_motor_states(): could not set RTS high, %s\n", strerror(errno));
 		return(-1);
 	}
-	
-	/* 
+
+	/*
 	 * If the DTR line can be raised and lowered in less than a full clock cycle
 	 * of the controller, there should be a delay here to make sure the motor
 	 * controller interrupts.
@@ -230,7 +235,7 @@ int motors::get_motor_states(void)
 	 *	ioctl(fdMotor, TIOCMGET, &status) before doing this.
 	 */
 	status &= ~TIOCM_DTR;
-	if(ioctl(fdMotor, TIOCMSET, &status))
+	if (ioctl(fdMotor, TIOCMSET, &status))
 	{
 		printf("get_motor_states(): could not set RTS low, %s\n", strerror(errno));
 		return(-1);
@@ -239,7 +244,7 @@ int motors::get_motor_states(void)
 	/* Read each byte sent from the controller */
 	unsigned char u8Buff[3];
 	int bytesRead;
-	if((bytesRead = read(fdMotor, u8Buff, 3)) != 3)
+	if ((bytesRead = read(fdMotor, u8Buff, 3)) != 3)
 	{
 		printf("get_motor_states(): the motor controller did not respond or only partial responded, %s\n", strerror(errno));
 		//return(-1);
@@ -247,7 +252,7 @@ int motors::get_motor_states(void)
 
 	//Test
 	printf("%d bytes read\n", bytesRead);
-	for(int i = 0; i < bytesRead; i++)
+	for (int i = 0; i < bytesRead; i++)
 	{
 		printf("%d ", u8Buff[i]);
 	}
@@ -255,7 +260,7 @@ int motors::get_motor_states(void)
 
 	/* Report any errors the motor controller had with the transmission */
 	int iError = (u8Buff[0] & ERROR_MASK) >> ERROR_OFFSET;
-	if( iError & (FRAME_ERROR|DATA_OVERRUN_ERROR|PARITY_ERROR|TIMEOUT_ERROR) )
+	if ( iError & (FRAME_ERROR|DATA_OVERRUN_ERROR|PARITY_ERROR|TIMEOUT_ERROR) )
 	{
 		printf("get_motor_states(): the motor controller could not process comand, Error %d\n", iError);
 		return(-1);
