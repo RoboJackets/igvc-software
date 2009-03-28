@@ -43,11 +43,11 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 {
 
 	/* Abort if there is no image. */
-	if ( visCvRaw->imageData==NULL )
-	{
-		printf("visCvRaw is NULL!\n");
-		return;
-	}
+//	if ( visCvRaw->imageData==NULL )
+//	{
+//		printf("visCvRaw is NULL!\n");
+//		return;
+//	}
 
 	/* copy image to internal buffer for drawing */
 	cvCopy(visCvRawTransform,visCvDebug);
@@ -1132,7 +1132,20 @@ void Vision::Normalize(IplImage* img)
 	{
 		scale = 1.0;
 	}
-	cvScale( img, img, scale, 0 ); //Normalizes matrix to 0-255 (grayscale)
+	cvScale( img, img, scale, -scale*min ); //Normalizes matrix to 0-255 (grayscale)
+}
+
+/*
+ * Normalizes a 0-255 grayscale image using its histogram
+ *  (normalizes brightness and increases contrast of the image)
+ */
+void Vision::Equalize(IplImage* img)
+{
+	if (img->nChannels == 1)
+	{
+		cvEqualizeHist(img,img);
+	}
+
 }
 
 /*
@@ -1141,14 +1154,14 @@ void Vision::Normalize(IplImage* img)
 void Vision::CvtPixToGoal(Point2D<int>& goal)
 {
 
-	int closeness = visCvPath->height/2;  //need to play with settings
+	int closeness = visCvPath->height/3; //2;  //need to play with settings
 	float farweight; // weight of the far goal
 
 	/* weight goals depending on how far we can see */
 	if ( goal_far.y > closeness ) // y is inverted -> 0 is top&far
 	{
 		/* can't see very far */
-		farweight = 0.20;
+		farweight = 0.15;
 	}
 	else
 	{

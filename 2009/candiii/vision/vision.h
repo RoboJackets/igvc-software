@@ -111,6 +111,9 @@ public:
 	// finds min/max values in a 0-255 greyscale image and normalizes using those
 	void Normalize(IplImage* img);
 
+	// finds histogram in a 0-255 greyscale image and normalizes using it
+	void Equalize(IplImage* img);
+
 	// width of robot in pixels
 	int ROBOT_WIDTH;
 
