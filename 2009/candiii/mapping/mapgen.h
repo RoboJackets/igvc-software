@@ -21,7 +21,7 @@ public:
 
 public:
 
-	void genMap();
+	int genMap();
 	void LoadXMLSettings();
 	int maxFeatures;
 	void init();
@@ -47,7 +47,7 @@ public:
 	int maxFeatureShift;
 	int imgHalfHeight;
 	int imgHalfWidth;
-	int genWorldmap();
+	int genLandmarkMap();
 	void mapCamPointToWorldPoint(CvPoint2D32f& cam, CvPoint2D32f& world);
 	void mapCamPointToWorldPoint(double camx, double camy, double& worldx, double& worldy);
 	std::vector< CvPoint3D32f > worldPoints; // z is ref count
@@ -55,6 +55,9 @@ public:
 	/**/
 	int genProbabilityMap();
 	IplImage* probmap;
+	int processMap();
+	CvPoint robotBaseAt;    // bottom of current image being pasted into world (in world coordinates)
+	CvPoint robotLookingAt; // top of current image being pasted into world (in world coordinates)
 
 
 };
