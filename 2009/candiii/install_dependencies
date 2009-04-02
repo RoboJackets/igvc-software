@@ -9,6 +9,13 @@ sleep 1
 echo "update =================================================================="
 sudo apt-get update
 
+echo "opencv dependencies======================================================="
+sudo apt-get --yes install libgtk2.0-dev
+sudo apt-get --yes install libavcodec-dev
+sudo apt-get --yes install libavformat-dev
+sudo apt-get --yes install libjpeg62-dev
+sudo apt-get --yes install libtiff4-dev
+
 echo "opencv =================================================================="
 sudo apt-get --yes install libcv1
 sudo apt-get --yes install libcvaux1 
@@ -36,6 +43,8 @@ echo "g++ ====================================================================="
 sudo apt-get --yes install g++
 
 echo "IEEE1394 ================================================================"
+echo " ..."
+sleep 1
 cd ../libdc1394-2.0.3/
 ./configure
 make

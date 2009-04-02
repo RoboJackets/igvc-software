@@ -213,7 +213,7 @@ void Vision::visHsvProcessing(Point2D<int>& goal)
 void Vision::visSweeperLines(Point2D<int>& goal)
 {
 
-	Graphics g_path(visCvPath);
+	//Graphics g_path(visCvPath);
 	Graphics g_draw(visCvDebug);
 
 	int pathDanger[nav_path__num];
@@ -1145,7 +1145,6 @@ void Vision::Equalize(IplImage* img)
 	{
 		cvEqualizeHist(img,img);
 	}
-
 }
 
 /*

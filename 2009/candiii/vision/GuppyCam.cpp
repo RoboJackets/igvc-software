@@ -16,7 +16,9 @@ int GuppyCam::connect()
 	catch (std::exception)
 	{
 		camconnected=0;
-		return 0;
+		//return 0;
+		printf("Error connecting to camera \n");
+		exit(-1);
 	}
 
 	std::vector<Camera::DCam*> cam = Camera::DCam::availableCameras();
@@ -32,7 +34,9 @@ int GuppyCam::connect()
 	else
 	{
 		camconnected=0;
-		return 0;
+		//return 0;
+        printf("Error connecting to camera \n");
+		exit(-1);
 	}
 }
 

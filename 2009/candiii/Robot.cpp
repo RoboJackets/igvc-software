@@ -154,6 +154,7 @@ int Robot::init()
 	{
 		if (!camera_firewire.GrabCvImage())
 		{
+		    printf("Error getting camera frame \n");
 			return 0; // fail
 		}
 	}
@@ -161,6 +162,7 @@ int Robot::init()
 	{
 		if (!camera_usb.GrabCvImage())
 		{
+		    printf("Error getting camera frame \n");
 			return 0; // fail
 		}
 	}
@@ -261,9 +263,9 @@ void Robot::LoadXMLSettings()
 		}
 		else
 		{
-			printf("Robot settings loaded \n");
+			printf("Robot settings loaded \n\t");
 		}
-		printf("values: _k %f  view %d \n",_k,trackbarVal);
+		printf("values: _k %f view %d motors %d \n",_k,trackbarVal,motorsMaxSpeed);
 	}
 
 }
@@ -328,6 +330,7 @@ void Robot::processFunc()
 	{
 		if (!camera_firewire.GrabCvImage())
 		{
+		    printf("Error getting camera frame \n");
 			return; // fail
 		}
 	}
@@ -335,6 +338,7 @@ void Robot::processFunc()
 	{
 		if (!camera_usb.GrabCvImage())
 		{
+		    printf("Error getting camera frame \n");
 			return; // fail
 		}
 	}
@@ -364,7 +368,10 @@ void Robot::processFunc()
 	/* SLAM Processing */
 	if (doMapping)
 	{
-		mapper.genMap();
+		if( mapper.genMap() )
+		{
+            //mapper.processMap(); //TESTING
+		}
 	}
 
 

@@ -58,6 +58,9 @@ public:
 	int processMap();
 	CvPoint robotBaseAt;    // bottom of current image being pasted into world (in world coordinates)
 	CvPoint robotLookingAt; // top of current image being pasted into world (in world coordinates)
+	Point2D<double> navPath_start(int pathID);
+	Point2D<double> navPath_end(int pathID);
+	Point2D<double> navPath_vector(int pathID);
 
 
 };

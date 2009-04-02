@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="0" tabpos="6">
-		<Cursor position="1447" topLine="12" />
+	<File name="Config.xml" open="1" top="0" tabpos="5">
+		<Cursor position="497" topLine="0" />
 	</File>
-	<File name="Robot.cpp" open="1" top="0" tabpos="3">
-		<Cursor position="9145" topLine="387" />
+	<File name="Robot.cpp" open="1" top="1" tabpos="3">
+		<Cursor position="8356" topLine="352" />
 	</File>
-	<File name="Robot.h" open="1" top="0" tabpos="4">
+	<File name="Robot.h" open="0" top="0" tabpos="4">
 		<Cursor position="1228" topLine="19" />
 	</File>
-	<File name="main.cpp" open="1" top="0" tabpos="12">
+	<File name="main.cpp" open="0" top="0" tabpos="12">
 		<Cursor position="432" topLine="0" />
 	</File>
 	<File name="mapping/PointParamEstimator.cpp" open="0" top="0" tabpos="10">
@@ -19,38 +19,38 @@
 	<File name="mapping/Ransac.h" open="0" top="0" tabpos="4">
 		<Cursor position="108" topLine="0" />
 	</File>
-	<File name="mapping/cvcorrImages.cpp" open="0" top="0" tabpos="8">
-		<Cursor position="2301" topLine="162" />
+	<File name="mapping/cvcorrImages.cpp" open="0" top="0" tabpos="14">
+		<Cursor position="9974" topLine="357" />
 	</File>
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
 		<Cursor position="3770" topLine="45" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="2">
-		<Cursor position="15687" topLine="690" />
+	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="25075" topLine="938" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="1">
-		<Cursor position="299" topLine="24" />
+		<Cursor position="1515" topLine="31" />
 	</File>
-	<File name="vision/CVcam.cpp" open="1" top="0" tabpos="9">
-		<Cursor position="206" topLine="0" />
+	<File name="vision/CVcam.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="516" topLine="11" />
 	</File>
-	<File name="vision/CVcam.h" open="1" top="0" tabpos="11">
+	<File name="vision/CVcam.h" open="0" top="0" tabpos="11">
 		<Cursor position="348" topLine="9" />
 	</File>
 	<File name="vision/DCam.cpp" open="0" top="0" tabpos="11">
-		<Cursor position="1013" topLine="45" />
+		<Cursor position="1483" topLine="71" />
 	</File>
-	<File name="vision/Graphics.h" open="0" top="0" tabpos="9">
-		<Cursor position="250" topLine="0" />
+	<File name="vision/Graphics.h" open="0" top="0" tabpos="10">
+		<Cursor position="2181" topLine="95" />
 	</File>
-	<File name="vision/GuppyCam.cpp" open="1" top="0" tabpos="10">
-		<Cursor position="156" topLine="6" />
+	<File name="vision/GuppyCam.cpp" open="1" top="0" tabpos="7">
+		<Cursor position="556" topLine="9" />
 	</File>
 	<File name="vision/GuppyCam.h" open="0" top="0" tabpos="10">
 		<Cursor position="906" topLine="4" />
 	</File>
-	<File name="vision/PjMat.cc" open="1" top="0" tabpos="8">
-		<Cursor position="496" topLine="0" />
+	<File name="vision/PjMat.cc" open="0" top="0" tabpos="7">
+		<Cursor position="4259" topLine="155" />
 	</File>
 	<File name="vision/Point2D.h" open="0" top="0" tabpos="8">
 		<Cursor position="0" topLine="0" />
@@ -61,13 +61,13 @@
 	<File name="vision/image_buffers.h" open="0" top="0" tabpos="6">
 		<Cursor position="809" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="0" tabpos="5">
-		<Cursor position="22181" topLine="895" />
+	<File name="vision/vision.cc" open="1" top="0" tabpos="4">
+		<Cursor position="22924" topLine="939" />
 	</File>
-	<File name="vision/vision.h" open="0" top="0" tabpos="5">
-		<Cursor position="90" topLine="0" />
+	<File name="vision/vision.h" open="0" top="0" tabpos="13">
+		<Cursor position="3786" topLine="97" />
 	</File>
-	<File name="../old_motors/motors_old.cpp" open="1" top="0" tabpos="7">
+	<File name="../old_motors/motors_old.cpp" open="0" top="0" tabpos="6">
 		<Cursor position="6578" topLine="186" />
 	</File>
 	<File name="../old_motors/motors_old.h" open="0" top="0" tabpos="12">

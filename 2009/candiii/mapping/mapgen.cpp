@@ -412,7 +412,7 @@ void MapGen::init()
 	cvSet( probmap, CV_RGB(127,127,127), NULL);
 
 	robotBaseAt = cvPoint(dx,dy);
-	robotLookingAt = cvPoint(dx,dy-2*imgHalfHeight);
+	robotLookingAt = cvPoint(dx,dy-1);
 
 	//==============================================================
 
@@ -423,6 +423,13 @@ void MapGen::init()
 	// Now set the number of threads
 	omp_set_num_threads(iCPU);
 	printf("omp num cpus %d \n", iCPU);
+
+    //==============================================================
+
+    /* process map stuff */
+    cvNamedWindow("processmap");
+
+
 
 }
 
@@ -683,10 +690,10 @@ int MapGen::genProbabilityMap()
 	robotLookingAt = cvPoint( (robotLookingAt.x+a)/2, (robotLookingAt.y+b)/2 );
 	//printf("bx=%d by=%d  lx=%d ly=%d \n",robotBaseAt.x,robotBaseAt.y,robotLookingAt.x,robotLookingAt.y);
 	/* draw a circle denoting base orientaion */
-	cvCircle(probmap, CvPoint(robotBaseAt),
-			 1,
-			 CV_RGB(127,127,127),
-			 1, 8, 0);
+//	cvCircle(probmap, CvPoint(robotBaseAt),
+//			 1,
+//			 CV_RGB(127,127,127),
+//			 1, 8, 0);
 
 
 	/* display */
@@ -697,14 +704,300 @@ int MapGen::genProbabilityMap()
 	return 1;
 }
 
-int MapGen::processMap()
-{
+
+// TESTING
 
 
-	return 1;
-}
 
-
+//#include "Graphics.h"
+//
+//int MapGen::processMap()
+//{
+//
+//    ////
+//    int nav_path__num = 7;
+//    int nav_path__center_path_id = nav_path__num/2;
+//    int nav_path__path_search_girth = 0;
+//    int danger_per_barrel_pixel = 1;
+//    int nav_path__danger_smoothing_radius = 1;
+//    int max_path_danger = 40;
+//
+//	CvScalar min_path_danger_color = CV_RGB(255, 255, 0);	// yellow
+//	CvScalar max_path_danger_color = CV_RGB(0, 0, 0);		// black
+//	CvScalar dangerous_pixel_color = CV_RGB(0, 0, 255);		// blue
+//
+//    IplImage* temp = cvCloneImage(probmap);
+//    IplImage* worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
+//    cvCvtColor(temp, worldDebug, CV_GRAY2BGR);
+//    cvReleaseImage(&temp);
+//
+//    int min_path_danger_value = 25;
+//    ////
+//
+//
+//	Graphics g_draw(worldDebug);
+//	int pathDanger[nav_path__num];
+//	int curPixelDanger = 0;
+//	int curPathDanger = 0;
+//	int weight = 0;
+//
+//	/* Compute and draw all navigation paths we are considering (and do other actions) */
+//	{
+//#pragma omp parallel for private(curPathDanger,curPixelDanger,weight)
+//		for (int pathID=0; pathID<nav_path__num; pathID++)
+//		{
+//			// Calculate path parameters
+//			Point2D<double> pathStart =navPath_start(pathID);
+//			Point2D<double> pathEnd = navPath_end(pathID);
+//
+//			// Calculate the set of points in the path
+//			QVector< Point2D<int> > pathPoints;
+//			Graphics::calculatePointsInLine(
+//				(int) pathStart.x, (int) pathStart.y,
+//				(int) pathEnd.x, (int) pathEnd.y,			//
+//				&pathPoints);								//
+//
+//			// Calculate the danger value for the path
+//			// along with the danger contributions of all
+//			// the pixels in the path
+//			curPathDanger = 0;
+//			uchar pixelDanger[pathPoints.count()];
+//			for (uint j=0, n2=pathPoints.count(); j<n2; j++)
+//			{
+//				//Point2D<int> curPathPoint = pathPoints[j];
+//
+//				// Calculate the danger contribution of the current path-pixel to the path-danger
+//				curPixelDanger = 0;
+//				for (int delta=-nav_path__path_search_girth; delta<=nav_path__path_search_girth; delta++)
+//				{
+//					// (XXX: Consider *nearby* pixels as different fragments of the path-pixel)
+//					Point2D<int> curPoint = pathPoints[j];
+//					curPoint.x += delta;
+//
+//					// check path image (half size) for black=bad
+//					double val = cvGetReal2D(probmap,curPoint.x,curPoint.y);
+//					//if (worldmap->imageData[curPoint.y*probmap->width+curPoint.x]<=(unsigned char)min_path_danger_value)
+//					if (val <=(unsigned char)min_path_danger_value)
+//					{
+//						// everything bad is a barrel
+//						curPixelDanger += danger_per_barrel_pixel;
+//						cvCircle( worldDebug, cvPoint(curPoint.x,curPoint.y), 1, CV_RGB(0,255,0), 1,8,0);
+//						printf("bad2 %f \n",val);
+//					}
+//					else
+//					{
+//						// Nothing special: Probably grass
+//						//curPixelDanger += 0;
+//						printf("good\n");
+//					}
+//				}
+//
+//				// Compensate for considering *nearby* pixels
+//				curPixelDanger /= ((nav_path__path_search_girth*2) + 1);
+//				pixelDanger[j] = curPixelDanger;
+//				curPathDanger += curPixelDanger;
+//			}
+//
+//			//==== weight outer path lines more scary than inner ==========//
+//			weight = abs(nav_path__center_path_id-pathID)/(nav_path__num);
+//			curPathDanger += weight;
+//
+//			// Clip high danger values to be no higher than max_path_danger
+//			if (curPathDanger > max_path_danger)
+//			{
+//				curPathDanger = max_path_danger;
+//			}
+//			pathDanger[pathID] = curPathDanger;
+//
+//			// Draw the body of the path using a color that is determined from the path's danger value
+//			//g_draw.setColor(navPath_color(curPathDanger));
+//			g_draw.setColor( cvScalar(0,0, (curPathDanger / (double)max_path_danger) * 255) );
+//			g_draw.drawLine(
+//				(int) pathStart.x, (int) pathStart.y,
+//				(int) pathEnd.x, (int) pathEnd.y);
+//
+//			g_draw.setColor(dangerous_pixel_color);
+//			// Hilight the "dangerous" pixels in the path
+//			// (that contributed to the path's total danger value)
+//			for (uint j=0, n2=pathPoints.count(); j<n2; j++)
+//			{
+//				uchar curPixelDanger = pixelDanger[j];
+//				if (curPixelDanger != 0)
+//				{
+//					Point2D<int> curPoint = pathPoints[j];
+//
+//					// Color the pixel either thickly/thinly,
+//					// depending on how dangerous it is
+//					if (curPixelDanger > danger_per_barrel_pixel)  	// maximum danger
+//					{
+//						g_draw.drawRect_rational(
+//							curPoint.x, curPoint.y,
+//							2, 2);
+//					}
+//					else
+//					{
+//						g_draw.drawPixel(curPoint.x, curPoint.y);
+//					}
+//				}
+//			}
+//		}
+//	}
+//	/*
+//	 * Apply smoothing to the path danger values so that paths
+//	 * that are *near* dangerous paths are also considered to
+//	 * be dangerous
+//	 */
+//	{
+//		int smoothedPathDangers[nav_path__num];
+//
+//		// Copy first edge
+//		for (int curPath_id = 0; curPath_id < nav_path__danger_smoothing_radius; curPath_id++)
+//		{
+//			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
+//		}
+//
+//		// Smooth interior
+//		int sumOfNearbyDangers = 0;
+//		int avgOfNearbyDangers = 0;
+//		for (int curPath_id = nav_path__danger_smoothing_radius;
+//				curPath_id < (nav_path__num - nav_path__danger_smoothing_radius + 1);
+//				curPath_id++)
+//		{
+//			sumOfNearbyDangers = 0;
+//			for (int delta = -nav_path__danger_smoothing_radius;
+//					delta < nav_path__danger_smoothing_radius;
+//					delta++)
+//			{
+//				sumOfNearbyDangers += pathDanger[curPath_id + delta];
+//			}
+//			avgOfNearbyDangers = sumOfNearbyDangers / (nav_path__danger_smoothing_radius*2 + 1);
+//
+//			smoothedPathDangers[curPath_id] = avgOfNearbyDangers;
+//		}
+//
+//		// Copy second edge
+//		for (int curPath_id = (nav_path__num - nav_path__danger_smoothing_radius);
+//				curPath_id < nav_path__num;
+//				curPath_id++)
+//		{
+//			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
+//		}
+//
+//		// Transfer smoothed dangers back to primary danger buffer
+//		for (int curPath_id=0; curPath_id<nav_path__num; curPath_id++)
+//		{
+//			pathDanger[curPath_id] = smoothedPathDangers[curPath_id];
+//		}
+//	}
+//
+//	/* Pick a path with a low danger-value to follow */
+//	{
+//		/*
+//		 * Find the path with the lowest danger value.
+//		 * If there are multiple such paths, pick the that is closest to the center
+//		 * (i.e., pick the path that points the most straight upward)
+//		 */
+//		int bestPath_id = 0;
+//		{
+//			int bestPath_danger = pathDanger[bestPath_id];
+//			int bestPath_distanceFromCenter = abs(nav_path__center_path_id - bestPath_id)+1;
+//			int curPath_danger;
+//			int curPath_distanceFromCenter;
+//			for (int curPath_id=0; curPath_id<nav_path__num; curPath_id++)
+//			{
+//				curPath_danger = pathDanger[curPath_id];
+//				curPath_distanceFromCenter = abs(nav_path__center_path_id - curPath_id);
+//
+//				if (curPath_danger < bestPath_danger)
+//				{
+//					bestPath_danger = curPath_danger;
+//					bestPath_id = curPath_id;
+//					bestPath_distanceFromCenter = curPath_distanceFromCenter;
+//				}
+//				else if (curPath_danger == bestPath_danger)
+//				{
+//					if (curPath_distanceFromCenter < bestPath_distanceFromCenter)
+//					{
+//						bestPath_id = curPath_id;
+//						bestPath_distanceFromCenter = curPath_distanceFromCenter;
+//					}
+//				}
+//			}
+//		}
+//
+//		/* Hilight the path that was picked */
+//		{
+//			//g_draw.setColor(navPath_color(pathDanger[bestPath_id]));
+//			g_draw.setColor( cvScalar(0,0, (pathDanger[bestPath_id] / (double)max_path_danger) * 255) );
+//
+//			// Redraw the path, but much more thickly (in order to hilight it)
+//
+//			Point2D<double> bestPath_start = navPath_start(bestPath_id);
+//			Point2D<double> bestPath_end = navPath_end(bestPath_id);
+//
+//
+//			for (int deltaX = -1; deltaX <= 1; deltaX++)
+//			{
+//				g_draw.drawLine(
+//					((int) bestPath_start.x) + deltaX, (int) bestPath_start.y,
+//					((int) bestPath_end.x) + deltaX, (int) bestPath_end.y);
+//			}
+//
+//			/* Update goal
+//			 * (convert to 320x240 frame) */
+////			goal.x = (bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
+////			goal.y = (int)bestPath_end.y/2;
+//
+//			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
+//		}
+//
+//		// DO IN MAIN:
+//		// 	drive motors
+//		// 	display motor output
+//
+//	}
+//
+//    cvShowImage("processmap",worldDebug);
+//    cvReleaseImage(&worldDebug);
+//
+//    //cvWaitKey(0);
+//
+//	return 1;
+//}
+//
+//Point2D<double> MapGen::navPath_start(int pathID)
+//{
+//    Point2D<double> start;
+//    start.x = robotBaseAt.x;
+//	start.y = robotBaseAt.y;
+//    return start;
+//}
+//Point2D<double> MapGen::navPath_end(int pathID)
+//{
+//    return navPath_start(pathID) + navPath_vector(pathID);
+//}
+//Point2D<double> MapGen::navPath_vector(int pathID)
+//{
+//    //pathID=4;
+//
+//    int nav_path__center_path_id = 3; //nav_path__num/2;
+//    int nav_path__view_cone__spacing = 16;
+//    float nav_path__view_distance_multiplier = .75;//0.5;
+//
+//	double x = (robotLookingAt.x - robotBaseAt.x) ;
+//	double y = (robotLookingAt.y - robotBaseAt.y) ; // positive y down
+//	//double y = robotBaseAt.y - robotLookingAt.y; // positive y down
+//	double rad = (atan(y/x)) ; // make up = 0 deg
+//	double radoff =( (nav_path__center_path_id-pathID)*nav_path__view_cone__spacing )*M_PI/180.0; // path selection
+//	rad += radoff; // rotate based on path
+//	if(x<0) rad += -M_PI ;
+//    //printf("  rad %.2f x %.2f y %.2f \n",rad,x,y);
+//    double radius = sqrtf(pow(x,2)+pow(y,2)); // dist formula
+//	return Point2D<double>(
+//			    radius*cos(rad),
+//			   radius*sin(rad) )   // computer y-axis is inverse of math y-axis
+//		   * nav_path__view_distance_multiplier;
+//}
 
 
 
