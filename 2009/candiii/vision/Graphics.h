@@ -14,14 +14,14 @@
 #include <QVector>
 
 
-int Math_min(int n1, int n2)
-{
-	return (n1 < n2) ? n1 : n2;
-}
-int Math_max(int n1, int n2)
-{
-	return (n1 > n2) ? n1 : n2;
-}
+//int Math_min(int n1, int n2)
+//{
+//	return (n1 < n2) ? n1 : n2;
+//}
+//int Math_max(int n1, int n2)
+//{
+//	return (n1 > n2) ? n1 : n2;
+//}
 
 
 
@@ -37,6 +37,15 @@ public:
 		this->buffer = buffer;
 		color = CV_RGB(0,0,0); //default to black
 	}
+
+static int Math_min(int n1, int n2)
+{
+	return (n1 < n2) ? n1 : n2;
+}
+static int Math_max(int n1, int n2)
+{
+	return (n1 > n2) ? n1 : n2;
+}
 
 	void setColor(const CvScalar color)
 	{

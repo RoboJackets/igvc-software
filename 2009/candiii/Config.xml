@@ -8,7 +8,7 @@
 <Config>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>0</useFirewireCamera>
+	<useFirewireCamera>0</useFirewireCamera>  <!-- set to 0 to load video -->
 	<gain>8</gain>
 	<shutter>8</shutter>
 	<gamma>0</gamma>
@@ -21,7 +21,7 @@
 	<!-- Vision Processing Settings -->
 	<satThresh>70</satThresh>     <!-- higher => more noise/sensitivity -->
 	<hueThresh>35</hueThresh>     <!-- higher => more noise/sensitivity -->
-	<robotWidth>20</robotWidth>   <!-- lower => we can squeeze through more -->
+	<robotWidth>25</robotWidth>   <!-- lower => we can squeeze through more -->
 	<doTransform>01</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
 	<maxDiff>40</maxDiff>         <!-- lower => more noise in thresh image -->
