@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!--  -->
-<!-- Comment -->
-<!--  -->
-
-
+<!--
+          _   _   _
+         | | | | (_)
+ ___  ___| |_| |_ _ _ __   __ _ ___
+/ __|/ _ \ __| __| | '_ \ / _` / __|
+\__ \  __/ |_| |_| | | | | (_| \__ \
+|___/\___|\__|\__|_|_| |_|\__, |___/
+                           __/ |
+                          |___/
+-->
 <Config>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>0</useFirewireCamera>  <!-- set to 0 to load video -->
-	<gain>8</gain>
-	<shutter>8</shutter>
+	<useFirewireCamera>1</useFirewireCamera>  <!-- set to 0 to load video -->
+	<gain>16</gain>
+	<shutter>150</shutter>
 	<gamma>0</gamma>
-	<auto_gain_and_shutter>0</auto_gain_and_shutter>
+	<auto_gain_and_shutter>1</auto_gain_and_shutter>
 
 	<!-- Guppy White Balance Settings -->
-	<red>528</red>
-	<blue>646</blue>
+	<red>517</red>   <!-- old 528 -->
+	<blue>602</blue> <!-- old 646 -->
 
 	<!-- Vision Processing Settings -->
 	<satThresh>70</satThresh>     <!-- higher => more noise/sensitivity -->
@@ -24,18 +28,18 @@
 	<robotWidth>25</robotWidth>   <!-- lower => we can squeeze through more -->
 	<doTransform>01</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
-	<maxDiff>40</maxDiff>         <!-- lower => more noise in thresh image -->
-	<boxPadding>100</boxPadding>   <!-- lower => wider box -->
+	<maxDiff>35</maxDiff>         <!-- lower => more noise in thresh image -->
+	<boxPadding>95</boxPadding>   <!-- lower => wider box -->
 
 	<!-- Robot Misc Settings -->
-	<_k>0.30</_k>                       <!-- lower => more smooth motor cotrol (averages new motor commands) -->
-    <defaultView>05</defaultView>       <!-- gui slider bar starting value -->
-    <motorsMaxSpeed>60</motorsMaxSpeed> <!-- max motor output [0-255] -->
+	<_k>0.25</_k>                       <!-- lower => more smooth motor cotrol (averages new motor commands) -->
+    <defaultView>03</defaultView>       <!-- gui slider bar starting value -->
+    <motorsMaxSpeed>55</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
-    <maxFeatures>74</maxFeatures>           <!-- max number for feature corners to find -->
-    <numFramesBack>03</numFramesBack>       <!-- frames between matching points/features ( >=2 )-->
-    <maxFeatureShift>11</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
+    <maxFeatures>70</maxFeatures>           <!-- max number for feature corners to find -->
+    <numFramesBack>02</numFramesBack>       <!-- frames between matching points/features ( >=2 )-->
+    <maxFeatureShift>21</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
 
     <!-- ON/OFF -->
     <doMapping>01</doMapping>
@@ -46,7 +50,8 @@
     <!--
 	<></>
 	<></>
-	<></>
 	-->
+    <!-- Comment -->
+    <!--  -->
 
 </Config>
