@@ -81,7 +81,7 @@ void Vision::init()
 		// Number of paths that are assessed between the starting/ending angles
 		nav_path__num = 21; //29;		// (Number of sweeper lines - should be odd number)
 		// Proportional to the lengths of the paths (in image space)
-		nav_path__view_distance_multiplier = 0.75; 	/* > 0.0 */
+		nav_path__view_distance_multiplier = 1.0; 	/* > 0.0 */
 	}
 	else
 	{
@@ -92,7 +92,7 @@ void Vision::init()
 	}
 	// Defines the "view/navigation cone", which is where the set of
 	// considered navigation paths is taken from.
-	nav_path__view_cone__offset = 23; //23.0; //30;
+	nav_path__view_cone__offset = 21; //23.0; //30;
 	nav_path__view_cone__start_angle = 0.0 + nav_path__view_cone__offset;	// >= 0.0
 	nav_path__view_cone__end_angle = 180.0 - nav_path__view_cone__offset;	// <= 180.0
 	nav_path__view_cone__delta_angle = nav_path__view_cone__end_angle - nav_path__view_cone__start_angle;
@@ -106,9 +106,9 @@ void Vision::init()
 	// (everything bad is a barrel)
 	danger_per_barrel_pixel = 1;
 	// Path danger values higher than this will be clipped to this value
-	max_path_danger = 60;					// >= 0
+	max_path_danger = 80;					// >= 0
 	// smoothing = paths that are *near* dangerous paths are also considered to be dangerous
-	nav_path__danger_smoothing_radius = 6;	// >= 0
+	nav_path__danger_smoothing_radius = 5;	// >= 0
 	// colors
 	min_path_danger_color = CV_RGB(255, 255, 0);	// yellow
 	max_path_danger_color = CV_RGB(0, 0, 0);		// black
@@ -1160,12 +1160,12 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 	if ( goal_far.y > closeness ) // y is inverted -> 0 is top&far
 	{
 		/* can't see very far */
-		farweight = 0.15;
+		farweight = 0.20;
 	}
 	else
 	{
 		/* can see far off */
-		farweight = 0.75;
+		farweight = 0.80;
 	}
 
 	/* set averaged goals */
@@ -1192,7 +1192,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 			goal.y=10; // min fwd speed
 			goal.x=0;
 		}
-		else if ( (visCvPath->height-goal_far.y) < 20 ) // XXX: HACK to get onto ramps & yellow bars
+		else if ( (visCvPath->height-goal_far.y) < 15 ) // XXX: HACK to get onto ramps & yellow bars
 		{
 			goal.y=10; // min fwd speed
 			goal.x=0;
