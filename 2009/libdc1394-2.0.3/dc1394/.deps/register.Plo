@@ -1,18 +1,18 @@
-register.lo register.o: register.c /usr/include/inttypes.h \
-  /usr/include/features.h /usr/include/sys/cdefs.h \
-  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
-  /usr/include/gnu/stubs-32.h /usr/include/stdint.h \
-  /usr/include/bits/wchar.h control.h ../dc1394/log.h ../dc1394/dc1394.h \
-  ../dc1394/types.h ../dc1394/camera.h /usr/include/stdio.h \
-  /usr/lib/gcc/i486-linux-gnu/4.2.3/include/stddef.h \
+register.lo: register.c /usr/include/inttypes.h /usr/include/features.h \
+  /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
+  /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h \
+  /usr/include/stdint.h /usr/include/bits/wchar.h control.h \
+  ../dc1394/log.h ../dc1394/dc1394.h ../dc1394/types.h ../dc1394/camera.h \
+  /usr/include/stdio.h /usr/lib/gcc/i486-linux-gnu/4.3.2/include/stddef.h \
   /usr/include/bits/types.h /usr/include/bits/typesizes.h \
   /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
-  /usr/lib/gcc/i486-linux-gnu/4.2.3/include/stdarg.h \
+  /usr/lib/gcc/i486-linux-gnu/4.3.2/include/stdarg.h \
   /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
-  /usr/include/bits/stdio.h ../dc1394/control.h ../dc1394/capture.h \
-  ../dc1394/video.h ../dc1394/conversions.h ../dc1394/format7.h \
-  ../dc1394/iso.h ../dc1394/register.h ../dc1394/utils.h internal.h \
-  ../config.h offsets.h platform.h register.h utils.h
+  /usr/include/bits/stdio.h /usr/include/bits/stdio2.h \
+  ../dc1394/control.h ../dc1394/capture.h ../dc1394/video.h \
+  ../dc1394/conversions.h ../dc1394/format7.h ../dc1394/iso.h \
+  ../dc1394/register.h ../dc1394/utils.h internal.h ../config.h offsets.h \
+  platform.h register.h utils.h
 
 /usr/include/inttypes.h:
 
@@ -42,7 +42,7 @@ control.h:
 
 /usr/include/stdio.h:
 
-/usr/lib/gcc/i486-linux-gnu/4.2.3/include/stddef.h:
+/usr/lib/gcc/i486-linux-gnu/4.3.2/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -54,13 +54,15 @@ control.h:
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/i486-linux-gnu/4.2.3/include/stdarg.h:
+/usr/lib/gcc/i486-linux-gnu/4.3.2/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
 
 /usr/include/bits/stdio.h:
+
+/usr/include/bits/stdio2.h:
 
 ../dc1394/control.h:
 
