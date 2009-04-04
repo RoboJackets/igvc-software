@@ -407,6 +407,10 @@ void Robot::processFunc()
 		start_timer(); // called second to time entire process (except first run)
 	}
 
+
+	/* pause (for testing) */
+	//cvWaitKey(0);
+
 }
 
 void Robot::startRobotThread(void* obj)

@@ -1,17 +1,18 @@
-iso.lo iso.o: iso.c iso.h ../dc1394/log.h ../dc1394/dc1394.h \
-  ../dc1394/types.h /usr/include/stdint.h /usr/include/features.h \
-  /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
-  /usr/include/gnu/stubs.h /usr/include/gnu/stubs-32.h \
-  /usr/include/bits/wchar.h ../dc1394/camera.h /usr/include/stdio.h \
-  /usr/lib/gcc/i486-linux-gnu/4.2.3/include/stddef.h \
+iso.lo: iso.c iso.h ../dc1394/log.h ../dc1394/dc1394.h ../dc1394/types.h \
+  /usr/include/stdint.h /usr/include/features.h /usr/include/sys/cdefs.h \
+  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+  /usr/include/gnu/stubs-32.h /usr/include/bits/wchar.h \
+  ../dc1394/camera.h /usr/include/stdio.h \
+  /usr/lib/gcc/i486-linux-gnu/4.3.2/include/stddef.h \
   /usr/include/bits/types.h /usr/include/bits/typesizes.h \
   /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
-  /usr/lib/gcc/i486-linux-gnu/4.2.3/include/stdarg.h \
+  /usr/lib/gcc/i486-linux-gnu/4.3.2/include/stdarg.h \
   /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
-  /usr/include/bits/stdio.h ../dc1394/control.h ../dc1394/capture.h \
-  ../dc1394/video.h ../dc1394/conversions.h ../dc1394/format7.h \
-  ../dc1394/iso.h ../dc1394/register.h ../dc1394/utils.h platform.h \
-  internal.h ../config.h offsets.h
+  /usr/include/bits/stdio.h /usr/include/bits/stdio2.h \
+  ../dc1394/control.h ../dc1394/capture.h ../dc1394/video.h \
+  ../dc1394/conversions.h ../dc1394/format7.h ../dc1394/iso.h \
+  ../dc1394/register.h ../dc1394/utils.h platform.h internal.h \
+  ../config.h offsets.h
 
 iso.h:
 
@@ -39,7 +40,7 @@ iso.h:
 
 /usr/include/stdio.h:
 
-/usr/lib/gcc/i486-linux-gnu/4.2.3/include/stddef.h:
+/usr/lib/gcc/i486-linux-gnu/4.3.2/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -51,13 +52,15 @@ iso.h:
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/i486-linux-gnu/4.2.3/include/stdarg.h:
+/usr/lib/gcc/i486-linux-gnu/4.3.2/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
 
 /usr/include/bits/stdio.h:
+
+/usr/include/bits/stdio2.h:
 
 ../dc1394/control.h:
 
