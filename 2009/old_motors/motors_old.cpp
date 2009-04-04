@@ -199,7 +199,8 @@ int Motors_Old::get_motor_states(void)
  */
 int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 {
-	//iRotation *= 1.25;
+	iRotation *= 1.10; // XXX: hack
+
 	int left  = iFwdVelocity + iRotation ;
 	int right = iFwdVelocity - iRotation ;
 
