@@ -45,6 +45,7 @@ sudo apt-get --yes install g++
 echo "IEEE1394 ================================================================"
 echo " ..."
 sleep 1
+sudo apt-get --yes install libraw1394-dev
 cd ../libdc1394-2.0.3/
 ./configure
 make
