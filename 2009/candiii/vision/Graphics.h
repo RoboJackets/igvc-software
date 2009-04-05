@@ -88,7 +88,7 @@ static int Math_max(int n1, int n2)
 
 	void drawPixel(int x, int y)
 	{
-		cvLine( buffer, cvPoint(x,y), cvPoint(x,y), color, 1, 8, 0 );
+		cvCircle( buffer, cvPoint(x,y), 1, color, 1, 8, 0 );
 	}
 
 //	template<class N>

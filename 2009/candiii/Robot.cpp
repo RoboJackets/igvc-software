@@ -370,7 +370,7 @@ void Robot::processFunc()
 	{
 		if( mapper.genMap() )
 		{
-            //mapper.processMap(); //TESTING
+            mapper.processMap(); //TESTING
 		}
 	}
 

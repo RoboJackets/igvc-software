@@ -81,7 +81,7 @@ void Vision::init()
 		// Number of paths that are assessed between the starting/ending angles
 		nav_path__num = 21; //29;		// (Number of sweeper lines - should be odd number)
 		// Proportional to the lengths of the paths (in image space)
-		nav_path__view_distance_multiplier = 1.0; 	/* > 0.0 */
+		nav_path__view_distance_multiplier = 0.65; 	/* > 0.0 */
 	}
 	else
 	{
@@ -110,9 +110,9 @@ void Vision::init()
 	// smoothing = paths that are *near* dangerous paths are also considered to be dangerous
 	nav_path__danger_smoothing_radius = 5;	// >= 0
 	// colors
-	min_path_danger_color = CV_RGB(255, 255, 0);	// yellow
-	max_path_danger_color = CV_RGB(0, 0, 0);		// black
-	dangerous_pixel_color = CV_RGB(0, 0, 255);		// blue
+	//min_path_danger_color = CV_RGB(255, 255, 0);	// yellow
+	//max_path_danger_color = CV_RGB(0, 0, 0);		// black
+	dangerous_pixel_color = CV_RGB(255, 0, 0);		// red
 	/**********************************************************************************/
 
 	// font
@@ -220,11 +220,12 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 	int curPixelDanger = 0;
 	int curPathDanger = 0;
 	int weight = 0;
+	int pathID = 0;
 
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	{
-#pragma omp parallel for private(curPathDanger,curPixelDanger,weight)
-		for (int pathID=0; pathID<nav_path__num; pathID++)
+#pragma omp parallel for private(curPathDanger,curPixelDanger,weight,pathID)
+		for (pathID=0; pathID<nav_path__num; pathID++)
 		{
 			// Calculate path parameters
 			Point2D<double> pathStart = navPath_start(pathID);
@@ -274,7 +275,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			weight = abs(nav_path__center_path_id-pathID)/(nav_path__num);
+			weight = abs(nav_path__center_path_id-pathID);///(nav_path__num);
 			curPathDanger += weight;
 
 			// Clip high danger values to be no higher than max_path_danger
@@ -968,9 +969,12 @@ double Vision::navPath_angle(int pathID)
  */
 CvScalar Vision::navPath_color(int pathDanger)
 {
+    // levels
 	return cvScalar(
-			   0, 0,
-			   (pathDanger / (double)max_path_danger) * 255); // levels of red
+			   178 ,
+			   62 ,
+			   (pathDanger / (double)max_path_danger) * 255
+			   );
 }
 
 /*
@@ -1289,7 +1293,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 
 	/* shrink visCvAdapt img to 320x240 */
 	cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
-	cvErode(visCvThresh, visCvThresh, NULL, 1); // 1 or 2
+	//cvErode(visCvThresh, visCvThresh, NULL, 1); // 1 or 2
 
 	/* generate visCvPath */
 	visGenPath(visCvThresh);
