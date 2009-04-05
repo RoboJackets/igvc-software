@@ -8,6 +8,9 @@
 #include <iostream>
 #include <omp.h>
 
+/* control what gets mapped into the world,
+*   and whether to use the reactive sweeper lines in the worldmap */
+#define PROCESS_MAP 0
 
 /* Landmark Map Settings */
 #define DO_LANDMARK_MAP 0
@@ -16,6 +19,7 @@
 // need this many counts to be considered a stable world pt
 #define WORLDPT_MINGOODCOUNT 6
 /* End Landmark Map Settings */
+
 
 
 
@@ -671,8 +675,11 @@ int MapGen::genProbabilityMap()
 			// get current val
 			setval = cvGetReal2D(probmap,wy,wx);
 			// and add/subtract based on thresh image
-			//setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval;
+			#if PROCESS_MAP
 			setval += (cvGetReal2D( /* visCvThresh */ visCvPath  ,y,x )==0)?badval:goodval;
+			#else
+            setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval;
+			#endif
 			// cap results
 			if (setval>255) setval = 255;
 			else if (setval<0) setval = 0;
@@ -714,6 +721,7 @@ int MapGen::genProbabilityMap()
 
 int MapGen::processMap()
 {
+#if PROCESS_MAP
 
     ////
     int nav_path__num = 7; //change 'vector' too
@@ -727,7 +735,7 @@ int MapGen::processMap()
     IplImage* worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
     cvCvtColor(temp, worldDebug, CV_GRAY2BGR);
     cvReleaseImage(&temp);
-    double min_path_danger_value = 20;
+    double min_path_danger_value = 70;//20; // lower => be less afraid
     ////
 
 
@@ -941,12 +949,8 @@ int MapGen::processMap()
 					((int) bestPath_end.x) + deltaX, (int) bestPath_end.y);
 			}
 
-			/* Update goal
-			 * (convert to 320x240 frame) */
-//			goal.x = (bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
-//			goal.y = (int)bestPath_end.y/2;
-
-            Point2D<int> goal;
+			/* Update goal */
+            Point2D<int> goal; // TODO: send to robot.cpp to be averaged with vision output
             int scalex = 20;
             goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
             goal.y = max_path_danger - pathDanger[bestPath_id] ;
@@ -964,6 +968,7 @@ int MapGen::processMap()
     cvReleaseImage(&worldDebug);
 
     //cvWaitKey(0);
+#endif
 
 	return 1;
 }

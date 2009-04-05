@@ -1,13 +1,13 @@
 #include "motors_old.h"
 
-#define MINREQSPEED 45
+#define MINREQSPEED 35
 
 Motors_Old::Motors_Old()
 {
 	//ctor
 	fdMotor = -1;
 	dVelocityScale = 1;
-	_max_speed_=100;
+	_max_speed_=60;
 	//SetupSerial();
 }
 
@@ -36,7 +36,10 @@ int Motors_Old::SetupSerial()
 	}
 
 	/* Set the port back to blocking (waiting) behavior for calls to read() */
-	fcntl(fdMotor, F_SETFL, 0);
+	//fcntl(fdMotor, F_SETFL, 0);
+	/*no! => go nonblocking!*/
+    fcntl(fdMotor, F_SETFL, O_NONBLOCK);
+
 
 	/* Get the current options for the port */
 	struct termios options;
@@ -199,7 +202,7 @@ int Motors_Old::get_motor_states(void)
  */
 int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 {
-	iRotation *= 1.10; // XXX: hack
+	iRotation *= 1.15; // XXX: hack
 
 	int left  = iFwdVelocity + iRotation ;
 	int right = iFwdVelocity - iRotation ;
@@ -216,6 +219,10 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 		if (left  > _max_speed_) left  = _max_speed_ ;
 		if (right > _max_speed_) right = _max_speed_ ;
 	}
+
+    // don't go backwards
+    if (right < 0) right = 0 ;
+	if (left  < 0) left  = 0 ;
 
 	// motors don't respond until certain output is reached
 	if (right != 0) right += MINREQSPEED ;
