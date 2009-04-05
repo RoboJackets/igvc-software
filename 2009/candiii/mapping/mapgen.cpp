@@ -375,7 +375,7 @@ void MapGen::init()
 	imgHalfWidth  = visCvGrey->width/2;
 
 	/* amount of top of image to ignore */
-	yFeatureThresh = visCvGrey->height/3;
+	yFeatureThresh = visCvGrey->height/3 + 30 ;
 
 
 	//==============================================================
@@ -671,7 +671,8 @@ int MapGen::genProbabilityMap()
 			// get current val
 			setval = cvGetReal2D(probmap,wy,wx);
 			// and add/subtract based on thresh image
-			setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval;
+			//setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval;
+			setval += (cvGetReal2D( /* visCvThresh */ visCvPath  ,y,x )==0)?badval:goodval;
 			// cap results
 			if (setval>255) setval = 255;
 			else if (setval<0) setval = 0;
@@ -715,23 +716,23 @@ int MapGen::processMap()
 {
 
     ////
-    int nav_path__num = 7;
+    int nav_path__num = 7; //change 'vector' too
     int nav_path__center_path_id = nav_path__num/2;
-    int nav_path__path_search_girth = 0;
-    int danger_per_barrel_pixel = 1;
+    int nav_path__path_search_girth = 0; //<2
+    int danger_per_barrel_pixel = 1; //=1
     int nav_path__danger_smoothing_radius = 1;
-    int max_path_danger = 40;
+    int max_path_danger = 50;
 
-	CvScalar min_path_danger_color = CV_RGB(255, 255, 0);	// yellow
+	CvScalar min_path_danger_color = CV_RGB(255, 155, 120);	// yellow
 	CvScalar max_path_danger_color = CV_RGB(128, 128, 0);		//
-	CvScalar dangerous_pixel_color = CV_RGB(0, 0, 255);		// blue
+	CvScalar dangerous_pixel_color = CV_RGB(120, 0, 255);		//
 
     IplImage* temp = cvCloneImage(probmap);
     IplImage* worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
     cvCvtColor(temp, worldDebug, CV_GRAY2BGR);
     cvReleaseImage(&temp);
 
-    int min_path_danger_value = 25;
+    double min_path_danger_value = 20;
     ////
 
 
@@ -775,20 +776,21 @@ int MapGen::processMap()
 					curPoint.x += delta;
 
 					// check path image (half size) for black=bad
-					double val = cvGetReal2D(probmap,curPoint.x,curPoint.y);
+					//double val = cvGetReal2D(probmap,curPoint.x,curPoint.y);
+					double val = cvGetReal1D(probmap,curPoint.y*probmap->width+curPoint.x);
 					//if (worldmap->imageData[curPoint.y*probmap->width+curPoint.x]<=(unsigned char)min_path_danger_value)
-					if (val <=(unsigned char)min_path_danger_value)
+					if (val <= min_path_danger_value)
 					{
 						// everything bad is a barrel
 						curPixelDanger += danger_per_barrel_pixel;
-						cvCircle( worldDebug, cvPoint(curPoint.x,curPoint.y), 1, CV_RGB(0,255,0), 1,8,0);
-						printf("bad2 %f \n",val);
+						//cvCircle( worldDebug, cvPoint(curPoint.x,curPoint.y), 1, CV_RGB(0,255,0), 1,8,0);
+						//printf("bad2 %.2f \n",val);
 					}
 					else
 					{
 						// Nothing special: Probably grass
 						//curPixelDanger += 0;
-						printf("good\n");
+						//printf("good\n");
 					}
 				}
 
@@ -799,7 +801,7 @@ int MapGen::processMap()
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			weight = abs(nav_path__center_path_id-pathID)/(nav_path__num);
+			weight = abs(nav_path__center_path_id-pathID);///(nav_path__num);
 			curPathDanger += weight;
 
 			// Clip high danger values to be no higher than max_path_danger
@@ -811,7 +813,7 @@ int MapGen::processMap()
 
 			// Draw the body of the path using a color that is determined from the path's danger value
 			//g_draw.setColor(navPath_color(curPathDanger));
-			g_draw.setColor( cvScalar(0,0, (curPathDanger / (double)max_path_danger) * 255) );
+			g_draw.setColor( cvScalar(128,128, (curPathDanger / (double)max_path_danger) * 255) );
 			g_draw.drawLine(
 				(int) pathStart.x, (int) pathStart.y,
 				(int) pathEnd.x, (int) pathEnd.y);
@@ -836,7 +838,8 @@ int MapGen::processMap()
 					}
 					else
 					{
-						g_draw.drawPixel(curPoint.x, curPoint.y);
+						//g_draw.drawPixel(curPoint.x, curPoint.y);
+						cvCircle( worldDebug, cvPoint(curPoint.x,curPoint.y), 1, CV_RGB(155,0,0), 1,8,0);
 					}
 				}
 			}
@@ -928,7 +931,7 @@ int MapGen::processMap()
 		/* Hilight the path that was picked */
 		{
 			//g_draw.setColor(navPath_color(pathDanger[bestPath_id]));
-			g_draw.setColor( cvScalar(0,0, (pathDanger[bestPath_id] / (double)max_path_danger) * 255) );
+			g_draw.setColor( cvScalar( (pathDanger[bestPath_id] / (double)max_path_danger) * 255 ,128,128 ) );
 
 			// Redraw the path, but much more thickly (in order to hilight it)
 
@@ -978,11 +981,10 @@ Point2D<double> MapGen::navPath_end(int pathID)
 }
 Point2D<double> MapGen::navPath_vector(int pathID)
 {
-    //pathID=4;
 
     int nav_path__center_path_id = 3; //nav_path__num/2;
     int nav_path__view_cone__spacing = 16;
-    float nav_path__view_distance_multiplier = .75;//0.5;
+    float nav_path__view_distance_multiplier = .60;//0.5;
 
 	double x = (robotLookingAt.x - robotBaseAt.x) ;
 	double y = (robotLookingAt.y - robotBaseAt.y) ; // positive y down
