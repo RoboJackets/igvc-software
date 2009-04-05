@@ -547,12 +547,14 @@ void Vision::robotWidthScan(IplImage* img, Point2D<int>& goal)
 		{
 			/* GOAL! */
 			//=== visCvPath is 320x240 so convert to 640x480 ===//
+			int gy2 = goal.y*2;
+			int gx2 = goal.x*2;
 			Graphics g(visCvDebug);
-			g.setColor(CV_RGB(0,0,0));
-			g.drawLine( center*2, img->height*2-2,
-						goal.x*2, goal.y*2 );
-			g.drawLine( (goal.x-half)*2 ,goal.y*2,
-						(goal.x+half)*2, goal.y*2 );
+			g.setColor(CV_RGB(20,20,0));
+			g.drawLine( img->width, img->height*2-2,
+						gx2, gy2 );
+			g.drawLine( gx2-ROBOT_WIDTH ,gy2,
+						gx2+ROBOT_WIDTH, gy2 );
 			//==================================================//
 		}
 	}
@@ -974,7 +976,7 @@ CvScalar Vision::navPath_color(int pathDanger)
     // levels
 	return cvScalar(
 			   178 ,
-			   62 ,
+			   32 ,
 			   (pathDanger / (double)max_path_danger) * 255
 			   );
 }
