@@ -275,7 +275,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			weight = abs(nav_path__center_path_id-pathID);///(nav_path__num);
+			weight = abs(nav_path__center_path_id-pathID);
 			curPathDanger += weight;
 
 			// Clip high danger values to be no higher than max_path_danger
@@ -893,6 +893,8 @@ void Vision::preProcessColors(IplImage* img)
 {
 	unsigned char red,green,blue;
 
+	//TODO: optimize with openmp and pointers!
+
 	// pixel data loop
 	for (int i = 0; i < img->imageSize-3; i+=3)
 	{
@@ -1157,14 +1159,14 @@ void Vision::Equalize(IplImage* img)
 void Vision::CvtPixToGoal(Point2D<int>& goal)
 {
 
-	int closeness = visCvPath->height/3; //2;  //need to play with settings
+	int closeness = visCvPath->height/3; // smaller value => use sweeper lines more often
 	float farweight; // weight of the far goal
 
 	/* weight goals depending on how far we can see */
 	if ( goal_far.y > closeness ) // y is inverted -> 0 is top&far
 	{
 		/* can't see very far */
-		farweight = 0.20;
+		farweight = 0.10;
 	}
 	else
 	{

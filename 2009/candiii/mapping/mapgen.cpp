@@ -722,16 +722,11 @@ int MapGen::processMap()
     int danger_per_barrel_pixel = 1; //=1
     int nav_path__danger_smoothing_radius = 3;
     int max_path_danger = 40;
-
-	CvScalar min_path_danger_color = CV_RGB(255, 155, 120);	// yellow
-	CvScalar max_path_danger_color = CV_RGB(128, 128, 0);		//
-	CvScalar dangerous_pixel_color = CV_RGB(120, 0, 255);		//
-
+    CvScalar dangerous_pixel_color = CV_RGB(255,0,0);
     IplImage* temp = cvCloneImage(probmap);
     IplImage* worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
     cvCvtColor(temp, worldDebug, CV_GRAY2BGR);
     cvReleaseImage(&temp);
-
     double min_path_danger_value = 20;
     ////
 
@@ -801,7 +796,7 @@ int MapGen::processMap()
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			weight = abs(nav_path__center_path_id-pathID);///(nav_path__num);
+			weight = abs(nav_path__center_path_id-pathID);
 			curPathDanger += weight;
 
 			// Clip high danger values to be no higher than max_path_danger
