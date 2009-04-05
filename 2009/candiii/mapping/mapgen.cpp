@@ -720,8 +720,8 @@ int MapGen::processMap()
     int nav_path__center_path_id = nav_path__num/2;
     int nav_path__path_search_girth = 0; //<2
     int danger_per_barrel_pixel = 1; //=1
-    int nav_path__danger_smoothing_radius = 1;
-    int max_path_danger = 50;
+    int nav_path__danger_smoothing_radius = 3;
+    int max_path_danger = 40;
 
 	CvScalar min_path_danger_color = CV_RGB(255, 155, 120);	// yellow
 	CvScalar max_path_danger_color = CV_RGB(128, 128, 0);		//
@@ -951,7 +951,12 @@ int MapGen::processMap()
 //			goal.x = (bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
 //			goal.y = (int)bestPath_end.y/2;
 
-			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
+            Point2D<int> goal;
+            int scalex = 20;
+            goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
+            goal.y = max_path_danger - pathDanger[bestPath_id] ;
+
+			printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
 		}
 
 		// DO IN MAIN:
