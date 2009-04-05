@@ -1,10 +1,16 @@
 Voltages
-- arduinos
-- usb hub
-- laptops
+- sonar - 11mA x 14 (if all are run at once, which shouldn't happen); 3mA x 14, otherwise.[read datasheet]
+- arduinos - 7-12V(**power from USB hub)
+- usb hub 
+- laptops - 80W, VDC?
 - lidar
-- camera
+- camera - firewire hub* (hack the cable)
+
 
 Ideas
 - integrated battery charger
 - switch to turn off
+- replace fuses with breakers
+- molex minifit jr
+
+

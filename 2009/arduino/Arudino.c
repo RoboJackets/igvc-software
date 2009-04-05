@@ -7,14 +7,8 @@
 /*
  * This is a template for running arduino code that can be used with the ArudinoInterface class. 
  */
-#define ATMEGA168
+#include "Arduino.h"
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <avr/signal.h>
-#include <avr/delay.h>
-//#include <stdio.h>
-#include <stdarg.h>
 
 /* PIN DEFINITIONS */
 //// add your definitions here ////
@@ -25,19 +19,6 @@
 struct data{
 };
 
-void setup(void) {
-	/* open the serial port */
-	Serial.begin(9600);
-	
-	/* set the pin modes */
-	//// add your pins here ////
-}
-
-void loop(void) {
-
-	// YOUR FUNCTIONS
-	readSerial();
-}
 
 void readSerial(void) {
 	if (Serial.available() > 0) {
