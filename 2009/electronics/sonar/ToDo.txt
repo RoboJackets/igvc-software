@@ -14,8 +14,11 @@ _+_New Autopilot Char >> '^'
 _+_Reset Inbytes
 _+_ByteSmasher
 _+_Comment
-___Readback values for individual gain, max distance, warning threshold, active/deactive status, global freq, global step total, individual step no.
+_+_Readback values for individual gain, max distance, warning threshold, active/deactive status, global freq, global step total, individual step no.
 _?_Command Receipt Confirmation
 ___How To / Basic Tutorial Guide
-___Comments
+_+_Comments
+___Sonar Library
 ___Sync Code with IGVC Conventions
+_+_Remove all newByte constructors
+___Write Simple Processing Text Interface

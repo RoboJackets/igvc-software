@@ -1,7 +1,6 @@
 Quoted items (' ') are representative of character values.
 Bracketed values ([x|y]) are representative of values where either x or y is used.
-Values beginning with '0x' are representative of hex values.
-The '+' symbol denotes concatenation between two or more values.
+The '+' symbol denotes concatenation between two or more values (NOT addition).
 The 2BYTE string denotes a variable of two bytes (0-65534), where MSB is sent first.
 The 1BYTE string denotes a variable of one byte (0-255).
 
@@ -10,10 +9,12 @@ Sonar Commands:
 Name			Char			Decimal			Description:
 
 Read All		'<'			060			-Reads first echo from all active sonar devices according to last ping.
-Ping All		'>'			062			-Pings all active sonar devices in pre-programmed sequence.
+Ping All		'>'			062			-Pings all active sonar devices in sequence.
 Ping Indiv		'A' thru 'Z'		065 thru 090		-Pings individual sonar device, where 'A' represents the device with address 0xF0,
 									 'B' represents the device aith address 0xF2, 'C' represents the device with
 									 address 0xF4, etc.
+Ping Indiv		'P'+1BYTE 		080+1BYTE
+Read Indiv		'R'+1BYTE		082+1BYTE
 Read Indiv		'a' thru 'z'		097 thru 122		-Reads first echo from individaul sonar device according to last ping, where 'a'
 									 represents the device with address 0xF0, 'b' represents the device with address
 									 0xF2, 'c' represents the device with address 0xF4, etc.
@@ -21,7 +22,7 @@ Autopilot		'^'+['0'|'1']		094+[048|049]		-Activates autopilot mode. Pings all ac
 									 sequence, then reads the first echo from all active sonar devices according to the
 									 last ping. All of this is done in a continuous loop. The second value indicates
 									 whether autopilot mode is to be activated ('1') or deactivated ('0').
-Set Freq		'%'+1BYTE		037+1BYTE		-Sets the step frequency of all 'auto ping' modes. This includes '>', '^', and '!'
+Set Freq		'%'+1BYTE		037+1BYTE		-Sets the step frequency of all 'auto ping' modes. This includes '>', '^', and '!'*2
 									 commands, but does not affect the 'A' thru 'Z' command. Frequency is set by the
 									 additional 1BYTE variable and is in the value of Hz.
 Set All Gain		'&'+1BYTE		038+1BYTE		-Sets the gain value of all active sonar devices. The Gain is set by the additional
@@ -35,7 +36,7 @@ Warning	Mode		'!'+['0'|'1']		033+[048|049]		-Activates warning mode. Pings all a
 									 ('0'). The threshold value can be set with the Set Thresh command.
 Set Indiv Gain		'+'+1BYTE+1BYTE		043+1BYTE+1BYTE		-Sets the gain of an individual sonar device. The sonar device ID is specified by
 									 the first 1BYTE variable. The Gain value is set by the second 1BYTE variable and
-									 can take on only the values between 1 and 31.
+									 can take on only the values between 1 and 31.*1
 Set Indiv MRange	'-'+1BYTE+2BYTE		045+1BYTE+2BYTE		-Sets the maximum range of an individual sonar device. The sonar device ID is
 									 specified by the first 1BYTE variable. The Max Range value is set by the next
 									 2BYTE variable, which is in units of mm.
@@ -58,3 +59,19 @@ Set Device Active 	'@'+['0'|'1']+1BYTE	064+[048|049]+1BYTE	-Sets an individual s
 									 all sonar devices (0-15 or E0-FF).
 Set Echo Num		'~'+1BYTE		126+1BYTE		-Sets global Echo_Num to value specified by fisrt Value. See SRF08 Datasheet for
 									 more on Echo's.
+Get Indiv Gain		':'+'+'+1BYTE		058+043+1BYTE		-Returns the set gain value of an individual sonar device. The first 1BYTE value 
+									 specifies the sonar device ID. Expect a 1BYTE value in the range of 1 to 31.*1
+Get Indiv MRange	':'+'-'+1BYTE		058+045+1BYTE		-Returns the set maximum range value of an individual sonar device. The first 1BYTE 
+									 value specifies the sonar device ID. Expect a 2BYTE value in units of mm.
+Get Indiv WarnThresh	':'+'='+1BYTE		058+061+1BYTE		-Returns the set threshold value of an individual sonar device. The first 1BYTE
+									 value specifies the sonar device ID. Expect a 2BYTE value in units of mm.
+Get Indiv Active	':'+'@'+1BYTE		058+064+1BYTE		-Returns the set active/deactive status of an individual sonar device. The first
+									 1BYTE value specifies the sonar device ID. Expect a 1BYTE value of 0 or 1.
+Get Indiv Step		':'+'$'+1BYTE		058+036+1BYTE		-Returns the set step value of an individual sonar device. The first 1BYTE value
+									 specifies the sonar device ID. Expect a 1BYTE value in the range of 0 to 15.
+Get Freq		':'+'%'			058+037			-Returns the set step frequency value of the system. Expect a 1BYTE value in units 
+									 of Hz. 
+Get Step Total		':'+'#'			058+035			-Returns the set total step total of the system. Expect a 1Byte value.
+
+*1 - See the SRF08 datasheet for more details on gain values.
+*2 - Nominal value for this setting is 14Hz.
