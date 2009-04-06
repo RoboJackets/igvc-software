@@ -3,7 +3,6 @@
 #include "XmlConfiguration.h"
 #include "image_buffers.h"
 #include "Graphics.h"
-
 #include <omp.h>
 
 /*
@@ -224,7 +223,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	{
-#pragma omp parallel for private(curPathDanger,curPixelDanger,weight,pathID)
+        #pragma omp parallel for private(curPathDanger,curPixelDanger,weight,pathID)
 		for (pathID=0; pathID<nav_path__num; pathID++)
 		{
 			// Calculate path parameters
@@ -596,7 +595,7 @@ void Vision::visGenPath(IplImage* img)
 		}
 
 		//scan left then right & generate visCvPath image
-#pragma omp parallel
+        #pragma omp parallel
 		{
 			scanFillLeft  (visCvPath, x, y, goodFirst, 0      , blackout);
 			scanFillRight (visCvPath, x, y, goodFirst, width-1, blackout);

@@ -530,7 +530,7 @@ void Robot::updateGlutDisplay()
 
 		/* get data from card */
 		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-		glReadPixels(	0				,	//GLint x,
+		glReadPixels( 0				,	//GLint x,
 					  0				,	//GLint y,
 					  visCvRaw->width	,	//GLsizei width,
 					  visCvRaw->height,	//GLsizei height,
@@ -590,7 +590,7 @@ void Robot::updateGlutDisplay()
 
 		/* get data from card */
 		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
-		glReadPixels(	0				,	//GLint x,
+		glReadPixels( 0				,	//GLint x,
 					  0				,	//GLint y,
 					  visCvRaw->width	,	//GLsizei width,
 					  visCvRaw->height,	//GLsizei height,

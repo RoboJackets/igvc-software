@@ -197,6 +197,7 @@ int MapGen::getFeatures()
 
 
 		/* draw lines from prev to curr points in curr image */
+		#pragma omp parallel for private(a,b,x,y,dx,dy) reduction(+:avgdx,avgdy)
 		for (i=0; i<maxFeatures; i++)
 		{
 			/* only look at points in both images */
@@ -282,7 +283,7 @@ int MapGen::processFeatures()
 
 	/* for RANSAC */
 	std::vector<double> pointParameters;
-	PointParamEstimator pointEstimator(0.3);
+	PointParamEstimator pointEstimator(0.3); //0.3; /* error percent */
 	matchList.clear();
 	CvPoint2D32f foundpts[ maxFeatures*2 ];
 
@@ -644,7 +645,8 @@ int MapGen::genProbabilityMap()
 		double curr;
 		double speed = 1;
 		int i;
-#pragma omp parallel for private(curr)
+
+        #pragma omp parallel for private(curr)
 		for (i=0; i<probmap->imageSize; i++)
 		{
 			curr = cvGetReal1D(probmap,i);
@@ -665,7 +667,8 @@ int MapGen::genProbabilityMap()
 	double setval;
 	double wx,wy;
 	int x,y;
-#pragma omp parallel for private(x,setval,wx,wy)
+
+    #pragma omp parallel for private(x,setval,wx,wy)
 	for (y=pad; y<visCvThresh->height-divby-pad; y+=divby)
 	{
 		for (x=pad; x<visCvThresh->width-divby-pad; x+=divby )
@@ -747,7 +750,7 @@ int MapGen::processMap()
 
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	{
-#pragma omp parallel for private(curPathDanger,curPixelDanger,weight)
+    #pragma omp parallel for private(curPathDanger,curPixelDanger,weight)
 		for (int pathID=0; pathID<nav_path__num; pathID++)
 		{
 			// Calculate path parameters
@@ -973,7 +976,7 @@ int MapGen::processMap()
 	return 1;
 }
 
-Point2D<double> MapGen::navPath_start(int pathID)
+Point2D<double> MapGen::navPath_start(/*int pathID*/)
 {
     Point2D<double> start;
     start.x = robotBaseAt.x;
@@ -982,7 +985,7 @@ Point2D<double> MapGen::navPath_start(int pathID)
 }
 Point2D<double> MapGen::navPath_end(int pathID)
 {
-    return navPath_start(pathID) + navPath_vector(pathID);
+    return navPath_start(/*pathID*/) + navPath_vector(pathID);
 }
 Point2D<double> MapGen::navPath_vector(int pathID)
 {
