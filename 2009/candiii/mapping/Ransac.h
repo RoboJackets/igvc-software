@@ -352,6 +352,7 @@ void Ransac<T,S>::estimate(ParameterEstimator<T,S> *paramEstimator, std::vector<
 		exactEstimateData.push_back(&(data[arr[j]]));
 	paramEstimator->estimate(exactEstimateData,exactEstimateParameters);
 
+    #pragma omp parallel for
 	for (j=0; j<numDataObjects; j++)
 	{
 		if (paramEstimator->agree(exactEstimateParameters, data[j]))
@@ -365,6 +366,7 @@ void Ransac<T,S>::estimate(ParameterEstimator<T,S> *paramEstimator, std::vector<
 		numVotesForBest = numVotesForCur;
 		memcpy(bestVotes,curVotes, numDataObjects*sizeof(short));
 	}
+
 }
 #endif //_RANSAC_H_
 

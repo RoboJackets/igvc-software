@@ -6,7 +6,7 @@
 
 #define _P_  printf("line: %d, file(%s)\n", __LINE__, __FILE__ );
 
-
+#include <omp.h>
 
 
 /**
