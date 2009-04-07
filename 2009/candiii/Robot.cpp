@@ -128,7 +128,6 @@ void Robot::releaseAllImages()
 
 int Robot::init()
 {
-
 	/* load xml settings - important to do first! */
 	LoadXMLSettings();
 
@@ -142,11 +141,15 @@ int Robot::init()
 	else
 	{
 		if (videofilename=="")
+		{
 			/* connect to the camera */
 			connectToCamera();
+		}
 		else
+		{
 			/* load a video */
 			camera_usb.connect(0, videofilename.c_str());
+		}
 	}
 
 	/* try to grab a frame to get image size */
@@ -174,6 +177,9 @@ int Robot::init()
 	/* configure opencv display window */
 	cvResizeWindow( "display", visCvRaw->width, visCvRaw->height );
 	cvMoveWindow( "display", 10, 10 ); // position on screen
+
+	/* Init default view (debug=1) */
+	trackbarHandler( trackbarVal );
 
 	/* init all CV images here */
 	{
@@ -211,8 +217,14 @@ int Robot::init()
 	mapper.init();
 
 	/* connect to motors */
-	motors.set_max_speed(motorsMaxSpeed);
-	motors.SetupSerial();
+	if(useMotors)
+	{
+        if(!motors.SetupSerial())
+        {
+            return 0; // fail
+        }
+        motors.set_max_speed(motorsMaxSpeed);
+	}
 
 	/* success */
 	return 1;
@@ -253,7 +265,7 @@ void Robot::LoadXMLSettings()
 				// load defaults
 				_k = .30;
 				trackbarVal = 1;
-				motorsMaxSpeed = 80;
+				motorsMaxSpeed = 50;
 				doMapping = 0;
 				useMotors = 1;
 				doVision = 1;
@@ -299,9 +311,6 @@ void Robot::Go()
 	/* Setup video card processing */
 	initGlut();
 
-	/* Init default view (debug=1) */
-	trackbarHandler( trackbarVal );
-
 	/*
 	 * Robot Loop!
 	 */
@@ -326,22 +335,8 @@ void Robot::processFunc()
 
 
 	/* Get raw image */
-	if (USE_FIREWIRE_CAMERA)
-	{
-		if (!camera_firewire.GrabCvImage())
-		{
-		    printf("Error getting camera frame \n");
-			return; // fail
-		}
-	}
-	else
-	{
-		if (!camera_usb.GrabCvImage())
-		{
-		    printf("Error getting camera frame \n");
-			return; // fail
-		}
-	}
+    if(!GrabImage())
+        return;
 
 
 	/* Shove raw image into graphics card for some processing on the card */
@@ -375,10 +370,6 @@ void Robot::processFunc()
 	}
 
 
-	/* Make decision */
-	//TODO:
-
-
 	/* Update displays */
 	vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
@@ -388,6 +379,7 @@ void Robot::processFunc()
 	{
 		motors.set_heading(heading_main.y, heading_main.x);
 	}
+
 
 	/* Save raw image last */
 	//if (saveRawVideo)
@@ -410,7 +402,6 @@ void Robot::processFunc()
 
 	/* pause (for testing) */
 	//cvWaitKey(0);
-
 }
 
 void Robot::startRobotThread(void* obj)
@@ -450,6 +441,28 @@ void Robot::connectToCamera()
 		}
 	}
 
+}
+
+int Robot::GrabImage()
+{
+	if (USE_FIREWIRE_CAMERA)
+	{
+		if (!camera_firewire.GrabCvImage())
+		{
+		    printf("Error getting camera frame \n");
+			return 0; // fail
+		}
+	}
+	else
+	{
+		if (!camera_usb.GrabCvImage())
+		{
+		    printf("Error getting camera frame \n");
+			return 0; // fail
+		}
+	}
+
+	return 1;
 }
 
 void Robot::initGlut()
