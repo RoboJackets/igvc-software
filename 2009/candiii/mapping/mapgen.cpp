@@ -10,7 +10,7 @@
 
 /* control what gets mapped into the world,
 *   and whether to use the reactive sweeper lines in the worldmap */
-#define PROCESS_MAP 0
+#define PROCESS_MAP 1
 
 /* Landmark Map Settings */
 #define DO_LANDMARK_MAP 0
@@ -738,7 +738,7 @@ int MapGen::processMap()
     IplImage* worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
     cvCvtColor(temp, worldDebug, CV_GRAY2BGR);
     cvReleaseImage(&temp);
-    double min_path_danger_value = 70;//20; // lower => be less afraid
+    double min_path_danger_value = 50;//20; // lower => be less afraid
     ////
 
 
@@ -754,7 +754,7 @@ int MapGen::processMap()
 		for (int pathID=0; pathID<nav_path__num; pathID++)
 		{
 			// Calculate path parameters
-			Point2D<double> pathStart =navPath_start(pathID);
+			Point2D<double> pathStart =navPath_start(/*pathID*/);
 			Point2D<double> pathEnd = navPath_end(pathID);
 
 			// Calculate the set of points in the path
@@ -941,7 +941,7 @@ int MapGen::processMap()
 
 			// Redraw the path, but much more thickly (in order to hilight it)
 
-			Point2D<double> bestPath_start = navPath_start(bestPath_id);
+			Point2D<double> bestPath_start = navPath_start(/*bestPath_id*/);
 			Point2D<double> bestPath_end = navPath_end(bestPath_id);
 
 
