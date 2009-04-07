@@ -81,6 +81,9 @@ public:
 	// to load a video
 	std::string videofilename;
 
+	// gets raw image
+	int GrabImage();
+
 	// view to display
 	int trackbarVal;
 

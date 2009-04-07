@@ -1,13 +1,13 @@
 #include "motors_old.h"
 
-#define MINREQSPEED 35
+#define MINREQSPEED 20
 
 Motors_Old::Motors_Old()
 {
 	//ctor
 	fdMotor = -1;
 	dVelocityScale = 1;
-	_max_speed_=60;
+	_max_speed_=50;
 	//SetupSerial();
 }
 
@@ -202,8 +202,11 @@ int Motors_Old::get_motor_states(void)
  */
 int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 {
-	iRotation *= 1.15; // XXX: hack
 
+    // XXX: hack!
+	iRotation *= 1.15;
+
+    // convert
 	int left  = iFwdVelocity + iRotation ;
 	int right = iFwdVelocity - iRotation ;
 
@@ -228,8 +231,10 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 	if (right != 0) right += MINREQSPEED ;
 	if (left  != 0) left  += MINREQSPEED ;
 
+	// show
 	printf("Motors: L=%d R=%d \n",left,right);
 
+    // do it!
 	return this->set_motors( left , right );
 }
 
