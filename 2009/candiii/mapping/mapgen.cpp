@@ -719,15 +719,16 @@ int MapGen::genProbabilityMap()
 // TESTING
 
 
-
+#if PROCESS_MAP
 #include "Graphics.h"
+#endif
 
 int MapGen::processMap()
 {
 #if PROCESS_MAP
 
     ////
-    int nav_path__num = 7; //change 'vector' too
+    int nav_path__num = 9; //change 'vector' too
     int nav_path__center_path_id = nav_path__num/2;
     int nav_path__path_search_girth = 0; //<2
     int danger_per_barrel_pixel = 1; //=1
@@ -769,34 +770,28 @@ int MapGen::processMap()
 			// the pixels in the path
 			curPathDanger = 0;
 			uchar pixelDanger[pathPoints.count()];
+			Point2D<int> curPoint;
 			for (uint j=0, n2=pathPoints.count(); j<n2; j++)
 			{
-				//Point2D<int> curPathPoint = pathPoints[j];
-
 				// Calculate the danger contribution of the current path-pixel to the path-danger
 				curPixelDanger = 0;
+				//Point2D<int> curPoint;
 				for (int delta=-nav_path__path_search_girth; delta<=nav_path__path_search_girth; delta++)
 				{
 					// (XXX: Consider *nearby* pixels as different fragments of the path-pixel)
-					Point2D<int> curPoint = pathPoints[j];
+					/*Point2D<int>*/ curPoint = pathPoints[j];
 					curPoint.x += delta;
 
 					// check path image (half size) for black=bad
-					//double val = cvGetReal2D(probmap,curPoint.x,curPoint.y);
 					double val = cvGetReal1D(probmap,curPoint.y*probmap->width+curPoint.x);
-					//if (worldmap->imageData[curPoint.y*probmap->width+curPoint.x]<=(unsigned char)min_path_danger_value)
 					if (val <= min_path_danger_value)
 					{
 						// everything bad is a barrel
 						curPixelDanger += danger_per_barrel_pixel;
-						//cvCircle( worldDebug, cvPoint(curPoint.x,curPoint.y), 1, CV_RGB(0,255,0), 1,8,0);
-						//printf("bad2 %.2f \n",val);
 					}
 					else
 					{
 						// Nothing special: Probably grass
-						//curPixelDanger += 0;
-						//printf("good\n");
 					}
 				}
 
@@ -820,31 +815,27 @@ int MapGen::processMap()
 			// Draw the body of the path using a color that is determined from the path's danger value
 			//g_draw.setColor(navPath_color(curPathDanger));
 			g_draw.setColor( cvScalar(128,128, (curPathDanger / (double)max_path_danger) * 255) );
-			g_draw.drawLine(
-				(int) pathStart.x, (int) pathStart.y,
-				(int) pathEnd.x, (int) pathEnd.y);
+			g_draw.drawLine( (int) pathStart.x, (int) pathStart.y, (int) pathEnd.x, (int) pathEnd.y);
 
 			g_draw.setColor(dangerous_pixel_color);
 			// Hilight the "dangerous" pixels in the path
 			// (that contributed to the path's total danger value)
+			//Point2D<int> curPoint;
 			for (uint j=0, n2=pathPoints.count(); j<n2; j++)
 			{
 				uchar curPixelDanger = pixelDanger[j];
 				if (curPixelDanger != 0)
 				{
-					Point2D<int> curPoint = pathPoints[j];
+					/*Point2D<int>*/ curPoint = pathPoints[j];
 
 					// Color the pixel either thickly/thinly,
 					// depending on how dangerous it is
 					if (curPixelDanger > danger_per_barrel_pixel)  	// maximum danger
 					{
-						g_draw.drawRect_rational(
-							curPoint.x, curPoint.y,
-							2, 2);
+						g_draw.drawRect_rational( curPoint.x, curPoint.y, 2, 2);
 					}
 					else
 					{
-						//g_draw.drawPixel(curPoint.x, curPoint.y);
 						cvCircle( worldDebug, cvPoint(curPoint.x,curPoint.y), 1, CV_RGB(155,0,0), 1,8,0);
 					}
 				}
@@ -958,7 +949,7 @@ int MapGen::processMap()
             goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
             goal.y = max_path_danger - pathDanger[bestPath_id] ;
 
-			printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
+			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
 		}
 
 		// DO IN MAIN:
@@ -990,7 +981,7 @@ Point2D<double> MapGen::navPath_end(int pathID)
 Point2D<double> MapGen::navPath_vector(int pathID)
 {
 
-    int nav_path__center_path_id = 3; //nav_path__num/2;
+    int nav_path__center_path_id = 4; //nav_path__num/2;
     int nav_path__view_cone__spacing = 16;
     float nav_path__view_distance_multiplier = .60;//0.5;
 

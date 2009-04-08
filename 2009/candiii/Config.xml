@@ -42,7 +42,7 @@
     <maxFeatureShift>21</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
 
     <!-- ON/OFF -->
-    <doMapping>01</doMapping>
+    <doMapping>00</doMapping>
     <useMotors>00</useMotors>
     <doVision>001</doVision>
 

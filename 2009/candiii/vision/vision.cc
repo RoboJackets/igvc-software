@@ -107,7 +107,7 @@ void Vision::init()
 	// Path danger values higher than this will be clipped to this value
 	max_path_danger = 80;					// >= 0
 	// smoothing = paths that are *near* dangerous paths are also considered to be dangerous
-	nav_path__danger_smoothing_radius = 5;	// >= 0
+	nav_path__danger_smoothing_radius = 6;	// >= 0
 	// colors
 	//min_path_danger_color = CV_RGB(255, 255, 0);	// yellow
 	//max_path_danger_color = CV_RGB(0, 0, 0);		// black
@@ -212,9 +212,7 @@ void Vision::visHsvProcessing(Point2D<int>& goal)
 void Vision::visSweeperLines(Point2D<int>& goal)
 {
 
-	//Graphics g_path(visCvPath);
 	Graphics g_draw(visCvDebug);
-
 	int pathDanger[nav_path__num];
 	int curPixelDanger = 0;
 	int curPathDanger = 0;
@@ -237,21 +235,19 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 				(int) pathEnd.x, (int) pathEnd.y,			// @ 640x480: 	maxPathEnd.x=607
 				&pathPoints);								//				minPathEnd.x=112
 
-			// Calculate the danger value for the path
-			// along with the danger contributions of all
-			// the pixels in the path
+			// Calculate the danger value for the path along with
+			// the danger contributions of all the pixels in the path
 			curPathDanger = 0;
 			uchar pixelDanger[pathPoints.count()];
+			Point2D<int> curPoint;
 			for (uint j=0, n2=pathPoints.count(); j<n2; j++)
 			{
-				//Point2D<int> curPathPoint = pathPoints[j];
-
 				// Calculate the danger contribution of the current path-pixel to the path-danger
 				curPixelDanger = 0;
 				for (int delta=-nav_path__path_search_girth; delta<=nav_path__path_search_girth; delta++)
 				{
 					// (XXX: Consider *nearby* pixels as different fragments of the path-pixel)
-					Point2D<int> curPoint = pathPoints[j];
+					/*Point2D<int>*/ curPoint = pathPoints[j];
 					curPoint.x += delta;
 
 					// check path image (half size) for black=bad
@@ -263,7 +259,6 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 					else
 					{
 						// Nothing special: Probably grass
-						//curPixelDanger += 0;
 					}
 				}
 
@@ -286,27 +281,23 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 
 			// Draw the body of the path using a color that is determined from the path's danger value
 			g_draw.setColor(navPath_color(curPathDanger));
-			g_draw.drawLine(
-				(int) pathStart.x, (int) pathStart.y,
-				(int) pathEnd.x, (int) pathEnd.y);
+			g_draw.drawLine( (int) pathStart.x, (int) pathStart.y, (int) pathEnd.x, (int) pathEnd.y);
 
-			g_draw.setColor(dangerous_pixel_color);
 			// Hilight the "dangerous" pixels in the path
 			// (that contributed to the path's total danger value)
+			g_draw.setColor(dangerous_pixel_color);
 			for (uint j=0, n2=pathPoints.count(); j<n2; j++)
 			{
 				uchar curPixelDanger = pixelDanger[j];
 				if (curPixelDanger != 0)
 				{
-					Point2D<int> curPoint = pathPoints[j];
+					/*Point2D<int>*/ curPoint = pathPoints[j];
 
 					// Color the pixel either thickly/thinly,
 					// depending on how dangerous it is
 					if (curPixelDanger > danger_per_barrel_pixel)  	// maximum danger
 					{
-						g_draw.drawRect_rational(
-							curPoint.x, curPoint.y,
-							2, 2);
+						g_draw.drawRect_rational( curPoint.x, curPoint.y, 2, 2);
 					}
 					else
 					{
@@ -410,7 +401,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 			{
 				g_draw.drawLine(
 					((int) bestPath_start.x) + deltaX, (int) bestPath_start.y,
-					((int) bestPath_end.x) + deltaX, (int) bestPath_end.y);
+					((int) bestPath_end.x)   + deltaX, (int) bestPath_end.y);
 			}
 
 			/* Update goal
@@ -660,10 +651,6 @@ int Vision::findBestX(IplImage* img, int height, int center)
  */
 int Vision::checkPixel(IplImage* img, const int x, const int y)
 {
-	//int good = 0;
-	//int index = y*img->width+x;
-	//unsigned char val = img->imageData[y*img->width+x];
-
 	// check: black = bad
 	//if ( !val )
 	if (!(unsigned char)img->imageData[y*img->width+x] )
@@ -686,8 +673,6 @@ int Vision::checkPixel(IplImage* img, const int x, const int y)
 		//good = 1;
 		return 1;
 	}
-
-	//return good;
 }
 
 /*
@@ -1224,10 +1209,8 @@ void Vision::Adapt()
 	cvCopy(visCvRawTransform,roi_img);
 	cvResetImageROI(visCvRawTransform);
 
-
 	/* display roi box in separate window */
 	cvShowImage( "roi" , roi_img );
-
 
 	/* get average rgb values inside the roi */
 	int blue=0,green=0,red=0;
@@ -1254,7 +1237,6 @@ void Vision::Adapt()
 		avgR = red*(k)   + avgR*(1-k);
 	}
 
-
 	unsigned char* rgbdata = (unsigned char*) visCvRawTransform->imageData;
 	/* generate visCvAdapt image here!
 	 *  white=good ~ black=bad */
@@ -1263,12 +1245,11 @@ void Vision::Adapt()
 		ab = *(rgbdata  );
 		ag = *(rgbdata+1);
 		ar = *(rgbdata+2);
-
 		rgbdata+=3;
 
-		if (    (abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&
-				(abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
-				(abs(ar-(unsigned char)avgR)<adapt_maxDiff))
+		if ((abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&
+			(abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
+			(abs(ar-(unsigned char)avgR)<adapt_maxDiff))
 		{
 			visCvAdapt->imageData[i/3] = GOOD_PIXEL;
 		}
@@ -1278,10 +1259,8 @@ void Vision::Adapt()
 		}
 	}
 
-
 	/* display roi box in the image we're using */
 	cvRectangle( visCvDebug, UL, LR, CV_RGB(100,0,0), 2, 8, 0);
-
 }
 
 /*
@@ -1309,7 +1288,6 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 
 	/* update return goal */
 	CvtPixToGoal(goal);
-
 }
 
 
