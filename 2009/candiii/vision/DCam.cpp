@@ -65,8 +65,8 @@ void DCam::open()
 	{
 		if (dc1394_video_set_framerate(	_camera,
 										//DC1394_FRAMERATE_60
-										DC1394_FRAMERATE_30
-										//DC1394_FRAMERATE_15
+										//DC1394_FRAMERATE_30
+										DC1394_FRAMERATE_15
 									  ))
 		{
 			throw runtime_error("Unable to set framerate.");

@@ -407,7 +407,7 @@ void MapGen::init()
 	cvSetReal2D( matCamToWorld, 1, 1, k );
 	cvSetReal2D( matCamToWorld, 1, 2, dy );
 	cvSetReal2D( matCamToWorld, 2, 2, 1 );
-	printCv33Matrix(matCamToWorld);
+	//printCv33Matrix(matCamToWorld);
 
 	//==============================================================
 

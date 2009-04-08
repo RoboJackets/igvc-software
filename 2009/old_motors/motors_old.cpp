@@ -1,6 +1,9 @@
 #include "motors_old.h"
 
+
 #define MINREQSPEED 20
+#define POLARITY -1     // direction of forward / connection to motor
+
 
 Motors_Old::Motors_Old()
 {
@@ -102,8 +105,8 @@ int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 	 * correct form to transmit to the motor controller.
 	 * 	Alternate Title: fun with the ? operator
 	 */
-	int iScaledLeftVel = (int)(dVelocityScale * iLeftVelocity);
-	int iScaledRightVel = (int)(dVelocityScale * iRightVelocity);
+	int iScaledLeftVel = POLARITY * (int)(dVelocityScale * iLeftVelocity);
+	int iScaledRightVel = POLARITY * (int)(dVelocityScale * iRightVelocity);
 	unsigned char data[3] =
 	{
 		(unsigned char)( (((iScaledLeftVel < 0) ? REVERSE : FORWARD) << LEFT_DIR_OFFSET) | (((iScaledRightVel < 0) ? REVERSE : FORWARD) << RIGHT_DIR_OFFSET) ),
@@ -166,7 +169,7 @@ int Motors_Old::get_motor_states(void)
 	int bytesRead;
 	if ((bytesRead = read(fdMotor, u8Buff, 3)) != 3)
 	{
-		printf("get_motor_states(): the motor controller did not respond or only partial responded, %s\n", strerror(errno));
+		printf("get_motor_states(): the motor controller did not respond or only partial responded, \n%s, %d bytes read\n", strerror(errno), bytesRead);
 		//return(-1);
 	}
 
