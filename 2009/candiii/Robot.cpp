@@ -219,11 +219,12 @@ int Robot::init()
 	/* connect to motors */
 	if(useMotors)
 	{
-        if(!motors.SetupSerial())
+        motors.set_max_speed(motorsMaxSpeed);
+        if(0!=motors.SetupSerial())
         {
+            printf("Motors Connect Fail \n");
             return 0; // fail
         }
-        motors.set_max_speed(motorsMaxSpeed);
 	}
 
 	/* success */
@@ -377,7 +378,11 @@ void Robot::processFunc()
 	/* Drive Robot via motor commands (GO!) */
 	if (useMotors)
 	{
-		motors.set_heading(heading_main.y, heading_main.x);
+		if(-1==motors.set_heading(heading_main.y, heading_main.x))
+		{
+            //motors.set_heading(0,0);
+            printf("  Motors error!!!\n");
+		}
 	}
 
 
