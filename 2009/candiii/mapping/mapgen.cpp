@@ -197,7 +197,7 @@ int MapGen::getFeatures()
 
 
 		/* draw lines from prev to curr points in curr image */
-		#pragma omp parallel for private(a,b,x,y,dx,dy) reduction(+:avgdx,avgdy)
+#pragma omp parallel for private(a,b,x,y,dx,dy) reduction(+:avgdx,avgdy)
 		for (i=0; i<maxFeatures; i++)
 		{
 			/* only look at points in both images */
@@ -429,10 +429,10 @@ void MapGen::init()
 	omp_set_num_threads(iCPU);
 	printf("omp num cpus %d \n", iCPU);
 
-    //==============================================================
+	//==============================================================
 
-    /* process map stuff */
-    cvNamedWindow("processmap");
+	/* process map stuff */
+	cvNamedWindow("processmap");
 
 
 
@@ -646,7 +646,7 @@ int MapGen::genProbabilityMap()
 		double speed = 1;
 		int i;
 
-        #pragma omp parallel for private(curr)
+#pragma omp parallel for private(curr)
 		for (i=0; i<probmap->imageSize; i++)
 		{
 			curr = cvGetReal1D(probmap,i);
@@ -668,7 +668,7 @@ int MapGen::genProbabilityMap()
 	double wx,wy;
 	int x,y;
 
-    #pragma omp parallel for private(x,setval,wx,wy)
+#pragma omp parallel for private(x,setval,wx,wy)
 	for (y=pad; y<visCvThresh->height-divby-pad; y+=divby)
 	{
 		for (x=pad; x<visCvThresh->width-divby-pad; x+=divby )
@@ -678,11 +678,11 @@ int MapGen::genProbabilityMap()
 			// get current val
 			setval = cvGetReal2D(probmap,wy,wx);
 			// and add/subtract based on thresh image
-			#if PROCESS_MAP
+#if PROCESS_MAP
 			setval += (cvGetReal2D( /* visCvThresh */ visCvPath  ,y,x )==0)?badval:goodval;
-			#else
-            setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval;
-			#endif
+#else
+			setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval;
+#endif
 			// cap results
 			if (setval>255) setval = 255;
 			else if (setval<0) setval = 0;
@@ -727,20 +727,20 @@ int MapGen::processMap()
 {
 #if PROCESS_MAP
 
-    ////
-    int nav_path__num = 9; //change 'vector' too
-    int nav_path__center_path_id = nav_path__num/2;
-    int nav_path__path_search_girth = 0; //<2
-    int danger_per_barrel_pixel = 1; //=1
-    int nav_path__danger_smoothing_radius = 3;
-    int max_path_danger = 40;
-    CvScalar dangerous_pixel_color = CV_RGB(255,0,0);
-    IplImage* temp = cvCloneImage(probmap);
-    IplImage* worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
-    cvCvtColor(temp, worldDebug, CV_GRAY2BGR);
-    cvReleaseImage(&temp);
-    double min_path_danger_value = 50;//20; // lower => be less afraid
-    ////
+	////
+	int nav_path__num = 9; //change 'vector' too
+	int nav_path__center_path_id = nav_path__num/2;
+	int nav_path__path_search_girth = 0; //<2
+	int danger_per_barrel_pixel = 1; //=1
+	int nav_path__danger_smoothing_radius = 3;
+	int max_path_danger = 40;
+	CvScalar dangerous_pixel_color = CV_RGB(255,0,0);
+	IplImage* temp = cvCloneImage(probmap);
+	IplImage* worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
+	cvCvtColor(temp, worldDebug, CV_GRAY2BGR);
+	cvReleaseImage(&temp);
+	double min_path_danger_value = 50;//20; // lower => be less afraid
+	////
 
 
 	Graphics g_draw(worldDebug);
@@ -751,7 +751,7 @@ int MapGen::processMap()
 
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	{
-    #pragma omp parallel for private(curPathDanger,curPixelDanger,weight)
+#pragma omp parallel for private(curPathDanger,curPixelDanger,weight)
 		for (int pathID=0; pathID<nav_path__num; pathID++)
 		{
 			// Calculate path parameters
@@ -779,7 +779,8 @@ int MapGen::processMap()
 				for (int delta=-nav_path__path_search_girth; delta<=nav_path__path_search_girth; delta++)
 				{
 					// (XXX: Consider *nearby* pixels as different fragments of the path-pixel)
-					/*Point2D<int>*/ curPoint = pathPoints[j];
+					/*Point2D<int>*/
+					curPoint = pathPoints[j];
 					curPoint.x += delta;
 
 					// check path image (half size) for black=bad
@@ -826,7 +827,8 @@ int MapGen::processMap()
 				uchar curPixelDanger = pixelDanger[j];
 				if (curPixelDanger != 0)
 				{
-					/*Point2D<int>*/ curPoint = pathPoints[j];
+					/*Point2D<int>*/
+					curPoint = pathPoints[j];
 
 					// Color the pixel either thickly/thinly,
 					// depending on how dangerous it is
@@ -944,10 +946,10 @@ int MapGen::processMap()
 			}
 
 			/* Update goal */
-            Point2D<int> goal; // TODO: send to robot.cpp to be averaged with vision output
-            int scalex = 20;
-            goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
-            goal.y = max_path_danger - pathDanger[bestPath_id] ;
+			Point2D<int> goal; // TODO: send to robot.cpp to be averaged with vision output
+			int scalex = 20;
+			goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
+			goal.y = max_path_danger - pathDanger[bestPath_id] ;
 
 			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
 		}
@@ -958,10 +960,10 @@ int MapGen::processMap()
 
 	}
 
-    cvShowImage("processmap",worldDebug);
-    cvReleaseImage(&worldDebug);
+	cvShowImage("processmap",worldDebug);
+	cvReleaseImage(&worldDebug);
 
-    //cvWaitKey(0);
+	//cvWaitKey(0);
 #endif
 
 	return 1;
@@ -969,21 +971,21 @@ int MapGen::processMap()
 
 Point2D<double> MapGen::navPath_start(/*int pathID*/)
 {
-    Point2D<double> start;
-    start.x = robotBaseAt.x;
+	Point2D<double> start;
+	start.x = robotBaseAt.x;
 	start.y = robotBaseAt.y;
-    return start;
+	return start;
 }
 Point2D<double> MapGen::navPath_end(int pathID)
 {
-    return navPath_start(/*pathID*/) + navPath_vector(pathID);
+	return navPath_start(/*pathID*/) + navPath_vector(pathID);
 }
 Point2D<double> MapGen::navPath_vector(int pathID)
 {
 
-    int nav_path__center_path_id = 4; //nav_path__num/2;
-    int nav_path__view_cone__spacing = 16;
-    float nav_path__view_distance_multiplier = .60;//0.5;
+	int nav_path__center_path_id = 4; //nav_path__num/2;
+	int nav_path__view_cone__spacing = 16;
+	float nav_path__view_distance_multiplier = .60;//0.5;
 
 	double x = (robotLookingAt.x - robotBaseAt.x) ;
 	double y = (robotLookingAt.y - robotBaseAt.y) ; // positive y down
@@ -991,11 +993,11 @@ Point2D<double> MapGen::navPath_vector(int pathID)
 	double rad = (atan(y/x)) ; // make up = 0 deg
 	double radoff =( (nav_path__center_path_id-pathID)*nav_path__view_cone__spacing )*M_PI/180.0; // path selection
 	rad += radoff; // rotate based on path
-	if(x<0) rad += -M_PI ;
-    //printf("  rad %.2f x %.2f y %.2f \n",rad,x,y);
-    double radius = sqrtf(pow(x,2)+pow(y,2)); // dist formula
+	if (x<0) rad += -M_PI ;
+	//printf("  rad %.2f x %.2f y %.2f \n",rad,x,y);
+	double radius = sqrtf(pow(x,2)+pow(y,2)); // dist formula
 	return Point2D<double>(
-			    radius*cos(rad),
+			   radius*cos(rad),
 			   radius*sin(rad) )   // computer y-axis is inverse of math y-axis
 		   * nav_path__view_distance_multiplier;
 }

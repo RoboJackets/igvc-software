@@ -158,7 +158,7 @@ int Robot::init()
 	{
 		if (!camera_firewire.GrabCvImage())
 		{
-		    printf("Error getting camera frame \n");
+			printf("Error getting camera frame \n");
 			return 0; // fail
 		}
 	}
@@ -166,7 +166,7 @@ int Robot::init()
 	{
 		if (!camera_usb.GrabCvImage())
 		{
-		    printf("Error getting camera frame \n");
+			printf("Error getting camera frame \n");
 			return 0; // fail
 		}
 	}
@@ -218,14 +218,14 @@ int Robot::init()
 	mapper.init();
 
 	/* connect to motors */
-	if(useMotors)
+	if (useMotors)
 	{
-        motors.set_max_speed(motorsMaxSpeed);
-        if(0!=motors.SetupSerial())
-        {
-            printf("Motors Connect Fail \n");
-            return 0; // fail
-        }
+		motors.set_max_speed(motorsMaxSpeed);
+		if (0!=motors.SetupSerial())
+		{
+			printf("Motors Connect Fail \n");
+			return 0; // fail
+		}
 	}
 
 	/* success */
@@ -337,8 +337,8 @@ void Robot::processFunc()
 
 
 	/* Get raw image */
-    if(!GrabImage())
-        return;
+	if (!GrabImage())
+		return;
 
 
 	/* Shove raw image into graphics card for some processing on the card */
@@ -365,9 +365,9 @@ void Robot::processFunc()
 	/* SLAM Processing */
 	if (doMapping)
 	{
-		if( mapper.genMap() )
+		if ( mapper.genMap() )
 		{
-            mapper.processMap(); //TESTING
+			mapper.processMap(); //TESTING
 		}
 	}
 
@@ -379,10 +379,10 @@ void Robot::processFunc()
 	/* Drive Robot via motor commands (GO!) */
 	if (useMotors)
 	{
-		if(-1==motors.set_heading(heading_main.y, heading_main.x))
+		if (-1==motors.set_heading(heading_main.y, heading_main.x))
 		{
-            //motors.set_heading(0,0);
-            printf("  Motors error!!!\n");
+			//motors.set_heading(0,0);
+			printf("  Motors error!!!\n");
 		}
 	}
 
@@ -455,7 +455,7 @@ int Robot::GrabImage()
 	{
 		if (!camera_firewire.GrabCvImage())
 		{
-		    printf("Error getting camera frame \n");
+			printf("Error getting camera frame \n");
 			return 0; // fail
 		}
 	}
@@ -463,7 +463,7 @@ int Robot::GrabImage()
 	{
 		if (!camera_usb.GrabCvImage())
 		{
-		    printf("Error getting camera frame \n");
+			printf("Error getting camera frame \n");
 			return 0; // fail
 		}
 	}

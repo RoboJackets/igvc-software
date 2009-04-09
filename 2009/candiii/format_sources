@@ -6,6 +6,7 @@ echo "formatting files..."
 find . -name '*.cpp' -print -exec astyle --style=ansi --indent=force-tab {} \;
 find . -name '*.cc' -print -exec astyle --style=ansi --indent=force-tab {} \;
 find . -name '*.c' -print -exec astyle --style=ansi --indent=force-tab {} \;
+find . -name '*.hpp' -print -exec astyle --style=ansi --indent=force-tab {} \;
 find . -name '*.h' -print -exec astyle --style=ansi --indent=force-tab {} \;
 
 echo "removing astyle crap..."
