@@ -36,7 +36,7 @@ int CVcam::connect(int deviceID, const char* filename)
 	{
 		camconnected=0;
 		//return 0;
-        printf("Error connecting to camera \n");
+		printf("Error connecting to camera \n");
 		exit(-1);
 	}
 }

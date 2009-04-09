@@ -35,7 +35,7 @@ int GuppyCam::connect()
 	{
 		camconnected=0;
 		//return 0;
-        printf("Error connecting to camera \n");
+		printf("Error connecting to camera \n");
 		exit(-1);
 	}
 }

@@ -218,7 +218,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	{
-        #pragma omp parallel for private(curPathDanger,curPixelDanger,weight,pathID)
+#pragma omp parallel for private(curPathDanger,curPixelDanger,weight,pathID)
 		for (pathID=0; pathID<nav_path__num; pathID++)
 		{
 			// Calculate path parameters
@@ -244,7 +244,8 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 				for (int delta=-nav_path__path_search_girth; delta<=nav_path__path_search_girth; delta++)
 				{
 					// (XXX: Consider *nearby* pixels as different fragments of the path-pixel)
-					/*Point2D<int>*/ curPoint = pathPoints[j];
+					/*Point2D<int>*/
+					curPoint = pathPoints[j];
 					curPoint.x += delta;
 
 					// check path image (half size) for black=bad
@@ -288,7 +289,8 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 				uchar curPixelDanger = pixelDanger[j];
 				if (curPixelDanger != 0)
 				{
-					/*Point2D<int>*/ curPoint = pathPoints[j];
+					/*Point2D<int>*/
+					curPoint = pathPoints[j];
 
 					// Color the pixel either thickly/thinly,
 					// depending on how dangerous it is
@@ -583,7 +585,7 @@ void Vision::visGenPath(IplImage* img)
 		}
 
 		//scan left then right & generate visCvPath image
-        #pragma omp parallel
+#pragma omp parallel
 		{
 			scanFillLeft  (visCvPath, x, y, goodFirst, 0      , blackout);
 			scanFillRight (visCvPath, x, y, goodFirst, width-1, blackout);
@@ -923,8 +925,9 @@ Point2D<double> Vision::navPath_start(int pathID)
  */
 Point2D<double> Vision::navPath_vector(int pathID)
 {
-	double deg = navPath_angle(pathID);
-	double rad = deg2rad(deg);
+	//double deg = navPath_angle(pathID);
+	//double rad = deg2rad(deg);
+	double rad = navPath_angle(pathID)*M_PI/180.0;
 	double radius = 0.75 * (visCvRaw->width) / 2;
 	return Point2D<double>(
 			   radius*cos(rad),
@@ -954,12 +957,12 @@ double Vision::navPath_angle(int pathID)
  */
 CvScalar Vision::navPath_color(int pathDanger)
 {
-    // levels
+	// levels
 	return cvScalar(
 			   178 ,
 			   32 ,
 			   (pathDanger / (double)max_path_danger) * 255
-			   );
+		   );
 }
 
 /*
@@ -1245,8 +1248,8 @@ void Vision::Adapt()
 		rgbdata+=3;
 
 		if ((abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&
-			(abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
-			(abs(ar-(unsigned char)avgR)<adapt_maxDiff))
+				(abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
+				(abs(ar-(unsigned char)avgR)<adapt_maxDiff))
 		{
 			visCvAdapt->imageData[i/3] = GOOD_PIXEL;
 		}
@@ -1268,11 +1271,11 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 
 	/* generate visCvAdapt img */
 	Adapt();
-	cvDilate(visCvAdapt, visCvAdapt, NULL, 1);
+	cvDilate(visCvAdapt, visCvAdapt, NULL, 1); // removes black spots/noise
 
 	/* shrink visCvAdapt img to 320x240 */
 	cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
-	//cvErode(visCvThresh, visCvThresh, NULL, 1); // 1 or 2
+	//cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
 
 	/* generate visCvPath */
 	visGenPath(visCvThresh);
