@@ -105,12 +105,10 @@ void Vision::init()
 	// (everything bad is a barrel)
 	danger_per_barrel_pixel = 1;
 	// Path danger values higher than this will be clipped to this value
-	max_path_danger = 75;					// >= 0
+	max_path_danger = 75;					// >= 0 // 75
 	// smoothing = paths that are *near* dangerous paths are also considered to be dangerous
 	nav_path__danger_smoothing_radius = 7;	// >= 0 // 6
 	// colors
-	//min_path_danger_color = CV_RGB(255, 255, 0);	// yellow
-	//max_path_danger_color = CV_RGB(0, 0, 0);		// black
 	dangerous_pixel_color = CV_RGB(255, 0, 0);		// red
 	/**********************************************************************************/
 
@@ -145,7 +143,6 @@ void Vision::init()
 		/* create and set roi img */
 		roi_img = cvCreateImage( cvSize(roi.width, roi.height), IPL_DEPTH_8U, 3 );
 	}
-
 
 }
 

@@ -23,6 +23,7 @@ void* robot_thread_caller(void* arg)
 	saveRawVideo=0; // don't save video yet
 	glRobot = (Robot*)arg; // assign pointer to static robot object for glut to use
 	static_cast<Robot*>(arg)->Go(); // start the robot
+	glRobot->destroy(); // kill the robot;
 	return NULL;
 }
 void robot_process_function_caller(void)
@@ -411,7 +412,7 @@ void Robot::processFunc()
 
 void Robot::startRobotThread(void* obj)
 {
-	sleep(.5);
+	//sleep(.5);
 	robot_thread_caller(obj);
 }
 
