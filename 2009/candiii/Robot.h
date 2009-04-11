@@ -97,6 +97,7 @@ public:
 	Point2D<int> heading_vision;
 	Point2D<int> heading_sensors;
 	Point2D<int> heading_main;
+	Point2D<int> heading_mapping;
 
 	// avg heading control
 	// _k = the % of new value to use

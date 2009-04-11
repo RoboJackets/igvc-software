@@ -1,7 +1,7 @@
 #include "motors_old.h"
 
 
-#define MINREQSPEED 20
+#define MINREQSPEED 10
 #define POLARITY -1     // direction of forward / connection to motor
 
 

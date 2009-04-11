@@ -719,11 +719,7 @@ int MapGen::genProbabilityMap()
 // TESTING
 
 
-#if PROCESS_MAP
-#include "Graphics.h"
-#endif
-
-int MapGen::processMap()
+int MapGen::processMap(Point2D<int>& goal)
 {
 #if PROCESS_MAP
 
@@ -946,7 +942,7 @@ int MapGen::processMap()
 			}
 
 			/* Update goal */
-			Point2D<int> goal; // TODO: send to robot.cpp to be averaged with vision output
+			//Point2D<int> goal; // TODO: send to robot.cpp to be averaged with vision output
 			int scalex = 20;
 			goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
 			goal.y = max_path_danger - pathDanger[bestPath_id] ;
