@@ -1222,7 +1222,7 @@ void Vision::Adapt()
 
 	/* average rgb over time */
 	static int first = 1;
-	float k = 0.05; // % of new value to use
+	float k = 0.075; // % of new value to use
 	if (first)
 	{
 		first = 0;

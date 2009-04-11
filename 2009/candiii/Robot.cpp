@@ -352,22 +352,12 @@ void Robot::processFunc()
 	}
 
 
-	/* Average motor commands
-	 * k = % of new value to use */
-	heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
-	heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
-
-
-	/* Get sensor information */
-	//TODO
-
-
 	/* SLAM Processing */
 	if (doMapping)
 	{
 		if ( mapper.genMap() )
 		{
-			mapper.processMap(); //TESTING
+			mapper.processMap(heading_mapping); //TESTING
 		}
 	}
 
@@ -379,11 +369,20 @@ void Robot::processFunc()
 	/* Drive Robot via motor commands (GO!) */
 	if (useMotors)
 	{
-		if (-1==motors.set_heading(heading_main.y, heading_main.x))
-		{
-			//motors.set_heading(0,0);
-			printf("  Motors error!!!\n");
-		}
+	    if (doMapping)
+	    {
+	        /* drive via mapping */
+            motors.set_heading(heading_mapping.y, heading_mapping.x);
+        }
+        else
+        {
+            /* Average motor commands from vision (account for high frame rate)
+             * k = % of new value to use */
+            heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
+            heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
+            /* drive via vision */
+            motors.set_heading(heading_main.y, heading_main.x);
+        }
 	}
 
 
@@ -397,7 +396,7 @@ void Robot::processFunc()
 	/* Stats */
 	if (useMotors)
 	{
-		printf("                    heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
+		printf("            heading: rot: %d  fwd: %d \n\n",heading_main.x,heading_main.y);
 	}
 	if (PRINTFRAMERATE)
 	{
@@ -494,6 +493,8 @@ void Robot::initGlut()
 	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	//glClearColor( 0.5, 0.5, 0.5, 1.0 );
 
 }
 

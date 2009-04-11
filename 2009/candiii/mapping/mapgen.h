@@ -7,6 +7,11 @@
 #include "cvcorrImages.h"
 #include <vector>
 
+
+#include "Graphics.h"
+
+
+
 /*
  * This file contains the robot's SLAM processing code.
  *   by: Chris McClanahan
@@ -55,7 +60,7 @@ public:
 	/**/
 	int genProbabilityMap();
 	IplImage* probmap;
-	int processMap();
+	int processMap(Point2D<int>& goal);
 	CvPoint robotBaseAt;    // bottom of current image being pasted into world (in world coordinates)
 	CvPoint robotLookingAt; // top of current image being pasted into world (in world coordinates)
 	Point2D<double> navPath_start(/*int pathID*/);
