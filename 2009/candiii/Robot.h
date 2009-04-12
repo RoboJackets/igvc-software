@@ -67,6 +67,9 @@ public:
 	// refreshes glut window with raw image data
 	void updateGlutDisplay();
 
+	// gets image mask to mark void transform area
+	void getGlutMask();
+
 	// starts the robot
 	void startRobotThread(void* obj);
 
