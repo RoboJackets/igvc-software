@@ -142,6 +142,9 @@ void Vision::init()
 
 		/* create and set roi img */
 		roi_img = cvCreateImage( cvSize(roi.width, roi.height), IPL_DEPTH_8U, 3 );
+
+		/* starting colors */
+		avgB=127; avgG=127; avgB=127;
 	}
 
 }

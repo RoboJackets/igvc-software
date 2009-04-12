@@ -12,11 +12,11 @@
 <Config>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>1</useFirewireCamera>  <!-- set to 0 to load video -->
+	<useFirewireCamera>00</useFirewireCamera>  <!-- set to 0 to load video -->
 	<gain>16</gain>
 	<shutter>150</shutter>
 	<gamma>0</gamma>
-	<auto_gain_and_shutter>1</auto_gain_and_shutter>
+	<auto_gain_and_shutter>01</auto_gain_and_shutter>
 
 	<!-- Guppy White Balance Settings -->
 	<red>517</red>   <!-- old 528 -->
@@ -43,7 +43,7 @@
 
     <!-- ON/OFF -->
     <doMapping>01</doMapping>
-    <useMotors>01</useMotors>
+    <useMotors>00</useMotors>
     <doVision>001</doVision>
 
 

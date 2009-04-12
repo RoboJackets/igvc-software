@@ -313,6 +313,9 @@ void Robot::Go()
 	/* Setup video card processing */
 	initGlut();
 
+	/* get transform edge mask */
+	getGlutMask();
+
 	/*
 	 * Robot Loop!
 	 */
@@ -494,7 +497,7 @@ void Robot::initGlut()
 	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-	//glClearColor( 0.5, 0.5, 0.5, 1.0 );
+	glClearColor( 0.0, 0.0, 0.0, 1.0 ); // set edge voidness to black
 
 }
 
@@ -648,5 +651,22 @@ void Robot::updateGlutDisplay()
 //                                        CV_FOURCC('P','I','M','1'),
 //                                      fps,cvSize(frameW,frameH),isColor);
 //}
+
+void Robot::getGlutMask()
+{
+    IplImage* visCvGlutMask = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+
+    cvSet( visCvRaw, CV_RGB(255,255,255) );
+    updateGlutDisplay();
+    cvAnd( visCvRawTransform, visCvRawTransform, visCvGlutMask );
+
+    cvNamedWindow("mask");
+    cvShowImage("mask",visCvGlutMask);
+    //cvWaitKey(0);
+
+    cvReleaseImage(&visCvGlutMask);
+}
+
+
 
 
