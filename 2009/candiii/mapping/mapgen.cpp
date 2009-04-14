@@ -391,7 +391,7 @@ void MapGen::init()
 	cvZero(matCamToWorld);
 
 	/* set up camera to world homography matrix */
-	double k = .25;//0.3; // scale factor
+	double k = 0.26;//.25;//0.3; // scale factor
 	// k  0  dx
 	// 0  k  dy
 	// 0  0  1
@@ -648,7 +648,7 @@ int MapGen::genProbabilityMap()
 	/* down-scale the thresh img, and map it into into world,
 	 *  while setting probabilities of obstacles and traversible area */
 	int divby = 2;      // image size denominator
-	int pad = 5;        // remove noise around img edges
+	int pad = 4;        // remove noise around img edges
 	double badval = -2; // rate for obstacle probability
 	double goodval = 7; // rate for travpath probability
 	double setval;

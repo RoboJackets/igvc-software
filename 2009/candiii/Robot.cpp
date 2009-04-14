@@ -315,12 +315,6 @@ void Robot::Go()
 	/* Setup video card processing */
 	initGlut();
 
-	/* get transform edge mask */
-    for (int i=0;i<6;i++)
-    {
-        getGlutMask(i); // loop == hack!
-    }
-
 
 	/*
 	 * Robot Loop!
@@ -343,6 +337,19 @@ void Robot::processFunc()
 	 * x = rotational speed ; range = (-128,127)
 	 * y = forward speed    ; range = (0,255)
 	 */
+
+
+    /* glut mask init hack */
+    static bool getMask = true;
+    if(getMask)
+    {
+        getMask=false;
+        /* get transform edge mask */
+        getGlutMask(1);
+        getGlutMask(2);
+        getGlutMask(3);
+        getGlutMask(4);
+    }
 
 
 	/* Get raw image */
@@ -509,9 +516,11 @@ void Robot::initGlut()
         glDisable(GL_DEPTH_TEST);
         glDisable(GL_LIGHTING);
         glEnable(GL_TEXTURE_RECTANGLE_ARB);
-        if (doTransform) setPjMat();
+        if (doTransform) setPjMat(); // create transform matrix
 	}
 
+    /* get transform edge mask */
+    getGlutMask(0); // zero here for first call to function
 }
 
 
@@ -536,7 +545,6 @@ void Robot::updateGlutDisplay()
 			//glLoadIdentity ();
 			/* * * * * * * * * * */
 
-			//glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
 			/* put data in card */
 			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
 
@@ -564,8 +572,10 @@ void Robot::updateGlutDisplay()
 		}
 		//glDisable(GL_TEXTURE_RECTANGLE_ARB);
 
+		//glFinish();
+        //glFlush();
+
 		/* get data from card */
-		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
 		glReadPixels( 0				,	//GLint x,
 					  0				,	//GLint y,
 					  visCvRaw->width	,	//GLsizei width,
@@ -665,19 +675,19 @@ void Robot::updateGlutDisplay()
 //                                      fps,cvSize(frameW,frameH),isColor);
 //}
 
-void Robot::getGlutMask(int first)
+void Robot::getGlutMask(int call)
 {
     /* this function gets a mask image of the transformed space
     *   to help when projecting the visCvThresh image into world space.
-    *    this function must be run in a loop so the updateGlutDisplay fully initializes the mask??,
+    *    this function should be run in a loop so the updateGlutDisplay/OpenGL fully initializes the mask,
     *     and even still, the mask still isn't fully correct sometimes... */
-    if(first==0) visCvGlutMask = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
+    if(call==0) visCvGlutMask = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
     cvSet( visCvRaw, CV_RGB(255,255,255) );
     updateGlutDisplay();
-    cvAnd( visCvRawTransform, visCvRawTransform, visCvRaw );
+    cvCopy( visCvRawTransform, visCvRaw );
     cvResize( visCvRaw, visCvGlutMask, CV_INTER_LINEAR );
 
-    if(first==0) cvNamedWindow("mask");
+    if(call==0) cvNamedWindow("mask");
     cvShowImage("mask",visCvGlutMask);
 }
 
