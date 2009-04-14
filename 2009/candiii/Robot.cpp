@@ -316,7 +316,7 @@ void Robot::Go()
 	initGlut();
 
 	/* get transform edge mask */
-    for (int i=0;i<10;i++)
+    for (int i=0;i<6;i++)
     {
         getGlutMask(i); // loop == hack!
     }
@@ -502,8 +502,15 @@ void Robot::initGlut()
 	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
 	glClearColor( 0.0, 0.0, 0.0, 1.0 ); // set edge voidness to black
+
+	// previously in updateGlutDisplay()
+	{
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_LIGHTING);
+        glEnable(GL_TEXTURE_RECTANGLE_ARB);
+        if (doTransform) setPjMat();
+	}
 
 }
 
@@ -517,24 +524,24 @@ void Robot::updateGlutDisplay()
 		/* perspective transform */
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_LIGHTING);
-		glEnable(GL_TEXTURE_RECTANGLE_ARB);
+		//glDisable(GL_DEPTH_TEST);
+		//glDisable(GL_LIGHTING);
+		//glEnable(GL_TEXTURE_RECTANGLE_ARB);
 		{
 
 			/* * * transform * * */
-			glLoadIdentity ();
-			glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity ();
+			//glLoadIdentity ();
+			//glOrtho (-1.0, 1.0, -1.0, 1.0, -1.0, 1.0); // sets up basic scale for input for you to draw on
+			//glMatrixMode(GL_PROJECTION);
+			//glLoadIdentity ();
 			/* * * * * * * * * * */
 
-			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
+			//glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
 			/* put data in card */
 			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
 
 			/* * * transform * * */
-			setPjMat();
+			//setPjMat();
 			/* * * * * * * * * * */
 
 			glBegin(GL_QUADS);
@@ -555,7 +562,7 @@ void Robot::updateGlutDisplay()
 			glEnd();
 
 		}
-		glDisable(GL_TEXTURE_RECTANGLE_ARB);
+		//glDisable(GL_TEXTURE_RECTANGLE_ARB);
 
 		/* get data from card */
 		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
@@ -662,7 +669,7 @@ void Robot::getGlutMask(int first)
 {
     /* this function gets a mask image of the transformed space
     *   to help when projecting the visCvThresh image into world space.
-    *    this function must be run in a loop so the updateGlutDisplay fully initializes the mask,
+    *    this function must be run in a loop so the updateGlutDisplay fully initializes the mask??,
     *     and even still, the mask still isn't fully correct sometimes... */
     if(first==0) visCvGlutMask = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
     cvSet( visCvRaw, CV_RGB(255,255,255) );
