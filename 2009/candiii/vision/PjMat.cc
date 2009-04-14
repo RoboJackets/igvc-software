@@ -60,6 +60,9 @@ void setPjMat()
 				   };
 
 	findmaxview(&n[0]);
+
+        glMatrixMode(GL_PROJECTION);
+
 	glLoadIdentity ();
 	glOrtho (-xscale, xscale, -yscale, yscale, -10.0, 10.0);
 	glTranslated(-translateX, -translateY, 0);
