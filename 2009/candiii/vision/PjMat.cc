@@ -58,6 +58,7 @@ void setPjMat()
 					0,0,0,0,\
 					sy,cx*cy,0,cy*sx/h
 				   };
+
 	findmaxview(&n[0]);
 	glLoadIdentity ();
 	glOrtho (-xscale, xscale, -yscale, yscale, -10.0, 10.0);
@@ -91,7 +92,6 @@ void findmaxview(GLdouble* n)
 	lx=(-n[0]*xi+n[12])/(-n[3]*xi+n[15]);
 	ly=(-n[1]*xi+n[13])/(-n[3]*xi+n[15]);
 
-
 	tx=(n[4]*yi+n[12])/(n[7]*yi+n[15]);
 	ty=(n[5]*yi+n[13])/(n[7]*yi+n[15]);
 
@@ -109,6 +109,7 @@ void findmaxview(GLdouble* n)
 
 	blx=(-n[0]*xi-n[4]*yi+n[12])/(-n[3]*xi-n[7]*yi+n[15]);
 	bly=(-n[1]*xi-n[5]*yi+n[13])/(-n[3]*xi-n[7]*yi+n[15]);
+
 	/****** 8-Neighbors *********/
 	maxy=max(max(max(max(max(max(max(					\
 										  ly,ry),ty),by),_try),tly),bry),bly);
@@ -129,12 +130,10 @@ void findmaxview(GLdouble* n)
 	minx=min(min(min(					\
 			lx,rx),tx),bx);*/
 
-
 	yscale=(maxy-miny)/2;
 	xscale=(maxx-minx)/2;
 	translateX=minx+xscale;
 	translateY=miny+yscale;
-
 
 #if USE_ROI
 	//start of region of interest code
@@ -145,15 +144,12 @@ void findmaxview(GLdouble* n)
 	//end roi code
 #endif
 
-
 #	undef xtran
 #	undef ytran
 #	undef yi
 #	undef xi
 
 }
-
-
 
 
 GLdouble* getPjMat()

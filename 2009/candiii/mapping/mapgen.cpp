@@ -8,9 +8,6 @@
 #include <iostream>
 #include <omp.h>
 
-/* control what gets mapped into the world,
-*   and whether to use the reactive sweeper lines in the worldmap */
-#define PROCESS_MAP 1
 
 /* Landmark Map Settings */
 #define DO_LANDMARK_MAP 0
@@ -105,10 +102,8 @@ int MapGen::genMap()
 #endif
 
 
-
 	/* end genMap() - success */
 	return 1;
-
 }
 
 int MapGen::getFeatures()
@@ -307,7 +302,6 @@ int MapGen::processFeatures()
 				foundpts[maxFeatures-1-i] = cvPoint2D32f(x,y);
 				matchList.push_back( std::pair<CvPoint2D32f,CvPoint2D32f>( foundpts[i],foundpts[maxFeatures-1-i] ) );
 			}
-
 		}
 	}
 
@@ -382,7 +376,6 @@ void MapGen::init()
 	/* amount of top of image to ignore */
 	yFeatureThresh = visCvGrey->height/3 + 30 ;
 
-
 	//==============================================================
 
 	/* world map stuff */
@@ -431,11 +424,6 @@ void MapGen::init()
 
 	//==============================================================
 
-	/* process map stuff */
-	cvNamedWindow("processmap");
-
-
-
 }
 
 void MapGen::LoadXMLSettings()
@@ -452,9 +440,10 @@ void MapGen::LoadXMLSettings()
 		/* display windows */
 		if (cfg.getInt("doMapping"))
 		{
-			cvNamedWindow("worldmap");
+			//cvNamedWindow("landmarkmap");
 			cvNamedWindow("curr");
-			cvNamedWindow("probmap");
+			//cvNamedWindow("probmap");
+            cvNamedWindow("processmap");
 		}
 
 	}
@@ -465,9 +454,9 @@ void MapGen::LoadXMLSettings()
 		{
 			printf("ERROR: Mapping settings NOT loaded! Using DEFAULTS \n");
 			{
-				maxFeatures   = 40;
-				numFramesBack = 3;
-				maxFeatureShift = 9;
+				maxFeatures   = 70;
+				numFramesBack = 2;
+				maxFeatureShift = 25;
 
 			}
 		}
@@ -475,7 +464,7 @@ void MapGen::LoadXMLSettings()
 		{
 			printf("Mapping settings loaded \n");
 		}
-		printf("values: maxFeatures %d  \n", maxFeatures);
+		printf(" values: maxFeatures %d  \n", maxFeatures);
 	}
 
 }
@@ -611,7 +600,8 @@ int MapGen::genLandmarkMap()
 	/* update/avg current robot orientation */
 	robotBaseAt = cvPoint( (robotBaseAt.x+x)/2, (robotBaseAt.y+y)/2 );
 	robotLookingAt = cvPoint( (robotLookingAt.x+a)/2, (robotLookingAt.y+b)/2 );
-	/* draw a line denoting heading orientaion */
+
+    /* draw a line denoting heading orientaion */
 	cvLine(worldmap, robotBaseAt, robotLookingAt,
 		   //CV_RGB(rand()%255,rand()%255,rand()%255),
 		   CV_RGB(255,255,255),
@@ -621,11 +611,8 @@ int MapGen::genLandmarkMap()
 			 //CV_RGB(rand()%255,rand()%255,rand()%255),
 			 CV_RGB(255,255,255),
 			 2, 8, 0);
-
 	/* display world view image */
-	cvShowImage("worldmap",worldmap);
-
-	//cvWaitKey(0);
+	cvShowImage("landmarkmap",worldmap);
 
 	return 1;
 }
@@ -673,21 +660,22 @@ int MapGen::genProbabilityMap()
 	{
 		for (x=pad; x<visCvThresh->width-divby-pad; x+=divby )
 		{
-			// map pts
-			mapCamPointToWorldPoint((double)x,(double)y,wx,wy);
-			// get current val
-			setval = cvGetReal2D(probmap,wy,wx);
-			// and add/subtract based on thresh image
-#if PROCESS_MAP
-			setval += (cvGetReal2D( /* visCvThresh */ visCvPath  ,y,x )==0)?badval:goodval;
-#else
-			setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval;
-#endif
-			// cap results
-			if (setval>255) setval = 255;
-			else if (setval<0) setval = 0;
-			// update probmap
-			cvSetReal2D(probmap,wy,wx,setval);
+		    // check void mask
+		    if ( cvGet2D(visCvGlutMask,y,x).val[0]==255 )
+		    {
+                // map pts
+                mapCamPointToWorldPoint((double)x,(double)y,wx,wy);
+                // get current val
+                setval = cvGetReal2D(probmap,wy,wx);
+                // and add/subtract based on thresh image
+                setval += (cvGetReal2D( /* visCvThresh */ visCvPath  ,y,x )==0)?badval:goodval; // more black
+                //setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval; // cooler looking
+                // cap results
+                if (setval>255) setval = 255;
+                else if (setval<0) setval = 0;
+                // update probmap
+                cvSetReal2D(probmap,wy,wx,setval);
+		    }
 		}
 	}
 
@@ -700,46 +688,42 @@ int MapGen::genProbabilityMap()
 	robotBaseAt = cvPoint( (robotBaseAt.x+wx)/2, (robotBaseAt.y+wy)/2 );
 	robotLookingAt = cvPoint( (robotLookingAt.x+a)/2, (robotLookingAt.y+b)/2 );
 	//printf("bx=%d by=%d  lx=%d ly=%d \n",robotBaseAt.x,robotBaseAt.y,robotLookingAt.x,robotLookingAt.y);
+
 	/* draw a circle denoting base orientaion */
-//	cvCircle(probmap, CvPoint(robotBaseAt),
-//			 1,
-//			 CV_RGB(127,127,127),
-//			 1, 8, 0);
-
-
+	//cvCircle(probmap, CvPoint(robotBaseAt),
+	//		 1,
+	//		 CV_RGB(127,127,127),
+	//		 1, 8, 0);
 	/* display */
-	cvShowImage("probmap",probmap);
-	//cvWaitKey(0);
+	//cvShowImage("probmap",probmap);
 
 	/* success */
 	return 1;
 }
 
 
-// TESTING
-
-
+//  copied from vision.cc visSweeperLines() and modified to work here
 int MapGen::processMap(Point2D<int>& goal)
 {
-#if PROCESS_MAP
 
-	////
-	int nav_path__num = 9; //change 'vector' too
+	// parameters
+	int nav_path__num = 9; //change 'vector' too!
 	int nav_path__center_path_id = nav_path__num/2;
-	int nav_path__path_search_girth = 0; //<2
+	int nav_path__path_search_girth = 0; // pixels near curr line to search
 	int danger_per_barrel_pixel = 1; //=1
-	int nav_path__danger_smoothing_radius = 3;
+	int nav_path__danger_smoothing_radius = 3; // lines nearby to search
 	int max_path_danger = 40;
 	CvScalar dangerous_pixel_color = CV_RGB(255,0,0);
+	double min_path_danger_value = 50;//20; // lower => be less afraid
+
+	// display
 	IplImage* temp = cvCloneImage(probmap);
 	IplImage* worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
 	cvCvtColor(temp, worldDebug, CV_GRAY2BGR);
 	cvReleaseImage(&temp);
-	double min_path_danger_value = 50;//20; // lower => be less afraid
-	////
-
-
 	Graphics g_draw(worldDebug);
+
+	// temp vars used below
 	int pathDanger[nav_path__num];
 	int curPixelDanger = 0;
 	int curPathDanger = 0;
@@ -929,11 +913,8 @@ int MapGen::processMap(Point2D<int>& goal)
 			g_draw.setColor( cvScalar( (pathDanger[bestPath_id] / (double)max_path_danger) * 255 ,128,128 ) );
 
 			// Redraw the path, but much more thickly (in order to hilight it)
-
 			Point2D<double> bestPath_start = navPath_start(/*bestPath_id*/);
 			Point2D<double> bestPath_end = navPath_end(bestPath_id);
-
-
 			for (int deltaX = -1; deltaX <= 1; deltaX++)
 			{
 				g_draw.drawLine(
@@ -942,7 +923,7 @@ int MapGen::processMap(Point2D<int>& goal)
 			}
 
 			/* Update goal */
-			//Point2D<int> goal; // TODO: send to robot.cpp to be averaged with vision output
+			//Point2D<int> goal;
 			int scalex = 20;
 			goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
 			goal.y = max_path_danger - pathDanger[bestPath_id] ;
@@ -956,11 +937,9 @@ int MapGen::processMap(Point2D<int>& goal)
 
 	}
 
+    /* results */
 	cvShowImage("processmap",worldDebug);
 	cvReleaseImage(&worldDebug);
-
-	//cvWaitKey(0);
-#endif
 
 	return 1;
 }
