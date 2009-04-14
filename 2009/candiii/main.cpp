@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 	 * Our display window
 	 * This has a trackbar at the top to select views
 	 */
-	cvNamedWindow("display", NULL);
+	cvNamedWindow("display", 0);
 
 	/*
 	 * Start robot main loop in a thread

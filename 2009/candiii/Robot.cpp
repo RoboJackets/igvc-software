@@ -176,8 +176,8 @@ int Robot::init()
 	cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
 
 	/* configure opencv display window */
-	cvResizeWindow( "display", visCvRaw->width, visCvRaw->height );
-	cvMoveWindow( "display", 10, 10 ); // position on screen
+	cvResizeWindow( "display", visCvRaw->width-40, visCvRaw->height );
+	cvMoveWindow( "display", 1, 10 ); // position on screen
 
 	/* Init default view (debug=1) */
 	trackbarHandler( trackbarVal );
@@ -314,7 +314,11 @@ void Robot::Go()
 	initGlut();
 
 	/* get transform edge mask */
-	getGlutMask();
+    for (int i=0;i<6;i++)
+    {
+        getGlutMask(i);
+    }
+
 
 	/*
 	 * Robot Loop!
@@ -652,19 +656,19 @@ void Robot::updateGlutDisplay()
 //                                      fps,cvSize(frameW,frameH),isColor);
 //}
 
-void Robot::getGlutMask()
+void Robot::getGlutMask(int first)
 {
-    IplImage* visCvGlutMask = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-
+    /* this function gets a mask image of the transformed space
+    *   to help when projecting the visCvThresh image into world space.
+    *    this function must be run in a loop so the updateGlutDisplay fully initializes the mask */
+    if(first==0) visCvGlutMask = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
     cvSet( visCvRaw, CV_RGB(255,255,255) );
     updateGlutDisplay();
-    cvAnd( visCvRawTransform, visCvRawTransform, visCvGlutMask );
+    cvAnd( visCvRawTransform, visCvRawTransform, visCvRaw );
+    cvResize( visCvRaw, visCvGlutMask, CV_INTER_LINEAR );
 
-    cvNamedWindow("mask");
+    if(first==0) cvNamedWindow("mask");
     cvShowImage("mask",visCvGlutMask);
-    //cvWaitKey(0);
-
-    cvReleaseImage(&visCvGlutMask);
 }
 
 
