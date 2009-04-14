@@ -2,13 +2,13 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="Config.xml" open="1" top="0" tabpos="1">
-		<Cursor position="1442" topLine="15" />
+		<Cursor position="1526" topLine="15" />
 	</File>
-	<File name="Robot.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="12706" topLine="509" />
+	<File name="Robot.cpp" open="1" top="1" tabpos="2">
+		<Cursor position="7790" topLine="323" />
 	</File>
 	<File name="Robot.h" open="1" top="0" tabpos="8">
-		<Cursor position="2147" topLine="80" />
+		<Cursor position="1784" topLine="84" />
 	</File>
 	<File name="main.cpp" open="0" top="0" tabpos="9">
 		<Cursor position="398" topLine="0" />
@@ -32,7 +32,7 @@
 		<Cursor position="3770" topLine="45" />
 	</File>
 	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="6">
-		<Cursor position="16135" topLine="677" />
+		<Cursor position="8844" topLine="384" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="7">
 		<Cursor position="1224" topLine="34" />
@@ -55,8 +55,8 @@
 	<File name="vision/GuppyCam.h" open="0" top="0" tabpos="10">
 		<Cursor position="906" topLine="4" />
 	</File>
-	<File name="vision/PjMat.cc" open="1" top="1" tabpos="4">
-		<Cursor position="524" topLine="0" />
+	<File name="vision/PjMat.cc" open="1" top="0" tabpos="4">
+		<Cursor position="1998" topLine="154" />
 	</File>
 	<File name="vision/Point2D.h" open="0" top="0" tabpos="8">
 		<Cursor position="0" topLine="0" />
@@ -68,7 +68,7 @@
 		<Cursor position="869" topLine="0" />
 	</File>
 	<File name="vision/vision.cc" open="1" top="0" tabpos="3">
-		<Cursor position="27768" topLine="1188" />
+		<Cursor position="29058" topLine="1257" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="13">
 		<Cursor position="3786" topLine="0" />
