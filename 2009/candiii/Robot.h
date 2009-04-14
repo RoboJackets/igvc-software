@@ -68,7 +68,7 @@ public:
 	void updateGlutDisplay();
 
 	// gets image mask to mark void transform area
-	void getGlutMask();
+	void getGlutMask(int first);
 
 	// starts the robot
 	void startRobotThread(void* obj);
