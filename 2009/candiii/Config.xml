@@ -12,7 +12,7 @@
 <Config>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>00</useFirewireCamera>  <!-- set to 0 to load video -->
+	<useFirewireCamera>01</useFirewireCamera>  <!-- set to 0 to load video -->
 	<gain>16</gain>
 	<shutter>150</shutter>
 	<gamma>0</gamma>
@@ -33,8 +33,8 @@
 
 	<!-- Robot Misc Settings -->
     <defaultView>01</defaultView>       <!-- gui slider bar starting value -->
-	<_k>0.30</_k>                       <!-- lower => more smooth motor cotrol (averages new motor commands) -->
-    <motorsMaxSpeed>30</motorsMaxSpeed> <!-- max motor output [0-255] -->
+	<_k>0.30</_k>                       <!-- lower => more smooth motor cotrol (averages new motor commands - vision only) -->
+    <motorsMaxSpeed>39</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
     <maxFeatures>70</maxFeatures>           <!-- max number for feature corners to find -->
@@ -43,7 +43,7 @@
 
     <!-- ON/OFF -->
     <doMapping>01</doMapping>
-    <useMotors>00</useMotors>
+    <useMotors>01</useMotors>
     <doVision>001</doVision>
 
 

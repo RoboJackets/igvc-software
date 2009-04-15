@@ -107,7 +107,7 @@ void Vision::init()
 	// Path danger values higher than this will be clipped to this value
 	max_path_danger = 75;					// >= 0 // 75
 	// smoothing = paths that are *near* dangerous paths are also considered to be dangerous
-	nav_path__danger_smoothing_radius = 7;	// >= 0 // 6
+	nav_path__danger_smoothing_radius = 6;	// >= 0 // 6
 	// colors
 	dangerous_pixel_color = CV_RGB(255, 0, 0);		// red
 	/**********************************************************************************/
@@ -270,7 +270,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			weight = abs(nav_path__center_path_id-pathID);
+			weight = 0;//abs(nav_path__center_path_id-pathID);
 			curPathDanger += weight;
 
 			// Clip high danger values to be no higher than max_path_danger
@@ -408,8 +408,9 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 
 			/* Update goal
 			 * (convert to 320x240 frame) */
-			goal.x = (bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
-			goal.y = (int)bestPath_end.y/2;
+			// int scalex = 40;
+			goal.x = /*(nav_path__center_path_id-pathID) * scalex;*/ (bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
+			goal.y = max_path_danger - pathDanger[bestPath_id]/2; //(int)bestPath_end.y/2;
 
 			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
 		}
@@ -1155,7 +1156,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 	if ( goal_far.y > closeness ) // y is inverted -> 0 is top&far
 	{
 		/* can't see very far */
-		farweight = 0.10;
+		farweight = 0.01;
 	}
 	else
 	{
@@ -1176,7 +1177,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 	 */
 	{
 		// rotation (0 = go straight)
-		goal.x = (visCvPath->width/2 - goal.x) * (255) / (visCvPath->width );
+		goal.x = (visCvPath->width/2 - goal.x) * (275) / (visCvPath->width );
 		// fwd speed
 		goal.y = (visCvPath->height  - goal.y) * (255) / (visCvPath->height);
 
@@ -1225,7 +1226,7 @@ void Vision::Adapt()
 
 	/* average rgb over time */
 	static int first = 1;
-	float k = 0.075; // % of new value to use
+	float k = 0.05; // % of new value to use
 	if (first)
 	{
 		first = 0;

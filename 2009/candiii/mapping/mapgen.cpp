@@ -650,7 +650,7 @@ int MapGen::genProbabilityMap()
 	int divby = 2;      // image size denominator
 	int pad = 4;        // remove noise around img edges
 	double badval = -2; // rate for obstacle probability
-	double goodval = 7; // rate for travpath probability
+	double goodval = 6; // rate for travpath probability
 	double setval;
 	double wx,wy;
 	int x,y;
@@ -685,8 +685,9 @@ int MapGen::genProbabilityMap()
 	mapCamPointToWorldPoint(imgHalfWidth, 0, a, b); // top center of camera frame
 	mapCamPointToWorldPoint(imgHalfWidth, visCvGrey->height-1, wx, wy); // bottom center of camera frame
 	/* update/avg current robot orientation */
-	robotBaseAt = cvPoint( (robotBaseAt.x+wx)/2, (robotBaseAt.y+wy)/2 );
-	robotLookingAt = cvPoint( (robotLookingAt.x+a)/2, (robotLookingAt.y+b)/2 );
+	float K_ = 0.25; // percent of new value
+	robotBaseAt = cvPoint( (robotBaseAt.x*(1-K_)+wx*K_), (robotBaseAt.y*(1-K_)+wy*K_) );
+	robotLookingAt = cvPoint( (robotLookingAt.x*(1-K_)+a*K_), (robotLookingAt.y*(1-K_)+b*K_) );
 	//printf("bx=%d by=%d  lx=%d ly=%d \n",robotBaseAt.x,robotBaseAt.y,robotLookingAt.x,robotLookingAt.y);
 
 	/* draw a circle denoting base orientaion */
@@ -709,12 +710,12 @@ int MapGen::processMap(Point2D<int>& goal)
 	// parameters
 	int nav_path__num = 9; //change 'vector' too!
 	int nav_path__center_path_id = nav_path__num/2;
-	int nav_path__path_search_girth = 0; // pixels near curr line to search
+	int nav_path__path_search_girth = 1; // pixels near curr line to search
 	int danger_per_barrel_pixel = 1; //=1
 	int nav_path__danger_smoothing_radius = 3; // lines nearby to search
-	int max_path_danger = 40;
+	int max_path_danger = 45;
 	CvScalar dangerous_pixel_color = CV_RGB(255,0,0);
-	double min_path_danger_value = 50;//20; // lower => be less afraid
+	double min_path_danger_value = 75;//20; // lower => be less afraid
 
 	// display
 	IplImage* temp = cvCloneImage(probmap);
@@ -783,7 +784,7 @@ int MapGen::processMap(Point2D<int>& goal)
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			weight = abs(nav_path__center_path_id-pathID);
+			weight = 0;//abs(nav_path__center_path_id-pathID);
 			curPathDanger += weight;
 
 			// Clip high danger values to be no higher than max_path_danger
@@ -924,9 +925,9 @@ int MapGen::processMap(Point2D<int>& goal)
 
 			/* Update goal */
 			//Point2D<int> goal;
-			int scalex = 20;
+			int scalex = 50;
 			goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
-			goal.y = max_path_danger - pathDanger[bestPath_id] ;
+			goal.y = max_path_danger + scalex - pathDanger[bestPath_id]/2 ;
 
 			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
 		}
