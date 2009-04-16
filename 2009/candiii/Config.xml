@@ -12,7 +12,7 @@
 <Config>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>01</useFirewireCamera>  <!-- set to 0 to load video -->
+	<useFirewireCamera>00</useFirewireCamera>  <!-- set to 0 to load video -->
 	<gain>16</gain>
 	<shutter>150</shutter>
 	<gamma>0</gamma>
@@ -42,8 +42,8 @@
     <maxFeatureShift>26</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
 
     <!-- ON/OFF -->
-    <doMapping>01</doMapping>
-    <useMotors>01</useMotors>
+    <doMapping>00</doMapping>
+    <useMotors>00</useMotors>
     <doVision>001</doVision>
 
 
