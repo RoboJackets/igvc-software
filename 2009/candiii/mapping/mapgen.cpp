@@ -682,10 +682,11 @@ int MapGen::genProbabilityMap()
 
 	/* get robot orientation in world coordinates */
 	double a,b;
+	int baseoffset = -10;
 	mapCamPointToWorldPoint(imgHalfWidth, 0, a, b); // top center of camera frame
-	mapCamPointToWorldPoint(imgHalfWidth, visCvGrey->height-1, wx, wy); // bottom center of camera frame
+	mapCamPointToWorldPoint(imgHalfWidth, visCvGrey->height - baseoffset, wx, wy); // bottom center of camera frame (minus some)
 	/* update/avg current robot orientation */
-	float K_ = 0.25; // percent of new value
+	float K_ = 0.50; // percent of new value
 	robotBaseAt = cvPoint( (robotBaseAt.x*(1-K_)+wx*K_), (robotBaseAt.y*(1-K_)+wy*K_) );
 	robotLookingAt = cvPoint( (robotLookingAt.x*(1-K_)+a*K_), (robotLookingAt.y*(1-K_)+b*K_) );
 	//printf("bx=%d by=%d  lx=%d ly=%d \n",robotBaseAt.x,robotBaseAt.y,robotLookingAt.x,robotLookingAt.y);
@@ -784,7 +785,7 @@ int MapGen::processMap(Point2D<int>& goal)
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			weight = 0;//abs(nav_path__center_path_id-pathID);
+			weight = abs(nav_path__center_path_id-pathID)/2;
 			curPathDanger += weight;
 
 			// Clip high danger values to be no higher than max_path_danger
@@ -925,9 +926,9 @@ int MapGen::processMap(Point2D<int>& goal)
 
 			/* Update goal */
 			//Point2D<int> goal;
-			int scalex = 50;
+			int scalex = 55;
 			goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
-			goal.y = max_path_danger + scalex - pathDanger[bestPath_id]/2 ;
+			goal.y = (max_path_danger + 1 - pathDanger[bestPath_id]) * 2 ;
 
 			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
 		}
@@ -960,8 +961,8 @@ Point2D<double> MapGen::navPath_vector(int pathID)
 {
 
 	int nav_path__center_path_id = 4; //nav_path__num/2;
-	int nav_path__view_cone__spacing = 16;
-	float nav_path__view_distance_multiplier = .60;//0.5;
+	int nav_path__view_cone__spacing = 15;
+	float nav_path__view_distance_multiplier = .60;//0.6;
 
 	double x = (robotLookingAt.x - robotBaseAt.x) ;
 	double y = (robotLookingAt.y - robotBaseAt.y) ; // positive y down

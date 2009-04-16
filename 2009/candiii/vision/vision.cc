@@ -14,9 +14,13 @@
 /* for scanning the path image */
 #define BAD_PIXEL  0	// value to set path image to
 #define GOOD_PIXEL 255	// value to set path image to
-#define L_R_OFFSET 20 	// pixel spacing from center scan line up
+#define L_R_OFFSET 25 	// pixel spacing from center scan line up
 #define PIXEL_SKIP 2 	// noise filtering threshold in checkPixel()
 #define EDGE_PAD   4    // top/bottom padding
+
+/* for Adapt() */
+#define K_ROI 0.025     // float: percentage of new roi avg to add to running avg
+
 
 /*
  *
@@ -270,7 +274,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			weight = 0;//abs(nav_path__center_path_id-pathID);
+			weight = abs(nav_path__center_path_id-pathID)/2;
 			curPathDanger += weight;
 
 			// Clip high danger values to be no higher than max_path_danger
@@ -408,8 +412,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 
 			/* Update goal
 			 * (convert to 320x240 frame) */
-			// int scalex = 40;
-			goal.x = /*(nav_path__center_path_id-pathID) * scalex;*/ (bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
+			goal.x = (bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
 			goal.y = max_path_danger - pathDanger[bestPath_id]/2; //(int)bestPath_end.y/2;
 
 			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
@@ -1213,6 +1216,9 @@ void Vision::Adapt()
 	cvCopy(visCvRawTransform,roi_img);
 	cvResetImageROI(visCvRawTransform);
 
+    /* blur image data */
+    cvSmooth(roi_img,roi_img,CV_GAUSSIAN,3,0,0,0);
+
 	/* display roi box in separate window */
 	cvShowImage( "roi" , roi_img );
 
@@ -1226,7 +1232,7 @@ void Vision::Adapt()
 
 	/* average rgb over time */
 	static int first = 1;
-	float k = 0.05; // % of new value to use
+	//float k = 0.025; // % of new value to use
 	if (first)
 	{
 		first = 0;
@@ -1236,9 +1242,9 @@ void Vision::Adapt()
 	}
 	else
 	{
-		avgB = blue*(k)  + avgB*(1-k);
-		avgG = green*(k) + avgG*(1-k);
-		avgR = red*(k)   + avgR*(1-k);
+		avgB = blue*(K_ROI)  + avgB*(1-K_ROI);
+		avgG = green*(K_ROI) + avgG*(1-K_ROI);
+		avgR = red*(K_ROI)   + avgR*(1-K_ROI);
 	}
 
 	unsigned char* rgbdata = (unsigned char*) visCvRawTransform->imageData;
@@ -1251,7 +1257,7 @@ void Vision::Adapt()
 		ar = *(rgbdata+2);
 		rgbdata+=3;
 
-		if ((abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&
+		if (    (abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&
 				(abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
 				(abs(ar-(unsigned char)avgR)<adapt_maxDiff))
 		{
@@ -1280,6 +1286,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 	/* shrink visCvAdapt img to 320x240 */
 	cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
 	//cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
+	cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
 
 	/* generate visCvPath */
 	visGenPath(visCvThresh);
@@ -1292,6 +1299,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 
 	/* update return goal */
 	CvtPixToGoal(goal);
+
 }
 
 
