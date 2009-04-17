@@ -66,7 +66,11 @@ public:
 	Point2D<double> navPath_start(/*int pathID*/);
 	Point2D<double> navPath_end(int pathID);
 	Point2D<double> navPath_vector(int pathID);
-
+    /**/
+	// previously static variables
+	int _t;
+	int _f;
+	int _do_map;
 
 };
 
