@@ -690,8 +690,8 @@ void Robot::getGlutMask(int call)
     cvCopy( visCvRawTransform, visCvRaw );
     cvResize( visCvRaw, visCvGlutMask, CV_INTER_LINEAR );
 
-    if(call==0) cvNamedWindow("mask");
-    cvShowImage("mask",visCvGlutMask);
+    //if(call==0) cvNamedWindow("mask");
+    //cvShowImage("mask",visCvGlutMask);
 }
 
 
