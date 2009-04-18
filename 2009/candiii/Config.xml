@@ -28,13 +28,13 @@
 	<robotWidth>25</robotWidth>   <!-- lower => we can squeeze through more -->
 	<doTransform>01</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
-	<maxDiff>35</maxDiff>         <!-- lower => more noise in thresh image -->
+	<maxDiff>30</maxDiff>         <!-- lower => more noise in thresh image -->
 	<boxPadding>88</boxPadding>   <!-- lower => wider box -->
 
 	<!-- Robot Misc Settings -->
     <defaultView>01</defaultView>       <!-- gui slider bar starting value -->
-	<_k>0.30</_k>                       <!-- lower => more smooth motor cotrol (averages new motor commands - vision only) -->
-    <motorsMaxSpeed>40</motorsMaxSpeed> <!-- max motor output [0-255] -->
+	<_k>0.750</_k>                       <!-- lower => more smooth motor cotrol (averages new motor commands - vision only) -->
+    <motorsMaxSpeed>30</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
     <maxFeatures>70</maxFeatures>           <!-- max number for feature corners to find -->
@@ -43,7 +43,7 @@
 
     <!-- ON/OFF -->
     <doMapping>01</doMapping>
-    <useMotors>01</useMotors>
+    <useMotors>00</useMotors>
     <doVision>001</doVision>
 
 
