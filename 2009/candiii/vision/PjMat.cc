@@ -7,7 +7,7 @@
 // (how much up from 0 we are, in radians)
 // 1.25 default from 2007
 // update: current measured guppy angle is 0.995 (57deg) for 2009
-#define OFFANGLE  1.16  //1.14   // we will use halfway for now!
+#define OFFANGLE  1.15  //1.14   // we will use halfway for now!
 // need to measure stuff below for guppy!
 /* *************************** */
 
@@ -61,7 +61,7 @@ void setPjMat()
 
 	findmaxview(&n[0]);
 
-        glMatrixMode(GL_PROJECTION);
+	glMatrixMode(GL_PROJECTION);
 
 	glLoadIdentity ();
 	glOrtho (-xscale, xscale, -yscale, yscale, -10.0, 10.0);

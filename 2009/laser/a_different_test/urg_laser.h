@@ -5,7 +5,8 @@
 #include <sys/termios.h>
 #include <cstdio>
 
-class UrgLaser {
+class UrgLaser
+{
 	FILE* dev;
 	int maxrange;
 	int minangle;
@@ -25,16 +26,29 @@ public:
 
 	UrgLaser();
 	~UrgLaser();
-	int makeScan(int aStart,int aEnd, int aSkip) {
+	int makeScan(int aStart,int aEnd, int aSkip)
+	{
 		return urgMakeScan(dev, aStart, aEnd, aSkip);
 	};
-    void initialize(char* aDevName="/dev/ttyACM0",int aSpeed=19200);
+	void initialize(char* aDevName="/dev/ttyACM0",int aSpeed=19200);
 	void closeSerial();
 
-	int getMaxRange(){return maxrange;};
-	int getMinAngle(){return minangle;};
-	int getMaxAngle(){return maxangle;};
-	int getMaxStep(){return maxstep;};
+	int getMaxRange()
+	{
+		return maxrange;
+	};
+	int getMinAngle()
+	{
+		return minangle;
+	};
+	int getMaxAngle()
+	{
+		return maxangle;
+	};
+	int getMaxStep()
+	{
+		return maxstep;
+	};
 
 };
 

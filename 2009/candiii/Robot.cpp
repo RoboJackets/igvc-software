@@ -339,17 +339,17 @@ void Robot::processFunc()
 	 */
 
 
-    /* glut mask init hack */
-    static bool getMask = true;
-    if(getMask)
-    {
-        getMask=false;
-        /* get transform edge mask */
-        getGlutMask(1);
-        getGlutMask(2);
-        getGlutMask(3);
-        getGlutMask(4);
-    }
+	/* glut mask init hack */
+	static bool getMask = true;
+	if (getMask)
+	{
+		getMask=false;
+		/* get transform edge mask */
+		getGlutMask(1);
+		getGlutMask(2);
+		getGlutMask(3);
+		getGlutMask(4);
+	}
 
 
 	/* Get raw image */
@@ -385,21 +385,21 @@ void Robot::processFunc()
 	/* Drive Robot via motor commands (GO!) */
 	if (useMotors)
 	{
-	    if (doMapping)
-	    {
-	        /* drive via mapping */
-            //motors.set_heading(heading_mapping.y, heading_mapping.x);
-            heading_main = heading_mapping;
-        }
-        else
-        {
-            /* Average motor commands from vision (account for high frame rate)
-             * k = % of new value to use */
-            heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
-            heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
-            /* drive via vision */
-            //motors.set_heading(heading_main.y, heading_main.x);
-        }
+		if (doMapping)
+		{
+			/* drive via mapping */
+			//motors.set_heading(heading_mapping.y, heading_mapping.x);
+			heading_main = heading_mapping;
+		}
+		else
+		{
+			/* Average motor commands from vision (account for high frame rate)
+			 * k = % of new value to use */
+			heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
+			heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
+			/* drive via vision */
+			//motors.set_heading(heading_main.y, heading_main.x);
+		}
 	}
 
 
@@ -414,7 +414,7 @@ void Robot::processFunc()
 	if (useMotors)
 	{
 
-	    motors.set_heading(heading_main.y, heading_main.x);
+		motors.set_heading(heading_main.y, heading_main.x);
 		printf("            heading: rot: %d  fwd: %d \n\n",heading_main.x,heading_main.y);
 	}
 	if (PRINTFRAMERATE)
@@ -516,14 +516,14 @@ void Robot::initGlut()
 
 	// previously in updateGlutDisplay()
 	{
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_LIGHTING);
-        glEnable(GL_TEXTURE_RECTANGLE_ARB);
-        if (doTransform) setPjMat(); // create transform matrix
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_LIGHTING);
+		glEnable(GL_TEXTURE_RECTANGLE_ARB);
+		if (doTransform) setPjMat(); // create transform matrix
 	}
 
-    /* get transform edge mask */
-    getGlutMask(0); // zero here for first call to function
+	/* get transform edge mask */
+	getGlutMask(0); // zero here for first call to function
 }
 
 
@@ -576,7 +576,7 @@ void Robot::updateGlutDisplay()
 		//glDisable(GL_TEXTURE_RECTANGLE_ARB);
 
 		//glFinish();
-        //glFlush();
+		//glFlush();
 
 		/* get data from card */
 		glReadPixels( 0				,	//GLint x,
@@ -680,18 +680,18 @@ void Robot::updateGlutDisplay()
 
 void Robot::getGlutMask(int call)
 {
-    /* this function gets a mask image of the transformed space
-    *   to help when projecting the visCvThresh image into world space.
-    *    this function should be run in a loop so the updateGlutDisplay/OpenGL fully initializes the mask,
-    *     and even still, the mask still isn't fully correct sometimes... */
-    if(call==0) visCvGlutMask = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
-    cvSet( visCvRaw, CV_RGB(255,255,255) );
-    updateGlutDisplay();
-    cvCopy( visCvRawTransform, visCvRaw );
-    cvResize( visCvRaw, visCvGlutMask, CV_INTER_LINEAR );
+	/* this function gets a mask image of the transformed space
+	*   to help when projecting the visCvThresh image into world space.
+	*    this function should be run in a loop so the updateGlutDisplay/OpenGL fully initializes the mask,
+	*     and even still, the mask still isn't fully correct sometimes... */
+	if (call==0) visCvGlutMask = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
+	cvSet( visCvRaw, CV_RGB(255,255,255) );
+	updateGlutDisplay();
+	cvCopy( visCvRawTransform, visCvRaw );
+	cvResize( visCvRaw, visCvGlutMask, CV_INTER_LINEAR );
 
-    //if(call==0) cvNamedWindow("mask");
-    //cvShowImage("mask",visCvGlutMask);
+	//if(call==0) cvNamedWindow("mask");
+	//cvShowImage("mask",visCvGlutMask);
 }
 
 

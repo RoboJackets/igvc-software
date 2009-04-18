@@ -41,7 +41,7 @@ int Motors_Old::SetupSerial()
 	/* Set the port back to blocking (waiting) behavior for calls to read() */
 	//fcntl(fdMotor, F_SETFL, 0);
 	/*no! => go nonblocking!*/
-    fcntl(fdMotor, F_SETFL, O_NONBLOCK);
+	fcntl(fdMotor, F_SETFL, O_NONBLOCK);
 
 
 	/* Get the current options for the port */
@@ -206,10 +206,10 @@ int Motors_Old::get_motor_states(void)
 int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 {
 
-    // XXX: hack!
+	// XXX: hack!
 	iRotation *= 1.15;
 
-    // convert
+	// convert
 	int left  = iFwdVelocity + iRotation ;
 	int right = iFwdVelocity - iRotation ;
 
@@ -226,8 +226,8 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 		if (right > _max_speed_) right = _max_speed_ ;
 	}
 
-    // don't go backwards
-    if (right < 0) right = 0 ;
+	// don't go backwards
+	if (right < 0) right = 0 ;
 	if (left  < 0) left  = 0 ;
 
 	// motors don't respond until certain output is reached
@@ -237,7 +237,7 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 	// show
 	printf("Motors: L=%d R=%d \n",left,right);
 
-    // do it!
+	// do it!
 	return this->set_motors( left , right );
 }
 
