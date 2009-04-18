@@ -16,7 +16,8 @@ using namespace std;
 UrgLaser::UrgLaser()
   Constructor
 ***********************************************************/
-UrgLaser::UrgLaser(){
+UrgLaser::UrgLaser()
+{
 	maxrange = 5600; //max range in [mm]
 	minangle = -135; //min angle in [deg]
 	maxangle = 135; //max angle in [deg]
@@ -30,15 +31,18 @@ UrgLaser::initialize(char* aDevName, int aSpeed)
  Input: aDevName -- device name (default = "/dev/ttyACM0")
         aSpeed -- communication speed (default = 19200bps)
 ***********************************************************/
-void UrgLaser::initialize(char* aDevName, int aSpeed){
+void UrgLaser::initialize(char* aDevName, int aSpeed)
+{
 	// Open serial port (aSpeed bps)
 	dev=openSerial(aDevName,aSpeed);
-	if(dev==NULL){
+	if (dev==NULL)
+	{
 		perror("Could not open serial port");
 		exit(1);
 	}
 	int tests = startSensor(dev);
-	if(tests<0){
+	if (tests<0)
+	{
 		perror("Error in startSenssor");
 		cerr << tests << endl;
 		exit(1);
@@ -55,14 +59,15 @@ UrgLaser::openSerial(char *aDevName, int aSpeed)
 	Return serial port file handle
 	Returns NULL when failed to open.
 ******************************************************/
-FILE* UrgLaser::openSerial(char *aDevName, int aSpeed){
+FILE* UrgLaser::openSerial(char *aDevName, int aSpeed)
+{
 	FILE* dev;
 
 	dev=fopen(aDevName,"w+");
-	if(dev==NULL) return NULL;	// invalid device file
+	if (dev==NULL) return NULL;	// invalid device file
 
 	// setup parameters
-	if(setupSerial(fileno(dev),aSpeed)) return dev;
+	if (setupSerial(fileno(dev),aSpeed)) return dev;
 
 	// fail
 	perror("setting term parameters");
@@ -77,13 +82,14 @@ UrgLaser::setupSerial(int aFd, int aSpeed)
 	aSpeed [in] Communication speed (bps)
  	Retval 0 Failed, 1 Success
 *******************************************************/
-int UrgLaser::setupSerial(int aFd, int aSpeed){
+int UrgLaser::setupSerial(int aFd, int aSpeed)
+{
 	int speed;
 	struct termios tio;
 
 	speed=bitrate(aSpeed);
-	if(speed==0)
-	return 0;	// invalid bitrate
+	if (speed==0)
+		return 0;	// invalid bitrate
 
 	tcgetattr(aFd,&tio);
 
@@ -102,7 +108,7 @@ int UrgLaser::setupSerial(int aFd, int aSpeed){
 	tio.c_lflag &= ~( ISIG | ICANON | ECHO );
 
 	// Commit
-	if(tcsetattr(aFd,TCSADRAIN,&tio)==0) return 1;
+	if (tcsetattr(aFd,TCSADRAIN,&tio)==0) return 1;
 
 	return 0;
 }
@@ -114,8 +120,10 @@ UrgLaser::bitrate(int aBR)
   	cfset[i|o] Returned value for speed function
 	Returns B0 if failed
 *****************************************************************/
-speed_t UrgLaser::bitrate(int aBR){
-	switch(aBR){
+speed_t UrgLaser::bitrate(int aBR)
+{
+	switch (aBR)
+	{
 	case 9600:
 		return B9600;
 
@@ -149,7 +157,8 @@ speed_t UrgLaser::bitrate(int aBR){
 UrgLaser::startSensor(FILE* aPort)
 	Set SCIP2.0 protocol and start the laser
 ************************************************/
-int UrgLaser::startSensor(FILE* aPort){
+int UrgLaser::startSensor(FILE* aPort)
+{
 	char req[8];
 	int i;
 	char echo[80];
@@ -158,30 +167,32 @@ int UrgLaser::startSensor(FILE* aPort){
 	sprintf(req,"SCIP2.0\n");
 	i=fwrite(req,sizeof(char),strlen(req),aPort);
 	// 'fwrite' error
-	if(i==0) return -1;
+	if (i==0) return -1;
 
 	// echo message
 	// 'fgets' error
-	if(fgets(echo, sizeof(echo), aPort) == NULL) return -2;
+	if (fgets(echo, sizeof(echo), aPort) == NULL) return -2;
 	// check echo message (== "SCIP2.0")
 	cerr << echo;
 
 	fgets(echo, sizeof(echo), aPort);
 	cerr << echo << endl;
-	if ( (strncmp("0Ee",echo,3)==0) ){
+	if ( (strncmp("0Ee",echo,3)==0) )
+	{
 		fgets(echo, sizeof(echo), aPort);
 		cerr << "SCIP2.0 protocol already set" << endl;
-	} else cerr << "Set SCIP2.0 protocol" << endl;
+	}
+	else cerr << "Set SCIP2.0 protocol" << endl;
 
 	// ---- get version ----
 	sprintf(req,"VV\n");
 	i=fwrite(req,sizeof(char),strlen(req),aPort);
 	// 'fwrite' error
-	if(i==0) return -1;
+	if (i==0) return -1;
 
 	// echo message
 	// 'fgets' error
-	if(fgets(echo, sizeof(echo), aPort) == NULL) return -2;
+	if (fgets(echo, sizeof(echo), aPort) == NULL) return -2;
 	// check echo message (== "BM____")
 	cerr << endl << echo << ':';
 	fflush(NULL);
@@ -207,11 +218,11 @@ int UrgLaser::startSensor(FILE* aPort){
 	sprintf(req,"BM\n");
 	i=fwrite(req,sizeof(char),strlen(req),aPort);
 	// 'fwrite' error
-	if(i==0) return -1;
+	if (i==0) return -1;
 
 	// echo message
 	// 'fgets' error
-	if(fgets(echo, sizeof(echo), aPort) == NULL) return -2;
+	if (fgets(echo, sizeof(echo), aPort) == NULL) return -2;
 	// check echo message (== "BM____")
 	cerr << endl << echo << ':';
 	fflush(NULL);
@@ -231,16 +242,19 @@ int UrgLaser::startSensor(FILE* aPort){
 UrgLaser::~UrgLaser()
 	Destructor
 *****************************************/
-UrgLaser::~UrgLaser(){
+UrgLaser::~UrgLaser()
+{
 }
 
 /****************************************
 UrgLaser::closeSerial();
 	Close sensor
 *****************************************/
-void UrgLaser::closeSerial(){
+void UrgLaser::closeSerial()
+{
 	int tests=stopSensor(dev);
-	if(tests<0){
+	if (tests<0)
+	{
 		perror("Error in stopSenssor");
 		cerr << tests << endl;
 	}
@@ -253,7 +267,8 @@ void UrgLaser::closeSerial(){
 UrgLaser::stopSensor(FILE* aPort)
 	Stop the laser
 *****************************************/
-int UrgLaser::stopSensor(FILE* aPort){
+int UrgLaser::stopSensor(FILE* aPort)
+{
 	char req[8];
 	int i;
 	char echo[80];
@@ -262,11 +277,11 @@ int UrgLaser::stopSensor(FILE* aPort){
 	sprintf(req,"QT\n");
 	i=fwrite(req,sizeof(char),strlen(req),aPort);
 	// 'fwrite' error
-	if(i==0) return -1;
+	if (i==0) return -1;
 
 	// echo message
 	// 'fgets' error
-	if(fgets(echo, sizeof(echo), aPort) == NULL) return -2;
+	if (fgets(echo, sizeof(echo), aPort) == NULL) return -2;
 	// check echo message (== "QT____")
 	cerr << endl << echo << ':';
 	fflush(NULL);
@@ -291,7 +306,8 @@ int UrgLaser::urgMakeScan(FILE* aPort, int aStart, int aEnd, int aSkip)
   		aSkip [in] Number of steps to be merged when multiple points are combined(1-99)
   	Return: 0 if OK, -1 if failed
 ******************************************************************************************/
-int UrgLaser::urgMakeScan(FILE* aPort, int aStart, int aEnd, int aSkip){
+int UrgLaser::urgMakeScan(FILE* aPort, int aStart, int aEnd, int aSkip)
+{
 	char req[16];
 	int *pt;
 	char line[70];
@@ -302,23 +318,25 @@ int UrgLaser::urgMakeScan(FILE* aPort, int aStart, int aEnd, int aSkip){
 
 	sprintf(req,"GD%04d%04d%02d\n",aStart,aEnd,aSkip);
 	i=fwrite(req,sizeof(char),strlen(req),aPort);
-	if(i==0)
+	if (i==0)
 		return -1;
 	// echo-back
-	if(fgets(line,sizeof(line),aPort)==NULL) return -1;
-	if(strcmp(req,line)!=0)	return -1;
+	if (fgets(line,sizeof(line),aPort)==NULL) return -1;
+	if (strcmp(req,line)!=0)	return -1;
 
 	// status
-	if(fgets(line,sizeof(line),aPort)==NULL) {
+	if (fgets(line,sizeof(line),aPort)==NULL)
+	{
 		return -1;
 	}
-	if(strcmp("00P\n",line)!=0)
+	if (strcmp("00P\n",line)!=0)
 	{
 		return -1;
 	}
 
 	// Timestamp and sum
-	if(fgets(line,sizeof(line),aPort)==NULL) {
+	if (fgets(line,sizeof(line),aPort)==NULL)
+	{
 		return -1;
 	}
 
@@ -328,21 +346,27 @@ int UrgLaser::urgMakeScan(FILE* aPort, int aStart, int aEnd, int aSkip){
 	int count = 0;
 	alldata =new char[3*((aEnd-aStart+1)/aSkip+1)];
 
-	for(;;){
+	for (;;)
+	{
 
-		if(fgets(line,sizeof(line),aPort)==NULL){
+		if (fgets(line,sizeof(line),aPort)==NULL)
+		{
 			return -1;
 		}
-		if(!strcmp("\n",line)){
+		if (!strcmp("\n",line))
+		{
 			//end of result
 			break;
 		}
 
 		// copy the data part into 'alldata'
 		pt_all = (char *)(alldata+count*64);
-		if ((lenlin = strlen(line) )== 66){
+		if ((lenlin = strlen(line) )== 66)
+		{
 			strncpy(pt_all, line, 64);
-		}else{
+		}
+		else
+		{
 			strncpy(pt_all, line, lenlin-2);
 			*(pt_all+lenlin-2)='\n';
 		}
@@ -352,9 +376,11 @@ int UrgLaser::urgMakeScan(FILE* aPort, int aStart, int aEnd, int aSkip){
 	pt_all = alldata;
 
 	int cnt = 0;
-	for(;;){
+	for (;;)
+	{
 		cnt++;
-		if (*(pt_all) == '\n') {
+		if (*(pt_all) == '\n')
+		{
 			break;
 		}
 		*(pt)=((((*(pt_all) - 0x30)<<6) + *(++pt_all) - 0x30)<<6) + *(++pt_all) - 0x30;

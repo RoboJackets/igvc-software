@@ -28,8 +28,8 @@
 	<robotWidth>25</robotWidth>   <!-- lower => we can squeeze through more -->
 	<doTransform>01</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
-	<maxDiff>30</maxDiff>         <!-- lower => more noise in thresh image -->
-	<boxPadding>90</boxPadding>   <!-- lower => wider box -->
+	<maxDiff>35</maxDiff>         <!-- lower => more noise in thresh image -->
+	<boxPadding>88</boxPadding>   <!-- lower => wider box -->
 
 	<!-- Robot Misc Settings -->
     <defaultView>01</defaultView>       <!-- gui slider bar starting value -->

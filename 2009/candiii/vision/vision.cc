@@ -19,7 +19,7 @@
 #define EDGE_PAD   4    // top/bottom padding
 
 /* for Adapt() */
-#define K_ROI 0.025     // float: percentage of new roi avg to add to running avg
+#define K_ROI 0.035     // float: percentage of new roi avg to add to running avg
 
 
 /*
@@ -51,6 +51,8 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 //		printf("visCvRaw is NULL!\n");
 //		return;
 //	}
+
+	cvSmooth(visCvRawTransform,visCvRawTransform,CV_BLUR,5,0,0,0);
 
 	/* copy image to internal buffer for drawing */
 	cvCopy(visCvRawTransform,visCvDebug);
@@ -148,7 +150,9 @@ void Vision::init()
 		roi_img = cvCreateImage( cvSize(roi.width, roi.height), IPL_DEPTH_8U, 3 );
 
 		/* starting colors */
-		avgB=127; avgG=127; avgB=127;
+		avgB=127;
+		avgG=127;
+		avgB=127;
 	}
 
 }
@@ -170,19 +174,19 @@ void Vision::visHsvProcessing(Point2D<int>& goal)
 	cvSmooth(visCvSaturation, visCvSaturation);
 	Normalize(visCvSaturation);
 	ThresholdImage(visCvSaturation, visCvSaturation, satThreshold);
-	cvDilate(visCvSaturation, visCvSaturation, NULL, 1);
+	//cvDilate(visCvSaturation, visCvSaturation, NULL, 1);
 
 	/* threshold hue
 	 * (320x240) */
 	cvSmooth(visCvHue, visCvHue);
 	Normalize(visCvHue);
 	ThresholdImage(visCvHue, visCvHue, hueThreshold);
-	cvDilate(visCvHue, visCvHue, NULL, 1);
+	//cvDilate(visCvHue, visCvHue, NULL, 1);
 
 	/* or the images together
 	 * (320x240) */
 	cvOr(visCvSaturation, visCvHue, visCvThresh);
-	cvDilate(visCvThresh, visCvThresh, NULL, 1);
+	//cvDilate(visCvThresh, visCvThresh, NULL, 1);
 
 	/* make white=good & black=bad
 	 * (320x240) */
@@ -901,7 +905,7 @@ void Vision::preProcessColors(IplImage* img)
 		{
 			// make orange
 			img->imageData[i  ] = 0;
-			img->imageData[i+1] = 128;
+			img->imageData[i+1] = 165;
 			img->imageData[i+2] = 255;
 		}
 
@@ -1216,8 +1220,8 @@ void Vision::Adapt()
 	cvCopy(visCvRawTransform,roi_img);
 	cvResetImageROI(visCvRawTransform);
 
-    /* blur image data */
-    cvSmooth(roi_img,roi_img,CV_GAUSSIAN,3,0,0,0);
+	/* blur image data */
+	cvSmooth(roi_img,roi_img,CV_BLUR,7,0,0,0);
 
 	/* display roi box in separate window */
 	cvShowImage( "roi" , roi_img );
@@ -1259,7 +1263,8 @@ void Vision::Adapt()
 
 		if (    (abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&
 				(abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
-				(abs(ar-(unsigned char)avgR)<adapt_maxDiff))
+				(abs(ar-(unsigned char)avgR)<adapt_maxDiff)
+		   )
 		{
 			visCvAdapt->imageData[i/3] = GOOD_PIXEL;
 		}
@@ -1286,7 +1291,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 	/* shrink visCvAdapt img to 320x240 */
 	cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
 	//cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
-	cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
+	//cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
 
 	/* generate visCvPath */
 	visGenPath(visCvThresh);
