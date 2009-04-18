@@ -19,7 +19,7 @@
 #define EDGE_PAD   4    // top/bottom padding
 
 /* for Adapt() */
-#define K_ROI 0.035     // float: percentage of new roi avg to add to running avg
+#define K_ROI 0.2035     // float: percentage of new roi avg to add to running avg
 
 
 /*
@@ -52,7 +52,7 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 //		return;
 //	}
 
-	cvSmooth(visCvRawTransform,visCvRawTransform,CV_BLUR,5,0,0,0);
+	cvSmooth(visCvRawTransform,visCvRawTransform,CV_BLUR,7,0,0,0);
 
 	/* copy image to internal buffer for drawing */
 	cvCopy(visCvRawTransform,visCvDebug);
@@ -111,7 +111,7 @@ void Vision::init()
 	// (everything bad is a barrel)
 	danger_per_barrel_pixel = 1;
 	// Path danger values higher than this will be clipped to this value
-	max_path_danger = 75;					// >= 0 // 75
+	max_path_danger = 79;					// >= 0 // 75
 	// smoothing = paths that are *near* dangerous paths are also considered to be dangerous
 	nav_path__danger_smoothing_radius = 6;	// >= 0 // 6
 	// colors
@@ -131,8 +131,8 @@ void Vision::init()
 		/* define roi corners (upper-left and lower-right) */
 		if (DO_TRANSFORM)
 		{
-			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/3);
-			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/6);
+			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/4);
+			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/7);
 		}
 		else
 		{
@@ -417,7 +417,7 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 			/* Update goal
 			 * (convert to 320x240 frame) */
 			goal.x = (bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
-			goal.y = max_path_danger - pathDanger[bestPath_id]/2; //(int)bestPath_end.y/2;
+			goal.y = max_path_danger - pathDanger[bestPath_id]; //(int)bestPath_end.y/2;
 
 			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
 		}
@@ -1163,12 +1163,12 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 	if ( goal_far.y > closeness ) // y is inverted -> 0 is top&far
 	{
 		/* can't see very far */
-		farweight = 0.01;
+		farweight = 0.00;
 	}
 	else
 	{
 		/* can see far off */
-		farweight = 0.80;
+		farweight = 0.10;
 	}
 
 	/* set averaged goals */
@@ -1184,7 +1184,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 	 */
 	{
 		// rotation (0 = go straight)
-		goal.x = (visCvPath->width/2 - goal.x) * (275) / (visCvPath->width );
+		goal.x = (visCvPath->width/2 - goal.x) * (255*2) / (visCvPath->width );
 		// fwd speed
 		goal.y = (visCvPath->height  - goal.y) * (255) / (visCvPath->height);
 
@@ -1201,6 +1201,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 			goal.x=0;
 		}
 
+        //goal.x = (float)goal.x * 2;
 		// Debug print
 		//printf("heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
 	}
