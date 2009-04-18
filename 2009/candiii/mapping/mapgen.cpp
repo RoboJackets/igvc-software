@@ -252,7 +252,7 @@ int MapGen::getFeatures()
 
 		/* check status *********/
 		{
-			if (avgdx<=0.05 && avgdy<=0.05)
+			if (avgdx<=0.01 && avgdy<=0.01)
 			{
 				return 0; // no motion
 			}
@@ -644,7 +644,7 @@ int MapGen::genProbabilityMap()
 
 
 	/* slowly move all probabilities toward unknown (127) */
-	if (0)
+	if (1)
 	{
 		double curr;
 		double speed = 1;
@@ -666,8 +666,8 @@ int MapGen::genProbabilityMap()
 	 *  while setting probabilities of obstacles and traversible area */
 	int divby = 2;      // image size denominator
 	int pad = 4;        // remove noise around img edges
-	double badval = -1; // rate for obstacle probability
-	double goodval = 1; // rate for travpath probability
+	double badval = -3; // rate for obstacle probability
+	double goodval = 4; // rate for travpath probability
 	double setval;
 	double wx,wy;
 	int x,y;
