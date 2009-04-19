@@ -9,6 +9,7 @@ qmake-qt4 -project \
 		-o candi.pro \
 		CONFIG+=debug \
 		QT+=xml \
+		QMAKE_CFLAGS+="-fopenmp" \
 		QMAKE_CXXFLAGS+="-fopenmp" \
 		QMAKE_LFLAGS+="-fopenmp" \
 		LIBS+="-L /usr/local/lib -lltdl -lpthread -lm"  \
