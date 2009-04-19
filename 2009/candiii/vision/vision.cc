@@ -19,7 +19,7 @@
 #define EDGE_PAD   4    // top/bottom padding
 
 /* for Adapt() */
-#define K_ROI 0.2035     // float: percentage of new roi avg to add to running avg
+#define K_ROI 0.15035     // float: percentage of new roi avg to add to running avg
 
 
 /*
@@ -52,7 +52,7 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 //		return;
 //	}
 
-	cvSmooth(visCvRawTransform,visCvRawTransform,CV_BLUR,7,0,0,0);
+	//cvSmooth(visCvRawTransform,visCvRawTransform,CV_BLUR,9,0,0,0);
 
 	/* copy image to internal buffer for drawing */
 	cvCopy(visCvRawTransform,visCvDebug);
@@ -1168,7 +1168,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 	else
 	{
 		/* can see far off */
-		farweight = 0.10;
+		farweight = 0.20;
 	}
 
 	/* set averaged goals */
@@ -1184,7 +1184,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 	 */
 	{
 		// rotation (0 = go straight)
-		goal.x = (visCvPath->width/2 - goal.x) * (255*2) / (visCvPath->width );
+		goal.x = (visCvPath->width/2 - goal.x) * (255*1.5) / (visCvPath->width );
 		// fwd speed
 		goal.y = (visCvPath->height  - goal.y) * (255) / (visCvPath->height);
 
@@ -1201,7 +1201,7 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 			goal.x=0;
 		}
 
-        //goal.x = (float)goal.x * 2;
+
 		// Debug print
 		//printf("heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
 	}
@@ -1292,7 +1292,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 	/* shrink visCvAdapt img to 320x240 */
 	cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
 	//cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
-	//cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
+	cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
 
 	/* generate visCvPath */
 	visGenPath(visCvThresh);

@@ -269,8 +269,8 @@ void Robot::LoadXMLSettings()
 				// load defaults
 				_k = .30;
 				trackbarVal = 1;
-				motorsMaxSpeed = 50;
-				doMapping = 0;
+				motorsMaxSpeed = 30;
+				doMapping = 1;
 				useMotors = 1;
 				doVision = 1;
 				doTransform = 1;
@@ -413,9 +413,8 @@ void Robot::processFunc()
 	/* Motors & Stats */
 	if (useMotors)
 	{
-
+        printf("Heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
 		motors.set_heading(heading_main.y, heading_main.x);
-		printf("            heading: rot: %d  fwd: %d \n\n",heading_main.x,heading_main.y);
 	}
 	if (PRINTFRAMERATE)
 	{

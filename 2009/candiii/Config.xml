@@ -12,11 +12,11 @@
 <Config>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>01</useFirewireCamera>  <!-- set to 0 to load video -->
+	<useFirewireCamera>0</useFirewireCamera>  <!-- set to 0 to load video -->
 	<gain>16</gain>
 	<shutter>100</shutter>
-	<gamma>0</gamma>
-	<auto_gain_and_shutter>00</auto_gain_and_shutter>
+	<gamma>1</gamma>
+	<auto_gain_and_shutter>01</auto_gain_and_shutter>
 
 	<!-- Guppy White Balance Settings -->
 	<red>517</red>   <!-- old 528 -->
@@ -28,8 +28,8 @@
 	<robotWidth>25</robotWidth>   <!-- lower => we can squeeze through more -->
 	<doTransform>01</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
-	<maxDiff>30</maxDiff>         <!-- lower => more noise in thresh image -->
-	<boxPadding>88</boxPadding>   <!-- lower => wider box -->
+	<maxDiff>25</maxDiff>         <!-- lower => more noise in thresh image -->
+	<boxPadding>84</boxPadding>   <!-- lower => wider box -->
 
 	<!-- Robot Misc Settings -->
     <defaultView>01</defaultView>       <!-- gui slider bar starting value -->
