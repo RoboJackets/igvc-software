@@ -26,7 +26,7 @@
 /* End Landmark Map Settings */
 
 
-
+#define fabs(x) ((x<0)?(-x):(x))
 
 MapGen::MapGen()
 {
@@ -241,10 +241,11 @@ int MapGen::getFeatures()
 				   cvPoint( imgHalfWidth-avgdx, imgHalfHeight-avgdy ),
 				   cvPoint( imgHalfWidth+avgdx, imgHalfHeight+avgdy ),
 				   CV_RGB(255,255,255), 3, 8, 0);
-			//printf("   adx %.2f ady %.2f \n",avgdx,avgdy);
+			//printf("   adx %.4f ady %.4f \n",avgdx,avgdy);
 		}
-		avgdx=abs(avgdx);
-		avgdy=abs(avgdy);
+		avgdx=fabs(avgdx);
+		avgdy=fabs(avgdy);
+        //printf("   adx %.4f ady %.4f \n",avgdx,avgdy);
 
 		/* show image with points drawn */
 		cvShowImage("curr",visCvGrey);
@@ -252,13 +253,15 @@ int MapGen::getFeatures()
 
 		/* check status *********/
 		{
-			if (avgdx<=0.01 && avgdy<=0.01)
+			if (avgdx<=0.05 && avgdy<=0.05)
 			{
+			    printf(" no motion \n");
 				return 0; // no motion
 			}
 
 			if ( ( avgdx > maxFeatureShift ) || ( avgdy > maxFeatureShift ) )
 			{
+			    printf(" feature shift too big \n");
 				return 0; // bumpy/noisy motion
 			}
 
@@ -268,6 +271,7 @@ int MapGen::getFeatures()
 			}
 			else
 			{
+			    printf(" need more matches \n");
 				return 0; // need more points matching
 			}
 		}
@@ -702,7 +706,7 @@ int MapGen::genProbabilityMap()
 
 	/* get robot orientation in world coordinates */
 	double a,b;
-	int baseoffset = -10;
+	int baseoffset = -15; // smaller is further back
 	mapCamPointToWorldPoint(imgHalfWidth, 0, a, b); // top center of camera frame
 	mapCamPointToWorldPoint(imgHalfWidth, visCvGrey->height - baseoffset, wx, wy); // bottom center of camera frame (minus some)
 	/* update/avg current robot orientation */

@@ -122,6 +122,7 @@
 				<search_path add="/usr/include/opencv" />
 				<search_path add="mapping" />
 				<search_path add="vision" />
+				<search_path add="../old_motors" />
 			</code_completion>
 			<debugger>
 				<search_path add="/home/chris/Desktop/workspace3/2009/candiii/" />
