@@ -15,6 +15,9 @@
 /* Use visCvPath (more black) or visCvThresh (more correct) to plot into worldmap */
 #define USE_PATH_IMG  0
 
+/* Avg dx dy of features must be grater than this */
+#define MIN_FEATURE_SHIFT 0.06
+
 
 
 /* Landmark Map Settings */
@@ -43,6 +46,8 @@ MapGen::~MapGen()
 	if (matCamToCam != NULL ) cvReleaseMat( &matCamToCam );
 	if (matCamToWorld != NULL ) cvReleaseMat( &matCamToWorld );
 	if (worldmap != NULL ) cvReleaseImage( &worldmap );
+	if (probmap != NULL ) cvReleaseImage( &probmap );
+	if (worldDebug != NULL ) cvReleaseImage( &worldDebug );
 }
 
 
@@ -245,7 +250,7 @@ int MapGen::getFeatures()
 		}
 		avgdx=fabs(avgdx);
 		avgdy=fabs(avgdy);
-        //printf("   adx %.4f ady %.4f \n",avgdx,avgdy);
+		//printf("   adx %.4f ady %.4f \n",avgdx,avgdy);
 
 		/* show image with points drawn */
 		cvShowImage("curr",visCvGrey);
@@ -253,15 +258,15 @@ int MapGen::getFeatures()
 
 		/* check status *********/
 		{
-			if (avgdx<=0.05 && avgdy<=0.05)
+			if (avgdx<=MIN_FEATURE_SHIFT && avgdy<=MIN_FEATURE_SHIFT)
 			{
-			    printf(" no motion \n");
+				printf(" no motion \n");
 				return 0; // no motion
 			}
 
 			if ( ( avgdx > maxFeatureShift ) || ( avgdy > maxFeatureShift ) )
 			{
-			    printf(" feature shift too big \n");
+				printf(" feature shift too big \n");
 				return 0; // bumpy/noisy motion
 			}
 
@@ -271,7 +276,7 @@ int MapGen::getFeatures()
 			}
 			else
 			{
-			    printf(" need more matches \n");
+				printf(" need more matches \n");
 				return 0; // need more points matching
 			}
 		}
@@ -442,6 +447,28 @@ void MapGen::init()
 	_do_map = 0;
 
 	//==============================================================
+
+	/* for sweeperlines copied from vision.cc */
+
+	nav_path__num = 9;
+	nav_path__center_path_id = nav_path__num/2;
+	nav_path__view_cone__spacing = 15;
+#if USE_PATH_IMG
+	danger_per_barrel_pixel = 1; //=1
+#else
+	danger_per_barrel_pixel = 6; //=1
+#endif
+	nav_path__path_search_girth = 1; // pixels near curr line to search
+	nav_path__danger_smoothing_radius = 3; // lines nearby to search
+	max_path_danger = 45;
+	min_path_danger_value = 75;//20; // lower => be less afraid
+	nav_path__view_distance_multiplier = 0.60;//0.6;
+	dangerous_pixel_color = CV_RGB(255,0,0);
+
+	worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
+
+	//==============================================================
+
 
 }
 
@@ -746,25 +773,8 @@ int MapGen::genProbabilityMap()
 int MapGen::processMap(Point2D<int>& goal)
 {
 
-	// parameters
-	int nav_path__num = 9; //change 'vector' too!
-	int nav_path__center_path_id = nav_path__num/2;
-	int nav_path__path_search_girth = 1; // pixels near curr line to search
-#if USE_PATH_IMG
-	int danger_per_barrel_pixel = 1; //=1
-#else
-	int danger_per_barrel_pixel = 5; //=1
-#endif
-	int nav_path__danger_smoothing_radius = 3; // lines nearby to search
-	int max_path_danger = 45;
-	CvScalar dangerous_pixel_color = CV_RGB(255,0,0);
-	double min_path_danger_value = 75;//20; // lower => be less afraid
-
 	// display
-	IplImage* temp = cvCloneImage(probmap);
-	IplImage* worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
-	cvCvtColor(temp, worldDebug, CV_GRAY2BGR);
-	cvReleaseImage(&temp);
+	cvCvtColor(probmap, worldDebug, CV_GRAY2BGR);
 	Graphics g_draw(worldDebug);
 
 	// temp vars used below
@@ -983,7 +993,6 @@ int MapGen::processMap(Point2D<int>& goal)
 
 	/* results */
 	cvShowImage("processmap",worldDebug);
-	cvReleaseImage(&worldDebug);
 
 	return 1;
 }
@@ -1002,13 +1011,9 @@ Point2D<double> MapGen::navPath_end(int pathID)
 Point2D<double> MapGen::navPath_vector(int pathID)
 {
 
-	int nav_path__center_path_id = 4; //nav_path__num/2;
-	int nav_path__view_cone__spacing = 15;
-	float nav_path__view_distance_multiplier = .60;//0.6;
-
-	double x = (robotLookingAt.x - robotBaseAt.x) ;
-	double y = (robotLookingAt.y - robotBaseAt.y) ; // positive y down
-	double rad = (atan(y/x)) ; // make up = 0 deg
+	int x = (robotLookingAt.x - robotBaseAt.x) ;
+	int y = (robotLookingAt.y - robotBaseAt.y) ; // positive y down
+	double rad = (atan((double)y/(double)x)) ; // make up = 0 deg
 	double radoff =( (nav_path__center_path_id-pathID)*nav_path__view_cone__spacing )*M_PI/180.0; // path selection
 	rad += radoff; // rotate based on path
 	if (x<0) rad += -M_PI ;
@@ -1016,7 +1021,7 @@ Point2D<double> MapGen::navPath_vector(int pathID)
 	double radius = sqrtf(pow(x,2)+pow(y,2)); // dist formula
 	return Point2D<double>(
 			   radius*cos(rad),
-			   radius*sin(rad) )   // computer y-axis is inverse of math y-axis
+			   radius*sin(rad) )   // opencv y-axis is inverse of math y-axis
 		   * nav_path__view_distance_multiplier;
 }
 

@@ -86,7 +86,7 @@ void Vision::init()
 		// Number of paths that are assessed between the starting/ending angles
 		nav_path__num = 21; //29;		// (Number of sweeper lines - should be odd number)
 		// Proportional to the lengths of the paths (in image space)
-		nav_path__view_distance_multiplier = 0.65; 	/* > 0.0 */
+		nav_path__view_distance_multiplier = 0.75; //0.65; 	/* > 0.0 */
 	}
 	else
 	{
@@ -111,7 +111,7 @@ void Vision::init()
 	// (everything bad is a barrel)
 	danger_per_barrel_pixel = 1;
 	// Path danger values higher than this will be clipped to this value
-	max_path_danger = 79;					// >= 0 // 75
+	max_path_danger = 70;					// >= 0 // 75
 	// smoothing = paths that are *near* dangerous paths are also considered to be dangerous
 	nav_path__danger_smoothing_radius = 6;	// >= 0 // 6
 	// colors

@@ -66,11 +66,24 @@ public:
 	Point2D<double> navPath_start(/*int pathID*/);
 	Point2D<double> navPath_end(int pathID);
 	Point2D<double> navPath_vector(int pathID);
+	IplImage* worldDebug;
 	/**/
 	// previously static variables
 	int _t;
 	int _f;
 	int _do_map;
+	/**/
+	int nav_path__num ;
+	int nav_path__center_path_id ;
+	int danger_per_barrel_pixel ;
+	int nav_path__path_search_girth ;
+	int nav_path__danger_smoothing_radius ;
+	int max_path_danger ;
+	double min_path_danger_value ;
+	int nav_path__view_cone__spacing ;
+	float nav_path__view_distance_multiplier ;
+	CvScalar dangerous_pixel_color ;
+	/**/
 
 };
 

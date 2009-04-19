@@ -373,7 +373,7 @@ void Robot::processFunc()
 	{
 		if ( mapper.genMap() )
 		{
-			mapper.processMap(heading_mapping); //TESTING
+			mapper.processMap(heading_mapping);
 		}
 	}
 
@@ -388,17 +388,15 @@ void Robot::processFunc()
 		if (doMapping)
 		{
 			/* drive via mapping */
-			//motors.set_heading(heading_mapping.y, heading_mapping.x);
 			heading_main = heading_mapping;
 		}
 		else
 		{
+			/* drive via vision */
 			/* Average motor commands from vision (account for high frame rate)
 			 * k = % of new value to use */
 			heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
 			heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
-			/* drive via vision */
-			//motors.set_heading(heading_main.y, heading_main.x);
 		}
 	}
 
@@ -410,18 +408,19 @@ void Robot::processFunc()
 	//}
 
 
-	/* Motors & Stats */
+	/* Drive Motors */
 	if (useMotors)
 	{
-        printf("Heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
+		printf("Heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
 		motors.set_heading(heading_main.y, heading_main.x);
 	}
+
+	/* Pring Stats */
 	if (PRINTFRAMERATE)
 	{
 		printf( "framerate: %.2f \n\n", elapsed_time() );
 		start_timer(); // called second to time entire process (except first run)
 	}
-
 
 	/* pause (for testing) */
 	//cvWaitKey(0);
