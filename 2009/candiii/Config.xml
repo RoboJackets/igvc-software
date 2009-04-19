@@ -12,7 +12,7 @@
 <Config>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>01</useFirewireCamera>  <!-- set to 0 to load video -->
+	<useFirewireCamera>00</useFirewireCamera>  <!-- set to 0 to load video -->
 	<gain>16</gain>
 	<shutter>100</shutter>
 	<gamma>0</gamma>
