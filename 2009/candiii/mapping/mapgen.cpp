@@ -10,7 +10,7 @@
 
 
 /* Percent of new robot world position to use */
-#define K_  0.50
+#define K_  0.450
 
 /* Use visCvPath (more black) or visCvThresh (more correct) to plot into worldmap */
 #define USE_PATH_IMG  0
@@ -18,6 +18,8 @@
 /* Avg dx dy of features must be grater than this */
 #define MIN_FEATURE_SHIFT 0.06
 
+/* slowly move worldmap probabilities back to unknown (127) */
+#define MOVE_TO_127 0
 
 
 /* Landmark Map Settings */
@@ -675,7 +677,7 @@ int MapGen::genProbabilityMap()
 
 
 	/* slowly move all probabilities toward unknown (127) */
-	if (1)
+	if (MOVE_TO_127)
 	{
 		double curr;
 		double speed = 1;
