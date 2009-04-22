@@ -13,7 +13,7 @@
 #define K_  0.450
 
 /* Use visCvPath (more black) or visCvThresh (more correct) to plot into worldmap */
-#define USE_PATH_IMG  0
+#define USE_PATH_IMG  1
 
 /* Avg dx dy of features must be grater than this */
 #define MIN_FEATURE_SHIFT 0.06
@@ -22,16 +22,18 @@
 #define MOVE_TO_127 0
 
 
-/* Landmark Map Settings */
+/* Landmark Map Settings */ ////////
 #define DO_LANDMARK_MAP 0
 // below this, new world pts are considered the same, and updated
 #define WORLDPT_PIXDIFF 1.5
 // need this many counts to be considered a stable world pt
 #define WORLDPT_MINGOODCOUNT 6
-/* End Landmark Map Settings */
+/* End Landmark Map Settings */ ////
 
-
+/* general absolute value */
 #define fabs(x) ((x<0)?(-x):(x))
+
+
 
 MapGen::MapGen()
 {
@@ -484,6 +486,7 @@ void MapGen::LoadXMLSettings()
 		maxFeatures   = cfg.getInt("maxFeatures");
 		numFramesBack = cfg.getInt("numFramesBack");
 		maxFeatureShift = cfg.getInt("maxFeatureShift");
+		moveTo127     = cfg.getInt("moveTo127");
 
 		/* display windows */
 		if (cfg.getInt("doMapping"))
@@ -508,6 +511,7 @@ void MapGen::LoadXMLSettings()
 				maxFeatures   = 70;
 				numFramesBack = 2;
 				maxFeatureShift = 25;
+				moveTo127     = 0;
 
 			}
 		}
@@ -515,7 +519,7 @@ void MapGen::LoadXMLSettings()
 		{
 			printf("Mapping settings loaded \n");
 		}
-		printf(" values: maxFeatures %d  \n", maxFeatures);
+		printf("\tvalues: maxFeatures %d  \n", maxFeatures);
 	}
 }
 
@@ -677,7 +681,7 @@ int MapGen::genProbabilityMap()
 
 
 	/* slowly move all probabilities toward unknown (127) */
-	if (MOVE_TO_127)
+	if (moveTo127)
 	{
 		double curr;
 		double speed = 1;
@@ -699,8 +703,8 @@ int MapGen::genProbabilityMap()
 	 *  while setting probabilities of obstacles and traversible area */
 	int divby = 2;      // image size denominator
 	int pad = 4;        // remove noise around img edges
-	double badval = -3; // rate for obstacle probability
-	double goodval = 4; // rate for travpath probability
+	double badval = -2; // rate for obstacle probability
+	double goodval = 3; // rate for travpath probability
 	double setval;
 	double wx,wy;
 	int x,y;
@@ -711,7 +715,7 @@ int MapGen::genProbabilityMap()
 		for (x=pad; x<visCvThresh->width-divby-pad; x+=divby )
 		{
 			// check void mask
-			if ( cvGet2D(visCvGlutMask,y,x).val[0]==255 )
+			//if ( cvGet2D(visCvGlutMask,y,x).val[0]==255 )
 			{
 				// map pts
 				mapCamPointToWorldPoint((double)x,(double)y,wx,wy);
@@ -721,7 +725,7 @@ int MapGen::genProbabilityMap()
 #if USE_PATH_IMG
 				setval += (cvGetReal2D( /* visCvThresh */ visCvPath  ,y,x )==0)?badval:goodval; // more black
 #else
-				setval += (cvGetReal2D( visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval; // cooler looking
+				setval += (cvGetReal2D(  visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval; // cooler looking
 #endif
 				// cap results
 				if (setval>255) setval = 255;

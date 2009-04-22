@@ -18,9 +18,6 @@
 #define PIXEL_SKIP 2 	// noise filtering threshold in checkPixel()
 #define EDGE_PAD   4    // top/bottom padding
 
-/* for Adapt() */
-#define K_ROI 0.15035     // float: percentage of new roi avg to add to running avg
-
 
 /*
  *
@@ -52,7 +49,7 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 //		return;
 //	}
 
-	//cvSmooth(visCvRawTransform,visCvRawTransform,CV_BLUR,9,0,0,0);
+	cvSmooth(visCvRawTransform,visCvRawTransform,CV_BLUR,5,0,0,0);
 
 	/* copy image to internal buffer for drawing */
 	cvCopy(visCvRawTransform,visCvDebug);
@@ -124,7 +121,7 @@ void Vision::init()
 	// display roi for adaptive coloring
 	cvNamedWindow("roi",1);
 	// move the window for easy comparison to raw
-	cvMoveWindow( "roi", visCvRaw->width/2-20, 60+visCvRaw->height );
+	cvMoveWindow( "roi", visCvRaw->width/2-adapt_boxPad/3, adapt_boxPad/2+visCvRaw->height );
 
 	/* init adaptive processing stuff */
 	{
@@ -592,7 +589,7 @@ void Vision::visGenPath(IplImage* img)
 		else
 		{
 			goodFirst=0;
-			blackout=1;
+			//blackout=1;   // blackout everything above this point
 		}
 
 		//scan left then right & generate visCvPath image
@@ -1057,6 +1054,7 @@ void Vision::LoadVisionXMLSettings()
 		adapt_maxDiff= cfg.getInt("maxDiff");
 		adapt_boxPad = cfg.getInt("boxPadding");
 		DO_ADAPTIVE  = cfg.getInt("doAdaptive");
+		k_roi        = cfg.getFloat("k_roi");
 	}
 
 	/* test */
@@ -1072,14 +1070,14 @@ void Vision::LoadVisionXMLSettings()
 				adapt_maxDiff= 35;
 				adapt_boxPad = 100;
 				DO_ADAPTIVE  = 1;
+				k_roi        = 0.025;
 			}
 		}
 		else
 		{
 			printf("Vision settings loaded \n");
 		}
-		printf("thresholds: sat %d  hue %d \n",satThreshold,hueThreshold);
-		printf("thresholds: maxDiff %d  boxPad %d \n",adapt_maxDiff,adapt_boxPad);
+		printf("\tvalues: k_roi %.3f maxDiff %d  boxPad %d \n",k_roi,adapt_maxDiff,adapt_boxPad);
 	}
 
 
@@ -1222,7 +1220,7 @@ void Vision::Adapt()
 	cvResetImageROI(visCvRawTransform);
 
 	/* blur image data */
-	cvSmooth(roi_img,roi_img,CV_BLUR,7,0,0,0);
+	cvSmooth(roi_img,roi_img,CV_BLUR,5,0,0,0);
 
 	/* display roi box in separate window */
 	cvShowImage( "roi" , roi_img );
@@ -1247,9 +1245,9 @@ void Vision::Adapt()
 	}
 	else
 	{
-		avgB = blue*(K_ROI)  + avgB*(1-K_ROI);
-		avgG = green*(K_ROI) + avgG*(1-K_ROI);
-		avgR = red*(K_ROI)   + avgR*(1-K_ROI);
+		avgB =  blue*(k_roi) + avgB*(1-k_roi);
+		avgG = green*(k_roi) + avgG*(1-k_roi);
+		avgR =   red*(k_roi) + avgR*(1-k_roi);
 	}
 
 	unsigned char* rgbdata = (unsigned char*) visCvRawTransform->imageData;
@@ -1276,7 +1274,7 @@ void Vision::Adapt()
 	}
 
 	/* display roi box in the image we're using */
-	cvRectangle( visCvDebug, UL, LR, CV_RGB(100,0,0), 2, 8, 0);
+	cvRectangle( visCvDebug, UL, LR, CV_RGB(120,0,0), 1, 8, 0);
 }
 
 /*

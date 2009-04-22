@@ -130,6 +130,7 @@ public:
 	int avgR;
 	int avgG;
 	int avgB;
+	double k_roi;
 
 };
 
