@@ -103,8 +103,8 @@ public:
 	Point2D<int> heading_mapping;
 
 	// avg heading control
-	// _k = the % of new value to use
-	double _k;
+	// k_motors = the % of new value to use
+	double k_motors;
 
 	// xml conf
 	void LoadXMLSettings();

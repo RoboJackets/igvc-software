@@ -67,6 +67,7 @@ public:
 	Point2D<double> navPath_end(int pathID);
 	Point2D<double> navPath_vector(int pathID);
 	IplImage* worldDebug;
+	int moveTo127;
 	/**/
 	// previously static variables
 	int _t;

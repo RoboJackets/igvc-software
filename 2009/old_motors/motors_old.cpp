@@ -205,10 +205,10 @@ int Motors_Old::get_motor_states(void)
  */
 int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 {
-
+printf("irotation %d",iRotation);
 	// XXX: hack!
 	iRotation *= 1.15;
-
+printf("\tirotation %d\n",iRotation);
 	// convert
 	int left  = iFwdVelocity + iRotation ;
 	int right = iFwdVelocity - iRotation ;

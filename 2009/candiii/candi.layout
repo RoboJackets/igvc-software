@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="0" tabpos="1">
-		<Cursor position="364" topLine="9" />
+	<File name="Config.xml" open="1" top="1" tabpos="1">
+		<Cursor position="1434" topLine="15" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="227" topLine="0" />
+		<Cursor position="8491" topLine="353" />
 	</File>
 	<File name="Robot.h" open="0" top="0" tabpos="8">
-		<Cursor position="2508" topLine="84" />
+		<Cursor position="2324" topLine="77" />
 	</File>
 	<File name="main.cpp" open="0" top="0" tabpos="9">
 		<Cursor position="398" topLine="0" />
@@ -31,11 +31,11 @@
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
 		<Cursor position="3770" topLine="45" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="6">
-		<Cursor position="5881" topLine="224" />
+	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="12099" topLine="490" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="7">
-		<Cursor position="1240" topLine="38" />
+		<Cursor position="1602" topLine="43" />
 	</File>
 	<File name="vision/CVcam.cpp" open="0" top="0" tabpos="6">
 		<Cursor position="31" topLine="0" />
@@ -68,13 +68,13 @@
 		<Cursor position="809" topLine="0" />
 	</File>
 	<File name="vision/vision.cc" open="1" top="0" tabpos="3">
-		<Cursor position="1853" topLine="78" />
+		<Cursor position="26178" topLine="1039" />
 	</File>
-	<File name="vision/vision.h" open="0" top="0" tabpos="9">
-		<Cursor position="2774" topLine="74" />
+	<File name="vision/vision.h" open="1" top="0" tabpos="8">
+		<Cursor position="4008" topLine="96" />
 	</File>
 	<File name="../old_motors/motors_old.cpp" open="1" top="0" tabpos="5">
-		<Cursor position="6594" topLine="196" />
+		<Cursor position="6314" topLine="199" />
 	</File>
 	<File name="../old_motors/motors_old.h" open="0" top="0" tabpos="12">
 		<Cursor position="1745" topLine="37" />

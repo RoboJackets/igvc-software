@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-          _   _   _
+<!--      _   _   _
          | | | | (_)
  ___  ___| |_| |_ _ _ __   __ _ ___
 / __|/ _ \ __| __| | '_ \ / _` / __|
@@ -23,23 +22,26 @@
 	<blue>602</blue> <!-- old 646 -->
 
 	<!-- Vision Processing Settings -->
-	<satThresh>70</satThresh>     <!-- higher => more noise/sensitivity -->
-	<hueThresh>35</hueThresh>     <!-- higher => more noise/sensitivity -->
-	<robotWidth>25</robotWidth>   <!-- lower => we can squeeze through more -->
+	<satThresh>70</satThresh>     <!-- (hsv only) higher => more noise/sensitivity -->
+	<hueThresh>35</hueThresh>     <!-- (hsv only) higher => more noise/sensitivity -->
+	<robotWidth>30</robotWidth>   <!-- lower => we can squeeze through more -->
 	<doTransform>01</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
-	<maxDiff>25</maxDiff>         <!-- lower => more noise in thresh image -->
-	<boxPadding>84</boxPadding>   <!-- lower => wider box -->
+
+	<maxDiff>30</maxDiff>         <!-- lower => more noise in thresh image -->
+	<boxPadding>85</boxPadding>   <!-- lower => wider box -->
+	<k_roi>0.030</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
 
 	<!-- Robot Misc Settings -->
     <defaultView>03</defaultView>       <!-- gui slider bar starting value -->
-	<_k>0.50</_k>                       <!-- lower => more smooth motor cotrol (averages new motor commands - vision only) -->
+	<k_motors>0.50</k_motors>           <!-- lower => more smooth motor cotrol (averages new motor commands - vision only) -->
     <motorsMaxSpeed>30</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
-    <maxFeatures>70</maxFeatures>           <!-- max number for feature corners to find -->
+    <maxFeatures>64</maxFeatures>           <!-- max number for feature corners to find -->
     <numFramesBack>02</numFramesBack>       <!-- frames between matching points/features ( >=2 )-->
     <maxFeatureShift>26</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
+    <moveTo127>0</moveTo127>                <!-- slowly forget worldmap history -->
 
     <!-- ON/OFF -->
     <doMapping>01</doMapping>

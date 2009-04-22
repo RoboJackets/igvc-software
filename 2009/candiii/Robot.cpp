@@ -58,7 +58,7 @@ void keyboardFunc(unsigned char key, int x, int y)   // handles keyboard button 
 /* for selecting images to display in the opencv window */
 void trackbarHandler(int pos)
 {
-	printf("view = %d \n", pos);
+	printf("\tview %d \n", pos);
 }
 /*****************************************************/
 
@@ -92,39 +92,22 @@ void Robot::destroy()
 void Robot::releaseAllImages()
 {
 	/* free all in image_buffers.h */
-
 	if ( visCvRaw !=NULL) cvReleaseImage(&visCvRaw );
-
 	if ( visCvDebug !=NULL) cvReleaseImage(&visCvDebug );
-
 	if ( visCvRedChannel !=NULL) cvReleaseImage(&visCvRedChannel );
-
 	if ( visCvGreenChannel !=NULL) cvReleaseImage(&visCvGreenChannel );
-
 	if ( visCvBlueChannel !=NULL) cvReleaseImage(&visCvBlueChannel );
-
 	if ( visCvHSV !=NULL) cvReleaseImage(&visCvHSV );
-
 	if ( visCvHue !=NULL) cvReleaseImage(&visCvHue );
-
 	if ( visCvSaturation !=NULL) cvReleaseImage(&visCvSaturation );
-
 	if ( visCvGrey !=NULL) cvReleaseImage(&visCvGrey );
-
 	if ( visCvThresh !=NULL) cvReleaseImage(&visCvThresh );
-
 	if ( visCvPath !=NULL) cvReleaseImage(&visCvPath );
-
 	if ( visCvHSVSmall !=NULL) cvReleaseImage(&visCvHSVSmall );
-
 	if ( visCvAdapt !=NULL) cvReleaseImage(&visCvAdapt );
-
 	if ( visCvAdaptSmall !=NULL) cvReleaseImage(&visCvAdaptSmall );
-
 	if ( visCvGreyBig !=NULL) cvReleaseImage(&visCvGreyBig );
-
 	if ( visCvRawTransform !=NULL) cvReleaseImage(&visCvRawTransform );
-
 	if ( visCvGlutMask !=NULL) cvReleaseImage(&visCvGlutMask );
 
 }
@@ -178,8 +161,8 @@ int Robot::init()
 	cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
 
 	/* configure opencv display window */
-	cvResizeWindow( "display", visCvRaw->width-40, visCvRaw->height );
-	cvMoveWindow( "display", 1, 10 ); // position on screen
+	cvResizeWindow( "display", visCvRaw->width-30, visCvRaw->height+10 );
+	cvMoveWindow( "display", 5, 10 ); // position on screen
 
 	/* Init default view (debug=1) */
 	trackbarHandler( trackbarVal );
@@ -225,7 +208,7 @@ int Robot::init()
 		motors.set_max_speed(motorsMaxSpeed);
 		if (0!=motors.SetupSerial())
 		{
-			printf("Motors Connect Fail \n");
+			printf("Motors Connect Fail !\n");
 			return 0; // fail
 		}
 	}
@@ -242,7 +225,7 @@ void Robot::LoadXMLSettings()
 	/* load settings */
 	{
 		/* k value = the % of new value to use */
-		_k = cfg.getFloat("_k");
+		k_motors = cfg.getFloat("k_motors");
 		/* see ConvertAllImageViews() in vision.cc */
 		trackbarVal = cfg.getInt("defaultView");
 		/* 0-255 */
@@ -267,7 +250,7 @@ void Robot::LoadXMLSettings()
 			printf("ERROR: Robot settings NOT loaded! Using DEFAULTS \n");
 			{
 				// load defaults
-				_k = .30;
+				k_motors = .30;
 				trackbarVal = 1;
 				motorsMaxSpeed = 30;
 				doMapping = 1;
@@ -279,9 +262,9 @@ void Robot::LoadXMLSettings()
 		}
 		else
 		{
-			printf("Robot settings loaded \n\t");
+			printf("Robot settings loaded \n");
 		}
-		printf("values: _k %f view %d motors %d \n",_k,trackbarVal,motorsMaxSpeed);
+		printf("\tvalues: k_motors %f view %d motors %d \n",k_motors,trackbarVal,motorsMaxSpeed);
 	}
 
 }
@@ -381,7 +364,7 @@ void Robot::processFunc()
 	/* Update displays */
 	vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
-
+useMotors=1;
 	/* Drive Robot via motor commands (GO!) */
 	if (useMotors)
 	{
@@ -395,8 +378,8 @@ void Robot::processFunc()
 			/* drive via vision */
 			/* Average motor commands from vision (account for high frame rate)
 			 * k = % of new value to use */
-			heading_main.x = _k*heading_vision.x + (1-_k)*heading_main.x;
-			heading_main.y = _k*heading_vision.y + (1-_k)*heading_main.y;
+			heading_main.x = k_motors*heading_vision.x + (1-k_motors)*heading_main.x;
+			heading_main.y = k_motors*heading_vision.y + (1-k_motors)*heading_main.y;
 		}
 	}
 
