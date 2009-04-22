@@ -43,9 +43,14 @@ void keyboardFunc(unsigned char key, int x, int y)   // handles keyboard button 
 		glRobot->destroy(); // kill the robot;
 		break;
 	case 's':
-		saveRawVideo = 1-saveRawVideo;
+		saveRawVideo = 1-saveRawVideo; // save video until s again
 		printf("video file \n");
 		break;
+    case 'p':
+        printf("PAUSED!");
+        cvWaitKey(0); // pause
+        printf("GO!");
+        break;
 	default:
 		printf("x,y %d,%d \n",x,y);
 		break;
@@ -364,7 +369,7 @@ void Robot::processFunc()
 	/* Update displays */
 	vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
-useMotors=1;
+
 	/* Drive Robot via motor commands (GO!) */
 	if (useMotors)
 	{
