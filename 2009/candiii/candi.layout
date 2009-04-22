@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="1" tabpos="1">
-		<Cursor position="1434" topLine="15" />
+	<File name="Config.xml" open="1" top="0" tabpos="1">
+		<Cursor position="1232" topLine="15" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="8491" topLine="353" />
+		<Cursor position="8617" topLine="359" />
 	</File>
 	<File name="Robot.h" open="0" top="0" tabpos="8">
 		<Cursor position="2324" topLine="77" />
@@ -67,8 +67,8 @@
 	<File name="vision/image_buffers.h" open="0" top="0" tabpos="6">
 		<Cursor position="809" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="0" tabpos="3">
-		<Cursor position="26178" topLine="1039" />
+	<File name="vision/vision.cc" open="1" top="1" tabpos="3">
+		<Cursor position="35766" topLine="1210" />
 	</File>
 	<File name="vision/vision.h" open="1" top="0" tabpos="8">
 		<Cursor position="4008" topLine="96" />

@@ -30,7 +30,7 @@
 
 	<maxDiff>30</maxDiff>         <!-- lower => more noise in thresh image -->
 	<boxPadding>85</boxPadding>   <!-- lower => wider box -->
-	<k_roi>0.030</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
+	<k_roi>0.100</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
 
 	<!-- Robot Misc Settings -->
     <defaultView>03</defaultView>       <!-- gui slider bar starting value -->
