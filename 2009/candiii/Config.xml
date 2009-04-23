@@ -11,7 +11,7 @@
 <Config>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>00</useFirewireCamera>  <!-- set to 0 to load video -->
+	<useFirewireCamera>001</useFirewireCamera>  <!-- set to 0 to load video -->
 	<gain>16</gain>
 	<shutter>100</shutter>
 	<gamma>0</gamma>
@@ -44,7 +44,7 @@
     <moveTo127>0</moveTo127>                <!-- slowly forget worldmap history -->
 
     <!-- ON/OFF -->
-    <doMapping>001</doMapping>
+    <doMapping>000</doMapping>
     <useMotors>00</useMotors>
     <doVision>001</doVision>
 

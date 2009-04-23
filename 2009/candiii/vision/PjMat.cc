@@ -7,14 +7,14 @@
 // (how much up from 0 we are, in radians)
 // 1.25 default from 2007
 // update: current measured guppy angle is ? for 2009
-#define OFFANGLE  1.1  // 1.1~=63deg
+#define OFFANGLE  1.17  // 1.1~=63deg 1.17~=67deg
 // need to measure stuff below for guppy!
 /* *************************** */
 
 /* use roi to shift camera view down to only see bottom of image */
 //  0 - if using narrow angle lens
 //  1 - if using  wide  angle lens
-#define USE_ROI 0
+#define USE_ROI 1
 
 //utility macros
 #define max(a,b) ((a>b)?a:b)
