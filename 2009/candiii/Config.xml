@@ -29,7 +29,7 @@
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
 
 	<maxDiff>30</maxDiff>         <!-- lower => more noise in thresh image -->
-	<boxPadding>85</boxPadding>   <!-- lower => wider box -->
+	<boxPadding>95</boxPadding>   <!-- lower => wider box -->
 	<k_roi>0.100</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
 
 	<!-- Robot Misc Settings -->

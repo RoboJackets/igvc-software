@@ -710,7 +710,7 @@ int MapGen::genProbabilityMap()
 	double wx,wy;
 	int x,y;
 
-#pragma omp parallel for private(x,setval,wx,wy)
+#pragma omp parallel for private(x,setval,wx,wy,weight)
 	for (y=pad; y<visCvThresh->height-divby-pad; y+=divby)
 	{
 		for (x=pad; x<visCvThresh->width-divby-pad; x+=divby )
@@ -751,7 +751,7 @@ int MapGen::genProbabilityMap()
 	//float K_ = 0.50; // percent of new value to use
 	robotBaseAt = cvPoint( (robotBaseAt.x*(1-K_)+wx*K_), (robotBaseAt.y*(1-K_)+wy*K_) );
 	//robotLookingAt = cvPoint( (robotLookingAt.x*(1-K_)+a*K_), (robotLookingAt.y*(1-K_)+b*K_) );
-	robotLookingAt = cvPoint( (robotLookingAt.x+a)/2 , (robotLookingAt.y+b)/2 );
+	robotLookingAt = cvPoint( (robotLookingAt.x+a)/2 , (robotLookingAt.y+b)/2 ); // be able to turn faster
 	//printf("bx=%d by=%d  lx=%d ly=%d \n",robotBaseAt.x,robotBaseAt.y,robotLookingAt.x,robotLookingAt.y);
 
 	/* draw a circle denoting base orientaion */
