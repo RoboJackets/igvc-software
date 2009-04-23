@@ -31,7 +31,7 @@
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
 		<Cursor position="3770" topLine="45" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="5">
+	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="5">
 		<Cursor position="11068" topLine="434" />
 	</File>
 	<File name="mapping/mapgen.h" open="1" top="0" tabpos="7">
@@ -67,7 +67,7 @@
 	<File name="vision/image_buffers.h" open="0" top="0" tabpos="6">
 		<Cursor position="809" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="0" tabpos="3">
+	<File name="vision/vision.cc" open="1" top="1" tabpos="3">
 		<Cursor position="37847" topLine="1271" />
 	</File>
 	<File name="vision/vision.h" open="1" top="0" tabpos="8">

@@ -1277,6 +1277,16 @@ void Vision::Adapt()
         {
             visCvAdapt->imageData[i/3] = BAD_PIXEL;
         }
+
+        // check for white by looking for blue (most dominant color b/c of sky)
+        if( (0) && (ab>150) )
+        {
+            visCvAdapt->imageData[i/3] = BAD_PIXEL;
+             //visCvDebug->imageData[i+0]=(unsigned char)255;
+             //visCvDebug->imageData[i+1]=(unsigned char)255;
+             //visCvDebug->imageData[i+2]=(unsigned char)255;
+        }
+
     }
 
     /* display roi box in the image we're using */
@@ -1296,7 +1306,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
     /* shrink visCvAdapt img to 320x240 */
     cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
     //cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
-    cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
+    //cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
 
     /* generate visCvPath */
     visGenPath(visCvThresh);
