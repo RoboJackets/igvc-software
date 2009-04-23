@@ -10,7 +10,7 @@
 
 
 /* Percent of new robot world position to use */
-#define K_  0.450
+#define K_  0.50
 
 /* Use visCvPath (more black) or visCvThresh (more correct) to plot into worldmap */
 #define USE_PATH_IMG  1
@@ -20,6 +20,7 @@
 
 /* slowly move worldmap probabilities back to unknown (127) */
 #define MOVE_TO_127 0
+
 
 
 /* Landmark Map Settings */ ////////
@@ -395,7 +396,7 @@ void MapGen::init()
 	imgHalfWidth  = visCvGrey->width/2;
 
 	/* amount of top of image to ignore */
-	yFeatureThresh = visCvGrey->height/3 + 30 ;
+	yFeatureThresh = visCvGrey->height/2 ; // higher => skip more of top
 
 	//==============================================================
 
@@ -465,8 +466,8 @@ void MapGen::init()
 	nav_path__path_search_girth = 1; // pixels near curr line to search
 	nav_path__danger_smoothing_radius = 3; // lines nearby to search
 	max_path_danger = 45;
-	min_path_danger_value = 75;//20; // lower => be less afraid
-	nav_path__view_distance_multiplier = 0.60;//0.6;
+	min_path_danger_value = 90;//20; // lower => be less afraid
+	nav_path__view_distance_multiplier = 0.54;//0.6;
 	dangerous_pixel_color = CV_RGB(255,0,0);
 
 	worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
@@ -703,9 +704,9 @@ int MapGen::genProbabilityMap()
 	 *  while setting probabilities of obstacles and traversible area */
 	int divby = 2;      // image size denominator
 	int pad = 4;        // remove noise around img edges
-	double badval = -2; // rate for obstacle probability
-	double goodval = 3; // rate for travpath probability
-	double setval;
+	double badval = -1; // rate for obstacle probability
+	double goodval = 2; // rate for travpath probability
+	double setval,weight;
 	double wx,wy;
 	int x,y;
 
@@ -715,7 +716,7 @@ int MapGen::genProbabilityMap()
 		for (x=pad; x<visCvThresh->width-divby-pad; x+=divby )
 		{
 			// check void mask
-			//if ( cvGet2D(visCvGlutMask,y,x).val[0]==255 )
+			if ( cvGet2D(visCvGlutMask,y,x).val[0]==255 )
 			{
 				// map pts
 				mapCamPointToWorldPoint((double)x,(double)y,wx,wy);
@@ -723,10 +724,14 @@ int MapGen::genProbabilityMap()
 				setval = cvGetReal2D(probmap,wy,wx);
 				// and add/subtract based on thresh image
 #if USE_PATH_IMG
-				setval += (cvGetReal2D( /* visCvThresh */ visCvPath  ,y,x )==0)?badval:goodval; // more black
+				weight = (cvGetReal2D( /* visCvThresh */ visCvPath  ,y,x )==0)?badval:goodval; // more black
 #else
-				setval += (cvGetReal2D(  visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval; // cooler looking
+				weight = (cvGetReal2D(  visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval; // cooler looking
 #endif
+                // weight closer stuff higher
+                if (y>imgHalfHeight) weight *= 2;
+                // update value
+                setval += weight;
 				// cap results
 				if (setval>255) setval = 255;
 				else if (setval<0) setval = 0;
@@ -745,7 +750,8 @@ int MapGen::genProbabilityMap()
 	/* update/avg current robot orientation */
 	//float K_ = 0.50; // percent of new value to use
 	robotBaseAt = cvPoint( (robotBaseAt.x*(1-K_)+wx*K_), (robotBaseAt.y*(1-K_)+wy*K_) );
-	robotLookingAt = cvPoint( (robotLookingAt.x*(1-K_)+a*K_), (robotLookingAt.y*(1-K_)+b*K_) );
+	//robotLookingAt = cvPoint( (robotLookingAt.x*(1-K_)+a*K_), (robotLookingAt.y*(1-K_)+b*K_) );
+	robotLookingAt = cvPoint( (robotLookingAt.x+a)/2 , (robotLookingAt.y+b)/2 );
 	//printf("bx=%d by=%d  lx=%d ly=%d \n",robotBaseAt.x,robotBaseAt.y,robotLookingAt.x,robotLookingAt.y);
 
 	/* draw a circle denoting base orientaion */
@@ -984,7 +990,7 @@ int MapGen::processMap(Point2D<int>& goal)
 
 			/* Update goal */
 			//Point2D<int> goal;
-			int scalex = 55;
+			int scalex = 50;
 			goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
 			goal.y = (max_path_danger + 1 - pathDanger[bestPath_id]) * 2 ;
 
