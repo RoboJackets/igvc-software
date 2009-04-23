@@ -6,22 +6,22 @@
 /* IMPORTANT CAM ANGLE *********/
 // (how much up from 0 we are, in radians)
 // 1.25 default from 2007
-// update: current measured guppy angle is 0.995 (57deg) for 2009
-#define OFFANGLE  1.14  //1.14   // we will use halfway for now!
+// update: current measured guppy angle is ? for 2009
+#define OFFANGLE  1.1  // 1.1~=63deg
 // need to measure stuff below for guppy!
 /* *************************** */
 
 /* use roi to shift camera view down to only see bottom of image */
 //  0 - if using narrow angle lens
 //  1 - if using  wide  angle lens
-#define USE_ROI 1
+#define USE_ROI 0
 
 //utility macros
 #define max(a,b) ((a>b)?a:b)
 #define min(a,b) ((a<b)?a:b)
 
 //inputs - the guppy camera uses 640x480 resolution
-#define HFOV (.8602)            //.8602 empirical value ~=49 degrees (in radians)
+#define HFOV (.7854)            // empirical half angle value in radians | (0.8602~=49deg) (0.7854~=45deg)
 #define VFOV (HFOV*0.75)		// aspect ratio == 0.75 == 480/640
 #define u (HFOV/2)
 #define v (VFOV/2)
@@ -143,7 +143,7 @@ void findmaxview(GLdouble* n)
 	yscale=yscale/2;
 	xscale=xscale/2;
 	//translateX=minx+xscale; // always commented out
-	translateY=miny+3.1*yscale;
+	translateY=miny+3.1*yscale;  // 3.1 is magical
 	//end roi code
 #endif
 

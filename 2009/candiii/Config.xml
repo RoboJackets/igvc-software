@@ -15,7 +15,7 @@
 	<gain>16</gain>
 	<shutter>100</shutter>
 	<gamma>0</gamma>
-	<auto_gain_and_shutter>01</auto_gain_and_shutter>
+	<auto_gain_and_shutter>001</auto_gain_and_shutter>
 
 	<!-- Guppy White Balance Settings -->
 	<red>517</red>   <!-- old 528 -->
@@ -33,18 +33,18 @@
 	<k_roi>0.100</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
 
 	<!-- Robot Misc Settings -->
-    <defaultView>03</defaultView>       <!-- gui slider bar starting value -->
+    <defaultView>02</defaultView>       <!-- gui slider bar starting value -->
 	<k_motors>0.50</k_motors>           <!-- lower => more smooth motor cotrol (averages new motor commands - vision only) -->
     <motorsMaxSpeed>30</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
     <maxFeatures>64</maxFeatures>           <!-- max number for feature corners to find -->
     <numFramesBack>02</numFramesBack>       <!-- frames between matching points/features ( >=2 )-->
-    <maxFeatureShift>26</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
+    <maxFeatureShift>28</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
     <moveTo127>0</moveTo127>                <!-- slowly forget worldmap history -->
 
     <!-- ON/OFF -->
-    <doMapping>01</doMapping>
+    <doMapping>001</doMapping>
     <useMotors>00</useMotors>
     <doVision>001</doVision>
 
