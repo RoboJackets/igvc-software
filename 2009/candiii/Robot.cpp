@@ -114,6 +114,7 @@ void Robot::releaseAllImages()
 	if ( visCvGreyBig !=NULL) cvReleaseImage(&visCvGreyBig );
 	if ( visCvRawTransform !=NULL) cvReleaseImage(&visCvRawTransform );
 	if ( visCvGlutMask !=NULL) cvReleaseImage(&visCvGlutMask );
+	if ( visCvRawTransformSmall !=NULL) cvReleaseImage(&visCvRawTransformSmall );
 
 }
 
@@ -175,7 +176,7 @@ int Robot::init()
 	/* init all CV images here */
 	{
 		/* 3 plane images (640x480) */
-		visCvDebug = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
+		//visCvDebug = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
 		visCvHSV = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
 		visCvRawTransform = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
 
@@ -185,6 +186,8 @@ int Robot::init()
 
 		/* 3 plane images (320x240) */
 		visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
+		visCvRawTransformSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
+		visCvDebug = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
 
 		/* 1 plane images (320x240) */
 		visCvHue = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
@@ -347,6 +350,10 @@ void Robot::processFunc()
 
 	/* Shove raw image into graphics card for some processing on the card */
 	updateGlutDisplay();
+
+
+    /* Scale raw image down to 320x240 */
+    cvResize(visCvRawTransform, visCvRawTransformSmall, CV_INTER_LINEAR);
 
 
 	/* Perform vision processing. */

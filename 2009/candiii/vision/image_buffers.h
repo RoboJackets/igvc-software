@@ -38,6 +38,7 @@ extern IplImage* visCvAdaptSmall;
 extern IplImage* visCvGreyBig;
 extern IplImage* visCvRawTransform;
 extern IplImage* visCvGlutMask;
+extern IplImage* visCvRawTransformSmall;
 
 
 /* conversions ***********************************************/

@@ -25,6 +25,7 @@ IplImage* visCvAdaptSmall;
 IplImage* visCvGreyBig;
 IplImage* visCvRawTransform;
 IplImage* visCvGlutMask;
+IplImage* visCvRawTransformSmall;
 
 
 /* conversions ***********************************************/
