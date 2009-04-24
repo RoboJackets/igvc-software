@@ -66,10 +66,9 @@ int MapGen::genMap()
 	 */
 
 
-	/* get and rezise raw image to grayscale */
+	/* get raw image to grayscale */
 	{
-		cvCvtColor(visCvRawTransform, visCvGreyBig, CV_BGR2GRAY);
-		cvResize(visCvGreyBig, visCvGrey, CV_INTER_LINEAR);
+		cvCvtColor(visCvRawTransformSmall, visCvGrey, CV_BGR2GRAY);
 	}
 
 

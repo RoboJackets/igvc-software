@@ -42,17 +42,12 @@ Vision::~Vision()
 void Vision::visProcessFrame(Point2D<int>& goal)
 {
 
-    /* Abort if there is no image. */
-//	if ( visCvRaw->imageData==NULL )
-//	{
-//		printf("visCvRaw is NULL!\n");
-//		return;
-//	}
 
-    cvSmooth(visCvRawTransform,visCvRawTransform,CV_BLUR,5,0,0,0);
+    /* filter image */
+    cvSmooth(visCvRawTransformSmall,visCvRawTransformSmall,CV_BLUR,5,0,0,0);
 
     /* copy image to internal buffer for drawing */
-    cvCopy(visCvRawTransform,visCvDebug);
+    cvCopy(visCvRawTransformSmall,visCvDebug);
 
     /* Choose vision algorithm, and update goal.  */
     if (DO_ADAPTIVE)
@@ -134,7 +129,7 @@ void Vision::init()
         else
         {
             UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/2);
-            LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/5);
+            LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/6);
         }
 
         /* setup roi */
@@ -256,8 +251,8 @@ void Vision::visSweeperLines(Point2D<int>& goal)
                     curPoint = pathPoints[j];
                     curPoint.x += delta;
 
-                    // check path image (half size) for black=bad
-                    if (visCvPath->imageData[curPoint.y/2*visCvPath->width+curPoint.x/2]==0)
+                    // check path image  for black=bad
+                    if (visCvPath->imageData[curPoint.y*visCvPath->width+curPoint.x]==0)
                     {
                         // everything bad is a barrel
                         curPixelDanger += danger_per_barrel_pixel;
@@ -411,12 +406,11 @@ void Vision::visSweeperLines(Point2D<int>& goal)
                     ((int) bestPath_end.x)   + deltaX, (int) bestPath_end.y);
             }
 
-            /* Update goal
-             * (convert to 320x240 frame) */
-            goal.x = (bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
+            /* Update goal */
+            goal.x =  bestPath_end.x; //(nav_path__center_path_id-bestPath_id) * nav_path__num;; //(bestPath_id) * visCvPath->width / (nav_path__num-1); //(int)bestPath_end.x/2;
             goal.y = max_path_danger - pathDanger[bestPath_id]; //(int)bestPath_end.y/2;
 
-            //printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
+            //printf("goal_near (%d,%d) \n",goal.x,goal.y); // print in vision.cc
         }
 
         // DO IN MAIN:
@@ -543,16 +537,22 @@ void Vision::robotWidthScan(IplImage* img, Point2D<int>& goal)
         else
         {
             /* GOAL! */
-            //=== visCvPath is 320x240 so convert to 640x480 ===//
-            int gy2 = goal.y*2;
-            int gx2 = goal.x*2;
+
+            //=== debug display  ===//
+            int gy2 = goal.y;
+            int gx2 = goal.x;
             Graphics g(visCvDebug);
             g.setColor(CV_RGB(20,20,0));
-            g.drawLine( img->width, img->height*2-2,
+            g.drawLine( img->width/2, img->height-2,
                         gx2, gy2 );
             g.drawLine( gx2-ROBOT_WIDTH ,gy2,
                         gx2+ROBOT_WIDTH, gy2 );
             //==================================================//
+
+            // flip y sign so higher is farther
+            goal.y = visCvPath->height - goal.y;
+            //printf("goal_far (%d,%d) \n",goal.x,goal.y);
+            // done!
         }
     }
 
@@ -924,8 +924,8 @@ double Vision::deg2rad(double degrees)
 Point2D<double> Vision::navPath_start(int pathID)
 {
     return Point2D<double>(
-               (visCvRaw->width / 2) + (nav_path__center_path_id-pathID),
-               visCvRaw->height - EDGE_PAD -1 );
+               (visCvDebug->width / 2) + (nav_path__center_path_id-pathID),
+               visCvDebug->height - EDGE_PAD -1 );
 }
 
 /*
@@ -936,7 +936,7 @@ Point2D<double> Vision::navPath_vector(int pathID)
     //double deg = navPath_angle(pathID);
     //double rad = deg2rad(deg);
     double rad = navPath_angle(pathID)*M_PI/180.0;
-    double radius = 0.75 * (visCvRaw->width) / 2;
+    double radius = 0.75 * (visCvDebug->width) / 2;
     return Point2D<double>(
                radius*cos(rad),
                -radius*sin(rad))	// computer y-axis is inverse of math y-axis
@@ -986,7 +986,7 @@ void Vision::ConvertAllImageViews(int trackbarVal)
         cvShowImage("display", visCvRaw);
         break;
     case 1:
-        cvPutText(visCvDebug, "Debug", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
+        cvPutText(visCvDebug, "Debug", cvPoint(5,visCvDebug->height-10), &font, CV_RGB(255,255,255));
         cvShowImage("display", visCvDebug);
         break;
     case 2:
@@ -1000,9 +1000,9 @@ void Vision::ConvertAllImageViews(int trackbarVal)
         cvShowImage("display", visCvThresh);
         break;
     case 4:
-        if (!DO_TRANSFORM) cvPutText(visCvAdapt, "Adaptive", cvPoint(5,visCvAdapt->height-10), &font, CV_RGB(0,0,0));
-        else cvPutText(visCvAdapt, "Adaptive", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
-        cvShowImage("display", visCvAdapt);
+        if (!DO_TRANSFORM) cvPutText(visCvAdaptSmall, "Adaptive", cvPoint(5,visCvAdaptSmall->height-10), &font, CV_RGB(0,0,0));
+        else cvPutText(visCvAdaptSmall, "Adaptive", cvPoint(5,visCvAdaptSmall->height-10), &font, CV_RGB(255,255,255));
+        cvShowImage("display", visCvAdaptSmall);
         break;
     case 5:
         cvPutText(visCvGrey, "Grey", cvPoint(5,visCvGrey->height-10), &font, CV_RGB(255,255,255));
@@ -1019,7 +1019,7 @@ void Vision::ConvertAllImageViews(int trackbarVal)
         cvShowImage("display", visCvSaturation);
         break;
     case 8:
-        cvPutText(visCvHSV, "HSV", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
+        cvPutText(visCvHSV, "HSV", cvPoint(5,visCvHSV->height-10), &font, CV_RGB(255,255,255));
         cvShowImage("display", visCvHSV);
         break;
 
@@ -1032,7 +1032,7 @@ void Vision::ConvertAllImageViews(int trackbarVal)
         break;
 
     }
-    //cvWaitKey(10);
+
     cvWaitKey(10);
 
 }
@@ -1154,11 +1154,11 @@ void Vision::Equalize(IplImage* img)
 void Vision::CvtPixToGoal(Point2D<int>& goal)
 {
 
-    int closeness = visCvPath->height/3; // smaller value => use sweeper lines more often
-    float farweight; // weight of the far goal
+    int closeness = visCvPath->height/2; // larger value => use sweeper lines more often
+    float farweight = 0.0; // weight of the far goal
 
     /* weight goals depending on how far we can see */
-    if ( goal_far.y > closeness ) // y is inverted -> 0 is top&far
+    if ( goal_far.y < closeness )
     {
         /* can't see very far */
         farweight = 0.00;
@@ -1169,10 +1169,10 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
         farweight = 0.20;
     }
 
+
     /* set averaged goals */
     goal.y = farweight*goal_far.y + (1-farweight)*goal_near.y;
-    // (flip goal_far.x's sign)
-    goal.x = farweight*(visCvPath->width-goal_far.x) + (1-farweight)*goal_near.x;
+    goal.x = farweight*(goal_far.x) + (1-farweight)*goal_near.x;
 
 
 
@@ -1182,9 +1182,12 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
      */
     {
         // rotation (0 = go straight)
-        goal.x = (visCvPath->width/2 - goal.x) * (255*1.5) / (visCvPath->width );
+        goal.x = (-visCvPath->width/2 + goal.x) * (255) / (visCvPath->width/2);
         // fwd speed
-        goal.y = (visCvPath->height  - goal.y) * (255) / (visCvPath->height);
+        goal.y = (  goal.y) * (255) / (visCvPath->height );
+
+        // Debug print
+        //printf("heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
 
         /* Now we are using above motor ranges. */
         /* Check for errors and prevent the robot from going crazy */
@@ -1193,15 +1196,14 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
             goal.y=10; // min fwd speed
             goal.x=0;
         }
-        else if ( (visCvPath->height-goal_far.y) < 15 ) // XXX: HACK to get onto ramps & yellow bars
+        else if ( (goal_far.y) < 9 ) // XXX: HACK to get onto ramps & yellow bars
         {
             goal.y=10; // min fwd speed
             goal.x=0;
         }
 
-
         // Debug print
-        //printf("heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
+        //printf(" heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
     }
 }
 
@@ -1215,9 +1217,9 @@ void Vision::Adapt()
 {
 
     /* set the roi img */
-    cvSetImageROI(visCvRawTransform,roi);
-    cvCopy(visCvRawTransform,roi_img);
-    cvResetImageROI(visCvRawTransform);
+    cvSetImageROI(visCvRawTransformSmall,roi);
+    cvCopy(visCvRawTransformSmall,roi_img);
+    cvResetImageROI(visCvRawTransformSmall);
 
     /* blur image data */
     cvSmooth(roi_img,roi_img,CV_BLUR,3,0,0,0);
@@ -1255,10 +1257,10 @@ void Vision::Adapt()
 		//avgR = 110;  //125;
     }
 
-    unsigned char* rgbdata = (unsigned char*) visCvRawTransform->imageData;
+    unsigned char* rgbdata = (unsigned char*) visCvRawTransformSmall->imageData;
     /* generate visCvAdapt image here!
      *  white=good ~ black=bad */
-    for (int i=0; i<visCvRawTransform->imageSize-3; i+=3)
+    for (int i=0; i<visCvRawTransformSmall->imageSize-3; i+=3)
     {
         ab = *(rgbdata  );
         ag = *(rgbdata+1);
@@ -1271,20 +1273,20 @@ void Vision::Adapt()
             (abs(ar-(unsigned char)avgR)<adapt_maxDiff)
         )
         {
-            visCvAdapt->imageData[i/3] = GOOD_PIXEL;
+            visCvAdaptSmall->imageData[i/3] = GOOD_PIXEL;
         }
         else
         {
-            visCvAdapt->imageData[i/3] = BAD_PIXEL;
+            visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
         }
 
         // check for white by looking for blue (most dominant color b/c of sky)
-        if( (0) && (ab>150) )
+        if( (1) && (ab>150) )
         {
-            visCvAdapt->imageData[i/3] = BAD_PIXEL;
-             //visCvDebug->imageData[i+0]=(unsigned char)255;
-             //visCvDebug->imageData[i+1]=(unsigned char)255;
-             //visCvDebug->imageData[i+2]=(unsigned char)255;
+            visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
+             visCvDebug->imageData[i+0]=(unsigned char)255;
+             visCvDebug->imageData[i+1]=(unsigned char)255;
+             visCvDebug->imageData[i+2]=(unsigned char)255;
         }
 
     }
@@ -1303,8 +1305,8 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
     Adapt();
     //cvDilate(visCvAdapt, visCvAdapt, NULL, 1); // removes black spots/noise
 
-    /* shrink visCvAdapt img to 320x240 */
-    cvResize(visCvAdapt, visCvThresh, CV_INTER_LINEAR);
+    /* copy visCvAdapt img into thresh image and filter */
+    cvCopy(visCvAdaptSmall,visCvThresh);
     //cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
     //cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
 
