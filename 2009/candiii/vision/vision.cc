@@ -44,7 +44,7 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 
 
     /* filter image */
-    cvSmooth(visCvRawTransformSmall,visCvRawTransformSmall,CV_BLUR,5,0,0,0);
+    //cvSmooth(visCvRawTransformSmall,visCvRawTransformSmall,CV_BLUR,3,0,0,0);
 
     /* copy image to internal buffer for drawing */
     cvCopy(visCvRawTransformSmall,visCvDebug);
@@ -1293,7 +1293,7 @@ void Vision::Adapt()
         }
 
         // check for white by looking for blue (most dominant color b/c of sky)
-        if ( (1) && (ab>150) )
+        if ( (1) && (ab>190) )
         {
             //visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
             *adaptdata = BAD_PIXEL;

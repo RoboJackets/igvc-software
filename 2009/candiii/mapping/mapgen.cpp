@@ -16,7 +16,7 @@
 #define USE_PATH_IMG  0
 
 /* Avg dx dy of features must be grater than this */
-#define MIN_FEATURE_SHIFT 0.06
+#define MIN_FEATURE_SHIFT 0.05
 
 /* slowly move worldmap probabilities back to unknown (127) */
 #define MOVE_TO_127 0
@@ -274,7 +274,7 @@ int MapGen::getFeatures()
 				return 0; // bumpy/noisy motion
 			}
 
-			if ( good > 1 )
+			if ( good > 2 )
 			{
 				return 1; // we have enough frames/points
 			}
@@ -299,7 +299,7 @@ int MapGen::processFeatures()
 
 	/* for RANSAC */
 	std::vector<float> pointParameters;
-	PointParamEstimator pointEstimator(0.3); //0.3; /* error percent */
+	PointParamEstimator pointEstimator(0.25); //0.3; /* error percent */
 	matchList.clear();
 	CvPoint2D32f foundpts[ maxFeatures*2 ];
 
@@ -395,7 +395,7 @@ void MapGen::init()
 	imgHalfWidth  = visCvGrey->width/2;
 
 	/* amount of top of image to ignore */
-	yFeatureThresh = visCvGrey->height/2 ; // higher => skip more of top
+	yFeatureThresh = visCvGrey->height/2 -15 ; // higher => skip more of top
 
 	//==============================================================
 
@@ -998,7 +998,7 @@ int MapGen::processMap(Point2D<int>& goal)
 			//Point2D<int> goal;
 			int scalex = 45;
 			goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
-			goal.y = (max_path_danger + 1 - pathDanger[bestPath_id]) * 2 ;
+			goal.y = (max_path_danger + 2 - pathDanger[bestPath_id]) * 2 ;
 
 			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
 		}

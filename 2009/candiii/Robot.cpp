@@ -383,7 +383,10 @@ void Robot::processFunc()
 		if (doMapping)
 		{
 			/* drive via mapping */
-			heading_main = heading_mapping;
+			/* Average motor commands from vision (account for high frame rate)
+			 * k = % of new value to use */
+			heading_main.x = k_motors*heading_mapping.x + (1-k_motors)*heading_main.x;
+			heading_main.y = k_motors*heading_mapping.y + (1-k_motors)*heading_main.y;
 		}
 		else
 		{
