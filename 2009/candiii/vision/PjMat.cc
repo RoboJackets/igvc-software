@@ -26,10 +26,10 @@
 #define u (HFOV/2)
 #define v (VFOV/2)
 
-volatile double h = 1;	    // height of camera
-volatile double x = -M_PI/2+OFFANGLE; // see above
-volatile double y = M_PI;
-volatile double z = M_PI;   //euler rotations about given axes
+volatile float h = 1;	    // height of camera
+volatile float x = -M_PI/2+OFFANGLE; // see above
+volatile float y = M_PI;
+volatile float z = M_PI;   //euler rotations about given axes
 
 int j=0;
 GLdouble xscale,yscale,translateX, translateY;
@@ -40,9 +40,9 @@ GLdouble m[16];
 void setPjMat()
 {
 	//int i;
-	double tu,tv;
-	double sx,sy,sz,cx,cy,cz;
-	//double translateX, translateY;
+	float tu,tv;
+	float sx,sy,sz,cx,cy,cz;
+	//float translateX, translateY;
 
 	tu=tan(u);
 	tv=tan(v);
@@ -158,8 +158,8 @@ void findmaxview(GLdouble* n)
 GLdouble* getPjMat()
 {
 	int i;
-	double tu,tv;
-	double sx,sy,sz,cx,cy,cz;
+	float tu,tv;
+	float sx,sy,sz,cx,cy,cz;
 	//symbols to make the matrix easier to type
 	tu=tan(u);
 	tv=tan(v);

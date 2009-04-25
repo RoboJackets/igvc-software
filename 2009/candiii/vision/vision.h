@@ -30,14 +30,14 @@ public:
 	// Number of paths that are assessed between the starting/ending angles
 	int nav_path__num ;
 	// Proportional to the lengths of the paths (in image space)	//0.35;<-with-transform
-	double nav_path__view_distance_multiplier ;
+	float nav_path__view_distance_multiplier ;
 	// Defines the "view/navigation cone", which is where the set of
 	// considered navigation paths is taken from.
-	double nav_path__view_cone__offset ;
-	double nav_path__view_cone__start_angle ;
-	double nav_path__view_cone__end_angle  ;
-	double nav_path__view_cone__delta_angle ;
-	double nav_path__view_cone__spacing  ;
+	float nav_path__view_cone__offset ;
+	float nav_path__view_cone__start_angle ;
+	float nav_path__view_cone__end_angle  ;
+	float nav_path__view_cone__delta_angle ;
+	float nav_path__view_cone__spacing  ;
 	// XXX: Controls how many pixels *near* a path-pixel are searched for dangerous pixels
 	// 0 <= nav_path__path_search_girth
 	int nav_path__path_search_girth ;
@@ -56,11 +56,11 @@ public:
 
 	// helpers for sweeperlines ////
 	void visSweeperLines(Point2D<int>& goal);
-	double deg2rad(double degrees);
-	Point2D<double> navPath_start(int pathID);
-	Point2D<double> navPath_vector(int pathID);
-	Point2D<double> navPath_end(int pathID);
-	double navPath_angle(int pathID);
+	float deg2rad(float degrees);
+	Point2D<float> navPath_start(int pathID);
+	Point2D<float> navPath_vector(int pathID);
+	Point2D<float> navPath_end(int pathID);
+	float navPath_angle(int pathID);
 	CvScalar navPath_color(int pathDanger);
 	/**********************************************************************************/
 
@@ -130,7 +130,7 @@ public:
 	int avgR;
 	int avgG;
 	int avgB;
-	double k_roi;
+	float k_roi;
 
 };
 

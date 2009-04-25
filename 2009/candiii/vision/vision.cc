@@ -225,8 +225,8 @@ void Vision::visSweeperLines(Point2D<int>& goal)
         for (pathID=0; pathID<nav_path__num; pathID++)
         {
             // Calculate path parameters
-            Point2D<double> pathStart = navPath_start(pathID);
-            Point2D<double> pathEnd = navPath_end(pathID);
+            Point2D<float> pathStart = navPath_start(pathID);
+            Point2D<float> pathEnd = navPath_end(pathID);
 
             // Calculate the set of points in the path
             QVector< Point2D<int> > pathPoints;
@@ -400,8 +400,8 @@ void Vision::visSweeperLines(Point2D<int>& goal)
             g_draw.setColor(navPath_color(pathDanger[bestPath_id]));
 
             // Redraw the path, but much more thickly (in order to hilight it)
-            Point2D<double> bestPath_start = navPath_start(bestPath_id);
-            Point2D<double> bestPath_end = navPath_end(bestPath_id);
+            Point2D<float> bestPath_start = navPath_start(bestPath_id);
+            Point2D<float> bestPath_end = navPath_end(bestPath_id);
             for (int deltaX = -1; deltaX <= 1; deltaX++)
             {
                 g_draw.drawLine(
@@ -663,7 +663,8 @@ int Vision::checkPixel(IplImage* img, const int x, const int y)
 {
     // check: black = bad
     //if ( !val )
-    if (!(unsigned char)img->imageData[y*img->width+x] )
+    //if (!(unsigned char)img->imageData[y*img->width+x] )
+    if (!(unsigned char) (*(img->imageData+(y*img->width+x))) )
     {
         // check for noise
         if ( !(img->imageData[ (y-PIXEL_SKIP)*img->width+x ]) )
@@ -916,7 +917,7 @@ void Vision::preProcessColors(IplImage* img)
 /*
  * Converts a measurement in degrees to radians.
  */
-double Vision::deg2rad(double degrees)
+float Vision::deg2rad(float degrees)
 {
     return degrees * M_PI / 180.0;
 }
@@ -924,9 +925,9 @@ double Vision::deg2rad(double degrees)
 /*
  *
  */
-Point2D<double> Vision::navPath_start(int pathID)
+Point2D<float> Vision::navPath_start(int pathID)
 {
-    return Point2D<double>(
+    return Point2D<float>(
                (visCvDebug->width / 2) + (nav_path__center_path_id-pathID),
                visCvDebug->height - EDGE_PAD -1 );
 }
@@ -934,13 +935,13 @@ Point2D<double> Vision::navPath_start(int pathID)
 /*
  *
  */
-Point2D<double> Vision::navPath_vector(int pathID)
+Point2D<float> Vision::navPath_vector(int pathID)
 {
-    //double deg = navPath_angle(pathID);
-    //double rad = deg2rad(deg);
-    double rad = navPath_angle(pathID)*M_PI/180.0;
-    double radius = 0.75 * (visCvDebug->width) / 2;
-    return Point2D<double>(
+    //float deg = navPath_angle(pathID);
+    //float rad = deg2rad(deg);
+    float rad = navPath_angle(pathID)*M_PI/180.0;
+    float radius = 0.75 * (visCvDebug->width) / 2;
+    return Point2D<float>(
                radius*cos(rad),
                -radius*sin(rad))	// computer y-axis is inverse of math y-axis
            * nav_path__view_distance_multiplier;
@@ -949,7 +950,7 @@ Point2D<double> Vision::navPath_vector(int pathID)
 /*
  *
  */
-Point2D<double> Vision::navPath_end(int pathID)
+Point2D<float> Vision::navPath_end(int pathID)
 {
     return navPath_start(pathID) + navPath_vector(pathID);
 }
@@ -957,7 +958,7 @@ Point2D<double> Vision::navPath_end(int pathID)
 /*
  *  result is in degrees
  */
-double Vision::navPath_angle(int pathID)
+float Vision::navPath_angle(int pathID)
 {
     return  nav_path__view_cone__start_angle +
             (pathID * nav_path__view_cone__spacing);
@@ -972,7 +973,7 @@ CvScalar Vision::navPath_color(int pathDanger)
     return cvScalar(
                178 ,
                32 ,
-               (pathDanger / (double)max_path_danger) * 255
+               (pathDanger / (float)max_path_danger) * 255
            );
 }
 
@@ -1260,37 +1261,53 @@ void Vision::Adapt()
         //avgR = 110;  //125;
     }
 
-    unsigned char* rgbdata = (unsigned char*) visCvRawTransformSmall->imageData;
+    /* pointers for speed */
+    unsigned char* rgbdata   = (unsigned char*) visCvRawTransformSmall->imageData;
+    unsigned char* adaptdata = (unsigned char*) visCvAdaptSmall->imageData;
+    unsigned char* debugdata = (unsigned char*) visCvDebug->imageData;
     /* generate visCvAdapt image here!
      *  white=good ~ black=bad */
-    for (int i=0; i<visCvRawTransformSmall->imageSize-3; i+=3)
+    for (int i=0, n=visCvRawTransformSmall->imageSize-3; i<n; i+=3)
     {
+        // get data
         ab = *(rgbdata  );
         ag = *(rgbdata+1);
         ar = *(rgbdata+2);
+        // pointer
         rgbdata+=3;
 
+        // check in roi
         if (
             //(abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&  // ramps/grass differ mainly in blue
             (abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
             (abs(ar-(unsigned char)avgR)<adapt_maxDiff)
         )
         {
-            visCvAdaptSmall->imageData[i/3] = GOOD_PIXEL;
+            //visCvAdaptSmall->imageData[i/3] = GOOD_PIXEL;
+            *adaptdata = GOOD_PIXEL;
         }
         else
         {
-            visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
+            //visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
+            *adaptdata = BAD_PIXEL;
         }
 
         // check for white by looking for blue (most dominant color b/c of sky)
         if ( (1) && (ab>150) )
         {
-            visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
-            visCvDebug->imageData[i+0]=(unsigned char)255;
-            visCvDebug->imageData[i+1]=(unsigned char)255;
-            visCvDebug->imageData[i+2]=(unsigned char)255;
+            //visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
+            *adaptdata = BAD_PIXEL;
+            //visCvDebug->imageData[i+0]=(unsigned char)255;
+            //visCvDebug->imageData[i+1]=(unsigned char)255;
+            //visCvDebug->imageData[i+2]=(unsigned char)255;
+            *(debugdata  ) = (unsigned char)255;
+            *(debugdata+1) = (unsigned char)255;
+            *(debugdata+2) = (unsigned char)255;
         }
+
+        // pointers
+        ++adaptdata;
+        debugdata+=3;
 
     }
 

@@ -104,7 +104,7 @@ public:
 
 	// avg heading control
 	// k_motors = the % of new value to use
-	double k_motors;
+	float k_motors;
 
 	// xml conf
 	void LoadXMLSettings();

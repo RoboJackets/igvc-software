@@ -12,7 +12,7 @@ void printCv33Matrix(CvMat* matrix)
 	{
 		for ( col = 0; col < 3; col++ )
 		{
-			printf(" %.2f ",(double)cvmGet( matrix, row, col ));
+			printf(" %.2f ",(float)cvmGet( matrix, row, col ));
 		}
 		printf("\n");
 	}
@@ -23,7 +23,7 @@ void printCv33Matrix(CvMat* matrix)
 /*****************************************************************************/
 /*
  */
-PointParamEstimator::PointParamEstimator(double delta) : m_deltaSquared(delta*delta)
+PointParamEstimator::PointParamEstimator(float delta) : m_deltaSquared(delta*delta)
 {
 }
 
@@ -31,7 +31,7 @@ PointParamEstimator::PointParamEstimator(double delta) : m_deltaSquared(delta*de
 /*
  */
 void PointParamEstimator::estimate(std::vector< std::pair<CvPoint2D32f ,CvPoint2D32f >* > &data,
-								   std::vector<double> &parameters)
+								   std::vector<float> &parameters)
 {
 	parameters.clear();
 	if (data.size()<2)
@@ -64,7 +64,7 @@ void PointParamEstimator::estimate(std::vector< std::pair<CvPoint2D32f ,CvPoint2
 /*
  */
 void PointParamEstimator::leastSquaresEstimate(std::vector< std::pair<CvPoint2D32f ,CvPoint2D32f >* > &data,
-		std::vector<double> &parameters)
+		std::vector<float> &parameters)
 {
 	parameters.clear();
 	if (data.size()<2)
@@ -96,11 +96,11 @@ void PointParamEstimator::leastSquaresEstimate(std::vector< std::pair<CvPoint2D3
 /*****************************************************************************/
 /*
  */
-bool PointParamEstimator::agree(std::vector<double> &parameters, std::pair<CvPoint2D32f ,CvPoint2D32f >  &data)
+bool PointParamEstimator::agree(std::vector<float> &parameters, std::pair<CvPoint2D32f ,CvPoint2D32f >  &data)
 {
 
-	double error;
-	double x1,y1,x2,y2,x2test,y2test;
+	float error;
+	float x1,y1,x2,y2,x2test,y2test;
 
 	// get prev pt
 	x1 = data.first.x;
@@ -143,7 +143,7 @@ int PointParamEstimator::computeHomography(CvPoint2D32f* prev, CvPoint2D32f* cur
 	    (x3,y3)<==>(x4,y4)
 	*/
 
-	double x1,y1,x2,y2,x3,y3,x4,y4,e,f,sint,cost,v1x,v1y,v2x,v2y,delta;
+	float x1,y1,x2,y2,x3,y3,x4,y4,e,f,sint,cost,v1x,v1y,v2x,v2y,delta;
 
 	x1 = prev[0].x;
 	y1 = prev[0].y;

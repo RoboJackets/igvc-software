@@ -54,7 +54,7 @@ public:
 	int imgHalfWidth;
 	int genLandmarkMap();
 	void mapCamPointToWorldPoint(CvPoint2D32f& cam, CvPoint2D32f& world);
-	void mapCamPointToWorldPoint(double camx, double camy, double& worldx, double& worldy);
+	void mapCamPointToWorldPoint(float camx, float camy, float& worldx, float& worldy);
 	std::vector< CvPoint3D32f > worldPoints; // z is ref count
 	void addOrUpdateWorldPoint(CvPoint3D32f wpt);
 	/**/
@@ -63,9 +63,9 @@ public:
 	int processMap(Point2D<int>& goal);
 	CvPoint robotBaseAt;    // bottom of current image being pasted into world (in world coordinates)
 	CvPoint robotLookingAt; // top of current image being pasted into world (in world coordinates)
-	Point2D<double> navPath_start(/*int pathID*/);
-	Point2D<double> navPath_end(int pathID);
-	Point2D<double> navPath_vector(int pathID);
+	Point2D<float> navPath_start(/*int pathID*/);
+	Point2D<float> navPath_end(int pathID);
+	Point2D<float> navPath_vector(int pathID);
 	IplImage* worldDebug;
 	int moveTo127;
 	/**/
@@ -80,7 +80,7 @@ public:
 	int nav_path__path_search_girth ;
 	int nav_path__danger_smoothing_radius ;
 	int max_path_danger ;
-	double min_path_danger_value ;
+	float min_path_danger_value ;
 	int nav_path__view_cone__spacing ;
 	float nav_path__view_distance_multiplier ;
 	CvScalar dangerous_pixel_color ;
