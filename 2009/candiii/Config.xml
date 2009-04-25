@@ -18,8 +18,8 @@
 	<auto_gain_and_shutter>001</auto_gain_and_shutter>
 
 	<!-- Guppy White Balance Settings -->
-	<red>517</red>   <!-- old 528 -->
 	<blue>602</blue> <!-- old 646 -->
+	<red>517</red>   <!-- old 528 -->
 
 	<!-- Vision Processing Settings -->
 	<satThresh>70</satThresh>     <!-- (hsv only) higher => more noise/sensitivity -->
@@ -28,13 +28,13 @@
 	<doTransform>01</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
 
-	<maxDiff>55</maxDiff>         <!-- lower => more noise in thresh image -->
-	<boxPadding>45</boxPadding>   <!-- lower => wider box -->
-	<k_roi>0.076</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
+	<maxDiff>50</maxDiff>         <!-- lower => more noise in thresh image -->
+	<boxPadding>42</boxPadding>   <!-- lower => wider box -->
+	<k_roi>0.085</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
 
 	<!-- Robot Misc Settings -->
     <defaultView>01</defaultView>       <!-- gui slider bar starting value -->
-	<k_motors>0.50</k_motors>           <!-- lower => more smooth motor cotrol (averages new motor commands - vision only) -->
+	<k_motors>0.50</k_motors>           <!-- lower => more smooth motor cotrol (averages new motor commands) -->
     <motorsMaxSpeed>39</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
