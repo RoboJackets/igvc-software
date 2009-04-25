@@ -13,7 +13,7 @@
 #define K_  0.50
 
 /* Use visCvPath (more black) or visCvThresh (more correct) to plot into worldmap */
-#define USE_PATH_IMG  1
+#define USE_PATH_IMG  0
 
 /* Avg dx dy of features must be grater than this */
 #define MIN_FEATURE_SHIFT 0.06
@@ -462,10 +462,10 @@ void MapGen::init()
 #else
 	danger_per_barrel_pixel = 6; //=1
 #endif
-	nav_path__path_search_girth = 1; // pixels near curr line to search
-	nav_path__danger_smoothing_radius = 3; // lines nearby to search
-	max_path_danger = 45;
-	min_path_danger_value = 90;//20; // lower => be less afraid
+	nav_path__path_search_girth = 0; // pixels near curr line to search
+	nav_path__danger_smoothing_radius = 2; // lines nearby to search
+	max_path_danger = 40;//45;
+	min_path_danger_value = 95;//20; // lower => be less afraid
 	nav_path__view_distance_multiplier = 0.54;//0.6;
 	dangerous_pixel_color = CV_RGB(255,0,0);
 
@@ -728,7 +728,8 @@ int MapGen::genProbabilityMap()
 				weight = (cvGetReal2D(  visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval; // cooler looking
 #endif
                 // weight closer stuff higher
-                if (y>imgHalfHeight) weight *= 2;
+                //if (y>imgHalfHeight) weight *= 2;
+                weight += (weight<0)?(-y/80):(y/80); //80=240/3
                 // update value
                 setval += weight;
 				// cap results
@@ -833,7 +834,13 @@ int MapGen::processMap(Point2D<int>& goal)
 					if (val <= min_path_danger_value)
 					{
 						// everything bad is a barrel
-						curPixelDanger += danger_per_barrel_pixel;
+
+						// sum dangers
+						//curPixelDanger += danger_per_barrel_pixel;
+
+						// set danger to closeness
+						//printf("id %d max %d danger %d\n",pathID,n2,n2-j);
+						curPixelDanger = n2-j;  break;
 					}
 					else
 					{
@@ -848,7 +855,7 @@ int MapGen::processMap(Point2D<int>& goal)
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			weight = abs(nav_path__center_path_id-pathID)/2;
+			weight = abs(nav_path__center_path_id-pathID);
 			curPathDanger += weight;
 
 			// Clip high danger values to be no higher than max_path_danger
@@ -989,7 +996,7 @@ int MapGen::processMap(Point2D<int>& goal)
 
 			/* Update goal */
 			//Point2D<int> goal;
-			int scalex = 50;
+			int scalex = 45;
 			goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
 			goal.y = (max_path_danger + 1 - pathDanger[bestPath_id]) * 2 ;
 

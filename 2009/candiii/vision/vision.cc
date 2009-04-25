@@ -96,14 +96,14 @@ void Vision::init()
     nav_path__view_cone__spacing = nav_path__view_cone__delta_angle / (nav_path__num-1);
     // XXX: Controls how many pixels *near* a path-pixel are searched for dangerous pixels
     // 0 <= nav_path__path_search_girth
-    nav_path__path_search_girth = 1;
+    nav_path__path_search_girth = 0;
     // (do not change without reason!)
     nav_path__center_path_id = (int) round((90.0 - nav_path__view_cone__start_angle) / nav_path__view_cone__spacing);
     // Amount of danger posed by a single barrel-pixel
     // (everything bad is a barrel)
     danger_per_barrel_pixel = 1;
     // Path danger values higher than this will be clipped to this value
-    max_path_danger = 70;					// >= 0 // 75
+    max_path_danger = 90;//70;					// >= 0 // 75
     // smoothing = paths that are *near* dangerous paths are also considered to be dangerous
     nav_path__danger_smoothing_radius = 6;	// >= 0 // 6
     // colors
@@ -255,7 +255,10 @@ void Vision::visSweeperLines(Point2D<int>& goal)
                     if (visCvPath->imageData[curPoint.y*visCvPath->width+curPoint.x]==0)
                     {
                         // everything bad is a barrel
-                        curPixelDanger += danger_per_barrel_pixel;
+                        //curPixelDanger += danger_per_barrel_pixel;
+
+                        // set danger to closeness
+                        curPixelDanger = n2-j; break;
                     }
                     else
                     {
@@ -589,7 +592,7 @@ void Vision::visGenPath(IplImage* img)
         else
         {
             goodFirst=0;
-            //blackout=1;   // blackout everything above this point
+            blackout=1;   // blackout everything above this point
         }
 
         //scan left then right & generate visCvPath image
@@ -1234,7 +1237,7 @@ void Vision::Adapt()
     blue  = data.val[0];
     green = data.val[1];
     red   = data.val[2];
-	//printf(" RGB %d %d %d \n", red, green, blue);
+    //printf(" RGB %d %d %d \n", red, green, blue);
 
     /* average rgb over time */
     static int first = 1;
@@ -1252,9 +1255,9 @@ void Vision::Adapt()
         avgR =   red*(k_roi) + avgR*(1-k_roi);
 
         //      ramps; grass;  (from 2007 video)
-		//avgB = 130;  //80;
-		//avgG = 127;  //133;
-		//avgR = 110;  //125;
+        //avgB = 130;  //80;
+        //avgG = 127;  //133;
+        //avgR = 110;  //125;
     }
 
     unsigned char* rgbdata = (unsigned char*) visCvRawTransformSmall->imageData;
@@ -1281,12 +1284,12 @@ void Vision::Adapt()
         }
 
         // check for white by looking for blue (most dominant color b/c of sky)
-        if( (1) && (ab>150) )
+        if ( (1) && (ab>150) )
         {
             visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
-             visCvDebug->imageData[i+0]=(unsigned char)255;
-             visCvDebug->imageData[i+1]=(unsigned char)255;
-             visCvDebug->imageData[i+2]=(unsigned char)255;
+            visCvDebug->imageData[i+0]=(unsigned char)255;
+            visCvDebug->imageData[i+1]=(unsigned char)255;
+            visCvDebug->imageData[i+2]=(unsigned char)255;
         }
 
     }
@@ -1307,7 +1310,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 
     /* copy visCvAdapt img into thresh image and filter */
     cvCopy(visCvAdaptSmall,visCvThresh);
-    //cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
+    cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
     //cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
 
     /* generate visCvPath */
