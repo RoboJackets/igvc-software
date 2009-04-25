@@ -295,10 +295,10 @@ int MapGen::processFeatures()
 
 	/* storage */
 	int i;
-	double x,y,a,b;
+	float x,y,a,b;
 
 	/* for RANSAC */
-	std::vector<double> pointParameters;
+	std::vector<float> pointParameters;
 	PointParamEstimator pointEstimator(0.3); //0.3; /* error percent */
 	matchList.clear();
 	CvPoint2D32f foundpts[ maxFeatures*2 ];
@@ -332,7 +332,7 @@ int MapGen::processFeatures()
 	/*
 	 * Run RANSAC on found features
 	 */
-	Ransac<CvPoint2D32f,double>::compute(
+	Ransac<CvPoint2D32f,float>::compute(
 		pointParameters,    // output cam-cam homography matrix
 		&pointEstimator,    // templeted class for comparing point matches
 		matchList,          // vector of point match pairs
@@ -412,7 +412,7 @@ void MapGen::init()
 	cvZero(matCamToWorld);
 
 	/* set up camera to world homography matrix */
-	double k = 0.25; //0.3; // scale factor
+	float k = 0.25; //0.3; // scale factor
 	// k  0  dx
 	// 0  k  dy
 	// 0  0  1
@@ -531,7 +531,7 @@ void MapGen::printCv33Matrix(CvMat* matrix)
 	{
 		for ( col = 0; col < 3; col++ )
 		{
-			printf(" %.2f ",(double)cvmGet( matrix, row, col ));
+			printf(" %.2f ",(float)cvmGet( matrix, row, col ));
 		}
 		printf("\n");
 	}
@@ -550,7 +550,7 @@ void MapGen::mapCamPointToWorldPoint(CvPoint2D32f& cam, CvPoint2D32f& world)
 			  cvmGet(matCamToWorld,1,2);
 }
 
-void MapGen::mapCamPointToWorldPoint(double camx, double camy, double& worldx, double& worldy)
+void MapGen::mapCamPointToWorldPoint(float camx, float camy, float& worldx, float& worldy)
 {
 	/* maps a point in camera frame to world frame
 	 *  via cam to world homography matrix */
@@ -573,7 +573,7 @@ void MapGen::addOrUpdateWorldPoint(CvPoint3D32f wpt)
 	}
 
 	/* pixel location difference threshold */
-	double thresh = WORLDPT_PIXDIFF ;
+	float thresh = WORLDPT_PIXDIFF ;
 	int i;
 	CvPoint3D32f* curr;
 
@@ -607,7 +607,7 @@ int MapGen::genLandmarkMap()
 	/* landmark processing */
 	if (1)
 	{
-		double wx,wy;
+		float wx,wy;
 
 		/* update all the found feature points into the world map point list */
 		for (int i=0; i<maxFeatures; i++)
@@ -648,7 +648,7 @@ int MapGen::genLandmarkMap()
 
 	/* draw a line from the center bottom of camera frame to center middle
 	 *  to show the orientation of the robot in the world map */
-	double x,y,a,b;
+	float x,y,a,b;
 	mapCamPointToWorldPoint( imgHalfWidth, 0, a, b); // top center of camera frame
 	mapCamPointToWorldPoint( imgHalfWidth, visCvGrey->height-1, x, y); // bottom center of camera frame
 	/* update/avg current robot orientation */
@@ -683,8 +683,8 @@ int MapGen::genProbabilityMap()
 	/* slowly move all probabilities toward unknown (127) */
 	if (moveTo127)
 	{
-		double curr;
-		double speed = 1;
+		float curr;
+		float speed = 1;
 		int i;
 
 #pragma omp parallel for private(curr)
@@ -703,10 +703,10 @@ int MapGen::genProbabilityMap()
 	 *  while setting probabilities of obstacles and traversible area */
 	int divby = 2;      // image size denominator
 	int pad = 4;        // remove noise around img edges
-	double badval = -1; // rate for obstacle probability
-	double goodval = 2; // rate for travpath probability
-	double setval,weight;
-	double wx,wy;
+	float badval = -1; // rate for obstacle probability
+	float goodval = 2; // rate for travpath probability
+	float setval,weight;
+	float wx,wy;
 	int x,y;
 
 #pragma omp parallel for private(x,setval,wx,wy,weight)
@@ -718,7 +718,7 @@ int MapGen::genProbabilityMap()
 			if ( cvGet2D(visCvGlutMask,y,x).val[0]==255 )
 			{
 				// map pts
-				mapCamPointToWorldPoint((double)x,(double)y,wx,wy);
+				mapCamPointToWorldPoint((float)x,(float)y,wx,wy);
 				// get current val
 				setval = cvGetReal2D(probmap,wy,wx);
 				// and add/subtract based on thresh image
@@ -743,7 +743,7 @@ int MapGen::genProbabilityMap()
 
 
 	/* get robot orientation in world coordinates */
-	double a,b;
+	float a,b;
 	int baseoffset = -15; // smaller is further back
 	mapCamPointToWorldPoint(imgHalfWidth, 0, a, b); // top center of camera frame
 	mapCamPointToWorldPoint(imgHalfWidth, visCvGrey->height - baseoffset, wx, wy); // bottom center of camera frame (minus some)
@@ -801,8 +801,8 @@ int MapGen::processMap(Point2D<int>& goal)
 		for (int pathID=0; pathID<nav_path__num; pathID++)
 		{
 			// Calculate path parameters
-			Point2D<double> pathStart =navPath_start(/*pathID*/);
-			Point2D<double> pathEnd = navPath_end(pathID);
+			Point2D<float> pathStart =navPath_start(/*pathID*/);
+			Point2D<float> pathEnd = navPath_end(pathID);
 
 			// Calculate the set of points in the path
 			QVector< Point2D<int> > pathPoints;
@@ -830,7 +830,7 @@ int MapGen::processMap(Point2D<int>& goal)
 					curPoint.x += delta;
 
 					// check path image (half size) for black=bad
-					double val = cvGetReal1D(probmap,curPoint.y*probmap->width+curPoint.x);
+					float val = cvGetReal1D(probmap,curPoint.y*probmap->width+curPoint.x);
 					if (val <= min_path_danger_value)
 					{
 						// everything bad is a barrel
@@ -867,7 +867,7 @@ int MapGen::processMap(Point2D<int>& goal)
 
 			// Draw the body of the path using a color that is determined from the path's danger value
 			//g_draw.setColor(navPath_color(curPathDanger));
-			g_draw.setColor( cvScalar(128,128, (curPathDanger / (double)max_path_danger) * 255) );
+			g_draw.setColor( cvScalar(128,128, (curPathDanger / (float)max_path_danger) * 255) );
 			g_draw.drawLine( (int) pathStart.x, (int) pathStart.y, (int) pathEnd.x, (int) pathEnd.y);
 
 			g_draw.setColor(dangerous_pixel_color);
@@ -982,11 +982,11 @@ int MapGen::processMap(Point2D<int>& goal)
 		/* Hilight the path that was picked */
 		{
 			//g_draw.setColor(navPath_color(pathDanger[bestPath_id]));
-			g_draw.setColor( cvScalar( (pathDanger[bestPath_id] / (double)max_path_danger) * 255 ,128,128 ) );
+			g_draw.setColor( cvScalar( (pathDanger[bestPath_id] / (float)max_path_danger) * 255 ,128,128 ) );
 
 			// Redraw the path, but much more thickly (in order to hilight it)
-			Point2D<double> bestPath_start = navPath_start(/*bestPath_id*/);
-			Point2D<double> bestPath_end = navPath_end(bestPath_id);
+			Point2D<float> bestPath_start = navPath_start(/*bestPath_id*/);
+			Point2D<float> bestPath_end = navPath_end(bestPath_id);
 			for (int deltaX = -1; deltaX <= 1; deltaX++)
 			{
 				g_draw.drawLine(
@@ -1015,29 +1015,29 @@ int MapGen::processMap(Point2D<int>& goal)
 	return 1;
 }
 
-Point2D<double> MapGen::navPath_start(/*int pathID*/)
+Point2D<float> MapGen::navPath_start(/*int pathID*/)
 {
-	Point2D<double> start;
+	Point2D<float> start;
 	start.x = robotBaseAt.x;
 	start.y = robotBaseAt.y;
 	return start;
 }
-Point2D<double> MapGen::navPath_end(int pathID)
+Point2D<float> MapGen::navPath_end(int pathID)
 {
 	return navPath_start(/*pathID*/) + navPath_vector(pathID);
 }
-Point2D<double> MapGen::navPath_vector(int pathID)
+Point2D<float> MapGen::navPath_vector(int pathID)
 {
 
 	int x = (robotLookingAt.x - robotBaseAt.x) ;
 	int y = (robotLookingAt.y - robotBaseAt.y) ; // positive y down
-	double rad = (atan((double)y/(double)x)) ; // make up = 0 deg
-	double radoff =( (nav_path__center_path_id-pathID)*nav_path__view_cone__spacing )*M_PI/180.0; // path selection
+	float rad = (atan((float)y/(float)x)) ; // make up = 0 deg
+	float radoff =( (nav_path__center_path_id-pathID)*nav_path__view_cone__spacing )*M_PI/180.0; // path selection
 	rad += radoff; // rotate based on path
 	if (x<0) rad += -M_PI ;
 	//printf("  rad %.2f x %.2f y %.2f \n",rad,x,y);
-	double radius = sqrtf(pow(x,2)+pow(y,2)); // dist formula
-	return Point2D<double>(
+	float radius = sqrtf(pow(x,2)+pow(y,2)); // dist formula
+	return Point2D<float>(
 			   radius*cos(rad),
 			   radius*sin(rad) )   // opencv y-axis is inverse of math y-axis
 		   * nav_path__view_distance_multiplier;

@@ -11,7 +11,7 @@
 <Config>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>00</useFirewireCamera>  <!-- set to 0 to load video -->
+	<useFirewireCamera>000</useFirewireCamera>  <!-- set to 0 to load video -->
 	<gain>16</gain>
 	<shutter>100</shutter>
 	<gamma>0</gamma>
@@ -28,14 +28,14 @@
 	<doTransform>01</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it -->
 
-	<maxDiff>40</maxDiff>         <!-- lower => more noise in thresh image -->
+	<maxDiff>55</maxDiff>         <!-- lower => more noise in thresh image -->
 	<boxPadding>45</boxPadding>   <!-- lower => wider box -->
-	<k_roi>0.06100</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
+	<k_roi>0.076</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
 
 	<!-- Robot Misc Settings -->
     <defaultView>01</defaultView>       <!-- gui slider bar starting value -->
 	<k_motors>0.50</k_motors>           <!-- lower => more smooth motor cotrol (averages new motor commands - vision only) -->
-    <motorsMaxSpeed>30</motorsMaxSpeed> <!-- max motor output [0-255] -->
+    <motorsMaxSpeed>39</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
     <maxFeatures>64</maxFeatures>           <!-- max number for feature corners to find -->

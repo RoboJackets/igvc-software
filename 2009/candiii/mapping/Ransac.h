@@ -78,12 +78,12 @@ public:
 	 * @param maximalOutlierPercentage The maximal expected percentage of outliers.
 	 * @return Returns the percentage of data used in the least squares estimate.
 	 */
-	static double compute(std::vector<S> &parameters,
+	static float compute(std::vector<S> &parameters,
 						  ParameterEstimator<T,S> *paramEstimator ,
 						  std::vector<std::pair<T,T> > &data,
 						  int numForEstimate,
-						  double desiredProbabilityForNoOutliers,
-						  double maximalOutlierPercentage);
+						  float desiredProbabilityForNoOutliers,
+						  float maximalOutlierPercentage);
 
 
 	/**
@@ -106,7 +106,7 @@ public:
 	 * NOTE: This method should be used only when n choose k is small (i.e. k or (n-k) are approximatly equal to n)
 	 *
 	 */
-	static double compute(std::vector<S> &parameters,
+	static float compute(std::vector<S> &parameters,
 						  ParameterEstimator<T,S> *paramEstimator ,
 						  std::vector<std::pair<T,T> > &data,
 						  int numForEstimate);
@@ -141,12 +141,12 @@ private:
 /*******************************Ransac Implementation*************************/
 
 template<class T, class S>
-double Ransac<T,S>::compute(std::vector<S> &parameters,
+float Ransac<T,S>::compute(std::vector<S> &parameters,
 							ParameterEstimator<T,S> *paramEstimator ,
 							std::vector<std::pair<T,T> > &data,
 							int numForEstimate,
-							double desiredProbabilityForNoOutliers,
-							double maximalOutlierPercentage)
+							float desiredProbabilityForNoOutliers,
+							float maximalOutlierPercentage)
 {
 	int numDataObjects = data.size();
 	//there are less data objects than the minimum required for an exact fit, or
@@ -164,9 +164,9 @@ double Ransac<T,S>::compute(std::vector<S> &parameters,
 	SubSetIndexComparator subSetIndexComparator(numForEstimate);
 	std::set<int *, SubSetIndexComparator > chosenSubSets(subSetIndexComparator);
 	int *curSubSetIndexes;
-	double outlierPercentage = maximalOutlierPercentage;
-	double numerator = log(1.0-desiredProbabilityForNoOutliers);
-	double denominator = log(1- pow(1-maximalOutlierPercentage, numForEstimate));
+	float outlierPercentage = maximalOutlierPercentage;
+	float numerator = log(1.0-desiredProbabilityForNoOutliers);
+	float denominator = log(1- pow(1-maximalOutlierPercentage, numForEstimate));
 
 	parameters.clear();
 
@@ -236,7 +236,7 @@ double Ransac<T,S>::compute(std::vector<S> &parameters,
 				memcpy(bestVotes,curVotes, numDataObjects*sizeof(short));
 			}
 			//update the estimate of outliers and the number of iterations we need
-			outlierPercentage = 1 - (double)numVotesForCur/(double)numDataObjects;
+			outlierPercentage = 1 - (float)numVotesForCur/(float)numDataObjects;
 			if (outlierPercentage < maximalOutlierPercentage)
 			{
 				maximalOutlierPercentage = outlierPercentage;
@@ -274,11 +274,11 @@ double Ransac<T,S>::compute(std::vector<S> &parameters,
 	delete [] curVotes;
 	delete [] notChosen;
 
-	return (double)numVotesForBest/(double)numDataObjects;
+	return (float)numVotesForBest/(float)numDataObjects;
 }
 /*****************************************************************************/
 template<class T, class S>
-double Ransac<T,S>::compute(std::vector<S> &parameters,
+float Ransac<T,S>::compute(std::vector<S> &parameters,
 							ParameterEstimator<T,S> *paramEstimator ,
 							std::vector<std::pair<T,T> > &data,
 							int numForEstimate)
@@ -309,7 +309,7 @@ double Ransac<T,S>::compute(std::vector<S> &parameters,
 	delete [] bestVotes;
 	delete [] curVotes;
 
-	return (double)leastSquaresEstimateData.size()/(double)numDataObjects;
+	return (float)leastSquaresEstimateData.size()/(float)numDataObjects;
 }
 /*****************************************************************************/
 template<class T, class S>

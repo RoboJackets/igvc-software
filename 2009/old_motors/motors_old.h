@@ -67,7 +67,7 @@ public:
 	int _iLeftVelocity;
 	int _iRightVelocity;
 	/**/
-	double dVelocityScale;
+	float dVelocityScale;
 	/**/
 	int controlMode;
 	/**/

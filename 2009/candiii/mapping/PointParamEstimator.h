@@ -13,10 +13,10 @@
  *
  */
 
-class PointParamEstimator : public ParameterEstimator < CvPoint2D32f  , double >
+class PointParamEstimator : public ParameterEstimator < CvPoint2D32f  , float >
 {
 public:
-	PointParamEstimator(double delta);
+	PointParamEstimator(float delta);
 
 	/**
 	 * Compute the line defined by the given data points.
@@ -26,7 +26,7 @@ public:
 	 *        If the vector contains less than two points then the resulting parameters
 	 *        vector is empty (size = 0).
 	 */
-	virtual void estimate(std::vector< std::pair<CvPoint2D32f ,CvPoint2D32f >* > &data, std::vector<double> &parameters);
+	virtual void estimate(std::vector< std::pair<CvPoint2D32f ,CvPoint2D32f >* > &data, std::vector<float> &parameters);
 
 	/**
 	 * Compute a least squares estimate of the line defined by the given points.
@@ -37,7 +37,7 @@ public:
 	 *                   If the vector contains less than two points then the resulting parameters
 	 *                   vector is empty (size = 0).
 	 */
-	virtual void leastSquaresEstimate(std::vector<std::pair<CvPoint2D32f ,CvPoint2D32f >* > &data, std::vector<double> &parameters);
+	virtual void leastSquaresEstimate(std::vector<std::pair<CvPoint2D32f ,CvPoint2D32f >* > &data, std::vector<float> &parameters);
 
 	/**
 	 * Return true if the distance between the line defined by the parameters and the
@@ -45,7 +45,7 @@ public:
 	 * @param parameters
 	 * @param data Check that the distance is smaller than 'delta'.
 	 */
-	virtual bool agree(std::vector<double> &parameters, std::pair<CvPoint2D32f ,CvPoint2D32f >  &data);
+	virtual bool agree(std::vector<float> &parameters, std::pair<CvPoint2D32f ,CvPoint2D32f >  &data);
 
 
 
@@ -54,7 +54,7 @@ public:
 
 
 private:
-	double m_deltaSquared; //
+	float m_deltaSquared; //
 	int computeHomography(CvPoint2D32f* p1, CvPoint2D32f* p2, CvMat* h);
 };
 
