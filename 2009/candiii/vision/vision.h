@@ -131,6 +131,7 @@ public:
 	int avgG;
 	int avgB;
 	float k_roi;
+	int adapt_whiteThresh;
 
 };
 

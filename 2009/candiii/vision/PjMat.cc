@@ -21,7 +21,7 @@
 #define min(a,b) ((a<b)?a:b)
 
 //inputs - the guppy camera uses 640x480 resolution
-#define HFOV (.7854)            // empirical half angle value in radians | (0.8602~=49deg) (0.7854~=45deg)
+#define HFOV (.7900)            // empirical half angle value in radians | (0.8602~=49deg) (0.7854~=45deg)
 #define VFOV (HFOV*0.75)		// aspect ratio == 0.75 == 480/640
 #define u (HFOV/2)
 #define v (VFOV/2)
