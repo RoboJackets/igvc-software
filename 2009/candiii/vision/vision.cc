@@ -44,7 +44,7 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 
 
     /* filter image */
-    //cvSmooth(visCvRawTransformSmall,visCvRawTransformSmall,CV_BLUR,3,0,0,0);
+    cvSmooth(visCvRawTransformSmall,visCvRawTransformSmall,CV_GAUSSIAN,3,0,0,0);
 
     /* copy image to internal buffer for drawing */
     cvCopy(visCvRawTransformSmall,visCvDebug);
@@ -1059,6 +1059,7 @@ void Vision::LoadVisionXMLSettings()
         adapt_boxPad = cfg.getInt("boxPadding");
         DO_ADAPTIVE  = cfg.getInt("doAdaptive");
         k_roi        = cfg.getFloat("k_roi");
+        adapt_whiteThresh = cfg.getFloat("whiteThresh");
     }
 
     /* test */
@@ -1075,6 +1076,7 @@ void Vision::LoadVisionXMLSettings()
                 adapt_boxPad = 100;
                 DO_ADAPTIVE  = 1;
                 k_roi        = 0.025;
+                adapt_whiteThresh = 190;
             }
         }
         else
@@ -1226,7 +1228,7 @@ void Vision::Adapt()
     cvResetImageROI(visCvRawTransformSmall);
 
     /* blur image data */
-    cvSmooth(roi_img,roi_img,CV_BLUR,3,0,0,0);
+    cvSmooth(roi_img,roi_img,CV_GAUSSIAN,3,0,0,0);
 
     /* display roi box in separate window */
     cvShowImage( "roi" , roi_img );
@@ -1293,7 +1295,7 @@ void Vision::Adapt()
         }
 
         // check for white by looking for blue (most dominant color b/c of sky)
-        if ( (1) && (ab>190) )
+        if ( (1) && (ab>adapt_whiteThresh) )
         {
             //visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
             *adaptdata = BAD_PIXEL;

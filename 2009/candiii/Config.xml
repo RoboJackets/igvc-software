@@ -31,6 +31,7 @@
 	<maxDiff>50</maxDiff>         <!-- lower => more noise in thresh image -->
 	<boxPadding>42</boxPadding>   <!-- lower => wider box -->
 	<k_roi>0.085</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
+	<whiteThresh>150</whiteThresh>   <!-- values above this number in blue channel are considered white lines -->
 
 	<!-- Robot Misc Settings -->
     <defaultView>01</defaultView>       <!-- gui slider bar starting value -->

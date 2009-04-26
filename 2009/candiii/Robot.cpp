@@ -363,7 +363,7 @@ void Robot::processFunc()
 	}
 
 
-	/* SLAM Processing */
+	/* Perform SLAM Processing */
 	if (doMapping)
 	{
 		if ( mapper.genMap() )
@@ -376,7 +376,7 @@ void Robot::processFunc()
 	/* Update displays */
 	vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
-
+useMotors=1;
 	/* Drive Robot via motor commands (GO!) */
 	if (useMotors)
 	{
@@ -413,7 +413,7 @@ void Robot::processFunc()
 		motors.set_heading(heading_main.y, heading_main.x);
 	}
 
-	/* Pring Stats */
+	/* Print Stats */
 	if (PRINTFRAMERATE)
 	{
 		printf( "framerate: %.2f \n\n", elapsed_time() );

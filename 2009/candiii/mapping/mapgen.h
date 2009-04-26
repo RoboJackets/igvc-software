@@ -27,7 +27,7 @@ public:
 public:
 
 	int genMap();
-	void LoadXMLSettings();
+	void LoadMappingXMLSettings();
 	int maxFeatures;
 	void init();
 	/**/
