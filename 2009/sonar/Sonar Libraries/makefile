@@ -1,10 +1,10 @@
 all: sonardevice
 
-sonardevice: sonartest_1_02.o SonarInterface.o ArduinoInterface.o DataPacket.o
-	g++ -o sdev sonartest_1_02.o SonarInterface.o ArduinoInterface.o DataPacket.o
+sonardevice: sonartest_checkall.o SonarInterface.o ArduinoInterface.o DataPacket.o
+	g++ -o sdev sonartest_checkall.o SonarInterface.o ArduinoInterface.o DataPacket.o
 
-sonartest_1_01.o: sonartest_1_02.cc
-	g++ -Wall -c -o sonartest_1_02.o sonartest_1_02.cc
+sonartest_1_01.o: sonartest_checkall.cc
+	g++ -Wall -c -o sonartest_checkall.o sonartest_checkall.cc
 
 SonarInterface.o: SonarInterface.cc
 	g++ -Wall -c -o SonarInterface.o SonarInterface.cc
