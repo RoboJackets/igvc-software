@@ -376,7 +376,7 @@ void Robot::processFunc()
 	/* Update displays */
 	vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
-useMotors=1;
+
 	/* Drive Robot via motor commands (GO!) */
 	if (useMotors)
 	{
