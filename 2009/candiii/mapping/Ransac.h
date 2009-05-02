@@ -79,11 +79,11 @@ public:
 	 * @return Returns the percentage of data used in the least squares estimate.
 	 */
 	static float compute(std::vector<S> &parameters,
-						  ParameterEstimator<T,S> *paramEstimator ,
-						  std::vector<std::pair<T,T> > &data,
-						  int numForEstimate,
-						  float desiredProbabilityForNoOutliers,
-						  float maximalOutlierPercentage);
+						 ParameterEstimator<T,S> *paramEstimator ,
+						 std::vector<std::pair<T,T> > &data,
+						 int numForEstimate,
+						 float desiredProbabilityForNoOutliers,
+						 float maximalOutlierPercentage);
 
 
 	/**
@@ -107,9 +107,9 @@ public:
 	 *
 	 */
 	static float compute(std::vector<S> &parameters,
-						  ParameterEstimator<T,S> *paramEstimator ,
-						  std::vector<std::pair<T,T> > &data,
-						  int numForEstimate);
+						 ParameterEstimator<T,S> *paramEstimator ,
+						 std::vector<std::pair<T,T> > &data,
+						 int numForEstimate);
 
 private:
 
@@ -142,11 +142,11 @@ private:
 
 template<class T, class S>
 float Ransac<T,S>::compute(std::vector<S> &parameters,
-							ParameterEstimator<T,S> *paramEstimator ,
-							std::vector<std::pair<T,T> > &data,
-							int numForEstimate,
-							float desiredProbabilityForNoOutliers,
-							float maximalOutlierPercentage)
+						   ParameterEstimator<T,S> *paramEstimator ,
+						   std::vector<std::pair<T,T> > &data,
+						   int numForEstimate,
+						   float desiredProbabilityForNoOutliers,
+						   float maximalOutlierPercentage)
 {
 	int numDataObjects = data.size();
 	//there are less data objects than the minimum required for an exact fit, or
@@ -279,9 +279,9 @@ float Ransac<T,S>::compute(std::vector<S> &parameters,
 /*****************************************************************************/
 template<class T, class S>
 float Ransac<T,S>::compute(std::vector<S> &parameters,
-							ParameterEstimator<T,S> *paramEstimator ,
-							std::vector<std::pair<T,T> > &data,
-							int numForEstimate)
+						   ParameterEstimator<T,S> *paramEstimator ,
+						   std::vector<std::pair<T,T> > &data,
+						   int numForEstimate)
 {
 	std::vector<std::pair<T,T>* > leastSquaresEstimateData;
 	int numDataObjects = data.size();

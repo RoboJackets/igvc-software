@@ -2,10 +2,10 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="Config.xml" open="1" top="1" tabpos="1">
-		<Cursor position="359" topLine="9" />
+		<Cursor position="1329" topLine="0" />
 	</File>
-	<File name="Robot.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="15760" topLine="608" />
+	<File name="Robot.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="9034" topLine="369" />
 	</File>
 	<File name="Robot.h" open="0" top="0" tabpos="9">
 		<Cursor position="2314" topLine="77" />
@@ -37,11 +37,11 @@
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
 		<Cursor position="3770" topLine="45" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="4">
-		<Cursor position="27480" topLine="1002" />
+	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="5">
+		<Cursor position="272" topLine="0" />
 	</File>
 	<File name="mapping/mapgen.h" open="0" top="0" tabpos="5">
-		<Cursor position="1861" topLine="15" />
+		<Cursor position="364" topLine="15" />
 	</File>
 	<File name="vision/CVcam.cpp" open="0" top="0" tabpos="6">
 		<Cursor position="31" topLine="0" />
@@ -61,8 +61,8 @@
 	<File name="vision/GuppyCam.h" open="0" top="0" tabpos="10">
 		<Cursor position="906" topLine="4" />
 	</File>
-	<File name="vision/PjMat.cc" open="1" top="0" tabpos="3">
-		<Cursor position="4113" topLine="124" />
+	<File name="vision/PjMat.cc" open="1" top="0" tabpos="4">
+		<Cursor position="306" topLine="0" />
 	</File>
 	<File name="vision/Point2D.h" open="0" top="0" tabpos="8">
 		<Cursor position="0" topLine="0" />
@@ -73,14 +73,14 @@
 	<File name="vision/image_buffers.h" open="0" top="0" tabpos="6">
 		<Cursor position="809" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="0" tabpos="2">
-		<Cursor position="21065" topLine="649" />
+	<File name="vision/vision.cc" open="1" top="0" tabpos="3">
+		<Cursor position="36109" topLine="0" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="6">
-		<Cursor position="4069" topLine="32" />
+		<Cursor position="4099" topLine="108" />
 	</File>
-	<File name="../old_motors/motors_old.cpp" open="0" top="0" tabpos="6">
-		<Cursor position="13" topLine="0" />
+	<File name="../old_motors/motors_old.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="6828" topLine="214" />
 	</File>
 	<File name="../old_motors/motors_old.h" open="0" top="0" tabpos="12">
 		<Cursor position="1430" topLine="48" />
