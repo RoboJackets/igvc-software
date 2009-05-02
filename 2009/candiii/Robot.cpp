@@ -46,11 +46,11 @@ void keyboardFunc(unsigned char key, int x, int y)   // handles keyboard button 
 		saveRawVideo = 1-saveRawVideo; // save video until s again
 		printf("video file \n");
 		break;
-    case 'p':
-        printf("PAUSED!");
-        cvWaitKey(0); // pause
-        printf("GO!");
-        break;
+	case 'p':
+		printf("PAUSED!");
+		cvWaitKey(0); // pause
+		printf("GO!");
+		break;
 	default:
 		printf("x,y %d,%d \n",x,y);
 		break;
@@ -352,8 +352,8 @@ void Robot::processFunc()
 	updateGlutDisplay();
 
 
-    /* Scale raw image down to 320x240 */
-    cvResize(visCvRawTransform, visCvRawTransformSmall, CV_INTER_LINEAR);
+	/* Scale raw image down to 320x240 */
+	cvResize(visCvRawTransform, visCvRawTransformSmall, CV_INTER_LINEAR);
 
 
 	/* Perform vision processing. */
