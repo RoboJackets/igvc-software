@@ -16,7 +16,7 @@
 #define GOOD_PIXEL 255	// value to set path image to
 #define L_R_OFFSET 25 	// pixel spacing from center scan line up
 #define PIXEL_SKIP 2 	// noise filtering threshold in checkPixel()
-#define EDGE_PAD   4    // top/bottom padding
+#define EDGE_PAD   3    // top/bottom padding
 
 
 /*

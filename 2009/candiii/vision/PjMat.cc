@@ -7,8 +7,9 @@
 // (how much up from 0 we are, in radians)
 // 1.25 default from 2007
 // update: current measured guppy angle is ? for 2009
-#define OFFANGLE  1.0  // 1.1~=63deg 1.17~=67deg
+#define OFFANGLE  0.93  // 1.1~=63deg 1.17~=67deg
 // need to measure stuff below for guppy!
+//  (remember to adjust nav_path__view_distance_multiplier when changing this!)
 /* *************************** */
 
 /* use roi to shift camera view down to only see bottom of image */
@@ -143,7 +144,7 @@ void findmaxview(GLdouble* n)
 	yscale=yscale/2;
 	xscale=xscale/2;
 	//translateX=minx+xscale; // always commented out
-	translateY=miny+3.1*yscale;  // 3.1 is magical
+	translateY=miny+3.0*yscale;  // 3.1 is magical
 	//end roi code
 #endif
 
