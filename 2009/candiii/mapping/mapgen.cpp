@@ -456,7 +456,7 @@ void MapGen::init()
 
 	nav_path__num = 9;
 	nav_path__center_path_id = nav_path__num/2;
-	nav_path__view_cone__spacing = 15;
+	nav_path__view_cone__spacing = 16;
 #if USE_PATH_IMG
 	danger_per_barrel_pixel = 1; //=1
 #else
@@ -465,8 +465,8 @@ void MapGen::init()
 	nav_path__path_search_girth = 0; // pixels near curr line to search <- deprecated!
 	nav_path__danger_smoothing_radius = 4; // lines nearby to search
 	max_path_danger = 45;//45;
-	min_path_danger_value = 95;//20; // lower => be less afraid
-	nav_path__view_distance_multiplier = 0.40;//0.5;
+	min_path_danger_value = 90;//20; // lower => be less afraid
+	nav_path__view_distance_multiplier = 0.45;//0.5;
 	dangerous_pixel_color = CV_RGB(255,0,0);
 
 	worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
