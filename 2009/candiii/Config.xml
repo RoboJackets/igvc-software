@@ -31,22 +31,22 @@
 	<maxDiff>50</maxDiff>         <!-- lower => more noise in thresh image -->
 	<boxPadding>42</boxPadding>   <!-- lower => wider box -->
 	<k_roi>0.085</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
-	<whiteThresh>150</whiteThresh>   <!-- values above this number in blue channel are considered white lines -->
+	<whiteThresh>200</whiteThresh>   <!-- values above this number in blue channel are considered white lines -->
 
 	<!-- Robot Misc Settings -->
-    <defaultView>01</defaultView>       <!-- gui slider bar starting value -->
+    <defaultView>03</defaultView>       <!-- gui slider bar starting value -->
 	<k_motors>0.50</k_motors>           <!-- lower => more smooth motor cotrol (averages new motor commands) -->
-    <motorsMaxSpeed>39</motorsMaxSpeed> <!-- max motor output [0-255] -->
+    <motorsMaxSpeed>40</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
     <maxFeatures>64</maxFeatures>           <!-- max number for feature corners to find -->
     <numFramesBack>02</numFramesBack>       <!-- frames between matching points/features ( >=2 )-->
     <maxFeatureShift>28</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
-    <moveTo127>0</moveTo127>                <!-- slowly forget worldmap history -->
+    <moveTo127>1</moveTo127>                <!-- slowly forget worldmap history -->
 
     <!-- ON/OFF -->
     <doMapping>001</doMapping>
-    <useMotors>00</useMotors>
+    <useMotors>001</useMotors>
     <doVision>001</doVision>
 
 
