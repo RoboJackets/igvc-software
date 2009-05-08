@@ -10,7 +10,10 @@
 
 
 /* Percent of new robot world position to use */
-#define K_  0.80
+#define K_  0.70
+
+/* Shift robot world position from currently calcualted position */
+#define BASE_OFFSET -15  // smaller is further back
 
 /* Use visCvPath (more black) or visCvThresh (more correct) to plot into worldmap */
 #define USE_PATH_IMG  0
@@ -18,18 +21,15 @@
 /* Avg dx dy of features must be grater than this */
 #define MIN_FEATURE_SHIFT 0.05
 
-/* slowly move worldmap probabilities back to unknown (127) */
-#define MOVE_TO_127 0
 
-
-
-/* Landmark Map Settings */ ////////
+/* Landmark Map Settings */ ////////////// (not used)
 #define DO_LANDMARK_MAP 0
 // below this, new world pts are considered the same, and updated
 #define WORLDPT_PIXDIFF 1.5
 // need this many counts to be considered a stable world pt
 #define WORLDPT_MINGOODCOUNT 6
-/* End Landmark Map Settings */ ////
+/* End Landmark Map Settings */ /////////
+
 
 /* general absolute value */
 #define fabs(x) ((x<0)?(-x):(x))
@@ -456,16 +456,16 @@ void MapGen::init()
 
 	nav_path__num = 9;
 	nav_path__center_path_id = nav_path__num/2;
-	nav_path__view_cone__spacing = 16;
+	nav_path__view_cone__spacing = 16; // degrees
 #if USE_PATH_IMG
 	danger_per_barrel_pixel = 1; //=1
 #else
 	danger_per_barrel_pixel = 6; //=1
 #endif
 	nav_path__path_search_girth = 0; // pixels near curr line to search <- deprecated!
-	nav_path__danger_smoothing_radius = 4; // lines nearby to search
-	max_path_danger = 45;//45;
-	min_path_danger_value = 90;//20; // lower => be less afraid
+	nav_path__danger_smoothing_radius = nav_path__center_path_id; // lines nearby to search
+	max_path_danger = 50;//45;
+	min_path_danger_value = 99;//20; // lower => be less afraid
 	nav_path__view_distance_multiplier = 0.45;//0.5;
 	dangerous_pixel_color = CV_RGB(255,0,0);
 
@@ -744,9 +744,8 @@ int MapGen::genProbabilityMap()
 
 	/* get robot orientation in world coordinates */
 	float a,b;
-	int baseoffset = -15; // smaller is further back
 	mapCamPointToWorldPoint(imgHalfWidth, 0, a, b); // top center of camera frame
-	mapCamPointToWorldPoint(imgHalfWidth, visCvGrey->height - baseoffset, wx, wy); // bottom center of camera frame (minus some)
+	mapCamPointToWorldPoint(imgHalfWidth, visCvGrey->height - BASE_OFFSET, wx, wy); // bottom center of camera frame (minus some)
 
 	/* update/avg current robot orientation */
 	if (1)
@@ -916,6 +915,14 @@ int MapGen::processMap(Point2D<int>& goal)
 			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
 		}
 
+		// Copy second edge
+		for (int curPath_id = (nav_path__num - nav_path__danger_smoothing_radius);
+				curPath_id < nav_path__num;
+				curPath_id++)
+		{
+			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
+		}
+
 		// Smooth interior
 		int sumOfNearbyDangers = 0;
 		int avgOfNearbyDangers = 0;
@@ -935,13 +942,13 @@ int MapGen::processMap(Point2D<int>& goal)
 			smoothedPathDangers[curPath_id] = avgOfNearbyDangers;
 		}
 
-		// Copy second edge
-		for (int curPath_id = (nav_path__num - nav_path__danger_smoothing_radius);
-				curPath_id < nav_path__num;
-				curPath_id++)
-		{
-			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
-		}
+//		// Copy second edge
+//		for (int curPath_id = (nav_path__num - nav_path__danger_smoothing_radius);
+//				curPath_id < nav_path__num;
+//				curPath_id++)
+//		{
+//			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
+//		}
 
 		// Transfer smoothed dangers back to primary danger buffer
 		for (int curPath_id=0; curPath_id<nav_path__num; curPath_id++)
