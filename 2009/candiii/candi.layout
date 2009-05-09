@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="0" tabpos="1">
+	<File name="Config.xml" open="1" top="1" tabpos="1">
 		<Cursor position="1605" topLine="15" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="9034" topLine="369" />
+		<Cursor position="9034" topLine="0" />
 	</File>
 	<File name="Robot.h" open="0" top="0" tabpos="9">
 		<Cursor position="2314" topLine="77" />
@@ -37,11 +37,11 @@
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
 		<Cursor position="3770" topLine="45" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="5">
-		<Cursor position="10656" topLine="448" />
+	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="5">
+		<Cursor position="22312" topLine="844" />
 	</File>
 	<File name="mapping/mapgen.h" open="0" top="0" tabpos="5">
-		<Cursor position="364" topLine="15" />
+		<Cursor position="257" topLine="0" />
 	</File>
 	<File name="vision/CVcam.cpp" open="0" top="0" tabpos="6">
 		<Cursor position="31" topLine="0" />
@@ -74,7 +74,7 @@
 		<Cursor position="809" topLine="0" />
 	</File>
 	<File name="vision/vision.cc" open="1" top="0" tabpos="3">
-		<Cursor position="2133" topLine="87" />
+		<Cursor position="1684" topLine="72" />
 	</File>
 	<File name="vision/vision.h" open="0" top="0" tabpos="6">
 		<Cursor position="4099" topLine="108" />
