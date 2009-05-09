@@ -13,7 +13,7 @@
 #define K_  0.70
 
 /* Shift robot world position from currently calcualted position */
-#define BASE_OFFSET -15  // smaller is further back
+#define BASE_OFFSET -5  // smaller is further back
 
 /* Use visCvPath (more black) or visCvThresh (more correct) to plot into worldmap */
 #define USE_PATH_IMG  0
@@ -463,7 +463,7 @@ void MapGen::init()
 	danger_per_barrel_pixel = 6; //=1
 #endif
 	nav_path__path_search_girth = 0; // pixels near curr line to search <- deprecated!
-	nav_path__danger_smoothing_radius = nav_path__center_path_id; // lines nearby to search
+	nav_path__danger_smoothing_radius = nav_path__center_path_id-1; // lines nearby to search
 	max_path_danger = 50;//45;
 	min_path_danger_value = 99;//20; // lower => be less afraid
 	nav_path__view_distance_multiplier = 0.45;//0.5;
@@ -916,12 +916,12 @@ int MapGen::processMap(Point2D<int>& goal)
 		}
 
 		// Copy second edge
-		for (int curPath_id = (nav_path__num - nav_path__danger_smoothing_radius);
-				curPath_id < nav_path__num;
-				curPath_id++)
-		{
-			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
-		}
+//		for (int curPath_id = (nav_path__num - nav_path__danger_smoothing_radius);
+//				curPath_id < nav_path__num;
+//				curPath_id++)
+//		{
+//			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
+//		}
 
 		// Smooth interior
 		int sumOfNearbyDangers = 0;
@@ -942,13 +942,13 @@ int MapGen::processMap(Point2D<int>& goal)
 			smoothedPathDangers[curPath_id] = avgOfNearbyDangers;
 		}
 
-//		// Copy second edge
-//		for (int curPath_id = (nav_path__num - nav_path__danger_smoothing_radius);
-//				curPath_id < nav_path__num;
-//				curPath_id++)
-//		{
-//			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
-//		}
+		// Copy second edge
+		for (int curPath_id = (nav_path__num - nav_path__danger_smoothing_radius);
+				curPath_id < nav_path__num;
+				curPath_id++)
+		{
+			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
+		}
 
 		// Transfer smoothed dangers back to primary danger buffer
 		for (int curPath_id=0; curPath_id<nav_path__num; curPath_id++)

@@ -398,6 +398,22 @@ void Robot::processFunc()
 		}
 	}
 
+    /* periodically stop and think */
+//	static int hack = 0;
+//	int hackstop = 175;
+//	if (hack > hackstop )
+//	{
+//		heading_main.x = 0;
+//		heading_main.y = 0;
+//		//hack = 0;
+//		printf("\n\n\n\tHACK\t\n\n\n");
+//	}
+//	if (hack > hackstop+10 )
+//	{
+//		hack = 0;
+//	}
+//	++hack;
+
 
 	/* Save raw image last */
 	//if (saveRawVideo)

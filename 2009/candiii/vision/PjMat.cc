@@ -144,7 +144,7 @@ void findmaxview(GLdouble* n)
 	yscale=yscale/2;
 	xscale=xscale/2;
 	//translateX=minx+xscale; // always commented out
-	translateY=miny+3.0*yscale;  // 3.1 is magical
+	translateY=miny+3.1*yscale;  // 3.1 is magical
 	//end roi code
 #endif
 
