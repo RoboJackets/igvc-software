@@ -7,9 +7,9 @@
 // (how much up from 0 we are, in radians)
 // 1.25 default from 2007
 // update: current measured guppy angle is ? for 2009
-#define OFFANGLE  0.93  // 1.1~=63deg
+#define OFFANGLE  01.05  // 1.1~=63deg
 // need to measure stuff below for guppy!
-//  (remember to adjust nav_path__view_distance_multiplier when changing this!)
+//  (remember to adjust "nav_path__view_distance_multiplier" when changing this!)
 /* *************************** */
 
 /* use roi to shift camera view down to only see bottom of image */

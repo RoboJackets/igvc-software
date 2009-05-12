@@ -64,8 +64,8 @@ void DCam::open()
 	if (!_initialized && _camera)
 	{
 		if (dc1394_video_set_framerate(	_camera,
-										//DC1394_FRAMERATE_60
-										DC1394_FRAMERATE_30
+										DC1394_FRAMERATE_60
+										//DC1394_FRAMERATE_30
 										//DC1394_FRAMERATE_15
 									  ))
 		{

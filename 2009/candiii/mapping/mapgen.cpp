@@ -466,7 +466,7 @@ void MapGen::init()
 	nav_path__danger_smoothing_radius = nav_path__center_path_id-1; // lines nearby to search
 	max_path_danger = 50;//45;
 	min_path_danger_value = 99;//20; // lower => be less afraid
-	nav_path__view_distance_multiplier = 0.45;//0.5;
+	nav_path__view_distance_multiplier = 0.40;//0.5;
 	dangerous_pixel_color = CV_RGB(255,0,0);
 
 	worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
