@@ -8,8 +8,9 @@
 
 typedef unsigned char byte;
 
-class DataPacket{
-	public:
+class DataPacket
+{
+public:
 
 	//copy constructor
 	DataPacket(const DataPacket& pk);
