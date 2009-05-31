@@ -3,11 +3,12 @@
 
 SonarInterface sdev;
 
-int main(void){
+int main(void)
+{
 
 
 	int data[10];
-	int dat;	
+	int dat;
 	printf("\nInitializing Link...\n");
 
 
@@ -15,29 +16,45 @@ int main(void){
 
 	printf("Pinging all sonars, then waiting for data return.\nShould return 11 rvalues (0-10).\n");
 	sdev.pingAll();
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
 	printf("NEXT>\n");
 	getchar();
 
 	printf("Deactivating every other sonar and repeating same process.\nShould return rvalues for 0,2,4,6,8,10.\n");
-	sdev.setIndivActive(1,0); sdev.setIndivActive(3,0); sdev.setIndivActive(5,0); sdev.setIndivActive(7,0); sdev.setIndivActive(9,0);
+	sdev.setIndivActive(1,0);
+	sdev.setIndivActive(3,0);
+	sdev.setIndivActive(5,0);
+	sdev.setIndivActive(7,0);
+	sdev.setIndivActive(9,0);
 	sdev.pingAll();
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
 	printf("NEXT>\n");
 	getchar();
 
 	printf("Switching Actives with deactives, and vice versa.\nShould return rvalues for 1,3,5,7,9.\n");
-	sdev.setIndivActive(1,1); sdev.setIndivActive(3,1); sdev.setIndivActive(5,1); sdev.setIndivActive(7,1); sdev.setIndivActive(9,1);
-	sdev.setIndivActive(0,0); sdev.setIndivActive(2,0); sdev.setIndivActive(4,0); sdev.setIndivActive(6,0); sdev.setIndivActive(8,0); sdev.setIndivActive(10,0);
+	sdev.setIndivActive(1,1);
+	sdev.setIndivActive(3,1);
+	sdev.setIndivActive(5,1);
+	sdev.setIndivActive(7,1);
+	sdev.setIndivActive(9,1);
+	sdev.setIndivActive(0,0);
+	sdev.setIndivActive(2,0);
+	sdev.setIndivActive(4,0);
+	sdev.setIndivActive(6,0);
+	sdev.setIndivActive(8,0);
+	sdev.setIndivActive(10,0);
 	sdev.pingAll();
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
 	printf("NEXT>\n");
@@ -52,7 +69,12 @@ int main(void){
 	getchar();
 
 	printf("Setting all gain to 3, then changing 5's gain to 8. Reading 0,5,8's gain. Should return 3,8,3\n");
-	sdev.setIndivActive(0,1); sdev.setIndivActive(2,1); sdev.setIndivActive(4,1); sdev.setIndivActive(6,1); sdev.setIndivActive(8,1); sdev.setIndivActive(10,1);
+	sdev.setIndivActive(0,1);
+	sdev.setIndivActive(2,1);
+	sdev.setIndivActive(4,1);
+	sdev.setIndivActive(6,1);
+	sdev.setIndivActive(8,1);
+	sdev.setIndivActive(10,1);
 	sdev.setAllGain(3);
 	sdev.setIndivGain(5,8);
 	dat = sdev.getIndivGain(0);
@@ -78,30 +100,36 @@ int main(void){
 
 	printf("Setting autopilot on for 3 iterations\n");
 	sdev.setAutopilot(1);
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
 	sdev.setAutopilot(0);
 	printf("Next three should return exact same values. Autopilot has been turned off.\n");
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
 	printf("NEXT>\n");
@@ -124,28 +152,34 @@ int main(void){
 	sdev.setIndivStep(9,1);
 	sdev.setIndivStep(10,0);
 	sdev.setAutopilot(1);
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
-	while(sdev.updateAll() == -1);
-	for(int i=0; i<11; i++){
+	while (sdev.updateAll() == -1);
+	for (int i=0; i<11; i++)
+	{
 		printf("%d:%d\n",i,sdev.readIndiv(i,'o'));
 	}
 	sdev.setAutopilot(0);
@@ -153,7 +187,8 @@ int main(void){
 	getchar();
 
 	printf("getting map of system\n");
-	for(int i = 0;i<11;i++){
+	for (int i = 0; i<11; i++)
+	{
 		dat = sdev.getIndivMRange(i);
 		printf("mr%d:%d\n",i,dat);
 		dat = sdev.getIndivGain(i);
@@ -163,7 +198,7 @@ int main(void){
 		dat = sdev.getIndivStep(i);
 		printf("st%d:%d\n",i,dat);
 	}
-	dat = sdev.getFreq();	
+	dat = sdev.getFreq();
 	printf("fr:%d\n",dat);
 	dat = sdev.getStepTotal();
 	printf("stot:%d\n",dat);

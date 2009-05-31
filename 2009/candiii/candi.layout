@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="1" tabpos="1">
+	<File name="Config.xml" open="1" top="0" tabpos="1">
 		<Cursor position="634" topLine="0" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="2">
@@ -37,7 +37,7 @@
 	<File name="mapping/cvcorrImages.h" open="0" top="0" tabpos="4">
 		<Cursor position="3770" topLine="45" />
 	</File>
-	<File name="mapping/mapgen.cpp" open="1" top="0" tabpos="5">
+	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="5">
 		<Cursor position="22312" topLine="844" />
 	</File>
 	<File name="mapping/mapgen.h" open="0" top="0" tabpos="5">
@@ -50,13 +50,16 @@
 		<Cursor position="348" topLine="0" />
 	</File>
 	<File name="vision/DCam.cpp" open="0" top="0" tabpos="7">
-		<Cursor position="965" topLine="35" />
+		<Cursor position="997" topLine="90" />
+	</File>
+	<File name="vision/DCam_Config.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="3208" topLine="0" />
 	</File>
 	<File name="vision/Graphics.h" open="0" top="0" tabpos="10">
 		<Cursor position="1675" topLine="70" />
 	</File>
 	<File name="vision/GuppyCam.cpp" open="0" top="0" tabpos="7">
-		<Cursor position="556" topLine="112" />
+		<Cursor position="739" topLine="0" />
 	</File>
 	<File name="vision/GuppyCam.h" open="0" top="0" tabpos="10">
 		<Cursor position="906" topLine="4" />

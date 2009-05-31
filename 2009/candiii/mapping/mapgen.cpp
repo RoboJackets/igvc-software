@@ -483,10 +483,10 @@ void MapGen::LoadMappingXMLSettings()
 
 	/* load settings */
 	{
-		maxFeatures   = cfg.getInt("maxFeatures");
-		numFramesBack = cfg.getInt("numFramesBack");
-		maxFeatureShift = cfg.getInt("maxFeatureShift");
-		moveTo127     = cfg.getInt("moveTo127");
+		maxFeatures    = cfg.getInt("maxFeatures");
+		numFramesBack  = cfg.getInt("numFramesBack");
+		maxFeatureShift= cfg.getInt("maxFeatureShift");
+		moveTo127      = cfg.getInt("moveTo127");
 
 		/* display windows */
 		if (cfg.getInt("doMapping"))
@@ -701,8 +701,8 @@ int MapGen::genProbabilityMap()
 
 	/* down-scale the thresh img, and map it into into world,
 	 *  while setting probabilities of obstacles and traversible area */
-	int divby = 2;      // image size denominator
-	int pad = 4;        // remove noise around img edges
+	int divby = 2;     // image size denominator
+	int pad = 4;       // remove noise around img edges
 	float badval = -1; // rate for obstacle probability
 	float goodval = 2; // rate for travpath probability
 	float setval,weight;
@@ -723,9 +723,9 @@ int MapGen::genProbabilityMap()
 				setval = cvGetReal2D(probmap,wy,wx);
 				// and add/subtract based on thresh image
 #if USE_PATH_IMG
-				weight = (cvGetReal2D( /* visCvThresh */ visCvPath  ,y,x )==0)?badval:goodval; // more black
+				weight = (cvGetReal2D( visCvPath   ,y,x )==0)?badval:goodval; // more black
 #else
-				weight = (cvGetReal2D(  visCvThresh /* visCvPath */ ,y,x )==0)?badval:goodval; // cooler looking
+				weight = (cvGetReal2D( visCvThresh ,y,x )==0)?badval:goodval; // cooler looking
 #endif
 				// weight closer stuff higher
 				//if (y>imgHalfHeight) weight *= 2;
