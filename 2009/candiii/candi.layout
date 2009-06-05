@@ -2,10 +2,10 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="Config.xml" open="1" top="0" tabpos="1">
-		<Cursor position="634" topLine="0" />
+		<Cursor position="359" topLine="6" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="9034" topLine="0" />
+		<Cursor position="228" topLine="0" />
 	</File>
 	<File name="Robot.h" open="0" top="0" tabpos="9">
 		<Cursor position="2314" topLine="77" />
@@ -38,7 +38,7 @@
 		<Cursor position="3770" topLine="45" />
 	</File>
 	<File name="mapping/mapgen.cpp" open="1" top="1" tabpos="5">
-		<Cursor position="22312" topLine="844" />
+		<Cursor position="27568" topLine="1029" />
 	</File>
 	<File name="mapping/mapgen.h" open="0" top="0" tabpos="5">
 		<Cursor position="257" topLine="0" />
