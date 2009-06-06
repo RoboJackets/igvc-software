@@ -47,7 +47,7 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 
 
 	/* filter image */
-	cvSmooth(visCvRawTransformSmall,visCvRawTransformSmall,CV_GAUSSIAN,3,0,0,0);
+	cvSmooth(visCvRawTransformSmall,visCvRawTransformSmall,/*CV_GAUSSIAN*/CV_BLUR,5,0,0,0);
 
 	/* copy image to internal buffer for drawing */
 	cvCopy(visCvRawTransformSmall,visCvDebug);
@@ -1076,6 +1076,7 @@ void Vision::LoadVisionXMLSettings()
 		RANGE_R  = cfg.getFloat("rangeR");
 		RANGE_G  = cfg.getFloat("rangeG");
 		RANGE_B  = cfg.getFloat("rangeB");
+		doMapping = cfg.getInt("doMapping");
 	}
 
 	/* test */
@@ -1096,6 +1097,7 @@ void Vision::LoadVisionXMLSettings()
 				RANGE_R = 1.10;
 				RANGE_G = 1.10;
 				RANGE_B = 1.10;
+				doMapping = 1;
 			}
 		}
 		else
@@ -1281,11 +1283,6 @@ void Vision::Adapt()
 		//avgR = 110;  //125;
 	}
 
-//    //////////////////////////////////////////////////////////////////// REMOVE ME AND PUT IN XML
-//    float RANGE_R = 1.10;
-//    float RANGE_G = 1.10;
-//    float RANGE_B = 1.10;
-//    //////////////////////////////////////////////////////////////////// REMOVE ME AND PUT IN XML
 
 	/* normalization */
 	float avgV = mymax(avgB,mymax(avgG,avgR)) +1;
@@ -1385,14 +1382,17 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 	cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
 	//cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
 
-	/* generate visCvPath */
-	visGenPath(visCvThresh);
+    if(doMapping == 0)
+    {
+        /* generate visCvPath */
+        visGenPath(visCvThresh);
 
-	/* scan high in img */
-	robotWidthScan(visCvPath, goal_far);
+        /* scan high in img */
+        robotWidthScan(visCvPath, goal_far);
 
-	/* setup navigation lines that sweep across the screen and updates goal. */
-	visSweeperLines(goal_near);
+        /* setup navigation lines that sweep across the screen and updates goal. */
+        visSweeperLines(goal_near);
+    }
 
 	/* update return goal */
 	CvtPixToGoal(goal);

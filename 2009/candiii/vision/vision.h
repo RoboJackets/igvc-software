@@ -122,6 +122,9 @@ public:
 	float RANGE_G;
 	float RANGE_R;
 
+	// don't do reactive stuff when mapping
+	int doMapping;
+
 	/* for the adaptive algorithms */
 	void Adapt();
 	void CvtPixToGoal(Point2D<int>& goal);
