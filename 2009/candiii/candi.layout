@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="Config.xml" open="1" top="0" tabpos="1">
-		<Cursor position="2318" topLine="21" />
+	<File name="Config.xml" open="1" top="1" tabpos="1">
+		<Cursor position="2425" topLine="21" />
 	</File>
 	<File name="Robot.cpp" open="1" top="0" tabpos="2">
 		<Cursor position="8807" topLine="349" />
 	</File>
-	<File name="Robot.h" open="0" top="0" tabpos="9">
+	<File name="Robot.h" open="1" top="0" tabpos="9">
 		<Cursor position="2314" topLine="77" />
 	</File>
 	<File name="XmlConfiguration.cpp" open="0" top="0" tabpos="0">
@@ -58,7 +58,7 @@
 	<File name="vision/Graphics.h" open="0" top="0" tabpos="10">
 		<Cursor position="1675" topLine="70" />
 	</File>
-	<File name="vision/GuppyCam.cpp" open="0" top="0" tabpos="9">
+	<File name="vision/GuppyCam.cpp" open="1" top="0" tabpos="9">
 		<Cursor position="1187" topLine="57" />
 	</File>
 	<File name="vision/GuppyCam.h" open="0" top="0" tabpos="10">
@@ -76,11 +76,11 @@
 	<File name="vision/image_buffers.h" open="0" top="0" tabpos="6">
 		<Cursor position="809" topLine="0" />
 	</File>
-	<File name="vision/vision.cc" open="1" top="1" tabpos="3">
+	<File name="vision/vision.cc" open="1" top="0" tabpos="3">
 		<Cursor position="26753" topLine="1062" />
 	</File>
 	<File name="vision/vision.h" open="1" top="0" tabpos="7">
-		<Cursor position="3875" topLine="105" />
+		<Cursor position="3875" topLine="107" />
 	</File>
 	<File name="../old_motors/motors_old.cpp" open="1" top="0" tabpos="6">
 		<Cursor position="6490" topLine="204" />
