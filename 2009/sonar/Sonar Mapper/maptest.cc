@@ -14,10 +14,10 @@ int main(int argc, char *argv[])
 	int height,width,step,channels;
 	uchar *data;
 	int i,j,k;
-	CvPoint robotBaseAt=cvPoint(160.5,230);
+	CvPoint robotBaseAt=cvPoint(600,600);
 
 	// load an image
-	img=cvCreateImage(cvSize(320,240),IPL_DEPTH_8U,3);
+	img=cvCreateImage(cvSize(1200,600),IPL_DEPTH_8U,3);
 	if (!img)
 	{
 		printf("Could not load image file: %s\n",argv[1]);
@@ -108,7 +108,21 @@ int main(int argc, char *argv[])
 	int dat;
 	double dists;
 	printf("\nInitializing Link...\n");
-	sdev.initSonDev(11,19,2000,15);
+	sdev.initSonDev(11,15,4000,15);
+	/**/
+	sdev.setStepTotal(6);
+	sdev.setIndivStep(0,0);
+	sdev.setIndivStep(5,0);
+	sdev.setIndivStep(3,1);
+	sdev.setIndivStep(8,1);
+	sdev.setIndivStep(10,2);
+	sdev.setIndivStep(1,3);
+	sdev.setIndivStep(6,3);
+	sdev.setIndivStep(4,4);
+	sdev.setIndivStep(9,4);
+	sdev.setIndivStep(2,5);
+	sdev.setIndivStep(7,5);
+	/**/
 	//End Setup
 
 	for (int n=1; n<100; n++)
@@ -130,12 +144,35 @@ int main(int argc, char *argv[])
 		{
 			cvEllipse( img,
 					   /*CvPoint center*/ 		robotBaseAt,
-					   /*CvSize axes*/			cvSize(rawdata[i]/4,rawdata[i]/4),
+					   /*CvSize axes*/			cvSize(rawdata[i]/10,rawdata[i]/10),
 					   /*double tiltangle*/	i*18,
 					   /*double startAngle*/ 	-9,
 					   /*double endAngle*/ 	9,
 					   CV_RGB(0,(char)(20*i),(char)(10*i)),
 					   /*int thickness*/		-1 );
+			if (rawdata[i]==0)
+			{
+				cvEllipse( img,
+						   /*CvPoint center*/ 		robotBaseAt,
+						   /*CvSize axes*/			cvSize(600,600),
+						   /*double tiltangle*/	i*18,
+						   /*double startAngle*/ 	-9,
+						   /*double endAngle*/ 	9,
+						   CV_RGB(0,(char)(20*i),(char)(10*i)),
+						   /*int thickness*/		-1 );
+			}
+		}
+		//Draw levels
+		for (int i=0; i<6; i++)
+		{
+			cvEllipse( img,
+					   /*CvPoint center*/ 		robotBaseAt,
+					   /*CvSize axes*/			cvSize(i*100,i*100),
+					   /*double tiltangle*/	90,
+					   /*double startAngle*/ 	-90,
+					   /*double endAngle*/ 	90,
+					   CV_RGB(255,255,255),
+					   /*int thickness*/		1 );
 		}
 
 		// show the image

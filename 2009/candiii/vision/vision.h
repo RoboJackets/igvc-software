@@ -117,6 +117,11 @@ public:
 	// width of robot in pixels
 	int ROBOT_WIDTH;
 
+	// "percent" difference from roi box ( must be > 1 )
+	float RANGE_B;
+	float RANGE_G;
+	float RANGE_R;
+
 	/* for the adaptive algorithms */
 	void Adapt();
 	void CvtPixToGoal(Point2D<int>& goal);

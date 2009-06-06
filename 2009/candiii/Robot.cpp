@@ -42,6 +42,10 @@ void keyboardFunc(unsigned char key, int x, int y)   // handles keyboard button 
 		printf("die! \n");
 		glRobot->destroy(); // kill the robot;
 		break;
+	case 'D':
+		printf("die! \n");
+		glRobot->destroy(); // kill the robot;
+		break;
 	case 's':
 		saveRawVideo = 1-saveRawVideo; // save video until s again
 		printf("video file \n");
@@ -398,7 +402,7 @@ void Robot::processFunc()
 		}
 	}
 
-    /* periodically stop and think */
+	/* periodically stop and think */
 //	static int hack = 0;
 //	int hackstop = 175;
 //	if (hack > hackstop )

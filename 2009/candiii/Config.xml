@@ -11,10 +11,10 @@
 <Config>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>00</useFirewireCamera>  <!-- set to 0 to load video -->
-	<gain>16</gain>
-	<shutter>100</shutter>
-	<gamma>0</gamma>
+	<useFirewireCamera>001</useFirewireCamera>  <!-- set to 0 to load video -->
+	<gain>19</gain>
+	<shutter>130</shutter>
+	<gamma>001</gamma>
 	<auto_gain_and_shutter>001</auto_gain_and_shutter>
 
 	<!-- Guppy White Balance Settings -->
@@ -28,15 +28,20 @@
 	<doTransform>01</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it | 0 => use hsv -->
 
-	<maxDiff>50</maxDiff>         <!-- lower => more noise in thresh image -->
-	<boxPadding>42</boxPadding>   <!-- lower => wider box -->
+	<maxDiff>45</maxDiff>         <!-- lower => more noise in thresh image -->
+	<boxPadding>45</boxPadding>   <!-- lower => wider box -->
 	<k_roi>0.080</k_roi>          <!-- higher => adjust to color in red rectangle faster -->
 	<whiteThresh>200</whiteThresh>   <!-- values above this number in blue channel are considered white lines -->
 
+	<rangeR>1.10</rangeR>  <!-- Settings for how far from the average -->
+	<rangeG>1.10</rangeG>  <!--  normalized colors inside the roi box. -->
+	<rangeB>1.15</rangeB>  <!--  Must be greater than 1.0 (fraction part is the percent from average) -->
+
+
 	<!-- Robot Misc Settings -->
-    <defaultView>03</defaultView>       <!-- gui slider bar starting value -->
+    <defaultView>00</defaultView>       <!-- gui slider bar starting value -->
 	<k_motors>0.50</k_motors>           <!-- lower => smoother motor cotrol (averages new motor commands) -->
-    <motorsMaxSpeed>40</motorsMaxSpeed> <!-- max motor output [0-255] -->
+    <motorsMaxSpeed>65</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
     <maxFeatures>64</maxFeatures>           <!-- max number for feature corners to find -->
@@ -45,7 +50,7 @@
     <moveTo127>01</moveTo127>                <!-- slowly forget worldmap history -->
 
     <!-- ON/OFF -->
-    <doMapping>0</doMapping>
+    <doMapping>00</doMapping>
     <useMotors>00</useMotors>
     <doVision>001</doVision>
 

@@ -18,6 +18,9 @@
 #define PIXEL_SKIP 2 	// noise filtering threshold in checkPixel()
 #define EDGE_PAD   2    // top/bottom padding
 
+/* math */
+#define mymax(a,b) ((a>b)?a:b)
+
 
 /*
  *
@@ -1070,6 +1073,9 @@ void Vision::LoadVisionXMLSettings()
 		DO_ADAPTIVE  = cfg.getInt("doAdaptive");
 		k_roi        = cfg.getFloat("k_roi");
 		adapt_whiteThresh = cfg.getFloat("whiteThresh");
+		RANGE_R  = cfg.getFloat("rangeR");
+		RANGE_G  = cfg.getFloat("rangeG");
+		RANGE_B  = cfg.getFloat("rangeB");
 	}
 
 	/* test */
@@ -1082,18 +1088,21 @@ void Vision::LoadVisionXMLSettings()
 				hueThreshold = 20;
 				DO_TRANSFORM = 1;
 				ROBOT_WIDTH  = 30;
-				adapt_maxDiff= 35;
+				adapt_maxDiff= 45;
 				adapt_boxPad = 100;
 				DO_ADAPTIVE  = 1;
-				k_roi        = 0.025;
+				k_roi        = 0.065;
 				adapt_whiteThresh = 190;
+				RANGE_R = 1.10;
+				RANGE_G = 1.10;
+				RANGE_B = 1.10;
 			}
 		}
 		else
 		{
 			printf("Vision settings loaded \n");
 		}
-		printf("\tvalues: k_roi %.3f maxDiff %d  boxPad %d \n",k_roi,adapt_maxDiff,adapt_boxPad);
+		printf("\tvalues: k_roi %.3f RANGES %f %f %f  boxPad %d \n",k_roi,RANGE_R,RANGE_G,RANGE_B,adapt_boxPad);
 	}
 
 
@@ -1170,20 +1179,20 @@ void Vision::Equalize(IplImage* img)
 void Vision::CvtPixToGoal(Point2D<int>& goal)
 {
 
-	int closeness = visCvPath->height/2; // larger value => use sweeper lines more often
+//	int closeness = visCvPath->height/2; // larger value => use sweeper lines more often
 	float farweight = 0.0; // weight of the far goal
 
 	/* weight goals depending on how far we can see */
-	if ( goal_far.y < closeness )
-	{
-		/* can't see very far */
-		farweight = 0.00;
-	}
-	else
-	{
-		/* can see far off */
-		farweight = 0.20;
-	}
+//	if ( goal_far.y < closeness )
+//	{
+//		/* can't see very far */
+//		farweight = 0.00;
+//	}
+//	else
+//	{
+//		/* can see far off */
+//		farweight = 0.20;
+//	}
 
 
 	/* set averaged goals */
@@ -1211,11 +1220,11 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 			goal.y=10; // min fwd speed
 			goal.x=0;
 		}
-		else if ( (goal_far.y) < 8 ) // XXX: HACK to get onto ramps & yellow bars
-		{
-			goal.y=10; // min fwd speed
-			goal.x=0;
-		}
+//		else if ( (goal_far.y) < 8 ) // XXX: HACK to get onto ramps & yellow bars
+//		{
+//			goal.y=10; // min fwd speed
+//			goal.x=0;
+//		}
 
 		// Debug print
 		//printf(" heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
@@ -1237,7 +1246,7 @@ void Vision::Adapt()
 	cvResetImageROI(visCvRawTransformSmall);
 
 	/* blur image data */
-	cvSmooth(roi_img,roi_img,CV_GAUSSIAN,3,0,0,0);
+	//cvSmooth(roi_img,roi_img,CV_GAUSSIAN,3,0,0,0);
 
 	/* display roi box in separate window */
 	cvShowImage( "roi" , roi_img );
@@ -1272,6 +1281,26 @@ void Vision::Adapt()
 		//avgR = 110;  //125;
 	}
 
+//    //////////////////////////////////////////////////////////////////// REMOVE ME AND PUT IN XML
+//    float RANGE_R = 1.10;
+//    float RANGE_G = 1.10;
+//    float RANGE_B = 1.10;
+//    //////////////////////////////////////////////////////////////////// REMOVE ME AND PUT IN XML
+
+	/* normalization */
+	float avgV = mymax(avgB,mymax(avgG,avgR)) +1;
+	float normR = avgR/avgV;
+	float normG = avgG/avgV;
+	float normB = avgB/avgV;
+	float apxV,npxR,npxG,npxB;
+	float maxThreshR = normR * RANGE_R;
+	float maxThreshG = normG * RANGE_G;
+	float maxThreshB = normB * RANGE_B;
+	float minThreshR = normR / RANGE_R;
+	float minThreshG = normG / RANGE_G;
+	float minThreshB = normB / RANGE_B;
+
+
 	/* pointers for speed */
 	unsigned char* rgbdata   = (unsigned char*) visCvRawTransformSmall->imageData;
 	unsigned char* adaptdata = (unsigned char*) visCvAdaptSmall->imageData;
@@ -1287,11 +1316,26 @@ void Vision::Adapt()
 		// pointer
 		rgbdata+=3;
 
+
+		// normalization
+		apxV = mymax(ab,mymax(ag,ar)) +1;
+		npxB = ab/apxV;
+		npxG = ag/apxV;
+		npxR = ar/apxV;
+
+
 		// check in roi
+//		if (
+//          // subtraction differences
+//			//(abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&  // ramps/grass differ mainly in blue
+//			(abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
+//			(abs(ar-(unsigned char)avgR)<adapt_maxDiff)
+//		)
 		if (
-			//(abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&  // ramps/grass differ mainly in blue
-			(abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
-			(abs(ar-(unsigned char)avgR)<adapt_maxDiff)
+			// ratios
+			(npxB < maxThreshB) && (npxB > minThreshB) &&
+			(npxG < maxThreshG) && (npxG > minThreshG) &&
+			(npxR < maxThreshR) && (npxR > minThreshR)
 		)
 		{
 			//visCvAdaptSmall->imageData[i/3] = GOOD_PIXEL;
@@ -1304,7 +1348,7 @@ void Vision::Adapt()
 		}
 
 		// check for white by looking for blue (most dominant color b/c of sky)
-		if ( (1) && (ab>adapt_whiteThresh) )
+		if ( (0) && (ab>adapt_whiteThresh) )
 		{
 			//visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
 			*adaptdata = BAD_PIXEL;
