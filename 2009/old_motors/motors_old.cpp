@@ -4,6 +4,7 @@
 #define MINREQSPEED 6
 #define POLARITY -1     // direction of forward / connection to motor
 
+#define USE_TE_BOARD
 
 Motors_Old::Motors_Old()
 {
@@ -32,7 +33,10 @@ int Motors_Old::SetupSerial()
 	 *	to the file before continuing execution) - this doesn't seem to work
 	 * O_NDELAY - don't wait for the DCD line to go to the space voltage
 	 */
-	if ((fdMotor = open(DEFAULT_PORT, O_RDWR | O_NOCTTY | O_DSYNC | O_RSYNC | O_NDELAY)) < 0)
+
+	//TODO -- test if O_NONBLOCK works
+
+	if ((fdMotor = open(DEFAULT_PORT, O_RDWR | O_NOCTTY | O_DSYNC | O_RSYNC | O_NDELAY )) < 0)
 	{
 		printf("SetupSerial(): could not open port %s, %s\n", DEFAULT_PORT, strerror(errno));
 		return(-1);
@@ -101,6 +105,7 @@ int Motors_Old::Shutdown()
  */
 int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 {
+
 	/* Scale the motor velocities, limit them to vaild values, and store them in the
 	 * correct form to transmit to the motor controller.
 	 * 	Alternate Title: fun with the ? operator
@@ -114,13 +119,68 @@ int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 		(unsigned char)( min(abs(iScaledRightVel), 255) )
 	};
 
+#ifdef USE_TE_BOARD
 	/* Send the motor states to the motor controller */
 	if ( write(fdMotor, data, 3) != 3 )
 	{
 		printf("set_motors(): could not write to serial port, %s\n", strerror(errno));
 		return(-1);
 	}
+#else
+	//This is a crappy hack for the 2009 IGVC competition because the TE board is about to die
+	//this code kills babies.
+	// do not use after competition
 
+	//for use with new hack MC arduino code
+
+	/* Send the motor states to the motor controller */
+	const char leftcmd = 'l';
+	const char rightcmd = 'r';
+	const char leftcmdresp = 'l';
+	const char rightcmdresp = 'r';
+	
+	char in = NULL;
+
+	unsigned char rdir = ((iScaledRightVel < 0) ? REVERSE : FORWARD);
+	unsigned char ldir = ((iScaledLeftVel < 0) ? REVERSE : FORWARD);
+
+	int loopnum = 0;
+	bool fail = false;
+	//Set left motor
+	do
+	{
+		write(fdMotor, &ldir, 1);
+		write(fdMotor, data+1, 1);
+		read(fdMotor, &in, 1);
+		loopnum++;
+
+		if(loopnum > 3)//Try 4 times
+		{
+			fail = true;
+			break;
+		}
+	} while((in != leftcmdresp));
+	loopnum = 0;
+	do
+	{
+		int loopnum = 0;
+		write(fdMotor, &rdir, 1);
+		write(fdMotor, data+2, 1);
+		read(fdMotor, &in, 1);
+		loopnum++;
+
+		if(loopnum > 3)//Try 4 times
+		{
+			fail = true;
+			break;
+		}
+	} while((in != rightcmdresp));	
+
+	if(fail)
+	{
+		return(-1);
+	}
+#endif
 	/* Make sure the data has finished being written - this can be removed if the option can be made work in open() */
 	tcdrain(fdMotor);
 
