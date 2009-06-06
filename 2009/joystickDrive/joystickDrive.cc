@@ -217,7 +217,8 @@ void joystickDrive::readJoystick() {
 					// Fall through to signal quit
 				*/
 				case SDL_QUIT:
-					done = 1;
+					//done = 1;
+					exit(-1);
 					break;
 				default:
 					break;
