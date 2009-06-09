@@ -8,12 +8,16 @@
 #include <iostream>
 #include <omp.h>
 
+/////////////////////////////////////////////////
+#define SWIVELINESS 0.74  // around 1.0
+#define SWEEPERLINELENGTH 0.43  //0.425
+/////////////////////////////////////////////////
 
 /* Percent of new robot world position to use */
-#define K_  0.70
+#define K_  0.85 //0.7 0.85
 
 /* Shift robot world position from currently calcualted position */
-#define BASE_OFFSET -5  // smaller is further back
+#define BASE_OFFSET 0   //-5  // smaller is further back
 
 /* Use visCvPath (more black) or visCvThresh (more correct) to plot into worldmap */
 #define USE_PATH_IMG  0
@@ -246,10 +250,10 @@ int MapGen::getFeatures()
 		{
 			avgdx/=good;
 			avgdy/=good;
-			cvLine(visCvGrey,
-				   cvPoint( imgHalfWidth-avgdx, imgHalfHeight-avgdy ),
-				   cvPoint( imgHalfWidth+avgdx, imgHalfHeight+avgdy ),
-				   CV_RGB(255,255,255), 3, 8, 0);
+//			cvLine(visCvGrey,
+//				   cvPoint( imgHalfWidth-avgdx, imgHalfHeight-avgdy ),
+//				   cvPoint( imgHalfWidth+avgdx, imgHalfHeight+avgdy ),
+//				   CV_RGB(255,255,255), 3, 8, 0);
 			//printf("   adx %.4f ady %.4f \n",avgdx,avgdy);
 		}
 		avgdx=fabs(avgdx);
@@ -257,7 +261,7 @@ int MapGen::getFeatures()
 		//printf("   adx %.4f ady %.4f \n",avgdx,avgdy);
 
 		/* show image with points drawn */
-		cvShowImage("curr",visCvGrey);
+		//cvShowImage("curr",visCvGrey);
 
 
 		/* check status *********/
@@ -299,7 +303,7 @@ int MapGen::processFeatures()
 
 	/* for RANSAC */
 	std::vector<float> pointParameters;
-	PointParamEstimator pointEstimator(0.25); //0.3; /* error percent */
+	PointParamEstimator pointEstimator(0.26); //0.3; /* error percent */
 	matchList.clear();
 	CvPoint2D32f foundpts[ maxFeatures*2 ];
 
@@ -395,7 +399,7 @@ void MapGen::init()
 	imgHalfWidth  = visCvGrey->width/2;
 
 	/* amount of top of image to ignore */
-	yFeatureThresh = visCvGrey->height/2 -15 ; // higher => skip more of top
+	yFeatureThresh = visCvGrey->height/3  ; // higher => skip more of top
 
 	//==============================================================
 
@@ -464,9 +468,9 @@ void MapGen::init()
 #endif
 	nav_path__path_search_girth = 0; // pixels near curr line to search <- deprecated!
 	nav_path__danger_smoothing_radius = nav_path__center_path_id-1; // lines nearby to search
-	max_path_danger = 50;//45;
-	min_path_danger_value = 99;//20; // lower => be less afraid
-	nav_path__view_distance_multiplier = 0.40;//0.5;
+	max_path_danger = 50;        //50;~22~deadzone //45;~20~deadzone
+	min_path_danger_value = 119;//99;//20; // lower => be less afraid
+	nav_path__view_distance_multiplier = SWEEPERLINELENGTH;//0.44;//0.5;
 	dangerous_pixel_color = CV_RGB(255,0,0);
 
 	worldDebug = cvCreateImage(cvSize(probmap->width,probmap->height),8,3);
@@ -491,13 +495,14 @@ void MapGen::LoadMappingXMLSettings()
 		/* display windows */
 		if (cfg.getInt("doMapping"))
 		{
+			//cvNamedWindow("curr");
+			//cvNamedWindow("probmap");
 #if DO_LANDMARK_MAP
 			cvNamedWindow("landmarkmap");
 #else
 			cvNamedWindow("processmap");
+			cvMoveWindow( "processmap", 590, 5 ); // position on screen
 #endif
-			cvNamedWindow("curr");
-			//cvNamedWindow("probmap");
 
 		}
 	}
@@ -510,7 +515,7 @@ void MapGen::LoadMappingXMLSettings()
 			{
 				maxFeatures   = 70;
 				numFramesBack = 2;
-				maxFeatureShift = 25;
+				maxFeatureShift = 55;
 				moveTo127     = 0;
 
 			}
@@ -702,9 +707,9 @@ int MapGen::genProbabilityMap()
 	/* down-scale the thresh img, and map it into into world,
 	 *  while setting probabilities of obstacles and traversible area */
 	int divby = 2;     // image size denominator
-	int pad = 4;       // remove noise around img edges
-	float badval = -1; // rate for obstacle probability
-	float goodval = 2; // rate for travpath probability
+	int pad = 5;       // remove noise around img edges
+	float badval = -2; // rate for obstacle probability
+	float goodval = 3; // rate for travpath probability
 	float setval,weight;
 	float wx,wy;
 	int x,y;
@@ -864,6 +869,7 @@ int MapGen::processMap(Point2D<int>& goal)
 			//==== weight outer path lines more scary than inner ==========//
 			weight = abs(nav_path__center_path_id-pathID);
 			curPathDanger += weight;
+			//printf("cur path %d danger %d \n",pathID,curPathDanger);
 
 			// Clip high danger values to be no higher than max_path_danger
 			if (curPathDanger > max_path_danger)
@@ -914,14 +920,6 @@ int MapGen::processMap(Point2D<int>& goal)
 		{
 			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
 		}
-
-		// Copy second edge
-//		for (int curPath_id = (nav_path__num - nav_path__danger_smoothing_radius);
-//				curPath_id < nav_path__num;
-//				curPath_id++)
-//		{
-//			smoothedPathDangers[curPath_id] = pathDanger[curPath_id];
-//		}
 
 		// Smooth interior
 		int sumOfNearbyDangers = 0;
@@ -1019,9 +1017,16 @@ int MapGen::processMap(Point2D<int>& goal)
 
 			/* Update goal */
 			//Point2D<int> goal;
-			int scalex = 40;
+			int scalex = 40*SWIVELINESS;
 			goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
-			goal.y = (max_path_danger + 2 - pathDanger[bestPath_id]) * 2 ;
+			goal.y = (max_path_danger + 3 - pathDanger[bestPath_id]) * 2 ;
+
+			//deadzone detection
+			if ( goal.y==22 && goal.x==0 )
+			{
+				goal.y=-181; //large because of minreqspeed is positive
+				goal.x=0;
+			}
 
 			//printf("goal(%d,%d) \n",goal.x,goal.y); // print in vision.cc
 		}
@@ -1051,7 +1056,6 @@ Point2D<float> MapGen::navPath_end(int pathID)
 }
 Point2D<float> MapGen::navPath_vector(int pathID)
 {
-
 	int x = (robotLookingAt.x - robotBaseAt.x) ;
 	int y = (robotLookingAt.y - robotBaseAt.y) ; // positive y down
 	float rad = (atan((float)y/(float)x)) ; // make up = 0 deg
@@ -1060,10 +1064,24 @@ Point2D<float> MapGen::navPath_vector(int pathID)
 	if (x<0) rad += -M_PI ;
 	//printf("  rad %.2f x %.2f y %.2f \n",rad,x,y);
 	float radius = sqrtf(pow(x,2)+pow(y,2)); // dist formula
+//	return Point2D<float>(
+//			   radius*cos(rad),
+//			   radius*sin(rad) )   // opencv y-axis is inverse of math y-axis
+//		   * nav_path__view_distance_multiplier;
+
+	//NEW HACK FOR CENTER SIZE
+	float line_aspect_ratio=1.2710;
+	float ratio_to_edge=1/line_aspect_ratio;
+	if (pathID!=nav_path__center_path_id)
+	{
+		ratio_to_edge=(float)abs(nav_path__center_path_id-pathID)/nav_path__num*2;
+	}
+//    float ratio_to_edge=(float)abs(nav_path__center_path_id-pathID)/nav_path__num*2;
 	return Point2D<float>(
 			   radius*cos(rad),
 			   radius*sin(rad) )   // opencv y-axis is inverse of math y-axis
-		   * nav_path__view_distance_multiplier;
+		   *(line_aspect_ratio-(line_aspect_ratio-1)*ratio_to_edge)*nav_path__view_distance_multiplier;
+	//END CENTER SIZE HACK
 }
 
 

@@ -123,7 +123,7 @@ int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 	/* Send the motor states to the motor controller */
 	if ( write(fdMotor, data, 3) != 3 )
 	{
-		printf("set_motors(): could not write to serial port, %s\n", strerror(errno));
+		//printf("set_motors(): could not write to serial port, %s\n", strerror(errno));
 		return(-1);
 	}
 #else
@@ -138,7 +138,7 @@ int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 	const char rightcmd = 'r';
 	const char leftcmdresp = 'l';
 	const char rightcmdresp = 'r';
-	
+
 	char in = NULL;
 
 	unsigned char rdir = ((iScaledRightVel < 0) ? REVERSE : FORWARD);
@@ -149,6 +149,7 @@ int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 	//Set left motor
 	do
 	{
+		write(fdMotor, &leftcmd, 1);
 		write(fdMotor, &ldir, 1);
 		write(fdMotor, data+1, 1);
 		read(fdMotor, &in, 1);
@@ -156,14 +157,17 @@ int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 
 		if(loopnum > 3)//Try 4 times
 		{
+			std::cout << "set left cmd fail" << std::endl;
 			fail = true;
 			break;
 		}
 	} while((in != leftcmdresp));
+
 	loopnum = 0;
+
 	do
 	{
-		int loopnum = 0;
+		write(fdMotor, &rightcmd, 1);
 		write(fdMotor, &rdir, 1);
 		write(fdMotor, data+2, 1);
 		read(fdMotor, &in, 1);
@@ -171,10 +175,11 @@ int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 
 		if(loopnum > 3)//Try 4 times
 		{
+			std::cout << "set right cmd fail" << std::endl;
 			fail = true;
 			break;
 		}
-	} while((in != rightcmdresp));	
+	} while((in != rightcmdresp));
 
 	if(fail)
 	{
@@ -184,8 +189,12 @@ int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 	/* Make sure the data has finished being written - this can be removed if the option can be made work in open() */
 	tcdrain(fdMotor);
 
+#ifdef USE_TE_BOARD
 	/* Get the current motor states from the motor controller */
 	return( get_motor_states() );
+#else
+	return(0);
+#endif
 }
 
 int Motors_Old::get_motor_states(void)
@@ -197,13 +206,13 @@ int Motors_Old::get_motor_states(void)
 	int status;
 	if (ioctl(fdMotor, TIOCMGET, &status))
 	{
-		printf("get_motor_states(): could not get serial port status, %s\n", strerror(errno));
+		//printf("get_motor_states(): could not get serial port status, %s\n", strerror(errno));
 		return(-1);
 	}
 	status |= TIOCM_DTR;
 	if (ioctl(fdMotor, TIOCMSET, &status))
 	{
-		printf("get_motor_states(): could not set RTS high, %s\n", strerror(errno));
+		//printf("get_motor_states(): could not set RTS high, %s\n", strerror(errno));
 		return(-1);
 	}
 
@@ -220,7 +229,7 @@ int Motors_Old::get_motor_states(void)
 	status &= ~TIOCM_DTR;
 	if (ioctl(fdMotor, TIOCMSET, &status))
 	{
-		printf("get_motor_states(): could not set RTS low, %s\n", strerror(errno));
+		//printf("get_motor_states(): could not set RTS low, %s\n", strerror(errno));
 		return(-1);
 	}
 
@@ -229,23 +238,23 @@ int Motors_Old::get_motor_states(void)
 	int bytesRead;
 	if ((bytesRead = read(fdMotor, u8Buff, 3)) != 3)
 	{
-		printf("get_motor_states(): the motor controller did not respond or only partial responded, \n%s, %d bytes read\n", strerror(errno), bytesRead);
+		//printf("get_motor_states(): the motor controller did not respond or only partial responded, \n%s, %d bytes read\n", strerror(errno), bytesRead);
 		//return(-1);
 	}
 
 	//Test
-	printf("%d bytes read\n", bytesRead);
+	//printf("%d bytes read\n", bytesRead);
 	for (int i = 0; i < bytesRead; i++)
 	{
-		printf("%d ", u8Buff[i]);
+		//printf("%d ", u8Buff[i]);
 	}
-	printf("\n");
+	//printf("\n");
 
 	/* Report any errors the motor controller had with the transmission */
 	int iError = (u8Buff[0] & ERROR_MASK) >> ERROR_OFFSET;
 	if ( iError & (FRAME_ERROR|DATA_OVERRUN_ERROR|PARITY_ERROR|TIMEOUT_ERROR) )
 	{
-		printf("get_motor_states(): the motor controller could not process comand, Error %d\n", iError);
+		//printf("get_motor_states(): the motor controller could not process comand, Error %d\n", iError);
 		return(-1);
 	}
 
@@ -288,15 +297,15 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 	}
 
 	// don't go backwards
-	if (right < 0) right = 0 ;
-	if (left  < 0) left  = 0 ;
+//	if (right < 0) right = 0 ;
+//	if (left  < 0) left  = 0 ;
 
 	// motors don't respond until certain output is reached
 	if (right != 0) right += MINREQSPEED ;
 	if (left  != 0) left  += MINREQSPEED ;
 
 	// show
-	printf("Motors: L=%d R=%d \n",left,right);
+//	printf("Motors: L=%d R=%d \n",left,right);
 
 	// do it!
 	return this->set_motors( left , right );

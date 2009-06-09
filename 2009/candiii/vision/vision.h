@@ -11,6 +11,9 @@
  *
  */
 
+extern int ON_RAMP;
+extern int DO_STOPANDTHINK;
+
 class Vision
 {
 
@@ -138,9 +141,16 @@ public:
 	int avgR;
 	int avgG;
 	int avgB;
+	int firstR;
+	int firstG;
+	int firstB;
 	float k_roi;
 	int adapt_whiteThresh;
 
+	/////Paul additions
+	void isRampPx(/*in*/IplImage *img,/*out*/IplImage* rimg);
+	void morphClosing(/*in*/IplImage *in,/*out*/IplImage* out,int width);
+	void findRamp(/*in*/IplImage* img,/*out*/IplImage* rimg, IplImage* rlineimg);
 };
 
 

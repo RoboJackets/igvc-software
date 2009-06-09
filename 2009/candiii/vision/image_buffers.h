@@ -40,6 +40,9 @@ extern IplImage* visCvRawTransform;
 extern IplImage* visCvGlutMask;
 extern IplImage* visCvRawTransformSmall;
 
+extern IplImage* visCvRamp;
+extern IplImage* visCvRampLines;
+
 
 /* conversions ***********************************************/
 

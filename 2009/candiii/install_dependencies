@@ -1,5 +1,20 @@
 #!/bin/sh
 
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+echo "Ubuntu 8.10 only!"
+
+
 # feel free to add to this script when you encounter missing libs/files
 echo "installing candi dependencies this may take a while... =================="
 echo "multiverse and universe repositories must be enabled! ==================="

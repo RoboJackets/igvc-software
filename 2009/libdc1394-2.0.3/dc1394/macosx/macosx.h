@@ -30,79 +30,84 @@
 
 #include "platform.h"
 
-typedef enum {
-    BUFFER_EMPTY = 0,
-    BUFFER_FILLED = 1,
-    BUFFER_CORRUPT = 2,
-    BUFFER_ENQUEUED = 3,
+typedef enum
+{
+	BUFFER_EMPTY = 0,
+	BUFFER_FILLED = 1,
+	BUFFER_CORRUPT = 2,
+	BUFFER_ENQUEUED = 3,
 } buffer_status;
 
-typedef struct _packet_info {
-    UInt32 header;
-    UInt32 status;
-    UInt32 timestamp;
+typedef struct _packet_info
+{
+	UInt32 header;
+	UInt32 status;
+	UInt32 timestamp;
 } packet_info;
 
-typedef struct _buffer_info {
-    platform_camera_t * craw;
-    int              i;
-    buffer_status    status;
-    struct timeval   filltime;
-    int              num_dcls;
-    NuDCLRef *       dcl_list;
-    packet_info *    pkts;
+typedef struct _buffer_info
+{
+	platform_camera_t * craw;
+	int              i;
+	buffer_status    status;
+	struct timeval   filltime;
+	int              num_dcls;
+	NuDCLRef *       dcl_list;
+	packet_info *    pkts;
 } buffer_info;
 
-struct _platform_t {
-    int dummy;
+struct _platform_t
+{
+	int dummy;
 };
 
 typedef struct __dc1394_capture
 {
-    unsigned int             num_frames;
-    //int                      frame_pages;
-    int                      last_dequeued;
-    int                      last_enqueued;
-    /* components needed for the DMA based video capture */
-    IOFireWireLibIsochChannelRef    chan;
-    IOFireWireLibRemoteIsochPortRef rem_port;
-    IOFireWireLibLocalIsochPortRef  loc_port;
-    IOFireWireLibNuDCLPoolRef       dcl_pool;
-    IOVirtualRange           databuf;
-    buffer_info *            buffers;
-    CFRunLoopRef             run_loop;
-    CFStringRef              run_loop_mode;
-    dc1394capture_callback_t callback;
-    void *                   callback_user_data;
-    int                      notify_pipe[2];
-    uint8_t                  frames_ready;
-    MPCriticalRegionID       mutex;
-    MPQueueID                termination_queue;
-    MPSemaphoreID            thread_init_semaphore;
-    MPTaskID                 task;
-    CFSocketRef              socket;
-    CFRunLoopSourceRef       socket_source;
-    uint8_t                  iso_is_allocated;
-    uint8_t                  iso_is_started;
+	unsigned int             num_frames;
+	//int                      frame_pages;
+	int                      last_dequeued;
+	int                      last_enqueued;
+	/* components needed for the DMA based video capture */
+	IOFireWireLibIsochChannelRef    chan;
+	IOFireWireLibRemoteIsochPortRef rem_port;
+	IOFireWireLibLocalIsochPortRef  loc_port;
+	IOFireWireLibNuDCLPoolRef       dcl_pool;
+	IOVirtualRange           databuf;
+	buffer_info *            buffers;
+	CFRunLoopRef             run_loop;
+	CFStringRef              run_loop_mode;
+	dc1394capture_callback_t callback;
+	void *                   callback_user_data;
+	int                      notify_pipe[2];
+	uint8_t                  frames_ready;
+	MPCriticalRegionID       mutex;
+	MPQueueID                termination_queue;
+	MPSemaphoreID            thread_init_semaphore;
+	MPTaskID                 task;
+	CFSocketRef              socket;
+	CFRunLoopSourceRef       socket_source;
+	uint8_t                  iso_is_allocated;
+	uint8_t                  iso_is_started;
 
-    uint32_t                 flags;
-    Boolean                  do_irm;
+	uint32_t                 flags;
+	Boolean                  do_irm;
 
-    dc1394video_frame_t     *frames;
+	dc1394video_frame_t     *frames;
 } dc1394capture_t;
 
-struct _platform_camera_t {
-    IOFireWireLibDeviceRef  iface;
-    UInt32                  generation;
+struct _platform_camera_t
+{
+	IOFireWireLibDeviceRef  iface;
+	UInt32                  generation;
 
-    dc1394camera_t * camera;
+	dc1394camera_t * camera;
 
-    dc1394capture_t         capture;
+	dc1394capture_t         capture;
 
-    int                     capture_is_set;
-    int                     iso_channel_is_set;
-    int                     iso_channel;
-    int                     iso_auto_started;
+	int                     capture_is_set;
+	int                     iso_channel_is_set;
+	int                     iso_channel;
+	int                     iso_auto_started;
 };
 
 

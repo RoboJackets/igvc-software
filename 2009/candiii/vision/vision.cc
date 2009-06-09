@@ -16,10 +16,22 @@
 #define GOOD_PIXEL 255	// value to set path image to
 #define L_R_OFFSET 25 	// pixel spacing from center scan line up
 #define PIXEL_SKIP 2 	// noise filtering threshold in checkPixel()
-#define EDGE_PAD   2    // top/bottom padding
+#define EDGE_PAD   3    // top/bottom padding
 
 /* math */
 #define mymax(a,b) ((a>b)?a:b)
+/* general absolute value */
+#define mfabs(x) ((x<0)?(-x):(x))
+
+//////////////////// HACKS /////////////////////////////////
+
+int ON_RAMP = 0;        //default value do not touch
+int DO_STOPANDTHINK = 0;//default value do not touch
+
+#define ENABLE_EXITRAMPMODE   0  // should be both on
+#define ENABLE_FINDRAMPS      0  //   or both off
+
+////////////////////////////////////////////////////////////
 
 
 /*
@@ -61,7 +73,6 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 	{
 		visHsvProcessing(goal); // modified 2008 method
 	}
-
 
 }//end vision processing
 
@@ -575,7 +586,6 @@ void Vision::robotWidthScan(IplImage* img, Point2D<int>& goal)
 	// IMPLICITLY:
 	// 	return goalx,goaly,
 	// 	or set -1 on error
-
 }
 
 /*
@@ -605,7 +615,7 @@ void Vision::visGenPath(IplImage* img)
 		else
 		{
 			goodFirst=0;
-			blackout=1;   // blackout everything above this point
+//            blackout=1;   // blackout everything above this point
 		}
 
 		//scan left then right & generate visCvPath image
@@ -1040,6 +1050,18 @@ void Vision::ConvertAllImageViews(int trackbarVal)
 		cvShowImage("display", visCvHSV);
 		break;
 
+////////////////
+	case 9:
+		cvPutText(visCvRamp, "Ramp", cvPoint(5,visCvRamp->height-10), &font, CV_RGB(255,255,255));
+		cvShowImage("display", visCvRamp);
+		break;
+	case 10:
+		cvPutText(visCvRampLines, "Ramp lines", cvPoint(5,visCvRampLines->height-10), &font, CV_RGB(0,0,0));
+		cvShowImage("display", visCvRampLines);
+		break;
+////////////////
+
+
 		/* future use (change value of numberOfViews) */
 //  case 9:
 //  	cvShowImage("display", );
@@ -1106,11 +1128,6 @@ void Vision::LoadVisionXMLSettings()
 		}
 		printf("\tvalues: k_roi %.3f RANGES %f %f %f  boxPad %d \n",k_roi,RANGE_R,RANGE_G,RANGE_B,adapt_boxPad);
 	}
-
-
-	/* temporary hack to use longer sweeperlines */
-	//DO_TRANSFORM = 0;
-
 
 }
 
@@ -1262,6 +1279,7 @@ void Vision::Adapt()
 	red   = data.val[2];
 	//printf(" RGB %d %d %d \n", red, green, blue);
 
+
 	/* average rgb over time */
 	static int first = 1;
 	if (first)
@@ -1270,6 +1288,11 @@ void Vision::Adapt()
 		avgB = blue;
 		avgG = green;
 		avgR = red;
+		firstB = blue;
+		firstG = green;
+		firstR = red;
+		visCvRamp = cvCloneImage( visCvAdaptSmall );
+		visCvRampLines = cvCloneImage( visCvAdaptSmall );
 	}
 	else
 	{
@@ -1283,7 +1306,6 @@ void Vision::Adapt()
 		//avgR = 110;  //125;
 	}
 
-
 	/* normalization */
 	float avgV = mymax(avgB,mymax(avgG,avgR)) +1;
 	float normR = avgR/avgV;
@@ -1296,12 +1318,37 @@ void Vision::Adapt()
 	float minThreshR = normR / RANGE_R;
 	float minThreshG = normG / RANGE_G;
 	float minThreshB = normB / RANGE_B;
+	//printf("roi norm bgr %f %f %f \n",normB,normG,normR);
+
+	/* ramp hack */
+#define RAMP_R 0.805
+#define RAMP_G 0.9580
+#define RAMP_B 0.985
+	float maxThreshRramp = RAMP_R * (RANGE_R-0.01);
+	float maxThreshGramp = RAMP_G * (RANGE_G-0.01);
+	float maxThreshBramp = RAMP_B * (RANGE_B-0.01);
+	float minThreshRramp = RAMP_R / (RANGE_R+0.01);
+	float minThreshGramp = RAMP_G / (RANGE_G+0.01);
+	float minThreshBramp = RAMP_B / (RANGE_B+0.01);
+
+	/* yellow bar hack */
+//    #define YBAR_R 0.810  //TODO
+//    #define YBAR_G 0.974  //TODO
+//    #define YBAR_B 0.986  //TODO
+//    float maxThreshRybar = YBAR_R * RANGE_R;
+//    float maxThreshGybar = YBAR_G * RANGE_G;
+//    float maxThreshBybar = YBAR_B * RANGE_B;
+//    float minThreshRybar = YBAR_R / RANGE_R;
+//    float minThreshGybar = YBAR_G / RANGE_G;
+//    float minThreshBybar = YBAR_B / RANGE_B;
 
 
-	/* pointers for speed */
+	/* pointers */
 	unsigned char* rgbdata   = (unsigned char*) visCvRawTransformSmall->imageData;
 	unsigned char* adaptdata = (unsigned char*) visCvAdaptSmall->imageData;
 	unsigned char* debugdata = (unsigned char*) visCvDebug->imageData;
+	unsigned char* rampdata = (unsigned char*) visCvRamp->imageData;
+
 	/* generate visCvAdapt image here!
 	 *  white=good ~ black=bad */
 	for (int i=0, n=visCvRawTransformSmall->imageSize-3; i<n; i+=3)
@@ -1313,55 +1360,75 @@ void Vision::Adapt()
 		// pointer
 		rgbdata+=3;
 
-
 		// normalization
 		apxV = mymax(ab,mymax(ag,ar)) +1;
 		npxB = ab/apxV;
 		npxG = ag/apxV;
 		npxR = ar/apxV;
 
-
-		// check in roi
-//		if (
-//          // subtraction differences
-//			//(abs(ab-(unsigned char)avgB)<adapt_maxDiff) &&  // ramps/grass differ mainly in blue
-//			(abs(ag-(unsigned char)avgG)<adapt_maxDiff) &&
-//			(abs(ar-(unsigned char)avgR)<adapt_maxDiff)
-//		)
+		/* check in roi */
 		if (
-			// ratios
+			// grass ratios
 			(npxB < maxThreshB) && (npxB > minThreshB) &&
 			(npxG < maxThreshG) && (npxG > minThreshG) &&
 			(npxR < maxThreshR) && (npxR > minThreshR)
 		)
 		{
-			//visCvAdaptSmall->imageData[i/3] = GOOD_PIXEL;
 			*adaptdata = GOOD_PIXEL;
 		}
 		else
 		{
-			//visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
 			*adaptdata = BAD_PIXEL;
 		}
 
-		// check for white by looking for blue (most dominant color b/c of sky)
-		if ( (0) && (ab>adapt_whiteThresh) )
+		// check for specific colors hack
+		//if(0)
 		{
-			//visCvAdaptSmall->imageData[i/3] = BAD_PIXEL;
-			*adaptdata = BAD_PIXEL;
-			//visCvDebug->imageData[i+0]=(unsigned char)255;
-			//visCvDebug->imageData[i+1]=(unsigned char)255;
-			//visCvDebug->imageData[i+2]=(unsigned char)255;
-			*(debugdata  ) = (unsigned char)255;
-			*(debugdata+1) = (unsigned char)255;
-			*(debugdata+2) = (unsigned char)255;
+			if (
+				// ramp ratios
+				(npxB < maxThreshBramp) && (npxB > minThreshBramp) &&
+				(npxG < maxThreshGramp) && (npxG > minThreshGramp) &&
+				(npxR < maxThreshRramp) && (npxR > minThreshRramp) &&
+				//(mfabs(npxB-npxG)<0.015)
+				(npxB>npxG)&&
+				(npxG>npxR)
+			)
+			{
+				//*adaptdata = GOOD_PIXEL;
+				*rampdata = GOOD_PIXEL;
+			}
+			else
+			{
+				*rampdata = BAD_PIXEL;
+			}
+
+//            if (
+//                // yellow bar ratios
+//                (npxB < maxThreshBybar) && (npxB > minThreshBybar) &&
+//                (npxG < maxThreshGybar) && (npxG > minThreshGybar) &&
+//                (npxR < maxThreshRybar) && (npxR > minThreshRybar)
+//            )
+//            {
+//                *adaptdata = GOOD_PIXEL;
+//            }
+
 		}
 
 		// pointers
 		++adaptdata;
+		++rampdata;
 		debugdata+=3;
 
-	}
+	}//end loop
+
+///////////// FIND RAMP HACK ////////////////////
+#if ENABLE_FINDRAMPS
+	findRamp(visCvRamp,visCvRamp,visCvRampLines);
+	cvOr(visCvAdaptSmall,visCvRamp,visCvAdaptSmall,NULL);
+	cvNot(visCvRampLines,visCvRampLines);
+	cvAnd(visCvAdaptSmall,visCvRampLines,visCvAdaptSmall,NULL);
+#endif
+/////////////////////////////////////////////////
 
 	/* display roi box in the image we're using */
 	cvRectangle( visCvDebug, UL, LR, CV_RGB(120,0,0), 1, 8, 0);
@@ -1375,28 +1442,104 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 
 	/* generate visCvAdapt img */
 	Adapt();
-	//cvDilate(visCvAdapt, visCvAdapt, NULL, 1); // removes black spots/noise
 
 	/* copy visCvAdapt img into thresh image and filter */
 	cvCopy(visCvAdaptSmall,visCvThresh);
+
+	//cvDilate(visCvAdapt, visCvAdapt,  NULL, 1); // removes black spots/noise
 	cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
+
 	//cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
+	//cvErode(visCvThresh, visCvThresh,  NULL, 2); // fills in barrels/lines, but adds grass noise
 
-    if(doMapping == 0)
-    {
-        /* generate visCvPath */
-        visGenPath(visCvThresh);
+	if (doMapping == 0)
+	{
+		/* generate visCvPath */
+		visGenPath(visCvThresh);
 
-        /* scan high in img */
-        robotWidthScan(visCvPath, goal_far);
+		/* scan high in img */
+		robotWidthScan(visCvPath, goal_far);
 
-        /* setup navigation lines that sweep across the screen and updates goal. */
-        visSweeperLines(goal_near);
-    }
+		/* setup navigation lines that sweep across the screen and updates goal. */
+		visSweeperLines(goal_near);
 
-	/* update return goal */
-	CvtPixToGoal(goal);
+		/* update return goal */
+		CvtPixToGoal(goal);
+	}
+
+
+///////////////// EXIT RAMP MODE ////////////////////
+
+	CvScalar data = cvAvg(visCvThresh);
+	int blue  = data.val[0];
+	//int green = data.val[1];
+	//int red   = data.val[2];
+	//printf("adapt avg %d %d %d \n", red, green, blue);
+//	unsigned char p;
+//	unsigned char* tdata = (unsigned char*) visCvThresh->imageData;
+	if ( (ENABLE_EXITRAMPMODE) && (blue < 46) ) //50  // higher gets in 'exit ramp' mode sooner
+	{
+		ON_RAMP = 1;
+		cvZero(visCvThresh);
+//		for (int i=0, n=visCvThresh->imageSize; i<n; ++i)
+//		{
+//			p = (unsigned char)visCvGrey->imageData[i];
+//			//printf( "grey %hhu \n", p );
+//			if ( p > (unsigned char)180 )
+//			{
+//				//visCvThresh->imageData[i] = BAD_PIXEL;
+//				*tdata = BAD_PIXEL;
+//			}
+//			else
+//			{
+//				//visCvThresh->imageData[i] = GOOD_PIXEL;
+//				*tdata = GOOD_PIXEL;
+//			}
+//		}
+//		++tdata;
+//		visGenPath(visCvThresh);
+//      cvCopy(visCvPath,visCvThresh);
+
+		cvNot(visCvThresh,visCvThresh);
+		cvCopy(visCvRampLines,visCvThresh);
+
+	}
+	else
+	{
+		//if(ON_RAMP) DO_STOPANDTHINK=1;
+		ON_RAMP=0;
+	}
+
+////////////////////////////////////////////////
+
 
 }
 
+
+
+///////////////////////// RAMP DETECTION HACKS  ////////////
+
+void Vision::morphClosing(/*in*/IplImage *in,/*out*/IplImage* out,int width)
+{
+	cvErode(in,out,NULL,width);
+	cvDilate(out,out,NULL,width);
+}
+
+void Vision::findRamp(/*in*/IplImage* img,/*out*/IplImage* rimg, IplImage* rlineimg)
+{
+	//IplImage * rimg0=cvCloneImage(rimg);
+	int RAMP_LINE_THRESH=210;
+	int RAMP_LINE_OVERFILL=6;
+	int RAMP_LINE_WIDTH=6;
+
+	//isRampPx(img,rimg0);
+	//morphClosing(img,rimg,RAMP_LINE_WIDTH);
+	cvDilate(img,rimg,NULL,RAMP_LINE_WIDTH);
+	cvThreshold(visCvGrey,rlineimg,RAMP_LINE_THRESH,255,CV_THRESH_BINARY);
+	cvDilate(rlineimg,rlineimg,NULL,RAMP_LINE_OVERFILL);
+	cvAnd(rlineimg,rimg,rlineimg,NULL);
+	//cvReleaseImage(&rimg0);
+}
+
+////////////////////////////////////////////////////////////////////////////////////
 

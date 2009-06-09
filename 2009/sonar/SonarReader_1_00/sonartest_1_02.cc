@@ -3,31 +3,43 @@
 
 SonarInterface sdev;
 
-int main(void){
+int main(void)
+{
 
 	int data[10];
-	int dat;	
+	int dat;
 	printf("\nInitializing Link...");
 	sdev.setFreq(14);
 
 	sdev.setStepTotal(4);
-	sdev.setIndivStep(0,0); sdev.setIndivActive(0,0);
-	sdev.setIndivStep(1,0); sdev.setIndivActive(1,1);
-	sdev.setIndivStep(2,0); sdev.setIndivActive(2,1);
-	sdev.setIndivStep(3,1); sdev.setIndivActive(3,1);
-	sdev.setIndivStep(4,1); sdev.setIndivActive(4,1);
-	sdev.setIndivStep(5,2); sdev.setIndivActive(5,1);
-	sdev.setIndivStep(6,2); sdev.setIndivActive(6,1);
-	sdev.setIndivStep(7,2); sdev.setIndivActive(7,1);
-	sdev.setIndivStep(8,3); sdev.setIndivActive(8,1);
-	sdev.setIndivStep(9,3); sdev.setIndivActive(9,1);
+	sdev.setIndivStep(0,0);
+	sdev.setIndivActive(0,0);
+	sdev.setIndivStep(1,0);
+	sdev.setIndivActive(1,1);
+	sdev.setIndivStep(2,0);
+	sdev.setIndivActive(2,1);
+	sdev.setIndivStep(3,1);
+	sdev.setIndivActive(3,1);
+	sdev.setIndivStep(4,1);
+	sdev.setIndivActive(4,1);
+	sdev.setIndivStep(5,2);
+	sdev.setIndivActive(5,1);
+	sdev.setIndivStep(6,2);
+	sdev.setIndivActive(6,1);
+	sdev.setIndivStep(7,2);
+	sdev.setIndivActive(7,1);
+	sdev.setIndivStep(8,3);
+	sdev.setIndivActive(8,1);
+	sdev.setIndivStep(9,3);
+	sdev.setIndivActive(9,1);
 
 	sdev.pingindiv(0);
-	
+
 
 	sdev.setIndivGain(0,15);
 	sdev.pingall();
-	for(int i=0; i<10; i++){
+	for (int i=0; i<10; i++)
+	{
 		dat = sdev.readindiv(i);
 		printf(":s:>%d--%d\n",i,dat);
 	}
@@ -36,7 +48,8 @@ int main(void){
 	sdev.setAllGain(30);
 	sdev.setIndivMRange(0,1500);
 	sdev.pingall();
-	for(int i=0; i<10; i++){
+	for (int i=0; i<10; i++)
+	{
 		dat = sdev.readindiv(i);
 		printf(":s:>%d--%d\n",i,dat);
 	}
@@ -56,7 +69,7 @@ int main(void){
 	printf(":f:>%d\n",dat);
 	dat = sdev.getStepTotal();
 	printf(":st:>%d\n",dat);
-	
+
 	printf("Success!\nProgram Terminated.\n");
 	return 0;
 }

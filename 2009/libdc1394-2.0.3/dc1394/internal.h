@@ -27,38 +27,41 @@
 #include "offsets.h"
 #include "platform.h"
 
-typedef struct _dc1394camera_priv_t {
-    dc1394camera_t camera;
+typedef struct _dc1394camera_priv_t
+{
+	dc1394camera_t camera;
 
-    platform_camera_t * pcam;
+	platform_camera_t * pcam;
 
-    uint64_t allocated_channels;
-    int allocated_bandwidth;
-    int iso_persist;
+	uint64_t allocated_channels;
+	int allocated_bandwidth;
+	int iso_persist;
 } dc1394camera_priv_t;
 
 #define DC1394_CAMERA_PRIV(c) ((dc1394camera_priv_t *)c)
 
-typedef struct _camera_info_t {
-    uint64_t guid;
-    int unit;
-    uint32_t unit_directory;
-    uint32_t unit_dependent_directory;
-    uint32_t unit_spec_ID;
-    uint32_t unit_sw_version;
-    char * vendor;
-    char * model;
-    uint32_t vendor_id;
-    uint32_t model_id;
-    platform_device_t * device;
+typedef struct _camera_info_t
+{
+	uint64_t guid;
+	int unit;
+	uint32_t unit_directory;
+	uint32_t unit_dependent_directory;
+	uint32_t unit_spec_ID;
+	uint32_t unit_sw_version;
+	char * vendor;
+	char * model;
+	uint32_t vendor_id;
+	uint32_t model_id;
+	platform_device_t * device;
 } camera_info_t;
 
-struct __dc1394_t {
-    platform_t  * platform;
-    platform_device_list_t * device_list;
+struct __dc1394_t
+{
+	platform_t  * platform;
+	platform_device_list_t * device_list;
 
-    int num_cameras;
-    camera_info_t * cameras;
+	int num_cameras;
+	camera_info_t * cameras;
 };
 
 void free_enumeration (dc1394_t * d);
@@ -114,12 +117,13 @@ int refresh_enumeration (dc1394_t * d);
 
 /* Enumeration of camera image formats */
 /* This could disappear from the API I think.*/
-enum {
-    DC1394_FORMAT0= 384,
-    DC1394_FORMAT1,
-    DC1394_FORMAT2,
-    DC1394_FORMAT6=390,
-    DC1394_FORMAT7
+enum
+{
+	DC1394_FORMAT0= 384,
+	DC1394_FORMAT1,
+	DC1394_FORMAT2,
+	DC1394_FORMAT6=390,
+	DC1394_FORMAT7
 };
 #define DC1394_FORMAT_MIN           DC1394_FORMAT0
 #define DC1394_FORMAT_MAX           DC1394_FORMAT7

@@ -27,6 +27,9 @@ IplImage* visCvRawTransform;
 IplImage* visCvGlutMask;
 IplImage* visCvRawTransformSmall;
 
+IplImage* visCvRamp;
+IplImage* visCvRampLines;
+
 
 /* conversions ***********************************************/
 

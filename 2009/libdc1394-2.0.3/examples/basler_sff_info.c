@@ -32,88 +32,103 @@
 
 int list_cameras (dc1394_t * d, dc1394camera_list_t * list)
 {
-    uint32_t i;
-    dc1394bool_t sff_available;
-    dc1394camera_t * camera;
+	uint32_t i;
+	dc1394bool_t sff_available;
+	dc1394camera_t * camera;
 
-    for (i = 0; i < list->num; i++) {
-        sff_available = DC1394_FALSE;
-        camera = dc1394_camera_new (d, list->ids[i].guid);
-        dc1394_basler_sff_is_available (camera, &sff_available);
+	for (i = 0; i < list->num; i++)
+	{
+		sff_available = DC1394_FALSE;
+		camera = dc1394_camera_new (d, list->ids[i].guid);
+		dc1394_basler_sff_is_available (camera, &sff_available);
 
-        printf ("%02d:0x%"PRIx64":%s:%s:%s\n", i, camera->guid,
-                camera->vendor, camera->model, sff_available ? "SFF" : "NO SFF");
-        dc1394_camera_free (camera);
-    }
-    return 0;
+		printf ("%02d:0x%"PRIx64":%s:%s:%s\n", i, camera->guid,
+				camera->vendor, camera->model, sff_available ? "SFF" : "NO SFF");
+		dc1394_camera_free (camera);
+	}
+	return 0;
 }
 
 int print_usage ()
 {
-    printf ("usage: basler_sff_info [--list-cameras|[--guid GUID]]\n");
-    return 1;
+	printf ("usage: basler_sff_info [--list-cameras|[--guid GUID]]\n");
+	return 1;
 }
 
 int main (int argc, char **argv)
 {
-    dc1394camera_t *camera = NULL;
-    uint64_t guid = 0x0LL;
-    dc1394_t * d;
-    dc1394camera_list_t * list;
-    dc1394error_t err;
+	dc1394camera_t *camera = NULL;
+	uint64_t guid = 0x0LL;
+	dc1394_t * d;
+	dc1394camera_list_t * list;
+	dc1394error_t err;
 
-    d = dc1394_new ();
-    err=dc1394_camera_enumerate (d, &list);
-    DC1394_ERR_RTN(err,"Failed to enumerate cameras");
+	d = dc1394_new ();
+	err=dc1394_camera_enumerate (d, &list);
+	DC1394_ERR_RTN(err,"Failed to enumerate cameras");
 
-    if (list->num == 0) {
-        dc1394_log_error("No cameras found");
-        return 1;
-    }
+	if (list->num == 0)
+	{
+		dc1394_log_error("No cameras found");
+		return 1;
+	}
 
-    /* parse arguments */
-    if (argc == 2) {
-        if (!strcmp (argv[1], "--list-cameras"))
-            list_cameras (d, list);
-        else
-            print_usage();
-        dc1394_camera_free_list (list);
-        dc1394_free (d);
-        return 0;
-    } else if (argc == 3) {
-        if (!strcmp (argv[1], "--guid")) {
-            if (sscanf (argv[2], "0x%"PRIx64, &guid) == 1) {
-            } else {
-                dc1394_camera_free_list (list);
-                dc1394_free (d);
-                return print_usage();
-            }
-        }
-    } else if (argc != 1) {
-        dc1394_camera_free_list (list);
-        dc1394_free (d);
-        return print_usage();
-    }
+	/* parse arguments */
+	if (argc == 2)
+	{
+		if (!strcmp (argv[1], "--list-cameras"))
+			list_cameras (d, list);
+		else
+			print_usage();
+		dc1394_camera_free_list (list);
+		dc1394_free (d);
+		return 0;
+	}
+	else if (argc == 3)
+	{
+		if (!strcmp (argv[1], "--guid"))
+		{
+			if (sscanf (argv[2], "0x%"PRIx64, &guid) == 1)
+			{
+			}
+			else
+			{
+				dc1394_camera_free_list (list);
+				dc1394_free (d);
+				return print_usage();
+			}
+		}
+	}
+	else if (argc != 1)
+	{
+		dc1394_camera_free_list (list);
+		dc1394_free (d);
+		return print_usage();
+	}
 
-    if (guid == 0x0LL) {
-        printf ("I: found %d camera%s, working with camera 0\n", list->num,
-                list->num == 1 ? "" : "s");
-        camera = dc1394_camera_new (d, list->ids[0].guid);
-    } else {
-        camera = dc1394_camera_new (d, guid);
-        if (camera == NULL) {
-            dc1394_log_error("no camera with guid 0x%"PRIx64" found", guid);
-            return 1;
-        }
+	if (guid == 0x0LL)
+	{
+		printf ("I: found %d camera%s, working with camera 0\n", list->num,
+				list->num == 1 ? "" : "s");
+		camera = dc1394_camera_new (d, list->ids[0].guid);
+	}
+	else
+	{
+		camera = dc1394_camera_new (d, guid);
+		if (camera == NULL)
+		{
+			dc1394_log_error("no camera with guid 0x%"PRIx64" found", guid);
+			return 1;
+		}
 
-        printf ("I: found camera with guid 0x%"PRIx64"\n", guid);
-    }
+		printf ("I: found camera with guid 0x%"PRIx64"\n", guid);
+	}
 
-    dc1394_camera_print_info (camera, stdout);
-    printf ("\nSFF feature info:\n");
-    dc1394_basler_sff_feature_print_all (camera, stdout);
-    dc1394_camera_free (camera);
-    dc1394_camera_free_list (list);
-    dc1394_free (d);
-    return 0;
+	dc1394_camera_print_info (camera, stdout);
+	printf ("\nSFF feature info:\n");
+	dc1394_basler_sff_feature_print_all (camera, stdout);
+	dc1394_camera_free (camera);
+	dc1394_camera_free_list (list);
+	dc1394_free (d);
+	return 0;
 }

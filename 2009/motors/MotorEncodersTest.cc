@@ -5,7 +5,8 @@
 #include "../arduino/DataPacket.hpp"
 using namespace std;
 
-int main(void) {
+int main(void)
+{
 	MotorEncoders encoders;
 
 //	cout << "Size of short = " << sizeof(short) << endl;
@@ -14,7 +15,8 @@ int main(void) {
 
 	//int exp_packetnum = 1;
 	int i;
-	for( i = 0; i < 100000; i++){
+	for ( i = 0; i < 100000; i++)
+	{
 		//cout << "Heading = " << encoders.getHeading() << endl;
 
 		//DataPacket packet;
@@ -22,7 +24,7 @@ int main(void) {
 		//encoders.getInfo_class(&packet);
 
 		encoder_reply_t parsed_data;
-		if(!encoders.getInfo(parsed_data))
+		if (!encoders.getInfo(parsed_data))
 		{
 			cout << parsed_data << "\n\n";
 
@@ -39,7 +41,7 @@ int main(void) {
 
 	DataPacket pk;
 
-	if(!encoders.arduinoInterface.arduinoResendPacket(98, pk))
+	if (!encoders.arduinoInterface.arduinoResendPacket(98, pk))
 	{
 		cout << pk << endl;
 
@@ -47,13 +49,15 @@ int main(void) {
 		//std::cout << "data size: " << (int) pk.header.size << std::endl;
 		//std::cout << "dataloc: " << (int) pk.data << std::endl;
 
-		if (pk.data != NULL){
-			if(pk.header.cmd == 'r'){
+		if (pk.data != NULL)
+		{
+			if (pk.header.cmd == 'r')
+			{
 				encoder_reply_t parsed_data;
 				memcpy(&parsed_data, pk.data, sizeof(encoder_reply_t));
 				cout << parsed_data << "\n\n";
 			}
 		}
-	
+
 	}
 }

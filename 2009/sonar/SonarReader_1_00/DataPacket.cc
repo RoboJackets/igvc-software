@@ -1,19 +1,23 @@
 #include "DataPacket.hpp"
 
-DataPacket::DataPacket(){
+DataPacket::DataPacket()
+{
 	data = NULL;
 	header.size = 0;
 }
 
-DataPacket::~DataPacket(){
-	if(data != NULL){
+DataPacket::~DataPacket()
+{
+	if (data != NULL)
+	{
 		delete[] data;
 		data = NULL;
 		header.size = 0;
 	}
 }
 
-DataPacket::DataPacket(const DataPacket& pk){
+DataPacket::DataPacket(const DataPacket& pk)
+{
 	this->header = pk.header;
 	this->data = new byte[pk.header.size];
 	memcpy(this->data, pk.data, pk.header.size);
@@ -29,14 +33,16 @@ void DataPacket::clear()
 	header.cmd = 0;
 	header.size = 0;
 
-	if(data != NULL){
+	if (data != NULL)
+	{
 		delete[] data;
 		data = NULL;
 		header.size = 0;
 	}
 }
 
-std::ostream& operator<<(std::ostream& output, DataPacket& pk){
+std::ostream& operator<<(std::ostream& output, DataPacket& pk)
+{
 //	output << std::hex;
 	output << "timestamp sec: " << pk.header.timestamp_sec << std::endl;
 	output << "timestamp usec: " << pk.header.timestamp_usec << std::endl;
@@ -48,7 +54,8 @@ std::ostream& operator<<(std::ostream& output, DataPacket& pk){
 	return(output);
 }
 
-std::ostream& operator<<(std::ostream& output, header_t header){
+std::ostream& operator<<(std::ostream& output, header_t header)
+{
 //	output << std::hex;
 	output << "timestamp sec: " << header.timestamp_sec << std::endl;
 	output << "timestamp usec: " << header.timestamp_usec << std::endl;
@@ -60,7 +67,8 @@ std::ostream& operator<<(std::ostream& output, header_t header){
 	return(output);
 }
 
-std::ostream& operator<<(std::ostream& output, encoder_reply_t data){
+std::ostream& operator<<(std::ostream& output, encoder_reply_t data)
+{
 	//output.setf(std::ios::hex);
 
 	output << std::hex;

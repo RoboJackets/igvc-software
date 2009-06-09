@@ -17,7 +17,12 @@
 
 
 //type for packet storage
-typedef struct {header_t head; size_t len; byte * msg; } packet_t;
+typedef struct
+{
+	header_t head;
+	size_t len;
+	byte * msg;
+} packet_t;
 
 /*
 //Header types

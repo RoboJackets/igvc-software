@@ -398,7 +398,7 @@ void Robot::processFunc()
 		}
 	}
 
-    /* periodically stop and think */
+	/* periodically stop and think */
 //	static int hack = 0;
 //	int hackstop = 175;
 //	if (hack > hackstop )

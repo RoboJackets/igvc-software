@@ -24,7 +24,8 @@ bool SPISendBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, in
 /**
  * Send and recieve the specified number of bytes via hardware interface.
  */
-bool SPITransfer(void *outdata, void *indata, unsigned int numBytes){
+bool SPITransfer(void *outdata, void *indata, unsigned int numBytes)
+{
 
 #endif /* SPI_H */
 

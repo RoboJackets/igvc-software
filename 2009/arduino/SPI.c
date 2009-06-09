@@ -1,6 +1,7 @@
 #include "SPI.h"
 
-void InitSPI(void) {
+void InitSPI(void)
+{
 	/* set the pin modes */ //TODO: do this with a loop (?)
 	pinMode(SPI_MISO, INPUT);
 	pinMode(SPI_MOSI, OUTPUT);
@@ -19,7 +20,8 @@ void InitSPI(void) {
 	TCCR1B = (1<<CS11)|(1<<CS10);//clkio/64
 }
 
-bool SPIReadBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, int clockPin) {
+bool SPIReadBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, int clockPin)
+{
 #ifdef BITBANG_SPI
 
 	/* Select the device */
@@ -28,10 +30,12 @@ bool SPIReadBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, in
 	delayMicroseconds(500);
 
 	/* Read each byte */
-	for (int i = 0; i < numBytes; i++) {
+	for (int i = 0; i < numBytes; i++)
+	{
 		data[i] = 0;
 		/* Read a single byte */
-		for (int j = 0; j < 8; j++) {
+		for (int j = 0; j < 8; j++)
+		{
 			/* Raise the clock */
 			digitalWrite(clockPin, HIGH);
 			/* Delay of 10us before data is sent */
@@ -51,35 +55,40 @@ bool SPIReadBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, in
 
 	/* The last bit is held for 50us */
 	delayMicroseconds(50);
-	/* Data only refreshed every 1 ms 
+	/* Data only refreshed every 1 ms
 	 * note: delay(1) is inaccurate for a 1 ms wait, seems to be only accurate to about max 200us
-	 */			
+	 */
 	delayMicroseconds(1000);
 
 	return(data);
 #else
 #ifdef HARD_SPI
 	recdata[numBytes];
-	for(int i = 0; i < numBytes; i++){
+	for (int i = 0; i < numBytes; i++)
+	{
 		*SPI_DATA_REG  = 0;
-		while(!(SPI_STATUS_REG << SPI_INT_FLG)){
+		while (!(SPI_STATUS_REG << SPI_INT_FLG))
+		{
 			;
 		}
 		recdata[i] = *SPI_DATA_REG;
 	}
 #else
-	#error "SPIReadInt: SPI mode not set.\n"
+#error "SPIReadInt: SPI mode not set.\n"
 #endif
 #endif
 }
 
-bool SPISendBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, int clockPin) {
+bool SPISendBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, int clockPin)
+{
 
 #ifdef HARD_SPI
 	//recdata[numBytes];
-	for(int i = 0; i < numBytes; i++){
+	for (int i = 0; i < numBytes; i++)
+	{
 		*SPI_DATA_REG  = data[i];
-		while(!(SPI_STATUS_REG << SPI_INT_FLG)){
+		while (!(SPI_STATUS_REG << SPI_INT_FLG))
+		{
 			;
 		}
 		//recdata[i] = *SPI_DATA_REG;
@@ -88,8 +97,10 @@ bool SPISendBytes(void *data, int numBytes, int inputPin, int slaveSelectPin, in
 
 }
 
-bool SPITransfer(void* outdata, void* indata, unsigned int numBytes){
-	for(int i = 0; i < numBytes; i++){
+bool SPITransfer(void* outdata, void* indata, unsigned int numBytes)
+{
+	for (int i = 0; i < numBytes; i++)
+	{
 		SPDR = outdata[i];	// Start the transmission
 		while (!(SPSR & (1<<SPIF))) // Wait the end of the transmission
 		{

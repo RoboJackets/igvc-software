@@ -7,12 +7,13 @@
 #include <stdarg.h>
 #include <wiring.h>
 #include "HardwareSerial.h"
-extern "C"{
+extern "C"
+{
 #include "sonar.h"
 }
 
 //=========Init Vars==================
-int heading;			//Heading 
+int heading;			//Heading
 int tx_num,rxn_num;		//Current Tx/Rx Packet Counts
 long global_time_sec;		//Global Time Var
 long global_time_usec;		//Global Time Var
@@ -24,86 +25,98 @@ extern byte proc_buff[5];	//SonDev Processor Buffer
 //====================================
 
 
-void readSerial(void) {
-	if (Serial.available()) {
+void readSerial(void)
+{
+	if (Serial.available())
+	{
 		int i;
 		header_t headerIn;
 		byte* hdrptr = (byte*)&headerIn;
 
 		while (Serial.available()<PACKET_HEADER_SIZE);
 
-		for(i=0;i<PACKET_HEADER_SIZE;i++){
+		for (i=0; i<PACKET_HEADER_SIZE; i++)
+		{
 			*(hdrptr+i) = Serial.read(); //take care of this
 		}
 
-		switch(headerIn.cmd){ //TODO: make these char --> defines
-			
-			case 'w':{
-	
-				while (Serial.available()<2){}  // TODO: add timeout
-				byte variableNumber = Serial.read();
-				byte variableValue = Serial.read();
-				setVariable(variableNumber, variableValue);
-				sendPacket(ARDUINO_SETVAR_RESP,0,NULL);
-				break;
+		switch (headerIn.cmd) //TODO: make these char --> defines
+		{
+
+		case 'w':
+		{
+
+			while (Serial.available()<2) {} // TODO: add timeout
+			byte variableNumber = Serial.read();
+			byte variableValue = Serial.read();
+			setVariable(variableNumber, variableValue);
+			sendPacket(ARDUINO_SETVAR_RESP,0,NULL);
+			break;
+		}
+
+		case 'i':
+		{
+			byte msg = 's';
+			sendPacket(ARDUINO_ID_RESP,1,&msg);
+			break;
+		}
+
+		case 's':
+		{
+			int i;
+			while (Serial.available()<headerIn.size);
+			for (i=0; i<headerIn.size; i++)
+			{
+				proc_buff[i] = Serial.read();
 			}
-			
-			case 'i':{
-				byte msg = 's';
-				sendPacket(ARDUINO_ID_RESP,1,&msg);
-				break;
-			}
-			
-			case 's':{
-				int i;
-				while (Serial.available()<headerIn.size);
-				for(i=0;i<headerIn.size;i++){
-					proc_buff[i] = Serial.read();
-				}
-				SonDev_Process(proc_buff,sendPacket);
-				break;
-			}
-			
-			default:{
-				//error 
-				break;
-			}
+			SonDev_Process(proc_buff,sendPacket);
+			break;
+		}
+
+		default:
+		{
+			//error
+			break;
+		}
 		}
 	}
 }
 
-void setVariable(byte num, byte val) {
-	switch (num) {
-		case MC_SETCLK:
-			{			
-			unsigned long int sec;
-			unsigned long int usec;
+void setVariable(byte num, byte val)
+{
+	switch (num)
+	{
+	case MC_SETCLK:
+	{
+		unsigned long int sec;
+		unsigned long int usec;
 
-			while (Serial.available()<7){}
-			byte * bptr = (byte *)&sec;
-			bptr[0] = val;
-			bptr[1] = Serial.read();
-			bptr[2] = Serial.read();
-			bptr[3] = Serial.read();
+		while (Serial.available()<7) {}
+		byte * bptr = (byte *)&sec;
+		bptr[0] = val;
+		bptr[1] = Serial.read();
+		bptr[2] = Serial.read();
+		bptr[3] = Serial.read();
 
-			bptr = (byte *)&usec;
-			bptr[0] = Serial.read();
-			bptr[1] = Serial.read();
-			bptr[2] = Serial.read();
-			bptr[3] = Serial.read();
+		bptr = (byte *)&usec;
+		bptr[0] = Serial.read();
+		bptr[1] = Serial.read();
+		bptr[2] = Serial.read();
+		bptr[3] = Serial.read();
 
-			global_time_sec = sec;
-			global_time_usec = usec;
-			arduino_time_millis = millis();
-			break;
-			}
-		default:
-			//error
-			break;
+		global_time_sec = sec;
+		global_time_usec = usec;
+		arduino_time_millis = millis();
+		break;
+	}
+	default:
+		//error
+		break;
 	}
 }
 
-void sendPacket(char cmd, int dataSize, byte* data) {
+void sendPacket(char cmd, int dataSize, byte* data)
+{
 	header_t headerOut;
 	genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
 	headerOut.packetnum = tx_num;
@@ -114,33 +127,40 @@ void sendPacket(char cmd, int dataSize, byte* data) {
 	tx_num++;
 }
 
-void sendStatus() {
+void sendStatus()
+{
 	serialPrintBytes(&heading, sizeof(double));
 }
 
-void serialPrintBytes(void *data, int numBytes) {
-	for (int i = 0; i < numBytes; i++) {
+void serialPrintBytes(void *data, int numBytes)
+{
+	for (int i = 0; i < numBytes; i++)
+	{
 		Serial.print(((unsigned char *)data)[i], BYTE);
 	}
 }
 
-void serialPrintDouble(double data, int precision) {
+void serialPrintDouble(double data, int precision)
+{
 	Serial.print((int)data);
 	Serial.print(".");
-	for(int i = 1; i < (precision+1); i++) {
+	for (int i = 1; i < (precision+1); i++)
+	{
 		data = (data - (double)((int)data)) * 10;
 		Serial.print((int)data);
 	}
 }
 
-unsigned int getTime(){
+unsigned int getTime()
+{
 	unsigned int time;
 	time = TCNT1L;
 	time |= TCNT1H << 8;
 	return(time);
 }
 
-void resetTime(){
+void resetTime()
+{
 	TCNT1H = 0;
 	TCNT1L = 0;
 }

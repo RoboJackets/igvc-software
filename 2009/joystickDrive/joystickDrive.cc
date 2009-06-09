@@ -10,6 +10,10 @@ int main()
 	for(;;)
 	{
 		jD.setMotor();
+		if(jD.shouldQuit())
+		{
+			return(0);
+		}
 		usleep(1000);
 		
 	}
@@ -17,6 +21,15 @@ int main()
 
 joystickDrive::joystickDrive()
 {
+	quit = false;
+	leftAnalogX = 0;
+	leftAnalogY = 0;
+	rightAnalogX = 0;
+	rightAnalogY = 0;
+	dPadX = 0;
+	dPadY = 0;
+	joystickButtons = 0;
+
 	joystick_open();
 	m_motorCtr.SetupSerial();
 }
@@ -108,18 +121,49 @@ void joystickDrive::setMotor()
 	{
 		vel = 128;
 	}
-	else if( theta > 120 || theta < -120 )
+/*
+	else if( theta > 120 || theta < -120 )//go backwards if the stick is nearly straight back
 	{
 		vel = scaleThrottle(vel);
+		std::cout << "right at ("<< rightAnalogX << "," << rightAnalogY << std::endl;
+		std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set left:" << -1*vel << "right " << -1*vel << std::endl;
 		m_motorCtr.set_motors(-1*vel, -1*vel);
+		return;
 	}
+*/
 	else
 	{
 		vel = scaleThrottle(vel);
 	}
 
-	//std::cout << "right at ("<< rightAnalogX << "," << rightAnalogY << ")\twould have set vel: " << vel << " head: " << (int)theta << std::endl;
-	std::cout << "right at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set vel: " << vel << " head: " << (int)theta << std::endl;
+	//turbo
+	if((joystickButtons & 32) == 32)
+	{
+		vel += 120;
+	}
+	//turbo
+	if((joystickButtons & 128) == 128)
+	{
+		vel += 200;
+	}
+
+	//force tight turn
+	if((joystickButtons & 1) == 1)
+	{
+		m_motorCtr.set_motors(0, vel);
+		std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set left: " << 0 << " right: " << vel << std::endl;
+		return;
+	}
+	else if((joystickButtons & 4) == 4)
+	{
+		m_motorCtr.set_motors(vel, 0);
+		std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set left: " << vel << " right: " << 0 << std::endl;
+		return;
+	}
+
+
+	std::cout << "right at ("<< rightAnalogX << "," << rightAnalogY << ")\twould have set vel: " << vel << " head: " << (int)theta << std::endl;
+	std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set vel: " << vel << " head: " << (int)theta << std::endl;
 
 	m_motorCtr.set_heading(vel,theta);
 }
@@ -218,10 +262,16 @@ void joystickDrive::readJoystick() {
 				*/
 				case SDL_QUIT:
 					//done = 1;
-					exit(-1);
+					//exit(-1);
+					quit = true;
 					break;
 				default:
 					break;
 			}
 		}
+}
+
+bool joystickDrive::shouldQuit()
+{
+	return(quit);
 }
