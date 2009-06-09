@@ -11,9 +11,10 @@
 
 #define ARDUINO_SD_CMD 's'
 
-class SonarInterface{
+class SonarInterface
+{
 
-	public:
+public:
 	SonarInterface(void);
 	virtual ~SonarInterface(void);
 
@@ -36,13 +37,14 @@ class SonarInterface{
 	int getIndivGain(int id);
 	int getIndivActive(int id);
 	int getIndivStep(int id);
-	int getFreq(void);	
+	int getFreq(void);
 	int getStepTotal(void);
 
-	private:
-	enum sd_optype_t{	SREAD_ALL,SPING_ALL,SREAD_IND,SPING_IND,SET_GAIN_ALL,SET_GAIN_IND,SET_MRANGE_ALL,SET_MRANGE_IND,
-					SET_FREQ,SET_STEP_IND,SET_STEP_TOT,SET_ACTIVE_IND,SET_ECHONUM,GET_GAIN_IND,GET_MRANGE_IND,
-					GET_ACTIVE_IND,GET_STEP_IND,GET_FREQ,GET_STEP_TOT,START_SONDEV, SET_AUTO_ALL};
+private:
+	enum sd_optype_t {	SREAD_ALL,SPING_ALL,SREAD_IND,SPING_IND,SET_GAIN_ALL,SET_GAIN_IND,SET_MRANGE_ALL,SET_MRANGE_IND,
+					   SET_FREQ,SET_STEP_IND,SET_STEP_TOT,SET_ACTIVE_IND,SET_ECHONUM,GET_GAIN_IND,GET_MRANGE_IND,
+					   GET_ACTIVE_IND,GET_STEP_IND,GET_FREQ,GET_STEP_TOT,START_SONDEV, SET_AUTO_ALL
+					 };
 	short int sonar_ranges[16];
 	ArduinoInterface arint;
 

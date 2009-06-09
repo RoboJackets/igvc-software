@@ -27,9 +27,9 @@ typedef void (*dc1394capture_callback_t)(dc1394camera_t *, void *);
 
 int
 dc1394_capture_schedule_with_runloop (dc1394camera_t * camera,
-                                      CFRunLoopRef run_loop, CFStringRef run_loop_mode);
+									  CFRunLoopRef run_loop, CFStringRef run_loop_mode);
 void
 dc1394_capture_set_callback (dc1394camera_t * camera,
-                             dc1394capture_callback_t callback, void * user_data);
+							 dc1394capture_callback_t callback, void * user_data);
 
 #endif

@@ -29,38 +29,41 @@
 #include "register.h"
 #include "offsets.h"
 
-struct _platform_t {
-    int dummy;
+struct _platform_t
+{
+	int dummy;
 };
 
-struct _platform_camera_t {
-    int fd;
-    char filename[32];
-    int generation;
-    uint32_t node_id;
+struct _platform_camera_t
+{
+	int fd;
+	char filename[32];
+	int generation;
+	uint32_t node_id;
 
-    dc1394camera_t * camera;
+	dc1394camera_t * camera;
 
-    int iso_fd;
-    int iso_handle;
-    struct juju_frame        * frames;
-    unsigned char        * buffer;
-    size_t buffer_size;
-    uint32_t flags;
-    unsigned int num_frames;
-    int current;
-    int ready_frames;
+	int iso_fd;
+	int iso_handle;
+	struct juju_frame        * frames;
+	unsigned char        * buffer;
+	size_t buffer_size;
+	uint32_t flags;
+	unsigned int num_frames;
+	int current;
+	int ready_frames;
 
-    unsigned int iso_channel;
-    int capture_is_set;
-    int iso_auto_started;
+	unsigned int iso_channel;
+	int capture_is_set;
+	int iso_auto_started;
 };
 
 
-struct juju_frame {
-    dc1394video_frame_t                 frame;
-    size_t                         size;
-    struct fw_cdev_iso_packet        *packets;
+struct juju_frame
+{
+	dc1394video_frame_t                 frame;
+	size_t                         size;
+	struct fw_cdev_iso_packet        *packets;
 };
 
 dc1394error_t

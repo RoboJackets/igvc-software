@@ -26,8 +26,9 @@
         rotating support.
 */
 
-typedef struct {
-    double matrix[2][2];
+typedef struct
+{
+	double matrix[2][2];
 } affine_transform_t;
 
 void affine_transform_init( affine_transform_t *this );

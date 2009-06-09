@@ -15,6 +15,7 @@ class joystickDrive
 		inline double getHeading();
 		void setMotor();
 		void setMotorTank();
+		bool shouldQuit();
 
 	private:
 		Motors_Old m_motorCtr;
@@ -33,6 +34,7 @@ class joystickDrive
 		int dPadX;
 		int dPadY;
 		int joystickButtons;
+		bool quit;
 };
 
 #endif

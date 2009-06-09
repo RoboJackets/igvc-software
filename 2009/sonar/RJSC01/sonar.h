@@ -15,18 +15,20 @@
 
 typedef unsigned char byte;
 
-typedef struct _sondev{
+typedef struct _sondev
+{
 	byte addr;
 	byte gain;
 	byte mrange;
 	byte seqid;
 	byte rdata[2];
 	byte flags; //mrangechange_flag,gainchange_flag,ping_flag, read_flag, warn_flag, cont_flag, active_bit
-}SONDEV;
+} SONDEV;
 
-enum sd_optype_t{SREAD_ALL,SPING_ALL,SREAD_IND,SPING_IND,SET_GAIN_ALL,SET_GAIN_IND,SET_MRANGE_ALL,SET_MRANGE_IND,
-			SET_FREQ,SET_STEP_IND,SET_STEP_TOT,SET_ACTIVE_IND,SET_ECHONUM,GET_GAIN_IND,GET_MRANGE_IND,
-			GET_ACTIVE_IND,GET_STEP_IND,GET_FREQ,GET_STEP_TOT,START_SONDEV, SET_AUTO_ALL, SDEV_ADDRSET};
+enum sd_optype_t {SREAD_ALL,SPING_ALL,SREAD_IND,SPING_IND,SET_GAIN_ALL,SET_GAIN_IND,SET_MRANGE_ALL,SET_MRANGE_IND,
+				  SET_FREQ,SET_STEP_IND,SET_STEP_TOT,SET_ACTIVE_IND,SET_ECHONUM,GET_GAIN_IND,GET_MRANGE_IND,
+				  GET_ACTIVE_IND,GET_STEP_IND,GET_FREQ,GET_STEP_TOT,START_SONDEV, SET_AUTO_ALL, SDEV_ADDRSET
+				 };
 
 //============FXNS=====================
 void SonDev_Start(int num, int initGain, int initMRange, int freq);

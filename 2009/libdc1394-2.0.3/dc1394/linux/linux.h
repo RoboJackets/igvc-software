@@ -30,45 +30,47 @@
 //#include "linux/raw1394support.h"
 #include <dc1394/dc1394.h>
 
-struct _platform_t {
-    int dummy;
+struct _platform_t
+{
+	int dummy;
 };
 
 typedef struct __dc1394_capture
 {
-    unsigned char            *capture_buffer;
-    /* components needed for the DMA based video capture */
-    const unsigned char     *dma_ring_buffer;
-    char                    *dma_device_file;
-    unsigned int             dma_buffer_size;
-    unsigned int             dma_frame_size;
-    unsigned int             num_dma_buffers;
-    unsigned int             dma_last_buffer;
-    int                      dma_fd;
-    raw1394handle_t          handle;
-    uint32_t                 flags;
+	unsigned char            *capture_buffer;
+	/* components needed for the DMA based video capture */
+	const unsigned char     *dma_ring_buffer;
+	char                    *dma_device_file;
+	unsigned int             dma_buffer_size;
+	unsigned int             dma_frame_size;
+	unsigned int             num_dma_buffers;
+	unsigned int             dma_last_buffer;
+	int                      dma_fd;
+	raw1394handle_t          handle;
+	uint32_t                 flags;
 
-    dc1394video_frame_t     *frames;
+	dc1394video_frame_t     *frames;
 } dc1394capture_t;
 
-struct _platform_camera_t {
-    raw1394handle_t handle;
-    int node, port;
-    uint32_t generation;
+struct _platform_camera_t
+{
+	raw1394handle_t handle;
+	int node, port;
+	uint32_t generation;
 
-    dc1394camera_t * camera;
+	dc1394camera_t * camera;
 
-    dc1394capture_t capture;
+	dc1394capture_t capture;
 
-    int                      capture_is_set;
-    int                      allocated_channel;
-    unsigned int             allocated_bandwidth;
-    int                      iso_auto_started;
-    unsigned int             iso_channel;
+	int                      capture_is_set;
+	int                      allocated_channel;
+	unsigned int             allocated_bandwidth;
+	int                      iso_auto_started;
+	unsigned int             iso_channel;
 
-    // for broadcast:
-    int           backup_node_id;
-    dc1394bool_t broadcast_is_set;
+	// for broadcast:
+	int           backup_node_id;
+	dc1394bool_t broadcast_is_set;
 };
 
 #endif

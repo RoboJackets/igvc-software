@@ -10,16 +10,21 @@
 -->
 <Config>
 
+    <!-- ON/OFF -->
+    <doMapping>001 </doMapping>
+    <doVision> 001 </doVision>
+    <useMotors>001 </useMotors>
+
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>000</useFirewireCamera>  <!-- set to 0 to load video -->
+	<useFirewireCamera>001</useFirewireCamera>  <!-- set to 0 to load video -->
 	<gain>19</gain>
 	<shutter>130</shutter>
 	<gamma>00</gamma>
 	<auto_gain_and_shutter>001</auto_gain_and_shutter>
 
 	<!-- Guppy White Balance Settings -->
-	<blue>602</blue> <!-- old 646 -->
-	<red>517</red>   <!-- old 528 -->
+	<blue>590</blue> <!-- 602 old 646 -->
+	<red>540</red>   <!-- 517 old 528 -->
 
 	<!-- Vision Processing Settings -->
 	<satThresh>70</satThresh>     <!-- (hsv only) higher => more noise/sensitivity -->
@@ -31,29 +36,27 @@
 	<maxDiff>45</maxDiff>          <!-- DEPRICATED! lower => more noise in thresh image -->
 	<whiteThresh>200</whiteThresh> <!-- DEPRICATED! values above this number in blue channel are considered white lines -->
 
-	<boxPadding>45</boxPadding>  <!-- lower => wider box -->
-	<k_roi>0.080</k_roi>         <!-- higher => adjust to color in red rectangle faster -->
+
+	<boxPadding>50</boxPadding>  <!-- lower => wider box -->
+	<k_roi>0.1000</k_roi>         <!-- higher => adjust to color in red rectangle faster -->
 
 	<rangeR>1.10</rangeR>  <!-- Settings for how far from the average -->
 	<rangeG>1.10</rangeG>  <!--  normalized colors inside the roi box. -->
-	<rangeB>1.15</rangeB>  <!--  Must be greater than 1.0 (fraction part is the percent from average) -->
+	<rangeB>1.09</rangeB>  <!--  Must be greater than 1.0 (fraction part is the percent from average) -->
 
 
 	<!-- Robot Misc Settings -->
     <defaultView>03</defaultView>       <!-- gui slider bar starting value -->
-	<k_motors>0.50</k_motors>           <!-- lower => smoother motor cotrol (averages new motor commands) -->
-    <motorsMaxSpeed>65</motorsMaxSpeed> <!-- max motor output [0-255] -->
+	<k_motors>0.725</k_motors>           <!-- lower => smoother motor cotrol (averages new motor commands) -->
+    <motorsMaxSpeed>75</motorsMaxSpeed> <!-- max motor output [0-255] -->
 
     <!-- Mapping Settings -->
-    <maxFeatures>64</maxFeatures>           <!-- max number for feature corners to find -->
+    <maxFeatures>76</maxFeatures>           <!-- max number for feature corners to find -->
     <numFramesBack>02</numFramesBack>       <!-- frames between matching points/features ( >=2 )-->
-    <maxFeatureShift>28</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
-    <moveTo127>00</moveTo127>                <!-- slowly forget worldmap history -->
+    <maxFeatureShift>1000</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
+    <moveTo127>001</moveTo127>                <!-- slowly forget worldmap history -->
 
-    <!-- ON/OFF -->
-    <doMapping>01</doMapping>
-    <useMotors>00</useMotors>
-    <doVision>001</doVision>
+
 
 
     <!--

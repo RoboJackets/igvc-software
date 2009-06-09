@@ -13,65 +13,66 @@ using namespace std;
 
 //TODO: make this use a namespace
 //TODO: make this sample regularly
-class MotorEncoders {
-	public:
-		//TODO: move these to .cc file
-		//TODO: change these to char arrays
+class MotorEncoders
+{
+public:
+	//TODO: move these to .cc file
+	//TODO: change these to char arrays
 
-		//typedef struct { double heading; double linVel; double rotVel } state_t;
-		//typedef struct { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } reply_t;
-		//typedef reply_t EncoderPacket;
-		//typedef struct __attribute__((__packed__)) { short command; short len; byte * arg; } command_t;
+	//typedef struct { double heading; double linVel; double rotVel } state_t;
+	//typedef struct { long timestamp; long packetnum; short dl; short dr; unsigned short dt; } reply_t;
+	//typedef reply_t EncoderPacket;
+	//typedef struct __attribute__((__packed__)) { short command; short len; byte * arg; } command_t;
 
-		/* Constructor */
-		MotorEncoders(void);
+	/* Constructor */
+	MotorEncoders(void);
 
-		/* Gets the current global heading in radians */
-		double getHeading(void);
+	/* Gets the current global heading in radians */
+	double getHeading(void);
 
-		/* Get linear velocity in m per s */	
-		double getLinVel(void);
+	/* Get linear velocity in m per s */
+	double getLinVel(void);
 
-		/* Get rotational velocity in radians per s */
-		double getRotVel(void);
+	/* Get rotational velocity in radians per s */
+	double getRotVel(void);
 
-		/* Set global heading */
-		void setHeading(double heading);
+	/* Set global heading */
+	void setHeading(double heading);
 
-		/* set to Push or Pull mode*/
-		bool setSendMode(int mode);
+	/* set to Push or Pull mode*/
+	bool setSendMode(int mode);
 
-		/* set to Push or Pull mode, set interogation rate (delay between data in ms)*/
-		bool setSendMode(int mode, int int_rts);
+	/* set to Push or Pull mode, set interogation rate (delay between data in ms)*/
+	bool setSendMode(int mode, int int_rts);
 
-		bool setArduinoClock();
+	bool setArduinoClock();
 
-		bool setLogFile(string str);
+	bool setLogFile(string str);
 
-		//bool setLogging(bool status);
+	//bool setLogging(bool status);
 
-		bool getInfo(encoder_reply_t& out_data);
+	bool getInfo(encoder_reply_t& out_data);
 
-		bool getInfo_class(byte*& out_data_rx); //TODO: get rid of this
+	bool getInfo_class(byte*& out_data_rx); //TODO: get rid of this
 
 
-		//public for debug only! move to private later
-		ArduinoInterface arduinoInterface;
+	//public for debug only! move to private later
+	ArduinoInterface arduinoInterface;
 
-	private:
-		int comm_mode;
-		int func;
-		double heading;
-		string logfile;
-		//bool logging_on;
-		bool setFunc(int ret);
+private:
+	int comm_mode;
+	int func;
+	double heading;
+	string logfile;
+	//bool logging_on;
+	bool setFunc(int ret);
 
-		
 
-		//unsigned int rx_packetnum;
-		//unsigned int tx_packetnum;
 
-		//EncoderPacket getDeltas(void);
+	//unsigned int rx_packetnum;
+	//unsigned int tx_packetnum;
+
+	//EncoderPacket getDeltas(void);
 
 };
 

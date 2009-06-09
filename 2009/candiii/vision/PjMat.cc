@@ -7,7 +7,7 @@
 // (how much up from 0 we are, in radians)
 // 1.25 default from 2007
 // update: current measured guppy angle is ? for 2009
-#define OFFANGLE  01.05  // 1.1~=63deg
+#define OFFANGLE  01.19  // 1.1~=63deg
 // need to measure stuff below for guppy!
 //  (remember to adjust "nav_path__view_distance_multiplier" when changing this!)
 /* *************************** */
@@ -22,7 +22,7 @@
 #define min(a,b) ((a<b)?a:b)
 
 //inputs - the guppy camera uses 640x480 resolution
-#define HFOV (0.85)           // half angle value in radians | (0.85~=48.7deg)-new (0.7854~=45deg)-old
+#define HFOV (0.601) //(0.85)           // half angle value in radians | (0.85~=48.7deg)-new (0.7854~=45deg)-old (higher push far things wider apart)
 #define VFOV (HFOV*0.75)		// aspect ratio == 0.75 == 480/640
 #define u (HFOV/2)
 #define v (VFOV/2)

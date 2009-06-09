@@ -8,7 +8,8 @@
 
 typedef unsigned char byte;
 
-MotorEncoders::MotorEncoders(void) {
+MotorEncoders::MotorEncoders(void)
+{
 
 	//unsigned int rx_packetnum = 1;
 	//unsigned int tx_packetnum = 1;
@@ -16,9 +17,10 @@ MotorEncoders::MotorEncoders(void) {
 }
 
 //true on error
-bool MotorEncoders::getInfo(encoder_reply_t& out_data) {
+bool MotorEncoders::getInfo(encoder_reply_t& out_data)
+{
 	DataPacket status;
-	
+
 	//arduinoInterface.getStatus(status);
 
 	bool ret = arduinoInterface.sendCommand(ARDUINO_GETSTATUS_CMD, NULL, 0);
@@ -27,7 +29,7 @@ bool MotorEncoders::getInfo(encoder_reply_t& out_data) {
 	byte* out_data_rx = NULL;
 
 
-	if(!arduinoInterface.recvCommand(cmdout, out_data_rx))
+	if (!arduinoInterface.recvCommand(cmdout, out_data_rx))
 	{
 		memcpy(&out_data, out_data_rx, sizeof(encoder_reply_t));
 		delete[] out_data_rx;
@@ -40,7 +42,8 @@ bool MotorEncoders::getInfo(encoder_reply_t& out_data) {
 	return(false);
 }
 
-bool MotorEncoders::getInfo_class(byte*& out_data_rx) {
+bool MotorEncoders::getInfo_class(byte*& out_data_rx)
+{
 	//EncoderData status;
 	//status->data = new byte[sizeof(DataPacket::encoder_reply_t)];
 	//bool ret = arduinoInterface.getStatus(*out_status);
@@ -81,16 +84,19 @@ EncoderPacket MotorEncoders::getDeltas(){
 }
 */
 
-double MotorEncoders::getHeading(void) {
+double MotorEncoders::getHeading(void)
+{
 	//EncoderPacket data = MotorEncoders::getDeltas();
 	encoder_reply_t data;
 	MotorEncoders::getInfo(data);
 	MotorEncoders::heading += ( ((double)(data.dr - data.dl)) * (double)RAD_PER_ENCODER_TICK * (double)WHEEL_RADIUS / (double)WHEEL_BASE );
-	while (MotorEncoders::heading >= (2*M_PI)) { // this could be done more effiecently
+	while (MotorEncoders::heading >= (2*M_PI))   // this could be done more effiecently
+	{
 		MotorEncoders::heading -= (2*M_PI);
 	}
 
-	while (heading < 0) {
+	while (heading < 0)
+	{
 		MotorEncoders::heading += (2*M_PI);
 	}
 
@@ -98,56 +104,62 @@ double MotorEncoders::getHeading(void) {
 	return(MotorEncoders::heading);
 }
 
-double MotorEncoders::getRotVel(void){
+double MotorEncoders::getRotVel(void)
+{
 	//EncoderPacket data = MotorEncoders::getDeltas();
 	encoder_reply_t data;
 	MotorEncoders::getInfo(data);
-/*
-	if(data.packetnum != rx_packetnum){
-		int trynum = 0;
-		do{		
-			resendPacket(rx_packetnum, &data, sizeof(data));
-			if(data.packetnum == rx_packetnum){
-				rx_packetnum++;
-				break;
-			}
-			trynum++;
-		}while((data.packetnum != rx_packetnum) && (trynum < 5))
-		return(NaN);
-	}
-	else{
-		rx_packetnum++;
-	}
-*/
+	/*
+		if(data.packetnum != rx_packetnum){
+			int trynum = 0;
+			do{
+				resendPacket(rx_packetnum, &data, sizeof(data));
+				if(data.packetnum == rx_packetnum){
+					rx_packetnum++;
+					break;
+				}
+				trynum++;
+			}while((data.packetnum != rx_packetnum) && (trynum < 5))
+			return(NaN);
+		}
+		else{
+			rx_packetnum++;
+		}
+	*/
 	double dt = data.dt / COUNTER_RATE;
 
 	double wr = data.dr / dt;
 	double wl = data.dl / dt;
-	
+
 	double w = (wr - wl)*WHEEL_RADIUS/WHEEL_BASE;
 
 	return(w);
 }
 
-void MotorEncoders::setHeading(double heading) {
+void MotorEncoders::setHeading(double heading)
+{
 	MotorEncoders::heading = heading;
 //	setVar(HEADING, &heading, sizeof(double));
 }
 
-bool MotorEncoders::setFunc(int mode){
+bool MotorEncoders::setFunc(int mode)
+{
 	return( arduinoInterface.setVar(MC_RET_T, &mode, sizeof(int)) );
 }
 
-bool MotorEncoders::setSendMode(int mode){
+bool MotorEncoders::setSendMode(int mode)
+{
 	return( arduinoInterface.setVar(MC_PUSHPULL, &mode, sizeof(int)) );
 }
 
-bool MotorEncoders::setLogFile(string str){
+bool MotorEncoders::setLogFile(string str)
+{
 	logfile = str;
 }
 
-bool MotorEncoders::setArduinoClock(){
-	//int time = 
+bool MotorEncoders::setArduinoClock()
+{
+	//int time =
 	struct timeval time;
 	struct timezone tz;
 	gettimeofday(&time, &tz);
@@ -160,7 +172,8 @@ bool MotorEncoders::setArduinoClock(){
 
 	return( arduinoInterface.setVar(MC_SETCLK, &millis, 4 ) );
 }
-bool MotorEncoders::setSendMode(int mode, int int_rt){
+bool MotorEncoders::setSendMode(int mode, int int_rt)
+{
 	bool a = arduinoInterface.setVar(MC_PUSHPULL, &mode, sizeof(int));
 	bool b = arduinoInterface.setVar(MC_INTEROG_DL, &int_rt, sizeof(int));
 

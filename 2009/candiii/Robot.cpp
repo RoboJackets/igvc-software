@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "Robot.h"
 #include "vision.h"
 #include "main.h"
@@ -11,6 +13,8 @@
 
 #define PRINTFRAMERATE 0
 
+
+#define STOPANDTHINK
 
 /*********** GLUT callbacks and functions ***********************/
 pthread_t Robot::robotThread; // for pthread_create
@@ -47,7 +51,8 @@ void keyboardFunc(unsigned char key, int x, int y)   // handles keyboard button 
 		glRobot->destroy(); // kill the robot;
 		break;
 	case 's':
-		saveRawVideo = 1-saveRawVideo; // save video until s again
+		//saveRawVideo = 1-saveRawVideo; // save video until s again
+		saveRawVideo = 1; // save untill  program exit
 		printf("video file \n");
 		break;
 	case 'p':
@@ -120,6 +125,9 @@ void Robot::releaseAllImages()
 	if ( visCvGlutMask !=NULL) cvReleaseImage(&visCvGlutMask );
 	if ( visCvRawTransformSmall !=NULL) cvReleaseImage(&visCvRawTransformSmall );
 
+	if ( visCvRamp !=NULL) cvReleaseImage(&visCvRamp );
+	if ( visCvRampLines !=NULL) cvReleaseImage(&visCvRampLines );
+
 }
 
 int Robot::init()
@@ -167,7 +175,7 @@ int Robot::init()
 	}
 
 	/* setup image selection bar */
-	int numberOfViews = 10; // important!!!
+	int numberOfViews = 15; // important!!!
 	cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
 
 	/* configure opencv display window */
@@ -402,34 +410,62 @@ void Robot::processFunc()
 		}
 	}
 
+#ifdef STOPANDTHINK
 	/* periodically stop and think */
-//	static int hack = 0;
-//	int hackstop = 175;
-//	if (hack > hackstop )
+	static int hack = 0;
+	int hackstop = 76; //80;
+
+	if ( hack > hackstop )
+	{
+		heading_main.x = 0;
+		heading_main.y = 0;
+		//hack = 0;
+		printf("\n\n\n\tSTOP HACK\t\n\n\n");
+		//motors.set_motors(-20, -20);
+		motors.set_motors(hack/8, hack/8);
+		if (hack > hackstop+14 )
+		{
+			hack = 0;
+			printf("\n\n\n\tRESUME!!!!!!\t\n\n\n");
+		}
+		++hack;
+		if (!ON_RAMP)
+		{
+			return;// causes robot to go backwards, otherwise it just stops on ramp
+		}
+	}
+	++hack;
+
+//	if(DO_STOPANDTHINK)
 //	{
 //		heading_main.x = 0;
 //		heading_main.y = 0;
-//		//hack = 0;
-//		printf("\n\n\n\tHACK\t\n\n\n");
-//	}
-//	if (hack > hackstop+10 )
-//	{
-//		hack = 0;
-//	}
-//	++hack;
+//		DO_STOPANDTHINK = 0;
+//		printf("\n\n\n\tSTOP HACK\t\n\n\n");
+//		motors.set_motors(0, 0);
+//		printf("\n\n\n\tRESUME!!!!!!\t\n\n\n");
+//    }
+#endif
 
 
-	/* Save raw image last */
-	//if (saveRawVideo)
-	//{
-	//	cvWriteFrame(cvVideoWriter,visCvRaw);
-	//}
+
+	/*Save raw image last*/
+	static int imgnum = 0;
+	if (saveRawVideo && (hack%2==0) )
+	{
+
+		std::stringstream fname;
+		fname << "./images/im_" << imgnum << ".jpg";
+
+		cvSaveImage(fname.str().c_str(),visCvRaw);
+		++imgnum;
+	}
 
 
 	/* Drive Motors */
 	if (useMotors)
 	{
-		printf("Heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
+		//printf("Heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
 		motors.set_heading(heading_main.y, heading_main.x);
 	}
 

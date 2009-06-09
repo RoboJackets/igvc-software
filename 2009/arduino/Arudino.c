@@ -5,7 +5,7 @@
 //	- comment everything
 
 /*
- * This is a template for running arduino code that can be used with the ArudinoInterface class. 
+ * This is a template for running arduino code that can be used with the ArudinoInterface class.
  */
 #include "Arduino.h"
 
@@ -16,64 +16,82 @@
 //// this defines everything that will be sent to the computer
 //TODO: make this work for push/pull
 //TODO: make this a typedef (must make prototype)
-struct data{
+struct data
+{
 };
 
 
-void readSerial(void) {
-	if (Serial.available() > 0) {
+void readSerial(void)
+{
+	if (Serial.available() > 0)
+	{
 		int incomingByte = Serial.read();
-		if (incomingByte == 'r') {
+		if (incomingByte == 'r')
+		{
 			sendStatus();
-		} else if (incomingByte == 'w') {
-			while (Serial.available()<2){}  // TODO: add timeout
+		}
+		else if (incomingByte == 'w')
+		{
+			while (Serial.available()<2) {} // TODO: add timeout
 			int variableNumber = Serial.read();
 			int variableValue = Serial.read();
 			setVariable(variableNumber, variableValue);
-		} else if (incomingByte == 'i') {
+		}
+		else if (incomingByte == 'i')
+		{
 			Serial.print("e");
-		} else {
+		}
+		else
+		{
 			//error
 		}
 	}
 }
 
 //TODO: make this use an array
-void setVariable(int num, int val) {
-	switch (num) {
-		case 0:
-			heading=val;
-			break;
-		default:
-			//error
-			break;
+void setVariable(int num, int val)
+{
+	switch (num)
+	{
+	case 0:
+		heading=val;
+		break;
+	default:
+		//error
+		break;
 	}
 	Serial.println(num);  //TODO: check for errors
 }
 
-void sendStatus() {
+void sendStatus()
+{
 	//serialPrintBytes(leftMotorTick, sizeof(int));  // only 9 bits are used
 	//serialPrintBytes(rightMotorTick, sizeof(int));
 	serialPrintBytes(&heading, sizeof(double));
 }
 
-void serialPrintBytes(void *data, int numBytes) {
-	for (int i = 0; i < numBytes; i++) {
+void serialPrintBytes(void *data, int numBytes)
+{
+	for (int i = 0; i < numBytes; i++)
+	{
 		Serial.print(((unsigned char *)data)[i], BYTE);
 	}
 }
 
 // Fixed point only. Should make scientific notation option.
-void serialPrintDouble(double data, int precision) {
+void serialPrintDouble(double data, int precision)
+{
 	Serial.print((int)data);
 	Serial.print(".");
-	for(int i = 1; i < (precision+1); i++) {
+	for (int i = 1; i < (precision+1); i++)
+	{
 		data = (data - (double)((int)data)) * 10;
 		Serial.print((int)data);
 	}
 }
 
-unsigned int getTime(){
+unsigned int getTime()
+{
 	unsigned int time;
 	//TCNT1 is a 16 bit timer/counter ~ pg 121
 	time = TCNT1L;//how often does this tick? tests say clkio = F_CPU.
@@ -81,7 +99,8 @@ unsigned int getTime(){
 	return(time);
 }
 
-void resetTime(){
+void resetTime()
+{
 	TCNT1H = 0;
 	TCNT1L = 0;
 }

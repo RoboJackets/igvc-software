@@ -30,19 +30,19 @@
 
 typedef struct __dc1394_camera_msw
 {
-    dc1394camera_t camera;
-    uint32_t node;
-    uint32_t port;
-    SELF_ID selfid;
-    HANDLE bw_handle;
-    msw1394_ISO ISO;
-    dc1394video_frame_t *frames;
+	dc1394camera_t camera;
+	uint32_t node;
+	uint32_t port;
+	SELF_ID selfid;
+	HANDLE bw_handle;
+	msw1394_ISO ISO;
+	dc1394video_frame_t *frames;
 
-    uint32_t capture_is_set;
-    uint32_t allocated_channel;
-    uint32_t allocated_bandwidth;
-    uint32_t iso_auto_started;
-    uint32_t iso_channel;
+	uint32_t capture_is_set;
+	uint32_t allocated_channel;
+	uint32_t allocated_bandwidth;
+	uint32_t iso_auto_started;
+	uint32_t iso_channel;
 
 } dc1394camera_msw_t;
 
