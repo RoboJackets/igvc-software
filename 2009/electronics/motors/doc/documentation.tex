@@ -15,21 +15,16 @@
 
 \subsection{TODO}
 \begin{enumerate}
- \item rename disable/enable
- \item bypass caps (10u, 100u)
- \item ground loops?
+ \item think about changing arduino header spacing
+ \item add keepout for opto
  \item check use MISO for SS
- \item check parts
  \item calculate component values for isolators, filters, and decoupling caps
- \item final check - trace widths, emf compatablity, ground plane penetration, etc
- \item cleanup - silkscreen
- \item finish documentation - add image of schematic and layout - legal check
- \item look for pcb company
- \item order samples => adjust Dikikey order
- \item get someone else to check
+ \item finish documentation
 \end{enumerate}
 
 \subsection{Board Description}
+The Open Source Motor Controller (OSMC) is a H-bridge.  It needs control circuitry.  Noise from motors should be isolated.
+
 
 \subsection{Pinout}
 
@@ -50,7 +45,6 @@ This design assumes that the motors are being driven from the same source.
 The digital isolations circuits (speed, direction, and enable) are phototransisters in a common collector (buffer) configuration.  The pull-down resistors aren't strictly necessary since the pins are pulled low by OSMC, but they are kept so that the pins can be used for other boards that don't do this.
 
 
-No header for a joystick was added because there will always be a computer present.
 
 \subsection{Layout}
 
@@ -58,16 +52,14 @@ ground planes
 
 bypass cap locations
 
+Things not on grid:  J3 (arduino header), sideways caps, parts of the ground planes, silkscreen
+
 \subsection{Parts list}
 \subsubsection{Optoisolators}
 \begin{description}
  \item[MOCD213-M] x 3
 
 2 channel optocoupler with transistor output.  Any kind of optocoupler can be used for the digital signals.  The part I picked was the cheapest I could find at the time on Digikey.
-
- \item[HCNR200/1] x 1
-
-Analog optocoupler for measuring battery voltages.  It would be nicer if this was in a smaller package.
 
 \end{description}
 
@@ -93,11 +85,13 @@ for current sensors
 
 \subsection{Future}
 \begin{itemize}
- \item bias battery voltage measurement
+ \item battery voltage measurement
+ \item motor voltage measurement (might be included in a different bridge driver)
  \item joystick?
  \item DC voltage control: using PWM to control the OSMC swtiching is not as efficient as using direct DC voltages.  This could be done by adding a lowpass filter to the PWM output or by using a DAC.
  \item Temperature sensing
  \item Regenerative Motor Braking (part of the OSMC?)
+ \item move optoisolation and microcontroller to H-bridge.  Could still be as flexible as OSMC by allowing arbitrary communication schemes.  Would have to be careful to minimize noise in the microcontroller side so measurements would be accurate.
 \end{itemize}
 
 \end{document}
