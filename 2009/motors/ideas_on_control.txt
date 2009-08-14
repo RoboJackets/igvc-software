@@ -1,7 +1,0 @@
-
-online characterization of transfer function
-- combine with other filtering
-- could be nonlinear(?)
-- identify driving surface
-
-motors: 0% Forward != 0% Reverse (?)
