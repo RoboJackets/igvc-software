@@ -1,4 +1,4 @@
-include_directories(${Candi_SOURCE_DIR}/arduino)
+include_directories(${IGVC_SOURCE_DIR}/arduino)
 
 link_libraries(ArduinoInterface DataPacket)
 
