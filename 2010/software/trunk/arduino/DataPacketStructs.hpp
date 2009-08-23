@@ -1,6 +1,8 @@
 #ifndef DataPacketStructs_H_
 #define DataPacketStructs_H_
 
+#include "standard_types.hpp"
+
 //length of header
 #define PACKET_HEADER_SIZE 14
 
@@ -9,9 +11,9 @@ typedef unsigned char byte;
 //Packet Header
 typedef struct __attribute__((__packed__))
 {
-	long timestamp_sec;
-	long timestamp_usec;
-	unsigned long packetnum;
+	int32 timestamp_sec;
+	int32 timestamp_usec;
+	uint32 packetnum;
 	byte cmd;
 	byte size;
 } header_t; //orig arduino - should be same as laptop
