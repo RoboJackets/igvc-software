@@ -49,7 +49,7 @@ bool ArduinoInterface::initLink(byte arduinoID)
 
 		//add a delay -- it seems somthing gets lost if we don't wait
 		//TODO: figure out what the problem is
-		usleep(2e6);
+		usleep(3 * 1e6);
 
 		if (arduinoFD == -1)
 		{
@@ -61,6 +61,7 @@ bool ArduinoInterface::initLink(byte arduinoID)
 			/* Check which arduino is connected to the port */
 			//byte reply;
 			if (sendCommand(ARDUINO_ID_CMD, NULL, 0))
+			//if (sendCommand(ARDUINO_GET_ID, NULL, 0))
 			{
 				std::cout << "could not communicate with arduino (outbound) on link " << serialAddress << std::endl;
 				exit(-1);//handle this!
@@ -93,7 +94,7 @@ bool ArduinoInterface::initLink(byte arduinoID)
 			if (readid == arduinoID)   //might want to use more than one byte for identifcation
 			{
 				printf("correct module.\n");
-				setArduinoTime();
+				//setArduinoTime();
 				break;
 			}
 			else
