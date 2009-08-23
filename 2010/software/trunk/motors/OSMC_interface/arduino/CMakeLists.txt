@@ -1,7 +1,7 @@
 include(${Candi_SOURCE_DIR}/arduino_diecimila_crosscompile.cmake)
 
 include_directories(${Candi_SOURCE_DIR}/arduino)
-include_directories(${Candi_SOURCE_DIR}/libarduino)
+include_directories(${Candi_SOURCE_DIR}/libarduinocore)
 
 link_libraries(arduinocore)
 
