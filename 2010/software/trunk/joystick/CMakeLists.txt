@@ -1,5 +1,5 @@
 
-include_directories(${Candi_SOURCE_DIR}/old_motors)
+include_directories(${Candi_SOURCE_DIR}/motors/old)
 
 link_libraries (
 	SDL
