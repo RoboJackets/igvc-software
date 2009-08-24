@@ -12,4 +12,5 @@ serial_comm_helper.cc
 packet_handle.cc
 SPI.cc
 wheel_encoders.cc
+current_sensors.cc
 )
