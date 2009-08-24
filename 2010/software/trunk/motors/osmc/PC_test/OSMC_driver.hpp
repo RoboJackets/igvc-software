@@ -5,11 +5,11 @@ class OSMC_driver
 {
 
 	public:
-
-	ArduinoInterface ai;
-
 	OSMC_driver();
 
-	private:
+	reply_dtick_t getEncoderData();
+	current_reply_t getCurrentData();
 
+	private:
+	ArduinoInterface ai;
 };

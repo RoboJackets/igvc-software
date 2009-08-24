@@ -5,6 +5,9 @@
 #include "DataPacketStructs.hpp"
 #include "ArduinoCmds.hpp"
 #include "packet_handle.hpp"
+#include "wheel_encoders.hpp"
+#include "current_sensors.hpp"
+
 extern "C" void __cxa_pure_virtual()
 {
 	for(;;)
@@ -84,10 +87,40 @@ int main()
 			}
 			case MC_GET_ENCODER_TICK:
 			{
-				Serial.println("Get Tick");
+				header_t headerOut;
+				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
+				headerOut.packetnum = tx_num;
+				headerOut.cmd = MC_GET_ENCODER_TICK;
+
+				reply_dtick_t msg = getEncoderStatus();
+				headerOut.size = sizeof(reply_dtick_t);
+		
+				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				serialPrintBytes(&msg, headerOut.size);
+				tx_num++;
 				break;
 			}
-			case MC_GET_CURRENT_VAL:
+			case MC_GET_RL_CURR_VAL:
+			{
+				header_t headerOut;
+				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
+				headerOut.packetnum = tx_num;
+				headerOut.cmd = MC_GET_RL_CURR_VAL;
+
+				current_reply_t msg = getBothCurrentADCVal();
+				headerOut.size = sizeof(current_reply_t);
+
+				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				serialPrintBytes(&msg, headerOut.size);
+				tx_num++;
+				break;
+			}
+			case MC_GET_R_CURR_VAL:
+			{
+				Serial.println("Get Current");
+				break;
+			}
+			case MC_GET_L_CURR_VAL:
 			{
 				Serial.println("Get Current");
 				break;

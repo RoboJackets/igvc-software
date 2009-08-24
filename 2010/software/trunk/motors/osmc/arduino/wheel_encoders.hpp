@@ -3,6 +3,7 @@
 
 #include "WProgram.h"
 #include "SPI.hpp"
+#include "DataPacketStructs.hpp"
 
 /* MOTOR ENCODER DEFINITIONS */
 #define COUNTER_SCALER			(64)
@@ -28,14 +29,15 @@
 #define BITBANG_SPI 1
 
 struct motorEncoderData{
-	int leftMotorTick;
-	int rightMotorTick;
-	unsigned int time; //this should be made an int, if possible
+	int16 leftMotorTick;
+	int16 rightMotorTick;
+	uint32 time; //this should be made an int, if possible
 };
 
 void calcDelta(struct motorEncoderData current, struct motorEncoderData previous, int *dl, int *dr, long *dt);
 void readMotorEncoders(struct motorEncoderData *data);
 int delta(int p2, int p1, int maxDiff, int maxVal, int dir);
 int convertMotorEncoderFormat(unsigned int data);
+reply_dtick_t getEncoderStatus();
 
 #endif
