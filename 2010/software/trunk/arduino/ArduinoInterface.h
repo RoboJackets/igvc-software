@@ -1,9 +1,12 @@
 #ifndef ARDUINO_INTERFACE_H
 #define ARDUINO_INTERFACE_H
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <termios.h>  /* POSIX terminal control definitions */
 #include <list>
+
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
 
 #include "DataPacket.hpp"
 
@@ -40,7 +43,7 @@ public:
 private:
 	/* Private serial interface */
 	int arduinoFD;
-	bool writeFully(int fd, void* buf, size_t numBytes);
+	bool writeFully(int fd, const void* buf, size_t numBytes);
 	bool readFully(int fd, void* buf, size_t numBytes);
 	int serialportInit(const char* serialport, speed_t baud);
 	bool serialFlush(int fd);
@@ -55,9 +58,15 @@ public:
 	struct timeval getTime();
 	bool setArduinoTime();
 
-	bool sendPacket(DataPacket pkout);
+	bool sendPacket(const DataPacket& pkout);
 	bool getPacket(DataPacket& out_pk_rx);
 	bool read_TimeOut(int fd, void * buf, size_t numBytes);
+
+	int serialportInit_BOOST(const char* serialport, int baud);
+	bool readFully_BOOST(void* buf, size_t numBytes);
+	bool writeFully_BOOST(const void* buf, size_t numBytes);
+	boost::asio::io_service my_io_service;
+	boost::asio::serial_port* asioserialport;
 };
 
 #endif /* ARDUINO_INTERFACE_H */

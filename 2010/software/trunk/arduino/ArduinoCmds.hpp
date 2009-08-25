@@ -9,7 +9,7 @@ enum mc_opttype_t { MC_PUSHPULL = 0, MC_RET_T, MC_INTEROG_DL, MC_SETCLK, MC_RESE
 enum mc_opt_t {MC_PUSH = 0, MC_PULL, MC_SEND_DTICK, MC_SEND_CURRENT};
 
 //enum for general errors
-enum error_t {DROPPED_PACKET, REQUESTED_PACKET_OUT_OF_RANGE};
+enum arduino_error_t {DROPPED_PACKET, REQUESTED_PACKET_OUT_OF_RANGE};
 
 //enum for sonar options
 enum sonar_opttype_t { SN_SET_RNG = 0, SN_SET_FREQ, SN_SET_GAIN, SN_SET_WARN,  };
@@ -26,9 +26,12 @@ const byte ARDUINO_SET_CLOCK		= 0x01;
 const byte ARDUINO_GET_ID		= 0x02;
 const byte ARDUINO_HALT_CATCH_FIRE	= 0x03;
 const byte MC_GET_ENCODER_TICK		= 0x04;
-const byte MC_GET_CURRENT_VAL		= 0x05;
-const byte MC_SET_R_SPEED		= 0x06;
-const byte MC_SET_L_SPEED		= 0x07;
+const byte MC_GET_RL_CURR_VAL		= 0x05;
+const byte MC_GET_R_CURR_VAL		= 0x06;
+const byte MC_GET_L_CURR_VAL		= 0x07;
+const byte MC_SET_R_SPEED		= 0x08;
+const byte MC_SET_L_SPEED		= 0x09;
+const byte MC_SET_RL_DUTY_CYCLE		= 0x0A;
 
 //IGVC2010 Board IDs
 const byte OSMC_IF_BOARD 	= 0x00;

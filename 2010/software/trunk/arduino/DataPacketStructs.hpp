@@ -23,37 +23,38 @@ typedef struct __attribute__((__packed__))
 //Error Frame
 typedef struct __attribute__((__packed__))
 {
-	int errnum;
+	int16 errnum;
 	byte * msg;
 } error_pk_t;
 
 //Encoder Data
 typedef struct __attribute__((__packed__))
 {
-	short dl;
-	short dr;
-	unsigned int dt;
+	int16 dl;
+	int16 dr;
+	uint16 dt;
 } encoder_reply_t;
 typedef struct __attribute__((__packed__))
 {
-	int dl;
-	int dr;
-	unsigned long dt;
+	int16 dl;//ticks
+	int16 dr;//ticks
+	uint32 dt;//millis
 } reply_dtick_t; // orig arduino
 
 //Current Data
 typedef struct __attribute__((__packed__))
 {
-	short il;
-	short ir;
+	int16 il;
+	int16 ir;
 } current_reply_t;
+/*
 typedef struct  __attribute__((__packed__))
 {
-	int currentl;
-	int currentr;
-	unsigned long dt;
+	int16 currentl;
+	int16 currentr;
+	uint32 dt;
 } reply_current_t; //orig arduino
-
+*/
 //Motor Speed Frame
 typedef struct __attribute__((__packed__))
 {
@@ -64,8 +65,8 @@ typedef struct __attribute__((__packed__))
 //Sonar Data Frame
 typedef struct __attribute__((__packed__))
 {
-	short id;
-	short range;
+	int16 id;
+	int16 range;
 } sonar_range_t; //range in milimeters
 
 #endif //DataPacketStructs_H_
