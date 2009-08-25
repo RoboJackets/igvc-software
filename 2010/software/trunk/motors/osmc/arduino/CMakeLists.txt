@@ -13,4 +13,5 @@ packet_handle.cc
 SPI.cc
 wheel_encoders.cc
 current_sensors.cc
+motorPWM.cc
 )
