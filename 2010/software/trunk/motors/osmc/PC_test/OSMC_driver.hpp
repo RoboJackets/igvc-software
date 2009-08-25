@@ -10,6 +10,8 @@ class OSMC_driver
 	reply_dtick_t getEncoderData();
 	current_reply_t getCurrentData();
 
+	void setmotorPWM(char rightDutyCycle, char leftDutyCycle);
+
 	private:
 	ArduinoInterface ai;
 };
