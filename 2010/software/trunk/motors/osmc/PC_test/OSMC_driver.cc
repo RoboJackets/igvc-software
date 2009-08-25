@@ -34,3 +34,17 @@ current_reply_t OSMC_driver::getCurrentData()
 	delete[] data;
 	return out;
 }
+
+void OSMC_driver::setmotorPWM(char rightDutyCycle, char leftDutyCycle)
+{
+	ai.sendCommand(MC_SET_RL_DUTY_CYCLE, NULL, 0);
+
+	byte cmdresp;
+	byte* data = NULL;
+	ai.recvCommand(cmdresp, data);
+
+	if(data != NULL)
+	{
+		delete[] data;
+	}
+}
