@@ -34,6 +34,8 @@ ArduinoInterface::ArduinoInterface()
 	//Init vars
 	tx_num = 1;
 	rx_num = 1;
+
+	asioserialport = new boost::asio::serial_port(my_io_service);
 }
 
 bool ArduinoInterface::initLink(byte arduinoID)
@@ -45,8 +47,8 @@ bool ArduinoInterface::initLink(byte arduinoID)
 		printf("Trying port #%d.\n", (int) i);
 
 		serialAddress[11]=i+'0';
-		arduinoFD = serialportInit(serialAddress, BAUD);
-
+		//arduinoFD = serialportInit(serialAddress, BAUD);
+		arduinoFD = serialportInit_BOOST(serialAddress, 9600);
 		//add a delay -- it seems somthing gets lost if we don't wait
 		//TODO: figure out what the problem is
 		usleep(3 * 1e6);
@@ -86,7 +88,8 @@ bool ArduinoInterface::initLink(byte arduinoID)
 				{
 					delete[] dataout;
 				}
-				exit(-1);//handle this!
+				//exit(-1);//handle this!
+				continue;
 			}
 			byte readid = *(dataout);
 			delete[] dataout;
@@ -125,6 +128,8 @@ ArduinoInterface::~ArduinoInterface(void)
 		return;
 	}
 	close(arduinoFD);
+
+	delete asioserialport;
 }
 
 /**
@@ -183,7 +188,7 @@ bool ArduinoInterface::setVar(int var, void *value, int size)
 }
 
 // ### PRIVATE FUNCTIONS: SERIAL API ###
-
+#if 0
 /**
  * Write exactly <tt>numBytes</tt> bytes to file <tt>fd</tt>
  * from buffer <tt>buf</tt>.
@@ -194,6 +199,7 @@ bool ArduinoInterface::setVar(int var, void *value, int size)
  * @return			<tt>true</tt> if an error occurs;
  * 					<tt>false</tt> if successful.
  */
+
 bool ArduinoInterface::writeFully(int fd, void* buf, size_t numBytes)
 {
 	char* src = (char*) buf;
@@ -246,6 +252,39 @@ bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes)
 	}
 	return false;
 }
+#endif
+
+/**
+ * Write exactly <tt>numBytes</tt> bytes to file <tt>fd</tt>
+ * from buffer <tt>buf</tt>.
+ *
+ * @param fd		the file to write to.
+ * @param buf		the buffer to read from.
+ * @param numBytes	the number of bytes to write.
+ * @return			<tt>true</tt> if an error occurs;
+ * 					<tt>false</tt> if successful.
+ */
+
+bool ArduinoInterface::writeFully(int fd, const void* buf, size_t numBytes)
+{
+	writeFully_BOOST(buf, numBytes);
+}
+
+/**
+ * Read exactly <tt>numBytes</tt> bytes from file <tt>fd</tt>
+ * into buffer <tt>buf</tt>.
+ *
+ * @param fd		the file to read from.
+ * @param buf		the buffer to read into.
+ * @param numBytes	the number of bytes to read.
+ * @return			<tt>true</tt> if an error occurs;
+ * 					<tt>false</tt> if successful.
+ */
+bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes)
+{
+	readFully_BOOST(buf, numBytes);
+}
+
 
 /**
  * Open a serial port at device <tt>serialport</tt> and initialize
@@ -308,6 +347,34 @@ int ArduinoInterface::serialportInit(const char* serialport, speed_t baud)
 	}
 
 	return fd;
+}
+
+int ArduinoInterface::serialportInit_BOOST(const char* serialport, int baud)
+{
+	if(asioserialport->is_open())
+	{
+		asioserialport->close();
+	}
+	asioserialport->open(serialport);
+
+	asioserialport->set_option(boost::asio::serial_port_base::baud_rate(baud));
+	asioserialport->set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
+	asioserialport->set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
+	asioserialport->set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
+
+	return asioserialport->native();
+}
+
+bool ArduinoInterface::readFully_BOOST(void* buf, size_t numBytes)
+{
+	boost::asio::read(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_at_least(numBytes));
+	return true;
+}
+
+bool ArduinoInterface::writeFully_BOOST(const void* buf, size_t numBytes)
+{
+	boost::asio::write(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_at_least(numBytes));
+	return true;
 }
 
 /**
@@ -478,7 +545,7 @@ bool ArduinoInterface::setArduinoTime()
 //new cmd struct notes
 //arduino send pk
 //true on error
-bool ArduinoInterface::sendPacket(DataPacket pkout)
+bool ArduinoInterface::sendPacket(const DataPacket& pkout)
 {
 
 	savePacket(pkout);
