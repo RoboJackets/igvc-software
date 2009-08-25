@@ -1,7 +1,7 @@
 #include "WProgram.h"
 #include "serial_comm_helper.hpp"
 
-bool serialReadBytesTimeout(int len, byte * msg)
+bool serialReadBytesTimeout(int len, byte* msg)
 {
 	//Maybe return imediatly if there is no data availible
 	//Only wait if there is a partial connection

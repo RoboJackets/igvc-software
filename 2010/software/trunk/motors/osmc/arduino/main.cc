@@ -7,6 +7,7 @@
 #include "packet_handle.hpp"
 #include "wheel_encoders.hpp"
 #include "current_sensors.hpp"
+#include "motorPWM.hpp"
 
 extern "C" void __cxa_pure_virtual()
 {
@@ -39,6 +40,14 @@ int main()
 	unsigned long tx_num = 0;
 	unsigned long rx_num = 0;
 
+	//start setting pin modes
+	pinMode(leftCurrentADCPin, INPUT);
+	pinMode(rightCurrentADCPin, INPUT);
+	pinMode(leftSpeedPin, OUTPUT);
+	pinMode(rightSpeedPin, OUTPUT);
+	//end setting pin modes
+
+
 	for(;;)
 	{
 
@@ -47,10 +56,17 @@ int main()
 			//spin
 		}
 
-		volatile header_t header;
+		header_t header;
+		byte* indata = NULL;
 		if(!serialReadBytesTimeout(PACKET_HEADER_SIZE, (byte*)&header))
 		{
 			continue;
+		}
+
+		if(header.size > 0)
+		{
+			indata = (byte*)malloc(header.size);
+			serialReadBytesTimeout(header.size, indata);
 		}
 
 		//Serial.println("Header cmd: ");
@@ -135,11 +151,37 @@ int main()
 				Serial.println("Set L Speed");
 				break;
 			}
+ 			case MC_SET_RL_DUTY_CYCLE:
+			{
+				//Serial.println("Set R Speed");
+
+				speed_set_t dcp;
+
+				memcpy(&dcp, indata, sizeof(speed_set_t));
+
+				setRightMotorDutyCycle(dcp.sr);
+				setLeftMotorDutyCycle(dcp.sl);
+
+				header_t headerOut;
+				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
+				headerOut.packetnum = tx_num;
+				headerOut.cmd = MC_SET_RL_DUTY_CYCLE;
+				headerOut.size = 0;
+		
+				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				tx_num++;
+				break;
+			}
 			default:
 			{
 				HCF();
 				break;
 			}
+		}
+		if(header.size > 0)
+		{
+			free(indata);
+			indata = NULL;
 		}
 	}
 

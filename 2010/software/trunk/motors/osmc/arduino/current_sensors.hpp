@@ -3,8 +3,7 @@
 
 #include "WProgram.h"
 #include "DataPacketStructs.hpp"
-const int leftCurrentADCPin	= 3;
-const int rightCurrentADCPin	= 4;
+#include "pinDefs.hpp"
 
 current_reply_t getBothCurrentADCVal();
 int getLeftCurrentADCVal();
