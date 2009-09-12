@@ -20,4 +20,16 @@ const int leftDirectionPin = 5;
 const int leftSpeedPin = 6;
 const int leftDisablePin = 7;
 
+const int joystickXADC = 0;
+const int joystickYADC = 1;
+const int joystickEnable = 8;
+
+/*
+const int rightDirectionPin = 4;
+const int rightSpeedPin = 3;
+const int rightDisablePin = 2;
+const int leftDirectionPin = 7;
+const int leftSpeedPin = 6;
+const int leftDisablePin = 5;
+*/
 #endif

@@ -2,8 +2,9 @@ include(${IGVC_SOURCE_DIR}/arduino_diecimila_crosscompile.cmake)
 
 include_directories(${IGVC_SOURCE_DIR}/arduino)
 include_directories(${IGVC_SOURCE_DIR}/extern/libarduinocore)
+include_directories(${IGVC_SOURCE_DIR}/extern/libsoftwareserial)
 
-link_libraries(arduinocore)
+link_libraries(arduinocore softwareserial)
 
 add_executable(OSMC_interface
 
@@ -14,4 +15,6 @@ SPI.cc
 wheel_encoders.cc
 current_sensors.cc
 motorPWM.cc
+#profile.cc
+analogjoystick.cc
 )
