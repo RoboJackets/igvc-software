@@ -2,9 +2,13 @@
 #define MOTORPWM_HPP_
 #include "WProgram.h"
 #include "pinDefs.hpp"
+#include "ArduinoCmds.hpp"
+#include <math.h>
 
-void setLeftMotorDutyCycle(char ldc);
-void setRightMotorDutyCycle(char rdc);
+const int DEAD_ZONE = 100;
+
+void setLeftMotorDutyCycle(byte dir, byte ldc);
+void setRightMotorDutyCycle(byte dir, byte rdc);
 
 void setPWMFreq();
 

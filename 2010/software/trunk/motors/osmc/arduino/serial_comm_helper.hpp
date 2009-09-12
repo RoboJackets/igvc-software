@@ -3,8 +3,8 @@
 
 #define TIMEOUT_LENGTH_MILLIS 1000
 
-bool serialReadBytesTimeout(int len, byte * msg);
+bool serialReadBytesTimeout(byte len, byte * msg);
 
-void serialPrintBytes(void *data, int numBytes);
+void serialPrintBytes(void *data, size_t numBytes);
 
 #endif
