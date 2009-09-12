@@ -47,6 +47,13 @@ typedef struct __attribute__((__packed__))
 	int16 il;
 	int16 ir;
 } current_reply_t;
+//Joystick Data
+typedef struct __attribute__((__packed__))
+{
+	int16 joy_x;
+	int16 joy_y;
+} joystick_reply_t;
+
 /*
 typedef struct  __attribute__((__packed__))
 {
@@ -58,8 +65,10 @@ typedef struct  __attribute__((__packed__))
 //Motor Speed Frame
 typedef struct __attribute__((__packed__))
 {
-	char sl;
-	char sr;
+	byte leftDir;
+	byte sl;
+	byte rightDir;
+	byte sr;
 } speed_set_t;
 
 //Sonar Data Frame
