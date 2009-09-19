@@ -139,12 +139,12 @@ void joystickDrive::setMotor()
 	//turbo
 	if((joystickButtons & 32) == 32)
 	{
-		vel += 120;
+		vel += 200;
 	}
 	//turbo
 	if((joystickButtons & 128) == 128)
 	{
-		vel += 200;
+		vel += 250;
 	}
 
 	//force tight turn
