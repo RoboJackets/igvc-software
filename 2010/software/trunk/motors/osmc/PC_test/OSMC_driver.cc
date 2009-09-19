@@ -35,16 +35,47 @@ current_reply_t OSMC_driver::getCurrentData()
 	return out;
 }
 
-void OSMC_driver::setmotorPWM(char rightDutyCycle, char leftDutyCycle)
+bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
 {
-	ai.sendCommand(MC_SET_RL_DUTY_CYCLE, NULL, 0);
+	speed_set_t cmdpk;
+	cmdpk.sr = rightDutyCycle;
+	cmdpk.rightDir = rightDir;
+	cmdpk.sl = leftDutyCycle;
+	cmdpk.leftDir = leftDir;
+
+	if(ai.sendCommand(MC_SET_RL_DUTY_CYCLE, &cmdpk, sizeof(speed_set_t)))
+	{
+		return true;
+	}
+	//ai.sendCommand(MC_SET_RL_DUTY_CYCLE, NULL, 0);
 
 	byte cmdresp;
 	byte* data = NULL;
-	ai.recvCommand(cmdresp, data);
+
+	if(ai.recvCommand(cmdresp, data))
+	{
+		return true;
+	}
 
 	if(data != NULL)
 	{
 		delete[] data;
 	}
+	return false;
+}
+
+joystick_reply_t OSMC_driver::getJoystickData()
+{
+
+	ai.sendCommand(MC_GET_JOYSTICK, NULL, 0);
+
+	byte retcmd = 0;
+	byte* data = NULL;
+	ai.recvCommand(retcmd, data);
+
+	joystick_reply_t out;
+	
+	memcpy(&out, data, sizeof(current_reply_t));
+	delete[] data;
+	return out;
 }

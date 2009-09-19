@@ -1,3 +1,5 @@
+include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
+
 include_directories(${IGVC_SOURCE_DIR}/arduino)
 
 link_libraries(ArduinoInterface DataPacket boost_system-mt)
