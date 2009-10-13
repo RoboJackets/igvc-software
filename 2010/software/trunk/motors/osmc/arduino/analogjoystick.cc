@@ -5,6 +5,7 @@ void setupJoystick()
 	pinMode(joystickXADC, INPUT);
 	pinMode(joystickXADC, INPUT);
 	pinMode(joystickEnable, INPUT);
+	digitalWrite(joystickEnable, HIGH);
 }
 /*
 void disableJoystick()
@@ -38,11 +39,23 @@ void joystickSetMotors()
 	int xAxis = 0;
 	int yAxis = 0;
 
+	const int XMiddle = 1023 / 2;
+	const int YMiddle = 1023 / 2;
+
 	getJoystickReading(&xAxis, &yAxis);
 
+	xAxis -= XMiddle;
+	yAxis -= YMiddle;
+
 	/* Apply deadzones */
-	if (abs(xAxis) < DEAD_ZONE){ xAxis = 0; }
-	if (abs(yAxis) < DEAD_ZONE){ yAxis = 0; }
+	if (abs(xAxis) < DEAD_ZONE)
+	{ 
+		xAxis = 0;
+	}
+	if (abs(yAxis) < DEAD_ZONE)
+	{
+		yAxis = 0;
+	}
 
 	/* Calculate drive outputs -- magic*/
 	int leftVelocity = yAxis + 3 * sign(xAxis) * sqrt(abs(xAxis));
@@ -50,10 +63,10 @@ void joystickSetMotors()
 
 	/* Limit drive velcocities to vaild values and convert them to drive speeds and directions */
 
-	int leftSpeed = min(abs(leftVelocity), 255);
-	int leftDir = (leftVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
-	int rightSpeed = min(abs(rightVelocity), 255);
-	int rightDir = (rightVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
+	byte leftSpeed = min(abs(leftVelocity), 255);
+	byte leftDir = (leftVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
+	byte rightSpeed = min(abs(rightVelocity), 255);
+	byte rightDir = (rightVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
 
 	setLeftMotorDutyCycle(leftDir, leftSpeed);
 	setRightMotorDutyCycle(rightDir, rightSpeed);

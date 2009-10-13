@@ -2,29 +2,35 @@
 
 void setLeftMotorDutyCycle(byte dir, byte ldc)
 {
+
+	byte scaledldc = ldc * leftScale;
+
 	if(dir == MC_MOTOR_FORWARD)
 	{
 		digitalWrite(leftDirectionPin, HIGH);
-		analogWrite(leftSpeedPin, 255 - ldc);
+		analogWrite(leftSpeedPin, 255 - scaledldc);
 	}
 	else
 	{
 		digitalWrite(leftDirectionPin, LOW);
-		analogWrite(leftSpeedPin, ldc);
+		analogWrite(leftSpeedPin, scaledldc);
 	}
 }
 
 void setRightMotorDutyCycle(byte dir, byte rdc)
 {
+
+	byte scaledrdc = rdc * rightScale;
+
 	if(dir == MC_MOTOR_FORWARD)
 	{
 		digitalWrite(rightDirectionPin, HIGH);
-		analogWrite(rightSpeedPin, 255 - rdc);
+		analogWrite(rightSpeedPin, 255 - scaledrdc);
 	}
 	else
 	{
 		digitalWrite(rightDirectionPin, LOW);
-		analogWrite(rightSpeedPin, rdc);
+		analogWrite(rightSpeedPin, scaledrdc);
 
 	}
 }

@@ -6,6 +6,8 @@
 
 #include "motorPWM.hpp"
 
+const int DEAD_ZONE = 100;
+
 void setupJoystick();
 void getJoystickReading(int* X, int* Y);
 void joystickSetMotors();
