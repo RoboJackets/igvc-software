@@ -63,20 +63,31 @@ int main()
 	//arduinoProfile aP(13, 12);
 
 	//aP.print("startup\n\r");
-
+	unsigned long joystickpollt0 = millis();
 	for(;;)
 	{
-		unsigned long joystickpollt0 = millis();
-		while(Serial.available() < 1)
+		if(digitalRead(joystickEnable) == LOW)
 		{
-			//spin
-			if(digitalRead(joystickEnable) == HIGH)
+			//Serial.println("joy on");
+			if((millis() - joystickpollt0) > 10)
 			{
-				if((millis() - joystickpollt0) > 10)
-				{
-					joystickSetMotors();
-				}
+				//Serial.println("joy set");
+
+				int x,y;
+				getJoystickReading(&x, &y);
+
+				Serial.print("x: ");
+				Serial.print(x, DEC);
+				Serial.print("\ty: ");
+				Serial.println(y, DEC);
+				joystickSetMotors();
+				joystickpollt0 = millis();	
 			}
+		}
+		
+		if(!(Serial.available() > 1))
+		{
+			continue;
 		}
 
 		header_t header;
@@ -95,6 +106,7 @@ int main()
 			{
 				free(indata);
 				indata = NULL;
+				/*
 				for(;;)
 				{
 					Serial.print("header.size: ");
@@ -113,7 +125,8 @@ int main()
 					}
 					delay(1000);
 				}
-				HCF();
+				*/
+				//HCF();
 				continue;
 			}
 		}
@@ -219,7 +232,7 @@ int main()
 			case ARDUINO_HALT_CATCH_FIRE:
 			default:
 			{
-				HCF();
+				//HCF();
 				break;
 			}
 		}//end switch
