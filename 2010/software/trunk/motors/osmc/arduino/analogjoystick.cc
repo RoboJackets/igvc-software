@@ -44,8 +44,12 @@ void joystickSetMotors()
 
 	getJoystickReading(&xAxis, &yAxis);
 
+	//shift 0
 	xAxis -= XMiddle;
 	yAxis -= YMiddle;
+
+	//make x go the right dir
+	xAxis *= -1;
 
 	/* Apply deadzones */
 	if (abs(xAxis) < DEAD_ZONE)
