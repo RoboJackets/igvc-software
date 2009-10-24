@@ -1,4 +1,5 @@
 #include "WProgram.h"
+#include "HardwareSerial.h"
 
 #include "serial_comm_helper.hpp"
 
@@ -39,7 +40,7 @@ int main()
 
 	unsigned long tx_num = 0;
 	unsigned long rx_num = 0;
-
+	bool analogJoyOn = false;
 	//setup
 	//pinMode(leftCurrentADCPin, INPUT);
 	//pinMode(rightCurrentADCPin, INPUT);
@@ -68,6 +69,7 @@ int main()
 	{
 		if(digitalRead(joystickEnable) == LOW)
 		{
+			analogJoyOn = true;
 			//Serial.println("joy on");
 			if((millis() - joystickpollt0) > 10)
 			{
@@ -83,6 +85,10 @@ int main()
 				joystickSetMotors();
 				joystickpollt0 = millis();	
 			}
+		}
+		else
+		{
+			analogJoyOn = false;
 		}
 		
 		if(!(Serial.available() > 1))
@@ -200,8 +206,12 @@ int main()
 
 				memcpy(&dcp, indata, sizeof(speed_set_t));
 
-				setRightMotorDutyCycle(dcp.rightDir, dcp.sr);
-				setLeftMotorDutyCycle(dcp.leftDir, dcp.sl);
+				//if the analog joystick is enabled, accept the serial command and resp success, but do not take the input
+				if(!analogJoyOn)
+				{
+					setRightMotorDutyCycle(dcp.rightDir, dcp.sr);
+					setLeftMotorDutyCycle(dcp.leftDir, dcp.sl);
+				}
 
 				header_t headerOut;
 				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
@@ -236,6 +246,7 @@ int main()
 				break;
 			}
 		}//end switch
+
 		if(header.size > 0)
 		{
 			free(indata);
