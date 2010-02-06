@@ -7,8 +7,11 @@ include_directories(
 	/usr/include/qt4/QtXml
 )
 
-SET(CMAKE_C_FLAGS  " -g3 -O0 -Wall -W -pthread -DQT_THREAD_SUPPORT -fopenmp")
-SET(CMAKE_CXX_FLAGS " -g3 -O0 -Wall -W -pthread -DQT_THREAD_SUPPORT -fopenmp")
+#SET(CMAKE_C_FLAGS  " -g3 -O0 -Wall -W -pthread -DQT_THREAD_SUPPORT -fopenmp")
+#SET(CMAKE_CXX_FLAGS " -g3 -O0 -Wall -W -pthread -DQT_THREAD_SUPPORT -fopenmp")
+
+SET(CMAKE_C_FLAGS  " -g -O2 -Wall -W -pthread -DQT_THREAD_SUPPORT -fopenmp")
+SET(CMAKE_CXX_FLAGS " -g -O2 -Wall -W -pthread -DQT_THREAD_SUPPORT -fopenmp")
 
 add_library(vision
 	CVcam.cpp

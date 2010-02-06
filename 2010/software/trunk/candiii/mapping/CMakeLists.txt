@@ -1,8 +1,11 @@
 #SET(CMAKE_C_FLAGS "-g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT -fopenmp")
 #SET(CMAKE_CXX_FLAGS "-g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT -fopenmp")
 
-SET(CMAKE_C_FLAGS "-g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
-SET(CMAKE_CXX_FLAGS "-g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
+#SET(CMAKE_C_FLAGS "-g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
+#SET(CMAKE_CXX_FLAGS "-g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
+
+SET(CMAKE_C_FLAGS "-g -O2 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
+SET(CMAKE_CXX_FLAGS "-g -O2 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
 
 include_directories(
 	${IGVC_SOURCE_DIR}/candiii
