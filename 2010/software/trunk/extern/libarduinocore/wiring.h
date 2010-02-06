@@ -19,7 +19,7 @@
   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
 
-  $Id: wiring.h 590 2009-05-24 15:12:19Z dmellis $
+  $Id: wiring.h 602 2009-06-01 08:32:11Z dmellis $
 */
 
 #ifndef Wiring_h
@@ -86,8 +86,8 @@ extern "C"{
 #define clockCyclesToMicroseconds(a) ( (a) / clockCyclesPerMicrosecond() )
 #define microsecondsToClockCycles(a) ( (a) * clockCyclesPerMicrosecond() )
 
-#define lowByte(w) ((w) & 0xff)
-#define highByte(w) ((w) >> 8)
+#define lowByte(w) ((uint8_t) ((w) & 0xff))
+#define highByte(w) ((uint8_t) ((w) >> 8))
 
 #define bitRead(value, bit) (((value) >> (bit)) & 0x01)
 #define bitSet(value, bit) ((value) |= (1UL << (bit)))
