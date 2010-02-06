@@ -1,11 +1,19 @@
 #ifndef ARDUINO_INTERFACE_H
 #define ARDUINO_INTERFACE_H
 
+#define USE_ASIO_NOBOOST
+
 #include <cstdlib>
 #include <termios.h>  /* POSIX terminal control definitions */
 #include <list>
 
-#include <boost/asio.hpp>
+#ifndef USE_ASIO_NOBOOST
+	#include <boost/asio.hpp>
+		namespace boost_asio = boost::asio;
+#else
+	#include </usr/local/include/asio.hpp>
+	namespace boost_asio = asio;
+#endif
 #include <boost/array.hpp>
 
 #include "DataPacket.hpp"
@@ -67,12 +75,15 @@ private:
 	int serialportInit_BOOST(const char* serialport, unsigned int baud);
 	bool readFully_BOOST(void* buf, size_t numBytes);
 	bool writeFully_BOOST(const void* buf, size_t numBytes);
-	boost::asio::io_service my_io_service;
-	boost::asio::serial_port* asioserialport;
-	bool readPending;
+	boost_asio::io_service my_io_service;
+	boost_asio::serial_port* asioserialport;
+	volatile bool readPending;
 
+#ifndef USE_ASIO_NOBOOST
 	void handle_serial_read(const boost::system::error_code& ec, size_t len);
-
+#else
+	void handle_serial_read(const asio::error_code& ec, size_t len);
+#endif
 //	void writeDone(const boost::system::error_code& ec, const size_t s);
 //	void runasync(const void* buf, size_t numBytes);
 //	bool writeDoneFlag;
