@@ -4,12 +4,13 @@
 #include "OSMC_driver.hpp"
 //#include <>
 
-static const int speedsetdel = 5 * 1e4;
+//static const int speedsetdel = 3 * 1e4;
+static const int speedsetdel = 2 * 1e4;
 
 int main()
 {
 	OSMC_driver drive;
-
+/*
 	for(;;)
 	{
 		reply_dtick_t datacoder = drive.getEncoderData();
@@ -21,6 +22,8 @@ int main()
 		std::cout << "data.dt:" << datacoder.dt << std::endl;
 		usleep(1e5);
 	}
+*/
+
 /*
 	for(;;)
 	{
@@ -32,7 +35,7 @@ int main()
 		usleep(1e5);
 	}
 */
-
+/*
 	for(;;)
 	{
 		joystick_reply_t datajoy = drive.getJoystickData();	
@@ -42,7 +45,7 @@ int main()
 		std::cout << "data.y:" << datajoy.joy_y << std::endl;
 		usleep(1e5);
 	}
-
+*/
 //	drive.setmotorPWM(MC_MOTOR_FORWARD, 255, MC_MOTOR_FORWARD, 255);
 //	for(;;)
 //	{
@@ -51,21 +54,35 @@ int main()
 
 	for(;;)
 {
-	for(int i = 0; i <= 255; i++)
+	for(int i = 0; i <= 255; i+=15)
 	{
 //		time_t t1 = time(NULL);
-		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, 0);
+		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
 		usleep(speedsetdel);
 //		time_t t2 = time(NULL);
 //		double dt = ((double)t2 - (double)t1);
 		std::cout <<"forward pwm: " << i << std::endl;
 	}
+	drive.setmotorPWM(MC_MOTOR_FORWARD, 255, MC_MOTOR_FORWARD, 255);
+
+	usleep(2e6);
+	for(int i = 255; i >= 0; i-=50)
+	{
+
+		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
+		usleep(speedsetdel);
+		std::cout <<"forward pwm: " << i << std::endl;
+	}
+	drive.setmotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
+	return 0;
+
+	
 		//clock_t t1 = clock();
 	time_t t1 = time(NULL);
 	for(int i = 255; i >= 0; i--)
 	{
 
-		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, 0);
+		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
 		usleep(speedsetdel);
 		std::cout <<"forward pwm: " << i << std::endl;
 	}
