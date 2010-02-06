@@ -4,7 +4,9 @@
 #include <SDL/SDL.h>
 #include <cmath>
 
-#include "motors_old.h"
+#include "OSMC_driver.hpp"
+//#define TEBOARD_MOTOR_CTRL
+#define ARDUINO_MOTOR_CTRL
 
 class joystickDrive
 {
@@ -18,7 +20,9 @@ class joystickDrive
 		bool shouldQuit();
 
 	private:
-		Motors_Old m_motorCtr;
+
+		OSMC_driver m_motorCtr;
+
 		pthread_t joystick_thread;
 		SDL_Joystick *joystick;
 
@@ -34,7 +38,7 @@ class joystickDrive
 		int dPadX;
 		int dPadY;
 		int joystickButtons;
-		bool quit;
+		volatile bool quit;
 };
 
 #endif
