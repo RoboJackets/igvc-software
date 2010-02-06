@@ -1,6 +1,8 @@
 #ifndef MOTORS_OLD_H
 #define MOTORS_OLD_H
 
+#include "OSMC_driver.hpp"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

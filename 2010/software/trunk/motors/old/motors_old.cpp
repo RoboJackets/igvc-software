@@ -1,7 +1,7 @@
 #include "motors_old.h"
 
 
-#define MINREQSPEED 6
+#define MINREQSPEED 60
 #define POLARITY -1     // direction of forward / connection to motor
 
 #define USE_TE_BOARD
@@ -11,7 +11,7 @@ Motors_Old::Motors_Old()
 	//ctor
 	fdMotor = -1;
 	dVelocityScale = 1;
-	_max_speed_=50;
+	_max_speed_=150;
 	//SetupSerial();
 }
 
@@ -103,6 +103,7 @@ int Motors_Old::Shutdown()
  *	it sends back its current motor states, control mode, and any errors it had
  *	with the transmission.
  */
+ #if 0
 int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 {
 
@@ -196,6 +197,39 @@ int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 	return(0);
 #endif
 }
+#endif
+
+int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
+{
+
+	static OSMC_driver osmcd;
+	
+	byte rdir, ldir, rvel, lvel;
+	
+	if(iLeftVelocity > 0)
+	{
+		ldir = MC_MOTOR_FORWARD;
+	}
+	else
+	{
+		ldir = 	MC_MOTOR_REVERSE;
+	}
+
+	if(iRightVelocity > 0)
+	{
+		rdir = MC_MOTOR_FORWARD;
+	}
+	else
+	{
+		rdir = MC_MOTOR_REVERSE;
+	}
+	
+	rvel = byte(iRightVelocity);
+	lvel = byte(iLeftVelocity);
+	
+	osmcd.setmotorPWM(rdir, rvel, ldir, rvel);
+
+}
 
 int Motors_Old::get_motor_states(void)
 {
@@ -286,8 +320,8 @@ int Motors_Old::set_heading(int iFwdVelocity, int iRotation)
 	if (1)
 	{
 		// scale speed
-		left  = ( left  * _max_speed_ / 255 ) ;
-		right = ( right * _max_speed_ / 255 ) ;
+		left  = int( float(left)  * float(_max_speed_) / float(255) ) ;
+		right = int( float(right) * float(_max_speed_) / float(255) ) ;
 	}
 	else
 	{
