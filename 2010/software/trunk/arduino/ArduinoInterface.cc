@@ -36,7 +36,7 @@ ArduinoInterface::ArduinoInterface()
 	tx_num = 1;
 	rx_num = 1;
 
-	asioserialport = new boost::asio::serial_port(my_io_service);
+	asioserialport = new boost_asio::serial_port(my_io_service);
 
 	readPending = true;
 }
@@ -371,25 +371,33 @@ int ArduinoInterface::serialportInit_BOOST(const char* serialport, unsigned int 
 	}
 	asioserialport->open(serialport);
 
-	asioserialport->set_option(boost::asio::serial_port_base::baud_rate(baud));
-	asioserialport->set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
-	asioserialport->set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
-	asioserialport->set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
+	asioserialport->set_option(boost_asio::serial_port_base::baud_rate(baud));
+	asioserialport->set_option(boost_asio::serial_port_base::flow_control(boost_asio::serial_port_base::flow_control::none));
+	asioserialport->set_option(boost_asio::serial_port_base::parity(boost_asio::serial_port_base::parity::none));
+	asioserialport->set_option(boost_asio::serial_port_base::stop_bits(boost_asio::serial_port_base::stop_bits::one));
 
 	return asioserialport->native();
 }
 
-void ArduinoInterface::handle_serial_read(const boost::system::error_code& ec, size_t len)
-{
-	//std::cout << "delagate called, read " << len << " bytes" << std::endl;
-	readPending = false;
-}
+#ifndef USE_ASIO_NOBOOST
+	void ArduinoInterface::handle_serial_read(const boost::system::error_code& ec, size_t len)
+	{
+		//std::cout << "delagate called, read " << len << " bytes" << std::endl;
+		readPending = false;
+	}
+#else
+	void ArduinoInterface::handle_serial_read(const asio::error_code& ec, size_t len)
+	{
+		//std::cout << "delagate called, read " << len << " bytes" << std::endl;
+		readPending = false;
+	}
+#endif
 
 bool ArduinoInterface::readFully_BOOST(void* buf, size_t numBytes)
 {
-	//boost::asio::read(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_all());
+	//boost_asio::read(*asioserialport, boost_asio::buffer(buf, numBytes), boost_asio::transfer_all());
 	readPending = true;
-	boost::asio::async_read(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_all(), boost::bind(&ArduinoInterface::handle_serial_read, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+	boost_asio::async_read(*asioserialport, boost_asio::buffer(buf, numBytes), boost_asio::transfer_all(), boost::bind(&ArduinoInterface::handle_serial_read, this, boost_asio::placeholders::error, boost_asio::placeholders::bytes_transferred));
 
 	time_t t1 = time(NULL);
 
@@ -416,8 +424,8 @@ bool ArduinoInterface::readFully_BOOST(void* buf, size_t numBytes)
 
 bool ArduinoInterface::writeFully_BOOST(const void* buf, size_t numBytes)
 {
-	boost::asio::write(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_all());
-	//boost::asio::async_write(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_all(), boost::bind(&ArduinoInterface::writeDone, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+	boost_asio::write(*asioserialport, boost_asio::buffer(buf, numBytes), boost_asio::transfer_all());
+	//boost_asio::async_write(*asioserialport, boost_asio::buffer(buf, numBytes), boost_asio::transfer_all(), boost::bind(&ArduinoInterface::writeDone, this, boost_asio::placeholders::error, boost_asio::placeholders::bytes_transferred));
 	//runasync(buf, numBytes);
 /*
 	while(writeDoneFlag == false)
