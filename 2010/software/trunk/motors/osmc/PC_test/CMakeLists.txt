@@ -4,6 +4,8 @@ include_directories(${IGVC_SOURCE_DIR}/arduino)
 
 add_library (OSMC_driver OSMC_driver.cc)
 
+target_link_libraries(OSMC_driver ArduinoInterface)
+
 link_libraries(ArduinoInterface DataPacket boost_system-mt OSMC_driver)
 
 add_executable(OSMC_test

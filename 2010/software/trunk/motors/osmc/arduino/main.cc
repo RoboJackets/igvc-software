@@ -78,10 +78,10 @@ int main()
 				int x,y;
 				getJoystickReading(&x, &y);
 
-				Serial.print("x: ");
-				Serial.print(x, DEC);
-				Serial.print("\ty: ");
-				Serial.println(y, DEC);
+				//Serial.print("x: ");
+				//Serial.print(x, DEC);
+				//Serial.print("\ty: ");
+				//Serial.println(y, DEC);
 				joystickSetMotors();
 				joystickpollt0 = millis();	
 			}
