@@ -46,15 +46,16 @@ private:
 	bool writeFully(int fd, const void* buf, size_t numBytes);
 	bool readFully(int fd, void* buf, size_t numBytes);
 	int serialportInit(const char* serialport, speed_t baud);
-	bool serialFlush(int fd);
+	static bool setSerialPortFromDevID(const int vendorid, const int devid, const char* serialport);
+	bool serialRxFlush();
 
 	std::list<DataPacket> tx_packet_list;
 	unsigned int rx_num;
 	unsigned int tx_num;
-	void savePacket(DataPacket pk);
-	DataPacket getSavedPacket(int packnum);
+	void savePacket(const DataPacket& pk);
+	DataPacket getSavedPacket(unsigned int packnum);
 public:
-	bool arduinoResendPacket(int pknum, DataPacket& pk_out);
+	bool arduinoResendPacket(unsigned int pknum, DataPacket& pk_out);
 	struct timeval getTime();
 	bool setArduinoTime();
 
@@ -62,11 +63,19 @@ public:
 	bool getPacket(DataPacket& out_pk_rx);
 	bool read_TimeOut(int fd, void * buf, size_t numBytes);
 
-	int serialportInit_BOOST(const char* serialport, int baud);
+private:
+	int serialportInit_BOOST(const char* serialport, unsigned int baud);
 	bool readFully_BOOST(void* buf, size_t numBytes);
 	bool writeFully_BOOST(const void* buf, size_t numBytes);
 	boost::asio::io_service my_io_service;
 	boost::asio::serial_port* asioserialport;
+	bool readPending;
+
+	void handle_serial_read(const boost::system::error_code& ec, size_t len);
+
+//	void writeDone(const boost::system::error_code& ec, const size_t s);
+//	void runasync(const void* buf, size_t numBytes);
+//	bool writeDoneFlag;
 };
 
 #endif /* ARDUINO_INTERFACE_H */

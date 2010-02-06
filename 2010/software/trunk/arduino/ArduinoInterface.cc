@@ -1,12 +1,12 @@
-#include <stdio.h>    /* Standard input/output definitions */
-#include <stdlib.h>
+#include <cstdio>    /* Standard input/output definitions */
+#include <cstdlib>
 #include <unistd.h>   /* UNIX standard function definitions */
 #include <fcntl.h>    /* File control definitions */
 #include <iostream>
 #include <cstring>//for memcpy
-
+#include <boost/bind.hpp> 
 #include <sys/time.h>
-#include <time.h>
+#include <ctime>
 
 #include "ArduinoInterface.h"
 #include "ArduinoCmds.hpp"
@@ -15,14 +15,15 @@
 //			add checks for disconnected arduino
 //			add error reporting
 
-#define WAIT_TIME 20 //Used for setting VTIME, each tick is 0.1 s
+//#define WAIT_TIME 20 //Used for setting VTIME, each tick is 0.1 s
 //#define WAIT_TIME 3 //Used for setting VTIME, each tick is 0.1 s
-#define MIN_BYTES_TO_RET 0 //Minimum nuber of bytes for read to return.
-#define BAUD B9600  //Serial baudrate
-#define SERIAL_PORT "/dev/ttyUSB0"
-#define MODULE_ID 'e'
+//#define MIN_BYTES_TO_RET 0 //Minimum nuber of bytes for read to return.
+//#define BAUD B9600  //Serial baudrate
+#define SERIAL_PORT "/dev/ttyUSB0";
+//#define MODULE_ID 'e'
 
-#define SERIAL_TIMOUT_SEC 2
+static const int SERIAL_TIMOUT_SEC = 3;
+static const int ARDUINO_STARTUP_DELAY_USEC = 3 * 1e6;
 
 /**
  * Opens a connection to an arduino.
@@ -36,8 +37,15 @@ ArduinoInterface::ArduinoInterface()
 	rx_num = 1;
 
 	asioserialport = new boost::asio::serial_port(my_io_service);
-}
 
+	readPending = true;
+}
+/*
+bool setSerialPortFromDevID(const int vendorid, const int devid, const char* serialport)
+{
+	//"modprobe ftdi_sio vendor=0x9e88 product=0x9e8f"
+}
+*/
 bool ArduinoInterface::initLink(byte arduinoID)
 {
 	/* See if anything is connected on ports USB0 through USB9 */
@@ -48,10 +56,11 @@ bool ArduinoInterface::initLink(byte arduinoID)
 
 		serialAddress[11]=i+'0';
 		//arduinoFD = serialportInit(serialAddress, BAUD);
-		arduinoFD = serialportInit_BOOST(serialAddress, 9600);
+		//arduinoFD = serialportInit_BOOST(serialAddress, 9600);
+		arduinoFD = serialportInit_BOOST(serialAddress, 57600);
 		//add a delay -- it seems somthing gets lost if we don't wait
 		//TODO: figure out what the problem is
-		usleep(3 * 1e6);
+		usleep(ARDUINO_STARTUP_DELAY_USEC);
 
 		if (arduinoFD == -1)
 		{
@@ -111,6 +120,7 @@ bool ArduinoInterface::initLink(byte arduinoID)
 		printf("Error: MotorEncoders: could not find arduino\n");
 		exit(1);
 	}
+	return true;
 }
 
 /**
@@ -123,12 +133,15 @@ ArduinoInterface::~ArduinoInterface(void)
 //		delete *it;
 //	}
 
+/*
 	if (arduinoFD == -1)
 	{
 		return;
 	}
 	close(arduinoFD);
+*/
 
+	asioserialport->close();
 	delete asioserialport;
 }
 
@@ -200,7 +213,7 @@ bool ArduinoInterface::setVar(int var, void *value, int size)
  * 					<tt>false</tt> if successful.
  */
 
-bool ArduinoInterface::writeFully(int fd, void* buf, size_t numBytes)
+bool ArduinoInterface::writeFully(int fd, const void* buf, size_t numBytes)
 {
 	char* src = (char*) buf;
 	size_t numLeft = numBytes;
@@ -264,10 +277,10 @@ bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes)
  * @return			<tt>true</tt> if an error occurs;
  * 					<tt>false</tt> if successful.
  */
-
+//#if 0
 bool ArduinoInterface::writeFully(int fd, const void* buf, size_t numBytes)
 {
-	writeFully_BOOST(buf, numBytes);
+	return writeFully_BOOST(buf, numBytes);
 }
 
 /**
@@ -282,9 +295,9 @@ bool ArduinoInterface::writeFully(int fd, const void* buf, size_t numBytes)
  */
 bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes)
 {
-	readFully_BOOST(buf, numBytes);
+	return readFully_BOOST(buf, numBytes);
 }
-
+//#endif
 
 /**
  * Open a serial port at device <tt>serialport</tt> and initialize
@@ -296,6 +309,7 @@ bool ArduinoInterface::readFully(int fd, void* buf, size_t numBytes)
  * @return 				<tt>fd</tt> the file descriptor for the open serial port;
  *                       -1 if an error occurs.
  */
+#if 0
 int ArduinoInterface::serialportInit(const char* serialport, speed_t baud)
 {
 	struct termios toptions;
@@ -348,8 +362,8 @@ int ArduinoInterface::serialportInit(const char* serialport, speed_t baud)
 
 	return fd;
 }
-
-int ArduinoInterface::serialportInit_BOOST(const char* serialport, int baud)
+#endif
+int ArduinoInterface::serialportInit_BOOST(const char* serialport, unsigned int baud)
 {
 	if(asioserialport->is_open())
 	{
@@ -365,16 +379,55 @@ int ArduinoInterface::serialportInit_BOOST(const char* serialport, int baud)
 	return asioserialport->native();
 }
 
+void ArduinoInterface::handle_serial_read(const boost::system::error_code& ec, size_t len)
+{
+	//std::cout << "delagate called, read " << len << " bytes" << std::endl;
+	readPending = false;
+}
+
 bool ArduinoInterface::readFully_BOOST(void* buf, size_t numBytes)
 {
-	boost::asio::read(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_at_least(numBytes));
-	return true;
+	//boost::asio::read(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_all());
+	readPending = true;
+	boost::asio::async_read(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_all(), boost::bind(&ArduinoInterface::handle_serial_read, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+
+	time_t t1 = time(NULL);
+
+		do
+		{
+			time_t t2 = time(NULL);
+
+			if((t2 - t1) > SERIAL_TIMOUT_SEC)
+			{
+				std::cout << "timeout" << std::endl;
+				asioserialport->cancel();
+				serialRxFlush();
+				return true;
+			}
+
+			my_io_service.poll_one();
+			usleep(100);
+		} while(readPending);
+
+		my_io_service.reset();
+
+	return false;
 }
 
 bool ArduinoInterface::writeFully_BOOST(const void* buf, size_t numBytes)
 {
-	boost::asio::write(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_at_least(numBytes));
-	return true;
+	boost::asio::write(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_all());
+	//boost::asio::async_write(*asioserialport, boost::asio::buffer(buf, numBytes), boost::asio::transfer_all(), boost::bind(&ArduinoInterface::writeDone, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+	//runasync(buf, numBytes);
+/*
+	while(writeDoneFlag == false)
+	{
+		usleep(0);
+	}
+
+	writeDoneFlag = false;
+*/
+	return false;
 }
 
 /**
@@ -382,23 +435,21 @@ bool ArduinoInterface::writeFully_BOOST(const void* buf, size_t numBytes)
  *
  * @param fd		the file to clear.
  */
-bool ArduinoInterface::serialFlush(int fd)   // TODO: is there a function for this?
+bool ArduinoInterface::serialRxFlush()   // TODO: is there a function for this?
 {
-	char dst[1];
-	ssize_t numRead = 0;
+	int fd = asioserialport->native();
+	int e = tcflush(fd, TCIFLUSH);
 
-	while (numRead)
+	if(e == 0)
 	{
-		numRead = read(fd, dst, 1);
-	}
-	if (numRead < 0)
-	{
+		std::cout << "Serial Rx Flush Succeced" << std::endl;
 		return true;
 	}
-}
-
-void savePacket(DataPacket* pk)
-{
+	else
+	{
+		std::cout << "Serial Rx Flush Fail" << std::endl;
+		return false;
+	}
 
 }
 
@@ -420,7 +471,7 @@ void savePacket(DataPacket* pk)
 //getResponse();
 
 //true on error
-bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket& pk_out)
+bool ArduinoInterface::arduinoResendPacket(unsigned int pknum, DataPacket& pk_out)
 {
 
 	sendCommand(ARDUINO_RSND_PK_CMD, &pknum, sizeof(int));
@@ -488,7 +539,7 @@ bool ArduinoInterface::arduinoResendPacket(int pknum, DataPacket& pk_out)
 	return false;
 }
 
-void ArduinoInterface::savePacket(DataPacket pk)
+void ArduinoInterface::savePacket(const DataPacket& pk)
 {
 	if (tx_packet_list.size() > 49)
 	{
@@ -501,7 +552,7 @@ void ArduinoInterface::savePacket(DataPacket pk)
 }
 
 //Get a packet that was set to the arduino from the list, by number
-DataPacket ArduinoInterface::getSavedPacket(int packnum)
+DataPacket ArduinoInterface::getSavedPacket(unsigned int packnum)
 {
 	std::list<DataPacket>::iterator it;
 	for (it = tx_packet_list.begin(); it != tx_packet_list.end(); it++)
@@ -517,14 +568,13 @@ DataPacket ArduinoInterface::getSavedPacket(int packnum)
 struct timeval ArduinoInterface::getTime()
 {
 	struct timeval time;
-	//struct timezone tz;
-	//gettimeofday(&time, &tz);
 	gettimeofday(&time, NULL);
 	//unsigned int millis = time.tv_sec*1000 + ((long int)((double)time.tv_usec/1000));
 
 	return(time);
 }
 
+/*
 bool ArduinoInterface::setArduinoTime()
 {
 	byte msg[9];
@@ -532,15 +582,16 @@ bool ArduinoInterface::setArduinoTime()
 
 	struct timeval t0 = getTime();
 
-	memcpy(msg+1, &t0.tv_sec, sizeof(unsigned long));
-	memcpy(msg+5, &t0.tv_usec, sizeof(unsigned long));
+	memcpy(msg+1, &t0.tv_sec, sizeof(uint32_t));//msg[1],msg[2],msg[3],msg[4]
+	memcpy(msg+5, &t0.tv_usec, sizeof(uint32_t));//msg[5],msg[6],msg[7],msg[8]
 
 	DataPacket rx_p;
 
 	sendCommand('w', msg, 9);
 	recvCommand(rx_p.header.cmd, rx_p.data);
+	return true;
 }
-
+*/
 
 //new cmd struct notes
 //arduino send pk
@@ -566,11 +617,19 @@ bool ArduinoInterface::sendPacket(const DataPacket& pkout)
 //true on error
 bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 {
-	readFully(arduinoFD, &(out_pk_rx.header), PACKET_HEADER_SIZE);
+	if(readFully(arduinoFD, &(out_pk_rx.header), PACKET_HEADER_SIZE))
+	{
+		std::cout << "Resv header failed in file " << __FILE__ << "at line " << __LINE__ << std::endl;
+		return true;
+	}
 	if (out_pk_rx.header.size > 0)
 	{
 		out_pk_rx.data = new byte[out_pk_rx.header.size];
-		readFully(arduinoFD, out_pk_rx.data, out_pk_rx.header.size);
+		if(readFully(arduinoFD, out_pk_rx.data, out_pk_rx.header.size))
+		{
+			std::cout << "Resv data sec failed in file " << __FILE__ << "at line " << __LINE__ << std::endl;
+			return true;
+		}
 	}
 	rx_num++;
 	/*
@@ -619,11 +678,12 @@ bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 		}
 	}
 
-	std::cout << "rec header:\n" << out_pk_rx.header << std::endl;
+	//std::cout << "rec header:\n" << out_pk_rx.header << std::endl;
 
 	return false;
 }
 
+#if 0
 bool ArduinoInterface::read_TimeOut(int fd, void * buf, size_t numBytes)
 {
 	char* dst = (char*) buf;
@@ -651,7 +711,7 @@ bool ArduinoInterface::read_TimeOut(int fd, void * buf, size_t numBytes)
 	}
 	return false;
 }
-
+#endif
 //bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx){
 bool ArduinoInterface::sendCommand(byte cmd, void * data_tx, int size_tx)
 {
@@ -666,10 +726,15 @@ bool ArduinoInterface::sendCommand(byte cmd, void * data_tx, int size_tx)
 	pk_tx.header.cmd = cmd;
 	pk_tx.header.size = size_tx;
 
-
-	pk_tx.data = new byte[size_tx];
-	memcpy(pk_tx.data, data_tx, size_tx);
-
+	if(size_tx > 0)
+	{
+		pk_tx.data = new byte[size_tx];
+		memcpy(pk_tx.data, data_tx, size_tx);
+	}
+	else
+	{
+		pk_tx.data = NULL;
+	}
 
 	if (sendPacket(pk_tx))
 	{
