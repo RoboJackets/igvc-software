@@ -545,7 +545,7 @@ void Robot::initGlut()
 {
 	// dummy args
 	int argc = 0;
-	char** argv;
+	char** argv = NULL;
 
 	// initialization
 	glutInit(&argc, argv);
