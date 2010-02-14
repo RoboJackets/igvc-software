@@ -49,7 +49,7 @@ void joystickSetMotors()
 	yAxis -= YMiddle;
 
 	//make x go the right dir
-	xAxis *= -1;
+	//xAxis *= -1;
 
 	/* Apply deadzones */
 	if (abs(xAxis) < DEAD_ZONE)
@@ -62,6 +62,8 @@ void joystickSetMotors()
 	}
 
 	/* Calculate drive outputs -- magic*/
+	//int leftVelocity = .5*float(yAxis) + 2 * sign(xAxis) * sqrt(abs(xAxis));
+	//int rightVelocity = .5*float(yAxis) - 2 * sign(xAxis) * sqrt(abs(xAxis));
 	int leftVelocity = yAxis + 3 * sign(xAxis) * sqrt(abs(xAxis));
 	int rightVelocity = yAxis - 3 * sign(xAxis) * sqrt(abs(xAxis));
 
