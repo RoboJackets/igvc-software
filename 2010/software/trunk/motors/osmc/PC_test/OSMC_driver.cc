@@ -1,10 +1,23 @@
 #include "OSMC_driver.hpp"
 
+#include <algorithm>
+
+const int OSMC_driver::_max_speed_ = 255;
+const int OSMC_driver::MINREQSPEED = 30;
+
 OSMC_driver::OSMC_driver()
 {
+	m_connected = false;
 	ai.initLink(OSMC_IF_BOARD);
+	m_connected = true;
 }
-
+#if 0
+OSMC_driver::connect()
+{
+	ai.initLink(OSMC_IF_BOARD);
+	m_connected = true;
+}
+#endif
 reply_dtick_t OSMC_driver::getEncoderData()
 {
 	ai.sendCommand(MC_GET_ENCODER_TICK, NULL, 0);
@@ -34,6 +47,47 @@ current_reply_t OSMC_driver::getCurrentData()
 	delete[] data;
 	return out;
 }
+
+bool OSMC_driver::set_motors(int leftVelocity, int rightVelocity)
+{
+
+	byte leftDutyCycle = std::min(abs(leftVelocity), 255);
+	byte leftDir = (leftVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
+
+	byte rightDutyCycle = std::min(abs(rightVelocity), 255);
+	byte rightDir = (rightVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
+
+	return setmotorPWM(rightDir, rightDutyCycle, leftDir, leftDutyCycle);
+
+}
+
+int OSMC_driver::set_heading(int iFwdVelocity, int iRotation)
+{
+	// convert
+	int left  = iFwdVelocity + iRotation ;
+	int right = iFwdVelocity - iRotation ;
+
+	if (false)
+	{
+		// scale speed
+		left  = int( float(left)  * float(_max_speed_) / float(255) ) ;
+		right = int( float(right) * float(_max_speed_) / float(255) ) ;
+	}
+	else
+	{
+		// cap speed
+		if (left  > _max_speed_) left  = _max_speed_ ;
+		if (right > _max_speed_) right = _max_speed_ ;
+	}
+
+	// motors don't respond until certain output is reached
+	if (right != 0) right += MINREQSPEED ;
+	if (left  != 0) left  += MINREQSPEED ;
+
+	// do it!
+	return this->set_motors( left , right );
+}
+
 
 bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
 {
