@@ -81,6 +81,16 @@ std::ostream& operator<<(std::ostream& output, encoder_reply_t data)
 
 	return(output);
 }
+
+std::ostream& operator<<(std::ostream& os, const new_encoder_pk_t& rv)
+{
+	os << "l: " << rv.pl << std::endl;
+	os << "r: " << rv.pr << std::endl;
+	os << "dl: " << rv.dl << std::endl;
+	os << "dr: " << rv.dr << std::endl;
+	return os;
+}
+
 /*
 std::ostream& operator<<(std::ostream& output, DataPacket::encoder_reply_t* data){
 	//output.setf(std::ios::hex);

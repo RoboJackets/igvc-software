@@ -3,9 +3,6 @@
 
 #include "standard_types.hpp"
 
-//length of header
-#define PACKET_HEADER_SIZE 14
-
 typedef unsigned char byte;
 
 //Packet Header
@@ -17,6 +14,9 @@ typedef struct __attribute__((__packed__))
 	byte cmd;
 	byte size;
 } header_t; //orig arduino - should be same as laptop
+
+//length of header
+#define PACKET_HEADER_SIZE (sizeof(header_t))
 
 //Data types
 
@@ -77,5 +77,13 @@ typedef struct __attribute__((__packed__))
 	int16 id;
 	int16 range;
 } sonar_range_t; //range in milimeters
+
+typedef struct  __attribute__((__packed__))
+{
+	int64_t pl;
+	int64_t pr;
+	int64_t dl;
+	int64_t dr;
+} new_encoder_pk_t;
 
 #endif //DataPacketStructs_H_

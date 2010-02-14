@@ -1,7 +1,7 @@
 #ifndef ARDUINO_INTERFACE_H
 #define ARDUINO_INTERFACE_H
 
-#define USE_ASIO_NOBOOST
+//#define USE_ASIO_NOBOOST
 
 #include <cstdlib>
 #include <termios.h>  /* POSIX terminal control definitions */
