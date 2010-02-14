@@ -225,12 +225,15 @@ int Robot::init()
 	/* connect to motors */
 	if (useMotors)
 	{
+		//deprecated - old motors
+		#if 0
 		motors.set_max_speed(motorsMaxSpeed);
 		if (0!=motors.SetupSerial())
 		{
 			printf("Motors Connect Fail !\n");
 			return 0; // fail
 		}
+		#endif
 	}
 
 	/* success */
@@ -422,7 +425,8 @@ void Robot::processFunc()
 		//hack = 0;
 		printf("\n\n\n\tSTOP HACK\t\n\n\n");
 		//motors.set_motors(-20, -20);
-		motors.set_motors(hack/8, hack/8);
+		//motors.set_motors(hack/8, hack/8);
+		osmcd.set_motors(hack/8, hack/8);
 		if (hack > hackstop+14 )
 		{
 			hack = 0;
@@ -466,7 +470,7 @@ void Robot::processFunc()
 	if (useMotors)
 	{
 		//printf("Heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
-		motors.set_heading(heading_main.y, heading_main.x);
+		osmcd.set_heading(heading_main.y, heading_main.x);
 	}
 
 	/* Print Stats */
