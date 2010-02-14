@@ -2,16 +2,21 @@
 
 void setLeftMotorDutyCycle(byte dir, byte ldc)
 {
-
-	byte scaledldc = ldc * leftScale;
+	byte scaledldc = float(ldc) * leftScale;
 
 	if(dir == MC_MOTOR_FORWARD)
 	{
+		//Serial.print("Motor DBG - L/Fwd: ");
+		//Serial.print(scaledldc, DEC);
+
 		digitalWrite(leftDirectionPin, HIGH);
 		analogWrite(leftSpeedPin, 255 - scaledldc);
 	}
 	else
 	{
+		//Serial.print("Motor DBG - L/Rev: ");
+		//Serial.print(scaledldc, DEC);
+
 		digitalWrite(leftDirectionPin, LOW);
 		analogWrite(leftSpeedPin, scaledldc);
 	}
@@ -19,16 +24,21 @@ void setLeftMotorDutyCycle(byte dir, byte ldc)
 
 void setRightMotorDutyCycle(byte dir, byte rdc)
 {
-
-	byte scaledrdc = rdc * rightScale;
+	byte scaledrdc = float(rdc) * rightScale;
 
 	if(dir == MC_MOTOR_FORWARD)
 	{
+		//Serial.print("Motor DBG - R/Fwd: ");
+		//Serial.print(scaledrdc, DEC);
+
 		digitalWrite(rightDirectionPin, HIGH);
 		analogWrite(rightSpeedPin, 255 - scaledrdc);
 	}
 	else
 	{
+		//Serial.print("Motor DBG - R/Rev: ");
+		//Serial.print(scaledrdc, DEC);
+
 		digitalWrite(rightDirectionPin, LOW);
 		analogWrite(rightSpeedPin, scaledrdc);
 
@@ -68,7 +78,7 @@ void setPWMFreq()
 {
 	//TCCR2B = TCCR2B & 0xF8 | 0x03;//pin 11/3 @ 976.5625Hz
 	//TCCR0B = TCCR0B & 0xF8 | 0x03;//pins 5/6 @ 976.5625Hz
-	TCCR2B = TCCR2B & 0xF8 | 0x02;//pin 11/3 @ 976.5625Hz
-	TCCR0B = TCCR0B & 0xF8 | 0x02;//pins 5/6 @ 976.5625Hz
+	TCCR2B = (TCCR2B & 0xF8) | 0x02;//pin 11/3 @ 2x976.5625Hz
+	TCCR0B = (TCCR0B & 0xF8) | 0x02;//pins 5/6 @ 2x976.5625Hz
 }
 

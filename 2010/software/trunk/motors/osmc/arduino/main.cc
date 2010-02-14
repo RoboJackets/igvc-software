@@ -18,7 +18,7 @@ extern "C" void __cxa_pure_virtual()
 
 	}
 }
-
+#if 0
 void HCF()
 {
 	pinMode(13, OUTPUT);
@@ -32,7 +32,7 @@ void HCF()
 		delay(1000);
 	}
 }
-
+#endif
 int main()
 {	
 	init();
@@ -145,12 +145,12 @@ int main()
 		{
 			case ARDUINO_RESET:
 			{
-				Serial.println("Reset");
+				//Serial.println("Reset");
 				break;
 			}
 			case ARDUINO_SET_CLOCK:
 			{
-				Serial.println("Set Clock");
+				//Serial.println("Set Clock");
 				break;
 			}
 			case ARDUINO_GET_ID:
