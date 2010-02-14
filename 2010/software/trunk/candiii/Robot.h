@@ -116,10 +116,11 @@ public:
 	int doMapping;
 
 	// motor control
-	Motors_Old motors;
+	//Motors_Old motors;
 	int motorsMaxSpeed;//0-255
 	int useMotors;
 
+	OSMC_driver osmcd;
 };
 
 #endif /*ROBOT_H_*/
