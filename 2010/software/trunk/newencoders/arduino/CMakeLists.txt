@@ -8,4 +8,5 @@ link_libraries(arduinocore)
 add_executable(newencoders
 	main.cc
 	diffenc.cc
+	serial_comm_helper.cc
 )
