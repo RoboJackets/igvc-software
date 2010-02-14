@@ -244,24 +244,4 @@ int incr_or_dec(int currstate, int laststate)
 	#endif
 }
 
-#if 0
-void leftenc_event_c1()
-{
-	static bool lastvalue;
-}
 
-void leftenc_event_c2()
-{
-	static bool lastvalue;
-}
-
-void rightenc_event_c1()
-{
-	static bool lastvalue;
-}
-
-void rightenc_event_c2()
-{
-	static bool lastvalue;
-}
-#endif
