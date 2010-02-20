@@ -9,7 +9,7 @@ class quadCoderDriver
 	public:
 	quadCoderDriver();
 
-	new_encoder_pk_t getEncoderState();
+	bool getEncoderState(new_encoder_pk_t& out);
 
 	private:
 	ArduinoInterface ai;
