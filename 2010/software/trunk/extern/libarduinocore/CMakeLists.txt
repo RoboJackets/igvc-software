@@ -11,4 +11,5 @@ add_library (arduinocore
 	pins_arduino.c
 	wiring_analog.c
 	wiring_pulse.c
+	Tone.cpp
 )
