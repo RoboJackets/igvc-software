@@ -19,7 +19,7 @@
   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
 
-  $Id: wiring.c 585 2009-05-12 10:55:26Z dmellis $
+  $Id: wiring.c 808 2009-12-18 17:44:08Z dmellis $
 */
 
 #include "wiring_private.h"
@@ -75,21 +75,21 @@ unsigned long millis()
 }
 
 unsigned long micros() {
-	unsigned long m, t;
-	uint8_t oldSREG = SREG;
+	unsigned long m;
+	uint8_t oldSREG = SREG, t;
 	
-	cli();	
+	cli();
+	m = timer0_overflow_count;
 	t = TCNT0;
   
 #ifdef TIFR0
-	if ((TIFR0 & _BV(TOV0)) && (t == 0))
-		t = 256;
+	if ((TIFR0 & _BV(TOV0)) && (t < 255))
+		m++;
 #else
-	if ((TIFR & _BV(TOV0)) && (t == 0))
-		t = 256;
+	if ((TIFR & _BV(TOV0)) && (t < 255))
+		m++;
 #endif
 
-	m = timer0_overflow_count;
 	SREG = oldSREG;
 	
 	return ((m << 8) + t) * (64 / clockCyclesPerMicrosecond());
@@ -103,13 +103,9 @@ void delay(unsigned long ms)
 		;
 }
 
-/* Delay for the given number of microseconds.  Assumes a 8 or 16 MHz clock. 
- * Disables interrupts, which will disrupt the millis() function if used
- * too frequently. */
+/* Delay for the given number of microseconds.  Assumes a 8 or 16 MHz clock. */
 void delayMicroseconds(unsigned int us)
 {
-	uint8_t oldSREG;
-
 	// calling avrlib's delay_us() function with low values (e.g. 1 or
 	// 2 microseconds) gives delays longer than desired.
 	//delay_us(us);
@@ -150,19 +146,11 @@ void delayMicroseconds(unsigned int us)
 	us--;
 #endif
 
-	// disable interrupts, otherwise the timer 0 overflow interrupt that
-	// tracks milliseconds will make us delay longer than we want.
-	oldSREG = SREG;
-	cli();
-
 	// busy wait
 	__asm__ __volatile__ (
 		"1: sbiw %0,1" "\n\t" // 2 cycles
 		"brne 1b" : "=w" (us) : "0" (us) // 2 cycles
 	);
-
-	// reenable interrupts.
-	SREG = oldSREG;
 }
 
 void init()
