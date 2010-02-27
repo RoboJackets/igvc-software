@@ -19,7 +19,7 @@
   Free Software Foundation, Inc., 59 Temple Place, Suite 330,
   Boston, MA  02111-1307  USA
 
-  $Id: wiring.h 602 2009-06-01 08:32:11Z dmellis $
+  $Id: wiring.h 804 2009-12-18 16:05:52Z dmellis $
 */
 
 #ifndef Wiring_h
@@ -30,10 +30,6 @@
 
 #ifdef __cplusplus
 extern "C"{
-#endif
-
-#ifndef ARDUINO
-#define ARDUINO 16
 #endif
 
 #define HIGH 0x1
