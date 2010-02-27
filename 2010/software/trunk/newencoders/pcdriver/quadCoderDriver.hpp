@@ -10,6 +10,8 @@ class quadCoderDriver
 	quadCoderDriver();
 
 	bool getEncoderState(new_encoder_pk_t& out);
+	bool getEncoderVel(double& rvel, double& lvel);
+	bool resetCount();
 
 	private:
 	ArduinoInterface ai;
