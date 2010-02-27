@@ -3,25 +3,12 @@
 
 bool serialReadBytesTimeout(byte len, byte* msg)
 {
-	//Maybe return imediatly if there is no data availible
-	//Only wait if there is a partial connection
-	//if(Serial.available() == 0)
-	//{
-	//	return false;
-	//}
-
 	unsigned long t1 = millis();
 
 	do
 	{
 		if(Serial.available() >= len)
 		{
-			/*
-			if(msg == NULL)
-			{
-				msg = (byte*)malloc(len);
-			}
-			*/
 			for(int i = 0; i < len; ++i)
 			{
 				msg[i] = Serial.read();
@@ -32,7 +19,11 @@ bool serialReadBytesTimeout(byte len, byte* msg)
 	} while( (millis() - t1) < TIMEOUT_LENGTH_MILLIS);
 
 	//otherwise timeout - flush link
-	Serial.flush();
+	if(Serial.available() > 0)
+	{
+		delay(TIMEOUT_LENGTH_MILLIS);//let laptop know to reset link
+		Serial.flush();//reset link
+	}
 	return false;
 }
 

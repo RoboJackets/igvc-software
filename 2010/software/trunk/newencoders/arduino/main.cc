@@ -4,6 +4,7 @@
 
 #include "DataPacketStructs.hpp"
 #include "ArduinoCmds.hpp"
+#include "common_defines.hpp"
 
 #include "serial_comm_helper.hpp"
 
@@ -30,7 +31,8 @@ void genTimestamp(long * sec, long * usec)
 int main()
 {	
 	init();
-	Serial.begin(57600);
+	Serial.begin(SERIAL_BAUD);
+	Serial.flush();
 
 	pinMode(left_encoder_pin_A, INPUT);
 	pinMode(left_encoder_pin_B, INPUT);
@@ -50,12 +52,13 @@ int main()
 	right_ticks = 0;
 
 	for(;;)
-	{		
+	{
+		/*	
 		if(!(Serial.available() >= PACKET_HEADER_SIZE))
 		{
 			continue;
 		}
-
+		*/
 		header_t header;
 		byte* indata = NULL;
 
@@ -66,6 +69,10 @@ int main()
 
 		if(header.size > 0)
 		{
+			if(header.size > 64)
+			{
+				continue;
+			}
 			indata = (byte*)malloc(header.size);
 			if(!serialReadBytesTimeout(header.size, indata))
 			{
@@ -87,18 +94,18 @@ int main()
 				//Serial.println("Set Clock");
 				break;
 			}
-			case ARDUINO_GET_ID:
+			case ARDUINO_ID_CMD:
 			{
 				header_t headerOut;
 				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
 
 				headerOut.packetnum = tx_num;
-				headerOut.cmd = ARDUINO_GET_ID;
+				headerOut.cmd = ARDUINO_ID_CMD;
 				headerOut.size = 1;
 				char msg = ENCODER_IF_BOARD;
 
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
-				Serial.print(msg);
+				Serial.print(msg, BYTE);
 				tx_num++;
 				break;
 			}
@@ -115,13 +122,15 @@ int main()
 
 				int64_t first_left = left_ticks;
 				int64_t first_right = right_ticks;
-				//delay(5);
-				_delay_ms(5);
+				delay(5);
+				//_delay_ms(5);
 				body.pl = left_ticks;
 				body.pr = right_ticks;
 
 				body.dl = left_ticks - first_left;
-				body.dr = right_ticks - first_right;
+				//body.dr = right_ticks - first_right;
+				body.dr = PIND;
+				body.dr = ((PIND & 0x0C) >> 2) & (~0xFC);
 
 				uint8_t* msg = (uint8_t*)&(body);
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
@@ -149,6 +158,7 @@ int main()
 			default:
 			{
 				//HCF();
+				//Serial.flush();
 				break;
 			}
 		}//end switch

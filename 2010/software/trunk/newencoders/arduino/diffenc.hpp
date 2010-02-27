@@ -20,8 +20,8 @@ void rightenc_event_B();
 
 void encoder_logger(const ENCODEREVENT e);
 
-void incr_or_dec(int currstate, int laststate, volatile int64_t* counter);
-int incr_or_dec(int currstate, int laststate);
+void incr_or_dec(const int currstate, const int laststate, volatile int64_t* counter);
+//int incr_or_dec(int currstate, int laststate);
 
 #endif
 

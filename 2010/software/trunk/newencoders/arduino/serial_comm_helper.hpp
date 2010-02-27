@@ -1,7 +1,7 @@
 #ifndef SERIAL_COMM_HELPER_HPP_
 #define SERIAL_COMM_HELPER_HPP_
 
-#define TIMEOUT_LENGTH_MILLIS 1000
+#include "common_defines.hpp"
 
 bool serialReadBytesTimeout(byte len, byte * msg);
 
