@@ -7,21 +7,21 @@
 
 enum ENCODEREVENT{ENCODEREVENT_leftA, ENCODEREVENT_leftB, ENCODEREVENT_rightA, ENCODEREVENT_rightB};
 
-extern volatile int64_t left_ticks;
-extern volatile int64_t right_ticks;
+//extern volatile int64_t left_ticks;
+//extern volatile int64_t right_ticks;
+extern volatile int64_t coder_ticks;
 
-extern volatile int64_t left_d_ticks;
-extern volatile int64_t right_d_ticks;
-
-void leftenc_event_A();
-void leftenc_event_B();
-void rightenc_event_A();
-void rightenc_event_B();
-
-void encoder_logger(const ENCODEREVENT e);
+void encoder_logger();
 
 void incr_or_dec(const int currstate, const int laststate, volatile int64_t* counter);
-//int incr_or_dec(int currstate, int laststate);
+
+//decode quadrature encoder input as a func of the current state and last state
+//the state is defined as x in {0x00, 0x4, 0x8, 0xC}, with ch A being the top bit
+// 0: 0x00
+// A: 0x04
+// B: 0x08
+// A&B: 0x0C
+void incr_or_dec_fast(const int currstate, const int laststate);
 
 #endif
 
