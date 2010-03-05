@@ -40,17 +40,17 @@ int main()
 	pinMode(right_encoder_pin_A, INPUT);
 	pinMode(right_encoder_pin_B, INPUT);
 
-	attachInterrupt(0, leftenc_event_A, CHANGE);
-	attachInterrupt(1, leftenc_event_B, CHANGE);
+	attachInterrupt(0, encoder_logger, CHANGE);
+	attachInterrupt(1, encoder_logger, CHANGE);
 
 	//attachInterrupt(2, rightenc_event_A, CHANGE);
 	//attachInterrupt(3, rightenc_event_B, CHANGE);
 
 	int32_t tx_num = 0;
 
-	left_ticks = 0;
-	right_ticks = 0;
-
+	//left_ticks = 0;
+	//right_ticks = 0;
+	coder_ticks = 0;
 	for(;;)
 	{
 		/*	
@@ -120,16 +120,15 @@ int main()
 
 				new_encoder_pk_t body;
 
-				int64_t first_left = left_ticks;
-				int64_t first_right = right_ticks;
-				delay(5);
-				//_delay_ms(5);
-				body.pl = left_ticks;
-				body.pr = right_ticks;
+				int64_t first_left = coder_ticks;
+				int64_t first_right = 0;
+				//delay(5);
+				_delay_ms(5);
+				body.pl = coder_ticks;
+				body.pr = 0;
 
-				body.dl = left_ticks - first_left;
+				body.dl = coder_ticks - first_left;
 				//body.dr = right_ticks - first_right;
-				body.dr = PIND;
 				body.dr = ((PIND & 0x0C) >> 2) & (~0xFC);
 
 				uint8_t* msg = (uint8_t*)&(body);
@@ -147,9 +146,9 @@ int main()
 				headerOut.cmd = ENCOER_RESET_COUNT;
 				headerOut.size = 0;
 
-				left_ticks = 0;
-				right_ticks = 0;
-
+				//left_ticks = 0;
+				//right_ticks = 0;
+				coder_ticks = 0;
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
 				tx_num++;
 				break;
