@@ -14,11 +14,12 @@ int main()
 	signal(SIGINT, handler);
 
 	quadCoderDriver qD;
-
-	for(;;)
+	qD.resetCount();
+	size_t t0 = time(NULL);
+	new_encoder_pk_t pk;
+	//for(;;)
+	while((time(NULL) - t0) < 10)
 	{
-		
-		new_encoder_pk_t pk;
 		if(!qD.getEncoderState(pk))
 		{
 			std::cout << pk << std::endl;
@@ -32,6 +33,10 @@ int main()
 		}
 
 		usleep(1e5);
+	}
+	if(!qD.getEncoderState(pk))
+	{
+		std::cout << pk << std::endl;
 	}
 
 }
