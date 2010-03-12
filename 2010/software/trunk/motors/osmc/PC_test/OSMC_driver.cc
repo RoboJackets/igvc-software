@@ -134,3 +134,49 @@ joystick_reply_t OSMC_driver::getJoystickData()
 	delete[] data;
 	return out;
 }
+
+// start dumb + hysteresis control code
+void OSMC_driver::getNewVel_dumb(const double ltarget, const double rtarget, const double lvel, const double rvel, const int rmset, const int lmset,  int& out_rmset, int& out_lmset)
+{
+	int posstep = 3;
+	int negstep = -3;
+
+	double lerror = ltarget - lvel;
+	double rerror = rtarget - rvel;
+
+	if(lerror > .1)
+	{
+		out_lmset = lmset + posstep;
+	}
+	else if(lerror < -.1)
+	{
+		out_lmset = lmset - negstep;
+	}
+	else
+	{
+		out_lmset = lmset;
+	}
+
+	if(rerror > .1)
+	{
+		out_rmset = rmset + posstep;
+	}
+	else if(rerror < -.1)
+	{
+		out_rmset = rmset - negstep;
+	}
+	else
+	{
+		out_rmset = rmset;
+	}
+}
+#if 0
+void OSMC_driver::getNewVel_pd(const double ltarget, const double rtarget, const double lvel, const double rvel, const int rmset, const int lmset,  int& out_rmset, int& out_lmset)
+{
+
+	const double k = .1;
+
+	double lerror = ltarget - lvel;
+	double rerror = rtarget - rvel;
+}
+#endif
