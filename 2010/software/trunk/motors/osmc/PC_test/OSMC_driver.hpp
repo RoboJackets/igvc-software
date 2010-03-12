@@ -23,6 +23,8 @@ class OSMC_driver
 	bool set_motors(int leftVelocity, int rightVelocity);
 	int set_heading(int iFwdVelocity, int iRotation);
 
+	void getNewVel_dumb(const double ltarget, const double rtarget, const double lvel, const double rvel, const int rmset, const int lmset,  int& out_rmset, int& out_lmset);
+
 	//add these commands
 	//bool enableMotor();
 	//bool disableMotor();
