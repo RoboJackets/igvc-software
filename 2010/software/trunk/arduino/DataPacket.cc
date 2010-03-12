@@ -64,6 +64,13 @@ std::ostream& operator<<(std::ostream& output, header_t header)
 	output << "cmd (char): " << (char) header.cmd << "\tcmd (ascii): " << (unsigned int) header.cmd << std::endl;
 	output << "size: " << (int) header.size << std::endl;
 
+	byte* header_p = (byte*) &header;
+	output << std::hex << "bin: ";
+	for(size_t i = 0; i < sizeof(header_t); i++)
+	{
+		output << int(header_p[i]) << ", ";
+	}
+	output << std::dec;
 	return(output);
 }
 
@@ -87,7 +94,9 @@ std::ostream& operator<<(std::ostream& os, const new_encoder_pk_t& rv)
 	os << "l: " << rv.pl << std::endl;
 	os << "r: " << rv.pr << std::endl;
 	os << "dl: " << rv.dl << std::endl;
+	os << std::hex;
 	os << "dr: " << rv.dr << std::endl;
+	os << std::dec;
 	return os;
 }
 
