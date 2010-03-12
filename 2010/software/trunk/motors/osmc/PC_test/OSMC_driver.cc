@@ -150,7 +150,7 @@ void OSMC_driver::getNewVel_dumb(const double ltarget, const double rtarget, con
 	}
 	else if(lerror < -.1)
 	{
-		out_lmset = lmset - negstep;
+		out_lmset = lmset + negstep;
 	}
 	else
 	{
@@ -163,7 +163,7 @@ void OSMC_driver::getNewVel_dumb(const double ltarget, const double rtarget, con
 	}
 	else if(rerror < -.1)
 	{
-		out_rmset = rmset - negstep;
+		out_rmset = rmset + negstep;
 	}
 	else
 	{
