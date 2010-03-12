@@ -8,7 +8,6 @@ add_library(quadCoderDriver
 
 add_executable(newCoderTest
 	test.cc
-
 )
 
 target_link_libraries(quadCoderDriver

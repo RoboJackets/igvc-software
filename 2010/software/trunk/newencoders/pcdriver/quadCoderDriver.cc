@@ -6,7 +6,7 @@
 //#define WHEEL_RADIUS		((double)5 / (double)MOTOR_RATIO)
 #define WHEEL_RADIUS		(double(.146) / double(2))
 #define WHEEL_BASE		((double)28)
-#define NUMBERTICKS		double(200)
+#define NUMBERTICKS		double(800)
 
 #define SMAPLEDELAY		double(5e-3)
 quadCoderDriver::quadCoderDriver()

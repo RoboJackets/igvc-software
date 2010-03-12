@@ -128,8 +128,9 @@ int main()
 				body.pr = 0;
 
 				body.dl = coder_ticks - first_left;
+				body.dr = 0;
 				//body.dr = right_ticks - first_right;
-				body.dr = ((PIND & 0x0C) >> 2) & (~0xFC);
+				//body.dr = ((PIND & 0x0C) >> 2) & (~0xFC);
 
 				uint8_t* msg = (uint8_t*)&(body);
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
