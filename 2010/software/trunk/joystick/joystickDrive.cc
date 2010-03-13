@@ -68,27 +68,27 @@ void joystickDrive::setMotor()
 		return;
 	}
 
-	double vel = mag / (double(32768)*sqrt(2)) * 160;
+	double vel = mag / (double(32768)*sqrt(2)) * 140;
 
 	double side = leftAnalogX / (double(32768)*sqrt(2)) * double(200) / double(5);
 
 	double rvel = -1, lvel = -1;
 
 	rvel = vel + side;
-	lvel = vel - 1.5*side + 35;
+	lvel = vel - 1.5*side + 55;
 
 
 	//turbo
 	if((joystickButtons & 32) == 32)
 	{
-		rvel += 10;
-		lvel += 10;
+		rvel += 20;
+		lvel += 20;
 	}
 	//turbo
 	if((joystickButtons & 128) == 128)
 	{
-		rvel += 20;
-		lvel += 20;
+		rvel += 40;
+		lvel += 40;
 	}
 
 	//force tight turn
