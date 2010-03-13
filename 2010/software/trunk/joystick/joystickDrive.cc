@@ -14,7 +14,7 @@ int main()
 		{
 			return(0);
 		}
-		usleep(1000);
+		usleep(10000);
 		
 	}
 }
@@ -54,7 +54,67 @@ inline double scaleThrottle(double t)
 	std::cout << "t: " << t << "\tf(t):" << (t-50)*slope + 50 << std::endl;
 	return( (t-50)*slope + 50 );
 }
+void joystickDrive::setMotor()
+{
+	readJoystick();
+	
+	double mag = sqrt(leftAnalogY*leftAnalogY);
 
+	double realmag = sqrt(leftAnalogX*leftAnalogX + leftAnalogY*leftAnalogY) / (double(32768)*sqrt(2)) * 225;
+
+	if(realmag < 50)
+	{
+		m_motorCtr.setmotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
+		return;
+	}
+
+	double vel = mag / (double(32768)*sqrt(2)) * 160;
+
+	double side = leftAnalogX / (double(32768)*sqrt(2)) * double(200) / double(5);
+
+	double rvel = -1, lvel = -1;
+
+	rvel = vel + side;
+	lvel = vel - 1.5*side + 35;
+
+
+	//turbo
+	if((joystickButtons & 32) == 32)
+	{
+		rvel += 10;
+		lvel += 10;
+	}
+	//turbo
+	if((joystickButtons & 128) == 128)
+	{
+		rvel += 20;
+		lvel += 20;
+	}
+
+	//force tight turn
+	if((joystickButtons & 1) == 1)
+	{
+		m_motorCtr.setmotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, rvel);
+		std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set left: " << 0 << " right: " << vel << std::endl;
+		return;
+	}
+	else if((joystickButtons & 4) == 4)
+	{
+		m_motorCtr.setmotorPWM(MC_MOTOR_FORWARD, lvel, MC_MOTOR_FORWARD, 0);
+		std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set left: " << vel << " right: " << 0 << std::endl;
+		return;
+	}
+	double r = -1,l=-1;
+	#if 0
+	if(!qD.getEncoderVel(r,l))
+	{
+		std::cout << "r: " << r << "l: " << l << std::endl;
+	}
+	#endif
+	std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set left: " << lvel << " right: " << rvel << " side: " << side <<std::endl;
+	m_motorCtr.setmotorPWM(MC_MOTOR_FORWARD, rvel, MC_MOTOR_FORWARD, lvel);
+}
+#if 0
 void joystickDrive::setMotor()
 {
 	readJoystick();
@@ -121,7 +181,7 @@ void joystickDrive::setMotor()
 
 	m_motorCtr.setmotorPWM(MC_MOTOR_FORWARD, vel+theta, MC_MOTOR_FORWARD, vel-theta);
 }
-
+#endif
 void joystickDrive::joystick_close(void) {
 	// Send an SDL_QUIT event to the joystick event loop
 	SDL_QuitEvent quitEvent = { SDL_QUIT };

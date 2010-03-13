@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "OSMC_driver.hpp"
+#include "quadCoderDriver.hpp"
 //#define TEBOARD_MOTOR_CTRL
 #define ARDUINO_MOTOR_CTRL
 
@@ -22,6 +23,7 @@ class joystickDrive
 	private:
 
 		OSMC_driver m_motorCtr;
+		//quadCoderDriver qD;
 
 		pthread_t joystick_thread;
 		SDL_Joystick *joystick;
