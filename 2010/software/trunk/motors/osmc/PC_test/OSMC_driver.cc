@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-const int OSMC_driver::_max_speed_ = 255;
+const int OSMC_driver::_max_speed_ = 130;
 const int OSMC_driver::MINREQSPEED = 30;
 
 OSMC_driver::OSMC_driver()
@@ -67,7 +67,7 @@ int OSMC_driver::set_heading(int iFwdVelocity, int iRotation)
 	int left  = iFwdVelocity + iRotation ;
 	int right = iFwdVelocity - iRotation ;
 
-	if (false)
+	if (true)
 	{
 		// scale speed
 		left  = int( float(left)  * float(_max_speed_) / float(255) ) ;
@@ -136,19 +136,21 @@ joystick_reply_t OSMC_driver::getJoystickData()
 }
 
 // start dumb + hysteresis control code
-void OSMC_driver::getNewVel_dumb(const double rtarget, const double ltarget, const double lvel, const double rvel, const int lmset, const int rmset,  int& out_lmset, int& out_rmset)
+void OSMC_driver::getNewVel_dumb(const double rtarget, const double ltarget, const double rvel, const double lvel, const int rmset, const int lmset,  int& out_rmset, int& out_lmset)
 {
-	int posstep = 3;
-	int negstep = -3;
+	int posstep = 1;
+	int negstep = -1;
+
+	double thresh = .03;
 
 	double lerror = ltarget - lvel;
 	double rerror = rtarget - rvel;
 
-	if(lerror > .1)
+	if(lerror > thresh)
 	{
 		out_lmset = lmset + posstep;
 	}
-	else if(lerror < -.1)
+	else if(lerror < -thresh)
 	{
 		out_lmset = lmset + negstep;
 	}
@@ -157,11 +159,11 @@ void OSMC_driver::getNewVel_dumb(const double rtarget, const double ltarget, con
 		out_lmset = lmset;
 	}
 
-	if(rerror > .1)
+	if(rerror > thresh)
 	{
 		out_rmset = rmset + posstep;
 	}
-	else if(rerror < -.1)
+	else if(rerror < -thresh)
 	{
 		out_rmset = rmset + negstep;
 	}

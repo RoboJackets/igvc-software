@@ -24,7 +24,8 @@ int main()
 
 	timeval t0;
 	gettimeofday(&t0, NULL);
-	for(int i = 0; i < 10; i++)
+	//for(int i = 0; i < 10; i++)
+	for(;;)
 	{
 		double r = -1, l = -1;
 		if(qD.getEncoderVel(r,l))
@@ -33,7 +34,12 @@ int main()
 			goto END;
 		}
 		int out_rmset, out_lmset;
-		motordriver.getNewVel_dumb(ltarget, rtarget, l, r, lm, rm,  out_lmset, out_rmset);
+//(const double rtarget, const double ltarget, const double rvel, const double lvel, const int rmset, const int lmset,  int& out_rmset, int& out_lmset)
+		motordriver.getNewVel_dumb(rtarget, ltarget, r, l, rm, lm,  out_rmset, out_lmset);
+
+		//int rdir = (out_rmset > 0) ? MC_MOTOR_FORWARD : MC_MOTOR_BACKWARD;
+		//int ldir = (out_lmset > 0) ? MC_MOTOR_FORWARD : MC_MOTOR_BACKWARD;
+
 		if(motordriver.setmotorPWM(MC_MOTOR_FORWARD, out_rmset, MC_MOTOR_FORWARD, out_lmset))
 		{
 			std::cerr << "motor set fail" << std::endl;
@@ -45,7 +51,10 @@ int main()
 		gettimeofday(&now, NULL);
 		double t = double(now.tv_sec - t0.tv_sec) + ( double(1e-6)*double(now.tv_usec - t0.tv_usec) );
 		std::cout << "t: " << t << " motor r" << out_rmset << " motor l:" << out_lmset << " r: " << r << " l: " << l << std::endl;
-		usleep(1e3);
+		usleep(1e5);
+
+		lm = out_lmset;
+		rm = out_rmset;
 	}
 
 }
