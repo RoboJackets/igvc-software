@@ -18,7 +18,8 @@ int main()
 	motordriver.setmotorPWM(MC_MOTOR_FORWARD, stepmag, MC_MOTOR_FORWARD, stepmag);
 	timeval t0;
 	gettimeofday(&t0, NULL);
-	for(int i = 0; i < 10; i++)
+	//for(int i = 0; i < 10; i++)
+	for(;;)
 	{
 		double r = -1, l = -1;
 		if(!qD.getEncoderVel(r,l))
