@@ -8,13 +8,17 @@ class quadCoderDriver
 {
 	public:
 	quadCoderDriver();
+	bool getEncoderVel(double& rvelFWD, double& lvelFWD,double& rvelAFT, double& lvelAFT);
+	bool resetCount(byte iface);
 
-	bool getEncoderState(new_encoder_pk_t& out);
-	bool getEncoderVel(double& rvel, double& lvel);
-	bool resetCount();
 
 	private:
-	ArduinoInterface ai;
+	bool getEncoderVel(ArduinoInterface& ai, double& rvel, double& lvel);
+	bool getEncoderState(ArduinoInterface& ai, new_encoder_pk_t& out);
+	bool resetCount(ArduinoInterface& ai);
+
+	ArduinoInterface fwd;
+	ArduinoInterface aft;
 
 	bool m_connected;
 };
