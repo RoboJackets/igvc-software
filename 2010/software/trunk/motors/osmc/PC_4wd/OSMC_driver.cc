@@ -8,7 +8,8 @@ const int OSMC_driver::MINREQSPEED = 30;
 OSMC_driver::OSMC_driver()
 {
 	m_connected = false;
-	ai.initLink(OSMC_IF_BOARD);
+	fwr.initLink(OSMC_IF_FOR_BOARD);
+	aft.initLink(OSMC_IF_AFT_BOARD);
 	m_connected = true;
 }
 #if 0
@@ -18,22 +19,15 @@ OSMC_driver::connect()
 	m_connected = true;
 }
 #endif
-reply_dtick_t OSMC_driver::getEncoderData()
+
+bool OSMC_driver::getCurrentData(current_reply_t& f, current_reply_t& b)
 {
-	ai.sendCommand(MC_GET_ENCODER_TICK, NULL, 0);
-
-	byte retcmd = 0;
-	byte* data = NULL;
-	ai.recvCommand(retcmd, data);
-
-	reply_dtick_t out;
-	
-	memcpy(&out, data, sizeof(reply_dtick_t));
-	delete[] data;
-	return out;
+	f = getCurrentData(fwr);
+	b = getCurrentData(aft);
+	return true;
 }
 
-current_reply_t OSMC_driver::getCurrentData()
+current_reply_t OSMC_driver::getCurrentData(ArduinoInterface& ai)
 {
 	ai.sendCommand(MC_GET_RL_CURR_VAL, NULL, 0);
 
@@ -48,48 +42,16 @@ current_reply_t OSMC_driver::getCurrentData()
 	return out;
 }
 
-bool OSMC_driver::set_motors(int leftVelocity, int rightVelocity)
+
+bool OSMC_driver::setmotorPWM(const byte rightDirFWD, const byte rightDutyCycleFWD, const byte leftDirFWD, const byte leftDutyCycleFWD, const byte rightDirAFT, const byte rightDutyCycleAFT, const byte leftDirAFT, const byte leftDutyCycleAFT)
 {
+	bool a = setmotorPWM(fwr, rightDirFWD, rightDutyCycleFWD, leftDirFWD, leftDutyCycleFWD);
+	bool b = setmotorPWM(aft, rightDirAFT, rightDutyCycleAFT, leftDirAFT, leftDutyCycleAFT);
 
-	byte leftDutyCycle = std::min(abs(leftVelocity), 255);
-	byte leftDir = (leftVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
-
-	byte rightDutyCycle = std::min(abs(rightVelocity), 255);
-	byte rightDir = (rightVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
-
-	return setmotorPWM(rightDir, rightDutyCycle, leftDir, leftDutyCycle);
-
+	return a && b;
 }
 
-int OSMC_driver::set_heading(int iFwdVelocity, int iRotation)
-{
-	// convert
-	int left  = iFwdVelocity + iRotation ;
-	int right = iFwdVelocity - iRotation ;
-
-	if (true)
-	{
-		// scale speed
-		left  = int( float(left)  * float(_max_speed_) / float(255) ) ;
-		right = int( float(right) * float(_max_speed_) / float(255) ) ;
-	}
-	else
-	{
-		// cap speed
-		if (left  > _max_speed_) left  = _max_speed_ ;
-		if (right > _max_speed_) right = _max_speed_ ;
-	}
-
-	// motors don't respond until certain output is reached
-	if (right != 0) right += MINREQSPEED ;
-	if (left  != 0) left  += MINREQSPEED ;
-
-	// do it!
-	return this->set_motors( left , right );
-}
-
-
-bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
+bool OSMC_driver::setmotorPWM(ArduinoInterface& ai, byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
 {
 	speed_set_t cmdpk;
 	cmdpk.sr = rightDutyCycle;
@@ -119,7 +81,14 @@ bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, 
 	return false;
 }
 
-joystick_reply_t OSMC_driver::getJoystickData()
+bool OSMC_driver::getJoystickData(joystick_reply_t& f, joystick_reply_t& b)
+{
+	f = getJoystickData(fwr);
+	b = getJoystickData(aft);
+	return true;
+}
+
+joystick_reply_t OSMC_driver::getJoystickData(ArduinoInterface& ai)
 {
 
 	ai.sendCommand(MC_GET_JOYSTICK, NULL, 0);
@@ -173,7 +142,7 @@ void OSMC_driver::getNewVel_dumb(const double rtarget, const double ltarget, con
 	}
 }
 
-void OSMC_driver::getNewVel_pd(const double ltarget, const double rtarget, const double lvel, const double rvel,const double lastlvel, const double lastrvel const int rmset, const int lmset, double dt, int& out_rmset, int& out_lmset)
+void OSMC_driver::getNewVel_pd(const double ltarget, const double rtarget, const double lvel, const double rvel,const double lastlvel, const double lastrvel, const int rmset, const int lmset, double dt, int& out_rmset, int& out_lmset)
 {
 
 	const double kp = .1;
