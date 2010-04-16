@@ -19,11 +19,12 @@
 quadCoderDriver::quadCoderDriver()
 {
 	m_connected = false;
-	ai.initLink(ENCODER_IF_BOARD);
+	fwd.initLink(ENCODER_IF_FOR_BOARD);
+	aft.initLink(ENCODER_IF_AFT_BOARD);
 	m_connected = true;
 }
 
-bool quadCoderDriver::getEncoderState(new_encoder_pk_t& out)
+bool quadCoderDriver::getEncoderState(ArduinoInterface& ai, new_encoder_pk_t& out)
 {
 
 	if(ai.sendCommand(ENCODER_GET_READING, NULL, 0))
@@ -44,12 +45,19 @@ bool quadCoderDriver::getEncoderState(new_encoder_pk_t& out)
 	return false;
 }
 
+bool quadCoderDriver::getEncoderVel(double& rvelFWD, double& lvelFWD,double& rvelAFT, double& lvelAFT)
+{
+	bool a = getEncoderVel(fwd, rvelFWD, lvelFWD);
+	bool b = getEncoderVel(aft, rvelAFT, lvelAFT);
+	return a&b;
+}
+
 //in meters per second
-bool quadCoderDriver::getEncoderVel(double& rvel, double& lvel)
+bool quadCoderDriver::getEncoderVel(ArduinoInterface& ai, double& rvel, double& lvel)
 {
 	new_encoder_pk_t out;
 	
-	if(getEncoderState(out))
+	if(getEncoderState(ai, out))
 	{
 		return true;
 	}
@@ -63,7 +71,23 @@ bool quadCoderDriver::getEncoderVel(double& rvel, double& lvel)
 	return false;
 }
 
-bool quadCoderDriver::resetCount()
+bool quadCoderDriver::resetCount(byte iface)
+{
+	if(iface == ENCODER_IF_FOR_BOARD)
+	{
+		return resetCount(fwd);
+	}
+	else if(iface == ENCODER_IF_AFT_BOARD)
+	{
+		return resetCount(aft);
+	}
+	else
+	{
+		return true;
+	}
+}
+
+bool quadCoderDriver::resetCount(ArduinoInterface& ai)
 {
 	new_encoder_pk_t out;
 	
