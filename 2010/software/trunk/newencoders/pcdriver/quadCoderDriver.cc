@@ -4,10 +4,17 @@
 /* ROBOT PHYSICAL DEFINITIONS */  /*TODO: determine these values */
 #define MOTOR_RATIO		((double)20)
 //#define WHEEL_RADIUS		((double)5 / (double)MOTOR_RATIO)
-#define WHEEL_RADIUS		(double(.146) / double(2))
-#define WHEEL_BASE		((double)28)
-#define NUMBERTICKS		double(800)
 
+//in meters
+#define WHEEL_RADIUS		(double(.146) / double(2))
+//unknown units
+#define WHEEL_BASE		((double)28)
+
+//there are 4 ticks per mark on the disk
+//#define NUMBERTICKS		double(800)
+#define NUMBERTICKS		double(400)
+
+//this is det by delay within arduino code
 #define SMAPLEDELAY		double(5e-3)
 quadCoderDriver::quadCoderDriver()
 {
@@ -37,6 +44,7 @@ bool quadCoderDriver::getEncoderState(new_encoder_pk_t& out)
 	return false;
 }
 
+//in meters per second
 bool quadCoderDriver::getEncoderVel(double& rvel, double& lvel)
 {
 	new_encoder_pk_t out;
@@ -51,6 +59,8 @@ bool quadCoderDriver::getEncoderVel(double& rvel, double& lvel)
 
 	lvel = ldtheta * WHEEL_RADIUS;
 	rvel = rdtheta * WHEEL_RADIUS;
+
+	return false;
 }
 
 bool quadCoderDriver::resetCount()
