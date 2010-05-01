@@ -5,8 +5,8 @@
 #include "ArduinoCmds.hpp"
 #include <math.h>
 
-const byte maxRightDuty = 150;
-const byte maxLeftDuty = 150;
+const byte maxRightDuty = 255;
+const byte maxLeftDuty = 255;
 
 //const byte maxRightDuty = 238;
 //const byte maxLeftDuty = 255;
