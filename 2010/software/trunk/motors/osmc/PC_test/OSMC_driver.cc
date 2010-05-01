@@ -172,13 +172,25 @@ void OSMC_driver::getNewVel_dumb(const double rtarget, const double ltarget, con
 		out_rmset = rmset;
 	}
 }
-#if 0
-void OSMC_driver::getNewVel_pd(const double ltarget, const double rtarget, const double lvel, const double rvel, const int rmset, const int lmset,  int& out_rmset, int& out_lmset)
+
+void OSMC_driver::getNewVel_pd(const double ltarget, const double rtarget, const double lvel, const double rvel,const double lastlvel, const double lastrvel, const int rmset, const int lmset, double dt, int& out_rmset, int& out_lmset)
 {
 
-	const double k = .1;
+	const double kp = .1;
+	const double kd = .1;
 
 	double lerror = ltarget - lvel;
 	double rerror = rtarget - rvel;
+
+	double lslope = (lvel - lastlvel) / dt;
+	double rslope = (rvel - lastrvel) / dt;
+
+	out_lmset = kp*lerror + kd*lslope;
+	out_rmset = kp*rerror + kd*rslope;
 }
-#endif
+
+
+void followCirc(double tangent[2], double vmag)
+{
+
+}
