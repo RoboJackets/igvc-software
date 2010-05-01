@@ -10,6 +10,9 @@
 #include "current_sensors.hpp"
 #include "motorPWM.hpp"
 #include "analogjoystick.hpp"
+
+#include "common_defines.hpp"
+
 //#include "profile.hpp"
 extern "C" void __cxa_pure_virtual()
 {
@@ -36,11 +39,12 @@ void HCF()
 int main()
 {	
 	init();
-	Serial.begin(57600);
+	Serial.begin(SERIAL_BAUD);
 
 	unsigned long tx_num = 0;
 	unsigned long rx_num = 0;
 	bool analogJoyOn = false;
+	unsigned long lastsettime = 0;
 	//setup
 	//pinMode(leftCurrentADCPin, INPUT);
 	//pinMode(rightCurrentADCPin, INPUT);
@@ -67,6 +71,16 @@ int main()
 	unsigned long joystickpollt0 = millis();
 	for(;;)
 	{
+
+		if((millis() - lastsettime) > 2e3)
+		{
+			if(!analogJoyOn)
+			{
+				setRightMotorDutyCycle(MC_MOTOR_FORWARD, 0);
+				setLeftMotorDutyCycle(MC_MOTOR_FORWARD, 0);
+			}
+		}
+
 		if(digitalRead(joystickEnable) == LOW)
 		{
 			analogJoyOn = true;
@@ -221,6 +235,8 @@ int main()
 		
 				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 				tx_num++;
+
+				lastsettime = millis();
 				break;
 			}
 			case MC_GET_JOYSTICK:
