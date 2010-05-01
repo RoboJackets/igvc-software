@@ -42,9 +42,12 @@ const byte MC_MOTOR_FORWARD		= 0x00;
 const byte MC_MOTOR_REVERSE		= 0x01;
 
 //IGVC2010 Board IDs
-const byte OSMC_IF_BOARD 	= 0x00;
+const byte OSMC_IF_BOARD 		= 0x00;
 const byte ENCODER_IF_BOARD 	= 0x01;
-
+const byte OSMC_IF_FOR_BOARD 	= 0x02;
+const byte OSMC_IF_AFT_BOARD 	= 0x03;
+const byte ENCODER_IF_FOR_BOARD = 0x04;
+const byte ENCODER_IF_AFT_BOARD = 0x05;
 #if 0
 //1 byte commands, laptop -> arduino
 #define ARDUINO_GETSTATUS_CMD 'r'
