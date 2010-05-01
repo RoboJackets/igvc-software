@@ -30,7 +30,7 @@ int main()
 		if(!qD.getEncoderVel(r,l))
 		{
 			std::cout << "r: " << r << "l: " << l << std::endl;
-		}		
+		}
 
 		if(reset)
 		{

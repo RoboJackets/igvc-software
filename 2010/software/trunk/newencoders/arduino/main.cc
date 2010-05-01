@@ -40,25 +40,22 @@ int main()
 	pinMode(right_encoder_pin_A, INPUT);
 	pinMode(right_encoder_pin_B, INPUT);
 
-	attachInterrupt(0, encoder_logger, CHANGE);
-	attachInterrupt(1, encoder_logger, CHANGE);
+	//attachInterrupt(0, encoder_logger, CHANGE);
+	//attachInterrupt(1, encoder_logger, CHANGE);
 
-	//attachInterrupt(2, rightenc_event_A, CHANGE);
-	//attachInterrupt(3, rightenc_event_B, CHANGE);
+	attachInterrupt(0, leftenc_event, CHANGE);
+	attachInterrupt(1, rightenc_event, CHANGE);
 
 	int32_t tx_num = 0;
 
-	//left_ticks = 0;
-	//right_ticks = 0;
-	coder_ticks = 0;
+	left_coder_ticks = 0;
+	right_coder_ticks = 0;
+	//coder_ticks = 0;
 	for(;;)
 	{
-		/*	
-		if(!(Serial.available() >= PACKET_HEADER_SIZE))
-		{
-			continue;
-		}
-		*/
+		//overspeed test
+		if((lastupdate - milis()) > 75)
+		//
 		header_t header;
 		byte* indata = NULL;
 
@@ -109,6 +106,7 @@ int main()
 				tx_num++;
 				break;
 			}
+			#if 0
 			case ENCODER_GET_READING:
 			{
 				header_t headerOut;
@@ -138,6 +136,34 @@ int main()
 				tx_num++;
 				break;
 			}
+			#else
+			case ENCODER_GET_READING:
+			{
+				header_t headerOut;
+				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
+
+				headerOut.packetnum = tx_num;
+				headerOut.cmd = ENCODER_GET_READING;
+				headerOut.size = sizeof(new_encoder_pk_t);
+
+				new_encoder_pk_t body;
+
+				int64_t first_left = left_coder_ticks;
+				int64_t first_right = right_coder_ticks;
+				_delay_ms(5);
+				body.pl = left_coder_ticks;
+				body.pr = right_coder_ticks;
+
+				body.dl = left_coder_ticks - first_left;
+				body.dr = right_coder_ticks - first_right;
+
+				uint8_t* msg = (uint8_t*)&(body);
+				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
+				Serial.write(msg, sizeof(new_encoder_pk_t));
+				tx_num++;
+				break;
+			}
+			#endif
 			case ENCOER_RESET_COUNT:
 			{
 				header_t headerOut;
@@ -147,9 +173,9 @@ int main()
 				headerOut.cmd = ENCOER_RESET_COUNT;
 				headerOut.size = 0;
 
-				//left_ticks = 0;
-				//right_ticks = 0;
-				coder_ticks = 0;
+				left_coder_ticks = 0;
+				right_coder_ticks = 0;
+				//coder_ticks = 0;
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
 				tx_num++;
 				break;
