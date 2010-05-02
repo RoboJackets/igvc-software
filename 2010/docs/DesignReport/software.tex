@@ -1,0 +1,145 @@
+
+\section{Software}
+% Updated version of software, based on RIP paper
+The new version of the software adds new passing capabilities using an optimization-based approach. The previous system supported moving, shooting, and could play the rules of soccer, but did not handle multirobot activity, such as passing, in a reliable manner. This year, as in the previous year, we use the shared vision system for field sensing using standardized patterns.  For 2010, we will extend the current system to implement a robust offensive passing system where the robots acquire ball control and make a coordinated series of passes until it can shoot on goal. We employ a multi-stage planner that creates initial plans with an \textit{analytical planner} and then performs \textit{nonlinear constrained optimization} over the positions of robots to create an improved plan that mixed low-level controllers can execute.  
+
+\begin{figure}
+  \centering
+  \vspace {0 cm}
+  \includegraphics[totalheight=1.6in]{images/gen_play}
+  \caption{A tree diagram showing a play structure of robots, where the five robots on the team are divided into single goalie, and four field robots executing under a single play.}
+  \label{fig:play_structure}
+\end{figure}
+
+The underlying structure of the software system is a streamlined variation on the \textit{Skills, Tactics and Plays} (STP) framework \cite{browning2005stp}, with more general plays and behaviors, in which a ``play'' is a top-level structure that the strategic-level gameplay module can switch between depending on the state of the game, and ``behaviors,'' which encapsulate the functionality of either one robot or a set of robots at once. A sample partitioning of robots into behaviors by a top-level play is shown in Figure \ref{fig:play_structure}. This accomplishes the same goals as the STP framework, but without strict divisions between ``Tactics' and ``Skills.'' During the last competition GT RoboCup SSL participated in, the system provided sufficient means to manage a variety of scenarios required by the rules, but was less robust in general fluid gameplay due to the inability to robustly collaborate between robots.  The offensive system at the time consisted of a pair of robots that chased the ball around the field and tried to make shots.  This system, while simple, is effective against weaker opponents, but proved to be no match for teams with robust passing systems.  
+
+There are a variety of means of approaching optimization in the context of high-dimensional systems, and this section will focus on the relationship between optimizing robot trajectories in an optimal controls sense by recovering robot trajectories from measurements taken on the environment.  The \textit{Simultaneous Localization and Mapping} (SLAM) problem is a canonical problem in the field, where an optimization algorithm must find the most likely position of a robot in an environment based on a series of measurements of the environment.  Much of the work in the field has focused on approaching this problem using Kalman or particle filters  \cite{Thrun05book,Thrun04ijrr,Dellaert03tutorial} to represent the state of the system, however we will focus on solutions that provide the entire trajectory of the robot, otherwise known as the complete SLAM problem.  The resulting operation used in solving SLAM problems becomes a matter of developing fast, multi-variable optimization algorithms, and there has been much work in this area to improve the underlying optimization techniques, particularly from graph theory \cite{Triggs99,Bertele72jmaa,Bertele72book}.  
+
+In order to perform robust, efficient passing, we have decided on a particular structure for the offense play. The basic concept is that if there is a shot available or a sequence of passes to a shot (henceforth known as a "shooting solution"), then the system will construct the sequence of paths for robots and kicks, run a nonlinear optimization technique to improve the path and ensure viability, and then execute it.
+
+\begin{figure}
+  \centering
+  \vspace {0 cm}
+  \subfloat[][Initial Plans]{\includegraphics[width=0.4\textwidth]{images/plan2_resized}}
+  \subfloat[][Plan Evaluation]{\includegraphics[width=0.4\textwidth]{images/plan3_resized}}
+  \qquad
+  \subfloat[][Optimized Plan]{\includegraphics[width=0.4\textwidth]{images/plan4_resized}}
+  \subfloat[][Cost Function Graph]{\includegraphics[width=0.4\textwidth]{images/plan5_resized}}
+  \caption{The plan optimization process, starting with a rough evaluation of plans and then optimization of a small set to generate a single optimized plan.}
+  \label{fig:planner-steps}
+\end{figure} 
+
+The resulting system structure for the offensive passing algorithm has the following structure, shown in Figure \ref{fig:planner-steps}.
+\begin{enumerate}
+ \item \textbf{Analytic Planner} Given the positions of all the robots and the ball, it is possible to determine if there is a shot solution available with a simple weighted graph search. This can be a simple heuristic for shot viability, or a more sophisticated system as necessary.
+ \item \textbf{Plan Evaluation} We take a set of plans and sort by quality on a number of metrics to create a good initial estimate for a plan.
+ \item \textbf{Optimization} With an initial estimate of a plan, the optimization engine will be able to create a graphical model of the plan and optimize for an optimal sequence of actions. The particular optimization engine is a nonlinear constrained optimization algorithm primarily designed for Simultaneous Localization and Mapping, but we will exploit the duality between this planning problem (create an optimal path from constraints) and SLAM (recover a previously traveled path given measurements).
+ \item \textbf{Execution} Given a viable plan, we choose among a variety of motion planning and behavioral approaches can be used to execute the actions parameterized by the plan.  
+\end{enumerate}
+
+The optimization algorithm comes from the GTSAM library \cite{Dellaert05rss} developed in the Georgia Tech Robotics and Intelligent Machines (RIM) center with Frank Dellaert, and is derived from Sequential Quadratic Programming. This algorithm is robust to both nonlinear systems and constraints, and has been reformulated to work in a graphical model environment, which allows for an intuitive construction of stochastic switched hybrid systems.
+
+\subsection{Analytic Planning}
+The analytic planner creates an initial set of pass plans, which consist of a sequence of passes ending with a shot on goal given the robots on the field.  We do a search over these possible plans and construct a cost function for pass solutions that penalizes passes that are too long or that are clearly blocked by either an opponent or another teammate. Special care is taken to not penalize solutions that have a possibility of being good passes at future levels of the planner. Using this cost initial function, we sort possible passes and select a subset of the best passes to send to the optimization phase.
+
+The cost function used resembles the evaluation step in the STP planner, though it differs because our pass structure is created before any robot has the ball, and includes all possible passes, allowing us to optimize the passer and the receivers, as well as the ball path.
+
+\subsection{Optimization}
+Once a plan has been selected for further evaluation, we use a constrained nonlinear optimization approach to find an improved solution.  A key observation in the development of the optimization technique is the dual nature between optimizing a robot control system and SAM.  In the SAM problem, the basic goal is to recover a robot trajectory based on a set of constraints from the robot's sensor systems and motion models after the robot has moved through the environment.  In the controls case, the goal is to determine an optimal trajectory based on a set of constraints, such as those on robot motion or obstacle avoidance.  In both cases, the goal is to recover a robot trajectory from a series of constraints, and they primarily differ in what sort of constraints are applied.  Rather than using the formulation of optimal control, we will use a graphical model approach to assemble a full cost function over the environment.  
+
+There are two steps to effective optimization of a soccer plan:
+\begin{itemize}
+ \item \textit{Factor Graph Construction}: we assemble a cost function to optimize using a piecewise factor graph approach usually used in SAM solutions.  This allows development by means of combining a large number of constraint functions that individually relate only a small number of variables.
+\item \textit{Nonlinear Optimization}: after the general cost function is assembled, we use Sequential Quadratic Programming (SQP) to reduce the a system with an arbitrary smooth nonlinear cost function and constraint set to a quadratic programming problem suitable for solving via Multi-frontal QR factorization.  
+ \end{itemize}
+
+The formulation of actual factors in this approach, as it derives from the need to define an error function in SAM, has the form of a function $h(x)$ dependent on the state of the system and a measurement $z$, where in the SAM case, the $h(x)$ is the generative measurement model and the $z$ is the actual value of the system, but in our system, $h(x)$ describes the current state with relation to a cost function, and $z$ is the optimal value.  Expressed in general form, these factors combine as in (\ref{factors}) to form a nonlinear least squares problem, where $x$ forms the set of state variables, $z_{k}$ is the optimal value for the constraint, and $R_{k}$ is a weighting matrix on the cost function.
+
+\begin{equation} \label{factors}
+ x^{*} = argmin(\frac{1}{2}\sum_{k}\left\Vert h_{k}(x_{k})-z_{k}\right\Vert _{R_{k}}^{2})
+\end{equation} 
+
+With this error-function approach, especially as it allows us to place relationships between variables in the system, we can build the cost function to define an optimal solution.  One of the basic cases where we assemble these cost functions is to optimize for shorter passes between robots, as well as smaller robot movements, which we express using an optimal distance where $z=0$, and $h(x,y)=\left\Vert x-y \right\Vert$.  By connecting all of nodes with constraints such as these, we can simultaneously optimize the movement of robots and passes to find a series of movements and passes that minimizes all of the distances.  In this unconstrained optimization case, we can approach the actual optimization using nonlinear unconstrained optimization techniques such as Levenberg-Marquardt or Gauss-Newton. Because of the least-squares formulation of a quadratic cost function, we can approximate the Hessian of the overall cost function using only the Jacobian of $h(x)$.  The factor can be approximated through a linearization of the measurement function, which produces the Quadratic Programming problem shown in (\ref{eq:full_linear_factor}).  
+
+\begin{equation} \label{eq:full_linear_factor}
+x^{*} = argmin(\frac{1}{2}\sum_{k}\left\Vert H_{x_{k}}x+h(x_{k_{0}})-z\right\Vert _{R_{k}}^{2})
+\end{equation}
+
+Some other cases where factors define a means to improve a plan:
+\begin{itemize}
+ \item Maximizing the distance of pass trajectories from other robots to prevent pass interception.
+ \item Maximizing the distance between robot paths and opponent robots to avoid collisions and improve movement speed.
+ \item Minimizing the angle between the facing of a robot upon receiving a pass and making the next pass so as to minimize the time necessary aiming.  
+\end{itemize}
+
+While this approach works for basic scenarios, such as making the robots move and pass the smallest possible distance, we also need to express hard constraints on the motion and passing of robots, such as staying on the field and not driving through other robots.  These constraints are not just cost functions to be minimized, but rather requirements that must be met for any solution to be feasible.  We can extend the previous expression to allow the incorporation of these hard constraints by redefining the optimization problem as a Lagrangian optimization problem, as in (\ref{constraints}), where we minimize the cost function over the states in the system and the Lagrange multiplier cofactors $\lambda$.
+
+\begin{equation} \label{constraints}
+x^{*} = argmin(\frac{1}{2}\sum_{k}\left\Vert h_{k}(x_{k})-z_{k}\right\Vert _{R_{k}}^{2}-\lambda^{T} g(x))
+\end{equation} 
+
+We can express the constraints in the form of $g(x)$, where $g(x)$ defines a vector-valued function where the constraints are considered fulfilled if $g(x)\leq 0$, which allows both equality constraints, such as ensuring passes arrive at the same time and location as the robot receiving the pass, or inequality constraints, such as maintaining bounds on the positions, velocities and acceleration of the robots to keep them on the field and driving with viable commands.  The addition of these constraints requires a more sophisticated solution method, and in our case, we use Sequential Quadratic Programming (SQP) to reduce the full nonlinear constrained problem into a series of quadratic programming subproblems with linear constraints, which can then be solved with a mixture of direct elimination of the constrained variables, and unconstrained optimization on the remaining variables \cite{Fletcher87book}. 
+
+\subsection{Tracking}
+To improve passing and overall system robustness, we implemented a new ball tracking filter based on work in \cite{kwok2004map}. The tracker uses a Rao-Blackwellized Particle Filter (RBPF) which is able to track in the presence of non-linear kicks and deflections. A state transition model handles these non-linearities, and we perform standard Extended Kalman Filter (EKF) tracking within each state. Our transition model includes two states: RollingWithFriction and Kicked. Compared with our previous EKF filter, this tracker is better at handling the range of ball scenarios, and our tests in both simulation and on the field showed it to be superior when the ball is rolling, being kicked, or bouncing off obstacles. Robot tracking is generally less erratic than ball tracking, and we did not need to use a more complex filter.
+
+\subsection{Control}
+In order translate the plans to robots in the actual system, we have a number of low-level controllers that execute commands. We can switch between various control approaches for particular applications, which is necessary to avoid suboptimal performance in some situations.  There are several means of issuing commands to the robots to execute movements across the field:
+\begin{description}
+ \item[RRT Planning] For situations when we need a robot to move around opponents, the ball, or teammates, we can use a simple RRT-based system to find a path.
+ \item[Direct Path Commands] We can instruct a robot to execute a specific path, which allows for more control by the higher-level modules in the system.  
+ \end{description}
+
+The low-level path execution uses a controller that drives the robots to their destinations as fast as possible with the ideal trapezoidal velocity profile.  Upon starting movement, the robot begins at maximum acceleration until it reaches maximum velocity, maintains the maximum velocity while following the path, and then slows at its maximum deceleration rate to stop at its goal. The bounds used in this model derive from empirical tests of robot performance.  
+
+
+
+
+% \paragraph{}
+% % This paragraph is from the 2008 TDP and has not been updated. If you update it, please remove this comment
+% The software system consists of separate processes that communicate over UDP. Each component can start and stop transparently to the other processes. This makes it easy to quickly bring down, modify, and restart one part of the system without affecting unchanged components. Each particular packet type that needs to be sent is defined by a specific port number, and a different range of ports for each team. This means that the receiving process only needs to listen on the port of interest and know which packet type to expect.
+% \paragraph{}
+% % This paragraph is from the 2008 TDP and has not been updated. If you update it, please remove this comment
+% Software is divided into 5 major components: vision, communication, motion, high level control, and simulation. The vision, communication, and simulation components are shared by both teams, while motion, and high level control are unique to the team they operate.
+% 
+% \subsection{Communication}
+% \paragraph{}
+% % This paragraph is from the 2008 TDP and has not been updated. If you update it, please remove this comment
+% The communication process is responsible sending radio commands from the host to the radio base station and out to the robots. It handles all radio specific tasks as well as controlling the robots by mapping software IDs to physical robots. Communication accepts packets that specify the speeds of motors, roller state, and kicking power.
+% 
+% \subsection{Motion}
+% \paragraph{}
+% % This paragraph is from the 2008 TDP and has not been updated. If you update it, please remove this comment
+% The motion process is responsible for controlling the motion and basic capabilities of the robots. Higher level components specify the intended function or location of the robots and allow the motion system to handle the detailed execution. 
+% 
+% \subsubsection{Behaviors and Constraints}
+% \paragraph{}
+% % This paragraph is from the 2008 TDP and has not been updated. If you update it, please remove this comment
+% Motion takes two parameter types: behaviors and constraints. Constraints limit the motion of a robot to particular locations and geometry on the field. Point constraints would make the robot stay at a certain point while line and segment constraints would limit the motion to the specified lines or segments. There are also constraints on angles for facing the ball, a particular robot, or a fixed angle. All of the constraint types are separated for motion control reasons. Specifying a constraint on the ball allows the motion to do better ball tracking when ball velocity is known. This allows for better tracking compared to setting the target angle from higher level control. 
+% \paragraph{}
+% % This paragraph is from the 2008 TDP and has not been updated. If you update it, please remove this comment
+% Behaviors are used as both modifications and additions to the constraints. Behaviors include such things as marking another player or handling the ball. When a behavior is active it changes the way certain constraints are handled in order to meet the specifics of the behavior. A simple example is retrieving a loose ball, where moving to an exact position is not necessary but speed and ability to block the other team is.
+% 
+% \subsubsection{Path Planning}
+% \paragraph{}
+% % This paragraph is from the 2008 TDP and has not been updated. If you update it, please remove this comment
+% A novel path planner has been developed for this year's system. The algorithm examines all possible obstacles from the perspective of both the controlled robot and the intended destination. Obstacles are defined to be all other robots as well as zones to avoid the ball during kickoff and game stoppage. 
+% 
+% \paragraph{Algorithm:}
+% % This paragraph is from the 2008 TDP and has not been updated. If you update it, please remove this comment
+% Lines are drawn from the controlled robot to avoid all of the obstacles. Lines are then drawn from the destination to also avoid all of the obstacles. The intersection of any line in the first set with any line in the second set creates a two segment path. All of these paths are then tested for collisions with other obstacles and any path found to cause a collision is removed. This leaves only paths that do not cause a collision. Among those, the optimal path is chosen and the robot begins to traverse it. New path planning occurs when new vision information is available.
+% 
+% % \begin{figure} 
+% % 	\centering
+% % 	\vspace {0 cm}
+% % 	\includegraphics[width=0.7\textwidth]{complex_path.png}
+% % 	\caption{Sample path.}
+% % \end{figure}
+% 
+% \subsection{High Level Control}
+% % This paragraph is from the 2008 TDP and has not been updated. If you update it, please remove this comment
+% The current high level control has the ability to assign roles to particular robots. Roles can be assigned based on how well a particular robot is suited to the task. Selection criteria include both hardware capabilities as well as game state and pose information.
+% 
+% \subsection{Simulation}
+% % This paragraph is from the 2008 TDP and has not been updated. If you update it, please remove this comment
+% A physics simulator for testing control and planning algorithms was developed for this year's team. The simulator replaces the vision and communications components such that no other changes must be made to other systems to use the simulator. The other components see the simulator just as they do the real systems.
