@@ -57,23 +57,23 @@ int main()
 	for(int i = 0; i <= 255; i+=15)
 	{
 //		time_t t1 = time(NULL);
-		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
+		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
 		usleep(speedsetdel);
 //		time_t t2 = time(NULL);
 //		double dt = ((double)t2 - (double)t1);
 		std::cout <<"forward pwm: " << i << std::endl;
 	}
-	drive.setmotorPWM(MC_MOTOR_FORWARD, 255, MC_MOTOR_FORWARD, 255);
+	drive.setmotorPWM(MC_MOTOR_FORWARD, 255, MC_MOTOR_FORWARD, 255, MC_MOTOR_FORWARD, 255, MC_MOTOR_FORWARD, 255);
 
 	usleep(2e6);
 	for(int i = 255; i >= 0; i-=50)
 	{
 
-		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
+		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i,MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
 		usleep(speedsetdel);
 		std::cout <<"forward pwm: " << i << std::endl;
 	}
-	drive.setmotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
+	drive.setmotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0,MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
 	return 0;
 
 	
@@ -82,7 +82,7 @@ int main()
 	for(int i = 255; i >= 0; i--)
 	{
 
-		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
+		drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
 		usleep(speedsetdel);
 		std::cout <<"forward pwm: " << i << std::endl;
 	}

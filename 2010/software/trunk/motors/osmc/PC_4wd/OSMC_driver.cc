@@ -45,10 +45,11 @@ current_reply_t OSMC_driver::getCurrentData(ArduinoInterface& ai)
 
 bool OSMC_driver::setmotorPWM(const byte rightDirFWD, const byte rightDutyCycleFWD, const byte leftDirFWD, const byte leftDutyCycleFWD, const byte rightDirAFT, const byte rightDutyCycleAFT, const byte leftDirAFT, const byte leftDutyCycleAFT)
 {
-	bool a = setmotorPWM(fwr, rightDirFWD, rightDutyCycleFWD, leftDirFWD, leftDutyCycleFWD);
-	bool b = setmotorPWM(aft, rightDirAFT, rightDutyCycleAFT, leftDirAFT, leftDutyCycleAFT);
+	bool ret = false;
+	ret |= setmotorPWM(fwr, rightDirFWD, rightDutyCycleFWD, leftDirFWD, leftDutyCycleFWD);
+	ret |= setmotorPWM(aft, rightDirAFT, rightDutyCycleAFT, leftDirAFT, leftDutyCycleAFT);
 
-	return a && b;
+	return ret;
 }
 
 bool OSMC_driver::setmotorPWM(ArduinoInterface& ai, byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)

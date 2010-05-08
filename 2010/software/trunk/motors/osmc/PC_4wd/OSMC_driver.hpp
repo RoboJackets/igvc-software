@@ -30,7 +30,7 @@ class OSMC_driver
 
 	private:
 
-	bool setmotorPWM(ArduinoInterface& ai, const byte rightDir, const byte rightDutyCycle, const byte leftDir, const byte leftDutyCycle);
+	bool setmotorPWM(ArduinoInterface& ai, byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle);
 	current_reply_t getCurrentData(ArduinoInterface& ai);
 	joystick_reply_t getJoystickData(ArduinoInterface& ai);
 
