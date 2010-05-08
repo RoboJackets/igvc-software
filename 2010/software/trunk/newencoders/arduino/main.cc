@@ -54,7 +54,7 @@ int main()
 	for(;;)
 	{
 		//overspeed test
-		if((lastupdate - milis()) > 75)
+		//if((lastupdate - milis()) > 75)
 		//
 		header_t header;
 		byte* indata = NULL;
