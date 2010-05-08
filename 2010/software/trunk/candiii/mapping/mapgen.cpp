@@ -1034,7 +1034,8 @@ int MapGen::processMap(Point2D<int>& goal)
 			//deadzone detection
 			if ( goal.y==22 && goal.x==0 )
 			{
-				goal.y=-181; //large because of minreqspeed is positive
+				//goal.y=-181; //large because of minreqspeed is positive
+				goal.y = 0;
 				goal.x=0;
 			}
 
