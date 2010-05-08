@@ -41,6 +41,7 @@ target_link_libraries(candiii
 	ltdl
 	m
 	GL
+	GLU
 	dc1394
 	glut
 	cv

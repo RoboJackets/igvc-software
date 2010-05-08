@@ -14,7 +14,7 @@
 #define PRINTFRAMERATE 0
 
 
-#define STOPANDTHINK
+//#define STOPANDTHINK
 
 /*********** GLUT callbacks and functions ***********************/
 pthread_t Robot::robotThread; // for pthread_create
@@ -455,7 +455,11 @@ void Robot::processFunc()
 
 	/*Save raw image last*/
 	static int imgnum = 0;
+#ifdef STOPANDTHINK
 	if (saveRawVideo && (hack%2==0) )
+#else
+	if (saveRawVideo )
+#endif
 	{
 
 		std::stringstream fname;
