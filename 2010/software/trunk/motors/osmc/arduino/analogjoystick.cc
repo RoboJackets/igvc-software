@@ -107,11 +107,13 @@ void joystickSetMotors()
 
 	/* Limit drive velcocities to vaild values and convert them to drive speeds and directions */
 
-	Serial.print("L/Rev: ");
+#ifdef _DEBUG
+	Serial.print("L/Rev: "); //will never execute, need to define "_DEBUG"
 	Serial.println(leftVelocity, DEC);
 
 	Serial.print("R/Rev: ");
 	Serial.println(rightVelocity, DEC);
+#endif
 
 	byte leftSpeed = min(abs(leftVelocity), 255);
 	byte leftDir = (leftVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
