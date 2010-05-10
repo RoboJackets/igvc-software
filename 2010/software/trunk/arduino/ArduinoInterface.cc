@@ -10,19 +10,14 @@
 
 #include "ArduinoInterface.h"
 #include "ArduinoCmds.hpp"
+#include "common_defines.hpp"
 
 // TODO:	add a timeouts to serial functions
 //			add checks for disconnected arduino
 //			add error reporting
 
-//#define WAIT_TIME 20 //Used for setting VTIME, each tick is 0.1 s
-//#define WAIT_TIME 3 //Used for setting VTIME, each tick is 0.1 s
-//#define MIN_BYTES_TO_RET 0 //Minimum nuber of bytes for read to return.
-//#define BAUD B9600  //Serial baudrate
 #define SERIAL_PORT "/dev/ttyUSB0";
-//#define MODULE_ID 'e'
 
-static const int SERIAL_TIMOUT_SEC = 3;
 static const int ARDUINO_STARTUP_DELAY_USEC = 3 * 1e6;
 
 /**
@@ -35,8 +30,6 @@ ArduinoInterface::ArduinoInterface()
 	//Init vars
 	tx_num = 1;
 	rx_num = 1;
-
-	asioserialport = new boost_asio::serial_port(my_io_service);
 
 	readPending = true;
 }
@@ -55,9 +48,19 @@ bool ArduinoInterface::initLink(byte arduinoID)
 		printf("Trying port #%d.\n", (int) i);
 
 		serialAddress[11]=i+'0';
-		//arduinoFD = serialportInit(serialAddress, BAUD);
-		//arduinoFD = serialportInit_BOOST(serialAddress, 9600);
-		arduinoFD = serialportInit_BOOST(serialAddress, 57600);
+
+		my_io_service.reset();
+		asioserialport = new boost_asio::serial_port(my_io_service);
+		try
+		{
+			arduinoFD = serialportInit_BOOST(serialAddress, SERIAL_BAUD);
+		}
+		catch (...)
+		{
+			asioserialport->close();
+			delete asioserialport;
+			continue;
+		}
 		//add a delay -- it seems somthing gets lost if we don't wait
 		//TODO: figure out what the problem is
 		usleep(ARDUINO_STARTUP_DELAY_USEC);
@@ -72,10 +75,12 @@ bool ArduinoInterface::initLink(byte arduinoID)
 			/* Check which arduino is connected to the port */
 			//byte reply;
 			if (sendCommand(ARDUINO_ID_CMD, NULL, 0))
-			//if (sendCommand(ARDUINO_GET_ID, NULL, 0))
 			{
 				std::cout << "could not communicate with arduino (outbound) on link " << serialAddress << std::endl;
-				exit(-1);//handle this!
+				asioserialport->close();
+				delete asioserialport;
+				continue;
+				//exit(-1);//handle this!
 			}
 
 			byte cmdout;
@@ -87,7 +92,10 @@ bool ArduinoInterface::initLink(byte arduinoID)
 				{
 					delete[] dataout;
 				}
-				exit(-1);//handle this!
+				asioserialport->close();
+				delete asioserialport;
+				continue;
+				//exit(-1);//handle this!
 			}
 
 			if (cmdout != ARDUINO_ID_CMD)
@@ -98,6 +106,8 @@ bool ArduinoInterface::initLink(byte arduinoID)
 					delete[] dataout;
 				}
 				//exit(-1);//handle this!
+				asioserialport->close();
+				delete asioserialport;
 				continue;
 			}
 			byte readid = *(dataout);
@@ -112,6 +122,8 @@ bool ArduinoInterface::initLink(byte arduinoID)
 			else
 			{
 				printf("wrong module.\n");
+				asioserialport->close();
+				delete asioserialport;
 			}
 		}
 	}
@@ -140,9 +152,11 @@ ArduinoInterface::~ArduinoInterface(void)
 	}
 	close(arduinoFD);
 */
-
-	asioserialport->close();
-	delete asioserialport;
+	if(asioserialport != NULL)
+	{
+		//asioserialport->close();
+		delete asioserialport;
+	}
 }
 
 /**
@@ -409,7 +423,7 @@ bool ArduinoInterface::readFully_BOOST(void* buf, size_t numBytes)
 			{
 				std::cout << "timeout" << std::endl;
 				asioserialport->cancel();
-				serialRxFlush();
+				//serialFlush();
 				return true;
 			}
 
@@ -443,19 +457,35 @@ bool ArduinoInterface::writeFully_BOOST(const void* buf, size_t numBytes)
  *
  * @param fd		the file to clear.
  */
-bool ArduinoInterface::serialRxFlush()   // TODO: is there a function for this?
+bool ArduinoInterface::serialFlush()   // TODO: is there a function for this?
 {
-	int fd = asioserialport->native();
-	int e = tcflush(fd, TCIFLUSH);
+	byte b;
+	int count = 0;
 
-	if(e == 0)
+	usleep(2*1e6);//let the bootloader timeout
+	int fd = asioserialport->native();
+	//int e = tcflush(fd, TCIOFLUSH);
+	int e = tcflush(fd, TCIOFLUSH);
+	//usleep(2*1e6);//let the bootloader timeout
+
+	while((count < 100))
+	{ 
+		//boost_asio::read(*asioserialport, boost_asio::buffer(&b, 1), boost_asio::transfer_at_least(0));
+		if(readFully_BOOST(&b,1))
+		{
+			break;
+		}
+		count++;
+	}
+
+	if(e == 0 && (count < 100))
 	{
-		std::cout << "Serial Rx Flush Succeced" << std::endl;
+		std::cout << "Serial Flush Succeced, pulled " << count << " from arduino" << std::endl;
 		return true;
 	}
 	else
 	{
-		std::cout << "Serial Rx Flush Fail" << std::endl;
+		std::cout << "Serial Flush Fail" << std::endl;
 		return false;
 	}
 
@@ -612,10 +642,19 @@ bool ArduinoInterface::sendPacket(const DataPacket& pkout)
 
 	savePacket(pkout);
 
-	writeFully(arduinoFD, &(pkout.header), PACKET_HEADER_SIZE);
+	if(writeFully(arduinoFD, &(pkout.header), PACKET_HEADER_SIZE))
+	{
+		serialFlush();
+		return true;
+	}
+
 	if (pkout.header.size > 0)
 	{
-		writeFully(arduinoFD, pkout.data, pkout.header.size);
+		if(writeFully(arduinoFD, pkout.data, pkout.header.size))
+		{
+			serialFlush();
+			return true;
+		}
 	}
 	tx_num++;
 
@@ -631,6 +670,7 @@ bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 	if(readFully(arduinoFD, &(out_pk_rx.header), PACKET_HEADER_SIZE))
 	{
 		std::cout << "Resv header failed in file " << __FILE__ << "at line " << __LINE__ << std::endl;
+		serialFlush();
 		return true;
 	}
 	if (out_pk_rx.header.size > 0)
@@ -639,6 +679,7 @@ bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 		if(readFully(arduinoFD, out_pk_rx.data, out_pk_rx.header.size))
 		{
 			std::cout << "Resv data sec failed in file " << __FILE__ << "at line " << __LINE__ << std::endl;
+			serialFlush();
 			return true;
 		}
 	}
@@ -663,9 +704,9 @@ bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 		}
 	*/
 
-	std::string pkhead((char*)&(out_pk_rx.header), PACKET_HEADER_SIZE);
+	//std::string pkhead((char*)&(out_pk_rx.header), PACKET_HEADER_SIZE);
 
-	std::cout << "header:" << pkhead << "\n" << out_pk_rx.header << std::endl;
+	std::cout << out_pk_rx.header << std::endl;
 
 	//parse the icoming packet, test if it is an error packet
 	if (out_pk_rx.header.cmd == 0xFF )
