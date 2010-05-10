@@ -55,7 +55,7 @@ private:
 	bool readFully(int fd, void* buf, size_t numBytes);
 	int serialportInit(const char* serialport, speed_t baud);
 	static bool setSerialPortFromDevID(const int vendorid, const int devid, const char* serialport);
-	bool serialRxFlush();
+	bool serialFlush();
 
 	std::list<DataPacket> tx_packet_list;
 	unsigned int rx_num;
