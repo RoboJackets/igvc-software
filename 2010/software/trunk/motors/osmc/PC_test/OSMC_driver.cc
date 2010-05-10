@@ -8,7 +8,9 @@ const int OSMC_driver::MINREQSPEED = 30;
 OSMC_driver::OSMC_driver()
 {
 	m_connected = false;
+	#ifndef MOTOR_SIMULATE
 	ai.initLink(OSMC_IF_BOARD);
+	#endif
 	m_connected = true;
 }
 #if 0
@@ -58,7 +60,6 @@ bool OSMC_driver::set_motors(int leftVelocity, int rightVelocity)
 	byte rightDir = (rightVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
 
 	return setmotorPWM(rightDir, rightDutyCycle, leftDir, leftDutyCycle);
-
 }
 
 int OSMC_driver::set_heading(int iFwdVelocity, int iRotation)
@@ -88,7 +89,7 @@ int OSMC_driver::set_heading(int iFwdVelocity, int iRotation)
 	return this->set_motors( left , right );
 }
 
-
+#ifndef MOTOR_SIMULATE
 bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
 {
 	speed_set_t cmdpk;
@@ -118,7 +119,23 @@ bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, 
 	}
 	return false;
 }
+#else
+bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
+{
+	int sr = (rightDir == MC_MOTOR_FORWARD) ? int(rightDutyCycle) : -int(rightDutyCycle);
+	int sl = (leftDir == MC_MOTOR_FORWARD) ? int(leftDutyCycle) : -int(leftDutyCycle);
 
+	std::cout << "right: " << sr << "\tleft: " << sl << std::endl;
+
+	if((rightDir == MC_MOTOR_REVERSE) || (leftDir == MC_MOTOR_REVERSE))
+	{
+		//atach dbg here
+		std::cout << "robot is moving backwards!!!" << std::endl;
+	}
+
+	return false;
+}
+#endif
 joystick_reply_t OSMC_driver::getJoystickData()
 {
 
