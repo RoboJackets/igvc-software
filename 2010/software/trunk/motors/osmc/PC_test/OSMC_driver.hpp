@@ -1,6 +1,9 @@
 #include "ArduinoInterface.h"
 #include "ArduinoCmds.hpp"
 
+//if this is defined, nothing is sent to the motors!, it is just printed to stdout
+//#define MOTOR_SIMULATE 1
+
 class OSMC_driver
 {
 
