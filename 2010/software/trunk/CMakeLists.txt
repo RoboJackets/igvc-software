@@ -2,8 +2,8 @@ project (IGVC)
 
 cmake_minimum_required(VERSION 2.6)
 
-#set(BOARD_REV diecimila)
-set(BOARD_REV duemilanove)
+set(BOARD_REV diecimila)
+#set(BOARD_REV duemilanove)
 
 add_subdirectory (arduino)
 add_subdirectory (gps)
