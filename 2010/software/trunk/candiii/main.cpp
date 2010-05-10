@@ -17,7 +17,8 @@ int main(int argc, char **argv)
 	 * Start robot main loop in a thread
 	 * (do vision processing, sensors, and drive control)
 	 */
-	Robot r(argv[1]);
+	char* input = (argc > 1) ? argv[1] : NULL;
+	Robot r(input);
 	r.startRobotThread(&r); // this doesn't return
 
 	return 0;
