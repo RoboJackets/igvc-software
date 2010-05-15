@@ -67,9 +67,9 @@ void findRamp()
 {
 	const double zero_tol = .01;
 
-	//double ranges[] = {1,2,3,4,5,0,2,4,6,8,0,3,6,9,0,4,9,16,25, -2,-4,-6, .1, .3, .5, 5, 15, 25};
+	double ranges[] = {1,2,3,4,5,0,2,4,6,8,0,3,6,9,0,4,9,16,25, -2,-4,-6, .1, .3, .5, 5, 15, 25};
 	//double ranges[] = {0, 1, 8, 27, 4, 5, 6, 9, 10};// this works
-	double ranges[] = {0, 1, 8, 27, 4, 5, 6, 9};// this does not
+	//double ranges[] = {0, 1, 8, 27, 4, 5, 6, 9};// this does not
 	//double ranges[] = {1,2,3,4,5};
 
 	const size_t sampnum = sizeof(ranges) / sizeof(double);
@@ -81,7 +81,8 @@ void findRamp()
 	double abs_doublederiv[doublederivum];
 
 	bool linear_map[sampnum] = {false};
-	int rampmap[sampnum] = {false};//differ between linear runs with different slopes
+	int rampmap[sampnum];//differ between linear runs with different slopes
+	std::fill(rampmap, rampmap+sampnum, -1);
 
 	takeDerivative(ranges, deriv, sampnum);
 	takeDerivative(deriv, doublederiv, derivnum);
@@ -134,7 +135,7 @@ void findRamp()
 		std::cout << "start: " << e.get<0>() << ", stop: " << e.get<1>() << std::endl;
 		std::cout << "\t";
 		printarray(ranges, e.get<0>(), e.get<1>());
-		std::fill(rampmap+e.get<0>(), rampmap+e.get<1>(), i);
+		std::fill(rampmap+e.get<0>(), rampmap+e.get<1>()+1, i);
 		i++;
 	}
 	std::cout << "rampmap: ";printarray(rampmap, sampnum);
