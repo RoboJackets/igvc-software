@@ -15,7 +15,7 @@ int main()
 
 	timeval t;
 	gettimeofday(&t, NULL);
-	double t0 = double(now_t.tv_sec) + double(1e-6)*double(now_t.tv_usec);
+	double t0 = double(t.tv_sec) + double(1e-6)*double(t.tv_usec);
 
 	for(;;)
 	{
