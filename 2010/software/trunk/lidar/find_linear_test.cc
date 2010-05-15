@@ -49,18 +49,18 @@ void printarray(T* v, size_t len)
 	{
 		std::cout << v[i] << ", ";
 	}
-		std::cout << v[len-1] << ">\n";
+	std::cout << v[len-1] << ">\n";
 }
 
 template<typename T>
 void printarray(T* v, size_t start, size_t stop)
 {
 	std::cout << "<" << v[start] << ", ";
-	for(int i = start+1; i < (stop); i++)
+	for(int i = start+1; i < stop; i++)
 	{
 		std::cout << v[i] << ", ";
 	}
-		std::cout << v[stop] << ">\n";
+	std::cout << v[stop] << ">\n";
 }
 
 void findRamp()
