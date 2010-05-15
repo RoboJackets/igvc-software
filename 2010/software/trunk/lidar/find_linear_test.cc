@@ -128,13 +128,16 @@ void findRamp()
 	std::cout << "doublederiv:\t\t";printarray(doublederiv, doublederivum);
 	std::cout << "abs_doublederiv:\t";printarray(abs_doublederiv, doublederivum);
 
+	int i = 0;
 	BOOST_FOREACH(range& e, lines)
 	{
 		std::cout << "start: " << e.get<0>() << ", stop: " << e.get<1>() << std::endl;
 		std::cout << "\t";
 		printarray(ranges, e.get<0>(), e.get<1>());
+		std::fill(rampmap+e.get<0>(), rampmap+e.get<1>(), i);
+		i++;
 	}
-
+	std::cout << "rampmap: ";printarray(rampmap, sampnum);
 }
 
 int main()
