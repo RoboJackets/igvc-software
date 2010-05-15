@@ -13,17 +13,23 @@ int main()
 
 	drive.setVel_pd(.5,.5);
 
+	timeval t;
+	gettimeofday(&t, NULL);
+	double t0 = double(now_t.tv_sec) + double(1e-6)*double(now_t.tv_usec);
+
 	for(;;)
 	{
 		double left, right;
 		byte lpwm, rpwm;
 
 		drive.updateVel_pd();
+		gettimeofday(&t, NULL);
+		double t1 = double(t.tv_sec) + double(1e-6)*double(t.tv_usec);
 
 		drive.getEncoderVel(right, left);
 		drive.getLastPWMSent(rpwm, lpwm);
-		std::cout << "left v: " << left << "right v: " << right << std::endl;
-		std::cout << "left pwm: " << lpwm << "right pwm: " << rpwm << std::endl;
+		std::cout << t1 - t0 << "\tleft v: " << left << "right v: " << right << std::endl;
+		std::cout << t1 - t0 << "\tleft pwm: " << lpwm << "right pwm: " << rpwm << std::endl;
 
 		usleep(speedsetdel);
 	}
