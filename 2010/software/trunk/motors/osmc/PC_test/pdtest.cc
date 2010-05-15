@@ -2,7 +2,6 @@
 #include <iostream>
 #include <ctime>
 #include "OSMC_driver.hpp"
-//#include <>
 
 //static const int speedsetdel = 3 * 1e4;
 static const int speedsetdel = 2 * 1e4;
@@ -35,5 +34,5 @@ int main()
 	}
 	drive.setmotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
 
-
+	return 0;
 }
