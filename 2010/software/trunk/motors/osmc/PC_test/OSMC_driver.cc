@@ -238,6 +238,7 @@ bool OSMC_driver::updateVel_pd()
 	return set_motors(out_lmset, out_rmset);
 }
 
+//this won't change the sign of the pwm freq
 void OSMC_driver::getNewVel_pd(const double now_lvel, const double now_rvel, const double dt, int& out_r, int& out_l)
 {
 	const double kp = .1;
@@ -249,8 +250,8 @@ void OSMC_driver::getNewVel_pd(const double now_lvel, const double now_rvel, con
 	double lerror_slope = (lerror - last_l_error) / dt;
 	double rerror_slope = (rerror - last_r_error) / dt;
 
-	out_l = -kp*lerror + -kd*lerror_slope;
-	out_r = -kp*rerror + -kd*rerror_slope;
+	out_l = lpwm + -kp*lerror + -kd*lerror_slope;
+	out_r = rpwm + -kp*rerror + -kd*rerror_slope;
 
 	//persist the stuff that needs to be saved
 	last_l_error = lerror;
