@@ -25,7 +25,7 @@ add_executable(dumbctltest
 )
 
 add_executable(pdtest
-	test_pd.cc
+	pdtest.cc
 )
 
 target_link_libraries(OSMC_test OSMC_driver)
