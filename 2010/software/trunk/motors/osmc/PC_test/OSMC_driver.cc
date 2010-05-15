@@ -7,11 +7,34 @@ const int OSMC_driver::MINREQSPEED = 30;
 
 OSMC_driver::OSMC_driver()
 {
+	lvgoal = 0;
+	rvgoal = 0;
 	m_connected = false;
+	encoder = NULL;
 	#ifndef MOTOR_SIMULATE
 	ai.initLink(OSMC_IF_BOARD);
+	encoder = new quadCoderDriver();
 	#endif
 	m_connected = true;
+	set_motors(0, 0);
+}
+
+OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface)
+{
+	lvgoal = 0;
+	rvgoal = 0;
+	m_connected = false;
+	encoder = NULL;
+	#ifndef MOTOR_SIMULATE
+	ai.initLink(motor_iface);
+	encoder = new quadCoderDriver(encoder_iface);
+	#endif
+	m_connected = true;
+	set_motors(0, 0);
+}
+OSMC_driver::~OSMC_driver()
+{
+	delete encoder;
 }
 #if 0
 OSMC_driver::connect()
@@ -20,19 +43,14 @@ OSMC_driver::connect()
 	m_connected = true;
 }
 #endif
-reply_dtick_t OSMC_driver::getEncoderData()
+bool OSMC_driver::getEncoderData(new_encoder_pk_t& pk)
 {
-	ai.sendCommand(MC_GET_ENCODER_TICK, NULL, 0);
+	return encoder->getEncoderState(pk);
+}
 
-	byte retcmd = 0;
-	byte* data = NULL;
-	ai.recvCommand(retcmd, data);
-
-	reply_dtick_t out;
-	
-	memcpy(&out, data, sizeof(reply_dtick_t));
-	delete[] data;
-	return out;
+bool OSMC_driver::getEncoderVel(double& rvel, double& lvel)
+{
+	return encoder->getEncoderVel(rvel, lvel);
 }
 
 current_reply_t OSMC_driver::getCurrentData()
@@ -52,7 +70,6 @@ current_reply_t OSMC_driver::getCurrentData()
 
 bool OSMC_driver::set_motors(int leftVelocity, int rightVelocity)
 {
-
 	byte leftDutyCycle = std::min(abs(leftVelocity), 255);
 	byte leftDir = (leftVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
 
@@ -117,6 +134,12 @@ bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, 
 	{
 		delete[] data;
 	}
+
+	ldir = leftDir;
+	lpwm = leftDutyCycle;
+	rdir = rightDir;
+	rpwm = rightDutyCycle;
+
 	return false;
 }
 #else
@@ -190,24 +213,52 @@ void OSMC_driver::getNewVel_dumb(const double rtarget, const double ltarget, con
 	}
 }
 
-void OSMC_driver::getNewVel_pd(const double ltarget, const double rtarget, const double lvel, const double rvel,const double lastlvel, const double lastrvel, const int rmset, const int lmset, double dt, int& out_rmset, int& out_lmset)
+void OSMC_driver::setVel_pd(double left, double right)
 {
+	lvgoal = left;
+	rvgoal = right;
+}
 
+bool OSMC_driver::updateVel_pd()
+{
+	double now_rvel, now_lvel;
+	timeval now_t;
+	gettimeofday(&now_t, NULL);
+
+	encoder->getEncoderVel(now_rvel, now_lvel);
+
+	double now_t_d = double(now_t.tv_sec) + double(1e-6)*double(now_t.tv_usec);
+	double dt = now_t_d - t;
+
+	int out_lmset, out_rmset;
+	getNewVel_pd(now_lvel, now_rvel, dt, out_rmset, out_lmset);
+
+	t = now_t_d;
+
+	return set_motors(out_lmset, out_rmset);
+}
+
+void OSMC_driver::getNewVel_pd(const double now_lvel, const double now_rvel, const double dt, int& out_r, int& out_l)
+{
 	const double kp = .1;
 	const double kd = .1;
 
-	double lerror = ltarget - lvel;
-	double rerror = rtarget - rvel;
+	double lerror = lvgoal - now_lvel;
+	double rerror = rvgoal - now_rvel;
 
-	double lslope = (lvel - lastlvel) / dt;
-	double rslope = (rvel - lastrvel) / dt;
+	double lerror_slope = (lerror - last_l_error) / dt;
+	double rerror_slope = (rerror - last_r_error) / dt;
 
-	out_lmset = kp*lerror + kd*lslope;
-	out_rmset = kp*rerror + kd*rslope;
+	out_l = -kp*lerror + -kd*lerror_slope;
+	out_r = -kp*rerror + -kd*rerror_slope;
+
+	//persist the stuff that needs to be saved
+	last_l_error = lerror;
+	last_r_error = rerror;
 }
 
-
-void followCirc(double tangent[2], double vmag)
+void OSMC_driver::getLastPWMSent(byte& r, byte& l)
 {
-
+	r = rpwm;
+	l = lpwm;
 }

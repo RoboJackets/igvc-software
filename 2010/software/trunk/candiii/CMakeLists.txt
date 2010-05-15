@@ -12,6 +12,7 @@ include_directories(
 	/usr/include/qt4/QtXml
 	${IGVC_SOURCE_DIR}/motors/osmc/PC_test
 	${IGVC_SOURCE_DIR}/arduino
+	${IGVC_SOURCE_DIR}/newencoders/pcdriver
 )
 
 link_directories(

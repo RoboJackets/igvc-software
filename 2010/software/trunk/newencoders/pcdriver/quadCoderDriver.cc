@@ -19,7 +19,16 @@
 quadCoderDriver::quadCoderDriver()
 {
 	m_connected = false;
+	ifname = ENCODER_IF_BOARD;
 	ai.initLink(ENCODER_IF_BOARD);
+	m_connected = true;
+}
+
+quadCoderDriver::quadCoderDriver(byte coder_name)
+{
+	m_connected = false;
+	this->ifname = coder_name;
+	ai.initLink(ifname);
 	m_connected = true;
 }
 
