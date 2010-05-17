@@ -22,6 +22,9 @@ class OSMC_4wd_driver
 	bool getEncoderVel(double& FL, double& FR, double& BL, double& BR);
 	bool getLastPWMSent();
 
+	//smart reckoning
+	void followCirc(double radius, double vmag);
+
 	private:
 
 	volatile bool m_connected;

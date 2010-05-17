@@ -15,7 +15,7 @@ int main()
 	OSMC_driver motordriver;
 	quadCoderDriver qD;
 
-	motordriver.setmotorPWM(MC_MOTOR_FORWARD, stepmag, MC_MOTOR_FORWARD, stepmag);
+	motordriver.setMotorPWM(MC_MOTOR_FORWARD, stepmag, MC_MOTOR_FORWARD, stepmag);
 	timeval t0;
 	gettimeofday(&t0, NULL);
 	//for(int i = 0; i < 10; i++)

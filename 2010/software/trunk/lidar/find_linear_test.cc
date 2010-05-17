@@ -110,7 +110,7 @@ void findRamp()
 		}
 
 		//stop a range
-		if( ((abs_doublederiv[i] >= zero_tol)) && (start != -1) && (i != (doublederivum-1)) )
+		if( ((abs_doublederiv[i] >= zero_tol)) && (start != -1) && (i != (doublederivum-1)) )//we are not at last element, have an open range. set the end to the next element
 		{
 			stop = i+1;
 			lines.push_back( boost::tuple<size_t,size_t>(start, stop) );

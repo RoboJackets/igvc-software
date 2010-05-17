@@ -8,8 +8,8 @@ OSMC_4wd_driver::OSMC_4wd_driver(const byte FORosmc, const byte FORcoder, const 
 
 bool OSMC_4wd_driver::setMotorPWM(const byte FRdir, const byte FRmag, const byte FLdir, const byte FLmag, const byte BRdir, const byte BRmag, const byte BLdir, const byte BLmag)
 {
-	bool a = FOR.setmotorPWM(FRdir, FRmag, FLdir, FLmag);
-	bool b = AFT.setmotorPWM(BRdir, BRmag, BLdir, BLmag);
+	bool a = FOR.setMotorPWM(FRdir, FRmag, FLdir, FLmag);
+	bool b = AFT.setMotorPWM(BRdir, BRmag, BLdir, BLmag);
 
 	return a || b;
 }

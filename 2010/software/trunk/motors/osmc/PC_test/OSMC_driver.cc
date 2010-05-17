@@ -76,7 +76,7 @@ bool OSMC_driver::set_motors(int leftVelocity, int rightVelocity)
 	byte rightDutyCycle = std::min(abs(rightVelocity), 255);
 	byte rightDir = (rightVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
 
-	return setmotorPWM(rightDir, rightDutyCycle, leftDir, leftDutyCycle);
+	return setMotorPWM(rightDir, rightDutyCycle, leftDir, leftDutyCycle);
 }
 
 int OSMC_driver::set_heading(int iFwdVelocity, int iRotation)
@@ -107,7 +107,7 @@ int OSMC_driver::set_heading(int iFwdVelocity, int iRotation)
 }
 
 #ifndef MOTOR_SIMULATE
-bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
+bool OSMC_driver::setMotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
 {
 	speed_set_t cmdpk;
 	cmdpk.sr = rightDutyCycle;
@@ -143,7 +143,7 @@ bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, 
 	return false;
 }
 #else
-bool OSMC_driver::setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
+bool OSMC_driver::setMotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
 {
 	int sr = (rightDir == MC_MOTOR_FORWARD) ? int(rightDutyCycle) : -int(rightDutyCycle);
 	int sl = (leftDir == MC_MOTOR_FORWARD) ? int(leftDutyCycle) : -int(leftDutyCycle);

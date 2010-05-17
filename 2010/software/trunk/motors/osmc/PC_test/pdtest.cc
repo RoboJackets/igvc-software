@@ -32,7 +32,7 @@ int main()
 
 		usleep(speedsetdel);
 	}
-	drive.setmotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
+	drive.setMotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
 
 	return 0;
 }

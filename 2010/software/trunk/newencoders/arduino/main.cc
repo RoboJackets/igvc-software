@@ -43,8 +43,8 @@ int main()
 	//attachInterrupt(0, encoder_logger, CHANGE);
 	//attachInterrupt(1, encoder_logger, CHANGE);
 
-	attachInterrupt(0, leftenc_event, CHANGE);
-	attachInterrupt(1, rightenc_event, CHANGE);
+	attachInterrupt(0, leftenc_event, CHANGE);//pin 2
+	attachInterrupt(1, rightenc_event, CHANGE);//pin 3
 
 	int32_t tx_num = 0;
 

@@ -18,7 +18,7 @@ int main()
 		{
 			//time_t t1 = time(NULL);
 			double left, right;
-			drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
+			drive.setMotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
 			drive.getEncoderVel(right, left);
 			std::cout << "l: " << left << "right" << right << std::endl;
 			usleep(speedsetdel);
@@ -26,19 +26,19 @@ int main()
 			//double dt = ((double)t2 - (double)t1);
 			std::cout <<"forward pwm: " << i << std::endl;
 		}
-		drive.setmotorPWM(MC_MOTOR_FORWARD, 255, MC_MOTOR_FORWARD, 255);
+		drive.setMotorPWM(MC_MOTOR_FORWARD, 255, MC_MOTOR_FORWARD, 255);
 
 		usleep(2e6);
 		for(int i = 255; i >= 0; i-=50)
 		{
 			double left, right;
-			drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
+			drive.setMotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
 			drive.getEncoderVel(right, left);
 			std::cout << "l: " << left << "right" << right << std::endl;
 			usleep(speedsetdel);
 			std::cout <<"forward pwm: " << i << std::endl;
 		}
-		drive.setmotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
+		drive.setMotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
 		return 0;
 
 	
@@ -47,7 +47,7 @@ int main()
 		for(int i = 255; i >= 0; i--)
 		{
 
-			drive.setmotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
+			drive.setMotorPWM(MC_MOTOR_FORWARD, i, MC_MOTOR_FORWARD, i);
 			usleep(speedsetdel);
 			std::cout <<"forward pwm: " << i << std::endl;
 		}
@@ -57,7 +57,7 @@ int main()
 		for(int i = 0; i <= 255; i++)
 		{
 			//clock_t t1 = clock();
-			drive.setmotorPWM(MC_MOTOR_REVERSE, i, MC_MOTOR_REVERSE, i);
+			drive.setMotorPWM(MC_MOTOR_REVERSE, i, MC_MOTOR_REVERSE, i);
 			usleep(speedsetdel);
 			std::cout <<"reverse pwm: " << i << std::endl;
 			//clock_t t2 = clock();
@@ -66,7 +66,7 @@ int main()
 		for(int i = 255; i >= 0; i--)
 		{
 			//clock_t t1 = clock();
-			drive.setmotorPWM(MC_MOTOR_REVERSE, i, MC_MOTOR_REVERSE, i);
+			drive.setMotorPWM(MC_MOTOR_REVERSE, i, MC_MOTOR_REVERSE, i);
 			std::cout <<"reverse pwm: " << i << std::endl;
 			usleep(speedsetdel);
 			//clock_t t2 = clock();

@@ -23,7 +23,7 @@ class OSMC_driver
 	joystick_reply_t getJoystickData();
 
 	//make 0 vel a nonrolling stop
-	bool setmotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle);
+	bool setMotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle);
 
 	//shims from old motor
 	bool set_motors(int leftVelocity, int rightVelocity);
