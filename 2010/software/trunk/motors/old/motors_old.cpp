@@ -227,7 +227,7 @@ int Motors_Old::set_motors(int iLeftVelocity, int iRightVelocity)
 	rvel = byte(iRightVelocity);
 	lvel = byte(iLeftVelocity);
 	
-	osmcd.setmotorPWM(rdir, rvel, ldir, rvel);
+	osmcd.setMotorPWM(rdir, rvel, ldir, rvel);
 
 }
 

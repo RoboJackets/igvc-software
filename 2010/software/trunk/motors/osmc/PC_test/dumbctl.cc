@@ -19,7 +19,7 @@ int main()
 	OSMC_driver motordriver;
 	quadCoderDriver qD;
 
-	motordriver.setmotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
+	motordriver.setMotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
 	qD.resetCount();
 
 	timeval t0;
@@ -40,7 +40,7 @@ int main()
 		//int rdir = (out_rmset > 0) ? MC_MOTOR_FORWARD : MC_MOTOR_BACKWARD;
 		//int ldir = (out_lmset > 0) ? MC_MOTOR_FORWARD : MC_MOTOR_BACKWARD;
 
-		if(motordriver.setmotorPWM(MC_MOTOR_FORWARD, out_rmset, MC_MOTOR_FORWARD, out_lmset))
+		if(motordriver.setMotorPWM(MC_MOTOR_FORWARD, out_rmset, MC_MOTOR_FORWARD, out_lmset))
 		{
 			std::cerr << "motor set fail" << std::endl;
 			goto END;
