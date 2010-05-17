@@ -33,3 +33,25 @@ bool OSMC_4wd_driver::setMotorPWM(const int FR, const int FL, const int BR, cons
 
 	return setMotorPWM(FRdir, FRmag, FLdir, FLmag, BRdir, BRmag, BLdir, BLmag);
 }
+
+void OSMC_4wd_driver::setMotorVel_pd(const double FR, const double FL, const double BR, const double BL)
+{
+	FOR.setVel_pd(FL, FR);
+	AFT.setVel_pd(BL, BR);
+}
+
+bool OSMC_4wd_driver::update_pd()
+{
+	bool a = FOR.updateVel_pd();
+	bool b = AFT.updateVel_pd();
+
+	return a || b;
+}
+
+bool OSMC_4wd_driver::getEncoderVel(double& FL, double& FR, double& BL, double& BR)
+{
+	bool a = FOR.getEncoderVel(FL, FR);
+	bool b = AFT.getEncoderVel(BL, BR);
+	
+	return a || b;
+}
