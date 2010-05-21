@@ -28,7 +28,7 @@ int main()
 		drive.getEncoderVel(right, left);
 		drive.getLastPWMSent(rpwm, lpwm);
 		std::cout << t1 - t0 << "\tleft v: " << left << "right v: " << right << std::endl;
-		std::cout << t1 - t0 << "\tleft pwm: " << lpwm << "right pwm: " << rpwm << std::endl;
+		std::cout << t1 - t0 << "\tleft pwm: " << int(lpwm) << "right pwm: " << int(rpwm) << std::endl;
 
 		usleep(speedsetdel);
 	}
