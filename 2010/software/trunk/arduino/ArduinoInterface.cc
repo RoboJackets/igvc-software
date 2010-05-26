@@ -706,7 +706,7 @@ bool ArduinoInterface::getPacket(DataPacket& out_pk_rx)
 
 	//std::string pkhead((char*)&(out_pk_rx.header), PACKET_HEADER_SIZE);
 
-	std::cout << out_pk_rx.header << std::endl;
+	//std::cout << out_pk_rx.header << std::endl;
 
 	//parse the icoming packet, test if it is an error packet
 	if (out_pk_rx.header.cmd == 0xFF )
