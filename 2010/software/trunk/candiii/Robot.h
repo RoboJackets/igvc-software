@@ -15,7 +15,14 @@
 #include "vision.h"
 
 #include "mapgen.h"
-#include "../motors/old/motors_old.h"
+
+#ifdef OSMC_2WD
+	#include "OSMC_driver.hpp"	
+#elif defined(OSMC_4WD)
+	#include "OSMC_4wd_driver.hpp"	
+#else
+	#error "Must define OSMC_2WD or OSMC_4WD"
+#endif
 
 /*===== Camera Settings ===========================================*/
 /* Determines camera compatability.
@@ -120,7 +127,13 @@ public:
 	int motorsMaxSpeed;//0-255
 	int useMotors;
 
-	OSMC_driver osmcd;
+	#ifdef OSMC_2WD
+		OSMC_driver osmcd;
+	#elif defined(OSMC_4WD)
+		OSMC_4wd_driver osmcd;
+	#else
+		#error "Must define OSMC_2WD or OSMC_4WD"
+	#endif
 };
 
 #endif /*ROBOT_H_*/

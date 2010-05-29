@@ -20,6 +20,9 @@
 
 static const int ARDUINO_STARTUP_DELAY_USEC = 3 * 1e6;
 
+//only init one at a time
+boost::mutex ArduinoInterface::initmutex;
+
 /**
  * Opens a connection to an arduino.
  *
@@ -41,6 +44,8 @@ bool setSerialPortFromDevID(const int vendorid, const int devid, const char* ser
 */
 bool ArduinoInterface::initLink(byte arduinoID)
 {
+	boost::mutex::scoped_lock initlock(initmutex);
+
 	/* See if anything is connected on ports USB0 through USB9 */
 	char serialAddress[] = SERIAL_PORT;
 	for (int i=0; i<10; i++)
