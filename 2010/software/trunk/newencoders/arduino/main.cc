@@ -148,14 +148,18 @@ int main()
 
 				new_encoder_pk_t body;
 
+				noInterrupts();
 				int64_t first_left = left_coder_ticks;
 				int64_t first_right = right_coder_ticks;
+				interrupts();
 				_delay_ms(5);
+				noInterrupts();
 				body.pl = left_coder_ticks;
 				body.pr = right_coder_ticks;
+				interrupts();
 
-				body.dl = left_coder_ticks - first_left;
-				body.dr = right_coder_ticks - first_right;
+				body.dl = body.pl - first_left;
+				body.dr = body.pr - first_right;
 
 				uint8_t* msg = (uint8_t*)&(body);
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
