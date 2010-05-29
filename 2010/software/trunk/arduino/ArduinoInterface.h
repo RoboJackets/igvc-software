@@ -15,6 +15,7 @@
 	namespace boost_asio = asio;
 #endif
 #include <boost/array.hpp>
+#include <boost/thread.hpp>
 
 #include "DataPacket.hpp"
 
@@ -78,6 +79,8 @@ private:
 	boost_asio::io_service my_io_service;
 	boost_asio::serial_port* asioserialport;
 	volatile bool readPending;
+
+	static boost::mutex initmutex;
 
 #ifndef USE_ASIO_NOBOOST
 	void handle_serial_read(const boost::system::error_code& ec, size_t len);
