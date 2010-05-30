@@ -12,10 +12,19 @@ OSMC_driver::OSMC_driver()
 	m_connected = false;
 	encoder = NULL;
 	#ifndef MOTOR_SIMULATE
-	ai.initLink(OSMC_IF_BOARD);
-	encoder = new quadCoderDriver();
+		ai.initLink(OSMC_IF_BOARD);
+	#endif
+	#ifndef ENCODER_SIMULATE
+		encoder = new quadCoderDriver();
+	#else
+		encoder = NULL;
 	#endif
 	m_connected = true;
+
+	timeval now_t;
+	gettimeofday(&now_t, NULL);
+	t = double(now_t.tv_sec) + double(1e-6)*double(now_t.tv_usec);
+
 	set_motors(0, 0);
 }
 
@@ -26,14 +35,24 @@ OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface)
 	m_connected = false;
 	encoder = NULL;
 	#ifndef MOTOR_SIMULATE
-	ai.initLink(motor_iface);
-	encoder = new quadCoderDriver(encoder_iface);
+		ai.initLink(motor_iface);
+	#endif
+	#ifndef ENCODER_SIMULATE
+		encoder = new quadCoderDriver(encoder_iface);
+	#else
+		encoder = NULL;
 	#endif
 	m_connected = true;
+
+	timeval now_t;
+	gettimeofday(&now_t, NULL);
+	t = double(now_t.tv_sec) + double(1e-6)*double(now_t.tv_usec);
+
 	set_motors(0, 0);
 }
 OSMC_driver::~OSMC_driver()
 {
+	set_motors(0, 0);
 	delete encoder;
 }
 #if 0
@@ -43,15 +62,32 @@ OSMC_driver::connect()
 	m_connected = true;
 }
 #endif
+
+#ifndef ENCODER_SIMULATE
 bool OSMC_driver::getEncoderData(new_encoder_pk_t& pk)
 {
 	return encoder->getEncoderState(pk);
 }
+#else
+bool OSMC_driver::getEncoderData(new_encoder_pk_t& pk)
+{
+	return true;
+}
+#endif
 
+#ifndef ENCODER_SIMULATE
 bool OSMC_driver::getEncoderVel(double& rvel, double& lvel)
 {
 	return encoder->getEncoderVel(rvel, lvel);
 }
+#else
+bool OSMC_driver::getEncoderVel(double& rvel, double& lvel)
+{
+	lvel = rvel = 0;
+	return false;
+}
+#endif
+
 
 current_reply_t OSMC_driver::getCurrentData()
 {
@@ -221,12 +257,19 @@ void OSMC_driver::setVel_pd(double left, double right)
 
 bool OSMC_driver::updateVel_pd()
 {
+	if((lvgoal == 0) && (rvgoal == 0))
+	{
+		return set_motors(0,0);
+	}
+
 	double now_rvel, now_lvel;
+	if(!getEncoderVel(now_rvel, now_lvel))
+	{
+		return true;
+	}
+
 	timeval now_t;
 	gettimeofday(&now_t, NULL);
-
-	encoder->getEncoderVel(now_rvel, now_lvel);
-
 	double now_t_d = double(now_t.tv_sec) + double(1e-6)*double(now_t.tv_usec);
 	double dt = now_t_d - t;
 
@@ -262,4 +305,30 @@ void OSMC_driver::getLastPWMSent(byte& r, byte& l)
 {
 	r = rpwm;
 	l = lpwm;
+}
+
+//set vel from vision vector
+//linear map -- if x = 0, make both wheel same speed
+//if angle = 90, go right, lock right wheel
+//if angle = -90, go left, lock left wheel
+bool OSMC_driver::set_vel_vec(const double y, const double x)
+{
+	if(y == 0)
+	{
+		setVel_pd(0, 0);
+		set_motors(0,0);
+	}
+
+	double mag = hypot(y,x);
+	double ang = atan2(y,x);
+	double dir = (y > 0) ? 1 : -1;
+
+	double adjslope = mag / (M_PI / double(2));
+
+	double rdir = mag - adjslope * ang;
+	double ldir = mag + adjslope * ang;
+
+	setVel_pd(ldir, rdir);
+
+	return false;
 }

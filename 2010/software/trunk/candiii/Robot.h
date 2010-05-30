@@ -134,6 +134,14 @@ public:
 	#else
 		#error "Must define OSMC_2WD or OSMC_4WD"
 	#endif
+
+	boost::mutex velmutex;
+	volatile double yvel;
+	volatile double xvel;
+	volatile bool run_vel_thread;
+	boost::thread* vel_update_thread;
+	void update_vel_func();
+	
 };
 
 #endif /*ROBOT_H_*/

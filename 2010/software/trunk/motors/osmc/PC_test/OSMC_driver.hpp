@@ -4,7 +4,9 @@
 #include "quadCoderDriver.hpp"
 
 //if this is defined, nothing is sent to the motors!, it is just printed to stdout
-//#define MOTOR_SIMULATE 1
+#define MOTOR_SIMULATE 1
+#define ENCODER_SIMULATE 1
+//#define CURRENT_SIMULATE 1
 
 class OSMC_driver
 {
@@ -49,6 +51,9 @@ class OSMC_driver
 	//get state
 	void getVelSet_pd();
 	void getLastPWMSent(byte& r, byte& l);
+
+	//set vel from vision vector
+	bool set_vel_vec(const double y, const double x);
 
 	private:
 	ArduinoInterface ai;

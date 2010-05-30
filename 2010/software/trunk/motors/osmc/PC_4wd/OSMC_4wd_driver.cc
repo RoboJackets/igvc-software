@@ -55,3 +55,11 @@ bool OSMC_4wd_driver::getEncoderVel(double& FL, double& FR, double& BL, double& 
 	
 	return a || b;
 }
+
+bool OSMC_4wd_driver::set_vel_vec(const double y, const double x)
+{
+	bool a = FOR.set_vel_vec(y,x);
+	bool b = AFT.set_vel_vec(y,x);
+
+	return a || b;
+}
