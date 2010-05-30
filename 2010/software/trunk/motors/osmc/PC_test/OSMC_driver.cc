@@ -151,7 +151,7 @@ int OSMC_driver::set_heading(const int iFwdVelocity, const int iRotation)
 }
 
 #ifndef MOTOR_SIMULATE
-bool OSMC_driver::setMotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
+bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, const byte leftDir, const byte leftDutyCycle)
 {
 	speed_set_t cmdpk;
 	cmdpk.sr = rightDutyCycle;
@@ -187,7 +187,7 @@ bool OSMC_driver::setMotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, 
 	return false;
 }
 #else
-bool OSMC_driver::setMotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle)
+bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, const byte leftDir, const byte leftDutyCycle)
 {
 	int sr = (rightDir == MC_MOTOR_FORWARD) ? int(rightDutyCycle) : -int(rightDutyCycle);
 	int sl = (leftDir == MC_MOTOR_FORWARD) ? int(leftDutyCycle) : -int(leftDutyCycle);
@@ -321,10 +321,10 @@ void OSMC_driver::getLastPWMSent(byte& r, byte& l)
 //if angle = -90, go left, lock left wheel
 bool OSMC_driver::set_vel_vec(const double y, const double x)
 {
-	if(y == 0)
+	if((y == 0) && (x == 0))
 	{
 		setVel_pd(0, 0);
-		set_motors(0,0);
+		return set_motors(0,0);
 	}
 
 	double mag = hypot(y,x);
@@ -333,8 +333,8 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 
 	double adjslope = mag / (M_PI / double(2));
 
-	double rdir = mag - adjslope * ang;
-	double ldir = mag + adjslope * ang;
+	double rdir = (mag - adjslope * ang) * dir;
+	double ldir = (mag + adjslope * ang) * dir;
 
 	setVel_pd(ldir, rdir);
 

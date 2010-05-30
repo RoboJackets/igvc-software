@@ -429,8 +429,8 @@ void Robot::processFunc()
 
 #ifdef STOPANDTHINK
 	/* periodically stop and think */
-	static int hack = 0;
-	int hackstop = 76; //80;
+	const static int hack = 0;
+	const int hackstop = 76; //80;
 
 	if ( hack > hackstop )
 	{
@@ -440,7 +440,12 @@ void Robot::processFunc()
 		printf("\n\n\n\tSTOP HACK\t\n\n\n");
 		//motors.set_motors(-20, -20);
 		//motors.set_motors(hack/8, hack/8);
-		osmcd.set_motors(hack/8, hack/8);
+		{
+			boost::mutex::scoped_lock lock(velmutex);
+			yvel = 0;
+			xvel = 0;
+			//osmcd.set_motors(hack, hack);//will get picked up on next update
+		}
 		if (hack > hackstop+14 )
 		{
 			hack = 0;
@@ -791,7 +796,11 @@ void Robot::update_vel_func()
 			boost::mutex::scoped_lock lock(velmutex);
 			osmcd.set_vel_vec(yvel, xvel);
 		}
-		osmcd.updateVel_pd();
+		if(osmcd.updateVel_pd())
+		{
+			std::cerr << "osmcd.updateVel_pd failed!" << std::endl;
+		}
+
 		//usleep(10e3);
 		usleep(1e6);
 	}

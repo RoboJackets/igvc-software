@@ -29,12 +29,12 @@ class OSMC_driver
 	joystick_reply_t getJoystickData();
 
 	//make 0 vel a nonrolling stop
-	bool setMotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle);
+	bool setMotorPWM(const byte rightDir, const byte rightDutyCycle, const byte leftDir, const byte leftDutyCycle);
 
 	//shims from old motor
-	bool set_motors(int leftPWM, int rightPWM);
-	bool set_motors(int pwm);
-	int set_heading(int iFwdVelocity, int iRotation);
+	bool set_motors(const int leftPWM, const int rightPWM);
+	bool set_motors(const int pwm);
+	int set_heading(const int iFwdVelocity, const int iRotation);
 
 	void getNewVel_dumb(const double rtarget, const double ltarget, const double rvel, const double lvel, const int rmset, const int lmset, int& out_rmset, int& out_lmset);
 
