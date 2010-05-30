@@ -3,6 +3,10 @@
 
 #include "OSMC_driver.hpp"
 
+//following gnu libc tradition,
+//a return value of false is success (eg, code 0)
+//a return value of true is failure (eg, code nonzero)
+
 class OSMC_4wd_driver
 {
 	public:
