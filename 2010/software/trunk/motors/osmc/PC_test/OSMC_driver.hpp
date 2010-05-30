@@ -28,7 +28,8 @@ class OSMC_driver
 	bool setMotorPWM(byte rightDir, byte rightDutyCycle, byte leftDir, byte leftDutyCycle);
 
 	//shims from old motor
-	bool set_motors(int leftVelocity, int rightVelocity);
+	bool set_motors(int leftPWM, int rightPWM);
+	bool set_motors(int pwm);
 	int set_heading(int iFwdVelocity, int iRotation);
 
 	void getNewVel_dumb(const double rtarget, const double ltarget, const double rvel, const double lvel, const int rmset, const int lmset, int& out_rmset, int& out_lmset);

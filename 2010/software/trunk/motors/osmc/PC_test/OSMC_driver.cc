@@ -104,18 +104,26 @@ current_reply_t OSMC_driver::getCurrentData()
 	return out;
 }
 
-bool OSMC_driver::set_motors(int leftVelocity, int rightVelocity)
+bool OSMC_driver::set_motors(const int pwm)
 {
-	byte leftDutyCycle = std::min(abs(leftVelocity), 255);
-	byte leftDir = (leftVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
+	byte DutyCycle = std::min(abs(pwm), 255);
+	byte Dir = (pwm < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
 
-	byte rightDutyCycle = std::min(abs(rightVelocity), 255);
-	byte rightDir = (rightVelocity < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
+	return setMotorPWM(Dir, DutyCycle, Dir, DutyCycle);
+}
+
+bool OSMC_driver::set_motors(const int leftPWM, const int rightPWM)
+{
+	byte leftDutyCycle = std::min(abs(leftPWM), 255);
+	byte leftDir = (leftPWM < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
+
+	byte rightDutyCycle = std::min(abs(rightPWM), 255);
+	byte rightDir = (rightPWM < 0) ? MC_MOTOR_REVERSE : MC_MOTOR_FORWARD;
 
 	return setMotorPWM(rightDir, rightDutyCycle, leftDir, leftDutyCycle);
 }
 
-int OSMC_driver::set_heading(int iFwdVelocity, int iRotation)
+int OSMC_driver::set_heading(const int iFwdVelocity, const int iRotation)
 {
 	// convert
 	int left  = iFwdVelocity + iRotation ;

@@ -1,6 +1,11 @@
 
 #include "OSMC_4wd_driver.hpp"
 
+OSMC_4wd_driver::OSMC_4wd_driver() : FOR(OSMC_IF_FOR_BOARD, ENCODER_IF_FOR_BOARD) , AFT(OSMC_IF_AFT_BOARD, ENCODER_IF_AFT_BOARD)
+{
+	m_connected = true;
+}
+
 OSMC_4wd_driver::OSMC_4wd_driver(const byte FORosmc, const byte FORcoder, const byte AFTosmc, const byte AFTcoder) : FOR(FORosmc, FORcoder) , AFT(AFTosmc, AFTcoder)
 {
 	m_connected = true;
@@ -10,6 +15,14 @@ bool OSMC_4wd_driver::setMotorPWM(const byte FRdir, const byte FRmag, const byte
 {
 	bool a = FOR.setMotorPWM(FRdir, FRmag, FLdir, FLmag);
 	bool b = AFT.setMotorPWM(BRdir, BRmag, BLdir, BLmag);
+
+	return a || b;
+}
+
+bool OSMC_4wd_driver::set_motors(const int pwm)
+{
+	bool a = FOR.set_motors(pwm);
+	bool b = AFT.set_motors(pwm);
 
 	return a || b;
 }
@@ -40,7 +53,7 @@ void OSMC_4wd_driver::setMotorVel_pd(const double FR, const double FL, const dou
 	AFT.setVel_pd(BL, BR);
 }
 
-bool OSMC_4wd_driver::update_pd()
+bool OSMC_4wd_driver::updateVel_pd()
 {
 	bool a = FOR.updateVel_pd();
 	bool b = AFT.updateVel_pd();
