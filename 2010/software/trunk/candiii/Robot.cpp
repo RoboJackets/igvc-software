@@ -798,7 +798,7 @@ void Robot::update_vel_func()
 
 	{
 		boost::mutex::scoped_lock lock(velmutex);
-		osmcd.set_motors(0,0);
+		osmcd.set_motors(0);
 	}
 }
 
