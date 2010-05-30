@@ -90,6 +90,10 @@ Robot::Robot(const char* filename)
 
 Robot::~Robot()
 {
+	run_vel_thread = false;
+	vel_update_thread->join();
+	delete vel_update_thread;
+
 	cvReleaseVideoWriter(&cvVideoWriter);
 	releaseAllImages();
 	destroy();
@@ -132,6 +136,13 @@ void Robot::releaseAllImages()
 
 int Robot::init()
 {
+	//set vel to 0
+	{
+		boost::mutex::scoped_lock lock(velmutex);
+		yvel = 0;
+		xvel = 0;
+	}
+
 	/* load xml settings - important to do first! */
 	LoadXMLSettings();
 
@@ -318,6 +329,9 @@ void Robot::Go()
 		}
 	}
 
+	run_vel_thread = true;
+	vel_update_thread = new boost::thread(&Robot::update_vel_func, this);
+
 	/* Setup video card processing */
 	initGlut();
 
@@ -473,8 +487,22 @@ void Robot::processFunc()
 	/* Drive Motors */
 	if (useMotors)
 	{
+		double mag = hypot(heading_main.x, heading_main.y);
+		double angle = (M_PI/double(2) - atan2(heading_main.y, heading_main.x)) * double(180) / M_PI;
+		double unit_x = heading_main.x / mag;
+		double unit_y = heading_main.y / mag;
+		double scale_x = unit_x * 1.5;
+		double scale_y = unit_y * 1.5;
+		std::cout << "DBG: sx: " << unit_x << " sy: " << unit_y << "mag: " << mag << " angle from y:" << angle << std::endl;
 		//printf("Heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
-		osmcd.set_heading(heading_main.y, heading_main.x);
+
+		//set_heading(heading_main.y, heading_main.x);
+		//set vel to 0
+		{
+			boost::mutex::scoped_lock lock(velmutex);
+			yvel = scale_y;
+			xvel = scale_x;
+		}
 	}
 
 	/* Print Stats */
@@ -755,5 +783,22 @@ void Robot::getGlutMask(int call)
 }
 
 
+void Robot::update_vel_func()
+{
+	while(run_vel_thread)
+	{
+		{
+			boost::mutex::scoped_lock lock(velmutex);
+			osmcd.set_vel_vec(yvel, xvel);
+		}
+		osmcd.updateVel_pd();
+		//usleep(10e3);
+		usleep(1e6);
+	}
 
+	{
+		boost::mutex::scoped_lock lock(velmutex);
+		osmcd.set_motors(0,0);
+	}
+}
 
