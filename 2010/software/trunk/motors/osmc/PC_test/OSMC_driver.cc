@@ -271,7 +271,7 @@ bool OSMC_driver::updateVel_pd()
 	}
 
 	double now_rvel, now_lvel;
-	if(!getEncoderVel(now_rvel, now_lvel))
+	if(getEncoderVel(now_rvel, now_lvel))
 	{
 		return true;
 	}
@@ -285,6 +285,8 @@ bool OSMC_driver::updateVel_pd()
 	getNewVel_pd(now_lvel, now_rvel, dt, out_rmset, out_lmset);
 
 	t = now_t_d;
+
+	std::cout << "setr: " << out_rmset << " setl: " << out_lmset << std::endl;
 
 	return set_motors(out_lmset, out_rmset);
 }
@@ -319,6 +321,7 @@ void OSMC_driver::getLastPWMSent(byte& r, byte& l)
 //linear map -- if x = 0, make both wheel same speed
 //if angle = 90, go right, lock right wheel
 //if angle = -90, go left, lock left wheel
+//in m/s
 bool OSMC_driver::set_vel_vec(const double y, const double x)
 {
 	if((y == 0) && (x == 0))
@@ -328,10 +331,12 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 	}
 
 	double mag = hypot(y,x);
-	double ang = atan2(y,x);
+	double ang = M_PI / double(2) - atan2(y,x);
 	double dir = (y > 0) ? 1 : -1;
 
 	double adjslope = mag / (M_PI / double(2));
+
+	std::cout << "mag: " << mag << " ang: " << ang << std::endl;
 
 	double rdir = (mag - adjslope * ang) * dir;
 	double ldir = (mag + adjslope * ang) * dir;
