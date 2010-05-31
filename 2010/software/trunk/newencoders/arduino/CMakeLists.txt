@@ -1,4 +1,4 @@
-include(${IGVC_SOURCE_DIR}/arduino_diecimila_crosscompile.cmake)
+include(${IGVC_SOURCE_DIR}/atmel_crosscompile.cmake)
 
 include_directories(${IGVC_SOURCE_DIR}/arduino)
 include_directories(${IGVC_SOURCE_DIR}/extern/libarduinocore)

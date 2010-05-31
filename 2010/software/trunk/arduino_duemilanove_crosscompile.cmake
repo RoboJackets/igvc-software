@@ -12,7 +12,6 @@ SET(CTUNING "-funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums")
 SET(COPT "-Os")
 SET(CMCU "-mmcu=atmega328p")
 SET(CDEFS "-DF_CPU=16000000")
-#SET(CDEFS "-DF_CPU=8000000")
 
 
 SET(CFLAGS "${CMCU} ${CDEBUG} ${CDEFS} ${CINCS} ${COPT} ${CWARN} ${CSTANDARD} ${CEXTRA}")

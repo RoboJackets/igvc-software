@@ -496,9 +496,9 @@ void Robot::processFunc()
 		double angle = (M_PI/double(2) - atan2(heading_main.y, heading_main.x)) * double(180) / M_PI;
 		double unit_x = heading_main.x / mag;
 		double unit_y = heading_main.y / mag;
-		double scale_x = unit_x * 1.5;
-		double scale_y = unit_y * 1.5;
-		std::cout << "DBG: sx: " << unit_x << " sy: " << unit_y << "mag: " << mag << " angle from y:" << angle << std::endl;
+		double scale_x = unit_x * motor_vel_mag; //set to 1.5 m/s max
+		double scale_y = unit_y * motor_vel_mag; //set to 1.5 m/s max
+		//std::cout << "DBG: sx: " << unit_x << " sy: " << unit_y << "mag: " << mag << " angle from y:" << angle << std::endl;
 		//printf("Heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
 
 		//set_heading(heading_main.y, heading_main.x);

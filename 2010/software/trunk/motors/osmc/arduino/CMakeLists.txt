@@ -1,9 +1,4 @@
-
-IF(${BOARD_REV} MATCHES "diecimila")
-	include(${IGVC_SOURCE_DIR}/arduino_diecimila_crosscompile.cmake)
-ELSEIF(${BOARD_REV} MATCHES "duemilanove")
-	include(${IGVC_SOURCE_DIR}/arduino_duemilanove_crosscompile.cmake)
-ENDIF(${BOARD_REV} MATCHES "diecimila")
+include(${IGVC_SOURCE_DIR}/atmel_crosscompile.cmake)
 
 
 include_directories(${IGVC_SOURCE_DIR}/arduino)

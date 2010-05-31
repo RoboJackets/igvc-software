@@ -16,6 +16,8 @@
 
 #include "mapgen.h"
 
+const static double motor_vel_mag = 1.5;
+
 #ifdef OSMC_2WD
 	#include "OSMC_driver.hpp"	
 #elif defined(OSMC_4WD)
