@@ -801,8 +801,8 @@ void Robot::update_vel_func()
 			std::cerr << "osmcd.updateVel_pd failed!" << std::endl;
 		}
 
-		//usleep(10e3);
-		usleep(1e6);
+		usleep(1e4);
+		//usleep(1e6);
 	}
 
 	{
