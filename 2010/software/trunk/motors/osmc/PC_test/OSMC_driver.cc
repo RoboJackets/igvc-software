@@ -159,7 +159,7 @@ bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, co
 	cmdpk.sl = leftDutyCycle;
 	cmdpk.leftDir = leftDir;
 
-	std::cout << "r: " << (int)rightDutyCycle << "l: " << (int)leftDutyCycle << std::endl;
+	std::cout << "r: " << (int)rightDutyCycle << " l: " << (int)leftDutyCycle << std::endl;
 
 	if(ai.sendCommand(MC_SET_RL_DUTY_CYCLE, &cmdpk, sizeof(speed_set_t)))
 	{

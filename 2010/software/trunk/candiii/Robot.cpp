@@ -96,6 +96,8 @@ Robot::~Robot()
 	lidar_update_thread->join();
 	delete vel_update_thread;
 	delete lidar_update_thread;
+	delete osmcd;
+	delete lidar;
 
 	cvReleaseVideoWriter(&cvVideoWriter);
 	releaseAllImages();
@@ -332,11 +334,20 @@ void Robot::Go()
 		}
 	}
 
+	#ifdef OSMC_2WD
+		osmcd = new OSMC_driver;
+	#elif defined(OSMC_4WD)
+		osmcd = new OSMC_4wd_driver;
+	#else
+		#error "Must define OSMC_2WD or OSMC_4WD"
+	#endif
+
 	run_vel_thread = true;
 	vel_update_thread = new boost::thread(&Robot::update_vel_func, this);
 
+	lidar = new NAV200;
 	run_lidar_thread = true;
-	lidar_update_thread = new boost::thread(&Robot::update_vel_func, this);
+	lidar_update_thread = new boost::thread(&Robot::update_lidar_func, this);
 
 	/* Setup video card processing */
 	initGlut();
@@ -450,7 +461,7 @@ void Robot::processFunc()
 			boost::mutex::scoped_lock lock(velmutex);
 			yvel = 0;
 			xvel = 0;
-			//osmcd.set_motors(hack, hack);//will get picked up on next update
+			//osmcd->set_motors(hack, hack);//will get picked up on next update
 		}
 		if (hack > hackstop+14 )
 		{
@@ -802,20 +813,20 @@ void Robot::update_vel_func()
 			y = yvel;
 			x = xvel;
 		}
-		osmcd.set_vel_vec(y, x);
+		osmcd->set_vel_vec(y, x);
 		
-		if(osmcd.updateVel_pd())
+		if(osmcd->updateVel_pd())
 		{
-			std::cerr << "osmcd.updateVel_pd failed!" << std::endl;
+			std::cerr << "osmcd->updateVel_pd failed!" << std::endl;
 		}
 
-		usleep(1e4);
+		usleep(5e4);
 		//usleep(1e6);
 	}
 
 	{
 		boost::mutex::scoped_lock lock(velmutex);
-		osmcd.set_motors(0);
+		osmcd->set_motors(0);
 	}
 }
 
@@ -824,12 +835,12 @@ void Robot::update_lidar_func()
 {
 	while(run_lidar_thread)
 	{
-		if(!lidar.read())
+		if(!lidar->read())
 		{
 			boost::mutex::scoped_lock lock(lidarmutex);
-			memcpy(this->coord, lidar.coord, sizeof(coord));
-			lidar.findLinearRuns(lidar_linear_regions);
-			lidar.getLongestRun(lidar_linear_regions, longest_linear_region);
+			memcpy(this->coord, lidar->coord, sizeof(coord));
+			lidar->findLinearRuns(lidar_linear_regions);
+			lidar->getLongestRun(lidar_linear_regions, longest_linear_region);
 		}
 		else
 		{

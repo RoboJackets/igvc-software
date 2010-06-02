@@ -132,9 +132,9 @@ public:
 	int useMotors;
 
 	#ifdef OSMC_2WD
-		OSMC_driver osmcd;
+		OSMC_driver* osmcd;
 	#elif defined(OSMC_4WD)
-		OSMC_4wd_driver osmcd;
+		OSMC_4wd_driver* osmcd;
 	#else
 		#error "Must define OSMC_2WD or OSMC_4WD"
 	#endif
@@ -146,7 +146,7 @@ public:
 	void update_vel_func();
 	
 
-	NAV200 lidar;
+	NAV200* lidar;
 	boost::mutex lidarmutex;
 	volatile bool run_lidar_thread;
 	boost::thread* lidar_update_thread;

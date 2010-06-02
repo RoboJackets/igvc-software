@@ -2,9 +2,9 @@ project (IGVC)
 
 cmake_minimum_required(VERSION 2.6)
 
-set(BOARD_REV diecimila)
+#set(BOARD_REV diecimila)
 #set(BOARD_REV duemilanove)
-#set(BOARD_REV sparkfun_pro_8mhz)
+set(BOARD_REV sparkfun_pro_8mhz)
 
 set(ROBOT_REV candiiidbg)
 #set(ROBOT_REV candiii)
