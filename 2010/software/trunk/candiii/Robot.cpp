@@ -91,8 +91,11 @@ Robot::Robot(const char* filename)
 Robot::~Robot()
 {
 	run_vel_thread = false;
+	run_lidar_thread = false;
 	vel_update_thread->join();
+	lidar_update_thread->join();
 	delete vel_update_thread;
+	delete lidar_update_thread;
 
 	cvReleaseVideoWriter(&cvVideoWriter);
 	releaseAllImages();
@@ -332,6 +335,9 @@ void Robot::Go()
 	run_vel_thread = true;
 	vel_update_thread = new boost::thread(&Robot::update_vel_func, this);
 
+	run_lidar_thread = true;
+	lidar_update_thread = new boost::thread(&Robot::update_vel_func, this);
+
 	/* Setup video card processing */
 	initGlut();
 
@@ -493,7 +499,6 @@ void Robot::processFunc()
 	if (useMotors)
 	{
 		double mag = hypot(heading_main.x, heading_main.y);
-		double angle = (M_PI/double(2) - atan2(heading_main.y, heading_main.x)) * double(180) / M_PI;
 		double unit_x = heading_main.x / mag;
 		double unit_y = heading_main.y / mag;
 		double scale_x = unit_x * motor_vel_mag; //set to 1.5 m/s max
@@ -502,7 +507,6 @@ void Robot::processFunc()
 		//printf("Heading: rot: %d  fwd: %d \n",heading_main.x,heading_main.y);
 
 		//set_heading(heading_main.y, heading_main.x);
-		//set vel to 0
 		{
 			boost::mutex::scoped_lock lock(velmutex);
 			yvel = scale_y;
@@ -792,10 +796,14 @@ void Robot::update_vel_func()
 {
 	while(run_vel_thread)
 	{
+		double y,x;
 		{
 			boost::mutex::scoped_lock lock(velmutex);
-			osmcd.set_vel_vec(yvel, xvel);
+			y = yvel;
+			x = xvel;
 		}
+		osmcd.set_vel_vec(y, x);
+		
 		if(osmcd.updateVel_pd())
 		{
 			std::cerr << "osmcd.updateVel_pd failed!" << std::endl;
@@ -808,6 +816,27 @@ void Robot::update_vel_func()
 	{
 		boost::mutex::scoped_lock lock(velmutex);
 		osmcd.set_motors(0);
+	}
+}
+
+
+void Robot::update_lidar_func()
+{
+	while(run_lidar_thread)
+	{
+		if(!lidar.read())
+		{
+			boost::mutex::scoped_lock lock(lidarmutex);
+			memcpy(this->coord, lidar.coord, sizeof(coord));
+			lidar.findLinearRuns(lidar_linear_regions);
+			lidar.getLongestRun(lidar_linear_regions, longest_linear_region);
+		}
+		else
+		{
+			std::cerr << "lidar read failed!" << std::endl;
+		}
+		//do something with the lidar input
+		usleep(1e5);
 	}
 }
 

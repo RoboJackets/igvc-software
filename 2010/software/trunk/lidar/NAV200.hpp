@@ -3,9 +3,17 @@
 #include <usb.h>
 
 #include <list>
+#include <deque>
 
 #include "boost/tuple/tuple.hpp"
 #include "boost/foreach.hpp"
+
+//if defined, will not connect to NAV200
+#define LIDAR_SIMULATE
+
+// NAV200, communication interace for the lidar
+// original code by ben
+// integration by jacob
 
 class NAV200
 {
@@ -48,15 +56,19 @@ class NAV200
 		float distance_scale;
 		
 		Point points[Num_Points];
-	
+		boost::tuple<float,float> coord[Num_Points];
+
 		//do some proccessing
-		bool findLinearRuns(std::list< boost::tuple<int,int> >& lines);
-		static bool findLinearRuns(const Point pts[Num_Points], std::list< boost::tuple<int,int> >& lines);
-		static bool findLinearRuns(const float distance[Num_Points], std::list< boost::tuple<int,int> >& lines);
+		bool findLinearRuns(std::deque< boost::tuple<float,float> >& lines);
+		static bool findLinearRuns(const boost::tuple<float,float> coord[Num_Points], std::deque< boost::tuple<float,float> >& lines);
+
+		static void getLongestRun(const std::deque< boost::tuple<float,float> >& lines, boost::tuple<float,float>& longest);
 
 	private:
 		//FIXME - This should be in libusb.  Find it.
 		static bool _usb_inited;
-		
+	
+	#ifndef LIDAR_SIMULATE	
 		usb_dev_handle *_handle;
+	#endif
 };
