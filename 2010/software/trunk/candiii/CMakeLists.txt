@@ -13,6 +13,7 @@ include_directories(
 	${IGVC_SOURCE_DIR}/motors/osmc/PC_4wd
 	${IGVC_SOURCE_DIR}/arduino
 	${IGVC_SOURCE_DIR}/newencoders/pcdriver
+	${IGVC_SOURCE_DIR}/lidar
 )
 
 IF(${ROBOT_REV} MATCHES "candiiidbg")
@@ -70,5 +71,7 @@ target_link_libraries(${robot_bin}
 
 	pthread
 	boost_thread-mt
+
+	NAV200
 )
 
