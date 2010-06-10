@@ -2,14 +2,14 @@ include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
 
 include_directories(
 	${IGVC_SOURCE_DIR}/arduino
-	${IGVC_SOURCE_DIR}/newencoders/pcdriver
+	${IGVC_SOURCE_DIR}/newencoders/pcdriver_signed
 )
 
 add_library (OSMC_driver OSMC_driver.cc)
 
 target_link_libraries(OSMC_driver 
 	ArduinoInterface
-	quadCoderDriver
+	quadCoderDriver_signed
 )
 
 add_executable(OSMC_test

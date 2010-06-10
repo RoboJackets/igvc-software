@@ -1,3 +1,4 @@
+
 #include "mapgen.h"
 #include "image_buffers.h"
 #include <stdio.h>
@@ -699,7 +700,8 @@ int MapGen::genProbabilityMap()
 	if (moveTo127)
 	{
 		float curr;
-		float speed = 1;
+		//float speed = 1;
+		float speed = 15;
 		int i;
 
 #pragma omp parallel for private(i,curr)
@@ -707,8 +709,10 @@ int MapGen::genProbabilityMap()
 		{
 			curr = cvGetReal1D(probmap,i);
 			if (curr==127) continue;
+			else if (abs(curr-127) < speed) cvSetReal1D(probmap,i,127);
 			else if (curr>127) cvSetReal1D(probmap,i,curr-speed);
 			else /*if(curr<127)*/ cvSetReal1D(probmap,i,curr+speed);
+
 			//else continue;
 		}
 	}
@@ -1030,6 +1034,16 @@ int MapGen::processMap(Point2D<int>& goal)
 			int scalex = 40*SWIVELINESS;
 			goal.x = (nav_path__center_path_id-bestPath_id)*scalex ;
 			goal.y = (max_path_danger + 3 - pathDanger[bestPath_id]) * 2 ;
+
+			//std::cout << "goal.y: " << goal.y << "goal.x: " << goal.x << std::endl;
+
+			//close detection
+			//if ( goal.y < 80 && goal.x==0 )
+			//{
+			//	goal.y = -30;
+			//	goal.x=0;
+			//	std::cout << "going backwards - close trigger - goal.y: " << goal.y << "goal.x: " << goal.x << std::endl;
+			//}
 
 			//deadzone detection
 			if ( goal.y==22 && goal.x==0 )

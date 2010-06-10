@@ -14,7 +14,7 @@ int main()
 		{
 			return(0);
 		}
-		usleep(10000);
+		usleep(4e4);
 		
 	}
 }
@@ -54,11 +54,12 @@ inline double scaleThrottle(double t)
 	std::cout << "t: " << t << "\tf(t):" << (t-50)*slope + 50 << std::endl;
 	return( (t-50)*slope + 50 );
 }
+#if 0
 void joystickDrive::setMotor()
 {
 	readJoystick();
 	
-	double mag = sqrt(leftAnalogY*leftAnalogY);
+	double mag = abs(leftAnalogY);
 
 	double realmag = sqrt(leftAnalogX*leftAnalogX + leftAnalogY*leftAnalogY) / (double(32768)*sqrt(2)) * 225;
 
@@ -68,14 +69,15 @@ void joystickDrive::setMotor()
 		return;
 	}
 
-	double vel = mag / (double(32768)*sqrt(2)) * 140;
+	double vel = mag / (double(32768)*sqrt(2)) * 110;
 
-	double side = leftAnalogX / (double(32768)*sqrt(2)) * double(200) / double(5);
+	double side = leftAnalogX / (double(32768)*sqrt(2)) * double(120) / double(5);
 
 	double rvel = -1, lvel = -1;
 
 	rvel = vel + side;
-	lvel = vel - 1.5*side + 55;
+	//lvel = vel - 1.5*side + 55;
+	lvel = vel - side;
 
 
 	//turbo
@@ -114,72 +116,84 @@ void joystickDrive::setMotor()
 	std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set left: " << lvel << " right: " << rvel << " side: " << side <<std::endl;
 	m_motorCtr.setMotorPWM(MC_MOTOR_FORWARD, rvel, MC_MOTOR_FORWARD, lvel);
 }
-#if 0
+#else
 void joystickDrive::setMotor()
 {
 	readJoystick();
 	char theta = -1*(getHeading() * 128/(M_PI) + 64 + 128);
 
-	//double mag = sqrt(rightAnalogX*rightAnalogX + rightAnalogY*rightAnalogY);
-	double mag = sqrt(leftAnalogX*leftAnalogX + leftAnalogY*leftAnalogY);
-	double norm_mag = mag / (32768*sqrt(2));
-	double vel = norm_mag * 255;
+	//double rmag = sqrt(rightAnalogX*rightAnalogX + rightAnalogY*rightAnalogY);
+	//double lmag = sqrt(leftAnalogX*leftAnalogX + leftAnalogY*leftAnalogY);
+	double rymag = -1*rightAnalogY;
+	double lymag = -1*leftAnalogY;
+	double norm_rymag = rymag / double(32768);
+	double norm_lymag = lymag / double(32768);
 
-	if(vel < 50 || isnan(vel) || isinf(vel) || vel > 255)//dead zone
+	double mag = 100;
+	int rvel = norm_rymag * double(mag);
+	int lvel = norm_lymag * double(mag);
+	
+	if(abs(rvel) < 50 || isnan(rvel) || isinf(rvel) || rvel > 255)//dead zone
 	{
-		vel = 0;
-		theta = 0;
+		rvel = 0;
 	}
-	else if((vel > 128) && (scaleThrottle(vel) > 128))//max
-	{
-		vel = 128;
-	}
-/*
-	else if( theta > 120 || theta < -120 )//go backwards if the stick is nearly straight back
-	{
-		vel = scaleThrottle(vel);
-		std::cout << "right at ("<< rightAnalogX << "," << rightAnalogY << std::endl;
-		std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set left:" << -1*vel << "right " << -1*vel << std::endl;
-		m_motorCtr.set_motors(-1*vel, -1*vel);
-		return;
-	}
-*/
 	else
 	{
-		vel = scaleThrottle(vel);
+		if(rvel > 0)
+		{
+			rvel = (rvel - 50) * 2;
+		}
+		else
+		{
+			rvel = (rvel + 50) * 2;
+		}
 	}
-
+	if(abs(lvel) < 50 || isnan(lvel) || isinf(lvel) || lvel > 255)//dead zone
+	{
+		lvel = 0;
+	}
+	else
+	{
+		if(lvel > 0)
+		{
+			lvel = (lvel - 50) * 2;
+		}
+		else
+		{
+			lvel = (lvel + 50) * 2;
+		}
+	}
 	//turbo
 	if((joystickButtons & 32) == 32)
 	{
-		vel += 200;
+		rvel += (rvel >= 0) ? 20 : -20;
+		lvel += (lvel >= 0) ? 20 : -20;
 	}
 	//turbo
 	if((joystickButtons & 128) == 128)
 	{
-		vel += 250;
+		rvel += (rvel >= 0) ? 20 : -20;
+		lvel += (lvel >= 0) ? 20 : -20;
 	}
 
 	//force tight turn
 	if((joystickButtons & 1) == 1)
 	{
-		m_motorCtr.setMotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, vel);
-		std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set left: " << 0 << " right: " << vel << std::endl;
-		return;
+		lvel = 0;
 	}
 	else if((joystickButtons & 4) == 4)
 	{
-		m_motorCtr.setMotorPWM(MC_MOTOR_FORWARD, vel, MC_MOTOR_FORWARD, 0);
-		std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set left: " << vel << " right: " << 0 << std::endl;
-		return;
+		rvel = 0;
 	}
 
 
-	std::cout << "right at ("<< rightAnalogX << "," << rightAnalogY << ")\twould have set vel: " << vel << " head: " << (int)theta << std::endl;
-	std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ")\twould have set vel: " << vel << " head: " << (int)theta << std::endl;
+	std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ") right at (" << rightAnalogX << "," << rightAnalogY << ")\twould have set lvel: " << lvel << " rvel: " << rvel << std::endl;
 
 
-	m_motorCtr.setMotorPWM(MC_MOTOR_FORWARD, vel+theta, MC_MOTOR_FORWARD, vel-theta);
+	if(m_motorCtr.set_motors(lvel, rvel))
+	{
+		std::cerr << "set failed" << std::endl;
+	}
 }
 #endif
 void joystickDrive::joystick_close(void) {

@@ -10,14 +10,17 @@ OSMC_driver::OSMC_driver()
 	lvgoal = 0;
 	rvgoal = 0;
 	m_connected = false;
-	encoder = NULL;
+	encoder_l = NULL;
+	encoder_r = NULL;
 	#ifndef MOTOR_SIMULATE
 		ai.initLink(OSMC_IF_BOARD);
 	#endif
 	#ifndef ENCODER_SIMULATE
-		encoder = new quadCoderDriver();
+		encoder_l = new quadCoderDriver_signed(ENCODER_IF_AFT_LEFT_BOARD);
+		encoder_r = new quadCoderDriver_signed(ENCODER_IF_AFT_RIGHT_BOARD);
 	#else
-		encoder = NULL;
+		encoder_l = NULL;
+		encoder_r = NULL;
 	#endif
 	m_connected = true;
 
@@ -28,19 +31,22 @@ OSMC_driver::OSMC_driver()
 	set_motors(0, 0);
 }
 
-OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface)
+OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface_l, byte encoder_iface_r)
 {
 	lvgoal = 0;
 	rvgoal = 0;
 	m_connected = false;
-	encoder = NULL;
+	encoder_l = NULL;
+	encoder_r = NULL;
 	#ifndef MOTOR_SIMULATE
 		ai.initLink(motor_iface);
 	#endif
 	#ifndef ENCODER_SIMULATE
-		encoder = new quadCoderDriver(encoder_iface);
+		encoder_l = new quadCoderDriver_signed(encoder_iface_l);
+		encoder_r = new quadCoderDriver_signed(encoder_iface_r);
 	#else
-		encoder = NULL;
+		encoder_l = NULL;
+		encoder_r = NULL;
 	#endif
 	m_connected = true;
 
@@ -53,7 +59,8 @@ OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface)
 OSMC_driver::~OSMC_driver()
 {
 	set_motors(0, 0);
-	delete encoder;
+	delete encoder_l;
+	delete encoder_r;
 }
 #if 0
 OSMC_driver::connect()
@@ -62,23 +69,27 @@ OSMC_driver::connect()
 	m_connected = true;
 }
 #endif
-
+/*
 #ifndef ENCODER_SIMULATE
 bool OSMC_driver::getEncoderData(new_encoder_pk_t& pk)
 {
 	return encoder->getEncoderState(pk);
-}
+
 #else
 bool OSMC_driver::getEncoderData(new_encoder_pk_t& pk)
 {
 	return true;
 }
 #endif
-
+*/
 #ifndef ENCODER_SIMULATE
 bool OSMC_driver::getEncoderVel(double& rvel, double& lvel)
 {
-	return encoder->getEncoderVel(rvel, lvel);
+	//return encoder->getEncoderVel(rvel, lvel);
+	bool ret = false;
+	ret |= encoder_r->getEncoderVel(rvel);
+	ret |= encoder_l->getEncoderVel(lvel);
+	return ret;
 }
 #else
 bool OSMC_driver::getEncoderVel(double& rvel, double& lvel)
@@ -153,10 +164,15 @@ int OSMC_driver::set_heading(const int iFwdVelocity, const int iRotation)
 #ifndef MOTOR_SIMULATE
 bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, const byte leftDir, const byte leftDutyCycle)
 {
+	//byte clamped_rightDutyCycle = (rightDutyCycle > 170) ? 170 : rightDutyCycle;
+	//byte clamped_leftDutyCycle = (leftDutyCycle > 170) ? 170 : leftDutyCycle;
+	byte clamped_rightDutyCycle = rightDutyCycle;
+	byte clamped_leftDutyCycle = leftDutyCycle;
+
 	speed_set_t cmdpk;
-	cmdpk.sr = rightDutyCycle;
+	cmdpk.sr = clamped_rightDutyCycle;
 	cmdpk.rightDir = rightDir;
-	cmdpk.sl = leftDutyCycle;
+	cmdpk.sl = clamped_leftDutyCycle;
 	cmdpk.leftDir = leftDir;
 
 	std::cout << "r: " << (int)rightDutyCycle << " l: " << (int)leftDutyCycle << std::endl;
@@ -194,11 +210,11 @@ bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, co
 
 	std::cout << "right: " << sr << "\tleft: " << sl << std::endl;
 
-	if((rightDir == MC_MOTOR_REVERSE) || (leftDir == MC_MOTOR_REVERSE))
-	{
-		//atach dbg here
-		std::cout << "robot is moving backwards!!!" << std::endl;
-	}
+//	if((rightDir == MC_MOTOR_REVERSE) || (leftDir == MC_MOTOR_REVERSE))
+//	{
+//		//atach dbg here
+//		std::cout << "robot is moving backwards!!!" << std::endl;
+//	}
 
 	return false;
 }
@@ -317,6 +333,7 @@ void OSMC_driver::getLastPWMSent(byte& r, byte& l)
 	l = lpwm;
 }
 
+/*
 //set vel from vision vector
 //linear map -- if x = 0, make both wheel same speed
 //if angle = 90, go right, lock right wheel
@@ -344,4 +361,85 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 	setVel_pd(ldir, rdir);
 
 	return false;
+}
+*/
+
+/*
+//set vel from vision vector
+//jacob magic number algo
+//linear map -- if x = 0, make both wheel same speed
+//if angle = 90, go right, lock right wheel
+//if angle = -90, go left, lock left wheel
+//in pwm count
+//input vector is unit vector
+bool OSMC_driver::set_vel_vec(const double y, const double x)
+{
+	if((y == 0) && (x == 0))
+	{
+		setVel_pd(0, 0);
+		return set_motors(0,0);
+	}
+
+	//double mag = 127;
+	double mag = 70;
+	//double asy = abs(y) / mag;
+	//double asx = abs(x) / mag;
+	double ang = M_PI / double(2) - atan2(y,x);
+	double dir = (y > 0) ? 1 : -1;
+
+	double adjslope = mag / (M_PI / double(2));
+
+	std::cout << "mag: " << mag << " ang: " << ang << std::endl;
+
+	double rdir = (mag - double(2)*double(1.5)*adjslope * ang) * dir;
+	double ldir = (mag + double(2)*double(1.5)*adjslope * ang) * dir;
+
+	return set_motors(ldir, rdir);
+}
+*/
+
+//set vel from vision vector
+//paul magic number algo
+//linear map -- if x = 0, make both wheel same speed
+
+//in pwm count
+bool OSMC_driver::set_vel_vec(const double y, const double x)
+{
+	if((y == 0) && (x == 0))
+	{
+		setVel_pd(0, 0);
+		return set_motors(0,0);
+	}
+
+	//const double fwdmag = 70;
+	const double fwdmag = 60;
+	const double revmag = -30;
+	const double turnthresh = M_PI / double(6);
+	const double ang = M_PI / double(2) - atan2(y,x);
+	const double dir = (y >= 0) ? 1 : -1;
+	const double forwardslope = double(2)*fwdmag / (M_PI / double(2));
+	const double backwardslope = double(-2)*revmag / (M_PI / double(2));
+
+	double rspeed, lspeed;
+	std::string branch;
+	if(ang < -turnthresh)
+	{
+		rspeed = (fwdmag - forwardslope * ang) * dir;
+		lspeed = (revmag + backwardslope * (ang - turnthresh)) * dir;
+		branch = "ang < -turnthresh";
+	}
+	else if(ang > turnthresh)
+	{
+		rspeed = (revmag - backwardslope * (ang - turnthresh)) * dir;
+		lspeed = (fwdmag + forwardslope * ang) * dir;
+		branch = "ang > turnthresh";
+	}
+	else 
+	{
+		rspeed = (fwdmag - forwardslope * ang) * dir;
+		lspeed = (fwdmag + forwardslope * ang) * dir;
+		branch = "abs(ang) < turnthresh";
+	}
+	std::cout << "r: " << rspeed << " l: " << lspeed << "angle: " << ang << " branch: " << branch << std::endl;
+	return set_motors(lspeed, rspeed);
 }

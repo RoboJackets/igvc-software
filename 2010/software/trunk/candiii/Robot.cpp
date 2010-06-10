@@ -97,7 +97,7 @@ Robot::~Robot()
 	delete vel_update_thread;
 	delete lidar_update_thread;
 	delete osmcd;
-	delete lidar;
+	//delete lidar;
 
 	cvReleaseVideoWriter(&cvVideoWriter);
 	releaseAllImages();
@@ -345,7 +345,7 @@ void Robot::Go()
 	run_vel_thread = true;
 	vel_update_thread = new boost::thread(&Robot::update_vel_func, this);
 
-	lidar = new NAV200;
+	//lidar = new NAV200;
 	run_lidar_thread = true;
 	lidar_update_thread = new boost::thread(&Robot::update_lidar_func, this);
 
@@ -446,8 +446,8 @@ void Robot::processFunc()
 
 #ifdef STOPANDTHINK
 	/* periodically stop and think */
-	const static int hack = 0;
-	const int hackstop = 76; //80;
+	static int hack = 0;
+	int hackstop = 76; //80;
 
 	if ( hack > hackstop )
 	{
@@ -606,7 +606,8 @@ void Robot::initGlut()
 	// initialization
 	glutInit(&argc, argv);
 	glutInitWindowSize(visCvRaw->width, visCvRaw->height);
-	glutInitWindowPosition(800, 480); 				// position on screen
+	//glutInitWindowPosition(800, 480); 				// position on screen
+	glutInitWindowPosition(0, 480); 				// position on screen
 	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
 	glutwindow = glutCreateWindow("Transform");
 	glutDisplayFunc(robot_process_function_caller); // the function glutMainLoop() runs
@@ -815,12 +816,13 @@ void Robot::update_vel_func()
 		}
 		osmcd->set_vel_vec(y, x);
 		
-		if(osmcd->updateVel_pd())
-		{
-			std::cerr << "osmcd->updateVel_pd failed!" << std::endl;
-		}
+		//if(osmcd->updateVel_pd())
+		//{
+		//	std::cerr << "osmcd->updateVel_pd failed!" << std::endl;
+		//}
 
-		usleep(5e4);
+		//usleep(5e4);
+		usleep(1e5);
 		//usleep(1e6);
 	}
 
@@ -835,17 +837,17 @@ void Robot::update_lidar_func()
 {
 	while(run_lidar_thread)
 	{
-		if(!lidar->read())
+		//if(!lidar->read())
 		{
 			boost::mutex::scoped_lock lock(lidarmutex);
-			memcpy(this->coord, lidar->coord, sizeof(coord));
-			lidar->findLinearRuns(lidar_linear_regions);
-			lidar->getLongestRun(lidar_linear_regions, longest_linear_region);
+		//	memcpy(this->coord, lidar->coord, sizeof(coord));
+		//	lidar->findLinearRuns(lidar_linear_regions);
+		//	lidar->getLongestRun(lidar_linear_regions, longest_linear_region);
 		}
-		else
-		{
-			std::cerr << "lidar read failed!" << std::endl;
-		}
+		//else
+		//{
+		//	std::cerr << "lidar read failed!" << std::endl;
+		//}
 		//do something with the lidar input
 		usleep(1e5);
 	}

@@ -17,7 +17,8 @@ class OSMC_4wd_driver
 	//set motor
 	bool setMotorPWM(const int FR, const int FL, const int BR, const int BL);//must be -255 <-> 255, larger input mag truncated to 255, sign is pos / rev, true on failure
 	bool setMotorPWM(const byte FRdir, const byte FRmag, const byte FLdir, const byte FLmag, const byte BRdir, const byte BRmag, const byte BLdir, const byte BLmag);//must be 0 - 255, dir is pos / rev, true on failure
-	void setMotorVel_pd(const double FR, const double FL, const double BR, const double BL);
+	void setVel_pd(const double FR, const double FL, const double BR, const double BL);
+	void setVel_pd(const double v);
 	bool set_motors(const int pwm);
 
 	//set vel from vision vector
@@ -28,7 +29,7 @@ class OSMC_4wd_driver
 
 	//interog
 	bool getEncoderVel(double& FL, double& FR, double& BL, double& BR);
-	bool getLastPWMSent();
+	bool getLastPWMSent(byte& FL, byte& FR, byte& BL, byte& BR);
 
 	//smart reckoning
 	//void followCirc(double radius, double vmag);

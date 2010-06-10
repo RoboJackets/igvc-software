@@ -48,6 +48,10 @@ const byte OSMC_IF_FOR_BOARD 	= 0x02;
 const byte OSMC_IF_AFT_BOARD 	= 0x03;
 const byte ENCODER_IF_FOR_BOARD = 0x04;
 const byte ENCODER_IF_AFT_BOARD = 0x05;
+const byte ENCODER_IF_FOR_RIGHT_BOARD = 0x06;
+const byte ENCODER_IF_AFT_RIGHT_BOARD = 0x07;
+const byte ENCODER_IF_FOR_LEFT_BOARD = 0x08;
+const byte ENCODER_IF_AFT_LEFT_BOARD = 0x09;
 #if 0
 //1 byte commands, laptop -> arduino
 #define ARDUINO_GETSTATUS_CMD 'r'

@@ -29,5 +29,6 @@ std::ostream& operator<<(std::ostream& output, DataPacket& pk);
 std::ostream& operator<<(std::ostream& output, header_t header);
 std::ostream& operator<<(std::ostream& output, encoder_reply_t data);
 std::ostream& operator<<(std::ostream& os, const new_encoder_pk_t& rv);
+std::ostream& operator<<(std::ostream& os, const new_encoder_single_pk_t& rv);
 
 #endif //DATAPACKET_HPP_

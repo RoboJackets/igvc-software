@@ -100,6 +100,14 @@ std::ostream& operator<<(std::ostream& os, const new_encoder_pk_t& rv)
 	return os;
 }
 
+std::ostream& operator<<(std::ostream& os, const new_encoder_single_pk_t& rv)
+{
+	os << "pos: " << rv.pcoder << std::endl;
+	os << "dpos: " << rv.dcoder << std::endl;
+	os << std::dec;
+	return os;
+}
+
 /*
 std::ostream& operator<<(std::ostream& output, DataPacket::encoder_reply_t* data){
 	//output.setf(std::ios::hex);

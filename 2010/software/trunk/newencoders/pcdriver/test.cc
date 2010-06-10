@@ -13,7 +13,7 @@ int main()
 
 	signal(SIGINT, handler);
 
-	quadCoderDriver qD;
+	quadCoderDriver qD(ENCODER_IF_FOR_RIGHT_BOARD);
 	qD.resetCount();
 	size_t t0 = time(NULL);
 	new_encoder_pk_t pk;

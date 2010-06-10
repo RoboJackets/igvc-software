@@ -2,7 +2,7 @@
 #include <iostream>
 #include <ctime>
 #include "OSMC_driver.hpp"
-#include "quadCoderDriver.hpp"
+#include "quadCoderDriver_signed.hpp"
 //#include <>
 
 //static const int speedsetdel = 3 * 1e4;
@@ -17,10 +17,9 @@ const double rtarget = .5;
 int main()
 {
 	OSMC_driver motordriver;
-	quadCoderDriver qD;
 
 	motordriver.setMotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
-	qD.resetCount();
+	//qD.resetCount();
 
 	timeval t0;
 	gettimeofday(&t0, NULL);
@@ -28,7 +27,7 @@ int main()
 	for(;;)
 	{
 		double r = -1, l = -1;
-		if(qD.getEncoderVel(r,l))
+		if(motordriver.getEncoderVel(r,l))
 		{
 			std::cerr << "encoder fail" << std::endl;
 			goto END;
