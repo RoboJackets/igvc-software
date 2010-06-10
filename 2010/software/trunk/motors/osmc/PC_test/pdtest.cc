@@ -20,13 +20,14 @@ int main()
 	{
 		double left, right;
 		byte lpwm, rpwm;
+		lpwm = rpwm = 0;
 
 		drive.updateVel_pd();
 		gettimeofday(&t, NULL);
 		double t1 = double(t.tv_sec) + double(1e-6)*double(t.tv_usec);
 
 		drive.getEncoderVel(right, left);
-		drive.getLastPWMSent(rpwm, lpwm);
+		//drive.getLastPWMSent(rpwm, lpwm);
 		std::cout << t1 - t0 << "\tleft v: " << left << "right v: " << right << std::endl;
 		std::cout << t1 - t0 << "\tleft pwm: " << int(lpwm) << "right pwm: " << int(rpwm) << std::endl;
 

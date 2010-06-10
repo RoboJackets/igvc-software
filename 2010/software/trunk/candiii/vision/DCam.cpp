@@ -77,7 +77,8 @@ void DCam::open()
 			throw runtime_error("Unable to set video mode.");
 		}
 
-		if (dc1394_capture_setup(_camera, 4, DC1394_CAPTURE_FLAGS_DEFAULT))
+		//if (dc1394_capture_setup(_camera, 4, DC1394_CAPTURE_FLAGS_DEFAULT))
+		if (dc1394_capture_setup(_camera, 1, DC1394_CAPTURE_FLAGS_DEFAULT))
 		{
 			throw runtime_error("Unable to setup capture.");
 		}
@@ -137,6 +138,7 @@ IplImage *DCam::read_frame()
 	try
 	{
 		dc1394_capture_dequeue(_camera, DC1394_CAPTURE_POLICY_WAIT, &_frame);
+		//dc1394_capture_dequeue(_camera, DC1394_CAPTURE_POLICY_POLL, &_frame);
 
 		if (_frame)
 		{

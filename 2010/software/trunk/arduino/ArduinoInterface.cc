@@ -117,7 +117,7 @@ bool ArduinoInterface::initLink(byte arduinoID)
 			}
 			byte readid = *(dataout);
 			delete[] dataout;
-			printf("found module %i\n", int(readid));
+			printf("found module %i\n, wanted %i", int(readid), int(arduinoID));
 			if (readid == arduinoID)   //might want to use more than one byte for identifcation
 			{
 				printf("correct module.\n");

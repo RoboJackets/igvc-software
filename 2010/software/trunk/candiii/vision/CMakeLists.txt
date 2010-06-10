@@ -12,8 +12,8 @@ IF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "jeanidbg"))
 	SET(CMAKE_C_FLAGS  " -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
 	SET(CMAKE_CXX_FLAGS " -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
 ELSEIF( (${ROBOT_REV} MATCHES "candiii") OR (${ROBOT_REV} MATCHES "jeani"))
-	SET(CMAKE_C_FLAGS  " -march=native -pipe -g3 -O2 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -DQT_THREAD_SUPPORT -fopenmp")
-	SET(CMAKE_CXX_FLAGS " -march=native -pipe -g3 -O2 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -DQT_THREAD_SUPPORT -fopenmp")
+	SET(CMAKE_C_FLAGS  " -march=native -pipe -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -DQT_THREAD_SUPPORT -fopenmp")
+	SET(CMAKE_CXX_FLAGS " -march=native -pipe -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -DQT_THREAD_SUPPORT -fopenmp")
 ENDIF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "jeanidbg"))
 
 add_library(vision

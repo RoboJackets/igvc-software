@@ -9,7 +9,7 @@
 #include "boost/foreach.hpp"
 
 //if defined, will not connect to NAV200
-#define LIDAR_SIMULATE
+//#define LIDAR_SIMULATE
 
 // NAV200, communication interace for the lidar
 // original code by ben

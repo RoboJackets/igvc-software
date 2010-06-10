@@ -13,6 +13,7 @@ include_directories(
 	${IGVC_SOURCE_DIR}/motors/osmc/PC_4wd
 	${IGVC_SOURCE_DIR}/arduino
 	${IGVC_SOURCE_DIR}/newencoders/pcdriver
+	${IGVC_SOURCE_DIR}/newencoders/pcdriver_signed
 	${IGVC_SOURCE_DIR}/lidar
 )
 
@@ -20,14 +21,14 @@ IF(${ROBOT_REV} MATCHES "candiiidbg")
 	SET(CMAKE_C_FLAGS  " -march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
 	SET(CMAKE_CXX_FLAGS "-march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
 ELSEIF(${ROBOT_REV} MATCHES "candiii")
-	SET(CMAKE_C_FLAGS  " -march=native -pipe -fopenmp -g3 -O2 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
-	SET(CMAKE_CXX_FLAGS "-march=native -pipe -fopenmp -g3 -O2 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
+	SET(CMAKE_C_FLAGS  " -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
+	SET(CMAKE_CXX_FLAGS "-march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
 ELSEIF(${ROBOT_REV} MATCHES "jeanidbg")
 	SET(CMAKE_C_FLAGS  "  -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
 	SET(CMAKE_CXX_FLAGS " -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
 ELSEIF(${ROBOT_REV} MATCHES "jeani")
-	SET(CMAKE_C_FLAGS  "  -march=native -pipe -fopenmp -g3 -O2 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
-	SET(CMAKE_CXX_FLAGS " -march=native -pipe -fopenmp -g3 -O2 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
+	SET(CMAKE_C_FLAGS  "  -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
+	SET(CMAKE_CXX_FLAGS " -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
 ENDIF(${ROBOT_REV} MATCHES "candiiidbg")
 
 
@@ -48,10 +49,10 @@ add_executable(${robot_bin}
 target_link_libraries(${robot_bin}
 	mapping
 	vision
-	motors_old
+	#motors_old
 	ArduinoInterface
 	OSMC_driver
-	OSMC_driver_4wd
+	#OSMC_driver_4wd
 
 	#ltdl
 	m
@@ -72,6 +73,6 @@ target_link_libraries(${robot_bin}
 	pthread
 	boost_thread-mt
 
-	NAV200
+	#NAV200
 )
 

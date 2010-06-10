@@ -34,17 +34,26 @@ void printarray(T* v, size_t start, size_t stop)
 int main()
 {
 
-	//NAV200 a;
-	float domains[NAV200::Num_Points] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
-	float ranges[NAV200::Num_Points] = {1,2,3,4,5,0,2,4,6,8,0,3,6,9,0,4,9,16,25, -2,-4,-6, .1, .3, .5, 5, 15, 25};
+	NAV200 a;
+	//float domains[NAV200::Num_Points] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
+	//float ranges[NAV200::Num_Points] = {1,2,3,4,5,0,2,4,6,8,0,3,6,9,0,4,9,16,25, -2,-4,-6, .1, .3, .5, 5, 15, 25};
 	boost::tuple<float,float> testcoord[NAV200::Num_Points];
 
+	if(!a.read())
+	{
+		std::cout << "could not read from lidar" << std::endl;
+		return -1;
+	}
+
+	memcpy(&testcoord, &a.coord, NAV200::Num_Points*sizeof(boost::tuple<float,float>));
+
+/*
 	for(int i = 0; i < NAV200::Num_Points; i++)
 	{
 		testcoord[i].get<0>() = domains[i];
 		testcoord[i].get<1>() = ranges[i];
 	}
-
+*/
 	std::deque< boost::tuple<float,float> > lines;
 	NAV200::findLinearRuns(testcoord, lines);
 
@@ -64,7 +73,7 @@ int main()
 		//std::fill(rampmap+e.get<0>(), rampmap+e.get<1>()+1, i);
 		i++;
 	}
-	std::cout << "ranges: ";printarray(ranges, NAV200::Num_Points);
+	//std::cout << "ranges: ";printarray(ranges, NAV200::Num_Points);
 	std::cout << "rampmap: ";printarray(rampmap, NAV200::Num_Points);
 
 	return 0;

@@ -30,10 +30,18 @@ typedef struct __attribute__((__packed__))
 //Encoder Data
 typedef struct __attribute__((__packed__))
 {
+	int16 dcoder;
+	uint16 dt;
+} encoder_single_reply_t;
+
+//Encoder Data
+typedef struct __attribute__((__packed__))
+{
 	int16 dl;
 	int16 dr;
 	uint16 dt;
 } encoder_reply_t;
+
 typedef struct __attribute__((__packed__))
 {
 	int16 dl;//ticks
@@ -85,5 +93,11 @@ typedef struct  __attribute__((__packed__))
 	int64_t dl;
 	int64_t dr;
 } new_encoder_pk_t;
+
+typedef struct  __attribute__((__packed__))
+{
+	int64_t pcoder;
+	int64_t dcoder;
+} new_encoder_single_pk_t;
 
 #endif //DataPacketStructs_H_

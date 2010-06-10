@@ -1,11 +1,11 @@
 #include "ArduinoInterface.h"
 #include "ArduinoCmds.hpp"
 
-#include "quadCoderDriver.hpp"
+#include "quadCoderDriver_signed.hpp"
 
 //if this is defined, nothing is sent to the motors!, it is just printed to stdout
 //#define MOTOR_SIMULATE 1
-//#define ENCODER_SIMULATE 1
+#define ENCODER_SIMULATE 1
 //#define CURRENT_SIMULATE 1
 
 //following gnu libc tradition,
@@ -17,7 +17,7 @@ class OSMC_driver
 
 	public:
 	OSMC_driver();
-	OSMC_driver(byte motor_iface, byte encoder_iface);
+	OSMC_driver(byte motor_iface, byte encoder_iface_l, byte encoder_iface_r);
 	~OSMC_driver();
 
 	#if 0
@@ -47,7 +47,7 @@ class OSMC_driver
 
 	//interact with the associated encoder
 	bool getEncoderVel(double& rvel, double& lvel);
-	bool getEncoderData(new_encoder_pk_t& pk);
+	//bool getEncoderData(new_encoder_pk_t& pk);
 
 	//run one pd loop
 	void setVel_pd(double left, double right);
@@ -63,7 +63,8 @@ class OSMC_driver
 	private:
 	ArduinoInterface ai;
 
-	quadCoderDriver* encoder;
+	quadCoderDriver_signed* encoder_l;
+	quadCoderDriver_signed* encoder_r;
 
 	const static int _max_speed_;
 	const static int MINREQSPEED;

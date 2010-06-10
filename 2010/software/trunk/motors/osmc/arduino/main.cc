@@ -65,6 +65,21 @@ int main()
 	setupJoystick();
 	//end setup
 
+	//test
+#if 0
+	for(;;)
+{
+		setRightMotorDutyCycle(MC_MOTOR_REVERSE, 200);
+		//setLeftMotorDutyCycle(MC_MOTOR_FORWARD, 200);
+		setLeftMotorDutyCycle(MC_MOTOR_REVERSE, 20);
+		for(;;)
+		{
+			delay(50);
+		}
+}
+#endif
+	//test
+
 	//arduinoProfile aP(13, 12);
 
 	//aP.print("startup\n\r");
@@ -176,6 +191,9 @@ int main()
 				headerOut.cmd = ARDUINO_GET_ID;
 				headerOut.size = 1;
 				char msg = OSMC_IF_BOARD;
+				//char msg = OSMC_IF_FOR_BOARD;
+				//char msg = OSMC_IF_AFT_BOARD;
+
 				//serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
 				Serial.print(msg);

@@ -16,7 +16,7 @@
 
 #include "mapgen.h"
 
-const static double motor_vel_mag = 1.5;
+const static double motor_vel_mag = 1.1;
 
 #ifdef OSMC_2WD
 	#include "OSMC_driver.hpp"	
@@ -26,7 +26,7 @@ const static double motor_vel_mag = 1.5;
 	#error "Must define OSMC_2WD or OSMC_4WD"
 #endif
 
-#include "NAV200.hpp"
+//#include "NAV200.hpp"
 
 /*===== Camera Settings ===========================================*/
 /* Determines camera compatability.
@@ -146,16 +146,16 @@ public:
 	void update_vel_func();
 	
 
-	NAV200* lidar;
+	//NAV200* lidar;
 	boost::mutex lidarmutex;
 	volatile bool run_lidar_thread;
 	boost::thread* lidar_update_thread;
 	void update_lidar_func();
 
 	//radians <start,stop>; 0 to the right, pos counterclockwise
-	std::deque< boost::tuple<float,float> > lidar_linear_regions;
-	boost::tuple<float,float> longest_linear_region;
-	boost::tuple<float,float> coord[NAV200::Num_Points];
+	//std::deque< boost::tuple<float,float> > lidar_linear_regions;
+	//boost::tuple<float,float> longest_linear_region;
+	//boost::tuple<float,float> coord[NAV200::Num_Points];
 };
 
 #endif /*ROBOT_H_*/
