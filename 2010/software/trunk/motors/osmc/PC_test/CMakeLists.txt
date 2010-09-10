@@ -16,9 +16,9 @@ add_executable(OSMC_test
 	main.cc
 )
 
-add_executable(step_test
-	stepresp.cc
-)
+#add_executable(step_test
+#	stepresp.cc
+#)
 
 add_executable(dumbctltest
 	dumbctl.cc
@@ -29,6 +29,6 @@ add_executable(pdtest
 )
 
 target_link_libraries(OSMC_test OSMC_driver)
-target_link_libraries(step_test OSMC_driver)
+#target_link_libraries(step_test OSMC_driver)
 target_link_libraries(dumbctltest OSMC_driver)
 target_link_libraries(pdtest OSMC_driver)
