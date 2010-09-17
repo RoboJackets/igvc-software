@@ -1,9 +1,11 @@
 
-include_directories(${IGVC_SOURCE_DIR}/motors/old)
-include_directories(${IGVC_SOURCE_DIR}/motors/osmc/PC_test)
-include_directories(${IGVC_SOURCE_DIR}/arduino)
-include_directories(${IGVC_SOURCE_DIR}/newencoders/pcdriver)
-include_directories(${IGVC_SOURCE_DIR}/newencoders/pcdriver_signed)
+include_directories(
+	${IGVC_SOURCE_DIR}/motors/old
+	${IGVC_SOURCE_DIR}/motors/osmc/PC_test
+	${IGVC_SOURCE_DIR}/arduino
+	${IGVC_SOURCE_DIR}/encoders/pcdriver
+	${IGVC_SOURCE_DIR}/encoders/pcdriver_signed
+)
 
 add_executable(joystickDrive joystickDrive.cc)
 

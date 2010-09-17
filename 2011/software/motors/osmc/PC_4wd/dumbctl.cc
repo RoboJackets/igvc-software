@@ -1,9 +1,7 @@
 
 #include <iostream>
 #include <ctime>
-#include "OSMC_driver.hpp"
-#include "quadCoderDriver.hpp"
-//#include <>
+#include "OSMC_4wd_driver.hpp"
 
 //static const int speedsetdel = 3 * 1e4;
 static const int speedsetdel = 2 * 1e4;
@@ -16,31 +14,19 @@ const double rtarget = .5;
 
 int main()
 {
-	OSMC_driver motordriver;
-	quadCoderDriver qD;
+	OSMC_4wd_driver motordriver;
 
-	motordriver.setmotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
-	qD.resetCount();
+	motordriver.setMotorPWM(MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0, MC_MOTOR_FORWARD, 0);
 
 	timeval t0;
 	gettimeofday(&t0, NULL);
 	//for(int i = 0; i < 10; i++)
 	for(;;)
 	{
-		double r = -1, l = -1;
-		if(qD.getEncoderVel(r,l))
-		{
-			std::cerr << "encoder fail" << std::endl;
-			goto END;
-		}
-		int out_rmset, out_lmset;
-//(const double rtarget, const double ltarget, const double rvel, const double lvel, const int rmset, const int lmset,  int& out_rmset, int& out_lmset)
+		//not implemented
 		motordriver.getNewVel_dumb(rtarget, ltarget, r, l, rm, lm,  out_rmset, out_lmset);
 
-		//int rdir = (out_rmset > 0) ? MC_MOTOR_FORWARD : MC_MOTOR_BACKWARD;
-		//int ldir = (out_lmset > 0) ? MC_MOTOR_FORWARD : MC_MOTOR_BACKWARD;
-
-		if(motordriver.setmotorPWM(MC_MOTOR_FORWARD, out_rmset, MC_MOTOR_FORWARD, out_lmset,MC_MOTOR_FORWARD, out_rmset, MC_MOTOR_FORWARD, out_lmset))
+		if(motordriver.setMotorPWM(MC_MOTOR_FORWARD, out_rmset, MC_MOTOR_FORWARD, out_lmset,MC_MOTOR_FORWARD, out_rmset, MC_MOTOR_FORWARD, out_lmset))
 		{
 			std::cerr << "motor set fail" << std::endl;
 			goto END;

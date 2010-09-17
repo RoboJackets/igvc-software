@@ -12,8 +12,8 @@ include_directories(
 	${IGVC_SOURCE_DIR}/motors/osmc/PC_test
 	${IGVC_SOURCE_DIR}/motors/osmc/PC_4wd
 	${IGVC_SOURCE_DIR}/arduino
-	${IGVC_SOURCE_DIR}/newencoders/pcdriver
-	${IGVC_SOURCE_DIR}/newencoders/pcdriver_signed
+	${IGVC_SOURCE_DIR}/encoders/pcdriver
+	${IGVC_SOURCE_DIR}/encoders/pcdriver_signed
 	${IGVC_SOURCE_DIR}/lidar
 )
 
@@ -23,10 +23,10 @@ IF(${ROBOT_REV} MATCHES "candiiidbg")
 ELSEIF(${ROBOT_REV} MATCHES "candiii")
 	SET(CMAKE_C_FLAGS  " -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
 	SET(CMAKE_CXX_FLAGS "-march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
-ELSEIF(${ROBOT_REV} MATCHES "jeanidbg")
+ELSEIF(${ROBOT_REV} MATCHES "jeannidbg")
 	SET(CMAKE_C_FLAGS  "  -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
 	SET(CMAKE_CXX_FLAGS " -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
-ELSEIF(${ROBOT_REV} MATCHES "jeani")
+ELSEIF(${ROBOT_REV} MATCHES "jeanni")
 	SET(CMAKE_C_FLAGS  "  -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
 	SET(CMAKE_CXX_FLAGS " -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
 ENDIF(${ROBOT_REV} MATCHES "candiiidbg")
@@ -35,8 +35,8 @@ ENDIF(${ROBOT_REV} MATCHES "candiiidbg")
 
 IF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "candiii"))
 	set(robot_bin candiii)
-ELSEIF((${ROBOT_REV} MATCHES "jeanidbg") OR (${ROBOT_REV} MATCHES "jeani"))
-	set(robot_bin jeani)
+ELSEIF((${ROBOT_REV} MATCHES "jeannidbg") OR (${ROBOT_REV} MATCHES "jeanni"))
+	set(robot_bin jeanni)
 ENDIF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "candiii"))
 
 add_executable(${robot_bin}
@@ -46,15 +46,14 @@ add_executable(${robot_bin}
 	XmlConfiguration.cpp
 )
 
+IF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "candiii"))
 target_link_libraries(${robot_bin}
 	mapping
 	vision
-	#motors_old
+
 	ArduinoInterface
 	OSMC_driver
-	#OSMC_driver_4wd
 
-	#ltdl
 	m
 	GL
 	GLU
@@ -75,4 +74,32 @@ target_link_libraries(${robot_bin}
 
 	#NAV200
 )
+ELSEIF((${ROBOT_REV} MATCHES "jeannidbg") OR (${ROBOT_REV} MATCHES "jeanni"))
+target_link_libraries(${robot_bin}
+	mapping
+	vision
 
+	ArduinoInterface
+	OSMC_driver_4wd
+
+	m
+	GL
+	GLU
+	glut
+
+	dc1394
+
+	cv
+	cvaux
+	highgui
+
+	QtXml
+	QtGui
+	QtCore
+
+	pthread
+	boost_thread-mt
+
+	#NAV200
+)
+ENDIF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "candiii"))

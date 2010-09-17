@@ -9,7 +9,7 @@ static const int speedsetdel = 2 * 1e4;
 
 int main()
 {
-	OSMC_4wd_driver drive(OSMC_IF_FOR_BOARD, ENCODER_IF_FOR_BOARD, OSMC_IF_AFT_BOARD, ENCODER_IF_AFT_BOARD);
+	OSMC_4wd_driver drive;
 /*
 	for(;;)
 	{
