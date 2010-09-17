@@ -1,5 +1,5 @@
 include_directories(
-	${IGVC_SOURCE_DIR}/candiii
+	${IGVC_SOURCE_DIR}/jeanni
 	/usr/include/qt4
 	/usr/include/qt4/Qt
 	/usr/include/qt4/QtGui
