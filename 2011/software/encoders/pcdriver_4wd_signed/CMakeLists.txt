@@ -2,7 +2,7 @@ include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
 
 include_directories(
 	${IGVC_SOURCE_DIR}/arduino
-	${IGVC_SOURCE_DIR}/newencoders/pcdriver_signed
+	${IGVC_SOURCE_DIR}/encoders/pcdriver_signed
 )
 
 add_library(quadCoderDriver_4wd_signed

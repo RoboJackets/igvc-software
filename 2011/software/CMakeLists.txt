@@ -7,9 +7,9 @@ set(BOARD_REV diecimila)
 #set(BOARD_REV sparkfun_pro_8mhz)
 
 #set(ROBOT_REV candiiidbg)
-set(ROBOT_REV candiii)
-#set(ROBOT_REV jeanidbg)
-#set(ROBOT_REV jeani)
+#set(ROBOT_REV candiii)
+#set(ROBOT_REV jeannidbg)
+set(ROBOT_REV jeanni)
 
 add_subdirectory (arduino)
 add_subdirectory (lidar)

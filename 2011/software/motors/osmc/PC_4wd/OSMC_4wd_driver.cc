@@ -1,12 +1,12 @@
 
 #include "OSMC_4wd_driver.hpp"
 
-OSMC_4wd_driver::OSMC_4wd_driver() : FOR(OSMC_IF_FOR_BOARD, ENCODER_IF_FOR_BOARD) , AFT(OSMC_IF_AFT_BOARD, ENCODER_IF_AFT_BOARD)
+OSMC_4wd_driver::OSMC_4wd_driver() : FOR(OSMC_IF_FOR_BOARD, ENCODER_IF_FOR_LEFT_BOARD, ENCODER_IF_FOR_RIGHT_BOARD) , AFT(OSMC_IF_AFT_BOARD, ENCODER_IF_AFT_LEFT_BOARD,  ENCODER_IF_AFT_RIGHT_BOARD)
 {
 	m_connected = true;
 }
 
-OSMC_4wd_driver::OSMC_4wd_driver(const byte FORosmc, const byte FORcoder, const byte AFTosmc, const byte AFTcoder) : FOR(FORosmc, FORcoder) , AFT(AFTosmc, AFTcoder)
+OSMC_4wd_driver::OSMC_4wd_driver(const byte FORosmc, const byte FORLcoder, const byte FORRcoder, const byte AFTosmc, const byte AFTLcoder, const byte AFTRcoder) : FOR(FORosmc, FORLcoder, FORRcoder) , AFT(AFTosmc, AFTLcoder, AFTRcoder)
 {
 	m_connected = true;
 }

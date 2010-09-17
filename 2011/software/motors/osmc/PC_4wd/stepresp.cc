@@ -10,7 +10,7 @@ static int stepmag = 60;
 
 int main()
 {
-	OSMC_4wd_driver motordriver(OSMC_IF_FOR_BOARD, ENCODER_IF_FOR_BOARD, OSMC_IF_AFT_BOARD, ENCODER_IF_AFT_BOARD);
+	OSMC_4wd_driver motordriver;
 
 	motordriver.setMotorPWM(MC_MOTOR_FORWARD, stepmag, MC_MOTOR_FORWARD, stepmag,MC_MOTOR_FORWARD, stepmag, MC_MOTOR_FORWARD, stepmag);
 	timeval t0;
