@@ -2,8 +2,8 @@ add_subdirectory(vision)
 add_subdirectory(mapping)
 
 include_directories(
-	${IGVC_SOURCE_DIR}/candiii/vision
-	${IGVC_SOURCE_DIR}/candiii/mapping
+	${IGVC_SOURCE_DIR}/jeanni/vision
+	${IGVC_SOURCE_DIR}/jeanni/mapping
 	/usr/include/qt4
 	/usr/include/qt4/Qt
 	/usr/include/qt4/QtGui
