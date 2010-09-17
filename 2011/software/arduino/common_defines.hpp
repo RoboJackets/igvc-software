@@ -1,0 +1,9 @@
+#ifndef COMMON_DEFINES_HPP_
+#define COMMON_DEFINES_HPP_
+
+#define TIMEOUT_LENGTH_MILLIS 2000
+#define SERIAL_BAUD 57600
+
+#define SERIAL_TIMOUT_SEC 3
+
+#endif
