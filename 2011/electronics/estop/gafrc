@@ -1,1 +1,1 @@
-(component-library "${PWD}/symbols")
+(component-library "${PWD}/../JeanniSymbols")
