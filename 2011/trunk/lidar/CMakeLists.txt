@@ -14,7 +14,14 @@ add_executable(test
 	test.cc
 )
 
+add_executable(simpletest
+	simpletest.cc
+)
+
 target_link_libraries(test
 	NAV200
 )
 
+target_link_libraries(simpletest
+	NAV200
+)
