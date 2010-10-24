@@ -71,9 +71,18 @@ NAV200::~NAV200()
 bool NAV200::read()
 {
 	uint8_t data[3083];
+	memset(data, 0, sizeof(data));
+
 	int ret = usb_control_msg(_handle, 0xc0, 4, 0, 0, (char *)data, sizeof(data), 500);
 	if (ret != sizeof(data))
 	{
+		std::cerr << "Error in Read, ret = " << ret << std::endl;
+		std::cerr << std::hex;
+		for(size_t i = 0; i < ret; i++)
+		{
+			std::cerr << (int) data[i] << " ";
+		}
+		std::cerr << std::dec;
 		// Command failed
 		//FIXME - There are many possible errors here.
 		return false;

@@ -18,3 +18,28 @@ target_link_libraries(test
 	NAV200
 )
 
+add_executable(lintest
+	find_linear_test.cc
+)
+
+target_link_libraries(lintest
+	NAV200
+)
+
+add_executable(datadump
+	datadump.cc
+)
+
+target_link_libraries(datadump
+	NAV200
+)
+
+add_executable(lidartestgui
+	lidartestgui.cc
+)
+
+target_link_libraries(lidartestgui
+	NAV200
+	cv
+	highgui
+)
