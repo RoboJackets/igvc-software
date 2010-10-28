@@ -100,7 +100,7 @@ Robot::~Robot()
 	//delete lidar;
 
 	cvReleaseVideoWriter(&cvVideoWriter);
-	releaseAllImages();
+	ImageBufferManager::getInstance().releaseAllImages();
 	destroy();
 }
 
@@ -110,33 +110,6 @@ void Robot::destroy()
 	glutDestroyWindow(glutwindow);
 	cvDestroyAllWindows();
 	exit(0);
-}
-
-void Robot::releaseAllImages()
-{
-	/* free all in image_buffers.h */
-	if ( visCvRaw !=NULL) cvReleaseImage(&visCvRaw );
-	if ( visCvDebug !=NULL) cvReleaseImage(&visCvDebug );
-	if ( visCvRedChannel !=NULL) cvReleaseImage(&visCvRedChannel );
-	if ( visCvGreenChannel !=NULL) cvReleaseImage(&visCvGreenChannel );
-	if ( visCvBlueChannel !=NULL) cvReleaseImage(&visCvBlueChannel );
-	if ( visCvHSV !=NULL) cvReleaseImage(&visCvHSV );
-	if ( visCvHue !=NULL) cvReleaseImage(&visCvHue );
-	if ( visCvSaturation !=NULL) cvReleaseImage(&visCvSaturation );
-	if ( visCvGrey !=NULL) cvReleaseImage(&visCvGrey );
-	if ( visCvThresh !=NULL) cvReleaseImage(&visCvThresh );
-	if ( visCvPath !=NULL) cvReleaseImage(&visCvPath );
-	if ( visCvHSVSmall !=NULL) cvReleaseImage(&visCvHSVSmall );
-	if ( visCvAdapt !=NULL) cvReleaseImage(&visCvAdapt );
-	if ( visCvAdaptSmall !=NULL) cvReleaseImage(&visCvAdaptSmall );
-	if ( visCvGreyBig !=NULL) cvReleaseImage(&visCvGreyBig );
-	if ( visCvRawTransform !=NULL) cvReleaseImage(&visCvRawTransform );
-	if ( visCvGlutMask !=NULL) cvReleaseImage(&visCvGlutMask );
-	if ( visCvRawTransformSmall !=NULL) cvReleaseImage(&visCvRawTransformSmall );
-
-	if ( visCvRamp !=NULL) cvReleaseImage(&visCvRamp );
-	if ( visCvRampLines !=NULL) cvReleaseImage(&visCvRampLines );
-
 }
 
 int Robot::init()
@@ -195,35 +168,18 @@ int Robot::init()
 	cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
 
 	/* configure opencv display window */
-	cvResizeWindow( "display", visCvRaw->width-30, visCvRaw->height+10 );
+	cvResizeWindow( "display", 
+			ImageBufferManager::getInstance().getvisCvRaw()->width-30, 
+			ImageBufferManager::getInstance().getvisCvRaw()->height+10 );
 	cvMoveWindow( "display", 5, 10 ); // position on screen
 
 	/* Init default view (debug=1) */
 	trackbarHandler( trackbarVal );
 
+	// EDFU remove this!!
 	/* init all CV images here */
 	{
-		/* 3 plane images (640x480) */
-		//visCvDebug = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-		visCvHSV = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-		visCvRawTransform = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 3);
-
-		/* 1 plane images (640x480) */
-		visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
-		visCvGreyBig = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
-
-		/* 3 plane images (320x240) */
-		visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
-		visCvRawTransformSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
-		visCvDebug = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
-
-		/* 1 plane images (320x240) */
-		visCvHue = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvSaturation = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvGrey = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvPath = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
-		visCvAdaptSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+		ImageBufferManager::getInstance().init();
 	}
 
 	/* set cleanup on exit */
@@ -399,7 +355,9 @@ void Robot::processFunc()
 
 
 	/* Scale raw image down to 320x240 */
-	cvResize(visCvRawTransform, visCvRawTransformSmall, CV_INTER_LINEAR);
+	cvResize(	ImageBufferManager::getInstance().getvisCvRawTransform(), 
+			ImageBufferManager::getInstance().getvisCvRawTransformSmall(), 
+			CV_INTER_LINEAR);
 
 
 	/* Perform vision processing. */
@@ -501,7 +459,7 @@ void Robot::processFunc()
 		std::stringstream fname;
 		fname << "./images/im_" << imgnum << ".jpg";
 
-		cvSaveImage(fname.str().c_str(),visCvRaw);
+		cvSaveImage(fname.str().c_str(), ImageBufferManager::getInstance().getvisCvRaw());
 		++imgnum;
 	}
 
@@ -605,7 +563,8 @@ void Robot::initGlut()
 
 	// initialization
 	glutInit(&argc, argv);
-	glutInitWindowSize(visCvRaw->width, visCvRaw->height);
+	glutInitWindowSize(	ImageBufferManager::getInstance().getvisCvRaw()->width, 
+				ImageBufferManager::getInstance().getvisCvRaw()->height);
 	//glutInitWindowPosition(800, 480); 				// position on screen
 	glutInitWindowPosition(0, 480); 				// position on screen
 	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH );
@@ -658,7 +617,15 @@ void Robot::updateGlutDisplay()
 			/* * * * * * * * * * */
 
 			/* put data in card */
-			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+			glTexImage2D(	GL_TEXTURE_RECTANGLE_ARB, 
+					0, 
+					GL_RGB, 
+					ImageBufferManager::getInstance().getvisCvRaw()->width, 
+					ImageBufferManager::getInstance().getvisCvRaw()->height, 
+					0, 
+					GL_BGR, 
+					GL_UNSIGNED_BYTE, 
+					ImageBufferManager::getInstance().getvisCvRaw()->imageData);
 
 			/* * * transform * * */
 			//setPjMat();
@@ -670,11 +637,12 @@ void Robot::updateGlutDisplay()
 				/* * * transform * * */
 				glTexCoord2i(0, 				0);
 				glVertex3f(-1,	-1,	0);
-				glTexCoord2i(visCvRaw->width, 	0);
+				glTexCoord2i(ImageBufferManager::getInstance().getvisCvRaw()->width, 	0);
 				glVertex3f( 1,	-1,	0);
-				glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
+				glTexCoord2i(	ImageBufferManager::getInstance().getvisCvRaw()->width, 	
+						ImageBufferManager::getInstance().getvisCvRaw()->height);
 				glVertex3f( 1,   1,	0);
-				glTexCoord2i(0, 				visCvRaw->height);
+				glTexCoord2i(0, ImageBufferManager::getInstance().getvisCvRaw()->height);
 				glVertex3f(-1,	 1,	0);
 				/* * * * * * * * * * */
 
@@ -690,13 +658,13 @@ void Robot::updateGlutDisplay()
 		/* get data from card */
 		glReadPixels( 0				,	//GLint x,
 					  0				,	//GLint y,
-					  visCvRaw->width	,	//GLsizei width,
-					  visCvRaw->height,	//GLsizei height,
+					  ImageBufferManager::getInstance().getvisCvRaw()->width	,	//GLsizei width,
+					  ImageBufferManager::getInstance().getvisCvRaw()->height,	//GLsizei height,
 					  GL_BGR			,	//GLenum format,
 					  GL_UNSIGNED_BYTE,	//GLenum type,
 					  //visCvRaw->imageData //Image
 					  //visCvDebug->imageData //Image
-					  visCvRawTransform->imageData //Image
+					  ImageBufferManager::getInstance().getvisCvRawTransform()->imageData //Image
 					);
 
 		// double buffering
@@ -715,25 +683,38 @@ void Robot::updateGlutDisplay()
 
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
-			gluOrtho2D(	0.0, (GLdouble)visCvRaw->width,	0.0, (GLdouble)visCvRaw->height);
+			gluOrtho2D(	0.0, 
+					(GLdouble)ImageBufferManager::getInstance().getvisCvRaw()->width,	
+					0.0, 
+					(GLdouble)ImageBufferManager::getInstance().getvisCvRaw()->height);
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
 			glMatrixMode(GL_MODELVIEW);
 			glBindTexture(GL_TEXTURE_RECTANGLE_ARB, cameraImageTextureID);
 			/* put data in card */
-			glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, visCvRaw->width, visCvRaw->height, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
+			glTexImage2D(	GL_TEXTURE_RECTANGLE_ARB, 
+					0, 
+					GL_RGB, 
+					ImageBufferManager::getInstance().getvisCvRaw()->width, 
+					ImageBufferManager::getInstance().getvisCvRaw()->height, 
+					0, 
+					GL_BGR, 
+					GL_UNSIGNED_BYTE, 
+					ImageBufferManager::getInstance().getvisCvRaw()->imageData);
 			glBegin(GL_QUADS);
 			{
 
 				// default perspective (upside down)
 				glTexCoord2i(0,					0);
 				glVertex2i(0, 				0);
-				glTexCoord2i(visCvRaw->width, 	0);
-				glVertex2i(visCvRaw->width, 0);
-				glTexCoord2i(visCvRaw->width, 	visCvRaw->height);
-				glVertex2i(visCvRaw->width, visCvRaw->height);
-				glTexCoord2i(0, 				visCvRaw->height);
-				glVertex2i(0, 				visCvRaw->height);
+				glTexCoord2i(ImageBufferManager::getInstance().getvisCvRaw()->width, 	0);
+				glVertex2i(ImageBufferManager::getInstance().getvisCvRaw()->width, 0);
+				glTexCoord2i(	ImageBufferManager::getInstance().getvisCvRaw()->width, 	
+						ImageBufferManager::getInstance().getvisCvRaw()->height);
+				glVertex2i(	ImageBufferManager::getInstance().getvisCvRaw()->width, 
+						ImageBufferManager::getInstance().getvisCvRaw()->height);
+				glTexCoord2i(0, ImageBufferManager::getInstance().getvisCvRaw()->height);
+				glVertex2i(0, 	ImageBufferManager::getInstance().getvisCvRaw()->height);
 				// corrected perspective (normal)
 				//glTexCoord2i(0, 				visCvRaw->height);	glVertex2i(0, 				0);
 				//glTexCoord2i(visCvRaw->width, 	visCvRaw->height);	glVertex2i(visCvRaw->width, 0);
@@ -750,13 +731,13 @@ void Robot::updateGlutDisplay()
 		//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGR, GL_UNSIGNED_BYTE, visCvRaw->imageData);
 		glReadPixels( 0				,	//GLint x,
 					  0				,	//GLint y,
-					  visCvRaw->width	,	//GLsizei width,
-					  visCvRaw->height,	//GLsizei height,
+					  ImageBufferManager::getInstance().getvisCvRaw()->width	,	//GLsizei width,
+					  ImageBufferManager::getInstance().getvisCvRaw()->height,	//GLsizei height,
 					  GL_BGR			,	//GLenum format,
 					  GL_UNSIGNED_BYTE,	//GLenum type,
 					  //visCvRaw->imageData //Image
 					  //visCvDebug->imageData //Image
-					  visCvRawTransform->imageData //Image
+					  ImageBufferManager::getInstance().getvisCvRawTransform()->imageData //Image
 					);
 
 		// double buffering
@@ -793,11 +774,12 @@ void Robot::getGlutMask(int call)
 	*   to help when projecting the visCvThresh image into world space.
 	*    this function should be run in a loop so the updateGlutDisplay/OpenGL fully initializes the mask,
 	*     and even still, the mask still isn't fully correct sometimes... */
-	if (call==0) visCvGlutMask = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
-	cvSet( visCvRaw, CV_RGB(255,255,255) );
+	if (call==0) 
+		ImageBufferManager::getInstance().setvisCvGlutMask(cvCreateImage(cvSize( ImageBufferManager::getInstance().getvisCvRaw()->width/2, ImageBufferManager::getInstance().getvisCvRaw()->height/2), IPL_DEPTH_8U, 3));
+	cvSet( ImageBufferManager::getInstance().getvisCvRaw(), CV_RGB(255,255,255) );
 	updateGlutDisplay();
-	cvCopy( visCvRawTransform, visCvRaw );
-	cvResize( visCvRaw, visCvGlutMask, CV_INTER_LINEAR );
+	cvCopy(  ImageBufferManager::getInstance().getvisCvRawTransform(),  ImageBufferManager::getInstance().getvisCvRaw() );
+	cvResize(  ImageBufferManager::getInstance().getvisCvRaw(),  ImageBufferManager::getInstance().getvisCvGlutMask(), CV_INTER_LINEAR );
 
 	//if(call==0) cvNamedWindow("mask");
 	//cvShowImage("mask",visCvGlutMask);

@@ -13,7 +13,7 @@
 #include "opencv/highgui.h"
 #include "Point2D.h"
 #include "vision.h"
-
+#include "image_buffers.h"
 #include "mapgen.h"
 
 const static double motor_vel_mag = 1.1;
