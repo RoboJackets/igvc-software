@@ -47,7 +47,7 @@ int GuppyCam::isValid()
 
 bool GuppyCam::GrabCvImage()
 {
-	visCvRaw = _dcam->read_frame();
+	ImageBufferManager::getInstance().visCvRaw = _dcam->read_frame();
 	return true;
 }
 

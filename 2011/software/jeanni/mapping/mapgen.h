@@ -7,7 +7,7 @@
 #include "cvcorrImages.h"
 #include <vector>
 
-
+#include "image_buffers.h"
 #include "Graphics.h"
 
 

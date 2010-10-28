@@ -59,10 +59,17 @@ void Vision::visProcessFrame(Point2D<int>& goal)
 
 
 	/* filter image */
-	cvSmooth(visCvRawTransformSmall,visCvRawTransformSmall,/*CV_GAUSSIAN*/CV_BLUR,5,0,0,0);
+	cvSmooth(	ImageBufferManager::getInstance().visCvRawTransformSmall, 
+			ImageBufferManager::getInstance().visCvRawTransformSmall, 
+			/*CV_GAUSSIAN*/CV_BLUR, 
+			5, 
+			0, 
+			0,
+ 			0);
 
 	/* copy image to internal buffer for drawing */
-	cvCopy(visCvRawTransformSmall,visCvDebug);
+	cvCopy(	ImageBufferManager::getInstance().visCvRawTransformSmall,
+		ImageBufferManager::getInstance().visCvDebug);
 
 	/* Choose vision algorithm, and update goal.  */
 	if (DO_ADAPTIVE)
@@ -84,7 +91,8 @@ void Vision::init()
 
 	/* load in vision settings */
 	LoadVisionXMLSettings();
-
+	
+	
 
 	/*** SweeperLines ****************************************************/
 	if ( DO_TRANSFORM )
@@ -130,20 +138,26 @@ void Vision::init()
 	// display roi for adaptive coloring
 	cvNamedWindow("roi",1);
 	// move the window for easy comparison to raw
-	cvMoveWindow( "roi", visCvRaw->width/2-adapt_boxPad/3, adapt_boxPad/2+visCvRaw->height );
+	cvMoveWindow( 	"roi", 
+			ImageBufferManager::getInstance().visCvRaw->width/2-adapt_boxPad/3, 
+			adapt_boxPad/2+ImageBufferManager::getInstance().visCvRaw->height );
 
 	/* init adaptive processing stuff */
 	{
 		/* define roi corners (upper-left and lower-right) */
 		if (DO_TRANSFORM)
 		{
-			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/4);
-			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/7);
+			UL = cvPoint(  	ImageBufferManager::getInstance().visCvDebug->width/3+adapt_boxPad, 
+					ImageBufferManager::getInstance().visCvDebug->height-adapt_boxPad/4);
+			LR = cvPoint(	2*ImageBufferManager::getInstance().visCvDebug->width/3-adapt_boxPad, 
+					ImageBufferManager::getInstance().visCvDebug->height-adapt_boxPad/7);
 		}
 		else
 		{
-			UL = cvPoint(  visCvDebug->width/3+adapt_boxPad, visCvDebug->height-adapt_boxPad/2);
-			LR = cvPoint(2*visCvDebug->width/3-adapt_boxPad, visCvDebug->height-adapt_boxPad/6);
+			UL = cvPoint(  	ImageBufferManager::getInstance().visCvDebug->width/3+adapt_boxPad, 
+					ImageBufferManager::getInstance().visCvDebug->height-adapt_boxPad/2);
+			LR = cvPoint(	2*ImageBufferManager::getInstance().visCvDebug->width/3-adapt_boxPad, 
+					ImageBufferManager::getInstance().visCvDebug->height-adapt_boxPad/6);
 		}
 
 		/* setup roi */
@@ -170,41 +184,51 @@ void Vision::visHsvProcessing(Point2D<int>& goal)
 {
 
 	/* fix special case colors */
-	preProcessColors(visCvDebug);
+	preProcessColors(ImageBufferManager::getInstance().visCvDebug);
 
 	/* split images into channels */
 	GetHSVChannels();
 
 	/* threshold saturation
 	 * (320x240) */
-	cvSmooth(visCvSaturation, visCvSaturation);
-	Normalize(visCvSaturation);
-	ThresholdImage(visCvSaturation, visCvSaturation, satThreshold);
+	cvSmooth(	ImageBufferManager::getInstance().visCvSaturation, 
+			ImageBufferManager::getInstance().visCvSaturation);
+	Normalize(	ImageBufferManager::getInstance().visCvSaturation);
+	ThresholdImage(	ImageBufferManager::getInstance().visCvSaturation, 
+			ImageBufferManager::getInstance().visCvSaturation, 
+			satThreshold);
 	//cvDilate(visCvSaturation, visCvSaturation, NULL, 1);
 
 	/* threshold hue
 	 * (320x240) */
-	cvSmooth(visCvHue, visCvHue);
-	Normalize(visCvHue);
-	ThresholdImage(visCvHue, visCvHue, hueThreshold);
+	cvSmooth(	ImageBufferManager::getInstance().visCvHue, 
+			ImageBufferManager::getInstance().visCvHue);
+	Normalize(	ImageBufferManager::getInstance().visCvHue);
+	ThresholdImage(	ImageBufferManager::getInstance().visCvHue, 
+			ImageBufferManager::getInstance().visCvHue, 
+			hueThreshold);
 	//cvDilate(visCvHue, visCvHue, NULL, 1);
 
 	/* or the images together
 	 * (320x240) */
-	cvOr(visCvSaturation, visCvHue, visCvThresh);
+	cvOr(	ImageBufferManager::getInstance().visCvSaturation, 
+		ImageBufferManager::getInstance().visCvHue, 
+		ImageBufferManager::getInstance().visCvThresh);
 	//cvDilate(visCvThresh, visCvThresh, NULL, 1);
 
 	/* make white=good & black=bad
 	 * (320x240) */
-	cvNot(visCvThresh, visCvThresh);
+	cvNot(	ImageBufferManager::getInstance().visCvThresh, 
+		ImageBufferManager::getInstance().visCvThresh);
 
 	/* generate path image, with white=path & black=bad
 	 * (320x240) */
-	visGenPath(visCvThresh);
+	visGenPath(	ImageBufferManager::getInstance().visCvThresh);
 
 	/* find next goal for robot by scanning up visCvPath Image, and set the goal.
 	 * (320x240) */
-	robotWidthScan(visCvPath, goal_far);	// returns -1 on error
+	robotWidthScan(	ImageBufferManager::getInstance().visCvPath, 
+			goal_far);	// returns -1 on error
 
 	/* setup navigation lines that sweep across the screen and updates goal. */
 	visSweeperLines(goal_near);
@@ -226,7 +250,7 @@ void Vision::visHsvProcessing(Point2D<int>& goal)
 void Vision::visSweeperLines(Point2D<int>& goal)
 {
 
-	Graphics g_draw(visCvDebug);
+	Graphics g_draw(ImageBufferManager::getInstance().visCvDebug);
 	int pathDanger[nav_path__num];
 	int curPixelDanger = 0;
 	int curPathDanger = 0;
@@ -266,7 +290,8 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 					//curPoint.x += delta;
 
 					// check path image  for black=bad
-					if (visCvPath->imageData[curPoint.y*visCvPath->width+curPoint.x]==0)
+					if (	ImageBufferManager::getInstance().visCvPath->
+						imageData[curPoint.y*ImageBufferManager::getInstance().visCvPath->width+curPoint.x]==0)
 					{
 						// everything bad is a barrel
 						//curPixelDanger += danger_per_barrel_pixel;
@@ -568,7 +593,7 @@ void Vision::robotWidthScan(IplImage* img, Point2D<int>& goal)
 			//=== debug display  ===//
 			int gy2 = goal.y;
 			int gx2 = goal.x;
-			Graphics g(visCvDebug);
+			Graphics g(ImageBufferManager::getInstance().visCvDebug);
 			g.setColor(CV_RGB(20,20,0));
 			g.drawLine( center, img->height-2,
 						gx2, gy2 );
@@ -577,7 +602,7 @@ void Vision::robotWidthScan(IplImage* img, Point2D<int>& goal)
 			//==================================================//
 
 			// flip y sign so higher is farther
-			goal.y = visCvPath->height - goal.y;
+			goal.y = ImageBufferManager::getInstance().visCvPath->height - goal.y;
 			//printf("goal_far (%d,%d) \n",goal.x,goal.y);
 			// done!
 		}
@@ -621,8 +646,13 @@ void Vision::visGenPath(IplImage* img)
 		//scan left then right & generate visCvPath image
 #pragma omp parallel
 		{
-			scanFillLeft  (visCvPath, x, y, goodFirst, 0      , blackout);
-			scanFillRight (visCvPath, x, y, goodFirst, width-1, blackout);
+			scanFillLeft  (	ImageBufferManager::getInstance().visCvPath, 
+					x, 
+					y, 
+					goodFirst, 
+					0, 
+					blackout);
+			scanFillRight (ImageBufferManager::getInstance().visCvPath, x, y, goodFirst, width-1, blackout);
 		}
 
 	}//y
@@ -738,7 +768,7 @@ void Vision::scanFillLeft(IplImage* img, int middleX, int y, int goodFirst, int 
 		{
 			if (good)
 			{
-				if (checkPixel(visCvThresh,x,y))
+				if (checkPixel(ImageBufferManager::getInstance().visCvThresh,x,y))
 				{
 					//set good
 					index = offset+x;
@@ -767,7 +797,7 @@ void Vision::scanFillLeft(IplImage* img, int middleX, int y, int goodFirst, int 
 		{
 			if (good==2)  	//in bad spot, check for good spot
 			{
-				if (checkPixel(visCvThresh,x,y))
+				if (checkPixel(ImageBufferManager::getInstance().visCvThresh,x,y))
 				{
 					//set good
 					good=1;
@@ -783,7 +813,7 @@ void Vision::scanFillLeft(IplImage* img, int middleX, int y, int goodFirst, int 
 			}
 			else if (good==1)  	//a good spot appeared, check for bad again
 			{
-				if (checkPixel(visCvThresh,x,y))
+				if (checkPixel(ImageBufferManager::getInstance().visCvThresh,x,y))
 				{
 					//set good
 					index = offset+x;
@@ -836,7 +866,7 @@ void Vision::scanFillRight(IplImage* img, int middleX, int y, int goodFirst, int
 		{
 			if (good)
 			{
-				if (checkPixel(visCvThresh,x,y))
+				if (checkPixel(ImageBufferManager::getInstance().visCvThresh,x,y))
 				{
 					//set good
 					index = offset+x;
@@ -865,7 +895,7 @@ void Vision::scanFillRight(IplImage* img, int middleX, int y, int goodFirst, int
 		{
 			if (good==2)  	//in bad spot, check for good spot
 			{
-				if (checkPixel(visCvThresh,x,y))
+				if (checkPixel(ImageBufferManager::getInstance().visCvThresh,x,y))
 				{
 					//set good
 					good=1;
@@ -881,7 +911,7 @@ void Vision::scanFillRight(IplImage* img, int middleX, int y, int goodFirst, int
 			}
 			else if (good==1)  	//a good spot appeared, check for bad again
 			{
-				if (checkPixel(visCvThresh,x,y))
+				if (checkPixel(ImageBufferManager::getInstance().visCvThresh,x,y))
 				{
 					//set good
 					index = offset+x;
@@ -951,8 +981,8 @@ float Vision::deg2rad(float degrees)
 Point2D<float> Vision::navPath_start(int pathID)
 {
 	return Point2D<float>(
-			   (visCvDebug->width / 2) + (nav_path__center_path_id-pathID),
-			   visCvDebug->height - EDGE_PAD -1 );
+			   (ImageBufferManager::getInstance().visCvDebug->width / 2) + (nav_path__center_path_id-pathID),
+			   ImageBufferManager::getInstance().visCvDebug->height - EDGE_PAD -1 );
 }
 
 /*
@@ -963,7 +993,7 @@ Point2D<float> Vision::navPath_vector(int pathID)
 	//float deg = navPath_angle(pathID);
 	//float rad = deg2rad(deg);
 	float rad = navPath_angle(pathID)*M_PI/180.0;
-	float radius = 0.75 * (visCvDebug->width) / 2;
+	float radius = 0.75 * (ImageBufferManager::getInstance().visCvDebug->width) / 2;
 	return Point2D<float>(
 			   radius*cos(rad),
 			   -radius*sin(rad))	// computer y-axis is inverse of math y-axis
@@ -1009,55 +1039,129 @@ void Vision::ConvertAllImageViews(int trackbarVal)
 	switch (trackbarVal)
 	{
 	case 0:
-		cvPutText(visCvRaw, "Raw", cvPoint(5,visCvRaw->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvRaw);
+		cvPutText(	ImageBufferManager::getInstance().visCvRaw, 
+				"Raw", 
+				cvPoint(5,ImageBufferManager::getInstance().visCvRaw->height-10), 
+				&font, 
+				CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvRaw);
 		break;
 	case 1:
-		cvPutText(visCvDebug, "Debug", cvPoint(5,visCvDebug->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvDebug);
+		cvPutText(	ImageBufferManager::getInstance().visCvDebug, 
+				"Debug", 
+				cvPoint(5,ImageBufferManager::getInstance().visCvDebug->height-10), 
+				&font, 
+				CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvDebug);
 		break;
 	case 2:
-		if (!DO_TRANSFORM) cvPutText(visCvPath, "Path", cvPoint(5,visCvPath->height-10), &font, CV_RGB(0,0,0));
-		else cvPutText(visCvPath, "Path", cvPoint(5,visCvPath->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvPath);
+		if (!DO_TRANSFORM) 
+			cvPutText(	ImageBufferManager::getInstance().visCvPath, 
+					"Path", 
+					cvPoint(5,ImageBufferManager::getInstance().visCvPath->height-10), 
+					&font, 
+					CV_RGB(0,0,0));
+		else 
+			cvPutText(	ImageBufferManager::getInstance().visCvPath, 
+					"Path", 
+					cvPoint(5,ImageBufferManager::getInstance().visCvPath->height-10), 
+					&font, 
+					CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvPath);
 		break;
 	case 3:
-		if (!DO_TRANSFORM) cvPutText(visCvThresh, "Thresh", cvPoint(5,visCvThresh->height-10), &font, CV_RGB(0,0,0));
-		else cvPutText(visCvThresh, "Thresh", cvPoint(5,visCvThresh->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvThresh);
+		if (!DO_TRANSFORM) 
+			cvPutText(	ImageBufferManager::getInstance().visCvThresh, 
+					"Thresh", 
+					cvPoint(5,ImageBufferManager::getInstance().visCvThresh->height-10), 
+					&font, 
+					CV_RGB(0,0,0));
+		else 
+			cvPutText(	ImageBufferManager::getInstance().visCvThresh, 
+					"Thresh", 
+					cvPoint(5,ImageBufferManager::getInstance().visCvThresh->height-10), 
+					&font, 
+					CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvThresh);
 		break;
 	case 4:
-		if (!DO_TRANSFORM) cvPutText(visCvAdaptSmall, "Adaptive", cvPoint(5,visCvAdaptSmall->height-10), &font, CV_RGB(0,0,0));
-		else cvPutText(visCvAdaptSmall, "Adaptive", cvPoint(5,visCvAdaptSmall->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvAdaptSmall);
+		if (!DO_TRANSFORM) 
+			cvPutText(	ImageBufferManager::getInstance().visCvAdaptSmall, 
+					"Adaptive", 
+					cvPoint(5,ImageBufferManager::getInstance().visCvAdaptSmall->height-10), 
+					&font, 
+					CV_RGB(0,0,0));
+		else 
+			cvPutText(	ImageBufferManager::getInstance().visCvAdaptSmall, 
+					"Adaptive", 
+					cvPoint(5,ImageBufferManager::getInstance().visCvAdaptSmall->height-10), 
+					&font, 
+					CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvAdaptSmall);
 		break;
 	case 5:
-		cvPutText(visCvGrey, "Grey", cvPoint(5,visCvGrey->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvGrey);
+		cvPutText(	ImageBufferManager::getInstance().visCvGrey, 
+				"Grey", 
+				cvPoint(5,ImageBufferManager::getInstance().visCvGrey->height-10), 
+				&font, 
+				CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvGrey);
 		break;
 	case 6:
-		if (DO_TRANSFORM) cvPutText(visCvHue, "Hue", cvPoint(5,visCvHue->height-10), &font, CV_RGB(0,0,0));
-		else cvPutText(visCvHue, "Hue", cvPoint(5,visCvHue->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvHue);
+		if (DO_TRANSFORM) 
+			cvPutText(	ImageBufferManager::getInstance().visCvHue, 
+					"Hue", 
+					cvPoint(5,ImageBufferManager::getInstance().visCvHue->height-10), 
+					&font, 
+					CV_RGB(0,0,0));
+		else 
+			cvPutText(	ImageBufferManager::getInstance().visCvHue, 
+					"Hue", 
+					cvPoint(5,ImageBufferManager::getInstance().visCvHue->height-10), 
+					&font, 
+					CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvHue);
 		break;
 	case 7:
-		if (DO_TRANSFORM) cvPutText(visCvSaturation, "Sat", cvPoint(5,visCvSaturation->height-10), &font, CV_RGB(0,0,0));
-		else cvPutText(visCvSaturation, "Sat", cvPoint(5,visCvSaturation->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvSaturation);
+		if (DO_TRANSFORM) 
+			cvPutText(	ImageBufferManager::getInstance().visCvSaturation, 
+					"Sat", 
+					cvPoint(5,ImageBufferManager::getInstance().visCvSaturation->height-10), 
+					&font, 
+					CV_RGB(0,0,0));
+		else 
+			cvPutText(	ImageBufferManager::getInstance().visCvSaturation, 
+					"Sat", 
+					cvPoint(5,ImageBufferManager::getInstance().visCvSaturation->height-10), 
+					&font, 
+					CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvSaturation);
 		break;
 	case 8:
-		cvPutText(visCvHSV, "HSV", cvPoint(5,visCvHSV->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvHSV);
+		cvPutText(	ImageBufferManager::getInstance().visCvHSV, 
+				"HSV", 
+				cvPoint(5,ImageBufferManager::getInstance().visCvHSV->height-10), 
+				&font, 
+				CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvHSV);
 		break;
 
 ////////////////
 	case 9:
-		cvPutText(visCvRamp, "Ramp", cvPoint(5,visCvRamp->height-10), &font, CV_RGB(255,255,255));
-		cvShowImage("display", visCvRamp);
+		cvPutText(	ImageBufferManager::getInstance().visCvRamp, 
+				"Ramp", 
+				cvPoint(5,ImageBufferManager::getInstance().visCvRamp->height-10), 
+				&font, 
+				CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvRamp);
 		break;
 	case 10:
-		cvPutText(visCvRampLines, "Ramp lines", cvPoint(5,visCvRampLines->height-10), &font, CV_RGB(0,0,0));
-		cvShowImage("display", visCvRampLines);
+		cvPutText(	ImageBufferManager::getInstance().visCvRampLines, 
+				"Ramp lines", 
+				cvPoint(5,ImageBufferManager::getInstance().visCvRampLines->height-10), 
+				&font, 
+				CV_RGB(0,0,0));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvRampLines);
 		break;
 ////////////////
 
@@ -1137,7 +1241,11 @@ void Vision::LoadVisionXMLSettings()
 void Vision::GetRGBChannels()
 {
 	// splitt raw image into color channels
-	cvSplit(visCvRawTransform, visCvBlueChannel, visCvGreenChannel, visCvRedChannel, NULL);
+	cvSplit(	ImageBufferManager::getInstance().visCvRawTransform, 
+			ImageBufferManager::getInstance().visCvBlueChannel, 
+			ImageBufferManager::getInstance().visCvGreenChannel, 
+			ImageBufferManager::getInstance().visCvRedChannel, 
+			NULL);
 }
 
 /*
@@ -1146,11 +1254,19 @@ void Vision::GetRGBChannels()
 void Vision::GetHSVChannels()
 {
 	// calculate HSV - Hue Saturation Value(Greyscale)
-	cvCvtColor(visCvRawTransform, visCvHSV, CV_BGR2HSV);
+	cvCvtColor(	ImageBufferManager::getInstance().visCvRawTransform, 
+			ImageBufferManager::getInstance().visCvHSV, 
+			CV_BGR2HSV);
 	// shrink !!
-	cvResize(visCvHSV, visCvHSVSmall, CV_INTER_LINEAR);
+	cvResize(	ImageBufferManager::getInstance().visCvHSV, 
+			ImageBufferManager::getInstance().visCvHSVSmall, 
+			CV_INTER_LINEAR);
 	// hsv
-	cvCvtPixToPlane(visCvHSVSmall, visCvHue, visCvSaturation, visCvGrey, 0);
+	cvCvtPixToPlane(	ImageBufferManager::getInstance().visCvHSVSmall, 
+				ImageBufferManager::getInstance().visCvHue, 
+				ImageBufferManager::getInstance().visCvSaturation, 
+				ImageBufferManager::getInstance().visCvGrey, 
+				0);
 }
 
 /*
@@ -1225,9 +1341,10 @@ void Vision::CvtPixToGoal(Point2D<int>& goal)
 	 */
 	{
 		// rotation (0 = go straight)
-		goal.x = (-visCvPath->width/2 + goal.x) * (255) / (visCvPath->width/2);
+		goal.x = (	-ImageBufferManager::getInstance().visCvPath->width/2 + goal.x) * (255) / 
+				(ImageBufferManager::getInstance().visCvPath->width/2);
 		// fwd speed
-		goal.y = (  goal.y) * (255) / (visCvPath->height );
+		goal.y = (  goal.y) * (255) / (ImageBufferManager::getInstance().visCvPath->height );
 
 		// Debug print
 		//printf("heading: rot(x): %d 	fwd(y): %d \n",goal.x,goal.y);
@@ -1260,9 +1377,9 @@ void Vision::Adapt()
 {
 
 	/* set the roi img */
-	cvSetImageROI(visCvRawTransformSmall,roi);
-	cvCopy(visCvRawTransformSmall,roi_img);
-	cvResetImageROI(visCvRawTransformSmall);
+	cvSetImageROI(ImageBufferManager::getInstance().visCvRawTransformSmall,roi);
+	cvCopy(ImageBufferManager::getInstance().visCvRawTransformSmall,roi_img);
+	cvResetImageROI(ImageBufferManager::getInstance().visCvRawTransformSmall);
 
 	/* blur image data */
 	//cvSmooth(roi_img,roi_img,CV_GAUSSIAN,3,0,0,0);
@@ -1291,8 +1408,8 @@ void Vision::Adapt()
 		firstB = blue;
 		firstG = green;
 		firstR = red;
-		visCvRamp = cvCloneImage( visCvAdaptSmall );
-		visCvRampLines = cvCloneImage( visCvAdaptSmall );
+		ImageBufferManager::getInstance().visCvRamp = cvCloneImage( ImageBufferManager::getInstance().visCvAdaptSmall );
+		ImageBufferManager::getInstance().visCvRampLines = cvCloneImage( ImageBufferManager::getInstance().visCvAdaptSmall );
 	}
 	else
 	{
@@ -1344,14 +1461,14 @@ void Vision::Adapt()
 
 
 	/* pointers */
-	unsigned char* rgbdata   = (unsigned char*) visCvRawTransformSmall->imageData;
-	unsigned char* adaptdata = (unsigned char*) visCvAdaptSmall->imageData;
-	unsigned char* debugdata = (unsigned char*) visCvDebug->imageData;
-	unsigned char* rampdata = (unsigned char*) visCvRamp->imageData;
+	unsigned char* rgbdata   = (unsigned char*) ImageBufferManager::getInstance().visCvRawTransformSmall->imageData;
+	unsigned char* adaptdata = (unsigned char*) ImageBufferManager::getInstance().visCvAdaptSmall->imageData;
+	unsigned char* debugdata = (unsigned char*) ImageBufferManager::getInstance().visCvDebug->imageData;
+	unsigned char* rampdata  = (unsigned char*) ImageBufferManager::getInstance().visCvRamp->imageData;
 
 	/* generate visCvAdapt image here!
 	 *  white=good ~ black=bad */
-	for (int i=0, n=visCvRawTransformSmall->imageSize-3; i<n; i+=3)
+	for (int i=0, n=ImageBufferManager::getInstance().visCvRawTransformSmall->imageSize-3; i<n; i+=3)
 	{
 		// get data
 		ab = *(rgbdata  );
@@ -1431,7 +1548,7 @@ void Vision::Adapt()
 /////////////////////////////////////////////////
 
 	/* display roi box in the image we're using */
-	cvRectangle( visCvDebug, UL, LR, CV_RGB(120,0,0), 1, 8, 0);
+	cvRectangle( ImageBufferManager::getInstance().visCvDebug, UL, LR, CV_RGB(120,0,0), 1, 8, 0);
 }
 
 /*
@@ -1444,10 +1561,13 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 	Adapt();
 
 	/* copy visCvAdapt img into thresh image and filter */
-	cvCopy(visCvAdaptSmall,visCvThresh);
+	cvCopy(ImageBufferManager::getInstance().visCvAdaptSmall,ImageBufferManager::getInstance().visCvThresh);
 
 	//cvDilate(visCvAdapt, visCvAdapt,  NULL, 1); // removes black spots/noise
-	cvErode(visCvThresh, visCvThresh, NULL, 1); // fills in barrels/lines, but adds grass noise
+	cvErode(	ImageBufferManager::getInstance().visCvThresh, 
+			ImageBufferManager::getInstance().visCvThresh, 
+			NULL, 
+			1); // fills in barrels/lines, but adds grass noise
 
 	//cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
 	//cvErode(visCvThresh, visCvThresh,  NULL, 2); // fills in barrels/lines, but adds grass noise
@@ -1455,10 +1575,10 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 	if (doMapping == 0)
 	{
 		/* generate visCvPath */
-		visGenPath(visCvThresh);
+		visGenPath(ImageBufferManager::getInstance().visCvThresh);
 
 		/* scan high in img */
-		robotWidthScan(visCvPath, goal_far);
+		robotWidthScan(ImageBufferManager::getInstance().visCvPath, goal_far);
 
 		/* setup navigation lines that sweep across the screen and updates goal. */
 		visSweeperLines(goal_near);
@@ -1470,7 +1590,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 
 ///////////////// EXIT RAMP MODE ////////////////////
 
-	CvScalar data = cvAvg(visCvThresh);
+	CvScalar data = cvAvg(ImageBufferManager::getInstance().visCvThresh);
 	int blue  = data.val[0];
 	//int green = data.val[1];
 	//int red   = data.val[2];
@@ -1480,7 +1600,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 	if ( (ENABLE_EXITRAMPMODE) && (blue < 46) ) //50  // higher gets in 'exit ramp' mode sooner
 	{
 		ON_RAMP = 1;
-		cvZero(visCvThresh);
+		cvZero(ImageBufferManager::getInstance().visCvThresh);
 //		for (int i=0, n=visCvThresh->imageSize; i<n; ++i)
 //		{
 //			p = (unsigned char)visCvGrey->imageData[i];
@@ -1500,8 +1620,8 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 //		visGenPath(visCvThresh);
 //      cvCopy(visCvPath,visCvThresh);
 
-		cvNot(visCvThresh,visCvThresh);
-		cvCopy(visCvRampLines,visCvThresh);
+		cvNot(ImageBufferManager::getInstance().visCvThresh,ImageBufferManager::getInstance().visCvThresh);
+		cvCopy(ImageBufferManager::getInstance().visCvRampLines,ImageBufferManager::getInstance().visCvThresh);
 
 	}
 	else
@@ -1535,7 +1655,7 @@ void Vision::findRamp(/*in*/IplImage* img,/*out*/IplImage* rimg, IplImage* rline
 	//isRampPx(img,rimg0);
 	//morphClosing(img,rimg,RAMP_LINE_WIDTH);
 	cvDilate(img,rimg,NULL,RAMP_LINE_WIDTH);
-	cvThreshold(visCvGrey,rlineimg,RAMP_LINE_THRESH,255,CV_THRESH_BINARY);
+	cvThreshold(ImageBufferManager::getInstance().visCvGrey,rlineimg,RAMP_LINE_THRESH,255,CV_THRESH_BINARY);
 	cvDilate(rlineimg,rlineimg,NULL,RAMP_LINE_OVERFILL);
 	cvAnd(rlineimg,rimg,rlineimg,NULL);
 	//cvReleaseImage(&rimg0);

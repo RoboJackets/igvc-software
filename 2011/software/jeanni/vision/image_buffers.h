@@ -15,35 +15,80 @@
 /* buffers ***********************************************/
 
 
+class ImageBufferManager
+{
+friend class Vision;
+friend class CVcam;
+friend class GuppyCam;
+protected:
+	ImageBufferManager(){};
+	~ImageBufferManager(){};
+	ImageBufferManager(const ImageBufferManager &);
+	ImageBufferManager & operator=(const ImageBufferManager &);
+	
+public:
+	static ImageBufferManager &getInstance();
+	void init();
+	void releaseAllImages();
+	IplImage* getvisCvRaw();
+	void setvisCvRaw(IplImage *);
+	IplImage* getvisCvDebug();
+	IplImage* getvisCvRedChannel();
+	IplImage* getvisCvGreenChannel();
+	IplImage* getvisCvBlueChannel();
+	IplImage* getvisCvHSV();
+	IplImage* getvisCvHue();
+	IplImage* getvisCvSaturation();
+	IplImage* getvisCvGrey();
+	IplImage* getvisCvThresh();
+	IplImage* getvisCvPath();
+	IplImage* getvisCvHSVSmall();
 
+	IplImage* getvisCvAdapt();
+	IplImage* getvisCvAdaptSmall();
+	
+	IplImage* getvisCvGreyBig();
+	IplImage* getvisCvRawTransform();
+	IplImage* getvisCvGlutMask();
+	void setvisCvGlutMask(IplImage*);
+	IplImage* getvisCvRawTransformSmall();
+	
+	IplImage* getvisCvRamp();
+	void setvisCvRamp(IplImage *);
+	IplImage* getvisCvRampLines();
+	void setvisCvRampLines(IplImage *);
+	
+	
+private:
 
-
+	
 // NOTE: these MUST be initialized in "Robot::init()"
-extern IplImage* visCvRaw;
-extern IplImage* visCvDebug;
-extern IplImage* visCvRedChannel;
-extern IplImage* visCvGreenChannel;
-extern IplImage* visCvBlueChannel;
-extern IplImage* visCvHSV;
-extern IplImage* visCvHue;
-extern IplImage* visCvSaturation;
-extern IplImage* visCvGrey;
-extern IplImage* visCvThresh;
-extern IplImage* visCvPath;
-extern IplImage* visCvHSVSmall;
+// EDFU : moved initialization to vision::init
+ IplImage* visCvRaw;
+ IplImage* visCvDebug;
+ IplImage* visCvRedChannel;
+ IplImage* visCvGreenChannel;
+ IplImage* visCvBlueChannel;
+ IplImage* visCvHSV;
+ IplImage* visCvHue;
+ IplImage* visCvSaturation;
+ IplImage* visCvGrey;
+ IplImage* visCvThresh;
+ IplImage* visCvPath;
+ IplImage* visCvHSVSmall;
 
-extern IplImage* visCvAdapt;
-extern IplImage* visCvAdaptSmall;
+ IplImage* visCvAdapt;
+ IplImage* visCvAdaptSmall;
 
-extern IplImage* visCvGreyBig;
-extern IplImage* visCvRawTransform;
-extern IplImage* visCvGlutMask;
-extern IplImage* visCvRawTransformSmall;
+ IplImage* visCvGreyBig;
+ IplImage* visCvRawTransform;
+ IplImage* visCvGlutMask;
+ IplImage* visCvRawTransformSmall;
 
-extern IplImage* visCvRamp;
-extern IplImage* visCvRampLines;
+ IplImage* visCvRamp;
+ IplImage* visCvRampLines;
 
-
+};
 /* conversions ***********************************************/
 
 

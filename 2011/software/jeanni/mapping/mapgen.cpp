@@ -9,6 +9,7 @@
 #include <iostream>
 #include <omp.h>
 
+
 /////////////////////////////////////////////////
 #define SWIVELINESS 0.74  // around 1.0
 #define SWEEPERLINELENGTH 0.43  //0.425
@@ -73,7 +74,9 @@ int MapGen::genMap()
 
 	/* get raw image to grayscale */
 	{
-		cvCvtColor(visCvRawTransformSmall, visCvGrey, CV_BGR2GRAY);
+		cvCvtColor(	ImageBufferManager::getInstance().getvisCvRawTransformSmall(), 
+				ImageBufferManager::getInstance().getvisCvGrey(), 
+				CV_BGR2GRAY);
 	}
 
 
@@ -84,7 +87,8 @@ int MapGen::genMap()
 		//cvErode( visCvGrey, visCvGrey, NULL, 1 );
 		//cvSmooth(visCvGrey,visCvGrey,CV_MEDIAN,3,0,0,0);
 		//cvSobel(visCvGrey,visCvGrey, 1, 1, 3);
-		cvEqualizeHist(visCvGrey,visCvGrey);
+		cvEqualizeHist(	ImageBufferManager::getInstance().getvisCvGrey(),
+				ImageBufferManager::getInstance().getvisCvGrey());
 	}
 
 
@@ -145,7 +149,8 @@ int MapGen::getFeatures()
 		{
 			_f=0;
 			/* get raw first frame */
-			cvCopy(visCvGrey, prev);
+			cvCopy(	ImageBufferManager::getInstance().getvisCvGrey(), 
+				prev);
 		}
 		else
 		{
@@ -196,7 +201,7 @@ int MapGen::getFeatures()
 //		cvCvtColor(visCvGrey, tempvisCvGrey, CV_GRAY2BGR);
 		found = icvFindCorrForGivenPoints(
 					prev,      /* Image 1 */
-					visCvGrey, /* Image 2 */
+					ImageBufferManager::getInstance().getvisCvGrey(), /* Image 2 */
 					points1,
 					status1,
 					points2,
@@ -212,7 +217,7 @@ int MapGen::getFeatures()
 		/* move current to previous */
 		if (found && !_f)
 		{
-			cvCopy(visCvGrey,prev);
+			cvCopy(ImageBufferManager::getInstance().getvisCvGrey(),prev);
 		}
 
 		/* local storage */
@@ -246,7 +251,13 @@ int MapGen::getFeatures()
 					good++;
 
 					/* draw good matches */
-					cvLine(visCvGrey, cvPoint( a-dx,b-dy ), cvPoint( x+dx,y+dy ), CV_RGB(0,0,0), 2, 8, 0);
+					cvLine(	ImageBufferManager::getInstance().getvisCvGrey(), 
+						cvPoint( a-dx,b-dy ), 
+						cvPoint( x+dx,y+dy ), 
+						CV_RGB(0,0,0), 
+						2, 
+						8, 
+						0);
 				}
 
 				/* draw all matches */
@@ -399,18 +410,18 @@ void MapGen::init()
 	points2 = cvCreateMat(2,maxFeatures,CV_32F);
 	status1 = cvCreateMat(1,maxFeatures,CV_8SC1);
 	status2 = cvCreateMat(1,maxFeatures,CV_8SC1);
-	prev = cvCreateImage(cvGetSize(visCvGrey), 8, 1);
+	prev = cvCreateImage(cvGetSize(ImageBufferManager::getInstance().getvisCvGrey()), 8, 1);
 	cvZero(points1);
 	cvZero(points2);
 	cvZero(status1);
 	cvZero(status2);
 
 	/* misc */
-	imgHalfHeight = visCvGrey->height/2;
-	imgHalfWidth  = visCvGrey->width/2;
+	imgHalfHeight = ImageBufferManager::getInstance().getvisCvGrey()->height/2;
+	imgHalfWidth  = ImageBufferManager::getInstance().getvisCvGrey()->width/2;
 
 	/* amount of top of image to ignore */
-	yFeatureThresh = visCvGrey->height/3  ; // higher => skip more of top
+	yFeatureThresh = ImageBufferManager::getInstance().getvisCvGrey()->height/3  ; // higher => skip more of top
 
 	//==============================================================
 
@@ -666,7 +677,10 @@ int MapGen::genLandmarkMap()
 	 *  to show the orientation of the robot in the world map */
 	float x,y,a,b;
 	mapCamPointToWorldPoint( imgHalfWidth, 0, a, b); // top center of camera frame
-	mapCamPointToWorldPoint( imgHalfWidth, visCvGrey->height-1, x, y); // bottom center of camera frame
+	mapCamPointToWorldPoint( 	imgHalfWidth, 
+					ImageBufferManager::getInstance().getvisCvGrey()->height-1, 
+					x, 
+					y); // bottom center of camera frame
 	/* update/avg current robot orientation */
 	robotBaseAt = cvPoint( (robotBaseAt.x+x)/2, (robotBaseAt.y+y)/2 );
 	robotLookingAt = cvPoint( (robotLookingAt.x+a)/2, (robotLookingAt.y+b)/2 );
@@ -729,12 +743,12 @@ int MapGen::genProbabilityMap()
 	int x,y;
 
 #pragma omp parallel for private(y,x,setval,wx,wy,weight)
-	for (y=pad; y<visCvThresh->height-divby-pad; y+=divby)
+	for (y=pad; y<ImageBufferManager::getInstance().getvisCvThresh()->height-divby-pad; y+=divby)
 	{
-		for (x=pad; x<visCvThresh->width-divby-pad; x+=divby )
+		for (x=pad; x<ImageBufferManager::getInstance().getvisCvThresh()->width-divby-pad; x+=divby )
 		{
 			// check void mask
-			if ( cvGet2D(visCvGlutMask,y,x).val[0]==255 )
+			if ( cvGet2D(ImageBufferManager::getInstance().getvisCvGlutMask(),y,x).val[0]==255 )
 			{
 				// map pts
 				mapCamPointToWorldPoint((float)x,(float)y,wx,wy);
@@ -744,7 +758,7 @@ int MapGen::genProbabilityMap()
 #if USE_PATH_IMG
 				weight = (cvGetReal2D( visCvPath   ,y,x )==0)?badval:goodval; // more black
 #else
-				weight = (cvGetReal2D( visCvThresh ,y,x )==0)?badval:goodval; // cooler looking
+				weight = (cvGetReal2D( ImageBufferManager::getInstance().getvisCvThresh() ,y,x )==0)?badval:goodval; // cooler looking
 #endif
 				// weight closer stuff higher
 				//if (y>imgHalfHeight) weight *= 2;
@@ -764,7 +778,10 @@ int MapGen::genProbabilityMap()
 	/* get robot orientation in world coordinates */
 	float a,b;
 	mapCamPointToWorldPoint(imgHalfWidth, 0, a, b); // top center of camera frame
-	mapCamPointToWorldPoint(imgHalfWidth, visCvGrey->height - BASE_OFFSET, wx, wy); // bottom center of camera frame (minus some)
+	mapCamPointToWorldPoint(	imgHalfWidth, 
+					ImageBufferManager::getInstance().getvisCvGrey()->height - BASE_OFFSET, 
+					wx, 
+					wy); // bottom center of camera frame (minus some)
 
 	/* update/avg current robot orientation */
 	if (1)

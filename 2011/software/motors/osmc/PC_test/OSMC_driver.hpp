@@ -4,7 +4,7 @@
 #include "quadCoderDriver_signed.hpp"
 
 //if this is defined, nothing is sent to the motors!, it is just printed to stdout
-//#define MOTOR_SIMULATE 1
+#define MOTOR_SIMULATE 1
 #define ENCODER_SIMULATE 1
 //#define CURRENT_SIMULATE 1
 

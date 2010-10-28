@@ -52,7 +52,7 @@ int CVcam::GrabCvImage()
 		return 0;
 
 	// get and set
-	visCvRaw = cvRetrieveFrame( capture );
+	ImageBufferManager::getInstance().visCvRaw = cvRetrieveFrame( capture );
 
 	return 1;
 }
