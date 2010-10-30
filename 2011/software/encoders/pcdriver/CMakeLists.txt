@@ -10,6 +10,10 @@ add_executable(newCoderTest
 	test.cc
 )
 
+add_executable(getvelocities
+	getvelocities
+)
+
 target_link_libraries(quadCoderDriver
 	ArduinoInterface
 )
@@ -17,3 +21,9 @@ target_link_libraries(quadCoderDriver
 target_link_libraries(newCoderTest
 	quadCoderDriver
 )
+
+target_link_libraries(getvelocities
+	quadCoderDriver
+)
+
+
