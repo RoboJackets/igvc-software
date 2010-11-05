@@ -4,6 +4,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
+#include <limits>
 
 using namespace std;
 
@@ -21,6 +22,13 @@ bool NAV200::_usb_inited = false;
 #ifndef LIDAR_SIMULATE
 NAV200::NAV200()
 {
+	memset(valid, 0, Num_Points*sizeof(bool));
+	memset(theta, 0, Num_Points*sizeof(float));
+	memset(radius, 0, Num_Points*sizeof(float));
+	memset(x, 0, Num_Points*sizeof(float));
+	memset(y, 0, Num_Points*sizeof(float));
+	memset(points, 0, Num_Points*sizeof(Point));
+
 	if (!_usb_inited)
 	{
 		usb_init();
@@ -51,6 +59,13 @@ NAV200::NAV200()
 #else
 NAV200::NAV200()
 {
+	memset(valid, 0, Num_Points*sizeof(bool));
+	memset(theta, 0, Num_Points*sizeof(float));
+	memset(radius, 0, Num_Points*sizeof(float));
+	memset(x, 0, Num_Points*sizeof(float));
+	memset(y, 0, Num_Points*sizeof(float));
+	memset(points, 0, Num_Points*sizeof(Point));
+
 	std::cerr << "LIDAR simulate mode enabled!" << std::endl;
 }
 #endif
@@ -78,7 +93,7 @@ bool NAV200::read()
 	{
 		std::cerr << "Error in Read, ret = " << ret << std::endl;
 		std::cerr << std::hex;
-		for(size_t i = 0; i < ret; i++)
+		for(int i = 0; i < ret; i++)
 		{
 			std::cerr << (int) data[i] << " ";
 		}
@@ -116,6 +131,19 @@ bool NAV200::read()
 
 		coord[i].get<0>() = pt.angle;
 		coord[i].get<1>() = pt.distance;
+
+		valid[i] = pt.valid;
+		
+		if(pt.valid)
+		{
+			theta[i] = pt.angle;
+			radius[i] = pt.distance;
+			polar2cart(theta[i], radius[i], x[i], y[i]);
+		}
+		else
+		{
+			x[i] = y[i] = radius[i] = theta[i] = std::numeric_limits<float>::quiet_NaN();
+		}
 	}
 	
 	std::sort(coord, coord + NAV200::Num_Points, tuple_sort_on_first);
@@ -162,7 +190,7 @@ void apply_func(T* v, size_t len, void (*f)(T&))
 //[a,b,c, ...]
 //[b - a, c - b, ...]
 template<typename A, typename B>
-void takeDerivative(const boost::tuple<A,B>* src, boost::tuple<A,B>* dest, const int srclen)
+void NAV200::takeDerivative(const boost::tuple<A,B>* src, boost::tuple<A,B>* dest, const int srclen)
 {
 	for(int i = 0; i < (srclen-1); i++)
 	{
@@ -171,15 +199,26 @@ void takeDerivative(const boost::tuple<A,B>* src, boost::tuple<A,B>* dest, const
 	}
 }
 
-bool NAV200::findLinearRuns(std::deque< boost::tuple<float,float> >& lines)
+bool NAV200::findLinearRuns(Point coord[Num_Points], std::deque< boost::tuple<size_t,size_t> >& lines, const double zero_tol)
 {
-	return findLinearRuns(coord, lines);
+	boost::tuple<float,float> coordtuple[Num_Points];
+
+	for(int i = 0; i < Num_Points; i++)
+	{
+		coordtuple[i].get<0>() = coord[i].angle;
+		coordtuple[i].get<1>() = coord[i].distance;
+	}
+
+	return findLinearRuns(coordtuple, lines, zero_tol);
 }
 
-bool NAV200::findLinearRuns(const boost::tuple<float,float> coord[Num_Points], std::deque< boost::tuple<float,float> >& lines)
+bool NAV200::findLinearRuns(std::deque< boost::tuple<size_t,size_t> >& lines, const double zero_tol)
 {
-	const double zero_tol = 1e-3;
+	return findLinearRuns(coord, lines, zero_tol);
+}
 
+bool NAV200::findLinearRuns(const boost::tuple<float,float> coord[Num_Points], std::deque< boost::tuple<size_t,size_t> >& lines, const double zero_tol)
+{
 	const int derivnum = Num_Points-1;
 	const int doublederivnum = Num_Points-2;
 
@@ -221,11 +260,7 @@ bool NAV200::findLinearRuns(const boost::tuple<float,float> coord[Num_Points], s
 		{
 			stop = i+2;
 
-			float first = coord[start].get<0>();
-			float second = coord[stop].get<0>();
-
-			lines.push_back( boost::tuple<float,float>(first, second) );
-
+			lines.push_back( boost::tuple<size_t,size_t>(start, stop) );
 			start = stop = -1;
 		}
 	}
@@ -233,8 +268,9 @@ bool NAV200::findLinearRuns(const boost::tuple<float,float> coord[Num_Points], s
 	return true;
 }
 
-void NAV200::getLongestRun(const std::deque< boost::tuple<float,float> >& lines, boost::tuple<float,float>& longest)
+void NAV200::getLongestRun(Point coord[Num_Points], const std::deque< boost::tuple<size_t,size_t> >& lines, boost::tuple<size_t,size_t>& longest)
 {
+	//fix this to use the lines to index into coord and calculate the length of a line segment. remeber to transform out of polar coord
 	float maxdist = -1;
 	size_t idx = -1;
 
