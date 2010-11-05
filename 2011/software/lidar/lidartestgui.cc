@@ -185,7 +185,7 @@ int main()
 
 			float derivR[NAV200::Num_Points];
 			float derivT[NAV200::Num_Points];
-			takeDerivative(goodr, goodt, derivR, derivT, numgoodpts)
+			NAV200::takeDerivative(goodr, goodt, derivR, derivT, numgoodpts);
 
 			//remove points w/ large slope
 
