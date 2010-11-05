@@ -45,11 +45,11 @@ int main()
 			continue;
 		}
 
-		std::deque< boost::tuple<float,float> > lines;
-		a.findLinearRuns(lines);
+		std::deque< boost::tuple<size_t,size_t> > lines;
+		a.findLinearRuns(lines, 1e-3);
 
-		boost::tuple<float,float> longest;
-		NAV200::getLongestRun(lines, longest);
+		boost::tuple<size_t,size_t> longest;
+		NAV200::getLongestRun(a.points, lines, longest);
 
 		std::cout << "idx: " << longest;
 
