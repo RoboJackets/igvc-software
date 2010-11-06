@@ -35,36 +35,35 @@ int main()
 {
 
 	NAV200 a;
-	//float domains[NAV200::Num_Points] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28};
-	//float ranges[NAV200::Num_Points] = {1,2,3,4,5,0,2,4,6,8,0,3,6,9,0,4,9,16,25, -2,-4,-6, .1, .3, .5, 5, 15, 25};
-	boost::tuple<float,float> testcoord[NAV200::Num_Points];
 
-for(;;)
-{
-	if(!a.read())
+
+	for(;;)
 	{
-		std::cout << "could not read from lidar" << std::endl;
-		usleep(1e5);
-		continue;
+		if(!a.read())
+		{
+			std::cout << "could not read from lidar" << std::endl;
+			usleep(1e5);
+			continue;
+		}
+
+		std::cout << "float theta[NAV200::Num_Points] = {";
+		for(int i = 0; i < (NAV200::Num_Points-2); i++)
+		{
+			std::cout << a.theta[i] << ", ";
+		}
+		std::cout << a.theta[NAV200::Num_Points-1] << "}\n";
+
+		std::cout << "float radius[NAV200::Num_Points] = {";
+		for(int i = 0; i < (NAV200::Num_Points-2); i++)
+		{
+			std::cout << a.radius[i] << ", ";
+		}
+		std::cout << a.radius[NAV200::Num_Points-1] << "}\n\n";
+
+		//usleep(1e6);
+		usleep(2e5);
 	}
 
-	std::cout << "x: [";
-	for(int i = 0; i < (NAV200::Num_Points-2); i++)
-	{
-		std::cout << a.coord[i].get<0>() << ", ";
-	}
-	std::cout << a.coord[NAV200::Num_Points-1].get<0>() << "]\n";
-
-	std::cout << "y: [";
-	for(int i = 0; i < (NAV200::Num_Points-2); i++)
-	{
-		std::cout << a.coord[i].get<1>() << ", ";
-	}
-	std::cout << a.coord[NAV200::Num_Points-1].get<1>() << "]\n\n";
-
-	//usleep(1e6);
-	usleep(2e5);
-}
 	return 0;
 
 }

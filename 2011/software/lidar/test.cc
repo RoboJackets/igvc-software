@@ -1,5 +1,6 @@
 
 #include "NAV200.hpp"
+#include "lidarProc.hpp"
 
 #include <iostream>
 
@@ -46,10 +47,10 @@ int main()
 		}
 
 		std::deque< boost::tuple<size_t,size_t> > lines;
-		a.findLinearRuns(lines, 1e-3);
+		lidarProc::findLinearRuns(a.theta, a.radius, NAV200::Num_Points, 1e-3, lines);
 
 		boost::tuple<size_t,size_t> longest;
-		NAV200::getLongestRun(a.points, lines, longest);
+		lidarProc::getLongestRun(a.theta, a.radius, lines, longest);
 
 		std::cout << "idx: " << longest;
 

@@ -10,12 +10,21 @@ target_link_libraries(NAV200
 	usb
 )
 
+add_library(lidarProc
+	lidarProc.cc
+)
+
+target_link_libraries(lidarProc
+	cv
+)
+
 add_executable(test
 	test.cc
 )
 
 target_link_libraries(test
 	NAV200
+	lidarProc
 )
 
 add_executable(lintest
@@ -40,6 +49,7 @@ add_executable(lidartestgui
 
 target_link_libraries(lidartestgui
 	NAV200
+	lidarProc
 	cv
 	highgui
 )
