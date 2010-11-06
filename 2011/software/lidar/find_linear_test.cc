@@ -45,7 +45,7 @@ template<typename T>
 void printarray(T* v, size_t len)
 {
 	std::cout << "<" << v[0] << ", ";
-	for(int i = 1; i < (len-1); i++)
+	for(size_t i = 1; i < (len-1); i++)
 	{
 		std::cout << v[i] << ", ";
 	}
@@ -56,7 +56,7 @@ template<typename T>
 void printarray(T* v, size_t start, size_t stop)
 {
 	std::cout << "<" << v[start] << ", ";
-	for(int i = start+1; i < stop; i++)
+	for(size_t i = start+1; i < stop; i++)
 	{
 		std::cout << v[i] << ", ";
 	}
@@ -90,7 +90,7 @@ void findRamp()
 	memcpy(abs_doublederiv, doublederiv, doublederivum*sizeof(double));
 	apply_func(abs_doublederiv, doublederivum, ref_abs);
 
-	for(int i = 0; i < doublederivum; i++)
+	for(size_t i = 0; i < doublederivum; i++)
 	{
 		if(abs_doublederiv[i] < zero_tol)
 		{
@@ -101,7 +101,7 @@ void findRamp()
 	std::list< boost::tuple<int,int> > lines;
 	int start, stop;
 	start = stop = -1;
-	for(int i = 0; i < doublederivum; i++)
+	for(size_t i = 0; i < doublederivum; i++)
 	{
 		//start a range
 		if( (abs_doublederiv[i] < zero_tol) && (start == -1))

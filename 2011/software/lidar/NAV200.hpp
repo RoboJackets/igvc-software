@@ -10,7 +10,7 @@
 #include "boost/foreach.hpp"
 
 //if defined, will not connect to NAV200
-//#define LIDAR_SIMULATE
+#define LIDAR_SIMULATE
 
 // NAV200, communication interace for the lidar
 // original code by ben
@@ -59,22 +59,12 @@ class NAV200
 		//normal
 		Point points[Num_Points];
 
-		//dumb - to be deprecated
-		boost::tuple<float,float> coord[Num_Points];
-
-		//polar coord + mask
+		//coord + mask
 		bool valid[Num_Points];
 		float theta[Num_Points];
 		float radius[Num_Points];
-		float x[Num_Points];
-		float y[Num_Points];
-
-		//do some proccessing
-		bool findLinearRuns(std::deque< boost::tuple<size_t,size_t> >& lines, const double zero_tol);
-		static bool findLinearRuns(const boost::tuple<float,float> coord[Num_Points], std::deque< boost::tuple<size_t,size_t> >& lines, const double zero_tol);
-		static bool findLinearRuns(Point coord[Num_Points], std::deque< boost::tuple<size_t,size_t> >& lines, const double zero_tol);
-
-		static void getLongestRun(Point coord[Num_Points], const std::deque< boost::tuple<size_t,size_t> >& lines, boost::tuple<size_t,size_t>& longest);
+		//float x[Num_Points];
+		//float y[Num_Points];
 
 		static void polar2cart(const float angle, const float radius, float& x, float& y)
 		{
@@ -84,9 +74,12 @@ class NAV200
 			y = radius * s;
 		}
 
-		static void polar2cart(const boost::tuple<float, float>& pt, float& x, float& y)
+		static void polar2cart(const float* angle, const float* radius, float* x, float* y, const size_t len)
 		{
-			polar2cart(pt.get<0>(), pt.get<1>(), x, y);
+			for(size_t i = 0; i < len; i++)
+			{
+				polar2cart(angle[i], radius[i], x[i], y[i]);
+			}
 		}
 
 		static bool polar2cart(const Point& pt, float& x, float& y)
@@ -97,6 +90,20 @@ class NAV200
 				return true;
 			}
 			return false;
+		}
+
+		static void cart2polar(const float x, const float y, float& angle, float& radius)
+		{
+			angle = atan2(y,x);
+			radius = sqrt(x*x + y*y);
+		}
+
+		static void cart2polar(const float* x, const float* y, float* angle, float* radius, const size_t len)
+		{
+			for(size_t i = 0; i < len; i++)
+			{
+				cart2polar(x[i], y[i], angle[i], radius[i]);
+			}
 		}
 
 		size_t getValidData(float thetaout[Num_Points], float radiusout[Num_Points])
@@ -113,23 +120,6 @@ class NAV200
 			}
 			return goodpts;
 		}
-
-	//[a,b,c, ...]
-	//[b - a, c - b, ...]
-	template<typename A, typename B>
-	static void takeDerivative(const boost::tuple<A,B>* src, boost::tuple<A,B>* dest, const int srclen);
-
-	//[a,b,c, ...]
-	//[b - a, c - b, ...]
-	template<typename T>
-	static void takeDerivative(const T* srcX, const T* srcY, T* destX, T* destY, const int srclen)
-	{
-		for(int i = 0; i < (srclen-1); i++)
-		{
-			destX[i] = srcX[i] + (srcX[i+1] - srcX[i]) / (T(2));
-			destY[i] = (srcY[i+1] - srcY[i]) / (srcX[i+1] - srcX[i]);
-		}
-	}
 
 	private:
 		//FIXME - This should be in libusb.  Find it.
