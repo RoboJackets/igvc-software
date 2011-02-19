@@ -60,6 +60,9 @@ class OSMC_driver
 	//set vel from vision vector
 	bool set_vel_vec(const double y, const double x);
 
+	//control for status light
+	void setLight(const byte option);
+
 	private:
 	ArduinoInterface ai;
 

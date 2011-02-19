@@ -16,6 +16,13 @@ add_executable(OSMC_test
 	main.cc
 )
 
+add_executable(LightTest
+	test_light.cc
+)
+
+target_link_libraries(LightTest 
+	OSMC_driver
+)
 #add_executable(step_test
 #	stepresp.cc
 #)

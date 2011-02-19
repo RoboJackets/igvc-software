@@ -13,3 +13,5 @@ function angArr = convert2angular(velArr,r)
         angArr(:,1+col) = cur_vel;
     end
 end
+
+% Kenneth Marino

@@ -99,13 +99,8 @@ int main()
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = ARDUINO_ID_CMD;
 				headerOut.size = 1;
-//				#ifdef FRONT_ENCODER
-//					char msg = ENCODER_IF_FOR_BOARD;
-//				#elif defined(BACK_ENCODER)
-					char msg = ENCODER_IF_AFT_BOARD;
-//				#else
-//					char msg = ENCODER_IF_BOARD;
-//				#endif
+					char msg = ENCODER_IF_AFT_LEFT_BOARD;
+
 
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
 				Serial.print(msg, BYTE);

@@ -32,7 +32,7 @@ class ArduinoInterface
 {
 public:
 	//bool sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx);
-	bool sendCommand(byte cmd, void* data_tx, int size_tx);
+	bool sendCommand(byte cmd, const void* data_tx, int size_tx);
 	bool recvCommand(byte& out_cmd, byte*& out_data_rx);// I new, you delete
 
 	/* Retrieve all of the state variables in the arduino */

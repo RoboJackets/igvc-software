@@ -24,6 +24,8 @@ const int joystickXADC = 0;
 const int joystickYADC = 1;
 const int joystickEnable = 8;
 
+const int LIGHT_PIN_LB = 13;
+
 /*
 const int rightDirectionPin = 4;
 const int rightSpeedPin = 3;

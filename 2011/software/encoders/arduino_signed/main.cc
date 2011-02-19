@@ -96,10 +96,10 @@ int main()
 				headerOut.cmd = ARDUINO_ID_CMD;
 				headerOut.size = 1;
 
-				char msg = ENCODER_IF_FOR_RIGHT_BOARD;
+				//char msg = ENCODER_IF_FOR_RIGHT_BOARD;
 				//char msg = ENCODER_IF_FOR_LEFT_BOARD;
 				//char msg = ENCODER_IF_AFT_RIGHT_BOARD;
-				//char msg = ENCODER_IF_AFT_LEFT_BOARD;
+				char msg = ENCODER_IF_AFT_LEFT_BOARD;
 
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
 				Serial.print(msg, BYTE);
