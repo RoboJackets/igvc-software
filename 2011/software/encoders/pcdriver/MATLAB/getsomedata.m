@@ -6,3 +6,5 @@ for pos = 1:length(t)
     fprintf(fh,'motor:%f\n',w(pos));
 end
 fclose(fh);
+
+% Kenneth Marino

@@ -37,21 +37,27 @@ const byte MC_GET_JOYSTICK		= 0x07;
 const byte ENCODER_GET_READING		= 0x08;
 const byte ENCOER_RESET_COUNT		= 0x09;
 
+const byte MC_SET_LIGHT			= 0x10;
+
+//IGVC2011 Status Light opts
+const byte MC_LIGHT_STEADY		= 0x00;
+const byte MC_LIGHT_PULSING		= 0x01;
+
 //IGVC2010 Motor DIR opts
 const byte MC_MOTOR_FORWARD		= 0x00;
 const byte MC_MOTOR_REVERSE		= 0x01;
 
 //IGVC2010 Board IDs
 const byte OSMC_IF_BOARD 		= 0x00;
-const byte ENCODER_IF_BOARD 	= 0x01;
-const byte OSMC_IF_FOR_BOARD 	= 0x02;
-const byte OSMC_IF_AFT_BOARD 	= 0x03;
-const byte ENCODER_IF_FOR_BOARD = 0x04;
-const byte ENCODER_IF_AFT_BOARD = 0x05;
-const byte ENCODER_IF_FOR_RIGHT_BOARD = 0x06;
-const byte ENCODER_IF_AFT_RIGHT_BOARD = 0x07;
-const byte ENCODER_IF_FOR_LEFT_BOARD = 0x08;
-const byte ENCODER_IF_AFT_LEFT_BOARD = 0x09;
+const byte ENCODER_IF_BOARD 		= 0x01;
+const byte OSMC_IF_FOR_BOARD 		= 0x02;
+const byte OSMC_IF_AFT_BOARD 		= 0x03;
+const byte ENCODER_IF_FOR_BOARD 	= 0x04;
+const byte ENCODER_IF_AFT_BOARD 	= 0x05;
+const byte ENCODER_IF_FOR_RIGHT_BOARD 	= 0x06;
+const byte ENCODER_IF_AFT_RIGHT_BOARD 	= 0x07;
+const byte ENCODER_IF_FOR_LEFT_BOARD 	= 0x08;
+const byte ENCODER_IF_AFT_LEFT_BOARD 	= 0x09;
 #if 0
 //1 byte commands, laptop -> arduino
 #define ARDUINO_GETSTATUS_CMD 'r'

@@ -62,6 +62,9 @@ int main()
 	digitalWrite(rightDisablePin, LOW);
 	digitalWrite(leftDisablePin, LOW);
 
+	pinMode(LIGHT_PIN_LB, OUTPUT);
+	digitalWrite(LIGHT_PIN_LB, HIGH);
+
 	setupJoystick();
 	//end setup
 
@@ -272,6 +275,22 @@ int main()
 				serialPrintBytes(&data, headerOut.size);
 				tx_num++;
 				break;
+			}
+			case MC_SET_LIGHT:
+			{
+				switch(indata[0])
+				{
+					case MC_LIGHT_STEADY:
+					{
+						digitalWrite(LIGHT_PIN_LB, HIGH);
+						break;					
+					}
+					case MC_LIGHT_PULSING:
+					{	
+						digitalWrite(LIGHT_PIN_LB, LOW);
+						break;
+					}
+				}
 			}
 			case ARDUINO_HALT_CATCH_FIRE:
 			default:

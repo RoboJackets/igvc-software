@@ -775,7 +775,7 @@ bool ArduinoInterface::read_TimeOut(int fd, void * buf, size_t numBytes)
 }
 #endif
 //bool ArduinoInterface::sendCommand(char cmd, void * data_tx, int size_tx, void * data_rx, int size_rx){
-bool ArduinoInterface::sendCommand(byte cmd, void * data_tx, int size_tx)
+bool ArduinoInterface::sendCommand(byte cmd, const void * data_tx, int size_tx)
 {
 	//Send the Command
 	DataPacket pk_tx;

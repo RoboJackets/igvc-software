@@ -25,3 +25,4 @@ function t = getT(inarr)
         t = [t times(minpos)];
     end
 end
+% Kenneth Marino

@@ -16,7 +16,7 @@ OSMC_driver::OSMC_driver()
 		ai.initLink(OSMC_IF_BOARD);
 	#endif
 	#ifndef ENCODER_SIMULATE
-		encoder_l = new quadCoderDriver_signed(ENCODER_IF_AFT_LEFT_BOARD);
+		//encoder_l = new quadCoderDriver_signed(ENCODER_IF_AFT_LEFT_BOARD);
 		encoder_r = new quadCoderDriver_signed(ENCODER_IF_AFT_RIGHT_BOARD);
 	#else
 		encoder_l = NULL;
@@ -442,4 +442,9 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 	}
 	std::cout << "r: " << rspeed << " l: " << lspeed << "angle: " << ang << " branch: " << branch << std::endl;
 	return set_motors(lspeed, rspeed);
+}
+
+void OSMC_driver::setLight(const byte option)
+{
+	ai.sendCommand(MC_SET_LIGHT,&option,1);
 }

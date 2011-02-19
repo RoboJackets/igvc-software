@@ -30,3 +30,4 @@ function arr = readFile(filename)
     end    
     fclose(fh);
 end
+% Kenneth Marino
