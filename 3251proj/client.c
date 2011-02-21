@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         displayMenu();
         
         if(connected) //ping the server
-            handlePing(my_id);
+            handlePing();
 
         while(scanf("%d", &input) != 1)
         {
@@ -115,25 +115,59 @@ void displayMenu()
  */
 int handleConnect()
 {
-    printf("Enter a user Id:\n");
+    char *servIP;
+    in_port_t servPort;
+    int rtnVal = 0;
+//    Message *send_msg;  //The check id message
+//    Message *rcv_msg; //The reply to the check id message
+    int available = 0; //whether the id is available or not
 
-    while(scanf("%s", my_id) != 1)
-    {
-        while(getchar() != '\n');
-        printf("Invalid Input\n");
-    }
-    
     /* Create a new TCP socket*/
     if((clientSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     {
         printf("socket() failed\n");
         return 0;
     }
-
+    
+    
     /* Construct the server address structure */
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
+    /* Get the server's ip address from the user */
+    if((servIP = (char *)(malloc(sizeof(char) * 16))) == NULL)//16 chars max ip length 
+    {
+        printf("Unable to malloc space for the server's ip\n");
+        return 0;
+    }
+    
+    /* Loop until the user enters a valid ip or inet_pton fails */
+    while(rtnVal == 0)
+    {
+        printf("Enter the server's IP address:");
+        while(scanf("%s", servIP) != 1)
+        {
+                while(getchar() != '\n');
+                printf("Invalid Input\n");
+        }
+
+        //Set the serv struct's ip to the value
+        rtnVal = inet_pton(AF_INET, servIP, &serv_addr.sin_addr.s_addr);
+    }
+
+    if(rtnVal < 0)
+    {
+        printf("inet_pton() failed\n");
+        return 0;
+    }
+     
+    /* Get the server's port from the user */
+    printf("Enter the server's port:");
+    while(scanf("%d", &servPort) != 1)
+    {
+        while(getchar() != '\n');
+        printf("Invalid Input\n");
+    }
     serv_addr.sin_port = htons(servPort);
 
     /* Establish connecction to the server */
@@ -143,7 +177,27 @@ int handleConnect()
         return 0;
     }
     
-    //TODO: Send message to make sure the client's id is valid
+    printf("Enter a user Id:");
+    while(scanf("%s", my_id) != 1)
+    {
+        while(getchar() != '\n');
+        printf("Invalid Input\n");
+    }
+
+  //  if((send_msg = (Message *)(malloc(sizeof(Message)))) == NULL)
+  //  {
+  //      printf("Unable to malloc space for the send_msg\n");
+   //     close(clientSock); //close the connection
+    //    return 0;
+   // }
+
+    /* The message has no data just the id of this client */
+ //   send_msg->type = MESSAGE_CHECKID;
+ //   send_msg->length = 0;
+ //   send_msg->client_id = my_id;
+ //   send_msg->data = NULL;
+
+    //ssize_t numByetes = send(clientSock, 
 
     return 1;
 }
@@ -161,12 +215,12 @@ void handleUpdate()
     //Get Latitude
     while(!valid)
     {
-        printf("Enter Latitude in degrees minutes seconds N/S:\n");
+        printf("Enter Latitude in degrees minutes seconds N/S:");
         while(scanf("%d %d %d %c", &lat_deg, &lat_min, &lat_sec, &lat_dir) != 4)
         {
                 while(getchar() != '\n');
                 printf("Invalid Input\n");
-                printf("Enter Latitude in degrees minutes seconds N/S:\n");
+                printf("Enter Latitude in degrees minutes seconds N/S:");
         }
 
         valid = (lat_deg >= 0 && lat_deg <= 90) && 
@@ -182,12 +236,12 @@ void handleUpdate()
     valid = 0;
     while(!valid)
     {
-        printf("Enter Longitude in degrees minutes seconds E/W:\n");
+        printf("Enter Longitude in degrees minutes seconds E/W:");
         while(scanf("%d %d %d %c", &lon_deg, &lon_min, &lon_sec, &lon_dir) != 4)
         {
                 while(getchar() != '\n');
                 printf("Invalid Input\n");
-                printf("Enter Longitude in degrees minutes seconds E/W:\n");
+                printf("Enter Longitude in degrees minutes seconds E/W:");
         }
         
         valid = (lon_deg >= 0 && lon_deg <= 180) && 
@@ -215,12 +269,12 @@ void handleFriends()
 
     while(1)
     {
-        printf("Enter the next Id (q to quit):\n");
+        printf("Enter the next Id (q to quit):");
         while(scanf("%s", next_friend) != 1)
         {
             while(getchar() != '\n');
             printf("Invalid Input\n");
-            printf("Enter the next Id (q to quit)\n");
+            printf("Enter the next Id (q to quit)");
         }
 
         //Exit on the quit

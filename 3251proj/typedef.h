@@ -3,7 +3,7 @@
 #define MAXNUMREQUESTS      100
 
 /* Structures */
-enum message_type
+enum Message_type
 {
     MESSAGE_INVALID = -1,
     MESSAGE_UPDATE = 0,
@@ -14,9 +14,9 @@ enum message_type
     MESSAGE_PING
 };
 
-struct message
+struct Message
 {
-    enum message_type type;
+    enum Message_type type;
     int length;
     char *client_id;
     char *data;
