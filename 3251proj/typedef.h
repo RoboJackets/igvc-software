@@ -11,13 +11,17 @@ enum Message_type
     MESSAGE_HISTORY,
     MESSAGE_LEAVE,
     MESSAGE_CHECKID,
+    MESSAGE_IDTAKEN,                 //server message
+    MESSAGE_IDAVAILABLE,             //server message
     MESSAGE_PING
 };
 
-struct Message
+typedef struct Message
 {
     enum Message_type type;
-    int length;
+    int length;                 //In bytes
     char *client_id;
     char *data;
-};
+} Message;
+
+/* Typedefs */

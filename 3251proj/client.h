@@ -7,13 +7,13 @@ void displayMenu(void);
 int handleConnect(void);
 
 /*Updates the location*/
-void handleUpdate(void);
+int handleUpdate(void);
 
 /*Gets and displays friend location*/
-void handleFriends(void);
+int handleFriends(void);
 
 /*Returns the history of this clients locations*/
-void handleHistory(void);
+int handleHistory(void);
 
 /*Closes the connection*/
 int handleLeave(void);
@@ -22,4 +22,10 @@ int handleLeave(void);
 int handleCheckId(void);
 
 /*Pings the server for verification of connection*/
-void handlePing(void);
+int handlePing(void);
+
+/*Sends the data (serialized) to the server*/
+int sendData(Message msg);
+
+/*Receives the data from the server and returns it*/
+Message receiveData(void);
