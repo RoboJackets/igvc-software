@@ -4,22 +4,22 @@
 void displayMenu(void);
 
 /*Connects to the server*/
-int handleConnect(char *id);
+int handleConnect(void);
 
 /*Updates the location*/
-void handleUpdate(char *id);
+void handleUpdate(void);
 
 /*Gets and displays friend location*/
-void handleFriends(char *id);
+void handleFriends(void);
 
-/*Returns the history of this clients requests*/
-void handleHistory(char *id);
+/*Returns the history of this clients locations*/
+void handleHistory(void);
 
 /*Closes the connection*/
-int handleLeave(char *id);
+int handleLeave(void);
 
 /*Checks to see whether this id is taken*/
-int handleCheckId(char *id);
+int handleCheckId(void);
 
 /*Pings the server for verification of connection*/
-void handlePing(char *id);
+void handlePing(void);

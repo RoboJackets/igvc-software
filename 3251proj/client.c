@@ -6,19 +6,21 @@
 #include <unistd.h>
 #include "client.h"
 #include "typedef.h"
+    
+int clientSock;		    /* socket descriptor */
+struct sockaddr_in serv_addr;   /* The server address */
+char *my_id;
 
 int main(int argc, char **argv)
 {
     int input;
     int connected = 0;
-    char my_id[MAXIDLEN]; //The id of this client 
     int valid = 0;
-    printf("Enter a user Id:\n");
 
-    while(scanf("%s", my_id) != 1)
+    if((my_id = (char *)(malloc(sizeof(char) * MAXIDLEN))) == NULL)
     {
-        while(getchar() != '\n');
-        printf("Invalid Input\n");
+        printf("Unable to malloc space for id\n");
+        return;
     }
     
     while(1)
@@ -39,14 +41,13 @@ int main(int argc, char **argv)
         {
             case 0:
             {
-               connected = handleConnect(my_id);
-         
+               connected = handleConnect();
                break;
             }
             case 1:
             {   
                if(connected)
-                       handleUpdate(my_id);
+                       handleUpdate();
                else
                    printf("Not connected to the server\n");
                
@@ -55,7 +56,7 @@ int main(int argc, char **argv)
             case 2:
             {   
                if(connected)
-                   handleFriends(my_id);
+                   handleFriends();
                else
                    printf("Not connected to the server\n");
                
@@ -64,7 +65,7 @@ int main(int argc, char **argv)
             case 3:
             {   
                if(connected)
-                   handleHistory(my_id);
+                   handleHistory();
                else
                    printf("Not connected to the server\n");
                
@@ -73,7 +74,7 @@ int main(int argc, char **argv)
             case 4:
             {   
                if(connected)
-                   connected = handleLeave(my_id);
+                   connected = handleLeave();
                else
                    printf("Not connected to the server\n");
                
@@ -82,7 +83,7 @@ int main(int argc, char **argv)
             case 5:
             {    
                if(connected)
-                   connected = handleLeave(my_id);
+                   connected = handleLeave();
               
                return;
             }
@@ -112,9 +113,38 @@ void displayMenu()
  * Connects to the server
  *      Returns 1 if it succeeds 0 otherwise
  */
-int handleConnect(char *id)
+int handleConnect()
 {
-    //TODO: handle connect
+    printf("Enter a user Id:\n");
+
+    while(scanf("%s", my_id) != 1)
+    {
+        while(getchar() != '\n');
+        printf("Invalid Input\n");
+    }
+    
+    /* Create a new TCP socket*/
+    if((clientSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+    {
+        printf("socket() failed\n");
+        return 0;
+    }
+
+    /* Construct the server address structure */
+    memset(&serv_addr, 0, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    serv_addr.sin_port = htons(servPort);
+
+    /* Establish connecction to the server */
+    if((connect(clientSock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
+    {
+        printf("connect() failed\n");
+        return 0;
+    }
+    
+    //TODO: Send message to make sure the client's id is valid
+
     return 1;
 }
 
@@ -122,7 +152,7 @@ int handleConnect(char *id)
  * Gets the new GPS coordinates from the user and sends the update to the server
  *      Waits for the server's acknowledgement
  */
-void handleUpdate(char *id)
+void handleUpdate()
 {
     int lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec;
     char lat_dir, lon_dir;
@@ -177,7 +207,7 @@ void handleUpdate(char *id)
  * Gets the list of friends from the user and sends the request to the server
  *      Waits for the server's answer
  */
-void handleFriends(char *id)
+void handleFriends()
 {
     char friends[MAXNUMREQUESTS][MAXIDLEN];
     char next_friend[MAXIDLEN];
@@ -208,10 +238,10 @@ void handleFriends(char *id)
 }   
 
 /*
- * Requests the list of messages sent (pings are ignored) from the server
+ * Requests the list of previous gps locations from the server
  *      Waits for the server's answer
  */
-void handleHistory(char *id)
+void handleHistory()
 {
 }
 
@@ -219,7 +249,7 @@ void handleHistory(char *id)
  * Closes the connection to the server
  *      Returns 0 if it succeeds -1 otherwise
  */
-int handleLeave(char *id)
+int handleLeave()
 {
     return 0;
 }
@@ -228,6 +258,6 @@ int handleLeave(char *id)
  * Pings the server
  *     Used so the server can handle non graceful leaves
  */
-void handlePing(char *id)
+void handlePing()
 {
 }
