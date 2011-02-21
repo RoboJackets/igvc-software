@@ -4,8 +4,8 @@
 #include <sys/socket.h>	  /* for socket(), connect(), send(), and recv() */
 #include <arpa/inet.h>	  /* for sockaddr_in and inet_addr() */
 #include <unistd.h>
-#include "client.h"
 #include "typedef.h"
+#include "client.h"
     
 int clientSock;		    /* socket descriptor */
 struct sockaddr_in serv_addr;   /* The server address */
@@ -16,6 +16,7 @@ int main(int argc, char **argv)
     int input;
     int connected = 0;
     int valid = 0;
+    int errorOccured = 0;
 
     if((my_id = (char *)(malloc(sizeof(char) * MAXIDLEN))) == NULL)
     {
@@ -28,7 +29,10 @@ int main(int argc, char **argv)
         displayMenu();
         
         if(connected) //ping the server
-            handlePing();
+           errorOccured = handlePing();
+
+        if(errorOccured)
+            connected = 0;
 
         while(scanf("%d", &input) != 1)
         {
@@ -41,50 +45,67 @@ int main(int argc, char **argv)
         {
             case 0:
             {
-               connected = handleConnect();
+               errorOccured = handleConnect();
+
+               if(!errorOccured)
+                   connected = 1;
+
                break;
             }
             case 1:
             {   
                if(connected)
-                       handleUpdate();
+                   errorOccured = handleUpdate();
                else
                    printf("Not connected to the server\n");
                
+               if(errorOccured)
+                   connected = 0;
+
                break;
             }
             case 2:
             {   
                if(connected)
-                   handleFriends();
+                   errorOccured = handleFriends();
                else
                    printf("Not connected to the server\n");
+               
+               if(errorOccured)
+                   connected = 0;
                
                break;
             }
             case 3:
             {   
                if(connected)
-                   handleHistory();
+                   errorOccured = handleHistory();
                else
                    printf("Not connected to the server\n");
+               
+               if(errorOccured)
+                   connected = 0;
                
                break;
             }
             case 4:
             {   
                if(connected)
-                   connected = handleLeave();
+                   errorOccured = handleLeave();
                else
                    printf("Not connected to the server\n");
                
+               connected = 0;
+
                break;
             }
             case 5:
             {    
                if(connected)
-                   connected = handleLeave();
+                   errorOccured = handleLeave();
               
+               connected = 0;
+
                return;
             }
             default: 
@@ -118,17 +139,16 @@ int handleConnect()
     char *servIP;
     in_port_t servPort;
     int rtnVal = 0;
-//    Message *send_msg;  //The check id message
-//    Message *rcv_msg; //The reply to the check id message
-    int available = 0; //whether the id is available or not
+    Message send_msg;  //The check id message
+    Message recv_msg; //The reply to the check id message
+    int errorOccured = 0;
 
     /* Create a new TCP socket*/
     if((clientSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     {
         printf("socket() failed\n");
-        return 0;
+        return 1;
     }
-    
     
     /* Construct the server address structure */
     memset(&serv_addr, 0, sizeof(serv_addr));
@@ -138,31 +158,34 @@ int handleConnect()
     if((servIP = (char *)(malloc(sizeof(char) * 16))) == NULL)//16 chars max ip length 
     {
         printf("Unable to malloc space for the server's ip\n");
-        return 0;
+        return 1;
     }
     
     /* Loop until the user enters a valid ip or inet_pton fails */
     while(rtnVal == 0)
     {
-        printf("Enter the server's IP address:");
+        printf("Enter the server's IP address: ");
         while(scanf("%s", servIP) != 1)
         {
-                while(getchar() != '\n');
-                printf("Invalid Input\n");
+            while(getchar() != '\n');
+            printf("Invalid Input\n");
         }
 
         //Set the serv struct's ip to the value
         rtnVal = inet_pton(AF_INET, servIP, &serv_addr.sin_addr.s_addr);
+
+        if(rtnVal == 0)
+            printf("Invalid IP address\n");
     }
 
     if(rtnVal < 0)
     {
         printf("inet_pton() failed\n");
-        return 0;
+        return 1;
     }
      
     /* Get the server's port from the user */
-    printf("Enter the server's port:");
+    printf("Enter the server's port: ");
     while(scanf("%d", &servPort) != 1)
     {
         while(getchar() != '\n');
@@ -174,53 +197,112 @@ int handleConnect()
     if((connect(clientSock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
     {
         printf("connect() failed\n");
-        return 0;
+        return 1;
     }
     
-    printf("Enter a user Id:");
+    printf("Enter your user Id: ");
     while(scanf("%s", my_id) != 1)
     {
         while(getchar() != '\n');
         printf("Invalid Input\n");
     }
 
-  //  if((send_msg = (Message *)(malloc(sizeof(Message)))) == NULL)
-  //  {
-  //      printf("Unable to malloc space for the send_msg\n");
-   //     close(clientSock); //close the connection
-    //    return 0;
-   // }
-
     /* The message has no data just the id of this client */
- //   send_msg->type = MESSAGE_CHECKID;
- //   send_msg->length = 0;
- //   send_msg->client_id = my_id;
- //   send_msg->data = NULL;
+    send_msg.type = MESSAGE_CHECKID;
+    send_msg.length = 0;
 
-    //ssize_t numByetes = send(clientSock, 
+    if((send_msg.client_id = (char *)(malloc(sizeof(char) * MAXIDLEN))) == NULL)
+    {
+        printf("Unable to malloc space for the send's client id\n");
+        close(clientSock);
+        clientSock = -1;
+        return 1;
+    }
 
-    return 1;
+    strcpy(send_msg.client_id, my_id);
+    send_msg.data = NULL;
+
+    errorOccured = sendData(send_msg);
+
+    if(errorOccured)
+    {
+        printf("Error Sending your id to the server\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        return 1;
+    }
+
+    recv_msg = receiveData();
+
+    if(recv_msg.type == MESSAGE_INVALID) //An error occured
+    {
+        printf("Error Receiving the server's response\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        return 1;
+    }
+
+    while(recv_msg.type != MESSAGE_IDAVAILABLE)
+    {
+        printf("That Id is already taken.\n");
+        printf("Enter your user Id: ");
+        while(scanf("%s", my_id) != 1)
+        {
+            while(getchar() != '\n');
+            printf("Invalid Input\n");
+        }
+    
+        strcpy(send_msg.client_id, my_id);
+        errorOccured = sendData(send_msg);
+        if(errorOccured)
+        {
+            printf("Error Sending your id to the server\n");
+            close(clientSock);
+            clientSock = -1;
+            free(send_msg.client_id);
+            return 1;
+        }
+
+        recv_msg = receiveData();
+        if(recv_msg.type == MESSAGE_INVALID) //An error occured
+
+        {
+            printf("Error Receiving the server's response\n");
+            close(clientSock);
+            clientSock = -1;
+            free(send_msg.client_id);
+            return 1;
+        }
+    }
+
+    //free the client_id
+    free(send_msg.client_id);
+ 
+    return 0;
 }
 
 /*
  * Gets the new GPS coordinates from the user and sends the update to the server
  *      Waits for the server's acknowledgement
  */
-void handleUpdate()
+int handleUpdate()
 {
     int lat_deg, lat_min, lat_sec, lon_deg, lon_min, lon_sec;
     char lat_dir, lon_dir;
     int valid = 0;
+    Message send_msg;
 
     //Get Latitude
     while(!valid)
     {
-        printf("Enter Latitude in degrees minutes seconds N/S:");
+        printf("Enter Latitude in degrees minutes seconds N/S: ");
         while(scanf("%d %d %d %c", &lat_deg, &lat_min, &lat_sec, &lat_dir) != 4)
         {
                 while(getchar() != '\n');
                 printf("Invalid Input\n");
-                printf("Enter Latitude in degrees minutes seconds N/S:");
+                printf("Enter Latitude in degrees minutes seconds N/S: ");
         }
 
         valid = (lat_deg >= 0 && lat_deg <= 90) && 
@@ -236,12 +318,12 @@ void handleUpdate()
     valid = 0;
     while(!valid)
     {
-        printf("Enter Longitude in degrees minutes seconds E/W:");
+        printf("Enter Longitude in degrees minutes seconds E/W: ");
         while(scanf("%d %d %d %c", &lon_deg, &lon_min, &lon_sec, &lon_dir) != 4)
         {
                 while(getchar() != '\n');
                 printf("Invalid Input\n");
-                printf("Enter Longitude in degrees minutes seconds E/W:");
+                printf("Enter Longitude in degrees minutes seconds E/W: ");
         }
         
         valid = (lon_deg >= 0 && lon_deg <= 180) && 
@@ -253,28 +335,72 @@ void handleUpdate()
             printf("Invalid Longitude\n");
     }
 
-    printf("Latitude:%d.%d.%d%c Longitude:%d.%d.%d%c\n", lat_deg, lat_min,
-            lat_sec, lat_dir, lon_deg, lon_min, lon_sec, lon_dir);
+    //printf("Latitude:%d.%d.%d%c Longitude:%d.%d.%d%c\n", lat_deg, lat_min,
+    //        lat_sec, lat_dir, lon_deg, lon_min, lon_sec, lon_dir);
+    
+    /*Make the Message*/
+    send_msg.type = MESSAGE_UPDATE;
+ 
+    if((send_msg.client_id = (char *)(malloc(sizeof(my_id)))) == NULL)
+    {
+        printf("Unable to malloc space for the message's client id\n");
+        close(clientSock);
+        clientSock = -1;
+        return 1;
+    }
+    strcpy(send_msg.client_id, my_id);
+    
+    if((send_msg.data = (char *)(malloc(sizeof(char) * 20))) == NULL)
+    {
+        printf("Unable to malloc space for the message's data\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        return 1;
+     }
+
+    sprintf(send_msg.data, "%d.%d.%d%c %d.%d.%d%c", lat_deg, lat_min, lat_sec,
+            lat_dir, lon_deg, lon_min, lon_sec, lon_dir);
+
+    send_msg.length = strlen(send_msg.data);
+
+    if(sendData(send_msg))
+    {
+        printf("Error Occured while sending update message\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        free(send_msg.data);
+        return 1;
+    }
+
+    free(send_msg.client_id);
+    free(send_msg.data);
+
+    return 0;
 }
 
 /*
  * Gets the list of friends from the user and sends the request to the server
  *      Waits for the server's answer
  */
-void handleFriends()
+int handleFriends()
 {
     char friends[MAXNUMREQUESTS][MAXIDLEN];
     char next_friend[MAXIDLEN];
     int index = 0;
+    Message send_msg;
+    Message recv_msg;
+    int errorOccured;
 
     while(1)
     {
-        printf("Enter the next Id (q to quit):");
+        printf("Enter the next Id (q to quit): ");
         while(scanf("%s", next_friend) != 1)
         {
             while(getchar() != '\n');
             printf("Invalid Input\n");
-            printf("Enter the next Id (q to quit)");
+            printf("Enter the next Id (q to quit): ");
         }
 
         //Exit on the quit
@@ -288,20 +414,76 @@ void handleFriends()
         index++;
     }
 
-    //Handle server interaction
+    /* Make the message */
+    send_msg.type = MESSAGE_FRIENDS;
+
+    if((send_msg.client_id = (char *)(malloc(sizeof(my_id)))) == NULL)
+    {
+        printf("Unable to malloc space for the message's client id\n");
+        close(clientSock);
+        clientSock = -1;
+        return 1;
+    }
+    strcpy(send_msg.client_id, my_id);
+    
+    //TODO: Create the message data so that the names are separated by the \n
+
+    return 0;
 }   
 
 /*
  * Requests the list of previous gps locations from the server
  *      Waits for the server's answer
  */
-void handleHistory()
+int handleHistory()
 {
+    Message send_msg;
+    Message recv_msg;
+
+    /* Make the message */
+    send_msg.type = MESSAGE_FRIENDS;
+
+    if((send_msg.client_id = (char *)(malloc(sizeof(my_id)))) == NULL)
+    {
+        printf("Unable to malloc space for the message's client id\n");
+        close(clientSock);
+        clientSock = -1;
+        return 1;
+    }
+    strcpy(send_msg.client_id, my_id);
+    
+    send_msg.length = 0;
+    send_msg.data = NULL;
+
+
+    if(sendData(send_msg))
+    {
+        printf("Error Occured with sending history message\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        return 1;
+    }
+ 
+    recv_msg = receiveData();
+
+    if(recv_msg.type == MESSAGE_INVALID)
+    {
+        printf("Error Occured with the server's response\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        return 1;
+    }
+
+    //TODO: Parse the data from the server and display it
+
+    return 0;
 }
 
 /*
  * Closes the connection to the server
- *      Returns 0 if it succeeds -1 otherwise
+ *      Returns 0 if it succeeds 1 otherwise
  */
 int handleLeave()
 {
@@ -312,6 +494,28 @@ int handleLeave()
  * Pings the server
  *     Used so the server can handle non graceful leaves
  */
-void handlePing()
+int handlePing()
 {
+    return 0;
+}
+
+
+/*
+ * Sends the data (serialized) to the server 
+ */
+int sendData(Message msg)
+{
+    return 0;
+}
+
+/*
+ * Receives the data from the server and returns it
+ */
+Message receiveData()
+{
+    Message msg; 
+    
+    msg.type = MESSAGE_IDAVAILABLE; //Placeholder
+
+    return msg;
 }
