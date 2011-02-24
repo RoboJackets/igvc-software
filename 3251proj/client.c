@@ -141,7 +141,6 @@ int handleConnect()
     int rtnVal = 0;
     Message send_msg;  //The check id message
     Message recv_msg; //The reply to the check id message
-    int errorOccured = 0;
 
     /* Create a new TCP socket*/
     if((clientSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
@@ -222,9 +221,7 @@ int handleConnect()
     strcpy(send_msg.client_id, my_id);
     send_msg.data = NULL;
 
-    errorOccured = sendData(send_msg);
-
-    if(errorOccured)
+    if(sendData(send_msg))
     {
         printf("Error Sending your id to the server\n");
         close(clientSock);
@@ -255,8 +252,7 @@ int handleConnect()
         }
     
         strcpy(send_msg.client_id, my_id);
-        errorOccured = sendData(send_msg);
-        if(errorOccured)
+        if(sendData(send_msg))
         {
             printf("Error Sending your id to the server\n");
             close(clientSock);
@@ -391,7 +387,7 @@ int handleFriends()
     int index = 0;
     Message send_msg;
     Message recv_msg;
-    int errorOccured;
+    int i, j;
 
     while(1)
     {
@@ -409,8 +405,8 @@ int handleFriends()
 
         strcpy(friends[index], next_friend);
 
-        printf("Next Friend: %s\n", next_friend);
-        printf("Friend[%d]: %s\n", index, friends[index]);
+    //    printf("Next Friend: %s\n", next_friend);
+    //    printf("Friend[%d]: %s\n", index, friends[index]);
         index++;
     }
 
@@ -426,8 +422,69 @@ int handleFriends()
     }
     strcpy(send_msg.client_id, my_id);
     
-    //TODO: Create the message data so that the names are separated by the \n
+    if((send_msg.data = (char *)(malloc(sizeof(char) * MAXNUMREQUESTS *
+                        (MAXIDLEN + 1)))) == NULL)
+    {
+        printf("Unable to malloc space for message's data\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        return 1;
+    }
 
+    //Data is sent in form "ID\nID\nID\n..."
+    index = 0;
+    for(i = 0; i < MAXNUMREQUESTS; i++)
+    {
+        for(j = 0; j < MAXIDLEN; j++)
+        {
+            char c = friends[i][j];
+            
+            if(c < 32) //invalid character name is done
+            {
+                send_msg.data[index] = '\n';
+                index++;
+                break;
+            }
+            else
+            {
+                send_msg.data[index] = c;
+                index++;
+            }
+        }
+    }
+    
+    if(sendData(send_msg))
+    {
+        printf("Error Occured sending the data\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        free(send_msg.data);
+        return 1;
+    }
+
+    recv_msg = receiveData();
+
+    if(recv_msg.type == MESSAGE_INVALID)
+    {
+        printf("Error Occured receiving the server's response\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        free(send_msg.data);
+        return 1;
+    }
+
+    //Data is received in form "ID GPS\nID GPS\nID ..."
+    printf("%s", recv_msg.data);
+    
+    
+    free(send_msg.client_id);
+    free(send_msg.data);
+    free(recv_msg.client_id);
+    free(recv_msg.data);
+   
     return 0;
 }   
 
@@ -441,7 +498,7 @@ int handleHistory()
     Message recv_msg;
 
     /* Make the message */
-    send_msg.type = MESSAGE_FRIENDS;
+    send_msg.type = MESSAGE_HISTORY;
 
     if((send_msg.client_id = (char *)(malloc(sizeof(my_id)))) == NULL)
     {
@@ -454,7 +511,6 @@ int handleHistory()
     
     send_msg.length = 0;
     send_msg.data = NULL;
-
 
     if(sendData(send_msg))
     {
@@ -476,7 +532,12 @@ int handleHistory()
         return 1;
     }
 
-    //TODO: Parse the data from the server and display it
+    //Data is in form "GPS\nGPS\n..."
+    printf("%s", recv_msg.data);
+
+    free(send_msg.client_id);
+    free(recv_msg.client_id);
+    free(recv_msg.data);
 
     return 0;
 }
@@ -487,6 +548,34 @@ int handleHistory()
  */
 int handleLeave()
 {
+    Message send_msg;
+
+    /* Make the message */
+    send_msg.type = MESSAGE_LEAVE;
+
+    if((send_msg.client_id = (char *)(malloc(sizeof(my_id)))) == NULL)
+    {
+        printf("Unable to malloc space for the message's client id\n");
+        close(clientSock);
+        clientSock = -1;
+        return 1;
+    }
+    strcpy(send_msg.client_id, my_id);
+    
+    send_msg.length = 0;
+    send_msg.data = NULL;
+
+    if(sendData(send_msg))
+    {
+        printf("Error Occured with sending history message\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        return 1;
+    }
+
+    free(send_msg.client_id);
+
     return 0;
 }
 
@@ -496,6 +585,34 @@ int handleLeave()
  */
 int handlePing()
 {
+    Message send_msg;
+
+    /* Make the message */
+    send_msg.type = MESSAGE_PING;
+
+    if((send_msg.client_id = (char *)(malloc(sizeof(my_id)))) == NULL)
+    {
+        printf("Unable to malloc space for the message's client id\n");
+        close(clientSock);
+        clientSock = -1;
+        return 1;
+    }
+    strcpy(send_msg.client_id, my_id);
+    
+    send_msg.length = 0;
+    send_msg.data = NULL;
+
+    if(sendData(send_msg))
+    {
+        printf("Error Occured with sending history message\n");
+        close(clientSock);
+        clientSock = -1;
+        free(send_msg.client_id);
+        return 1;
+    }
+
+    free(send_msg.client_id);
+    
     return 0;
 }
 
@@ -516,6 +633,9 @@ Message receiveData()
     Message msg; 
     
     msg.type = MESSAGE_IDAVAILABLE; //Placeholder
+
+    //TODO: check to make sure the message is valid, to this client, and
+    //formatted correctly if not free it and set the message type to invalid
 
     return msg;
 }
