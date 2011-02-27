@@ -17,7 +17,7 @@
 #define HEXLENGTH 40		/* Formatted Hex string from SHA1 */
 #define MAXPENDING 50 /* Maximum number of incoming connections */
 #define MAXLINELENGTH 5000
-
+#define PINGTIMEOUT   200
 
 int count = 0;
 
@@ -26,10 +26,10 @@ int handleConnect(char *client_id);
 int handleUpdate(char *client_id, char *gps);
 int handleFriends(char *client_id, char *friend_list);
 int handleHistory(char *client_id);
-int handlePing(char *client_id);
 int handleLeave(char *client_id);
 int sendData(Message msg);
-char *getGPS(char *id);
+char *getGPS(char *id, int type);
+int replaceLine(char *id, char *gps);
 
 int main(int argc, char **argv)
 {
@@ -95,6 +95,8 @@ void handleClient(int serverSocket)
 	unsigned char resultBuf[SHALENGTH]; /* Buff to store change result */
 	char answerBuf[HEXLENGTH];		/* Buff contains formatted answer */
 	unsigned int clntLen;		/* Length of address data struct */
+        int pingTimer = 0;              //Time since last ping reset with every
+                                        //ping
 
 	/* Accept incoming connection */
 	clntLen = sizeof(changeClntAddr);
@@ -153,6 +155,8 @@ int handleConnect(char *client_id)
        {
            msg.type = MESSAGE_IDTAKEN;
            msg.client_id = client_id; 
+           msg.length = 0;
+           msg.data = NULL;
            sendData(msg);
            fclose(file);
            return 0; 
@@ -164,6 +168,8 @@ int handleConnect(char *client_id)
 
    msg.type = MESSAGE_IDAVAILABLE;
    msg.client_id = client_id; 
+   msg.length = 0;
+   msg.data = NULL;
    
    if(sendData(msg))
    {
@@ -178,49 +184,7 @@ int handleConnect(char *client_id)
 
 int handleUpdate(char *client_id, char *gps)
 {
-   //Setup the files
-   FILE *in;
-   in = fopen("data.txt","r"); //fprintf(file,"%s","To write");
-   FILE *out;
-   out = fopen("temp.txt", "w");
-
-   char *temp;
-   char *id;
-   int found = 0;
-
-   if((temp = (char *)(malloc(sizeof(char) * strlen(client_id)))) == NULL)
-   {
-       printf("Unable to malloc space for the file lines\n");
-       return 1;
-   }
-
-   while(fscanf(in, "%s\n", temp) != EOF)
-   {
-       id = strtok(temp, " "); //get the first token as the id
-
-       if(strcmp(id, client_id) == 0) //Found that Id already
-       {
-           temp = strtok(temp, " "); //Remove the user id on temp
-           sprintf(temp, "%s %s %s", client_id, gps, temp);
-           found = 1;          
-       }
-       fputs(temp, out); //Write the line (edited or not)
-   }
-   
-   if(!found)
-   {
-       sprintf(temp, "%s %s", client_id, gps);
-       fputs(temp, out); //Write the line (edited or not)
-   }
-
-   fclose(in);
-   fclose(out);
-
-   //Replace the old file with the new one
-   remove("data.txt");
-   rename("temp.txt", "data.txt");
-
-   return 0;
+    return replaceLine(client_id, gps);
 }
 
 int handleFriends(char *client_id, char *friend_list)
@@ -257,10 +221,12 @@ int handleFriends(char *client_id, char *friend_list)
     next_friend = strtok(friend_list, "\n");
     while(next_friend != NULL)
     { 
-        temp = getGPS(next_friend);
+        temp = getGPS(next_friend, MESSAGE_FRIENDS);
         strcat(msg.data, temp);
         next_friend = strtok(NULL, "\n");
     }
+
+    msg.length = strlen(msg.data);
 
     if(sendData(msg))
     {
@@ -273,20 +239,49 @@ int handleFriends(char *client_id, char *friend_list)
 
 int handleHistory(char *client_id)
 {
+    Message msg;
+
+    if((msg.client_id = (char *)(malloc(sizeof(char) * strlen(client_id)))) ==
+            NULL)
+    {
+        printf("Unable to malloc space for the message\n");
+        return 1;
+    }
+
+    if((msg.data = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) ==
+            NULL)
+    {
+        printf("Unable to malloc space for the message\n");
+        free(msg.client_id);
+        return 1;
+    }
+    
+    msg.type = MESSAGE_HISTORY;
+    strcpy(msg.client_id, client_id);
+    msg.data = getGPS(client_id, MESSAGE_HISTORY);
+    msg.length = strlen(msg.data);
+
+    if(sendData(msg))
+    {
+        printf("Error Occured during sendData\n");
+        free(msg.client_id);
+        free(msg.data);
+        return 1;
+    }
+
+    free(msg.client_id);
+    free(msg.data);
     return 0;
 }
 
-int handlePing(char *client_id)
-{
-    return 0;
-}
-
+/* This function simply removes the client from the file it does not 
+ * close the connection that has to be done in handleClient */
 int handleLeave(char *client_id)
 {
-    return 0;
+    return replaceLine(client_id, NULL);
 }
 
-char *getGPS(char *id)
+char *getGPS(char *id, int type)
 {
     char *line, *lat, *lon;
     FILE *fp;
@@ -306,16 +301,77 @@ char *getGPS(char *id)
 
         if(strcmp(temp, id) == 0)
         {
-            lat = strtok(NULL, " "); //get the latitude
-            lon = strtok(NULL, " "); //get the longitude
-
-            sprintf(line, "%s: %s %s", temp, lat, lon);
+            if(type == MESSAGE_FRIENDS)
+            {
+                lat = strtok(NULL, " "); //get the latitude
+                lon = strtok(NULL, " "); //get the longitude
+                sprintf(line, "%s: %s %s", temp, lat, lon);
+            }
+            else if(type == MESSAGE_HISTORY)
+            {
+               //Do Nothing I want the whole line         
+            }
             return line;
         }
     }
 
     sprintf(line, "%s: Not Found\n", id);
     return line;
+}
+
+int replaceLine(char *client_id, char *gps)
+{
+   //Setup the files
+   FILE *in;
+   in = fopen("data.txt","r"); //fprintf(file,"%s","To write");
+   FILE *out;
+   out = fopen("temp.txt", "w");
+
+   char *temp;
+   char *id;
+   int found = 0;
+
+   if((temp = (char *)(malloc(sizeof(char) * strlen(client_id)))) == NULL)
+   {
+       printf("Unable to malloc space for the file lines\n");
+       return 1;
+   }
+
+   while(fscanf(in, "%s\n", temp) != EOF)
+   {
+       id = strtok(temp, " "); //get the first token as the id
+
+       if(strcmp(id, client_id) == 0) //Found that Id already
+       {
+           temp = strtok(temp, " "); //Remove the user id on temp
+
+           if(gps != NULL) //make the new line
+           {
+               sprintf(temp, "%s %s %s", client_id, gps, temp);
+           }
+           else //this was a leave clear the line
+           {
+               sprintf(temp, "");
+           }
+           found = 1;          
+       }
+       fputs(temp, out); //Write the line (edited or not)
+   }
+   
+   if(!found && gps != NULL)
+   {
+       sprintf(temp, "%s %s", client_id, gps);
+       fputs(temp, out); //Write the line
+   }
+
+   fclose(in);
+   fclose(out);
+
+   //Replace the old file with the new one
+   remove("data.txt");
+   rename("temp.txt", "data.txt");
+
+   return 0;
 }
 
 int sendData(Message msg)
