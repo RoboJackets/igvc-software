@@ -36,10 +36,6 @@ int replaceLine(char *id, char *gps);
 
 int main(int argc, char **argv)
 {
-	//File setup
-	FILE *file;
-	file = fopen("data.txt","a+"); //fprintf(file,"%s","To write");
-
 	//TODO: Set up server
 	int serverSock;			/* Server Socket */
 	struct sockaddr_in changeServAddr;	/* Local address */
@@ -88,8 +84,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	fclose(file);
-
 	return 0;
 }
 
@@ -118,7 +112,7 @@ void handleClient(int clntSock)
 
 	/* Receive message from client */
 	ssize_t numBytesRec = 0;
-	while(1) {
+	while(!leave) {
 		int loopBytes;
 		loopBytes = recv(clientSock, &buffer[numBytesRec], sizeof(buffer)-numBytesRec, 0);
 		if(loopBytes < 0) {
@@ -129,66 +123,53 @@ void handleClient(int clntSock)
 			printf("recv() returned: %d bytes\n", loopBytes);
 
 		numBytesRec += loopBytes;
-	}
 
-	/* Return message to client */
-	while(numBytesRec > 0) {  //0 indicates end of stream
-		//Echo message back to client
-		ssize_t numBytesSent = send(clntSock, buffer, numBytesRec, 0);
-		if(numBytesSent < 0) {
-			printf("send() failed");
-			break;
+		/* Return message to client */
+		while(numBytesRec > 0) {  //0 indicates end of stream
+			//Echo message back to client
+			ssize_t numBytesSent = send(clntSock, buffer, numBytesRec, 0);
+			if(numBytesSent < 0) {
+				printf("send() failed");
+				break;
+			}
+			else if(numBytesSent != numBytesRec) {
+				printf("send(), sent unexpected number of bytes");
+				break;
+			}
 		}
-		else if(numBytesSent != numBytesRec) {
-			printf("send(), sent unexpected number of bytes");
-			break;
-		}
-	}
 
-	//Decode incoming message and call appropriate handler
-	switch(((struct Message *) buffer)->type) {
-		case(MESSAGE_UPDATE):
-		{
-			handleUpdate();
-			break;
-		}
-		case(MESSAGE_FRIENDS):
-		{
-			handleFriends();
-			break;
-		}
-		case(MESSAGE_HISTORY):
-		{
-			handleHistory();
-			break;
-		}
-		case(MESSAGE_LEAVE):
-		{
-			handleLeave();
-			break;
-		}
-		case(MESSAGE_CHECKID):
-		{
-			handleCheckId();
-			break;
-		}
-		case(MESSAGE_IDTAKEN):
-		{
-			handleIdTaken();
-			break;
-		}
-		case(MESSAGE_IDAVAILABLE):
-		{
-			handleIdAvailable();
-			break;
-		}
-		case(MESSAGE_PING):
-		{
-			handlePing();
-			break;
+		//Decode incoming message and call appropriate handler
+		switch(((struct Message *) buffer)->type) {
+			case(MESSAGE_UPDATE):
+			{
+				handleUpdate();
+				break;
+			}
+			case(MESSAGE_FRIENDS):
+			{
+				handleFriends();
+				break;
+			}
+			case(MESSAGE_HISTORY):
+			{
+				handleHistory();
+				break;
+			}
+			case(MESSAGE_LEAVE):
+			{
+				handleLeave();
+				leave++;
+				break;
+			}
+			case(MESSAGE_CHECKID):
+			{
+				handleCheckId();
+				break;
+			}
+			default:
+				printf("Unknown message type");
 		}
 	}
-
 
 	close(clntSock);
 
@@ -200,6 +181,7 @@ int handleCheckId(char *client_id, int sock)
    Message msg;
    char *temp;
 
+	 temp = &temp[2];
    //Setup the file
    FILE *file;
    file = fopen("data.txt","r"); //fprintf(file,"%s","To write");
@@ -407,6 +389,7 @@ int replaceLine(char *client_id, char *gps)
 
    while(fscanf(in, "%s\n", temp) != EOF)
    {
+		 	 temp = &temp[2];
        id = strtok(temp, " "); //get the first token as the id
 
        if(strcmp(id, client_id) == 0) //Found that Id already
@@ -415,11 +398,11 @@ int replaceLine(char *client_id, char *gps)
 
            if(gps != NULL) //make the new line
            {
-               sprintf(temp, "%s %s %s", client_id, gps, temp);
+               sprintf(temp, "a %s %s %s", client_id, gps, temp);
            }
            else //this was a leave clear the line
            {
-               sprintf(temp, "");
+               sprintf(temp, "i %s %s", client_id, temp);
            }
            found = 1;          
        }
@@ -428,7 +411,7 @@ int replaceLine(char *client_id, char *gps)
    
    if(!found && gps != NULL)
    {
-       sprintf(temp, "%s %s", client_id, gps);
+       sprintf(temp, "a %s %s", client_id, gps);
        fputs(temp, out); //Write the line
    }
 
