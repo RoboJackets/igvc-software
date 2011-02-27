@@ -18,9 +18,6 @@ int handleHistory(void);
 /*Closes the connection*/
 int handleLeave(void);
 
-/*Checks to see whether this id is taken*/
-int handleCheckId(void);
-
 /*Pings the server for verification of connection*/
 int handlePing(void);
 
