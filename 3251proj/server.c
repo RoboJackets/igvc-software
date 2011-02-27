@@ -29,6 +29,7 @@ int handleHistory(char *client_id);
 int handlePing(char *client_id);
 int handleLeave(char *client_id);
 int sendData(Message msg);
+char *getGPS(char *id);
 
 int main(int argc, char **argv)
 {
@@ -157,14 +158,21 @@ int handleConnect(char *client_id)
            return 0; 
        }
    }
+   
+   fclose(file);
+   free(temp);
 
    msg.type = MESSAGE_IDAVAILABLE;
    msg.client_id = client_id; 
-   sendData(msg);
+   
+   if(sendData(msg))
+   {
+       printf("Error Occured during send\n");
+       free(msg.client_id);
+       return 1;
+   }
 
-   fclose(file);
    free(msg.client_id);
-   free(temp);
    return 0;
 }
 
@@ -217,6 +225,49 @@ int handleUpdate(char *client_id, char *gps)
 
 int handleFriends(char *client_id, char *friend_list)
 {
+    char *next_friend;
+    Message msg;
+    char *temp;
+
+    if((msg.client_id = (char *)(malloc(sizeof(char) * strlen(client_id)))) ==
+            NULL)
+    {
+        printf("Unable to malloc space for the message\n");
+        return 1;
+    }
+
+    if((msg.data = (char *)(malloc(sizeof(char) * MAXNUMREQUESTS * (MAXIDLEN +
+                            20)))) == NULL)
+    {
+        printf("Unable to malloc space for the message\n");
+        free(msg.client_id);
+        return 1;
+    }
+
+    if((temp = (char *)(malloc(sizeof(char) * (MAXIDLEN + 20)))) == NULL)
+    {
+        printf("Unable to malloc space\n");
+        free(msg.client_id);
+        free(msg.data);
+        return 1;
+    }
+
+    msg.client_id = client_id;
+
+    next_friend = strtok(friend_list, "\n");
+    while(next_friend != NULL)
+    { 
+        temp = getGPS(next_friend);
+        strcat(msg.data, temp);
+        next_friend = strtok(NULL, "\n");
+    }
+
+    if(sendData(msg))
+    {
+        printf("Error Occured during Send\n");
+        return 1;
+    }
+
     return 0;
 }
 
@@ -235,6 +286,37 @@ int handleLeave(char *client_id)
     return 0;
 }
 
+char *getGPS(char *id)
+{
+    char *line, *lat, *lon;
+    FILE *fp;
+
+    char *temp;
+    fp = fopen("data.txt", "r");
+
+    if((line = (char *)(malloc(sizeof(char) * (MAXIDLEN + 20)))) == NULL)
+    {
+        printf("Unable to malloc space\n");
+        return NULL;
+    }
+
+    while(fgets(line, MAXIDLEN, fp))
+    {
+        temp = strtok(line, " "); //get the first token
+
+        if(strcmp(temp, id) == 0)
+        {
+            lat = strtok(NULL, " "); //get the latitude
+            lon = strtok(NULL, " "); //get the longitude
+
+            sprintf(line, "%s: %s %s", temp, lat, lon);
+            return line;
+        }
+    }
+
+    sprintf(line, "%s: Not Found\n", id);
+    return line;
+}
 
 int sendData(Message msg)
 {
