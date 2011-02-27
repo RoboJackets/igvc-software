@@ -22,7 +22,7 @@
 //Structure of arguments to pass to client thread
 struct ThreadArgs {
 	int clntSock; //Socket descriptor for client
-}
+};
 
 void handleClient(int clntSock);
 int handleCheckId(char *client_id, int sock);
