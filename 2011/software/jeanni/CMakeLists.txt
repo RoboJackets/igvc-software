@@ -15,6 +15,7 @@ include_directories(
 	${IGVC_SOURCE_DIR}/encoders/pcdriver
 	${IGVC_SOURCE_DIR}/encoders/pcdriver_signed
 	${IGVC_SOURCE_DIR}/lidar
+	${IGVC_SOURCE_DIR}/joystick
 )
 
 IF(${ROBOT_REV} MATCHES "candiiidbg")
@@ -72,6 +73,8 @@ target_link_libraries(${robot_bin}
 	pthread
 	boost_thread-mt
 
+	joystick
+
 	#NAV200
 )
 ELSEIF((${ROBOT_REV} MATCHES "jeannidbg") OR (${ROBOT_REV} MATCHES "jeanni"))
@@ -100,6 +103,7 @@ target_link_libraries(${robot_bin}
 	pthread
 	boost_thread-mt
 
+	joystick
 	#NAV200
 )
 ENDIF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "candiii"))
