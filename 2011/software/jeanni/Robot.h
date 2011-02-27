@@ -15,6 +15,7 @@
 #include "vision.h"
 #include "image_buffers.h"
 #include "mapgen.h"
+#include "joystickDrive.hpp"
 
 const static double motor_vel_mag = 1.1;
 
@@ -151,6 +152,9 @@ public:
 	volatile bool run_lidar_thread;
 	boost::thread* lidar_update_thread;
 	void update_lidar_func();
+
+	// joystick driver
+	joystickDrive jD;
 
 	//radians <start,stop>; 0 to the right, pos counterclockwise
 	//std::deque< boost::tuple<float,float> > lidar_linear_regions;
