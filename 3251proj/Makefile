@@ -24,5 +24,5 @@ server: server.c
 	$(CC) -lcrypto -pthread server.c -o gpsServer
 
 clean:
-	    rm -f client server *.o
+	    rm -f client gpsServer *.o
 
