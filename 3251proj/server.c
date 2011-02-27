@@ -22,12 +22,12 @@
 int count = 0;
 
 void handleClient(int serverSocket);
-int handleCheckId(char *client_id);
+int handleCheckId(char *client_id, int sock);
 int handleUpdate(char *client_id, char *gps);
-int handleFriends(char *client_id, char *friend_list);
-int handleHistory(char *client_id);
+int handleFriends(char *client_id, char *friend_list, int sock);
+int handleHistory(char *client_id, int sock);
 int handleLeave(char *client_id);
-int sendData(Message msg);
+int sendData(Message msg, int sock);
 char *getGPS(char *id, int type);
 int replaceLine(char *id, char *gps);
 
@@ -127,7 +127,7 @@ pthread_exit(0);
 count--;
 }
 
-int handleCheckId(char *client_id)
+int handleCheckId(char *client_id, int sock)
 {
    Message msg;
    char *temp;
@@ -157,7 +157,7 @@ int handleCheckId(char *client_id)
            msg.client_id = client_id; 
            msg.length = 0;
            msg.data = NULL;
-           sendData(msg);
+           sendData(msg, sock);
            fclose(file);
            return 0; 
        }
@@ -171,7 +171,7 @@ int handleCheckId(char *client_id)
    msg.length = 0;
    msg.data = NULL;
    
-   if(sendData(msg))
+   if(sendData(msg, sock))
    {
        printf("Error Occured during send\n");
        free(msg.client_id);
@@ -187,7 +187,7 @@ int handleUpdate(char *client_id, char *gps)
     return replaceLine(client_id, gps);
 }
 
-int handleFriends(char *client_id, char *friend_list)
+int handleFriends(char *client_id, char *friend_list, int sock)
 {
     char *next_friend;
     Message msg;
@@ -228,7 +228,7 @@ int handleFriends(char *client_id, char *friend_list)
 
     msg.length = strlen(msg.data);
 
-    if(sendData(msg))
+    if(sendData(msg, sock))
     {
         printf("Error Occured during Send\n");
         return 1;
@@ -237,7 +237,7 @@ int handleFriends(char *client_id, char *friend_list)
     return 0;
 }
 
-int handleHistory(char *client_id)
+int handleHistory(char *client_id, int sock)
 {
     Message msg;
 
@@ -261,7 +261,7 @@ int handleHistory(char *client_id)
     msg.data = getGPS(client_id, MESSAGE_HISTORY);
     msg.length = strlen(msg.data);
 
-    if(sendData(msg))
+    if(sendData(msg, sock))
     {
         printf("Error Occured during sendData\n");
         free(msg.client_id);
@@ -374,7 +374,27 @@ int replaceLine(char *client_id, char *gps)
    return 0;
 }
 
-int sendData(Message msg)
+/*
+ * Sends the data (serialized) to the client 
+ */
+int sendData(Message msg, int sock)
 {
+    ssize_t numBytes = 0;
+    int bufLen;
+
+    //Send the msg
+    bufLen = strlen((char *)(&msg));
+    numBytes = send(sock, (char *)(&msg), bufLen, 0);
+    if(numBytes < 0)
+    {
+        printf("send() Failed\n");
+        return 1;
+    }
+    else if(numBytes != bufLen)
+    {
+        printf("send() sent the wrong number of bytes\n");
+        return 1;
+    }
+
     return 0;
 }
