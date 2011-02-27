@@ -16,8 +16,19 @@
 #define SHALENGTH 20		/* SHA1 hash size*/
 #define HEXLENGTH 40		/* Formatted Hex string from SHA1 */
 #define MAXPENDING 50 /* Maximum number of incoming connections */
+#define MAXLINELENGTH 5000
+
+
+int count = 0;
 
 void handleClient(int serverSocket);
+int handleConnect(char *client_id);
+int handleUpdate(char *client_id, char *gps);
+int handleFriends(char *client_id, char *friend_list);
+int handleHistory(char *client_id);
+int handlePing(char *client_id);
+int handleLeave(char *client_id);
+int sendData(Message msg);
 
 int main(int argc, char **argv)
 {
@@ -26,7 +37,7 @@ int main(int argc, char **argv)
 	file = fopen("data.txt","a+"); //fprintf(file,"%s","To write");
 
 	//Threads initialization
-	int count = 0;
+//	int count = 0;
 	int maxAllowed = MAXPENDING;
 	pthread_t *client_id = (pthread_t*) malloc(sizeof(pthread_t)*maxAllowed);
 	if(client_id == NULL) exit (1);
@@ -113,3 +124,119 @@ pthread_exit(0);
 count--;
 }
 
+int handleConnect(char *client_id)
+{
+   Message msg;
+   char *temp;
+
+   //Setup the file
+   FILE *file;
+   file = fopen("data.txt","r"); //fprintf(file,"%s","To write");
+   
+   if((msg.client_id = (char *)(malloc(sizeof(char) * strlen(client_id)))) == NULL)
+   {
+       printf("Unable to malloc space for the client's id\n");
+       return -1;
+   }
+   
+   if((temp = (char *)(malloc(sizeof(char) * strlen(client_id)))) == NULL)
+   {
+       printf("Unable to malloc space for the client's id\n");
+       return -1;
+   }
+
+
+   while(fgets(temp, strlen(temp), file) != NULL)
+   {
+       if(strcmp(temp, client_id) == 0) //Found that Id already
+       {
+           msg.type = MESSAGE_IDTAKEN;
+           msg.client_id = client_id; 
+           sendData(msg);
+           fclose(file);
+           return 0; 
+       }
+   }
+
+   msg.type = MESSAGE_IDAVAILABLE;
+   msg.client_id = client_id; 
+   sendData(msg);
+
+   fclose(file);
+   free(msg.client_id);
+   free(temp);
+   return 0;
+}
+
+int handleUpdate(char *client_id, char *gps)
+{
+   //Setup the files
+   FILE *in;
+   in = fopen("data.txt","r"); //fprintf(file,"%s","To write");
+   FILE *out;
+   out = fopen("temp.txt", "w");
+
+   char *temp;
+   char *id;
+   int found = 0;
+
+   if((temp = (char *)(malloc(sizeof(char) * strlen(client_id)))) == NULL)
+   {
+       printf("Unable to malloc space for the file lines\n");
+       return 1;
+   }
+
+   while(fscanf(in, "%s\n", temp) != EOF)
+   {
+       id = strtok(temp, " "); //get the first token as the id
+
+       if(strcmp(id, client_id) == 0) //Found that Id already
+       {
+           temp = strtok(temp, " "); //Remove the user id on temp
+           sprintf(temp, "%s %s %s", client_id, gps, temp);
+           found = 1;          
+       }
+       fputs(temp, out); //Write the line (edited or not)
+   }
+   
+   if(!found)
+   {
+       sprintf(temp, "%s %s", client_id, gps);
+       fputs(temp, out); //Write the line (edited or not)
+   }
+
+   fclose(in);
+   fclose(out);
+
+   //Replace the old file with the new one
+   remove("data.txt");
+   rename("temp.txt", "data.txt");
+
+   return 0;
+}
+
+int handleFriends(char *client_id, char *friend_list)
+{
+    return 0;
+}
+
+int handleHistory(char *client_id)
+{
+    return 0;
+}
+
+int handlePing(char *client_id)
+{
+    return 0;
+}
+
+int handleLeave(char *client_id)
+{
+    return 0;
+}
+
+
+int sendData(Message msg)
+{
+    return 0;
+}
