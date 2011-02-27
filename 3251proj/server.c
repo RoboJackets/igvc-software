@@ -1,28 +1,23 @@
-/*///////////////////////////////////////////////////////////
-*
-* FILE:		server.c
-* AUTHOR:	Anthony Gendreau
-* PROJECT:	CS 3251 Project 1 - Professor Traynor
-* DESCRIPTION:	Network Server Code
-*
-*////////////////////////////////////////////////////////////
-
-/*Included libraries*/
-
 #include <stdio.h>	  /* for printf() and fprintf() */
 #include <sys/socket.h>	  /* for socket(), connect(), send(), and recv() */
 #include <arpa/inet.h>	  /* for sockaddr_in and inet_addr() */
 #include <stdlib.h>	  /* supports all sorts of functionality */
 #include <unistd.h>	  /* for close() */
 #include <string.h>	  /* support any string ops */
-#include <openssl/sha.h>  /* for SHA1 */
+#include <pthread.h>
+#include "server.h"
+#include "typedef.h"
+#include <pthread.h>
 
+/* These may not be used, 2/21 */
 #define RCVBUFSIZE 512		/* The receive buffer size */
 #define SNDBUFSIZE 512		/* The send buffer size */
 #define BUFSIZE 40		/* Your name can be as many as 40 chars*/
 #define SHALENGTH 20		/* SHA1 hash size*/
 #define HEXLENGTH 40		/* Formatted Hex string from SHA1 */
-#define MAXPENDING 10           /* Maximum number of incoming connections */
+#define MAXPENDING 50 /* Maximum number of incoming connections */
+#define MAXLINELENGTH 5000
+#define PINGTIMEOUT   200
 
 //Structure of arguments to pass to client thread
 struct ThreadArgs {
@@ -41,13 +36,14 @@ int replaceLine(char *id, char *gps);
 
 int main(int argc, char **argv)
 {
+	//File setup
+	FILE *file;
+	file = fopen("data.txt","a+"); //fprintf(file,"%s","To write");
 
-    int i;				/* Declaring a counter variable*/
-    char nameBuf[BUFSIZE];		/* Buff to store name from client */
-    unsigned char resultBuf[SHALENGTH]; /* Buff to store change result */
-    char answerBuf[HEXLENGTH];		/* Buff contains formatted answer */
-    int rcvlen;
-    unsigned short servPort = 4000;
+	//TODO: Set up server
+	int serverSock;			/* Server Socket */
+	struct sockaddr_in changeServAddr;	/* Local address */
+	unsigned short changeServPort;	/* Server port */
 
 
 	/* Create new TCP Socket for incoming requests*/
@@ -119,18 +115,23 @@ void handleClient(int clntSock)
 {
 	char buffer[BUFSIZE];		/* Buff to store name from client */
 
-	ssize_t numBytesRec;
+
+	/* Receive message from client */
+	ssize_t numBytesRec = 0;
 	while(1) {
-		/* Receive message from client */
-		numBytesRec = recv(clientSock, buffer, BUFSIZE, 0);
-		if(numBytesRec < 0) {
+		int loopBytes;
+		loopBytes = recv(clientSock, &buffer[numBytesRec], sizeof(buffer)-numBytesRec, 0);
+		if(loopBytes < 0) {
 			printf("recv() failed");
 			break;
 		}
+		else
+			printf("recv() returned: %d bytes\n", loopBytes);
+
+		numBytesRec += loopBytes;
 	}
 
 	/* Return message to client */
-	int totalBytesRec = 0;
 	while(numBytesRec > 0) {  //0 indicates end of stream
 		//Echo message back to client
 		ssize_t numBytesSent = send(clntSock, buffer, numBytesRec, 0);
@@ -142,13 +143,56 @@ void handleClient(int clntSock)
 			printf("send(), sent unexpected number of bytes");
 			break;
 		}
-		totalBytesRec += numBytesRec;
 	}
 
 	//Decode incoming message and call appropriate handler
+	switch(((struct Message *) buffer)->type) {
+		case(MESSAGE_UPDATE):
+		{
+			handleUpdate();
+			break;
+		}
+		case(MESSAGE_FRIENDS):
+		{
+			handleFriends();
+			break;
+		}
+		case(MESSAGE_HISTORY):
+		{
+			handleHistory();
+			break;
+		}
+		case(MESSAGE_LEAVE):
+		{
+			handleLeave();
+			break;
+		}
+		case(MESSAGE_CHECKID):
+		{
+			handleCheckId();
+			break;
+		}
+		case(MESSAGE_IDTAKEN):
+		{
+			handleIdTaken();
+			break;
+		}
+		case(MESSAGE_IDAVAILABLE):
+		{
+			handleIdAvailable();
+			break;
+		}
+		case(MESSAGE_PING):
+		{
+			handlePing();
+			break;
+		}
+	}
 
 
 	close(clntSock);
+
+	return 0;
 }
 
 int handleCheckId(char *client_id, int sock)
@@ -220,103 +264,205 @@ int handleFriends(char *client_id, char *friend_list, int sock)
     if((msg.client_id = (char *)(malloc(sizeof(char) * strlen(client_id)))) ==
             NULL)
     {
-        printf("socket() failed\n");
-        exit(1);
+        printf("Unable to malloc space for the message\n");
+        return 1;
     }
-    else
-        printf("Server Socket: %d\n", serverSock);
 
-    /* Construct local address structure*/
-    memset(&changeServAddr, 0, sizeof(changeServAddr));
-    changeServAddr.sin_family = AF_INET;
-    changeServAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    changeServAddr.sin_port = htons(servPort);
-
-    /* Bind to local address structure */
-    if(bind(serverSock, (struct sockaddr *) &changeServAddr, sizeof(changeServAddr)) < 0)
+    if((msg.data = (char *)(malloc(sizeof(char) * MAXNUMREQUESTS * (MAXIDLEN +
+                            20)))) == NULL)
     {
-        printf("bind() failed\n");
-        exit(1);
+        printf("Unable to malloc space for the message\n");
+        free(msg.client_id);
+        return 1;
     }
-    else
-        printf("bind() succeeded\n");
 
-    /* Listen for incoming connections */
-    if(listen(serverSock, MAXPENDING) < 0)
+    if((temp = (char *)(malloc(sizeof(char) * (MAXIDLEN + 20)))) == NULL)
     {
-        printf("listen() failed\n");
-        exit(1);
+        printf("Unable to malloc space\n");
+        free(msg.client_id);
+        free(msg.data);
+        return 1;
     }
-    else
-        printf("listen() succeeded\n");
 
-    /* Loop server forever*/
-    while(1)
+    msg.client_id = client_id;
+
+    next_friend = strtok(friend_list, "\n");
+    while(next_friend != NULL)
+    { 
+        temp = getGPS(next_friend, MESSAGE_FRIENDS);
+        strcat(msg.data, temp);
+        next_friend = strtok(NULL, "\n");
+    }
+
+    msg.length = strlen(msg.data);
+
+    if(sendData(msg, sock))
     {
-
-	/* Accept incoming connection */
-        clntLen = sizeof(changeClntAddr);
-        printf("Client Length: %d\n", clntLen);
-
-        if((clientSock = accept(serverSock, (struct sockaddr *) &changeClntAddr, &clntLen)) < 0)
-        {
-            printf("accept() failed\n");
-            exit(1);
-        }
-        else
-            printf("accept() succeeded\n");
-
-	/* Extract Your Name from the packet, store in nameBuf */
-        //while(rcvlen < sizeof(nameBuf))
-        //{
-            int temp;
-            if((temp = recv(clientSock, &nameBuf[rcvlen], sizeof(nameBuf)-rcvlen, 0)) < 0)
-            {
-                printf("recv() failed\n");
-                exit(1);
-            }
-            else
-                printf("recv() returned: %d bytes\n", temp);
-
-            rcvlen += temp;
-
-        //    if(temp == 0)
-         //       break;
-       //}
-
-	/* Run this and return the final value in answerBuf to client */
-	name_changer(nameBuf, resultBuf);
-	for (i = 0; i < SHALENGTH; i++) 
-	{
-	  sprintf(&answerBuf[i*2],"%02x ", resultBuf[i]);
-	}
-	printf("%s\n", answerBuf);
-
-
-	/* Return answerBuf to client */
-        if(send(clientSock, answerBuf, sizeof(answerBuf), 0) != sizeof(answerBuf))
-        {
-            printf("send() failed\n");
-            exit(1);
-        }
-        else
-            printf("send() succeeded\n");
-
-        if((close(clientSock)) < 0)
-        {
-            printf("close() failed\n");
-            exit(1);
-        }
+        printf("Error Occured during Send\n");
+        return 1;
     }
 
     return 0;
 }
 
-/* Takes the client name and changes it */
-/* Students should NOT touch this code */
-void name_changer(char *nameBuf, char *resultBuf) 
+int handleHistory(char *client_id, int sock)
 {
-    SHA1((unsigned char *)nameBuf, strlen(nameBuf), (unsigned char *)resultBuf);
+    Message msg;
+
+    if((msg.client_id = (char *)(malloc(sizeof(char) * strlen(client_id)))) ==
+            NULL)
+    {
+        printf("Unable to malloc space for the message\n");
+        return 1;
+    }
+
+    if((msg.data = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) ==
+            NULL)
+    {
+        printf("Unable to malloc space for the message\n");
+        free(msg.client_id);
+        return 1;
+    }
+    
+    msg.type = MESSAGE_HISTORY;
+    strcpy(msg.client_id, client_id);
+    msg.data = getGPS(client_id, MESSAGE_HISTORY);
+    msg.length = strlen(msg.data);
+
+    if(sendData(msg, sock))
+    {
+        printf("Error Occured during sendData\n");
+        free(msg.client_id);
+        free(msg.data);
+        return 1;
+    }
+
+    free(msg.client_id);
+    free(msg.data);
+    return 0;
 }
 
+/* This function simply removes the client from the file it does not 
+ * close the connection that has to be done in handleClient */
+int handleLeave(char *client_id)
+{
+    return replaceLine(client_id, NULL);
+}
 
+char *getGPS(char *id, int type)
+{
+    char *line, *lat, *lon;
+    FILE *fp;
+
+    char *temp;
+    fp = fopen("data.txt", "r");
+
+    if((line = (char *)(malloc(sizeof(char) * (MAXIDLEN + 20)))) == NULL)
+    {
+        printf("Unable to malloc space\n");
+        return NULL;
+    }
+
+    while(fgets(line, MAXIDLEN, fp))
+    {
+        temp = strtok(line, " "); //get the first token
+
+        if(strcmp(temp, id) == 0)
+        {
+            if(type == MESSAGE_FRIENDS)
+            {
+                lat = strtok(NULL, " "); //get the latitude
+                lon = strtok(NULL, " "); //get the longitude
+                sprintf(line, "%s: %s %s", temp, lat, lon);
+            }
+            else if(type == MESSAGE_HISTORY)
+            {
+               //Do Nothing I want the whole line         
+            }
+            return line;
+        }
+    }
+
+    sprintf(line, "%s: Not Found\n", id);
+    return line;
+}
+
+int replaceLine(char *client_id, char *gps)
+{
+   //Setup the files
+   FILE *in;
+   in = fopen("data.txt","r"); //fprintf(file,"%s","To write");
+   FILE *out;
+   out = fopen("temp.txt", "w");
+
+   char *temp;
+   char *id;
+   int found = 0;
+
+   if((temp = (char *)(malloc(sizeof(char) * strlen(client_id)))) == NULL)
+   {
+       printf("Unable to malloc space for the file lines\n");
+       return 1;
+   }
+
+   while(fscanf(in, "%s\n", temp) != EOF)
+   {
+       id = strtok(temp, " "); //get the first token as the id
+
+       if(strcmp(id, client_id) == 0) //Found that Id already
+       {
+           temp = strtok(temp, " "); //Remove the user id on temp
+
+           if(gps != NULL) //make the new line
+           {
+               sprintf(temp, "%s %s %s", client_id, gps, temp);
+           }
+           else //this was a leave clear the line
+           {
+               sprintf(temp, "");
+           }
+           found = 1;          
+       }
+       fputs(temp, out); //Write the line (edited or not)
+   }
+   
+   if(!found && gps != NULL)
+   {
+       sprintf(temp, "%s %s", client_id, gps);
+       fputs(temp, out); //Write the line
+   }
+
+   fclose(in);
+   fclose(out);
+
+   //Replace the old file with the new one
+   remove("data.txt");
+   rename("temp.txt", "data.txt");
+
+   return 0;
+}
+
+/*
+ * Sends the data (serialized) to the client 
+ */
+int sendData(Message msg, int sock)
+{
+    ssize_t numBytes = 0;
+    int bufLen;
+
+    //Send the msg
+    bufLen = strlen((char *)(&msg));
+    numBytes = send(sock, (char *)(&msg), bufLen, 0);
+    if(numBytes < 0)
+    {
+        printf("send() Failed\n");
+        return 1;
+    }
+    else if(numBytes != bufLen)
+    {
+        printf("send() sent the wrong number of bytes\n");
+        return 1;
+    }
+
+    return 0;
+}
