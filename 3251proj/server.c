@@ -19,9 +19,12 @@
 #define MAXLINELENGTH 5000
 #define PINGTIMEOUT   200
 
-int count = 0;
+//Structure of arguments to pass to client thread
+struct ThreadArgs {
+	int clntSock; //Socket descriptor for client
+}
 
-void handleClient(int serverSocket);
+void handleClient(int clntSock);
 int handleCheckId(char *client_id, int sock);
 int handleUpdate(char *client_id, char *gps);
 int handleFriends(char *client_id, char *friend_list, int sock);
@@ -36,12 +39,6 @@ int main(int argc, char **argv)
 	//File setup
 	FILE *file;
 	file = fopen("data.txt","a+"); //fprintf(file,"%s","To write");
-
-	//Threads initialization
-//	int count = 0;
-	int maxAllowed = MAXPENDING;
-	pthread_t *client_id = (pthread_t*) malloc(sizeof(pthread_t)*maxAllowed);
-	if(client_id == NULL) exit (1);
 
 	//TODO: Set up server
 	int serverSock;			/* Server Socket */
@@ -70,12 +67,25 @@ int main(int argc, char **argv)
 		printf("listen() failed");
 	}
 
-
-
 	while(1)
 	{
-		//pthread_create(client_id,NULL,handleClient(serverSock),&count);
-		count++;
+		int clntSock = accept(serverSocket, (struct sockaddr *) &changeClntAddr, &clntLen);	
+	}
+
+	//Create seperate memory for client arguments
+	struct ThreadArgs *threadArgs = (struct ThreadArgs *) malloc(sizeof(struct ThreadArgs));
+	if(threadArgs == NULL) {
+		printf("malloc() failed");
+		return 1;
+	}
+	threadArgs->clntSock =clntSock;
+
+	//Threads creation
+	pthread_t threadID;
+	int returnValue = pthread_create(&threadID, NULL, ThreadMain, threadArgs);
+	if(returnValue != 0) {
+		printf("pthread_create() failed with thread %lu\n", (unsigned long int) threadID);
+		return 1;
 	}
 
 	fclose(file);
@@ -86,45 +96,55 @@ int main(int argc, char **argv)
 /*
  * Maintains all the server' connections
  */
-void handleClient(int serverSocket)
+void *ThreadMain(void *threadArgs) {
+	//Gaurantee thread resources deallocated on return
+	pthread_detach(pthread_self());
+
+	//Extra socket file descriptor from argument
+	int clntSock = ((struct ThreadArgs *) threadArgs)->clntSock;
+	free(threadArgs); //Deallocate memory for argument
+
+	handleClient(clntSock);
+
+	return NULL;
+}
+
+
+//wrap their recieves in while loops and return a message. either call our handle messages directly after decoding what type of message it is 
+void handleClient(int clntSock)
 {
-	int clientSock;			/* Client Socket */
-	int i;				/* Declaring a counter variable*/
-	struct sockaddr_in changeClntAddr;	/* Client address */
-	char nameBuf[BUFSIZE];		/* Buff to store name from client */
-	unsigned char resultBuf[SHALENGTH]; /* Buff to store change result */
-	char answerBuf[HEXLENGTH];		/* Buff contains formatted answer */
-	unsigned int clntLen;		/* Length of address data struct */
-        int pingTimer = 0;              //Time since last ping reset with every
-                                        //ping
+	char buffer[BUFSIZE];		/* Buff to store name from client */
 
-	/* Accept incoming connection */
-	clntLen = sizeof(changeClntAddr);
-	if((clientSock = accept(serverSocket, (struct sockaddr *) &changeClntAddr, &clntLen)) < 0) {
-		printf("accept() failed");
-	}
-	
-	/* printf("HIT\n"); */
-	/* Extract Your Name from the packet, store in nameBuf */
-	if((recv(clientSock, nameBuf, BUFSIZE, 0)) < 0) {
-		printf("recv() failed");
+	ssize_t numBytesRec;
+	while(1) {
+		/* Receive message from client */
+		numBytesRec = recv(clientSock, buffer, BUFSIZE, 0);
+		if(numBytesRec < 0) {
+			printf("recv() failed");
+			break;
+		}
 	}
 
-	/* Run this and return the final value in answerBuf to client */
-	for (i = 0; i < SHALENGTH; i++) 
-	{
-  	sprintf(&answerBuf[i*2],"%02x ", resultBuf[i]);
+	/* Return message to client */
+	int totalBytesRec = 0;
+	while(numBytesRec > 0) {  //0 indicates end of stream
+		//Echo message back to client
+		ssize_t numBytesSent = send(clntSock, buffer, numBytesRec, 0);
+		if(numBytesSent < 0) {
+			printf("send() failed");
+			break;
+		}
+		else if(numBytesSent != numBytesRec) {
+			printf("send(), sent unexpected number of bytes");
+			break;
+		}
+		totalBytesRec += numBytesRec;
 	}
-	printf("%s\n", answerBuf);
 
-	/* Return answerBuf to client */
-	if(send(clientSock, answerBuf, HEXLENGTH, 0) != HEXLENGTH) {
-		printf("send() failed");
-	}
+	//Decode incoming message and call appropriate handler
 
-close(clientSock);
-pthread_exit(0);
-count--;
+
+	close(clntSock);
 }
 
 int handleCheckId(char *client_id, int sock)
