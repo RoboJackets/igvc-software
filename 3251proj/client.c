@@ -193,23 +193,19 @@ int handleConnect()
     serv_addr.sin_port = htons(servPort);
 
     /* Establish connecction to the server */
-    /*if((connect(clientSock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
+    if((connect(clientSock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
     {
         printf("connect() failed\n");
         return 1;
-    }*/
+    }
     
 
- //   while((temp = strchr(my_id, ' ')) != NULL)
- //   {
-        printf("Enter your user Id (No Spaces Allowed): ");
-        while(scanf("%s", my_id) != 1)
-        {
-           while(getchar() != '\n');
-           printf("Invalid Input\n");
-        }
-
- //   }
+    printf("Enter your user Id (No Spaces Allowed): ");
+    while(scanf("%s", my_id) != 1)
+    {
+        while(getchar() != '\n');
+        printf("Invalid Input\n");
+    }
 
     /* The message has no data just the id of this client */
     send_msg.type = MESSAGE_CHECKID;
