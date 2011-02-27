@@ -22,7 +22,7 @@
 int count = 0;
 
 void handleClient(int serverSocket);
-int handleConnect(char *client_id);
+int handleCheckId(char *client_id);
 int handleUpdate(char *client_id, char *gps);
 int handleFriends(char *client_id, char *friend_list);
 int handleHistory(char *client_id);
@@ -127,7 +127,7 @@ pthread_exit(0);
 count--;
 }
 
-int handleConnect(char *client_id)
+int handleCheckId(char *client_id)
 {
    Message msg;
    char *temp;
