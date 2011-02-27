@@ -1,6 +1,8 @@
 /* Defines */
-#define MAXIDLEN            100
+#define MAXIDLEN            40
 #define MAXNUMREQUESTS      100
+#define SENDBUFSIZE         5000
+#define RECVBUFSIZE         6000
 
 /* Structures */
 enum Message_type
