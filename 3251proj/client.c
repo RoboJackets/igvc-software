@@ -622,6 +622,77 @@ int handlePing()
  */
 int sendData(Message msg)
 {
+    ssize_t numBytes = 0;
+    int bufLen;
+
+    char *sendBuf;
+
+    if((sendBuf = (char *)(malloc(sizeof(char) * msg.length))) == NULL)
+    {
+        printf("Unable to malloc space for the send buffer\n");
+        return 1;
+    }
+
+    //Send the type
+    sprintf(sendBuf, "%d", msg.type);
+    bufLen = strlen(sendBuf);
+    numBytes = send(clientSock, sendBuf, bufLen, 0);
+    if(numBytes < 0)
+    {
+        printf("send() Failed\n");
+        return 1;
+    }
+    else if(numBytes != bufLen)
+    {
+        printf("send() sent the wrong number of bytes\n");
+        return 1;
+    }
+
+    //Send the client_id
+    sprintf(sendBuf, "%s", msg.client_id);
+    bufLen = strlen(sendBuf);
+    numBytes = send(clientSock, sendBuf, bufLen, 0);
+    if(numBytes < 0)
+    {
+        printf("send() Failed\n");
+        return 1;
+    }
+    else if(numBytes != bufLen)
+    {
+        printf("send() sent the wrong number of bytes\n");
+        return 1;
+    }
+
+    //Send the length
+    sprintf(sendBuf, "%d", msg.length);
+    bufLen = strlen(sendBuf);
+    numBytes = send(clientSock, sendBuf, bufLen, 0);
+    if(numBytes < 0)
+    {
+        printf("send() Failed\n");
+        return 1;
+    }
+    else if(numBytes != bufLen)
+    {
+        printf("send() sent the wrong number of bytes\n");
+        return 1;
+    }
+    
+    //Send the data
+    sprintf(sendBuf, "%s", msg.data);
+    bufLen = strlen(sendBuf);
+    numBytes = send(clientSock, sendBuf, bufLen, 0);
+    if(numBytes < 0)
+    {
+        printf("send() Failed\n");
+        return 1;
+    }
+    else if(numBytes != bufLen)
+    {
+        printf("send() sent the wrong number of bytes\n");
+        return 1;
+    }
+    
     return 0;
 }
 
