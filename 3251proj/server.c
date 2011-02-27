@@ -33,6 +33,7 @@ int handleLeave(char *client_id);
 int sendData(Message msg, int sock);
 char *getGPS(char *id, int type);
 int replaceLine(char *id, char *gps);
+void *ThreadMain(void *threadArgs);
 
 int main(int argc, char **argv)
 {
@@ -40,7 +41,8 @@ int main(int argc, char **argv)
 	int serverSock;			/* Server Socket */
 	struct sockaddr_in changeServAddr;	/* Local address */
 	unsigned short changeServPort;	/* Server port */
-
+        struct sockaddr_in changeClntAddr;
+        socklen_t clntLen = sizeof(changeClntAddr);
 
 	/* Create new TCP Socket for incoming requests*/
 	if((serverSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
@@ -65,25 +67,26 @@ int main(int argc, char **argv)
 
 	while(1)
 	{
-		int clntSock = accept(serverSocket, (struct sockaddr *) &changeClntAddr, &clntLen);	
-	}
+		int clntSock = accept(serverSock, (struct sockaddr *) &changeClntAddr, &clntLen);	
+	
 
-	//Create seperate memory for client arguments
-	struct ThreadArgs *threadArgs = (struct ThreadArgs *) malloc(sizeof(struct ThreadArgs));
-	if(threadArgs == NULL) {
-		printf("malloc() failed");
-		return 1;
-	}
-	threadArgs->clntSock =clntSock;
+	        //Create seperate memory for client arguments
+        	struct ThreadArgs *threadArgs = (struct ThreadArgs *) malloc(sizeof(struct ThreadArgs));
+	        if(threadArgs == NULL) {
+	        	printf("malloc() failed");
+        		return 1;
+        	}
+        	threadArgs->clntSock = clntSock;
 
-	//Threads creation
-	pthread_t threadID;
-	int returnValue = pthread_create(&threadID, NULL, ThreadMain, threadArgs);
-	if(returnValue != 0) {
-		printf("pthread_create() failed with thread %lu\n", (unsigned long int) threadID);
-		return 1;
-	}
+        	//Threads creation
+        	pthread_t threadID;
+        	int returnValue = pthread_create(&threadID, NULL, ThreadMain, threadArgs);
+        	if(returnValue != 0) {
+        		printf("pthread_create() failed with thread %lu\n", (unsigned long int) threadID);
+        		return 1;
+        	}
 
+        }
 	return 0;
 }
 
@@ -108,13 +111,14 @@ void *ThreadMain(void *threadArgs) {
 void handleClient(int clntSock)
 {
 	char buffer[BUFSIZE];		/* Buff to store name from client */
-
+        int leave = 0;
+        ssize_t loopBytes;
+        Message *msg;
 
 	/* Receive message from client */
 	ssize_t numBytesRec = 0;
 	while(!leave) {
-		int loopBytes;
-		loopBytes = recv(clientSock, &buffer[numBytesRec], sizeof(buffer)-numBytesRec, 0);
+		loopBytes = recv(clntSock, &buffer[numBytesRec], sizeof(buffer)-numBytesRec, 0);
 		if(loopBytes < 0) {
 			printf("recv() failed");
 			break;
@@ -138,32 +142,35 @@ void handleClient(int clntSock)
 			}
 		}
 
+                msg = (struct Message *)(buffer);
+
 		//Decode incoming message and call appropriate handler
-		switch(((struct Message *) buffer)->type) {
+		switch(msg->type) {
 			case(MESSAGE_UPDATE):
 			{
-				handleUpdate();
+				handleUpdate(msg->client_id, msg->data);
 				break;
 			}
 			case(MESSAGE_FRIENDS):
 			{
-				handleFriends();
+				handleFriends(msg->client_id, msg->data,
+                                        clntSock);
 				break;
 			}
 			case(MESSAGE_HISTORY):
 			{
-				handleHistory();
+				handleHistory(msg->client_id, clntSock);
 				break;
 			}
 			case(MESSAGE_LEAVE):
 			{
-				handleLeave();
-				leave++;
+				handleLeave(msg->client_id);
+				leave = 1;
 				break;
 			}
 			case(MESSAGE_CHECKID):
 			{
-				handleCheckId();
+				handleCheckId(msg->client_id, clntSock);
 				break;
 			}
 			default:
@@ -172,16 +179,14 @@ void handleClient(int clntSock)
 	}
 
 	close(clntSock);
-
-	return 0;
 }
 
 int handleCheckId(char *client_id, int sock)
 {
    Message msg;
    char *temp;
-
-	 temp = &temp[2];
+   char status;
+   char *id;
    //Setup the file
    FILE *file;
    file = fopen("data.txt","r"); //fprintf(file,"%s","To write");
@@ -199,11 +204,22 @@ int handleCheckId(char *client_id, int sock)
    }
 
 
-   while(fgets(temp, strlen(temp), file) != NULL)
+   while(fscanf(file, "%s\n", temp) != EOF)
    {
-       if(strcmp(temp, client_id) == 0) //Found that Id already
+       status = temp[0];
+       temp = &temp[2];
+       id = strtok(temp, " ");
+       if(strcmp(id, client_id) == 0) //Found that Id already
        {
-           msg.type = MESSAGE_IDTAKEN;
+           if(status == 'a')
+           {
+               msg.type = MESSAGE_IDTAKEN;
+           }
+           else
+           {
+               msg.type = MESSAGE_IDAVAILABLE;
+           }
+         
            msg.client_id = client_id; 
            msg.length = 0;
            msg.data = NULL;
@@ -325,7 +341,7 @@ int handleHistory(char *client_id, int sock)
 }
 
 /* This function simply removes the client from the file it does not 
- * close the connection that has to be done in handleClient */
+ * close the connection that has to be done in*/
 int handleLeave(char *client_id)
 {
     return replaceLine(client_id, NULL);
