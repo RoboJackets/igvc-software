@@ -24,6 +24,8 @@ struct ThreadArgs {
 	int clntSock; //Socket descriptor for client
 };
 
+pthread_mutex_t file_lock = PTHREAD_MUTEX_INITIALIZER;
+
 void handleClient(int clntSock);
 int handleCheckId(char *client_id, int sock);
 int handleUpdate(char *client_id, char *gps);
@@ -43,6 +45,7 @@ int main(int argc, char **argv)
 	unsigned short changeServPort;	/* Server port */
         struct sockaddr_in changeClntAddr;
         socklen_t clntLen = sizeof(changeClntAddr);
+
 
 	/* Create new TCP Socket for incoming requests*/
 	if((serverSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
@@ -170,7 +173,10 @@ void handleClient(int clntSock)
 			}
 			case(MESSAGE_CHECKID):
 			{
-				handleCheckId(msg->client_id, clntSock);
+				
+                                pthread_mutex_lock(&file_lock);
+                                handleCheckId(msg->client_id, clntSock);
+                                pthread_mutex_unlock(&file_lock);
 				break;
 			}
 			default:
@@ -250,7 +256,11 @@ int handleCheckId(char *client_id, int sock)
 
 int handleUpdate(char *client_id, char *gps)
 {
-    return replaceLine(client_id, gps);
+    int val;
+    pthread_mutex_lock(&file_lock);
+    val = replaceLine(client_id, gps);
+    pthread_mutex_unlock(&file_lock);
+    return val;
 }
 
 int handleFriends(char *client_id, char *friend_list, int sock)
@@ -287,7 +297,10 @@ int handleFriends(char *client_id, char *friend_list, int sock)
     next_friend = strtok(friend_list, "\n");
     while(next_friend != NULL)
     { 
+        pthread_mutex_lock(&file_lock);
         temp = getGPS(next_friend, MESSAGE_FRIENDS);
+        pthread_mutex_unlock(&file_lock);
+        
         strcat(msg.data, temp);
         next_friend = strtok(NULL, "\n");
     }
@@ -324,7 +337,11 @@ int handleHistory(char *client_id, int sock)
     
     msg.type = MESSAGE_HISTORY;
     strcpy(msg.client_id, client_id);
+    
+    pthread_mutex_lock(&file_lock);
     msg.data = getGPS(client_id, MESSAGE_HISTORY);
+    pthread_mutex_unlock(&file_lock);
+    
     msg.length = strlen(msg.data);
 
     if(sendData(msg, sock))
@@ -344,7 +361,10 @@ int handleHistory(char *client_id, int sock)
  * close the connection that has to be done in*/
 int handleLeave(char *client_id)
 {
-    return replaceLine(client_id, NULL);
+    int val;
+    pthread_mutex_lock(&file_lock);
+    val = replaceLine(client_id, NULL);
+    pthread_mutex_unlock(&file_lock);
 }
 
 char *getGPS(char *id, int type)
