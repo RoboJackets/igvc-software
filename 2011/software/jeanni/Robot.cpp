@@ -331,6 +331,8 @@ void Robot::processFunc()
 	 * y = forward speed    ; range = (0,255)
 	 */
 
+	// Switches into joystick mode if manual override button is pressed
+	if ()
 
 	/* glut mask init hack */
 	static bool getMask = true;
