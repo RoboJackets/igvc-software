@@ -13,16 +13,19 @@ class joystickDrive
 {
 	public:
 		joystickDrive();
+		joystickDrive(OSMC_driver*);
 		~joystickDrive();
 
 		inline double getHeading();
 		void setMotor();
 		void setMotorTank();
 		bool shouldQuit();
+		bool manualOverride();
+		void readJoystick();
 
 	private:
 
-		OSMC_driver m_motorCtr;
+		OSMC_driver* m_motorCtr;
 		//quadCoderDriver qD;
 
 		pthread_t joystick_thread;
@@ -30,8 +33,7 @@ class joystickDrive
 
 		const char* joystick_open(void);
 		void joystick_close(void);
-
-		void readJoystick();
+		void printLoop();
 
 		int leftAnalogX;
 		int leftAnalogY;

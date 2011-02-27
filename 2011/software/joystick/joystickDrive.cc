@@ -1,8 +1,8 @@
-
 #include "joystickDrive.hpp"
 
 //static SDL_Joystick *joystick;
 
+/* Main now in joystickmain
 int main()
 {
 	joystickDrive jD;
@@ -11,7 +11,7 @@ int main()
 	{
 		//jD.printLoop();		
 		jD.setMotor();
-		jd.readJoystick();
+		jD.readJoystick();
 		if(jD.shouldQuit())
 		{
 			return(0);
@@ -19,10 +19,27 @@ int main()
 		usleep(4e4);
 		
 	}
-}
+}*/
 
 joystickDrive::joystickDrive()
 {
+	m_motorCtr = new OSMC_driver();	
+	quit = false;
+	leftAnalogX = 0;
+	leftAnalogY = 0;
+	rightAnalogX = 0;
+	rightAnalogY = 0;
+	dPadX = 0;
+	dPadY = 0;
+	joystickButtons = 0;
+
+	joystick_open();
+	
+}
+
+joystickDrive::joystickDrive(OSMC_driver* osmc)
+{		
+	m_motorCtr = osmc;	
 	quit = false;
 	leftAnalogX = 0;
 	leftAnalogY = 0;
@@ -192,7 +209,7 @@ void joystickDrive::setMotor()
 	std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ") right at (" << rightAnalogX << "," << rightAnalogY << ")\twould have set lvel: " << lvel << " rvel: " << rvel << std::endl;
 
 
-	if(m_motorCtr.set_motors(lvel, rvel))
+	if(m_motorCtr->set_motors(lvel, rvel))
 	{
 		std::cerr << "set failed" << std::endl;
 	}
@@ -317,7 +334,8 @@ void joystickDrive::printLoop()
 {
 	for(;;)
 	{
-		jd.readJoystick();	
+		readJoystick();	
 		std::cout << "Button value: " << std::hex << joystickButtons << "\n";
+		usleep(1e5);
 	}
 }
