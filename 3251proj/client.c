@@ -625,12 +625,7 @@ int sendData(Message msg)
     ssize_t numBytes = 0;
     int bufLen;
 
-    //char sendBuf[SENDBUFSIZE];
-
-
     //Send the msg
-    //sprintf(sendBuf, "Type:%d\nID:%s\nLength:%d\nData:%s\n", msg.type,
-    //        msg.id, msg.length, msg.data);
     bufLen = strlen((char *)(&msg));
     numBytes = send(clientSock, (char *)(&msg), bufLen, 0);
     if(numBytes < 0)
