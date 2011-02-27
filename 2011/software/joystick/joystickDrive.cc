@@ -9,7 +9,9 @@ int main()
 
 	for(;;)
 	{
+		//jD.printLoop();		
 		jD.setMotor();
+		jd.readJoystick();
 		if(jD.shouldQuit())
 		{
 			return(0);
@@ -302,4 +304,20 @@ void joystickDrive::readJoystick() {
 bool joystickDrive::shouldQuit()
 {
 	return(quit);
+}
+
+bool joystickDrive::manualOverride()
+{
+	// Checks if the manual override button is pressed
+	return false;
+}
+
+void joystickDrive::printLoop()
+// Helper method for figuring out buttons on joystick
+{
+	for(;;)
+	{
+		jd.readJoystick();	
+		std::cout << "Button value: " << std::hex << joystickButtons << "\n";
+	}
 }
