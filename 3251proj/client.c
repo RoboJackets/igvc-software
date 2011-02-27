@@ -625,18 +625,14 @@ int sendData(Message msg)
     ssize_t numBytes = 0;
     int bufLen;
 
-    char *sendBuf;
+    //char sendBuf[SENDBUFSIZE];
 
-    if((sendBuf = (char *)(malloc(sizeof(char) * msg.length))) == NULL)
-    {
-        printf("Unable to malloc space for the send buffer\n");
-        return 1;
-    }
 
-    //Send the type
-    sprintf(sendBuf, "%d", msg.type);
-    bufLen = strlen(sendBuf);
-    numBytes = send(clientSock, sendBuf, bufLen, 0);
+    //Send the msg
+    //sprintf(sendBuf, "Type:%d\nID:%s\nLength:%d\nData:%s\n", msg.type,
+    //        msg.id, msg.length, msg.data);
+    bufLen = strlen((char *)(&msg));
+    numBytes = send(clientSock, (char *)(&msg), bufLen, 0);
     if(numBytes < 0)
     {
         printf("send() Failed\n");
@@ -648,51 +644,6 @@ int sendData(Message msg)
         return 1;
     }
 
-    //Send the client_id
-    sprintf(sendBuf, "%s", msg.client_id);
-    bufLen = strlen(sendBuf);
-    numBytes = send(clientSock, sendBuf, bufLen, 0);
-    if(numBytes < 0)
-    {
-        printf("send() Failed\n");
-        return 1;
-    }
-    else if(numBytes != bufLen)
-    {
-        printf("send() sent the wrong number of bytes\n");
-        return 1;
-    }
-
-    //Send the length
-    sprintf(sendBuf, "%d", msg.length);
-    bufLen = strlen(sendBuf);
-    numBytes = send(clientSock, sendBuf, bufLen, 0);
-    if(numBytes < 0)
-    {
-        printf("send() Failed\n");
-        return 1;
-    }
-    else if(numBytes != bufLen)
-    {
-        printf("send() sent the wrong number of bytes\n");
-        return 1;
-    }
-    
-    //Send the data
-    sprintf(sendBuf, "%s", msg.data);
-    bufLen = strlen(sendBuf);
-    numBytes = send(clientSock, sendBuf, bufLen, 0);
-    if(numBytes < 0)
-    {
-        printf("send() Failed\n");
-        return 1;
-    }
-    else if(numBytes != bufLen)
-    {
-        printf("send() sent the wrong number of bytes\n");
-        return 1;
-    }
-    
     return 0;
 }
 
@@ -701,12 +652,61 @@ int sendData(Message msg)
  */
 Message receiveData()
 {
-    Message msg; 
-    
-    msg.type = MESSAGE_IDAVAILABLE; //Placeholder
+    Message *temp;
+    Message msg;
+    unsigned int totalBytesRcvd = 0;
+    ssize_t numBytes = 0;
+    char recvBuf[RECVBUFSIZE];
+    char s[RECVBUFSIZE];
+    char token[10];
+    int i, j = 0;
 
-    //TODO: check to make sure the message is valid, to this client, and
-    //formatted correctly if not free it and set the message type to invalid
+    while(totalBytesRcvd < RECVBUFSIZE)
+    {
+        numBytes = recv(clientSock, &(recvBuf[totalBytesRcvd]), RECVBUFSIZE - 
+                totalBytesRcvd, 0);
+
+        if(numBytes < 0)
+        {
+            printf("recv() failed\n");
+            msg.type = MESSAGE_INVALID;
+            return msg;
+        }
+
+        totalBytesRcvd += numBytes;
+
+        if(numBytes == 0)
+            break;
+    }
+
+    temp = (Message *)(recvBuf);
+
+    msg.type = temp->type;
+    msg.length = temp->length;
+
+    if((msg.client_id = (char *)(malloc(sizeof(temp->client_id)))) == NULL)
+    {
+        printf("Unable to malloc space for the received message\n");
+        free(temp->client_id);
+        free(temp->data);
+        free(temp);
+        msg.type = MESSAGE_INVALID;
+        return msg;
+    }
+
+    strcpy(msg.client_id, temp->client_id);
+
+    if((msg.data = (char *)(malloc(sizeof(temp->data)))) == NULL)
+    {
+        printf("Unable to malloc space for the received message\n");
+        free(temp->client_id);
+        free(temp->data);
+        free(temp);
+        msg.type = MESSAGE_INVALID;
+        return msg;
+    }
+
+    strcpy(msg.data, temp->data);
 
     return msg;
 }
