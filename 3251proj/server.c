@@ -457,6 +457,15 @@ int replaceLine(char *client_id, char *gps)
 int sendData(Message msg, int sock)
 {
     char *sendBuf;
+    char *temp;
+    int i;
+    
+    if((temp = (char *)(malloc(sizeof(int)))) == NULL)
+    {
+        printf("Malloc failed\n");
+        return 1;
+    }
+
 
     //Send the type
     if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
@@ -464,8 +473,17 @@ int sendData(Message msg, int sock)
         printf("Malloc failed\n");
         return 1;
     }
-    sprintf(sendBuf, "%d", msg.type);
+
+    //Fill the size with 0's until size of int - temp is full
+    //then append temp
+    sprintf(temp, "%d", msg.type);
+    for(i = 0; i < sizeof(int) - strlen(temp); i++) 
+    {
+        strcat(sendBuf, "0"); 
+    }
+    strcat(sendBuf, temp);
     printf("type: %d buf: %s\n", msg.type, sendBuf);
+  
     if(executeSend(sendBuf, sock))
     {
         printf("send() failed\n");
@@ -479,8 +497,17 @@ int sendData(Message msg, int sock)
         printf("Malloc failed\n");
         return 1;
     }
-    sprintf(sendBuf, "%d", msg.id_len);
+    
+    //Fill the size with 0's until size of int - temp is full
+    //then append temp
+    sprintf(temp, "%d", msg.id_len);
+    for(i = 0; i < sizeof(int) - strlen(temp); i++) 
+    {
+        strcat(sendBuf, "0"); 
+    }
+    strcat(sendBuf, temp);
     printf("ID length: %d buf: %s\n", msg.id_len, sendBuf);
+    
     if(executeSend(sendBuf, sock))
     {
         printf("send() failed\n");
@@ -523,8 +550,16 @@ int sendData(Message msg, int sock)
                 executeSend("", sock);
         return 1;
     }
-    sprintf(sendBuf, "%d", msg.length);
+    //Fill the size with 0's until size of int - temp is full
+    //then append temp
+    sprintf(temp, "%d", msg.length);
+    for(i = 0; i < sizeof(int) - strlen(temp); i++) 
+    {
+        strcat(sendBuf, "0"); 
+    }
+    strcat(sendBuf, temp);
     printf("length: %d buf: %s\n", msg.length, sendBuf);
+    
     if(executeSend(sendBuf, sock))
     {
         printf("send() failed\n");
@@ -585,10 +620,25 @@ Message receiveData(int sock)
 {
     Message msg;
     char *buf;
+    int i = 0;
 
-    char *temp = (char *)(malloc(sizeof(int)));
-    sprintf(temp, "%d", 1);
+    char *temp;
+    
+    if((temp = (char *)(malloc(sizeof(int)))) == NULL)
+    {
+        printf("Malloc failed\n");
+        msg.type = MESSAGE_INVALID;
+        return msg;
+    }
+    
+    //for all the integer fields use this size
+    for(i = 0; i < sizeof(int); i++)
+    {
+        strcat(temp, "0");
+    }
+
     int size = strlen(temp);
+    free(temp);
 
     //get the type
     buf = executeReceive(sock, size);
