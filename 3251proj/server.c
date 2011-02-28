@@ -41,6 +41,7 @@ int executeSend(char *buf, int sock);
 char *executeReceive(int sock, int size);
 Message receiveData(int sock);
 char *readLine(FILE *fp);
+char *getFriend(char *friend_list, int index);
 
 int main(int argc, char **argv)
 {
@@ -333,6 +334,9 @@ int handleFriends(char *client_id, char *friend_list, int sock)
     char *next_friend;
     Message msg;
     char *temp;
+    int index = 0;
+
+    msg.type = MESSAGE_FRIENDS;
 
     if((msg.client_id = (char *)(malloc(sizeof(char) * strlen(client_id)))) ==
             NULL)
@@ -360,18 +364,23 @@ int handleFriends(char *client_id, char *friend_list, int sock)
     strcpy(msg.client_id, client_id);
     msg.id_len = strlen(msg.client_id);
 
-    next_friend = strtok(friend_list, "\n");
-    while(next_friend != NULL)
+    //printf("friends: %s\n", friend_list);
+
+    next_friend = getFriend(friend_list, index);
+    while(strcmp(next_friend, ""))
     { 
+        index++;
+        //printf("next_friend: %s\n", next_friend);
         pthread_mutex_lock(&file_lock);
         temp = getGPS(next_friend, MESSAGE_FRIENDS);
         pthread_mutex_unlock(&file_lock);
         
         strcat(msg.data, temp);
-        next_friend = strtok(NULL, "\n");
+        next_friend = getFriend(friend_list, index);
     }
 
     msg.length = strlen(msg.data);
+//    printf("length: %d Data: %s\n", msg.length, msg.data);
 
     if(sendData(msg, sock))
     {
@@ -380,6 +389,48 @@ int handleFriends(char *client_id, char *friend_list, int sock)
     }
 
     return 0;
+}
+
+char *getFriend(char *friend_list, int index)
+{
+    int count = 0, i = 0, j = 0;
+    char c;
+    char *temp;
+
+    if((temp = (char *)(malloc(sizeof(char) * strlen(friend_list)))) == NULL)
+    {
+        printf("Malloc Failed\n");
+        return "";
+    }
+    strcpy(temp, "");
+
+    while(count < index && i < strlen(friend_list))
+    {
+        c = friend_list[i];
+        
+        if(c == '\n') //Found the end of the first id
+            count++;
+        i++;
+    }
+
+    //get the actual name
+    for(; i < strlen(friend_list); i++)
+    {
+        c = friend_list[i];
+      //  printf("Char: %c Int: %d\n", c, c);
+
+        if(c < 33) //Then the character is invalid
+            break;
+
+        temp[j] = c;
+        j++;
+    }
+
+    temp[j] = 0;
+
+    //printf("Return Val: %s\n", temp);
+
+    return temp;
 }
 
 int handleHistory(char *client_id, int sock)
@@ -465,16 +516,19 @@ char *getGPS(char *id, int type)
 {
     char *line, *lat, *lon;
     FILE *fp;
-
+    char *saved;
     char *temp;
+    int i = 0;
+    int offset = 0;
+
     fp = fopen("data.txt", "r");
 
-   /* if((line = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
+    if((saved = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
     {
         printf("Unable to malloc space\n");
         return "";
     }
-*/
+   
     if(fp == NULL) //File is not there
     {
         sprintf(line, "%s: Not Found\n", id);
@@ -487,28 +541,36 @@ char *getGPS(char *id, int type)
         if(strlen(line) < 3) //Ignore the line its to short
             continue;
 
-        printf("Line: %s\n", line);
+        strcpy(saved, line);
+
+       // printf("Line: %s", line);
 
         temp = &line[2]; //remove the status field
         temp = strtok(temp, " "); //get the first token
 
-        printf("ID: %s Temp %s\n", id, temp);
-
         if(strcmp(temp, id) == 0)
         {
+            printf("MATCH\n");
             if(type == MESSAGE_FRIENDS)
             {
                 lat = strtok(NULL, " "); //get the latitude
                 lon = strtok(NULL, " "); //get the longitude
-                sprintf(line, "%s: %s %s", temp, lat, lon);
+                //printf("Return Value: %s: %s %s", id, lat, lon);
+                sprintf(line, "%s: %s %s", id, lat, lon);
             }
             else if(type == MESSAGE_HISTORY)
             {
                 //remove the status field
-                line = &line[2];
+                strcpy(line, &(saved[2]));
             }
             return line;
         }
+
+        for(i = 0; i < strlen(line); i++) //Clear the line
+        {
+            line[i] = 0;
+        }
+
         line = readLine(fp);
     }
 
@@ -557,7 +619,7 @@ int replaceLine(char *client_id, char *gps)
    line = readLine(in);
    while(strcmp(line, ""))
    {
-       printf("Line: %s", line);
+      // printf("Line: %s", line);
        if(strlen(line) < 3) //skip the line too short
            continue;
 
@@ -567,9 +629,6 @@ int replaceLine(char *client_id, char *gps)
 
        if(strcmp(id, client_id) == 0) //Found that Id already
        {
-           //strtok(temp, " "); //Remove the user id on temp
-     //      temp =  &line[2+strlen(id)];
-     //      printf("Temp: %s", temp);
            printf("Line: %s", saved);
            printf("Old GPS: %s", &(saved[2+strlen(id)]));
 
@@ -623,7 +682,6 @@ char *readLine(FILE *fp)
     c = fgetc(fp);
     while(c != '\n' && c != EOF && i < MAXLINELENGTH - 1) //Read the whole line as characters
     {
-      printf("Char: %c String: %s\n", c, line);
       line[i] = c;
       c = fgetc(fp);
       i++;
@@ -632,7 +690,6 @@ char *readLine(FILE *fp)
     if(i != 0) //Add an endline if the line is not an empty line
         line[i] = '\n';
 
-    printf("Char: %c String: %s\n", c, line);
     return line;
 }
 
@@ -641,6 +698,7 @@ char *readLine(FILE *fp)
  */
 int sendData(Message msg, int sock)
 {
+    printf("Reached sendData\n");
     char *sendBuf;
     char *temp;
     int i;
@@ -650,7 +708,6 @@ int sendData(Message msg, int sock)
         printf("Malloc failed\n");
         return 1;
     }
-
 
     //Send the type
     if((sendBuf = (char *)(malloc(sizeof(char) * 9))) == NULL)
@@ -662,6 +719,7 @@ int sendData(Message msg, int sock)
     //Fill the size with 0's until size of int - temp is full
     //then append temp
     sprintf(temp, "%d", msg.type);
+    printf("Type: %s len: %d\n", temp, strlen(temp));
     sprintf(sendBuf, "");
     for(i = 0; i < 9 - strlen(temp); i++) 
     {
@@ -687,6 +745,7 @@ int sendData(Message msg, int sock)
     //Fill the size with 0's until size of int - temp is full
     //then append temp
     sprintf(temp, "%d", msg.id_len);
+    printf("ID_len: %s len: %d\n", temp, strlen(temp));
     sprintf(sendBuf, "");
     for(i = 0; i < 9 - strlen(temp); i++) 
     {
@@ -729,6 +788,7 @@ int sendData(Message msg, int sock)
     //Fill the size with 0's until size of int - temp is full
     //then append temp
     sprintf(temp, "%d", msg.length);
+    printf("temp: %s len: %d\n", temp, strlen(temp));
     sprintf(sendBuf, "");
     for(i = 0; i < 9 - strlen(temp); i++) 
     {
