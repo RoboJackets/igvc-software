@@ -580,6 +580,7 @@ char *getGPS(char *id, int type)
 
 int replaceLine(char *client_id, char *gps)
 {
+   //TODO: Debug this method
    //Setup the files
    FILE *in;
    in = fopen("data.txt","r"); //fprintf(file,"%s","To write");
