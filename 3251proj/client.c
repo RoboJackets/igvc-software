@@ -52,7 +52,10 @@ int main(int argc, char **argv)
             case 0:
             {
 //               printf("CONNECT\n"); 
-               errorOccured = handleConnect();
+               if(!connected)
+                   errorOccured = handleConnect();
+               else
+                   printf("Already Connected\n");
 
                if(!errorOccured)
                    connected = 1;
@@ -621,6 +624,15 @@ int handleLeave()
         clientSock = -1;
         return 1;
     }
+
+    if((send_msg.data = (char *)(malloc(sizeof(char)))) == NULL)
+    {
+        printf("Malloc Failed\n");
+        close(clientSock);
+        clientSock = -1;
+        return 1;
+    }
+
     strcpy(send_msg.client_id, my_id);
     send_msg.id_len = strlen(send_msg.client_id);
     send_msg.length = 0;
@@ -635,7 +647,7 @@ int handleLeave()
         return 1;
     }
 
-    free(send_msg.client_id);
+    //free(send_msg.client_id);
 
     return 0;
 }
