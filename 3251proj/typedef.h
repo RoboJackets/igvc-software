@@ -21,6 +21,7 @@ enum Message_type
 typedef struct Message
 {
     enum Message_type type;
+    int id_len;
     int length;                 //In bytes
     char *client_id;
     char *data;
