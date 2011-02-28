@@ -36,13 +36,16 @@ int sendData(Message msg, int sock);
 char *getGPS(char *id, int type);
 int replaceLine(char *id, char *gps);
 void *ThreadMain(void *threadArgs);
+int executeSend(char *buf, int sock);
+char *executeReceive(int sock);
+Message receiveData(int sock);
 
 int main(int argc, char **argv)
 {
 	//TODO: Set up server
 	int serverSock;			/* Server Socket */
 	struct sockaddr_in changeServAddr;	/* Local address */
-	unsigned short changeServPort;	/* Server port */
+	unsigned short changeServPort = 4000;	/* Server port */
         struct sockaddr_in changeClntAddr;
         socklen_t clntLen = sizeof(changeClntAddr);
 
@@ -51,22 +54,30 @@ int main(int argc, char **argv)
 	if((serverSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
 		printf("socket() failed");
 	}
+        else
+            printf("Server Socket: %d\n", serverSock);
+
 
   /* Construct local address structure*/
   memset(&changeServAddr, 0, sizeof(changeServAddr));
 	changeServAddr.sin_family = AF_INET;
 	changeServAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	changeServAddr.sin_port = htons(2567); /* changeServPort*/
+	changeServAddr.sin_port = htons(changeServPort); /* changeServPort*/
     
   /* Bind to local address structure */
 	if(bind(serverSock, (struct sockaddr *) &changeServAddr, sizeof(changeServAddr)) < 0) {
 		printf("bind() failed");
 	}
+        else
+            printf("bind() succeeded\n");
+
 
   /* Listen for incoming connections */
   if(listen(serverSock, MAXPENDING) < 0) {
 		printf("listen() failed");
 	}
+  else
+      printf("listen() succeeded\n");
 
 	while(1)
 	{
@@ -115,59 +126,33 @@ void handleClient(int clntSock)
 {
 	char buffer[BUFSIZE];		/* Buff to store name from client */
         int leave = 0;
-        ssize_t loopBytes;
-        Message *msg;
+        Message msg;
 
 	/* Receive message from client */
-	ssize_t numBytesRec = 0;
 	while(!leave) {
-		loopBytes = recv(clntSock, &buffer[numBytesRec], sizeof(buffer)-numBytesRec, 0);
-		if(loopBytes < 0) {
-			printf("recv() failed");
-			break;
-		}
-		else
-			printf("recv() returned: %d bytes\n", loopBytes);
-
-		numBytesRec += loopBytes;
-
-		/* Return message to client */
-		while(numBytesRec > 0) {  //0 indicates end of stream
-			//Echo message back to client
-			ssize_t numBytesSent = send(clntSock, buffer, numBytesRec, 0);
-			if(numBytesSent < 0) {
-				printf("send() failed");
-				break;
-			}
-			else if(numBytesSent != numBytesRec) {
-				printf("send(), sent unexpected number of bytes");
-				break;
-			}
-		}
-
-                msg = (struct Message *)(buffer);
+                msg = receiveData(clntSock);
 
 		//Decode incoming message and call appropriate handler
-		switch(msg->type) {
+		switch(msg.type) {
 			case(MESSAGE_UPDATE):
 			{
-				handleUpdate(msg->client_id, msg->data);
+				handleUpdate(msg.client_id, msg.data);
 				break;
 			}
 			case(MESSAGE_FRIENDS):
 			{
-				handleFriends(msg->client_id, msg->data,
+				handleFriends(msg.client_id, msg.data,
                                         clntSock);
 				break;
 			}
 			case(MESSAGE_HISTORY):
 			{
-				handleHistory(msg->client_id, clntSock);
+				handleHistory(msg.client_id, clntSock);
 				break;
 			}
 			case(MESSAGE_LEAVE):
 			{
-				handleLeave(msg->client_id);
+				handleLeave(msg.client_id);
 				leave = 1;
 				break;
 			}
@@ -175,7 +160,7 @@ void handleClient(int clntSock)
 			{
 				
                                 pthread_mutex_lock(&file_lock);
-                                handleCheckId(msg->client_id, clntSock);
+                                handleCheckId(msg.client_id, clntSock);
                                 pthread_mutex_unlock(&file_lock);
 				break;
 			}
@@ -228,7 +213,7 @@ int handleCheckId(char *client_id, int sock)
          
            msg.client_id = client_id; 
            msg.length = 0;
-           msg.data = NULL;
+           msg.data = "";
            sendData(msg, sock);
            fclose(file);
            return 0; 
@@ -241,7 +226,7 @@ int handleCheckId(char *client_id, int sock)
    msg.type = MESSAGE_IDAVAILABLE;
    msg.client_id = client_id; 
    msg.length = 0;
-   msg.data = NULL;
+   msg.data = "";
    
    if(sendData(msg, sock))
    {
@@ -378,7 +363,7 @@ char *getGPS(char *id, int type)
     if((line = (char *)(malloc(sizeof(char) * (MAXIDLEN + 20)))) == NULL)
     {
         printf("Unable to malloc space\n");
-        return NULL;
+        return "";
     }
 
     while(fgets(line, MAXIDLEN, fp))
@@ -466,12 +451,97 @@ int replaceLine(char *client_id, char *gps)
  */
 int sendData(Message msg, int sock)
 {
+    char *sendBuf;
+
+    //Send the type
+    if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
+    {
+        printf("Malloc failed\n");
+        return 1;
+    }
+    sprintf(sendBuf, "%d", msg.type);
+    if(executeSend(sendBuf, sock))
+    {
+        printf("send() failed\n");
+
+        //Send 4 empty messages because the client expects 4 messages
+        executeSend("", sock);
+        executeSend("", sock);
+        executeSend("", sock);
+        executeSend("", sock);
+        return 1;
+    }
+    free(sendBuf);
+
+    //Send the client id
+    if((sendBuf = (char *)(malloc(sizeof(char) * strlen(msg.client_id)))) == NULL)
+    {
+        printf("Malloc failed\n");
+        //Send 3 empty messages because the client expects 4 messages
+        executeSend("", sock);
+        executeSend("", sock);
+        executeSend("", sock);
+        return 1;
+    }
+    sprintf(sendBuf, "%s", msg.client_id);
+    if(executeSend(sendBuf, sock))
+    {
+        printf("send() failed\n");
+        //Send 3 empty messages because the client expects 4 messages
+        executeSend("", sock);
+        executeSend("", sock);
+        executeSend("", sock);
+        return 1;
+    }
+    free(sendBuf);
+
+    //Send the length
+    if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
+    {
+        printf("Malloc failed\n");
+        //Send 2 empty messages because the client expects 4 messages
+        executeSend("", sock);
+        executeSend("", sock);
+        return 1;
+    }
+    sprintf(sendBuf, "%d", msg.length);
+    if(executeSend(sendBuf, sock))
+    {
+        printf("send() failed\n");
+        //Send 2 empty messages because the client expects 4 messages
+        executeSend("", sock);
+        executeSend("", sock);
+        return 1;
+    }
+    free(sendBuf);
+    
+    //Send the data
+    if((sendBuf = (char *)(malloc(sizeof(char) * msg.length))) == NULL)
+    {
+        printf("Malloc failed\n");
+        return 1;
+    }
+    sprintf(sendBuf, "%s", msg.data);
+    if(executeSend(sendBuf, sock))
+    {
+        printf("send() failed\n");
+        //Send 1 empty messages because the client expects 4 messages
+        executeSend("", sock);
+        return 1;
+    }
+    free(sendBuf);
+
+    return 0;
+}
+
+int executeSend(char *buf, int sock)
+{
     ssize_t numBytes = 0;
     int bufLen;
-
+    
     //Send the msg
-    bufLen = strlen((char *)(&msg));
-    numBytes = send(sock, (char *)(&msg), bufLen, 0);
+    bufLen = strlen(buf);
+    numBytes = send(sock, buf, bufLen, 0);
     if(numBytes < 0)
     {
         printf("send() Failed\n");
@@ -482,6 +552,102 @@ int sendData(Message msg, int sock)
         printf("send() sent the wrong number of bytes\n");
         return 1;
     }
-
+    
     return 0;
+}
+
+Message receiveData(int sock)
+{
+    Message msg;
+    char *buf;
+
+    //get the type
+    buf = executeReceive(sock);
+  
+    if(buf == "")
+    {
+        msg.type = MESSAGE_INVALID;
+        buf = executeReceive(sock);
+        buf = executeReceive(sock);
+        buf = executeReceive(sock);
+        return msg;
+    }
+
+    msg.type = atoi(buf);
+
+    //get the id
+    buf = executeReceive(sock);
+    if(buf == "")
+    {
+        msg.type = MESSAGE_INVALID;
+        buf = executeReceive(sock);
+        buf = executeReceive(sock);
+        return msg;
+    }
+    
+    if((msg.client_id = (char *)(malloc(sizeof(char) * strlen(buf)))) == NULL)
+    {
+        printf("Malloc failed\n");
+        msg.type = MESSAGE_INVALID;
+    }
+    
+    if(msg.type == MESSAGE_INVALID)
+    {
+        buf = executeReceive(sock);
+        buf = executeReceive(sock);
+        return msg;
+    }
+    strcpy(msg.client_id, buf);
+
+    
+    //get the length
+    buf = executeReceive(sock);
+    if(buf == "")
+    {
+        msg.type = MESSAGE_INVALID;
+        buf = executeReceive(sock);
+        return msg;
+    }
+    msg.length = atoi(buf);
+
+    //get the data
+    if(buf == "")
+    {
+        msg.type = MESSAGE_INVALID;
+        return msg;
+    }
+
+    return msg;
+}
+
+char *executeReceive(int sock)
+{
+    char *recvBuf;
+    unsigned int totalBytesRcvd = 0;
+    ssize_t numBytes = 0;
+    
+    if((recvBuf = (char *)(malloc(sizeof(char) * RECVBUFSIZE))) == NULL)
+    {
+        printf("Malloc failed\n");
+        return "";
+    }
+
+    while(totalBytesRcvd < RECVBUFSIZE)
+    {
+        numBytes = recv(sock, &(recvBuf[totalBytesRcvd]), RECVBUFSIZE - 
+                totalBytesRcvd, 0);
+
+        if(numBytes < 0)
+        {
+            printf("recv() failed\n");
+            return "";
+        }
+
+        totalBytesRcvd += numBytes;
+
+        if(numBytes == 0)
+            break;
+    }
+
+    return recvBuf;
 }
