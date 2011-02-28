@@ -40,6 +40,7 @@ void *ThreadMain(void *threadArgs);
 int executeSend(char *buf, int sock);
 char *executeReceive(int sock, int size);
 Message receiveData(int sock);
+char *readLine(FILE *fp);
 
 int main(int argc, char **argv)
 {
@@ -53,7 +54,8 @@ int main(int argc, char **argv)
 
 	/* Create new TCP Socket for incoming requests*/
 	if((serverSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-		printf("socket() failed");
+		printf("socket() failed\n");
+                return 1;
 	}
         else
             printf("Server Socket: %d\n", serverSock);
@@ -67,7 +69,8 @@ int main(int argc, char **argv)
     
   /* Bind to local address structure */
 	if(bind(serverSock, (struct sockaddr *) &changeServAddr, sizeof(changeServAddr)) < 0) {
-		printf("bind() failed");
+		printf("bind() failed\n");
+                return 1;
 	}
         else
             printf("bind() succeeded\n");
@@ -75,7 +78,8 @@ int main(int argc, char **argv)
 
   /* Listen for incoming connections */
   if(listen(serverSock, MAXPENDING) < 0) {
-		printf("listen() failed");
+		printf("listen() failed\n");
+                return 1;
 	}
   else
       printf("listen() succeeded\n");
@@ -149,9 +153,9 @@ void handleClient(int clntSock)
 
                 msg = receiveData(clntSock);
 
-                printf("Message Contents:\nType: %d\nID: %s\nID_LEN: %d\n",
-                        msg.type, msg.client_id, msg.id_len);
-                printf("Length: %d\nData: %s\n", msg.length, msg.data);
+    //            printf("Message Contents:\nType: %d\nID: %s\nID_LEN: %d\n",
+     //                   msg.type, msg.client_id, msg.id_len);
+      //          printf("Length: %d\nData: %s\n", msg.length, msg.data);
 //                continue;
                 
                 if((client_id = (char *)(malloc(sizeof(char) * msg.id_len))) ==
@@ -202,7 +206,9 @@ void handleClient(int clntSock)
                         }
                         case(MESSAGE_INVALID):
                         {
-	                    printf("INVALID\n");			
+	                    printf("INVALID\n");	
+                            close(clntSock);
+                            leave = 1;
                             break;
                         }
 			default:
@@ -235,11 +241,11 @@ int handleCheckId(char *client_id, int sock)
        return -1;
    }
    
-   if((temp = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
+   /*if((temp = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
    {
        printf("Unable to malloc space for the client's id\n");
        return -1;
-   }
+   }*/
 
    if(file == NULL)
    {
@@ -259,12 +265,13 @@ int handleCheckId(char *client_id, int sock)
        return 0;
    }
 
-   while(fscanf(file, "%s", temp) != EOF)
+   temp = readLine(file);
+   while(strcmp(temp, ""))
    {
-       if(strlen(temp) < 2) //Ignore the line its too short
+       if(strlen(temp) < 3) //Ignore the line its too short
            continue;
        status = temp[0];
-       temp = &temp[1];
+       temp = &temp[2];
        id = strtok(temp, " ");
        if(strcmp(id, client_id) == 0) //Found that Id already
        {
@@ -286,6 +293,8 @@ int handleCheckId(char *client_id, int sock)
            fclose(file);
            return 0; 
        }
+
+       temp = readLine(file);
    }
    
    fclose(file);
@@ -388,7 +397,7 @@ int handleHistory(char *client_id, int sock)
             NULL)
     {
         printf("Unable to malloc space for the message\n");
-        free(msg.client_id);
+   //     free(msg.client_id);
         return 1;
     }
     
@@ -405,13 +414,13 @@ int handleHistory(char *client_id, int sock)
     if(sendData(msg, sock))
     {
         printf("Error Occured during sendData\n");
-        free(msg.client_id);
-        free(msg.data);
+//        free(msg.client_id);
+ //       free(msg.data);
         return 1;
     }
 
-    free(msg.client_id);
-    free(msg.data);
+    //free(msg.client_id);
+    //free(msg.data);
     return 0;
 }
 
@@ -460,23 +469,30 @@ char *getGPS(char *id, int type)
     char *temp;
     fp = fopen("data.txt", "r");
 
-    if((line = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
+   /* if((line = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
     {
         printf("Unable to malloc space\n");
         return "";
     }
-
+*/
     if(fp == NULL) //File is not there
     {
         sprintf(line, "%s: Not Found\n", id);
         return line;
     }
-
-    while(fgets(line, MAXLINELENGTH, fp))
+   
+    line = readLine(fp);
+    while(strcmp(line, ""))
     {
-        if(strlen(line) < 2) //Ignore the line its to short
+        if(strlen(line) < 3) //Ignore the line its to short
             continue;
-        temp = strtok(line, " "); //get the first token
+
+        printf("Line: %s\n", line);
+
+        temp = &line[2]; //remove the status field
+        temp = strtok(temp, " "); //get the first token
+
+        printf("ID: %s Temp %s\n", id, temp);
 
         if(strcmp(temp, id) == 0)
         {
@@ -488,10 +504,12 @@ char *getGPS(char *id, int type)
             }
             else if(type == MESSAGE_HISTORY)
             {
-               //Do Nothing I want the whole line         
+                //remove the status field
+                line = &line[2];
             }
             return line;
         }
+        line = readLine(fp);
     }
 
     sprintf(line, "%s: Not Found\n", id);
@@ -507,18 +525,25 @@ int replaceLine(char *client_id, char *gps)
    out = fopen("temp.txt", "w");
 
    char *temp;
+   char *line;
+   char *saved;
    char *id;
    int found = 0;
 
    if((temp = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
    {
-       printf("Unable to malloc space for the file lines\n");
-       return 1;
+        printf("Unable to malloc space for the file lines\n");
+        return 1;
+   }
+   if((saved = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
+   {
+        printf("Unable to malloc space for the file lines\n");
+        return 1;
    }
 
    if(in == NULL)
    {    
-       sprintf(temp, "a %s %s", client_id, gps);
+       sprintf(temp, "a %s %s\n", client_id, gps);
        fputs(temp, out); //Write the line
        fclose(in);
        fclose(out);
@@ -529,34 +554,45 @@ int replaceLine(char *client_id, char *gps)
        return 0;
    }
 
-   while(fscanf(in, "%s\n", temp) != EOF)
+   line = readLine(in);
+   while(strcmp(line, ""))
    {
-       if(strlen(temp) < 2) //skip the line too short
+       printf("Line: %s", line);
+       if(strlen(line) < 3) //skip the line too short
            continue;
 
-       temp = &temp[1];
+       strcpy(saved, line);
+       temp = &line[2];
        id = strtok(temp, " "); //get the first token as the id
 
        if(strcmp(id, client_id) == 0) //Found that Id already
        {
-           temp = strtok(temp, " "); //Remove the user id on temp
+           //strtok(temp, " "); //Remove the user id on temp
+     //      temp =  &line[2+strlen(id)];
+     //      printf("Temp: %s", temp);
+           printf("Line: %s", saved);
+           printf("Old GPS: %s", &(saved[2+strlen(id)]));
 
            if(gps != NULL) //make the new line
            {
-               sprintf(temp, "a %s %s %s", client_id, gps, temp);
+               sprintf(temp, "a %s %s %s", client_id, gps, &(saved[2+strlen(id)]));
            }
            else //this was a leave clear the line
            {
-               sprintf(temp, "i %s %s", client_id, temp);
+               sprintf(temp, "i %s %s", client_id, &(saved[2+strlen(id)]));
            }
            found = 1;          
        }
+       printf("Out: %s", temp);
        fputs(temp, out); //Write the line (edited or not)
+
+       line = readLine(in);
    }
    
    if(!found && gps != NULL)
    {
-       sprintf(temp, "a %s %s", client_id, gps);
+       sprintf(temp, "a %s %s\n", client_id, gps);
+       printf("Out: %s", temp);
        fputs(temp, out); //Write the line
    }
 
@@ -568,6 +604,36 @@ int replaceLine(char *client_id, char *gps)
    rename("temp.txt", "data.txt");
 
    return 0;
+}
+
+
+char *readLine(FILE *fp)
+{
+    char *line;
+    char c = 0;
+    int i = 0;
+
+    if((line = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
+    {
+        printf("Malloc Failed\n");
+        return NULL;
+    }
+    strcpy(line, "");
+
+    c = fgetc(fp);
+    while(c != '\n' && c != EOF && i < MAXLINELENGTH - 1) //Read the whole line as characters
+    {
+      printf("Char: %c String: %s\n", c, line);
+      line[i] = c;
+      c = fgetc(fp);
+      i++;
+    }
+
+    if(i != 0) //Add an endline if the line is not an empty line
+        line[i] = '\n';
+
+    printf("Char: %c String: %s\n", c, line);
+    return line;
 }
 
 /*
@@ -796,6 +862,11 @@ Message receiveData(int sock)
     {
         return msg;
     }
+
+    for(i = msg.id_len; i < strlen(buf); i++) //Clear any extraneous stuff 
+    {
+        buf[i] = 0;
+    }
     strcpy(msg.client_id, buf);
 
     
@@ -825,6 +896,10 @@ Message receiveData(int sock)
         {
             msg.type = MESSAGE_INVALID;
             return msg;
+        }
+        for(i = msg.length; i < strlen(buf); i++) //Clear any extraneous stuff 
+        {
+                buf[i] = 0;
         }
         strcpy(msg.data, buf);
     }
