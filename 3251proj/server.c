@@ -37,7 +37,7 @@ char *getGPS(char *id, int type);
 int replaceLine(char *id, char *gps);
 void *ThreadMain(void *threadArgs);
 int executeSend(char *buf, int sock);
-char *executeReceive(int sock);
+char *executeReceive(int sock, int size);
 Message receiveData(int sock);
 
 int main(int argc, char **argv)
@@ -211,9 +211,11 @@ int handleCheckId(char *client_id, int sock)
                msg.type = MESSAGE_IDAVAILABLE;
            }
          
-           msg.client_id = client_id; 
+           strcpy(msg.client_id, client_id);
+           msg.id_len = strlen(msg.client_id);
            msg.length = 0;
-           msg.data = "";
+           strcpy(msg.data, "");
+  
            sendData(msg, sock);
            fclose(file);
            return 0; 
@@ -224,9 +226,10 @@ int handleCheckId(char *client_id, int sock)
    free(temp);
 
    msg.type = MESSAGE_IDAVAILABLE;
-   msg.client_id = client_id; 
+   strcpy(msg.client_id, client_id);
+   msg.id_len = strlen(msg.client_id);
    msg.length = 0;
-   msg.data = "";
+   strcpy(msg.data, "");
    
    if(sendData(msg, sock))
    {
@@ -277,7 +280,8 @@ int handleFriends(char *client_id, char *friend_list, int sock)
         return 1;
     }
 
-    msg.client_id = client_id;
+    strcpy(msg.client_id, client_id);
+    msg.id_len = strlen(msg.client_id);
 
     next_friend = strtok(friend_list, "\n");
     while(next_friend != NULL)
@@ -322,7 +326,8 @@ int handleHistory(char *client_id, int sock)
     
     msg.type = MESSAGE_HISTORY;
     strcpy(msg.client_id, client_id);
-    
+    msg.id_len = strlen(msg.client_id);
+
     pthread_mutex_lock(&file_lock);
     msg.data = getGPS(client_id, MESSAGE_HISTORY);
     pthread_mutex_unlock(&file_lock);
@@ -460,19 +465,29 @@ int sendData(Message msg, int sock)
         return 1;
     }
     sprintf(sendBuf, "%d", msg.type);
+    printf("type: %d buf: %s\n", msg.type, sendBuf);
     if(executeSend(sendBuf, sock))
     {
         printf("send() failed\n");
-
-        //Send 4 empty messages because the client expects 4 messages
-        executeSend("", sock);
-        executeSend("", sock);
-        executeSend("", sock);
-        executeSend("", sock);
         return 1;
     }
     free(sendBuf);
 
+    //Send the id length
+    if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
+    {
+        printf("Malloc failed\n");
+        return 1;
+    }
+    sprintf(sendBuf, "%d", msg.id_len);
+    printf("ID length: %d buf: %s\n", msg.id_len, sendBuf);
+    if(executeSend(sendBuf, sock))
+    {
+        printf("send() failed\n");
+        return 1;
+    }
+    free(sendBuf);
+    
     //Send the client id
     if((sendBuf = (char *)(malloc(sizeof(char) * strlen(msg.client_id)))) == NULL)
     {
@@ -480,17 +495,20 @@ int sendData(Message msg, int sock)
         //Send 3 empty messages because the client expects 4 messages
         executeSend("", sock);
         executeSend("", sock);
-        executeSend("", sock);
+        if(msg.length > 0)
+                executeSend("", sock);
         return 1;
     }
     sprintf(sendBuf, "%s", msg.client_id);
+    printf("id: %s buf: %s\n", msg.client_id, sendBuf);
     if(executeSend(sendBuf, sock))
     {
         printf("send() failed\n");
         //Send 3 empty messages because the client expects 4 messages
         executeSend("", sock);
         executeSend("", sock);
-        executeSend("", sock);
+        if(msg.length > 0)
+                executeSend("", sock);
         return 1;
     }
     free(sendBuf);
@@ -501,35 +519,42 @@ int sendData(Message msg, int sock)
         printf("Malloc failed\n");
         //Send 2 empty messages because the client expects 4 messages
         executeSend("", sock);
-        executeSend("", sock);
+        if(msg.length > 0)
+                executeSend("", sock);
         return 1;
     }
     sprintf(sendBuf, "%d", msg.length);
+    printf("length: %d buf: %s\n", msg.length, sendBuf);
     if(executeSend(sendBuf, sock))
     {
         printf("send() failed\n");
         //Send 2 empty messages because the client expects 4 messages
         executeSend("", sock);
-        executeSend("", sock);
+        if(msg.length > 0)
+                executeSend("", sock);
         return 1;
     }
     free(sendBuf);
     
     //Send the data
-    if((sendBuf = (char *)(malloc(sizeof(char) * msg.length))) == NULL)
+    if(msg.length > 0)
     {
-        printf("Malloc failed\n");
-        return 1;
+        if((sendBuf = (char *)(malloc(sizeof(char) * (msg.length+1)))) == NULL)
+        {
+            printf("Malloc failed\n");
+            return 1;
+        }
+        sprintf(sendBuf, "%s", msg.data);
+        printf("data: %s buf: %s\n", msg.data, sendBuf);
+        if(executeSend(sendBuf, sock))
+        {
+            printf("send() failed\n");
+            //Send 1 empty messages because the client expects 4 messages
+            executeSend("", sock);
+            return 1;
+        }
+        free(sendBuf);
     }
-    sprintf(sendBuf, "%s", msg.data);
-    if(executeSend(sendBuf, sock))
-    {
-        printf("send() failed\n");
-        //Send 1 empty messages because the client expects 4 messages
-        executeSend("", sock);
-        return 1;
-    }
-    free(sendBuf);
 
     return 0;
 }
@@ -561,27 +586,36 @@ Message receiveData(int sock)
     Message msg;
     char *buf;
 
+    char *temp = (char *)(malloc(sizeof(int)));
+    sprintf(temp, "%d", 1);
+    int size = strlen(temp);
+
     //get the type
-    buf = executeReceive(sock);
-  
+    buf = executeReceive(sock, size);
+    printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
-        buf = executeReceive(sock);
-        buf = executeReceive(sock);
-        buf = executeReceive(sock);
         return msg;
     }
-
     msg.type = atoi(buf);
 
-    //get the id
-    buf = executeReceive(sock);
+    //get the id length
+    buf = executeReceive(sock, size);
+    printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
-        buf = executeReceive(sock);
-        buf = executeReceive(sock);
+        return msg;
+    }
+    msg.id_len = atoi(buf);
+   
+    //get the id
+    buf = executeReceive(sock, msg.id_len);
+    printf("buf: %s\n", buf);
+    if(buf == "")
+    {
+        msg.type = MESSAGE_INVALID;
         return msg;
     }
     
@@ -593,49 +627,65 @@ Message receiveData(int sock)
     
     if(msg.type == MESSAGE_INVALID)
     {
-        buf = executeReceive(sock);
-        buf = executeReceive(sock);
         return msg;
     }
     strcpy(msg.client_id, buf);
 
     
     //get the length
-    buf = executeReceive(sock);
+    buf = executeReceive(sock, size);
+    printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
-        buf = executeReceive(sock);
         return msg;
     }
     msg.length = atoi(buf);
 
     //get the data
-    if(buf == "")
+    if((msg.data = (char *)(malloc(sizeof(char) *(msg.length+1)))) == NULL)
     {
+        printf("malloc failed\n");
         msg.type = MESSAGE_INVALID;
         return msg;
+    }
+    
+    if(msg.length > 0)
+    {
+        printf("buf: %s\n", buf);
+        if(buf == "")
+        {
+            msg.type = MESSAGE_INVALID;
+            return msg;
+        }
+        strcpy(msg.data, buf);
+    }
+    else
+    {
+        strcpy(msg.data, "");
     }
 
     return msg;
 }
 
-char *executeReceive(int sock)
+char *executeReceive(int sock, int size)
 {
     char *recvBuf;
     unsigned int totalBytesRcvd = 0;
     ssize_t numBytes = 0;
-    
-    if((recvBuf = (char *)(malloc(sizeof(char) * RECVBUFSIZE))) == NULL)
+   
+    printf("Reached executeReceive()\n");
+
+    if((recvBuf = (char *)(malloc(sizeof(char) * size))) == NULL)
     {
         printf("Malloc failed\n");
         return "";
     }
 
-    while(totalBytesRcvd < RECVBUFSIZE)
+    while(totalBytesRcvd < size)
     {
-        numBytes = recv(sock, &(recvBuf[totalBytesRcvd]), RECVBUFSIZE - 
-                totalBytesRcvd, 0);
+        numBytes = recv(sock, &(recvBuf[totalBytesRcvd]), size - totalBytesRcvd, 0);
+        printf("Received %d\n", numBytes);
 
         if(numBytes < 0)
         {
@@ -644,10 +694,11 @@ char *executeReceive(int sock)
         }
 
         totalBytesRcvd += numBytes;
+        printf("Received %d of %d bytes\n", totalBytesRcvd, size);
 
         if(numBytes == 0)
             break;
     }
-
+   
     return recvBuf;
 }
