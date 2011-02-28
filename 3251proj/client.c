@@ -420,6 +420,15 @@ int handleFriends()
     Message recv_msg;
     int i, j;
 
+    //Clear the friends array
+    for(i = 0; i < MAXNUMREQUESTS; i++)
+    {
+        for(j = 0; j < MAXIDLEN; j++)
+        {
+            friends[i][j] = 0;
+        }
+    }
+
     while(1)
     {
         printf("Enter the next Id (q to quit): ");
@@ -472,11 +481,18 @@ int handleFriends()
         {
             char c = friends[i][j];
             
-            if(c < 32) //invalid character name is done
+            if(c == 0) //invalid character name is done
             {
-                send_msg.data[index] = '\n';
-                index++;
-                break;
+                if(j != 0)
+                {
+                    send_msg.data[index] = '\n';
+                    index++;
+                    break;
+                }
+                else //this id is not set skip it
+                {
+                   break;
+                }
             }
             else
             {
@@ -485,6 +501,8 @@ int handleFriends()
             }
         }
     }
+    send_msg.length = strlen(send_msg.data);
+    //printf("Length: %d Data: %s\n", send_msg.length, send_msg.data);
     
     if(sendData(send_msg))
     {
@@ -750,7 +768,7 @@ int sendData(Message msg)
     sprintf(sendBuf, "");
     for(i = 0; i < 9 - strlen(temp); i++)
     {
-        strcat(sendBuf, "0");
+            strcat(sendBuf, "0");
     }
     strcat(sendBuf, temp);
     
