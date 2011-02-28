@@ -635,6 +635,14 @@ int handlePing()
 int sendData(Message msg)
 {
     char *sendBuf;
+    char *temp;
+    int i;
+   
+    if((temp = (char *)(malloc(sizeof(int)))) == NULL)
+    {
+        printf("Malloc failed\n");
+        return 1;
+    }
 
     //Send the type
     if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
@@ -642,7 +650,15 @@ int sendData(Message msg)
         printf("Malloc failed\n");
         return 1;
     }
-    sprintf(sendBuf, "%d", msg.type);
+    
+    //Pad the string with 0's so the size is correct
+    sprintf(temp, "%d", msg.type);
+    for(i = 0; i < sizeof(int) - strlen(temp); i++)
+    {
+        strcat(sendBuf, "0");
+    }
+    strcat(sendBuf, temp);
+
     printf("Type: %d Buf: %s\n", msg.type, sendBuf);
     if(executeSend(sendBuf))
     {
@@ -657,7 +673,15 @@ int sendData(Message msg)
         printf("Malloc failed\n");
         return 1;
     }
-    sprintf(sendBuf, "%d", msg.id_len);
+    
+    //Pad the string with 0's so the size is correct
+    sprintf(temp, "%d", msg.id_len);
+    for(i = 0; i < sizeof(int) - strlen(temp); i++)
+    {
+        strcat(sendBuf, "0");
+    }
+    strcat(sendBuf, temp);
+    
     printf("ID Length: %d Buf: %s\n", msg.id_len, sendBuf);
     if(executeSend(sendBuf))
     {
@@ -687,7 +711,15 @@ int sendData(Message msg)
         printf("Malloc failed\n");
         return 1;
     }
-    sprintf(sendBuf, "%d", msg.length);
+    
+    //Pad the string with 0's so the size is correct
+    sprintf(temp, "%d", msg.length);
+    for(i = 0; i < sizeof(int) - strlen(temp); i++)
+    {
+        strcat(sendBuf, "0");
+    }
+    strcat(sendBuf, temp);
+    
     printf("length: %d buf: %s\n", msg.length, sendBuf);
     if(executeSend(sendBuf))
     {
@@ -746,11 +778,22 @@ Message receiveData()
 {
     Message msg;
     char *buf;
- 
-    char *temp = (char *)(malloc(sizeof(int)));
-    sprintf(temp, "%d", 1);
+    int i = 0;
+    char *temp;
+    
+    if((temp = (char *)(malloc(sizeof(int)))) == NULL)
+    {
+        printf("Malloc Failed\n");
+        msg.type = MESSAGE_INVALID;
+        return msg;
+    }
+    
+    for(i = 0; i < sizeof(int); i++)
+    {
+        strcat(temp, "0");
+    }
     int size = strlen(temp);
-
+    free(temp);
     
     //get the type
     buf = executeReceive(size);
