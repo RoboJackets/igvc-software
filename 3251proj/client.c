@@ -29,6 +29,7 @@ int main(int argc, char **argv)
     
     while(1)
     {
+//        printf("Next Option\n");
         displayMenu();
         
        // if(connected) //ping the server
@@ -44,19 +45,24 @@ int main(int argc, char **argv)
             displayMenu();
         }
 
+  //      printf("Input: %d\n", input);
+
         switch(input)
         {
             case 0:
             {
+//               printf("CONNECT\n"); 
                errorOccured = handleConnect();
 
                if(!errorOccured)
                    connected = 1;
+  //             printf("CONNECT\n"); 
 
                break;
             }
             case 1:
             {   
+    //           printf("UPDATE\n"); 
                if(connected)
                    errorOccured = handleUpdate();
                else
@@ -64,11 +70,13 @@ int main(int argc, char **argv)
                
                if(errorOccured)
                    connected = 0;
+      //         printf("UPDATE\n"); 
 
                break;
             }
             case 2:
             {   
+        //       printf("FRIENDS\n"); 
                if(connected)
                    errorOccured = handleFriends();
                else
@@ -76,38 +84,46 @@ int main(int argc, char **argv)
                
                if(errorOccured)
                    connected = 0;
+          //     printf("FRIENDS\n"); 
                
                break;
             }
             case 3:
             {   
+            //   printf("HISTORY\n"); 
                if(connected)
                    errorOccured = handleHistory();
+//                   errorOccured = 0;
                else
                    printf("Not connected to the server\n");
                
                if(errorOccured)
                    connected = 0;
+              // printf("HISTORY\n"); 
                
                break;
             }
             case 4:
             {   
+             //  printf("LEAVE\n"); 
                if(connected)
                    errorOccured = handleLeave();
                else
                    printf("Not connected to the server\n");
                
                connected = 0;
+             //  printf("LEAVE\n"); 
 
                break;
             }
             case 5:
             {    
+              // printf("QUIT\n"); 
                if(connected)
                    errorOccured = handleLeave();
               
                connected = 0;
+//               printf("QUIT\n"); 
 
                return;
             }
@@ -231,6 +247,7 @@ int handleConnect()
 
     strcpy(send_msg.client_id, my_id);
     send_msg.id_len = strlen(send_msg.client_id);
+//    printf("ID: %s Length: %d\n", send_msg.client_id, send_msg.id_len);
     strcpy(send_msg.data, "");
 
     if(sendData(send_msg))
@@ -264,6 +281,7 @@ int handleConnect()
         }
     
         strcpy(send_msg.client_id, my_id);
+        send_msg.id_len = strlen(send_msg.client_id);
         if(sendData(send_msg))
         {
             printf("Error Sending your id to the server\n");
@@ -491,7 +509,7 @@ int handleFriends()
     }
 
     //Data is received in form "ID GPS\nID GPS\nID ..."
-    printf("%s", recv_msg.data);
+    printf("%s\n", recv_msg.data);
     
     
     free(send_msg.client_id);
@@ -511,12 +529,23 @@ int handleHistory()
     Message send_msg;
     Message recv_msg;
 
+    //if(1)
+//        return 0;
+
     /* Make the message */
     send_msg.type = MESSAGE_HISTORY;
 
     if((send_msg.client_id = (char *)(malloc(sizeof(my_id)))) == NULL)
     {
         printf("Unable to malloc space for the message's client id\n");
+        close(clientSock);
+        clientSock = -1;
+        return 1;
+    }
+
+    if((send_msg.data = (char *)(malloc(sizeof(char)))) == NULL)
+    {
+        printf("Malloc Failed\n");
         close(clientSock);
         clientSock = -1;
         return 1;
@@ -547,7 +576,7 @@ int handleHistory()
     }
 
     //Data is in form "GPS\nGPS\n..."
-    printf("%s", recv_msg.data);
+    printf("%s\n", recv_msg.data);
 
     free(send_msg.client_id);
     free(recv_msg.client_id);
@@ -851,6 +880,11 @@ Message receiveData()
     {
         return msg;
     }
+
+    for(i = msg.id_len; i < strlen(buf); i++) //Clear any extraneous data
+    {
+        buf[i] = 0;
+    }
     strcpy(msg.client_id, buf);
 
     
@@ -880,6 +914,10 @@ Message receiveData()
         {
             msg.type = MESSAGE_INVALID;
             return msg;
+        }
+        for(i = msg.length; i < strlen(buf); i++) //Clear any extraneous data
+        {
+                buf[i] = 0;
         }
         strcpy(msg.data, buf);
     }
