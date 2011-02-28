@@ -31,8 +31,8 @@ int main(int argc, char **argv)
     {
         displayMenu();
         
-        if(connected) //ping the server
-           errorOccured = handlePing();
+       // if(connected) //ping the server
+        //   errorOccured = handlePing();
 
         if(errorOccured)
             connected = 0;
@@ -118,6 +118,8 @@ int main(int argc, char **argv)
             }
         }
     }
+
+    return 0;
 }
 
 /*
@@ -638,14 +640,14 @@ int sendData(Message msg)
     char *temp;
     int i;
    
-    if((temp = (char *)(malloc(sizeof(int)))) == NULL)
+    if((temp = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
         printf("Malloc failed\n");
         return 1;
     }
 
     //Send the type
-    if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
+    if((sendBuf = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
         printf("Malloc failed\n");
         return 1;
@@ -653,7 +655,8 @@ int sendData(Message msg)
     
     //Pad the string with 0's so the size is correct
     sprintf(temp, "%d", msg.type);
-    for(i = 0; i < sizeof(int) - strlen(temp); i++)
+    sprintf(sendBuf, "");
+    for(i = 0; i < 9 - strlen(temp); i++)
     {
         strcat(sendBuf, "0");
     }
@@ -668,7 +671,7 @@ int sendData(Message msg)
     free(sendBuf);
 
     //Send the id length
-    if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
+    if((sendBuf = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
         printf("Malloc failed\n");
         return 1;
@@ -676,7 +679,8 @@ int sendData(Message msg)
     
     //Pad the string with 0's so the size is correct
     sprintf(temp, "%d", msg.id_len);
-    for(i = 0; i < sizeof(int) - strlen(temp); i++)
+    sprintf(sendBuf, "");
+    for(i = 0; i < 9 - strlen(temp); i++)
     {
         strcat(sendBuf, "0");
     }
@@ -706,7 +710,7 @@ int sendData(Message msg)
     free(sendBuf);
 
     //Send the length
-    if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
+    if((sendBuf = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
         printf("Malloc failed\n");
         return 1;
@@ -714,7 +718,8 @@ int sendData(Message msg)
     
     //Pad the string with 0's so the size is correct
     sprintf(temp, "%d", msg.length);
-    for(i = 0; i < sizeof(int) - strlen(temp); i++)
+    sprintf(sendBuf, "");
+    for(i = 0; i < 9 - strlen(temp); i++)
     {
         strcat(sendBuf, "0");
     }
@@ -779,24 +784,24 @@ Message receiveData()
     Message msg;
     char *buf;
     int i = 0;
-    char *temp;
+   /* char *temp;
     
-    if((temp = (char *)(malloc(sizeof(int)))) == NULL)
+    if((temp = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
         printf("Malloc Failed\n");
         msg.type = MESSAGE_INVALID;
         return msg;
     }
     
-    for(i = 0; i < sizeof(int); i++)
+    for(i = 0; i < 9; i++)
     {
         strcat(temp, "0");
     }
     int size = strlen(temp);
     free(temp);
-    
+   */ 
     //get the type
-    buf = executeReceive(size);
+    buf = executeReceive(9);
     printf("buf: %s\n", buf);
     if(buf == "")
     {
@@ -805,8 +810,13 @@ Message receiveData()
     }
     msg.type = atoi(buf);
 
+    if(msg.type == MESSAGE_INVALID)
+    {
+        return msg;
+    }
+
     //get the id len
-    buf = executeReceive(size);
+    buf = executeReceive(9);
     printf("buf: %s\n", buf);
     if(buf == "")
     {
@@ -814,6 +824,13 @@ Message receiveData()
         return msg;
     }
     msg.id_len = atoi(buf);
+    
+    if(msg.id_len == 0)
+    {
+        printf("Invalid Id\n");
+        msg.type = MESSAGE_INVALID;
+        return msg;
+    }
     
     //get the id
     buf = executeReceive(msg.id_len);
@@ -838,7 +855,7 @@ Message receiveData()
 
     
     //get the length
-    buf = executeReceive(size);
+    buf = executeReceive(9);
     printf("buf: %s\n", buf);
     if(buf == "")
     {

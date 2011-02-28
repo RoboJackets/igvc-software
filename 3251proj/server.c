@@ -32,6 +32,7 @@ int handleUpdate(char *client_id, char *gps);
 int handleFriends(char *client_id, char *friend_list, int sock);
 int handleHistory(char *client_id, int sock);
 int handleLeave(char *client_id);
+int handlePing(char *client_id, int sock);
 int sendData(Message msg, int sock);
 char *getGPS(char *id, int type);
 int replaceLine(char *id, char *gps);
@@ -127,43 +128,83 @@ void handleClient(int clntSock)
 	char buffer[BUFSIZE];		/* Buff to store name from client */
         int leave = 0;
         Message msg;
+        char *client_id;
+        int ping = 0;
+        int i = 0;
 
 	/* Receive message from client */
 	while(!leave) {
+                if(ping)
+                {
+                   /* if(handlePing(client_id, clntSock))
+                    {
+                        printf("Ping Failed\n");
+                        close(clntSock);
+                        return;
+                    }*/
+                }
+
+                while(i < 5000) {i++;} //Wait between each message 
+                i = 0;
+
                 msg = receiveData(clntSock);
+
+                printf("Message Contents:\nType: %d\nID: %s\nID_LEN: %d\n",
+                        msg.type, msg.client_id, msg.id_len);
+                printf("Length: %d\nData: %s\n", msg.length, msg.data);
+//                continue;
+                
+                if((client_id = (char *)(malloc(sizeof(char) * msg.id_len))) ==
+                        NULL)
+                {
+                    printf("Malloc Failed\n");
+                    close(clntSock);
+                    return;
+                }
+                strcpy(client_id, msg.client_id);
 
 		//Decode incoming message and call appropriate handler
 		switch(msg.type) {
 			case(MESSAGE_UPDATE):
 			{
+	                        printf("UPDATE\n");			
 				handleUpdate(msg.client_id, msg.data);
 				break;
 			}
 			case(MESSAGE_FRIENDS):
 			{
+	                        printf("FRIENDS\n");			
 				handleFriends(msg.client_id, msg.data,
                                         clntSock);
 				break;
 			}
 			case(MESSAGE_HISTORY):
 			{
+	                        printf("HISTORY\n");			
 				handleHistory(msg.client_id, clntSock);
 				break;
 			}
 			case(MESSAGE_LEAVE):
 			{
+	                        printf("LEAVE\n");			
 				handleLeave(msg.client_id);
 				leave = 1;
 				break;
 			}
 			case(MESSAGE_CHECKID):
 			{
-				
+	                        printf("CHECKID\n");			
                                 pthread_mutex_lock(&file_lock);
                                 handleCheckId(msg.client_id, clntSock);
                                 pthread_mutex_unlock(&file_lock);
+                                ping = 1;
 				break;
-			}
+                        }
+                        case(MESSAGE_INVALID):
+                        {
+	                    printf("INVALID\n");			
+                            break;
+                        }
 			default:
 				printf("Unknown message type");
 		}
@@ -180,25 +221,50 @@ int handleCheckId(char *client_id, int sock)
    char *id;
    //Setup the file
    FILE *file;
-   file = fopen("data.txt","r"); //fprintf(file,"%s","To write");
-   
+   file = fopen("data.txt","r"); 
+
    if((msg.client_id = (char *)(malloc(sizeof(char) * strlen(client_id)))) == NULL)
    {
        printf("Unable to malloc space for the client's id\n");
        return -1;
    }
+
+   if((msg.data = (char *)(malloc(sizeof(char)))) == NULL)
+   {
+       printf("Malloc Failed\n");
+       return -1;
+   }
    
-   if((temp = (char *)(malloc(sizeof(char) * strlen(client_id)))) == NULL)
+   if((temp = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
    {
        printf("Unable to malloc space for the client's id\n");
        return -1;
    }
 
-
-   while(fscanf(file, "%s\n", temp) != EOF)
+   if(file == NULL)
    {
+       msg.type = MESSAGE_IDAVAILABLE;
+       msg.id_len = strlen(client_id);
+       strcpy(msg.client_id, client_id);
+       msg.length = 0;
+       strcpy(msg.data, "");
+       if(sendData(msg, sock))
+       {
+           printf("Send Failed\n");
+           free(msg.client_id);
+           free(temp);
+           free(msg.data);
+           return 1;
+       }
+       return 0;
+   }
+
+   while(fscanf(file, "%s", temp) != EOF)
+   {
+       if(strlen(temp) < 2) //Ignore the line its too short
+           continue;
        status = temp[0];
-       temp = &temp[2];
+       temp = &temp[1];
        id = strtok(temp, " ");
        if(strcmp(id, client_id) == 0) //Found that Id already
        {
@@ -223,7 +289,7 @@ int handleCheckId(char *client_id, int sock)
    }
    
    fclose(file);
-   free(temp);
+   //free(temp);
 
    msg.type = MESSAGE_IDAVAILABLE;
    strcpy(msg.client_id, client_id);
@@ -235,10 +301,12 @@ int handleCheckId(char *client_id, int sock)
    {
        printf("Error Occured during send\n");
        free(msg.client_id);
+       free(msg.data);
        return 1;
    }
 
-   free(msg.client_id);
+//   free(msg.client_id);
+//   free(msg.data);
    return 0;
 }
 
@@ -357,6 +425,33 @@ int handleLeave(char *client_id)
     pthread_mutex_unlock(&file_lock);
 }
 
+int handlePing(char *client_id, int sock)
+{
+    Message msg;
+
+    msg.type = MESSAGE_PING;
+    msg.id_len = strlen(client_id);
+
+    if((msg.client_id = (char *)(malloc(sizeof(char) * msg.id_len))) == NULL)
+    {
+        printf("Malloc Failed\n");
+        return 1;
+    }
+    strcpy(msg.client_id, client_id);
+   
+    msg.length = 0;
+
+    if((msg.data = (char *)(malloc(sizeof(char) * (msg.length+1)))) == NULL)
+    {
+        printf("Malloc Failed\n");
+        free(msg.client_id);
+        return 1;
+    }
+    strcpy(msg.data, "");
+
+    return sendData(msg, sock);
+}
+
 char *getGPS(char *id, int type)
 {
     char *line, *lat, *lon;
@@ -365,14 +460,22 @@ char *getGPS(char *id, int type)
     char *temp;
     fp = fopen("data.txt", "r");
 
-    if((line = (char *)(malloc(sizeof(char) * (MAXIDLEN + 20)))) == NULL)
+    if((line = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
     {
         printf("Unable to malloc space\n");
         return "";
     }
 
-    while(fgets(line, MAXIDLEN, fp))
+    if(fp == NULL) //File is not there
     {
+        sprintf(line, "%s: Not Found\n", id);
+        return line;
+    }
+
+    while(fgets(line, MAXLINELENGTH, fp))
+    {
+        if(strlen(line) < 2) //Ignore the line its to short
+            continue;
         temp = strtok(line, " "); //get the first token
 
         if(strcmp(temp, id) == 0)
@@ -407,15 +510,31 @@ int replaceLine(char *client_id, char *gps)
    char *id;
    int found = 0;
 
-   if((temp = (char *)(malloc(sizeof(char) * strlen(client_id)))) == NULL)
+   if((temp = (char *)(malloc(sizeof(char) * MAXLINELENGTH))) == NULL)
    {
        printf("Unable to malloc space for the file lines\n");
        return 1;
    }
 
+   if(in == NULL)
+   {    
+       sprintf(temp, "a %s %s", client_id, gps);
+       fputs(temp, out); //Write the line
+       fclose(in);
+       fclose(out);
+
+       //Replace the old file with the new one
+       remove("data.txt");
+       rename("temp.txt", "data.txt");
+       return 0;
+   }
+
    while(fscanf(in, "%s\n", temp) != EOF)
    {
-		 	 temp = &temp[2];
+       if(strlen(temp) < 2) //skip the line too short
+           continue;
+
+       temp = &temp[1];
        id = strtok(temp, " "); //get the first token as the id
 
        if(strcmp(id, client_id) == 0) //Found that Id already
@@ -460,7 +579,7 @@ int sendData(Message msg, int sock)
     char *temp;
     int i;
     
-    if((temp = (char *)(malloc(sizeof(int)))) == NULL)
+    if((temp = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
         printf("Malloc failed\n");
         return 1;
@@ -468,7 +587,7 @@ int sendData(Message msg, int sock)
 
 
     //Send the type
-    if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
+    if((sendBuf = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
         printf("Malloc failed\n");
         return 1;
@@ -477,7 +596,8 @@ int sendData(Message msg, int sock)
     //Fill the size with 0's until size of int - temp is full
     //then append temp
     sprintf(temp, "%d", msg.type);
-    for(i = 0; i < sizeof(int) - strlen(temp); i++) 
+    sprintf(sendBuf, "");
+    for(i = 0; i < 9 - strlen(temp); i++) 
     {
         strcat(sendBuf, "0"); 
     }
@@ -492,7 +612,7 @@ int sendData(Message msg, int sock)
     free(sendBuf);
 
     //Send the id length
-    if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
+    if((sendBuf = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
         printf("Malloc failed\n");
         return 1;
@@ -501,7 +621,8 @@ int sendData(Message msg, int sock)
     //Fill the size with 0's until size of int - temp is full
     //then append temp
     sprintf(temp, "%d", msg.id_len);
-    for(i = 0; i < sizeof(int) - strlen(temp); i++) 
+    sprintf(sendBuf, "");
+    for(i = 0; i < 9 - strlen(temp); i++) 
     {
         strcat(sendBuf, "0"); 
     }
@@ -520,10 +641,6 @@ int sendData(Message msg, int sock)
     {
         printf("Malloc failed\n");
         //Send 3 empty messages because the client expects 4 messages
-        executeSend("", sock);
-        executeSend("", sock);
-        if(msg.length > 0)
-                executeSend("", sock);
         return 1;
     }
     sprintf(sendBuf, "%s", msg.client_id);
@@ -532,28 +649,22 @@ int sendData(Message msg, int sock)
     {
         printf("send() failed\n");
         //Send 3 empty messages because the client expects 4 messages
-        executeSend("", sock);
-        executeSend("", sock);
-        if(msg.length > 0)
-                executeSend("", sock);
         return 1;
     }
     free(sendBuf);
 
     //Send the length
-    if((sendBuf = (char *)(malloc(sizeof(int)))) == NULL)
+    if((sendBuf = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
         printf("Malloc failed\n");
         //Send 2 empty messages because the client expects 4 messages
-        executeSend("", sock);
-        if(msg.length > 0)
-                executeSend("", sock);
         return 1;
     }
     //Fill the size with 0's until size of int - temp is full
     //then append temp
     sprintf(temp, "%d", msg.length);
-    for(i = 0; i < sizeof(int) - strlen(temp); i++) 
+    sprintf(sendBuf, "");
+    for(i = 0; i < 9 - strlen(temp); i++) 
     {
         strcat(sendBuf, "0"); 
     }
@@ -564,9 +675,6 @@ int sendData(Message msg, int sock)
     {
         printf("send() failed\n");
         //Send 2 empty messages because the client expects 4 messages
-        executeSend("", sock);
-        if(msg.length > 0)
-                executeSend("", sock);
         return 1;
     }
     free(sendBuf);
@@ -584,8 +692,6 @@ int sendData(Message msg, int sock)
         if(executeSend(sendBuf, sock))
         {
             printf("send() failed\n");
-            //Send 1 empty messages because the client expects 4 messages
-            executeSend("", sock);
             return 1;
         }
         free(sendBuf);
@@ -622,9 +728,9 @@ Message receiveData(int sock)
     char *buf;
     int i = 0;
 
-    char *temp;
+/*    char *temp;
     
-    if((temp = (char *)(malloc(sizeof(int)))) == NULL)
+    if((temp = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
         printf("Malloc failed\n");
         msg.type = MESSAGE_INVALID;
@@ -632,16 +738,15 @@ Message receiveData(int sock)
     }
     
     //for all the integer fields use this size
-    for(i = 0; i < sizeof(int); i++)
+    for(i = 0; i < 9; i++)
     {
         strcat(temp, "0");
     }
 
     int size = strlen(temp);
-    free(temp);
-
+*/
     //get the type
-    buf = executeReceive(sock, size);
+    buf = executeReceive(sock, 9);
     printf("buf: %s\n", buf);
     if(buf == "")
     {
@@ -650,8 +755,13 @@ Message receiveData(int sock)
     }
     msg.type = atoi(buf);
 
+    if(msg.type == MESSAGE_INVALID)
+    {
+        return msg;
+    }
+
     //get the id length
-    buf = executeReceive(sock, size);
+    buf = executeReceive(sock, 9);
     printf("buf: %s\n", buf);
     if(buf == "")
     {
@@ -660,6 +770,13 @@ Message receiveData(int sock)
     }
     msg.id_len = atoi(buf);
    
+    if(msg.id_len == 0)
+    {
+        printf("Invalid ID\n");
+        msg.type = MESSAGE_INVALID;
+        return msg;
+    }
+
     //get the id
     buf = executeReceive(sock, msg.id_len);
     printf("buf: %s\n", buf);
@@ -683,7 +800,7 @@ Message receiveData(int sock)
 
     
     //get the length
-    buf = executeReceive(sock, size);
+    buf = executeReceive(sock, 9);
     printf("buf: %s\n", buf);
     if(buf == "")
     {
@@ -699,9 +816,10 @@ Message receiveData(int sock)
         msg.type = MESSAGE_INVALID;
         return msg;
     }
-    
+   
     if(msg.length > 0)
     {
+        buf = executeReceive(sock, msg.length);
         printf("buf: %s\n", buf);
         if(buf == "")
         {
