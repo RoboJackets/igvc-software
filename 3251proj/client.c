@@ -700,10 +700,10 @@ int sendData(Message msg)
     char *temp;
     int i;
     
-    printf("send Data\n");
-    printf("Message Contents:\nType: %d\nId Len: %d\nId: %s\nLen: %d\nData: %s\n",
-            msg.type, msg.id_len, msg.client_id, msg.length, 
-            msg.data);
+    //printf("send Data\n");
+    //printf("Message Contents:\nType: %d\nId Len: %d\nId: %s\nLen: %d\nData: %s\n",
+    //        msg.type, msg.id_len, msg.client_id, msg.length, 
+    //        msg.data);
    
     if((temp = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
