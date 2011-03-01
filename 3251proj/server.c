@@ -134,101 +134,102 @@ void *ThreadMain(void *threadArgs) {
 //wrap their recieves in while loops and return a message. either call our handle messages directly after decoding what type of message it is 
 void handleClient(int clntSock)
 {
-	char buffer[BUFSIZE];		/* Buff to store name from client */
-        int leave = 0;
-        Message msg;
-        char *client_id = NULL;
-        int i = 0;
+    char buffer[BUFSIZE];		/* Buff to store name from client */
+    int leave = 0;
+    Message msg;
+    char *client_id = NULL;
+    int i = 0;
 
-        printf("Open Client Connection\n");
+    printf("Open Client Connection\n");
 
-	/* Receive message from client */
-	while(!leave) {
+    /* Receive message from client */
+    while(!leave) {
                 
-                while(i < 5000) {i++;} //Wait between each message 
-                i = 0;
+         while(i < 5000) {i++;}  i=0;//Wait between each message 
+        
+         printf("Waiting For Message from client\n");
 
-                msg = receiveData(clntSock);
+         msg = receiveData(clntSock);
 
-    //            printf("Message Contents:\nType: %d\nID: %s\nID_LEN: %d\n",
-     //                   msg.type, msg.client_id, msg.id_len);
-      //          printf("Length: %d\nData: %s\n", msg.length, msg.data);
-//                continue;
+         //printf("Message Contents:\nType: %d\nID: %s\nID_LEN: %d\n",
+         //    msg.type, msg.client_id, msg.id_len);
+         //printf("Length: %d\nData: %s\n", msg.length, msg.data);
                 
 
-                //Update the id if necessary
-                if(msg.type != MESSAGE_INVALID)
-                {
-                    if(client_id != NULL)
-                        free(client_id);
-                    if((client_id = (char *)(malloc(sizeof(char) * msg.id_len))) ==
-                        NULL)
-                    {
-                        printf("Malloc Failed\n");
-                        close(clntSock);
-                        return;
-                    }
-                    strcpy(client_id, msg.client_id);
-                }
-     //           printf("Client Id: %s\n", client_id);
+         //Update the id if necessary
+         if(msg.type != MESSAGE_INVALID)
+         {
+             if(client_id != NULL)
+                 free(client_id);
+               
+             if((client_id = (char *)(malloc(sizeof(char) * msg.id_len))) ==  NULL)
+             {
+                 printf("Malloc Failed\n");
+                 close(clntSock);
+                 return;
+             }
+             strcpy(client_id, msg.client_id);
+         }
+         //printf("Client Id: %s\n", client_id);
 
-		//Decode incoming message and call appropriate handler
-		switch(msg.type) {
-			case(MESSAGE_UPDATE):
-			{
-	                        //printf("UPDATE\n");			
-				handleUpdate(msg.client_id, msg.data);
-				break;
-			}
-			case(MESSAGE_FRIENDS):
-			{
-	                        //printf("FRIENDS\n");			
-				handleFriends(msg.client_id, msg.data,
-                                        clntSock);
-				break;
-			}
-			case(MESSAGE_HISTORY):
-			{
-	                        //printf("HISTORY\n");			
-				handleHistory(msg.client_id, clntSock);
-				break;
-			}
-			case(MESSAGE_LEAVE):
-			{
-	                        //printf("LEAVE\n");			
-				handleLeave(msg.client_id);
-				leave = 1;
-				break;
-			}
-			case(MESSAGE_CHECKID):
-			{
-	                        //printf("CHECKID\n");			
-                                pthread_mutex_lock(&file_lock);
-                                handleCheckId(msg.client_id, clntSock);
-                                pthread_mutex_unlock(&file_lock);
-				break;
-                        }
-                        case(MESSAGE_INVALID):
-                        {
-	                    //printf("INVALID\n");	
-                            close(clntSock);
-                            leave = 1;
-                            break;
-                        }
-			default:
-				printf("Unknown message type");
-		}
-	}
+         //Decode incoming message and call appropriate handler
+         switch(msg.type) {
+             case(MESSAGE_UPDATE):
+             {
+                 printf("Received Update Message From %s handling...\n", client_id);			
+		 handleUpdate(msg.client_id, msg.data);
+		 break;
+             }
+	     case(MESSAGE_FRIENDS):
+	     {
+	         printf("Received Friends Message From %s handling...\n", client_id);			
+	         handleFriends(msg.client_id, msg.data, clntSock);
+	         break;
+	     }
+	     case(MESSAGE_HISTORY):
+	     {
+	         printf("Received History Message From %s handling...\n", client_id);			
+		 handleHistory(msg.client_id, clntSock);
+		 break;
+	     }
+	     case(MESSAGE_LEAVE):
+	     {
+	         printf("Received Leave Message From %s handling...\n", client_id);			
+		 handleLeave(msg.client_id);
+		 leave = 1;
+		 break;
+	     }
+	     case(MESSAGE_CHECKID):
+	     {
+	         printf("Received CheckId Message From %s handling...\n", client_id);			
+                 pthread_mutex_lock(&file_lock);
+                 handleCheckId(msg.client_id, clntSock);
+                 pthread_mutex_unlock(&file_lock);
+	         break;
+             }
+             case(MESSAGE_INVALID):
+             {
+	         printf("Received Invalid Message From %s closing socket...\n", 
+                         client_id);			
+                 close(clntSock);
+                 leave = 1;
+                 break;
+             }
+             default:
+             {
+                 printf("Received Unknown message type ignoring...");
+             }
+         }
+    }
 
-        //Client killed itself 
-        if(client_id != NULL && strcmp(client_id, "") != 0 && msg.type ==
-                MESSAGE_INVALID)
-        {
-            handleLeave(client_id);
-        }
+    //Client killed itself 
+    if(client_id != NULL && strcmp(client_id, "") != 0 && msg.type == MESSAGE_INVALID)
+    {
+        handleLeave(client_id);
+    }
 
-        printf("Close Client Connection\n");
-	close(clntSock);
+    printf("Close Client Connection\n");
+    close(clntSock);
 }
 
 int handleCheckId(char *client_id, int sock)
@@ -717,13 +718,13 @@ char *readLine(FILE *fp)
  */
 int sendData(Message msg, int sock)
 {
-    printf("Reached sendData\n");
+    //printf("Reached sendData\n");
     char *sendBuf;
     char *temp;
     int i;
     
-    printf("Socket: %d\nMessage Contents:\nType: %d\nId Len: %d\nId: %s\nLen: %d\nData: %s\n",
-            sock, msg.type, msg.id_len, msg.client_id, msg.length, msg.data);
+    //printf("Socket: %d\nMessage Contents:\nType: %d\nId Len: %d\nId: %s\nLen: %d\nData: %s\n",
+    //        sock, msg.type, msg.id_len, msg.client_id, msg.length, msg.data);
 
     if((temp = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
@@ -877,11 +878,11 @@ Message receiveData(int sock)
     char temp[9];
     int i = 0;
 
-    printf("receiveData()\n");
+    //printf("receiveData()\n");
     
     //get the type
     buf = executeReceive(sock, 9);
-    printf("buf: %s\n", buf);
+    //printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
@@ -902,7 +903,7 @@ Message receiveData(int sock)
 
     //get the id length
     buf = executeReceive(sock, 9);
-    printf("buf: %s\n", buf);
+    //printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
@@ -925,7 +926,7 @@ Message receiveData(int sock)
 
     //get the id
     buf = executeReceive(sock, msg.id_len);
-    printf("buf: %s\n", buf);
+  //  printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
@@ -952,7 +953,7 @@ Message receiveData(int sock)
     
     //get the length
     buf = executeReceive(sock, 9);
-    printf("buf: %s\n", buf);
+    //printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
@@ -977,7 +978,7 @@ Message receiveData(int sock)
     if(msg.length > 0)
     {
         buf = executeReceive(sock, msg.length);
-        printf("buf: %s\n", buf);
+      //  printf("buf: %s\n", buf);
         if(buf == "")
         {
             msg.type = MESSAGE_INVALID;
@@ -991,7 +992,7 @@ Message receiveData(int sock)
     }
     else
     {
-        printf("No Data\n");
+       // printf("No Data\n");
         strcpy(msg.data, "");
     }
 
