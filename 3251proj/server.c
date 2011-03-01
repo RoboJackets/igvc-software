@@ -620,7 +620,7 @@ int replaceLine(char *client_id, char *gps)
    line = readLine(in);
    while(strcmp(line, ""))
    {
-      // printf("Line: %s", line);
+       printf("Line: %s", line);
        if(strlen(line) < 3) //skip the line too short
            continue;
 
@@ -642,6 +642,10 @@ int replaceLine(char *client_id, char *gps)
                sprintf(temp, "i %s %s", client_id, &(saved[2+strlen(id)]));
            }
            found = 1;          
+       }
+       else
+       {
+           strcpy(temp, saved);
        }
        printf("Out: %s", temp);
        fputs(temp, out); //Write the line (edited or not)
