@@ -282,7 +282,7 @@ int handleCheckId(char *client_id, int sock)
            }
            else
            {
-               //TODO: Set the status to taken here
+               replaceLine(client_id, "");
                msg.type = MESSAGE_IDAVAILABLE;
            }
          
@@ -301,7 +301,8 @@ int handleCheckId(char *client_id, int sock)
    
    fclose(file);
    //free(temp);
-
+   
+   replaceLine(client_id, "");
    msg.type = MESSAGE_IDAVAILABLE;
    strcpy(msg.client_id, client_id);
    msg.id_len = strlen(msg.client_id);
@@ -619,6 +620,7 @@ int replaceLine(char *client_id, char *gps)
    }
 
    line = readLine(in);
+   printf("Line: %s", line);
    while(strcmp(line, ""))
    {
        printf("Line: %s", line);

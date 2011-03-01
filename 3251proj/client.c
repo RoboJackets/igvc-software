@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     if((my_id = (char *)(malloc(sizeof(char) * MAXIDLEN))) == NULL)
     {
         printf("Unable to malloc space for id\n");
-        return;
+        return; 
     }
     
     while(1)
