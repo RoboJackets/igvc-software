@@ -282,6 +282,7 @@ int handleCheckId(char *client_id, int sock)
            }
            else
            {
+               //TODO: Set the status to taken here
                msg.type = MESSAGE_IDAVAILABLE;
            }
          
