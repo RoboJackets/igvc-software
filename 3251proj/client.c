@@ -32,9 +32,6 @@ int main(int argc, char **argv)
 //        printf("Next Option\n");
         displayMenu();
         
-       // if(connected) //ping the server
-        //   errorOccured = handlePing();
-
         if(errorOccured)
             connected = 0;
 
@@ -230,10 +227,15 @@ int handleConnect()
     
 
     printf("Enter your user Id (No Spaces Allowed): ");
-    while(scanf("%s", my_id) != 1)
+    while(scanf("%s", my_id) != 1 || strcmp(my_id, "q") == 0)
     {
         while(getchar() != '\n');
         printf("Invalid Input\n");
+
+        if(strcmp(my_id, "q") == 0)
+            printf("Id cannot be q\n");
+        
+        printf("Enter your user Id (No Spaces Allowed): ");
     }
 
     /* The message has no data just the id of this client */
@@ -530,8 +532,7 @@ int handleFriends()
     }
 
     //Data is received in form "ID GPS\nID GPS\nID ..."
-    printf("%s\n", recv_msg.data);
-    
+    printf("Friends Locations\n%s\n", recv_msg.data);
     
     free(send_msg.client_id);
     free(send_msg.data);
@@ -549,9 +550,6 @@ int handleHistory()
 {
     Message send_msg;
     Message recv_msg;
-
-    //if(1)
-//        return 0;
 
     /* Make the message */
     send_msg.type = MESSAGE_HISTORY;
@@ -576,6 +574,10 @@ int handleHistory()
     send_msg.length = 0;
     strcpy(send_msg.data, "");
 
+    printf("Message Contents:\nType: %d\nId Len: %d\nId: %s\nLen: %d\nData: %s\n",
+            send_msg.type, send_msg.id_len, send_msg.client_id, send_msg.length, 
+            send_msg.data);
+
     if(sendData(send_msg))
     {
         printf("Error Occured with sending history message\n");
@@ -596,8 +598,7 @@ int handleHistory()
         return 1;
     }
 
-    //Data is in form "GPS\nGPS\n..."
-    printf("%s\n", recv_msg.data);
+    printf("History: %s\n", recv_msg.data);
 
     free(send_msg.client_id);
     free(recv_msg.client_id);
@@ -698,6 +699,11 @@ int sendData(Message msg)
     char *sendBuf;
     char *temp;
     int i;
+    
+    printf("send Data\n");
+    printf("Message Contents:\nType: %d\nId Len: %d\nId: %s\nLen: %d\nData: %s\n",
+            msg.type, msg.id_len, msg.client_id, msg.length, 
+            msg.data);
    
     if((temp = (char *)(malloc(sizeof(char) * 9))) == NULL)
     {
@@ -721,7 +727,7 @@ int sendData(Message msg)
     }
     strcat(sendBuf, temp);
 
-    printf("Type: %d Buf: %s\n", msg.type, sendBuf);
+    //printf("Type: %d Buf: %s\n", msg.type, sendBuf);
     if(executeSend(sendBuf))
     {
         printf("send() failed\n");
@@ -745,7 +751,7 @@ int sendData(Message msg)
     }
     strcat(sendBuf, temp);
     
-    printf("ID Length: %d Buf: %s\n", msg.id_len, sendBuf);
+    //printf("ID Length: %d Buf: %s\n", msg.id_len, sendBuf);
     if(executeSend(sendBuf))
     {
         printf("send() failed\n");
@@ -760,7 +766,7 @@ int sendData(Message msg)
         return 1;
     }
     sprintf(sendBuf, "%s", msg.client_id);
-    printf("Id: %s Buf %s\n", msg.client_id, sendBuf);
+    //printf("Id: %s Buf %s\n", msg.client_id, sendBuf);
     if(executeSend(sendBuf))
     {
         printf("send() failed\n");
@@ -784,7 +790,7 @@ int sendData(Message msg)
     }
     strcat(sendBuf, temp);
     
-    printf("length: %d buf: %s\n", msg.length, sendBuf);
+    //printf("length: %d buf: %s\n", msg.length, sendBuf);
     if(executeSend(sendBuf))
     {
         printf("send() failed\n");
@@ -801,7 +807,7 @@ int sendData(Message msg)
             return 1;
         }
         sprintf(sendBuf, "%s", msg.data);
-        printf("Data: %s buf: %s\n", msg.data, sendBuf);
+        //printf("Data: %s buf: %s\n", msg.data, sendBuf);
         if(executeSend(sendBuf))
         {
             printf("send() failed\n");
@@ -843,25 +849,10 @@ Message receiveData()
     Message msg;
     char *buf;
     int i = 0;
-   /* char *temp;
     
-    if((temp = (char *)(malloc(sizeof(char) * 9))) == NULL)
-    {
-        printf("Malloc Failed\n");
-        msg.type = MESSAGE_INVALID;
-        return msg;
-    }
-    
-    for(i = 0; i < 9; i++)
-    {
-        strcat(temp, "0");
-    }
-    int size = strlen(temp);
-    free(temp);
-   */ 
     //get the type
     buf = executeReceive(9);
-    printf("buf: %s\n", buf);
+    //printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
@@ -876,7 +867,7 @@ Message receiveData()
 
     //get the id len
     buf = executeReceive(9);
-    printf("buf: %s\n", buf);
+    //printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
@@ -893,7 +884,7 @@ Message receiveData()
     
     //get the id
     buf = executeReceive(msg.id_len);
-    printf("buf: %s\n", buf);
+    //printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
@@ -920,7 +911,7 @@ Message receiveData()
     
     //get the length
     buf = executeReceive(9);
-    printf("buf: %s\n", buf);
+    //printf("buf: %s\n", buf);
     if(buf == "")
     {
         msg.type = MESSAGE_INVALID;
@@ -939,7 +930,7 @@ Message receiveData()
     if(msg.length > 0)
     {
         buf = executeReceive(msg.length);
-        printf("buf: %s\n", buf);
+        //printf("buf: %s\n", buf);
         if(buf == "")
         {
             msg.type = MESSAGE_INVALID;
@@ -976,7 +967,7 @@ char *executeReceive(int size)
     {
         numBytes = recv(clientSock, &(recvBuf[totalBytesRcvd]), 
                 size - totalBytesRcvd, 0);
-        printf("Received %d\n", numBytes);
+        //printf("Received %d\n", numBytes);
 
         if(numBytes < 0)
         {
@@ -985,7 +976,7 @@ char *executeReceive(int size)
         }
 
         totalBytesRcvd += numBytes;
-        printf("Received %d of %d bytes\n", totalBytesRcvd, size);
+        //printf("Received %d of %d bytes\n", totalBytesRcvd, size);
 
         if(numBytes == 0)
             break;
