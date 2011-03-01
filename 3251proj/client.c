@@ -848,6 +848,7 @@ Message receiveData()
 {
     Message msg;
     char *buf;
+    char temp[9];
     int i = 0;
     
     //get the type
@@ -858,7 +859,13 @@ Message receiveData()
         msg.type = MESSAGE_INVALID;
         return msg;
     }
-    msg.type = atoi(buf);
+
+    //only use the first 9 chars in the buf for the type
+    for(i = 0; i < 9; i++)
+    {
+        temp[i] = buf[i];
+    }
+    msg.type = atoi(temp);
 
     if(msg.type == MESSAGE_INVALID)
     {
@@ -873,9 +880,15 @@ Message receiveData()
         msg.type = MESSAGE_INVALID;
         return msg;
     }
-    msg.id_len = atoi(buf);
     
-    if(msg.id_len == 0)
+    //only use the first 9 chars in the buf for the id length
+    for(i = 0; i < 9; i++)
+    {
+        temp[i] = buf[i];
+    }
+    msg.id_len = atoi(temp);
+    
+    if(msg.id_len <= 0)
     {
         printf("Invalid Id\n");
         msg.type = MESSAGE_INVALID;
@@ -917,7 +930,13 @@ Message receiveData()
         msg.type = MESSAGE_INVALID;
         return msg;
     }
-    msg.length = atoi(buf);
+    
+    //only use the first 9 chars in the buf for the length
+    for(i = 0; i < 9; i++)
+    {
+        temp[i] = buf[i];
+    }
+    msg.length = atoi(temp);
 
     //get the data
     if((msg.data = (char *)(malloc(sizeof(char) * (msg.length+1)))) == NULL)
