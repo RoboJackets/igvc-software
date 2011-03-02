@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 	//TODO: Set up server
 	int serverSock;			/* Server Socket */
 	struct sockaddr_in changeServAddr;	/* Local address */
-	unsigned short changeServPort = 4000;	/* Server port */
+	unsigned short changeServPort = 25250;	/* Server port */
         struct sockaddr_in changeClntAddr;
         socklen_t clntLen = sizeof(changeClntAddr);
 
