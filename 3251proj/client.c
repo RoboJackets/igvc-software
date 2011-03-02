@@ -158,7 +158,7 @@ void displayMenu()
 int handleConnect()
 {
     char *servIP;
-    unsigned short servPort = 4000;
+    unsigned short servPort = 25250;
     int rtnVal = 0;
     Message send_msg;  //The check id message
     Message recv_msg; //The reply to the check id message
@@ -173,19 +173,18 @@ int handleConnect()
     /* Construct the server address structure */
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    serv_addr.sin_port = htons(servPort);
+    //serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
     /* Get the server's ip address from the user */
-   /* if((servIP = (char *)(malloc(sizeof(char) * 16))) == NULL)//16 chars max ip length 
+    if((servIP = (char *)(malloc(sizeof(char) * 16))) == NULL)//16 chars max ip length 
     {
         printf("Unable to malloc space for the server's ip\n");
         return 1;
-    }*/
+    }
     
     /* Loop until the user enters a valid ip or inet_pton fails */
-/*     while(rtnVal == 0)
-     {
+    while(rtnVal == 0)
+    {
         printf("Enter the server's IP address: ");
         while(scanf("%s", servIP) != 1)
         {
@@ -193,30 +192,20 @@ int handleConnect()
             printf("Invalid Input\n");
         }
 
-        //Set the serv struct's ip to the value
+          //Set the serv struct's ip to the value
           rtnVal = inet_pton(AF_INET, servIP, &serv_addr.sin_addr.s_addr);
-  //      serv_addr.sin_addr.s_addr = inet_addr(servIP);
+          
           if(rtnVal == 0)
              printf("Invalid IP address\n");
-      }
-
-      if(rtnVal < 0)
-      {
-          printf("inet_pton() failed\n");
-          return 1;
-      }
-   
-
-  */   
-    /* Get the server's port from the user */
-  /*  printf("Enter the server's port: ");
-    while(scanf("%d", &servPort) != 1)
-    {
-        while(getchar() != '\n');
-        printf("Invalid Input\n");
     }
-    //serv_addr.sin_port = htons(servPort);
-*/
+
+    if(rtnVal < 0)
+    {
+        printf("inet_pton() failed\n");
+        return 1;
+    }
+    
+    serv_addr.sin_port = htons(servPort);
 
     /* Establish connecction to the server */
     if((connect(clientSock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
@@ -445,7 +434,7 @@ int handleFriends()
         }
 
         //Exit on the quit
-        if(next_friend[0] == 'q' || next_friend[0] == 'Q')
+        if(strcmp(next_friend, "q") == 0)
             break;
 
         strcpy(friends[index], next_friend);
@@ -574,9 +563,9 @@ int handleHistory()
     send_msg.length = 0;
     strcpy(send_msg.data, "");
 
-    printf("Message Contents:\nType: %d\nId Len: %d\nId: %s\nLen: %d\nData: %s\n",
-            send_msg.type, send_msg.id_len, send_msg.client_id, send_msg.length, 
-            send_msg.data);
+    //printf("Message Contents:\nType: %d\nId Len: %d\nId: %s\nLen: %d\nData: %s\n",
+    //        send_msg.type, send_msg.id_len, send_msg.client_id, send_msg.length, 
+    //        send_msg.data);
 
     if(sendData(send_msg))
     {
@@ -598,7 +587,7 @@ int handleHistory()
         return 1;
     }
 
-    printf("History: %s\n", recv_msg.data);
+    printf("History:\n%s\n", recv_msg.data);
 
     free(send_msg.client_id);
     free(recv_msg.client_id);
