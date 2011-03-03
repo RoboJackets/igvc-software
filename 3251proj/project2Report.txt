@@ -17,6 +17,37 @@ typedef struct Message
     char *data;
 } Message;
 
+The fields of the messages equate to:
+
+Type:
+    The type of the message can be one of the following:
+        MESSAGE_INVALID 
+        MESSAGE_CHECKID - client only message
+        MESSAGE_FRIENDS
+        MESSAGE_HISTORY
+        MESSAGE_LEAVE
+        MESSAGE_IDAVAILABLE - server only message
+        MESSAGE_IDTAKEN - server only message
+Id_Len:
+    The length of the client id
+client_id:
+    The string for the client's id
+length:
+    The length of the data field
+data:
+    The string for the actual data
+
+This format allows for the message to be easily serialized and sent over the
+connection. The message is broken up by fields then each numeric field is
+converted into a 10 character, to be able to represent all possible integers,
+string and sent so that the receiving side knows how many bytes to expect. The
+id_len is sent right before the client_id is sent which informs the receiver how
+many bytes to expect for the id, this is then repeated again for the length and
+data fields. Since the message is sent piecemeal any padding differences between
+the server and the client are not an issue for the message sent and the ends of
+the connections are responsible for reconstructing the message again. The
+Message Types equate to the actual function of each message. The MESSAGE_INVALID
+type is used whenever an error occurs in either sending or receiving a message.
 
 3. Pthreads vs select()
 For our server we chose to use pthreads instead of select(). The main difference between the two from our standpoint is that with pthreads the programmer must handle synchronization but with select() the function to handle clients is more complicated. Since the only shared resource was the database file, synchronization was not a difficult problem making pthreads simpler to implement than select(). There is also a concern about pthreads requiring extra resources for each new thread but we did not feel that this would be an issue for this particular project.
