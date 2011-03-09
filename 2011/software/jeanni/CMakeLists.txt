@@ -1,7 +1,9 @@
-add_subdirectory(vision)
-add_subdirectory(mapping)
+
 
 include_directories(
+
+	#/home/robojackets/OpenCV_2.1.0_install/include
+
 	${IGVC_SOURCE_DIR}/jeanni/vision
 	${IGVC_SOURCE_DIR}/jeanni/mapping
 	/usr/include/qt4
@@ -18,6 +20,13 @@ include_directories(
 	${IGVC_SOURCE_DIR}/joystick
 )
 
+link_directories(
+#/home/robojackets/OpenCV_2.1.0_install/lib
+)
+
+add_subdirectory(vision)
+add_subdirectory(mapping)
+
 IF(${ROBOT_REV} MATCHES "candiiidbg")
 	SET(CMAKE_C_FLAGS  " -march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
 	SET(CMAKE_CXX_FLAGS "-march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
@@ -25,8 +34,8 @@ ELSEIF(${ROBOT_REV} MATCHES "candiii")
 	SET(CMAKE_C_FLAGS  " -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
 	SET(CMAKE_CXX_FLAGS "-march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
 ELSEIF(${ROBOT_REV} MATCHES "jeannidbg")
-	SET(CMAKE_C_FLAGS  "  -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
-	SET(CMAKE_CXX_FLAGS " -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
+	SET(CMAKE_C_FLAGS  "  -march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
+	SET(CMAKE_CXX_FLAGS " -march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
 ELSEIF(${ROBOT_REV} MATCHES "jeanni")
 	SET(CMAKE_C_FLAGS  "  -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
 	SET(CMAKE_CXX_FLAGS " -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
