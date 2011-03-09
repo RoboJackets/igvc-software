@@ -48,6 +48,8 @@
 
 #include "opencv/highgui.h"
 
+#include "opencv/cvinternal.h"
+
 #include <stdio.h>
 
 /* Valery Mosyagin */
@@ -420,14 +422,15 @@ int icvFindCorrForGivenPoints( IplImage *image1,/* Image 1 */
                 fundMatr = cvMat(3,3,CV_64F,fundMatr_dat);
         
                 //CV_CALL( pStatus = cvCreateMat(1,totalCorns,CV_32F) );
-                CV_CALL( pStatus = cvCreateMat(1,totalCorns,CV_8SC1) );
+                CV_CALL( pStatus = cvCreateMat(1,totalCorns,CV_8UC1) );
 
-		assert(CV_IS_MASK_ARR(pStatus));
-		assert(CV_IS_MAT_CONT(pStatus->type));
-		assert((pStatus->rows == 1 || pStatus->cols == 1));
-		//assert(pStatus->rows*pStatus->cols == count);
+        	//CV_Assert( CV_IS_MASK_ARR(pStatus) );
+		//CV_Assert( CV_IS_MAT_CONT(pStatus->type) );
+		//CV_Assert( (pStatus->rows == 1 || pStatus->cols == 1) );
+		//CV_Assert( pStatus->rows*pStatus->cols == count );
 
                 int num = cvFindFundamentalMat(tmpPoints1,tmpPoints2,&fundMatr,CV_FM_RANSAC,threshold,0.99,pStatus);
+		//int num = cvFindFundamentalMat(tmpPoints1,tmpPoints2,&fundMatr,CV_FM_RANSAC,threshold,0.99,NULL);
                 if( num > 0 )
                 {
                     int curr = 0;
