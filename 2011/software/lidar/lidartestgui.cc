@@ -25,9 +25,11 @@ cv::Mat rmisoLidar(imh, imw, CV_8UC(1));
 boost::mutex rmisoLidarMutex;
 cv::Mat morphLidar(imh, imw, CV_8UC(1));
 boost::mutex morphLidarMutex;
+cv::Mat linesLidar(imh, imw, CV_8UC(1));
+boost::mutex linesLidarMutex;
 
 float minrange = 0, maxrange = 0;
-const int numpos = 3;
+const int numpos = 4;
 
 void drawimage(int pos)
 {
@@ -56,6 +58,12 @@ void drawimage(int pos)
 		{
 				boost::mutex::scoped_lock lock(morphLidarMutex);
 				cv::imshow(winname, morphLidar);
+				break;
+		}
+		case 4:
+		{
+				boost::mutex::scoped_lock lock(linesLidarMutex);
+				cv::imshow(winname, linesLidar);
 				break;
 		}
 		default:
@@ -141,6 +149,30 @@ void plotNAV200cart(float* x, float* y, cv::Mat& im, size_t len)
 
 }
 
+void plotline200cart(float* x, float* y, cv::Mat& im, float startx, float starty, float endx, float endy, size_t len)
+{
+	maxrange = -1*std::numeric_limits<float>::max();
+	for(size_t i = 0; i < len; i++)
+	{
+		float distance = sqrt(x[i]*x[i] + y[i]*y[i]);
+		maxrange = std::max(maxrange, distance);
+	}
+	minrange = -maxrange;
+
+	cv::Size sz = im.size();
+
+
+	int startxpx = linmap<float>(startx, minrange, maxrange, 0, sz.width);
+	int startypx = sz.height - linmap<float>(starty, minrange, maxrange, 0, sz.height);
+
+	int endxpx = linmap<float>(endx, minrange, maxrange, 0, sz.width);
+	int endypx = sz.height - linmap<float>(endy, minrange, maxrange, 0, sz.height);
+
+	cv::Point a(startxpx, startypx);
+	cv::Point b(endxpx, endypx);
+	cv::line(im, a, b, cv::color(255,255,255));
+}
+
 void array2NAV200(const float* x, const float* y, NAV200::Point* points, size_t len)
 {
 	for(size_t i = 0; i < len; i++)
@@ -179,7 +211,7 @@ int main()
 
 	for(;;)
 	{
-		//lidar.read();
+		lidar.read();
 		{
 			boost::mutex::scoped_lock lock(rawImageMutex);
 			//plotNAV200Pts(points, rawlidar);
@@ -200,6 +232,10 @@ int main()
 			float derivT[NAV200::Num_Points];
 			lidarProc::takeDerivative(goodr, goodt, derivR, derivT, numgoodpts);
 
+			float ddR[NAV200::Num_Points];
+			float ddT[NAV200::Num_Points];
+			lidarProc::takeDerivative(derivR, derivT, ddR, ddT, numgoodpts);
+
 			//remove points w/ large slope
 			float x_avg[NAV200::Num_Points];
 			float y_avg[NAV200::Num_Points];
@@ -218,7 +254,21 @@ int main()
 			cv::dilate(morphLidar, morphLidar, cv::Mat());
 
 			std::deque< boost::tuple<size_t,size_t> > lines;
-			//NAV200::findLinearRuns(avgpoints, lines, 1e-1);
+			lidarProc::findLinearRuns(goodr, goodt, numgoodpts, 1e-2, lines);
+
+			boost::tuple<size_t,size_t> pt;
+			BOOST_FOREACH(pt, lines)
+			{
+				float startr = goodr[pt.get<0>()];
+				float startt = goodt[pt.get<0>()];
+
+				float endr = goodr[pt.get<1>()];
+				float endt = goodt[pt.get<1>()];
+
+				float startx, starty, endx, endy;
+				NAV200::polar2cart(startr, startt, startx, starty);
+				NAV200::polar2cart(endr, endt, endx, endy);
+			}
 
 			for(size_t i = 0; i < lines.size(); i++)
 			{
