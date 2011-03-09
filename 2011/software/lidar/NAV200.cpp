@@ -129,7 +129,7 @@ bool NAV200::read()
 		}
 		else
 		{
-			x[i] = y[i] = radius[i] = theta[i] = std::numeric_limits<float>::quiet_NaN();
+			radius[i] = theta[i] = std::numeric_limits<float>::quiet_NaN();
 		}
 	}
 
