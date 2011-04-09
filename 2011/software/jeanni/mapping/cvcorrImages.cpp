@@ -43,6 +43,7 @@
 #include "opencv/cv.h"
 #include "opencv/cvaux.h"
 #include "opencv/cvtypes.h"
+#include "opencv/cvinternal.h"
 //#include <float.h>
 //#include <limits.h>
 
