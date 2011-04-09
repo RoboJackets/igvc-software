@@ -6,13 +6,13 @@ include_directories(
 	${IGVC_SOURCE_DIR}/encoders/pcdriver_signed
 )
 
-add_executable(joystickDrive 
-joystickmain.cc
-)
+#add_executable(joystickDrive 
+#joystickmain.cc
+#)
 
-target_link_libraries (joystickDrive
-	joystick
-)
+#target_link_libraries (joystickDrive
+#	joystick
+#)
 
 add_library(joystick
 	joystickDrive.cc
