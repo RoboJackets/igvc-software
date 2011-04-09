@@ -34,6 +34,7 @@ int main()
 			datafile << "time:" << t1 << endl << "r_vel:" << right_vel << endl << "l_vel:" << left_vel << endl;	
 			//fprintf(ofile, "time:%f\nr_vel:%f\nl_vel:%f\n", t1, right_vel, left_vel);
 		}
+	}
 	
 	//fclose(ofile);
 	datafile.close();
