@@ -9,6 +9,7 @@
 namespace lidarProc
 {
 
+/*
 bool findLinearRuns(const float* theta, const float* radius, const size_t len, const double zero_tol, std::deque< boost::tuple<size_t,size_t> >& lines)
 {
 	const int derivnum = len-1;
@@ -67,6 +68,72 @@ bool findLinearRuns(const float* theta, const float* radius, const size_t len, c
 
 	return true;
 }
+*/
+
+bool findLinearRuns(const float* theta, const float* radius, const size_t len, const double zero_tol, std::deque< boost::tuple<size_t,size_t> >& lines)
+{
+	assert(zero_tol > 0);
+
+	const int derivnum = len-1;
+	const int doublederivnum = len-2;
+
+	float deriv_radius[derivnum];
+
+	float second_deriv_radius[doublederivnum];
+	
+	float abs_distance_second_deriv[doublederivnum];
+
+	takeDerivative_fwd(theta, radius, deriv_radius, len);
+	takeDerivative_fwd(theta, deriv_radius, second_deriv_radius, derivnum);
+
+	for(int i = 0; i < doublederivnum; i++)
+	{
+		abs_distance_second_deriv[i] = fabsf(second_deriv_radius[i]);
+	}
+
+	bool linear_map[doublederivnum];
+	memset(linear_map, 0, doublederivnum*sizeof(bool));
+
+	for(int i = 0; i < doublederivnum; i++)
+	{
+		if(abs_distance_second_deriv[i] < zero_tol)
+		{
+			linear_map[i] = true;
+		}
+	}
+
+	bool inrun = false;
+	size_t start;
+	size_t stop;
+	for(int i = 0; i < doublederivnum; i++)
+	{
+
+		if((inrun) && (linear_map[i] == true))
+		{
+			continue;
+		}
+
+		if((inrun) && (linear_map[i] == false))
+		{
+			stop = i - 1;
+			inrun = false;
+
+			boost::tuple<size_t, size_t> run(start, stop);
+			lines.push_back(run);
+			continue;
+		}
+		
+		if((linear_map[i] == true) && (!inrun))
+		{
+			start = i;
+			inrun = true;
+			continue;
+		}
+	}
+
+	return true;
+}
+
 
 void getLongestRun(const float* x, const float* y, const std::deque< boost::tuple<size_t,size_t> >& lines, boost::tuple<size_t,size_t>& longest)
 {
@@ -154,18 +221,58 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 	}
 }
 
-//just like cv::morphologyEx(morphLidar, morphLidar, cv::MORPH_CLOSE, cv::Mat(), cv::Point(-1,-1), itr);
-void deepClose(cv::Mat& im, size_t itr)
-{
-	for(size_t i = 0; i < itr; i++)
+	bool isPathClear(const float theta, const float radius, const double angle_tol, const float* t_pt, const float* r_pt, const size_t numpts)
 	{
-		cv::dilate(im, im, cv::Mat());
+		const float theta_low = theta - angle_tol;
+		const float theta_high = theta + angle_tol;
+
+		// count the points within the provided cone
+		size_t pts_in_cone = 0;
+		for(size_t i = 0; i < numpts; i++)
+		{
+			const float& t_i = t_pt[i];
+			const float& r_i = r_pt[i];
+
+			if((theta_low <= t_i) && (t_i <= theta_high))
+			{
+				if(r_i <= radius)
+				{
+					pts_in_cone++;
+				}
+			}
+		}
+
+		//need to allow for noise. this is a stupid way to do so.
+		const static size_t pt_thresh = 5;
+		if(pts_in_cone > pt_thresh)
+		{
+			return false;
+		}
+
+		return true;
 	}
 
-	for(size_t i = 0; i < itr; i++)
+	//lines must be in order such that successive lines are the closest match
+	bool collectNearRuns(const float* theta, const float* radius, const size_t len, const double distance, std::deque< boost::tuple<size_t,size_t> >& lines, std::deque< boost::tuple<size_t,size_t> >& grown_lines)
+{
+
+	for(size_t i = 0; i < (lines.size() - 1); i++)
 	{
-		cv::erode(im, im, cv::Mat());
+		const boost::tuple<size_t,size_t>& pt = lines[i];
+		const float& startt = theta[pt.get<0>()];
+		const float& startr = radius[pt.get<0>()];
+		const float& stopt = theta[pt.get<1>()];
+		const float& stopr = radius[pt.get<1>()];
+
+		const boost::tuple<size_t,size_t>& next_pt = lines[i+1];
+		const float& next_startt = theta[next_pt.get<0>()];
+		const float& next_startr = radius[next_pt.get<0>()];
+		const float& next_stopt = theta[next_pt.get<1>()];
+		const float& next_stopr = radius[next_pt.get<1>()];
+
+		
 	}
 }
+
 }
 

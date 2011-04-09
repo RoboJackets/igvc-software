@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <limits>
 #include <list>
 #include <deque>
 
@@ -88,6 +89,11 @@ class NAV200
 			{
 				polar2cart(pt.angle, pt.distance, x, y);
 				return true;
+			}
+			else
+			{
+				x = std::numeric_limits<float>::signaling_NaN();
+				y = std::numeric_limits<float>::signaling_NaN();
 			}
 			return false;
 		}
