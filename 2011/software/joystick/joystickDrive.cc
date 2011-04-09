@@ -325,8 +325,8 @@ bool joystickDrive::shouldQuit()
 
 bool joystickDrive::manualOverride()
 {
+	return check_button(RT_TRIG);	
 	// Checks if the manual override button is pressed
-	return false;
 }
 
 void joystickDrive::printLoop()
@@ -336,6 +336,14 @@ void joystickDrive::printLoop()
 	{
 		readJoystick();	
 		std::cout << "Button value: " << std::hex << joystickButtons << "\n";
-		usleep(1e5);
+		bool t = joystickButtons << 8;
+		std::cout << t << "\n";	
+		usleep(1e5);bool check_button(BUTTON);
 	}
+}
+
+bool joystickDrive::check_button(BUTTON b)
+{
+	readJoystick();
+	return (bool)(joystickButtons & 1<<b);
 }
