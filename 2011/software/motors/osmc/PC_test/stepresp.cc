@@ -2,18 +2,18 @@
 #include <iostream>
 #include <ctime>
 #include "OSMC_driver.hpp"
-#include "quadCoderDriver.hpp"
+//#include "quadCoderDriver.hpp"
 //#include <>
 
 //static const int speedsetdel = 3 * 1e4;
 static const int speedsetdel = 2 * 1e4;
 
-static int stepmag = 60;
+static int stepmag = 200;
 
 int main()
 {
 	OSMC_driver motordriver;
-	quadCoderDriver qD;
+	//quadCoderDriver qD;
 
 	motordriver.setMotorPWM(MC_MOTOR_FORWARD, stepmag, MC_MOTOR_FORWARD, stepmag);
 	timeval t0;
@@ -22,7 +22,7 @@ int main()
 	for(;;)
 	{
 		double r = -1, l = -1;
-		if(!qD.getEncoderVel(r,l))
+		//if(!qD.getEncoderVel(r,l))
 		{
 			timeval now;
 			gettimeofday(&now, NULL);

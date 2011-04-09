@@ -1,3 +1,6 @@
+#ifndef OSMC_DRIVER
+#define OSMC_DRIVER
+
 #include "ArduinoInterface.h"
 #include "ArduinoCmds.hpp"
 
@@ -86,3 +89,5 @@ class OSMC_driver
 	double t;// seconds since unix epoch
 	void getNewVel_pd(const double now_lvel, const double now_rvel, const double dt, int& out_r, int& out_l);
 };
+
+#endif
