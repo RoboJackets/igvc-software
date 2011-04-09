@@ -19,7 +19,7 @@ include_directories(
 )
 
 add_library(mapping
-	cvcorrImages.cpp
+#	cvcorrImages.cpp
 	mapgen.cpp
 	PointParamEstimator.cpp
 )
