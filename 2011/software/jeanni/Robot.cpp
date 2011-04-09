@@ -332,7 +332,7 @@ void Robot::processFunc()
 	 */
 
 	// Switches into joystick mode if manual override button is pressed
-	jD.readJoystick();
+	//jD.readJoystick();
 	if (jD.manualOverride())
 	{
 		//osmcd->setLight(MC_LIGHT_STEADY);		
