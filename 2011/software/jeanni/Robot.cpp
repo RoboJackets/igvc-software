@@ -335,14 +335,15 @@ void Robot::processFunc()
 	jD.readJoystick();
 	if (jD.manualOverride())
 	{
-		osmcd->setLight(MC_LIGHT_STEADY);		
+		//osmcd->setLight(MC_LIGHT_STEADY);		
 		while (jD.manualOverride())		
 		{
 			jD.setMotor();
 			usleep(1e5);
 			jD.readJoystick();
 		}	
-		osmcd->setLight(MC_LIGHT_PULSING);
+	
+//	osmcd->setLight(MC_LIGHT_PULSING);
 	}
 
 	/* glut mask init hack */
