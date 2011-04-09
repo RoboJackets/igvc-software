@@ -81,3 +81,11 @@ bool OSMC_4wd_driver::set_vel_vec(const double y, const double x)
 
 	return a || b;
 }
+
+bool OSMC_4wd_driver::setLight(const byte option)
+{
+	bool a = FOR.setLight(option);
+	bool b = AFT.setLight(option);
+	
+	return a || b;
+}

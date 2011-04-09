@@ -444,7 +444,7 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 	return set_motors(lspeed, rspeed);
 }
 
-void OSMC_driver::setLight(const byte option)
+bool OSMC_driver::setLight(const byte option)
 {
-	ai.sendCommand(MC_SET_LIGHT,&option,1);
+	return ai.sendCommand(MC_SET_LIGHT,&option,1);
 }

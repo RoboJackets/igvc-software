@@ -34,6 +34,8 @@ class OSMC_4wd_driver
 	//smart reckoning
 	//void followCirc(double radius, double vmag);
 
+	bool setLight(const byte option);
+
 	private:
 
 	volatile bool m_connected;
