@@ -47,14 +47,14 @@ int main()
 		}
 
 		std::cout << "float theta[NAV200::Num_Points] = {";
-		for(int i = 0; i < (NAV200::Num_Points-2); i++)
+		for(int i = 0; i <= (NAV200::Num_Points-2); i++)
 		{
 			std::cout << a.theta[i] << ", ";
 		}
 		std::cout << a.theta[NAV200::Num_Points-1] << "}\n";
 
 		std::cout << "float radius[NAV200::Num_Points] = {";
-		for(int i = 0; i < (NAV200::Num_Points-2); i++)
+		for(int i = 0; i <= (NAV200::Num_Points-2); i++)
 		{
 			std::cout << a.radius[i] << ", ";
 		}

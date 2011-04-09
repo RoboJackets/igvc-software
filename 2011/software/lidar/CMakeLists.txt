@@ -52,4 +52,9 @@ target_link_libraries(lidartestgui
 	lidarProc
 	cv
 	highgui
+
+	#mgl-fltk
+	mgl-glut
+
+	boost_thread-mt
 )
