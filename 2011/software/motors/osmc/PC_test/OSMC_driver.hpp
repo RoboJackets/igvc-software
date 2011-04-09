@@ -64,7 +64,7 @@ class OSMC_driver
 	bool set_vel_vec(const double y, const double x);
 
 	//control for status light
-	void setLight(const byte option);
+	bool setLight(const byte option);
 
 	private:
 	ArduinoInterface ai;
