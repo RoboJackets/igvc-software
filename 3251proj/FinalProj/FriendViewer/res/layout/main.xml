@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <Button android:layout_height="50dip" android:layout_width="wrap_content" android:layout_gravity="right" android:id="@+id/logoutID" android:text="@string/logoutBtn"></Button>
+    <FrameLayout android:id="@+id/frameLayout1" android:layout_width="fill_parent" android:layout_height="160dip">
+        <TextView android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@+id/FriendsList" android:text="@string/ListTxt"></TextView>
+    </FrameLayout>
+    <RelativeLayout android:id="@+id/relativeLayout1" android:layout_width="fill_parent" android:layout_height="50dip">
+        <EditText android:layout_alignParentTop="true" android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@+id/FriendID" android:text="@string/FriendTxt"></EditText>
+    </RelativeLayout>
+    <RelativeLayout android:id="@+id/relativeLayout2" android:layout_width="fill_parent" android:layout_height="50dip" android:gravity="center_horizontal">
+        <Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentLeft="true" android:id="@+id/addID" android:text="@string/AddBtn"></Button>
+        <Button android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/RemoveID" android:text="@string/RemoveBtn" android:layout_toRightOf="@+id/addID"></Button>
+    </RelativeLayout>
+    <RelativeLayout android:id="@+id/relativeLayout3" android:layout_width="fill_parent" android:layout_height="10dip"></RelativeLayout>
+    <RelativeLayout android:id="@+id/relativeLayout4" android:layout_width="fill_parent" android:layout_height="50dip" android:gravity="center_horizontal">
+        <Button android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/closeID" android:text="@string/closeBtn" android:layout_toRightOf="@+id/MapID"></Button>
+        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/MapID" android:text="@string/MapBtn"></Button>
+    </RelativeLayout>
+</LinearLayout>
