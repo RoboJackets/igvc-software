@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <Button android:layout_height="50dip" android:layout_width="wrap_content" android:layout_gravity="right" android:id="@+id/logoutID" android:text="@string/logoutBtn"></Button>
+    <FrameLayout android:id="@+id/frameLayout1" android:layout_width="fill_parent" android:layout_height="250dip">
+        <com.google.android.maps.MapView
+    	xmlns:android="http://schemas.android.com/apk/res/android"
+    	android:layout_width="fill_parent"
+    	android:layout_height="fill_parent"
+    	android:clickable="true"
+    	android:apiKey="Your Maps API Key goes here" android:id="@+id/MapID"/>
+    </FrameLayout>
+    <RelativeLayout android:id="@+id/relativeLayout4" android:layout_width="fill_parent" android:layout_height="50dip" android:gravity="center_horizontal">
+        <Button android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/closeID" android:text="@string/closeBtn"></Button>
+    </RelativeLayout>
+</LinearLayout>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, ViewContact!</string>
+    <string name="app_name">Contacts</string>
+    <string name="FriendsLabel">Friend ID:</string>
+    <string name="LatLabel">Latitude:</string>
+    <string name="LonLabel">Longitude:</string>
+    <string name="FriendField"></string>
+    <string name="LatField"></string>
+    <string name="LonField"></string>
+    <string name="logoutBtn">logout</string>
+    <string name="closeBtn">Close</string>
+</resources>

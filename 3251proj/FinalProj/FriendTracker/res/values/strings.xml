@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, FriendTracker!</string>
+    <string name="app_name">Friend Tracker</string>
+    <string name="logoutBtn">logout</string>
+    <string name="FriendsLabel">Friends ID:</string>
+    <string name="FriendsTxt"></string>
+    <string name="LookupBtn">Lookup Friend</string>
+    <string name="closeBtn">Close</string>
+    <string name="UpdateBtn">Update My Location</string>
+    <string name="LatLabel">Latitude:</string>
+    <string name="LatTxt"></string>
+    <string name="LonLabel">Longitude:</string>
+    <string name="LonTxt"></string>
+    <string name="HistoryBtn">My History</string>
+    <string name="CloseBtn">Close</string>
+    <string name="LoginBtn">Login</string>
+    <string name="loginTxt"></string>
+    <string name="ViewFriendsBtn">View Friends</string>
+</resources>

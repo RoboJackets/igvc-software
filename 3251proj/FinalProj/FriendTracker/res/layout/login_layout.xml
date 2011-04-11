@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" android:orientation="vertical">
+    <RelativeLayout android:layout_height="wrap_content" android:id="@+id/relativeLayout2" android:layout_width="fill_parent" android:gravity="center_horizontal">
+        <EditText android:layout_alignParentTop="true" android:layout_height="wrap_content" android:id="@+id/LoginTxtId" android:text="@string/loginTxt" android:layout_width="fill_parent"></EditText>
+    </RelativeLayout>
+    <RelativeLayout android:layout_height="wrap_content" android:id="@+id/relativeLayout1" android:layout_width="fill_parent" android:gravity="center_horizontal">
+        <Button android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/LoginId" android:text="@string/LoginBtn" android:width="200dip" android:height="50dip"></Button>
+    </RelativeLayout>
+    <RelativeLayout android:layout_height="wrap_content" android:id="@+id/closeBtnLayout" android:layout_width="fill_parent" android:gravity="center_horizontal">
+        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:id="@+id/CloseId" android:text="@string/CloseBtn"></Button>
+    </RelativeLayout>
+</LinearLayout>
