@@ -32,33 +32,44 @@ public class Message {
 		
 		//Read the type
 		input = readNextField(inStream, 9);
-		if(input == null)
-			return null;
+		if(input == null) {
+			message.type = MESSAGE_INVALID;
+			return message;
+		}
+		
 		message.type = Integer.parseInt(input);
 		
 		//Read the Id length
 		input = readNextField(inStream, 9);
-		if(input == null)
-			return null;
+		if(input == null) {
+			message.type = MESSAGE_INVALID;
+			return message;
+		}
 		message.id_length = Integer.parseInt(input);
 		
 		//Read the id
 		input = readNextField(inStream, message.id_length);
-		if(input == null)
-			return null;
+		if(input == null) {
+			message.type = MESSAGE_INVALID;
+			return message;
+		}
 		message.clientId = new String(input);
 		
 		//Read the data length 
 		input = readNextField(inStream, 9);
-		if(input == null)
-			return null;
+		if(input == null) {
+			message.type = MESSAGE_INVALID;
+			return message;
+		}
 		message.length = Integer.parseInt(input);
 		
 		//Read the data
 		if(message.length > 0) {
 			input = readNextField(inStream, message.length);
-			if(input == null)
-				return null;
+			if(input == null) {
+				message.type = MESSAGE_INVALID;
+				return message;
+			}
 			message.message = new String(input);
 		}
 		
@@ -125,4 +136,10 @@ public class Message {
 		length = -1;
 		message = null;
 	}
+	
+	public int getType() {return type;}
+	public int getIdLen() {return id_length;}
+	public String getId() {return clientId;}
+	public int getLength() {return length;}
+	public String getMessage() {return message;}
 }
