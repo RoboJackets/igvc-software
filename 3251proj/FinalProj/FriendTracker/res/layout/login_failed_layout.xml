@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" android:orientation="vertical">
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="10dip" android:id="@+id/Margin1"></RelativeLayout>
+    <RelativeLayout android:layout_width="fill_parent" android:id="@+id/HistoryLayout" android:layout_height="250dip" android:gravity="center">
+        <TextView android:layout_alignParentLeft="true" android:layout_height="wrap_content" android:id="@+id/LoginFailedID" android:layout_width="wrap_content" android:text="@string/LoginFailedLabel"></TextView>
+    </RelativeLayout>
+    <RelativeLayout android:layout_height="wrap_content" android:id="@+id/closeBtnLayout" android:layout_width="fill_parent" android:gravity="center_horizontal">
+        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:text="@string/CloseBtn" android:id="@+id/MainCloseId" android:onClick="close"></Button>
+    </RelativeLayout>
+</LinearLayout>

@@ -14,42 +14,45 @@ public final class R {
         public static final int icon=0x7f020000;
     }
     public static final class id {
-        public static final int CloseId=0x7f05000e;
-        public static final int FriendButtonLayout=0x7f050012;
-        public static final int FriendIDLayout=0x7f05000f;
-        public static final int FriendsId=0x7f050010;
-        public static final int FriendsTxtId=0x7f050011;
+        public static final int CloseId=0x7f050010;
+        public static final int FriendButtonLayout=0x7f050014;
+        public static final int FriendIDLayout=0x7f050011;
+        public static final int FriendsId=0x7f050012;
+        public static final int FriendsTxtId=0x7f050013;
         public static final int HistoryLabelID=0x7f050003;
         public static final int HistoryLayout=0x7f050002;
         public static final int HistoryTxtID=0x7f050004;
-        public static final int IPLabelID=0x7f05000b;
-        public static final int IdLabelID=0x7f050008;
-        public static final int LatId=0x7f050017;
-        public static final int LatLayout=0x7f050016;
-        public static final int LatTxtId=0x7f050018;
-        public static final int LoginBtnLayout=0x7f05000c;
-        public static final int LoginId=0x7f05000d;
-        public static final int LoginTxtId=0x7f050009;
-        public static final int LonId=0x7f05001a;
-        public static final int LonLayout=0x7f050019;
-        public static final int LonTxtId=0x7f05001b;
-        public static final int LookupID=0x7f050013;
+        public static final int IPLabelID=0x7f05000c;
+        public static final int IdLabelID=0x7f050009;
+        public static final int LatId=0x7f050019;
+        public static final int LatLayout=0x7f050018;
+        public static final int LatTxtId=0x7f05001a;
+        public static final int LoginBtnLayout=0x7f05000e;
+        public static final int LoginFailedID=0x7f050007;
+        public static final int LoginId=0x7f05000f;
+        public static final int LoginTxtId=0x7f05000a;
+        public static final int LonId=0x7f05001c;
+        public static final int LonLayout=0x7f05001b;
+        public static final int LonTxtId=0x7f05001d;
+        public static final int LookupID=0x7f050015;
         public static final int MainCloseId=0x7f050006;
         public static final int Margin1=0x7f050001;
-        public static final int ServerIPLayout=0x7f05000a;
-        public static final int UpdateBtnLayout=0x7f05001c;
-        public static final int UpdateID=0x7f05001d;
-        public static final int ViewFriendId=0x7f050014;
-        public static final int cliendIDLayout=0x7f050007;
+        public static final int ServerIPLayout=0x7f05000b;
+        public static final int UpdateBtnLayout=0x7f05001e;
+        public static final int UpdateID=0x7f05001f;
+        public static final int ViewFriendId=0x7f050016;
+        public static final int cliendIDLayout=0x7f050008;
         public static final int closeBtnLayout=0x7f050005;
-        public static final int historyID=0x7f05001e;
+        public static final int historyID=0x7f050020;
         public static final int logoutId=0x7f050000;
-        public static final int margin2=0x7f050015;
+        public static final int margin2=0x7f050017;
+        public static final int serverIPTxtID=0x7f05000d;
     }
     public static final class layout {
         public static final int history_layout=0x7f030000;
-        public static final int login_layout=0x7f030001;
-        public static final int main=0x7f030002;
+        public static final int login_failed_layout=0x7f030001;
+        public static final int login_layout=0x7f030002;
+        public static final int main=0x7f030003;
     }
     public static final class string {
         public static final int CloseBtn=0x7f04000c;
@@ -64,6 +67,7 @@ public final class R {
         public static final int LatLabel=0x7f040007;
         public static final int LatTxt=0x7f040008;
         public static final int LoginBtn=0x7f04000d;
+        public static final int LoginFailedLabel=0x7f040015;
         public static final int LonLabel=0x7f040009;
         public static final int LonTxt=0x7f04000a;
         public static final int LookupBtn=0x7f040005;

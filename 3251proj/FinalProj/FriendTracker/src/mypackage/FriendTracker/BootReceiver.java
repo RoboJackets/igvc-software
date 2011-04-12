@@ -8,15 +8,15 @@ public class BootReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		//Start the Login In Screen Activity
+		//Start the LoginScreen Activity
 		Intent startupIntent = new Intent(context, LoginScreen.class);
 		startupIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startActivity(startupIntent);
 		
-		//Start the FriendTrackerControl Service
-		Intent serviceIntent = new Intent();
-		serviceIntent.setAction("mypackage.FriendTracker.startatboot.FriendTrackerControl");
-		context.startService(serviceIntent);
-
+		//Start the FriendTrackerContron Service
+		Intent startupService = new Intent(context, FriendTrackerControl.class);
+		startupIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		context.startService(startupService);
+	
 	}
 }

@@ -22,6 +22,7 @@
     <string name="IPTxt"></string>
     <string name="HistoryLabel">History:</string>
     <string name="HistoryTxt"></string>
+    <string name="LoginFailedLabel">Login Failed.</string>
     
     
     

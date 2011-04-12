@@ -2,18 +2,24 @@ package mypackage.FriendTracker;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 
 
-public class FriendTracker extends Activity {
+public class FriendTracker extends Activity implements ServiceConnection {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
+        Context context = this.getApplicationContext();
+        Intent intent = new Intent(context, mypackage.FriendTracker.FriendTrackerControl.class);
+        context.bindService(intent, this, Context.BIND_AUTO_CREATE) ;;  
     }
     
     //The following methods are called when there button is pressed
@@ -56,4 +62,16 @@ public class FriendTracker extends Activity {
     public void close(View view) {
     	
     }
+
+	@Override
+	public void onServiceConnected(ComponentName name, IBinder service) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onServiceDisconnected(ComponentName name) {
+		// TODO Auto-generated method stub
+		
+	}
 }

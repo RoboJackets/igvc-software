@@ -10,7 +10,7 @@
     
     <RelativeLayout android:id="@+id/ServerIPLayout" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center_vertical" android:gravity="center_vertical">
         <TextView android:layout_alignParentLeft="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/IPLabelID" android:layout_marginTop="25dip" android:text="@string/IPLabel"></TextView>
-        <EditText android:layout_alignParentTop="true" android:id="@+id/LoginTxtId" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_toRightOf="@+id/IPLabelID" android:text="@string/IPTxt"></EditText>
+        <EditText android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_toRightOf="@+id/IPLabelID" android:text="@string/IPTxt" android:id="@+id/serverIPTxtID"></EditText>
     </RelativeLayout>
     
     <RelativeLayout android:layout_height="wrap_content" android:id="@+id/LoginBtnLayout" android:layout_width="fill_parent" android:gravity="center_horizontal">
