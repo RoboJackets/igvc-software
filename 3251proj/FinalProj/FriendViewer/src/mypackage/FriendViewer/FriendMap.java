@@ -1,7 +1,10 @@
 package mypackage.FriendViewer;
 
 import android.os.Bundle;
+import android.view.View;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -23,4 +26,24 @@ public class FriendMap extends MapActivity {
 	protected boolean isRouteDisplayed() {
 	    return false;
 	}
+	
+	//These methods are called when their button is pressed
+	
+	public void logout(View view) {
+		Intent i = new Intent("android.intent.action.MAIN");
+    	ComponentName n = new
+    	ComponentName("mypackage.FriendTracker",
+    	"mypackage.FriendTracker.LoginScreen");
+    	i.setComponent(n);
+    	startActivity(i); 
+    }
+    
+    public void close(View view) {
+    	Intent i = new Intent("android.intent.action.MAIN");
+    	ComponentName n = new
+    	ComponentName("mypackage.ViewContact",
+    	"mypackage.ViewContact.ViewContact");
+    	i.setComponent(n);
+    	startActivity(i); 
+    }
 }

@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" android:orientation="vertical">
-    <Button android:layout_width="wrap_content" android:layout_gravity="right" android:id="@+id/logoutId" android:height="20dip" android:layout_height="50dip" android:text="@string/logoutBtn"></Button>
+    <Button android:layout_width="wrap_content" android:layout_gravity="right" android:id="@+id/logoutId" android:height="20dip" android:layout_height="50dip" android:text="@string/logoutBtn" android:onClick="logout"></Button>
     <RelativeLayout android:layout_width="fill_parent" android:layout_height="10dip" android:id="@+id/Margin1"></RelativeLayout>
      <RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center_vertical" android:id="@+id/FriendIDLayout">
         <TextView android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/FriendsId" android:text="@string/FriendsLabel" android:layout_marginLeft="20dip" android:layout_marginTop="12dip"></TextView>
@@ -20,6 +20,6 @@
     </RelativeLayout>
     <RelativeLayout android:layout_width="fill_parent" android:layout_height="10dip" android:id="@+id/margin3"></RelativeLayout>
     <RelativeLayout android:layout_height="wrap_content" android:id="@+id/closeBtnLayout" android:layout_width="fill_parent" android:gravity="center_horizontal">
-        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:id="@+id/CloseId" android:text="@string/closeBtn"></Button>
+        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:id="@+id/CloseId" android:text="@string/closeBtn" android:onClick="close"></Button>
     </RelativeLayout>
 </LinearLayout>
