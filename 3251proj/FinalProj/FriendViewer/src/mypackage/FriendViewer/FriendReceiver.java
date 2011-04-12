@@ -3,6 +3,7 @@ package mypackage.FriendViewer;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.view.View;
 
 public class FriendReceiver extends BroadcastReceiver {
 
@@ -11,5 +12,4 @@ public class FriendReceiver extends BroadcastReceiver {
 		// TODO Auto-generated method stub
 
 	}
-
 }

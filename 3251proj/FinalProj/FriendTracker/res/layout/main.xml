@@ -2,15 +2,15 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" android:orientation="vertical">
-    <Button android:layout_width="wrap_content" android:layout_gravity="right" android:id="@+id/logoutId" android:text="@string/logoutBtn" android:height="20dip" android:layout_height="50dip"></Button>
+    <Button android:layout_width="wrap_content" android:layout_gravity="right" android:id="@+id/logoutId" android:text="@string/logoutBtn" android:height="20dip" android:layout_height="50dip" android:onClick="logout"></Button>
     <RelativeLayout android:layout_width="fill_parent" android:layout_height="10dip" android:id="@+id/Margin1"></RelativeLayout>
     <RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center_vertical" android:id="@+id/FriendIDLayout">
         <TextView android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/FriendsId" android:text="@string/FriendsLabel" android:layout_marginLeft="20dip" android:layout_marginTop="12dip"></TextView>
-        <EditText android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_marginLeft="100dip" android:width="250dip" android:id="@+id/FriendsTxtId" android:text="@string/FriendsTxt" android:layout_height="50dip"></EditText>
+        <EditText android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_marginLeft="100dip" android:width="250dip" android:id="@+id/FriendsTxtId" android:layout_height="50dip" android:text="@string/FriendsTxt"></EditText>
     </RelativeLayout>
     <RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/FriendButtonLayout" android:gravity="left">
-        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:text="@string/LookupBtn" android:id="@+id/LookupID"></Button>
-        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:height="50dip" android:layout_height="50dip" android:id="@+id/ViewFriendId" android:text="@string/ViewFriendsBtn" android:layout_marginLeft="190dip"></Button>
+        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:text="@string/LookupBtn" android:id="@+id/LookupID" android:onClick="lookupFriend"></Button>
+        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:height="50dip" android:layout_height="50dip" android:id="@+id/ViewFriendId" android:text="@string/ViewFriendsBtn" android:onClick="viewFriends" android:layout_toRightOf="@+id/LookupID"></Button>
     </RelativeLayout>
     <RelativeLayout android:layout_width="fill_parent" android:layout_height="10dip" android:id="@+id/margin2"></RelativeLayout>
     <RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center_vertical" android:id="@+id/LatLayout">
@@ -22,10 +22,10 @@
         <EditText android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_marginLeft="100dip" android:width="250dip" android:layout_height="50dip" android:id="@+id/LonTxtId" android:text="@string/LonTxt"></EditText>
     </RelativeLayout>
     <RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="left" android:id="@+id/UpdateBtnLayout">
-        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:id="@+id/UpdateID" android:text="@string/UpdateBtn"></Button>
-        <Button android:layout_alignParentTop="true" android:id="@+id/historyID" android:text="@string/HistoryBtn" android:layout_height="50dip" android:layout_width="wrap_content" android:layout_marginLeft="200dip"></Button>
+        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:id="@+id/UpdateID" android:text="@string/UpdateBtn" android:onClick="updateLocation"></Button>
+        <Button android:layout_alignParentTop="true" android:id="@+id/historyID" android:text="@string/HistoryBtn" android:layout_height="50dip" android:layout_width="wrap_content" android:onClick="history" android:layout_toRightOf="@+id/UpdateID"></Button>
     </RelativeLayout>
     <RelativeLayout android:layout_height="wrap_content" android:id="@+id/closeBtnLayout" android:layout_width="fill_parent" android:gravity="center_horizontal">
-        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:id="@+id/CloseId" android:text="@string/CloseBtn"></Button>
+        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:text="@string/CloseBtn" android:id="@+id/MainCloseId" android:onClick="close"></Button>
     </RelativeLayout>
 </LinearLayout>
