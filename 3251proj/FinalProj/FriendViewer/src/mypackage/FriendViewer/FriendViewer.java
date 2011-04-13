@@ -41,10 +41,15 @@ public class FriendViewer extends Activity {
 		Intent i = new Intent("android.intent.action.MAIN");
     	ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.LoginScreen");
     	i.setComponent(n);
-    	startActivity(i); 
+    	startActivity(i);
+    	finish();
     }
     
     public void close(View view) {
-    	
+    	Intent i = new Intent("android.intent.action.MAIN");
+    	ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.FriendTracker");
+    	i.setComponent(n);
+    	startActivity(i);
+    	finish();
     }
 }
