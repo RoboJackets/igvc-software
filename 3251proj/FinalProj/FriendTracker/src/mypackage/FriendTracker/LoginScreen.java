@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.EditText;
 
 public class LoginScreen extends Activity implements ServiceConnection {
+
+	
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -22,7 +24,7 @@ public class LoginScreen extends Activity implements ServiceConnection {
     
     public void login(View view) {
     	//Start the FriendTrackerControl Service & bind this screen to it
-    	Context context = this.getApplicationContext();
+    	Context context = getApplicationContext();
 		Intent intent = new Intent(context, mypackage.FriendTracker.FriendTrackerControl.class);
 		
 		//Add this class as the binder for the intent
@@ -36,9 +38,17 @@ public class LoginScreen extends Activity implements ServiceConnection {
 		EditText ip = (EditText)findViewById(R.id.serverIPTxtID);
 		intent.putExtra("ip", ip.getText().toString());	
         context.bindService(intent, this, Context.BIND_AUTO_CREATE);
+        finish();
     }
     
     public void close(View view) {
+    	finish();
+    }
+    
+    public void finish() {
+    	Context context = getApplicationContext();
+    	context.unbindService(this);
+    	super.finish();
     }
 
 	@Override

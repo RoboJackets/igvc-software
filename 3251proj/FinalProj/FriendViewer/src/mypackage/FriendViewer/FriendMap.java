@@ -34,12 +34,14 @@ public class FriendMap extends MapActivity {
     	ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.LoginScreen");
     	i.setComponent(n);
     	startActivity(i); 
+    	finish();
     }
     
     public void close(View view) {
     	Intent i = new Intent("android.intent.action.MAIN");
-    	ComponentName n = new ComponentName("mypackage.ViewContact", "mypackage.ViewContact.ViewContact");
+    	ComponentName n = new ComponentName("mypackage.FriendViewer", "mypackage.FriendViewer.FriendViewer");
     	i.setComponent(n);
     	startActivity(i); 
+    	finish();
     }
 }
