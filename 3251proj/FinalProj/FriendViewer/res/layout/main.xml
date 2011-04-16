@@ -5,7 +5,7 @@
     android:layout_height="fill_parent">
     <Button android:layout_height="50dip" android:layout_width="wrap_content" android:layout_gravity="right" android:id="@+id/logoutID" android:text="@string/logoutBtn" android:onClick="logout"></Button>
     <FrameLayout android:id="@+id/frameLayout1" android:layout_width="fill_parent" android:layout_height="160dip">
-        <TextView android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@+id/FriendsList" android:text="@string/ListTxt"></TextView>
+        <EditText android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@+id/FriendListId" android:text="@string/FriendsListTxt"></EditText>
     </FrameLayout>
     <RelativeLayout android:id="@+id/relativeLayout1" android:layout_width="fill_parent" android:layout_height="50dip">
         <EditText android:layout_alignParentTop="true" android:layout_width="fill_parent" android:layout_height="fill_parent" android:id="@+id/FriendID" android:text="@string/FriendTxt"></EditText>

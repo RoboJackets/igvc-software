@@ -6,7 +6,7 @@
     <RelativeLayout android:layout_width="fill_parent" android:layout_height="10dip" android:id="@+id/Margin1"></RelativeLayout>
     <RelativeLayout android:layout_width="fill_parent" android:id="@+id/HistoryLayout" android:layout_height="250dip" android:gravity="center_vertical">
         <TextView android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/HistoryLabelID" android:text="@string/HistoryLabel" android:layout_marginLeft="20dip" android:layout_marginTop="100dip"></TextView>
-        <EditText android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_marginLeft="100dip" android:width="250dip" android:id="@+id/HistoryTxtID" android:text="@string/HistoryTxt" android:layout_height="fill_parent" android:editable="false"></EditText>
+        <EditText android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_marginLeft="100dip" android:width="250dip" android:layout_height="fill_parent" android:editable="false" android:text="@string/HistoryTxt" android:id="@+id/historyInputID"></EditText>
     </RelativeLayout>
     <RelativeLayout android:layout_height="wrap_content" android:id="@+id/closeBtnLayout" android:layout_width="fill_parent" android:gravity="center_horizontal">
         <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:text="@string/CloseBtn" android:id="@+id/MainCloseId" android:onClick="close"></Button>
