@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
     <string name="hello">Hello World, FriendViewer!</string>
     <string name="app_name">Friend Viewer</string>
@@ -6,7 +6,8 @@
     <string name="closeBtn">Close</string>
     <string name="AddBtn">Add Friend</string>
     <string name="RemoveBtn">Remove Friend</string>
-    <string name="FriendTxt"></string>
-    <string name="ListTxt"></string>
+    <string name="FriendTxt"/>
+    <string name="ListTxt"/>
     <string name="MapBtn">Map</string>
+    <string name="FriendsListTxt"></string>
 </resources>

@@ -18,6 +18,6 @@ public class LoginFailed extends Activity {
     	ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.LoginScreen");
     	i.setComponent(n);
     	startActivity(i); 
-    	finish();
+    	//finish();
 	}
 }

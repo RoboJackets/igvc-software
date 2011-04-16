@@ -15,7 +15,7 @@ public final class R {
     }
     public static final class id {
         public static final int FriendID=0x7f050004;
-        public static final int FriendsList=0x7f050002;
+        public static final int FriendListId=0x7f050002;
         public static final int MapID=0x7f05000b;
         public static final int RemoveID=0x7f050007;
         public static final int addID=0x7f050006;
@@ -34,6 +34,7 @@ public final class R {
     public static final class string {
         public static final int AddBtn=0x7f040004;
         public static final int FriendTxt=0x7f040006;
+        public static final int FriendsListTxt=0x7f040009;
         public static final int ListTxt=0x7f040007;
         public static final int MapBtn=0x7f040008;
         public static final int RemoveBtn=0x7f040005;

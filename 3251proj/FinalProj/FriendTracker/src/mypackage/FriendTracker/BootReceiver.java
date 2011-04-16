@@ -17,6 +17,5 @@ public class BootReceiver extends BroadcastReceiver {
 		Intent startupService = new Intent(context, FriendTrackerControl.class);
 		startupIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		context.startService(startupService);
-	
 	}
 }

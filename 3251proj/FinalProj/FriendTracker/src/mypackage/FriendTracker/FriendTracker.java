@@ -16,6 +16,7 @@ import android.widget.EditText;
 
 public class FriendTracker extends Activity implements ServiceConnection {
 	FriendTrackerControl mService;
+	Context mContext;
 	
     /** Called when the activity is first created. */
     @Override
@@ -23,24 +24,27 @@ public class FriendTracker extends Activity implements ServiceConnection {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        Context context = this.getApplicationContext();
-        Intent intent = new Intent(context, mypackage.FriendTracker.FriendTrackerControl.class);
-        context.bindService(intent, this, Context.BIND_AUTO_CREATE); 
+        mContext = this.getApplicationContext();
+        Intent intent = new Intent(mContext, mypackage.FriendTracker.FriendTrackerControl.class);
+        mContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
     }
     
     //The following methods are called when there button is pressed
     
     public void viewFriends(View view) {
+    	//Intent intent = new Intent(mContext, mypackage.FriendTracker.FriendTrackerControl.class);
+		
     	Intent i = new Intent("android.intent.action.MAIN");
-    	ComponentName n = new ComponentName("mypackage.FriendViewer", "mypackage.FriendViewer.FriendViewer");
-    	i.setComponent(n);
-    	startActivity(i); 
+    	i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		ComponentName n = new ComponentName("mypackage.FriendViewer", "mypackage.FriendViewer.FriendViewer");
+		i.setComponent(n);
+		startActivity(i);
+		finish();
     }
     
     public void lookupFriend(View view) {
     	//Start the FriendTrackerControl Service & bind this screen to it
-    	Context context = getApplicationContext();
-		Intent intent = new Intent(context, mypackage.FriendTracker.FriendTrackerControl.class);
+		Intent intent = new Intent(mContext, mypackage.FriendTracker.FriendTrackerControl.class);
     	EditText friendId = (EditText)findViewById(R.id.FriendsTxtId);
 		intent.putExtra("FriendId", friendId.getText().toString());
 		
@@ -53,33 +57,43 @@ public class FriendTracker extends Activity implements ServiceConnection {
     }
     
     public void updateLocation(View view) {
-    	
+		Intent intent = new Intent(mContext, mypackage.FriendTracker.FriendTrackerControl.class);
+		EditText lat = (EditText)findViewById(R.id.LatTxtId);
+		EditText lon = (EditText)findViewById(R.id.LonTxtId);
+		intent.putExtra("Lat", lat.getText().toString());
+		intent.putExtra("Lon", lon.getText().toString());
+    	try {
+    		mService.updateLocation(intent);
+    	}
+    	catch (IOException e) {
+    		e.printStackTrace();
+    	}
     }
     
     public void history(View view) {
-    	Intent i = new Intent("android.intent.action.MAIN");
-    	ComponentName n = new
-    	ComponentName("mypackage.FriendTracker",
-    	"mypackage.FriendTracker.ViewHistory");
-    	i.setComponent(n);
-    	startActivity(i);
+    	Intent intent = new Intent(mContext, mypackage.FriendTracker.FriendTrackerControl.class);
+    	try {
+    		mService.startHistory(intent);
+    		finish();
+    	}
+    	catch (IOException e) {
+    		e.printStackTrace();
+    	}
     }
     
     public void logout(View view) {
     	Intent i = new Intent("android.intent.action.MAIN");
-    	ComponentName n = new
-    	ComponentName("mypackage.FriendTracker",
-    	"mypackage.FriendTracker.LoginScreen");
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    	ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.LoginScreen");
     	i.setComponent(n);
-    	startActivity(i); 
+    	startActivity(i);
     	finish();
     }
     
     public void close(View view) {
     	Intent i = new Intent("android.intent.action.MAIN");
-    	ComponentName n = new
-    	ComponentName("mypackage.FriendTracker",
-    	"mypackage.FriendTracker.LoginScreen");
+    	i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    	ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.LoginScreen");
     	i.setComponent(n);
     	startActivity(i); 
     	finish();
@@ -90,11 +104,11 @@ public class FriendTracker extends Activity implements ServiceConnection {
 		// TODO Auto-generated method stub
 		LocalBinder binder = (LocalBinder) service;
 		mService = binder.getService();
+		FriendProvider.setupFriendProvider(mContext, mService);
 	}
 
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 		// TODO Auto-generated method stub
-		
 	}
 }
