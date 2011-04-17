@@ -14,20 +14,15 @@ public final class R {
         public static final int icon=0x7f020000;
     }
     public static final class id {
-        public static final int AddButtonLayout=0x7f050005;
         public static final int FriendListId=0x7f050002;
-        public static final int FriendTxtId=0x7f050004;
-        public static final int FrinedInputLayout=0x7f050003;
-        public static final int MapID=0x7f05000b;
-        public static final int RemoveID=0x7f050007;
-        public static final int addID=0x7f050006;
-        public static final int closeID=0x7f05000a;
-        public static final int frameLayout1=0x7f05000c;
+        public static final int MapID=0x7f050006;
+        public static final int closeID=0x7f050005;
+        public static final int frameLayout1=0x7f050007;
         public static final int friendListLayout=0x7f050001;
         public static final int logoutID=0x7f050000;
-        public static final int mapButtonLayout=0x7f050009;
-        public static final int relativeLayout3=0x7f050008;
-        public static final int relativeLayout4=0x7f05000d;
+        public static final int mapButtonLayout=0x7f050004;
+        public static final int relativeLayout3=0x7f050003;
+        public static final int relativeLayout4=0x7f050008;
     }
     public static final class layout {
         public static final int main=0x7f030000;

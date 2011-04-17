@@ -49,6 +49,11 @@
 				<action android:name="mypackage.FriendTracker.startatboot.FriendTrackerControl" />
 			</intent-filter>
 		</service>
+		
+		<provider android:name=".FriendProvider" 
+        		  android:authorities="mypackage.friendtracker.friendprovider">
+        </provider>
+        
     </application>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>

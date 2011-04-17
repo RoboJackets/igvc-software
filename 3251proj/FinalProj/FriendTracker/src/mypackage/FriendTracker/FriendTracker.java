@@ -32,19 +32,31 @@ public class FriendTracker extends Activity implements ServiceConnection {
 	// The following methods are called when there button is pressed
 
 	public void viewFriends(View view) {
-		// Intent intent = new Intent(mContext,
-		// mypackage.FriendTracker.FriendTrackerControl.class);
-
-		Intent i = new Intent("android.intent.action.MAIN");
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		ComponentName n = new ComponentName("mypackage.FriendViewer",
-				"mypackage.FriendViewer.FriendViewer");
-		i.setComponent(n);
-		startActivity(i);
-		finish();
+		Intent intent = new Intent(mContext, mypackage.FriendTracker.FriendTrackerControl.class);
+		try {
+			mService.viewFriends(intent);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public void lookupFriend(View view) {
+	public void addFriend(View view) {
+		Intent intent = new Intent(mContext,
+				mypackage.FriendTracker.FriendTrackerControl.class);
+		View idLayout = findViewById(R.id.FriendIDLayout);
+		EditText friendId = (EditText) idLayout.findViewById(R.id.FriendsTxtId);
+		intent.putExtra("FriendId", friendId.getText().toString());
+
+		try {
+			mService.addFriend(intent);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void removeFriend(View view) {
 		// Start the FriendTrackerControl Service & bind this screen to it
 		Intent intent = new Intent(mContext,
 				mypackage.FriendTracker.FriendTrackerControl.class);
@@ -53,7 +65,7 @@ public class FriendTracker extends Activity implements ServiceConnection {
 		intent.putExtra("FriendId", friendId.getText().toString());
 
 		try {
-			mService.lookupFriend(intent);
+			mService.removeFriend(intent);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -117,7 +129,6 @@ public class FriendTracker extends Activity implements ServiceConnection {
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		LocalBinder binder = (LocalBinder) service;
 		mService = binder.getService();
-		FriendProvider.initialize(mContext, mService);
 	}
 
 	@Override

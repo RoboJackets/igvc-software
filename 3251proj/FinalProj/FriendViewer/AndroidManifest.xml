@@ -25,7 +25,7 @@
 				<category android:name="android.intent.category.HOME" />
 			</intent-filter>
 		</receiver>
-        
+		       
 	    <uses-library android:name="com.google.android.maps" />
     </application>
     <uses-permission android:name="android.permission.INTERNET" />
