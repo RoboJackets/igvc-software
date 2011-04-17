@@ -27,9 +27,9 @@ public final class R {
         public static final int History_logoutId=0x7f050000;
         public static final int IPLabelID=0x7f05000b;
         public static final int IdLabelID=0x7f050008;
-        public static final int LatId=0x7f05001b;
-        public static final int LatLayout=0x7f05001a;
-        public static final int LatTxtId=0x7f05001c;
+        public static final int LatId=0x7f05001c;
+        public static final int LatLayout=0x7f05001b;
+        public static final int LatTxtId=0x7f05001d;
         public static final int LoginScreen_CloseId=0x7f050010;
         public static final int LoginScreen_LoginBtnLayout=0x7f05000d;
         public static final int LoginScreen_LoginId=0x7f05000e;
@@ -38,19 +38,20 @@ public final class R {
         public static final int LoginScreen_cliendIDLayout=0x7f050007;
         public static final int LoginScreen_closeBtnLayout=0x7f05000f;
         public static final int LoginScreen_serverIPTxtID=0x7f05000c;
-        public static final int LonId=0x7f05001e;
-        public static final int LonLayout=0x7f05001d;
-        public static final int LonTxtId=0x7f05001f;
+        public static final int LonId=0x7f05001f;
+        public static final int LonLayout=0x7f05001e;
+        public static final int LonTxtId=0x7f050020;
         public static final int LookupID=0x7f050017;
-        public static final int MainCloseId=0x7f050024;
+        public static final int MainCloseId=0x7f050025;
         public static final int Margin1=0x7f050012;
-        public static final int UpdateBtnLayout=0x7f050020;
-        public static final int UpdateID=0x7f050021;
+        public static final int UpdateBtnLayout=0x7f050021;
+        public static final int UpdateID=0x7f050022;
         public static final int ViewFriendId=0x7f050018;
-        public static final int closeBtnLayout=0x7f050023;
-        public static final int historyID=0x7f050022;
+        public static final int closeBtnLayout=0x7f050024;
+        public static final int historyID=0x7f050023;
         public static final int logoutId=0x7f050011;
-        public static final int margin2=0x7f050019;
+        public static final int margin2=0x7f05001a;
+        public static final int removeFriendBtn=0x7f050019;
     }
     public static final class layout {
         public static final int history_layout=0x7f030000;
@@ -58,31 +59,28 @@ public final class R {
         public static final int main=0x7f030002;
     }
     public static final class string {
-        public static final int AddBtn=0x7f040017;
-        public static final int CloseBtn=0x7f04000c;
-        public static final int FriendTxt=0x7f040016;
+        public static final int AddFriendBtn=0x7f040014;
+        public static final int CloseBtn=0x7f04000a;
+        public static final int FriendTxt=0x7f040013;
         public static final int FriendsLabel=0x7f040003;
         public static final int FriendsTxt=0x7f040004;
-        public static final int HistoryBtn=0x7f04000b;
-        public static final int HistoryLabel=0x7f040013;
-        public static final int HistoryTxt=0x7f040014;
-        public static final int IPLabel=0x7f040011;
-        public static final int IPTxt=0x7f040012;
-        public static final int IdLabel=0x7f040010;
-        public static final int LatLabel=0x7f040007;
-        public static final int LatTxt=0x7f040008;
-        public static final int LoginBtn=0x7f04000d;
-        public static final int LoginFailedLabel=0x7f040015;
-        public static final int LonLabel=0x7f040009;
-        public static final int LonTxt=0x7f04000a;
-        public static final int LookupBtn=0x7f040005;
-        public static final int MapBtn=0x7f040019;
-        public static final int RemoveBtn=0x7f040018;
-        public static final int UpdateBtn=0x7f040006;
-        public static final int ViewFriendsBtn=0x7f04000f;
+        public static final int HistoryBtn=0x7f040016;
+        public static final int HistoryLabel=0x7f040011;
+        public static final int HistoryTxt=0x7f040012;
+        public static final int IPLabel=0x7f04000f;
+        public static final int IPTxt=0x7f040010;
+        public static final int IdLabel=0x7f04000e;
+        public static final int LatLabel=0x7f040006;
+        public static final int LatTxt=0x7f040007;
+        public static final int LoginBtn=0x7f04000b;
+        public static final int LonLabel=0x7f040008;
+        public static final int LonTxt=0x7f040009;
+        public static final int RemoveFriendBtn=0x7f040015;
+        public static final int UpdateBtn=0x7f040005;
+        public static final int ViewFriendsBtn=0x7f04000d;
         public static final int app_name=0x7f040001;
         public static final int hello=0x7f040000;
-        public static final int loginTxt=0x7f04000e;
+        public static final int loginTxt=0x7f04000c;
         public static final int logoutBtn=0x7f040002;
     }
 }

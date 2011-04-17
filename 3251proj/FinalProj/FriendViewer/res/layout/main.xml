@@ -7,13 +7,6 @@
     <RelativeLayout android:id="@+id/friendListLayout" android:layout_width="fill_parent" android:layout_height="160dip">
         <EditText android:text="EditText" android:layout_alignParentLeft="true" android:id="@+id/FriendListId" android:layout_width="fill_parent" android:layout_height="fill_parent" android:editable="false"></EditText>
     </RelativeLayout>
-    <RelativeLayout android:id="@+id/FrinedInputLayout" android:layout_width="fill_parent" android:layout_height="50dip">
-        <EditText android:layout_alignParentTop="true" android:layout_width="fill_parent" android:layout_height="fill_parent" android:text="@string/FriendTxt" android:id="@+id/FriendTxtId"></EditText>
-    </RelativeLayout>
-    <RelativeLayout android:layout_width="fill_parent" android:layout_height="50dip" android:gravity="center_horizontal" android:id="@+id/AddButtonLayout">
-        <Button android:layout_height="wrap_content" android:layout_width="wrap_content" android:layout_alignParentLeft="true" android:id="@+id/addID" android:text="@string/AddBtn" android:onClick="addFriend"></Button>
-        <Button android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/RemoveID" android:text="@string/RemoveBtn" android:layout_toRightOf="@+id/addID" android:onClick="removeFriend"></Button>
-    </RelativeLayout>
     <RelativeLayout android:id="@+id/relativeLayout3" android:layout_width="fill_parent" android:layout_height="10dip"></RelativeLayout>
     <RelativeLayout android:layout_width="fill_parent" android:layout_height="50dip" android:gravity="center_horizontal" android:id="@+id/mapButtonLayout">
         <Button android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/closeID" android:text="@string/closeBtn" android:layout_toRightOf="@+id/MapID" android:onClick="close"></Button>
