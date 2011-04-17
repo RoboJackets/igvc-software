@@ -12,59 +12,86 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class LoginScreen extends Activity implements ServiceConnection {
 	FriendTrackerControl mService;
 	Context mContext;
-	
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {	
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.login_layout);
-        mContext = this.getApplicationContext();
-        Intent intent = new Intent(mContext, mypackage.FriendTracker.FriendTrackerControl.class);
-        mContext.bindService(intent, this, Context.BIND_AUTO_CREATE); 
-    }
-    
-    //The following methods are called when there button is pressed
-    
-    public void login(View view) {
-		Intent intent = new Intent(mContext, mypackage.FriendTracker.FriendTrackerControl.class);
-	
-		//Get the login id and add it to the intent
-		EditText login = (EditText)findViewById(R.id.LoginTxtId);
-		intent.putExtra("id", login.getText().toString());
-		
-		//Get the server ip and add it to the intent
-		EditText ip = (EditText)findViewById(R.id.serverIPTxtID);
+
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.login_layout);
+		mContext = this.getApplicationContext();
+		Intent intent = new Intent(mContext,
+				mypackage.FriendTracker.FriendTrackerControl.class);
+		mContext.bindService(intent, this, Context.BIND_AUTO_CREATE);
+	}
+
+	// The following methods are called when there button is pressed
+
+	public void login(View view) {
+		Intent intent = new Intent(mContext,
+				mypackage.FriendTracker.FriendTrackerControl.class);
+
+		// Get the login id and add it to the intent
+		View loginLayout = findViewById(R.id.LoginScreen_cliendIDLayout);
+		EditText login = (EditText) loginLayout
+				.findViewById(R.id.LoginScreen_LoginTxtId);
+		String id = login.getText().toString();
+		intent.putExtra("id", id);
+
+		if (id.contains(" ")) {
+			Toast toast = Toast.makeText(getApplicationContext(),
+					"Error: Id cannot contains spaces\n", Toast.LENGTH_SHORT);
+			toast.show();
+			return;
+		}
+
+		if (id.equals("q") || id.equals("Q")) {
+			Toast toast = Toast.makeText(getApplicationContext(),
+					"Error: Id cannot be q/Q\n", Toast.LENGTH_SHORT);
+			toast.show();
+			return;
+		}
+
+		// Get the server ip and add it to the intent
+		View ipLayout = findViewById(R.id.LoginScreen_ServerIPLayout);
+		EditText ip = (EditText) ipLayout
+				.findViewById(R.id.LoginScreen_serverIPTxtID);
 		intent.putExtra("ip", ip.getText().toString());
-        
+
 		try {
 			mService.login(intent);
-		} catch (IOException e) {
-			Intent i = new Intent("android.intent.action.MAIN");
-			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.LoginFailed");
-			i.setComponent(n);
-			startActivity(i);
+			// finish();
+		} catch (Exception e) {
+			Toast toast = Toast.makeText(getApplicationContext(),
+					"Unable to Connect to Server\n", Toast.LENGTH_SHORT);
+			toast.show();
 		}
-		//mContext.unbindService(this); //Finish this activity it's no longer needed
-		finish();
-    }
-    
-    public void close(View view) {
-    		finish();
-    }
+		// mContext.unbindService(this); //Finish this activity it's no longer
+		// needed
 
+	}
+
+	public void close(View view) {
+		finish();
+	}
+
+	// Kill the activity when its not in the foreground anymore
+	public void onPause() {
+		super.onPause();
+		finish();
+	}
 
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		// TODO Auto-generated method stub
 		LocalBinder binder = (LocalBinder) service;
 		mService = binder.getService();
-		
-		//Logout any logged in user
+
+		// Logout any logged in user
 		try {
 			mService.logout();
 		} catch (IOException e) {

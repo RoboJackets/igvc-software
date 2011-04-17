@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="mypackage/FriendTracker/" kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
+	<classpathentry excluding="mypackage/FriendTracker/BootReceiver.java|mypackage/FriendTracker/FriendTracker.java|mypackage/FriendTracker/LoginScreen.java|mypackage/FriendTracker/ViewHistory.java" kind="src" path="FriendTracker"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/FriendTracker"/>
 	<classpathentry kind="output" path="bin"/>
