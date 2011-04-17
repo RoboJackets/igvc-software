@@ -23,6 +23,10 @@
     <string name="HistoryLabel">History:</string>
     <string name="HistoryTxt"></string>
     <string name="LoginFailedLabel">Login Failed.</string>
+    <string name="FriendTxt"></string>
+    <string name="AddBtn">Add Friend</string>
+    <string name="RemoveBtn">Remove Friend</string>
+    <string name="MapBtn">View Map</string>
     
     
     

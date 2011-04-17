@@ -3,22 +3,22 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" android:orientation="vertical">
     
-    <RelativeLayout android:id="@+id/cliendIDLayout" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center_vertical" android:gravity="center_vertical">
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center_vertical" android:gravity="center_vertical" android:id="@+id/LoginScreen_cliendIDLayout">
         <TextView android:layout_alignParentLeft="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/IdLabelID" android:layout_marginTop="25dip" android:text="@string/IdLabel"></TextView>
-	    <EditText android:layout_alignParentTop="true" android:id="@+id/LoginTxtId" android:text="@string/loginTxt" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_toRightOf="@+id/IdLabelID"></EditText>
+	    <EditText android:layout_alignParentTop="true" android:text="@string/loginTxt" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_toRightOf="@+id/IdLabelID" android:id="@+id/LoginScreen_LoginTxtId"></EditText>
     </RelativeLayout>
     
-    <RelativeLayout android:id="@+id/ServerIPLayout" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center_vertical" android:gravity="center_vertical">
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_gravity="center_vertical" android:gravity="center_vertical" android:id="@+id/LoginScreen_ServerIPLayout">
         <TextView android:layout_alignParentLeft="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/IPLabelID" android:layout_marginTop="25dip" android:text="@string/IPLabel"></TextView>
-        <EditText android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_toRightOf="@+id/IPLabelID" android:text="@string/IPTxt" android:id="@+id/serverIPTxtID"></EditText>
+        <EditText android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="fill_parent" android:layout_toRightOf="@+id/IPLabelID" android:text="@string/IPTxt" android:id="@+id/LoginScreen_serverIPTxtID"></EditText>
     </RelativeLayout>
     
-    <RelativeLayout android:layout_height="wrap_content" android:id="@+id/LoginBtnLayout" android:layout_width="fill_parent" android:gravity="center_horizontal">
-        <Button android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/LoginId" android:text="@string/LoginBtn" android:width="200dip" android:height="50dip" android:onClick="login"></Button>
+    <RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center_horizontal" android:id="@+id/LoginScreen_LoginBtnLayout">
+        <Button android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:text="@string/LoginBtn" android:width="200dip" android:height="50dip" android:onClick="login" android:id="@+id/LoginScreen_LoginId"></Button>
     </RelativeLayout>
     
-    <RelativeLayout android:layout_height="wrap_content" android:id="@+id/closeBtnLayout" android:layout_width="fill_parent" android:gravity="center_horizontal">
-        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:id="@+id/CloseId" android:text="@string/CloseBtn" android:onClick="close"></Button>
+    <RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center_horizontal" android:id="@+id/LoginScreen_closeBtnLayout">
+        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:text="@string/CloseBtn" android:onClick="close" android:id="@+id/LoginScreen_CloseId"></Button>
     </RelativeLayout>
 
 </LinearLayout>

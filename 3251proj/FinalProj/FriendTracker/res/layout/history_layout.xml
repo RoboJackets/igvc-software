@@ -2,13 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" android:orientation="vertical">
-    <Button android:layout_width="wrap_content" android:layout_gravity="right" android:id="@+id/logoutId" android:text="@string/logoutBtn" android:height="20dip" android:layout_height="50dip" android:onClick="logout"></Button>
-    <RelativeLayout android:layout_width="fill_parent" android:layout_height="10dip" android:id="@+id/Margin1"></RelativeLayout>
-    <RelativeLayout android:layout_width="fill_parent" android:id="@+id/HistoryLayout" android:layout_height="250dip" android:gravity="center_vertical">
+    <Button android:layout_width="wrap_content" android:layout_gravity="right" android:text="@string/logoutBtn" android:height="20dip" android:layout_height="50dip" android:onClick="logout" android:id="@+id/History_logoutId"></Button>
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="10dip" android:id="@+id/History_Margin1"></RelativeLayout>
+    <RelativeLayout android:layout_width="fill_parent" android:layout_height="250dip" android:gravity="center_vertical" android:id="@+id/HistoryLayout">
         <TextView android:layout_alignParentTop="true" android:layout_height="wrap_content" android:layout_width="wrap_content" android:id="@+id/HistoryLabelID" android:text="@string/HistoryLabel" android:layout_marginLeft="20dip" android:layout_marginTop="100dip"></TextView>
-        <EditText android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_marginLeft="100dip" android:width="250dip" android:layout_height="fill_parent" android:editable="false" android:text="@string/HistoryTxt" android:id="@+id/historyInputID"></EditText>
+        <EditText android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_marginLeft="100dip" android:width="250dip" android:layout_height="fill_parent" android:editable="false" android:text="@string/HistoryTxt" android:id="@+id/History_historyTxtId"></EditText>
     </RelativeLayout>
-    <RelativeLayout android:layout_height="wrap_content" android:id="@+id/closeBtnLayout" android:layout_width="fill_parent" android:gravity="center_horizontal">
-        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:text="@string/CloseBtn" android:id="@+id/MainCloseId" android:onClick="close"></Button>
+    <RelativeLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:gravity="center_horizontal" android:id="@+id/History_closeBtnLayout">
+        <Button android:layout_alignParentTop="true" android:layout_width="wrap_content" android:layout_height="50dip" android:text="@string/CloseBtn" android:onClick="close" android:id="@+id/History_CloseId"></Button>
     </RelativeLayout>
 </LinearLayout>

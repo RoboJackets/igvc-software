@@ -13,72 +13,70 @@ import java.util.Set;
 
 public class FriendProvider extends ContentProvider {
 
-	private static HashMap<String, String> myFriends = new HashMap<String, String>();
+	private static HashMap<String, String> myFriends;
 	private static FriendTrackerControl mService;
 	private static Context mContext;
-	
-	public static void setupFriendProvider(Context context, FriendTrackerControl service) {
-		if(mContext == null) {
+	private static boolean initialized = false;
+
+	public static void initialize(Context context, FriendTrackerControl service) {
+		if(!initialized) {
 			mService = service;
 			mContext = context;
+			myFriends = new HashMap<String, String>();
+			initialized = true;
 		}
 	}
 	
-	
+	public static boolean isInitialized() {
+		return initialized;
+	}
+
 	public static String getFriend(String id) {
-		if(myFriends != null) {
-			HashMap<String, String> temp = myFriends;
-			String ans =  myFriends.get(id);
-			System.out.println("Hello");
-			return ans;
-		}
+		if (mContext != null)
+			return myFriends.get(id);
+
 		return null;
 	}
-	
+
 	public static String addFriend(String id, String loc) {
-		if(myFriends != null) {
-			HashMap<String, String> temp = myFriends;
-			String ans = myFriends.put(id, loc);		
-			return ans;
-		}
+		if (mContext != null)
+			return myFriends.put(id, loc);
+
 		return null;
 	}
-	
+
 	public static String addFriend(String id) {
-		Intent intent = new Intent(mContext, mypackage.FriendTracker.FriendTrackerControl.class);
+		Intent intent = new Intent(mContext,
+				mypackage.FriendTracker.FriendTrackerControl.class);
 		intent.putExtra("FriendId", id);
-		
-    	try {
-    		if(mService != null) {
-    			mService.lookupFriend(intent);
-    			return getFriend(id);
-    		}
-    		return null;
+
+		try {
+			if (mService != null) {
+				mService.lookupFriend(intent);
+				return getFriend(id);
+			}
+			return null;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
+
 	public static String removeFriend(String id) {
-		if(myFriends != null) {
-			HashMap<String, String> temp = myFriends;
-			String ans =  myFriends.remove(id);
-			return ans;
-		}
+		if (mContext != null)
+			return myFriends.remove(id);
+
 		return null;
 	}
-	
+
 	public static Set<String> getAllFriends() {
-		if(myFriends != null) {
-			HashMap<String, String> temp = myFriends;
-			Set<String> ans = myFriends.keySet();
-			return ans;
-		}
+		if (mContext != null)
+			return myFriends.keySet();
+
 		return null;
 	}
-	
+
 	@Override
 	public int delete(Uri arg0, String arg1, String[] arg2) {
 		// TODO Auto-generated method stub
@@ -116,5 +114,5 @@ public class FriendProvider extends ContentProvider {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-	
+
 }
