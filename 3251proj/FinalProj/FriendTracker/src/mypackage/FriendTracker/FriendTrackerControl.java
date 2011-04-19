@@ -8,14 +8,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.IBinder;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-
 import mypackage.FriendTracker.Friend.Friends;
 
 public class FriendTrackerControl extends Service {
@@ -24,6 +23,23 @@ public class FriendTrackerControl extends Service {
 	String clientId;
 	String serverIP;
 	static String myHistory;
+	CountDownTimer updateTimer = new CountDownTimer(40000, 5000) {
+
+	     public void onTick(long millisUntilFinished) {
+	         try {
+				updateDatabase();
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	     }
+
+	     //Restart the timer
+	     public void onFinish() {
+	    	 this.start();
+	     }
+	  };
+
 	/**
 	 * Class for clients to access. Because we know this service always runs in
 	 * the same process as its clients, we don't need to deal with IPC.
@@ -45,6 +61,7 @@ public class FriendTrackerControl extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		//		myListener = new myActionListener();
 		// mProvider = new FriendProvider();
 		// We want this service to continue running until it is explicitly
 		// stopped, so return sticky.
@@ -70,10 +87,11 @@ public class FriendTrackerControl extends Service {
 		ServerMessage reply = ServerMessage.receive(clientSock);
 
 		if (reply.getType() == ServerMessage.MESSAGE_IDAVAILABLE) {
-			ComponentName n = new ComponentName("mypackage.FriendTracker",
-					"mypackage.FriendTracker.FriendTracker");
+			ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.FriendTracker");
 			i.setComponent(n);
 			startActivity(i);
+			updateTimer.start();
+
 		} else {
 			Toast toast = Toast.makeText(getApplicationContext(),
 					"Invalid Client Id Specified\n", Toast.LENGTH_SHORT);
@@ -90,32 +108,11 @@ public class FriendTrackerControl extends Service {
 		clientSock = null;
 		clientId = null;
 	}
-	
-	public void viewFriends(Intent intent) throws IOException {
-		
-		ArrayList<String> ids = new ArrayList<String>(); 
-		
-		Cursor cursor =  getContentResolver().query(Friends.CONTENT_URI, null, null, null, null);
-		cursor.moveToNext();
 
-		do {
+	public void viewFriends(Intent intent) throws Exception {	
+		String temp = "HELLO";
+		updateDatabase();
 
-			int infoColumn = cursor.getColumnIndex(Friends.INFO);
-			String value = cursor.getString(infoColumn);
-			String id = value.substring(0, value.indexOf(" "));
-			ids.add(id);
-		} while (cursor.moveToNext());
-		
-		//Update all the ids in the database
-		for(int i = 0; i < ids.size(); i++) {
-			removeRecord(ids.get(i));
-			ServerMessage msg = new ServerMessage(ServerMessage.MESSAGE_FRIENDS, clientId, new String(ids.get(i) + '\n'));
-			msg.send(clientSock);
-			ServerMessage response = ServerMessage.receive(clientSock);
-			String message = formatResponse(response.getMessage());
-			addRecord(ids.get(i), message);
-		}
-				
 		Intent i = new Intent("android.intent.action.MAIN");
 		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		ComponentName n = new ComponentName("mypackage.FriendViewer", "mypackage.FriendViewer.FriendViewer");
@@ -132,24 +129,49 @@ public class FriendTrackerControl extends Service {
 		ServerMessage response = ServerMessage.receive(clientSock);
 
 		String message = formatResponse(response.getMessage());
-		
+
 		addRecord(id, message);
-		
+
 		Toast toast = Toast.makeText(getApplicationContext(), "Friend Added\n",
 				Toast.LENGTH_SHORT);
 		toast.show();
 	}
-	
+
 	public void removeFriend(Intent intent) throws IOException {
 		Bundle b = intent.getExtras();
 		String id = b.getString("FriendId");
-		
+
 		int count = removeRecord(id);
-		
+
 		if(count > 0) {
 			Toast toast = Toast.makeText(getApplicationContext(), "Friend Removed\n",
 					Toast.LENGTH_SHORT);
 			toast.show();
+		}
+	}
+
+	public void updateDatabase() throws Exception {
+		ArrayList<String> ids = new ArrayList<String>(); 
+
+		Cursor cursor =  getContentResolver().query(Friends.CONTENT_URI, null, null, null, null);
+		cursor.moveToNext();
+
+		do {
+
+			int infoColumn = cursor.getColumnIndex(Friends.INFO);
+			String value = cursor.getString(infoColumn);
+			String id = value.substring(0, value.indexOf(" "));
+			ids.add(id);
+		} while (cursor.moveToNext());
+
+		//Update all the ids in the database
+		for(int i = 0; i < ids.size(); i++) {
+			removeRecord(ids.get(i));
+			ServerMessage msg = new ServerMessage(ServerMessage.MESSAGE_FRIENDS, clientId, new String(ids.get(i) + '\n'));
+			msg.send(clientSock);
+			ServerMessage response = ServerMessage.receive(clientSock);
+			String message = formatResponse(response.getMessage());
+			addRecord(ids.get(i), message);
 		}
 	}
 
@@ -194,13 +216,13 @@ public class FriendTrackerControl extends Service {
 
 	private int removeRecord(String id) {
 		String match = findRecord(id);
-		
+
 		if(match.equalsIgnoreCase("NO MATCHES"))
 			return 0;
-		
+
 		return getContentResolver().delete(Friends.CONTENT_URI, Friends.INFO+"=?", new String[]{match});
 	}
-	
+
 	private String findRecord(String id) {
 		Cursor cursor =  getContentResolver().query(Friends.CONTENT_URI, null, null, null, null);
 
@@ -211,32 +233,32 @@ public class FriendTrackerControl extends Service {
 				return value;
 			}
 		}
-		
+
 		return "NO MATCHES";
 	}
 
 	private Uri addRecord(String id, String data) {
 		ContentValues cv=new ContentValues();
 		cv.put(Friend.Friends.INFO, data);
-		
+
 		//Try to delete the old one and add the new o
 		int count = removeRecord(id);
-		
+
 		return getContentResolver().insert(Friends.CONTENT_URI, cv);
 	}
-	
+
 	private String formatResponse(String response) {
 		String message = response;
-		
+
 		message = message.substring(0, message.length() - 1); //remove the \n char
-		
+
 		//Remove the : chars
 		while(message.indexOf(":") != -1)
 			message = message.substring(0, message.indexOf(":")) + message.substring(message.indexOf(":") + 1); 
-		
+
 		return message;
 	}
-	
+
 	private boolean validateLatitude(String lat) {
 		if (lat.contains(" "))
 			return false;
@@ -325,7 +347,7 @@ public class FriendTrackerControl extends Service {
 		Intent i = new Intent("android.intent.action.MAIN");
 		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		ComponentName n = new ComponentName("mypackage.FriendTracker",
-				"mypackage.FriendTracker.ViewHistory");
+		"mypackage.FriendTracker.ViewHistory");
 		i.setComponent(n);
 		myHistory = "No Locations";
 		ServerMessage msg = new ServerMessage(ServerMessage.MESSAGE_HISTORY,

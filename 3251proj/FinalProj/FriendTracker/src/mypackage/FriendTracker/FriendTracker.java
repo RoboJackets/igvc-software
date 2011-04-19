@@ -35,7 +35,7 @@ public class FriendTracker extends Activity implements ServiceConnection {
 		Intent intent = new Intent(mContext, mypackage.FriendTracker.FriendTrackerControl.class);
 		try {
 			mService.viewFriends(intent);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
