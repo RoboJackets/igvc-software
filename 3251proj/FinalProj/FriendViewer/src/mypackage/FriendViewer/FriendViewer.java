@@ -7,11 +7,14 @@ import mypackage.FriendTracker.FriendProvider;
 import mypackage.FriendTracker.Friend.Friends;
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.EditText;
 //import mypackage.FriendViewer.*;
@@ -20,18 +23,32 @@ import android.widget.Toast;
 public class FriendViewer extends Activity {
 
 	private String friendList;
-	
+	private FriendContentObserver friendsObserver = null;
+	private Handler handler = new Handler();
+
+	private class FriendContentObserver extends ContentObserver {
+		public FriendContentObserver( Handler h ) {
+			super( h );
+		}
+
+		public void onChange(boolean selfChange) {
+			displayList();
+		}
+	}
+
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		registerContentObservers();
 		displayList();
 	}
 
 	public void displayList() {
 		friendList = "";
-		
+
 		Cursor cursor =  getContentResolver().query(Friends.CONTENT_URI, null, null, null, null);
 
 		while (cursor.moveToNext()) {
@@ -39,7 +56,7 @@ public class FriendViewer extends Activity {
 			String value = cursor.getString(infoColumn);
 			friendList += value + "\n";
 		}
-		
+
 		friendList = friendList.substring(0, friendList.length() - 1); //Remove the extra \n at the end
 		View layout = findViewById(R.id.friendListLayout);
 		EditText list = (EditText) layout.findViewById(R.id.FriendListId);
@@ -79,5 +96,29 @@ public class FriendViewer extends Activity {
 	public void onPause() {
 		super.onPause();
 		finish();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		unregisterContentObservers();
+	}
+
+
+	// Set up content observer for our content provider
+	private void registerContentObservers() {
+		ContentResolver cr = getContentResolver();
+		friendsObserver = new FriendContentObserver( handler );
+		cr.registerContentObserver( Friend.Friends.CONTENT_URI, true,
+				friendsObserver );
+
+	}
+
+	private void unregisterContentObservers() {
+		ContentResolver cr = getContentResolver();
+		if( friendsObserver != null ) {		// just paranoia
+			cr.unregisterContentObserver( friendsObserver );
+			friendsObserver = null;
+		}
 	}
 }
