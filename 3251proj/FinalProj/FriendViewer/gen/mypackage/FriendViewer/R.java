@@ -17,10 +17,10 @@ public final class R {
         public static final int FriendListId=0x7f050002;
         public static final int MapID=0x7f050006;
         public static final int closeID=0x7f050005;
-        public static final int frameLayout1=0x7f050007;
         public static final int friendListLayout=0x7f050001;
         public static final int logoutID=0x7f050000;
         public static final int mapButtonLayout=0x7f050004;
+        public static final int mapLayoutId=0x7f050007;
         public static final int relativeLayout3=0x7f050003;
         public static final int relativeLayout4=0x7f050008;
     }
