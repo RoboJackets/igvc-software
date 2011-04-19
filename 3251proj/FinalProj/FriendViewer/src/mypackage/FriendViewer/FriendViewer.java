@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 public class FriendViewer extends Activity {
 
+	private String friendList;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -28,7 +30,7 @@ public class FriendViewer extends Activity {
 	}
 
 	public void displayList() {
-		String friendList = "";
+		friendList = "";
 		
 		Cursor cursor =  getContentResolver().query(Friends.CONTENT_URI, null, null, null, null);
 
@@ -49,6 +51,7 @@ public class FriendViewer extends Activity {
 	public void viewMap(View view) {
 		Intent i = new Intent("android.intent.action.MAIN");
 		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		i.putExtra("Friends", friendList);
 		ComponentName n = new ComponentName("mypackage.FriendViewer", "mypackage.FriendViewer.FriendMap");
 		i.setComponent(n);
 		startActivity(i); 

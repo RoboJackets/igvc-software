@@ -14,17 +14,25 @@ public class ViewContact extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        String id = savedInstanceState.getString("Id");
-        String lat = savedInstanceState.getString("Lat");
-        String lon = savedInstanceState.getString("Lon");
+        if(savedInstanceState == null || savedInstanceState.isEmpty())
+        	return;
         
-        EditText idText = (EditText) findViewById(R.id.FriendsTxtId);
-        EditText latText = (EditText) findViewById(R.id.LatTxtId);
-        EditText lonText = (EditText) findViewById(R.id.LonTxtId);
+        String id = savedInstanceState.getString("Id");
+        int lat = savedInstanceState.getInt("Lat");
+        int lon = savedInstanceState.getInt("Lon");
+        
+        View idLayout = findViewById(R.id.FriendIDLayout);
+        EditText idText = (EditText) idLayout.findViewById(R.id.FriendsTxtId);
+        
+        View latLayout = findViewById(R.id.LatLayout);
+        EditText latText = (EditText) latLayout.findViewById(R.id.LatTxtId);
+        
+        View lonLayout = findViewById(R.id.LonLayout);
+        EditText lonText = (EditText) lonLayout.findViewById(R.id.LonTxtId);
         
         idText.setText(id);
-        latText.setText(lat);
-        lonText.setText(lon);
+        latText.setText(String.valueOf(lat));
+        lonText.setText(String.valueOf(lon));
     }
     
     //These methods are called when their button is pressed
@@ -35,7 +43,7 @@ public class ViewContact extends Activity {
     	ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.LoginScreen");
     	i.setComponent(n);
     	startActivity(i);
-    	finish();
+    	//finish();
     }
     
     public void close(View view) {
@@ -44,6 +52,6 @@ public class ViewContact extends Activity {
     	ComponentName n = new ComponentName("mypackage.FriendViewer", "mypackage.FriendViewer.FriendMap");
     	i.setComponent(n);
     	startActivity(i);
-    	finish();
+    	//finish();
     }
 }

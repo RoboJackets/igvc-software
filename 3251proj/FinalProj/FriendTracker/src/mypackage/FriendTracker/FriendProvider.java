@@ -1,5 +1,7 @@
 package mypackage.FriendTracker;
 
+import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import mypackage.FriendTracker.Friend.Friends;
@@ -37,6 +39,8 @@ public class FriendProvider extends ContentProvider {
 	private static final int FRIENDS = 1;
 
 	private static HashMap<String, String> friendsProjectionMap;
+	
+	private static final String SERVERIP = "10.0.2.2";
 
 	private static class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -162,5 +166,87 @@ public class FriendProvider extends ContentProvider {
 		friendsProjectionMap = new HashMap<String, String>();
 		friendsProjectionMap.put(Friends.FRIEND_ID, Friends.FRIEND_ID);
 		friendsProjectionMap.put(Friends.INFO, Friends.INFO);
+	}
+	
+	
+	public void updateAllLocations() throws Exception {
+		Socket clientSock;
+		String clientId = "ContentProvider";
+		ArrayList<String> ids = new ArrayList<String>();
+		
+		//
+		clientSock = new Socket(SERVERIP, 25250);
+		
+		Cursor cursor =  query(Friends.CONTENT_URI, null, null, null, null);
+		cursor.moveToNext();
+
+		do {
+
+			int infoColumn = cursor.getColumnIndex(Friends.INFO);
+			String value = cursor.getString(infoColumn);
+			String id = value.substring(0, value.indexOf(" "));			
+			ids.add(id);
+		} while (cursor.moveToNext());
+		
+		//Update all the ids in the database
+		for(int i = 0; i < ids.size(); i++) {
+			removeRecord(ids.get(i));
+			ServerMessage msg = new ServerMessage(ServerMessage.MESSAGE_FRIENDS, clientId, 
+					new String(ids.get(i) + '\n'));
+			msg.send(clientSock);
+			ServerMessage response = ServerMessage.receive(clientSock);
+			String message = formatResponse(response.getMessage());
+			addRecord(ids.get(i), message);
+		}
+		
+		//Leave and close 
+		ServerMessage msg = new ServerMessage(ServerMessage.MESSAGE_LEAVE, clientId, "");
+		msg.send(clientSock);
+		clientSock.close();
+	}
+	
+	private int removeRecord(String id) {
+		String match = findRecord(id);
+		
+		if(match.equalsIgnoreCase("NO MATCHES"))
+			return 0;
+		
+		return delete(Friends.CONTENT_URI, Friends.INFO+"=?", new String[]{match});
+	}
+	
+	private String findRecord(String id) {
+		Cursor cursor =  query(Friends.CONTENT_URI, null, null, null, null);
+
+		while (cursor.moveToNext()) {
+			int infoColumn = cursor.getColumnIndex(Friends.INFO);
+			String value = cursor.getString(infoColumn);
+			if(value.startsWith(id)) {
+				return value;
+			}
+		}
+		
+		return "NO MATCHES";
+	}
+
+	private Uri addRecord(String id, String data) {
+		ContentValues cv=new ContentValues();
+		cv.put(Friend.Friends.INFO, data);
+		
+		//Try to delete the old one and add the new o
+		int count = removeRecord(id);
+		
+		return insert(Friends.CONTENT_URI, cv);
+	}
+	
+	private String formatResponse(String response) {
+		String message = response;
+		
+		message = message.substring(0, message.length() - 1); //remove the \n char
+		
+		//Remove the : chars
+		while(message.indexOf(":") != -1)
+			message = message.substring(0, message.indexOf(":")) + message.substring(message.indexOf(":") + 1); 
+		
+		return message;
 	}
 }
