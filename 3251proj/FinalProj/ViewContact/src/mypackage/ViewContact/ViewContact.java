@@ -54,4 +54,10 @@ public class ViewContact extends Activity {
     	startActivity(i);
     	//finish();
     }
+    
+  //Kill the activity when its not in the foreground anymore
+	public void onPause() {
+		super.onPause();
+		finish();
+	}
 }

@@ -23,7 +23,7 @@ public class FriendTrackerControl extends Service {
 	String clientId;
 	String serverIP;
 	static String myHistory;
-	CountDownTimer updateTimer = new CountDownTimer(40000, 5000) {
+	CountDownTimer updateTimer = new CountDownTimer(4000000, 10000) {
 
 	     public void onTick(long millisUntilFinished) {
 	         try {
@@ -150,31 +150,6 @@ public class FriendTrackerControl extends Service {
 		}
 	}
 
-	public void updateDatabase() throws Exception {
-		ArrayList<String> ids = new ArrayList<String>(); 
-
-		Cursor cursor =  getContentResolver().query(Friends.CONTENT_URI, null, null, null, null);
-		cursor.moveToNext();
-
-		do {
-
-			int infoColumn = cursor.getColumnIndex(Friends.INFO);
-			String value = cursor.getString(infoColumn);
-			String id = value.substring(0, value.indexOf(" "));
-			ids.add(id);
-		} while (cursor.moveToNext());
-
-		//Update all the ids in the database
-		for(int i = 0; i < ids.size(); i++) {
-			removeRecord(ids.get(i));
-			ServerMessage msg = new ServerMessage(ServerMessage.MESSAGE_FRIENDS, clientId, new String(ids.get(i) + '\n'));
-			msg.send(clientSock);
-			ServerMessage response = ServerMessage.receive(clientSock);
-			String message = formatResponse(response.getMessage());
-			addRecord(ids.get(i), message);
-		}
-	}
-
 	public void updateLocation(Intent intent) throws IOException {
 		Bundle b = intent.getExtras();
 		String lat = b.getString("Lat");
@@ -211,6 +186,31 @@ public class FriendTrackerControl extends Service {
 					"Invalid Longitude Specified\nFormat Deg.Min.SecE\n",
 					Toast.LENGTH_SHORT);
 			toast.show();
+		}
+	}
+
+	private void updateDatabase() throws Exception {
+		ArrayList<String> ids = new ArrayList<String>(); 
+	
+		Cursor cursor =  getContentResolver().query(Friends.CONTENT_URI, null, null, null, null);
+		cursor.moveToNext();
+	
+		do {
+	
+			int infoColumn = cursor.getColumnIndex(Friends.INFO);
+			String value = cursor.getString(infoColumn);
+			String id = value.substring(0, value.indexOf(" "));
+			ids.add(id);
+		} while (cursor.moveToNext());
+	
+		//Update all the ids in the database
+		for(int i = 0; i < ids.size(); i++) {
+			removeRecord(ids.get(i));
+			ServerMessage msg = new ServerMessage(ServerMessage.MESSAGE_FRIENDS, clientId, new String(ids.get(i) + '\n'));
+			msg.send(clientSock);
+			ServerMessage response = ServerMessage.receive(clientSock);
+			String message = formatResponse(response.getMessage());
+			addRecord(ids.get(i), message);
 		}
 	}
 

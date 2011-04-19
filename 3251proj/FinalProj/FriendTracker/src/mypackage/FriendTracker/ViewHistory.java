@@ -44,6 +44,9 @@ public class ViewHistory extends Activity {
 			temp = temp.substring(index);
 		}
 
+		if(history.equals("")) 
+			return "No Locations";
+		
 		history = history.substring(0, history.length() - 1); // trim off the
 																// extra \n at
 																// the end

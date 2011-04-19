@@ -38,6 +38,11 @@ public class FriendPositionOverlay extends ItemizedOverlay {
 	    populate();
 	}
 	
+	public void removeOverlay(int index) {
+		mOverlays.remove(index);
+		populate();
+	}
+	
 	@Override
 	protected OverlayItem createItem(int i) {
 	  return mOverlays.get(i);
@@ -46,7 +51,14 @@ public class FriendPositionOverlay extends ItemizedOverlay {
 	@Override
 	protected boolean onTap(int index) {
 	  OverlayItem item = mOverlays.get(index);
-	  Intent i = new Intent("android.intent.action.MAIN");
+	  String text = item.getTitle() + "\nLatitude: " + item.getPoint().getLatitudeE6() + "\nLongitude: " + 
+	  		item.getPoint().getLongitudeE6() + '\n';
+	  
+	  Toast toast = Toast.makeText(mContext, text,
+				Toast.LENGTH_SHORT);
+		toast.show();
+	  
+	  /*Intent i = new Intent("android.intent.action.MAIN");
 	  i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 	  ComponentName n = new ComponentName("mypackage.ViewContact", "mypackage.ViewContact.ViewContact");
 	  i.setComponent(n);
@@ -56,7 +68,7 @@ public class FriendPositionOverlay extends ItemizedOverlay {
 	  b.putInt("Lat", item.getPoint().getLatitudeE6());
 	  b.putInt("Lon", item.getPoint().getLongitudeE6());
 	  i.putExtras(b);
-	  mContext.startActivity(i);
+	  mContext.startActivity(i);*/
 	  return true;
 	}
 }

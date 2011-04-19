@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class FriendTracker extends Activity implements ServiceConnection {
 	FriendTrackerControl mService;
@@ -46,7 +47,15 @@ public class FriendTracker extends Activity implements ServiceConnection {
 				mypackage.FriendTracker.FriendTrackerControl.class);
 		View idLayout = findViewById(R.id.FriendIDLayout);
 		EditText friendId = (EditText) idLayout.findViewById(R.id.FriendsTxtId);
-		intent.putExtra("FriendId", friendId.getText().toString());
+		String id = friendId.getText().toString();
+		if(id.equals("")) {
+			Toast toast = Toast.makeText(getApplicationContext(),
+					"Error: Id cannot be empty\n", Toast.LENGTH_SHORT);
+			toast.show();
+			return;
+		}
+		
+		intent.putExtra("FriendId", id);
 
 		try {
 			mService.addFriend(intent);
@@ -62,7 +71,16 @@ public class FriendTracker extends Activity implements ServiceConnection {
 				mypackage.FriendTracker.FriendTrackerControl.class);
 		View idLayout = findViewById(R.id.FriendIDLayout);
 		EditText friendId = (EditText) idLayout.findViewById(R.id.FriendsTxtId);
-		intent.putExtra("FriendId", friendId.getText().toString());
+		
+		String id = friendId.getText().toString();
+		if(id.equals("")) {
+			Toast toast = Toast.makeText(getApplicationContext(),
+					"Error: Id cannot be empty\n", Toast.LENGTH_SHORT);
+			toast.show();
+			return;
+		}
+		
+		intent.putExtra("FriendId", id);
 
 		try {
 			mService.removeFriend(intent);
