@@ -35,7 +35,7 @@ public class ViewHistory extends Activity {
 			nextE = temp.indexOf("E");
 			nextW = temp.indexOf("W");
 			
-			if(nextE != -1 && nextE < nextW) {
+			if((nextE != -1 && nextE < nextW) || nextW == -1) {
 				history += temp.substring(0, nextE+1) + "\n";
 				temp = temp.substring(nextE+1);
 			}
