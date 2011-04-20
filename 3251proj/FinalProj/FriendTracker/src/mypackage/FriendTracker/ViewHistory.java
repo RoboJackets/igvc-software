@@ -23,7 +23,7 @@ public class ViewHistory extends Activity {
 	}
 
 	public String formatHistory(String input) {
-		int index = 0;
+		int nextW, nextE;
 		String history = "";
 
 		String temp = input.toUpperCase();
@@ -31,17 +31,21 @@ public class ViewHistory extends Activity {
 		temp = temp.trim(); // trim any extra spaces
 
 		// Parse the string into each history and add a \n to separate them
-		while (temp.indexOf("E") != -1) {
-			history += temp.substring(index, temp.indexOf("E") + 1) + "\n";
-			index = temp.indexOf("E") + 1;
-			temp = temp.substring(index);
-		}
-
-		index = 0; // reset the index
-		while (temp.indexOf("W") != -1) {
-			history += temp.substring(index, temp.indexOf("W") + 1) + "\n";
-			index = temp.indexOf("W") + 1;
-			temp = temp.substring(index);
+		while (temp.indexOf("E") != -1 || temp.indexOf("W") != -1) {
+			nextE = temp.indexOf("E");
+			nextW = temp.indexOf("W");
+			
+			if(nextE != -1 && nextE < nextW) {
+				history += temp.substring(0, nextE+1) + "\n";
+				temp = temp.substring(nextE+1);
+			}
+			else {
+				history += temp.substring(0, nextW+1) + "\n";
+				temp = temp.substring(nextW+1);
+			}
+			//update the string
+			
+			temp = temp.trim();
 		}
 
 		if(history.equals("")) 
