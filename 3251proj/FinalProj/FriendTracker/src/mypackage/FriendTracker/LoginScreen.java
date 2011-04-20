@@ -42,7 +42,7 @@ public class LoginScreen extends Activity implements ServiceConnection {
 		String id = login.getText().toString();
 		intent.putExtra("id", id);
 
-		if (id.contains(" ")) {
+		if (id.contains(" ") || id.equals("")) {
 			Toast toast = Toast.makeText(getApplicationContext(),
 					"Error: Id cannot contains spaces\n", Toast.LENGTH_SHORT);
 			toast.show();
@@ -60,7 +60,16 @@ public class LoginScreen extends Activity implements ServiceConnection {
 		View ipLayout = findViewById(R.id.LoginScreen_ServerIPLayout);
 		EditText ip = (EditText) ipLayout
 				.findViewById(R.id.LoginScreen_serverIPTxtID);
-		intent.putExtra("ip", ip.getText().toString());
+		
+		String addr = ip.getText().toString();
+		if(addr.equals("")) {
+			Toast toast = Toast.makeText(getApplicationContext(),
+					"Error: Ip is not set\n", Toast.LENGTH_SHORT);
+			toast.show();
+			return;
+		}
+			
+		intent.putExtra("ip", addr);
 
 		try {
 			mService.login(intent);
@@ -72,10 +81,10 @@ public class LoginScreen extends Activity implements ServiceConnection {
 		}
 		// mContext.unbindService(this); //Finish this activity it's no longer
 		// needed
-
 	}
 
 	public void close(View view) {
+		//unbindService(this);
 		finish();
 	}
 
@@ -103,5 +112,6 @@ public class LoginScreen extends Activity implements ServiceConnection {
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 		// TODO Auto-generated method stub
+		finish();
 	}
 }

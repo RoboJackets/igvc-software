@@ -124,7 +124,6 @@ public class FriendTracker extends Activity implements ServiceConnection {
 				"mypackage.FriendTracker.LoginScreen");
 		i.setComponent(n);
 		startActivity(i);
-		finish();
 	}
 
 	public void close(View view) {
@@ -134,7 +133,6 @@ public class FriendTracker extends Activity implements ServiceConnection {
 				"mypackage.FriendTracker.LoginScreen");
 		i.setComponent(n);
 		startActivity(i);
-		finish();
 	}
 
 	// Kill the activity when its not in the foreground anymore
@@ -152,5 +150,6 @@ public class FriendTracker extends Activity implements ServiceConnection {
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 		// TODO Auto-generated method stub
+		finish();
 	}
 }

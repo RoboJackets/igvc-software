@@ -57,9 +57,15 @@ public class FriendViewer extends Activity {
 			friendList += value + "\n";
 		}
 
-		friendList = friendList.substring(0, friendList.length() - 1); //Remove the extra \n at the end
 		View layout = findViewById(R.id.friendListLayout);
 		EditText list = (EditText) layout.findViewById(R.id.FriendListId);
+		
+		if(friendList.equals(""))  {
+			list.setText("");
+			return;
+		}
+		
+		friendList = friendList.substring(0, friendList.length() - 1); //Remove the extra \n at the end
 		list.setText(friendList);
 	}
 
@@ -80,7 +86,7 @@ public class FriendViewer extends Activity {
 		ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.LoginScreen");
 		i.setComponent(n);
 		startActivity(i);
-		finish();
+		unregisterContentObservers();
 	}
 
 	public void close(View view) {
@@ -89,12 +95,13 @@ public class FriendViewer extends Activity {
 		ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.FriendTracker");
 		i.setComponent(n);
 		startActivity(i);
-		finish();
+		unregisterContentObservers();
 	}
 
 	//Kill the activity when its not in the foreground anymore
 	public void onPause() {
 		super.onPause();
+		unregisterContentObservers();
 		finish();
 	}
 
