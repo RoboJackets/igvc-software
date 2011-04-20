@@ -14,12 +14,17 @@ public class ViewContact extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        if(savedInstanceState == null || savedInstanceState.isEmpty())
-        	return;
+        //Get the intent and it's bundle
+        Intent i = getIntent();
+        Bundle b = i.getExtras();
         
-        String id = savedInstanceState.getString("Id");
-        int lat = savedInstanceState.getInt("Lat");
-        int lon = savedInstanceState.getInt("Lon");
+        if(b == null)
+        	return;
+        	
+        //If there is a bundle use it to update the text fields
+        String id = b.getString("Id");
+        int lat = b.getInt("Lat");
+        int lon = b.getInt("Lon");
         
         View idLayout = findViewById(R.id.FriendIDLayout);
         EditText idText = (EditText) idLayout.findViewById(R.id.FriendsTxtId);
@@ -48,14 +53,13 @@ public class ViewContact extends Activity {
     
     public void close(View view) {
     	Intent i = new Intent("android.intent.action.MAIN");
-    	i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    	ComponentName n = new ComponentName("mypackage.FriendViewer", "mypackage.FriendViewer.FriendMap");
-    	i.setComponent(n);
-    	startActivity(i);
-    	//finish();
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		ComponentName n = new ComponentName("mypackage.FriendViewer", "mypackage.FriendViewer.FriendMap");
+		i.setComponent(n);
+		startActivity(i); 
     }
     
-  //Kill the activity when its not in the foreground anymore
+ // Kill the activity when its not in the foreground anymore
 	public void onPause() {
 		super.onPause();
 		finish();

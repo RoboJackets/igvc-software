@@ -38,7 +38,7 @@ public class FriendTrackerControl extends Service {
 	     public void onFinish() {
 	    	 this.start();
 	     }
-	  };
+	};
 
 	/**
 	 * Class for clients to access. Because we know this service always runs in
@@ -61,8 +61,6 @@ public class FriendTrackerControl extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		//		myListener = new myActionListener();
-		// mProvider = new FriendProvider();
 		// We want this service to continue running until it is explicitly
 		// stopped, so return sticky.
 		return START_STICKY;
@@ -73,12 +71,6 @@ public class FriendTrackerControl extends Service {
 		clientId = bundle.getString("id");
 		serverIP = bundle.getString("ip");
 
-		Intent i = new Intent("android.intent.action.MAIN");
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-		// clientSock = new Socket("10.0.2.2", 25250);
-		// clientId = "test";
-
 		clientSock = new Socket(serverIP, 25250);
 		ServerMessage msg = new ServerMessage(ServerMessage.MESSAGE_CHECKID,
 				clientId, "");
@@ -87,14 +79,18 @@ public class FriendTrackerControl extends Service {
 		ServerMessage reply = ServerMessage.receive(clientSock);
 
 		if (reply.getType() == ServerMessage.MESSAGE_IDAVAILABLE) {
+			Intent i = new Intent("android.intent.action.MAIN");
+			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			ComponentName n = new ComponentName("mypackage.FriendTracker", "mypackage.FriendTracker.FriendTracker");
 			i.setComponent(n);
+			
+			//updateTimer.start();
+			
 			startActivity(i);
-			updateTimer.start();
-
+			
 		} else {
 			Toast toast = Toast.makeText(getApplicationContext(),
-					"Invalid Client Id Specified\n", Toast.LENGTH_SHORT);
+					"Client Id Not Available\n", Toast.LENGTH_SHORT);
 			toast.show();
 		}
 	}
@@ -107,11 +103,14 @@ public class FriendTrackerControl extends Service {
 		}
 		clientSock = null;
 		clientId = null;
+		
+		if(updateTimer != null)
+			updateTimer.cancel();
 	}
 
 	public void viewFriends(Intent intent) throws Exception {	
-		String temp = "HELLO";
 		updateDatabase();
+		updateTimer.start();
 
 		Intent i = new Intent("android.intent.action.MAIN");
 		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -193,15 +192,14 @@ public class FriendTrackerControl extends Service {
 		ArrayList<String> ids = new ArrayList<String>(); 
 	
 		Cursor cursor =  getContentResolver().query(Friends.CONTENT_URI, null, null, null, null);
-		cursor.moveToNext();
 	
-		do {
+		while (cursor.moveToNext()) {
 	
 			int infoColumn = cursor.getColumnIndex(Friends.INFO);
 			String value = cursor.getString(infoColumn);
 			String id = value.substring(0, value.indexOf(" "));
 			ids.add(id);
-		} while (cursor.moveToNext());
+		} 
 	
 		//Update all the ids in the database
 		for(int i = 0; i < ids.size(); i++) {

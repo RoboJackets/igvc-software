@@ -219,6 +219,7 @@ public class FriendMap extends MapActivity {
 	//Kill the activity when its not in the foreground anymore
 	public void onPause() {
 		super.onPause();
+		unregisterContentObservers();
 		finish();
 	}
 
