@@ -15,7 +15,7 @@ ifeq ($(OS), SunOS)
 	LDFLAGS=-lsocket -lnsl
     endif
 
-all: client server 
+all: server 
 
 client: client.c
 	$(CC) client.c -o client
