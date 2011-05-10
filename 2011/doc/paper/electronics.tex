@@ -55,3 +55,19 @@ Nearly all computation is performed on a single laptop containing a quadcore Int
 \subsubsection{MCU}
 
 Microcontrollers are used on Roxi as data acquisition boards to collect data from the wheel encoders, and as motor control boards to generate PWM signals to drive the H-bridges. There are 6 ATmega328p based Arduino Duemilanove boards on the robot, 4 interfacing with the wheel encoders, and 2 to drive the motors.
+
+\subsection{Safety Features}
+
+As autonomous systems are dangerous, and can behave unpredictably when hardware or software errors occur, several safty features are included in this robot.
+
+\subsubsection{Emergancy Stop}
+
+The robot is equiped with an emergency stop that when triggered will physically disconnect power to the motors. This will stop forward motion quickly. Both a physical button on the back of the robot and a wireless trigger are provided.
+
+\subsubsection{Safety Light}
+
+
+
+\subsubsection{Rear-Facing LIDAR}
+
+This robot also uses a rear facing LIDAR as a saftey feature. This allows the robot to sense if something has moved behind it, allowing the robot to avoid hitting anyone walking behind it if the robot decides to move backwards during autonomous operation.
