@@ -27,7 +27,7 @@ P 2800 400 2300 400 1 0 0
 T 5300 400 5 10 0 0 0 6 1
 pintype=unknown
 T 2245 395 5 10 1 1 0 6 1
-pinlabel=+19.5V
+pinlabel=+9V
 T 2395 445 5 10 0 1 0 0 1
 pinnumber=0
 T 5300 400 5 10 0 0 0 6 1
