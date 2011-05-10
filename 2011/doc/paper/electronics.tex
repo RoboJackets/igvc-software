@@ -8,7 +8,7 @@ Roxi uses vision and LIDAR as its primary sensors used for the navigation challe
 
 \subsubsection{Vision}
 
-The vision system consists of a AVT Guppy F-036C camera connected via an IEEE 1394a link to the main computer. This camera is capable of 752 x 480 resolution at 64 fps. This camera is polled at approximately 10 Hz to send a new frame to the vision algorithm.  The camera is placed at the top of the mast, facing forwards and down to allow the lines and obstacle in front of the robot to be sensed. The camera has a field of view of $32.5^{\circ} \text{ x } 42.5^{\circ}$, and is mounted at a height of $2$ m.
+The vision system consists of a AVT Guppy F-036C camera connected via an IEEE 1394a link to the main computer. This camera is capable of 752 x 480 resolution at 64 fps. This camera is polled at approximately 10 Hz to send a new frame to the vision algorithm.  The camera is placed at the top of the mast, facing forwards and down to allow the lines and obstacle in front of the robot to be sensed. The camera has a field of view of $32.5^{\circ} \text{ x } 42.5^{\circ}$, and is mounted at a height of 1.65 m.
 
 \subsubsection{Wheel Encoder}
 
@@ -28,7 +28,7 @@ A GPS is used to provide world position to the robot, allowing obstacles to be p
 
 Main power for the robot comes from two sealed lead acid gell-cell batteries. These batteries are connected in series to produce a nominal 24 VDC supply for the motors and other systems. This provides approximately XX $W \cdot hr$ of energy, XX hours of runtime of the motors, and XX hours of runtime of the electronics and motors.
 
-The batteries are connected to a power distribution board, which allows the connection to each motor to be fused with XX Amps, allowing power to be cut in the event of a motor stall to prevent damage to the H-bridge. Power is also provided to several DC-DC boost converters, which output 5 VDC, 9 VDC, and 19.5 VDC for other electronics on the robot.
+The batteries are connected to a power distribution board, which allows the connection to each motor to be fused with a limit of 20 Amps, allowing power to be cut in the event of a motor stall to prevent damage to the H-bridge and motor. Power is also provided to several DC-DC boost converters, which output 5 VDC, 9 VDC, and 19.5 VDC for other electronics on the robot.
 
 \subsubsection{H Bridge}
 
