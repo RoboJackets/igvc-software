@@ -8,15 +8,19 @@ Roxi uses vision and LIDAR as its primary sensors used for the navigation challe
 
 \subsubsection{Vision}
 
-The vision system consists of a AVT "Guppy" F-XXX camera connected via an IEEE 1394a link to the main computer. This camera is capible of XXX x XXX resolution at XX fps.
+The vision system consists of a AVT "Guppy" F-036C camera connected via an IEEE 1394a link to the main computer. This camera is capable of 752 x 480 resolution at 64 fps. This camera is polled at approximately 10 Hz to send a new frame to the vision algorithm.  The camera is placed at the top of the mast, facing forwards and down to allow the lines and obstacle in front of the robot to be sensed.
 
 \subsubsection{Wheel Encoder}
 
-
+Each wheel is connected to a quadrature wheel encoder, allowing wheel rate to be measured. This allows the velocity of the robot to be measured. The encoder is a US Digital E3-200-375-I-H-M-B, with 200 counts per revolution and an index channel. This allows for wheel rates up to XX speed to be sensed. The quadrature lines drive interrupts on a microcontroller, which then feeds the state of the lines to a state machine which increments or decrements a wheel counter. Wheel angular velocity is measured by differencing the number of counts over a 5 ms period, allowing a bandwidth of XX Hz and XX m / s. The microcontrollers are capable of sending both rate and count information to the laptop, allowing for speed control and odometry operations.
 
 \subsubsection{LIDAR}
 
+Two front and rear mounted Sick NAV300 LIDAR are used as object and ramp detectors. The LIDAR have a $270^{\circ}$ FOV and a 10 meter range. The front facing LIDAR is used as an object finder, while the back facing LIDAR is used as a safety feature allowing the robot to sense if an object / person is moved behind it after the robot has moved through an area.
+
 \subsubsection{GPS}
+
+A GPS is used
 
 \subsection{Power}
 
