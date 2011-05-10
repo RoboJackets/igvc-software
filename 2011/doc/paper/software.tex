@@ -20,7 +20,7 @@ Using motion data, camera frames are drawn into the world map, shown to the righ
 
 \subsubsection{Path Planning}
 
-
+Once the world map is generated, a potential fields algorithm is used. The robot is attracted to the furthest clear point in view and the ramp for the autonmous challenge and the nearest waypoint for the navigation challenge. Obsticals are repel the robot, and the strength of the the field is higher if the object is closer.
 
 \subsubsection{Sensor Filtering}
 
@@ -28,4 +28,4 @@ As our robot has 2 GPS modules, we perform basic filtering to allow the error in
 
 \subsubsection{LIDAR}
 
-The LIDAR is used as an obstical and ramp detection sensor. The incoming range information is filtered with a running average to reduce random noise, and is then passed through an erosion-dilation filter to remove islolated points. The $2^nd$ derivative is then calculated and thesholded to look for linear objects similar in width to the ramp which when found are given to the path planner as a special goal. Returns with non-zero $2^nd$ derivatives are interpreted and given to the path planner as objects to be avoided.
+The LIDAR is used as an obstical and ramp detection sensor. The incoming range information is filtered with a running average to reduce random noise, and is then passed through an erosion-dilation filter to remove islolated points. The $2^{nd}$ derivative is then calculated and thesholded to look for linear objects similar in width to the ramp which when found are given to the path planner as a special goal. Returns with non-zero $2^{nd}$ derivatives are interpreted and given to the path planner as objects to be avoided.
