@@ -70,4 +70,4 @@ As our robot has 2 GPS modules, we perform basic filtering to allow the error in
 
 \subsubsection{LIDAR}
 
-The LIDAR is used as an obstacle and ramp detection sensor. The incoming range information is filtered with a running average to reduce random noise, and is then passed through an erosion-dilation filter to remove islolated points. The $2^{nd}$ derivative is then calculated and thesholded to look for linear objects similar in width to the ramp which when found are given to the path planner as a special goal. Returns with non-zero $2^{nd}$ derivatives are interpreted and given to the path planner as objects to be avoided.
+The LIDAR is used as an obstacle and ramp detection sensor. The incoming range information is filtered with a running average to reduce random noise, and is then passed through an erosion-dilation filter to remove isolated points. The $2^{nd}$ derivative is then calculated and thesholded to look for linear objects similar in width to the ramp which when found are given to the path planner as a special goal. Returns with non-zero $2^{nd}$ derivatives are interpreted and given to the path planner as objects to be avoided.
