@@ -20,10 +20,12 @@ Using motion data, camera frames are drawn into the world map, shown to the righ
 
 \subsubsection{Path Planning}
 
+
+
 \subsubsection{Sensor Filtering}
 
-As our robot has 2 GPS modules, we perform basic filtering to allow the error in the position measurement to be reduced. At this time, a simple average is performed which theoretically reduces random error by a factor of 1.41. We plan to extend this to a full Kalman filter incorperating data form the GPS, wheel encoders, and an IMU (currently not integrated) in future competitions.
+As our robot has 2 GPS modules, we perform basic filtering to allow the error in the position measurement to be reduced. At this time, a simple average is performed which theoretically reduces random error by a factor of 1.41. We plan to extend this to a full Kalman filter incorperating data from the GPS, wheel encoders, and an IMU (currently not integrated) in future competitions.
 
 \subsubsection{LIDAR}
 
-The LIDAR is used as an obstical and ramp detection sensor. The incoming range information is filtered with a running average to reduce random noise, and is then passed through an erosion-dilation filter to remove lone pixels. The $2^nd$ derivative is then calculated and thesholded to look for linear objects similar width as the ramp which when found are given to the path planner as a special goal. Returns with non-zero $2^nd$ derivatives are interpreted and given to the path planner as objects to be avoided.
+The LIDAR is used as an obstical and ramp detection sensor. The incoming range information is filtered with a running average to reduce random noise, and is then passed through an erosion-dilation filter to remove islolated points. The $2^nd$ derivative is then calculated and thesholded to look for linear objects similar in width to the ramp which when found are given to the path planner as a special goal. Returns with non-zero $2^nd$ derivatives are interpreted and given to the path planner as objects to be avoided.
