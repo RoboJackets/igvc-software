@@ -1,6 +1,6 @@
 \section{Electronics Design}
 
-The electronics for Roxi can be broken into three major catagories: Senors, Power, and computers.
+The electronics for Roxi can be broken into three major categories: Senors, Power, and computers.
 
 \subsection{Sensors}
 
@@ -20,13 +20,13 @@ Two front and rear mounted Sick NAV300 LIDAR are used as object and ramp detecto
 
 \subsubsection{GPS}
 
-A GPS is used to provide world position to the robot, allowing obstacles to be placed in world space and allowing waypoints to be followed.
+A GPS is used to provide world position to the robot, allowing obstacles to be placed in world space and allowing waypoints to be followed. A Garmin XXX gps is mounted to the mast to allow a clear view of the sky. This GPS is accurate to XX m and has a time to first fix or XXX min.
 
 \subsection{Power}
 
 \subsubsection{Main Power}
 
-Main power for the robot comes from two sealed lead acid gell-cell batteries. These batteries are connected in series to produce a nominal 24 VDC supply for the motors and other systems. This provides approximatly XX $W \cdot hr$ of energy, XX hours of runtime of the motors, and XX hours of runtime of the electronics and motors.
+Main power for the robot comes from two sealed lead acid gell-cell batteries. These batteries are connected in series to produce a nominal 24 VDC supply for the motors and other systems. This provides approximately XX $W \cdot hr$ of energy, XX hours of runtime of the motors, and XX hours of runtime of the electronics and motors.
 
 The batteries are connected to a power distribution board, which allows the connection to each motor to be fused with XX Amps, allowing power to be cut in the event of a motor stall to prevent damage to the H-bridge. Power is also provided to several DC-DC boost converters, which output 5 VDC, 9 VDC, and 19.5 VDC for other electronics on the robot.
 
@@ -42,8 +42,8 @@ Other systems are provided power through the use of DC-DC converters to produce 
 
 \subsubsection{Main Computer}
 
-Nearly all computation is performed on a single laptop containing a quadcore Intel Core i7 cpu, cuda enabled NVIDIA 285M gpu, and 6 GB of RAM. This computer is responsible for all vision, lidar, and GPS data processing and all path planning and control algoritms. It also forms the core of the sensor interconects, providing the firewire and USB bus the camera, GPS, and microcontrollers use.
+Nearly all computation is performed on a single laptop containing a quadcore Intel Core i7 cpu, cuda enabled NVIDIA 285M gpu, and 6 GB of RAM. This computer is responsible for all vision, lidar, and GPS data processing and all path planning and control algorithms. It also forms the core of the sensor interconnects, providing the firewire and USB bus the camera, GPS, and microcontrollers use. This laptop replaces the main computer used in previous years, and was replaced with support from Northrup Grumman.
 
 \subsubsection{MCU}
 
-Microcontrollers are used on Roxi as data aquisition boards to collect data from the wheel encoders, and as motor control boards to generate PWM signals to drive the H-bridges. There are 6 ATmega328p based Arduino Duemilanove boards on the robot, 4 interfacing with the wheel encoders, and 2 to drive the motors.
+Microcontrollers are used on Roxi as data acquisition boards to collect data from the wheel encoders, and as motor control boards to generate PWM signals to drive the H-bridges. There are 6 ATmega328p based Arduino Duemilanove boards on the robot, 4 interfacing with the wheel encoders, and 2 to drive the motors.
