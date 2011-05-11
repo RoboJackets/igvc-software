@@ -12,11 +12,11 @@ The vision system consists of a AVT Guppy F-036C camera connected via an IEEE 13
 
 \subsubsection{Wheel Encoder}
 
-Each wheel is connected to a quadrature wheel encoder, allowing wheel rate to be measured. This allows the velocity of the robot to be measured. The encoder is a US Digital E3-200-375-I-H-M-B, with 200 counts per revolution and an index channel. This allows for wheel rates up to XX speed to be sensed. The quadrature lines drive interrupts on a microcontroller, which then feeds the state of the lines to a state machine which increments or decrements a wheel counter. Wheel angular velocity is measured by differencing the number of counts over a 5 ms period, allowing a bandwidth of XX Hz and XX m / s. The microcontrollers are capable of sending both rate and count information to the laptop, allowing for speed control and odometry operations.
+Each wheel is connected to a quadrature wheel encoder, allowing wheel rate to be measured. This allows the velocity of the robot to be measured. The encoder is a US Digital E3-200-375-I-H-M-B, with 200 counts per revolution and an index channel. This allows for wheel rates to be sensed. The quadrature lines drive interrupts on a microcontroller, which then feeds the state of the lines to a state machine which increments or decrements a wheel counter. Wheel angular velocity is measured by differencing the number of counts over a 5 ms period. The microcontrollers are capable of sending both rate and count information to the laptop, allowing for speed control and odometry operations.
 
 \subsubsection{LIDAR}
 
-Two front and rear mounted Sick NAV300 LIDAR are used as object and ramp detectors. The LIDAR have a $270^{\circ}$ FOV and a 10 meter range. The front facing LIDAR is used as an object finder, while the back facing LIDAR is used as a safety feature allowing the robot to sense if an object / person is moved behind it after the robot has moved through an area.
+Two front and rear mounted Sick NAV200 LIDAR are used as object and ramp detectors. The LIDAR have a $270^{\circ}$ FOV and a 10 meter range. The front facing LIDAR is used as an object finder, while the back facing LIDAR is used as a safety feature allowing the robot to sense if an object / person is moved behind it after the robot has moved through an area.
 
 \subsubsection{GPS}
 
@@ -50,7 +50,7 @@ Other systems are provided power through the use of DC-DC converters to produce 
 
 \subsubsection{Main Computer}
 
-Nearly all computation is performed on a single laptop containing a quadcore Intel Core i7 cpu, cuda enabled NVIDIA 285M gpu, and 6 GB of RAM. This computer is responsible for all vision, LIDAR, and GPS data processing and all path planning and control algorithms. It also forms the core of the sensor interconnects, providing the firewire and USB bus the camera, GPS, and microcontrollers use. This laptop replaces the main computer used in previous years, and was replaced with support from Northrup Grumman.
+Nearly all computation is performed on a single laptop containing a quadcore Intel Core i7 cpu, cuda enabled NVIDIA 285M gpu, and 6 GB of RAM. This computer is responsible for all vision, LIDAR, and GPS data processing and all path planning and control algorithms. It also forms the core of the sensor interconnects, providing the firewire and USB bus the camera, GPS, and microcontrollers use. This laptop replaces the main computer used in previous years, and was made possible with support from Northrup Grumman.
 
 \subsubsection{MCU}
 
