@@ -5,6 +5,7 @@
 #include "boost/foreach.hpp"
 
 
+#include <iostream>
 
 namespace lidarProc
 {
@@ -74,8 +75,8 @@ bool findLinearRuns(const float* theta, const float* radius, const size_t len, c
 {
 	assert(zero_tol > 0);
 
-	const int derivnum = len-1;
-	const int doublederivnum = len-2;
+	const int derivnum = len;
+	const int doublederivnum = len;
 
 	float deriv_radius[derivnum];
 
@@ -83,8 +84,8 @@ bool findLinearRuns(const float* theta, const float* radius, const size_t len, c
 	
 	float abs_distance_second_deriv[doublederivnum];
 
-	takeDerivative_fwd(theta, radius, deriv_radius, len);
-	takeDerivative_fwd(theta, deriv_radius, second_deriv_radius, derivnum);
+	takeDerivative_center(theta, radius, deriv_radius, len);
+	takeDerivative_center(theta, deriv_radius, second_deriv_radius, derivnum);
 
 	for(int i = 0; i < doublederivnum; i++)
 	{
@@ -103,8 +104,8 @@ bool findLinearRuns(const float* theta, const float* radius, const size_t len, c
 	}
 
 	bool inrun = false;
-	size_t start;
-	size_t stop;
+	size_t start = 0;
+	size_t stop = 0;
 	for(int i = 0; i < doublederivnum; i++)
 	{
 
@@ -221,7 +222,7 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 	}
 }
 
-	bool isPathClear(const float theta, const float radius, const double angle_tol, const float* t_pt, const float* r_pt, const size_t numpts)
+	bool isRadialClear(const float theta, const float radius, const double angle_tol, const float* t_pt, const float* r_pt, const size_t numpts)
 	{
 		const float theta_low = theta - angle_tol;
 		const float theta_high = theta + angle_tol;
@@ -243,8 +244,36 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 		}
 
 		//need to allow for noise. this is a stupid way to do so.
-		const static size_t pt_thresh = 5;
+		const static size_t pt_thresh = 0;
 		if(pts_in_cone > pt_thresh)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool isPathClear(const float theta, const float width, const float* t_pt, const float* r_pt, const size_t numpts)
+	{
+		// count the points within the provided cone
+		size_t pts_in_width = 0;
+
+		for(size_t i = 0; i < numpts; i++)
+		{
+			float rt_pt, rr_pt;
+			polar_rotate(t_pt[i], r_pt[i], theta, rt_pt, rr_pt);
+
+			float x = rr_pt * cos(rt_pt);
+
+			if( abs(x) < (width/2.0))
+			{
+				pts_in_width++;
+			}
+		}
+		std::cout << pts_in_width << std::endl;
+		//need to allow for noise. this is a stupid way to do so.
+		const static size_t pt_thresh = 3;
+		if(pts_in_width > pt_thresh)
 		{
 			return false;
 		}
@@ -255,7 +284,9 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 	//lines must be in order such that successive lines are the closest match
 	bool collectNearRuns(const float* theta, const float* radius, const size_t len, const double distance, std::deque< boost::tuple<size_t,size_t> >& lines, std::deque< boost::tuple<size_t,size_t> >& grown_lines)
 {
-
+	bool started = false;
+	size_t segment_start = 0;
+	size_t segment_end = 0;
 	for(size_t i = 0; i < (lines.size() - 1); i++)
 	{
 		const boost::tuple<size_t,size_t>& pt = lines[i];
@@ -270,8 +301,31 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 		const float& next_stopt = theta[next_pt.get<1>()];
 		const float& next_stopr = radius[next_pt.get<1>()];
 
-		
+		float d = polar_distance(stopt, stopr, next_stopt, next_stopr);
+
+		if(d < distance)
+		{
+			if(!started)
+			{
+				started = true;
+				segment_start = i;
+			}
+		}
+		else
+		{
+			if(started)
+			{
+				started = false;
+				segment_end = i;
+
+				boost::tuple<size_t,size_t> seg;
+				seg.get<0>() = segment_start;
+				seg.get<1>() = segment_end;
+				grown_lines.push_back(seg);
+			}
+		}
 	}
+	return false;
 }
 
 }
