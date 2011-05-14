@@ -34,6 +34,10 @@ NAV200::NAV200()
 		{
 			if (dev->descriptor.idVendor == 0x3141 && dev->descriptor.idProduct == 0x0008)
 			{
+//				if(strcmp(dev->descriptor.filename, "/dev/lidar_front") == 0)
+//				{
+
+//				}
 			    _handle = usb_open(dev);
 				break;
 			}

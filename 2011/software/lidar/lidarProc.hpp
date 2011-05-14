@@ -22,12 +22,34 @@ namespace lidarProc
 	}
 
 	template<typename T>
+	static void takeDerivative_bkwd(const T* srcX, const T* srcY, T* destY, const int srclen)
+	{
+		for(int i = 0; i < (srclen-1); i++)
+		{
+			destY[i] = (srcY[i] - srcY[i-1]) / (srcX[i] - srcX[i-1]);
+		}
+	}
+
+	template<typename T>
 	static void takeDerivative_fwd(const T* srcX, const T* srcY, T* destY, const int srclen)
 	{
 		for(int i = 0; i < (srclen-1); i++)
 		{
 			destY[i] = (srcY[i+1] - srcY[i]) / (srcX[i+1] - srcX[i]);
 		}
+	}
+
+	//2nd order
+	//dest is same len as src
+	template<typename T>
+	static void takeDerivative_center(const T* srcX, const T* srcY, T* destY, const int srclen)
+	{
+		destY[0] = (srcY[1] - srcY[0]) / (srcX[1] - srcX[0]);
+		for(int i = 1; i < (srclen-1); i++)
+		{
+			destY[i] = (srcY[i+1] - srcY[i-1]) / (srcX[i+1] - srcX[i-1]);
+		}
+		destY[srclen-1] = (srcY[srclen-1] - srcY[srclen-2]) / (srcX[srclen-1] - srcX[srclen-2]);
 	}
 
 	template <typename T>
@@ -85,14 +107,31 @@ namespace lidarProc
 	template<typename T>
 	T cart_distance(const T& x0, const T& y0, const T& x1, const T& y1)
 	{
-		return cart_distance_sq(x0, y0, x1, y1);
+		return sqrt(cart_distance_sq(x0, y0, x1, y1));
 	}
 
 	template<typename T>
 	T polar_distance(const T& t0, const T& r0, const T& t1, const T& r1)
 	{
-		return polar_distance_sq(t0, r0, t1, r1);
+		return sqrt(polar_distance_sq(t0, r0, t1, r1));
 	}
+
+	inline float cart_rotate(const float& x, const float& y, const float& theta, float& rx, float& ry)
+	{
+		float st;
+		float ct;
+		sincosf(theta, &st, &ct);
+
+		rx = ct * x - st*y;
+		ry = st * x + ct*y;
+	}
+
+	inline float polar_rotate(const float& t, const float& r, const float& theta, float& rt, float& rr)
+	{
+		rt = t + theta;
+		rr = r;
+	}
+
 
 	bool findLinearRuns(const float* theta, const float* radius, const size_t len, const double zero_tol, std::deque< boost::tuple<size_t,size_t> >& lines);
 
@@ -102,7 +141,8 @@ namespace lidarProc
 
 	void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, float* x_out, float* y_out, size_t& len_out, const float dist);
 
-	bool isPathClear(const float theta, const float radius, const double angle_tol, const float* t_pt, const float* r_pt, const size_t numpts);
+	bool isRadialClear(const float theta, const float radius, const double angle_tol, const float* t_pt, const float* r_pt, const size_t numpts);
+	bool isPathClear(const float theta, const float width, const float* t_pt, const float* r_pt, const size_t numpts);
 }
 
 #endif //LIDARPROC_CC
