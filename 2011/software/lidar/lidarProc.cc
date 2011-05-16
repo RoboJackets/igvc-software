@@ -253,7 +253,7 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 		return true;
 	}
 
-	bool isPathClear(const float theta, const float width, const float* t_pt, const float* r_pt, const size_t numpts)
+	bool isPathClear(const float theta, const float width, const float distance, const float* t_pt, const float* r_pt, const size_t numpts)
 	{
 		// count the points within the provided cone
 		size_t pts_in_width = 0;
@@ -263,9 +263,10 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 			float rt_pt, rr_pt;
 			polar_rotate(t_pt[i], r_pt[i], theta, rt_pt, rr_pt);
 
-			float x = rr_pt * cos(rt_pt);
+			float x, y;
+			NAV200::polar2cart(rt_pt, rr_pt, x, y);
 
-			if( abs(x) < (width/2.0))
+			if( (abs(x) < (width/2.0)) && (y <= distance))
 			{
 				pts_in_width++;
 			}
