@@ -53,8 +53,7 @@ target_link_libraries(lidartestgui
 	cv
 	highgui
 
-	#mgl-fltk
-	mgl-glut
+	plplotd
 
 	boost_thread-mt
 )
