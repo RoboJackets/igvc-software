@@ -386,7 +386,7 @@ int main()
 			ispathclearLidar.setTo(127);
 			for(double theta = 0.0; theta < (2.0*M_PI); theta+=.05)
 			{
-				bool clear = lidarProc::isPathClear(theta, .1, theta_dense, r_dense, denselen);
+				bool clear = lidarProc::isPathClear(theta, .1, 1, theta_dense, r_dense, denselen);
 
 				float x, y;
 				NAV200::polar2cart(theta, 2.5, x, y);

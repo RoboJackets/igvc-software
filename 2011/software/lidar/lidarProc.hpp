@@ -142,7 +142,7 @@ namespace lidarProc
 	void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, float* x_out, float* y_out, size_t& len_out, const float dist);
 
 	bool isRadialClear(const float theta, const float radius, const double angle_tol, const float* t_pt, const float* r_pt, const size_t numpts);
-	bool isPathClear(const float theta, const float width, const float* t_pt, const float* r_pt, const size_t numpts);
+	bool isPathClear(const float theta, const float width, const float distance, const float* t_pt, const float* r_pt, const size_t numpts);
 }
 
 #endif //LIDARPROC_CC
