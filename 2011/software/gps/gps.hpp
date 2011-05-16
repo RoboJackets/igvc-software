@@ -3,6 +3,8 @@
 #include <boost/thread.hpp>
 #include <list>
 
+
+
 class gps
 {
 	public:
