@@ -7,51 +7,6 @@
 
 namespace lidarProc
 {
-
-	//[a,b,c, ...]
-	//[b - a, c - b, ...]
-	template<typename T>
-	static void takeDerivative(const T* srcX, const T* srcY, T* destX, T* destY, const int srclen)
-	{
-		for(int i = 0; i < (srclen-1); i++)
-		{
-			//destX[i] = srcX[i] + (srcX[i+1] - srcX[i]) / (T(2));
-			destX[i] = srcX[i];
-			destY[i] = (srcY[i+1] - srcY[i]) / (srcX[i+1] - srcX[i]);
-		}
-	}
-
-	template<typename T>
-	static void takeDerivative_bkwd(const T* srcX, const T* srcY, T* destY, const int srclen)
-	{
-		for(int i = 0; i < (srclen-1); i++)
-		{
-			destY[i] = (srcY[i] - srcY[i-1]) / (srcX[i] - srcX[i-1]);
-		}
-	}
-
-	template<typename T>
-	static void takeDerivative_fwd(const T* srcX, const T* srcY, T* destY, const int srclen)
-	{
-		for(int i = 0; i < (srclen-1); i++)
-		{
-			destY[i] = (srcY[i+1] - srcY[i]) / (srcX[i+1] - srcX[i]);
-		}
-	}
-
-	//2nd order
-	//dest is same len as src
-	template<typename T>
-	static void takeDerivative_center(const T* srcX, const T* srcY, T* destY, const int srclen)
-	{
-		destY[0] = (srcY[1] - srcY[0]) / (srcX[1] - srcX[0]);
-		for(int i = 1; i < (srclen-1); i++)
-		{
-			destY[i] = (srcY[i+1] - srcY[i-1]) / (srcX[i+1] - srcX[i-1]);
-		}
-		destY[srclen-1] = (srcY[srclen-1] - srcY[srclen-2]) / (srcX[srclen-1] - srcX[srclen-2]);
-	}
-
 	template <typename T>
 	void runavg(const T* in, T* out, const size_t len, const size_t n)
 	{
@@ -116,7 +71,7 @@ namespace lidarProc
 		return sqrt(polar_distance_sq(t0, r0, t1, r1));
 	}
 
-	inline float cart_rotate(const float& x, const float& y, const float& theta, float& rx, float& ry)
+	inline void cart_rotate(const float& x, const float& y, const float& theta, float& rx, float& ry)
 	{
 		float st;
 		float ct;
@@ -126,7 +81,7 @@ namespace lidarProc
 		ry = st * x + ct*y;
 	}
 
-	inline float polar_rotate(const float& t, const float& r, const float& theta, float& rt, float& rr)
+	inline void polar_rotate(const float& t, const float& r, const float& theta, float& rt, float& rr)
 	{
 		rt = t + theta;
 		rr = r;

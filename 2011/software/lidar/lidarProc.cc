@@ -1,9 +1,11 @@
 #include "NAV200.hpp"
 
 #include "lidarProc.hpp"
+#include "finiteDiff.hpp"
 
 #include "boost/foreach.hpp"
 
+#include "opencv/cv.h"
 
 #include <iostream>
 
@@ -328,6 +330,17 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 	}
 	return false;
 }
+
+	void fitPtsToLine(const float* theta, const float* radius, size_t len)
+	{
+		std::list< std::vector<cv::Point2f> > divided_pts;
+
+		//need to perform initial subdivision based on slope distance or something
+
+		//do a linear fit
+		//cv::Vec6f line;
+		//cv::fitLine(divided_pts, line, CV_DIST_L2, 0, .01, .01);
+	}
 
 }
 

@@ -10,6 +10,7 @@
 
 #include "NAV200.hpp"
 #include "lidarProc.hpp"
+#include "finiteDiff.hpp"
 
 static const std::string winname = "lidartest";
 static const std::string trackname = "lidartestbar";
@@ -265,13 +266,11 @@ int main()
 
 			// get the polar slope
 			float derivR[NAV200::Num_Points];
-			float derivT[NAV200::Num_Points];
-			lidarProc::takeDerivative(goodr, goodt, derivR, derivT, numgoodpts);
+			takeDerivative_center(goodt, goodr, derivR, numgoodpts);
 
 			// get the polar accel
 			float ddR[NAV200::Num_Points];
-			float ddT[NAV200::Num_Points];
-			lidarProc::takeDerivative(derivR, derivT, ddR, ddT, numgoodpts);
+			take2ndDerivative_center(goodt, goodr, ddR, numgoodpts);
 
 			//remove points w/ large slope
 			float x_avg[NAV200::Num_Points];
