@@ -1,7 +1,11 @@
 include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
 
-add_library(gps_test
+add_executable(gps_test
 	gps_test.cc
+)
+
+target_link_libraries(gps_test
+	gps
 )
 
 add_library(gps
@@ -9,5 +13,6 @@ add_library(gps
 )
 
 target_link_libraries(gps
-	boost_asio
+	boost_thread
+	boost_system
 )
