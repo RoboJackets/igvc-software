@@ -12,6 +12,9 @@
 #include "lidarProc.hpp"
 #include "finiteDiff.hpp"
 
+//#include "plConfig.h"
+#include "plplot/plplot.h"
+
 static const std::string winname = "lidartest";
 static const std::string trackname = "lidartestbar";
 boost::mutex winMutex;
@@ -218,12 +221,53 @@ void array2NAV200(const float* x, const float* y, NAV200::Point* points, size_t 
 	}
 }
 
+void plplot_plot(const float* theta, const float* r, size_t len, const char* filename, cv::Mat& im)
+{
+	const char* opt[] = {"scratch", "-o", filename};
+	int optlen = 3;
+	plparseopts(&optlen, opt, PL_PARSE_FULL);
+
+	plsdev("png");
+
+	plinit();
+
+	plenv(0, -2.0*M_PI, -3, 3, 1, 1);
+	//plenv(-5, 5, -5, 5, 1, 2);
+	//plenv(-10, 10, -10, 10, 1, 2);
+
+	float x[NAV200::Num_Points];
+	float y[NAV200::Num_Points];
+	NAV200::polar2cart(theta, r, x, y, len);
+
+	double xd[NAV200::Num_Points];
+	double yd[NAV200::Num_Points];
+	double td[NAV200::Num_Points];
+	double rd[NAV200::Num_Points];
+	for(size_t i = 0; i < len; i++)
+	{
+		td[i] = double(theta[i]);
+		rd[i] = double(r[i]);
+
+		xd[i] = double(x[i]);
+		yd[i] = double(y[i]);
+	}
+	//plline(len, xd, yd);
+	plline(len, td, rd);
+
+	plend();
+
+	im = cv::imread(filename);
+}
+
 int main()
 {
 	//setup gui
 	//cv::namedWindow(winname, CV_WINDOW_AUTOSIZE);
 	cv::namedWindow(winname);
 	cv::createTrackbar(trackname, winname, NULL, numpos, trackbarcallback, NULL);
+
+	cv::namedWindow("dR");
+	cv::namedWindow("ddR");
 
 	NAV200 lidar;
 
@@ -265,12 +309,18 @@ int main()
 			plotNAV200Pts(avgpoints, runavglidar, numgoodpts);
 
 			// get the polar slope
-			float derivR[NAV200::Num_Points];
-			takeDerivative_center(goodt, goodr, derivR, numgoodpts);
+			float dR[NAV200::Num_Points];
+			takeDerivative_center(goodt, goodr, dR, numgoodpts);
+			cv::Mat dRim;
+			plplot_plot(goodt, dR, numgoodpts, "dR.png", dRim);
+			cv::imshow("dR", dRim);
 
 			// get the polar accel
 			float ddR[NAV200::Num_Points];
 			take2ndDerivative_center(goodt, goodr, ddR, numgoodpts);
+			cv::Mat ddRim;
+			plplot_plot(goodt, ddR, numgoodpts, "ddR.png", ddRim);
+			cv::imshow("ddR", ddRim);
 
 			//remove points w/ large slope
 			float x_avg[NAV200::Num_Points];

@@ -75,7 +75,23 @@ class NAV200
 			y = radius * s;
 		}
 
+		static void polar2cart(const double angle, const double radius, double& x, double& y)
+		{
+			double s,c;
+			sincos(angle, &s, &c);
+			x = radius * c;
+			y = radius * s;
+		}
+
 		static void polar2cart(const float* angle, const float* radius, float* x, float* y, const size_t len)
+		{
+			for(size_t i = 0; i < len; i++)
+			{
+				polar2cart(angle[i], radius[i], x[i], y[i]);
+			}
+		}
+
+		static void polar2cart(const double* angle, const double* radius, double* x, double* y, const size_t len)
 		{
 			for(size_t i = 0; i < len; i++)
 			{
@@ -98,13 +114,42 @@ class NAV200
 			return false;
 		}
 
+		static bool polar2cart(const Point& pt, double& x, double& y)
+		{
+			if(pt.valid)
+			{
+				polar2cart(pt.angle, pt.distance, x, y);
+				return true;
+			}
+			else
+			{
+				x = std::numeric_limits<double>::signaling_NaN();
+				y = std::numeric_limits<double>::signaling_NaN();
+			}
+			return false;
+		}
+
 		static void cart2polar(const float x, const float y, float& angle, float& radius)
 		{
 			angle = atan2(y,x);
 			radius = sqrt(x*x + y*y);
 		}
 
+		static void cart2polar(const double x, const double y, double& angle, double& radius)
+		{
+			angle = atan2(y,x);
+			radius = sqrt(x*x + y*y);
+		}
+
 		static void cart2polar(const float* x, const float* y, float* angle, float* radius, const size_t len)
+		{
+			for(size_t i = 0; i < len; i++)
+			{
+				cart2polar(x[i], y[i], angle[i], radius[i]);
+			}
+		}
+
+		static void cart2polar(const double* x, const double* y, double* angle, double* radius, const size_t len)
 		{
 			for(size_t i = 0; i < len; i++)
 			{
