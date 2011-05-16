@@ -91,7 +91,7 @@ void drawimage(int pos)
 		case 5:
 		{
 				boost::mutex::scoped_lock lock(grownlinesLidarMutex);
-				cv::putText(linesLidar, "Grow Lines", cv::Point(0, imh-50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255));
+				cv::putText(grownlinesLidar, "Grow Lines", cv::Point(0, imh-50), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(255));
 				cv::imshow(winname, grownlinesLidar);
 				break;
 		}
@@ -346,7 +346,7 @@ int main()
 			#if 1
 			//find lines with polar
 			std::deque< boost::tuple<size_t,size_t> > lines;
-			lidarProc::findLinearRuns(theta_dense, r_dense, numgoodpts, 3, lines);
+			lidarProc::findLinearRuns(theta_dense, r_dense, numgoodpts, 4, lines);
 
 			boost::tuple<size_t,size_t> pt;
 			BOOST_FOREACH(pt, lines)

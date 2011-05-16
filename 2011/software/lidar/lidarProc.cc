@@ -87,7 +87,7 @@ bool findLinearRuns(const float* theta, const float* radius, const size_t len, c
 	float abs_distance_second_deriv[doublederivnum];
 
 	takeDerivative_center(theta, radius, deriv_radius, len);
-	takeDerivative_center(theta, deriv_radius, second_deriv_radius, derivnum);
+	take2ndDerivative_center(theta, radius, second_deriv_radius, derivnum);
 
 	for(int i = 0; i < doublederivnum; i++)
 	{
@@ -273,7 +273,7 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 				pts_in_width++;
 			}
 		}
-		std::cout << pts_in_width << std::endl;
+		//std::cout << pts_in_width << std::endl;
 		//need to allow for noise. this is a stupid way to do so.
 		const static size_t pt_thresh = 3;
 		if(pts_in_width > pt_thresh)
@@ -290,7 +290,8 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 	bool started = false;
 	size_t segment_start = 0;
 	size_t segment_end = 0;
-	for(size_t i = 0; i < (lines.size() - 1); i++)
+	size_t numline = lines.size();
+	for(size_t i = 0; i < (numline - 1); i++)
 	{
 		const boost::tuple<size_t,size_t>& pt = lines[i];
 		const float& startt = theta[pt.get<0>()];
@@ -304,7 +305,7 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 		const float& next_stopt = theta[next_pt.get<1>()];
 		const float& next_stopr = radius[next_pt.get<1>()];
 
-		float d = polar_distance(stopt, stopr, next_stopt, next_stopr);
+		float d = polar_distance(stopt, stopr, next_startt, next_startr);
 
 		if(d < distance)
 		{
