@@ -13,6 +13,11 @@ add_library(gps
 )
 
 target_link_libraries(gps
+	nmea
 	boost_thread
 	boost_system
+)
+
+add_library(nmea
+	nmea.cc
 )

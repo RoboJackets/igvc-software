@@ -13,6 +13,7 @@ int main()
 	{
 		gps::GPSState state = gpsA.get_last_pos();
 		std::cout << "lat: " << state.lat << "\tlon: " << state.lon << std::endl;
+		usleep(1e6);
 	}
 
 }

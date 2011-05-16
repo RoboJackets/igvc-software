@@ -1,4 +1,5 @@
 #include "gps.hpp"
+#include "nmea.hpp"
 
 gps::gps() : running(false), gps_port(io_service)
 {
@@ -60,30 +61,27 @@ void gps::gps_comm()
 
 bool gps::parse_message(const std::string& line, GPSState& state)
 {
-	char message[1024];
-	strcpy(message, line.c_str());
-	
-	char * pch;
-	pch = strtok (message,",");
-	if(strncmp("GPGLL",pch,5)==0)
+	if(nmea::decodeGPGGA(line))
 	{
-		//printf("got lat:");
-		pch = strtok (NULL, ",");
-		//printf ("messlat: %s\n",pch);
-		state.lat = atof(pch);
-		//printf("storelat:%f\n",latlon.lat);
-		pch = strtok (NULL, ",");
-//		latlon.lat_dir = * pch;
-		pch = strtok (NULL, ",");
-		//printf ("messlon: %s\n",pch);
-		state.lon = atof(pch);
-		pch = strtok (NULL, ",");
-//		latlon.lon_dir = *pch;
-		//printf("storelon:%f\n",latlon.lon);
+		return true;
 	}
-	while(pch!=NULL)
+	if(nmea::decodeGPRMC(line))
 	{
-		//printf("doing some more tokens\n");
-		pch = strtok (NULL, ",");
+		return true;
 	}
+	if(nmea::decodeGPRMT(line))
+	{
+		return true;
+	}
+	if(nmea::decodeGPGSA(line))
+	{
+		return true;
+	}
+	if(nmea::decodeGPGSV(line))
+	{
+		return true;
+	}
+	return false;
 }
+
+
