@@ -13,7 +13,7 @@ set(ROBOT_REV candiiidbg)
 
 add_subdirectory (arduino)
 add_subdirectory (lidar)
-#add_subdirectory (gps)
+add_subdirectory (gps)
 add_subdirectory (joystick)
 add_subdirectory (extern)
 add_subdirectory (motors)
