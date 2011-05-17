@@ -1,3 +1,7 @@
+#ifndef GPS
+#define GPS
+
+#include "gps_common.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -8,13 +12,6 @@
 class gps
 {
 	public:
-	struct GPSState
-	{
-		double time;
-		double lat;
-		double lon;
-	};
-
 	gps();
 	~gps();
 
@@ -22,7 +19,7 @@ class gps
 	void start();
 	void stop();
 
-	const GPSState& get_last_pos();
+	bool get_last_pos(GPSState& state);
 
 	private:
 	bool running;
@@ -38,5 +35,7 @@ class gps
 
 	boost::mutex state_queue_mutex;
 	std::list<GPSState> state_queue;
-	size_t queuelen;
+	size_t queue_len;
 };
+
+#endif
