@@ -95,74 +95,76 @@ void gps::close()
 	m_connected = false;
 }
 
-void gps::handle_serial_read(const boost::system::error_code& ec, size_t len)
+void gps::handle_serial_read_timer(const boost::system::error_code& ec)
 {
-	readPending = false;
+	if(ec)
+	{
+		return;
+	}
+
+	std::cerr << "Serial Timout" << std::endl;
+	gps_port.cancel();
+	reconnect();
 }
 
-void gps::gps_comm()
+void gps::handle_serial_read(const boost::system::error_code& ec, size_t len, boost::asio::deadline_timer& timeout)
 {
-	while(running)
+	if(ec || (len == 0))
 	{
-		std::string line;
-		try
-		{
-			time_t t1 = time(NULL);
-			readPending = true;
-			boost::asio::async_read_until(gps_port, comm_buffer, '\n', boost::bind(&gps::handle_serial_read, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
-			do
-			{
-				time_t t2 = time(NULL);
+		return;
+	}
+	timeout.cancel();//data rec, kill the timer
 
-				if((t2 - t1) > SERIAL_TIMOUT_SEC)
-				{
-					std::cout << "serial timeout" << std::endl;
-					gps_port.cancel();
-					do
-					{
-					reconnect();
-					} while(!m_connected);					
-					continue;
-				}
-
-				io_service.poll();
-				usleep(100);
-			} while(readPending);
-			io_service.reset();
-
-		boost::asio::read_until(gps_port, comm_buffer, '\n');
-		std::istream is(&comm_buffer);
-		
+	std::string line;
+	try
+	{
+		std::istream is(&comm_buffer);	
 		std::getline(is, line);
-		}
-		catch(...)
-		{
-			do
-			{
-				reconnect();
-			} while(!m_connected);
-		}
+	}
+	catch(...)
+	{
+		std::cerr << "Error parsing GPS packet!" << std::endl;
+		return;
+	}
 
-		try
-		{
+	try
+	{
 		GPSState state;
 		if(nmea::decodeGPGGA(line, state))
 		{
+			boost::mutex::scoped_lock lock(state_queue_mutex);
+	
 			state_queue.push_back(state);
 			if(state_queue.size() > queue_len)
 			{
 				state_queue.pop_front();
 			}
 		}
+	}
+	catch(...)
+	{
+		std::cerr << "Error parsing GPS packet!" << std::endl;
+	}
+}
+
+void gps::gps_comm()
+{
+	while(running)
+	{
+		boost::asio::deadline_timer timeout(io_service);
+		timeout.expires_from_now(boost::posix_time::milliseconds(2e3));
+		try
+		{
+			boost::asio::async_read_until(gps_port, comm_buffer, '\n', boost::bind(&gps::handle_serial_read, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred, boost::ref(timeout)));
+
+			timeout.async_wait(boost::bind(&gps::handle_serial_read_timer, this, boost::asio::placeholders::error));
+
+			io_service.run();
+			io_service.reset();
 		}
 		catch(...)
 		{
-			std::cerr << "Error parsing GPS packet!" << std::endl;
-			std::cerr << "Reconnecting" << std::endl;
-			do
-			{
-				reconnect();
-			} while(!m_connected);
+			reconnect();
 		}
 	}
 }

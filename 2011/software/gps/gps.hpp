@@ -27,7 +27,8 @@ class gps
 
 	boost::asio::streambuf comm_buffer;
 	void gps_comm();
-	void handle_serial_read(const boost::system::error_code& ec, size_t len);
+	void handle_serial_read(const boost::system::error_code& ec, size_t len, boost::asio::deadline_timer& timeout);
+	void handle_serial_read_timer(const boost::system::error_code& ec);
 
 	void reconnect();
 
