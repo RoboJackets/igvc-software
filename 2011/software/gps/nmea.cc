@@ -66,7 +66,7 @@ bool nmea::decodeGPRMC(const std::string& line, GPSState& state)
 
 bool nmea::decodeGPRMT(const std::string& line)
 {
-
+	return false;
 }
 
 bool nmea::decodeGPGGA(const std::string& line, GPSState& state)
@@ -117,7 +117,7 @@ bool nmea::decodeGPGGA(const std::string& line, GPSState& state)
 	}
 
 	const std::string& numsat = splitvec[7];
-	state.numSat = boost::lexical_cast<int>(numsat.c_str());
+	state.num_sat = boost::lexical_cast<int>(numsat.c_str());
 
 	const std::string& horizDilutionPrec = splitvec[8];
 	const std::string& sealevelheight = splitvec[9];
@@ -129,10 +129,10 @@ bool nmea::decodeGPGGA(const std::string& line, GPSState& state)
 
 bool nmea::decodeGPGSA(const std::string& line)
 {
-
+	return false;
 }
 
 bool nmea::decodeGPGSV(const std::string& line)
 {
-
+	return false;
 }

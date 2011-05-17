@@ -6,7 +6,7 @@ enum GPS_QUALITY {GPS_QUALITY_NOFIX=0, GPS_QUALITY_NON_DIFF=1, GPS_QUALITY_WAAS=
 
 struct GPSState
 {
-	int numSat;
+	int num_sat;
 	GPS_QUALITY qual;
 	double utc_time;
 	double lat;

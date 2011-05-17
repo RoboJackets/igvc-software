@@ -14,11 +14,11 @@ int main()
 		GPSState state;
 		if(gpsA.get_last_pos(state))
 		{
-			std::cout << "Qual: " << state.qual << " lat: " << state.lat << "\tlon: " << state.lon << std::endl;
+			std::cout << "Qual: " << state.qual << " Sats: " << state.num_sat << " lat: " << state.lat << " lon: " << state.lon << std::endl;
 		}
 		else
 		{
-			std::cout << "Error in packet" << std::endl;
+			std::cout << "Error getting gps state" << std::endl;
 		}
 		usleep(1e6);
 	}
