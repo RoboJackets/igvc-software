@@ -1,5 +1,8 @@
+
 #include "gps.hpp"
 #include "nmea.hpp"
+
+#include <iostream>
 
 gps::gps() : running(false), gps_port(io_service), queue_len(50)
 {
@@ -75,6 +78,8 @@ void gps::gps_comm()
 		std::string line;
 		std::getline(is, line);
 
+		try
+		{
 		GPSState state;
 		if(nmea::decodeGPGGA(line, state))
 		{
@@ -83,6 +88,11 @@ void gps::gps_comm()
 			{
 				state_queue.pop_front();
 			}
+		}
+		}
+		catch(...)
+		{
+			std::cerr << "Error parsing GPS packet!" << std::endl;
 		}
 	}
 }
