@@ -6,8 +6,8 @@ int main()
 {
 	gps gpsA;
 
-	//gpsA.open("/dev/ttyUSB0", 38400);
-	gpsA.open("/dev/rfcomm0", 19200);
+	gpsA.open("/dev/ttyUSB0", 38400);
+	//gpsA.open("/dev/rfcomm0", 19200);
 	gpsA.start();
 
 	while(true)
