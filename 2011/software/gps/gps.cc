@@ -1,7 +1,7 @@
 #include "gps.hpp"
 #include "nmea.hpp"
 
-gps::gps() : running(false), gps_port(io_service)
+gps::gps() : running(false), gps_port(io_service), queue_len(50)
 {
 	
 }
@@ -22,10 +22,31 @@ void gps::stop()
 	iothread.join();
 }
 
-const gps::GPSState& gps::get_last_pos()
+bool gps::get_last_pos(GPSState& state)
 {
 	boost::mutex::scoped_lock lock(state_queue_mutex);
-	return state_queue.back();
+
+	if(state_queue.empty())
+	{
+		return false;
+	}
+
+/*
+	if(fabsf(state_queue.back().utc_time - now) > .5)
+	{
+		return false;
+	}
+*/
+
+/*
+	if( (state_queue.back().qual != GPS_QUALITY_NON_DIFF) && (state_queue.back().qual != GPS_QUALITY_WAAS))
+	{
+		return false;
+	}
+*/
+
+	state = state_queue.back();
+	return true;
 }
 
 bool gps::open(char* port, size_t baud)
@@ -55,17 +76,24 @@ void gps::gps_comm()
 		std::getline(is, line);
 
 		GPSState state;
-		bool ret = parse_message(line, state);
+		if(nmea::decodeGPGGA(line, state))
+		{
+			state_queue.push_back(state);
+			if(state_queue.size() > queue_len)
+			{
+				state_queue.pop_front();
+			}
+		}
 	}
 }
 
 bool gps::parse_message(const std::string& line, GPSState& state)
 {
-	if(nmea::decodeGPGGA(line))
+	if(nmea::decodeGPGGA(line, state))
 	{
 		return true;
 	}
-	if(nmea::decodeGPRMC(line))
+	if(nmea::decodeGPRMC(line, state))
 	{
 		return true;
 	}
