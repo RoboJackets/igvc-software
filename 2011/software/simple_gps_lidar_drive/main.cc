@@ -8,8 +8,8 @@
 #include "lidarProc.hpp"
 #include "NAV200.hpp"
 
-static const double waypointLat[] = {33};
-static const double waypointLon[] = {8};
+static const double waypointLat[] = {33.787175};
+static const double waypointLon[] = {-84.406264};
 static const size_t numPts = 1;
 
 int main()
@@ -61,7 +61,7 @@ int main()
 			}
 
 			distance = lambert_distance(state, target);
-
+			std::cout << "Distance to go: " << distance << " m" << std::endl;
 			//get lidar data
 			if(!lidar.read())
 			{
@@ -73,7 +73,7 @@ int main()
 			lidarProc::runavg(goodradius, runavg_goodradius, numlidarpts, 30);
 
 			//get vector to first waypoint
-			double x = waypointLat[i] - state.lon;
+			double x = waypointLon[i] - state.lon;
 			double y = waypointLat[i] - state.lat;
 			double targetvector = atan2(y,x);
 
@@ -97,7 +97,7 @@ int main()
 					clear = lidarProc::isPathClear(angle_to_target, 1, 1, goodtheta, runavg_goodradius, numlidarpts);
 				}
 			}
-		
+			std::cout << "Angle to go (post lidar): " << angle_to_target << " rad" << std::endl;
 			//got the angle we decided
 			motors.set_vel_vec(sin(angle_to_target),cos(angle_to_target));
 		}
