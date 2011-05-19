@@ -20,7 +20,7 @@ class gps
 	void start();
 	void stop();
 
-	bool get_last_pos(GPSState& state);
+	bool get_last_state(GPSState& state);
 
 	private:
 	volatile bool running;

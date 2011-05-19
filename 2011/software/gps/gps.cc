@@ -25,7 +25,7 @@ void gps::stop()
 	iothread.join();
 }
 
-bool gps::get_last_pos(GPSState& state)
+bool gps::get_last_state(GPSState& state)
 {
 	boost::mutex::scoped_lock lock(state_queue_mutex);
 
@@ -34,19 +34,24 @@ bool gps::get_last_pos(GPSState& state)
 		return false;
 	}
 
-/*
-	if(fabsf(state_queue.back().utc_time - now) > .5)
+	struct timeval now;
+	gettimeofday(&now, NULL);
+	time_t secDelta = difftime(now.tv_sec, state_queue.back().laptoptime.tv_sec);
+	suseconds_t usecDelta = now.tv_usec - state_queue.back().laptoptime.tv_usec;
+	double delta = double(secDelta) + 1e-6*double(usecDelta);
+	if(delta > .5)
 	{
+		std::cerr << "GPS Marker Out Of Date!" << std::endl;
 		return false;
 	}
-*/
 
-/*
+
+
 	if( (state_queue.back().qual != GPS_QUALITY_NON_DIFF) && (state_queue.back().qual != GPS_QUALITY_WAAS))
 	{
 		return false;
 	}
-*/
+
 
 	state = state_queue.back();
 	return true;
@@ -103,6 +108,11 @@ void gps::handle_serial_read_timer(const boost::system::error_code& ec)
 	}
 
 	std::cerr << "Serial Timout" << std::endl;
+{
+	boost::mutex::scoped_lock lock(state_queue_mutex);	
+	state_queue.clear();
+}
+
 	gps_port.cancel();
 	reconnect();
 }
@@ -132,6 +142,7 @@ void gps::handle_serial_read(const boost::system::error_code& ec, size_t len, bo
 		GPSState state;
 		if(nmea::decodeGPGGA(line, state))
 		{
+			gettimeofday(&state.laptoptime, NULL);
 			boost::mutex::scoped_lock lock(state_queue_mutex);
 	
 			state_queue.push_back(state);
