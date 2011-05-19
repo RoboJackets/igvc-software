@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <kdtree++/kdtree.hpp>
+
 int main()
 {
 	gps gpsA;
@@ -23,5 +25,4 @@ int main()
 		}
 		usleep(1e6);
 	}
-
 }

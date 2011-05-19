@@ -15,4 +15,7 @@ struct GPSState
 	double lon;
 };
 
+//distance in meters
+double lambert_distance(const GPSState& a, const GPSState& b);
+
 #endif
