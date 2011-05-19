@@ -13,6 +13,7 @@ struct GPSState
 	timeval laptoptime;
 	double lat;
 	double lon;
+	double courseoverground;
 };
 
 //distance in meters

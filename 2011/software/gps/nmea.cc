@@ -53,7 +53,7 @@ bool nmea::decodeGPRMC(const std::string& line, GPSState& state)
 
 	double speedKTS = boost::lexical_cast<double>(splitvec[6].c_str());
 
-	double courseoverground = boost::lexical_cast<double>(splitvec[7].c_str());
+	state.courseoverground = boost::lexical_cast<double>(splitvec[7].c_str());
 
 	std::string utcdate = splitvec[8];
 

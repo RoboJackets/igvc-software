@@ -140,7 +140,8 @@ void gps::handle_serial_read(const boost::system::error_code& ec, size_t len, bo
 	try
 	{
 		GPSState state;
-		if(nmea::decodeGPGGA(line, state))
+		//if(nmea::decodeGPGGA(line, state))
+		if(nmea::decodeGPRMC(line, state))
 		{
 			gettimeofday(&state.laptoptime, NULL);
 			boost::mutex::scoped_lock lock(state_queue_mutex);
