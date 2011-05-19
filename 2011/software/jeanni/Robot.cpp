@@ -90,6 +90,8 @@ Robot::Robot(const char* filename)
 
 Robot::~Robot()
 {
+	osmcd->setLight(MC_LIGHT_STEADY);
+
 	run_vel_thread = false;
 	run_lidar_thread = false;
 	vel_update_thread->join();
@@ -297,6 +299,8 @@ void Robot::Go()
 	#else
 		#error "Must define OSMC_2WD or OSMC_4WD"
 	#endif
+	osmcd->setLight(MC_LIGHT_PULSING);
+
 
 	run_vel_thread = true;
 	vel_update_thread = new boost::thread(&Robot::update_vel_func, this);
@@ -335,7 +339,7 @@ void Robot::processFunc()
 	jD.readJoystick();
 	if (jD.manualOverride())
 	{
-		osmcd->setLight(MC_LIGHT_STEADY);		
+		osmcd->setLight(MC_LIGHT_STEADY);
 		while (jD.manualOverride())		
 		{
 			jD.setMotor();
@@ -343,7 +347,7 @@ void Robot::processFunc()
 			jD.readJoystick();
 		}	
 	
-	osmcd->setLight(MC_LIGHT_PULSING);
+		osmcd->setLight(MC_LIGHT_PULSING);
 	}
 
 	/* glut mask init hack */
