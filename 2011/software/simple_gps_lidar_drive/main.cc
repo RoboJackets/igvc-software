@@ -18,7 +18,8 @@ int main()
 	OSMC_4wd_driver motors;
 
 	gps gpsA;
-	gpsA.open("/dev/USB0", 38400);
+	gpsA.open("/dev/ttyUSB0", 38400);
+	//gpsA.open("/dev/rfcomm0", 19200);
 
 	GPSState state;
 	bool stateValid;
