@@ -13,7 +13,7 @@ int main()
 	while(true)
 	{
 		GPSState state;
-		if(gpsA.get_last_pos(state))
+		if(gpsA.get_last_state(state))
 		{
 			std::cout << "Qual: " << state.qual << " Sats: " << state.num_sat << " lat: " << state.lat << " lon: " << state.lon << std::endl;
 		}

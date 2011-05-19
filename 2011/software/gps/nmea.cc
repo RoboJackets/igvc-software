@@ -62,6 +62,8 @@ bool nmea::decodeGPRMC(const std::string& line, GPSState& state)
 	char magvardir = splitvec[11][0];
 
 	char mode = splitvec[12][0];
+
+	return true;
 }
 
 bool nmea::decodeGPRMT(const std::string& line)
