@@ -10,6 +10,7 @@ target_link_libraries(gps_test
 
 add_library(gps
 	gps.cc
+	gps_common.cc
 )
 
 target_link_libraries(gps
