@@ -1,9 +1,11 @@
 #ifndef LIDARPROC_CC
 #define LIDARPROC_CC
 
-#include "boost/tuple/tuple.hpp"
+#include <deque>
 
-#include "opencv/cv.h"
+#include <boost/tuple/tuple.hpp>
+
+#include <opencv/cv.h>
 
 namespace lidarProc
 {
