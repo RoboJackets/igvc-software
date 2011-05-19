@@ -18,4 +18,5 @@ target_link_libraries(gps_drive
 	gps
 	OSMC_driver_4wd
 	NAV200
+	lidarProc
 )
