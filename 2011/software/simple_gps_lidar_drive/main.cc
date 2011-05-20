@@ -8,8 +8,8 @@
 #include "lidarProc.hpp"
 #include "NAV200.hpp"
 
-static const double waypointLat[] = {33.787175};
-static const double waypointLon[] = {-84.406264};
+static const double waypointLat[] = {33.787175,  33.787196};
+static const double waypointLon[] = {-84.406264, -84.406066};
 static const size_t numPts = 1;
 
 int main()
@@ -26,7 +26,7 @@ int main()
 	stateValid = gpsA.get_last_state(state);
 	while( (!stateValid) )
 	{
-		std::cout << "Waiting For Satilites" << std::endl;
+		std::cout << "Waiting For Satellites" << std::endl;
 		usleep(1e6);
 		stateValid = gpsA.get_last_state(state);
 	}
@@ -37,7 +37,7 @@ int main()
 	//get new fix
 	while( (!stateValid) )
 	{
-		std::cout << "Waiting For Satilites" << std::endl;
+		std::cout << "Waiting For Satellites" << std::endl;
 		usleep(2e5);
 		stateValid = gpsA.get_last_state(state);
 	}
@@ -56,7 +56,7 @@ int main()
 		{
 			while( (!stateValid) )
 			{
-				std::cout << "Waiting For Satilites" << std::endl;
+				std::cout << "Waiting For Satellites" << std::endl;
 				usleep(2e5);
 				stateValid = gpsA.get_last_state(state);
 			}
@@ -81,6 +81,8 @@ int main()
 			//local 
 			double angle_to_target = targetvector - (M_PI_2 - state.courseoverground);
 
+			std::cout << "Angle to go (pre lidar): " << angle_to_target << " rad" << std::endl;
+
 			//can we go the dir we want?
 			bool clear = lidarProc::isPathClear(angle_to_target, 1, 1, goodtheta, runavg_goodradius, numlidarpts);
 
@@ -97,10 +99,19 @@ int main()
 					angle_to_target -= .05;
 					clear = lidarProc::isPathClear(angle_to_target, 1, 1, goodtheta, runavg_goodradius, numlidarpts);
 				}
+
+				//go straight if robot can't find a path
+				if(fabsf(angle_to_target) > (2.0*M_PI))
+				{
+					clear = true;
+					angle_to_target = M_PI_2;
+				}
 			}
 			std::cout << "Angle to go (post lidar): " << angle_to_target << " rad" << std::endl;
 			//got the angle we decided
 			motors.set_vel_vec(sin(angle_to_target),cos(angle_to_target));
 		}
+		distance = lambert_distance(state, target);
+		std::cout << "Waypoint " << i << " hit at final distance " << distance << " m" << std::endl;
 	}
 }
