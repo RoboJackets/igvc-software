@@ -1,8 +1,8 @@
 #include "joystickDrive.hpp"
 
 //static SDL_Joystick *joystick;
-
-/* Main now in joystickmain
+/*
+//Main now in joystickmain
 int main()
 {
 	joystickDrive jD;
@@ -19,11 +19,13 @@ int main()
 		usleep(4e4);
 		
 	}
-}*/
-
+}
+*/
 joystickDrive::joystickDrive()
 {
-	m_motorCtr = new OSMC_driver();	
+	//m_motorCtr = new OSMC_driver();	
+	m_motorCtr = new OSMC_4wd_driver();
+
 	quit = false;
 	leftAnalogX = 0;
 	leftAnalogY = 0;
@@ -37,7 +39,7 @@ joystickDrive::joystickDrive()
 	
 }
 
-joystickDrive::joystickDrive(OSMC_driver* osmc)
+joystickDrive::joystickDrive(OSMC_4wd_driver* osmc)
 {		
 	m_motorCtr = osmc;	
 	quit = false;
@@ -209,7 +211,7 @@ void joystickDrive::setMotor()
 	std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ") right at (" << rightAnalogX << "," << rightAnalogY << ")\twould have set lvel: " << lvel << " rvel: " << rvel << std::endl;
 
 
-	if(m_motorCtr->set_motors(lvel, rvel))
+	if(m_motorCtr->setMotorPWM(lvel, rvel,lvel, rvel))
 	{
 		std::cerr << "set failed" << std::endl;
 	}

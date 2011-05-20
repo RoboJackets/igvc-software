@@ -4,7 +4,8 @@
 #include <SDL/SDL.h>
 #include <cmath>
 
-#include "OSMC_driver.hpp"
+//#include "OSMC_driver.hpp"
+#include "OSMC_4wd_driver.hpp"
 //#include "quadCoderDriver.hpp"
 //#define TEBOARD_MOTOR_CTRL
 #define ARDUINO_MOTOR_CTRL
@@ -20,7 +21,7 @@ class joystickDrive
 {
 	public:
 		joystickDrive();
-		joystickDrive(OSMC_driver*);
+		joystickDrive(OSMC_4wd_driver*);
 		~joystickDrive();
 
 		inline double getHeading();
@@ -33,7 +34,8 @@ class joystickDrive
 
 	private:
 
-		OSMC_driver* m_motorCtr;
+		//OSMC_driver* m_motorCtr;
+		OSMC_4wd_driver* m_motorCtr;
 		//quadCoderDriver qD;
 
 		pthread_t joystick_thread;
