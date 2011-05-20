@@ -1,3 +1,6 @@
+#ifndef OSMC_4wd_driver_HPP
+#define OSMC_4wd_driver_HPP
+
 #include "ArduinoInterface.h"
 #include "ArduinoCmds.hpp"
 
@@ -43,3 +46,5 @@ class OSMC_4wd_driver
 	OSMC_driver FOR;
 	OSMC_driver AFT;
 };
+
+#endif
