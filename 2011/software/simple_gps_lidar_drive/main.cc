@@ -8,8 +8,13 @@
 #include "lidarProc.hpp"
 #include "NAV200.hpp"
 
-static const double waypointLat[] = {33.787175,  33.787196};
-static const double waypointLon[] = {-84.406264, -84.406066};
+//static const double waypointLat[] = {33.787175,  33.787196};
+//static const double waypointLon[] = {-84.406264, -84.406066};
+//static const size_t numPts = 1;
+
+
+static const double waypointLat[] = {33.787195};
+static const double waypointLon[] = {-84.406886};
 static const size_t numPts = 1;
 
 int main()
