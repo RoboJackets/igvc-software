@@ -446,5 +446,7 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 
 bool OSMC_driver::setLight(const byte option)
 {
+#ifndef MOTOR_SIMULATE
 	return ai.sendCommand(MC_SET_LIGHT,&option,1);
+#endif
 }
