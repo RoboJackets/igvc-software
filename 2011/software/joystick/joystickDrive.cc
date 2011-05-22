@@ -211,7 +211,8 @@ void joystickDrive::setMotor()
 	std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ") right at (" << rightAnalogX << "," << rightAnalogY << ")\twould have set lvel: " << lvel << " rvel: " << rvel << std::endl;
 
 
-	if(m_motorCtr->setMotorPWM(lvel, rvel,lvel, rvel))
+	//if(m_motorCtr->setMotorPWM(lvel, rvel,lvel, rvel))
+	if(m_motorCtr->setMotorPWM(rvel, lvel,rvel, lvel))
 	{
 		std::cerr << "set failed" << std::endl;
 	}
