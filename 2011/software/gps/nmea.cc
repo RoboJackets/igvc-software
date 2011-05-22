@@ -44,6 +44,25 @@ bool nmea::decodeGPRMC(const std::string& line, GPSState& state)
 	decodeUTCTime(splitvec[1]);
 	
 	char status = splitvec[2][0];
+	switch(status)
+	{
+		case 'A':
+		{
+			state.qual = GPS_QUALITY_NON_DIFF;
+			break;
+		}
+		case 'V':
+		{
+			state.qual = GPS_QUALITY_NOFIX;
+			break;
+		}
+		default:
+		{
+			state.qual = GPS_QUALITY_UNKNOWN;
+			break;
+		}
+	}
+
 
 	const char LatHemi = splitvec[4][0];
 	state.lat = decodeLatitude(splitvec[3], LatHemi);
@@ -51,13 +70,20 @@ bool nmea::decodeGPRMC(const std::string& line, GPSState& state)
 	const char LonHemi = splitvec[6][0];
 	state.lon = decodeLongitude(splitvec[5], LonHemi);
 
-	double speedKTS = boost::lexical_cast<double>(splitvec[6].c_str());
+	double speedKTS = boost::lexical_cast<double>(splitvec[7].c_str());
 
-	state.courseoverground = boost::lexical_cast<double>(splitvec[7].c_str());
+	state.courseoverground = boost::lexical_cast<double>(splitvec[8].c_str());
 
-	std::string utcdate = splitvec[8];
+	std::string utcdate = splitvec[9];
 
-	double magvariation = boost::lexical_cast<double>(splitvec[10].c_str());
+	try
+	{
+		double magvariation = boost::lexical_cast<double>(splitvec[10].c_str());
+	}
+	catch(...)
+	{
+		double magvariation = 0;
+	}
 
 	char magvardir = splitvec[11][0];
 
