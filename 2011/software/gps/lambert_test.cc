@@ -9,7 +9,9 @@ int main()
 	point1.lon = 95.6945472222;
 	point2.lat = 39.17635;
 	point2.lon = 95.6897388889;
-
-	std::cout << "The distance is " << lambert_distance(point1,point2) << "meters.\n";
+	double mdist = lambert_distance(point1,point2);
+	double adist = 7128;
+	std::cout << "The measured distance is " << mdist << " meters.\n";
+	std::cout << "The actual distance is " << adist << " meters.\n";
 	return 0;
 }
