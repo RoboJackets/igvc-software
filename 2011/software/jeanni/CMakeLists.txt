@@ -1,4 +1,7 @@
-
+FIND_PACKAGE( Qt4 REQUIRED )
+QT4_WRAP_CPP(MOC_SRCS 
+vision/DCam_Config.h
+)
 
 include_directories(
 
@@ -51,7 +54,8 @@ ENDIF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "candiii"))
 
 add_executable(${robot_bin}
 	main.cpp
-	moc_DCam_Config.cpp
+	#moc_DCam_Config.cpp
+	${MOC_SRCS}	
 	Robot.cpp
 	XmlConfiguration.cpp
 )
