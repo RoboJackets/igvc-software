@@ -7,15 +7,21 @@ double lambert_distance(const GPSState& a, const GPSState& b)
 {
 	static const double eq_rad = 6378.137e3;
 	static const double r = 298.257223563;
+	static const double PI = 4*atan(1);	
 
-	const double psia = atan2( (r - 1.0) * tan(a.lat) , r );
-	const double psib = atan2( (r - 1.0) * tan(b.lat) , r );
+	double alat = a.lat*PI/180;
+	double blat = b.lat*PI/180;
+	double alon = a.lon*PI/180;
+	double blon = b.lon*PI/180;
+
+	const double psia = atan2( (r - 1.0) * tan(alat) , r );
+	const double psib = atan2( (r - 1.0) * tan(blat) , r );
 
 	const double P = (psia + psib) / 2.0;
 	const double Q = (psia - psib) / 2.0;
 
-	const double dlon = b.lon - a.lon;
-	const double sigma = acos( sin(a.lat)*sin(b.lat) + cos(a.lat)*cos(b.lat) * cos(dlon) );
+	const double dlon = blon - alon;
+	const double sigma = acos( sin(alat)*sin(blat) + cos(alat)*cos(blat) * cos(dlon) );
 
 	const double sP = sin(P);
 	const double cP = cos(P);
@@ -34,13 +40,28 @@ double lambert_distance(const GPSState& a, const GPSState& b)
 	return d;
 }
 
-double haversine_distance(const GPSState& a, const GPSState& b)
+/*double haversine_distance(const GPSState& a, const GPSState& b)
 {
-	static const double r = 6378.137e3;	
-	double dlat = b.lat - a.lat;
-	double dlon = b.lon - a.lon;
-	double a1 = sin(dlat/2.0)*sin(dlat/2.0)+cos(a.lat)*cos(b.lat)*sin(dlon/2.0)*sin(dlon/2.0);
+	static const double eq_rad = 6378.137e3;
+	static const double r = 298.257223563;
+	static const double PI = 4*atan(1);	
+
+	double alat = a.lat*PI/180;
+	double blat = b.lat*PI/180;
+	double alon = a.lon*PI/180;
+	double blon = b.lon*PI/180;	
+	
+	double dlat = blat - alat;
+	double dlon = blon - alon;
+	double a1 = sin(dlat/2.0)*sin(dlat/2.0)+cos(alat)*cos(blat)*sin(dlon/2.0)*sin(dlon/2.0);
 	double c = 2*atan2(sqrt(a1),sqrt(1-a1));
 	double d = r*c;
 	return d;
-}
+}*/
+
+/*double bowring_distance(const GPSState& a, const GPSState& b)
+{
+	double sigma = 	
+	double d = a1*C*sigma/(B*B)
+	return d;	
+}*/
