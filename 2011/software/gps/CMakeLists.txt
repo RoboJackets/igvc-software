@@ -8,6 +8,14 @@ target_link_libraries(gps_test
 	gps
 )
 
+add_executable(lambert_test
+	lambert_test.cc
+)
+
+target_link_libraries(lambert_test
+	gps
+)
+
 add_library(gps
 	gps.cc
 	gps_common.cc
