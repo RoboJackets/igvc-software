@@ -23,8 +23,10 @@ int main()
 	OSMC_4wd_driver motors;
 
 	gps gpsA;
-	gpsA.open("/dev/ttyUSB0", 38400);
-	//gpsA.open("/dev/rfcomm0", 19200);
+	//gpsA.open("/dev/ttyUSB0", 38400);
+	gpsA.open("/dev/rfcomm0", 19200);
+
+	gpsA.start();
 
 	GPSState state;
 	bool stateValid;
@@ -32,10 +34,11 @@ int main()
 	while( (!stateValid) )
 	{
 		std::cout << "Waiting For Satellites" << std::endl;
-		usleep(1e6);
+		usleep(1e5);
 		stateValid = gpsA.get_last_state(state);
 	}
 
+	std::cout << "Avg 10s" << std::endl;
 	//Average position for 10s
 	usleep(10e6);
 	
@@ -43,7 +46,7 @@ int main()
 	while( (!stateValid) )
 	{
 		std::cout << "Waiting For Satellites" << std::endl;
-		usleep(2e5);
+		usleep(1e5);
 		stateValid = gpsA.get_last_state(state);
 	}
 
@@ -65,6 +68,8 @@ int main()
 				usleep(2e5);
 				stateValid = gpsA.get_last_state(state);
 			}
+			
+			std::cout << state.lat << ", " << state.lon << "\t//\t" << waypointLat[i]<< ", " << waypointLon[i] << std::endl;
 
 			distance = lambert_distance(state, target);
 			std::cout << "Distance to go: " << distance << " m" << std::endl;

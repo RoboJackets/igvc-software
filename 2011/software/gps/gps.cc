@@ -31,6 +31,7 @@ bool gps::get_last_state(GPSState& state)
 
 	if(state_queue.empty())
 	{
+		std::cerr << "GPS queue empty!" << std::endl;
 		return false;
 	}
 
@@ -49,6 +50,7 @@ bool gps::get_last_state(GPSState& state)
 
 	if( (state_queue.back().qual != GPS_QUALITY_NON_DIFF) && (state_queue.back().qual != GPS_QUALITY_WAAS))
 	{
+		std::cerr << "GPS state bad - " << int(state_queue.back().qual) << std::endl;
 		return false;
 	}
 

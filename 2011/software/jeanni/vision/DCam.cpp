@@ -63,10 +63,11 @@ void DCam::open()
 {
 	if (!_initialized && _camera)
 	{
+		// 15fps causes data to be dropped on the old laptop, resulting in bad colors.  Don't use it.
 		if (dc1394_video_set_framerate(	_camera,
 										//DC1394_FRAMERATE_60
-										//DC1394_FRAMERATE_30
-										DC1394_FRAMERATE_15
+										DC1394_FRAMERATE_30
+										//DC1394_FRAMERATE_15
 									  ))
 		{
 			throw runtime_error("Unable to set framerate.");
@@ -143,6 +144,8 @@ IplImage *DCam::read_frame()
 		if (_frame)
 		{
 			//QMutexLocker ml(&_camera_thread->mutex);
+			// The camera is actually BGGR, but OpenCV expects BGR while libdc1394 provides RGB,
+			// so swap the R and B channels here.
 			dc1394_bayer_decoding_8bit(	_frame->image,
 										(uint8_t *)_image->imageData,
 										_image->width,
