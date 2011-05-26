@@ -18,5 +18,6 @@ struct GPSState
 
 //distance in meters
 double lambert_distance(const GPSState& a, const GPSState& b);
+double haversine_distance(const GPSState& a, const GPSState& b);
 
 #endif
