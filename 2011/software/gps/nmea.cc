@@ -1,5 +1,6 @@
 #include "nmea.hpp"
 #include <vector>
+#include <cmath>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -9,26 +10,34 @@ void nmea::decodeUTCTime(const std::string& val)
 }
 double nmea::decodeLatitude(const std::string& val, const char hemi)
 {
-	double deg = boost::lexical_cast<double>(val.c_str());
+	double raw = boost::lexical_cast<double>(val.c_str());
+	double intpart;
+	double frac = modf(raw / 100.0, &intpart);
+	double deg = intpart + frac / 60.0;
+
 	if(hemi == 'N')
 	{
-		return deg / 100.0;
+		return deg;
 	}
 	else
 	{
-		return deg / -100.0;
+		return deg * -1.0;
 	}
 }
 double nmea::decodeLongitude(const std::string& val, const char hemi)
 {
-	double deg = boost::lexical_cast<double>(val.c_str());
+	double raw = boost::lexical_cast<double>(val.c_str());
+	double intpart;
+	double frac = modf(raw / 100.0, &intpart);
+	double deg = intpart + frac / 60.0;
+
 	if(hemi == 'E')
 	{
-		return deg / 100.0;
+		return deg;
 	}
 	else
 	{
-		return deg / -100.0;
+		return deg * -1.0;
 	}
 }
 
