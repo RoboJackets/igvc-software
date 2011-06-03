@@ -13,7 +13,7 @@ double nmea::decodeLatitude(const std::string& val, const char hemi)
 	double raw = boost::lexical_cast<double>(val.c_str());
 	double intpart;
 	double frac = modf(raw / 100.0, &intpart);
-	double deg = intpart + frac / 60.0;
+	double deg = intpart + frac * 100.0 / 60.0;
 
 	if(hemi == 'N')
 	{
@@ -29,7 +29,7 @@ double nmea::decodeLongitude(const std::string& val, const char hemi)
 	double raw = boost::lexical_cast<double>(val.c_str());
 	double intpart;
 	double frac = modf(raw / 100.0, &intpart);
-	double deg = intpart + frac / 60.0;
+	double deg = intpart + frac * 100.0 / 60.0;
 
 	if(hemi == 'E')
 	{
@@ -46,7 +46,7 @@ bool nmea::decodeGPRMC(const std::string& line, GPSState& state)
 	std::vector< std::string > splitvec;
 	boost::algorithm::split(splitvec, line, boost::algorithm::is_any_of(","), boost::algorithm::token_compress_off);
 
-	if(splitvec.size() != 13) return false;
+	if(splitvec.size() != 12) return false;
 
 	if(splitvec[0] != std::string("$GPRMC")) return false;
 
@@ -96,7 +96,7 @@ bool nmea::decodeGPRMC(const std::string& line, GPSState& state)
 
 	char magvardir = splitvec[11][0];
 
-	char mode = splitvec[12][0];
+	//char mode = splitvec[12][0];
 
 	return true;
 }
