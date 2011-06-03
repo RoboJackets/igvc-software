@@ -1,5 +1,5 @@
 Initial connections
-La - GRN
+La - GND
 N  - +24V
 Lb - Manual
 
