@@ -57,3 +57,18 @@ target_link_libraries(lidartestgui
 
 	boost_thread-mt
 )
+
+add_executable(testpathclear
+	testpathclear.cc
+)
+
+target_link_libraries(testpathclear
+	NAV200
+	lidarProc
+	cv
+	highgui
+
+	plplotd
+
+	boost_thread-mt
+)
