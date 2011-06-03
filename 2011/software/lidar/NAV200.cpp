@@ -49,7 +49,7 @@ NAV200::NAV200()
 		throw runtime_error("Can't open USB device");
 	}
 	
-	distance_scale = 0.8255 / 300;
+	distance_scale = 0.8255 / 300.0;
 }
 #else
 NAV200::NAV200()
