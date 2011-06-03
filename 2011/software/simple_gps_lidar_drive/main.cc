@@ -13,8 +13,12 @@
 //static const size_t numPts = 1;
 
 
-static const double waypointLat[] = {33.787195};
-static const double waypointLon[] = {-84.406886};
+//static const double waypointLat[] = {33.787195};
+//static const double waypointLon[] = {-84.406886};
+//static const size_t numPts = 1;
+
+static const double waypointLat[] = {42.67888880473297};
+static const double waypointLon[] = {-83.19609817733424};
 static const size_t numPts = 1;
 
 int main()
@@ -120,6 +124,7 @@ int main()
 			std::cout << "Angle to go (post lidar): " << angle_to_target << " rad" << std::endl;
 			//got the angle we decided
 			motors.set_vel_vec(sin(angle_to_target),cos(angle_to_target));
+			usleep(1e3);
 		}
 		distance = lambert_distance(state, target);
 		std::cout << "Waypoint " << i << " hit at final distance " << distance << " m" << std::endl;
