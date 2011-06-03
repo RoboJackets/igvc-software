@@ -6,13 +6,12 @@
 double lambert_distance(const GPSState& a, const GPSState& b)
 {
 	static const double eq_rad = 6378.137e3;
-	static const double r = 298.257223563;
-	static const double PI = 4*atan(1);	
+	static const double r = 298.257223563;	
 
-	double alat = a.lat*PI/180;
-	double blat = b.lat*PI/180;
-	double alon = a.lon*PI/180;
-	double blon = b.lon*PI/180;
+	double alat = a.lat*M_PI/180.0;
+	double blat = b.lat*M_PI/180.0;
+	double alon = a.lon*M_PI/180.0;
+	double blon = b.lon*M_PI/180.0;
 
 	const double psia = atan2( (r - 1.0) * tan(alat) , r );
 	const double psib = atan2( (r - 1.0) * tan(blat) , r );
