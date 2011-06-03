@@ -26,20 +26,23 @@ int main()
 	NAV200 lidar;
 	OSMC_4wd_driver motors;
 
+	motors.setLight(MC_LIGHT_PULSING);
+
 	gps gpsA;
-	//gpsA.open("/dev/ttyUSB0", 38400);
-	gpsA.open("/dev/rfcomm0", 19200);
+	gpsA.open("/dev/ttyUSB2", 38400);
+	//gpsA.open("/dev/rfcomm0", 19200);
 
 	gpsA.start();
 
 	GPSState state;
-	bool stateValid;
-	stateValid = gpsA.get_last_state(state);
+	{
+	bool stateValid = gpsA.get_last_state(state);
 	while( (!stateValid) )
 	{
 		std::cout << "Waiting For Satellites" << std::endl;
 		usleep(1e5);
 		stateValid = gpsA.get_last_state(state);
+	}
 	}
 
 	std::cout << "Avg 10s" << std::endl;
@@ -47,11 +50,14 @@ int main()
 	usleep(10e6);
 	
 	//get new fix
+	{
+	bool stateValid = gpsA.get_last_state(state);
 	while( (!stateValid) )
 	{
 		std::cout << "Waiting For Satellites" << std::endl;
 		usleep(1e5);
 		stateValid = gpsA.get_last_state(state);
+	}
 	}
 
 	float goodtheta[NAV200::Num_Points];
@@ -66,14 +72,17 @@ int main()
 
 		while( distance > 2.0 )
 		{
+			{
+			bool stateValid = gpsA.get_last_state(state);
 			while( (!stateValid) )
 			{
 				std::cout << "Waiting For Satellites" << std::endl;
 				usleep(2e5);
 				stateValid = gpsA.get_last_state(state);
 			}
-			
-			std::cout << state.lat << ", " << state.lon << "\t//\t" << waypointLat[i]<< ", " << waypointLon[i] << std::endl;
+			}
+			printf("%0.8f, %0.8f\t//\t%0.8f, %0.8f\n", state.lat, state.lon, waypointLat[i], waypointLon[i]);
+			//std::cout << state.lat << ", " << state.lon << "\t//\t" << waypointLat[i]<< ", " << waypointLon[i] << std::endl;
 
 			distance = lambert_distance(state, target);
 			std::cout << "Distance to go: " << distance << " m" << std::endl;
@@ -129,4 +138,6 @@ int main()
 		distance = lambert_distance(state, target);
 		std::cout << "Waypoint " << i << " hit at final distance " << distance << " m" << std::endl;
 	}
+
+	motors.setLight(MC_LIGHT_STEADY);
 }
