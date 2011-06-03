@@ -38,29 +38,3 @@ double lambert_distance(const GPSState& a, const GPSState& b)
 
 	return d;
 }
-
-/*double haversine_distance(const GPSState& a, const GPSState& b)
-{
-	static const double eq_rad = 6378.137e3;
-	static const double r = 298.257223563;
-	static const double PI = 4*atan(1);	
-
-	double alat = a.lat*PI/180;
-	double blat = b.lat*PI/180;
-	double alon = a.lon*PI/180;
-	double blon = b.lon*PI/180;	
-	
-	double dlat = blat - alat;
-	double dlon = blon - alon;
-	double a1 = sin(dlat/2.0)*sin(dlat/2.0)+cos(alat)*cos(blat)*sin(dlon/2.0)*sin(dlon/2.0);
-	double c = 2*atan2(sqrt(a1),sqrt(1-a1));
-	double d = r*c;
-	return d;
-}*/
-
-/*double bowring_distance(const GPSState& a, const GPSState& b)
-{
-	double sigma = 	
-	double d = a1*C*sigma/(B*B)
-	return d;	
-}*/
