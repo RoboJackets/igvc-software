@@ -124,6 +124,7 @@ int main()
 			std::cout << "Angle to go (post lidar): " << angle_to_target << " rad" << std::endl;
 			//got the angle we decided
 			motors.set_vel_vec(sin(angle_to_target),cos(angle_to_target));
+			usleep(1e3);
 		}
 		distance = lambert_distance(state, target);
 		std::cout << "Waypoint " << i << " hit at final distance " << distance << " m" << std::endl;
