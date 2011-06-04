@@ -6,6 +6,8 @@ void setLeftMotorDutyCycle(byte dir, byte ldc)
 {
 	byte scaledldc = float(ldc) * leftScale;
 
+	if(scaledldc > 200) scaledldc = 200;
+
 	if(dir == MC_MOTOR_FORWARD)
 	{
 		//Serial.print("Motor DBG - L/Fwd: ");
@@ -27,6 +29,8 @@ void setLeftMotorDutyCycle(byte dir, byte ldc)
 void setRightMotorDutyCycle(byte dir, byte rdc)
 {
 	byte scaledrdc = float(rdc) * rightScale;
+
+	if(scaledrdc > 200) scaledrdc = 200;
 
 	if(dir == MC_MOTOR_FORWARD)
 	{
