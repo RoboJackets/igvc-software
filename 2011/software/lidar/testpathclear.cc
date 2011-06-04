@@ -35,19 +35,11 @@ int main()
 			std::cout << clear << "\n";
 			
 			#elif TEST_OP == 1
-<<<<<<< HEAD
 			float cost[40];
-			lidarProc::getSectorCost(3, goodt, goodr, numgoodpts,cost);
+			lidarProc::getSectorCost(3, goodt, goodr, numgoodpts, cost);
 			for (int i = 0; i < 40; i++)
 			{
 				std::cout << "From << " << -(i*9) << " to " << -(i*9+9) << " degrees, cost is " << cost[i] << "\n";
-=======
-			float* cost;
-			lidarProc::getSectorCost(1, goodt, goodr, numgoodpts, cost);
-			for (int i = 0; i < 40; i++)
-			{
-				std::cout << "From " << -(i*9) << " to " << -(i*9+9) << " degrees, cost is " << cost[i] << "\n";
->>>>>>> db2b0920c7a73540abcc2ab161f6a91ab7b437ca
 			}
 			#endif
 		}		
