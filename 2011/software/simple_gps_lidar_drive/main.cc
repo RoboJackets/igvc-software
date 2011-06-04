@@ -86,7 +86,7 @@ int main()
 				stateValid = gpsA.get_last_state(state);
 			}
 			}
-			printf("%0.8f, %0.8f\t//\t%0.8f, %0.8f\n", state.lat, state.lon, waypointLat[i], waypointLon[i]);
+			printf("sat: %i\t%0.8f, %0.8f\t//\t%0.8f, %0.8f\n", state.num_sat, state.lat, state.lon, waypointLat[i], waypointLon[i]);
 			//std::cout << state.lat << ", " << state.lon << "\t//\t" << waypointLat[i]<< ", " << waypointLon[i] << std::endl;
 
 			distance = lambert_distance(state, target);
