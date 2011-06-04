@@ -16,4 +16,5 @@ int main()
 		std::cout << "Error in function\n";
 	else 
 		std::cout << "Light pulsing\n";		
+	usleep(5e6);
 }
