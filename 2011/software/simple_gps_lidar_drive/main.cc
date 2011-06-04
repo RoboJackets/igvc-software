@@ -22,7 +22,11 @@
 //static const double waypointLon[] = {-84.406886};
 //static const size_t numPts = 1;
 
-static const double waypointLat[] = {42.67888880473297};
+//static const double waypointLat[] = {42.67888880473297};
+//static const double waypointLon[] = {-83.19609817733424};
+//static const size_t numPts = 1;
+
+static const double waypointLat[] = {42.67839313};
 static const double waypointLon[] = {-83.19609817733424};
 static const size_t numPts = 1;
 
