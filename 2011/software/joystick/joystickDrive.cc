@@ -150,7 +150,7 @@ void joystickDrive::setMotor()
 	double norm_rymag = rymag / double(32768);
 	double norm_lymag = lymag / double(32768);
 
-	double mag = 100;
+	double mag = 120;
 	int rvel = norm_rymag * double(mag);
 	int lvel = norm_lymag * double(mag);
 	
@@ -187,14 +187,14 @@ void joystickDrive::setMotor()
 	//turbo
 	if((joystickButtons & 32) == 32)
 	{
-		rvel += (rvel >= 0) ? 20 : -20;
-		lvel += (lvel >= 0) ? 20 : -20;
+		rvel += (rvel >= 0) ? 30 : -30;
+		lvel += (lvel >= 0) ? 30 : -30;
 	}
 	//turbo
 	if((joystickButtons & 128) == 128)
 	{
-		rvel += (rvel >= 0) ? 20 : -20;
-		lvel += (lvel >= 0) ? 20 : -20;
+		rvel += (rvel >= 0) ? 30 : -30;
+		lvel += (lvel >= 0) ? 30 : -30;
 	}
 
 	//force tight turn
