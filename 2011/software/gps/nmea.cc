@@ -173,3 +173,30 @@ bool nmea::decodeGPGSV(const std::string& line)
 {
 	return false;
 }
+
+bool nmea::decodeRPY(const std::string& line, gyroState& state)
+{
+	std::vector< std::string > splitvec;
+	boost::algorithm::split(splitvec, line, boost::algorithm::is_any_of(","), boost::algorithm::token_compress_off);
+
+	if(splitvec.size() != 12) return false;
+
+	if(splitvec[0] != std::string("$RPY")) return false;
+
+	try
+	{
+		state.rpy[0] = boost::lexical_cast<double>(splitvec[1]) / 10.0;
+		state.rpy[1] = boost::lexical_cast<double>(splitvec[2]) / 10.0;
+		state.rpy[2] = boost::lexical_cast<double>(splitvec[3]) / 10.0;
+
+		state.balloffset = boost::lexical_cast<double>(splitvec[4]) / 100.0;
+
+		state.yawrate = boost::lexical_cast<double>(splitvec[5]) / 100.0;
+	}
+	catch(...)
+	{
+		return false;
+	}
+
+	return true;
+}
