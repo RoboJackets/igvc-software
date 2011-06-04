@@ -73,7 +73,7 @@ bool gyro::open(const char* port, size_t baud)
 	try
 	{
 		gyro_port.set_option(boost::asio::serial_port_base::baud_rate(baud));
-		//gyro_port.set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
+		gyro_port.set_option(boost::asio::serial_port_base::flow_control(boost::asio::serial_port_base::flow_control::none));
 		gyro_port.set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
 		gyro_port.set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
 	}
@@ -107,7 +107,7 @@ void gyro::handle_serial_read_timer(const boost::system::error_code& ec)
 }
 
 	gyro_port.cancel();
-	reconnect();
+	//reconnect();
 }
 
 void gyro::handle_serial_read(const boost::system::error_code& ec, size_t len, boost::asio::deadline_timer& timeout)
@@ -168,7 +168,7 @@ void gyro::gyro_comm()
 		}
 		catch(...)
 		{
-			reconnect();
+			//reconnect();
 		}
 	}
 }
