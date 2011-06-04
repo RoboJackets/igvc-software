@@ -100,6 +100,7 @@ namespace lidarProc
 
 	bool isRadialClear(const float theta, const float radius, const double angle_tol, const float* t_pt, const float* r_pt, const size_t numpts);
 	bool isPathClear(const float theta, const float width, const float distance, const float* t_pt, const float* r_pt, const size_t numpts);
+	float* getSectorCost(const float distance, const float* t_pt, const float* r_pt, const size_t numpts);
 }
 
 #endif //LIDARPROC_CC
