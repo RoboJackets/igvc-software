@@ -281,7 +281,7 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 		float slice_area = .5*distance*width;
 		point_density = pts_in_width / slice_area;		
 
-		const float density_thresh = 3.0;
+		const float density_thresh = 100.0;
 
 		if(point_density > density_thresh)
 		{
@@ -350,40 +350,37 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 		//cv::fitLine(divided_pts, line, CV_DIST_L2, 0, .01, .01);
 	}
 
-	void getSectorCost(const float distance, const float* t_pt, const float* r_pt, const size_t numpts, float* cost)
+	void getSectorCost(const float distance, const float* theta_pt, const float* radius_pt, const size_t numpts, float* cost)
 	// Given an outside radius, and a number of lidar points, this function will return an array of the cost 
 	// of each 9 degree segment of the circle around of the lidar. Lines run from 0 to -9 degrees for the 
 	// first line, -9 to -18 degrees for the second etc.
 	{
-<<<<<<< HEAD
-		static const int NUMLINES = 40;		
-		//float cost[NUMLINES];		
-		for(int i = 0; i < NUMLINES; i++)
-=======
 		static const size_t NUMLINES = 40;		
 		//float cost[NUMLINES];		
 		for(size_t i = 0; i < NUMLINES; i++)
->>>>>>> db2b0920c7a73540abcc2ab161f6a91ab7b437ca
 		{
 		// For each sweeper
-			float start_ang = -((float)i*(M_PI/NUMLINES));
-			float end_ang = -(start_ang + (M_PI/NUMLINES));
+			float start_ang = -((float)i*(M_PI/20.0));
+			float end_ang = start_ang - (M_PI/20.0);
+			//std::cout << "start: " << start_ang*180/M_PI << "\nend: " << end_ang*180/M_PI << "\n"; 
 			float sweeper_scary = 0;
 			for(size_t j = 0; j < numpts; j++)
 			{
 			// For each point
 			//std::cout << "Yes, im reading\n";
 			//std::cout << "Angle " << t_pt[j] << " between " << start_ang << " and " << end_ang << "\n";
-				if (t_pt[j] >= start_ang && r_pt[j] <= end_ang)
+				if (theta_pt[j] <= start_ang && theta_pt[j] >= end_ang && radius_pt[j] <= distance)
 				{
-					//std::cout << "Point in Quadrant\n";
-				// If the points in the sweeper lines
-					float point_scary = 1 - t_pt[j]/distance;
+					float point_scary = 1 - radius_pt[j]/distance;
+					//std::cout << "r_pt: " << r_pt[j] << "\n";
+					//std::cout << "distance: " << distance << "\n";
+					//std::cout << "-----" << point_scary << "------\n";					
 					sweeper_scary+=point_scary;
 					// Add scaryness factor for each point to scaryness for the sector
 				} 
 			}
 			cost[i] = sweeper_scary;
+			// This comment goes out to the G man, because I skipped church today to write this code.
 		}
 	}
 }
