@@ -21,6 +21,7 @@ struct gyroState
 	double rpy[3];
 	double yawrate;
 	double balloffset;
+	timeval laptoptime;
 };
 
 //distance in meters
