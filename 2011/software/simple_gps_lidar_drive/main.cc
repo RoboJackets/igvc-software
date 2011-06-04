@@ -8,6 +8,11 @@
 #include "lidarProc.hpp"
 #include "NAV200.hpp"
 
+/*//To run the vision code with the gps
+#include "main.h"
+#include "Robot.h"
+#include <QApplication>*/
+
 //static const double waypointLat[] = {33.787175,  33.787196};
 //static const double waypointLon[] = {-84.406264, -84.406066};
 //static const size_t numPts = 1;
