@@ -194,8 +194,8 @@ int main()
 				headerOut.cmd = ARDUINO_GET_ID;
 				headerOut.size = 1;
 				//char msg = OSMC_IF_BOARD;
-				char msg = OSMC_IF_FOR_BOARD;
-				//char msg = OSMC_IF_AFT_BOARD;
+				//char msg = OSMC_IF_FOR_BOARD;
+				char msg = OSMC_IF_AFT_BOARD;
 
 				//serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);

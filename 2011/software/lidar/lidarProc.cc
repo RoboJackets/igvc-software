@@ -355,9 +355,15 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 	// of each 9 degree segment of the circle around of the lidar. Lines run from 0 to -9 degrees for the 
 	// first line, -9 to -18 degrees for the second etc.
 	{
+<<<<<<< HEAD
+		static const int NUMLINES = 40;		
+		//float cost[NUMLINES];		
+		for(int i = 0; i < NUMLINES; i++)
+=======
 		static const size_t NUMLINES = 40;		
 		//float cost[NUMLINES];		
 		for(size_t i = 0; i < NUMLINES; i++)
+>>>>>>> db2b0920c7a73540abcc2ab161f6a91ab7b437ca
 		{
 		// For each sweeper
 			float start_ang = -((float)i*(M_PI/NUMLINES));

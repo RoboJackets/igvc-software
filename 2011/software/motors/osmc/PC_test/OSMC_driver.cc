@@ -208,7 +208,7 @@ bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, co
 	int sr = (rightDir == MC_MOTOR_FORWARD) ? int(rightDutyCycle) : -int(rightDutyCycle);
 	int sl = (leftDir == MC_MOTOR_FORWARD) ? int(leftDutyCycle) : -int(leftDutyCycle);
 
-	std::cout << "right: " << sr << "\tleft: " << sl << std::endl;
+	//std::cout << "right: " << sr << "\tleft: " << sl << std::endl;
 
 //	if((rightDir == MC_MOTOR_REVERSE) || (leftDir == MC_MOTOR_REVERSE))
 //	{
@@ -440,7 +440,7 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 		lspeed = (fwdmag + forwardslope * ang) * dir;
 		branch = "abs(ang) < turnthresh";
 	}
-	std::cout << "r: " << rspeed << " l: " << lspeed << "angle: " << ang << " branch: " << branch << std::endl;
+	//std::cout << "r: " << rspeed << " l: " << lspeed << "angle: " << ang << " branch: " << branch << std::endl;
 	return set_motors(lspeed, rspeed);
 }
 
