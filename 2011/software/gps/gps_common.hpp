@@ -16,6 +16,13 @@ struct GPSState
 	double courseoverground;
 };
 
+struct gyroState
+{
+	double rpy[3];
+	double yawrate;
+	double balloffset;
+};
+
 //distance in meters
 double lambert_distance(const GPSState& a, const GPSState& b);
 //double haversine_distance(const GPSState& a, const GPSState& b);
