@@ -259,6 +259,7 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 	{
 		// count the points within the provided cone
 		size_t pts_in_width = 0;
+		float point_density;
 
 		for(size_t i = 0; i < numpts; i++)
 		{
@@ -268,15 +269,21 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 			float x, y;
 			NAV200::polar2cart(rt_pt, rr_pt, x, y);
 
-			if( (abs(x) < (width/2.0)) && (y <= distance))
+			if( (fabsf(x) < (width/2.0)) && (y <= distance))
 			{
 				pts_in_width++;
 			}
 		}
 		//std::cout << pts_in_width << std::endl;
 		//need to allow for noise. this is a stupid way to do so.
-		const static size_t pt_thresh = 3;
-		if(pts_in_width > pt_thresh)
+		//const static size_t pt_thresh = 2000;
+
+		float slice_area = .5*distance*width;
+		point_density = pts_in_width / slice_area		
+
+		const float density_thresh = 3.0;
+
+		if(point_density > density_thresh)
 		{
 			return false;
 		}
