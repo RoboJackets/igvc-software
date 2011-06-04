@@ -8,6 +8,11 @@
 #include "lidarProc.hpp"
 #include "NAV200.hpp"
 
+/*//To run the vision code with the gps
+#include "main.h"
+#include "Robot.h"
+#include <QApplication>*/
+
 //static const double waypointLat[] = {33.787175,  33.787196};
 //static const double waypointLon[] = {-84.406264, -84.406066};
 //static const size_t numPts = 1;
@@ -81,7 +86,7 @@ int main()
 				stateValid = gpsA.get_last_state(state);
 			}
 			}
-			printf("%0.8f, %0.8f\t//\t%0.8f, %0.8f\n", state.lat, state.lon, waypointLat[i], waypointLon[i]);
+			printf("sat: %i\t%0.8f, %0.8f\t//\t%0.8f, %0.8f\n", state.num_sat, state.lat, state.lon, waypointLat[i], waypointLon[i]);
 			//std::cout << state.lat << ", " << state.lon << "\t//\t" << waypointLat[i]<< ", " << waypointLon[i] << std::endl;
 
 			distance = lambert_distance(state, target);
