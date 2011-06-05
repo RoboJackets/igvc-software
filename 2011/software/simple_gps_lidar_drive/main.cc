@@ -38,7 +38,7 @@ int main()
 	motors.setLight(MC_LIGHT_PULSING);
 
 	gps gpsA;
-	gpsA.open("/dev/ttyUSB0", 38400);
+	gpsA.open("/dev/ttyGPS", 38400);
 	//gpsA.open("/dev/rfcomm0", 19200);
 
 	gpsA.start();

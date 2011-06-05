@@ -44,12 +44,12 @@ int main()
 	motors.setLight(MC_LIGHT_PULSING);
 
 	gyro gyroA;
-	gyroA.open("/dev/ttyUSB0", 115200);
+	gyroA.open("/dev/ttyIMU", 115200);
 	gyroA.start();
 	gyroState gy_state;
 
 	gps gpsA;
-	gpsA.open("/dev/ttyUSB0", 38400);
+	gpsA.open("/dev/ttyGPS", 38400);
 	//gpsA.open("/dev/rfcomm0", 19200);
 
 	gpsA.start();
@@ -136,23 +136,29 @@ int main()
 
 			std::cout << "Angle to go (pre lidar): " << angle_to_target << " rad" << std::endl;
 			
-			if(gyroA.get_last_state(gy_state)&& fabsf(angle_to_target)<M_PI/4.0)
+			if(gyroA.get_last_state(gy_state) && fabsf(angle_to_target)<M_PI/4.0)
+			// If the imu is responding and the robot is more than 45 degrees from the gps waypoint
 			{
 				float start_yaw =convertyaw(gy_state.rpy[2]);
+				// Converts current yaw to radians and reverses direction 
 				float end_yaw = start_yaw+angle_to_target;
 				float current_yaw = start_yaw;		
-				float the_diff = fmodf((end_yaw - current_yaw)+M_PI,2*M_PI)-M_PI;		
-				while(fabsf(the_diff)>M_PI/32.0)
+				float the_diff = fmodf((end_yaw - current_yaw)+M_PI,2*M_PI)-M_PI;
+				// Figures out how far it needs to turn			
+				while(fabsf(the_diff)>M_PI/32.0)		// Acuracy of about 5 degrees
 				{
-					gyroA.get_last_state(gy_state);					
-					the_diff = fmodf((end_yaw - convertyaw(gy_state.rpy[2]))+M_PI,2*M_PI)-M_PI;					
+					gyroA.get_last_state(gy_state);		//Update state					
+					the_diff = fmodf((end_yaw - convertyaw(gy_state.rpy[2]))+M_PI,2*M_PI)-M_PI;
+					// Recalculates how far it must turn					
 					if( the_diff > 0)
 					{
 						motors.setMotorPWM(40,-40,40,-40);	
+						// Turn left in place
 					}
 					else
 					{
 						motors.setMotorPWM(-40,40,-40,40);
+						// Turn right in place
 					}
 				}  
 			}
@@ -162,13 +168,13 @@ int main()
 				{
 					//r 140, l60
 					motors.setMotorPWM(140, 60, 140, 60);
-					// Turn left
+					// Arc left 
 				}
 				else
 				{
 					//r 20, l 140
 					motors.setMotorPWM(20, 140, 20, 140);
-					// Turn right
+					// Arc right
 				}
 			}
 				while(true)
