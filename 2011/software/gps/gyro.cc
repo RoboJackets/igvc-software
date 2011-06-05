@@ -50,6 +50,17 @@ bool gyro::get_last_state(gyroState& state)
 	return true;
 }
 
+bool get_heading(double& heading)
+{
+	gyroState state
+	if(get_last_state(state))
+	{
+		heading = state.rpy[2];//assume robot is flat
+		return true;
+	}
+	return false;
+}
+
 bool gyro::open(const char* port, size_t baud)
 {
 	m_port = port;
