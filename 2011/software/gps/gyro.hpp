@@ -21,7 +21,7 @@ class gyro
 	void stop();
 
 	bool get_last_state(gyroState& state);
-	bool get_heading(double& heading)
+	bool get_heading(double& heading);
 	
 	private:
 	volatile bool running;
