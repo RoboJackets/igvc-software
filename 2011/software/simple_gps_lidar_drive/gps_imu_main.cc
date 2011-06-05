@@ -30,10 +30,10 @@
 //static const double waypointLat[] = {42.67888880473297};
 //static const double waypointLon[] = {-83.19609817733424};
 //static const size_t numPts = 1;
-
-static const double waypointLat[] = {42.6781012505};
-static const double waypointLon[] = {-83.1948615905};
-static const size_t numPts = 1;
+//42.67847883, -83.19472683
+static const double waypointLat[] = {42.6781012505,42.67847883,42.6781012505,42.67847883};
+static const double waypointLon[] = {-83.1948615905,-83.19472683,-83.1948615905,-83.19472683};
+static const size_t numPts = 4;
 
 volatile bool usegentleturn = false;
 void handle_timer(const boost::system::error_code& ec)
@@ -42,7 +42,7 @@ void handle_timer(const boost::system::error_code& ec)
 	usegentleturn = false;
 }
 
-void bullshitturnwhilegpsisgettingbrainback(OSMC_4wd_driver& motors)
+/*void bullshitturnwhilegpsisgettingbrainback(OSMC_4wd_driver& motors)
 {
 	double angle_to_target = 0;
 	while(usegentleturn)
@@ -61,7 +61,7 @@ void bullshitturnwhilegpsisgettingbrainback(OSMC_4wd_driver& motors)
 		}
 		usleep(1e5);
 	}
-}
+}*/
 
 float convertyaw(float olddeg)
 {
@@ -84,8 +84,8 @@ int main()
 	gyroState gy_state;
 
 	gps gpsA;
-	gpsA.open("/dev/ttyGPS", 38400);
-	//gpsA.open("/dev/rfcomm0", 19200);
+	//gpsA.open("/dev/ttyGPS", 38400);
+	gpsA.open("/dev/rfcomm0", 19200);
 
 	gpsA.start();
 	
@@ -187,32 +187,35 @@ int main()
 			//usleep(2e6);
 
 			gettimeofday(&cur_time,NULL);
-			double thetimediff = (cur_time.tv_sec + cur_time.tv_usec/1000.0)-(time_last_turn.tv_sec + time_last_turn.tv_usec/1000.0);
-			if(gyroA.get_last_state(gy_state) && fabsf(angle_to_target)<M_PI/4.0 && thetimediff >= 2.0)
+			double thetimediff = (cur_time.tv_sec + cur_time.tv_usec/1.0e6)-(time_last_turn.tv_sec + time_last_turn.tv_usec/1.0e6);
+			std::cout<<"time diff:"<<thetimediff<<std::endl;
+			if((gyroA.get_last_state(gy_state)||1) && fabsf(angle_to_target)>M_PI/4.0 && thetimediff >= 3.0)
 			// If the imu is responding and the robot is more than 45 degrees from the gps waypoint
 			{
 				float start_yaw =convertyaw(gy_state.rpy[2]);
 				// Converts current yaw to radians and reverses direction 
 				float end_yaw = start_yaw+angle_to_target;
 				float current_yaw = start_yaw;		
-				float the_diff = fmodf((end_yaw - current_yaw)+M_PI,2*M_PI)-M_PI;
+				float the_diff = fmodf(fmodf((end_yaw - current_yaw),2*M_PI)+5*M_PI,2*M_PI)-M_PI;
 				// Figures out how far it needs to turn			
 				while(fabsf(the_diff)>M_PI/32.0)		// Acuracy of about 5 degrees
 				{
-					gyroA.get_last_state(gy_state);		//Update state					
-					the_diff = fmodf((end_yaw - convertyaw(gy_state.rpy[2]))+M_PI,2*M_PI)-M_PI;
+					if(!gyroA.get_last_state(gy_state)){usleep(1000);motors.setMotorPWM(0, 0,0, 0);continue;};		//Update state				
+					current_yaw =convertyaw(gy_state.rpy[2]);	
+					the_diff = fmodf(fmodf((end_yaw - current_yaw),2*M_PI)+5*M_PI,2*M_PI)-M_PI;
 					std::cout << "The diff: " << the_diff << "\n";					
 					// Recalculates how far it must turn					
 					if( the_diff > 0)
 					{
-						motors.setMotorPWM(60,-60,60,-60);	
+						motors.setMotorPWM(120,-80,120,-80);	
 						// Turn left in place
 					}
 					else
 					{
-						motors.setMotorPWM(-60,60,-60,60);
+						motors.setMotorPWM(-80,120,-80,120);
 						// Turn right in place
 					}
+					usleep(1e5);
 				}  
 				gettimeofday(&time_last_turn,NULL);
 			}
@@ -221,13 +224,17 @@ int main()
 				if(angle_to_target > 0)
 				{
 					//r 140, l60
-					motors.setMotorPWM(140, 60, 140, 60);
+					//motors.setMotorPWM(140, 60, 140, 60);
+					motors.setMotorPWM(90, 90, 90, 90);
+					std::cout<<"less";
 					// Arc left 
 				}
 				else
 				{
 					//r 20, l 140
-					motors.setMotorPWM(20, 140, 20, 140);
+					//motors.setMotorPWM(20, 140, 20, 140);
+					motors.setMotorPWM(90, 90, 90, 90);
+					std::cout<<"more";
 					// Arc right
 				}
 			}
