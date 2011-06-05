@@ -5,9 +5,11 @@ const float IMU_Control::gps_drift=.1;//estimated drift threshold [m/s]
 const float IMU_Control::imu_drift=.1;//estimated drift threshold (set to a number higher than the drift rate of imu) [deg/s]
 
 
-void IMU_Control::start(void){
+void IMU_Control::start(void)
+{
 	init();
-	while(true){
+	while(true)
+	{
 		update();
 		usleep(update_interval*1e6);
 	}
@@ -18,14 +20,17 @@ float IMU_Control::sub_deg(float a,float b)
 	return fmodf(a-b+180.0,360.0)-180.0;	
 }
 
-float IMU_Control::heading(void)
+bool IMU_Control::heading(double& correctedHeading)
 {
-	return imu_heading()+imu_off;
+	double gyro_heading;
+	bool retimu = gyroref.get_heading(gyro_heading);
+	correctedHeading = gyro_heading+imu_off;
+	return retimu;
 }
 
 void IMU_Control::init(void)
 {
-	last_time=time();
+	last_time=simpletime();
 
 	double gps_heading;
 	double imu_heading;
@@ -35,8 +40,8 @@ void IMU_Control::init(void)
 	
 	{
 		GETGPSIMUDATA:
-		retgps = gps.get_heading(gps_heading);
-		retimu = imu.get_heading(imu_heading);
+		retgps = gpsref.get_heading(gps_heading);
+		retimu = gyroref.get_heading(imu_heading);
 		if(!(retgps && retimu))
 		{
 			usleep(1e5);
@@ -45,14 +50,19 @@ void IMU_Control::init(void)
 	}
 
 	imu_off = sub_deg(gps_heading,imu_heading);
-	
 }
 
 void IMU_Control::update(void)
 {	
-	if(gps_speed()>gps_drift){
-		double elapsed=time()-last_time;
-		float error=sub_deg(gps_heading(),heading());
+	double gps_speed;
+	bool retgpsspeed = gpsref.get_speed(gps_speed);
+
+	double gps_heading;
+	bool retgpsheading = gpsref.get_heading(gps_heading);
+	
+	if(gps_speed>gps_drift){
+		double elapsed=simpletime()-last_time;
+		float error=sub_deg(gps_heading,heading());
 		if (elapsed<min_update) return;
 		if (fabsf(error)<imu_drift*elapsed){
 			imu_off=imu_off+signbit(error)*imu_drift*elapsed;
