@@ -26,8 +26,8 @@
 //static const double waypointLon[] = {-83.19609817733424};
 //static const size_t numPts = 1;
 
-static const double waypointLat[] = {42.67839313};
-static const double waypointLon[] = {-83.19609817733424};
+static const double waypointLat[] = {42.6781012505};
+static const double waypointLon[] = {-83.1948615905};
 static const size_t numPts = 1;
 
 int main()
@@ -38,7 +38,7 @@ int main()
 	motors.setLight(MC_LIGHT_PULSING);
 
 	gps gpsA;
-	gpsA.open("/dev/ttyUSB2", 38400);
+	gpsA.open("/dev/ttyUSB0", 38400);
 	//gpsA.open("/dev/rfcomm0", 19200);
 
 	gpsA.start();
@@ -90,7 +90,7 @@ int main()
 				stateValid = gpsA.get_last_state(state);
 			}
 			}
-			printf("sat: %i\t%0.8f, %0.8f\t//\t%0.8f, %0.8f\n", state.num_sat, state.lat, state.lon, waypointLat[i], waypointLon[i]);
+			printf("sat: %i\tcog: %0.2f\t%0.8f, %0.8f\t//\t%0.8f, %0.8f\n", state.num_sat, state.courseoverground, state.lat, state.lon, waypointLat[i], waypointLon[i]);
 			//std::cout << state.lat << ", " << state.lon << "\t//\t" << waypointLat[i]<< ", " << waypointLon[i] << std::endl;
 
 			distance = lambert_distance(state, target);
@@ -111,10 +111,22 @@ int main()
 			double targetvector = atan2(y,x);
 
 			//local 
-			double angle_to_target = targetvector - (M_PI_2 - state.courseoverground);
+			double angle_to_target = targetvector - (M_PI_2 - state.courseoverground * M_PI / 180.0);
 
 			std::cout << "Angle to go (pre lidar): " << angle_to_target << " rad" << std::endl;
 
+			if(angle_to_target > 0)
+			{
+				//r 140, l60
+				motors.setMotorPWM(140, 60, 140, 60);
+			}
+			else
+			{
+				//r 20, l 140
+				motors.setMotorPWM(20, 140, 20, 140);
+			}
+
+/*
 			//can we go the dir we want?
 			bool clear = lidarProc::isPathClear(angle_to_target, 1, 1, goodtheta, runavg_goodradius, numlidarpts);
 
@@ -140,8 +152,10 @@ int main()
 				}
 			}
 			std::cout << "Angle to go (post lidar): " << angle_to_target << " rad" << std::endl;
+*/
+
 			//got the angle we decided
-			motors.set_vel_vec(sin(angle_to_target),cos(angle_to_target));
+			//motors.set_vel_vec(sin(angle_to_target),cos(angle_to_target));
 			usleep(1e3);
 		}
 		distance = lambert_distance(state, target);
