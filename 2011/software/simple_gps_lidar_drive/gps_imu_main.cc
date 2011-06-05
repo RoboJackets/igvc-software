@@ -46,6 +46,7 @@ int main()
 	gyro gyroA;
 	gyroA.open("/dev/ttyUSB0", 115200);
 	gyroA.start();
+	gyroState gy_state;
 
 	gps gpsA;
 	gpsA.open("/dev/ttyUSB0", 38400);
@@ -76,6 +77,16 @@ int main()
 		std::cout << "Waiting For Satellites" << std::endl;
 		usleep(1e5);
 		stateValid = gpsA.get_last_state(state);
+	}
+	}
+	
+	{
+	bool stateValid = gyroA.get_last_state(gy_state);
+	while( (!stateValid) )
+	{
+		std::cout << "Waiting For IMU" << std::endl;
+		usleep(1e5);
+		stateValid = gyroA.get_last_state(gy_state);
 	}
 	}
 
@@ -125,16 +136,16 @@ int main()
 
 			std::cout << "Angle to go (pre lidar): " << angle_to_target << " rad" << std::endl;
 			
-			gyroState gy_state;
 			if(gyroA.get_last_state(gy_state)&& fabsf(angle_to_target)<M_PI/4.0)
 			{
 				float start_yaw =convertyaw(gy_state.rpy[2]);
 				float end_yaw = start_yaw+angle_to_target;
-				float current_yaw = start_yaw;			
-				while(fabsf(current_yaw-end_yaw)>M_PI/32.0)
+				float current_yaw = start_yaw;		
+				float the_diff = fmodf((end_yaw - current_yaw)+M_PI,2*M_PI)-M_PI;		
+				while(fabsf(the_diff)>M_PI/32.0)
 				{
 					gyroA.get_last_state(gy_state);					
-					float the_diff = fmodf((end_yaw - convertyaw(gy_state.rpy[2]))+M_PI,2*M_PI)-M_PI;					
+					the_diff = fmodf((end_yaw - convertyaw(gy_state.rpy[2]))+M_PI,2*M_PI)-M_PI;					
 					if( the_diff > 0)
 					{
 						motors.setMotorPWM(40,-40,40,-40);	
