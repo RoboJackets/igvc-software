@@ -1,3 +1,4 @@
+#include "gyro.hpp"
 
 #include <iostream>
 
@@ -7,6 +8,10 @@
 
 #include "lidarProc.hpp"
 #include "NAV200.hpp"
+
+#include <sys/time.h>
+
+//#include <boost/asio.hpp>
 
 /*//To run the vision code with the gps
 #include "main.h"
@@ -25,24 +30,65 @@
 //static const double waypointLat[] = {42.67888880473297};
 //static const double waypointLon[] = {-83.19609817733424};
 //static const size_t numPts = 1;
+//42.67847883, -83.19472683
+static const double waypointLat[] = {42.6781012505,42.67847883,42.6781012505,42.67847883};
+static const double waypointLon[] = {-83.1948615905,-83.19472683,-83.1948615905,-83.19472683};
+static const size_t numPts = 4;
 
-static const double waypointLat[] = {42.6781012505};
-static const double waypointLon[] = {-83.1948615905};
-static const size_t numPts = 1;
+volatile bool usegentleturn = false;
+void handle_timer(const boost::system::error_code& ec)
+{
+	std::cerr << "Fuck Me..." << std::endl;
+	usegentleturn = false;
+}
+
+/*void bullshitturnwhilegpsisgettingbrainback(OSMC_4wd_driver& motors)
+{
+	double angle_to_target = 0;
+	while(usegentleturn)
+	{
+		if(angle_to_target > 0)
+		{
+			//r 140, l60
+			motors.setMotorPWM(140, 60, 140, 60);
+			// Arc left 
+		}
+		else
+		{
+			//r 20, l 140
+			motors.setMotorPWM(20, 140, 20, 140);
+			// Arc right
+		}
+		usleep(1e5);
+	}
+}*/
+
+float convertyaw(float olddeg)
+{
+	return -olddeg*M_PI/180.0;
+}
 
 int main()
 {
+
+	boost::asio::io_service io_service;
+
 	NAV200 lidar;
 	OSMC_4wd_driver motors;
 
 	motors.setLight(MC_LIGHT_PULSING);
 
+	gyro gyroA;
+	gyroA.open("/dev/ttyIMU", 115200);
+	gyroA.start();
+	gyroState gy_state;
+
 	gps gpsA;
-	gpsA.open("/dev/ttyGPS", 38400);
-	//gpsA.open("/dev/rfcomm0", 19200);
+	//gpsA.open("/dev/ttyGPS", 38400);
+	gpsA.open("/dev/rfcomm0", 19200);
 
 	gpsA.start();
-
+	
 	GPSState state;
 	{
 	bool stateValid = gpsA.get_last_state(state);
@@ -68,17 +114,30 @@ int main()
 		stateValid = gpsA.get_last_state(state);
 	}
 	}
+	
+	{
+	bool stateValid = gyroA.get_last_state(gy_state);
+	while( (!stateValid) )
+	{
+		std::cout << "Waiting For IMU" << std::endl;
+		usleep(1e5);
+		stateValid = gyroA.get_last_state(gy_state);
+	}
+	}
 
 	float goodtheta[NAV200::Num_Points];
 	float goodradius[NAV200::Num_Points];
 	float runavg_goodradius[NAV200::Num_Points];
+	
+	timeval time_last_turn;
+	timeval cur_time;
+	gettimeofday(&time_last_turn,NULL);
 	for(size_t i = 0; i < numPts; i++)
 	{
 		GPSState target;
 		target.lat = waypointLat[i];
 		target.lon = waypointLon[i];
 		double distance = lambert_distance(state, target);
-
 		while( distance > 2.0 )
 		{
 			{
@@ -115,17 +174,70 @@ int main()
 
 			std::cout << "Angle to go (pre lidar): " << angle_to_target << " rad" << std::endl;
 
-			if(angle_to_target > 0)
-			{
-				//r 140, l60
-				motors.setMotorPWM(140, 60, 140, 60);
-			}
-			else
-			{
-				//r 20, l 140
-				motors.setMotorPWM(20, 140, 20, 140);
-			}
+			//go forward for a while to get heading from gps
+/*
+			boost::asio::deadline_timer timeout(io_service);
+			timeout.expires_from_now(boost::posix_time::milliseconds(2e3));
+			timeout.async_wait(boost::bind(handle_timer, boost::asio::placeholders::error));
+			motors.setMotorPWM(-60, -60, -60, -60);
+			io_service.run();
+			io_service.reset();
+*/
+			//motors.setMotorPWM(60, 60, 60, 60);
+			//usleep(2e6);
 
+			gettimeofday(&cur_time,NULL);
+			double thetimediff = (cur_time.tv_sec + cur_time.tv_usec/1.0e6)-(time_last_turn.tv_sec + time_last_turn.tv_usec/1.0e6);
+			std::cout<<"time diff:"<<thetimediff<<std::endl;
+			if((gyroA.get_last_state(gy_state)||1) && fabsf(angle_to_target)>M_PI/4.0 && thetimediff >= 3.0)
+			// If the imu is responding and the robot is more than 45 degrees from the gps waypoint
+			{
+				float start_yaw =convertyaw(gy_state.rpy[2]);
+				// Converts current yaw to radians and reverses direction 
+				float end_yaw = start_yaw+angle_to_target;
+				float current_yaw = start_yaw;		
+				float the_diff = fmodf(fmodf((end_yaw - current_yaw),2*M_PI)+5*M_PI,2*M_PI)-M_PI;
+				// Figures out how far it needs to turn			
+				while(fabsf(the_diff)>M_PI/32.0)		// Acuracy of about 5 degrees
+				{
+					if(!gyroA.get_last_state(gy_state)){usleep(1000);motors.setMotorPWM(0, 0,0, 0);continue;};		//Update state				
+					current_yaw =convertyaw(gy_state.rpy[2]);	
+					the_diff = fmodf(fmodf((end_yaw - current_yaw),2*M_PI)+5*M_PI,2*M_PI)-M_PI;
+					std::cout << "The diff: " << the_diff << "\n";					
+					// Recalculates how far it must turn					
+					if( the_diff > 0)
+					{
+						motors.setMotorPWM(120,-80,120,-80);	
+						// Turn left in place
+					}
+					else
+					{
+						motors.setMotorPWM(-80,120,-80,120);
+						// Turn right in place
+					}
+					usleep(1e5);
+				}  
+				gettimeofday(&time_last_turn,NULL);
+			}
+			else	
+			{
+				if(angle_to_target > 0)
+				{
+					//r 140, l60
+					//motors.setMotorPWM(140, 60, 140, 60);
+					motors.setMotorPWM(90, 90, 90, 90);
+					std::cout<<"less";
+					// Arc left 
+				}
+				else
+				{
+					//r 20, l 140
+					//motors.setMotorPWM(20, 140, 20, 140);
+					motors.setMotorPWM(90, 90, 90, 90);
+					std::cout<<"more";
+					// Arc right
+				}
+			}
 /*
 			//can we go the dir we want?
 			bool clear = lidarProc::isPathClear(angle_to_target, 1, 1, goodtheta, runavg_goodradius, numlidarpts);

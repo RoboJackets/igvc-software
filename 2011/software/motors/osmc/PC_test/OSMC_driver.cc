@@ -175,7 +175,25 @@ bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, co
 	cmdpk.sl = clamped_leftDutyCycle;
 	cmdpk.leftDir = leftDir;
 
-	std::cout << "r: " << (int)rightDutyCycle << " l: " << (int)leftDutyCycle << std::endl;
+	std::cout << "r: ";
+	if(rightDir == MC_MOTOR_REVERSE)
+	{
+		std::cout << -1*(int)rightDutyCycle;
+	}
+	else
+	{
+		std::cout << (int)rightDutyCycle;
+	}
+	std::cout << " l: ";
+	if(leftDir == MC_MOTOR_REVERSE)
+	{
+		std::cout << -1*(int)leftDutyCycle;
+	}
+	else
+	{
+		std::cout << (int)leftDutyCycle;
+	}
+ 	std::cout << std::endl;
 
 	if(ai.sendCommand(MC_SET_RL_DUTY_CYCLE, &cmdpk, sizeof(speed_set_t)))
 	{
