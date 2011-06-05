@@ -75,7 +75,7 @@ bool gps::get_heading(double& heading)
 	GPSState state;
 	if(get_last_state(state))
 	{
-		speed = state.courseoverground;
+		heading = state.courseoverground;
 		return true;
 	}
 	return false;
