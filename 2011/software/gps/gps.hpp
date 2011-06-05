@@ -21,6 +21,8 @@ class gps
 	void stop();
 
 	bool get_last_state(GPSState& state);
+	bool get_speed(double& speed);
+	bool get_heading(double& heading);
 
 	private:
 	volatile bool running;

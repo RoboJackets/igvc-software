@@ -14,6 +14,7 @@ struct GPSState
 	double lat;
 	double lon;
 	double courseoverground;
+	double speedoverground;
 };
 
 struct gyroState

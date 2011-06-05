@@ -48,3 +48,7 @@ target_link_libraries(gyro
 add_library(nmea
 	nmea.cc
 )
+
+add_library(IMU_Control
+IMU_Control.cc
+)
