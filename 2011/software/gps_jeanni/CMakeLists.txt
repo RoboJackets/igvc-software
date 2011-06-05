@@ -21,6 +21,7 @@ include_directories(
 	${IGVC_SOURCE_DIR}/encoders/pcdriver_signed
 	${IGVC_SOURCE_DIR}/lidar
 	${IGVC_SOURCE_DIR}/joystick
+	${IGVC_SOURCE_DIR}/gps
 )
 
 link_directories(
@@ -64,6 +65,7 @@ IF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "candiii"))
 target_link_libraries(${robot_bin}
 	gps_mapping
 	gps_vision
+	gps
 
 	ArduinoInterface
 	OSMC_driver
@@ -94,6 +96,7 @@ ELSEIF((${ROBOT_REV} MATCHES "jeannidbg") OR (${ROBOT_REV} MATCHES "jeanni"))
 target_link_libraries(${robot_bin}
 	gps_mapping
 	gps_vision
+	gps
 
 	ArduinoInterface
 	OSMC_driver_4wd

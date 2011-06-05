@@ -4,6 +4,7 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include "Point2D.h"
+#include "gps.hpp"
 
 /*
  * This file contains the robot's primary vision processing code main function.
@@ -29,6 +30,12 @@ public:
 	/* flag for performing image perspective transform */
 	int DO_TRANSFORM ;
 
+	//Vector of input gps coordinates
+        
+
+	//Latitude, Longitude, and Direction from gps
+	double lat, lon, gpsDir, angle_off_waypoint;
+
 	/*** SweeperLines ****************************************************/
 	// Number of paths that are assessed between the starting/ending angles
 	int nav_path__num ;
@@ -46,6 +53,8 @@ public:
 	int nav_path__path_search_girth ;
 	// (do not change without reason!)
 	int nav_path__center_path_id ;
+	int nav_path__diff_angle ;
+	int nav_path__chosen_path_id ;
 	// Amount of danger posed by a single barrel-pixel
 	// (everything bad is a barrel)
 	int danger_per_barrel_pixel ;

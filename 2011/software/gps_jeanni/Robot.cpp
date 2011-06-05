@@ -94,10 +94,13 @@ Robot::~Robot()
 
 	run_vel_thread = false;
 	run_lidar_thread = false;
+	run_gps_thread = false;
 	vel_update_thread->join();
 	lidar_update_thread->join();
+	gps_update_thread->join();
 	delete vel_update_thread;
 	delete lidar_update_thread;
+	delete gps_update_thread;
 	delete osmcd;
 	//delete lidar;
 
@@ -308,6 +311,9 @@ void Robot::Go()
 	//lidar = new NAV200;
 	run_lidar_thread = true;
 	lidar_update_thread = new boost::thread(&Robot::update_lidar_func, this);
+
+	run_gps_thread = true;
+	gps_update_thread = new boost::thread(&Robot::update_gps_func, this);
 
 	/* Setup video card processing */
 	initGlut();
@@ -853,6 +859,22 @@ void Robot::update_lidar_func()
 		//}
 		//do something with the lidar input
 		usleep(1e5);
+	}
+}
+
+void Robot::update_gps_func()
+{
+	while(run_gps_thread)
+	{
+	  // if(!gps->read())
+	  //{
+	      boost::mutex::scoped_lock lock(gpsmutex);
+	  //}
+	  // else
+	  // {
+	  //    std::cerr << "lidar read failed!" << std::endl;
+	  //}
+	  usleep(1e5);
 	}
 }
 
