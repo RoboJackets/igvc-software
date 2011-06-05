@@ -350,7 +350,7 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 		//cv::fitLine(divided_pts, line, CV_DIST_L2, 0, .01, .01);
 	}
 
-	void getSectorCost(const float distance, const float* theta_pt, const float* radius_pt, const size_t numpts, float* cost)
+	void getSectorCost(const float distance, const float* theta_pt, const float* radius_pt, const size_t numpts, float cost[40])
 	// Given an outside radius, and a number of lidar points, this function will return an array of the cost 
 	// of each 9 degree segment of the circle around of the lidar. Lines run from 0 to -9 degrees for the 
 	// first line, -9 to -18 degrees for the second etc.
@@ -360,7 +360,7 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 		for(size_t i = 0; i < NUMLINES; i++)
 		{
 		// For each sweeper
-			float start_ang = -((float)i*(M_PI/20.0));
+			float start_ang = -float(i)*(M_PI/20.0);
 			float end_ang = start_ang - (M_PI/20.0);
 			//std::cout << "start: " << start_ang*180/M_PI << "\nend: " << end_ang*180/M_PI << "\n"; 
 			float sweeper_scary = 0;

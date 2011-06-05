@@ -19,4 +19,17 @@ target_link_libraries(gps_drive
 	OSMC_driver_4wd
 	NAV200
 	lidarProc
+	gyro
+)
+
+add_executable(gps_imu
+	gps_imu_main.cc
+)
+
+target_link_libraries(gps_imu
+	gps
+	OSMC_driver_4wd
+	NAV200
+	lidarProc
+	gyro
 )
