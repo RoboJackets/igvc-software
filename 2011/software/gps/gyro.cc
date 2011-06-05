@@ -50,7 +50,7 @@ bool gyro::get_last_state(gyroState& state)
 	return true;
 }
 
-bool get_heading(double& heading)
+bool gyro::get_heading(double& heading)
 {
 	gyroState state;
 	if(get_last_state(state))
