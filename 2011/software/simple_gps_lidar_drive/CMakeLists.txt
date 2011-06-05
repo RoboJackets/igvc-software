@@ -23,7 +23,7 @@ target_link_libraries(gps_drive
 )
 
 add_executable(gps_imu
-	gps_imu_main
+	gps_imu_main.cc
 )
 
 target_link_libraries(gps_imu
