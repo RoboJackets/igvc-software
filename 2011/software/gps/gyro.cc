@@ -52,7 +52,7 @@ bool gyro::get_last_state(gyroState& state)
 
 bool get_heading(double& heading)
 {
-	gyroState state
+	gyroState state;
 	if(get_last_state(state))
 	{
 		heading = state.rpy[2];//assume robot is flat
