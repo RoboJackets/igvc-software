@@ -25,7 +25,7 @@ class IMU_Control
 	}
 	
 	void start();
-	float heading();
+	bool heading(double& heading);
 	void init();
 	void update();
 
@@ -41,8 +41,10 @@ class IMU_Control
 	gps& gpsref;
 	gyro& gyroref;
 
+	boost::mutex imu_off_mutex;
+
 	double last_time;// last time we updated [s]
-	static const double min_update_wait;//shortest IMU correct interval [s]
+	static const double min_update;//shortest IMU correct interval [s]
 	static const float gps_drift;//estimated drift threshold [m/s]
 	static const float imu_drift;//estimated drift threshold (set to a number higher than the drift rate of imu) [deg/s]
 	float imu_off;// [deg]
