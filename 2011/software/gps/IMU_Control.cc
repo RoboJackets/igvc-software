@@ -1,6 +1,6 @@
 #include "IMU_Control.hpp"
 
-const double IMU_Control::min_update_wait=1;//shortest IMU correct interval [s]
+const double IMU_Control::min_update=1;//shortest IMU correct interval [s]
 const float IMU_Control::gps_drift=.1;//estimated drift threshold [m/s]
 const float IMU_Control::imu_drift=.1;//estimated drift threshold (set to a number higher than the drift rate of imu) [deg/s]
 
@@ -24,6 +24,8 @@ bool IMU_Control::heading(double& correctedHeading)
 {
 	double gyro_heading;
 	bool retimu = gyroref.get_heading(gyro_heading);
+
+	boost::mutex::scoped_lock lock(imu_off_mutex);
 	correctedHeading = gyro_heading+imu_off;
 	return retimu;
 }
@@ -60,13 +62,21 @@ void IMU_Control::update(void)
 	double gps_heading;
 	bool retgpsheading = gpsref.get_heading(gps_heading);
 	
+	double internalHeading;
+	bool retinternal = heading(internalHeading);
+	
 	if(gps_speed>gps_drift){
 		double elapsed=simpletime()-last_time;
-		float error=sub_deg(gps_heading,heading());
+		float error=sub_deg(gps_heading,internalHeading);
 		if (elapsed<min_update) return;
-		if (fabsf(error)<imu_drift*elapsed){
-			imu_off=imu_off+signbit(error)*imu_drift*elapsed;
-		}else{
+		if (fabsf(error)<imu_drift*elapsed)
+		{
+			boost::mutex::scoped_lock lock(imu_off_mutex);
+			imu_off=imu_off+std::signbit(error)*imu_drift*elapsed;
+		}
+		else
+		{
+			boost::mutex::scoped_lock lock(imu_off_mutex);
 			imu_off=imu_off+error;
 		}
 	}
