@@ -153,8 +153,9 @@ void Vision::init()
 	//John code start
 	if(haveDir)
 	{
-	  angle_off_waypoint = atan2((coords[0]-lat),(coords[1]-lon)); //probably wrong
-	  nav_path__diff_angle = gpsDir - angle_off_waypoint; //gpsVector not calculated yet
+	  angle_off_waypoint = atan2((coords[0]-lat),(coords[1]-lon));
+	  angle_off_waypoint = (M_PI_2 - angle_off_waypoint)*180.0 / M_PI; //convert radians to degrees
+	  nav_path__diff_angle = gpsDir - angle_off_waypoint;
 	  if(nav_path__diff_angle > (nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 0;
 	  else if(nav_path__diff_angle < -(nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 20;
 	  else if(nav_path__diff_angle >= 0)
