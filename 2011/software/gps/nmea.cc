@@ -72,15 +72,29 @@ bool nmea::decodeGPRMC(const std::string& line, GPSState& state)
 		}
 	}
 
-
+	try
+	{
 	const char LatHemi = splitvec[4][0];
 	state.lat = decodeLatitude(splitvec[3], LatHemi);
 
 	const char LonHemi = splitvec[6][0];
 	state.lon = decodeLongitude(splitvec[5], LonHemi);
+	}
+	catch(...)
+	{
+		return false;
+	}
 
-	double speedKTS = boost::lexical_cast<double>(splitvec[7].c_str());
-
+	try
+	{
+		double speedKTS = boost::lexical_cast<double>(splitvec[7].c_str());
+		double speedms = speedKTS  * .514444444444444444;
+		state.speedoverground = speedms;
+	}
+	catch(...)
+	{
+		return false;
+	}
 	state.courseoverground = boost::lexical_cast<double>(splitvec[8].c_str());
 
 	std::string utcdate = splitvec[9];

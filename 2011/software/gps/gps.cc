@@ -59,6 +59,28 @@ bool gps::get_last_state(GPSState& state)
 	return true;
 }
 
+bool gps::get_speed(double& speed)
+{
+	GPSState state;
+	if(get_last_state(state))
+	{
+		speed = state.speedoverground;
+		return true;
+	}
+	return false;
+}
+
+bool gps::get_heading(double& heading)
+{
+	GPSState state;
+	if(get_last_state(state))
+	{
+		speed = state.courseoverground;
+		return true;
+	}
+	return false;
+}
+
 bool gps::open(const char* port, size_t baud)
 {
 	m_port = port;
