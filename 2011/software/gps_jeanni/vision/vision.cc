@@ -97,25 +97,7 @@ void Vision::init()
 	/* load in vision settings */
 	LoadVisionXMLSettings();
 	
-	//Get gps data
-	gps gpsA;
-
-	gpsA.open("/dev/ttyUSB0", 38400);
-	gpsA.start();
-
-	GPSState state;
-	bool haveDir = false;
-	if(gpsA.get_last_state(state))
-	{
-	  lat = state.lat;
-	  lon = state.lon;
-	  gpsDir = state.courseoverground;
-	  haveDir = true;
-	}
-	else
-	{
-	  std::cout << "Error getting gps state" << std::endl;
-	}
+	
 
 	/*//Change this!
 	GPSState pt1;
@@ -150,27 +132,7 @@ void Vision::init()
 	// (do not change without reason!)
 	nav_path__center_path_id = (int) round((90.0 - nav_path__view_cone__start_angle) / nav_path__view_cone__spacing);
 
-	//John code start
-	if(haveDir)
-	{
-	  angle_off_waypoint = atan2((coords[0]-lat),(coords[1]-lon));
-	  angle_off_waypoint = (M_PI_2 - angle_off_waypoint)*180.0 / M_PI; //convert radians to degrees
-	  nav_path__diff_angle = gpsDir - angle_off_waypoint;
-	  if(nav_path__diff_angle > (nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 0;
-	  else if(nav_path__diff_angle < -(nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 20;
-	  else if(nav_path__diff_angle >= 0)
-	  {
-	    nav_path__chosen_path_id = nav_path__center_path_id - (int) round(nav_path__diff_angle / nav_path__view_cone__spacing); //check
-	  }
-	  else
-	  {
-	    nav_path__chosen_path_id = nav_path__center_path_id + (int) round(nav_path__diff_angle / nav_path__view_cone__spacing); //check
-	  }
-	}
-	else
-	{
-	  nav_path__chosen_path_id = nav_path__center_path_id;
-	}
+	
 	//nav_path__currGps_path_id = FIND LINE FROM VECTOR DETERMINED BY GPS AND IMU!!!
 	// Amount of danger posed by a single barrel-pixel
 	// (everything bad is a barrel)
@@ -307,7 +269,53 @@ void Vision::visSweeperLines(Point2D<int>& goal)
 	int curPathDanger = 0;
 	int weight = 0;
 	int pathID = 0;
+	
+	//Get gps data
+	/*
+	gps gpsA;
 
+	gpsA.open("/dev/ttyUSB0", 38400);
+	gpsA.start();
+
+	GPSState state;
+	bool haveDir = true;
+	if(gpsA.get_last_state(state))
+	{
+	  lat = state.lat;
+	  lon = state.lon;
+	  gpsDir = state.courseoverground;
+	  std::cout << "Good gps state" << std::endl;
+	  haveDir = true;
+	}
+	else
+	{
+	  haveDir = true;
+	  std::cout << "Error getting gps state" << std::endl;
+	}
+	
+	//John code start
+	if(haveDir)
+	{
+	  angle_off_waypoint = atan2((coords[0]-lat),(coords[1]-lon));
+	  angle_off_waypoint = (M_PI_2 - angle_off_waypoint)*180.0 / M_PI; //convert radians to degrees
+	  nav_path__diff_angle = gpsDir - angle_off_waypoint;
+	  if(nav_path__diff_angle > (nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 0;
+	  else if(nav_path__diff_angle < -(nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 20;
+	  else if(nav_path__diff_angle >= 0)
+	  {
+	    nav_path__chosen_path_id = nav_path__center_path_id - (int) round(nav_path__diff_angle / nav_path__view_cone__spacing); //check
+	  }
+	  else
+	  {
+	    nav_path__chosen_path_id = nav_path__center_path_id + (int) round(nav_path__diff_angle / nav_path__view_cone__spacing); //check
+	  }
+	}
+	else
+	{
+	  nav_path__chosen_path_id = nav_path__center_path_id;
+	}
+	std::cout << "ID:" << nav_path__chosen_path_id << std::endl;
+	*/
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	{
 #pragma omp parallel for private(curPathDanger,curPixelDanger,weight,pathID)

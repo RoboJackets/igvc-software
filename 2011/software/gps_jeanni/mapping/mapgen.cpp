@@ -8,6 +8,7 @@
 #include "Ransac.h"
 #include <iostream>
 #include <omp.h>
+#include "gps.hpp"
 
 
 /////////////////////////////////////////////////
@@ -40,10 +41,15 @@
 /* general absolute value */
 #define fabs(x) ((x<0)?(-x):(x))
 
+//Constants
+static double coords[24] = {42.67839313, -83.19609817733424};
 
 
-MapGen::MapGen()
+
+MapGen::MapGen(gps& g) : gpsA(g)
 {
+	gpsA.open("/dev/ttyGPS", 38400);
+	gpsA.start();
 }
 
 MapGen::~MapGen()
@@ -996,29 +1002,83 @@ int MapGen::processMap(Point2D<int>& goal)
 		int bestPath_id = 0;
 		{
 			int bestPath_danger = pathDanger[bestPath_id];
-			int bestPath_distanceFromCenter = abs(nav_path__center_path_id - bestPath_id)+1;
+			int bestPath_distanceFromDesired = nav_path__center_path_id*2;
+			
+			
+			// John code start
+			double lat, lon, gpsDir;
+
+			GPSState state;
+			bool haveDir = true;
+			if(gpsA.get_last_state(state))
+			{
+			  lat = state.lat;
+			  lon = state.lon;
+			  gpsDir = state.courseoverground;
+			  std::cout << "Good gps state" << std::endl;
+			  haveDir = true;
+			}
+			else
+			{
+			  haveDir = true;
+			  std::cout << "Error getting gps state" << std::endl;
+			}
+	
+			double angle_off_waypoint, nav_path__diff_angle;
+			double nav_path__view_cone__delta_angle=nav_path__view_cone__spacing*nav_path__center_path_id*2;
+			int nav_path__chosen_path_id;//the line we want to go to
+			
+			if(haveDir)
+			{
+			  angle_off_waypoint = atan2((coords[0]-lat),(coords[1]-lon));
+			  angle_off_waypoint = (M_PI_2 - angle_off_waypoint)*180.0 / M_PI; //convert radians to degrees
+			  nav_path__diff_angle = gpsDir - angle_off_waypoint;
+			  std::cout << "diff_angle: " << nav_path__diff_angle << "\n";
+			  if(nav_path__diff_angle > (nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 0;
+			  else if(nav_path__diff_angle < -(nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 20;
+			  else if(nav_path__diff_angle >= 0)
+			  {
+			    nav_path__chosen_path_id = nav_path__center_path_id - (int) round(nav_path__diff_angle / nav_path__view_cone__spacing); //check
+			  }
+			  else
+			  {
+			    nav_path__chosen_path_id = nav_path__center_path_id + (int) round(nav_path__diff_angle / nav_path__view_cone__spacing); //check
+			  }
+			}
+			else
+			{
+			  nav_path__chosen_path_id = nav_path__center_path_id;
+			}
+			std::cout << "ID:" << nav_path__chosen_path_id << std::endl;
+			
+			
+			// John Code End
+			
+			
+			//Choose best path
 			int curPath_danger;
-			int curPath_distanceFromCenter;
+			int curPath_distanceFromDesired;
 			for (int curPath_id=0; curPath_id<nav_path__num; curPath_id++)
 			{
 				curPath_danger = pathDanger[curPath_id];
-				curPath_distanceFromCenter = abs(nav_path__center_path_id - curPath_id);
+				curPath_distanceFromDesired = abs(nav_path__chosen_path_id - curPath_id);
 
 				if (curPath_danger < bestPath_danger)
 				{
 					bestPath_danger = curPath_danger;
 					bestPath_id = curPath_id;
-					bestPath_distanceFromCenter = curPath_distanceFromCenter;
+					bestPath_distanceFromDesired = curPath_distanceFromDesired;
 				}
 				else if (curPath_danger == bestPath_danger)
 				{
-					if (curPath_distanceFromCenter < bestPath_distanceFromCenter)
+					if (curPath_distanceFromDesired < bestPath_distanceFromDesired)
 					{
 						bestPath_id = curPath_id;
-						bestPath_distanceFromCenter = curPath_distanceFromCenter;
+						bestPath_distanceFromDesired = curPath_distanceFromDesired;
 					}
 				}
 			}
+			std::cout << "Best Path: " << bestPath_id << "\n";	
 		}
 
 		/* Hilight the path that was picked */

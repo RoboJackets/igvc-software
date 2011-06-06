@@ -1,15 +1,8 @@
-
-IF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "jeannidbg"))
-	SET(CMAKE_C_FLAGS "-march=native -pipe -g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
-	SET(CMAKE_CXX_FLAGS "-march=native -pipe -g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
-ELSEIF( (${ROBOT_REV} MATCHES "candiii") OR (${ROBOT_REV} MATCHES "jeanni"))
-	SET(CMAKE_C_FLAGS "-march=native -pipe -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -DQT_THREAD_SUPPORT -fopenmp")
-	SET(CMAKE_CXX_FLAGS "-march=native -pipe -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -DQT_THREAD_SUPPORT -fopenmp")
-ENDIF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "jeannidbg"))
+include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
 
 include_directories(
-	${IGVC_SOURCE_DIR}/jeanni
-	${IGVC_SOURCE_DIR}/jeanni/vision
+	${IGVC_SOURCE_DIR}/gps_jeanni
+	${IGVC_SOURCE_DIR}/gps_jeanni/vision
 	/usr/include/opencv
 	/usr/include/qt4
 	/usr/include/qt4/Qt
