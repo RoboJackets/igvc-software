@@ -844,6 +844,55 @@ int MapGen::processMap(Point2D<int>& goal)
 	int curPathDanger = 0;
 	int weight = 0;
 
+	// John code start
+	double lat, lon, gpsDir;
+
+	GPSState state;
+	bool haveDir = true;
+	if(gpsA.get_last_state(state))
+	{
+	  lat = state.lat;
+	  lon = state.lon;
+	  gpsDir = state.courseoverground;
+	  std::cout << "Good gps state" << std::endl;
+	  haveDir = true;
+	}
+	else
+	{
+	  haveDir = true;
+	  std::cout << "Error getting gps state" << std::endl;
+	}
+
+	double angle_off_waypoint, nav_path__diff_angle;
+	double nav_path__view_cone__delta_angle=nav_path__view_cone__spacing*nav_path__center_path_id*2;
+	int nav_path__chosen_path_id;//the line we want to go to
+	
+	if(haveDir)
+	{
+	  angle_off_waypoint = atan2((coords[0]-lat),(coords[1]-lon)); //in radians
+	  angle_off_waypoint = (M_PI_2 - angle_off_waypoint)*180.0 / M_PI; //convert radians to bearings
+	  nav_path__diff_angle = angle_off_waypoint - gpsDir; //degrees
+	  std::cout << "diff_angle: " << nav_path__diff_angle << "angle_off_waypoint:" << angle_off_waypoint << std::endl;
+	  if(nav_path__diff_angle > (nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 0;
+	  else if(nav_path__diff_angle < -(nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 20;
+	  else if(nav_path__diff_angle >= 0)
+	  {
+	    nav_path__chosen_path_id = nav_path__center_path_id - (int) round(nav_path__diff_angle / nav_path__view_cone__spacing); //check
+	  }
+	  else
+	  {
+	    nav_path__chosen_path_id = nav_path__center_path_id + (int) round(nav_path__diff_angle / nav_path__view_cone__spacing); //check
+	  }
+	}
+	else
+	{
+	  nav_path__chosen_path_id = nav_path__center_path_id;
+	}
+	std::cout << "ID:" << nav_path__chosen_path_id << std::endl;
+		
+	// John Code End
+
+
 	/* Compute and draw all navigation paths we are considering (and do other actions) */
 	{
 #pragma omp parallel for private(curPathDanger,curPixelDanger,weight)
@@ -904,7 +953,7 @@ int MapGen::processMap(Point2D<int>& goal)
 			}
 
 			//==== weight outer path lines more scary than inner ==========//
-			weight = abs(nav_path__center_path_id-pathID);
+			weight = abs(nav_path__chosen_path_id-pathID);
 			curPathDanger += weight;
 			//printf("cur path %d danger %d \n",pathID,curPathDanger);
 
@@ -1005,54 +1054,7 @@ int MapGen::processMap(Point2D<int>& goal)
 			int bestPath_distanceFromDesired = nav_path__center_path_id*2;
 			
 			
-			// John code start
-			double lat, lon, gpsDir;
-
-			GPSState state;
-			bool haveDir = true;
-			if(gpsA.get_last_state(state))
-			{
-			  lat = state.lat;
-			  lon = state.lon;
-			  gpsDir = state.courseoverground;
-			  std::cout << "Good gps state" << std::endl;
-			  haveDir = true;
-			}
-			else
-			{
-			  haveDir = true;
-			  std::cout << "Error getting gps state" << std::endl;
-			}
-	
-			double angle_off_waypoint, nav_path__diff_angle;
-			double nav_path__view_cone__delta_angle=nav_path__view_cone__spacing*nav_path__center_path_id*2;
-			int nav_path__chosen_path_id;//the line we want to go to
 			
-			if(haveDir)
-			{
-			  angle_off_waypoint = atan2((coords[0]-lat),(coords[1]-lon));
-			  angle_off_waypoint = (M_PI_2 - angle_off_waypoint)*180.0 / M_PI; //convert radians to degrees
-			  nav_path__diff_angle = gpsDir - angle_off_waypoint;
-			  std::cout << "diff_angle: " << nav_path__diff_angle << "\n";
-			  if(nav_path__diff_angle > (nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 0;
-			  else if(nav_path__diff_angle < -(nav_path__view_cone__delta_angle / 2)) nav_path__chosen_path_id = 20;
-			  else if(nav_path__diff_angle >= 0)
-			  {
-			    nav_path__chosen_path_id = nav_path__center_path_id - (int) round(nav_path__diff_angle / nav_path__view_cone__spacing); //check
-			  }
-			  else
-			  {
-			    nav_path__chosen_path_id = nav_path__center_path_id + (int) round(nav_path__diff_angle / nav_path__view_cone__spacing); //check
-			  }
-			}
-			else
-			{
-			  nav_path__chosen_path_id = nav_path__center_path_id;
-			}
-			std::cout << "ID:" << nav_path__chosen_path_id << std::endl;
-			
-			
-			// John Code End
 			
 			
 			//Choose best path
