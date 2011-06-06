@@ -13,7 +13,7 @@
     <!-- ON/OFF -->
     <doMapping>001 </doMapping>
     <doVision> 001 </doVision>
-    <useMotors>000 </useMotors>
+    <useMotors>001 </useMotors>
 
 	<!-- Guppy Misc Settings -->
 	<useFirewireCamera>001</useFirewireCamera>  <!-- set to 0 to load video -->

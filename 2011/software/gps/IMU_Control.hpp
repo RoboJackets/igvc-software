@@ -19,7 +19,7 @@ Call heading() to get the heading
 class IMU_Control
 {
 
-	IMU_Control(gps& g, gyro& i) : gpsref(g), gyroref(i), imu_off(0), update_interval(0)
+	IMU_Control(gps& g, gyro& i) : gpsref(g), gyroref(i), imu_off(0), update_interval(0.7)
 	{
 
 	}

@@ -15,17 +15,19 @@
 #include "vision.h"
 #include "image_buffers.h"
 #include "mapgen.h"
-#include "joystickDrive.hpp"
+//#include "joystickDrive.hpp"
 
 const static double motor_vel_mag = 1.1;
 
 #ifdef OSMC_2WD
-	#include "OSMC_driver.hpp"	
+	#include "OSMC_driver.hpp"
 #elif defined(OSMC_4WD)
 	#include "OSMC_4wd_driver.hpp"	
 #else
 	#error "Must define OSMC_2WD or OSMC_4WD"
 #endif
+
+#include "gps.hpp"
 
 //#include "NAV200.hpp"
 
@@ -123,6 +125,8 @@ public:
 	// xml conf
 	void LoadXMLSettings();
 
+	gps gpsA;
+
 	// map generator and slam processing
 	MapGen mapper;
 	int doMapping;
@@ -158,7 +162,9 @@ public:
 	void update_gps_func();
 
 	// joystick driver
-	joystickDrive jD;
+	//joystickDrive jD;
+
+
 
 	//radians <start,stop>; 0 to the right, pos counterclockwise
 	//std::deque< boost::tuple<float,float> > lidar_linear_regions;

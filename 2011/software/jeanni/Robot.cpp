@@ -336,6 +336,7 @@ void Robot::processFunc()
 	 */
 
 	// Switches into joystick mode if manual override button is pressed
+	/*
 	jD.readJoystick();
 	if (jD.manualOverride())
 	{
@@ -349,7 +350,7 @@ void Robot::processFunc()
 	
 		osmcd->setLight(MC_LIGHT_PULSING);
 	}
-
+	*/
 	/* glut mask init hack */
 	static bool getMask = true;
 	if (getMask)

@@ -10,6 +10,8 @@
 #include "image_buffers.h"
 #include "Graphics.h"
 
+#include "gps.hpp"
+
 
 
 /*
@@ -21,7 +23,7 @@
 class MapGen
 {
 public:
-	MapGen();
+	MapGen(gps& g);
 	virtual ~MapGen();
 
 public:
@@ -86,6 +88,7 @@ public:
 	CvScalar dangerous_pixel_color ;
 	/**/
 
+	gps& gpsA;
 };
 
 #endif // MAPGEN_H

@@ -78,7 +78,7 @@ void trackbarHandler(int pos)
 
 
 // constructor
-Robot::Robot(const char* filename)
+Robot::Robot(const char* filename) : mapper(gpsA)
 {
 	/* only the CVcam can load video... */
 	if (filename != NULL)
@@ -342,7 +342,7 @@ void Robot::processFunc()
 	 */
 
 	// Switches into joystick mode if manual override button is pressed
-	jD.readJoystick();
+	/*jD.readJoystick();
 	if (jD.manualOverride())
 	{
 		osmcd->setLight(MC_LIGHT_STEADY);
@@ -354,7 +354,7 @@ void Robot::processFunc()
 		}	
 	
 		osmcd->setLight(MC_LIGHT_PULSING);
-	}
+	}*/
 
 	/* glut mask init hack */
 	static bool getMask = true;

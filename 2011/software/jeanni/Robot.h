@@ -154,7 +154,7 @@ public:
 	void update_lidar_func();
 
 	// joystick driver
-	joystickDrive jD;
+	//joystickDrive jD;
 
 	//radians <start,stop>; 0 to the right, pos counterclockwise
 	//std::deque< boost::tuple<float,float> > lidar_linear_regions;

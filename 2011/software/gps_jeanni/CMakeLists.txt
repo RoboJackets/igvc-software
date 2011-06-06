@@ -1,3 +1,5 @@
+include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
+
 FIND_PACKAGE( Qt4 REQUIRED )
 QT4_WRAP_CPP(MOC_SRCS 
 vision/DCam_Config.h
@@ -7,8 +9,8 @@ include_directories(
 
 	#/home/robojackets/OpenCV_2.1.0_install/include
 
-	${IGVC_SOURCE_DIR}/jeanni/vision
-	${IGVC_SOURCE_DIR}/jeanni/mapping
+	${IGVC_SOURCE_DIR}/gps_jeanni/vision
+	${IGVC_SOURCE_DIR}/gps_jeanni/mapping
 	/usr/include/qt4
 	/usr/include/qt4/Qt
 	/usr/include/qt4/QtGui
@@ -30,22 +32,6 @@ link_directories(
 
 add_subdirectory(vision)
 add_subdirectory(mapping)
-
-IF(${ROBOT_REV} MATCHES "candiiidbg")
-	SET(CMAKE_C_FLAGS  " -march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
-	SET(CMAKE_CXX_FLAGS "-march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
-ELSEIF(${ROBOT_REV} MATCHES "candiii")
-	SET(CMAKE_C_FLAGS  " -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
-	SET(CMAKE_CXX_FLAGS "-march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")
-ELSEIF(${ROBOT_REV} MATCHES "jeannidbg")
-	SET(CMAKE_C_FLAGS  "  -march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
-	SET(CMAKE_CXX_FLAGS " -march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
-ELSEIF(${ROBOT_REV} MATCHES "jeanni")
-	SET(CMAKE_C_FLAGS  "  -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
-	SET(CMAKE_CXX_FLAGS " -march=native -pipe -fopenmp -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_4WD")
-ENDIF(${ROBOT_REV} MATCHES "candiiidbg")
-
-
 
 IF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "candiii"))
 	set(robot_bin gps_candiii)

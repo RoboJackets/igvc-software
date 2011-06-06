@@ -1,5 +1,5 @@
 #include "IMU_Control.hpp"
-
+#include <iostream>
 const double IMU_Control::min_update=1;//shortest IMU correct interval [s]
 const float IMU_Control::gps_drift=.1;//estimated drift threshold [m/s]
 const float IMU_Control::imu_drift=.1;//estimated drift threshold (set to a number higher than the drift rate of imu) [deg/s]
@@ -52,6 +52,9 @@ void IMU_Control::init(void)
 	}
 
 	imu_off = sub_deg(gps_heading,imu_heading);
+	if (update_interval<min_update){
+		std::cout<<"Heading correction is set to be attempted faster than the maximum speed setting. This is stupid."<<std::endl;
+	}
 }
 
 void IMU_Control::update(void)
