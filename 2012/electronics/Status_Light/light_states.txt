@@ -1,0 +1,9 @@
+Initial connections
+La - GND
+N  - +24V
+Lb - Manual
+
+	No Light	Steady Light	Pulsing Light
+La	0		0		0
+N	0		+24		+24
+Lb	0		0		+24

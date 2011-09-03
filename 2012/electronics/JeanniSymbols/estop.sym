@@ -1,0 +1,48 @@
+v 20100214 2
+B 300 0 1600 1800 3 0 0 0 -1 -1 0 -1 -1 -1 -1 -1
+P 0 1600 300 1600 1 0 0
+{
+T -3000 1600 5 10 0 0 0 0 1
+pintype=unknown
+T 355 1595 5 10 1 1 0 0 1
+pinlabel=White
+T 205 1645 5 10 0 1 0 6 1
+pinnumber=0
+T -3000 1600 5 10 0 0 0 0 1
+pinseq=0
+}
+P 0 1200 300 1200 1 0 0
+{
+T 0 1200 5 10 0 0 0 0 1
+pintype=unknown
+T 355 1195 5 10 1 1 0 0 1
+pinlabel=Red (+24V)
+T 205 1245 5 10 0 1 0 6 1
+pinnumber=0
+T 0 1200 5 10 0 0 0 0 1
+pinseq=0
+}
+P 0 200 300 200 1 0 0
+{
+T 0 200 5 10 0 0 0 0 1
+pintype=unknown
+T 355 195 5 10 1 1 0 0 1
+pinlabel=Black (Gnd)
+T 205 245 5 10 0 1 0 6 1
+pinnumber=0
+T 0 200 5 10 0 0 0 0 1
+pinseq=0
+}
+P 2200 1600 1900 1600 1 0 0
+{
+T 2200 1600 5 10 0 0 0 0 1
+pintype=unknown
+T 1845 1595 5 10 1 1 0 6 1
+pinlabel=White
+T 1995 1645 5 10 0 1 0 0 1
+pinnumber=0
+T 2200 1600 5 10 0 0 0 0 1
+pinseq=0
+}
+T 500 1900 9 10 1 0 0 0 1
+Wireless E-Stop

@@ -1,0 +1,101 @@
+\documentclass[letterpaper,12pt,notitlepage]{report}
+
+\usepackage[latin1]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fontenc}
+\usepackage{graphicx}
+
+\begin{document}
+\title{OSMC Interface Shield}
+\author{}
+\date{}
+\maketitle
+
+\subsection{TODO}
+\begin{enumerate}
+ \item change pin numbers on arduino header to match board
+ \item fix silkscreen -  Encoders, Joystick enable
+ \item add keepout for opto
+ \item finish documentation
+ \item test opto without pull-down resistors
+ \item freq cuttoff around 1kHz => could use more expensive part (not pin compatable and get 1MHz)
+ \item amplifier better if in CE (why?)
+\end{enumerate}
+
+\subsection{Board Description}
+The Open Source Motor Controller (OSMC) is a H-bridge.  It needs control circuitry.  Noise from motors should be isolated.
+
+
+\subsection{Pinout}
+
+inverted signal?
+
+\subsection{Circuit Design}
+
+Consider getting some cable to connect the hall effect sensors that has a shield and internally twisted wires. Connect the shield wire to the GND of the control board only at this one point - hopefully this way any capacitive coupled noise should be conducted straight to the bypass capacitors. To protect against magnetic noise on the line, again make sure that the internal wires are twisted about each other - the power is like the input current and the signal and gnd represent the return current. The less area there is in the loop (by having them twisted as tightly as possible) the less likely this system is to pick stray magnetic fields on the cable. And of course, you can play with the capacitance value on the low pass filter. 
+
+Since the sampling rate for the arduino is ? the cutoff for the anti-aliasing filter was chosen to be ?, which makes the sampling rate equal to 10(?) times the maximum frequency.
+
+Optoisolators were used to seperate the two power sources.  Ground planes where used to reduce noise.
+
+This design assumes that the motors are being driven from the same source.
+
+\textquotedblleft The input lines of the 4081A are 'modified TTL' in that a high level signal is any voltage between 3 and 12V\textquotedblright
+
+The digital isolations circuits (speed, direction, and enable) are phototransisters in a common collector (buffer) configuration.  The pull-down resistors aren't strictly necessary since the pins are pulled low by OSMC, but they are kept so that the pins can be used for other boards that don't do this.
+
+
+
+\subsection{Layout}
+
+ground planes
+
+bypass cap locations
+
+Things not on grid:  J3 (arduino header), sideways caps, parts of the ground planes, silkscreen
+
+\subsection{Parts list}
+\subsubsection{Optoisolators}
+\begin{description}
+ \item[MOCD213-M] x 3
+
+2 channel optocoupler with transistor output.  Any kind of optocoupler can be used for the digital signals.  The part I picked was the cheapest I could find at the time on Digikey.
+
+\end{description}
+
+\subsubsection{Headers}
+\begin{description}
+ \item[?] x 3
+
+for arduino
+
+ \item[?] x 2
+
+for OSMC
+
+ \item[?] x 2
+
+for encoders
+
+ \item[?] x 2
+
+for current sensors
+
+ \end{description}
+
+\subsection{Future}
+\begin{itemize}
+ \item add reset button
+ \item add power led
+ \item think about changing arduino header spacing
+ \item move optoisolation to OSMC
+ \item move microcontroller to OSMC.  Could still be as flexible as OSMC by allowing arbitrary communication schemes.  Would have to be careful to minimize noise in the microcontroller side so measurements would be accurate.
+ \item digital joystick (USB master)
+ \item battery or motor voltage measurement (might be included in a different bridge driver)
+ \item Temperature sensing - use to calibrate other sensors
+ \item Regenerative Motor Braking (part of the OSMC?)
+\end{itemize}
+
+\end{document}
