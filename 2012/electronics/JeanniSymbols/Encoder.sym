@@ -1,0 +1,59 @@
+v 20100214 2
+B 500 0 900 1100 3 0 0 0 -1 -1 0 -1 -1 -1 -1 -1
+P 0 900 500 900 1 0 0
+{
+T 0 900 5 10 0 0 0 0 1
+pintype=unknown
+T 555 895 5 10 1 1 0 0 1
+pinlabel=unknown
+T 405 945 5 10 0 1 0 6 1
+pinnumber=0
+T 0 900 5 10 0 0 0 0 1
+pinseq=0
+}
+P 0 700 500 700 1 0 0
+{
+T 0 700 5 10 0 0 0 0 1
+pintype=unknown
+T 555 695 5 10 1 1 0 0 1
+pinlabel=unknown
+T 405 745 5 10 0 1 0 6 1
+pinnumber=0
+T 0 700 5 10 0 0 0 0 1
+pinseq=0
+}
+P 0 500 500 500 1 0 0
+{
+T 0 500 5 10 0 0 0 0 1
+pintype=unknown
+T 555 495 5 10 1 1 0 0 1
+pinlabel=unknown
+T 405 545 5 10 0 1 0 6 1
+pinnumber=0
+T 0 500 5 10 0 0 0 0 1
+pinseq=0
+}
+P 0 300 500 300 1 0 0
+{
+T 0 300 5 10 0 0 0 0 1
+pintype=unknown
+T 555 295 5 10 1 1 0 0 1
+pinlabel=unknown
+T 405 345 5 10 0 1 0 6 1
+pinnumber=0
+T 0 300 5 10 0 0 0 0 1
+pinseq=0
+}
+P 0 100 500 100 1 0 0
+{
+T 0 100 5 10 0 0 0 0 1
+pintype=unknown
+T 555 95 5 10 1 1 0 0 1
+pinlabel=unknown
+T 405 145 5 10 0 1 0 6 1
+pinnumber=0
+T 0 100 5 10 0 0 0 0 1
+pinseq=0
+}
+T 600 1200 9 10 1 0 0 0 1
+Encoder

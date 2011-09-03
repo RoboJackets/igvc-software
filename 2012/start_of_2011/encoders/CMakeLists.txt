@@ -1,0 +1,7 @@
+add_subdirectory(arduino)
+add_subdirectory(arduino_signed)
+add_subdirectory(pcdriver)
+add_subdirectory(pcdriver_signed)
+add_subdirectory(pcdriver_4wd)
+add_subdirectory(pcdriver_4wd_signed)
+add_subdirectory(encodertester)

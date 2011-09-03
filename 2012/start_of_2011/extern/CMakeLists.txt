@@ -1,0 +1,3 @@
+add_subdirectory(libarduinocore)
+add_subdirectory(libarduinocore_19)
+add_subdirectory(libsoftwareserial)
