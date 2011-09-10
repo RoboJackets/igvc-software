@@ -14,6 +14,8 @@ http://arduino.cc/playground/HM55B
 */
 #include <math.h> // (no semicolon)
 #include "WProgram.h"
+#include "HardwareSerial.h"
+
 //// VARS
 const int CLK_pin = 8;
 const int EN_pin = 9;
@@ -129,6 +131,5 @@ void loop() {
   angle = 180 * (atan2(-1 * Y_Data , X_Data) / M_PI); // angle is atan( -y/x) !!!
   Serial.print(angle); // print angle
   Serial.println("");
-
 }
 
