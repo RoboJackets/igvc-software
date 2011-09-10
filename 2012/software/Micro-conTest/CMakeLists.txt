@@ -14,6 +14,6 @@ target_link_libraries(Micro-controllerTest
 add_executable(MagTest
 	MagnotometerTest.cpp)
 
-target_link_libraries(Micro-controllerTest
+target_link_libraries(MagTest
 	arduinocore
 )
