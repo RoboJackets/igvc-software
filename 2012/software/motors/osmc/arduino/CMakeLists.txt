@@ -21,3 +21,9 @@ motorPWM.cc
 analogjoystick.cc
 )
 
+
+add_executable(MagTest
+	MagnotometerTest.cpp
+)
+
+
