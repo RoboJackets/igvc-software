@@ -14,9 +14,9 @@ http://arduino.cc/playground/HM55B
 */
 #include <math.h> // (no semicolon)
 //// VARS
-byte CLK_pin = 8;
-byte EN_pin = 9;
-byte DIO_pin = 10;
+const int CLK_pin = 8;
+const int EN_pin = 9;
+const int DIO_pin = 10;
 
 int X_Data = 0;
 int Y_Data = 0;
