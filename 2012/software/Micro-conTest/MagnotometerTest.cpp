@@ -13,6 +13,7 @@ http://arduino.cc/playground/HM55B
 /////////////////////////////////
 */
 #include <math.h> // (no semicolon)
+#include "WProgram.h"
 //// VARS
 const int CLK_pin = 8;
 const int EN_pin = 9;
@@ -98,6 +99,11 @@ int HM55B_ReadCommand() {
   return result;
 }
 
+int main()
+{
+	setup();
+	loop();
+}
 
 void setup() {
   Serial.begin(115200);
