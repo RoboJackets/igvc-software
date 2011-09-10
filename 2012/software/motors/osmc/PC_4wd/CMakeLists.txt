@@ -24,6 +24,10 @@ add_executable(light_test_4wd
 	lighttest.cc
 )
 
+add_executable(MagTest
+	MagnotometerTest.cpp
+)
+
 #add_executable(dumbctltest_4wd
 #	dumbctl.cc
 #)
