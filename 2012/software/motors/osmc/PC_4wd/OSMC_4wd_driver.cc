@@ -89,3 +89,11 @@ bool OSMC_4wd_driver::setLight(const byte option)
 	
 	return a || b;
 }
+
+bool OSMC_4wd_driver::GetMagnetometerHeading()
+{
+	bool a = FOR.GetMagnetometerHeading();
+	bool b = AFT.GetMagnetometerHeading();
+
+	return a || b;
+}

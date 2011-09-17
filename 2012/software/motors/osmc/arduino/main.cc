@@ -10,6 +10,7 @@
 #include "current_sensors.hpp"
 #include "motorPWM.hpp"
 #include "analogjoystick.hpp"
+#include "magnetometer.hpp"
 
 #include "common_defines.hpp"
 
@@ -273,6 +274,24 @@ int main()
 		
 				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
 				serialPrintBytes(&data, headerOut.size);
+				tx_num++;
+				break;
+			}
+			case MAG_GET_MAGDATA:
+			{
+				magnetometer_pk_t heading;
+				header_t headerOut;
+				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
+				headerOut.packetnum = tx_num; 
+				headerOut.cmd = MAG_GET_MAGDATA;
+
+				// Defined in new file magnetometer.cc
+				heading = getHeading();
+
+				headerOut.size = sizeof(magnetometer_pk_t);
+		
+				serialPrintBytes(&headerOut, PACKET_HEADER_SIZE);
+				serialPrintBytes(&heading, headerOut.size);
 				tx_num++;
 				break;
 			}
