@@ -18,4 +18,5 @@ current_sensors.cc
 motorPWM.cc
 #profile.cc
 analogjoystick.cc
+magnetometer.cc
 )
