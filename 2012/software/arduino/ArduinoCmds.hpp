@@ -38,6 +38,8 @@ const byte ENCODER_GET_READING		= 0x08;
 const byte ENCOER_RESET_COUNT		= 0x09;
 
 const byte MC_SET_LIGHT			= 0x10;
+// IGVC Magnetometer opts
+const byte MAG_GET_MAGDATA		= 0x11;
 
 //IGVC2011 Status Light opts
 const byte MC_LIGHT_STEADY		= 0x00;

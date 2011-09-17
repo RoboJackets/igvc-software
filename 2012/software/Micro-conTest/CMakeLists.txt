@@ -26,3 +26,11 @@ testboard.cpp
 target_link_libraries(testboard
 	arduinocore
 )
+
+add_executable(testArduino
+testArduino.cpp
+)
+
+target_link_libraries(testArduino
+	arduinocore
+)
