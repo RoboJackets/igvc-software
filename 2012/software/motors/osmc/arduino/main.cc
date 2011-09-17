@@ -109,7 +109,7 @@ int main()
 
 				int x,y;
 				getJoystickReading(&x, &y);
-
+			
 				//Serial.print("x: ");
 				//Serial.print(x, DEC);
 				//Serial.print("\ty: ");
