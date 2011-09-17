@@ -65,7 +65,7 @@ class OSMC_driver
 
 	//control for status light
 	bool setLight(const byte option);
-	bool GetMagnetometerHeading();
+	bool GetMagnetometerHeading(int& heading);
 
 	private:
 	ArduinoInterface ai;
