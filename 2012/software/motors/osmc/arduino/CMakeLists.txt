@@ -1,6 +1,5 @@
 include(${IGVC_SOURCE_DIR}/atmel_crosscompile.cmake)
 
-
 include_directories(${IGVC_SOURCE_DIR}/arduino)
 include_directories(${IGVC_SOURCE_DIR}/extern/libarduinocore)
 include_directories(${IGVC_SOURCE_DIR}/extern/libsoftwareserial)
@@ -19,5 +18,5 @@ current_sensors.cc
 motorPWM.cc
 #profile.cc
 analogjoystick.cc
+magnetometer.cc
 )
-
