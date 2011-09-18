@@ -1,4 +1,3 @@
-
 #include "OSMC_4wd_driver.hpp"
 
 OSMC_4wd_driver::OSMC_4wd_driver() : FOR(OSMC_IF_FOR_BOARD, ENCODER_IF_FOR_LEFT_BOARD, ENCODER_IF_FOR_RIGHT_BOARD) , AFT(OSMC_IF_AFT_BOARD, ENCODER_IF_AFT_LEFT_BOARD,  ENCODER_IF_AFT_RIGHT_BOARD)
@@ -87,5 +86,13 @@ bool OSMC_4wd_driver::setLight(const byte option)
 	bool a = FOR.setLight(option);
 	bool b = AFT.setLight(option);
 	
+	return a || b;
+}
+
+bool OSMC_4wd_driver::GetMagnetometerHeading(int& angle)
+{
+	bool a = FOR.GetMagnetometerHeading(angle);
+	bool b = AFT.GetMagnetometerHeading(angle);
+
 	return a || b;
 }

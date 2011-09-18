@@ -45,6 +45,7 @@ class OSMC_4wd_driver
 
 	OSMC_driver FOR;
 	OSMC_driver AFT;
+	bool GetMagnetometerHeading(int& angle);
 };
 
 #endif

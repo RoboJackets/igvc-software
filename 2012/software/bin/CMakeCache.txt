@@ -160,6 +160,9 @@ IGVC_BINARY_DIR:STATIC=/home/kenny/igvc/2012/software/bin
 //Value Computed by CMake
 IGVC_SOURCE_DIR:STATIC=/home/kenny/igvc/2012/software
 
+//Dependencies for target
+IMU_Control_LIB_DEPENDS:STATIC=
+
 //Dependencies for the target
 NAV200_LIB_DEPENDS:STATIC=general;usb;
 
@@ -520,6 +523,15 @@ arduinocore_LIB_DEPENDS:STATIC=
 //Dependencies for the target
 gps_LIB_DEPENDS:STATIC=general;nmea;general;boost_thread;general;boost_system;
 
+//Dependencies for target
+gps_mapping_LIB_DEPENDS:STATIC=
+
+//Dependencies for the target
+gps_vision_LIB_DEPENDS:STATIC=general;QtCore;
+
+//Dependencies for the target
+gyro_LIB_DEPENDS:STATIC=general;nmea;general;boost_thread;general;boost_system;
+
 //Dependencies for the target
 joystick_LIB_DEPENDS:STATIC=general;SDL;general;OSMC_driver;general;OSMC_driver_4wd;
 
@@ -646,7 +658,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_LOCAL_GENERATORS:INTERNAL=28
+CMAKE_NUMBER_OF_LOCAL_GENERATORS:INTERNAL=31
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

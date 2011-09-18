@@ -100,4 +100,9 @@ typedef struct  __attribute__((__packed__))
 	int64_t dcoder;
 } new_encoder_single_pk_t;
 
+typedef struct __attribute__((__packed__))
+{
+	int32 angle;
+} magnetometer_pk_t;
+
 #endif //DataPacketStructs_H_
