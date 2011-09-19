@@ -25,7 +25,7 @@ void genTimestamp(long * sec, long * usec)
 	//*usec = *sec - (global_time_usec + millis()*1000 - arduino_time_millis*1000);
 
 	*sec = 0;
-	*usec = 0;
+	*usec = 0;l
 }
 
 int main()
@@ -43,8 +43,11 @@ int main()
 	//attachInterrupt(0, encoder_logger, CHANGE);
 	//attachInterrupt(1, encoder_logger, CHANGE);
 
-	attachInterrupt(0, leftenc_event, CHANGE);//pin 2
-	attachInterrupt(1, rightenc_event, CHANGE);//pin 3
+	//attachInterrupt(0, leftenc_event, CHANGE);//pin 2
+	//attachInterrupt(1, rightenc_event, CHANGE);//pin 3
+
+	attachInterrupt(0, leftenc_event, RISING); // pin 2
+	attachInterrupt(1, rightenc_event, RISING); // pin 3
 
 	int32_t tx_num = 0;
 
