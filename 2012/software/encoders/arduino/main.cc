@@ -25,7 +25,7 @@ void genTimestamp(long * sec, long * usec)
 	//*usec = *sec - (global_time_usec + millis()*1000 - arduino_time_millis*1000);
 
 	*sec = 0;
-	*usec = 0;l
+	*usec = 0;
 }
 
 int main()
