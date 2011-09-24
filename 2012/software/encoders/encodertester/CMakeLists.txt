@@ -8,3 +8,7 @@ link_libraries(arduinocore)
 add_executable(encodertester
 	encodertester.cc
 )
+
+add_executable(encoderTesting2
+	encoderTesting2.cc
+)
