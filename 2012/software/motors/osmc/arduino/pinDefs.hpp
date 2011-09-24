@@ -27,6 +27,12 @@ const int joystickEnable = 8;
 
 const int LIGHT_PIN_LB = 13;
 
+const int magCLK = 8;
+const int magEN = 9;
+const int magDIO = 10;
+
+
+
 /*
 const int rightDirectionPin = 4;
 const int rightSpeedPin = 3;
