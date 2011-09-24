@@ -10,30 +10,22 @@ int stateB;
 int lastStateA=LOW;
 int lastStateB=LOW;
 
-void loopTest();
-
-int main()
+void setup()
 {
-init();
-pinMode(encoderPinA,INPUT);
-pinMode(encoderPinB,INPUT);
-loopTest();
-return 0;
+	serial.Begin(57600);
+	pinMode(encoderPinA,INPUT);
+	pinMode(encoderPinB,INPUT);
 }
 
-void loopTest()
+void loop()
 {
-while(true)
-{
-stateA=digitalRead(encoderPinA);
-stateB=digitalRead(encoderPinB);
-if(stateA=!lastStateA && encoderPinB!=lastStateB)
-{
-counter++;
-lastStateA=stateA;
-lastStateB=stateB;
-}
-
-printf("%d\n",counter);
-}
+	stateA=digitalRead(encoderPinA);
+	stateB=digitalRead(encoderPinB);
+	if(stateA=!lastStateA && encoderPinB!=lastStateB)
+	{
+		counter++;
+		lastStateA=stateA;
+		lastStateB=stateB;
+	}
+	Serial.println(analogValue,counter);
 }
