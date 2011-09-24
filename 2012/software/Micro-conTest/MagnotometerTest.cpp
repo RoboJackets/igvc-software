@@ -106,7 +106,7 @@ int main()
 }
 
 void setup() {
-  Serial.begin(115200);
+  //Serial.begin(115200);
   pinMode(EN_pin, OUTPUT);
   pinMode(CLK_pin, OUTPUT);
   pinMode(DIO_pin, INPUT);
@@ -117,18 +117,18 @@ void setup() {
 void loop() {
   HM55B_StartMeasurementCommand(); // necessary!!
   delay(40); // the data is 40ms later ready
-  Serial.print(HM55B_ReadCommand()); // read data and print Status
-  Serial.print(" ");  
+  //Serial.print(HM55B_ReadCommand()); // read data and print Status
+  //Serial.print(" ");  
   X_Data = ShiftIn(11); // Field strength in X
   Y_Data = ShiftIn(11); // and Y direction
-  Serial.print(X_Data); // print X strength
-  Serial.print(" ");
-  Serial.print(Y_Data); // print Y strength
-  Serial.print(" ");
+  //Serial.print(X_Data); // print X strength
+  //Serial.print(" ");
+  //Serial.print(Y_Data); // print Y strength
+  //Serial.print(" ");
   digitalWrite(EN_pin, HIGH); // ok deselect chip
   angle = 180 * (atan2(-1 * Y_Data , X_Data) / M_PI); // angle is atan( -y/x) !!!
-  Serial.print(angle); // print angle
-  Serial.println("");
+  //Serial.print(angle); // print angle
+  //Serial.println("");
 
 }
 
