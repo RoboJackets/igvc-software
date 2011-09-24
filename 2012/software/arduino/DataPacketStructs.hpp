@@ -103,6 +103,8 @@ typedef struct  __attribute__((__packed__))
 typedef struct __attribute__((__packed__))
 {
 	int32 angle;
+	int32 X_val;
+	int32 Y_val;
 } magnetometer_pk_t;
 
 #endif //DataPacketStructs_H_
