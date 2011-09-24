@@ -1,3 +1,4 @@
+#include "WProgram.h"
 
 #define encoderPinA 4
 #define encoderPinB 6
@@ -8,6 +9,8 @@ int stateA;
 int stateB;
 int lastStateA=LOW;
 int lastStateB=LOW;
+
+void loopTest();
 
 int main()
 {
