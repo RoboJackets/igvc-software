@@ -43,8 +43,11 @@ int main()
 	//attachInterrupt(0, encoder_logger, CHANGE);
 	//attachInterrupt(1, encoder_logger, CHANGE);
 
-	attachInterrupt(0, leftenc_event, CHANGE);//pin 2
-	attachInterrupt(1, rightenc_event, CHANGE);//pin 3
+	//attachInterrupt(0, leftenc_event, CHANGE);//pin 2
+	//attachInterrupt(1, rightenc_event, CHANGE);//pin 3
+
+	attachInterrupt(0, leftenc_event, RISING); // pin 2
+	attachInterrupt(1, rightenc_event, RISING); // pin 3
 
 	int32_t tx_num = 0;
 
@@ -99,8 +102,8 @@ int main()
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = ARDUINO_ID_CMD;
 				headerOut.size = 1;
-					char msg = ENCODER_IF_AFT_LEFT_BOARD;
-
+				//char msg = ENCODER_IF_AFT_LEFT_BOARD;
+				char msg = ENCODER_IF_FOR_RIGHT_BOARD;
 
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
 				Serial.print(msg, BYTE);

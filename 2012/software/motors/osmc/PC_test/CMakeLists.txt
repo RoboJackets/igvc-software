@@ -28,7 +28,12 @@ add_executable(pdtest
 	pdtest.cc
 )
 
+add_executable(MagnoTest
+	testMagnetometer.cc
+)
+
 target_link_libraries(OSMC_test OSMC_driver)
 target_link_libraries(step_test OSMC_driver)
 target_link_libraries(dumbctltest OSMC_driver)
 target_link_libraries(pdtest OSMC_driver)
+target_link_libraries(MagnoTest OSMC_driver)
