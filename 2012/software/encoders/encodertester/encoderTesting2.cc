@@ -14,26 +14,26 @@ void loopTest();
 
 int main()
 {
-init();
-pinMode(encoderPinA,INPUT);
-pinMode(encoderPinB,INPUT);
-loopTest();
-return 0;
+	init();
+	pinMode(encoderPinA,INPUT);
+	pinMode(encoderPinB,INPUT);
+	loopTest();
+	return 0;
 }
 
 void loopTest()
 {
-while(true)
-{
-stateA=digitalRead(encoderPinA);
-stateB=digitalRead(encoderPinB);
-if(stateA=!lastStateA && encoderPinB!=lastStateB)
-{
-counter++;
-lastStateA=stateA;
-lastStateB=stateB;
-}
+	while(true)
+	{
+		stateA=digitalRead(encoderPinA);
+		stateB=digitalRead(encoderPinB);
+		if(stateA=!lastStateA && encoderPinB!=lastStateB)
+		{
+			counter++;
+			lastStateA=stateA;
+			lastStateB=stateB;
+		}
 
-printf("%d\n",counter);
-}
+		printf("%d\n",counter);
+	}
 }
