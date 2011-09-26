@@ -6,5 +6,11 @@
 #include "pinDefs.hpp"
 
 magnetometer_pk_t getHeading();
+int ShiftIn(int);
+void ShiftOut(int, int);
+void HM55B_Reset();
+void HM55B_StartMeasurementCommand();
+int HM55B_ReadCommand();
+void setup();
 
 #endif

@@ -469,7 +469,7 @@ bool OSMC_driver::setLight(const byte option)
 #endif
 }
 
-bool OSMC_driver::GetMagnetometerHeading(int& heading)
+bool OSMC_driver::GetMagnetometerHeading(int& heading, int& X_Value, int& Y_Value)
 {
 	if(ai.sendCommand(MAG_GET_MAGDATA, NULL, 0))
 	{
@@ -488,6 +488,8 @@ bool OSMC_driver::GetMagnetometerHeading(int& heading)
 	memcpy(&out, data, sizeof(magnetometer_pk_t));
 
 	heading = out.angle;	
+	X_Value = out.X_val;	
+	Y_Value = out.Y_val;	
 	delete[] data;
 	return false;
 }
