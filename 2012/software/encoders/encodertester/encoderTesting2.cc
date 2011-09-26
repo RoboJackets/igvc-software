@@ -12,14 +12,14 @@ int lastStateB=LOW;
 
 void setup()
 {
-	serial.Begin(57600);
+/*	serial.Begin(57600);
 	pinMode(encoderPinA,INPUT);
-	pinMode(encoderPinB,INPUT);
+	pinMode(encoderPinB,INPUT); */
 }
 
 void loop()
 {
-	stateA=digitalRead(encoderPinA);
+	/*stateA=digitalRead(encoderPinA);
 	stateB=digitalRead(encoderPinB);
 	if(stateA=!lastStateA && encoderPinB!=lastStateB)
 	{
@@ -27,5 +27,5 @@ void loop()
 		lastStateA=stateA;
 		lastStateB=stateB;
 	}
-	Serial.println(analogValue,counter);
+	Serial.println(analogValue,counter);*/
 }
