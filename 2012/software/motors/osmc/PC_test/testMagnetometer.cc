@@ -7,15 +7,21 @@ int main()
 	OSMC_driver drive;
 
 	int angle;
-
-	if (drive.GetMagnetometerHeading(angle))
+	int XV;
+	int YV;
+	for (;;)
 	{
-		std::cout << "Error in function\n";
+		if (drive.GetMagnetometerHeading(angle, XV, YV))
+		{
+			std::cout << "Error in function\n";
+		}
+
+		else
+		{
+			std::cout << "Angle: " << angle << "\n";
+			std::cout << "X: " << XV << "\n";
+			std::cout << "Y: " << YV << "\n";	
+		}	
+		usleep(1000);
 	}
-
-	else
-	{
-		std::cout << angle << "\n";	
-	}	
-	usleep(1000);
 }
