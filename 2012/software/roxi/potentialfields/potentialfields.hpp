@@ -43,11 +43,12 @@ private:
 	int ysize;				// Size of bitmaps (y)
 
 	// Constants
-	const static double meters_per_pixel = 0;	// Allows conversion from image to real distances
+	const static double meters_per_pixel = 1;	// Allows conversion from image to real distances
 	const static int robot_radius = 0;		// Radius of the robot in pixels of the input boolean array
-	const static double obstacle_weight = 0;	// Weight given to avoiding obstacles
-	const static double image_goal_weight = 0;	// Weight given to get to image goals (flags)
-	const static double gps_goal_weight = 0;	// Weight given to get to GPS goal
+	const static double obstacle_weight = 1;	// Weight given to avoiding obstacles
+	const static double image_goal_weight = 1;	// Weight given to get to image goals (flags)
+	const static double gps_goal_weight = 1;	// Weight given to get to GPS goal
+	const static double gps_avoid_weight = 1;	// Weight given to avoid old GPS points
 
 	// Private Methods
 	void removeclumps(bool* obstacles);
@@ -62,9 +63,14 @@ private:
 	void VecToxy(double mag, double ang, double& x, double& y);
 	void AddVecs(double* xvals, double* yvals, int numVecs, double& xnet, double& ynet);
 	bool get2Dindexvalue(bool* array, int x, int y);
+	void set2Dindexvalue(bool* array, int x, int y, bool val);
+	void fillinRadius(bool* obstacles, int x, int y, int radius);
 	double rad2deg(double rads);
 	double deg2rad(double degs);
 	double vec2bear(double ang);
+	void attractorPixels(int x0, int y0, int xt, int yt, double& x_vel, double& yvel);
+	void repulsivePixels(int x0, int y0, int xt, int yt, double& x_vel, double& yvel);
+	void getIndexesInRadius(int x0, int y0, int radius, int* xinds, int* yinds, int& numinds);
 };
 
 #endif

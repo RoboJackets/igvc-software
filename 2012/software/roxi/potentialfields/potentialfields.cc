@@ -45,7 +45,7 @@ void potentialfields::getNextVector(bool* obstacles, bool* targets, int xsize, i
 	getImgTargetVec(targets, imagetarx, imagetary);
 	getGPSTargetVec(gpstarx, gpstary);
 	getGPSAvoidVec(gpsavoidx, gpsavoidy);
-	
+
 	int number_vecs = 4;
 	double xcomps[] = {obstaclex, imagetarx, gpstarx, gpsavoidx};
 	double ycomps[] = {obstacley, imagetary, gpstary, gpsavoidy};	
@@ -67,7 +67,16 @@ void potentialfields::removeclumps(bool* obstacles)
 /* Adds radius of robot to all of the obstacles so that the robot doesn't try to fit into small gaps */
 void potentialfields::radiusfix(bool* obstacles)
 {
-	// TODO: Write this function
+	for (int y = 0; y < ysize; y++)
+	{
+		for (int x = 0; x < xsize; x++)
+		{
+			if (get2Dindexvalue(obstacles, x, y) == 1)
+			{
+				fillinRadius(obstacles, x, y, robot_radius);
+			}
+		}
+	}
 	return;
 }
 
@@ -102,14 +111,15 @@ void potentialfields::getGPSAvoidVec(double& xvel, double& yvel)
 /* Converts a pixel x and y disrance to a real */
 void potentialfields::convertToRealxy(double& xcomp, double& ycomp)
 {
-	// TODO: Write this function
+	xcomp *= meters_per_pixel;
+	ycomp *= meters_per_pixel;
 	return;
 }
 
 /* Converts a pixel vector to a real vector */
 void potentialfields::convertToRealVec(double& vel, double& ang)
 {
-	// TODO: Write this function
+	vel *= meters_per_pixel;
 	return;
 }
 
@@ -142,10 +152,52 @@ void potentialfields::AddVecs(double* xvals, double* yvals, int numVecs, double&
 	return;
 }
 
+void potentialfields::attractorPixels(int x0, int y0, int xt, int yt, double& x_vel, double& yvel)
+{
+	// TODO: Write this function
+	return;
+}
+
+void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, double& x_vel, double& yvel)
+{
+	// TODO: Write this function
+	return;
+}
+ 
 /* Returns the value at the index array[x][y] as if it were a 2D array */
 bool potentialfields::get2Dindexvalue(bool* array, int x, int y)
 {
 	return array[y*ysize+x];
+}
+
+/* Sets the value at the index array[x][y] to val as if it were a 2D array */
+void potentialfields::set2Dindexvalue(bool* array, int x, int y, bool val)
+{
+	array[y*ysize+x] = val;
+}
+
+/* Fills in 1's within the radius of the third input around the point (x,y) */
+void potentialfields::fillinRadius(bool* obstacle, int x, int y, int radius)
+{
+	int* xinds = NULL;
+	int* yinds = NULL;
+	int numinds;	
+
+	getIndexesInRadius(x, y, radius, xinds, yinds, numinds);
+	for(int i = 0; i < numinds; i++)
+	{
+		set2Dindexvalue(obstacle, xinds[i], yinds[i], 1);
+	}
+
+	delete [] xinds;
+	delete [] yinds;
+	return;	
+}
+
+void potentialfields::getIndexesInRadius(int x0, int y0, int radius, int* xinds, int* yinds, int& numinds)
+{
+	// TODO: Write this function
+	return;
 }
 
 /* Converts radians to degrees */
@@ -163,6 +215,14 @@ double potentialfields::deg2rad(double degrees)
 /* Converts angle ccw from due East to angle cw from due North */
 double potentialfields::vec2bear(double ang)
 {
-	// TODO: Write this function
-	return 0;
+	double bearing = (-ang+90);
+	while(ang < 0)
+	{
+		ang += 360;
+	}
+	while(ang > 360)
+	{
+		ang -= 360;
+	}
+	return ang;
 }
