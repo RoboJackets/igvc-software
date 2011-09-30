@@ -11,16 +11,8 @@ int stateB;
 int lastStateA=LOW;
 int lastStateB=LOW;
 
-int main()
-{
-	setup();
-	while(1)
-		loop();
-	return 0;
-}
 void setup()
 {
-	Serial.begin(57600);
 	pinMode(encoderPinA,INPUT);
 	pinMode(encoderPinB,INPUT);
 	stateA=lastStateA=digitalRead(encoderPinA);
@@ -41,6 +33,3 @@ void loop()
 	}
 	lastStateA=stateA;
 	lastStateB=stateB;
-	Serial.println(countA);
-	Serial.println(countB);
-	Serial.println(0);//lame way to seperate pairs of value due to uncertainty as to how method works
