@@ -44,4 +44,3 @@ void loop()
 	Serial.println(countA);
 	Serial.println(countB);
 	Serial.println(0);//lame way to seperate pairs of value due to uncertainty as to how method works
-}
