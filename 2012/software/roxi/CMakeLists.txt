@@ -21,6 +21,7 @@ include_directories(
 	${IGVC_SOURCE_DIR}/encoders/pcdriver_signed
 	${IGVC_SOURCE_DIR}/lidar
 	${IGVC_SOURCE_DIR}/joystick
+	${IGVC_SOURCE_DIR}/gps
 )
 
 link_directories(
