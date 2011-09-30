@@ -1,6 +1,8 @@
 #include "potentialfields.hpp"
 #include "gps_points.hpp"
 #include "commonVecOps.hpp"
+#include <stdio.h>
+#include <string.h>
 
 /* Creates new potentialfields object and initializes fields */
 potentialfields::potentialfields()
@@ -281,7 +283,8 @@ void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, 
 	return;
 }
 
-double distBtwGPSPoints(const GPS_point& a, const GPS_point& b)
+/* Finds the distance in meters between two GPS points */
+double potentialfields::distBtwGPSPoints(const GPS_point& a, const GPS_point& b)
 {
 	GPSState gpsa, gpsb;
 	gpsa.lon = a.lon;
@@ -289,4 +292,50 @@ double distBtwGPSPoints(const GPS_point& a, const GPS_point& b)
 	gpsb.lon = b.lon;
 	gpsb.lat = b.lat;
 	return lambert_distance(gpsa, gpsb);
+}
+
+void potentialfields::medianThreshFileter(bool* array, int thresh_size)
+{
+	// Makes a copy of the array and then 0s out the old array
+	bool arraycopy[xsize*ysize];
+	memcpy(arraycopy, array, xsize*ysize);
+	for(int i = 0; i < xsize*ysize; i++)
+		array[i] = 0;
+	 
+	
+
+	// Finds the square root of the perfect square at least twice the size of the threshold
+	int n = ceil(sqrt(thresh_size*2));
+
+	for(int xoff = 0; xoff < n; xoff++)
+	{
+		for(int yoff = 0; yoff < n; xoff++)
+		{
+			for(int x = xoff; (x+n) <= xsize; x+=n)
+			{
+				for(int y = yoff; (y+n) <= ysize; y+=n)
+				{
+					int sum = 0;
+					for(int i = 0; i<n; i++)
+					{
+						for(int j = 0; j<n; j++)
+						{
+							sum += int(get2Dindexvalue(arraycopy, x+i, y+j));
+						}
+					}
+
+					if(sum/(n*n) >= 0.5)
+					{
+						for(int i = 0; i<n; i++)
+						{
+							for(int j = 0; j<n; j++)
+							{
+								set2Dindexvalue(array, x+i, y+j, get2Dindexvalue(arraycopy,x+i,y+j));
+							}
+						}
+					}
+				} 
+			}
+		}
+	}
 }

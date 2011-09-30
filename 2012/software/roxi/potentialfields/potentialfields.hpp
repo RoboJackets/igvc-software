@@ -86,6 +86,7 @@ private:
 	void repulsivePixels(int x0, int y0, int xt, int yt, int radius, double& x_vel, double& y_vel);
 	void doSomethingforIndexesInRadius(int x0, int y0, int radius, bool* bitmap, RAD_OPTION OPTION, ReturnData data);
 	double distBtwGPSPoints(const GPS_point& a, const GPS_point& b);
+	void medianThreshFileter(bool* array, int thresh_size);
 };
 
 #endif
