@@ -1,10 +1,10 @@
 #include <iostream>
 #include <ctime>
-#include "OSMC_driver.hpp"
+#include "OSMC_4wd_driver.hpp"
 
 int main()
 {
-	OSMC_driver drive;
+	OSMC_4wd_driver drive;
 
 	int angle;
 	int XV;

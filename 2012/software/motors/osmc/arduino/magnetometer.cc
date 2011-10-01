@@ -2,31 +2,43 @@
 #include <math.h> // (no semicolon)
 
 //// VARS
-byte CLK_pin = 8;
-byte EN_pin = 9;
-byte DIO_pin = 10;
+byte CLK_pin = magCLK;//8;
+byte EN_pin = magEN;//9;
+byte DIO_pin = magDIO;//10;
 
 int X_Data = 0;
 int Y_Data = 0;
 int angle;
+const int Y_OFFSET = -167;
+const int X_OFFSET = 8;
+const int ANG_OFFSET = 0;
 
 magnetometer_pk_t getHeading()
 {
-	setup();
+	static bool FirstTime = true;
+	if(FirstTime) 
+	{
+		setup();
+		FirstTime = false;
+	}
+	
 	magnetometer_pk_t heading;
 	HM55B_StartMeasurementCommand(); // necessary!!
 	delay(40); // the data is 40ms later ready
 	HM55B_ReadCommand();
+	delay(2);
 	//Serial.print(HM55B_ReadCommand()); // read data and print Status
 	//Serial.print(" ");  
-	X_Data = ShiftIn(11); // Field strength in X
-	Y_Data = ShiftIn(11); // and Y direction
+	X_Data = ShiftIn(11)+X_OFFSET; // Field strength in X
+	Y_Data = ShiftIn(11)+Y_OFFSET; // and Y direction
+	delay(4);
 	//Serial.print(X_Data); // print X strength
 	//Serial.print(" ");
-	//Serial.print(Y_Data); // print Y strength
+	//Serial.print(Y_Data); // print  Y strength
 	//Serial.print(" ");
 	digitalWrite(EN_pin, HIGH); // ok deselect chip
-	angle = 180 * (atan2(-1 * Y_Data , X_Data) / M_PI); // angle is atan( -y/x) !!!
+	angle = 180 * (atan2(-1 * Y_Data , X_Data) / M_PI) + ANG_OFFSET; // angle is atan( -y/x) !!!
+	delay(2);
 	//Serial.print(angle); // print angle
 	//Serial.println("");
 	heading.angle = angle;

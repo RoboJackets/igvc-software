@@ -38,6 +38,7 @@ class OSMC_4wd_driver
 	//void followCirc(double radius, double vmag);
 
 	bool setLight(const byte option);
+	bool GetMagnetometerHeading(int& angle, int& X_Value, int& Y_Value);
 
 	private:
 
@@ -45,7 +46,6 @@ class OSMC_4wd_driver
 
 	OSMC_driver FOR;
 	OSMC_driver AFT;
-	bool GetMagnetometerHeading(int& angle, int& X_Value, int& Y_Value);
 };
 
 #endif
