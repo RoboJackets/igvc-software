@@ -4,7 +4,8 @@
 #define encoderPinB 6
 #define encoderOutputI 5
 
-int counter=0;
+int countA;
+int countB;
 int stateA;
 int stateB;
 int lastStateA=LOW;
@@ -12,20 +13,23 @@ int lastStateB=LOW;
 
 void setup()
 {
-/*	serial.Begin(57600);
 	pinMode(encoderPinA,INPUT);
-	pinMode(encoderPinB,INPUT); */
+	pinMode(encoderPinB,INPUT);
+	stateA=lastStateA=digitalRead(encoderPinA);
+	stateB=lastStateB=digitalRead(encoderPinB);
 }
 
 void loop()
 {
-	/*stateA=digitalRead(encoderPinA);
+	stateA=digitalRead(encoderPinA);
 	stateB=digitalRead(encoderPinB);
-	if(stateA=!lastStateA && encoderPinB!=lastStateB)
+	if(stateA==HIGH && lastStateA!=stateA)
 	{
-		counter++;
-		lastStateA=stateA;
-		lastStateB=stateB;
+		countA++;
 	}
-	Serial.println(analogValue,counter);*/
-}
+	if(stateB==HIGH && lastStateB!=stateB)
+	{
+		countB++;
+	}
+	lastStateA=stateA;
+	lastStateB=stateB;
