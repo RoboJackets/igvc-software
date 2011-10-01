@@ -23,7 +23,9 @@ add_executable(step_test_4wd
 add_executable(light_test_4wd
 	lighttest.cc
 )
-
+add_executable(MagnoTest_4wd
+	testMagnetometer.cc
+)
 #add_executable(dumbctltest_4wd
 #	dumbctl.cc
 #)
@@ -32,4 +34,5 @@ target_link_libraries(OSMC_test_4wd OSMC_driver_4wd)
 target_link_libraries(OSMC_test_4wd_2 OSMC_driver_4wd)
 target_link_libraries(step_test_4wd OSMC_driver_4wd)
 target_link_libraries(light_test_4wd OSMC_driver_4wd)
+target_link_libraries(MagnoTest_4wd OSMC_driver_4wd)
 #target_link_libraries(dumbctltest_4wd OSMC_driver_4wd)
