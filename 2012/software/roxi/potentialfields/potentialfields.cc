@@ -42,9 +42,13 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 Angle given by a value between 0 and 360 with 0 at due North */
 void potentialfields::getNextVector(bool* obstacles, bool* targets, int xsize, int ysize, int robotx, int roboty, double& vel_mag, double& vel_ang)
 {
+	// Update the current GPS location
+	updateCurLocation();	
+	
 	// Set the robot's current location on the bitmap
 	robotlocx = robotx;
 	robotlocy = roboty;
+
 
 	// Alter the bitmap to remove stray clumps of non-obstacles
 	removeclumps(obstacles);
@@ -115,6 +119,13 @@ void potentialfields::getAvoidVec(bool* obstacles, double& xvel, double& yvel)
 	// Multiply each by the constant multiplier and convert it to m/s
 	xvel = data.x_vel * obstacle_weight * meters_per_pixel;
 	yvel = data.y_vel * obstacle_weight * meters_per_pixel;
+
+	// Rotate the vector based on the current bearing (assume that this is the orientation of the image)
+	double mag, ang;
+	xyToVec(xvel, yvel, mag, ang);
+	ang = RotateBearing(ang, imgAngle);
+	void VecToxy(double mag, double ang, double& x, double& y);
+	
 	return;
 }
 
@@ -338,4 +349,18 @@ void potentialfields::medianThreshFileter(bool* array, int thresh_size)
 			}
 		}
 	}
+}
+
+/* Updates the current latitude, longitude and image angle based on latest GPS data */
+void potentialfields::updateCurLocation()
+{
+	// Finds the index of the latest GPS_point
+	int curEl = GPS_Prev_Loc.size() - 1;
+	
+	// Updates curlat, curlon, and imgAngle based on latest data	
+	curlat = GPS_Prev_Loc[curEl].lat;
+	curlon = GPS_Prev_Loc[curEl].lon;
+	imgAngle = GPS_Prev_Loc[curEl].ang;	
+
+	return;
 }

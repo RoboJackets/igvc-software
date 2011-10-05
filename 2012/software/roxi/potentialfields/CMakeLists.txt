@@ -15,3 +15,13 @@ include_directories(
 	/usr/include/qt4/QtCore
 	/usr/include/qt4/QtXml
 )
+
+add_executable(potentialfieldstest
+	test.cc
+)
+
+target_link_libraries(potentialfieldstest
+	potentialfields
+	cv
+	cvaux
+)
