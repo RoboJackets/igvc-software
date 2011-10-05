@@ -63,3 +63,18 @@ double Distance2D(double x1, double y1, double x2, double y2)
 	double dy = y2 - y1;
 	return sqrt(dx*dx + dy*dy);
 }
+
+/* Rotates bearing input angle0 by dangle */
+double RotateBearing(double angle0, double dangle)
+{
+	double angle = angle0 + dangle;
+	while(angle >= 360)
+	{
+		angle-=360;
+	}	
+	while(angle < 0)
+	{
+		angle+=360;
+	}
+	return angle;
+}

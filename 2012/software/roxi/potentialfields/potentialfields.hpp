@@ -1,6 +1,10 @@
 #ifndef _POTENTIAL_FIELDS_H_
 #define _POTENTIAL_FIELDS_H_
 
+// Says whether or not testing mode is on. In testing mode, access to private methods is made public.
+// Should be commented out unless currently testing the functions
+#define TESTINGMODE
+
 #include "gps_points.hpp"
 #include <vector>
 #include "gps_common.hpp"
@@ -57,6 +61,9 @@ private:
 	int ysize;				// Size of bitmaps (y)
 	int robotlocx;			// Current x position of robot
 	int robotlocy;			// Currnet y position of robot
+	double curlat;			// Current latitude of the robot
+	double curlon;			// Current longitude of the robot
+	double imgAngle;		// Angle (in bearings) of the current image
 
 	// Constants
 	const static double meters_per_pixel = 1;	// Allows conversion from image to real distances
@@ -70,6 +77,11 @@ private:
 	const static double gps_goal_radius = 1;	// Radius of the gps goal
 	const static double gps_max_distance = 1;	// Radius at which the attraction to the goal becomes a constant
 
+	#ifdef TESTINGMODE
+	// If testing mode is on, all member functions are public so they can be tested directly by the testing function
+	// Otherwise, the members should all be private
+	public:
+	#endif
 	// Private Methods
 	void removeclumps(bool* obstacles);
 	void radiusfix(bool* obstacles);
@@ -87,6 +99,8 @@ private:
 	void doSomethingforIndexesInRadius(int x0, int y0, int radius, bool* bitmap, RAD_OPTION OPTION, ReturnData data);
 	double distBtwGPSPoints(const GPS_point& a, const GPS_point& b);
 	void medianThreshFileter(bool* array, int thresh_size);
+	void updateCurLocation();
+
 };
 
 #endif
