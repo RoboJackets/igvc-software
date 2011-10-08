@@ -3,6 +3,10 @@
 #include "commonVecOps.hpp"
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 /* Creates new potentialfields object and initializes fields */
 potentialfields::potentialfields()
@@ -25,15 +29,16 @@ potentialfields::~potentialfields()
 /* Adds the robot's current GPS waypoint to the class */
 void potentialfields::dropWaypoint(double lat, double lon, double ang)
 {
+	cout << "lat: " << lat << endl << "lon: " << lon << endl << "ang: " << ang << endl;
 	bool isEmpty = GPS_Prev_Loc.empty();
-	GPS_Prev_Loc.push_back(GPS_point(lat, lon));
+	GPS_Prev_Loc.push_back(GPS_point(lat, lon, ang));
 	
 	// If this is the first GPS point, then this needs to be added as the final goal for the robot (the course is circular) 	
 	if (isEmpty)
 	{
 		GPS_Goals.push_back(GPS_point(lat, lon, ang));
 	}
-	
+
 	// TODO: If the current GPS location is within the right radius of the goal GPS location, index up the goal GPS point
 	// If the goal is out of bounds, just start back at 0
 }
@@ -92,6 +97,8 @@ void potentialfields::removeclumps(bool* obstacles)
 /* Adds radius of robot to all of the obstacles so that the robot doesn't try to fit into small gaps */
 void potentialfields::radiusfix(bool* obstacles)
 {
+	std::vector<int> xinds;
+	std::vector<int> yinds;
 	for (int y = 0; y < ysize; y++)
 	{
 		for (int x = 0; x < xsize; x++)
@@ -100,10 +107,17 @@ void potentialfields::radiusfix(bool* obstacles)
 			// within the radius of the robot
 			if (get2Dindexvalue(obstacles, x, y) == 1)
 			{
-				fillinRadius(obstacles, x, y, robot_radius);
+				xinds.push_back(x);
+				yinds.push_back(y);
 			}
 		}
 	}
+
+	for(int i=0; i<xinds.size(); i++)
+	{
+		fillinRadius(obstacles, xinds[i], yinds[i], robot_radius);
+	}
+
 	return;
 }
 
@@ -114,7 +128,10 @@ void potentialfields::getAvoidVec(bool* obstacles, double& xvel, double& yvel)
 
 	// Return a sum of all of the x and y components from all of the obstacle pixels within the
 	// predefined radius
-	doSomethingforIndexesInRadius(robotlocx, robotlocy, obstacle_avoid_radius, obstacles, OBSTACLES, data);
+	//cout << "robotlocx: " << robotlocx << " robotlocy: " << robotlocy << " obstacle_rad: " << obstacle_avoid_radius << endl;
+	doSomethingforIndexesInRadius(robotlocx, robotlocy, obstacle_avoid_radius, obstacles, OBSTACLES, &data);
+
+	//cout << "data.x_vel: " << data.x_vel << endl << "data.y_vel: " << data.y_vel << endl;
 
 	// Multiply each by the constant multiplier and convert it to m/s
 	xvel = data.x_vel * obstacle_weight * meters_per_pixel;
@@ -136,7 +153,7 @@ void potentialfields::getImgTargetVec(bool* targets, double& xvel, double& yvel)
 
 	// Return a sum of all of the x and y components from all of the goal pixels within the
 	// predefined radius
-	doSomethingforIndexesInRadius(robotlocx, robotlocy, target_reach_radius, targets, ATTRACTORS, data);
+	doSomethingforIndexesInRadius(robotlocx, robotlocy, target_reach_radius, targets, ATTRACTORS, &data);
 
 	// Multiply each by the constant multiplier and convert it to m/s
 	xvel = data.x_vel * image_goal_weight * meters_per_pixel;
@@ -153,14 +170,14 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 	if (distance > (gps_max_distance + gps_goal_radius))
 	{	
 		// If the robot is far away from the GPS goal, gets a constant vector towards the GPS location
-		xvel = gps_goal_weight * gps_max_distance * cos(theta);
-		yvel = gps_goal_weight * gps_max_distance * sin(theta);
+		xvel = gps_goal_weight * gps_max_distance * sin(theta);
+		yvel = gps_goal_weight * gps_max_distance * cos(theta);
 	}
 	else
 	{
 		// If the robot is close to the goal, vector towards the GPS location smaller and smaller
-		xvel = gps_goal_weight*(distance - gps_goal_radius)*cos(theta);
-		yvel = gps_goal_weight*(distance - gps_goal_radius)*sin(theta);
+		xvel = gps_goal_weight*(distance - gps_goal_radius)*sin(theta);
+		yvel = gps_goal_weight*(distance - gps_goal_radius)*cos(theta);
 	}
 	return;
 }
@@ -192,11 +209,17 @@ void potentialfields::attractorPixels(int x0, int y0, int xt, int yt, double& x_
 {
 	// Finds the distance between the pixels and the angle to go to the second pixel
 	double d = Distance2D(x0, y0, xt, yt);
-	double theta = atan2((y0-yt), (x0-xt));
+	double theta = atan2((yt-y0), (xt-x0));
 
 	// Creates vectors pointing towards the goal pixel, proportional to the distance from the target
 	x_vel = d*cos(theta);
 	y_vel = d*sin(theta);
+
+	//cout << "x/y: " << sqrt((x_vel/y_vel)*(x_vel/y_vel));
+
+	// Reverses direction of y_vel because the image indexes for height start at the top, so all the
+	// y values have to be reversed
+	y_vel = -y_vel;
 	return;
 }
 
@@ -204,44 +227,55 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 {
 	// Finds the distance between the pixels and the angle to go to the second pixel
 	double d = Distance2D(x0, y0, xt, yt);
-	double theta = atan2((y0-yt), (x0-xt));
+	double theta = atan2((yt-y0), (xt-x0));
 
 	// Creates vectors pointing away from the obstacle pixel, proportional to the distance from the target
 	x_vel = -(radius-d)*cos(theta);
 	y_vel = -(radius-d)*sin(theta);
+
+	//cout << "x/y: " << sqrt((x_vel/y_vel)*(x_vel/y_vel));
+
+	// Reverses direction of y_vel because the image indexes for height start at the top, so all the
+	// y values have to be reversed
+	y_vel = -y_vel;
 	return;
 }
  
 /* Returns the value at the index array[x][y] as if it were a 2D array */
 bool potentialfields::get2Dindexvalue(bool* array, int x, int y)
 {
-	return array[y*ysize+x];
+	/*cout << endl << "xsize is "  << xsize << endl;
+	cout << endl << "(" << x << "," << y << ") is at index " << y*xsize+x << " in this array" << endl;*/
+	return array[y*xsize+x];
 }
 
 /* Sets the value at the index array[x][y] to val as if it were a 2D array */
 void potentialfields::set2Dindexvalue(bool* array, int x, int y, bool val)
 {
-	array[y*ysize+x] = val;
+	array[y*xsize+x] = val;
 }
 
 /* Fills in 1's within the radius of the third input around the point (x,y) */
 void potentialfields::fillinRadius(bool* obstacle, int x, int y, int radius)
 {
-	doSomethingforIndexesInRadius(x, y, radius, obstacle, FILL1, ReturnData());
+	doSomethingforIndexesInRadius(x, y, radius, obstacle, FILL1, NULL);
 	return;	
 }
 
-void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, bool* bitmap, RAD_OPTION OPTION, ReturnData data)
+void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, bool* bitmap, RAD_OPTION OPTION, ReturnData* data)
 {
+	//cout << "x0: " << x0 << "\ny0: " << y0 << "\nradius: " << radius << endl;
 	// Starts at the lowest y up to the highest y possible within the radius
 	for (int y = y0 - radius; y <= y0 + radius; y++)
 	{
+		//cout << "y: " << y << endl;
 		// Checks to make sure the indexes are within the bounds of the bitmask
 		if (y < 0 || y >= ysize)
 			continue; 
 
 		// Figures out the maximum x distance for the current y
-		int xdistmax = floor(sqrt(radius*radius - y*y)+.5);
+		int xdistmax = floor(sqrt(radius*radius - (y0-y)*(y0-y))+.5);
+		//cout << "xdistmax at y = " << y << " is " << xdistmax << endl;
 
 		// Starts at the lowest x possible for the current y and goes to the highest x possible for the current y
 		for(int x = x0 - xdistmax; x <= x0 + xdistmax; x++)
@@ -249,6 +283,8 @@ void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, 
 			// Checks to make sure the indexes are within the bounds of the bitmask
 			if (x < 0 || x >= xsize)
 				continue;
+			
+			//cout << "I'm at (" << x << "," << y << ")\n";
 
 			// Does different operations depending on the value of OPTION
 			switch(OPTION)
@@ -265,12 +301,20 @@ void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, 
 	
 				// Finds the pixel repulsions and sums them together
 				case OBSTACLES:
+					//printbitmap(bitmap);
 					if (get2Dindexvalue(bitmap, x, y) == 1)
 					{
+						//cout << "Here1\n";
 						double curx_vel, cury_vel;
 						repulsivePixels(x0, y0, x, y, radius, curx_vel, cury_vel);
-						data.x_vel += curx_vel;
-						data.y_vel += cury_vel;
+						data->x_vel += curx_vel;
+						data->y_vel += cury_vel;
+						/*cout << "x0: " << x0 << endl;	
+						cout << "y0: " << y0 << endl;
+						cout << "x: " << x << endl;	
+						cout << "y: " << y << endl;
+						cout << "xvel: " << data->x_vel << endl;
+						cout << "yvel: " << data->y_vel << endl;*/
 					}
 					break;
 
@@ -278,10 +322,16 @@ void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, 
 				case ATTRACTORS:
 					if (get2Dindexvalue(bitmap, x, y) == 1)
 					{
+						//cout << "Here2\n";
 						double curx_vel, cury_vel;
 						attractorPixels(x0, y0, x, y, curx_vel, cury_vel);
-						data.x_vel += curx_vel;
-						data.y_vel += cury_vel;
+						data->x_vel += curx_vel;
+						data->y_vel += cury_vel;
+						/*cout << "x0: " << x0 << endl;	
+						cout << "y0: " << y0 << endl;
+						cout << "x: " << x << endl;	
+						cout << "y: " << y << endl;
+						cout << "xvel: " << data->x_vel << " " ;*/
 					}
 					break;
 
@@ -363,4 +413,16 @@ void potentialfields::updateCurLocation()
 	imgAngle = GPS_Prev_Loc[curEl].ang;	
 
 	return;
+}
+
+void potentialfields::printbitmap(bool* bitmap)
+{
+	for(int row=0; row<ysize; row++)
+	{
+		for(int col=0; col<xsize; col++)
+		{
+			cout << bitmap[row*xsize+col] << " ";
+		}
+		cout << endl;
+	}
 }

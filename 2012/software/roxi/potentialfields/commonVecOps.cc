@@ -12,8 +12,8 @@ void xyToVec(double x, double y, double& mag, double& ang)
 /* Converts a vector with magnitude and angle to x and y components. Angle given by 0-360 with 0 at North */
 void VecToxy(double mag, double ang, double& x, double& y)
 {
-	x = mag * cos(deg2rad(ang));
-	y = mag * cos(rad2deg(ang));
+	x = mag * sin(deg2rad(ang));
+	y = mag * cos(deg2rad(ang));
 	return;
 }
 
@@ -45,15 +45,15 @@ double deg2rad(double degrees)
 double vec2bear(double ang)
 {
 	double bearing = (-ang+90);
-	while(ang < 0)
+	while(bearing < 0)
 	{
-		ang += 360;
+		bearing += 360;
 	}
-	while(ang > 360)
+	while(bearing > 360)
 	{
-		ang -= 360;
+		bearing -= 360;
 	}
-	return ang;
+	return bearing;
 }
 
 /* Returns distance between two coordinates */
