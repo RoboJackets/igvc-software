@@ -27,6 +27,8 @@ struct gyroState
 
 //distance in meters
 double lambert_distance(const GPSState& a, const GPSState& b);
+//bearing in degrees
+double lambert_bearing(const GPSState& a, const GPSState& b);
 //double haversine_distance(const GPSState& a, const GPSState& b);
 //double bowring_distance(const GPSState& a, const GPSState& b);
 #endif

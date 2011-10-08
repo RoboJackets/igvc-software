@@ -38,3 +38,25 @@ double lambert_distance(const GPSState& a, const GPSState& b)
 
 	return d;
 }
+
+double lambert_bearing(const GPSState& a, const GPSState& b)
+{
+	double alat = a.lat*M_PI/180.0;
+	double blat = b.lat*M_PI/180.0;
+	double alon = a.lon*M_PI/180.0;
+	double blon = b.lon*M_PI/180.0;
+
+	const double dlon = blon - alon;
+
+	const double YY = sin(dlon) * cos(blat);
+	const double XX = cos(alat) * sin(blat) - sin(alat) * cos(blat) * cos(dlon);
+	
+	double bring = atan2(YY, XX) * 180/M_PI;
+	if (bring < 0)
+	{
+	bring = bring + 360;
+	}	
+
+	return bring;
+
+}
