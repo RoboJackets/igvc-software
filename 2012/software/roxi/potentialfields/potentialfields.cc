@@ -41,6 +41,10 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 
 	// TODO: If the current GPS location is within the right radius of the goal GPS location, index up the goal GPS point
 	// If the goal is out of bounds, just start back at 0
+	if (distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1],GPS_Goals[currentGoal]) < gps_goal_radius)
+	{
+		currentGoal = (currentGoal+1) % GPS_Goals.size();
+	}
 }
 
 /* Changes value of input references vel_mag and vel_ang with the velocity and angle determined by the potential fields algorithm.
@@ -164,8 +168,8 @@ void potentialfields::getImgTargetVec(bool* targets, double& xvel, double& yvel)
 /* Returns the x and y components of the GPS goal vector in meters */
 void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 {
-	double distance = 0;
-	double theta = 0;
+	double distance = distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
+	double theta = angleBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
 	// TODO: Figure out the distance and angle from the current GPS coordinate to the goal GPS coordinate
 	if (distance > (gps_max_distance + gps_goal_radius))
 	{	
@@ -353,6 +357,16 @@ double potentialfields::distBtwGPSPoints(const GPS_point& a, const GPS_point& b)
 	gpsb.lon = b.lon;
 	gpsb.lat = b.lat;
 	return lambert_distance(gpsa, gpsb);
+}
+
+double angleBtwGPSPoints(const GPS_point& a, const GPS_point& b)
+{
+	GPSState gpsa, gpsb;
+	gpsa.lon = a.lon;
+	gpsa.lat = a.lat;
+	gpsb.lon = b.lon;
+	gpsb.lat = b.lat;
+	return lambert_bearing(gpsa, gpsb);;
 }
 
 void potentialfields::medianThreshFileter(bool* array, int thresh_size)
