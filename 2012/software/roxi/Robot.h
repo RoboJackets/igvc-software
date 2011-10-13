@@ -27,6 +27,8 @@ const static double motor_vel_mag = 1.1;
 	#error "Must define OSMC_2WD or OSMC_4WD"
 #endif
 
+#include "gps.hpp"
+
 //#include "NAV200.hpp"
 
 /*===== Camera Settings ===========================================*/
@@ -123,6 +125,8 @@ public:
 	// xml conf
 	void LoadXMLSettings();
 
+	gps gpsA;
+
 	// map generator and slam processing
 	MapGen mapper;
 	int doMapping;
@@ -149,9 +153,13 @@ public:
 
 	//NAV200* lidar;
 	boost::mutex lidarmutex;
+	boost::mutex gpsmutex;
 	volatile bool run_lidar_thread;
+	volatile bool run_gps_thread;
 	boost::thread* lidar_update_thread;
+	boost::thread* gps_update_thread;
 	void update_lidar_func();
+	void update_gps_func();
 
 	// joystick driver
 	//joystickDrive jD;
