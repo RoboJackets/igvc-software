@@ -72,7 +72,7 @@ bool quadCoderDriver_signed::getEncoderVel(double& vel)
 
 bool quadCoderDriver_signed::resetCount()
 {
-	if(ai.sendCommand(ENCOER_RESET_COUNT, NULL, 0))
+	if(ai.sendCommand(ENCODER_RESET_COUNT, NULL, 0))
 	{
 		return true;
 	}
