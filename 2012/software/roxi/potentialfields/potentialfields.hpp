@@ -3,6 +3,8 @@
 
 // Says whether or not testing mode is on. In testing mode, access to private methods is made public.
 // Should be commented out unless currently testing the functions
+
+// Angles in bearings 0-360. Please provide it angles in bearings!
 //#define TESTINGMODE
 
 #include "gps_points.hpp"

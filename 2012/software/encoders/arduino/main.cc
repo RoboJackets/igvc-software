@@ -172,13 +172,13 @@ int main()
 				break;
 			}
 			#endif
-			case ENCOER_RESET_COUNT:
+			case ENCODER_RESET_COUNT:
 			{
 				header_t headerOut;
 				genTimestamp(&headerOut.timestamp_sec, &headerOut.timestamp_usec);
 
 				headerOut.packetnum = tx_num;
-				headerOut.cmd = ENCOER_RESET_COUNT;
+				headerOut.cmd = ENCODER_RESET_COUNT;
 				headerOut.size = 0;
 
 				left_coder_ticks = 0;

@@ -10,14 +10,22 @@ volatile int64_t right_coder_ticks;
 enum trigger{TRIG_LEFT, TRIG_RIGHT};
 
 void leftenc_event()
-{
-	left_coder_ticks++;
+{ 
+	// Left wheel CW means it's going foward
+	if (digitalRead(left_encoder_pin_B) == HIGH)
+		left_coder_ticks++;
+	else
+		left_coder_ticks--;
 	//encoder_logger(TRIG_LEFT);
 }
 
 void rightenc_event()
 {
-	right_coder_ticks++;
+	// Right wheel CCW means it'g going backward
+	if (digitalRead(right_encoder_pin_B) == LOW)
+		right_coder_ticks++;
+	else
+		right_coder_ticks--;
 	//encoder_logger(TRIG_RIGHT);
 }
 

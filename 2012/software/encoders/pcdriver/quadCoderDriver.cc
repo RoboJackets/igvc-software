@@ -76,7 +76,7 @@ bool quadCoderDriver::resetCount()
 {
 	new_encoder_pk_t out;
 	
-	if(ai.sendCommand(ENCOER_RESET_COUNT, NULL, 0))
+	if(ai.sendCommand(ENCODER_RESET_COUNT, NULL, 0))
 	{
 		return true;
 	}
