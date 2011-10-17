@@ -10,22 +10,23 @@ void handler(int signum)
 
 int main()
 {
-
-	signal(SIGINT, handler);
+	// This testing exectuable has been disabled because the definitions in quadCoderDriver_signed have changed
+	// Take a look at the new object, and rewrite correctly to test different functions
+	/*signal(SIGINT, handler);
 	quadCoderDriver_signed qD(ENCODER_IF_AFT_RIGHT_BOARD);
 	qD.resetCount();
 	size_t t0 = time(NULL);
 	new_encoder_single_pk_t pk;
-	for(;;)
+	for(;;)*/
 	//while((time(NULL) - t0) < 10)
-	{
+	//{
 /*
 		if(!qD.getEncoderState(pk))
 		{
 			std::cout << pk << std::endl;
 		}
 */
-		double v;
+		/*double v;
 		if(!qD.getEncoderVel(v))
 		{
 			std::cout << "v: " << v << std::endl;
@@ -42,6 +43,6 @@ int main()
 	if(!qD.getEncoderState(pk))
 	{
 		std::cout << pk << std::endl;
-	}
+	}*/
 
 }

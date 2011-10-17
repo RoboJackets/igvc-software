@@ -10,14 +10,13 @@ OSMC_driver::OSMC_driver()
 	lvgoal = 0;
 	rvgoal = 0;
 	m_connected = false;
-	encoder_l = NULL;
-	encoder_r = NULL;
+	encoder = NULL;
 	#ifndef MOTOR_SIMULATE
 		ai.initLink(OSMC_IF_BOARD);
 	#endif
 	#ifndef ENCODER_SIMULATE
 		//encoder_l = new quadCoderDriver_signed(ENCODER_IF_AFT_LEFT_BOARD);
-		encoder_r = new quadCoderDriver_signed(ENCODER_IF_AFT_RIGHT_BOARD);
+		//encoder_r = new quadCoderDriver_signed(ENCODER_IF_AFT_RIGHT_BOARD);
 	#else
 		encoder_l = NULL;
 		encoder_r = NULL;
@@ -31,22 +30,18 @@ OSMC_driver::OSMC_driver()
 	set_motors(0, 0);
 }
 
-OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface_l, byte encoder_iface_r)
+OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface)
 {
 	lvgoal = 0;
 	rvgoal = 0;
 	m_connected = false;
-	encoder_l = NULL;
-	encoder_r = NULL;
 	#ifndef MOTOR_SIMULATE
 		ai.initLink(motor_iface);
 	#endif
 	#ifndef ENCODER_SIMULATE
-		encoder_l = new quadCoderDriver_signed(encoder_iface_l);
-		encoder_r = new quadCoderDriver_signed(encoder_iface_r);
+		encoder = new quadCoderDriver_signed(encoder_iface);
 	#else
-		encoder_l = NULL;
-		encoder_r = NULL;
+		encoder = NULL;
 	#endif
 	m_connected = true;
 
@@ -59,8 +54,7 @@ OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface_l, byte encoder_if
 OSMC_driver::~OSMC_driver()
 {
 	set_motors(0, 0);
-	delete encoder_l;
-	delete encoder_r;
+	delete encoder;
 }
 #if 0
 OSMC_driver::connect()
@@ -83,22 +77,33 @@ bool OSMC_driver::getEncoderData(new_encoder_pk_t& pk)
 #endif
 */
 #ifndef ENCODER_SIMULATE
-bool OSMC_driver::getEncoderVel(double& rvel, double& lvel)
+bool OSMC_driver::getEncoderVel(double& lvel, double& rvel)
 {
 	//return encoder->getEncoderVel(rvel, lvel);
 	bool ret = false;
-	ret |= encoder_r->getEncoderVel(rvel);
-	ret |= encoder_l->getEncoderVel(lvel);
+	ret = encoder->getEncoderVel(lvel, rvel);
+	return ret;
+}
+
+bool OSMC_driver::getEncoderDist(double& ldist, double& rdist)
+{
+	bool ret = false;
+	ret = encoder->getEncoderDist(ldist, rdist);
 	return ret;
 }
 #else
-bool OSMC_driver::getEncoderVel(double& rvel, double& lvel)
+bool OSMC_driver::getEncoderVel(double& lvel, double& rvel)
 {
 	lvel = rvel = 0;
 	return false;
 }
-#endif
 
+bool OSMC_driver::getEncoderDist(double& ldist, double& rdist)
+{
+	ldist = rdist = 0;
+	return false;
+}
+#endif
 
 current_reply_t OSMC_driver::getCurrentData()
 {

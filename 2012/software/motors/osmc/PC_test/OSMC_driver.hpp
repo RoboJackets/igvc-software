@@ -8,7 +8,7 @@
 
 //if this is defined, nothing is sent to the motors!, it is just printed to stdout
 //#define MOTOR_SIMULATE 1
-#define ENCODER_SIMULATE 1
+//#define ENCODER_SIMULATE 1
 //#define CURRENT_SIMULATE 1
 
 //following gnu libc tradition,
@@ -20,7 +20,7 @@ class OSMC_driver
 
 	public:
 	OSMC_driver();
-	OSMC_driver(byte motor_iface, byte encoder_iface_l, byte encoder_iface_r);
+	OSMC_driver(byte motor_iface, byte encoder_iface);
 	~OSMC_driver();
 
 	#if 0
@@ -49,7 +49,9 @@ class OSMC_driver
 	//bool disableMotor();
 
 	//interact with the associated encoder
-	bool getEncoderVel(double& rvel, double& lvel);
+	bool getEncoderVel(double& lvel, double& rvel);
+	bool getEncoderDist(double& ldist, double& rdist);
+	//bool getEncoderDist(double&, double&);
 	//bool getEncoderData(new_encoder_pk_t& pk);
 
 	//run one pd loop
@@ -70,8 +72,7 @@ class OSMC_driver
 	private:
 	ArduinoInterface ai;
 
-	quadCoderDriver_signed* encoder_l;
-	quadCoderDriver_signed* encoder_r;
+	quadCoderDriver_signed* encoder;
 
 	const static int _max_speed_;
 	const static int MINREQSPEED;

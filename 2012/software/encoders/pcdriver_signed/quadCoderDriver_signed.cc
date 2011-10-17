@@ -32,7 +32,7 @@ quadCoderDriver_signed::quadCoderDriver_signed(byte coder_name)
 	m_connected = true;
 }
 
-bool quadCoderDriver_signed::getEncoderState(new_encoder_single_pk_t& out)
+bool quadCoderDriver_signed::getEncoderState(new_encoder_pk_t& out)
 {
 
 	if(ai.sendCommand(ENCODER_GET_READING, NULL, 0))
@@ -48,24 +48,42 @@ bool quadCoderDriver_signed::getEncoderState(new_encoder_single_pk_t& out)
 		return true;
 	}
 
-	memcpy(&out, data, sizeof(new_encoder_single_pk_t));
+	memcpy(&out, data, sizeof(new_encoder_pk_t));
 	delete[] data;
 	return false;
 }
 
 //in meters per second
-bool quadCoderDriver_signed::getEncoderVel(double& vel)
+bool quadCoderDriver_signed::getEncoderVel(double& vel_l, double& vel_r)
 {
-	new_encoder_single_pk_t out;
+	new_encoder_pk_t out;
 	
 	if(getEncoderState(out))
 	{
 		return true;
 	}
 
-	double dtheta = ((out.dcoder / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SMAPLEDELAY;
+	double dtheta_l = ((out.dl / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SMAPLEDELAY;
+	vel_l = dtheta_l * WHEEL_RADIUS;
 
-	vel = dtheta * WHEEL_RADIUS;
+	double dtheta_r = ((out.dr / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SMAPLEDELAY;
+	vel_r = dtheta_r * WHEEL_RADIUS;
+
+	return false;
+}
+
+/* Returns distance each wheel has traveled in meters since last reset */
+bool quadCoderDriver_signed::getEncoderDist(double& dist_l, double& dist_r)
+{
+	new_encoder_pk_t out;
+	
+	if(getEncoderState(out))
+	{
+		return true;
+	}
+
+	dist_l = ((out.pl / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) * WHEEL_RADIUS;
+	dist_r = ((out.pr / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) * WHEEL_RADIUS;
 
 	return false;
 }

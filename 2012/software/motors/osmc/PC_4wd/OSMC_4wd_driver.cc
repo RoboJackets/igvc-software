@@ -1,11 +1,11 @@
 #include "OSMC_4wd_driver.hpp"
 
-OSMC_4wd_driver::OSMC_4wd_driver() : FOR(OSMC_IF_FOR_BOARD, ENCODER_IF_FOR_LEFT_BOARD, ENCODER_IF_FOR_RIGHT_BOARD) , AFT(OSMC_IF_AFT_BOARD, ENCODER_IF_AFT_LEFT_BOARD,  ENCODER_IF_AFT_RIGHT_BOARD)
+OSMC_4wd_driver::OSMC_4wd_driver() : FOR(OSMC_IF_FOR_BOARD, ENCODER_IF_FOR_BOARD) , AFT(OSMC_IF_AFT_BOARD, ENCODER_IF_AFT_BOARD)
 {
 	m_connected = true;
 }
 
-OSMC_4wd_driver::OSMC_4wd_driver(const byte FORosmc, const byte FORLcoder, const byte FORRcoder, const byte AFTosmc, const byte AFTLcoder, const byte AFTRcoder) : FOR(FORosmc, FORLcoder, FORRcoder) , AFT(AFTosmc, AFTLcoder, AFTRcoder)
+OSMC_4wd_driver::OSMC_4wd_driver(const byte FORosmc, const byte FORcoder, const byte AFTosmc, const byte AFTcoder) : FOR(FORosmc, FORcoder) , AFT(AFTosmc, AFTcoder)
 {
 	m_connected = true;
 }
@@ -70,6 +70,14 @@ bool OSMC_4wd_driver::getEncoderVel(double& FL, double& FR, double& BL, double& 
 	bool a = FOR.getEncoderVel(FL, FR);
 	bool b = AFT.getEncoderVel(BL, BR);
 	
+	return a || b;
+}
+
+bool OSMC_4wd_driver::getEncoderDist(double& FL, double& FR, double& BL, double& BR)
+{
+	bool a = FOR.getEncoderDist(FL, FR);
+	bool b = AFT.getEncoderDist(BL, BR);
+
 	return a || b;
 }
 
