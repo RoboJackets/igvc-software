@@ -14,7 +14,7 @@ class OSMC_4wd_driver
 {
 	public:
 	OSMC_4wd_driver();
-	OSMC_4wd_driver(const byte FORosmc, const byte FORLcoder, const byte FORRcoder, const byte AFTosmc, const byte AFTLcoder, const byte AFTRcoder);
+	OSMC_4wd_driver(const byte FORosmc, const byte FORcoder, const byte AFTosmc, const byte AFTcoder);
 	//~OSMC_4wd_driver();
 
 	//set motor
@@ -32,6 +32,7 @@ class OSMC_4wd_driver
 
 	//interog
 	bool getEncoderVel(double& FL, double& FR, double& BL, double& BR);
+	bool getEncoderDist(double& FL, double& FR, double& BL, double& BR);
 	bool getLastPWMSent(byte& FL, byte& FR, byte& BL, byte& BR);
 
 	//smart reckoning

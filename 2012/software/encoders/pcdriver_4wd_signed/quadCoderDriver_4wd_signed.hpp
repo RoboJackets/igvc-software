@@ -16,10 +16,8 @@ class quadCoderDriver_4wd_signed
 
 	private:
 
-	quadCoderDriver_signed fr;
-	quadCoderDriver_signed fl;
-	quadCoderDriver_signed br;
-	quadCoderDriver_signed bl;
+	quadCoderDriver_signed front;
+	quadCoderDriver_signed back;
 
 	bool m_connected;
 };
