@@ -10,6 +10,10 @@
 #include "gps_points.hpp"
 #include <vector>
 #include "gps_common.hpp"
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#include "Point2D.h"
+#include <math.h>
 
 /* This struct encapsulates GPS data */
 // Note all angles should be in bearings with 0 at due north
@@ -28,6 +32,10 @@ struct GPS_point
 
 /* enum for deciding what to do in doSomethingforIndexesInRadius */
 enum RAD_OPTION {FILL0, FILL1, OBSTACLES, ATTRACTORS};
+
+/* enums to decide  how to convert an image */
+enum IMAGETYPE {FEATURE_HIGH, FEATURE_LOW};
+enum FEATURETYPE {OBSTACLE, ATTRACTOR};
 
 /* structure for encapsolating return data fo doSomethingforIndexesInRadius */
 struct ReturnData
@@ -70,6 +78,7 @@ public:
 	int robotlocy;			// Currnet y position of robot
 	double curlat;			// Current latitude of the robot
 	double curlon;			// Current longitude of the robot
+	double curang;		// Current angle 		
 	double imgAngle;		// Angle (in bearings) of the current image
 
 	// Constants
@@ -83,6 +92,8 @@ public:
 	const static int target_reach_radius = 10000;	// Radius arond the robot in which the robot considers image goals
 	const static double gps_goal_radius = 1;	// Radius of the gps goal
 	const static double gps_max_distance = 1;	// Radius at which the attraction to the goal becomes a constant
+	const static double obstacle_bitmap_thresh = 100;	// Threshold value for converting obstacle images to bitmaps
+	const static double attractor_bitmap_thresh = 100;	// Threshold value for converting attractor images to bitmaps
 
 	// Private Methods
 	void removeclumps(bool* obstacles);
@@ -104,7 +115,7 @@ public:
 	void medianThreshFileter(bool* array, int thresh_size);
 	void updateCurLocation();
 	void printbitmap(bool* bitmap);
-
+	void IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE featType, bool* bitmap, int& xsize, int& ysize);
 };
 
 #endif
