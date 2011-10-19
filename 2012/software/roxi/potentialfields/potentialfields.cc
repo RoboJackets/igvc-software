@@ -87,7 +87,10 @@ void potentialfields::getNextVector(bool* obstacles, bool* targets, int xsize, i
 	// Find the resulting vector by adding up all of the components
 	AddVecs(xcomps, ycomps, number_vecs, xnet, ynet);	 
 	xyToVec(xnet, ynet, vel_mag, vel_ang);	
-	 
+
+	// Rotates the velocity vector to the angle from the perspective of the robot
+	vel_ang = RotateBearing(vel_ang, -curang);
+
 	return;
 }
 
@@ -421,14 +424,15 @@ void potentialfields::updateCurLocation()
 	// Finds the index of the latest GPS_point
 	int curEl = GPS_Prev_Loc.size() - 1;
 	
-	// Updates curlat, curlon, and imgAngle based on latest data	
+	// Updates curlat, curlon, and curAngle based on latest data	
 	curlat = GPS_Prev_Loc[curEl].lat;
 	curlon = GPS_Prev_Loc[curEl].lon;
-	imgAngle = GPS_Prev_Loc[curEl].ang;	
+	curang = GPS_Prev_Loc[curEl].ang;	
 
 	return;
 }
 
+/* Prints bitmap with 1's and 0's */
 void potentialfields::printbitmap(bool* bitmap)
 {
 	for(int row=0; row<ysize; row++)
@@ -438,5 +442,55 @@ void potentialfields::printbitmap(bool* bitmap)
 			cout << bitmap[row*xsize+col] << " ";
 		}
 		cout << endl;
+	}
+}
+
+/* Converts an IPlImage into a bitmap based on the thresholds in the header file */
+void potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE featType, bool* bitmap, int& xsize, int& ysiiiize)
+{
+	double thresh;
+	// Sets which threshold we'll be using
+	if (featType == OBSTACLE)
+		thresh = obstacle_bitmap_thresh;
+	else
+		thresh = attractor_bitmap_thresh;
+
+	int height = img->height;
+	int width = img->width;
+	int step = img->widthStep;
+	int channels = img->nChannels;
+	uchar* data = (uchar *)img->imageData;
+	int index = 0;
+	bitmap = new bool[height*width];
+	for(int hindex = 0; hindex < height; hindex++)
+	{
+		for(int windex = 0; windex < width; windex++)
+		{
+			// Finds average intensity over all the channels. If there's just one channel, this isn't strictly necessary
+			double avgval;
+			for (int i = 0; i < channels; i++)
+			{
+				avgval += (double)data[hindex*step+windex*channels+i];
+			}
+			avgval /= channels;
+
+			// If it's a feature high type, it is 1 if the average value is greater than the threshold. If it's
+			// a feature low type, it is a 1 if the average value is greater than the threshold. 
+			bool isFeature;
+			if (imgType == FEATURE_HIGH)
+				isFeature = avgval > thresh;
+			else
+				isFeature = avgval < thresh;
+
+			if(isFeature)
+			{
+				bitmap[index] = 1;
+			}
+			else
+			{
+				bitmap[index] = 0;
+			}
+			index++;
+		}
 	}
 }
