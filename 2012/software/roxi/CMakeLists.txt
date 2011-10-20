@@ -31,6 +31,7 @@ link_directories(
 add_subdirectory(vision)
 add_subdirectory(mapping)
 add_subdirectory(potentialfields)
+add_subdirectory(RobotPosition)
 
 IF(${ROBOT_REV} MATCHES "candiiidbg")
 	SET(CMAKE_C_FLAGS  " -march=native -pipe -fopenmp -g3 -O0 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -D_REENTRANT -DQT_XML_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_SHARED -DOSMC_2WD")

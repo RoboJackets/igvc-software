@@ -11,6 +11,13 @@ int stateB;
 int lastStateA=LOW;
 int lastStateB=LOW;
 
+int main()
+{
+	setup();
+	while(1)
+		loop();
+	return 0;
+}
 void setup()
 {
 	pinMode(encoderPinA,INPUT);
@@ -33,3 +40,4 @@ void loop()
 	}
 	lastStateA=stateA;
 	lastStateB=stateB;
+}
