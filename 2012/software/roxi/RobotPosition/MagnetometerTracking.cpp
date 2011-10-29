@@ -1,37 +1,23 @@
-#include <math.h>
-#include "OSMC_4wd_driver.hpp"
+#include "MagnetometerTracking.hpp"
 
-class MagnetometerTracking
-{
-private:
-double bearing;
-double initialBearing;
-OSMC_4wd_driver osmc;
-int angle;
-int XV;
-int YV;
-
-public:
-IMUTracking(OSMC_4wd_driver driver)
+MagnetometerTracking::MagnetometerTracking(OSMC_4wd_driver * driver)
 {
 	osmc=driver;
-	bearing=osmc.GetMagnetometerHeading(angle, XV, YV);
+	//bearing=(*osmc).GetMagnetometerHeading(angle, XV, YV);
 	initialBearing=bearing;
 }
 
-void update()
+void MagnetometerTracking::update()
 {
-	bearing=osmc.GetMagnetometerHeading(angle, XV, YV);
+	//bearing=(*osmc).GetMagnetometerHeading(angle, XV, YV);
 }
 
-
-void reset()
+void MagnetometerTracking::reset()
 {
 	bearing=initialBearing;
 }
 
-int getBearing()
+double MagnetometerTracking::getBearing()
 {
 	return bearing;
 }
-};
