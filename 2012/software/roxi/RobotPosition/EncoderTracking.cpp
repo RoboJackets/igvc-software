@@ -1,59 +1,56 @@
-#include <math.h>
-#include "OSMC_4wd_driver.hpp"
 
-class encoderTracking
+#include "EncoderTracking.hpp"
+
+
+EncoderTracking::EncoderTracking(OSMC_4wd_driver * driver)
 {
-private:
-double x;
-double y;
-double angle;
-const double WHEEL_RADIUS=1;
-const double WHEEL_BASE=1;//distance between wheels 
-const int CYCLES_PER_ROTATION=1;
-OSMC_4wd_driver osmc;
-
-
-
-public :
-encoderTracking(OSMC_4wd_driver driver):x(0),y(0),angle(M_PI/2)
-{
+x=0;
+y=0;
+angle=M_PI/2;
 osmc=driver;
 }
 
-void update()
+EncoderTracking::EncoderTracking()
 {
-	int lastRightCycles;//get data from OSMC
-	int lastLeftCycles;//get data from OSMC
-	double distanceRight=wheelRadius/cyclesPerRotation*lastRightCycles;
-	double distanceLeft=wheelRadius/cyclesPerRotation*lastLeftCycles;
-	
-	double distanceCenter=(distanceRight+distanceLeft)/2;
-	//Counterclockwise currently set as positive - should possibly change depending on gyro/other code
-	angle+=(distanceRight-distanceLeft)/(2*wheelBase);
-	x+=distanceCenter*sin(angle);
-	y+=distanceCenter*cos(angle);
-	 
+x=0;
+y=0;
+angle=M_PI/2;
 }
 
-void reset()
+void EncoderTracking::reset()
 {
 	x=0;
 	y=0;
 	angle=M_PI/2;
 }
 
-int getX()
+double EncoderTracking::getX()
 {
 	return x;
 }
 
-int getY()
+double EncoderTracking::getY()
 {
 	return y;
 }
 
-int getAngle()
+double EncoderTracking::getAngle()
 {
 	return angle;
 }
-};
+
+void EncoderTracking::update()
+{
+	int lastRightCycles;//get data from OSMC
+	int lastLeftCycles;//get data from OSMC
+	double distanceRight=WHEEL_RADIUS/CYCLES_PER_ROTATION*lastRightCycles;
+	double distanceLeft=WHEEL_RADIUS/CYCLES_PER_ROTATION*lastLeftCycles;
+	
+	double distanceCenter=(distanceRight+distanceLeft)/2;
+	//Counterclockwise currently set as positive - should possibly change depending on gyro/other code
+	angle+=(distanceRight-distanceLeft)/(2*WHEEL_BASE);
+	x+=distanceCenter*sin(angle);
+	y+=distanceCenter*cos(angle);
+}
+
+

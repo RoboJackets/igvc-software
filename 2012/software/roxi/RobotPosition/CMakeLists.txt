@@ -1,17 +1,21 @@
 include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
 
-#Code does not compile currently because of C++ syntax and other stuff
 
-#add_executable(encoderTracking
-#	EncoderTracking.cpp
-#)
+add_library(robot_position
+	RobotPosition.cpp
+	MagnetometerTracking.cpp
+	EncoderTracking.cpp	
+)
 
 
-#add_executable(MagnetometerTracking
-#	MagnetometerTracking.cpp
-#)
 
-#add_executable(RobotPosition.cpp
-#	RobotPosition.cpp
-#)
+target_link_libraries(robot_position
+	boost_system
+	gps
+	OSMC_driver
+	boost_thread
+	IMU_Control
+)
+
+
 
