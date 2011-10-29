@@ -1,10 +1,12 @@
 #ifndef _POTENTIAL_FIELDS_H_
 #define _POTENTIAL_FIELDS_H_
 
-// Says whether or not testing mode is on. In testing mode, access to private methods is made public.
-// Should be commented out unless currently testing the functions
+// Potential Fields Algorithm Implementation Written by Kenny Marino
 
 // Angles in bearings 0-360. Please provide it angles in bearings!
+
+// Says whether or not testing mode is on. In testing mode, access to private methods is made public.
+// Should be commented out unless currently testing the functions
 //#define TESTINGMODE
 
 #include "gps_points.hpp"

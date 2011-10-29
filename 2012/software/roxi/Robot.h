@@ -16,6 +16,7 @@
 #include "image_buffers.h"
 #include "mapgen.h"
 #include "joystickDrive.hpp"
+#include "potentialfields.hpp"
 
 const static double motor_vel_mag = 1.1;
 
@@ -130,6 +131,9 @@ public:
 	// map generator and slam processing
 	MapGen mapper;
 	int doMapping;
+
+	// Potential Fields object
+	potentialfields pf;
 
 	// motor control
 	//Motors_Old motors;

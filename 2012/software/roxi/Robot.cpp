@@ -9,6 +9,7 @@
 #include <GL/glut.h>
 #include "XmlConfiguration.h"
 #include "logging/timer.h"
+#include "potentialfields.hpp"
 
 
 #define PRINTFRAMERATE 0
@@ -389,19 +390,24 @@ void Robot::processFunc()
 
 
 	/* Perform vision processing. */
-	if (doVision)
-	{
-		vp.visProcessFrame(heading_vision);
-	}
+	//if (doVision)
+	//{
+	//	vp.visProcessFrame(heading_vision);
+	//}
 
 
 	/* Perform SLAM Processing */
+	//if (doMapping)
+	//{
+	//	if ( mapper.genMap() )
+	//	{
+	//		mapper.processMap(heading_mapping);
+	//	}
+	//}
+
 	if (doMapping)
 	{
-		if ( mapper.genMap() )
-		{
-			mapper.processMap(heading_mapping);
-		}
+		mapper.genMap();
 	}
 
 
