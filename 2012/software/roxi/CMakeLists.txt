@@ -9,6 +9,7 @@ include_directories(
 
 	${IGVC_SOURCE_DIR}/roxi/vision
 	${IGVC_SOURCE_DIR}/roxi/mapping
+	${IGVC_SOURCE_DIR}/roxi/potentialfields
 	/usr/include/qt4
 	/usr/include/qt4/Qt
 	/usr/include/qt4/QtGui

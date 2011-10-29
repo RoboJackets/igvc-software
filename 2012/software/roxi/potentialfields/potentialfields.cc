@@ -172,7 +172,7 @@ void potentialfields::getImgTargetVec(bool* targets, double& xvel, double& yvel)
 void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 {
 	double distance = distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
-	double theta = angleBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
+	double theta =	angleBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
 	// TODO: Figure out the distance and angle from the current GPS coordinate to the goal GPS coordinate
 	if (distance > (gps_max_distance + gps_goal_radius))
 	{	
@@ -362,7 +362,7 @@ double potentialfields::distBtwGPSPoints(const GPS_point& a, const GPS_point& b)
 	return lambert_distance(gpsa, gpsb);
 }
 
-double angleBtwGPSPoints(const GPS_point& a, const GPS_point& b)
+double potentialfields::angleBtwGPSPoints(const GPS_point& a, const GPS_point& b)
 {
 	GPSState gpsa, gpsb;
 	gpsa.lon = a.lon;
