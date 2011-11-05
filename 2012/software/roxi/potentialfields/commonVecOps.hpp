@@ -12,4 +12,5 @@ void AddVecs(double* xvals, double* yvals, int numVecs, double& xnet, double& yn
 double Distance2D(double x1, double y1, double x2, double y2);
 double RotateBearing(double angle0, double dangle);
 
+
 #endif
