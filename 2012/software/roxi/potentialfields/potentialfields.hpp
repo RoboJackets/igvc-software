@@ -63,7 +63,7 @@ public:
 	~potentialfields();
 	// Public methods
 	void dropWaypoint(double lat, double lon, double ang);
-	void getNextVector(bool* obstacles, bool* targets, int xsize, int ysize, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal);
+	void getNextVector(IplImage* obstacles, IplImage* targets, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal);
 		
 #ifndef TESTINGMODE
 	// If testing mode is on, all member functions and members are public so they can be tested directly by the testing function
