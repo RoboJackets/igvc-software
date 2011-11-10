@@ -11,7 +11,7 @@ void handler(int signum)
 int main()
 {
 	signal(SIGINT, handler);
-	quadCoderDriver_signed qD(ENCODER_IF_AFT_RIGHT_BOARD);
+	quadCoderDriver_signed qD(ENCODER_IF_AFT_BOARD);
 	qD.resetCount();
 	size_t t0 = time(NULL);
 
