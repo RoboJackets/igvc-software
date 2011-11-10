@@ -118,6 +118,7 @@ public:
 	Point2D<int> heading_sensors;
 	Point2D<int> heading_main;
 	Point2D<int> heading_mapping;
+	Point2D<int> heading_pathplan;
 
 	// avg heading control
 	// k_motors = the % of new value to use

@@ -49,8 +49,31 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 
 /* Changes value of input references vel_mag and vel_ang with the velocity and angle determined by the potential fields algorithm.
 Angle given by a value between 0 and 360 with 0 at due North */
-void potentialfields::getNextVector(bool* obstacles, bool* targets, int xsize, int ysize, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
+void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
 {
+	// Transform the input image to a bitmap of obstacles
+	bool* obstacles;
+	IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, obstacles, xsize, ysize);
+
+	// Transform the input image to a bitmap of targets
+	int tempx, tempy;
+	bool* targets;
+	if (targets_ipl == NULL)
+	{
+		targets = NULL;
+		tempx = xsize;
+		tempy = ysize;
+	}
+	else
+	{
+		IPl2Bitmap(targets_ipl, FEATURE_LOW, ATTRACTOR, targets, tempx, tempy);
+	}
+	if (xsize != tempx || ysize != tempy)
+	{
+		cout << "Input images not the same size" << endl;
+		// TODO: Should probably actually do something about this. Don't care right now.
+	}
+
 	// Update the current GPS location
 	updateCurLocation();	
 	

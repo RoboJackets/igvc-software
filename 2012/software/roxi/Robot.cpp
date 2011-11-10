@@ -390,24 +390,26 @@ void Robot::processFunc()
 
 
 	/* Perform vision processing. */
-	//if (doVision)
-	//{
-	//	vp.visProcessFrame(heading_vision);
-	//}
+	if (doVision)
+	{
+		vp.visProcessFrame(heading_vision);
+	}
 
 
 	/* Perform SLAM Processing */
-	//if (doMapping)
-	//{
-	//	if ( mapper.genMap() )
-	//	{
-	//		mapper.processMap(heading_mapping);
-	//	}
-	//}
+	if (doMapping)
+	{
+		if ( mapper.genMap() )
+		{
+			mapper.processMap(heading_mapping);
+			pf.getNextVector(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
+		}
+	}
 
 	if (doMapping)
 	{
 		mapper.genMap();
+		pf.getNextVector(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
 	}
 
 
