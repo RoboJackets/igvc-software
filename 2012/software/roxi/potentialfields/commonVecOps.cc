@@ -56,6 +56,16 @@ double vec2bear(double ang)
 	return bearing;
 }
 
+/* Converts angle ccw from due East to angle cw from due North */
+double bear2vec(double bearing)
+{
+	double ang = (-bearing-90);
+	ang = fmodf(ang,360);
+	if (ang > 180)
+		ang = ang - 180;
+	return ang;
+}
+
 /* Returns distance between two coordinates */
 double Distance2D(double x1, double y1, double x2, double y2)
 {
