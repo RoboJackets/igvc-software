@@ -7,8 +7,9 @@
 
 using std::cout;
 using std::endl;
-
-/* Creates new potentialfields object and initializes fields */
+/*************** Public Functions ***********************************************************************************************/
+// Creates new potentialfields object and initializes fields 
+#if RUN_MODE == GPS
 potentialfields::potentialfields()
 {
 	// Initialize the goal GPS points
@@ -19,17 +20,34 @@ potentialfields::potentialfields()
 	currentGoal = 0;
 	return;
 }
+#elif RUN_MODE == ROBOT_POS
+potentialfields::potentialfields(GPS_point center_point)
+{
+	for (int i=0; i M num_GPS_Goals; i++)
+	{
+		GPS_point goalpoint = GPS_point(goalWaypointLat[i], goalWaypointLon[i]);
+		double distance = distBtwGPSPoints(center_point, goal_point);
+		double angle = angleBtwGPSPoints(center_point, goal_point);
+		double x = distance*sin(deg2rad(angle));
+		double y = distance*cos(deg2rad(angle));
+		Pos_Goals.push_back(Pos_point(x,y));
+	}
+	currentGoal = 0;
+	return;
+}
+#endif
 
-/* Destructor for potentialfields */
+// Destructor for potentialfields
 potentialfields::~potentialfields()
 {
 	return;
 }
 
-/* Adds the robot's current GPS waypoint to the class */
+// Adds the robot's current GPS waypoint to the class
+#if RUN_MODE == GPS
 void potentialfields::dropWaypoint(double lat, double lon, double ang)
 {
-	cout << "lat: " << lat << endl << "lon: " << lon << endl << "ang: " << ang << endl;
+	//cout << "lat: " << lat << endl << "lon: " << lon << endl << "ang: " << ang << endl;
 	bool isEmpty = GPS_Prev_Loc.empty();
 	GPS_Prev_Loc.push_back(GPS_point(lat, lon, ang));
 	
@@ -39,16 +57,40 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 		GPS_Goals.push_back(GPS_point(lat, lon, ang));
 	}
 
-	// TODO: If the current GPS location is within the right radius of the goal GPS location, index up the goal GPS point
+	// If the current GPS location is within the right radius of the goal GPS location, index up the goal GPS point
 	// If the goal is out of bounds, just start back at 0
 	if (distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1],GPS_Goals[currentGoal]) < gps_goal_radius)
 	{
 		currentGoal = (currentGoal+1) % GPS_Goals.size();
 	}
 }
+#elif RUN_MODE == ROBOT_POS
+void potentialfields::dropWaypoint(double x, double y, double ang)
+{
+	bool isEmpty = Pos_Prev_Loc.empty()
+	Pos_Prev_Loc.push_back(Pos_point(x,y,ang));
+	
+	// If this is the first real-world position, then this needs to be added as the final goal for the robot (the course is circular)	
+	if (isEmpty)
+	{
+		Pos_Goals.push_back(Pos_point(x,y,ang));
+	}
+	
+	// If the current real-world location is within the right radius of the goal location, index up the next goal point
+	// If the goal is out of bounds, just start back at 0
+	double x1 = Pos_Prev_Loc[Pos_Prev_Loc.size()-1].x;
+	double y1 = Pos_Prev_Loc[Pos_Prev_Loc.size()-1].y;
+	double x2 = Pos_Goals[currentGoal].x;
+	double y2 = Pos_Goals[currentGoal].y;
+	if (Distance2D(x1, y1, x2, y2) < gps_goal_radius)
+	{
+		currentGoal = (currentGoal+1) % Pos_Goals.size();
+	} 
+}
+#endif
 
-/* Changes value of input references vel_mag and vel_ang with the velocity and angle determined by the potential fields algorithm.
-Angle given by a value between 0 and 360 with 0 at due North */
+// Changes value of input references vel_mag and vel_ang with the velocity and angle determined by the potential fields algorithm.
+// Angle given by a value between 0 and 360 with 0 at due North
 void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
 {
 	// Transform the input image to a bitmap of obstacles
@@ -78,11 +120,11 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 	updateCurLocation();	
 	
 	// Set the robot's current location on the bitmap
-	robotlocx = robotBaseAt.x;
-	robotlocy = robotBaseAt.y;
+	robotmaplocx = robotBaseAt.x;
+	robotmaplocy = robotBaseAt.y;
 
 	// Figure out what direction the map is facing relative to the robot
-	double map_ang_from_rob = getMapAngle(robotBaseAt, robotLookingAt);	
+	double map_ang_from_rob = GetMapAngle(robotBaseAt, robotLookingAt);	
 
 	// Alter the bitmap to remove stray clumps of non-obstacles
 	removeclumps(obstacles);
@@ -122,15 +164,67 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 
 	return;
 }
+/********************************************************************************************************************************/
 
-/* Gets rid of stray clumps of grass and other noise from the obstacle bitfield*/
+/*************** Map pre-processing functions ***********************************************************************************/
+// Converts an IPlImage into a bitmap based on the thresholds in the header file 
+void potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE featType, bool* bitmap, int& xsize, int& ysiiiize)
+{
+	double thresh;
+	// Sets which threshold we'll be using
+	if (featType == OBSTACLE)
+		thresh = obstacle_bitmap_thresh;
+	else
+		thresh = attractor_bitmap_thresh;
+
+	int height = img->height;
+	int width = img->width;
+	int step = img->widthStep;
+	int channels = img->nChannels;
+	uchar* data = (uchar *)img->imageData;
+	int index = 0;
+	bitmap = new bool[height*width];
+	for(int hindex = 0; hindex < height; hindex++)
+	{
+		for(int windex = 0; windex < width; windex++)
+		{
+			// Finds average intensity over all the channels. If there's just one channel, this isn't strictly necessary
+			double avgval;
+			for (int i = 0; i < channels; i++)
+			{
+				avgval += (double)data[hindex*step+windex*channels+i];
+			}
+			avgval /= channels;
+
+			// If it's a feature high type, it is 1 if the average value is greater than the threshold. If it's
+			// a feature low type, it is a 1 if the average value is greater than the threshold. 
+			bool isFeature;
+			if (imgType == FEATURE_HIGH)
+				isFeature = avgval > thresh;
+			else
+				isFeature = avgval < thresh;
+
+			if(isFeature)
+			{
+				bitmap[index] = 1;
+			}
+			else
+			{
+				bitmap[index] = 0;
+			}
+			index++;
+		}
+	}
+}
+
+// Gets rid of stray clumps of grass and other noise from the obstacle bitfield
 void potentialfields::removeclumps(bool* obstacles)
 {
 	// TODO: Write this function
 	return;
 }
 
-/* Adds radius of robot to all of the obstacles so that the robot doesn't try to fit into small gaps */
+// Adds radius of robot to all of the obstacles so that the robot doesn't try to fit into small gaps 
 void potentialfields::radiusfix(bool* obstacles)
 {
 	std::vector<int> xinds;
@@ -157,15 +251,64 @@ void potentialfields::radiusfix(bool* obstacles)
 	return;
 }
 
-/* Returns the x and y components of the obstacle avoidance vector in meters */
+// Implementation of a median threshold filter as a possible solution to the clumps of grass problem
+void potentialfields::medianThreshFilter(bool* array, int thresh_size)
+{
+	// Makes a copy of the array and then 0s out the old array
+	bool arraycopy[xsize*ysize];
+	memcpy(arraycopy, array, xsize*ysize);
+	for(int i = 0; i < xsize*ysize; i++)
+		array[i] = 0;
+	 
+	
+
+	// Finds the square root of the perfect square at least twice the size of the threshold
+	int n = ceil(sqrt(thresh_size*2));
+
+	for(int xoff = 0; xoff < n; xoff++)
+	{
+		for(int yoff = 0; yoff < n; xoff++)
+		{
+			for(int x = xoff; (x+n) <= xsize; x+=n)
+			{
+				for(int y = yoff; (y+n) <= ysize; y+=n)
+				{
+					int sum = 0;
+					for(int i = 0; i<n; i++)
+					{
+						for(int j = 0; j<n; j++)
+						{
+							sum += int(get2Dindexvalue(arraycopy, x+i, y+j));
+						}
+					}
+
+					if(sum/(n*n) >= 0.5)
+					{
+						for(int i = 0; i<n; i++)
+						{
+							for(int j = 0; j<n; j++)
+							{
+								set2Dindexvalue(array, x+i, y+j, get2Dindexvalue(arraycopy,x+i,y+j));
+							}
+						}
+					}
+				} 
+			}
+		}
+	}
+}
+/********************************************************************************************************************************/
+
+/*************** Component vector functions for obstacles and goals *************************************************************/
+// Returns the x and y components of the obstacle avoidance vector in meters 
 void potentialfields::getAvoidVec(bool* obstacles, double angle_of_map, double& xvel, double& yvel)
 {
 	ReturnData data;
 
 	// Return a sum of all of the x and y components from all of the obstacle pixels within the
 	// predefined radius
-	//cout << "robotlocx: " << robotlocx << " robotlocy: " << robotlocy << " obstacle_rad: " << obstacle_avoid_radius << endl;
-	doSomethingforIndexesInRadius(robotlocx, robotlocy, obstacle_avoid_radius, obstacles, OBSTACLES, &data);
+	//cout << "robotmaplocx: " << robotmaplocx << " robotlocy: " << robotlocy << " obstacle_rad: " << obstacle_avoid_radius << endl;
+	doSomethingforIndexesInRadius(robotmaplocx, robotmaplocy, obstacle_avoid_radius, obstacles, OBSTACLES, &data);
 
 	//cout << "data.x_vel: " << data.x_vel << endl << "data.y_vel: " << data.y_vel << endl;
 
@@ -182,14 +325,14 @@ void potentialfields::getAvoidVec(bool* obstacles, double angle_of_map, double& 
 	return;
 }
 
-/* Returns the x and y components of the Image target vector in meters */
+// Returns the x and y components of the Image target vector in meters 
 void potentialfields::getImgTargetVec(bool* targets, double& xvel, double& yvel)
 {
 	ReturnData data;
 
 	// Return a sum of all of the x and y components from all of the goal pixels within the
 	// predefined radius
-	doSomethingforIndexesInRadius(robotlocx, robotlocy, target_reach_radius, targets, ATTRACTORS, &data);
+	doSomethingforIndexesInRadius(robotmaplocx, robotmaplocy, target_reach_radius, targets, ATTRACTORS, &data);
 
 	// Multiply each by the constant multiplier and convert it to m/s
 	xvel = data.x_vel * image_goal_weight * meters_per_pixel;
@@ -197,11 +340,11 @@ void potentialfields::getImgTargetVec(bool* targets, double& xvel, double& yvel)
 	return;
 }
 
-/* Returns the x and y components of the GPS goal vector in meters */
+// Returns the x and y components of the GPS goal vector in meters
 void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 {
-	double distance = distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
-	double theta =	angleBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
+	double distance = getDistCur2Goal();
+	double theta =	getAngleCur2Goal();
 	// TODO: Figure out the distance and angle from the current GPS coordinate to the goal GPS coordinate
 	if (distance > (gps_max_distance + gps_goal_radius))
 	{	
@@ -218,7 +361,7 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 	return;
 }
 
-/* Returns the x and y components of the GPS avoidance vector in meters */
+// Returns the x and y components of the GPS avoidance vector in meters 
 void potentialfields::getGPSAvoidVec(double& xvel, double& yvel)
 {
 	// TODO: Write this function
@@ -226,21 +369,10 @@ void potentialfields::getGPSAvoidVec(double& xvel, double& yvel)
 	return;
 }
 
-/* Converts a pixel x and y disrance to a real */
-void potentialfields::convertToRealxy(double& xcomp, double& ycomp)
-{
-	xcomp *= meters_per_pixel;
-	ycomp *= meters_per_pixel;
-	return;
-}
+/********************************************************************************************************************************/
 
-/* Converts a pixel vector to a real vector */
-void potentialfields::convertToRealVec(double& vel, double& ang)
-{
-	vel *= meters_per_pixel;
-	return;
-}
-
+/*************** Helper functions for bitmap obstacles and goals ****************************************************************/
+// Finds the potential field vector for a single attractive pixel
 void potentialfields::attractorPixels(int x0, int y0, int xt, int yt, double& x_vel, double& y_vel)
 {
 	// Finds the distance between the pixels and the angle to go to the second pixel
@@ -259,6 +391,7 @@ void potentialfields::attractorPixels(int x0, int y0, int xt, int yt, double& x_
 	return;
 }
 
+// Finds the potential field vector for a single repulsive pixel
 void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius, double& x_vel, double& y_vel)
 {
 	// Finds the distance between the pixels and the angle to go to the second pixel
@@ -276,28 +409,33 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 	y_vel = -y_vel;
 	return;
 }
- 
-/* Returns the value at the index array[x][y] as if it were a 2D array */
-bool potentialfields::get2Dindexvalue(bool* array, int x, int y)
+
+// Converts a pixel x and y disrance to a real 
+void potentialfields::convertToRealxy(double& xcomp, double& ycomp)
 {
-	/*cout << endl << "xsize is "  << xsize << endl;
-	cout << endl << "(" << x << "," << y << ") is at index " << y*xsize+x << " in this array" << endl;*/
-	return array[y*xsize+x];
+	xcomp *= meters_per_pixel;
+	ycomp *= meters_per_pixel;
+	return;
 }
 
-/* Sets the value at the index array[x][y] to val as if it were a 2D array */
-void potentialfields::set2Dindexvalue(bool* array, int x, int y, bool val)
+// Converts a pixel vector to a real vector 
+void potentialfields::convertToRealVec(double& vel, double& ang)
 {
-	array[y*xsize+x] = val;
+	vel *= meters_per_pixel;
+	return;
 }
 
-/* Fills in 1's within the radius of the third input around the point (x,y) */
+/********************************************************************************************************************************/
+
+/*************** Bitmap helpers *************************************************************************************************/
+// Fills in 1's within the radius of the third input around the point (x,y) 
 void potentialfields::fillinRadius(bool* obstacle, int x, int y, int radius)
 {
 	doSomethingforIndexesInRadius(x, y, radius, obstacle, FILL1, NULL);
 	return;	
 }
-
+ 
+// Performs some action given by RAD_OPTION on every pixel within a certain radius of a given pixel
 void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, bool* bitmap, RAD_OPTION OPTION, ReturnData* data)
 {
 	//cout << "x0: " << x0 << "\ny0: " << y0 << "\nradius: " << radius << endl;
@@ -380,74 +518,23 @@ void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, 
 	return;
 }
 
-/* Finds the distance in meters between two GPS points */
-double potentialfields::distBtwGPSPoints(const GPS_point& a, const GPS_point& b)
+// Returns the value at the index array[x][y] as if it were a 2D array
+bool potentialfields::get2Dindexvalue(bool* array, int x, int y)
 {
-	GPSState gpsa, gpsb;
-	gpsa.lon = a.lon;
-	gpsa.lat = a.lat;
-	gpsb.lon = b.lon;
-	gpsb.lat = b.lat;
-	return lambert_distance(gpsa, gpsb);
+	/*cout << endl << "xsize is "  << xsize << endl;
+	cout << endl << "(" << x << "," << y << ") is at index " << y*xsize+x << " in this array" << endl;*/
+	return array[y*xsize+x];
 }
 
-double potentialfields::angleBtwGPSPoints(const GPS_point& a, const GPS_point& b)
+// Sets the value at the index array[x][y] to val as if it were a 2D array
+void potentialfields::set2Dindexvalue(bool* array, int x, int y, bool val)
 {
-	GPSState gpsa, gpsb;
-	gpsa.lon = a.lon;
-	gpsa.lat = a.lat;
-	gpsb.lon = b.lon;
-	gpsb.lat = b.lat;
-	return lambert_bearing(gpsa, gpsb);;
+	array[y*xsize+x] = val;
 }
+/********************************************************************************************************************************/
 
-void potentialfields::medianThreshFileter(bool* array, int thresh_size)
-{
-	// Makes a copy of the array and then 0s out the old array
-	bool arraycopy[xsize*ysize];
-	memcpy(arraycopy, array, xsize*ysize);
-	for(int i = 0; i < xsize*ysize; i++)
-		array[i] = 0;
-	 
-	
-
-	// Finds the square root of the perfect square at least twice the size of the threshold
-	int n = ceil(sqrt(thresh_size*2));
-
-	for(int xoff = 0; xoff < n; xoff++)
-	{
-		for(int yoff = 0; yoff < n; xoff++)
-		{
-			for(int x = xoff; (x+n) <= xsize; x+=n)
-			{
-				for(int y = yoff; (y+n) <= ysize; y+=n)
-				{
-					int sum = 0;
-					for(int i = 0; i<n; i++)
-					{
-						for(int j = 0; j<n; j++)
-						{
-							sum += int(get2Dindexvalue(arraycopy, x+i, y+j));
-						}
-					}
-
-					if(sum/(n*n) >= 0.5)
-					{
-						for(int i = 0; i<n; i++)
-						{
-							for(int j = 0; j<n; j++)
-							{
-								set2Dindexvalue(array, x+i, y+j, get2Dindexvalue(arraycopy,x+i,y+j));
-							}
-						}
-					}
-				} 
-			}
-		}
-	}
-}
-
-/* Updates the current latitude, longitude and image angle based on latest GPS data */
+/*************** Real world-localization functions ******************************************************************************/
+// Updates the current latitude, longitude and image angle based on latest GPS data
 void potentialfields::updateCurLocation()
 {
 	// Finds the index of the latest GPS_point
@@ -461,70 +548,16 @@ void potentialfields::updateCurLocation()
 	return;
 }
 
-/* Prints bitmap with 1's and 0's */
-void potentialfields::printbitmap(bool* bitmap)
+// Calculates the angle that the map is pointed relative to the robot
+double potentialfields::GetMapAngle(CvPoint robotBaseAt, CvPoint robotLookingAt)
 {
-	for(int row=0; row<ysize; row++)
-	{
-		for(int col=0; col<xsize; col++)
-		{
-			cout << bitmap[row*xsize+col] << " ";
-		}
-		cout << endl;
-	}
+	double angle = atan2((robotLookingAt.y-robotBaseAt.y), (robotLookingAt.x - robotBaseAt.x));
+	angle = rad2deg(angle);
+	angle = fmodf(90-angle, 360);
+	return angle;
 }
 
-/* Converts an IPlImage into a bitmap based on the thresholds in the header file */
-void potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE featType, bool* bitmap, int& xsize, int& ysiiiize)
-{
-	double thresh;
-	// Sets which threshold we'll be using
-	if (featType == OBSTACLE)
-		thresh = obstacle_bitmap_thresh;
-	else
-		thresh = attractor_bitmap_thresh;
-
-	int height = img->height;
-	int width = img->width;
-	int step = img->widthStep;
-	int channels = img->nChannels;
-	uchar* data = (uchar *)img->imageData;
-	int index = 0;
-	bitmap = new bool[height*width];
-	for(int hindex = 0; hindex < height; hindex++)
-	{
-		for(int windex = 0; windex < width; windex++)
-		{
-			// Finds average intensity over all the channels. If there's just one channel, this isn't strictly necessary
-			double avgval;
-			for (int i = 0; i < channels; i++)
-			{
-				avgval += (double)data[hindex*step+windex*channels+i];
-			}
-			avgval /= channels;
-
-			// If it's a feature high type, it is 1 if the average value is greater than the threshold. If it's
-			// a feature low type, it is a 1 if the average value is greater than the threshold. 
-			bool isFeature;
-			if (imgType == FEATURE_HIGH)
-				isFeature = avgval > thresh;
-			else
-				isFeature = avgval < thresh;
-
-			if(isFeature)
-			{
-				bitmap[index] = 1;
-			}
-			else
-			{
-				bitmap[index] = 0;
-			}
-			index++;
-		}
-	}
-}
-
-/* Puts the calculated vector into the range of the output and round it to the nearest integer */
+// Puts the calculated vector into the range of the output and round it to the nearest integer 
 void potentialfields::setOutputs(double vel_mag, double vel_ang, Point2D<int>& goal)
 {
 	//  Make the angles to the left of the robot in the range of -180 - 0 instead of 180-360	
@@ -552,11 +585,80 @@ void potentialfields::setOutputs(double vel_mag, double vel_ang, Point2D<int>& g
 		goal.y = 255;
 	}
 }
+/********************************************************************************************************************************/
 
-double potentialfields::getMapAngle(CvPoint robotBaseAt, CvPoint robotLookingAt)
+/*************** Position related functions *************************************************************************************/
+// Finds the distance in meters between two GPS points 
+double potentialfields::distBtwGPSPoints(const GPS_point& a, const GPS_point& b)
 {
-	double angle = atan2((robotLookingAt.y-robotBaseAt.y), (robotLookingAt.x - robotBaseAt.x));
-	angle = rad2deg(angle);
-	angle = fmodf(90-angle, 360);
-	return angle;
+	GPSState gpsa, gpsb;
+	gpsa.lon = a.lon;
+	gpsa.lat = a.lat;
+	gpsb.lon = b.lon;
+	gpsb.lat = b.lat;
+	return lambert_distance(gpsa, gpsb);
 }
+
+// Finds the angle between two GPS points in degrees
+double potentialfields::angleBtwGPSPoints(const GPS_point& a, const GPS_point& b)
+{
+	GPSState gpsa, gpsb;
+	gpsa.lon = a.lon;
+	gpsa.lat = a.lat;
+	gpsb.lon = b.lon;
+	gpsb.lat = b.lat;
+	return lambert_bearing(gpsa, gpsb);
+}
+
+// Gets distance between the robot's current real world location and the goal
+#if RUN_MODE == GPS
+double potentialfields::getDistCur2Goal()
+{
+	return distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
+}
+#elif RUN_MODE == ROBOT_POS
+double potentialfields::getDistCur2Goal()
+{
+	double x1 = Pos_Prev_Loc[Pos_Prev_Loc.size()-1].x;
+	double y1 = Pos_Prev_Loc[Pos_Prev_Loc.size()-1].y;
+	double x2 = Pos_Goals[currentGoal].x;	
+	double y2 = Pos_Goals[currentGoal].y;	
+	return Distance2D(x1, y1, x2, y2);
+}
+#endif
+
+// Gets angle between the robot's current real world location and the goal
+#if RUN_MODE == GPS
+double potentialfields::getAngleCur2Goal()
+{
+	return angleBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
+}
+#elif RUN_MODE == ROBOT_POS
+double potentialfields::getAngleCur2Goal()
+{
+	double x1 = Pos_Prev_Loc[Pos_Prev_Loc.size()-1].x;
+	double y1 = Pos_Prev_Loc[Pos_Prev_Loc.size()-1].y;
+	double x2 = Pos_Goals[currentGoal].x;	
+	double y2 = Pos_Goals[currentGoal].y;	
+	double theta = atan2((y2-y1),(x2-x1));
+	double ang = vec2bear(rad2deg(theta));		
+}
+#endif
+
+
+/********************************************************************************************************************************/
+
+/*************** Various Helper functions ***************************************************************************************/
+// Prints bitmap with 1's and 0's 
+void potentialfields::printbitmap(bool* bitmap)
+{
+	for(int row=0; row<ysize; row++)
+	{
+		for(int col=0; col<xsize; col++)
+		{
+			cout << bitmap[row*xsize+col] << " ";
+		}
+		cout << endl;
+	}
+}
+/********************************************************************************************************************************/
