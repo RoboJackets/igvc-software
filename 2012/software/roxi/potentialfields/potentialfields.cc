@@ -49,15 +49,40 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 
 /* Changes value of input references vel_mag and vel_ang with the velocity and angle determined by the potential fields algorithm.
 Angle given by a value between 0 and 360 with 0 at due North */
-void potentialfields::getNextVector(bool* obstacles, bool* targets, int xsize, int ysize, int robotx, int roboty, double& vel_mag, double& vel_ang)
+void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
 {
+	// Transform the input image to a bitmap of obstacles
+	bool* obstacles;
+	IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, obstacles, xsize, ysize);
+
+	// Transform the input image to a bitmap of targets
+	int tempx, tempy;
+	bool* targets;
+	if (targets_ipl == NULL)
+	{
+		targets = NULL;
+		tempx = xsize;
+		tempy = ysize;
+	}
+	else
+	{
+		IPl2Bitmap(targets_ipl, FEATURE_LOW, ATTRACTOR, targets, tempx, tempy);
+	}
+	if (xsize != tempx || ysize != tempy)
+	{
+		cout << "Input images not the same size" << endl;
+		// TODO: Should probably actually do something about this. Don't care right now.
+	}
+
 	// Update the current GPS location
 	updateCurLocation();	
 	
 	// Set the robot's current location on the bitmap
-	robotlocx = robotx;
-	robotlocy = roboty;
+	robotlocx = robotBaseAt.x;
+	robotlocy = robotBaseAt.y;
 
+	// Figure out what direction the map is facing relative to the robot
+	double map_ang_from_rob = getMapAngle(robotBaseAt, robotLookingAt);	
 
 	// Alter the bitmap to remove stray clumps of non-obstacles
 	removeclumps(obstacles);
@@ -68,7 +93,7 @@ void potentialfields::getNextVector(bool* obstacles, bool* targets, int xsize, i
 	double obstaclex, obstacley, imagetarx, imagetary, gpstarx, gpstary, gpsavoidx, gpsavoidy;
 
 	// Get the vector contribution from the obstacles on the bitmap
-	getAvoidVec(obstacles, obstaclex, obstacley);
+	getAvoidVec(obstacles, map_ang_from_rob, obstaclex, obstacley);
 
 	// Get the vector contribution from the goals on the bitmap
 	getImgTargetVec(targets, imagetarx, imagetary);
@@ -85,11 +110,15 @@ void potentialfields::getNextVector(bool* obstacles, bool* targets, int xsize, i
 	double xnet, ynet;
 
 	// Find the resulting vector by adding up all of the components
-	AddVecs(xcomps, ycomps, number_vecs, xnet, ynet);	 
+	AddVecs(xcomps, ycomps, number_vecs, xnet, ynet);
+	double vel_mag, vel_ang;	 
 	xyToVec(xnet, ynet, vel_mag, vel_ang);	
 
 	// Rotates the velocity vector to the angle from the perspective of the robot
 	vel_ang = RotateBearing(vel_ang, -curang);
+
+	// Finally, round the values, put them in range and set them to the output point
+	setOutputs(vel_mag, vel_ang, goal);
 
 	return;
 }
@@ -129,7 +158,7 @@ void potentialfields::radiusfix(bool* obstacles)
 }
 
 /* Returns the x and y components of the obstacle avoidance vector in meters */
-void potentialfields::getAvoidVec(bool* obstacles, double& xvel, double& yvel)
+void potentialfields::getAvoidVec(bool* obstacles, double angle_of_map, double& xvel, double& yvel)
 {
 	ReturnData data;
 
@@ -147,7 +176,7 @@ void potentialfields::getAvoidVec(bool* obstacles, double& xvel, double& yvel)
 	// Rotate the vector based on the current bearing (assume that this is the orientation of the image)
 	double mag, ang;
 	xyToVec(xvel, yvel, mag, ang);
-	ang = RotateBearing(ang, imgAngle);
+	ang = RotateBearing(ang, angle_of_map);
 	void VecToxy(double mag, double ang, double& x, double& y);
 	
 	return;
@@ -172,7 +201,7 @@ void potentialfields::getImgTargetVec(bool* targets, double& xvel, double& yvel)
 void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 {
 	double distance = distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
-	double theta = angleBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
+	double theta =	angleBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
 	// TODO: Figure out the distance and angle from the current GPS coordinate to the goal GPS coordinate
 	if (distance > (gps_max_distance + gps_goal_radius))
 	{	
@@ -362,7 +391,7 @@ double potentialfields::distBtwGPSPoints(const GPS_point& a, const GPS_point& b)
 	return lambert_distance(gpsa, gpsb);
 }
 
-double angleBtwGPSPoints(const GPS_point& a, const GPS_point& b)
+double potentialfields::angleBtwGPSPoints(const GPS_point& a, const GPS_point& b)
 {
 	GPSState gpsa, gpsb;
 	gpsa.lon = a.lon;
@@ -493,4 +522,41 @@ void potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE f
 			index++;
 		}
 	}
+}
+
+/* Puts the calculated vector into the range of the output and round it to the nearest integer */
+void potentialfields::setOutputs(double vel_mag, double vel_ang, Point2D<int>& goal)
+{
+	//  Make the angles to the left of the robot in the range of -180 - 0 instead of 180-360	
+	if (vel_ang > 180)
+	{
+		vel_ang -= 360;
+	}
+
+	goal.x = floor(vel_ang + 0.5);
+	goal.y = floor(vel_mag + 0.5);	
+
+	// Set limits to x
+	if (goal.x < -128)
+	{
+		goal.x = -128;
+	}
+	else if (goal.y > 127)
+	{
+		goal.x = 127;
+	}
+	
+	// Set limits to y
+	if (goal.y > 255)
+	{
+		goal.y = 255;
+	}
+}
+
+double potentialfields::getMapAngle(CvPoint robotBaseAt, CvPoint robotLookingAt)
+{
+	double angle = atan2((robotLookingAt.y-robotBaseAt.y), (robotLookingAt.x - robotBaseAt.x));
+	angle = rad2deg(angle);
+	angle = fmodf(90-angle, 360);
+	return angle;
 }

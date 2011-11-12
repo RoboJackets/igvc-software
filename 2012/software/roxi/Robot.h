@@ -16,6 +16,7 @@
 #include "image_buffers.h"
 #include "mapgen.h"
 #include "joystickDrive.hpp"
+#include "potentialfields.hpp"
 
 const static double motor_vel_mag = 1.1;
 
@@ -117,6 +118,7 @@ public:
 	Point2D<int> heading_sensors;
 	Point2D<int> heading_main;
 	Point2D<int> heading_mapping;
+	Point2D<int> heading_pathplan;
 
 	// avg heading control
 	// k_motors = the % of new value to use
@@ -130,6 +132,9 @@ public:
 	// map generator and slam processing
 	MapGen mapper;
 	int doMapping;
+
+	// Potential Fields object
+	potentialfields pf;
 
 	// motor control
 	//Motors_Old motors;

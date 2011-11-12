@@ -102,8 +102,8 @@ int main()
 				headerOut.packetnum = tx_num;
 				headerOut.cmd = ARDUINO_ID_CMD;
 				headerOut.size = 1;
-				//char msg = ENCODER_IF_AFT_BOARD;
-				char msg = ENCODER_IF_FOR_BOARD;
+				char msg = ENCODER_IF_AFT_BOARD;
+				//char msg = ENCODER_IF_FOR_BOARD;
 
 				Serial.write((uint8_t*)&headerOut, PACKET_HEADER_SIZE);
 				Serial.print(msg, BYTE);
