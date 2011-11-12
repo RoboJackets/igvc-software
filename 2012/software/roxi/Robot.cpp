@@ -9,6 +9,7 @@
 #include <GL/glut.h>
 #include "XmlConfiguration.h"
 #include "logging/timer.h"
+#include "potentialfields.hpp"
 
 
 #define PRINTFRAMERATE 0
@@ -401,7 +402,14 @@ void Robot::processFunc()
 		if ( mapper.genMap() )
 		{
 			mapper.processMap(heading_mapping);
+			pf.getNextVector(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
 		}
+	}
+
+	if (doMapping)
+	{
+		mapper.genMap();
+		pf.getNextVector(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
 	}
 
 

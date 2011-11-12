@@ -1,10 +1,12 @@
 #ifndef _POTENTIAL_FIELDS_H_
 #define _POTENTIAL_FIELDS_H_
 
-// Says whether or not testing mode is on. In testing mode, access to private methods is made public.
-// Should be commented out unless currently testing the functions
+// Potential Fields Algorithm Implementation Written by Kenny Marino
 
 // Angles in bearings 0-360. Please provide it angles in bearings!
+
+// Says whether or not testing mode is on. In testing mode, access to private methods is made public.
+// Should be commented out unless currently testing the functions
 //#define TESTINGMODE
 
 #include "gps_points.hpp"
@@ -61,7 +63,7 @@ public:
 	~potentialfields();
 	// Public methods
 	void dropWaypoint(double lat, double lon, double ang);
-	void getNextVector(bool* obstacles, bool* targets, int xsize, int ysize, int robotx, int roboty, double& vel_mag, double& vel_ang);
+	void getNextVector(IplImage* obstacles, IplImage* targets, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal);
 		
 #ifndef TESTINGMODE
 	// If testing mode is on, all member functions and members are public so they can be tested directly by the testing function
@@ -98,7 +100,7 @@ public:
 	// Private Methods
 	void removeclumps(bool* obstacles);
 	void radiusfix(bool* obstacles);
-	void getAvoidVec(bool* obstacles, double& xvel, double& yvel);
+	void getAvoidVec(bool* obstacles, double angle_of_map, double& xvel, double& yvel);
 	void getImgTargetVec(bool* targets, double& xvel, double& yvel);
 	void getGPSTargetVec(double& xvel, double& yvel);
 	void getGPSAvoidVec(double& xvel, double& yvel);
@@ -116,6 +118,8 @@ public:
 	void updateCurLocation();
 	void printbitmap(bool* bitmap);
 	void IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE featType, bool* bitmap, int& xsize, int& ysize);
+	void setOutputs(double vel_mag, double vel_ang, Point2D<int>& goal);double GetMapAngle(CvPoint robotBaseAt, CvPoint robotLookingAt);
+	double getMapAngle(CvPoint robotBaseAt, CvPoint robotLookingAt);
 };
 
 #endif
