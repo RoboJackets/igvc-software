@@ -90,6 +90,8 @@ Robot::Robot(const char* filename)
 	/* Start gps*/
 	gpsA.open("/dev/ttyGPS", 38400);
 	gpsA.start();
+	/* If using robot position
+	pfdeclared = false;*/
 }
 
 Robot::~Robot()
@@ -395,6 +397,15 @@ void Robot::processFunc()
 		vp.visProcessFrame(heading_vision);
 	}
 
+	/* If it's using robot position */
+	/*
+	if (!pfdeclared)
+	{
+		// TODO: fill this in correctly
+		//potfield = new potentialfields(gpspoint);
+		pfdeclared = true;
+	}
+	potentialfields &pf = *potfield;*/
 
 	/* Perform SLAM Processing */
 	if (doMapping)
