@@ -19,6 +19,8 @@ void update();
 
 void reset();
 
+void setTo(double X, double Y, double Angle);
+
 double getX();
 
 double getY();
