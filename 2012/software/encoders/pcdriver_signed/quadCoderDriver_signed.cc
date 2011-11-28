@@ -15,7 +15,7 @@
 //#define NUMBERTICKS		double(400)
 
 //this is det by delay within arduino code
-#define SMAPLEDELAY		double(5e-3)
+#define SAMPLEDELAY		double(5e-3)
 quadCoderDriver_signed::quadCoderDriver_signed()
 {
 	m_connected = false;
