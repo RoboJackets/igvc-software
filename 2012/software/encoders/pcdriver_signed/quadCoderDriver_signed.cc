@@ -63,10 +63,10 @@ bool quadCoderDriver_signed::getEncoderVel(double& vel_l, double& vel_r)
 		return true;
 	}
 
-	double dtheta_l = ((out.dl / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SMAPLEDELAY;
+	double dtheta_l = ((out.dl / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SAMPLEDELAY;
 	vel_l = dtheta_l * WHEEL_RADIUS;
 
-	double dtheta_r = ((out.dr / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SMAPLEDELAY;
+	double dtheta_r = ((out.dr / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SAMPLEDELAY;
 	vel_r = dtheta_r * WHEEL_RADIUS;
 
 	return false;
