@@ -12,10 +12,13 @@ RobotPosition::RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Contro
 	MagnetometerTracking magnetometer(driver);
 	gpsA=&gpsObject;
 	gpsA.get_last_state(&gpsFirstState);
+	time(&initialTime);
 }
 
 void RobotPosition::update()
 {
+	time_t currentTime=time(NULL);
+	timeDifference=difftime(initialTime,currentTime);
 	GPSState lastState;
 	gpsA.get_last_state(&lastState);
 	double xGPS;
@@ -25,15 +28,18 @@ void RobotPosition::update()
 
 	encoder.update();
 	IMU.update();
-	double xDeltaEncoder=encoder.getX();
-	double yDeltaEncoder=encoder.getY();
-	double angleDeltaEncoder=encoder.getAngle();
+	double xEncoder=encoder.getX();
+	double yEncoder=encoder.getY();
+	angle=encoder.getAngle();
 	magnetometer.update();
 	double magBearing=magnetometer.getBearing();
-	x+=(xDeltaEncoder*encoderWeight+xGPS*GPSWeights)/2;
-	y+=(yDeltaEncoder*encoderWeight+yGPS*GPSWeight)/2;
+	x+=xEncoder*cos(timeDifference*MATH_PI/SECONDS_PER_CYCLE)+xGPS*sin(timeDifference*MATH_PI/SECONDS_PER_CYCLE);
+	y+=yEncoder*cos(timeDifference*MATH_PI/SECONDS_PER_CYCLE)+yGPS*sin(timeDifference*MATH_PI/SECONDS_PER_CYCLE);
+	if(timeDifference%SECOND_PER_CYCLE<0.2)
+		encoder.setTo(x,y,angle); 
+
 	
-	encoder.reset();
+	
 	bearing=magBearing;
 }
 
@@ -45,7 +51,11 @@ double RobotPosition::getY()
 {
 return y;
 }
-double getBearing()
+double RobotPosition::getBearing()
 {
 return bearing;
+}
+double RobotPosition::getAngle()
+{
+return angle;
 }

@@ -24,6 +24,13 @@ void EncoderTracking::reset()
 	angle=M_PI/2;
 }
 
+void EncoderTracking::setTo(double X, double Y, double Angle)
+{
+	x=X;
+	y=Y;
+	angle=Angle;
+}
+
 double EncoderTracking::getX()
 {
 	return x;
