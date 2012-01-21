@@ -15,7 +15,7 @@
 //#define NUMBERTICKS		double(400)
 
 //this is det by delay within arduino code
-#define SMAPLEDELAY		double(5e-3)
+#define SAMPLEDELAY		double(5e-3)
 quadCoderDriver_signed::quadCoderDriver_signed()
 {
 	m_connected = false;
@@ -63,10 +63,10 @@ bool quadCoderDriver_signed::getEncoderVel(double& vel_l, double& vel_r)
 		return true;
 	}
 
-	double dtheta_l = ((out.dl / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SMAPLEDELAY;
+	double dtheta_l = ((out.dl / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SAMPLEDELAY;
 	vel_l = dtheta_l * WHEEL_RADIUS;
 
-	double dtheta_r = ((out.dr / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SMAPLEDELAY;
+	double dtheta_r = ((out.dr / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SAMPLEDELAY;
 	vel_r = dtheta_r * WHEEL_RADIUS;
 
 	return false;
