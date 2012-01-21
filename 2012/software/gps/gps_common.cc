@@ -5,6 +5,9 @@
 //distance in meters
 double lambert_distance(const GPSState& a, const GPSState& b)
 {
+	if ((a.lat == b.lat) && (a.lon == b.lon))
+		return 0;
+	
 	static const double eq_rad = 6378.137e3;
 	static const double r = 298.257223563;	
 
