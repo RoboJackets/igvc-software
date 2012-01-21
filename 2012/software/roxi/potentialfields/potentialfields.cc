@@ -98,8 +98,8 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 	bool* obstacles = IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, imgx, imgy);
 	xsize = imgx;
 	ysize = imgy;
-	cout << "xsize: " << xsize << endl;
-	cout << "ysize: " << ysize << endl;
+	//cout << "xsize: " << xsize << endl;
+	//cout << "ysize: " << ysize << endl;
 	//printbitmap(obstacles);	
 
 	// Transform the input image to a bitmap of targets
@@ -117,11 +117,9 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 	}
 	if (xsize != tempx || ysize != tempy)
 	{
-		cout << "Input images not the same size" << endl;
+		//cout << "Input images not the same size" << endl;
 		// TODO: Should probably actually do something about this. Don't care right now.
 	}
-	
-	cout << "Segfault here 1\n"; 
 
 	// Update the current GPS location
 	updateCurLocation();	
@@ -136,57 +134,45 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 	// Alter the bitmap to remove stray clumps of non-obstacles
 	removeclumps(obstacles);
 
-	cout << "Segfault here 2\n";
-
 	// Increase the size of obstacles so robot doesn't try to squeese through
 	radiusfix(obstacles);
 
 	double obstaclex, obstacley, imagetarx, imagetary, gpstarx, gpstary, gpsavoidx, gpsavoidy;
 
-	cout << "Segfault here 3\n";
-
 	// Get the vector contribution from the obstacles on the bitmap
 	getAvoidVec(obstacles, map_ang_from_rob, obstaclex, obstacley);
 	
-	cout << "Segfault here 4\n";
-
 	// Get the vector contribution from the goals on the bitmap
 	getImgTargetVec(targets, imagetarx, imagetary);
-
-	cout << "Segfault here 5\n";
 
 	// Get the vector contribution from the GPS goal(s)
 	getGPSTargetVec(gpstarx, gpstary);
 
-	cout << "Segfault here 6\n";
-
 	// Get the vector contribution from the GPS past goal(s)
 	getGPSAvoidVec(gpsavoidx, gpsavoidy);
-
-	cout << "Segfault here 7\n";
 
 	int number_vecs = 4;
 	double xcomps[] = {obstaclex, imagetarx, gpstarx, gpsavoidx};
 	double ycomps[] = {obstacley, imagetary, gpstary, gpsavoidy};	
 	double xnet, ynet;
 
-	cout << "obstaclex: " << obstaclex << endl << "obstacley: " << obstacley << endl;
-	cout << "gpstarx: " << gpstarx << endl << "gpstary: " << gpstary << endl;
+	//cout << "obstaclex: " << obstaclex << endl << "obstacley: " << obstacley << endl;
+	//cout << "gpstarx: " << gpstarx << endl << "gpstary: " << gpstary << endl;
 
 	// Find the resulting vector by adding up all of the components
 	AddVecs(xcomps, ycomps, number_vecs, xnet, ynet);
 	
-	cout << "xnet: " << xnet << endl << "ynet: " << ynet << endl;
+	//cout << "xnet: " << xnet << endl << "ynet: " << ynet << endl;
 
 	double vel_mag, vel_ang;	 
 	xyToVec(xnet, ynet, vel_mag, vel_ang);	
 	
-	cout << "vel_mag: " << vel_mag << endl << "vel_ang: " << vel_ang << endl;
+	//cout << "vel_mag: " << vel_mag << endl << "vel_ang: " << vel_ang << endl;
 
 	// Rotates the velocity vector to the angle from the perspective of the robot
 	vel_ang = RotateBearing(vel_ang, -curang);
 
-	cout << "curang: " << curang << endl;
+	//cout << "curang: " << curang << endl;
 
 	// Finally, round the values, put them in range and set them to the output point
 	setOutputs(vel_mag, vel_ang, goal);
@@ -383,7 +369,7 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 	double distance = getDistCur2Goal();
 	double theta =	getAngleCur2Goal();
 
-	cout << "distance: " << distance << endl << "theta: " << theta << endl;	
+	//cout << "distance: " << distance << endl << "theta: " << theta << endl;	
 
 	// TODO: Figure out the distance and angle from the current GPS coordinate to the goal GPS coordinate
 	if (distance > (gps_max_distance + gps_goal_radius))
@@ -609,7 +595,7 @@ void potentialfields::setOutputs(double vel_mag, double vel_ang, Point2D<int>& g
 	goal.x = floor(vel_ang + 0.5);
 	goal.y = floor(vel_mag + 0.5);	
 
-	cout << "goal.x: " << goal.x << endl;
+	//cout << "goal.x: " << goal.x << endl;
 
 	// Set limits to x
 	if (goal.x < -128)
@@ -656,9 +642,6 @@ double potentialfields::angleBtwGPSPoints(const GPS_point& a, const GPS_point& b
 #if RUN_MODE == GPS
 double potentialfields::getDistCur2Goal()
 {
-	cout << "Cur pos:    " << GPS_Prev_Loc[GPS_Prev_Loc.size()-1].lat << ", " << GPS_Prev_Loc[GPS_Prev_Loc.size()-1].lon << endl;
-	cout << "Target pos: " << GPS_Goals[currentGoal].lat << ", " << GPS_Goals[currentGoal].lon << endl;
-	cout << "currentGoal: " << currentGoal << endl;
 	return distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]);
 }
 #elif RUN_MODE == ROBOT_POS
