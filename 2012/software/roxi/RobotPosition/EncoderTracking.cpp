@@ -1,4 +1,3 @@
-
 #include "EncoderTracking.hpp"
 
 
@@ -48,13 +47,14 @@ double EncoderTracking::getAngle()
 
 void EncoderTracking::update()
 {
-	int lastRightCycles;//get data from OSMC
-	int lastLeftCycles;//get data from OSMC
-	double distanceRight=WHEEL_RADIUS/CYCLES_PER_ROTATION*lastRightCycles;
-	double distanceLeft=WHEEL_RADIUS/CYCLES_PER_ROTATION*lastLeftCycles;
-	
-	double distanceCenter=(distanceRight+distanceLeft)/2;
-	//Counterclockwise currently set as positive - should possibly change depending on gyro/other code
+	double distanceRightF;
+	double distanceLeftF;
+	double distanceRightB;
+	double distanceLeftB;
+	(*osmc).getEncoderDist(distanceLeftF, distanceRightF, distanceLeftB, distanceRightB);
+	double distanceRight=(distanceRightF+distanceRightB)/2;
+	double distanceLeft=(distanceLeftB+distanceLeftF)/2;
+	double distanceCenter=(distanceLeft+distanceRight)/2;
 	angle+=(distanceRight-distanceLeft)/(2*WHEEL_BASE);
 	x+=distanceCenter*sin(angle);
 	y+=distanceCenter*cos(angle);
