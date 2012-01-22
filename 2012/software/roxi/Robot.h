@@ -135,6 +135,10 @@ public:
 
 	// Potential Fields object
 	potentialfields pf;
+	/* If it's using robot position
+	potentialfields* potfield;
+	bool pfdeclared;*/
+	
 
 	// motor control
 	//Motors_Old motors;
