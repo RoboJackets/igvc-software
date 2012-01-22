@@ -125,9 +125,9 @@ private:
 	/************* Constants ******************/
 	const static double meters_per_pixel = 2;		// Allows conversion from image to real distances
 	const static int robot_radius = 2;			// Radius of the robot in pixels of the input boolean array
-	const static double obstacle_weight = 1;		// Weight given to avoiding obstacles
+	const static double obstacle_weight = 3.32e-7;		// Weight given to avoiding obstacles
 	const static double image_goal_weight = 1;		// Weight given to get to image goals (flags)
-	const static double gps_goal_weight = 1;		// Weight given to get to GPS goal
+	const static double gps_goal_weight = 510;		// Weight given to get to GPS goal
 	const static double gps_avoid_weight = 1;		// Weight given to avoid old GPS points
 	const static int obstacle_avoid_radius = 10000; 	// Radius around the robot in which the robot considers those obstacles 
 	const static int target_reach_radius = 10000;		// Radius arond the robot in which the robot considers image goals
@@ -139,7 +139,7 @@ private:
 
 	/************* Private Methods ************/
 	// Map pre-processing functions
-	void IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE featType, bool* bitmap, int& xsize, int& ysize);
+	bool* IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE featType, int& imgx, int& imgy);
 	void removeclumps(bool* obstacles);
 	void radiusfix(bool* obstacles);
 	void medianThreshFilter(bool* array, int thresh_size);

@@ -12,7 +12,7 @@ void printbitmap(bool* bitmap, int width, int height);
 
 int main()
 {
-	IplImage* img = cvLoadImage("../TestFiles/course3.png");
+	IplImage* img = cvLoadImage("../TestFiles/course1.png");
 	// create a window
 	//cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE); 
 	//cvMoveWindow("mainWin", 100, 100);
@@ -139,12 +139,11 @@ int main()
 
 	// Will only run if TESTINGMODE is defined, meaning that the functions of class potentialfields have been made
 	// public for testing purposes. 
-	#ifdef TESTINGMODE
 
 	// Constructor
 	potentialfields pf;
-	pf.xsize = width;
-	pf.ysize = height;
+	//pf.xsize = width;
+	//pf.ysize = height;
 	/*int numgoals = pf.GPS_Goals.size();
 	for(int i=0; i<numgoals; i++)
 	{
@@ -155,11 +154,27 @@ int main()
 	}*/
 
 	// dropWaypoint
-	/*pf.dropWaypoint(42.6777,-83.1951,90);
+	pf.dropWaypoint(42.6777,-83.1951,90);
 	pf.dropWaypoint(42.6790,-83.1942,45);
 	pf.dropWaypoint(42.681,-83.1940,0);
-	numgoals = pf.GPS_Goals.size();
-	for(int i=0; i<numgoals; i++)
+
+	CvPoint robotBaseAt = CvPoint();
+	robotBaseAt.x = 320;
+	robotBaseAt.y = 480;
+
+	CvPoint robotLookingAt = CvPoint();
+	robotLookingAt.x = 320;
+	robotLookingAt.y = 1;
+
+	Point2D<int> goal = Point2D<int>();
+	
+	pf.getNextVector(img, 0, robotBaseAt, robotLookingAt, goal);
+
+	cout << "goal.x = " << goal.x << endl;
+	cout << "goal.y = " << goal.y << endl;
+
+	//numgoals = pf.GPS_Goals.size();
+	/*for(int i=0; i<numgoals; i++)
 	{
 		cout << "GPS goal " << i+1 << endl;
 		cout << "\tlat: " << pf.GPS_Goals[i].lat << endl;
@@ -174,7 +189,8 @@ int main()
 		cout << "\tlon: " << pf.GPS_Prev_Loc[i].lon << endl;
 		cout << "\tang: " << pf.GPS_Prev_Loc[i].ang << endl << endl;
 	}*/
-	
+
+	#ifdef TESTINGMODE
 	// removeclumps
 	// void removeclumps(bool* obstacles);
 	// TODO: Test once function is written

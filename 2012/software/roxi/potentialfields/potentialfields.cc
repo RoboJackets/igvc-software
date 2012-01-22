@@ -94,8 +94,13 @@ void potentialfields::dropWaypoint(double x, double y, double ang)
 void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
 {
 	// Transform the input image to a bitmap of obstacles
-	bool* obstacles;
-	IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, obstacles, xsize, ysize);
+	int imgx, imgy;
+	bool* obstacles = IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, imgx, imgy);
+	xsize = imgx;
+	ysize = imgy;
+	//cout << "xsize: " << xsize << endl;
+	//cout << "ysize: " << ysize << endl;
+	//printbitmap(obstacles);	
 
 	// Transform the input image to a bitmap of targets
 	int tempx, tempy;
@@ -108,11 +113,11 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 	}
 	else
 	{
-		IPl2Bitmap(targets_ipl, FEATURE_LOW, ATTRACTOR, targets, tempx, tempy);
+		targets = IPl2Bitmap(targets_ipl, FEATURE_LOW, ATTRACTOR, tempx, tempy);
 	}
 	if (xsize != tempx || ysize != tempy)
 	{
-		cout << "Input images not the same size" << endl;
+		//cout << "Input images not the same size" << endl;
 		// TODO: Should probably actually do something about this. Don't care right now.
 	}
 
@@ -136,7 +141,7 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 
 	// Get the vector contribution from the obstacles on the bitmap
 	getAvoidVec(obstacles, map_ang_from_rob, obstaclex, obstacley);
-
+	
 	// Get the vector contribution from the goals on the bitmap
 	getImgTargetVec(targets, imagetarx, imagetary);
 
@@ -151,13 +156,23 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 	double ycomps[] = {obstacley, imagetary, gpstary, gpsavoidy};	
 	double xnet, ynet;
 
+	//cout << "obstaclex: " << obstaclex << endl << "obstacley: " << obstacley << endl;
+	//cout << "gpstarx: " << gpstarx << endl << "gpstary: " << gpstary << endl;
+
 	// Find the resulting vector by adding up all of the components
 	AddVecs(xcomps, ycomps, number_vecs, xnet, ynet);
+	
+	//cout << "xnet: " << xnet << endl << "ynet: " << ynet << endl;
+
 	double vel_mag, vel_ang;	 
 	xyToVec(xnet, ynet, vel_mag, vel_ang);	
+	
+	//cout << "vel_mag: " << vel_mag << endl << "vel_ang: " << vel_ang << endl;
 
 	// Rotates the velocity vector to the angle from the perspective of the robot
 	vel_ang = RotateBearing(vel_ang, -curang);
+
+	//cout << "curang: " << curang << endl;
 
 	// Finally, round the values, put them in range and set them to the output point
 	setOutputs(vel_mag, vel_ang, goal);
@@ -168,7 +183,7 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 
 /*************** Map pre-processing functions ***********************************************************************************/
 // Converts an IPlImage into a bitmap based on the thresholds in the header file 
-void potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE featType, bool* bitmap, int& xsize, int& ysiiiize)
+bool* potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE featType, int& width, int& height)
 {
 	double thresh;
 	// Sets which threshold we'll be using
@@ -177,13 +192,13 @@ void potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE f
 	else
 		thresh = attractor_bitmap_thresh;
 
-	int height = img->height;
-	int width = img->width;
+	height = img->height;
+	width = img->width;
 	int step = img->widthStep;
 	int channels = img->nChannels;
 	uchar* data = (uchar *)img->imageData;
 	int index = 0;
-	bitmap = new bool[height*width];
+	bool* bitmap = new bool[height*width];
 	for(int hindex = 0; hindex < height; hindex++)
 	{
 		for(int windex = 0; windex < width; windex++)
@@ -215,6 +230,8 @@ void potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE f
 			index++;
 		}
 	}
+	//printbitmap(bitmap);
+	return bitmap;
 }
 
 // Gets rid of stray clumps of grass and other noise from the obstacle bitfield
@@ -328,6 +345,12 @@ void potentialfields::getAvoidVec(bool* obstacles, double angle_of_map, double& 
 // Returns the x and y components of the Image target vector in meters 
 void potentialfields::getImgTargetVec(bool* targets, double& xvel, double& yvel)
 {
+	if (targets == 0)
+	{
+		xvel = 0;
+		yvel = 0;
+		return;
+	}
 	ReturnData data;
 
 	// Return a sum of all of the x and y components from all of the goal pixels within the
@@ -345,6 +368,9 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 {
 	double distance = getDistCur2Goal();
 	double theta =	getAngleCur2Goal();
+
+	//cout << "distance: " << distance << endl << "theta: " << theta << endl;	
+
 	// TODO: Figure out the distance and angle from the current GPS coordinate to the goal GPS coordinate
 	if (distance > (gps_max_distance + gps_goal_radius))
 	{	
@@ -569,12 +595,14 @@ void potentialfields::setOutputs(double vel_mag, double vel_ang, Point2D<int>& g
 	goal.x = floor(vel_ang + 0.5);
 	goal.y = floor(vel_mag + 0.5);	
 
+	//cout << "goal.x: " << goal.x << endl;
+
 	// Set limits to x
 	if (goal.x < -128)
 	{
 		goal.x = -128;
 	}
-	else if (goal.y > 127)
+	else if (goal.x > 127)
 	{
 		goal.x = 127;
 	}
@@ -662,3 +690,4 @@ void potentialfields::printbitmap(bool* bitmap)
 	}
 }
 /********************************************************************************************************************************/
+
