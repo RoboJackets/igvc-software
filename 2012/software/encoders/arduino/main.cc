@@ -38,7 +38,7 @@ int main()
 	pinMode(left_encoder_pin_B, INPUT);
 
 	pinMode(right_encoder_pin_A, INPUT);
-	pinMode(right_encoder_pin_B, INPUT);
+	pinMode(right_1encoder_pin_B, INPUT);
 
 	//attachInterrupt(0, encoder_logger, CHANGE);
 	//attachInterrupt(1, encoder_logger, CHANGE);
