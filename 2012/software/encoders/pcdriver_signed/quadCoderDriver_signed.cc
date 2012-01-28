@@ -1,5 +1,3 @@
-
-]45
 #include "quadCoderDriver_signed.hpp"
 
 /* ROBOT PHYSICAL DEFINITIONS */  /*TODO: determine these values */
