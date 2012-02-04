@@ -89,9 +89,19 @@ void potentialfields::dropWaypoint(double x, double y, double ang)
 }
 #endif
 
+void potentialfields::getVectorMotor(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
+{
+	double vel_mag, vel_ang;
+	getNextVector(obstacles_ipl, targets_ipl, robotBaseAt, robotLookingAt, vel_mag, vel_ang);
+
+	// Finally, round the values, put them in range and set them to the output point
+	setOutputs(vel_mag, vel_ang, goal);
+}
+
+
 // Changes value of input references vel_mag and vel_ang with the velocity and angle determined by the potential fields algorithm.
 // Angle given by a value between 0 and 360 with 0 at due North
-void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
+void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, double& out_mag, double& out_ang)
 {
 	// Transform the input image to a bitmap of obstacles
 	int imgx, imgy;
@@ -173,9 +183,8 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 	vel_ang = RotateBearing(vel_ang, -curang);
 
 	//cout << "curang: " << curang << endl;
-
-	// Finally, round the values, put them in range and set them to the output point
-	setOutputs(vel_mag, vel_ang, goal);
+	out_mag = vel_mag;
+	out_ang = vel_ang; 
 
 	return;
 }
