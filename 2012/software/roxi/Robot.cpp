@@ -413,15 +413,15 @@ void Robot::processFunc()
 		if ( mapper.genMap() )
 		{
 			mapper.processMap(heading_mapping);
-			pf.getNextVector(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
+			pf.getVectorMotor(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
 		}
 	}
 
-	if (doMapping)
+	/*if (doMapping)
 	{
 		mapper.genMap();
-		pf.getNextVector(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
-	}
+		pf.getVectorMotor(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
+	}*/
 
 
 	/* Update displays */
