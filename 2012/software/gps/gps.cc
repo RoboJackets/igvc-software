@@ -1,7 +1,7 @@
 
 #include "gps.hpp"
 #include "nmea.hpp"
-
+#include "backtrace.hpp"
 #include <iostream>
 
 gps::gps() : running(false), gps_port(io_service), queue_len(50)
@@ -93,6 +93,7 @@ bool gps::open(const char* port, size_t baud)
 	catch(...)
 	{
 		std::cerr << "Failed to open serial port" << std::endl;
+		stacktrace();
 		return false;
 	}
 

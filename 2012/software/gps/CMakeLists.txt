@@ -33,6 +33,7 @@ target_link_libraries(gps
 	nmea
 	boost_thread
 	boost_system
+	backtrace
 )
 
 add_library(gyro
@@ -51,4 +52,8 @@ add_library(nmea
 
 add_library(IMU_Control
 IMU_Control.cc
+)
+
+add_library(backtrace
+backtrace.cc
 )
