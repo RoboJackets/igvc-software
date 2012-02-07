@@ -15,7 +15,7 @@
 #define PRINTFRAMERATE 0
 
 
-//#define STOPANDTHINK
+
 
 /*********** GLUT callbacks and functions ***********************/
 pthread_t Robot::robotThread; // for pthread_create
@@ -204,20 +204,6 @@ int Robot::init()
 
 	/* setup slam processing module */
 	mapper.init();
-
-	/* connect to motors */
-	if (useMotors)
-	{
-		//deprecated - old motors
-		#if 0
-		motors.set_max_speed(motorsMaxSpeed);
-		if (0!=motors.SetupSerial())
-		{
-			printf("Motors Connect Fail !\n");
-			return 0; // fail
-		}
-		#endif
-	}
 
 	/* success */
 	return 1;
@@ -449,58 +435,13 @@ void Robot::processFunc()
 		}
 	}
 
-#ifdef STOPANDTHINK
-	/* periodically stop and think */
-	static int hack = 0;
-	int hackstop = 76; //80;
-
-	if ( hack > hackstop )
-	{
-		heading_main.x = 0;
-		heading_main.y = 0;
-		//hack = 0;
-		printf("\n\n\n\tSTOP HACK\t\n\n\n");
-		//motors.set_motors(-20, -20);
-		//motors.set_motors(hack/8, hack/8);
-		{
-			boost::mutex::scoped_lock lock(velmutex);
-			yvel = 0;
-			xvel = 0;
-			//osmcd->set_motors(hack, hack);//will get picked up on next update
-		}
-		if (hack > hackstop+14 )
-		{
-			hack = 0;
-			printf("\n\n\n\tRESUME!!!!!!\t\n\n\n");
-		}
-		++hack;
-		if (!ON_RAMP)
-		{
-			return;// causes robot to go backwards, otherwise it just stops on ramp
-		}
-	}
-	++hack;
-
-//	if(DO_STOPANDTHINK)
-//	{
-//		heading_main.x = 0;
-//		heading_main.y = 0;
-//		DO_STOPANDTHINK = 0;
-//		printf("\n\n\n\tSTOP HACK\t\n\n\n");
-//		motors.set_motors(0, 0);
-//		printf("\n\n\n\tRESUME!!!!!!\t\n\n\n");
-//    }
-#endif
 
 
 
 	/*Save raw image last*/
 	static int imgnum = 0;
-#ifdef STOPANDTHINK
-	if (saveRawVideo && (hack%2==0) )
-#else
+
 	if (saveRawVideo )
-#endif
 	{
 
 		std::stringstream fname;
