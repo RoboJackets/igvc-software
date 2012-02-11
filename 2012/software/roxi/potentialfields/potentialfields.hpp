@@ -91,8 +91,9 @@ public:
 	void dropWaypoint(double x, double y, double ang);	// Adds new Robot position points
 	#endif
 	~potentialfields();					// Destructor
-	void getNextVector(IplImage* obstacles, IplImage* targets, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal);
-								// Returns a vector of where the robot should go next
+	void getVectorMotor(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal);
+	// Returns a vector of where the robot should go next
+	
 	/******************************************/
 	
 #ifndef TESTINGMODE
@@ -123,9 +124,9 @@ private:
 	/******************************************/
 
 	/************* Constants ******************/
-	const static double meters_per_pixel = 2;		// Allows conversion from image to real distances
+	const static double meters_per_pixel = .02;		// Allows conversion from image to real distances
 	const static int robot_radius = 2;			// Radius of the robot in pixels of the input boolean array
-	const static double obstacle_weight = 3.32e-7;		// Weight given to avoiding obstacles
+	const static double obstacle_weight = 3.32e-5;		// Weight given to avoiding obstacles
 	const static double image_goal_weight = 1;		// Weight given to get to image goals (flags)
 	const static double gps_goal_weight = 510;		// Weight given to get to GPS goal
 	const static double gps_avoid_weight = 1;		// Weight given to avoid old GPS points
@@ -144,6 +145,9 @@ private:
 	void radiusfix(bool* obstacles);
 	void medianThreshFilter(bool* array, int thresh_size);
 
+	// Big picture methods
+	void getNextVector(IplImage* obstacles, IplImage* targets, CvPoint robotBaseAt, CvPoint robotLookingAt, double& out_mag, double& out_ang);
+								
 	// Component vector functions for obstacles and goals
 	void getAvoidVec(bool* obstacles, double angle_of_map, double& xvel, double& yvel);
 	void getImgTargetVec(bool* targets, double& xvel, double& yvel);

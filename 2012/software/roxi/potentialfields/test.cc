@@ -168,7 +168,7 @@ int main()
 
 	Point2D<int> goal = Point2D<int>();
 	
-	pf.getNextVector(img, 0, robotBaseAt, robotLookingAt, goal);
+	pf.getVectorMotor(img, 0, robotBaseAt, robotLookingAt, goal);
 
 	cout << "goal.x = " << goal.x << endl;
 	cout << "goal.y = " << goal.y << endl;
