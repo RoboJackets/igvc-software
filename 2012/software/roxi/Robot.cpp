@@ -239,7 +239,7 @@ void Robot::LoadXMLSettings()
 	{
 		if (doVision==-1 || trackbarVal==-1)
 		{
-			printf("ERROR: Robot settings NOT loaded! Using DEFAULTS \n");
+			printf("ERROR: Robot.cpp: Robot settings NOT loaded! Using DEFAULTS \n");
 			{
 				// load defaults
 				k_motors = .30;

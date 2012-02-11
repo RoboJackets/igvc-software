@@ -64,6 +64,13 @@ add_executable(${robot_bin}
 	XmlConfiguration.cpp
 )
 
+add_library(xml
+	XmlConfiguration.cpp)
+
+target_link_libraries(xml
+	QtXml
+)
+
 IF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "candiii"))
 target_link_libraries(${robot_bin}
 	roxi_mapping
