@@ -1,4 +1,3 @@
-
 #include "quadCoderDriver_signed.hpp"
 
 /* ROBOT PHYSICAL DEFINITIONS */  /*TODO: determine these values */
@@ -6,7 +5,7 @@
 //#define WHEEL_RADIUS		((double)5 / (double)MOTOR_RATIO)
 
 //in meters
-#define WHEEL_RADIUS		(double(.146) / double(2))
+#define WHEEL_RADIUS		(double(.131))
 //unknown units
 #define WHEEL_BASE		((double)28)
 
@@ -15,7 +14,7 @@
 //#define NUMBERTICKS		double(400)
 
 //this is det by delay within arduino code
-#define SAMPLEDELAY		double(5e-3)
+#define SMAPLEDELAY		double(5e-3)
 quadCoderDriver_signed::quadCoderDriver_signed()
 {
 	m_connected = false;
@@ -63,10 +62,10 @@ bool quadCoderDriver_signed::getEncoderVel(double& vel_l, double& vel_r)
 		return true;
 	}
 
-	double dtheta_l = ((out.dl / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SAMPLEDELAY;
+	double dtheta_l = ((out.dl / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SMAPLEDELAY;
 	vel_l = dtheta_l * WHEEL_RADIUS;
 
-	double dtheta_r = ((out.dr / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SAMPLEDELAY;
+	double dtheta_r = ((out.dr / NUMBERTICKS * double(2)*M_PI) / MOTOR_RATIO) / SMAPLEDELAY;
 	vel_r = dtheta_r * WHEEL_RADIUS;
 
 	return false;
