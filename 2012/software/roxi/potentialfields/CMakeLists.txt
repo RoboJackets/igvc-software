@@ -1,11 +1,4 @@
-add_library(potentialfields
-	potentialfields.cc
-	commonVecOps.cc
-)
-
-target_link_libraries(potentialfields
-	gps
-)
+include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
 
 include_directories(
 	${IGVC_SOURCE_DIR}/roxi
@@ -16,6 +9,16 @@ include_directories(
 	/usr/include/qt4/QtXml
 )
 
+add_library(potentialfields
+	potentialfields.cc
+	commonVecOps.cc
+)
+
+target_link_libraries(potentialfields
+	gps
+	xml
+)
+
 add_executable(potentialfieldstest
 	test.cc
 )
@@ -24,4 +27,5 @@ target_link_libraries(potentialfieldstest
 	potentialfields
 	cv
 	cvaux
+	QtCore
 )
