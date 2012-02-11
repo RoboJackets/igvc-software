@@ -8,8 +8,8 @@ ELSEIF( (${ROBOT_REV} MATCHES "candiii") OR (${ROBOT_REV} MATCHES "jeanni"))
 ENDIF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "jeannidbg"))
 
 include_directories(
-	${IGVC_SOURCE_DIR}/jeanni
-	${IGVC_SOURCE_DIR}/jeanni/vision
+	${IGVC_SOURCE_DIR}/roxi
+	${IGVC_SOURCE_DIR}/roxi/vision
 	/usr/include/opencv
 	/usr/include/qt4
 	/usr/include/qt4/Qt
