@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include "XmlConfiguration.h"
 
 using std::cout;
 using std::endl;
@@ -16,6 +17,7 @@ potentialfields::potentialfields()
 	for (int i = 0; i < num_GPS_Goals; i++)
 	{
 		GPS_Goals.push_back(GPS_point(goalWaypointLat[i], goalWaypointLon[i]));
+		loadXML();
 	}
 	currentGoal = 0;
 	return;
@@ -31,6 +33,7 @@ potentialfields::potentialfields(GPS_point center_point)
 		double x = distance*sin(deg2rad(angle));
 		double y = distance*cos(deg2rad(angle));
 		Pos_Goals.push_back(Pos_point(x,y));
+		loadXML();
 	}
 	currentGoal = 0;
 	return;
@@ -89,6 +92,7 @@ void potentialfields::dropWaypoint(double x, double y, double ang)
 }
 #endif
 
+// Public function for running potential fields
 void potentialfields::getVectorMotor(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
 {
 	double vel_mag, vel_ang;
@@ -98,6 +102,16 @@ void potentialfields::getVectorMotor(IplImage* obstacles_ipl, IplImage* targets_
 	setOutputs(vel_mag, vel_ang, goal);
 }
 
+void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
+{
+	std::priority_queue<PFieldNode> closed_set;	// The set of nodes already evaluated.
+	std::priority_queue<PFieldNode> open_set;	// The set of tentative nodes to be evaluated
+	std::priority_queue<PFieldNode> came_from; 	// The map of navigated nodes
+}
+
+/********************************************************************************************************************************/
+
+/*************** Big Picture Methods ********************************************************************************************/
 
 // Changes value of input references vel_mag and vel_ang with the velocity and angle determined by the potential fields algorithm.
 // Angle given by a value between 0 and 360 with 0 at due North
@@ -188,6 +202,15 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 
 	return;
 }
+
+/********************************************************************************************************************************/
+
+/*************** A* Methods *****************************************************************************************************/
+// Calculates the h_score at the given node
+void potentialfields::calculateHScore(PFieldNode node)
+{
+}
+
 /********************************************************************************************************************************/
 
 /*************** Map pre-processing functions ***********************************************************************************/
@@ -697,6 +720,13 @@ void potentialfields::printbitmap(bool* bitmap)
 		}
 		cout << endl;
 	}
+}
+
+// Loads variables from the XML file
+void potentialfields::loadXML()
+{
+	XmlConfiguration cfg("Config.xml");
+	meters_per_pixel = cfg.getFloat("meters_per_pixel");
 }
 /********************************************************************************************************************************/
 

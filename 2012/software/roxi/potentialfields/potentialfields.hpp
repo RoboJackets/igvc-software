@@ -1,8 +1,11 @@
 #ifndef _POTENTIAL_FIELDS_H_
 #define _POTENTIAL_FIELDS_H_
 
-/* Potential Fields Algorithm Implementation: Written by Kenny Marino
-Note: Angles in bearings 0-360. Please provide it angles in bearings! */
+/**
+ * Potential Fields Algorithm Implementation
+ * Note: Angles in bearings 0-360. Please provide it angles in bearings! 
+ * @author Kenny Marino
+*/ 
 
 /************* #defines *******************/
 #define RUN_MODE GPS
@@ -19,6 +22,7 @@ Note: Angles in bearings 0-360. Please provide it angles in bearings! */
 #include <opencv/highgui.h>
 #include "Point2D.h"
 #include <math.h>
+#include <queue>
 /******************************************/
 
 /************* Structures *****************/
@@ -54,7 +58,7 @@ struct Pos_point
 	double ang;
 };
 
-// structure for encapsolating return data fo doSomethingforIndexesInRadius
+// Structure for encapsolating return data fo doSomethingforIndexesInRadius
 struct ReturnData
 {
 	ReturnData()
@@ -65,6 +69,27 @@ struct ReturnData
 	double x_vel;
 	double y_vel;
 };
+
+// class for a node in potential fields with A*
+class PFieldNode
+{
+public:
+	double field_strength;
+	double x_dist_from_goal_m;
+	double y_dist_from_goal_m;
+	double robot_angle;
+	double g_score;
+	double h_score;
+	double f_score;
+	CvPoint robotBaseAt;
+	CvPoint robotLookingAt;	
+		
+	bool operator<(const PFieldNode &other) const {
+    		return (this->f_score < other.f_score);
+  	}
+};
+
+
 /******************************************/
 
 /************* Enums **********************/
@@ -92,7 +117,8 @@ public:
 	#endif
 	~potentialfields();					// Destructor
 	void getVectorMotor(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal);
-	// Returns a vector of where the robot should go next
+	void getCompleteVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal);
+	// Returns a vector of where the robot should go next, instantanous and with the A* search
 	
 	/******************************************/
 	
@@ -121,21 +147,23 @@ private:
 	int robotmaplocy;			// Currnet y position of robot in map
 	double curang;				// Current angle 		
 	double imgAngle;			// Angle (in bearings) of the current image
+	double meters_per_pixel;		// Allows conversion from image to real distances
 	/******************************************/
 
 	/************* Constants ******************/
-	const static double meters_per_pixel = .02;		// Allows conversion from image to real distances
-	const static int robot_radius = 2;			// Radius of the robot in pixels of the input boolean array
-	const static double obstacle_weight = 3.32e-5;		// Weight given to avoiding obstacles
-	const static double image_goal_weight = 1;		// Weight given to get to image goals (flags)
-	const static double gps_goal_weight = 510;		// Weight given to get to GPS goal
-	const static double gps_avoid_weight = 1;		// Weight given to avoid old GPS points
-	const static int obstacle_avoid_radius = 10000; 	// Radius around the robot in which the robot considers those obstacles 
-	const static int target_reach_radius = 10000;		// Radius arond the robot in which the robot considers image goals
-	const static double gps_goal_radius = 1;		// Radius of the gps goal
-	const static double gps_max_distance = 1;		// Radius at which the attraction to the goal becomes a constant
-	const static double obstacle_bitmap_thresh = 100;	// Threshold value for converting obstacle images to bitmaps
-	const static double attractor_bitmap_thresh = 100;	// Threshold value for converting attractor images to bitmaps
+	const static int robot_radius = 2;				// Radius of the robot in pixels of the input boolean array
+	const static double obstacle_weight = 3.32e-5;			// Weight given to avoiding obstacles
+	const static double image_goal_weight = 1;			// Weight given to get to image goals (flags)
+	const static double gps_goal_weight = 510;			// Weight given to get to GPS goal
+	const static double gps_avoid_weight = 1;			// Weight given to avoid old GPS points
+	const static int obstacle_avoid_radius = 10000;		 	// Radius around the robot in which the robot considers those obstacles 
+	const static int target_reach_radius = 1000;			// Radius arond the robot in which the robot considers image goals
+	const static double gps_goal_radius = 1;			// Radius of the gps goal
+	const static double gps_max_distance = 1;			;// Radius at which the attraction to the goal becomes a constant
+	const static double obstacle_bitmap_thresh = 100;		// Threshold value for converting obstacle images to bitmaps
+	const static double attractor_bitmap_thresh = 100;		// Threshold value for converting attractor images to bitmaps
+	const static double stepsize_m = .1;				// Step size in meters
+									
 	/******************************************/
 
 	/************* Private Methods ************/
@@ -147,6 +175,9 @@ private:
 
 	// Big picture methods
 	void getNextVector(IplImage* obstacles, IplImage* targets, CvPoint robotBaseAt, CvPoint robotLookingAt, double& out_mag, double& out_ang);
+
+	// A* search methods
+	void calculateHScore(PFieldNode node);
 								
 	// Component vector functions for obstacles and goals
 	void getAvoidVec(bool* obstacles, double angle_of_map, double& xvel, double& yvel);
@@ -179,6 +210,7 @@ private:
 	
 	// Various helper functions
 	void printbitmap(bool* bitmap);
+	void loadXML();
 };
 /******************************************/
 

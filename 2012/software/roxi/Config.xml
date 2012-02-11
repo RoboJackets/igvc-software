@@ -55,7 +55,7 @@
     <numFramesBack>02</numFramesBack>       <!-- frames between matching points/features ( >=2 )-->
     <maxFeatureShift>1000</maxFeatureShift>   <!-- max allowed feature point movement (in pixels) -->
     <moveTo127>001</moveTo127>                <!-- slowly forget worldmap history -->
-
+    <meters_per_pixel>0.02</meters_per_pixel>
 
 
 

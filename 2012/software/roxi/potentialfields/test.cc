@@ -22,6 +22,14 @@ int main()
  	//cvWaitKey(0);
   	// release the image
   	//cvReleaseImage(&img);
+
+	/*PFieldNode p1;
+	p1.f_score = 100;
+	PFieldNode p2;
+	p2.f_score = 0;
+	bool x = p1 < p2;
+	cout << "p1 < p2 : " << x << endl;*/
+
 	int height = img->height;
 	int width = img->width;
 	int step = img->widthStep;
