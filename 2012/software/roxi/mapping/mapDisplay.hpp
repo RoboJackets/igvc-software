@@ -3,6 +3,9 @@
 #include <sys/time.h>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <opencv/cvaux.h>
+#include <opencv/cvtypes.h>
+#include <opencv/cvinternal.h>
 #include "gps.hpp"
 #include "gps_common.hpp"
 
@@ -14,16 +17,16 @@
 class mapDisplay
 {
 private:
-IplImage lastImage;
-std::vector <cvPoint> GPSPoints;
-std::vector <cvPoint> additionalPoints;
+IplImage* lastImage;
+std::vector <CvPoint> GPSPoints;
+std::vector <CvPoint> additionalPoints;
 GPSState referencePoint;
 double meters_per_pixel;
 public:
-mapDisplay(GPSState reference, cvImage startImage);
-void draw();
-double addPointToDraw(GPSState newPoint);
-double addGPSPointToDraw(GPSState newGPSPoint);
-double addPointToDraw(double lat, double lon);
-double addGPSPointToDraw(double lat, double lon);
+mapDisplay(GPSState reference, CvImage* startImage);
+void draw(CvImage* newImage);
+void addPointToDraw(GPSState newPoint);
+void addGPSPointToDraw(GPSState newGPSPoint);
+void addPointToDraw(double lat, double lon);
+void addGPSPointToDraw(double lat, double lon);
 };

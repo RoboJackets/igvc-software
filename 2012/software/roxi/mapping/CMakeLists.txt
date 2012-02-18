@@ -1,3 +1,4 @@
+include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
 
 IF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "jeannidbg"))
 	SET(CMAKE_C_FLAGS "-march=native -pipe -g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
@@ -8,6 +9,7 @@ ELSEIF( (${ROBOT_REV} MATCHES "candiii") OR (${ROBOT_REV} MATCHES "jeanni"))
 ENDIF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "jeannidbg"))
 
 include_directories(
+	${IGVC_SOURCE_DIR}/gps
 	${IGVC_SOURCE_DIR}/roxi
 	${IGVC_SOURCE_DIR}/roxi/vision
 	/usr/include/opencv
@@ -22,4 +24,7 @@ add_library(roxi_mapping
 	cvcorrImages.cpp
 	mapgen.cpp
 	PointParamEstimator.cpp
+	mapDisplay.cpp
 )
+
+
