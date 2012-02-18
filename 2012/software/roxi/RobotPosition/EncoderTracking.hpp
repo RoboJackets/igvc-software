@@ -26,4 +26,6 @@ double getX();
 double getY();
 
 double getAngle();
+
+double getBearing();
 };
