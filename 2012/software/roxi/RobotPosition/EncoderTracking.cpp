@@ -45,6 +45,11 @@ double EncoderTracking::getAngle()
 	return angle;
 }
 
+double EncoderTracking::getBearing()
+{
+	return 450-angle;
+}
+
 void EncoderTracking::update()
 {
 	double distanceRightF;

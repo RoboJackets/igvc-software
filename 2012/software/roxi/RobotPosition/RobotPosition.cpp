@@ -1,6 +1,7 @@
 #include "RobotPosition.hpp"
 RobotPosition::RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Control& imuObject)
 {
+	magnetometer=new MagnetometerTracking(driver);
 	updatesSinceReset=0;
 	x=0;	
 	y=0;
@@ -10,8 +11,8 @@ RobotPosition::RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Contro
 	posFilterCoefficient=POS_TIME_CONSTANT/(POS_TIME_CONSTANT+SAMPLE_PERIOD);
 	orientationFilterCoefficient=ORIENTATION_TIME_CONSTANT/(ORIENTATION_TIME_CONSTANT+SAMPLE_PERIOD);
 	encoder=new EncoderTracking(driver);
-	IMU=&imuObject;
-	magnetometer=new MagnetometerTracking(driver);
+	(*encoder).setTo(0,0,450-initBearing);
+	IMU=&imuObject;	
 	gpsA=&gpsObject;
 	(*gpsA).get_last_state(gpsFirstState);
 	timeElapsed=0;
@@ -35,7 +36,6 @@ void RobotPosition::update()
 	
 	(*magnetometer).update();
 	double magBearing=(*magnetometer).getBearing();
-	angle=lambert_bearing(gpsFirstState,lastState)*(1-orientationFilterCoefficient)+(*encoder).getAngle()*orientationFilterCoefficient;
 	x+=xEncoder*(posFilterCoefficient)+xGPS*(1-posFilterCoefficient);
 	y+=yEncoder*(posFilterCoefficient)+yGPS*(1-posFilterCoefficient);
 	(*encoder).setTo(x,y,angle); 
@@ -43,7 +43,7 @@ void RobotPosition::update()
 
 	
 	//filtering may not be needed for bearing if magnetometer is good enough by itself - determine in testing
-	bearing=magBearing*(1-orientationFilterCoefficient)+(initBearing-angle+360)*orientationFilterCoefficient;
+	bearing=magBearing*(1-orientationFilterCoefficient)+((*encoder).getBearing())*orientationFilterCoefficient;
 	//bearing=magBearing;
 }
 
