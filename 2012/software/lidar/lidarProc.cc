@@ -380,7 +380,6 @@ void removeIsolatedPoints(const float* x_in, const float* y_in, size_t len_in, f
 				} 
 			}
 			cost[i] = sweeper_scary;
-			// This comment goes out to the G man, because I skipped church today to write this code.
 		}
 	}
 }
