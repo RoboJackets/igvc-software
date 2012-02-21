@@ -1,12 +1,24 @@
 #include "mapDisplay.hpp"
 
 mapDisplay::mapDisplay(GPSState reference, CvImage* startImage)
-{
+{	
+/*
+	XmlConfiguration cfg("Config.xml");
+	meters_per_pixel=cfg.getFloat("meters_per_pixel");
+*/
 	lastImage=(IplImage*)startImage;
 	referencePoint=reference;
 	cvNamedWindow("Field Map",CV_WINDOW_AUTOSIZE);
 	cvMoveWindow("Field Map",X_COORD_ON_SCREEN ,Y_COORD_ON_SCREEN);
 	cvResizeWindow("Field Map",WIDTH,HEIGHT); 
+}
+
+mapDisplay::mapDisplay(int lat, int lon, CvImage* startImage)
+{	
+	GPSState ref;
+	ref.lon=lon;
+	ref.lat=lat;
+	mapDisplay(ref,startImage);
 }
 
 void mapDisplay::draw(CvImage* newImage)
@@ -24,8 +36,8 @@ void mapDisplay::draw(CvImage* newImage)
 
 void mapDisplay::addPointToDraw(GPSState newPoint)
 {
-	double xGPS;
-	double yGPS;
+	double xGPS=newPoint.lon-referencePoint.lon;
+	double yGPS=newPoint.lat-referencePoint.lat;
 	lambert_distance_xy(newPoint,referencePoint,&xGPS,&yGPS);
 	CvPoint toAdd=cvPoint ((int)(xGPS/meters_per_pixel),(int)(yGPS/meters_per_pixel));
 	additionalPoints.push_back(toAdd);
@@ -33,8 +45,8 @@ void mapDisplay::addPointToDraw(GPSState newPoint)
 
 void mapDisplay::addGPSPointToDraw(GPSState newGPSPoint)
 {
-	double xGPS;
-	double yGPS;
+	double xGPS=newGPSPoint.lon-referencePoint.lon;
+	double yGPS=newGPSPoint.lat-referencePoint.lat;;
 	lambert_distance_xy(newGPSPoint,referencePoint,&xGPS,&yGPS);
 	CvPoint toAdd=cvPoint ((int)(xGPS/meters_per_pixel),(int)(yGPS/meters_per_pixel));
 	GPSPoints.push_back(toAdd);
@@ -46,11 +58,7 @@ void mapDisplay::addPointToDraw(double lat, double lon)
 	GPSState newPoint;
 	newPoint.lon=lon;
 	newPoint.lat=lat;
-	double xGPS;
-	double yGPS;
-	lambert_distance_xy(newPoint,referencePoint,&xGPS,&yGPS);
-	CvPoint toAdd=cvPoint ((int)(xGPS/meters_per_pixel),(int)(yGPS/meters_per_pixel));
-	additionalPoints.push_back(toAdd);
+	addPointToDraw(newPoint);
 }
 
 void mapDisplay::addGPSPointToDraw(double lat, double lon)
@@ -58,9 +66,5 @@ void mapDisplay::addGPSPointToDraw(double lat, double lon)
 	GPSState newPoint;
 	newPoint.lon=lon;
 	newPoint.lat=lat;
-	double xGPS;
-	double yGPS;
-	lambert_distance_xy(newPoint,referencePoint,&xGPS,&yGPS);
-	CvPoint toAdd=cvPoint ((int)(xGPS/meters_per_pixel),(int)(yGPS/meters_per_pixel));
-	GPSPoints.push_back(toAdd);
+	addGPSPointToDraw(newPoint);
 }

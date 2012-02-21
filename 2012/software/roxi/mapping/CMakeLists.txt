@@ -25,6 +25,19 @@ add_library(roxi_mapping
 	mapgen.cpp
 	PointParamEstimator.cpp
 	mapDisplay.cpp
+	mapDisplayTest.cpp
 )
 
 
+
+target_link_libraries(roxi_mapping	
+	gps
+	cv
+	cvaux
+	highgui
+)
+
+#add_executable(displayTest
+#mapDisplayTest.cpp
+#mapDisplay.cpp
+#)
