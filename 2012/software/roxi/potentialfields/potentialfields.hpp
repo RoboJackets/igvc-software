@@ -75,6 +75,8 @@ class PFieldNode
 {
 public:
 	double field_strength;
+	double dist_from_goal_m;
+	double angle_to_goal;
 	double x_dist_from_goal_m;
 	double y_dist_from_goal_m;
 	double robot_angle;
@@ -83,10 +85,22 @@ public:
 	double f_score;
 	CvPoint robotBaseAt;
 	CvPoint robotLookingAt;	
-		
+	PFieldNode* prev;
+	PFieldNode* next_c;
+	PFieldNode* next_l;
+	PFieldNode* next_r;		
+
 	bool operator<(const PFieldNode &other) const {
     		return (this->f_score < other.f_score);
   	}
+
+	PFieldNode()
+	{
+		prev = NULL;
+		next_c = NULL;
+		next_l = NULL;
+		next_r = NULL;
+	}
 };
 
 
@@ -96,9 +110,12 @@ public:
 // enum for deciding what to do in doSomethingforIndexesInRadius 
 enum RAD_OPTION {FILL0, FILL1, OBSTACLES, ATTRACTORS};
 
-// enums to decide  how to convert an image 
+// enums to decide how to convert an image 
 enum IMAGETYPE {FEATURE_HIGH, FEATURE_LOW};
 enum FEATURETYPE {OBSTACLE, ATTRACTOR};
+
+// enum to decide mode of getNextVector
+enum NEXT_MODE {INSTANT, ASTAR};  
 /******************************************/
 
 /************* Main Class *****************/
@@ -163,6 +180,8 @@ private:
 	const static double obstacle_bitmap_thresh = 100;		// Threshold value for converting obstacle images to bitmaps
 	const static double attractor_bitmap_thresh = 100;		// Threshold value for converting attractor images to bitmaps
 	const static double stepsize_m = .1;				// Step size in meters
+	const static double guessed_min_potential = 10;			// Potential used in calculation of heuristic
+	const static double meters_per_pixel_const = 0.02;		// Meters per pixel constant
 									
 	/******************************************/
 
@@ -174,15 +193,19 @@ private:
 	void medianThreshFilter(bool* array, int thresh_size);
 
 	// Big picture methods
-	void getNextVector(IplImage* obstacles, IplImage* targets, CvPoint robotBaseAt, CvPoint robotLookingAt, double& out_mag, double& out_ang);
+	void getNextVector(NEXT_MODE mode, IplImage* obstacles, IplImage* targets, CvPoint robotBaseAt, CvPoint robotLookingAt, double& out_mag, double& out_ang, double dist_to_goal, double angle_from_goal);
 
 	// A* search methods
-	void calculateHScore(PFieldNode node);
+	void calculateHScore(PFieldNode* node);
+	void expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplImage* targets_ipl);
+	bool checkForSolution(PFieldNode* node);
+	void deleteTree(PFieldNode* node);
 								
 	// Component vector functions for obstacles and goals
 	void getAvoidVec(bool* obstacles, double angle_of_map, double& xvel, double& yvel);
 	void getImgTargetVec(bool* targets, double& xvel, double& yvel);
 	void getGPSTargetVec(double& xvel, double& yvel);
+	void getGPSTargetVec(double& xvel, double& yvel, double distance, double theta);
 	void getGPSAvoidVec(double& xvel, double& yvel);
 
 	// Helper functions for bitmap obstacles and goals
