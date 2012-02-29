@@ -17,25 +17,25 @@ potentialfields::potentialfields()
 	for (int i = 0; i < num_GPS_Goals; i++)
 	{
 		GPS_Goals.push_back(GPS_point(goalWaypointLat[i], goalWaypointLon[i]));
-		loadXML();
 	}
 	currentGoal = 0;
+	loadXML();
 	return;
 }
 #elif RUN_MODE == ROBOT_POS
 potentialfields::potentialfields(GPS_point center_point)
 {
 	for (int i=0; i M num_GPS_Goals; i++)
-	{
+	
 		GPS_point goalpoint = GPS_point(goalWaypointLat[i], goalWaypointLon[i]);
 		double distance = distBtwGPSPoints(center_point, goal_point);
 		double angle = angleBtwGPSPoints(center_point, goal_point);
 		double x = distance*sin(deg2rad(angle));
 		double y = distance*cos(deg2rad(angle));
 		Pos_Goals.push_back(Pos_point(x,y));
-		loadXML();
 	}
 	currentGoal = 0;
+	loadXML();
 	return;
 }
 #endif
@@ -62,7 +62,7 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 
 	// If the current GPS location is within the right radius of the goal GPS location, index up the goal GPS point
 	// If the goal is out of bounds, just start back at 0
-	if (distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1],GPS_Goals[currentGoal]) < gps_goal_radius)
+	if (distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]) < gps_goal_radius)
 	{
 		currentGoal = (currentGoal+1) % GPS_Goals.size();
 	}
@@ -96,7 +96,7 @@ void potentialfields::dropWaypoint(double x, double y, double ang)
 void potentialfields::getVectorMotor(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
 {
 	double vel_mag, vel_ang;
-	getNextVector(obstacles_ipl, targets_ipl, robotBaseAt, robotLookingAt, vel_mag, vel_ang);
+	getNextVector(INSTANT, obstacles_ipl, targets_ipl, robotBaseAt, robotLookingAt, vel_mag, vel_ang, 0, 0);
 
 	// Finally, round the values, put them in range and set them to the output point
 	setOutputs(vel_mag, vel_ang, goal);
@@ -106,7 +106,24 @@ void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targe
 {
 	std::priority_queue<PFieldNode> closed_set;	// The set of nodes already evaluated.
 	std::priority_queue<PFieldNode> open_set;	// The set of tentative nodes to be evaluated
-	std::priority_queue<PFieldNode> came_from; 	// The map of navigated nodes
+
+	// Create the first node
+	PFieldNode* root = new PFieldNode();
+	updateCurLocation();
+	root->robot_angle = curang;
+	double dist = getDistCur2Goal();
+	double angle = getAngleCur2Goal();
+	root->dist_from_goal_m = dist;
+	root->angle_to_goal = angle;
+	root->x_dist_from_goal_m = dist*sin(deg2rad(angle));
+	root->y_dist_from_goal_m = dist*cos(deg2rad(angle));
+	root->g_score = 0;
+	calculateHScore(root);
+	root->f_score = root->g_score + root->h_score;
+	root->robotBaseAt = robotBaseAt;
+	root->robotLookingAt = robotLookingAt;
+
+	// TODO Finish this method
 }
 
 /********************************************************************************************************************************/
@@ -115,7 +132,7 @@ void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targe
 
 // Changes value of input references vel_mag and vel_ang with the velocity and angle determined by the potential fields algorithm.
 // Angle given by a value between 0 and 360 with 0 at due North
-void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, double& out_mag, double& out_ang)
+void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, double& out_mag, double& out_ang, double dist_from_goal_m, double angl_to_goal)
 {
 	// Transform the input image to a bitmap of obstacles
 	int imgx, imgy;
@@ -145,9 +162,12 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 		// TODO: Should probably actually do something about this. Don't care right now.
 	}
 
-	// Update the current GPS location
-	updateCurLocation();	
-	
+	if (mode == INSTANT)
+	{
+		// Update the current GPS location
+		updateCurLocation();	
+	}	
+
 	// Set the robot's current location on the bitmap
 	robotmaplocx = robotBaseAt.x;
 	robotmaplocy = robotBaseAt.y;
@@ -170,7 +190,14 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 	getImgTargetVec(targets, imagetarx, imagetary);
 
 	// Get the vector contribution from the GPS goal(s)
-	getGPSTargetVec(gpstarx, gpstary);
+	if (mode == INSTANT)
+	{
+		getGPSTargetVec(gpstarx, gpstary);
+	}
+	else
+	{
+		getGPSTargetVec(gpstarx, gpstary, dist_from_goal_m, angl_to_goal);
+	}
 
 	// Get the vector contribution from the GPS past goal(s)
 	getGPSAvoidVec(gpsavoidx, gpsavoidy);
@@ -207,8 +234,128 @@ void potentialfields::getNextVector(IplImage* obstacles_ipl, IplImage* targets_i
 
 /*************** A* Methods *****************************************************************************************************/
 // Calculates the h_score at the given node
-void potentialfields::calculateHScore(PFieldNode node)
+void potentialfields::calculateHScore(PFieldNode* node)
 {
+	// H score is the straight line number of steps to the goal times an estimated min potential
+	double numsteps = node->dist_from_goal_m / stepsize_m;
+	node->h_score = numsteps*guessed_min_potential;
+}
+
+// Creates three child nodes and calculates necessary paramater for those nodes
+void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplImage* targets_ipl)
+{
+	double out_mag, out_ang;	
+	getNextVector(ASTAR, obstacles_ipl, targets_ipl, node->robotBaseAt, node->robotLookingAt, out_mag, out_ang, node->x_dist_from_goal_m, node->y_dist_from_goal_m);
+	node->field_strength = out_mag;
+	PFieldNode* center = new PFieldNode();
+	PFieldNode* left = new PFieldNode();
+	PFieldNode* right = new PFieldNode();
+
+	double x_traveled, y_traveled, x_from_goal, y_from_goal, dist;
+	int x_pixels, y_pixels; 
+	CvPoint robotBaseAt, robotLookingAt;	
+
+	// Set fields for center node
+	center->robot_angle = out_ang;
+	x_traveled = stepsize_m * sin(deg2rad(out_ang));
+	y_traveled = stepsize_m * cos(deg2rad(out_ang));
+	x_from_goal = node->x_dist_from_goal_m - x_traveled;
+	y_from_goal = node->y_dist_from_goal_m - y_traveled;	
+	dist = sqrt(x_from_goal*x_from_goal + y_from_goal*y_from_goal);
+	center->dist_from_goal_m = dist;
+	center->angle_to_goal = atan2(y_from_goal, x_from_goal);
+	center->x_dist_from_goal_m = x_from_goal;
+	center->y_dist_from_goal_m = y_from_goal;	
+	center->g_score = node->g_score + out_mag*stepsize_m;
+	calculateHScore(center);
+	center->f_score = center->g_score + center->h_score;
+	x_pixels = node->robotBaseAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
+	y_pixels = node->robotBaseAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
+	robotBaseAt.x = x_pixels;
+	robotBaseAt.y = y_pixels;
+	center->robotBaseAt;
+	x_pixels = node->robotLookingAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
+	y_pixels = node->robotLookingAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
+	robotLookingAt.x = x_pixels;
+	robotLookingAt.y = y_pixels;
+	center->prev = node;
+
+	// Set fields for left node
+	left->robot_angle = RotateBearing(out_ang,-90);
+	x_traveled = stepsize_m * sin(deg2rad(left->robot_angle));
+	y_traveled = stepsize_m * cos(deg2rad(left->robot_angle));
+	x_from_goal = node->x_dist_from_goal_m - x_traveled;
+	y_from_goal = node->y_dist_from_goal_m - y_traveled;	
+	dist = sqrt(x_from_goal*x_from_goal + y_from_goal*y_from_goal);
+	left->dist_from_goal_m = dist;
+	left->angle_to_goal = atan2(y_from_goal, x_from_goal);
+	left->x_dist_from_goal_m = x_from_goal;
+	left->y_dist_from_goal_m = y_from_goal;	
+	left->g_score = node->g_score + out_mag*stepsize_m;
+	calculateHScore(left);
+	left->f_score = left->g_score + left->h_score;
+	x_pixels = node->robotBaseAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
+	y_pixels = node->robotBaseAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
+	robotBaseAt.x = x_pixels;
+	robotBaseAt.y = y_pixels;
+	left->robotBaseAt;
+	x_pixels = node->robotLookingAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
+	y_pixels = node->robotLookingAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
+	robotLookingAt.x = x_pixels;
+	robotLookingAt.y = y_pixels;
+	left->prev = node;
+
+	// Set fields for right node
+	right->robot_angle = RotateBearing(out_ang,-90);
+	x_traveled = stepsize_m * sin(deg2rad(right->robot_angle));
+	y_traveled = stepsize_m * cos(deg2rad(right->robot_angle));
+	x_from_goal = node->x_dist_from_goal_m - x_traveled;
+	y_from_goal = node->y_dist_from_goal_m - y_traveled;	
+	dist = sqrt(x_from_goal*x_from_goal + y_from_goal*y_from_goal);
+	right->dist_from_goal_m = dist;
+	right->angle_to_goal = atan2(y_from_goal, x_from_goal);
+	right->x_dist_from_goal_m = x_from_goal;
+	right->y_dist_from_goal_m = y_from_goal;	
+	right->g_score = node->g_score + out_mag*stepsize_m;
+	calculateHScore(right);
+	right->f_score = right->g_score + right->h_score;
+	x_pixels = node->robotBaseAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
+	y_pixels = node->robotBaseAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
+	robotBaseAt.x = x_pixels;
+	robotBaseAt.y = y_pixels;
+	right->robotBaseAt;
+	x_pixels = node->robotLookingAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
+	y_pixels = node->robotLookingAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
+	robotLookingAt.x = x_pixels;
+	robotLookingAt.y = y_pixels;
+	right->prev = node;
+
+	// Adds new nodes to root node
+	node->next_c = center;
+	node->next_l = left;
+	node->next_r = right;
+}
+
+// Checks to see if the input node is close enough to the solution
+bool potentialfields::checkForSolution(PFieldNode* node)
+{
+	if (node->dist_from_goal_m < gps_goal_radius)
+		return true;
+	else
+		return false;
+}
+
+// Deletes entire PFieldNode tree recursively
+void potentialfields::deleteTree(PFieldNode* node)
+{
+	// Check and delete right tree
+	if (node->next_l != NULL)
+		deleteTree(node->next_l);
+	if (node->next_c != NULL)
+		deleteTree(node->next_c);
+	if (node->next_r != NULL)
+		deleteTree(node->next_r);
+	delete node;
 }
 
 /********************************************************************************************************************************/
@@ -399,10 +546,13 @@ void potentialfields::getImgTargetVec(bool* targets, double& xvel, double& yvel)
 void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 {
 	double distance = getDistCur2Goal();
-	double theta =	getAngleCur2Goal();
+	double theta = deg2rad(getAngleCur2Goal());
+	getGPSTargetVec(xvel, yvel, distance, theta);
+}
 
-	//cout << "distance: " << distance << endl << "theta: " << theta << endl;	
-
+// Returns the x and y components of the GPS goal vector in meters
+void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distance, double theta)
+{
 	// TODO: Figure out the distance and angle from the current GPS coordinate to the goal GPS coordinate
 	if (distance > (gps_max_distance + gps_goal_radius))
 	{	
@@ -725,8 +875,9 @@ void potentialfields::printbitmap(bool* bitmap)
 // Loads variables from the XML file
 void potentialfields::loadXML()
 {
-	XmlConfiguration cfg("Config.xml");
-	meters_per_pixel = cfg.getFloat("meters_per_pixel");
+	//XmlConfiguration cfg("../Config.xml");
+	//meters_per_pixel = cfg.getFloat("meters_per_pixel");
+	meters_per_pixel = meters_per_pixel_const;
 }
 /********************************************************************************************************************************/
 
