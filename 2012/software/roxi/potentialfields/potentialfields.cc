@@ -104,8 +104,8 @@ void potentialfields::getVectorMotor(IplImage* obstacles_ipl, IplImage* targets_
 
 void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
 {
-	std::priority_queue<PFieldNode> closed_set;	// The set of nodes already evaluated.
-	std::priority_queue<PFieldNode> open_set;	// The set of tentative nodes to be evaluated
+	std::priority_queue<PFieldNode*> closed_set;	// The set of nodes already evaluated.
+	std::priority_queue<PFieldNode*> open_set;	// The set of tentative nodes to be evaluated
 
 	// Create the first node
 	PFieldNode* root = new PFieldNode();
@@ -122,8 +122,64 @@ void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targe
 	root->f_score = root->g_score + root->h_score;
 	root->robotBaseAt = robotBaseAt;
 	root->robotLookingAt = robotLookingAt;
+	root->prev = NULL;
+	closed_set.push(root);
 
-	// TODO Finish this method
+	bool solutionFound = false;
+	PFieldNode* solNode;
+	// Loops until a solution is found
+	while(!solutionFound)
+	{
+		PFieldNode* curNode = closed_set.top();
+		closed_set.pop();
+		if (checkForSolution(curNode) == true)
+		{
+			solutionFound = true;
+			solNode = curNode;
+		}
+		else
+		{
+			expandNode(curNode, obstacles_ipl, targets_ipl);
+			open_set.push(curNode->next_c);
+			open_set.push(curNode->next_l);
+			open_set.push(curNode->next_r);
+		}
+	} 
+
+	// Find  topmost node (after initial position)
+	bool topFound = false;
+	PFieldNode* lastNode = NULL;
+	PFieldNode* curNode = solNode;
+	while(!topFound)
+	{
+		// If it's the top node
+		if (curNode->prev == NULL)
+		{
+			// If it's the root node
+			if (lastNode == NULL)
+			{	
+				// This shouldn't happen
+				cout << "Error: PField should have reset goals" << endl;
+				goal.x = 0;
+				goal.y = 0;
+			}
+			// If it's the center node
+			else if (lastNode == curNode->next_c)
+			{	
+				// Use the solution from the first call to getNextVector
+				setOutputs(curNode->field_strength, lastNode->robot_angle, goal);
+			}
+			// Else it's not the center
+			else
+			{
+				// Use the angle, but set the magnitude to be way slower
+				setOutputs(slow_speed, lastNode->robot_angle, goal);
+			}
+			topFound = true;
+		}
+		lastNode = curNode;
+		curNode = curNode->prev;
+	}
 }
 
 /********************************************************************************************************************************/
@@ -273,11 +329,12 @@ void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplI
 	y_pixels = node->robotBaseAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
 	robotBaseAt.x = x_pixels;
 	robotBaseAt.y = y_pixels;
-	center->robotBaseAt;
+	center->robotBaseAt = robotBaseAt;
 	x_pixels = node->robotLookingAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
 	y_pixels = node->robotLookingAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
 	robotLookingAt.x = x_pixels;
 	robotLookingAt.y = y_pixels;
+	center->robotLookingAt = robotLookingAt;
 	center->prev = node;
 
 	// Set fields for left node
@@ -298,11 +355,12 @@ void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplI
 	y_pixels = node->robotBaseAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
 	robotBaseAt.x = x_pixels;
 	robotBaseAt.y = y_pixels;
-	left->robotBaseAt;
+	left->robotBaseAt = robotBaseAt;
 	x_pixels = node->robotLookingAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
 	y_pixels = node->robotLookingAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
 	robotLookingAt.x = x_pixels;
 	robotLookingAt.y = y_pixels;
+	left->robotLookingAt = robotLookingAt;
 	left->prev = node;
 
 	// Set fields for right node
@@ -323,11 +381,12 @@ void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplI
 	y_pixels = node->robotBaseAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
 	robotBaseAt.x = x_pixels;
 	robotBaseAt.y = y_pixels;
-	right->robotBaseAt;
+	right->robotBaseAt = robotBaseAt;
 	x_pixels = node->robotLookingAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
 	y_pixels = node->robotLookingAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
 	robotLookingAt.x = x_pixels;
 	robotLookingAt.y = y_pixels;
+	right->robotLookingAt = robotLookingAt;
 	right->prev = node;
 
 	// Adds new nodes to root node
@@ -416,6 +475,7 @@ bool* potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE 
 // Gets rid of stray clumps of grass and other noise from the obstacle bitfield
 void potentialfields::removeclumps(bool* obstacles)
 {
+	obstacles = obstacles;
 	// TODO: Write this function
 	return;
 }
@@ -439,7 +499,7 @@ void potentialfields::radiusfix(bool* obstacles)
 		}
 	}
 
-	for(int i=0; i<xinds.size(); i++)
+	for(int i=0; i < (int) xinds.size(); i++)
 	{
 		fillinRadius(obstacles, xinds[i], yinds[i], robot_radius);
 	}
@@ -572,6 +632,8 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distanc
 // Returns the x and y components of the GPS avoidance vector in meters 
 void potentialfields::getGPSAvoidVec(double& xvel, double& yvel)
 {
+	xvel = xvel;
+	yvel = yvel;
 	// TODO: Write this function
 	// Write only if it becomes useful
 	return;
@@ -629,6 +691,7 @@ void potentialfields::convertToRealxy(double& xcomp, double& ycomp)
 // Converts a pixel vector to a real vector 
 void potentialfields::convertToRealVec(double& vel, double& ang)
 {
+	ang = ang;
 	vel *= meters_per_pixel;
 	return;
 }

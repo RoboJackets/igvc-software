@@ -91,7 +91,8 @@ public:
 	PFieldNode* next_r;		
 
 	bool operator<(const PFieldNode &other) const {
-    		return (this->f_score < other.f_score);
+		// Has less priority the higher the fscore
+    		return (this->f_score > other.f_score);
   	}
 
 	PFieldNode()
@@ -182,6 +183,7 @@ private:
 	const static double stepsize_m = .1;				// Step size in meters
 	const static double guessed_min_potential = 10;			// Potential used in calculation of heuristic
 	const static double meters_per_pixel_const = 0.02;		// Meters per pixel constant
+	const static int slow_speed = 50;				// Slow speed for robot to travel
 									
 	/******************************************/
 
