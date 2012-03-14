@@ -104,8 +104,8 @@ void potentialfields::getVectorMotor(IplImage* obstacles_ipl, IplImage* targets_
 
 void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
 {
-	std::priority_queue<PFieldNode*> closed_set;	// The set of nodes already evaluated.
-	std::priority_queue<PFieldNode*> open_set;	// The set of tentative nodes to be evaluated
+	std::priority_queue<PFieldNodeShell> open_set;	// The set of tentative nodes to be evaluated
+	std::vector<indexNode> visited_set;		// Indexes of nodes already visited
 
 	// Create the first node
 	PFieldNode* root = new PFieldNode();
@@ -117,55 +117,86 @@ void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targe
 	root->angle_to_goal = angle;
 	root->x_dist_from_goal_m = dist*sin(deg2rad(angle));
 	root->y_dist_from_goal_m = dist*cos(deg2rad(angle));
+	root->x_ind_from_goal = floor(root->x_dist_from_goal_m/stepsize_m + 0.5);
+	root->y_ind_from_goal = floor(root->y_dist_from_goal_m/stepsize_m + 0.5);
 	root->g_score = 0;
 	calculateHScore(root);
 	root->f_score = root->g_score + root->h_score;
 	root->robotBaseAt = robotBaseAt;
 	root->robotLookingAt = robotLookingAt;
+	getNextVector(ASTAR, obstacles_ipl, targets_ipl, root->robotBaseAt, root->robotLookingAt, root->field_strength, root->field_direction, dist, angle);
 	root->prev = NULL;
-	closed_set.push(root);
+	open_set.push(PFieldNodeShell(root));
+	visited_set.push_back(indexNode(root->x_ind_from_goal, root->y_ind_from_goal));
+	
+	//cout << "root node: " << root << endl;
 
 	bool solutionFound = false;
 	PFieldNode* solNode;
 	// Loops until a solution is found
 	while(!solutionFound)
 	{
-		PFieldNode* curNode = closed_set.top();
-		closed_set.pop();
-		if (checkForSolution(curNode) == true)
+		PFieldNodeShell curNodeTemp = open_set.top();
+		solNode = curNodeTemp.node;
+		//cout << "cur node: " << solNode << endl;
+		//cout << "prev: " << solNode->prev << endl;
+		open_set.pop();
+		if (checkForSolution(solNode) == true)
 		{
 			solutionFound = true;
-			solNode = curNode;
 		}
 		else
 		{
-			expandNode(curNode, obstacles_ipl, targets_ipl);
-			open_set.push(curNode->next_c);
-			open_set.push(curNode->next_l);
-			open_set.push(curNode->next_r);
+			expandNode(solNode, obstacles_ipl, targets_ipl);
+			if (notVisited(visited_set, solNode->next_c))
+			{
+				open_set.push(PFieldNodeShell(solNode->next_c));
+				visited_set.push_back(indexNode(solNode->next_c));
+			}
+			if (notVisited(visited_set, solNode->next_l))
+			{
+				open_set.push(PFieldNodeShell(solNode->next_l));
+				visited_set.push_back(indexNode(solNode->next_l));
+			}
+			if (notVisited(visited_set, solNode->next_r))
+			{
+				open_set.push(PFieldNodeShell(solNode->next_r));
+				visited_set.push_back(indexNode(solNode->next_r));
+			}			
+			//if (solNode->potential < 0)
+			//	addPotential(open_set, 1000);
 		}
 	} 
+
+	//cout << "Found a solution" << endl;
 
 	// Find  topmost node (after initial position)
 	bool topFound = false;
 	PFieldNode* lastNode = NULL;
 	PFieldNode* curNode = solNode;
+	//cout << "cur " <<  curNode << endl;
+	//cout << "prev " << curNode->prev << endl;
 	while(!topFound)
 	{
+		//cout << "cur " <<  curNode << endl;
+		//cout << "prev " << curNode->prev << endl;
 		// If it's the top node
 		if (curNode->prev == NULL)
 		{
+			//cout << "I free now?" << endl;
 			// If it's the root node
 			if (lastNode == NULL)
 			{	
 				// This shouldn't happen
-				cout << "Error: PField should have reset goals" << endl;
+				//cout << "Error: PField should have reset goals" << endl;
 				goal.x = 0;
 				goal.y = 0;
 			}
 			// If it's the center node
 			else if (lastNode == curNode->next_c)
 			{	
+				//cout << "strength: " << curNode->field_strength << endl;
+				//cout << "angle: " << lastNode->robot_angle << endl;
 				// Use the solution from the first call to getNextVector
 				setOutputs(curNode->field_strength, lastNode->robot_angle, goal);
 			}
@@ -177,9 +208,12 @@ void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targe
 			}
 			topFound = true;
 		}
+		//cout << "What about here" << endl;
 		lastNode = curNode;
 		curNode = curNode->prev;
 	}
+	//cout << "I out" << endl;
+	deleteTree(root);
 }
 
 /********************************************************************************************************************************/
@@ -190,6 +224,21 @@ void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targe
 // Angle given by a value between 0 and 360 with 0 at due North
 void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, double& out_mag, double& out_ang, double dist_from_goal_m, double angl_to_goal)
 {
+	/*cout << "Mode: " << mode << endl;
+	cout << "obstacles: " << obstacles_ipl << endl;
+	cout << "targets: " << targets_ipl << endl;
+	cout << "base at x: " << robotBaseAt.x << endl;
+	cout << "base at y: " << robotBaseAt.y << endl;
+	cout << "looking at x: " << robotLookingAt.x << endl;
+	cout << "looking at y: " << robotLookingAt.y << endl;
+	cout << "dist_from_goal: " << dist_from_goal_m << endl;
+	cout << "ang to goal: " << angl_to_goal << endl;*/
+
+	/*IplImage* showImage = cvCloneImage(obstacles_ipl);
+	cvCircle(showImage, robotBaseAt, 10, CV_RGB(255,0,0), 1);
+	cv::imshow("mainWin", showImage);
+	cvWaitKey(1);	*/
+
 	// Transform the input image to a bitmap of obstacles
 	int imgx, imgy;
 	bool* obstacles = IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, imgx, imgy);
@@ -300,31 +349,32 @@ void potentialfields::calculateHScore(PFieldNode* node)
 // Creates three child nodes and calculates necessary paramater for those nodes
 void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplImage* targets_ipl)
 {
-	double out_mag, out_ang;	
-	getNextVector(ASTAR, obstacles_ipl, targets_ipl, node->robotBaseAt, node->robotLookingAt, out_mag, out_ang, node->x_dist_from_goal_m, node->y_dist_from_goal_m);
-	node->field_strength = out_mag;
+	//cout << "node: " << node << endl;
+	double out_mag, out_ang, dist, ang;
+	
+	out_mag = node->field_strength;
+	out_ang = node->field_direction;
 	PFieldNode* center = new PFieldNode();
 	PFieldNode* left = new PFieldNode();
 	PFieldNode* right = new PFieldNode();
 
-	double x_traveled, y_traveled, x_from_goal, y_from_goal, dist;
+	double x_traveled, y_traveled, x_from_goal, y_from_goal;
 	int x_pixels, y_pixels; 
 	CvPoint robotBaseAt, robotLookingAt;	
 
 	// Set fields for center node
 	center->robot_angle = out_ang;
 	x_traveled = stepsize_m * sin(deg2rad(out_ang));
-	y_traveled = stepsize_m * cos(deg2rad(out_ang));
+	y_traveled = -(stepsize_m * cos(deg2rad(out_ang)));
 	x_from_goal = node->x_dist_from_goal_m - x_traveled;
-	y_from_goal = node->y_dist_from_goal_m - y_traveled;	
+	y_from_goal = node->y_dist_from_goal_m + y_traveled;	
 	dist = sqrt(x_from_goal*x_from_goal + y_from_goal*y_from_goal);
 	center->dist_from_goal_m = dist;
 	center->angle_to_goal = atan2(y_from_goal, x_from_goal);
 	center->x_dist_from_goal_m = x_from_goal;
-	center->y_dist_from_goal_m = y_from_goal;	
-	center->g_score = node->g_score + out_mag*stepsize_m;
-	calculateHScore(center);
-	center->f_score = center->g_score + center->h_score;
+	center->y_dist_from_goal_m = y_from_goal;
+	center->x_ind_from_goal = floor(center->x_dist_from_goal_m/stepsize_m + 0.5);
+	center->y_ind_from_goal = floor(center->y_dist_from_goal_m/stepsize_m + 0.5);
 	x_pixels = node->robotBaseAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
 	y_pixels = node->robotBaseAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
 	robotBaseAt.x = x_pixels;
@@ -335,22 +385,30 @@ void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplI
 	robotLookingAt.x = x_pixels;
 	robotLookingAt.y = y_pixels;
 	center->robotLookingAt = robotLookingAt;
+	// Get potential
+	dist = sqrt(center->x_dist_from_goal_m*center->x_dist_from_goal_m+center->y_dist_from_goal_m*center->y_dist_from_goal_m);
+	ang = vec2bear(rad2deg(atan2(center->y_dist_from_goal_m, center->x_dist_from_goal_m)));
+	getNextVector(ASTAR, obstacles_ipl, targets_ipl, center->robotBaseAt, center->robotLookingAt, center->field_strength, center->field_direction, dist, ang);
+	center->g_score = node->g_score + center->field_strength*stepsize_m;
+	calculateHScore(center);
+	center->f_score = center->g_score + center->h_score;
+	//cout << "Center potential: " << center->field_strength << endl;
+	//cout << "Center g_score: " << center->g_score << endl;
 	center->prev = node;
 
 	// Set fields for left node
 	left->robot_angle = RotateBearing(out_ang,-90);
 	x_traveled = stepsize_m * sin(deg2rad(left->robot_angle));
-	y_traveled = stepsize_m * cos(deg2rad(left->robot_angle));
+	y_traveled = -(stepsize_m * cos(deg2rad(left->robot_angle)));
 	x_from_goal = node->x_dist_from_goal_m - x_traveled;
-	y_from_goal = node->y_dist_from_goal_m - y_traveled;	
+	y_from_goal = node->y_dist_from_goal_m + y_traveled;	
 	dist = sqrt(x_from_goal*x_from_goal + y_from_goal*y_from_goal);
 	left->dist_from_goal_m = dist;
 	left->angle_to_goal = atan2(y_from_goal, x_from_goal);
 	left->x_dist_from_goal_m = x_from_goal;
 	left->y_dist_from_goal_m = y_from_goal;	
-	left->g_score = node->g_score + out_mag*stepsize_m;
-	calculateHScore(left);
-	left->f_score = left->g_score + left->h_score;
+	left->x_ind_from_goal = floor(left->x_dist_from_goal_m/stepsize_m + 0.5);
+	left->y_ind_from_goal = floor(left->y_dist_from_goal_m/stepsize_m + 0.5);
 	x_pixels = node->robotBaseAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
 	y_pixels = node->robotBaseAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
 	robotBaseAt.x = x_pixels;
@@ -361,22 +419,30 @@ void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplI
 	robotLookingAt.x = x_pixels;
 	robotLookingAt.y = y_pixels;
 	left->robotLookingAt = robotLookingAt;
+	// Get potential
+	dist = sqrt(left->x_dist_from_goal_m*left->x_dist_from_goal_m+left->y_dist_from_goal_m*left->y_dist_from_goal_m);
+	ang = vec2bear(rad2deg(atan2(left->y_dist_from_goal_m, left->x_dist_from_goal_m)));
+	getNextVector(ASTAR, obstacles_ipl, targets_ipl, left->robotBaseAt, left->robotLookingAt, left->field_strength, left->field_direction, dist, ang);
+	left->g_score = node->g_score + left->field_strength*stepsize_m;
+	calculateHScore(left);
+	left->f_score = left->g_score + left->h_score;
+	//cout << "Left potential: " << left->field_strength << endl;
+	//cout << "Left g_score: " << left->g_score << endl;
 	left->prev = node;
 
 	// Set fields for right node
-	right->robot_angle = RotateBearing(out_ang,-90);
+	right->robot_angle = RotateBearing(out_ang, 90);
 	x_traveled = stepsize_m * sin(deg2rad(right->robot_angle));
-	y_traveled = stepsize_m * cos(deg2rad(right->robot_angle));
+	y_traveled = -(stepsize_m * cos(deg2rad(right->robot_angle)));
 	x_from_goal = node->x_dist_from_goal_m - x_traveled;
-	y_from_goal = node->y_dist_from_goal_m - y_traveled;	
+	y_from_goal = node->y_dist_from_goal_m + y_traveled;	
 	dist = sqrt(x_from_goal*x_from_goal + y_from_goal*y_from_goal);
 	right->dist_from_goal_m = dist;
 	right->angle_to_goal = atan2(y_from_goal, x_from_goal);
 	right->x_dist_from_goal_m = x_from_goal;
 	right->y_dist_from_goal_m = y_from_goal;	
-	right->g_score = node->g_score + out_mag*stepsize_m;
-	calculateHScore(right);
-	right->f_score = right->g_score + right->h_score;
+	right->x_ind_from_goal = floor(right->x_dist_from_goal_m/stepsize_m + 0.5);
+	right->y_ind_from_goal = floor(right->y_dist_from_goal_m/stepsize_m + 0.5);	
 	x_pixels = node->robotBaseAt.x + floor((x_traveled / meters_per_pixel_const)+.5);
 	y_pixels = node->robotBaseAt.y + floor((y_traveled / meters_per_pixel_const)+.5);
 	robotBaseAt.x = x_pixels;
@@ -387,12 +453,40 @@ void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplI
 	robotLookingAt.x = x_pixels;
 	robotLookingAt.y = y_pixels;
 	right->robotLookingAt = robotLookingAt;
+	// Get potential
+	dist = sqrt(right->x_dist_from_goal_m*right->x_dist_from_goal_m+right->y_dist_from_goal_m*right->y_dist_from_goal_m);
+	ang = vec2bear(rad2deg(atan2(right->y_dist_from_goal_m, right->x_dist_from_goal_m)));
+	getNextVector(ASTAR, obstacles_ipl, targets_ipl, right->robotBaseAt, right->robotLookingAt, right->field_strength, right->field_direction, dist, ang);
+	right->g_score = node->g_score + right->field_strength*stepsize_m;
+	calculateHScore(right);
+	right->f_score = right->g_score + right->h_score;
+	//cout << "Right potential: " << right->field_strength << endl;
+	//cout << "Right g_score: " << right->g_score << endl;
 	right->prev = node;
+
+	IplImage* showImage = cvCloneImage(obstacles_ipl);
+	cvCircle(showImage, node->robotBaseAt, 10, CV_RGB(255,0,0), 10);
+	cvCircle(showImage, left->robotBaseAt, 3, CV_RGB(0,0,255), 1); 
+	cvCircle(showImage, right->robotBaseAt, 3, CV_RGB(0,0,255), 1); 
+	cvCircle(showImage, center->robotBaseAt, 3, CV_RGB(0,0,255), 1); 
+	CvPoint goal_at;
+	//cout << "goal x in meters: " << node->x_dist_from_goal_m << endl;
+	//cout << "goal y in meters: " << node->y_dist_from_goal_m << endl;
+	goal_at.x = floor((node->x_dist_from_goal_m)/meters_per_pixel_const + .5) + node->robotBaseAt.x;
+	goal_at.y = -floor((node->y_dist_from_goal_m)/meters_per_pixel_const + .5) + node->robotBaseAt.y;
+	cvCircle(showImage, goal_at, 5, CV_RGB(0,255,0), 5);
+	//cout << "goal x: " << goal_at.x << "\ngoal y: " << goal_at.y << endl;
+	cv::imshow("mainWin", showImage);
+	cvWaitKey(1);
 
 	// Adds new nodes to root node
 	node->next_c = center;
 	node->next_l = left;
 	node->next_r = right;
+
+	assert(node == node->next_c->prev);
+	assert(node == node->next_l->prev);
+	assert(node == node->next_r->prev);
 }
 
 // Checks to see if the input node is close enough to the solution
@@ -403,6 +497,43 @@ bool potentialfields::checkForSolution(PFieldNode* node)
 	else
 		return false;
 }
+
+// Returns true if the node has not yet been visited
+bool potentialfields::notVisited(std::vector<indexNode>& visited_set, PFieldNode* node)
+{
+	for (uint i = 0; i < visited_set.size(); i++)
+	{
+		indexNode curNode = visited_set[i];
+		if (curNode.x_ind == node->x_ind_from_goal && curNode.y_ind == node->y_ind_from_goal)
+			return false;
+	}
+	return true;
+}
+
+// Adds a number to all of the potentials in the open set
+/*void potentialfields::addPotential(std::priority_queue<PFieldNodeShell>& open_set, double potential)
+{	
+	cout << "Add potential !!!!!!!" << endl;
+	std::vector<PFieldNodeShell> temp;
+	while(!open_set.empty())
+	{
+		PFieldNodeShell curNodeTemp = open_set.top();
+		temp.push_back(PFieldNodeShell(curNodeTemp.node));
+		open_set.pop();
+	}
+	for (uint i = 0; i < temp.size(); i++)
+	{	
+		PFieldNode* curNodeTemp = temp[i].node;
+		curNodeTemp->potential += potential;
+		//cout << "New potential: " << curNodeTemp->potential << endl;
+		open_set.push(PFieldNodeShell(curNodeTemp));
+	}		
+	
+	//open_set.push(PFieldNodeShell(root));
+	//PFieldNodeShell curNodeTemp = open_set.top();
+	//solNode = curNodeTemp.node;
+	//open_set.pop();
+}*/
 
 // Deletes entire PFieldNode tree recursively
 void potentialfields::deleteTree(PFieldNode* node)
