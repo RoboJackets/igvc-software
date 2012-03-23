@@ -95,6 +95,41 @@ void eraseShapeOnBitmap(Shape shape,bool** eraseFrom){
 }
 
 void eraseShadow(Shape shape, IplImage* img){
+	char done=1;
+	double slopeX=shape.avgX-ROBOT_POS_X_IN_CAMERA_FRAME*width;
+	double slopeY=shape.avgY-ROBOT_POS_Y_IN_CAMERA_FRAME*height;
+	double translateX=0;
+	double translateY=0;
+	int channels=visionImage->nChannels;
+	int imageArraySize=width*height;
+	if(slopeX>slopeY){	
+		slopeX/=slopeX;
+		slopeY/=slopeY;
+	}
+	else{
+		slopeY/=slopeY;
+		slopeX/=slopeY;
+	}
+	while(done!=0){
+		done=0;
+		for(int i=0;i<shape.numPoints;i++){
+			if(translateX>=1 || translateX<=-1){
+				shape.points.at(i).x+=(int)translateX;
+				translateX+=-1*(int)translateX;
+			}
+			if(translateY>=1 || translateY<=-1){
+				shape.points.at(i).x+=1;
+				translateY+=-1*(int)translateX;
+			}
+			if(shape.points.at(i).x>=0 && shape.points.at(i).x<=width && shape.points.at(i).y>=0 && shape.points.at(i).y<=height){
+				done=1;
+				for(int c=0;c<channels;c++)
+					img->image[(shape.points.at(i).x+shape.points.at(i).y*width)*channels+c]=0;
+			}
+			translateX+=slopeX;
+			translateY+=slopeY;
+    		}
+	}
 
 
 }
