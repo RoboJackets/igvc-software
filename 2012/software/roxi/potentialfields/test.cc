@@ -12,12 +12,12 @@ void printbitmap(bool* bitmap, int width, int height);
 
 int main()
 {
-	IplImage* img = cvLoadImage("../TestFiles/course1.png");
+	IplImage* img = cvLoadImage("../TestFiles/course6.png");
 	// create a window
-	//cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE); 
-	//cvMoveWindow("mainWin", 100, 100);
+	cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE); 
+	cvMoveWindow("mainWin", 100, 100);
   	// show the image
-  	//cvShowImage("mainWin", img );
+  	cvShowImage("mainWin", img );
   	// wait for a key
  	//cvWaitKey(0);
   	// release the image
@@ -164,11 +164,10 @@ int main()
 	// dropWaypoint
 	pf.dropWaypoint(42.6777,-83.1951,90);
 	pf.dropWaypoint(42.6790,-83.1942,45);
-	pf.dropWaypoint(42.681,-83.1940,0);
-
+	pf.dropWaypoint(42.69994,-83.1940,0);
 	CvPoint robotBaseAt = CvPoint();
 	robotBaseAt.x = 320;
-	robotBaseAt.y = 480;
+	robotBaseAt.y = 340;
 
 	CvPoint robotLookingAt = CvPoint();
 	robotLookingAt.x = 320;
@@ -176,7 +175,8 @@ int main()
 
 	Point2D<int> goal = Point2D<int>();
 	
-	pf.getVectorMotor(img, 0, robotBaseAt, robotLookingAt, goal);
+	//pf.getVectorMotor(img, 0, robotBaseAt, robotLookingAt, goal);
+	pf.getCompleteVector(img, 0, robotBaseAt, robotLookingAt, goal);
 
 	cout << "goal.x = " << goal.x << endl;
 	cout << "goal.y = " << goal.y << endl;
