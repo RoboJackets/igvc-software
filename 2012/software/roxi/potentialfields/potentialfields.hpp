@@ -23,6 +23,7 @@
 #include "Point2D.h"
 #include <math.h>
 #include <queue>
+#include <iostream>
 /******************************************/
 
 /************* Structures *****************/
@@ -75,10 +76,13 @@ class PFieldNode
 {
 public:
 	double field_strength;
+	double field_direction;
 	double dist_from_goal_m;
 	double angle_to_goal;
 	double x_dist_from_goal_m;
 	double y_dist_from_goal_m;
+	int x_ind_from_goal;
+	int y_ind_from_goal;
 	double robot_angle;
 	double g_score;
 	double h_score;
@@ -92,7 +96,8 @@ public:
 
 	bool operator<(const PFieldNode &other) const {
 		// Has less priority the higher the fscore
-    		return (this->f_score > other.f_score);
+		//std::cout << "Wat up dawg\n";
+    		return (this->f_score < other.f_score);
   	}
 
 	PFieldNode()
@@ -104,6 +109,41 @@ public:
 	}
 };
 
+class PFieldNodeShell
+{
+public:
+	PFieldNode* node;
+
+	PFieldNodeShell(PFieldNode* inNode)
+	{
+		node = inNode;
+	}
+
+	bool operator<(const PFieldNodeShell &other) const {
+		// Has less priority the higher the fscore
+		//std::cout << "Wat up dawg\n";
+    		return (this->node->f_score > other.node->f_score);
+  	}
+};
+
+struct indexNode
+{
+public:
+	int x_ind;
+	int y_ind;
+
+	indexNode(int x, int y)
+	{
+		x_ind = x;
+		y_ind = y;
+	}
+
+	indexNode(PFieldNode* node)
+	{
+		x_ind = node->x_ind_from_goal;
+		y_ind = node->y_ind_from_goal;
+	}
+};
 
 /******************************************/
 
@@ -170,18 +210,18 @@ private:
 
 	/************* Constants ******************/
 	const static int robot_radius = 2;				// Radius of the robot in pixels of the input boolean array
-	const static double obstacle_weight = 3.32e-5;			// Weight given to avoiding obstacles
+	const static double obstacle_weight = 3.32e-3;			// Weight given to avoiding obstacles
 	const static double image_goal_weight = 1;			// Weight given to get to image goals (flags)
-	const static double gps_goal_weight = 510;			// Weight given to get to GPS goal
+	const static double gps_goal_weight = 5100;			// Weight given to get to GPS goal
 	const static double gps_avoid_weight = 1;			// Weight given to avoid old GPS points
 	const static int obstacle_avoid_radius = 10000;		 	// Radius around the robot in which the robot considers those obstacles 
 	const static int target_reach_radius = 1000;			// Radius arond the robot in which the robot considers image goals
 	const static double gps_goal_radius = 1;			// Radius of the gps goal
-	const static double gps_max_distance = 1;			;// Radius at which the attraction to the goal becomes a constant
+	const static double gps_max_distance = 10;			// Radius at which the attraction to the goal becomes a constant
 	const static double obstacle_bitmap_thresh = 100;		// Threshold value for converting obstacle images to bitmaps
 	const static double attractor_bitmap_thresh = 100;		// Threshold value for converting attractor images to bitmaps
-	const static double stepsize_m = .1;				// Step size in meters
-	const static double guessed_min_potential = 10;			// Potential used in calculation of heuristic
+	const static double stepsize_m = .5;				// Step size in meters
+	const static double guessed_min_potential = 1000;		// Potential used in calculation of heuristic
 	const static double meters_per_pixel_const = 0.02;		// Meters per pixel constant
 	const static int slow_speed = 50;				// Slow speed for robot to travel
 									
@@ -201,7 +241,9 @@ private:
 	void calculateHScore(PFieldNode* node);
 	void expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplImage* targets_ipl);
 	bool checkForSolution(PFieldNode* node);
+	//void addPotential(std::priority_queue<PFieldNodeShell>& open_set, double potential);
 	void deleteTree(PFieldNode* node);
+	bool notVisited(std::vector<indexNode>& visited_set, PFieldNode* node);
 								
 	// Component vector functions for obstacles and goals
 	void getAvoidVec(bool* obstacles, double angle_of_map, double& xvel, double& yvel);
