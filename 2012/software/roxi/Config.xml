@@ -11,12 +11,13 @@
 <Config>
 
     <!-- ON/OFF -->
-    <doMapping>001 </doMapping>
-    <doVision> 001 </doVision>
-    <useMotors>000 </useMotors>
+    <doMapping>  001 </doMapping>
+    <doVision>   001 </doVision>
+    <useMotors>  000 </useMotors>
+    <useEncoders>000 </useEncoders>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>001</useFirewireCamera>  <!-- set to 0 to load video -->
+	<useFirewireCamera>001</useFirewireCamera>  <!-- set to 0 to load video  or cvcam--->
 	<gain>19</gain>
 	<shutter>130</shutter>
 	<gamma>00</gamma>

@@ -1,12 +1,15 @@
 #include "OSMC_driver.hpp"
+#include "XmlConfiguration.h"//for knowing whether to simulate motors
 
 #include <algorithm>
+#include <iostream>
 
 const int OSMC_driver::_max_speed_ = 130;
 const int OSMC_driver::MINREQSPEED = 30;
 
 OSMC_driver::OSMC_driver()
 {
+	std::cout<<"WARNING: THIS CODE BELIEVED TO BE DEAD! WAS NOT UPDATED TO REFLECT MOTOR SIMULATION 3/24/12"<<std::endl;
 	lvgoal = 0;
 	rvgoal = 0;
 	m_connected = false;
@@ -32,17 +35,24 @@ OSMC_driver::OSMC_driver()
 
 OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface)
 {
+	/* load xml file to see if we need encoders/motors*/
+	XmlConfiguration cfg("Config.xml");
+	
+	useMotors   = cfg.getInt("useMotors");
+	useEncoders = cfg.getInt("useEncoders");
+	
 	lvgoal = 0;
 	rvgoal = 0;
 	m_connected = false;
-	#ifndef MOTOR_SIMULATE
+	if(useMotors){
 		ai.initLink(motor_iface);
-	#endif
-	#ifndef ENCODER_SIMULATE
+	}
+	if(useEncoders){
 		encoder = new quadCoderDriver_signed(encoder_iface);
-	#else
+	}
+	else{
 		encoder = NULL;
-	#endif
+	}
 	m_connected = true;
 
 	timeval now_t;
@@ -76,34 +86,32 @@ bool OSMC_driver::getEncoderData(new_encoder_pk_t& pk)
 }
 #endif
 */
-#ifndef ENCODER_SIMULATE
+
 bool OSMC_driver::getEncoderVel(double& lvel, double& rvel)
 {
 	//return encoder->getEncoderVel(rvel, lvel);
 	bool ret = false;
-	ret = encoder->getEncoderVel(lvel, rvel);
+	if(useEncoders){
+		ret = encoder->getEncoderVel(lvel, rvel);
+	}else{
+		lvel = rvel = 0;
+		return false;
+	}
 	return ret;
 }
 
 bool OSMC_driver::getEncoderDist(double& ldist, double& rdist)
 {
 	bool ret = false;
-	ret = encoder->getEncoderDist(ldist, rdist);
+	if(useEncoders){
+		ret = encoder->getEncoderDist(ldist, rdist);
+	}else{
+		ldist = rdist = 0;
+		return false;
+	}
 	return ret;
 }
-#else
-bool OSMC_driver::getEncoderVel(double& lvel, double& rvel)
-{
-	lvel = rvel = 0;
-	return false;
-}
 
-bool OSMC_driver::getEncoderDist(double& ldist, double& rdist)
-{
-	ldist = rdist = 0;
-	return false;
-}
-#endif
 
 current_reply_t OSMC_driver::getCurrentData()
 {
@@ -166,9 +174,10 @@ int OSMC_driver::set_heading(const int iFwdVelocity, const int iRotation)
 	return this->set_motors( left , right );
 }
 
-#ifndef MOTOR_SIMULATE
+#ifndef MOTOR_SIMULATE//deprecated, now using useMotors and useEncoders
 bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, const byte leftDir, const byte leftDutyCycle)
 {
+	
 	//byte clamped_rightDutyCycle = (rightDutyCycle > 170) ? 170 : rightDutyCycle;
 	//byte clamped_leftDutyCycle = (leftDutyCycle > 170) ? 170 : leftDutyCycle;
 	byte clamped_rightDutyCycle = rightDutyCycle;
@@ -199,8 +208,9 @@ bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, co
 		std::cout << (int)leftDutyCycle;
 	}
  	std::cout << std::endl;
-
-	if(ai.sendCommand(MC_SET_RL_DUTY_CYCLE, &cmdpk, sizeof(speed_set_t)))
+	
+	
+	if(useMotors)if(ai.sendCommand(MC_SET_RL_DUTY_CYCLE, &cmdpk, sizeof(speed_set_t)))
 	{
 		return true;
 	}
@@ -208,7 +218,7 @@ bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, co
 	byte cmdresp;
 	byte* data = NULL;
 
-	if(ai.recvCommand(cmdresp, data))
+	if(useMotors)if(ai.recvCommand(cmdresp, data))
 	{
 		return true;
 	}
@@ -225,9 +235,10 @@ bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, co
 
 	return false;
 }
-#else
+#else //code should never run
 bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, const byte leftDir, const byte leftDutyCycle)
 {
+	std::cout<<"WARNING: THIS CODE BELIEVED TO BE DEAD! WAS NOT UPDATED TO REFLECT MOTOR SIMULATION 3/24/12"<<std::endl;
 	int sr = (rightDir == MC_MOTOR_FORWARD) ? int(rightDutyCycle) : -int(rightDutyCycle);
 	int sl = (leftDir == MC_MOTOR_FORWARD) ? int(leftDutyCycle) : -int(leftDutyCycle);
 
@@ -244,7 +255,7 @@ bool OSMC_driver::setMotorPWM(const byte rightDir, const byte rightDutyCycle, co
 #endif
 joystick_reply_t OSMC_driver::getJoystickData()
 {
-
+	std::cout<<"WARNING: THIS CODE BELIEVED TO BE DEAD! WAS NOT UPDATED TO REFLECT MOTOR SIMULATION 3/24/12"<<std::endl;
 	ai.sendCommand(MC_GET_JOYSTICK, NULL, 0);
 
 	byte retcmd = 0;
@@ -469,9 +480,11 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 
 bool OSMC_driver::setLight(const byte option)
 {
-#ifndef MOTOR_SIMULATE
-	return ai.sendCommand(MC_SET_LIGHT,&option,1);
-#endif
+	if(useMotors){
+		return ai.sendCommand(MC_SET_LIGHT,&option,1);
+	}else{
+		return false;
+	}
 }
 
 bool OSMC_driver::GetMagnetometerHeading(int& heading, int& X_Value, int& Y_Value)

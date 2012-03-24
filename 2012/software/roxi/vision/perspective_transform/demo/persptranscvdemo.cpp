@@ -14,11 +14,23 @@ using namespace std;
 //as demoing how to do perspective transform stuff
 //Requires a default webcam
 
+
+/*CvPoint2D32f CvPoint2D32f::operator+(CvPoint2D32f other){
+	CvPoint2D32f out;
+	return out
+}*/
+
+
 static IplImage *MainImage;
 
 void shownow(const char* name,const Mat& m){
 	imshow(name,m);
-	waitKey(1);
+	//waitKey(1);
+}
+
+CvPoint2D32f add(CvPoint2D32f a,CvPoint2D32f b){
+	CvPoint2D32f ret=cvPoint2D32f(a.x+b.x,a.y+b.y);
+	return ret;
 }
 
 void dotransform(){
@@ -27,7 +39,9 @@ void dotransform(){
 	CvMat*  map_matrix=cvCreateMat( 3, 3, CV_32FC1 );
 	CvPoint2D32f src[4];
 	double sc=100;
-	CvPoint2D32f dst[4]={ cvPoint2D32f(0.,sc),cvPoint2D32f(sc,sc),cvPoint2D32f(sc,0.),cvPoint2D32f(0.,0.)};
+	CvPoint2D32f ul=cvPoint2D32f(MainImage->width/2-sc/2,MainImage->height/2-sc/2);
+	
+	CvPoint2D32f dst[4]={ add(cvPoint2D32f(0.,sc),ul),add(cvPoint2D32f(sc,sc),ul),add(cvPoint2D32f(sc,0.),ul),add(cvPoint2D32f(0.,0.),ul)};
 	
 	//Load src and dst points
 	for(int i=0;i<4;i++){
@@ -39,7 +53,7 @@ void dotransform(){
    IplImage* tmp=cvCloneImage(MainImage);
 
   	cvWarpPerspective( MainImage, tmp, map_matrix,
-                        CV_INTER_LINEAR&(!CV_WARP_FILL_OUTLIERS),	//flags
+                        CV_INTER_AREA&(!CV_WARP_FILL_OUTLIERS),	//flags
                         cvScalarAll(0) );									//fillval
    cvReleaseImage(&MainImage);
    MainImage=cvCloneImage(tmp);
@@ -83,7 +97,9 @@ int main(){
 			
 			shownow("mainWin",img);
 
+
 			cvReleaseImage(&img);
+			if (waitKey(10)>=0)return 0;
 		}
 	
 	
