@@ -1,8 +1,16 @@
 include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
 
 include_directories(
+	#for XmlConfiguration
+	${IGVC_SOURCE_DIR}/roxi
+	
 	${IGVC_SOURCE_DIR}/arduino
 	${IGVC_SOURCE_DIR}/encoders/pcdriver_signed
+	/usr/include/qt4
+	/usr/include/qt4/Qt
+	/usr/include/qt4/QtGui
+	/usr/include/qt4/QtCore
+	/usr/include/qt4/QtXml
 )
 
 add_library (OSMC_driver OSMC_driver.cc)
@@ -10,6 +18,9 @@ add_library (OSMC_driver OSMC_driver.cc)
 target_link_libraries(OSMC_driver 
 	ArduinoInterface
 	quadCoderDriver_signed
+	
+	#for XmlConfiguration
+	xml
 )
 
 add_executable(OSMC_test
