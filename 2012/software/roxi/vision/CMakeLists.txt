@@ -7,6 +7,7 @@ include_directories(
 	/usr/include/qt4/QtXml
 )
 
+add_subdirectory(perspective_transform)
 
 IF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "jeanidbg"))
 	SET(CMAKE_C_FLAGS  " -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")

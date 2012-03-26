@@ -8,6 +8,8 @@
 #include <QString>
 #include <QWidget>
 
+// This file is the base class that all cameras should inherit from to interface with the rest of the code.
+
 // Each type of video source will subclass Camera.
 // The constructor needs to add (this) to _cameras.
 // The destructor needs to remove (this) from _cameras.
