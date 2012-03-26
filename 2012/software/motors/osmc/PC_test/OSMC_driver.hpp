@@ -70,6 +70,10 @@ class OSMC_driver
 	bool GetMagnetometerHeading(int& heading, int& X_Value, int& Y_Value);
 
 	private:
+	//Whether to use motors or encoders, or fake it
+	bool useMotors;
+	bool useEncoders;
+	
 	ArduinoInterface ai;
 
 	quadCoderDriver_signed* encoder;
@@ -90,6 +94,7 @@ class OSMC_driver
 	double last_r_error;// m/s error at time t
 	double t;// seconds since unix epoch
 	void getNewVel_pd(const double now_lvel, const double now_rvel, const double dt, int& out_r, int& out_l);
+	static void loadConfig();//load config file to see if we need to use motors or encoders
 };
 
 #endif
