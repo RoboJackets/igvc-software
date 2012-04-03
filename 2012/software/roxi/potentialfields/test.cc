@@ -12,7 +12,7 @@ void printbitmap(bool* bitmap, int width, int height);
 
 int main()
 {
-	IplImage* img = cvLoadImage("../TestFiles/course1.png");
+	IplImage* img = cvLoadImage("../TestFiles/course6.png");
 	// create a window
 	cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE); 
 	cvMoveWindow("mainWin", 100, 100);
