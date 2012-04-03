@@ -215,11 +215,11 @@ void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targe
 	//cout << "I out" << endl;
 	deleteTree(root);
 
-	for (int i = 0; i < visited_set.size(); i++)
+	/*for (int i = 0; i < visited_set.size(); i++)
 	{
 		cout << i << "\nx_ind: " << visited_set[i].x_ind << endl;
 		cout << "y_ind: " << visited_set[i].y_ind << endl;
-	}
+	}*/
 }
 
 /********************************************************************************************************************************/
@@ -296,8 +296,8 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 
 	// Get the vector contribution from the obstacles on the bitmap
 	getAvoidVec(obstacles, map_ang_from_rob, obstaclex, obstacley);
-	cout << "obstacle x " << obstaclex << endl;
-	cout << "obstacle y " << obstacley << endl;
+	/*cout << "obstacle x " << obstaclex << endl;
+	cout << "obstacle y " << obstacley << endl;*/
 	
 	// Get the vector contribution from the goals on the bitmap
 	getImgTargetVec(targets, imagetarx, imagetary);
@@ -311,10 +311,10 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	{
 		getGPSTargetVec(gpstarx, gpstary, dist_from_goal_m, deg2rad(angl_to_goal));
 	}
-	cout << "gps x " << gpstarx << endl;
+	/*cout << "gps x " << gpstarx << endl;
 	cout << "gps y " << gpstary << endl;
 	cout << "dist " << dist_from_goal_m << endl;
-	cout << "angle " << angl_to_goal << endl;
+	cout << "angle " << angl_to_goal << endl;*/
 
 	// Get the vector contribution from the GPS past goal(s)
 	getGPSAvoidVec(gpsavoidx, gpsavoidy);
@@ -493,7 +493,7 @@ void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplI
 	cout << "g score " << node->g_score << endl;
 	cout << "h score " << node->h_score << endl;
 	cout << "f score " << node->f_score << endl;
-	cvWaitKey(1000);
+	cvWaitKey(1);
 
 	// Adds new nodes to root node
 	node->next_c = center;
@@ -816,8 +816,10 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 	double theta = atan2((yt-y0), (xt-x0));
 
 	// Creates vectors pointing away from the obstacle pixel, proportional to the distance from the target
-	x_vel = -(radius-d)*cos(theta);
-	y_vel = -(radius-d)*sin(theta);
+	//x_vel = -(radius-d)*cos(theta);
+	//y_vel = -(radius-d)*sin(theta);
+	x_vel = -1/(d*d)*cos(theta);
+	y_vel = -1/(d*d)*sin(theta);
 
 	//cout << "x/y: " << sqrt((x_vel/y_vel)*(x_vel/y_vel));
 
