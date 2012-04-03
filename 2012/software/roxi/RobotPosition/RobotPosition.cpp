@@ -6,10 +6,10 @@ RobotPosition::RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Contro
 	x=0;	
 	y=0;
 	z=0;
+        coeMag=0.5; coeEncoder=0.5; coeIMU=0.5; coeGPS=0.5;
+	enabledMag=true; enabledEncoder=true; enabledIMU=true; enabledGPS=true;
 	(*magnetometer).update();
 	initBearing=(*magnetometer).getBearing();
-	posFilterCoefficient=POS_TIME_CONSTANT/(POS_TIME_CONSTANT+SAMPLE_PERIOD);
-	orientationFilterCoefficient=ORIENTATION_TIME_CONSTANT/(ORIENTATION_TIME_CONSTANT+SAMPLE_PERIOD);
 	encoder=new EncoderTracking(driver);
 	(*encoder).setTo(0,0,450-initBearing);
 	IMU=&imuObject;	
@@ -23,28 +23,95 @@ void RobotPosition::update()
 {
 	gettimeofday(&currentTime,NULL);
 	timeElapsed=(currentTime.tv_sec-initialTime.tv_sec)*1000+(currentTime.tv_usec-initialTime.tv_usec)/1000;
+	updatePosition();
+	updateOrientation();
+}
+
+void RobotPosition::updatePosition(){
 	GPSState lastState;
 	(*gpsA).get_last_state(lastState);
 	double xGPS;
 	double yGPS;
 	lambert_distance_xy(gpsFirstState,lastState,&xGPS,&yGPS);
+	if(abs(xGPS-x)>=DIFFERENCE_THRESHOLD_POS || abs(yGPS-y)>=DIFFERENCE_THRESHOLD_POS)
+		disableGPS();
+	else if(!enabledGPS)
+		enableGPS(GPS_COE);
 
-
-	(*encoder).update();
 	double xEncoder=(*encoder).getX();
 	double yEncoder=(*encoder).getY();
-	
-	(*magnetometer).update();
-	double magBearing=(*magnetometer).getBearing();
-	x+=xEncoder*(posFilterCoefficient)+xGPS*(1-posFilterCoefficient);
-	y+=yEncoder*(posFilterCoefficient)+yGPS*(1-posFilterCoefficient);
-	(*encoder).setTo(x,y,angle); 
-	
+	if(abs(xEncoder-x)>=DIFFERENCE_THRESHOLD_POS || abs(yEncoder-y)>=DIFFERENCE_THRESHOLD_POS)
+		disableEncoders();
+	else if(!enabledEncoder)
+		enableEncoders(ENCODER_COE);
 
+	x=xGPS*coeGPS+xEncoder*coeEncoder;
+	y=yGPS*coeGPS+yEncoder*coeEncoder;
+
+}
+
+void RobotPosition::updateOrientation(){
+	double magBearing=(*magnetometer).getBearing();
+	if(abs(magBearing-bearing)>=DIFFERENCE_THRESHOLD_ORIENTATION)
+		disableMag();
+	else if(!enabledMag)
+		enableMag(MAG_COE);
+	double encoderBearing=(*encoder).getBearing();
+	if(abs(encoderBearing-bearing)>=DIFFERENCE_THRESHOLD_ORIENTATION)
+		disableMag();
+	else if(!enabledMag)
+		enableMag(ENCODER_COE);
+
+	bearing=coeMag*magBearing+coeEncoder*encoderBearing;
 	
-	//filtering may not be needed for bearing if magnetometer is good enough by itself - determine in testing
-	bearing=magBearing*(1-orientationFilterCoefficient)+((*encoder).getBearing())*orientationFilterCoefficient;
-	//bearing=magBearing;
+}
+
+void RobotPosition::disableGPS(){
+enabledGPS=false;
+coeGPS=0;
+coeEncoder=1;
+}
+
+void RobotPosition::disableIMU(){
+enabledIMU=false;
+coeIMU=0;
+coeMag=1;
+}
+
+void RobotPosition::disableMag(){
+enabledMag=false;
+coeMag=0;
+coeIMU=1;
+}
+
+void RobotPosition::disableEncoders(){
+enabledEncoder=false;
+coeEncoder=0;
+coeGPS=1;
+}
+
+void RobotPosition::enableGPS(double coe){
+enabledGPS=true;
+coeGPS=coe;
+coeEncoder=1-coe;
+}
+
+void RobotPosition::enableIMU(double coe){
+enabledIMU=true;
+coeIMU=coe;
+coeMag=1-coe;
+}
+
+void RobotPosition::enableMag(double coe){
+enabledMag=true;
+coeMag=coe;
+coeIMU=1-coe;
+}
+
+void RobotPosition::enableEncoders(double coe){
+enabledEncoder=true;
+coeEncoder=coe;
+coeGPS=1-coe;
 }
 
 /*
