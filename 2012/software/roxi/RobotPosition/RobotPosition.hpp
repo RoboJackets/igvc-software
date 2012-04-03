@@ -6,20 +6,19 @@
 #include "gps_common.hpp"
 #include "MagnetometerTracking.hpp"
 #include "EncoderTracking.hpp"
-#define POS_TIME_CONSTANT 3
-#define ORIENTATION_TIME_CONSTANT 3
-#define SAMPLE_PERIOD 50
+#define DIFFERENCE_THRESHOLD_POS 5
+#define DIFFERENCE_THRESHOLD_ORIENTATION 1.5
+
+#define ENCODER_COE 0.5
+#define MAG_COE 0.5
+#define GPS_COE 0.5
 
 class RobotPosition
 {
-double x;
-double y;
-double z;
-double angle;
-double bearing;
-double initBearing;
-double posFilterCoefficient;
-double orientationFilterCoefficient;
+double x, y, z;
+double angle, bearing, initBearing;
+double coeMag, coeEncoder, coeIMU, coeGPS;
+bool enabledMag, enabledEncoder, enabledIMU, enabledGPS;
 int updatesSinceReset;
 int timeElapsed;
 GPSState gpsFirstState;
@@ -36,4 +35,15 @@ double getY();
 double getAngle();
 double getBearing();
 int getTimeElapsed();
+void disableGPS();
+void disableIMU();
+void disableMag();
+void disableEncoders();
+void enableGPS(double coe);
+void enableMag(double coe);
+void enableEncoders(double coe);
+void enableIMU(double coe);
+private:
+void updatePosition();
+void updateOrientation();
 };
