@@ -49,7 +49,7 @@ void dotransform(){
 	}
 	
 	cvGetPerspectiveTransform( src,dst,
-                               map_matrix );
+                               map_matrix );//put the transform into mapmatrix
    IplImage* tmp=cvCloneImage(MainImage);
 
   	cvWarpPerspective( MainImage, tmp, map_matrix,
@@ -86,19 +86,26 @@ int main(){
 
 
 		while(1){
-			tmp=cvQueryFrame(cap);	//capture camera frame, but not allowed to release because 
-											//it is a pointer to an internal buffer
-			img=cvCloneImage(tmp);	//copy i's header and data to my buffer
+			tmp=cvQueryFrame(cap);	//capture camera frame, but not allowed to 
+			                        //release because it is a pointer to an internal buffer
+			try{							
+				img=cvCloneImage(tmp);	//copy i's header and data to my buffer
+			}catch(...){							//image data was corrupted, ignore it and 
+												//throw in a fake
+												//as a workaruound
+				cout<<"Ignoring presumed bad jpeg"<<endl;
+				img=cvCreateImage(cvSize(640,480),IPL_DEPTH_8U,3); 
+			}
 			
 			MainImage=img;
 			drawlines();
 			dotransform();//use the four points clicked by user to do a perspective transform 
-			img=MainImage;//Mainimage was altered by tansform
+			img=MainImage;//Mainimage was altered by transform
 			
 			shownow("mainWin",img);
 
 
-			cvReleaseImage(&img);
+			cvReleaseImage(&img);//release mainimage and image?
 			if (waitKey(10)>=0)return 0;
 		}
 	

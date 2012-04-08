@@ -44,3 +44,15 @@ target_link_libraries(ptdemo
 	cvaux
 	highgui
 )
+
+#glut perspective transform demo
+add_executable(gptdemo
+gldemo.cpp
+)
+
+target_link_libraries(gptdemo
+	cv
+	cvaux
+	highgui
+	glut
+)
