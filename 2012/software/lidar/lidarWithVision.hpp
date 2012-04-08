@@ -7,8 +7,15 @@
 #include <opencv/cvinternal.h>
 #include <vector>
 
+#define ROBOT_POS_X_IN_CAMERA_FRAME 0.5
+#define ROBOT_POS_Y_IN_CAMERA_FRAME 0.5
+typedef struct point{
+	int x;
+	int y;
+}Point;
+
+
 typedef struct shape{
-	std::vector <Point> points;
 	int numPoints;
 	float avgX;
 	float avgY;
@@ -18,18 +25,15 @@ typedef struct shape{
 	int minX;
 	int maxY;
 	int minY;
+	std::vector<Point> points;
 }Shape;
 
-typedef struct point{
-	int x;
-	int y;
-}Point;
 
 /*
 take in cartesian points from the lidar, create ipl image of lidar points, erase shadows from camera image.
 */
 IplImage correctVisionWithLidar(float lidarX[], float lidarY[], IplImage* visionImage);
-void buildShape(int currX,int currY, bool* checked, bool* bitMap,std::vector<Point>* currShape);
+void buildShape(int currX,int currY, bool* checked, bool* bitMap,Shape* currShape);
 void addPointToShape(Point point, Shape* addTo);
-void eraseShapeOnBitmap(std::vector<Point> shape,bool** eraseFrom);
-void eraseShadow(Shape shape, IplImage img);
+void eraseShapeOnBitmap(Shape shape,bool* eraseFrom);
+void eraseShadow(Shape shape, IplImage* img);
