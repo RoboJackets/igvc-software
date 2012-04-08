@@ -6,6 +6,10 @@ add_library(NAV200
 	NAV200.cpp
 )
 
+add_library(lidarWithVision
+lidarWithVision.cc
+)
+
 target_link_libraries(NAV200
 	usb
 )
@@ -51,6 +55,7 @@ target_link_libraries(lidartestgui
 	NAV200
 	lidarProc
 	cv
+	cvaux
 	highgui
 
 	plplotd
