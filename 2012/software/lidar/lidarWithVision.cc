@@ -5,15 +5,11 @@ const int RADIUS=3;
 int height;
 int width;
 
-
-
-
 IplImage correctVisionWithLidar(float lidarX[], float lidarY[], IplImage* visionImage){
 	height=visionImage->height;
 	width=visionImage->width;
-	int channels=visionImage->nChannels;
-	int imageArraySize=width*height;
 	bool lidarBitMap[height*width];
+	int imageArraySize=height*width;
 	std::fill_n(lidarBitMap,sizeof(lidarBitMap)/sizeof(bool),false);
 //Construct blotted pixel representation of lidar places
 	for(int i=0;0<sizeof(lidarX)/sizeof(float);i++){
@@ -25,23 +21,22 @@ IplImage correctVisionWithLidar(float lidarX[], float lidarY[], IplImage* vision
 			}
         }
 		
-
-	
-	//Construct checked array with all starting of as unchecked
-	for(int i=0;i<sizeof(lidarBitMap)/sizeof(bool);i++){
+//Construct checked array with all starting of as unchecked
+	for(unsigned int i=0;i<sizeof(lidarBitMap)/sizeof(bool);i++){
                 if(lidarBitMap[i]){
                 	bool checked[imageArraySize];
                 	std::fill_n(checked,sizeof(checked)/sizeof(bool),false);
                         Shape presentShape;
                         buildShape(i%width,i/width,checked,lidarBitMap,&presentShape);
                         eraseShapeOnBitmap(presentShape,lidarBitMap);
-                        eraseShadow(presentShape, &visionImage);
+                        eraseShadow(presentShape, visionImage);
 	}
 	}	
+	return *visionImage;
 }
 
 
-void buildShape(int currX,int currY, bool* checked, bool* bitMap,std::vector<Point>* currShape){
+void buildShape(int currX,int currY, bool* checked, bool* bitMap,Shape* currShape){
         Point currPoint={currX,currY};
 	checked[currX+currY*width]=true;
         
@@ -88,9 +83,9 @@ void addPointToShape(Point toAdd, Shape* addTo){
 		addTo->minY=toAdd.y;
 }
 
-void eraseShapeOnBitmap(Shape shape,bool** eraseFrom){
+void eraseShapeOnBitmap(Shape shape,bool* eraseFrom){
     for(int i=0;i<shape.numPoints;i++){
-        (*eraseFrom)[shape.points.at(i).x+shape.points.at(i).y*width]=false;
+        eraseFrom[shape.points.at(i).x+shape.points.at(i).y*width]=false;
     }
 }
 
@@ -100,8 +95,7 @@ void eraseShadow(Shape shape, IplImage* img){
 	double slopeY=shape.avgY-ROBOT_POS_Y_IN_CAMERA_FRAME*height;
 	double translateX=0;
 	double translateY=0;
-	int channels=visionImage->nChannels;
-	int imageArraySize=width*height;
+	int channels=img->nChannels;
 	if(slopeX>slopeY){	
 		slopeX/=slopeX;
 		slopeY/=slopeY;
@@ -124,7 +118,7 @@ void eraseShadow(Shape shape, IplImage* img){
 			if(shape.points.at(i).x>=0 && shape.points.at(i).x<=width && shape.points.at(i).y>=0 && shape.points.at(i).y<=height){
 				done=1;
 				for(int c=0;c<channels;c++)
-					img->image[(shape.points.at(i).x+shape.points.at(i).y*width)*channels+c]=0;
+					img->imageData[(shape.points.at(i).x+shape.points.at(i).y*width)*channels+c]=0;
 			}
 			translateX+=slopeX;
 			translateY+=slopeY;
