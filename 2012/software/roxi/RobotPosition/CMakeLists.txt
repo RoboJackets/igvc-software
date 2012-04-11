@@ -7,6 +7,15 @@ add_library(robot_position
 	EncoderTracking.cpp	
 )
 
+add_library(Coordinates
+	Coordinates.cpp
+)
+
+target_link_libraries(Coordinates
+	opencv
+	highgui
+
+)
 
 
 target_link_libraries(robot_position
