@@ -1,4 +1,5 @@
 #include "RobotPosition.hpp"
+
 RobotPosition::RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Control& imuObject)
 {
 	magnetometer=new MagnetometerTracking(driver);
@@ -6,8 +7,9 @@ RobotPosition::RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Contro
 	x=0;	
 	y=0;
 	z=0;
-        coeMag=0.5; coeEncoder=0.5; coeIMU=0.5; coeGPS=0.5;
-	enabledMag=true; enabledEncoder=true; enabledIMU=true; enabledGPS=true;
+        coeMag=0; coeEncoder=0; coeIMU=0; coeGPS=1;
+	//State for all sensors but GPS initially off(GPS is required)
+	enabledMag=false; enabledEncoder=false; enabledIMU=false; enabledGPS=true;
 	(*magnetometer).update();
 	initBearing=(*magnetometer).getBearing();
 	encoder=new EncoderTracking(driver);
@@ -17,6 +19,16 @@ RobotPosition::RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Contro
 	(*gpsA).get_last_state(gpsFirstState);
 	timeElapsed=0;
 	gettimeofday(&initialTime,NULL);
+}
+
+RobotPosition::RobotPosition(double X, double Y, double Angle){
+	x=X;
+	y=Y;
+	angle=Angle;
+}
+
+RobotPosition RobotPosition::getInstance(){
+	return instance;
 }
 
 void RobotPosition::update()
