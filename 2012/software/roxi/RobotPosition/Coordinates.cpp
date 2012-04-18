@@ -29,3 +29,29 @@ CvMat* getWorldToRobotMat(RobotPosition pos){
 	cvInv(inverseMat, resultMat, CV_LU);
 	return resultMat;
 }
+
+void convertRobotToWorld(double *x, double *y, RobotPosition pos){
+	int coordinates[]={*x, *y, 1};
+	CvMat posMat=cvMat(3,1,CV_64FC1,coordinates);
+	CvMat* result=cvCreateMat(3,1,CV_64FC1);
+	cvMatMul(getRobotToWorldMat(pos),&posMat,result);
+	*x =cvmGet(result,0,0);
+	*y=cvmGet(result,1,0);
+}
+
+void convertWorldToRobot(double *x, double *y, RobotPosition pos){
+	int coordinates[]={*x, *y, 1};
+	CvMat posMat=cvMat(3,1,CV_64FC1,coordinates);
+	CvMat* result=cvCreateMat(3,1,CV_64FC1);
+	cvMatMul(getWorldToRobotMat(pos),&posMat,result);
+	*x =cvmGet(result,0,0);
+	*y=cvmGet(result,1,0);
+}
+
+void convertRobotToWorld(double *x, double *y){
+	convertRobotToWorld(x,y,RobotPosition::getInstance());
+}
+
+void convertWorldToRobot(double *x, double *y){
+	convertWorldToRobot(x,y,RobotPosition::getInstance());
+}
