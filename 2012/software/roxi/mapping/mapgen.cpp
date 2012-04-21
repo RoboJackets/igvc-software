@@ -7,6 +7,7 @@
 #include "PointParamEstimator.h"
 #include "Ransac.h"
 #include <iostream>
+#include "Coordinates.h"
 #include <omp.h>
 
 
@@ -353,7 +354,7 @@ int MapGen::processFeatures()
 	}
 
 	//printMatchesVector(matchList);
-
+	
 
 	/*
 	 * Run RANSAC on found features
@@ -373,11 +374,12 @@ int MapGen::processFeatures()
 	}
 
 	/* crude check for errors */
+	// matCamToWorld=getRobotToWorldMat; TODO : implementation of matrix using robot position  - eventually replace current homography code
 	if ( cvDet(matCamToCam) == 0 )
 	{
 		return 0; // bad matrix
 	}
-
+	
 	//printCv33Matrix(matCamToCam);
 
 
