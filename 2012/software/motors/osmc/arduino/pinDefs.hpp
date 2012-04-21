@@ -27,9 +27,9 @@ const int joystickEnable = 8;
 
 const int LIGHT_PIN_LB = 13;
 
-const byte magCLK = 8;
-const byte magEN = 9;
-const byte magDIO = 10;
+const byte magCLK = 10;
+const byte magEN = 11;
+const byte magDIO = 12;
 
 
 

@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <fstream>
 #include "XmlConfiguration.h"
 
-using std::cout;
-using std::endl;
+using namespace std;
+
 /*************** Public Functions ***********************************************************************************************/
 // Creates new potentialfields object and initializes fields 
 #if RUN_MODE == GPS
@@ -66,6 +67,11 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 	{
 		currentGoal = (currentGoal+1) % GPS_Goals.size();
 	}
+
+	// Write to GPS points file
+	ofstream gpsfile;
+	gpsfile.open("gps.txt", ios::app);
+	gpsfile << "lat: " << lat << "\tlon: " << lon << "\tangle: " << ang << endl;
 }
 #elif RUN_MODE == ROBOT_POS
 void potentialfields::dropWaypoint(double x, double y, double ang)
