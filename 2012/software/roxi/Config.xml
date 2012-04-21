@@ -17,7 +17,7 @@
     <useEncoders>000 </useEncoders>
 
 	<!-- Guppy Misc Settings -->
-	<useFirewireCamera>001</useFirewireCamera>  <!-- set to 0 to load video  or cvcam--->
+	<useFirewireCamera>001</useFirewireCamera>  <!-- set to 0 to load video  or cvcam -->
 	<gain>19</gain>
 	<shutter>130</shutter>
 	<gamma>00</gamma>
