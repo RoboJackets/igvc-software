@@ -349,6 +349,7 @@ void Robot::processFunc()
 	}
 	*/
 	/* glut mask init hack */
+	RobotPosition.init(osmc,gps,lidar);
 	static bool getMask = true;
 	if (getMask)
 	{
@@ -383,7 +384,7 @@ void Robot::processFunc()
 	}
 
 	/* If it's using robot position */
-	/*
+	/*Also call RobotPosition.init(osmc, gps, IMU (NULL for imu?) TODO: transition to robot position code
 	if (!pfdeclared)
 	{
 		// TODO: fill this in correctly
