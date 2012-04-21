@@ -505,7 +505,9 @@ bool OSMC_driver::GetMagnetometerHeading(int& heading, int& X_Value, int& Y_Valu
 	magnetometer_pk_t out;
 	memcpy(&out, data, sizeof(magnetometer_pk_t));
 
-	heading = out.angle;	
+	heading = out.angle;
+	heading += 360;
+	heading %= 360;	
 	X_Value = out.X_val;	
 	Y_Value = out.Y_val;	
 	delete[] data;

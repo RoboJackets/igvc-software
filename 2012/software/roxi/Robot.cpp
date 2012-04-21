@@ -398,14 +398,16 @@ void Robot::processFunc()
 		if ( mapper.genMap() )
 		{
 			mapper.processMap(heading_mapping);
-			GPSState state;
-			gpsA.get_last_state(state);
-			int angle, dummy1, dummy2;
-			osmcd->GetMagnetometerHeading(angle, dummy1, dummy2);
-			pf.dropWaypoint(state.lat, state.lon, angle);			
-			pf.getVectorMotor(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
 		}
 	}
+
+	/* Do potential fields */
+	GPSState state;
+	gpsA.get_last_state(state);
+	int angle, dummy1, dummy2;
+	osmcd->GetMagnetometerHeading(angle, dummy1, dummy2);
+	pf.dropWaypoint(state.lat, state.lon, angle);			
+	pf.getVectorMotor(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
 
 	/*if (doMapping)
 	{
@@ -421,7 +423,13 @@ void Robot::processFunc()
 	/* Drive Robot via motor commands (GO!) */
 	if (useMotors)
 	{
-		if (doMapping)
+		if (true)
+		{
+			/* drive via potential fields */
+			heading_main.x = k_motors*heading_pathplan.x + (1-k_motors)*heading_main.x;
+			heading_main.y = k_motors*heading_pathplan.y + (1-k_motors)*heading_main.y;
+		}		
+		else if (doMapping)
 		{
 			/* drive via mapping */
 			/* Average motor commands from mapping (account for high frame rate)
