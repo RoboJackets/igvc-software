@@ -33,7 +33,7 @@ A digital compass, the Hitachi HM55B Compass Module is used to get an absolute m
 
 Main power for the robot comes from two sealed lead acid gell-cell batteries. These batteries are connected in series to produce a nominal 24 VDC supply for the motors and other systems. This provides approximately 672 $W \cdot hr$ of energy and approximately 1 hour of runtime of the motors.
 
-The batteries are connected to a power distribution board, which allows the connection to each motor to be fused with a limit of 40 Amps, allowing power to be cut in the event of a motor stall to prevent damage to the H-bridge and motor. Power is also provided to several DC-DC boost converters, which output 5 VDC, 9 VDC, 12 VDC, and 19.5 VDC for other electronics on the robot.
+The batteries are connected to a power distribution board, which allows the connection to each motor to be fused with a limit of 40 Amps, allowing power to be cut in the event of a motor stall to prevent damage to the H-bridge and motor. Power is also provided to several DC-DC boost converters, which output 5 VDC, 9 VDC, and 19.5 VDC for other electronics on the robot.
 
 \subsubsection{H Bridge}
 
@@ -41,7 +41,7 @@ Each motor is connected to an Open Source Motor Controller (OSMC) H-bridge. This
 
 \subsubsection{Component Power}
 
-Other systems are provided power through the use of DC-DC converters to produce voltages at 5 V, 9 V, 12 V, and 19.5 V. This allows for the usb tethered microcontrollers, the sensors, and the main computer to be powered off of the main lead acid batteries. This greatly simplifies charging the robot, as only one battery system needs to be maintained.
+Other systems are provided power through the use of DC-DC converters to produce voltages at 5 V, 9 V, and 19.5 V. This allows for the usb tethered microcontrollers, the sensors, and the main computer to be powered off of the main lead acid batteries. This greatly simplifies charging the robot, as only one battery system needs to be maintained.
 
 \begin{figure}[H]
 \begin{center}
