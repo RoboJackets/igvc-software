@@ -88,7 +88,7 @@ Robot::Robot(const char* filename)
 		videofilename = "";
 
 	/* Start gps*/
-	gpsA.open("/dev/ttyGPS", 38400);
+	gpsA.open("/dev/ttyGPS", 4800);
 	gpsA.start();
 	/* If using robot position
 	pfdeclared = false;*/
