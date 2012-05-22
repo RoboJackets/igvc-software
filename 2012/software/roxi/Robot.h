@@ -87,9 +87,6 @@ public:
 	// gets image mask to mark void transform area
 	void getGlutMask(int call);
 
-	// starts the robot
-	void startRobotThread(void* obj);
-
 	/* the robot thread
 	 * this is static so "atexit()" works */
 	static pthread_t robotThread;

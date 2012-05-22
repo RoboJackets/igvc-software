@@ -23,14 +23,7 @@ Robot* glRobot; // for glut
 static GLuint cameraImageTextureID; // for glut
 int glutwindow; // for glut
 int saveRawVideo; // flag for saving video - global because of glut use
-void* robot_thread_caller(void* arg)
-{
-	saveRawVideo=0; // don't save video yet
-	glRobot = (Robot*)arg; // assign pointer to static robot object for glut to use
-	static_cast<Robot*>(arg)->Go(); // start the robot
-	glRobot->destroy(); // kill the robot;
-	return NULL;
-}
+
 void robot_process_function_caller(void)
 {
 	glRobot->processFunc(); // for glutMainLoop
@@ -86,6 +79,9 @@ Robot::Robot(const char* filename)
 		videofilename = filename;
 	else
 		videofilename = "";
+	
+	saveRawVideo=0; // don't save video yet
+	glRobot = this; // assign pointer to static robot object for glut to use
 
 	/* Start gps*/
 	gpsA.open("/dev/ttyGPS", 4800);
@@ -445,12 +441,6 @@ void Robot::processFunc()
 
 	/* pause (for testing) */
 	//cvWaitKey(0);
-}
-
-void Robot::startRobotThread(void* obj)
-{
-	//sleep(.5);
-	robot_thread_caller(obj);
 }
 
 int Robot::connectToVideoSource()
