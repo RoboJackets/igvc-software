@@ -137,41 +137,9 @@ int Robot::init()
 
 	/* select and connect to the camera source ,
 	 *   and possibly load a video */
-	if (USE_FIREWIRE_CAMERA)
+	if(!connectToVideoSource())
 	{
-		/* connect to the camera */
-		connectToCamera();
-	}
-	else
-	{
-		if (videofilename=="")
-		{
-			/* connect to the camera */
-			connectToCamera();
-		}
-		else
-		{
-			/* load a video */
-			camera_usb.connect(0, videofilename.c_str());
-		}
-	}
-
-	/* try to grab a frame to get image size */
-	if (USE_FIREWIRE_CAMERA)
-	{
-		if (!camera_firewire.GrabCvImage())
-		{
-			printf("Error getting camera frame \n");
-			return 0; // fail
-		}
-	}
-	else
-	{
-		if (!camera_usb.GrabCvImage())
-		{
-			printf("Error getting camera frame \n");
-			return 0; // fail
-		}
+		return 0;
 	}
 
 	/* setup image selection bar */
@@ -348,8 +316,10 @@ void Robot::processFunc()
 		osmcd->setLight(MC_LIGHT_PULSING);
 	}
 	*/
+	
+
+	
 	/* glut mask init hack */
-	RobotPosition.init(osmc,gps,lidar);
 	static bool getMask = true;
 	if (getMask)
 	{
@@ -384,7 +354,10 @@ void Robot::processFunc()
 	}
 
 	/* If it's using robot position */
-	/*Also call RobotPosition.init(osmc, gps, IMU (NULL for imu?) TODO: transition to robot position code
+	/*Also call RobotPosition.init(osmc, gps, IMU (NULL for imu?) TODO: transition to robot position code */
+	RobotPosition.init(osmc,gps,lidar);
+	
+	/*
 	if (!pfdeclared)
 	{
 		// TODO: fill this in correctly
@@ -501,6 +474,39 @@ void Robot::startRobotThread(void* obj)
 	robot_thread_caller(obj);
 }
 
+int Robot::connectToVideoSource()
+{
+	if (videofilename=="")
+	{
+		/* connect to the camera */
+		connectToCamera();
+	}
+	else
+	{
+		/* load a video */
+		camera_usb.connect(0, videofilename.c_str());
+	}
+
+	/* try to grab a frame to get image size */
+	if (USE_FIREWIRE_CAMERA)
+	{
+		if (!camera_firewire.GrabCvImage())
+		{
+			printf("Error getting camera frame \n");
+			return 0; // fail
+		}
+	}
+	else
+	{
+		if (!camera_usb.GrabCvImage())
+		{
+			printf("Error getting camera frame \n");
+			return 0; // fail
+		}
+	}
+	return 1;
+}
+
 void Robot::connectToCamera()
 {
 	if (USE_FIREWIRE_CAMERA)
@@ -508,7 +514,6 @@ void Robot::connectToCamera()
 		if (!camera_firewire.connect())
 		{
 			printf("Camera connect failure \n");
-			printf("Try using sudo... \n");
 			exit(-1);
 		}
 		else
@@ -522,7 +527,6 @@ void Robot::connectToCamera()
 		if (!camera_usb.connect())
 		{
 			printf("Camera connect failure \n");
-			printf("Try using sudo... \n");
 			exit(-1);
 		}
 		else
