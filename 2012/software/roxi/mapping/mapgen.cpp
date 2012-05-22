@@ -7,7 +7,7 @@
 #include "PointParamEstimator.h"
 #include "Ransac.h"
 #include <iostream>
-#include "Coordinates.h"
+#include "Coordinates.hpp"
 #include <omp.h>
 
 

@@ -465,8 +465,7 @@ int Robot::connectToVideoSource()
 	if (videofilename=="")
 	{
 		/* connect to the camera */
-		connectToCamera();
-		
+		connectToCamera();	
 	}
 	else
 	{
