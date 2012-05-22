@@ -80,12 +80,9 @@ Robot::Robot(const char* filename)
 	else
 		videofilename = "";
 	
-	saveRawVideo=0; // don't save video yet
-	glRobot = this; // assign pointer to static robot object for glut to use
-
-	/* Start gps*/
-	gpsA.open("/dev/ttyGPS", 4800);
-	gpsA.start();
+	/* Quit if we can't initialize properly */
+	if (!init())
+		exit(-1);
 	/* If using robot position
 	pfdeclared = false;*/
 }
@@ -133,10 +130,15 @@ int Robot::init()
 
 	/* select and connect to the camera source ,
 	 *   and possibly load a video */
+	saveRawVideo=0; // don't save video yet
 	if(!connectToVideoSource())
 	{
 		return 0;
 	}
+	
+	/* setup gps */
+	gpsA.open("/dev/ttyGPS", 4800);
+	gpsA.start();
 	
 	/* setup osmc control boards */
 	#ifdef OSMC_2WD
@@ -235,12 +237,8 @@ void Robot::LoadXMLSettings()
 void Robot::Go()
 {
 	/*
-	 * This function initializes and starts the robot
+	 * This function starts the robot's various threads
 	 */
-
-	/* Quit if we can't initialize properly */
-	if (!init())
-		return;
 
 	run_vel_thread = true;
 	vel_update_thread = new boost::thread(&Robot::update_vel_func, this);
@@ -549,7 +547,10 @@ void Robot::initGlut()
 	// dummy args
 	int argc = 0;
 	char** argv = NULL;
-
+	
+	//expose robot to gl code
+	glRobot = this; // assign pointer to static robot object for glut to use
+	
 	// initialization
 	glutInit(&argc, argv);
 	glutInitWindowSize(	ImageBufferManager::getInstance().getvisCvRaw()->width, 
