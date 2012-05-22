@@ -43,7 +43,7 @@ bool gps::get_last_state(GPSState& state)
 	if(delta > .5)
 	{
 		std::cerr << "GPS Marker Out Of Date!" << std::endl;
-		return false;
+		//return false;//if we want it to be fatal HACK
 	}
 
 
@@ -51,7 +51,7 @@ bool gps::get_last_state(GPSState& state)
 	if( (state_queue.back().qual != GPS_QUALITY_NON_DIFF) && (state_queue.back().qual != GPS_QUALITY_WAAS))
 	{
 		std::cerr << "GPS state bad - " << int(state_queue.back().qual) << std::endl;
-		return false;
+		//return false;//if we want it to be fatal HACK
 	}
 
 
@@ -166,7 +166,8 @@ void gps::handle_serial_read(const boost::system::error_code& ec, size_t len, bo
 	{
 		GPSState state;
 		//if(nmea::decodeGPGGA(line, state))
-		if(nmea::decodeGPRMC(line, state))
+		//if(nmea::decodeGPRMC(line, state))
+		if(gps::parse_message(line, state))
 		{
 			gettimeofday(&state.laptoptime, NULL);
 			boost::mutex::scoped_lock lock(state_queue_mutex);
