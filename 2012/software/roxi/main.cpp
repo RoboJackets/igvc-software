@@ -17,9 +17,9 @@ int main(int argc, char **argv)
 	 * Start robot main loop in a thread
 	 * (do vision processing, sensors, and drive control)
 	 */
-	//char* input = (argc > 1) ? argv[1] : NULL
 	Robot r(argv[1]);
-	r.startRobotThread(&r); // this doesn't return
+	r.Go(); // start the robot
+	r.destroy(); // kill the robot;
 
 	return 0;
 }
