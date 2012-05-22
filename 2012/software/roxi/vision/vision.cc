@@ -92,7 +92,7 @@ void Vision::init()
 	/* load in vision settings */
 	LoadVisionXMLSettings();
 	
-	
+	ImageBufferManager::getInstance().init();
 
 	/*** SweeperLines ****************************************************/
 	if ( DO_TRANSFORM )

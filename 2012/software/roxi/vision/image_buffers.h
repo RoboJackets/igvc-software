@@ -62,8 +62,7 @@ public:
 private:
 
 	
-// NOTE: these MUST be initialized in "Robot::init()"
-// EDFU : moved initialization to vision::init
+// NOTE: these MUST be initialized in "Vision::init()"
  IplImage* visCvRaw;
  IplImage* visCvDebug;
  IplImage* visCvRedChannel;
