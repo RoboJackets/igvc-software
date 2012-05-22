@@ -169,6 +169,9 @@ int Robot::init()
 
 	/* setup vision module */
 	vp.init();
+	
+	/* Setup video card processing */
+	initGlut();
 
 	/* setup slam processing module */
 	mapper.init();
@@ -239,21 +242,7 @@ void Robot::Go()
 	if (!init())
 		return;
 
-	/* Quit if there is no camera */
-	if (USE_FIREWIRE_CAMERA)
-	{
-		if (!camera_firewire.isValid())
-		{
-			return; // fail
-		}
-	}
-	else
-	{
-		if (!camera_usb.isValid())
-		{
-			return; // fail
-		}
-	}
+
 
 	#ifdef OSMC_2WD
 		osmcd = new OSMC_driver;
@@ -273,9 +262,6 @@ void Robot::Go()
 
 	run_gps_thread = true;
 	gps_update_thread = new boost::thread(&Robot::update_gps_func, this);
-
-	/* Setup video card processing */
-	initGlut();
 
 
 	/*
@@ -355,7 +341,7 @@ void Robot::processFunc()
 
 	/* If it's using robot position */
 	/*Also call RobotPosition.init(osmc, gps, IMU (NULL for imu?) TODO: transition to robot position code */
-	RobotPosition.init(osmc,gps,lidar);
+	//RobotPosition.init(osmc,gps,lidar);
 	
 	/*
 	if (!pfdeclared)
@@ -480,16 +466,23 @@ int Robot::connectToVideoSource()
 	{
 		/* connect to the camera */
 		connectToCamera();
+		
 	}
 	else
 	{
 		/* load a video */
 		camera_usb.connect(0, videofilename.c_str());
 	}
-
+	
+	
 	/* try to grab a frame to get image size */
 	if (USE_FIREWIRE_CAMERA)
 	{
+		if (!camera_firewire.isValid())
+		{
+			printf("Error getting camera \n");
+			return 0; // fail
+		}
 		if (!camera_firewire.GrabCvImage())
 		{
 			printf("Error getting camera frame \n");
@@ -498,12 +491,21 @@ int Robot::connectToVideoSource()
 	}
 	else
 	{
+		if (!camera_usb.isValid())
+		{
+			printf("Error getting camera or video \n");
+			return 0; // fail
+		}
 		if (!camera_usb.GrabCvImage())
 		{
 			printf("Error getting camera frame \n");
 			return 0; // fail
 		}
 	}
+	
+
+	
+	
 	return 1;
 }
 
