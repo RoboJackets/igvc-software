@@ -141,7 +141,17 @@ int Robot::init()
 	{
 		return 0;
 	}
-
+	
+	/* setup osmc control boards */
+	#ifdef OSMC_2WD
+		osmcd = new OSMC_driver;
+	#elif defined(OSMC_4WD)
+		osmcd = new OSMC_4wd_driver;
+	#else
+		#error "Must define OSMC_2WD or OSMC_4WD"
+	#endif
+	osmcd->setLight(MC_LIGHT_PULSING);
+	
 	/* setup image selection bar */
 	int numberOfViews = 15; // important!!!
 	cvCreateTrackbar("bar","display",&trackbarVal,numberOfViews,trackbarHandler);
@@ -241,17 +251,6 @@ void Robot::Go()
 	/* Quit if we can't initialize properly */
 	if (!init())
 		return;
-
-
-
-	#ifdef OSMC_2WD
-		osmcd = new OSMC_driver;
-	#elif defined(OSMC_4WD)
-		osmcd = new OSMC_4wd_driver;
-	#else
-		#error "Must define OSMC_2WD or OSMC_4WD"
-	#endif
-	osmcd->setLight(MC_LIGHT_PULSING);
 
 	run_vel_thread = true;
 	vel_update_thread = new boost::thread(&Robot::update_vel_func, this);
