@@ -165,12 +165,6 @@ int Robot::init()
 	/* Init default view (debug=1) */
 	trackbarHandler( trackbarVal );
 
-	// EDFU remove this!!
-	/* init all CV images here */
-	{
-		ImageBufferManager::getInstance().init();
-	}
-
 	/* set cleanup on exit */
 	atexit(Robot::destroy);
 
