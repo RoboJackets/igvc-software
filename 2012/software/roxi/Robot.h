@@ -94,13 +94,6 @@ public:
 	 * this is static so "atexit()" works */
 	static pthread_t robotThread;
 
-	// connects to the camera (USB or 1394)
-	void connectToCamera();
-	// sorry to hack camera sorce this way...
-	int USE_FIREWIRE_CAMERA;
-	// to load a video
-	std::string videofilename;
-
 	// gets raw image
 	int GrabImage();
 
@@ -177,6 +170,18 @@ public:
 	//std::deque< boost::tuple<float,float> > lidar_linear_regions;
 	//boost::tuple<float,float> longest_linear_region;
 	//boost::tuple<float,float> coord[NAV200::Num_Points];
+private:
+
+	//camera setup
+	// connects to camera or video file
+	int connectToVideoSource();
+	// connects to the camera (USB or 1394)
+	void connectToCamera();
+	// sorry to hack camera sorce this way...
+	int USE_FIREWIRE_CAMERA;
+	// to load a video
+	std::string videofilename;
+	
 };
 
 #endif /*ROBOT_H_*/
