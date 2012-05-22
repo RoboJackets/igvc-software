@@ -12,7 +12,9 @@ add_library(Coordinates
 )
 
 target_link_libraries(Coordinates
-	opencv
+	#CV stuff
+	cv
+	cvaux
 	highgui
 
 )

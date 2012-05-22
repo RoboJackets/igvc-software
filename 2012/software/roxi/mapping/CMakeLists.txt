@@ -12,6 +12,7 @@ include_directories(
 	${IGVC_SOURCE_DIR}/gps
 	${IGVC_SOURCE_DIR}/roxi
 	${IGVC_SOURCE_DIR}/roxi/vision
+	${IGVC_SOURCE_DIR}/roxi/RobotPosition
 	/usr/include/opencv
 	/usr/include/qt4
 	/usr/include/qt4/Qt
@@ -32,9 +33,12 @@ add_library(roxi_mapping
 
 target_link_libraries(roxi_mapping	
 	gps
+	Coordinates
+	#CV stuff
 	cv
 	cvaux
 	highgui
+	
 )
 
 #add_executable(displayTest
