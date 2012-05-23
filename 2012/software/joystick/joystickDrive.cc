@@ -196,18 +196,17 @@ void joystickDrive::setMotor()
 		rvel += (rvel >= 0) ? 30 : -30;
 		lvel += (lvel >= 0) ? 30 : -30;
 	}
-	//backward
-	/*if((joystickButtons & ) == )
+	/*//backward
+	if((joystickButtons & 10) == 10)
 	{
 		rvel -= (rvel >= 0) ? 30 : -30;
 		lvel -= (lvel >= 0) ? 30 : -30;
 	}
-	if ((joystickButtons & ) == )
+	if ((joystickButtons & 40) == 40)
 	{
 		rvel -= (rvel >= 0) ? 30 : -30;
 		lvel -= (lvel >= 0) ? 30 : -30;
-	}
-	*/
+	}*/
 	//force tight turn
 	if((joystickButtons & 1) == 1)
 	{
@@ -219,10 +218,10 @@ void joystickDrive::setMotor()
 	}
 
 
-	std::cout << "btn:" << joystickButtons << "\tleft at ("<< leftAnalogX << "," << leftAnalogY << ") right at (" << rightAnalogX << "," << rightAnalogY << ")\twould have set lvel: " << lvel << " rvel: " << rvel << std::endl;
+	std::cout << /*"btn:" << joystickButtons << */"\tleft at ("<< leftAnalogX << "," << leftAnalogY << ") right at (" << rightAnalogX << "," << rightAnalogY << ")\twould have set lvel: " << lvel << " rvel: " << rvel << std::endl;
 
 	// Find button values
-	printLoop();
+	//printLoop();
 
 	//if(m_motorCtr->setMotorPWM(lvel, rvel,lvel, rvel))
 	if(m_motorCtr->setMotorPWM(rvel, lvel,rvel, lvel))
