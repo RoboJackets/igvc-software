@@ -73,6 +73,7 @@ class OSMC_driver
 	//Whether to use motors or encoders, or fake it
 	bool useMotors;
 	bool useEncoders;
+	bool useMagnetometer;
 	
 	ArduinoInterface ai;
 
