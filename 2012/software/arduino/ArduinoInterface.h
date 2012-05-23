@@ -52,6 +52,7 @@ public:
 private:
 	/* Private serial interface */
 	int arduinoFD;
+	byte arduinoBoardID;
 	bool writeFully(int fd, const void* buf, size_t numBytes);
 	bool readFully(int fd, void* buf, size_t numBytes);
 	int serialportInit(const char* serialport, speed_t baud);
