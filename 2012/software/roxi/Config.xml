@@ -15,6 +15,7 @@
     <doVision>   001 </doVision>
     <useMotors>  000 </useMotors>
     <useEncoders>000 </useEncoders>
+    <useMagnetometer>  001 </useMagnetometer>
 
 	<!-- Guppy Misc Settings -->
 	<useFirewireCamera>001</useFirewireCamera>  <!-- set to 0 to load video  or cvcam -->
