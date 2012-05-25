@@ -22,6 +22,11 @@ int GuppyCam::connect()
 	}
 
 	std::vector<Camera::DCam*> cam = Camera::DCam::availableCameras();
+	if (cam.size()==0)
+	{
+		printf("Error connecting to camera \n");
+		return 0;
+	}
 	_dcam = cam[0];
 	_dcam->open();
 	_camera = _dcam->camera();
@@ -51,6 +56,10 @@ bool GuppyCam::GrabCvImage()
 	return true;
 }
 
+IplImage * GuppyCam::ReturnFrame()
+{
+	return _dcam->read_frame();
+}
 
 
 void GuppyCam::setGain(int value)
