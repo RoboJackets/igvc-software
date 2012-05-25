@@ -10,9 +10,11 @@ using namespace std;
 CvCapture* camera=cvCaptureFromCAM(0);//capture from default camera
 static IplImage *MainImage;
 CvMat*  map_matrix=0;
+int useFirewire;
 
 #include "mouse_callback.cpp"
 #include "util.cpp"//utility functions
+#include "firewire_harness.cpp"
 
 
 
@@ -36,6 +38,9 @@ void dotransform(){
 	cvGetPerspectiveTransform( src,dst,
                                map_matrix );//put the transform into mapmatrix
                                
+   cvSave( "PerspectiveMapMatrix.xml", map_matrix  );
+   
+                               
    //printMat(map_matrix);//for debug
    IplImage* tmp=cvCloneImage(MainImage);
 
@@ -55,8 +60,11 @@ void cvDisplay(){
 	//
 	//Capture a camera frame and store in MainImage
 	//
-	tmp=cvQueryFrame(camera);	//capture camera frame, but not allowed to 
-			                  //release because it is a pointer to an internal buffer
+	
+	//capture camera frame (Don't release this one)
+	tmp=useFirewire?camera_firewire.ReturnFrame():cvQueryFrame(camera);
+	
+	
 	try{				
 		cvReleaseImage(&MainImage);			
 		MainImage=cvCloneImage(tmp);	//copy i's header and data to my buffer
@@ -143,11 +151,18 @@ void display(void)
    CvMat cv2gl=cvMat(4,4,CV_64FC1,cv2gldat);
    cvInvert(&gl2cv,&cv2gl);	//invert to get the reverse transformation
    glMultMatrixd(cv2gl.data.db);
-   
+  
    //tack on the perspective transform from opencv
-   if(map_matrix) multMat2d(map_matrix);//use the opencv projection matrix
+   //if(map_matrix) multMat2d(map_matrix);//use the opencv projection matrix
+   if(map_matrix){
+ 
+   	cvReleaseMat(&map_matrix);
+   	map_matrix=(CvMat*)cvLoad( "PerspectiveMapMatrix.xml" );
+   	multMat2d(map_matrix);
+   	cout<<"Matrix Loaded"<<endl;
+    	//multMat2d((CvMat*)cvLoad( "PerspectiveMapMatrix.xml" ));//do it from file
+	}
    
-
    
    //draw an easily recognizable test object
    glColor3f (0.5, 0.5, 1.0);
@@ -185,10 +200,15 @@ void reshape (int w, int h)
 
 int main(int argc, char** argv)
 {
-	   //setup opencv stuff
+	//setup camera
+	useFirewire=connectToCamera()?0:1;
+
+	//setup opencv stuff
 	cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE); 
 	cvMoveWindow("mainWin", 100, 100);
 	cvSetMouseCallback( "mainWin", mouse_callback, (void*) MainImage);
+	
+
 	
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
