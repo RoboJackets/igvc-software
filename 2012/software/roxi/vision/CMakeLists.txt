@@ -1,3 +1,9 @@
+include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
+FIND_PACKAGE( Qt4 REQUIRED )
+QT4_WRAP_CPP(MOC_SRCS 
+DCam_Config.h
+)
+
 include_directories(
 	${IGVC_SOURCE_DIR}/roxi
 	/usr/include/qt4
@@ -9,15 +15,8 @@ include_directories(
 
 add_subdirectory(perspective_transform)
 
-IF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "jeanidbg"))
-	SET(CMAKE_C_FLAGS  " -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
-	SET(CMAKE_CXX_FLAGS " -march=native -pipe -g3 -O0 -Wall -Wextra -pthread -DQT_THREAD_SUPPORT")
-ELSEIF( (${ROBOT_REV} MATCHES "candiii") OR (${ROBOT_REV} MATCHES "jeani"))
-	SET(CMAKE_C_FLAGS  " -march=native -pipe -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -DQT_THREAD_SUPPORT -fopenmp")
-	SET(CMAKE_CXX_FLAGS " -march=native -pipe -g3 -O3 -Wall -Wextra -Wuninitialized -Werror=uninitialized -pthread -DQT_THREAD_SUPPORT -fopenmp")
-ENDIF((${ROBOT_REV} MATCHES "candiiidbg") OR (${ROBOT_REV} MATCHES "jeanidbg"))
-
 add_library(roxi_vision
+	${MOC_SRCS}	
 	CVcam.cpp
 	DCam.cpp
 	image_buffers.cpp
