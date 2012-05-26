@@ -157,7 +157,9 @@ int Robot::init()
 			return 0;
 		}
 	}
-		
+	/* If it's using robot position */
+	/*Also call RobotPosition.init(osmc, gps, IMU (NULL for imu?) TODO: transition to robot position code */
+	RobotPosition.init(osmc,gps,lidar);
 	
 	/* setup image selection bar */
 	int numberOfViews = 15; // important!!!
@@ -338,10 +340,6 @@ void Robot::processFunc()
 	{
 		vp.visProcessFrame(heading_vision);
 	}
-
-	/* If it's using robot position */
-	/*Also call RobotPosition.init(osmc, gps, IMU (NULL for imu?) TODO: transition to robot position code */
-	//RobotPosition.init(osmc,gps,lidar);
 	
 	/*
 	if (!pfdeclared)
