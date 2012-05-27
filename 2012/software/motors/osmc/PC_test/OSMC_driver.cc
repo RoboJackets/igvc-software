@@ -10,6 +10,7 @@ const int OSMC_driver::MINREQSPEED = 30;
 OSMC_driver::OSMC_driver()
 {
 	std::cout<<"WARNING: YOU SHOULD USE 4WD!"<<std::endl;
+	std::cout.flush();
 	OSMC_driver(OSMC_IF_BOARD, ENCODER_IF_BOARD);
 	
 	/*
