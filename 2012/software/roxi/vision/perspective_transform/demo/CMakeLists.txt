@@ -75,3 +75,21 @@ target_link_libraries(fwgldemo
 	QtGui
 	xml
 )
+
+#glut perspective transform demo with firewire that loads perspective transform from file
+add_executable(loaddemo
+loaddemo.cpp
+)
+target_link_libraries(loaddemo
+	cv
+	cvaux
+	highgui
+	glut
+	
+	
+	roxi_vision
+	QtCore
+	QtXml
+	QtGui
+	xml
+)
