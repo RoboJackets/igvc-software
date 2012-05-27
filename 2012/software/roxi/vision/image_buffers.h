@@ -58,6 +58,9 @@ public:
 	IplImage* getvisCvRampLines();
 	void setvisCvRampLines(IplImage *);
 	
+	IplImage* getpfThresh();
+	void setpfThresh(IplImage* image);
+	
 	
 private:
 
@@ -86,6 +89,8 @@ private:
 
  IplImage* visCvRamp;
  IplImage* visCvRampLines;
+ 
+ IplImage* pfThresh;
 
 };
 /* conversions ***********************************************/
