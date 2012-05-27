@@ -7,12 +7,14 @@
 using namespace cv;
 using namespace std;
 
-CvCapture* camera=cvCaptureFromCAM(0);//capture from default camera
+CvCapture* camera=NULL;//capture from default camera
 static IplImage *MainImage;
 CvMat*  map_matrix=0;
+int useFirewire;
 
 #include "mouse_callback.cpp"
 #include "util.cpp"//utility functions
+#include "firewire_harness.cpp"
 
 
 
@@ -36,6 +38,9 @@ void dotransform(){
 	cvGetPerspectiveTransform( src,dst,
                                map_matrix );//put the transform into mapmatrix
                                
+   cvSave( "PerspectiveMapMatrix.xml", map_matrix  );
+   
+                               
    //printMat(map_matrix);//for debug
    IplImage* tmp=cvCloneImage(MainImage);
 
@@ -55,8 +60,11 @@ void cvDisplay(){
 	//
 	//Capture a camera frame and store in MainImage
 	//
-	tmp=cvQueryFrame(camera);	//capture camera frame, but not allowed to 
-			                  //release because it is a pointer to an internal buffer
+	
+	//capture camera frame (Don't release this one)
+	tmp=useFirewire?camera_firewire.ReturnFrame():cvQueryFrame(camera);
+	
+	
 	try{				
 		cvReleaseImage(&MainImage);			
 		MainImage=cvCloneImage(tmp);	//copy i's header and data to my buffer
@@ -132,45 +140,53 @@ void display(void)
    glMatrixMode (GL_PROJECTION);
    glLoadIdentity ();             /* clear the projection matrix */
    
-   double flat[16]=	{-1	,0			,0		,0 \
-						,0		,-1		,0		,0 \
-						,0		,0			,0		,0 \
-						,0	,0 		,0		,-1};//inverts w so that reverse transformations wind up in the right half space of clip coordinates(no clip condition is -w_clip<=(x,y,z)_clip<=w_clip, ie. -1<=NDC<=1 && w_clip>0
-	glMultMatrixd(flat);					
+   double flat[16]=	{1	,0			,0		,0 \
+							,0	,1			,0		,0 \
+							,0	,0			,0		,0 \
+							,0	,0 		,0		,1};//doesn't invert w so that reverse transformations wind up in the right half space of clip coordinates(no clip condition is -w_clip<=(x,y,z)_clip<=w_clip, ie. -1<=NDC<=1 && w_clip>0
+	double flatn[16]=	{-1,0			,0		,0 \
+							,0	,-1		,0		,0 \
+							,0	,0			,0		,0 \
+							,0	,0 		,0		,-1};//inverts w so that reverse transformations wind up in the right half space of clip coordinates(no clip condition is -w_clip<=(x,y,z)_clip<=w_clip, ie. -1<=NDC<=1 && w_clip>0	
+								
+	static int ct=0;
+	switch((ct++)%2){
+		case 0:glMultMatrixd(flat);break;
+		case 1:glMultMatrixd(flatn);break;
+   }
    
    //load up so that persp transform from opencv's output maps back to gl coords
    double cv2gldat[16]; 
    CvMat cv2gl=cvMat(4,4,CV_64FC1,cv2gldat);
    cvInvert(&gl2cv,&cv2gl);	//invert to get the reverse transformation
    glMultMatrixd(cv2gl.data.db);
-   
+  
    //tack on the perspective transform from opencv
-   if(map_matrix) multMat2d(map_matrix);//use the opencv projection matrix
-   
+   //if(map_matrix) multMat2d(map_matrix);//use the opencv projection matrix
+   if(map_matrix){
+ 		//cvSave( "PerspectiveMapMatrix.xml", map_matrix  );
+   	cvReleaseMat(&map_matrix);
+   	map_matrix=(CvMat*)cvLoad( "PerspectiveMapMatrix.xml" );
+   	multMat2d(map_matrix);
+   	cout<<"Matrix Loaded"<<endl;
+    	//multMat2d((CvMat*)cvLoad( "PerspectiveMapMatrix.xml" ));//do it from file
+	}
 
-   
-   //draw an easily recognizable test object
-   glColor3f (0.5, 0.5, 1.0);
-   glBegin(GL_TRIANGLE_STRIP);
-   glVertex2f(-1,1);
-   glVertex2f(1,1);
-	glVertex2f(-1,-1);
-	glVertex2f(1,-1);
-	glEnd();
-   glColor3f (1.0, 1.0, 1.0);
-   glBegin(GL_TRIANGLE_STRIP);
-   glVertex2f(0,1);
-   glVertex2f(1,1);
-	glVertex2f(0,0);
-	glVertex2f(1,0);
-   glEnd();
-   glColor3f (1.0, 0.5, 0.5);
-   glBegin(GL_TRIANGLE_STRIP);
-   glVertex2f(0,-1);
-   glVertex2f(-1,-1);
-	glVertex2f(0,0);
-
-   glEnd();
+   float xstep=.1;
+   float ystep=.1;
+   for(float x=-1;x<1;x+=xstep){
+   	for(float y=-1;y<1;y+=ystep){
+		   //draw an easily recognizable test object (light one is flatn)
+			glColor3f ((x/2+.5)*(((float)(ct%2==0))*.5+.5), (((float)(ct%2==0))*.5+.5), (y/2+.5)*(((float)(ct%2==0))*.5+.5));
+			glBegin(GL_TRIANGLE_STRIP);
+			glVertex2f(x,y+ystep);
+			glVertex2f(x+xstep,y+ystep);
+			glVertex2f(x,y);
+			glVertex2f(x+xstep,y);
+			glEnd();
+		}
+	}
+				
    glFlush ();
 }
 
@@ -185,10 +201,18 @@ void reshape (int w, int h)
 
 int main(int argc, char** argv)
 {
-	   //setup opencv stuff
+	//setup camera
+	useFirewire=connectToCamera()?0:1;
+	if (!useFirewire){
+		camera=cvCaptureFromCAM(0);
+	}
+
+	//setup opencv stuff
 	cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE); 
 	cvMoveWindow("mainWin", 100, 100);
 	cvSetMouseCallback( "mainWin", mouse_callback, (void*) MainImage);
+	
+
 	
    glutInit(&argc, argv);
    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB);
