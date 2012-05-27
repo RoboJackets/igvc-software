@@ -1,7 +1,9 @@
+
 include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
 include_directories(
 	${IGVC_SOURCE_DIR}/roxi/vision/perspective_transform
 	/usr/include/opencv
+	${IGVC_SOURCE_DIR}/roxi/vision
 )
 
 #checker calibrater
@@ -55,4 +57,39 @@ target_link_libraries(gptdemo
 	cvaux
 	highgui
 	glut
+)
+#glut perspective transform demo with firewire
+add_executable(fwgldemo
+fwgldemo.cpp
+)
+target_link_libraries(fwgldemo
+	cv
+	cvaux
+	highgui
+	glut
+	
+	
+	roxi_vision
+	QtCore
+	QtXml
+	QtGui
+	xml
+)
+
+#glut perspective transform demo with firewire that loads perspective transform from file
+add_executable(loaddemo
+loaddemo.cpp
+)
+target_link_libraries(loaddemo
+	cv
+	cvaux
+	highgui
+	glut
+	
+	
+	roxi_vision
+	QtCore
+	QtXml
+	QtGui
+	xml
 )

@@ -35,6 +35,9 @@ public:
 
 	// grabs raw opencv image (into global visCvRaw)
 	bool GrabCvImage();
+	
+	// returns an image in a manner similar to cvQueryFrame
+	IplImage * ReturnFrame();
 
 	// grabs raw image and converts it into (global) visRaw
 	void GrabBuffer2DImage();

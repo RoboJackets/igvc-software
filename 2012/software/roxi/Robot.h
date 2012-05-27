@@ -134,7 +134,9 @@ public:
 	//Motors_Old motors;
 	int motorsMaxSpeed;//0-255
 	int useMotors;
-
+	int useMagnetometer;
+	int MagnetometerHeading;
+private:
 	#ifdef OSMC_2WD
 		OSMC_driver* osmcd;
 	#elif defined(OSMC_4WD)
@@ -142,6 +144,7 @@ public:
 	#else
 		#error "Must define OSMC_2WD or OSMC_4WD"
 	#endif
+public:
 	boost::mutex velmutex;
 	volatile double yvel;
 	volatile double xvel;
