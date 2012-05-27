@@ -27,14 +27,12 @@ MagnetometerTracking *magnetometer;
 timeval initialTime,currentTime;
 gps * gpsA;
 IMU_Control * IMU;
-static RobotPosition instance;
-RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Control& imuObject);
+static RobotPosition* instance;
+RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Control* imuObject);
 public :
-static void init(OSMC_4wd_driver * driver,gps& gpsObject,IMU_Control& imuObject){
-	instance= RobotPosition(driver,gpsObject,imuObject);
-}
+static void init(OSMC_4wd_driver * driver,gps& gpsObject,IMU_Control* imuObject);
 RobotPosition(double x, double y, double angle);
-static RobotPosition getInstance();
+static RobotPosition* getInstance();
 void update();
 double getX();
 double getY();

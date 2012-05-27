@@ -17,6 +17,7 @@
 #include "mapgen.h"
 #include "joystickDrive.hpp"
 #include "potentialfields.hpp"
+#include "NAV200.hpp"
 
 const static double motor_vel_mag = 1.1;
 

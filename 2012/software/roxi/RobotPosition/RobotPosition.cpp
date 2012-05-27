@@ -1,6 +1,8 @@
 #include "RobotPosition.hpp"
 
-RobotPosition::RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Control& imuObject)
+RobotPosition* RobotPosition::instance;
+
+RobotPosition::RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Control* imuObject)
 {
 	magnetometer=new MagnetometerTracking(driver);
 	updatesSinceReset=0;
@@ -14,7 +16,7 @@ RobotPosition::RobotPosition(OSMC_4wd_driver* driver, gps& gpsObject, IMU_Contro
 	initBearing=(*magnetometer).getBearing();
 	encoder=new EncoderTracking(driver);
 	(*encoder).setTo(0,0,450-initBearing);
-	IMU=&imuObject;	
+	IMU=imuObject;	
 	gpsA=&gpsObject;
 	(*gpsA).get_last_state(gpsFirstState);
 	timeElapsed=0;
@@ -27,7 +29,12 @@ RobotPosition::RobotPosition(double X, double Y, double Angle){
 	angle=Angle;
 }
 
-RobotPosition RobotPosition::getInstance(){
+void RobotPosition::init(OSMC_4wd_driver * driver,gps& gpsObject,IMU_Control* imuObject){
+	
+	instance= new RobotPosition(driver,gpsObject,imuObject);
+}
+
+RobotPosition* RobotPosition::getInstance(){
 	return instance;
 }
 
