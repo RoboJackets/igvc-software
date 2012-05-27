@@ -135,30 +135,30 @@ void Vision::init()
 	// font
 	cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 1.0, 1.0, 0, 2);
 
-	// display roi for adaptive coloring
-	cvNamedWindow("roi",1);
-	// move the window for easy comparison to raw
-	cvMoveWindow( 	"roi", 
-			ImageBufferManager::getInstance().visCvRaw->width/2-adapt_boxPad/3, 
-			adapt_boxPad/2+ImageBufferManager::getInstance().visCvRaw->height );
-
 	/* init adaptive processing stuff */
 	{
 		/* define roi corners (upper-left and lower-right) */
 		if (DO_TRANSFORM)
 		{
-			UL = cvPoint(  	ImageBufferManager::getInstance().visCvDebug->width/3+adapt_boxPad, 
-					ImageBufferManager::getInstance().visCvDebug->height-adapt_boxPad/4);
-			LR = cvPoint(	2*ImageBufferManager::getInstance().visCvDebug->width/3-adapt_boxPad, 
-					ImageBufferManager::getInstance().visCvDebug->height-adapt_boxPad/7);
+			UL = cvPoint(  	ImageBufferManager::getInstance().visCvDebug->width/2-adapt_boxPad/2, 
+					ImageBufferManager::getInstance().visCvDebug->height-adapt_boxPad);
+			LR = cvPoint(	ImageBufferManager::getInstance().visCvDebug->width/2+adapt_boxPad/2, 
+					ImageBufferManager::getInstance().visCvDebug->height);
 		}
 		else
 		{
-			UL = cvPoint(  	ImageBufferManager::getInstance().visCvDebug->width/3+adapt_boxPad, 
-					ImageBufferManager::getInstance().visCvDebug->height-adapt_boxPad/2);
-			LR = cvPoint(	2*ImageBufferManager::getInstance().visCvDebug->width/3-adapt_boxPad, 
-					ImageBufferManager::getInstance().visCvDebug->height-adapt_boxPad/6);
+			UL = cvPoint(  	ImageBufferManager::getInstance().visCvDebug->width/2-adapt_boxPad/2, 
+					ImageBufferManager::getInstance().visCvDebug->height-adapt_boxPad);
+			LR =  cvPoint(	ImageBufferManager::getInstance().visCvDebug->width/2+adapt_boxPad/2, 
+					ImageBufferManager::getInstance().visCvDebug->height);
 		}
+		
+		// display roi for adaptive coloring
+		cvNamedWindow("roi",1);
+		// move the window for easy comparison to raw
+		cvMoveWindow( 	"roi", 
+				UL.x, 
+				UL.y);
 
 		/* setup roi */
 		roi.x = UL.x;
@@ -1164,7 +1164,14 @@ void Vision::ConvertAllImageViews(int trackbarVal)
 		cvShowImage("display", ImageBufferManager::getInstance().visCvRampLines);
 		break;
 ////////////////
-
+	case 11:
+		cvPutText(	ImageBufferManager::getInstance().pfThresh, 
+				"Obstacles Thresh", 
+				cvPoint(5,ImageBufferManager::getInstance().pfThresh->height-10), 
+				&font, 
+				CV_RGB(0,0,0));
+		cvShowImage("display", ImageBufferManager::getInstance().pfThresh);
+		break;
 
 		/* future use (change value of numberOfViews) */
 //  case 9:
