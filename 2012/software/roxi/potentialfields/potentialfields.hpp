@@ -210,7 +210,7 @@ private:
 
 	/************* Constants ******************/
 	const static int robot_radius = 2;				// Radius of the robot in pixels of the input boolean array
-	const static double obstacle_weight = 3.32e3;			// Weight given to avoiding obstacles
+	const static double obstacle_weight = 6.32e3;			// Weight given to avoiding obstacles
 	const static double image_goal_weight = 1;			// Weight given to get to image goals (flags)
 	const static double gps_goal_weight = 51;			// Weight given to get to GPS goal
 	const static double gps_avoid_weight = 1;			// Weight given to avoid old GPS points
@@ -218,7 +218,7 @@ private:
 	const static int target_reach_radius = 1000;			// Radius arond the robot in which the robot considers image goals
 	const static double gps_goal_radius = 1;			// Radius of the gps goal
 	const static double gps_max_distance = 10;			// Radius at which the attraction to the goal becomes a constant
-	const static double obstacle_bitmap_thresh = 100;		// Threshold value for converting obstacle images to bitmaps
+	const static double obstacle_bitmap_thresh = 125;		// Threshold value for converting obstacle images to bitmaps
 	const static double attractor_bitmap_thresh = 100;		// Threshold value for converting attractor images to bitmaps
 	const static double stepsize_m = .5;				// Step size in meters
 	const static double guessed_min_potential = 100;		// Potential used in calculation of heuristic
