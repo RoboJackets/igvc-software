@@ -19,9 +19,6 @@
 /* Percent of new robot world position to use */
 #define K_  0.85 //0.7 0.85
 
-/* Shift robot world position from currently calcualted position */
-#define BASE_OFFSET 0   //-5  // smaller is further back
-
 /* Use visCvPath (more black) or visCvThresh (more correct) to plot into worldmap */
 #define USE_PATH_IMG  0
 
@@ -97,6 +94,7 @@ int MapGen::genMap()
 	 *  don't continue if we don't have any */
 	if ( !getFeatures() )
 	{
+		//cout<<"no features"<<endl;
 		return 0;
 	}
 
@@ -278,6 +276,11 @@ int MapGen::getFeatures()
 //				   cvPoint( imgHalfWidth+avgdx, imgHalfHeight+avgdy ),
 //				   CV_RGB(255,255,255), 3, 8, 0);
 			//printf("   adx %.4f ady %.4f \n",avgdx,avgdy);
+		}else
+		{//no matches at all restart
+			
+			_t=0;
+			_f=0;
 		}
 		avgdx=fabs(avgdx);
 		avgdy=fabs(avgdy);
@@ -289,6 +292,25 @@ int MapGen::getFeatures()
 
 		/* check status *********/
 		{
+			if ( good > 2 )
+			{
+				return 1; // we have enough frames/points
+			}
+			else
+			{
+				printf(" need more matches \n");
+				_t--;
+				static int failures=0;
+				if(failures>2)
+				{
+					printf(" need more matches for %d tries, resetting. \n",failures);
+					failures=0;
+					_f=1;
+					_t=0;
+				}
+				failures++;
+				return 0; // need more points matching
+			}
 			if (avgdx<=MIN_FEATURE_SHIFT && avgdy<=MIN_FEATURE_SHIFT)
 			{
 				printf(" no motion \n");
@@ -300,20 +322,14 @@ int MapGen::getFeatures()
 				printf(" feature shift too big \n");
 				return 0; // bumpy/noisy motion
 			}
-
-			if ( good > 2 )
-			{
-				return 1; // we have enough frames/points
-			}
-			else
-			{
-				printf(" need more matches \n");
-				return 0; // need more points matching
-			}
 		}
 	}
-
-
+	if (_t>numFramesBack||_t<0)
+	{
+		printf(" frameskip or multiple freakout! this should never happen! \n");
+		_t=0;
+	}
+	//printf(" need more frames \n");
 	return 0; // need more frames
 }
 
@@ -440,7 +456,7 @@ void MapGen::init()
 	cvZero(matCamToWorld);
 
 	/* set up camera to world homography matrix */
-	float k = 0.25; //0.3; // scale factor
+	float k = CamToWorldScale;  // scale factor
 	// k  0  dx
 	// 0  k  dy
 	// 0  0  1
@@ -515,6 +531,8 @@ void MapGen::LoadMappingXMLSettings()
 		numFramesBack  = cfg.getInt("numFramesBack");
 		maxFeatureShift= cfg.getInt("maxFeatureShift");
 		moveTo127      = cfg.getInt("moveTo127");
+		CamToWorldScale= cfg.getFloat("CamToWorldScale");
+		RobotBaseOffset= cfg.getInt("RobotBaseOffset");
 
 		/* display windows */
 		if (cfg.getInt("doMapping"))
@@ -781,7 +799,7 @@ int MapGen::genProbabilityMap()
 	float a,b;
 	mapCamPointToWorldPoint(imgHalfWidth, 0, a, b); // top center of camera frame
 	mapCamPointToWorldPoint(	imgHalfWidth, 
-					ImageBufferManager::getInstance().getvisCvGrey()->height - BASE_OFFSET, 
+					ImageBufferManager::getInstance().getvisCvGrey()->height + RobotBaseOffset, 
 					wx, 
 					wy); // bottom center of camera frame (minus some)
 
@@ -800,10 +818,10 @@ int MapGen::genProbabilityMap()
 	//printf("bx=%d by=%d  lx=%d ly=%d \n",robotBaseAt.x,robotBaseAt.y,robotLookingAt.x,robotLookingAt.y);
 
 	/* draw a circle denoting base orientaion */
-	//cvCircle(probmap, CvPoint(robotBaseAt),
-	//		 1,
-	//		 CV_RGB(127,127,127),
-	//		 1, 8, 0);
+	cvCircle(probmap, CvPoint(robotBaseAt),
+			 1,
+			 CV_RGB(127,127,127),
+			 1, 8, 0);
 	/* display */
 	//cvShowImage("probmap",probmap);
 
