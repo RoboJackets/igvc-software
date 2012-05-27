@@ -63,6 +63,8 @@ public:
 	int processMap(Point2D<int>& goal);
 	CvPoint robotBaseAt;    // bottom of current image being pasted into world (in world coordinates)
 	CvPoint robotLookingAt; // top of current image being pasted into world (in world coordinates)
+	float CamToWorldScale;
+	int RobotBaseOffset;
 	Point2D<float> navPath_start(/*int pathID*/);
 	Point2D<float> navPath_end(int pathID);
 	Point2D<float> navPath_vector(int pathID);
@@ -73,7 +75,7 @@ public:
 	int _t;
 	int _f;
 	int _do_map;
-	/**/
+	/**///sweeper lines
 	int nav_path__num ;
 	int nav_path__center_path_id ;
 	int danger_per_barrel_pixel ;
