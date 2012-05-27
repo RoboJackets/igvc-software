@@ -10,6 +10,7 @@
 #include "XmlConfiguration.h"
 #include "logging/timer.h"
 #include "potentialfields.hpp"
+#include "RobotPosition.hpp"
 
 
 #define PRINTFRAMERATE 0
@@ -140,6 +141,9 @@ int Robot::init()
 	gpsA.open("/dev/ttyGPS", 4800);
 	gpsA.start();
 	
+	/* lidar */
+	//lidar = new NAV200;
+	
 	/* setup osmc control boards */
 	#ifdef OSMC_2WD
 		osmcd = new OSMC_driver;
@@ -159,7 +163,7 @@ int Robot::init()
 	}
 	/* If it's using robot position */
 	/*Also call RobotPosition.init(osmc, gps, IMU (NULL for imu?) TODO: transition to robot position code */
-	RobotPosition.init(osmc,gps,lidar);
+ 	RobotPosition::init(osmcd,gpsA,NULL);
 	
 	/* setup image selection bar */
 	int numberOfViews = 15; // important!!!
@@ -258,7 +262,6 @@ void Robot::Go()
 	run_vel_thread = true;
 	vel_update_thread = new boost::thread(&Robot::update_vel_func, this);
 
-	//lidar = new NAV200;
 	run_lidar_thread = true;
 	lidar_update_thread = new boost::thread(&Robot::update_lidar_func, this);
 
