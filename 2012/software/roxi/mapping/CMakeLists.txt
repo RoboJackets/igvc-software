@@ -33,7 +33,7 @@ add_library(roxi_mapping
 
 target_link_libraries(roxi_mapping	
 	gps
-	Coordinates
+#	Coordinates
 	#CV stuff
 	cv
 	cvaux
