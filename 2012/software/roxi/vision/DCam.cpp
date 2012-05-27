@@ -9,6 +9,8 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
+#include <iostream>
+
 using namespace std;
 using namespace Camera;
 
@@ -89,7 +91,7 @@ void DCam::open()
 			throw runtime_error("Unable to start ISO transmission.");
 		}
 
-		printf("Initialized camera %016llx\n", _camera->guid);
+		printf("Initialized camera %016llx\n", (long long unsigned int)_camera->guid);
 
 		_initialized = true;
 	}
@@ -138,7 +140,12 @@ IplImage *DCam::read_frame()
 
 	try
 	{
-		dc1394_capture_dequeue(_camera, DC1394_CAPTURE_POLICY_WAIT, &_frame);
+		dc1394error_t ec;
+		if(ec=dc1394_capture_dequeue(_camera, DC1394_CAPTURE_POLICY_WAIT, &_frame))
+		{
+			std::cout<<"libdc1394 error reading frame from dc1394_capture_dequeue, error code"<< ec << endl;
+			return _image;
+		};
 		//dc1394_capture_dequeue(_camera, DC1394_CAPTURE_POLICY_POLL, &_frame);
 
 		if (_frame)
