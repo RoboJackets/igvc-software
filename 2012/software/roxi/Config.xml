@@ -32,6 +32,9 @@
 	<satThresh>70</satThresh>     <!-- (hsv only) higher => more noise/sensitivity -->
 	<hueThresh>35</hueThresh>     <!-- (hsv only) higher => more noise/sensitivity -->
 	<robotWidth>15</robotWidth>   <!-- lower => we can squeeze through more -->
+	<CamToWorldScale>.4</CamToWorldScale><!-- scale factor between camera frame and world map -->
+	<RobotBaseOffset>5</RobotBaseOffset><!-- how far back in pixels is the robot base origin from the frame -->
+	
 	<doTransform>01</doTransform> <!-- 1 => use graphics card transformations -->
 	<doAdaptive>01</doAdaptive>   <!-- 1 => use use roi box to drive on colors inside it | 0 => use hsv -->
 
