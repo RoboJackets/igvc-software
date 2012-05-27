@@ -44,12 +44,18 @@ bool setSerialPortFromDevID(const int vendorid, const int devid, const char* ser
 */
 bool ArduinoInterface::initLink(byte arduinoID)
 {
+	arduinoBoardID = arduinoID;
 	boost::mutex::scoped_lock initlock(initmutex);
 
 	/* See if anything is connected on ports USB0 through USB9 */
 	char serialAddress[] = SERIAL_PORT;
-	for (int i=0; i<10; i++)
+	for (int i=0; i<11; i++)
 	{
+		if(i==10)//failed to find on 1-9
+		{
+			printf("\nRequested Arduino not found!\n");
+			exit(1);
+		}
 		printf("Trying port #%d.\n", (int) i);
 
 		serialAddress[11]=i+'0';
@@ -132,6 +138,7 @@ bool ArduinoInterface::initLink(byte arduinoID)
 			}
 		}
 	}
+	
 	if (arduinoFD == -1)
 	{
 		printf("Error: MotorEncoders: could not find arduino\n");
@@ -801,6 +808,7 @@ bool ArduinoInterface::sendCommand(byte cmd, const void * data_tx, int size_tx)
 	if (sendPacket(pk_tx))
 	{
 		std::cout << "could not send packet" << std::endl;
+		std::cout << "Board " << (int)arduinoBoardID << std::endl;
 		return true;
 	}
 
@@ -816,6 +824,7 @@ bool ArduinoInterface::recvCommand(byte& out_cmd, byte*& out_data_rx)
 	if (getPacket(out_pk_rx))
 	{
 		std::cout << "could not rec packet" << std::endl;
+		std::cout << "Board " << (int)arduinoBoardID << std::endl;
 		return true;
 	}
 

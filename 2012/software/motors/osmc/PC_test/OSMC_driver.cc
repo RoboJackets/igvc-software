@@ -9,6 +9,10 @@ const int OSMC_driver::MINREQSPEED = 30;
 
 OSMC_driver::OSMC_driver()
 {
+	std::cout<<"WARNING: YOU SHOULD USE 4WD!"<<std::endl;
+	OSMC_driver(OSMC_IF_BOARD, ENCODER_IF_BOARD);
+	
+	/*
 	std::cout<<"WARNING: THIS CODE BELIEVED TO BE DEAD! WAS NOT UPDATED TO REFLECT MOTOR SIMULATION 3/24/12"<<std::endl;
 	lvgoal = 0;
 	rvgoal = 0;
@@ -30,7 +34,7 @@ OSMC_driver::OSMC_driver()
 	gettimeofday(&now_t, NULL);
 	t = double(now_t.tv_sec) + double(1e-6)*double(now_t.tv_usec);
 
-	set_motors(0, 0);
+	set_motors(0, 0);*/
 }
 
 OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface)
@@ -40,6 +44,7 @@ OSMC_driver::OSMC_driver(byte motor_iface, byte encoder_iface)
 	
 	useMotors   = cfg.getInt("useMotors");
 	useEncoders = cfg.getInt("useEncoders");
+	useMagnetometer = cfg.getInt("useMagnetometer");
 	
 	lvgoal = 0;
 	rvgoal = 0;
@@ -503,6 +508,12 @@ bool OSMC_driver::GetMagnetometerHeading(int& heading, int& X_Value, int& Y_Valu
 	}
 
 	magnetometer_pk_t out;
+	if( retcmd!=MAG_GET_MAGDATA)
+	{
+		std::cout <<"not a magnetometer packet! got id:"<<(int)retcmd<<std::endl;
+		return true;
+	}
+	
 	memcpy(&out, data, sizeof(magnetometer_pk_t));
 
 	heading = out.angle;

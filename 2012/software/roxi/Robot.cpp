@@ -149,6 +149,17 @@ int Robot::init()
 		#error "Must define OSMC_2WD or OSMC_4WD"
 	#endif
 	osmcd->setLight(MC_LIGHT_PULSING);
+	if (useMagnetometer){
+		int dummy1, dummy2;
+		if(osmcd->GetMagnetometerHeading(MagnetometerHeading, dummy1, dummy2))//for a starting angle
+		{
+			std::cout<<"Magnetometer Failed"<<std::endl;
+			return 0;
+		}
+	}
+	/* If it's using robot position */
+	/*Also call RobotPosition.init(osmc, gps, IMU (NULL for imu?) TODO: transition to robot position code */
+	RobotPosition.init(osmc,gps,lidar);
 	
 	/* setup image selection bar */
 	int numberOfViews = 15; // important!!!
@@ -199,6 +210,8 @@ void Robot::LoadXMLSettings()
 		doMapping = cfg.getInt("doMapping");
 		/* drive motors */
 		useMotors = cfg.getInt("useMotors");
+		/* magnetometer */
+		useMagnetometer = cfg.getInt("useMagnetometer");
 		/* vision processing */
 		doVision = cfg.getInt("doVision");
 		/* use gl transformation */
@@ -220,8 +233,10 @@ void Robot::LoadXMLSettings()
 				motorsMaxSpeed = 30;
 				doMapping = 1;
 				useMotors = 1;
+				useMagnetometer = 1;
 				doVision = 1;
 				doTransform = 1;
+				
 				USE_FIREWIRE_CAMERA = 1;
 			}
 		}
@@ -325,10 +340,6 @@ void Robot::processFunc()
 	{
 		vp.visProcessFrame(heading_vision);
 	}
-
-	/* If it's using robot position */
-	/*Also call RobotPosition.init(osmc, gps, IMU (NULL for imu?) TODO: transition to robot position code */
-	//RobotPosition.init(osmc,gps,lidar);
 	
 	/*
 	if (!pfdeclared)
@@ -351,9 +362,8 @@ void Robot::processFunc()
 	/* Do potential fields */
 	GPSState state;
 	gpsA.get_last_state(state);
-	int angle, dummy1, dummy2;
-	osmcd->GetMagnetometerHeading(angle, dummy1, dummy2);
-	pf.dropWaypoint(state.lat, state.lon, angle);			
+	
+	pf.dropWaypoint(state.lat, state.lon, MagnetometerHeading);			
 	pf.getVectorMotor(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
 
 	/*if (doMapping)
@@ -789,6 +799,11 @@ void Robot::update_vel_func()
 		if(osmcd->set_vel_vec(y, x))
 		{
 			std::cerr << "osmcd->set_vel_vec failed!" << std::endl;
+		}
+		int dummy1,dummy2;
+		if(osmcd->GetMagnetometerHeading(MagnetometerHeading, dummy1, dummy2))
+		{
+			std::cerr << "osmcd->GetMagnetometerHeading failed!" << std::endl;
 		}
 		
 		//if(osmcd->updateVel_pd())
