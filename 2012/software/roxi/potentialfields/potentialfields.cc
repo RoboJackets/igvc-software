@@ -1,8 +1,12 @@
 #include "potentialfields.hpp"
 #include "gps_points.hpp"
 #include "commonVecOps.hpp"
+
+#include "image_buffers.h"
+
 #include <stdio.h>
 #include <string.h>
+
 #include <iostream>
 #include <fstream>
 #include "XmlConfiguration.h"
@@ -104,8 +108,12 @@ void potentialfields::getVectorMotor(IplImage* obstacles_ipl, IplImage* targets_
 	double vel_mag, vel_ang;
 	getNextVector(INSTANT, obstacles_ipl, targets_ipl, robotBaseAt, robotLookingAt, vel_mag, vel_ang, 0, 0);
 
+	cout << "vel_mag " << vel_mag << "\nvel_ang " << vel_ang << endl;
+
 	// Finally, round the values, put them in range and set them to the output point
 	setOutputs(vel_mag, vel_ang, goal);
+	
+	cout << "goal.x " << goal.x << "\ngoal.y " << goal.y << endl; 
 }
 
 void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, Point2D<int>& goal)
@@ -254,6 +262,13 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	// Transform the input image to a bitmap of obstacles
 	int imgx, imgy;
 	bool* obstacles = IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, imgx, imgy);
+	
+	
+	IplImage * pfThresh=cvCloneImage(obstacles_ipl);
+	cvThreshold(obstacles_ipl,pfThresh,obstacle_bitmap_thresh,255,CV_THRESH_BINARY_INV);
+	ImageBufferManager::getInstance().setpfThresh(pfThresh);
+	//printbitmap(obstacles);
+	
 	xsize = imgx;
 	ysize = imgy;
 	//cout << "xsize: " << xsize << endl;
@@ -317,7 +332,7 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	{
 		getGPSTargetVec(gpstarx, gpstary, dist_from_goal_m, deg2rad(angl_to_goal));
 	}
-	/*cout << "gps x " << gpstarx << endl;
+	/*out << "gps x " << gpstarx << endl;
 	cout << "gps y " << gpstary << endl;
 	cout << "dist " << dist_from_goal_m << endl;
 	cout << "angle " << angl_to_goal << endl;*/
@@ -330,8 +345,8 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	double ycomps[] = {obstacley, imagetary, gpstary, gpsavoidy};	
 	double xnet, ynet;
 
-	//cout << "obstaclex: " << obstaclex << endl << "obstacley: " << obstacley << endl;
-	//cout << "gpstarx: " << gpstarx << endl << "gpstary: " << gpstary << endl;
+	cout << "obstaclex: " << obstaclex << endl << "obstacley: " << obstacley << endl;
+	cout << "gpstarx: " << gpstarx << endl << "gpstary: " << gpstary << endl;
 
 	// Find the resulting vector by adding up all of the components
 	AddVecs(xcomps, ycomps, number_vecs, xnet, ynet);
@@ -341,7 +356,7 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	double vel_mag, vel_ang;	 
 	xyToVec(xnet, ynet, vel_mag, vel_ang);	
 	
-	//cout << "vel_mag: " << vel_mag << endl << "vel_ang: " << vel_ang << endl;
+	cout << "vel_mag: " << vel_mag << endl << "vel_ang: " << vel_ang << endl;
 
 	// Rotates the velocity vector to the angle from the perspective of the robot
 	vel_ang = RotateBearing(vel_ang, -curang);
@@ -349,6 +364,8 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	//cout << "curang: " << curang << endl;
 	out_mag = vel_mag;
 	out_ang = vel_ang; 
+	
+	delete obstacles;
 
 	return;
 }
@@ -595,7 +612,7 @@ bool* potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE 
 		for(int windex = 0; windex < width; windex++)
 		{
 			// Finds average intensity over all the channels. If there's just one channel, this isn't strictly necessary
-			double avgval;
+			double avgval = 0;
 			for (int i = 0; i < channels; i++)
 			{
 				avgval += (double)data[hindex*step+windex*channels+i];
@@ -603,7 +620,7 @@ bool* potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE 
 			avgval /= channels;
 
 			// If it's a feature high type, it is 1 if the average value is greater than the threshold. If it's
-			// a feature low type, it is a 1 if the average value is greater than the threshold. 
+			// a feature low type, it is a 1 if the average value is less than the threshold. 
 			bool isFeature;
 			if (imgType == FEATURE_HIGH)
 				isFeature = avgval > thresh;
@@ -824,9 +841,16 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 	// Creates vectors pointing away from the obstacle pixel, proportional to the distance from the target
 	//x_vel = -(radius-d)*cos(theta);
 	//y_vel = -(radius-d)*sin(theta);
-	x_vel = -1/(d*d)*cos(theta);
-	y_vel = -1/(d*d)*sin(theta);
-
+	if (d == 0)
+	{
+		x_vel = 0;
+		y_vel = 0;
+	}
+	else
+	{
+		x_vel = -1/(d*d)*cos(theta);
+		y_vel = -1/(d*d)*sin(theta);
+	}
 	//cout << "x/y: " << sqrt((x_vel/y_vel)*(x_vel/y_vel));
 
 	// Reverses direction of y_vel because the image indexes for height start at the top, so all the
@@ -986,32 +1010,16 @@ double potentialfields::GetMapAngle(CvPoint robotBaseAt, CvPoint robotLookingAt)
 // Puts the calculated vector into the range of the output and round it to the nearest integer 
 void potentialfields::setOutputs(double vel_mag, double vel_ang, Point2D<int>& goal)
 {
-	//  Make the angles to the left of the robot in the range of -180 - 0 instead of 180-360	
-	if (vel_ang > 180)
-	{
-		vel_ang -= 360;
-	}
-
-	goal.x = floor(vel_ang + 0.5);
-	goal.y = floor(vel_mag + 0.5);	
-
-	//cout << "goal.x: " << goal.x << endl;
-
-	// Set limits to x
-	if (goal.x < -128)
-	{
-		goal.x = -128;
-	}
-	else if (goal.x > 127)
-	{
-		goal.x = 127;
-	}
+	double x_real, y_real;
 	
-	// Set limits to y
-	if (goal.y > 255)
-	{
-		goal.y = 255;
-	}
+	vel_ang=(fmod((vel_ang+180),360)-180);        //put angle into -180 to 180
+	vel_ang=vel_ang<-90?-90:vel_ang;	//if ang<-90 set to -90
+	vel_ang=vel_ang> 90? 90:vel_ang;	//if ang> 90 set to  90
+	
+	VecToxy(vel_mag, vel_ang, x_real, y_real);
+	
+	goal.x = floor(x_real + 0.5);
+	goal.y = floor(y_real + 0.5);	
 }
 /********************************************************************************************************************************/
 
