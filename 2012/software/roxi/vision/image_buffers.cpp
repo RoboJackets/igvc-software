@@ -26,6 +26,8 @@ IplImage* visCvRawTransformSmall;
 IplImage* visCvRamp;
 IplImage* visCvRampLines;
 
+IplImage* pfThresh;
+
 /* conversions ***********************************************/
 
 /* singleton *************************************************/
@@ -46,6 +48,7 @@ void ImageBufferManager::init()
 		/* 1 plane images (640x480) */
 		visCvAdapt = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
 		visCvGreyBig = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);
+		pfThresh = cvCreateImage(cvSize(visCvRaw->width,visCvRaw->height), IPL_DEPTH_8U, 1);//not really 640x480
 
 		/* 3 plane images (320x240) */
 		visCvHSVSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 3);
@@ -59,6 +62,9 @@ void ImageBufferManager::init()
 		visCvThresh = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
 		visCvPath = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
 		visCvAdaptSmall = cvCreateImage(cvSize(visCvRaw->width/2,visCvRaw->height/2), IPL_DEPTH_8U, 1);
+		
+		
+		
 }
 
 void ImageBufferManager::releaseAllImages()
@@ -85,6 +91,7 @@ void ImageBufferManager::releaseAllImages()
 
 	if ( visCvRamp !=NULL) cvReleaseImage(&visCvRamp );
 	if ( visCvRampLines !=NULL) cvReleaseImage(&visCvRampLines );
+	if ( pfThresh !=NULL) cvReleaseImage(&pfThresh );
 
 }
 /* getters ***************************************************/
@@ -206,4 +213,13 @@ void ImageBufferManager::setvisCvRampLines(IplImage* image)
 	visCvRampLines = image;
 }
 
+IplImage* ImageBufferManager::getpfThresh()
+{
+	return pfThresh;
+}
 
+void ImageBufferManager::setpfThresh(IplImage* image)
+{
+	cvReleaseImage(&pfThresh);
+	pfThresh = image;
+}
