@@ -10,6 +10,7 @@ include_directories(
 	${IGVC_SOURCE_DIR}/roxi/vision
 	${IGVC_SOURCE_DIR}/roxi/mapping
 	${IGVC_SOURCE_DIR}/roxi/potentialfields
+	${IGVC_SOURCE_DIR}/roxi/RobotPosition
 	/usr/include/qt4
 	/usr/include/qt4/Qt
 	/usr/include/qt4/QtGui
@@ -77,6 +78,8 @@ target_link_libraries(${robot_bin}
 	roxi_vision
 	gps
 	potentialfields
+	robot_position
+	NAV200#lidar
 
 	ArduinoInterface
 	OSMC_driver
@@ -109,6 +112,8 @@ target_link_libraries(${robot_bin}
 	roxi_vision
 	gps
 	potentialfields
+	robot_position
+	NAV200#lidar
 
 	ArduinoInterface
 	OSMC_driver_4wd
