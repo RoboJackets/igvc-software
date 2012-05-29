@@ -304,8 +304,8 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	robotmaplocx = robotBaseAt.x;
 	robotmaplocy = robotBaseAt.y;
 
-	// Figure out what direction the map is facing relative to the robot
-	double map_ang_from_rob = GetMapAngle(robotBaseAt, robotLookingAt);	
+	// Figure out what direction the map is facing relative toworld coordinates
+	double map_ang_from_world = GetMapAngle(robotBaseAt, robotLookingAt);	
 
 	// Alter the bitmap to remove stray clumps of non-obstacles
 	removeclumps(obstacles);
@@ -316,7 +316,7 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	double obstaclex, obstacley, imagetarx, imagetary, gpstarx, gpstary, gpsavoidx, gpsavoidy;
 
 	// Get the vector contribution from the obstacles on the bitmap
-	getAvoidVec(obstacles, map_ang_from_rob, obstaclex, obstacley);
+	getAvoidVec(obstacles, map_ang_from_world, obstaclex, obstacley);
 	/*cout << "obstacle x " << obstaclex << endl;
 	cout << "obstacle y " << obstacley << endl;*/
 	
@@ -998,11 +998,12 @@ void potentialfields::updateCurLocation()
 	return;
 }
 
-// Calculates the angle that the map is pointed relative to the robot
+// Calculates the angle that the map is pointed rrelative to the world frame
 double potentialfields::GetMapAngle(CvPoint robotBaseAt, CvPoint robotLookingAt)
 {
 	double angle = atan2((robotLookingAt.y-robotBaseAt.y), (robotLookingAt.x - robotBaseAt.x));
 	angle = rad2deg(angle);
+	angle += curang;
 	angle = fmodf(90-angle, 360);
 	return angle;
 }
