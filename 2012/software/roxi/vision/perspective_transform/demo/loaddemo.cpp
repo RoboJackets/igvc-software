@@ -38,6 +38,22 @@ void dotransform(){
    							,0		,0			,1		,0 \
    							,w		,h 		,0		,2};//transposed because opengl is col major
   	CvMat gl2cv=cvMat(4,4,CV_64FC1,gl2cvdat);
+  	
+  	double flat[16]=			{1	,0		,0		,0 \
+							,0	,1		,0		,0 \
+							,0	,0		,0		,0 \
+							,0	,0 		,0		,1};//doesn't invert w so that reverse transformations wind up in the right half space of clip coordinates(no clip condition is -w_clip<=(x,y,z)_clip<=w_clip, ie. -1<=NDC<=1 && w_clip>0
+	double flatn[16]=		{-1	,0		,0		,0 \
+							,0	,-1		,0		,0 \
+							,0	,0		,0		,0 \
+							,0	,0 		,0		,-1};//inverts w so that reverse transformations wind up in the right half space of clip coordinates(no clip condition is -w_clip<=(x,y,z)_clip<=w_clip, ie. -1<=NDC<=1 && w_clip>0	
+  	
+  	//load map matrix							
+	if(map_matrix){
+ 		//cvSave( "PerspectiveMapMatrix.xml", map_matrix  );
+   	cvReleaseMat(&map_matrix);
+	}
+	map_matrix=(CvMat*)cvLoad( "PerspectiveMapMatrix.xml" );
    						
   	glMatrixMode (GL_MODELVIEW);
   	
@@ -48,21 +64,12 @@ void dotransform(){
 	//
    glMatrixMode (GL_PROJECTION);
    glLoadIdentity ();             /* clear the projection matrix */
-   
-   double flat[16]=	{1	,0			,0		,0 \
-							,0	,1			,0		,0 \
-							,0	,0			,0		,0 \
-							,0	,0 		,0		,1};//doesn't invert w so that reverse transformations wind up in the right half space of clip coordinates(no clip condition is -w_clip<=(x,y,z)_clip<=w_clip, ie. -1<=NDC<=1 && w_clip>0
-	double flatn[16]=	{-1,0			,0		,0 \
-							,0	,-1		,0		,0 \
-							,0	,0			,0		,0 \
-							,0	,0 		,0		,-1};//inverts w so that reverse transformations wind up in the right half space of clip coordinates(no clip condition is -w_clip<=(x,y,z)_clip<=w_clip, ie. -1<=NDC<=1 && w_clip>0	
-								
 	
-	switch((ct++)%2){
-		case 0:glMultMatrixd(flat);break;
-		case 1:glMultMatrixd(flatn);break;
-   }
+	if (map_matrix&&(cvmGet( map_matrix, 0, 0)>=0)){//I think this chooses the right one??
+		glMultMatrixd(flat);
+	}else{
+		glMultMatrixd(flatn);
+	}
    
    //load up so that persp transform from opencv's output maps back to gl coords
    double cv2gldat[16]; 
@@ -71,11 +78,8 @@ void dotransform(){
    glMultMatrixd(cv2gl.data.db);
   
    //tack on the perspective transform from opencv
-   if(map_matrix){
- 		//cvSave( "PerspectiveMapMatrix.xml", map_matrix  );
-   	cvReleaseMat(&map_matrix);
-	}
-	map_matrix=(CvMat*)cvLoad( "PerspectiveMapMatrix.xml" );
+   
+	
 	multMat2d(map_matrix);
 	cout<<"Matrix Loaded"<<endl;
    
@@ -102,10 +106,23 @@ void cvDisplay(){
 										//as a workaruound
 		cout<<"Ignoring presumed bad jpeg"<<endl;
 		MainImage=cvCreateImage(cvSize(640,480),IPL_DEPTH_8U,3); 
+		tmp=cvCloneImage(MainImage);//mild memory leak
 	}
-	
-	
-	
+	/******* Undistort Image *******/
+	static int firstrun=1;
+	// Load Distortions
+	static CvMat *intrinsic = (CvMat*)cvLoad( "Intrinsics.xml" );
+	static CvMat *distortion = (CvMat*)cvLoad( "Distortion.xml" );
+	static IplImage* mapx;
+	static IplImage* mapy;
+	if(firstrun){//first time through
+		// Build the undistort map that we will use for all subsequent frames
+		mapx = cvCreateImage( cvGetSize( MainImage ), IPL_DEPTH_32F, 1 );
+		mapy = cvCreateImage( cvGetSize( MainImage ), IPL_DEPTH_32F, 1 );
+		cvInitUndistortMap( intrinsic, distortion, mapx, mapy );
+	}
+	cvRemap( tmp, MainImage, mapx, mapy ); // undistort image
+	/*******/
 	
 	shownow("mainWin",MainImage);	   
 	
@@ -149,12 +166,11 @@ void display(void)
    float ystep=1;
    for(float x=-1;x<1;x+=xstep){
    	for(float y=-1;y<1;y+=ystep){
-   		float s=1;
    		//
-		   float xt=((x)/2+.5)*(MainImage->width)*s;
-		   float yt=((y)/2+.5)*(MainImage->height)*s;
-		   float xtstep=((xstep)/2+.5)*(MainImage->width)*s;
-		   float ytstep=((ystep)/2+.5)*(MainImage->height)*s;
+		   float xt=((x)/2+.5)*(MainImage->width);
+		   float yt=(1-((y)/2+.5))*(MainImage->height);//textures load upside down on opengl
+		   float xtstep=((xstep)/2+.5)*(MainImage->width)/2;
+		   float ytstep=-1*((ystep)/2+.5)*(MainImage->height)/2;
 		   //
 		   /*
 		   float xt=x;
@@ -162,8 +178,7 @@ void display(void)
 		   float xtstep=xstep;
 		   float ytstep=ystep;
 		   */
-		   //draw an easily recognizable test object (light one is flatn)
-			glColor3f ((x/2+.5)*(((float)(ct%2==0))*.5+.5), (((float)(ct%2==0))*.5+.5), (y/2+.5)*(((float)(ct%2==0))*.5+.5));
+		   glColor3f ((x/2+.5)*(((float)(ct%2==0))*.5+.5), (((float)(ct%2==0))*.5+.5), (y/2+.5)*(((float)(ct%2==0))*.5+.5));
 			glBegin(GL_TRIANGLE_STRIP);
 			
 			glTexCoord2f(xt,yt+ytstep);
@@ -203,7 +218,7 @@ int main(int argc, char** argv)
 
 	//setup opencv stuff
 	cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE); 
-	cvMoveWindow("mainWin", 100, 100);
+	cvMoveWindow("mainWin", 800, 100);
 	cvSetMouseCallback( "mainWin", mouse_callback, (void*) MainImage);
 	
 

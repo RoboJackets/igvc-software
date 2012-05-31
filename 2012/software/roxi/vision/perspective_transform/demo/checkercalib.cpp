@@ -1,23 +1,28 @@
 #include <cv.h>
 #include <cvaux.h>
 #include <highgui.h>  
-
+#include "firewire_harness.cpp"
 
 
 int n_boards = 0;
 const int board_dt = 1;
 int board_w;
 int board_h;
+int useFirewire;
 
 int main(int argc, char* argv[])
 {
-	board_w = 5; // Board width in squares
+	board_w = 6; // Board width in squares
 	board_h = 8; // Board height 
 	n_boards = 8; // Number of boards
 	int board_n = board_w * board_h;
 	CvSize board_sz = cvSize( board_w, board_h );
-	CvCapture* capture = cvCreateCameraCapture( 0 );
-	assert( capture );
+	CvCapture* camera;
+	
+	useFirewire=connectToCamera()?0:1;
+	if (!useFirewire){
+		camera=cvCaptureFromCAM(0);
+	}
 
 	cvNamedWindow( "Calibration" );
 	// Allocate Sotrage
@@ -32,8 +37,9 @@ int main(int argc, char* argv[])
 	int successes = 0;
 	int ready=0;
 	int step, frame = 0;
-
-	IplImage *image = cvQueryFrame( capture );
+	
+	
+	IplImage *image = useFirewire?camera_firewire.ReturnFrame():cvQueryFrame(camera);
 	IplImage *gray_image = cvCreateImage( cvGetSize( image ), 8, 1 );
 	
 
@@ -91,7 +97,7 @@ int main(int argc, char* argv[])
 			ready=0;
 		}
 			
-		image = cvQueryFrame( capture ); // Get next image
+		image = useFirewire?camera_firewire.ReturnFrame():cvQueryFrame(camera); // Get next image
 	} // End collection while loop
 
 	// Allocate matrices according to how many chessboards found
@@ -159,7 +165,7 @@ int main(int argc, char* argv[])
 		}
 		if( c == 27 )
 			break;
-		image = cvQueryFrame( capture );
+		image = useFirewire?camera_firewire.ReturnFrame():cvQueryFrame(camera);
 	}
 
 	return 0;

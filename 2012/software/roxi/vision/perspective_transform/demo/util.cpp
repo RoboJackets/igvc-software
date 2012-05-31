@@ -72,8 +72,8 @@ void multMat2d(const CvMat* Cv){
 	/* Elements map like so:
 	
 	0	1	2			0:0	4:1	 8:	12:2
-	3	4	5  ->		1:3	5:4	 9:	13:5
-	6	7	8			2:		6:		10:8	14:
+	3	4	5  ->			1:3	5:4	 9:	13:5
+	6	7	8			2:	6:	10:1	14:
 						3:6	7:7	11:	15:8
 	because opencv is row major and gl is col major and we need to fill out missing z components
 	*/
@@ -93,7 +93,7 @@ void multMat2d(const CvMat* Cv){
 	M[4]=C[1];
 	M[5]=C[4];
 	M[7]=C[7];
-	M[10]=C[8];//z = identity
+	M[10]=1;//z = identity
 	M[12]=C[2];
 	M[13]=C[5];
 	M[15]=C[8];
