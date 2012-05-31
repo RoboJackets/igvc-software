@@ -1179,6 +1179,12 @@ void Vision::ConvertAllImageViews(int trackbarVal)
 //  	break;
 
 	default:
+	cvPutText(	ImageBufferManager::getInstance().visCvRaw, 
+				"RawFill", 
+				cvPoint(5,ImageBufferManager::getInstance().visCvRaw->height-10), 
+				&font, 
+				CV_RGB(255,255,255));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvRaw);
 		break;
 
 	}
