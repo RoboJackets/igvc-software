@@ -23,9 +23,9 @@ void dotransform(){
 		return;
 	map_matrix=cvCreateMat( 3, 3, CV_32FC1 );
 	CvPoint2D32f src[4];
-	double sc=100;
+	double sc=200;
 	//upper left corner of mapped square
-	CvPoint2D32f ul=cvPoint2D32f(MainImage->width/2-sc/2,MainImage->height/2-sc/2);
+	CvPoint2D32f ul=cvPoint2D32f(MainImage->width/2-sc/2,MainImage->height-sc-1);
 	
 	//the four points to map the clicked ones to
 	CvPoint2D32f dst[4]={ add(cvPoint2D32f(0.,sc),ul),add(cvPoint2D32f(sc,sc),ul),add(cvPoint2D32f(sc,0.),ul),add(cvPoint2D32f(0.,0.),ul)};
@@ -73,7 +73,24 @@ void cvDisplay(){
 										//as a workaruound
 		cout<<"Ignoring presumed bad jpeg"<<endl;
 		MainImage=cvCreateImage(cvSize(640,480),IPL_DEPTH_8U,3); 
+		tmp=cvCloneImage(MainImage);//mild memory leak
 	}
+	static int firstrun=1;
+	// Load Distortions
+	static CvMat *intrinsic = (CvMat*)cvLoad( "Intrinsics.xml" );
+	static CvMat *distortion = (CvMat*)cvLoad( "Distortion.xml" );
+	static IplImage* mapx;
+	static IplImage* mapy;
+	if(firstrun){//first time through
+		// Build the undistort map that we will use for all subsequent frames
+		mapx = cvCreateImage( cvGetSize( MainImage ), IPL_DEPTH_32F, 1 );
+		mapy = cvCreateImage( cvGetSize( MainImage ), IPL_DEPTH_32F, 1 );
+		cvInitUndistortMap( intrinsic, distortion, mapx, mapy );
+	}
+	cvRemap( tmp, MainImage, mapx, mapy ); // undistort image
+
+	
+	
 	
 	
 	//draw lines between clicked points on MainImage
@@ -201,6 +218,7 @@ void reshape (int w, int h)
 
 int main(int argc, char** argv)
 {
+	cout<<"This program uses the calibrations from ckdemo, please run it if you haven't already"<<endl;
 	//setup camera
 	useFirewire=connectToCamera()?0:1;
 	if (!useFirewire){

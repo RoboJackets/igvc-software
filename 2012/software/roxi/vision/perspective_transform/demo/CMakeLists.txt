@@ -14,6 +14,12 @@ target_link_libraries(ckcalib
 	cv
 	cvaux
 	highgui
+	
+	roxi_vision
+	QtCore
+	QtXml
+	QtGui
+	xml
 )
 
 #line draw demo
