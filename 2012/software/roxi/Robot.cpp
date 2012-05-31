@@ -1,5 +1,5 @@
 #include <sstream>
-
+#include <fstream>
 #include "Robot.h"
 #include "vision.h"
 #include "main.h"
@@ -15,6 +15,7 @@
 
 #define PRINTFRAMERATE 0
 
+using namespace std;
 
 
 
@@ -307,9 +308,10 @@ void Robot::processFunc()
 		osmcd->setLight(MC_LIGHT_PULSING);
 	}
 	*/
-	
-
-	
+	    ofstream log;
+	log.open("log2.txt", ios::app); 
+	int n=0;
+	log<<n++<<endl;log.flush();
 	/* glut mask init hack */
 	static bool getMask = true;
 	if (getMask)
@@ -322,28 +324,28 @@ void Robot::processFunc()
 		getGlutMask(4);
 	}
 
-
+log<<n++<<endl;log.flush();
 	/* Get raw image */
 	if (!GrabImage())
 		return;
 
-
+log<<n++<<endl;log.flush();
 	/* Shove raw image into graphics card for some processing on the card */
 	updateGlutDisplay();
 
-
+log<<n++<<endl;log.flush();
 	/* Scale raw image down to 320x240 */
 	cvResize(	ImageBufferManager::getInstance().getvisCvRawTransform(), 
 			ImageBufferManager::getInstance().getvisCvRawTransformSmall(), 
 			CV_INTER_LINEAR);
-
+log<<n++<<endl;log.flush();
 
 	/* Perform vision processing. */
 	if (doVision)
 	{
 		vp.visProcessFrame(heading_vision);
 	}
-	
+	log<<n++<<endl;log.flush();
 	/*
 	if (!pfdeclared)
 	{
@@ -361,14 +363,14 @@ void Robot::processFunc()
 			mapper.processMap(heading_mapping);
 		}
 	}
-
+log<<n++<<endl;log.flush();
 	/* Do potential fields */
 	GPSState state;
 	gpsA.get_last_state(state);
 	
 	pf.dropWaypoint(state.lat, state.lon, MagnetometerHeading);			
 	pf.getVectorMotor(mapper.probmap, NULL, mapper.robotBaseAt, mapper.robotLookingAt, heading_pathplan);
-
+log<<n++<<endl;log.flush();
 	/*if (doMapping)
 	{
 		mapper.genMap();
@@ -379,7 +381,7 @@ void Robot::processFunc()
 	/* Update displays */
 	vp.ConvertAllImageViews(trackbarVal); // display views based on trackbar position
 
-
+log<<n++<<endl;log.flush();
 	/* Drive Robot via motor commands (GO!) */
 	if (useMotors)
 	{
@@ -408,7 +410,7 @@ void Robot::processFunc()
 	}
 
 
-
+log<<n++<<endl;log.flush();
 
 	/*Save raw image last*/
 	static int imgnum = 0;
@@ -423,7 +425,7 @@ void Robot::processFunc()
 		++imgnum;
 	}
 
-
+log<<n++<<endl;log.flush();
 	/* Drive Motors */
 	if (useMotors)
 	{
@@ -442,14 +444,14 @@ void Robot::processFunc()
 			xvel = scale_x;
 		}
 	}
-
+log<<n++<<endl;log.flush();
 	/* Print Stats */
 	if (PRINTFRAMERATE)
 	{
 		printf( "framerate: %.2f \n\n", elapsed_time() );
 		start_timer(); // called second to time entire process (except first run)
 	}
-
+log<<n++<<endl;log.flush();
 	/* pause (for testing) */
 	//cvWaitKey(0);
 }
@@ -601,7 +603,32 @@ void Robot::initGlut()
 
 void Robot::updateGlutDisplay()
 {
-
+	//HACK!! opengl seemed to be crashing X so I have replaced it with opencv
+	static int firstrun=1;
+	// Load Distortions
+	static CvMat *intrinsic = (CvMat*)cvLoad( "Intrinsics.xml" );
+	static CvMat *distortion = (CvMat*)cvLoad( "Distortion.xml" );
+	static IplImage* mapx;
+	static IplImage* mapy;
+	if(firstrun){//first time through
+		// Build the undistort map that we will use for all subsequent frames
+		mapx = cvCreateImage( cvGetSize( ImageBufferManager::getInstance().getvisCvRaw() ), IPL_DEPTH_32F, 1 );
+		mapy = cvCreateImage( cvGetSize( ImageBufferManager::getInstance().getvisCvRaw() ), IPL_DEPTH_32F, 1 );
+		cvInitUndistortMap( intrinsic, distortion, mapx, mapy );
+	}
+	cvRemap( ImageBufferManager::getInstance().getvisCvRaw(), ImageBufferManager::getInstance().getvisCvRawTransform(), mapx, mapy ); // undistort image
+	//perspective correction
+	CvMat*  map_matrix=0;
+	map_matrix=(CvMat*)cvLoad( "PerspectiveMapMatrix.xml" );
+	if(map_matrix){
+	cvWarpPerspective( ImageBufferManager::getInstance().getvisCvRaw(), ImageBufferManager::getInstance().getvisCvRawTransform(), map_matrix,
+                        CV_INTER_AREA&(!CV_WARP_FILL_OUTLIERS),	//flags
+                        cvScalarAll(0) );									//fillval
+   return;
+   }//END HACK
+                       
+    ofstream log;
+	log.open("log.txt", ios::app);                   
 	if (doTransform)
 	{
 		/* perspective transform */
@@ -618,7 +645,11 @@ void Robot::updateGlutDisplay()
 			//glMatrixMode(GL_PROJECTION);
 			//glLoadIdentity ();
 			/* * * * * * * * * * */
-
+			
+			
+		
+			log<<"start glTexImage2D();"<<endl;log.flush();
+			
 			/* put data in card */
 			glTexImage2D(	GL_TEXTURE_RECTANGLE_ARB, 
 					0, 
@@ -629,11 +660,12 @@ void Robot::updateGlutDisplay()
 					GL_BGR, 
 					GL_UNSIGNED_BYTE, 
 					ImageBufferManager::getInstance().getvisCvRaw()->imageData);
+			log<<"end glTexImage2D();"<<endl;log.flush();
 
 			/* * * transform * * */
 			//setPjMat();
 			/* * * * * * * * * * */
-
+			log<<"start quads;"<<endl;log.flush();
 			glBegin(GL_QUADS);
 			{
 
@@ -651,13 +683,17 @@ void Robot::updateGlutDisplay()
 
 			}
 			glEnd();
+			log<<"end quads;"<<endl;log.flush();
 
 		}
 		//glDisable(GL_TEXTURE_RECTANGLE_ARB);
-
-		//glFinish();
+		
+		log<<"start glFinish();"<<endl;log.flush();
+		glFinish();
+		log<<"end glFinish();"<<endl;log.flush();
 		//glFlush();
-
+		
+		log<<"start glReadPixels("<<endl;log.flush();
 		/* get data from card */
 		glReadPixels( 0				,	//GLint x,
 					  0				,	//GLint y,
@@ -669,9 +705,13 @@ void Robot::updateGlutDisplay()
 					  //visCvDebug->imageData //Image
 					  ImageBufferManager::getInstance().getvisCvRawTransform()->imageData //Image
 					);
+		log<<"end glReadPixels("<<endl;log.flush();			
 
+		log<<"start glutSwapBuffers()"<<endl;log.flush();
 		// double buffering
 		glutSwapBuffers();
+		log<<"end glutSwapBuffers()"<<endl;log.flush();
+		
 
 	}
 	else
@@ -746,6 +786,7 @@ void Robot::updateGlutDisplay()
 		// double buffering
 		glutSwapBuffers();
 	}
+	glFinish();
 
 } // end update glut
 
