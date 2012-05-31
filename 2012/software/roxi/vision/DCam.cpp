@@ -158,7 +158,7 @@ IplImage *DCam::read_frame()
 										_image->width,
 										_image->height,
 										DC1394_COLOR_FILTER_RGGB,
-										DC1394_BAYER_METHOD_NEAREST
+										DC1394_BAYER_METHOD_SIMPLE
 									  );
 		}
 		else
