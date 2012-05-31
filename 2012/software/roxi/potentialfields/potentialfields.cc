@@ -108,7 +108,7 @@ void potentialfields::getVectorMotor(IplImage* obstacles_ipl, IplImage* targets_
 	double vel_mag, vel_ang;
 	getNextVector(INSTANT, obstacles_ipl, targets_ipl, robotBaseAt, robotLookingAt, vel_mag, vel_ang, 0, 0);
 
-	cout << "vel_mag " << vel_mag << "\nvel_ang " << vel_ang << endl;
+	cout << "vel_mag " << vel_mag << "\nvel_ang(bot)" << vel_ang << endl;
 
 	// Finally, round the values, put them in range and set them to the output point
 	setOutputs(vel_mag, vel_ang, goal);
@@ -317,8 +317,8 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 
 	// Get the vector contribution from the obstacles on the bitmap
 	getAvoidVec(obstacles, map_ang_from_world, obstaclex, obstacley);
-	/*cout << "obstacle x " << obstaclex << endl;
-	cout << "obstacle y " << obstacley << endl;*/
+	//cout << "obstacle x " << obstaclex << endl;
+	//cout << "obstacle y " << obstacley << endl;
 	
 	// Get the vector contribution from the goals on the bitmap
 	getImgTargetVec(targets, imagetarx, imagetary);
@@ -356,7 +356,7 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	double vel_mag, vel_ang;	 
 	xyToVec(xnet, ynet, vel_mag, vel_ang);	
 	
-	cout << "vel_mag: " << vel_mag << endl << "vel_ang: " << vel_ang << endl;
+	cout << "vel_mag: " << vel_mag << endl << "vel_ang(world): " << vel_ang << endl;
 
 	// Rotates the velocity vector to the angle from the perspective of the robot
 	vel_ang = RotateBearing(vel_ang, -curang);
@@ -734,20 +734,20 @@ void potentialfields::getAvoidVec(bool* obstacles, double angle_of_map, double& 
 	// Return a sum of all of the x and y components from all of the obstacle pixels within the
 	// predefined radius
 	//cout << "robotmaplocx: " << robotmaplocx << " robotlocy: " << robotlocy << " obstacle_rad: " << obstacle_avoid_radius << endl;
-	doSomethingforIndexesInRadius(robotmaplocx, robotmaplocy, obstacle_avoid_radius, obstacles, OBSTACLES, &data);
+	doSomethingforIndexesInRadius(robotmaplocx, robotmaplocy, obstacle_avoid_radius, obstacles, OBSTACLES, &data);//+y is up
 
-	//cout << "data.x_vel: " << data.x_vel << endl << "data.y_vel: " << data.y_vel << endl;
-
+	//cout << "Map avoid Vecs data.x_vel: " << data.x_vel << endl << "data.y_vel: " << data.y_vel << endl;
+	//cout << "angle_of_map: " << angle_of_map << endl;
 	// Multiply each by the constant multiplier and convert it to m/s
 	xvel = data.x_vel * obstacle_weight * meters_per_pixel;
 	yvel = data.y_vel * obstacle_weight * meters_per_pixel;
 
 	// Rotate the vector based on the current bearing (assume that this is the orientation of the image)
 	double mag, ang;
-	xyToVec(xvel, yvel, mag, ang);
+	xyToVec(xvel, yvel, mag, ang);//in map coordinates
 	ang = RotateBearing(ang, angle_of_map);
-	void VecToxy(double mag, double ang, double& x, double& y);
-	
+	VecToxy(mag,ang, xvel, yvel);
+	//cout << "obstacle push bearing in world : " << ang << endl;
 	return;
 }
 
@@ -998,14 +998,18 @@ void potentialfields::updateCurLocation()
 	return;
 }
 
-// Calculates the angle that the map is pointed rrelative to the world frame
+// Calculates the angle that the map is pointed rrelative to the world frame in bearings(north=0,cw+)
 double potentialfields::GetMapAngle(CvPoint robotBaseAt, CvPoint robotLookingAt)
 {
-	double angle = atan2((robotLookingAt.y-robotBaseAt.y), (robotLookingAt.x - robotBaseAt.x));
-	angle = rad2deg(angle);
-	angle += curang;
-	angle = fmodf(90-angle, 360);
-	return angle;
+	double rangle = atan2(-(robotLookingAt.y-robotBaseAt.y), (robotLookingAt.x - robotBaseAt.x));//robot angle [a] (+y was down)
+	double mangle;
+	rangle = rad2deg(rangle);
+	//cout<<"raw bot angle: "<<rangle<<endl;//measured math style on map
+	mangle=curang+rangle-90;//bearing of map north in world=bearing of robot in world(curang)+angle of robot on map-90=bearing of mapright-90
+	//cout<<"curang: "<<curang<<endl;
+	//cout<<"map angle: "<<mangle<<endl;
+	mangle = fmodf(mangle, 360);
+	return mangle;
 }
 
 // Puts the calculated vector into the range of the output and round it to the nearest integer 
