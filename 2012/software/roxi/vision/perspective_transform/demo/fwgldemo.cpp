@@ -36,19 +36,19 @@ void dotransform(){
 	}
 	
 	cvGetPerspectiveTransform( src,dst,
-                               map_matrix );//put the transform into mapmatrix
-                               
-   cvSave( "PerspectiveMapMatrix.xml", map_matrix  );
-   
-                               
-   //printMat(map_matrix);//for debug
-   IplImage* tmp=cvCloneImage(MainImage);
+		                       map_matrix );//put the transform into mapmatrix
+		                       
+	cvSave( "PerspectiveMapMatrix.xml", map_matrix  );
 
-  	cvWarpPerspective( MainImage, tmp, map_matrix,
-                        CV_INTER_AREA&(!CV_WARP_FILL_OUTLIERS),	//flags
-                        cvScalarAll(0) );									//fillval
-   cvReleaseImage(&MainImage);
-   MainImage=tmp;
+		                       
+	//printMat(map_matrix);//for debug
+	IplImage* tmp=cvCloneImage(MainImage);
+
+	cvWarpPerspective( MainImage, tmp, map_matrix,
+		                CV_INTER_AREA&(!CV_WARP_FILL_OUTLIERS),	//flags
+		                cvScalarAll(0) );									//fillval
+	cvReleaseImage(&MainImage);
+	MainImage=tmp;
    
 }
 
@@ -86,6 +86,7 @@ void cvDisplay(){
 		mapx = cvCreateImage( cvGetSize( MainImage ), IPL_DEPTH_32F, 1 );
 		mapy = cvCreateImage( cvGetSize( MainImage ), IPL_DEPTH_32F, 1 );
 		cvInitUndistortMap( intrinsic, distortion, mapx, mapy );
+		firstrun=0;
 	}
 	cvRemap( tmp, MainImage, mapx, mapy ); // undistort image
 
