@@ -1172,6 +1172,14 @@ void Vision::ConvertAllImageViews(int trackbarVal)
 				CV_RGB(0,0,0));
 		cvShowImage("display", ImageBufferManager::getInstance().pfThresh);
 		break;
+	case 12:
+		cvPutText(	ImageBufferManager::getInstance().visCvRawTransform, 
+				"Raw Transformed Frame", 
+				cvPoint(5,ImageBufferManager::getInstance().visCvRawTransform->height-10), 
+				&font, 
+				CV_RGB(0,0,0));
+		cvShowImage("display", ImageBufferManager::getInstance().visCvRawTransform);
+		break;
 
 		/* future use (change value of numberOfViews) */
 //  case 9:
