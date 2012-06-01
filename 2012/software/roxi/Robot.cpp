@@ -615,6 +615,7 @@ void Robot::updateGlutDisplay()
 		mapx = cvCreateImage( cvGetSize( ImageBufferManager::getInstance().getvisCvRaw() ), IPL_DEPTH_32F, 1 );
 		mapy = cvCreateImage( cvGetSize( ImageBufferManager::getInstance().getvisCvRaw() ), IPL_DEPTH_32F, 1 );
 		cvInitUndistortMap( intrinsic, distortion, mapx, mapy );
+		firstrun=0;
 	}
 	cvRemap( ImageBufferManager::getInstance().getvisCvRaw(), ImageBufferManager::getInstance().getvisCvRawTransform(), mapx, mapy ); // undistort image
 	//perspective correction
