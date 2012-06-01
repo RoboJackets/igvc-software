@@ -120,6 +120,7 @@ void cvDisplay(){
 		mapx = cvCreateImage( cvGetSize( MainImage ), IPL_DEPTH_32F, 1 );
 		mapy = cvCreateImage( cvGetSize( MainImage ), IPL_DEPTH_32F, 1 );
 		cvInitUndistortMap( intrinsic, distortion, mapx, mapy );
+		firstrun=0;
 	}
 	cvRemap( tmp, MainImage, mapx, mapy ); // undistort image
 	/*******/
