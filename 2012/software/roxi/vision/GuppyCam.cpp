@@ -34,7 +34,6 @@ int GuppyCam::connect()
 	if (_dcam->is_open())
 	{
 		camconnected=1;
-		return 1;
 	}
 	else
 	{
@@ -43,6 +42,8 @@ int GuppyCam::connect()
 		printf("Error connecting to camera \n");
 		exit(-1);
 	}
+	
+	return 1;
 }
 
 int GuppyCam::isValid()
@@ -52,13 +53,31 @@ int GuppyCam::isValid()
 
 bool GuppyCam::GrabCvImage()
 {
-	ImageBufferManager::getInstance().visCvRaw = _dcam->read_frame();
+	ImageBufferManager::getInstance().visCvRaw = ReturnFrame();
 	return true;
 }
 
 IplImage * GuppyCam::ReturnFrame()
 {
-	return _dcam->read_frame();
+	IplImage* tmp=_dcam->read_frame();
+	
+	while(!tmp){//retry until success
+		printf("DCam::read_frame() reported an error! Resetting Camera!\n");
+		system("espeak -a 300 -p 50 -s 170 -g15 -v en/en+f2 \"Camera Lost\" 2>0 &");
+		resetCamera();
+		system("espeak -a 300 -p 50 -s 170 -g15 -v en/en+f2 \"Camera Recovered\" 2>0 &");
+		tmp=_dcam->read_frame();
+	}
+	
+	return tmp;
+}
+
+int GuppyCam::resetCamera(){
+//Forcibly resets camera, possibly leaking memory as a result
+	_dcam->resetCamera();
+	_camera = _dcam->camera();
+	loadSettings();
+	return 1;
 }
 
 
@@ -107,7 +126,7 @@ void GuppyCam::setAllAuto(bool useauto)
 
 }
 
-void GuppyCam::loadSettings()
+int GuppyCam::loadSettings()
 {
 
 //	setAllAuto(); // for now use auto
@@ -149,7 +168,7 @@ void GuppyCam::loadSettings()
 	// set other values
 	setGamma( gamma );
 	setWhiteBalance( red, blue );
-
+	return 1;
 }
 
 

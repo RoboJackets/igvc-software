@@ -26,6 +26,9 @@ public:
 
 	// connects to 1394 camera
 	int connect();
+	
+	//Forcibly resets camera (possibly leaking memory as a result!)
+	int resetCamera();
 
 	// flag for init capture connection
 	int camconnected;
@@ -53,7 +56,7 @@ public:
 
 
 	// loads values/settings for camera
-	void loadSettings();
+	int loadSettings();
 
 };
 
