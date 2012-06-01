@@ -622,7 +622,7 @@ void Robot::updateGlutDisplay()
 	map_matrix=(CvMat*)cvLoad( "PerspectiveMapMatrix.xml" );
 	if(map_matrix){
 	cvWarpPerspective( ImageBufferManager::getInstance().getvisCvRaw(), ImageBufferManager::getInstance().getvisCvRawTransform(), map_matrix,
-                        CV_INTER_AREA&(!CV_WARP_FILL_OUTLIERS),	//flags
+                        CV_INTER_AREA|CV_WARP_FILL_OUTLIERS,	//flags
                         cvScalarAll(0) );									//fillval
    return;
    }//END HACK
@@ -845,7 +845,7 @@ void Robot::update_vel_func()
 			std::cerr << "osmcd->set_vel_vec failed!" << std::endl;
 		}
 		int dummy1,dummy2;
-		if(osmcd->GetMagnetometerHeading(MagnetometerHeading, dummy1, dummy2))
+		if(useMagnetometer && osmcd->GetMagnetometerHeading(MagnetometerHeading, dummy1, dummy2))
 		{
 			std::cerr << "osmcd->GetMagnetometerHeading failed!" << std::endl;
 		}
