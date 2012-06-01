@@ -51,6 +51,13 @@ public:
 	 * channels or bandwidth. A bus reset will free those things
 	 *  as a side effect."*/
 	void reset1394Bus();
+	
+	
+	/**Forces libdc1394 to reset, for when camera temporarily dies.*/
+	int resetCamera();
+	
+	int registerResetCallback(int (*callback)(DCam*));
+	
 
 	dc1394camera_t *camera() const
 	{
@@ -62,6 +69,8 @@ public:
 	{
 		return _config;
 	}
+	
+	
 
 protected:
 	// One-time global initialization
@@ -77,6 +86,11 @@ protected:
 	bool _initialized;
 	IplImage* _image;
 	DCam_Config *_config;
+	
+	//An optional pointer to a function to be called on camera reset.
+	//Note: Will be given a this pointer to allow member function calling.
+	int (*resetCallback)(DCam* thisPtr);
+	
 };
 };
 

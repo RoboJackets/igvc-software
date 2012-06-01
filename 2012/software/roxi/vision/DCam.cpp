@@ -20,7 +20,7 @@ std::vector<DCam*> DCam::cameras;
 dc1394_t *DCam::_dc1394 = 0;
 
 DCam::DCam(uint64_t guid)
-		: Base()
+		: Base(),resetCallback(NULL)
 {
 	_initialized = false;
 	_config = 0;
@@ -81,7 +81,7 @@ void DCam::open()
 		}
 
 		//if (dc1394_capture_setup(_camera, 4, DC1394_CAPTURE_FLAGS_DEFAULT))
-		if (dc1394_capture_setup(_camera, 1, DC1394_CAPTURE_FLAGS_DEFAULT))
+		if (dc1394_capture_setup(_camera, 1, DC1394_CAPTURE_FLAGS_DEFAULT))//the 1 is frames in ring buffer
 		{
 			throw runtime_error("Unable to setup capture.");
 		}
@@ -94,6 +94,10 @@ void DCam::open()
 		printf("Initialized camera %016llx\n", (long long unsigned int)_camera->guid);
 
 		_initialized = true;
+	}
+	else
+	{
+		printf("Tried to open already open camera %016llx\n", (long long unsigned int)_camera->guid);
 	}
 }
 
@@ -141,10 +145,10 @@ IplImage *DCam::read_frame()
 	try
 	{
 		dc1394error_t ec;
-		if(ec=dc1394_capture_dequeue(_camera, DC1394_CAPTURE_POLICY_WAIT, &_frame))
+		if( (ec=dc1394_capture_dequeue(_camera, DC1394_CAPTURE_POLICY_WAIT, &_frame)) )
 		{
 			std::cout<<"libdc1394 error reading frame from dc1394_capture_dequeue, error code"<< ec << endl;
-			return _image;
+			return 0;
 		};
 		//dc1394_capture_dequeue(_camera, DC1394_CAPTURE_POLICY_POLL, &_frame);
 
@@ -178,6 +182,63 @@ IplImage *DCam::read_frame()
 
 	return _image;
 }
+
+int DCam::resetCamera(){
+//Forces libdc1394 to reset, for when camera temporarily dies.
+//
+//In order to avoid possible segfaults we don't try to clean 
+//up old stuff, so there is a memory leak on calling this.
+	int error =1;
+	while(error){
+		//reset libdc
+		dc1394_free(_dc1394);
+		_dc1394 = dc1394_new();
+		cout<<"_dc1394 "<< _dc1394 << endl;
+		if(!_dc1394)continue;
+		
+		//list cameras
+		dc1394camera_list_t *list = 0;
+		if(DC1394_SUCCESS!=dc1394_camera_enumerate(_dc1394, &list))continue;
+		cout<<"list*  "<< list << endl;
+		if(!list)continue;
+		
+		//check num cams, must be > 0
+		cout<<"list->num  "<< list->num << endl;
+		if(!list->num)continue;
+		
+		//connect to first camera
+		_camera = dc1394_camera_new(_dc1394, list->ids[0].guid);
+		cout<<"_camera "<< _camera << endl;
+		if(!_camera)continue;
+		
+		//open camera stream
+		_initialized=false;
+		try{
+			open();
+		}
+		catch(std::exception)
+		{
+			cout<<"Camera stream opening failed!"<< endl;
+			continue;
+		}
+		
+		//call reset callback if one has been registered
+		if (resetCallback)
+		{
+			if(!resetCallback(this))continue;
+		}
+		
+		//it all worked! we're back up
+		error=0;
+	}
+	return 1;
+}
+
+int DCam::registerResetCallback(int (*callback)(DCam*)){
+	this->resetCallback=callback;
+	return 1;
+}
+
 
 void DCam::exposure(unsigned int level)
 {
