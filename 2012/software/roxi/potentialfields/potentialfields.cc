@@ -646,7 +646,7 @@ bool* potentialfields::IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE 
 void potentialfields::removeclumps(bool* obstacles)
 {
 	obstacles = obstacles;
-	// TODO: Write this function
+	// TODO: Write this functionf
 	return;
 }
 
@@ -848,8 +848,8 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 	}
 	else
 	{
-		x_vel = -1/(d*d)*cos(theta);
-		y_vel = -1/(d*d)*sin(theta);
+		x_vel = -1/(d)*cos(theta);
+		y_vel = -1/(d)*sin(theta);
 	}
 	//cout << "x/y: " << sqrt((x_vel/y_vel)*(x_vel/y_vel));
 
