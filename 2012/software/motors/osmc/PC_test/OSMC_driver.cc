@@ -452,13 +452,13 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 	}
 
 	//const double fwdmag = 70;
-	const double fwdmag = 60;
+	/*const double fwdmag = 60;
+	const double dir = (y >= 0) ? 1 : -1;
 	const double revmag = -30;
 	const double turnthresh = M_PI / double(6);
 	const double ang = M_PI / double(2) - atan2(y,x);
-	const double dir = (y >= 0) ? 1 : -1;
-	const double forwardslope = double(2)*fwdmag / (M_PI / double(2));
-	const double backwardslope = double(-2)*revmag / (M_PI / double(2));
+	const double forwardslope = fwdmag / (M_PI / double(2));
+	const double backwardslope = -revmag / (M_PI / double(2));
 
 	double rspeed, lspeed;
 	std::string branch;
@@ -479,8 +479,27 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 		rspeed = (fwdmag - forwardslope * ang) * dir;
 		lspeed = (fwdmag + forwardslope * ang) * dir;
 		branch = "abs(ang) < turnthresh";
-	}
+	}*/
 	//std::cout << "r: " << rspeed << " l: " << lspeed << "angle: " << ang << " branch: " << branch << std::endl;
+
+	// Set left and right speeds
+	const double fwdmag = 60;
+	const double dir = (y >= 0) ? 1 : -1;
+	const double slope = 2.0 * fwdmag / (M_PI / 2.0);
+	const double ang = M_PI / double(2) - atan2(y,x);
+	double lspeed, rspeed;
+		
+	if (ang < 0)
+	{
+		lspeed = (fwdmag + ang * slope) * dir;
+		rspeed = fwdmag * dir;			
+	}
+	else
+	{
+		lspeed = fwdmag * dir;
+		rspeed = (fwdmag - ang * slope) * dir;
+	}
+
 	return set_motors(lspeed, rspeed);
 }
 
