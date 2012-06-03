@@ -88,3 +88,12 @@ double RotateBearing(double angle0, double dangle)
 	}
 	return angle;
 }
+
+/* Clamps angle to within the clamp angle */
+double clampVector(double ang, double gps_clamp_angle)
+{
+	if (ang > 180 && ang < 360 - gps_clamp_angle)
+		ang = 360 - gps_clamp_angle;
+	else if (ang < 180 && ang > gps_clamp_angle)
+		ang = gps_clamp_angle;
+}

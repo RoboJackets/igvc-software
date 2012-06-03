@@ -12,5 +12,6 @@ void VecToxy(double mag, double ang, double& x, double& y);
 void AddVecs(double* xvals, double* yvals, int numVecs, double& xnet, double& ynet);
 double Distance2D(double x1, double y1, double x2, double y2);
 double RotateBearing(double angle0, double dangle);
+double clampVector(double ang, double gps_clamp_angle);
 
 #endif
