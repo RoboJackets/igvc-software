@@ -304,8 +304,8 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	robotmaplocx = robotBaseAt.x;
 	robotmaplocy = robotBaseAt.y;
 
-	// Figure out what direction the map is facing relative toworld coordinates
-	double map_ang_from_world = GetMapAngle(robotBaseAt, robotLookingAt);	
+	// Figure out what direction the map is facing relative to world coordinates
+	imgAngle = GetMapAngle(robotBaseAt, robotLookingAt);	
 
 	// Alter the bitmap to remove stray clumps of non-obstacles
 	removeclumps(obstacles);
@@ -316,7 +316,7 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	double obstaclex, obstacley, imagetarx, imagetary, gpstarx, gpstary, gpsavoidx, gpsavoidy;
 
 	// Get the vector contribution from the obstacles on the bitmap
-	getAvoidVec(obstacles, map_ang_from_world, obstaclex, obstacley);
+	getAvoidVec(obstacles, imgAngle, obstaclex, obstacley);
 	//cout << "obstacle x " << obstaclex << endl;
 	//cout << "obstacle y " << obstacley << endl;
 	
@@ -863,7 +863,39 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 
 	// Reverses direction of y_vel because the image indexes for height start at the top, so all the
 	// y values have to be reversed
-	y_vel = -y_vel;
+	y_vel = -y_vel;	
+	
+	// Get angle in robot coordinates
+	double mag, angle;
+	xyToVec(x_vel, y_vel, mag, angle);
+	angle = RotateBearing(angle, imgAngle);	
+	angle = RotateBearing(angle, -curang);
+	if (angle > 180)
+		angle -= 360;
+
+	// Chooses vector 90 degrees from obstacle closest to forward
+	double anglePlus = angle + 90;
+	if (anglePlus > 180)
+		anglePlus -= 360;
+	double angleMinus = angle - 90;
+	if (angleMinus < -180)
+		angleMinus += 360;
+	if (anglePlus > -90 && anglePlus < 90)
+		angle = anglePlus;
+	else
+		angle = angleMinus;
+	if (angle <	0)
+		angle += 360;
+
+	// Convert back to map coordinates
+	angle = RotateBearing(angle, curang);
+	angle = RotateBearing(angle, -imgAngle);
+	VecToxy(mag, angle, x_vel, y_vel);
+
+	/*double scaleFactor = 1 - abs(angle)/180;
+	x_vel *= scaleFactor;
+	y_vel *= scaleFactor;*/
+
 	return;
 }
 
@@ -1006,7 +1038,7 @@ void potentialfields::updateCurLocation()
 	return;
 }
 
-// Calculates the angle that the map is pointed rrelative to the world frame in bearings(north=0,cw+)
+// Calculates the angle that the map is pointed relative to the world frame in bearings(north=0,cw+)
 double potentialfields::GetMapAngle(CvPoint robotBaseAt, CvPoint robotLookingAt)
 {
 	double rangle = atan2(-(robotLookingAt.y-robotBaseAt.y), (robotLookingAt.x - robotBaseAt.x));//robot angle [a] (+y was down)
