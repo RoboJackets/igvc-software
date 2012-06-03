@@ -789,6 +789,14 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distanc
 		// If the robot is far away from the GPS goal, gets a constant vector towards the GPS location
 		xvel = gps_goal_weight * gps_max_distance * sin(theta);
 		yvel = gps_goal_weight * gps_max_distance * cos(theta);
+
+		// Rotate to within clamp angle
+		double mag, ang;
+		xyToVec(xvel, yvel, mag, ang);
+		ang = RotateBearing(ang, curang);
+		ang = clampVector(ang, gps_clamp_angle);
+		ang = RotateBearing(ang, -curang);
+		VecToxy(mag, ang, xvel, yvel);
 	}
 	else
 	{

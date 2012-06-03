@@ -222,8 +222,9 @@ private:
 	const static double attractor_bitmap_thresh = 100;		// Threshold value for converting attractor images to bitmaps
 	const static double stepsize_m = .5;				// Step size in meters
 	const static double guessed_min_potential = 100;		// Potential used in calculation of heuristic
-	const static double meters_per_pixel_const = 0.02;		// Meters per pixel constant
+	const static double meters_per_pixel_const = 0.04;		// Meters per pixel constant
 	const static int slow_speed = 50;				// Slow speed for robot to travel
+	const static int gps_clamp_angle = 45;				// Angle to clamp GPS vector
 									
 	/******************************************/
 
