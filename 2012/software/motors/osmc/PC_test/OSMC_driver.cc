@@ -482,13 +482,78 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 	}*/
 	//std::cout << "r: " << rspeed << " l: " << lspeed << "angle: " << ang << " branch: " << branch << std::endl;
 
-	// Set left and right speeds
-	const double fwdmag = 60;
-	const double dir = (y >= 0) ? 1 : -1;
+
+
+	/************************************************************************
+	This function calculates "good" values to send to the motors 
+	when the robot wants to go in the direction specified
+	by the vector (x,y), assuming that the robot is facing along the +y axis.
+	
+	Critical parameters: FWDMAG, DIFFMUL
+	
+	The function works in two stages: 
+	1. The ideal velocities for the wheels are generated to correspond to the following motor curves:
+	
+		Left: 
+			            ^
+			            |[vel]
+			            |
+			  +FWDMAG ->|----------                                                  
+			           /|                                                            
+			          / |                                                            
+			         /  |                                                            
+			        /   |                                                            
+		<----------/-------------------->                                            
+			  |   /|    |    |    |     [deg cw]                                         
+			 -90 /-45   |   +45  +90                                                 
+			    /       |                                                            
+			   /        |                                                            
+			  /         |<- -FWDMAG                                                    
+			            |                              
+			            v
+		 
+		 Right:
+			            ^
+			            |[vel]
+			            |
+			  ----------|<- +FWDMAG                                                               
+			            |\                                                           
+			            | \                                                          
+			            |  \                                                         
+			            |   \                                                        
+		<--------------------\---------->                                            
+			  |    |    |    |\   |     [deg cw]                                         
+			 -90  -45   |   +45\ +90                                                 
+			            |       \                                                    
+			            |        \                                                   
+			  -FWDMAG ->|         \                                          
+			            |                              
+			            v
+		 These were chosen so that full left and right would turn in place,
+		 straight would go straight, and 45deg would lock up one side.
+	 
+	 2. The velocities are corrected to get the values needed to get those behaviors.
+		 
+		 Unfortunately the velocities produced by directly sending these 
+		 signals don't have the desired behavior. For example, if the left wheel
+		 is told to go 100 and the right 0, the left side goes slower and the 
+		 right side moves forward some. In other words the left and right wheel 
+		 behaviors are coupled so that try to behave similarly when told to do 
+		 different things, they act more similarly than desired.
+		 
+		 To correct for the discrepancy, the difference in left and right wheel speed are amplified by DIFFMUL.
+	     
+	*******************************************************************************/
+
+
+	
+	const double fwdmag = 80;// this controls the basic speed the wheels run at
+	const double diffmul = .2;// this is how much the difference in wheel powers is multiplied by to correct for velocity crosstalk
+	const double dir = (y >= 0) ? 1 : -1;//behavior of this function not guaranteed to be smooth crossing to y<0;
 	const double slope = 2.0 * fwdmag / (M_PI / 2.0);
 	const double ang = M_PI / double(2) - atan2(y,x);
 	double lspeed, rspeed;
-		
+	// Get ideal left and right speeds	
 	if (ang < 0)
 	{
 		lspeed = (fwdmag + ang * slope) * dir;
@@ -499,6 +564,11 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 		lspeed = fwdmag * dir;
 		rspeed = (fwdmag - ang * slope) * dir;
 	}
+	
+	// Amplify speed difference to correct for coupled motor behavior.
+	double diff = rspeed - lspeed;
+	rspeed = rspeed + diff*diffmul;
+	lspeed = lspeed - diff*diffmul;
 
 	return set_motors(lspeed, rspeed);
 }

@@ -4,7 +4,7 @@
 
 int main()
 {
-	OSMC_driver drive;
+	OSMC_driver drive(OSMC_IF_FOR_BOARD, NULL);
 
 	int angle;
 	int XV;
