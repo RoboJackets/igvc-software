@@ -154,6 +154,7 @@ int Robot::init()
 		#error "Must define OSMC_2WD or OSMC_4WD"
 	#endif
 	osmcd->setLight(MC_LIGHT_PULSING);
+	
 	if (useMagnetometer){
 		int dummy1, dummy2;
 		if(osmcd->GetMagnetometerHeading(MagnetometerHeading, dummy1, dummy2))//for a starting angle
