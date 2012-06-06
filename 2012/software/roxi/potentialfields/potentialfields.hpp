@@ -279,6 +279,7 @@ private:
 	// Various helper functions
 	void printbitmap(bool* bitmap);
 	void loadXML();
+	void pfDebug(double gps_x, double gps_y, double obstacle_x, double obstacle_y); 
 };
 /******************************************/
 

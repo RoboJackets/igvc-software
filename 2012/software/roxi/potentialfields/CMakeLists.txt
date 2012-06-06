@@ -13,6 +13,7 @@ include_directories(
 add_library(potentialfields
 	potentialfields.cc
 	commonVecOps.cc
+	pfdebug.cc
 )
 
 target_link_libraries(potentialfields
