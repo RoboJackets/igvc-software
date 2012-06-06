@@ -345,8 +345,9 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	double ycomps[] = {obstacley, imagetary, gpstary, gpsavoidy};	
 	double xnet, ynet;
 
-	cout << "obstaclex: " << obstaclex << endl << "obstacley: " << obstacley << endl;
-	cout << "gpstarx: " << gpstarx << endl << "gpstary: " << gpstary << endl;
+	//cout << "obstaclex: " << obstaclex << endl << "obstacley: " << obstacley << endl;
+	//cout << "gpstarx: " << gpstarx << endl << "gpstary: " << gpstary << endl;
+	pfDebug(gpstarx, gpstary, obstaclex, obstacley); 
 
 	// Find the resulting vector by adding up all of the components
 	AddVecs(xcomps, ycomps, number_vecs, xnet, ynet);
