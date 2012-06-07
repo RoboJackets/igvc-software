@@ -9,7 +9,7 @@ const int rightCurrentADCPin	= 4;
 //#define SPI_MOSI 				/*13*/
 const int SPI_MISO			= 7;/*12*/
 //const int SPI_CLK			= 6;/*11*/
-const int SPI_CLK			= 13;/*11*/
+const int SPI_CLK			= -1;//13;/*11*/
 const int SPI_SS_LEFT_MOTOR_ENCODER	= 5;/*10*/
 const int SPI_SS_RIGHT_MOTOR_ENCODER	= 4;/*9*/
 
