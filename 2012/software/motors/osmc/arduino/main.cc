@@ -97,6 +97,7 @@ int main()
 			{
 				setRightMotorDutyCycle(MC_MOTOR_FORWARD, 0);
 				setLeftMotorDutyCycle(MC_MOTOR_FORWARD, 0);
+				digitalWrite(LIGHT_PIN_LB, HIGH);
 			}
 		}
 
