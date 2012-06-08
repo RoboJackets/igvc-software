@@ -73,7 +73,7 @@ int main()
 
 	boost::asio::io_service io_service;
 
-	NAV200 lidar;
+	//NAV200 lidar;
 	OSMC_4wd_driver motors;
 
 	motors.setLight(MC_LIGHT_PULSING);
@@ -84,8 +84,9 @@ int main()
 	gyroState gy_state;
 
 	gps gpsA;
+	gpsA.open("/dev/ttyGPS", 4800);
 	//gpsA.open("/dev/ttyGPS", 38400);
-	gpsA.open("/dev/rfcomm0", 19200);
+	//gpsA.open("/dev/rfcomm0", 19200);
 
 	gpsA.start();
 	
@@ -154,15 +155,15 @@ int main()
 
 			distance = lambert_distance(state, target);
 			std::cout << "Distance to go: " << distance << " m" << std::endl;
-			//get lidar data
-			if(!lidar.read())
-			{
-				std::cerr << "No LIDAR Data, using old data" << std::endl;
-			}
-			//copy the good points
-			size_t numlidarpts = lidar.getValidData(goodtheta, goodradius);
-			//running average
-			lidarProc::runavg(goodradius, runavg_goodradius, numlidarpts, 30);
+			////get lidar data
+			//if(!lidar.read())
+			//{
+			//	std::cerr << "No LIDAR Data, using old data" << std::endl;
+			//}
+			////copy the good points
+			//size_t numlidarpts = lidar.getValidData(goodtheta, goodradius);
+			////running average
+			//lidarProc::runavg(goodradius, runavg_goodradius, numlidarpts, 30);
 
 			//get vector to first waypoint
 			double x = waypointLon[i] - state.lon;
