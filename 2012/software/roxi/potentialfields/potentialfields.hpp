@@ -226,6 +226,7 @@ private:
 	const static int slow_speed = 50;				    // Slow speed for robot to travel
 	const static int gps_clamp_angle = 45;				// Angle to clamp GPS vector
 	const static int turn_multiplier=2.0;               //Stretch angles in order to cause harder turns
+	const static int max_pixels_sector = 30;			// Maximum saturation of pixels in a sector
 									
 	/******************************************/
 
