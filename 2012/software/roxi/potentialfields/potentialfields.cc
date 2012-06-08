@@ -929,6 +929,10 @@ void potentialfields::fillinRadius(bool* obstacle, int x, int y, int radius)
 // Performs some action given by RAD_OPTION on every pixel within a certain radius of a given pixel
 void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, bool* bitmap, RAD_OPTION OPTION, ReturnData* data)
 {
+	// Queue for storing individual obstacle values for each sector
+	std::priority_queue<double> x_vals[12];
+	std::priority_queue<double> y_vals[12];
+
 	//cout << "x0: " << x0 << "\ny0: " << y0 << "\nradius: " << radius << endl;
 	// Starts at the lowest y up to the highest y possible within the radius
 	for (int y = y0 - radius; y <= y0 + radius; y++)
@@ -969,17 +973,16 @@ void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, 
 					//printbitmap(bitmap);
 					if (get2Dindexvalue(bitmap, x, y) == 1)
 					{
-						//cout << "Here1\n";
 						double curx_vel, cury_vel;
 						repulsivePixels(x0, y0, x, y, radius, curx_vel, cury_vel);
-						data->x_vel += curx_vel;
-						data->y_vel += cury_vel;
-						/*cout << "x0: " << x0 << endl;	
-						cout << "y0: " << y0 << endl;
-						cout << "x: " << x << endl;	
-						cout << "y: " << y << endl;
-						cout << "xvel: " << data->x_vel << endl;
-						cout << "yvel: " << data->y_vel << endl;*/
+
+						// Add to sector
+						double theta = atan2((y-y0), (x-x0));
+						theta = vec2bear(rad2deg(theta));
+						int sector = (int) (theta / 30);
+						sector = (sector < 12) ? sector : 11;
+						x_vals[sector].push(curx_vel);
+						y_vals[sector].push(cury_vel); 
 					}
 					break;
 
@@ -1005,6 +1008,27 @@ void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, 
 					break;
 			}
 		}	
+	}
+	
+	// Take the max number of pixels. Chooses highest values.
+	if (OPTION == OBSTACLES)
+	{
+		for (int sector = 0; sector < 12; sector++)
+		{
+			int size;
+			if (x_vals[sector].size() > max_pixels_sector)
+				size = max_pixels_sector;
+			else
+				size = x_vals[sector].size();
+			
+			for (int i = 0; i < size; i++)
+			{	
+				data->x_vel += x_vals[sector].top();
+				data->y_vel += y_vals[sector].top();
+				x_vals[sector].pop();
+				y_vals[sector].pop();
+			}
+		}
 	}
 	return;
 }
