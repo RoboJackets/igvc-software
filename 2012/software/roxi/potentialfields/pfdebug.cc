@@ -1,6 +1,7 @@
 #include "potentialfields.hpp"
 #include "commonVecOps.hpp"
-
+#include <iostream>
+using namespace std;
 void potentialfields::pfDebug(double gps_x, double gps_y, double obstacle_x, double obstacle_y)
 {
 	const double scaleFactor = 20;
@@ -11,12 +12,12 @@ void potentialfields::pfDebug(double gps_x, double gps_y, double obstacle_x, dou
 	double gps_mag, gps_ang, obs_mag, obs_ang;
 	xyToVec(gps_x, gps_y, gps_mag, gps_ang);
 	xyToVec(obstacle_x, obstacle_y, obs_mag, obs_ang);
-	gps_ang = RotateBearing(gps_ang, curang);
-	obs_ang = RotateBearing(obs_ang, curang);
+	gps_ang = RotateBearing(gps_ang, -curang);
+	obs_ang = RotateBearing(obs_ang, -curang);
 	double gps_x_new, gps_y_new, obs_x_new, obs_y_new;
 	VecToxy(gps_mag, gps_ang, gps_x_new, gps_y_new);
 	VecToxy(obs_mag, obs_ang, obs_x_new, obs_y_new);
-
+	//cout<<"new obs ang: "<<obs_ang<<endl;
 	// Flip y's for display
 	gps_y_new = - gps_y_new;
 	obs_y_new = - obs_y_new;
