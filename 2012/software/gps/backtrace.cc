@@ -4,6 +4,19 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <execinfo.h>
+#include <unistd.h>
+
+
+static char exeprtthingy____[32768];
+char * getexe() {
+	char link[32768];
+    
+    snprintf(link,sizeof link,"/proc/%d/exe",getpid());
+    if(readlink(link,exeprtthingy____,sizeof exeprtthingy____)==-1) {
+        fprintf(stderr,"ERROR getting exe name\n");
+    }
+    return exeprtthingy____;
+}
 
 void stacktrace() {
 
@@ -21,13 +34,15 @@ void stacktrace() {
     //printf("[bt] #%d %s\n", i, messages[i]);
 
     char syscom[256];
-    sprintf(syscom,"addr2line %p -e roxi_j", trace[i]); //last parameter is the name of this app
+    sprintf(syscom,"addr2line %p -e %s", trace[i],getexe()); //last parameter is the name of this app
     system(syscom);
   }
 
 
 }
 
+
+    
 
 
 
