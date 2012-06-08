@@ -794,9 +794,9 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distanc
 		// Rotate to within clamp angle
 		double mag, ang;
 		xyToVec(xvel, yvel, mag, ang);
-		ang = RotateBearing(ang, curang);
-		ang = clampVector(ang, gps_clamp_angle);
 		ang = RotateBearing(ang, -curang);
+		ang = clampVector(ang, gps_clamp_angle);
+		ang = RotateBearing(ang, curang);
 		VecToxy(mag, ang, xvel, yvel);
 	}
 	else
@@ -1057,8 +1057,8 @@ double potentialfields::GetMapAngle(CvPoint robotBaseAt, CvPoint robotLookingAt)
 void potentialfields::setOutputs(double vel_mag, double vel_ang, Point2D<int>& goal)
 {
 	double x_real, y_real;
-	
 	vel_ang=(fmod((vel_ang+180),360)-180);        //put angle into -180 to 180
+	vel_ang=vel_ang*turn_multiplier;	//cause turns to be harder than necessary, this is especially useful for 90 deg potential fields
 	vel_ang=vel_ang<-90?-90:vel_ang;	//if ang<-90 set to -90
 	vel_ang=vel_ang> 90? 90:vel_ang;	//if ang> 90 set to  90
 	
