@@ -33,7 +33,7 @@ int DO_STOPANDTHINK = 0;//default value do not touch
 
 ////////////////////////////////////////////////////////////
 
-
+int Vision::RemoveLines;
 /*
  *
  */
@@ -1591,8 +1591,8 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 			1); // fills in barrels/lines, but adds grass noise
 
 
-	if(RemoveLines){
-		cvDilate(visCvThresh, visCvThresh, NULL, 3); // removes lines
+	if(Vision::RemoveLines){
+		cvDilate(ImageBufferManager::getInstance().visCvThresh, ImageBufferManager::getInstance().visCvThresh, NULL, 3); // removes lines
 	}
 	//cvErode(visCvThresh, visCvThresh,  NULL, 2); // fills in barrels/lines, but adds grass noise
 
