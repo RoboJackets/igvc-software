@@ -146,11 +146,14 @@ public:
 	int firstB;
 	float k_roi;
 	int adapt_whiteThresh;
+	int RemoveLines;
 
 	/////Paul additions
 	void isRampPx(/*in*/IplImage *img,/*out*/IplImage* rimg);
 	void morphClosing(/*in*/IplImage *in,/*out*/IplImage* out,int width);
 	void findRamp(/*in*/IplImage* img,/*out*/IplImage* rimg, IplImage* rlineimg);
+	
+	//
 };
 
 
