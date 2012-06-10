@@ -159,7 +159,7 @@ int main()
 	// Constructor
 	potentialfields pf;
 	// Test getObstacleVec
-	bool newbitmap[9] = {0, 1, 0, 0, 1, 0, 0, 0, 0};
+	/*bool newbitmap[9] = {0, 1, 0, 0, 1, 0, 0, 0, 0};
 	int x0 = 1, y0 = 2;
 	int radius = 10;
 	double mag, ang, xvel, yvel;
@@ -172,7 +172,7 @@ int main()
 	xyToVec(newdata.x_vel, newdata.y_vel, mag, ang);//in map coordinates
 	ang = RotateBearing(ang, pf.imgAngle);
 	VecToxy(mag,ang, xvel, yvel);
-	cout << "x_vel " << xvel << "\ny_vel " << yvel << endl;
+	cout << "x_vel " << xvel << "\ny_vel " << yvel << endl;*/
 	//pf.xsize = width;
 	//pf.ysize = height;
 	/*int numgoals = pf.GPS_Goals.size();

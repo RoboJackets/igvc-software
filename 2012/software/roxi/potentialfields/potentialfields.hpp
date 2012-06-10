@@ -12,6 +12,7 @@
 //#define RUN_MODE ROBOT_POS
 #define TESTINGMODE	// Says whether or not testing mode is on. In testing mode, access to private methods is made public.
 			// Should be commented out unless currently testing the functions
+#define GOALRADDEF 1
 /******************************************/
 
 /************* #includes ******************/
@@ -32,15 +33,19 @@
 // with 0 at due north
 struct GPS_point
 {
-	GPS_point(double i_lat, double i_lon, double i_ang=0)
+	GPS_point(double i_lat, double i_lon, double i_ang=0, double i_rad=GOALRADDEF, double i_avoid=false)
 	{
 		lat = i_lat;
 		lon = i_lon;
 		ang = i_ang;
+		radius = i_rad;
+		avoidLines = i_avoid;
 	}
 	double lat;
 	double lon;
 	double ang;
+	double radius;
+	bool avoidLines;
 };
 
 // This struct encapsulates robot position data
@@ -220,6 +225,7 @@ private:
 	double meters_per_pixel;		// Allows conversion from image to real distances
 	/******************************************/
 
+public:
 	/************* Constants ******************/
 	const static int robot_radius = 2;				// Radius of the robot in pixels of the input boolean array
 	const static double obstacle_weight = 2.480e5;			// Weight given to avoiding obstacles
@@ -228,8 +234,9 @@ private:
 	const static double gps_avoid_weight = 1;			// Weight given to avoid old GPS points
 	const static int obstacle_avoid_radius = 30;		 	// Radius around the robot in which the robot considers those obstacles 
 	const static int target_reach_radius = 1000;			// Radius arond the robot in which the robot considers image goals
-	const static double gps_goal_radius = 1;			// Radius of the gps goal
-	const static double gps_max_distance = 1;			// Radius at which the attraction to the goal becomes a constant
+	const static double gps_goal_radius_default = GOALRADDEF;			// Radius of the gps goal
+	const static double gps_max_distance_default = 1;			// Radius at which the attraction to the goal becomes a constant
+	const static double gps_dist_to_ignore_lines = 2;		// Distance to start ignoring lines from GPS point
 	const static double obstacle_bitmap_thresh = 125;		// Threshold value for converting obstacle images to bitmaps
 	const static double attractor_bitmap_thresh = 100;		// Threshold value for converting attractor images to bitmaps
 	const static double stepsize_m = .5;				// Step size in meters
@@ -241,13 +248,14 @@ private:
 	const static int max_pixels_sector = 30;			// Maximum saturation of pixels in a sector
 									
 	/******************************************/
-
+private:
 	/************* Private Methods ************/
 	// Map pre-processing functions
 	bool* IPl2Bitmap(IplImage* img, IMAGETYPE imgType, FEATURETYPE featType, int& imgx, int& imgy);
 	void removeclumps(bool* obstacles);
 	void radiusfix(bool* obstacles);
 	void medianThreshFilter(bool* array, int thresh_size);
+	void RemoveLines(IplImage* img);
 
 	// Big picture methods
 	void getNextVector(NEXT_MODE mode, IplImage* obstacles, IplImage* targets, CvPoint robotBaseAt, CvPoint robotLookingAt, double& out_mag, double& out_ang, double dist_to_goal, double angle_from_goal);
@@ -276,9 +284,7 @@ private:
 	// Bitmap helpers
 	void fillinRadius(bool* obstacles, int x, int y, int radius);
 	void doSomethingforIndexesInRadius(int x0, int y0, int radius, bool* bitmap, RAD_OPTION OPTION, ReturnData* data);	
-public:
 	void getObstacleVector(int x0, int y0, int radius, bool* bitmap, ReturnData* data);
-private:
 	bool get2Dindexvalue(bool* array, int x, int y);
 	void set2Dindexvalue(bool* array, int x, int y, bool val);
 		

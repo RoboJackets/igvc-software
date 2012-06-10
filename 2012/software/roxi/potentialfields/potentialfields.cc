@@ -21,7 +21,7 @@ potentialfields::potentialfields()
 	// Initialize the goal GPS points
 	for (int i = 0; i < num_GPS_Goals; i++)
 	{
-		GPS_Goals.push_back(GPS_point(goalWaypointLat[i], goalWaypointLon[i]));
+		GPS_Goals.push_back(GPS_point(goalWaypointLat[i], goalWaypointLon[i], 0, goalRadius[i], goalAvoidLines[i]));
 	}
 	currentGoal = 0;
 	loadXML();
@@ -67,7 +67,7 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 
 	// If the current GPS location is within the right radius of the goal GPS location, index up the goal GPS point
 	// If the goal is out of bounds, just start back at 0
-	if (distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]) < gps_goal_radius)
+	if (distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]) < GPS_Goals[currentGoal].radius)
 	{
 		system("espeak -a 300 -p 50 -s 170 -g15 -v en/en+f2 \"Point Found\" 2>0 &");
 		currentGoal = (currentGoal+1) % GPS_Goals.size();
@@ -265,8 +265,15 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	int imgx, imgy;
 	bool* obstacles = IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, imgx, imgy);
 	
-	
 	IplImage * pfThresh=cvCloneImage(obstacles_ipl);
+
+	// Get current and goal GPS points and call RemoveLines if necessary
+	GPS_point goal = GPS_Goals[currentGoal];
+	GPS_point current = GPS_Prev_Loc[GPS_Prev_Loc.size()-1];	
+	double distToGoal = distBtwGPSPoints(current, goal);
+	if (goal.avoidLines && distToGoal < goal.radius + gps_dist_to_ignore_lines)
+		RemoveLines(pfThresh);
+
 	cvThreshold(obstacles_ipl,pfThresh,obstacle_bitmap_thresh,255,CV_THRESH_BINARY_INV);
 	ImageBufferManager::getInstance().setpfThresh(pfThresh);
 	//printbitmap(obstacles);
@@ -537,7 +544,7 @@ void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplI
 // Checks to see if the input node is close enough to the solution
 bool potentialfields::checkForSolution(PFieldNode* node)
 {
-	if (node->dist_from_goal_m < gps_goal_radius)
+	if (node->dist_from_goal_m < gps_goal_radius_default)
 		return true;
 	else
 		return false;
@@ -801,11 +808,11 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distance, double theta)
 {
 	// TODO: Figure out the distance and angle from the current GPS coordinate to the goal GPS coordinate
-	if (distance > (gps_max_distance + gps_goal_radius))
+	if (distance > (gps_max_distance_default + GPS_Goals[currentGoal].radius))
 	{	
 		// If the robot is far away from the GPS goal, gets a constant vector towards the GPS location
-		xvel = gps_goal_weight * gps_max_distance * sin(theta);
-		yvel = gps_goal_weight * gps_max_distance * cos(theta);
+		xvel = gps_goal_weight * gps_max_distance_default * sin(theta);
+		yvel = gps_goal_weight * gps_max_distance_default * cos(theta);
 		
 		//cout<<"clamp\n";
 		// Rotate to within clamp angle
@@ -826,8 +833,8 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distanc
 	{
 		cout<<"noclamp\n";
 		// If the robot is close to the goal, vector towards the GPS location smaller and smaller
-		xvel = gps_goal_weight*(distance - gps_goal_radius)*sin(theta);
-		yvel = gps_goal_weight*(distance - gps_goal_radius)*cos(theta);
+		xvel = gps_goal_weight*(distance - gps_goal_radius_default)*sin(theta);
+		yvel = gps_goal_weight*(distance - gps_goal_radius_default)*cos(theta);
 	}
 	return;
 }
@@ -938,6 +945,11 @@ void potentialfields::convertToRealVec(double& vel, double& ang)
 	ang = ang;
 	vel *= meters_per_pixel;
 	return;
+}
+
+// Removes line-like things from image
+void potentialfields::RemoveLines(IplImage* img)
+{
 }
 
 /********************************************************************************************************************************/
