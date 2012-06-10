@@ -69,6 +69,7 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 	// If the goal is out of bounds, just start back at 0
 	if (distBtwGPSPoints(GPS_Prev_Loc[GPS_Prev_Loc.size()-1], GPS_Goals[currentGoal]) < gps_goal_radius)
 	{
+		system("espeak -a 300 -p 50 -s 170 -g15 -v en/en+f2 \"Point Found\" 2>0 &");
 		currentGoal = (currentGoal+1) % GPS_Goals.size();
 	}
 
@@ -244,6 +245,7 @@ void potentialfields::getCompleteVector(IplImage* obstacles_ipl, IplImage* targe
 // Angle given by a value between 0 and 360 with 0 at due North
 void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, IplImage* targets_ipl, CvPoint robotBaseAt, CvPoint robotLookingAt, double& out_mag, double& out_ang, double dist_from_goal_m, double angl_to_goal)
 {
+	clearDebug();
 	/*cout << "Mode: " << mode << endl;
 	cout << "obstacles: " << obstacles_ipl << endl;
 	cout << "targets: " << targets_ipl << endl;
@@ -361,6 +363,9 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 
 	// Rotates the velocity vector to the angle from the perspective of the robot
 	vel_ang = RotateBearing(vel_ang, -curang);
+	
+	//Debug
+	showDebug();
 
 	//cout << "curang: " << curang << endl;
 	out_mag = vel_mag;
@@ -735,7 +740,8 @@ void potentialfields::getAvoidVec(bool* obstacles, double angle_of_map, double& 
 	// Return a sum of all of the x and y components from all of the obstacle pixels within the
 	// predefined radius
 	//cout << "robotmaplocx: " << robotmaplocx << " robotlocy: " << robotlocy << " obstacle_rad: " << obstacle_avoid_radius << endl;
-	doSomethingforIndexesInRadius(robotmaplocx, robotmaplocy, obstacle_avoid_radius, obstacles, OBSTACLES, &data);//+y is up
+	//doSomethingforIndexesInRadius(robotmaplocx, robotmaplocy, obstacle_avoid_radius, obstacles, OBSTACLES, &data);//+y is up
+	getObstacleVector(robotmaplocx, robotmaplocy, obstacle_avoid_radius, obstacles, &data);
 
 	//cout << "Map avoid Vecs data.x_vel: " << data.x_vel << endl << "data.y_vel: " << data.y_vel << endl;
 	//cout << "angle_of_map: " << angle_of_map << endl;
@@ -748,6 +754,16 @@ void potentialfields::getAvoidVec(bool* obstacles, double angle_of_map, double& 
 	xyToVec(xvel, yvel, mag, ang);//in map coordinates
 	ang = RotateBearing(ang, angle_of_map);
 	VecToxy(mag,ang, xvel, yvel);
+	
+	xyToVec(xvel, yvel, mag, ang);
+	addWorldVec(xvel,yvel,20);
+	ang = RotateBearing(ang, -curang);
+	ang=fmodf(ang+180,360)-180;//-180to180
+	
+	ang=ang*turn_multiplier;
+	ang = RotateBearing(ang, curang);
+	VecToxy(mag, ang, xvel, yvel);
+	
 	//cout << "obstacle push bearing in world : " << ang << endl;
 	return;
 }
@@ -790,17 +806,25 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distanc
 		// If the robot is far away from the GPS goal, gets a constant vector towards the GPS location
 		xvel = gps_goal_weight * gps_max_distance * sin(theta);
 		yvel = gps_goal_weight * gps_max_distance * cos(theta);
-
+		
+		//cout<<"clamp\n";
 		// Rotate to within clamp angle
 		double mag, ang;
 		xyToVec(xvel, yvel, mag, ang);
+		
 		ang = RotateBearing(ang, -curang);
+		cout << "Distance " << distance << endl;
+		cout << "Before clamp ang (bot) " << ang << endl;
+		
 		ang = clampVector(ang, gps_clamp_angle);
+		cout << "Clamp ang (bot) " << ang << endl;
 		ang = RotateBearing(ang, curang);
 		VecToxy(mag, ang, xvel, yvel);
+		addWorldVec(xvel,yvel,20);
 	}
 	else
 	{
+		cout<<"noclamp\n";
 		// If the robot is close to the goal, vector towards the GPS location smaller and smaller
 		xvel = gps_goal_weight*(distance - gps_goal_radius)*sin(theta);
 		yvel = gps_goal_weight*(distance - gps_goal_radius)*cos(theta);
@@ -857,7 +881,7 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 	}
 	else
 	{
-		x_vel = -1/(d)*cos(theta);
+		x_vel = -1/(d)*cos(theta);		
 		y_vel = -1/(d)*sin(theta);
 	}
 	//cout << "x/y: " << sqrt((x_vel/y_vel)*(x_vel/y_vel));
@@ -925,16 +949,118 @@ void potentialfields::fillinRadius(bool* obstacle, int x, int y, int radius)
 	doSomethingforIndexesInRadius(x, y, radius, obstacle, FILL1, NULL);
 	return;	
 }
+
+void potentialfields::getObstacleVector(int x0, int y0, int radius, bool* bitmap, ReturnData* data)
+{
+	// Queue for storing individual obstacle values for each sector	
+	std::priority_queue<Magnitude> vals[12];
+	double sector_vector_x[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	double sector_vector_y[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};	
+	
+	for (int y = y0 - radius; y <= y0 + radius; y++)
+	{
+		//cout << "y: " << y << endl;
+		// Checks to make sure the indexes are within the bounds of the bitmask
+		if (y < 0 || y >= ysize)
+			continue; 
+
+		// Figures out the maximum x distance for the current y
+		int xdistmax = floor(sqrt(radius*radius - (y0-y)*(y0-y))+.5);
+
+		// Starts at the lowest x possible for the current y and goes to the highest x possible for the current y
+		for(int x = x0 - xdistmax; x <= x0 + xdistmax; x++)
+		{
+			// Checks to make sure the indexes are within the bounds of the bitmask
+			if (x < 0 || x >= xsize)
+				continue;
+			
+			if (get2Dindexvalue(bitmap, x, y) == 1)
+			{
+				double curx_vel, cury_vel;
+				repulsivePixels(x0, y0, x, y, radius, curx_vel, cury_vel);
+				//data->x_vel+=curx_vel;
+				//data->y_vel+=cury_vel;
+				//break;
+				// Add to sector
+				double theta = atan2(-(y-y0), (x-x0));
+					
+				theta = vec2bear(rad2deg(theta));
+				theta = RotateBearing(theta, imgAngle);
+				theta = RotateBearing(theta, -curang);
+				
+				//cout << "theta: " << theta << endl;	
+					
+				int sector = (int)(theta / 30);
+				sector = (sector < 12) ? sector : 11;
+				
+				//cout << "sector: " << sector << endl;
+				
+				double curmag, curang;
+				
+				xyToVec(curx_vel, cury_vel, curmag, curang);
+				Magnitude m;
+				m.mag = curmag;
+				m.ang = curang;	// Relative to map
+				
+				//cout << "mag " << m.mag << " ang " << m.ang << endl;
+				vals[sector].push(m);
+			}
+		}
+	}
+	
+	//return;
+	double totalx = 0;
+	for (int sector = 0; sector < 12; sector++)
+	{
+		int size;
+		if (vals[sector].size() > max_pixels_sector)
+			size = max_pixels_sector;
+		else
+			size = vals[sector].size();
+		
+		for (int i = 0; i < size; i++)
+		{	
+			double x, y, mag, ang;
+			Magnitude m = vals[sector].top();
+			mag = m.mag;
+			ang = m.ang;
+				
+			VecToxy(mag, ang, x, y);
+			sector_vector_x[sector] += x;
+			sector_vector_y[sector] += y;
+			vals[sector].pop();
+		}
+		totalx += sector_vector_x[sector];
+		//cout << "totalx " << totalx << endl;
+	}
+	
+	if (totalx > 0)
+	{
+		if (sector_vector_x[0] < 0)
+			sector_vector_x[0] *= -1.0;
+		if (sector_vector_x[11] < 0)
+			sector_vector_x[11]  *= -1.0;
+	}
+	else
+	{
+		if (sector_vector_x[0] > 0)
+			sector_vector_x[0] *= -1.0;
+		if (sector_vector_x[11] > 0)
+			sector_vector_x[11]  *= -1.0;	
+	}
+	
+	//clearDebug();
+	for (int sector = 0; sector < 12; sector++)
+	{		
+		//addVec(sector_vector_x[sector],sector_vector_y[sector]);
+		data->x_vel += sector_vector_x[sector];
+		data->y_vel += sector_vector_y[sector];
+	}	
+}
  
 // Performs some action given by RAD_OPTION on every pixel within a certain radius of a given pixel
 void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, bool* bitmap, RAD_OPTION OPTION, ReturnData* data)
 {
-	// Queue for storing individual obstacle values for each sector
-	std::priority_queue<double> x_vals[12];
-	std::priority_queue<double> y_vals[12];
-
-	//cout << "x0: " << x0 << "\ny0: " << y0 << "\nradius: " << radius << endl;
-	// Starts at the lowest y up to the highest y possible within the radius
 	for (int y = y0 - radius; y <= y0 + radius; y++)
 	{
 		//cout << "y: " << y << endl;
@@ -970,20 +1096,7 @@ void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, 
 	
 				// Finds the pixel repulsions and sums them together
 				case OBSTACLES:
-					//printbitmap(bitmap);
-					if (get2Dindexvalue(bitmap, x, y) == 1)
-					{
-						double curx_vel, cury_vel;
-						repulsivePixels(x0, y0, x, y, radius, curx_vel, cury_vel);
-
-						// Add to sector
-						double theta = atan2((y-y0), (x-x0));
-						theta = vec2bear(rad2deg(theta));
-						int sector = (int) (theta / 30);
-						sector = (sector < 12) ? sector : 11;
-						x_vals[sector].push(curx_vel);
-						y_vals[sector].push(cury_vel); 
-					}
+					cout << "Many errors here" << endl;
 					break;
 
 				// Finds the pixel attractions and sums them together
@@ -1010,28 +1123,10 @@ void potentialfields::doSomethingforIndexesInRadius(int x0, int y0, int radius, 
 		}	
 	}
 	
-	// Take the max number of pixels. Chooses highest values.
-	if (OPTION == OBSTACLES)
-	{
-		for (int sector = 0; sector < 12; sector++)
-		{
-			int size;
-			if (x_vals[sector].size() > max_pixels_sector)
-				size = max_pixels_sector;
-			else
-				size = x_vals[sector].size();
-			
-			for (int i = 0; i < size; i++)
-			{	
-				data->x_vel += x_vals[sector].top();
-				data->y_vel += y_vals[sector].top();
-				x_vals[sector].pop();
-				y_vals[sector].pop();
-			}
-		}
-	}
 	return;
 }
+
+
 
 // Returns the value at the index array[x][y] as if it were a 2D array
 bool potentialfields::get2Dindexvalue(bool* array, int x, int y)
@@ -1082,7 +1177,7 @@ void potentialfields::setOutputs(double vel_mag, double vel_ang, Point2D<int>& g
 {
 	double x_real, y_real;
 	vel_ang=(fmod((vel_ang+180),360)-180);        //put angle into -180 to 180
-	vel_ang=vel_ang*turn_multiplier;	//cause turns to be harder than necessary, this is especially useful for 90 deg potential fields
+	vel_ang=vel_ang;	//cause turns to be harder than necessary, this is especially useful for 90 deg potential fields
 	vel_ang=vel_ang<-90?-90:vel_ang;	//if ang<-90 set to -90
 	vel_ang=vel_ang> 90? 90:vel_ang;	//if ang> 90 set to  90
 	
