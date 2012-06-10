@@ -10,7 +10,7 @@
 /************* #defines *******************/
 #define RUN_MODE GPS
 //#define RUN_MODE ROBOT_POS
-//#define TESTINGMODE	// Says whether or not testing mode is on. In testing mode, access to private methods is made public.
+#define TESTINGMODE	// Says whether or not testing mode is on. In testing mode, access to private methods is made public.
 			// Should be commented out unless currently testing the functions
 /******************************************/
 
@@ -69,6 +69,18 @@ struct ReturnData
 	}
 	double x_vel;
 	double y_vel;
+};
+
+// Struct for sorting magnitude values
+struct Magnitude
+{
+	double mag;
+	double ang;
+	
+	bool operator<(const Magnitude &other) const
+	{
+		return this->mag < other.mag;
+	}
 };
 
 // class for a node in potential fields with A*
@@ -210,22 +222,22 @@ private:
 
 	/************* Constants ******************/
 	const static int robot_radius = 2;				// Radius of the robot in pixels of the input boolean array
-	const static double obstacle_weight = 8.80e3;			// Weight given to avoiding obstacles
+	const static double obstacle_weight = 2.480e5;			// Weight given to avoiding obstacles
 	const static double image_goal_weight = 1;			// Weight given to get to image goals (flags)
-	const static double gps_goal_weight = 51;			// Weight given to get to GPS goal
+	const static double gps_goal_weight = 510;			// Weight given to get to GPS goal
 	const static double gps_avoid_weight = 1;			// Weight given to avoid old GPS points
 	const static int obstacle_avoid_radius = 30;		 	// Radius around the robot in which the robot considers those obstacles 
 	const static int target_reach_radius = 1000;			// Radius arond the robot in which the robot considers image goals
 	const static double gps_goal_radius = 1;			// Radius of the gps goal
-	const static double gps_max_distance = 10;			// Radius at which the attraction to the goal becomes a constant
+	const static double gps_max_distance = 1;			// Radius at which the attraction to the goal becomes a constant
 	const static double obstacle_bitmap_thresh = 125;		// Threshold value for converting obstacle images to bitmaps
 	const static double attractor_bitmap_thresh = 100;		// Threshold value for converting attractor images to bitmaps
 	const static double stepsize_m = .5;				// Step size in meters
 	const static double guessed_min_potential = 100;		// Potential used in calculation of heuristic
 	const static double meters_per_pixel_const = 0.04;		// Meters per pixel constant
 	const static int slow_speed = 50;				    // Slow speed for robot to travel
-	const static int gps_clamp_angle = 45;				// Angle to clamp GPS vector
-	const static int turn_multiplier=2.0;               //Stretch angles in order to cause harder turns
+	const static int gps_clamp_angle = 60;				// Angle to clamp GPS vector
+	const static int turn_multiplier=1.99;               //Stretch angles in order to cause harder turns
 	const static int max_pixels_sector = 30;			// Maximum saturation of pixels in a sector
 									
 	/******************************************/
@@ -264,6 +276,9 @@ private:
 	// Bitmap helpers
 	void fillinRadius(bool* obstacles, int x, int y, int radius);
 	void doSomethingforIndexesInRadius(int x0, int y0, int radius, bool* bitmap, RAD_OPTION OPTION, ReturnData* data);	
+public:
+	void getObstacleVector(int x0, int y0, int radius, bool* bitmap, ReturnData* data);
+private:
 	bool get2Dindexvalue(bool* array, int x, int y);
 	void set2Dindexvalue(bool* array, int x, int y, bool val);
 		
@@ -282,6 +297,11 @@ private:
 	void printbitmap(bool* bitmap);
 	void loadXML();
 	void pfDebug(double gps_x, double gps_y, double obstacle_x, double obstacle_y); 
+private:
+	void clearDebug();
+	void showDebug();
+	void addVec(double x,double y);
+	void addWorldVec(double x,double y,double scaleFactor=1/20,CvScalar color=CV_RGB(0,0,255));
 };
 /******************************************/
 

@@ -4,7 +4,7 @@
 
 int main()
 {
-	OSMC_driver drive;
+	OSMC_driver drive(OSMC_IF_FOR_BOARD, NULL);
 	int angle;
 	int XV;
 	int YV;
@@ -27,6 +27,7 @@ int main()
 	for(;;)
 	{
 		drive.GetMagnetometerHeading(angle, XV, YV);
+		std::cout << "\t\tcurrx:"<<XV<<"  curry:"<<YV<<std::endl;
 		if(XV>X_max){X_max=XV;}
 		if(XV<X_min){X_min=XV;}
 		if(YV>Y_max){Y_max=YV;}
@@ -39,5 +40,6 @@ int main()
 		Y_Offset = (Y_min - Y_max)/2 - Y_min;
 		std::cout << "X Offset:" << X_Offset << "\n";
 		std::cout << "Y Offset:" << Y_Offset << "\n";
+		std::cerr<<XV<<"\t"<<YV<<std::endl;
 	}
 }
