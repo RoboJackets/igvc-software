@@ -21,7 +21,7 @@ potentialfields::potentialfields()
 	// Initialize the goal GPS points
 	for (int i = 0; i < num_GPS_Goals; i++)
 	{
-		GPS_Goals.push_back(GPS_point(goalWaypointLat[i], goalWaypointLon[i], 0, goalRadius[i], goalAvoidLines[i]));
+		GPS_Goals.push_back(GPS_point(goalWaypointLat[i], goalWaypointLon[i], 0, goalRadius[i], goalIgnoreLines[i]));
 	}
 	currentGoal = 0;
 	loadXML();
@@ -263,16 +263,17 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 
 	// Transform the input image to a bitmap of obstacles
 	int imgx, imgy;
-	bool* obstacles = IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, imgx, imgy);
-	
-	IplImage * pfThresh=cvCloneImage(obstacles_ipl);
 
 	// Get current and goal GPS points and call RemoveLines if necessary
 	GPS_point goal = GPS_Goals[currentGoal];
 	GPS_point current = GPS_Prev_Loc[GPS_Prev_Loc.size()-1];	
 	double distToGoal = distBtwGPSPoints(current, goal);
-	if (goal.avoidLines && distToGoal < goal.radius + gps_dist_to_ignore_lines)
-		RemoveLines(pfThresh);
+	if (goal.ignoreLines && distToGoal < goal.radius + gps_dist_to_ignore_lines)
+		RemoveLines(obstacles_ipl);
+
+	bool* obstacles = IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, imgx, imgy);
+	
+	IplImage * pfThresh=cvCloneImage(obstacles_ipl);
 
 	cvThreshold(obstacles_ipl,pfThresh,obstacle_bitmap_thresh,255,CV_THRESH_BINARY_INV);
 	ImageBufferManager::getInstance().setpfThresh(pfThresh);
@@ -807,7 +808,6 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 // Returns the x and y components of the GPS goal vector in meters
 void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distance, double theta)
 {
-	// TODO: Figure out the distance and angle from the current GPS coordinate to the goal GPS coordinate
 	if (distance > (gps_max_distance_default + GPS_Goals[currentGoal].radius))
 	{	
 		// If the robot is far away from the GPS goal, gets a constant vector towards the GPS location
