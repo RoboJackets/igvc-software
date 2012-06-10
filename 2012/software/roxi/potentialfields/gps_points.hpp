@@ -16,9 +16,13 @@ static const double goalWaypointLon[] = {-83.195364772,-83.195414922,-83.1953647
 #elif defined(PRAC1)
 static const double goalWaypointLat[] = {42.67828694, 42.67815921};
 static const double goalWaypointLon[] = {-83.1949283, -83.19497341}; 
+static const double goalRadius[] = {2, 2};
+static const bool goalAvoidLines[] = {false, true};
 #elif defined(PRAC2)
 static const double goalWaypointLat[] = {42.67836202, 42.67848317};
-static const double goalWaypointLon[] = {-83.19535227, -83.19506897}
+static const double goalWaypointLon[] = {-83.19535227, -83.19506897};
+static const double goalRadius[] = {2, 2};
+static const bool goalAvoidLines[] = {false, true};
 #else
 static const double goalWaypointLat[] = {42.70};
 static const double goalWaypointLon[] = {-83.194};
