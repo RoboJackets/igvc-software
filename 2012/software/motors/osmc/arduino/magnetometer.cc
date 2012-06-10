@@ -9,8 +9,8 @@ byte DIO_pin = magDIO;//10;
 int X_Data = 0;
 int Y_Data = 0;
 int angle;
-const int Y_OFFSET = -167;
-const int X_OFFSET = 8;
+const int Y_OFFSET = -185;//25;//-167;
+const int X_OFFSET = 25;//-172;//8;
 const int ANG_OFFSET = 0;
 
 magnetometer_pk_t getHeading()

@@ -12,7 +12,7 @@ void printbitmap(bool* bitmap, int width, int height);
 
 int main()
 {
-	IplImage* img = cvLoadImage("../TestFiles/course6.png");
+	/*IplImage* img = cvLoadImage("../TestFiles/course6.png");
 	// create a window
 	cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE); 
 	cvMoveWindow("mainWin", 100, 100);
@@ -30,7 +30,7 @@ int main()
 	bool x = p1 < p2;
 	cout << "p1 < p2 : " << x << endl;*/
 
-	int height = img->height;
+	/*int height = img->height;
 	int width = img->width;
 	int step = img->widthStep;
 	int channels = img->nChannels;
@@ -56,7 +56,7 @@ int main()
 			}
 			index++;
 		}
-	}
+	}*/
 
 	/*for(int row=0; row<height; row++)
 	{
@@ -148,8 +148,31 @@ int main()
 	// Will only run if TESTINGMODE is defined, meaning that the functions of class potentialfields have been made
 	// public for testing purposes. 
 
+	double ang1 = 0, ang2 = -32, ang3 = 179, ang4 = 181, ang5 = 270;
+	ang1 = clampVector(ang1, 30);
+	ang2 = clampVector(ang2, 30);
+	ang3 = clampVector(ang3, 30);
+	ang4 = clampVector(ang4, 30);
+	ang5 = clampVector(ang5, 30);
+	cout << "ang1 " << ang1 << " ang2 " << ang2 << " ang3 " << ang3 << " ang4 " << ang4 << " ang5 " << ang5 << endl;
+
 	// Constructor
 	potentialfields pf;
+	// Test getObstacleVec
+	bool newbitmap[9] = {0, 1, 0, 0, 1, 0, 0, 0, 0};
+	int x0 = 1, y0 = 2;
+	int radius = 10;
+	double mag, ang, xvel, yvel;
+	ReturnData newdata;;
+	pf.imgAngle = 90;//90;
+	pf.curang = 180;//180;
+	pf.xsize = 3;
+	pf.ysize = 3;
+	pf.getObstacleVector(x0, y0, radius, newbitmap, &newdata);
+	xyToVec(newdata.x_vel, newdata.y_vel, mag, ang);//in map coordinates
+	ang = RotateBearing(ang, pf.imgAngle);
+	VecToxy(mag,ang, xvel, yvel);
+	cout << "x_vel " << xvel << "\ny_vel " << yvel << endl;
 	//pf.xsize = width;
 	//pf.ysize = height;
 	/*int numgoals = pf.GPS_Goals.size();
@@ -162,7 +185,7 @@ int main()
 	}*/
 
 	// dropWaypoint
-	pf.dropWaypoint(42.6777,-83.1951,90);
+	/*pf.dropWaypoint(42.6777,-83.1951,90);
 	pf.dropWaypoint(42.6790,-83.1942,45);
 	pf.dropWaypoint(42.69994,-83.1940,0);
 	CvPoint robotBaseAt = CvPoint();
