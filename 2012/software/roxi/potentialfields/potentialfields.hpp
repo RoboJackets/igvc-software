@@ -33,19 +33,19 @@
 // with 0 at due north
 struct GPS_point
 {
-	GPS_point(double i_lat, double i_lon, double i_ang=0, double i_rad=GOALRADDEF, double i_avoid=false)
+	GPS_point(double i_lat, double i_lon, double i_ang=0, double i_rad=GOALRADDEF, double i_ignore=false)
 	{
 		lat = i_lat;
 		lon = i_lon;
 		ang = i_ang;
 		radius = i_rad;
-		avoidLines = i_avoid;
+		ignoreLines = i_ignore;
 	}
 	double lat;
 	double lon;
 	double ang;
 	double radius;
-	bool avoidLines;
+	bool ignoreLines;
 };
 
 // This struct encapsulates robot position data
