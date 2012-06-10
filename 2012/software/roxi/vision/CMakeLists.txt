@@ -26,7 +26,12 @@ add_library(roxi_vision
 	PjMat.cc
 )
 
+add_library(morphops
+	morphops.cc
+)
+
 target_link_libraries(roxi_vision
 QtCore
+morphops
 )
 
