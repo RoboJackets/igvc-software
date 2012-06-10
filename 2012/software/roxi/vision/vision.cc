@@ -1590,7 +1590,10 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 			NULL, 
 			1); // fills in barrels/lines, but adds grass noise
 
-	//cvDilate(visCvThresh, visCvThresh, NULL, 1); // removes black spots/noise
+
+	if(RemoveLines){
+		cvDilate(visCvThresh, visCvThresh, NULL, 3); // removes lines
+	}
 	//cvErode(visCvThresh, visCvThresh,  NULL, 2); // fills in barrels/lines, but adds grass noise
 
 	if (doMapping == 0)
