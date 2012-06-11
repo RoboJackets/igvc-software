@@ -447,6 +447,7 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 {
 	if((y == 0) && (x == 0))
 	{
+		setVel_pd(-10, -10);
 		setVel_pd(0, 0);
 		return set_motors(0,0);
 	}

@@ -146,7 +146,7 @@ public:
 	int firstB;
 	float k_roi;
 	int adapt_whiteThresh;
-	int RemoveLines;
+	static int RemoveLines;
 
 	/////Paul additions
 	void isRampPx(/*in*/IplImage *img,/*out*/IplImage* rimg);
