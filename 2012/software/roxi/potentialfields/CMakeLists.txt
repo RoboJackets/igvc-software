@@ -3,6 +3,7 @@ include(${IGVC_SOURCE_DIR}/standardPCOpts.cmake)
 include_directories(
 	${IGVC_SOURCE_DIR}/roxi
 	${IGVC_SOURCE_DIR}/roxi/vision
+	/usr/include/opencv
 	/usr/include/qt4
 	/usr/include/qt4/Qt
 	/usr/include/qt4/QtGui
@@ -20,15 +21,26 @@ target_link_libraries(potentialfields
 	gps
 	xml
 	roxi_vision
-)
-
-add_executable(potentialfieldstest
-	test.cc
-)
-
-target_link_libraries(potentialfieldstest
-	potentialfields
-	cv
-	cvaux
+	
 	QtCore
+	QtXml
+	QtGui
+	xml
+	
 )
+
+#add_executable(potentialfieldstest
+#	test.cc
+#)
+
+#target_link_libraries(potentialfieldstest
+#	potentialfields
+#	cv
+#	cvaux
+#	QtCore
+	
+#	QtCore
+#	QtXml
+#	QtGui
+#	xml
+#)
