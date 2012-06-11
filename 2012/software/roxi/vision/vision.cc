@@ -1592,6 +1592,7 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 			1); // fills in barrels/lines, but adds grass noise
 
 
+
 	if(RemoveLines){
 		cvDilate(ImageBufferManager::getInstance().visCvThresh, ImageBufferManager::getInstance().visCvThresh, NULL, 9); // removes lines
 	}
