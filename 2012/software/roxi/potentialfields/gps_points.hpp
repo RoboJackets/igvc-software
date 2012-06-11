@@ -17,12 +17,22 @@ static const double goalWaypointLon[] = {-83.195364772,-83.195414922,-83.1953647
 static const double goalWaypointLat[] = {42.67828694, 42.67815921};
 static const double goalWaypointLon[] = {-83.1949283, -83.19497341}; 
 static const double goalRadius[] = {1, 1};
-static const bool goalIgnoreLines[] = {false, true};
+static const bool goalIgnoreLines[] = {true, false};
 #elif defined(PRAC2)
 static const double goalWaypointLat[] = {42.67836202, 42.67848317};
 static const double goalWaypointLon[] = {-83.19535227, -83.19506897};
 static const double goalRadius[] = {1, 1};
-static const bool goalIgnoreLines[] = {false, true};
+static const bool goalIgnoreLines[] = {false, false};
+#elif defined(COMPCW)
+static const double goalWaypointLat[] = {42.67955517, 	42.67948318, 	42.67927407, 	42.67901806,	42.6788151, 	42.67875409	};
+static const double goalWaypointLon[] = {-83.19487315, 	-83.19518328, 	-83.19534374, 	-83.1953296, 	-83.19514147, 	-83.19483987};
+static const double goalRadius[] = 		{1, 			2, 				1, 				1, 				2, 				1			};
+static const bool goalIgnoreLines[] = 	{false,			true,			true,			true,			true,			false		};
+#elif defined(COMPCCW)
+static const double goalWaypointLat[] = {42.67875409, 	42.6788151, 	42.67901806, 	42.67927407, 	42.67948318, 	42.67955517	};
+static const double goalWaypointLon[] = {-83.19483987, 	-83.19514147, 	-83.1953296, 	-83.19534374, 	-83.19518328,	-83.19487315};
+static const double goalRadius[] = 		{1, 			2, 				1, 				1, 				2, 				1			};
+static const bool goalIgnoreLines[] = 	{false,			true,			true,			true,			true,			false		};
 #else
 static const double goalWaypointLat[] = {42.70};
 static const double goalWaypointLon[] = {-83.194};

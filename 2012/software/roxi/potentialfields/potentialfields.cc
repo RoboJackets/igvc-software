@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include "XmlConfiguration.h"
+#include "vision.h"
 
 using namespace std;
 
@@ -71,6 +72,8 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 	{
 		system("espeak -a 300 -p 50 -s 170 -g15 -v en/en+f2 \"Point Found\" 2>0 &");
 		currentGoal = (currentGoal+1) % GPS_Goals.size();
+		Vision::RemoveLines = 0;
+		
 	}
 
 	// Write to GPS points file
@@ -269,7 +272,10 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	GPS_point current = GPS_Prev_Loc[GPS_Prev_Loc.size()-1];	
 	double distToGoal = distBtwGPSPoints(current, goal);
 	if (goal.ignoreLines && distToGoal < goal.radius + gps_dist_to_ignore_lines)
+	{
 		RemoveLines(obstacles_ipl);
+		Vision::RemoveLines = 1;
+	}
 
 	bool* obstacles = IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, imgx, imgy);
 	
@@ -769,6 +775,18 @@ void potentialfields::getAvoidVec(bool* obstacles, double angle_of_map, double& 
 	ang=fmodf(ang+180,360)-180;//-180to180
 	
 	ang=ang*turn_multiplier;
+	
+	ang = RotateBearing(ang, 0);
+	
+	// Exception
+	cout << "BEFORE: ang " << ang << " mag " << mag << endl;
+	if (mag > 5000 && (ang < 20 || ang > 340))
+	{
+		if (ang < 180) ang = 90;
+		else ang = 270; 
+		cout << "HERE: ang " << ang << " mag " << mag << endl;
+	}
+		
 	ang = RotateBearing(ang, curang);
 	VecToxy(mag, ang, xvel, yvel);
 	
@@ -990,9 +1008,9 @@ void potentialfields::getObstacleVector(int x0, int y0, int radius, bool* bitmap
 			{
 				double curx_vel, cury_vel;
 				repulsivePixels(x0, y0, x, y, radius, curx_vel, cury_vel);
-				//data->x_vel+=curx_vel;
-				//data->y_vel+=cury_vel;
-				//break;
+				data->x_vel+=curx_vel;
+				data->y_vel+=cury_vel;
+				break;
 				// Add to sector
 				double theta = atan2(-(y-y0), (x-x0));
 					
@@ -1020,7 +1038,7 @@ void potentialfields::getObstacleVector(int x0, int y0, int radius, bool* bitmap
 		}
 	}
 	
-	//return;
+	return;
 	double totalx = 0;
 	for (int sector = 0; sector < 12; sector++)
 	{
@@ -1050,6 +1068,14 @@ void potentialfields::getObstacleVector(int x0, int y0, int radius, bool* bitmap
 	{
 		if (sector_vector_x[0] < 0)
 			sector_vector_x[0] *= -1.0;
+		if (sector_vector_x[1] < 0)
+			sector_vector_x[1] *= -1.0;
+		if (sector_vector_x[2] < 0)
+			sector_vector_x[2] *= -1.0;
+		if (sector_vector_x[9] < 0)
+			sector_vector_x[9] *= -1.0;
+		if (sector_vector_x[10] < 0)
+			sector_vector_x[10] *= -1.0;
 		if (sector_vector_x[11] < 0)
 			sector_vector_x[11]  *= -1.0;
 	}
@@ -1057,6 +1083,14 @@ void potentialfields::getObstacleVector(int x0, int y0, int radius, bool* bitmap
 	{
 		if (sector_vector_x[0] > 0)
 			sector_vector_x[0] *= -1.0;
+		if (sector_vector_x[1] > 0)
+			sector_vector_x[1] *= -1.0;
+		if (sector_vector_x[2] > 0)
+			sector_vector_x[2] *= -1.0;
+		if (sector_vector_x[9] > 0)
+			sector_vector_x[9] *= -1.0;
+		if (sector_vector_x[10] > 0)
+			sector_vector_x[10] *= -1.0;
 		if (sector_vector_x[11] > 0)
 			sector_vector_x[11]  *= -1.0;	
 	}
