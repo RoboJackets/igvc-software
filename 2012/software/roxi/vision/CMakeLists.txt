@@ -24,6 +24,7 @@ add_library(roxi_vision
 	DCam_Config.cpp
 	GuppyCam.cpp
 	PjMat.cc
+	bwareaopen.cc
 )
 
 add_library(morphops
