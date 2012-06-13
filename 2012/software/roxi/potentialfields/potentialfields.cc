@@ -79,6 +79,7 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 	// Write to GPS points file
 	ofstream gpsfile;
 	gpsfile.open("gps.txt", ios::app);
+	gpsfile.precision(10);
 	gpsfile << "lat: " << lat << "\tlon: " << lon << "\tangle: " << ang << endl;
 }
 #elif RUN_MODE == ROBOT_POS
@@ -780,7 +781,15 @@ void potentialfields::getAvoidVec(bool* obstacles, double angle_of_map, double& 
 	
 	// Exception
 	cout << "BEFORE: ang " << ang << " mag " << mag << endl;
-	if (mag > 5000 && (ang < 20 || ang > 340))
+	
+	IplImage* thr=ImageBufferManager::getInstance().visCvThresh;
+	int sum=0;
+	for(int y=thr->height/2;y<thr->height;y++)
+	{
+		sum+=(cvGetReal2D(thr,y,thr->height/2)==0);
+	}
+	cout<<"sum"<<sum<<endl;
+	if (mag > 4000 && (ang < 20 || ang > 340) && sum>10)
 	{
 		if (ang < 180) ang = 90;
 		else ang = 270; 
@@ -826,6 +835,7 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 // Returns the x and y components of the GPS goal vector in meters
 void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distance, double theta)
 {
+	cout << "Target lat: " << GPS_Goals[currentGoal].lat << " lon: " << GPS_Goals[currentGoal].lon << endl; 
 	if (distance > (gps_max_distance_default + GPS_Goals[currentGoal].radius))
 	{	
 		// If the robot is far away from the GPS goal, gets a constant vector towards the GPS location
@@ -841,7 +851,7 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distanc
 		cout << "Distance " << distance << endl;
 		cout << "Before clamp ang (bot) " << ang << endl;
 		
-		ang = clampVector(ang, gps_clamp_angle);
+		//ang = clampVector(ang, gps_clamp_angle);
 		cout << "Clamp ang (bot) " << ang << endl;
 		ang = RotateBearing(ang, curang);
 		VecToxy(mag, ang, xvel, yvel);
@@ -917,6 +927,9 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 	
 	// Get angle in robot coordinates
 	double mag, angle;
+	double x_vel0, y_vel0;
+	x_vel0=x_vel;
+	y_vel0=y_vel;
 	xyToVec(x_vel, y_vel, mag, angle);
 	angle = RotateBearing(angle, imgAngle);	
 	angle = RotateBearing(angle, -curang);
@@ -941,6 +954,8 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 	angle = RotateBearing(angle, curang);
 	angle = RotateBearing(angle, -imgAngle);
 	VecToxy(mag, angle, x_vel, y_vel);
+	x_vel+=.2*x_vel0;
+	y_vel+=.2*y_vel0;
 
 	/*double scaleFactor = 1 - abs(angle)/180;
 	x_vel *= scaleFactor;
@@ -1008,9 +1023,9 @@ void potentialfields::getObstacleVector(int x0, int y0, int radius, bool* bitmap
 			{
 				double curx_vel, cury_vel;
 				repulsivePixels(x0, y0, x, y, radius, curx_vel, cury_vel);
-				data->x_vel+=curx_vel;
-				data->y_vel+=cury_vel;
-				break;
+				//data->x_vel+=curx_vel;
+				//data->y_vel+=cury_vel;
+				//break;
 				// Add to sector
 				double theta = atan2(-(y-y0), (x-x0));
 					
@@ -1038,7 +1053,7 @@ void potentialfields::getObstacleVector(int x0, int y0, int radius, bool* bitmap
 		}
 	}
 	
-	return;
+	//return;
 	double totalx = 0;
 	for (int sector = 0; sector < 12; sector++)
 	{

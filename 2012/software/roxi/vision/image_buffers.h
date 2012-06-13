@@ -18,6 +18,7 @@
 class ImageBufferManager
 {
 friend class Vision;
+friend class potentialfields;
 friend class CVcam;
 friend class GuppyCam;
 protected:
