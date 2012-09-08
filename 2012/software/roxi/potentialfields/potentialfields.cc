@@ -525,7 +525,7 @@ void potentialfields::expandNode(PFieldNode* node, IplImage* obstacles_ipl, IplI
 	goal_at.y = -floor((node->y_dist_from_goal_m)/meters_per_pixel_const + .5) + node->robotBaseAt.y;
 	cvCircle(showImage, goal_at, 5, CV_RGB(0,255,0), 5);
 	//cout << "goal x: " << goal_at.x << "\ngoal y: " << goal_at.y << endl;
-	cv::imshow("mainWin", showImage);
+	cv::imshow("mainWin", cv::Mat(showImage));
 	cout << "field strength " << node->field_strength << endl;
 	cout << "g score " << node->g_score << endl;
 	cout << "h score " << node->h_score << endl;

@@ -35,9 +35,8 @@ target_link_libraries(roxi_mapping
 	gps
 #	Coordinates
 	#CV stuff
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_highgui
 	
 )
 

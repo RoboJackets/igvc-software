@@ -1,6 +1,6 @@
 #include <string>
-#include "opencv/cxtypes.h"
-#include "opencv/cvtypes.h"
+//#include "opencv/cxtypes.h"
+//#include "opencv/cvtypes.h"
 #include "opencv/cxcore.h"
 #include "opencv/cv.h"
 #include "opencv/highgui.h"

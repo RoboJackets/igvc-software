@@ -3,8 +3,8 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <opencv/cvaux.h>
-#include <opencv/cvtypes.h>
-#include <opencv/cvinternal.h>
+//#include <opencv/cvtypes.h>
+//#include <opencv/cvinternal.h>
 #include <vector>
 
 #define ROBOT_POS_X_IN_CAMERA_FRAME 0.5
