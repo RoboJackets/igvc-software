@@ -4,8 +4,8 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <opencv/cvaux.h>
-#include <opencv/cvtypes.h>
-#include <opencv/cvinternal.h>
+//#include <opencv/cvtypes.h>
+//#include <opencv/cvinternal.h>
 #include "gps.hpp"
 #include "gps_common.hpp"
 //#include "XmlConfiguration.h"
