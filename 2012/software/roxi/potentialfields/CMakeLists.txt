@@ -20,6 +20,9 @@ target_link_libraries(potentialfields
 	gps
 	xml
 	roxi_vision
+	opencv_core
+	opencv_highgui
+	opencv_imgproc
 )
 
 add_executable(potentialfieldstest
@@ -28,7 +31,6 @@ add_executable(potentialfieldstest
 
 target_link_libraries(potentialfieldstest
 	potentialfields
-	cv
-	cvaux
+	opencv_core
 	QtCore
 )

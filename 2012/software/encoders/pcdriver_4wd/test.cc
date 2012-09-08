@@ -1,5 +1,5 @@
 #include "quadCoderDriver.hpp"
-
+#include <signal.h>
 volatile bool reset = false;
 
 void handler(int signum)
