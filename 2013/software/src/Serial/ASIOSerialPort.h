@@ -10,7 +10,7 @@
 
 #include <boost/asio.hpp>
 #include <string>
-namespace IGVC{
+
 /**
  * This is a helper class to simplify the interface for interacting with serial ports.
  *
@@ -47,7 +47,7 @@ public:
 private:
 	boost::asio::io_service ioservice;
 	boost::asio::serial_port port;
+
 };
 
-} //IGVC
 #endif /* ASIOSERIALPORT_H_ */
