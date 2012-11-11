@@ -6,8 +6,7 @@
  */
 
 #include "ASIOSerialPort.h"
-
-namespace IGVC {
+#include <iostream>
 
 ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud):
 	port(ioservice, port_name)
@@ -44,11 +43,18 @@ std::string ASIOSerialPort::readln() {
 	std::string line;
 
 	while(true) {
+		try {
 		boost::asio::read(port, boost::asio::buffer(&c,1));
+		} catch(boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> > err) {
+			std::cerr << "Error reading stream. Device may have been unplugged." << std::endl;
+			return line;
+		}
 		switch(c) {
 		case '\r':
+			return line;
 			break;
 		case '\n':
+			return line;
 			break;
 		default:
 			line += c;
@@ -56,10 +62,8 @@ std::string ASIOSerialPort::readln() {
 		}
 	}
 
-	return line;
+	return "";
 }
 
 ASIOSerialPort::~ASIOSerialPort() {
 }
-
-}//IGVC
