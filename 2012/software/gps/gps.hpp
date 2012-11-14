@@ -11,7 +11,7 @@
 
 class gps
 {
-	public:
+public:
 	gps();
 	~gps();
 
@@ -24,7 +24,7 @@ class gps
 	bool get_speed(double& speed);
 	bool get_heading(double& heading);
 
-	private:
+private:
 	volatile bool running;
 
 	boost::asio::streambuf comm_buffer;
