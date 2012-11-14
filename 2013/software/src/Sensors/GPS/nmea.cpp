@@ -8,6 +8,7 @@ void nmea::decodeUTCTime(const std::string& val)
 {
 
 }
+
 double nmea::decodeLatitude(const std::string& val, const char hemi)
 {
 	double raw = boost::lexical_cast<double>(val.c_str());

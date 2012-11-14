@@ -12,16 +12,17 @@
 namespace IGVC {
 namespace Sensors {
 
-HemisphereA100GPS::HemisphereA100GPS() {
-	serialPort("/dev/HemiGPS",9600);
-	iothread = boost::thread(boost::bind(&HemisphereA100GPS::threadRun(), this));
+HemisphereA100GPS::HemisphereA100GPS():
+	serialPort("/dev/HemiGPS", 9600),
+	iothread(boost::bind( &HemisphereA100GPS::threadRun, this)),
+	stateQueue()
+{
 	maxBufferLength = 10;
-	stateQueue();
 }
 
 void HemisphereA100GPS::threadRun() {
 	while(serialPort.isConnected()) {
-		char* line = serialPort.readln();
+		std::string line = serialPort.readln();
 		GPSState state;
 		if(parseLine(line, state)) {
 			gettimeofday(&state.laptoptime, NULL);
@@ -64,7 +65,8 @@ GPSState HemisphereA100GPS::peekStateWithTime(timeval time, double acceptableErr
 			return s;
 		}
 	}
-	return 0;
+	GPSState empty;
+	return empty;
 }
 
 GPSState HemisphereA100GPS::popStateWithTime(timeval time, double acceptableError) {
@@ -82,7 +84,20 @@ GPSState HemisphereA100GPS::popStateWithTime(timeval time, double acceptableErro
 			iter++;
 		}
 	}
-	return 0;
+	GPSState empty;
+	return empty;
+}
+
+GPSState HemisphereA100GPS::GetState() {
+	return popLatestState();
+}
+
+GPSState HemisphereA100GPS::GetStateAtTime(timeval time) {
+	return popStateWithTime(time, 0.1);
+}
+
+bool HemisphereA100GPS::StateIsAvailable() {
+	return !stateQueue.empty();
 }
 
 HemisphereA100GPS::~HemisphereA100GPS() {
