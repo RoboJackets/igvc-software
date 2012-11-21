@@ -1,15 +1,13 @@
-
-
-boolean state = false;
 long lastMillis;
 
 void setup()
 {
   Serial.begin(9600);
-  pinMode(13, OUTPUT);
-  pinMode(9, OUTPUT);
-  pinMode(2, INPUT);
-  pinMode(3, INPUT);
+  pinMode(13, OUTPUT);  //onboard LED
+  pinMode(9, OUTPUT);   //motor pwm pin
+  pinMode(10, OUTPUT);  //motor direction pin
+  pinMode(2, INPUT);    //encoder
+  pinMode(3, INPUT);    //encoder
   lastMillis = millis();
 }
 
@@ -25,6 +23,8 @@ void loop()
     
     if(inByte == "W")
     {
+      dir = Serial.read();
+      digitalWrite(10, dir);
       int pwm = Serial.read();
       analogWrite(9, pwm);
     }
