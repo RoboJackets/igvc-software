@@ -10,8 +10,8 @@ ASIOSerialPort arduinoLeft("/dev/arduinoLeft", 9600);
 ASIOSerialPort arduinoRight("/dev/arduinoRight", 9600);
 
 //TODO: Need to be checked
-const int OSMC_driver::maxPwm = 130;
-const int OSMC_driver::minPwm = 30;
+const byte OSMC_driver::maxPwm = 130;
+const byte OSMC_driver::minPwm = 30;
 
 bool OSMC_driver::arduinoCheck()	//Checks we are connected and able to send and receive data from the arduinos
 {
@@ -33,21 +33,25 @@ bool OSMC_driver::arduinoCheck()	//Checks we are connected and able to send and 
 	}
 }
 
-void OSMC_driver::setPwm(int pwm)	//writes pwm to arduinos setting both motors to the same pwm
+void OSMC_driver::setPwm(byte pwm, byte dir)	//writes pwm to arduinos setting both motors to the same pwm and direction (0 = forwards, 1 = backwards)
 {
-	checkPwm(pwm);
+	checkPwm(pwm, dir);
 	arduinoLeft.write("W");
-	arduinoLeft.write(pwm);
 	arduinoRight.write("W");
+	arduinoLeft.write(dir);
+	arduinoRight.write(dir);
+	arduinoLeft.write(pwm);
 	arduinoRight.write(pwm);
 }
 
-void OSMC_driver::setMotorsPwm(int pwmLeft, int pwmRight)		//writes pwmLeft and pwmRight to respective arduinos
+void OSMC_driver::setMotorsPwm(byte pwmLeft, byte dirLeft, byte pwmRight, byte dirRight)		//writes pwmLeft and pwmRight to respective arduinos
 {
 	checkPwm(pwmLeft, pwmRight);
 	arduinoLeft.write("W");
-	arduinoLeft.write(pwmLeft);
 	arduinoRight.write("W");
+	arduinoLeft.write(dirLeft);
+	arduinoRight.write(dirRight);
+	arduinoLeft.write(pwmLeft);
 	arduinoRight.write(pwmRight);
 }
 
@@ -57,15 +61,15 @@ void OSMC_driver::stopMotors()		//Stops the motors
 	arduinoRight.write("S");
 }
 
-void OSMC_driver::checkPwm(int pwm)
+void OSMC_driver::checkPwm(byte pwm, byte dir)	//checks that the pwm is within the minPwm and maxPwm
 {
 	if (pwm < minPwm)
 	{
-		setPwm(minPwm);
+		setPwm(minPwm, dir);
 	}
 	else if (pwm > maxPwm)
 	{
-		setPwm(maxPwm);
+		setPwm(maxPwm, dir);
 	}
 	else
 	{
@@ -73,15 +77,15 @@ void OSMC_driver::checkPwm(int pwm)
 	}
 }
 
-void OSMC_driver::checkPwm(int pwmLeft, int pwmRight)
+void OSMC_driver::checkPwm(byte pwmLeft, byte pwmRight)	//checks that the pwm for the left and right are within the minPwm and maxPwm
 {
 	if (pwmLeft < minPwm or pwmRight< minPwm)
 	{
-		setPwm(minPwm);
+		setPwm(minPwm, 1);
 	}
 	else if (pwmLeft > maxPwm or pwmRight > maxPwm)
 	{
-		setPwm(maxPwm);
+		setPwm(maxPwm, 1);
 	}
 	else
 	{
