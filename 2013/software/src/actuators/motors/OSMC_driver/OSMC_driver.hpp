@@ -7,11 +7,11 @@ class OSMC_driver
 
 public:
 	bool arduinoCheck();
-	void setPwm(int pwm);
-	void setMotorsPwm(int pwmLeft, int pwmRight);
+	void setPwm(byte pwm, byte dir);
+	void setMotorsPwm(byte pwmLeft, byte dirLeft, byte pwmRight, byte dirRight);
 	void stopMotors();
-	void checkPwm(int pwm);
-	void checkPwm(int pwmLeft, int pwmRight);
+	void checkPwm(byte pwm, byte dir);
+	void checkPwm(byte pwmLeft, byte pwmRight);
 
 private:
 	const static int maxPwm;
