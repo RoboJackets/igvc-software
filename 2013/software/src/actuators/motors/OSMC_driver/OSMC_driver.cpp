@@ -13,6 +13,13 @@ ASIOSerialPort arduinoRight("/dev/arduinoRight", 9600);
 const byte OSMC_driver::maxPwm = 130;
 const byte OSMC_driver::minPwm = 30;
 
+OSMC_driver::~OSMC_driver()
+{
+	stopMotors();
+	arduinoRight.close();
+	arduinoLeft.close();
+}
+
 bool OSMC_driver::arduinoCheck()	//Checks we are connected and able to send and receive data from the arduinos
 {
 	std::cout << "Testing serial API..." << std::endl;
