@@ -41,37 +41,17 @@ bool HemisphereA100GPS::parseLine(std::string line, GPSState &state) {
 		   nmea::decodeGPRMC(line, state);
 }
 
-GPSState HemisphereA100GPS::peekLatestState() {
-	boost::mutex::scoped_lock lock(queueLocker);
-	return stateQueue.back();
-}
-
-GPSState HemisphereA100GPS::popLatestState() {
+GPSState HemisphereA100GPS::GetState() {
 	boost::mutex::scoped_lock lock(queueLocker);
 	GPSState state = stateQueue.back();
 	stateQueue.remove(state);
 	return state;
 }
 
-GPSState HemisphereA100GPS::peekStateWithTime(timeval time, double acceptableError) {
+GPSState HemisphereA100GPS::GetStateAtTime(timeval time) {
 	boost::mutex::scoped_lock lock(queueLocker);
 	std::list<GPSState>::iterator iter = stateQueue.begin();
-	while(iter != stateQueue.end()) {
-		GPSState s = (*iter);
-		time_t secDelta = difftime(time.tv_sec, s.laptoptime.tv_sec);
-		suseconds_t usecDelta = time.tv_usec - s.laptoptime.tv_usec;
-		double delta = double(secDelta) + 1e-6*double(usecDelta);
-		if(delta <= acceptableError) {
-			return s;
-		}
-	}
-	GPSState empty;
-	return empty;
-}
-
-GPSState HemisphereA100GPS::popStateWithTime(timeval time, double acceptableError) {
-	boost::mutex::scoped_lock lock(queueLocker);
-	std::list<GPSState>::iterator iter = stateQueue.begin();
+	double acceptableError = 0.1;
 	while(iter != stateQueue.end()) {
 		GPSState s = (*iter);
 		time_t secDelta = difftime(time.tv_sec, s.laptoptime.tv_sec);
@@ -86,14 +66,6 @@ GPSState HemisphereA100GPS::popStateWithTime(timeval time, double acceptableErro
 	}
 	GPSState empty;
 	return empty;
-}
-
-GPSState HemisphereA100GPS::GetState() {
-	return popLatestState();
-}
-
-GPSState HemisphereA100GPS::GetStateAtTime(timeval time) {
-	return popStateWithTime(time, 0.1);
 }
 
 bool HemisphereA100GPS::StateIsAvailable() {
