@@ -23,10 +23,6 @@ public:
 	HemisphereA100GPS();
 	GPSState GetState();
 	GPSState GetStateAtTime(timeval time);
-	GPSState peekLatestState();
-	GPSState popLatestState();
-	GPSState peekStateWithTime(timeval time, double acceptableError);
-	GPSState popStateWithTime(timeval time, double acceptableError);
 	bool StateIsAvailable();
 	~HemisphereA100GPS();
 
