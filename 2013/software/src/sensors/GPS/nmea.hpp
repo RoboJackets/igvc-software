@@ -7,6 +7,9 @@
 
 using namespace IGVC::Sensors;
 
+/**
+ * This namespace contains helper methods for interpreting messages received from devices following the nmea standard.
+ */
 namespace nmea
 {
 	//GPS funcs
