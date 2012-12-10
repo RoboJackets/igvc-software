@@ -9,6 +9,7 @@
 #define MAP_H_
 
 #include "../common/Pose.hpp"
+#include "MapPoint.hpp"
 
 namespace IGVC {
 namespace Mapping {
@@ -17,9 +18,10 @@ class Map {
 public:
 	Map();
 	~Map();
+	bool poseIsOpen(Pose p);
+	void setPoint(float x, float y, ObjectType t);
 private:
 	std::list<MapPoint> points;
-	bool poseIsOpen(Pose p);
 };
 
 } /* namespace Mapping */
