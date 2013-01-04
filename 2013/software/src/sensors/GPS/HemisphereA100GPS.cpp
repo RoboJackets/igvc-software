@@ -32,6 +32,7 @@ void HemisphereA100GPS::threadRun() {
 			if(stateQueue.size() > maxBufferLength) {
 				stateQueue.pop_front();
 			}
+			fireEvent(&GPSListener::onNewStateAvailable, (void*)&state);
 		}
 	}
 }
