@@ -11,7 +11,7 @@
 #include "GPS.hpp"
 
 #include <boost/thread.hpp>
-#include "ASIOSerialPort.h"
+#include "serial/ASIOSerialPort.h"
 
 #include <list>
 
