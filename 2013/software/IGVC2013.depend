@@ -1,0 +1,57 @@
+# depslib dependency file v1.0
+1353811255 source:/home/matt/igvc/2013/software/src/sensors/GPS/HemisphereA100GPS.cpp
+	"HemisphereA100GPS.h"
+	"nmea.hpp"
+	<string>
+
+1357268515 /home/matt/igvc/2013/software/src/sensors/GPS/HemisphereA100GPS.h
+	"GPS.hpp"
+	<boost/thread.hpp>
+	"serial/ASIOSerialPort.h"
+	<list>
+
+1352862671 /home/matt/igvc/2013/software/src/sensors/GPS/GPS.hpp
+	<time.h>
+
+1357102291 /home/matt/igvc/2013/software/src//serial/ASIOSerialPort.h
+	<boost/asio.hpp>
+	<string>
+
+1353981257 /home/matt/igvc/2013/software/src/sensors/GPS/nmea.hpp
+	"GPS.hpp"
+	<string>
+
+1357268618 source:/home/matt/igvc/2013/software/src/sensors/GPS/TestGPS.cpp
+	"sensors/GPS/GPS.hpp"
+	"sensors/GPS/HemisphereA100GPS.h"
+	<iostream>
+
+1352862671 /home/matt/igvc/2013/software/src//sensors/GPS/GPS.hpp
+	<time.h>
+
+1357268515 /home/matt/igvc/2013/software/src//sensors/GPS/HemisphereA100GPS.h
+	"GPS.hpp"
+	<boost/thread.hpp>
+	"serial/ASIOSerialPort.h"
+	<list>
+
+1352856910 source:/home/matt/igvc/2013/software/src/sensors/GPS/nmea.cpp
+	"nmea.hpp"
+	<vector>
+	<cmath>
+	<boost/lexical_cast.hpp>
+	<boost/algorithm/string.hpp>
+
+1357097995 source:/home/matt/igvc/2013/software/src/serial/ASIOSerialPort.cpp
+	"ASIOSerialPort.h"
+	<iostream>
+
+1357102291 /home/matt/igvc/2013/software/src/serial/ASIOSerialPort.h
+	<boost/asio.hpp>
+	<string>
+
+1352676716 source:/home/matt/igvc/2013/software/src/serial/SerialPortTest.cpp
+	<string.h>
+	"ASIOSerialPort.h"
+	<iostream>
+
