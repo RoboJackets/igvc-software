@@ -1,6 +1,6 @@
 //============================================================================
 // Name        : SerialPortTest.cpp
-// Author      : 
+// Author      :
 // Version     :
 // Copyright   : Your copyright notice
 // Description : Hello World in C++, Ansi-style
@@ -10,8 +10,6 @@
 
 #include "ASIOSerialPort.h"
 #include <iostream>
-
-using namespace std;
 
 int main() {
 	std::cout << "Testing serial API..." << std::endl;
