@@ -59,7 +59,7 @@ GPSState HemisphereA100GPS::GetStateAtTime(timeval time) {
 		suseconds_t usecDelta = time.tv_usec - s.laptoptime.tv_usec;
 		double delta = double(secDelta) + 1e-6*double(usecDelta);
 		if(delta <= acceptableError) {
-			iter = stateQueue.erase(iter);
+//			iter = stateQueue.erase(iter);
 			return s;
 		} else {
 			iter++;

@@ -63,6 +63,9 @@
 		<Unit filename="src/common/Pose.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/events/EventGenerator.cpp">
+			<Option target="TestGPS" />
+		</Unit>
 		<Unit filename="src/events/EventGenerator.h">
 			<Option target="TestGPS" />
 		</Unit>
