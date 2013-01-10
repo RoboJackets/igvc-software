@@ -35,7 +35,7 @@ private:
 
 	size_t maxBufferLength; // maximum number of states to be stored in the buffer
 
-	std::list<GPSState> stateQueue; // buffer of the latest maxBufferLength states
+	std::list<GPSState> stateQueue; // buffer of the latest maxBufferLength states. This is a std::list instead of a std::queue because of the need to iterate to retrieve a state at a given timestamp
 
 	void threadRun(); // the method that runs on iothread
 
