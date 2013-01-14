@@ -25,7 +25,7 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 			<Add directory="$(#boost).include" />
-			<Add directory="/home/matt/igvc/2013/software/src/" />
+			<Add directory="src" />
 		</Compiler>
 		<Linker>
 			<Add library="boost_system" />
