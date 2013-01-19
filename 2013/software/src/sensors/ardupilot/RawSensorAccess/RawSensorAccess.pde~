@@ -118,7 +118,7 @@ void loop()
 	filteredVals.z = (abs(accelVals.z) > 0.05 ? accelVals.z : 0);
 	
 	uint32_t tnow = hal.scheduler->micros();
-	float deltat = ( tnow - last_update ) / 1000000.0;
+	float deltat = ( tnow - last_update ) / 1000.0;
 
 	velocity.x += filteredVals.x * deltat;
 	velocity.y += filteredVals.y * deltat;
