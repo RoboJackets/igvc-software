@@ -8,20 +8,20 @@ class OSMC_driver
 public:
 	~OSMC_driver();
 	bool arduinoCheck();
-	void setPwm(byte pwm, byte dir);
-	void setMotorsPwm(byte pwmLeft, byte dirLeft, byte pwmRight, byte dirRight);
-	void goTurn(int degree, byte dir);
-	void goForward(double dist, byte pwm, byte dir);
+	void setPwm(char pwm, char dir);
+	void setMotorsPwm(char pwmLeft, char dirLeft, char pwmRight, char dirRight);
+	void goTurn(int degree, char dir);
+	void goForward(double dist, char pwm, char dir);
 	void stopMotors();
-	void checkPwm(byte pwm, byte dir);
-	void checkPwm(byte pwmLeft, byte pwmRight);
+	void checkPwm(char pwm, char dir);
+	void checkPwm2(char pwmLeft, char pwmRight);
 	float readEncoder();
 	void encoderLoop(float totalDist);
-	void goForwardOld(float totalDist, byte pwm, byte dir);
+	void goForwardOld(float totalDist, char pwm, char dir);
 
 private:
-	const static int maxPwm;
-	const static int minPwm;
+	const static char maxPwm;
+	const static char minPwm;
 
 };
 
