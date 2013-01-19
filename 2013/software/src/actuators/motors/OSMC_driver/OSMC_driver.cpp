@@ -8,6 +8,7 @@ using namespace std;
 
 ASIOSerialPort arduinoLeft("/dev/arduinoLeft", 9600);
 ASIOSerialPort arduinoRight("/dev/arduinoRight", 9600);
+ASIOSerialPort arduinoEncoder("/dev/arduinoEncoder", 9600);
 
 //TODO: Need to be checked
 const byte OSMC_driver::maxPwm = 130;
@@ -60,6 +61,58 @@ void OSMC_driver::setMotorsPwm(byte pwmLeft, byte dirLeft, byte pwmRight, byte d
 	arduinoRight.write(dirRight);
 	arduinoLeft.write(pwmLeft);
 	arduinoRight.write(pwmRight);
+}
+
+void OSMC_driver::goTurn(int degree, byte dir)
+{
+
+}
+
+void OSMC_driver::goForward(double dist, byte pwm, byte dir)
+{
+    checkPwm(pwm, dir);
+    arduinoLeft.write("WD");
+    arduinoLeft.write(dist);
+    arduinoLeft.write(dir);
+    arduinoLeft.write(pwm);
+    arduinoRight.write("WD");
+    arduinoRight.write(dist);
+    arduinoRight.write(dir);
+    arduinoRight.write(pwm);
+    while(arduinoRight.readln() == "!" && arduinoLeft.readln() == "!")
+    {
+        break;
+    }
+}
+
+float OSMC_driver::readEncoder()
+{
+    arduinoEncoder.write("R");
+    float dist = arduinoEncoder.readln();
+    return dist;
+}
+
+void OSMC_driver::encoderLoop(float totalDist)
+{
+    dist = readEncoder();
+    while (dist<totalDist)
+    {
+        dist = readEncoder();
+    }
+    stopMotors();
+}
+
+void OSMC_driver::goForwardOld(float totalDist, byte pwm, byte dir)
+{
+    checkPwm(pwm, dir);
+    arduinoLeft.write("WS");
+    arduinoLeft.write(dir);
+    arduinoLeft.write(pwm);
+    arduinoRight.write("WS");
+    arduinoRight.write(dir);
+    arduinoRight.write(pwm);
+    encoderLoop(totalDist);
+
 }
 
 void OSMC_driver::stopMotors()		//Stops the motors
