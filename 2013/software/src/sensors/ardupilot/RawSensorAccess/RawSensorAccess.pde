@@ -101,6 +101,7 @@ void setup() {
 
 Vector3f velocity;
 uint32_t last_update;
+bool first_loop = true;
 
 void loop()
 {
@@ -111,14 +112,20 @@ void loop()
 	ahrs.update();
 
 	Vector3f accelVals = ahrs.get_accel_ef();
+	//Vector3f accelVals = ahrs.get_ins()->get_accel();
 	accelVals.z += GRAVITY_MSS;
 	Vector3f filteredVals;
-	filteredVals.x = (abs(accelVals.x) > 0.05 ? accelVals.x : 0);
-	filteredVals.y = (abs(accelVals.y) > 0.05 ? accelVals.y : 0);
-	filteredVals.z = (abs(accelVals.z) > 0.05 ? accelVals.z : 0);
+	filteredVals.x = accelVals.x;//(abs(accelVals.x) > 0.05 ? accelVals.x : 0.0);
+	filteredVals.y = accelVals.y;//(abs(accelVals.y) > 0.05 ? accelVals.y : 0.0);
+	filteredVals.z = accelVals.z;//(abs(accelVals.z) > 0.05 ? accelVals.z : 0.0);
 	
 	uint32_t tnow = hal.scheduler->micros();
 	float deltat = ( tnow - last_update ) / 1000000.0;
+	if(first_loop)
+	{
+		first_loop = false;
+		deltat = 0;
+	}
 
 	velocity.x += filteredVals.x * deltat;
 	velocity.y += filteredVals.y * deltat;
