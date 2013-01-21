@@ -8,14 +8,11 @@
 class sensor {
 public:
 	sensor();
-	bool sensor::open(const std::string& device, size_t baud);
-	void close();
+	fuse();
 	virtual ~sensor();
 
 private:
 	boost::thread iothread;
-	boost::asio::io_service io_service;
-	boost::asio::serial_port port;
 
 };
 
