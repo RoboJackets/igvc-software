@@ -1,15 +1,21 @@
+/*
+ * Lidar.h
+ *
+ *  Created on: Jan 22, 2012
+ *      Author: Alexander Huynh
+Copypasta from: Matthew Barulic
+ */
+
 #ifndef LIDAR_H
 #define LIDAR_H
 
+#include <stdint.h>
 #include <time.h>
 #include "events/EventGenerator.cpp"
 
 namespace IGVC {
 namespace Sensors {
 
-//class Lidar
-//{
-    //public:
     class Point
     {
         public:
@@ -27,17 +33,24 @@ namespace Sensors {
             float angle;
 
             // Raw distance
-            int raw;
+            uint8_t raw;
 
             // Distance in meters
             float distance;
 
             // Intensity of return, unknown units
-            int intensity;
+            uint8_t intensity;
     };
-    static const int Num_Points = 1024;
 
-    //Point pnt[Num_Points];
+/*
+ * A struct that represents a data packet from the Lidar device.
+ */
+struct LidarState
+{
+	timeval laptoptime;
+	Point pnt[1024];
+};
+
 
     class LidarListener
     {
@@ -46,7 +59,7 @@ namespace Sensors {
     };
 
     /*
-     * Interface for GPS devices.
+     * Interface for Lidars.
      */
     class Lidar : public EventGenerator<LidarListener>
     {
@@ -54,15 +67,15 @@ namespace Sensors {
         virtual ~Lidar() { }
 
         /*
-         * Returns the most recent state acquired from the GPS device.
+         * Returns the most recent state acquired from the Lidar.
          */
-        //virtual LidarState GetState() = 0;
+        virtual LidarState GetState() = 0;
 
         /*
          * Returns the LidarState with the given timestamp.
          * Throws an error if no such LidarState exists in the buffer.
          */
-        //virtual LidarState GetStateAtTime(timeval time) = 0;
+        virtual LidarState GetStateAtTime(timeval time) = 0;
 
         /*
          * Return true if there is at least one state in the buffer.
@@ -71,7 +84,6 @@ namespace Sensors {
 
 };
 
-//};
 
 } /* namespace Sensors */
 } /* namespace IGVC */
