@@ -4,7 +4,6 @@
 
 #CodeBlocks
 *.layout
-*.depend
 */*/bin/*
 */*/obj/*
 */*/.objs/*
