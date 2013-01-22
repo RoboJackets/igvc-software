@@ -1,0 +1,34 @@
+# depslib dependency file v1.0
+1358810362 source:/home/matt/igvc/2013/software/src/sensors/DataArray.cpp
+	"DataArray.h"
+
+1358810362 /home/matt/igvc/2013/software/src/sensors/DataArray.h
+	<boost/circular_buffer.hpp>
+
+1358810362 source:/home/matt/igvc/2013/software/src/sensors/SensorData.cpp
+	"SensorData.h"
+	"timing.h"
+
+1358810362 /home/matt/igvc/2013/software/src/sensors/SensorData.h
+
+1358810362 /home/matt/igvc/2013/software/src/sensors/timing.h
+	"boost/date_time/local_time/local_time.hpp"
+
+1358810362 source:/home/matt/igvc/2013/software/src/sensors/main.cpp
+	<iostream>
+	"SensorData.h"
+	"DataArray.h"
+
+1357097995 source:/home/matt/igvc/2013/software/src/serial/ASIOSerialPort.cpp
+	"ASIOSerialPort.h"
+	<iostream>
+
+1357102291 /home/matt/igvc/2013/software/src/serial/ASIOSerialPort.h
+	<boost/asio.hpp>
+	<string>
+
+1357692935 source:/home/matt/igvc/2013/software/src/serial/SerialPortTest.cpp
+	<string.h>
+	"ASIOSerialPort.h"
+	<iostream>
+
