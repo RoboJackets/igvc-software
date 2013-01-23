@@ -22,6 +22,8 @@
 			</Target>
 			<Target title="TestMotors">
 				<Option output="bin/debug/MotorTest" prefix_auto="1" extension_auto="1" />
+			<Target title="TestData">
+				<Option output="bin/debug/TestData" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
@@ -89,6 +91,12 @@
 		<Unit filename="src/mapping/MapPoint.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/sensors/DataArray.cpp">
+			<Option target="TestData" />
+		</Unit>
+		<Unit filename="src/sensors/DataArray.h">
+			<Option target="TestData" />
+		</Unit>
 		<Unit filename="src/sensors/GPS/GPS.hpp">
 			<Option target="TestGPS" />
 		</Unit>
@@ -107,6 +115,12 @@
 		<Unit filename="src/sensors/GPS/nmea.hpp">
 			<Option target="TestGPS" />
 		</Unit>
+		<Unit filename="src/sensors/SensorData.cpp">
+			<Option target="TestData" />
+		</Unit>
+		<Unit filename="src/sensors/SensorData.h">
+			<Option target="TestData" />
+		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -120,7 +134,7 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/main.cpp">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="TestData" />
 		</Unit>
 		<Unit filename="src/sensors/sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -128,8 +142,17 @@
 		<Unit filename="src/sensors/sensor.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="src/serial/ASIOSerialPort.cpp" />
-		<Unit filename="src/serial/ASIOSerialPort.h" />
+		<Unit filename="src/sensors/timing.h">
+			<Option target="TestData" />
+		</Unit>
+		<Unit filename="src/serial/ASIOSerialPort.cpp">
+			<Option target="TestSerial" />
+			<Option target="TestGPS" />
+		</Unit>
+		<Unit filename="src/serial/ASIOSerialPort.h">
+			<Option target="TestSerial" />
+			<Option target="TestGPS" />
+		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
 		</Unit>
