@@ -20,6 +20,8 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+			<Target title="TestMotors">
+				<Option output="bin/debug/MotorTest" prefix_auto="1" extension_auto="1" />
 			<Target title="TestData">
 				<Option output="bin/debug/TestData" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
@@ -60,10 +62,16 @@
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.cpp">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="TestMotors" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
+			<Option target="TestMotors" />
+		</Unit>
+		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest">
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
+			<Option target="TestMotors" />
 		</Unit>
 		<Unit filename="src/common/Pose.hpp">
 			<Option target="&lt;{~None~}&gt;" />
