@@ -3,6 +3,7 @@
 #include <cmath>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <iostream>
 
 void nmea::decodeUTCTime(const std::string& val)
 {
@@ -15,6 +16,8 @@ double nmea::decodeLatitude(const std::string& val, const char hemi)
 	double intpart;
 	double frac = modf(raw / 100.0, &intpart);
 	double deg = intpart + frac * 100.0 / 60.0;
+
+	std::cout <<raw << std::endl;
 
 	if(hemi == 'N')
 	{
@@ -52,7 +55,7 @@ bool nmea::decodeGPRMC(const std::string& line, GPSState& state)
 	if(splitvec[0] != std::string("$GPRMC")) return false;
 
 	decodeUTCTime(splitvec[1]);
-	
+
 	char status = splitvec[2][0];
 	switch(status)
 	{
