@@ -13,7 +13,7 @@ namespace IGVC {
 namespace Sensors {
 
 HemisphereA100GPS::HemisphereA100GPS():
-	serialPort("/dev/HemiGPS", 9600),
+	serialPort("/dev/ttyGPS", 4800),
 	iothread(boost::bind( &HemisphereA100GPS::threadRun, this)),
 	stateQueue()
 {
