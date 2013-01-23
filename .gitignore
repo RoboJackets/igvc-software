@@ -3,6 +3,7 @@
 /*/bin/**
 
 #CodeBlocks
+*.depend
 *.layout
 */*/bin/*
 */*/obj/*
