@@ -21,7 +21,9 @@
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="TestMotors">
-				<Option output="bin/debug/MotorTest" prefix_auto="1" extension_auto="1" />
+				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
 			</Target>
 			<Target title="TestData">
 				<Option output="bin/debug/TestData" prefix_auto="1" extension_auto="1" />
