@@ -19,7 +19,7 @@ add_library(lidarProc
 )
 
 target_link_libraries(lidarProc
-	cv
+	opencv_core
 )
 
 add_executable(test
@@ -54,13 +54,13 @@ add_executable(lidartestgui
 target_link_libraries(lidartestgui
 	NAV200
 	lidarProc
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_highgui
+	opencv_imgproc
 
 	plplotd
 
-	boost_thread-mt
+	boost_thread
 )
 
 add_executable(testpathclear
@@ -70,10 +70,10 @@ add_executable(testpathclear
 target_link_libraries(testpathclear
 	NAV200
 	lidarProc
-	cv
-	highgui
+	opencv_core
+	opencv_highgui
 
 	plplotd
 
-	boost_thread-mt
+	boost_thread
 )

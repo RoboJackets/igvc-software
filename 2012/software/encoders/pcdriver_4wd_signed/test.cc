@@ -1,5 +1,5 @@
 #include "quadCoderDriver_4wd_signed.hpp"
-
+#include <signal.h>
 volatile bool reset = false;
 
 void handler(int signum)
