@@ -70,9 +70,6 @@
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
 			<Option target="TestMotors" />
 		</Unit>
-		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
 			<Option target="TestMotors" />
 		</Unit>
