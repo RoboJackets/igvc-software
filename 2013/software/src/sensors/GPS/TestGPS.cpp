@@ -14,7 +14,7 @@ private:
 public:
     MyGPSListener()
     {
-        file.open("data.txt");
+//        file.open("data.txt");
     }
     void onNewStateAvailable(void* state)
     {
@@ -22,32 +22,28 @@ public:
         myState = (GPSState*)state;
 
         std::cout << std::setprecision(9)  <<  myState->lat << "\t" << myState->lon << std::endl;
-        file << std::setprecision(9)  <<  myState->lat << "\t" << myState->lon << std::endl;
+//        file << std::setprecision(9)  <<  myState->lat << "\t" << myState->lon << std::endl;
     }
     ~MyGPSListener()
     {
-        file.close();
+//        file.close();
     }
 };
 
 int main()
 {
 
+    // Initalize specific gps class
     HemisphereA100GPS gps;
 
     std::cout << "GPS device initialized. Press Ctrl+C to quit." << std::endl;
 
+    // Instantiate a gps listener
     MyGPSListener listener;
-    gps.addListener(&listener);
-    while(true);
 
- /*   while(true)
-    {
-        if(gps.StateIsAvailable())
-        {
-            GPSState state = gps.GetState();
-            std::cout << state.lat << "\t" << state.lon << std::endl;
-        }
-    }
-*/
+    // Add the new listener to our GPS
+    gps.addListener(&listener);
+
+    // Keep the main app running while the GPS thread runs
+    while(true);
 }
