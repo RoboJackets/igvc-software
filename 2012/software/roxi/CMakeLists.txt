@@ -84,16 +84,19 @@ target_link_libraries(${robot_bin}
 
 	dc1394
 
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_highgui
+	opencv_calib3d
+	opencv_contrib
+	opencv_legacy
+	opencv_video
 
 	QtXml
 	QtGui
 	QtCore
 
 	pthread
-	boost_thread-mt
+	boost_thread
 
 	joystick
 
@@ -118,9 +121,12 @@ target_link_libraries(${robot_bin}
 
 	dc1394
 
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_highgui
+	opencv_calib3d
+	opencv_contrib
+	opencv_legacy
+	opencv_video
 
 	QtXml
 	QtGui

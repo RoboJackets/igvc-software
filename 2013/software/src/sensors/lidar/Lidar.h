@@ -1,0 +1,90 @@
+/*
+ * Lidar.h
+ *
+ *  Created on: Jan 22, 2012
+ *      Author: Alexander Huynh
+Copypasta from: Matthew Barulic
+ */
+
+#ifndef LIDAR_H
+#define LIDAR_H
+
+#include <stdint.h>
+#include <time.h>
+#include "events/EventGenerator.cpp"
+
+namespace IGVC {
+namespace Sensors {
+
+    class Point
+    {
+        public:
+            Point()
+            {
+                valid = false;
+                distance = 0;
+                intensity = 0;
+            }
+
+            // If false, the other members are not meaningful
+            bool valid;
+
+            // Angle in radians counterclockwise from right, with the LEDs pointing forward.
+            float angle;
+
+            // Raw distance
+            uint8_t raw;
+
+            // Distance in meters
+            float distance;
+
+            // Intensity of return, unknown units
+            uint8_t intensity;
+    };
+
+/*
+ * A struct that represents a data packet from the Lidar device.
+ */
+struct LidarState
+{
+	timeval laptoptime;
+	Point pnt[1024];
+};
+
+
+    class LidarListener
+    {
+        public:
+            virtual void onNewStateAvailable(void* state) = 0;
+    };
+
+    /*
+     * Interface for Lidars.
+     */
+    class Lidar : public EventGenerator<LidarListener>
+    {
+    public:
+        virtual ~Lidar() { }
+
+        /*
+         * Returns the most recent state acquired from the Lidar.
+         */
+        virtual LidarState GetState() = 0;
+
+        /*
+         * Returns the LidarState with the given timestamp.
+         * Throws an error if no such LidarState exists in the buffer.
+         */
+        virtual LidarState GetStateAtTime(timeval time) = 0;
+
+        /*
+         * Return true if there is at least one state in the buffer.
+         */
+        virtual bool StateIsAvailable() = 0;
+
+};
+
+
+} /* namespace Sensors */
+} /* namespace IGVC */
+#endif // LIDAR_H

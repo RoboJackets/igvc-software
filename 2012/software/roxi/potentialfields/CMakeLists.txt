@@ -27,6 +27,9 @@ target_link_libraries(potentialfields
 	QtGui
 	xml
 	
+	opencv_core
+	opencv_highgui
+	opencv_imgproc
 )
 
 #add_executable(potentialfieldstest
@@ -44,3 +47,8 @@ target_link_libraries(potentialfields
 #	QtGui
 #	xml
 #)
+target_link_libraries(potentialfieldstest
+	potentialfields
+	opencv_core
+	QtCore
+)

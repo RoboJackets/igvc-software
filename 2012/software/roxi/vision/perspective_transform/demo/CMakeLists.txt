@@ -11,9 +11,10 @@ add_executable(ckcalib
 checkercalib.cpp
 )
 target_link_libraries(ckcalib
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_imgproc
+	opencv_highgui
+	opencv_calib3d
 	
 	roxi_vision
 	QtCore
@@ -27,9 +28,9 @@ add_executable(ldemo
 linedemo.cpp
 )
 target_link_libraries(ldemo
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_imgproc
+	opencv_highgui
 )
 
 #webcam demo
@@ -37,9 +38,9 @@ add_executable(wcdemo
 cvwebcamdemo.cpp
 )
 target_link_libraries(wcdemo
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_imgproc
+	opencv_highgui
 )
 
 #perspective transform demo
@@ -48,9 +49,9 @@ persptranscvdemo.cpp
 )
 
 target_link_libraries(ptdemo
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_imgproc
+	opencv_highgui
 )
 
 #glut perspective transform demo
@@ -59,9 +60,9 @@ gldemo.cpp
 )
 
 target_link_libraries(gptdemo
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_imgproc
+	opencv_highgui
 	glut
 )
 #glut perspective transform demo with firewire
@@ -69,9 +70,9 @@ add_executable(fwgldemo
 fwgldemo.cpp
 )
 target_link_libraries(fwgldemo
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_imgproc
+	opencv_highgui
 	glut
 	
 	
@@ -87,9 +88,9 @@ add_executable(loaddemo
 loaddemo.cpp
 )
 target_link_libraries(loaddemo
-	cv
-	cvaux
-	highgui
+	opencv_core
+	opencv_imgproc
+	opencv_highgui
 	glut
 	
 	
