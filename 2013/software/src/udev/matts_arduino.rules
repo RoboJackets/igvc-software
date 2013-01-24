@@ -1,0 +1,1 @@
+KERNEL=="ttyUSB?", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="A800eKZ8", SYMLINK+="arduino"
