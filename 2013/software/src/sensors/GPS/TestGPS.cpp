@@ -7,23 +7,27 @@
 using namespace IGVC::Sensors;
 using namespace std;
 
-class MyGPSListener : public GPSListener
+class MyGPSListener
 {
 private:
     ofstream file;
 public:
-    MyGPSListener()
+    MyGPSListener(GPS* gps)
+        : LonNewStateAvailable(this)
     {
+        gps->onNewData += &LonNewStateAvailable;
 //        file.open("data.txt");
     }
-    void onNewStateAvailable(void* state)
-    {
-        GPSState* myState;
-        myState = (GPSState*)state;
 
-        std::cout << std::setprecision(9)  <<  myState->lat << "\t" << myState->lon << std::endl;
-//        file << std::setprecision(9)  <<  myState->lat << "\t" << myState->lon << std::endl;
+    void onNewStateAvailable(GPSState state)
+    {
+
+        std::cout << std::setprecision(9)  << state.lat << "\t" << state.lon << std::endl;
+//        file << std::setprecision(9)  << state.lat << "\t" << state.>lon << std::endl;
     }
+
+    LISTENER(MyGPSListener, onNewStateAvailable, GPSState);
+
     ~MyGPSListener()
     {
 //        file.close();
@@ -39,10 +43,7 @@ int main()
     std::cout << "GPS device initialized. Press Ctrl+C to quit." << std::endl;
 
     // Instantiate a gps listener
-    MyGPSListener listener;
-
-    // Add the new listener to our GPS
-    gps.addListener(&listener);
+    MyGPSListener listener(&gps);
 
     // Keep the main app running while the GPS thread runs
     while(true);
