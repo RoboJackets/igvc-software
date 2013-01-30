@@ -9,7 +9,8 @@
 #include <iostream>
 
 ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud):
-	port(ioservice, port_name)
+	port(ioservice, port_name),
+	eventThread(boost::bind(&ASIOSerialPort::eventThreadRun, this))
 {
 	if( !port.is_open() ) {
 		std::cerr << "Failed to open serial port: " << port_name << std::endl;
@@ -25,8 +26,7 @@ ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud):
 		exit(1);
 	}
 
-	eventThread(boost::bind(&ASIOSerialPort::eventThreadRun, this));
-	portLocker();
+
 
 	_line = "";
 }
@@ -69,7 +69,7 @@ void ASIOSerialPort::write(std::string s) {
 	boost::asio::write(port, boost::asio::buffer(s.c_str(),s.size()));
 }
 
-void ASIOSerialPort::write(char[] msg, int length)
+void ASIOSerialPort::write(char *msg, int length)
 {
     boost::asio::write(port, boost::asio::buffer(msg, length));
 }
@@ -122,9 +122,9 @@ char ASIOSerialPort::read()
     return in;
 }
 
-char[] ASIOSerialPort::read(int numBytes)
+char* ASIOSerialPort::read(int numBytes)
 {
-    char[] bytes = char[numBytes];
+    char* bytes;
     for(int i = 0; i < numBytes; i++)
     {
         bytes[i] = read();
