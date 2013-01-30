@@ -14,28 +14,43 @@ namespace Sensors {
 
 HemisphereA100GPS::HemisphereA100GPS():
 	serialPort("/dev/ttyGPS", 4800),
-	iothread(boost::bind( &HemisphereA100GPS::threadRun, this)),
+	LonNewSerialLine(this),
 	stateQueue()
 {
+    serialPort.onNewLine += &LonNewSerialLine;
 	maxBufferLength = 10;
 }
 
-void HemisphereA100GPS::threadRun() {
-	while(serialPort.isConnected()) {
-		std::string line = serialPort.readln();
-		GPSState state;
-		if(parseLine(line, state)) {
-			gettimeofday(&state.laptoptime, NULL);
+void HemisphereA100GPS::onNewSerialLine(string line) {
+    GPSState state;
+    if(parseLine(line, state)) {
+        gettimeofday(&state.laptoptime, NULL);
 
-			boost::mutex::scoped_lock lock(queueLocker);
-			stateQueue.push_back(state);
-			if(stateQueue.size() > maxBufferLength) {
-				stateQueue.pop_front();
-			}
-			onNewData(state);
-		}
-	}
+        boost::mutex::scoped_lock lock(queueLocker);
+        stateQueue.push_back(state);
+        if(stateQueue.size() > maxBufferLength) {
+            stateQueue.pop_front();
+        }
+        onNewData(state);
+    }
 }
+
+//void HemisphereA100GPS::threadRun() {
+//	while(serialPort.isConnected()) {
+//		std::string line = serialPort.readln();
+//		GPSState state;
+//		if(parseLine(line, state)) {
+//			gettimeofday(&state.laptoptime, NULL);
+//
+//			boost::mutex::scoped_lock lock(queueLocker);
+//			stateQueue.push_back(state);
+//			if(stateQueue.size() > maxBufferLength) {
+//				stateQueue.pop_front();
+//			}
+//			onNewData(state);
+//		}
+//	}
+//}
 
 bool HemisphereA100GPS::parseLine(std::string line, GPSState &state) {
 	return nmea::decodeGPGGA(line, state) ||
