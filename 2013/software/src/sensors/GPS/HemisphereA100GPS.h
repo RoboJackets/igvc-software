@@ -10,7 +10,7 @@
 
 #include "GPS.hpp"
 
-#include <boost/thread.hpp>
+//#include <boost/thread.hpp>
 #include "serial/ASIOSerialPort.h"
 
 #include <list>
@@ -29,15 +29,15 @@ public:
 private:
 
 	ASIOSerialPort serialPort; // Serial port for GPS communication
-	boost::thread iothread; // thread to poll the GPS device
-	boost::mutex queueLocker; // mutex for thread-safing the buffer
 
+	void onNewSerialLine(string line);
+	LISTENER(HemisphereA100GPS, onNewSerialLine, string);
+
+	boost::mutex queueLocker; // mutex for thread-safing the buffer
 
 	size_t maxBufferLength; // maximum number of states to be stored in the buffer
 
 	std::list<GPSState> stateQueue; // buffer of the latest maxBufferLength states. This is a std::list instead of a std::queue because of the need to iterate to retrieve a state at a given timestamp
-
-	void threadRun(); // the method that runs on iothread
 
 	bool parseLine(std::string line, GPSState &state); // parses a line from the GPS device
 };
