@@ -9,6 +9,7 @@
 #define ASIOSERIALPORT_H_
 
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
 #include <string>
 
 /**
@@ -21,6 +22,11 @@ public:
 	 * The constructor takes in the path to the port (eg. "/dev/ttyUSB0") and a baud rate for the connection and opens the connection.
 	 */
 	ASIOSerialPort(std::string port_name, size_t baud);
+
+    /**
+     * Starts the thread for triggering events.
+     */
+     void startEvents();
 
 	/**
 	 * Closes the serial connection.
@@ -35,18 +41,47 @@ public:
 	/**
 	 * Writes the given string to the serial port.
 	 */
-	void write(std::string s);
+	void write(std::string msg);
+
+    /**
+     * Writes the given array of chars to the serial port.
+     */
+	void write(char *msg, int length);
 
 	/**
 	 * Reads bytes from the serial port until \n or \r is found.
+	 * Events will be disabled while waiting for this method to execute.
 	 * Returns a string containing the bytes read excluding the newline.
 	 */
 	std::string readln();
+
+	/**
+	 * Reads a single byte from the serial port.
+	 * Returns the read byte.
+	 */
+    char read();
+
+    /**
+     * Reads numBytes bytes from the serial port.
+     * Returns an array containing the read bytes.
+     */
+     char* read(int numBytes);
+
+    Event<String> onNewLine;
+    Event<char> onNewByte;
 
 	~ASIOSerialPort();
 private:
 	boost::asio::io_service ioservice;
 	boost::asio::serial_port port;
+
+	boost::thread eventThread;
+	boost::mutex portLocker;
+	void eventThreadRun();
+
+	bool _eventsEnabled;
+
+	std::string _line;
 
 };
 

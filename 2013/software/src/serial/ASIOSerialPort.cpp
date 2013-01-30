@@ -24,6 +24,37 @@ ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud):
 		std::cerr << "Failed to set all options on port: " << port_name << std::endl;
 		exit(1);
 	}
+
+	eventThread(boost::bind(&ASIOSerialPort::eventThreadRun, this));
+	portLocker();
+
+	_line = "";
+}
+
+void ASIOSerialPort::startEvents()
+{
+    //TODO ASIOSerialPort::startEvents()
+    _eventsEnabled = true;
+}
+
+void ASIOSerialPort::eventThreadRun()
+{
+    while(isConnected())
+    {
+        if(_eventsEnabled)
+        {
+            char in = read();
+            onNewByte(in);
+            if(in == '\n' || in == '\r')
+            {
+                onNewLine(_line);
+                _line = "";
+            } else {
+                _line += in;
+            }
+
+        }
+    }
 }
 
 void ASIOSerialPort::close() {
@@ -38,19 +69,26 @@ void ASIOSerialPort::write(std::string s) {
 	boost::asio::write(port, boost::asio::buffer(s.c_str(),s.size()));
 }
 
+void ASIOSerialPort::write(char[] msg, int length)
+{
+    boost::asio::write(port, boost::asio::buffer(msg, length));
+}
+
 std::string ASIOSerialPort::readln() {
+    _eventsEnabled = false;
 	char c;
 	std::string line;
 
 	while(true) {
 		try {
-		boost::asio::read(port, boost::asio::buffer(&c,1));
+            boost::asio::read(port, boost::asio::buffer(&c,1));
 		} catch(boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
 			std::cerr << "Error reading stream. Device may have been unplugged." << std::endl;
 			return line;
 		}
 		switch(c) {
 		case '\r':
+            _eventsEnabled = true;
 			return line;
 			break;
 		case '\n':
@@ -62,7 +100,30 @@ std::string ASIOSerialPort::readln() {
 		}
 	}
 
+    _eventsEnabled = true;
 	return "";
+}
+
+char ASIOSerialPort::read()
+{
+    char in;
+    try {
+        boost::asio::read(port, boost::asio::buffer(&in, 1));
+    } catch (boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
+        std::cerr << "Error reading stream. Device may have been unplugged." << std::endl;
+        return 0;
+    }
+    return in;
+}
+
+char[] ASIOSerialPort::read(int numBytes)
+{
+    char[] bytes = char[numBytes];
+    for(int i = 0; i < numBytes; i++)
+    {
+        bytes[i] = read();
+    }
+    return bytes;
 }
 
 ASIOSerialPort::~ASIOSerialPort() {
