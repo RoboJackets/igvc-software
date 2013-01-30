@@ -756,8 +756,8 @@ int MapGen::genProbabilityMap()
 	 *  while setting probabilities of obstacles and traversible area */
 	int divby = 2;     // image size denominator
 	int pad = 5;       // remove noise around img edges
-	float badval = -2; // rate for obstacle probability
-	float goodval = 3; // rate for travpath probability
+	float badval = -20;//-2 // rate for obstacle probability
+	float goodval = 10;//3 // rate for travpath probability
 	float setval,weight;
 	float wx,wy;
 	int x,y;

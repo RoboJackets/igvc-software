@@ -1,38 +1,50 @@
 #include "sensors/GPS/GPS.hpp"
 #include "sensors/GPS/HemisphereA100GPS.h"
 #include <iostream>
+#include <fstream>
+#include <iomanip>
 
 using namespace IGVC::Sensors;
+using namespace std;
 
-class MyGPSListener : public GPSListener
+class MyGPSListener
 {
-    void onNewStateAvailable(void* state)
+private:
+    ofstream file;
+public:
+    MyGPSListener(GPS* gps)
+        : LonNewStateAvailable(this)
     {
-        GPSState* myState;
-        myState = (GPSState*)state;
+        gps->onNewData += &LonNewStateAvailable;
+//        file.open("data.txt");
+    }
 
-        std::cout << myState->lat << "\t" << myState->lon << std::endl;
+    void onNewStateAvailable(GPSState state)
+    {
+
+        std::cout << std::setprecision(9)  << state.lat << "\t" << state.lon << std::endl;
+//        file << std::setprecision(9)  << state.lat << "\t" << state.>lon << std::endl;
+    }
+
+    LISTENER(MyGPSListener, onNewStateAvailable, GPSState);
+
+    ~MyGPSListener()
+    {
+//        file.close();
     }
 };
 
 int main()
 {
 
+    // Initalize specific gps class
     HemisphereA100GPS gps;
 
     std::cout << "GPS device initialized. Press Ctrl+C to quit." << std::endl;
 
-    MyGPSListener listener;
-    gps.addListener(&listener);
-    while(true);
+    // Instantiate a gps listener
+    MyGPSListener listener(&gps);
 
- /*   while(true)
-    {
-        if(gps.StateIsAvailable())
-        {
-            GPSState state = gps.GetState();
-            std::cout << state.lat << "\t" << state.lon << std::endl;
-        }
-    }
-*/
+    // Keep the main app running while the GPS thread runs
+    while(true);
 }
