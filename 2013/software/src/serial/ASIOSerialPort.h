@@ -11,6 +11,9 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <string>
+#include <events/Event.hpp>
+
+using namespace std;
 
 /**
  * This is a helper class to simplify the interface for interacting with serial ports.
@@ -67,7 +70,7 @@ public:
      */
      char* read(int numBytes);
 
-    Event<String> onNewLine;
+    Event<string> onNewLine;
     Event<char> onNewByte;
 
 	~ASIOSerialPort();
