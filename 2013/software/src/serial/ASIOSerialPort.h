@@ -28,8 +28,15 @@ public:
 
     /**
      * Starts the thread for triggering events.
+     * Disables synchronous read methods.
      */
      void startEvents();
+
+     /**
+      * Stops the thread for triggering events.
+      * Reenables synchronous read methods.
+      */
+      void stopEvents();
 
 	/**
 	 * Closes the serial connection.
@@ -53,7 +60,6 @@ public:
 
 	/**
 	 * Reads bytes from the serial port until \n or \r is found.
-	 * Events will be disabled while waiting for this method to execute.
 	 * Returns a string containing the bytes read excluding the newline.
 	 */
 	std::string readln();

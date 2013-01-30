@@ -8,9 +8,8 @@
 #include "ASIOSerialPort.h"
 #include <iostream>
 
-ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud):
-	port(ioservice, port_name),
-	eventThread(boost::bind(&ASIOSerialPort::eventThreadRun, this))
+ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud)
+    : port(ioservice, port_name)
 {
 	if( !port.is_open() ) {
 		std::cerr << "Failed to open serial port: " << port_name << std::endl;
@@ -31,18 +30,18 @@ ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud):
 	_line = "";
 }
 
-void ASIOSerialPort::startEvents()
-{
-    //TODO ASIOSerialPort::startEvents()
+void ASIOSerialPort::startEvents() {
     _eventsEnabled = true;
+	eventThread = boost::thread(boost::bind(&ASIOSerialPort::eventThreadRun, this));
 }
 
-void ASIOSerialPort::eventThreadRun()
-{
-    while(isConnected())
+void ASIOSerialPort::stopEvents() {
+    _eventsEnabled = false;
+}
+
+void ASIOSerialPort::eventThreadRun() {
+    while(isConnected() && _eventsEnabled)
     {
-        if(_eventsEnabled)
-        {
             char in = read();
             onNewByte(in);
             if(in == '\n' || in == '\r')
@@ -52,8 +51,6 @@ void ASIOSerialPort::eventThreadRun()
             } else {
                 _line += in;
             }
-
-        }
     }
 }
 
@@ -69,13 +66,11 @@ void ASIOSerialPort::write(std::string s) {
 	boost::asio::write(port, boost::asio::buffer(s.c_str(),s.size()));
 }
 
-void ASIOSerialPort::write(char *msg, int length)
-{
+void ASIOSerialPort::write(char *msg, int length) {
     boost::asio::write(port, boost::asio::buffer(msg, length));
 }
 
 std::string ASIOSerialPort::readln() {
-    _eventsEnabled = false;
 	char c;
 	std::string line;
 	int nTimes = 0;
@@ -105,13 +100,10 @@ std::string ASIOSerialPort::readln() {
 			break;
 		}
 	}
-
-    _eventsEnabled = true;
 	return "";
 }
 
-char ASIOSerialPort::read()
-{
+char ASIOSerialPort::read() {
     char in;
     try {
         boost::asio::read(port, boost::asio::buffer(&in, 1));
@@ -122,9 +114,8 @@ char ASIOSerialPort::read()
     return in;
 }
 
-char* ASIOSerialPort::read(int numBytes)
-{
-    char* bytes;
+char* ASIOSerialPort::read(int numBytes) {
+    char* bytes = new char[numBytes];
     for(int i = 0; i < numBytes; i++)
     {
         bytes[i] = read();
