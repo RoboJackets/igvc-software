@@ -133,9 +133,9 @@ void loop()
 
 	hal.console->printf_P(
 			PSTR("%4.2f %4.2f %4.2f\n"),
-			velocity.x,
-			velocity.y,
-			velocity.z);
+			filteredVals.x,
+			filteredVals.y,
+			filteredVals.z);
 	last_update = tnow;
 }
 

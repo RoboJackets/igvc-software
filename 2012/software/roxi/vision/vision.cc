@@ -4,6 +4,7 @@
 #include "image_buffers.h"
 #include "Graphics.h"
 #include <omp.h>
+#include "bwareaopen.h"
 
 /*
  * This file contains the robot's primary vision processing code main function.
@@ -34,6 +35,7 @@ int DO_STOPANDTHINK = 0;//default value do not touch
 ////////////////////////////////////////////////////////////
 
 int Vision::RemoveLines;
+
 /*
  *
  */
@@ -1591,9 +1593,15 @@ void Vision::visAdaptiveProcessing(Point2D<int>& goal)
 			1); // fills in barrels/lines, but adds grass noise
 
 
-	if(Vision::RemoveLines){
-		cvDilate(ImageBufferManager::getInstance().visCvThresh, ImageBufferManager::getInstance().visCvThresh, NULL, 3); // removes lines
+
+	if(RemoveLines){
+		cvDilate(ImageBufferManager::getInstance().visCvThresh, ImageBufferManager::getInstance().visCvThresh, NULL, 9); // removes lines
 	}
+	cvNot(ImageBufferManager::getInstance().visCvThresh,ImageBufferManager::getInstance().visCvThresh);
+	bwareaopen(ImageBufferManager::getInstance().visCvThresh,100);
+	cvNot(ImageBufferManager::getInstance().visCvThresh,ImageBufferManager::getInstance().visCvThresh);
+	
+	
 	//cvErode(visCvThresh, visCvThresh,  NULL, 2); // fills in barrels/lines, but adds grass noise
 
 	if (doMapping == 0)
