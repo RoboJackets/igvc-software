@@ -25,6 +25,7 @@
 #include <math.h>
 #include <queue>
 #include <iostream>
+//#include "vision.h"
 /******************************************/
 
 /************* Structures *****************/
@@ -181,6 +182,7 @@ enum NEXT_MODE {INSTANT, ASTAR};
 // GPS goal waypoints, and keeps track of the current GPS position 
 class potentialfields
 {
+friend class ImageBufferManager;
 public: 
 	/************* Public Methods *************/	
 	#if RUN_MODE == GPS
@@ -232,7 +234,7 @@ public:
 	const static double image_goal_weight = 1;			// Weight given to get to image goals (flags)
 	const static double gps_goal_weight = 510;			// Weight given to get to GPS goal
 	const static double gps_avoid_weight = 1;			// Weight given to avoid old GPS points
-	const static int obstacle_avoid_radius = 30;		 	// Radius around the robot in which the robot considers those obstacles 
+	const static int obstacle_avoid_radius = 35;		 	// Radius around the robot in which the robot considers those obstacles 
 	const static int target_reach_radius = 1000;			// Radius arond the robot in which the robot considers image goals
 	const static double gps_goal_radius_default = GOALRADDEF;			// Radius of the gps goal
 	const static double gps_max_distance_default = 1;			// Radius at which the attraction to the goal becomes a constant

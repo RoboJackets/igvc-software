@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include "XmlConfiguration.h"
+#include "vision.h"
 
 using namespace std;
 
@@ -71,11 +72,14 @@ void potentialfields::dropWaypoint(double lat, double lon, double ang)
 	{
 		system("espeak -a 300 -p 50 -s 170 -g15 -v en/en+f2 \"Point Found\" 2>0 &");
 		currentGoal = (currentGoal+1) % GPS_Goals.size();
+		Vision::RemoveLines = 0;
+		
 	}
 
 	// Write to GPS points file
 	ofstream gpsfile;
 	gpsfile.open("gps.txt", ios::app);
+	gpsfile.precision(10);
 	gpsfile << "lat: " << lat << "\tlon: " << lon << "\tangle: " << ang << endl;
 }
 #elif RUN_MODE == ROBOT_POS
@@ -269,7 +273,10 @@ void potentialfields::getNextVector(NEXT_MODE mode, IplImage* obstacles_ipl, Ipl
 	GPS_point current = GPS_Prev_Loc[GPS_Prev_Loc.size()-1];	
 	double distToGoal = distBtwGPSPoints(current, goal);
 	if (goal.ignoreLines && distToGoal < goal.radius + gps_dist_to_ignore_lines)
+	{
 		RemoveLines(obstacles_ipl);
+		Vision::RemoveLines = 1;
+	}
 
 	bool* obstacles = IPl2Bitmap(obstacles_ipl, FEATURE_LOW, OBSTACLE, imgx, imgy);
 	
@@ -769,6 +776,26 @@ void potentialfields::getAvoidVec(bool* obstacles, double angle_of_map, double& 
 	ang=fmodf(ang+180,360)-180;//-180to180
 	
 	ang=ang*turn_multiplier;
+	
+	ang = RotateBearing(ang, 0);
+	
+	// Exception
+	cout << "BEFORE: ang " << ang << " mag " << mag << endl;
+	
+	IplImage* thr=ImageBufferManager::getInstance().visCvThresh;
+	int sum=0;
+	for(int y=thr->height/2;y<thr->height;y++)
+	{
+		sum+=(cvGetReal2D(thr,y,thr->height/2)==0);
+	}
+	cout<<"sum"<<sum<<endl;
+	if (mag > 4000 && (ang < 20 || ang > 340) && sum>10)
+	{
+		if (ang < 180) ang = 90;
+		else ang = 270; 
+		cout << "HERE: ang " << ang << " mag " << mag << endl;
+	}
+		
 	ang = RotateBearing(ang, curang);
 	VecToxy(mag, ang, xvel, yvel);
 	
@@ -808,6 +835,7 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel)
 // Returns the x and y components of the GPS goal vector in meters
 void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distance, double theta)
 {
+	cout << "Target lat: " << GPS_Goals[currentGoal].lat << " lon: " << GPS_Goals[currentGoal].lon << endl; 
 	if (distance > (gps_max_distance_default + GPS_Goals[currentGoal].radius))
 	{	
 		// If the robot is far away from the GPS goal, gets a constant vector towards the GPS location
@@ -823,7 +851,7 @@ void potentialfields::getGPSTargetVec(double& xvel, double& yvel, double distanc
 		cout << "Distance " << distance << endl;
 		cout << "Before clamp ang (bot) " << ang << endl;
 		
-		ang = clampVector(ang, gps_clamp_angle);
+		//ang = clampVector(ang, gps_clamp_angle);
 		cout << "Clamp ang (bot) " << ang << endl;
 		ang = RotateBearing(ang, curang);
 		VecToxy(mag, ang, xvel, yvel);
@@ -899,6 +927,9 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 	
 	// Get angle in robot coordinates
 	double mag, angle;
+	double x_vel0, y_vel0;
+	x_vel0=x_vel;
+	y_vel0=y_vel;
 	xyToVec(x_vel, y_vel, mag, angle);
 	angle = RotateBearing(angle, imgAngle);	
 	angle = RotateBearing(angle, -curang);
@@ -923,6 +954,8 @@ void potentialfields::repulsivePixels(int x0, int y0, int xt, int yt, int radius
 	angle = RotateBearing(angle, curang);
 	angle = RotateBearing(angle, -imgAngle);
 	VecToxy(mag, angle, x_vel, y_vel);
+	x_vel+=.2*x_vel0;
+	y_vel+=.2*y_vel0;
 
 	/*double scaleFactor = 1 - abs(angle)/180;
 	x_vel *= scaleFactor;
@@ -1050,6 +1083,14 @@ void potentialfields::getObstacleVector(int x0, int y0, int radius, bool* bitmap
 	{
 		if (sector_vector_x[0] < 0)
 			sector_vector_x[0] *= -1.0;
+		if (sector_vector_x[1] < 0)
+			sector_vector_x[1] *= -1.0;
+		if (sector_vector_x[2] < 0)
+			sector_vector_x[2] *= -1.0;
+		if (sector_vector_x[9] < 0)
+			sector_vector_x[9] *= -1.0;
+		if (sector_vector_x[10] < 0)
+			sector_vector_x[10] *= -1.0;
 		if (sector_vector_x[11] < 0)
 			sector_vector_x[11]  *= -1.0;
 	}
@@ -1057,6 +1098,14 @@ void potentialfields::getObstacleVector(int x0, int y0, int radius, bool* bitmap
 	{
 		if (sector_vector_x[0] > 0)
 			sector_vector_x[0] *= -1.0;
+		if (sector_vector_x[1] > 0)
+			sector_vector_x[1] *= -1.0;
+		if (sector_vector_x[2] > 0)
+			sector_vector_x[2] *= -1.0;
+		if (sector_vector_x[9] > 0)
+			sector_vector_x[9] *= -1.0;
+		if (sector_vector_x[10] > 0)
+			sector_vector_x[10] *= -1.0;
 		if (sector_vector_x[11] > 0)
 			sector_vector_x[11]  *= -1.0;	
 	}

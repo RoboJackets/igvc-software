@@ -447,6 +447,7 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 {
 	if((y == 0) && (x == 0))
 	{
+		setVel_pd(-10, -10);
 		setVel_pd(0, 0);
 		return set_motors(0,0);
 	}
@@ -548,7 +549,7 @@ bool OSMC_driver::set_vel_vec(const double y, const double x)
 
 	
 	const double fwdmag = 80;// this controls the basic speed the wheels run at
-	const double diffmul = .2;// this is how much the difference in wheel powers is multiplied by to correct for velocity crosstalk
+	const double diffmul = .4;// this is how much the difference in wheel powers is multiplied by to correct for velocity crosstalk
 	const double dir = (y >= 0) ? 1 : -1;//behavior of this function not guaranteed to be smooth crossing to y<0;
 	const double slope = 2.0 * fwdmag / (M_PI / 2.0);
 	const double ang = M_PI / double(2) - atan2(y,x);

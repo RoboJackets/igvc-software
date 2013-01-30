@@ -9,7 +9,7 @@
 #define GPS_HPP_
 
 #include <time.h>
-#include "events/EventGenerator.cpp"
+#include "events/Event.hpp"
 
 namespace IGVC {
 namespace Sensors {
@@ -51,16 +51,10 @@ public:
 	}
 };
 
-class GPSListener
-{
-public:
-    virtual void onNewStateAvailable(void* state) = 0;
-};
-
 /*
  * Interface for GPS devices.
  */
-class GPS : public EventGenerator<GPSListener>
+class GPS
 {
 public:
 	virtual ~GPS() { }
@@ -81,6 +75,9 @@ public:
 	 */
 	virtual bool StateIsAvailable() = 0;
 
+    Event<GPSState> onNewData;
+    Event<void*> onDeviceFailure;
+    Event<void*> onDataExpiration;
 };
 
 } //Sensors

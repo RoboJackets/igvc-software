@@ -842,6 +842,7 @@ void Robot::update_vel_func()
 			y = yvel;
 			x = xvel;
 		}
+		//osmcd->set_vel_vec(-10, -10);
 		if(osmcd->set_vel_vec(y, x))
 		{
 			std::cerr << "osmcd->set_vel_vec failed!" << std::endl;
