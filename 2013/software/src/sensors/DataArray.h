@@ -44,7 +44,7 @@ template<class DataType>
 int DataArray<DataType>::firstIndBefore(long long aTime)
 //TODO Reconsider the return values of this function.
 {
-    int size = buff.size()
+    int size = buff.size();
     if (size == 0)
     {
         return -1; //buffer is empty, no valid answer
@@ -52,7 +52,7 @@ int DataArray<DataType>::firstIndBefore(long long aTime)
 
     for (int i =0;i<size;i++)
     {
-        if aTime > buff[i].time
+        if (aTime > buff[i].time)
         {
             return i; //Handles situations where time is later than first entry or between two existing ones.
         }
@@ -66,7 +66,7 @@ int DataArray<DataType>::firstIndAfter(long long aTime)
 //TODO Reconsider the return values of this function.
 //TODO Verify logic for this function, it was a quick port from firstIndAfter
 {
-    int size = buff.size()
+    int size = buff.size();
     if (size == 0)
     {
         return -1; //buffer is empty, no valid answer
@@ -74,7 +74,7 @@ int DataArray<DataType>::firstIndAfter(long long aTime)
 
     for (int i =size-1;i>-1;i--)
     {
-        if aTime > buff[i].time
+        if( aTime > buff[i].time)
         {
             return i; //Handles situations where time is later than first entry or between two existing ones.
         }
