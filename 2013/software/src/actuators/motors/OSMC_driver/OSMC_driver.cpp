@@ -17,18 +17,18 @@ const char OSMC_driver::minPwm = 30;
 OSMC_driver::~OSMC_driver()
 {
 	stopMotors();
-	arduinoRight.close();
+//	arduinoRight.close();
 	arduinoLeft.close();
-	arduinoEncoder.close();
+//	arduinoEncoder.close();
 }
 
 bool OSMC_driver::arduinoCheck()	//Checks we are connected and able to send and receive data from the arduinos
 {
 	std::cout << "Testing serial API..." << std::endl;
 	arduinoLeft.write("T");
-	arduinoRight.write("T");
+//	arduinoRight.write("T");
 	sleep(0.01);
-	if (arduinoRight.readln() == "T" and arduinoLeft.readln() == "T")
+	if (/*arduinoRight.readln() == "T" and */arduinoLeft.readln() == "T")
 	{
 		std::cout<<"Successfully read from Arduinos" << std::endl;
 		return true;
@@ -37,23 +37,66 @@ bool OSMC_driver::arduinoCheck()	//Checks we are connected and able to send and 
 	{
 		std::cout<<"Failed to read from Arduinos"<<std::endl;
 		arduinoLeft.close();
-		arduinoRight.close();
+	//	arduinoRight.close();
 		return false;
 	}
 }
 
 void OSMC_driver::setPwm(char pwm, char dir)	//writes pwm to arduinos setting both motors to the same pwm and direction (0 = forwards, 1 = backwards)
 {
-	checkPwm(pwm, dir);
-	arduinoLeft.write("WS" + dir + pwm);
-	arduinoRight.write("WS"+dir+pwm);
+    setRightLeftPwm(pwm, dir, pwm, dir);
 }
 
-void OSMC_driver::setMotorsPwm(char pwmLeft, char dirLeft, char pwmRight, char dirRight)		//writes pwmLeft and pwmRight to respective arduinos
+void OSMC_driver::setRightLeftPwm(char pwmRight, char dirRight, char pwmLeft, char dirLeft)
 {
-	checkPwm2(pwmLeft, pwmRight);
-	arduinoLeft.write("W" + dirLeft + pwmLeft);
-	arduinoRight.write("W"+dirRight+pwmRight);
+    pwmRight = adjustSpeedRight(pwmRight, dirRight);
+    dirLeft = adjustDirLeft(dirLeft);
+    pwmLeft = adjustSpeedLeft(pwmLeft, dirLeft);
+    string wt = "WS";
+    wt.append(1,dirRight);
+    wt.append(1,pwmRight);
+    wt.append(1,dirLeft);
+    wt.append(1,pwmLeft);
+    cout<<wt.c_str()<<endl;
+    arduinoRight.write(wt);
+    string wt1 = "WS";
+    wt1.append(1,dirLeft);
+    wt1.append(1,pwmLeft);
+    wt1.append(1,dirRight);
+    wt1.append(1,pwmRight);
+    arduinoLeft.write(wt1);
+}
+
+char OSMC_driver::adjustSpeedRight(char pwm, char dir)
+{
+    if (dir == 1)
+    {
+        pwm = 255-pwm;
+    }
+    if (dir == 0)
+    {
+        pwm = pwm;
+    }
+    return (pwm);
+}
+
+char OSMC_driver::adjustSpeedLeft(char pwm, char dir)
+{
+    if (dir == 1)
+    {
+        pwm = 255-pwm;
+    }
+    if (dir == 0)
+    {
+        pwm = pwm;
+    }
+    return (pwm);
+}
+
+char OSMC_driver::adjustDirLeft(char dirLeft)
+{
+    dirLeft = 1-dirLeft;
+    return (dirLeft);
 }
 
 void OSMC_driver::goTurn(int degree, char dir)
@@ -75,21 +118,23 @@ void OSMC_driver::goForward(double dist, char pwm, char dir)
     std::ostringstream right;
     right << dist << dir << pwm;
 
-    arduinoRight.write("WD");
-    arduinoRight.write(right.str().c_str());
+ //   arduinoRight.write("WD");
+ //   arduinoRight.write(right.str().c_str());
 
-    while(arduinoRight.readln() == "!" && arduinoLeft.readln() == "!")
+    while(/*arduinoRight.readln() == "!" && */arduinoLeft.readln() == "!")
     {
         break;
     }
 }
 
-float OSMC_driver::readEncoder()
+double OSMC_driver::readEncoder()
 {
-    arduinoEncoder.write("R");
+    string r = "R";
+    arduinoEncoder.write(r);
+  //  sleep(1);
     std::string dist1 = arduinoEncoder.readln();
     double dist = ::atof(dist1.c_str());
-    return dist;
+    return (dist);
 }
 
 void OSMC_driver::encoderLoop(float totalDist)
@@ -98,25 +143,29 @@ void OSMC_driver::encoderLoop(float totalDist)
     while (dist<totalDist)
     {
         dist = readEncoder();
+        cout<<dist<<endl;
     }
+    cout<<"Dropped Loop"<<endl;
     stopMotors();
 }
 
 void OSMC_driver::goForwardOld(float totalDist, char pwm, char dir)
 {
-    checkPwm(pwm, dir);
-
-    arduinoLeft.write("WS"+dir+pwm);
-    arduinoRight.write("WS"+dir+pwm);
-
-    encoderLoop(totalDist);
-
+    string f = "F";
+    arduinoEncoder.write(f);
+  //  sleep(1);
+    string var;
+    var = "";
+    var = arduinoEncoder.readln();
+    cout<<var<<endl;
+ //   sleep(1);
+ //   setRightLeftPwm(pwm, dir, pwm, dir);
+ //   encoderLoop(totalDist);
 }
 
 void OSMC_driver::stopMotors()		//Stops the motors
 {
-	arduinoLeft.write("S");
-	arduinoRight.write("S");
+    setRightLeftPwm(0,1,0,1);
 }
 
 void OSMC_driver::checkPwm(char pwm, char dir)	//checks that the pwm is within the minPwm and maxPwm
