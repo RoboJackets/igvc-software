@@ -8,6 +8,8 @@ SensorData::SensorData() : MeasurementTime(milliseconds_since_epoch())
 }
 
 SensorData::SensorData(long long time) : MeasurementTime(time)
+{
+
 }
 
 

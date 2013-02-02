@@ -103,6 +103,9 @@
 		<Unit filename="src/sensors/DataStructures/DataArray.h">
 			<Option target="TestData" />
 		</Unit>
+		<Unit filename="src/sensors/DataStructures/DataPoint.hpp">
+			<Option target="TestData" />
+		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
 			<Option target="TestData" />
 		</Unit>

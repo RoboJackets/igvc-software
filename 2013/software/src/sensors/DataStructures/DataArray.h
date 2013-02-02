@@ -53,7 +53,7 @@ int DataArray<DataType>::firstIndBefore(long long aTime)
 
     for (int i =0;i<size;i++)
     {
-        if (aTime > buff[i].time)
+        if (aTime > buff[i].time())
         {
             return i; //Handles situations where time is later than first entry or between two existing ones.
         }
@@ -75,7 +75,7 @@ int DataArray<DataType>::firstIndAfter(long long aTime)
 
     for (int i =size-1;i>-1;i--)
     {
-        if (aTime > buff[i].time)
+        if (aTime > buff[i].time())
         {
             return i; //Handles situations where time is later than first entry or between two existing ones.
         }
