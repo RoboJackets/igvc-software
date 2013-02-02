@@ -36,6 +36,11 @@
 					<Add directory="/home/alex/Desktop/IGVC/2013/software/**" />
 				</Linker>
 			</Target>
+			<Target title="TestLidar">
+				<Option output="bin/Debug/TestLidar" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -156,6 +161,18 @@
 		</Unit>
 		<Unit filename="src/sensors/encoders/pcdriver_signed/test.cc">
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/sensors/lidar/Lidar.h">
+			<Option target="TestLidar" />
+		</Unit>
+		<Unit filename="src/sensors/lidar/NAV200.cpp">
+			<Option target="TestLidar" />
+		</Unit>
+		<Unit filename="src/sensors/lidar/NAV200.h">
+			<Option target="TestLidar" />
+		</Unit>
+		<Unit filename="src/sensors/lidar/TestLidar.cpp">
+			<Option target="TestLidar" />
 		</Unit>
 		<Unit filename="src/sensors/main.cpp">
 			<Option target="TestData" />
