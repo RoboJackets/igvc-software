@@ -102,16 +102,16 @@ std::string ASIOSerialPort::readln() {
 		}
 		if(_packetHasBeenDefined)
 		{
-		    if(c==_startByte)
+		    if(c==_packetStartByte)
 		    {
 		        _packet = "";
 		        _hasEncounteredStartByte = true;
 		    }
 		    if(_hasEncounteredStartByte)
 		    {
-		        packet += c;
+		        _packet += c;
 		    }
-		    if(c==_endByte)
+		    if(c==_packetEndByte)
 		    {
                 onNewPacket(_packet);
                 _hasEncounteredStartByte = false;
@@ -143,8 +143,8 @@ char* ASIOSerialPort::read(int numBytes) {
 
 void ASIOSerialPort::definePacket(char startByte, char endByte)
 {
-    _startByte = startByte;
-    _endByte = endByte;
+    _packetStartByte = startByte;
+    _packetEndByte = endByte;
     _packetHasBeenDefined = true;
 }
 
