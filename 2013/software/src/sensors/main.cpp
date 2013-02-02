@@ -26,6 +26,10 @@ int main()
     Mistii.push(GPSData(49.12, 0.2122, 11,1));
     sleep(2);
     Mistii.push(GPSData(49.12, 0.2122, 11,3));
+    sleep(2);
+    Mistii.push(GPSData(49.12, 0.2122, 11,5));
+    sleep(2);
+    Mistii.push(GPSData(49.12, 0.2122, 11,7));
     std::cout << std::setprecision(10) << Mistii.angVel(1) << std::endl;
     //std::cout << std::setprecision(4) << Mistii.angVel(1);
    // std::cout << GPSArray[0].Lat() <<  " Should be 49.12"<< std::endl;

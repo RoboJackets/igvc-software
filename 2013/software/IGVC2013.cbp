@@ -96,10 +96,25 @@
 		<Unit filename="src/mapping/MapPoint.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="src/sensors/DataArray.cpp">
+		<Unit filename="src/sensors/DataStructures/DataArray.cpp">
 			<Option target="TestData" />
 		</Unit>
-		<Unit filename="src/sensors/DataArray.h">
+		<Unit filename="src/sensors/DataStructures/DataArray.h">
+			<Option target="TestData" />
+		</Unit>
+		<Unit filename="src/sensors/DataStructures/DataPoint.hpp">
+			<Option target="TestData" />
+		</Unit>
+		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
+			<Option target="TestData" />
+		</Unit>
+		<Unit filename="src/sensors/DataStructures/GPSData.h">
+			<Option target="TestData" />
+		</Unit>
+		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
+			<Option target="TestData" />
+		</Unit>
+		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/GPS.hpp">
@@ -119,12 +134,6 @@
 		</Unit>
 		<Unit filename="src/sensors/GPS/nmea.hpp">
 			<Option target="TestGPS" />
-		</Unit>
-		<Unit filename="src/sensors/SensorData.cpp">
-			<Option target="TestData" />
-		</Unit>
-		<Unit filename="src/sensors/SensorData.h">
-			<Option target="TestData" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -152,9 +161,6 @@
 		</Unit>
 		<Unit filename="src/sensors/main.cpp">
 			<Option target="TestData" />
-		</Unit>
-		<Unit filename="src/sensors/sensor.cpp">
-			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/sensor.h">
 			<Option target="&lt;{~None~}&gt;" />
