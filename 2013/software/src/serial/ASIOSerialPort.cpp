@@ -26,7 +26,8 @@ ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud)
 	}
 
 
-
+    _packetHasBeenDefined = false;
+    _hasEncounteredStartByte = false;
 	_line = "";
 }
 
@@ -99,6 +100,23 @@ std::string ASIOSerialPort::readln() {
 			std::cout<<nTimes<<std::endl;
 			break;
 		}
+		if(_packetHasBeenDefined)
+		{
+		    if(c==_startByte)
+		    {
+		        _packet = "";
+		        _hasEncounteredStartByte = true;
+		    }
+		    if(_hasEncounteredStartByte)
+		    {
+		        packet += c;
+		    }
+		    if(c==_endByte)
+		    {
+                onNewPacket(_packet);
+                _hasEncounteredStartByte = false;
+		    }
+		}
 	}
 	return "";
 }
@@ -121,6 +139,13 @@ char* ASIOSerialPort::read(int numBytes) {
         bytes[i] = read();
     }
     return bytes;
+}
+
+void ASIOSerialPort::definePacket(char startByte, char endByte)
+{
+    _startByte = startByte;
+    _endByte = endByte;
+    _packetHasBeenDefined = true;
 }
 
 ASIOSerialPort::~ASIOSerialPort() {

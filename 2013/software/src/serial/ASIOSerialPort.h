@@ -76,8 +76,15 @@ public:
      */
      char* read(int numBytes);
 
+     /**
+      * Defines the start and end bytes that will trigger a onNewPacket event.
+      * NOTE: You must call startEvents() for the onNewPacket event to fire.
+      */
+     void definePacket(char startByte, char endByte);
+
     Event<string> onNewLine;
     Event<char> onNewByte;
+    Event<string> onNewPacket;
 
 	~ASIOSerialPort();
 private:
@@ -90,7 +97,13 @@ private:
 
 	bool _eventsEnabled;
 
-	std::string _line;
+	char _packetStartByte;
+	char _packetEndByte;
+	bool _packetHasBeenDefined;
+	bool _hasEncounteredStartByte;
+	string _packet;
+
+	string _line;
 
 };
 
