@@ -9,12 +9,13 @@ class DataArray
         DataArray(int);
         void push(DataType);
         int size();
+        int firstIndBefore(long long);
+        int firstIndAfter(long long);
         DataType operator[](int);
         virtual ~DataArray();
 
     private:
-        int firstIndBefore(long long);
-        int firstIndAfter(long long);
+
         boost::circular_buffer<DataType> buff;
         int length;
 };
@@ -67,14 +68,14 @@ int DataArray<DataType>::firstIndAfter(long long aTime)
 //TODO Verify logic for this function, it was a quick port from firstIndAfter
 {
     int size = buff.size();
-    if (size == 0)
+    if (size == 0);
     {
         return -1; //buffer is empty, no valid answer
     }
 
     for (int i =size-1;i>-1;i--)
     {
-        if( aTime > buff[i].time)
+        if (aTime > buff[i].time)
         {
             return i; //Handles situations where time is later than first entry or between two existing ones.
         }
