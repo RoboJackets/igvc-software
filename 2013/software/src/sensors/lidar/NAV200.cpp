@@ -5,7 +5,6 @@
  *      Author: Alexander Huynh
 Copypasta from: Matthew Barulic
  */
-
 #include "NAV200.h"
 #include <iostream>
 #include <string>
@@ -13,14 +12,25 @@ Copypasta from: Matthew Barulic
 namespace IGVC {
 namespace Sensors {
 
-/*NAV200::NAV200():
+NAV200::NAV200():
     serialPort("/dev/NAV200", 9600),
-	iothread(boost::bind( &NAV200::threadRun, this)),*/
-
-NAV200::NAV200()                                                //ERR: no matching function for call to 'ASIOSerialPort::ASIOSerialPort()'
+	iothread(boost::bind( &NAV200::threadRun, this))
 {
-    //serialPort("/dev/NAV200", 9600);
-	//iothread(boost::bind( &NAV200::threadRun, this));
+}
+
+LidarState NAV200::GetState()
+{
+    return LidarState();
+}
+
+LidarState NAV200::GetStateAtTime(timeval time)
+{
+
+}
+
+bool NAV200::StateIsAvailable()
+{
+    return true;
 }
 
 

@@ -11,7 +11,7 @@ Copypasta from: Matthew Barulic
 
 #include <stdint.h>
 #include <time.h>
-#include "events/EventGenerator.cpp"
+#include "events/Event.hpp"
 
 namespace IGVC {
 namespace Sensors {
@@ -42,46 +42,49 @@ namespace Sensors {
             uint8_t intensity;
     };
 
-/*
- * A struct that represents a data packet from the Lidar device.
- */
-struct LidarState
-{
-	timeval laptoptime;
-	Point pnt[1024];
-};
+    /*
+     * A struct that represents a data packet from the Lidar device.
+     */
+    struct LidarState
+    {
+        timeval laptoptime;
+        Point pnt[1024];
+    };
 
 
-    class LidarListener
+    /*class LidarListener
     {
         public:
             virtual void onNewStateAvailable(void* state) = 0;
-    };
+    };*/
+
+/*
+ * Interface for Lidars.
+ */
+class Lidar
+{
+public:
+    virtual ~Lidar() { }
 
     /*
-     * Interface for Lidars.
+     * Returns the most recent state acquired from the Lidar.
      */
-    class Lidar : public EventGenerator<LidarListener>
-    {
-    public:
-        virtual ~Lidar() { }
+    virtual LidarState GetState() = 0;
 
-        /*
-         * Returns the most recent state acquired from the Lidar.
-         */
-        virtual LidarState GetState() = 0;
+    /*
+     * Returns the LidarState with the given timestamp.
+     * Throws an error if no such LidarState exists in the buffer.
+     */
+    virtual LidarState GetStateAtTime(timeval time) = 0;
 
-        /*
-         * Returns the LidarState with the given timestamp.
-         * Throws an error if no such LidarState exists in the buffer.
-         */
-        virtual LidarState GetStateAtTime(timeval time) = 0;
+    /*
+     * Return true if there is at least one state in the buffer.
+     */
+    virtual bool StateIsAvailable() = 0;
 
-        /*
-         * Return true if there is at least one state in the buffer.
-         */
-        virtual bool StateIsAvailable() = 0;
-
+    Event<LidarState> onNewData;
+    Event<void*> onDeviceFailure;
+    Event<void*> onDataExpiration;
 };
 
 
