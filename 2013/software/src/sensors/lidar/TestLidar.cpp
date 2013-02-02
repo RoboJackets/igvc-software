@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iomanip>
 
+
+
 using namespace IGVC::Sensors;
 using namespace std;
 
@@ -34,10 +36,21 @@ public:
     }
 };
 
+
+
 int main()
 {
-    cout << "Active!" << endl;
+    std::cout << "Lidar initialized. Press Ctrl+C to quit." << std::endl;
+
     NAV200 lidar;
+
+    // Instantiate a lidar listener
+    MyLidarListener listener(&lidar);
+
+    // Keep the main app running while the Lidar thread runs
+    while(true);
+
     cout << "Process ended." << endl;
+
 	return 0;
 }
