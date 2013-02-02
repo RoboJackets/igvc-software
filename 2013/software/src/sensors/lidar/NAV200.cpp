@@ -13,7 +13,7 @@ namespace IGVC {
 namespace Sensors {
 
 NAV200::NAV200():
-    serialPort("/dev/NAV200", 9600),
+    serialPort("/dev/NAV200", 19200),
 	iothread(boost::bind( &NAV200::threadRun, this))
 {
 }
@@ -25,7 +25,7 @@ LidarState NAV200::GetState()
 
 LidarState NAV200::GetStateAtTime(timeval time)
 {
-
+    return LidarState();
 }
 
 bool NAV200::StateIsAvailable()
@@ -35,7 +35,30 @@ bool NAV200::StateIsAvailable()
 
 
 void NAV200::threadRun() {
+
+    // This command is sent to the LIDAR to get distance and intensity data.
+    /*const uint8_t CMD_GET [6] = {
+        0x53,	// Command S
+        0x42,	// Subcommand B
+        0x02,	// Size high
+        0x00,	// Size low
+        0x04,	// SB function
+        0x9b	// Checksum
+    };*/
+
 	while(serialPort.isConnected()) {
+
+        char* data = new char[3083];
+        memset(data, 0, sizeof(data));
+        data = serialPort.read(3083);
+
+        std::cout << "\nTest Data:" << std::endl;
+        std::cout << "  d1:" + data[7] << std::endl; //raw distance 1
+        std::cout << "  d2:" + data[8] << std::endl; //raw distance 2
+        std::cout << "  in:" + data[9] << std::endl; //intensity
+
+
+	    //ASIOSerialPort::write(*CMD_GET, 6);   //uint8_t data[3083] =
 		/*
 
 		//input appears to be in some form containing 1024 pairings of this data:
