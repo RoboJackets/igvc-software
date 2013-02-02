@@ -21,13 +21,8 @@
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="TestMotors">
-<<<<<<< HEAD
-				<Option output="IGVC2013" prefix_auto="0" extension_auto="1" />
-				<Option type="1" />
-=======
 				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
 				<Option type="0" />
->>>>>>> b4ef2b026e3e9ae8ee03299d30f2bd169af7e03c
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="TestData">
