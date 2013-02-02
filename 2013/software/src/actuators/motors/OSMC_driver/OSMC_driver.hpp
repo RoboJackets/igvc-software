@@ -16,8 +16,8 @@ public:
 	void checkPwm(char pwm, char dir);
 	void checkPwm2(char pwmLeft, char pwmRight);
 	double readEncoder();
-	void encoderLoop(float totalDist);
-	void goForwardOld(float totalDist, char pwm, char dir);
+	void encoderLoop(double totalDist);
+	void goForwardOld(double totalDist, char pwm, char dir);
 	void setRightLeftPwm(char pwmRight, char dirRight, char pwmLeft, char dirLeft);
 	char adjustSpeedRight(char pwm, char dir);
 	char adjustSpeedLeft(char pwm, char dir);

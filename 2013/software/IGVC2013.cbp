@@ -21,20 +21,14 @@
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="TestMotors">
-				<Option output="bin/Debug/TestMotors" prefix_auto="1" extension_auto="1" />
-				<Option type="0" />
+				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="TestData">
-				<Option output="bin/Debug/TestData" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/debug/TestData" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Compiler>
-					<Add directory="/home/alex/Desktop/IGVC/2013/software/src/sensors/DataStructures" />
-				</Compiler>
-				<Linker>
-					<Add directory="/home/alex/Desktop/IGVC/2013/software/**" />
-				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
@@ -97,25 +91,10 @@
 		<Unit filename="src/mapping/MapPoint.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="src/sensors/DataStructures/DataArray.cpp">
+		<Unit filename="src/sensors/DataArray.cpp">
 			<Option target="TestData" />
 		</Unit>
-		<Unit filename="src/sensors/DataStructures/DataArray.h">
-			<Option target="TestData" />
-		</Unit>
-		<Unit filename="src/sensors/DataStructures/DataPoint.hpp">
-			<Option target="TestData" />
-		</Unit>
-		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
-			<Option target="TestData" />
-		</Unit>
-		<Unit filename="src/sensors/DataStructures/GPSData.h">
-			<Option target="TestData" />
-		</Unit>
-		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
-			<Option target="TestData" />
-		</Unit>
-		<Unit filename="src/sensors/DataStructures/SensorData.h">
+		<Unit filename="src/sensors/DataArray.h">
 			<Option target="TestData" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/GPS.hpp">
@@ -136,14 +115,11 @@
 		<Unit filename="src/sensors/GPS/nmea.hpp">
 			<Option target="TestGPS" />
 		</Unit>
-		<Unit filename="src/sensors/RobotPosition.cpp">
+		<Unit filename="src/sensors/SensorData.cpp">
 			<Option target="TestData" />
 		</Unit>
-		<Unit filename="src/sensors/RobotPosition.h">
+		<Unit filename="src/sensors/SensorData.h">
 			<Option target="TestData" />
-		</Unit>
-		<Unit filename="src/sensors/Sensor.cpp">
-			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -159,6 +135,9 @@
 		</Unit>
 		<Unit filename="src/sensors/main.cpp">
 			<Option target="TestData" />
+		</Unit>
+		<Unit filename="src/sensors/sensor.cpp">
+			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/sensor.h">
 			<Option target="&lt;{~None~}&gt;" />

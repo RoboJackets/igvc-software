@@ -9,6 +9,11 @@ int main() {
 	std::cout << "Going Forward" << std::endl;
 	OSMC_driver driver;
 
-	driver.goForwardOld(0.2,100,1);
-//    driver.stopMotors();
+    for (int i=0; i<200; i++)
+    {
+        driver.setPwm(i,1);
+    }
+    sleep(2);
+    driver.stopMotors();
+
 }

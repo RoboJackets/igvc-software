@@ -99,11 +99,27 @@ char OSMC_driver::adjustDirLeft(char dirLeft)
     return (dirLeft);
 }
 
-void OSMC_driver::goTurn(int degree, char dir)
+/*
+void OSMC_driver::turn(int degree, char dir)
 {
-
+    if (dir == 1)
+    {
+        setRightLeftPwm(200,1,200,0);
+        sleep(1);   //need something to determine how long it should run to turn a specific amount of degrees
+        stopMotors();
+    }
+    else if (dir == 0)
+    {
+        setRightLeftPwm(200,0,200,1);
+        sleep(1);   //need something to determine how long it should run to turn a specific amount of degrees
+        stopMotors();
+    }
+    else
+    {
+        cout<<"Bad direction"<<endl;
+    }
 }
-
+*/
 void OSMC_driver::goForward(double dist, char pwm, char dir)
 {
     checkPwm(pwm, dir);
@@ -130,37 +146,38 @@ void OSMC_driver::goForward(double dist, char pwm, char dir)
 double OSMC_driver::readEncoder()
 {
     string r = "R";
-    arduinoEncoder.write(r);
-  //  sleep(1);
+    arduinoEncoder.write("R");
+    sleep(0.1);
     std::string dist1 = arduinoEncoder.readln();
     double dist = ::atof(dist1.c_str());
-    return (dist);
+    return dist;
 }
 
-void OSMC_driver::encoderLoop(float totalDist)
+void OSMC_driver::encoderLoop(double totalDist)
 {
     double dist = readEncoder();
     while (dist<totalDist)
     {
         dist = readEncoder();
         cout<<dist<<endl;
+        sleep(0.05);
     }
     cout<<"Dropped Loop"<<endl;
     stopMotors();
 }
 
-void OSMC_driver::goForwardOld(float totalDist, char pwm, char dir)
+void OSMC_driver::goForwardOld(double totalDist, char pwm, char dir)
 {
     string f = "F";
     arduinoEncoder.write(f);
-  //  sleep(1);
-    string var;
-    var = "";
-    var = arduinoEncoder.readln();
-    cout<<var<<endl;
+    sleep(1);
+  //  string var;
+ //   var = "";
+ //  var = arduinoEncoder.readln();
+ //   cout<<var<<endl;
  //   sleep(1);
- //   setRightLeftPwm(pwm, dir, pwm, dir);
- //   encoderLoop(totalDist);
+    setRightLeftPwm(pwm, dir, pwm, dir);
+    encoderLoop(totalDist);
 }
 
 void OSMC_driver::stopMotors()		//Stops the motors
