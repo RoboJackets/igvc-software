@@ -18,8 +18,6 @@ int byte6;
 
 void setup()
 {
-//  TCCR2B = TCCR2B & 0xF8 | 0x03;
-//  TCCR0B = TCCR0B & 0xF8 | 0x03;
   Serial.begin(9600);
   pinMode(rightDir, OUTPUT);
   pinMode(rightSpeed, OUTPUT);
@@ -30,14 +28,39 @@ void setup()
 
 }
 
-void waitForSerial()
-{
-  while(Serial.available() == 0) { }
-}
 
 void loop()
 {
   /*
+  digitalWrite(rightDir, 1);
+  digitalWrite(leftDir, 1);
+  
+  //analogWrite(rightSpeed, 255);
+  //analogWrite(leftSpeed, 255);
+  
+  delay(3000);
+  
+
+  
+  for (int i = 255; i>0;i-=1)
+  {
+    analogWrite(rightSpeed, i);
+    analogWrite(leftSpeed, i);
+    delay(50);
+  }
+  
+for (int i = 0; i<255;i+=1)
+  {
+    analogWrite(rightSpeed, i);
+    analogWrite(leftSpeed, i);
+    delay(50);
+  }
+  
+    analogWrite(rightSpeed, 255);
+    analogWrite(leftSpeed, 255);
+  
+  
+  
   waitForSerial();
   byte1 = Serial.read();
   if(byte1 == 'W')
@@ -66,12 +89,14 @@ void loop()
   {
     byte1 = Serial.read(); //First Case either W, R, S, T
     delay(200);
+    if (byte1 == 'W'){
     byte2 = Serial.read(); //Second Case only applicable under byte1 == W either S, D
     byte3 = Serial.read(); //Right Direction
     byte4 = Serial.read(); //Right Speed
     byte5 = Serial.read(); //Left Direction
     byte6 = Serial.read(); //Left Speed
-    dist = Serial.parseFloat();
+    }
+   // dist = Serial.parseFloat();
   }
   switch (byte1)
   {
