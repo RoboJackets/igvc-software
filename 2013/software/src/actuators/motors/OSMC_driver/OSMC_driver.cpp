@@ -3,6 +3,7 @@
 #include "serial/ASIOSerialPort.h"
 #include <iostream>
 #include "actuators/motors/OSMC_driver/OSMC_driver.hpp"
+#include <time.h>
 
 using namespace std;
 
@@ -65,6 +66,7 @@ void OSMC_driver::setRightLeftPwm(char pwmRight, char dirRight, char pwmLeft, ch
     wt1.append(1,dirRight);
     wt1.append(1,pwmRight);
     arduinoLeft.write(wt1);
+    usleep(1100000);
 }
 
 char OSMC_driver::adjustSpeedRight(char pwm, char dir)
@@ -207,6 +209,8 @@ void OSMC_driver::checkPwm2(char pwmLeft, char pwmRight)	//checks that the pwm f
 	{
 		setPwm(maxPwm, 1);
 	}
+
+
 
 }
 
