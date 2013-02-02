@@ -18,6 +18,7 @@ class RobotPosition
         double accel(int Index);
         double angVel(int Index);
         void push(GPSData newData);
+        doudlbe avgSpeed()
 
 
     private:
