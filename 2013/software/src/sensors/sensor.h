@@ -8,7 +8,6 @@
 class sensor {
 public:
 	sensor();
-	fuse();
 	virtual ~sensor();
 
 private:
