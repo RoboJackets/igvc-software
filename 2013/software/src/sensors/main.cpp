@@ -4,27 +4,8 @@
 #include "DataArray.h"
 //#include <boost/circular_buffer.hpp>
 
-class GPSData : public SensorData
-{
-public:
-    inline GPSData(double Latitude, double Longitude): SensorData(), Lati(Latitude), Longi(Longitude)
-    {
-    }
+#include "DataStructures/GPSData.h"
 
-    inline double Lat(void)
-    {
-        return Lati;
-    }
-
-    inline double Long(void)
-    {
-        return Longi;
-    }
-
-    private:
-        double Lati;
-        double Longi;
-};
 
 int main()
 {
@@ -34,7 +15,7 @@ int main()
     DataArray<GPSData> GPSArray(100);
     //GPSData dat(49.12, 0.2122);
     //GPSArray.push(dat);
-    GPSArray.push(GPSData(49.12, 0.2122));
+    GPSArray.push(GPSData(49.12, 0.2122, 11,1));
     std::cout << GPSArray[0].Lat() <<  " Should be 49.12"<< std::endl;
     std::cout << GPSArray.size() << std::endl;
 
