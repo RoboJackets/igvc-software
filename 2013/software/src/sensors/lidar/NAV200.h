@@ -5,13 +5,12 @@
  *      Author: Alexander Huynh
 Copypasta from: Matthew Barulic
  */
-
 #ifndef NAV200_H
 #define NAV200_H
 
 #include "Lidar.h"
 
-#include <boost/thread.hpp>
+//#include <boost/thread.hpp>
 #include "serial/ASIOSerialPort.h"
 
 
@@ -23,6 +22,9 @@ class NAV200: public IGVC::Sensors::Lidar {
 public:
     NAV200();
     ~NAV200();
+    LidarState GetState();
+    LidarState GetStateAtTime(timeval time);
+    bool StateIsAvailable();
 
 private:
 
