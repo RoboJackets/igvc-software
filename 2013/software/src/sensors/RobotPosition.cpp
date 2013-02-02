@@ -72,8 +72,4 @@ double RobotPosition::avgSpeed(long long end, long long start)
     }
     dt = Speed[endInd].time() - Speed[startInd].time();
     return millisPerSecond*integral/dt;
-
-
-
-
 }
