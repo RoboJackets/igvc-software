@@ -9,7 +9,7 @@ using namespace std;
 
 ASIOSerialPort arduinoLeft("/dev/igvc_2012_left_motor_shield", 9600);
 ASIOSerialPort arduinoRight("/dev/igvc_2012_right_motor_shield", 9600);
-ASIOSerialPort arduinoEncoder("/dev/igvc_2012_right_encoder_shield", 9600);
+//ASIOSerialPort arduinoEncoder("/dev/igvc_2012_right_encoder_shield", 9600);
 
 //TODO: Need to be checked
 const char OSMC_driver::maxPwm = 130;
@@ -66,7 +66,7 @@ void OSMC_driver::setRightLeftPwm(char pwmRight, char dirRight, char pwmLeft, ch
     wt1.append(1,dirRight);
     wt1.append(1,pwmRight);
     arduinoLeft.write(wt1);
-    usleep(1100000);
+    //usleep(1100000);
 }
 
 char OSMC_driver::adjustSpeedRight(char pwm, char dir)
@@ -148,11 +148,11 @@ void OSMC_driver::goForward(double dist, char pwm, char dir)
 double OSMC_driver::readEncoder()
 {
     string r = "R";
-    arduinoEncoder.write("R");
+   // arduinoEncoder.write("R");
     sleep(0.1);
-    std::string dist1 = arduinoEncoder.readln();
-    double dist = ::atof(dist1.c_str());
-    return dist;
+   // std::string dist1 = arduinoEncoder.readln();
+    //double dist = ::atof(dist1.c_str());
+    //return dist;
 }
 
 void OSMC_driver::encoderLoop(double totalDist)
@@ -171,7 +171,7 @@ void OSMC_driver::encoderLoop(double totalDist)
 void OSMC_driver::goForwardOld(double totalDist, char pwm, char dir)
 {
     string f = "F";
-    arduinoEncoder.write(f);
+ //   arduinoEncoder.write(f);
     sleep(1);
   //  string var;
  //   var = "";
