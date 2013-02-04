@@ -13,8 +13,6 @@ public:
 	void goTurn(int degree, char dir);
 	void goForward(double dist, char pwm, char dir);
 	void stopMotors();
-	void checkPwm(char pwm, char dir);
-	void checkPwm2(char pwmLeft, char pwmRight);
 	double readEncoder();
 	void encoderLoop(double totalDist);
 	void goForwardOld(double totalDist, char pwm, char dir);
