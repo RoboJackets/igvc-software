@@ -87,14 +87,14 @@ for (int i = 0; i<255;i+=1)
 
   if (Serial.available()>0)
   {
-    byte1 = Serial.read(); //First Case either W, R, S, T
+    byte1 = Serial.read(); //First Case either W, R, D, T
     delay(200);
-    if (byte1 == 'W'){
-    byte2 = Serial.read(); //Second Case only applicable under byte1 == W either S, D
-    byte3 = Serial.read(); //Right Direction
-    byte4 = Serial.read(); //Right Speed
-    byte5 = Serial.read(); //Left Direction
-    byte6 = Serial.read(); //Left Speed
+    if (byte1 == 'W' || byte1 == 'R' || byte1 == 'D' || byte1 == 'T')
+    {
+      byte3 = Serial.read(); //Right Direction
+      byte4 = Serial.read(); //Right Speed
+      byte5 = Serial.read(); //Left Direction
+      byte6 = Serial.read(); //Left Speed
     }
    // dist = Serial.parseFloat();
   }
@@ -102,43 +102,28 @@ for (int i = 0; i<255;i+=1)
   {
     case 'W':
     {
-      switch (byte2)
-      {
-        case 'S':
-        {
-          //moving both wheels in the same direction and speed
-          digitalWrite(rightDir, byte3);
-          digitalWrite(leftDir, byte5);
-          analogWrite(rightSpeed, byte4);
-          analogWrite(leftSpeed, byte6);
-          break;
-        }
-        
-        case 'D':
-        {
-         //Encoder feed back loop for moving a set distance        
-         break; 
-        } 
-      }
+      //moving wheels in a certain direction and speed
+      digitalWrite(rightDir, byte3);
+      digitalWrite(leftDir, byte5);
+      analogWrite(rightSpeed, byte4);
+      analogWrite(leftSpeed, byte6);
+      break;
+    }
+    case 'D':
+    {
+     //Loop for moving a set distance
+     break; 
     }
     
     case 'R':
     {
-      
-      break;
-    }
-    
-    case 'S':
-    {
-      //Stop the motors
-      digitalWrite(rightDisable, HIGH);
-      digitalWrite(leftDisable, HIGH);
+      //Getting info from encoders
       break;
     }
     
     case 'T':
     {
-      //Testing the connection to arduinos will just return a confirmaton to the computer
+      //Testing the connection to arduinos will send a confirmaton to the computer
       Serial.println("T");
     }
   }
