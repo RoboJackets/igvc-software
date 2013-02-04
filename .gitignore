@@ -12,3 +12,5 @@
 
 #ArdupilotIgnores
 /2013/software/src/sensors/ardupilot/config.mk
+
+*~
