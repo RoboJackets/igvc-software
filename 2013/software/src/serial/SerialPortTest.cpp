@@ -30,7 +30,7 @@ public:
 
 int main() {
 	std::cout << "Testing serial API..." << std::endl;
-	ASIOSerialPort serialPort("/dev/arduino", 9600);
+	ASIOSerialPort serialPort("/dev/ttyUSB0", 9600);
 
 	LinePrinter printer(&serialPort);
 	serialPort.startEvents();

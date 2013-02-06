@@ -11,6 +11,10 @@ int main()
 	std::cout << "Going Forward" << std::endl;
 	//driver.setPwm(255,1);
 
+	sleep(1);
+
+	driver.arduinoCheck();
+
     for (int i=0;i<255;i+=5)
     {
         driver.setPwm(i,1);
