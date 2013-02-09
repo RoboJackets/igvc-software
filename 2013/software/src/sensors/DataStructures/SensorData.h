@@ -5,12 +5,12 @@ class SensorData
 {
     public:
         SensorData();
-        SensorData(long long);
-        long long time();
+        SensorData(double);
+        double time();
         virtual ~SensorData();
 
     private:
-        long long MeasurementTime; //Units should be milliseconds
+        double MeasurementTime; //Units should be milliseconds
 };
 
 #endif // SENSORDATA_H

@@ -8,6 +8,7 @@ class DataPoint : public SensorData
 {
 	public:
         DataPoint(aType val);
+        DataPoint(aType val, double aTime);
         aType value();
         virtual ~DataPoint();
 
@@ -20,6 +21,13 @@ template <class aType>
 DataPoint<aType>::DataPoint(aType val) : SensorData(), Value(val)
 {
 }
+
+template <class aType>
+DataPoint<aType>::DataPoint(aType val, double aTime) : SensorData(aTime), Value(val)
+{
+}
+
+
 
 template<class aType>
 aType DataPoint<aType>::value()

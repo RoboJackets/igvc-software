@@ -1,7 +1,6 @@
 #include <iostream>
 #include <unistd.h>
 #include <iomanip>
-//#include "timing.h"
 #include "SensorData.h"
 #include "DataArray.h"
 //#include <boost/circular_buffer.hpp>
@@ -20,17 +19,20 @@ int main()
     DataArray<GPSData> GPSArray(100);
     //GPSData dat(49.12, 0.2122);
     //GPSArray.push(dat);
-    GPSArray.push(GPSData(49.12, 0.2122, 11,1));
-    GPSArray.push(GPSData(49.12, 0.2122, 11,1));
+    //GPSArray.push(GPSData(49.12, 0.2122, 11,1));
+    //GPSArray.push(GPSData(49.12, 0.2122, 11,1));
     RobotPosition Mistii;
     Mistii.push(GPSData(49.12, 0.2122, 11,1));
     sleep(2);
-    Mistii.push(GPSData(49.12, 0.2122, 11,3));
+    Mistii.push(GPSData(49.12, 0.2122, 11,11));
     sleep(2);
     Mistii.push(GPSData(49.12, 0.2122, 11,5));
     sleep(2);
     Mistii.push(GPSData(49.12, 0.2122, 11,7));
-    std::cout << std::setprecision(10) << Mistii.angVel(1) << std::endl;
+
+
+    std::cout<< "First speed: " << Mistii.Speed()[0].value() << ". Second Speed: " << Mistii.Speed()[1].value() << std::endl;
+    std::cout << std::setprecision(5) << Mistii.accel(1) << std::endl;
     //std::cout << std::setprecision(4) << Mistii.angVel(1);
    // std::cout << GPSArray[0].Lat() <<  " Should be 49.12"<< std::endl;
 
