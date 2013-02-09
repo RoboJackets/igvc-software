@@ -53,18 +53,24 @@ void OSMC_driver::setRightLeftPwm(char pwmRight, char dirRight, char pwmLeft, ch
     pwmRight = adjustSpeedRight(pwmRight, dirRight);
     dirLeft = adjustDirLeft(dirLeft);
     pwmLeft = adjustSpeedLeft(pwmLeft, dirLeft);
-    string w = "W";
-    w.append(1,dirRight);
-    w.append(1,pwmRight);
-    w.append(1,dirLeft);
-    w.append(1,pwmLeft);
+    string w = "SW";
+    w.append(intToString(dirRight));
+    w.append(" ");
+    w.append(intToString(pwmRight));
+    w.append(" ");
+    w.append(intToString(dirLeft));
+    w.append(" ");
+    w.append(intToString(pwmLeft));
     cout<<w.c_str()<<endl;
     arduinoRight.write(w);
-    string w1 = "W";
-    w1.append(1,dirLeft);
-    w1.append(1,pwmLeft);
-    w1.append(1,dirRight);
-    w1.append(1,pwmRight);
+    string w1 = "SW";
+    w1.append(intToString(dirLeft));
+    w1.append(" ");
+    w1.append(intToString(pwmLeft));
+    w1.append(" ");
+    w1.append(intToString(dirRight));
+    w1.append(" ");
+    w1.append(intToString(pwmRight));
     arduinoLeft.write(w1);
 }
 
@@ -100,28 +106,38 @@ char OSMC_driver::adjustDirLeft(char dirLeft)
     return (dirLeft);
 }
 
-/*
-void OSMC_driver::turn(int degree, char dir)
+
+void OSMC_driver::turn(double radius, int pwm, int dir)
 {
+    double v1 = 0;
+    double v2 = 0;
+    double halfWB = WHEELBASE/2;
+    double comp1 = (radius+halfWB)/(radius-halfWB);
+    v2 = (2*pwm*comp1)/(1+comp1);
+    v1 = 2*pwm-v2;
     if (dir == 1)
     {
-        setRightLeftPwm(200,1,200,0);
-        sleep(1);   //need something to determine how long it should run to turn a specific amount of degrees
-        stopMotors();
+        setRightLeftPwm(v1, 0, v2, 0);
     }
-    else if (dir == 0)
+    else if(dir == 0)
     {
-        setRightLeftPwm(200,0,200,1);
-        sleep(1);   //need something to determine how long it should run to turn a specific amount of degrees
-        stopMotors();
+        setRightLeftPwm(v2, 0, v1, 0);
     }
     else
     {
         cout<<"Bad direction"<<endl;
     }
-}
-*/
 
+}
+
+string OSMC_driver::intToString(int input)
+{
+    std::ostringstream s;
+    s << input;
+//    cout<< s.str() << endl;
+    return s.str();
+
+}
 // For use with new robot
 /*
 void OSMC_driver::goForward(double dist, char pwm, char dir)
