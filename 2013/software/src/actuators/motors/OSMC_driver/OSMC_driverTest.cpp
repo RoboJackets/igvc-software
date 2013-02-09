@@ -1,5 +1,3 @@
-
-
 #include <string.h>
 #include "serial/ASIOSerialPort.h"
 #include <iostream>
@@ -15,7 +13,8 @@ int main()
 
 	sleep(1);
 
-	//driver.arduinoCheck();
+//	driver.arduinoCheck();
+
 
     for (int i=0;i<255;i+=1)
     {
