@@ -2,18 +2,18 @@
 #include "../timing.h"
 
 
-SensorData::SensorData() : MeasurementTime(milliseconds_since_epoch())
+SensorData::SensorData() : MeasurementTime(seconds_since_IGVCpoch())
 {
 
 }
 
-SensorData::SensorData(long long time) : MeasurementTime(time)
+SensorData::SensorData(double time) : MeasurementTime(time)
 {
 
 }
 
 
-long long SensorData::time()
+double SensorData::time()
 {
     return MeasurementTime;
 }
