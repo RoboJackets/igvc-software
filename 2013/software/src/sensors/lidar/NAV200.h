@@ -9,8 +9,7 @@ Copypasta from: Matthew Barulic
 #define NAV200_H
 
 #include "Lidar.h"
-
-//#include <boost/thread.hpp>
+#include <libusb-1.0/libusb.h>
 #include "serial/ASIOSerialPort.h"
 
 
@@ -25,12 +24,16 @@ public:
     LidarState GetState();
     LidarState GetStateAtTime(timeval time);
     bool StateIsAvailable();
+    void stop();
 
 private:
 
-    ASIOSerialPort serialPort;
+    //ASIOSerialPort serialPort;
     boost::thread iothread;
     boost::mutex queueLocker;
+    libusb_device_handle *_handle;
+    libusb_context *ctx;
+    bool _running;
 
     void threadRun(); // the method that runs on iothread
 };
