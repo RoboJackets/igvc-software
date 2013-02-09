@@ -15,7 +15,7 @@ int main()
 
 	//driver.arduinoCheck();
 
-    for (int i=0;i<255;i+=5)
+    for (int i=0;i<255;i+=1)
     {
         driver.setPwm(i,1);
         usleep(250000);
