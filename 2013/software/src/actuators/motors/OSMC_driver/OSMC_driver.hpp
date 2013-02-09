@@ -23,6 +23,13 @@ public:
 	void turn(double radius, int pwm, int dir);
 	string intToString(int input);
 
+	enum Direction {
+	    LEFT,
+	    RIGHT,
+	    FORWARD,
+	    BACKWARD
+	};
+
 private:
 	const static char maxPwm;
 	const static char minPwm;
