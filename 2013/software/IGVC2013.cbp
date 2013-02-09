@@ -45,12 +45,11 @@
 				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Linker>
-					<Add library="SDL" />
-					<Add library="SDL_image" />
-					<Add library="SDL_ttf" />
-					<Add directory="../../../../../../usr/lib/x86_64-linux-gnu" />
-				</Linker>
+			</Target>
+			<Target title="TestJoystick_and_Motors">
+				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
 			</Target>
 		</Build>
 		<Compiler>
@@ -88,11 +87,11 @@
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.cpp">
 			<Option target="TestMotors" />
-			<Option target="TestJoystick" />
+			<Option target="TestJoystick_and_Motors" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
 			<Option target="TestMotors" />
-			<Option target="TestJoystick" />
+			<Option target="TestJoystick_and_Motors" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
 			<Option target="TestMotors" />
@@ -177,12 +176,15 @@
 		</Unit>
 		<Unit filename="src/sensors/joystick/Joystick.cpp">
 			<Option target="TestJoystick" />
+			<Option target="TestJoystick_and_Motors" />
 		</Unit>
 		<Unit filename="src/sensors/joystick/Joystick.h">
 			<Option target="TestJoystick" />
+			<Option target="TestJoystick_and_Motors" />
 		</Unit>
 		<Unit filename="src/sensors/joystick/testJoystick.cpp">
 			<Option target="TestJoystick" />
+			<Option target="TestJoystick_and_Motors" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/Lidar.h">
 			<Option target="TestLidar" />
@@ -210,14 +212,14 @@
 			<Option target="TestGPS" />
 			<Option target="TestMotors" />
 			<Option target="TestLidar" />
-			<Option target="TestJoystick" />
+			<Option target="TestJoystick_and_Motors" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
 			<Option target="TestGPS" />
 			<Option target="TestMotors" />
 			<Option target="TestLidar" />
-			<Option target="TestJoystick" />
+			<Option target="TestJoystick_and_Motors" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
