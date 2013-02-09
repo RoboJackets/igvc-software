@@ -18,23 +18,25 @@ class RobotPosition
         double accel(int Index);
         double angVel(int Index);
         void push(GPSData newData);
-        doudlbe avgSpeed()
+        double avgSpeed(long long end, long long start);
+        DataArray<DataPoint <double> > Speed(void);
+
 
 
     private:
         double avgLat(long long end, long long start);
         double avgLong(long long end, long long start);
-        double avgSpeed(long long end, long long start);
+        //double avgSpeed(long long end, long long start);
         double avgHeading(long long end, long long start);
         double ptIntLat(int endingInd); //Integral of value over the period between endingInd-1 and endingInd
         double ptIntLong(int endingInd);
         double ptIntSpeed(int endingInd);
         double ptIntHeading(int endingInd);
 
-        DataArray<DataPoint <double> > Lat;
-        DataArray<DataPoint <double> >  Long;
-        DataArray<DataPoint <double> > Speed;
-        DataArray<DataPoint <double> >  Heading;
+        DataArray<DataPoint <double> > _Lat;
+        DataArray<DataPoint <double> >  _Long;
+        DataArray<DataPoint <double> > _Speed;
+        DataArray<DataPoint <double> >  _Heading;
         double LatVar;
         double longVar;
         double SpeedVar;

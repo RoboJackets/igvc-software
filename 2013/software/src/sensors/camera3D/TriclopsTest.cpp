@@ -1,6 +1,6 @@
 //============================================================================
 // Name        : TriclopsTest.cpp
-// Author      : 
+// Author      :
 // Version     :
 // Copyright   : Your copyright notice
 // Description : Hello World in C++, Ansi-style
@@ -34,6 +34,7 @@ void handleError(TriclopsBool error, string msg) {
 	}
 }
 
+/*
 int main() {
 
 	TriclopsContext context;
@@ -62,3 +63,4 @@ int main() {
 
 	return 0;
 }
+*/
