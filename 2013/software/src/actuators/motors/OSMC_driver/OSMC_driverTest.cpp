@@ -13,16 +13,20 @@ int main()
 
 	sleep(1);
 
-	driver.arduinoCheck();
+	//driver.arduinoCheck();
 
     for (int i=0;i<255;i+=5)
     {
         driver.setPwm(i,1);
         usleep(250000);
     }
+    sleep(1);
     cout<<"Full Speed"<<endl;
 
-    sleep(10);
+    sleep(2);
+
+    cout<<"Two seconds have passed"<<endl;
 
     driver.stopMotors();
+
 }
