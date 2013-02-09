@@ -48,7 +48,7 @@
 			</Target>
 			<Target title="TestJoystick_and_Motors">
 				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
-				<Option type="0" />
+				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
 		</Build>
