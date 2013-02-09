@@ -6,6 +6,12 @@ class OSMC_driver
 {
 
 public:
+
+	enum Direction {
+	    LEFT,
+	    RIGHT
+	};
+
 	~OSMC_driver();
 	bool arduinoCheck();
 	void setPwm(char pwm, char dir);
@@ -20,15 +26,10 @@ public:
 	char adjustSpeedRight(char pwm, char dir);
 	char adjustSpeedLeft(char pwm, char dir);
 	char adjustDirLeft(char dirLeft);
-	void turn(double radius, int pwm, int dir);
+	void turn(double radius, int pwm, char dir);
 	string intToString(int input);
 
-	enum Direction {
-	    LEFT,
-	    RIGHT,
-	    FORWARD,
-	    BACKWARD
-	};
+
 
 
 private:
