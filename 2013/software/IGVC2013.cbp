@@ -42,7 +42,7 @@
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="TestJoystick">
-				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
+				<Option output="TestJoystick" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Linker>
@@ -52,18 +52,33 @@
 					<Add directory="../../../../../../usr/lib/x86_64-linux-gnu" />
 				</Linker>
 			</Target>
+			<Target title="testCamera">
+				<Option output="bin/Debug/testCamera" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Linker>
+					<Add library="flycapture" />
+				</Linker>
+			</Target>
+			<Target title="Xbee">
+				<Option output="bin/Debug/Xbee" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 			<Add directory="$(#boost).include" />
 			<Add directory="src" />
+			<Add directory="/usr/include" />
 		</Compiler>
 		<Linker>
 			<Add library="boost_system" />
 			<Add library="pthread" />
 			<Add library="boost_thread" />
 			<Add directory="$(#boost).lib" />
+			<Add directory="/usr/lib/" />
 		</Linker>
 		<Unit filename="src/IGVC.hpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -88,11 +103,9 @@
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.cpp">
 			<Option target="TestMotors" />
-			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
 			<Option target="TestMotors" />
-			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
 			<Option target="TestMotors" />
@@ -163,6 +176,9 @@
 		<Unit filename="src/sensors/Sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
+			<Option target="testCamera" />
+		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -210,17 +226,20 @@
 			<Option target="TestGPS" />
 			<Option target="TestMotors" />
 			<Option target="TestLidar" />
-			<Option target="TestJoystick" />
+			<Option target="Xbee" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
 			<Option target="TestGPS" />
 			<Option target="TestMotors" />
 			<Option target="TestLidar" />
-			<Option target="TestJoystick" />
+			<Option target="Xbee" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
+		</Unit>
+		<Unit filename="src/xbee.cpp">
+			<Option target="Xbee" />
 		</Unit>
 		<Extensions>
 			<code_completion />
