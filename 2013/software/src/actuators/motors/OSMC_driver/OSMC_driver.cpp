@@ -107,7 +107,7 @@ char OSMC_driver::adjustDirLeft(char dirLeft)
 }
 
 
-void OSMC_driver::turn(double radius, int pwm, int dir)
+void OSMC_driver::turn(double radius, int pwm, Direction dir)
 {
     double v1 = 0;
     double v2 = 0;
@@ -115,7 +115,7 @@ void OSMC_driver::turn(double radius, int pwm, int dir)
     double comp1 = (radius+halfWB)/(radius-halfWB);
     v2 = (2*pwm*comp1)/(1+comp1);
     v1 = 2*pwm-v2;
-    if (dir == 1)
+    if (dir == RIGHT)
     {
         setRightLeftPwm(v1, 0, v2, 0);
     }
