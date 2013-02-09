@@ -40,6 +40,9 @@
 				<Option output="bin/Debug/TestLidar" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Linker>
+					<Add library="usb-1.0" />
+				</Linker>
 			</Target>
 			<Target title="TestJoystick">
 				<Option output="TestJoystick" prefix_auto="1" extension_auto="1" />
@@ -76,7 +79,6 @@
 			<Add library="boost_system" />
 			<Add library="pthread" />
 			<Add library="boost_thread" />
-			<Add library="usb-1.0" />
 			<Add directory="$(#boost).lib" />
 			<Add directory="/usr/lib/" />
 		</Linker>
@@ -103,10 +105,6 @@
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.cpp">
 			<Option target="TestMotors" />
-		</Unit>
-		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
-			<Option target="TestMotors" />
-			<Option target="TestJoystick_and_Motors" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
 			<Option target="TestMotors" />
