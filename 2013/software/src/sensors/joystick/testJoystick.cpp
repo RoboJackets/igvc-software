@@ -9,10 +9,10 @@ int main(int argc, char* args[] )
 
     Joystick Logitech; //Joystick Object
     OSMC_driver driver; //Motor Driver Object
-    sleep(5);
+    sleep(1);
 
-    volatile int leftPWM;
-    volatile int rightPWM;
+    volatile int leftPWM, setleftPWM=0;
+    volatile int rightPWM, setrightPWM=0;
     int leftDirection, rightDirection;
 
     bool ev; //Catch return status of Joystick read function
@@ -22,6 +22,8 @@ int main(int argc, char* args[] )
     {
         return 1;
     }
+
+    driver.stopMotors();
 
     while(true)
     {
@@ -39,17 +41,14 @@ int main(int argc, char* args[] )
             leftPWM=(int)(Logitech.leftYAxis/32768.0*255);
             if(signbit(leftPWM))
             {
-
                 leftDirection=0;
-
             }
 
             else
             {
                 leftDirection=1;
             }
-
-            rightPWM=abs(rightPWM);
+            leftPWM=abs(leftPWM);
 
             rightPWM=(int)(Logitech.rightYAxis/32768.0*255);
             if(signbit(rightPWM))
@@ -61,17 +60,34 @@ int main(int argc, char* args[] )
             {
                 rightDirection=1;
             }
-
             rightPWM=abs(rightPWM);
 
             std::cout<<"leftPWM =  "<<leftPWM<<"\n";
             std::cout<<"rightPWM =  "<<rightPWM<<"\n";
             std::cout<<"leftdirection =  "<<leftDirection<<"\n";
             std::cout<<"rightdirection =  "<<rightDirection<<"\n";
-         //   driver.setRightLeftPwm((char)rightPWM,1,(char)leftPWM,1);
-            driver.setRightLeftPwm(rightPWM, 1, leftPWM, 1);
-            usleep(500000);
-            driver.setPwm(leftPWM,1);
+
+            if(leftPWM>setleftPWM)
+                {
+                    if(setleftPWM<255)
+                    {
+                        setleftPWM+=1;
+                        std:cout<<"setleftPWM:"<<setleftPWM<<"\n";
+                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
+                        usleep(200000);
+                    }
+                }
+
+            else if(leftPWM<setleftPWM)
+                {
+                    if(setleftPWM>0)
+                    {
+                        setleftPWM-=1;
+                        std:cout<<"setleftPWM:"<<setleftPWM<<"\n";
+                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
+                        usleep(200000);
+                    }
+                }
         }
 
     }
