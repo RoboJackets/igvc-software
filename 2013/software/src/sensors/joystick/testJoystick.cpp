@@ -4,94 +4,98 @@
 #include "serial/ASIOSerialPort.h"
 using namespace std;
 
-int main( int argc, char* args[] )
+int main(int argc, char* args[] )
 {
-    OSMC_driver driver;
-    //Quit flag
-    bool quit = false;
 
-    //Make the joystick
-    Joystick XBox;
-    //OSMC_driver driver;
-    //sleep(5);
-    //Make the Screen
-    Graph myDisplay;
-    volatile int leftPWM;
-    volatile int rightPWM;
-    int leftdirection, rightdirection;
-    //The frame rate regulator
-    Timer fps;
+    Joystick Logitech; //Joystick Object
+    OSMC_driver driver; //Motor Driver Object
+    sleep(1);
 
-    //Initialize
-    if(!XBox.initJoystick())
-    return 1;
+    volatile int leftPWM, setleftPWM=0;
+    volatile int rightPWM, setrightPWM=0;
+    int leftDirection, rightDirection;
 
-    if(!myDisplay.initGraph())
+    bool ev; //Catch return status of Joystick read function
+
+    //Initialize Joystick subsystem
+    if(!Logitech.initJoystick())
     {
-        std::cout<<"Error Initializing Graph"<<"\n";
         return 1;
     }
 
-    fps.initTimer();
+    driver.stopMotors();
 
-     while (quit == false)
-     //while (XBox.Quit() ==false && myDisplay.Quit() ==false)
-     {
+    while(true)
+    {
 
-//        fps.start();
+        //read Joystick data
+        ev=Logitech.readJoystick();
 
-
-      //  while(1)
-       // {
-
-
-            XBox.readJoystick();
-
-            cout << XBox.leftAnalogY << "\t" << XBox.rightAnalogY << endl;
-
-            //set pwm
-//            leftPWM=(int)(XBox.leftAnalogY/32768.0*255);
-//            if(signbit(leftPWM))
-//            leftdirection=0;
-//            else
-//            leftdirection=1;
-//            rightPWM=abs(rightPWM);
-//
-//            rightPWM=(int)(XBox.rightAnalogY/32768.0*255);
-//            if(signbit(rightPWM))
-//            rightdirection=0;
-//            else
-//            rightdirection=1;
-//            rightPWM=abs(rightPWM);
-//
-//
-//            std::cout<<"leftPWM =  "<<leftPWM<<"\n";
-//            std::cout<<"rightPWM =  "<<rightPWM<<"\n";
-//            std::cout<<"leftdirection =  "<<leftdirection<<"\n";
-//            std::cout<<"rightdirection =  "<<rightdirection<<"\n";
-//
-//
-//         //   driver.setRightLeftPwm((char)rightPWM,1,(char)leftPWM,1);
-//            driver.setRightLeftPwm(rightPWM, 1, leftPWM, 1);
-//            usleep(500000);
-            //driver.setPwm(leftPWM,1);
-            //sleep(3);
-         //   XBox.setMotion();
-       // }
-
-
-       // myDisplay.displayGraph();
-        //Cap the frame rate
-  /*      if( fps.get_ticks() < 5000 / myDisplay.FRAMES_PER_SECOND )
+        //Display Joystick data
+        if(ev)
         {
-            SDL_Delay ( ( 5000 / myDisplay.FRAMES_PER_SECOND ) - fps.get_ticks() );
-        }
-*/
-     }
+            Logitech.displayJoystick();
 
-    //Clean up
-  //  myDisplay.cleanGraph();
-    XBox.cleanJoystick();
-    std::cout<<"Quitting"<<SDL_GetError()<<"\n";
+            //Set Motor PWM
+
+            leftPWM=(int)(Logitech.leftYAxis/32768.0*255);
+            if(signbit(leftPWM))
+            {
+                leftDirection=0;
+            }
+
+            else
+            {
+                leftDirection=1;
+            }
+            leftPWM=abs(leftPWM);
+
+            rightPWM=(int)(Logitech.rightYAxis/32768.0*255);
+            if(signbit(rightPWM))
+            {
+                rightDirection=0;
+            }
+
+            else
+            {
+                rightDirection=1;
+            }
+            rightPWM=abs(rightPWM);
+
+            std::cout<<"leftPWM =  "<<leftPWM<<"\n";
+            std::cout<<"rightPWM =  "<<rightPWM<<"\n";
+            std::cout<<"leftdirection =  "<<leftDirection<<"\n";
+            std::cout<<"rightdirection =  "<<rightDirection<<"\n";
+
+            if(leftPWM>setleftPWM)
+                {
+                    if(setleftPWM<255)
+                    {
+                        setleftPWM+=1;
+                        std:cout<<"setleftPWM:"<<setleftPWM<<"\n";
+                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
+                        usleep(200000);
+                    }
+                }
+
+            else if(leftPWM<setleftPWM)
+                {
+                    if(setleftPWM>0)
+                    {
+                        setleftPWM-=1;
+                        std:cout<<"setleftPWM:"<<setleftPWM<<"\n";
+                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
+                        usleep(200000);
+                    }
+                }
+        }
+
+    }
+
     return 0;
+
 }
+
+
+
+
