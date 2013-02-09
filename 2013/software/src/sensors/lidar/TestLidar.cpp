@@ -5,7 +5,6 @@
 #include <iomanip>
 
 
-
 using namespace IGVC::Sensors;
 using namespace std;
 
@@ -48,7 +47,16 @@ int main()
     MyLidarListener listener(&lidar);
 
     // Keep the main app running while the Lidar thread runs
-    while(true);
+    while(true)
+    {
+        cout << "test" << endl;
+        char in;
+        cin >> in;
+        if(in == 27)
+            break;
+    }
+
+    lidar.stop();
 
     cout << "Process ended." << endl;
 

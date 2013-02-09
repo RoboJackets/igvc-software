@@ -63,6 +63,7 @@
 			<Add library="boost_system" />
 			<Add library="pthread" />
 			<Add library="boost_thread" />
+			<Add library="usb-1.0" />
 			<Add directory="$(#boost).lib" />
 		</Linker>
 		<Unit filename="src/IGVC.hpp">
