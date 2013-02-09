@@ -30,6 +30,7 @@ public:
 	    BACKWARD
 	};
 
+
 private:
 	const static char maxPwm;
 	const static char minPwm;

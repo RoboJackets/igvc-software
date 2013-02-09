@@ -82,10 +82,10 @@ int main(int argc, char* args[] )
                 {
                     if(setleftPWM>0)
                     {
-                       setleftPWM-=1;
-                       std:cout<<"setleftPWM:"<<setleftPWM<<"\n";
-                       driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
-                       usleep(200000);
+                        setleftPWM-=1;
+                        std:cout<<"setleftPWM:"<<setleftPWM<<"\n";
+                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
+                        usleep(200000);
                     }
                 }
         }

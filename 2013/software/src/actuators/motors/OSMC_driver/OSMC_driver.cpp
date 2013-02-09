@@ -43,9 +43,17 @@ bool OSMC_driver::arduinoCheck()	//Checks we are connected and able to send and 
 	}
 }
 
-void OSMC_driver::setPwm(char pwm, char dir)	//writes pwm to arduinos setting both motors to the same pwm and direction (0 = forwards, 1 = backwards)
+void OSMC_driver::setPwm(char pwm, Direction dir)	//writes pwm to arduinos setting both motors to the same pwm and direction (0 = forwards, 1 = backwards)
 {
-    setRightLeftPwm(pwm, dir, pwm, dir);
+    if (dir == FORWARD)
+    {
+        dir1 = 0;
+    }
+    else if(dir == BACKWARD)
+    {
+        dir1 = 1;
+    }
+    setRightLeftPwm(pwm, dir1, pwm, dir1);
 }
 
 void OSMC_driver::setRightLeftPwm(char pwmRight, char dirRight, char pwmLeft, char dirLeft)
@@ -119,7 +127,7 @@ void OSMC_driver::turn(double radius, int pwm, Direction dir)
     {
         setRightLeftPwm(v1, 0, v2, 0);
     }
-    else if(dir == 0)
+    else if(dir == LEFT)
     {
         setRightLeftPwm(v2, 0, v1, 0);
     }
