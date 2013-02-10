@@ -9,6 +9,7 @@ int main(int argc, char* args[] )
 
     Joystick Logitech; //Joystick Object
     OSMC_driver driver; //Motor Driver Object
+    int Timer;
     sleep(1);
 
     volatile int leftPWM, setleftPWM=0;
@@ -29,12 +30,14 @@ int main(int argc, char* args[] )
     {
 
         //read Joystick data
+
         ev=Logitech.readJoystick();
 
-        //Display Joystick data
+
         if(ev)
         {
-            Logitech.displayJoystick();
+            //Display Joystick data
+            //Logitech.displayJoystick();
 
             //Set Motor PWM
 
@@ -62,33 +65,60 @@ int main(int argc, char* args[] )
             }
             rightPWM=abs(rightPWM);
 
-            std::cout<<"leftPWM =  "<<leftPWM<<"\n";
-            std::cout<<"rightPWM =  "<<rightPWM<<"\n";
-            std::cout<<"leftdirection =  "<<leftDirection<<"\n";
-            std::cout<<"rightdirection =  "<<rightDirection<<"\n";
+//            std::cout<<"leftPWM =  "<<leftPWM<<"\n";
+//            std::cout<<"rightPWM =  "<<rightPWM<<"leftDirection<<"\n";
+//            std::cout<<"rightdirection =  "<<rightDirection\n";
+//            std::cout<<"leftdirection =  "<<<<"\n";
 
-            if(leftPWM>setleftPWM)
-                {
-                    if(setleftPWM<255)
-                    {
-                        setleftPWM+=1;
-                        std:cout<<"setleftPWM:"<<setleftPWM<<"\n";
-                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
-                        usleep(200000);
-                    }
-                }
 
-            else if(leftPWM<setleftPWM)
-                {
-                    if(setleftPWM>0)
-                    {
-                        setleftPWM-=1;
-                        std:cout<<"setleftPWM:"<<setleftPWM<<"\n";
-                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
-                        usleep(200000);
-                    }
-                }
         }
+
+
+        setleftPWM=leftPWM;
+        setrightPWM=rightPWM;
+        cout<<"setleftPWM:"<<setleftPWM<<"    ";
+        cout<<"setrightPWM:"<<setrightPWM<<"\n";
+        usleep(100);
+        Timer++;
+        if (Timer==2000)
+        {
+            driver.setRightLeftPwm((char)setrightPWM,0,(char)setleftPWM,0);
+            Timer=0;
+        }
+
+
+
+
+
+//                  if(leftPWMsetleftPWM)
+//                {
+//                    if(setleftPWM<255)
+//                    {
+//                        setleftPWM+=10;
+//                        if (setleftPWM>=255)
+//                        {
+//                            setleftPWM=255;
+//                        }
+//                        cout<<"setleftPWM:"<<setleftPWM<<"\n";
+//                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
+//                        usleep(200000);
+//                    }
+//                }
+//
+//            else if(leftPWM<setleftPWM)
+//                {
+//                    if(setleftPWM>0)
+//                    {
+//                        setleftPWM-=10;
+//                        if (setleftPWM<=0)
+//                        {
+//                            setleftPWM=0;
+//                        }
+//                        cout<<"setleftPWM:"<<setleftPWM<<"\n";
+//                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
+//                        usleep(200000);
+//                    }
+//                }
 
     }
 
