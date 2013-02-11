@@ -1,11 +1,12 @@
 
+//pin numbers
 const int rightDir = 5;
 const int rightSpeed = 6;
 const int rightDisable = 7;
 const int leftDir = 2;
 const int leftSpeed = 3;
 const int leftDisable = 4;
-double dist;
+
 int dirRight;
 int dirLeft;
 int byte0;
@@ -16,7 +17,6 @@ int byte4;
 int byte5;
 int byte6;
 
-
 void setup()
 {
   Serial.begin(9600);
@@ -26,66 +26,10 @@ void setup()
   pinMode(leftDir, OUTPUT);
   pinMode(leftSpeed, OUTPUT);
   pinMode(leftDisable, OUTPUT);
-
 }
-
 
 void loop()
 {
-  /*
-  digitalWrite(rightDir, 1);
-  digitalWrite(leftDir, 1);
-  
-  //analogWrite(rightSpeed, 255);
-  //analogWrite(leftSpeed, 255);
-  
-  delay(3000);
-  
-
-  
-  for (int i = 255; i>0;i-=1)
-  {
-    analogWrite(rightSpeed, i);
-    analogWrite(leftSpeed, i);
-    delay(50);
-  }
-  
-for (int i = 0; i<255;i+=1)
-  {
-    analogWrite(rightSpeed, i);
-    analogWrite(leftSpeed, i);
-    delay(50);
-  }
-  
-    analogWrite(rightSpeed, 255);
-    analogWrite(leftSpeed, 255);
-  
-  
-  
-  waitForSerial();
-  byte1 = Serial.read();
-  if(byte1 == 'W')
-  {
-    waitForSerial();
-    byte2 = Serial.read();
-    if( byte2 == 'S')
-    {
-      byte3 = Serial.read();
-      waitForSerial();
-      byte4 = Serial.read();
-      waitForSerial();
-      byte5 = Serial.read();
-      waitForSerial();
-      byte6 = Serial.read();
-      
-      digitalWrite(rightDir, byte3);
-      digitalWrite(leftDir, byte5);
-      analogWrite(rightSpeed, byte4);
-      analogWrite(leftSpeed, byte6);
-    }
-  }
-  */
-
   if (Serial.available()>0)
   {
     byte0 = Serial.read();
@@ -109,7 +53,6 @@ for (int i = 0; i<255;i+=1)
       {
         return;
       }
-   // dist = Serial.parseFloat();
     } 
     else 
     {
@@ -120,6 +63,7 @@ for (int i = 0; i<255;i+=1)
   {
     return;
   }
+  
   switch (byte1)
   {
     case 'W':
@@ -134,7 +78,7 @@ for (int i = 0; i<255;i+=1)
     case 'D':
     {
      //Loop for moving a set distance
-     break; 
+      break; 
     }
     
     case 'R':
