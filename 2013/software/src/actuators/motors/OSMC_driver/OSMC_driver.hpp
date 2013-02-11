@@ -29,12 +29,7 @@ public:
 	void turn(double radius, int pwm, char dir);
 	string intToString(int input);
 
-
-
-
 private:
-	const static char maxPwm;
-	const static char minPwm;
 	const static double WHEELBASE = 0.762; //meters
 
 };
