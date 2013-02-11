@@ -11,10 +11,6 @@ ASIOSerialPort arduinoLeft("/dev/igvc_2012_left_motor_shield", 9600);
 ASIOSerialPort arduinoRight("/dev/igvc_2012_right_motor_shield", 9600);
 ASIOSerialPort arduinoEncoder("/dev/igvc_2012_right_encoder_shield", 9600);
 
-//TODO: Need to be checked
-const char OSMC_driver::maxPwm = 130;
-const char OSMC_driver::minPwm = 30;
-
 OSMC_driver::~OSMC_driver()
 {
 	stopMotors();
@@ -23,7 +19,8 @@ OSMC_driver::~OSMC_driver()
 	arduinoEncoder.close();
 }
 
-bool OSMC_driver::arduinoCheck()	//Checks we are connected and able to send and receive data from the arduinos
+//Checks we are connected and able to send and receive data from the arduinos
+bool OSMC_driver::arduinoCheck()
 {
 	std::cout << "Testing serial API..." << std::endl;
 	arduinoLeft.write("T");
@@ -43,11 +40,13 @@ bool OSMC_driver::arduinoCheck()	//Checks we are connected and able to send and 
 	}
 }
 
-void OSMC_driver::setPwm(char pwm, char dir)	//writes pwm to arduinos setting both motors to the same pwm and direction (0 = forwards, 1 = backwards)
+//writes pwm to arduinos setting both motors to the same pwm and direction (0 = forwards, 1 = backwards)
+void OSMC_driver::setPwm(char pwm, char dir)
 {
     setRightLeftPwm(pwm, dir, pwm, dir);
 }
 
+// Writes to arduinos a string of ints dirRight, pwmRight, dirLeft, pwmLeft.
 void OSMC_driver::setRightLeftPwm(char pwmRight, char dirRight, char pwmLeft, char dirLeft)
 {
     pwmRight = adjustSpeedRight(pwmRight, dirRight);
@@ -61,7 +60,6 @@ void OSMC_driver::setRightLeftPwm(char pwmRight, char dirRight, char pwmLeft, ch
     w.append(intToString(dirLeft));
     w.append(" ");
     w.append(intToString(pwmLeft));
-    cout<<w.c_str()<<endl;
     arduinoRight.write(w);
     string w1 = "SW";
     w1.append(intToString(dirLeft));
@@ -74,6 +72,7 @@ void OSMC_driver::setRightLeftPwm(char pwmRight, char dirRight, char pwmLeft, ch
     arduinoLeft.write(w1);
 }
 
+//adjusts the pwm of the right motors based on the direction
 char OSMC_driver::adjustSpeedRight(char pwm, char dir)
 {
     if (dir == 1)
@@ -87,6 +86,7 @@ char OSMC_driver::adjustSpeedRight(char pwm, char dir)
     return (pwm);
 }
 
+//adjusts the pwm of the left motors based on the direction
 char OSMC_driver::adjustSpeedLeft(char pwm, char dir)
 {
     if (dir == 1)
@@ -100,13 +100,14 @@ char OSMC_driver::adjustSpeedLeft(char pwm, char dir)
     return (pwm);
 }
 
+//adjusts the direction of the left motors because they are mirrors of the right motors
 char OSMC_driver::adjustDirLeft(char dirLeft)
 {
     dirLeft = 1-dirLeft;
     return (dirLeft);
 }
 
-
+//turn the robot at a pwm around a circle of a certain radius with a direction
 void OSMC_driver::turn(double radius, int pwm, char dir)    //dir = 0 Right  dir = 1 Left
 {
     double v1 = 0;
@@ -130,33 +131,18 @@ void OSMC_driver::turn(double radius, int pwm, char dir)    //dir = 0 Right  dir
 
 }
 
+//Used in writing integers to the arduinos as strings
 string OSMC_driver::intToString(int input)
 {
     std::ostringstream s;
     s << input;
-//    cout<< s.str() << endl;
     return s.str();
 
 }
-// For use with new robot
+
+//Dont quite work at the moment
+//functions for reading encoder data from the arduinos and moving a set distance
 /*
-void OSMC_driver::goForward(double dist, char pwm, char dir)
-{
-    string d = "D";
-    wd.append(1,dist);
-    wd.append(1,dir);
-    wd.append(1,pwm);
-
-    arduino.write(wd);
-
-    while(arduino.readln() == "!")
-    {
-        break;
-    }
-}
-
-*/
-
 double OSMC_driver::readEncoder()
 {
     string r = "R";
@@ -187,14 +173,14 @@ void OSMC_driver::goForwardOld(double totalDist, char pwm, char dir)
     sleep(1);
     string var;
     var = "";
-   var = arduinoEncoder.readln();
- //   cout<<var<<endl;
- //   sleep(1);
+    var = arduinoEncoder.readln();
     setRightLeftPwm(pwm, dir, pwm, dir);
     encoderLoop(totalDist);
 }
+*/
 
-void OSMC_driver::stopMotors()		//Stops the motors
+//Stops the motors
+void OSMC_driver::stopMotors()
 {
     setRightLeftPwm(0,1,0,1);
 }
