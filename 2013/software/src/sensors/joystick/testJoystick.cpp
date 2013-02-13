@@ -7,88 +7,44 @@ using namespace std;
 int main(int argc, char* args[] )
 {
 
-    Joystick Logitech; //Joystick Object
+    Joystick Logi; //Joystick Object
     OSMC_driver driver; //Motor Driver Object
-    int Timer;
     sleep(1);
 
-    volatile int leftPWM, setleftPWM=0;
-    volatile int rightPWM, setrightPWM=0;
-    int leftDirection, rightDirection;
+
 
     bool ev; //Catch return status of Joystick read function
 
     //Initialize Joystick subsystem
-    if(!Logitech.initJoystick())
+    if(!Logi.initJoystick())
     {
         return 1;
     }
 
     driver.stopMotors();
-
+    uint16_t Timer=0;
     while(true)
     {
 
         //read Joystick data
 
-        ev=Logitech.readJoystick();
-
-
-        if(ev)
+        if(Logi.readJoystick())
         {
             //Display Joystick data
             //Logitech.displayJoystick();
-
-            //Set Motor PWM
-
-            leftPWM=(int)(Logitech.leftYAxis/32768.0*255);
-            if(signbit(leftPWM))
-            {
-                leftDirection=0;
-            }
-
-            else
-            {
-                leftDirection=1;
-            }
-            leftPWM=abs(leftPWM);
-
-            rightPWM=(int)(Logitech.rightYAxis/32768.0*255);
-            if(signbit(rightPWM))
-            {
-                rightDirection=0;
-            }
-
-            else
-            {
-                rightDirection=1;
-            }
-            rightPWM=abs(rightPWM);
-
-//            std::cout<<"leftPWM =  "<<leftPWM<<"\n";
-//            std::cout<<"rightPWM =  "<<rightPWM<<"leftDirection<<"\n";
-//            std::cout<<"rightdirection =  "<<rightDirection\n";
-//            std::cout<<"leftdirection =  "<<<<"\n";
-
+            Logi.getPWM();
 
         }
 
-
-        setleftPWM=leftPWM;
-        setrightPWM=rightPWM;
-        cout<<"setleftPWM:"<<setleftPWM<<"    ";
-        cout<<"setrightPWM:"<<setrightPWM<<"\n";
-        usleep(100);
-        Timer++;
-        if (Timer==2000)
+        if(Logi.CycleCheck())
         {
-            driver.setRightLeftPwm((char)setrightPWM,0,(char)setleftPWM,0);
-            Timer=0;
+            Logi.smoothPWM();
+            driver.setRightLeftPwm(Logi.RPWM,Logi.RDirection,Logi.LPWM,Logi.LDirection);
+            cout<<"LPWM:"<<Logi.LPWM<<"    ";
+            cout<<"RPWM:"<<Logi.RPWM<<"\n";
+            cout<<"jLPWM:"<<Logi.jLPWM<<"    ";
+            cout<<"jRPWM:"<<Logi.jRPWM<<"\n";
         }
-
-
-
-
 
 //                  if(leftPWMsetleftPWM)
 //                {

@@ -1,7 +1,6 @@
 #include "Joystick.h"
 
-bool Joystick::initJoystick()
-{
+bool Joystick::initJoystick() {
     //The Logitech
     joy_fd = open("/dev/input/by-id/usb-Logitech_Logitech_Cordless_RumblePad_2-joystick", O_RDONLY); //Open Joystick file for read-only
 
@@ -23,22 +22,44 @@ bool Joystick::initJoystick()
 
         axis.resize(numAxes);
         B.resize(numButtons);
-        leftYAxis=0; leftXAxis=0; rightYAxis=0; rightXAxis=0;
+        LYAxis=0; LXAxis=0; RYAxis=0; RXAxis=0;
         padYAxis=0; padXAxis=0;
+        jLPWM=255; sLPWM=255; LPWM=0;
+        jRPWM=255; sRPWM=255; RPWM=0;
+        LDirection=0; RDirection=0;
         return true;
     }
 }
 
-Joystick::~Joystick()
-{
+Joystick::Joystick() {
+   // initJoystick();
+}
+
+Joystick::~Joystick() {
     close(joy_fd);
     joy_fd = -1;
     axis.clear();
     B.clear();
 }
 
-bool Joystick::readJoystick()
-{
+void Joystick::startEvents() {
+    _eventsEnabled = true;
+	eventThread = boost::thread(boost::bind(&Joystick::eventThreadRun, this));
+}
+
+void Joystick::stopEvents() {
+    _eventsEnabled = false;
+}
+
+void Joystick::eventThreadRun() {
+    while(_eventsEnabled)
+    {
+            //Put Main Loop from test file here after complete debugging
+            //Code will not have main test file.
+    }
+}
+
+bool Joystick::readJoystick() {
         struct pollfd pfd;
 
         pfd.fd = joy_fd;
@@ -81,7 +102,7 @@ bool Joystick::readJoystick()
         {
             axis[event.number] = event.value;
         }
-        leftXAxis=axis[0]; leftYAxis=-axis[1]; rightXAxis=axis[2]; rightYAxis=-axis[3];
+        LXAxis=axis[0]; LYAxis=-axis[1]; RXAxis=axis[2]; RYAxis=-axis[3];
         padXAxis=axis[4]; padYAxis=-axis[5];
 
         return true;
@@ -89,13 +110,144 @@ bool Joystick::readJoystick()
 
 }
 
-void Joystick::displayJoystick()
-{
+void Joystick::getPWM() {
 
-    cout<<" leftXAxis : "   <<leftXAxis<<"    ";
-    cout<<" leftYAxis : "   <<leftYAxis<<"    ";
-    cout<<" rightXAxis : "  <<rightXAxis<<"    ";
-    cout<<" rightYAxis : "  <<rightYAxis<<"    ";
+            jLPWM=(LYAxis/32768.0*255)+255;
+            jRPWM=(RYAxis/32768.0*255)+255;
+
+}
+
+void Joystick::smoothPWM() {
+
+
+//    if(LDirection==sLDIRECTION)
+//    {
+//        if(LPWM>sLPWM)
+//        {
+//            sLPWM+=1;
+//        }
+//
+//        else if(LPWM<sLPWM)
+//        {
+//            sLPWM-=1;
+//        }
+//    }
+//
+//    else if(LDirection>sLDIRECTION)
+//    {
+//        if(LPWM>sLPWM)
+//        {
+//            sLPWM+=1;
+//        }
+//
+//        else if(LPWM<sLPWM)
+//        {
+//            sLPWM-=1;
+//        }
+//    }
+//
+//    else if(LDirection<sLDIRECTION)
+//    {
+//        if(LPWM>sLPWM)
+//        {
+//            sLPWM+=1;
+//        }
+//
+//        else if(LPWM<sLPWM)
+//        {
+//            sLPWM-=1;
+//        }
+//    }
+
+    //Smooth Left Motor PWM - de-offset and set direction
+    if(jLPWM-5>sLPWM)
+    {
+        sLPWM+=5;
+        if(sLPWM>510)
+        {
+            sLPWM=510;
+        }
+        LPWM=sLPWM-255;
+        LDirection=signbit(LPWM);
+        if(LDirection==1)
+        {
+            LPWM=255-LPWM;
+        }
+    }
+    else if(jLPWM+5<sLPWM)
+    {
+        sLPWM-=15;
+        if(abs(sLPWM)-255<=15)
+        {
+            sLPWM=255;
+        }
+
+        LPWM=sLPWM-255;
+        LDirection=signbit(LPWM);
+        if(LDirection==1)
+        {
+            LPWM=255-LPWM;
+        }
+    }
+
+    //Smooth Right Motor PWM - de-offset and set direction
+    if(jRPWM-5>sRPWM)
+    {
+        sRPWM+=5;
+        if(sRPWM>510)
+        {
+            sRPWM=510;
+        }
+        RPWM=sRPWM-255;
+        RDirection=signbit(RPWM);
+        if(RDirection==1)
+        {
+            RPWM=255-RPWM;
+        }
+    }
+    else if(jRPWM+5<sRPWM)
+    {
+        sRPWM-=15;
+        if(abs(sRPWM)-255<=15)
+        {
+            sRPWM=255;
+        }
+        RPWM=sRPWM-255;
+        RDirection=signbit(RPWM);
+        if(RDirection==1)
+        {
+            RPWM=255-RPWM;
+        }
+    }
+
+
+}
+
+bool Joystick::CycleCheck(){
+
+    gettimeofday(&cycleTime, NULL);
+
+    currentMicro = cycleTime.tv_usec;
+    //cout<<"currentMicro"<<currentMicro<<"\n";
+    //cout<<"diffMicro"<<currentMicro-lastMicro<<"\n";
+    if(currentMicro - lastMicro >= setCYCLE)
+    {
+        lastMicro = currentMicro;
+        cout<<"Cyclesuccess"<<"\n";
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void Joystick::displayJoystick() {
+
+    cout<<" leftXAxis : "   <<LXAxis<<"    ";
+    cout<<" leftYAxis : "   <<LYAxis<<"    ";
+    cout<<" rightXAxis : "  <<RXAxis<<"    ";
+    cout<<" rightYAxis : "  <<RYAxis<<"    ";
     cout<<" padXAxis : "    <<padXAxis<<"    ";
     cout<<" padYAxis : "    <<padYAxis<<"    ";
 
