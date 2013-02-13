@@ -17,21 +17,17 @@ public:
         : LonNewStateAvailable(this)
     {
         lidar->onNewData += &LonNewStateAvailable;
-//        file.open("data.txt");
     }
 
     void onNewStateAvailable(LidarState state)
     {
-
-        std::cout << " Test Output " << std::endl; //std::setprecision(9)  << state.lat << "\t" << state.lon
-//        file << std::setprecision(9)  << state.lat << "\t" << state.>lon << std::endl;
+        cout << state.points[0].distance << endl;
     }
 
     LISTENER(MyLidarListener, onNewStateAvailable, LidarState);
 
     ~MyLidarListener()
     {
-//        file.close();
     }
 };
 

@@ -16,12 +16,14 @@ Copypasta from: Matthew Barulic
 namespace IGVC {
 namespace Sensors {
 
-    class Point
+    class LidarPoint
     {
         public:
-            Point()
+            LidarPoint()
             {
                 valid = false;
+                angle = 0;
+                raw = 0;
                 distance = 0;
                 intensity = 0;
             }
@@ -47,16 +49,9 @@ namespace Sensors {
      */
     struct LidarState
     {
-        timeval laptoptime;
-        Point pnt[1024];
+        timeval timestamp;
+        LidarPoint points[1024];
     };
-
-
-    /*class LidarListener
-    {
-        public:
-            virtual void onNewStateAvailable(void* state) = 0;
-    };*/
 
 /*
  * Interface for Lidars.

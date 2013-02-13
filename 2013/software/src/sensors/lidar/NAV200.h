@@ -17,7 +17,7 @@ Copypasta from: Matthew Barulic
 namespace IGVC {
 namespace Sensors {
 
-class NAV200: public IGVC::Sensors::Lidar {
+class NAV200: public Lidar {
 public:
     NAV200();
     ~NAV200();
@@ -29,11 +29,12 @@ public:
 private:
 
     //ASIOSerialPort serialPort;
-    boost::thread iothread;
-    boost::mutex queueLocker;
+    boost::thread _iothread;
+    boost::mutex _queueLocker;
     libusb_device_handle *_handle;
-    libusb_context *ctx;
+    libusb_context *_ctx;
     bool _running;
+    int _numPoints;
 
     void threadRun(); // the method that runs on iothread
 };
