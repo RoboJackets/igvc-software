@@ -3,16 +3,13 @@
  *
  *  Created on: Jan 22, 2012
  *      Author: Alexander Huynh
-Copypasta from: Matthew Barulic
  */
 #ifndef NAV200_H
 #define NAV200_H
 
 #include "Lidar.h"
 #include <libusb-1.0/libusb.h>
-#include "serial/ASIOSerialPort.h"
-
-
+#include <boost/thread.hpp>
 
 namespace IGVC {
 namespace Sensors {
@@ -27,8 +24,6 @@ public:
     void stop();
 
 private:
-
-    //ASIOSerialPort serialPort;
     boost::thread _iothread;
     boost::mutex _queueLocker;
     libusb_device_handle *_handle;
