@@ -11,6 +11,8 @@
 #include <libusb-1.0/libusb.h>
 #include <cmath>
 
+using namespace std;
+
 namespace IGVC {
 namespace Sensors {
 
