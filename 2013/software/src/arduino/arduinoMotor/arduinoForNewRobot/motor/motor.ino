@@ -1,6 +1,8 @@
 
 
 #include <stdlib.h>
+#include "PID_v1.h"
+
 
 
 //pin numbers
@@ -14,6 +16,13 @@ const int encoderRightData1;
 const int encoderRightData2;
 const int encoderLeftData1;
 const int encoderLeftData2;
+const int MaxMotorSpeed;
+double DesiredSpeedLeft, PIDSpeedInLeft, PIDSpeedOutLeft; //PID Variables Left Motor
+double DesiredSpeedRight, PIDSpeedInRight, PIDSpeedOutRight; //PID Variables Right Motor
+const double R_Kp=2, R_Ki=5, R_Kd=1;
+const double L_Kp=2, L_Ki=5, L_Kd=1;
+
+
 
 int dirRight;
 int dirLeft;
@@ -26,6 +35,9 @@ int byte5;
 int byte6;
 double byte7;
 double byte8;
+
+PID PIDLeft(&PIDSpeedInLeft, &PIDSpeedOutLeft, &DesiredSpeedLeft, L_Kp,L_Ki,L_Kd, DIRECT); //Calling PID Method Left Motor
+PID PIDRight(&PIDSpeedInRight, &PIDSpeedOutRight, &DesiredSpeedRight, R_Kp,R_Ki,R_Kd, DIRECT); //Calling PID Method Right Motor
 
 volatile int tickDataRight = 0;
 volatile int tickDataLeft = 0;
@@ -50,6 +62,8 @@ void setup()
   pinMode(encoderLeftData2, INPUT);
   attachInterrupt(0, tickRight, RISING);
   attachInterrupt(1, tickLeft, RISING);
+  PIDLeft.SetMode(AUTOMATIC);
+  PIDRight.SetMode(AUTOMATIC);
 }
 
 void loop()
@@ -68,10 +82,12 @@ void loop()
         byte3 = Serial.parseInt(); //Right Direction
         while (Serial.available()<=0){}
         byte4 = Serial.parseInt(); //Right Speed
+        DesiredSpeedRight=(double)byte4;
         while (Serial.available()<=0){}
         byte5 = Serial.parseInt(); //Left Direction
         while (Serial.available()<=0){}
         byte6 = Serial.parseInt(); //Left Speed
+        DesiredSpeedLeft=(double)byte6;
         if (byte1 == 'D')
         {
           while (Serial.available()<=0){}
@@ -99,7 +115,7 @@ void loop()
   
   switch (byte1)
   {
-    case 'W':
+    case 'W': 
     {
       //moving wheels in a certain direction and speed
       digitalWrite(rightDir, byte3);
@@ -108,7 +124,7 @@ void loop()
       analogWrite(leftSpeed, byte6);
       break;
     }
-    case 'D':
+    case 'D': //
     {
       digitalWrite(rightDir, byte3);
       digitalWrite(leftDir, byte5);
@@ -120,7 +136,7 @@ void loop()
       tickDataLeft = 0;
       double distTravelledRight = (metersPerTick*abs(tickDataRight))*2;
       double distTravelledLeft = (metersPerTick*abs(tickDataLeft))*2;
-      distTravelled = (distTravelledRight+distTravelledLeft)/2.0;
+      double distTravelled = (distTravelledRight+distTravelledLeft)/2.0;
       while(distTravelled<=byte7)
       {
         distTravelledRight = (metersPerTick*abs(tickDataRight))*2;
@@ -163,7 +179,7 @@ void loop()
       break;
     }
     
-    case 'P'
+    case 'P':
     {
       tickDataRight = 0;
       tickDataLeft = 0;
@@ -171,26 +187,31 @@ void loop()
       int time = millis();
       digitalWrite(rightDir, byte3);
       digitalWrite(leftDir, byte5);
-      analogWrite(rightSpeed, byte4);
-      analogWrite(leftSpeed, byte6);
+      
       while(time-timeStart<=100)
       {
         time = millis();
       }
+      
       double distTravelledRight = (metersPerTick*abs(tickDataRight))*2;
       double distTravelledLeft = (metersPerTick*abs(tickDataLeft))*2;
       double speedRight = distTravelledRight/0.1;
       double speedLeft = distTravelledLeft/0.1;
-          
       
-
+      PIDSpeedInRight=speedRight/MaxMotorSpeed*255; //Scale Motor Encoder Speed Reading to 0-255 to compare to PWM Desired Command
+      PIDSpeedInLeft=speedLeft/MaxMotorSpeed*255;
+      PIDLeft.SetControllerDirection(byte5); //Update Direction in PID Controller
+      PIDLeft.Compute();                     //PID Controller will compute new variables, called earlier by reference.
+      PIDRight.SetControllerDirection(byte3);
+      PIDRight.Compute();
+      analogWrite(rightSpeed, PIDSpeedOutRight);
+      analogWrite(leftSpeed, PIDSpeedOutLeft);
       
-            
-    
       break;  
     }
     
   }
+}
 }
 
 void tickRight()
