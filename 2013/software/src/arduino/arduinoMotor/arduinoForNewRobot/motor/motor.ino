@@ -1,4 +1,7 @@
+
+
 #include <stdlib.h>
+
 
 //pin numbers
 const int rightDir = 5;
@@ -59,7 +62,7 @@ void loop()
       while (Serial.available()<=0){}
       byte1 = Serial.read(); //First Case either W, R, D, T
       delay(200);
-      if (byte1 == 'W' || byte1 == 'D')
+      if (byte1 == 'W' || byte1 == 'D' || byte1 == 'P')
       {
         while (Serial.available()<=0){}
         byte3 = Serial.parseInt(); //Right Direction
@@ -134,6 +137,8 @@ void loop()
     case 'R':
     {
       //Turning an angle
+      tickDataRight = 0;
+      tickDataLeft = 0;
       double distTravelledRight = (metersPerTick*abs(tickDataRight))*2;
       double distTravelledLeft = (metersPerTick*abs(tickDataLeft))*2;
       double angle = abs(distTravelledRight-distTravelledLeft)/wheelBase;
@@ -160,7 +165,27 @@ void loop()
     
     case 'P'
     {
+      tickDataRight = 0;
+      tickDataLeft = 0;
+      int timeStart = millis();
+      int time = millis();
+      digitalWrite(rightDir, byte3);
+      digitalWrite(leftDir, byte5);
+      analogWrite(rightSpeed, byte4);
+      analogWrite(leftSpeed, byte6);
+      while(time-timeStart<=100)
+      {
+        time = millis();
+      }
+      double distTravelledRight = (metersPerTick*abs(tickDataRight))*2;
+      double distTravelledLeft = (metersPerTick*abs(tickDataLeft))*2;
+      double speedRight = distTravelledRight/0.1;
+      double speedLeft = distTravelledLeft/0.1;
+          
       
+
+      
+            
     
       break;  
     }
