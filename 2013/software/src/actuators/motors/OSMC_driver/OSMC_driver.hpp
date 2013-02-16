@@ -9,7 +9,9 @@ public:
 
 	enum Direction {
 	    LEFT,
-	    RIGHT
+	    RIGHT,
+	    FORWARD,
+	    BACKWARD
 	};
 
 	~OSMC_driver();
@@ -26,8 +28,10 @@ public:
 	char adjustSpeedRight(char pwm, char dir);
 	char adjustSpeedLeft(char pwm, char dir);
 	char adjustDirLeft(char dirLeft);
-	void turn(double radius, int pwm, char dir);
+	void turn(double radius, int pwm, Direction dir);
 	string intToString(int input);
+	string doubleToString(double input);
+	void forward(char pwm, char dir, double dist);
 
 private:
 	const static double WHEELBASE = 0.762; //meters
