@@ -7,8 +7,9 @@ int main()
 {
     OSMC_driver driver;
 
-    /*
+
 	std::cout << "Going Forward" << std::endl;
+	/*
 	//driver.setPwm(255,1);
 
 	sleep(1);
@@ -29,8 +30,9 @@ int main()
     cout<<"Two seconds have passed"<<endl;
     */
 
-    driver.turn(2.0,100,0);
-    sleep(5);
+    driver.turn(1.0,75,driver.RIGHT);
+   //driver.setRightLeftPwm(75,0,75,1);
+    sleep(10);
 
     driver.stopMotors();
 

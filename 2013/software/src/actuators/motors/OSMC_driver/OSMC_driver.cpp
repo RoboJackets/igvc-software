@@ -41,9 +41,20 @@ bool OSMC_driver::arduinoCheck()
 }
 
 //writes pwm to arduinos setting both motors to the same pwm and direction (0 = forwards, 1 = backwards)
-void OSMC_driver::setPwm(char pwm, char dir)
+void OSMC_driver::setPwm(char pwm, Direction dir)
 {
-    setRightLeftPwm(pwm, dir, pwm, dir);
+    if(dir==FORWARD)
+    {
+        setRightLeftPwm(pwm, 0, pwm, 0);
+    }
+    else if(dir==BACKWARD)
+    {
+
+    }
+    else
+    {
+        cout<<"Bad Direction"<<endl;
+    }
 }
 
 // Writes to arduinos a string of ints dirRight, pwmRight, dirLeft, pwmLeft.
@@ -108,7 +119,58 @@ char OSMC_driver::adjustDirLeft(char dirLeft)
 }
 
 //turn the robot at a pwm around a circle of a certain radius with a direction
-void OSMC_driver::turn(double radius, int pwm, char dir)    //dir = 0 Right  dir = 1 Left
+void OSMC_driver::turn(double radius, int pwm, Direction dir)    //dir = 0 Right  dir = 1 Left
+{
+    double v1 = 0;
+    double v2 = 0;
+    double halfWB = WHEELBASE/2;
+    double comp1 = (radius+halfWB)/(radius-halfWB);
+    v2 = (2*pwm*comp1)/(1+comp1);
+    v1 = 2*pwm-v2;
+    if (dir == RIGHT)
+    {
+        setRightLeftPwm(v1, 0, v2, 0);
+    }
+    else if(dir == LEFT)
+    {
+        setRightLeftPwm(v2, 0, v1, 0);
+    }
+    else
+    {
+        cout<<"Bad direction"<<endl;
+    }
+
+}
+
+//Used in writing integers to the arduinos as strings
+string OSMC_driver::intToString(int input)
+{
+    std::ostringstream s;
+    s << input;
+    return s.str();
+}
+
+//Used in writing doubles to the arduinos as strings
+string OSMC_driver::doubleToString(double input)
+{
+    std::ostringstream s;
+    s << input;
+    return s.str();
+}
+
+/*
+//Go forward a set distance at a set speed in a certain direction
+void OSMC_driver::forward(char pwm, char dir, double dist)
+{
+    setPwm(pwm, dir)
+    string d = " ";
+    d.append(doubleToString(dist));
+    arduino.write(d);
+    //TODO event listener for a ! from arduino
+    //while(arduino.readln() != "!") {};
+}
+
+void OSMC_driver::turn(double radius, double degree, int pwm, char dir)    //dir = 0 Right  dir = 1 Left
 {
     double v1 = 0;
     double v2 = 0;
@@ -128,17 +190,11 @@ void OSMC_driver::turn(double radius, int pwm, char dir)    //dir = 0 Right  dir
     {
         cout<<"Bad direction"<<endl;
     }
-
+    string r = "SR";
+    r.append(doubleToString(degree))
+    arduino.write(r);
 }
-
-//Used in writing integers to the arduinos as strings
-string OSMC_driver::intToString(int input)
-{
-    std::ostringstream s;
-    s << input;
-    return s.str();
-
-}
+*/
 
 //Dont quite work at the moment
 //functions for reading encoder data from the arduinos and moving a set distance
