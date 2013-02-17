@@ -16,6 +16,9 @@ namespace IGVC
                 LidarState GetState();
                 LidarState GetStateAtTime(timeval time);
                 bool StateIsAvailable();
+                void loadFile(const char* path);
+                void setDelay(int usec);
+
             protected:
             private:
 
@@ -23,7 +26,13 @@ namespace IGVC
 
             bool _running;
 
+            int _delay;
+
             void thread_run();
+
+            LidarState _data;
+
+            std::vector<std::string> StringSplit(const std::string &source, const char *delimiter = " ", bool keepEmpty = false);
         };
     }
 }
