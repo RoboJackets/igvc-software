@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Fri Feb 15 18:26:44 2013
+** Created: Sat Feb 16 21:38:20 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,26 +23,55 @@ static const uint qt_meta_data_MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       0,    0, // methods
+       8,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
        0,       // signalCount
 
+ // slots: signature, parameters, type, tag, flags
+      18,   12,   11,   11, 0x08,
+      56,   11,   11,   11, 0x08,
+      85,   11,   11,   11, 0x08,
+     111,   11,   11,   11, 0x08,
+     139,   11,   11,   11, 0x08,
+     170,   11,   11,   11, 0x08,
+     199,   11,   11,   11, 0x08,
+     226,   11,   11,   11, 0x08,
+
        0        // eod
 };
 
 static const char qt_meta_stringdata_MainWindow[] = {
-    "MainWindow\0"
+    "MainWindow\0\0value\0"
+    "on_horizontalSlider_valueChanged(int)\0"
+    "on_actionCapture_triggered()\0"
+    "on_actionExit_triggered()\0"
+    "on_actionNAV200_triggered()\0"
+    "on_actionLoad_File_triggered()\0"
+    "on_actionDefault_triggered()\0"
+    "on_actionLines_triggered()\0"
+    "on_actionPoints_triggered()\0"
 };
 
 void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
-    Q_UNUSED(_o);
-    Q_UNUSED(_id);
-    Q_UNUSED(_c);
-    Q_UNUSED(_a);
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        Q_ASSERT(staticMetaObject.cast(_o));
+        MainWindow *_t = static_cast<MainWindow *>(_o);
+        switch (_id) {
+        case 0: _t->on_horizontalSlider_valueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 1: _t->on_actionCapture_triggered(); break;
+        case 2: _t->on_actionExit_triggered(); break;
+        case 3: _t->on_actionNAV200_triggered(); break;
+        case 4: _t->on_actionLoad_File_triggered(); break;
+        case 5: _t->on_actionDefault_triggered(); break;
+        case 6: _t->on_actionLines_triggered(); break;
+        case 7: _t->on_actionPoints_triggered(); break;
+        default: ;
+        }
+    }
 }
 
 const QMetaObjectExtraData MainWindow::staticMetaObjectExtraData = {
@@ -76,6 +105,11 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     _id = QMainWindow::qt_metacall(_c, _id, _a);
     if (_id < 0)
         return _id;
+    if (_c == QMetaObject::InvokeMetaMethod) {
+        if (_id < 8)
+            qt_static_metacall(this, _c, _id, _a);
+        _id -= 8;
+    }
     return _id;
 }
 QT_END_MOC_NAMESPACE

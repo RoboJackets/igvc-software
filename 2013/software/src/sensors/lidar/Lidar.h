@@ -35,7 +35,7 @@ namespace Sensors {
             float angle;
 
             // Raw distance
-            uint8_t raw;
+            uint16_t raw;
 
             // Distance in meters
             float distance;
