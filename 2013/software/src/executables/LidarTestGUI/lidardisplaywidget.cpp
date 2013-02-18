@@ -5,7 +5,9 @@
 
 LidarDisplayWidget::LidarDisplayWidget(QWidget *parent) :
     QWidget(parent),
-    LonNewLidarData(this)
+    LonNewLidarData(this),
+    _lidObstExtractor(),
+    _obstacles()
 {
     _scale = 1.0;
     _drawing = false;
@@ -18,16 +20,16 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
     QPainter painter;
     painter.begin(this);
     QPointF origin(this->width()/2.0, this->height()/2.0);
+
+    painter.setPen(Qt::black);
     boost::mutex::scoped_lock(_locker);
     for(int i = 0; i < 1024; i++)
     {
         LidarPoint p = _lidarData.points[i];
         if(p.valid)
         {
-//            if( ( p.angle - M_PI ) < 0.1 )
-//                std::cout <<  << std::endl;
-            QPointF end(cos(p.angle)*p.distance*_scale + origin.x(), -sin(p.angle)*p.distance*_scale + origin.y());
-//            std::cout << end.x() << ", " << end.y() << std::endl;
+            QPointF end(cos(p.angle)*p.distance * _scale + origin.x(), -sin(p.angle)*p.distance*_scale + origin.y());
+
             switch(_vMode)
             {
             case Points:
@@ -39,6 +41,30 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
             }
         }
     }
+
+    painter.setPen(Qt::green);
+//    std::cout << _obstacles.size() << std::endl;
+    for(std::vector<Obstacle*>::iterator iter = _obstacles.begin(); iter < _obstacles.end(); iter++)
+    {
+        Obstacle *obstacle = *iter;
+        Point *points = obstacle->getPoints();
+        for(int i = 0; i < obstacle->getNumPoints()-1; i++)
+        {
+            Point p1 = points[i], p2 = points[i+1];
+            QPointF start(p1.x, -p1.y);
+            start *= _scale;
+            start += origin;
+            QPointF end(p2.x, -p2.y);
+            end *= _scale;
+            end += origin;
+            painter.drawLine(start, end);
+        }
+    }
+
+    painter.setPen(Qt::red);
+    painter.drawLine(origin, origin + QPointF(_scale,0));
+    painter.drawLine(origin, origin + QPointF(0,-_scale));
+
     painter.end();
     _drawing = false;
 }
@@ -48,6 +74,12 @@ void LidarDisplayWidget::onNewLidarData(LidarState state)
     while(_drawing);
     boost::mutex::scoped_lock(_locker);
     _lidarData = state;
+    for(int i = 0; i < 1024; i++)
+    {
+        if( abs( _lidarData.points[i].angle + M_PI / 2.0 ) < 0.75 )
+            _lidarData.points[i].valid = false;
+    }
+    _obstacles = _lidObstExtractor.extractObstacles(_lidarData);
     update();
 }
 
@@ -55,6 +87,7 @@ void LidarDisplayWidget::setScale(double scale)
 {
     while(_drawing);
     _scale = scale;
+    this->update();
 }
 
 void LidarDisplayWidget::setLidar(Lidar *device)

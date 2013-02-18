@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     removeToolBar(ui->toolBar);
     ui->lidarView->setScale(0.25);
     ui->horizontalSlider->setRange(10, 10000);
-    ui->horizontalSlider->setValue(ui->horizontalSlider->maximum()/2);
+    ui->horizontalSlider->setValue(ui->horizontalSlider->maximum()/4);
     switchMode(Default);
 }
 
