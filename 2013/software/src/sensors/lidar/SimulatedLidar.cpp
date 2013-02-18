@@ -23,8 +23,7 @@ SimulatedLidar::SimulatedLidar()
         LidarPoint &p = _data.points[i];
         p.valid = true;
         p.angle = i * ( ( M_PI * 2.0 ) / 1024);
-//      p.distance = 1 / (sin(p.angle) + cos(p.angle));  // Makes a straight line
-        p.distance = i/102.4; // Makes a cool spiral
+        p.distance = i/1024.0; // Makes a cool spiral
     }
 }
 
@@ -35,6 +34,7 @@ void SimulatedLidar::thread_run()
         //usleep(_delay);
         sleep(1);
         onNewData(_data);
+        _running = false;
     }
 }
 
