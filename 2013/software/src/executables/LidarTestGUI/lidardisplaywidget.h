@@ -4,6 +4,7 @@
 #include <QWidget>
 #include "sensors/lidar/Lidar.h"
 #include <boost/thread.hpp>
+#include "mapping/extractors/lidarobstacleextractor.h"
 
 using namespace IGVC::Sensors;
 
@@ -45,6 +46,9 @@ private:
     double _scale;
 
     bool _drawing;
+
+    LidarObstacleExtractor _lidObstExtractor;
+    std::vector<Obstacle*> _obstacles;
 };
 
 #endif // LIDARDISPLAYWIDGET_H
