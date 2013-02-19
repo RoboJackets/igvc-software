@@ -2,7 +2,9 @@
 #define LIDARDISPLAYWIDGET_H
 
 #include <QWidget>
-#include "sensors/lidar/SimulatedLidar.h"
+#include "sensors/lidar/Lidar.h"
+#include <boost/thread.hpp>
+#include "mapping/extractors/lidarobstacleextractor.h"
 
 using namespace IGVC::Sensors;
 
@@ -15,6 +17,17 @@ public:
     void setScale(double scale);
     double scale();
 
+    void capture();
+
+    void setLidar(Lidar *device);
+
+    enum ViewMode {
+        Points,
+        Lines
+    };
+
+    void setViewMode(ViewMode mode);
+
 protected:
     void paintEvent(QPaintEvent *event);
 
@@ -26,11 +39,16 @@ private:
     LidarState _lidarData;
     boost::mutex _locker;
     
-    SimulatedLidar _lidar;
+    Lidar *_lidar;
+
+    ViewMode _vMode;
 
     double _scale;
 
     bool _drawing;
+
+    LidarObstacleExtractor _lidObstExtractor;
+    std::vector<Obstacle*> _obstacles;
 };
 
 #endif // LIDARDISPLAYWIDGET_H
