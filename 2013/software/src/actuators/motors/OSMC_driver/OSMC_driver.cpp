@@ -41,8 +41,9 @@ bool OSMC_driver::arduinoCheck()
 }
 
 //writes pwm to arduinos setting both motors to the same pwm and direction (0 = forwards, 1 = backwards)
-void OSMC_driver::setPwm(char pwm, Direction dir)
+void OSMC_driver::setPwm(char pwm, char dir)
 {
+    /*
     if(dir==FORWARD)
     {
         setRightLeftPwm(pwm, 0, pwm, 0);
@@ -55,6 +56,8 @@ void OSMC_driver::setPwm(char pwm, Direction dir)
     {
         cout<<"Bad Direction"<<endl;
     }
+    */
+    setRightLeftPwm(pwm,dir,pwm,dir);
 }
 
 // Writes to arduinos a string of ints dirRight, pwmRight, dirLeft, pwmLeft.
