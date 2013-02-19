@@ -14,7 +14,9 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     ../../sensors/lidar/NAV200.cpp \
     lidardisplaywidget.cpp \
-    ../../sensors/lidar/SimulatedLidar.cpp
+    ../../sensors/lidar/SimulatedLidar.cpp \
+    ../../mapping/extractors/lidarobstacleextractor.cpp \
+    ../../mapping/obstacles/linearobstacle.cpp
 
 INCLUDEPATH += ../../
 
@@ -24,7 +26,10 @@ HEADERS  += mainwindow.h \
     ../../events/Event.hpp \
     ../../events/Delegate.hpp \
     lidardisplaywidget.h \
-    ../../sensors/lidar/SimulatedLidar.h
+    ../../sensors/lidar/SimulatedLidar.h \
+    ../../mapping/extractors/lidarobstacleextractor.h \
+    ../../mapping/obstacles/linearobstacle.h \
+    ../../mapping/obstacles/obstacle.hpp
 
 FORMS    += mainwindow.ui
 
