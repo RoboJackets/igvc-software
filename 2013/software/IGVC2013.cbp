@@ -210,7 +210,7 @@
 		<Unit filename="src/sensors/joystickMB/JoystickMB.h">
 			<Option target="JoystickMB" />
 		</Unit>
-		<Unit filename="src/sensors/joystickMB/main_JoystickMBcpp">
+		<Unit filename="src/sensors/joystickMB/main_JoystickMB.cpp">
 			<Option target="JoystickMB" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/Lidar.h">
