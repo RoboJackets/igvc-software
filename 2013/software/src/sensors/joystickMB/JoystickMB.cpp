@@ -65,6 +65,7 @@ void JoystickMB::threadRun()
 
         onNewData(_state);
     }
+    cout << "thread end" << endl;
 }
 
 bool JoystickMB::isOpen()
@@ -82,6 +83,7 @@ void JoystickMB::disconnect()
         _joystick_fd = -1;
         _state.axes.clear();
         _state.buttons.clear();
+        cout << "done" << endl;
     }
 }
 
