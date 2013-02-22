@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Sun Feb 17 04:43:20 2013
+** Created: Tue Feb 19 23:47:59 2013
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -36,6 +36,7 @@ public:
     QAction *actionDefault;
     QAction *actionLines;
     QAction *actionPoints;
+    QAction *actionAbout;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QSlider *horizontalSlider;
@@ -45,6 +46,7 @@ public:
     QMenu *menuLidar;
     QMenu *menuSimulated;
     QMenu *menuView;
+    QMenu *menuHelp;
     QToolBar *toolBar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -71,6 +73,8 @@ public:
         actionLines->setObjectName(QString::fromUtf8("actionLines"));
         actionPoints = new QAction(MainWindow);
         actionPoints->setObjectName(QString::fromUtf8("actionPoints"));
+        actionAbout = new QAction(MainWindow);
+        actionAbout->setObjectName(QString::fromUtf8("actionAbout"));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -105,6 +109,8 @@ public:
         menuSimulated->setObjectName(QString::fromUtf8("menuSimulated"));
         menuView = new QMenu(menuBar);
         menuView->setObjectName(QString::fromUtf8("menuView"));
+        menuHelp = new QMenu(menuBar);
+        menuHelp->setObjectName(QString::fromUtf8("menuHelp"));
         MainWindow->setMenuBar(menuBar);
         toolBar = new QToolBar(MainWindow);
         toolBar->setObjectName(QString::fromUtf8("toolBar"));
@@ -113,6 +119,7 @@ public:
         menuBar->addAction(menuFile->menuAction());
         menuBar->addAction(menuLidar->menuAction());
         menuBar->addAction(menuView->menuAction());
+        menuBar->addAction(menuHelp->menuAction());
         menuFile->addAction(actionCapture);
         menuFile->addSeparator();
         menuFile->addAction(actionExit);
@@ -122,6 +129,7 @@ public:
         menuSimulated->addAction(actionDefault);
         menuView->addAction(actionLines);
         menuView->addAction(actionPoints);
+        menuHelp->addAction(actionAbout);
 
         retranslateUi(MainWindow);
 
@@ -138,10 +146,12 @@ public:
         actionDefault->setText(QApplication::translate("MainWindow", "Default", 0, QApplication::UnicodeUTF8));
         actionLines->setText(QApplication::translate("MainWindow", "Lines", 0, QApplication::UnicodeUTF8));
         actionPoints->setText(QApplication::translate("MainWindow", "Points", 0, QApplication::UnicodeUTF8));
+        actionAbout->setText(QApplication::translate("MainWindow", "About", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0, QApplication::UnicodeUTF8));
         menuLidar->setTitle(QApplication::translate("MainWindow", "Lidar", 0, QApplication::UnicodeUTF8));
         menuSimulated->setTitle(QApplication::translate("MainWindow", "Simulated", 0, QApplication::UnicodeUTF8));
         menuView->setTitle(QApplication::translate("MainWindow", "View", 0, QApplication::UnicodeUTF8));
+        menuHelp->setTitle(QApplication::translate("MainWindow", "Help", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

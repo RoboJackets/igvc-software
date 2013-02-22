@@ -160,7 +160,7 @@ void Joystick::smoothPWM() {
 //    }
 
     //Smooth Left Motor PWM - de-offset and set direction
-    if(jLPWM-5>sLPWM)
+   if(jLPWM-5>sLPWM)
     {
         sLPWM+=5;
         if(sLPWM>510)
@@ -191,6 +191,7 @@ void Joystick::smoothPWM() {
     }
 
     //Smooth Right Motor PWM - de-offset and set direction
+
     if(jRPWM-5>sRPWM)
     {
         sRPWM+=5;

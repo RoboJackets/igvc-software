@@ -20,6 +20,52 @@ std::vector<Obstacle*> LidarObstacleExtractor::extractObstacles(LidarState data)
 std::vector<Obstacle*> LidarObstacleExtractor::extractLinearObstacles(LidarState *data)
 {
     using namespace std;
+
+    vector<Obstacle *> lines;
+
+    bool inLine = false;
+
+    Point start, end;
+
+    for(int i = 0; i < 1024; i++)
+    {
+        LidarPoint &pt = data->points[i];
+
+        float x = cos(pt.angle)*pt.distance;
+        float y = sin(pt.angle)*pt.distance;
+
+        if(pt.valid)
+        {
+            if(!inLine)
+            {
+                start = Point(x, y);
+                inLine = true;
+            } else {
+                end = Point(x, y);
+            }
+        } else {
+            if(inLine)
+            {
+                lines.push_back(new LinearObstacle(start, end));
+                inLine = false;
+            }
+        }
+    }
+
+//    for (int i = 0; i < lines.size(); i++)
+//    {
+//        Point *points = lines.at(i)->getPoints();
+//        for(int p = 0; p < lines.at(i)->getNumPoints(); p++)
+//        {
+//            cout << "(" << points[p].x << ", " << points[p].y << ") ";
+//        }
+//        cout << endl;
+//    }
+//    cout << endl;
+
+    return lines;
+
+/*  Hough transform
     float maxPossibleRho = 0;
     for(int i = 0; i < 1024; i++)
     {
@@ -66,13 +112,10 @@ std::vector<Obstacle*> LidarObstacleExtractor::extractLinearObstacles(LidarState
     // from a wall in the shop. We think it'll work for the
     // fence. Could be wrong.
     int minVotes = 10;
-    int maxVotes = 0;
-    float distThreshold = 0.1;
     for(int t = 0; t < numThetaBins; t++)
     {
         for(int r = 0; r < numRhoBins; r++)
         {
-            maxVotes = max(maxVotes , accumulator[t][r]);
             if(accumulator[t][r] > minVotes)
             {
                 Point min;
@@ -81,6 +124,8 @@ std::vector<Obstacle*> LidarObstacleExtractor::extractLinearObstacles(LidarState
                 float theta = t * radPerBin;
                 float rho = r * metersPerBin;
 
+                bool foundMin = false;
+
                 for(int i = 0; i < 1024; i++)
                 {
                     LidarPoint &pt = data->points[i];
@@ -88,52 +133,71 @@ std::vector<Obstacle*> LidarObstacleExtractor::extractLinearObstacles(LidarState
                     {
                         float x = cos(pt.angle) * pt.distance;
                         float y = sin(pt.angle) * pt.distance;
-                        float y_line = (sin(theta)!=0) ? (rho - cos(theta) * x) / sin(theta) : y;
-                        if(abs(y - y_line) < distThreshold)
+                        bool isOnLine = isPointOnLine(x, y, rho, theta, i, data->points);
+                        if(!foundMin && isOnLine)
                         {
                             min.x = x;
                             min.y = y;
-                            break;
-                        }
-                    }
-                }
-
-                for(int i = 1024; i > -1; i--)
-                {
-                    LidarPoint &pt = data->points[i];
-                    if(pt.valid)
-                    {
-                        float x = cos(pt.angle) * pt.distance;
-                        float y = sin(pt.angle) * pt.distance;
-                        float y_line = (sin(theta)!=0) ? (rho - cos(theta) * x) / sin(theta) : y;
-                        if(abs(y - y_line) < distThreshold)
+                            foundMin = true;
+                        } else if(foundMin && isOnLine)
                         {
                             max.x = x;
                             max.y = y;
+                        } else if(foundMin && !isOnLine)
+                        {
                             break;
                         }
+                    } else if(foundMin)
+                    {
+                        break;
                     }
                 }
-
-//                min.x = -1.0;
-//                max.x = 1.0;
-
-//                if(sin(theta) != 0)
-//                {
-//                    min.y = (rho - cos(theta) * min.x) / sin(theta);
-//                    max.y = (rho - cos(theta) * max.x) / sin(theta);
-//                } else {
-//                    min.y = -1.0;
-//                    max.y = 1.0;
-//                }
-
                 lines.push_back(new LinearObstacle(min, max));
             }
         }
     }
-    std::cout << maxVotes << std::endl;
 
-    return lines;
+    return lines;*/
+}
+
+bool LidarObstacleExtractor::isPointOnLine(float x, float y, float rho, float theta, int pointIndex, LidarPoint *points)
+{
+    float y_dist_thresh = 0.1;
+    float x_dist_thresh = 0.1;
+    float n_theta_thresh = 0.01;
+    if(sin(theta) != 0)
+    {
+        float y_line = (rho - cos(theta) * x) / sin(theta);
+        if(abs(y_line - y) < y_dist_thresh)
+        {
+            return true;
+        } else {
+            return false;
+        }
+
+    } else {
+        float n_theta = 0;
+        if(abs(x-rho) < x_dist_thresh)
+        {
+            estimateNormalAtPoint(pointIndex, points, n_theta);
+            if(abs(theta - n_theta) < n_theta_thresh)
+            {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+}
+
+void LidarObstacleExtractor::estimateNormalAtPoint(int pointIndex, LidarPoint *points, float &n_theta)
+{
+    Point p1(points[pointIndex-1].distance*cos(points[pointIndex-1].angle),points[pointIndex-1].distance*sin(points[pointIndex-1].angle));
+    Point p2(points[pointIndex+1].distance*cos(points[pointIndex+1].angle),points[pointIndex+1].distance*sin(points[pointIndex+1].angle));
+    Point diff(p1.x-p2.x, p1.y-p2.y);
+    n_theta = atan2(diff.y, diff.x);
 }
 
 void LidarObstacleExtractor::extractCircularObstacles(LidarState *data)

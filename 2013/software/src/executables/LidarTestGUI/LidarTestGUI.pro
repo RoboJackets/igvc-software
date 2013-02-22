@@ -61,3 +61,10 @@ else:unix:!symbian: PRE_TARGETDEPS += $$PWD/../../../../../../../../usr/lib/libb
 
 CONFIG += link_pkgconfig
 PKGCONFIG += x11
+
+OTHER_FILES += \
+    HelpText.html
+
+helptext.path = $$OUT_PWD
+helptext.files = HelpText.html
+INSTALLS += helptext

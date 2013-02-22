@@ -28,6 +28,10 @@ public:
 
     void setViewMode(ViewMode mode);
 
+    bool event(QEvent * event);
+
+    bool shouldUpdateOnScaling;
+
 protected:
     void paintEvent(QPaintEvent *event);
 
@@ -46,6 +50,10 @@ private:
     double _scale;
 
     bool _drawing;
+
+    bool _isDragging;
+
+    QPointF _origin;
 
     LidarObstacleExtractor _lidObstExtractor;
     std::vector<Obstacle*> _obstacles;

@@ -33,6 +33,8 @@ private:
 
     std::vector<Obstacle*> extractLinearObstacles(LidarState *data);
     void extractCircularObstacles(LidarState *data);
+    bool isPointOnLine(float x, float y, float rho, float theta, int pointIndex, LidarPoint *points);
+    void estimateNormalAtPoint(int pointIndex, LidarPoint *points, float &n_theta);
 
 };
 
