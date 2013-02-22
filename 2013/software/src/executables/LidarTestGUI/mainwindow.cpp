@@ -1,7 +1,9 @@
 #include "mainwindow.h"
-#include "qpainter.h"
+#include <QPainter>
 #include "ui_mainwindow.h"
-#include "qfiledialog.h"
+#include <QFileDialog>
+#include <QTextEdit>
+#include <fstream>
 
 using namespace IGVC::Sensors;
 
@@ -14,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lidarView->setScale(0.25);
     ui->horizontalSlider->setRange(10, 10000);
     ui->horizontalSlider->setValue(ui->horizontalSlider->maximum()/4);
+    ui->actionLines->setEnabled(false);
     switchMode(Default);
 }
 
@@ -64,6 +67,9 @@ void MainWindow::on_actionDefault_triggered()
 
 void MainWindow::switchMode(Mode newMode)
 {
+    if(newMode == _mode && newMode != File)
+        return;
+
     NAV200 *_newNav;
     SimulatedLidar *_newSim;
 
@@ -73,6 +79,7 @@ void MainWindow::switchMode(Mode newMode)
     case Nav200:
         _newNav = new NAV200();
         ui->lidarView->setLidar(_newNav);
+        ui->lidarView->shouldUpdateOnScaling = false;
         break;
     case File:
         _newSim = new SimulatedLidar();
@@ -93,6 +100,7 @@ void MainWindow::switchMode(Mode newMode)
     {
     case Nav200:
         _nav200->stop();
+        ui->lidarView->shouldUpdateOnScaling = true;
         delete _nav200;
         break;
     case File:
@@ -127,9 +135,32 @@ void MainWindow::switchMode(Mode newMode)
 void MainWindow::on_actionLines_triggered()
 {
     ui->lidarView->setViewMode(LidarDisplayWidget::Lines);
+    ui->actionLines->setEnabled(false);
+    ui->actionPoints->setEnabled(true);
 }
 
 void MainWindow::on_actionPoints_triggered()
 {
     ui->lidarView->setViewMode(LidarDisplayWidget::Points);
+    ui->actionLines->setEnabled(true);
+    ui->actionPoints->setEnabled(false);
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    std::fstream ifs("HelpText.html");
+    if(ifs)
+    {
+        std::stringstream content;
+        content << ifs.rdbuf();
+        QTextEdit *help = new QTextEdit(this);
+        help->setWindowFlags(Qt::Tool);
+        help->setWindowTitle("About");
+        help->setReadOnly(true);
+        help->setHtml(content.str().c_str());
+//        help->append(content.str().c_str());
+        help->show();
+    } else {
+        std::cerr << "Error: Could not load help file." << std::endl;
+    }
 }
