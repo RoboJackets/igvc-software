@@ -39,6 +39,16 @@ void LinearObstacle::setPoints(Point start, Point end)
     _end = end;
 }
 
+void LinearObstacle::setStart(Point start)
+{
+    _start = start;
+}
+
+void LinearObstacle::setEnd(Point end)
+{
+    _end = end;
+}
+
 }
 }
 }
