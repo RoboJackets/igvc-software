@@ -104,10 +104,12 @@
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.cpp">
 			<Option target="TestMotors" />
 			<Option target="TestJoystick_and_Motors" />
+			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
 			<Option target="TestMotors" />
 			<Option target="TestJoystick_and_Motors" />
+			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
 			<Option target="TestMotors" />
@@ -139,10 +141,16 @@
 		<Unit filename="src/sensors/DataStructures/DataPoint.hpp">
 			<Option target="TestData" />
 		</Unit>
+		<Unit filename="src/sensors/DataStructures/GPSAccuracy.hpp">
+			<Option target="TestData" />
+		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
 			<Option target="TestData" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.h">
+			<Option target="TestData" />
+		</Unit>
+		<Unit filename="src/sensors/DataStructures/IMUData.hpp">
 			<Option target="TestData" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
@@ -233,6 +241,7 @@
 			<Option target="TestLidar" />
 			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
+			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
@@ -241,6 +250,7 @@
 			<Option target="TestLidar" />
 			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
+			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
