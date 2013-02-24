@@ -12,9 +12,6 @@ class RobotPosition
 {
     public:
         RobotPosition();
-        void fuse(GPSData);
-        //fuse(IMUData);
-        //fuse(EncoderData);
         virtual ~RobotPosition();
         double accel(int Index);
         double angVel(int Index);
@@ -33,15 +30,12 @@ class RobotPosition
         double longAtTime(double time);
         double speedAtTime(double time);
         double headingAtTime(double time);
-        void latLongUpdate(double oldLat, double oldLong, double distance, double angle, double& newLat, double& newLong);
         void latLongCartesianUpdate(double oldLat, double oldLong, double deltaX, double deltaY, double& newLat, double& newLong);
         DataArray<DataPoint <double> >& Lat(void);
         DataArray<DataPoint <double> >& Long(void);
         DataArray<DataPoint <double> >& Heading(void);
         DataArray<DataPoint <double> >& Speed(void);
         GPSData IMU2GPS(IMUData in);
-        double LatRateOfChange(double endInd);
-        double LongRateOfChange(double endInd);
         void print(void);
 
     private:
