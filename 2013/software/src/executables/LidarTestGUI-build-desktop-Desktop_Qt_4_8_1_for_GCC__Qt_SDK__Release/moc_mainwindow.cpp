@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Sun Feb 17 04:43:28 2013
+** Created: Tue Feb 19 23:48:01 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-       8,   14, // methods
+       9,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -39,6 +39,7 @@ static const uint qt_meta_data_MainWindow[] = {
      170,   11,   11,   11, 0x08,
      199,   11,   11,   11, 0x08,
      226,   11,   11,   11, 0x08,
+     254,   11,   11,   11, 0x08,
 
        0        // eod
 };
@@ -53,6 +54,7 @@ static const char qt_meta_stringdata_MainWindow[] = {
     "on_actionDefault_triggered()\0"
     "on_actionLines_triggered()\0"
     "on_actionPoints_triggered()\0"
+    "on_actionAbout_triggered()\0"
 };
 
 void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -69,6 +71,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 5: _t->on_actionDefault_triggered(); break;
         case 6: _t->on_actionLines_triggered(); break;
         case 7: _t->on_actionPoints_triggered(); break;
+        case 8: _t->on_actionAbout_triggered(); break;
         default: ;
         }
     }
@@ -106,9 +109,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 8)
+        if (_id < 9)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 8;
+        _id -= 9;
     }
     return _id;
 }

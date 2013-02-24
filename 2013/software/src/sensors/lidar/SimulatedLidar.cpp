@@ -31,10 +31,10 @@ void SimulatedLidar::thread_run()
 {
     while(_running)
     {
-        //usleep(_delay);
+//        usleep(_delay);
         sleep(1);
         onNewData(_data);
-        _running = false;
+//        _running = false;
     }
 }
 
@@ -61,6 +61,8 @@ bool SimulatedLidar::StateIsAvailable()
 
 void SimulatedLidar::loadFile(const char *path)
 {
+    _running = false;
+    _thread.join();
     using namespace std;
     LidarState state;
     string line;
@@ -95,6 +97,8 @@ void SimulatedLidar::loadFile(const char *path)
         errmsg.exec();
     }
     _data = state;
+    _thread = boost::thread(boost::bind(&SimulatedLidar::thread_run, this));
+    _running = true;
 }
 
 void SimulatedLidar::setDelay(int usec)

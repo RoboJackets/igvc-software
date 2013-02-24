@@ -38,6 +38,8 @@ private slots:
 
     void on_actionPoints_triggered();
 
+    void on_actionAbout_triggered();
+
 private:
     Ui::MainWindow *ui;
     NAV200 *_nav200;

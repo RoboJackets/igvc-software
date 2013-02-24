@@ -1,5 +1,7 @@
 #include "lidardisplaywidget.h"
-#include "qpainter.h"
+#include <QPainter>
+#include <QEvent>
+#include <QMouseEvent>
 #include <iostream>
 #include <fstream>
 
@@ -12,6 +14,8 @@ LidarDisplayWidget::LidarDisplayWidget(QWidget *parent) :
     _scale = 1.0;
     _drawing = false;
     _vMode = Lines;
+    _origin = QPointF(164, 104.5);
+    shouldUpdateOnScaling = true;
 }
 
 void LidarDisplayWidget::paintEvent(QPaintEvent *)
@@ -19,7 +23,6 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
     _drawing = true;
     QPainter painter;
     painter.begin(this);
-    QPointF origin(this->width()/2.0, this->height()/2.0);
 
     painter.setPen(Qt::black);
     boost::mutex::scoped_lock(_locker);
@@ -28,7 +31,7 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
         LidarPoint p = _lidarData.points[i];
         if(p.valid)
         {
-            QPointF end(cos(p.angle)*p.distance * _scale + origin.x(), -sin(p.angle)*p.distance*_scale + origin.y());
+            QPointF end(cos(p.angle)*p.distance * _scale + _origin.x(), -sin(p.angle)*p.distance*_scale + _origin.y());
 
             switch(_vMode)
             {
@@ -36,7 +39,7 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
                 painter.drawPoint(end);
                 break;
             case Lines:
-                painter.drawLine(origin, end);
+                painter.drawLine(_origin, end);
                 break;
             }
         }
@@ -44,6 +47,18 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
 
     painter.setPen(Qt::green);
 //    std::cout << _obstacles.size() << std::endl;
+
+//    for (int i = 0; i < _obstacles.size(); i++)
+//    {
+//        Point *points = _obstacles.at(i)->getPoints();
+//        for(int p = 0; p < _obstacles.at(i)->getNumPoints(); p++)
+//        {
+//            std::cout << "(" << points[p].x << ", " << points[p].y << ") ";
+//        }
+//        std::cout << std::endl;
+//    }
+//    std::cout << std::endl;
+
     for(std::vector<Obstacle*>::iterator iter = _obstacles.begin(); iter < _obstacles.end(); iter++)
     {
         Obstacle *obstacle = *iter;
@@ -51,19 +66,22 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
         for(int i = 0; i < obstacle->getNumPoints()-1; i++)
         {
             Point p1 = points[i], p2 = points[i+1];
+            std::cout << "(" << p1.x << ", " << p1.y << ")";
             QPointF start(p1.x, -p1.y);
             start *= _scale;
-            start += origin;
+            start += _origin;
             QPointF end(p2.x, -p2.y);
             end *= _scale;
-            end += origin;
+            end += _origin;
+            std::cout << "(" << start.x() << ", " << start.y() << ")";
             painter.drawLine(start, end);
         }
     }
+    std::cout << std::endl;
 
     painter.setPen(Qt::red);
-    painter.drawLine(origin, origin + QPointF(_scale,0));
-    painter.drawLine(origin, origin + QPointF(0,-_scale));
+    painter.drawLine(_origin, _origin + QPointF(_scale,0));
+    painter.drawLine(_origin, _origin + QPointF(0,-_scale));
 
     painter.end();
     _drawing = false;
@@ -86,12 +104,24 @@ void LidarDisplayWidget::onNewLidarData(LidarState state)
 void LidarDisplayWidget::setScale(double scale)
 {
     while(_drawing);
+    boost::mutex::scoped_lock(_locker);
     _scale = scale;
-    this->update();
+    // Normally, I wouldn't recommend a hack like this,
+    // but for some reason this causes things to crash
+    // when running on the NAV200, so I just have the
+    // main window tell this widget not to update on
+    // scaling when running on the NAV200. You shouldn't
+    // notice much of a difference when running the app
+    // because the NAV200 refreshes the data often enough
+    // to more or less keep up.
+    if(shouldUpdateOnScaling)
+        this->update();
 }
 
 void LidarDisplayWidget::setLidar(Lidar *device)
 {
+    while(_drawing);
+    boost::mutex::scoped_lock(_locker);
     if(device)
     {
         _lidar = device;
@@ -99,8 +129,36 @@ void LidarDisplayWidget::setLidar(Lidar *device)
     }
 }
 
+bool LidarDisplayWidget::event(QEvent *event)
+{
+    if(event->type() == QEvent::MouseButtonPress)
+    {
+        _isDragging = true;
+        return true;
+    } else if(event->type() == QEvent::MouseButtonRelease)
+    {
+        _isDragging = false;
+        return true;
+    } else if(event->type() == QEvent::MouseMove)
+    {
+        if(_isDragging)
+        {
+            QMouseEvent *me = static_cast<QMouseEvent *>(event);
+            _origin.setX(me->x());
+            _origin.setY(me->y());
+            // See setScale() to find out why this is here.
+            if(shouldUpdateOnScaling)
+                this->update();
+        }
+        return true;
+    }
+    return QWidget::event(event);
+}
+
 void LidarDisplayWidget::setViewMode(ViewMode mode)
 {
+    while(_drawing);
+    boost::mutex::scoped_lock(_locker);
     _vMode = mode;
     this->update();
 }

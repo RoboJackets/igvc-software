@@ -2,6 +2,10 @@
 #ifndef OSMC_DRIVER
 #define OSMC_DRIVER
 
+#include "serial/ASIOSerialPort.h"
+
+using namespace std;
+
 class OSMC_driver
 {
 
@@ -14,6 +18,7 @@ public:
 	    BACKWARD
 	};
 
+    OSMC_driver();
 	~OSMC_driver();
 	bool arduinoCheck();
 	void setPwm(char pwm, char dir);
@@ -35,6 +40,9 @@ public:
 
 private:
 	const static double WHEELBASE = 0.762; //meters
+	ASIOSerialPort arduinoLeft;
+    ASIOSerialPort arduinoRight;
+    ASIOSerialPort arduinoEncoder;
 
 };
 

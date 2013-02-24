@@ -1,15 +1,17 @@
 #include <string.h>
 
-#include "serial/ASIOSerialPort.h"
 #include <iostream>
 #include "actuators/motors/OSMC_driver/OSMC_driver.hpp"
 #include <time.h>
 
 using namespace std;
 
-ASIOSerialPort arduinoLeft("/dev/igvc_2012_left_motor_shield", 9600);
-ASIOSerialPort arduinoRight("/dev/igvc_2012_right_motor_shield", 9600);
-ASIOSerialPort arduinoEncoder("/dev/igvc_2012_right_encoder_shield", 9600);
+OSMC_driver::OSMC_driver()
+    : arduinoLeft("/dev/igvc_2012_left_motor_shield", 9600),
+    arduinoRight("/dev/igvc_2012_right_motor_shield", 9600),
+    arduinoEncoder("/dev/igvc_2012_right_encoder_shield", 9600)
+{
+}
 
 OSMC_driver::~OSMC_driver()
 {

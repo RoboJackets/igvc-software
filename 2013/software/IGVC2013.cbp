@@ -7,7 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="TestSerial">
-				<Option output="bin/Debug/TestSerial" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/TestSerial" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -16,17 +16,17 @@
 				</Compiler>
 			</Target>
 			<Target title="TestGPS">
-				<Option output="bin/Debug/TestGPS" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/TestGPS" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="TestMotors">
-				<Option output="bin/Debug/TestMotors" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/TestMotors" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="TestData">
-				<Option output="bin/Debug/TestData" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/TestData" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
@@ -37,22 +37,17 @@
 				</Linker>
 			</Target>
 			<Target title="TestLidar">
-				<Option output="bin/Debug/TestLidar" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/TestLidar" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="TestJoystick">
-				<Option output="TestJoystick" prefix_auto="1" extension_auto="1" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-			</Target>
-			<Target title="TestJoystick_and_Motors">
-				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/TestJoystick" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="testCamera">
-				<Option output="bin/Debug/testCamera" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/testCamera" prefix_auto="1" extension_auto="1" />
 				<Option type="0" />
 				<Option compiler="gcc" />
 				<Linker>
@@ -60,8 +55,13 @@
 				</Linker>
 			</Target>
 			<Target title="Xbee">
-				<Option output="bin/Debug/Xbee" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/Xbee" prefix_auto="1" extension_auto="1" />
 				<Option type="0" />
+				<Option compiler="gcc" />
+			</Target>
+			<Target title="JoystickMB">
+				<Option output="bin/JoystickMB" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
 		</Build>
@@ -103,6 +103,7 @@
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.cpp">
 			<Option target="TestMotors" />
+<<<<<<< HEAD
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 		</Unit>
@@ -110,6 +111,15 @@
 			<Option target="TestMotors" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
+=======
+			<Option target="TestJoystick" />
+			<Option target="JoystickMB" />
+		</Unit>
+		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
+			<Option target="TestMotors" />
+			<Option target="TestJoystick" />
+			<Option target="JoystickMB" />
+>>>>>>> 21b6a58d31260cd7e885ccb991619c91197eaf07
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
 			<Option target="TestMotors" />
@@ -203,15 +213,21 @@
 		</Unit>
 		<Unit filename="src/sensors/joystick/Joystick.cpp">
 			<Option target="TestJoystick" />
-			<Option target="TestJoystick_and_Motors" />
 		</Unit>
 		<Unit filename="src/sensors/joystick/Joystick.h">
 			<Option target="TestJoystick" />
-			<Option target="TestJoystick_and_Motors" />
 		</Unit>
 		<Unit filename="src/sensors/joystick/testJoystick.cpp">
 			<Option target="TestJoystick" />
-			<Option target="TestJoystick_and_Motors" />
+		</Unit>
+		<Unit filename="src/sensors/joystickMB/JoystickMB.cpp">
+			<Option target="JoystickMB" />
+		</Unit>
+		<Unit filename="src/sensors/joystickMB/JoystickMB.h">
+			<Option target="JoystickMB" />
+		</Unit>
+		<Unit filename="src/sensors/joystickMB/main_JoystickMB.cpp">
+			<Option target="JoystickMB" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/Lidar.h">
 			<Option target="TestLidar" />
@@ -242,6 +258,8 @@
 			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
+			<Option target="TestJoystick" />
+			<Option target="JoystickMB" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
@@ -251,6 +269,7 @@
 			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
+			<Option target="JoystickMB" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
