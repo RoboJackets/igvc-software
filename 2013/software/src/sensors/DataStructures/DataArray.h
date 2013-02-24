@@ -9,8 +9,8 @@ class DataArray
         DataArray(int);
         void push(DataType);
         int size();
-        int firstIndBefore(long long);
-        int firstIndAfter(long long);
+        int firstIndBefore(double);
+        int firstIndAfter(double);
         DataType operator[](int);
         virtual ~DataArray();
 
@@ -18,6 +18,8 @@ class DataArray
 
         boost::circular_buffer<DataType> buff;
         int length;
+
+
 };
 
 
@@ -42,7 +44,7 @@ int DataArray<DataType>::size(void)
 * This function makes the asssumptions that the array is a chronologically ordered with the newest time being first
 ***/
 template<class DataType>
-int DataArray<DataType>::firstIndBefore(long long aTime)
+int DataArray<DataType>::firstIndBefore(double aTime)
 //TODO Reconsider the return values of this function.
 {
     int size = buff.size();
@@ -53,35 +55,38 @@ int DataArray<DataType>::firstIndBefore(long long aTime)
 
     for (int i =0;i<size;i++)
     {
-        if (aTime > buff[i].time())
+        if (aTime >= buff[i].time())
         {
             return i; //Handles situations where time is later than first entry or between two existing ones.
         }
     }
 
-    return -1; //All entries are after the queried time
+    return -3; //All entries are after the queried time
 }
 
 template<class DataType>
-int DataArray<DataType>::firstIndAfter(long long aTime)
+int DataArray<DataType>::firstIndAfter(double aTime)
 //TODO Reconsider the return values of this function.
 //TODO Verify logic for this function, it was a quick port from firstIndAfter
 {
     int size = buff.size();
-    if (size == 0);
+    if (size == 0)
     {
+        std::cout << "Buffer is empty";
         return -1; //buffer is empty, no valid answer
     }
 
     for (int i =size-1;i>-1;i--)
     {
-        if (aTime > buff[i].time())
+        if (aTime <= buff[i].time())
         {
+            //std:: cout << "aTime is " << aTime << ". buffTime is " << buff[i].time() << std::endl;
             return i; //Handles situations where time is later than first entry or between two existing ones.
         }
     }
 
-    return -1; //All entries are before the queried time
+    //TODO rethink if this is the desired output for this situation
+    return 0; //All entries are before the queried time
 }
 
 
