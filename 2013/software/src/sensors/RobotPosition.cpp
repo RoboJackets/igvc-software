@@ -17,8 +17,6 @@ RobotPosition::~RobotPosition()
     //dtor
 }
 
-
-
 void RobotPosition::push(GPSData newData)
 {
     double time = seconds_since_IGVCpoch();
@@ -188,13 +186,19 @@ int RobotPosition::update(GPSData newData)
 
 int RobotPosition::update(IMUData newData)
 {
-    GPSData newForm = IMU2GPS(newData);
-    return update(newForm);
+    if (_Lat.size()<3) //Ensures there is absolutele information position before we try to use relative to update it.
+    {
+        return -1;
+    }
+     else
+     {
+        GPSData newForm = IMU2GPS(newData);
+        return update(newForm);
+     }
 }
 
 GPSData RobotPosition::IMU2GPS(IMUData in)
 {
-    double time = in.time();
     double lastMeasurementTime = in.time()-in.deltaTime();
     double offsetHeading;
     double offsetSpeed;
@@ -203,11 +207,29 @@ GPSData RobotPosition::IMU2GPS(IMUData in)
     double oldLong = longAtTime(lastMeasurementTime);
     double newLat;
     double newLong;
-    //latLongUpdate(oldLat, oldLong, offsetSpeed, offsetHeading, newLat, newLong);
     latLongCartesianUpdate(oldLat, oldLong, in.deltaX(), in.deltaY(), newLat, newLong);
     GPSData newForm((double)newLat, (double)newLong, in.Heading(), in.Speed(), in.time());
     return newForm;
 
+}
+
+double RobotPosition::linInterp(double time, DataArray<DataPoint <double> >& attr)
+{
+    int previous = attr.firstIndBefore(time);
+    if (previous == 0) // If the time is after our latest information
+    {
+        return attr[0].value();
+    }
+
+    else //Do linear interpolation
+    {
+        double last = attr[previous].value();
+        double slope = rateOfChange((previous-1), attr);
+        double dT =  time-attr[previous].time();
+        return last + (slope*dT);
+    }
+    //TODO add code to ensure that there are at least two values available or state as assumption
+    //There may need to be code written for the case in which
 }
 
 double RobotPosition::latAtTime(double time)
@@ -230,35 +252,6 @@ double RobotPosition::speedAtTime(double time)
     return linInterp(time, _Speed);
 }
 
-double RobotPosition::linInterp(double time, DataArray<DataPoint <double> >& attr)
-{
-    int previous = attr.firstIndBefore(time);
-    if (previous == 0) // If the time is after our latest information
-    {
-        return attr[0].value();
-    }
-
-    else //Do linear interpolation
-    {
-        double last = attr[previous].value();
-        double slope = rateOfChange((previous-1), attr);
-        double dT =  time-attr[previous].time();
-        return last + (slope*dT);
-
-
-        /*
-        double before = attr[previous].value();
-        double after = attr[previous-1].value();
-        double percentStep = (time-attr[previous].time())/(attr[previous-1].time()-attr[previous].time());
-        return before + (after-before)*percentStep;
-        */
-    }
-
-
-
-    //TODO add code to ensure that there are at least two values available or state as assumption
-    //There may need to be code written for the case in which
-}
 
 //Gives the linear rate of change between two indices of one of the data structures
 double RobotPosition::rateOfChange(int ind, DataArray<DataPoint <double> >& attr)
@@ -269,8 +262,6 @@ double RobotPosition::rateOfChange(int ind, DataArray<DataPoint <double> >& attr
     return (newVal-oldVal)/dT;
 }
 
-
-
 //Taken from http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
 void RobotPosition::latLongCartesianUpdate(double oldLat, double oldLong, double deltaX, double deltaY, double& newLat, double& newLong)
 {
@@ -278,36 +269,12 @@ void RobotPosition::latLongCartesianUpdate(double oldLat, double oldLong, double
     newLong = oldLong + deltaX/(111,111*cos(oldLat));
 }
 
-void RobotPosition::latLongUpdate(double oldLat, double oldLong, double distance, double angle, double& newLat, double& newLong)
-{
-    oldLat = deg2rad(oldLat);
-    double lat=asin(sin(oldLat)*cos(distance)+cos(oldLat)*sin(distance)*cos(angle));
-    double lon;
-    if (cos(lat)==0)
-    {
-        lon=oldLong;      // endpoint a pole
-    }
-
-    else
-    {
-        lon=fmod(oldLat-asin(sin(angle)*sin(distance)/cos(lat))+M_PI,2*M_PI)-M_PI;
-    }
-
-    newLat = rad2deg(newLat);
-    newLong = rad2deg(newLong);
-}
-
-double RobotPosition::LatRateOfChange(double endInd)
-{
-    rateOfChange(endInd, _Lat);
-}
-
-double RobotPosition::LongRateOfChange(double endInd)
-{
-    rateOfChange(endInd, _Long);
-}
-
 void RobotPosition::print(void) {
 std::cout << "Lat: " << _Lat[0].value() << ".Long: " << _Long[0].value() << ".Heading: " << _Heading[0].value() << "Speed: " << _Speed[0].value() << ".";
 //TODO add print method to acccuracy and call it here
+}
+
+DataArray<DataPoint <double> >& RobotPosition::Lat(void)
+{
+    return _Lat;
 }
