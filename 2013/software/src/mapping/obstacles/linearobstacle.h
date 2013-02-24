@@ -22,6 +22,9 @@ public:
 
     void setPoints(Point start, Point end);
 
+    void setStart(Point start);
+    void setEnd(Point end);
+
 private:
     Point _start;
     Point _end;
