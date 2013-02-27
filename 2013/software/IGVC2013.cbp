@@ -159,10 +159,12 @@
 		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
+			<Option target="TestGPS" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.h">
 			<Option target="TestData" />
 			<Option target="Regression" />
+			<Option target="TestGPS" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/IMUData.hpp">
 			<Option target="TestData" />
@@ -171,10 +173,12 @@
 		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
+			<Option target="TestGPS" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
 			<Option target="Regression" />
+			<Option target="TestGPS" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/GPS.hpp">
 			<Option target="TestGPS" />
