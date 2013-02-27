@@ -32,6 +32,8 @@ public:
 
     bool shouldUpdateOnScaling;
 
+    bool showInvalid;
+
 protected:
     void paintEvent(QPaintEvent *event);
 
