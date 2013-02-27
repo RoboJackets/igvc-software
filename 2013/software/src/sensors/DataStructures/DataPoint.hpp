@@ -1,7 +1,7 @@
 #ifndef DATAPOINT_H
 #define DATAPOINT_H
 
-#include <SensorData.h>
+#include <sensors/DataStructures/SensorData.h>
 
 template <class aType>
 class DataPoint : public SensorData
