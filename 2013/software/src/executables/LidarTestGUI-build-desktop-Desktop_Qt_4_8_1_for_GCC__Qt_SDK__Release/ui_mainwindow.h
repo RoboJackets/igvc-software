@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Tue Feb 19 23:47:59 2013
+** Created: Tue Feb 26 17:34:51 2013
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -37,6 +37,7 @@ public:
     QAction *actionLines;
     QAction *actionPoints;
     QAction *actionAbout;
+    QAction *actionInvalid_Points;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QSlider *horizontalSlider;
@@ -75,6 +76,9 @@ public:
         actionPoints->setObjectName(QString::fromUtf8("actionPoints"));
         actionAbout = new QAction(MainWindow);
         actionAbout->setObjectName(QString::fromUtf8("actionAbout"));
+        actionInvalid_Points = new QAction(MainWindow);
+        actionInvalid_Points->setObjectName(QString::fromUtf8("actionInvalid_Points"));
+        actionInvalid_Points->setCheckable(true);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -129,6 +133,8 @@ public:
         menuSimulated->addAction(actionDefault);
         menuView->addAction(actionLines);
         menuView->addAction(actionPoints);
+        menuView->addSeparator();
+        menuView->addAction(actionInvalid_Points);
         menuHelp->addAction(actionAbout);
 
         retranslateUi(MainWindow);
@@ -147,6 +153,10 @@ public:
         actionLines->setText(QApplication::translate("MainWindow", "Lines", 0, QApplication::UnicodeUTF8));
         actionPoints->setText(QApplication::translate("MainWindow", "Points", 0, QApplication::UnicodeUTF8));
         actionAbout->setText(QApplication::translate("MainWindow", "About", 0, QApplication::UnicodeUTF8));
+        actionInvalid_Points->setText(QApplication::translate("MainWindow", "Invalid Points", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        actionInvalid_Points->setToolTip(QApplication::translate("MainWindow", "Invalid Points", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0, QApplication::UnicodeUTF8));
         menuLidar->setTitle(QApplication::translate("MainWindow", "Lidar", 0, QApplication::UnicodeUTF8));
         menuSimulated->setTitle(QApplication::translate("MainWindow", "Simulated", 0, QApplication::UnicodeUTF8));

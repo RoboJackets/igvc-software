@@ -14,13 +14,24 @@ struct Point {
         y = 0;
     }
 
-    Point(int xval, int yval)
+    Point(float xval, float yval)
     {
         x = xval;
         y = yval;
     }
 
-    float x, y;
+    bool operator == (Point other)
+    {
+        return x == other.x && y == other.y;
+    }
+
+    bool operator != (Point other)
+    {
+        return x != other.x || y != other.y;
+    }
+
+    float x;
+    float y;
 };
 
 class Obstacle

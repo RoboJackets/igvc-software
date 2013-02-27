@@ -164,3 +164,8 @@ void MainWindow::on_actionAbout_triggered()
         std::cerr << "Error: Could not load help file." << std::endl;
     }
 }
+
+void MainWindow::on_actionInvalid_Points_triggered(bool checked)
+{
+    ui->lidarView->showInvalid = checked;
+}

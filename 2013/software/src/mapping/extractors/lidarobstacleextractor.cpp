@@ -39,9 +39,21 @@ std::vector<Obstacle*> LidarObstacleExtractor::extractLinearObstacles(LidarState
             if(!inLine)
             {
                 start = Point(x, y);
+                end = Point(x, y);
                 inLine = true;
             } else {
-                end = Point(x, y);
+                float dist = sqrt( (x-end.x)*(x-end.x) + (y-end.y)*(y-end.y) );
+                if(dist > 0.05)
+                {
+                    if(start != end)
+                    {
+//                    end = Point(x,y);
+                        lines.push_back(new LinearObstacle(start, end));
+                    }
+                    inLine = false;
+                } else {
+                    end = Point(x, y);
+                }
             }
         } else {
             if(inLine)
@@ -51,17 +63,10 @@ std::vector<Obstacle*> LidarObstacleExtractor::extractLinearObstacles(LidarState
             }
         }
     }
-
-//    for (int i = 0; i < lines.size(); i++)
-//    {
-//        Point *points = lines.at(i)->getPoints();
-//        for(int p = 0; p < lines.at(i)->getNumPoints(); p++)
-//        {
-//            cout << "(" << points[p].x << ", " << points[p].y << ") ";
-//        }
-//        cout << endl;
-//    }
-//    cout << endl;
+    if(inLine)
+    {
+        lines.push_back(new LinearObstacle(start, end));
+    }
 
     return lines;
 

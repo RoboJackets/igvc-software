@@ -16,6 +16,7 @@ LidarDisplayWidget::LidarDisplayWidget(QWidget *parent) :
     _vMode = Lines;
     _origin = QPointF(164, 104.5);
     shouldUpdateOnScaling = true;
+    showInvalid = false;
 }
 
 void LidarDisplayWidget::paintEvent(QPaintEvent *)
@@ -42,11 +43,30 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
                 painter.drawLine(_origin, end);
                 break;
             }
+        } else {
+            if(showInvalid)
+            {
+                painter.setPen(Qt::gray);
+                QPointF end(cos(p.angle)*p.distance * _scale + _origin.x(), -sin(p.angle)*p.distance*_scale + _origin.y());
+
+                switch(_vMode)
+                {
+                case Points:
+                    painter.drawPoint(end);
+                    break;
+                case Lines:
+                    painter.drawLine(_origin, end);
+                    break;
+                }
+                painter.setPen(Qt::black);
+            }
         }
     }
 
-    painter.setPen(Qt::green);
-//    std::cout << _obstacles.size() << std::endl;
+    painter.setPen(QPen(Qt::blue, 2));
+    std::cout << _obstacles.size() << std::endl;
+
+
 
 //    for (int i = 0; i < _obstacles.size(); i++)
 //    {
@@ -65,19 +85,16 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
         Point *points = obstacle->getPoints();
         for(int i = 0; i < obstacle->getNumPoints()-1; i++)
         {
-            Point p1 = points[i], p2 = points[i+1];
-            std::cout << "(" << p1.x << ", " << p1.y << ")";
+            Point &p1 = points[i], &p2 = points[i+1];
             QPointF start(p1.x, -p1.y);
             start *= _scale;
             start += _origin;
             QPointF end(p2.x, -p2.y);
             end *= _scale;
             end += _origin;
-            std::cout << "(" << start.x() << ", " << start.y() << ")";
             painter.drawLine(start, end);
         }
     }
-    std::cout << std::endl;
 
     painter.setPen(Qt::red);
     painter.drawLine(_origin, _origin + QPointF(_scale,0));
