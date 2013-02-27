@@ -13,18 +13,21 @@ namespace IGVC {
 namespace Sensors {
 
 HemisphereA100GPS::HemisphereA100GPS():
-	serialPort("/dev/ttyGPS", 4800),
+    DefaultAccuracy(.0001, .0001, 3, 0.01),
+    serialPort("/dev/ttyGPS", 4800),
 	LonNewSerialLine(this),
 	stateQueue()
 {
     serialPort.onNewLine += &LonNewSerialLine;
 	maxBufferLength = 10;
+	serialPort.startEvents();
 }
 
 void HemisphereA100GPS::onNewSerialLine(string line) {
-    GPSState state;
+    GPSData state;
     if(parseLine(line, state)) {
-        gettimeofday(&state.laptoptime, NULL);
+        // TODO set time
+//        gettimeofday(&state.laptoptime, NULL);
 
         boost::mutex::scoped_lock lock(queueLocker);
         stateQueue.push_back(state);
@@ -38,7 +41,7 @@ void HemisphereA100GPS::onNewSerialLine(string line) {
 //void HemisphereA100GPS::threadRun() {
 //	while(serialPort.isConnected()) {
 //		std::string line = serialPort.readln();
-//		GPSState state;
+//		GPSData state;
 //		if(parseLine(line, state)) {
 //			gettimeofday(&state.laptoptime, NULL);
 //
@@ -52,25 +55,25 @@ void HemisphereA100GPS::onNewSerialLine(string line) {
 //	}
 //}
 
-bool HemisphereA100GPS::parseLine(std::string line, GPSState &state) {
+bool HemisphereA100GPS::parseLine(std::string line, GPSData &state) {
 	return nmea::decodeGPGGA(line, state) ||
 		   nmea::decodeGPRMC(line, state);
 }
 
-GPSState HemisphereA100GPS::GetState() {
+GPSData HemisphereA100GPS::GetState() {
 	boost::mutex::scoped_lock lock(queueLocker);
-	GPSState state = stateQueue.back();
+	GPSData state = stateQueue.back();
 	stateQueue.remove(state);
 	return state;
 }
 
-GPSState HemisphereA100GPS::GetStateAtTime(timeval time) {
+GPSData HemisphereA100GPS::GetStateAtTime(timeval time) {
 	boost::mutex::scoped_lock lock(queueLocker);
-	std::list<GPSState>::iterator iter = stateQueue.begin();
+	std::list<GPSData>::iterator iter = stateQueue.begin();
 	double acceptableError = 0.1;
 	while(iter != stateQueue.end()) {
-		GPSState s = (*iter);
-		time_t secDelta = difftime(time.tv_sec, s.laptoptime.tv_sec);
+		GPSData s = (*iter);
+		/*time_t secDelta = difftime(time.tv_sec, s.laptoptime.tv_sec);
 		suseconds_t usecDelta = time.tv_usec - s.laptoptime.tv_usec;
 		double delta = double(secDelta) + 1e-6*double(usecDelta);
 		if(delta <= acceptableError) {
@@ -78,9 +81,9 @@ GPSState HemisphereA100GPS::GetStateAtTime(timeval time) {
 			return s;
 		} else {
 			iter++;
-		}
+		}*/
 	}
-	GPSState empty;
+	GPSData empty;
 	return empty;
 }
 
@@ -89,6 +92,7 @@ bool HemisphereA100GPS::StateIsAvailable() {
 }
 
 HemisphereA100GPS::~HemisphereA100GPS() {
+    serialPort.stopEvents();
 	serialPort.close();
 }
 
