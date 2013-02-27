@@ -64,6 +64,14 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+			<Target title="Regression">
+				<Option output="bin/Regression" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Linker>
+					<Add library="boost_unit_test_framework" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -103,23 +111,13 @@
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.cpp">
 			<Option target="TestMotors" />
-<<<<<<< HEAD
-			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
 			<Option target="TestMotors" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
-=======
-			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />
-		</Unit>
-		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
-			<Option target="TestMotors" />
-			<Option target="TestJoystick" />
-			<Option target="JoystickMB" />
->>>>>>> 21b6a58d31260cd7e885ccb991619c91197eaf07
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
 			<Option target="TestMotors" />
@@ -144,30 +142,39 @@
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/DataArray.cpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/DataArray.h">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/DataPoint.hpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSAccuracy.hpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.h">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/IMUData.hpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/GPS.hpp">
 			<Option target="TestGPS" />
@@ -187,11 +194,16 @@
 		<Unit filename="src/sensors/GPS/nmea.hpp">
 			<Option target="TestGPS" />
 		</Unit>
+		<Unit filename="src/sensors/IMU/IMU.h">
+			<Option target="TestData" />
+		</Unit>
 		<Unit filename="src/sensors/RobotPosition.cpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/RobotPosition.h">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/Sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -258,7 +270,6 @@
 			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
-			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
@@ -276,6 +287,9 @@
 		</Unit>
 		<Unit filename="src/xbee.cpp">
 			<Option target="Xbee" />
+		</Unit>
+		<Unit filename="test/sensors/RobotPositionTest.cpp">
+			<Option target="Regression" />
 		</Unit>
 		<Extensions>
 			<code_completion />
