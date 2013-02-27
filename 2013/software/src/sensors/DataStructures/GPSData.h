@@ -8,6 +8,17 @@
 class GPSData : public SensorData
 {
 public:
+
+    inline GPSData()
+        : SensorData(),
+        _Accuracy(NAV200Default)
+    {
+        _Lat = 0;
+        _Long = 0;
+        _Heading = 0;
+        _Speed = 0;
+    }
+
     inline GPSData(double latitude, double longitude, double heading, double speed): SensorData(), _Lat(latitude), _Long(longitude),
       _Heading(heading), _Speed(speed), _Accuracy(NAV200Default)
     {
@@ -63,7 +74,50 @@ public:
         return _Accuracy.SpeedVar();
     }
 
+    inline void Lat(double val)
+    {
+        _Lat = val;
+    }
 
+    inline void  Long(double val)
+    {
+        _Long = val;
+    }
+
+    inline void  Heading(double val)
+    {
+        _Heading = val;
+    }
+
+    inline void  Speed(double val)
+    {
+        _Speed = val;
+    }
+
+    inline void  Accuracy(GPSAccuracy val)
+    {
+            _Accuracy = val;
+    }
+
+    inline void  LatVar(double val)
+    {
+        //TODO set variance
+    }
+
+    inline void  LongVar(double val)
+    {
+        //TODO set variance
+    }
+
+    inline void  HeadingVar(double val)
+    {
+        //TODO set variance
+    }
+
+    inline void  SpeedVar(double val)
+    {
+        //TODO set variance
+    }
 
     private:
         double _Lat;
