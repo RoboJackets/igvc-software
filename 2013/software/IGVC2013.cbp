@@ -194,6 +194,9 @@
 		<Unit filename="src/sensors/GPS/nmea.hpp">
 			<Option target="TestGPS" />
 		</Unit>
+		<Unit filename="src/sensors/IMU/IMU.h">
+			<Option target="TestData" />
+		</Unit>
 		<Unit filename="src/sensors/RobotPosition.cpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
