@@ -6,17 +6,25 @@
 
 #define deg2rad(a) a/180*M_PI
 #define rad2deg(a) a*M_PI/180
+/*
+RobotPosition::RobotPosition(IGVC::Sensors::GPS* gps, IMU* imu) : _Lat(100), _Long(100), _Speed(100), _Heading(100), _Accuracy(100, 100,100, 100), LonNewGPSData(this), LonNewIMUData(this)
+{
+    gps->onNewData += &LonNewGPSData;
+    imu->onNewData += &LonNewIMUData;
+}
+*/
 
 RobotPosition::RobotPosition() : _Lat(100), _Long(100), _Speed(100), _Heading(100), _Accuracy(100, 100,100, 100)
 {
-    //ctor
 }
 
 RobotPosition::~RobotPosition()
 {
     //dtor
 }
+/**
 
+**/
 void RobotPosition::push(GPSData newData)
 {
     double time = seconds_since_IGVCpoch();
@@ -27,6 +35,16 @@ void RobotPosition::push(GPSData newData)
     //combine accuracies
 }
 
+int RobotPosition::onNewGPSData(GPSData newData)
+{
+    return update(newData);
+}
+
+
+int RobotPosition::onNewIMUData(IMUData newData)
+{
+    return update(newData);
+}
 
 /**
 Determines the acceleration of the robot between two indices. The end
@@ -80,44 +98,6 @@ double RobotPosition::ptIntSpeed(int endingInd)
     double C = _Speed[endingInd+1].value();
     double integral = A/3*pow((dti),3) + (B/2) * pow((dti),2) + C*dti;
     return integral;
-}
-
-
-/**
-
-**/
-
-double RobotPosition::ptIntHeading(int endingInd)
-{
-    //TODO Account for when an indice lower than 2 is pased
-    int dti = _Heading[endingInd].time() - _Heading[endingInd+1].time();
-    int dtiMinus = _Heading[endingInd+1].time() - _Heading[endingInd+2].time();
-    int dt = dti + dtiMinus;
-    double A = ((angVel(endingInd)-angVel(endingInd+1))/dt)/2;
-    double B = angVel(endingInd+1);
-    double C = _Heading[endingInd+1].value();
-    double integral = A/3*pow((dti),3) + (B/2) * pow((dti),2) + C*dti;
-    return integral;
-}
-
-double RobotPosition::ptAvgHeading(int endingInd)
-{
-    double integral = ptIntHeading(endingInd);
-    int dT = _Heading[endingInd].time() - _Heading[endingInd+1].time();
-    return integral/dT;
-}
-
-void RobotPosition::CatersianStep(int endingInd, double& x, double& y)
-{
-    x = ptIntSpeed(endingInd)*cos(ptAvgHeading(endingInd));
-    y = ptIntSpeed(endingInd)*cos(ptAvgHeading(endingInd));
-}
-
-void RobotPosition::Cartesian2Polar(double x, double y, double& theta, double& r)
-{
-    //inputs reversed from normal usage because theta is complement of angle
-    theta = atan2(x,y);
-    r = sqrt(pow(x,2)+pow(y,2));
 }
 
 double RobotPosition::avgSpeed(double end, double start)
@@ -183,7 +163,9 @@ int RobotPosition::update(GPSData newData)
     return 0;
 }
 
-
+/**
+Updatesr robot position information using
+**/
 int RobotPosition::update(IMUData newData)
 {
     if (_Lat.size()<3) //Ensures there is absolutele information position before we try to use relative to update it.
@@ -200,9 +182,6 @@ int RobotPosition::update(IMUData newData)
 GPSData RobotPosition::IMU2GPS(IMUData in)
 {
     double lastMeasurementTime = in.time()-in.deltaTime();
-    double offsetHeading;
-    double offsetSpeed;
-    Cartesian2Polar(in.deltaX(), in.deltaY(), offsetHeading, offsetSpeed);
     double oldLat = latAtTime(lastMeasurementTime);
     double oldLong = longAtTime(lastMeasurementTime);
     double newLat;
@@ -252,7 +231,6 @@ double RobotPosition::speedAtTime(double time)
     return linInterp(time, _Speed);
 }
 
-
 //Gives the linear rate of change between two indices of one of the data structures
 double RobotPosition::rateOfChange(int ind, DataArray<DataPoint <double> >& attr)
 {
@@ -265,8 +243,8 @@ double RobotPosition::rateOfChange(int ind, DataArray<DataPoint <double> >& attr
 //Taken from http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
 void RobotPosition::latLongCartesianUpdate(double oldLat, double oldLong, double deltaX, double deltaY, double& newLat, double& newLong)
 {
-    newLat = oldLat + deltaY/111,111;
-    newLong = oldLong + deltaX/(111,111*cos(oldLat));
+    newLat = oldLat + deltaY/111111;
+    newLong = oldLong + deltaX/(111111*cos(oldLat));
 }
 
 void RobotPosition::print(void) {
