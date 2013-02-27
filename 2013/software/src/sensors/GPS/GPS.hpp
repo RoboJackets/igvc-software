@@ -10,6 +10,7 @@
 
 #include <time.h>
 #include "events/Event.hpp"
+#include "sensors/DataStructures/GPSData.h"
 
 namespace IGVC {
 namespace Sensors {
@@ -26,32 +27,6 @@ enum GPS_QUALITY {
 };
 
 /*
- * A struct that represents a data packet from the GPS device.
- */
-struct GPSState
-{
-	int num_sat;
-	GPS_QUALITY qual;
-	timeval laptoptime;
-	double lat;
-	double lon;
-	double courseoverground;
-	double speedoverground;
-
-public:
-	bool operator== (GPSState o){
-		time_t delta = difftime(laptoptime.tv_sec, o.laptoptime.tv_sec);
-		return num_sat == o.num_sat &&
-			   qual == o.qual &&
-			   delta == 0 &&
-			   lat == o.lat &&
-			   lon == o.lon &&
-			   courseoverground == o.courseoverground &&
-			   speedoverground == o.speedoverground;
-	}
-};
-
-/*
  * Interface for GPS devices.
  */
 class GPS
@@ -62,20 +37,20 @@ public:
 	/*
 	 * Returns the most recent state acquired from the GPS device.
 	 */
-	virtual GPSState GetState() = 0;
+	virtual GPSData GetState() = 0;
 
 	/*
 	 * Returns the GPSState with the given timestamp.
 	 * Throws an error if no such GPSState exists in the buffer.
 	 */
-	virtual GPSState GetStateAtTime(timeval time) = 0;
+	virtual GPSData GetStateAtTime(timeval time) = 0;
 
 	/*
 	 * Return true if there is at least one state in the buffer.
 	 */
 	virtual bool StateIsAvailable() = 0;
 
-    Event<GPSState> onNewData;
+    Event<GPSData> onNewData;
     Event<void*> onDeviceFailure;
     Event<void*> onDataExpiration;
 };

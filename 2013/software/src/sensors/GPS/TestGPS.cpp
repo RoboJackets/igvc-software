@@ -19,14 +19,14 @@ public:
 //        file.open("data.txt");
     }
 
-    void onNewStateAvailable(GPSState state)
+    void onNewStateAvailable(GPSData state)
     {
 
-        std::cout << std::setprecision(9)  << state.lat << "\t" << state.lon << std::endl;
+        std::cout << std::setprecision(9)  << state.Lat() << "\t" << state.Long() << "\t" << state.Heading() << std::endl;
 //        file << std::setprecision(9)  << state.lat << "\t" << state.>lon << std::endl;
     }
 
-    LISTENER(MyGPSListener, onNewStateAvailable, GPSState);
+    LISTENER(MyGPSListener, onNewStateAvailable, GPSData);
 
     ~MyGPSListener()
     {

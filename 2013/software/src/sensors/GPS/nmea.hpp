@@ -13,9 +13,9 @@ using namespace IGVC::Sensors;
 namespace nmea
 {
 	//GPS funcs
-	bool decodeGPRMC(const std::string& line, GPSState& state);
+	bool decodeGPRMC(const std::string& line, GPSData& state);
 	bool decodeGPRMT(const std::string& line);
-	bool decodeGPGGA(const std::string& line, GPSState& state);
+	bool decodeGPGGA(const std::string& line, GPSData& state);
 	bool decodeGPGSA(const std::string& line);
 	bool decodeGPGSV(const std::string& line);
 	void decodeUTCTime(const std::string& val);
