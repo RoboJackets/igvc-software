@@ -40,6 +40,8 @@ private slots:
 
     void on_actionAbout_triggered();
 
+    void on_actionInvalid_Points_triggered(bool checked);
+
 private:
     Ui::MainWindow *ui;
     NAV200 *_nav200;

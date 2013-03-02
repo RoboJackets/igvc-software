@@ -21,10 +21,11 @@ namespace Sensors {
 class HemisphereA100GPS: public IGVC::Sensors::GPS {
 public:
 	HemisphereA100GPS();
-	GPSState GetState();
-	GPSState GetStateAtTime(timeval time);
+	GPSData GetState();
+	GPSData GetStateAtTime(timeval time);
 	bool StateIsAvailable();
 	~HemisphereA100GPS();
+	GPSAccuracy DefaultAccuracy;
 
 private:
 
@@ -37,9 +38,9 @@ private:
 
 	size_t maxBufferLength; // maximum number of states to be stored in the buffer
 
-	std::list<GPSState> stateQueue; // buffer of the latest maxBufferLength states. This is a std::list instead of a std::queue because of the need to iterate to retrieve a state at a given timestamp
+	std::list<GPSData> stateQueue; // buffer of the latest maxBufferLength states. This is a std::list instead of a std::queue because of the need to iterate to retrieve a state at a given timestamp
 
-	bool parseLine(std::string line, GPSState &state); // parses a line from the GPS device
+	bool parseLine(std::string line, GPSData &state); // parses a line from the GPS device
 };
 
 } /* namespace Sensors */

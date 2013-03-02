@@ -8,13 +8,24 @@
 class GPSData : public SensorData
 {
 public:
+
+    inline GPSData()
+        : SensorData(),
+        _Accuracy()
+    {
+        _Lat = 0;
+        _Long = 0;
+        _Heading = 0;
+        _Speed = 0;
+    }
+
     inline GPSData(double latitude, double longitude, double heading, double speed): SensorData(), _Lat(latitude), _Long(longitude),
-      _Heading(heading), _Speed(speed), _Accuracy(NAV200Default)
+      _Heading(heading), _Speed(speed), _Accuracy()
     {
     }
 
     inline GPSData(double latitude, double longitude, double heading, double speed, double time): SensorData(time), _Lat(latitude),
-     _Long(longitude), _Heading(heading), _Speed(speed), _Accuracy(NAV200Default)
+     _Long(longitude), _Heading(heading), _Speed(speed), _Accuracy()
     {
     }
 
@@ -63,7 +74,60 @@ public:
         return _Accuracy.SpeedVar();
     }
 
+    inline void Lat(double val)
+    {
+        _Lat = val;
+    }
 
+    inline void  Long(double val)
+    {
+        _Long = val;
+    }
+
+    inline void  Heading(double val)
+    {
+        _Heading = val;
+    }
+
+    inline void  Speed(double val)
+    {
+        _Speed = val;
+    }
+
+    inline void  Accuracy(GPSAccuracy val)
+    {
+            _Accuracy = val;
+    }
+
+    inline void  LatVar(double val)
+    {
+        //TODO set variance
+    }
+
+    inline void  LongVar(double val)
+    {
+        //TODO set variance
+    }
+
+    inline void  HeadingVar(double val)
+    {
+        //TODO set variance
+    }
+
+    inline void  SpeedVar(double val)
+    {
+        //TODO set variance
+    }
+
+    bool operator == (GPSData other)
+    {
+        return _Lat == other.Lat() &&
+                     _Long == other.Long() &&
+                     _Heading == other.Heading() &&
+                     _Speed == other.Speed();
+//                     _Accuracy == other.Accuracy() &&
+
+    }
 
     private:
         double _Lat;
@@ -71,7 +135,6 @@ public:
         double _Heading;
         double _Speed;
         GPSAccuracy _Accuracy;
-        static GPSAccuracy NAV200Default; //TODO The default values are complete BS. Do some testing to find this stuff
 
 };
 
