@@ -74,7 +74,6 @@ void ASIOSerialPort::write(char *msg, int length) {
 std::string ASIOSerialPort::readln() {
 	char c;
 	std::string line;
-	int nTimes = 0;
 
 
 	while(true) {
@@ -83,7 +82,6 @@ std::string ASIOSerialPort::readln() {
 		} catch(boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
 			std::cerr << "Error reading stream. Device may have been unplugged." << std::endl;
 			std::cout<<"Error reading stream. Device may have been unplugged."<<std::endl;
-			std::cout<<nTimes<<std::endl;
 			return line;
 		}
 		switch(c) {
@@ -96,8 +94,6 @@ std::string ASIOSerialPort::readln() {
 			break;
 		default:
 			line += c;
-			nTimes++;
-			std::cout<<nTimes<<std::endl;
 			break;
 		}
 		if(_packetHasBeenDefined)
