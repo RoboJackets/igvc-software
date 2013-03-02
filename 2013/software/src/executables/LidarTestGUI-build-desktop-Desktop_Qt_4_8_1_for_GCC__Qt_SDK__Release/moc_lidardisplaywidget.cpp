@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'lidardisplaywidget.h'
 **
-** Created: Tue Feb 19 20:43:25 2013
+** Created: Tue Feb 26 17:34:58 2013
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
