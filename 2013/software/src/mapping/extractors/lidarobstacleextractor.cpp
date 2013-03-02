@@ -5,9 +5,13 @@
 
 using namespace IGVC::Sensors;
 
-LidarObstacleExtractor::LidarObstacleExtractor()
+LidarObstacleExtractor::LidarObstacleExtractor(Lidar *device)
     : LonNewLidarData(this)
 {
+    if(device)
+    {
+        device->onNewData += &LonNewLidarData;
+    }
 }
 
 void LidarObstacleExtractor::onNewLidarData(LidarState data)
