@@ -8,7 +8,8 @@
 LidarDisplayWidget::LidarDisplayWidget(QWidget *parent) :
     QWidget(parent),
     LonNewLidarData(this),
-    _lidObstExtractor(),
+    LonNewObstacles(this),
+    _lidObstExtractor(NULL),
     _obstacles()
 {
     _scale = 1.0;
@@ -63,36 +64,24 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
         }
     }
 
-    painter.setPen(QPen(Qt::blue, 2));
-    std::cout << _obstacles.size() << std::endl;
-
-
-
-//    for (int i = 0; i < _obstacles.size(); i++)
-//    {
-//        Point *points = _obstacles.at(i)->getPoints();
-//        for(int p = 0; p < _obstacles.at(i)->getNumPoints(); p++)
-//        {
-//            std::cout << "(" << points[p].x << ", " << points[p].y << ") ";
-//        }
-//        std::cout << std::endl;
-//    }
-//    std::cout << std::endl;
-
-    for(std::vector<Obstacle*>::iterator iter = _obstacles.begin(); iter < _obstacles.end(); iter++)
+    if(!_obstacles.empty())
     {
-        Obstacle *obstacle = *iter;
-        Point *points = obstacle->getPoints();
-        for(int i = 0; i < obstacle->getNumPoints()-1; i++)
+        painter.setPen(QPen(Qt::blue, 2));
+        for(std::vector<Obstacle*>::iterator iter = _obstacles.begin(); iter < _obstacles.end(); iter++)
         {
-            Point &p1 = points[i], &p2 = points[i+1];
-            QPointF start(p1.x, -p1.y);
-            start *= _scale;
-            start += _origin;
-            QPointF end(p2.x, -p2.y);
-            end *= _scale;
-            end += _origin;
-            painter.drawLine(start, end);
+            Obstacle *obstacle = *iter;
+            Point *points = obstacle->getPoints();
+            for(int i = 0; i < obstacle->getNumPoints()-1; i++)
+            {
+                Point &p1 = points[i], &p2 = points[i+1];
+                QPointF start(p1.x, -p1.y);
+                start *= _scale;
+                start += _origin;
+                QPointF end(p2.x, -p2.y);
+                end *= _scale;
+                end += _origin;
+                painter.drawLine(start, end);
+            }
         }
     }
 
@@ -109,12 +98,22 @@ void LidarDisplayWidget::onNewLidarData(LidarState state)
     while(_drawing);
     boost::mutex::scoped_lock(_locker);
     _lidarData = state;
-    for(int i = 0; i < 1024; i++)
-    {
-        if( abs( _lidarData.points[i].angle + M_PI / 2.0 ) < 0.75 )
-            _lidarData.points[i].valid = false;
-    }
-    _obstacles = _lidObstExtractor.extractObstacles(_lidarData);
+//    for(int i = 0; i < 1024; i++)
+//    {
+//        if( abs( _lidarData.points[i].angle + M_PI / 2.0 ) < 0.75 )
+//            _lidarData.points[i].valid = false;
+//    }
+//    _obstacles = _lidObstExtractor.extractObstacles(_lidarData);
+    update();
+}
+
+void LidarDisplayWidget::onNewObstacles(std::vector<Obstacle *> obstacles)
+{
+    while(_drawing);
+    boost::mutex::scoped_lock(_locker);
+
+    _obstacles = obstacles;
+
     update();
 }
 
@@ -141,8 +140,12 @@ void LidarDisplayWidget::setLidar(Lidar *device)
     boost::mutex::scoped_lock(_locker);
     if(device)
     {
+        if(_lidar) _lidar->onNewData -= &LonNewLidarData;
         _lidar = device;
         _lidar->onNewData += &LonNewLidarData;
+        if(_lidObstExtractor) _lidObstExtractor->onNewData -= &LonNewObstacles;
+        _lidObstExtractor = new LidarObstacleExtractor(_lidar);
+        _lidObstExtractor->onNewData += &LonNewObstacles;
     }
 }
 

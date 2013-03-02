@@ -13,7 +13,7 @@ using namespace IGVC::mapping::obstacles;
 class LidarObstacleExtractor
 {
 public:
-    LidarObstacleExtractor();
+    LidarObstacleExtractor(Lidar* device);
 
     std::vector<Obstacle*> extractObstacles(LidarState data);
 
