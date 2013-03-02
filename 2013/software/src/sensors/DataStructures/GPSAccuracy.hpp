@@ -4,6 +4,12 @@
 class GPSAccuracy
 {
     public:
+        inline GPSAccuracy(): _LatVariance(0), _LongVariance(0),
+         _HeadingVariance(0), _SpeedVariance(0)
+        {
+
+        }
+
         inline GPSAccuracy(double latVar, double longVar, double headingVar, double speedVar) : _LatVariance(latVar), _LongVariance(longVar),
          _HeadingVariance(headingVar), _SpeedVariance(speedVar)
          {

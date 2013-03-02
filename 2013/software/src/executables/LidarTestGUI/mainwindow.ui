@@ -77,6 +77,8 @@
     </property>
     <addaction name="actionLines"/>
     <addaction name="actionPoints"/>
+    <addaction name="separator"/>
+    <addaction name="actionInvalid_Points"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -135,6 +137,17 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionInvalid_Points">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Invalid Points</string>
+   </property>
+   <property name="toolTip">
+    <string>Invalid Points</string>
    </property>
   </action>
  </widget>
