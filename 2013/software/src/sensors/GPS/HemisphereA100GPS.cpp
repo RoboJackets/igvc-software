@@ -8,6 +8,7 @@
 #include "HemisphereA100GPS.h"
 #include "nmea.hpp"
 #include <string>
+#include <cmath>
 
 namespace IGVC {
 namespace Sensors {
@@ -23,12 +24,33 @@ HemisphereA100GPS::HemisphereA100GPS():
 	serialPort.startEvents();
 }
 
+float HemisphereA100GPS::headingBetweenPoints(GPSData a, GPSData b)
+{
+    float latA = a.Lat();
+    float lonA = a.Long();
+    float latB = b.Lat();
+    float lonB = b.Long();
+    float twopi = 2.0*M_PI;
+    return fmod(
+                    atan2(
+                      sin(lonA-lonB)*cos(latB) ,
+                      cos(latA)*sin(latB)-sin(latA)*cos(latB)*cos(lonA-lonB) ),
+                    twopi)
+                * (180.0 / M_PI);
+}
+
 void HemisphereA100GPS::onNewSerialLine(string line) {
     GPSData state;
     if(parseLine(line, state)) {
         // TODO set time
 //        gettimeofday(&state.laptoptime, NULL);
 
+        if ( abs(_lastDiffPoint.Lat() - state.Lat()) > 0.000002 || abs(_lastDiffPoint.Long() - state.Long()) > 0.000002)
+        {
+            _currentHeading = headingBetweenPoints(_lastDiffPoint, state);
+            _lastDiffPoint = state;
+        }
+        state.Heading(_currentHeading);
         boost::mutex::scoped_lock lock(queueLocker);
         stateQueue.push_back(state);
         if(stateQueue.size() > maxBufferLength) {
@@ -37,23 +59,6 @@ void HemisphereA100GPS::onNewSerialLine(string line) {
         onNewData(state);
     }
 }
-
-//void HemisphereA100GPS::threadRun() {
-//	while(serialPort.isConnected()) {
-//		std::string line = serialPort.readln();
-//		GPSData state;
-//		if(parseLine(line, state)) {
-//			gettimeofday(&state.laptoptime, NULL);
-//
-//			boost::mutex::scoped_lock lock(queueLocker);
-//			stateQueue.push_back(state);
-//			if(stateQueue.size() > maxBufferLength) {
-//				stateQueue.pop_front();
-//			}
-//			onNewData(state);
-//		}
-//	}
-//}
 
 bool HemisphereA100GPS::parseLine(std::string line, GPSData &state) {
 	return nmea::decodeGPGGA(line, state) ||

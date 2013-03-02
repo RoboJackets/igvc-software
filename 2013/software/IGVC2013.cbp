@@ -72,6 +72,11 @@
 					<Add library="boost_unit_test_framework" />
 				</Linker>
 			</Target>
+			<Target title="BasicGPSWaypoints">
+				<Option output="bin/BasicGPSWaypoints" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -88,6 +93,9 @@
 			<Add directory="$(#boost).lib" />
 			<Add directory="/usr/lib/" />
 		</Linker>
+		<Unit filename="executables/BasicGPSWaypoints/main.cpp">
+			<Option target="BasicGPSWaypoints" />
+		</Unit>
 		<Unit filename="src/IGVC.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -112,12 +120,14 @@
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.cpp">
 			<Option target="TestMotors" />
 			<Option target="TestJoystick" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
 			<Option target="TestMotors" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
 			<Option target="TestMotors" />
@@ -155,16 +165,19 @@
 		<Unit filename="src/sensors/DataStructures/GPSAccuracy.hpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.h">
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/IMUData.hpp">
 			<Option target="TestData" />
@@ -174,29 +187,36 @@
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/GPS.hpp">
 			<Option target="TestGPS" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/HemisphereA100GPS.cpp">
 			<Option target="TestGPS" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/HemisphereA100GPS.h">
 			<Option target="TestGPS" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/TestGPS.cpp">
 			<Option target="TestGPS" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/nmea.cpp">
 			<Option target="TestGPS" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/nmea.hpp">
 			<Option target="TestGPS" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/sensors/IMU/IMU.h">
 			<Option target="TestData" />
@@ -275,6 +295,7 @@
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
@@ -285,6 +306,7 @@
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />
+			<Option target="BasicGPSWaypoints" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />

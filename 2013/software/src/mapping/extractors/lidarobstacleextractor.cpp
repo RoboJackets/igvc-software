@@ -6,7 +6,21 @@
 using namespace IGVC::Sensors;
 
 LidarObstacleExtractor::LidarObstacleExtractor()
+    : LonNewLidarData(this)
 {
+}
+
+void LidarObstacleExtractor::onNewLidarData(LidarState data)
+{
+    using namespace std;
+
+    vector<Obstacle *> obstacles;
+
+    vector<Obstacle *> lines = extractLinearObstacles(&data);
+
+    obstacles.insert(obstacles.end(), lines.begin(), lines.end());
+
+    onNewData(obstacles);
 }
 
 std::vector<Obstacle*> LidarObstacleExtractor::extractObstacles(LidarState data)

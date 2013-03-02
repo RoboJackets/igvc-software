@@ -1,6 +1,7 @@
 #ifndef LIDAROBSTACLEEXTRACTOR_H
 #define LIDAROBSTACLEEXTRACTOR_H
 
+#include "events/Event.hpp"
 #include "sensors/lidar/Lidar.h"
 #include "mapping/obstacles/linearobstacle.h"
 #include <cmath>
@@ -9,19 +10,6 @@
 using namespace IGVC::Sensors;
 using namespace IGVC::mapping::obstacles;
 
-struct Line {
-    float rho;
-    float theta;
-    float y(float x) {
-        if(sin(theta) != 0)
-        {
-            return ( rho - x*cos(theta) ) / sin(theta);
-        } else {
-            return 0;
-        }
-    }
-};
-
 class LidarObstacleExtractor
 {
 public:
@@ -29,7 +17,12 @@ public:
 
     std::vector<Obstacle*> extractObstacles(LidarState data);
 
+    Event<std::vector<Obstacle*> > onNewData;
+
 private:
+
+    void onNewLidarData(LidarState data);
+    LISTENER(LidarObstacleExtractor, onNewLidarData, LidarState);
 
     std::vector<Obstacle*> extractLinearObstacles(LidarState *data);
     void extractCircularObstacles(LidarState *data);
