@@ -1,6 +1,6 @@
 
-//#include "sensors/RobotPosition.h"
-//#include "actuators/motors/OSMC_driver/OSMC_driver.hpp"
+#include "sensors/RobotPosition.h"
+#include "actuators/motors/OSMC_driver/OSMC_driver.hpp"
 #include <cmath>
 #include <iostream>
 
@@ -20,6 +20,6 @@ int main()
 {
 
     std::cout << headingBetweenPoints(33.787360, -84.406981, 33.787380, -84.407);
-//    RobotPosition position();
-//    OSMC_driver driver();
+    RobotPosition position();
+    OSMC_driver driver();
 }
