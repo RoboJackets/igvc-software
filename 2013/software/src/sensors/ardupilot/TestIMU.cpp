@@ -11,6 +11,6 @@ int main()
     while(true)
     {
         ardupilot.update();
-        usleep(100000);
+        usleep(50000);
     }
 }
