@@ -2,12 +2,15 @@
 #include <string.h>
 #include <iostream>
 #include <sstream>
+#include "sensors/DataStructures/IMUData.hpp"
 
 using namespace std;
 
-ASIOSerialPort ardupilotPort("/dev/ttyACM0", 115200); //need dev rule for imu
+Ardupilot::Ardupilot():
+ardupilotPort("/dev/ttyIMU", 115200)
+{
 
-Ardupilot::Ardupilot(){}
+}
 
 Ardupilot::~Ardupilot()
 {
@@ -21,25 +24,26 @@ void Ardupilot::update()
 
     string check;
     iss>>check;
+
     if(check == "A")
     {
-    string headingS;
-    iss>>headingS;
-    double heading = atof(headingS.c_str());
+        string headingS;
+        iss>>headingS;
+        double heading = atof(headingS.c_str());
 
-    string speedS;
-    iss>>speedS;
-    double speed = atof(speedS.c_str());
+        string speedS;
+        iss>>speedS;
+        double speed = atof(speedS.c_str());
 
-    string positionXS;
-    iss>>positionXS;
-    double positionX = atof(positionXS.c_str());
+        string positionXS;
+        iss>>positionXS;
+        double positionX = atof(positionXS.c_str());
 
-    string positionYS;
-    iss>>positionYS;
-    double positionY = atof(positionYS.c_str());
+        string positionYS;
+        iss>>positionYS;
+        double positionY = atof(positionYS.c_str());
 
-    cout<<heading<<"\t"<<speed<<"\t"<<positionX<<"\t"<<positionY<<endl;
+        cout<<heading<<"\t"<<speed<<"\t"<<positionX<<"\t"<<positionY<<endl;
     }
 }
 
