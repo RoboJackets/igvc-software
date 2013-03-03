@@ -10,8 +10,8 @@
 #include "RobotPosition.h"
 #include "DataStructures/DataPoint.hpp"
 
-GPSAccuracy GPSData::NAV200Default = GPSAccuracy(.0001, .0001, 3, 0.01);
-GPSAccuracy IMUData::ArduPilotDefault= GPSAccuracy(.001, .001, 1, .1);
+//GPSAccuracy GPSData::NAV200Default = GPSAccuracy(.0001, .0001, 3, 0.01);
+//GPSAccuracy IMUData::ArduPilotDefault= GPSAccuracy(.001, .001, 1, .1);
 
 int main()
 {
@@ -30,17 +30,12 @@ int main()
 
     RobotPosition Mistii;
     Mistii.update(GPSData(49.12, 0.2122, 11,1, currTime+=2));
-    std::cout << "ohai";
     Mistii.update(GPSData(49.12, 0.2122, 10,3, currTime+=2));
-    std::cout << "ohai";
     Mistii.update(GPSData(49.12, 0.2122, 11,3, currTime+=2));
-    std::cout << "ohai";
     Mistii.update(GPSData(49.12, 0.2122, 11,5, currTime+=2));
-    std::cout << "ohai";
     Mistii.update(GPSData(49.32, 0.2122, 13,7, currTime+=2));
     Mistii.update(GPSData(49.32, 0.2122, 13,7, currTime+=2));
     Mistii.update(GPSData(49.32, 0.2122, 13,7, currTime+=2));
-    std::cout << "ohai";
 
     Mistii.print();
 
