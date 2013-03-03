@@ -5,6 +5,7 @@
 		<Option title="IGVC 2013" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
+		<Option virtualFolders="src/sensors/GPS/;" />
 		<Build>
 			<Target title="TestSerial">
 				<Option output="bin/TestSerial" prefix_auto="1" extension_auto="1" />
@@ -150,8 +151,8 @@
 			<Option target="TestData" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
+			<Option virtualFolder="src/sensors/GPS/" />
 			<Option target="TestData" />
-
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.h">
 			<Option target="TestData" />
