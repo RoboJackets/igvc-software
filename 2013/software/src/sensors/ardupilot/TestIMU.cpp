@@ -10,7 +10,6 @@ int main()
     sleep(1);
     while(true)
     {
-//        ardupilot.write('A');
         ardupilot.update();
         usleep(100000);
     }
