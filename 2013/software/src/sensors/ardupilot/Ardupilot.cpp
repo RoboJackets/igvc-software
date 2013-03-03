@@ -25,7 +25,7 @@ void Ardupilot::update()
     string check;
     iss>>check;
 
-    if(check == "A")
+    if(check.compare("A") == 0)
     {
         string headingS;
         iss>>headingS;
