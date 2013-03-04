@@ -97,11 +97,20 @@ void setup() {
 #if WITH_GPS
 	g_gps->init(hal.uartB);
 #endif
+	hal.console->printf("!\n");
 }
 
 Vector3f velocity;
+Vector3f position;
+Vector3f prePosition;
+
 uint32_t last_update;
 bool first_loop = true;
+double speed;
+double heading;
+int count;
+double deltaPX;
+double deltaPY;
 
 void loop()
 {
@@ -110,14 +119,15 @@ void loop()
 #endif
 
 	ahrs.update();
+	compass.read();
 
 	Vector3f accelVals = ahrs.get_accel_ef();
-	//Vector3f accelVals = ahrs.get_ins()->get_accel();
+
 	accelVals.z += GRAVITY_MSS;
 	Vector3f filteredVals;
-	filteredVals.x = accelVals.x;//(abs(accelVals.x) > 0.05 ? accelVals.x : 0.0);
-	filteredVals.y = accelVals.y;//(abs(accelVals.y) > 0.05 ? accelVals.y : 0.0);
-	filteredVals.z = accelVals.z;//(abs(accelVals.z) > 0.05 ? accelVals.z : 0.0);
+	filteredVals.x = (abs(accelVals.x) > 0.005 ? accelVals.x : 0.0);
+	filteredVals.y = (abs(accelVals.y) > 0.005 ? accelVals.y : 0.0);
+	filteredVals.z = (abs(accelVals.z) > 0.005 ? accelVals.z : 0.0);
 	
 	uint32_t tnow = hal.scheduler->micros();
 	float deltat = ( tnow - last_update ) / 1000000.0;
@@ -129,14 +139,33 @@ void loop()
 
 	velocity.x += filteredVals.x * deltat;
 	velocity.y += filteredVals.y * deltat;
-	velocity.z += filteredVals.z * deltat;
 
-	hal.console->printf_P(
-			PSTR("%4.2f %4.2f %4.2f\n"),
-			filteredVals.x,
-			filteredVals.y,
-			filteredVals.z);
+	position.x += velocity.x * deltat;
+	position.y += velocity.y * deltat;
+
+	deltaPX = position.x-prePosition.x;
+	deltaPY = position.y-prePosition.y;	
+
+	prePosition.x = position.x;
+	prePosition.y = position.y;	
+
+	speed = sqrt((velocity.x*velocity.x)+(velocity.y*velocity.y));
+
+	heading = compass.calculate_heading(ahrs.get_dcm_matrix())+3.1415;
+	heading = heading*180/3.1415;
+	
+	hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f %4.2f\n"), heading, speed, 			deltaPX, deltaPY);
+
+
 	last_update = tnow;
+	if(count>=400)
+	{
+		velocity.x = 0;
+		velocity.y = 0;
+		count = 0;
+	}
+	count++;
+
 }
 
 AP_HAL_MAIN();
