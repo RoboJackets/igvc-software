@@ -1,4 +1,4 @@
 SUBSYSTEM == "tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303",ATTRS{bcdDevice}=="0202", NAME:="ttyGPS"
-SUBSYSTEM == "tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303",ATTRS{bcdDevice}=="0300", NAME:="ttyIMU"
+SUBSYSTEM == "tty", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0010",ATTRS{bcdDevice}=="0001", NAME:="ttyIMU"
 SUBSYSTEM == "tty", ATTRS{idVendor}=="3141", ATTRS{idProduct}=="0008",ATTRS{bcdDevice}=="sd?1", NAME:="ttyLidar"
 
