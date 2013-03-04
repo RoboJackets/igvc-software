@@ -7,6 +7,8 @@ void greyscale(Magick::Image& image)
     image.quantizeColorSpace( GRAYColorspace );
     image.quantizeColors( 256 );
     image.quantize( );
+    image.display();
+    image.write("/home/alex/Desktop/img.png");
 }
 
 void zeroAllButRed(Magick::Image& image)
