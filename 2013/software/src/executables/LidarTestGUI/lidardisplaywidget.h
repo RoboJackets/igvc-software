@@ -5,7 +5,6 @@
 #include "sensors/lidar/Lidar.h"
 #include <boost/thread.hpp>
 #include "mapping/extractors/lidarobstacleextractor.h"
-#include <vector>
 
 using namespace IGVC::Sensors;
 using namespace IGVC::mapping::extractors;
@@ -44,9 +43,6 @@ private:
 
     LISTENER(LidarDisplayWidget, onNewLidarData, LidarState)
 
-    void onNewObstacles(std::vector<Obstacle *> obstacles);
-    LISTENER(LidarDisplayWidget, onNewObstacles, std::vector<Obstacle *>)
-
     LidarState _lidarData;
     boost::mutex _locker;
     
@@ -60,7 +56,7 @@ private:
 
     QPointF _origin;
 
-    LidarObstacleExtractor *_lidObstExtractor;
+    LidarObstacleExtractor _lidObstExtractor;
     std::vector<Obstacle*> _obstacles;
 };
 
