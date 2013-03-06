@@ -8,6 +8,7 @@
 #include <vector>
 
 using namespace IGVC::Sensors;
+using namespace IGVC::mapping::extractors;
 
 class LidarDisplayWidget : public QWidget
 {
@@ -54,8 +55,6 @@ private:
     ViewMode _vMode;
 
     double _scale;
-
-    bool _drawing;
 
     bool _isDragging;
 
