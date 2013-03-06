@@ -1,9 +1,13 @@
 #include "lidarobstacleextractor.h"
 #include <algorithm>
-//#include <cmath>
 #include <iostream>
 
-using namespace IGVC::Sensors;
+namespace IGVC
+{
+namespace mapping
+{
+namespace extractors
+{
 
 LidarObstacleExtractor::LidarObstacleExtractor(Lidar *device)
     : LonNewLidarData(this)
@@ -12,6 +16,8 @@ LidarObstacleExtractor::LidarObstacleExtractor(Lidar *device)
     {
         device->onNewData += &LonNewLidarData;
     }
+    jumpDistThreshold = 0.1;
+    linearityThreshold = 0.475;
 }
 
 void LidarObstacleExtractor::onNewLidarData(LidarState data)
@@ -20,30 +26,21 @@ void LidarObstacleExtractor::onNewLidarData(LidarState data)
 
     vector<Obstacle *> obstacles;
 
-    vector<Obstacle *> lines = extractLinearObstacles(&data);
-
-    obstacles.insert(obstacles.end(), lines.begin(), lines.end());
+    vector<Obstacle*> filtered = filterLinearObstacles(clusterByJumps(clusterByValidity(&data)));
+    obstacles.insert(obstacles.end(), filtered.begin(), filtered.end());
 
     onNewData(obstacles);
 }
 
-std::vector<Obstacle*> LidarObstacleExtractor::extractObstacles(LidarState data)
-{
-    return extractLinearObstacles(&data);
-}
-
-/**
- * Runs hough linear transform on the given lidar data
- */
-std::vector<Obstacle*> LidarObstacleExtractor::extractLinearObstacles(LidarState *data)
+std::vector<PointArrayObstacle*> LidarObstacleExtractor::clusterByValidity(LidarState *data)
 {
     using namespace std;
 
-    vector<Obstacle *> lines;
+    vector<PointArrayObstacle*> clusters;
 
-    bool inLine = false;
+    bool inCluster = false;
 
-    Point start, end;
+    PointArrayObstacle *cluster;
 
     for(int i = 0; i < 1024; i++)
     {
@@ -54,176 +51,157 @@ std::vector<Obstacle*> LidarObstacleExtractor::extractLinearObstacles(LidarState
 
         if(pt.valid)
         {
-            if(!inLine)
+            if(!inCluster)
             {
-                start = Point(x, y);
-                end = Point(x, y);
-                inLine = true;
+                clusters.push_back(new PointArrayObstacle());
+                cluster = clusters.at(clusters.size()-1);
+                cluster->addPoint(Point(x,y));
+                inCluster = true;
             } else {
-                float dist = sqrt( (x-end.x)*(x-end.x) + (y-end.y)*(y-end.y) );
-                if(dist > 0.05)
-                {
-                    if(start != end)
-                    {
-//                    end = Point(x,y);
-                        lines.push_back(new LinearObstacle(start, end));
-                    }
-                    inLine = false;
-                } else {
-                    end = Point(x, y);
-                }
+                cluster->addPoint(Point(x,y));
             }
         } else {
-            if(inLine)
+            if(inCluster)
             {
-                lines.push_back(new LinearObstacle(start, end));
-                inLine = false;
-            }
-        }
-    }
-    if(inLine)
-    {
-        lines.push_back(new LinearObstacle(start, end));
-    }
-
-    return lines;
-
-/*  Hough transform
-    float maxPossibleRho = 0;
-    for(int i = 0; i < 1024; i++)
-    {
-        float rho = data->points[i].distance;
-        maxPossibleRho = max(rho, maxPossibleRho);
-    }
-
-    float metersPerBin = 0.008;
-    int numThetaBins = 100;
-    int numRhoBins = maxPossibleRho / metersPerBin;
-    int accumulator[numThetaBins][numRhoBins];
-    for(int t = 0; t < numThetaBins; t++)
-        for(int r = 0; r < numRhoBins; r++)
-            accumulator[t][r] = 0;
-
-    float radPerBin = ( M_PI * 2.0 ) / numThetaBins;
-
-    for(int i = 0; i < 1024; i++)
-    {
-        LidarPoint &p = data->points[i];
-
-        if(p.valid)
-        {
-            float x = cos(p.angle) * p.distance;
-            float y = sin(p.angle) * p.distance;
-
-            for(int t=0; t < numThetaBins; t++)
-            {
-                float theta = radPerBin * t;
-                float rho = x * cos(theta) + y * sin(theta);
-                if(rho > 0)
-                {
-                    int rhoIndex = rho / metersPerBin;
-                    accumulator[t][rhoIndex]++;
-                }
+                inCluster = false;
             }
         }
     }
 
-    vector<Obstacle*> lines;
-
-    // This is a totally eyeballed guess based on the data
-    // we got from a robot standing at an eyeballed distance
-    // from a wall in the shop. We think it'll work for the
-    // fence. Could be wrong.
-    int minVotes = 10;
-    for(int t = 0; t < numThetaBins; t++)
-    {
-        for(int r = 0; r < numRhoBins; r++)
-        {
-            if(accumulator[t][r] > minVotes)
-            {
-                Point min;
-                Point max;
-
-                float theta = t * radPerBin;
-                float rho = r * metersPerBin;
-
-                bool foundMin = false;
-
-                for(int i = 0; i < 1024; i++)
-                {
-                    LidarPoint &pt = data->points[i];
-                    if(pt.valid)
-                    {
-                        float x = cos(pt.angle) * pt.distance;
-                        float y = sin(pt.angle) * pt.distance;
-                        bool isOnLine = isPointOnLine(x, y, rho, theta, i, data->points);
-                        if(!foundMin && isOnLine)
-                        {
-                            min.x = x;
-                            min.y = y;
-                            foundMin = true;
-                        } else if(foundMin && isOnLine)
-                        {
-                            max.x = x;
-                            max.y = y;
-                        } else if(foundMin && !isOnLine)
-                        {
-                            break;
-                        }
-                    } else if(foundMin)
-                    {
-                        break;
-                    }
-                }
-                lines.push_back(new LinearObstacle(min, max));
-            }
-        }
-    }
-
-    return lines;*/
+    return clusters;
 }
 
-bool LidarObstacleExtractor::isPointOnLine(float x, float y, float rho, float theta, int pointIndex, LidarPoint *points)
+std::vector<PointArrayObstacle*> LidarObstacleExtractor::clusterByJumps(std::vector<PointArrayObstacle*> data)
 {
-    float y_dist_thresh = 0.1;
-    float x_dist_thresh = 0.1;
-    float n_theta_thresh = 0.01;
-    if(sin(theta) != 0)
-    {
-        float y_line = (rho - cos(theta) * x) / sin(theta);
-        if(abs(y_line - y) < y_dist_thresh)
-        {
-            return true;
-        } else {
-            return false;
-        }
+    using namespace std;
+    vector<PointArrayObstacle*> clusters;
 
-    } else {
-        float n_theta = 0;
-        if(abs(x-rho) < x_dist_thresh)
+    bool inCluster = false;
+
+    PointArrayObstacle *newcluster;
+
+    for(vector<PointArrayObstacle*>::iterator iter = data.begin(); iter < data.end(); iter++)
+    {
+        PointArrayObstacle* cluster = (*iter);
+        Point* points = cluster->getPoints();
+        for(int i = 0; i < cluster->getNumPoints()-1; i++)
         {
-            estimateNormalAtPoint(pointIndex, points, n_theta);
-            if(abs(theta - n_theta) < n_theta_thresh)
+            if(!inCluster)
             {
-                return true;
+                clusters.push_back(new PointArrayObstacle());
+                newcluster = clusters.at(clusters.size()-1);
+                newcluster->addPoint(points[i]);
+                inCluster = true;
             } else {
-                return false;
+                float dist = points[i].distanceTo(points[i+1]);
+                newcluster->addPoint(points[i]);
+                if(dist >= jumpDistThreshold)
+                {
+                    // Jump detected, break cluster
+                    inCluster = false;
+                }
             }
+        }
+        if(inCluster)
+            newcluster->addPoint(points[cluster->getNumPoints()-1]);
+        inCluster = false;
+    }
+    return clusters;
+}
+
+Point LidarObstacleExtractor::calculateCenterOfMass(Point *points, int numPoints)
+{
+    Point cm;
+    for(int i = 0; i < numPoints; i++)
+    {
+        cm.x += points[i].x;
+        cm.y += points[i].y;
+    }
+    cm.x /= numPoints;
+    cm.y /= numPoints;
+    return cm;
+}
+
+float LidarObstacleExtractor::calculateMoment(Point *points, int numPoints, int p, int q)
+{
+    Point cm = calculateCenterOfMass(points, numPoints);
+    float u = 0;
+    for(int i = 0; i < numPoints; i++)
+    {
+        Point &point = points[i];
+        u += pow((point.x - cm.x), p) * pow((point.y - cm.y),q);
+    }
+    u /= numPoints;
+    return u;
+}
+
+float LidarObstacleExtractor::calculateAngleOfOrientation(Point *points, int numPoints)
+{
+    return 0.5 * atan( ( 2.0 * calculateMoment(points, numPoints, 1, 1) ) / ( calculateMoment(points, numPoints, 2, 0) - calculateMoment(points, numPoints, 0, 2) ) );
+}
+
+float LidarObstacleExtractor::measureLinearity(Point *points, int numPoints)
+{
+    int k = numPoints / 2;
+//    Point cm = calculateCenterOfMass(points, numPoints);
+    float angle = calculateAngleOfOrientation(points, numPoints);
+    float M = tan(angle);
+//    Point normal(-M,1);
+    Point localNormals[k];
+    for(int i = 0; i < k; i++)
+    {
+        Point a = points[rand() % numPoints];
+        Point b;
+        while(b == a)
+        {
+            b = points[rand() % numPoints];
+        }
+        float m = (b.y - a.y) / (b.x - a.x);
+        float norm = sqrt(m*m + 1);
+        float dp = m*M + 1;
+        if(dp < 0)
+        {
+            localNormals[i] = Point(m/norm, -1/norm);
         } else {
-            return false;
+            localNormals[i] = Point(-m/norm, 1/norm);
         }
     }
+    Point normalToOrientation(0,0);
+    for(int i = 0; i < k; i++)
+    {
+        normalToOrientation.x += localNormals[i].x;
+        normalToOrientation.y += localNormals[i].y;
+    }
+
+    normalToOrientation.x /= numPoints;
+    normalToOrientation.y /= numPoints;
+
+    return normalToOrientation.distanceTo(Point(0,0));
 }
 
-void LidarObstacleExtractor::estimateNormalAtPoint(int pointIndex, LidarPoint *points, float &n_theta)
+std::vector<Obstacle*> LidarObstacleExtractor::filterLinearObstacles(std::vector<PointArrayObstacle*> data)
 {
-    Point p1(points[pointIndex-1].distance*cos(points[pointIndex-1].angle),points[pointIndex-1].distance*sin(points[pointIndex-1].angle));
-    Point p2(points[pointIndex+1].distance*cos(points[pointIndex+1].angle),points[pointIndex+1].distance*sin(points[pointIndex+1].angle));
-    Point diff(p1.x-p2.x, p1.y-p2.y);
-    n_theta = atan2(diff.y, diff.x);
+    using namespace std;
+
+    std::vector<Obstacle*> obstacles;
+
+    for(vector<PointArrayObstacle*>::iterator iter = data.begin(); iter < data.end(); iter++)
+    {
+        PointArrayObstacle* cluster = (*iter);
+        float linearity = measureLinearity(cluster->getPoints(), cluster->getNumPoints());
+        if(linearity >= linearityThreshold)
+        {
+            // This is a line
+            obstacles.push_back(new LinearObstacle(cluster->getPoints()[0], cluster->getPoints()[cluster->getNumPoints()-1]));
+        } else {
+            // This is not a line
+            obstacles.push_back(cluster);
+        }
+    }
+
+    return obstacles;
 }
 
-void LidarObstacleExtractor::extractCircularObstacles(LidarState *data)
-{
-
+}
+}
 }

@@ -1,6 +1,8 @@
 #ifndef OBSTACLE_H
 #define OBSTACLE_H
 
+#include <cmath>
+
 namespace IGVC
 {
 namespace mapping
@@ -28,6 +30,13 @@ struct Point {
     bool operator != (Point other)
     {
         return x != other.x || y != other.y;
+    }
+
+    float distanceTo(Point other)
+    {
+        float dx = this->x - other.x;
+        float dy = this->y - other.y;
+        return sqrt( dx*dx + dy*dy );
     }
 
     float x;
