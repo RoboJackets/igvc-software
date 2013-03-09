@@ -16,6 +16,13 @@ class Ardupilot
         Event<IMUData> onNewIMUData;
 
     private:
+        double timeLast;
+        double timeCurrent;
+        double heading;
+        double speed;
+        double positionX;
+        double positionY;
+        double deltat;
         ASIOSerialPort ardupilotPort;
 };
 
