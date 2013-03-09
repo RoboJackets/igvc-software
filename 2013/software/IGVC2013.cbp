@@ -178,6 +178,7 @@
 		<Unit filename="src/sensors/DataStructures/GPSAccuracy.hpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
 			<Option target="TestData" />
@@ -197,11 +198,17 @@
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="TestIMU" />
+		</Unit>
+		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
+			<Option target="TestData" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/GPS.hpp">
 			<Option target="TestGPS" />
@@ -302,6 +309,7 @@
 		</Unit>
 		<Unit filename="src/sensors/timing.h">
 			<Option target="TestData" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.cpp">
 			<Option target="TestSerial" />
