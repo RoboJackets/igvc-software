@@ -73,6 +73,25 @@ void MainWindow::switchMode(Mode newMode)
     NAV200 *_newNav;
     SimulatedLidar *_newSim;
 
+    // Clean up old lidar
+    switch(_mode)
+    {
+    case Nav200:
+        _nav200->stop();
+        ui->lidarView->shouldUpdateOnScaling = true;
+        delete _nav200;
+        break;
+    case File:
+        delete _simulated;
+        break;
+    case Default:
+        delete _simulated;
+        break;
+    case None:
+        // Do nothing
+        break;
+    }
+
     // Make new lidar
     switch(newMode)
     {
@@ -89,25 +108,6 @@ void MainWindow::switchMode(Mode newMode)
     case Default:
         _newSim = new SimulatedLidar();
         ui->lidarView->setLidar(_newSim);
-        break;
-    case None:
-        // Do nothing
-        break;
-    }
-
-    // Clean up old lidar
-    switch(_mode)
-    {
-    case Nav200:
-        _nav200->stop();
-        ui->lidarView->shouldUpdateOnScaling = true;
-        delete _nav200;
-        break;
-    case File:
-        delete _simulated;
-        break;
-    case Default:
-        delete _simulated;
         break;
     case None:
         // Do nothing

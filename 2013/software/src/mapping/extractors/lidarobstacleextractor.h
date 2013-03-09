@@ -1,41 +1,52 @@
 #ifndef LIDAROBSTACLEEXTRACTOR_H
 #define LIDAROBSTACLEEXTRACTOR_H
 
+#include "events/Event.hpp"
 #include "sensors/lidar/Lidar.h"
 #include "mapping/obstacles/linearobstacle.h"
 #include <cmath>
 #include <vector>
+#include "mapping/obstacles/pointarrayobstacle.h"
 
 using namespace IGVC::Sensors;
 using namespace IGVC::mapping::obstacles;
 
-struct Line {
-    float rho;
-    float theta;
-    float y(float x) {
-        if(sin(theta) != 0)
-        {
-            return ( rho - x*cos(theta) ) / sin(theta);
-        } else {
-            return 0;
-        }
-    }
-};
+namespace IGVC
+{
+namespace mapping
+{
+namespace extractors
+{
 
 class LidarObstacleExtractor
 {
 public:
-    LidarObstacleExtractor();
+    LidarObstacleExtractor(Lidar* device);
 
-    std::vector<Obstacle*> extractObstacles(LidarState data);
+    Event<std::vector<Obstacle*> > onNewData;
+
+    float jumpDistThreshold;
+    float linearityThreshold;
 
 private:
 
-    std::vector<Obstacle*> extractLinearObstacles(LidarState *data);
-    void extractCircularObstacles(LidarState *data);
-    bool isPointOnLine(float x, float y, float rho, float theta, int pointIndex, LidarPoint *points);
-    void estimateNormalAtPoint(int pointIndex, LidarPoint *points, float &n_theta);
+    void onNewLidarData(LidarState data);
+    LISTENER(LidarObstacleExtractor, onNewLidarData, LidarState)
+
+    float measureLinearity(Point* points, int numPoints);
+    float calculateMoment(Point* points, int numPoints, int p, int q);
+    Point calculateCenterOfMass(Point* points, int numPoints);
+    float calculateAngleOfOrientation(Point* points, int numPoints);
+
+    std::vector<PointArrayObstacle*> clusterByValidity(LidarState *data);
+    std::vector<PointArrayObstacle*> clusterByJumps(std::vector<PointArrayObstacle*> data);
+    std::vector<Obstacle*> filterLinearObstacles(std::vector<PointArrayObstacle*> data);
 
 };
+
+}
+}
+}
+
 
 #endif // LIDAROBSTACLEEXTRACTOR_H

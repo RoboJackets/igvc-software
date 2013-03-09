@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include "PID_v1.h"
 
-
-
 //pin numbers
 const int rightDir = 5;
 const int rightSpeed = 6;
@@ -21,8 +19,6 @@ double DesiredSpeedLeft, PIDSpeedInLeft, PIDSpeedOutLeft; //PID Variables Left M
 double DesiredSpeedRight, PIDSpeedInRight, PIDSpeedOutRight; //PID Variables Right Motor
 const double R_Kp=2, R_Ki=5, R_Kd=1;
 const double L_Kp=2, L_Ki=5, L_Kd=1;
-
-
 
 int dirRight;
 int dirLeft;
