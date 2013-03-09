@@ -3,6 +3,8 @@
 #include <iostream>
 #include "sensors/ardupilot/Ardupilot.hpp"
 
+GPSAccuracy IMUData::ArduPilotDefault= GPSAccuracy(.001, .001, 1, .1);
+
 int main()
 {
     Ardupilot ardupilot;
