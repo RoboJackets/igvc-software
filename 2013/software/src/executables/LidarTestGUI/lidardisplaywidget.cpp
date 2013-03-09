@@ -8,11 +8,11 @@
 LidarDisplayWidget::LidarDisplayWidget(QWidget *parent) :
     QWidget(parent),
     LonNewLidarData(this),
-    _lidObstExtractor(),
+    LonNewObstacles(this),
+    _lidObstExtractor(NULL),
     _obstacles()
 {
     _scale = 1.0;
-    _drawing = false;
     _vMode = Lines;
     _origin = QPointF(164, 104.5);
     shouldUpdateOnScaling = true;
@@ -21,12 +21,11 @@ LidarDisplayWidget::LidarDisplayWidget(QWidget *parent) :
 
 void LidarDisplayWidget::paintEvent(QPaintEvent *)
 {
-    _drawing = true;
+    boost::unique_lock<boost::mutex> lock(_locker);
     QPainter painter;
     painter.begin(this);
 
     painter.setPen(Qt::black);
-    boost::mutex::scoped_lock(_locker);
     for(int i = 0; i < 1024; i++)
     {
         LidarPoint p = _lidarData.points[i];
@@ -63,36 +62,24 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
         }
     }
 
-    painter.setPen(QPen(Qt::blue, 2));
-    std::cout << _obstacles.size() << std::endl;
-
-
-
-//    for (int i = 0; i < _obstacles.size(); i++)
-//    {
-//        Point *points = _obstacles.at(i)->getPoints();
-//        for(int p = 0; p < _obstacles.at(i)->getNumPoints(); p++)
-//        {
-//            std::cout << "(" << points[p].x << ", " << points[p].y << ") ";
-//        }
-//        std::cout << std::endl;
-//    }
-//    std::cout << std::endl;
-
-    for(std::vector<Obstacle*>::iterator iter = _obstacles.begin(); iter < _obstacles.end(); iter++)
+    if(!_obstacles.empty())
     {
-        Obstacle *obstacle = *iter;
-        Point *points = obstacle->getPoints();
-        for(int i = 0; i < obstacle->getNumPoints()-1; i++)
+        painter.setPen(QPen(Qt::blue, 2));
+        for(std::vector<Obstacle*>::iterator iter = _obstacles.begin(); iter < _obstacles.end(); iter++)
         {
-            Point &p1 = points[i], &p2 = points[i+1];
-            QPointF start(p1.x, -p1.y);
-            start *= _scale;
-            start += _origin;
-            QPointF end(p2.x, -p2.y);
-            end *= _scale;
-            end += _origin;
-            painter.drawLine(start, end);
+            Obstacle *obstacle = *iter;
+            Point *points = obstacle->getPoints();
+            for(int i = 0; i < obstacle->getNumPoints()-1; i++)
+            {
+                Point &p1 = points[i], &p2 = points[i+1];
+                QPointF start(p1.x, -p1.y);
+                start *= _scale;
+                start += _origin;
+                QPointF end(p2.x, -p2.y);
+                end *= _scale;
+                end += _origin;
+                painter.drawLine(start, end);
+            }
         }
     }
 
@@ -101,27 +88,27 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
     painter.drawLine(_origin, _origin + QPointF(0,-_scale));
 
     painter.end();
-    _drawing = false;
 }
 
 void LidarDisplayWidget::onNewLidarData(LidarState state)
 {
-    while(_drawing);
-    boost::mutex::scoped_lock(_locker);
+    boost::unique_lock<boost::mutex> lock(_locker);
     _lidarData = state;
-    for(int i = 0; i < 1024; i++)
-    {
-        if( abs( _lidarData.points[i].angle + M_PI / 2.0 ) < 0.75 )
-            _lidarData.points[i].valid = false;
-    }
-    _obstacles = _lidObstExtractor.extractObstacles(_lidarData);
+    update();
+}
+
+void LidarDisplayWidget::onNewObstacles(std::vector<Obstacle *> obstacles)
+{
+    boost::unique_lock<boost::mutex> lock(_locker);
+
+    _obstacles = obstacles;
+
     update();
 }
 
 void LidarDisplayWidget::setScale(double scale)
 {
-    while(_drawing);
-    boost::mutex::scoped_lock(_locker);
+    boost::unique_lock<boost::mutex> lock(_locker);
     _scale = scale;
     // Normally, I wouldn't recommend a hack like this,
     // but for some reason this causes things to crash
@@ -137,12 +124,21 @@ void LidarDisplayWidget::setScale(double scale)
 
 void LidarDisplayWidget::setLidar(Lidar *device)
 {
-    while(_drawing);
-    boost::mutex::scoped_lock(_locker);
+    boost::unique_lock<boost::mutex> lock(_locker);
     if(device)
     {
+        if(_lidObstExtractor)
+        {
+            _lidObstExtractor->onNewData -= &LonNewObstacles;
+        }
+        if(_lidar)
+        {
+            _lidar->onNewData -= &LonNewLidarData;
+        }
         _lidar = device;
         _lidar->onNewData += &LonNewLidarData;
+        _lidObstExtractor = new LidarObstacleExtractor(_lidar);
+        _lidObstExtractor->onNewData += &LonNewObstacles;
     }
 }
 
@@ -174,8 +170,7 @@ bool LidarDisplayWidget::event(QEvent *event)
 
 void LidarDisplayWidget::setViewMode(ViewMode mode)
 {
-    while(_drawing);
-    boost::mutex::scoped_lock(_locker);
+    boost::unique_lock<boost::mutex> lock(_locker);
     _vMode = mode;
     this->update();
 }
@@ -187,7 +182,7 @@ double LidarDisplayWidget::scale()
 
 void LidarDisplayWidget::capture()
 {
-    boost::mutex::scoped_lock(_locker);
+    boost::unique_lock<boost::mutex> lock(_locker);
     using namespace std;
     ofstream file;
     file.open("lidar_frame.csv");

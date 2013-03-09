@@ -31,17 +31,20 @@ void SimulatedLidar::thread_run()
 {
     while(_running)
     {
-//        usleep(_delay);
-        sleep(1);
-        onNewData(_data);
-//        _running = false;
+        try {
+            sleep(1);
+            onNewData(_data);
+            boost::this_thread::interruption_point();
+        } catch (const boost::thread_interrupted&)
+        {
+            _running = false;
+        }
     }
 }
 
 SimulatedLidar::~SimulatedLidar()
 {
-    _running = false;
-    _thread.join();
+    _thread.interrupt();
 }
 
 LidarState SimulatedLidar::GetState()

@@ -16,7 +16,8 @@ SOURCES += main.cpp\
     lidardisplaywidget.cpp \
     ../../sensors/lidar/SimulatedLidar.cpp \
     ../../mapping/extractors/lidarobstacleextractor.cpp \
-    ../../mapping/obstacles/linearobstacle.cpp
+    ../../mapping/obstacles/linearobstacle.cpp \
+    ../../mapping/obstacles/pointarrayobstacle.cpp
 
 INCLUDEPATH += ../../
 
@@ -29,7 +30,8 @@ HEADERS  += mainwindow.h \
     ../../sensors/lidar/SimulatedLidar.h \
     ../../mapping/extractors/lidarobstacleextractor.h \
     ../../mapping/obstacles/linearobstacle.h \
-    ../../mapping/obstacles/obstacle.hpp
+    ../../mapping/obstacles/obstacle.hpp \
+    ../../mapping/obstacles/pointarrayobstacle.h
 
 FORMS    += mainwindow.ui
 
