@@ -82,6 +82,8 @@
 				</Compiler>
 				<Linker>
 					<Add option="`Magick++-config --ldflags --libs`" />
+					<Add library="flycapture" />
+					<Add library="opencv_core" />
 				</Linker>
 			</Target>
 			<Target title="testCV">
@@ -200,10 +202,6 @@
 			<Option target="TestGPS" />
 			<Option target="TestIMU" />
 		</Unit>
-		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
-			<Option target="TestData" />
-			<Option target="TestIMU" />
-		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
 			<Option target="Regression" />
@@ -241,6 +239,12 @@
 		</Unit>
 		<Unit filename="src/sensors/Sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/Bumblebee2.cpp">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/Bumblebee2.h">
+			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
