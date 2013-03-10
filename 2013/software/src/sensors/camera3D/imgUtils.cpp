@@ -1,6 +1,8 @@
 #include "imgUtils.h"
 
 using namespace std;
+using namespace cv;
+/*
 using namespace Magick;
 void greyscale(Magick::Image& image)
 {
@@ -83,3 +85,11 @@ void copyGreen(Image& into, Image& outof)
     into.setPixels(0,0,ncols,nrows);
     into.syncPixels();
 }
+*/
+/*
+void ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
+{
+    mat = cv::Mat(img.GetRows(), img.GetCols(), CV_8UC3, img.GetData(), cv::Mat::AUTO_STEP);
+    return;
+}
+*/
