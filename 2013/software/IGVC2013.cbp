@@ -56,7 +56,7 @@
 			</Target>
 			<Target title="Xbee">
 				<Option output="bin/Xbee" prefix_auto="1" extension_auto="1" />
-				<Option type="0" />
+				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
 			<Target title="JoystickMB">
@@ -64,10 +64,38 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
-			<Target title="TestIMU">
-				<Option output="bin/TestIMU" prefix_auto="1" extension_auto="1" />
+			<Target title="Regression">
+				<Option output="bin/Regression" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Linker>
+					<Add library="boost_unit_test_framework" />
+				</Linker>
+			</Target>
+			<Target title="TestImgUtils">
+				<Option output="bin/testImgUtils" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="`Magick++-config --cxxflags --cppflags --ldflags --libs`" />
+				</Compiler>
+				<Linker>
+					<Add option="`Magick++-config --ldflags --libs`" />
+					<Add library="flycapture" />
+					<Add library="opencv_core" />
+				</Linker>
+			</Target>
+			<Target title="testCV">
+				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Linker>
+					<Add library="opencv_highgui" />
+					<Add library="opencv_core" />
+					<Add library="opencv_imgproc" />
+					<Add library="flycapture" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
@@ -139,18 +167,25 @@
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/DataArray.cpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/DataArray.h">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/DataPoint.hpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSAccuracy.hpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
+			<Option target="TestGPS" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.h">
 			<Option target="TestData" />
@@ -159,14 +194,19 @@
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/IMUData.hpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
+			<Option target="TestGPS" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/GPS.hpp">
 			<Option target="TestGPS" />
@@ -186,29 +226,45 @@
 		<Unit filename="src/sensors/GPS/nmea.hpp">
 			<Option target="TestGPS" />
 		</Unit>
+		<Unit filename="src/sensors/IMU/IMU.h">
+			<Option target="TestData" />
+		</Unit>
 		<Unit filename="src/sensors/RobotPosition.cpp">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/RobotPosition.h">
 			<Option target="TestData" />
+			<Option target="Regression" />
 		</Unit>
 		<Unit filename="src/sensors/Sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="src/sensors/ardupilot/Ardupilot.cpp">
-			<Option target="TestIMU" />
+		<Unit filename="src/sensors/camera3D/Bumblebee2.cpp">
+			<Option target="testCV" />
 		</Unit>
-		<Unit filename="src/sensors/ardupilot/Ardupilot.hpp">
-			<Option target="TestIMU" />
-		</Unit>
-		<Unit filename="src/sensors/ardupilot/TestIMU.cpp">
-			<Option target="TestIMU" />
+		<Unit filename="src/sensors/camera3D/Bumblebee2.h">
+			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="testCamera" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/imgUtils.cpp">
+			<Option target="testCamera" />
+			<Option target="TestImgUtils" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/imgUtils.h">
+			<Option target="testCamera" />
+			<Option target="TestImgUtils" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/opencvTest.cpp">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/utilsTest.cpp">
+			<Option target="TestImgUtils" />
 		</Unit>
 		<Unit filename="src/sensors/encoders/pcdriver_signed/quadCoderDriver_signed.cc">
 			<Option target="&lt;{~None~}&gt;" />
@@ -257,6 +313,7 @@
 		</Unit>
 		<Unit filename="src/sensors/timing.h">
 			<Option target="TestData" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.cpp">
 			<Option target="TestSerial" />
@@ -267,7 +324,6 @@
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />
-			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
@@ -278,13 +334,15 @@
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />
-			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
 		</Unit>
 		<Unit filename="src/xbee.cpp">
 			<Option target="Xbee" />
+		</Unit>
+		<Unit filename="test/sensors/RobotPositionTest.cpp">
+			<Option target="Regression" />
 		</Unit>
 		<Extensions>
 			<code_completion />

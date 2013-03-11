@@ -23,7 +23,7 @@ RobotPosition::~RobotPosition()
     //dtor
 }
 /**
-
+User must get mutex lock prior to use
 **/
 void RobotPosition::push(GPSData newData)
 {
@@ -47,7 +47,8 @@ int RobotPosition::onNewIMUData(IMUData newData)
 }
 
 /**
-Determines the acceleration of the robot between two indices. The end
+Determines the acceleration of the robot between two indices.
+User must get mutex lock prior to use
 **/
 double RobotPosition::accel(int Index)
 {
@@ -64,8 +65,9 @@ double RobotPosition::accel(int Index)
         return dV/dT;
     }
 }
-
-
+/**
+User must get mutex lock prior to use
+**/
 double RobotPosition::angVel(int Index)
 {
     double dTheta;
@@ -85,6 +87,7 @@ double RobotPosition::angVel(int Index)
 
 /***
 Returns the Integral of the speed(i.e. distance) over the period between endingInd and endingInd+1
+User must get mutex lock prior to use
 ***/
 
 double RobotPosition::ptIntSpeed(int endingInd)
@@ -99,6 +102,10 @@ double RobotPosition::ptIntSpeed(int endingInd)
     double integral = A/3*pow((dti),3) + (B/2) * pow((dti),2) + C*dti;
     return integral;
 }
+
+/**
+User must get mutex lock prior to use
+**/
 
 double RobotPosition::avgSpeed(double end, double start)
 {
@@ -115,9 +122,18 @@ double RobotPosition::avgSpeed(double end, double start)
     return integral/dT;
 }
 
+
+/**
+Thread safe, gets lock before performing work
+**/
 //TODO simplify this by writing a method to do probabibalistic combination
 int RobotPosition::update(GPSData newData)
 {
+
+    while(!StateMutex.try_lock())
+    {
+    }
+
     double newTime = newData.time();
 
 
@@ -160,6 +176,7 @@ int RobotPosition::update(GPSData newData)
         std::cout << "Prediction was " << predSpeed << ". Measurement was " << newSpeed<< "." << std::endl;
     }
 
+    StateMutex.unlock();
     return 0;
 }
 
@@ -255,4 +272,21 @@ std::cout << "Lat: " << _Lat[0].value() << ".Long: " << _Long[0].value() << ".He
 DataArray<DataPoint <double> >& RobotPosition::Lat(void)
 {
     return _Lat;
+}
+
+bool RobotPosition::try_lock()
+{
+    return StateMutex.try_lock();
+}
+
+void RobotPosition::lock()
+{
+    StateMutex.lock();
+    return;
+}
+
+void RobotPosition::unlock()
+{
+    StateMutex.unlock();
+    return;
 }
