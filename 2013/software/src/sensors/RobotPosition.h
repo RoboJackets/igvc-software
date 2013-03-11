@@ -8,6 +8,8 @@
 #include "IMU/IMU.h"
 #include "GPS/HemisphereA100GPS.h"
 
+#include <boost/thread.hpp>
+
 
 const int millisPerSecond = 1000;
 
@@ -44,7 +46,9 @@ class RobotPosition
         DataArray<DataPoint <double> >& Long(void);
         DataArray<DataPoint <double> >& Heading(void);
         DataArray<DataPoint <double> >& Speed(void);
-
+        bool try_lock();
+        void lock();
+        void unlock();
 
     private:
         double ptIntSpeed(int endingInd);
@@ -55,6 +59,8 @@ class RobotPosition
         DataArray<DataPoint <double> > _Speed;
         DataArray<DataPoint <double> >  _Heading;
         GPSAccuracy _Accuracy;
+        boost::mutex StateMutex;
+
 };
 
 #endif // ROBOTPOSITION_H

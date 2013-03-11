@@ -2,6 +2,7 @@
 #include <string.h>
 #include <iostream>
 #include <sstream>
+#include "sensors/timing.h"
 #include "sensors/DataStructures/IMUData.hpp"
 
 using namespace std;
@@ -9,7 +10,7 @@ using namespace std;
 Ardupilot::Ardupilot():
 ardupilotPort("/dev/ttyIMU", 115200)
 {
-
+    timeLast = seconds_since_IGVCpoch();
 }
 
 Ardupilot::~Ardupilot()
@@ -27,23 +28,30 @@ void Ardupilot::update()
 
     if(check.compare("A") == 0)
     {
+        timeCurrent = seconds_since_IGVCpoch();
         string headingS;
         iss>>headingS;
-        double heading = atof(headingS.c_str());
+        heading = atof(headingS.c_str());
 
         string speedS;
         iss>>speedS;
-        double speed = atof(speedS.c_str());
+        speed = atof(speedS.c_str());
 
         string positionXS;
         iss>>positionXS;
-        double positionX = atof(positionXS.c_str());
+        positionX = atof(positionXS.c_str());
 
         string positionYS;
         iss>>positionYS;
-        double positionY = atof(positionYS.c_str());
+        positionY = atof(positionYS.c_str());
 
-        cout<<heading<<"\t"<<speed<<"\t"<<positionX<<"\t"<<positionY<<endl;
+        deltat = timeCurrent-timeLast;
+
+        cout<<heading<<"\t"<<speed<<"\t"<<positionX<<"\t"<<positionY<<"\t"<<deltat<<endl;
+
+        onNewIMUData(IMUData(positionX, positionY, heading, speed, deltat));
+
+        timeLast = timeCurrent;
     }
 }
 
