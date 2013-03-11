@@ -9,6 +9,10 @@ using namespace FlyCapture2;
 
 main()
 {
-    Bumblebee2 thisguy();
+   std::cout << "at least this will print";
+    Bumblebee2 thisguy;
+    thisguy.run();
+    std::cout << "this shouldn't hit";
+
 
 }
