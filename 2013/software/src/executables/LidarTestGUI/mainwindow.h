@@ -42,10 +42,11 @@ private slots:
 
     void on_actionInvalid_Points_triggered(bool checked);
 
+    void on_actionFullscreen_triggered(bool checked);
+
 private:
     Ui::MainWindow *ui;
-    NAV200 *_nav200;
-    SimulatedLidar *_simulated;
+    Lidar* _lidar;
     QString _filePath;
     enum Mode {
         None,

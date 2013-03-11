@@ -83,7 +83,6 @@ void NAV200::threadRun() {
                 cout << "Bad checksum!" << endl;
             } else {
                 LidarState state;
-                float distance_scale =  0.8255 / 300.0;
                 int start = data[5] + data[6] * 256;
                 int offset = 7;
                 for(int i=0; i < _numPoints; i++)
@@ -93,11 +92,7 @@ void NAV200::threadRun() {
 
                     // Converting from little endian data
                     pt.raw = data[offset] + ( data[offset + 1] << 8 );
-                    // Derived this distance formula from page 14 of
-                    // "Telegrams for Configuring and Operating the
-                    // NAV200 Laser Positioning System"
-                    //pt.distance = ( ( pt.raw / 65536.0 ) * 29900.0 ) + 100.0;
-                    //pt.distance /= 1000.0; // convert mm to m
+
                     pt.distance = pt.raw / 391.8181818;
                     pt.intensity = data[offset + 2];
                     pt.valid = !(pt.raw & 0x4000);
@@ -105,6 +100,14 @@ void NAV200::threadRun() {
 
                     offset += 3;
                 }
+
+                try {
+                    boost::this_thread::interruption_point();
+                } catch (boost::thread_interrupted&)
+                {
+                    break;
+                }
+
                 onNewData(state);
             }
         }
@@ -117,13 +120,9 @@ void NAV200::threadRun() {
 	return;
 }
 
-void NAV200::stop()
-{
-    _running = false;
-    _iothread.join();
-}
-
 NAV200::~NAV200() {
+    _running = false;
+    _iothread.interrupt();
 }
 
 } /* namespace Sensors */
