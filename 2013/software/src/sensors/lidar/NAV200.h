@@ -21,7 +21,6 @@ public:
     LidarState GetState();
     LidarState GetStateAtTime(timeval time);
     bool StateIsAvailable();
-    void stop();
 
 private:
     boost::thread _iothread;

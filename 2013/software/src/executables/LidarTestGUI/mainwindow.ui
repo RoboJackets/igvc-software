@@ -46,7 +46,7 @@
      <x>0</x>
      <y>0</y>
      <width>400</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -79,6 +79,8 @@
     <addaction name="actionPoints"/>
     <addaction name="separator"/>
     <addaction name="actionInvalid_Points"/>
+    <addaction name="separator"/>
+    <addaction name="actionFullscreen"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -148,6 +150,14 @@
    </property>
    <property name="toolTip">
     <string>Invalid Points</string>
+   </property>
+  </action>
+  <action name="actionFullscreen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Fullscreen</string>
    </property>
   </action>
  </widget>

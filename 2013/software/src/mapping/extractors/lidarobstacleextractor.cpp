@@ -15,9 +15,20 @@ LidarObstacleExtractor::LidarObstacleExtractor(Lidar *device)
     if(device)
     {
         device->onNewData += &LonNewLidarData;
+        _device = device;
     }
     jumpDistThreshold = 0.1;
     linearityThreshold = 0.475;
+    sizeThreshold = 10;
+}
+
+void LidarObstacleExtractor::disconnect()
+{
+    if(_device)
+    {
+        _device->onNewData -= &LonNewLidarData;
+        _device = 0;
+    }
 }
 
 void LidarObstacleExtractor::onNewLidarData(LidarState data)
@@ -26,7 +37,7 @@ void LidarObstacleExtractor::onNewLidarData(LidarState data)
 
     vector<Obstacle *> obstacles;
 
-    vector<Obstacle*> filtered = filterLinearObstacles(clusterByJumps(clusterByValidity(&data)));
+    vector<Obstacle*> filtered = filterLinearObstacles(filterBySize(clusterByJumps(clusterByValidity(&data))));
     obstacles.insert(obstacles.end(), filtered.begin(), filtered.end());
 
     onNewData(obstacles);
@@ -106,6 +117,23 @@ std::vector<PointArrayObstacle*> LidarObstacleExtractor::clusterByJumps(std::vec
             newcluster->addPoint(points[cluster->getNumPoints()-1]);
         inCluster = false;
     }
+    return clusters;
+}
+
+std::vector<PointArrayObstacle*> LidarObstacleExtractor::filterBySize(std::vector<PointArrayObstacle*> data)
+{
+    using namespace std;
+    vector<PointArrayObstacle*> clusters;
+
+    for(vector<PointArrayObstacle*>::iterator iter = data.begin(); iter < data.end(); iter++)
+    {
+        PointArrayObstacle* cluster = (*iter);
+        if(cluster->getNumPoints() > sizeThreshold)
+        {
+            clusters.push_back(cluster);
+        }
+    }
+
     return clusters;
 }
 
