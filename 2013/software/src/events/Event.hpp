@@ -10,12 +10,14 @@
 #include <vector>
 #include <algorithm>
 #include "Delegate.hpp"
+#include <iostream>
+#include <stdio.h>
 
 template <typename T>
 class Event
 {
     public:
-        inline void operator+=(Delegate<T>* delegate)
+        void operator+=(Delegate<T>* delegate)
         {
             // An object can only subscribe once
             if (find(_delegates.begin(), _delegates.end(), delegate) == _delegates.end())
@@ -23,7 +25,7 @@ class Event
                 _delegates.push_back(delegate);
             }
         }
-        inline void operator-=(Delegate<T>* delegate)
+        void operator-=(Delegate<T>* delegate)
         {
             typedef typename std::vector< Delegate<T>* >::iterator iter;
             iter i = _delegates.begin();
@@ -39,13 +41,18 @@ class Event
                 }
             }
         }
-        inline void operator()(T param)
+        void operator()(T param)
         {
             typedef typename std::vector< Delegate<T>* >::iterator iter;
             for (iter i = _delegates.begin(); i != _delegates.end(); ++i)
             {
                 (*i)->operator()(param);
             }
+        }
+
+        typename std::vector<Delegate<T>* >::size_type numDelegates()
+        {
+            return _delegates.size();
         }
 
     private:
