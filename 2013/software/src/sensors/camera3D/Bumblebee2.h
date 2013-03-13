@@ -41,8 +41,10 @@ class Bumblebee2
         Bumblebee2();
         virtual ~Bumblebee2();
         Event<ImagePair> onNewData;
-        int run();
+        int Run();
     private:
+        int StartCamera();
+        int CloseCamera();
         void ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat);
         void PrintError( FlyCapture2::Error error );
         ImagePair _images;
