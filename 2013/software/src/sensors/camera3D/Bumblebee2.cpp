@@ -3,13 +3,14 @@
 #include "sensors/camera3D/imgUtils.h"
 #include <opencv2/highgui/highgui.hpp>
 #include "sensors/camera3D/imgUtils.h"
+#include <unistd.h>
 
 using namespace FlyCapture2;
 using namespace cv;
 
 Bumblebee2::Bumblebee2(): _running(true), _images()
 {
-    run();
+    //run();
 }
 
 void Bumblebee2::PrintError( FlyCapture2::Error error )
@@ -23,12 +24,12 @@ int Bumblebee2::run()
     Mat right;
     const Mode k_fmt7Mode = MODE_3;
     const PixelFormat k_fmt7PixFmt = PIXEL_FORMAT_RAW16;
-
     Error error;
 
     BusManager busMgr;
     unsigned int numCameras;
     error = busMgr.GetNumOfCameras(&numCameras);
+    printf("Number of cameras detected: %u\n", numCameras);
     if (error != PGRERROR_OK)
     {
         PrintError( error );
@@ -130,28 +131,39 @@ int Bumblebee2::run()
     //printf( "Frame rate is %3.2f fps\n", frmRate.absValue );
 
     Image rawImage;
+    Image savedRaw;
     namedWindow( "leftDisp", CV_WINDOW_AUTOSIZE );
     namedWindow( "rightDisp", CV_WINDOW_AUTOSIZE );
-    while(_running)
+    //trash first frame
+    error = cam.RetrieveBuffer((FlyCapture2::Image*) &rawImage);
+
+    while(1)
     {
         // Retrieve an image
-        error = cam.RetrieveBuffer( &rawImage );
+        error = cam.RetrieveBuffer((FlyCapture2::Image*) &rawImage);
+        if (error != PGRERROR_OK)
+        {
+            PrintError( error );
+            continue;
+        }
+        error = savedRaw.DeepCopy((const Image*) &rawImage);
         if (error != PGRERROR_OK)
         {
             PrintError( error );
             continue;
         }
 
+
         // Get the raw image dimensions
         PixelFormat pixFormat;
         unsigned int rows, cols, stride;
-        rawImage.GetDimensions( &rows, &cols, &stride, &pixFormat );
+        savedRaw.GetDimensions( &rows, &cols, &stride, &pixFormat );
 
 	// Create a converted image
         Image convertedImage;
 
         // Convert the raw image
-        error = rawImage.Convert( PIXEL_FORMAT_BGR, &convertedImage );
+        error = savedRaw.Convert( PIXEL_FORMAT_BGR, &convertedImage );
         if (error != PGRERROR_OK)
         {
             PrintError( error );
@@ -161,15 +173,15 @@ int Bumblebee2::run()
 
         ptgrey2opencv(convertedImage,right);
 
-		unsigned char* data = rawImage.GetData();
-		for(int i = 1; i < rawImage.GetDataSize(); i += 2)
+		unsigned char* data = savedRaw.GetData();
+		for(int i = 1; i < savedRaw.GetDataSize(); i += 2)
 		{
-			char tmp = data[i];
+            char tmp = data[i];
 			data[i] = data[i-1];
 			data[i-1] = tmp;
 		}
 
-        error = rawImage.Convert( PIXEL_FORMAT_BGR, &convertedImage );
+        error = savedRaw.Convert( PIXEL_FORMAT_BGR, &convertedImage );
         if (error != PGRERROR_OK)
         {
             PrintError( error );
@@ -177,9 +189,12 @@ int Bumblebee2::run()
         }
 
         ptgrey2opencv(convertedImage, left);
+        //convertedImage.Save("/home/robojackets/Desktop/pgright.png");
         imshow( "leftDisp", left);
         imshow( "rightDisp", right);
-
+        //imwrite("/home/robojackets/Desktop/right.png",right);
+        //imwrite("/home/robojackets/Desktop/left.png",left);
+        waitKey(0);
     }
 
     // Stop capturing images
@@ -203,7 +218,8 @@ int Bumblebee2::run()
 
 void Bumblebee2::ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
 {
-    mat = cv::Mat(img.GetRows(), img.GetCols(), CV_8UC3, img.GetData(), cv::Mat::AUTO_STEP);
+    Mat newMat = cv::Mat(img.GetRows(), img.GetCols(), CV_8UC3, img.GetData(), cv::Mat::AUTO_STEP);
+    mat = newMat.clone();
     return;
 }
 

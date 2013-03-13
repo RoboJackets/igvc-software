@@ -27,3 +27,16 @@ int main(int, char**)
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;
 }
+
+/*
+
+int main()
+{
+
+
+   std::cout << "at least this will print";
+    Bumblebee2 thisguy;
+    thisguy.run();
+    std::cout << "this shouldn't hit";
+}
+*/
