@@ -8,9 +8,10 @@
 using namespace FlyCapture2;
 using namespace cv;
 
-Bumblebee2::Bumblebee2(): _running(true), _images()
+Bumblebee2::Bumblebee2(): _running(true), _images(), _cam()
 {
-    //run();
+    StartCamera();
+    Run();
 }
 
 void Bumblebee2::PrintError( FlyCapture2::Error error )
@@ -18,10 +19,8 @@ void Bumblebee2::PrintError( FlyCapture2::Error error )
     error.PrintErrorTrace();
 }
 
-int Bumblebee2::run()
+int Bumblebee2::StartCamera()
 {
-    Mat left;
-    Mat right;
     const Mode k_fmt7Mode = MODE_3;
     const PixelFormat k_fmt7PixFmt = PIXEL_FORMAT_RAW16;
     Error error;
@@ -50,10 +49,9 @@ int Bumblebee2::run()
         return -1;
     }
 
-    Camera cam;
 
     // Connect to a camera
-    error = cam.Connect(&guid);
+    error = _cam.Connect(&guid);
     if (error != PGRERROR_OK)
     {
         PrintError( error );
@@ -64,7 +62,7 @@ int Bumblebee2::run()
     Format7Info fmt7Info;
     bool supported;
     fmt7Info.mode = k_fmt7Mode;
-    error = cam.GetFormat7Info( &fmt7Info, &supported );
+    error = _cam.GetFormat7Info( &fmt7Info, &supported );
     if (error != PGRERROR_OK)
     {
         PrintError( error );
@@ -83,7 +81,7 @@ int Bumblebee2::run()
     Format7PacketInfo fmt7PacketInfo;
 
     // Validate the settings to make sure that they are valid
-    error = cam.ValidateFormat7Settings(
+    error = _cam.ValidateFormat7Settings(
         &fmt7ImageSettings,
         &valid,
         &fmt7PacketInfo );
@@ -101,7 +99,7 @@ int Bumblebee2::run()
     }
 
     // Set the settings to the camera
-    error = cam.SetFormat7Configuration(
+    error = _cam.SetFormat7Configuration(
         &fmt7ImageSettings,
         fmt7PacketInfo.recommendedBytesPerPacket );
     if (error != PGRERROR_OK)
@@ -111,17 +109,24 @@ int Bumblebee2::run()
     }
 
     // Start capturing images
-    error = cam.StartCapture();
+    error = _cam.StartCapture();
     if (error != PGRERROR_OK)
     {
         PrintError( error );
         return -1;
     }
+}
+
+int Bumblebee2::Run()
+{
+    Mat left;
+    Mat right;
+    Error error;
 
     // Retrieve frame rate property
     Property frmRate;
     frmRate.type = FRAME_RATE;
-    error = cam.GetProperty( &frmRate );
+    error = _cam.GetProperty( &frmRate );
     if (error != PGRERROR_OK)
     {
         PrintError( error );
@@ -135,12 +140,12 @@ int Bumblebee2::run()
     namedWindow( "leftDisp", CV_WINDOW_AUTOSIZE );
     namedWindow( "rightDisp", CV_WINDOW_AUTOSIZE );
     //trash first frame
-    error = cam.RetrieveBuffer((FlyCapture2::Image*) &rawImage);
+    error = _cam.RetrieveBuffer((FlyCapture2::Image*) &rawImage);
 
     while(1)
     {
         // Retrieve an image
-        error = cam.RetrieveBuffer((FlyCapture2::Image*) &rawImage);
+        error = _cam.RetrieveBuffer((FlyCapture2::Image*) &rawImage);
         if (error != PGRERROR_OK)
         {
             PrintError( error );
@@ -194,11 +199,19 @@ int Bumblebee2::run()
         imshow( "rightDisp", right);
         //imwrite("/home/robojackets/Desktop/right.png",right);
         //imwrite("/home/robojackets/Desktop/left.png",left);
-        waitKey(0);
+        if(waitKey(30) >= 0) break;
     }
 
+    CloseCamera();
+
+	return 0;
+}
+
+int Bumblebee2::CloseCamera()
+{
+    Error error;
     // Stop capturing images
-    error = cam.StopCapture();
+    error = _cam.StopCapture();
     if (error != PGRERROR_OK)
     {
         PrintError( error );
@@ -206,16 +219,13 @@ int Bumblebee2::run()
     }
 
     // Disconnect the camera
-    error = cam.Disconnect();
+    error = _cam.Disconnect();
     if (error != PGRERROR_OK)
     {
         PrintError( error );
         return -1;
     }
-
-	return 0;
 }
-
 void Bumblebee2::ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
 {
     Mat newMat = cv::Mat(img.GetRows(), img.GetCols(), CV_8UC3, img.GetData(), cv::Mat::AUTO_STEP);
