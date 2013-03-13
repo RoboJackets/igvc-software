@@ -15,7 +15,7 @@ int main(int argc, char**argv)
     //string rPath = "/home/alex/Desktop/GroundTruth/proj2-pair2-R.png";
 
     Image depthImage;
-    getDispInputImg(lPath, rPath, depthImage);
-    depthImage.display();
-    depthImage.write("/home/alex/Desktop/release/src/examples/common/example1/igvcinput.ppm");
+    //getDispInputImg(lPath, rPath, depthImage);
+    //depthImage.display();
+    //depthImage.write("/home/alex/Desktop/release/src/examples/common/example1/igvcinput.ppm");
 }
