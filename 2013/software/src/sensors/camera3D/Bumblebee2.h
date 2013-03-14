@@ -27,6 +27,7 @@ class Bumblebee2
         static void ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat);
         Mat& Left();
         Mat& Right();
+        StereoPair Images();
     private:
         int StartCamera();
         int CloseCamera();
