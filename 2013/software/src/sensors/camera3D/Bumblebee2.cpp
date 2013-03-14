@@ -312,6 +312,10 @@ void Bumblebee2::UnlockImages()
     _imagesLock.unlock();
 }
 
+StereoPair Bumblebee2::Images()
+{
+    return _images;
+}
 
 
 Bumblebee2::~Bumblebee2()
@@ -373,6 +377,7 @@ void ProcessFrame(Image* rawImage, const void* that)
     thisHere.Left() = left.clone();
     thisHere.Right() = right.clone();
     thisHere.UnlockImages();
+    thisHere.onNewData(thisHere.Images());
 
     return;
 
