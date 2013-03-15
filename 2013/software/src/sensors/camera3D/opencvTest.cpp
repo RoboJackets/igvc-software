@@ -5,14 +5,58 @@
 #include "Bumblebee2.h"
 
 using namespace cv;
-using namespace FlyCapture2;
-
-main()
+/*
+int main(int, char**)
 {
-   std::cout << "at least this will print";
-    Bumblebee2 thisguy;
-    thisguy.run();
-    std::cout << "this shouldn't hit";
+    VideoCapture cap(0); // open the default camera
+    if(!cap.isOpened())  // check if we succeeded
+        return -1;
 
+    Mat edges;
+    namedWindow("edges",1);
+    namedWindow("edges2",2);
+    for(;;)
+    {
+        Mat frame;
+        Mat frame2;
+        cap >> frame;
+        imshow("edges", frame);
+
+        for (int row =0; row < frame.rows; row++)
+        {
+            uchar* p = frame.ptr(row);
+            for(int col =1; col < frame.cols; col+=4)
+            {
+                char tmp = p[col];
+                p[col] = p[col-1];
+                p[col-1] = tmp;
+            }
+        }
+
+        imshow("edges2", frame);
+        //cap >> frame; // get a new frame from camera
+
+        //cvtColor(frame, edges, CV_BGR2GRAY);
+
+        //GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
+        //Canny(edges, edges, 0, 30, 3);
+
+        //imshow("edges2", frame2);
+        if(waitKey(30) >= 0) break;
+    }
+    // the camera will be deinitialized automatically in VideoCapture destructor
+    return 0;
+}
+*/
+
+
+int main()
+{
+
+
+    Bumblebee2 thisguy;
+    //thisguy.StartCamera();
+    //thisguy.run();
 
 }
+

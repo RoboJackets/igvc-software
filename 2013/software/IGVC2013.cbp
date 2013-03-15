@@ -249,6 +249,9 @@
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
 		</Unit>
+		<Unit filename="src/sensors/camera3D/StereoPair.hpp">
+			<Option target="testCV" />
+		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
 			<Option target="testCamera" />
 		</Unit>

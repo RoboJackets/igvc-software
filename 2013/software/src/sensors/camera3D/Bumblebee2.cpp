@@ -8,20 +8,14 @@
 using namespace FlyCapture2;
 using namespace cv;
 
-Bumblebee2::Bumblebee2(): _running(true), _images()
+Bumblebee2::Bumblebee2(): _running(true), _images(), _cam()
 {
-    //run();
+    StartCamera();
+    Run();
 }
 
-void Bumblebee2::PrintError( FlyCapture2::Error error )
+int Bumblebee2::StartCamera()
 {
-    error.PrintErrorTrace();
-}
-
-int Bumblebee2::run()
-{
-    Mat left;
-    Mat right;
     const Mode k_fmt7Mode = MODE_3;
     const PixelFormat k_fmt7PixFmt = PIXEL_FORMAT_RAW16;
     Error error;
@@ -50,10 +44,9 @@ int Bumblebee2::run()
         return -1;
     }
 
-    Camera cam;
 
     // Connect to a camera
-    error = cam.Connect(&guid);
+    error = _cam.Connect(&guid);
     if (error != PGRERROR_OK)
     {
         PrintError( error );
@@ -64,7 +57,7 @@ int Bumblebee2::run()
     Format7Info fmt7Info;
     bool supported;
     fmt7Info.mode = k_fmt7Mode;
-    error = cam.GetFormat7Info( &fmt7Info, &supported );
+    error = _cam.GetFormat7Info( &fmt7Info, &supported );
     if (error != PGRERROR_OK)
     {
         PrintError( error );
@@ -83,7 +76,7 @@ int Bumblebee2::run()
     Format7PacketInfo fmt7PacketInfo;
 
     // Validate the settings to make sure that they are valid
-    error = cam.ValidateFormat7Settings(
+    error = _cam.ValidateFormat7Settings(
         &fmt7ImageSettings,
         &valid,
         &fmt7PacketInfo );
@@ -101,7 +94,7 @@ int Bumblebee2::run()
     }
 
     // Set the settings to the camera
-    error = cam.SetFormat7Configuration(
+    error = _cam.SetFormat7Configuration(
         &fmt7ImageSettings,
         fmt7PacketInfo.recommendedBytesPerPacket );
     if (error != PGRERROR_OK)
@@ -111,17 +104,86 @@ int Bumblebee2::run()
     }
 
     // Start capturing images
-    error = cam.StartCapture();
+    error = _cam.StartCapture();
     if (error != PGRERROR_OK)
     {
         PrintError( error );
         return -1;
     }
 
+    error = _cam.SetCallback(&ProcessFrame, this);
+    if (error != PGRERROR_OK)
+    {
+        PrintError( error );
+        return -1;
+    }
+
+}
+
+/*
+void Bumblebee2::ProcessFrame(Image* rawImage, const void* otherThings)
+{
+        Image savedRaw;
+        Error error;
+        Mat right, left;
+        error = savedRaw.DeepCopy((const Image*) &rawImage);
+        if (error != PGRERROR_OK)
+        {
+            PrintError( error );
+            return;
+        }
+
+        // Get the raw image dimensions
+        PixelFormat pixFormat;
+        unsigned int rows, cols, stride;
+        savedRaw.GetDimensions( &rows, &cols, &stride, &pixFormat );
+
+	// Create a converted image
+        Image convertedImage;
+
+        // Convert the raw image
+        error = savedRaw.Convert( PIXEL_FORMAT_BGR, &convertedImage );
+        if (error != PGRERROR_OK)
+        {
+            PrintError( error );
+            return;
+        }
+
+        ptgrey2opencv(convertedImage,right);
+
+		unsigned char* data = savedRaw.GetData();
+		for(int i = 1; i < savedRaw.GetDataSize(); i += 2)
+		{
+            char tmp = data[i];
+			data[i] = data[i-1];
+			data[i-1] = tmp;
+		}
+
+        error = savedRaw.Convert( PIXEL_FORMAT_BGR, &convertedImage );
+        if (error != PGRERROR_OK)
+        {
+            PrintError( error );
+            return;
+        }
+
+        ptgrey2opencv(convertedImage, left);
+        return;
+
+}
+*/
+
+
+
+int Bumblebee2::Run()
+{
+    Mat left;
+    Mat right;
+    Error error;
+
     // Retrieve frame rate property
     Property frmRate;
     frmRate.type = FRAME_RATE;
-    error = cam.GetProperty( &frmRate );
+    error = _cam.GetProperty( &frmRate );
     if (error != PGRERROR_OK)
     {
         PrintError( error );
@@ -135,12 +197,12 @@ int Bumblebee2::run()
     namedWindow( "leftDisp", CV_WINDOW_AUTOSIZE );
     namedWindow( "rightDisp", CV_WINDOW_AUTOSIZE );
     //trash first frame
-    error = cam.RetrieveBuffer((FlyCapture2::Image*) &rawImage);
+    error = _cam.RetrieveBuffer((FlyCapture2::Image*) &rawImage);
 
     while(1)
     {
         // Retrieve an image
-        error = cam.RetrieveBuffer((FlyCapture2::Image*) &rawImage);
+        error = _cam.RetrieveBuffer((FlyCapture2::Image*) &rawImage);
         if (error != PGRERROR_OK)
         {
             PrintError( error );
@@ -194,11 +256,19 @@ int Bumblebee2::run()
         imshow( "rightDisp", right);
         //imwrite("/home/robojackets/Desktop/right.png",right);
         //imwrite("/home/robojackets/Desktop/left.png",left);
-        waitKey(0);
+        if(waitKey(30) >= 0) break;
     }
 
+    CloseCamera();
+
+	return 0;
+}
+
+int Bumblebee2::CloseCamera()
+{
+    Error error;
     // Stop capturing images
-    error = cam.StopCapture();
+    error = _cam.StopCapture();
     if (error != PGRERROR_OK)
     {
         PrintError( error );
@@ -206,14 +276,12 @@ int Bumblebee2::run()
     }
 
     // Disconnect the camera
-    error = cam.Disconnect();
+    error = _cam.Disconnect();
     if (error != PGRERROR_OK)
     {
         PrintError( error );
         return -1;
     }
-
-	return 0;
 }
 
 void Bumblebee2::ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
@@ -223,8 +291,95 @@ void Bumblebee2::ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
     return;
 }
 
+
+Mat& Bumblebee2::Left()
+{
+    return _images.RightImage();
+}
+
+Mat& Bumblebee2::Right()
+{
+    return _images.LeftImage();
+}
+
+void Bumblebee2::LockImages()
+{
+    _imagesLock.lock();
+}
+
+void Bumblebee2::UnlockImages()
+{
+    _imagesLock.unlock();
+}
+
+
+
 Bumblebee2::~Bumblebee2()
 {
     //dtor
 }
 
+
+void ProcessFrame(Image* rawImage, const void* that)
+{
+
+    Bumblebee2&  thisHere= *((Bumblebee2*)that);
+    Image savedRaw;
+    Error error;
+    Mat right, left;
+    error = savedRaw.DeepCopy((const Image*) &rawImage);
+    if (error != PGRERROR_OK)
+    {
+        PrintError( error );
+        return;
+    }
+
+    // Get the raw image dimensions
+    PixelFormat pixFormat;
+    unsigned int rows, cols, stride;
+    savedRaw.GetDimensions( &rows, &cols, &stride, &pixFormat );
+
+// Create a converted image
+    Image convertedImage;
+
+    // Convert the raw image
+    error = savedRaw.Convert( PIXEL_FORMAT_BGR, &convertedImage );
+    if (error != PGRERROR_OK)
+    {
+        PrintError( error );
+        return;
+    }
+
+    Bumblebee2::ptgrey2opencv(convertedImage,right);
+
+    unsigned char* data = savedRaw.GetData();
+    for(int i = 1; i < savedRaw.GetDataSize(); i += 2)
+    {
+        char tmp = data[i];
+        data[i] = data[i-1];
+        data[i-1] = tmp;
+    }
+
+    error = savedRaw.Convert( PIXEL_FORMAT_BGR, &convertedImage );
+    if (error != PGRERROR_OK)
+    {
+        PrintError( error );
+        return;
+    }
+
+    Bumblebee2::ptgrey2opencv(convertedImage, left);
+
+    thisHere.LockImages();
+    thisHere.Left() = left.clone();
+    thisHere.Right() = right.clone();
+    thisHere.UnlockImages();
+
+    return;
+
+}
+
+
+void PrintError( FlyCapture2::Error error )
+{
+    error.PrintErrorTrace();
+}
