@@ -9,33 +9,33 @@ namespace obstacles
 
 CircularObstacle::CircularObstacle()
 {
-    _center = Point(0,0);
+    _center = Vector2f(0.0f,0.0f);
     _radius = 0;
     _resolution = 8;
 }
 
-CircularObstacle::CircularObstacle(Point center, float radius)
+CircularObstacle::CircularObstacle(Vector2f center, float radius)
 {
     _center = center;
     _radius = radius;
     _resolution = 8;
 }
 
-CircularObstacle::CircularObstacle(Point center, float radius, int resolution)
+CircularObstacle::CircularObstacle(Vector2f center, float radius, int resolution)
 {
     _center = center;
     _radius = radius;
     _resolution = resolution;
 }
 
-Point* CircularObstacle::getPoints()
+Vector2f* CircularObstacle::getPoints()
 {
-    Point *pts = new Point[_resolution];
+    Vector2f *pts = new Vector2f[_resolution];
 
     int index = 0;
     for(float theta = 0; theta < 2*M_PI; theta += ( 2 * M_PI ) / _resolution)
     {
-        pts[index] = Point(_radius*cos(theta)+_center.x, _radius*sin(theta)+_center.y);
+        pts[index] = Vector2f(_radius*cos(theta), _radius*sin(theta)) + _center;
         index++;
     }
 

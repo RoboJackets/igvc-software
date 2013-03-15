@@ -15,19 +15,19 @@ class LinearObstacle : public Obstacle
 public:
     LinearObstacle();
 
-    LinearObstacle(Point start, Point end);
+    LinearObstacle(Vector2f start, Vector2f end);
 
-    Point* getPoints();
+    Vector2f* getPoints();
     int getNumPoints();
 
-    void setPoints(Point start, Point end);
+    void setPoints(Vector2f start, Vector2f end);
 
-    void setStart(Point start);
-    void setEnd(Point end);
+    void setStart(Vector2f start);
+    void setEnd(Vector2f end);
 
 private:
-    Point _start;
-    Point _end;
+    Vector2f _start;
+    Vector2f _end;
 };
 
 }

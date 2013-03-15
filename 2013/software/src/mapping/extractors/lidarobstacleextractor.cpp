@@ -37,7 +37,7 @@ void LidarObstacleExtractor::onNewLidarData(LidarState data)
 
     vector<Obstacle *> obstacles;
 
-    vector<Obstacle*> filtered = filterLinearObstacles(filterBySize(clusterByJumps(clusterByValidity(&data))));
+    vector<Obstacle*> filtered = filterCircularObstacles(filterLinearObstacles(filterBySize(clusterByJumps(clusterByValidity(&data)))));
     obstacles.insert(obstacles.end(), filtered.begin(), filtered.end());
 
     onNewData(obstacles);
@@ -66,10 +66,10 @@ std::vector<PointArrayObstacle*> LidarObstacleExtractor::clusterByValidity(Lidar
             {
                 clusters.push_back(new PointArrayObstacle());
                 cluster = clusters.at(clusters.size()-1);
-                cluster->addPoint(Point(x,y));
+                cluster->addPoint(Vector2f(x,y));
                 inCluster = true;
             } else {
-                cluster->addPoint(Point(x,y));
+                cluster->addPoint(Vector2f(x,y));
             }
         } else {
             if(inCluster)
@@ -94,7 +94,7 @@ std::vector<PointArrayObstacle*> LidarObstacleExtractor::clusterByJumps(std::vec
     for(vector<PointArrayObstacle*>::iterator iter = data.begin(); iter < data.end(); iter++)
     {
         PointArrayObstacle* cluster = (*iter);
-        Point* points = cluster->getPoints();
+        Vector2f* points = cluster->getPoints();
         for(int i = 0; i < cluster->getNumPoints()-1; i++)
         {
             if(!inCluster)
@@ -104,7 +104,8 @@ std::vector<PointArrayObstacle*> LidarObstacleExtractor::clusterByJumps(std::vec
                 newcluster->addPoint(points[i]);
                 inCluster = true;
             } else {
-                float dist = points[i].distanceTo(points[i+1]);
+                //float dist = points[i].distanceTo(points[i+1]);
+                float dist = (points[i+1] - points[i]).norm();
                 newcluster->addPoint(points[i]);
                 if(dist >= jumpDistThreshold)
                 {
@@ -137,74 +138,70 @@ std::vector<PointArrayObstacle*> LidarObstacleExtractor::filterBySize(std::vecto
     return clusters;
 }
 
-Point LidarObstacleExtractor::calculateCenterOfMass(Point *points, int numPoints)
+Vector2f LidarObstacleExtractor::calculateCenterOfMass(Vector2f *points, int numPoints)
 {
-    Point cm;
+    Vector2f cm;
     for(int i = 0; i < numPoints; i++)
     {
-        cm.x += points[i].x;
-        cm.y += points[i].y;
+        cm += points[i];
     }
-    cm.x /= numPoints;
-    cm.y /= numPoints;
+    cm /= numPoints;
     return cm;
 }
 
-float LidarObstacleExtractor::calculateMoment(Point *points, int numPoints, int p, int q)
+float LidarObstacleExtractor::calculateMoment(Vector2f *points, int numPoints, int p, int q)
 {
-    Point cm = calculateCenterOfMass(points, numPoints);
+    Vector2f cm = calculateCenterOfMass(points, numPoints);
     float u = 0;
     for(int i = 0; i < numPoints; i++)
     {
-        Point &point = points[i];
-        u += pow((point.x - cm.x), p) * pow((point.y - cm.y),q);
+        Vector2f &point = points[i];
+        u += pow((point[0] - cm[0]), p) * pow((point[1] - cm[1]),q);
     }
     u /= numPoints;
     return u;
 }
 
-float LidarObstacleExtractor::calculateAngleOfOrientation(Point *points, int numPoints)
+float LidarObstacleExtractor::calculateAngleOfOrientation(Vector2f *points, int numPoints)
 {
     return 0.5 * atan( ( 2.0 * calculateMoment(points, numPoints, 1, 1) ) / ( calculateMoment(points, numPoints, 2, 0) - calculateMoment(points, numPoints, 0, 2) ) );
 }
 
-float LidarObstacleExtractor::measureLinearity(Point *points, int numPoints)
+float LidarObstacleExtractor::measureLinearity(Vector2f *points, int numPoints)
 {
     int k = numPoints / 2;
 //    Point cm = calculateCenterOfMass(points, numPoints);
     float angle = calculateAngleOfOrientation(points, numPoints);
     float M = tan(angle);
 //    Point normal(-M,1);
-    Point localNormals[k];
+    Vector2f localNormals[k];
     for(int i = 0; i < k; i++)
     {
-        Point a = points[rand() % numPoints];
-        Point b;
+        Vector2f a = points[rand() % numPoints];
+        Vector2f b;
         while(b == a)
         {
             b = points[rand() % numPoints];
         }
-        float m = (b.y - a.y) / (b.x - a.x);
+        float m = (b[1] - a[1]) / (b[0] - a[0]);
         float norm = sqrt(m*m + 1);
         float dp = m*M + 1;
         if(dp < 0)
         {
-            localNormals[i] = Point(m/norm, -1/norm);
+            localNormals[i] = Vector2f(m/norm, -1/norm);
         } else {
-            localNormals[i] = Point(-m/norm, 1/norm);
+            localNormals[i] = Vector2f(-m/norm, 1/norm);
         }
     }
-    Point normalToOrientation(0,0);
+    Vector2f normalToOrientation(0,0);
     for(int i = 0; i < k; i++)
     {
-        normalToOrientation.x += localNormals[i].x;
-        normalToOrientation.y += localNormals[i].y;
+        normalToOrientation += localNormals[i];
     }
 
-    normalToOrientation.x /= numPoints;
-    normalToOrientation.y /= numPoints;
+    normalToOrientation /= numPoints;
 
-    return normalToOrientation.distanceTo(Point(0,0));
+    return normalToOrientation.norm();
 }
 
 std::vector<Obstacle*> LidarObstacleExtractor::filterLinearObstacles(std::vector<PointArrayObstacle*> data)
@@ -228,6 +225,26 @@ std::vector<Obstacle*> LidarObstacleExtractor::filterLinearObstacles(std::vector
     }
 
     return obstacles;
+}
+
+std::vector<Obstacle*> LidarObstacleExtractor::filterCircularObstacles(std::vector<Obstacle*> data)
+{
+    using namespace std;
+    vector<Obstacle*> filtered;
+
+    for(vector<Obstacle*>::iterator iter = data.begin(); iter != data.end(); iter++)
+    {
+        Obstacle* obst = (*iter);
+        PointArrayObstacle* raw = dynamic_cast<PointArrayObstacle*>(obst);
+        if(raw != 0)
+        {
+
+        } else {
+            filtered.push_back(obst);
+        }
+    }
+
+    return filtered;
 }
 
 }

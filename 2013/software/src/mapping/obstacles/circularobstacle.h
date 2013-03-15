@@ -14,23 +14,23 @@ class CircularObstacle : public Obstacle
 {
 public:
     CircularObstacle();
-    CircularObstacle(Point center, float radius);
-    CircularObstacle(Point center, float radius, int resolution);
-    Point* getPoints();
+    CircularObstacle(Vector2f center, float radius);
+    CircularObstacle(Vector2f center, float radius, int resolution);
+    Vector2f* getPoints();
     int getNumPoints();
 
     void resolution(int val);
     int resolution();
 
-    void center(Point val);
-    Point center();
+    void center(Vector2f val);
+    Vector2f center();
 
     void radius(float val);
     float radius();
 
 private:
     int _resolution;
-    Point _center;
+    Vector2f _center;
     float _radius;
 };
 
