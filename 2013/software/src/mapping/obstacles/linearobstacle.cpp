@@ -13,16 +13,16 @@ LinearObstacle::LinearObstacle()
 {
 }
 
-LinearObstacle::LinearObstacle(Point start, Point end)
+LinearObstacle::LinearObstacle(Vector2f start, Vector2f end)
     : Obstacle()
 {
     _start = start;
     _end = end;
 }
 
-Point* LinearObstacle::getPoints()
+Vector2f *LinearObstacle::getPoints()
 {
-    Point *ps = new Point[2];
+    Vector2f *ps = new Vector2f[2];
     ps[0] = _start;
     ps[1] = _end;
     return ps;
@@ -33,18 +33,18 @@ int LinearObstacle::getNumPoints()
     return 2;
 }
 
-void LinearObstacle::setPoints(Point start, Point end)
+void LinearObstacle::setPoints(Vector2f start, Vector2f end)
 {
     _start = start;
     _end = end;
 }
 
-void LinearObstacle::setStart(Point start)
+void LinearObstacle::setStart(Vector2f start)
 {
     _start = start;
 }
 
-void LinearObstacle::setEnd(Point end)
+void LinearObstacle::setEnd(Vector2f end)
 {
     _end = end;
 }

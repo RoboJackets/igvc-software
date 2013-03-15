@@ -17,12 +17,12 @@ int PointArrayObstacle::getNumPoints()
     return _points.size();
 }
 
-Point* PointArrayObstacle::getPoints()
+Vector2f *PointArrayObstacle::getPoints()
 {
     return _points.data();
 }
 
-void PointArrayObstacle::addPoint(Point p)
+void PointArrayObstacle::addPoint(Vector2f p)
 {
     _points.push_back(p);
 }
