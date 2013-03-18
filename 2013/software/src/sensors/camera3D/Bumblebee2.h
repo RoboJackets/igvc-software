@@ -28,6 +28,8 @@ class Bumblebee2
         Mat& Left();
         Mat& Right();
         StereoPair Images();
+        void Running(bool);
+        bool Running();
     private:
         int StartCamera();
         int CloseCamera();
