@@ -11,7 +11,6 @@ using namespace cv;
 Bumblebee2::Bumblebee2(): _running(true), _images(), _cam()
 {
     StartCamera();
-    Run();
 }
 
 int Bumblebee2::StartCamera()
@@ -117,7 +116,6 @@ int Bumblebee2::StartCamera()
         PrintError( error );
         return -1;
     }
-
 }
 
 /*
