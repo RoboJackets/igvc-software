@@ -72,3 +72,4 @@ OTHER_FILES += \
 helptext.path = $$OUT_PWD
 helptext.files = HelpText.html
 INSTALLS += helptext
+

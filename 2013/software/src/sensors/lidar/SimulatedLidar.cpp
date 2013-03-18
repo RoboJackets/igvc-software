@@ -23,7 +23,12 @@ SimulatedLidar::SimulatedLidar()
         LidarPoint &p = _data.points[i];
         p.valid = true;
         p.angle = i * ( ( M_PI * 2.0 ) / 1024);
-        p.distance = i/1024.0; // Makes a cool spiral
+        //p.distance = i/1024.0; // Makes a cool spiral
+        //p.distance = 1; // Makes a circle
+        //p.distance = 0.5*(3*sin(p.angle)-sqrt(9*sin(p.angle)*sin(p.angle) + 10)); // Circle centered above origin
+        p.distance = 0.5*(2*sin(p.angle)-sqrt(4*sin(p.angle)*sin(p.angle) - 3));
+        if(p.angle < M_PI / 3.0 || p.angle > 2.0*M_PI/3.0)
+            p.valid = false;
     }
 }
 
