@@ -93,6 +93,7 @@ int Bumblebee2::StartCamera()
     }
 
     // Set the settings to the camera
+
     error = _cam.SetFormat7Configuration(
         &fmt7ImageSettings,
         fmt7PacketInfo.recommendedBytesPerPacket );
@@ -102,20 +103,23 @@ int Bumblebee2::StartCamera()
         return -1;
     }
 
+
     // Start capturing images
-    error = _cam.StartCapture();
+    error = _cam.StartCapture(&ProcessFrame, this);
     if (error != PGRERROR_OK)
     {
         PrintError( error );
         return -1;
     }
 
+/*
     error = _cam.SetCallback(&ProcessFrame, this);
     if (error != PGRERROR_OK)
     {
         PrintError( error );
         return -1;
     }
+*/
 }
 
 /*
@@ -289,6 +293,15 @@ void Bumblebee2::ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
     return;
 }
 
+void Bumblebee2::Running(bool newState)
+{
+    _running = newState;
+}
+
+bool Bumblebee2::Running(void)
+{
+    return _running;
+}
 
 Mat& Bumblebee2::Left()
 {
