@@ -174,7 +174,7 @@ void Bumblebee2::ProcessFrame(Image* rawImage, const void* otherThings)
 }
 */
 
-
+/*
 
 int Bumblebee2::Run()
 {
@@ -265,7 +265,7 @@ int Bumblebee2::Run()
 
 	return 0;
 }
-
+*/
 int Bumblebee2::CloseCamera()
 {
     Error error;
@@ -285,6 +285,7 @@ int Bumblebee2::CloseCamera()
         return -1;
     }
 }
+
 
 void Bumblebee2::ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
 {
@@ -337,12 +338,11 @@ Bumblebee2::~Bumblebee2()
 
 void ProcessFrame(Image* rawImage, const void* that)
 {
-
     Bumblebee2&  thisHere= *((Bumblebee2*)that);
     Image savedRaw;
     Error error;
     Mat right, left;
-    error = savedRaw.DeepCopy((const Image*) &rawImage);
+    error = savedRaw.DeepCopy((const Image*) rawImage);
     if (error != PGRERROR_OK)
     {
         PrintError( error );
