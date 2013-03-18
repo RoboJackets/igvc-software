@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    _lidar = 0;
     ui->setupUi(this);
     removeToolBar(ui->toolBar);
     ui->lidarView->setScale(0.25);
@@ -33,8 +34,8 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)
 
 void MainWindow::closeEvent(QCloseEvent *)
 {
-    if(_mode == Nav200)
-        _nav200->stop();
+    if(_lidar)
+        delete _lidar;
 }
 
 void MainWindow::on_actionCapture_triggered()
@@ -70,62 +71,50 @@ void MainWindow::switchMode(Mode newMode)
     if(newMode == _mode && newMode != File)
         return;
 
-    NAV200 *_newNav;
-    SimulatedLidar *_newSim;
+    ui->lidarView->clearDeviceListeners();
 
-    // Clean up old lidar
-    switch(_mode)
-    {
-    case Nav200:
-        _nav200->stop();
-        ui->lidarView->shouldUpdateOnScaling = true;
-        delete _nav200;
-        break;
-    case File:
-        delete _simulated;
-        break;
-    case Default:
-        delete _simulated;
-        break;
-    case None:
-        // Do nothing
-        break;
-    }
+    NAV200 *newNav=0;
+    SimulatedLidar *newSim=0;
 
     // Make new lidar
     switch(newMode)
     {
     case Nav200:
-        _newNav = new NAV200();
-        ui->lidarView->setLidar(_newNav);
+        newNav = new NAV200();
+        ui->lidarView->setLidar(newNav);
         ui->lidarView->shouldUpdateOnScaling = false;
         break;
     case File:
-        _newSim = new SimulatedLidar();
-        _newSim->loadFile(_filePath.toStdString().c_str());
-        ui->lidarView->setLidar(_newSim);
+        newSim = new SimulatedLidar();
+        newSim->loadFile(_filePath.toStdString().c_str());
+        ui->lidarView->setLidar(newSim);
         break;
     case Default:
-        _newSim = new SimulatedLidar();
-        ui->lidarView->setLidar(_newSim);
+        newSim = new SimulatedLidar();
+        ui->lidarView->setLidar(newSim);
         break;
-    case None:
-        // Do nothing
+    default:
+        newSim = new SimulatedLidar();
+        ui->lidarView->setLidar(newSim);
         break;
     }
 
-    // Set local pointers
-    switch(newMode)
+    // Clean up old lidar
+    if(_mode==Nav200)
+        ui->lidarView->shouldUpdateOnScaling = true;
+    if(_lidar)
     {
-    case Nav200:
-        _nav200 = _newNav;
-        break;
-    case File:
-        _simulated = _newSim;
-        break;
-    case Default:
-        _simulated = _newSim;
-        break;
+        delete _lidar;
+        _lidar = 0;
+    }
+
+    //Set local pointer
+    if(newMode == Nav200)
+    {
+        _lidar = newNav;
+    } else if(newMode == File || newMode == Default)
+    {
+        _lidar = newSim;
     }
 
     // Switch mode
@@ -168,4 +157,14 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::on_actionInvalid_Points_triggered(bool checked)
 {
     ui->lidarView->showInvalid = checked;
+}
+
+void MainWindow::on_actionFullscreen_triggered(bool checked)
+{
+    if(checked)
+    {
+        this->showFullScreen();
+    } else {
+        this->showNormal();
+    }
 }

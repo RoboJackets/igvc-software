@@ -33,11 +33,11 @@ void SimulatedLidar::thread_run()
     {
         try {
             sleep(1);
-            onNewData(_data);
             boost::this_thread::interruption_point();
-        } catch (const boost::thread_interrupted&)
-        {
+            onNewData(_data);
+        } catch (const boost::thread_interrupted&) {
             _running = false;
+            break;
         }
     }
 }

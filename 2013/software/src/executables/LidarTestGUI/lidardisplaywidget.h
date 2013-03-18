@@ -31,6 +31,8 @@ public:
 
     bool event(QEvent * event);
 
+    void clearDeviceListeners();
+
     bool shouldUpdateOnScaling;
 
     bool showInvalid;
@@ -40,8 +42,10 @@ protected:
 
 private:
     void onNewLidarData(LidarState state);
+    void onNewObstacleData(std::vector<Obstacle*> obstacles);
 
     LISTENER(LidarDisplayWidget, onNewLidarData, LidarState)
+    LISTENER(LidarDisplayWidget, onNewObstacleData, std::vector<Obstacle*>)
 
     LidarState _lidarData;
     boost::mutex _locker;
@@ -56,7 +60,7 @@ private:
 
     QPointF _origin;
 
-    LidarObstacleExtractor _lidObstExtractor;
+    LidarObstacleExtractor* _lidObstExractor;
     std::vector<Obstacle*> _obstacles;
 };
 

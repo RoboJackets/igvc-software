@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Tue Mar 5 20:18:26 2013
+** Created: Sat Mar 9 20:42:33 2013
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -38,6 +38,7 @@ public:
     QAction *actionPoints;
     QAction *actionAbout;
     QAction *actionInvalid_Points;
+    QAction *actionFullscreen;
     QWidget *centralWidget;
     QVBoxLayout *verticalLayout;
     QSlider *horizontalSlider;
@@ -79,6 +80,9 @@ public:
         actionInvalid_Points = new QAction(MainWindow);
         actionInvalid_Points->setObjectName(QString::fromUtf8("actionInvalid_Points"));
         actionInvalid_Points->setCheckable(true);
+        actionFullscreen = new QAction(MainWindow);
+        actionFullscreen->setObjectName(QString::fromUtf8("actionFullscreen"));
+        actionFullscreen->setCheckable(true);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         verticalLayout = new QVBoxLayout(centralWidget);
@@ -104,7 +108,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 400, 25));
+        menuBar->setGeometry(QRect(0, 0, 400, 23));
         menuFile = new QMenu(menuBar);
         menuFile->setObjectName(QString::fromUtf8("menuFile"));
         menuLidar = new QMenu(menuBar);
@@ -135,6 +139,8 @@ public:
         menuView->addAction(actionPoints);
         menuView->addSeparator();
         menuView->addAction(actionInvalid_Points);
+        menuView->addSeparator();
+        menuView->addAction(actionFullscreen);
         menuHelp->addAction(actionAbout);
 
         retranslateUi(MainWindow);
@@ -157,6 +163,7 @@ public:
 #ifndef QT_NO_TOOLTIP
         actionInvalid_Points->setToolTip(QApplication::translate("MainWindow", "Invalid Points", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
+        actionFullscreen->setText(QApplication::translate("MainWindow", "Fullscreen", 0, QApplication::UnicodeUTF8));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0, QApplication::UnicodeUTF8));
         menuLidar->setTitle(QApplication::translate("MainWindow", "Lidar", 0, QApplication::UnicodeUTF8));
         menuSimulated->setTitle(QApplication::translate("MainWindow", "Simulated", 0, QApplication::UnicodeUTF8));

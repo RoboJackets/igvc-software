@@ -16,12 +16,12 @@ class PointArrayObstacle : public Obstacle
 public:
     PointArrayObstacle();
     int getNumPoints();
-    Point* getPoints();
+    Vector2f* getPoints();
 
-    void addPoint(Point p);
+    void addPoint(Vector2f p);
 
 private:
-    std::vector<Point> _points;
+    std::vector<Vector2f> _points;
 };
 
 }
