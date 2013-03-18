@@ -249,6 +249,12 @@
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
 		</Unit>
+		<Unit filename="src/sensors/camera3D/OpenCVDisplay.cpp">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/OpenCVDisplay.h">
+			<Option target="testCV" />
+		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoPair.hpp">
 			<Option target="testCV" />
 		</Unit>
