@@ -3,7 +3,6 @@
 
 #include "events/Event.hpp"
 #include "sensors/lidar/Lidar.h"
-#include "mapping/obstacles/linearobstacle.h"
 #include <cmath>
 #include <vector>
 #include "mapping/obstacles/pointarrayobstacle.h"
@@ -38,15 +37,13 @@ private:
     void onNewLidarData(LidarState data);
     LISTENER(LidarObstacleExtractor, onNewLidarData, LidarState)
 
-    float measureLinearity(Vector2f* points, int numPoints);
-    float calculateMoment(Vector2f* points, int numPoints, int p, int q);
-    Vector2f calculateCenterOfMass(Vector2f* points, int numPoints);
-    float calculateAngleOfOrientation(Vector2f* points, int numPoints);
+    float calculateLinearCorrelationCoefficient(Vector2f* points, int numPoints);
+    Vector2f closestPointToLineFromPoint(Vector2f &lineCoefs, Vector2f &p);
 
     std::vector<PointArrayObstacle*> clusterByValidity(LidarState *data);
     std::vector<PointArrayObstacle*> clusterByJumps(std::vector<PointArrayObstacle*> data);
     std::vector<PointArrayObstacle*> filterBySize(std::vector<PointArrayObstacle*> data);
-    std::vector<Obstacle*> filterLinearObstacles(std::vector<PointArrayObstacle*> data);
+    std::vector<Obstacle*> filterByLinearRegression(std::vector<PointArrayObstacle*> data);
     std::vector<Obstacle*> filterCircularObstacles(std::vector<Obstacle*> data);
 
 };
