@@ -60,24 +60,21 @@ void LidarDisplayWidget::paintEvent(QPaintEvent *)
         }
     }
 
-    if(!_obstacles.empty())
+    painter.setPen(QPen(Qt::blue, 2));
+    for(std::vector<Obstacle*>::iterator iter = _obstacles.begin(); iter < _obstacles.end(); iter++)
     {
-        painter.setPen(QPen(Qt::blue, 2));
-        for(std::vector<Obstacle*>::iterator iter = _obstacles.begin(); iter < _obstacles.end(); iter++)
+        Obstacle *obstacle = *iter;
+        Vector2f *points = obstacle->getPoints();
+        for(int i = 0; i < obstacle->getNumPoints()-1; i++)
         {
-            Obstacle *obstacle = *iter;
-            Point *points = obstacle->getPoints();
-            for(int i = 0; i < obstacle->getNumPoints()-1; i++)
-            {
-                Point &p1 = points[i], &p2 = points[i+1];
-                QPointF start(p1.x, -p1.y);
-                start *= _scale;
-                start += _origin;
-                QPointF end(p2.x, -p2.y);
-                end *= _scale;
-                end += _origin;
-                painter.drawLine(start, end);
-            }
+            Vector2f &p1 = points[i], &p2 = points[i+1];
+            QPointF start(p1[0], -p1[1]);
+            start *= _scale;
+            start += _origin;
+            QPointF end(p2[0], -p2[1]);
+            end *= _scale;
+            end += _origin;
+            painter.drawLine(start, end);
         }
     }
 
@@ -159,6 +156,12 @@ bool LidarDisplayWidget::event(QEvent *event)
         return true;
     }
     return QWidget::event(event);
+}
+
+void LidarDisplayWidget::wheelEvent(QWheelEvent *event)
+{
+    float newScale = _scale + event->delta()/5.0;
+    setScale( newScale > 0 ? newScale : 0 );
 }
 
 void LidarDisplayWidget::clearDeviceListeners()

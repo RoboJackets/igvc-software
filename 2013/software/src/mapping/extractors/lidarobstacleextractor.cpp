@@ -1,6 +1,9 @@
 #include "lidarobstacleextractor.h"
 #include <algorithm>
 #include <iostream>
+#include "mapping/obstacles/linearobstacle.h"
+#include "mapping/obstacles/circularobstacle.h"
+#include <eigen3/Eigen/Geometry>
 
 namespace IGVC
 {
@@ -18,7 +21,7 @@ LidarObstacleExtractor::LidarObstacleExtractor(Lidar *device)
         _device = device;
     }
     jumpDistThreshold = 0.1;
-    linearityThreshold = 0.475;
+    linearityThreshold = 0.75;
     sizeThreshold = 10;
 }
 
@@ -37,7 +40,7 @@ void LidarObstacleExtractor::onNewLidarData(LidarState data)
 
     vector<Obstacle *> obstacles;
 
-    vector<Obstacle*> filtered = filterCircularObstacles(filterLinearObstacles(filterBySize(clusterByJumps(clusterByValidity(&data)))));
+    vector<Obstacle*> filtered = filterCircularObstacles(filterByLinearRegression(filterBySize(clusterByJumps(clusterByValidity(&data)))));
     obstacles.insert(obstacles.end(), filtered.begin(), filtered.end());
 
     onNewData(obstacles);
@@ -138,88 +141,81 @@ std::vector<PointArrayObstacle*> LidarObstacleExtractor::filterBySize(std::vecto
     return clusters;
 }
 
-Vector2f LidarObstacleExtractor::calculateCenterOfMass(Vector2f *points, int numPoints)
+float LidarObstacleExtractor::calculateLinearCorrelationCoefficient(Vector2f *points, int numPoints)
 {
-    Vector2f cm;
+    // Compute averages
+    float avgX = 0;
+    float avgY = 0;
     for(int i = 0; i < numPoints; i++)
     {
-        cm += points[i];
+        avgX += points[i][0];
+        avgY += points[i][1];
     }
-    cm /= numPoints;
-    return cm;
-}
+    avgX /= numPoints;
+    avgY /= numPoints;
 
-float LidarObstacleExtractor::calculateMoment(Vector2f *points, int numPoints, int p, int q)
-{
-    Vector2f cm = calculateCenterOfMass(points, numPoints);
-    float u = 0;
+    // Compute variances and covariances of X and Y
+    float SSxx = 0;
+    float SSyy = 0;
+    float SSxy = 0;
     for(int i = 0; i < numPoints; i++)
     {
-        Vector2f &point = points[i];
-        u += pow((point[0] - cm[0]), p) * pow((point[1] - cm[1]),q);
+        float xi = points[i][0];
+        float yi = points[i][1];
+        SSxx += (xi - avgX)*(xi - avgX);
+        SSyy += (yi - avgY)*(yi - avgY);
+        SSxy += (xi - avgX)*(yi - avgY);
     }
-    u /= numPoints;
-    return u;
+    return ( SSxy * SSxy ) / ( SSxx * SSyy );
 }
 
-float LidarObstacleExtractor::calculateAngleOfOrientation(Vector2f *points, int numPoints)
+Vector2f LidarObstacleExtractor::closestPointToLineFromPoint(Vector2f &lineCoefs, Vector2f &p)
 {
-    return 0.5 * atan( ( 2.0 * calculateMoment(points, numPoints, 1, 1) ) / ( calculateMoment(points, numPoints, 2, 0) - calculateMoment(points, numPoints, 0, 2) ) );
+    Vector2f A = Vector2f(0,lineCoefs[0]); // Point on line @ x = 0
+    Vector2f B = Vector2f(1,lineCoefs[1] + lineCoefs[0]); // Point on line @ x = 1
+    Vector2f AP = p - A;
+    Vector2f AB = B - A;
+    float t = AP.dot(AB) / AB.squaredNorm();
+    return A + AB*t;
 }
 
-float LidarObstacleExtractor::measureLinearity(Vector2f *points, int numPoints)
-{
-    int k = numPoints / 2;
-//    Point cm = calculateCenterOfMass(points, numPoints);
-    float angle = calculateAngleOfOrientation(points, numPoints);
-    float M = tan(angle);
-//    Point normal(-M,1);
-    Vector2f localNormals[k];
-    for(int i = 0; i < k; i++)
-    {
-        Vector2f a = points[rand() % numPoints];
-        Vector2f b;
-        while(b == a)
-        {
-            b = points[rand() % numPoints];
-        }
-        float m = (b[1] - a[1]) / (b[0] - a[0]);
-        float norm = sqrt(m*m + 1);
-        float dp = m*M + 1;
-        if(dp < 0)
-        {
-            localNormals[i] = Vector2f(m/norm, -1/norm);
-        } else {
-            localNormals[i] = Vector2f(-m/norm, 1/norm);
-        }
-    }
-    Vector2f normalToOrientation(0,0);
-    for(int i = 0; i < k; i++)
-    {
-        normalToOrientation += localNormals[i];
-    }
-
-    normalToOrientation /= numPoints;
-
-    return normalToOrientation.norm();
-}
-
-std::vector<Obstacle*> LidarObstacleExtractor::filterLinearObstacles(std::vector<PointArrayObstacle*> data)
+std::vector<Obstacle*> LidarObstacleExtractor::filterByLinearRegression(std::vector<PointArrayObstacle*> data)
 {
     using namespace std;
 
     std::vector<Obstacle*> obstacles;
 
-    for(vector<PointArrayObstacle*>::iterator iter = data.begin(); iter < data.end(); iter++)
+    for(vector<PointArrayObstacle*>::iterator iter = data.begin(); iter != data.end(); iter++)
     {
         PointArrayObstacle* cluster = (*iter);
-        float linearity = measureLinearity(cluster->getPoints(), cluster->getNumPoints());
-        if(linearity >= linearityThreshold)
+        Vector2f *points = cluster->getPoints();
+
+        // Filter non-linear obstacles via correlation coefficient
+        float rsquared = calculateLinearCorrelationCoefficient(points, cluster->getNumPoints());
+        if(rsquared >= linearityThreshold)
         {
-            // This is a line
-            obstacles.push_back(new LinearObstacle(cluster->getPoints()[0], cluster->getPoints()[cluster->getNumPoints()-1]));
+            MatrixXf A(cluster->getNumPoints(), 2);
+            for(int i = 0; i < cluster->getNumPoints(); i++)
+            {
+                A(i,0) = 1;
+                A(i,1) = points[i][0]; // X-Values
+            }
+            MatrixXf b(cluster->getNumPoints(),1);
+            for(int i = 0; i < cluster->getNumPoints(); i++)
+            {
+                b(i,0) = points[i][1]; // Y-Values
+            }
+
+            /*
+             * Solve Az=b to estimate y=mx+c where m=z[1] and c = z[0]
+             */
+            Vector2f z = A.jacobiSvd(ComputeThinU | ComputeThinV).solve(b);
+
+            Vector2f start = closestPointToLineFromPoint(z, points[0]);
+            Vector2f end = closestPointToLineFromPoint(z, points[cluster->getNumPoints()-1]);
+
+            obstacles.push_back(new LinearObstacle(start, end));
         } else {
-            // This is not a line
             obstacles.push_back(cluster);
         }
     }
@@ -238,8 +234,69 @@ std::vector<Obstacle*> LidarObstacleExtractor::filterCircularObstacles(std::vect
         PointArrayObstacle* raw = dynamic_cast<PointArrayObstacle*>(obst);
         if(raw != 0)
         {
+            // This obstacle has yet to be classified, check for circularity
+
+            Vector2f center(0.0f, 0.0f);
+            Vector2f *points = raw->getPoints();
+            int q = 0;
+            for(int ind = 0; ind < raw->getNumPoints()-2; ind++)
+            {
+                Vector2f Pi = points[ind], Pj = points[ind + 1], Pk = points[ind + 2];
+                Vector2f circumcenter;
+                float delta = (Pk[0]-Pj[0])*(Pj[1]-Pi[1])-(Pj[0]-Pi[0])*(Pk[1]-Pj[1]);
+                if(delta != 0) // If this triplet does not form a line
+                {
+//                    circumcenter[0] = ( (Pk[1]-Pj[1])*Pi.squaredNorm()+(Pi[1]-Pk[1])*Pj.squaredNorm()+(Pj[1]-Pi[1])*Pk.squaredNorm() ) / delta;
+//                    circumcenter[1] = - ( (Pk[0]-Pj[0])*Pi.squaredNorm()+(Pi[0]-Pk[0])*Pj.squaredNorm()+(Pj[0]-Pi[0])*Pk.squaredNorm() ) / delta;
+
+                    Vector2f PiPj = Pj - Pi;
+                    Vector2f V1 = Vector2f(PiPj[1], - PiPj[0]).normalized();
+                    Vector2f O1 = ( Pi + Pj ) / 2.0;
+
+                    Vector2f PjPk = Pk - Pj;
+                    Vector2f V2 = Vector2f(PjPk[1], - PjPk[0]).normalized();
+                    Vector2f O2 = ( Pj + Pk ) / 2.0;
+
+                    MatrixXf A(2,2);
+                    for(int i = 0; i < 2; i++)
+                    {
+                        A(i,0) = V1[i];
+                        A(i,1) = V2[i];
+                    }
+                    Vector2f b = O2 - O1;
+
+                    Vector2f z = A.jacobiSvd(ComputeThinU | ComputeThinV).solve(b);
+
+                    circumcenter = O1 + z[0] * V1;
+
+                    center += circumcenter;
+                    q++;
+                }
+            }
+            if(q != 0) // If at least one triplet was not a line...
+                center /= q;
+
+            float rhat = 0;
+            float rmin = (points[0]-center).norm();
+            float rmax = (points[0]-center).norm();
+            for(int i = 0; i < raw->getNumPoints(); i++)
+            {
+                float r = (points[i] - center).norm();
+                rhat += r;
+                rmin = min(r, rmin);
+                rmax = max(r, rmax);
+            }
+            rhat /= raw->getNumPoints();
+
+            float rdeviance = rmax - rmin;
+
+            if(rdeviance < 0.1)
+                filtered.push_back(new CircularObstacle(center, rhat, 32));
+            else
+                filtered.push_back(obst);
 
         } else {
+            // This obstacle has already been classified, ignore it
             filtered.push_back(obst);
         }
     }
