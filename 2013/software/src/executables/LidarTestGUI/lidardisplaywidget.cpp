@@ -8,9 +8,7 @@
 LidarDisplayWidget::LidarDisplayWidget(QWidget *parent) :
     QWidget(parent),
     LonNewLidarData(this),
-    LonNewObstacles(this),
-    _lidObstExtractor(NULL),
-    _obstacles()
+    LonNewObstacleData(this)
 {
     _scale = 1.0;
     _vMode = Lines;
@@ -97,12 +95,10 @@ void LidarDisplayWidget::onNewLidarData(LidarState state)
     update();
 }
 
-void LidarDisplayWidget::onNewObstacles(std::vector<Obstacle *> obstacles)
+void LidarDisplayWidget::onNewObstacleData(std::vector<Obstacle*> obstacles)
 {
     boost::unique_lock<boost::mutex> lock(_locker);
-
     _obstacles = obstacles;
-
     update();
 }
 
@@ -125,20 +121,17 @@ void LidarDisplayWidget::setScale(double scale)
 void LidarDisplayWidget::setLidar(Lidar *device)
 {
     boost::unique_lock<boost::mutex> lock(_locker);
+    if(_lidObstExractor)
+    {
+        _lidObstExractor->disconnect();
+        delete _lidObstExractor;
+    }
     if(device)
     {
-        if(_lidObstExtractor)
-        {
-            _lidObstExtractor->onNewData -= &LonNewObstacles;
-        }
-        if(_lidar)
-        {
-            _lidar->onNewData -= &LonNewLidarData;
-        }
         _lidar = device;
         _lidar->onNewData += &LonNewLidarData;
-        _lidObstExtractor = new LidarObstacleExtractor(_lidar);
-        _lidObstExtractor->onNewData += &LonNewObstacles;
+        _lidObstExractor = new LidarObstacleExtractor(_lidar);
+        _lidObstExractor->onNewData += &LonNewObstacleData;
     }
 }
 
@@ -166,6 +159,15 @@ bool LidarDisplayWidget::event(QEvent *event)
         return true;
     }
     return QWidget::event(event);
+}
+
+void LidarDisplayWidget::clearDeviceListeners()
+{
+    if(_lidar)
+    {
+        _lidar->onNewData -= &LonNewLidarData;
+        _lidar = 0;
+    }
 }
 
 void LidarDisplayWidget::setViewMode(ViewMode mode)
