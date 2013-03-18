@@ -6,6 +6,25 @@
 #include "sensors/camera3D/OpenCVDisplay.h"
 
 using namespace cv;
+
+
+
+int main()
+{
+
+
+    Bumblebee2 thisguy;
+    std::cout << "got through Bumblebee Constructor" << std::endl;
+    OpenCVDisplay Disp(&thisguy);
+    while(thisguy.Running())
+    {
+    }
+
+    //thisguy.StartCamera();
+    //thisguy.run();
+
+}
+
 /*
 int main(int, char**)
 {
@@ -49,17 +68,3 @@ int main(int, char**)
     return 0;
 }
 */
-
-
-int main()
-{
-
-
-    Bumblebee2 thisguy;
-    OpenCVDisplay Disp(thisguy);
-
-    //thisguy.StartCamera();
-    //thisguy.run();
-
-}
-

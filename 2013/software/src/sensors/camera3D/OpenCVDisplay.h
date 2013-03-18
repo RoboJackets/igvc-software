@@ -8,7 +8,7 @@
 class OpenCVDisplay
 {
     public:
-        OpenCVDisplay(Bumblebee2&);
+        OpenCVDisplay(Bumblebee2*);
         virtual ~OpenCVDisplay();
         void onNewFrame(StereoPair newFrame);
         LISTENER(OpenCVDisplay, onNewFrame, StereoPair);
@@ -16,6 +16,7 @@ class OpenCVDisplay
     private:
         string _LeftWindowName;
         string _RightWindowName;
+        Bumblebee2* _cam;
 };
 
 #endif // OPENCVDISPLAY_H
