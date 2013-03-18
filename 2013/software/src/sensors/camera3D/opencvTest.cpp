@@ -3,6 +3,7 @@
 #include <iostream>
 #include <flycapture/FlyCapture2.h>
 #include "Bumblebee2.h"
+#include "sensors/camera3D/OpenCVDisplay.h"
 
 using namespace cv;
 /*
@@ -55,6 +56,8 @@ int main()
 
 
     Bumblebee2 thisguy;
+    OpenCVDisplay Disp(thisguy);
+
     //thisguy.StartCamera();
     //thisguy.run();
 
