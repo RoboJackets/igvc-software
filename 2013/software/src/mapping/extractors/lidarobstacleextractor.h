@@ -23,24 +23,31 @@ class LidarObstacleExtractor
 public:
     LidarObstacleExtractor(Lidar* device);
 
+    void disconnect();
+
     Event<std::vector<Obstacle*> > onNewData;
 
     float jumpDistThreshold;
     float linearityThreshold;
+    int sizeThreshold;
 
 private:
+
+    Lidar *_device;
 
     void onNewLidarData(LidarState data);
     LISTENER(LidarObstacleExtractor, onNewLidarData, LidarState)
 
-    float measureLinearity(Point* points, int numPoints);
-    float calculateMoment(Point* points, int numPoints, int p, int q);
-    Point calculateCenterOfMass(Point* points, int numPoints);
-    float calculateAngleOfOrientation(Point* points, int numPoints);
+    float measureLinearity(Vector2f* points, int numPoints);
+    float calculateMoment(Vector2f* points, int numPoints, int p, int q);
+    Vector2f calculateCenterOfMass(Vector2f* points, int numPoints);
+    float calculateAngleOfOrientation(Vector2f* points, int numPoints);
 
     std::vector<PointArrayObstacle*> clusterByValidity(LidarState *data);
     std::vector<PointArrayObstacle*> clusterByJumps(std::vector<PointArrayObstacle*> data);
+    std::vector<PointArrayObstacle*> filterBySize(std::vector<PointArrayObstacle*> data);
     std::vector<Obstacle*> filterLinearObstacles(std::vector<PointArrayObstacle*> data);
+    std::vector<Obstacle*> filterCircularObstacles(std::vector<Obstacle*> data);
 
 };
 
