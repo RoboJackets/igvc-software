@@ -9,6 +9,7 @@
 
 void ProcessFrame(Image* rawImage, void const* otherThings);
 void PrintError(FlyCapture2::Error error);
+void dc1394_deinterlace_stereo(unsigned char* src, unsigned char* dest, int width, int height);
 
 using namespace cv;
 using namespace FlyCapture2;
@@ -30,6 +31,9 @@ class Bumblebee2
         StereoPair Images();
         void Running(bool);
         bool Running();
+        int frameCount;
+        boost::mutex frameLock;
+        FlyCapture2::Camera& Cam();
     private:
         int StartCamera();
         int CloseCamera();
@@ -38,6 +42,7 @@ class Bumblebee2
         StereoPair _images;
         FlyCapture2::Camera _cam;
         boost::mutex _imagesLock;
+
         bool _running;
 };
 

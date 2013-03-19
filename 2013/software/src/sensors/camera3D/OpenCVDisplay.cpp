@@ -9,9 +9,19 @@ OpenCVDisplay::OpenCVDisplay(Bumblebee2* cam) : LonNewFrame(this), _LeftWindowNa
 
 void OpenCVDisplay::onNewFrame(StereoPair newFrame)
 {
-    imshow(_RightWindowName, newFrame.RightImage());
-    imshow(_LeftWindowName, newFrame.LeftImage());
+    (*_cam).LockImages();
+    Mat newLeft, newRight;
+    newRight = newFrame.RightImage().clone();
+    newLeft = newFrame.LeftImage().clone();
+
+    //imshow(_RightWindowName, newFrame.RightImage());
+    //imshow(_LeftWindowName, newFrame.LeftImage());
+
+    imshow(_RightWindowName,newRight);
+    imshow(_LeftWindowName, newLeft);
+    (*_cam).UnlockImages();
     if(waitKey(20) >= 0) (*_cam).Running(false);
+
 }
 
 OpenCVDisplay::~OpenCVDisplay()
