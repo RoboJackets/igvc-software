@@ -31,6 +31,8 @@ public:
 
     bool event(QEvent * event);
 
+    void wheelEvent(QWheelEvent *event);
+
     void clearDeviceListeners();
 
     bool shouldUpdateOnScaling;
