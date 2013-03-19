@@ -16,9 +16,11 @@ int main()
     Bumblebee2 thisguy;
     std::cout << "got through Bumblebee Constructor" << std::endl;
     OpenCVDisplay Disp(&thisguy);
+    /*
     std::string fName = "/home/robojackets/Desktop/this.mpeg";
     int nFrame = 300;
     StereoVidMaker maker (&thisguy, nFrame, fName);
+    */
     while(thisguy.Running())
     {
     }

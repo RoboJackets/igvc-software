@@ -4,6 +4,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "sensors/camera3D/imgUtils.h"
 #include <unistd.h>
+#include <dc1394/conversions.h>
+
 
 using namespace FlyCapture2;
 using namespace cv;
@@ -343,7 +345,7 @@ void ProcessFrame(Image* rawImage, const void* that)
     Bumblebee2&  thisHere= *((Bumblebee2*)that);
     Image savedRaw;
     Error error;
-    Mat right, left;
+    //Mat right, left;
     error = savedRaw.DeepCopy((const Image*) rawImage);
     if (error != PGRERROR_OK)
     {
@@ -355,6 +357,16 @@ void ProcessFrame(Image* rawImage, const void* that)
     PixelFormat pixFormat;
     unsigned int rows, cols, stride;
     savedRaw.GetDimensions( &rows, &cols, &stride, &pixFormat );
+//Begin experiment
+    unsigned char* data = savedRaw.GetData();
+    unsigned char* dest = new unsigned char[rows*cols*6];
+    dc1394_deinterlace_stereo(data, dest, cols, rows);
+    Mat right = cv::Mat(rows, cols, CV_8UC3, dest, stride);
+    Mat left= cv::Mat(rows, cols, CV_8UC3, dest + ((rows*cols)>>1)-1, stride);
+//End experiment
+
+
+/*
 
 // Create a converted image
     Image convertedImage;
@@ -385,6 +397,8 @@ void ProcessFrame(Image* rawImage, const void* that)
     }
 
     Bumblebee2::ptgrey2opencv(convertedImage, left);
+*/
+
 
     thisHere.LockImages();
     thisHere.Left() = left.clone();
