@@ -4,7 +4,7 @@
 #include <flycapture/FlyCapture2.h>
 #include "Bumblebee2.h"
 #include "sensors/camera3D/OpenCVDisplay.h"
-
+#include "sensors/camera3D/StereoVidMaker.h"
 using namespace cv;
 
 
@@ -16,6 +16,9 @@ int main()
     Bumblebee2 thisguy;
     std::cout << "got through Bumblebee Constructor" << std::endl;
     OpenCVDisplay Disp(&thisguy);
+    std::string fName = "/home/robojackets/Desktop/this.mpeg";
+    int nFrame = 300;
+    StereoVidMaker maker (&thisguy, nFrame, fName);
     while(thisguy.Running())
     {
     }
