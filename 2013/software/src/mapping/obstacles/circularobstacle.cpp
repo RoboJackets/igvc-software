@@ -33,7 +33,7 @@ Vector2f* CircularObstacle::getPoints()
     Vector2f *pts = new Vector2f[_resolution];
 
     int index = 0;
-    for(float theta = 0; theta < 2*M_PI; theta += ( 2 * M_PI ) / _resolution)
+    for(float theta = 0; theta <= 2*M_PI; theta += ( 2 * M_PI ) / _resolution)
     {
         pts[index] = Vector2f(_radius*cos(theta), _radius*sin(theta)) + _center;
         index++;
