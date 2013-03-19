@@ -11,7 +11,7 @@ void OpenCVDisplay::onNewFrame(StereoPair newFrame)
 {
     imshow(_RightWindowName, newFrame.RightImage());
     imshow(_LeftWindowName, newFrame.LeftImage());
-    if(waitKey(30) >= 0) (*_cam).Running(false);
+    if(waitKey(20) >= 0) (*_cam).Running(false);
 }
 
 OpenCVDisplay::~OpenCVDisplay()
