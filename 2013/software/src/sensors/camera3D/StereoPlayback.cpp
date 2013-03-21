@@ -14,6 +14,7 @@ void StereoPlayback::Run()
     {
         usleep(waitTime); //TODO Ensure this function call is non-blocking or replace it with something that is
 
+
         Mat left, right;
         lsuccess = _leftVid.grab();
         _leftVid.retrieve(left);

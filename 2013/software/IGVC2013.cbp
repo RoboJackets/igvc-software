@@ -101,29 +101,6 @@
 				<Option output="bin/TestLaneDetection" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
-				<Compiler>
-					<Add directory="$(#opencv).include" />
-				</Compiler>
-				<Linker>
-					<Add library="opencv_calib3d" />
-					<Add library="opencv_contrib" />
-					<Add library="opencv_core" />
-					<Add library="opencv_features2d" />
-					<Add library="opencv_flann" />
-					<Add library="opencv_gpu" />
-					<Add library="opencv_highgui" />
-					<Add library="opencv_imgproc" />
-					<Add library="opencv_legacy" />
-					<Add library="opencv_ml" />
-					<Add library="opencv_objdetect" />
-					<Add library="opencv_photo" />
-					<Add library="opencv_stitching" />
-					<Add library="opencv_ts" />
-					<Add library="opencv_video" />
-					<Add library="opencv_videostab" />
-					<Add directory="$(#opencv).lib" />
-				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
@@ -268,9 +245,6 @@
 		<Unit filename="src/sensors/Sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="src/sensors/camera2D/laneDetection/testLaneDetection.cpp">
-			<Option target="TestLaneDetection" />
-		</Unit>
 		<Unit filename="src/sensors/camera3D/Bumblebee2.cpp">
 			<Option target="testCV" />
 		</Unit>
@@ -308,10 +282,10 @@
 			<Option target="testCamera" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/featureFinder.cpp">
-			<Option target="testCV" />
+			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/featureFinder.h">
-			<Option target="testCV" />
+			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/imgUtils.cpp">
 			<Option target="testCamera" />
