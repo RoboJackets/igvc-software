@@ -2,7 +2,8 @@
 #include <boost/thread/condition_variable.hpp>
 #include <unistd.h>
 
-StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, int fps=20) : _leftVid(leftVideo), _rightVid(rightVideo), _framesPerSecond(fps)
+StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, int fps=20) : _leftVid(leftVideo), _rightVid(rightVideo),
+    _framesPerSecond(fps), _playbackThread(&StereoPlayback::Run, this)
 {
 }
 
