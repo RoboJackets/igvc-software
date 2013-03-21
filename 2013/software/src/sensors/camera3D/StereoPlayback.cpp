@@ -29,7 +29,6 @@ void StereoPlayback::Run()
         {
             Running(false);
         }
-
     }
 }
 
