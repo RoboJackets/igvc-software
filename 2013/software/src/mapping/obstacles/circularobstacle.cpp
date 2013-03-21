@@ -57,6 +57,26 @@ int CircularObstacle::resolution()
     return _resolution;
 }
 
+void CircularObstacle::center(Vector2f val)
+{
+    _center = val;
+}
+
+Vector2f CircularObstacle::center()
+{
+    return _center;
+}
+
+void CircularObstacle::radius(float val)
+{
+    _radius = val;
+}
+
+float CircularObstacle::radius()
+{
+    return _radius;
+}
+
 }
 }
 }
