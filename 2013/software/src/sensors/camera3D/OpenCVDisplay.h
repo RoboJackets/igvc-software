@@ -3,12 +3,12 @@
 
 #include "sensors/camera3D/StereoPair.hpp"
 #include "events/Delegate.hpp"
-#include "sensors/camera3D/Bumblebee2.h"
+#include "sensors/camera3D/StereoSource.hpp"
 
 class OpenCVDisplay
 {
     public:
-        OpenCVDisplay(Bumblebee2*);
+        OpenCVDisplay(StereoSource&);
         virtual ~OpenCVDisplay();
         void onNewFrame(StereoPair newFrame);
         LISTENER(OpenCVDisplay, onNewFrame, StereoPair);
@@ -16,7 +16,7 @@ class OpenCVDisplay
     private:
         string _LeftWindowName;
         string _RightWindowName;
-        Bumblebee2* _cam;
+        StereoSource& _source;
 };
 
 #endif // OPENCVDISPLAY_H
