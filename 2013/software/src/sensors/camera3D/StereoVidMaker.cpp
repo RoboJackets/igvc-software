@@ -1,9 +1,12 @@
 #include "sensors/camera3D/StereoVidMaker.h"
 
-StereoVidMaker::StereoVidMaker(Bumblebee2* cam, int frameCount, string videoName): LonNewFrame(this), _frameCount(frameCount)
+StereoVidMaker::StereoVidMaker(StereoSource& source, int frameCount, string videoName): LonNewFrame(this), _frameCount(frameCount), _source(source)
 {
-    (*cam).onNewData += &LonNewFrame;
-    _writer.open((const std::string&)videoName, CV_FOURCC('P','I','M','1'), (int)20, cv::Size(1024,768), true);
+    source.onNewData += &LonNewFrame;
+    const std::string leftVidName = videoName + "_left";
+    const std::string rightVidName = videoName + "_right";
+    _leftWriter.open((const std::string&)leftVidName, CV_FOURCC('P','I','M','1'), (int)20, cv::Size(1024,768), true);
+    _rightWriter.open((const std::string&)rightVidName, CV_FOURCC('P','I','M','1'), (int)20, cv::Size(1024,768), true);
 
 }
 void StereoVidMaker::onNewFrame(StereoPair newPair)
@@ -14,7 +17,8 @@ void StereoVidMaker::onNewFrame(StereoPair newPair)
     }
     else
     {
-        _writer.write((const cv::Mat&) newPair.LeftImage());
+        _rightWriter.write((const cv::Mat&) newPair.LeftImage());
+        _leftWriter.write((const cv::Mat&) newPair.LeftImage());
         _frameCount--;
     }
 }
