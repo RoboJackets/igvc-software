@@ -29,6 +29,7 @@ public:
     float jumpDistThreshold;
     float linearityThreshold;
     int sizeThreshold;
+    float maxAllowedRadius;
 
 private:
 
@@ -45,7 +46,11 @@ private:
     std::vector<PointArrayObstacle*> filterBySize(std::vector<PointArrayObstacle*> data);
     std::vector<Obstacle*> filterByLinearRegression(std::vector<PointArrayObstacle*> data);
     std::vector<Obstacle*> filterCircularObstacles(std::vector<Obstacle*> data);
+    std::vector<Obstacle*> filterCirclesByRadius(std::vector<Obstacle*> data);
 
+    std::vector<Obstacle*> filterCirclularObstacleWithRadius(std::vector<Obstacle*> data, float radius);
+
+    std::vector<Obstacle*> smoothData(std::vector<PointArrayObstacle*> data);
 };
 
 }

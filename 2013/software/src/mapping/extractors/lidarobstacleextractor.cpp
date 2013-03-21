@@ -22,7 +22,8 @@ LidarObstacleExtractor::LidarObstacleExtractor(Lidar *device)
     }
     jumpDistThreshold = 0.1;
     linearityThreshold = 0.75;
-    sizeThreshold = 10;
+    sizeThreshold = 20;
+    maxAllowedRadius = 1;
 }
 
 void LidarObstacleExtractor::disconnect()
@@ -40,7 +41,8 @@ void LidarObstacleExtractor::onNewLidarData(LidarState data)
 
     vector<Obstacle *> obstacles;
 
-    vector<Obstacle*> filtered = filterCircularObstacles(filterByLinearRegression(filterBySize(clusterByJumps(clusterByValidity(&data)))));
+//    vector<Obstacle*> filtered = filterCirclesByRadius(filterCircularObstacles(filterByLinearRegression(filterBySize(clusterByJumps(clusterByValidity(&data))))));
+    vector<Obstacle*> filtered = smoothData(clusterByJumps(clusterByValidity(&data)));
     obstacles.insert(obstacles.end(), filtered.begin(), filtered.end());
 
     onNewData(obstacles);
@@ -239,9 +241,9 @@ std::vector<Obstacle*> LidarObstacleExtractor::filterCircularObstacles(std::vect
             Vector2f center(0.0f, 0.0f);
             Vector2f *points = raw->getPoints();
             int q = 0;
-            for(int ind = 0; ind < raw->getNumPoints()-2; ind++)
+            for(int ind = 0; ind < 2/*raw->getNumPoints()-1*/; ind++)
             {
-                Vector2f Pi = points[ind], Pj = points[ind + 1], Pk = points[ind + 2];
+                Vector2f Pi = points[ind*raw->getNumPoints()/4], Pj = points[(ind+1)*raw->getNumPoints()/4], Pk = points[(ind+2)*raw->getNumPoints()/4];
                 Vector2f circumcenter;
                 float delta = (Pk[0]-Pj[0])*(Pj[1]-Pi[1])-(Pj[0]-Pi[0])*(Pk[1]-Pj[1]);
                 if(delta != 0) // If this triplet does not form a line
@@ -297,6 +299,145 @@ std::vector<Obstacle*> LidarObstacleExtractor::filterCircularObstacles(std::vect
 
         } else {
             // This obstacle has already been classified, ignore it
+            filtered.push_back(obst);
+        }
+    }
+
+    return filtered;
+}
+
+std::vector<Obstacle*> LidarObstacleExtractor::filterCirclesByRadius(std::vector<Obstacle*> data)
+{
+    using namespace std;
+    vector<Obstacle*> filtered;
+
+    for(vector<Obstacle*>::iterator iter = data.begin(); iter != data.end(); iter++)
+    {
+        Obstacle* obst = (*iter);
+        CircularObstacle* raw = dynamic_cast<CircularObstacle*>(obst);
+        if(raw != 0)
+        {
+            if(raw->radius() <= maxAllowedRadius)
+            {
+                filtered.push_back(raw);
+            }
+        } else {
+            filtered.push_back(obst);
+        }
+    }
+    return filtered;
+}
+
+void placeVote(std::vector< std::pair< Vector2f, int > > &votes, Vector2f point)
+{
+    using namespace std;
+    for(vector< pair< Vector2f, int > >::iterator it = votes.begin(); it != votes.end(); it++)
+    {
+        Vector2f key = it->first;
+        if((key - point).norm() < /*dist*/0.25)
+        {
+            it->second++;
+        }
+    }
+    votes.push_back(pair<Vector2f, int>(point, 1));
+}
+
+std::vector<Obstacle*> LidarObstacleExtractor::filterCirclularObstacleWithRadius(std::vector<Obstacle*> data, float radius)
+{
+    using namespace std;
+    vector<Obstacle*> filtered;
+
+    for(vector<Obstacle*>::iterator iter = data.begin(); iter != data.end(); iter++)
+    {
+        Obstacle* obst = (*iter);
+        PointArrayObstacle* casted = dynamic_cast<PointArrayObstacle*>(obst);
+        if(casted != 0)
+        {
+            Vector2f *points = casted->getPoints();
+            int N = casted->getNumPoints();
+            vector< pair< Vector2f, int > > votes;
+            Vector2f P0, P1, P2, intersect1, intersect2;
+            for(int i = 0; i < N; i++)
+            {
+                for(int j = i+1; j < N; j++)
+                {
+                    cout << votes.size() << endl;
+                    P0 = points[i];
+                    P1 = points[j];
+                    float d = (P1 - P0).norm();
+                    if(d > 2*radius)
+                    {
+                        // No intersection
+                        continue;
+                    }
+                    else if(d == 2*radius)
+                    {
+                        // 1 intersection
+                        intersect1 = (P0 + P1) / 2.0;
+                        placeVote(votes, intersect1);
+                    }
+                    else
+                    {
+                        // 2 intersections
+                        float h = sqrt( radius*radius - (d*d)/4 );
+                        P2 = P0 + (P1 - P0)/2;
+                        intersect1(P2[0] + h*(P1[1] - P0[1])/d, P2[1] - h*(P1[0]-P0[0])/d);
+                        intersect2(P2[0] - h*(P1[1] - P0[1])/d, P2[1] + h*(P1[0]-P0[0])/d);
+                        placeVote(votes, intersect1);
+                        placeVote(votes, intersect2);
+                    }
+                }
+            }
+            pair<Vector2f, int> maxPair = votes[0];
+            for(vector< pair< Vector2f, int > >::iterator it = votes.begin(); it != votes.end(); it++)
+            {
+                if(it->second > maxPair.second)
+                {
+                    maxPair = (*it);
+                }
+            }
+            filtered.push_back(new CircularObstacle(maxPair.first, radius));
+        } else {
+            filtered.push_back(obst);
+        }
+    }
+
+    return filtered;
+}
+
+std::vector<Obstacle*> LidarObstacleExtractor::smoothData(std::vector<PointArrayObstacle*> data)
+{
+    using namespace std;
+    vector<Obstacle*> filtered;
+
+    for(vector<PointArrayObstacle*>::iterator iter = data.begin(); iter != data.end(); iter++)
+    {
+        Obstacle* obst = (*iter);
+        PointArrayObstacle* casted = dynamic_cast<PointArrayObstacle*>(obst);
+        if(casted != 0)
+        {
+
+            Vector2f *points = casted->getPoints();
+            int N = casted->getNumPoints();
+            Vector2f *newPoints = new Vector2f[N];
+
+            newPoints[0] = points[0];
+            newPoints[1] = points[1];
+            newPoints[N-2] = points[N-2];
+            newPoints[N-1] = points[N-1];
+            for(int i = 2; i < N-2; i++)
+            {
+                newPoints[i] = 0.1*points[i-1] + 0.2*points[i-1] + 0.4*points[i] + 0.2*points[i+1] + 0.1*points[i+2];
+            }
+
+            PointArrayObstacle *newObst = new PointArrayObstacle();
+
+            for(int i = 0; i < N; i++)
+                newObst->addPoint(newPoints[i]);
+
+            filtered.push_back(newObst);
+
+        } else {
             filtered.push_back(obst);
         }
     }
