@@ -27,9 +27,21 @@ void StereoPlayback::Run()
         }
         else
         {
+            LockRunning();
             Running(false);
+            UnlockRunning();
         }
     }
+}
+
+void StereoPlayback::UnlockRunning(void)
+{
+    _runningLock.unlock();
+}
+
+void StereoPlayback::LockRunning(void)
+{
+    _runningLock.lock();
 }
 
 StereoPlayback::~StereoPlayback()

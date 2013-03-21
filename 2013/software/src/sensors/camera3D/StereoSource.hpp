@@ -3,7 +3,7 @@
 
 #include "sensors/camera3D/StereoPair.hpp"
 #include "events/Event.hpp"
-#include <boost/thread.hpp>
+#include <boost/thread/thread.hpp>
 
 class StereoSource
 {
@@ -18,7 +18,6 @@ class StereoSource
     private:
         bool _running;
         boost::mutex _imagesLock;
-
 };
 
 #endif // STEREOSOURCE_H
