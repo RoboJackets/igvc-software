@@ -10,7 +10,7 @@
 using namespace FlyCapture2;
 using namespace cv;
 
-Bumblebee2::Bumblebee2(): /*_running(true),*/ _images(), _cam(), frameCount(0), frameLock()
+Bumblebee2::Bumblebee2(): _images(), _cam(), frameCount(0), frameLock()
 {
     StartCamera();
 }
@@ -141,21 +141,9 @@ void Bumblebee2::ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
     //Mat newMat = cv::Mat(img.GetRows(), img.GetCols(), CV_8UC3, img.GetData(), stride);
     Mat newMat = cv::Mat(img.GetRows(), img.GetCols(), CV_8UC3, img.GetData(), cv::Mat::AUTO_STEP);
 
-    mat = newMat.clone(); //must be done, otherwise repeated calls crush each other
+    mat = newMat.clone(); //must be cloned, otherwise repeated calls crush each other
     return;
 }
-
-/*
-void Bumblebee2::Running(bool newState)
-{
-    _running = newState;
-}
-
-bool Bumblebee2::Running(void)
-{
-    return _running;
-}
-*/
 
 Mat& Bumblebee2::Left()
 {
@@ -205,11 +193,9 @@ void ProcessFrame(Image* rawImage, const void* that)
     Error error;
     Mat right, left;
 
-
-
+/*
     char filename[512];
     sprintf( filename, "./newthings/%u-%d.jpg", 121, thisHere.frameCount++);
-
 
     // Convert the raw image
     Image convImage;
@@ -220,8 +206,7 @@ void ProcessFrame(Image* rawImage, const void* that)
         PrintError( error );
         return;
     }
-
-
+*/
 
     error = savedRaw.DeepCopy((const Image*) rawImage);
     if (error != PGRERROR_OK)
@@ -236,22 +221,6 @@ void ProcessFrame(Image* rawImage, const void* that)
     PixelFormat pixFormat;
     unsigned int rows, cols, stride;
     savedRaw.GetDimensions( &rows, &cols, &stride, &pixFormat );
-
-/*
-//Begin experiment
-    unsigned char* data = savedRaw.GetData();
-    cout << "where" << endl;
-    unsigned char* dest = new unsigned char[rows*cols*8];
-    cout << "is" << endl;
-    dc1394_deinterlace_stereo(data, dest, 2*cols, rows);
-    cout << "it" << endl;
-    Mat right = cv::Mat(rows, cols, CV_8UC1, dest, cols);
-    cout << "dumped?" << endl;
-    Mat left= cv::Mat(rows, cols, CV_8UC1, dest + ((2*rows*cols)>>1)-1, cols);
-    //Mat left= cv::Mat(rows, cols, CV_8UC4, dest + ((rows*cols*4)>>1)-1, cv::Mat::AUTO_STEP);
-//End experiment
-*/
-
 
 
 // Create a converted image
@@ -306,23 +275,7 @@ void ProcessFrame(Image* rawImage, const void* that)
 
 }
 
-
 void PrintError( FlyCapture2::Error error )
 {
     error.PrintErrorTrace();
-}
-
-
-void dc1394_deinterlace_stereo(unsigned char* src, unsigned char* dest, int width, int height)
-{
-    register int i = (width*height)-1;
-    register int j = ((width*height)>>1)-1;
-    register int k = (width*height)-1;
-    unsigned char filler;
-    while (i >= 1) {
-        dest[k--] = src[i--];
-        //cout << "Source is the problem" << endl;
-        dest[j--] = src[i--];
-    }
-    return;
 }

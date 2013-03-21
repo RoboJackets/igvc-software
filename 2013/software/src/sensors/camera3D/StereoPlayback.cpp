@@ -13,8 +13,7 @@ void StereoPlayback::Run()
     bool lsuccess, rsuccess;
     while(Running())
     {
-        usleep(waitTime); //TODO Ensure this function call is non-blocking or replace it with something that is
-
+        usleep(waitTime); //TODO Ensure this function call is non-blocking(gives up the processor during sleep) or replace it with something that is
 
         Mat left, right;
         lsuccess = _leftVid.grab();
@@ -33,16 +32,6 @@ void StereoPlayback::Run()
             UnlockRunning();
         }
     }
-}
-
-void StereoPlayback::UnlockRunning(void)
-{
-    _runningLock.unlock();
-}
-
-void StereoPlayback::LockRunning(void)
-{
-    _runningLock.lock();
 }
 
 StereoPlayback::~StereoPlayback()
