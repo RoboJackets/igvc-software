@@ -289,8 +289,29 @@
 		<Unit filename="src/sensors/camera3D/StereoPair.hpp">
 			<Option target="testCV" />
 		</Unit>
+		<Unit filename="src/sensors/camera3D/StereoPlayback.cpp">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/StereoPlayback.h">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/StereoSource.hpp">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/StereoVidMaker.cpp">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/StereoVidMaker.h">
+			<Option target="testCV" />
+		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
 			<Option target="testCamera" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/featureFinder.cpp">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/featureFinder.h">
+			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/imgUtils.cpp">
 			<Option target="testCamera" />

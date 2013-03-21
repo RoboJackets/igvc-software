@@ -5,6 +5,8 @@
 #include "Bumblebee2.h"
 #include "sensors/camera3D/OpenCVDisplay.h"
 #include "sensors/camera3D/StereoVidMaker.h"
+#include "sensors/camera3D/StereoSource.hpp"
+#include "sensors/camera3D/StereoPlayback.h"
 using namespace cv;
 
 
@@ -12,18 +14,29 @@ using namespace cv;
 int main()
 {
 
+    std::string fName = "/home/robojackets/Desktop/this";
+    std::string lName, rName;
+    lName = fName + "_left" + ".mpeg";
+    rName = fName + "_right" + ".mpeg";
 
-    Bumblebee2 thisguy;
-    std::cout << "got through Bumblebee Constructor" << std::endl;
-    OpenCVDisplay Disp(&thisguy);
+    StereoPlayback s(lName, rName, 20);
+
+    //Bumblebee2 thisguy;
+    OpenCVDisplay Disp(s);
+    s.Run();
+
     /*
-    std::string fName = "/home/robojackets/Desktop/this.mpeg";
+    std::string fName = "/home/robojackets/Desktop/this";
+    //std::string fName = "/home/alex/Desktop/vid1";
     int nFrame = 300;
-    StereoVidMaker maker (&thisguy, nFrame, fName);
+    StereoVidMaker maker(thisguy, nFrame, fName);
     */
+
+    /*
     while(thisguy.Running())
     {
     }
+    */
 
     //thisguy.StartCamera();
     //thisguy.run();
