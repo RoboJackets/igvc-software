@@ -7,20 +7,17 @@
 #include "sensors/camera3D/StereoVidMaker.h"
 #include "sensors/camera3D/StereoSource.hpp"
 #include "sensors/camera3D/StereoPlayback.h"
+
 using namespace cv;
-
-
 
 int main()
 {
-
     std::string fName = "/home/robojackets/Desktop/this";
     std::string lName, rName;
     lName = fName + "_left" + ".mpeg";
     rName = fName + "_right" + ".mpeg";
     StereoPlayback thisguy(lName, rName, 20);
-    Bumblebee2 thisguy;
-
+    //Bumblebee2 thisguy;
 
     OpenCVDisplay Disp(thisguy);
 

@@ -13,10 +13,13 @@ class StereoSource
         inline void Running(bool newState) {_running = newState;}
         inline void LockImages() {_imagesLock.lock();}
         inline void UnlockImages() {_imagesLock.unlock();}
+        inline void LockRunning() {_runningLock.lock();}
+        inline void UnlockRunning() {_runningLock.unlock();}
         Event<StereoPair> onNewData;
         virtual ~StereoSource() {}
     private:
         bool _running;
+        boost::mutex _runningLock;
         boost::mutex _imagesLock;
 };
 
