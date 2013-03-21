@@ -296,7 +296,6 @@ void ProcessFrame(Image* rawImage, const void* that)
 
     Bumblebee2::ptgrey2opencv(convertedImage, left);
 
-
     thisHere.LockImages();
     thisHere.Left() = left.clone();
     thisHere.Right() = right.clone();
