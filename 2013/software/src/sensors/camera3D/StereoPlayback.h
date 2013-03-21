@@ -14,6 +14,7 @@ class StereoPlayback : public StereoSource
         VideoCapture _leftVid;
         VideoCapture _rightVid;
         int _framesPerSecond;
+        StereoPair _images;
         //bool _running;
 };
 
