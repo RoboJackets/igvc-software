@@ -20,8 +20,12 @@ void OpenCVDisplay::onNewFrame(StereoPair newFrame)
     imshow(_RightWindowName,newRight);
     imshow(_LeftWindowName, newLeft);
     _source.UnlockImages();
-    if(waitKey(20) >= 0) _source.Running(false);
-
+    if(waitKey(20) >= 0)
+        {
+            _source.LockRunning();
+            _source.Running(false);
+            _source.UnlockRunning();
+        }
 }
 
 OpenCVDisplay::~OpenCVDisplay()
