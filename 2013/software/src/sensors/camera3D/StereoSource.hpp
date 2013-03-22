@@ -15,7 +15,7 @@ class StereoSource
         inline void UnlockImages() {_imagesLock.unlock();}
         inline void LockRunning() {_runningLock.lock();}
         inline void UnlockRunning() {_runningLock.unlock();}
-        Event<StereoPair> onNewData;
+        Event<StereoPair&> onNewData;
         virtual ~StereoSource() {}
     private:
         bool _running;

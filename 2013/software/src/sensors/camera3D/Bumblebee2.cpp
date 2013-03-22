@@ -10,12 +10,13 @@
 using namespace FlyCapture2;
 using namespace cv;
 
-Bumblebee2::Bumblebee2(): _images(), _cam(), frameCount(0), frameLock()
+Bumblebee2::Bumblebee2(int frameRate): _images(), _cam(), frameCount(0), frameLock()
 {
-    StartCamera();
+    std::cout << "starting camera with framerate of " << frameRate << std::endl;
+    StartCamera(frameRate);
 }
 
-int Bumblebee2::StartCamera()
+int Bumblebee2::StartCamera(int frameRate)
 {
     const Mode k_fmt7Mode = MODE_3;
     const PixelFormat k_fmt7PixFmt = PIXEL_FORMAT_RAW16;
@@ -44,7 +45,6 @@ int Bumblebee2::StartCamera()
         PrintError( error );
         return -1;
     }
-
 
     // Connect to a camera
     error = _cam.Connect(&guid);
@@ -95,15 +95,44 @@ int Bumblebee2::StartCamera()
     }
 
     // Set the settings to the camera
-
     error = _cam.SetFormat7Configuration(
         &fmt7ImageSettings,
-        fmt7PacketInfo.recommendedBytesPerPacket );
+        fmt7PacketInfo.recommendedBytesPerPacket >> 1);
+
+    //std::cout << "Packet Size set to " << fmt7PacketInfo.recommendedBytesPerPacket << std::endl;
+
     if (error != PGRERROR_OK)
     {
         PrintError( error );
         return -1;
     }
+
+    //Set Frame Rate
+    Property frmRate;
+    frmRate.type = FRAME_RATE;
+    error = _cam.GetProperty( &frmRate );
+    frmRate.onOff=true;
+    frmRate.absControl= true;
+    frmRate.valueA = frameRate;
+    frmRate.absValue = frameRate;
+
+    error = _cam.SetProperty( &frmRate );
+    if (error != PGRERROR_OK)
+    {
+        PrintError( error );
+        return -1;
+    }
+
+    //Ensure it was properly set
+    frmRate.absValue =1231212; //set to a nonsense value to ensure value is actually fetched and not simply from previous assignment
+    error = _cam.GetProperty( &frmRate );
+    if (error != PGRERROR_OK)
+    {
+        PrintError( error );
+        return -1;
+    }
+    printf( "Frame rate is %3.2f fps\n", frmRate.absValue );
+
 
     // Start capturing images
     error = _cam.StartCapture(&ProcessFrame, this);
@@ -167,7 +196,7 @@ void Bumblebee2::UnlockImages()
 }
 */
 
-StereoPair Bumblebee2::Images()
+StereoPair& Bumblebee2::Images()
 {
     return _images;
 }
@@ -270,7 +299,6 @@ void ProcessFrame(Image* rawImage, const void* that)
     thisHere.Right() = right.clone();
     thisHere.UnlockImages();
     thisHere.onNewData(thisHere.Images());
-    //delete[] dest;
     return;
 }
 
