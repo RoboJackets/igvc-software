@@ -6,7 +6,7 @@
 class StereoPlayback : public StereoSource
 {
     public:
-        StereoPlayback(std::string leftVideo, std::string rightVideo, int fps);
+        StereoPlayback(std::string leftVideo, std::string rightVideo, int fps=20);
         void Run();
         virtual ~StereoPlayback();
 

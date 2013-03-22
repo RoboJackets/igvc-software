@@ -272,7 +272,6 @@ void ProcessFrame(Image* rawImage, const void* that)
     thisHere.onNewData(thisHere.Images());
     //delete[] dest;
     return;
-
 }
 
 void PrintError( FlyCapture2::Error error )
