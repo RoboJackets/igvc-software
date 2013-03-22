@@ -12,22 +12,25 @@ using namespace cv;
 
 int main()
 {
+    /*
     std::string fName = "/home/robojackets/Desktop/this";
     std::string lName, rName;
     lName = fName + "_left" + ".mpeg";
     rName = fName + "_right" + ".mpeg";
     StereoPlayback thisguy(lName, rName, 20);
-    //Bumblebee2 thisguy;
+    */
+    int fps = 20;
+    Bumblebee2 thisguy(fps);
 
     OpenCVDisplay Disp(thisguy);
 
-    //
-    /* //initialize video maker
-    std::string fName = "/home/robojackets/Desktop/this";
-    //std::string fName = "/home/alex/Desktop/vid1";
-    int nFrame = 300;
-    StereoVidMaker maker(thisguy, nFrame, fName);
-    */
+
+    //initialize video maker
+
+    std::string saveName = "/home/robojackets/Desktop/camTesting/highRes1024packet20fps";
+    int nFrame = 10*fps;
+    StereoVidMaker maker(thisguy, nFrame, saveName);
+
 
     while(thisguy.Running())
     {

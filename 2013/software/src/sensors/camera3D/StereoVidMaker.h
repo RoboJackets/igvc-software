@@ -15,8 +15,8 @@ class StereoVidMaker
     public:
         StereoVidMaker(StereoSource& source, int frameCount, std::string videoName); //videoName must NOT have an extension, it will be saved as MPEG
         virtual ~StereoVidMaker();
-        void onNewFrame(StereoPair);
-        LISTENER(StereoVidMaker,onNewFrame, StereoPair);
+        void onNewFrame(StereoPair&);
+        LISTENER(StereoVidMaker,onNewFrame, StereoPair&);
     private:
         int _frameCount;
         VideoWriter _leftWriter;
