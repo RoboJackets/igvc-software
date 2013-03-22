@@ -7,7 +7,7 @@ OpenCVDisplay::OpenCVDisplay(StereoSource& source) : LonNewFrame(this), _LeftWin
     namedWindow(_LeftWindowName,1);
 }
 
-void OpenCVDisplay::onNewFrame(StereoPair newFrame)
+void OpenCVDisplay::onNewFrame(StereoPair& newFrame)
 {
     _source.LockImages();
     Mat newLeft, newRight;
@@ -21,11 +21,11 @@ void OpenCVDisplay::onNewFrame(StereoPair newFrame)
     imshow(_LeftWindowName, newLeft);
     _source.UnlockImages();
     if(waitKey(20) >= 0)
-        {
-            _source.LockRunning();
-            _source.Running(false);
-            _source.UnlockRunning();
-        }
+    {
+        _source.LockRunning();
+        _source.Running(false);
+        _source.UnlockRunning();
+    }
 }
 
 OpenCVDisplay::~OpenCVDisplay()
