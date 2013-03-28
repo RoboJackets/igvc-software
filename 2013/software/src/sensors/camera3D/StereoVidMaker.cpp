@@ -20,7 +20,7 @@ void StereoVidMaker::onNewFrame(StereoPair& newPair)
     else
     {
         std::cout << "printing frame" << std::endl;
-        _rightWriter.write((const cv::Mat&) newPair.LeftImage());
+        _rightWriter.write((const cv::Mat&) newPair.RightImage());
         _leftWriter.write((const cv::Mat&) newPair.LeftImage());
         _frameCount--;
     }
