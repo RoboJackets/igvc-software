@@ -10,13 +10,12 @@
 using namespace FlyCapture2;
 using namespace cv;
 
-Bumblebee2::Bumblebee2(int frameRate): _images(), _cam(), frameCount(0), frameLock()
+Bumblebee2::Bumblebee2(): _images(), _cam(), frameCount(0), frameLock()
 {
-    std::cout << "starting camera with framerate of " << frameRate << std::endl;
-    StartCamera(frameRate);
+    StartCamera();
 }
 
-int Bumblebee2::StartCamera(int frameRate)
+int Bumblebee2::StartCamera()
 {
     const Mode k_fmt7Mode = MODE_3;
     const PixelFormat k_fmt7PixFmt = PIXEL_FORMAT_RAW16;
@@ -86,45 +85,36 @@ int Bumblebee2::StartCamera(int frameRate)
         PrintError( error );
         return -1;
     }
+    cout << "is it valid?" << valid << endl;
 
     if ( !valid )
     {
         // Settings are not valid
-		printf("Format7 settings are not valid\n");
         return -1;
     }
 
     // Set the settings to the camera
     error = _cam.SetFormat7Configuration(
         &fmt7ImageSettings,
-        fmt7PacketInfo.recommendedBytesPerPacket >> 1);
+        fmt7PacketInfo.recommendedBytesPerPacket>>1);
 
-    //std::cout << "Packet Size set to " << fmt7PacketInfo.recommendedBytesPerPacket << std::endl;
+    unsigned int dis;
+    float dat;
+    _cam.GetFormat7Configuration(&fmt7ImageSettings, &dis, &dat);
+
+    std::cout << "Packet Size set to " << dis <<" should be "<< (fmt7PacketInfo.recommendedBytesPerPacket>>1)<< std::endl;
 
     if (error != PGRERROR_OK)
     {
         PrintError( error );
         return -1;
     }
+
 
     //Set Frame Rate
     Property frmRate;
     frmRate.type = FRAME_RATE;
-    error = _cam.GetProperty( &frmRate );
-    frmRate.onOff=true;
-    frmRate.absControl= true;
-    frmRate.valueA = frameRate;
-    frmRate.absValue = frameRate;
 
-    error = _cam.SetProperty( &frmRate );
-    if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return -1;
-    }
-
-    //Ensure it was properly set
-    frmRate.absValue =1231212; //set to a nonsense value to ensure value is actually fetched and not simply from previous assignment
     error = _cam.GetProperty( &frmRate );
     if (error != PGRERROR_OK)
     {
@@ -132,7 +122,6 @@ int Bumblebee2::StartCamera(int frameRate)
         return -1;
     }
     printf( "Frame rate is %3.2f fps\n", frmRate.absValue );
-
 
     // Start capturing images
     error = _cam.StartCapture(&ProcessFrame, this);
@@ -209,7 +198,7 @@ FlyCapture2::Camera& Bumblebee2::Cam(void)
 
 Bumblebee2::~Bumblebee2()
 {
-    //dtor
+    CloseCamera();
 }
 
 
@@ -275,7 +264,7 @@ void ProcessFrame(Image* rawImage, const void* that)
 */
 
 
-    Bumblebee2::ptgrey2opencv(convertedImage,right);
+    Bumblebee2::ptgrey2opencv(convertedImage,left);
 
     unsigned char* data = savedRaw.GetData();
     for(int i = 1; i < savedRaw.GetDataSize(); i += 2)
@@ -292,7 +281,7 @@ void ProcessFrame(Image* rawImage, const void* that)
         return;
     }
 
-    Bumblebee2::ptgrey2opencv(convertedImage, left);
+    Bumblebee2::ptgrey2opencv(convertedImage, right);
 
     thisHere.LockImages();
     thisHere.Left() = left.clone();

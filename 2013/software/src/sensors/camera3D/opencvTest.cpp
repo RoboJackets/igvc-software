@@ -19,8 +19,7 @@ int main()
     rName = fName + "_right" + ".mpeg";
     StereoPlayback thisguy(lName, rName, 20);
     */
-    int fps = 20;
-    Bumblebee2 thisguy(fps);
+    Bumblebee2 thisguy;
 
     OpenCVDisplay Disp(thisguy);
 
@@ -28,8 +27,8 @@ int main()
     //initialize video maker
 
     std::string saveName = "/home/robojackets/Desktop/camTesting/highRes1024packet20fps";
-    int nFrame = 10*fps;
-    StereoVidMaker maker(thisguy, nFrame, saveName);
+    int nFrame = 100;
+    //StereoVidMaker maker(thisguy, nFrame, saveName);
 
 
     while(thisguy.Running())

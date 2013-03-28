@@ -17,7 +17,7 @@ using namespace FlyCapture2;
 class Bumblebee2 : public StereoSource
 {
     public:
-        Bumblebee2(int frameRate=20);
+        Bumblebee2();
         virtual ~Bumblebee2();
         int Run();
         //void LockImages();
@@ -30,7 +30,7 @@ class Bumblebee2 : public StereoSource
         boost::mutex frameLock;
         FlyCapture2::Camera& Cam();
     private:
-        int StartCamera(int frameRate);
+        int StartCamera();
         int CloseCamera();
         StereoPair _images;
         FlyCapture2::Camera _cam;
