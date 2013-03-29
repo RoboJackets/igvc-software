@@ -12,7 +12,7 @@
 
 using namespace cv;
 
-
+/*
 int main()
 {
     std::string  left = "/home/alex/Desktop/IGVC/2013/software/trainingSets/cone/set2/11123906-0-Left.bmp";
@@ -40,14 +40,16 @@ int main()
 
     S(LG,RG,D,CV_16S);
     Mat dispD;
-    convertScaleAbs(D, dispD, 2);
+    //convertScaleAbs(D, dispD, 2);
+    double minVal, maxVal;
+    minMaxLoc(D, &minVal, &maxVal);
+    D.convertTo(dispD, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));
     imshow("this", dispD);
     if(waitKey(20000) >= 0);
 }
+*/
 
 
-
-/*
 int main()
 {
 
@@ -56,7 +58,7 @@ int main()
     std::string lName, rName;
     lName = fName + "_left" + ".mpeg";
     rName = fName + "_right" + ".mpeg";
-    StereoPlayback thisguy(lName, rName, 2);
+    StereoPlayback thisguy(lName, rName, 20);
 
     //Bumblebee2 thisguy;
 
@@ -76,4 +78,3 @@ int main()
     {
     }
 }
-*/

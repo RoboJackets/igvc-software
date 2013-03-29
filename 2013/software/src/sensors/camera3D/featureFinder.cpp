@@ -1,4 +1,5 @@
 #include "featureFinder.h"
+#include "sensors/timing.h"
 
 
 
@@ -6,6 +7,7 @@ featureFinder::featureFinder(StereoSource& source) : LonNewFrame(this), _stereo(
 {
     source.onNewData += &LonNewFrame;
     namedWindow("disp", 1);
+    setDefaultBMState(_stereo.state);
 }
 
 void featureFinder::onNewFrame(StereoPair& newPair)
@@ -15,46 +17,43 @@ void featureFinder::onNewFrame(StereoPair& newPair)
 
 void featureFinder::StereoBM(StereoPair& newPair, CvArr* disparity)
 {
+    double tic,toc;
+    tic = seconds_since_IGVCpoch();
     _useLock.lock();
     Mat lGray, rGray, dis;
     cvtColor( newPair.LeftImage(), lGray, CV_BGR2GRAY );
     cvtColor( newPair.RightImage(), rGray, CV_BGR2GRAY );
 
-    Ptr<CvStereoBMState> def = _stereo.state;
-    def->preFilterSize=5;
-    def->preFilterCap=6;
-    def->SADWindowSize = 45;
-    def->minDisparity = 0;
-    def->numberOfDisparities = 80;
-    def->textureThreshold = 0;
-    def->uniquenessRatio =2;
-    def->speckleWindowSize = 0;
-    def->speckleRange = 60;
-
     _stereo(rGray, lGray, dis);
+    toc = seconds_since_IGVCpoch();
+    std::cout << "Disparity map took " << toc-tic << " seconds to generate" << std::endl;
     //onNewDepthMap(_disparityMap);
     Mat dispDis;
-    convertScaleAbs(dis, dispDis, 5);
+    double minVal, maxVal;
+    minMaxLoc(dis, &minVal, &maxVal);
+    dis.convertTo(dispDis, CV_8U, 255.0/(maxVal - minVal), -minVal * 255.0/(maxVal - minVal));
     imshow("disp", dispDis);
     //imwrite("this.jpg", dis);
     _useLock.unlock();
+    tic = seconds_since_IGVCpoch();
     if(waitKey(20) >= 0);
+
+    std::cout << "Disparity map took " << tic-toc << " seconds to display" << std::endl;
 }
 
-/*
-void featureFinder::setDefaultBMState(CvStereoBMState& def)
+
+void featureFinder::setDefaultBMState(Ptr<CvStereoBMState>& state)
 {
-    def.preFilterSize=5;
-    def.preFilterCap=6;
-    def.SADWindowSize = 45;
-    def.minDisparity = 0;
-    def.numberOfDisparities = 80;
-    def.textureThreshold = 0;
-    def.uniquenessRatio =2;
-    def.speckleWindowSize = 0;
-    def.speckleRange = 60;
+    state->preFilterSize=5;
+    state->preFilterCap=6;
+    state->SADWindowSize = 45;
+    state->minDisparity = 0;
+    state->numberOfDisparities = 80;
+    state->textureThreshold = 0;
+    state->uniquenessRatio =2;
+    state->speckleWindowSize = 0;
+    state->speckleRange = 60;
 }
-*/
 
 featureFinder::~featureFinder()
 {
