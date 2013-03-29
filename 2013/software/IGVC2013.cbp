@@ -95,6 +95,7 @@
 					<Add library="opencv_core" />
 					<Add library="opencv_imgproc" />
 					<Add library="flycapture" />
+					<Add library="opencv_calib3d" />
 				</Linker>
 			</Target>
 			<Target title="TestLaneDetection">
@@ -282,10 +283,10 @@
 			<Option target="testCamera" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/featureFinder.cpp">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/featureFinder.h">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/imgUtils.cpp">
 			<Option target="testCamera" />
