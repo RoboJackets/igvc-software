@@ -17,7 +17,7 @@ class featureFinder
         LISTENER(featureFinder, onNewFrame, StereoPair&);
         void onNewFrame(StereoPair& newPair);
     private:
-        void setDefaultBMState(CvStereoBMState& def);
+        void setDefaultBMState(Ptr<CvStereoBMState>&);
         //Event<StereoPair> onNewFrame;
         Event<Mat> onNewDepthMap;
         cv::StereoBM _stereo;
