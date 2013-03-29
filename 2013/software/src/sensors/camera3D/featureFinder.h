@@ -14,13 +14,15 @@ class featureFinder
         featureFinder(StereoSource& source);
         void StereoBM(StereoPair& newPair, CvArr* disparity);
         virtual ~featureFinder();
-        LISTENER(featureFinder, onNewFrame, StereoPair);
+        LISTENER(featureFinder, onNewFrame, StereoPair&);
+        void onNewFrame(StereoPair& newPair);
     private:
         void setDefaultBMState(CvStereoBMState& def);
-        Event<StereoPair> onNewFrame;
+        //Event<StereoPair> onNewFrame;
         Event<Mat> onNewDepthMap;
         cv::StereoBM _stereo;
         Mat _disparityMap;
+        boost::mutex _useLock;
 };
 
 #endif // FEATUREFINDER_H
