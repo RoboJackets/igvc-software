@@ -1,4 +1,5 @@
 #include "sensors/camera3D/StereoVidMaker.h"
+#include <string>
 
 StereoVidMaker::StereoVidMaker(StereoSource& source, string videoName,int frameCount, int frameRate, bool video): LonNewFrame(this), _totalFrames(frameCount), _source(source),
 _leftWriter(), _rightWriter(), _nFrames(0), _video(video), _name(videoName)
@@ -13,7 +14,7 @@ _leftWriter(), _rightWriter(), _nFrames(0), _video(video), _name(videoName)
 
 void StereoVidMaker::onNewFrame(StereoPair& newPair)
 {
-    if (_nFrames < totalFrames)
+    if (_nFrames < _totalFrames)
     {
         if (_video)
         {
@@ -40,13 +41,15 @@ void StereoVidMaker::addFrame(StereoPair& newPair)
     _nFrames++;
 }
 
-
 void StereoVidMaker::takeStereoImage(StereoPair& newPair)
 {
-    const std::string leftImageName = videoName + _nFrames + "_left" +".jpg";
-    const std::string rightImageName = videoName + _nFrames + "_right" + ".jpg";
+    std::stringstream ss;
+    ss << _name << _nFrames;
+    const std::string leftImageName = ss.str()+ "_left" +".jpg";
+    const std::string rightImageName = ss.str() + "_right" + ".jpg";
     imwrite(leftImageName, newPair.LeftImage());
     imwrite(rightImageName, newPair.RightImage());
+    _nFrames++;
 }
 
 StereoVidMaker::~StereoVidMaker()
