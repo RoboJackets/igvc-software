@@ -10,7 +10,7 @@
 using namespace FlyCapture2;
 using namespace cv;
 
-Bumblebee2::Bumblebee2(): /*_running(true),*/ _images(), _cam(), frameCount(0), frameLock()
+Bumblebee2::Bumblebee2(): _images(), _cam(), frameCount(0), frameLock()
 {
     StartCamera();
 }
@@ -44,7 +44,6 @@ int Bumblebee2::StartCamera()
         PrintError( error );
         return -1;
     }
-
 
     // Connect to a camera
     error = _cam.Connect(&guid);
@@ -86,24 +85,43 @@ int Bumblebee2::StartCamera()
         PrintError( error );
         return -1;
     }
+    cout << "is it valid?" << valid << endl;
 
     if ( !valid )
     {
         // Settings are not valid
-		printf("Format7 settings are not valid\n");
         return -1;
     }
 
     // Set the settings to the camera
-
     error = _cam.SetFormat7Configuration(
         &fmt7ImageSettings,
-        fmt7PacketInfo.recommendedBytesPerPacket );
+        fmt7PacketInfo.recommendedBytesPerPacket>>1);
+
+    unsigned int dis;
+    float dat;
+    _cam.GetFormat7Configuration(&fmt7ImageSettings, &dis, &dat);
+
+    std::cout << "Packet Size set to " << dis <<" should be "<< (fmt7PacketInfo.recommendedBytesPerPacket>>1)<< std::endl;
+
     if (error != PGRERROR_OK)
     {
         PrintError( error );
         return -1;
     }
+
+
+    //Set Frame Rate
+    Property frmRate;
+    frmRate.type = FRAME_RATE;
+
+    error = _cam.GetProperty( &frmRate );
+    if (error != PGRERROR_OK)
+    {
+        PrintError( error );
+        return -1;
+    }
+    printf( "Frame rate is %3.2f fps\n", frmRate.absValue );
 
     // Start capturing images
     error = _cam.StartCapture(&ProcessFrame, this);
@@ -141,21 +159,9 @@ void Bumblebee2::ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
     //Mat newMat = cv::Mat(img.GetRows(), img.GetCols(), CV_8UC3, img.GetData(), stride);
     Mat newMat = cv::Mat(img.GetRows(), img.GetCols(), CV_8UC3, img.GetData(), cv::Mat::AUTO_STEP);
 
-    mat = newMat.clone(); //must be done, otherwise repeated calls crush each other
+    mat = newMat.clone(); //must be cloned, otherwise repeated calls crush each other
     return;
 }
-
-/*
-void Bumblebee2::Running(bool newState)
-{
-    _running = newState;
-}
-
-bool Bumblebee2::Running(void)
-{
-    return _running;
-}
-*/
 
 Mat& Bumblebee2::Left()
 {
@@ -179,7 +185,7 @@ void Bumblebee2::UnlockImages()
 }
 */
 
-StereoPair Bumblebee2::Images()
+StereoPair& Bumblebee2::Images()
 {
     return _images;
 }
@@ -192,7 +198,7 @@ FlyCapture2::Camera& Bumblebee2::Cam(void)
 
 Bumblebee2::~Bumblebee2()
 {
-    //dtor
+    CloseCamera();
 }
 
 
@@ -205,11 +211,9 @@ void ProcessFrame(Image* rawImage, const void* that)
     Error error;
     Mat right, left;
 
-
-
+/*
     char filename[512];
     sprintf( filename, "./newthings/%u-%d.jpg", 121, thisHere.frameCount++);
-
 
     // Convert the raw image
     Image convImage;
@@ -220,8 +224,7 @@ void ProcessFrame(Image* rawImage, const void* that)
         PrintError( error );
         return;
     }
-
-
+*/
 
     error = savedRaw.DeepCopy((const Image*) rawImage);
     if (error != PGRERROR_OK)
@@ -236,22 +239,6 @@ void ProcessFrame(Image* rawImage, const void* that)
     PixelFormat pixFormat;
     unsigned int rows, cols, stride;
     savedRaw.GetDimensions( &rows, &cols, &stride, &pixFormat );
-
-/*
-//Begin experiment
-    unsigned char* data = savedRaw.GetData();
-    cout << "where" << endl;
-    unsigned char* dest = new unsigned char[rows*cols*8];
-    cout << "is" << endl;
-    dc1394_deinterlace_stereo(data, dest, 2*cols, rows);
-    cout << "it" << endl;
-    Mat right = cv::Mat(rows, cols, CV_8UC1, dest, cols);
-    cout << "dumped?" << endl;
-    Mat left= cv::Mat(rows, cols, CV_8UC1, dest + ((2*rows*cols)>>1)-1, cols);
-    //Mat left= cv::Mat(rows, cols, CV_8UC4, dest + ((rows*cols*4)>>1)-1, cv::Mat::AUTO_STEP);
-//End experiment
-*/
-
 
 
 // Create a converted image
@@ -277,7 +264,7 @@ void ProcessFrame(Image* rawImage, const void* that)
 */
 
 
-    Bumblebee2::ptgrey2opencv(convertedImage,right);
+    Bumblebee2::ptgrey2opencv(convertedImage,left);
 
     unsigned char* data = savedRaw.GetData();
     for(int i = 1; i < savedRaw.GetDataSize(); i += 2)
@@ -294,35 +281,17 @@ void ProcessFrame(Image* rawImage, const void* that)
         return;
     }
 
-    Bumblebee2::ptgrey2opencv(convertedImage, left);
+    Bumblebee2::ptgrey2opencv(convertedImage, right);
 
     thisHere.LockImages();
     thisHere.Left() = left.clone();
     thisHere.Right() = right.clone();
     thisHere.UnlockImages();
     thisHere.onNewData(thisHere.Images());
-    //delete[] dest;
     return;
-
 }
-
 
 void PrintError( FlyCapture2::Error error )
 {
     error.PrintErrorTrace();
-}
-
-
-void dc1394_deinterlace_stereo(unsigned char* src, unsigned char* dest, int width, int height)
-{
-    register int i = (width*height)-1;
-    register int j = ((width*height)>>1)-1;
-    register int k = (width*height)-1;
-    unsigned char filler;
-    while (i >= 1) {
-        dest[k--] = src[i--];
-        //cout << "Source is the problem" << endl;
-        dest[j--] = src[i--];
-    }
-    return;
 }
