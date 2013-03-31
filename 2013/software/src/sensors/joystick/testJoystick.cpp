@@ -1,87 +1,79 @@
-#include "Joystick.h"
-#include "actuators/motors/OSMC_driver/OSMC_driver.hpp"
 #include <iostream>
-#include "serial/ASIOSerialPort.h"
+#include "sensors/joystick/Joystick.h"
+#include "actuators/motors/OSMC_driver/OSMC_driver.hpp"
+#include <sys/time.h>
+#include <boost/thread.hpp>
+
 using namespace std;
 
-int main(int argc, char* args[] )
+class TankDriver
 {
+    private:
+    Joystick *_joy;
+    OSMC_driver *_driver;
+    LISTENER(TankDriver, onNewJoystick, JoystickState);
+    volatile int _LPWM, _RPWM, _LDIR, _RDIR;
 
-    Joystick Logi; //Joystick Object
-    OSMC_driver driver; //Motor Driver Object
-    sleep(1);
-
-
-
-    bool ev; //Catch return status of Joystick read function
-
-    //Initialize Joystick subsystem
-    if(!Logi.initJoystick())
+    public:
+    TankDriver(Joystick *joystick, OSMC_driver *driver)
+        : LonNewJoystick(this)
     {
-        return 1;
+        _joy = joystick;
+        _joy->onNewData += &LonNewJoystick;
+        _driver = driver;
+        _driver->stopMotors();
+        _LDIR = 0;
+        _LPWM = 0;
+        _RDIR = 0;
+        _RPWM = 0;
     }
 
-    driver.stopMotors();
-    uint16_t Timer=0;
-    while(true)
+    void onNewJoystick(JoystickState state)
     {
+        int LIn = state.axes[1];
+        int RIn = state.axes[3];
 
-        //read Joystick data
+        double maxVal = 32767.0;
 
-        if(Logi.readJoystick())
+        _LPWM = abs( ( LIn / maxVal ) * 150.0 );
+        _RPWM= abs( ( RIn / maxVal ) * 150.0 );
+
+        int DEADBAND = 30;
+        if(_LPWM < DEADBAND)
         {
-            //Display Joystick data
-            //Logitech.displayJoystick();
-            Logi.getPWM();
-
+            _LPWM = 0;
+        }
+        if(_RPWM < DEADBAND)
+        {
+            _RPWM = 0;
         }
 
-        if(Logi.CycleCheck())
+        _LDIR = !signbit(LIn);
+        _RDIR = !signbit(RIn);
+
+        cout << "Right : " << (_LDIR &&_LPWM? "-" : " ") << _LPWM << "    " << (_RDIR &&_RPWM? "-" : " ") << _RPWM << endl;
+        _driver->setRightLeftPwm(_RPWM, _RDIR, _LPWM, _LDIR);
+
+        if(state.buttons[0])
         {
-            Logi.smoothPWM();
-            driver.setRightLeftPwm(Logi.RPWM,Logi.RDirection,Logi.LPWM,Logi.LDirection);
-            cout<<"LPWM:"<<Logi.LPWM<<"    ";
-            cout<<"RPWM:"<<Logi.RPWM<<"\n";
-            cout<<"jLPWM:"<<Logi.jLPWM<<"    ";
-            cout<<"jRPWM:"<<Logi.jRPWM<<"\n";
+            cout << "exit" << endl;
+            _joy->disconnect();
+            exit(0);
         }
-
-//                  if(leftPWMsetleftPWM)
-//                {
-//                    if(setleftPWM<255)
-//                    {
-//                        setleftPWM+=10;
-//                        if (setleftPWM>=255)
-//                        {
-//                            setleftPWM=255;
-//                        }
-//                        cout<<"setleftPWM:"<<setleftPWM<<"\n";
-//                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
-//                        usleep(200000);
-//                    }
-//                }
-//
-//            else if(leftPWM<setleftPWM)
-//                {
-//                    if(setleftPWM>0)
-//                    {
-//                        setleftPWM-=10;
-//                        if (setleftPWM<=0)
-//                        {
-//                            setleftPWM=0;
-//                        }
-//                        cout<<"setleftPWM:"<<setleftPWM<<"\n";
-//                        driver.setRightLeftPwm((char)setleftPWM,0,(char)setleftPWM,0);
-//                        usleep(200000);
-//                    }
-//                }
-
     }
+};
 
+int main()
+{
+    Joystick joystick;
+    if(joystick.isOpen())
+    {
+        OSMC_driver driver;
+        TankDriver tankdrive(&joystick, &driver);
+        cout << "Press button 1 to exit." << endl;
+        while(joystick.isOpen()) { }
+    } else {
+        cout << "Could not open joystick, exiting." << endl;
+    }
     return 0;
-
 }
-
-
-
-
