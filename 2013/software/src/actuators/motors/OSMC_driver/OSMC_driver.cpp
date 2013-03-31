@@ -6,7 +6,7 @@
 
 using namespace std;
 
-OSMC_driver::OSMC_driver()
+OSMC_driver::OSMC_driver() :
     arduinoLeft("/dev/igvc_2012_left_motor_shield", 9600),
     arduinoRight("/dev/igvc_2012_right_motor_shield", 9600),
     arduinoEncoder("/dev/igvc_2012_right_encoder_shield", 9600)
