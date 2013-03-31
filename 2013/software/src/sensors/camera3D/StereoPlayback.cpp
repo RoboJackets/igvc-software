@@ -2,7 +2,8 @@
 #include <boost/thread/condition_variable.hpp>
 #include <unistd.h>
 
-StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, int fps=20) : _leftVid(leftVideo), _rightVid(rightVideo), _framesPerSecond(fps)
+StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, int fps) : _leftVid(leftVideo), _rightVid(rightVideo),
+    _framesPerSecond(fps), _playbackThread(&StereoPlayback::Run, this)
 {
 }
 
@@ -12,7 +13,7 @@ void StereoPlayback::Run()
     bool lsuccess, rsuccess;
     while(Running())
     {
-        usleep(waitTime); //TODO Ensure this function call is non-blocking or replace it with something that is
+        usleep(waitTime); //TODO Ensure this function call is non-blocking(gives up the processor during sleep) or replace it with something that is
 
         Mat left, right;
         lsuccess = _leftVid.grab();
@@ -26,9 +27,10 @@ void StereoPlayback::Run()
         }
         else
         {
+            LockRunning();
             Running(false);
+            UnlockRunning();
         }
-
     }
 }
 
