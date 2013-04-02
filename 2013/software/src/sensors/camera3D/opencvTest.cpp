@@ -52,7 +52,6 @@ int main()
 
 int main()
 {
-
     /*
     //std::string fName = "/home/robojackets/Desktop/this";
     std::string fName = "/home/alex/Desktop/IGVC/2013/software/trainingSets/this";
@@ -71,8 +70,8 @@ int main()
     std::string saveName = "/home/robojackets/Desktop/camTesting/dat";
 
 
-    int nFrame = 5;
-    StereoVidMaker maker(thisguy, saveName, nFrame, 20, 0);
+    int nFrame = 100;
+    StereoVidMaker maker(thisguy, saveName, nFrame, 20, 1);
 
 
     while(thisguy.Running())
