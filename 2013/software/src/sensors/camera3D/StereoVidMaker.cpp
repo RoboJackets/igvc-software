@@ -34,8 +34,6 @@ void StereoVidMaker::onNewFrame(StereoPair& newPair)
 void StereoVidMaker::addFrame(StereoPair& newPair)
 {
     std::cout << "printing frame" << std::endl;
-    //_rightWriter.write((const cv::Mat&) newPair.RightImage());
-    //_leftWriter.write((const cv::Mat&) newPair.LeftImage());
     _rightWriter << newPair.RightImage();
     _leftWriter << newPair.LeftImage();
     _nFrames++;
