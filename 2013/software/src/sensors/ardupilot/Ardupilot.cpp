@@ -47,7 +47,7 @@ void Ardupilot::update()
 
         deltat = timeCurrent-timeLast;
 
-        cout<<heading<<"\t"<<speed<<"\t"<<positionX<<"\t"<<positionY<<"\t"<<deltat<<endl;
+        cout<<"H:" << heading<<"\tS:"<<speed<<"\tPx:"<<positionX<<"\tPy:"<<positionY<<"\tDt:"<<deltat<<endl;
 
         onNewIMUData(IMUData(positionX, positionY, heading, speed, deltat));
 
