@@ -26,6 +26,7 @@ HemisphereA100GPS::HemisphereA100GPS():
 void HemisphereA100GPS::onNewSerialLine(string line) {
     GPSData state;
     if(parseLine(line, state)) {
+        state.Accuracy(DefaultAccuracy);
         // TODO set time
 //        gettimeofday(&state.laptoptime, NULL);
 

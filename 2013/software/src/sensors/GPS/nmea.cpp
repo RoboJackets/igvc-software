@@ -17,7 +17,7 @@ double nmea::decodeLatitude(const std::string& val, const char hemi)
 	double frac = modf(raw / 100.0, &intpart);
 	double deg = intpart + frac * 100.0 / 60.0;
 
-	std::cout <<raw << std::endl;
+	//std::cout <<raw << std::endl;
 
 	if(hemi == 'N')
 	{
