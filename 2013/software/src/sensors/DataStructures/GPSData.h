@@ -2,8 +2,19 @@
 #define GPSDATA_H
 
 #include "SensorData.h"
+//#include <sensors/GPS/GPS.hpp>
 #include "GPSAccuracy.hpp"
 
+/*
+ * An enumeration of GPS quality states.
+ */
+enum GPS_QUALITY {
+	GPS_QUALITY_NOFIX=0,
+	GPS_QUALITY_NON_DIFF=1,
+	GPS_QUALITY_WAAS=2,
+	GPS_QUALITY_ESTIMATED=6,
+	GPS_QUALITY_UNKNOWN=7
+};
 
 class GPSData : public SensorData
 {
@@ -74,6 +85,11 @@ public:
         return _Accuracy.SpeedVar();
     }
 
+    inline GPS_QUALITY Quality(void)
+    {
+        return _quality;
+    }
+
     inline void Lat(double val)
     {
         _Lat = val;
@@ -119,6 +135,11 @@ public:
         //TODO set variance
     }
 
+    inline void Quality(GPS_QUALITY val)
+    {
+        _quality = val;
+    }
+
     bool operator == (GPSData other)
     {
         return _Lat == other.Lat() &&
@@ -135,6 +156,7 @@ public:
         double _Heading;
         double _Speed;
         GPSAccuracy _Accuracy;
+        GPS_QUALITY _quality;
 
 };
 
