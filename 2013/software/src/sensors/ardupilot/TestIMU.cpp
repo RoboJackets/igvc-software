@@ -25,7 +25,9 @@ private:
 int main()
 {
     Ardupilot ardupilot;
+    IMUListener listener(&ardupilot);
     std::cout<<"Running"<<endl;
+    while(true){ };
 //    sleep(1);
 //    while(true)
 //    {
