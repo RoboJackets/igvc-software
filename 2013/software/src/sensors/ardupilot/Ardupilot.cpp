@@ -49,8 +49,6 @@ void Ardupilot::onNewSerialLine(string line)
 
         deltat = timeCurrent-timeLast;
 
-        cout<<"H:" << heading<<"\tS:"<<speed<<"\tPx:"<<positionX<<"\tPy:"<<positionY<<"\tDt:"<<deltat<<endl;
-
         onNewIMUData(IMUData(positionX, positionY, heading, speed, deltat));
 
         timeLast = timeCurrent;
