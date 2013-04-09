@@ -24,6 +24,9 @@ class Ardupilot
         double positionY;
         double deltat;
         ASIOSerialPort ardupilotPort;
+
+        void onNewSerialLine(string line);
+        LISTENER(Ardupilot, onNewSerialLine, string);
 };
 
 #endif // ARDUPILOT_H
