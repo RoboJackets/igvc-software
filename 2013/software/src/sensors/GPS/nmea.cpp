@@ -17,8 +17,6 @@ double nmea::decodeLatitude(const std::string& val, const char hemi)
 	double frac = modf(raw / 100.0, &intpart);
 	double deg = intpart + frac * 100.0 / 60.0;
 
-	//std::cout <<raw << std::endl;
-
 	if(hemi == 'N')
 	{
 		return deg;
@@ -56,25 +54,25 @@ bool nmea::decodeGPRMC(const std::string& line, GPSData& state)
 
 	decodeUTCTime(splitvec[1]);
 
-//	char status = splitvec[2][0];
-//	switch(status)
-//	{
-//		case 'A':
-//		{
-//			state.qual = GPS_QUALITY_NON_DIFF;
-//			break;
-//		}
-//		case 'V':
-//		{
-//			state.qual = GPS_QUALITY_NOFIX;
-//			break;
-//		}
-//		default:
-//		{
-//			state.qual = GPS_QUALITY_UNKNOWN;
-//			break;
-//		}
-//	}
+	char status = splitvec[2][0];
+	switch(status)
+	{
+		case 'A':
+		{
+			state.Quality(GPS_QUALITY_NON_DIFF);
+			break;
+		}
+		case 'V':
+		{
+			state.Quality(GPS_QUALITY_NOFIX);
+			break;
+		}
+		default:
+		{
+			state.Quality(GPS_QUALITY_UNKNOWN);
+			break;
+		}
+	}
 
 	try
 	{
@@ -148,35 +146,35 @@ bool nmea::decodeGPGGA(const std::string& line, GPSData& state)
 //	state.lon = decodeLongitude(splitvec[4], LonHemi);
     state.Long(decodeLongitude(splitvec[4], LonHemi));
 
-//	const char gpsQuality = splitvec[6][0];
-//	switch(gpsQuality)
-//	{
-//		case '0':
-//		{
-//			state.qual = GPS_QUALITY_NOFIX;
-//			break;
-//		}
-//		case '1':
-//		{
-//			state.qual = GPS_QUALITY_NON_DIFF;
-//			break;
-//		}
-//		case '2':
-//		{
-//			state.qual = GPS_QUALITY_WAAS;
-//			break;
-//		}
-//		case '6':
-//		{
-//			state.qual = GPS_QUALITY_ESTIMATED;
-//			break;
-//		}
-//		default:
-//		{
-//			state.qual = GPS_QUALITY_UNKNOWN;
-//			break;
-//		}
-//	}
+	const char gpsQuality = splitvec[6][0];
+	switch(gpsQuality)
+	{
+		case '0':
+		{
+			state.Quality(GPS_QUALITY_NOFIX);
+			break;
+		}
+		case '1':
+		{
+			state.Quality(GPS_QUALITY_NON_DIFF);
+			break;
+		}
+		case '2':
+		{
+			state.Quality(GPS_QUALITY_WAAS);
+			break;
+		}
+		case '6':
+		{
+			state.Quality(GPS_QUALITY_ESTIMATED);
+			break;
+		}
+		default:
+		{
+			state.Quality(GPS_QUALITY_UNKNOWN);
+			break;
+		}
+	}
 
 	const std::string& numsat = splitvec[7];
 //	state.num_sat = boost::lexical_cast<int>(numsat.c_str());
