@@ -81,7 +81,7 @@ std::string ASIOSerialPort::readln() {
             boost::asio::read(port, boost::asio::buffer(&c,1));
 		} catch(boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
 			std::cerr << "Error reading stream. Device may have been unplugged." << std::endl;
-			std::cout<<"Error reading stream. Device may have been unplugged."<<std::endl;
+			std::cout << "\t" << err.what() << std::endl;
 			return line;
 		}
 		switch(c) {
@@ -123,6 +123,7 @@ char ASIOSerialPort::read() {
         boost::asio::read(port, boost::asio::buffer(&in, 1));
     } catch (boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
         std::cerr << "Error reading stream. Device may have been unplugged." << std::endl;
+        std::cout << "\t" << err.what() << std::endl;
         return 0;
     }
     return in;

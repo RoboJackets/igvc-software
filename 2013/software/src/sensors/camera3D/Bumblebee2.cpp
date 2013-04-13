@@ -85,7 +85,6 @@ int Bumblebee2::StartCamera()
         PrintError( error );
         return -1;
     }
-    cout << "is it valid?" << valid << endl;
 
     if ( !valid )
     {
@@ -96,7 +95,7 @@ int Bumblebee2::StartCamera()
     // Set the settings to the camera
     error = _cam.SetFormat7Configuration(
         &fmt7ImageSettings,
-        fmt7PacketInfo.recommendedBytesPerPacket>>1);
+        fmt7PacketInfo.recommendedBytesPerPacket>>1); //packet size of recommendedBytesPerPacket>>1(which is 2048) ensures proper transmission of data at 10fps, do not change
 
     unsigned int dis;
     float dat;

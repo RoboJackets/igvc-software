@@ -103,8 +103,18 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+<<<<<<< HEAD
 			<Target title="TestFile">
 				<Option output="bin/TestFile" prefix_auto="1" extension_auto="1" />
+=======
+			<Target title="TestPositionTracking">
+				<Option output="bin/TestPositionTracking" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
+			<Target title="TestIMU">
+				<Option output="bin/TestIMU" prefix_auto="1" extension_auto="1" />
+>>>>>>> 3c44e39287b9eca134596cb7fe9276a0de0b1e7d
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
@@ -179,6 +189,15 @@
 		<Unit filename="src/mapping/MapPoint.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/pose_tracking/PoseTracker.cpp">
+			<Option target="TestPositionTracking" />
+		</Unit>
+		<Unit filename="src/pose_tracking/PoseTracker.h">
+			<Option target="TestPositionTracking" />
+		</Unit>
+		<Unit filename="src/pose_tracking/TestPositionTracking.cpp">
+			<Option target="TestPositionTracking" />
+		</Unit>
 		<Unit filename="src/sensors/DataStructures/DataArray.cpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
@@ -194,54 +213,65 @@
 		<Unit filename="src/sensors/DataStructures/GPSAccuracy.hpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
-			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.cpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="TestPositionTracking" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/GPSData.h">
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="TestPositionTracking" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/IMUData.hpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
+			<Option target="TestPositionTracking" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="TestPositionTracking" />
 			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
 			<Option target="Regression" />
 			<Option target="TestGPS" />
+			<Option target="TestPositionTracking" />
 			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/GPS.hpp">
 			<Option target="TestGPS" />
+			<Option target="TestPositionTracking" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/HemisphereA100GPS.cpp">
 			<Option target="TestGPS" />
+			<Option target="TestPositionTracking" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/HemisphereA100GPS.h">
 			<Option target="TestGPS" />
+			<Option target="TestPositionTracking" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/TestGPS.cpp">
 			<Option target="TestGPS" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/nmea.cpp">
 			<Option target="TestGPS" />
+			<Option target="TestPositionTracking" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/nmea.hpp">
 			<Option target="TestGPS" />
+			<Option target="TestPositionTracking" />
 		</Unit>
 		<Unit filename="src/sensors/IMU/IMU.h">
 			<Option target="TestData" />
+			<Option target="TestPositionTracking" />
 		</Unit>
 		<Unit filename="src/sensors/RobotPosition.cpp">
 			<Option target="TestData" />
@@ -259,6 +289,15 @@
 		</Unit>
 		<Unit filename="src/sensors/WaypointReader.h">
 			<Option target="TestFile" />
+		</Unit>
+		<Unit filename="src/sensors/ardupilot/Ardupilot.cpp">
+			<Option target="TestIMU" />
+		</Unit>
+		<Unit filename="src/sensors/ardupilot/Ardupilot.hpp">
+			<Option target="TestIMU" />
+		</Unit>
+		<Unit filename="src/sensors/ardupilot/TestIMU.cpp">
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/Bumblebee2.cpp">
 			<Option target="testCV" />
@@ -278,29 +317,8 @@
 		<Unit filename="src/sensors/camera3D/StereoPair.hpp">
 			<Option target="testCV" />
 		</Unit>
-		<Unit filename="src/sensors/camera3D/StereoPlayback.cpp">
-			<Option target="testCV" />
-		</Unit>
-		<Unit filename="src/sensors/camera3D/StereoPlayback.h">
-			<Option target="testCV" />
-		</Unit>
-		<Unit filename="src/sensors/camera3D/StereoSource.hpp">
-			<Option target="testCV" />
-		</Unit>
-		<Unit filename="src/sensors/camera3D/StereoVidMaker.cpp">
-			<Option target="testCV" />
-		</Unit>
-		<Unit filename="src/sensors/camera3D/StereoVidMaker.h">
-			<Option target="testCV" />
-		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
 			<Option target="testCamera" />
-		</Unit>
-		<Unit filename="src/sensors/camera3D/featureFinder.cpp">
-			<Option target="testCV" />
-		</Unit>
-		<Unit filename="src/sensors/camera3D/featureFinder.h">
-			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/imgUtils.cpp">
 			<Option target="testCamera" />
@@ -363,7 +381,6 @@
 		</Unit>
 		<Unit filename="src/sensors/timing.h">
 			<Option target="TestData" />
-			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.cpp">
 			<Option target="TestSerial" />
@@ -374,6 +391,8 @@
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />
+			<Option target="TestPositionTracking" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
@@ -384,6 +403,8 @@
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />
+			<Option target="TestPositionTracking" />
+			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
