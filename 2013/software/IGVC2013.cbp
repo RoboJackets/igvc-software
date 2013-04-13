@@ -103,6 +103,11 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+			<Target title="TestFile">
+				<Option output="bin/TestFile" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -119,6 +124,9 @@
 			<Add directory="$(#boost).lib" />
 			<Add directory="/usr/lib/" />
 		</Linker>
+		<Unit filename="../../../TestFile.cpp">
+			<Option target="TestFile" />
+		</Unit>
 		<Unit filename="src/IGVC.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
@@ -245,6 +253,12 @@
 		</Unit>
 		<Unit filename="src/sensors/Sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/sensors/WaypointReader.cpp">
+			<Option target="TestFile" />
+		</Unit>
+		<Unit filename="src/sensors/WaypointReader.h">
+			<Option target="TestFile" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/Bumblebee2.cpp">
 			<Option target="testCV" />
