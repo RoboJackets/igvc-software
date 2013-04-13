@@ -154,7 +154,7 @@ void loop()
 	heading = compass.calculate_heading(ahrs.get_dcm_matrix())+3.1415;
 	heading = heading*180/3.1415;
 	
-	hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f %4.2f\n"), heading, speed, 			deltaPX, deltaPY);
+	hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f %4.2f\n"), heading, speed, deltaPX, deltaPY);
 
 
 	last_update = tnow;

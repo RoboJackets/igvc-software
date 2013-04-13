@@ -11,8 +11,6 @@
 #include "sensors/DataStructures/DataPoint.hpp"
 
 
-
-
 using namespace boost::unit_test;
 
 GPSAccuracy GPSData::NAV200Default = GPSAccuracy(.0001, .0001, 3, 0.01);

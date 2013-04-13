@@ -274,6 +274,11 @@ DataArray<DataPoint <double> >& RobotPosition::Lat(void)
     return _Lat;
 }
 
+DataArray<DataPoint <double> >& RobotPosition::Long(void)
+{
+    return _Long;
+}
+
 bool RobotPosition::try_lock()
 {
     return StateMutex.try_lock();
