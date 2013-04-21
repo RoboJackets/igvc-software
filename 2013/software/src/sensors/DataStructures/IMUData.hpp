@@ -7,6 +7,10 @@
 class IMUData : public SensorData
 {
 public:
+    inline IMUData()
+    {
+    }
+
     inline IMUData(double deltaX, double deltaY, double Heading, double Speed, double deltaTime) : SensorData(), _deltaX(deltaX),
      _deltaY(deltaY), _Heading(Heading),_deltaTime(deltaTime), _Accuracy(ArduPilotDefault)
      {
