@@ -103,6 +103,10 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+<<<<<<< HEAD
+			<Target title="TestFile">
+				<Option output="bin/TestFile" prefix_auto="1" extension_auto="1" />
+=======
 			<Target title="TestPositionTracking">
 				<Option output="bin/TestPositionTracking" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
@@ -110,6 +114,7 @@
 			</Target>
 			<Target title="TestIMU">
 				<Option output="bin/TestIMU" prefix_auto="1" extension_auto="1" />
+>>>>>>> 3c44e39287b9eca134596cb7fe9276a0de0b1e7d
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
@@ -149,6 +154,9 @@
 			<Add directory="$(#boost).lib" />
 			<Add directory="/usr/lib/" />
 		</Linker>
+		<Unit filename="../../../TestFile.cpp">
+			<Option target="TestFile" />
+		</Unit>
 		<Unit filename="src/IGVC.hpp">
 			<Option target="LidarObstacleAvoidance" />
 		</Unit>
@@ -316,6 +324,12 @@
 		</Unit>
 		<Unit filename="src/sensors/Sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/sensors/WaypointReader.cpp">
+			<Option target="TestFile" />
+		</Unit>
+		<Unit filename="src/sensors/WaypointReader.h">
+			<Option target="TestFile" />
 		</Unit>
 		<Unit filename="src/sensors/ardupilot/Ardupilot.cpp">
 			<Option target="TestIMU" />
