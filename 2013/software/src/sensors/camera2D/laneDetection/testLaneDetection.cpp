@@ -5,6 +5,7 @@
 #include <vector>
 
 using namespace cv;
+using namespace std;
 
 Mat frame, filtered, binary;
 
@@ -56,9 +57,23 @@ int main()
 
     frame.copyTo(filtered);
 
-    boxFilter(filtered, filtered, 0, Size(9,9));
+//    boxFilter(filtered, filtered, 0, Size(9,9));
 
-    { // Increase contrast of color image
+    cvtColor(filtered, filtered, CV_BGR2HSV);
+
+    {
+        vector<Mat> channels;
+        split(filtered, channels);
+        Mat H = channels[0];
+        equalizeHist(H, H);
+        imshow("Hue", H);
+        Mat S = channels[1];
+        S.at
+    }
+
+    imshow("Filtered", filtered);
+
+/*    { // Increase contrast of color image
         // http://stackoverflow.com/questions/15007304/histogram-equalization-not-working-on-color-image-opencv
         Mat ycrcb;
         cvtColor(filtered, ycrcb, CV_BGR2YCrCb);
@@ -104,7 +119,7 @@ int main()
 
     cvtColor(binary, binary, CV_BGR2GRAY);
 
-    imshow("Binary", binary);
+    imshow("Binary", binary);*/
 
     if(waitKey(10) > 0)
         break;
