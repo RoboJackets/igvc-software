@@ -143,19 +143,30 @@ void loop()
 	position.x += velocity.x * deltat;
 	position.y += velocity.y * deltat;
 
-	deltaPX = position.x-prePosition.x;
-	deltaPY = position.y-prePosition.y;	
-
-	prePosition.x = position.x;
-	prePosition.y = position.y;	
-
 	speed = sqrt((velocity.x*velocity.x)+(velocity.y*velocity.y));
 
 	heading = compass.calculate_heading(ahrs.get_dcm_matrix())+3.1415;
 	heading = heading*180/3.1415;
 	
-	hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f %4.2f\n"), heading, speed, deltaPX, deltaPY);
+	if(hal.console->available() > 0)
+	{
+		if(hal.console->read() == 'g')
+		{
+			double dx = position.x - prePosition.x;
+			double dy = position.y - prePosition.y;
+			hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f \n"),dx,dy,heading);
+			prePosition.x = position.x;
+			prePosition.y = position.y;
+		}
+	}
 
+	/*deltaPX = position.x-prePosition.x;
+	deltaPY = position.y-prePosition.y;	
+
+	prePosition.x = position.x;
+	prePosition.y = position.y;	
+
+	hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f %4.2f\n"), heading, speed, deltaPX, deltaPY);
 
 	last_update = tnow;
 	if(count>=400)
@@ -164,7 +175,7 @@ void loop()
 		velocity.y = 0;
 		count = 0;
 	}
-	count++;
+	count++;*/
 
 }
 
