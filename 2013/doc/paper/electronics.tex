@@ -14,6 +14,22 @@ microcontrollers use.
 
 This year saw a drastic reduction in the number of microcontrollers used. While last year's design utilized 6 Arduino Duemilanove boards to accomplish the task of interfacing with the the motors and encoders, this year's design was able to accomplish the same task while utilizing only a single Arduino Uno board. This was made possible through the design of a custom interfacing daughterboard.
 
+\begin{figure}[H]
+\begin{minipage}[b]{0.5\linewidth}
+\centering
+\includegraphics[width=3in]{./Pics/schematisch.png}
+\caption{Electrical Board Schematic}
+\label{FIG:Schematic}
+\end{minipage}
+\hspace{0.1in}
+\begin{minipage}[b]{0.5\linewidth}
+\centering
+\includegraphics[width=3in]{./Pics/baord.png}
+\caption{Daughter Board}
+\label{FIG:Board}
+\end{minipage}
+\end{figure}
+
 \subsection{Sensors}
 
 This year saw a significant additions to the existing sensor system. These included the addition of an ArduPilot IMU and a BumbleBee2 Stereo Camera. Additionally, the new mechanical design led to several changes in the existing sensor system.
@@ -31,7 +47,7 @@ A GPS is used to provide world position to the robot, allowing obstacles to be p
 
 \subsubsection{IMU}
 
-Misti also utilize an ArduPilot IMU. This IMU includes a 3-axis accelerometer, 3-axis gyroscopeand a 3-axis magnetometer as well as a barometric pressure sensor. The baord contains an atmega2560 chip and can both be programmed and communicate with the main computer through a USB connection.
+Misti also utilize an ArduPilot IMU. This IMU includes a 3-axis accelerometer, 3-axis gyroscope and a 3-axis magnetometer as well as a barometric pressure sensor. The board contains an atmega2560 chip and can both be programmed and communicate with the main computer through a USB connection.
  
 \subsubsection{Encoders}
 
@@ -50,3 +66,10 @@ to prevent damage to the H-bridge and motor. Each motor is connected to two OSMC
 
 Power is also provided to several DC-DC buck converters, which output 5 VDC, 12 VDC, and 19.5 VDC for the other electronics on the robot.
 
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=6in]{./Pics/PowerSchematic.png}
+\caption{Power Distribution Schematic}
+\label{FIG:Distribution}
+\end{center}
+\end{figure}
