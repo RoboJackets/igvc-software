@@ -29,15 +29,25 @@ ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud)
     _packetHasBeenDefined = false;
     _hasEncounteredStartByte = false;
 	_line = "";
+	_eventRequests = 0;
 }
 
 void ASIOSerialPort::startEvents() {
-    _eventsEnabled = true;
-	eventThread = boost::thread(boost::bind(&ASIOSerialPort::eventThreadRun, this));
+    _eventRequests++;
+    if(!_eventsEnabled)
+    {
+        _eventsEnabled = true;
+        eventThread = boost::thread(boost::bind(&ASIOSerialPort::eventThreadRun, this));
+    }
 }
 
 void ASIOSerialPort::stopEvents() {
-    _eventsEnabled = false;
+    _eventRequests--;
+    if(_eventRequests == 0)
+    {
+        _eventsEnabled = false;
+    }
+
 }
 
 void ASIOSerialPort::eventThreadRun() {
