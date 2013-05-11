@@ -96,6 +96,7 @@ private:
 	void eventThreadRun();
 
 	bool _eventsEnabled;
+	int _eventRequests;
 
 	char _packetStartByte;
 	char _packetEndByte;
