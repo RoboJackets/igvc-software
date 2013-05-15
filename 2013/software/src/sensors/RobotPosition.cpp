@@ -181,7 +181,7 @@ int RobotPosition::update(GPSData newData)
 }
 
 /**
-Updatesr robot position information using
+Updates robot position information using IMU data
 **/
 int RobotPosition::update(IMUData newData)
 {
