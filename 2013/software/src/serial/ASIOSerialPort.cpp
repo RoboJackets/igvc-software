@@ -46,6 +46,7 @@ void ASIOSerialPort::stopEvents() {
     if(_eventRequests == 0)
     {
         _eventsEnabled = false;
+        eventThread.join();
     }
 
 }
@@ -66,6 +67,11 @@ void ASIOSerialPort::eventThreadRun() {
 }
 
 void ASIOSerialPort::close() {
+    if(_eventsEnabled)
+    {
+        _eventsEnabled = false;
+        eventThread.join();
+    }
 	port.close();
 }
 
@@ -156,4 +162,9 @@ void ASIOSerialPort::definePacket(char startByte, char endByte)
 }
 
 ASIOSerialPort::~ASIOSerialPort() {
+    if(_eventsEnabled)
+    {
+        _eventsEnabled = false;
+        eventThread.join();
+    }
 }
