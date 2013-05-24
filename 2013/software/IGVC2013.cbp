@@ -152,6 +152,30 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+			<Target title="TestCameraStabilization">
+				<Option output="bin/TestCameraStabilization" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Linker>
+					<Add library="/usr/local/lib/libopencv_calib3d.so" />
+					<Add library="/usr/local/lib/libopencv_contrib.so" />
+					<Add library="/usr/local/lib/libopencv_core.so" />
+					<Add library="/usr/local/lib/libopencv_features2d.so" />
+					<Add library="/usr/local/lib/libopencv_flann.so" />
+					<Add library="/usr/local/lib/libopencv_gpu.so" />
+					<Add library="/usr/local/lib/libopencv_highgui.so" />
+					<Add library="/usr/local/lib/libopencv_imgproc.so" />
+					<Add library="/usr/local/lib/libopencv_legacy.so" />
+					<Add library="/usr/local/lib/libopencv_ml.so" />
+					<Add library="/usr/local/lib/libopencv_nonfree.so" />
+					<Add library="/usr/local/lib/libopencv_objdetect.so" />
+					<Add library="/usr/local/lib/libopencv_photo.so" />
+					<Add library="/usr/local/lib/libopencv_stitching.so" />
+					<Add library="/usr/local/lib/libopencv_ts.so" />
+					<Add library="/usr/local/lib/libopencv_video.so" />
+					<Add library="/usr/local/lib/libopencv_videostab.so" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -170,6 +194,7 @@
 		</Linker>
 		<Unit filename="src/IGVC.hpp">
 			<Option target="LidarObstacleAvoidance" />
+			<Option target="TestCameraStabilization" />
 		</Unit>
 		<Unit filename="src/actuators/motors/ArduinoMotorControl/2013Arduino/ArduinoIDETest.cpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -206,6 +231,9 @@
 		</Unit>
 		<Unit filename="src/common/Pose.hpp">
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/common/utils/StringUtils.hpp">
+			<Option target="TestCameraStabilization" />
 		</Unit>
 		<Unit filename="src/events/Delegate.hpp">
 			<Option target="TestGPS" />
@@ -346,17 +374,28 @@
 			<Option target="TestIMU" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
+			<Option target="TestCameraStabilization" />
 		</Unit>
 		<Unit filename="src/sensors/ardupilot/Ardupilot.hpp">
 			<Option target="TestIMU" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
+			<Option target="TestCameraStabilization" />
 		</Unit>
 		<Unit filename="src/sensors/ardupilot/TestIMU.cpp">
 			<Option target="TestIMU" />
 		</Unit>
 		<Unit filename="src/sensors/camera2D/laneDetection/testLaneDetection.cpp">
 			<Option target="TestLaneDetection" />
+		</Unit>
+		<Unit filename="src/sensors/camera2D/stabilization/RollStabilizer.cpp">
+			<Option target="TestCameraStabilization" />
+		</Unit>
+		<Unit filename="src/sensors/camera2D/stabilization/RollStabilizer.h">
+			<Option target="TestCameraStabilization" />
+		</Unit>
+		<Unit filename="src/sensors/camera2D/stabilization/TestCameraStabilization.cpp">
+			<Option target="TestCameraStabilization" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/Bumblebee2.cpp">
 			<Option target="testCV" />
@@ -462,6 +501,7 @@
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
 			<Option target="LidarObstacleAvoidance" />
+			<Option target="TestCameraStabilization" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
@@ -476,6 +516,7 @@
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
 			<Option target="LidarObstacleAvoidance" />
+			<Option target="TestCameraStabilization" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
