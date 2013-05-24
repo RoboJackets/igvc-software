@@ -22,9 +22,11 @@ static const Matrix2d anotherFunction(void);
 
 int main( int argc, char** argv )
 {
-  Vector3d t;
-  t << 7,6,9;
-  cout << t(2);
+  Matrix3d t = MatrixXd::Identity(3,3);
+  t.col(2) << 7,6,9;
+  cout << t << endl;
+
+  cout << t.row(1).mean();
 
 }
 

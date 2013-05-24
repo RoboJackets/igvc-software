@@ -39,6 +39,7 @@ class GrassOdometer
     Matrix3d RotMat3d(double roll, double pitch, double yaw);
     Matrix4d HomogRotMat3d(double roll, double pitch, double yaw);
     Matrix2d ImgRotMat(double angle);
+    Matrix3d HomogImgRotMat(double angle);
 
     ~GrassOdometer();
   private:
