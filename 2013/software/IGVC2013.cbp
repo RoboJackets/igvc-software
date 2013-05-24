@@ -162,6 +162,8 @@
 					<Add library="opencv_imgproc" />
 					<Add library="flycapture" />
 					<Add library="opencv_calib3d" />
+					<Add library="opencv_features2d" />
+					<Add library="opencv_flann" />
 				</Linker>
 			</Target>
 		</Build>
@@ -216,10 +218,7 @@
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
 			<Option target="TestMotors" />
 		</Unit>
-		<Unit filename="src/common/FLPriotityQueue.cpp">
-			<Option target="OdometryTest" />
-		</Unit>
-		<Unit filename="src/common/FLPriotityQueue.h">
+		<Unit filename="src/common/FLPriotityQueue.hpp">
 			<Option target="OdometryTest" />
 		</Unit>
 		<Unit filename="src/common/Pose.hpp">
