@@ -176,6 +176,20 @@
 					<Add library="/usr/local/lib/libopencv_videostab.so" />
 				</Linker>
 			</Target>
+			<Target title="OdometryTest">
+				<Option output="obj/OdometryTest" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Linker>
+					<Add library="opencv_highgui" />
+					<Add library="opencv_core" />
+					<Add library="opencv_imgproc" />
+					<Add library="flycapture" />
+					<Add library="opencv_calib3d" />
+					<Add library="opencv_features2d" />
+					<Add library="opencv_flann" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -228,6 +242,9 @@
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
 			<Option target="TestMotors" />
+		</Unit>
+		<Unit filename="src/common/FLPriotityQueue.hpp">
+			<Option target="OdometryTest" />
 		</Unit>
 		<Unit filename="src/common/Pose.hpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -415,6 +432,9 @@
 		<Unit filename="src/sensors/camera3D/StereoPair.hpp">
 			<Option target="testCV" />
 		</Unit>
+		<Unit filename="src/sensors/camera3D/StereoSource.hpp">
+			<Option target="testCV" />
+		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
 			<Option target="testCamera" />
 		</Unit>
@@ -520,6 +540,33 @@
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
+		</Unit>
+		<Unit filename="src/vision/ColorRange.cpp">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/vision/ColorRange.h">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/vision/GrassOdometer.cpp">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/vision/GrassOdometer.h">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/vision/ImageHolder.cpp">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/vision/ImageHolder.h">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/vision/VisualOdometry.cpp">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/vision/colorRangeFinder.cpp">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/vision/colorRangeFinder.h">
+			<Option target="OdometryTest" />
 		</Unit>
 		<Unit filename="src/xbee.cpp">
 			<Option target="Xbee" />
