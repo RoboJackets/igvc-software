@@ -6,23 +6,25 @@
 
 using namespace std;
 
+struct IMURawData
+{
+    double roll;
+    double pitch;
+    double heading;
+    double accelX;
+    double accelY;
+    double accelZ;
+};
+
 class Ardupilot
 {
     public:
         Ardupilot();
         ~Ardupilot();
-        void update();
-        void write(char a);
         Event<IMUData> onNewIMUData;
+        Event<IMURawData> onNewRawData;
 
     private:
-        double timeLast;
-        double timeCurrent;
-        double heading;
-        double speed;
-        double positionX;
-        double positionY;
-        double deltat;
         ASIOSerialPort ardupilotPort;
 
         void onNewSerialLine(string line);
