@@ -1,15 +1,135 @@
 #include "vision/GrassOdometer.h"
 
-GrassOdometer::GrassOdometer(ColorRange limits, int numKeyPoints) : _colors(limits), _numKeyPoints(numKeyPoints)
+GrassOdometer::GrassOdometer(ColorRange limits, int numKeyPoints) : _colors(limits), _numKeyPoints(numKeyPoints), _firstFrame(true)
 {
 }
 
 void GrassOdometer::processImage(Mat src, int numPoints)
 {
+  Mat descriptors;
+  vector<KeyPoint> kp;
+  MatrixXd pos;
+  double dx, dy;
+  if (!_firstFrame)
+  {
+    findKeypointsSURF(src, kp, descriptors, pos);
+    findDeltas(descriptors, pos, dx, dy);
+    _firstFrame=false;
+  }
+
+  _lastFramePositions = pos;
+  _lastFrameDescriptors = descriptors;
+  _lastFrame = src.clone();
+
 }
 
-void GrassOdometer::
+void GrassOdometer::findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints, Mat& theDescriptors, MatrixXd& thePositions)
+{
+   //Change image to grayscale for feature detection & description
+  Mat frame_gray;
+  cvtColor( frame, frame_gray, CV_BGR2GRAY );
 
+  //Detect features
+  int minHessian = 100;
+  SurfFeatureDetector detector(minHessian);
+  vector<KeyPoint> keypoints;
+  detector.detect( frame_gray, keypoints);
+
+  //Remove the points from non-grassy regions
+  RemoveNonGrassPts(frame, keypoints);
+
+  //Remove the points that are too far away from the robot
+  ///TODO Add this functionality
+
+  //Get feature descriptors
+  SurfDescriptorExtractor extractor;
+  Mat descriptors;
+  extractor.compute(frame_gray, keypoints, descriptors);
+
+  //Compute Position Information for points
+
+  int nCols, nRows;
+  nRows = 768;
+  nCols = 1024;
+  double dPhi,dTheta;
+  double cameraAngle;
+  double heightOfMast, cameraHeight;
+  double yCam, xCam, zCam, yRobot, xRobot, zRobot;
+  double roll, pitch, yaw;
+  roll = pitch = yaw = 0;
+  Vector3d pos;
+  int r,c;
+  Eigen::Matrix<double,4,4> rotDynMat;
+  Eigen::MatrixXd currentPos(4,keypoints.size());
+  Vector3d cameraPos, cameraOffset;
+  double mastHeight, d2c;
+  double phi, theta;
+  d2c = 0.508; //meters
+  mastHeight = 1.676; //meters
+  cameraPos << -d2c, 0, -mastHeight; //both d2c and mastHeight are negative because of NED direction conventions
+
+  cameraOffset = rotDynMat.topLeftCorner(3,3)*cameraPos; //describes position relative to
+  cameraHeight = -cameraOffset(2);
+
+  rotDynMat = HomogRotMat3d(roll, pitch, yaw);
+  //Need to get the positions for all points, not just those matched, because non-matched may appear in next frame
+  for(int i=0;i<keypoints.size();i++)
+  {
+    r = keypoints[i].pt.y;
+    c = keypoints[i].pt.x;
+    pos << r,c,1; //BE CAREFUL, REMEMBER R CORRESPONDS TO THE Y VALUE
+
+    pos = centerImageCoords(nRows, nCols) * pos; //Changes coordinates in picture such that center of image is 0,0
+    pos = HomogImgRotMat(roll)*pos; //Correct for roll of image by rotating it back the opposite way
+
+    phi = cameraAngle - pitch + dPhi * pos(0);
+    theta = dTheta * pos(1);
+
+    xCam = cameraHeight/tan(phi);
+    yCam = cameraHeight/tan(theta);
+
+    xRobot = xCam - cameraOffset(0);
+    yRobot = yCam - cameraOffset(1);
+    zRobot = 0;  //Since we are defining the robot position as on the ground and the points are as welll
+
+    //Get positions of objects relative to camera
+
+    currentPos(0,i) = xRobot;
+    currentPos(1,i) = yRobot;
+    currentPos(2,i) = zRobot;
+    currentPos(3,i) = 1;
+  }
+
+  currentPos = rotDynMat.inverse()*currentPos; //makes positions extrinsic. i.e. x is now north, etc
+
+
+}
+
+void GrassOdometer::findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& deltax, double deltay)
+{
+
+  std::vector< DMatch > matches;
+
+  MatchPointsFLANN(matches, newDescriptors, _lastFrameDescriptors);
+
+  //Create matrices of corresponding points
+  int nMatches = matches.size();
+  MatrixXd oldPoints, newPoints, deltaMat;
+  oldPoints = MatrixXd::Zero(4, nMatches);
+  newPoints = MatrixXd::Zero(4, nMatches);
+  int newIndex, oldIndex;
+  for(int i =0;i<nMatches;i++)
+  {
+    newIndex = matches[i].queryIdx;
+    oldIndex = matches[i].trainIdx;
+    newPoints.col(i) = newPos.col(newIndex);
+    oldPoints.col(i) = _lastFramePositions.col(oldIndex);
+  }
+
+  deltaMat = newPoints-oldPoints;
+  deltax = deltaMat.row(0).mean();
+  deltay = deltaMat.row(1).mean();
+}
 
 
 void GrassOdometer::ProcesImageSURF(Mat& frame)
