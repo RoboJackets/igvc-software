@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.6.6)  9 MAY 2013 19:59
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.6.6)  10 MAY 2013 15:35
 entering extended mode
  %&-line parsing enabled.
 **igvc_paper_2013.tex
@@ -413,6 +413,12 @@ LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
 (Font)              Font shape `OT1/ptm/b/n' tried instead on input line 3.
 
+Overfull \hbox (8.18886pt too wide) in paragraph at lines 6--7
+\OT1/ptm/m/n/12 RoboJackets is the com-pet-i-tive robotics or-ga-ni-za-tion at 
+the Geor-gia In-sti-tute of Tech-nol-ogy. Founded
+ []
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 26--26
 []\OT1/ptm/m/n/12 Software Lead, Elec-tri-cal
  []
@@ -425,22 +431,18 @@ Underfull \hbox (badness 10000) in paragraph at lines 26--26
 l.83 
      ] (./mechanical.tex
 File: ./Pics/Misti_Vehicle.png Graphic file (type png)
- <use ./Pics/Misti_Vehicle.png>
-Missing character: There is no â in font ptmr7t!
-Missing character: There is no € in font ptmr7t!
-Missing character: There is no ™ in font ptmr7t!
- [5pdfTeX warning (ext4): destination with the same identifier (name{figure.1})
- has been already used, duplicate ignored
+ <use ./Pics/Misti_Vehicle.png> [5pdfTeX warning (ext4): destination with the s
+ame identifier (name{figure.1}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.22 \item E
-            nhance Night-time Operability]
-<./Pics/GearboxAssembled.png, id=156, 729.4452pt x 499.6266pt>
+l.23 \end{enumerate}
+                    ]
+<./Pics/GearboxAssembled.png, id=158, 729.4452pt x 499.6266pt>
 File: ./Pics/GearboxAssembled.png Graphic file (type png)
 
 <use ./Pics/GearboxAssembled.png>
-<./Pics/GearboxExploded.png, id=158, 765.0984pt x 414.8298pt>
+<./Pics/GearboxExploded.png, id=160, 765.0984pt x 414.8298pt>
 File: ./Pics/GearboxExploded.png Graphic file (type png)
 
 <use ./Pics/GearboxExploded.png>
@@ -451,24 +453,23 @@ Overfull \hbox (11.78748pt too wide) in paragraph at lines 34--47
 Missing character: There is no â in font ptmr7t!
 Missing character: There is no € in font ptmr7t!
 Missing character: There is no ™ in font ptmr7t!
-[6pdfTeX warning (ext4): destination with the same identifier (name{figure.2}) 
-has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.52 
-     pdfTeX warning (ext4): destination with the same identifier (name{figure.3
-}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.52 
-      <./Pics/GearboxAssembled.png> <./Pics/GearboxExploded.png>]
-<./Pics/Suspension-Far.png, id=171, 697.10437pt x 432.86719pt>
+<./Pics/Suspension-Far.png, id=162, 697.10437pt x 432.86719pt>
 File: ./Pics/Suspension-Far.png Graphic file (type png)
 
-<use ./Pics/Suspension-Far.png>
-<./Pics/Stress.png, id=173, 469.755pt x 320.69812pt>
+<use ./Pics/Suspension-Far.png> [6pdfTeX warning (ext4): destination with the s
+ame identifier (name{figure.2}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.59 \end{figure}
+                 pdfTeX warning (ext4): destination with the same identifier (n
+ame{figure.3}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.59 \end{figure}
+                  <./Pics/GearboxAssembled.png> <./Pics/GearboxExploded.png>]
+<./Pics/Stress.png, id=174, 469.755pt x 320.69812pt>
 File: ./Pics/Stress.png Graphic file (type png)
  <use ./Pics/Stress.png>
 [7pdfTeX warning (ext4): destination with the same identifier (name{figure.4}) 
@@ -476,32 +477,32 @@ has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.76 
-     pdfTeX warning (ext4): destination with the same identifier (name{figure.5
-}) has been already used, duplicate ignored
-
-\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
-                                                  \fi \fi 
-l.76 
-      <./Pics/Suspension-Far.png (PNG copy)> <./Pics/Stress.png (PNG copy)>]
-<./Pics/Cycles.png, id=181, 469.755pt x 320.69812pt>
+l.74 
+      <./Pics/Suspension-Far.png (PNG copy)>]
+<./Pics/Cycles.png, id=185, 469.755pt x 320.69812pt>
 File: ./Pics/Cycles.png Graphic file (type png)
  <use ./Pics/Cycles.png>
-<./Pics/Mast.png, id=183, 465.23813pt x 462.22687pt>
+<./Pics/Mast.png, id=187, 465.23813pt x 462.22687pt>
 File: ./Pics/Mast.png Graphic file (type png)
  <use ./Pics/Mast.png>
-[8pdfTeX warning (ext4): destination with the same identifier (name{figure.6}) 
+[8pdfTeX warning (ext4): destination with the same identifier (name{figure.5}) 
 has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
 l.97 
-      <./Pics/Cycles.png (PNG copy)>]
+     pdfTeX warning (ext4): destination with the same identifier (name{figure.6
+}) has been already used, duplicate ignored
+
+\AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
+                                                  \fi \fi 
+l.97 
+      <./Pics/Stress.png (PNG copy)> <./Pics/Cycles.png (PNG copy)>]
 Missing character: There is no â in font ptmr7t!
 Missing character: There is no € in font ptmr7t!
 Missing character: There is no ™ in font ptmr7t!
 
-<./Pics/QWOP.png, id=190, 259.2084pt x 197.538pt>
+<./Pics/QWOP.png, id=194, 259.2084pt x 197.538pt>
 File: ./Pics/QWOP.png Graphic file (type png)
  <use ./Pics/QWOP.png>
 [9pdfTeX warning (ext4): destination with the same identifier (name{figure.7}) 
@@ -517,10 +518,10 @@ l.108
                                                   \fi \fi 
 l.108 
        <./Pics/Mast.png (PNG copy)> <./Pics/QWOP.png>]
-<./Pics/Sensors.png, id=198, 732.8178pt x 458.6736pt>
+<./Pics/Sensors.png, id=202, 732.8178pt x 458.6736pt>
 File: ./Pics/Sensors.png Graphic file (type png)
  <use ./Pics/Sensors.png>
-<./Pics/Lighting.png, id=200, 408.77719pt x 394.47375pt>
+<./Pics/Lighting.png, id=204, 408.77719pt x 394.47375pt>
 File: ./Pics/Lighting.png Graphic file (type png)
 
 <use ./Pics/Lighting.png>) [10pdfTeX warning (ext4): destination with the same 
@@ -536,69 +537,46 @@ l.86
                                                   \fi \fi 
 l.86 
       <./Pics/Sensors.png> <./Pics/Lighting.png (PNG copy)>] (./electronics.tex
-<./Pics/schematisch.png, id=207, 1107.1764pt x 745.3446pt>
+<./Pics/schematisch.png, id=211, 1107.1764pt x 745.3446pt>
 File: ./Pics/schematisch.png Graphic file (type png)
 
 <use ./Pics/schematisch.png>
-<./Pics/baord.png, id=208, 248.6088pt x 157.5486pt>
+<./Pics/baord.png, id=212, 248.6088pt x 157.5486pt>
 File: ./Pics/baord.png Graphic file (type png)
  <use ./Pics/baord.png>
-Overfull \hbox (11.78748pt too wide) in paragraph at lines 18--31
-[][]   [] 
- []
-
-[11pdfTeX warning (ext4): destination with the same identifier (name{figure.11}
-) has been already used, duplicate ignored
+[11] [12pdfTeX warning (ext4): destination with the same identifier (name{figur
+e.11}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.36 \subsubsection{LIDAR}
-                          pdfTeX warning (ext4): destination with the same iden
-tifier (name{figure.12}) has been already used, duplicate ignored
+l.40 
+     pdfTeX warning (ext4): destination with the same identifier (name{figure.1
+2}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.36 \subsubsection{LIDAR}
-                           <./Pics/schematisch.png (PNG copy)> <./Pics/baord.pn
-g (PNG copy)>] [12]
-<./Pics/PowerSchematic.png, id=229, 711.6186pt x 530.9436pt>
+l.40 
+      <./Pics/schematisch.png (PNG copy)> <./Pics/baord.png (PNG copy)>]
+[13] <./Pics/PowerSchematic.png, id=238, 711.6186pt x 530.9436pt>
 File: ./Pics/PowerSchematic.png Graphic file (type png)
 
-<use ./Pics/PowerSchematic.png>) [13] (./software.tex [14pdfTeX warning (ext4):
- destination with the same identifier (name{figure.13}) has been already used, 
-duplicate ignored
+<use ./Pics/PowerSchematic.png>) (./software.tex [14pdfTeX warning (ext4): dest
+ination with the same identifier (name{figure.13}) has been already used, dupli
+cate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.6 
-     <./Pics/PowerSchematic.png (PNG copy)>]
-! Undefined control sequence.
-l.10 \subsubsubsection
-                      {Lane Detection}
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-! Undefined control sequence.
-l.13 \subsubsubsection
-                      {Visual Odometry}
-The control sequence at the end of the top line
-of your error message was never \def'ed. If you have
-misspelled it (e.g., `\hobx'), type `I' and the correct
-spelling (e.g., `I\hbox'). Otherwise just continue,
-and I'll forget about whatever was undefined.
-
-[15] <./Pics/BenCode_534_small.jpg, id=249, 321.2pt x 240.9pt>
+l.4 
+     <./Pics/PowerSchematic.png (PNG copy)>] [15]
+<./Pics/BenCode_534_small.jpg, id=251, 321.2pt x 240.9pt>
 File: ./Pics/BenCode_534_small.jpg Graphic file (type jpg)
 
 <use ./Pics/BenCode_534_small.jpg>
-<./Pics/BenCode_534_small_green.jpg, id=250, 321.2pt x 240.9pt>
+<./Pics/BenCode_534_small_green.jpg, id=252, 321.2pt x 240.9pt>
 File: ./Pics/BenCode_534_small_green.jpg Graphic file (type jpg)
 
 <use ./Pics/BenCode_534_small_green.jpg>
-Overfull \hbox (11.78748pt too wide) in paragraph at lines 19--32
+Overfull \hbox (11.78748pt too wide) in paragraph at lines 25--38
 [][]   [] 
  []
 
@@ -607,17 +585,17 @@ Overfull \hbox (11.78748pt too wide) in paragraph at lines 19--32
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.40 \subsubsection{Sensor Integration}
-                                       pdfTeX warning (ext4): destination with 
-the same identifier (name{figure.15}) has been already used, duplicate ignored
+l.42 \subsubsection{Path Planning}
+                                  pdfTeX warning (ext4): destination with the s
+ame identifier (name{figure.15}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.40 \subsubsection{Sensor Integration}
-                                        <./Pics/BenCode_534_small.jpg> <./Pics/
-BenCode_534_small_green.jpg>]) [17] (./cost.tex) [18pdfTeX warning (ext4): dest
-ination with the same identifier (name{table.2}) has been already used, duplica
-te ignored
+l.42 \subsubsection{Path Planning}
+                                   <./Pics/BenCode_534_small.jpg> <./Pics/BenCo
+de_534_small_green.jpg>]) (./cost.tex [17]) [18pdfTeX warning (ext4): destinati
+on with the same identifier (name{table.2}) has been already used, duplicate ig
+nored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
@@ -635,11 +613,12 @@ Here is how much of TeX's memory you used:
 /usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texlive/
 fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-texlive/fonts/type1
 /public/amsfonts/cm/cmr12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsf
-onts/cm/cmsy8.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></
-usr/share/texmf-texlive/fonts/type1/urw/times/utmr8a.pfb>
-Output written on igvc_paper_2013.pdf (18 pages, 2323139 bytes).
+onts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy8
+.pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/tex
+mf-texlive/fonts/type1/urw/times/utmr8a.pfb>
+Output written on igvc_paper_2013.pdf (18 pages, 2332304 bytes).
 PDF statistics:
- 307 PDF objects out of 1000 (max. 8388607)
+ 312 PDF objects out of 1000 (max. 8388607)
  74 named destinations out of 1000 (max. 500000)
  212 words of extra memory for PDF output out of 10000 (max. 10000000)
 
