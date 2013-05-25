@@ -8,26 +8,26 @@
 \contentsline {subsubsection}{\numberline {2.2.2}Suspension}{6}{subsubsection.2.2.2}
 \contentsline {subsection}{\numberline {2.3}Frame}{7}{subsection.2.3}
 \contentsline {subsection}{\numberline {2.4}Mast}{8}{subsection.2.4}
-\contentsline {subsection}{\numberline {2.5}LIDAR}{10}{subsection.2.5}
+\contentsline {subsection}{\numberline {2.5}LIDAR}{11}{subsection.2.5}
 \contentsline {section}{\numberline {3}Electronics Design}{11}{section.3}
 \contentsline {subsection}{\numberline {3.1}Computers}{11}{subsection.3.1}
 \contentsline {subsubsection}{\numberline {3.1.1}Main Computer}{11}{subsubsection.3.1.1}
 \contentsline {subsubsection}{\numberline {3.1.2}MCU}{11}{subsubsection.3.1.2}
 \contentsline {subsection}{\numberline {3.2}Sensors}{12}{subsection.3.2}
 \contentsline {subsubsection}{\numberline {3.2.1}LIDAR}{12}{subsubsection.3.2.1}
-\contentsline {subsubsection}{\numberline {3.2.2}Stereo Camera}{12}{subsubsection.3.2.2}
-\contentsline {subsubsection}{\numberline {3.2.3}GPS}{12}{subsubsection.3.2.3}
-\contentsline {subsubsection}{\numberline {3.2.4}IMU}{12}{subsubsection.3.2.4}
-\contentsline {subsubsection}{\numberline {3.2.5}Encoders}{12}{subsubsection.3.2.5}
+\contentsline {subsubsection}{\numberline {3.2.2}Stereo Camera}{13}{subsubsection.3.2.2}
+\contentsline {subsubsection}{\numberline {3.2.3}GPS}{13}{subsubsection.3.2.3}
+\contentsline {subsubsection}{\numberline {3.2.4}IMU}{13}{subsubsection.3.2.4}
+\contentsline {subsubsection}{\numberline {3.2.5}Encoders}{13}{subsubsection.3.2.5}
 \contentsline {subsection}{\numberline {3.3}Power}{13}{subsection.3.3}
 \contentsline {subsubsection}{\numberline {3.3.1}Sources}{13}{subsubsection.3.3.1}
-\contentsline {subsubsection}{\numberline {3.3.2}Distribution}{13}{subsubsection.3.3.2}
+\contentsline {subsubsection}{\numberline {3.3.2}Distribution}{14}{subsubsection.3.3.2}
 \contentsline {section}{\numberline {4}Software}{14}{section.4}
 \contentsline {subsection}{\numberline {4.1}Architecture}{14}{subsection.4.1}
 \contentsline {subsection}{\numberline {4.2}Algorithms}{15}{subsection.4.2}
 \contentsline {subsubsection}{\numberline {4.2.1}Vision}{15}{subsubsection.4.2.1}
-\contentsline {subsubsection}{\numberline {4.2.2}Mapping}{16}{subsubsection.4.2.2}
-\contentsline {subsubsection}{\numberline {4.2.3}Path Planning}{16}{subsubsection.4.2.3}
+\contentsline {subsubsection}{\numberline {4.2.2}Mapping}{17}{subsubsection.4.2.2}
+\contentsline {subsubsection}{\numberline {4.2.3}Path Planning}{17}{subsubsection.4.2.3}
 \contentsline {subsubsection}{\numberline {4.2.4}Controls}{17}{subsubsection.4.2.4}
 \contentsline {subsubsection}{\numberline {4.2.5}Sensor Integration}{17}{subsubsection.4.2.5}
 \contentsline {section}{\numberline {5}Cost}{18}{section.5}
