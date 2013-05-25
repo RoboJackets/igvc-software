@@ -5,7 +5,8 @@
 #include <eigen3/Eigen/Dense>
 
 #include "vision/ColorRange.h"
-#include "common/FLPriotityQueue.hpp"
+//#include "common/FLPriotityQueue.hpp"
+#include "common/Robot.h"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/features2d/features2d.hpp"
 
@@ -18,10 +19,8 @@ class GrassOdometer
   public:
     GrassOdometer(ColorRange limits, int numKeyPoints);
     void processImage(Mat src, int numPoints);
-    void processImageHarris(Mat src, int numPoints);
-    void getHarrisScores(Mat& frame ,Mat& scores, int blockSize = 2, int apertureSize = 3, double k = 0.04);
-    void zeroOutOfRange(Mat& frame, Mat& scores);
-    void getTopScores(Mat& scores, int nScores, HarrisScore* resultArray);
+    void findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints, Mat& theDescriptors, MatrixXd& thePositions);
+    void findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& deltax, double deltay);
     void FuckItWeWillDoItLive(Mat& frame1, Mat& frame2);
     void ProcesImageSURF(Mat& frame);
     void RemoveNonGrassPts(Mat& frame, std::vector<KeyPoint>& keypoints);
@@ -43,12 +42,14 @@ class GrassOdometer
 
     ~GrassOdometer();
   private:
+    Robot _robot = Robot::Misti();
     ColorRange _colors;
     int _numKeyPoints;
     Mat _lastFrame;
     std::vector<KeyPoint> _previousKeyPoints;
     Mat _lastFrameDescriptors;
     MatrixXd _lastFramePositions;
+    bool _firstFrame;
 
 
 

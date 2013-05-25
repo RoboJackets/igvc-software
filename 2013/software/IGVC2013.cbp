@@ -249,6 +249,12 @@
 		<Unit filename="src/common/Pose.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/common/Robot.cpp">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/common/Robot.h">
+			<Option target="OdometryTest" />
+		</Unit>
 		<Unit filename="src/common/utils/StringUtils.hpp">
 			<Option target="TestCameraStabilization" />
 		</Unit>
