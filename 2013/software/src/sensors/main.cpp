@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <iomanip>
 #include "SensorData.h"
-#include "DataArray.h"
+#include "DataArray.hpp"
 #include "timing.h"
 //#include <boost/circular_buffer.hpp>
 
