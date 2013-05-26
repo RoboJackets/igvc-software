@@ -74,7 +74,6 @@ class RobotPosition
         DataArray<DataPoint <double> > _Yaw;
         GPSAccuracy _Accuracy;
         boost::mutex StateMutex;
-
 };
 
 #endif // ROBOTPOSITION_H
