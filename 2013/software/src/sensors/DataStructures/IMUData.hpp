@@ -11,46 +11,41 @@ public:
     {
     }
 
-    inline IMUData(double deltaX, double deltaY, double Heading, double Speed, double deltaTime) : SensorData(), _deltaX(deltaX),
-     _deltaY(deltaY), _Heading(Heading),_deltaTime(deltaTime), _Accuracy(ArduPilotDefault)
-     {
-     }
-
-    inline double deltaX(void)
+    /**
+    Defined according to NED convention
+    **/
+    inline IMUData(double roll, double pitch, double yaw) : SensorData(), _Roll(roll), _Pitch(pitch), _Yaw(yaw)
     {
-        return _deltaX;
     }
 
-    inline double deltaY(void)
+    /**
+    Units: Radians
+    **/
+    inline double Roll(void)
     {
-        return _deltaY;
+        return _Roll;
     }
 
-    inline double Heading(void)
+    /**
+    Units: Radians
+    **/
+    inline double Pitch(void)
     {
-        return _Heading;
+        return _Pitch;
     }
 
-    inline double Speed(void)
+    /**
+    Units: Radians
+    **/
+    inline double Yaw(void)
     {
-        return _Speed;
-    }
-
-    inline double deltaTime(void)
-    {
-        return _deltaTime;
+        return _Yaw;
     }
 
 private:
-    double _deltaX; //East being positive
-    double _deltaY; //North being positive
-    double _Heading;
-    double _Speed;
-    double _deltaTime;
-    GPSAccuracy _Accuracy;
-    static GPSAccuracy ArduPilotDefault;
+    double _Roll;
+    double _Pitch;
+    double _Yaw;
 };
-
-//GPSAccuracy IMUData::ArduPilotDefault= GPSAccuracy(.001, .001, 1, .1);
 
 #endif // IMUDATA_H

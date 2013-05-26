@@ -4,8 +4,14 @@
 #include "common/FLPriotityQueue.hpp"
 #include  "common/Robot.h"
 
-#include <queue>
 
+#include "sensors/DataStructures/VisOdomData.hpp"
+#include "sensors/DataStructures/IMUData.hpp"
+#include "sensors/DataStructures/MatData.hpp"
+
+#include "sensors/camera3D/CameraInfo.h"
+
+#include <queue>
 
 #include <iostream>
 #include <eigen3/Eigen/Dense>
@@ -17,12 +23,11 @@ using namespace std;
 using namespace Eigen;
 using namespace cv;
 
-
 int main( int argc, char** argv )
 {
-  Robot thisGuy;
-  thisGuy = Robot::Misti();
-  cout << Robot::Misti().HorizontalCamOffset();
+  CameraInfo info = CameraInfo::Bumblebee2_BB2_08S2C_38();
+  cout << rad2deg(info.HFOV()) << endl;
+
 }
 /*
 #include <stdio.h>
