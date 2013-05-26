@@ -1,6 +1,7 @@
 #include <iostream>
-#include "sensors/joystickMB/JoystickMB.h"
-#include "actuators/motors/OSMC_driver/OSMC_driver.hpp"
+#include <sensors/joystickMB/JoystickMB.h>
+//#include <actuators/motors/OSMC_driver/OSMC_driver.hpp>
+#include <actuators/motors/MotorDriver/MotorEncoderDriver2013.h>
 #include <sys/time.h>
 #include <boost/thread.hpp>
 
@@ -10,18 +11,19 @@ class TankDriver
 {
     private:
     JoystickMB *_joy;
-    OSMC_driver *_driver;
+    //OSMC_driver *_driver;
+    MotorDriver *_driver;
     LISTENER(TankDriver, onNewJoystick, JoystickState);
     volatile int _LPWM, _RPWM, _LDIR, _RDIR;
 
     public:
-    TankDriver(JoystickMB *joystick, OSMC_driver *driver)
+    TankDriver(JoystickMB *joystick, MotorDriver *driver)
         : LonNewJoystick(this)
     {
         _joy = joystick;
         _joy->onNewData += &LonNewJoystick;
         _driver = driver;
-        _driver->stopMotors();
+        _driver->stop();
         _LDIR = 0;
         _LPWM = 0;
         _RDIR = 0;
@@ -35,7 +37,7 @@ class TankDriver
 
         double maxVal = 32767.0;
 
-        _LPWM = abs( ( LIn / maxVal ) * 150.0 );
+        /*_LPWM = abs( ( LIn / maxVal ) * 150.0 );
         _RPWM= abs( ( RIn / maxVal ) * 150.0 );
 
         int DEADBAND = 30;
@@ -52,7 +54,25 @@ class TankDriver
         _RDIR = !signbit(RIn);
 
         cout << "Right : " << (_LDIR &&_LPWM? "-" : " ") << _LPWM << "    " << (_RDIR &&_RPWM? "-" : " ") << _RPWM << endl;
-        _driver->setRightLeftPwm(_RPWM, _RDIR, _LPWM, _LDIR);
+        _driver->setRightLeftPwm(_RPWM, _RDIR, _LPWM, _LDIR);*/
+
+        double LSpeed = -(double)LIn / maxVal;
+        double RSpeed = -(double)RIn / maxVal;
+
+        double DEADBAND = 0.15;
+
+        LSpeed *= 0.75;
+        RSpeed *= 0.75;
+
+        if(abs(LSpeed) < DEADBAND)
+            LSpeed = 0;
+        if(abs(RSpeed) < DEADBAND)
+            RSpeed = 0;
+
+        cout << LSpeed << "\t" << RSpeed << endl;
+
+        _driver->setVelocities(LSpeed, RSpeed);
+
 
         if(state.buttons[0])
         {
@@ -68,7 +88,7 @@ int main()
     JoystickMB joystick;
     if(joystick.isOpen())
     {
-        OSMC_driver driver;
+        MotorEncoderDriver2013 driver;
         TankDriver tankdrive(&joystick, &driver);
         cout << "Press button 1 to exit." << endl;
         while(joystick.isOpen()) { }
