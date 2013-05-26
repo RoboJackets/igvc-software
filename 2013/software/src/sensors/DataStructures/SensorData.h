@@ -8,7 +8,6 @@ class SensorData
         SensorData(double);
         double time();
         virtual ~SensorData();
-
     private:
         double MeasurementTime; //Units should be milliseconds
 };
