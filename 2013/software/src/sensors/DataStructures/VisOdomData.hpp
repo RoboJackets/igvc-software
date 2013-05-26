@@ -33,7 +33,7 @@ public:
 
     inline double Heading(void)
     {
-      atan2(_deltaY, _deltaX);
+      return atan2(_deltaY, _deltaX);
     }
 
     inline double deltaTime(void)
