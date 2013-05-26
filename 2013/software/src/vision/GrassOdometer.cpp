@@ -52,8 +52,7 @@ void GrassOdometer::findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints
   nRows = 768;
   nCols = 1024;
   double dPhi,dTheta;
-  double cameraAngle;
-  double heightOfMast, cameraHeight;
+  double cameraAngle, cameraHeight;
   double yCam, xCam, zCam, yRobot, xRobot, zRobot;
   double roll, pitch, yaw;
   roll = pitch = yaw = 0;
@@ -73,7 +72,7 @@ void GrassOdometer::findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints
 
   rotDynMat = HomogRotMat3d(roll, pitch, yaw);
   //Need to get the positions for all points, not just those matched, because non-matched may appear in next frame
-  for(int i=0;i<keypoints.size();i++)
+  for(unsigned int i=0;i<keypoints.size();i++)
   {
     r = keypoints[i].pt.y;
     c = keypoints[i].pt.x;
