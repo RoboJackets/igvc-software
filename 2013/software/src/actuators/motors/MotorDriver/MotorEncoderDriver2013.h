@@ -2,6 +2,15 @@
 #define MOTORENCODERDRIVER2013_H
 #include <serial/ASIOSerialPort.h>
 #include <actuators/motors/MotorDriver/MotorDriver.hpp>
+#include <events/Event.hpp>
+#include <boost/thread.hpp>
+
+struct EncPose
+{
+    double x;
+    double y;
+    double theta;
+};
 
 class MotorEncoderDriver2013 : public MotorDriver
 {
@@ -16,6 +25,8 @@ class MotorEncoderDriver2013 : public MotorDriver
         double getRightVelocity();
         void stop();
 
+        Event<EncPose> onNewPosition;
+
     protected:
     private:
         ASIOSerialPort _arduino;
@@ -23,6 +34,11 @@ class MotorEncoderDriver2013 : public MotorDriver
         double _rightVel;
         double _maxVel;
         void writeVelocities();
+        boost::thread _encThread;
+        boost::mutex _portLock;
+        void encThreadRun();
+        EncPose _pose;
+        bool _running;
 };
 
 #endif // MOTORENCODERDRIVER2013_H
