@@ -2,9 +2,16 @@
 #include "vision/ColorRange.h"
 #include "vision/colorRangeFinder.h"
 #include "common/FLPriotityQueue.hpp"
+#include  "common/Robot.h"
+
+
+#include "sensors/DataStructures/VisOdomData.hpp"
+#include "sensors/DataStructures/IMUData.hpp"
+#include "sensors/DataStructures/MatData.hpp"
+
+#include "sensors/camera3D/CameraInfo.h"
 
 #include <queue>
-
 
 #include <iostream>
 #include <eigen3/Eigen/Dense>
@@ -12,36 +19,16 @@ using Eigen::MatrixXd;
 
 //Start of copies function
 
-
+using namespace std;
 using namespace Eigen;
 using namespace cv;
 
-
-Matrix<double, Dynamic,Dynamic> afunction(int anum);
-static const Matrix2d anotherFunction(void);
-
 int main( int argc, char** argv )
 {
-  Matrix3d t = MatrixXd::Identity(3,3);
-  t.col(2) << 7,6,9;
-  cout << t << endl;
-
-  cout << t.row(1).mean();
+  CameraInfo info = CameraInfo::Bumblebee2_BB2_08S2C_38();
+  cout << rad2deg(info.HFOV()) << endl;
 
 }
-
-Matrix<double, Dynamic,Dynamic> afunction(int roll)
-{
-  MatrixXd cMat = MatrixXd::Constant(3,3,7);
-  cMat.topLeftCorner(2,2) = anotherFunction();
-  return cMat;
-}
-
-static const Matrix2d anotherFunction(void)
-{
-  return MatrixXd::Identity(2,2);
-}
-
 /*
 #include <stdio.h>
 #include <iostream>

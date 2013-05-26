@@ -2,11 +2,13 @@
 #define ROBOTPOSITION_H
 
 #include "DataStructures/GPSData.h"
-#include "DataStructures/DataArray.h"
+#include "DataStructures/DataArray.hpp"
 #include "DataStructures/DataPoint.hpp"
 #include "DataStructures/IMUData.hpp"
+#include "DataStructures/VisOdomData.hpp"
 #include "IMU/IMU.h"
 #include "GPS/HemisphereA100GPS.h"
+#include "vision/GrassOdometer.h"
 
 #include <boost/thread.hpp>
 
@@ -17,11 +19,13 @@ class RobotPosition
 {
     public:
         RobotPosition();
-        //RobotPosition(IGVC::Sensors::GPS* gps, IMU*);
-        //LISTENER(RobotPosition, onNewGPSData, GPSData);
-        //LISTENER(RobotPosition, onNewIMUData, IMUData);
+        RobotPosition(IGVC::Sensors::GPS* gps, IMU*, GrassOdometer* odo);
+        LISTENER(RobotPosition, onNewGPSData, GPSData);
+        LISTENER(RobotPosition, onNewIMUData, IMUData);
+        LISTENER(RobotPosition, onNewVisOdomData, VisOdomData);
         int onNewGPSData(GPSData);
         int onNewIMUData(IMUData);
+        int onNewVisOdomData(VisOdomData);
         virtual ~RobotPosition();
         double accel(int Index);
         double angVel(int Index);
@@ -29,6 +33,8 @@ class RobotPosition
         void push (IMUData newData);
         int update(GPSData);
         int update (IMUData);
+        int update(VisOdomData);
+
 
         //Private functions being tested
         double avgSpeed(double end, double start);
@@ -40,7 +46,9 @@ class RobotPosition
         double speedAtTime(double time);
         double headingAtTime(double time);
         void latLongCartesianUpdate(double oldLat, double oldLong, double deltaX, double deltaY, double& newLat, double& newLong);
-        GPSData IMU2GPS(IMUData in);
+
+        GPSData VisOdom2GPS(VisOdomData in);
+
         void print(void);
         DataArray<DataPoint <double> >& Lat(void);
         DataArray<DataPoint <double> >& Long(void);
@@ -51,13 +59,19 @@ class RobotPosition
         void unlock();
 
     private:
+        IGVC::Sensors::GPS* _GPS;
+        IMU* _IMU;
+        GrassOdometer* _Odom;
         double ptIntSpeed(int endingInd);
         double ptIntHeading(int endingInd);
         double ptAvgHeading(int endingInd);
         DataArray<DataPoint <double> > _Lat;
         DataArray<DataPoint <double> >  _Long;
         DataArray<DataPoint <double> > _Speed;
-        DataArray<DataPoint <double> >  _Heading;
+        DataArray<DataPoint <double> > _Heading;
+        DataArray<DataPoint <double> > _Roll;
+        DataArray<DataPoint <double> > _Pitch;
+        DataArray<DataPoint <double> > _Yaw;
         GPSAccuracy _Accuracy;
         boost::mutex StateMutex;
 
