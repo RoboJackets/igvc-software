@@ -269,6 +269,12 @@
 		<Unit filename="src/common/Pose.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/common/Robot.cpp">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/common/Robot.h">
+			<Option target="OdometryTest" />
+		</Unit>
 		<Unit filename="src/common/utils/StringUtils.hpp">
 			<Option target="TestCameraStabilization" />
 		</Unit>
@@ -305,11 +311,7 @@
 		<Unit filename="src/pose_tracking/TestPositionTracking.cpp">
 			<Option target="TestPositionTracking" />
 		</Unit>
-		<Unit filename="src/sensors/DataStructures/DataArray.cpp">
-			<Option target="TestData" />
-			<Option target="Regression" />
-		</Unit>
-		<Unit filename="src/sensors/DataStructures/DataArray.h">
+		<Unit filename="src/sensors/DataStructures/DataArray.hpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
 		</Unit>
@@ -341,6 +343,11 @@
 			<Option target="TestPositionTracking" />
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/sensors/DataStructures/MatData.hpp">
+			<Option target="TestData" />
+			<Option target="OdometryTest" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
 			<Option target="TestData" />
@@ -349,6 +356,7 @@
 			<Option target="TestPositionTracking" />
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
+			<Option target="OdometryTest" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
@@ -357,6 +365,10 @@
 			<Option target="TestPositionTracking" />
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/sensors/DataStructures/VisOdomData.hpp">
+			<Option target="OdometryTest" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/GPS.hpp">
 			<Option target="TestGPS" />
@@ -439,6 +451,15 @@
 		</Unit>
 		<Unit filename="src/sensors/camera3D/Bumblebee2.h">
 			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/Camera.cpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/CameraInfo.cpp">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/CameraInfo.h">
+			<Option target="OdometryTest" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
