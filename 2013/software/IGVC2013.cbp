@@ -54,16 +54,6 @@
 					<Add library="flycapture" />
 				</Linker>
 			</Target>
-			<Target title="Xbee">
-				<Option output="bin/Xbee" prefix_auto="1" extension_auto="1" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-			</Target>
-			<Target title="JoystickMB">
-				<Option output="bin/JoystickMB" prefix_auto="1" extension_auto="1" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-			</Target>
 			<Target title="Regression">
 				<Option output="bin/Regression" prefix_auto="1" extension_auto="1" />
 				<Option type="0" />
@@ -239,28 +229,26 @@
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/MotorDriver.hpp">
 			<Option target="TestMotorDriver" />
-			<Option target="JoystickMB" />
+			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/MotorEncoderDriver2013.cpp">
 			<Option target="TestMotorDriver" />
-			<Option target="JoystickMB" />
+			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/MotorEncoderDriver2013.h">
 			<Option target="TestMotorDriver" />
-			<Option target="JoystickMB" />
+			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/TestMotorDriver.cpp">
 			<Option target="TestMotorDriver" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.cpp">
 			<Option target="TestOSMC_driver" />
-			<Option target="TestJoystick" />
 			<Option target="LidarObstacleAvoidance" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
 			<Option target="TestOSMC_driver" />
 			<Option target="TestJoystick_and_Motors" />
-			<Option target="TestJoystick" />
 			<Option target="LidarObstacleAvoidance" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
@@ -515,13 +503,13 @@
 			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/sensors/joystickMB/JoystickMB.cpp">
-			<Option target="JoystickMB" />
+			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/joystickMB/JoystickMB.h">
-			<Option target="JoystickMB" />
+			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/joystickMB/main_JoystickMB.cpp">
-			<Option target="JoystickMB" />
+			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/Lidar.h">
 			<Option target="TestLidar" />
@@ -557,10 +545,8 @@
 			<Option target="TestGPS" />
 			<Option target="TestOSMC_driver" />
 			<Option target="TestLidar" />
-			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
-			<Option target="JoystickMB" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
@@ -573,10 +559,8 @@
 			<Option target="TestGPS" />
 			<Option target="TestOSMC_driver" />
 			<Option target="TestLidar" />
-			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
-			<Option target="JoystickMB" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
@@ -615,7 +599,7 @@
 			<Option target="OdometryTest" />
 		</Unit>
 		<Unit filename="src/xbee.cpp">
-			<Option target="Xbee" />
+			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="test/sensors/RobotPositionTest.cpp">
 			<Option target="Regression" />
