@@ -20,8 +20,8 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
-			<Target title="TestOSMC_driver">
-				<Option output="bin/TestOSMC_driver" prefix_auto="1" extension_auto="1" />
+			<Target title="TestMotors">
+				<Option output="bin/TestMotors" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
@@ -53,6 +53,16 @@
 				<Linker>
 					<Add library="flycapture" />
 				</Linker>
+			</Target>
+			<Target title="Xbee">
+				<Option output="bin/Xbee" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
+			<Target title="JoystickMB">
+				<Option output="bin/JoystickMB" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
 			</Target>
 			<Target title="Regression">
 				<Option output="bin/Regression" prefix_auto="1" extension_auto="1" />
@@ -167,7 +177,7 @@
 				</Linker>
 			</Target>
 			<Target title="OdometryTest">
-				<Option output="bin/OdometryTest" prefix_auto="1" extension_auto="1" />
+				<Option output="obj/OdometryTest" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Linker>
@@ -179,14 +189,6 @@
 					<Add library="opencv_features2d" />
 					<Add library="opencv_flann" />
 				</Linker>
-			</Target>
-			<Target title="TestMotorDriver">
-				<Option output="bin/TestMotorDriver" prefix_auto="1" extension_auto="1" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-				<Compiler>
-					<Add option="-g" />
-				</Compiler>
 			</Target>
 		</Build>
 		<Compiler>
@@ -207,7 +209,6 @@
 		<Unit filename="src/IGVC.hpp">
 			<Option target="LidarObstacleAvoidance" />
 			<Option target="TestCameraStabilization" />
-			<Option target="TestMotorDriver" />
 		</Unit>
 		<Unit filename="src/actuators/motors/ArduinoMotorControl/2013Arduino/ArduinoIDETest.cpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -227,32 +228,20 @@
 		<Unit filename="src/actuators/motors/ArduinoMotorControl/DecimiliaMotor_ArduinoIDE/pinDefs.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="src/actuators/motors/MotorDriver/MotorDriver.hpp">
-			<Option target="TestMotorDriver" />
-			<Option target="TestJoystick" />
-		</Unit>
-		<Unit filename="src/actuators/motors/MotorDriver/MotorEncoderDriver2013.cpp">
-			<Option target="TestMotorDriver" />
-			<Option target="TestJoystick" />
-		</Unit>
-		<Unit filename="src/actuators/motors/MotorDriver/MotorEncoderDriver2013.h">
-			<Option target="TestMotorDriver" />
-			<Option target="TestJoystick" />
-		</Unit>
-		<Unit filename="src/actuators/motors/MotorDriver/TestMotorDriver.cpp">
-			<Option target="TestMotorDriver" />
-		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.cpp">
-			<Option target="TestOSMC_driver" />
+			<Option target="TestMotors" />
+			<Option target="TestJoystick" />
 			<Option target="LidarObstacleAvoidance" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driver.hpp">
-			<Option target="TestOSMC_driver" />
+			<Option target="TestMotors" />
 			<Option target="TestJoystick_and_Motors" />
+			<Option target="TestJoystick" />
+			<Option target="JoystickMB" />
 			<Option target="LidarObstacleAvoidance" />
 		</Unit>
 		<Unit filename="src/actuators/motors/OSMC_driver/OSMC_driverTest.cpp">
-			<Option target="TestOSMC_driver" />
+			<Option target="TestMotors" />
 		</Unit>
 		<Unit filename="src/common/FLPriotityQueue.hpp">
 			<Option target="OdometryTest" />
@@ -503,13 +492,13 @@
 			<Option target="TestJoystick" />
 		</Unit>
 		<Unit filename="src/sensors/joystickMB/JoystickMB.cpp">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="JoystickMB" />
 		</Unit>
 		<Unit filename="src/sensors/joystickMB/JoystickMB.h">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="JoystickMB" />
 		</Unit>
 		<Unit filename="src/sensors/joystickMB/main_JoystickMB.cpp">
-			<Option target="&lt;{~None~}&gt;" />
+			<Option target="JoystickMB" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/Lidar.h">
 			<Option target="TestLidar" />
@@ -543,30 +532,32 @@
 		<Unit filename="src/serial/ASIOSerialPort.cpp">
 			<Option target="TestSerial" />
 			<Option target="TestGPS" />
-			<Option target="TestOSMC_driver" />
+			<Option target="TestMotors" />
 			<Option target="TestLidar" />
+			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
+			<Option target="JoystickMB" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
 			<Option target="LidarObstacleAvoidance" />
 			<Option target="TestCameraStabilization" />
-			<Option target="TestMotorDriver" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
 			<Option target="TestGPS" />
-			<Option target="TestOSMC_driver" />
+			<Option target="TestMotors" />
 			<Option target="TestLidar" />
+			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
+			<Option target="JoystickMB" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
 			<Option target="LidarObstacleAvoidance" />
 			<Option target="TestCameraStabilization" />
-			<Option target="TestMotorDriver" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
@@ -597,9 +588,6 @@
 		</Unit>
 		<Unit filename="src/vision/colorRangeFinder.h">
 			<Option target="OdometryTest" />
-		</Unit>
-		<Unit filename="src/xbee.cpp">
-			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="test/sensors/RobotPositionTest.cpp">
 			<Option target="Regression" />
