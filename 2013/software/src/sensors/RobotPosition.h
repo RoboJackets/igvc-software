@@ -19,10 +19,11 @@ class RobotPosition
 {
     public:
         RobotPosition();
-        RobotPosition(IGVC::Sensors::GPS* gps, IMU*, GrassOdometer* odo);
+        RobotPosition(IGVC::Sensors::GPS* gps, IMU*);
         LISTENER(RobotPosition, onNewGPSData, GPSData);
         LISTENER(RobotPosition, onNewIMUData, IMUData);
         LISTENER(RobotPosition, onNewVisOdomData, VisOdomData);
+        void addOdometer(GrassOdometer* odo);
         int onNewGPSData(GPSData);
         int onNewIMUData(IMUData);
         int onNewVisOdomData(VisOdomData);

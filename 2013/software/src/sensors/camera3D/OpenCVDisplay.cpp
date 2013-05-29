@@ -7,12 +7,12 @@ OpenCVDisplay::OpenCVDisplay(StereoSource& source) : LonNewFrame(this), _LeftWin
     namedWindow(_LeftWindowName,1);
 }
 
-void OpenCVDisplay::onNewFrame(StereoPair& newFrame)
+void OpenCVDisplay::onNewFrame(StereoImageData newFrame)
 {
     _source.LockImages();
     Mat newLeft, newRight;
-    newRight = newFrame.RightImage().clone();
-    newLeft = newFrame.LeftImage().clone();
+    newRight = newFrame.rightMat().clone();
+    newLeft = newFrame.leftMat().clone();
 
     //imshow(_RightWindowName, newFrame.RightImage());
     //imshow(_LeftWindowName, newFrame.LeftImage());

@@ -16,6 +16,8 @@ class CameraInfo
     static CameraInfo Bumblebee2_BB2_08S2C_38();
     double HFOV();
     double VFOV();
+    double dPhi();
+    double dTheta();
     //Getters
     double FocalLength();
     int PixelsPerRow();
@@ -32,11 +34,11 @@ class CameraInfo
     virtual ~CameraInfo();
 
   private:
-    double _FocalLength;
-    int _PixelsPerRow;
-    int _PixelsPerColumn;
-    double _PixelSideLength;
-    double _Baseline;
+    double _focalLength;
+    int _pixelsPerRow;
+    int _pixelsPerColumn;
+    double _pixelSideLength;
+    double _baseline;
 };
 
 #endif // CAMERAINFO_H

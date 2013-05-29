@@ -10,15 +10,21 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/features2d/features2d.hpp"
 #include "sensors/DataStructures/VisOdomData.hpp"
+#include "sensors/camera3D/CameraInfo.h"
+#include "sensors/DataStructures/ImageData.hpp"
+
 
 using namespace cv;
 using namespace Eigen;
 
+class RobotPosition;
+
 class GrassOdometer
 {
   public:
-    GrassOdometer(ColorRange limits, int numKeyPoints);
-    void processImage(Mat src, int numPoints);
+    GrassOdometer(ColorRange limits, int numKeyPoints=100);
+    GrassOdometer(Robot robot, CameraInfo cam, ColorRange limits, int numKeyPoints=100);
+    void processImage(ImageData src);
     void findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints, Mat& theDescriptors, MatrixXd& thePositions);
     void findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& deltax, double deltay);
     void FuckItWeWillDoItLive(Mat& frame1, Mat& frame2);
@@ -46,15 +52,14 @@ class GrassOdometer
     ~GrassOdometer();
   private:
     Robot _robot = Robot::Misti();
+    CameraInfo _cam;
     ColorRange _colors;
     int _numKeyPoints;
-    Mat _lastFrame;
+    ImageData _lastFrame;
     std::vector<KeyPoint> _previousKeyPoints;
     Mat _lastFrameDescriptors;
     MatrixXd _lastFramePositions;
     bool _firstFrame;
-
-
 
 
 };

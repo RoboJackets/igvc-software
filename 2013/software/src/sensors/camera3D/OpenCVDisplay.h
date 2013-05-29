@@ -10,8 +10,8 @@ class OpenCVDisplay
     public:
         OpenCVDisplay(StereoSource&);
         virtual ~OpenCVDisplay();
-        void onNewFrame(StereoPair& newFrame);
-        LISTENER(OpenCVDisplay, onNewFrame, StereoPair&);
+        void onNewFrame(StereoImageData newFrame);
+        LISTENER(OpenCVDisplay, onNewFrame, StereoImageData);
 
     private:
         string _LeftWindowName;
