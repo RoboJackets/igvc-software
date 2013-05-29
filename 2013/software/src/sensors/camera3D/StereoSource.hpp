@@ -2,6 +2,7 @@
 #define STEREOSOURCE_H
 
 #include "sensors/camera3D/StereoPair.hpp"
+#include "sensors/DataStructures/StereoImageData.hpp"
 #include "events/Event.hpp"
 #include <boost/thread/thread.hpp>
 
@@ -15,7 +16,7 @@ class StereoSource
         inline void UnlockImages() {_imagesLock.unlock();}
         inline void LockRunning() {_runningLock.lock();}
         inline void UnlockRunning() {_runningLock.unlock();}
-        Event<StereoPair&> onNewData;
+        Event<StereoImageData> onNewData;
         virtual ~StereoSource() {}
     private:
         bool _running;
