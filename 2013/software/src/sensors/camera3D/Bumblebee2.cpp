@@ -1,9 +1,5 @@
 #include "Bumblebee2.h"
-#include <stdio.h>
-#include "sensors/camera3D/imgUtils.h"
-#include <opencv2/highgui/highgui.hpp>
-#include "sensors/camera3D/imgUtils.h"
-#include <unistd.h>
+
 //#include <dc1394/conversions.h>
 
 
@@ -162,14 +158,25 @@ void Bumblebee2::ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
     return;
 }
 
-Mat& Bumblebee2::Left()
+ImageData Bumblebee2::left()
 {
-    return _images.RightImage();
+  return _images.left();
 }
 
-Mat& Bumblebee2::Right()
+ImageData Bumblebee2::right()
 {
-    return _images.LeftImage();
+  return _images.right();
+}
+
+
+Mat& Bumblebee2::LeftMat()
+{
+    return _images.leftMat();
+}
+
+Mat& Bumblebee2::RightMat()
+{
+    return _images.rightMat();
 }
 
 /*
@@ -184,7 +191,7 @@ void Bumblebee2::UnlockImages()
 }
 */
 
-StereoPair& Bumblebee2::Images()
+StereoImageData Bumblebee2::Images()
 {
     return _images;
 }
@@ -283,8 +290,8 @@ void ProcessFrame(Image* rawImage, const void* that)
     Bumblebee2::ptgrey2opencv(convertedImage, right);
 
     thisHere.LockImages();
-    thisHere.Left() = left.clone();
-    thisHere.Right() = right.clone();
+    thisHere.left() = left.clone();
+    thisHere.right() = right.clone();
     thisHere.UnlockImages();
     thisHere.onNewData(thisHere.Images());
     return;

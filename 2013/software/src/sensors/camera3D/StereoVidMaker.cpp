@@ -1,8 +1,8 @@
 #include "sensors/camera3D/StereoVidMaker.h"
 #include <string>
 
-StereoVidMaker::StereoVidMaker(StereoSource& source, string videoName,int frameCount, int frameRate, bool video): LonNewFrame(this), _totalFrames(frameCount), _source(source),
-_leftWriter(), _rightWriter(), _nFrames(0), _video(video), _name(videoName)
+StereoVidMaker::StereoVidMaker(StereoSource& source, string videoName,int frameCount, int frameRate, bool video): LonNewFrame(this),
+  _leftWriter(), _rightWriter(), _source(source), _nFrames(0), _totalFrames(frameCount), _video(video), _name(videoName)
 {
     _source.onNewData += &LonNewFrame;
     const std::string leftVidName = videoName + "_left" +".mpeg";
@@ -12,7 +12,7 @@ _leftWriter(), _rightWriter(), _nFrames(0), _video(video), _name(videoName)
 
 }
 
-void StereoVidMaker::onNewFrame(StereoPair& newPair)
+void StereoVidMaker::onNewFrame(StereoImageData newPair)
 {
     if (_nFrames < _totalFrames)
     {
@@ -31,22 +31,22 @@ void StereoVidMaker::onNewFrame(StereoPair& newPair)
     }
 }
 
-void StereoVidMaker::addFrame(StereoPair& newPair)
+void StereoVidMaker::addFrame(StereoImageData newPair)
 {
     std::cout << "printing frame" << std::endl;
-    _rightWriter << newPair.RightImage();
-    _leftWriter << newPair.LeftImage();
+    _rightWriter << newPair.rightMat();
+    _leftWriter << newPair.leftMat();
     _nFrames++;
 }
 
-void StereoVidMaker::takeStereoImage(StereoPair& newPair)
+void StereoVidMaker::takeStereoImage(StereoImageData newPair)
 {
     std::stringstream ss;
     ss << _name << _nFrames;
     const std::string leftImageName = ss.str()+ "_left" +".jpg";
     const std::string rightImageName = ss.str() + "_right" + ".jpg";
-    imwrite(leftImageName, newPair.LeftImage());
-    imwrite(rightImageName, newPair.RightImage());
+    imwrite(leftImageName, newPair.leftMat());
+    imwrite(rightImageName, newPair.rightMat());
     _nFrames++;
 }
 
