@@ -1,5 +1,5 @@
 #include <iostream>
-#include <sensors/Joystick/Joystick.h>
+#include <sensors/joystick/Joystick.h>
 //#include <actuators/motors/OSMC_driver/OSMC_driver.hpp>
 #include <actuators/motors/MotorDriver/MotorEncoderDriver2013.h>
 #include <sys/time.h>
@@ -61,8 +61,8 @@ class TankDriver
 
         double DEADBAND = 0.15;
 
-        LSpeed *= 0.75;
-        RSpeed *= 0.75;
+        LSpeed *= 1.0;
+        RSpeed *= 1.0;
 
         if(abs(LSpeed) < DEADBAND)
             LSpeed = 0;
