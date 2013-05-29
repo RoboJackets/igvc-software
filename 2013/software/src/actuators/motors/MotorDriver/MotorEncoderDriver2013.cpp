@@ -8,6 +8,7 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
 {
     _leftVel = 0;
     _rightVel = 0;
+    _duration = 0;
     _maxVel = 3.4;
     writeVelocities();
     _running = true;
@@ -25,7 +26,7 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
         usleep(250);
     }
     cout << endl;
-    _encThread = boost::thread(boost::bind(&MotorEncoderDriver2013::encThreadRun, this));
+    //_encThread = boost::thread(boost::bind(&MotorEncoderDriver2013::encThreadRun, this));
 }
 
 double MotorEncoderDriver2013::getLeftVelocity()
@@ -45,22 +46,25 @@ void MotorEncoderDriver2013::stop()
     writeVelocities();
 }
 
-void MotorEncoderDriver2013::setVelocities(double left, double right)
+void MotorEncoderDriver2013::setVelocities(double left, double right, int millis)
 {
     _leftVel = left;
     _rightVel = right;
+    _duration = millis;
     writeVelocities();
 }
 
-void MotorEncoderDriver2013::setLeftVelocity(double vel)
+void MotorEncoderDriver2013::setLeftVelocity(double vel, int millis)
 {
     _leftVel = vel;
+    _duration = millis;
     writeVelocities();
 }
 
-void MotorEncoderDriver2013::setRightVelocity(double vel)
+void MotorEncoderDriver2013::setRightVelocity(double vel, int millis)
 {
     _rightVel = vel;
+    _duration = millis;
     writeVelocities();
 }
 
@@ -81,7 +85,7 @@ void MotorEncoderDriver2013::writeVelocities()
     if(Ldir) Lpwm = 255 - Lpwm;
     if(Rdir) Rpwm = 255 - Rpwm;
 
-    msg << "SW" << Rdir << " " << Rpwm << " " << Ldir << " " << Lpwm;
+    msg << "SW" << Rdir << " " << Rpwm << " " << Ldir << " " << Lpwm << " " << _duration;
     _portLock.lock();
     _arduino.write(msg.str());
     _portLock.unlock();
