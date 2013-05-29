@@ -22,7 +22,7 @@ void StereoPlayback::Run()
         if (lsuccess && rsuccess)
         {
             _rightVid.retrieve(right);
-            _images = StereoPair(left, right);
+            _images = StereoImageData(left, right);
             onNewData(_images);
         }
         else

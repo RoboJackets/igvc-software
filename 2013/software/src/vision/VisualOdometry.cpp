@@ -7,7 +7,8 @@
 
 #include "sensors/DataStructures/VisOdomData.hpp"
 #include "sensors/DataStructures/IMUData.hpp"
-#include "sensors/DataStructures/MatData.hpp"
+#include "sensors/DataStructures/ImageData.hpp"
+#include "sensors/DataStructures/StereoImageData.hpp"
 
 #include "sensors/camera3D/CameraInfo.h"
 
@@ -26,7 +27,6 @@ using namespace cv;
 int main( int argc, char** argv )
 {
   CameraInfo info = CameraInfo::Bumblebee2_BB2_08S2C_38();
-  cout << rad2deg(info.HFOV()) << endl;
 
 }
 /*

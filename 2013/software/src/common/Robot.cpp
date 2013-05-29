@@ -46,6 +46,11 @@ double Robot::Baseline()
   return(_Baseline);
 }
 
+double Robot::HeightOfMast()
+{
+  return _HeightOfMast;
+}
+
 /**
 Gives the distance from the base of the mast(more precisely the point directly below where the camera sit0s) forward to the center of the robot
 Units:Meters
@@ -54,7 +59,6 @@ double Robot::Mast2Center()
 {
   return(_Mast2Center);
 }
-
 
 /**
 The horizontal distance from the focal point to the center of the mast/robot

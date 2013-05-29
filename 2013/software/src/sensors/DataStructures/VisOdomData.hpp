@@ -11,7 +11,7 @@ public:
     {
     }
 
-    inline VisOdomData(double deltaX, double deltaY, double Speed, double deltaTime, double variance = 123123) : SensorData(), _deltaX(deltaX),
+    inline VisOdomData(double deltaX, double deltaY, double deltaTime, double variance = 123123) : SensorData(), _deltaX(deltaX),
      _deltaY(deltaY), _deltaTime(deltaTime), _Variance(variance)
     {
     }

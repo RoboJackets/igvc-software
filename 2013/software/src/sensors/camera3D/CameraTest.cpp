@@ -14,7 +14,6 @@
 #include <flycapture/BusManager.h>
 #include <flycapture/FlyCapture2Defs.h>
 
-
 #include <opencv2/opencv.hpp>
 
 using namespace std;
@@ -59,8 +58,8 @@ main()
 
 
     //Set Trigger Mode to External
-    ca.SetTriggerMode
-         error = cam.Connect(&guid);
+     cam.SetTriggerMode();
+     error = cam.Connect(&guid);
      if (error != PGRERROR_OK)
      {
          PrintError( error );

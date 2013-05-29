@@ -2,6 +2,8 @@
 #define STEREOPLAYBACK_H
 
 #include "sensors/camera3D/StereoSource.hpp"
+#include "sensors/DataStructures/StereoImageData.hpp"
+
 
 class StereoPlayback : public StereoSource
 {
@@ -14,7 +16,7 @@ class StereoPlayback : public StereoSource
         VideoCapture _leftVid;
         VideoCapture _rightVid;
         int _framesPerSecond;
-        StereoPair _images;
+        StereoImageData _images;
         boost::thread _playbackThread;
 };
 
