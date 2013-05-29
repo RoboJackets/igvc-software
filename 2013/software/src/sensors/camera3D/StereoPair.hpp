@@ -1,6 +1,7 @@
 #ifndef STEREOPAIR_H
 #define STEREOPAIR_H
 
+
 #include <flycapture/FlyCapture2.h>
 #include <opencv2/opencv.hpp>
 

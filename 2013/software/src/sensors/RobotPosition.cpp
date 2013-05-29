@@ -8,20 +8,28 @@
 #define rad2deg(a) a*180/M_PI
 
 
-
-RobotPosition::RobotPosition(IGVC::Sensors::GPS* gps, IMU* imu, GrassOdometer* odom) : _GPS(gps), _IMU(imu), _Odom(odom), _Lat(100), _Long(100),
-  _Speed(100), _Heading(100), _Accuracy(100, 100,100, 100), LonNewGPSData(this), LonNewIMUData(this), LonNewVisOdomData(this)
+/**
+Odometer is not properly initialized due to circular dependency, addOdometer should be called once odometer is initialized using position
+**/
+RobotPosition::RobotPosition(IGVC::Sensors::GPS* gps, IMU* imu) : LonNewGPSData(this), LonNewIMUData(this), LonNewVisOdomData(this),
+ _GPS(gps), _IMU(imu), _Odom(0), _Lat(100), _Long(100), _Speed(100), _Heading(100), _Roll(100), _Pitch(100), _Yaw(100), _Accuracy(100, 100,100, 100)
 {
     gps->onNewData += &LonNewGPSData;
     imu->onNewData += &LonNewIMUData;
-    odom->onNewData += &LonNewVisOdomData;
 }
 
-RobotPosition::RobotPosition() : _GPS(0), _IMU(0), _Lat(100), _Long(100), _Speed(100), _Heading(100), _Accuracy(100, 100,100, 100),
-  LonNewGPSData(this), LonNewIMUData(this), LonNewVisOdomData(this)
+RobotPosition::RobotPosition() : LonNewGPSData(this), LonNewIMUData(this), LonNewVisOdomData(this), _GPS(0), _IMU(0), _Lat(100),
+  _Long(100), _Speed(100), _Heading(100), _Roll(100), _Pitch(100), _Yaw(100), _Accuracy(100, 100,100, 100)
 {
 
 }
+
+void RobotPosition::addOdometer(GrassOdometer* odo)
+{
+  _Odom = odo;
+  _Odom->onNewData += &LonNewVisOdomData;
+}
+
 
 RobotPosition::~RobotPosition()
 {
@@ -33,6 +41,8 @@ RobotPosition::~RobotPosition()
   {
     _IMU-> onNewData -= &LonNewIMUData;
   }
+  if (_Odom != 0)
+    _Odom-> onNewData -= &LonNewVisOdomData;
 }
 /**
 User must get mutex lock prior to use
@@ -208,7 +218,7 @@ int RobotPosition::update(IMUData newData)
   _Roll.push(DataPoint<double>(newData.Roll(), time));
   _Pitch.push(DataPoint<double>(newData.Pitch(), time));
   _Yaw.push(DataPoint<double>(newData.Yaw(), time));
-
+  return 0;
 }
 
 

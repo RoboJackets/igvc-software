@@ -22,7 +22,7 @@ Units: Radians
 **/
 double CameraInfo::HFOV()
 {
-  return 2*atan2(_PixelsPerRow*_PixelSideLength/2,_FocalLength);
+  return 2*atan2(_pixelsPerRow*_pixelSideLength/2,_focalLength);
 }
 
 /**
@@ -31,7 +31,25 @@ Units: Radians
 **/
 double CameraInfo::VFOV()
 {
-  return 2*atan2(_PixelsPerColumn*_PixelSideLength/2,_FocalLength);
+  return 2*atan2(_pixelsPerColumn*_pixelSideLength/2,_focalLength);
+}
+
+/**
+Under the assumption that each pixel corresponds to an equal angular section of the image, gives the angular height of each pixel
+Units: Radians (per Pixel)
+**/
+double CameraInfo::dPhi()
+{
+  return VFOV()/_pixelsPerColumn;
+}
+
+/**
+Under the assumption that each pixel corresponds to an equal angular section of the image, gives the angular width of each pixel
+Units: Radians (per Pixel)
+**/
+double CameraInfo::dTheta()
+{
+  return HFOV()/_pixelsPerRow;
 }
 
 /**
@@ -40,7 +58,7 @@ Units: Meters
 **/
 double CameraInfo::FocalLength()
 {
-  return _FocalLength;
+  return _focalLength;
 }
 
 /**
@@ -49,7 +67,7 @@ Units: unitless
 **/
 int CameraInfo::PixelsPerRow()
 {
-  return _PixelsPerRow;
+  return _pixelsPerRow;
 }
 
 /**
@@ -58,7 +76,7 @@ Units: unitless
 **/
 int CameraInfo::PixelsPerColumn()
 {
-  return _PixelsPerColumn;
+  return _pixelsPerColumn;
 }
 
 /**
@@ -67,7 +85,7 @@ Units:Meters
 **/
 double CameraInfo::PixelSideLength()
 {
-  return _PixelSideLength;
+  return _pixelSideLength;
 }
 
 /**
@@ -77,34 +95,33 @@ Units: Meters
 **/
 double CameraInfo::Baseline()
 {
-  return _Baseline;
+  return _baseline;
 }
 
 void CameraInfo::FocalLength(double fl)
 {
-  _FocalLength = fl;
+  _focalLength = fl;
 }
 void CameraInfo::PixelsPerRow(int ppr)
 {
-  _PixelsPerRow = ppr;
+  _pixelsPerRow = ppr;
 }
 
 void CameraInfo::PixelsPerColumn(int ppc)
 {
-  _PixelsPerColumn = ppc;
+  _pixelsPerColumn = ppc;
 }
 
 void CameraInfo::PixelSideLength(double len)
 {
-  _PixelSideLength = len;
+  _pixelSideLength = len;
 }
 
 void CameraInfo::Baseline(double bl)
 {
-  _Baseline = bl;
+  _baseline = bl;
 }
 
 CameraInfo::~CameraInfo()
 {
-
 }
