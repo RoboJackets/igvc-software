@@ -1,8 +1,9 @@
 #include <iostream>
-#include <GraphSearch.hpp>
+#include <pathplanning/GraphSearch.hpp>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <vector>
+#include <actuators/motors/MotorDriver/MotorEncoderDriver2013.h>
 
 using namespace std;
 using namespace pcl;
@@ -11,7 +12,7 @@ class Location
 {
 public:
     double x, y, theta;
-    static const double sameness_threshold = 0.1;
+    static const double sameness_threshold = 0.01;
     Location(){ }
     Location(double _x, double _y, double _theta)
     {
@@ -95,9 +96,9 @@ public:
         kdtree.setInputCloud(Map.makeShared());
         //cout << "Expanding " << state << endl;
         std::list<Move> acts;
-        double delta = 0.01;
-        double Wmin = -M_PI;
-        double Wmax =  M_PI;
+        double delta = 0.001;
+        double Wmin = -0.8;
+        double Wmax =  0.8;
         for(double W = Wmin; W <= Wmax; W+=delta)
         {
             Move move(Speed, W);
@@ -150,12 +151,10 @@ public:
     Location getResult(Location state, Move action)
     {
         Location result;
-        double Vr = action.V - (Baseline/2.0)*action.W;
-        double Vl = action.V + (Baseline/2.0)*action.W;
-        if(Vr - Vl != 0)
+        if(action.W != 0)
         {
-            double w = -(Vr - Vl) / Baseline;
-            double R = -(Baseline/2.0)*((Vl + Vr) / (Vr - Vl));
+            double w = action.W;
+            double R = action.V / action.W;
             double ICCx = state.x + cos(state.theta - M_PI/2.0) * R;
             double ICCy = state.y + sin(state.theta - M_PI/2.0) * R;
             using namespace Eigen;
@@ -165,7 +164,6 @@ public:
             Vector3d a(state.x - ICCx, state.y - ICCy, state.theta);
             Vector3d b(ICCx, ICCy, wdt);
             Vector3d c = T * a + b;
-            //cout << c << endl;
             result.x = c[0];
             result.y = c[1];
             result.theta = fmod(c[2], M_PI*2.0);
@@ -174,8 +172,8 @@ public:
         else
         {
             result.theta = state.theta;
-            result.x = state.x + cos(result.theta) * Vl * DeltaT;
-            result.y = state.y + sin(result.theta) * Vl * DeltaT;
+            result.x = state.x + cos(result.theta) * action.V * DeltaT;
+            result.y = state.y + sin(result.theta) * action.V * DeltaT;
         }
         return result;
 
@@ -201,37 +199,22 @@ int main()
     Problem problem;
 
     {
-        double mapdelta = 0.25;
-        for(double x = 0; x < 10; x+=mapdelta)
+        double xc = 0;
+        double yc = 1.5;
+        double r = 0.5;
+
+        for(double t = 0; t < 2.0 * M_PI; t += M_PI / 6)
         {
-            problem.Map.points.push_back(PointXYZ(x,0,0));
-            problem.Map.points.push_back(PointXYZ(x,10-mapdelta,0));
-        }
-        for(double y = mapdelta; y < 10-mapdelta; y+=mapdelta)
-        {
-            problem.Map.points.push_back(PointXYZ(0, y, 0));
-            problem.Map.points.push_back(PointXYZ(10-mapdelta, y, 0));
-        }
-        for(double y = mapdelta; y < 5; y+=mapdelta)
-        {
-            problem.Map.points.push_back(PointXYZ(2, y, 0));
-        }
-        for(double y = 10-mapdelta; y >= 4; y-=mapdelta)
-        {
-            problem.Map.points.push_back(PointXYZ(3.5,y,0));
-        }
-        for(double x = 3.5+mapdelta; x <= 7; x+=mapdelta)
-        {
-            problem.Map.points.push_back(PointXYZ(x,4,0));
+            problem.Map.points.push_back(PointXYZ(xc + cos(t)*r, yc + sin(t)*r, 0));
         }
     }
 
 
     problem.Threshold = 0.5;
-    problem.Start = Location(1,1,-M_PI/2.0);
-    problem.Goal = Location(5,5,0);
+    problem.Start = Location(0,0,-M_PI/2.0);
+    problem.Goal = Location(0,4,0);
     problem.Speed = 0.4;
-    problem.DeltaT = 0.4;
+    problem.DeltaT = 0.75JJJ;
     problem.Baseline = 0.71755;
     problem.PointTurnsEnabled = false;
 
@@ -300,10 +283,27 @@ int main()
     }
     cout << endl;
 
+    cout << endl << "Total time: " << (double)moves->size() * problem.DeltaT << " seconds." << endl;
+
     while(!viewer.wasStopped())
     {
         viewer.spin();
     }
+
+    /*int micros = problem.DeltaT * 1000000;
+    MotorEncoderDriver2013 driver;
+    int k =0;
+    for(list<Move>::iterator iter = moves->begin(); iter != moves->end(); iter++)
+    {
+        Move action = (*iter);
+        cout << k++ << endl;
+        double Vr = action.V + (problem.Baseline/2.0)*action.W;
+        double Vl = action.V - (problem.Baseline/2.0)*action.W;
+        driver.setVelocities(Vl, Vr, micros);
+        usleep(micros);
+        driver.stop();
+        sleep(2);
+    }*/
 
     return 0;
 }

@@ -18,9 +18,9 @@ class MotorEncoderDriver2013 : public MotorDriver
         MotorEncoderDriver2013();
         virtual ~MotorEncoderDriver2013();
 
-        void setVelocities(double left, double right);
-        void setLeftVelocity(double vel);
-        void setRightVelocity(double vel);
+        void setVelocities(double left, double right, int millis = 0);
+        void setLeftVelocity(double vel, int millis = 0);
+        void setRightVelocity(double vel, int millis = 0);
         double getLeftVelocity();
         double getRightVelocity();
         void stop();
@@ -32,6 +32,7 @@ class MotorEncoderDriver2013 : public MotorDriver
         ASIOSerialPort _arduino;
         double _leftVel;
         double _rightVel;
+        int _duration;
         double _maxVel;
         void writeVelocities();
         boost::thread _encThread;
