@@ -54,11 +54,6 @@
 					<Add library="flycapture" />
 				</Linker>
 			</Target>
-			<Target title="Xbee">
-				<Option output="bin/Xbee" prefix_auto="1" extension_auto="1" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-			</Target>
 			<Target title="JoystickMB">
 				<Option output="bin/JoystickMB" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
@@ -189,6 +184,11 @@
 					<Add library="opencv_features2d" />
 					<Add library="opencv_flann" />
 				</Linker>
+			</Target>
+			<Target title="IGVC2013">
+				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
+				<Option type="0" />
+				<Option compiler="gcc" />
 			</Target>
 		</Build>
 		<Compiler>
@@ -325,9 +325,11 @@
 			<Option target="TestBasicMapping" />
 			<Option target="OdometryTest" />
 		</Unit>
-		<Unit filename="src/sensors/DataStructures/MatData.hpp">
+		<Unit filename="src/sensors/DataStructures/ImageData.hpp">
 			<Option target="TestData" />
 			<Option target="OdometryTest" />
+			<Option target="TestSerial" />
+			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
 			<Option target="TestData" />
@@ -337,6 +339,8 @@
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
 			<Option target="OdometryTest" />
+			<Option target="TestSerial" />
+			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
@@ -346,6 +350,11 @@
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
 			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/sensors/DataStructures/StereoImageData.hpp">
+			<Option target="OdometryTest" />
+			<Option target="TestSerial" />
+			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/VisOdomData.hpp">
 			<Option target="OdometryTest" />
@@ -432,9 +441,6 @@
 		<Unit filename="src/sensors/camera3D/Bumblebee2.h">
 			<Option target="testCV" />
 		</Unit>
-		<Unit filename="src/sensors/camera3D/Camera.cpp">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.cpp">
 			<Option target="OdometryTest" />
 		</Unit>
@@ -450,10 +456,19 @@
 		<Unit filename="src/sensors/camera3D/OpenCVDisplay.h">
 			<Option target="testCV" />
 		</Unit>
-		<Unit filename="src/sensors/camera3D/StereoPair.hpp">
+		<Unit filename="src/sensors/camera3D/StereoPlayback.cpp">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/StereoPlayback.h">
 			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoSource.hpp">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/StereoVidMaker.cpp">
+			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/StereoVidMaker.h">
 			<Option target="testCV" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
@@ -534,7 +549,6 @@
 			<Option target="TestGPS" />
 			<Option target="TestMotors" />
 			<Option target="TestLidar" />
-			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />
@@ -549,7 +563,6 @@
 			<Option target="TestGPS" />
 			<Option target="TestMotors" />
 			<Option target="TestLidar" />
-			<Option target="Xbee" />
 			<Option target="TestJoystick_and_Motors" />
 			<Option target="TestJoystick" />
 			<Option target="JoystickMB" />

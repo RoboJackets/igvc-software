@@ -15,11 +15,11 @@ class StereoVidMaker
     public:
         StereoVidMaker(StereoSource& source, std::string videoName, int frameCount, int frameRate=10, bool video=true); //videoName must NOT have an extension, it will be saved as MPEG
         virtual ~StereoVidMaker();
-        void onNewFrame(StereoPair&);
-        LISTENER(StereoVidMaker,onNewFrame, StereoPair&);
+        void onNewFrame(StereoImageData);
+        LISTENER(StereoVidMaker,onNewFrame, StereoImageData);
     private:
-        void addFrame(StereoPair&);
-        void takeStereoImage(StereoPair&);
+        void addFrame(StereoImageData);
+        void takeStereoImage(StereoImageData);
         VideoWriter _leftWriter;
         VideoWriter _rightWriter;
         StereoSource& _source;
@@ -27,8 +27,6 @@ class StereoVidMaker
         int _totalFrames;
         bool _video;
         string _name;
-
-
 };
 
 #endif // STEREOVIDMAKER_H
