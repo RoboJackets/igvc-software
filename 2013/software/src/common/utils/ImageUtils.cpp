@@ -1,6 +1,6 @@
 #include "ImageUtils.h"
 
-void computeOffsets(Vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot, CameraInfo derCameraInfo, int nRows, int nCols)
+void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot, CameraInfo& derCameraInfo, int nRows, int nCols)
 {
 
   //Compute Position Information for points
