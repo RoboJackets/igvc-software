@@ -9,6 +9,11 @@ Robot::Robot() : _Baseline(0), _HeightOfMast(0), _Mast2Center(0), _HorizontalCam
   //ctor
 }
 
+Robot Robot::CurrentRobot()
+{
+  return Misti();
+}
+
 /**
 Returns a Robot structure with all of the appropriate values for the 2013 robot loaded
 **/

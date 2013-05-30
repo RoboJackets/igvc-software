@@ -8,6 +8,7 @@ class Robot
 {
   public:
     Robot();
+    static Robot CurrentRobot();
     static Robot Misti();
     static Robot Roxii();
     double Baseline();
