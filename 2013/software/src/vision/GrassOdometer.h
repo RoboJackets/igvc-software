@@ -12,6 +12,7 @@
 #include "sensors/DataStructures/VisOdomData.hpp"
 #include "sensors/camera3D/CameraInfo.h"
 #include "sensors/DataStructures/ImageData.hpp"
+#include "common/utils/ImageUtils.h"
 
 
 using namespace cv;
@@ -26,7 +27,7 @@ class GrassOdometer
     GrassOdometer(Robot robot, CameraInfo cam, ColorRange limits, int numKeyPoints=100);
     void processImage(ImageData src);
     void findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints, Mat& theDescriptors, MatrixXd& thePositions);
-    void computeOffsets(Vector<KeyPoint>& keypoints, MatrixXd& currentPos, int nRows, int nCols);
+    //void computeOffsets(Vector<KeyPoint>& keypoints, MatrixXd& currentPos, int nRows, int nCols);
     void findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& deltax, double deltay);
     void FuckItWeWillDoItLive(Mat& frame1, Mat& frame2);
     void ProcesImageSURF(Mat& frame);
@@ -37,6 +38,7 @@ class GrassOdometer
 
     Event<VisOdomData> onNewData;
 
+/*
     Matrix3d centerImageCoords(int nRows, int nCols);
     Matrix3d RollRotMatrix(double roll);
     Matrix3d PitchRotMatrix(double pitch);
@@ -48,7 +50,7 @@ class GrassOdometer
     Matrix4d HomogRotMat3d(double roll, double pitch, double yaw);
     Matrix2d ImgRotMat(double angle);
     Matrix3d HomogImgRotMat(double angle);
-
+*/
 
     ~GrassOdometer();
   private:
