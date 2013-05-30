@@ -38,9 +38,7 @@ void GrassOdometer::findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints
   Mat frame_gray;
   cvtColor( frame, frame_gray, CV_BGR2GRAY );
 
-
   //Detect features
-  //int minHessian = 100;
 
   SurfFeatureDetector detector(_numKeyPoints);
   vector<KeyPoint> keypoints;
@@ -62,54 +60,9 @@ void GrassOdometer::findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints
   int nCols, nRows;
   nRows = frame.rows;
   nCols = frame.cols;
-  double cameraHeight;
-  double yCam, xCam, yRobot, xRobot, zRobot;
-  double roll, pitch, yaw;
-  roll = pitch = yaw = 0;
-  Vector3d pos;
-  int r,c;
-  Eigen::Matrix<double,4,4> rotDynMat;
-  Eigen::MatrixXd currentPos(4,keypoints.size());
-  Vector3d cameraPos, cameraOffset;
-
-  double phi, theta;
-  cameraPos << -_robot.Mast2Center(), 0, -_robot.HeightOfMast(); //both variables are negated because of NED direction conventions
-
-  cameraOffset = rotDynMat.topLeftCorner(3,3)*cameraPos; //describes position relative to
-  cameraHeight = -cameraOffset(2);
-
-  rotDynMat = HomogRotMat3d(roll, pitch, yaw);
-  //Need to get the positions for all points, not just those matched, because non-matched may appear in next frame
-  for(unsigned int i=0;i<keypoints.size();i++)
-  {
-    r = keypoints[i].pt.y;
-    c = keypoints[i].pt.x;
-    pos << r,c,1; //BE CAREFUL, REMEMBER R CORRESPONDS TO THE Y VALUE
-
-    pos = centerImageCoords(nRows, nCols) * pos; //Changes coordinates in picture such that center of image is 0,0
-    pos = HomogImgRotMat(roll)*pos; //Correct for roll of image by rotating it back the opposite way
-
-    phi = _robot.CameraAngle() - pitch + _cam.dPhi() * pos(0);
-    theta = _cam.dTheta() * pos(1);
-
-    xCam = cameraHeight/tan(phi);
-    yCam = cameraHeight/tan(theta);
-
-    xRobot = xCam - cameraOffset(0);
-    yRobot = yCam - cameraOffset(1);
-    zRobot = 0;  //Since we are defining the robot position as on the ground and the points are as welll
-
-    //Get positions of objects relative to camera
-
-    currentPos(0,i) = xRobot;
-    currentPos(1,i) = yRobot;
-    currentPos(2,i) = zRobot;
-    currentPos(3,i) = 1;
-  }
-
-  currentPos = rotDynMat.inverse()*currentPos; //makes positions extrinsic. i.e. x is now north, etc
-
-
+  MatrixXd pos;
+  computeOffsets(keypoints, pos, _robot, _cam, nRows, nCols);
+  thePositions = pos;
 }
 
 void GrassOdometer::findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& deltax, double deltay)
@@ -138,6 +91,7 @@ void GrassOdometer::findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& de
   deltay = deltaMat.row(1).mean();
 }
 
+/*
 Matrix3d GrassOdometer::RollRotMatrix(double roll)
 {
   Matrix3d rMat = MatrixXd::Zero(3,3);
@@ -236,7 +190,7 @@ Matrix3d GrassOdometer::HomogImgRotMat(double angle)
   return rotMat;
 }
 
-
+*/
 
 void GrassOdometer::RemoveNonGrassPts(Mat& frame, std::vector<KeyPoint>& keypoints)
 {
@@ -306,60 +260,6 @@ void GrassOdometer::ShowCorrespondence(Mat& frame1, std::vector<KeyPoint>& keypo
 }
 
 
-void GrassOdometer::computeOffsets(Vector<KeyPoint>& keypoints, MatrixXd& Pos, int nRows, int nCols)
-{
-
-  //Compute Position Information for points
-
-  double cameraHeight;
-  double yCam, xCam, yRobot, xRobot, zRobot;
-  double roll, pitch, yaw;
-  roll = pitch = yaw = 0;
-  Vector3d pos;
-  int r,c;
-  Eigen::Matrix<double,4,4> rotDynMat;
-  Eigen::MatrixXd currentPos(4,keypoints.size());
-  Vector3d cameraPos, cameraOffset;
-
-  double phi, theta;
-  cameraPos << -_robot.Mast2Center(), 0, -_robot.HeightOfMast(); //both variables are negated because of NED direction conventions
-
-  cameraOffset = rotDynMat.topLeftCorner(3,3)*cameraPos; //describes position relative to
-  cameraHeight = -cameraOffset(2);
-
-  rotDynMat = HomogRotMat3d(roll, pitch, yaw);
-  //Need to get the positions for all points, not just those matched, because non-matched may appear in next frame
-  for(unsigned int i=0;i<keypoints.size();i++)
-  {
-    r = keypoints[i].pt.y;
-    c = keypoints[i].pt.x;
-    pos << r,c,1; //BE CAREFUL, REMEMBER R CORRESPONDS TO THE Y VALUE
-
-    pos = centerImageCoords(nRows, nCols) * pos; //Changes coordinates in picture such that center of image is 0,0
-    pos = HomogImgRotMat(roll)*pos; //Correct for roll of image by rotating it back the opposite way
-
-    phi = _robot.CameraAngle() - pitch + _cam.dPhi() * pos(0);
-    theta = _cam.dTheta() * pos(1);
-
-    xCam = cameraHeight/tan(phi);
-    yCam = cameraHeight/tan(theta);
-
-    xRobot = xCam - cameraOffset(0);
-    yRobot = yCam - cameraOffset(1);
-    zRobot = 0;  //Since we are defining the robot position as on the ground and the points are as welll
-
-    //Get positions of objects relative to camera
-
-    currentPos(0,i) = xRobot;
-    currentPos(1,i) = yRobot;
-    currentPos(2,i) = zRobot;
-    currentPos(3,i) = 1;
-  }
-
-  currentPos = rotDynMat.inverse()*currentPos; //makes positions extrinsic. i.e. x is now north, etc
-  Pos = currentPos;
-
-}
 
 
 GrassOdometer::~GrassOdometer()

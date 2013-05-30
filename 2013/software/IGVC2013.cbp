@@ -320,6 +320,12 @@
 		<Unit filename="src/common/Robot.h">
 			<Option target="OdometryTest" />
 		</Unit>
+		<Unit filename="src/common/utils/ImageUtils.cpp">
+			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/common/utils/ImageUtils.h">
+			<Option target="OdometryTest" />
+		</Unit>
 		<Unit filename="src/common/utils/StringUtils.hpp">
 			<Option target="TestCameraStabilization" />
 		</Unit>
