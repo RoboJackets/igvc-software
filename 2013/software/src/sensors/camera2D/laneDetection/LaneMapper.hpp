@@ -4,10 +4,13 @@
 #include <events/Event.hpp>
 #include <sensors/DataStructures/StereoImageData.hpp>
 #include <opencv2/opencv.hpp>
+#include <common/utils/ImageUtils.h>
 
 class LaneMapper
 {
 public:
+    Event<MatrixXd> onNewLanes;
+
     LaneMapper(Event<StereoImageData>* source)
         : LOnNewFrame(this)
     {
@@ -156,6 +159,8 @@ private:
 
         Mat lines = mask.mul(grassfiltered);
 
+        vector<KeyPoint> keyPoints;
+
         {
             uchar* p;
             for(int r = 0; r < lines.rows; r++)
@@ -166,11 +171,18 @@ private:
                     if(p[c] == 255)
                     {
                         // Add to vector.
-
+                        keyPoints.push_back(KeyPoint(r, c, 1));
                     }
                 }
             }
         }
+
+        MatrixXd pos;
+        Robot robot = Robot::Misti();
+        CameraInfo cameraInfo = CameraInfo::Bumblebee2_BB2_08S2C_38();
+        computeOffsets(keyPoints, pos, robot, cameraInfo, lines.rows, lines.cols);
+
+        onNewLanes(pos);
     }
     LISTENER(LaneMapper, OnNewFrame, StereoImageData);
 };
