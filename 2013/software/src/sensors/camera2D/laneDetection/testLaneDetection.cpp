@@ -3,6 +3,7 @@
 #include <cmath>
 #include <set>
 #include <vector>
+#include <sensors/camera2D/laneDetection/LaneMapper.hpp>
 
 using namespace cv;
 using namespace std;
