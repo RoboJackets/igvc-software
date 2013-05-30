@@ -26,6 +26,7 @@ class GrassOdometer
     GrassOdometer(Robot robot, CameraInfo cam, ColorRange limits, int numKeyPoints=100);
     void processImage(ImageData src);
     void findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints, Mat& theDescriptors, MatrixXd& thePositions);
+    void computeOffsets(Vector<KeyPoint>& keypoints, MatrixXd& currentPos, int nRows, int nCols);
     void findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& deltax, double deltay);
     void FuckItWeWillDoItLive(Mat& frame1, Mat& frame2);
     void ProcesImageSURF(Mat& frame);
