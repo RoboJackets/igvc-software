@@ -18,10 +18,11 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
   double phi, theta;
   cameraPos << -derRobot.Mast2Center(), 0, -derRobot.HeightOfMast(); //both variables are negated because of NED direction conventions
 
+  rotDynMat = HomogRotMat3d(roll, pitch, yaw);
+
   cameraOffset = rotDynMat.topLeftCorner(3,3)*cameraPos; //describes position relative to
   cameraHeight = -cameraOffset(2);
 
-  rotDynMat = HomogRotMat3d(roll, pitch, yaw);
   //Need to get the positions for all points, not just those matched, because non-matched may appear in next frame
   for(unsigned int i=0;i<keypoints.size();i++)
   {
