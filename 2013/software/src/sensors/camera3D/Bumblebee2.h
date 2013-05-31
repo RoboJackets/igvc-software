@@ -11,7 +11,6 @@
 #include "events/Event.hpp"
 #include "sensors/camera3D/StereoPair.hpp"
 #include "sensors/camera3D/StereoSource.hpp"
-#include "sensors/camera3D/imgUtils.h"
 #include "sensors/DataStructures/SensorData.h"
 
 

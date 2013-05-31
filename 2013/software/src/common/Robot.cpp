@@ -1,8 +1,17 @@
 #include "Robot.h"
 
+#define inchesToMeters(a) a*.0254
+#define deg2rad(a) a/180*M_PI
+#define rad2deg(a) a*180/M_PI
+
 Robot::Robot() : _Baseline(0), _HeightOfMast(0), _Mast2Center(0), _HorizontalCamOffset(0), _TireDiameter(0), _CameraAngle(0)
 {
   //ctor
+}
+
+Robot Robot::CurrentRobot()
+{
+  return Misti();
 }
 
 /**
@@ -11,12 +20,13 @@ Returns a Robot structure with all of the appropriate values for the 2013 robot 
 Robot Robot::Misti()
 {
   Robot misti;
-  misti.Baseline(1);
-  misti.HeightOfMast(2);
-  misti.Mast2Center(3);
-  misti.HorizontalCamOffset(3.5);
-  misti.TireDiameter(4);
-  misti.CameraAngle(5);
+  misti.Baseline(inchesToMeters(24));
+  misti.HeightOfMast(inchesToMeters(62));
+  misti.Mast2Center(inchesToMeters(22));
+  misti.HorizontalCamOffset(inchesToMeters(2.5));
+  misti.TireDiameter(inchesToMeters(13.5));
+  misti.Lidar2Center(inchesToMeters(10));
+  misti.CameraAngle(deg2rad(22.5));
   return misti;
 }
 
@@ -27,12 +37,13 @@ Returns a Robot structure with all of the appropriate values for the 2011-2012 r
 Robot Robot::Roxii()
 {
   Robot roxi;
-  roxi.Baseline(0);
-  roxi.HeightOfMast(0);
-  roxi.Mast2Center(0);
-  roxi.HorizontalCamOffset(323);
-  roxi.TireDiameter(0);
-  roxi.CameraAngle(0);
+  roxi.Baseline(inchesToMeters(29));
+  roxi.HeightOfMast(inchesToMeters(63));
+  roxi.Mast2Center(inchesToMeters(20));
+  roxi.HorizontalCamOffset(inchesToMeters(2.5));
+  roxi.TireDiameter(inchesToMeters(10.5));
+  roxi.Lidar2Center(inchesToMeters(11));
+  roxi.CameraAngle(deg2rad(22.5));
   return roxi;
 }
 

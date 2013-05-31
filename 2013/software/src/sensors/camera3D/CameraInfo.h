@@ -13,6 +13,7 @@ class CameraInfo
   public:
     //Actually useful functions
     CameraInfo();
+    static CameraInfo CurrentCamera();
     static CameraInfo Bumblebee2_BB2_08S2C_38();
     double HFOV();
     double VFOV();
