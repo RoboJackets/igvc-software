@@ -5,6 +5,12 @@ CameraInfo::CameraInfo()
 
 }
 
+CameraInfo CameraInfo::CurrentCamera()
+{
+  return Bumblebee2_BB2_08S2C_38();
+}
+
+
 CameraInfo CameraInfo::Bumblebee2_BB2_08S2C_38()
 {
   CameraInfo cam;

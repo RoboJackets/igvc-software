@@ -3,6 +3,8 @@
 
 GrassOdometer::GrassOdometer(ColorRange limits, int numKeyPoints) : _colors(limits), _numKeyPoints(numKeyPoints), _firstFrame(true)
 {
+  _robot = Robot::CurrentRobot();
+  _cam = CameraInfo::CurrentCamera();
 }
 
 void GrassOdometer::processImage(ImageData src)
@@ -91,107 +93,6 @@ void GrassOdometer::findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& de
   deltay = deltaMat.row(1).mean();
 }
 
-/*
-Matrix3d GrassOdometer::RollRotMatrix(double roll)
-{
-  Matrix3d rMat = MatrixXd::Zero(3,3);
-  rMat(0,0) = 1;
-  rMat(1,1) = cos(roll);
-  rMat(1,2) = sin(roll);
-  rMat(2,1) = -sin(roll);
-  rMat(2,2) = cos(roll);
-  return rMat;
-}
-
-Matrix4d GrassOdometer::HomogRollRotMatrix(double roll)
-{
-  Matrix4d rMat = MatrixXd::Zero(4,4);
-  rMat.topLeftCorner(3,3) = RollRotMatrix(roll);
-  rMat(3,3) = 1;
-  return rMat;
-}
-
-Matrix3d GrassOdometer::PitchRotMatrix(double pitch)
-{
-  Matrix3d rMat = MatrixXd::Zero(3,3);
-  rMat(0,0) = cos(pitch);
-  rMat(0,2) = sin(pitch);
-  rMat(1,1) = 1;
-  rMat(2,0) = -sin(pitch);
-  rMat(2,2) = cos(pitch);
-  return rMat;
-}
-
-Matrix4d GrassOdometer::HomogPitchRotMatrix(double pitch)
-{
-  Matrix4d rMat = MatrixXd::Zero(4,4);
-  rMat.topLeftCorner(3,3) = PitchRotMatrix(pitch);
-  rMat(3,3) = 1;
-  return rMat;
-}
-
-Matrix3d GrassOdometer::YawRotMatrix(double yaw)
-{
-  MatrixXd rMat = MatrixXd::Zero(3,3);
-  rMat(0,0) = cos(yaw);
-  rMat(0,1) = sin(yaw);
-  rMat(1,0) = -sin(yaw);
-  rMat(1,1) = cos(yaw);
-  rMat(2,2) = 1;
-  return rMat;
-}
-
-Matrix4d GrassOdometer::HomogYawRotMatrix(double yaw)
-{
-  Matrix4d rMat = MatrixXd::Zero(4,4);
-  rMat.topLeftCorner(3,3) = YawRotMatrix(yaw);
-  rMat(3,3) = 1;
-  return rMat;
-}
-
-Matrix3d GrassOdometer::RotMat3d(double roll, double pitch, double yaw)
-{
-  return YawRotMatrix(yaw)*PitchRotMatrix(pitch)*RollRotMatrix(roll);
-}
-
-Matrix4d GrassOdometer::HomogRotMat3d(double roll, double pitch, double yaw)
-{
-  return HomogYawRotMatrix(yaw)*HomogPitchRotMatrix(pitch)*HomogRollRotMatrix(roll);
-}
-
-
-Matrix3d GrassOdometer::centerImageCoords(int nRows, int nCols)
-{
-  Matrix3d transMat = MatrixXd::Identity(3,3);
-  transMat(0,0) = 1;
-  transMat(1,1) = 1;
-  transMat(0,2) = -(nRows-1)/2;
-  transMat(1,2) = -(nCols-1)/2;
-
-  return transMat;
-}
-
-//Assumes vector it is multiplying has row value in first row, column value in second row
-Matrix2d GrassOdometer::ImgRotMat(double angle)
-{
-  Matrix2d rotMat;
-  rotMat(0,0) = cos(angle);
-  rotMat(0,1) = sin(angle);
-  rotMat(1,0) = -sin(angle);
-  rotMat(1,1) = cos(angle);
-  return rotMat;
-}
-
-Matrix3d GrassOdometer::HomogImgRotMat(double angle)
-{
-  Matrix3d rotMat = MatrixXd::Zero(3,3);
-  rotMat.topLeftCorner(2,2) = ImgRotMat(angle);
-  rotMat(2,2) = 1;
-  return rotMat;
-}
-
-*/
-
 void GrassOdometer::RemoveNonGrassPts(Mat& frame, std::vector<KeyPoint>& keypoints)
 {
   //Remove out of range points
@@ -237,10 +138,6 @@ void GrassOdometer::MatchPointsFLANN(std::vector<DMatch>& good_matches, Mat& des
 
 }
 
-
-
-
-
 void GrassOdometer::ShowCorrespondence(Mat& frame1, std::vector<KeyPoint>& keypoints_1, Mat& frame2, std::vector<KeyPoint>& keypoints_2,
                                   std::vector<DMatch>&  good_matches)
 {
@@ -258,9 +155,6 @@ void GrassOdometer::ShowCorrespondence(Mat& frame1, std::vector<KeyPoint>& keypo
 
   waitKey(0);
 }
-
-
-
 
 GrassOdometer::~GrassOdometer()
 {
