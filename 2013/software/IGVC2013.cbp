@@ -302,15 +302,19 @@
 		</Unit>
 		<Unit filename="src/common/Robot.cpp">
 			<Option target="OdometryTest" />
+			<Option target="TestLaneDetection" />
 		</Unit>
 		<Unit filename="src/common/Robot.h">
 			<Option target="OdometryTest" />
+			<Option target="TestLaneDetection" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.cpp">
 			<Option target="OdometryTest" />
+			<Option target="TestLaneDetection" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.h">
 			<Option target="OdometryTest" />
+			<Option target="TestLaneDetection" />
 		</Unit>
 		<Unit filename="src/common/utils/StringUtils.hpp">
 			<Option target="TestCameraStabilization" />
@@ -518,9 +522,11 @@
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.cpp">
 			<Option target="OdometryTest" />
+			<Option target="TestLaneDetection" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.h">
 			<Option target="OdometryTest" />
+			<Option target="TestLaneDetection" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
@@ -578,15 +584,6 @@
 		</Unit>
 		<Unit filename="src/sensors/joystick/testJoystick.cpp">
 			<Option target="TestJoystick" />
-		</Unit>
-		<Unit filename="src/sensors/joystickMB/JoystickMB.cpp">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="src/sensors/joystickMB/JoystickMB.h">
-			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="src/sensors/joystickMB/main_JoystickMB.cpp">
-			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/Lidar.h">
 			<Option target="TestLidar" />
