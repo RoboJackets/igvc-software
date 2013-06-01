@@ -234,6 +234,11 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+			<Target title="TestCompetitionController">
+				<Option output="bin/TestCompetitionController" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -338,9 +343,11 @@
 		</Unit>
 		<Unit filename="src/competitionControl/WaypointReader.cpp">
 			<Option target="TestWaypointReader" />
+			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/competitionControl/WaypointReader.h">
 			<Option target="TestWaypointReader" />
+			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/events/Delegate.hpp">
 			<Option target="TestGPS" />
@@ -456,16 +463,19 @@
 			<Option target="TestGPS" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
+			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/HemisphereA100GPS.cpp">
 			<Option target="TestGPS" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
+			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/HemisphereA100GPS.h">
 			<Option target="TestGPS" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
+			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/TestGPS.cpp">
 			<Option target="TestGPS" />
@@ -474,11 +484,13 @@
 			<Option target="TestGPS" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
+			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/nmea.hpp">
 			<Option target="TestGPS" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
+			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/sensors/IMU/IMU.h">
 			<Option target="TestData" />
@@ -494,12 +506,6 @@
 		</Unit>
 		<Unit filename="src/sensors/Sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />
-		</Unit>
-		<Unit filename="src/sensors/WaypointReader.cpp">
-			<Option target="TestFile" />
-		</Unit>
-		<Unit filename="src/sensors/WaypointReader.h">
-			<Option target="TestFile" />
 		</Unit>
 		<Unit filename="src/sensors/ardupilot/Ardupilot.cpp">
 			<Option target="TestIMU" />
