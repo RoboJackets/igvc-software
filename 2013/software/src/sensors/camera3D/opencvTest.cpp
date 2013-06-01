@@ -54,7 +54,9 @@ int main()
 {
 
     //std::string fName = "/home/robojackets/Desktop/this";
-    std::string fName = "/home/alex/Desktop/IGVC/2013/software/trainingSets/this";
+    //std::string fName = "/home/alex/Desktop/IGVC/2013/software/trainingSets/this";
+    std::string fName = "/home/alex/Desktop/IGVC/2013/software/trainingSets/firstOnRobot";
+    //std::string fName = "home/alex/Desktop/firstOnRobot";
     std::string lName, rName;
     lName = fName + "_left" + ".mpeg";
     rName = fName + "_right" + ".mpeg";
