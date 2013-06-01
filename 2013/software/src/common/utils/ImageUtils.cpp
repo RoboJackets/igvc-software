@@ -22,6 +22,7 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
 
   cameraOffset = rotDynMat.topLeftCorner(3,3)*cameraPos; //describes position relative to
   cameraHeight = -cameraOffset(2);
+  std::cout << "The camera is " << cameraHeight << " meters high." << std::endl;
 
   //Need to get the positions for all points, not just those matched, because non-matched may appear in next frame
   for(unsigned int i=0;i<keypoints.size();i++)
@@ -35,12 +36,15 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
 
     phi = derRobot.CameraAngle() - pitch + derCameraInfo.dPhi() * pos(0);
     theta = derCameraInfo.dTheta() * pos(1);
+    std::cout << "Pos(1): " << pos(1) << "Theta " << theta << std::endl;
 
     xCam = cameraHeight/tan(phi);
-    yCam = cameraHeight/tan(theta);
+    yCam = cameraHeight*tan(theta);
 
-    xRobot = xCam - cameraOffset(0);
-    yRobot = yCam - cameraOffset(1);
+    std::cout << "xcam is " << xCam << ". yCam is " << yCam << std::endl;
+    xRobot = xCam + cameraOffset(0);
+
+    yRobot = yCam + cameraOffset(1);
     zRobot = 0;  //Since we are defining the robot position as on the ground and the points are as welll
 
     //Get positions of objects relative to camera
