@@ -224,9 +224,13 @@
 				<Option type="0" />
 				<Option compiler="gcc" />
 			</Target>
+			<Target title="TestWaypointReader">
+				<Option output="bin/TestWaypointReader" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
-			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 			<Add directory="$(#boost).include" />
 			<Add directory="src" />
@@ -318,6 +322,15 @@
 		</Unit>
 		<Unit filename="src/common/utils/StringUtils.hpp">
 			<Option target="TestCameraStabilization" />
+		</Unit>
+		<Unit filename="src/competitionControl/TestWaypointReader.cpp">
+			<Option target="TestWaypointReader" />
+		</Unit>
+		<Unit filename="src/competitionControl/WaypointReader.cpp">
+			<Option target="TestWaypointReader" />
+		</Unit>
+		<Unit filename="src/competitionControl/WaypointReader.h">
+			<Option target="TestWaypointReader" />
 		</Unit>
 		<Unit filename="src/events/Delegate.hpp">
 			<Option target="TestGPS" />
