@@ -13,7 +13,7 @@ using namespace std;
 
 int main()
 {
-    Mat frame = imread("/home/matt/Pictures/CalStateData.png");
+    Mat frame = imread("/home/matt/Pictures/TestData1.png");
 
     imshow("raw", frame);
 
