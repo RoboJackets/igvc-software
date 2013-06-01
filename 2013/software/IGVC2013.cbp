@@ -229,8 +229,14 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+			<Target title="testPerspectiveTransform">
+				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
+			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 			<Add directory="$(#boost).include" />
 			<Add directory="src" />
@@ -307,18 +313,22 @@
 		<Unit filename="src/common/Robot.cpp">
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
+			<Option target="testPerspectiveTransform" />
 		</Unit>
 		<Unit filename="src/common/Robot.h">
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
+			<Option target="testPerspectiveTransform" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.cpp">
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
+			<Option target="testPerspectiveTransform" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.h">
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
+			<Option target="testPerspectiveTransform" />
 		</Unit>
 		<Unit filename="src/common/utils/StringUtils.hpp">
 			<Option target="TestCameraStabilization" />
@@ -536,10 +546,12 @@
 		<Unit filename="src/sensors/camera3D/CameraInfo.cpp">
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
+			<Option target="testPerspectiveTransform" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.h">
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
+			<Option target="testPerspectiveTransform" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
@@ -686,6 +698,9 @@
 		</Unit>
 		<Unit filename="src/vision/colorRangeFinder.h">
 			<Option target="OdometryTest" />
+		</Unit>
+		<Unit filename="src/vision/testImageUtils.cpp">
+			<Option target="testPerspectiveTransform" />
 		</Unit>
 		<Unit filename="test/sensors/RobotPositionTest.cpp">
 			<Option target="Regression" />
