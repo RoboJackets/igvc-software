@@ -12,20 +12,13 @@ double distx = 2.87;
 double disty = 0.7112;
 
 
-//int c = 680;
-//int r = 500;
-
-
+/*
 int c = 650;
 int r = 480;
+*/
 
-
-//int c = 512;
-//int r = 384;
-
-
-//int c = 678;
-//int r = 490;
+int c = 680;
+int r = 500;
 
 using namespace std;
 using namespace cv;
@@ -59,5 +52,4 @@ main()
   IGVC::CameraInfo inf = IGVC::CameraInfo::CurrentCamera();
   computeOffsets(entry, datAnswer, rob, inf, 768, 1024);
   cout << datAnswer;
-
 }

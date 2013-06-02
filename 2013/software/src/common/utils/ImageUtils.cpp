@@ -1,5 +1,7 @@
 #include "ImageUtils.h"
 
+using namespace std;
+
 void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols)
 {
 
@@ -22,7 +24,6 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
 
   cameraOffset = rotDynMat.topLeftCorner(3,3)*cameraPos; //describes position relative to
   cameraHeight = -cameraOffset(2);
-  std::cout << "The camera is " << cameraHeight << " meters high." << std::endl;
 
   //Need to get the positions for all points, not just those matched, because non-matched may appear in next frame
   for(unsigned int i=0;i<keypoints.size();i++)
@@ -34,9 +35,10 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
     pos = centerImageCoords(nRows, nCols) * pos; //Changes coordinates in picture such that center of image is 0,0
     pos = HomogImgRotMat(roll)*pos; //Correct for roll of image by rotating it back the opposite way
 
+
     phi = derRobot.CameraAngle() - pitch + atan2((derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
     theta = atan2((derCameraInfo.PixelSideLength() * pos(1)), derCameraInfo.FocalLength());
-    std::cout << "Phi is " << phi << ". Theta is " << theta << "." << std::endl;
+    //cout << "first argument in theta is  " <<  derCameraInfo.PixelSideLength() * pos(1) << endl;
     xCam = cameraHeight/tan(phi);
     yCam = xCam*tan(theta);
 

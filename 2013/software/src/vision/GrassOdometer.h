@@ -17,6 +17,7 @@
 
 using namespace cv;
 using namespace Eigen;
+using namespace IGVC;
 
 class RobotPosition;
 
