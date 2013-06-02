@@ -1,6 +1,6 @@
 #include "ImageUtils.h"
 
-void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot, CameraInfo& derCameraInfo, int nRows, int nCols)
+void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols)
 {
 
   //Compute Position Information for points
@@ -157,4 +157,27 @@ Matrix3d HomogImgRotMat(double angle)
   rotMat.topLeftCorner(2,2) = ImgRotMat(angle);
   rotMat(2,2) = 1;
   return rotMat;
+}
+
+Mat correctDistortion(Mat rawImg, Mat cameraMatrix, Mat distCoeffs)
+{
+  /*
+  double start, end;
+  start = seconds_since_IGVCpoch();
+  */
+
+  Mat rview, map1, map2;
+
+  Size imageSize = rawImg.size();
+
+  Mat optNewMat = getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, imageSize, 1, imageSize, 0);
+
+  initUndistortRectifyMap(cameraMatrix, distCoeffs, Mat(), optNewMat, imageSize, CV_16SC2, map1, map2);
+
+  remap(rawImg, rview, map1, map2, INTER_LINEAR);
+  /*
+  end = seconds_since_IGVCpoch();
+  std::cout << "This function took " << end-start << " seconds." << std::endl;
+  */
+  return rview;
 }

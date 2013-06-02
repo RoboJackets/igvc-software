@@ -2,9 +2,12 @@
 #include <boost/thread/condition_variable.hpp>
 #include <unistd.h>
 
-StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, int fps) : _leftVid(leftVideo), _rightVid(rightVideo),
-    _framesPerSecond(fps), _playbackThread(&StereoPlayback::Run, this)
+StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, int fps, string fileName, bool undistort) : _leftVid(leftVideo), _rightVid(rightVideo),
+    _framesPerSecond(fps), _playbackThread(&StereoPlayback::Run, this), _undistort(undistort)
 {
+  FileStorage fs(fileName, FileStorage::READ); // Read the settings
+  fs["Camera_Matrix"] >> _cameraMatrix;
+  fs["Distortion_Coefficients"] >> _distCoeffs;
 }
 
 void StereoPlayback::Run()
@@ -22,6 +25,13 @@ void StereoPlayback::Run()
         if (lsuccess && rsuccess)
         {
             _rightVid.retrieve(right);
+
+            if (_undistort)
+            {
+              left = correctImage(left);
+              right = correctImage(right);
+            }
+
             _images = StereoImageData(left, right);
             onNewData(_images);
         }
@@ -33,6 +43,12 @@ void StereoPlayback::Run()
         }
     }
 }
+
+Mat StereoPlayback::correctImage(Mat img)
+{
+  return correctDistortion(img,  _cameraMatrix, _distCoeffs);
+}
+
 
 StereoPlayback::~StereoPlayback()
 {
