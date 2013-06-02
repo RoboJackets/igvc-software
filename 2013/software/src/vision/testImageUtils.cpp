@@ -15,8 +15,27 @@ double disty = 0.7112;
 int c = 680;
 int r = 500;
 
+
 using namespace std;
 using namespace cv;
+
+main()
+{
+  FileStorage fmx1("/home/alex/Desktop/IGVC/2013/software/src/sensors/camera3D/calib/mx1.xml", FileStorage::READ);
+  FileStorage fmx2("/home/alex/Desktop/IGVC/2013/software/src/sensors/camera3D/calib/mx2.xml", FileStorage::READ);
+  FileStorage fmy1("/home/alex/Desktop/IGVC/2013/software/src/sensors/camera3D/calib/my1.xml", FileStorage::READ);
+  FileStorage fmy2("/home/alex/Desktop/IGVC/2013/software/src/sensors/camera3D/calib/my2.xml", FileStorage::READ);
+  Mat left = imread("/home/alex/Desktop/img_left2.jpg");
+  mat newLeft
+  Settings
+  remap(left, leftCalib, mx1, my1);
+  if (!fmx1.isOpened())
+  {
+    cout << "could not open config file" << endl;
+  }
+}
+
+/*
 main()
 {
   vector<KeyPoint> entry;
@@ -30,3 +49,4 @@ main()
   cout << datAnswer;
 
 }
+*/
