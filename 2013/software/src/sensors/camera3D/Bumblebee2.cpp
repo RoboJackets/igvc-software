@@ -266,11 +266,20 @@ void ProcessFrame(Image* rawImage, const void* that)
     Bumblebee2::ptgrey2opencv(convertedImage, right);
 
     thisHere.LockImages();
-    thisHere.left() = thisHere.correctImage(left.clone());
-    thisHere.right() = thisHere.correctImage(right.clone());
+    Mat leftCorrected, rightCorrected;
+    leftCorrected = thisHere.correctImage(left);
+    rightCorrected = thisHere.correctImage(right);
+    thisHere.Images(leftCorrected, rightCorrected);
     thisHere.UnlockImages();
     thisHere.onNewData(thisHere.Images());
     return;
+}
+
+
+void Bumblebee2::Images(Mat& l, Mat& r)
+{
+  _images = StereoImageData(l,r);
+
 }
 
 void PrintError( FlyCapture2::Error error )

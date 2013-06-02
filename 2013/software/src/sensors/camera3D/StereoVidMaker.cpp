@@ -37,6 +37,10 @@ void StereoVidMaker::addFrame(StereoImageData newPair)
     _rightWriter << newPair.rightMat();
     _leftWriter << newPair.leftMat();
     _nFrames++;
+    if (_nFrames != -1)
+    {
+      _nFrames++;
+    }
 }
 
 void StereoVidMaker::takeStereoImage(StereoImageData newPair)
@@ -47,7 +51,6 @@ void StereoVidMaker::takeStereoImage(StereoImageData newPair)
     const std::string rightImageName = ss.str() + "_right" + ".jpg";
     imwrite(leftImageName, newPair.leftMat());
     imwrite(rightImageName, newPair.rightMat());
-    _nFrames++;
 }
 
 StereoVidMaker::~StereoVidMaker()
