@@ -15,14 +15,11 @@ void OpenCVDisplay::onNewFrame(StereoImageData newFrame)
     newRight = newFrame.rightMat().clone();
     newLeft = newFrame.leftMat().clone();
 
-    //imshow(_RightWindowName, newFrame.RightImage());
-    //imshow(_LeftWindowName, newFrame.LeftImage());
-
     imshow(_RightWindowName,newRight);
     imshow(_LeftWindowName, newLeft);
     _source.UnlockImages();
 
-    char dat = waitKey(20);
+    char dat = waitKey(10);
     if (dat == ' ')
     {
       std::stringstream leftname, rightname;
@@ -42,6 +39,8 @@ void OpenCVDisplay::onNewFrame(StereoImageData newFrame)
         _source.UnlockRunning();
     }
 }
+
+
 
 OpenCVDisplay::~OpenCVDisplay()
 {

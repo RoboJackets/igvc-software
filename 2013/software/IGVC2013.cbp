@@ -233,6 +233,24 @@
 				<Option output="IGVC2013" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Linker>
+					<Add library="opencv_highgui" />
+					<Add library="opencv_core" />
+					<Add library="opencv_imgproc" />
+					<Add library="opencv_calib3d" />
+				</Linker>
+			</Target>
+			<Target title="CalibrateCamera">
+				<Option output="bin/CalibrateCamera" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Linker>
+					<Add library="opencv_highgui" />
+					<Add library="opencv_core" />
+					<Add library="opencv_imgproc" />
+					<Add library="opencv_calib3d" />
+					<Add library="opencv_features2d" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
@@ -579,6 +597,9 @@
 		</Unit>
 		<Unit filename="src/sensors/camera3D/TriclopsTest.cpp">
 			<Option target="testCamera" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/calib/calibrate.cpp">
+			<Option target="CalibrateCamera" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/imgUtils.cpp">
 			<Option target="testCamera" />

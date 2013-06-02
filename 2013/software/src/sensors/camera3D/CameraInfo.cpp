@@ -1,17 +1,18 @@
 #include "CameraInfo.h"
 
-CameraInfo::CameraInfo()
+
+IGVC::CameraInfo::CameraInfo()
 {
 
 }
 
-CameraInfo CameraInfo::CurrentCamera()
+IGVC::CameraInfo IGVC::CameraInfo::CurrentCamera()
 {
   return Bumblebee2_BB2_08S2C_38();
 }
 
 
-CameraInfo CameraInfo::Bumblebee2_BB2_08S2C_38()
+IGVC::CameraInfo IGVC::CameraInfo::Bumblebee2_BB2_08S2C_38()
 {
   CameraInfo cam;
   cam.FocalLength(3.8*pow(10,-3));
@@ -26,7 +27,7 @@ CameraInfo CameraInfo::Bumblebee2_BB2_08S2C_38()
 Horizontal Field of View of the Camera
 Units: Radians
 **/
-double CameraInfo::HFOV()
+double IGVC::CameraInfo::HFOV()
 {
   return 2*atan2(_pixelsPerRow*_pixelSideLength/2,_focalLength);
 }
@@ -35,7 +36,7 @@ double CameraInfo::HFOV()
 Vertical Field of View of the Camera
 Units: Radians
 **/
-double CameraInfo::VFOV()
+double IGVC::CameraInfo::VFOV()
 {
   return 2*atan2(_pixelsPerColumn*_pixelSideLength/2,_focalLength);
 }
@@ -44,7 +45,7 @@ double CameraInfo::VFOV()
 Under the assumption that each pixel corresponds to an equal angular section of the image, gives the angular height of each pixel
 Units: Radians (per Pixel)
 **/
-double CameraInfo::dPhi()
+double IGVC::CameraInfo::dPhi()
 {
   return VFOV()/_pixelsPerColumn;
 }
@@ -53,7 +54,7 @@ double CameraInfo::dPhi()
 Under the assumption that each pixel corresponds to an equal angular section of the image, gives the angular width of each pixel
 Units: Radians (per Pixel)
 **/
-double CameraInfo::dTheta()
+double IGVC::CameraInfo::dTheta()
 {
   return HFOV()/_pixelsPerRow;
 }
@@ -62,7 +63,7 @@ double CameraInfo::dTheta()
 Focal Length of the Camera
 Units: Meters
 **/
-double CameraInfo::FocalLength()
+double IGVC::CameraInfo::FocalLength()
 {
   return _focalLength;
 }
@@ -71,7 +72,7 @@ double CameraInfo::FocalLength()
 Number of Pixels per Row; a.k.a number of columns
 Units: unitless
 **/
-int CameraInfo::PixelsPerRow()
+int IGVC::CameraInfo::PixelsPerRow()
 {
   return _pixelsPerRow;
 }
@@ -80,7 +81,7 @@ int CameraInfo::PixelsPerRow()
 Number of Pixels per Column; a.k.a number of rows
 Units: unitless
 **/
-int CameraInfo::PixelsPerColumn()
+int IGVC::CameraInfo::PixelsPerColumn()
 {
   return _pixelsPerColumn;
 }
@@ -89,7 +90,7 @@ int CameraInfo::PixelsPerColumn()
 Physical length of the side of pixel. Implies square pixels
 Units:Meters
 **/
-double CameraInfo::PixelSideLength()
+double IGVC::CameraInfo::PixelSideLength()
 {
   return _pixelSideLength;
 }
@@ -99,35 +100,35 @@ Distance between focal points of the two stereo camera. This attribute should re
 for stereo cameras. If you are reading this, you are now tasked with this responsibility
 Units: Meters
 **/
-double CameraInfo::Baseline()
+double IGVC::CameraInfo::Baseline()
 {
   return _baseline;
 }
 
-void CameraInfo::FocalLength(double fl)
+void IGVC::CameraInfo::FocalLength(double fl)
 {
   _focalLength = fl;
 }
-void CameraInfo::PixelsPerRow(int ppr)
+void IGVC::CameraInfo::PixelsPerRow(int ppr)
 {
   _pixelsPerRow = ppr;
 }
 
-void CameraInfo::PixelsPerColumn(int ppc)
+void IGVC::CameraInfo::PixelsPerColumn(int ppc)
 {
   _pixelsPerColumn = ppc;
 }
 
-void CameraInfo::PixelSideLength(double len)
+void IGVC::CameraInfo::PixelSideLength(double len)
 {
   _pixelSideLength = len;
 }
 
-void CameraInfo::Baseline(double bl)
+void IGVC::CameraInfo::Baseline(double bl)
 {
   _baseline = bl;
 }
 
-CameraInfo::~CameraInfo()
+IGVC::CameraInfo::~CameraInfo()
 {
 }
