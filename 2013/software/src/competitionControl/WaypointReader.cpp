@@ -12,20 +12,23 @@ bool WaypointReader::LoadWaypoints(std::string path)
     ifstream input(path.c_str());
     if(input.is_open())
     {
-        //input.unsetf(std::ios_base::skipws);
+        double lat, lon;
+        char ignored;
         while(input.good())
         {
-            double lat, lon;
-            char ignored;
+            lat = 0, lon = 0;
+            ignored = 0;
             input >> lat;
             input >> ignored;
             input >> lon;
-            Waypoint wp;
-            wp.Lattitude = lat;
-            wp.Longitude = lon;
-            _waypoints.push_back(wp);
+            if(lat != 0 && lon != 0)
+            {
+                Waypoint wp;
+                wp.Lattitude = lat;
+                wp.Longitude = lon;
+                _waypoints.push_back(wp);
+            }
         }
-        std::cout << _waypoints.size() << " waypoints loaded." << std::endl;
         input.close();
         _index = -1;
         return true;
