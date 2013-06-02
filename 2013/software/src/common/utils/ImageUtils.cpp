@@ -34,12 +34,11 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
     pos = centerImageCoords(nRows, nCols) * pos; //Changes coordinates in picture such that center of image is 0,0
     pos = HomogImgRotMat(roll)*pos; //Correct for roll of image by rotating it back the opposite way
 
-    phi = derRobot.CameraAngle() - pitch + derCameraInfo.dPhi() * pos(0);
-    theta = derCameraInfo.dTheta() * pos(1);
-    std::cout << "Pos(1): " << pos(1) << "Theta " << theta << std::endl;
-
+    phi = derRobot.CameraAngle() - pitch + atan2((derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
+    theta = atan2((derCameraInfo.PixelSideLength() * pos(1)), derCameraInfo.FocalLength());
+    std::cout << "Phi is " << phi << ". Theta is " << theta << "." << std::endl;
     xCam = cameraHeight/tan(phi);
-    yCam = cameraHeight*tan(theta);
+    yCam = xCam*tan(theta);
 
     std::cout << "xcam is " << xCam << ". yCam is " << yCam << std::endl;
     xRobot = xCam + cameraOffset(0);
