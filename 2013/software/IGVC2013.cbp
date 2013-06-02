@@ -252,16 +252,6 @@
 					<Add library="opencv_features2d" />
 				</Linker>
 			</Target>
-			<Target title="TestCompetitionController">
-				<Option output="bin/TestCompetitionController" prefix_auto="1" extension_auto="1" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-			</Target>
-			<Target title="TestSafetyLight">
-				<Option output="bin/TestSafetyLight" prefix_auto="1" extension_auto="1" />
-				<Option type="1" />
-				<Option compiler="gcc" />
-			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -283,12 +273,6 @@
 			<Option target="TestCameraStabilization" />
 			<Option target="TestMotorDriver" />
 			<Option target="TestPathPlanning" />
-		</Unit>
-		<Unit filename="src/actuators/lights/LightController.hpp">
-			<Option target="TestSafetyLight" />
-		</Unit>
-		<Unit filename="src/actuators/lights/TestSafetyLight.cpp">
-			<Option target="TestSafetyLight" />
 		</Unit>
 		<Unit filename="src/actuators/motors/ArduinoMotorControl/2013Arduino/ArduinoIDETest.cpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -348,21 +332,29 @@
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
 			<Option target="testPerspectiveTransform" />
+			<Option target="testCV" />
+			<Option target="CalibrateCamera" />
 		</Unit>
 		<Unit filename="src/common/Robot.h">
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
 			<Option target="testPerspectiveTransform" />
+			<Option target="testCV" />
+			<Option target="CalibrateCamera" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.cpp">
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
 			<Option target="testPerspectiveTransform" />
+			<Option target="testCV" />
+			<Option target="CalibrateCamera" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.h">
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
 			<Option target="testPerspectiveTransform" />
+			<Option target="testCV" />
+			<Option target="CalibrateCamera" />
 		</Unit>
 		<Unit filename="src/common/utils/StringUtils.hpp">
 			<Option target="TestCameraStabilization" />
@@ -372,11 +364,9 @@
 		</Unit>
 		<Unit filename="src/competitionControl/WaypointReader.cpp">
 			<Option target="TestWaypointReader" />
-			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/competitionControl/WaypointReader.h">
 			<Option target="TestWaypointReader" />
-			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/events/Delegate.hpp">
 			<Option target="TestGPS" />
@@ -492,19 +482,16 @@
 			<Option target="TestGPS" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
-			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/HemisphereA100GPS.cpp">
 			<Option target="TestGPS" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
-			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/HemisphereA100GPS.h">
 			<Option target="TestGPS" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
-			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/TestGPS.cpp">
 			<Option target="TestGPS" />
@@ -513,13 +500,11 @@
 			<Option target="TestGPS" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
-			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/sensors/GPS/nmea.hpp">
 			<Option target="TestGPS" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
-			<Option target="TestCompetitionController" />
 		</Unit>
 		<Unit filename="src/sensors/IMU/IMU.h">
 			<Option target="TestData" />
@@ -535,6 +520,12 @@
 		</Unit>
 		<Unit filename="src/sensors/Sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/sensors/WaypointReader.cpp">
+			<Option target="TestFile" />
+		</Unit>
+		<Unit filename="src/sensors/WaypointReader.h">
+			<Option target="TestFile" />
 		</Unit>
 		<Unit filename="src/sensors/ardupilot/Ardupilot.cpp">
 			<Option target="TestIMU" />
@@ -582,11 +573,15 @@
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
 			<Option target="testPerspectiveTransform" />
+			<Option target="testCV" />
+			<Option target="CalibrateCamera" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.h">
 			<Option target="OdometryTest" />
 			<Option target="TestLaneDetection" />
 			<Option target="testPerspectiveTransform" />
+			<Option target="testCV" />
+			<Option target="CalibrateCamera" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
@@ -616,6 +611,9 @@
 			<Option target="testCamera" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/calib/calibrate.cpp">
+			<Option target="&lt;{~None~}&gt;" />
+		</Unit>
+		<Unit filename="src/sensors/camera3D/calib/loadCalib.cpp">
 			<Option target="CalibrateCamera" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/imgUtils.cpp">
@@ -691,7 +689,6 @@
 			<Option target="TestCameraStabilization" />
 			<Option target="TestMotorDriver" />
 			<Option target="TestPathPlanning" />
-			<Option target="TestSafetyLight" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
@@ -707,7 +704,6 @@
 			<Option target="TestCameraStabilization" />
 			<Option target="TestMotorDriver" />
 			<Option target="TestPathPlanning" />
-			<Option target="TestSafetyLight" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
