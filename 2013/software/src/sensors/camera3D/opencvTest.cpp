@@ -57,11 +57,13 @@ int main()
     //std::string fName = "/home/alex/Desktop/IGVC/2013/software/trainingSets/this";
     std::string fName = "/home/alex/Desktop/IGVC/2013/software/trainingSets/firstOnRobot";
     //std::string fName = "home/alex/Desktop/firstOnRobot";
+    /*
     std::string lName, rName;
     lName = fName + "_left" + ".mpeg";
     rName = fName + "_right" + ".mpeg";
     StereoPlayback thisguy(lName, rName, 20);
-    //Bumblebee2 thisguy;
+    */
+    Bumblebee2 thisguy;
 
     OpenCVDisplay Disp(thisguy);
     //featureFinder he(thisguy);
