@@ -35,6 +35,7 @@ class Bumblebee2 : public StereoSource
         Mat& LeftMat();
         Mat& RightMat();
         StereoImageData Images();
+        void Images(Mat& leftImage, Mat& rightImage);
         int frameCount;
         boost::mutex frameLock;
         FlyCapture2::Camera& Cam();
