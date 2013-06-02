@@ -6,9 +6,12 @@
 using namespace FlyCapture2;
 using namespace cv;
 
-Bumblebee2::Bumblebee2(): _images(), _cam(), frameCount(0), frameLock()
+Bumblebee2::Bumblebee2(string fileName): _images(), _cam(), frameCount(0), frameLock()
 {
-    StartCamera();
+  FileStorage fs(fileName, FileStorage::READ); // Read the settings
+  fs["Camera_Matrix"] >> _cameraMatrix;
+  fs["Distortion_Coefficients"] >> _distCoeffs;
+  StartCamera();
 }
 
 int Bumblebee2::StartCamera()
@@ -217,21 +220,6 @@ void ProcessFrame(Image* rawImage, const void* that)
     Error error;
     Mat right, left;
 
-/*
-    char filename[512];
-    sprintf( filename, "./newthings/%u-%d.jpg", 121, thisHere.frameCount++);
-
-    // Convert the raw image
-    Image convImage;
-    error = (*rawImage).Convert( PIXEL_FORMAT_BGRU, &convImage );
-    error = convImage.Save( filename );
-    if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return;
-    }
-*/
-
     error = savedRaw.DeepCopy((const Image*) rawImage);
     if (error != PGRERROR_OK)
     {
@@ -247,7 +235,7 @@ void ProcessFrame(Image* rawImage, const void* that)
     savedRaw.GetDimensions( &rows, &cols, &stride, &pixFormat );
 
 
-// Create a converted image
+    // Create a converted image
     Image convertedImage;
 
     // Convert the raw image
@@ -257,18 +245,6 @@ void ProcessFrame(Image* rawImage, const void* that)
         PrintError( error );
         return;
     }
-
-/*
-        char filename[512];
-        sprintf( filename, "./newthings/%u-%d.bmp", 121, thisHere.frameCount++ );
-    error = convertedImage.Save( filename );
-    if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return;
-    }
-*/
-
 
     Bumblebee2::ptgrey2opencv(convertedImage,left);
 
@@ -290,8 +266,8 @@ void ProcessFrame(Image* rawImage, const void* that)
     Bumblebee2::ptgrey2opencv(convertedImage, right);
 
     thisHere.LockImages();
-    thisHere.left() = left.clone();
-    thisHere.right() = right.clone();
+    thisHere.left() = thisHere.correctImage(left.clone());
+    thisHere.right() = thisHere.correctImage(right.clone());
     thisHere.UnlockImages();
     thisHere.onNewData(thisHere.Images());
     return;
@@ -300,4 +276,10 @@ void ProcessFrame(Image* rawImage, const void* that)
 void PrintError( FlyCapture2::Error error )
 {
     error.PrintErrorTrace();
+}
+
+
+Mat Bumblebee2::correctImage(Mat rawImg)
+{
+  return correctDistortion(rawImg, _cameraMatrix, _distCoeffs);
 }

@@ -7,11 +7,12 @@
 
 #include "common/Robot.h"
 #include "sensors/camera3D/CameraInfo.h"
+#include "sensors/timing.h"
 
 using namespace cv;
 using namespace Eigen;
 
-void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot, CameraInfo& derCameraInfo, int nRows, int nCols);
+void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols);
 Matrix3d centerImageCoords(int nRows, int nCols);
 Matrix3d RollRotMatrix(double roll);
 Matrix3d PitchRotMatrix(double pitch);
@@ -23,6 +24,7 @@ Matrix3d RotMat3d(double roll, double pitch, double yaw);
 Matrix4d HomogRotMat3d(double roll, double pitch, double yaw);
 Matrix2d ImgRotMat(double angle);
 Matrix3d HomogImgRotMat(double angle);
+Mat correctDistortion(Mat rawImg, Mat camerMatrix, Mat _distCoeffs);
 
 
 
