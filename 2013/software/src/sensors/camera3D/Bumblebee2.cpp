@@ -213,6 +213,7 @@ Bumblebee2::~Bumblebee2()
 
 void ProcessFrame(Image* rawImage, const void* that)
 {
+
     Image* fake;
     Bumblebee2&  thisHere= *((Bumblebee2*)that);
     thisHere.frameLock.lock();
@@ -265,18 +266,17 @@ void ProcessFrame(Image* rawImage, const void* that)
 
     Bumblebee2::ptgrey2opencv(convertedImage, right);
 
+
     thisHere.LockImages();
     Mat leftCorrected, rightCorrected;
-    StereoImageData newFrame(left, right);
-    /*
+    //StereoImageData newFrame(left, right);
     leftCorrected = thisHere.correctImage(left);
     rightCorrected = thisHere.correctImage(right);
     thisHere.Images(leftCorrected, rightCorrected);
-    */
     thisHere.UnlockImages();
-
-    //thisHere.onNewData(thisHere.Images());
-    thisHere.onNewData(newFrame);
+    thisHere.frameCount++;
+    thisHere.onNewData(thisHere.Images());
+    //thisHere.onNewData(newFrame);
     return;
 }
 
