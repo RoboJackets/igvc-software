@@ -198,25 +198,13 @@
 				<Option output="bin/TestPerspTrans" prefix_auto="1" extension_auto="1" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option use_console_runner="0" />
 				<Linker>
-					<Add library="/usr/local/lib/libopencv_calib3d.so" />
-					<Add library="/usr/local/lib/libopencv_contrib.so" />
-					<Add library="/usr/local/lib/libopencv_core.so" />
-					<Add library="/usr/local/lib/libopencv_features2d.so" />
-					<Add library="/usr/local/lib/libopencv_flann.so" />
-					<Add library="/usr/local/lib/libopencv_gpu.so" />
-					<Add library="/usr/local/lib/libopencv_highgui.so" />
-					<Add library="/usr/local/lib/libopencv_imgproc.so" />
-					<Add library="/usr/local/lib/libopencv_legacy.so" />
-					<Add library="/usr/local/lib/libopencv_ml.so" />
-					<Add library="/usr/local/lib/libopencv_nonfree.so" />
-					<Add library="/usr/local/lib/libopencv_objdetect.so" />
-					<Add library="/usr/local/lib/libopencv_photo.so" />
-					<Add library="/usr/local/lib/libopencv_stitching.so" />
-					<Add library="/usr/local/lib/libopencv_ts.so" />
-					<Add library="/usr/local/lib/libopencv_video.so" />
-					<Add library="/usr/local/lib/libopencv_videostab.so" />
+					<Add library="opencv_highgui" />
+					<Add library="opencv_core" />
+					<Add library="opencv_imgproc" />
+					<Add library="opencv_calib3d" />
+					<Add library="flycapture" />
+					<Add library="opencv_features2d" />
 				</Linker>
 			</Target>
 			<Target title="IGVC2013">
@@ -250,6 +238,23 @@
 					<Add library="opencv_imgproc" />
 					<Add library="opencv_calib3d" />
 					<Add library="opencv_features2d" />
+				</Linker>
+			</Target>
+			<Target title="PerspTransformCalculator">
+				<Option output="bin/PerspTransformCalculator" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add directory="/usr/include/" />
+				</Compiler>
+				<Linker>
+					<Add library="opencv_highgui" />
+					<Add library="opencv_core" />
+					<Add library="opencv_imgproc" />
+					<Add library="opencv_calib3d" />
+					<Add library="flycapture" />
+					<Add library="opencv_features2d" />
+					<Add directory="/usr/lib" />
 				</Linker>
 			</Target>
 		</Build>
@@ -334,6 +339,8 @@
 			<Option target="testPerspectiveTransform" />
 			<Option target="testCV" />
 			<Option target="CalibrateCamera" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/common/Robot.h">
 			<Option target="OdometryTest" />
@@ -341,6 +348,8 @@
 			<Option target="testPerspectiveTransform" />
 			<Option target="testCV" />
 			<Option target="CalibrateCamera" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.cpp">
 			<Option target="OdometryTest" />
@@ -348,6 +357,8 @@
 			<Option target="testPerspectiveTransform" />
 			<Option target="testCV" />
 			<Option target="CalibrateCamera" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.h">
 			<Option target="OdometryTest" />
@@ -355,6 +366,8 @@
 			<Option target="testPerspectiveTransform" />
 			<Option target="testCV" />
 			<Option target="CalibrateCamera" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/common/utils/StringUtils.hpp">
 			<Option target="TestCameraStabilization" />
@@ -449,6 +462,8 @@
 			<Option target="OdometryTest" />
 			<Option target="TestSerial" />
 			<Option target="testCV" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.cpp">
 			<Option target="TestData" />
@@ -460,6 +475,8 @@
 			<Option target="OdometryTest" />
 			<Option target="TestSerial" />
 			<Option target="testCV" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
@@ -469,11 +486,15 @@
 			<Option target="TestIMU" />
 			<Option target="TestBasicMapping" />
 			<Option target="OdometryTest" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/StereoImageData.hpp">
 			<Option target="OdometryTest" />
 			<Option target="TestSerial" />
 			<Option target="testCV" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/VisOdomData.hpp">
 			<Option target="OdometryTest" />
@@ -551,6 +572,9 @@
 		<Unit filename="src/sensors/camera2D/laneDetection/testLaneDetection.cpp">
 			<Option target="TestLaneDetection" />
 		</Unit>
+		<Unit filename="src/sensors/camera2D/perspectiveTransform/PerspTransformCalculator.cpp">
+			<Option target="PerspTransformCalculator" />
+		</Unit>
 		<Unit filename="src/sensors/camera2D/perspectiveTransform/main.cpp">
 			<Option target="TestPerspTrans" />
 		</Unit>
@@ -565,9 +589,13 @@
 		</Unit>
 		<Unit filename="src/sensors/camera3D/Bumblebee2.cpp">
 			<Option target="testCV" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/Bumblebee2.h">
 			<Option target="testCV" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.cpp">
 			<Option target="OdometryTest" />
@@ -575,6 +603,8 @@
 			<Option target="testPerspectiveTransform" />
 			<Option target="testCV" />
 			<Option target="CalibrateCamera" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.h">
 			<Option target="OdometryTest" />
@@ -582,6 +612,8 @@
 			<Option target="testPerspectiveTransform" />
 			<Option target="testCV" />
 			<Option target="CalibrateCamera" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
@@ -600,6 +632,8 @@
 		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoSource.hpp">
 			<Option target="testCV" />
+			<Option target="PerspTransformCalculator" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoVidMaker.cpp">
 			<Option target="testCV" />
@@ -650,16 +684,19 @@
 			<Option target="TestLidar" />
 			<Option target="TestBasicMapping" />
 			<Option target="LidarObstacleAvoidance" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/NAV200.cpp">
 			<Option target="TestLidar" />
 			<Option target="TestBasicMapping" />
 			<Option target="LidarObstacleAvoidance" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/NAV200.h">
 			<Option target="TestLidar" />
 			<Option target="TestBasicMapping" />
 			<Option target="LidarObstacleAvoidance" />
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/TestLidar.cpp">
 			<Option target="TestLidar" />
