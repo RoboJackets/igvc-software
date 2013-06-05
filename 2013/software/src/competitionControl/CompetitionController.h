@@ -3,6 +3,8 @@
 
 #include <sensors/GPS/GPS.hpp>
 #include <competitionControl/WaypointReader.h>
+#include <sensors/camera3D/StereoSource.hpp>
+#include <sensors/lidar/Lidar.h>
 #include <vector>
 
 class CompetitionController
