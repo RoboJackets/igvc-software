@@ -3,4 +3,6 @@
 int main()
 {
     CompetitionController controller(NULL, NULL);
+
+
 }
