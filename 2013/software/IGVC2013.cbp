@@ -257,6 +257,11 @@
 					<Add directory="/usr/lib" />
 				</Linker>
 			</Target>
+			<Target title="CompetitionControl">
+				<Option output="bin/CompetitionControl" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -278,6 +283,7 @@
 			<Option target="TestCameraStabilization" />
 			<Option target="TestMotorDriver" />
 			<Option target="TestPathPlanning" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/actuators/motors/ArduinoMotorControl/2013Arduino/ArduinoIDETest.cpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -359,6 +365,7 @@
 			<Option target="CalibrateCamera" />
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.h">
 			<Option target="OdometryTest" />
@@ -368,9 +375,19 @@
 			<Option target="CalibrateCamera" />
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/common/utils/StringUtils.hpp">
 			<Option target="TestCameraStabilization" />
+		</Unit>
+		<Unit filename="src/competitionControl/CompetitionController.cpp">
+			<Option target="CompetitionControl" />
+		</Unit>
+		<Unit filename="src/competitionControl/CompetitionController.h">
+			<Option target="CompetitionControl" />
+		</Unit>
+		<Unit filename="src/competitionControl/TestCompetitionController.cpp">
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/competitionControl/TestWaypointReader.cpp">
 			<Option target="TestWaypointReader" />
@@ -544,21 +561,25 @@
 		</Unit>
 		<Unit filename="src/sensors/WaypointReader.cpp">
 			<Option target="TestFile" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/WaypointReader.h">
 			<Option target="TestFile" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/ardupilot/Ardupilot.cpp">
 			<Option target="TestIMU" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
 			<Option target="TestCameraStabilization" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/ardupilot/Ardupilot.hpp">
 			<Option target="TestIMU" />
 			<Option target="TestPositionTracking" />
 			<Option target="TestBasicMapping" />
 			<Option target="TestCameraStabilization" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/ardupilot/TestIMU.cpp">
 			<Option target="TestIMU" />
@@ -591,11 +612,13 @@
 			<Option target="testCV" />
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/Bumblebee2.h">
 			<Option target="testCV" />
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.cpp">
 			<Option target="OdometryTest" />
@@ -605,6 +628,7 @@
 			<Option target="CalibrateCamera" />
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.h">
 			<Option target="OdometryTest" />
@@ -614,6 +638,7 @@
 			<Option target="CalibrateCamera" />
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
@@ -634,6 +659,7 @@
 			<Option target="testCV" />
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoVidMaker.cpp">
 			<Option target="testCV" />
@@ -685,18 +711,21 @@
 			<Option target="TestBasicMapping" />
 			<Option target="LidarObstacleAvoidance" />
 			<Option target="TestPerspTrans" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/NAV200.cpp">
 			<Option target="TestLidar" />
 			<Option target="TestBasicMapping" />
 			<Option target="LidarObstacleAvoidance" />
 			<Option target="TestPerspTrans" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/NAV200.h">
 			<Option target="TestLidar" />
 			<Option target="TestBasicMapping" />
 			<Option target="LidarObstacleAvoidance" />
 			<Option target="TestPerspTrans" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/lidar/TestLidar.cpp">
 			<Option target="TestLidar" />
@@ -726,6 +755,7 @@
 			<Option target="TestCameraStabilization" />
 			<Option target="TestMotorDriver" />
 			<Option target="TestPathPlanning" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
@@ -741,6 +771,7 @@
 			<Option target="TestCameraStabilization" />
 			<Option target="TestMotorDriver" />
 			<Option target="TestPathPlanning" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
