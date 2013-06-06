@@ -6,7 +6,7 @@
 using namespace FlyCapture2;
 using namespace cv;
 
-Bumblebee2::Bumblebee2(string fileName): _images(), _cam(), frameCount(0), frameLock()
+Bumblebee2::Bumblebee2(string fileName): frameCount(0), frameLock(), _images(), _cam()
 {
   FileStorage fs(fileName, FileStorage::READ); // Read the settings
   fs["Camera_Matrix"] >> _cameraMatrix;
@@ -128,6 +128,7 @@ int Bumblebee2::StartCamera()
         PrintError( error );
         return -1;
     }
+    return 0;
 }
 
 int Bumblebee2::CloseCamera()
@@ -148,12 +149,13 @@ int Bumblebee2::CloseCamera()
         PrintError( error );
         return -1;
     }
+    return 0;
 }
 
 
 void Bumblebee2::ptgrey2opencv(FlyCapture2::Image& img, cv::Mat& mat)
 {
-    int stride = img.GetStride();
+    //int stride = img.GetStride();
     //Mat newMat = cv::Mat(img.GetRows(), img.GetCols(), CV_8UC3, img.GetData(), stride);
     Mat newMat = cv::Mat(img.GetRows(), img.GetCols(), CV_8UC3, img.GetData(), cv::Mat::AUTO_STEP);
 
@@ -214,7 +216,7 @@ Bumblebee2::~Bumblebee2()
 void ProcessFrame(Image* rawImage, const void* that)
 {
 
-    Image* fake;
+    //Image* fake;
     Bumblebee2&  thisHere= *((Bumblebee2*)that);
     thisHere.frameLock.lock();
     Image savedRaw;
@@ -250,7 +252,7 @@ void ProcessFrame(Image* rawImage, const void* that)
     Bumblebee2::ptgrey2opencv(convertedImage,left);
 
     unsigned char* data = savedRaw.GetData();
-    for(int i = 1; i < savedRaw.GetDataSize(); i += 2)
+    for(unsigned int i = 1; i < savedRaw.GetDataSize(); i += 2)
     {
         char tmp = data[i];
         data[i] = data[i-1];
