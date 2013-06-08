@@ -268,6 +268,7 @@ void ProcessFrame(Image* rawImage, const void* that)
     thisHere.LockImages();
     Mat leftCorrected, rightCorrected;
     StereoImageData newFrame(left, right);
+
     /*
     leftCorrected = thisHere.correctImage(left);
     rightCorrected = thisHere.correctImage(right);
