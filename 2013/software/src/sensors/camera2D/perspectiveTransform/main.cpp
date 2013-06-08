@@ -16,6 +16,8 @@ bool RUNNING = true;
 
 Mat gFrame;
 
+int thresh;
+
 void OnMouse(int evtType, int x, int y, int, void*)
 {
     if(evtType == EVENT_LBUTTONUP)
@@ -49,6 +51,8 @@ private:
     {
         if(RUNNING)
         {
+            imshow("raw", frame);
+
             blur(frame, frame, Size(9,9), Point(-1,-1));
 
             Mat HSV;
@@ -61,21 +65,26 @@ private:
             Mat output(frame.rows, frame.cols, CV_8UC1);
             bitwise_and(channels[0], channels[1], output);
 
-            /*int erosion_size = 11;
-            cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS,
-                                                        cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
-                                                        cv::Point(erosion_size, erosion_size) );
+            Mat intensity;
+            {
+                vector<Mat> rgbChs;
+                split(frame, rgbChs);
+                intensity = ((rgbChs[0] + rgbChs[1]) + rgbChs[2])  / 3;
+            }
+            equalizeHist(intensity, intensity);
+            threshold(intensity, intensity, thresh, 255, CV_THRESH_BINARY);
+            imshow("Intense", intensity);
 
-            dilate(output, output, element);
-            erode(output, output, element);*/
+            bitwise_and(output, intensity, output);
 
-            int erosion_size = 6;
+            /*int erosion_size = 6;
             cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS,
                                                         cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
                                                         cv::Point(erosion_size, erosion_size) );
 
             erode(output, output, element);
-            dilate(output, output, element);
+            dilate(output, output, element);*/
+
 
             imshow("output", output);
 
@@ -115,18 +124,20 @@ private:
 
 int main()
 {
-    //NAV200 lidar;
+    NAV200 lidar;
 
-    //Bumblebee2 camera("/home/robojackets/igvc/2013/software/src/sensors/camera3D/calib/out_camera_data.xml");
+    Bumblebee2 camera("/home/robojackets/igvc/2013/software/src/sensors/camera3D/calib/out_camera_data.xml");
 
-    StereoImageRepeater source("/home/robojackets/Desktop/img_right2.jpg", "/home/robojackets/Desktop/img_right2.jpg");
+    //StereoImageRepeater source("/home/robojackets/Desktop/img_right2.jpg", "/home/robojackets/Desktop/img_right2.jpg");
 
     //while(!camera.frameCount);
 
     namedWindow("Image");
     setMouseCallback("Image", OnMouse, 0);
 
-    CameraListener listener(&source, 0);-
+    createTrackbar("t1", "Image", &thresh, 255, 0, 0);
+
+    CameraListener listener(&camera, &lidar);
 
     waitKey(0);
 
