@@ -320,16 +320,19 @@
 			<Option target="TestMotorDriver" />
 			<Option target="TestJoystick" />
 			<Option target="TestPathPlanning" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/MotorEncoderDriver2013.cpp">
 			<Option target="TestMotorDriver" />
 			<Option target="TestJoystick" />
 			<Option target="TestPathPlanning" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/MotorEncoderDriver2013.h">
 			<Option target="TestMotorDriver" />
 			<Option target="TestJoystick" />
 			<Option target="TestPathPlanning" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/TestMotorDriver.cpp">
 			<Option target="TestMotorDriver" />
@@ -392,9 +395,8 @@
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
 		</Unit>
-		<Unit filename="src/common/utils/StringUtils.hpp">
-			<Option target="TestCameraStabilization" />
-		</Unit>
+		<Unit filename="src/common/utils/StringUtils.cpp" />
+		<Unit filename="src/common/utils/StringUtils.hpp" />
 		<Unit filename="src/competitionControl/CompetitionController.cpp">
 			<Option target="CompetitionControl" />
 		</Unit>
