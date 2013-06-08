@@ -24,7 +24,7 @@ using namespace FlyCapture2;
 class Bumblebee2 : public StereoSource
 {
     public:
-        Bumblebee2(string fileName ="/home/alex/Desktop/IGVC/2013/software/src/sensors/camera3D/calib/out_camera_data.xml");
+        Bumblebee2(string fileName ="/home/robojackets/igvc/2013/software/src/sensors/camera3D/calib/out_camera_data.xml");
         virtual ~Bumblebee2();
         int Run();
         //void LockImages();

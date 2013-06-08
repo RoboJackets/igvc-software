@@ -10,7 +10,7 @@
 class OpenCVDisplay
 {
     public:
-        OpenCVDisplay(StereoSource& source, string path = "/home/alex/Desktop/img");
+        OpenCVDisplay(StereoSource& source, string path = "/home/robojackets/Desktop/img");
         virtual ~OpenCVDisplay();
         void onNewFrame(StereoImageData newFrame);
         LISTENER(OpenCVDisplay, onNewFrame, StereoImageData);

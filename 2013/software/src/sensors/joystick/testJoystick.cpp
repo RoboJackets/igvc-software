@@ -56,8 +56,8 @@ class TankDriver
         cout << "Right : " << (_LDIR &&_LPWM? "-" : " ") << _LPWM << "    " << (_RDIR &&_RPWM? "-" : " ") << _RPWM << endl;
         _driver->setRightLeftPwm(_RPWM, _RDIR, _LPWM, _LDIR);*/
 
-        double LSpeed = -(double)LIn / maxVal;
-        double RSpeed = -(double)RIn / maxVal;
+        double LSpeed = -(double)LIn / maxVal * 2.0;
+        double RSpeed = -(double)RIn / maxVal * 2.0;
 
         double DEADBAND = 0.15;
 
