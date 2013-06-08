@@ -4,6 +4,8 @@
 #include "SensorData.h"
 #include <math.h>
 
+using namespace std;
+
 class VisOdomData : public SensorData
 {
 public:
@@ -39,6 +41,12 @@ public:
     inline double deltaTime(void)
     {
         return _deltaTime;
+    }
+
+    ostream& print(ostream& stream)//, VisOdomData dat)
+    {
+
+      return stream << "Change in X is " << _deltaX << endl << " Change in Y is" << _deltaY << endl;
     }
 
 private:

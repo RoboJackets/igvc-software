@@ -15,6 +15,15 @@ class GPSAccuracy
          {
          }
 
+          GPSAccuracy defaultGPSAccuracy()
+          {
+            double latVar = 1.1082*pow(10,-10);
+            double longVar = 7.352*pow(10,-11);
+            double headingVar = .0076; //Assumes std of 5 degrees
+            double speedVar = 4.25*pow(10,-4);
+            return GPSAccuracy(latVar, longVar, headingVar, speedVar);
+          }
+
          inline double LatVar(void)
          {
             return _LatVariance;

@@ -20,6 +20,8 @@ int r = 480;
 int c = 680;
 int r = 500;
 
+int rs[4] = {520,520,685,685};
+int cs[4] = {260, 565, 291, 615};
 
 
 using namespace std;
@@ -42,12 +44,15 @@ main()
 */
 
 
-
 main()
 {
   vector<KeyPoint> entry;
 
-  entry.push_back(KeyPoint(c,r,1,1,1,1,1));
+  for(int i = 0;i<4;i++)
+  {
+    entry.push_back(KeyPoint(cs[i],rs[i],1,1,1,1,1));
+  }
+
   cout << entry.at(0).pt.x << endl;
   Eigen::MatrixXd datAnswer;
   Robot rob = Robot::CurrentRobot();
