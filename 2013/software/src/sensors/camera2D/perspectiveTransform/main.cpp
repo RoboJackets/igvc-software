@@ -51,21 +51,33 @@ private:
         {
             blur(frame, frame, Size(9,9), Point(-1,-1));
 
-            {
-                Mat output = Mat(frame.rows, frame.cols, CV_8UC1);
-                uchar* p;
-                uchar* p2;
-                for(int r = 0; r < frame.rows; r++)
-                {
-                    p = frame.ptr<uchar>(r);
-                    p2 = output.ptr<uchar>(r);
-                    for(int c = 0; c < frame.cols; c++)
-                    {
-                        p2[c] = p[c*3] + p[c*3+2] - p[c*3+1];
-                    }
-                }
-                imshow("Image", output);
-            }
+            Mat HSV;
+            cvtColor(frame, HSV, CV_BGR2HSV);
+            vector<Mat> channels;
+            split(HSV, channels);
+            threshold(channels[0], channels[0], 90, 255, CV_THRESH_BINARY);
+            threshold(channels[1], channels[1], 25, 255, CV_THRESH_BINARY);
+
+            Mat output(frame.rows, frame.cols, CV_8UC1);
+            bitwise_and(channels[0], channels[1], output);
+
+            /*int erosion_size = 11;
+            cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS,
+                                                        cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
+                                                        cv::Point(erosion_size, erosion_size) );
+
+            dilate(output, output, element);
+            erode(output, output, element);*/
+
+            int erosion_size = 6;
+            cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS,
+                                                        cv::Size(2 * erosion_size + 1, 2 * erosion_size + 1),
+                                                        cv::Point(erosion_size, erosion_size) );
+
+            erode(output, output, element);
+            dilate(output, output, element);
+
+            imshow("output", output);
 
             /*{ // Increase contrast of color image
                 //http://stackoverflow.com/questions/15007304/histogram-equalization-not-working-on-color-image-opencv
@@ -95,7 +107,7 @@ private:
             }*/
 
             gFrame = frame;
-            //imshow("Image", frame);
+            imshow("Image", frame);
         }
     }
     LISTENER(CameraListener, OnNewFrame, Mat);
