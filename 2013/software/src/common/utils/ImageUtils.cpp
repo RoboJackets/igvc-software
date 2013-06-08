@@ -37,9 +37,12 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
 
 
     phi = derRobot.CameraAngle() - pitch + atan2((derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
+    //phi = derRobot.CameraAngle() - pitch + atan2((600/768 * derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
     theta = atan2((derCameraInfo.PixelSideLength() * pos(1)), derCameraInfo.FocalLength());
+     //theta = atan2((900/1024*derCameraInfo.PixelSideLength() * pos(1)), derCameraInfo.FocalLength());
     //cout << "first argument in theta is  " <<  derCameraInfo.PixelSideLength() * pos(1) << endl;
     xCam = cameraHeight/tan(phi);
+    //xCam = 2.87 + .5588;
     yCam = xCam*tan(theta);
 
     std::cout << "xcam is " << xCam << ". yCam is " << yCam << std::endl;
