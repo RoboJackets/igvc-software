@@ -256,6 +256,8 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add directory="/usr/include/" />
+					<Add directory="/usr/include/pcl-1.6" />
+					<Add directory="/usr/include/eigen3" />
 				</Compiler>
 				<Linker>
 					<Add library="opencv_highgui" />
