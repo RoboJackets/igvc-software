@@ -8,39 +8,34 @@
 #include <sensors/lidar/Lidar.h>
 #include <sensors/ardupilot/Ardupilot.hpp>
 #include <vector>
+#include <pcl/common/common_headers.h>
 
 namespace IGVC
 {
 namespace Control
 {
 
-enum Mode
-{
-    ObstacleAvoidance,
-    WaypointNavigation
-};
-
 class CompetitionController
 {
     public:
         CompetitionController(IGVC::Sensors::GPS* gps,
-                              IGVC::Sensors::Lidar* lidar,
-                              StereoSource* stereoCam,
+                              Event<pcl::PointCloud<PointXYZ> > mapSource,
                               Ardupilot* imu,
                               WaypointReader* waypointReader);
         virtual ~CompetitionController();
         bool isRunning();
+
+        double MaxW;
+        double DeltaT;
+
     protected:
     private:
         IGVC::Sensors::GPS* _gps;
-        IGVC::Sensors::Lidar* _lidar;
-        StereoSource* _stereoCam;
         Ardupilot* _imu;
         WaypointReader* _waypointReader;
         std::vector<GPSData> _gpsBuffer;
         const unsigned int GPS_BUFFER_SIZE;
         GPSData _currentAvgGPS;
-        Mode _mode;
         double _currentHeading;
 
         void OnNewGPSData(GPSData data);
@@ -49,7 +44,16 @@ class CompetitionController
         void OnNewIMUData(IMURawData data);
         LISTENER(CompetitionController, OnNewIMUData, IMURawData);
 
+        void OnNewMapFrame(pcl::PointCloud<PointXYZ>  mapFrame);
+        LISTENER(CompetitionController, OnNewMapFrame, pcl::PointCloud<PointXYZ> );
+
         double headingFromAToB(GPSData A, GPSData B);
+
+        double distBetween(GPSData A, GPSData B);
+        double GPSdX(GPSData A, GPSData B);
+        double GPSdY(GPSData A, GPSData B);
+
+        pair<double, double> result(double W, double V);
 };
 
 }

@@ -3,24 +3,19 @@
 
 #include <vector>
 #include <string>
-
-struct Waypoint
-{
-    double Lattitude;
-    double Longitude;
-};
+#include <sensors/DataStructures/GPSData.h>
 
 class WaypointReader
 {
     public:
         WaypointReader();
         bool LoadWaypoints(std::string path);
-        Waypoint Current();
+        GPSData Current();
         bool Next();
         virtual ~WaypointReader();
     protected:
     private:
-        std::vector<Waypoint> _waypoints;
+        std::vector<GPSData> _waypoints;
         unsigned int _index;
 };
 
