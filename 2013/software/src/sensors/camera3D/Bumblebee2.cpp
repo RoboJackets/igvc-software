@@ -215,7 +215,6 @@ Bumblebee2::~Bumblebee2()
 
 void ProcessFrame(Image* rawImage, const void* that)
 {
-
     //Image* fake;
     Bumblebee2&  thisHere= *((Bumblebee2*)that);
     thisHere.frameLock.lock();

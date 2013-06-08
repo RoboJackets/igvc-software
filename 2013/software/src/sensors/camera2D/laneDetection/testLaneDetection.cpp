@@ -10,14 +10,41 @@
 
 using namespace cv;
 using namespace std;
+using namespace IGVC;
 
 int main()
 {
-    Mat frame = imread("/home/matt/Pictures/TestData1.png");
+    VideoCapture cam(1);
 
-    imshow("raw", frame);
+    sleep(2);
 
-    blur(frame, frame, Size(3, 3), Point(-1, -1) );
+    Mat frame;// = imread("/home/matt/Pictures/TestData1.png");
+
+    namedWindow("filtered");
+    int t1val = 0;
+    int t2val = 0;
+    int t3val = 0;
+    createTrackbar("t1", "filtered", &t1val, 255, 0);
+    createTrackbar("t2", "filtered", &t2val, 255, 0);
+    createTrackbar("t3", "filtered", &t3val, 255, 0);
+
+    while(true)
+    {
+        cam >> frame;
+
+        {
+
+        }
+
+        imshow("filtered", frame);
+
+        if(waitKey(10) >= 0)
+            break;
+    }
+
+
+
+    /*blur(frame, frame, Size(3, 3), Point(-1, -1) );
 
     Mat grassfiltered;
     {
@@ -173,6 +200,6 @@ int main()
     output << pos;
     output.close();
 
-    waitKey(0);
+    waitKey(0);*/
     return 0;
 }
