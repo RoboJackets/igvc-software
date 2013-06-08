@@ -26,10 +26,10 @@ void GrassOdometer::processImage(ImageData src)
     findDeltas(descriptors, pos, dx, dy);
     update = VisOdomData(dx,dy,dt);
   }
-
   _lastFramePositions = pos;
   _lastFrameDescriptors = descriptors;
   _lastFrame = src.deepCopy();
+  update.print(std::cout);
   onNewData(update);
 
 }
