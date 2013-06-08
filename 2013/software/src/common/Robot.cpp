@@ -25,8 +25,9 @@ Robot Robot::Misti()
   misti.Mast2Center(inchesToMeters(22));
   misti.HorizontalCamOffset(inchesToMeters(2.5));
   misti.TireDiameter(inchesToMeters(13.5));
-  misti.Lidar2Center(inchesToMeters(10));
+  misti.Lidar2Center(inchesToMeters(12));
   misti.CameraAngle(deg2rad(22.5));
+  misti.Length(inchesToMeters(40.375));
   return misti;
 }
 
@@ -124,6 +125,15 @@ double Robot::Lidar2Center()
   return _Lidar2Center;
 }
 
+double Robot::Length()
+{
+  return _Length;
+}
+
+double Robot::Dist2Front()
+{
+  return _Length/2;
+}
 
 void Robot::Baseline(double newBaseline)
 {
@@ -159,6 +169,12 @@ void Robot::Lidar2Center(double newLidar2Center)
 {
   _Lidar2Center = newLidar2Center;
 }
+
+void Robot::Length(double len)
+{
+  _Length = len;
+}
+
 Robot::~Robot()
 {
   //dtor
