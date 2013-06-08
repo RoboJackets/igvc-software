@@ -11,9 +11,10 @@ int main()
     WaypointReader waypointReader;
     waypointReader.LoadWaypoints("");
 
+    Event<void*> myEvent;
+
     CompetitionController controller(new HemisphereA100GPS(),
-                                     new NAV200(),
-                                     new Bumblebee2(),
+                                     myEvent,
                                      new Ardupilot(),
                                      &waypointReader);
 
