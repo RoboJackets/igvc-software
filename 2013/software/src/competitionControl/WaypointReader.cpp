@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 
+
 WaypointReader::WaypointReader()
 {
 }

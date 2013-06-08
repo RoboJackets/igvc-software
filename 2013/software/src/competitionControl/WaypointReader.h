@@ -21,7 +21,7 @@ class WaypointReader
     protected:
     private:
         std::vector<Waypoint> _waypoints;
-        int _index;
+        unsigned int _index;
 };
 
 #endif // WAYPOINTREADER_H
