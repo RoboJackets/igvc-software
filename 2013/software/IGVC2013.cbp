@@ -641,12 +641,14 @@
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="OdometryTest" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/Bumblebee2.h">
 			<Option target="testCV" />
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="OdometryTest" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.cpp">
 			<Option target="OdometryTest" />
