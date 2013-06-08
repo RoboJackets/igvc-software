@@ -98,3 +98,51 @@ void showMatchingPixels(int bMin, int bMax, int gMin, int gMax, int rMin, int rM
     }
 
 }
+
+
+
+void showMatchingPixels(int bMin, int bMax, int gMin, int gMax, int rMin, int rMax, int reduction, string img)
+{
+    bMin+=reduction;
+    gMin+=reduction;
+    rMin+=reduction;
+    bMax-=reduction;
+    gMax-=reduction;
+    rMax-=reduction;
+    int r, c, rows, cols;
+    uchar *blue, *green, *red;
+
+    Mat track = imread(img);
+
+    rows = track.rows;
+    cols = track.cols;
+
+    for(r=0; r<rows; r++)
+    {
+       for(c=0; c<cols; c++)
+       {
+         blue = &track.data[track.step[0]*r + track.step[1]* c + 0];
+         green = &track.data[track.step[0]*r + track.step[1]* c + 1];
+         red = &track.data[track.step[0]*r + track.step[1]* c + 2];
+         if (((*blue >= bMin) &&(*blue <= bMax)) && ((*green >= gMin) &&(*green <= gMax)) && ((*red >= rMin) &&(*red <= rMax)))
+         {
+         }
+         else
+         {
+          *blue=0;
+          *green=0;
+          *red=0;
+         }
+       }
+    }
+
+    string winName = "window1";
+    namedWindow( winName, CV_WINDOW_AUTOSIZE );
+    imshow(winName, track);
+    char dat=0;
+    imwrite("/home/alex/Desktop/BenCode_534_small_green.jpg", track);
+    while (dat==0)
+    {
+      dat = waitKey(50000);
+    }
+}
