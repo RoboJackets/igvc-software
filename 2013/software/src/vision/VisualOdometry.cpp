@@ -9,10 +9,20 @@
 #include "sensors/DataStructures/IMUData.hpp"
 #include "sensors/DataStructures/ImageData.hpp"
 #include "sensors/DataStructures/StereoImageData.hpp"
-
+#include "sensors/camera3D/Bumblebee2.h"
 #include "sensors/camera3D/CameraInfo.h"
 
 #include <queue>
+
+
+//Addded from below
+#include <stdio.h>
+#include <iostream>
+#include "opencv2/core/core.hpp"
+#include "opencv2/features2d/features2d.hpp"
+#include "opencv2/highgui/highgui.hpp"
+
+
 
 #include <iostream>
 #include <eigen3/Eigen/Dense>
@@ -23,29 +33,18 @@ using Eigen::MatrixXd;
 using namespace std;
 using namespace Eigen;
 using namespace cv;
+using namespace IGVC;
 
 int main( int argc, char** argv )
 {
-  CameraInfo info = CameraInfo::Bumblebee2_BB2_08S2C_38();
+  IGVC::CameraInfo info = IGVC::CameraInfo::Bumblebee2_BB2_08S2C_38();
 
-}
-/*
-#include <stdio.h>
-#include <iostream>
-#include "opencv2/core/core.hpp"
-#include "opencv2/features2d/features2d.hpp"
-#include "opencv2/highgui/highgui.hpp"
-
-int main( int argc, char** argv )
-  {
-  Mat img_1 = imread( argv[1]);
-  Mat img_2 = imread( argv[2]);
+  Bumblebee2 cam;
   ColorRange limits(4,71,13,144,12,136);
-  GrassOdometer odo(limits, 50);
-  odo.FuckItWeWillDoItLive(img_1, img_2);
-
+  GrassOdometer odo(limits, 100);
+  //RobotPosition(cam)
 }
-*/
+
 
 /*
 
