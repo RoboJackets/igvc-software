@@ -604,12 +604,21 @@
 		<Unit filename="src/sensors/ardupilot/TestIMU.cpp">
 			<Option target="TestIMU" />
 		</Unit>
+		<Unit filename="src/sensors/camera2D/laneDetection/CameraListener.hpp">
+			<Option target="TestPerspTrans" />
+		</Unit>
 		<Unit filename="src/sensors/camera2D/laneDetection/LaneMapper.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
 		<Unit filename="src/sensors/camera2D/laneDetection/LidarBasedObstacleHider.hpp">
 			<Option target="TestPerspTrans" />
 			<Option target="testCV" />
+		</Unit>
+		<Unit filename="src/sensors/camera2D/laneDetection/finalLaneDetection.cpp">
+			<Option target="TestPerspTrans" />
+		</Unit>
+		<Unit filename="src/sensors/camera2D/laneDetection/finalLaneDetection.h">
+			<Option target="TestPerspTrans" />
 		</Unit>
 		<Unit filename="src/sensors/camera2D/laneDetection/secondAttempt.cpp">
 			<Option target="&lt;{~None~}&gt;" />
