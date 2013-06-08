@@ -8,7 +8,11 @@ namespace IGVC
 namespace Control
 {
 
-CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps, Event<pcl::PointCloud<PointXYZ> > mapSource, Ardupilot* imu, WaypointReader* waypointReader)
+CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
+                                            Event<pcl::PointCloud<pcl::PointXYZ> >* mapSource,
+                                            Ardupilot* imu,
+                                            WaypointReader* waypointReader,
+                                            MotorDriver* driver)
     : GPS_BUFFER_SIZE(5),
       LOnNewGPSData(this),
       LOnNewIMUData(this),
@@ -20,6 +24,9 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps, Event<pcl:
     _imu = imu;
     _imu->onNewRawData += &LOnNewIMUData;
     _currentHeading = 0;
+    _driver = driver;
+
+    (*mapSource) += &LOnNewMapFrame;
 
     MaxW = 0.8;
     DeltaT = 2.5;
@@ -57,7 +64,7 @@ void CompetitionController::OnNewIMUData(IMURawData data)
     _currentHeading = data.heading;
 }
 
-void CompetitionController::OnNewMapFrame(pcl::PointCloud<PointXYZ> mapFrame)
+void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFrame)
 {
     vector< pair<double, double> > available_actions;
 
@@ -84,10 +91,22 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<PointXYZ> mapFrame)
         waypointCoords.first = GPSdX(_currentAvgGPS, _waypointReader->Current());
         waypointCoords.second = GPSdY(_currentAvgGPS, _waypointReader->Current());
 
+        pair<double, double> endLoc = result(action.second, action.first);
 
+        double dist = distBetween(waypointCoords, endLoc);
 
-        //if(minDist == -1 || )
+        if(minDist == -1 || dist < minDist)
+        {
+            minPair = action;
+            minDist = dist;
+        }
     }
+
+    double Baseline = Robot::CurrentRobot().Baseline();
+    double Vr = minPair.first + (Baseline/2.0)*minPair.second;
+    double Vl = minPair.first - (Baseline/2.0)*minPair.second;
+
+    _driver->setVelocities(Vl, Vr);
 
 }
 
@@ -102,6 +121,13 @@ double CompetitionController::distBetween(GPSData A, GPSData B)
 {
     double dy = B.Lat() - A.Lat();
     double dx = cos(M_PI/180.0*A.Lat())*(B.Long() - A.Long());
+    return sqrt(dx*dx + dy*dy);
+}
+
+double CompetitionController::distBetween(pair<double, double> A, pair<double, double> B)
+{
+    double dy = B.second - A.second;
+    double dx = B.first - A.first;
     return sqrt(dx*dx + dy*dy);
 }
 

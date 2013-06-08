@@ -1,19 +1,25 @@
 #ifndef CAMERALISTENER_H
 #define CAMERALISTENER_H
 
+#include <pcl/point_types.h>
 #include "sensors/lidar/NAV200.h"
 #include "sensors/camera3D/Bumblebee2.h"
 #include "sensors/camera3D/StereoSource.hpp"
 #include "common/Robot.h"
-#include <pcl/common/common_headers.h>
+#include <sensors/camera2D/perspectiveTransform/PerspectiveTransformer.hpp>
+#include <sensors/camera2D/laneDetection/LidarBasedObstacleHider.hpp>
 
 bool RUNNING = true;
 bool DEBUGGING = false;
 
+using namespace IGVC::Sensors;
+
 class CameraListener
 {
 public:
-    CameraListener(StereoSource *cam, Lidar *lidar, int intensityThresh=230, string fileName = "/home/robojackets/igvc/2013/software/calibration/PTCalibMat.yml")
+    CameraListener(StereoSource *cam, Lidar *lidar,
+                   int intensityThresh=230,
+                   string fileName = "/home/robojackets/igvc/2013/software/calibration/PTCalibMat.yml")
         : _transformer(cam),
           _hider(lidar, &_transformer.OnNewTransformedImage),
           LOnNewFrame(this)
@@ -29,6 +35,8 @@ public:
         file.release();
     }
 
+    Event<pcl::PointCloud< pcl::PointXYZ> > OnNewData;
+
 private:
     Lidar* _lidar;
     StereoSource* _cam;
@@ -38,6 +46,7 @@ private:
     Robot _robotInfo;
     double _metersPerPixel;
     LISTENER(CameraListener, OnNewFrame, Mat);
+    pcl::PointCloud<pcl::PointXYZ> _pointcloud;
 
     void OnNewFrame(Mat frame)
     {
@@ -92,9 +101,13 @@ private:
                   x = _robotInfo.Dist2Front() + r*_metersPerPixel;
                   y = centeredCol*_metersPerPixel;
 
+                  _pointcloud.points.push_back(pcl::PointXYZ(x, y, 0));
+
                 }
               }
             }
+
+            OnNewData(_pointcloud);
 
             /*int erosion_size = 6;
             cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS,

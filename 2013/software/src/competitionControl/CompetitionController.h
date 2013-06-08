@@ -9,6 +9,8 @@
 #include <sensors/ardupilot/Ardupilot.hpp>
 #include <vector>
 #include <pcl/common/common_headers.h>
+#include <actuators/motors/MotorDriver/MotorDriver.hpp>
+#include <common/Robot.h>
 
 namespace IGVC
 {
@@ -19,9 +21,10 @@ class CompetitionController
 {
     public:
         CompetitionController(IGVC::Sensors::GPS* gps,
-                              Event<pcl::PointCloud<PointXYZ> > mapSource,
+                              Event<pcl::PointCloud<pcl::PointXYZ> >* mapSource,
                               Ardupilot* imu,
-                              WaypointReader* waypointReader);
+                              WaypointReader* waypointReader,
+                              MotorDriver* driver);
         virtual ~CompetitionController();
         bool isRunning();
 
@@ -33,6 +36,7 @@ class CompetitionController
         IGVC::Sensors::GPS* _gps;
         Ardupilot* _imu;
         WaypointReader* _waypointReader;
+        MotorDriver* _driver;
         std::vector<GPSData> _gpsBuffer;
         const unsigned int GPS_BUFFER_SIZE;
         GPSData _currentAvgGPS;
@@ -44,12 +48,13 @@ class CompetitionController
         void OnNewIMUData(IMURawData data);
         LISTENER(CompetitionController, OnNewIMUData, IMURawData);
 
-        void OnNewMapFrame(pcl::PointCloud<PointXYZ>  mapFrame);
-        LISTENER(CompetitionController, OnNewMapFrame, pcl::PointCloud<PointXYZ> );
+        void OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ>  mapFrame);
+        LISTENER(CompetitionController, OnNewMapFrame, pcl::PointCloud<pcl::PointXYZ> );
 
         double headingFromAToB(GPSData A, GPSData B);
 
         double distBetween(GPSData A, GPSData B);
+        double distBetween(pair<double, double> A, pair<double, double> B);
         double GPSdX(GPSData A, GPSData B);
         double GPSdY(GPSData A, GPSData B);
 
