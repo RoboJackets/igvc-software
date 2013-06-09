@@ -8,11 +8,12 @@
 #include <competitionControl/WaypointReader.h>
 #include <sensors/camera3D/StereoSource.hpp>
 #include <sensors/lidar/Lidar.h>
-#include <sensors/ardupilot/Ardupilot.hpp>
+#include <sensors/IMU/IMU.h>
 #include <vector>
 #include <actuators/motors/MotorDriver/MotorDriver.hpp>
 #include <common/Robot.h>
 #include <fstream>
+#include <sensors/RobotPosition.h>
 
 namespace IGVC
 {
@@ -23,6 +24,7 @@ class CompetitionController
 {
     public:
         CompetitionController(IGVC::Sensors::GPS* gps,
+                              IMU* imu,
                               Event<pcl::PointCloud<pcl::PointXYZ> >* mapSource,
                               WaypointReader* waypointReader,
                               MotorDriver* driver,
@@ -36,7 +38,7 @@ class CompetitionController
     protected:
     private:
         std::ofstream _logFile;
-        IGVC::Sensors::GPS* _gps;
+        RobotPosition _poseTracker;
         WaypointReader* _waypointReader;
         MotorDriver* _driver;
         std::vector<GPSData> _gpsBuffer;
@@ -48,9 +50,6 @@ class CompetitionController
 
         void OnNewGPSData(GPSData data);
         LISTENER(CompetitionController, OnNewGPSData, GPSData);
-
-        void OnNewIMUData(IMURawData data);
-        LISTENER(CompetitionController, OnNewIMUData, IMURawData);
 
         void OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ>  mapFrame);
         LISTENER(CompetitionController, OnNewMapFrame, pcl::PointCloud<pcl::PointXYZ> );
