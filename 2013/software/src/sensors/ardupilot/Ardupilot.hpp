@@ -3,6 +3,7 @@
 
 #include "serial/ASIOSerialPort.h"
 #include "sensors/DataStructures/IMUData.hpp"
+#include <sensors/IMU/IMU.h>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ struct IMURawData
     double accelZ;
 };
 
-class Ardupilot
+class Ardupilot : public IMU
 {
     public:
         Ardupilot();

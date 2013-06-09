@@ -639,14 +639,17 @@
 		<Unit filename="src/sensors/IMU/IMU.h">
 			<Option target="TestData" />
 			<Option target="TestPositionTracking" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/RobotPosition.cpp">
 			<Option target="TestData" />
 			<Option target="Regression" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/RobotPosition.h">
 			<Option target="TestData" />
 			<Option target="Regression" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/Sensor.cpp">
 			<Option target="&lt;{~None~}&gt;" />

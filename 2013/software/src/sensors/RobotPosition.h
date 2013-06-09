@@ -46,6 +46,14 @@ class RobotPosition
         double longAtTime(double time);
         double speedAtTime(double time);
         double headingAtTime(double time);
+
+        double currentLat();
+        double currentLong();
+        double currentHeading();
+        double currentRoll();
+        double currentPitch();
+        double currentYaw();
+
         void latLongCartesianUpdate(double oldLat, double oldLong, double deltaX, double deltaY, double& newLat, double& newLong);
 
         GPSData VisOdom2GPS(VisOdomData in);

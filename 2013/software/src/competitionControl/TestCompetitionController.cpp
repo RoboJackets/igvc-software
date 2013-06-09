@@ -6,6 +6,7 @@
 #include <actuators/motors/MotorDriver/MotorEncoderDriver2013.h>
 #include <iostream>
 #include <sensors/camera3D/StereoPlayback.h>
+#include <sensors/ardupilot/Ardupilot.hpp>
 
 using namespace IGVC::Control;
 using namespace IGVC::Sensors;
@@ -20,6 +21,9 @@ int main()
 
     cout << "Connecting to GPS..." << endl;
     //HemisphereA100GPS GPS;
+
+    cout << "Connecting to IMU..." << endl;
+    //Ardupilot imu;
 
     cout << "Connecting to motor driver..." << endl;
 
@@ -42,6 +46,7 @@ int main()
     cout << "Initializing controller..." << endl;
 
     CompetitionController controller(0,
+                                     0,
                                      &camList.OnNewData,
                                      &waypointReader,
                                      0);

@@ -2,11 +2,12 @@
 #define IMU_H
 
 #include "events/Event.hpp"
+#include <sensors/DataStructures/IMUData.hpp>
 
 class IMU
 {
     public:
-        IMU();
+        IMU() { }
         Event<IMUData>onNewData;
 
 
