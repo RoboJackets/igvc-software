@@ -123,7 +123,7 @@ private:
             imshow("lines", output);
             waitKey(10);
             OnNewFilteredFrame(output);
-            OnNewData(_pointcloud);+
+            OnNewData(_pointcloud);
 
             /*int erosion_size = 6;
             cv::Mat element = cv::getStructuringElement(cv::MORPH_CROSS,
