@@ -2,6 +2,7 @@
 #include <sensors/camera3D/Bumblebee2.h>
 #include <sensors/camera2D/laneDetection/CameraListener.hpp>
 #include <iostream>
+#include <sensors/camera3D/StereoPlayback.h>
 
 using namespace IGVC::Sensors;
 using namespace std;
@@ -29,15 +30,17 @@ private:
 int main()
 {
 
-    Bumblebee2 camera;
+    //Bumblebee2 camera;
+
+    StereoPlayback camera("/home/robojackets/Desktop/camTesting/data/CompCourse_left0.mpeg", "/home/robojackets/Desktop/camTesting/data/CompCourse_right0.mpeg");
 
     cout << "Connecting to lidar..." << endl;
 
-    NAV200 lidar;
+    //NAV200 lidar;
 
     cout << "Initializing listener..." << endl;
 
-    CameraListener camList(&camera, &lidar);
+    CameraListener camList(&camera, 0);
 
     CameraListenerListener camListList(&camList);
 

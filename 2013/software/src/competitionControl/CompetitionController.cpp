@@ -18,7 +18,8 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
       GPS_BUFFER_SIZE(5),
       LOnNewGPSData(this),
       LOnNewIMUData(this),
-      LOnNewMapFrame(this)
+      LOnNewMapFrame(this),
+      _viewer("Map and Path")
 {
     _gps = gps;
     _gps->onNewData += &LOnNewGPSData;
@@ -30,7 +31,7 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
     (*mapSource) += &LOnNewMapFrame;
 
     MaxW = 0.8;
-    DeltaT = 0.5;
+    DeltaT = 0.1;
 }
 
 bool CompetitionController::isRunning()
@@ -70,15 +71,19 @@ void CompetitionController::OnNewIMUData(IMURawData data)
 
 void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFrame)
 {
+    cout << mapFrame.points.size() << " points recieved." << endl;
     if(!_hasAllData)
         return;
+    _viewer.removeAllPointClouds(0);
+    _viewer.removeAllShapes();
+    _viewer.addPointCloud(mapFrame.makeShared(), "map");
+    _viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "map");
+    _viewer.spin();
     std::cout << "Compcon newMap" << std::endl;
     vector< pair<double, double> > available_actions;
 
     using namespace std;
     cout << "Loading possible actions" << endl;
-
-    cout << mapFrame.points.size() << " points recieved." << endl;
 
     double v = 0.4;
     for(double w = -MaxW; w <= MaxW; w += 0.5)
@@ -89,7 +94,7 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
         pcl::PointXYZ searchPoint(end.first, end.second, 0);
         std::vector<int> pointIdxRadiusSearch;
         std::vector<float> pointRadiusSquaredDistance;
-        if(kdtree.radiusSearch(searchPoint, 0.5, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0)
+        if(kdtree.radiusSearch(searchPoint, 0.01, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0)
         {
             available_actions.push_back(pair<double,double>(v, w));
         }
