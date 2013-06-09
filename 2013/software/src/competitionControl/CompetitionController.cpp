@@ -11,23 +11,20 @@ namespace Control
 {
 
 CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
-                                            Event<pcl::PointCloud<pcl::PointXYZ> >* mapSource,
-                                            WaypointReader* waypointReader,
-                                            MotorDriver* driver,
-                                            string fileName)
+                                             IMU* imu,
+                                             Event<pcl::PointCloud<pcl::PointXYZ> >* mapSource,
+                                             WaypointReader* waypointReader,
+                                             MotorDriver* driver,
+                                             string fileName)
     : _hasAllData(false),
       GPS_BUFFER_SIZE(5),
       LOnNewGPSData(this),
-      LOnNewIMUData(this),
       LOnNewMapFrame(this),
       _viewer("Map and Path"),
       _logFile()
 {
-    _gps = gps;
-    if(_gps)
-        _gps->onNewData += &LOnNewGPSData;
-    else
-        _hasAllData = true;
+    RobotPosition(gps, imu);
+
     _waypointReader = waypointReader;
     _waypointReader->Next();
     _currentHeading = 0;
@@ -68,12 +65,6 @@ void CompetitionController::OnNewGPSData(GPSData data)
     _currentAvgGPS.Heading(_currentAvgGPS.Heading() + ( data.Heading() / GPS_BUFFER_SIZE ));
     _currentAvgGPS.Speed(_currentAvgGPS.Speed() + ( data.Speed() / GPS_BUFFER_SIZE ));
     _hasAllData = true;
-}
-
-void CompetitionController::OnNewIMUData(IMURawData data)
-{
-    std::cout << "Compcon imu" << std::endl;
-    _currentHeading = data.heading;
 }
 
 /*
@@ -175,8 +166,12 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
 {
     //cout << mapFrame.points.size() << " points recieved." << endl;
     //Bunch of Visualization stuff
-    if(!_hasAllData)
+    //if(!_hasAllData)
+        //return;
+
+    if(_poseTracker.Lat().size() == 0 && _poseTracker.Long().size() == 0)
         return;
+
     _viewer.removeAllPointClouds(0);
     _viewer.removeAllShapes();
     _viewer.addPointCloud(mapFrame.makeShared(), "map");
@@ -214,7 +209,7 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
         pcl::PointXYZ searchPoint(end.first, end.second, 0);
         std::vector<int> pointIdxRadiusSearch;
         std::vector<float> pointRadiusSquaredDistance;
-        if(kdtree.radiusSearch(searchPoint, 0.1, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0)
+        if(kdtree.radiusSearch(searchPoint, 1.219, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0)
         {
         }
         else
@@ -244,15 +239,52 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
       }
     }
 
+    double minDist = -1;
+    double minW = 0;
+
+    GPSData waypoint = _waypointReader->Current();
+    GPSData currentPos;
+    currentPos.Lat(_poseTracker.Lat()[0].value());
+    currentPos.Long(_poseTracker.Long()[0].value());
+
+    double waypointHeading = headingFromAToB(currentPos, waypoint);
+
+    double currentHeading = _poseTracker.currentYaw();
+
+    for(int j=0; j < nPaths; j++)
+    {
+        if(scores[j] <= scores[secondMinArg])
+        {
+            double w = -MaxW + j * wInc;
+
+            pair<double, double> endLoc = result(w, v);
+
+            double angle = atan2(endLoc.second, endLoc.first);
+            //double angle = w*DeltaT;
+
+            double endHeading = angle + currentHeading;
+
+            double dist = abs(endHeading - waypointHeading);
+
+            if(minDist == -1 || dist < minDist)
+            {
+                minDist = dist;
+                minW = w;
+            }
+        }
+    }
+
     cout << "minArg is" << minArg<< endl;
     cout << "This means the robot wants to travel at" << -MaxW + wInc*minArg << endl;
     cout << "largest distractor is " << -MaxW + wInc*secondMinArg << endl;
     _logFile << -MaxW + wInc*minArg << endl;
     //available_actions.push_back(pair<double,double>(v, w));
 
+    cout << "Deciding to use w=" << minW << endl;
+
     pair<double, double> minPair;
     minPair.first = v;
-    minPair.second = -MaxW+wInc*minArg;
+    minPair.second = minW;//-MaxW+wInc*minArg;
 
     cout << "Computing velocities..." << endl;
 
@@ -390,8 +422,6 @@ pair<double, double> CompetitionController::result(double W, double V, double dt
 }
 CompetitionController::~CompetitionController()
 {
-    if(_gps)
-        _gps->onNewData -= &LOnNewGPSData;
 }
 
 }
