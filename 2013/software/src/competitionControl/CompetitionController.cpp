@@ -1,5 +1,6 @@
 #include <pcl/kdtree/kdtree_flann.h>
 #include "CompetitionController.h"
+#include <sstream>
 
 using namespace IGVC::Sensors;
 using namespace std;
@@ -37,7 +38,7 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
     _logFile.open(fileName.c_str());
 
     MaxW = 0.8;
-    DeltaT = 1.5;
+    DeltaT = 7;
 }
 
 bool CompetitionController::isRunning()
@@ -189,9 +190,9 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
     //Find Potential Routes
     double v = 0.4; //meters per second
 
-    double wInc = 0.05; //step size between possible omegas
+    double wInc = 0.1; //step size between possible omegas
     int i=0; //servers as an iterator for scores so the desired index doesnt have to be rederied from w
-    double deltaDeltaT=0.1;
+    double deltaDeltaT=0.5;
 
     const int nPaths = floor((2*MaxW)/wInc);
     std::vector<double> scores;
@@ -207,6 +208,9 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
         pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
         kdtree.setInputCloud(mapFrame.makeShared());
         pair<double, double> end = result(w,v,T);
+        /*stringstream name;
+        name << "Sphere" << w << T;
+        _viewer.addSphere(pcl::PointXYZ(end.first, end.second, 0), 0.1, name.str(), 0);*/
         pcl::PointXYZ searchPoint(end.first, end.second, 0);
         std::vector<int> pointIdxRadiusSearch;
         std::vector<float> pointRadiusSquaredDistance;
@@ -222,10 +226,13 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
       i++;
     }
 
+    //_viewer.spin();
+
     int minArg = 0;
     int secondMinArg = 0;
-    int min = 50000;
+    int min = scores[0];
     int currentScore;
+
     for(int j=0;j<nPaths;j++)
     {
       currentScore = scores[j];
@@ -239,7 +246,7 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
 
     cout << "minArg is" << minArg<< endl;
     cout << "This means the robot wants to travel at" << -MaxW + wInc*minArg << endl;
-    cout << "largest distractor is " << MaxW + wInc*secondMinArg << endl;
+    cout << "largest distractor is " << -MaxW + wInc*secondMinArg << endl;
     _logFile << -MaxW + wInc*minArg << endl;
     //available_actions.push_back(pair<double,double>(v, w));
 
@@ -355,7 +362,7 @@ pair<double, double> CompetitionController::result(double W, double V)
         endLocation[0] = 0;
         endLocation[1] = V * DeltaT;
     }
-    return pair<double, double> (endLocation[0], endLocation[1]);
+    return pair<double, double> (-endLocation[0], endLocation[1]);
 }
 
 pair<double, double> CompetitionController::result(double W, double V, double dt)
@@ -379,7 +386,7 @@ pair<double, double> CompetitionController::result(double W, double V, double dt
         endLocation[0] = 0;
         endLocation[1] = V * dt;
     }
-    return pair<double, double> (endLocation[0], endLocation[1]);
+    return pair<double, double> (-endLocation[0], endLocation[1]);
 }
 CompetitionController::~CompetitionController()
 {
