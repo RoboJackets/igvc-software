@@ -296,6 +296,7 @@
 					<Add directory="/usr/include/" />
 					<Add directory="/usr/include/pcl-1.6" />
 					<Add directory="/usr/include/eigen3" />
+					<Add directory="/usr/include/vtk-5.8" />
 				</Compiler>
 				<Linker>
 					<Add library="opencv_highgui" />

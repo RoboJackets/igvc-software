@@ -12,13 +12,15 @@ namespace Control
 CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
                                             Event<pcl::PointCloud<pcl::PointXYZ> >* mapSource,
                                             WaypointReader* waypointReader,
-                                            MotorDriver* driver)
+                                            MotorDriver* driver,
+                                            string fileName)
     : _hasAllData(false),
       GPS_BUFFER_SIZE(5),
       LOnNewGPSData(this),
       LOnNewIMUData(this),
       LOnNewMapFrame(this),
-      _viewer("Map and Path")
+      _viewer("Map and Path"),
+      _logFile()
 {
     _gps = gps;
     _gps->onNewData += &LOnNewGPSData;
@@ -28,6 +30,8 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
     _driver = driver;
 
     (*mapSource) += &LOnNewMapFrame;
+
+    _logFile.open(fileName.c_str());
 
     MaxW = 0.8;
     DeltaT = 0.1;
@@ -173,7 +177,7 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
     _viewer.removeAllShapes();
     _viewer.addPointCloud(mapFrame.makeShared(), "map");
     _viewer.setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "map");
-    _viewer.spin();
+    _viewer.spinOnce();
     std::cout << "Compcon newMap" << std::endl;
     vector< pair<double, double> > available_actions;
 
@@ -225,17 +229,32 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
       if (currentScore<min)
       {
         secondMinArg = minArg;
+
         minArg = secondMinArg;
         min = currentScore;
       }
     }
 
-    cout << "minArg is" << endl;
+    cout << "minArg is" << minArg<< endl;
+    cout << "This means the robot wants to travel at" << -MaxW + wInc*minArg << endl;
+    cout << "largest distractor is " << MaxW + wInc*secondMinArg << endl;
+    _logFile << -MaxW + wInc*minArg << endl;
     //available_actions.push_back(pair<double,double>(v, w));
 
     pair<double, double> minPair;
     minPair.first = v;
     minPair.second = -MaxW+wInc*minArg;
+
+    cout << "Computing velocities..." << endl;
+
+    double Baseline = Robot::CurrentRobot().Baseline();
+    double Vr = minPair.first + (Baseline/2.0)*minPair.second;
+    double Vl = minPair.first - (Baseline/2.0)*minPair.second;
+
+    cout << "Decided on Vl=" << Vl << " and Vr=" << Vr << endl;
+
+    _driver->setVelocities(Vl, Vr);
+
     /*
     double minDist = -1;
 
