@@ -21,9 +21,9 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
       LOnNewGPSData(this),
       LOnNewMapFrame(this),
       _viewer("Map and Path"),
-      _logFile()
+      _logFile(),
+      _poseTracker(gps, imu)
 {
-    RobotPosition(gps, imu);
 
     _waypointReader = waypointReader;
     _waypointReader->Next();
@@ -169,7 +169,7 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
     //if(!_hasAllData)
         //return;
 
-    if(_poseTracker.Lat().size() == 0 && _poseTracker.Long().size() == 0)
+    if(_poseTracker.Lat().size() == 0 || _poseTracker.Long().size() == 0 ||  _poseTracker._Yaw.size() == 0)
         return;
 
     _viewer.removeAllPointClouds(0);
@@ -214,7 +214,6 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
         }
         else
         {
-          cout << "object found!" << endl;
           scores[i]+=weighting(T);
         }
       }

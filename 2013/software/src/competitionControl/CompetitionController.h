@@ -31,13 +31,12 @@ class CompetitionController
                               string fileName = "/home/robojackets/Desktop/directionLog.txt");
         virtual ~CompetitionController();
         bool isRunning();
-
         double MaxW;
         double DeltaT;
 
     protected:
     private:
-        std::ofstream _logFile;
+            std::ofstream _logFile;
         RobotPosition _poseTracker;
         WaypointReader* _waypointReader;
         MotorDriver* _driver;

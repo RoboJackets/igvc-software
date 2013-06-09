@@ -28,13 +28,16 @@ void Ardupilot::onNewSerialLine(string line)
     if(line[0] == 'A')
     {
         vector<string> tokens = split(line, ' ');
-        IMURawData data;
-        data.roll = atof(tokens[1].c_str());
-        data.pitch = atof(tokens[2].c_str());
-        data.heading = atof(tokens[3].c_str());
-        data.accelX = atof(tokens[4].c_str());
-        data.accelY = atof(tokens[5].c_str());
-        data.accelZ = atof(tokens[6].c_str());
-        onNewRawData(data);
+        IMURawData rdata;
+        rdata.roll = atof(tokens[1].c_str());
+        rdata.pitch = atof(tokens[2].c_str());
+        rdata.heading = atof(tokens[3].c_str());
+        rdata.accelX = atof(tokens[4].c_str());
+        rdata.accelY = atof(tokens[5].c_str());
+        rdata.accelZ = atof(tokens[6].c_str());
+        onNewRawData(rdata);
+
+        IMUData data(rdata.roll, rdata.pitch, rdata.heading);
+        onNewData(data);
     }
 }
