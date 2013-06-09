@@ -3,8 +3,9 @@
 
 int main()
 {
-  MotorEncoderDriver2013 drivertermina;
+  MotorEncoderDriver2013 driver;
   int millis = 50000;
   int speed=1.7;
   driver.setVelocities(speed, speed, millis);
 }
+
