@@ -30,6 +30,8 @@ private:
 int main()
 {
 
+    cout << "setting up stereo source..." << endl;
+
     //Bumblebee2 camera;
 
     StereoPlayback camera("/home/robojackets/Desktop/camTesting/data/CompCourse_left0.mpeg", "/home/robojackets/Desktop/camTesting/data/CompCourse_right0.mpeg");

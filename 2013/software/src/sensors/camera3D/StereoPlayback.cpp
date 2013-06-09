@@ -8,6 +8,7 @@ StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, in
   FileStorage fs(fileName, FileStorage::READ); // Read the settings
   fs["Camera_Matrix"] >> _cameraMatrix;
   fs["Distortion_Coefficients"] >> _distCoeffs;
+  fs.release();
 }
 
 void StereoPlayback::Run()
