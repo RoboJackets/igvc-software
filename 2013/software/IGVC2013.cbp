@@ -770,10 +770,12 @@
 		<Unit filename="src/sensors/camera3D/StereoPlayback.cpp">
 			<Option target="testCV" />
 			<Option target="TestLaneFilter" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoPlayback.h">
 			<Option target="testCV" />
 			<Option target="TestLaneFilter" />
+			<Option target="CompetitionControl" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoSource.hpp">
 			<Option target="testCV" />
