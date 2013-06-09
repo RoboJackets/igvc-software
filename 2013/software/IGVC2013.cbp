@@ -258,6 +258,7 @@
 					<Add directory="/usr/include/" />
 					<Add directory="/usr/include/pcl-1.6" />
 					<Add directory="/usr/include/eigen3" />
+					<Add directory="/usr/include/vtk-5.8" />
 				</Compiler>
 				<Linker>
 					<Add library="opencv_highgui" />
@@ -267,6 +268,12 @@
 					<Add library="flycapture" />
 					<Add library="opencv_features2d" />
 					<Add library="pcl_kdtree" />
+					<Add library="pcl_common" />
+					<Add library="pcl_visualization" />
+					<Add library="vtkCommon" />
+					<Add library="vtkFiltering" />
+					<Add library="vtkRendering" />
+					<Add library="vtkGraphics" />
 					<Add directory="/usr/lib" />
 				</Linker>
 			</Target>
