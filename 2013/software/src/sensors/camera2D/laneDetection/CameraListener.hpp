@@ -24,11 +24,10 @@ public:
                    string fileName = "/home/robojackets/igvc/2013/software/calibration/PTCalibMat.yml")
         : _transformer(cam),
           _hider(lidar, &_transformer.OnNewTransformedImage),
-          _Writer(),
+          //_Writer(),
           LOnNewFrame(this)
     {
         _cam = cam;
-        _lidar = lidar;
         //_transformer.OnNewTransformedImage += &LOnNewFrame;
         _hider.OnNewProcessedFrame += &LOnNewFrame;
         _robotInfo = Robot::Misti();
@@ -38,20 +37,19 @@ public:
         FileStorage file(fileName, FileStorage::READ);
         file["mPerPixel"] >> _metersPerPixel;
         file.release();
-        _Writer.open((const std::string&)"/home/robojackets/Desktop/lines.mpeg", CV_FOURCC('P','I','M','1'), 20, cv::Size(640,480), true);
+        //_Writer.open((const std::string&)"/home/robojackets/Desktop/lines.mpeg", CV_FOURCC('P','I','M','1'), 20, cv::Size(640,480), true);
     }
 
     Event<pcl::PointCloud< pcl::PointXYZ> > OnNewData;
     Event<Mat> OnNewFilteredFrame;
 
 private:
-    Lidar* _lidar;
     StereoSource* _cam;
     PerspectiveTransformer _transformer;
     LidarBasedObstacleHider _hider;
     int _thresh;
     Robot _robotInfo;
-    VideoWriter _Writer;
+    //VideoWriter _Writer;
     double _metersPerPixel;
     LISTENER(CameraListener, OnNewFrame, Mat);
     pcl::PointCloud<pcl::PointXYZ> _pointcloud;
@@ -64,7 +62,7 @@ private:
         {
             if (DEBUGGING) {imshow("raw", frame);}
 
-            _Writer << frame;
+            //_Writer << frame;
 
             blur(frame, frame, Size(9,9), Point(-1,-1));
 
