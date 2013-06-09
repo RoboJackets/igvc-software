@@ -34,7 +34,7 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
     _logFile.open(fileName.c_str());
 
     MaxW = 0.8;
-    DeltaT = 0.1;
+    DeltaT = 1.5
 }
 
 bool CompetitionController::isRunning()
@@ -199,7 +199,6 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
 
     for(double w = -MaxW; w <= MaxW; w += wInc)
     {
-
       for(double T = deltaDeltaT;T<=DeltaT;T+=deltaDeltaT)
       {
         pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
@@ -213,6 +212,7 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
         }
         else
         {
+          cout << "object found!" << endl;
           scores[i]+=weighting(T);
         }
       }
