@@ -23,7 +23,10 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
       _logFile()
 {
     _gps = gps;
-    _gps->onNewData += &LOnNewGPSData;
+    if(_gps)
+        _gps->onNewData += &LOnNewGPSData;
+    else
+        _hasAllData = true;
     _waypointReader = waypointReader;
     _waypointReader->Next();
     _currentHeading = 0;
@@ -34,7 +37,7 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
     _logFile.open(fileName.c_str());
 
     MaxW = 0.8;
-    DeltaT = 1.5
+    DeltaT = 1.5;
 }
 
 bool CompetitionController::isRunning()
@@ -253,7 +256,8 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
 
     cout << "Decided on Vl=" << Vl << " and Vr=" << Vr << endl;
 
-    _driver->setVelocities(Vl, Vr);
+    if(_driver)
+        _driver->setVelocities(Vl, Vr);
 
     /*
     double minDist = -1;
