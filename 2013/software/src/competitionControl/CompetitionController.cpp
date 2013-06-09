@@ -1,3 +1,5 @@
+#include <pcl/kdtree/kdtree_flann.h>
+
 #include "CompetitionController.h"
 
 using namespace IGVC::Sensors;
@@ -10,10 +12,10 @@ namespace Control
 
 CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
                                             Event<pcl::PointCloud<pcl::PointXYZ> >* mapSource,
-                                            Ardupilot* imu,
                                             WaypointReader* waypointReader,
                                             MotorDriver* driver)
-    : GPS_BUFFER_SIZE(5),
+    : _hasAllData(false),
+      GPS_BUFFER_SIZE(5),
       LOnNewGPSData(this),
       LOnNewIMUData(this),
       LOnNewMapFrame(this)
@@ -21,15 +23,14 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
     _gps = gps;
     _gps->onNewData += &LOnNewGPSData;
     _waypointReader = waypointReader;
-    _imu = imu;
-    _imu->onNewRawData += &LOnNewIMUData;
+    _waypointReader->Next();
     _currentHeading = 0;
     _driver = driver;
 
     (*mapSource) += &LOnNewMapFrame;
 
     MaxW = 0.8;
-    DeltaT = 2.5;
+    DeltaT = 0.5;
 }
 
 bool CompetitionController::isRunning()
@@ -39,6 +40,7 @@ bool CompetitionController::isRunning()
 
 void CompetitionController::OnNewGPSData(GPSData data)
 {
+    std::cout << "Compcon gps" << std::endl;
     if(_gpsBuffer.size() >= GPS_BUFFER_SIZE)
     {
         _gpsBuffer.push_back(data);
@@ -57,29 +59,43 @@ void CompetitionController::OnNewGPSData(GPSData data)
     _currentAvgGPS.Long(_currentAvgGPS.Long() + ( data.Long() / GPS_BUFFER_SIZE ));
     _currentAvgGPS.Heading(_currentAvgGPS.Heading() + ( data.Heading() / GPS_BUFFER_SIZE ));
     _currentAvgGPS.Speed(_currentAvgGPS.Speed() + ( data.Speed() / GPS_BUFFER_SIZE ));
+    _hasAllData = true;
 }
 
 void CompetitionController::OnNewIMUData(IMURawData data)
 {
+    std::cout << "Compcon imu" << std::endl;
     _currentHeading = data.heading;
 }
 
 void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFrame)
 {
+    if(!_hasAllData)
+        return;
+    std::cout << "Compcon newMap" << std::endl;
     vector< pair<double, double> > available_actions;
+
+    using namespace std;
+    cout << "Loading possible actions" << endl;
+
+    cout << mapFrame.points.size() << " points recieved." << endl;
 
     double v = 0.4;
     for(double w = -MaxW; w <= MaxW; w += 0.5)
     {
-
-
-        if(true/*Point is occupiable*/)
+        pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+        kdtree.setInputCloud(mapFrame.makeShared());
+        pair<double, double> end = result(w,v);
+        pcl::PointXYZ searchPoint(end.first, end.second, 0);
+        std::vector<int> pointIdxRadiusSearch;
+        std::vector<float> pointRadiusSquaredDistance;
+        if(kdtree.radiusSearch(searchPoint, 0.5, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0)
         {
             available_actions.push_back(pair<double,double>(v, w));
         }
     }
 
-    using namespace pcl;
+    cout << "Checking possible actions..." << endl;
 
     pair<double, double> minPair;
     double minDist = -1;
@@ -87,13 +103,25 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
     for(vector< pair<double, double> >::iterator iter = available_actions.begin(); iter != available_actions.end(); iter++)
     {
         pair<double, double> action = (*iter);
+
+        cout << "Action done" << endl;
+
         pair<double, double> waypointCoords;
+
+        cout << _waypointReader->Current().Lat() << endl;
+
         waypointCoords.first = GPSdX(_currentAvgGPS, _waypointReader->Current());
         waypointCoords.second = GPSdY(_currentAvgGPS, _waypointReader->Current());
 
+        cout << "loaded" << endl;
+
         pair<double, double> endLoc = result(action.second, action.first);
 
+        cout << "resulted" << endl;
+
         double dist = distBetween(waypointCoords, endLoc);
+
+        cout << "dist" << endl;
 
         if(minDist == -1 || dist < minDist)
         {
@@ -102,9 +130,13 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
         }
     }
 
+    cout << "Computing velocities..." << endl;
+
     double Baseline = Robot::CurrentRobot().Baseline();
     double Vr = minPair.first + (Baseline/2.0)*minPair.second;
     double Vl = minPair.first - (Baseline/2.0)*minPair.second;
+
+    cout << "Decided on Vl=" << Vl << " and Vr=" << Vr << endl;
 
     _driver->setVelocities(Vl, Vr);
 
@@ -169,8 +201,6 @@ CompetitionController::~CompetitionController()
 {
     if(_gps)
         _gps->onNewData -= &LOnNewGPSData;
-    if(_imu)
-        _imu->onNewRawData -= &LOnNewIMUData;
 }
 
 }

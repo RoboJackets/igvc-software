@@ -22,7 +22,6 @@ class CompetitionController
     public:
         CompetitionController(IGVC::Sensors::GPS* gps,
                               Event<pcl::PointCloud<pcl::PointXYZ> >* mapSource,
-                              Ardupilot* imu,
                               WaypointReader* waypointReader,
                               MotorDriver* driver);
         virtual ~CompetitionController();
@@ -34,13 +33,13 @@ class CompetitionController
     protected:
     private:
         IGVC::Sensors::GPS* _gps;
-        Ardupilot* _imu;
         WaypointReader* _waypointReader;
         MotorDriver* _driver;
         std::vector<GPSData> _gpsBuffer;
         const unsigned int GPS_BUFFER_SIZE;
         GPSData _currentAvgGPS;
         double _currentHeading;
+        bool _hasAllData;
 
         void OnNewGPSData(GPSData data);
         LISTENER(CompetitionController, OnNewGPSData, GPSData);

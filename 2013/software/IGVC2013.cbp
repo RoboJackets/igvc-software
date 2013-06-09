@@ -266,6 +266,7 @@
 					<Add library="opencv_calib3d" />
 					<Add library="flycapture" />
 					<Add library="opencv_features2d" />
+					<Add library="pcl_kdtree" />
 					<Add directory="/usr/lib" />
 				</Linker>
 			</Target>
