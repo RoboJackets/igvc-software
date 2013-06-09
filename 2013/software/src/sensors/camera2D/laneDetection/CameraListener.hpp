@@ -16,6 +16,7 @@ bool DEBUGGING = true;
 
 using namespace IGVC::Sensors;
 
+
 class CameraListener
 {
 public:
@@ -56,8 +57,6 @@ private:
 
     void OnNewFrame(Mat frame)
     {
-        std::cout << "CamList newFrame" << std::endl;
-        std::cout << "Running" << ( RUNNING ? "t" : "f" ) << std::endl;
         if(RUNNING)
         {
             if (DEBUGGING) {imshow("raw", frame);}
@@ -66,15 +65,53 @@ private:
 
             blur(frame, frame, Size(9,9), Point(-1,-1));
 
-            Mat HSV;
-            cvtColor(frame, HSV, CV_BGR2HSV);
+            Mat HLS;
+            cvtColor(frame, HLS, CV_BGR2HLS);
+
+            imshow("HSV", HLS);
+
             vector<Mat> channels;
-            split(HSV, channels);
-            threshold(channels[0], channels[0], 90, 255, CV_THRESH_BINARY);
-            threshold(channels[1], channels[1], 25, 255, CV_THRESH_BINARY);
+            split(HLS, channels);
+            channels[1] = Mat(HLS.rows, HLS.cols, CV_8UC1, Scalar(127,127,127));
+            equalizeHist(channels[2], channels[2]);
+            merge(channels, HLS);
+            Mat HLSFilter1;
+            cvtColor(HLS, HLSFilter1, CV_HLS2BGR);
+            imshow("HLS", HLSFilter1);
+
+            {
+                uchar* p;
+                for(int r = 0; r < HLSFilter1.rows; r++)
+                {
+                    p = HLSFilter1.ptr<uchar>(r);
+                    for(int c = 0; c < HLSFilter1.cols * HLSFilter1.channels(); c += HLSFilter1.channels())
+                    {
+                        if(p[c] > 150 && p[c+1] < 50 && p[c+2] < 50)
+                        {
+                            p[c] = 255;
+                            p[c+1] = 255;
+                            p[c+2] = 255;
+                        }
+                        else
+                        {
+                            p[c] = 0;
+                            p[c+1] = 0;
+                            p[c+2] = 0;
+                        }
+                    }
+                }
+            }
+            imshow("newBin", HLSFilter1);
+            cvtColor(HLSFilter1, HLSFilter1, CV_BGR2GRAY);
+
+            threshold(channels[0], channels[0],  90, 255, CV_THRESH_BINARY);
+            threshold(channels[2], channels[2], 25, 255, CV_THRESH_BINARY);
+
 
             Mat output(frame.rows, frame.cols, CV_8UC1);
             bitwise_and(channels[0], channels[1], output);
+
+            bitwise_and(output, HLSFilter1, output);
 
             //imshow("H&S", output);
 
@@ -88,13 +125,13 @@ private:
 
             //int intensityThresh = 230;
             threshold(intensity, intensity, _thresh, 255, CV_THRESH_BINARY);
-            //imshow("Intense", intensity);
+            imshow("Intense", intensity);
 
             bitwise_and(output, intensity, output);
 
             uchar* p;
-            int x;
-            int y;
+            double x;
+            double y;
 
             int nRows = output.rows;
             int nCols = output.cols;
@@ -102,6 +139,7 @@ private:
             int centeredCol;
 
 
+            _pointcloud.points.clear();
             for (int r=0;r<nRows;r++)
             {
               p = output.ptr<uchar>(r);
@@ -110,7 +148,7 @@ private:
                 if (p[c] !=0)
                 {
                   centeredCol = c - nCols/2;
-                  x = _robotInfo.Dist2Front() + r*_metersPerPixel;
+                  x = _robotInfo.Dist2Front() + (output.rows - r)*_metersPerPixel;
                   y = centeredCol*_metersPerPixel;
 
                   _pointcloud.points.push_back(pcl::PointXYZ(x, y, 0));

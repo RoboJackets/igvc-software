@@ -26,15 +26,17 @@ int main()
 
     cout << "Connecting to camera..." << endl;
 
-    Bumblebee2 camera;
+    //Bumblebee2 camera;
+
+    StereoPlayback camera("/home/robojackets/Desktop/camTesting/data/CompCourse_left0.mpeg", "/home/robojackets/Desktop/camTesting/data/CompCourse_right0.mpeg");
 
     cout << "Connecting to lidar..." << endl;
 
-    NAV200 lidar;
+    //NAV200 lidar;
 
     cout << "Initializing listener..." << endl;
 
-    CameraListener camList(&camera, &lidar);
+    CameraListener camList(&camera, 0);
 
     cout << "Initializing controller..." << endl;
 

@@ -52,7 +52,7 @@ int main()
             break;
     }
 
-    lidar.stop();
+    //lidar.stop();
 
     cout << "Process ended." << endl;
 
