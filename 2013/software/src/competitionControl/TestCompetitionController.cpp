@@ -20,20 +20,20 @@ int main()
     waypointReader.LoadWaypoints("/home/robojackets/practiceCourse.txt");
 
     cout << "Connecting to GPS..." << endl;
-    //HemisphereA100GPS GPS;
+    HemisphereA100GPS GPS;
 
     cout << "Connecting to IMU..." << endl;
-    //Ardupilot imu;
+    Ardupilot imu;
 
     cout << "Connecting to motor driver..." << endl;
 
-    //MotorEncoderDriver2013 driver;
+    MotorEncoderDriver2013 driver;
 
     cout << "Connecting to camera..." << endl;
 
-    //Bumblebee2 camera;
+    Bumblebee2 camera;
 
-    StereoPlayback camera("/home/robojackets/Desktop/camTesting/data/CompCourse_left0.mpeg", "/home/robojackets/Desktop/camTesting/data/CompCourse_right0.mpeg");
+    //StereoPlayback camera("/home/robojackets/Desktop/camTesting/data/CompCourse_left0.mpeg", "/home/robojackets/Desktop/camTesting/data/CompCourse_right0.mpeg");
 
     cout << "Connecting to lidar..." << endl;
 
@@ -45,11 +45,11 @@ int main()
 
     cout << "Initializing controller..." << endl;
 
-    CompetitionController controller(0,
-                                     0,
+    CompetitionController controller(&GPS,
+                                     &imu,
                                      &camList.OnNewData,
                                      &waypointReader,
-                                     0);
+                                     &driver);
 
     cout << "Running..." << endl;
 
