@@ -55,7 +55,7 @@ int main()
 
     //std::string fName = "/home/robojackets/Desktop/this";
     //std::string fName = "/home/alex/Desktop/IGVC/2013/software/trainingSets/this";
-    std::string fName = "/home/alex/Desktop/IGVC/2013/software/trainingSets/firstOnRobot";
+    //std::string fName = "/home/alex/Desktop/IGVC/2013/software/trainingSets/firstOnRobot";
     //std::string fName = "home/alex/Desktop/firstOnRobot";
     /*
     std::string lName, rName;
@@ -70,11 +70,11 @@ int main()
 
     //initialize video maker
 
-    //std::string saveName = "/home/robojackets/Desktop/camTesting/dat";
+    std::string saveName = "/home/robojackets/Desktop/camTesting/CompCourse";
 
 
-    //int nFrame = 100;
-    //StereoVidMaker maker(thisguy, saveName, nFrame, 20, 1);
+    int nFrame = 100000;
+    StereoVidMaker maker(thisguy, saveName, nFrame, 20, 1);
 
 
     while(thisguy.Running())

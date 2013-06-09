@@ -1,6 +1,8 @@
 #ifndef COMPETITIONCONTROLLER_H
 #define COMPETITIONCONTROLLER_H
 
+#include <pcl/common/common_headers.h>
+#include <pcl/visualization/cloud_viewer.h>
 #include <IGVC.hpp>
 #include <sensors/GPS/GPS.hpp>
 #include <competitionControl/WaypointReader.h>
@@ -8,7 +10,6 @@
 #include <sensors/lidar/Lidar.h>
 #include <sensors/ardupilot/Ardupilot.hpp>
 #include <vector>
-#include <pcl/common/common_headers.h>
 #include <actuators/motors/MotorDriver/MotorDriver.hpp>
 #include <common/Robot.h>
 
@@ -40,6 +41,7 @@ class CompetitionController
         GPSData _currentAvgGPS;
         double _currentHeading;
         bool _hasAllData;
+        pcl::visualization::PCLVisualizer _viewer;
 
         void OnNewGPSData(GPSData data);
         LISTENER(CompetitionController, OnNewGPSData, GPSData);
