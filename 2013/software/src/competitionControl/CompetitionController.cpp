@@ -195,7 +195,6 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
 
     for(double w = -MaxW; w <= MaxW; w += wInc)
     {
-
       for(double T = deltaDeltaT;T<=DeltaT;T+=deltaDeltaT)
       {
         pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
@@ -209,6 +208,7 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
         }
         else
         {
+          cout << "object found!" << endl;
           scores[i]+=weighting(T);
         }
       }
