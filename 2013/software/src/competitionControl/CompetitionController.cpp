@@ -225,7 +225,7 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
       if (currentScore<min)
       {
         secondMinArg = minArg;
-        minArg = secondMinArg;
+        minArg = j;
         min = currentScore;
       }
     }
