@@ -59,7 +59,10 @@ class CompetitionController
         double GPSdX(GPSData A, GPSData B);
         double GPSdY(GPSData A, GPSData B);
 
+        double weighting(double delta);
+
         pair<double, double> result(double W, double V);
+        pair<double, double> result(double W, double V, double dt);
 };
 
 }

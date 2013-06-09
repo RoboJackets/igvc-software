@@ -259,6 +259,7 @@
 					<Add directory="/usr/include/pcl-1.6" />
 					<Add directory="/usr/include/eigen3" />
 					<Add directory="/usr/include/vtk-5.8" />
+					<Add directory="/usr/local/include/pcl-1.6" />
 				</Compiler>
 				<Linker>
 					<Add library="opencv_highgui" />
@@ -320,6 +321,7 @@
 			<Add directory="$(#boost).include" />
 			<Add directory="src" />
 			<Add directory="/usr/include" />
+			<Add directory="/urs/local/include" />
 		</Compiler>
 		<Linker>
 			<Add library="boost_system" />
