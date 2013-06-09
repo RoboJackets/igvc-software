@@ -275,6 +275,11 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+			<Target title="moveForward">
+				<Option output="bin/runStraight" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -317,6 +322,9 @@
 		<Unit filename="src/actuators/motors/ArduinoMotorControl/DecimiliaMotor_ArduinoIDE/pinDefs.h">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
+		<Unit filename="src/actuators/motors/Executables/moveForward.cpp">
+			<Option target="moveForward" />
+		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/MotorDriver.hpp">
 			<Option target="TestMotorDriver" />
 			<Option target="TestJoystick" />
@@ -328,12 +336,14 @@
 			<Option target="TestJoystick" />
 			<Option target="TestPathPlanning" />
 			<Option target="CompetitionControl" />
+			<Option target="moveForward" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/MotorEncoderDriver2013.h">
 			<Option target="TestMotorDriver" />
 			<Option target="TestJoystick" />
 			<Option target="TestPathPlanning" />
 			<Option target="CompetitionControl" />
+			<Option target="moveForward" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/TestMotorDriver.cpp">
 			<Option target="TestMotorDriver" />
@@ -800,6 +810,7 @@
 			<Option target="TestMotorDriver" />
 			<Option target="TestPathPlanning" />
 			<Option target="CompetitionControl" />
+			<Option target="moveForward" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
@@ -816,6 +827,7 @@
 			<Option target="TestMotorDriver" />
 			<Option target="TestPathPlanning" />
 			<Option target="CompetitionControl" />
+			<Option target="moveForward" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
