@@ -12,6 +12,7 @@
 #include <vector>
 #include <actuators/motors/MotorDriver/MotorDriver.hpp>
 #include <common/Robot.h>
+#include <fstream>
 
 namespace IGVC
 {
@@ -24,7 +25,8 @@ class CompetitionController
         CompetitionController(IGVC::Sensors::GPS* gps,
                               Event<pcl::PointCloud<pcl::PointXYZ> >* mapSource,
                               WaypointReader* waypointReader,
-                              MotorDriver* driver);
+                              MotorDriver* driver,
+                              string fileName = "/home/robojackets/Desktop/directionLog.txt");
         virtual ~CompetitionController();
         bool isRunning();
 
@@ -33,6 +35,7 @@ class CompetitionController
 
     protected:
     private:
+        std::ofstream _logFile;
         IGVC::Sensors::GPS* _gps;
         WaypointReader* _waypointReader;
         MotorDriver* _driver;

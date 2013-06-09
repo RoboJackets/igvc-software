@@ -26,7 +26,6 @@ private:
 
     void ProcessFrame(StereoImageData data)
     {
-        std::cout << "PerspTrans procFrame" << std::endl;
         using namespace cv;
         _source->LockImages();
         try
