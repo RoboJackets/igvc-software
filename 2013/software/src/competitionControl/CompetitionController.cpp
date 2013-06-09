@@ -30,7 +30,7 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
     (*mapSource) += &LOnNewMapFrame;
 
     MaxW = 0.8;
-    DeltaT = 0.1;
+    DeltaT = 1.5
 }
 
 bool CompetitionController::isRunning()
