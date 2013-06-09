@@ -572,7 +572,7 @@
 		<Unit filename="src/mapping/MapPoint.hpp">
 			<Option target="&lt;{~None~}&gt;" />
 		</Unit>
-		<Unit filename="src/mapping/PointCloudAdder.h">
+		<Unit filename="src/mapping/PointCloudAdder.hpp">
 			<Option target="TestPointCloudAdder" />
 		</Unit>
 		<Unit filename="src/mapping/TestBasicMapping.cpp">
