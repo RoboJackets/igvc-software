@@ -12,7 +12,7 @@
 #include "sensors/camera3D/StereoVidMaker.h"
 
 bool RUNNING = true;
-bool DEBUGGING = false;
+bool DEBUGGING = true;
 
 using namespace IGVC::Sensors;
 

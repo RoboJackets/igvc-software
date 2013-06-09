@@ -280,6 +280,32 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 			</Target>
+			<Target title="TestLaneFilter">
+				<Option output="bin/CompetitionControl" prefix_auto="1" extension_auto="1" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add directory="/usr/include/" />
+					<Add directory="/usr/include/pcl-1.6" />
+					<Add directory="/usr/include/eigen3" />
+				</Compiler>
+				<Linker>
+					<Add library="opencv_highgui" />
+					<Add library="opencv_core" />
+					<Add library="opencv_imgproc" />
+					<Add library="opencv_calib3d" />
+					<Add library="flycapture" />
+					<Add library="opencv_features2d" />
+					<Add library="pcl_kdtree" />
+					<Add library="pcl_common" />
+					<Add library="pcl_visualization" />
+					<Add library="vtkCommon" />
+					<Add library="vtkFiltering" />
+					<Add library="vtkRendering" />
+					<Add library="vtkGraphics" />
+					<Add directory="/usr/lib" />
+				</Linker>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -303,6 +329,7 @@
 			<Option target="TestPathPlanning" />
 			<Option target="CompetitionControl" />
 			<Option target="TestHeadingToWaypoint" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/actuators/motors/ArduinoMotorControl/2013Arduino/ArduinoIDETest.cpp">
 			<Option target="&lt;{~None~}&gt;" />
@@ -330,6 +357,7 @@
 			<Option target="TestJoystick" />
 			<Option target="TestPathPlanning" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/MotorEncoderDriver2013.cpp">
 			<Option target="TestMotorDriver" />
@@ -337,6 +365,7 @@
 			<Option target="TestPathPlanning" />
 			<Option target="CompetitionControl" />
 			<Option target="moveForward" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/MotorEncoderDriver2013.h">
 			<Option target="TestMotorDriver" />
@@ -344,6 +373,7 @@
 			<Option target="TestPathPlanning" />
 			<Option target="CompetitionControl" />
 			<Option target="moveForward" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/actuators/motors/MotorDriver/TestMotorDriver.cpp">
 			<Option target="TestMotorDriver" />
@@ -375,6 +405,7 @@
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/common/Robot.h">
 			<Option target="OdometryTest" />
@@ -385,6 +416,7 @@
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.cpp">
 			<Option target="OdometryTest" />
@@ -395,6 +427,7 @@
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/common/utils/ImageUtils.h">
 			<Option target="OdometryTest" />
@@ -405,14 +438,17 @@
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/common/utils/StringUtils.cpp" />
 		<Unit filename="src/common/utils/StringUtils.hpp" />
 		<Unit filename="src/competitionControl/CompetitionController.cpp">
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/competitionControl/CompetitionController.h">
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/competitionControl/TestCompetitionController.cpp">
 			<Option target="CompetitionControl" />
@@ -423,10 +459,12 @@
 		<Unit filename="src/competitionControl/WaypointReader.cpp">
 			<Option target="TestWaypointReader" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/competitionControl/WaypointReader.h">
 			<Option target="TestWaypointReader" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/events/Delegate.hpp">
 			<Option target="TestGPS" />
@@ -529,6 +567,7 @@
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
@@ -541,6 +580,7 @@
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/StereoImageData.hpp">
 			<Option target="OdometryTest" />
@@ -548,6 +588,7 @@
 			<Option target="testCV" />
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/VisOdomData.hpp">
 			<Option target="OdometryTest" />
@@ -629,6 +670,9 @@
 			<Option target="TestPerspTrans" />
 			<Option target="testCV" />
 		</Unit>
+		<Unit filename="src/sensors/camera2D/laneDetection/TestLaneFilter.cpp">
+			<Option target="TestLaneFilter" />
+		</Unit>
 		<Unit filename="src/sensors/camera2D/laneDetection/finalLaneDetection.cpp">
 			<Option target="TestPerspTrans" />
 		</Unit>
@@ -666,6 +710,7 @@
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
 			<Option target="OdometryTest" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/Bumblebee2.h">
 			<Option target="testCV" />
@@ -673,6 +718,7 @@
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
 			<Option target="OdometryTest" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.cpp">
 			<Option target="OdometryTest" />
@@ -683,6 +729,7 @@
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraInfo.h">
 			<Option target="OdometryTest" />
@@ -693,6 +740,7 @@
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/CameraTest.cpp">
 			<Option target="testCamera" />
@@ -711,15 +759,18 @@
 		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoPlayback.cpp">
 			<Option target="testCV" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoPlayback.h">
 			<Option target="testCV" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoSource.hpp">
 			<Option target="testCV" />
 			<Option target="PerspTransformCalculator" />
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/sensors/camera3D/StereoVidMaker.cpp">
 			<Option target="testCV" />
@@ -811,6 +862,7 @@
 			<Option target="TestPathPlanning" />
 			<Option target="CompetitionControl" />
 			<Option target="moveForward" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/serial/ASIOSerialPort.h">
 			<Option target="TestSerial" />
@@ -828,6 +880,7 @@
 			<Option target="TestPathPlanning" />
 			<Option target="CompetitionControl" />
 			<Option target="moveForward" />
+			<Option target="TestLaneFilter" />
 		</Unit>
 		<Unit filename="src/serial/SerialPortTest.cpp">
 			<Option target="TestSerial" />
