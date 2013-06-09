@@ -5,6 +5,7 @@
 #include <sensors/camera2D/laneDetection/CameraListener.hpp>
 #include <actuators/motors/MotorDriver/MotorEncoderDriver2013.h>
 #include <iostream>
+#include <sensors/camera3D/StereoPlayback.h>
 
 using namespace IGVC::Control;
 using namespace IGVC::Sensors;
@@ -18,11 +19,11 @@ int main()
     waypointReader.LoadWaypoints("/home/robojackets/practiceCourse.txt");
 
     cout << "Connecting to GPS..." << endl;
-    HemisphereA100GPS GPS;
+    //HemisphereA100GPS GPS;
 
     cout << "Connecting to motor driver..." << endl;
 
-    MotorEncoderDriver2013 driver;
+    //MotorEncoderDriver2013 driver;
 
     cout << "Connecting to camera..." << endl;
 
@@ -40,10 +41,10 @@ int main()
 
     cout << "Initializing controller..." << endl;
 
-    CompetitionController controller(&GPS,
+    CompetitionController controller(0,
                                      &camList.OnNewData,
                                      &waypointReader,
-                                     &driver);
+                                     0);
 
     cout << "Running..." << endl;
 
