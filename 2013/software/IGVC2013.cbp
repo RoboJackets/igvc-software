@@ -565,11 +565,13 @@
 			<Option target="TestWaypointReader" />
 			<Option target="CompetitionControl" />
 			<Option target="TestLaneFilter" />
+			<Option target="TestHeadingToWaypoint" />
 		</Unit>
 		<Unit filename="src/competitionControl/WaypointReader.h">
 			<Option target="TestWaypointReader" />
 			<Option target="CompetitionControl" />
 			<Option target="TestLaneFilter" />
+			<Option target="TestHeadingToWaypoint" />
 		</Unit>
 		<Unit filename="src/events/Delegate.hpp">
 			<Option target="TestGPS" />
@@ -682,6 +684,8 @@
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
 			<Option target="TestLaneFilter" />
+			<Option target="TestHeadingToWaypoint" />
+			<Option target="TestWaypointReader" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/SensorData.h">
 			<Option target="TestData" />
@@ -695,6 +699,9 @@
 			<Option target="TestPerspTrans" />
 			<Option target="CompetitionControl" />
 			<Option target="TestLaneFilter" />
+			<Option target="TestSerial" />
+			<Option target="TestHeadingToWaypoint" />
+			<Option target="TestWaypointReader" />
 		</Unit>
 		<Unit filename="src/sensors/DataStructures/StereoImageData.hpp">
 			<Option target="OdometryTest" />
@@ -766,7 +773,6 @@
 			<Option target="TestBasicMapping" />
 			<Option target="TestCameraStabilization" />
 			<Option target="CompetitionControl" />
-			<Option target="TestHeadingToWaypoint" />
 		</Unit>
 		<Unit filename="src/sensors/ardupilot/Ardupilot.hpp">
 			<Option target="TestIMU" />
@@ -774,7 +780,6 @@
 			<Option target="TestBasicMapping" />
 			<Option target="TestCameraStabilization" />
 			<Option target="CompetitionControl" />
-			<Option target="TestHeadingToWaypoint" />
 		</Unit>
 		<Unit filename="src/sensors/ardupilot/TestIMU.cpp">
 			<Option target="TestIMU" />
@@ -1037,6 +1042,9 @@
 		</Unit>
 		<Unit filename="src/vision/testImageUtils.cpp">
 			<Option target="testPerspectiveTransform" />
+		</Unit>
+		<Unit filename="test/TestHeadingToWaypoint.cpp">
+			<Option target="TestHeadingToWaypoint" />
 		</Unit>
 		<Unit filename="test/sensors/RobotPositionTest.cpp">
 			<Option target="Regression" />
