@@ -36,7 +36,8 @@ class CompetitionController
 
     protected:
     private:
-            std::ofstream _logFile;
+        bool _running;
+        std::ofstream _logFile;
         RobotPosition _poseTracker;
         WaypointReader* _waypointReader;
         MotorDriver* _driver;
