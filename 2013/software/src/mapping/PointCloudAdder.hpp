@@ -4,18 +4,22 @@
 #include "events/Delegate.hpp"
 #include <pcl/common/common.h>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <events/Event.hpp>
 
 
-typedef PC pcl::PointCloud<pcl::PointXYZ>;
+typedef pcl::PointCloud<pcl::PointXYZ> PC;
 
 class PointCloudAdder
 {
   public:
-    PointCloudAdder(Event< PC>* event1, Event<PC>* event2):
-    _cloud1Received(false), _cloud2Received(false)
+    PointCloudAdder(Event<PC>* event1, Event<PC>* event2)
+        : _cloud1Received(false),
+          _cloud2Received(false),
+          LonNewSource1(this),
+          LonNewSource2(this)
     {
-      (*event1)->&LonNewSource1;
-      (*event2)->&LonNewSource2;
+      (*event1) += &LonNewSource1;
+      (*event2) += &LonNewSource2;
     }
 
     LISTENER(PointCloudAdder, onNewSource1, PC);
@@ -24,16 +28,17 @@ class PointCloudAdder
     virtual ~PointCloudAdder() {}
 
   private:
-      void onNewSourece1(PC newCloud)
+      void onNewSource1(PC newCloud)
       {
         if (_cloud2Received)
         {
-          return _cloud1 += _cloud2;
+          _cloud1 += _cloud2;
+          onBothData(_cloud1);
           _cloud2Received = false;
         }
         else
         {
-          _cloud1Received1 = true;
+          _cloud1Received = true;
         }
       }
 
@@ -41,18 +46,19 @@ class PointCloudAdder
       {
         if (_cloud1Received)
         {
-          return _cloud1 += _cloud2;
+          _cloud1 += _cloud2;
+          onBothData(_cloud1);
           _cloud1Received = false;
         }
         else
         {
-          _cloud1Received2= true;
+          _cloud2Received= true;
         }
       }
 
 
-    pcl::PointCloud<pcl::PointXYZ> _cloud1
-    pcl::PointCloud<pcl::PointXYZ> _cloud2
+    pcl::PointCloud<pcl::PointXYZ> _cloud1;
+    pcl::PointCloud<pcl::PointXYZ> _cloud2;
     bool _cloud1Received;
     bool _cloud2Received;
 };
