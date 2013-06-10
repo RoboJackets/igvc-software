@@ -22,6 +22,7 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
       LOnNewMapFrame(this),
       _viewer("Map and Path"),
       _logFile(),
+      _running(true),
       _poseTracker(gps, imu)
 {
 
@@ -40,7 +41,7 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
 
 bool CompetitionController::isRunning()
 {
-    return true;
+    return _running;
 }
 
 void CompetitionController::OnNewGPSData(GPSData data)
@@ -168,6 +169,10 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
     //Bunch of Visualization stuff
     //if(!_hasAllData)
         //return;
+    if (!_running)
+    {
+      return;
+    }
 
     if(_poseTracker.Lat().size() == 0 || _poseTracker.Long().size() == 0 ||  _poseTracker._Yaw.size() == 0)
         return;
@@ -245,6 +250,17 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
     GPSData currentPos;
     currentPos.Lat(_poseTracker.Lat()[0].value());
     currentPos.Long(_poseTracker.Long()[0].value());
+
+    if (distBetween(waypoint,currentPos)<2)
+    {
+      if(!(_waypointReader->Next()))
+      {
+        _running = false;
+        _driver->stop();
+        return;
+      }
+
+    }
 
     double waypointHeading = headingFromAToB(currentPos, waypoint);
 
