@@ -1,3 +1,5 @@
+#include <mapping/LidarToPointCloudConverter.hpp>
+#include <mapping/PointCloudAdder.hpp>
 #include <competitionControl/CompetitionController.h>
 #include <sensors/GPS/HemisphereA100GPS.h>
 #include <sensors/lidar/NAV200.h>
@@ -7,6 +9,7 @@
 #include <iostream>
 #include <sensors/camera3D/StereoPlayback.h>
 #include <sensors/ardupilot/Ardupilot.hpp>
+#include <actuators/lights/LightController.hpp>
 
 using namespace IGVC::Control;
 using namespace IGVC::Sensors;
@@ -14,6 +17,9 @@ using namespace std;
 
 int main()
 {
+    LightController lights;
+    lights.SetSafetyLightState(Blinking);
+
     cout << "Loading waypoints..." << endl;
 
     WaypointReader waypointReader;
@@ -37,23 +43,29 @@ int main()
 
     cout << "Connecting to lidar..." << endl;
 
-    //NAV200 lidar;
+    NAV200 lidar;
+
+    LidarToPointCloudConverter LTPCC(&lidar);
 
     cout << "Initializing listener..." << endl;
 
-    CameraListener camList(&camera, 0);
+    CameraListener camList(&camera, &lidar);
+
+    PointCloudAdder PCA(&LTPCC.OnNewData, &camList.OnNewData);
 
     cout << "Initializing controller..." << endl;
 
     CompetitionController controller(&GPS,
                                      &imu,
-                                     &camList.OnNewData,
+                                     &PCA.onBothData,
                                      &waypointReader,
                                      &driver);
 
     cout << "Running..." << endl;
 
     while(controller.isRunning()) { }
+
+    lights.SetSafetyLightState(Solid);
 
     cout << "done" << endl;
 
