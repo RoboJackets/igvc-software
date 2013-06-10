@@ -34,7 +34,7 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
 
     _logFile.open(fileName.c_str());
 
-    MaxW = 0.8;
+    MaxW = 1.25;
     DeltaT = 7;
 }
 

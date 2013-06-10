@@ -43,13 +43,13 @@ int main()
 
     cout << "Connecting to lidar..." << endl;
 
-    NAV200 lidar;
+    //NAV200 lidar;
 
-    LidarToPointCloudConverter LTPCC(&lidar);
+    LidarToPointCloudConverter LTPCC(0);
 
     cout << "Initializing listener..." << endl;
 
-    CameraListener camList(&camera, &lidar);
+    CameraListener camList(&camera, 0);
 
     PointCloudAdder PCA(&LTPCC.OnNewData, &camList.OnNewData);
 
@@ -57,7 +57,7 @@ int main()
 
     CompetitionController controller(&GPS,
                                      &imu,
-                                     &PCA.onBothData,
+                                     &camList.OnNewData,
                                      &waypointReader,
                                      &driver);
 
