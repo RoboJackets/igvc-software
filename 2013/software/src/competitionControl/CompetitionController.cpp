@@ -35,7 +35,7 @@ CompetitionController::CompetitionController(IGVC::Sensors::GPS* gps,
 
     _logFile.open(fileName.c_str());
 
-    MaxW = 1.25;
+    MaxW = 0.8;
     DeltaT = 7;
 }
 
@@ -198,6 +198,7 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
     std::vector<double> scores;
     scores.assign(nPaths,0);
 
+    cout << "Setting scores..." << endl;
 
     double minDeltaT = Robot::CurrentRobot().Dist2Front()/v;
 
@@ -205,15 +206,25 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
     {
       for(double T = deltaDeltaT;T<=DeltaT;T+=deltaDeltaT)
       {
+        if(mapFrame.points.size() == 0)
+        {
+            scores[i] = 0;
+            break;
+        }
+
+        cout << "Creating tree" << endl;
         pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
         kdtree.setInputCloud(mapFrame.makeShared());
+        cout << "getting result" << endl;
         pair<double, double> end = result(w,v,T);
+        cout << "got result" << endl;
         /*stringstream name;
         name << "Sphere" << w << T;
         _viewer.addSphere(pcl::PointXYZ(end.first, end.second, 0), 0.1, name.str(), 0);*/
         pcl::PointXYZ searchPoint(end.first, end.second, 0);
         std::vector<int> pointIdxRadiusSearch;
         std::vector<float> pointRadiusSquaredDistance;
+        cout << "check in radius" << endl;
         if(kdtree.radiusSearch(searchPoint, 1.219, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0)
         {
         }
@@ -224,6 +235,8 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
       }
       i++;
     }
+
+    cout << "Finding min score..." << endl;
 
     //_viewer.spin();
 
@@ -243,6 +256,8 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
       }
     }
 
+    cout << "Breaking ties via GPS..." << endl;
+
     double minDist = -1;
     double minW = 0;
 
@@ -259,12 +274,17 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
         _driver->stop();
         return;
       }
-
     }
 
-    double waypointHeading = headingFromAToB(currentPos, waypoint);
+    cout << "Current Waypoint : " << waypoint.Lat() << ", " << waypoint.Long() << endl;
+
+    double waypointHeading = headingFromAToB(waypoint, currentPos);
 
     double currentHeading = _poseTracker.currentYaw();
+    cout << "Current yaw is " << currentHeading << endl;
+    cout << "Headin to w " << waypointHeading << endl;
+
+    cout << "Currently " << abs(waypointHeading - currentHeading) << " degrees from facing waypoint." << endl;
 
     for(int j=0; j < nPaths; j++)
     {
@@ -272,15 +292,17 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
         {
             double w = -MaxW + j * wInc;
 
-            pair<double, double> endLoc = result(w, v);
+            pair<double, double> endLoc = result(w, v, 0.25);
 
-            double angle = atan2(endLoc.second, endLoc.first);
-            //double angle = w*DeltaT;
+            //double angle = atan2(endLoc.second, endLoc.first);
+            double angle = w*0.25;
 
             double endHeading = angle + currentHeading;
 
             double dist = abs(endHeading - waypointHeading);
 
+            cout << w << " = " << dist << endl;
+\
             if(minDist == -1 || dist < minDist)
             {
                 minDist = dist;
@@ -359,15 +381,17 @@ void CompetitionController::OnNewMapFrame(pcl::PointCloud<pcl::PointXYZ> mapFram
 
 double CompetitionController::headingFromAToB(GPSData A, GPSData B)
 {
+    cout << setprecision(10) << A.Lat() << " " << A.Long() << " - " << B.Lat() << " " << B.Long() << endl;
     double dy = B.Lat() - A.Lat();
     double dx = cos(M_PI/180.0*A.Lat())*(B.Long() - A.Long());
-    return atan2(dy, dx);
+    cout << "DY:" << dy << " DX:" << dx << endl;
+    return atan2(-dx, dy)/M_PI * 180.0;
 }
 
 double CompetitionController::distBetween(GPSData A, GPSData B)
 {
-    double dy = B.Lat() - A.Lat();
-    double dx = cos(M_PI/180.0*A.Lat())*(B.Long() - A.Long());
+    double dy = (A.Lat() - B.Lat()) * 111111;
+    double dx = (A.Long() - B.Long()) * cos(A.Lat()) * 111111;
     return sqrt(dx*dx + dy*dy);
 }
 

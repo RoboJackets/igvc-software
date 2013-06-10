@@ -18,7 +18,7 @@ using namespace std;
 int main()
 {
     LightController lights;
-    lights.SetSafetyLightState(Blinking);
+lights.SetSafetyLightState(Blinking);
 
     cout << "Loading waypoints..." << endl;
 
@@ -45,13 +45,13 @@ int main()
 
     //NAV200 lidar;
 
-    LidarToPointCloudConverter LTPCC(0);
+    //0LidarToPointCloudConverter LTPCC(0);
 
     cout << "Initializing listener..." << endl;
 
     CameraListener camList(&camera, 0);
 
-    PointCloudAdder PCA(&LTPCC.OnNewData, &camList.OnNewData);
+    //PointCloudAdder PCA(&LTPCC.OnNewData, &camList.OnNewData);
 
     cout << "Initializing controller..." << endl;
 
