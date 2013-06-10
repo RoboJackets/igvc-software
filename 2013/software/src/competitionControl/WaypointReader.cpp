@@ -20,7 +20,6 @@ bool WaypointReader::LoadWaypoints(std::string path)
             lat = 0, lon = 0;
             ignored = 0;
             input >> lat;
-            input >> ignored;
             input >> lon;
             if(lat != 0 && lon != 0)
             {
