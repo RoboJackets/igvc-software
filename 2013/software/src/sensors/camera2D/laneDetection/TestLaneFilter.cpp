@@ -49,9 +49,9 @@ int main()
 
     cout << "setting up stereo source..." << endl;
 
-    //Bumblebee2 camera;
+    Bumblebee2 camera;
 
-    StereoPlayback camera("/home/robojackets/Desktop/camTesting/data/1CompCourse_left.mpeg", "/home/robojackets/Desktop/camTesting/data/1CompCourse_left.mpeg");
+    //StereoPlayback camera("/home/robojackets/Desktop/camTesting/data/1CompCourse_left.mpeg", "/home/robojackets/Desktop/camTesting/data/1CompCourse_left.mpeg");
 
     cout << "Connecting to lidar..." << endl;
 
