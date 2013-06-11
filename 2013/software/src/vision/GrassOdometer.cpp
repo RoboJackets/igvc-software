@@ -7,6 +7,11 @@ GrassOdometer::GrassOdometer(ColorRange limits, int numKeyPoints) : _colors(limi
   _cam = CameraInfo::CurrentCamera();
 }
 
+/**
+Usage: Takes in iamge and produces an update statement for RobotPositon
+
+**/
+
 void GrassOdometer::processImage(ImageData src)
 {
   Mat descriptors;
@@ -33,6 +38,10 @@ void GrassOdometer::processImage(ImageData src)
   onNewData(update);
 
 }
+
+/**
+Uses SURF method to find and identify keypoints and match them to previous frame's
+**/
 
 void GrassOdometer::findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints, Mat& theDescriptors, MatrixXd& thePositions)
 {
@@ -67,6 +76,10 @@ void GrassOdometer::findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints
   thePositions = pos;
 }
 
+/**
+Returns an average chnange of the row nad column values of keypoints within the iamge
+
+**/
 void GrassOdometer::findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& deltax, double deltay)
 {
 
@@ -88,11 +101,16 @@ void GrassOdometer::findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& de
     oldPoints.col(i) = _lastFramePositions.col(oldIndex);
   }
 
+
   deltaMat = newPoints-oldPoints;
+  //TODO use a better method than simply taking the mean to determine the change in position, consider some ML stuff
   deltax = deltaMat.row(0).mean();
   deltay = deltaMat.row(1).mean();
 }
 
+/**
+Runs keypoints through a naiive color segmentation comparison to determine if they should be considered or are on an obstacle
+**/
 void GrassOdometer::RemoveNonGrassPts(Mat& frame, std::vector<KeyPoint>& keypoints)
 {
   //Remove out of range points
