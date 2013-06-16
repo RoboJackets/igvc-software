@@ -21,6 +21,8 @@ namespace IGVC {
 
 	namespace PathFinding {}
 
+	namespace Control {}
+
 }
 
 #endif /* IGVC_HPP_ */

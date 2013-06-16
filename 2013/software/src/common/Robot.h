@@ -20,6 +20,8 @@ class Robot
     double TireCircumference();
     double Lidar2Center();
     double CameraAngle();
+    double Length();
+    double Dist2Front();
     void Baseline(double);
     void HeightOfMast(double);
     void Mast2Center(double);
@@ -27,6 +29,7 @@ class Robot
     void TireDiameter(double);
     void CameraAngle(double);
     void Lidar2Center(double);
+    void Length(double);
     virtual ~Robot();
   private:
     double _Baseline;
@@ -36,6 +39,7 @@ class Robot
     double _TireDiameter;
     double _CameraAngle;
     double _Lidar2Center;
+    double _Length; //Length of the robot from front to back
 };
 
 #endif // ROBOT_H

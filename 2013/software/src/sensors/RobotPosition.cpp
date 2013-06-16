@@ -14,8 +14,10 @@ Odometer is not properly initialized due to circular dependency, addOdometer sho
 RobotPosition::RobotPosition(IGVC::Sensors::GPS* gps, IMU* imu) : LonNewGPSData(this), LonNewIMUData(this), LonNewVisOdomData(this),
  _GPS(gps), _IMU(imu), _Odom(0), _Lat(100), _Long(100), _Speed(100), _Heading(100), _Roll(100), _Pitch(100), _Yaw(100), _Accuracy(100, 100,100, 100)
 {
-    gps->onNewData += &LonNewGPSData;
-    imu->onNewData += &LonNewIMUData;
+    if(gps)
+        gps->onNewData += &LonNewGPSData;
+    if(imu)
+        imu->onNewData += &LonNewIMUData;
 }
 
 RobotPosition::RobotPosition() : LonNewGPSData(this), LonNewIMUData(this), LonNewVisOdomData(this), _GPS(0), _IMU(0), _Lat(100),
@@ -60,7 +62,9 @@ void RobotPosition::push(GPSData newData)
 
 int RobotPosition::onNewGPSData(GPSData newData)
 {
-  return update(newData);
+  //return update(newData);
+  push(newData);
+  return 0;
 }
 
 
@@ -284,6 +288,36 @@ double RobotPosition::headingAtTime(double time)
 double RobotPosition::speedAtTime(double time)
 {
     return linInterp(time, _Speed);
+}
+
+double RobotPosition::currentRoll()
+{
+    return _Roll[0].value();
+}
+
+double RobotPosition::currentPitch()
+{
+    return _Pitch[0].value();
+}
+
+double RobotPosition::currentYaw()
+{
+    return _Yaw[0].value();
+}
+
+double RobotPosition::currentLat()
+{
+    _Lat[0].value();
+}
+
+double RobotPosition::currentLong()
+{
+    _Long[0].value();
+}
+
+double RobotPosition::currentHeading()
+{
+    _Heading[0].value();
 }
 
 //Gives the linear rate of change between two indices of one of the data structures
