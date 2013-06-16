@@ -122,7 +122,7 @@ void loop()
 	filteredVals.y = (abs(accelVals.y) > 0.005 ? accelVals.y : 0.0);
 	filteredVals.z = (abs(accelVals.z) > 0.005 ? accelVals.z : 0.0);
 
-	double heading = compass.calculate_heading(ahrs.get_dcm_matrix())+3.1415;
+	double heading = compass.calculate_heading(ahrs.get_dcm_matrix());
 	heading = heading*180.0/3.1415;
 	
 	if( prevAccels.x != filteredVals.x ||
