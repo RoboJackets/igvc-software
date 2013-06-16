@@ -3,13 +3,17 @@
 
 #include "sensors/camera3D/StereoSource.hpp"
 #include "sensors/DataStructures/StereoImageData.hpp"
+#include "common/utils/ImageUtils.h"
 
 
 class StereoPlayback : public StereoSource
 {
     public:
-        StereoPlayback(std::string leftVideo, std::string rightVideo, int fps=20);
+        StereoPlayback(std::string leftVideo, std::string rightVideo, int fps=20,
+                       string fileName="/home/robojackets/igvc/2013/software/src/sensors/camera3D/calib/out_camera_data.xml",
+                       bool undistort=true);
         void Run();
+        Mat correctImage(Mat);
         virtual ~StereoPlayback();
 
     private:
@@ -17,7 +21,11 @@ class StereoPlayback : public StereoSource
         VideoCapture _rightVid;
         int _framesPerSecond;
         StereoImageData _images;
+        Mat _cameraMatrix;
+        Mat _distCoeffs;
+        bool _undistort;
         boost::thread _playbackThread;
+
 };
 
 #endif // STEREOPLAYBACK_H

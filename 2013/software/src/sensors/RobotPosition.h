@@ -19,7 +19,7 @@ class RobotPosition
 {
     public:
         RobotPosition();
-        RobotPosition(IGVC::Sensors::GPS* gps, IMU*);
+        RobotPosition(IGVC::Sensors::GPS* gps, IMU* imu);
         LISTENER(RobotPosition, onNewGPSData, GPSData);
         LISTENER(RobotPosition, onNewIMUData, IMUData);
         LISTENER(RobotPosition, onNewVisOdomData, VisOdomData);
@@ -46,6 +46,14 @@ class RobotPosition
         double longAtTime(double time);
         double speedAtTime(double time);
         double headingAtTime(double time);
+
+        double currentLat();
+        double currentLong();
+        double currentHeading();
+        double currentRoll();
+        double currentPitch();
+        double currentYaw();
+
         void latLongCartesianUpdate(double oldLat, double oldLong, double deltaX, double deltaY, double& newLat, double& newLong);
 
         GPSData VisOdom2GPS(VisOdomData in);
@@ -59,13 +67,6 @@ class RobotPosition
         void lock();
         void unlock();
 
-    private:
-        IGVC::Sensors::GPS* _GPS;
-        IMU* _IMU;
-        GrassOdometer* _Odom;
-        double ptIntSpeed(int endingInd);
-        double ptIntHeading(int endingInd);
-        double ptAvgHeading(int endingInd);
         DataArray<DataPoint <double> > _Lat;
         DataArray<DataPoint <double> >  _Long;
         DataArray<DataPoint <double> > _Speed;
@@ -73,6 +74,14 @@ class RobotPosition
         DataArray<DataPoint <double> > _Roll;
         DataArray<DataPoint <double> > _Pitch;
         DataArray<DataPoint <double> > _Yaw;
+
+    private:
+        IGVC::Sensors::GPS* _GPS;
+        IMU* _IMU;
+        GrassOdometer* _Odom;
+        double ptIntSpeed(int endingInd);
+        double ptIntHeading(int endingInd);
+        double ptAvgHeading(int endingInd);
         GPSAccuracy _Accuracy;
         boost::mutex StateMutex;
 };

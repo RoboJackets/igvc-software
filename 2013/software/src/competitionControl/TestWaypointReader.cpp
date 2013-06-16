@@ -6,12 +6,12 @@ using namespace std;
 int main()
 {
     WaypointReader reader;
-    if(reader.LoadWaypoints("/home/matt/Waypoints.txt"))
+    if(reader.LoadWaypoints("/home/robojackets/practiceCourse.txt"))
     {
         while(reader.Next())
         {
-            Waypoint wp = reader.Current();
-            cout << wp.Lattitude << ", " << wp.Longitude << endl;
+            GPSData wp = reader.Current();
+            cout << wp.Lat() << ", " << wp.Long() << endl;
         }
     }
     else

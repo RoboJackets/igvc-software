@@ -17,6 +17,7 @@
 
 using namespace cv;
 using namespace Eigen;
+using namespace IGVC;
 
 class RobotPosition;
 
@@ -25,36 +26,17 @@ class GrassOdometer
   public:
     GrassOdometer(ColorRange limits, int numKeyPoints=100);
     void processImage(ImageData src);
-    void findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints, Mat& theDescriptors, MatrixXd& thePositions);
-    //void computeOffsets(Vector<KeyPoint>& keypoints, MatrixXd& currentPos, int nRows, int nCols);
-    void findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& deltax, double deltay);
-    void FuckItWeWillDoItLive(Mat& frame1, Mat& frame2);
-    void ProcesImageSURF(Mat& frame);
     void RemoveNonGrassPts(Mat& frame, std::vector<KeyPoint>& keypoints);
     void ShowCorrespondence(Mat& frame1, std::vector<KeyPoint>& keypoints_1, Mat& frame2, std::vector<KeyPoint>& keypoints_2,
                             std::vector<DMatch>&  good_matches);
     void MatchPointsFLANN(std::vector<DMatch>& good_matches, Mat& descriptors_1, Mat& descriptors_2 );
-
     Event<VisOdomData> onNewData;
 
-/*
-    Matrix3d centerImageCoords(int nRows, int nCols);
-    Matrix3d RollRotMatrix(double roll);
-    Matrix3d PitchRotMatrix(double pitch);
-    Matrix3d YawRotMatrix(double yaw);
-    Matrix4d HomogRollRotMatrix(double roll);
-    Matrix4d HomogPitchRotMatrix(double pitch);
-    Matrix4d HomogYawRotMatrix(double yaw);
-    Matrix3d RotMat3d(double roll, double pitch, double yaw);
-    Matrix4d HomogRotMat3d(double roll, double pitch, double yaw);
-    Matrix2d ImgRotMat(double angle);
-    Matrix3d HomogImgRotMat(double angle);
-*/
 
     ~GrassOdometer();
   private:
-    Robot _robot = Robot::Misti();
-    CameraInfo _cam;
+    Robot _robot;
+    IGVC::CameraInfo _cam;
     ColorRange _colors;
     int _numKeyPoints;
     ImageData _lastFrame;
@@ -62,6 +44,11 @@ class GrassOdometer
     Mat _lastFrameDescriptors;
     MatrixXd _lastFramePositions;
     bool _firstFrame;
+
+
+    void findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints, Mat& theDescriptors, MatrixXd& thePositions);
+    void findDeltas(Mat& newDescriptors, MatrixXd& newPos, double& deltax, double deltay);
+
 
 
 };

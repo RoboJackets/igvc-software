@@ -1,0 +1,31 @@
+digraph dataFlow {
+	subgraph sensors {
+		"Lidar"[pos="0,0"];
+		"Stereo_Camera"[pos="80,0"];
+		"Encoders"[pos="160,160"];
+		"IMU"[pos="240,0"];
+		"GPS"[pos="320,0"];
+
+	}
+
+	"Robot Position";
+	"Obstacle Location";
+	"Motor Control";
+	"Path";
+	"Motion Commands";
+
+	"Stereo_Camera"->"Robot Position";
+	"Encoders"->"Robot Position";
+	"IMU"->"Robot Position";
+	"GPS"->"Robot Position";
+	"Stereo_Camera"->"Obstacle Location"
+	"Lidar"->"Obstacle Location"
+	"Encoders"->"Motor Control"
+	"Robot Position"-> "Path"
+	"Obstacle Location"->"Path"
+	"Path"->"Motion Commands"
+	
+	"Motor Control"->"Motion Commands"
+
+}
+
