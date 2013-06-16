@@ -9,7 +9,7 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
     _leftVel = 0;
     _rightVel = 0;
     _duration = 0;
-    _maxVel = 3.4;
+    _maxVel = 2.0;
     writeVelocities();
     _running = true;
     _pose.x = 0;

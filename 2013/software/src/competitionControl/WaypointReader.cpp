@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 
+
 WaypointReader::WaypointReader()
 {
 }
@@ -19,13 +20,12 @@ bool WaypointReader::LoadWaypoints(std::string path)
             lat = 0, lon = 0;
             ignored = 0;
             input >> lat;
-            input >> ignored;
             input >> lon;
             if(lat != 0 && lon != 0)
             {
-                Waypoint wp;
-                wp.Lattitude = lat;
-                wp.Longitude = lon;
+                GPSData wp;
+                wp.Lat(lat);
+                wp.Long(lon);
                 _waypoints.push_back(wp);
             }
         }
@@ -39,7 +39,7 @@ bool WaypointReader::LoadWaypoints(std::string path)
     }
 }
 
-Waypoint WaypointReader::Current()
+GPSData WaypointReader::Current()
 {
     return _waypoints[_index];
 }

@@ -1,6 +1,8 @@
 #include "ImageUtils.h"
 
-void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot, CameraInfo& derCameraInfo, int nRows, int nCols)
+using namespace std;
+
+void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols)
 {
 
   //Compute Position Information for points
@@ -22,7 +24,6 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
 
   cameraOffset = rotDynMat.topLeftCorner(3,3)*cameraPos; //describes position relative to
   cameraHeight = -cameraOffset(2);
-  std::cout << "The camera is " << cameraHeight << " meters high." << std::endl;
 
   //Need to get the positions for all points, not just those matched, because non-matched may appear in next frame
   for(unsigned int i=0;i<keypoints.size();i++)
@@ -34,12 +35,15 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
     pos = centerImageCoords(nRows, nCols) * pos; //Changes coordinates in picture such that center of image is 0,0
     pos = HomogImgRotMat(roll)*pos; //Correct for roll of image by rotating it back the opposite way
 
-    phi = derRobot.CameraAngle() - pitch + derCameraInfo.dPhi() * pos(0);
-    theta = derCameraInfo.dTheta() * pos(1);
-    std::cout << "Pos(1): " << pos(1) << "Theta " << theta << std::endl;
 
+    phi = derRobot.CameraAngle() - pitch + atan2((derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
+    //phi = derRobot.CameraAngle() - pitch + atan2((600/768 * derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
+    theta = atan2((derCameraInfo.PixelSideLength() * pos(1)), derCameraInfo.FocalLength());
+     //theta = atan2((900/1024*derCameraInfo.PixelSideLength() * pos(1)), derCameraInfo.FocalLength());
+    //cout << "first argument in theta is  " <<  derCameraInfo.PixelSideLength() * pos(1) << endl;
     xCam = cameraHeight/tan(phi);
-    yCam = cameraHeight*tan(theta);
+    //xCam = 2.87 + .5588;
+    yCam = xCam*tan(theta);
 
     std::cout << "xcam is " << xCam << ". yCam is " << yCam << std::endl;
     xRobot = xCam + cameraOffset(0);
@@ -157,4 +161,27 @@ Matrix3d HomogImgRotMat(double angle)
   rotMat.topLeftCorner(2,2) = ImgRotMat(angle);
   rotMat(2,2) = 1;
   return rotMat;
+}
+
+Mat correctDistortion(Mat rawImg, Mat cameraMatrix, Mat distCoeffs)
+{
+  /*
+  double start, end;
+  start = seconds_since_IGVCpoch();
+  */
+
+  Mat rview, map1, map2;
+
+  Size imageSize = rawImg.size();
+
+  Mat optNewMat = getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, imageSize, 1, imageSize, 0);
+
+  initUndistortRectifyMap(cameraMatrix, distCoeffs, Mat(), optNewMat, imageSize, CV_16SC2, map1, map2);
+
+  remap(rawImg, rview, map1, map2, INTER_LINEAR);
+  /*
+  end = seconds_since_IGVCpoch();
+  std::cout << "This function took " << end-start << " seconds." << std::endl;
+  */
+  return rview;
 }

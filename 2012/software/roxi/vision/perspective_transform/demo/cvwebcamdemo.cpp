@@ -20,21 +20,23 @@ waitKey(1);
 
 int main(){
 	
-		Mat imgm=imread("face.png",1);
+		
 		IplImage img;
 		IplImage *i=0;
 		IplImage *i2=0;
 		IplImage *i3=0;
+		/*Mat imgm=imread("face.png",1);
 		img=imgm;//demo create IplImage from a Mat
 		Mat img2(&img);//demo convert back
 		cvNamedWindow("mainWin", CV_WINDOW_AUTOSIZE); 
 		cvMoveWindow("mainWin", 100, 100);
-		imshow("mainWin", imgm );
+		imshow("mainWin", imgm );*/
 		CvCapture* cap=cvCaptureFromCAM(0);//capture from default camera
 		//CvCapture* cap=cvCreateCameraCapture(0);//deprecated I think
 		
 
-
+		if(!cap)
+			cout << "not open" << endl;
 
 
 		while(1){
@@ -42,12 +44,12 @@ int main(){
 			i2=cvCloneImage(i);//copy i's header and data
 			//cvReleaseImage(&i2);//dealloc i's data
 			//switch rapidly between camera image and test image
-			shownow("mainWin",i2);
+			imshow("mainWin",Mat(i2));
 			
 			cvReleaseImage(&i3);
 			i3=cvCloneImage(i2);//copy i's header and data
 			cvResize(&img,i3);//resize test pic to frame
-			shownow("mainWin",i3);//draw test pic
+			imshow("mainWin",Mat(i3));//draw test pic
 			
 			if(waitKey(1)>0) break;//process events and quit on key press
 			cvReleaseImage(&i2);

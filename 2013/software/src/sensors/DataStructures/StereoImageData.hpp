@@ -9,8 +9,8 @@ class StereoImageData : public SensorData
     StereoImageData() {}
     StereoImageData(Mat& left, Mat& right)
     {
-      _leftImage = left;
-      _rightImage = right;
+      _leftImage = left.clone();
+      _rightImage = right.clone();
     }
 
     ImageData left()
