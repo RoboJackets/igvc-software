@@ -1,7 +1,7 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.6.6)  10 MAY 2013 15:35
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2012.9.19)  9 JUL 2013 19:57
 entering extended mode
  %&-line parsing enabled.
-**igvc_paper_2013.tex
+**igvc_paper_2013
 (./igvc_paper_2013.tex
 LaTeX2e <2009/09/24>
 Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
@@ -576,7 +576,7 @@ File: ./Pics/BenCode_534_small.jpg Graphic file (type jpg)
 File: ./Pics/BenCode_534_small_green.jpg Graphic file (type jpg)
 
 <use ./Pics/BenCode_534_small_green.jpg>
-Overfull \hbox (11.78748pt too wide) in paragraph at lines 25--38
+Overfull \hbox (11.78748pt too wide) in paragraph at lines 24--37
 [][]   [] 
  []
 
@@ -585,13 +585,13 @@ Overfull \hbox (11.78748pt too wide) in paragraph at lines 25--38
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.42 \subsubsection{Path Planning}
+l.41 \subsubsection{Path Planning}
                                   pdfTeX warning (ext4): destination with the s
 ame identifier (name{figure.15}) has been already used, duplicate ignored
 
 \AtBegShi@Output ...ipout \box \AtBeginShipoutBox 
                                                   \fi \fi 
-l.42 \subsubsection{Path Planning}
+l.41 \subsubsection{Path Planning}
                                    <./Pics/BenCode_534_small.jpg> <./Pics/BenCo
 de_534_small_green.jpg>]) (./cost.tex [17]) [18pdfTeX warning (ext4): destinati
 on with the same identifier (name{table.2}) has been already used, duplicate ig
@@ -603,12 +603,12 @@ l.102 \end{document}
                     ] AED: lastpage setting LastPage (./igvc_paper_2013.aux) ) 
 Here is how much of TeX's memory you used:
  6114 strings out of 495061
- 87231 string characters out of 1182622
+ 87231 string characters out of 1182621
  173211 words of memory out of 3000000
  9081 multiletter control sequences out of 15000+50000
  18554 words of font info for 44 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
- 38i,11n,43p,1317b,384s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 38i,11n,43p,1313b,384s stack positions out of 5000i,500n,10000p,200000b,50000s
 {
 /usr/share/texmf-texlive/fonts/enc/dvips/base/8r.enc}</usr/share/texmf-texlive/
 fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-texlive/fonts/type1
@@ -616,7 +616,7 @@ fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texmf-texlive/fonts/type1
 onts/cm/cmr8.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmsy8
 .pfb></usr/share/texmf-texlive/fonts/type1/urw/times/utmb8a.pfb></usr/share/tex
 mf-texlive/fonts/type1/urw/times/utmr8a.pfb>
-Output written on igvc_paper_2013.pdf (18 pages, 2332304 bytes).
+Output written on igvc_paper_2013.pdf (18 pages, 2332297 bytes).
 PDF statistics:
  312 PDF objects out of 1000 (max. 8388607)
  74 named destinations out of 1000 (max. 500000)
