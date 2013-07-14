@@ -1,6 +1,0 @@
-CXX         = g++
-CXXFLAGS   += -Wall -g -O3 -fPIC
-INCDIRS    += -I. -I /cluster/mkl/8.1/include -DMKL
-DYLIB_EXT   = so
-CXXDYLIB    = -shared
-LDFLAGS    += -L /cluster/mkl/8.1/lib/em64t -lmkl_solver -lmkl_lapack -lmkl
