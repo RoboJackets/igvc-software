@@ -1,4 +1,0 @@
-pdflatex igvc_paper_2011
-bibtex igvc_paper_2011
-pdflatex igvc_paper_2011
-pdflatex igvc_paper_2011
