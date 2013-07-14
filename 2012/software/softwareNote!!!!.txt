@@ -1,3 +1,0 @@
-There are still unpushed changes on the igvc laptop. Someone should do a git push on the robot laptop.
-
--Kenny

@@ -1,8 +1,0 @@
-MKL_HOME  = /opt/intel/mkl/8.1.1
-DYLIB_EXT   = so
-CXX         = g++
-CXXDYLIB    = -shared
-CXXFLAGS   += -Wall -g -O3 -funroll-loops -floop-optimize -falign-loops \
- 			  -fPIC -DMKL
-INCDIRS    += -I. -I$(MKL_HOME)/include
-LDFLAGS    += -L$(MKL_HOME)/lib/em64t -lmkl -lguide -lpthread

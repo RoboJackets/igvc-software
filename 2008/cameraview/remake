@@ -1,4 +1,0 @@
-#!/bin/sh
-
-# Generates the 'Makefile' from 'config.pro'
-qmake-qt4 -unix -o Makefile config.pro

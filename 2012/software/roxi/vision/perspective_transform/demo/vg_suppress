@@ -1,7 +1,0 @@
-{
-   LIBZ_SUPPRESSION
-   Memcheck:Cond
-   ...
-   obj:/lib/x86_64-linux-gnu/libz.so*
-}
-
