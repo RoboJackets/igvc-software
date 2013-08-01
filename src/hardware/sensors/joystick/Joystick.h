@@ -3,7 +3,7 @@
 
 #include <boost/thread.hpp>
 #include <vector>
-#include "events/Event.hpp"
+#include "common/events/Event.hpp"
 
 using namespace std;
 

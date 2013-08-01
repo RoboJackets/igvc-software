@@ -14,3 +14,7 @@
 /2013/software/src/sensors/ardupilot/config.mk
 
 *~
+
+#Qt Creator
+*.pro.user
+/build/*

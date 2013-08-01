@@ -2,7 +2,7 @@
 #define SIMULATEDLIDAR_H
 
 #include <boost/thread.hpp>
-#include "sensors/lidar/Lidar.h"
+#include "hardware/sensors/lidar/Lidar.h"
 
 namespace IGVC
 {

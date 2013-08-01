@@ -17,7 +17,7 @@ public:
         return instance;
     }
 
-    bool load(std::string path);
+    bool load(std::string path = defaultPath);
 
     template<typename T>
     T getValue(std::string category, std::string name, T defaultVal)
@@ -63,7 +63,33 @@ public:
         return result;
     }
 
-    // TODO Add nodes for categories/names that can't be found.
+    template<typename T>
+    T getValue(int categoryInd, int nameInd, T defaultVal)
+    {
+        using namespace std;
+        QDomElement root = xmlFile.documentElement();
+
+        if(categoryInd >= root.childNodes().count())
+            return defaultVal;
+
+        QDomNode categoryNode = root.childNodes().at(categoryInd);
+
+        if(nameInd >= categoryNode.childNodes().count())
+            return defaultVal;
+
+        string value = categoryNode.childNodes().at(nameInd).firstChild().nodeValue().toStdString();
+
+        stringstream stream;
+
+        stream << value;
+
+        T result;
+
+        stream >> result;
+
+        return result;
+    }
+
     template<typename T>
     void setValue(std::string category, std::string name, T value)
     {
@@ -98,14 +124,46 @@ public:
         variableNode.firstChild().setNodeValue(stream.str().c_str());
     }
 
-    bool save(std::string path);
+    template<typename T>
+    void setValue(int categoryInd, int nameInd, T value)
+    {
+        using namespace std;
+        stringstream stream;
+
+        stream << value;
+
+        QDomElement root = xmlFile.documentElement();
+
+        if(categoryInd < root.childNodes().count())
+        {
+            QDomNode categoryNode = root.childNodes().at(categoryInd);
+            if(nameInd < categoryNode.childNodes().count())
+            {
+                categoryNode.childNodes().at(nameInd).firstChild().setNodeValue(stream.str().c_str());
+            }
+        }
+    }
+
+    bool save(std::string path = defaultPath);
+
+    int numberOfCategories();
+
+    int numberOfValues(std::string category);
+
+    int numberOfValues(int categoryIndex);
+
+    std::string categoryLabel(int categoryInd);
+
+    std::string valueLabel(int categoryInd, int valueInd);
 
 protected:
 
     QDomDocument xmlFile;
 
+    static std::string defaultPath;
+
 private:
-    ConfigManager() {}
+    ConfigManager();
 
     ConfigManager(ConfigManager const&);
 

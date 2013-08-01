@@ -1,4 +1,4 @@
-#include "sensors/lidar/SimulatedLidar.h"
+#include "hardware/sensors/lidar/SimulatedLidar.h"
 #include <iostream>
 #include <fstream>
 #include <string>
