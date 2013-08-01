@@ -11,7 +11,7 @@ Copypasta from: Matthew Barulic
 
 #include <stdint.h>
 #include <time.h>
-#include "events/Event.hpp"
+#include "common/events/Event.hpp"
 
 namespace IGVC {
 namespace Sensors {

@@ -9,8 +9,8 @@
 #define GPS_HPP_
 
 #include <time.h>
-#include "events/Event.hpp"
-#include "sensors/DataStructures/GPSData.h"
+#include "common/events/Event.hpp"
+#include "hardware/sensors/DataStructures/GPSData.h"
 
 namespace IGVC {
 namespace Sensors {
