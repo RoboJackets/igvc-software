@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QMdiSubWindow>
 #include <QTextEdit>
+#include "adapters/joystickadapter.h"
 
 #include <iostream>
 
@@ -19,11 +20,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(windowMapper, SIGNAL(mapped(QWidget*)),
             this, SLOT(setActiveSubWindow(QWidget*)));
 
-    ui->hardwareStatusList->addItem("GSP");
+    ui->hardwareStatusList->addItem("Joystick");
     connect(ui->hardwareStatusList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(openHardwareView(QModelIndex)));
 
     setupMenus();
     updateWindowMenu();
+
+    _joystick = new Joystick;
 }
 
 void MainWindow::setupMenus()
@@ -38,17 +41,30 @@ void MainWindow::setupMenus()
 
 MainWindow::~MainWindow()
 {
+    delete _joystick;
     delete ui;
 }
 
 void MainWindow::openHardwareView(QModelIndex index)
 {
-    if(index.row()==0 && !findWindowWithTitle("GPS"))
+    if(index.row()==0)
     {
-        MDIWindow *newWindow = new MDIWindow;
-        newWindow->setWindowTitle("GPS");
-        mdiArea->addSubWindow(newWindow);
-        newWindow->show();
+        if(MDIWindow* window = findWindowWithTitle("Joystick"))
+        {
+            if(!window->isVisible())
+                window->show();
+        }
+        else
+        {
+            using namespace std;
+            MDIWindow *newWindow = new MDIWindow;
+            newWindow->setWindowTitle("Joystick");
+            JoystickAdapter *adapter = new JoystickAdapter(_joystick);
+            newWindow->setLayout(new QGridLayout);
+            newWindow->layout()->addWidget(adapter);
+            mdiArea->addSubWindow(newWindow);
+            newWindow->show();
+        }
     }
     updateWindowMenu();
 }
@@ -111,7 +127,7 @@ MDIWindow* MainWindow::findWindowWithTitle(QString title)
     foreach(QMdiSubWindow *window, mdiArea->subWindowList())
     {
         MDIWindow *mdiChild = qobject_cast<MDIWindow*>(window->widget());
-        if(mdiChild->windowTitle() == title)
+        if(mdiChild && mdiChild->windowTitle() == title)
             return mdiChild;
     }
     return 0;

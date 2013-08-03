@@ -31,7 +31,8 @@ SOURCES += \
     ../src/hardware/sensors/DataStructures/SensorData.cpp \
     ../src/hardware/sensors/DataStructures/GPSData.cpp \
     ../src/hardware/sensors/DataStructures/DataArray.cpp \
-    ../src/hardware/serial/ASIOSerialPort.cpp
+    ../src/hardware/serial/ASIOSerialPort.cpp \
+    ../src/gui/adapters/joystickadapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -60,10 +61,12 @@ HEADERS  += \
     ../src/hardware/sensors/DataStructures/GPSAccuracy.hpp \
     ../src/hardware/sensors/DataStructures/DataPoint.hpp \
     ../src/hardware/sensors/DataStructures/DataArray.hpp \
-    ../src/hardware/serial/ASIOSerialPort.h
+    ../src/hardware/serial/ASIOSerialPort.h \
+    ../src/gui/adapters/joystickadapter.h
 
 FORMS    += \
-    ../src/gui/mainwindow.ui
+    ../src/gui/mainwindow.ui \
+    ../src/gui/adapters/joystickadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc

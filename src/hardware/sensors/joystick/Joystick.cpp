@@ -19,6 +19,9 @@ Joystick::Joystick()
         ioctl(_joystick_fd, JSIOCGAXES, &numAxes);
         ioctl(_joystick_fd, JSIOCGBUTTONS, &numButtons);
 
+        _numAxes = numAxes;
+        _numButtons = numButtons;
+
         _state.axes.resize(numAxes);
         _state.buttons.resize(numButtons);
 
@@ -90,4 +93,14 @@ void Joystick::disconnect()
 Joystick::~Joystick()
 {
     disconnect();
+}
+
+int Joystick::NumAxes()
+{
+    return _numAxes;
+}
+
+int Joystick::NumButtons()
+{
+    return _numButtons;
 }
