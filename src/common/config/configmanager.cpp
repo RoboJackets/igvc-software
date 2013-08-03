@@ -36,6 +36,12 @@ bool ConfigManager::load(std::string path)
 
 bool ConfigManager::save(string path)
 {
+    if(path.empty())
+        path = defaultPath;
+
+    cout << path << endl;
+    cout << xmlFile.documentElement().firstChild().firstChildElement("val2").firstChild().nodeValue().toStdString() << endl;
+
     QFile file(QString(path.c_str()));
 
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))

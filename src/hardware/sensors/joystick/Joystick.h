@@ -1,5 +1,5 @@
 #ifndef JOYSTICK_H
-#define JOYSTICB_H
+#define JOYSTICK_H
 
 #include <boost/thread.hpp>
 #include <vector>
@@ -21,6 +21,8 @@ class Joystick
         void disconnect();
         virtual ~Joystick();
         Event<JoystickState> onNewData;
+        int NumAxes();
+        int NumButtons();
     protected:
     private:
         boost::thread _iothread;
@@ -28,6 +30,8 @@ class Joystick
         void threadRun();
         bool _isOpen;
         JoystickState _state;
+        int _numAxes;
+        int _numButtons;
 };
 
 #endif // JOYSTICK_H
