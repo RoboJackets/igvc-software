@@ -7,6 +7,7 @@
 #include "mdiwindow.h"
 #include <QMdiArea>
 #include <QSignalMapper>
+#include "hardware/sensors/joystick/Joystick.h"
 
 namespace Ui {
 class MainWindow;
@@ -36,6 +37,8 @@ private:
     QMdiArea* mdiArea;
     QSignalMapper *windowMapper;
 
+
+    Joystick* _joystick;
 
     MDIWindow *activeMdiChild();
     void setupMenus();
