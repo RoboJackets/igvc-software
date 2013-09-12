@@ -11,7 +11,8 @@ TARGET = IGVC_Control
 TEMPLATE = app
 QT += gui declarative
 
-INCLUDEPATH += ../src/
+INCLUDEPATH += ../src/ \
+    ../src/gui/
 
 SOURCES += \
     ../src/common/config/configmanager.cpp \
