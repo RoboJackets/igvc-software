@@ -47,25 +47,37 @@ MainWindow::~MainWindow()
 
 void MainWindow::openHardwareView(QModelIndex index)
 {
-    if(index.row()==0)
+    QString labelText = ui->hardwareStatusList->item(index.row())->text();
+    if(MDIWindow* window = findWindowWithTitle(labelText))
     {
-        if(MDIWindow* window = findWindowWithTitle("Joystick"))
+        if(!window->isVisible())
+            window->show();
+    }
+    else
+    {
+        using namespace std;
+        MDIWindow *newWindow = new MDIWindow;
+        newWindow->setWindowTitle(labelText);
+        newWindow->setLayout(new QGridLayout);
+
+        //JoystickAdapter *adapter = new JoystickAdapter(_joystick);
+        QWidget* adapter;
+
+        if(labelText == "Joystick")
         {
-            if(!window->isVisible())
-                window->show();
+            adapter = new JoystickAdapter(_joystick);
         }
         else
         {
-            using namespace std;
-            MDIWindow *newWindow = new MDIWindow;
-            newWindow->setWindowTitle("Joystick");
-            JoystickAdapter *adapter = new JoystickAdapter(_joystick);
-            newWindow->setLayout(new QGridLayout);
-            newWindow->layout()->addWidget(adapter);
-            mdiArea->addSubWindow(newWindow);
-            newWindow->show();
+            adapter = new QWidget();
         }
+
+        newWindow->layout()->addWidget(adapter);
+
+        mdiArea->addSubWindow(newWindow);
+        newWindow->show();
     }
+
     updateWindowMenu();
 }
 
