@@ -24,6 +24,7 @@ class MotorEncoderDriver2013 : public MotorDriver
         double getLeftVelocity();
         double getRightVelocity();
         void stop();
+        void setControlEvent(Event<MotorCommand> *event);
 
         Event<EncPose> onNewPosition;
 
@@ -40,6 +41,9 @@ class MotorEncoderDriver2013 : public MotorDriver
         void encThreadRun();
         EncPose _pose;
         bool _running;
+        Event<MotorCommand> *_controlEvent;
+        void onControlEvent(MotorCommand cmd);
+        LISTENER(MotorEncoderDriver2013, onControlEvent, MotorCommand);
 };
 
 #endif // MOTORENCODERDRIVER2013_H
