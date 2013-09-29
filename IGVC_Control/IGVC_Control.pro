@@ -33,7 +33,9 @@ SOURCES += \
     ../src/hardware/sensors/DataStructures/GPSData.cpp \
     ../src/hardware/sensors/DataStructures/DataArray.cpp \
     ../src/hardware/serial/ASIOSerialPort.cpp \
-    ../src/gui/adapters/joystickadapter.cpp
+    ../src/gui/adapters/joystickadapter.cpp \
+    ../src/hardware/actuators/motors/MotorEncoderDriver2013.cpp \
+    ../src/common/utils/StringUtils.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -63,7 +65,10 @@ HEADERS  += \
     ../src/hardware/sensors/DataStructures/DataPoint.hpp \
     ../src/hardware/sensors/DataStructures/DataArray.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
-    ../src/gui/adapters/joystickadapter.h
+    ../src/gui/adapters/joystickadapter.h \
+    ../src/hardware/actuators/motors/MotorEncoderDriver2013.h \
+    ../src/hardware/actuators/motors/MotorDriver.hpp \
+    ../src/common/utils/StringUtils.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
