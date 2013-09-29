@@ -18,18 +18,25 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
     _pose.x = 0;
     _pose.y = 0;
     _pose.theta = 0;
-    cout << "Waiting for motor arduino.";
-    cout.flush();
-    string line;
-    while((line = _arduino.readln()).compare("Ready"))
+    if(_arduino.isConnected())
     {
-        //cout << line << endl;
-        cout << ".";
+        cout << "Waiting for motor arduino.";
         cout.flush();
-        usleep(250);
+        string line;
+        while((line = _arduino.readln()).compare("Ready"))
+        {
+            //cout << line << endl;
+            cout << ".";
+            cout.flush();
+            usleep(250);
+        }
+        cout << endl;
+        Logger::Log(LogLevel::Info, "Motor arduino connected.");
     }
-    cout << endl;
-    Logger::Log(LogLevel::Info, "Motor arduino connected.");
+    else
+    {
+        Logger::Log(LogLevel::Warning, "Motor arduino not connected. Commands will be ignored.");
+    }
     //_encThread = boost::thread(boost::bind(&MotorEncoderDriver2013::encThreadRun, this));
 }
 
