@@ -8,6 +8,7 @@
 #include <QMdiArea>
 #include <QSignalMapper>
 #include "hardware/sensors/joystick/Joystick.h"
+#include "hardware/actuators/motors/MotorEncoderDriver2013.h"
 #include "intelligence/JoystickDriver.hpp"
 
 namespace Ui {
@@ -43,6 +44,9 @@ private:
 
     JoystickDriver *_joystickDriver;
     Joystick *_joystick;
+
+    MotorDriver *_motorController;
+
 
     MDIWindow *activeMdiChild();
     void setupMenus();

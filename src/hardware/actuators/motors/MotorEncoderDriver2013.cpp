@@ -2,10 +2,13 @@
 #include <sstream>
 #include <iostream>
 #include <common/utils/StringUtils.hpp>
+#include <common/logger/logger.h>
 
 MotorEncoderDriver2013::MotorEncoderDriver2013()
- : _arduino("/dev/igvc_2013_motor_arduino", 9600)
+ : _arduino("/dev/igvc_2013_motor_arduino", 9600),
+   LonControlEvent(this)
 {
+    _controlEvent = 0;
     _leftVel = 0;
     _rightVel = 0;
     _duration = 0;
@@ -20,12 +23,13 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
     string line;
     while((line = _arduino.readln()).compare("Ready"))
     {
-        cout << line << endl;
+        //cout << line << endl;
         cout << ".";
         cout.flush();
         usleep(250);
     }
     cout << endl;
+    Logger::Log(LogLevel::Info, "Motor arduino connected.");
     //_encThread = boost::thread(boost::bind(&MotorEncoderDriver2013::encThreadRun, this));
 }
 
@@ -89,6 +93,25 @@ void MotorEncoderDriver2013::writeVelocities()
     _portLock.lock();
     _arduino.write(msg.str());
     _portLock.unlock();
+}
+
+void MotorEncoderDriver2013::setControlEvent(Event<MotorCommand> *event)
+{
+    if(_controlEvent)
+    {
+        (*_controlEvent) -= &LonControlEvent;
+    }
+    if(event)
+    {
+        _controlEvent = event;
+        (*_controlEvent) += &LonControlEvent;
+    }
+}
+
+void MotorEncoderDriver2013::onControlEvent(MotorCommand cmd)
+{
+    setLeftVelocity(cmd.leftVel, (cmd.timed?cmd.millis:0));
+    setLeftVelocity(cmd.rightVel, (cmd.timed?cmd.millis:0));
 }
 
 void MotorEncoderDriver2013::encThreadRun()
