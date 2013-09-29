@@ -27,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     updateWindowMenu();
 
     _joystick = new Joystick;
+    _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 }
 
 void MainWindow::setupMenus()
@@ -143,4 +144,16 @@ MDIWindow* MainWindow::findWindowWithTitle(QString title)
             return mdiChild;
     }
     return 0;
+}
+
+void MainWindow::on_joystickButton_toggled(bool checked)
+{
+    if(checked)
+    {
+
+    }
+    else
+    {
+
+    }
 }

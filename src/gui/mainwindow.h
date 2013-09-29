@@ -8,6 +8,7 @@
 #include <QMdiArea>
 #include <QSignalMapper>
 #include "hardware/sensors/joystick/Joystick.h"
+#include "intelligence/JoystickDriver.hpp"
 
 namespace Ui {
 class MainWindow;
@@ -31,6 +32,8 @@ private slots:
 
     void openHardwareView(QModelIndex index);
 
+    void on_joystickButton_toggled(bool checked);
+
 private:
     Ui::MainWindow *ui;
     ConfigTreeModel configTreeModel;
@@ -38,7 +41,8 @@ private:
     QSignalMapper *windowMapper;
 
 
-    Joystick* _joystick;
+    JoystickDriver *_joystickDriver;
+    Joystick *_joystick;
 
     MDIWindow *activeMdiChild();
     void setupMenus();
