@@ -35,12 +35,12 @@ public:
         output << msg;
         if(level == LogLevel::Error)
         {
-            std::cerr << msg << std::endl;
+            std::cerr << output.str() << std::endl;
             std::cerr.flush();
         }
         else if(level != LogLevel::Debug)
         {
-            std::cout << msg << std::endl;
+            std::cout << output.str() << std::endl;
             std::cout.flush();
         }
         _instance->_fileOutStream << output.str() << std::endl;
