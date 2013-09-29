@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystick = new Joystick;
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
+
+    _motorController = new MotorEncoderDriver2013;
 }
 
 void MainWindow::setupMenus()
@@ -148,12 +150,14 @@ MDIWindow* MainWindow::findWindowWithTitle(QString title)
 
 void MainWindow::on_joystickButton_toggled(bool checked)
 {
+    this->setFocus();
     if(checked)
     {
-
+        _motorController->setControlEvent(&_joystickDriver->controlEvent);
     }
     else
     {
-
+        //TODO : Set motor controller to listen to intelligence events
+        _motorController->setControlEvent(0);
     }
 }
