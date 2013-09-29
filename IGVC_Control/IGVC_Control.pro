@@ -68,7 +68,8 @@ HEADERS  += \
     ../src/gui/adapters/joystickadapter.h \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.h \
     ../src/hardware/actuators/motors/MotorDriver.hpp \
-    ../src/common/utils/StringUtils.hpp
+    ../src/common/utils/StringUtils.hpp \
+    ../src/intelligence/JoystickDriver.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
