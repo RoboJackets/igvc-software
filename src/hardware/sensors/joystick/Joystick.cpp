@@ -3,17 +3,18 @@
 #include <poll.h>
 #include <errno.h>
 #include <linux/joystick.h>
+#include "common/logger/logger.h"
 
 Joystick::Joystick()
 {
     _joystick_fd = open("/dev/input/js0", O_RDONLY);
     if(_joystick_fd < 0)
     {
-        cerr << "Could not open joystick." << endl;
+        Logger::Log(LogLevel::Warning, "Could not open joystick.");
         _isOpen = false;
     } else {
         _isOpen = true;
-        cout << "Joystick opened." << endl;
+        Logger::Log(LogLevel::Info, "Joystick opened.");
 
         unsigned int numAxes=0, numButtons=0;
         ioctl(_joystick_fd, JSIOCGAXES, &numAxes);
@@ -47,7 +48,9 @@ void Joystick::threadRun()
             // Poll error
             if(errno != EINTR)
             {
-                cerr << "Joystick poll error." << endl;
+                std::stringstream msg;
+                msg << "Joystick poll error: " << errno;
+                Logger::Log(LogLevel::Warning, msg.str());
                 continue;
             }
         }
@@ -68,7 +71,6 @@ void Joystick::threadRun()
 
         onNewData(_state);
     }
-    cout << "thread end" << endl;
 }
 
 bool Joystick::isOpen()
@@ -86,7 +88,7 @@ void Joystick::disconnect()
         _joystick_fd = -1;
         _state.axes.clear();
         _state.buttons.clear();
-        cout << "done" << endl;
+        Logger::Log(LogLevel::Info, "Joystick closed.");
     }
 }
 
