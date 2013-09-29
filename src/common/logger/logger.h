@@ -31,7 +31,7 @@ public:
         if(!_instance)
             _instance = new Logger();
         std::stringstream output;
-        output << dateTimeStr() << " [" << LogLevel::str(level) << "] ";
+        output << dateTimeStr() << " [" << LogLevel::str(level) << "] \t";
         output << msg;
         if(level == LogLevel::Error)
         {
