@@ -1,8 +1,8 @@
 #ifndef MOTORENCODERDRIVER2013_H
 #define MOTORENCODERDRIVER2013_H
-#include <serial/ASIOSerialPort.h>
-#include <actuators/motors/MotorDriver/MotorDriver.hpp>
-#include <events/Event.hpp>
+#include <hardware/serial/ASIOSerialPort.h>
+#include <hardware/actuators/motors/MotorDriver.hpp>
+#include <common/events/Event.hpp>
 #include <boost/thread.hpp>
 
 struct EncPose
