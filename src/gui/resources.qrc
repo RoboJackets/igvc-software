@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/images">
         <file alias="Joystick">images/gamecontroller.png</file>
+        <file>images/close.png</file>
+        <file>images/checkmark.png</file>
     </qresource>
 </RCC>
