@@ -242,16 +242,6 @@
     <addaction name="separator"/>
     <addaction name="actionClose"/>
    </widget>
-   <widget class="QMenu" name="menuRobot">
-    <property name="title">
-     <string>Robot</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuSensors">
-    <property name="title">
-     <string>Sensors</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
      <string>Windows</string>
@@ -264,8 +254,6 @@
     <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuRobot"/>
-   <addaction name="menuSensors"/>
    <addaction name="menuWindow"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>

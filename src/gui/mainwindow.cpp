@@ -27,6 +27,13 @@ MainWindow::MainWindow(QWidget *parent) :
     updateWindowMenu();
 
     _joystick = new Joystick;
+    ui->joystickButton->setEnabled(_joystick->isOpen());
+
+    if(!_joystick->isOpen())
+        ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(QIcon(":/images/images/close.png"));
+    else
+        ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(QIcon(":/images/images/checkmark.png"));
+
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
     _motorController = new MotorEncoderDriver2013;
