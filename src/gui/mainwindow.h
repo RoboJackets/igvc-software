@@ -41,6 +41,8 @@ private:
     QMdiArea* mdiArea;
     QSignalMapper *windowMapper;
 
+    QIcon checkIcon;
+    QIcon xIcon;
 
     JoystickDriver *_joystickDriver;
     Joystick *_joystick;
