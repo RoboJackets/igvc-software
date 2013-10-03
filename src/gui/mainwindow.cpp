@@ -63,7 +63,6 @@ void MainWindow::openHardwareView(QModelIndex index)
         newWindow->setWindowTitle(labelText);
         newWindow->setLayout(new QGridLayout);
 
-        //JoystickAdapter *adapter = new JoystickAdapter(_joystick);
         QWidget* adapter;
 
         if(labelText == "Joystick")
