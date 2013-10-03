@@ -23,7 +23,6 @@ MainWindow::MainWindow(QWidget *parent) :
     checkIcon = QIcon(QString(":/images/Checkmark"));
     xIcon = QIcon(QString(":/images/Close"));
 
-    ui->hardwareStatusList->addItem("Joystick");
     connect(ui->hardwareStatusList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(openHardwareView(QModelIndex)));
 
     setupMenus();
@@ -31,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystick = new Joystick;
     ui->joystickButton->setEnabled(_joystick->isOpen());
+    ui->hardwareStatusList->addItem("Joystick");
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
