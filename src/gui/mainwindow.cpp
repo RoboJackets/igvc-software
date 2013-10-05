@@ -28,14 +28,16 @@ MainWindow::MainWindow(QWidget *parent) :
     setupMenus();
     updateWindowMenu();
 
+    _motorController = new MotorEncoderDriver2013;
+    ui->hardwareStatusList->addItem("Motor Board");
+    ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isOpen() ? checkIcon : xIcon);
+
     _joystick = new Joystick;
     ui->joystickButton->setEnabled(_joystick->isOpen());
     ui->hardwareStatusList->addItem("Joystick");
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
-
-    _motorController = new MotorEncoderDriver2013;
 }
 
 void MainWindow::setupMenus()
