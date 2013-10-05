@@ -147,6 +147,11 @@ void MotorEncoderDriver2013::encThreadRun()
     }
 }
 
+bool MotorEncoderDriver2013::isOpen()
+{
+    return _arduino.isConnected();
+}
+
 MotorEncoderDriver2013::~MotorEncoderDriver2013()
 {
     _running = false;

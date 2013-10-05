@@ -65,6 +65,11 @@ class MotorDriver
          * NOTE: Passing a null pointer will still unregister from the previously registered control event.
          */
         virtual void setControlEvent(Event<MotorCommand> *event) = 0;
+
+        /*
+         * Returns the connection status of this motor driver.
+         */
+        virtual bool isOpen() = 0;
 };
 
 #endif // MOTORDRIVER_H

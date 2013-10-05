@@ -26,6 +26,8 @@ class MotorEncoderDriver2013 : public MotorDriver
         void stop();
         void setControlEvent(Event<MotorCommand> *event);
 
+        bool isOpen();
+
         Event<EncPose> onNewPosition;
 
     protected:
