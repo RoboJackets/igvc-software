@@ -3,5 +3,6 @@
         <file alias="Joystick">images/gamecontroller.png</file>
         <file alias="Close">images/close.png</file>
         <file alias="Checkmark">images/checkmark.png</file>
+        <file alias="RoboBuzz">images/RoboBuzz_48x48.png</file>
     </qresource>
 </RCC>
