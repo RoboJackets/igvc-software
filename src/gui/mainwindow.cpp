@@ -3,6 +3,7 @@
 #include <QMdiSubWindow>
 #include <QTextEdit>
 #include "adapters/joystickadapter.h"
+#include "adapters/cameraadapter.h"
 
 #include <iostream>
 
@@ -20,7 +21,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(windowMapper, SIGNAL(mapped(QWidget*)),
             this, SLOT(setActiveSubWindow(QWidget*)));
 
-    ui->hardwareStatusList->addItem("Joystick");
+    setupHardwareStatusList();
+
     connect(ui->hardwareStatusList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(openHardwareView(QModelIndex)));
 
     setupMenus();
@@ -45,9 +47,20 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::setupHardwareStatusList()
+{
+    //Adds all of the clickable hardware elements to the sidebar
+
+    ui->hardwareStatusList->addItem("Joystick");
+    ui->hardwareStatusList->addItem("Camera");
+}
+
 void MainWindow::openHardwareView(QModelIndex index)
 {
-    if(index.row()==0)
+    //getting the name of the element
+    string hardwareID = index.data().toString().toUtf8().constData();
+
+    if(hardwareID=="Joystick")
     {
         if(MDIWindow* window = findWindowWithTitle("Joystick"))
         {
@@ -66,6 +79,26 @@ void MainWindow::openHardwareView(QModelIndex index)
             newWindow->show();
         }
     }
+    if(hardwareID=="Camera")
+    {
+        if(MDIWindow* window = findWindowWithTitle("Camera"))
+        {
+            if(!window->isVisible())
+                window->show();
+        }
+        else
+        {
+            using namespace std;
+            MDIWindow *newWindow = new MDIWindow;
+            newWindow->setWindowTitle("Camera");
+            CameraAdapter *adapter = new CameraAdapter();
+            newWindow->setLayout(new QGridLayout);
+            newWindow->layout()->addWidget(adapter);
+            mdiArea->addSubWindow(newWindow);
+            newWindow->show();
+        }
+    }
+
     updateWindowMenu();
 }
 
