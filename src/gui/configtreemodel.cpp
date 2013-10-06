@@ -25,9 +25,11 @@ public:
     }
 };
 
-ConfigTreeModel::ConfigTreeModel(QObject *)
+ConfigTreeModel::ConfigTreeModel(QObject *) :
+    LOnConfigStructureChanged(this)
 {
     QObject::connect(&_model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(dataWasChanged(QStandardItem*)));
+    ConfigManager::Instance().StructureChanged += &LOnConfigStructureChanged;
 }
 
 void ConfigTreeModel::dataWasChanged(QStandardItem *item)
@@ -40,6 +42,7 @@ void ConfigTreeModel::dataWasChanged(QStandardItem *item)
 
 void ConfigTreeModel::populateModel()
 {
+    _model.clear();
     _model.setColumnCount(2);
     _model.setHeaderData(0, Qt::Horizontal, "Name");
     _model.setHeaderData(1, Qt::Horizontal, "Value");
@@ -73,4 +76,9 @@ void ConfigTreeModel::populateModel()
 QStandardItemModel* ConfigTreeModel::model()
 {
     return &_model;
+}
+
+void ConfigTreeModel::OnConfigStructureChanged(void *)
+{
+    populateModel();
 }

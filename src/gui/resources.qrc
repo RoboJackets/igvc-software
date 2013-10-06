@@ -1,5 +1,11 @@
 <RCC>
     <qresource prefix="/images">
-        <file alias="Joystick">images/gamecontroller.png</file>
+        <file alias="Close">images/close.png</file>
+        <file alias="Checkmark">images/checkmark.png</file>
+        <file alias="RoboBuzz">images/RoboBuzz_48x48.png</file>
+        <file alias="Play">images/play-32.png</file>
+        <file alias="Joystick">images/joystick-32.png</file>
+        <file alias="Pause">images/pause-32.png</file>
+        <file alias="Stop">images/stop-32.png</file>
     </qresource>
 </RCC>

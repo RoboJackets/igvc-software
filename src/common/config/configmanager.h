@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <common/events/Event.hpp>
 
 class ConfigManager
 {
@@ -35,6 +36,7 @@ public:
             stringstream stream;
             stream << defaultVal;
             root.firstChildElement(category.c_str()).firstChildElement(name.c_str()).appendChild(xmlFile.createTextNode(stream.str().c_str()));
+            StructureChanged(0);
             return defaultVal;
         }
 
@@ -47,6 +49,7 @@ public:
             stringstream stream;
             stream << defaultVal;
             categoryNode.firstChildElement(name.c_str()).appendChild(xmlFile.createTextNode(stream.str().c_str()));
+            StructureChanged(0);
             return defaultVal;
         }
 
@@ -108,6 +111,7 @@ public:
             root.appendChild(xmlFile.createElement(category.c_str()));
             root.firstChildElement(category.c_str()).appendChild(xmlFile.createElement(name.c_str()));
             root.firstChildElement(category.c_str()).firstChildElement(name.c_str()).appendChild(xmlFile.createTextNode(stream.str().c_str()));
+            StructureChanged(0);
             return;
         }
 
@@ -118,6 +122,7 @@ public:
             cout << "[ConfigManager] No such variable." << endl;
             root.firstChildElement(category.c_str()).appendChild(xmlFile.createElement(name.c_str()));
             root.firstChildElement(category.c_str()).firstChildElement(name.c_str()).appendChild(xmlFile.createTextNode(stream.str().c_str()));
+            StructureChanged(0);
             return;
         }
 
@@ -155,6 +160,8 @@ public:
     std::string categoryLabel(int categoryInd);
 
     std::string valueLabel(int categoryInd, int valueInd);
+
+    Event<void*> StructureChanged;
 
 protected:
 

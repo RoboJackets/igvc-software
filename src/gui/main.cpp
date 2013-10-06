@@ -7,7 +7,8 @@
 
 int main(int argc, char *argv[])
 {
-    ConfigManager::Instance().load();
+    if(!ConfigManager::Instance().load())
+        ConfigManager::Instance().save();
 
     QApplication a(argc, argv);
     MainWindow w;

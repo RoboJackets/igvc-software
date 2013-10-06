@@ -1,4 +1,5 @@
 #include "configmanager.h"
+#include "common/logger/logger.h"
 
 using namespace std;
 
@@ -20,17 +21,24 @@ bool ConfigManager::load(std::string path)
 
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        cout << "[ConfigManager] Could not open config file: " << defaultPath << endl;
+        stringstream msg;
+        msg << "[ConfigManager] Could not open config file: " << defaultPath;
+        Logger::Log(LogLevel::Warning, msg.str());
+        //cout << "[ConfigManager] Could not open config file: " << defaultPath << endl;
         return false;
     }
 
     if(!xmlFile.setContent(&file))
     {
-        cout << "[ConfigManager] Could not parse config file: " << defaultPath << endl;
+        stringstream msg;
+        msg << "[ConfigManager] Could not parse config file: " << defaultPath;
+        Logger::Log(LogLevel::Warning, msg.str());
+        //cout << "[ConfigManager] Could not parse config file: " << defaultPath << endl;
         return false;
     }
 
     file.close();
+    StructureChanged(0);
     return true;
 }
 
@@ -39,14 +47,14 @@ bool ConfigManager::save(string path)
     if(path.empty())
         path = defaultPath;
 
-    cout << path << endl;
-    cout << xmlFile.documentElement().firstChild().firstChildElement("val2").firstChild().nodeValue().toStdString() << endl;
-
     QFile file(QString(path.c_str()));
 
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        cout << "[ConfigManager] Could not open file." << endl;
+        stringstream msg;
+        msg << "[ConfigManager] Could not open file for saving.";
+        Logger::Log(LogLevel::Warning, msg.str());
+        //cout << "[ConfigManager] Could not open file for saving." << endl;
         return false;
     }
 
