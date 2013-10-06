@@ -31,6 +31,8 @@ private slots:
 
     void openHardwareView(QModelIndex index);
 
+    void setupHardwareStatusList();
+
 private:
     Ui::MainWindow *ui;
     ConfigTreeModel configTreeModel;
