@@ -3,6 +3,7 @@
 #include <QMdiSubWindow>
 #include <QTextEdit>
 #include "adapters/joystickadapter.h"
+#include "adapters/cameraadapter.h"
 
 #include <iostream>
 
@@ -38,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
+
+    ui->hardwareStatusList->addItem("Camera");
 
     isRunning = false;
     isPaused = false;
@@ -81,6 +84,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         {
             adapter = new JoystickAdapter(_joystick);
             newWindow->setWindowIcon(QIcon(":/images/Joystick"));
+        }
+        else if(labelText == "Camera")
+        {
+            adapter = new CameraAdapter();
         }
         else
         {
