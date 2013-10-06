@@ -35,6 +35,10 @@ private slots:
 
     void on_joystickButton_toggled(bool checked);
 
+    void on_playButton_clicked();
+
+    void on_stopButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     ConfigTreeModel configTreeModel;
@@ -49,6 +53,7 @@ private:
 
     MotorDriver *_motorController;
 
+    bool isRunning, isPaused;
 
     MDIWindow *activeMdiChild();
     void setupMenus();

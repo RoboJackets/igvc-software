@@ -38,6 +38,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
+
+    isRunning = false;
+    isPaused = false;
+    ui->stopButton->setVisible(false);
 }
 
 void MainWindow::setupMenus()
@@ -167,5 +171,38 @@ void MainWindow::on_joystickButton_toggled(bool checked)
     {
         //TODO : Set motor controller to listen to intelligence events
         _motorController->setControlEvent(0);
+    }
+}
+
+void MainWindow::on_playButton_clicked()
+{
+    if(isRunning)
+    {
+        if(isPaused)
+        {
+            ui->playButton->setIcon(QIcon(":/images/Pause"));
+        }
+        else
+        {
+            ui->playButton->setIcon(QIcon(":/images/Play"));
+        }
+        isPaused = !isPaused;
+    }
+    else
+    {
+        ui->playButton->setIcon(QIcon(":/images/Pause"));
+        ui->stopButton->setVisible(true);
+        isRunning = true;
+    }
+}
+
+void MainWindow::on_stopButton_clicked()
+{
+    if(isRunning)
+    {
+        ui->playButton->setIcon(QIcon(":/images/Play"));
+        ui->stopButton->setVisible(false);
+        isRunning = false;
+        isPaused = false;
     }
 }
