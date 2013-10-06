@@ -8,6 +8,8 @@
 #include <QMdiArea>
 #include <QSignalMapper>
 #include "hardware/sensors/joystick/Joystick.h"
+#include "hardware/actuators/motors/MotorEncoderDriver2013.h"
+#include "intelligence/JoystickDriver.hpp"
 
 namespace Ui {
 class MainWindow;
@@ -31,7 +33,15 @@ private slots:
 
     void openHardwareView(QModelIndex index);
 
+
     void setupHardwareStatusList();
+
+    void on_joystickButton_toggled(bool checked);
+
+    void on_playButton_clicked();
+
+    void on_stopButton_clicked();
+
 
 private:
     Ui::MainWindow *ui;
@@ -39,8 +49,15 @@ private:
     QMdiArea* mdiArea;
     QSignalMapper *windowMapper;
 
+    QIcon checkIcon;
+    QIcon xIcon;
 
-    Joystick* _joystick;
+    JoystickDriver *_joystickDriver;
+    Joystick *_joystick;
+
+    MotorDriver *_motorController;
+
+    bool isRunning, isPaused;
 
     MDIWindow *activeMdiChild();
     void setupMenus();

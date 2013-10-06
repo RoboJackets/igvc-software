@@ -104,8 +104,7 @@ private:
 	bool _hasEncounteredStartByte;
 	string _packet;
 
-	string _line;
-
+    string _line;
 };
 
 #endif /* ASIOSERIALPORT_H_ */
