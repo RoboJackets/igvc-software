@@ -34,7 +34,8 @@ private slots:
     void openHardwareView(QModelIndex index);
 
 
-    void setupHardwareStatusList();
+    //TODO : We're gonna make this a real thing.
+    //void setupHardwareStatusList();
 
     void on_joystickButton_toggled(bool checked);
 
