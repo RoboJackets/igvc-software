@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>RoboJackets IGVC</string>
+   <string>RoboJackets IGVC Control</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/images/RoboBuzz</normaloff>:/images/RoboBuzz</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -28,7 +32,7 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>30</height>
+          <height>32</height>
          </size>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
@@ -46,6 +50,9 @@
          </property>
          <item row="0" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout">
+           <property name="sizeConstraint">
+            <enum>QLayout::SetDefaultConstraint</enum>
+           </property>
            <item>
             <widget class="BatteryIndicator" name="batteryIndicator">
              <property name="sizePolicy">
@@ -66,6 +73,9 @@
              <property name="value">
               <number>24</number>
              </property>
+             <property name="invertedAppearance">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
            <item>
@@ -82,32 +92,60 @@
             </spacer>
            </item>
            <item>
-            <widget class="QPushButton" name="pauseButton">
-             <property name="text">
-              <string>Pause</string>
-             </property>
-            </widget>
-           </item>
-           <item>
             <widget class="QPushButton" name="playButton">
              <property name="text">
-              <string>Play</string>
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/images/Play</normaloff>:/images/Play</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="stopButton">
+             <property name="autoFillBackground">
+              <bool>false</bool>
+             </property>
              <property name="text">
-              <string>Stop</string>
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/images/Stop</normaloff>:/images/Stop</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QPushButton" name="joystickButton">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="minimumSize">
               <size>
-               <width>0</width>
-               <height>0</height>
+               <width>32</width>
+               <height>32</height>
               </size>
              </property>
              <property name="toolTip">
@@ -242,16 +280,6 @@
     <addaction name="separator"/>
     <addaction name="actionClose"/>
    </widget>
-   <widget class="QMenu" name="menuRobot">
-    <property name="title">
-     <string>Robot</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuSensors">
-    <property name="title">
-     <string>Sensors</string>
-    </property>
-   </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
      <string>Windows</string>
@@ -264,8 +292,6 @@
     <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuRobot"/>
-   <addaction name="menuSensors"/>
    <addaction name="menuWindow"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>

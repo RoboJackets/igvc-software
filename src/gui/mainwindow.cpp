@@ -3,7 +3,6 @@
 #include <QMdiSubWindow>
 #include <QTextEdit>
 #include "adapters/joystickadapter.h"
-#include "adapters/cameraadapter.h"
 
 #include <iostream>
 
@@ -21,14 +20,28 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(windowMapper, SIGNAL(mapped(QWidget*)),
             this, SLOT(setActiveSubWindow(QWidget*)));
 
-    setupHardwareStatusList();
+    checkIcon = QIcon(QString(":/images/Checkmark"));
+    xIcon = QIcon(QString(":/images/Close"));
 
     connect(ui->hardwareStatusList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(openHardwareView(QModelIndex)));
 
     setupMenus();
     updateWindowMenu();
 
+    _motorController = new MotorEncoderDriver2013;
+    ui->hardwareStatusList->addItem("Motor Board");
+    ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isOpen() ? checkIcon : xIcon);
+
     _joystick = new Joystick;
+    ui->joystickButton->setEnabled(_joystick->isOpen());
+    ui->hardwareStatusList->addItem("Joystick");
+    ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
+
+    _joystickDriver = new JoystickDriver(&_joystick->onNewData);
+
+    isRunning = false;
+    isPaused = false;
+    ui->stopButton->setVisible(false);
 }
 
 void MainWindow::setupMenus()
@@ -47,56 +60,37 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::setupHardwareStatusList()
-{
-    //Adds all of the clickable hardware elements to the sidebar
-
-    ui->hardwareStatusList->addItem("Joystick");
-    ui->hardwareStatusList->addItem("Camera");
-}
-
 void MainWindow::openHardwareView(QModelIndex index)
 {
-    //getting the name of the element
-    string hardwareID = index.data().toString().toUtf8().constData();
-
-    if(hardwareID=="Joystick")
+    QString labelText = ui->hardwareStatusList->item(index.row())->text();
+    if(MDIWindow* window = findWindowWithTitle(labelText))
     {
-        if(MDIWindow* window = findWindowWithTitle("Joystick"))
-        {
-            if(!window->isVisible())
-                window->show();
-        }
-        else
-        {
-            using namespace std;
-            MDIWindow *newWindow = new MDIWindow;
-            newWindow->setWindowTitle("Joystick");
-            JoystickAdapter *adapter = new JoystickAdapter(_joystick);
-            newWindow->setLayout(new QGridLayout);
-            newWindow->layout()->addWidget(adapter);
-            mdiArea->addSubWindow(newWindow);
-            newWindow->show();
-        }
+        if(!window->isVisible())
+            window->show();
     }
-    if(hardwareID=="Camera")
+    else
     {
-        if(MDIWindow* window = findWindowWithTitle("Camera"))
+        using namespace std;
+        MDIWindow *newWindow = new MDIWindow;
+        newWindow->setWindowTitle(labelText);
+        newWindow->setLayout(new QGridLayout);
+
+        QWidget* adapter;
+
+        if(labelText == "Joystick")
         {
-            if(!window->isVisible())
-                window->show();
+            adapter = new JoystickAdapter(_joystick);
+            newWindow->setWindowIcon(QIcon(":/images/Joystick"));
         }
         else
         {
-            using namespace std;
-            MDIWindow *newWindow = new MDIWindow;
-            newWindow->setWindowTitle("Camera");
-            CameraAdapter *adapter = new CameraAdapter();
-            newWindow->setLayout(new QGridLayout);
-            newWindow->layout()->addWidget(adapter);
-            mdiArea->addSubWindow(newWindow);
-            newWindow->show();
+            adapter = new QWidget();
         }
+
+        newWindow->layout()->addWidget(adapter);
+
+        mdiArea->addSubWindow(newWindow);
+        newWindow->show();
     }
 
     updateWindowMenu();
@@ -164,4 +158,51 @@ MDIWindow* MainWindow::findWindowWithTitle(QString title)
             return mdiChild;
     }
     return 0;
+}
+
+void MainWindow::on_joystickButton_toggled(bool checked)
+{
+    this->setFocus();
+    if(checked)
+    {
+        _motorController->setControlEvent(&_joystickDriver->controlEvent);
+    }
+    else
+    {
+        //TODO : Set motor controller to listen to intelligence events
+        _motorController->setControlEvent(0);
+    }
+}
+
+void MainWindow::on_playButton_clicked()
+{
+    if(isRunning)
+    {
+        if(isPaused)
+        {
+            ui->playButton->setIcon(QIcon(":/images/Pause"));
+        }
+        else
+        {
+            ui->playButton->setIcon(QIcon(":/images/Play"));
+        }
+        isPaused = !isPaused;
+    }
+    else
+    {
+        ui->playButton->setIcon(QIcon(":/images/Pause"));
+        ui->stopButton->setVisible(true);
+        isRunning = true;
+    }
+}
+
+void MainWindow::on_stopButton_clicked()
+{
+    if(isRunning)
+    {
+        ui->playButton->setIcon(QIcon(":/images/Play"));
+        ui->stopButton->setVisible(false);
+        isRunning = false;
+        isPaused = false;
+    }
 }
