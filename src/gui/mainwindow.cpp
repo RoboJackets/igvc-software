@@ -25,6 +25,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->hardwareStatusList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(openHardwareView(QModelIndex)));
 
+    Logger::setSatusBar(ui->statusBar);
+
     setupMenus();
     updateWindowMenu();
 
@@ -204,5 +206,19 @@ void MainWindow::on_stopButton_clicked()
         ui->stopButton->setVisible(false);
         isRunning = false;
         isPaused = false;
+    }
+}
+
+void MainWindow::on_actionStatus_Bar_toggled(bool checked)
+{
+    if(checked)
+    {
+        ui->statusBar->show();
+        Logger::setSatusBar(ui->statusBar);
+    }
+    else
+    {
+        ui->statusBar->hide();
+        Logger::setSatusBar(0);
     }
 }
