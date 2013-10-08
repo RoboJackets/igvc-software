@@ -39,6 +39,8 @@ private slots:
 
     void on_stopButton_clicked();
 
+    void on_actionStatus_Bar_toggled(bool arg1);
+
 private:
     Ui::MainWindow *ui;
     ConfigTreeModel configTreeModel;

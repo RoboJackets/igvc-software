@@ -14,6 +14,7 @@ Logger::Logger()
     stream << ".txt";
     std::cout << stream.str() << std::endl;
     _fileOutStream.open(stream.str().c_str());
+    _statusBar = 0;
 }
 
 Logger::~Logger()
