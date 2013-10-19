@@ -81,7 +81,7 @@ void MainWindow::openHardwareView(QModelIndex index)
 
         if(labelText == "Joystick")
         {
-            adapter = new JoystickAdapter(_joystick);
+            adapter = new JoystickAdapter(0);//_joystick);
             newWindow->setWindowIcon(QIcon(":/images/Joystick"));
         }
         else
