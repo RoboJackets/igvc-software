@@ -10,7 +10,7 @@
 
 #include <time.h>
 #include "common/events/Event.hpp"
-#include "hardware/sensors/DataStructures/GPSData.h"
+#include "hardware/sensors/DataStructures/GPSData.hpp"
 
 namespace IGVC {
 namespace Sensors {

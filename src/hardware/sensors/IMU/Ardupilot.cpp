@@ -2,7 +2,7 @@
 #include <string.h>
 #include <iostream>
 #include <sstream>
-#include "hardware/sensors/timing.h"
+#include <common/utils/timing.h>
 #include <common/utils/StringUtils.hpp>
 
 using namespace std;
