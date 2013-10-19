@@ -7,7 +7,7 @@ class SensorData
 {
     public:
         SensorData() : MeasurementTime(seconds_since_IGVCpoch()) { }
-        SensorData(double time_ms) : MeasurementTime(time) { }
+        SensorData(double time_ms) : MeasurementTime(time_ms) { }
         double time()
 	{
 		return MeasurementTime;
