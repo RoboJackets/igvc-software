@@ -29,9 +29,6 @@ SOURCES += \
     ../src/hardware/sensors/joystick/Joystick.cpp \
     ../src/hardware/sensors/lidar/SimulatedLidar.cpp \
     ../src/hardware/sensors/lidar/NAV200.cpp \
-    ../src/hardware/sensors/DataStructures/SensorData.cpp \
-    ../src/hardware/sensors/DataStructures/GPSData.cpp \
-    ../src/hardware/sensors/DataStructures/DataArray.cpp \
     ../src/hardware/serial/ASIOSerialPort.cpp \
     ../src/gui/adapters/joystickadapter.cpp \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.cpp \
