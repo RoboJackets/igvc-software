@@ -1,7 +1,7 @@
 #ifndef GPSDATA_H
 #define GPSDATA_H
 
-#include "SensorData.h"
+#include "SensorData.hpp"
 //#include <sensors/GPS/GPS.hpp>
 #include "GPSAccuracy.hpp"
 
