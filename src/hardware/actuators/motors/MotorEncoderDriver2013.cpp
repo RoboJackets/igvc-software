@@ -37,6 +37,7 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
     {
         Logger::Log(LogLevel::Warning, "Motor arduino not connected. Commands will be ignored.");
     }
+    //TODO : Encoder access on Arduino-side code
     //_encThread = boost::thread(boost::bind(&MotorEncoderDriver2013::encThreadRun, this));
 }
 
@@ -96,9 +97,12 @@ void MotorEncoderDriver2013::writeVelocities()
     if(Ldir) Lpwm = 255 - Lpwm;
     if(Rdir) Rpwm = 255 - Rpwm;
 
-    msg << "SW" << Rdir << " " << Rpwm << " " << Ldir << " " << Lpwm << " " << _duration;
+    //TODO : duration not yet supported on Arduino-side code
+    msg << "SW" << Rdir << " " << Rpwm << " " << Ldir << " " << Lpwm;// << " " << _duration;
     _portLock.lock();
     _arduino.write(msg.str());
+    Logger::Log(LogLevel::Info, _maxVel);
+    //Logger::Log(LogLevel::Info, msg.str());
     _portLock.unlock();
 }
 
@@ -118,7 +122,7 @@ void MotorEncoderDriver2013::setControlEvent(Event<MotorCommand> *event)
 void MotorEncoderDriver2013::onControlEvent(MotorCommand cmd)
 {
     setLeftVelocity(cmd.leftVel, (cmd.timed?cmd.millis:0));
-    setLeftVelocity(cmd.rightVel, (cmd.timed?cmd.millis:0));
+    setRightVelocity(cmd.rightVel, (cmd.timed?cmd.millis:0));
 }
 
 void MotorEncoderDriver2013::encThreadRun()
