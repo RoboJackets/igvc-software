@@ -41,7 +41,7 @@ void loop()
         while(Serial.available()<=0){}
         analogWrite(rightSpeed, Serial.parseInt());
         while(Serial.available()<=0){}
-        digitalWrite(leftDir, Serial.parseInt());
+        digitalWrite(leftDir, !Serial.parseInt());
         while(Serial.available()<=0){}
         analogWrite(leftSpeed, Serial.parseInt());
       }
