@@ -2,8 +2,8 @@
 int rightDir = 9;
 int rightSpeed = 10;
 int rightDisable = 11;
-int leftDir = 6;
-int leftSpeed = 7;
+int leftDir = 7;
+int leftSpeed = 6;
 int leftDisable = 8;
 
 
@@ -41,7 +41,7 @@ void loop()
         while(Serial.available()<=0){}
         analogWrite(rightSpeed, Serial.parseInt());
         while(Serial.available()<=0){}
-        digitalWrite(leftDir, !Serial.parseInt());
+        digitalWrite(leftDir, Serial.parseInt());
         while(Serial.available()<=0){}
         analogWrite(leftSpeed, Serial.parseInt());
       }
