@@ -9,13 +9,14 @@
 
 #include <vector>
 #include <algorithm>
-#include "Delegate.hpp"
 #include <iostream>
 #include <stdio.h>
+#include "Delegate.hpp"
 
 template <typename T>
 class Event
 {
+    typedef typename std::vector< Delegate<T>* >::iterator iter;
     public:
         void operator+=(Delegate<T>* delegate)
         {
@@ -27,7 +28,6 @@ class Event
         }
         void operator-=(Delegate<T>* delegate)
         {
-            typedef typename std::vector< Delegate<T>* >::iterator iter;
             iter i = _delegates.begin();
             while (i != _delegates.end())
             {
@@ -43,9 +43,9 @@ class Event
         }
         void operator()(T param)
         {
-            typedef typename std::vector< Delegate<T>* >::iterator iter;
             for (iter i = _delegates.begin(); i != _delegates.end(); ++i)
             {
+                if((*i) != NULL)
                 (*i)->operator()(param);
             }
         }
