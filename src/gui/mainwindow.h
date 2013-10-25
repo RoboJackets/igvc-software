@@ -41,6 +41,10 @@ private slots:
 
     void on_actionStatus_Bar_toggled(bool arg1);
 
+    void on_saveConfigButton_clicked();
+
+    void on_loadConfigButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     ConfigTreeModel configTreeModel;
