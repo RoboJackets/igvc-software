@@ -1,8 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "adapters/joystickadapter.h"
+
 #include <QMdiSubWindow>
 #include <QTextEdit>
-#include "adapters/joystickadapter.h"
+#include <QFileDialog>
 
 #include <iostream>
 
@@ -81,7 +83,7 @@ void MainWindow::openHardwareView(QModelIndex index)
 
         if(labelText == "Joystick")
         {
-            adapter = new JoystickAdapter(0);//_joystick);
+            adapter = new JoystickAdapter(_joystick);
             newWindow->setWindowIcon(QIcon(":/images/Joystick"));
         }
         else
@@ -221,4 +223,15 @@ void MainWindow::on_actionStatus_Bar_toggled(bool checked)
         ui->statusBar->hide();
         Logger::setSatusBar(0);
     }
+}
+
+void MainWindow::on_saveConfigButton_clicked()
+{
+    ConfigManager::Instance().save();
+}
+
+void MainWindow::on_loadConfigButton_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Configuration File"), "", tr("XML Files(*.xml)"));
+    ConfigManager::Instance().load(fileName.toStdString());
 }

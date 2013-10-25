@@ -11,6 +11,8 @@ int main(int argc, char *argv[])
 #ifdef Q_WS_X11
     XInitThreads();
 #endif
+
+    qRegisterMetaType<Qt::Orientation>("Qt::Orientation");
     if(!ConfigManager::Instance().load())
         ConfigManager::Instance().save();
 
