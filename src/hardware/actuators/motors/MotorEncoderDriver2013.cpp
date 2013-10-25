@@ -101,7 +101,6 @@ void MotorEncoderDriver2013::writeVelocities()
     msg << "SW" << Rdir << " " << Rpwm << " " << Ldir << " " << Lpwm;// << " " << _duration;
     _portLock.lock();
     _arduino.write(msg.str());
-    Logger::Log(LogLevel::Info, _maxVel);
     //Logger::Log(LogLevel::Info, msg.str());
     _portLock.unlock();
 }
@@ -112,9 +111,9 @@ void MotorEncoderDriver2013::setControlEvent(Event<MotorCommand> *event)
     {
         (*_controlEvent) -= &LonControlEvent;
     }
+    _controlEvent = event;
     if(event)
     {
-        _controlEvent = event;
         (*_controlEvent) += &LonControlEvent;
     }
 }
