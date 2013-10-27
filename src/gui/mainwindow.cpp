@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "adapters/joystickadapter.h"
+#include "adapters/mapadapter.h"
 
 #include <QMdiSubWindow>
 #include <QTextEdit>
@@ -40,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->joystickButton->setEnabled(_joystick->isOpen());
     ui->hardwareStatusList->addItem("Joystick");
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
+
+    ui->hardwareStatusList->addItem("Map");
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
@@ -85,6 +88,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         {
             adapter = new JoystickAdapter(_joystick);
             newWindow->setWindowIcon(QIcon(":/images/Joystick"));
+        }
+        else if(labelText == "Map")
+        {
+            adapter = new MapAdapter();
         }
         else
         {

@@ -7,5 +7,6 @@
         <file alias="Joystick">images/joystick-32.png</file>
         <file alias="Pause">images/pause-32.png</file>
         <file alias="Stop">images/stop-32.png</file>
+        <file alias="Home">images/home-25.png</file>
     </qresource>
 </RCC>
