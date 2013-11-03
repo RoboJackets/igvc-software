@@ -37,7 +37,9 @@ SOURCES += \
     ../src/intelligence/pathplanning/searchmove.cpp \
     ../src/intelligence/pathplanning/igvcsearchproblem.cpp \
     ../src/hardware/sensors/IMU/Ardupilot.cpp \
-    ../src/gui/adapters/mapadapter.cpp
+    ../src/gui/adapters/mapadapter.cpp \
+    ../src/intelligence/mapping.cpp \
+    ../src/intelligence/mapping/mapping.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -78,7 +80,9 @@ HEADERS  += \
     ../src/intelligence/pathplanning/searchmove.h \
     ../src/intelligence/pathplanning/igvcsearchproblem.h \
     ../src/hardware/sensors/IMU/Ardupilot.h \
-    ../src/gui/adapters/mapadapter.h
+    ../src/gui/adapters/mapadapter.h \
+    ../src/intelligence/mapping.h \
+    ../src/intelligence/mapping/mapping.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
