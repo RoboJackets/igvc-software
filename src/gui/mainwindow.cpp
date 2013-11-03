@@ -3,6 +3,8 @@
 #include <QMdiSubWindow>
 #include <QTextEdit>
 #include "adapters/joystickadapter.h"
+#include "adapters/lidaradapter.h"
+#include <QDebug>
 
 #include <iostream>
 
@@ -38,6 +40,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
+
+    ui->hardwareStatusList->addItem("LIDAR");
 
     isRunning = false;
     isPaused = false;
@@ -81,6 +85,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         {
             adapter = new JoystickAdapter(_joystick);
             newWindow->setWindowIcon(QIcon(":/images/Joystick"));
+        }
+        else if(labelText == "LIDAR")
+        {
+            adapter = new LidarAdapter();
         }
         else
         {
