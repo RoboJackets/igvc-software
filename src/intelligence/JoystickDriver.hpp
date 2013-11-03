@@ -29,8 +29,10 @@ private:
     void OnNewJoystickEvent(JoystickState state)
     {
         double maxVel = ConfigManager::Instance().getValue("Joystick", "MaxSpeed", 1.0);
-        double left = (state.axes[1]/32767)*maxVel;
-        double right = (state.axes[2]/32767)*maxVel;
+        int leftJoyAxis = ConfigManager::Instance().getValue("Joystick", "LeftAxis", 1);
+        int rightJoyAxis = ConfigManager::Instance().getValue("Joystick", "RightAxis", 3);
+        double left = (state.axes[leftJoyAxis]/32767)*maxVel;
+        double right = (state.axes[rightJoyAxis]/32767)*maxVel;
         controlEvent(MotorCommand(left,right));
     }
     LISTENER(JoystickDriver, OnNewJoystickEvent, JoystickState)
