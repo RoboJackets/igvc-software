@@ -12,13 +12,13 @@ public:
     Mapping(IGVC::Sensors::Lidar *lidar);
     ~Mapping();
     pcl::PointCloud<pcl::PointXYZ>::Ptr getCloud();
-    void saveCloud(std::string path);
-    bool readCloud(std::string path);
+    //void saveCloud(std::string path);
+    //bool readCloud(std::string path);
     Event<pcl::PointCloud<pcl::PointXYZ>::Ptr> onNewMap;
 private:
     IGVC::Sensors::Lidar *_lidar;
     void OnLidarData(IGVC::Sensors::LidarState state);
-    LISTENER(mapping, OnLidarData, IGVC::Sensors::LidarState)
+    LISTENER(Mapping, OnLidarData, IGVC::Sensors::LidarState)
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 };
 
