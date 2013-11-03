@@ -96,7 +96,7 @@ bool ASIOSerialPort::isConnected() {
 }
 
 void ASIOSerialPort::write(std::string s) {
-    if(isConnected()) boost::asio::write(port, boost::asio::buffer(s.c_str(),s.size()));
+    if(isConnected()) boost::asio::write(port, boost::asio::buffer(s.c_str(),s.length()));
 }
 
 void ASIOSerialPort::write(char *msg, int length) {
@@ -110,12 +110,12 @@ std::string ASIOSerialPort::readln() {
 	std::string line;
 
 
-	while(true) {
-		try {
+    while(true) {
+        try {
             boost::asio::read(port, boost::asio::buffer(&c,1));
 		} catch(boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
-			std::cerr << "Error reading stream. Device may have been unplugged." << std::endl;
-			std::cout << "\t" << err.what() << std::endl;
+            Logger::Log(LogLevel::Error, "Error reading serial port. Device may have been uplugged.");
+            Logger::Log(LogLevel::Error, err.what());
 			return line;
 		}
 		switch(c) {
@@ -158,8 +158,8 @@ char ASIOSerialPort::read() {
     try {
         boost::asio::read(port, boost::asio::buffer(&in, 1));
     } catch (boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
-        std::cerr << "Error reading stream. Device may have been unplugged." << std::endl;
-        std::cout << "\t" << err.what() << std::endl;
+        Logger::Log(LogLevel::Error, "Error reading serial port. Device may have been uplugged.");
+        Logger::Log(LogLevel::Error, err.what());
         return 0;
     }
     return in;
