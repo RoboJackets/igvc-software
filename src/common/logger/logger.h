@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <QDateTime>
+#include <QStatusBar>
 
 namespace LogLevel
 {
@@ -37,14 +38,33 @@ public:
         {
             std::cerr << output.str() << std::endl;
             std::cerr.flush();
+            if(_instance->_statusBar)
+            {
+                _instance->_statusBar->clearMessage();
+                _instance->_statusBar->setStyleSheet("QStatusBar{padding-left:8px;background:rgba(0,0,0,0);color:red;font-weight:bold;}");
+                _instance->_statusBar->showMessage(output.str().c_str());
+            }
         }
         else if(level != LogLevel::Debug)
         {
             std::cout << output.str() << std::endl;
             std::cout.flush();
+            if(_instance->_statusBar)
+            {
+               _instance->_statusBar->clearMessage();
+               _instance-> _statusBar->setStyleSheet("QStatusBar{padding-left:8px;background:rgba(0,0,0,0);color:black;font-weight:bold;}");
+               _instance-> _statusBar->showMessage(output.str().c_str());
+            }
         }
         _instance->_fileOutStream << output.str() << std::endl;
         _instance->_fileOutStream.flush();
+    }
+
+    static void setSatusBar(QStatusBar *statusBar)
+    {
+        if(!_instance)
+            _instance = new Logger();
+        _instance->_statusBar = statusBar;
     }
 
 private:
@@ -54,6 +74,8 @@ private:
     static Logger *_instance;
 
     std::ofstream _fileOutStream;
+
+    QStatusBar *_statusBar;
 
     Logger();
 

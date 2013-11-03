@@ -1,8 +1,8 @@
 #ifndef IMU_H
 #define IMU_H
 
-#include "events/Event.hpp"
-#include <sensors/DataStructures/IMUData.hpp>
+#include <common/events/Event.hpp>
+#include <hardware/sensors/DataStructures/IMUData.hpp>
 
 class IMU
 {

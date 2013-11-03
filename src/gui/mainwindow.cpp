@@ -1,10 +1,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "adapters/joystickadapter.h"
+#include "adapters/mapadapter.h"
+
 #include <QMdiSubWindow>
 #include <QTextEdit>
 #include "adapters/joystickadapter.h"
 #include "adapters/lidaradapter.h"
 #include <QDebug>
+#include <QFileDialog>
 
 #include <iostream>
 
@@ -27,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->hardwareStatusList, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(openHardwareView(QModelIndex)));
 
+    Logger::setSatusBar(ui->statusBar);
+
     setupMenus();
     updateWindowMenu();
 
@@ -38,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->joystickButton->setEnabled(_joystick->isOpen());
     ui->hardwareStatusList->addItem("Joystick");
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
+
+    ui->hardwareStatusList->addItem("Map");
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
@@ -89,6 +97,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "LIDAR")
         {
             adapter = new LidarAdapter();
+		}
+        else if(labelText == "Map")
+        {
+            adapter = new MapAdapter();
         }
         else
         {
@@ -213,4 +225,29 @@ void MainWindow::on_stopButton_clicked()
         isRunning = false;
         isPaused = false;
     }
+}
+
+void MainWindow::on_actionStatus_Bar_toggled(bool checked)
+{
+    if(checked)
+    {
+        ui->statusBar->show();
+        Logger::setSatusBar(ui->statusBar);
+    }
+    else
+    {
+        ui->statusBar->hide();
+        Logger::setSatusBar(0);
+    }
+}
+
+void MainWindow::on_saveConfigButton_clicked()
+{
+    ConfigManager::Instance().save();
+}
+
+void MainWindow::on_loadConfigButton_clicked()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Configuration File"), "", tr("XML Files(*.xml)"));
+    ConfigManager::Instance().load(fileName.toStdString());
 }
