@@ -35,7 +35,7 @@ public:
         return state == Goal;//state.distTo(Goal) < Threshold;
     }
 
-    double getStepCost(SearchLocation state, SearchMove action)
+    double getStepCost(SearchLocation, SearchMove action)
     {
         double R = abs(action.V) / abs(action.W);
         double theta = abs(action.W) * DeltaT;
