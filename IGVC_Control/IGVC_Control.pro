@@ -82,7 +82,8 @@ HEADERS  += \
     ../src/hardware/sensors/IMU/Ardupilot.h \
     ../src/gui/adapters/mapadapter.h \
     ../src/intelligence/mapping/mapping.h \
-    ../src/hardware/sensors/gps/simulatedgps.h
+    ../src/hardware/sensors/gps/simulatedgps.h \
+    ../src/hardware/sensors/IMU/IMU.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
