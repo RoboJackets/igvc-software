@@ -39,7 +39,8 @@ SOURCES += \
     ../src/hardware/sensors/IMU/Ardupilot.cpp \
     ../src/gui/adapters/mapadapter.cpp \
     ../src/intelligence/mapping/mapping.cpp \
-    ../src/hardware/sensors/gps/simulatedgps.cpp
+    ../src/hardware/sensors/gps/simulatedgps.cpp \
+    ../src/gui/adapters/gpsvisualizer.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -83,12 +84,14 @@ HEADERS  += \
     ../src/gui/adapters/mapadapter.h \
     ../src/intelligence/mapping/mapping.h \
     ../src/hardware/sensors/gps/simulatedgps.h \
-    ../src/hardware/sensors/IMU/IMU.h
+    ../src/hardware/sensors/IMU/IMU.h \
+    ../src/gui/adapters/gpsvisualizer.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
     ../src/gui/adapters/joystickadapter.ui \
-    ../src/gui/adapters/mapadapter.ui
+    ../src/gui/adapters/mapadapter.ui \
+    ../src/gui/adapters/gpsvisualizer.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
