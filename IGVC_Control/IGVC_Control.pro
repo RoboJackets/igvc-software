@@ -11,6 +11,8 @@ TARGET = IGVC_Control
 TEMPLATE = app
 QT += gui declarative
 
+CONFIG += c++11
+
 INCLUDEPATH += ../src/ \
     ../src/gui/
 
