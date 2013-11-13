@@ -41,7 +41,11 @@ SOURCES += \
     ../src/hardware/sensors/IMU/Ardupilot.cpp \
     ../src/gui/adapters/mapadapter.cpp \
     ../src/intelligence/mapping/mapping.cpp \
-    ../src/hardware/sensors/gps/simulatedgps.cpp
+    ../src/hardware/sensors/gps/simulatedgps.cpp \
+    ../src/intelligence/posetracking/RobotPosition.cpp \
+    ../src/common/utils/ImageUtils.cpp \
+    ../src/common/Robot.cpp \
+    ../src/hardware/sensors/camera/CameraInfo.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -85,7 +89,11 @@ HEADERS  += \
     ../src/gui/adapters/mapadapter.h \
     ../src/intelligence/mapping/mapping.h \
     ../src/hardware/sensors/gps/simulatedgps.h \
-    ../src/hardware/sensors/IMU/IMU.h
+    ../src/hardware/sensors/IMU/IMU.h \
+    ../src/intelligence/posetracking/RobotPosition.h \
+    ../src/common/utils/ImageUtils.h \
+    ../src/common/Robot.h \
+    ../src/hardware/sensors/camera/CameraInfo.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -133,3 +141,8 @@ LIBS += -L/usr/lib/ -lvtkCommon
 INCLUDEPATH += /usr/include/eigen3
 DEPENDPATH += /usr/include/eigen3
 
+# OpenCV
+INCLUDEPATH += /usr/include/
+DEPENDPATH += /usr/include/
+
+LIBS += -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_calib3d
