@@ -1,7 +1,6 @@
 #ifndef VISODOMDATA_H
 #define VISODOMDATA_H
 
-#include "SensorData.h"
 #include <math.h>
 
 using namespace std;
