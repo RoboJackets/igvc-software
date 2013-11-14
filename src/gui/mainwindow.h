@@ -10,6 +10,7 @@
 #include "hardware/sensors/joystick/Joystick.h"
 #include "hardware/actuators/motors/MotorEncoderDriver2013.h"
 #include "intelligence/JoystickDriver.hpp"
+#include <hardware/sensors/gps/GPS.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -58,6 +59,8 @@ private:
     Joystick *_joystick;
 
     MotorDriver *_motorController;
+
+    IGVC::Sensors::GPS *_GPS;
 
     bool isRunning, isPaused;
 
