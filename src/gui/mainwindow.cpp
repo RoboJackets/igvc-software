@@ -2,12 +2,17 @@
 #include "ui_mainwindow.h"
 #include "adapters/joystickadapter.h"
 #include "adapters/mapadapter.h"
+#include "adapters/gpsvisualizer.h"
+
+#include <hardware/sensors/gps/simulatedgps.h>
 
 #include <QMdiSubWindow>
 #include <QTextEdit>
 #include <QFileDialog>
 
 #include <iostream>
+
+using namespace IGVC::Sensors;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -46,6 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
+    _GPS = new SimulatedGPS("/home/victor/Desktop/GPSData.txt");
+    ui->hardwareStatusList->addItem("GPS");
+
     isRunning = false;
     isPaused = false;
     ui->stopButton->setVisible(false);
@@ -65,6 +73,7 @@ MainWindow::~MainWindow()
 {
     delete _joystick;
     delete ui;
+    delete _GPS;
 }
 
 void MainWindow::openHardwareView(QModelIndex index)
@@ -92,6 +101,11 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "Map")
         {
             adapter = new MapAdapter();
+        }
+        else if(labelText == "GPS")
+        {
+            adapter = new GPSVisualizer(_GPS);
+
         }
         else
         {

@@ -2,108 +2,130 @@
 #include "ui_gpsvisualizer.h"
 #include <cmath>
 
-GPSVisualizer::GPSVisualizer(QWidget *parent) :
+GPSVisualizer::GPSVisualizer(GPS *gps, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::GPSVisualizer)
-
+    ui(new Ui::GPSVisualizer),
+    LOnNewData(this),
+    minLat(-5),
+    maxLat(5),
+    minLong(-5),
+    maxLong(5)
 {
     ui->setupUi(this);
-    scene = new QGraphicsScene();
+    //scene = new QGraphicsScene();
     for (int i = 0;i<5;i++) {
-
-            coordinates[i][0] = 0;
-            coordinates[i][1] = 0;
-
+        coordinates[i][0] = 0;
+        coordinates[i][1] = 0;
     }
+    gps->onNewData += &LOnNewData;
+    _GPS = gps;
+    ui->user_Top->setPlainText(QString::number(maxLat));
+    ui->user_Right->setPlainText(QString::number(maxLong));
+    ui->user_Bottom->setPlainText(QString::number(minLat));
+    ui->user_Left->setPlainText(QString::number(minLong));
 
-
-
-}
-
-void GPSVisualizer::sceneConst() {
-
-    pixmap= QPixmap(QSize(ui->sizeHint()));\
-    painter.begin(&pixmap);
-    painter.setPen(Qt::white);
-    painter.drawLine(QPoint(0,pixmap.height()/2),QPoint(pixmap.width(),pixmap.height()/2));
-    painter.drawLine(QPoint(pixmap.width()/2,0),QPoint(pixmap.width()/2,pixmap.height()));
 }
 
 GPSVisualizer::~GPSVisualizer()
 {
+    _GPS->onNewData -= &LOnNewData;
     delete ui;
-    painter.end();
+
 }
 
 void GPSVisualizer::labelPrint() {
-    ui->dataLabel->setText(QString("Latitude                Longitude\n"));
-    for (int i=0;i<5;i++) {
-
-        ui->dataLabel->setText(QString::number(coordinates[i][0]));
-        ui->dataLabel->setText(QString('                '));
-        ui->dataLabel->setText(QString::number(coordinates[i][1]));
-        ui->dataLabel->setText(QString('\n'));
-
+    //paint data label
+    QString LatLabel = QString("Latitude<br />");
+    for (int i = 0;i < 5;i++) {
+        LatLabel = LatLabel + QString::number(coordinates[i][0]) + QString("<br />");
     }
+    ui->LatitudeLabel->setText(LatLabel);
+
+    QString LongLabel = QString("Longitude<br />");
+    for (int i = 0;i < 5;i++) {
+        LongLabel = LongLabel + QString::number(coordinates[i][1]) + QString("<br />");
+    }
+    ui->LongitudeLabel->setText(LongLabel);
+
+
+    horizontalFactor = ui->GraphicsHolder->width() / (maxLong - minLong);
+    verticalFactor = ui->GraphicsHolder->height() / (maxLat - minLat);
+
 }
 
-void GPSVisualizer::onNewData(GPSData& data) {
-    for (int i = 0;i<5;i++) {
-
-            coordinates[i+1][0] = coordinates[i][0];
-            coordinates[i+1][1] = coordinates[i][1];
-            //first index:points from most recent[0] to least recent;
-            //second index: [0]->latitude,[1]->longitude
+void GPSVisualizer::OnNewData(GPSData data) {
+    //shifting old data
+    for (int i = 4;i>0;i--) {
+        coordinates[i][0] = coordinates[i-1][0];
+        coordinates[i][1] = coordinates[i-1][1];
     }
 
+    //assign new data
     coordinates[0][0] = data.Lat();
     coordinates[0][1] = data.Long();
+
+    //print data label
     labelPrint();
-    double minLat = coordinates[0][0];
-    double maxLat = minLat;
-    double minLong = coordinates[0][1];
-    double maxLong = minLong;
-    for (int i=0;i<5;i++) {
-        if (coordinates[i][0] <= minLat) {
-            minLat = coordinates[i][0];
-        }
-        else {
-            maxLat = coordinates[i][0];
-        }
-        if (coordinates[i][1] <= minLong) {
-            minLong = coordinates[i][1];
-        }
-        else {
-            maxLong = coordinates[i][1];
-        }
-    }
-    horizontalFactor = (maxLong - minLong) / QSize(ui->graphics->width());
-    verticalFactor = (maxLat - minLat) / QSize(ui->graphics->height());
+
+
+    //update graphics holder
+    ui->GraphicsHolder->update();
+
+
 }
 
-void GPSVisualizer::boundaryLabelPrint() {
-    painter.setPen(Qt::black);
-    painter.drawText(QPoint(ui->graphics->width()/2,ui->graphics->height()), QString::number(minLat));//bottom
-    painter.drawText(QPoint(ui->graphics->width(),0), QString::number(maxLat));//top
-    painter.rotate(270);
-    painter.drawText(QPoint(ui->graphics->width(),0), QString::number(minLong));//left
-    painter.rotate(180);
-    painter.drawText(QPoint(ui->graphics->width(),0), QString::number(maxLong));//right
-    painter.rotate(270);
-}
 
-void GPSVisualizer::drawPoints() {
-    painter.setBrush(Qt::red);
-    painter.drawEllipse(QPoint(10,10),5,5);
-}
 
 void GPSVisualizer::paintEvent(QPaintEvent *event)
 {
+    QPainter painter(this);
 
-    sceneConst();
-    boundaryLabelPrint();
-    drawPoints();
-    scene->addPixmap(pixmap);
-    ui->graphics->setScene(scene);
+    painter.setPen(Qt::black);
 
+    //black ackground painting
+    painter.fillRect(ui->GraphicsHolder->x(),
+                     ui->GraphicsHolder->y(),
+                     ui->GraphicsHolder->width(),
+                     ui->GraphicsHolder->height(),
+                     Qt::SolidPattern);
+
+
+    //draw X and Y axis
+    //X axis: longitude, Y axis:latitude
+    painter.setPen(Qt::white);
+    painter.drawLine(QPoint(ui->GraphicsHolder->x()+ui->GraphicsHolder->width()/2,ui->GraphicsHolder->y()),
+                     QPoint(ui->GraphicsHolder->x()+ui->GraphicsHolder->width()/2,ui->GraphicsHolder->y()+ui->GraphicsHolder->height())); //y axis
+    painter.drawLine(QPoint(ui->GraphicsHolder->x(),ui->GraphicsHolder->y()+ui->GraphicsHolder->height()/2),
+                     QPoint(ui->GraphicsHolder->x()+ui->GraphicsHolder->width(),ui->GraphicsHolder->y()+ui->GraphicsHolder->height()/2)); //x axis
+
+    //draw the latest five points
+    //biggest point: the lattest
+    painter.setBrush(Qt::red);
+    QPoint origin = QPoint(ui->GraphicsHolder->x() + ui->GraphicsHolder->width()/2,
+                           ui->GraphicsHolder->y() + ui->GraphicsHolder->height()/2);
+    painter.drawEllipse(origin, 6, 6);
+    for (int i = 0; i < 4;i++) {
+        painter.drawEllipse(origin + QPoint((coordinates[i+1][1] - coordinates[0][1]) * horizontalFactor,
+                - (coordinates[0][0] - coordinates[i+1][0]) * verticalFactor), 5 - i, 5 - i);
+    }
+}
+
+void GPSVisualizer::on_user_Top_textChanged()
+{
+    maxLat = QString(ui->user_Top->toPlainText()).toDouble();
+}
+
+void GPSVisualizer::on_user_Right_textChanged()
+{
+    maxLong = QString(ui->user_Right->toPlainText()).toDouble();
+}
+
+void GPSVisualizer::on_user_Bottom_textChanged()
+{
+    minLat = QString(ui->user_Bottom->toPlainText()).toDouble();
+}
+
+void GPSVisualizer::on_user_Left_textChanged()
+{
+    minLong = QString(ui->user_Left->toPlainText()).toDouble();
 }
