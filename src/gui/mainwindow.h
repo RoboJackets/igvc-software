@@ -46,6 +46,10 @@ private slots:
 
     void on_loadConfigButton_clicked();
 
+    void on_actionHemisphere_A100_triggered();
+
+    void on_actionSimulatedGPS_triggered();
+
 private:
     Ui::MainWindow *ui;
     ConfigTreeModel configTreeModel;
@@ -67,6 +71,7 @@ private:
     MDIWindow *activeMdiChild();
     void setupMenus();
     MDIWindow* findWindowWithTitle(QString title);
+    void updateHardwareStatusIcons();
 };
 
 #endif // MAINWINDOW_H
