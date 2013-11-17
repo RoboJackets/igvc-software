@@ -41,6 +41,11 @@ public:
 	 */
 	virtual bool StateIsAvailable() = 0;
 
+    /*
+     * Return true if the device is connected and communicating.
+     */
+    virtual bool isOpen() = 0;
+
     Event<GPSData> onNewData;
     Event<void*> onDeviceFailure;
     Event<void*> onDataExpiration;
