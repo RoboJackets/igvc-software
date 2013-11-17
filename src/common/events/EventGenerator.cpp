@@ -26,8 +26,8 @@ void EventGenerator<ListenerType>::removeListener(ListenerType *listener)
 template <class ListenerType>
 void EventGenerator<ListenerType>::fireEvent( void (ListenerType::*eventFunction) (void*), void* eventData )
 {
-    for(typename std::list<ListenerType*>::iterator iter = listeners.begin(); iter != listeners.end(); iter++)
+    for(auto eventFunction : listeners)
     {
-        ((*iter)->*eventFunction)(eventData);
+        (*eventFunction)(eventData);
     }
 }
