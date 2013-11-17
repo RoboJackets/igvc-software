@@ -1,18 +1,17 @@
-#include "gpsvisualizer.h"
-#include "ui_gpsvisualizer.h"
+#include "gpsadapter.h"
+#include "ui_gpsadapter.h"
 #include <cmath>
 
-GPSVisualizer::GPSVisualizer(GPS *gps, QWidget *parent) :
+GPSAdapter::GPSAdapter(GPS *gps, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::GPSVisualizer),
-    LOnNewData(this),
+    ui(new Ui::GPSAdapter),
     minLat(-5),
     maxLat(5),
     minLong(-5),
-    maxLong(5)
+    maxLong(5),
+    LOnNewData(this)
 {
     ui->setupUi(this);
-    //scene = new QGraphicsScene();
     for (int i = 0;i<5;i++) {
         coordinates[i][0] = 0;
         coordinates[i][1] = 0;
@@ -26,14 +25,14 @@ GPSVisualizer::GPSVisualizer(GPS *gps, QWidget *parent) :
 
 }
 
-GPSVisualizer::~GPSVisualizer()
+GPSAdapter::~GPSAdapter()
 {
     _GPS->onNewData -= &LOnNewData;
     delete ui;
 
 }
 
-void GPSVisualizer::labelPrint() {
+void GPSAdapter::labelPrint() {
     //paint data label
     QString LatLabel = QString("Latitude<br />");
     for (int i = 0;i < 5;i++) {
@@ -53,7 +52,7 @@ void GPSVisualizer::labelPrint() {
 
 }
 
-void GPSVisualizer::OnNewData(GPSData data) {
+void GPSAdapter::OnNewData(GPSData data) {
     //shifting old data
     for (int i = 4;i>0;i--) {
         coordinates[i][0] = coordinates[i-1][0];
@@ -76,7 +75,7 @@ void GPSVisualizer::OnNewData(GPSData data) {
 
 
 
-void GPSVisualizer::paintEvent(QPaintEvent *event)
+void GPSAdapter::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
@@ -110,22 +109,22 @@ void GPSVisualizer::paintEvent(QPaintEvent *event)
     }
 }
 
-void GPSVisualizer::on_user_Top_textChanged()
+void GPSAdapter::on_user_Top_textChanged()
 {
     maxLat = QString(ui->user_Top->toPlainText()).toDouble();
 }
 
-void GPSVisualizer::on_user_Right_textChanged()
+void GPSAdapter::on_user_Right_textChanged()
 {
     maxLong = QString(ui->user_Right->toPlainText()).toDouble();
 }
 
-void GPSVisualizer::on_user_Bottom_textChanged()
+void GPSAdapter::on_user_Bottom_textChanged()
 {
     minLat = QString(ui->user_Bottom->toPlainText()).toDouble();
 }
 
-void GPSVisualizer::on_user_Left_textChanged()
+void GPSAdapter::on_user_Left_textChanged()
 {
     minLong = QString(ui->user_Left->toPlainText()).toDouble();
 }
