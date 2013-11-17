@@ -40,7 +40,7 @@ SOURCES += \
     ../src/gui/adapters/mapadapter.cpp \
     ../src/intelligence/mapping/mapping.cpp \
     ../src/hardware/sensors/gps/simulatedgps.cpp \
-    ../src/gui/adapters/gpsvisualizer.cpp
+    ../src/gui/adapters/gpsadapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -85,13 +85,13 @@ HEADERS  += \
     ../src/intelligence/mapping/mapping.h \
     ../src/hardware/sensors/gps/simulatedgps.h \
     ../src/hardware/sensors/IMU/IMU.h \
-    ../src/gui/adapters/gpsvisualizer.h
+    ../src/gui/adapters/gpsadapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
     ../src/gui/adapters/joystickadapter.ui \
     ../src/gui/adapters/mapadapter.ui \
-    ../src/gui/adapters/gpsvisualizer.ui
+    ../src/gui/adapters/gpsadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
