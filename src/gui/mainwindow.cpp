@@ -5,6 +5,7 @@
 #include "adapters/gpsadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
+#include <hardware/sensors/gps/HemisphereA100GPS.h>
 
 #include <QMdiSubWindow>
 #include <QTextEdit>
@@ -40,20 +41,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _motorController = new MotorEncoderDriver2013;
     ui->hardwareStatusList->addItem("Motor Board");
-    ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isOpen() ? checkIcon : xIcon);
 
     _joystick = new Joystick;
     ui->joystickButton->setEnabled(_joystick->isOpen());
     ui->hardwareStatusList->addItem("Joystick");
-    ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
 
     ui->hardwareStatusList->addItem("Map");
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
     _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
+    ui->actionSimulatedGPS->setChecked(true);
     ui->hardwareStatusList->addItem("GPS");
-    ui->hardwareStatusList->findItems("GPS", Qt::MatchExactly).at(0)->setIcon(_GPS->isOpen() ? checkIcon : xIcon);
+
+    updateHardwareStatusIcons();
 
     isRunning = false;
     isPaused = false;
@@ -97,7 +98,6 @@ void MainWindow::openHardwareView(QModelIndex index)
         if(labelText == "Joystick")
         {
             adapter = new JoystickAdapter(_joystick);
-            newWindow->setWindowIcon(QIcon(":/images/Joystick"));
         }
         else if(labelText == "Map")
         {
@@ -106,7 +106,6 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "GPS")
         {
             adapter = new GPSAdapter(_GPS);
-
         }
         else
         {
@@ -256,4 +255,29 @@ void MainWindow::on_loadConfigButton_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Configuration File"), "", tr("XML Files(*.xml)"));
     ConfigManager::Instance().load(fileName.toStdString());
+}
+
+void MainWindow::on_actionHemisphere_A100_triggered()
+{
+    ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
+    _GPS = new HemisphereA100GPS();
+    updateHardwareStatusIcons();
+}
+
+void MainWindow::on_actionSimulatedGPS_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated GPS Data File"), "", tr("Text Files(*.txt)"));
+    if(fileName.length() > 0)
+    {
+        ui->actionHemisphere_A100->setChecked(!ui->actionSimulatedGPS->isChecked());
+        _GPS = new SimulatedGPS(fileName.toStdString());
+        updateHardwareStatusIcons();
+    }
+}
+
+void MainWindow::updateHardwareStatusIcons()
+{
+    ui->hardwareStatusList->findItems("GPS", Qt::MatchExactly).at(0)->setIcon(_GPS->isOpen() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isOpen() ? checkIcon : xIcon);
 }
