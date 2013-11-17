@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include "adapters/joystickadapter.h"
 #include "adapters/mapadapter.h"
-#include "adapters/gpsvisualizer.h"
+#include "adapters/gpsadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
 
@@ -104,7 +104,7 @@ void MainWindow::openHardwareView(QModelIndex index)
         }
         else if(labelText == "GPS")
         {
-            adapter = new GPSVisualizer(_GPS);
+            adapter = new GPSAdapter(_GPS);
 
         }
         else
