@@ -16,6 +16,7 @@ public:
     bool StateIsAvailable();
     GPSData GetState();
     GPSData GetStateAtTime(timeval time);
+    bool isOpen();
 
     ~SimulatedGPS();
 

@@ -51,8 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
-    _GPS = new SimulatedGPS("/home/victor/Desktop/GPSData.txt");
+    _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
     ui->hardwareStatusList->addItem("GPS");
+    ui->hardwareStatusList->findItems("GPS", Qt::MatchExactly).at(0)->setIcon(_GPS->isOpen() ? checkIcon : xIcon);
 
     isRunning = false;
     isPaused = false;
