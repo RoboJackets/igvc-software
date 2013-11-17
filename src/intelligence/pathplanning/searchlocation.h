@@ -8,7 +8,7 @@ class SearchLocation
 public:
     double x, y, theta;
 
-    static const double sameness_threshold = 0.01;
+    static constexpr double sameness_threshold = 0.01;
 
     SearchLocation() { }
     SearchLocation(double _x, double _y, double _theta);
