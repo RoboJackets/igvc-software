@@ -53,9 +53,9 @@ void CameraAdapter::OnCameraData(CameraData data)
 QImage CameraAdapter::CVMat2QImage(cv::Mat img)
 {
     cv::Mat temp(img.cols, img.rows, img.type());
-    //cv::cvtColor(img, temp, CV_BayerGR2RGB);
+    cv::cvtColor(img, temp, CV_BGR2RGB);
 
-    QImage dest((uchar*)img.data,img.cols,img.rows, img.step, QImage::Format_RGB888);
+    QImage dest((uchar*)temp.data,temp.cols,temp.rows, temp.step, QImage::Format_RGB888);
     QImage dest2(dest);
     dest2.detach();
     return dest2;
@@ -70,8 +70,8 @@ void CameraAdapter::paintEvent(QPaintEvent *e)
 
        ui->leftFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.leftFeed)));
        ui->rightFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.rightFeed)));
-        ui->depthMapLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.depthMap)));
-        ui->pointCloudLabel->setPixmap(QPixmap::fromImage( CVMat2QImage(_data.pointCloud)));
+       ui->depthMapLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.depthMap)));
+       ui->pointCloudLabel->setPixmap(QPixmap::fromImage( CVMat2QImage(_data.pointCloud)));
 
     }
 
@@ -79,20 +79,3 @@ void CameraAdapter::paintEvent(QPaintEvent *e)
     _mutex.unlock();
     QWidget::paintEvent(e);
 }
-
-/*void CameraAdapter::resizeEvent(QResizeEvent *e)
-{
-    QSize size = currentLeftFrame.size();
-    cout << size.width() << ", " << size.height() << "\n";
-    size.scale(this->size().boundedTo(size), Qt::KeepAspectRatio);
-    currentLeftFrame = currentLeftFrame.scaled(size, Qt::KeepAspectRatio);
-
-    this->resize(size);
-
-
-    ui->tabWidget->resize(this->sizeHint());
-
-
-    QWidget::resizeEvent(e);
-
-}*/
