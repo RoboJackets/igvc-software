@@ -1,14 +1,17 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include "adapters/joystickadapter.h"
 #include "adapters/mapadapter.h"
 #include "adapters/gpsadapter.h"
 #include "adapters/joystickadapter.h"
 #include "adapters/cameraadapter.h"
+#include "adapters/imuadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/HemisphereA100GPS.h>
 #include <hardware/sensors/camera/StereoPlayback.h>
+#include <hardware/sensors/IMU/Ardupilot.h>
 
 #include <QMdiSubWindow>
 #include <QTextEdit>
@@ -59,6 +62,9 @@ MainWindow::MainWindow(QWidget *parent) :
     _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
     ui->actionSimulatedGPS->setChecked(true);
     ui->hardwareStatusList->addItem("GPS");
+
+    _IMU = new Ardupilot();
+    ui->hardwareStatusList->addItem("IMU");
 
     updateHardwareStatusIcons();
 
@@ -116,6 +122,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "Camera")
         {
             adapter = new CameraAdapter(_stereoSource);
+        }
+        else if(labelText == "IMU")
+        {
+            adapter = new IMUAdapter(_IMU);
         }
         else
         {
