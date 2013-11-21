@@ -11,6 +11,7 @@
 #include "hardware/actuators/motors/MotorEncoderDriver2013.h"
 #include "intelligence/JoystickDriver.hpp"
 #include <hardware/sensors/gps/GPS.hpp>
+#include <hardware/sensors/camera/StereoSource.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -69,6 +70,8 @@ private:
     MotorDriver *_motorController;
 
     IGVC::Sensors::GPS *_GPS;
+
+    StereoSource *_stereoSource;
 
     bool isRunning, isPaused;
 

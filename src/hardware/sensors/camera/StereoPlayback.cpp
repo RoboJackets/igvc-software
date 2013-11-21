@@ -5,10 +5,13 @@
 StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, int fps, string fileName, bool undistort) : _leftVid(leftVideo), _rightVid(rightVideo),
     _framesPerSecond(fps), _playbackThread(&StereoPlayback::Run, this), _undistort(undistort)
 {
-  FileStorage fs(fileName, FileStorage::READ); // Read the settings
-  fs["Camera_Matrix"] >> _cameraMatrix;
-  fs["Distortion_Coefficients"] >> _distCoeffs;
-  fs.release();
+    if(_undistort)
+    {
+        FileStorage fs(fileName, FileStorage::READ); // Read the settings
+        fs["Camera_Matrix"] >> _cameraMatrix;
+        fs["Distortion_Coefficients"] >> _distCoeffs;
+        fs.release();
+    }
 }
 
 void StereoPlayback::Run()

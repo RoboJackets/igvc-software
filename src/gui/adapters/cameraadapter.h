@@ -6,8 +6,7 @@
 #include <boost/thread.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include "common/events/Event.hpp"
-
+#include <hardware/sensors/camera/StereoSource.hpp>
 
 
 namespace Ui {
@@ -19,7 +18,7 @@ class CameraAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit CameraAdapter(/*CameraAdapterTester *camera,*/ QWidget *parent = 0);
+    explicit CameraAdapter(StereoSource *source, QWidget *parent = 0);
     ~CameraAdapter();
 
 protected:
@@ -29,18 +28,17 @@ protected:
 private:
     Ui::CameraAdapter *ui;
 
-    //Camera *camera;
-//    CameraAdapterTester *_camera;
+    StereoSource *_stereoSource;
 
-//    CameraData _data;
+    StereoImageData _data;
     bool gotData;
 
     boost::mutex _mutex;
 
     QImage CVMat2QImage(cv::Mat img);
 
-//    void OnCameraData(CameraData data);
-//    LISTENER(CameraAdapter, OnCameraData, CameraData)
+    void OnCameraData(StereoImageData data);
+    LISTENER(CameraAdapter, OnCameraData, StereoImageData)
 };
 
 #endif // CAMERAADAPTER_H

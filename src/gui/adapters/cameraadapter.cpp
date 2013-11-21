@@ -6,18 +6,19 @@
 #include <QGridLayout>
 #include <opencv2/imgproc/imgproc.hpp>
 
-CameraAdapter::CameraAdapter(QWidget *parent) :
+CameraAdapter::CameraAdapter(StereoSource *source, QWidget *parent) :
      QWidget(parent),
-     ui(new Ui::CameraAdapter)/*,
-     LOnCameraData(this)*/
+     ui(new Ui::CameraAdapter),
+     LOnCameraData(this)
 {
     ui->setupUi(this);
 
-//    if(camera)
-//    {
-//        _camera = camera;
-//        _camera->onNewData += &LOnCameraData;
-//    }
+    if(source)
+    {
+        _stereoSource = source;
+        _stereoSource->onNewData += &LOnCameraData;
+    }
+
     if(parent)
     {
         parent->setLayout(new QGridLayout());
@@ -27,23 +28,23 @@ CameraAdapter::CameraAdapter(QWidget *parent) :
 
 CameraAdapter::~CameraAdapter()
 {
-//    if(_camera)
-//        _camera->onNewData -= &LOnCameraData;
+    if(_stereoSource)
+        _stereoSource->onNewData -= &LOnCameraData;
     delete ui;
 }
 
-//void CameraAdapter::OnCameraData(CameraData data)
-//{
+void CameraAdapter::OnCameraData(StereoImageData data)
+{
 
-//    if(isVisible())
-//    {
-//        _mutex.lock();
-//        _data = data;
-//        gotData = true;
-//        _mutex.unlock();
-//        update();
-//    }
-//}
+    if(isVisible())
+    {
+        _mutex.lock();
+        _data = data;
+        gotData = true;
+        _mutex.unlock();
+        update();
+    }
+}
 
 
 QImage CameraAdapter::CVMat2QImage(cv::Mat img)
@@ -64,8 +65,8 @@ void CameraAdapter::paintEvent(QPaintEvent *e)
 
     if(gotData){
 
-//       ui->leftFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.leftFeed)));
-//       ui->rightFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.rightFeed)));
+        ui->leftFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.left().mat())));
+        ui->rightFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.right().mat())));
 //       ui->depthMapLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.depthMap)));
 //       ui->pointCloudLabel->setPixmap(QPixmap::fromImage( CVMat2QImage(_data.pointCloud)));
 

@@ -47,7 +47,10 @@ SOURCES += \
     ../src/common/utils/ImageUtils.cpp \
     ../src/common/Robot.cpp \
     ../src/hardware/sensors/camera/CameraInfo.cpp \
-    ../src/gui/adapters/gpsadapter.cpp
+    ../src/gui/adapters/gpsadapter.cpp \
+    ../src/hardware/sensors/camera/StereoPlayback.cpp \
+    ../src/hardware/sensors/camera/StereoImageRepeater.cpp \
+    ../src/hardware/sensors/camera/Bumblebee2.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -97,7 +100,12 @@ HEADERS  += \
     ../src/common/utils/ImageUtils.h \
     ../src/common/Robot.h \
     ../src/hardware/sensors/camera/CameraInfo.h \
-    ../src/gui/adapters/gpsadapter.h
+    ../src/gui/adapters/gpsadapter.h \
+    ../src/hardware/sensors/camera/StereoSource.hpp \
+    ../src/hardware/sensors/camera/StereoPlayback.h \
+    ../src/hardware/sensors/camera/StereoPair.hpp \
+    ../src/hardware/sensors/camera/StereoImageRepeater.h \
+    ../src/hardware/sensors/camera/Bumblebee2.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -151,4 +159,10 @@ DEPENDPATH += /usr/include/eigen3
 INCLUDEPATH += /usr/include/
 DEPENDPATH += /usr/include/
 
-LIBS += -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_calib3d
+LIBS += -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_calib3d -lopencv_highgui
+
+# FlyCapture2
+INCLUDEPATH += /usr/include/
+DEPENDPATH += /usr/include/
+
+LIBS += -L/usr/lib/ -lflycapture
