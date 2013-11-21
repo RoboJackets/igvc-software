@@ -8,6 +8,7 @@
 
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/HemisphereA100GPS.h>
+#include <hardware/sensors/camera/StereoPlayback.h>
 
 #include <QMdiSubWindow>
 #include <QTextEdit>
@@ -52,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
+    _stereoSource = new StereoPlayback("/media/DATA/Robojackets/IGVC/igvc_cam_data/video/CompCourse_left0.mpeg","/media/DATA/Robojackets/IGVC/igvc_cam_data/video/CompCourse_right0.mpeg",20,"",false);
     ui->hardwareStatusList->addItem("Camera");
 
     _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
@@ -78,8 +80,8 @@ void MainWindow::setupMenus()
 MainWindow::~MainWindow()
 {
     delete _joystick;
-    delete ui;
     delete _GPS;
+    delete ui;
 }
 
 void MainWindow::openHardwareView(QModelIndex index)
@@ -113,7 +115,7 @@ void MainWindow::openHardwareView(QModelIndex index)
         }
         else if(labelText == "Camera")
         {
-            adapter = new CameraAdapter();
+            adapter = new CameraAdapter(_stereoSource);
         }
         else
         {
