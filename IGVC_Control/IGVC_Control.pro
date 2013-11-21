@@ -11,6 +11,8 @@ TARGET = IGVC_Control
 TEMPLATE = app
 QT += gui declarative
 
+CONFIG += c++11
+
 INCLUDEPATH += ../src/ \
     ../src/gui/
 
@@ -29,9 +31,6 @@ SOURCES += \
     ../src/hardware/sensors/joystick/Joystick.cpp \
     ../src/hardware/sensors/lidar/SimulatedLidar.cpp \
     ../src/hardware/sensors/lidar/NAV200.cpp \
-    ../src/hardware/sensors/DataStructures/SensorData.cpp \
-    ../src/hardware/sensors/DataStructures/GPSData.cpp \
-    ../src/hardware/sensors/DataStructures/DataArray.cpp \
     ../src/hardware/serial/ASIOSerialPort.cpp \
     ../src/gui/adapters/joystickadapter.cpp \
     ../src/gui/adapters/cameraadapter.cpp \
@@ -40,7 +39,15 @@ SOURCES += \
     ../src/intelligence/pathplanning/searchlocation.cpp \
     ../src/intelligence/pathplanning/searchmove.cpp \
     ../src/intelligence/pathplanning/igvcsearchproblem.cpp \
-    ../src/hardware/sensors/IMU/Ardupilot.cpp
+    ../src/hardware/sensors/IMU/Ardupilot.cpp \
+    ../src/gui/adapters/mapadapter.cpp \
+    ../src/intelligence/mapping/mapping.cpp \
+    ../src/hardware/sensors/gps/simulatedgps.cpp \
+    ../src/intelligence/posetracking/RobotPosition.cpp \
+    ../src/common/utils/ImageUtils.cpp \
+    ../src/common/Robot.cpp \
+    ../src/hardware/sensors/camera/CameraInfo.cpp \
+    ../src/gui/adapters/gpsadapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -81,12 +88,23 @@ HEADERS  += \
     ../src/intelligence/pathplanning/searchlocation.h \
     ../src/intelligence/pathplanning/searchmove.h \
     ../src/intelligence/pathplanning/igvcsearchproblem.h \
-    ../src/hardware/sensors/IMU/Ardupilot.h
+    ../src/hardware/sensors/IMU/Ardupilot.h \
+    ../src/gui/adapters/mapadapter.h \
+    ../src/intelligence/mapping/mapping.h \
+    ../src/hardware/sensors/gps/simulatedgps.h \
+    ../src/hardware/sensors/IMU/IMU.h \
+    ../src/intelligence/posetracking/RobotPosition.h \
+    ../src/common/utils/ImageUtils.h \
+    ../src/common/Robot.h \
+    ../src/hardware/sensors/camera/CameraInfo.h \
+    ../src/gui/adapters/gpsadapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
     ../src/gui/adapters/joystickadapter.ui \
     ../src/gui/adapters/cameraadapter.ui
+    ../src/gui/adapters/mapadapter.ui \
+    ../src/gui/adapters/gpsadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
@@ -99,33 +117,38 @@ DEPENDPATH += /usr/include
 
 # libUSB (for LIDAR)
 
-unix:!macx: LIBS += -L/usr/lib/x86_64-linux-gnu/ -lusb-1.0
+LIBS += -L/usr/lib/x86_64-linux-gnu/ -lusb-1.0
 
 INCLUDEPATH += /usr/lib/x86_64-linux-gnu
 DEPENDPATH += /usr/lib/x86_64-linux-gnu
 
-unix:!macx: PRE_TARGETDEPS += /usr/lib/x86_64-linux-gnu/libusb-1.0.a
+PRE_TARGETDEPS += /usr/lib/x86_64-linux-gnu/libusb-1.0.a
 
 # BOOST
 
-unix:!macx: LIBS += -L/usr/lib/ -lboost_thread -lboost_system
+LIBS += -L/usr/lib/ -lboost_thread -lboost_system
 
-unix:!macx: PRE_TARGETDEPS += /usr/lib/libboost_thread.a
-unix:!macx: PRE_TARGETDEPS += /usr/lib/libboost_system.a
+PRE_TARGETDEPS += /usr/lib/libboost_thread.a
+PRE_TARGETDEPS += /usr/lib/libboost_system.a
 
 # PCL
 INCLUDEPATH += /usr/include/pcl-1.7
 DEPENDPATH += /usr/include/pcl-1.7
 
-unix:!macx: LIBS += -L/usr/lib -lpcl_common -lpcl_visualization -lpcl_kdtree
+LIBS += -L/usr/lib -lpcl_common -lpcl_visualization -lpcl_kdtree
 
 # VTK (PCL Dependency)
 INCLUDEPATH += /usr/include/vtk-5.8
 DEPENDPATH += /usr/include/vtk-5.8
 
-unix:!macx: LIBS += -L/usr/lib/ -lvtkCommon
+LIBS += -L/usr/lib/ -lvtkCommon
 
 # Eigen (header-only library)
 INCLUDEPATH += /usr/include/eigen3
 DEPENDPATH += /usr/include/eigen3
 
+# OpenCV
+INCLUDEPATH += /usr/include/
+DEPENDPATH += /usr/include/
+
+LIBS += -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_calib3d

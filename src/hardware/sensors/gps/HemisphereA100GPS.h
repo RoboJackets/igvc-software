@@ -24,6 +24,7 @@ public:
 	GPSData GetState();
 	GPSData GetStateAtTime(timeval time);
 	bool StateIsAvailable();
+    bool isOpen();
 	~HemisphereA100GPS();
 	GPSAccuracy DefaultAccuracy;
 
