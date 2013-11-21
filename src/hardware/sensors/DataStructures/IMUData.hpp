@@ -1,7 +1,7 @@
 #ifndef IMUDATA_H
 #define IMUDATA_H
 
-#include "SensorData.h"
+#include "SensorData.hpp"
 #include "GPSAccuracy.hpp"
 
 class IMUData : public SensorData
