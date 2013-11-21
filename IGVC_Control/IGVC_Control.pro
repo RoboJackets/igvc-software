@@ -50,7 +50,8 @@ SOURCES += \
     ../src/gui/adapters/gpsadapter.cpp \
     ../src/hardware/sensors/camera/StereoPlayback.cpp \
     ../src/hardware/sensors/camera/StereoImageRepeater.cpp \
-    ../src/hardware/sensors/camera/Bumblebee2.cpp
+    ../src/hardware/sensors/camera/Bumblebee2.cpp \
+    ../src/gui/adapters/imuadapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -105,14 +106,16 @@ HEADERS  += \
     ../src/hardware/sensors/camera/StereoPlayback.h \
     ../src/hardware/sensors/camera/StereoPair.hpp \
     ../src/hardware/sensors/camera/StereoImageRepeater.h \
-    ../src/hardware/sensors/camera/Bumblebee2.h
+    ../src/hardware/sensors/camera/Bumblebee2.h \
+    ../src/gui/adapters/imuadapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
     ../src/gui/adapters/joystickadapter.ui \
     ../src/gui/adapters/cameraadapter.ui \
     ../src/gui/adapters/mapadapter.ui \
-    ../src/gui/adapters/gpsadapter.ui
+    ../src/gui/adapters/gpsadapter.ui \
+    ../src/gui/adapters/imuadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
