@@ -46,7 +46,8 @@ SOURCES += \
     ../src/common/utils/ImageUtils.cpp \
     ../src/common/Robot.cpp \
     ../src/hardware/sensors/camera/CameraInfo.cpp \
-    ../src/gui/adapters/gpsadapter.cpp
+    ../src/gui/adapters/gpsadapter.cpp \
+    ../src/intelligence/posetracking/positiontracker.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -95,7 +96,9 @@ HEADERS  += \
     ../src/common/utils/ImageUtils.h \
     ../src/common/Robot.h \
     ../src/hardware/sensors/camera/CameraInfo.h \
-    ../src/gui/adapters/gpsadapter.h
+    ../src/gui/adapters/gpsadapter.h \
+    ../src/intelligence/posetracking/positiontracker.h \
+    ../src/intelligence/posetracking/gaussianvariable.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
