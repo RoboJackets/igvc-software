@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
-    _stereoSource = new StereoPlayback("/media/DATA/Robojackets/IGVC/igvc_cam_data/video/CompCourse_left0.mpeg","/media/DATA/Robojackets/IGVC/igvc_cam_data/video/CompCourse_right0.mpeg",20,"",false);
+    _stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
     ui->hardwareStatusList->addItem("Camera");
 
     _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
