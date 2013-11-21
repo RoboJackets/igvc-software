@@ -4,8 +4,11 @@
 #include <QWidget>
 #include <QRect>
 #include <boost/thread.hpp>
-#include "hardware/sensors/joystick/Joystick.h"
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include "cameraadaptertester.h"
 #include "common/events/Event.hpp"
+
 
 
 namespace Ui {
@@ -17,7 +20,7 @@ class CameraAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit CameraAdapter(/*Camera *camera,*/ QWidget *parent = 0);
+    explicit CameraAdapter(CameraAdapterTester *camera, QWidget *parent = 0);
     ~CameraAdapter();
 
 protected:
@@ -27,25 +30,18 @@ protected:
 private:
     Ui::CameraAdapter *ui;
 
-    QImage currentLeftFrame;
-    QImage currentRightFrame;
-    QImage currentDepthFrame;
-    QImage currentPointCloudFrame;
-
-
     //Camera *camera;
+    CameraAdapterTester *_camera;
 
-    //CameraState _state;
+    CameraData _data;
+    bool gotData;
 
     boost::mutex _mutex;
 
-    void paint(QPainter* painter);
+    QImage CVMat2QImage(cv::Mat img);
 
-    void OnCameraData(/*CameraState state*/);
-
-    /*void OnJoystickData(JoystickState state);
-    LISTENER(JoystickAdapter, OnJoystickData, JoystickState)*/
-
+    void OnCameraData(CameraData data);
+    LISTENER(CameraAdapter, OnCameraData, CameraData)
 };
 
 #endif // CAMERAADAPTER_H
