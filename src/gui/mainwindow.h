@@ -12,6 +12,7 @@
 #include "intelligence/JoystickDriver.hpp"
 #include <hardware/sensors/gps/GPS.hpp>
 #include <hardware/sensors/camera/StereoSource.hpp>
+#include <hardware/sensors/IMU/IMU.h>
 
 namespace Ui {
 class MainWindow;
@@ -72,6 +73,8 @@ private:
     IGVC::Sensors::GPS *_GPS;
 
     StereoSource *_stereoSource;
+
+    IMU *_IMU;
 
     bool isRunning, isPaused;
 
