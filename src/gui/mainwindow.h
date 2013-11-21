@@ -10,6 +10,7 @@
 #include "hardware/sensors/joystick/Joystick.h"
 #include "hardware/actuators/motors/MotorEncoderDriver2013.h"
 #include "intelligence/JoystickDriver.hpp"
+#include <hardware/sensors/gps/GPS.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -43,6 +44,15 @@ private slots:
 
     void on_stopButton_clicked();
 
+    void on_actionStatus_Bar_toggled(bool arg1);
+
+    void on_saveConfigButton_clicked();
+
+    void on_loadConfigButton_clicked();
+
+    void on_actionHemisphere_A100_triggered();
+
+    void on_actionSimulatedGPS_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -58,11 +68,14 @@ private:
 
     MotorDriver *_motorController;
 
+    IGVC::Sensors::GPS *_GPS;
+
     bool isRunning, isPaused;
 
     MDIWindow *activeMdiChild();
     void setupMenus();
     MDIWindow* findWindowWithTitle(QString title);
+    void updateHardwareStatusIcons();
 };
 
 #endif // MAINWINDOW_H

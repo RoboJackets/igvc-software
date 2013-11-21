@@ -10,7 +10,7 @@
 
 #include <time.h>
 #include "common/events/Event.hpp"
-#include "hardware/sensors/DataStructures/GPSData.h"
+#include "hardware/sensors/DataStructures/GPSData.hpp"
 
 namespace IGVC {
 namespace Sensors {
@@ -40,6 +40,11 @@ public:
 	 * Return true if there is at least one state in the buffer.
 	 */
 	virtual bool StateIsAvailable() = 0;
+
+    /*
+     * Return true if the device is connected and communicating.
+     */
+    virtual bool isOpen() = 0;
 
     Event<GPSData> onNewData;
     Event<void*> onDeviceFailure;
