@@ -1,58 +1,79 @@
 #include "cameraadapter.h"
 #include "ui_cameraadapter.h"
+#include "cameraadaptertester.h"
 #include <QGraphicsItem>
 #include <QPixmap>
+#include <iostream>
 #include <QGridLayout>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include "common/events/Event.hpp"
 
-CameraAdapter::CameraAdapter(QWidget *parent) :
+CameraAdapter::CameraAdapter(CameraAdapterTester *camera, QWidget *parent) :
      QWidget(parent),
-     ui(new Ui::CameraAdapter)
+     ui(new Ui::CameraAdapter),
+     LOnCameraData(this)
 {
     ui->setupUi(this);
 
-    currentLeftFrame.load("/home/idan/Downloads/testImage.png");
-    currentRightFrame.load("/home/idan/Downloads/testImage.png");
-    currentDepthFrame.load("/home/idan/Downloads/testImage.png");
-    currentPointCloudFrame.load("/home/idan/Downloads/testImage.png");
-
+    if(camera)
+    {
+        _camera = camera;
+        _camera->onNewData += &LOnCameraData;
+    }
     if(parent)
     {
         parent->setLayout(new QGridLayout());
     }
+    gotData = false;
 }
 
 CameraAdapter::~CameraAdapter()
 {
-    /*if(_joystick)
-        _joystick->onNewData -= &LOnJoystickData;
-    delete ui;*/
+    if(_camera)
+        _camera->onNewData -= &LOnCameraData;
+    delete ui;
 }
 
-void CameraAdapter::OnCameraData(/*CameraState state*/)
+void CameraAdapter::OnCameraData(CameraData data)
 {
+
     if(isVisible())
     {
         _mutex.lock();
-        //_state = state;
+        _data = data;
+        gotData = true;
         _mutex.unlock();
         update();
     }
 }
 
-void CameraAdapter::paint(QPainter *painter)
+
+QImage CameraAdapter::CVMat2QImage(cv::Mat img)
 {
-    //painter->drawImage(ui->leftFeedTab, currentLeftFrame);
+    cv::Mat temp(img.cols, img.rows, img.type());
+    //cv::cvtColor(img, temp, CV_BayerGR2RGB);
+
+    QImage dest((uchar*)img.data,img.cols,img.rows, img.step, QImage::Format_RGB888);
+    QImage dest2(dest);
+    dest2.detach();
+    return dest2;
 }
+
 
 void CameraAdapter::paintEvent(QPaintEvent *e)
 {
-
-
     _mutex.lock();
-    ui->leftFeedLabel->setPixmap(QPixmap::fromImage(currentLeftFrame));
-    ui->rightFeedLabel->setPixmap(QPixmap::fromImage(currentRightFrame));
-    ui->depthMapLabel->setPixmap(QPixmap::fromImage(currentDepthFrame));
-    ui->pointCloudLabel->setPixmap(QPixmap::fromImage(currentPointCloudFrame));
+
+    if(gotData){
+
+       ui->leftFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.leftFeed)));
+       ui->rightFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.rightFeed)));
+        ui->depthMapLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.depthMap)));
+        ui->pointCloudLabel->setPixmap(QPixmap::fromImage( CVMat2QImage(_data.pointCloud)));
+
+    }
 
 
     _mutex.unlock();
