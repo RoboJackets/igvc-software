@@ -41,9 +41,11 @@ void StereoPlayback::Run()
         }
         else
         {
-            LockRunning();
-            Running(false);
-            UnlockRunning();
+            _leftVid.set(CV_CAP_PROP_POS_FRAMES , 0);
+            _rightVid.set(CV_CAP_PROP_POS_FRAMES, 0);
+//            LockRunning();
+//            Running(false);
+//            UnlockRunning();
         }
     }
 }
