@@ -1,27 +1,23 @@
 #include "cameraadapter.h"
 #include "ui_cameraadapter.h"
-#include "cameraadaptertester.h"
 #include <QGraphicsItem>
 #include <QPixmap>
 #include <iostream>
 #include <QGridLayout>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "common/events/Event.hpp"
 
-CameraAdapter::CameraAdapter(CameraAdapterTester *camera, QWidget *parent) :
+CameraAdapter::CameraAdapter(QWidget *parent) :
      QWidget(parent),
-     ui(new Ui::CameraAdapter),
-     LOnCameraData(this)
+     ui(new Ui::CameraAdapter)/*,
+     LOnCameraData(this)*/
 {
     ui->setupUi(this);
 
-    if(camera)
-    {
-        _camera = camera;
-        _camera->onNewData += &LOnCameraData;
-    }
+//    if(camera)
+//    {
+//        _camera = camera;
+//        _camera->onNewData += &LOnCameraData;
+//    }
     if(parent)
     {
         parent->setLayout(new QGridLayout());
@@ -31,23 +27,23 @@ CameraAdapter::CameraAdapter(CameraAdapterTester *camera, QWidget *parent) :
 
 CameraAdapter::~CameraAdapter()
 {
-    if(_camera)
-        _camera->onNewData -= &LOnCameraData;
+//    if(_camera)
+//        _camera->onNewData -= &LOnCameraData;
     delete ui;
 }
 
-void CameraAdapter::OnCameraData(CameraData data)
-{
+//void CameraAdapter::OnCameraData(CameraData data)
+//{
 
-    if(isVisible())
-    {
-        _mutex.lock();
-        _data = data;
-        gotData = true;
-        _mutex.unlock();
-        update();
-    }
-}
+//    if(isVisible())
+//    {
+//        _mutex.lock();
+//        _data = data;
+//        gotData = true;
+//        _mutex.unlock();
+//        update();
+//    }
+//}
 
 
 QImage CameraAdapter::CVMat2QImage(cv::Mat img)
@@ -68,10 +64,10 @@ void CameraAdapter::paintEvent(QPaintEvent *e)
 
     if(gotData){
 
-       ui->leftFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.leftFeed)));
-       ui->rightFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.rightFeed)));
-       ui->depthMapLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.depthMap)));
-       ui->pointCloudLabel->setPixmap(QPixmap::fromImage( CVMat2QImage(_data.pointCloud)));
+//       ui->leftFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.leftFeed)));
+//       ui->rightFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.rightFeed)));
+//       ui->depthMapLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.depthMap)));
+//       ui->pointCloudLabel->setPixmap(QPixmap::fromImage( CVMat2QImage(_data.pointCloud)));
 
     }
 
