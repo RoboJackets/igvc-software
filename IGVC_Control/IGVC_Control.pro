@@ -102,7 +102,7 @@ HEADERS  += \
 FORMS    += \
     ../src/gui/mainwindow.ui \
     ../src/gui/adapters/joystickadapter.ui \
-    ../src/gui/adapters/cameraadapter.ui
+    ../src/gui/adapters/cameraadapter.ui \
     ../src/gui/adapters/mapadapter.ui \
     ../src/gui/adapters/gpsadapter.ui
 
