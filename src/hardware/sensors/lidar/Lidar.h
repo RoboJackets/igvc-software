@@ -72,10 +72,7 @@ public:
      */
     virtual LidarState GetStateAtTime(timeval time) = 0;
 
-    /*
-     * Return true if there is at least one state in the buffer.
-     */
-    virtual bool StateIsAvailable() = 0;
+    virtual bool IsWorking() = 0;
 
     Event<LidarState> onNewData;
     Event<void*> onDeviceFailure;

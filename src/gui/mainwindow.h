@@ -11,6 +11,9 @@
 #include "hardware/actuators/motors/MotorEncoderDriver2013.h"
 #include "intelligence/JoystickDriver.hpp"
 #include <hardware/sensors/gps/GPS.hpp>
+#include <hardware/sensors/camera/StereoSource.hpp>
+#include <hardware/sensors/IMU/IMU.h>
+#include <hardware/sensors/lidar/Lidar.h>
 
 namespace Ui {
 class MainWindow;
@@ -33,6 +36,10 @@ private slots:
     void updateMenus();
 
     void openHardwareView(QModelIndex index);
+
+
+    //TODO : We're gonna make this a real thing.
+    //void setupHardwareStatusList();
 
     void on_joystickButton_toggled(bool checked);
 
@@ -65,6 +72,12 @@ private:
     MotorDriver *_motorController;
 
     IGVC::Sensors::GPS *_GPS;
+
+    StereoSource *_stereoSource;
+
+    IMU *_IMU;
+
+    IGVC::Sensors::Lidar *_lidar;
 
     bool isRunning, isPaused;
 
