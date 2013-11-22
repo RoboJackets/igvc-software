@@ -20,7 +20,7 @@ public:
     ~NAV200();
     LidarState GetState();
     LidarState GetStateAtTime(timeval time);
-    bool StateIsAvailable();
+    bool IsWorking();
 
 private:
     boost::thread _iothread;
