@@ -15,7 +15,10 @@ namespace LogLevel
         Warning,
         Error
     };
-    static const char* LevelNames[] = {"Debug","Info","Warning","Error"};
+    /* Names are padded so that all strings have the same length.
+     * This makes printed formatting nicer.
+     */
+    static const char* LevelNames[] = {"Debug  ", "Info   ", "Warning", "Error  "};
     static std::string str(Level level)
     {
         return LevelNames[level];

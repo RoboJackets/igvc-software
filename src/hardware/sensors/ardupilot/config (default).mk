@@ -3,4 +3,4 @@ BOARD=mega2560
 # The communication port used to communicate with the APM.
 PORT=/dev/ttyACM0
 # The Arduino IDE install directory
-ARDUINO=/home/username/arduino-1.0.3
+ARDUINO=/home/username/arduino-1.0.5
