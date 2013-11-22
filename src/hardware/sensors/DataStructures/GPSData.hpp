@@ -150,6 +150,12 @@ public:
 
     }
 
+    friend std::ostream &operator<< (std::ostream &stream, GPSData &data)
+    {
+        stream << "(" << data.Lat() << ", " << data.Long() << ")";
+        return stream;
+    }
+
     private:
         double _Lat;
         double _Long;
