@@ -12,6 +12,7 @@
 #include <hardware/sensors/gps/HemisphereA100GPS.h>
 #include <hardware/sensors/camera/StereoPlayback.h>
 #include <hardware/sensors/IMU/Ardupilot.h>
+#include <hardware/sensors/lidar/SimulatedLidar.h>
 
 #include <QMdiSubWindow>
 #include <QTextEdit>
@@ -59,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
+    _lidar = new SimulatedLidar();
     ui->hardwareStatusList->addItem("LIDAR");
 
     _stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
@@ -118,7 +120,7 @@ void MainWindow::openHardwareView(QModelIndex index)
         }
         else if(labelText == "LIDAR")
         {
-            adapter = new LidarAdapter();
+            adapter = new LidarAdapter(_lidar);
 	}
         else if(labelText == "Map")
         {

@@ -13,6 +13,7 @@
 #include <hardware/sensors/gps/GPS.hpp>
 #include <hardware/sensors/camera/StereoSource.hpp>
 #include <hardware/sensors/IMU/IMU.h>
+#include <hardware/sensors/lidar/Lidar.h>
 
 namespace Ui {
 class MainWindow;
@@ -75,6 +76,8 @@ private:
     StereoSource *_stereoSource;
 
     IMU *_IMU;
+
+    IGVC::Sensors::Lidar *_lidar;
 
     bool isRunning, isPaused;
 
