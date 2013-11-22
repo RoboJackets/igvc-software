@@ -117,7 +117,6 @@ FORMS    += \
     ../src/gui/adapters/lidaradapter.ui \
     ../src/gui/adapters/mapadapter.ui \
     ../src/gui/adapters/cameraadapter.ui \
-    ../src/gui/adapters/mapadapter.ui \
     ../src/gui/adapters/gpsadapter.ui \
     ../src/gui/adapters/imuadapter.ui
 
