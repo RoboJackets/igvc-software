@@ -15,7 +15,7 @@ namespace IGVC
                 virtual ~SimulatedLidar();
                 LidarState GetState();
                 LidarState GetStateAtTime(timeval time);
-                bool StateIsAvailable();
+                bool IsWorking();
                 void loadFile(const char* path);
                 void setDelay(int usec);
 
