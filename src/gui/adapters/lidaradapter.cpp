@@ -6,22 +6,25 @@
 #include <QDebug>
 
 
-LidarAdapter::LidarAdapter(QWidget *parent) :
+LidarAdapter::LidarAdapter(IGVC::Sensors::Lidar *lidar, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::LidarAdapter)
+    ui(new Ui::LidarAdapter),
+    LOnLidarData(this)
 {
     ui->setupUi(this);
     NUMPTS = 1024;
 
-    for (int i = 0; i < NUMPTS; i++)
-        dataPts[i] = rand() % 4000 + 1;
-
     isFit = false;
-    //hasState = false;
+
+    _lidar = lidar;
+    if(_lidar != nullptr)
+        _lidar->onNewData += &LOnLidarData;
 }
 
 LidarAdapter::~LidarAdapter()
 {
+    if(_lidar != nullptr)
+        _lidar->onNewData -= &LOnLidarData;
     delete ui;
 }
 
@@ -65,59 +68,52 @@ void LidarAdapter::paintEvent(QPaintEvent *)
                    wid - (minIsWidth ? 0 : minOffset),
                    hei - (minIsWidth ? minOffset: 0));
 
-    //if (!hasState)
-    //    return;
-
-
-    // TODO : make this parse a LidarState object.
-
-    ui->tf_range->setText(QString("Range: %1").arg(round(range)));
+    ui->tf_range->setText(QString("Range: %1").arg(range / 1000.0)); // mm to m
 
     /*
      *  now draw lidar rays using relative distances;
      *  furthest distance is largest line and all other lines use a % of the longest
      */
 
-    double interval = 2 * M_PI / NUMPTS;
-    double currAngle = 0;
     p.setPen(QPen(QColor(0, 0, 0, 32)));
     double mag;         // % of longest line
 
-    for (int i = 0; i < NUMPTS; i++)
+    for(IGVC::Sensors::LidarPoint point : _data.points)
     {
-
-
-        mag = dataPts[i] / range;
-        if (mag > 1)
-            mag = 1;
-        p.drawLine(centerX, centerY,
-                   centerX + cos(currAngle) * mag * minDimension * .5,
-                   centerY - sin(currAngle) * mag * minDimension * .5);
-        currAngle += interval;
+        if(point.valid)
+        {
+            mag = point.distance / range;
+            if(mag > 1)
+                mag = 1;
+            p.drawLine(centerX, centerY,
+                       centerX + cos(point.angle) * mag * minDimension * .5,
+                       centerY - sin(point.angle) * mag * minDimension * .5);
+        }
     }
 }
 
-/*void LidarAdapter::OnLidarData(IGVC::Sensors::LidarState state)
+void LidarAdapter::OnLidarData(IGVC::Sensors::LidarState state)
 {
-    currState = state;
-    hasState = true;
-}*/
+    _data = state;
+}
 
 // TODO : Maybe add input textfield for range
 
 void LidarAdapter::on_btn_fit_clicked()
 {
-    double maxSize = dataPts[0];
-    for (int i = 1; i < NUMPTS; i++)    // find longest line
-        if (dataPts[i] > maxSize)
-            maxSize = dataPts[i];
-    fitRange = maxSize;
+    double maxSize = 0;
+    for(IGVC::Sensors::LidarPoint point : _data.points)
+        if(point.valid)
+            if(point.distance > maxSize)
+                maxSize = point.distance;
+
+    fitRange = maxSize * 1000.0; // m to mm
     isFit = true;
     ui->btn_slider->setSliderPosition(fitRange);
     update();
 }
 
-void LidarAdapter::on_btn_slider_actionTriggered(int action)
+void LidarAdapter::on_btn_slider_actionTriggered(int)
 {
     isFit = false;
     update();
