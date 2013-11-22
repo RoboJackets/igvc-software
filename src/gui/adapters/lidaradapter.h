@@ -2,7 +2,7 @@
 #define LIDARADAPTER_H
 
 #include <QWidget>
-#include "hardware/sensors/lidar/Lidar.h"
+#include <hardware/sensors/lidar/Lidar.h>
 
 namespace Ui {
 class LidarAdapter;
@@ -13,7 +13,7 @@ class LidarAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit LidarAdapter(QWidget *parent = 0);
+    explicit LidarAdapter(IGVC::Sensors::Lidar *lidar, QWidget *parent = 0);
     ~LidarAdapter();
 
 protected:
@@ -21,20 +21,20 @@ protected:
 
 private slots:
     void on_btn_fit_clicked();
-    void on_btn_slider_actionTriggered(int action);
+    void on_btn_slider_actionTriggered(int);
 
 private:
     Ui::LidarAdapter *ui;
-    double dataPts[1024];
     bool isFit;
     double fitRange;
 
     int NUMPTS;
 
-    //IGVC::Sensors::LidarState currState;
-    //void OnLidarData(IGVC::Sensors::LidarState state);
-    //LISTENER(lidaradapter, OnLidarData, IGVC::Sensors::LidarState);
-   // bool hasState;
+    IGVC::Sensors::Lidar *_lidar;
+    IGVC::Sensors::LidarState _data;
+
+    void OnLidarData(IGVC::Sensors::LidarState state);
+    LISTENER(LidarAdapter, OnLidarData, IGVC::Sensors::LidarState)
 };
 
 #endif // LIDARADAPTER_H
