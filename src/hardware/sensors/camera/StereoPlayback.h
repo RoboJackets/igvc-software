@@ -1,9 +1,9 @@
 #ifndef STEREOPLAYBACK_H
 #define STEREOPLAYBACK_H
 
-#include "sensors/camera3D/StereoSource.hpp"
-#include "sensors/DataStructures/StereoImageData.hpp"
-#include "common/utils/ImageUtils.h"
+#include <hardware/sensors/camera/StereoSource.hpp>
+#include <hardware/sensors/DataStructures/StereoImageData.hpp>
+#include <common/utils/ImageUtils.h>
 
 
 class StereoPlayback : public StereoSource

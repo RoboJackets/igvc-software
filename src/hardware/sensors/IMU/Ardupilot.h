@@ -7,23 +7,14 @@
 
 using namespace std;
 
-struct IMURawData
-{
-    double roll;
-    double pitch;
-    double heading;
-    double accelX;
-    double accelY;
-    double accelZ;
-};
-
 class Ardupilot : public IMU
 {
     public:
         Ardupilot();
         ~Ardupilot();
         Event<IMUData> onNewIMUData;
-        Event<IMURawData> onNewRawData;
+
+        bool isWorking();
 
     private:
         ASIOSerialPort ardupilotPort;
