@@ -14,6 +14,8 @@ class Ardupilot : public IMU
         ~Ardupilot();
         Event<IMUData> onNewIMUData;
 
+        bool isWorking();
+
     private:
         ASIOSerialPort ardupilotPort;
 
