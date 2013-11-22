@@ -1,14 +1,24 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include "adapters/joystickadapter.h"
 #include "adapters/mapadapter.h"
 #include "adapters/gpsadapter.h"
+#include "adapters/joystickadapter.h"
+#include "adapters/cameraadapter.h"
+#include "adapters/imuadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/HemisphereA100GPS.h>
+#include <hardware/sensors/camera/StereoPlayback.h>
+#include <hardware/sensors/IMU/Ardupilot.h>
+#include <hardware/sensors/lidar/SimulatedLidar.h>
 
 #include <QMdiSubWindow>
 #include <QTextEdit>
+#include "adapters/joystickadapter.h"
+#include "adapters/lidaradapter.h"
+#include <QDebug>
 #include <QFileDialog>
 
 #include <iostream>
@@ -50,9 +60,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
+    _lidar = new SimulatedLidar();
+    ui->hardwareStatusList->addItem("LIDAR");
+
+    _stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
+    ui->hardwareStatusList->addItem("Camera");
+
     _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
     ui->actionSimulatedGPS->setChecked(true);
     ui->hardwareStatusList->addItem("GPS");
+
+    _IMU = new Ardupilot();
+    ui->hardwareStatusList->addItem("IMU");
 
     updateHardwareStatusIcons();
 
@@ -74,8 +93,8 @@ void MainWindow::setupMenus()
 MainWindow::~MainWindow()
 {
     delete _joystick;
-    delete ui;
     delete _GPS;
+    delete ui;
 }
 
 void MainWindow::openHardwareView(QModelIndex index)
@@ -99,6 +118,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         {
             adapter = new JoystickAdapter(_joystick);
         }
+        else if(labelText == "LIDAR")
+        {
+            adapter = new LidarAdapter(_lidar);
+	}
         else if(labelText == "Map")
         {
             adapter = new MapAdapter();
@@ -106,6 +129,14 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "GPS")
         {
             adapter = new GPSAdapter(_GPS);
+        }
+        else if(labelText == "Camera")
+        {
+            adapter = new CameraAdapter(_stereoSource);
+        }
+        else if(labelText == "IMU")
+        {
+            adapter = new IMUAdapter(_IMU);
         }
         else
         {
@@ -280,4 +311,6 @@ void MainWindow::updateHardwareStatusIcons()
     ui->hardwareStatusList->findItems("GPS", Qt::MatchExactly).at(0)->setIcon(_GPS->isOpen() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isOpen() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("IMU", Qt::MatchExactly).at(0)->setIcon(_IMU->isWorking() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->IsWorking() ? checkIcon : xIcon);
 }

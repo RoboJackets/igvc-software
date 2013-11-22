@@ -8,10 +8,10 @@
 #include <unistd.h>
 #include <opencv2/highgui/highgui.hpp>
 
-#include "events/Event.hpp"
-#include "sensors/camera3D/StereoPair.hpp"
-#include "sensors/camera3D/StereoSource.hpp"
-#include "sensors/DataStructures/SensorData.h"
+#include <common/events/Event.hpp>
+#include <hardware/sensors/camera/StereoPair.hpp>
+#include <hardware/sensors/camera/StereoSource.hpp>
+#include <hardware/sensors/DataStructures/SensorData.hpp>
 #include "common/utils/ImageUtils.h"
 
 
