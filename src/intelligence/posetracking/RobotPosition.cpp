@@ -219,9 +219,9 @@ int RobotPosition::update(IMUData newData)
 {
 
   double time = newData.time();
-  _Roll.push(DataPoint<double>(newData.Roll(), time));
-  _Pitch.push(DataPoint<double>(newData.Pitch(), time));
-  _Yaw.push(DataPoint<double>(newData.Yaw(), time));
+  _Roll.push(DataPoint<double>(newData.Roll, time));
+  _Pitch.push(DataPoint<double>(newData.Pitch, time));
+  _Yaw.push(DataPoint<double>(newData.Yaw, time));
   return 0;
 }
 
