@@ -82,7 +82,7 @@ void LidarAdapter::paintEvent(QPaintEvent *)
     {
         if(point.valid)
         {
-            mag = point.distance / range;
+            mag = point.distance / ( range / 1000.0 );
             if(mag > 1)
                 mag = 1;
             p.drawLine(centerX, centerY,
