@@ -338,8 +338,23 @@
     <addaction name="actionCascade"/>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuSensors">
+    <property name="title">
+     <string>Sensors</string>
+    </property>
+    <widget class="QMenu" name="menuGPS">
+     <property name="title">
+      <string>GPS</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="actionHemisphere_A100"/>
+     <addaction name="actionSimulatedGPS"/>
+    </widget>
+    <addaction name="menuGPS"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindow"/>
+   <addaction name="menuSensors"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionClose">
@@ -384,6 +399,22 @@
    </property>
    <property name="text">
     <string>Status Bar</string>
+   </property>
+  </action>
+  <action name="actionHemisphere_A100">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Hemisphere A100</string>
+   </property>
+  </action>
+  <action name="actionSimulatedGPS">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Simulated</string>
    </property>
   </action>
  </widget>

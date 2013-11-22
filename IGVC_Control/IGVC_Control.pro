@@ -11,6 +11,8 @@ TARGET = IGVC_Control
 TEMPLATE = app
 QT += gui declarative
 
+CONFIG += c++11
+
 INCLUDEPATH += ../src/ \
     ../src/gui/
 
@@ -31,6 +33,7 @@ SOURCES += \
     ../src/hardware/sensors/lidar/NAV200.cpp \
     ../src/hardware/serial/ASIOSerialPort.cpp \
     ../src/gui/adapters/joystickadapter.cpp \
+    ../src/gui/adapters/cameraadapter.cpp \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.cpp \
     ../src/common/utils/StringUtils.cpp \
     ../src/intelligence/pathplanning/searchlocation.cpp \
@@ -39,7 +42,17 @@ SOURCES += \
     ../src/gui/adapters/lidaradapter.cpp \
     ../src/hardware/sensors/IMU/Ardupilot.cpp \
     ../src/gui/adapters/mapadapter.cpp \
-    ../src/intelligence/mapping/mapping.cpp
+    ../src/intelligence/mapping/mapping.cpp \
+    ../src/hardware/sensors/gps/simulatedgps.cpp \
+    ../src/intelligence/posetracking/RobotPosition.cpp \
+    ../src/common/utils/ImageUtils.cpp \
+    ../src/common/Robot.cpp \
+    ../src/hardware/sensors/camera/CameraInfo.cpp \
+    ../src/gui/adapters/gpsadapter.cpp \
+    ../src/hardware/sensors/camera/StereoPlayback.cpp \
+    ../src/hardware/sensors/camera/StereoImageRepeater.cpp \
+    ../src/hardware/sensors/camera/Bumblebee2.cpp \
+    ../src/gui/adapters/imuadapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -70,6 +83,7 @@ HEADERS  += \
     ../src/hardware/sensors/DataStructures/DataArray.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
     ../src/gui/adapters/joystickadapter.h \
+    ../src/gui/adapters/cameraadapter.h \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.h \
     ../src/hardware/actuators/motors/MotorDriver.hpp \
     ../src/common/utils/StringUtils.hpp \
@@ -82,13 +96,30 @@ HEADERS  += \
     ../src/gui/adapters/lidaradapter.h \
     ../src/hardware/sensors/IMU/Ardupilot.h \
     ../src/gui/adapters/mapadapter.h \
-    ../src/intelligence/mapping/mapping.h
+    ../src/intelligence/mapping/mapping.h \
+    ../src/hardware/sensors/gps/simulatedgps.h \
+    ../src/hardware/sensors/IMU/IMU.h \
+    ../src/intelligence/posetracking/RobotPosition.h \
+    ../src/common/utils/ImageUtils.h \
+    ../src/common/Robot.h \
+    ../src/hardware/sensors/camera/CameraInfo.h \
+    ../src/gui/adapters/gpsadapter.h \
+    ../src/hardware/sensors/camera/StereoSource.hpp \
+    ../src/hardware/sensors/camera/StereoPlayback.h \
+    ../src/hardware/sensors/camera/StereoPair.hpp \
+    ../src/hardware/sensors/camera/StereoImageRepeater.h \
+    ../src/hardware/sensors/camera/Bumblebee2.h \
+    ../src/gui/adapters/imuadapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
     ../src/gui/adapters/joystickadapter.ui \
     ../src/gui/adapters/lidaradapter.ui \
-    ../src/gui/adapters/mapadapter.ui
+    ../src/gui/adapters/mapadapter.ui \
+    ../src/gui/adapters/cameraadapter.ui \
+    ../src/gui/adapters/mapadapter.ui \
+    ../src/gui/adapters/gpsadapter.ui \
+    ../src/gui/adapters/imuadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
@@ -131,3 +162,14 @@ LIBS += -L/usr/lib/ -lvtkCommon
 INCLUDEPATH += /usr/include/eigen3
 DEPENDPATH += /usr/include/eigen3
 
+# OpenCV
+INCLUDEPATH += /usr/include/
+DEPENDPATH += /usr/include/
+
+LIBS += -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_calib3d -lopencv_highgui
+
+# FlyCapture2
+INCLUDEPATH += /usr/include/
+DEPENDPATH += /usr/include/
+
+LIBS += -L/usr/lib/ -lflycapture
