@@ -41,12 +41,12 @@ void JoystickAdapter::paintEvent(QPaintEvent *e)
 {
     _mutex.lock();
     ui->axesList->clear();
-    for(unsigned int i = 0; i < _state.axes.size(); i++)
+    for(auto i = 0u; i < _state.axes.size(); i++)
     {
         ui->axesList->addItem(tr("Axis %0 : %1").arg(i).arg(_state.axes[i]));
     }
     ui->buttonsList->clear();
-    for(unsigned int i = 0; i < _state.buttons.size(); i++)
+    for(auto i = 0u; i < _state.buttons.size(); i++)
     {
         ui->buttonsList->addItem(tr("Button %0 : %1").arg(i).arg(_state.buttons[i]));
     }

@@ -10,6 +10,9 @@
 #include "hardware/sensors/joystick/Joystick.h"
 #include "hardware/actuators/motors/MotorEncoderDriver2013.h"
 #include "intelligence/JoystickDriver.hpp"
+#include <hardware/sensors/gps/GPS.hpp>
+#include <hardware/sensors/camera/StereoSource.hpp>
+#include <hardware/sensors/IMU/IMU.h>
 
 namespace Ui {
 class MainWindow;
@@ -33,6 +36,10 @@ private slots:
 
     void openHardwareView(QModelIndex index);
 
+
+    //TODO : We're gonna make this a real thing.
+    //void setupHardwareStatusList();
+
     void on_joystickButton_toggled(bool checked);
 
     void on_playButton_clicked();
@@ -44,6 +51,10 @@ private slots:
     void on_saveConfigButton_clicked();
 
     void on_loadConfigButton_clicked();
+
+    void on_actionHemisphere_A100_triggered();
+
+    void on_actionSimulatedGPS_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -59,11 +70,18 @@ private:
 
     MotorDriver *_motorController;
 
+    IGVC::Sensors::GPS *_GPS;
+
+    StereoSource *_stereoSource;
+
+    IMU *_IMU;
+
     bool isRunning, isPaused;
 
     MDIWindow *activeMdiChild();
     void setupMenus();
     MDIWindow* findWindowWithTitle(QString title);
+    void updateHardwareStatusIcons();
 };
 
 #endif // MAINWINDOW_H
