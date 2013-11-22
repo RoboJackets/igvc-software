@@ -62,9 +62,9 @@ LidarState SimulatedLidar::GetStateAtTime(timeval time)
     return _data;
 }
 
-bool SimulatedLidar::StateIsAvailable()
+bool SimulatedLidar::IsWorking()
 {
-    return false;
+    return true;
 }
 
 void SimulatedLidar::loadFile(const char *path)

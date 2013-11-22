@@ -1,7 +1,7 @@
 #ifndef STEREOIMAGEREPEATER_H
 #define STEREOIMAGEREPEATER_H
 
-#include <sensors/camera3D/StereoSource.hpp>
+#include <hardware/sensors/camera/StereoSource.hpp>
 #include <boost/thread.hpp>
 
 class StereoImageRepeater : public StereoSource
