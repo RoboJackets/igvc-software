@@ -33,11 +33,13 @@ SOURCES += \
     ../src/hardware/sensors/lidar/NAV200.cpp \
     ../src/hardware/serial/ASIOSerialPort.cpp \
     ../src/gui/adapters/joystickadapter.cpp \
+    ../src/gui/adapters/cameraadapter.cpp \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.cpp \
     ../src/common/utils/StringUtils.cpp \
     ../src/intelligence/pathplanning/searchlocation.cpp \
     ../src/intelligence/pathplanning/searchmove.cpp \
     ../src/intelligence/pathplanning/igvcsearchproblem.cpp \
+    ../src/gui/adapters/lidaradapter.cpp \
     ../src/hardware/sensors/IMU/Ardupilot.cpp \
     ../src/gui/adapters/mapadapter.cpp \
     ../src/intelligence/mapping/mapping.cpp \
@@ -47,6 +49,10 @@ SOURCES += \
     ../src/common/Robot.cpp \
     ../src/hardware/sensors/camera/CameraInfo.cpp \
     ../src/gui/adapters/gpsadapter.cpp \
+    ../src/hardware/sensors/camera/StereoPlayback.cpp \
+    ../src/hardware/sensors/camera/StereoImageRepeater.cpp \
+    ../src/hardware/sensors/camera/Bumblebee2.cpp \
+    ../src/gui/adapters/imuadapter.cpp \
     ../src/intelligence/posetracking/positiontracker.cpp
 
 HEADERS  += \
@@ -78,6 +84,7 @@ HEADERS  += \
     ../src/hardware/sensors/DataStructures/DataArray.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
     ../src/gui/adapters/joystickadapter.h \
+    ../src/gui/adapters/cameraadapter.h \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.h \
     ../src/hardware/actuators/motors/MotorDriver.hpp \
     ../src/common/utils/StringUtils.hpp \
@@ -87,6 +94,7 @@ HEADERS  += \
     ../src/intelligence/pathplanning/searchlocation.h \
     ../src/intelligence/pathplanning/searchmove.h \
     ../src/intelligence/pathplanning/igvcsearchproblem.h \
+    ../src/gui/adapters/lidaradapter.h \
     ../src/hardware/sensors/IMU/Ardupilot.h \
     ../src/gui/adapters/mapadapter.h \
     ../src/intelligence/mapping/mapping.h \
@@ -97,14 +105,23 @@ HEADERS  += \
     ../src/common/Robot.h \
     ../src/hardware/sensors/camera/CameraInfo.h \
     ../src/gui/adapters/gpsadapter.h \
+    ../src/hardware/sensors/camera/StereoSource.hpp \
+    ../src/hardware/sensors/camera/StereoPlayback.h \
+    ../src/hardware/sensors/camera/StereoPair.hpp \
+    ../src/hardware/sensors/camera/StereoImageRepeater.h \
+    ../src/hardware/sensors/camera/Bumblebee2.h \
+    ../src/gui/adapters/imuadapter.h \
     ../src/intelligence/posetracking/positiontracker.h \
     ../src/intelligence/posetracking/gaussianvariable.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
     ../src/gui/adapters/joystickadapter.ui \
+    ../src/gui/adapters/lidaradapter.ui \
     ../src/gui/adapters/mapadapter.ui \
-    ../src/gui/adapters/gpsadapter.ui
+    ../src/gui/adapters/cameraadapter.ui \
+    ../src/gui/adapters/gpsadapter.ui \
+    ../src/gui/adapters/imuadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
@@ -151,4 +168,10 @@ DEPENDPATH += /usr/include/eigen3
 INCLUDEPATH += /usr/include/
 DEPENDPATH += /usr/include/
 
-LIBS += -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_calib3d
+LIBS += -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_calib3d -lopencv_highgui
+
+# FlyCapture2
+INCLUDEPATH += /usr/include/
+DEPENDPATH += /usr/include/
+
+LIBS += -L/usr/lib/ -lflycapture

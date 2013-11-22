@@ -10,7 +10,7 @@ class IMU
         IMU() { }
         Event<IMUData>onNewData;
 
-
+        virtual bool isWorking() = 0;
     private:
 
 };
