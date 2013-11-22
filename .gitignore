@@ -17,6 +17,6 @@
 *~
 
 #Qt Creator
-*.pro.user
+*.pro.user*
 #ignores all top-level directories whose name starts with "build". This ignores the default Qt build directory formatting for projects.
 /build*

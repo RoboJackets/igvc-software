@@ -1,14 +1,14 @@
 #ifndef ROBOTPOSITION_H
 #define ROBOTPOSITION_H
 
-#include <hardware/sensors/DataStructures/GPSData.h>
+#include <hardware/sensors/DataStructures/GPSData.hpp>
 #include <hardware/sensors/DataStructures/DataArray.hpp>
 #include <hardware/sensors/DataStructures/DataPoint.hpp>
 #include <hardware/sensors/DataStructures/IMUData.hpp>
 #include <hardware/sensors/DataStructures/VisOdomData.hpp>
 #include <hardware/sensors/IMU/IMU.h>
-#include <hardware/sensors/GPS/HemisphereA100GPS.h>
-#include "vision/GrassOdometer.h"
+#include <hardware/sensors/gps/HemisphereA100GPS.h>
+#include <intelligence/vision/2D/GrassOdometer/GrassOdometer.h>
 
 #include <boost/thread.hpp>
 
