@@ -1,9 +1,9 @@
 #ifndef STEREOSOURCE_H
 #define STEREOSOURCE_H
 
-#include "sensors/camera3D/StereoPair.hpp"
-#include "sensors/DataStructures/StereoImageData.hpp"
-#include "events/Event.hpp"
+#include <hardware/sensors/camera/StereoPair.hpp>
+#include <hardware/sensors/DataStructures/StereoImageData.hpp>
+#include <common/events/Event.hpp>
 #include <boost/thread/thread.hpp>
 
 class StereoSource

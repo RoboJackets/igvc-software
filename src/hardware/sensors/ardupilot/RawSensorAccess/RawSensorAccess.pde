@@ -132,7 +132,7 @@ void loop()
 		prevPitch != ahrs.pitch ||
 		prevHeading != heading )
 	{
-		hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f \n"),ahrs.roll,ahrs.pitch,heading, filteredVals.x, filteredVals.y, filteredVals.z);
+		hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f \n"),ahrs.roll*180.0/M_PI,ahrs.pitch*180.0/M_PI,heading, filteredVals.x, filteredVals.y, filteredVals.z);
 		prevAccels.x = filteredVals.x;
 		prevAccels.y = filteredVals.y;
 		prevAccels.z = filteredVals.z;
