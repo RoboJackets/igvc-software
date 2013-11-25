@@ -1,10 +1,11 @@
 #include "positiontracker.h"
+#include <cmath>
 
 PositionTracker::PositionTracker()
 {
 }
 
-Position PositionTracker::UpdateWithMeasurement(Position s, Position measurement)
+Position PositionTracker::UpdateWithMeasurement(Position S, Position Measurement)
 {
     Position result;
     result.X.SetValue( ( S.X.Value()*Measurement.X.Variance() + Measurement.X.Value()*S.X.Variance() ) / (S.X.Variance()+Measurement.X.Variance()) );
@@ -17,7 +18,7 @@ Position PositionTracker::UpdateWithMeasurement(Position s, Position measurement
     return result;
 }
 
-Position PositionTracker::UpdateWithMotion(Position s, Position delta)
+Position PositionTracker::UpdateWithMotion(Position S, Position Delta)
 {
     Position result;
     result.X.SetValue(S.X.Value() + Delta.X.Value());
@@ -39,7 +40,7 @@ Position PositionTracker::DelaFromMotionCommand()
     double theta = _current_estimate.T.Value() * M_PI/180.0;
     double thetaPrime = (_current_estimate.T.Value() + W*t) * M_PI/180.0;
     delta.T.SetValue(W*t);
-    delta.X.SetValue(R*(Cos(theta) - Cos(thetaPrime)));
-    delta.Y.SetValue(R*(Sin(thetaPrime) - Sin(theta)));
+    delta.X.SetValue(R*(cos(theta) - cos(thetaPrime)));
+    delta.Y.SetValue(R*(sin(thetaPrime) - sin(theta)));
     return delta;
 }
