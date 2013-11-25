@@ -94,6 +94,9 @@ MainWindow::~MainWindow()
 {
     delete _joystick;
     delete _GPS;
+    delete _IMU;
+    delete _stereoSource;
+    delete _lidar;
     delete ui;
 }
 
