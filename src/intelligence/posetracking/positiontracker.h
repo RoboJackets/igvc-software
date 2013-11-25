@@ -1,10 +1,12 @@
 #ifndef POSITIONTRACKER_H
 #define POSITIONTRACKER_H
 
-#include <gaussianvariable.hpp>
+#include "gaussianvariable.hpp"
+#include <iostream>
 
 class Position
 {
+public:
     // Global horizontal component
     GaussianVariable<double> X;
     // Global vertical component
@@ -12,7 +14,7 @@ class Position
     // Heading west of north (degrees)
     GaussianVariable<double> T;
 
-    friend std::ostream &operator<< (std::ostream &stream, State &s)
+    friend std::ostream &operator<< (std::ostream &stream, Position &s)
     {
         stream << s.X.Value() << " (" << s.X.Variance() << "), ";
         stream << s.Y.Value() << " (" << s.Y.Variance() << "), ";
@@ -27,8 +29,8 @@ public:
     PositionTracker();
 
 private:
-    Position UpdateWithMotion(Position s, Position delta);
-    Position UpdateWithMeasurement(Position s, Position measurement);
+    Position UpdateWithMotion(Position S, Position Delta);
+    Position UpdateWithMeasurement(Position S, Position Measurement);
 
     Position DelaFromMotionCommand();
 
