@@ -58,6 +58,11 @@ public:
      */
 	void write(char *msg, int length);
 
+    /**
+     * Writes the given array of unsigned chars to the serial port.
+     */
+    void write(unsigned char *msg, int length);
+
 	/**
 	 * Reads bytes from the serial port until \n or \r is found.
 	 * Returns a string containing the bytes read excluding the newline.
