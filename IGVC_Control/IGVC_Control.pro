@@ -53,7 +53,8 @@ SOURCES += \
     ../src/hardware/sensors/camera/StereoImageRepeater.cpp \
     ../src/hardware/sensors/camera/Bumblebee2.cpp \
     ../src/gui/adapters/imuadapter.cpp \
-    ../src/intelligence/posetracking/positiontracker.cpp
+    ../src/intelligence/posetracking/positiontracker.cpp \
+    ../src/hardware/sensors/lidar/lms200.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -112,7 +113,8 @@ HEADERS  += \
     ../src/hardware/sensors/camera/Bumblebee2.h \
     ../src/gui/adapters/imuadapter.h \
     ../src/intelligence/posetracking/positiontracker.h \
-    ../src/intelligence/posetracking/gaussianvariable.hpp
+    ../src/intelligence/posetracking/gaussianvariable.hpp \
+    ../src/hardware/sensors/lidar/lms200.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -175,3 +177,10 @@ INCLUDEPATH += /usr/include/
 DEPENDPATH += /usr/include/
 
 LIBS += -L/usr/lib/ -lflycapture
+
+#SICK Toolbox
+#NOTE : Toolbox depends on pthread library
+INCLUDEPATH += /usr/local/include
+DEPENDPATH += /usr/local/include
+
+LIBS += -L/usr/local/lib -lsicklms-1.0 -pthread
