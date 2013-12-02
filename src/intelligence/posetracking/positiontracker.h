@@ -37,7 +37,7 @@ private:
     Position UpdateWithMotion(Position S, Position Delta);
     Position UpdateWithMeasurement(Position S, Position Measurement);
 
-    Position DelaFromMotionCommand(MotorCommand cmd);
+    Position DeltaFromMotionCommand(MotorCommand cmd);
 
     Position _current_estimate;
 
