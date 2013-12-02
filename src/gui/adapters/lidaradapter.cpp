@@ -95,6 +95,7 @@ void LidarAdapter::paintEvent(QPaintEvent *)
 void LidarAdapter::OnLidarData(IGVC::Sensors::LidarState state)
 {
     _data = state;
+    update();
 }
 
 // TODO : Maybe add input textfield for range

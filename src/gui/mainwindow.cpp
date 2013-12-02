@@ -13,6 +13,7 @@
 #include <hardware/sensors/camera/StereoPlayback.h>
 #include <hardware/sensors/IMU/Ardupilot.h>
 #include <hardware/sensors/lidar/SimulatedLidar.h>
+#include <hardware/sensors/lidar/lms200.h>
 
 #include <QMdiSubWindow>
 #include <QTextEdit>
@@ -60,7 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
-    _lidar = new SimulatedLidar();
+//    _lidar = new SimulatedLidar();
+    _lidar = new LMS200();
     ui->hardwareStatusList->addItem("LIDAR");
 
     _stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
@@ -92,12 +94,12 @@ void MainWindow::setupMenus()
 
 MainWindow::~MainWindow()
 {
+    delete ui;
     delete _joystick;
     delete _GPS;
     delete _IMU;
     delete _stereoSource;
     delete _lidar;
-    delete ui;
 }
 
 void MainWindow::openHardwareView(QModelIndex index)
