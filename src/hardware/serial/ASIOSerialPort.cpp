@@ -30,6 +30,7 @@ ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud)
             port.set_option(boost::asio::serial_port_base::baud_rate(baud));
             port.set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
             port.set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
+
         } catch(...) {
             std::stringstream msg;
             msg << "Failed to set all options on port: " << port_name;
@@ -100,6 +101,10 @@ void ASIOSerialPort::write(std::string s) {
 }
 
 void ASIOSerialPort::write(char *msg, int length) {
+    if(isConnected()) boost::asio::write(port, boost::asio::buffer(msg, length));
+}
+
+void ASIOSerialPort::write(unsigned char *msg, int length) {
     if(isConnected()) boost::asio::write(port, boost::asio::buffer(msg, length));
 }
 
