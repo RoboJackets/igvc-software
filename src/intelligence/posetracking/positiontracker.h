@@ -3,22 +3,25 @@
 
 #include "gaussianvariable.hpp"
 #include <iostream>
+#include <hardware/sensors/gps/GPS.hpp>
+#include <hardware/actuators/motors/MotorDriver.hpp>
+#include <hardware/sensors/IMU/IMU.h>
 
 class Position
 {
 public:
     // Global horizontal component
-    GaussianVariable<double> X;
+    GaussianVariable<double> Latitude;
     // Global vertical component
-    GaussianVariable<double> Y;
+    GaussianVariable<double> Longitude;
     // Heading west of north (degrees)
-    GaussianVariable<double> T;
+    GaussianVariable<double> Heading;
 
     friend std::ostream &operator<< (std::ostream &stream, Position &s)
     {
-        stream << s.X.Value() << " (" << s.X.Variance() << "), ";
-        stream << s.Y.Value() << " (" << s.Y.Variance() << "), ";
-        stream << s.T.Value() << " (" << s.T.Variance() << ")";
+        stream << s.Latitude.Value() << " (" << s.Latitude.Variance() << "), ";
+        stream << s.Longitude.Value() << " (" << s.Longitude.Variance() << "), ";
+        stream << s.Heading.Value() << " (" << s.Heading.Variance() << ")";
         return stream;
     }
 };
@@ -28,14 +31,26 @@ class PositionTracker
 public:
     PositionTracker();
 
+    Position GetPosition();
+
 private:
     Position UpdateWithMotion(Position S, Position Delta);
     Position UpdateWithMeasurement(Position S, Position Measurement);
 
-    Position DelaFromMotionCommand();
+    Position DelaFromMotionCommand(MotorCommand cmd);
 
     Position _current_estimate;
 
+    void OnGPSData(GPSData data);
+
+    void OnMotionCommand(MotorCommand cmd);
+
+    void OnIMUData(IMUData data);
+
+public:
+    LISTENER(PositionTracker, OnGPSData, GPSData)
+    LISTENER(PositionTracker, OnMotionCommand, MotorCommand)
+    LISTENER(PositionTracker, OnIMUData, IMUData)
 };
 
 #endif // POSITIONTRACKER_H
