@@ -55,6 +55,11 @@ class Event
             return _delegates.size();
         }
 
+        void Clear()
+        {
+            _delegates.clear();
+        }
+
     private:
         std::vector< Delegate<T>* > _delegates;
 };
