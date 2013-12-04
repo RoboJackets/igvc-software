@@ -39,10 +39,11 @@ Position PositionTracker::UpdateWithMotion(Position S, Position Delta)
     return result;
 }
 
-Position PositionTracker::DelaFromMotionCommand(MotorCommand cmd)
+Position PositionTracker::DeltaFromMotionCommand(MotorCommand cmd)
 {
     using namespace std;
     double V = ( cmd.leftVel + cmd.rightVel ) / 2.0;
+    // TODO - Calculate omega
     double W;
     double t = cmd.millis / 1000.0;
     double R = V/W;
@@ -74,5 +75,5 @@ void PositionTracker::OnIMUData(IMUData data)
 
 void PositionTracker::OnMotionCommand(MotorCommand cmd)
 {
-    _current_estimate = UpdateWithMotion(_current_estimate, DelaFromMotionCommand(cmd));
+    _current_estimate = UpdateWithMotion(_current_estimate, DeltaFromMotionCommand(cmd));
 }
