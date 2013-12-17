@@ -1,5 +1,6 @@
 #include "positiontracker.h"
 #include <cmath>
+#include <common/config/configmanager.h>
 
 PositionTracker::PositionTracker()
     : LOnGPSData(this),
@@ -42,9 +43,8 @@ Position PositionTracker::UpdateWithMotion(Position S, Position Delta)
 Position PositionTracker::DeltaFromMotionCommand(MotorCommand cmd)
 {
     using namespace std;
-    double V = ( cmd.leftVel + cmd.rightVel ) / 2.0;
-    // TODO - Calculate omega
-    double W;
+    double V = ( cmd.rightVel + cmd.leftVel ) / 2.0;
+    double W = ( cmd.rightVel - cmd.leftVel ) / ConfigManager::getValue("Robot", "Baseline", 1.0);
     double t = cmd.millis / 1000.0;
     double R = V/W;
     Position delta;
