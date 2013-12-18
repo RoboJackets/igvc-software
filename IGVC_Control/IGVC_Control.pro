@@ -19,7 +19,6 @@ INCLUDEPATH += ../src/ \
 SOURCES += \
     ../src/common/config/configmanager.cpp \
     ../src/common/logger/logger.cpp \
-    ../src/common/events/EventGenerator.cpp \
     ../src/gui/systemstatusindicator.cpp \
     ../src/gui/mdiwindow.cpp \
     ../src/gui/mainwindow.cpp \
