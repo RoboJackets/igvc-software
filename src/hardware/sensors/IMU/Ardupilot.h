@@ -7,6 +7,13 @@
 
 using namespace std;
 
+/*!
+ * \brief For connecting to the Ardupilot IMU device.
+ *
+ * Connects over the /dev/ttyIMU serial port with 115200 baud rate.
+ * \author Matthew Barulic
+ * \headerfile Ardupilot.h <hardware/sensors/IMU/Ardupilot.h>
+ */
 class Ardupilot : public IMU
 {
     public:
