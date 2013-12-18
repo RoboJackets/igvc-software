@@ -19,6 +19,10 @@ namespace Ui {
 class MainWindow;
 }
 
+/*!
+ * \brief The main window of the control application.
+ * \author Matthew Barulic
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT

@@ -9,6 +9,10 @@ namespace Ui {
 class IMUAdapter;
 }
 
+/*!
+ * \brief Widget for displaying IMU data.
+ * \author Matthew Barulic
+ */
 class IMUAdapter : public QWidget
 {
     Q_OBJECT
