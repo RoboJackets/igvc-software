@@ -3,6 +3,10 @@
 
 #include <QWidget>
 
+/*!
+ * \brief Widget for displaying iconic representation of overall system status
+ * \note Functionality is not yet implemented.
+ */
 class SystemStatusIndicator : public QWidget
 {
     Q_OBJECT
