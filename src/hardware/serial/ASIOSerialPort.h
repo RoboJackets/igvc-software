@@ -1,8 +1,6 @@
-/*
- * ASIOSerialPort.h
- *
- *  Created on: Nov 8, 2012
- *      Author: Matthew Barulic
+/*! \file ASIOSerialPort.h
+ * \date Created on: Nov 8, 2012
+ * \author Matthew Barulic
  */
 
 #ifndef ASIOSERIALPORT_H_
@@ -15,7 +13,10 @@
 
 using namespace std;
 
-/*! \brief Helper class to simplify interfacing with serial port hardware. */
+/*!
+ * \brief Helper class to simplify interfacing with serial port hardware.
+ * \headerfile ASIOSerialPort.h <hardware/serial/ASIOSerialPort.h>
+ */
 class ASIOSerialPort {
 public:
     /*! \brief The constructor takes in the path to the port (eg. "/dev/ttyUSB0") and a baud rate for the connection and opens the connection. */
