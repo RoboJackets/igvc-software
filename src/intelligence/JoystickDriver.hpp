@@ -6,6 +6,10 @@
 #include <hardware/actuators/motors/MotorDriver.hpp>
 #include <common/config/configmanager.h>
 
+/*!
+ * \brief Maps joystick data to motion commands for manual drive control.
+ * \author Matthew Barulic
+ */
 class JoystickDriver
 {
 public:

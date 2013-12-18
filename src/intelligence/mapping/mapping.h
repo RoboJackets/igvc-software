@@ -6,6 +6,10 @@
 #include <pcl/point_types.h>
 #include <pcl/io/file_io.h>
 
+/*!
+ * \brief Maps the course from sensor data.
+ * \author Al Chaussee
+ */
 class Mapping
 {
 public:
