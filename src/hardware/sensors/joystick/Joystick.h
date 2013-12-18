@@ -13,17 +13,33 @@ class JoystickState {
         vector<int> buttons;
 };
 
+/*!
+ * \brief For connecting to Joystick devices.
+ *
+ * \author Matthew Barulic
+ * \headerfile Joystick.h <hardware/sensors/joystick/Joystick.h>
+ */
 class Joystick
 {
     public:
         Joystick();
+        /*! \brief Returns true if the device was successfully opened. */
         bool isOpen();
+        /*! \brief Closes the connection to the device. */
         void disconnect();
+
         virtual ~Joystick();
+
         Event<JoystickState> onNewData;
+        /*! \brief Returns the number of axes on the connected device.
+         *  \note Some devices may label physical buttons (such as d-pads) as axes.
+         */
         int NumAxes();
+        /*! \brief Returns the number of buttons on the connected device.
+         *  \note Some devices may label physical buttons (such as d-pads) as axes.
+         */
         int NumButtons();
-    protected:
+
     private:
         boost::thread _iothread;
         int _joystick_fd;
