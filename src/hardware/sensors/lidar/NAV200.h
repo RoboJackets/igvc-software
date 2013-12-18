@@ -1,8 +1,6 @@
-/*
- * NAV200.h
- *
- *  Created on: Jan 22, 2012
- *      Author: Alexander Huynh
+/*! \file NAV200.h
+ *  \date Created: Jan 22, 2012
+ *  \author Alexander Huynh
  */
 #ifndef NAV200_H
 #define NAV200_H
