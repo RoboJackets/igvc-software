@@ -13,6 +13,10 @@ namespace Ui {
 class CameraAdapter;
 }
 
+/*!
+ * \brief Widget for displaying stereo camera data.
+ * \author Idan Mintz
+ */
 class CameraAdapter : public QWidget
 {
     Q_OBJECT

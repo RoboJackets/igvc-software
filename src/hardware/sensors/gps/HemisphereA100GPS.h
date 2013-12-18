@@ -1,8 +1,6 @@
-/*
- * HemisphereA100GPS.h
- *
- *  Created on: Nov 5, 2012
- *      Author: Matthew Barulic
+/*! \file HemisphereA100GPS.h
+ *  \date Created: Nov 5, 2012
+ *  \author Matthew Barulic
  */
 
 #ifndef HEMISPHEREA100GPS_H_
@@ -10,7 +8,6 @@
 
 #include "GPS.hpp"
 
-//#include <boost/thread.hpp>
 #include "hardware/serial/ASIOSerialPort.h"
 
 #include <list>
@@ -18,6 +15,10 @@
 namespace IGVC {
 namespace Sensors {
 
+/*!
+ * \brief For connecting to the Hemisphere A100 GPS device
+ * \headerfile HemisphereA100GPS.h <hardware/sensors/gps/HemisphereA100GPS.h>
+ */
 class HemisphereA100GPS: public IGVC::Sensors::GPS {
 public:
 	HemisphereA100GPS();

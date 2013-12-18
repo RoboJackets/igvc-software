@@ -10,6 +10,10 @@ namespace Ui {
 class MapAdapter;
 }
 
+/*!
+ * \brief Widget for displaying Map data.
+ * \author Matthew Barulic
+ */
 class MapAdapter : public QWidget
 {
     Q_OBJECT
@@ -33,14 +37,10 @@ private slots:
 private:
     Ui::MapAdapter *ui;
 
-    /*
-     * pixels per meter
-     */
+    // pixels per meter
     double _scale;
 
-    /*
-     * on-screen displacement of map's origin from widget's center
-     */
+    // on-screen displacement of map's origin from widget's center
     QPoint _origin;
 
     bool _isDragging;
