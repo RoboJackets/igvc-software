@@ -8,6 +8,10 @@ namespace Ui {
 class LidarAdapter;
 }
 
+/*!
+ * \brief Widget for displaying LIDAR data.
+ * \author Alexander Huynh
+ */
 class LidarAdapter : public QWidget
 {
     Q_OBJECT

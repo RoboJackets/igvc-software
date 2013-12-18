@@ -7,6 +7,10 @@
 
 #include <cmath>
 
+/*!
+ * \brief DEPRECATED Provides access to physical measurements of the robot.
+ * \deprecated This class's functionality has been replaced by ConfigManager. All references to this class expected to be removed Spring 2014.
+ */
 class Robot
 {
   public:
