@@ -13,6 +13,10 @@ namespace Ui {
 class GPSAdapter;
 }
 
+/*!
+ * \brief Widget for displaying GPS data.
+ * \author Victor Ying
+ */
 class GPSAdapter : public QWidget
 {
     Q_OBJECT

@@ -3,6 +3,10 @@
 
 #include <QProgressBar>
 
+/*!
+ * \brief Widget for displaying battery charge level.
+ * \note Functionality is not yet implemented.
+ */
 class BatteryIndicator : public QProgressBar
 {
     Q_OBJECT
