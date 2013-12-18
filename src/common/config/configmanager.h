@@ -16,6 +16,7 @@
  * Variables are represented as a two-level tree of categorized variables. This allows for duplicating variable names without ambiguity.
  *
  * \author Matthew Barulic
+ * \headerfile configmanager.h <common/configmanager.h>
  */
 class ConfigManager
 {
