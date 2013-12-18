@@ -15,83 +15,76 @@
 
 using namespace std;
 
-/**
- * This is a helper class to simplify the interface for interacting with serial ports.
- *
- */
+/*! \brief Helper class to simplify interfacing with serial port hardware. */
 class ASIOSerialPort {
 public:
-	/**
-	 * The constructor takes in the path to the port (eg. "/dev/ttyUSB0") and a baud rate for the connection and opens the connection.
-	 */
+    /*! \brief The constructor takes in the path to the port (eg. "/dev/ttyUSB0") and a baud rate for the connection and opens the connection. */
 	ASIOSerialPort(std::string port_name, size_t baud);
 
-    /**
-     * Starts the thread for triggering events.
+    /*! \brief Starts the thread for triggering events.
+     *
      * Disables synchronous read methods.
      */
      void startEvents();
 
-     /**
-      * Stops the thread for triggering events.
+     /*! \brief Stops the thread for triggering events.
+      *
       * Reenables synchronous read methods.
       */
       void stopEvents();
 
-	/**
-	 * Closes the serial connection.
-	 */
+    /*! \brief Closes the serial connection. */
 	void close();
 
-	/**
-	 * Returns true if the serial port is connected and open
-	 */
+    /*! \brief Returns true if the serial port is connected and open */
 	bool isConnected();
 
-	/**
-	 * Writes the given string to the serial port.
-	 */
+    /*! \brief Writes the given string to the serial port. */
 	void write(std::string msg);
 
-    /**
-     * Writes the given array of chars to the serial port.
-     */
+    /*! \brief Writes the given array of chars to the serial port. */
 	void write(char *msg, int length);
 
-    /**
-     * Writes the given array of unsigned chars to the serial port.
-     */
+    /*! \brief Writes the given array of unsigned chars to the serial port. */
     void write(unsigned char *msg, int length);
 
-	/**
-	 * Reads bytes from the serial port until \n or \r is found.
-	 * Returns a string containing the bytes read excluding the newline.
+    /*! \brief Reads bytes from the serial port until \n or \r is found.
+     * \return String containing the bytes read excluding the newline.
 	 */
 	std::string readln();
 
-	/**
-	 * Reads a single byte from the serial port.
-	 * Returns the read byte.
+    /*! \brief Reads a single byte from the serial port.
+     * \return The byte read.
 	 */
     char read();
 
-    /**
-     * Reads numBytes bytes from the serial port.
-     * Returns an array containing the read bytes.
+    /*! \brief Reads numBytes bytes from the serial port.
+     * \return An array containing the read bytes.
      */
      char* read(int numBytes);
 
-     /**
-      * Defines the start and end bytes that will trigger a onNewPacket event.
-      * NOTE: You must call startEvents() for the onNewPacket event to fire.
+     /*!
+      * \brief Defines the start and end bytes that will trigger a onNewPacket event.
+      * \note You must call startEvents() for the onNewPacket event to fire.
       */
      void definePacket(char startByte, char endByte);
 
-    Event<string> onNewLine;
-    Event<char> onNewByte;
-    Event<string> onNewPacket;
+     /*! \brief onNewLine Fires every time a new line character is found in the stream.
+      * \note You must call startEvents() for this event to fire.
+      */
+     Event<string> onNewLine;
+     /*! \brief onNewByte Fires every time a byte is found in the stream.
+      * \note You must call startEvents() for this event to fire.
+      */
+     Event<char> onNewByte;
+     /*! \brief onNewPacket Fires every time a user-define packet is found in the stream.
+      * \note You must call startEvents() for this event to fire.
+      * \note You must define a packet with definePacket() for this event to fire.
+      * \see definePacket
+      */
+     Event<string> onNewPacket;
 
-	~ASIOSerialPort();
+     ~ASIOSerialPort();
 private:
 	boost::asio::io_service ioservice;
 	boost::asio::serial_port port;
