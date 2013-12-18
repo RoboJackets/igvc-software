@@ -13,6 +13,15 @@
 #include <stdio.h>
 #include "Delegate.hpp"
 
+
+/*!
+ * \brief The Event class
+ *
+ * This class handles registration and removal of listeners as well as the firing of the event itself.
+ * To use this class, create an instance of this type and expose it as a public member so other classes can register listeners.
+ * \note This class was originally downloaded from an article by Clint Caywood. Some minor modifications have since been made.
+ * \headerfile Event.hpp <common/events/Event.hpp>
+ */
 template <typename T>
 class Event
 {

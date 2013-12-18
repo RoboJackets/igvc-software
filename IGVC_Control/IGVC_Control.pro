@@ -19,7 +19,6 @@ INCLUDEPATH += ../src/ \
 SOURCES += \
     ../src/common/config/configmanager.cpp \
     ../src/common/logger/logger.cpp \
-    ../src/common/events/EventGenerator.cpp \
     ../src/gui/systemstatusindicator.cpp \
     ../src/gui/mdiwindow.cpp \
     ../src/gui/mainwindow.cpp \
@@ -59,7 +58,6 @@ SOURCES += \
 HEADERS  += \
     ../src/common/config/configmanager.h \
     ../src/common/logger/logger.h \
-    ../src/common/events/EventGenerator.h \
     ../src/common/events/Event.hpp \
     ../src/common/events/Delegate.hpp \
     ../src/gui/systemstatusindicator.h \
