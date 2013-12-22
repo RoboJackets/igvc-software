@@ -44,7 +44,7 @@ Position PositionTracker::DeltaFromMotionCommand(MotorCommand cmd)
 {
     using namespace std;
     double V = ( cmd.rightVel + cmd.leftVel ) / 2.0;
-    double W = ( cmd.rightVel - cmd.leftVel ) / ConfigManager::getValue("Robot", "Baseline", 1.0);
+    double W = ( cmd.rightVel - cmd.leftVel ) / ConfigManager::Instance().getValue("Robot", "Baseline", 1.0);
     double t = cmd.millis / 1000.0;
     double R = V/W;
     Position delta;
