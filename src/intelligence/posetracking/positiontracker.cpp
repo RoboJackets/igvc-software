@@ -57,6 +57,24 @@ Position PositionTracker::DeltaFromMotionCommand(MotorCommand cmd)
     return delta;
 }
 
+Position PositionTracker::MeasurementFromIMUData(IMUData data)
+{
+    // Uses the "Destination point given distance and bearing from start point" described here:
+    // http://www.movable-type.co.uk/scripts/latlong.html#destPoint
+    Position measurement;
+    double lat1 = _current_estimate.Latitude.Value();
+    double lon1 = _current_estimate.Latitude.Value();
+    double hed1 = _current_estimate.Heading.Value();
+    double d = sqrt(data.X*data.X + data.Y*data.Y); // Distance travelled
+    double R = 6378137; // radius of Earth
+    measurement.Latitude.SetValue(asin(sin(lat1)*cos(d/R)+cos(lat1)*sin(d/R)*cos(hed1)));
+    measurement.Longitude.SetValue(lon1 + atan2(sin(hed1)*sin(d/R)*cos(lat1),cos(d/R)-sin(lat1)*sin(measurement.Latitude.Value())));
+    measurement.Heading.SetValue(atan2(measurement.Longitude.Value()-lon1)*sin(lat1), cos(measurement.Latitude.Value())*sin(lat1)-sin(measurement.Latitude.Value())*cos(lat1)*cos(measurement.Longitude.Value()-lon1));
+    measurement.Heading.SetValue((measurement.Heading.Value()+180) % 360);
+    // TODO - handle variances
+    return measurement;
+}
+
 void PositionTracker::OnGPSData(GPSData data)
 {
     Position measurement;
@@ -70,7 +88,7 @@ void PositionTracker::OnGPSData(GPSData data)
 
 void PositionTracker::OnIMUData(IMUData data)
 {
-
+    _current_estimate = UpdateWithMeasurement(_current_estimate, MeasurementFromIMUData(data));
 }
 
 void PositionTracker::OnMotionCommand(MotorCommand cmd)
