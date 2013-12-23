@@ -38,6 +38,7 @@ private:
     Position UpdateWithMeasurement(Position S, Position Measurement);
 
     Position DeltaFromMotionCommand(MotorCommand cmd);
+    Position MeasurementFromIMUData(IMUData data);
 
     Position _current_estimate;
 
