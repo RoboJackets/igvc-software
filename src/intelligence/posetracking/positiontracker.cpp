@@ -71,8 +71,12 @@ Position PositionTracker::MeasurementFromIMUData(IMUData data)
     double R = 6378137; // radius of Earth
     measurement.Latitude.SetValue(asin(sin(lat1)*cos(d/R)+cos(lat1)*sin(d/R)*cos(hed1)));
     measurement.Longitude.SetValue(lon1 + atan2(sin(hed1)*sin(d/R)*cos(lat1),cos(d/R)-sin(lat1)*sin(measurement.Latitude.Value())));
-    measurement.Heading.SetValue(atan2(measurement.Longitude.Value()-lon1)*sin(lat1), cos(measurement.Latitude.Value())*sin(lat1)-sin(measurement.Latitude.Value())*cos(lat1)*cos(measurement.Longitude.Value()-lon1));
-    measurement.Heading.SetValue((measurement.Heading.Value()+180) % 360);
+    measurement.Heading.SetValue(atan2((measurement.Longitude.Value()-lon1)*sin(lat1), cos(measurement.Latitude.Value())*sin(lat1)-sin(measurement.Latitude.Value())*cos(lat1)*cos(measurement.Longitude.Value()-lon1)));
+    measurement.Heading.SetValue(measurement.Heading.Value()+180);
+    while(measurement.Heading.Value() >= 360)
+        measurement.Heading.SetValue(measurement.Heading.Value() - 360);
+    while(measurement.Heading.Value() < 0)
+        measurement.Heading.SetValue(measurement.Heading.Value() + 360);
     // TODO - handle variances
     return measurement;
 }
