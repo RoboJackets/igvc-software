@@ -111,8 +111,8 @@ HEADERS  += \
     ../src/hardware/sensors/camera/Bumblebee2.h \
     ../src/gui/adapters/imuadapter.h \
     ../src/intelligence/posetracking/positiontracker.h \
-    ../src/intelligence/posetracking/gaussianvariable.hpp \
-    ../src/hardware/sensors/lidar/lms200.h
+    ../src/hardware/sensors/lidar/lms200.h \
+    ../src/common/utils/gaussianvariable.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
