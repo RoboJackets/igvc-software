@@ -22,9 +22,9 @@ public:
 
     friend std::ostream &operator<< (std::ostream &stream, Position &s)
     {
-        stream << s.Latitude.Value() << " (" << s.Latitude.Variance() << "), ";
-        stream << s.Longitude.Value() << " (" << s.Longitude.Variance() << "), ";
-        stream << s.Heading.Value() << " (" << s.Heading.Variance() << ")";
+        stream << s.Latitude << " (" << s.Latitude.Variance << "), ";
+        stream << s.Longitude << " (" << s.Longitude.Variance << "), ";
+        stream << s.Heading<< " (" << s.Heading.Variance << ")";
         return stream;
     }
 };
