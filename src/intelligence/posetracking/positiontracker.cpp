@@ -65,7 +65,9 @@ Position PositionTracker::MeasurementFromIMUData(IMUData data)
     double lat1 = _current_estimate.Latitude.Value();
     double lon1 = _current_estimate.Latitude.Value();
     double hed1 = _current_estimate.Heading.Value();
-    double d = sqrt(data.X*data.X + data.Y*data.Y); // Distance travelled
+    double dx = data.X /* * time*time */;
+    double dy = data.Y /* * time*time */;
+    double d = sqrt(dx*dx + dy*dy); // Distance travelled
     double R = 6378137; // radius of Earth
     measurement.Latitude.SetValue(asin(sin(lat1)*cos(d/R)+cos(lat1)*sin(d/R)*cos(hed1)));
     measurement.Longitude.SetValue(lon1 + atan2(sin(hed1)*sin(d/R)*cos(lat1),cos(d/R)-sin(lat1)*sin(measurement.Latitude.Value())));
