@@ -10,27 +10,33 @@ template <class T>
 class GaussianVariable
 {
 public:
+    T Value;
+    double Variance;
+
     GaussianVariable(T value = 0, double variance = 0)
-        : value(value),
-          variance(variance)
+        : Value(value),
+          Variance(variance)
     {
     }
-
-    T Value() { return value; }
-    double Variance() { return variance; }
-
-    void SetValue(T val) { value = val; }
-    void SetVariance(double val) { variance = val; }
 
     double ProbabilityOfValue(T val)
     {
         using namespace std;
-        return (1/sqrt(2*M_PI*variance))*exp( ( -0.5*(val-value)*(val-value) ) / variance );
+        return (1/sqrt(2*M_PI*Variance))*exp( ( -0.5*(val-Value)*(val-Value) ) / Variance );
     }
 
+    GaussianVariable& operator=(T val)
+    {
+        Value = val;
+        return *this;
+    }
+    operator T()
+    {
+        return Value;
+    }
+
+
 private:
-    T value;
-    double variance;
 };
 
 #endif // GAUSSIANVARIABLE_H

@@ -17,26 +17,26 @@ Position PositionTracker::GetPosition()
 Position PositionTracker::UpdateWithMeasurement(Position S, Position Measurement)
 {
     Position result;
-    result.Latitude.SetValue( ( S.Latitude.Value()*Measurement.Latitude.Variance() + Measurement.Latitude.Value()*S.Latitude.Variance() ) / (S.Latitude.Variance()+Measurement.Latitude.Variance()) );
-    result.Longitude.SetValue( ( S.Longitude.Value()*Measurement.Longitude.Variance() + Measurement.Longitude.Value()*S.Longitude.Variance() ) / (S.Longitude.Variance()+Measurement.Longitude.Variance()) );
-    result.Heading.SetValue( ( S.Heading.Value()*Measurement.Heading.Variance() + Measurement.Heading.Value()*S.Heading.Variance() ) / (S.Heading.Variance()+Measurement.Heading.Variance()) );
+    result.Latitude = ( S.Latitude*Measurement.Latitude.Variance + Measurement.Latitude*S.Latitude.Variance ) / (S.Latitude.Variance+Measurement.Latitude.Variance);
+    result.Longitude = ( S.Longitude*Measurement.Longitude.Variance + Measurement.Longitude*S.Longitude.Variance ) / (S.Longitude.Variance+Measurement.Longitude.Variance);
+    result.Heading = ( S.Heading*Measurement.Heading.Variance + Measurement.Heading*S.Heading.Variance ) / (S.Heading.Variance+Measurement.Heading.Variance);
 
-    result.Latitude.SetVariance( 1.0 / (1.0/S.Latitude.Variance() + 1.0 / Measurement.Latitude.Variance()) );
-    result.Longitude.SetVariance( 1.0 / (1.0/S.Longitude.Variance() + 1.0 / Measurement.Longitude.Variance()) );
-    result.Heading.SetVariance( 1.0 / (1.0/S.Heading.Variance() + 1.0 / Measurement.Heading.Variance()) );
+    result.Latitude.Variance = ( 1.0 / (1.0/S.Latitude.Variance + 1.0 / Measurement.Latitude.Variance) );
+    result.Longitude.Variance = ( 1.0 / (1.0/S.Longitude.Variance + 1.0 / Measurement.Longitude.Variance) );
+    result.Heading.Variance = ( 1.0 / (1.0/S.Heading.Variance + 1.0 / Measurement.Heading.Variance) );
     return result;
 }
 
 Position PositionTracker::UpdateWithMotion(Position S, Position Delta)
 {
     Position result;
-    result.Latitude.SetValue(S.Latitude.Value() + Delta.Latitude.Value());
-    result.Longitude.SetValue(S.Longitude.Value() + Delta.Longitude.Value());
-    result.Heading.SetValue(S.Heading.Value() + Delta.Heading.Value());
+    result.Latitude = S.Latitude + Delta.Latitude;
+    result.Longitude = S.Longitude + Delta.Longitude;
+    result.Heading = S.Heading + Delta.Heading;
 
-    result.Latitude.SetVariance(S.Latitude.Variance() + Delta.Latitude.Variance());
-    result.Longitude.SetVariance(S.Longitude.Variance() + Delta.Longitude.Variance());
-    result.Heading.SetVariance(S.Heading.Variance() + Delta.Heading.Variance());
+    result.Latitude.Variance = S.Latitude.Variance + Delta.Latitude.Variance;
+    result.Longitude.Variance = S.Longitude.Variance + Delta.Longitude.Variance;
+    result.Heading.Variance = S.Heading.Variance + Delta.Heading.Variance;
     return result;
 }
 
@@ -48,11 +48,11 @@ Position PositionTracker::DeltaFromMotionCommand(MotorCommand cmd)
     double t = cmd.millis / 1000.0;
     double R = V/W;
     Position delta;
-    double theta = _current_estimate.Heading.Value() * M_PI/180.0;
-    double thetaPrime = (_current_estimate.Heading.Value() + W*t) * M_PI/180.0;
-    delta.Heading.SetValue(W*t);
-    delta.Latitude.SetValue(R*(cos(theta) - cos(thetaPrime)));
-    delta.Longitude.SetValue(R*(sin(thetaPrime) - sin(theta)));
+    double theta = _current_estimate.Heading * M_PI/180.0;
+    double thetaPrime = (_current_estimate.Heading + W*t) * M_PI/180.0;
+    delta.Heading = W*t;
+    delta.Latitude = R*(cos(theta) - cos(thetaPrime));
+    delta.Longitude = R*(sin(thetaPrime) - sin(theta));
     // TODO - handle variances
     return delta;
 }
@@ -62,21 +62,21 @@ Position PositionTracker::MeasurementFromIMUData(IMUData data)
     // Uses the "Destination point given distance and bearing from start point" described here:
     // http://www.movable-type.co.uk/scripts/latlong.html#destPoint
     Position measurement;
-    double lat1 = _current_estimate.Latitude.Value();
-    double lon1 = _current_estimate.Latitude.Value();
-    double hed1 = _current_estimate.Heading.Value();
+    double lat1 = _current_estimate.Latitude;
+    double lon1 = _current_estimate.Latitude;
+    double hed1 = _current_estimate.Heading;
     double dx = data.X /* * time*time */;
     double dy = data.Y /* * time*time */;
     double d = sqrt(dx*dx + dy*dy); // Distance travelled
     double R = 6378137; // radius of Earth
-    measurement.Latitude.SetValue(asin(sin(lat1)*cos(d/R)+cos(lat1)*sin(d/R)*cos(hed1)));
-    measurement.Longitude.SetValue(lon1 + atan2(sin(hed1)*sin(d/R)*cos(lat1),cos(d/R)-sin(lat1)*sin(measurement.Latitude.Value())));
-    measurement.Heading.SetValue(atan2((measurement.Longitude.Value()-lon1)*sin(lat1), cos(measurement.Latitude.Value())*sin(lat1)-sin(measurement.Latitude.Value())*cos(lat1)*cos(measurement.Longitude.Value()-lon1)));
-    measurement.Heading.SetValue(measurement.Heading.Value()+180);
-    while(measurement.Heading.Value() >= 360)
-        measurement.Heading.SetValue(measurement.Heading.Value() - 360);
-    while(measurement.Heading.Value() < 0)
-        measurement.Heading.SetValue(measurement.Heading.Value() + 360);
+    measurement.Latitude = asin(sin(lat1)*cos(d/R)+cos(lat1)*sin(d/R)*cos(hed1));
+    measurement.Longitude = (lon1 + atan2(sin(hed1)*sin(d/R)*cos(lat1),cos(d/R)-sin(lat1)*sin(measurement.Latitude)));
+    measurement.Heading = (atan2((measurement.Longitude-lon1)*sin(lat1), cos(measurement.Latitude)*sin(lat1)-sin(measurement.Latitude)*cos(lat1)*cos(measurement.Longitude-lon1)));
+    measurement.Heading = (measurement.Heading+180);
+    while(measurement.Heading >= 360)
+        measurement.Heading = (measurement.Heading - 360);
+    while(measurement.Heading < 0)
+        measurement.Heading = (measurement.Heading + 360);
     // TODO - handle variances
     return measurement;
 }
@@ -84,10 +84,10 @@ Position PositionTracker::MeasurementFromIMUData(IMUData data)
 void PositionTracker::OnGPSData(GPSData data)
 {
     Position measurement;
-    measurement.Latitude.SetValue(data.Lat());
-    measurement.Longitude.SetValue(data.Long());
+    measurement.Latitude = data.Lat();
+    measurement.Longitude = data.Long();
     // TODO - make sure the GPS actually outputs heading data
-    measurement.Heading.SetValue(data.Heading());
+    measurement.Heading = data.Heading();
     // TODO - handle variances
     _current_estimate = UpdateWithMeasurement(_current_estimate, measurement);
 }
