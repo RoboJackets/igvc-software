@@ -13,7 +13,6 @@ namespace IGVC {
 namespace Sensors {
 
 HemisphereA100GPS::HemisphereA100GPS():
-    DefaultAccuracy(.0001, .0001, 3, 0.01),
     serialPort("/dev/ttyGPS", 4800),
 	LonNewSerialLine(this),
 	stateQueue()
@@ -26,7 +25,6 @@ HemisphereA100GPS::HemisphereA100GPS():
 void HemisphereA100GPS::onNewSerialLine(string line) {
     GPSData state;
     if(parseLine(line, state)) {
-        state.Accuracy(DefaultAccuracy);
         // TODO set time
 //        gettimeofday(&state.laptoptime, NULL);
 
@@ -38,23 +36,6 @@ void HemisphereA100GPS::onNewSerialLine(string line) {
         onNewData(state);
     }
 }
-
-//void HemisphereA100GPS::threadRun() {
-//	while(serialPort.isConnected()) {
-//		std::string line = serialPort.readln();
-//		GPSData state;
-//		if(parseLine(line, state)) {
-//			gettimeofday(&state.laptoptime, NULL);
-//
-//			boost::mutex::scoped_lock lock(queueLocker);
-//			stateQueue.push_back(state);
-//			if(stateQueue.size() > maxBufferLength) {
-//				stateQueue.pop_front();
-//			}
-//			onNewData(state);
-//		}
-//	}
-//}
 
 bool HemisphereA100GPS::parseLine(std::string line, GPSData &state) {
 	return nmea::decodeGPGGA(line, state) ||
@@ -68,10 +49,10 @@ GPSData HemisphereA100GPS::GetState() {
 	return state;
 }
 
-GPSData HemisphereA100GPS::GetStateAtTime(timeval time) {
+GPSData HemisphereA100GPS::GetStateAtTime(timeval) {
 	boost::mutex::scoped_lock lock(queueLocker);
 	std::list<GPSData>::iterator iter = stateQueue.begin();
-	double acceptableError = 0.1;
+    //double acceptableError = 0.1;
 	while(iter != stateQueue.end()) {
 		GPSData s = (*iter);
 		/*time_t secDelta = difftime(time.tv_sec, s.laptoptime.tv_sec);
