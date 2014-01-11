@@ -23,18 +23,17 @@ class HemisphereA100GPS: public IGVC::Sensors::GPS {
 public:
 	HemisphereA100GPS();
 	GPSData GetState();
-	GPSData GetStateAtTime(timeval time);
+    GPSData GetStateAtTime(timeval);
 	bool StateIsAvailable();
     bool isOpen();
-	~HemisphereA100GPS();
-	GPSAccuracy DefaultAccuracy;
+    ~HemisphereA100GPS();
 
 private:
 
 	ASIOSerialPort serialPort; // Serial port for GPS communication
 
 	void onNewSerialLine(string line);
-	LISTENER(HemisphereA100GPS, onNewSerialLine, string);
+    LISTENER(HemisphereA100GPS, onNewSerialLine, string)
 
 	boost::mutex queueLocker; // mutex for thread-safing the buffer
 

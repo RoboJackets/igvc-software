@@ -1,7 +1,7 @@
 #ifndef POSITIONTRACKER_H
 #define POSITIONTRACKER_H
 
-#include "gaussianvariable.hpp"
+#include <common/utils/gaussianvariable.hpp>
 #include <iostream>
 #include <hardware/sensors/gps/GPS.hpp>
 #include <hardware/actuators/motors/MotorDriver.hpp>
