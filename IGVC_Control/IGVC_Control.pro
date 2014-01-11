@@ -52,7 +52,8 @@ SOURCES += \
     ../src/hardware/sensors/camera/StereoImageRepeater.cpp \
     ../src/hardware/sensors/camera/Bumblebee2.cpp \
     ../src/gui/adapters/imuadapter.cpp \
-    ../src/hardware/sensors/lidar/lms200.cpp
+    ../src/hardware/sensors/lidar/lms200.cpp \
+    ../src/hardware/sensors/gps/gpsfilereader.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -109,7 +110,9 @@ HEADERS  += \
     ../src/hardware/sensors/camera/StereoImageRepeater.h \
     ../src/hardware/sensors/camera/Bumblebee2.h \
     ../src/gui/adapters/imuadapter.h \
-    ../src/hardware/sensors/lidar/lms200.h
+    ../src/hardware/sensors/lidar/lms200.h \
+    ../src/hardware/sensors/gps/gpsfilereader.h \
+    ../src/hardware/sensors/DataStructures/GPSData.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
