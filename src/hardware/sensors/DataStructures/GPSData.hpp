@@ -30,6 +30,12 @@ public:
         _Speed = 0;
     }
 
+    // for use with gpsfilereader only
+    inline GPSData(double latitude, double longitude): SensorData(), _Lat(latitude), _Long(longitude),
+      _Heading(), _Speed(), _Accuracy()
+    {
+    }
+
     inline GPSData(double latitude, double longitude, double heading, double speed): SensorData(), _Lat(latitude), _Long(longitude),
       _Heading(heading), _Speed(speed), _Accuracy()
     {
