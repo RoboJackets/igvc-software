@@ -43,7 +43,6 @@ SOURCES += \
     ../src/gui/adapters/mapadapter.cpp \
     ../src/intelligence/mapping/mapping.cpp \
     ../src/hardware/sensors/gps/simulatedgps.cpp \
-    ../src/intelligence/posetracking/RobotPosition.cpp \
     ../src/common/utils/ImageUtils.cpp \
     ../src/common/Robot.cpp \
     ../src/hardware/sensors/camera/CameraInfo.cpp \
@@ -78,7 +77,6 @@ HEADERS  += \
     ../src/hardware/sensors/DataStructures/IMUData.hpp \
     ../src/hardware/sensors/DataStructures/ImageData.hpp \
     ../src/hardware/sensors/DataStructures/GPSData.h \
-    ../src/hardware/sensors/DataStructures/GPSAccuracy.hpp \
     ../src/hardware/sensors/DataStructures/DataPoint.hpp \
     ../src/hardware/sensors/DataStructures/DataArray.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
@@ -99,7 +97,6 @@ HEADERS  += \
     ../src/intelligence/mapping/mapping.h \
     ../src/hardware/sensors/gps/simulatedgps.h \
     ../src/hardware/sensors/IMU/IMU.h \
-    ../src/intelligence/posetracking/RobotPosition.h \
     ../src/common/utils/ImageUtils.h \
     ../src/common/Robot.h \
     ../src/hardware/sensors/camera/CameraInfo.h \
@@ -112,7 +109,8 @@ HEADERS  += \
     ../src/gui/adapters/imuadapter.h \
     ../src/intelligence/posetracking/positiontracker.h \
     ../src/hardware/sensors/lidar/lms200.h \
-    ../src/common/utils/gaussianvariable.hpp
+    ../src/common/utils/gaussianvariable.hpp \
+    ../src/hardware/sensors/DataStructures/GPSData.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
