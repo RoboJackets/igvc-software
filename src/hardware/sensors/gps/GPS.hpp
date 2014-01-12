@@ -1,8 +1,6 @@
-/*
- * GPS.hpp
- *
- *  Created on: Nov 5, 2012
- *      Author: Matthew Barulic
+/*! \file GPS.hpp
+ *  \date Created: Nov 5, 2012
+ *  \author Matthew Barulic
  */
 
 #ifndef GPS_HPP_
@@ -17,29 +15,34 @@ namespace Sensors {
 
 
 
-/*
- * Interface for GPS devices.
+/*!
+ * \brief Interface for GPS devices.
+ * \headerfile GPS.hpp <hardware/sensors/gps/GPS.hpp>
  */
 class GPS
 {
 public:
 	virtual ~GPS() { }
 
-	/*
-	 * Returns the most recent state acquired from the GPS device.
+    /*!
+     * \brief Returns the most recent state acquired from the GPS device.
 	 */
 	virtual GPSData GetState() = 0;
 
-	/*
-	 * Returns the GPSState with the given timestamp.
-	 * Throws an error if no such GPSState exists in the buffer.
+    /*!
+     * \brief Returns the GPSState with the given timestamp.
 	 */
 	virtual GPSData GetStateAtTime(timeval time) = 0;
 
-	/*
-	 * Return true if there is at least one state in the buffer.
+    /*!
+     * \brief Return true if there is at least one state in the buffer.
 	 */
 	virtual bool StateIsAvailable() = 0;
+
+    /*!
+     * \brief Return true if the device is connected and communicating.
+     */
+    virtual bool isOpen() = 0;
 
     Event<GPSData> onNewData;
     Event<void*> onDeviceFailure;

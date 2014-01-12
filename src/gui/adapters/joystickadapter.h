@@ -10,6 +10,10 @@ namespace Ui {
 class JoystickAdapter;
 }
 
+/*!
+ * \brief Widget for displaying joystick data
+ * \author Matthew Barulic
+ */
 class JoystickAdapter : public QWidget
 {
     Q_OBJECT

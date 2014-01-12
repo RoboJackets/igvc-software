@@ -1,9 +1,6 @@
-/*
- * Lidar.h
- *
- *  Created on: Jan 22, 2012
- *      Author: Alexander Huynh
-Copypasta from: Matthew Barulic
+/*! \file Lidar.h
+ * \date Created on: Jan 22, 2012
+ * \author Alexander Huynh, Matthew Barulic
  */
 
 #ifndef LIDAR_H
@@ -28,24 +25,24 @@ namespace Sensors {
                 intensity = 0;
             }
 
-            // If false, the other members are not meaningful
+            /*! \brief If false, the other members are not meaningful */
             bool valid;
 
-            // Angle in radians counterclockwise from right, with the LEDs pointing forward.
+            /*! \brief Angle in radians counterclockwise from right, with the LEDs pointing forward.*/
             float angle;
 
-            // Raw distance
+            /*! \brief Raw distance */
             uint16_t raw;
 
-            // Distance in meters
+            /*! \brief Distance in meters*/
             float distance;
 
-            // Intensity of return, unknown units
+            /*! \brief Intensity of return, unknown units */
             uint8_t intensity;
     };
 
-    /*
-     * A struct that represents a data packet from the Lidar device.
+    /*!
+     * \brief A struct that represents a data packet from the Lidar device.
      */
     struct LidarState
     {
@@ -53,29 +50,26 @@ namespace Sensors {
         LidarPoint points[1024];
     };
 
-/*
- * Interface for Lidars.
+/*!
+ * \brief Interface for Lidars.
+ * \headerfile Lidar.h <hardware/sensors/lidar/Lidar.h>
  */
 class Lidar
 {
 public:
     virtual ~Lidar() { }
 
-    /*
-     * Returns the most recent state acquired from the Lidar.
+    /*!
+     * \brief Returns the most recent state acquired from the Lidar.
      */
     virtual LidarState GetState() = 0;
 
-    /*
-     * Returns the LidarState with the given timestamp.
-     * Throws an error if no such LidarState exists in the buffer.
+    /*!
+     * \brief Returns the LidarState with the given timestamp.
      */
     virtual LidarState GetStateAtTime(timeval time) = 0;
 
-    /*
-     * Return true if there is at least one state in the buffer.
-     */
-    virtual bool StateIsAvailable() = 0;
+    virtual bool IsWorking() = 0;
 
     Event<LidarState> onNewData;
     Event<void*> onDeviceFailure;
