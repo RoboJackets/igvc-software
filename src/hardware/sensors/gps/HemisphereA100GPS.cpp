@@ -92,6 +92,10 @@ bool HemisphereA100GPS::StateIsAvailable() {
 	return !stateQueue.empty();
 }
 
+bool HemisphereA100GPS::isOpen() {
+    return serialPort.isConnected();
+}
+
 HemisphereA100GPS::~HemisphereA100GPS() {
     serialPort.stopEvents();
 	serialPort.close();

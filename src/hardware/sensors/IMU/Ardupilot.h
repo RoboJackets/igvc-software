@@ -7,23 +7,21 @@
 
 using namespace std;
 
-struct IMURawData
-{
-    double roll;
-    double pitch;
-    double heading;
-    double accelX;
-    double accelY;
-    double accelZ;
-};
-
+/*!
+ * \brief For connecting to the Ardupilot IMU device.
+ *
+ * Connects over the /dev/ttyIMU serial port with 115200 baud rate.
+ * \author Matthew Barulic
+ * \headerfile Ardupilot.h <hardware/sensors/IMU/Ardupilot.h>
+ */
 class Ardupilot : public IMU
 {
     public:
         Ardupilot();
         ~Ardupilot();
         Event<IMUData> onNewIMUData;
-        Event<IMURawData> onNewRawData;
+
+        bool isWorking();
 
     private:
         ASIOSerialPort ardupilotPort;
