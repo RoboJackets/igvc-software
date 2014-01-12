@@ -100,17 +100,10 @@ void setup() {
 	hal.console->printf("!\n");
 }
 
-Vector3f velocity;
-Vector3f position;
-Vector3f prePosition;
-
-uint32_t last_update;
-bool first_loop = true;
-double speed;
-double heading;
-int count;
-double deltaPX;
-double deltaPY;
+Vector3f prevAccels;
+double prevRoll;
+double prevPitch;
+double prevHeading;
 
 void loop()
 {
@@ -121,17 +114,34 @@ void loop()
 	ahrs.update();
 	compass.read();
 
-	/*Vector3f accelVals = ahrs.get_accel_ef();
+	Vector3f accelVals = ahrs.get_accel_ef();
 
 	accelVals.z += GRAVITY_MSS;
 	Vector3f filteredVals;
 	filteredVals.x = (abs(accelVals.x) > 0.005 ? accelVals.x : 0.0);
 	filteredVals.y = (abs(accelVals.y) > 0.005 ? accelVals.y : 0.0);
-	filteredVals.z = (abs(accelVals.z) > 0.005 ? accelVals.z : 0.0);*/
-	
-	
-	hal.console->printf_P( PSTR("A %4.2f\n"),ahrs.roll);
+	filteredVals.z = (abs(accelVals.z) > 0.005 ? accelVals.z : 0.0);
 
+	double heading = compass.calculate_heading(ahrs.get_dcm_matrix());
+	heading = heading*180.0/3.1415;
+	
+	if( prevAccels.x != filteredVals.x ||
+		prevAccels.y != filteredVals.y ||
+		prevAccels.z != filteredVals.z ||
+		prevRoll != ahrs.roll ||
+		prevPitch != ahrs.pitch ||
+		prevHeading != heading )
+	{
+		hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f \n"),ahrs.roll*180.0/M_PI,ahrs.pitch*180.0/M_PI,heading, filteredVals.x, filteredVals.y, filteredVals.z);
+		prevAccels.x = filteredVals.x;
+		prevAccels.y = filteredVals.y;
+		prevAccels.z = filteredVals.z;
+		prevRoll = ahrs.roll;
+		prevPitch = ahrs.pitch;
+		prevHeading = heading;
+	}
+
+	
 }
 
 AP_HAL_MAIN();

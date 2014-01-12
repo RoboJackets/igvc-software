@@ -23,6 +23,9 @@ bool SimulatedGPS::StateIsAvailable()
 
 GPSData SimulatedGPS::GetState()
 {
+    if(_data.size() == 0)
+        return GPSData();
+
     _index++;
     _index %= _data.size();
     return _data.at(_index);
@@ -33,14 +36,22 @@ GPSData SimulatedGPS::GetStateAtTime(timeval)
     return GetState();
 }
 
+bool SimulatedGPS::isOpen()
+{
+    return _data.size() > 0;
+}
+
 void SimulatedGPS::threadRun()
 {
     while(_running)
     {
-        onNewData(_data.at(_index));
-        _index++;
-        _index %= _data.size();
-        sleep(1);
+        if(_data.size() > 0)
+        {
+            onNewData(_data.at(_index));
+            _index++;
+            _index %= _data.size();
+            sleep(1);
+        }
     }
 }
 
@@ -56,7 +67,6 @@ void SimulatedGPS::loadFile(std::string file)
         stringstream msg;
         msg << "Could not open file : " << file;
         Logger::Log(LogLevel::Error, msg.str());
-        _data.push_back(GPSData());
         return;
     }
 

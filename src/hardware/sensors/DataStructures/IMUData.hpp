@@ -7,45 +7,23 @@
 class IMUData : public SensorData
 {
 public:
-    inline IMUData()
-    {
-    }
+     // Defined according to NED convention
+    IMUData(double roll=0, double pitch=0, double yaw=0, double x=0, double y=0, double z=0)
+        : SensorData(), Roll(roll), Pitch(pitch), Yaw(yaw), X(x), Y(y), Z(z) { }
 
-    /**
-    Defined according to NED convention
-    **/
-    inline IMUData(double roll, double pitch, double yaw) : SensorData(), _Roll(roll), _Pitch(pitch), _Yaw(yaw)
-    {
-    }
+    // Units: Degrees
+    double Roll;
+    // Units: Degrees
+    double Pitch;
+    // Units: Degrees
+    double Yaw;
 
-    /**
-    Units: Radians
-    **/
-    inline double Roll(void)
-    {
-        return _Roll;
-    }
-
-    /**
-    Units: Radians
-    **/
-    inline double Pitch(void)
-    {
-        return _Pitch;
-    }
-
-    /**
-    Units: Radians
-    **/
-    inline double Yaw(void)
-    {
-        return _Yaw;
-    }
-
-private:
-    double _Roll;
-    double _Pitch;
-    double _Yaw;
+    // Units: g's
+    double X;
+    // Units: g's
+    double Y;
+    // Units: g's
+    double Z;
 };
 
 #endif // IMUDATA_H

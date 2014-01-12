@@ -1,13 +1,25 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
 #include "adapters/joystickadapter.h"
 #include "adapters/mapadapter.h"
 #include "adapters/gpsadapter.h"
+#include "adapters/joystickadapter.h"
+#include "adapters/cameraadapter.h"
+#include "adapters/imuadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
+#include <hardware/sensors/gps/HemisphereA100GPS.h>
+#include <hardware/sensors/camera/StereoPlayback.h>
+#include <hardware/sensors/IMU/Ardupilot.h>
+#include <hardware/sensors/lidar/SimulatedLidar.h>
+#include <hardware/sensors/lidar/lms200.h>
 
 #include <QMdiSubWindow>
 #include <QTextEdit>
+#include "adapters/joystickadapter.h"
+#include "adapters/lidaradapter.h"
+#include <QDebug>
 #include <QFileDialog>
 
 #include <iostream>
@@ -40,19 +52,30 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _motorController = new MotorEncoderDriver2013;
     ui->hardwareStatusList->addItem("Motor Board");
-    ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isOpen() ? checkIcon : xIcon);
 
     _joystick = new Joystick;
     ui->joystickButton->setEnabled(_joystick->isOpen());
     ui->hardwareStatusList->addItem("Joystick");
-    ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
 
     ui->hardwareStatusList->addItem("Map");
 
     _joystickDriver = new JoystickDriver(&_joystick->onNewData);
 
-    _GPS = new SimulatedGPS("/home/victor/Desktop/GPSData.txt");
+//    _lidar = new SimulatedLidar();
+    _lidar = new LMS200();
+    ui->hardwareStatusList->addItem("LIDAR");
+
+    _stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
+    ui->hardwareStatusList->addItem("Camera");
+
+    _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
+    ui->actionSimulatedGPS->setChecked(true);
     ui->hardwareStatusList->addItem("GPS");
+
+    _IMU = new Ardupilot();
+    ui->hardwareStatusList->addItem("IMU");
+
+    updateHardwareStatusIcons();
 
     isRunning = false;
     isPaused = false;
@@ -71,9 +94,10 @@ void MainWindow::setupMenus()
 
 MainWindow::~MainWindow()
 {
-    delete _joystick;
     delete ui;
+    delete _joystick;
     delete _GPS;
+    delete _lidar;
 }
 
 void MainWindow::openHardwareView(QModelIndex index)
@@ -96,8 +120,11 @@ void MainWindow::openHardwareView(QModelIndex index)
         if(labelText == "Joystick")
         {
             adapter = new JoystickAdapter(_joystick);
-            newWindow->setWindowIcon(QIcon(":/images/Joystick"));
         }
+        else if(labelText == "LIDAR")
+        {
+            adapter = new LidarAdapter(_lidar);
+	}
         else if(labelText == "Map")
         {
             adapter = new MapAdapter();
@@ -105,7 +132,14 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "GPS")
         {
             adapter = new GPSAdapter(_GPS);
-
+        }
+        else if(labelText == "Camera")
+        {
+            adapter = new CameraAdapter(_stereoSource);
+        }
+        else if(labelText == "IMU")
+        {
+            adapter = new IMUAdapter(_IMU);
         }
         else
         {
@@ -255,4 +289,31 @@ void MainWindow::on_loadConfigButton_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Configuration File"), "", tr("XML Files(*.xml)"));
     ConfigManager::Instance().load(fileName.toStdString());
+}
+
+void MainWindow::on_actionHemisphere_A100_triggered()
+{
+    ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
+    _GPS = new HemisphereA100GPS();
+    updateHardwareStatusIcons();
+}
+
+void MainWindow::on_actionSimulatedGPS_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated GPS Data File"), "", tr("Text Files(*.txt)"));
+    if(fileName.length() > 0)
+    {
+        ui->actionHemisphere_A100->setChecked(!ui->actionSimulatedGPS->isChecked());
+        _GPS = new SimulatedGPS(fileName.toStdString());
+        updateHardwareStatusIcons();
+    }
+}
+
+void MainWindow::updateHardwareStatusIcons()
+{
+    ui->hardwareStatusList->findItems("GPS", Qt::MatchExactly).at(0)->setIcon(_GPS->isOpen() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isOpen() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("IMU", Qt::MatchExactly).at(0)->setIcon(_IMU->isWorking() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->IsWorking() ? checkIcon : xIcon);
 }
