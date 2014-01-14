@@ -46,6 +46,10 @@ Position PositionTracker::DeltaFromMotionCommand(MotorCommand cmd)
      * TODO - Need to make sure this accounts for the time it takes to actually get to where we're going.
      * Perhaps fire this after the motion command is done.
      */
+    /*
+     * TODO!!! - This will fail spectacularly if W is zero (ie. straight forward or backward)
+     * This is very much not good.
+     */
     using namespace std;
     double V = ( cmd.rightVel + cmd.leftVel ) / 2.0;
     double W = ( cmd.rightVel - cmd.leftVel ) / ConfigManager::Instance().getValue("Robot", "Baseline", 1.0);
