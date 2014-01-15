@@ -47,20 +47,28 @@ Position PositionTracker::DeltaFromMotionCommand(MotorCommand cmd)
      * Perhaps fire this after the motion command is done.
      */
     /*
-     * TODO!!! - This will fail spectacularly if W is zero (ie. straight forward or backward)
-     * This is very much not good.
+     * TODO - This is doing meters only. We need to convert this translation into GPS coordinates
      */
     using namespace std;
     double V = ( cmd.rightVel + cmd.leftVel ) / 2.0;
     double W = ( cmd.rightVel - cmd.leftVel ) / ConfigManager::Instance().getValue("Robot", "Baseline", 1.0);
     double t = cmd.millis / 1000.0;
-    double R = V/W;
-    Position delta;
     double theta = _current_estimate.Heading * M_PI/180.0;
-    double thetaPrime = (_current_estimate.Heading + W*t) * M_PI/180.0;
-    delta.Heading = W*t;
-    delta.Latitude = R*(cos(theta) - cos(thetaPrime));
-    delta.Longitude = R*(sin(thetaPrime) - sin(theta));
+    Position delta;
+    if(W != 0)
+    {
+        double R = V/W;
+        double thetaPrime = (_current_estimate.Heading + W*t) * M_PI/180.0;
+        delta.Heading = W*t;
+        delta.Latitude = R*(cos(theta) - cos(thetaPrime));
+        delta.Longitude = R*(sin(thetaPrime) - sin(theta));
+    }
+    else
+    {
+        delta.Heading = 0;
+        delta.Latitude = V*t*cos(theta);
+        delta.Longitude = V*t*sin(theta);
+    }
     // TODO - handle variances
     return delta;
 }
