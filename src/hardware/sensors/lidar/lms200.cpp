@@ -45,7 +45,7 @@ void LMS200::thread_run()
         }
 
         LidarState state;
-        for(int i = 0; i < num_values_returned; i++)
+        for(uint i = 0; i < num_values_returned; i++)
         {
             state.points[i] = LidarPoint();
             state.points[i].distance = values[i] / 1000.0; // mm to m conversion
@@ -53,7 +53,7 @@ void LMS200::thread_run()
             state.points[i].angle = 0.00872664626 * i; // device defaults to 0.5 degree resolution (0.00872664626 radians)
             state.points[i].valid = true;
         }
-        for(int i = num_values_returned; i < 1024; i++)
+        for(uint i = num_values_returned; i < 1024; i++)
         {
             state.points[i] = LidarPoint();
             state.points[i].valid = false;
@@ -67,7 +67,7 @@ LidarState LMS200::GetState()
     return LidarState();
 }
 
-LidarState LMS200::GetStateAtTime(timeval time)
+LidarState LMS200::GetStateAtTime(timeval)
 {
     return LidarState();
 }
