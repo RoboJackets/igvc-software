@@ -14,7 +14,7 @@ public:
     ~LMS200();
 
     LidarState GetState();
-    LidarState GetStateAtTime(timeval time);
+    LidarState GetStateAtTime(timeval);
 
     bool IsWorking();
 
