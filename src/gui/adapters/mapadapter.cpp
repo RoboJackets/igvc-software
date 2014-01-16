@@ -8,10 +8,10 @@ using namespace pcl;
 
 MapAdapter::MapAdapter(QWidget *parent) :
     QWidget(parent),
+    LonNewMap(this),
     ui(new Ui::MapAdapter),
     _scale(20),
-    _map(0),
-    LonNewMap(this)
+    _map(0)
 {
     ui->setupUi(this);
 }
