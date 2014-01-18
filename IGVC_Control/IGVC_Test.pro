@@ -20,5 +20,6 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/common/utils/StringUtils.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
-    ../src/common/utils/StringUtils.hpp
+    ../src/common/utils/StringUtils.hpp \
+    ../src/tests/testlinedetection.hpp
 
