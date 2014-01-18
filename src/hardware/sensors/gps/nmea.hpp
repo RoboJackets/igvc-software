@@ -15,14 +15,14 @@ namespace nmea
 	//GPS funcs
 	bool decodeGPRMC(const std::string& line, GPSData& state);
     /*! \note Not implemented */
-	bool decodeGPRMT(const std::string& line);
+    bool decodeGPRMT(const std::string&);
 	bool decodeGPGGA(const std::string& line, GPSData& state);
     /*! \note Not implemented */
-	bool decodeGPGSA(const std::string& line);
+    bool decodeGPGSA(const std::string&);
     /*! \note Not implemented */
-	bool decodeGPGSV(const std::string& line);
+    bool decodeGPGSV(const std::string&);
     /*! \note Not implemented */
-	void decodeUTCTime(const std::string& val);
+    void decodeUTCTime(const std::string&);
 	double decodeLatitude(const std::string& val, const char hemi);
 	double decodeLongitude(const std::string& val, const char hemi);
 }
