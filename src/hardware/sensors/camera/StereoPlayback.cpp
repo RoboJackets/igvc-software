@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, int fps, string fileName, bool undistort) : _leftVid(leftVideo), _rightVid(rightVideo),
-    _framesPerSecond(fps), _playbackThread(&StereoPlayback::Run, this), _undistort(undistort)
+    _framesPerSecond(fps), _undistort(undistort), _playbackThread(&StereoPlayback::Run, this)
 {
     if(_undistort)
     {
