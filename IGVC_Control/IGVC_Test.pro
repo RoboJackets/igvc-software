@@ -23,10 +23,10 @@ TEMPLATE = app
 #SOURCES += tst_qtestprojecttest.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-SOURCES += \
-    teststringutils.cpp \
+SOURCES += testmain.cpp \
     ../src/common/utils/StringUtils.cpp
 
 HEADERS += \
+    teststringutils.hpp \
     ../src/common/utils/StringUtils.hpp
 
