@@ -5,7 +5,7 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
-void nmea::decodeUTCTime(const std::string& val)
+void nmea::decodeUTCTime(const std::string&)
 {
 
 }
@@ -104,25 +104,25 @@ bool nmea::decodeGPRMC(const std::string& line, GPSData& state)
 //	state.courseoverground = boost::lexical_cast<double>(splitvec[8].c_str());
     state.Heading(boost::lexical_cast<double>(splitvec[8].c_str()));
 
-	std::string utcdate = splitvec[9];
+//	std::string utcdate = splitvec[9];
 
-	try
-	{
-		double magvariation = boost::lexical_cast<double>(splitvec[10].c_str());
-	}
-	catch(...)
-	{
-		double magvariation = 0;
-	}
+//	try
+//	{
+//		double magvariation = boost::lexical_cast<double>(splitvec[10].c_str());
+//	}
+//	catch(...)
+//	{
+//		double magvariation = 0;
+//	}
 
-	char magvardir = splitvec[11][0];
+//	char magvardir = splitvec[11][0];
 
 //	char mode = splitvec[12][0];
 
 	return true;
 }
 
-bool nmea::decodeGPRMT(const std::string& line)
+bool nmea::decodeGPRMT(const std::string&)
 {
 	return false;
 }
@@ -176,23 +176,23 @@ bool nmea::decodeGPGGA(const std::string& line, GPSData& state)
 		}
 	}
 
-	const std::string& numsat = splitvec[7];
+//	const std::string& numsat = splitvec[7];
 //	state.num_sat = boost::lexical_cast<int>(numsat.c_str());
 
-	const std::string& horizDilutionPrec = splitvec[8];
-	const std::string& sealevelheight = splitvec[9];
-	const std::string& geoidalheight = splitvec[10];
-	const std::string& diffgps = splitvec[11];
-	const std::string& diffrefid = splitvec[12];
+//	const std::string& horizDilutionPrec = splitvec[8];
+//	const std::string& sealevelheight = splitvec[9];
+//	const std::string& geoidalheight = splitvec[10];
+//	const std::string& diffgps = splitvec[11];
+//	const std::string& diffrefid = splitvec[12];
 	return true;
 }
 
-bool nmea::decodeGPGSA(const std::string& line)
+bool nmea::decodeGPGSA(const std::string&)
 {
 	return false;
 }
 
-bool nmea::decodeGPGSV(const std::string& line)
+bool nmea::decodeGPGSV(const std::string&)
 {
 	return false;
 }
