@@ -1,6 +1,8 @@
+#ifndef TESTSTRINGUTILS_H
+#define TESTSTRINGUTILS_H
+
 #include <QtTest>
 #include <common/utils/StringUtils.hpp>
-#include <iostream>
 
 class TestStringUtils: public QObject
 {
@@ -19,7 +21,4 @@ private Q_SLOTS:
     }
 };
 
-
-QTEST_APPLESS_MAIN(TestStringUtils)
-
-#include "teststringutils.moc"
+#endif
