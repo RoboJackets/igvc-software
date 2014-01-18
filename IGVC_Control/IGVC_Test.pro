@@ -1,8 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator
-#
-#-------------------------------------------------
 
 QT       += testlib
 
@@ -19,14 +14,11 @@ INCLUDEPATH += ../src/ \
 
 TEMPLATE = app
 
-
-#SOURCES += tst_qtestprojecttest.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-SOURCES += testmain.cpp \
+SOURCES += ../src/tests/testmain.cpp \
     ../src/common/utils/StringUtils.cpp
 
-HEADERS += \
-    teststringutils.hpp \
+HEADERS += ../src/tests/teststringutils.hpp \
     ../src/common/utils/StringUtils.hpp
 
