@@ -70,6 +70,8 @@ public:
         _instance->_statusBar = statusBar;
     }
 
+    static void Clear();
+
 private:
 
     static std::string dateTimeStr();
