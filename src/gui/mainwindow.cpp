@@ -319,3 +319,8 @@ void MainWindow::updateHardwareStatusIcons()
     ui->hardwareStatusList->findItems("IMU", Qt::MatchExactly).at(0)->setIcon(_IMU->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->IsWorking() ? checkIcon : xIcon);
 }
+
+void MainWindow::on_actionClearLogs_triggered()
+{
+    Logger::Clear();
+}
