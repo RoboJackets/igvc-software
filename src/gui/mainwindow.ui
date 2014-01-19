@@ -352,9 +352,16 @@
     </widget>
     <addaction name="menuGPS"/>
    </widget>
+   <widget class="QMenu" name="menuLogs">
+    <property name="title">
+     <string>Logs</string>
+    </property>
+    <addaction name="actionClearLogs"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindow"/>
    <addaction name="menuSensors"/>
+   <addaction name="menuLogs"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionClose">
@@ -415,6 +422,14 @@
    </property>
    <property name="text">
     <string>Simulated</string>
+   </property>
+  </action>
+  <action name="actionClearLogs">
+   <property name="text">
+    <string>Clear</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete All Log Files</string>
    </property>
   </action>
  </widget>
