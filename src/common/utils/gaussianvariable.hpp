@@ -35,6 +35,10 @@ public:
         return Value;
     }
 
+    operator T() const
+    {
+        return Value;
+    }
 
 private:
 };

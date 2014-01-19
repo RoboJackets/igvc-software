@@ -1,8 +1,9 @@
 #include <QTest>
-#include "teststringutils.hpp"
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include "teststringutils.hpp"
+#include "testpositiontracker.hpp"
 
 void RunTestCase(QObject* testCase, std::vector<std::string> args)
 {
@@ -35,4 +36,5 @@ int main(int argc, const char* argv[])
 
     // Execute selected test cases
     RunTestCase(new TestStringUtils(), args);
+    RunTestCase(new TestPositionTracker(), args);
 }
