@@ -27,6 +27,30 @@ public:
         stream << s.Heading<< " (" << s.Heading.Variance << ")";
         return stream;
     }
+
+    bool operator == (const Position& other)
+    {
+        return  Latitude == other.Latitude &&
+                Longitude == other.Longitude &&
+                Heading == other.Heading;
+    }
+
+    bool operator != (const Position& other)
+    {
+        return !(operator ==(other));
+    }
+
+    bool operator == (const Position& other) const
+    {
+        return  Latitude == other.Latitude &&
+                Longitude == other.Longitude &&
+                Heading == other.Heading;
+    }
+
+    bool operator != (const Position& other) const
+    {
+        return !(operator ==(other));
+    }
 };
 
 /*!
