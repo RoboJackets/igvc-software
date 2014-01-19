@@ -7,6 +7,9 @@ PositionTracker::PositionTracker()
       LOnMotionCommand(this),
       LOnIMUData(this)
 {
+    _current_estimate.Latitude.Variance = 10000;
+    _current_estimate.Longitude.Variance = 10000;
+    _current_estimate.Heading.Variance = 10000;
 }
 
 Position PositionTracker::GetPosition()
@@ -88,7 +91,7 @@ Position PositionTracker::MeasurementFromIMUData(IMUData data)
     measurement.Latitude = asin(sin(lat1)*cos(d/R)+cos(lat1)*sin(d/R)*cos(hed1));
     measurement.Longitude = (lon1 + atan2(sin(hed1)*sin(d/R)*cos(lat1),cos(d/R)-sin(lat1)*sin(measurement.Latitude)));
     measurement.Heading = (atan2((measurement.Longitude-lon1)*sin(lat1), cos(measurement.Latitude)*sin(lat1)-sin(measurement.Latitude)*cos(lat1)*cos(measurement.Longitude-lon1)));
-    measurement.Heading = (measurement.Heading+180);
+//    measurement.Heading = (measurement.Heading+180);
     while(measurement.Heading >= 360)
         measurement.Heading = (measurement.Heading - 360);
     while(measurement.Heading < 0)
@@ -104,7 +107,11 @@ void PositionTracker::OnGPSData(GPSData data)
     measurement.Longitude = data.Long();
     // TODO - make sure the GPS actually outputs heading data
     measurement.Heading = data.Heading();
-    // TODO - handle variances
+
+    measurement.Latitude.Variance = data.LatVar();
+    measurement.Longitude.Variance = data.LongVar();
+    measurement.Heading.Variance = data.HeadingVar();
+
     _current_estimate = UpdateWithMeasurement(_current_estimate, measurement);
 }
 
