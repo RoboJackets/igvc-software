@@ -6,83 +6,84 @@ char window_name[16] = "Filter Practice";
 char original_window_name[9] = "Original";
 
 //For the erosion/dilation stuff
+///\var int erosion_elem
+///\brief contains the number corresponding to the element used for erosion
+///       2 is what we are currently using (an ellipse)
 int erosion_elem = 2;
+///\var int erosion_size
+///\brief specifies the size of the area to be eroded.
 int erosion_size = 2;
 int dilation_elem = 2;
 int dilation_size = 1;
+
 int const max_elem = 2;
 int const max_kernel_size = 21;
+///\var Mat src
+///\brief contains the original, unprocessed image
+
+///\var Mat dst
+///\brief contains the new, processed image that isolates the lines
 Mat src, dst;
 
 
 void Erosion( int, void* );
 void Dilation( int, void* );
+///
+/// \brief LineDetector::LineDetector
+///        initiates a new instance of a LineDetector.
+///        Requires only the image or video file
+/// \param imgFile The image or video file to load from
+///
 
 LineDetector::LineDetector(std::string imgFile)
 {
     cap = cv::VideoCapture(imgFile);
     loadImage(imgFile);
-    //cout << "\nRows: "<< src.rows<< "\tCols: "<< src.cols <<endl;
 }
 
+///
+/// \brief LineDetector::loadImage
+///        Loads the image or video from a string.
+///        public so that it can be iterated through in case
+///        of a video file.
+/// \param imgFile String with the location of the image/video file
+/// \return a boolean that is true if the file was loaded successfully
+///
 bool LineDetector::loadImage(std::string imgFile){
-    //Save the image file
-    this->imgFile = imgFile;
 
-    //Read the image file to my VideoCapture
-    bool success = cap.read(src);
+    this->imgFile = imgFile; ///< Saves imgFile as a class variable
 
-    //Make a clone, dst.
-    //Dst is what we will apply the algorithm to
-    dst = src.clone();
+    bool success = cap.read(src); ///<Reads the image file to my VideoCapture
+                                  ///<True if successful
+
+    dst = src.clone(); ///<dst is a clone that we will apply the algorithm to
     return success;
 }
 
 
 
 void LineDetector::applyAlgorithm(){
-    //numBlocks - the number of rows and columns to use to divide the screen into blocks
-    //for filtering out scatter
-    int numBlocks, whiteThreshold;
 
-    //Gets the total average of all the pixels in the screen
-    //To account for brightness variability.
-    float totalAvg = getAvg();
+    float totalAvg = getAvg(); ///<Total Average of the pixels in the screen
+                               ///<Used to account for brightness variability
 
-    //Set to 15 to begin with, may change.
-    numBlocks = 15;
-    //numBlocks = totalAvg> 90? 60:30;
-
-    //The whiteThreshold varies depending on the average brightness
-    whiteThreshold = totalAvg > 90? 5:2;
-
-    //Blur it a little.
-    GaussianBlur(dst, dst, Size(GAUSSSIZE,GAUSSSIZE),2,0);
+    GaussianBlur(dst, dst, Size(GAUSSSIZE,GAUSSSIZE),2,0);///<Blurs the picture just a little
     GaussianBlur(src, src, Size(GAUSSSIZE,GAUSSSIZE),2,0);
 
-    //Separate the pixels into black (not lines) and white (lines)
-    blackAndWhite(totalAvg);
+    blackAndWhite(totalAvg); ///<Separates the pixels into black(not lines) and white (lines)
 
-    //filter2(numBlocks, whiteThreshold*2);
-    //Leave for now, may take out later
-    //GaussianBlur(dst, dst, Size(GAUSSSIZE,GAUSSSIZE),2,0);
+    Erosion( 0, 0 );
+    Dilation(0,0);
 
-    //Get rid of the scatter
-    //filter2(numBlocks*4, whiteThreshold*2);
-    //filter2(numBlocks, whiteThreshold);
-
-
-    //Erosion/Dilation practice stuff below
-    //fpt erosionPTR = (fpt) Erosion;
-      Erosion( 0, 0 );
-      Dilation(0,0);
-
-    displayImage();
+    displayImage();///<Displays both the original and processed images
 }
 
+///
+/// \brief Erosion erodes the white away
+///
 void Erosion( int, void* )
 {
-  int erosion_type;
+  int erosion_type;///<erosion_type is set to ellipse in the LineDetector class
   if( erosion_elem == 0 ){ erosion_type = MORPH_RECT; }
   else if( erosion_elem == 1 ){ erosion_type = MORPH_CROSS; }
   else if( erosion_elem == 2) { erosion_type = MORPH_ELLIPSE; }
@@ -91,14 +92,15 @@ void Erosion( int, void* )
                                        Size( 2*erosion_size + 1, 2*erosion_size+1 ),
                                        Point( erosion_size, erosion_size ) );
 
-  /// Apply the erosion operation
-  erode( dst, dst, element );
-  //imshow( "Erosion Demo", erosion_dst );
+  erode( dst, dst, element );///< Apply the erosion operation
 }
 
+///
+/// \brief Dilation enhances the white lines
+///
 void Dilation( int, void* )
 {
-  int dilation_type;
+  int dilation_type;///<Set to ellipse in LineDetector
   if( dilation_elem == 0 ){ dilation_type = MORPH_RECT; }
   else if( dilation_elem == 1 ){ dilation_type = MORPH_CROSS; }
   else if( dilation_elem == 2) { dilation_type = MORPH_ELLIPSE; }
@@ -106,11 +108,15 @@ void Dilation( int, void* )
   Mat element = getStructuringElement( dilation_type,
                                        Size( 2*dilation_size + 1, 2*dilation_size+1 ),
                                        Point( dilation_size, dilation_size ) );
-  /// Apply the dilation operation
-  dilate( dst, dst, element );
+
+  dilate( dst, dst, element );  ///< Apply the dilation operation
 }
 
-
+///
+/// \brief LineDetector::blackAndWhite converts the image into
+///        black (not lines) and white (lines)
+/// \param totalAvg The average brightness of the picture
+///
 void LineDetector::blackAndWhite(float totalAvg){
     Vec3b p;
     int rows = src.rows;
@@ -135,17 +141,11 @@ void LineDetector::blackAndWhite(float totalAvg){
 
     //Loops through relevant parts of the image and scans for white lines
     //Also tries to detect obstacles
-    //NOTE: look into incorporating lidar data for that.
     int tempAvg;
     for (int i = rows/3; i< rows*5/6; i++){
         for(int j=0; j< cols; j++){
             tempAvg = totalAvg*(1.1 - i*.1/768);
             p = dst.at<Vec3b>(i, j); //Current pixel
-
-            //int colorAvg = (p[0]+p[1]+p[2])/3;
-            //int maxDiff = AVGDIFF(p[0], p[1], p[2]);
-           /* if ((colorAvg>= totalAvg*COLORRATIO)&&(colorAvg<= totalAvg*COLORRATIOMAX)&&(maxDiff < 90)&&
-                    (maxDiff > (totalAvg > 90? 30:15 ))&&(i>src.rows*2/6)&&(p[0]>totalAvg*1.7)){*/
 
             //If there is a significant amount of red in the pixel, it's most likely an orange cone
             //Get rid of the obstacle
@@ -153,10 +153,12 @@ void LineDetector::blackAndWhite(float totalAvg){
                 detectObstacle(i, j);
             }
             //Filters out the white and makes it pure white
-            if((p[0]>tempAvg*1.5)&& (p[0] < tempAvg*2)&& (p[1] < tempAvg*1.6)&&(p[2]>tempAvg*1.1) &&(p[2]<tempAvg*1.7)&&(p[1]>tempAvg*1.05)){
+            if((p[0]>tempAvg*1.5)&& (p[0] < tempAvg*2.2)&& (p[1] < tempAvg*1.6)&&(p[2]>tempAvg*1.1) &&
+                    (p[2]<tempAvg*1.7)&&(p[1]>tempAvg*1.05)&&(ABSDIFF(p[1], p[2]) <20)){
                 dst.at<Vec3b>(i,j)[0] = 255;
                 dst.at<Vec3b>(i,j)[1] = 255;
                 dst.at<Vec3b>(i,j)[2] = 255;
+
             }
             else { //Otherwise, set pixel to black
                 dst.at<Vec3b>(i,j)[0] = 0;
@@ -167,10 +169,16 @@ void LineDetector::blackAndWhite(float totalAvg){
     }
 }
 
+///
+/// \brief LineDetector::detectObstacle detects orange and bright white obstacles
+/// \param row the row of the top of the obstacle
+/// \param col the column of the left of the obstacle
+///
 void LineDetector::detectObstacle(int row, int col){
     Vec3b p = dst.at<Vec3b>(row,col);
     int row2 = row;
     int col2 = col;
+
     //While the pixel is still orange, turn it black
     //Then on to the next one, by row
     while (p[2]>100){
@@ -180,6 +188,7 @@ void LineDetector::detectObstacle(int row, int col){
         p = dst.at<Vec3b>(++row2, col);
     }
     p = dst.at<Vec3b>(row,col);
+
     //While the pixel is still orange, turn it black
     //Then on to the next one, by column
     while (p[2]>100){
@@ -188,6 +197,7 @@ void LineDetector::detectObstacle(int row, int col){
         dst.at<Vec3b>(row, col2)[2] = 0;
         p = dst.at<Vec3b>(row, ++col2);
     }
+
     //Turn everything in that block we just found black
     for(int i = row+1; i<row2;i++){
         for (int j = col+1; j<col2; j++){
@@ -198,6 +208,10 @@ void LineDetector::detectObstacle(int row, int col){
     }
 }
 
+///
+/// \brief LineDetector::displayImage Displays both the original and
+///        transformed images
+///
 void LineDetector::displayImage(){
     //Show transformed image
     imshow(window_name, dst);
@@ -206,52 +220,12 @@ void LineDetector::displayImage(){
     //Wait slightly
     waitKey(DELAY);
 }
-//Currently retired
-void LineDetector::filter(int numBlocks, int whiteThreshold){
-    //Get the number of rows and columns in each block
-    int blockRows = src.rows/numBlocks;
-    int blockCols = src.cols/numBlocks;
-    int myAvg, numNbor;
-
-    //Loop through each block
-    for (int i=1; i<numBlocks-1; i++){
-        for(int j=1; j<numBlocks-1;j++){
-            //Get block average color
-            myAvg+= getBlockAvg(i*blockRows, (i+1)*blockRows-1, j*blockCols, (j+1)*blockCols-1);
-            if ((myAvg > whiteThreshold)){//If the average is higher than the Threshol
-                numNbor = checkNbors(i, j, blockRows, blockCols, whiteThreshold);
-                if (numNbor<2||numNbor > 7){
-                    blackoutSection(i*blockRows, (i+1)*blockRows-1, j*blockCols, (j+1)*blockCols-1);
-                }
-            }
-            else blackoutSection(i*blockRows, (i+1)*blockRows-1, j*blockCols, (j+1)*blockCols-1);
-        }
-    }
-}
-//TODO modify this to only account for the used space (not the top and bottom)
-void LineDetector::filter2(int numBlocks, int whiteThreshold){
-    //Get the number of rows and columns in each block
-    int blockRows = src.rows/numBlocks;
-    int blockCols = src.cols/numBlocks;
-    int myAvg, numNbor;
-
-    //Loop through the blocks
-    for (int i=1; i<numBlocks-1; i++){
-        for(int j=1; j<numBlocks-1;j++){
-            //Get block average
-            myAvg = getBlockAvg(i*blockRows, (i+1)*blockRows-1, j*blockCols, (j+1)*blockCols-1);
-            if ((myAvg > whiteThreshold)){//If white enough, check neighbors
-                numNbor = checkNbors(i, j, blockRows, blockCols, whiteThreshold*10);
-                if (numNbor<3){//If 1 or no neighbors, turn it black
-                    blackoutSection(i*blockRows, (i+1)*blockRows-1, j*blockCols, (j+1)*blockCols-1);
-                }
-            }
-            else blackoutSection(i*blockRows, (i+1)*blockRows-1, j*blockCols, (j+1)*blockCols-1);
-        }
-    }
-}
 
 
+///
+/// \brief LineDetector::getAvg gets the average of the relevant pixels
+/// \return the average as a floating point number
+///
 float LineDetector::getAvg(){
     Vec3b p;
     float totalAvg = 0;
@@ -265,45 +239,22 @@ float LineDetector::getAvg(){
     return totalAvg;
 }
 
+///
+/// \brief LineDetector::blackoutSection turns a section of the image black
+/// \param rowl the lower row bound
+/// \param rowu the upper row bound
+/// \param coll the left column bound
+/// \param colu the right column bound
+///
 void LineDetector::blackoutSection(int rowl, int rowu, int coll, int colu){
-//    int channels = dst.channels();
-//    coll *=channels;
-//    colu *=channels;
-//    uchar* p = dst.data;
+
     for (int i=rowl;i<=rowu;i++){
         for (int j = coll; j<=colu; j++){
             dst.at<Vec3b>(i,j)[0] = 0;
             dst.at<Vec3b>(i,j)[1] = 0;
             dst.at<Vec3b>(i,j)[2] = 0;
-//            p[i*dst.cols+j] =0;
-//            p[i*dst.cols+j+1] =0;
-//            p[i*dst.cols+j+2] =0;
         }
     }
 }
 
-int LineDetector::checkNbors(int rowStartNum, int colStartNum, int rowSize, int colSize, int threshold){
-    uchar avg =0, numNbors =0;
-    for (int i =-1; i<=1; i++){
-        for(int j= -1; j<=1; j++){
-            avg = getBlockAvg((rowStartNum+j)*rowSize, (rowStartNum+j+1)*rowSize-1, (colStartNum+i)*colSize, (colStartNum+i+1)*colSize-1);
-            numNbors+= (avg > threshold)? 1:0;
-        }
-    }
-    return numNbors;
-}
 
-int LineDetector::getBlockAvg(int rowl, int rowu, int coll, int colu){
-    int avg = 0;
-    int num = (rowl-rowu+1)*(coll-colu+1);
-    int channels = src.channels();
-    coll *= channels;
-    colu *=channels;
-    uchar* p = src.data;
-    for (int i = rowl;i<=rowu; i++){
-        for (int j = coll; j<= colu;j++){
-            avg += p[i*src.cols+j];
-        }
-    }
-    return (avg/num);
-}
