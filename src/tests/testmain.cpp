@@ -1,5 +1,6 @@
 #include <QTest>
 #include "teststringutils.hpp"
+#include "testgpsutils.h"
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -35,4 +36,5 @@ int main(int argc, const char* argv[])
 
     // Execute selected test cases
     RunTestCase(new TestStringUtils(), args);
+    RunTestCase(new TestGPSUtils(), args);
 }
