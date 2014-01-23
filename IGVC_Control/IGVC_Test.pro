@@ -20,5 +20,7 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/common/utils/StringUtils.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
-    ../src/common/utils/StringUtils.hpp
+    ../src/common/utils/StringUtils.hpp \
+    ../src/tests/testgpsutils.h \
+    ../src/common/utils/GPSUtils.h
 
