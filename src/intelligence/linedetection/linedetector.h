@@ -12,7 +12,7 @@
 #define DELAY 1
 #define COLORRATIO 1.4
 #define COLORRATIOMAX 1.47
-#define GAUSSSIZE 9
+#define GAUSSSIZE 19
 #define WHITETHRESHOLDBLOCK 5
 
 typedef void (*fpt) (int, void*);
