@@ -6,21 +6,23 @@ char window_name[16] = "Filter Practice";
 char original_window_name[9] = "Original";
 
 //For the erosion/dilation stuff
-int erosion_elem = 0;
-int erosion_size = 5;
-int dilation_elem = 0;
-int dilation_size = 0;
+int erosion_elem = 2;
+int erosion_size = 2;
+int dilation_elem = 2;
+int dilation_size = 1;
 int const max_elem = 2;
 int const max_kernel_size = 21;
 Mat src, dst;
 
 
 void Erosion( int, void* );
+void Dilation( int, void* );
 
 LineDetector::LineDetector(std::string imgFile)
 {
     cap = cv::VideoCapture(imgFile);
     loadImage(imgFile);
+    //cout << "\nRows: "<< src.rows<< "\tCols: "<< src.cols <<endl;
 }
 
 bool LineDetector::loadImage(std::string imgFile){
@@ -56,6 +58,7 @@ void LineDetector::applyAlgorithm(){
 
     //Blur it a little.
     GaussianBlur(dst, dst, Size(GAUSSSIZE,GAUSSSIZE),2,0);
+    GaussianBlur(src, src, Size(GAUSSSIZE,GAUSSSIZE),2,0);
 
     //Separate the pixels into black (not lines) and white (lines)
     blackAndWhite(totalAvg);
@@ -72,6 +75,7 @@ void LineDetector::applyAlgorithm(){
     //Erosion/Dilation practice stuff below
     //fpt erosionPTR = (fpt) Erosion;
       Erosion( 0, 0 );
+      Dilation(0,0);
 
     displayImage();
 }
@@ -92,6 +96,21 @@ void Erosion( int, void* )
   //imshow( "Erosion Demo", erosion_dst );
 }
 
+void Dilation( int, void* )
+{
+  int dilation_type;
+  if( dilation_elem == 0 ){ dilation_type = MORPH_RECT; }
+  else if( dilation_elem == 1 ){ dilation_type = MORPH_CROSS; }
+  else if( dilation_elem == 2) { dilation_type = MORPH_ELLIPSE; }
+
+  Mat element = getStructuringElement( dilation_type,
+                                       Size( 2*dilation_size + 1, 2*dilation_size+1 ),
+                                       Point( dilation_size, dilation_size ) );
+  /// Apply the dilation operation
+  dilate( dst, dst, element );
+}
+
+
 void LineDetector::blackAndWhite(float totalAvg){
     Vec3b p;
     int rows = src.rows;
@@ -99,7 +118,7 @@ void LineDetector::blackAndWhite(float totalAvg){
 
     //Turn the top quarter of the screen and bottom sixth of the screen black
     //We can disregard these areas - may extend the bottom of the screen slightly later on
-    for (int i = 0; i< rows/4; i++){
+    for (int i = 0; i< rows/3; i++){
         for(int j=0; j< cols; j++){
              dst.at<Vec3b>(i,j)[0] = 0;
              dst.at<Vec3b>(i,j)[1] = 0;
@@ -117,8 +136,10 @@ void LineDetector::blackAndWhite(float totalAvg){
     //Loops through relevant parts of the image and scans for white lines
     //Also tries to detect obstacles
     //NOTE: look into incorporating lidar data for that.
-    for (int i = rows/5; i< rows*5/6; i++){
+    int tempAvg;
+    for (int i = rows/3; i< rows*5/6; i++){
         for(int j=0; j< cols; j++){
+            tempAvg = totalAvg*(1.1 - i*.1/768);
             p = dst.at<Vec3b>(i, j); //Current pixel
 
             //int colorAvg = (p[0]+p[1]+p[2])/3;
@@ -128,11 +149,11 @@ void LineDetector::blackAndWhite(float totalAvg){
 
             //If there is a significant amount of red in the pixel, it's most likely an orange cone
             //Get rid of the obstacle
-            if (p[2] > totalAvg*2){
+            if (p[2] > totalAvg*2|| p[2] > 253){
                 detectObstacle(i, j);
             }
             //Filters out the white and makes it pure white
-            if((p[0]>totalAvg*1.55)&& (p[0] < totalAvg*2.05)&& (p[1] < totalAvg*1.65)&&(p[2]>totalAvg*1.05) &&(p[2]<totalAvg*1.75)&&(p[1]>totalAvg*.95)){
+            if((p[0]>tempAvg*1.5)&& (p[0] < tempAvg*2)&& (p[1] < tempAvg*1.6)&&(p[2]>tempAvg*1.1) &&(p[2]<tempAvg*1.7)&&(p[1]>tempAvg*1.05)){
                 dst.at<Vec3b>(i,j)[0] = 255;
                 dst.at<Vec3b>(i,j)[1] = 255;
                 dst.at<Vec3b>(i,j)[2] = 255;
@@ -234,13 +255,13 @@ void LineDetector::filter2(int numBlocks, int whiteThreshold){
 float LineDetector::getAvg(){
     Vec3b p;
     float totalAvg = 0;
-    for (int i = src.rows/5; i< 4*src.rows/5; i++){
-        for(int j=src.cols/5; j< 4*src.cols/5; j++){
+    for (int i = src.rows/3; i< 5*src.rows/6; i++){
+        for(int j=src.cols/6; j< 5*src.cols/6; j++){
             p = dst.at<Vec3b>(i, j);
             totalAvg += (p[0]+p[1]+p[2])/3;
         }
     }
-    totalAvg = (25*totalAvg)/(src.cols*src.rows*9);
+    totalAvg = (25*totalAvg)/(src.cols*src.rows*8);
     return totalAvg;
 }
 
