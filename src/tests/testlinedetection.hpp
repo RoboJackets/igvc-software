@@ -2,7 +2,7 @@
 #define TESTLINEDETECTION_HPP
 
 #include <QtTest>
-#include <intelligence/linedetection/linedetectionlist.h>
+#include <intelligence/linedetection/linedetector.h>
 #include <iostream>
 #include <common/events/Event.hpp>
 #ifdef _WIN32
@@ -32,7 +32,7 @@ private Q_SLOTS:
             QFAIL("Could not load test video.");
         }
 
-        LineDetectionList ldl(newImageFrameEvent);
+        LineDetector ldl(newImageFrameEvent);
 
         while (success){
             newImageFrameEvent(src);
