@@ -20,6 +20,7 @@ private Q_SLOTS:
     void testCase1()
     {
         //char videoFile[] = "../igvc_cam_data/stills/img_left2.jpg";
+        ///Note: This may not be the correct directory on your computer
         char videoFile[] = "../src/intelligence/igvc_cam_data/video/CompCourse_left0.mpeg";
 
          LineDetector ln(videoFile);
