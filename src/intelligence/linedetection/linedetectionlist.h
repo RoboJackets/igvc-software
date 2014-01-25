@@ -1,8 +1,12 @@
-#ifndef LINEDETECTOR_H
-#define LINEDETECTOR_H
+#ifndef LINEDETECTIONLIST_H
+#define LINEDETECTIONLIST_H
 #include <iostream>
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
+#include <common/logger/logger.h>
+#include <sstream>
+#include <common/events/Event.hpp>
+#include <hardware/sensors/DataStructures/ImageData.hpp>
 
 /*!\def ABS(a)
 *\brief a Macro that returns the absolute value of a number
@@ -24,23 +28,20 @@
 using namespace std;
 using namespace cv;
 
-class LineDetector
+class LineDetectionList
 {
 public:
-    LineDetector(std::string imgFile);
-    void applyAlgorithm();
-    bool loadImage(std::string imgFile);
+    LineDetectionList(Event<ImageData> &evtSrc);
+    void onImageEvent(ImageData imgd);
+    LISTENER(LineDetectionList, onImageEvent, ImageData)
 private:
     void blackoutSection(int rowl, int rowu, int coll, int colu);
     float getAvg(void);
     void displayImage();
     void blackAndWhite(float totalAvg);
-    ///\brief The location of the image/video file to load
-    std::string imgFile;
     int display_dst(int delay);
     ///\brief the VideoCapture of the image/video
     VideoCapture cap;
     void detectObstacle(int i, int j);
 };
-
-#endif // LINEDETECTOR_H
+#endif // LINEDETECTIONLIST_H
