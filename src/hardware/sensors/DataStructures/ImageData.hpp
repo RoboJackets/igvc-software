@@ -4,6 +4,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <hardware/sensors/DataStructures/SensorData.hpp>
+#include <common/events/Event.hpp>
 
 using namespace cv;
 
