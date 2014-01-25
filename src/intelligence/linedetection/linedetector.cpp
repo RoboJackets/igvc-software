@@ -50,32 +50,35 @@ LineDetector::LineDetector(std::string imgFile)
 /// \return a boolean that is true if the file was loaded successfully
 ///
 bool LineDetector::loadImage(std::string imgFile){
+    ///Saves imgFile as a class variable
+    this->imgFile = imgFile;
+    ///Reads the image file to my VideoCapture
+    ///True if successful
+    bool success = cap.read(src);
 
-    this->imgFile = imgFile; ///< Saves imgFile as a class variable
-
-    bool success = cap.read(src); ///<Reads the image file to my VideoCapture
-                                  ///<True if successful
-
-    dst = src.clone(); ///<dst is a clone that we will apply the algorithm to
+    ///<dst is a clone that we will apply the algorithm to
+    dst = src.clone();
     return success;
 }
 
 
 
 void LineDetector::applyAlgorithm(){
+    ///Total Average of the pixels in the screen
+    ///Used to account for brightness variability
+    float totalAvg = getAvg();
 
-    float totalAvg = getAvg(); ///<Total Average of the pixels in the screen
-                               ///<Used to account for brightness variability
-
-    GaussianBlur(dst, dst, Size(GAUSSSIZE,GAUSSSIZE),2,0);///<Blurs the picture just a little
+    ///Blurs the picture just a little
+    GaussianBlur(dst, dst, Size(GAUSSSIZE,GAUSSSIZE),2,0);
     GaussianBlur(src, src, Size(GAUSSSIZE,GAUSSSIZE),2,0);
-
-    blackAndWhite(totalAvg); ///<Separates the pixels into black(not lines) and white (lines)
+    ///Separates the pixels into black(not lines) and white (lines)
+    blackAndWhite(totalAvg);
 
     Erosion( 0, 0 );
     Dilation(0,0);
 
-    displayImage();///<Displays both the original and processed images
+    ///Displays both the original and processed images
+    displayImage();
 }
 
 ///
@@ -83,7 +86,8 @@ void LineDetector::applyAlgorithm(){
 ///
 void Erosion( int, void* )
 {
-  int erosion_type;///<erosion_type is set to ellipse in the LineDetector class
+  ///erosion_type is set to ellipse in the LineDetector class
+  int erosion_type;
   if( erosion_elem == 0 ){ erosion_type = MORPH_RECT; }
   else if( erosion_elem == 1 ){ erosion_type = MORPH_CROSS; }
   else if( erosion_elem == 2) { erosion_type = MORPH_ELLIPSE; }
@@ -91,8 +95,8 @@ void Erosion( int, void* )
   Mat element = getStructuringElement( erosion_type,
                                        Size( 2*erosion_size + 1, 2*erosion_size+1 ),
                                        Point( erosion_size, erosion_size ) );
-
-  erode( dst, dst, element );///< Apply the erosion operation
+  ///Apply the erosion operation
+  erode( dst, dst, element );
 }
 
 ///
@@ -100,7 +104,8 @@ void Erosion( int, void* )
 ///
 void Dilation( int, void* )
 {
-  int dilation_type;///<Set to ellipse in LineDetector
+  ///Set to ellipse in LineDetector
+  int dilation_type;
   if( dilation_elem == 0 ){ dilation_type = MORPH_RECT; }
   else if( dilation_elem == 1 ){ dilation_type = MORPH_CROSS; }
   else if( dilation_elem == 2) { dilation_type = MORPH_ELLIPSE; }
@@ -108,8 +113,9 @@ void Dilation( int, void* )
   Mat element = getStructuringElement( dilation_type,
                                        Size( 2*dilation_size + 1, 2*dilation_size+1 ),
                                        Point( dilation_size, dilation_size ) );
+///Apply the dilation operation
+  dilate( dst, dst, element );
 
-  dilate( dst, dst, element );  ///< Apply the dilation operation
 }
 
 ///
