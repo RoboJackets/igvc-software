@@ -1,4 +1,6 @@
 #include "linedetector.h"
+#include <common/logger/logger.h>
+#include <sstream>
 
 using namespace std;
 using namespace cv;
@@ -38,7 +40,13 @@ void Dilation( int, void* );
 LineDetector::LineDetector(std::string imgFile)
 {
     cap = cv::VideoCapture(imgFile);
-    loadImage(imgFile);
+    if(!loadImage(imgFile))
+    {
+        stringstream msg;
+        msg << "[LineDetector] Failed to load imgFile: " << imgFile;
+        Logger::Log(LogLevel::Error, msg.str());
+        throw "ERROR: Failed to load imgfile!";
+    }
 }
 
 ///
