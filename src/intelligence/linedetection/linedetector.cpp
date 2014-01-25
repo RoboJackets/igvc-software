@@ -6,7 +6,8 @@ using namespace cv;
 LineDetector::LineDetector(Event<ImageData> &evtSrc)
     : LonImageEvent(this),
       max_elem(2),
-      max_kernel_size(2)
+      max_kernel_size(2),
+      gaussian_size(7)
 {
     evtSrc+= &LonImageEvent;
     window_name = "Filter Practice";
@@ -25,8 +26,8 @@ void LineDetector::onImageEvent(ImageData imgd){
     float totalAvg = getAvg();
 
     ///Blurs the picture just a little
-    GaussianBlur(dst, dst, Size(GAUSSSIZE,GAUSSSIZE),2,0);
-    GaussianBlur(src, src, Size(GAUSSSIZE,GAUSSSIZE),2,0);
+    GaussianBlur(dst, dst, Size(gaussian_size,gaussian_size),2,0);
+    GaussianBlur(src, src, Size(gaussian_size,gaussian_size),2,0);
     ///Separates the pixels into black(not lines) and white (lines)
     blackAndWhite(totalAvg);
 
@@ -178,7 +179,7 @@ void LineDetector::displayImage(){
     //Show original image in a different window
     imshow(original_window_name, src);
     //Wait slightly
-    waitKey(DELAY);
+    waitKey(1);
 }
 
 
