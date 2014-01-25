@@ -1,43 +1,23 @@
-#include "linedetectionlist.h"
+#include "linedetector.h"
 
 using namespace std;
 using namespace cv;
 
-char window_name[16] = "Filter Practice";
-char original_window_name[9] = "Original";
-
-//For the erosion/dilation stuff
-///\var int erosion_elem
-///\brief contains the number corresponding to the element used for erosion
-///       2 is what we are currently using (an ellipse)
-int erosion_elem = 2;
-///\var int erosion_size
-///\brief specifies the size of the area to be eroded.
-int erosion_size = 2;
-int dilation_elem = 2;
-int dilation_size = 1;
-
-int const max_elem = 2;
-int const max_kernel_size = 21;
-
-///\var Mat src
-///\brief contains the original, unprocessed image
-
-///\var Mat dst
-///\brief contains the new, processed image that isolates the lines
-Mat src, dst;
-
-void Erosion( int, void* );
-void Dilation( int, void* );
-
-
-
-LineDetectionList::LineDetectionList(Event<ImageData> &evtSrc) : LonImageEvent(this)
+LineDetector::LineDetector(Event<ImageData> &evtSrc)
+    : LonImageEvent(this),
+      max_elem(2),
+      max_kernel_size(2)
 {
     evtSrc+= &LonImageEvent;
+    window_name = "Filter Practice";
+    original_window_name = "Original";
+    erosion_elem = 2;
+    erosion_size = 2;
+    dilation_elem = 2;
+    dilation_size = 1;
 }
 
-void LineDetectionList::onImageEvent(ImageData imgd){
+void LineDetector::onImageEvent(ImageData imgd){
     src = imgd.mat();
     dst = src.clone();
     ///Total Average of the pixels in the screen
@@ -58,7 +38,7 @@ void LineDetectionList::onImageEvent(ImageData imgd){
 
 }
 
-void Erosion( int, void* )
+void LineDetector::Erosion( int, void* )
 {
   ///erosion_type is set to ellipse in the LineDetector class
   int erosion_type;
@@ -76,7 +56,7 @@ void Erosion( int, void* )
 ///
 /// \brief Dilation enhances the white lines
 ///
-void Dilation( int, void* )
+void LineDetector::Dilation( int, void* )
 {
   ///Set to ellipse in LineDetector
   int dilation_type;
@@ -97,7 +77,7 @@ void Dilation( int, void* )
 ///        black (not lines) and white (lines)
 /// \param totalAvg The average brightness of the picture
 ///
-void LineDetectionList::blackAndWhite(float totalAvg){
+void LineDetector::blackAndWhite(float totalAvg){
     Vec3b p;
     int rows = src.rows;
     int cols = src.cols;
@@ -154,7 +134,7 @@ void LineDetectionList::blackAndWhite(float totalAvg){
 /// \param row the row of the top of the obstacle
 /// \param col the column of the left of the obstacle
 ///
-void LineDetectionList::detectObstacle(int row, int col){
+void LineDetector::detectObstacle(int row, int col){
     Vec3b p = dst.at<Vec3b>(row,col);
     int row2 = row;
     int col2 = col;
@@ -192,7 +172,7 @@ void LineDetectionList::detectObstacle(int row, int col){
 /// \brief LineDetector::displayImage Displays both the original and
 ///        transformed images
 ///
-void LineDetectionList::displayImage(){
+void LineDetector::displayImage(){
     //Show transformed image
     imshow(window_name, dst);
     //Show original image in a different window
@@ -206,7 +186,7 @@ void LineDetectionList::displayImage(){
 /// \brief LineDetector::getAvg gets the average of the relevant pixels
 /// \return the average as a floating point number
 ///
-float LineDetectionList::getAvg(){
+float LineDetector::getAvg(){
     Vec3b p;
     float totalAvg = 0;
     for (int i = src.rows/3; i< 5*src.rows/6; i++){
@@ -226,7 +206,7 @@ float LineDetectionList::getAvg(){
 /// \param coll the left column bound
 /// \param colu the right column bound
 ///
-void LineDetectionList::blackoutSection(int rowl, int rowu, int coll, int colu){
+void LineDetector::blackoutSection(int rowl, int rowu, int coll, int colu){
 
     for (int i=rowl;i<=rowu;i++){
         for (int j = coll; j<=colu; j++){
