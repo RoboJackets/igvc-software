@@ -61,6 +61,8 @@ private slots:
 
     void on_actionSimulatedGPS_triggered();
 
+    void on_actionClearLogs_triggered();
+
 private:
     Ui::MainWindow *ui;
     ConfigTreeModel configTreeModel;
