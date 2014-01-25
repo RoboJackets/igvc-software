@@ -31,7 +31,7 @@ private Q_SLOTS:
         QVERIFY(end.Heading.Variance - 7.99361 < 0.00001);
     }
 
-    void testUpdateFromIMU_Stationary()
+    void testUpdateFromIMU_NoAccel()
     {
         PositionTracker tracker;
         Event<IMUData> testEvent;
