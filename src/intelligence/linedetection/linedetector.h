@@ -1,5 +1,5 @@
-#ifndef LINEDETECTIONLIST_H
-#define LINEDETECTIONLIST_H
+#ifndef LINEDETECTOR_H
+#define LINEDETECTOR_H
 #include <iostream>
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
@@ -28,12 +28,12 @@
 using namespace std;
 using namespace cv;
 
-class LineDetectionList
+class LineDetector
 {
 public:
-    LineDetectionList(Event<ImageData> &evtSrc);
+    LineDetector(Event<ImageData> &evtSrc);
     void onImageEvent(ImageData imgd);
-    LISTENER(LineDetectionList, onImageEvent, ImageData)
+    LISTENER(LineDetector, onImageEvent, ImageData)
 private:
     void blackoutSection(int rowl, int rowu, int coll, int colu);
     float getAvg(void);
@@ -43,5 +43,32 @@ private:
     ///\brief the VideoCapture of the image/video
     VideoCapture cap;
     void detectObstacle(int i, int j);
+
+    void Erosion(int, void*);
+    void Dilation(int, void*);
+
+    const char* window_name;
+    const char* original_window_name;
+
+    //For the erosion/dilation stuff
+    ///\var int erosion_elem
+    ///\brief contains the number corresponding to the element used for erosion
+    ///       2 is what we are currently using (an ellipse)
+    int erosion_elem;
+    ///\var int erosion_size
+    ///\brief specifies the size of the area to be eroded.
+    int erosion_size;
+    int dilation_elem;
+    int dilation_size;
+
+    const int max_elem;
+    const int max_kernel_size;
+
+    ///\var Mat src
+    ///\brief contains the original, unprocessed image
+
+    ///\var Mat dst
+    ///\brief contains the new, processed image that isolates the lines
+    Mat src, dst;
 };
-#endif // LINEDETECTIONLIST_H
+#endif // LINEDETECTOR_H
