@@ -2,8 +2,9 @@
 #define TESTLINEDETECTION_HPP
 
 #include <QtTest>
-#include <intelligence/linedetection/linedetector.h>
+#include <intelligence/linedetection/linedetectionlist.h>
 #include <iostream>
+#include <common/events/Event.hpp>
 #ifdef _WIN32
     #include <direct.h>
     #define GetCurrentDir _getcwd
@@ -11,7 +12,7 @@
     #include <unistd.h>
     #define GetCurrentDir getcwd
 #endif
-
+//My event of type <
 class TestLineDetection: public QObject
 {
     Q_OBJECT
@@ -19,17 +20,20 @@ class TestLineDetection: public QObject
 private Q_SLOTS:
     void testCase1()
     {
-        //char videoFile[] = "../igvc_cam_data/stills/img_left2.jpg";
-        ///Note: This may not be the correct directory on your computer
+        ///NOTE: The directory may not be the same on your computer!
         char videoFile[] = "../src/intelligence/igvc_cam_data/video/CompCourse_left0.mpeg";
+        VideoCapture cap(videoFile);
+        Mat src;
+        Event<ImageData> newImageFrameEvent;
+        bool success = cap.read(src);
 
-         LineDetector ln(videoFile);
-         bool success =true;
-         while(success){
+        LineDetectionList ldl(newImageFrameEvent);
 
-             ln.applyAlgorithm();
-             success = ln.loadImage(videoFile);
-         }
+        while (success){
+            newImageFrameEvent(src);
+            waitKey(1);
+            success = cap.read(src);
+        }
     }
 };
 

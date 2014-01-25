@@ -1,9 +1,8 @@
-#include "linedetector.h"
-#include <common/logger/logger.h>
-#include <sstream>
+#include "linedetectionlist.h"
 
 using namespace std;
 using namespace cv;
+
 char window_name[16] = "Filter Practice";
 char original_window_name[9] = "Original";
 
@@ -20,6 +19,7 @@ int dilation_size = 1;
 
 int const max_elem = 2;
 int const max_kernel_size = 21;
+
 ///\var Mat src
 ///\brief contains the original, unprocessed image
 
@@ -27,51 +27,19 @@ int const max_kernel_size = 21;
 ///\brief contains the new, processed image that isolates the lines
 Mat src, dst;
 
-
 void Erosion( int, void* );
 void Dilation( int, void* );
-///
-/// \brief LineDetector::LineDetector
-///        initiates a new instance of a LineDetector.
-///        Requires only the image or video file
-/// \param imgFile The image or video file to load from
-///
 
-LineDetector::LineDetector(std::string imgFile)
+
+
+LineDetectionList::LineDetectionList(Event<ImageData> &evtSrc) : LonImageEvent(this)
 {
-    cap = cv::VideoCapture(imgFile);
-    if(!loadImage(imgFile))
-    {
-        stringstream msg;
-        msg << "[LineDetector] Failed to load imgFile: " << imgFile;
-        Logger::Log(LogLevel::Error, msg.str());
-        throw "ERROR: Failed to load imgfile!";
-    }
+    evtSrc+= &LonImageEvent;
 }
 
-///
-/// \brief LineDetector::loadImage
-///        Loads the image or video from a string.
-///        public so that it can be iterated through in case
-///        of a video file.
-/// \param imgFile String with the location of the image/video file
-/// \return a boolean that is true if the file was loaded successfully
-///
-bool LineDetector::loadImage(std::string imgFile){
-    ///Saves imgFile as a class variable
-    this->imgFile = imgFile;
-    ///Reads the image file to my VideoCapture
-    ///True if successful
-    bool success = cap.read(src);
-
-    ///<dst is a clone that we will apply the algorithm to
+void LineDetectionList::onImageEvent(ImageData imgd){
+    src = imgd.mat();
     dst = src.clone();
-    return success;
-}
-
-
-
-void LineDetector::applyAlgorithm(){
     ///Total Average of the pixels in the screen
     ///Used to account for brightness variability
     float totalAvg = getAvg();
@@ -87,11 +55,9 @@ void LineDetector::applyAlgorithm(){
 
     ///Displays both the original and processed images
     displayImage();
+
 }
 
-///
-/// \brief Erosion erodes the white away
-///
 void Erosion( int, void* )
 {
   ///erosion_type is set to ellipse in the LineDetector class
@@ -131,7 +97,7 @@ void Dilation( int, void* )
 ///        black (not lines) and white (lines)
 /// \param totalAvg The average brightness of the picture
 ///
-void LineDetector::blackAndWhite(float totalAvg){
+void LineDetectionList::blackAndWhite(float totalAvg){
     Vec3b p;
     int rows = src.rows;
     int cols = src.cols;
@@ -188,7 +154,7 @@ void LineDetector::blackAndWhite(float totalAvg){
 /// \param row the row of the top of the obstacle
 /// \param col the column of the left of the obstacle
 ///
-void LineDetector::detectObstacle(int row, int col){
+void LineDetectionList::detectObstacle(int row, int col){
     Vec3b p = dst.at<Vec3b>(row,col);
     int row2 = row;
     int col2 = col;
@@ -226,7 +192,7 @@ void LineDetector::detectObstacle(int row, int col){
 /// \brief LineDetector::displayImage Displays both the original and
 ///        transformed images
 ///
-void LineDetector::displayImage(){
+void LineDetectionList::displayImage(){
     //Show transformed image
     imshow(window_name, dst);
     //Show original image in a different window
@@ -240,7 +206,7 @@ void LineDetector::displayImage(){
 /// \brief LineDetector::getAvg gets the average of the relevant pixels
 /// \return the average as a floating point number
 ///
-float LineDetector::getAvg(){
+float LineDetectionList::getAvg(){
     Vec3b p;
     float totalAvg = 0;
     for (int i = src.rows/3; i< 5*src.rows/6; i++){
@@ -260,7 +226,7 @@ float LineDetector::getAvg(){
 /// \param coll the left column bound
 /// \param colu the right column bound
 ///
-void LineDetector::blackoutSection(int rowl, int rowu, int coll, int colu){
+void LineDetectionList::blackoutSection(int rowl, int rowu, int coll, int colu){
 
     for (int i=rowl;i<=rowu;i++){
         for (int j = coll; j<=colu; j++){
