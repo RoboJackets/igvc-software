@@ -8,21 +8,17 @@
 #include <common/events/Event.hpp>
 #include <hardware/sensors/DataStructures/ImageData.hpp>
 
-/*!\def ABS(a)
-*\brief a Macro that returns the absolute value of a number
-*/
+/**
+ * @def ABS(a)
+ * @brief a Macro that returns the absolute value of a number
+ */
 #define ABS(a) (((a) < 0)? -1*(a):(a))
-/*!\def ABSDIFF(a,b)
-*\brief a Macro that returns the positive difference between a and b
-*/
+/**
+ * @def ABSDIFF(a,b)
+ * @brief a Macro that returns the positive difference between a and b
+ */
 #define ABSDIFF(a, b) (ABS((a)-(b)))
-///\def DELAY
-///\brief the Delay to use when displaying images. 0 for infinity
-#define DELAY 1
-///\def GAUSSIZE
-///\brief The size of the Gaussian blur. The bigger the greater the blur
-///       Must be odd!
-#define GAUSSSIZE 7
+
 
 
 using namespace std;
@@ -63,6 +59,12 @@ private:
 
     const int max_elem;
     const int max_kernel_size;
+
+    /**
+     * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
+     * @note Must be odd!
+     */
+    const int gaussian_size;
 
     ///\var Mat src
     ///\brief contains the original, unprocessed image
