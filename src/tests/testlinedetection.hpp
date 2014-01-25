@@ -27,6 +27,11 @@ private Q_SLOTS:
         Event<ImageData> newImageFrameEvent;
         bool success = cap.read(src);
 
+        if(!success)
+        {
+            QFAIL("Could not load test video.");
+        }
+
         LineDetectionList ldl(newImageFrameEvent);
 
         while (success){
