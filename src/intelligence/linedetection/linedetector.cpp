@@ -1,4 +1,8 @@
 #include "linedetector.h"
+#include <common/logger/logger.h>
+#include <sstream>
+#include <iostream>
+#include <cstdlib>
 
 using namespace std;
 using namespace cv;
@@ -10,8 +14,6 @@ LineDetector::LineDetector(Event<ImageData> &evtSrc)
       gaussian_size(7)
 {
     evtSrc+= &LonImageEvent;
-    window_name = "Filter Practice";
-    original_window_name = "Original";
     erosion_elem = 2;
     erosion_size = 2;
     dilation_elem = 2;
@@ -21,27 +23,23 @@ LineDetector::LineDetector(Event<ImageData> &evtSrc)
 void LineDetector::onImageEvent(ImageData imgd){
     src = imgd.mat();
     dst = src.clone();
-    ///Total Average of the pixels in the screen
-    ///Used to account for brightness variability
+    /** Total Average of the pixels in the screen. Used to account for brightness variability. */
     float totalAvg = getAvg();
 
-    ///Blurs the picture just a little
+    /** Blurs the picture just a little */
     GaussianBlur(dst, dst, Size(gaussian_size,gaussian_size),2,0);
     GaussianBlur(src, src, Size(gaussian_size,gaussian_size),2,0);
-    ///Separates the pixels into black(not lines) and white (lines)
+    /** Separates the pixels into black(not lines) and white (lines) */
     blackAndWhite(totalAvg);
 
-    Erosion( 0, 0 );
-    Dilation(0,0);
+    Erosion();
+    Dilation();
 
-    ///Displays both the original and processed images
-    displayImage();
-
+    onNewLines(ImageData(dst));
 }
 
-void LineDetector::Erosion( int, void* )
+void LineDetector::Erosion()
 {
-  ///erosion_type is set to ellipse in the LineDetector class
   int erosion_type;
   if( erosion_elem == 0 ){ erosion_type = MORPH_RECT; }
   else if( erosion_elem == 1 ){ erosion_type = MORPH_CROSS; }
@@ -50,16 +48,13 @@ void LineDetector::Erosion( int, void* )
   Mat element = getStructuringElement( erosion_type,
                                        Size( 2*erosion_size + 1, 2*erosion_size+1 ),
                                        Point( erosion_size, erosion_size ) );
-  ///Apply the erosion operation
+  // Apply the erosion operation
   erode( dst, dst, element );
 }
 
-///
-/// \brief Dilation enhances the white lines
-///
-void LineDetector::Dilation( int, void* )
+/** Dilation enhances the white lines */
+void LineDetector::Dilation()
 {
-  ///Set to ellipse in LineDetector
   int dilation_type;
   if( dilation_elem == 0 ){ dilation_type = MORPH_RECT; }
   else if( dilation_elem == 1 ){ dilation_type = MORPH_CROSS; }
@@ -68,16 +63,16 @@ void LineDetector::Dilation( int, void* )
   Mat element = getStructuringElement( dilation_type,
                                        Size( 2*dilation_size + 1, 2*dilation_size+1 ),
                                        Point( dilation_size, dilation_size ) );
-///Apply the dilation operation
+  // Apply the dilation operation
   dilate( dst, dst, element );
 
 }
 
-///
-/// \brief LineDetector::blackAndWhite converts the image into
-///        black (not lines) and white (lines)
-/// \param totalAvg The average brightness of the picture
-///
+/**
+ *  @brief LineDetector::blackAndWhite converts the image into
+ *         black (not lines) and white (lines)
+ *  @param totalAvg The average brightness of the picture
+ */
 void LineDetector::blackAndWhite(float totalAvg){
     Vec3b p;
     int rows = src.rows;
@@ -115,7 +110,7 @@ void LineDetector::blackAndWhite(float totalAvg){
             }
             //Filters out the white and makes it pure white
             if((p[0]>tempAvg*1.5)&& (p[0] < tempAvg*2.2)&& (p[1] < tempAvg*1.6)&&(p[2]>tempAvg*1.1) &&
-                    (p[2]<tempAvg*1.7)&&(p[1]>tempAvg*1.05)&&(ABSDIFF(p[1], p[2]) <20)){
+                    (p[2]<tempAvg*1.7)&&(p[1]>tempAvg*1.05)&&(abs(p[1] - p[2]) <20)){
                 dst.at<Vec3b>(i,j)[0] = 255;
                 dst.at<Vec3b>(i,j)[1] = 255;
                 dst.at<Vec3b>(i,j)[2] = 255;
@@ -130,11 +125,10 @@ void LineDetector::blackAndWhite(float totalAvg){
     }
 }
 
-///
-/// \brief LineDetector::detectObstacle detects orange and bright white obstacles
-/// \param row the row of the top of the obstacle
-/// \param col the column of the left of the obstacle
-///
+/**
+ *  \brief LineDetector::detectObstacle detects orange and bright white obstacles
+ *  \param col the column of the left of the obstacle
+ */
 void LineDetector::detectObstacle(int row, int col){
     Vec3b p = dst.at<Vec3b>(row,col);
     int row2 = row;
@@ -169,24 +163,10 @@ void LineDetector::detectObstacle(int row, int col){
     }
 }
 
-///
-/// \brief LineDetector::displayImage Displays both the original and
-///        transformed images
-///
-void LineDetector::displayImage(){
-    //Show transformed image
-    imshow(window_name, dst);
-    //Show original image in a different window
-    imshow(original_window_name, src);
-    //Wait slightly
-    waitKey(1);
-}
-
-
-///
-/// \brief LineDetector::getAvg gets the average of the relevant pixels
-/// \return the average as a floating point number
-///
+/**
+ *  \brief LineDetector::getAvg gets the average of the relevant pixels
+ *  \return the average as a floating point number
+ */
 float LineDetector::getAvg(){
     Vec3b p;
     float totalAvg = 0;
@@ -200,13 +180,13 @@ float LineDetector::getAvg(){
     return totalAvg;
 }
 
-///
-/// \brief LineDetector::blackoutSection turns a section of the image black
-/// \param rowl the lower row bound
-/// \param rowu the upper row bound
-/// \param coll the left column bound
-/// \param colu the right column bound
-///
+/**
+ *  \brief LineDetector::blackoutSection turns a section of the image black
+ *  \param rowl the lower row bound
+ *  \param rowu the upper row bound
+ *  \param coll the left column bound
+ *  \param colu the right column bound
+ */
 void LineDetector::blackoutSection(int rowl, int rowu, int coll, int colu){
 
     for (int i=rowl;i<=rowu;i++){
