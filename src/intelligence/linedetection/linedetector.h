@@ -1,28 +1,9 @@
 #ifndef LINEDETECTOR_H
 #define LINEDETECTOR_H
-#include <iostream>
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
-#include <common/logger/logger.h>
-#include <sstream>
 #include <common/events/Event.hpp>
 #include <hardware/sensors/DataStructures/ImageData.hpp>
-
-/**
- * @def ABS(a)
- * @brief a Macro that returns the absolute value of a number
- */
-#define ABS(a) (((a) < 0)? -1*(a):(a))
-/**
- * @def ABSDIFF(a,b)
- * @brief a Macro that returns the positive difference between a and b
- */
-#define ABSDIFF(a, b) (ABS((a)-(b)))
-
-
-
-using namespace std;
-using namespace cv;
 
 class LineDetector
 {
@@ -30,29 +11,30 @@ public:
     LineDetector(Event<ImageData> &evtSrc);
     void onImageEvent(ImageData imgd);
     LISTENER(LineDetector, onImageEvent, ImageData)
+
+    Event<ImageData> onNewLines;
 private:
     void blackoutSection(int rowl, int rowu, int coll, int colu);
     float getAvg(void);
-    void displayImage();
     void blackAndWhite(float totalAvg);
     int display_dst(int delay);
-    ///\brief the VideoCapture of the image/video
-    VideoCapture cap;
     void detectObstacle(int i, int j);
 
-    void Erosion(int, void*);
-    void Dilation(int, void*);
+    void Erosion();
+    void Dilation();
 
-    const char* window_name;
-    const char* original_window_name;
+    /** @brief the VideoCapture of the image/video */
+    cv::VideoCapture cap;
 
     //For the erosion/dilation stuff
-    ///\var int erosion_elem
-    ///\brief contains the number corresponding to the element used for erosion
-    ///       2 is what we are currently using (an ellipse)
+    /**
+     * @brief contains the number corresponding to the element used for erosion
+     * @note 2 is what we are currently using (an ellipse)
+     */
     int erosion_elem;
-    ///\var int erosion_size
-    ///\brief specifies the size of the area to be eroded.
+    /**
+     * @brief specifies the size of the area to be eroded.
+     **/
     int erosion_size;
     int dilation_elem;
     int dilation_size;
@@ -66,11 +48,13 @@ private:
      */
     const int gaussian_size;
 
-    ///\var Mat src
-    ///\brief contains the original, unprocessed image
-
-    ///\var Mat dst
-    ///\brief contains the new, processed image that isolates the lines
-    Mat src, dst;
+    /**
+     * @brief src contains the original, unprocessed image
+     */
+    cv::Mat src;
+    /**
+     * @brief dst contains the new, processed image that isolates the lines
+     */
+    cv::Mat dst;
 };
 #endif // LINEDETECTOR_H
