@@ -25,5 +25,7 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/tests/testpositiontracker.hpp \
     ../src/intelligence/posetracking/positiontracker.h \
     ../src/common/config/configmanager.h \
-    ../src/common/logger/logger.h
+    ../src/common/logger/logger.h \
+    ../src/tests/testgpsutils.h \
+    ../src/common/utils/GPSUtils.h
 
