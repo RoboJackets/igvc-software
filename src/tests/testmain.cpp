@@ -4,6 +4,7 @@
 #include <iostream>
 #include "teststringutils.hpp"
 #include "testpositiontracker.hpp"
+#include "testgpsutils.h"
 
 void RunTestCase(QObject* testCase, std::vector<std::string> args)
 {
@@ -37,4 +38,5 @@ int main(int argc, const char* argv[])
     // Execute selected test cases
     RunTestCase(new TestStringUtils(), args);
     RunTestCase(new TestPositionTracker(), args);
+    RunTestCase(new TestGPSUtils(), args);
 }
