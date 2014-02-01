@@ -8,12 +8,12 @@
 class AngleUtils
 {
     public:
-    inline static double angleToRads(double angle)
+    inline static double degToRads(double angle)
     {
         return angle*(M_PI/180.0);
     }
 
-    inline static double radsToAngle(double rad)
+    inline static double radsToDeg(double rad)
     {
         return rad*(180.0/M_PI);
     }
