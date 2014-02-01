@@ -6,19 +6,27 @@
 #include "common/utils/AngleUtils.h"
 #include <iostream>
 #include <iomanip>
+#include <cmath>
 
 class TestAngleUtils: public QObject
 {
     Q_OBJECT
 
     private Q_SLOTS:
-    void testCase1()
+    void degToRads()
     {
         using namespace std;
         double angle = 42.0;
-        double rads = AngleUtils::angleToRads(angle);
-        std::cout<<rads<<endl;
-        double angle2 = AngleUtils::radsToAngle(rads);
-        std::cout<<angle2<<endl;
+        double rads = AngleUtils::degToRads(angle);
+        QCOMPARE(rads, 42.0*(M_PI/180.0));
+
+    }
+    void radsToDeg()
+    {
+        using namespace std;
+        double rads = 42.0*(M_PI/180.0);
+        double angle = AngleUtils::radsToDeg(rads);
+        QCOMPARE(angle, 42.0);
+
     }
 };
