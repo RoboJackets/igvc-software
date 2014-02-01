@@ -7,13 +7,8 @@
 #include <common/logger/logger.h>
 using namespace std;
 
-GPSFileReader::GPSFileReader()
-{
-    //this(GPS_COORD_LIST);
-}
-
 // format of GPS coordinate: lat,long\n
-GPSFileReader::GPSFileReader(string file)
+void GPSFileReader::read(string file, queue<GPSData>& gpsList)
 {
     string line = "";
     ifstream infile;
@@ -70,21 +65,3 @@ GPSFileReader::GPSFileReader(string file)
     }
     infile.close();
 }
-
-GPSData GPSFileReader::getNext()
-{
-    if (gpsList.size() > 0)
-    {
-        GPSData data = gpsList.front();
-        gpsList.pop();
-        return data;
-    }
-    else
-    {
-        stringstream msg;
-        msg << "GPSFileReader::getNext(): No more coordinates." << endl;
-        Logger::Log(LogLevel::Error, msg.str());
-        return GPSData();
-    }
-}
-
