@@ -8,11 +8,9 @@ using namespace std;
 class GPSFileReader
 {
 public:
-    GPSFileReader();
-    GPSFileReader(string file);
-    GPSData getNext();
+    static void read(string file, queue<GPSData>& gpsList);
+
 private:
-    queue<GPSData> gpsList;
 };
 
 #endif // GPSFILEREADER_H
