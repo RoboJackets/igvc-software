@@ -1,7 +1,5 @@
 
-QT       += testlib
-
-QT       -= gui
+QT       += testlib core declarative gui
 
 TARGET = IGVC_Test
 CONFIG   += console
