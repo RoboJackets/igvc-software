@@ -110,7 +110,8 @@ HEADERS  += \
     ../src/hardware/sensors/camera/Bumblebee2.h \
     ../src/gui/adapters/imuadapter.h \
     ../src/hardware/sensors/lidar/lms200.h \
-    ../src/common/utils/GPSUtils.h
+    ../src/common/utils/GPSUtils.h \
+    ../src/common/utils/AngleUtils.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
