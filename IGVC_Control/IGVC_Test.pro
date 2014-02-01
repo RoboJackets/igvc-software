@@ -24,5 +24,5 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/tests/testgpsutils.h \
     ../src/common/utils/GPSUtils.h \
     ../src/common/utils/AngleUtils.h \
-    ../src/tests/testangleutils.h
+    ../src/tests/testangleutils.h \
 
