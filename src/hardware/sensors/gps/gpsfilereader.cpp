@@ -20,7 +20,7 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
         msg << "Could not open file (in GPSFileReader): " << file << endl;
         cout << msg;
         Logger::Log(LogLevel::Error, msg.str());
-        return;
+        throw GPSFileNotFoundException(msg.str());
     }
 
     int lineIndex = 1;
@@ -37,7 +37,7 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
                 stringstream msg;
                 msg << "GPSFileReader: Entry at line " << lineIndex << " is malformed. (Size != 2)" << endl;
                 Logger::Log(LogLevel::Error, msg.str());
-                exit(EXIT_FAILURE);
+                throw GPSFileFormatException(msg.str());
             }
 
             GPSData newData;
@@ -50,14 +50,14 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
                 stringstream msg;
                 msg << "GPSFileReader: Latitude at line " << lineIndex << " is not a valid latitude (" << newData.Lat() << ")" << endl;
                 Logger::Log(LogLevel::Error, msg.str());
-                exit(EXIT_FAILURE);
+                throw GPSFileFormatException(msg.str());
             }
             if (abs(newData.Long()) > 180)
             {
                 stringstream msg;
                 msg << "GPSFileReader: Longitude at line " << lineIndex << " is not a valid longitude (" << newData.Long() << ")" << endl;
                 Logger::Log(LogLevel::Error, msg.str());
-                exit(EXIT_FAILURE);
+                throw GPSFileFormatException(msg.str());
             }
             gpsList.push(newData);
             lineIndex++;
