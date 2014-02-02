@@ -114,7 +114,9 @@ HEADERS  += \
     ../src/hardware/sensors/lidar/lms200.h \
     ../src/hardware/sensors/gps/gpsfilereader.h \
     ../src/hardware/sensors/DataStructures/GPSData.hpp \
-    ../src/hardware/sensors/gps/GPSWaypointSource.h
+    ../src/hardware/sensors/gps/GPSWaypointSource.h \
+    ../src/common/utils/GPSUtils.h \
+    ../src/common/utils/AngleUtils.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
