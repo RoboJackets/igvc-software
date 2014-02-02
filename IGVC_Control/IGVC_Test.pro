@@ -1,12 +1,5 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator
-#
-#-------------------------------------------------
 
-QT       += testlib
-
-QT       -= gui
+QT       += testlib core declarative gui
 
 TARGET = IGVC_Test
 CONFIG   += console
@@ -19,14 +12,15 @@ INCLUDEPATH += ../src/ \
 
 TEMPLATE = app
 
-
-#SOURCES += tst_qtestprojecttest.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
-SOURCES += testmain.cpp \
+SOURCES += ../src/tests/testmain.cpp \
     ../src/common/utils/StringUtils.cpp
 
-HEADERS += \
-    teststringutils.hpp \
-    ../src/common/utils/StringUtils.hpp
+HEADERS += ../src/tests/teststringutils.hpp \
+    ../src/common/utils/StringUtils.hpp \
+    ../src/tests/testgpsutils.h \
+    ../src/common/utils/GPSUtils.h \
+    ../src/common/utils/AngleUtils.h \
+    ../src/tests/testangleutils.h
 
