@@ -1,4 +1,6 @@
 #include <QTest>
+#include "testangleutils.h"
+#include "testgpsreader.hpp"
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -39,4 +41,6 @@ int main(int argc, const char* argv[])
     RunTestCase(new TestStringUtils(), args);
     RunTestCase(new TestPositionTracker(), args);
     RunTestCase(new TestGPSUtils(), args);
+    RunTestCase(new TestAngleUtils(), args);
+    RunTestCase(new TestGPSReader(), args);
 }
