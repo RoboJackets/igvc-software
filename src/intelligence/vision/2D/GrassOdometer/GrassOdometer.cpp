@@ -1,9 +1,7 @@
-#include "vision/GrassOdometer.h"
-#include "sensors/RobotPosition.h"
+#include "GrassOdometer.h"
 
 GrassOdometer::GrassOdometer(ColorRange limits, int numKeyPoints) : _colors(limits), _numKeyPoints(numKeyPoints), _firstFrame(true)
 {
-  _robot = Robot::CurrentRobot();
   _cam = CameraInfo::CurrentCamera();
 }
 
@@ -72,7 +70,7 @@ void GrassOdometer::findKeypointsSURF(Mat& frame, vector<KeyPoint>& theKeyPoints
   nRows = frame.rows;
   nCols = frame.cols;
   MatrixXd pos;
-  computeOffsets(keypoints, pos, _robot, _cam, nRows, nCols);
+  computeOffsets(keypoints, pos, _cam, nRows, nCols);
   thePositions = pos;
 }
 
