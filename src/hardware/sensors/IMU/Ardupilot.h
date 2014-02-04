@@ -2,7 +2,7 @@
 #define ARDUPILOT_H
 
 #include <hardware/serial/ASIOSerialPort.h>
-#include <hardware/sensors/DataStructures/IMUData.hpp>
+#include <common/datastructures/IMUData.hpp>
 #include <hardware/sensors/IMU/IMU.h>
 
 using namespace std;

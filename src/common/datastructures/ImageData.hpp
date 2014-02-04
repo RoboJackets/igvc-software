@@ -3,7 +3,7 @@
 
 
 #include <opencv2/opencv.hpp>
-#include <hardware/sensors/DataStructures/SensorData.hpp>
+#include <common/datastructures/SensorData.hpp>
 
 using namespace cv;
 
