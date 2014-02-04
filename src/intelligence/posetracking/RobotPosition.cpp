@@ -307,17 +307,17 @@ double RobotPosition::currentYaw()
 
 double RobotPosition::currentLat()
 {
-    _Lat[0].value();
+    return _Lat[0].value();
 }
 
 double RobotPosition::currentLong()
 {
-    _Long[0].value();
+    return _Long[0].value();
 }
 
 double RobotPosition::currentHeading()
 {
-    _Heading[0].value();
+    return _Heading[0].value();
 }
 
 //Gives the linear rate of change between two indices of one of the data structures

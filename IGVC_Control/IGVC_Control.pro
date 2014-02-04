@@ -52,7 +52,9 @@ SOURCES += \
     ../src/hardware/sensors/camera/Bumblebee2.cpp \
     ../src/gui/adapters/imuadapter.cpp \
     ../src/intelligence/posetracking/positiontracker.cpp \
-    ../src/hardware/sensors/lidar/lms200.cpp
+    ../src/hardware/sensors/lidar/lms200.cpp \
+    ../src/hardware/sensors/gps/gpsfilereader.cpp \
+    ../src/hardware/sensors/gps/GPSWaypointSource.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -111,6 +113,10 @@ HEADERS  += \
     ../src/hardware/sensors/lidar/lms200.h \
     ../src/common/utils/gaussianvariable.hpp \
     ../src/hardware/sensors/DataStructures/GPSData.hpp
+    ../src/hardware/sensors/gps/gpsfilereader.h \
+    ../src/hardware/sensors/gps/GPSWaypointSource.h \
+    ../src/common/utils/GPSUtils.h \
+    ../src/common/utils/AngleUtils.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
