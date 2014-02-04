@@ -45,7 +45,6 @@ SOURCES += \
     ../src/hardware/sensors/gps/simulatedgps.cpp \
     ../src/intelligence/posetracking/RobotPosition.cpp \
     ../src/common/utils/ImageUtils.cpp \
-    ../src/common/Robot.cpp \
     ../src/hardware/sensors/camera/CameraInfo.cpp \
     ../src/gui/adapters/gpsadapter.cpp \
     ../src/hardware/sensors/camera/StereoPlayback.cpp \
@@ -102,7 +101,6 @@ HEADERS  += \
     ../src/hardware/sensors/IMU/IMU.h \
     ../src/intelligence/posetracking/RobotPosition.h \
     ../src/common/utils/ImageUtils.h \
-    ../src/common/Robot.h \
     ../src/hardware/sensors/camera/CameraInfo.h \
     ../src/gui/adapters/gpsadapter.h \
     ../src/hardware/sensors/camera/StereoSource.hpp \
