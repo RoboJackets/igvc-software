@@ -2,7 +2,7 @@
 #define IMU_H
 
 #include <common/events/Event.hpp>
-#include <hardware/sensors/DataStructures/IMUData.hpp>
+#include <common/datastructures/IMUData.hpp>
 
 /*!
  * \brief Interface for IMU devices.

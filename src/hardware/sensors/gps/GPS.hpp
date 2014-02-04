@@ -8,7 +8,7 @@
 
 #include <time.h>
 #include "common/events/Event.hpp"
-#include "hardware/sensors/DataStructures/GPSData.hpp"
+#include <common/datastructures/GPSData.hpp>
 
 namespace IGVC {
 namespace Sensors {
