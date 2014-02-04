@@ -4,7 +4,7 @@
 #include <QtTest>
 #include <hardware/sensors/DataStructures/GPSData.hpp>
 #include <common/logger/logger.h>
-#include <hardware/sensors/gps/gpsfilereader.h>
+#include <common/utils/gpsfilereader.h>
 #include <iostream>
 
 
