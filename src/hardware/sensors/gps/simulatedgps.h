@@ -4,7 +4,7 @@
 #include "GPS.hpp"
 #include <boost/thread.hpp>
 #include <queue>
-#include "gpsfilereader.h"
+#include <common/utils/gpsfilereader.h>
 
 namespace IGVC {
 namespace Sensors {
