@@ -35,7 +35,6 @@ class GrassOdometer
 
     ~GrassOdometer();
   private:
-    Robot _robot;
     IGVC::CameraInfo _cam;
     ColorRange _colors;
     int _numKeyPoints;
