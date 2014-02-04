@@ -44,7 +44,6 @@ SOURCES += \
     ../src/intelligence/mapping/mapping.cpp \
     ../src/hardware/sensors/gps/simulatedgps.cpp \
     ../src/common/utils/ImageUtils.cpp \
-    ../src/common/Robot.cpp \
     ../src/hardware/sensors/camera/CameraInfo.cpp \
     ../src/gui/adapters/gpsadapter.cpp \
     ../src/hardware/sensors/camera/StereoPlayback.cpp \
@@ -53,8 +52,8 @@ SOURCES += \
     ../src/gui/adapters/imuadapter.cpp \
     ../src/intelligence/posetracking/positiontracker.cpp \
     ../src/hardware/sensors/lidar/lms200.cpp \
-    ../src/hardware/sensors/gps/gpsfilereader.cpp \
-    ../src/hardware/sensors/gps/GPSWaypointSource.cpp
+    ../src/common/utils/GPSWaypointSource.cpp \
+    ../src/common/utils/gpsfilereader.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -100,7 +99,6 @@ HEADERS  += \
     ../src/hardware/sensors/gps/simulatedgps.h \
     ../src/hardware/sensors/IMU/IMU.h \
     ../src/common/utils/ImageUtils.h \
-    ../src/common/Robot.h \
     ../src/hardware/sensors/camera/CameraInfo.h \
     ../src/gui/adapters/gpsadapter.h \
     ../src/hardware/sensors/camera/StereoSource.hpp \
@@ -113,10 +111,10 @@ HEADERS  += \
     ../src/hardware/sensors/lidar/lms200.h \
     ../src/common/utils/gaussianvariable.hpp \
     ../src/hardware/sensors/DataStructures/GPSData.hpp
-    ../src/hardware/sensors/gps/gpsfilereader.h \
-    ../src/hardware/sensors/gps/GPSWaypointSource.h \
     ../src/common/utils/GPSUtils.h \
-    ../src/common/utils/AngleUtils.h
+    ../src/common/utils/AngleUtils.h \
+    ../src/common/utils/GPSWaypointSource.h \
+    ../src/common/utils/gpsfilereader.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
