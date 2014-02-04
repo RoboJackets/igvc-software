@@ -18,8 +18,8 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/common/utils/StringUtils.cpp \
     ../src/intelligence/posetracking/positiontracker.cpp \
     ../src/common/config/configmanager.cpp \
-    ../src/hardware/sensors/gps/gpsfilereader.cpp \
-    ../src/common/logger/logger.cpp
+    ../src/common/logger/logger.cpp \
+    ../src/common/utils/gpsfilereader.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
     ../src/common/utils/StringUtils.hpp \
@@ -32,6 +32,6 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/common/utils/AngleUtils.h \
     ../src/tests/testangleutils.h \
     ../src/tests/testgpsreader.hpp \
-    ../src/hardware/sensors/gps/gpsfilereader.h \
-    ../src/common/logger/logger.h
+    ../src/common/logger/logger.h \
+    ../src/common/utils/gpsfilereader.h
 
