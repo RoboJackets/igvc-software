@@ -1,7 +1,8 @@
 #ifndef STEREOIMAGEDATA_H
 #define STEREOIMAGEDATA_H
 
-#include <hardware/sensors/DataStructures/ImageData.hpp>
+#include <common/datastructures/GPSData.hpp>
+#include <common/datastructures/ImageData.hpp>
 
 class StereoImageData : public SensorData
 {

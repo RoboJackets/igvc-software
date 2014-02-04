@@ -2,7 +2,7 @@
 #define GPSFILEREADER_H
 #include <string>
 #include <queue>
-#include <hardware/sensors/DataStructures/GPSData.hpp>
+#include <common/datastructures/GPSData.hpp>
 using namespace std;
 
 class GPSFileReader

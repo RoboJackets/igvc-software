@@ -6,12 +6,11 @@
 
 #include <common/events/Event.hpp>
 #include <common/utils/ColorRange.h>
-#include <common/Robot.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
-#include <hardware/sensors/DataStructures/VisOdomData.hpp>
+#include <common/datastructures/VisOdomData.hpp>
 #include <hardware/sensors/camera/CameraInfo.h>
-#include <hardware/sensors/DataStructures/ImageData.hpp>
+#include <common/datastructures/ImageData.hpp>
 #include <common/utils/ImageUtils.h>
 
 

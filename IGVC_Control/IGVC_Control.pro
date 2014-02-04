@@ -72,15 +72,15 @@ HEADERS  += \
     ../src/hardware/sensors/lidar/SimulatedLidar.h \
     ../src/hardware/sensors/lidar/NAV200.h \
     ../src/hardware/sensors/lidar/Lidar.h \
-    ../src/hardware/sensors/DataStructures/VisOdomData.hpp \
-    ../src/hardware/sensors/DataStructures/StereoImageData.hpp \
-    ../src/hardware/sensors/DataStructures/SensorData.h \
-    ../src/hardware/sensors/DataStructures/IMUData.hpp \
-    ../src/hardware/sensors/DataStructures/ImageData.hpp \
-    ../src/hardware/sensors/DataStructures/GPSData.h \
-    ../src/hardware/sensors/DataStructures/GPSAccuracy.hpp \
-    ../src/hardware/sensors/DataStructures/DataPoint.hpp \
-    ../src/hardware/sensors/DataStructures/DataArray.hpp \
+    ../src/common/datastructures/VisOdomData.hpp \
+    ../src/common/datastructures/StereoImageData.hpp \
+    ../src/common/datastructures/SensorData.h \
+    ../src/common/datastructures/IMUData.hpp \
+    ../src/common/datastructures/ImageData.hpp \
+    ../src/common/datastructures/GPSData.h \
+    ../src/common/datastructures/GPSAccuracy.hpp \
+    ../src/common/datastructures/DataPoint.hpp \
+    ../src/common/datastructures/DataArray.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
     ../src/gui/adapters/joystickadapter.h \
     ../src/gui/adapters/cameraadapter.h \
@@ -110,7 +110,7 @@ HEADERS  += \
     ../src/hardware/sensors/camera/Bumblebee2.h \
     ../src/gui/adapters/imuadapter.h \
     ../src/hardware/sensors/lidar/lms200.h \
-    ../src/hardware/sensors/DataStructures/GPSData.hpp \
+    ../src/common/datastructures/GPSData.hpp \
     ../src/common/utils/GPSUtils.h \
     ../src/common/utils/AngleUtils.h \
     ../src/common/utils/GPSWaypointSource.h \
