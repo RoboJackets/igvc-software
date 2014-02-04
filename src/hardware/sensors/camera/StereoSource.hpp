@@ -2,7 +2,7 @@
 #define STEREOSOURCE_H
 
 #include <hardware/sensors/camera/StereoPair.hpp>
-#include <hardware/sensors/DataStructures/StereoImageData.hpp>
+#include <common/datastructures/StereoImageData.hpp>
 #include <common/events/Event.hpp>
 #include <boost/thread/thread.hpp>
 

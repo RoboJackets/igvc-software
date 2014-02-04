@@ -5,7 +5,6 @@
 #include <opencv2/opencv.hpp>
 #include <eigen3/Eigen/Dense>
 
-#include <common/Robot.h>
 #include <hardware/sensors/camera/CameraInfo.h>
 #include <common/utils/timing.h>
 
