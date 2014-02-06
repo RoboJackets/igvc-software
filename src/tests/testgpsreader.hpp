@@ -2,7 +2,7 @@
 #define TESTGPSREADER_H
 
 #include <QtTest>
-#include <hardware/sensors/DataStructures/GPSData.hpp>
+#include <common/datastructures/GPSData.hpp>
 #include <common/logger/logger.h>
 #include <common/utils/gpsfilereader.h>
 #include <iostream>

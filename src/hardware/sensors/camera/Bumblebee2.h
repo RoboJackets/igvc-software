@@ -11,7 +11,7 @@
 #include <common/events/Event.hpp>
 #include <hardware/sensors/camera/StereoPair.hpp>
 #include <hardware/sensors/camera/StereoSource.hpp>
-#include <hardware/sensors/DataStructures/SensorData.hpp>
+#include <common/datastructures/SensorData.hpp>
 #include "common/utils/ImageUtils.h"
 
 
