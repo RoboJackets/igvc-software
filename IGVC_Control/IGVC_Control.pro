@@ -53,8 +53,7 @@ SOURCES += \
     ../src/intelligence/posetracking/positiontracker.cpp \
     ../src/hardware/sensors/lidar/lms200.cpp \
     ../src/common/utils/GPSWaypointSource.cpp \
-    ../src/common/utils/gpsfilereader.cpp \
-    ../src/intelligence/posetracking/RobotPosition.cpp
+    ../src/common/utils/gpsfilereader.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -112,7 +111,6 @@ HEADERS  += \
     ../src/intelligence/posetracking/positiontracker.h \
     ../src/hardware/sensors/lidar/lms200.h \
     ../src/common/utils/gaussianvariable.hpp \
-    ../src/intelligence/posetracking/RobotPosition.h \
     ../src/common/datastructures/GPSData.hpp \
     ../src/common/utils/GPSUtils.h \
     ../src/common/utils/AngleUtils.h \
