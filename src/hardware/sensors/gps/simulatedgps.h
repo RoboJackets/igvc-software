@@ -3,7 +3,8 @@
 
 #include "GPS.hpp"
 #include <boost/thread.hpp>
-#include <vector>
+#include <queue>
+#include <common/utils/gpsfilereader.h>
 
 namespace IGVC {
 namespace Sensors {
@@ -25,10 +26,7 @@ private:
 
     void threadRun();
 
-    void loadFile(std::string file);
-
-    std::vector<GPSData> _data;
-    int _index;
+    std::queue<GPSData> _data;
     bool _running;
 
 };

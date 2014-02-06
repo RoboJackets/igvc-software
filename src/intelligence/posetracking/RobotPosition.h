@@ -1,11 +1,11 @@
 #ifndef ROBOTPOSITION_H
 #define ROBOTPOSITION_H
 
-#include <hardware/sensors/DataStructures/GPSData.hpp>
-#include <hardware/sensors/DataStructures/DataArray.hpp>
-#include <hardware/sensors/DataStructures/DataPoint.hpp>
-#include <hardware/sensors/DataStructures/IMUData.hpp>
-#include <hardware/sensors/DataStructures/VisOdomData.hpp>
+#include <common/datastructures/GPSData.hpp>
+#include <common/datastructures/DataArray.hpp>
+#include <common/datastructures/DataPoint.hpp>
+#include <common/datastructures/IMUData.hpp>
+#include <common/datastructures/VisOdomData.hpp>
 #include <hardware/sensors/IMU/IMU.h>
 #include <hardware/sensors/gps/HemisphereA100GPS.h>
 #include <intelligence/vision/2D/GrassOdometer/GrassOdometer.h>
@@ -20,9 +20,9 @@ class RobotPosition
     public:
         RobotPosition();
         RobotPosition(IGVC::Sensors::GPS* gps, IMU* imu);
-        LISTENER(RobotPosition, onNewGPSData, GPSData);
-        LISTENER(RobotPosition, onNewIMUData, IMUData);
-        LISTENER(RobotPosition, onNewVisOdomData, VisOdomData);
+        LISTENER(RobotPosition, onNewGPSData, GPSData)
+        LISTENER(RobotPosition, onNewIMUData, IMUData)
+        LISTENER(RobotPosition, onNewVisOdomData, VisOdomData)
         void addOdometer(GrassOdometer* odo);
         int onNewGPSData(GPSData);
         int onNewIMUData(IMUData);
