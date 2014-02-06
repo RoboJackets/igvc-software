@@ -28,4 +28,6 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/tests/testgpsreader.hpp \
     ../src/common/logger/logger.h \
     ../src/common/utils/gpsfilereader.h
+    ../src/tests/testangleutils.h
+
 
