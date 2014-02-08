@@ -35,6 +35,7 @@ void LineDetector::onImageEvent(ImageData imgd){
     Erosion();
     Dilation();
 
+
     onNewLines(ImageData(dst));
 }
 
