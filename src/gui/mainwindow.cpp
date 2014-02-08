@@ -294,7 +294,7 @@ void MainWindow::on_loadConfigButton_clicked()
 void MainWindow::on_actionHemisphere_A100_triggered()
 {
     ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
-    _GPS = new HemisphereA100GPS();
+    _GPS = new NMEACompatibleGPS();
     updateHardwareStatusIcons();
 }
 
