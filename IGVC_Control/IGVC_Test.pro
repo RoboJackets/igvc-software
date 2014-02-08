@@ -17,13 +17,15 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 SOURCES += ../src/tests/testmain.cpp \
     ../src/common/utils/StringUtils.cpp \
     ../src/common/logger/logger.cpp \
-    ../src/intelligence/linedetection/linedetector.cpp
+    ../src/intelligence/linedetection/linedetector.cpp \
+    ../src/intelligence/linedetection/transformer.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
     ../src/common/utils/StringUtils.hpp \
     ../src/tests/testlinedetection.hpp \
     ../src/common/logger/logger.h \
-    ../src/intelligence/linedetection/linedetector.h
+    ../src/intelligence/linedetection/linedetector.h \
+    ../src/intelligence/linedetection/transformer.h
 
 INCLUDEPATH += /usr/include
 DEPENDPATH += /usr/include
