@@ -3,6 +3,7 @@
 
 #include <QtTest>
 #include <intelligence/linedetection/linedetector.h>
+#include <intelligence/linedetection/transformer.h>
 #include <iostream>
 #include <common/events/Event.hpp>
 
@@ -29,6 +30,8 @@ private:
         lines = img.mat();
         DisplayImages();
     }
+
+
     LISTENER(TestLineDetection, onResults, ImageData)
 
 private Q_SLOTS:
@@ -45,8 +48,11 @@ private Q_SLOTS:
             QFAIL("Could not load test video.");
         }
 
-        LineDetector ldl(newImageFrameEvent);
-        ldl.onNewLines += &LonResults;
+//        LineDetector ldl(newImageFrameEvent);
+//        ldl.onNewLines += &LonResults;
+        transformer trans(newImageFrameEvent);
+        trans.onNewLines += &LonResults;
+
 
         while (success){
             responded = false;
