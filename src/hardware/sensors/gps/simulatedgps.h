@@ -24,6 +24,8 @@ public:
 private:
     boost::thread _thread;
 
+    bool _open;
+
     void threadRun();
 
     std::queue<GPSData> _data;

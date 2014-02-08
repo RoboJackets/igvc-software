@@ -11,6 +11,7 @@
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/nmeacompatiblegps.h>
 #include <hardware/sensors/camera/StereoPlayback.h>
+#include <hardware/sensors/camera/Bumblebee2.h>
 #include <hardware/sensors/IMU/Ardupilot.h>
 #include <hardware/sensors/lidar/SimulatedLidar.h>
 #include <hardware/sensors/lidar/lms200.h>
@@ -65,7 +66,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _lidar = new LMS200();
     ui->hardwareStatusList->addItem("LIDAR");
 
-    _stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
+    //_stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
+    _stereoSource = new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml");
     ui->hardwareStatusList->addItem("Camera");
 
     _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
