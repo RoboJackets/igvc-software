@@ -19,21 +19,21 @@ namespace Sensors {
  * \brief For connecting to the Hemisphere A100 GPS device
  * \headerfile HemisphereA100GPS.h <hardware/sensors/gps/HemisphereA100GPS.h>
  */
-class HemisphereA100GPS: public IGVC::Sensors::GPS {
+class NMEACompatibleGPS: public IGVC::Sensors::GPS {
 public:
-	HemisphereA100GPS();
+    NMEACompatibleGPS();
 	GPSData GetState();
     GPSData GetStateAtTime(timeval);
 	bool StateIsAvailable();
     bool isOpen();
-    ~HemisphereA100GPS();
+    ~NMEACompatibleGPS();
 
 private:
 
 	ASIOSerialPort serialPort; // Serial port for GPS communication
 
 	void onNewSerialLine(string line);
-    LISTENER(HemisphereA100GPS, onNewSerialLine, string)
+    LISTENER(NMEACompatibleGPS, onNewSerialLine, string)
 
 	boost::mutex queueLocker; // mutex for thread-safing the buffer
 
