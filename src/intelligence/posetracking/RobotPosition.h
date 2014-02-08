@@ -7,7 +7,7 @@
 #include <common/datastructures/IMUData.hpp>
 #include <common/datastructures/VisOdomData.hpp>
 #include <hardware/sensors/IMU/IMU.h>
-#include <hardware/sensors/gps/HemisphereA100GPS.h>
+#include <hardware/sensors/gps/nmeacompatiblegps.h>
 #include <intelligence/vision/2D/GrassOdometer/GrassOdometer.h>
 
 #include <boost/thread.hpp>
