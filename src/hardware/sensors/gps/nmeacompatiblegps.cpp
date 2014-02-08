@@ -5,14 +5,14 @@
  *      Author: Matthew Barulic
  */
 
-#include "HemisphereA100GPS.h"
+#include "nmeacompatiblegps.h"
 #include "nmea.hpp"
 #include <string>
 
 namespace IGVC {
 namespace Sensors {
 
-HemisphereA100GPS::HemisphereA100GPS():
+NMEACompatibleGPS::NMEACompatibleGPS():
     serialPort("/dev/ttyGPS", 4800),
 	LonNewSerialLine(this),
 	stateQueue()
@@ -22,7 +22,7 @@ HemisphereA100GPS::HemisphereA100GPS():
 	serialPort.startEvents();
 }
 
-void HemisphereA100GPS::onNewSerialLine(string line) {
+void NMEACompatibleGPS::onNewSerialLine(string line) {
     GPSData state;
     if(parseLine(line, state)) {
         // TODO set time
@@ -37,19 +37,19 @@ void HemisphereA100GPS::onNewSerialLine(string line) {
     }
 }
 
-bool HemisphereA100GPS::parseLine(std::string line, GPSData &state) {
+bool NMEACompatibleGPS::parseLine(std::string line, GPSData &state) {
 	return nmea::decodeGPGGA(line, state) ||
 		   nmea::decodeGPRMC(line, state);
 }
 
-GPSData HemisphereA100GPS::GetState() {
+GPSData NMEACompatibleGPS::GetState() {
 	boost::mutex::scoped_lock lock(queueLocker);
 	GPSData state = stateQueue.back();
 	stateQueue.remove(state);
 	return state;
 }
 
-GPSData HemisphereA100GPS::GetStateAtTime(timeval) {
+GPSData NMEACompatibleGPS::GetStateAtTime(timeval time) {
 	boost::mutex::scoped_lock lock(queueLocker);
 	std::list<GPSData>::iterator iter = stateQueue.begin();
     //double acceptableError = 0.1;
@@ -69,15 +69,15 @@ GPSData HemisphereA100GPS::GetStateAtTime(timeval) {
 	return empty;
 }
 
-bool HemisphereA100GPS::StateIsAvailable() {
+bool NMEACompatibleGPS::StateIsAvailable() {
 	return !stateQueue.empty();
 }
 
-bool HemisphereA100GPS::isOpen() {
+bool NMEACompatibleGPS::isOpen() {
     return serialPort.isConnected();
 }
 
-HemisphereA100GPS::~HemisphereA100GPS() {
+NMEACompatibleGPS::~NMEACompatibleGPS() {
     serialPort.stopEvents();
 	serialPort.close();
 }
