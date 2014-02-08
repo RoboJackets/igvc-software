@@ -26,7 +26,6 @@ SOURCES += \
     ../src/gui/configtreemodel.cpp \
     ../src/gui/batteryindicator.cpp \
     ../src/hardware/sensors/gps/nmea.cpp \
-    ../src/hardware/sensors/gps/HemisphereA100GPS.cpp \
     ../src/hardware/sensors/joystick/Joystick.cpp \
     ../src/hardware/sensors/lidar/SimulatedLidar.cpp \
     ../src/hardware/sensors/lidar/NAV200.cpp \
@@ -53,7 +52,8 @@ SOURCES += \
     ../src/gui/adapters/imuadapter.cpp \
     ../src/hardware/sensors/lidar/lms200.cpp \
     ../src/common/utils/GPSWaypointSource.cpp \
-    ../src/common/utils/gpsfilereader.cpp
+    ../src/common/utils/gpsfilereader.cpp \
+    ../src/hardware/sensors/gps/nmeacompatiblegps.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -66,7 +66,6 @@ HEADERS  += \
     ../src/gui/configtreemodel.h \
     ../src/gui/batteryindicator.h \
     ../src/hardware/sensors/gps/nmea.hpp \
-    ../src/hardware/sensors/gps/HemisphereA100GPS.h \
     ../src/hardware/sensors/gps/GPS.hpp \
     ../src/hardware/sensors/joystick/Joystick.h \
     ../src/hardware/sensors/lidar/SimulatedLidar.h \
@@ -114,7 +113,8 @@ HEADERS  += \
     ../src/common/utils/GPSUtils.h \
     ../src/common/utils/AngleUtils.h \
     ../src/common/utils/GPSWaypointSource.h \
-    ../src/common/utils/gpsfilereader.h
+    ../src/common/utils/gpsfilereader.h \
+    ../src/hardware/sensors/gps/nmeacompatiblegps.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
