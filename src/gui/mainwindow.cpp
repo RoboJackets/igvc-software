@@ -9,7 +9,7 @@
 #include "adapters/imuadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
-#include <hardware/sensors/gps/HemisphereA100GPS.h>
+#include <hardware/sensors/gps/nmeacompatiblegps.h>
 #include <hardware/sensors/camera/StereoPlayback.h>
 #include <hardware/sensors/IMU/Ardupilot.h>
 #include <hardware/sensors/lidar/SimulatedLidar.h>

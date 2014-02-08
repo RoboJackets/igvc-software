@@ -30,7 +30,7 @@ public:
 
     // for use with gpsfilereader only
     inline GPSData(double latitude, double longitude): SensorData(), _Lat(latitude), _Long(longitude),
-      _Heading(), _Speed(), _Accuracy()
+      _Heading(), _Speed()
     {
     }
 

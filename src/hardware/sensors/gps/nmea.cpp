@@ -48,7 +48,8 @@ bool nmea::decodeGPRMC(const std::string& line, GPSData& state)
 	std::vector< std::string > splitvec;
 	boost::algorithm::split(splitvec, line, boost::algorithm::is_any_of(","), boost::algorithm::token_compress_off);
 
-	if(splitvec.size() != 13) return false;
+
+    if(splitvec.size() != 14){ return false; }
 
 	if(splitvec[0] != std::string("$GPRMC")) return false;
 
@@ -130,7 +131,7 @@ bool nmea::decodeGPRMT(const std::string&)
 bool nmea::decodeGPGGA(const std::string& line, GPSData& state)
 {
 	std::vector< std::string > splitvec;
-	boost::algorithm::split(splitvec, line, boost::algorithm::is_any_of(","), boost::algorithm::token_compress_off);
+    boost::algorithm::split(splitvec, line, boost::algorithm::is_any_of(","), boost::algorithm::token_compress_off);
 
 	if(splitvec.size() != 15) return false;
 
