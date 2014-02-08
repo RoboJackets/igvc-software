@@ -78,7 +78,6 @@ HEADERS  += \
     ../src/common/datastructures/IMUData.hpp \
     ../src/common/datastructures/ImageData.hpp \
     ../src/common/datastructures/GPSData.h \
-    ../src/common/datastructures/GPSAccuracy.hpp \
     ../src/common/datastructures/DataPoint.hpp \
     ../src/common/datastructures/DataArray.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
