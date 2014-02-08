@@ -13,13 +13,14 @@ namespace IGVC {
 namespace Sensors {
 
 NMEACompatibleGPS::NMEACompatibleGPS():
-    serialPort("/dev/ttyGPS", 4800),
+    serialPort("/dev/ttyGPS", 19200/*For HemisphereA100 4800*/),
 	LonNewSerialLine(this),
 	stateQueue()
 {
     serialPort.onNewLine += &LonNewSerialLine;
 	maxBufferLength = 10;
 	serialPort.startEvents();
+    std::cout << "GPS inited" << std::endl;
 }
 
 void NMEACompatibleGPS::onNewSerialLine(string line) {

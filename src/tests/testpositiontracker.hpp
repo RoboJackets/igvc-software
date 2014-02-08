@@ -17,9 +17,9 @@ private Q_SLOTS:
         testEvent += &tracker.LOnGPSData;
         auto start = tracker.GetPosition();
         auto data = GPSData(1,1,M_PI_2,0);
-        data.LatVar(8);
+        /*data.LatVar(8);
         data.LongVar(8);
-        data.HeadingVar(8);
+        data.HeadingVar(8);*/
         testEvent(data);
         auto end = tracker.GetPosition();
         QVERIFY(start != end);
