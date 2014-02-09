@@ -1,4 +1,5 @@
 #include "basicpositiontracker.h"
+#include <common/utils/GPSUtils.h>
 
 BasicPositionTracker::BasicPositionTracker()
     : NUMBER_OF_POINTS_FOR_ORIGIN(300),
@@ -21,7 +22,7 @@ void BasicPositionTracker::onNewGPS(GPSData data)
         originPointsRecorded++;
         return;
     }
-    // GPS -> Cartesian deltas (origin, data, &currentPosition.X, &currentPosition.Y);
+    GPSUtils::coordsToMetricXY(origin.Lat(), origin.Long(), data.Lat(), data.Long(), currentPosition.X, currentPosition.Y);
     onNewPosition(currentPosition);
 }
 
