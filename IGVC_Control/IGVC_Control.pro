@@ -53,7 +53,8 @@ SOURCES += \
     ../src/hardware/sensors/lidar/lms200.cpp \
     ../src/common/utils/GPSWaypointSource.cpp \
     ../src/common/utils/gpsfilereader.cpp \
-    ../src/hardware/sensors/gps/nmeacompatiblegps.cpp
+    ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
+    ../src/intelligence/posetracking/basicpositiontracker.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -114,7 +115,9 @@ HEADERS  += \
     ../src/common/utils/AngleUtils.h \
     ../src/common/utils/GPSWaypointSource.h \
     ../src/common/utils/gpsfilereader.h \
-    ../src/hardware/sensors/gps/nmeacompatiblegps.h
+    ../src/hardware/sensors/gps/nmeacompatiblegps.h \
+    ../src/intelligence/posetracking/basicpositiontracker.h \
+    ../src/common/datastructures/robotposition.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
