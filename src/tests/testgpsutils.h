@@ -43,10 +43,23 @@ private Q_SLOTS:
 
         std::cout<<std::setprecision(9)<<"Expected\t Lat: "<<lat2<<"   Lon"<<lon2<<"   Dist: "<<dist<<endl;
         std::cout<<std::setprecision(9)<<"Test\t Lat: "<<newLat<<"  Lon"<<newLon<<"  Dist: "<<distBetween<<endl;
+    }
 
+    void testCoordsToMetricXY()
+    {
+        using namespace std;
 
+        double lat1 =  33.787371;
+        double lon1 = -84.406211;
+        double lat2 =  33.787372;
+        double lon2 = -84.406183;
 
+        double dX = 0;
+        double dY = 0;
 
+        GPSUtils::coordsToMetricXY(lat1, lon1, lat2, lon2, dX, dY);
+
+        std::cout << dX << ", " << dY << std::endl;
     }
 };
 
