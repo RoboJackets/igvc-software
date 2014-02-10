@@ -20,6 +20,7 @@
 #include <QTextEdit>
 #include "adapters/joystickadapter.h"
 #include "adapters/lidaradapter.h"
+#include "adapters/positiontrackeradapter.h"
 #include <QDebug>
 #include <QFileDialog>
 
@@ -76,6 +77,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _IMU = new Ardupilot();
     ui->hardwareStatusList->addItem("IMU");
+
+    _posTracker = new BasicPositionTracker;
+    _GPS->onNewData += &_posTracker->LonNewGPS;
+    _IMU->onNewData += &_posTracker->LonNewIMU;
+    ui->hardwareStatusList->addItem("Position Tracker");
 
     updateHardwareStatusIcons();
 
@@ -144,6 +150,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "IMU")
         {
             adapter = new IMUAdapter(_IMU);
+        }
+        else if(labelText == "Position Tracker")
+        {
+            adapter = new PositionTrackerAdapter(&(_posTracker->onNewPosition));
         }
         else
         {
