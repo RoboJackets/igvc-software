@@ -8,6 +8,10 @@ class RobotPosition
 {
 public:
 
+    RobotPosition() { }
+
+    RobotPosition(double x, double y, double h) : X(x), Y(y), Heading(h) { }
+
     /**
      * @brief The horizontal component of the robot's positon
      */
