@@ -54,7 +54,8 @@ SOURCES += \
     ../src/common/utils/GPSWaypointSource.cpp \
     ../src/common/utils/gpsfilereader.cpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
-    ../src/intelligence/posetracking/basicpositiontracker.cpp
+    ../src/intelligence/posetracking/basicpositiontracker.cpp \
+    ../src/gui/adapters/positiontrackeradapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -117,7 +118,8 @@ HEADERS  += \
     ../src/common/utils/gpsfilereader.h \
     ../src/hardware/sensors/gps/nmeacompatiblegps.h \
     ../src/intelligence/posetracking/basicpositiontracker.h \
-    ../src/common/datastructures/robotposition.hpp
+    ../src/common/datastructures/robotposition.hpp \
+    ../src/gui/adapters/positiontrackeradapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -126,7 +128,8 @@ FORMS    += \
     ../src/gui/adapters/mapadapter.ui \
     ../src/gui/adapters/cameraadapter.ui \
     ../src/gui/adapters/gpsadapter.ui \
-    ../src/gui/adapters/imuadapter.ui
+    ../src/gui/adapters/imuadapter.ui \
+    ../src/gui/adapters/positiontrackeradapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
