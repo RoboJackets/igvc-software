@@ -14,6 +14,7 @@
 #include <hardware/sensors/camera/StereoSource.hpp>
 #include <hardware/sensors/IMU/IMU.h>
 #include <hardware/sensors/lidar/Lidar.h>
+#include <intelligence/posetracking/basicpositiontracker.h>
 
 namespace Ui {
 class MainWindow;
@@ -84,6 +85,8 @@ private:
     IMU *_IMU;
 
     IGVC::Sensors::Lidar *_lidar;
+
+    BasicPositionTracker *_posTracker;
 
     bool isRunning, isPaused;
 
