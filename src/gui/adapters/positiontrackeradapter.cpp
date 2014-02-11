@@ -7,11 +7,11 @@ PositionTrackerAdapter::PositionTrackerAdapter(Event<RobotPosition> *src, QWidge
     QWidget(parent),
     ui(new Ui::PositionTrackerAdapter),
     source(src),
-    LonNewPosition(this),
     minx(-0.5),
     maxx( 0.5),
     miny(-0.5),
-    maxy( 0.5)
+    maxy( 0.5),
+    LonNewPosition(this)
 {
     ui->setupUi(this);
 
@@ -31,25 +31,28 @@ void PositionTrackerAdapter::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    painter.setPen(Qt::black);
-
-    int margin = 4;
-    int w = this->width() - margin*2;
-    int h = this->height() - margin*2;
-
-    double xscale = w / (maxx - minx);
-    double yscale = h / (maxy - miny);
-
-    int lastx = (positions[0].X + minx) * xscale;
-    int lasty = h - ( (positions[0].Y + miny) * yscale );
-    for(uint i = 1; i < positions.size(); i++)
+    if(positions.size() > 0)
     {
-        RobotPosition p = positions[i];
-        int x = (p.X + minx) * xscale;
-        int y = h - ( (p.Y + miny) * yscale );
-        painter.drawLine(lastx+margin, lasty+margin, x+margin, y+margin);
-        lastx = x;
-        lasty = y;
+        painter.setPen(Qt::black);
+
+        int margin = 4;
+        int w = this->width() - margin*2;
+        int h = this->height() - margin*2;
+
+        double xscale = w / (maxx - minx);
+        double yscale = h / (maxy - miny);
+
+        int lastx = (positions[0].X + minx) * xscale;
+        int lasty = h - ( (positions[0].Y + miny) * yscale );
+        for(uint i = 1; i < positions.size(); i++)
+        {
+            RobotPosition p = positions[i];
+            int x = (p.X + minx) * xscale;
+            int y = h - ( (p.Y + miny) * yscale );
+            painter.drawLine(lastx+margin, lasty+margin, x+margin, y+margin);
+            lastx = x;
+            lasty = y;
+        }
     }
 
     painter.end();

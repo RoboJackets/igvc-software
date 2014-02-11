@@ -27,7 +27,8 @@ GPSAdapter::GPSAdapter(GPS *gps, QWidget *parent) :
 
 GPSAdapter::~GPSAdapter()
 {
-    _GPS->onNewData -= &LOnNewData;
+    if(_GPS != nullptr)
+        _GPS->onNewData -= &LOnNewData;
     delete ui;
 
 }

@@ -64,6 +64,9 @@ private slots:
 
     void on_actionClearLogs_triggered();
 
+protected:
+    void closeEvent(QCloseEvent *);
+
 private:
     Ui::MainWindow *ui;
     ConfigTreeModel configTreeModel;
