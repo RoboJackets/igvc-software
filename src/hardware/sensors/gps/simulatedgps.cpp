@@ -24,6 +24,7 @@ SimulatedGPS::SimulatedGPS(std::string file) : _running(true)
         Logger::Log(LogLevel::Error, msg.str());
         _open = false;
     }
+    _delay = 100000;
     _thread = boost::thread(boost::bind(&SimulatedGPS::threadRun, this));
 }
 
@@ -62,7 +63,7 @@ void SimulatedGPS::threadRun()
         {
             onNewData(GetState());
         }
-        sleep(1);
+        usleep(_delay);
     }
 }
 
@@ -70,6 +71,12 @@ SimulatedGPS::~SimulatedGPS()
 {
     _running = false;
     _thread.join();
+}
+
+void SimulatedGPS::setHz(double Hz)
+{
+    // 1 million / ( 1 / x seconds) = x million microseconds
+    _delay = 1000000/Hz;
 }
 
 }
