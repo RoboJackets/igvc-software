@@ -36,6 +36,9 @@ private slots:
 
     void on_user_Left_textChanged();
 
+Q_SIGNALS:
+    void updateBecauseNewData();
+
 private:
 
     Ui::GPSAdapter *ui;

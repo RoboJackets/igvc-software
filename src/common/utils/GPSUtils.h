@@ -47,7 +47,7 @@ class GPSUtils
          */
         static void coordsToMetricXY(double lat1, double lon1, double lat2, double lon2, double &dX, double &dY)
         {
-            dX = coordsToMeter(lat1, lon1, lat1, lon2);
-            dY = coordsToMeter(lat1, lon1, lat2, lon1);
+            dX = std::copysign(1.0, lon2-lon1) * coordsToMeter(lat1, lon1, lat1, lon2);
+            dY = std::copysign(1.0, lat2-lat1) * coordsToMeter(lat1, lon1, lat2, lon1);
         }
 };

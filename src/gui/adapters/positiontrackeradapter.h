@@ -21,6 +21,12 @@ public:
 protected:
     void paintEvent(QPaintEvent*);
 
+Q_SIGNALS:
+    void updateBecauseOfData();
+
+private slots:
+    void on_pushButton_clicked();
+
 private:
     Ui::PositionTrackerAdapter *ui;
 
