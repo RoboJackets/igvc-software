@@ -102,8 +102,11 @@ void MainWindow::setupMenus()
 
 MainWindow::~MainWindow()
 {
+    _GPS->onNewData -= &(_posTracker->LonNewGPS);
+    _IMU->onNewData -= &(_posTracker->LonNewIMU);
     delete ui;
     delete _joystick;
+    delete _posTracker;
     delete _GPS;
     delete _IMU;
     delete _stereoSource;
@@ -309,6 +312,7 @@ void MainWindow::on_actionHemisphere_A100_triggered()
 {
     ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
     _GPS = new NMEACompatibleGPS();
+    _GPS->onNewData += &(_posTracker->LonNewGPS);
     updateHardwareStatusIcons();
 }
 
@@ -319,6 +323,7 @@ void MainWindow::on_actionSimulatedGPS_triggered()
     {
         ui->actionHemisphere_A100->setChecked(!ui->actionSimulatedGPS->isChecked());
         _GPS = new SimulatedGPS(fileName.toStdString());
+        _GPS->onNewData += &(_posTracker->LonNewGPS);
         updateHardwareStatusIcons();
     }
 }
@@ -335,4 +340,11 @@ void MainWindow::updateHardwareStatusIcons()
 void MainWindow::on_actionClearLogs_triggered()
 {
     Logger::Clear();
+}
+
+void MainWindow::closeEvent(QCloseEvent *e)
+{
+    mdiArea->closeAllSubWindows();
+    std::cout << mdiArea->subWindowList().size() << std::endl;
+    QMainWindow::closeEvent(e);
 }
