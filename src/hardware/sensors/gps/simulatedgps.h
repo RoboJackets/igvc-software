@@ -21,6 +21,8 @@ public:
 
     ~SimulatedGPS();
 
+    void setHz(double Hz);
+
 private:
     boost::thread _thread;
 
@@ -30,6 +32,8 @@ private:
 
     std::queue<GPSData> _data;
     bool _running;
+
+    int _delay;
 
 };
 
