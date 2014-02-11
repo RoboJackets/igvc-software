@@ -38,6 +38,8 @@ class Event
         void operator-=(Delegate<T>* delegate)
         {
             iter i = _delegates.begin();
+            if(_delegates.size() == 0)
+                return;
             while (i != _delegates.end())
             {
                 if (*i == delegate)

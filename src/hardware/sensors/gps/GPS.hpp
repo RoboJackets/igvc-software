@@ -22,7 +22,7 @@ namespace Sensors {
 class GPS
 {
 public:
-	virtual ~GPS() { }
+    virtual ~GPS() { }
 
     /*!
      * \brief Returns the most recent state acquired from the GPS device.
