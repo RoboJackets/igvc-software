@@ -25,7 +25,6 @@ private:
     RobotPosition currentPosition;
     GPSData origin;
 
-    const int NUMBER_OF_POINTS_FOR_ORIGIN;
     int originPointsRecorded;
 
 public:
