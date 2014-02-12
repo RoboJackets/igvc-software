@@ -71,8 +71,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _stereoSource = new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml");
     ui->hardwareStatusList->addItem("Camera");
 
-    _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
-    ui->actionSimulatedGPS->setChecked(true);
+    _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 19200);
+    ui->actionOutback_A321->setChecked(true);
     ui->hardwareStatusList->addItem("GPS");
 
     _IMU = new Ardupilot();
@@ -311,7 +311,7 @@ void MainWindow::on_loadConfigButton_clicked()
 void MainWindow::on_actionHemisphere_A100_triggered()
 {
     ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
-    _GPS = new NMEACompatibleGPS();
+    _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 4800);
     _GPS->onNewData += &(_posTracker->LonNewGPS);
     updateHardwareStatusIcons();
 }
@@ -347,4 +347,12 @@ void MainWindow::closeEvent(QCloseEvent *e)
     mdiArea->closeAllSubWindows();
     std::cout << mdiArea->subWindowList().size() << std::endl;
     QMainWindow::closeEvent(e);
+}
+
+void MainWindow::on_actionOutback_A321_triggered()
+{
+    ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
+    _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 19200);
+    _GPS->onNewData += &(_posTracker->LonNewGPS);
+    updateHardwareStatusIcons();
 }
