@@ -1,10 +1,10 @@
 #include "basicpositiontracker.h"
 #include <common/utils/GPSUtils.h>
 #include <common/logger/logger.h>
+#include <common/config/configmanager.h>
 
 BasicPositionTracker::BasicPositionTracker()
-    : NUMBER_OF_POINTS_FOR_ORIGIN(300),
-      LonNewGPS(this),
+    : LonNewGPS(this),
       LonNewIMU(this)
 {
 }
@@ -16,12 +16,13 @@ RobotPosition BasicPositionTracker::GetPosition()
 
 void BasicPositionTracker::onNewGPS(GPSData data)
 {
-    if(originPointsRecorded < NUMBER_OF_POINTS_FOR_ORIGIN)
+    int numPointsForOrigin = ConfigManager::Instance().getValue("BasicPoseTracker", "PointsForOrigin", 300);
+    if(originPointsRecorded < numPointsForOrigin)
     {
-        origin.Lat(  origin.Lat()  + ( data.Lat()  / NUMBER_OF_POINTS_FOR_ORIGIN ) );
-        origin.Long( origin.Long() + ( data.Long() / NUMBER_OF_POINTS_FOR_ORIGIN ) );
+        origin.Lat(  origin.Lat()  + ( data.Lat()  / numPointsForOrigin ) );
+        origin.Long( origin.Long() + ( data.Long() / numPointsForOrigin ) );
         originPointsRecorded++;
-        if(originPointsRecorded == NUMBER_OF_POINTS_FOR_ORIGIN)
+        if(originPointsRecorded == numPointsForOrigin)
         {
             std::stringstream msg;
             msg << "Position tracker origin found : LAT " << origin.Lat() << "\tLONG " << origin.Long();
