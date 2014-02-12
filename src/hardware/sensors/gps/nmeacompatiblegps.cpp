@@ -12,8 +12,9 @@
 namespace IGVC {
 namespace Sensors {
 
-NMEACompatibleGPS::NMEACompatibleGPS():
-    serialPort("/dev/ttyGPS", 19200/*For HemisphereA100 4800*/),
+NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
+    :serialPort(devicePath, baudRate),
+    //serialPort("/dev/ttyGPS", 19200/*For HemisphereA100 4800*/),
 	LonNewSerialLine(this),
 	stateQueue()
 {

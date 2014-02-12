@@ -21,7 +21,7 @@ namespace Sensors {
  */
 class NMEACompatibleGPS: public IGVC::Sensors::GPS {
 public:
-    NMEACompatibleGPS();
+    NMEACompatibleGPS(std::string devicePath, uint baudRate);
 	GPSData GetState();
     GPSData GetStateAtTime(timeval);
 	bool StateIsAvailable();
