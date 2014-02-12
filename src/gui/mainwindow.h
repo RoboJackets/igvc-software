@@ -64,6 +64,8 @@ private slots:
 
     void on_actionClearLogs_triggered();
 
+    void on_actionOutback_A321_triggered();
+
 protected:
     void closeEvent(QCloseEvent *);
 
