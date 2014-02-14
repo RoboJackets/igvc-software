@@ -11,7 +11,9 @@
 
 void RunTestCase(QObject* testCase, std::vector<std::string> args, bool runByDefault = true)
 {
-    if(runByDefault && ( args.size() == 0 || std::find(args.begin(), args.end(), testCase->metaObject()->className()) != args.end() ))
+    if(runByDefault && ( args.size() == 0 ||
+                         std::find(args.begin(), args.end(), testCase->metaObject()->className()) != args.end() ||
+                         std::find(args.begin(), args.end(), "all") != args.end()))
     {
         QTest::qExec(testCase);
     }
@@ -28,11 +30,9 @@ int main(int argc, const char* argv[])
     for(int i = 0; i < argc; i++)
         if(argv[i][0] != '/')
             args.push_back(argv[i]);
-    if(std::find(args.begin(), args.end(), "all") != args.end())
-        args.clear();
     if(args.size() == 0)
     {
-        std::cout << "Running all tests." << std::endl;
+        std::cout << "Running all default tests." << std::endl;
     }
     else
     {
