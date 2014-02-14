@@ -83,13 +83,13 @@ private:
 
     MotorDriver *_motorController;
 
-    IGVC::Sensors::GPS *_GPS;
+    GPS *_GPS;
 
     StereoSource *_stereoSource;
 
     IMU *_IMU;
 
-    IGVC::Sensors::Lidar *_lidar;
+    Lidar *_lidar;
 
     BasicPositionTracker *_posTracker;
 
