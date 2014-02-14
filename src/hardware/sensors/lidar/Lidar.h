@@ -10,45 +10,42 @@
 #include <time.h>
 #include "common/events/Event.hpp"
 
-namespace IGVC {
-namespace Sensors {
+class LidarPoint
+{
+    public:
+        LidarPoint()
+        {
+            valid = false;
+            angle = 0;
+            raw = 0;
+            distance = 0;
+            intensity = 0;
+        }
 
-    class LidarPoint
-    {
-        public:
-            LidarPoint()
-            {
-                valid = false;
-                angle = 0;
-                raw = 0;
-                distance = 0;
-                intensity = 0;
-            }
+        /*! \brief If false, the other members are not meaningful */
+        bool valid;
 
-            /*! \brief If false, the other members are not meaningful */
-            bool valid;
+        /*! \brief Angle in radians counterclockwise from right, with the LEDs pointing forward.*/
+        float angle;
 
-            /*! \brief Angle in radians counterclockwise from right, with the LEDs pointing forward.*/
-            float angle;
+        /*! \brief Raw distance */
+        uint16_t raw;
 
-            /*! \brief Raw distance */
-            uint16_t raw;
+        /*! \brief Distance in meters*/
+        float distance;
 
-            /*! \brief Distance in meters*/
-            float distance;
+        /*! \brief Intensity of return, unknown units */
+        uint8_t intensity;
+};
 
-            /*! \brief Intensity of return, unknown units */
-            uint8_t intensity;
-    };
-
-    /*!
-     * \brief A struct that represents a data packet from the Lidar device.
-     */
-    struct LidarState
-    {
-        timeval timestamp;
-        LidarPoint points[1024];
-    };
+/*!
+ * \brief A struct that represents a data packet from the Lidar device.
+ */
+struct LidarState
+{
+    timeval timestamp;
+    LidarPoint points[1024];
+};
 
 /*!
  * \brief Interface for Lidars.
@@ -76,7 +73,4 @@ public:
     Event<void*> onDataExpiration;
 };
 
-
-} /* namespace Sensors */
-} /* namespace IGVC */
 #endif // LIDAR_H

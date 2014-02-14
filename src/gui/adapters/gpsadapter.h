@@ -7,7 +7,6 @@
 #include <QLabel>
 #include <hardware/sensors/gps/GPS.hpp>
 
-using namespace IGVC::Sensors;
 
 namespace Ui {
 class GPSAdapter;
