@@ -9,9 +9,13 @@
 #include "testgpsutils.h"
 #include "capturegpsandpostracker.hpp"
 
-void RunTestCase(QObject* testCase, std::vector<std::string> args)
+void RunTestCase(QObject* testCase, std::vector<std::string> args, bool runByDefault = true)
 {
-    if(args.size() == 0 || std::find(args.begin(), args.end(), testCase->metaObject()->className()) != args.end())
+    if(runByDefault && ( args.size() == 0 || std::find(args.begin(), args.end(), testCase->metaObject()->className()) != args.end() ))
+    {
+        QTest::qExec(testCase);
+    }
+    else if(std::find(args.begin(), args.end(), testCase->metaObject()->className()) != args.end())
     {
         QTest::qExec(testCase);
     }
@@ -44,5 +48,5 @@ int main(int argc, const char* argv[])
     RunTestCase(new TestGPSUtils(), args);
     RunTestCase(new TestAngleUtils(), args);
     RunTestCase(new TestGPSReader(), args);
-    RunTestCase(new CaptureGPSAndPosTracker(), args);
+    RunTestCase(new CaptureGPSAndPosTracker(), args, false);
 }
