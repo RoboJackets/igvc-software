@@ -13,9 +13,6 @@
 
 using namespace std;
 
-namespace IGVC {
-namespace Sensors {
-
 NAV200::NAV200()
 {
     _numPoints = 1024;
@@ -125,5 +122,3 @@ NAV200::~NAV200() {
     _iothread.interrupt();
 }
 
-} /* namespace Sensors */
-} /* namespace IGVC */

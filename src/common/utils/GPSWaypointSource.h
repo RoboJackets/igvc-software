@@ -6,9 +6,6 @@
 
 #endif // GPSWAYPOINTSOURCE_H
 
-namespace IGVC {
-namespace Sensors {
-
 class GPSWaypointSource
 {
 public:
@@ -17,5 +14,3 @@ public:
 private:
     std::queue<GPSData> _data;
 };
-}
-}
