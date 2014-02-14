@@ -9,9 +9,6 @@
 #include "nmea.hpp"
 #include <string>
 
-namespace IGVC {
-namespace Sensors {
-
 NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
     :serialPort(devicePath, baudRate),
     //serialPort("/dev/ttyGPS", 19200/*For HemisphereA100 4800*/),
@@ -83,6 +80,3 @@ NMEACompatibleGPS::~NMEACompatibleGPS() {
     serialPort.stopEvents();
 	serialPort.close();
 }
-
-} /* namespace Sensors */
-} /* namespace IGVC */

@@ -4,10 +4,6 @@
 #include <common/utils/StringUtils.hpp>
 #include <common/logger/logger.h>
 
-namespace IGVC {
-namespace Sensors {
-
-
 SimulatedGPS::SimulatedGPS(std::string file) : _running(true)
 {
     try {
@@ -77,7 +73,4 @@ void SimulatedGPS::setHz(double Hz)
 {
     // 1 million / ( 1 / x seconds) = x million microseconds
     _delay = 1000000/Hz;
-}
-
-}
 }

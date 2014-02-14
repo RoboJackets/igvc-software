@@ -4,7 +4,7 @@
 #include <pcl/io/pcd_io.h>
 #include <math.h>
 
-Mapping::Mapping(IGVC::Sensors::Lidar *lidar):LOnLidarData(this)
+Mapping::Mapping(Lidar *lidar):LOnLidarData(this)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr _cloud(new pcl::PointCloud<pcl::PointXYZ>);
     _cloud->height = 1;
@@ -26,7 +26,7 @@ Mapping::~Mapping()
         _lidar->onNewData -= &LOnLidarData;
 }
 
-void Mapping::OnLidarData(IGVC::Sensors::LidarState state)
+void Mapping::OnLidarData(LidarState state)
 {
     for (int i=0;i<1024;i++)
     {
