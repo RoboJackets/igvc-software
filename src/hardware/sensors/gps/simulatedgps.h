@@ -6,9 +6,6 @@
 #include <queue>
 #include <common/utils/gpsfilereader.h>
 
-namespace IGVC {
-namespace Sensors {
-
 class SimulatedGPS : public GPS
 {
 public:
@@ -37,6 +34,4 @@ private:
 
 };
 
-}
-}
 #endif // SIMULATEDGPS_H

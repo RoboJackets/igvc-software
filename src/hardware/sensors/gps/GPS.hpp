@@ -10,11 +10,6 @@
 #include "common/events/Event.hpp"
 #include <common/datastructures/GPSData.hpp>
 
-namespace IGVC {
-namespace Sensors {
-
-
-
 /*!
  * \brief Interface for GPS devices.
  * \headerfile GPS.hpp <hardware/sensors/gps/GPS.hpp>
@@ -48,9 +43,6 @@ public:
     Event<void*> onDeviceFailure;
     Event<void*> onDataExpiration;
 };
-
-} //Sensors
-} //IGVC
 
 
 #endif /* GPS_HPP_ */
