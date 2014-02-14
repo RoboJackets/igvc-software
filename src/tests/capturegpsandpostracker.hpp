@@ -15,7 +15,8 @@ public:
     CaptureGPSAndPosTracker(QObject *parent = 0)
         : QObject(parent),
           LonNewPosData(this),
-          LonNewGPSData(this)
+          LonNewGPSData(this),
+          gps("/dev/ttyGPS", 19200)
     {
         gpsPts = 0;
         ptPts = 0;
@@ -66,7 +67,7 @@ private:
     int gpsPts;
     int ptPts;
 
-    IGVC::Sensors::NMEACompatibleGPS gps;
+    NMEACompatibleGPS gps;
     BasicPositionTracker tracker;
 
 private Q_SLOTS:
