@@ -7,7 +7,8 @@
 #include "intelligence/posetracking/RobotPosition.h"
 #include "common/utils/GPSUtils.h"
 
-Mapping::Mapping(IGVC::Sensors::Lidar *lidar, RobotPosition robot):LOnLidarData(this)
+
+Mapping::Mapping(Lidar *lidar):LOnLidarData(this)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr _cloud(new pcl::PointCloud<pcl::PointXYZ>);
     _cloud->height = 1;
@@ -33,7 +34,7 @@ Mapping::~Mapping()
         _lidar->onNewData -= &LOnLidarData;
 }
 
-void Mapping::OnLidarData(IGVC::Sensors::LidarState state)
+void Mapping::OnLidarData(LidarState state)
 {
     double d = GPSUtils::coordsToMeter(startLat, startLon, robot.currentLat(), robot.currentLong());
 
