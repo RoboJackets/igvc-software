@@ -1,6 +1,7 @@
 #include "positiontracker.h"
 #include <cmath>
 #include <common/config/configmanager.h>
+#include <common/utils/GPSUtils.h>
 
 PositionTracker::PositionTracker()
     : LOnGPSData(this),
@@ -10,6 +11,7 @@ PositionTracker::PositionTracker()
     _current_estimate.Latitude.Variance = 10000;
     _current_estimate.Longitude.Variance = 10000;
     _current_estimate.Heading.Variance = 10000;
+    prevIMUTime = 0;
 }
 
 Position PositionTracker::GetPosition()
@@ -80,17 +82,21 @@ Position PositionTracker::MeasurementFromIMUData(IMUData data)
 {
     // Uses the "Destination point given distance and bearing from start point" described here:
     // http://www.movable-type.co.uk/scripts/latlong.html#destPoint
+
     Position measurement;
+    double time = data.time() - prevIMUTime;
+    prevIMUTime = data.time();
     double lat1 = _current_estimate.Latitude;
     double lon1 = _current_estimate.Latitude;
     double hed1 = _current_estimate.Heading;
-    double dx = data.X /* * time*time */;
-    double dy = data.Y /* * time*time */;
+    double dx = data.X * time*time;
+    double dy = data.Y * time*time;
     double d = sqrt(dx*dx + dy*dy); // Distance travelled
     double R = 6378137; // radius of Earth
     measurement.Latitude = asin(sin(lat1)*cos(d/R)+cos(lat1)*sin(d/R)*cos(hed1));
     measurement.Longitude = (lon1 + atan2(sin(hed1)*sin(d/R)*cos(lat1),cos(d/R)-sin(lat1)*sin(measurement.Latitude)));
-    measurement.Heading = (atan2((measurement.Longitude-lon1)*sin(lat1), cos(measurement.Latitude)*sin(lat1)-sin(measurement.Latitude)*cos(lat1)*cos(measurement.Longitude-lon1)));
+
+    measurement.Heading = (atan2(sin(measurement.Longitude-lon1)*cos(measurement.Latitude), cos(lat1)*sin(measurement.Latitude)-sin(lat1)*cos(measurement.Latitude)*cos(measurement.Longitude-lon1)));
 //    measurement.Heading = (measurement.Heading+180);
     while(measurement.Heading >= 360)
         measurement.Heading = (measurement.Heading - 360);
@@ -117,7 +123,10 @@ void PositionTracker::OnGPSData(GPSData data)
 
 void PositionTracker::OnIMUData(IMUData data)
 {
-    _current_estimate = UpdateWithMeasurement(_current_estimate, MeasurementFromIMUData(data));
+    if(prevIMUTime == 0)
+        prevIMUTime = data.time();
+    else
+        _current_estimate = UpdateWithMeasurement(_current_estimate, MeasurementFromIMUData(data));
 }
 
 void PositionTracker::OnMotionCommand(MotorCommand cmd)
