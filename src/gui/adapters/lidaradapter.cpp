@@ -6,7 +6,7 @@
 #include <QDebug>
 
 
-LidarAdapter::LidarAdapter(IGVC::Sensors::Lidar *lidar, QWidget *parent) :
+LidarAdapter::LidarAdapter(Lidar *lidar, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::LidarAdapter),
     LOnLidarData(this)
@@ -78,7 +78,7 @@ void LidarAdapter::paintEvent(QPaintEvent *)
     p.setPen(QPen(QColor(0, 0, 0, 32)));
     double mag;         // % of longest line
 
-    for(IGVC::Sensors::LidarPoint point : _data.points)
+    for(LidarPoint point : _data.points)
     {
         if(point.valid)
         {
@@ -92,7 +92,7 @@ void LidarAdapter::paintEvent(QPaintEvent *)
     }
 }
 
-void LidarAdapter::OnLidarData(IGVC::Sensors::LidarState state)
+void LidarAdapter::OnLidarData(LidarState state)
 {
     _data = state;
     update();
@@ -103,7 +103,7 @@ void LidarAdapter::OnLidarData(IGVC::Sensors::LidarState state)
 void LidarAdapter::on_btn_fit_clicked()
 {
     double maxSize = 0;
-    for(IGVC::Sensors::LidarPoint point : _data.points)
+    for(LidarPoint point : _data.points)
         if(point.valid)
             if(point.distance > maxSize)
                 maxSize = point.distance;

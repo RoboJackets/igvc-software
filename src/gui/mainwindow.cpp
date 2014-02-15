@@ -9,8 +9,9 @@
 #include "adapters/imuadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
-#include <hardware/sensors/gps/HemisphereA100GPS.h>
+#include <hardware/sensors/gps/nmeacompatiblegps.h>
 #include <hardware/sensors/camera/StereoPlayback.h>
+#include <hardware/sensors/camera/Bumblebee2.h>
 #include <hardware/sensors/IMU/Ardupilot.h>
 #include <hardware/sensors/lidar/SimulatedLidar.h>
 #include <hardware/sensors/lidar/lms200.h>
@@ -19,12 +20,11 @@
 #include <QTextEdit>
 #include "adapters/joystickadapter.h"
 #include "adapters/lidaradapter.h"
+#include "adapters/positiontrackeradapter.h"
 #include <QDebug>
 #include <QFileDialog>
 
 #include <iostream>
-
-using namespace IGVC::Sensors;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -65,15 +65,21 @@ MainWindow::MainWindow(QWidget *parent) :
     _lidar = new LMS200();
     ui->hardwareStatusList->addItem("LIDAR");
 
-    _stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
+    //_stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
+    _stereoSource = new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml");
     ui->hardwareStatusList->addItem("Camera");
 
-    _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
-    ui->actionSimulatedGPS->setChecked(true);
+    _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 19200);
+    ui->actionOutback_A321->setChecked(true);
     ui->hardwareStatusList->addItem("GPS");
 
     _IMU = new Ardupilot();
     ui->hardwareStatusList->addItem("IMU");
+
+    _posTracker = new BasicPositionTracker;
+    _GPS->onNewData += &_posTracker->LonNewGPS;
+    _IMU->onNewData += &_posTracker->LonNewIMU;
+    ui->hardwareStatusList->addItem("Position Tracker");
 
     updateHardwareStatusIcons();
 
@@ -94,9 +100,14 @@ void MainWindow::setupMenus()
 
 MainWindow::~MainWindow()
 {
+    _GPS->onNewData -= &(_posTracker->LonNewGPS);
+    _IMU->onNewData -= &(_posTracker->LonNewIMU);
     delete ui;
     delete _joystick;
+    delete _posTracker;
     delete _GPS;
+    delete _IMU;
+    delete _stereoSource;
     delete _lidar;
 }
 
@@ -140,6 +151,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "IMU")
         {
             adapter = new IMUAdapter(_IMU);
+        }
+        else if(labelText == "Position Tracker")
+        {
+            adapter = new PositionTrackerAdapter(&(_posTracker->onNewPosition));
         }
         else
         {
@@ -294,7 +309,8 @@ void MainWindow::on_loadConfigButton_clicked()
 void MainWindow::on_actionHemisphere_A100_triggered()
 {
     ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
-    _GPS = new HemisphereA100GPS();
+    _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 4800);
+    _GPS->onNewData += &(_posTracker->LonNewGPS);
     updateHardwareStatusIcons();
 }
 
@@ -305,6 +321,7 @@ void MainWindow::on_actionSimulatedGPS_triggered()
     {
         ui->actionHemisphere_A100->setChecked(!ui->actionSimulatedGPS->isChecked());
         _GPS = new SimulatedGPS(fileName.toStdString());
+        _GPS->onNewData += &(_posTracker->LonNewGPS);
         updateHardwareStatusIcons();
     }
 }
@@ -321,4 +338,19 @@ void MainWindow::updateHardwareStatusIcons()
 void MainWindow::on_actionClearLogs_triggered()
 {
     Logger::Clear();
+}
+
+void MainWindow::closeEvent(QCloseEvent *e)
+{
+    mdiArea->closeAllSubWindows();
+    std::cout << mdiArea->subWindowList().size() << std::endl;
+    QMainWindow::closeEvent(e);
+}
+
+void MainWindow::on_actionOutback_A321_triggered()
+{
+    ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
+    _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 19200);
+    _GPS->onNewData += &(_posTracker->LonNewGPS);
+    updateHardwareStatusIcons();
 }

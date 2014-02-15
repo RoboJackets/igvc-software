@@ -347,6 +347,7 @@
       <string>GPS</string>
      </property>
      <addaction name="separator"/>
+     <addaction name="actionOutback_A321"/>
      <addaction name="actionHemisphere_A100"/>
      <addaction name="actionSimulatedGPS"/>
     </widget>
@@ -430,6 +431,14 @@
    </property>
    <property name="toolTip">
     <string>Delete All Log Files</string>
+   </property>
+  </action>
+  <action name="actionOutback_A321">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Outback A321</string>
    </property>
   </action>
  </widget>

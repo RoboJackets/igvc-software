@@ -17,7 +17,7 @@ class LidarAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit LidarAdapter(IGVC::Sensors::Lidar *lidar, QWidget *parent = 0);
+    explicit LidarAdapter(Lidar *lidar, QWidget *parent = 0);
     ~LidarAdapter();
 
 protected:
@@ -34,11 +34,11 @@ private:
 
     int NUMPTS;
 
-    IGVC::Sensors::Lidar *_lidar;
-    IGVC::Sensors::LidarState _data;
+    Lidar *_lidar;
+    LidarState _data;
 
-    void OnLidarData(IGVC::Sensors::LidarState state);
-    LISTENER(LidarAdapter, OnLidarData, IGVC::Sensors::LidarState)
+    void OnLidarData(LidarState state);
+    LISTENER(LidarAdapter, OnLidarData, LidarState)
 };
 
 #endif // LIDARADAPTER_H

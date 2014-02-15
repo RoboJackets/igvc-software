@@ -2,8 +2,7 @@
 #define GPSDATA_H
 
 #include "SensorData.hpp"
-//#include <sensors/GPS/GPS.hpp>
-#include "GPSAccuracy.hpp"
+#include <common/utils/gaussianvariable.hpp>
 
 /*
  * An enumeration of GPS quality states.
@@ -21,8 +20,7 @@ class GPSData : public SensorData
 public:
 
     inline GPSData()
-        : SensorData(),
-        _Accuracy()
+        : SensorData()
     {
         _Lat = 0;
         _Long = 0;
@@ -32,66 +30,61 @@ public:
 
     // for use with gpsfilereader only
     inline GPSData(double latitude, double longitude): SensorData(), _Lat(latitude), _Long(longitude),
-      _Heading(), _Speed(), _Accuracy()
+      _Heading(), _Speed()
     {
     }
 
     inline GPSData(double latitude, double longitude, double heading, double speed): SensorData(), _Lat(latitude), _Long(longitude),
-      _Heading(heading), _Speed(speed), _Accuracy()
+      _Heading(heading), _Speed(speed)
     {
     }
 
     inline GPSData(double latitude, double longitude, double heading, double speed, double time): SensorData(time), _Lat(latitude),
-     _Long(longitude), _Heading(heading), _Speed(speed), _Accuracy()
+     _Long(longitude), _Heading(heading), _Speed(speed)
     {
     }
 
-    inline double Lat(void)
+    inline double Lat()
     {
         return _Lat;
     }
 
-    inline double Long(void)
+    inline double Long()
     {
         return _Long;
     }
 
-    inline double Heading(void)
+    inline double Heading()
     {
         return _Heading;
     }
 
-    inline double Speed(void)
+    inline double Speed()
     {
         return _Speed;
     }
 
-    inline GPSAccuracy Accuracy(void)
+    inline double LatVar()
     {
-            return _Accuracy;
+        return _Lat.Variance;
     }
 
-    inline double LatVar(void)
+    inline double LongVar()
     {
-        return _Accuracy.LatVar();
+        return _Long.Variance;
     }
 
-    inline double LongVar(void)
+    inline double HeadingVar()
     {
-        return _Accuracy.LongVar();
+        return _Heading.Variance;
     }
 
-    inline double HeadingVar(void)
+    inline double SpeedVar()
     {
-        return _Accuracy.HeadingVar();
+        return _Speed.Variance;
     }
 
-    inline double SpeedVar(void)
-    {
-        return _Accuracy.SpeedVar();
-    }
-
-    inline GPS_QUALITY Quality(void)
+    inline GPS_QUALITY Quality()
     {
         return _quality;
     }
@@ -116,30 +109,25 @@ public:
         _Speed = val;
     }
 
-    inline void  Accuracy(GPSAccuracy val)
-    {
-            _Accuracy = val;
-    }
-
     /*
     inline void  LatVar(double val)
     {
-        //TODO set variance
+        _Lat.Variance = val;
     }
 
     inline void  LongVar(double val)
     {
-        //TODO set variance
+        _Long.Variance = val;
     }
 
     inline void  HeadingVar(double val)
     {
-        //TODO set variance
+        _Heading.Variance = val;
     }
 
     inline void  SpeedVar(double val)
     {
-        //TODO set variance
+        _Speed.Variance = val;
     }
 */
     inline void Quality(GPS_QUALITY val)
@@ -150,11 +138,9 @@ public:
     bool operator == (GPSData other)
     {
         return _Lat == other.Lat() &&
-                     _Long == other.Long() &&
-                     _Heading == other.Heading() &&
-                     _Speed == other.Speed();
-//                     _Accuracy == other.Accuracy() &&
-
+               _Long == other.Long() &&
+               _Heading == other.Heading() &&
+               _Speed == other.Speed();
     }
 
     friend std::ostream &operator<< (std::ostream &stream, GPSData &data)
@@ -164,16 +150,12 @@ public:
     }
 
     private:
-        double _Lat;
-        double _Long;
-        double _Heading;
-        double _Speed;
-        GPSAccuracy _Accuracy;
+        GaussianVariable<double> _Lat;
+        GaussianVariable<double> _Long;
+        GaussianVariable<double> _Heading;
+        GaussianVariable<double> _Speed;
         GPS_QUALITY _quality;
 
 };
-
-//GPSAccuracy GPSData::NAV200Default = GPSAccuracy(.0001, .0001, 3, .3);
-
 
 #endif // GPSDATA_H
