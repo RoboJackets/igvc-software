@@ -42,6 +42,61 @@ private Q_SLOTS:
         auto end = tracker.GetPosition();
         QCOMPARE(start, end);
     }
+
+    void testUpdateFromIMU_AccelX()
+    {
+        PositionTracker tracker;
+        Event<IMUData> testEvent;
+        testEvent += &tracker.LOnIMUData;
+        testEvent(IMUData(0,0,0,0,0,0));
+        auto start = tracker.GetPosition();
+
+        double time = 2.0;
+        double accel = 1.0;
+        double d = (0.0*time) + (0.5 * accel * time * time);
+
+        usleep(2000000);
+        auto data = IMUData(0,0,0,accel,0,0);
+        testEvent(data);
+        auto end = tracker.GetPosition();
+        QVERIFY(start != end);
+        QVERIFY(end.Heading == start.Heading);
+        QVERIFY(end.Longitude == start.Longitude);
+        QVERIFY(end.Latitude != start.Latitude);
+
+        std::cout << "Heading: "<<end.Heading << std::endl;
+        std::cout << "Latitude: "<<end.Latitude << std::endl;
+        std::cout << "Longitude: "<<end.Longitude << std::endl;
+
+    }
+
+    void testUpdateFromIMU_AccelY()
+    {
+        PositionTracker tracker;
+        Event<IMUData> testEvent;
+        testEvent += &tracker.LOnIMUData;
+        testEvent(IMUData(0,0,0,0,0,0));
+        auto start = tracker.GetPosition();
+
+        double time = 2.0;
+        double accel = 1.0;
+        double d = (0.0*time) + (0.5 * accel * time * time);
+
+        usleep(2000000);
+        auto data = IMUData(0,0,0,0,accel,0);
+        testEvent(data);
+        usleep(2000000);
+        auto data2 = IMUData(0,0,0,0,0.5,0);
+        testEvent(data2);
+        auto end = tracker.GetPosition();
+        QVERIFY(start != end);
+        //QVERIFY(end.Heading == start.Heading);
+        //QVERIFY(end.Longitude == start.Longitude);
+        //QVERIFY(end.Latitude != start.Latitude);
+        std::cout << "Heading: "<<end.Heading << std::endl;
+        std::cout << "Latitude: "<<end.Latitude << std::endl;
+        std::cout << "Longitude: "<<end.Longitude << std::endl;
+    }
 };
 
 #endif // TESTPOSITIONTRACKER_HPP
