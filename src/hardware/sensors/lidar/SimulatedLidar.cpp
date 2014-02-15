@@ -6,11 +6,6 @@
 #include <QErrorMessage>
 #include <sstream>
 
-namespace IGVC
-{
-namespace Sensors
-{
-
 SimulatedLidar::SimulatedLidar()
     : _data()
 {
@@ -147,5 +142,3 @@ std::vector<std::string> SimulatedLidar::StringSplit(const std::string &source, 
     return results;
 }
 
-}
-}

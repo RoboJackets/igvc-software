@@ -26,7 +26,6 @@ SOURCES += \
     ../src/gui/configtreemodel.cpp \
     ../src/gui/batteryindicator.cpp \
     ../src/hardware/sensors/gps/nmea.cpp \
-    ../src/hardware/sensors/gps/HemisphereA100GPS.cpp \
     ../src/hardware/sensors/joystick/Joystick.cpp \
     ../src/hardware/sensors/lidar/SimulatedLidar.cpp \
     ../src/hardware/sensors/lidar/NAV200.cpp \
@@ -43,7 +42,6 @@ SOURCES += \
     ../src/gui/adapters/mapadapter.cpp \
     ../src/intelligence/mapping/mapping.cpp \
     ../src/hardware/sensors/gps/simulatedgps.cpp \
-    ../src/intelligence/posetracking/RobotPosition.cpp \
     ../src/common/utils/ImageUtils.cpp \
     ../src/hardware/sensors/camera/CameraInfo.cpp \
     ../src/gui/adapters/gpsadapter.cpp \
@@ -51,9 +49,13 @@ SOURCES += \
     ../src/hardware/sensors/camera/StereoImageRepeater.cpp \
     ../src/hardware/sensors/camera/Bumblebee2.cpp \
     ../src/gui/adapters/imuadapter.cpp \
+    ../src/intelligence/posetracking/positiontracker.cpp \
     ../src/hardware/sensors/lidar/lms200.cpp \
     ../src/common/utils/GPSWaypointSource.cpp \
-    ../src/common/utils/gpsfilereader.cpp
+    ../src/common/utils/gpsfilereader.cpp \
+    ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
+    ../src/intelligence/posetracking/basicpositiontracker.cpp \
+    ../src/gui/adapters/positiontrackeradapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -66,7 +68,6 @@ HEADERS  += \
     ../src/gui/configtreemodel.h \
     ../src/gui/batteryindicator.h \
     ../src/hardware/sensors/gps/nmea.hpp \
-    ../src/hardware/sensors/gps/HemisphereA100GPS.h \
     ../src/hardware/sensors/gps/GPS.hpp \
     ../src/hardware/sensors/joystick/Joystick.h \
     ../src/hardware/sensors/lidar/SimulatedLidar.h \
@@ -78,7 +79,6 @@ HEADERS  += \
     ../src/common/datastructures/IMUData.hpp \
     ../src/common/datastructures/ImageData.hpp \
     ../src/common/datastructures/GPSData.h \
-    ../src/common/datastructures/GPSAccuracy.hpp \
     ../src/common/datastructures/DataPoint.hpp \
     ../src/common/datastructures/DataArray.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
@@ -99,7 +99,6 @@ HEADERS  += \
     ../src/intelligence/mapping/mapping.h \
     ../src/hardware/sensors/gps/simulatedgps.h \
     ../src/hardware/sensors/IMU/IMU.h \
-    ../src/intelligence/posetracking/RobotPosition.h \
     ../src/common/utils/ImageUtils.h \
     ../src/hardware/sensors/camera/CameraInfo.h \
     ../src/gui/adapters/gpsadapter.h \
@@ -109,12 +108,19 @@ HEADERS  += \
     ../src/hardware/sensors/camera/StereoImageRepeater.h \
     ../src/hardware/sensors/camera/Bumblebee2.h \
     ../src/gui/adapters/imuadapter.h \
+    ../src/intelligence/posetracking/positiontracker.h \
     ../src/hardware/sensors/lidar/lms200.h \
+    ../src/common/utils/gaussianvariable.hpp \
+    ../src/common/datastructures/GPSData.hpp \
     ../src/common/utils/GPSUtils.h \
     ../src/common/utils/AngleUtils.h
     ../src/common/datastructures/GPSData.hpp \
     ../src/common/utils/GPSWaypointSource.h \
-    ../src/common/utils/gpsfilereader.h
+    ../src/common/utils/gpsfilereader.h \
+    ../src/hardware/sensors/gps/nmeacompatiblegps.h \
+    ../src/intelligence/posetracking/basicpositiontracker.h \
+    ../src/common/datastructures/robotposition.hpp \
+    ../src/gui/adapters/positiontrackeradapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -123,7 +129,8 @@ FORMS    += \
     ../src/gui/adapters/mapadapter.ui \
     ../src/gui/adapters/cameraadapter.ui \
     ../src/gui/adapters/gpsadapter.ui \
-    ../src/gui/adapters/imuadapter.ui
+    ../src/gui/adapters/imuadapter.ui \
+    ../src/gui/adapters/positiontrackeradapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
