@@ -4,19 +4,29 @@
 #include <common/utils/StringUtils.hpp>
 #include <common/logger/logger.h>
 
-namespace IGVC {
-namespace Sensors {
-
-
 SimulatedGPS::SimulatedGPS(std::string file) : _running(true)
 {
-    GPSFileReader::read(file, _data);
+    try {
+        GPSFileReader::read(file, _data);
+        _open = true;
+    } catch (GPSFileNotFoundException) {
+        std::stringstream msg;
+        msg << "[SimulatedGPS] Could not find file : " << file;
+        Logger::Log(LogLevel::Error, msg.str());
+        _open = false;
+    } catch (GPSFileFormatException) {
+        std::stringstream msg;
+        msg << "[SimulatedGPS] File " << file << " is not formatted correctly.";
+        Logger::Log(LogLevel::Error, msg.str());
+        _open = false;
+    }
+    _delay = 100000;
     _thread = boost::thread(boost::bind(&SimulatedGPS::threadRun, this));
 }
 
 bool SimulatedGPS::StateIsAvailable()
 {
-    return true;
+    return _open && _data.size() > 0;
 }
 
 GPSData SimulatedGPS::GetState()
@@ -38,7 +48,7 @@ GPSData SimulatedGPS::GetStateAtTime(timeval)
 
 bool SimulatedGPS::isOpen()
 {
-    return _data.size() > 0;
+    return _open && _data.size() > 0;
 }
 
 void SimulatedGPS::threadRun()
@@ -48,8 +58,8 @@ void SimulatedGPS::threadRun()
         if(_data.size() > 0)
         {
             onNewData(GetState());
-            sleep(1);
         }
+        usleep(_delay);
     }
 }
 
@@ -59,5 +69,8 @@ SimulatedGPS::~SimulatedGPS()
     _thread.join();
 }
 
-}
+void SimulatedGPS::setHz(double Hz)
+{
+    // 1 million / ( 1 / x seconds) = x million microseconds
+    _delay = 1000000/Hz;
 }

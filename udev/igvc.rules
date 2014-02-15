@@ -1,4 +1,5 @@
 SUBSYSTEM == "tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303",ATTRS{bcdDevice}=="0202", NAME:="ttyGPS"
+SUBSYSTEM == "tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303",ATTRS{bcdDevice}=="0300", NAME:="ttyGPS"
 SUBSYSTEM == "tty", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0010",ATTRS{bcdDevice}=="0001", NAME:="ttyIMU"
 KERNEL=="ttyACM?", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", ATTRS{serial}=="74934303030351909112",SYMLINK+="igvc_2013_motor_arduino"
 KERNEL=="ttyACM?", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", ATTRS{serial}=="74937303836351E06160",SYMLINK+="igvc_2013_light_arduino"
