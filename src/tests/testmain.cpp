@@ -1,15 +1,23 @@
 #include <QTest>
-#include "teststringutils.hpp"
-#include "testgpsutils.h"
 #include "testangleutils.h"
 #include "testgpsreader.hpp"
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include "teststringutils.hpp"
+#include "testpositiontracker.hpp"
+#include "testgpsutils.h"
+#include "capturegpsandpostracker.hpp"
 
-void RunTestCase(QObject* testCase, std::vector<std::string> args)
+void RunTestCase(QObject* testCase, std::vector<std::string> args, bool runByDefault = true)
 {
-    if(args.size() == 0 || std::find(args.begin(), args.end(), testCase->metaObject()->className()) != args.end())
+    if(runByDefault && ( args.size() == 0 ||
+                         std::find(args.begin(), args.end(), testCase->metaObject()->className()) != args.end() ||
+                         std::find(args.begin(), args.end(), "all") != args.end()))
+    {
+        QTest::qExec(testCase);
+    }
+    else if(std::find(args.begin(), args.end(), testCase->metaObject()->className()) != args.end())
     {
         QTest::qExec(testCase);
     }
@@ -22,11 +30,9 @@ int main(int argc, const char* argv[])
     for(int i = 0; i < argc; i++)
         if(argv[i][0] != '/')
             args.push_back(argv[i]);
-    if(std::find(args.begin(), args.end(), "all") != args.end())
-        args.clear();
     if(args.size() == 0)
     {
-        std::cout << "Running all tests." << std::endl;
+        std::cout << "Running all default tests." << std::endl;
     }
     else
     {
@@ -38,7 +44,9 @@ int main(int argc, const char* argv[])
 
     // Execute selected test cases
     RunTestCase(new TestStringUtils(), args);
+    RunTestCase(new TestPositionTracker(), args);
     RunTestCase(new TestGPSUtils(), args);
     RunTestCase(new TestAngleUtils(), args);
     RunTestCase(new TestGPSReader(), args);
+    RunTestCase(new CaptureGPSAndPosTracker(), args, false);
 }

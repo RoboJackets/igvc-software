@@ -41,4 +41,13 @@ class GPSUtils
             newLat = newLat * (180.0/M_PI);
             newLon = newLon * (180.0/M_PI);
         }
+
+        /**
+         * @brief Takes two GPS coordinates and outputs X and Y displacements.
+         */
+        static void coordsToMetricXY(double lat1, double lon1, double lat2, double lon2, double &dX, double &dY)
+        {
+            dX = std::copysign(1.0, lon2-lon1) * coordsToMeter(lat1, lon1, lat1, lon2);
+            dY = std::copysign(1.0, lat2-lat1) * coordsToMeter(lat1, lon1, lat2, lon1);
+        }
 };
