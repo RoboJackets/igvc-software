@@ -17,6 +17,7 @@ public:
     RobotPosition GetPosition();
 
     Event<RobotPosition> onNewPosition;
+    Event<int> onOriginPercentage;
 
 private:
     void onNewGPS(GPSData data);
