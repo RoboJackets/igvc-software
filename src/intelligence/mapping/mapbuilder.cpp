@@ -51,7 +51,7 @@ void MapBuilder::OnLidarData(LidarState state)
 
     //Transform current cloud to match robot's position (determined via odometry)
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_transformed (new pcl::PointCloud<pcl::PointXYZ>);
-    double mx = -pose.X;
+    double mx =  pose.X;
     double my =  pose.Y;
     double mt = AngleUtils::degToRads(pose.Heading);
     Eigen::Vector3f translation(mx, my, 0);
