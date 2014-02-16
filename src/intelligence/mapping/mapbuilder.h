@@ -23,6 +23,8 @@ public:
 
     void Clear();
 
+    void ChangeLidar(Lidar *device);
+
 private:
 
     void OnLidarData(LidarState state);

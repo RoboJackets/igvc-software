@@ -73,6 +73,20 @@ void MapBuilder::Clear()
     cloud->clear();
 }
 
+void MapBuilder::ChangeLidar(Lidar *device)
+{
+    if(_lidar != nullptr)
+    {
+        _lidar->onNewData -= &LOnLidarData;
+    }
+    _lidar = device;
+    if(_lidar != nullptr)
+    {
+        _lidar->onNewData += &LOnLidarData;
+    }
+
+}
+
 /*
 void Mapping::saveCloud(std::string path)
 {
