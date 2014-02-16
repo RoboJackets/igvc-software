@@ -3,28 +3,36 @@
 #include <QPainter>
 #include <cmath>
 
-PositionTrackerAdapter::PositionTrackerAdapter(Event<RobotPosition> *src, QWidget *parent) :
+PositionTrackerAdapter::PositionTrackerAdapter(BasicPositionTracker *src, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PositionTrackerAdapter),
-    source(src),
+    posTracker(src),
     minx(-0.5),
     maxx( 0.5),
     miny(-0.5),
     maxy( 0.5),
-    LonNewPosition(this)
+    LonNewPosition(this),
+    LonOriginPercentage(this)
 {
     ui->setupUi(this);
 
-    if(source != nullptr)
-        (*source) += &LonNewPosition;
+    if(posTracker != nullptr)
+    {
+        posTracker->onNewPosition += &LonNewPosition;
+        posTracker->onOriginPercentage += &LonOriginPercentage;
+    }
 
     connect(this, SIGNAL(updateBecauseOfData()), this, SLOT(update()));
 }
 
 PositionTrackerAdapter::~PositionTrackerAdapter()
 {
-    if(source != nullptr)
-        (*source) -= &LonNewPosition;
+    if(posTracker != nullptr)
+    {
+        posTracker->onNewPosition -= &LonNewPosition;
+        posTracker->onOriginPercentage -= &LonOriginPercentage;
+        posTracker = nullptr;
+    }
     positions.clear();
     delete ui;
 }
@@ -88,6 +96,13 @@ void PositionTrackerAdapter::onNewPosition(RobotPosition pos)
     miny = std::min(pos.Y, miny);
     maxy = std::max(pos.Y, maxy);
     updateBecauseOfData();
+}
+
+void PositionTrackerAdapter::onOriginPercentage(int percent)
+{
+    ui->progressBar->setValue(percent);
+    if(percent == 100)
+        ui->progressBar->hide();
 }
 
 void PositionTrackerAdapter::on_pushButton_clicked()
