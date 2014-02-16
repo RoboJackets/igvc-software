@@ -15,6 +15,7 @@
 #include <hardware/sensors/IMU/IMU.h>
 #include <hardware/sensors/lidar/Lidar.h>
 #include <intelligence/posetracking/basicpositiontracker.h>
+#include <intelligence/mapping/mapbuilder.h>
 
 namespace Ui {
 class MainWindow;
@@ -92,6 +93,8 @@ private:
     Lidar *_lidar;
 
     BasicPositionTracker *_posTracker;
+
+    MapBuilder *_mapper;
 
     bool isRunning, isPaused;
 

@@ -5,6 +5,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <common/events/Event.hpp>
+#include <intelligence/mapping/mapbuilder.h>
 
 namespace Ui {
 class MapAdapter;
@@ -19,10 +20,8 @@ class MapAdapter : public QWidget
     Q_OBJECT
     
 public:
-    explicit MapAdapter(QWidget *parent = 0);
+    explicit MapAdapter(MapBuilder *mapper, QWidget *parent = 0);
     ~MapAdapter();
-
-    LISTENER(MapAdapter, onNewMap, pcl::PointCloud<pcl::PointXYZ>*)
 
 protected:
     void mousePressEvent(QMouseEvent *e);
@@ -33,6 +32,8 @@ private slots:
     void on_scaleSlider_sliderMoved(int position);
 
     void on_homeButton_clicked();
+
+    void on_pushButton_clicked();
 
 private:
     Ui::MapAdapter *ui;
@@ -46,13 +47,16 @@ private:
     bool _isDragging;
     QPoint _previousMousePosition;
 
-    pcl::PointCloud<pcl::PointXYZ> *_map;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr _map;
 
     void setScale(int scale);
 
-    void onNewMap(pcl::PointCloud<pcl::PointXYZ> *map);
+    void onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr map);
+    LISTENER(MapAdapter, onNewMap, pcl::PointCloud<pcl::PointXYZ>::Ptr)
 
     void paintEvent(QPaintEvent *);
+
+    MapBuilder *_mapper;
 };
 
 #endif // MAPADAPTER_H
