@@ -3,6 +3,7 @@
 #include <cmath>
 #include <common/utils/AngleUtils.h>
 #include <pcl/common/transforms.h>
+#include <common/config/configmanager.h>
 
 
 MapBuilder::MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker):LOnLidarData(this)
@@ -34,6 +35,8 @@ MapBuilder::~MapBuilder()
 void MapBuilder::OnLidarData(LidarState state)
 {
     RobotPosition pose = poseTracker->GetPosition();
+    double lidarOffset_y = ConfigManager::Instance().getValue("MapBuilder", "lidarOffset_y", 0);
+    double lidarOffset_x = ConfigManager::Instance().getValue("MapBuilder", "lidarOffset_x", 0);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_lidar(new pcl::PointCloud<pcl::PointXYZ>);
 
@@ -42,8 +45,8 @@ void MapBuilder::OnLidarData(LidarState state)
         if(state.points[i].valid)
         {
             pcl::PointXYZ p;
-            p.x = cos(state.points[i].angle)*state.points[i].distance;
-            p.y = -sin(state.points[i].angle)*state.points[i].distance;
+            p.x = cos(state.points[i].angle)*state.points[i].distance + lidarOffset_x;
+            p.y = -sin(state.points[i].angle)*state.points[i].distance - lidarOffset_y;
             p.z = 0;
             cloud_lidar->points.push_back(p);
         }
