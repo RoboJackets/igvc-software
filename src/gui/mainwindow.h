@@ -67,6 +67,10 @@ private slots:
 
     void on_actionOutback_A321_triggered();
 
+    void on_actionSimulatedLidar_triggered();
+
+    void on_actionLMS_200_triggered();
+
 protected:
     void closeEvent(QCloseEvent *);
 

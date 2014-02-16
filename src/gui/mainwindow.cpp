@@ -64,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    _lidar = new SimulatedLidar();
     _lidar = new LMS200();
     ui->hardwareStatusList->addItem("LIDAR");
+    ui->actionLMS_200->setChecked(true);
 
     //_stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
     _stereoSource = new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml");
@@ -311,7 +312,9 @@ void MainWindow::on_loadConfigButton_clicked()
 
 void MainWindow::on_actionHemisphere_A100_triggered()
 {
-    ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
+    ui->actionSimulatedGPS->setChecked(false);
+    ui->actionHemisphere_A100->setChecked(true);
+    ui->actionOutback_A321->setChecked(false);
     _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 4800);
     _GPS->onNewData += &(_posTracker->LonNewGPS);
     updateHardwareStatusIcons();
@@ -322,7 +325,9 @@ void MainWindow::on_actionSimulatedGPS_triggered()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated GPS Data File"), "", tr("Text Files(*.txt)"));
     if(fileName.length() > 0)
     {
-        ui->actionHemisphere_A100->setChecked(!ui->actionSimulatedGPS->isChecked());
+        ui->actionSimulatedGPS->setChecked(true);
+        ui->actionHemisphere_A100->setChecked(false);
+        ui->actionOutback_A321->setChecked(false);
         _GPS = new SimulatedGPS(fileName.toStdString());
         _GPS->onNewData += &(_posTracker->LonNewGPS);
         updateHardwareStatusIcons();
@@ -352,8 +357,36 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 void MainWindow::on_actionOutback_A321_triggered()
 {
-    ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
+    ui->actionSimulatedGPS->setChecked(false);
+    ui->actionHemisphere_A100->setChecked(false);
+    ui->actionOutback_A321->setChecked(true);
     _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 19200);
     _GPS->onNewData += &(_posTracker->LonNewGPS);
+    updateHardwareStatusIcons();
+}
+
+void MainWindow::on_actionSimulatedLidar_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated Lidar Data File"), "", tr("Text Files(*.txt)"));
+    if(fileName.length() > 0)
+    {
+        ui->actionLMS_200->setChecked(false);
+        ui->actionSimulatedLidar->setChecked(true);
+        SimulatedLidar *newDevice = new SimulatedLidar;
+        newDevice->loadFile(fileName.toStdString().c_str());
+        _mapper->ChangeLidar(newDevice);
+        _mapper->Clear();
+        _lidar = newDevice;
+        updateHardwareStatusIcons();
+    }
+}
+
+void MainWindow::on_actionLMS_200_triggered()
+{
+    ui->actionLMS_200->setChecked(true);
+    ui->actionSimulatedLidar->setChecked(false);
+    _lidar = new LMS200;
+    _mapper->ChangeLidar(_lidar);
+    _mapper->Clear();
     updateHardwareStatusIcons();
 }
