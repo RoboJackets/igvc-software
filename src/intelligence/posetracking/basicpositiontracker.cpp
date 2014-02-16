@@ -23,7 +23,7 @@ void BasicPositionTracker::onNewGPS(GPSData data)
         origin.Lat(  origin.Lat()  + data.Lat() );
         origin.Long( origin.Long() + data.Long() );
         originPointsRecorded++;
-        std::cout << numPointsForOrigin - originPointsRecorded << " " << data.Lat() << " " << data.Long() << std::endl;
+        onOriginPercentage((int)( ( (double)originPointsRecorded/(double)numPointsForOrigin) * 100 ));
         if(originPointsRecorded == numPointsForOrigin)
         {
             std::stringstream msg;
