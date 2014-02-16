@@ -8,6 +8,7 @@
 #include "nmeacompatiblegps.h"
 #include "nmea.hpp"
 #include <string>
+#include <common/logger/logger.h>
 
 NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
     :serialPort(devicePath, baudRate),
@@ -18,7 +19,7 @@ NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
     serialPort.onNewLine += &LonNewSerialLine;
 	maxBufferLength = 10;
 	serialPort.startEvents();
-    std::cout << "GPS inited" << std::endl;
+    Logger::Log(LogLevel::Info, "GPS Initialized");
 }
 
 void NMEACompatibleGPS::onNewSerialLine(string line) {
