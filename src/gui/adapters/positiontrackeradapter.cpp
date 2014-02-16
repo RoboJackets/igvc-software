@@ -31,7 +31,25 @@ PositionTrackerAdapter::~PositionTrackerAdapter()
 
 void PositionTrackerAdapter::paintEvent(QPaintEvent *)
 {
+    double scale = 100 * ( (maxx-minx) / this->width() );
+    ui->scaleLabel->setText(tr("%1 m").arg(scale,1));
+
     QPainter painter(this);
+
+    painter.setPen(Qt::blue);
+    int scaleLineLength = 100;
+    painter.drawLine(ui->scaleLabel->x() + (ui->scaleLabel->width()/2) - scaleLineLength/2,
+                     ui->scaleLabel->y() ,
+                     ui->scaleLabel->x() + (ui->scaleLabel->width()/2) + scaleLineLength/2,
+                     ui->scaleLabel->y() );
+    painter.drawLine(ui->scaleLabel->x() + (ui->scaleLabel->width()/2) - scaleLineLength/2,
+                     ui->scaleLabel->y() - 2,
+                     ui->scaleLabel->x() + (ui->scaleLabel->width()/2) - scaleLineLength/2,
+                     ui->scaleLabel->y() + 2);
+    painter.drawLine(ui->scaleLabel->x() + (ui->scaleLabel->width()/2) + scaleLineLength/2,
+                     ui->scaleLabel->y() - 2,
+                     ui->scaleLabel->x() + (ui->scaleLabel->width()/2) + scaleLineLength/2,
+                     ui->scaleLabel->y() + 2);
 
     if(positions.size() > 0)
     {
