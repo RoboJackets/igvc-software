@@ -158,7 +158,7 @@ void MainWindow::openHardwareView(QModelIndex index)
         }
         else if(labelText == "Position Tracker")
         {
-            adapter = new PositionTrackerAdapter(&(_posTracker->onNewPosition));
+            adapter = new PositionTrackerAdapter(_posTracker);
         }
         else
         {

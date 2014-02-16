@@ -2,8 +2,7 @@
 #define POSITIONTRACKERADAPTER_H
 
 #include <QWidget>
-#include <common/datastructures/robotposition.hpp>
-#include <common/events/Event.hpp>
+#include <intelligence/posetracking/basicpositiontracker.h>
 #include <vector>
 
 namespace Ui {
@@ -15,7 +14,7 @@ class PositionTrackerAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit PositionTrackerAdapter(Event<RobotPosition> *src, QWidget *parent = 0);
+    explicit PositionTrackerAdapter(BasicPositionTracker *src, QWidget *parent = 0);
     ~PositionTrackerAdapter();
 
 protected:
@@ -30,7 +29,7 @@ private slots:
 private:
     Ui::PositionTrackerAdapter *ui;
 
-    Event<RobotPosition> *source;
+    BasicPositionTracker *posTracker;
 
     std::vector<RobotPosition> positions;
 
@@ -38,6 +37,9 @@ private:
 
     void onNewPosition(RobotPosition pos);
     LISTENER(PositionTrackerAdapter, onNewPosition, RobotPosition)
+
+    void onOriginPercentage(int percent);
+    LISTENER(PositionTrackerAdapter, onOriginPercentage, int)
 };
 
 #endif // POSITIONTRACKERADAPTER_H
