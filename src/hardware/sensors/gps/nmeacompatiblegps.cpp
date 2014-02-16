@@ -19,7 +19,10 @@ NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
     serialPort.onNewLine += &LonNewSerialLine;
 	maxBufferLength = 10;
 	serialPort.startEvents();
-    Logger::Log(LogLevel::Info, "GPS Initialized");
+    if(serialPort.isConnected())
+        Logger::Log(LogLevel::Info, "GPS Initialized");
+    else
+        Logger::Log(LogLevel::Error, "GPS failed to initialize");
 }
 
 void NMEACompatibleGPS::onNewSerialLine(string line) {
