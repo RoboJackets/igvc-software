@@ -6,14 +6,17 @@
 
 using namespace pcl;
 
-MapAdapter::MapAdapter(QWidget *parent) :
+MapAdapter::MapAdapter(MapBuilder *mapper, QWidget *parent) :
     QWidget(parent),
-    LonNewMap(this),
     ui(new Ui::MapAdapter),
     _scale(20),
-    _map(0)
+    LonNewMap(this),
+    _mapper(mapper)
 {
     ui->setupUi(this);
+
+    if(_mapper != nullptr)
+        _mapper->onNewMap += &LonNewMap;
 }
 
 void MapAdapter::setScale(int scale)
@@ -25,7 +28,7 @@ void MapAdapter::setScale(int scale)
     update();
 }
 
-void MapAdapter::onNewMap(pcl::PointCloud<PointXYZ> *map)
+void MapAdapter::onNewMap(pcl::PointCloud<PointXYZ>::Ptr map)
 {
     _map = map;
     update();
@@ -77,6 +80,8 @@ void MapAdapter::paintEvent(QPaintEvent *)
 MapAdapter::~MapAdapter()
 {
     delete ui;
+    if(_mapper != nullptr)
+        _mapper->onNewMap -= &LonNewMap;
 }
 
 void MapAdapter::on_scaleSlider_sliderMoved(int position)
@@ -109,4 +114,9 @@ void MapAdapter::mouseMoveEvent(QMouseEvent *e)
 void MapAdapter::wheelEvent(QWheelEvent *e)
 {
     setScale(_scale + ( e->angleDelta().y() / 30 ) );
+}
+
+void MapAdapter::on_pushButton_clicked()
+{
+    _mapper->Clear();
 }
