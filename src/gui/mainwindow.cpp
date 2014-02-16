@@ -69,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _stereoSource = new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml");
     ui->hardwareStatusList->addItem("Camera");
 
+//    _GPS = new SimulatedGPS("");
     _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 19200);
     ui->actionOutback_A321->setChecked(true);
     ui->hardwareStatusList->addItem("GPS");
@@ -80,6 +81,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _GPS->onNewData += &_posTracker->LonNewGPS;
     _IMU->onNewData += &_posTracker->LonNewIMU;
     ui->hardwareStatusList->addItem("Position Tracker");
+
+    _mapper = new MapBuilder(_lidar, _posTracker);
 
     updateHardwareStatusIcons();
 
@@ -138,7 +141,7 @@ void MainWindow::openHardwareView(QModelIndex index)
 	}
         else if(labelText == "Map")
         {
-            adapter = new MapAdapter();
+            adapter = new MapAdapter(_mapper);
         }
         else if(labelText == "GPS")
         {
