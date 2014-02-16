@@ -22,9 +22,13 @@ protected:
 
 Q_SIGNALS:
     void updateBecauseOfData();
+    void setProgress(int);
 
 private slots:
-    void on_pushButton_clicked();
+
+    void on_resetButton_clicked();
+
+    void on_clearButton_clicked();
 
 private:
     Ui::PositionTrackerAdapter *ui;
