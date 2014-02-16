@@ -161,7 +161,7 @@ PRE_TARGETDEPS += /usr/lib/libboost_system.a
 INCLUDEPATH += /usr/include/pcl-1.7
 DEPENDPATH += /usr/include/pcl-1.7
 
-LIBS += -L/usr/lib -lpcl_common -lpcl_visualization -lpcl_kdtree
+LIBS += -L/usr/lib -lpcl_common -lpcl_visualization -lpcl_kdtree -lpcl_filters
 
 # VTK (PCL Dependency)
 INCLUDEPATH += /usr/include/vtk-5.8

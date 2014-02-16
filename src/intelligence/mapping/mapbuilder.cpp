@@ -3,6 +3,7 @@
 #include <cmath>
 #include <common/utils/AngleUtils.h>
 #include <pcl/common/transforms.h>
+#include <pcl/filters/voxel_grid.h>
 #include <common/config/configmanager.h>
 
 
@@ -62,6 +63,15 @@ void MapBuilder::OnLidarData(LidarState state)
     pcl::transformPointCloud(*cloud_lidar, *cloud_transformed, translation, rotation);
 
     (*cloud) += (*cloud_transformed);
+
+    //Run map cloud through a VoxelGrid to remove any duplicate points
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_removedDuplicates (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::VoxelGrid<pcl::PointXYZ> duplicateRemover;
+    duplicateRemover.setInputCloud(cloud);
+    duplicateRemover.setLeafSize (0.05f, 0.05f, 0.05f);
+    duplicateRemover.filter(*cloud_removedDuplicates);
+
+    cloud.swap(cloud_removedDuplicates);
 
     onNewMap(cloud);
 }
