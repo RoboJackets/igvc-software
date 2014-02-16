@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="3">
+   <item row="1" column="4">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -27,7 +27,7 @@
      </property>
     </spacer>
    </item>
-   <item row="2" column="0">
+   <item row="2" column="1">
     <spacer name="horizontalSpacer_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -43,20 +43,17 @@
      </property>
     </spacer>
    </item>
-   <item row="2" column="3">
-    <widget class="QPushButton" name="pushButton">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
+   <item row="2" column="2">
+    <widget class="QLabel" name="scaleLabel">
+     <property name="styleSheet">
+      <string notr="true">color: rgb(0, 0, 255);</string>
      </property>
      <property name="text">
-      <string>Clear</string>
+      <string>0.0</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="2">
+   <item row="2" column="3">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -69,20 +66,30 @@
      </property>
     </spacer>
    </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="scaleLabel">
-     <property name="styleSheet">
-      <string notr="true">color: rgb(0, 0, 255);</string>
+   <item row="2" column="0">
+    <widget class="QPushButton" name="clearButton">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
      </property>
      <property name="text">
-      <string>0.0</string>
+      <string>Clear</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="6">
+   <item row="0" column="0" colspan="7">
     <widget class="QProgressBar" name="progressBar">
      <property name="value">
-      <number>24</number>
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="4">
+    <widget class="QPushButton" name="resetButton">
+     <property name="text">
+      <string>Reset</string>
      </property>
     </widget>
    </item>
