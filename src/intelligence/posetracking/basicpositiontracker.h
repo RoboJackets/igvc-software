@@ -16,6 +16,8 @@ public:
 
     RobotPosition GetPosition();
 
+    void Reset();
+
     Event<RobotPosition> onNewPosition;
     Event<int> onOriginPercentage;
 

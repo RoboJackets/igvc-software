@@ -23,6 +23,7 @@ PositionTrackerAdapter::PositionTrackerAdapter(BasicPositionTracker *src, QWidge
     }
 
     connect(this, SIGNAL(updateBecauseOfData()), this, SLOT(update()));
+    connect(this, SIGNAL(setProgress(int)), ui->progressBar, SLOT(setValue(int)));
 }
 
 PositionTrackerAdapter::~PositionTrackerAdapter()
@@ -100,12 +101,19 @@ void PositionTrackerAdapter::onNewPosition(RobotPosition pos)
 
 void PositionTrackerAdapter::onOriginPercentage(int percent)
 {
-    ui->progressBar->setValue(percent);
+    setProgress(percent);
     if(percent == 100)
         ui->progressBar->hide();
 }
 
-void PositionTrackerAdapter::on_pushButton_clicked()
+void PositionTrackerAdapter::on_resetButton_clicked()
+{
+    on_clearButton_clicked();
+    posTracker->Reset();
+    ui->progressBar->show();
+}
+
+void PositionTrackerAdapter::on_clearButton_clicked()
 {
     positions.clear();
     minx = -0.5;
