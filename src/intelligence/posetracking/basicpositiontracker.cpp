@@ -7,6 +7,7 @@ BasicPositionTracker::BasicPositionTracker()
     : LonNewGPS(this),
       LonNewIMU(this)
 {
+    originPointsRecorded = 0;
 }
 
 RobotPosition BasicPositionTracker::GetPosition()
@@ -19,12 +20,15 @@ void BasicPositionTracker::onNewGPS(GPSData data)
     int numPointsForOrigin = ConfigManager::Instance().getValue("BasicPoseTracker", "PointsForOrigin", 300);
     if(originPointsRecorded < numPointsForOrigin)
     {
-        origin.Lat(  origin.Lat()  + ( data.Lat()  / numPointsForOrigin ) );
-        origin.Long( origin.Long() + ( data.Long() / numPointsForOrigin ) );
+        origin.Lat(  origin.Lat()  + data.Lat() );
+        origin.Long( origin.Long() + data.Long() );
         originPointsRecorded++;
+        std::cout << numPointsForOrigin - originPointsRecorded << " " << data.Lat() << " " << data.Long() << std::endl;
         if(originPointsRecorded == numPointsForOrigin)
         {
             std::stringstream msg;
+            origin.Lat(origin.Lat() / (double)numPointsForOrigin);
+            origin.Long(origin.Long() / (double)numPointsForOrigin);
             msg << "Position tracker origin found : LAT " << origin.Lat() << "\tLONG " << origin.Long();
             Logger::Log(LogLevel::Info, msg.str());
         }
