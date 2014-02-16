@@ -50,8 +50,9 @@ void MapAdapter::paintEvent(QPaintEvent *)
     // Draw robot position
     painter.setPen(Qt::red);
     RobotPosition pos = _posTracker->GetPosition();
-    painter.drawEllipse(QPoint(pos.X, pos.Y) + center, 5, 5);
-    painter.drawLine(QPoint(pos.X, pos.Y) + center, QPoint(5*sin(AngleUtils::degToRads(pos.Heading)),5*cos(AngleUtils::degToRads(180+pos.Heading))) + center);
+    QPoint posMark = _scale * QPoint(pos.X, pos.Y) + center;
+    painter.drawEllipse(posMark, 5, 5);
+    painter.drawLine(posMark, posMark + QPoint(5*sin(AngleUtils::degToRads(pos.Heading)),5*cos(AngleUtils::degToRads(180+pos.Heading))));
 
     // Draw map
     if(_map != NULL)
