@@ -3,15 +3,17 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <common/utils/AngleUtils.h>
 
 using namespace pcl;
 
-MapAdapter::MapAdapter(MapBuilder *mapper, QWidget *parent) :
+MapAdapter::MapAdapter(MapBuilder *mapper, BasicPositionTracker *posTracker, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MapAdapter),
     _scale(20),
     LonNewMap(this),
-    _mapper(mapper)
+    _mapper(mapper),
+    _posTracker(posTracker)
 {
     ui->setupUi(this);
 
@@ -44,6 +46,12 @@ void MapAdapter::paintEvent(QPaintEvent *)
     painter.drawLine(center, center + QPoint(0,-1*_scale));
     painter.setPen(Qt::blue);
     painter.drawLine(center, center + QPoint(1*_scale,0));
+
+    // Draw robot position
+    painter.setPen(Qt::red);
+    RobotPosition pos = _posTracker->GetPosition();
+    painter.drawEllipse(QPoint(pos.X, pos.Y) + center, 5, 5);
+    painter.drawLine(QPoint(pos.X, pos.Y) + center, QPoint(5*sin(AngleUtils::degToRads(pos.Heading)),5*cos(AngleUtils::degToRads(180+pos.Heading))) + center);
 
     // Draw map
     if(_map != NULL)
