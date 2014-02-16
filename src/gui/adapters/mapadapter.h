@@ -6,6 +6,7 @@
 #include <pcl/point_types.h>
 #include <common/events/Event.hpp>
 #include <intelligence/mapping/mapbuilder.h>
+#include <intelligence/posetracking/basicpositiontracker.h>
 
 namespace Ui {
 class MapAdapter;
@@ -20,7 +21,7 @@ class MapAdapter : public QWidget
     Q_OBJECT
     
 public:
-    explicit MapAdapter(MapBuilder *mapper, QWidget *parent = 0);
+    explicit MapAdapter(MapBuilder *mapper, BasicPositionTracker *posTracker, QWidget *parent = 0);
     ~MapAdapter();
 
 protected:
@@ -57,6 +58,8 @@ private:
     void paintEvent(QPaintEvent *);
 
     MapBuilder *_mapper;
+
+    BasicPositionTracker *_posTracker;
 };
 
 #endif // MAPADAPTER_H
