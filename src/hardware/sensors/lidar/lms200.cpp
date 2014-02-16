@@ -38,7 +38,7 @@ void LMS200::thread_run()
         unsigned int values[SickLMS::SICK_MAX_NUM_MEASUREMENTS] = {0};
         unsigned int num_values_returned = 0;
         try {
-        _device.GetSickScan(values, num_values_returned);
+            _device.GetSickScan(values, num_values_returned);
         } catch(...) {
             Logger::Log(LogLevel::Error, "Failed to get scan data from SICK LMS200 device.");
             continue;
