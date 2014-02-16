@@ -142,7 +142,7 @@ void MainWindow::openHardwareView(QModelIndex index)
 	}
         else if(labelText == "Map")
         {
-            adapter = new MapAdapter(_mapper);
+            adapter = new MapAdapter(_mapper, _posTracker);
         }
         else if(labelText == "GPS")
         {
