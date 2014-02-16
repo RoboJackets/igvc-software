@@ -15,6 +15,14 @@ RobotPosition BasicPositionTracker::GetPosition()
     return currentPosition;
 }
 
+void BasicPositionTracker::Reset()
+{
+    origin.Lat(0);
+    origin.Long(0);
+    origin.Heading(0);
+    originPointsRecorded = 0;
+}
+
 void BasicPositionTracker::onNewGPS(GPSData data)
 {
     int numPointsForOrigin = ConfigManager::Instance().getValue("BasicPoseTracker", "PointsForOrigin", 300);
