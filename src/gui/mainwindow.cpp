@@ -351,7 +351,6 @@ void MainWindow::on_actionClearLogs_triggered()
 void MainWindow::closeEvent(QCloseEvent *e)
 {
     mdiArea->closeAllSubWindows();
-    std::cout << mdiArea->subWindowList().size() << std::endl;
     QMainWindow::closeEvent(e);
 }
 
