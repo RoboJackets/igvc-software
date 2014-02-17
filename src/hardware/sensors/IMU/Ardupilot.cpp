@@ -9,16 +9,15 @@
 using namespace std;
 
 Ardupilot::Ardupilot()
- : ardupilotPort("/dev/ttyIMU", 115200),
-   LonNewSerialLine(this)
+ : ardupilotPort("/dev/ttyIMU", 115200)
 {
-    ardupilotPort.onNewLine += &LonNewSerialLine;
+    connect(&ardupilotPort, SIGNAL(onNewLine(std::string)), this, SLOT(onNewSerialLine(std::string)));
     ardupilotPort.startEvents();
 }
 
 Ardupilot::~Ardupilot()
 {
-    ardupilotPort.onNewLine -= &LonNewSerialLine;
+    disconnect(&ardupilotPort, SIGNAL(onNewLine(std::string)), this, SLOT(onNewSerialLine(std::string)));
     ardupilotPort.stopEvents();
     ardupilotPort.close();
 }

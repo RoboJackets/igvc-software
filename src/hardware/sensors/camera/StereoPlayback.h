@@ -2,7 +2,7 @@
 #define STEREOPLAYBACK_H
 
 #include <hardware/sensors/camera/StereoSource.hpp>
-#include <hardware/sensors/DataStructures/StereoImageData.hpp>
+#include <common/datastructures/StereoImageData.hpp>
 #include <common/utils/ImageUtils.h>
 
 

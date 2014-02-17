@@ -1,5 +1,5 @@
 
-QT       += testlib gui core declarative
+QT       += testlib xml core gui declarative
 
 TARGET = IGVC_Test
 CONFIG   += console
@@ -19,11 +19,33 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/common/logger/logger.cpp \
     ../src/intelligence/linedetection/linedetector.cpp \
     ../src/intelligence/linedetection/transformer.cpp
+    ../src/intelligence/posetracking/positiontracker.cpp \
+    ../src/common/config/configmanager.cpp \
+    ../src/common/utils/gpsfilereader.cpp \
+    ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
+    ../src/hardware/serial/ASIOSerialPort.cpp \
+    ../src/hardware/sensors/gps/nmea.cpp \
+    ../src/intelligence/posetracking/basicpositiontracker.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
-    ../src/common/utils/StringUtils.hpp \
-    ../src/tests/testlinedetection.hpp \
+    ../src/tests/testpositiontracker.hpp \
+    ../src/tests/testgpsutils.h \
+    ../src/tests/testgpsreader.hpp \
+    ../src/tests/testangleutils.h \
+    ../src/tests/capturegpsandpostracker.hpp \
+    ../src/common/config/configmanager.h \
     ../src/common/logger/logger.h \
+    ../src/common/utils/GPSUtils.h \
+    ../src/common/utils/AngleUtils.h \
+    ../src/common/utils/gpsfilereader.h \
+    ../src/common/utils/StringUtils.hpp \
+    ../src/intelligence/posetracking/positiontracker.h \
+    ../src/intelligence/posetracking/basicpositiontracker.h \
+    ../src/hardware/sensors/gps/nmeacompatiblegps.h \
+    ../src/hardware/serial/ASIOSerialPort.h \
+    ../src/hardware/sensors/gps/nmea.hpp \
+    ../src/hardware/sensors/gps/GPS.hpp \
+    ../src/tests/testlinedetection.hpp \
     ../src/intelligence/linedetection/linedetector.h \
     ../src/intelligence/linedetection/transformer.h
 
@@ -73,6 +95,13 @@ INCLUDEPATH += /usr/include/
 DEPENDPATH += /usr/include/
 
 LIBS += -L/usr/lib/ -lflycapture
+
+#SICK Toolbox
+#NOTE : Toolbox depends on pthread library
+INCLUDEPATH += /usr/local/include
+DEPENDPATH += /usr/local/include
+
+LIBS += -L/usr/local/lib -lsicklms-1.0 -pthread
 
 #SICK Toolbox
 #NOTE : Toolbox depends on pthread library

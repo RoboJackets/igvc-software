@@ -4,14 +4,13 @@
 
 JoystickAdapter::JoystickAdapter(Joystick *joystick, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::JoystickAdapter),
-    LOnJoystickData(this)
+    ui(new Ui::JoystickAdapter)
 {
     ui->setupUi(this);
     if(joystick)
     {
         _joystick = joystick;
-        _joystick->onNewData += &LOnJoystickData;
+        connect(_joystick, SIGNAL(onNewData(JoystickState)), this, SLOT(onJoystickData(JoystickState)));
     }
     if(parent)
     {
@@ -21,12 +20,14 @@ JoystickAdapter::JoystickAdapter(Joystick *joystick, QWidget *parent) :
 
 JoystickAdapter::~JoystickAdapter()
 {
-    if(_joystick)
-        _joystick->onNewData -= &LOnJoystickData;
+    if(_joystick != nullptr)
+    {
+        disconnect(_joystick, SIGNAL(onNewData(JoystickState)), this, SLOT(onJoystickData(JoystickState)));
+    }
     delete ui;
 }
 
-void JoystickAdapter::OnJoystickData(JoystickState state)
+void JoystickAdapter::onJoystickData(JoystickState state)
 {
     if(isVisible())
     {
