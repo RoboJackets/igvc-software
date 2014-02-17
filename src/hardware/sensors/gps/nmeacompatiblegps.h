@@ -11,12 +11,15 @@
 #include "hardware/serial/ASIOSerialPort.h"
 
 #include <list>
+#include <QObject>
 
 /*!
  * \brief For connecting to the Hemisphere A100 GPS device
  * \headerfile HemisphereA100GPS.h <hardware/sensors/gps/HemisphereA100GPS.h>
  */
-class NMEACompatibleGPS: public GPS {
+class NMEACompatibleGPS: public GPS
+{
+    Q_OBJECT
 public:
     NMEACompatibleGPS(std::string devicePath, uint baudRate);
 	GPSData GetState();
@@ -25,12 +28,12 @@ public:
     bool isOpen();
     ~NMEACompatibleGPS();
 
+private slots:
+    void onNewSerialLine(std::string line);
+
 private:
 
-	ASIOSerialPort serialPort; // Serial port for GPS communication
-
-	void onNewSerialLine(string line);
-    LISTENER(NMEACompatibleGPS, onNewSerialLine, string)
+    ASIOSerialPort serialPort; // Serial port for GPS communication
 
 	boost::mutex queueLocker; // mutex for thread-safing the buffer
 
