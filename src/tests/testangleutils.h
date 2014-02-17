@@ -1,7 +1,6 @@
 #ifndef TESTANGLEUTILS_H
 #define TESTANGLEUTILS_H
 
-#endif // TESTANGLEUTILS_H
 #include <QtTest>
 #include "common/utils/AngleUtils.h"
 #include <iostream>
@@ -30,3 +29,5 @@ class TestAngleUtils: public QObject
 
     }
 };
+
+#endif // TESTANGLEUTILS_H
