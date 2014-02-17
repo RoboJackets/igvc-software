@@ -35,6 +35,8 @@ private slots:
 
     void on_user_Left_textChanged();
 
+    void onNewData(GPSData data);
+
 Q_SIGNALS:
     void updateBecauseNewData();
 
@@ -55,8 +57,6 @@ private:
     double minLong;
     double maxLong;
 
-    void OnNewData(GPSData data);
-    LISTENER(GPSAdapter,OnNewData,GPSData)
     GPS* _GPS;
 };
 

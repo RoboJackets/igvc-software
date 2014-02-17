@@ -4,6 +4,8 @@
 #include <common/utils/StringUtils.hpp>
 #include <common/logger/logger.h>
 
+using namespace std;
+
 MotorEncoderDriver2013::MotorEncoderDriver2013()
  : _arduino("/dev/igvc_2013_motor_arduino", 9600),
    LonControlEvent(this)
