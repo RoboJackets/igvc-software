@@ -10,16 +10,14 @@ PositionTrackerAdapter::PositionTrackerAdapter(BasicPositionTracker *src, QWidge
     minx(-0.5),
     maxx( 0.5),
     miny(-0.5),
-    maxy( 0.5),
-    LonNewPosition(this),
-    LonOriginPercentage(this)
+    maxy( 0.5)
 {
     ui->setupUi(this);
 
     if(posTracker != nullptr)
     {
-        posTracker->onNewPosition += &LonNewPosition;
-        posTracker->onOriginPercentage += &LonOriginPercentage;
+        connect(posTracker, SIGNAL(onNewPosition(RobotPosition)), this, SLOT(onNewPosition(RobotPosition)));
+        connect(posTracker, SIGNAL(onOriginPercentage(int)), this, SLOT(onOriginPercentage(int)));
     }
 
     connect(this, SIGNAL(updateBecauseOfData()), this, SLOT(update()));
@@ -30,8 +28,8 @@ PositionTrackerAdapter::~PositionTrackerAdapter()
 {
     if(posTracker != nullptr)
     {
-        posTracker->onNewPosition -= &LonNewPosition;
-        posTracker->onOriginPercentage -= &LonOriginPercentage;
+        disconnect(posTracker, SIGNAL(onNewPosition(RobotPosition)), this, SLOT(onNewPosition(RobotPosition)));
+        disconnect(posTracker, SIGNAL(onOriginPercentage(int)), this, SLOT(onOriginPercentage(int)));
         posTracker = nullptr;
     }
     positions.clear();

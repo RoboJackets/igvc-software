@@ -30,6 +30,10 @@ private slots:
 
     void on_clearButton_clicked();
 
+    void onNewPosition(RobotPosition pos);
+
+    void onOriginPercentage(int percent);
+
 private:
     Ui::PositionTrackerAdapter *ui;
 
@@ -38,12 +42,6 @@ private:
     std::vector<RobotPosition> positions;
 
     double minx, maxx, miny, maxy;
-
-    void onNewPosition(RobotPosition pos);
-    LISTENER(PositionTrackerAdapter, onNewPosition, RobotPosition)
-
-    void onOriginPercentage(int percent);
-    LISTENER(PositionTrackerAdapter, onOriginPercentage, int)
 };
 
 #endif // POSITIONTRACKERADAPTER_H
