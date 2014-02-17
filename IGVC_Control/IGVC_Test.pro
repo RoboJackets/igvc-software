@@ -18,7 +18,7 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/common/utils/StringUtils.cpp \
     ../src/common/logger/logger.cpp \
     ../src/intelligence/linedetection/linedetector.cpp \
-    ../src/intelligence/linedetection/transformer.cpp
+    ../src/intelligence/linedetection/transformer.cpp \
     ../src/intelligence/posetracking/positiontracker.cpp \
     ../src/common/config/configmanager.cpp \
     ../src/common/utils/gpsfilereader.cpp \

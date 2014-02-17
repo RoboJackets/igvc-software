@@ -3,7 +3,7 @@
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <common/events/Event.hpp>
-#include <hardware/sensors/DataStructures/ImageData.hpp>
+#include <common/datastructures/ImageData.hpp>
 
 class LineDetector
 {
