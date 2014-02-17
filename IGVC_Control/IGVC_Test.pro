@@ -26,25 +26,23 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/intelligence/posetracking/basicpositiontracker.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
-    ../src/common/utils/StringUtils.hpp \
     ../src/tests/testpositiontracker.hpp \
-    ../src/intelligence/posetracking/positiontracker.h \
+    ../src/tests/testgpsutils.h \
+    ../src/tests/testgpsreader.hpp \
+    ../src/tests/testangleutils.h \
+    ../src/tests/capturegpsandpostracker.hpp \
     ../src/common/config/configmanager.h \
     ../src/common/logger/logger.h \
-    ../src/tests/testgpsutils.h \
     ../src/common/utils/GPSUtils.h \
     ../src/common/utils/AngleUtils.h \
-    ../src/tests/testangleutils.h \
-    ../src/tests/testgpsreader.hpp \
-    ../src/common/logger/logger.h \
     ../src/common/utils/gpsfilereader.h \
-    ../src/tests/testangleutils.h \
-    ../src/common/utils/gpsfilereader.h \
-    ../src/tests/capturegpsandpostracker.hpp \
+    ../src/common/utils/StringUtils.hpp \
+    ../src/intelligence/posetracking/positiontracker.h \
+    ../src/intelligence/posetracking/basicpositiontracker.h \
     ../src/hardware/sensors/gps/nmeacompatiblegps.h \
     ../src/hardware/serial/ASIOSerialPort.h \
     ../src/hardware/sensors/gps/nmea.hpp \
-    ../src/intelligence/posetracking/basicpositiontracker.h
+    ../src/hardware/sensors/gps/GPS.hpp
 
 # libUSB (for LIDAR)
 
