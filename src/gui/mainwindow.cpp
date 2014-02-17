@@ -78,9 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _IMU = new Ardupilot();
     ui->hardwareStatusList->addItem("IMU");
 
-    _posTracker = new BasicPositionTracker;
-//    _GPS->onNewData += &_posTracker->LonNewGPS;
-//    _IMU->onNewData += &_posTracker->LonNewIMU;
+    _posTracker = new BasicPositionTracker(_GPS, _IMU);
     ui->hardwareStatusList->addItem("Position Tracker");
 
     _mapper = new MapBuilder(_lidar, _posTracker);
@@ -104,8 +102,6 @@ void MainWindow::setupMenus()
 
 MainWindow::~MainWindow()
 {
-//    _GPS->onNewData -= &(_posTracker->LonNewGPS);
-//    _IMU->onNewData -= &(_posTracker->LonNewIMU);
     delete ui;
     delete _joystick;
     delete _posTracker;
@@ -235,7 +231,7 @@ MDIWindow* MainWindow::findWindowWithTitle(QString title)
         if(mdiChild && mdiChild->windowTitle() == title)
             return mdiChild;
     }
-    return 0;
+    return nullptr;
 }
 
 void MainWindow::on_joystickButton_toggled(bool checked)
@@ -317,7 +313,7 @@ void MainWindow::on_actionHemisphere_A100_triggered()
     ui->actionHemisphere_A100->setChecked(true);
     ui->actionOutback_A321->setChecked(false);
     _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 4800);
-//    _GPS->onNewData += &(_posTracker->LonNewGPS);
+    _posTracker->ChangeGPS(_GPS);
     updateHardwareStatusIcons();
 }
 
@@ -329,8 +325,15 @@ void MainWindow::on_actionSimulatedGPS_triggered()
         ui->actionSimulatedGPS->setChecked(true);
         ui->actionHemisphere_A100->setChecked(false);
         ui->actionOutback_A321->setChecked(false);
+//        MDIWindow *window = findWindowWithTitle("GPS");
+//        if( window != nullptr)
+//        {
+//            QWidget* p = (QWidget*)window->parent();
+//            if(p != nullptr)
+//                p->close();
+//        }
         _GPS = new SimulatedGPS(fileName.toStdString());
-//        _GPS->onNewData += &(_posTracker->LonNewGPS);
+        _posTracker->ChangeGPS(_GPS);
         updateHardwareStatusIcons();
     }
 }
@@ -361,7 +364,7 @@ void MainWindow::on_actionOutback_A321_triggered()
     ui->actionHemisphere_A100->setChecked(false);
     ui->actionOutback_A321->setChecked(true);
     _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 19200);
-//    _GPS->onNewData += &(_posTracker->LonNewGPS);
+    _posTracker->ChangeGPS(_GPS);
     updateHardwareStatusIcons();
 }
 
