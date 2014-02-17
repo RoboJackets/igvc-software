@@ -8,15 +8,14 @@
 
 CameraAdapter::CameraAdapter(StereoSource *source, QWidget *parent) :
      QWidget(parent),
-     ui(new Ui::CameraAdapter),
-     LOnCameraData(this)
+     ui(new Ui::CameraAdapter)
 {
     ui->setupUi(this);
 
-    if(source)
+    if(source != nullptr)
     {
         _stereoSource = source;
-        _stereoSource->onNewData += &LOnCameraData;
+        connect(_stereoSource, SIGNAL(onNewData(StereoImageData)), this, SLOT(onCameraData(StereoImageData)));
     }
 
     if(parent)
@@ -29,12 +28,12 @@ CameraAdapter::CameraAdapter(StereoSource *source, QWidget *parent) :
 
 CameraAdapter::~CameraAdapter()
 {
-    if(_stereoSource)
-        _stereoSource->onNewData -= &LOnCameraData;
+    if(_stereoSource != nullptr)
+        disconnect(_stereoSource, SIGNAL(onNewData(StereoImageData)), this, SLOT(onCameraData(StereoImageData)));
     delete ui;
 }
 
-void CameraAdapter::OnCameraData(StereoImageData data)
+void CameraAdapter::onCameraData(StereoImageData data)
 {
 
     if(isVisible())
