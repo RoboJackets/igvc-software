@@ -14,9 +14,8 @@ class CaptureGPSAndPosTracker : public QObject
 public:
     CaptureGPSAndPosTracker(QObject *parent = 0)
         : QObject(parent),
-          LonNewPosData(this),
-          LonNewGPSData(this),
-          gps("/dev/ttyGPS", 19200)
+          gps("/dev/ttyGPS", 19200),
+          tracker(&gps, nullptr)
     {
         gpsPts = 0;
         ptPts = 0;
@@ -32,18 +31,17 @@ public:
         delete ptfile;
     }
 
-private:
+private slots:
     void onNewPosData(RobotPosition pos)
     {
         (*PTOut) << pos.X << "," << pos.Y << "," << pos.Heading << "\n";
         ptPts++;
         if(ptPts > PT_PTS)
         {
-            tracker.onNewPosition -= &LonNewPosData;
+            disconnect(&tracker, SIGNAL(onNewPosition(RobotPosition)), this, SLOT(onNewPosData(RobotPosition)));
             ptfile->close();
         }
     }
-    LISTENER(CaptureGPSAndPosTracker, onNewPosData, RobotPosition)
 
     void onNewGPSData(GPSData d)
     {
@@ -51,12 +49,12 @@ private:
         gpsPts++;
         if(gpsPts > GPS_PTS)
         {
-            gps.onNewData -= &LonNewGPSData;
+            disconnect(&gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPSData(GPSData)));
             gpsfile->close();
         }
     }
-    LISTENER(CaptureGPSAndPosTracker, onNewGPSData, GPSData)
 
+private:
     QTextStream *GPSOut;
     QTextStream *PTOut;
     QFile *gpsfile;
@@ -82,9 +80,8 @@ private Q_SLOTS:
         PTOut = new QTextStream(ptfile);
         PTOut->setRealNumberPrecision(15);
 
-        gps.onNewData += &(tracker.LonNewGPS);
-        gps.onNewData += &LonNewGPSData;
-        tracker.onNewPosition += &LonNewPosData;
+        connect(&gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPSData(GPSData)));
+        connect(&tracker, SIGNAL(onNewPosition(RobotPosition)), this, SLOT(onNewPosData(RobotPosition)));
 
         while(ptPts <= PT_PTS || gpsPts <= GPS_PTS)
         {
