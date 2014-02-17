@@ -6,7 +6,7 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-#include <common/events/Event.hpp>
+#include <QObject>
 
 /*!
  * \brief The ConfigManager class
@@ -18,8 +18,9 @@
  * \author Matthew Barulic
  * \headerfile configmanager.h <common/configmanager.h>
  */
-class ConfigManager
+class ConfigManager : public QObject
 {
+    Q_OBJECT
 public:
     static ConfigManager& Instance()
     {
@@ -58,7 +59,7 @@ public:
             stringstream stream;
             stream << defaultVal;
             root.firstChildElement(category.c_str()).firstChildElement(name.c_str()).appendChild(xmlFile.createTextNode(stream.str().c_str()));
-            StructureChanged(0);
+            StructureChanged();
             return defaultVal;
         }
 
@@ -71,7 +72,7 @@ public:
             stringstream stream;
             stream << defaultVal;
             categoryNode.firstChildElement(name.c_str()).appendChild(xmlFile.createTextNode(stream.str().c_str()));
-            StructureChanged(0);
+            StructureChanged();
             return defaultVal;
         }
 
@@ -148,7 +149,7 @@ public:
             root.appendChild(xmlFile.createElement(category.c_str()));
             root.firstChildElement(category.c_str()).appendChild(xmlFile.createElement(name.c_str()));
             root.firstChildElement(category.c_str()).firstChildElement(name.c_str()).appendChild(xmlFile.createTextNode(stream.str().c_str()));
-            StructureChanged(0);
+            StructureChanged();
             return;
         }
 
@@ -159,7 +160,7 @@ public:
             cout << "[ConfigManager] No such variable." << endl;
             root.firstChildElement(category.c_str()).appendChild(xmlFile.createElement(name.c_str()));
             root.firstChildElement(category.c_str()).firstChildElement(name.c_str()).appendChild(xmlFile.createTextNode(stream.str().c_str()));
-            StructureChanged(0);
+            StructureChanged();
             return;
         }
 
@@ -223,10 +224,11 @@ public:
      */
     std::string valueLabel(int categoryInd, int valueInd);
 
+signals:
     /*!
-     * \brief StructureChanged This event is fired every time the structure of the config tree is changed.
+     * \brief StructureChanged This signal is emitted every time the structure of the config tree is changed.
      */
-    Event<void*> StructureChanged;
+    void StructureChanged();
 
 protected:
 

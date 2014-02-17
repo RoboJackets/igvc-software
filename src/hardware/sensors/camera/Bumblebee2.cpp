@@ -1,7 +1,7 @@
 #include "Bumblebee2.h"
 
 //#include <dc1394/conversions.h>
-
+#include <common/logger/logger.h>
 
 using namespace FlyCapture2;
 using namespace cv;
@@ -11,7 +11,8 @@ Bumblebee2::Bumblebee2(string fileName): frameCount(0), frameLock(), _images(), 
   FileStorage fs(fileName, FileStorage::READ); // Read the settings
   fs["Camera_Matrix"] >> _cameraMatrix;
   fs["Distortion_Coefficients"] >> _distCoeffs;
-  StartCamera();
+  if ( StartCamera() != 0 )
+      Logger::Log(LogLevel::Error, "Camera failed to initialize.");
 }
 
 int Bumblebee2::StartCamera()
@@ -23,7 +24,6 @@ int Bumblebee2::StartCamera()
     BusManager busMgr;
     unsigned int numCameras;
     error = busMgr.GetNumOfCameras(&numCameras);
-    printf("Number of cameras detected: %u\n", numCameras);
     if (error != PGRERROR_OK)
     {
         PrintError( error );
@@ -32,7 +32,7 @@ int Bumblebee2::StartCamera()
 
     if ( numCameras < 1 )
     {
-        printf( "Insufficient number of cameras... exiting\n" );
+        Logger::Log(LogLevel::Error, "[Bumblebee2] No camera connected.");
         return -1;
     }
 
@@ -133,21 +133,24 @@ int Bumblebee2::StartCamera()
 
 int Bumblebee2::CloseCamera()
 {
-    Error error;
-    // Stop capturing images
-    error = _cam.StopCapture();
-    if (error != PGRERROR_OK)
+    if(_cam.IsConnected())
     {
-        PrintError( error );
-        return -1;
-    }
+        Error error;
+        // Stop capturing images
+        error = _cam.StopCapture();
+        if (error != PGRERROR_OK)
+        {
+            PrintError( error );
+            return -1;
+        }
 
-    // Disconnect the camera
-    error = _cam.Disconnect();
-    if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return -1;
+        // Disconnect the camera
+        error = _cam.Disconnect();
+        if (error != PGRERROR_OK)
+        {
+            PrintError( error );
+            return -1;
+        }
     }
     return 0;
 }
@@ -291,7 +294,11 @@ void Bumblebee2::Images(Mat& l, Mat& r)
 
 void PrintError( FlyCapture2::Error error )
 {
-    error.PrintErrorTrace();
+    std::stringstream msg;
+    msg << "[Bumblebee2] ";
+    msg << error.GetDescription();
+    Logger::Log(LogLevel::Error, msg.str());
+//    error.PrintErrorTrace();
 }
 
 

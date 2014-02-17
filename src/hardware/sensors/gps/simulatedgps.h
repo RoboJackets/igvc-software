@@ -3,10 +3,8 @@
 
 #include "GPS.hpp"
 #include <boost/thread.hpp>
-#include <vector>
-
-namespace IGVC {
-namespace Sensors {
+#include <queue>
+#include <common/utils/gpsfilereader.h>
 
 class SimulatedGPS : public GPS
 {
@@ -20,19 +18,20 @@ public:
 
     ~SimulatedGPS();
 
+    void setHz(double Hz);
+
 private:
     boost::thread _thread;
 
+    bool _open;
+
     void threadRun();
 
-    void loadFile(std::string file);
-
-    std::vector<GPSData> _data;
-    int _index;
+    std::queue<GPSData> _data;
     bool _running;
+
+    int _delay;
 
 };
 
-}
-}
 #endif // SIMULATEDGPS_H

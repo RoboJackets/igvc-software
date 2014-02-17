@@ -4,11 +4,11 @@
 #include <common/utils/StringUtils.hpp>
 #include <common/logger/logger.h>
 
+using namespace std;
+
 MotorEncoderDriver2013::MotorEncoderDriver2013()
- : _arduino("/dev/igvc_2013_motor_arduino", 9600),
-   LonControlEvent(this)
+ : _arduino("/dev/igvc_2013_motor_arduino", 9600)
 {
-    _controlEvent = 0;
     _leftVel = 0;
     _rightVel = 0;
     _duration = 0;
@@ -105,20 +105,7 @@ void MotorEncoderDriver2013::writeVelocities()
     _portLock.unlock();
 }
 
-void MotorEncoderDriver2013::setControlEvent(Event<MotorCommand> *event)
-{
-    if(_controlEvent)
-    {
-        (*_controlEvent) -= &LonControlEvent;
-    }
-    _controlEvent = event;
-    if(event)
-    {
-        (*_controlEvent) += &LonControlEvent;
-    }
-}
-
-void MotorEncoderDriver2013::onControlEvent(MotorCommand cmd)
+void MotorEncoderDriver2013::setMotorCommand(MotorCommand cmd)
 {
     setLeftVelocity(cmd.leftVel, (cmd.timed?cmd.millis:0));
     setRightVelocity(cmd.rightVel, (cmd.timed?cmd.millis:0));
