@@ -6,6 +6,7 @@
 #include <hardware/sensors/gps/GPS.hpp>
 #include <hardware/actuators/motors/MotorDriver.hpp>
 #include <hardware/sensors/IMU/IMU.h>
+#include <common/events/Event.hpp>
 
 /*!
  * \brief Data structure for robot's position.
