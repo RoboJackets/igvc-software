@@ -8,8 +8,7 @@
 
 LidarAdapter::LidarAdapter(Lidar *lidar, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::LidarAdapter),
-    LOnLidarData(this)
+    ui(new Ui::LidarAdapter)
 {
     ui->setupUi(this);
     NUMPTS = 1024;
@@ -18,13 +17,13 @@ LidarAdapter::LidarAdapter(Lidar *lidar, QWidget *parent) :
 
     _lidar = lidar;
     if(_lidar != nullptr)
-        _lidar->onNewData += &LOnLidarData;
+        connect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
 }
 
 LidarAdapter::~LidarAdapter()
 {
     if(_lidar != nullptr)
-        _lidar->onNewData -= &LOnLidarData;
+        disconnect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
     delete ui;
 }
 
@@ -92,7 +91,7 @@ void LidarAdapter::paintEvent(QPaintEvent *)
     }
 }
 
-void LidarAdapter::OnLidarData(LidarState state)
+void LidarAdapter::onLidarData(LidarState state)
 {
     _data = state;
     update();

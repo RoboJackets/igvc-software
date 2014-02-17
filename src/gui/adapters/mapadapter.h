@@ -4,7 +4,6 @@
 #include <QWidget>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <common/events/Event.hpp>
 #include <intelligence/mapping/mapbuilder.h>
 #include <intelligence/posetracking/basicpositiontracker.h>
 
@@ -36,6 +35,8 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr map);
+
 private:
     Ui::MapAdapter *ui;
 
@@ -51,9 +52,6 @@ private:
     pcl::PointCloud<pcl::PointXYZ>::Ptr _map;
 
     void setScale(int scale);
-
-    void onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr map);
-    LISTENER(MapAdapter, onNewMap, pcl::PointCloud<pcl::PointXYZ>::Ptr)
 
     void paintEvent(QPaintEvent *);
 
