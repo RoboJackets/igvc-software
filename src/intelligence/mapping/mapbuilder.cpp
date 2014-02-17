@@ -7,7 +7,7 @@
 #include <common/config/configmanager.h>
 
 
-MapBuilder::MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker):LOnLidarData(this)
+MapBuilder::MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr _cloud(new pcl::PointCloud<pcl::PointXYZ>);
     _cloud->height = 1;
@@ -18,7 +18,7 @@ MapBuilder::MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker):LOnLidar
     if(lidar)
     {
         _lidar = lidar;
-        _lidar->onNewData += &LOnLidarData;
+        connect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
     }
 
     this->poseTracker = poseTracker;
@@ -29,11 +29,11 @@ MapBuilder::MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker):LOnLidar
 MapBuilder::~MapBuilder()
 {
     if(_lidar)
-        _lidar->onNewData -= &LOnLidarData;
+        disconnect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
     poseTracker = nullptr;
 }
 
-void MapBuilder::OnLidarData(LidarState state)
+void MapBuilder::onLidarData(LidarState state)
 {
     RobotPosition pose = poseTracker->GetPosition();
     double lidarOffset_y = ConfigManager::Instance().getValue("MapBuilder", "lidarOffset_y", 0);
@@ -90,12 +90,12 @@ void MapBuilder::ChangeLidar(Lidar *device)
 {
     if(_lidar != nullptr)
     {
-        _lidar->onNewData -= &LOnLidarData;
+        disconnect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(lidarState)));
     }
     _lidar = device;
     if(_lidar != nullptr)
     {
-        _lidar->onNewData += &LOnLidarData;
+        connect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(lidarState)));
     }
 
 }
