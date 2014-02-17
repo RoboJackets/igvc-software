@@ -8,16 +8,17 @@ GPSAdapter::GPSAdapter(GPS *gps, QWidget *parent) :
     minLat(-5),
     maxLat(5),
     minLong(-5),
-    maxLong(5),
-    LOnNewData(this)
+    maxLong(5)
 {
     ui->setupUi(this);
     for (int i = 0;i<5;i++) {
         coordinates[i][0] = 0;
         coordinates[i][1] = 0;
     }
-    gps->onNewData += &LOnNewData;
+
     _GPS = gps;
+    if(_GPS != nullptr)
+        connect(_GPS, SIGNAL(onNewData(GPSData)), this, SLOT(onNewData(GPSData)));
     ui->user_Top->setPlainText(QString::number(maxLat));
     ui->user_Right->setPlainText(QString::number(maxLong));
     ui->user_Bottom->setPlainText(QString::number(minLat));
@@ -29,7 +30,10 @@ GPSAdapter::GPSAdapter(GPS *gps, QWidget *parent) :
 GPSAdapter::~GPSAdapter()
 {
     if(_GPS != nullptr)
-        _GPS->onNewData -= &LOnNewData;
+    {
+        disconnect(_GPS, SIGNAL(onNewData(GPSData)), this, SLOT(onNewData(GPSData)));
+        _GPS = nullptr;
+    }
     delete ui;
 
 }
@@ -54,7 +58,7 @@ void GPSAdapter::labelPrint() {
 
 }
 
-void GPSAdapter::OnNewData(GPSData data) {
+void GPSAdapter::onNewData(GPSData data) {
     //shifting old data
     for (int i = 4;i>0;i--) {
         coordinates[i][0] = coordinates[i-1][0];
