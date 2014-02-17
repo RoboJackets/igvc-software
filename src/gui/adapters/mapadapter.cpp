@@ -11,14 +11,13 @@ MapAdapter::MapAdapter(MapBuilder *mapper, BasicPositionTracker *posTracker, QWi
     QWidget(parent),
     ui(new Ui::MapAdapter),
     _scale(20),
-    LonNewMap(this),
     _mapper(mapper),
     _posTracker(posTracker)
 {
     ui->setupUi(this);
 
     if(_mapper != nullptr)
-        _mapper->onNewMap += &LonNewMap;
+        connect(_mapper, SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), this, SLOT(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
 }
 
 void MapAdapter::setScale(int scale)
@@ -90,7 +89,7 @@ MapAdapter::~MapAdapter()
 {
     delete ui;
     if(_mapper != nullptr)
-        _mapper->onNewMap -= &LonNewMap;
+        disconnect(_mapper, SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), this, SLOT(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
 }
 
 void MapAdapter::on_scaleSlider_sliderMoved(int position)
