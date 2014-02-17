@@ -5,28 +5,33 @@
  *      Author: Matthew Barulic
  */
 
-#include "HemisphereA100GPS.h"
+#include "nmeacompatiblegps.h"
 #include "nmea.hpp"
 #include <string>
+#include <common/logger/logger.h>
 
-namespace IGVC {
-namespace Sensors {
+using namespace std;
 
-HemisphereA100GPS::HemisphereA100GPS():
-    DefaultAccuracy(.0001, .0001, 3, 0.01),
-    serialPort("/dev/ttyGPS", 4800),
-	LonNewSerialLine(this),
+NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
+    :serialPort(devicePath, baudRate),
 	stateQueue()
 {
-    serialPort.onNewLine += &LonNewSerialLine;
-	maxBufferLength = 10;
-	serialPort.startEvents();
+    if(serialPort.isConnected())
+    {
+        Logger::Log(LogLevel::Info, "GPS Initialized");
+        connect(&serialPort, SIGNAL(onNewLine(std::string)), this, SLOT(onNewSerialLine(std::string)));
+        maxBufferLength = 10;
+        serialPort.startEvents();
+    }
+    else
+    {
+        Logger::Log(LogLevel::Error, "GPS failed to initialize");
+    }
 }
 
-void HemisphereA100GPS::onNewSerialLine(string line) {
+void NMEACompatibleGPS::onNewSerialLine(string line) {
     GPSData state;
     if(parseLine(line, state)) {
-        state.Accuracy(DefaultAccuracy);
         // TODO set time
 //        gettimeofday(&state.laptoptime, NULL);
 
@@ -39,39 +44,22 @@ void HemisphereA100GPS::onNewSerialLine(string line) {
     }
 }
 
-//void HemisphereA100GPS::threadRun() {
-//	while(serialPort.isConnected()) {
-//		std::string line = serialPort.readln();
-//		GPSData state;
-//		if(parseLine(line, state)) {
-//			gettimeofday(&state.laptoptime, NULL);
-//
-//			boost::mutex::scoped_lock lock(queueLocker);
-//			stateQueue.push_back(state);
-//			if(stateQueue.size() > maxBufferLength) {
-//				stateQueue.pop_front();
-//			}
-//			onNewData(state);
-//		}
-//	}
-//}
-
-bool HemisphereA100GPS::parseLine(std::string line, GPSData &state) {
+bool NMEACompatibleGPS::parseLine(std::string line, GPSData &state) {
 	return nmea::decodeGPGGA(line, state) ||
 		   nmea::decodeGPRMC(line, state);
 }
 
-GPSData HemisphereA100GPS::GetState() {
+GPSData NMEACompatibleGPS::GetState() {
 	boost::mutex::scoped_lock lock(queueLocker);
 	GPSData state = stateQueue.back();
 	stateQueue.remove(state);
 	return state;
 }
 
-GPSData HemisphereA100GPS::GetStateAtTime(timeval time) {
+GPSData NMEACompatibleGPS::GetStateAtTime(timeval time) {
 	boost::mutex::scoped_lock lock(queueLocker);
 	std::list<GPSData>::iterator iter = stateQueue.begin();
-	double acceptableError = 0.1;
+    //double acceptableError = 0.1;
 	while(iter != stateQueue.end()) {
 		GPSData s = (*iter);
 		/*time_t secDelta = difftime(time.tv_sec, s.laptoptime.tv_sec);
@@ -88,18 +76,15 @@ GPSData HemisphereA100GPS::GetStateAtTime(timeval time) {
 	return empty;
 }
 
-bool HemisphereA100GPS::StateIsAvailable() {
+bool NMEACompatibleGPS::StateIsAvailable() {
 	return !stateQueue.empty();
 }
 
-bool HemisphereA100GPS::isOpen() {
+bool NMEACompatibleGPS::isOpen() {
     return serialPort.isConnected();
 }
 
-HemisphereA100GPS::~HemisphereA100GPS() {
+NMEACompatibleGPS::~NMEACompatibleGPS() {
     serialPort.stopEvents();
 	serialPort.close();
 }
-
-} /* namespace Sensors */
-} /* namespace IGVC */
