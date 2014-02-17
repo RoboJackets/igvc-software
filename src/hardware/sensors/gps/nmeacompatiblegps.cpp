@@ -10,19 +10,23 @@
 #include <string>
 #include <common/logger/logger.h>
 
+using namespace std;
+
 NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
     :serialPort(devicePath, baudRate),
-    //serialPort("/dev/ttyGPS", 19200/*For HemisphereA100 4800*/),
-	LonNewSerialLine(this),
 	stateQueue()
 {
-    serialPort.onNewLine += &LonNewSerialLine;
-	maxBufferLength = 10;
-	serialPort.startEvents();
     if(serialPort.isConnected())
+    {
         Logger::Log(LogLevel::Info, "GPS Initialized");
+        connect(&serialPort, SIGNAL(onNewLine(std::string)), this, SLOT(onNewSerialLine(std::string)));
+        maxBufferLength = 10;
+        serialPort.startEvents();
+    }
     else
+    {
         Logger::Log(LogLevel::Error, "GPS failed to initialize");
+    }
 }
 
 void NMEACompatibleGPS::onNewSerialLine(string line) {
