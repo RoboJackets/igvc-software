@@ -26,6 +26,7 @@ protected:
 private slots:
     void on_btn_fit_clicked();
     void on_btn_slider_actionTriggered(int);
+    void onLidarData(LidarState state);
 
 private:
     Ui::LidarAdapter *ui;
@@ -36,9 +37,6 @@ private:
 
     Lidar *_lidar;
     LidarState _data;
-
-    void OnLidarData(LidarState state);
-    LISTENER(LidarAdapter, OnLidarData, LidarState)
 };
 
 #endif // LIDARADAPTER_H
