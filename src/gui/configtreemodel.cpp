@@ -25,11 +25,12 @@ public:
     }
 };
 
-ConfigTreeModel::ConfigTreeModel(QObject *) :
-    LOnConfigStructureChanged(this)
+ConfigTreeModel::ConfigTreeModel(QObject *)
 {
-    QObject::connect(&_model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(dataWasChanged(QStandardItem*)));
-    ConfigManager::Instance().StructureChanged += &LOnConfigStructureChanged;
+    connect(&_model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(dataWasChanged(QStandardItem*)));
+    connect(&ConfigManager::Instance(), &ConfigManager::StructureChanged, [=](){
+        populateModel();
+    });
 }
 
 void ConfigTreeModel::dataWasChanged(QStandardItem *item)
@@ -76,9 +77,4 @@ void ConfigTreeModel::populateModel()
 QStandardItemModel* ConfigTreeModel::model()
 {
     return &_model;
-}
-
-void ConfigTreeModel::OnConfigStructureChanged(void *)
-{
-    populateModel();
 }

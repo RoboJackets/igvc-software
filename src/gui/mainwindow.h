@@ -14,6 +14,8 @@
 #include <hardware/sensors/camera/StereoSource.hpp>
 #include <hardware/sensors/IMU/IMU.h>
 #include <hardware/sensors/lidar/Lidar.h>
+#include <intelligence/posetracking/basicpositiontracker.h>
+#include <intelligence/mapping/mapbuilder.h>
 
 namespace Ui {
 class MainWindow;
@@ -63,6 +65,15 @@ private slots:
 
     void on_actionClearLogs_triggered();
 
+    void on_actionOutback_A321_triggered();
+
+    void on_actionSimulatedLidar_triggered();
+
+    void on_actionLMS_200_triggered();
+
+protected:
+    void closeEvent(QCloseEvent *);
+
 private:
     Ui::MainWindow *ui;
     ConfigTreeModel configTreeModel;
@@ -77,13 +88,17 @@ private:
 
     MotorDriver *_motorController;
 
-    IGVC::Sensors::GPS *_GPS;
+    GPS *_GPS;
 
     StereoSource *_stereoSource;
 
     IMU *_IMU;
 
-    IGVC::Sensors::Lidar *_lidar;
+    Lidar *_lidar;
+
+    BasicPositionTracker *_posTracker;
+
+    MapBuilder *_mapper;
 
     bool isRunning, isPaused;
 
