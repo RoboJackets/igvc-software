@@ -59,7 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->hardwareStatusList->addItem("Map");
 
-    _joystickDriver = new JoystickDriver(&_joystick->onNewData);
+    _joystickDriver = new JoystickDriver(_joystick);
 
 //    _lidar = new SimulatedLidar();
     _lidar = new LMS200();
@@ -243,12 +243,13 @@ void MainWindow::on_joystickButton_toggled(bool checked)
     this->setFocus();
     if(checked)
     {
-        _motorController->setControlEvent(&_joystickDriver->controlEvent);
+        // TODO : disconnect from intelilgence signals
+        connect(_joystickDriver, SIGNAL(onNewMotorCommand(MotorCommand)), _motorController, SLOT(setMotorCommand(MotorCommand)));
     }
     else
     {
-        //TODO : Set motor controller to listen to intelligence events
-        _motorController->setControlEvent(0);
+        disconnect(_joystickDriver, SIGNAL(onNewMotorCommand(MotorCommand)), _motorController, SLOT(setMotorCommand(MotorCommand)));
+        // TODO : connect to intelligence signals
     }
 }
 
