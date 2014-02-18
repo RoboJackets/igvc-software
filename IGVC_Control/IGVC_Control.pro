@@ -154,9 +154,6 @@ PRE_TARGETDEPS += /usr/lib/x86_64-linux-gnu/libusb-1.0.a
 
 LIBS += -L/usr/lib/ -lboost_thread -lboost_system
 
-PRE_TARGETDEPS += /usr/lib/libboost_thread.a
-PRE_TARGETDEPS += /usr/lib/libboost_system.a
-
 # PCL
 INCLUDEPATH += /usr/include/pcl-1.7
 DEPENDPATH += /usr/include/pcl-1.7
