@@ -7,7 +7,6 @@
 #include <QLabel>
 #include <hardware/sensors/gps/GPS.hpp>
 
-using namespace IGVC::Sensors;
 
 namespace Ui {
 class GPSAdapter;
@@ -36,6 +35,11 @@ private slots:
 
     void on_user_Left_textChanged();
 
+    void onNewData(GPSData data);
+
+Q_SIGNALS:
+    void updateBecauseNewData();
+
 private:
 
     Ui::GPSAdapter *ui;
@@ -53,8 +57,6 @@ private:
     double minLong;
     double maxLong;
 
-    void OnNewData(GPSData data);
-    LISTENER(GPSAdapter,OnNewData,GPSData)
     GPS* _GPS;
 };
 

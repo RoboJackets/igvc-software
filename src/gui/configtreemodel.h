@@ -2,7 +2,6 @@
 #define CONFIGGUIADAPTER_H
 
 #include <QStandardItemModel>
-#include <common/events/Event.hpp>
 
 /*!
  * \brief Handles translating configuration data for the config editor tree in MainWindow.
@@ -31,9 +30,6 @@ public slots:
 
 private:
     QStandardItemModel _model;
-
-    void OnConfigStructureChanged(void*);
-    LISTENER(ConfigTreeModel, OnConfigStructureChanged, void*);
 };
 
 #endif // CONFIGGUIADAPTER_H
