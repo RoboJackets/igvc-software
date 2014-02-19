@@ -148,8 +148,6 @@ LIBS += -L/usr/lib/x86_64-linux-gnu/ -lusb-1.0
 INCLUDEPATH += /usr/lib/x86_64-linux-gnu
 DEPENDPATH += /usr/lib/x86_64-linux-gnu
 
-PRE_TARGETDEPS += /usr/lib/x86_64-linux-gnu/libusb-1.0.a
-
 # BOOST
 
 LIBS += -L/usr/lib/ -lboost_thread -lboost_system
