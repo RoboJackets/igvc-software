@@ -9,9 +9,6 @@
 #include <libusb-1.0/libusb.h>
 #include <boost/thread.hpp>
 
-namespace IGVC {
-namespace Sensors {
-
 class NAV200: public Lidar {
 public:
     NAV200();
@@ -31,6 +28,4 @@ private:
     void threadRun(); // the method that runs on iothread
 };
 
-} /* namespace Sensors */
-} /* namespace IGVC */
 #endif // NAV200_H

@@ -2,7 +2,6 @@
 #define IMUDATA_H
 
 #include "SensorData.hpp"
-#include "GPSAccuracy.hpp"
 
 class IMUData : public SensorData
 {

@@ -3,6 +3,7 @@
 #include <cmath>
 #include <common/utils/timing.h>
 #include <iostream>
+#include "common/utils/GPSUtils.h"
 
 #define deg2rad(a) a/180*M_PI
 #define rad2deg(a) a*180/M_PI
@@ -307,17 +308,17 @@ double RobotPosition::currentYaw()
 
 double RobotPosition::currentLat()
 {
-    _Lat[0].value();
+    return _Lat[0].value();
 }
 
 double RobotPosition::currentLong()
 {
-    _Long[0].value();
+    return _Long[0].value();
 }
 
 double RobotPosition::currentHeading()
 {
-    _Heading[0].value();
+    return _Heading[0].value();
 }
 
 //Gives the linear rate of change between two indices of one of the data structures
@@ -332,8 +333,7 @@ double RobotPosition::rateOfChange(int ind, DataArray<DataPoint <double> >& attr
 //Taken from http://gis.stackexchange.com/questions/2951/algorithm-for-offsetting-a-latitude-longitude-by-some-amount-of-meters
 void RobotPosition::latLongCartesianUpdate(double oldLat, double oldLong, double deltaX, double deltaY, double& newLat, double& newLong)
 {
-    newLat = oldLat + deltaY/111111;
-    newLong = oldLong + deltaX/(111111*cos(oldLat));
+    GPSUtils::latLongCartesianUpdate(oldLat, oldLong, deltaX, deltaY, newLat, newLong);
 }
 
 void RobotPosition::print(void) {
