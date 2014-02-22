@@ -24,6 +24,8 @@ public:
 private slots:
     void paintEvent(QPaintEvent *);
 
+    void onNewData(IMUData data);
+
 private:
     Ui::IMUAdapter *ui;
 
@@ -32,9 +34,6 @@ private:
     std::vector<IMUData> _data;
 
     bool _lock;
-
-    void OnNewData(IMUData data);
-    LISTENER(IMUAdapter, OnNewData, IMUData);
 };
 
 #endif // IMUADAPTER_H

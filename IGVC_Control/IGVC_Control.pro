@@ -26,7 +26,6 @@ SOURCES += \
     ../src/gui/configtreemodel.cpp \
     ../src/gui/batteryindicator.cpp \
     ../src/hardware/sensors/gps/nmea.cpp \
-    ../src/hardware/sensors/gps/HemisphereA100GPS.cpp \
     ../src/hardware/sensors/joystick/Joystick.cpp \
     ../src/hardware/sensors/lidar/SimulatedLidar.cpp \
     ../src/hardware/sensors/lidar/NAV200.cpp \
@@ -41,11 +40,8 @@ SOURCES += \
     ../src/gui/adapters/lidaradapter.cpp \
     ../src/hardware/sensors/IMU/Ardupilot.cpp \
     ../src/gui/adapters/mapadapter.cpp \
-    ../src/intelligence/mapping/mapping.cpp \
     ../src/hardware/sensors/gps/simulatedgps.cpp \
-    ../src/intelligence/posetracking/RobotPosition.cpp \
     ../src/common/utils/ImageUtils.cpp \
-    ../src/common/Robot.cpp \
     ../src/hardware/sensors/camera/CameraInfo.cpp \
     ../src/gui/adapters/gpsadapter.cpp \
     ../src/hardware/sensors/camera/StereoPlayback.cpp \
@@ -53,7 +49,14 @@ SOURCES += \
     ../src/hardware/sensors/camera/Bumblebee2.cpp \
     ../src/gui/adapters/imuadapter.cpp \
     ../src/hardware/sensors/lidar/lms200.cpp \
-    ../src/intelligence/linedetection/linedetector.cpp
+    ../src/intelligence/linedetection/linedetector.cpp \
+    ../src/intelligence/posetracking/positiontracker.cpp \
+    ../src/common/utils/GPSWaypointSource.cpp \
+    ../src/common/utils/gpsfilereader.cpp \
+    ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
+    ../src/intelligence/posetracking/basicpositiontracker.cpp \
+    ../src/gui/adapters/positiontrackeradapter.cpp \
+    ../src/intelligence/mapping/mapbuilder.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -66,21 +69,19 @@ HEADERS  += \
     ../src/gui/configtreemodel.h \
     ../src/gui/batteryindicator.h \
     ../src/hardware/sensors/gps/nmea.hpp \
-    ../src/hardware/sensors/gps/HemisphereA100GPS.h \
     ../src/hardware/sensors/gps/GPS.hpp \
     ../src/hardware/sensors/joystick/Joystick.h \
     ../src/hardware/sensors/lidar/SimulatedLidar.h \
     ../src/hardware/sensors/lidar/NAV200.h \
     ../src/hardware/sensors/lidar/Lidar.h \
-    ../src/hardware/sensors/DataStructures/VisOdomData.hpp \
-    ../src/hardware/sensors/DataStructures/StereoImageData.hpp \
-    ../src/hardware/sensors/DataStructures/SensorData.h \
-    ../src/hardware/sensors/DataStructures/IMUData.hpp \
-    ../src/hardware/sensors/DataStructures/ImageData.hpp \
-    ../src/hardware/sensors/DataStructures/GPSData.h \
-    ../src/hardware/sensors/DataStructures/GPSAccuracy.hpp \
-    ../src/hardware/sensors/DataStructures/DataPoint.hpp \
-    ../src/hardware/sensors/DataStructures/DataArray.hpp \
+    ../src/common/datastructures/VisOdomData.hpp \
+    ../src/common/datastructures/StereoImageData.hpp \
+    ../src/common/datastructures/SensorData.h \
+    ../src/common/datastructures/IMUData.hpp \
+    ../src/common/datastructures/ImageData.hpp \
+    ../src/common/datastructures/GPSData.h \
+    ../src/common/datastructures/DataPoint.hpp \
+    ../src/common/datastructures/DataArray.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
     ../src/gui/adapters/joystickadapter.h \
     ../src/gui/adapters/cameraadapter.h \
@@ -96,12 +97,9 @@ HEADERS  += \
     ../src/gui/adapters/lidaradapter.h \
     ../src/hardware/sensors/IMU/Ardupilot.h \
     ../src/gui/adapters/mapadapter.h \
-    ../src/intelligence/mapping/mapping.h \
     ../src/hardware/sensors/gps/simulatedgps.h \
     ../src/hardware/sensors/IMU/IMU.h \
-    ../src/intelligence/posetracking/RobotPosition.h \
     ../src/common/utils/ImageUtils.h \
-    ../src/common/Robot.h \
     ../src/hardware/sensors/camera/CameraInfo.h \
     ../src/gui/adapters/gpsadapter.h \
     ../src/hardware/sensors/camera/StereoSource.hpp \
@@ -111,7 +109,20 @@ HEADERS  += \
     ../src/hardware/sensors/camera/Bumblebee2.h \
     ../src/gui/adapters/imuadapter.h \
     ../src/hardware/sensors/lidar/lms200.h \
-    ../src/intelligence/linedetection/linedetector.h
+    ../src/intelligence/linedetection/linedetector.h \
+    ../src/intelligence/posetracking/positiontracker.h \
+    ../src/common/utils/gaussianvariable.hpp \
+    ../src/common/datastructures/GPSData.hpp \
+    ../src/common/utils/GPSUtils.h \
+    ../src/common/utils/AngleUtils.h \
+    ../src/common/datastructures/GPSData.hpp \
+    ../src/common/utils/GPSWaypointSource.h \
+    ../src/common/utils/gpsfilereader.h \
+    ../src/hardware/sensors/gps/nmeacompatiblegps.h \
+    ../src/intelligence/posetracking/basicpositiontracker.h \
+    ../src/common/datastructures/robotposition.hpp \
+    ../src/gui/adapters/positiontrackeradapter.h \
+    ../src/intelligence/mapping/mapbuilder.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -120,7 +131,8 @@ FORMS    += \
     ../src/gui/adapters/mapadapter.ui \
     ../src/gui/adapters/cameraadapter.ui \
     ../src/gui/adapters/gpsadapter.ui \
-    ../src/gui/adapters/imuadapter.ui
+    ../src/gui/adapters/imuadapter.ui \
+    ../src/gui/adapters/positiontrackeradapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
@@ -138,20 +150,15 @@ LIBS += -L/usr/lib/x86_64-linux-gnu/ -lusb-1.0
 INCLUDEPATH += /usr/lib/x86_64-linux-gnu
 DEPENDPATH += /usr/lib/x86_64-linux-gnu
 
-PRE_TARGETDEPS += /usr/lib/x86_64-linux-gnu/libusb-1.0.a
-
 # BOOST
 
 LIBS += -L/usr/lib/ -lboost_thread -lboost_system
-
-PRE_TARGETDEPS += /usr/lib/libboost_thread.a
-PRE_TARGETDEPS += /usr/lib/libboost_system.a
 
 # PCL
 INCLUDEPATH += /usr/include/pcl-1.7
 DEPENDPATH += /usr/include/pcl-1.7
 
-LIBS += -L/usr/lib -lpcl_common -lpcl_visualization -lpcl_kdtree
+LIBS += -L/usr/lib -lpcl_common -lpcl_visualization -lpcl_kdtree -lpcl_filters
 
 # VTK (PCL Dependency)
 INCLUDEPATH += /usr/include/vtk-5.8

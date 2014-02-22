@@ -4,25 +4,24 @@
 
 IMUAdapter::IMUAdapter(IMU *imu, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::IMUAdapter),
-    LOnNewData(this)
+    ui(new Ui::IMUAdapter)
 {
     ui->setupUi(this);
 
     if(imu)
     {
         _imu = imu;
-        _imu->onNewData += &LOnNewData;
+        connect(_imu, SIGNAL(onNewData(IMUData)), this, SLOT(onNewData(IMUData)));
     }
 }
 
 IMUAdapter::~IMUAdapter()
 {
-    _imu->onNewData -= &LOnNewData;
+    disconnect(_imu, SIGNAL(onNewData(IMUData)), this, SLOT(onNewData(IMUData)));
     delete ui;
 }
 
-void IMUAdapter::OnNewData(IMUData data)
+void IMUAdapter::onNewData(IMUData data)
 {
     _data.push_back(data);
     if(_data.size() > 10)

@@ -9,8 +9,9 @@
 #include "adapters/imuadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
-#include <hardware/sensors/gps/HemisphereA100GPS.h>
+#include <hardware/sensors/gps/nmeacompatiblegps.h>
 #include <hardware/sensors/camera/StereoPlayback.h>
+#include <hardware/sensors/camera/Bumblebee2.h>
 #include <hardware/sensors/IMU/Ardupilot.h>
 #include <hardware/sensors/lidar/SimulatedLidar.h>
 #include <hardware/sensors/lidar/lms200.h>
@@ -19,12 +20,11 @@
 #include <QTextEdit>
 #include "adapters/joystickadapter.h"
 #include "adapters/lidaradapter.h"
+#include "adapters/positiontrackeradapter.h"
 #include <QDebug>
 #include <QFileDialog>
 
 #include <iostream>
-
-using namespace IGVC::Sensors;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -59,21 +59,29 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->hardwareStatusList->addItem("Map");
 
-    _joystickDriver = new JoystickDriver(&_joystick->onNewData);
+    _joystickDriver = new JoystickDriver(_joystick);
 
 //    _lidar = new SimulatedLidar();
     _lidar = new LMS200();
     ui->hardwareStatusList->addItem("LIDAR");
+    ui->actionLMS_200->setChecked(true);
 
-    _stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
+    //_stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
+    _stereoSource = new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml");
     ui->hardwareStatusList->addItem("Camera");
 
-    _GPS = new SimulatedGPS((QDir::currentPath() + "/GPSData.txt").toStdString());
-    ui->actionSimulatedGPS->setChecked(true);
+//    _GPS = new SimulatedGPS("");
+    _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 19200);
+    ui->actionOutback_A321->setChecked(true);
     ui->hardwareStatusList->addItem("GPS");
 
     _IMU = new Ardupilot();
     ui->hardwareStatusList->addItem("IMU");
+
+    _posTracker = new BasicPositionTracker(_GPS, _IMU);
+    ui->hardwareStatusList->addItem("Position Tracker");
+
+    _mapper = new MapBuilder(_lidar, _posTracker);
 
     updateHardwareStatusIcons();
 
@@ -96,7 +104,10 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete _joystick;
+    delete _posTracker;
     delete _GPS;
+    delete _IMU;
+    delete _stereoSource;
     delete _lidar;
 }
 
@@ -127,7 +138,7 @@ void MainWindow::openHardwareView(QModelIndex index)
 	}
         else if(labelText == "Map")
         {
-            adapter = new MapAdapter();
+            adapter = new MapAdapter(_mapper, _posTracker);
         }
         else if(labelText == "GPS")
         {
@@ -140,6 +151,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "IMU")
         {
             adapter = new IMUAdapter(_IMU);
+        }
+        else if(labelText == "Position Tracker")
+        {
+            adapter = new PositionTrackerAdapter(_posTracker);
         }
         else
         {
@@ -216,7 +231,7 @@ MDIWindow* MainWindow::findWindowWithTitle(QString title)
         if(mdiChild && mdiChild->windowTitle() == title)
             return mdiChild;
     }
-    return 0;
+    return nullptr;
 }
 
 void MainWindow::on_joystickButton_toggled(bool checked)
@@ -224,12 +239,13 @@ void MainWindow::on_joystickButton_toggled(bool checked)
     this->setFocus();
     if(checked)
     {
-        _motorController->setControlEvent(&_joystickDriver->controlEvent);
+        // TODO : disconnect from intelilgence signals
+        connect(_joystickDriver, SIGNAL(onNewMotorCommand(MotorCommand)), _motorController, SLOT(setMotorCommand(MotorCommand)));
     }
     else
     {
-        //TODO : Set motor controller to listen to intelligence events
-        _motorController->setControlEvent(0);
+        disconnect(_joystickDriver, SIGNAL(onNewMotorCommand(MotorCommand)), _motorController, SLOT(setMotorCommand(MotorCommand)));
+        // TODO : connect to intelligence signals
     }
 }
 
@@ -293,8 +309,11 @@ void MainWindow::on_loadConfigButton_clicked()
 
 void MainWindow::on_actionHemisphere_A100_triggered()
 {
-    ui->actionSimulatedGPS->setChecked(!ui->actionHemisphere_A100->isChecked());
-    _GPS = new HemisphereA100GPS();
+    ui->actionSimulatedGPS->setChecked(false);
+    ui->actionHemisphere_A100->setChecked(true);
+    ui->actionOutback_A321->setChecked(false);
+    _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 4800);
+    _posTracker->ChangeGPS(_GPS);
     updateHardwareStatusIcons();
 }
 
@@ -303,8 +322,18 @@ void MainWindow::on_actionSimulatedGPS_triggered()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated GPS Data File"), "", tr("Text Files(*.txt)"));
     if(fileName.length() > 0)
     {
-        ui->actionHemisphere_A100->setChecked(!ui->actionSimulatedGPS->isChecked());
+        ui->actionSimulatedGPS->setChecked(true);
+        ui->actionHemisphere_A100->setChecked(false);
+        ui->actionOutback_A321->setChecked(false);
+//        MDIWindow *window = findWindowWithTitle("GPS");
+//        if( window != nullptr)
+//        {
+//            QWidget* p = (QWidget*)window->parent();
+//            if(p != nullptr)
+//                p->close();
+//        }
         _GPS = new SimulatedGPS(fileName.toStdString());
+        _posTracker->ChangeGPS(_GPS);
         updateHardwareStatusIcons();
     }
 }
@@ -321,4 +350,46 @@ void MainWindow::updateHardwareStatusIcons()
 void MainWindow::on_actionClearLogs_triggered()
 {
     Logger::Clear();
+}
+
+void MainWindow::closeEvent(QCloseEvent *e)
+{
+    mdiArea->closeAllSubWindows();
+    QMainWindow::closeEvent(e);
+}
+
+void MainWindow::on_actionOutback_A321_triggered()
+{
+    ui->actionSimulatedGPS->setChecked(false);
+    ui->actionHemisphere_A100->setChecked(false);
+    ui->actionOutback_A321->setChecked(true);
+    _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 19200);
+    _posTracker->ChangeGPS(_GPS);
+    updateHardwareStatusIcons();
+}
+
+void MainWindow::on_actionSimulatedLidar_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated Lidar Data File"), "", tr("Text Files(*.txt)"));
+    if(fileName.length() > 0)
+    {
+        ui->actionLMS_200->setChecked(false);
+        ui->actionSimulatedLidar->setChecked(true);
+        SimulatedLidar *newDevice = new SimulatedLidar;
+        newDevice->loadFile(fileName.toStdString().c_str());
+        _mapper->ChangeLidar(newDevice);
+        _mapper->Clear();
+        _lidar = newDevice;
+        updateHardwareStatusIcons();
+    }
+}
+
+void MainWindow::on_actionLMS_200_triggered()
+{
+    ui->actionLMS_200->setChecked(true);
+    ui->actionSimulatedLidar->setChecked(false);
+    _lidar = new LMS200;
+    _mapper->ChangeLidar(_lidar);
+    _mapper->Clear();
+    updateHardwareStatusIcons();
 }

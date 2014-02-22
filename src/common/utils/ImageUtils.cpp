@@ -1,8 +1,9 @@
 #include "ImageUtils.h"
+#include <common/config/configmanager.h>
 
 using namespace std;
 
-void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols)
+void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols)
 {
 
   //Compute Position Information for points
@@ -18,7 +19,7 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
   Vector3d cameraPos, cameraOffset;
 
   double phi, theta;
-  cameraPos << -derRobot.Mast2Center(), 0, -derRobot.HeightOfMast(); //both variables are negated because of NED direction conventions
+  cameraPos << - ConfigManager::Instance().getValue("Dimensions", "Mast2Center", 0), 0, - ConfigManager::Instance().getValue("Dimensions", "HeightOfMast", 0); //both variables are negated because of NED direction conventions
 
   rotDynMat = HomogRotMat3d(roll, pitch, yaw);
 
@@ -36,7 +37,7 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, Robot& derRobot,
     pos = HomogImgRotMat(roll)*pos; //Correct for roll of image by rotating it back the opposite way
 
 
-    phi = derRobot.CameraAngle() - pitch + atan2((derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
+    phi = ConfigManager::Instance().getValue("Dimensions", "CameraAngle", 0) - pitch + atan2((derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
     //phi = derRobot.CameraAngle() - pitch + atan2((600/768 * derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
     theta = atan2((derCameraInfo.PixelSideLength() * pos(1)), derCameraInfo.FocalLength());
      //theta = atan2((900/1024*derCameraInfo.PixelSideLength() * pos(1)), derCameraInfo.FocalLength());
