@@ -58,7 +58,7 @@ private Q_SLOTS:
             responded = false;
             newImageFrameEvent(src);
             // This checks that the LineDetector is actually responding to events
-            QTRY_VERIFY_WITH_TIMEOUT(responded, 10);
+            QTRY_VERIFY_WITH_TIMEOUT(responded, 1000);
             cv::waitKey(1);
             success = cap.read(src);
         }
