@@ -9,15 +9,15 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <string>
-#include <common/events/Event.hpp>
-
-using namespace std;
+#include <QObject>
 
 /*!
  * \brief Helper class to simplify interfacing with serial port hardware.
  * \headerfile ASIOSerialPort.h <hardware/serial/ASIOSerialPort.h>
  */
-class ASIOSerialPort {
+class ASIOSerialPort : public  QObject {
+    Q_OBJECT
+
 public:
     /*! \brief The constructor takes in the path to the port (eg. "/dev/ttyUSB0") and a baud rate for the connection and opens the connection. */
 	ASIOSerialPort(std::string port_name, size_t baud);
@@ -70,22 +70,24 @@ public:
       */
      void definePacket(char startByte, char endByte);
 
+     ~ASIOSerialPort();
+
+signals:
      /*! \brief onNewLine Fires every time a new line character is found in the stream.
       * \note You must call startEvents() for this event to fire.
       */
-     Event<string> onNewLine;
+     void onNewLine(std::string line);
      /*! \brief onNewByte Fires every time a byte is found in the stream.
       * \note You must call startEvents() for this event to fire.
       */
-     Event<char> onNewByte;
+     void onNewByte(char byte);
      /*! \brief onNewPacket Fires every time a user-define packet is found in the stream.
       * \note You must call startEvents() for this event to fire.
       * \note You must define a packet with definePacket() for this event to fire.
       * \see definePacket
       */
-     Event<string> onNewPacket;
+     void onNewPacket(std::string packet);
 
-     ~ASIOSerialPort();
 private:
 	boost::asio::io_service ioservice;
 	boost::asio::serial_port port;
@@ -101,9 +103,9 @@ private:
 	char _packetEndByte;
 	bool _packetHasBeenDefined;
 	bool _hasEncounteredStartByte;
-	string _packet;
+    std::string _packet;
 
-    string _line;
+    std::string _line;
 };
 
 #endif /* ASIOSERIALPORT_H_ */
