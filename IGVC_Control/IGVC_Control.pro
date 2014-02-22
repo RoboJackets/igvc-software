@@ -75,10 +75,10 @@ HEADERS  += \
     ../src/hardware/sensors/lidar/Lidar.h \
     ../src/common/datastructures/VisOdomData.hpp \
     ../src/common/datastructures/StereoImageData.hpp \
-    ../src/common/datastructures/SensorData.h \
+    ../src/common/datastructures/SensorData.hpp \
     ../src/common/datastructures/IMUData.hpp \
     ../src/common/datastructures/ImageData.hpp \
-    ../src/common/datastructures/GPSData.h \
+    ../src/common/datastructures/GPSData.hpp \
     ../src/common/datastructures/DataPoint.hpp \
     ../src/common/datastructures/DataArray.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
