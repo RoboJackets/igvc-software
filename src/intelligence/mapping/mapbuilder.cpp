@@ -5,6 +5,9 @@
 #include <pcl/common/transforms.h>
 #include <pcl/filters/voxel_grid.h>
 #include <common/config/configmanager.h>
+#include <pcl/registration/icp.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/filters/passthrough.h>
 
 
 MapBuilder::MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker)
@@ -14,6 +17,7 @@ MapBuilder::MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker)
     _cloud->width = 1024;
     _cloud->is_dense = false;
     _cloud->points.resize(_cloud->width*_cloud->height);
+    firstFrame = true;
 
     if(lidar)
     {
@@ -62,11 +66,40 @@ void MapBuilder::onLidarData(LidarState state)
     Eigen::Quaternionf rotation(Eigen::AngleAxisf(mt, Eigen::Vector3f::UnitZ()));
     pcl::transformPointCloud(*cloud_lidar, *cloud_transformed, translation, rotation);
 
-    (*cloud) += (*cloud_transformed);
+    // ICP to refine cloud alignment
+    if(!firstFrame)
+    {
+        //Use ICP to fix errors in transformation
+        pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
+        icp.setMaxCorrespondenceDistance(2);
+        icp.setMaximumIterations(30);
+        icp.setInputCloud(cloud_transformed);
+        icp.setInputTarget(cloud);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_aligned (new pcl::PointCloud<pcl::PointXYZ>);
+        icp.align(*cloud_aligned);
+
+        if(icp.hasConverged())
+        {
+            //Add aligned cloud points to map cloud
+            (*cloud) += *cloud_aligned;
+        }
+        else
+        {
+            //Ignore alignment atempt
+            std::cout << "No convergence." << std::endl;
+            (*cloud) += *cloud_transformed;
+        }
+    }
+    else
+    {
+        //Add first cloud's points to map cloud
+        (*cloud) += *cloud_transformed;
+    }
 
     //Run map cloud through a VoxelGrid to remove any duplicate points
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_removedDuplicates (new pcl::PointCloud<pcl::PointXYZ>);
     pcl::VoxelGrid<pcl::PointXYZ> duplicateRemover;
+
     duplicateRemover.setInputCloud(cloud);
     duplicateRemover.setLeafSize (0.05f, 0.05f, 0.05f);
     duplicateRemover.filter(*cloud_removedDuplicates);
@@ -74,6 +107,7 @@ void MapBuilder::onLidarData(LidarState state)
     cloud.swap(cloud_removedDuplicates);
 
     onNewMap(cloud);
+    firstFrame = false;
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr MapBuilder::getCloud()
