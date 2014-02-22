@@ -74,7 +74,7 @@ void LidarAdapter::paintEvent(QPaintEvent *)
      *  furthest distance is largest line and all other lines use a % of the longest
      */
 
-    p.setPen(QPen(QColor(0, 0, 0, 32)));
+    p.setPen(Qt::black);
     double mag;         // % of longest line
 
     for(LidarPoint point : _data.points)
