@@ -7,22 +7,24 @@
 #define GPS_HPP_
 
 #include <time.h>
-#include "common/events/Event.hpp"
-#include "hardware/sensors/DataStructures/GPSData.hpp"
-
-namespace IGVC {
-namespace Sensors {
-
-
+#include <common/datastructures/GPSData.hpp>
+#include <QObject>
 
 /*!
  * \brief Interface for GPS devices.
  * \headerfile GPS.hpp <hardware/sensors/gps/GPS.hpp>
  */
-class GPS
+class GPS : public QObject
 {
+    Q_OBJECT
+
+signals:
+    void onNewData(GPSData);
+
 public:
-	virtual ~GPS() { }
+    GPS() { qRegisterMetaType<GPSData>("GPSData"); }
+
+    virtual ~GPS() { }
 
     /*!
      * \brief Returns the most recent state acquired from the GPS device.
@@ -43,14 +45,7 @@ public:
      * \brief Return true if the device is connected and communicating.
      */
     virtual bool isOpen() = 0;
-
-    Event<GPSData> onNewData;
-    Event<void*> onDeviceFailure;
-    Event<void*> onDataExpiration;
 };
-
-} //Sensors
-} //IGVC
 
 
 #endif /* GPS_HPP_ */

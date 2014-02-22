@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
 #endif
 
     qRegisterMetaType<Qt::Orientation>("Qt::Orientation");
+    qRegisterMetaType<std::string>("std::string");
     if(!ConfigManager::Instance().load())
         ConfigManager::Instance().save();
 
