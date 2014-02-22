@@ -5,8 +5,6 @@
 
 #include <string>
 
-using namespace IGVC::Sensors;
-
 /*!
  * \brief Contains helper methods for interpreting messages received from devices following the NMEA GPS standard.
  */

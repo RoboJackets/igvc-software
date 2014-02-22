@@ -1,6 +1,0 @@
-SUBSYSTEM == "tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303",ATTRS{bcdDevice}=="0202", NAME:="ttyGPS"
-SUBSYSTEM == "tty", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0010",ATTRS{bcdDevice}=="0001", NAME:="ttyIMU"
-KERNEL=="ttyUSB?", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="A600ah8R", SYMLINK+="igvc_2012_left_encoder_shield"
-KERNEL=="ttyUSB?", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="A900adES", SYMLINK+="igvc_2012_right_encoder_shield"
-KERNEL=="ttyUSB?", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="A600ahwx", SYMLINK+="igvc_2012_left_motor_shield"
-KERNEL=="ttyUSB?", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="A600ahjr", SYMLINK+="igvc_2012_right_motor_shield"

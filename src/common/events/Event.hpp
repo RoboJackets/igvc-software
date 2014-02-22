@@ -38,6 +38,8 @@ class Event
         void operator-=(Delegate<T>* delegate)
         {
             iter i = _delegates.begin();
+            if(_delegates.size() == 0)
+                return;
             while (i != _delegates.end())
             {
                 if (*i == delegate)
@@ -62,6 +64,11 @@ class Event
         typename std::vector<Delegate<T>* >::size_type numDelegates()
         {
             return _delegates.size();
+        }
+
+        void Clear()
+        {
+            _delegates.clear();
         }
 
     private:
