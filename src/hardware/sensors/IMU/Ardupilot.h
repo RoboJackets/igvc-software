@@ -2,10 +2,9 @@
 #define ARDUPILOT_H
 
 #include <hardware/serial/ASIOSerialPort.h>
-#include <hardware/sensors/DataStructures/IMUData.hpp>
+#include <common/datastructures/IMUData.hpp>
 #include <hardware/sensors/IMU/IMU.h>
-
-using namespace std;
+#include <QObject>
 
 /*!
  * \brief For connecting to the Ardupilot IMU device.
@@ -16,18 +15,18 @@ using namespace std;
  */
 class Ardupilot : public IMU
 {
+    Q_OBJECT
     public:
         Ardupilot();
         ~Ardupilot();
-        Event<IMUData> onNewIMUData;
 
         bool isWorking();
 
+    private slots:
+        void onNewSerialLine(std::string line);
+
     private:
         ASIOSerialPort ardupilotPort;
-
-        void onNewSerialLine(string line);
-        LISTENER(Ardupilot, onNewSerialLine, string);
 };
 
 #endif // ARDUPILOT_H

@@ -5,8 +5,6 @@
 #include <sicklms-1.0/SickLMS.hh>
 #include <boost/thread.hpp>
 
-using namespace IGVC::Sensors;
-
 class LMS200 : public Lidar
 {
 public:

@@ -8,15 +8,14 @@
 
 CameraAdapter::CameraAdapter(StereoSource *source, QWidget *parent) :
      QWidget(parent),
-     ui(new Ui::CameraAdapter),
-     LOnCameraData(this)
+     ui(new Ui::CameraAdapter)
 {
     ui->setupUi(this);
 
-    if(source)
+    if(source != nullptr)
     {
         _stereoSource = source;
-        _stereoSource->onNewData += &LOnCameraData;
+        connect(_stereoSource, SIGNAL(onNewData(StereoImageData)), this, SLOT(onCameraData(StereoImageData)));
     }
 
     if(parent)
@@ -24,16 +23,17 @@ CameraAdapter::CameraAdapter(StereoSource *source, QWidget *parent) :
         parent->setLayout(new QGridLayout());
     }
     gotData = false;
+    connect(ui->saveLeft,SIGNAL(released()),SLOT(on_saveLeft_clicked()));
 }
 
 CameraAdapter::~CameraAdapter()
 {
-    if(_stereoSource)
-        _stereoSource->onNewData -= &LOnCameraData;
+    if(_stereoSource != nullptr)
+        disconnect(_stereoSource, SIGNAL(onNewData(StereoImageData)), this, SLOT(onCameraData(StereoImageData)));
     delete ui;
 }
 
-void CameraAdapter::OnCameraData(StereoImageData data)
+void CameraAdapter::onCameraData(StereoImageData data)
 {
 
     if(isVisible())
@@ -58,14 +58,18 @@ QImage CameraAdapter::CVMat2QImage(cv::Mat img)
     return dest2;
 }
 
+void CameraAdapter::on_saveLeft_clicked()
+{
+    leftImage.save("../leftCapture.jpg");
+}
 
 void CameraAdapter::paintEvent(QPaintEvent *e)
 {
     _mutex.lock();
 
     if(gotData){
-
-        ui->leftFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.left().mat())));
+        leftImage = CVMat2QImage(_data.left().mat());
+        ui->leftFeedLabel->setPixmap(QPixmap::fromImage(leftImage));
         ui->rightFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.right().mat())));
 //       ui->depthMapLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.depthMap)));
 //       ui->pointCloudLabel->setPixmap(QPixmap::fromImage( CVMat2QImage(_data.pointCloud)));

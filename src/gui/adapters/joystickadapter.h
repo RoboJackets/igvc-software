@@ -4,7 +4,6 @@
 #include <QWidget>
 #include <boost/thread.hpp>
 #include "hardware/sensors/joystick/Joystick.h"
-#include "common/events/Event.hpp"
 
 namespace Ui {
 class JoystickAdapter;
@@ -24,6 +23,9 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *e);
+
+private slots:
+    void onJoystickData(JoystickState state);
     
 private:
     Ui::JoystickAdapter *ui;
@@ -33,9 +35,6 @@ private:
     JoystickState _state;
 
     boost::mutex _mutex;
-
-    void OnJoystickData(JoystickState state);
-    LISTENER(JoystickAdapter, OnJoystickData, JoystickState)
 };
 
 #endif // JOYSTICKADAPTER_H
