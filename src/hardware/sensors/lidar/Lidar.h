@@ -55,6 +55,11 @@ class Lidar : public QObject
 {
     Q_OBJECT
 public:
+    Lidar()
+    {
+        qRegisterMetaType<LidarState>("LidarState");
+    }
+
     virtual ~Lidar() { }
 
     /*!
