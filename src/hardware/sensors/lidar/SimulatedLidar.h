@@ -4,37 +4,31 @@
 #include <boost/thread.hpp>
 #include "hardware/sensors/lidar/Lidar.h"
 
-namespace IGVC
+class SimulatedLidar : public Lidar
 {
-    namespace Sensors
-    {
-        class SimulatedLidar : public Lidar
-        {
-            public:
-                SimulatedLidar();
-                virtual ~SimulatedLidar();
-                LidarState GetState();
-                LidarState GetStateAtTime(timeval time);
-                bool IsWorking();
-                void loadFile(const char* path);
-                void setDelay(int usec);
+    public:
+        SimulatedLidar();
+        virtual ~SimulatedLidar();
+        LidarState GetState();
+        LidarState GetStateAtTime(timeval time);
+        bool IsWorking();
+        void loadFile(const char* path);
+        void setDelay(int usec);
 
-            protected:
-            private:
+    protected:
+    private:
 
-            boost::thread _thread;
+    boost::thread _thread;
 
-            bool _running;
+    bool _running;
 
-            int _delay;
+    int _delay;
 
-            void thread_run();
+    void thread_run();
 
-            LidarState _data;
+    LidarState _data;
 
-            std::vector<std::string> StringSplit(const std::string &source, const char *delimiter = " ", bool keepEmpty = false);
-        };
-    }
-}
+    std::vector<std::string> StringSplit(const std::string &source, const char *delimiter = " ", bool keepEmpty = false);
+};
 
 #endif // SIMULATEDLIDAR_H

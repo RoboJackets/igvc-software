@@ -8,26 +8,32 @@ GPSAdapter::GPSAdapter(GPS *gps, QWidget *parent) :
     minLat(-5),
     maxLat(5),
     minLong(-5),
-    maxLong(5),
-    LOnNewData(this)
+    maxLong(5)
 {
     ui->setupUi(this);
     for (int i = 0;i<5;i++) {
         coordinates[i][0] = 0;
         coordinates[i][1] = 0;
     }
-    gps->onNewData += &LOnNewData;
+
     _GPS = gps;
+    if(_GPS != nullptr)
+        connect(_GPS, SIGNAL(onNewData(GPSData)), this, SLOT(onNewData(GPSData)));
     ui->user_Top->setPlainText(QString::number(maxLat));
     ui->user_Right->setPlainText(QString::number(maxLong));
     ui->user_Bottom->setPlainText(QString::number(minLat));
     ui->user_Left->setPlainText(QString::number(minLong));
 
+    connect(this, SIGNAL(updateBecauseNewData()), this, SLOT(update()));
 }
 
 GPSAdapter::~GPSAdapter()
 {
-    _GPS->onNewData -= &LOnNewData;
+    if(_GPS != nullptr)
+    {
+        disconnect(_GPS, SIGNAL(onNewData(GPSData)), this, SLOT(onNewData(GPSData)));
+        _GPS = nullptr;
+    }
     delete ui;
 
 }
@@ -36,13 +42,13 @@ void GPSAdapter::labelPrint() {
     //paint data label
     QString LatLabel = QString("Latitude<br />");
     for (int i = 0;i < 5;i++) {
-        LatLabel = LatLabel + QString::number(coordinates[i][0]) + QString("<br />");
+        LatLabel = LatLabel + QString::number(coordinates[i][0],'g',15) + QString("<br />");
     }
     ui->LatitudeLabel->setText(LatLabel);
 
     QString LongLabel = QString("Longitude<br />");
     for (int i = 0;i < 5;i++) {
-        LongLabel = LongLabel + QString::number(coordinates[i][1]) + QString("<br />");
+        LongLabel = LongLabel + QString::number(coordinates[i][1], 'g', 15) + QString("<br />");
     }
     ui->LongitudeLabel->setText(LongLabel);
 
@@ -52,7 +58,7 @@ void GPSAdapter::labelPrint() {
 
 }
 
-void GPSAdapter::OnNewData(GPSData data) {
+void GPSAdapter::onNewData(GPSData data) {
     //shifting old data
     for (int i = 4;i>0;i--) {
         coordinates[i][0] = coordinates[i-1][0];
@@ -68,9 +74,7 @@ void GPSAdapter::OnNewData(GPSData data) {
 
 
     //update graphics holder
-    ui->GraphicsHolder->update();
-
-
+    updateBecauseNewData();
 }
 
 
@@ -107,6 +111,8 @@ void GPSAdapter::paintEvent(QPaintEvent *)
         painter.drawEllipse(origin + QPoint((coordinates[i+1][1] - coordinates[0][1]) * horizontalFactor,
                 - (coordinates[0][0] - coordinates[i+1][0]) * verticalFactor), 5 - i, 5 - i);
     }
+
+    painter.end();
 }
 
 void GPSAdapter::on_user_Top_textChanged()

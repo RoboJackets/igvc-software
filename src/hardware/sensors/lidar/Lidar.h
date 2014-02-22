@@ -8,54 +8,52 @@
 
 #include <stdint.h>
 #include <time.h>
-#include "common/events/Event.hpp"
+#include <QObject>
 
-namespace IGVC {
-namespace Sensors {
-
-    class LidarPoint
+class LidarPoint
+{
+public:
+    LidarPoint()
     {
-        public:
-            LidarPoint()
-            {
-                valid = false;
-                angle = 0;
-                raw = 0;
-                distance = 0;
-                intensity = 0;
-            }
+        valid = false;
+        angle = 0;
+        raw = 0;
+        distance = 0;
+        intensity = 0;
+    }
 
-            /*! \brief If false, the other members are not meaningful */
-            bool valid;
+    /*! \brief If false, the other members are not meaningful */
+    bool valid;
 
-            /*! \brief Angle in radians counterclockwise from right, with the LEDs pointing forward.*/
-            float angle;
+    /*! \brief Angle in radians counterclockwise from right, with the LEDs pointing forward.*/
+    float angle;
 
-            /*! \brief Raw distance */
-            uint16_t raw;
+    /*! \brief Raw distance */
+    uint16_t raw;
 
-            /*! \brief Distance in meters*/
-            float distance;
+    /*! \brief Distance in meters*/
+    float distance;
 
-            /*! \brief Intensity of return, unknown units */
-            uint8_t intensity;
-    };
+    /*! \brief Intensity of return, unknown units */
+    uint8_t intensity;
+};
 
-    /*!
-     * \brief A struct that represents a data packet from the Lidar device.
-     */
-    struct LidarState
-    {
-        timeval timestamp;
-        LidarPoint points[1024];
-    };
+/*!
+ * \brief A struct that represents a data packet from the Lidar device.
+ */
+struct LidarState
+{
+    timeval timestamp;
+    LidarPoint points[1024];
+};
 
 /*!
  * \brief Interface for Lidars.
  * \headerfile Lidar.h <hardware/sensors/lidar/Lidar.h>
  */
-class Lidar
+class Lidar : public QObject
 {
+    Q_OBJECT
 public:
     virtual ~Lidar() { }
 
@@ -71,12 +69,8 @@ public:
 
     virtual bool IsWorking() = 0;
 
-    Event<LidarState> onNewData;
-    Event<void*> onDeviceFailure;
-    Event<void*> onDataExpiration;
+signals:
+    void onNewData(LidarState);
 };
 
-
-} /* namespace Sensors */
-} /* namespace IGVC */
 #endif // LIDAR_H

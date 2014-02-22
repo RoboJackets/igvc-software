@@ -3,17 +3,21 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <common/utils/AngleUtils.h>
 
 using namespace pcl;
 
-MapAdapter::MapAdapter(QWidget *parent) :
+MapAdapter::MapAdapter(MapBuilder *mapper, BasicPositionTracker *posTracker, QWidget *parent) :
     QWidget(parent),
-    LonNewMap(this),
     ui(new Ui::MapAdapter),
     _scale(20),
-    _map(0)
+    _mapper(mapper),
+    _posTracker(posTracker)
 {
     ui->setupUi(this);
+
+    if(_mapper != nullptr)
+        connect(_mapper, SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), this, SLOT(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
 }
 
 void MapAdapter::setScale(int scale)
@@ -25,7 +29,7 @@ void MapAdapter::setScale(int scale)
     update();
 }
 
-void MapAdapter::onNewMap(pcl::PointCloud<PointXYZ> *map)
+void MapAdapter::onNewMap(pcl::PointCloud<PointXYZ>::Ptr map)
 {
     _map = map;
     update();
@@ -41,6 +45,13 @@ void MapAdapter::paintEvent(QPaintEvent *)
     painter.drawLine(center, center + QPoint(0,-1*_scale));
     painter.setPen(Qt::blue);
     painter.drawLine(center, center + QPoint(1*_scale,0));
+
+    // Draw robot position
+    painter.setPen(Qt::red);
+    RobotPosition pos = _posTracker->GetPosition();
+    QPoint posMark = _scale * QPoint(pos.X, -pos.Y) + center;
+    painter.drawEllipse(posMark, 5, 5);
+    painter.drawLine(posMark, posMark + QPoint(5*sin(AngleUtils::degToRads(pos.Heading)),5*cos(AngleUtils::degToRads(180+pos.Heading))));
 
     // Draw map
     if(_map != NULL)
@@ -77,6 +88,8 @@ void MapAdapter::paintEvent(QPaintEvent *)
 MapAdapter::~MapAdapter()
 {
     delete ui;
+    if(_mapper != nullptr)
+        disconnect(_mapper, SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), this, SLOT(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
 }
 
 void MapAdapter::on_scaleSlider_sliderMoved(int position)
@@ -109,4 +122,9 @@ void MapAdapter::mouseMoveEvent(QMouseEvent *e)
 void MapAdapter::wheelEvent(QWheelEvent *e)
 {
     setScale(_scale + ( e->angleDelta().y() / 30 ) );
+}
+
+void MapAdapter::on_pushButton_clicked()
+{
+    _mapper->Clear();
 }

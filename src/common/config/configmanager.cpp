@@ -38,7 +38,7 @@ bool ConfigManager::load(std::string path)
     }
 
     file.close();
-    StructureChanged(0);
+    StructureChanged();
     return true;
 }
 
