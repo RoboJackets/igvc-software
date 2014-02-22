@@ -14,7 +14,9 @@ class IMU : public QObject
 signals:
     void onNewData(IMUData);
 public:
-    IMU() { }
+    IMU() {
+        qRegisterMetaType<IMUData>("IMUData");
+    }
 
     /*! \brief Returns true if the device is working correctly. */
     virtual bool isWorking() = 0;
