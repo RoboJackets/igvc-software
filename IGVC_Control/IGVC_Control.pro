@@ -156,7 +156,7 @@ LIBS += -L/usr/lib/ -lboost_thread -lboost_system
 INCLUDEPATH += /usr/include/pcl-1.7
 DEPENDPATH += /usr/include/pcl-1.7
 
-LIBS += -L/usr/lib -lpcl_common -lpcl_visualization -lpcl_kdtree -lpcl_filters
+LIBS += -L/usr/lib -lpcl_common -lpcl_visualization -lpcl_kdtree -lpcl_filters -lpcl_search
 
 # VTK (PCL Dependency)
 INCLUDEPATH += /usr/include/vtk-5.8
