@@ -3,6 +3,7 @@
 
 
 using namespace std;
+
 transformer::transformer(Event<ImageData> &evtSrc)
     :LonImageEvent(this)
 {
@@ -10,6 +11,7 @@ transformer::transformer(Event<ImageData> &evtSrc)
     //TODO here put in the coordinates of pc1-pc2
     //As measured in real life
     /// (x1, x2, x3, y1, y2, y3, 1 1 1)
+
     pcam = (cv::Mat_<float>(2,2) << 427, 511, 642, 642);
     cout<< pcam << endl;
 
@@ -43,6 +45,7 @@ void transformer::onImageEvent(ImageData imgd){
             newLoc.at<float>(1,0) = r;
             newLoc = transformMat*newLoc;
             dst.at<cv::Vec3b>((int)newLoc.at<float>(1,0),(int) newLoc.at<float>(0,0)) = src.at<cv::Vec3b>(r,c);
+
         }
     }
     onNewLines(ImageData(dst));

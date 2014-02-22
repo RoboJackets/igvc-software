@@ -11,30 +11,29 @@
 #include "hardware/serial/ASIOSerialPort.h"
 
 #include <list>
-
-namespace IGVC {
-namespace Sensors {
+#include <QObject>
 
 /*!
  * \brief For connecting to the Hemisphere A100 GPS device
  * \headerfile HemisphereA100GPS.h <hardware/sensors/gps/HemisphereA100GPS.h>
  */
-class HemisphereA100GPS: public IGVC::Sensors::GPS {
+class NMEACompatibleGPS: public GPS
+{
+    Q_OBJECT
 public:
-	HemisphereA100GPS();
+    NMEACompatibleGPS(std::string devicePath, uint baudRate);
 	GPSData GetState();
-	GPSData GetStateAtTime(timeval time);
+    GPSData GetStateAtTime(timeval);
 	bool StateIsAvailable();
     bool isOpen();
-	~HemisphereA100GPS();
-	GPSAccuracy DefaultAccuracy;
+    ~NMEACompatibleGPS();
+
+private slots:
+    void onNewSerialLine(std::string line);
 
 private:
 
-	ASIOSerialPort serialPort; // Serial port for GPS communication
-
-	void onNewSerialLine(string line);
-	LISTENER(HemisphereA100GPS, onNewSerialLine, string);
+    ASIOSerialPort serialPort; // Serial port for GPS communication
 
 	boost::mutex queueLocker; // mutex for thread-safing the buffer
 
@@ -45,6 +44,4 @@ private:
 	bool parseLine(std::string line, GPSData &state); // parses a line from the GPS device
 };
 
-} /* namespace Sensors */
-} /* namespace IGVC */
 #endif /* HEMISPHEREA100GPS_H_ */

@@ -347,10 +347,20 @@
       <string>GPS</string>
      </property>
      <addaction name="separator"/>
+     <addaction name="actionOutback_A321"/>
      <addaction name="actionHemisphere_A100"/>
      <addaction name="actionSimulatedGPS"/>
     </widget>
+    <widget class="QMenu" name="menuLidar">
+     <property name="title">
+      <string>Lidar</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="actionLMS_200"/>
+     <addaction name="actionSimulatedLidar"/>
+    </widget>
     <addaction name="menuGPS"/>
+    <addaction name="menuLidar"/>
    </widget>
    <widget class="QMenu" name="menuLogs">
     <property name="title">
@@ -430,6 +440,30 @@
    </property>
    <property name="toolTip">
     <string>Delete All Log Files</string>
+   </property>
+  </action>
+  <action name="actionOutback_A321">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Outback A321</string>
+   </property>
+  </action>
+  <action name="actionLMS_200">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>LMS 200</string>
+   </property>
+  </action>
+  <action name="actionSimulatedLidar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Simulated</string>
    </property>
   </action>
  </widget>
