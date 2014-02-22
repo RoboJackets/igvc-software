@@ -1,5 +1,5 @@
 
-QT       += testlib gui core declarative
+QT       += testlib xml core gui declarative
 
 TARGET = IGVC_Test
 CONFIG   += console
@@ -18,12 +18,34 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/common/utils/StringUtils.cpp \
     ../src/common/logger/logger.cpp \
     ../src/intelligence/linedetection/linedetector.cpp \
-    ../src/intelligence/linedetection/transformer.cpp
+    ../src/intelligence/linedetection/transformer.cpp \
+    ../src/intelligence/posetracking/positiontracker.cpp \
+    ../src/common/config/configmanager.cpp \
+    ../src/common/utils/gpsfilereader.cpp \
+    ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
+    ../src/hardware/serial/ASIOSerialPort.cpp \
+    ../src/hardware/sensors/gps/nmea.cpp \
+    ../src/intelligence/posetracking/basicpositiontracker.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
-    ../src/common/utils/StringUtils.hpp \
-    ../src/tests/testlinedetection.hpp \
+    ../src/tests/testpositiontracker.hpp \
+    ../src/tests/testgpsutils.h \
+    ../src/tests/testgpsreader.hpp \
+    ../src/tests/testangleutils.h \
+    ../src/tests/capturegpsandpostracker.hpp \
+    ../src/common/config/configmanager.h \
     ../src/common/logger/logger.h \
+    ../src/common/utils/GPSUtils.h \
+    ../src/common/utils/AngleUtils.h \
+    ../src/common/utils/gpsfilereader.h \
+    ../src/common/utils/StringUtils.hpp \
+    ../src/intelligence/posetracking/positiontracker.h \
+    ../src/intelligence/posetracking/basicpositiontracker.h \
+    ../src/hardware/sensors/gps/nmeacompatiblegps.h \
+    ../src/hardware/serial/ASIOSerialPort.h \
+    ../src/hardware/sensors/gps/nmea.hpp \
+    ../src/hardware/sensors/gps/GPS.hpp \
+    ../src/tests/testlinedetection.hpp \
     ../src/intelligence/linedetection/linedetector.h \
     ../src/intelligence/linedetection/transformer.h
 
@@ -37,14 +59,9 @@ LIBS += -L/usr/lib/x86_64-linux-gnu/ -lusb-1.0
 INCLUDEPATH += /usr/lib/x86_64-linux-gnu
 DEPENDPATH += /usr/lib/x86_64-linux-gnu
 
-PRE_TARGETDEPS += /usr/lib/x86_64-linux-gnu/libusb-1.0.a
-
 # BOOST
 
 LIBS += -L/usr/lib/ -lboost_thread -lboost_system
-
-PRE_TARGETDEPS += /usr/lib/libboost_thread.a
-PRE_TARGETDEPS += /usr/lib/libboost_system.a
 
 # PCL
 INCLUDEPATH += /usr/include/pcl-1.7

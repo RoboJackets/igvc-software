@@ -38,7 +38,7 @@ void LMS200::thread_run()
         unsigned int values[SickLMS::SICK_MAX_NUM_MEASUREMENTS] = {0};
         unsigned int num_values_returned = 0;
         try {
-        _device.GetSickScan(values, num_values_returned);
+            _device.GetSickScan(values, num_values_returned);
         } catch(...) {
             Logger::Log(LogLevel::Error, "Failed to get scan data from SICK LMS200 device.");
             continue;
@@ -51,7 +51,7 @@ void LMS200::thread_run()
             state.points[i].distance = values[i] / 1000.0; // mm to m conversion
             state.points[i].raw = values[i];
             state.points[i].angle = 0.00872664626 * i; // device defaults to 0.5 degree resolution (0.00872664626 radians)
-            state.points[i].valid = true;
+            state.points[i].valid = state.points[i].distance <= 8.0;
         }
         for(uint i = num_values_returned; i < 1024; i++)
         {
