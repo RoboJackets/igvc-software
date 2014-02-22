@@ -7,6 +7,7 @@ BasicPositionTracker::BasicPositionTracker(GPS *gps, IMU *imu)
     : _gps(gps),
       _imu(imu)
 {
+    qRegisterMetaType<RobotPosition>("RobotPosition");
     originPointsRecorded = 0;
     if(_gps != nullptr)
         connect(_gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
