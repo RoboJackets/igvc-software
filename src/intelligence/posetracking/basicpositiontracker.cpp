@@ -80,6 +80,7 @@ void BasicPositionTracker::onNewGPS(GPSData data)
 
 void BasicPositionTracker::onNewIMU(IMUData data)
 {
-    currentPosition.Heading = data.Yaw;
+    currentPosition.Heading = ( (data.Yaw < 0) ? data.Yaw + 360 : data.Yaw );
+
     onNewPosition(currentPosition);
 }
