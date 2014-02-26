@@ -41,11 +41,6 @@ GPSData SimulatedGPS::GetState()
     return temp;
 }
 
-GPSData SimulatedGPS::GetStateAtTime(timeval)
-{
-    return GetState();
-}
-
 bool SimulatedGPS::isOpen()
 {
     return _open && _data.size() > 0;
