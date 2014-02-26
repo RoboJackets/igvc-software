@@ -10,7 +10,6 @@ class SimulatedLidar : public Lidar
         SimulatedLidar();
         virtual ~SimulatedLidar();
         LidarState GetState();
-        LidarState GetStateAtTime(timeval time);
         bool IsWorking();
         void loadFile(const char* path);
         void setDelay(int usec);
