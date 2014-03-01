@@ -67,11 +67,6 @@ public:
      */
     virtual LidarState GetState() = 0;
 
-    /*!
-     * \brief Returns the LidarState with the given timestamp.
-     */
-    virtual LidarState GetStateAtTime(timeval time) = 0;
-
     virtual bool IsWorking() = 0;
 
 signals:
