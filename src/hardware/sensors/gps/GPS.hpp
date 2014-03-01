@@ -32,11 +32,6 @@ public:
 	virtual GPSData GetState() = 0;
 
     /*!
-     * \brief Returns the GPSState with the given timestamp.
-	 */
-	virtual GPSData GetStateAtTime(timeval time) = 0;
-
-    /*!
      * \brief Return true if there is at least one state in the buffer.
 	 */
 	virtual bool StateIsAvailable() = 0;
