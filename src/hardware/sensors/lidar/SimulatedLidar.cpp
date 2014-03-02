@@ -52,11 +52,6 @@ LidarState SimulatedLidar::GetState()
     return _data;
 }
 
-LidarState SimulatedLidar::GetStateAtTime(timeval time)
-{
-    return _data;
-}
-
 bool SimulatedLidar::IsWorking()
 {
     return true;
