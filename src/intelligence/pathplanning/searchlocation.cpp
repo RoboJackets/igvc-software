@@ -14,7 +14,7 @@ bool SearchLocation::operator == (const SearchLocation &other)
     return abs(x - other.x) < sameness_threshold && abs(y - other.y) < sameness_threshold;// && abs(theta - other.theta) < sameness_threshold;
 }
 
-bool SearchLocation::operator < (const SearchLocation &other)
+bool SearchLocation::operator < (const SearchLocation &other) const
 {
     if(x < other.x)
     {
