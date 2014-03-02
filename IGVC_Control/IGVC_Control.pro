@@ -55,7 +55,8 @@ SOURCES += \
     ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
     ../src/intelligence/posetracking/basicpositiontracker.cpp \
     ../src/gui/adapters/positiontrackeradapter.cpp \
-    ../src/intelligence/mapping/mapbuilder.cpp
+    ../src/intelligence/mapping/mapbuilder.cpp \
+    ../src/intelligence/pathplanning/astarplanner.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -120,7 +121,9 @@ HEADERS  += \
     ../src/intelligence/posetracking/basicpositiontracker.h \
     ../src/common/datastructures/robotposition.hpp \
     ../src/gui/adapters/positiontrackeradapter.h \
-    ../src/intelligence/mapping/mapbuilder.h
+    ../src/intelligence/mapping/mapbuilder.h \
+    ../src/intelligence/pathplanning/pathplanner.hpp \
+    ../src/intelligence/pathplanning/astarplanner.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
