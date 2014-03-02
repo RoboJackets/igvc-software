@@ -8,6 +8,7 @@
 #include "testpositiontracker.hpp"
 #include "testgpsutils.h"
 #include "capturegpsandpostracker.hpp"
+#include "CaptureIMU.hpp"
 
 void RunTestCase(QObject* testCase, std::vector<std::string> args, bool runByDefault = true)
 {
@@ -49,4 +50,5 @@ int main(int argc, const char* argv[])
     RunTestCase(new TestAngleUtils(), args);
     RunTestCase(new TestGPSReader(), args);
     RunTestCase(new CaptureGPSAndPosTracker(), args, false);
+    RunTestCase(new CaptureIMU(), args, false);
 }
