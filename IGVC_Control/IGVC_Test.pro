@@ -23,7 +23,8 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
     ../src/hardware/serial/ASIOSerialPort.cpp \
     ../src/hardware/sensors/gps/nmea.cpp \
-    ../src/intelligence/posetracking/basicpositiontracker.cpp
+    ../src/intelligence/posetracking/basicpositiontracker.cpp \
+    ../src/hardware/sensors/IMU/Ardupilot.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
     ../src/tests/testpositiontracker.hpp \
@@ -42,7 +43,10 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.h \
     ../src/hardware/serial/ASIOSerialPort.h \
     ../src/hardware/sensors/gps/nmea.hpp \
-    ../src/hardware/sensors/gps/GPS.hpp
+    ../src/hardware/sensors/gps/GPS.hpp \
+    ../src/tests/CaptureIMU.hpp \
+    ../src/hardware/sensors/IMU/Ardupilot.h \
+    ../src/hardware/sensors/IMU/IMU.h
 
 # libUSB (for LIDAR)
 
