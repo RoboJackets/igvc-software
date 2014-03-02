@@ -56,26 +56,6 @@ GPSData NMEACompatibleGPS::GetState() {
 	return state;
 }
 
-GPSData NMEACompatibleGPS::GetStateAtTime(timeval time) {
-	boost::mutex::scoped_lock lock(queueLocker);
-	std::list<GPSData>::iterator iter = stateQueue.begin();
-    //double acceptableError = 0.1;
-	while(iter != stateQueue.end()) {
-		GPSData s = (*iter);
-		/*time_t secDelta = difftime(time.tv_sec, s.laptoptime.tv_sec);
-		suseconds_t usecDelta = time.tv_usec - s.laptoptime.tv_usec;
-		double delta = double(secDelta) + 1e-6*double(usecDelta);
-		if(delta <= acceptableError) {
-//			iter = stateQueue.erase(iter);
-			return s;
-		} else {
-			iter++;
-		}*/
-	}
-	GPSData empty;
-	return empty;
-}
-
 bool NMEACompatibleGPS::StateIsAvailable() {
 	return !stateQueue.empty();
 }
