@@ -55,17 +55,17 @@ class Lidar : public QObject
 {
     Q_OBJECT
 public:
+    Lidar()
+    {
+        qRegisterMetaType<LidarState>("LidarState");
+    }
+
     virtual ~Lidar() { }
 
     /*!
      * \brief Returns the most recent state acquired from the Lidar.
      */
     virtual LidarState GetState() = 0;
-
-    /*!
-     * \brief Returns the LidarState with the given timestamp.
-     */
-    virtual LidarState GetStateAtTime(timeval time) = 0;
 
     virtual bool IsWorking() = 0;
 
