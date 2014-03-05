@@ -21,6 +21,8 @@ protected:
      */
     bool pathIsValid();
 
+    float distanceFromPath(SearchLocation point);
+
     IGVCSearchProblem searchproblem;
     path_t path;
 
