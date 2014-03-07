@@ -8,7 +8,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     kdtree.setInputCloud(Map.makeShared());
     //cout << "Expanding " << state << endl;
     std::list<SearchMove> acts;
-    double delta = 0.001;
+    double delta = 0.01;
     double Wmin = -0.8;
     double Wmax =  0.8;
     for(double W = Wmin; W <= Wmax; W+=delta)
