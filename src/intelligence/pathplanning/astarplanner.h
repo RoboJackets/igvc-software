@@ -25,6 +25,10 @@ protected:
 
     IGVCSearchProblem searchproblem;
     path_t path;
+    /** Flags used to ensure that all 3 pieces have been set before the algorithm runs. */
+    bool mapSet;
+    bool startSet;
+    bool goalSet;
 
 public slots:
     void OnNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr map);
