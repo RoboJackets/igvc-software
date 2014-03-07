@@ -9,6 +9,7 @@
 #include "testgpsutils.h"
 #include "capturegpsandpostracker.hpp"
 #include "CaptureIMU.hpp"
+#include "testastarplanner.hpp"
 
 void RunTestCase(QObject* testCase, std::vector<std::string> args, bool runByDefault = true)
 {
@@ -51,4 +52,5 @@ int main(int argc, const char* argv[])
     RunTestCase(new TestGPSReader(), args);
     RunTestCase(new CaptureGPSAndPosTracker(), args, false);
     RunTestCase(new CaptureIMU(), args, false);
+    RunTestCase(new TestAStarPlanner(), args);
 }
