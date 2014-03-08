@@ -23,7 +23,10 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
     ../src/hardware/serial/ASIOSerialPort.cpp \
     ../src/hardware/sensors/gps/nmea.cpp \
-    ../src/intelligence/posetracking/basicpositiontracker.cpp
+    ../src/intelligence/posetracking/basicpositiontracker.cpp \
+    ../src/intelligence/controller/controller.cpp \
+    ../src/common/utils/GPSWaypointSource.cpp \
+    ../src/hardware/sensors/gps/simulatedgps.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
     ../src/tests/testpositiontracker.hpp \
@@ -42,7 +45,11 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.h \
     ../src/hardware/serial/ASIOSerialPort.h \
     ../src/hardware/sensors/gps/nmea.hpp \
-    ../src/hardware/sensors/gps/GPS.hpp
+    ../src/hardware/sensors/gps/GPS.hpp \
+    ../src/tests/testcontroller.h \
+    ../src/intelligence/controller/controller.h \
+    ../src/common/utils/GPSWaypointSource.h \
+    ../src/hardware/sensors/gps/simulatedgps.h
 
 # libUSB (for LIDAR)
 
