@@ -22,6 +22,7 @@ private:
         cv::imshow("Filter Practice", lines);
         //Show original image in a different window
         cv::imshow("Original", src);
+        //cv::waitKey(0);
     }
 
     void onResults(ImageData img)
@@ -38,7 +39,9 @@ private Q_SLOTS:
     void testCase1()
     {
         ///NOTE: The directory may not be the same on your computer!
-        char videoFile[] = "../src/intelligence/igvc_cam_data/video/CompCourse_left0.mpeg";
+        char videoFile[] = "../src/intelligence/igvc_cam_data/stills/img_left2.jpg"; //Still
+        //char videoFile[] = "../src/intelligence/igvc_cam_data/video/CompCourse_left0.mpeg"; //vid
+
         cv::VideoCapture cap(videoFile);
         Event<ImageData> newImageFrameEvent;
         bool success = cap.read(src);
@@ -48,11 +51,8 @@ private Q_SLOTS:
             QFAIL("Could not load test video.");
         }
 
-//        LineDetector ldl(newImageFrameEvent);
-//        ldl.onNewLines += &LonResults;
-        transformer trans(newImageFrameEvent);
-        trans.onNewLines += &LonResults;
-
+        LineDetector ldl(newImageFrameEvent);
+       ldl.onNewLines += &LonResults;
 
         while (success){
             responded = false;
