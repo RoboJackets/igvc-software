@@ -10,6 +10,7 @@
 #include "capturegpsandpostracker.hpp"
 #include "CaptureIMU.hpp"
 #include "testastarplanner.hpp"
+#include <common/config/configmanager.h>
 
 void RunTestCase(QObject* testCase, std::vector<std::string> args, bool runByDefault = true)
 {
@@ -26,7 +27,7 @@ void RunTestCase(QObject* testCase, std::vector<std::string> args, bool runByDef
 }
 
 int main(int argc, const char* argv[])
-{
+{    
     // Setup arguments vector
     std::vector<std::string> args;
     for(int i = 0; i < argc; i++)
@@ -43,6 +44,10 @@ int main(int argc, const char* argv[])
             std::cout << args[i] << ", ";
         std::cout << (args.size() > 1 ? "and " : "") << args[args.size()-1] << "." << std::endl;
     }
+
+    // Init ConfigManager
+    if(!ConfigManager::Instance().load())
+        ConfigManager::Instance().save();
 
     // Execute selected test cases
     RunTestCase(new TestStringUtils(), args);
