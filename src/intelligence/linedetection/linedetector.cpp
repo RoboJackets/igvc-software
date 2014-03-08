@@ -28,16 +28,78 @@ void LineDetector::onImageEvent(ImageData imgd){
 
     /** Blurs the picture just a little */
     GaussianBlur(dst, dst, Size(gaussian_size,gaussian_size),2,0);
-    GaussianBlur(src, src, Size(gaussian_size,gaussian_size),2,0);
     /** Separates the pixels into black(not lines) and white (lines) */
     blackAndWhite(totalAvg);
 
     Erosion();
     Dilation();
 
+    transformPoints();
+    toPointCloud();
 
-    onNewLines(ImageData(dst));
+
+//    pcl::visualization::CloudViewer viewer ("Simple Cloud Viewer");
+//    viewer.showCloud(cloud);
+//    while (!viewer.wasStopped ())
+//    {
+//    }
+
+
+    onNewLines(ImageData(transformDst));
+    pcl::io::savePCDFileASCII("line_pcd.pcd", cloud);
 }
+
+void LineDetector::transformPoints(){
+
+    int offset = 100;
+    int factor = 5;
+    //pcam is where the coordinates are in actual space (in inches right now)
+    //pcam = (cv::Mat_<float>(4,2) << offset-12,72, offset, 72, offset, 60,offset -12, 60);
+    pcam = (cv::Mat_<float>(4,2) << 4,81, -8, 81, -8, 93,4, 93);
+    pcam = pcam+offset;
+    //p is where they show up as pixels on the camera
+    //p = (cv::Mat_<float>(4,2) << 427, 642, 515, 642, 512, 589, 432, 588);
+     p= (cv::Mat_<float>(4,2) << 440, 674, 356, 679, 364, 631, 439, 627);
+    //pcam = pcam*3+450; //This is just so we can see it on the screen
+    //Getting the transform
+    transformMat = cv::getPerspectiveTransform(p, pcam);
+    //Apply the transform to dst and store result in transformDST
+    cv::warpPerspective(dst, transformDst, transformMat, transformDst.size());
+}
+
+void LineDetector::toPointCloud(){
+    cloud.width = transformDst.rows*transformDst.cols/2; //change later
+    cloud.height = 1;
+    cloud.points.resize(cloud.width*cloud.height);
+    int i =0;
+
+    //Add points to the cloud if they are white (right now only checking the first
+    //layer)
+    for (int r=0; r<transformDst.rows;r++){
+        for (int c=0; c<transformDst.cols; c++){
+            if (transformDst.at<cv::Vec3b>(r,c)[0]==255){
+                cloud.points[i].x = .0245*(c-100)/2;
+                cloud.points[i].y = .0245*(r-100)/2;
+                cloud.points[i++].z = 1;
+            }
+        }
+    }
+
+    //Plots one meter long lines on x and y for scale
+    for(int r=0; r<21; r++){
+        cloud.points[i].x = 0;
+        cloud.points[i].y = (float) r/20;
+        cloud.points[i++].z = 0;
+    }
+
+    for(int r=0; r<21; r++){
+        cloud.points[i].x = (float) r/20;
+        cloud.points[i].y =0;
+        cloud.points[i++].z = 0;
+    }
+
+}
+
 
 void LineDetector::Erosion()
 {
