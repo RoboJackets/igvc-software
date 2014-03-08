@@ -8,7 +8,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     kdtree.setInputCloud(Map.makeShared());
     //cout << "Expanding " << state << endl;
     std::list<SearchMove> acts;
-    double delta = 0.01;
+    double delta = 0.05;
     double Wmin = -0.8;
     double Wmax =  0.8;
     for(double W = Wmin; W <= Wmax; W+=delta)
@@ -68,25 +68,30 @@ SearchLocation IGVCSearchProblem::getResult(SearchLocation state, SearchMove act
     {
         double w = action.W;
         double R = action.V / action.W;
-        double ICCx = state.x + cos(state.theta - M_PI/2.0) * R;
-        double ICCy = state.y + sin(state.theta - M_PI/2.0) * R;
+        double ICCx = state.x - ( R * cos(M_PI - state.theta) );
+        double ICCy = state.y - ( R * sin(M_PI - state.theta) );
         using namespace Eigen;
         Matrix3d T;
         double wdt = w*DeltaT;
-        T << cos(wdt), -sin(wdt), 0, sin(wdt), cos(wdt), 0, 0, 0, 1;
+        T << cos(wdt), sin(wdt), 0, -sin(wdt), cos(wdt), 0, 0, 0, 1;
         Vector3d a(state.x - ICCx, state.y - ICCy, state.theta);
-        Vector3d b(ICCx, ICCy, wdt);
-        Vector3d c = T * a + b;
+        Vector3d b = T*a;
+        Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
+        //Vector3d b(ICCx, ICCy, wdt);
+        //Vector3d c = T * a + b;
         result.x = c[0];
         result.y = c[1];
-        result.theta = fmod(c[2], M_PI*2.0);
-        result.theta = (result.theta > 0) ? result.theta : result.theta + M_PI*2.0;
+        result.theta = c[2];
+        while(result.theta < 0)
+            result.theta += 2*M_PI;
+        while(result.theta > 2*M_PI)
+            result.theta -= 2*M_PI;
     }
     else
     {
         result.theta = state.theta;
-        result.x = state.x + cos(result.theta) * action.V * DeltaT;
-        result.y = state.y + sin(result.theta) * action.V * DeltaT;
+        result.x = state.x + cos(M_PI_2 - result.theta) * action.V * DeltaT;
+        result.y = state.y + sin(M_PI_2 - result.theta) * action.V * DeltaT;
     }
     return result;
 }
