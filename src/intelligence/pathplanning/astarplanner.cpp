@@ -37,10 +37,11 @@ void AStarPlanner::run()
         searchproblem.PointTurnsEnabled = false;
         searchproblem.Baseline = ConfigManager::Instance().getValue("Robot", "Baseline", 0);
         searchproblem.Threshold = ConfigManager::Instance().getValue("AStarPlanner", "CollisionRadius", 1.0);
+        searchproblem.GoalThreshold = ConfigManager::Instance().getValue("AStarPlanner", "GoalThreshold", 1.0);
         auto newpath = GraphSearch::AStar(searchproblem);
         path.clear();
         for(int i = 0; i < newpath.getNumberOfSteps(); i++)
-            path.push_back(std::pair<SearchMove,SearchLocation>(newpath.getAction(i), newpath.getState(i)));
+            path.push_back(std::pair<SearchMove,SearchLocation>(newpath.getAction(i), newpath.getState(i+1)));
         OnNewPath(path);
     }
 }
