@@ -72,27 +72,26 @@ public:
             Path<StateType, ActionType> path = frontier.top();
             frontier.pop();
 
-            expanded.insert(path.getLastState());
-
-            if(problem.isGoal(path.getLastState()))
+            if(!setContainsElement(expanded, path.getLastState()))
             {
-                return path;
-            }
-            list<ActionType> legalActions = problem.getActions(path.getLastState());
-            StateType last = path.getLastState();
+                expanded.insert(path.getLastState());
 
-            for( typename list<ActionType>::iterator it = legalActions.begin(); it != legalActions.end(); it++)
-            {
-                ActionType action = (*it);
-                StateType result = problem.getResult(last, action);
-
-                if(!setContainsElement(expanded, result))
+                if(problem.isGoal(path.getLastState()))
                 {
+                    return path;
+                }
+                list<ActionType> legalActions = problem.getActions(path.getLastState());
+                StateType last = path.getLastState();
+
+                for( typename list<ActionType>::iterator it = legalActions.begin(); it != legalActions.end(); it++)
+                {
+                    ActionType action = (*it);
+                    StateType result = problem.getResult(last, action);
+
                     Path<StateType, ActionType> newPath(path);
                     newPath.addAction(action);
                     newPath.addState(result);
                     frontier.push(newPath);
-                    expanded.insert(result);
                 }
             }
         }
@@ -120,27 +119,27 @@ public:
             Path<StateType, ActionType> path = frontier.front();
             frontier.pop();
 
-            expanded.insert(path.getLastState());
-
-            if(problem.isGoal(path.getLastState()))
+            if(!setContainsElement(expanded, path.getLastState()))
             {
-                return path;
-            }
-            list<ActionType> legalActions = problem.getActions(path.getLastState());
-            StateType last = path.getLastState();
 
-            for( typename list<ActionType>::iterator it = legalActions.begin(); it != legalActions.end(); it++)
-            {
-                ActionType action = (*it);
-                StateType result = problem.getResult(last, action);
+                expanded.insert(path.getLastState());
 
-                if(!setContainsElement(expanded, result))
+                if(problem.isGoal(path.getLastState()))
                 {
+                    return path;
+                }
+                list<ActionType> legalActions = problem.getActions(path.getLastState());
+                StateType last = path.getLastState();
+
+                for( typename list<ActionType>::iterator it = legalActions.begin(); it != legalActions.end(); it++)
+                {
+                    ActionType action = (*it);
+                    StateType result = problem.getResult(last, action);
+
                     Path<StateType, ActionType> newPath(path);
                     newPath.addAction(action);
                     newPath.addState(result);
                     frontier.push(newPath);
-                    expanded.insert(result);
                 }
             }
         }
@@ -169,32 +168,30 @@ public:
             Path<StateType, ActionType> path = frontier.top();
             frontier.pop();
 
-            expanded.insert(path.getLastState());
-
-            if(problem.isGoal(path.getLastState()))
+            if(!setContainsElement(expanded, path.getLastState()))
             {
-                return path;
-            }
-            list<ActionType> legalActions = problem.getActions(path.getLastState());
-            StateType last = path.getLastState();
+                StateType last = path.getLastState();
+                expanded.insert(last);
 
-            for( typename list<ActionType>::iterator it = legalActions.begin(); it != legalActions.end(); it++)
-            {
-                ActionType action = (*it);
-                StateType result = problem.getResult(last, action);
-
-                if(!setContainsElement(expanded, result))
+                if(problem.isGoal(last))
                 {
+                    return path;
+                }
+                list<ActionType> legalActions = problem.getActions(last);
+
+                for( typename list<ActionType>::iterator it = legalActions.begin(); it != legalActions.end(); it++)
+                {
+                    ActionType action = (*it);
+                    StateType result = problem.getResult(last, action);
                     Path<StateType, ActionType> newPath(path);
                     newPath.addAction(action);
                     newPath.addState(result);
                     frontier.push(newPath);
-                    expanded.insert(result);
                 }
             }
         }
 
-        cout << __func__ << " Error: Could not find a solution." << endl;
+//        cout << __func__ << " Error: Could not find a solution." << endl;
         Path<StateType, ActionType> empty;
         return empty;
     }
