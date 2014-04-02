@@ -27,7 +27,6 @@ public:
 
 private:
     cv::Mat src, dst;
-   // cv::Vector<cv::Point2f> p, pcam;
     cv::Mat p, pcam, transformMat, addition;
 };
 
