@@ -7,6 +7,8 @@
 
 Joystick::Joystick()
 {
+
+    qRegisterMetaType<JoystickState>("JoystickState");
     _joystick_fd = open("/dev/input/js0", O_RDONLY);
     if(_joystick_fd < 0)
     {
