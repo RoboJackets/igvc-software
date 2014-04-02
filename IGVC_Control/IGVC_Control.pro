@@ -56,7 +56,8 @@ SOURCES += \
     ../src/intelligence/posetracking/basicpositiontracker.cpp \
     ../src/gui/adapters/positiontrackeradapter.cpp \
     ../src/intelligence/mapping/mapbuilder.cpp \
-    ../src/intelligence/pathplanning/astarplanner.cpp
+    ../src/intelligence/pathplanning/astarplanner.cpp \
+    ../src/gui/adapters/pathadapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -123,7 +124,8 @@ HEADERS  += \
     ../src/gui/adapters/positiontrackeradapter.h \
     ../src/intelligence/mapping/mapbuilder.h \
     ../src/intelligence/pathplanning/pathplanner.hpp \
-    ../src/intelligence/pathplanning/astarplanner.h
+    ../src/intelligence/pathplanning/astarplanner.h \
+    ../src/gui/adapters/pathadapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -133,7 +135,8 @@ FORMS    += \
     ../src/gui/adapters/cameraadapter.ui \
     ../src/gui/adapters/gpsadapter.ui \
     ../src/gui/adapters/imuadapter.ui \
-    ../src/gui/adapters/positiontrackeradapter.ui
+    ../src/gui/adapters/positiontrackeradapter.ui \
+    ../src/gui/adapters/pathadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
