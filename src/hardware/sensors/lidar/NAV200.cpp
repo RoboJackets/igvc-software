@@ -37,11 +37,6 @@ LidarState NAV200::GetState()
     return LidarState();
 }
 
-LidarState NAV200::GetStateAtTime(timeval time)
-{
-    return LidarState();
-}
-
 bool NAV200::IsWorking()
 {
     return true;
