@@ -25,7 +25,8 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
     ../src/hardware/serial/ASIOSerialPort.cpp \
     ../src/hardware/sensors/gps/nmea.cpp \
-    ../src/intelligence/posetracking/basicpositiontracker.cpp
+    ../src/intelligence/posetracking/basicpositiontracker.cpp \
+    ../src/hardware/sensors/IMU/Ardupilot.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
     ../src/tests/testpositiontracker.hpp \
@@ -47,7 +48,10 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/hardware/sensors/gps/GPS.hpp \
     ../src/tests/testlinedetection.hpp \
     ../src/intelligence/linedetection/linedetector.h \
-    ../src/intelligence/linedetection/transformer.h
+    ../src/intelligence/linedetection/transformer.h \
+    ../src/tests/CaptureIMU.hpp \
+    ../src/hardware/sensors/IMU/Ardupilot.h \
+    ../src/hardware/sensors/IMU/IMU.h
 
 INCLUDEPATH += /usr/include
 DEPENDPATH += /usr/include
