@@ -14,7 +14,6 @@ public:
     NAV200();
     ~NAV200();
     LidarState GetState();
-    LidarState GetStateAtTime(timeval time);
     bool IsWorking();
 
 private:
