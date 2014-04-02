@@ -22,7 +22,6 @@ private:
         cv::imshow("Filter Practice", lines);
         //Show original image in a different window
         cv::imshow("Original", src);
-        //cv::waitKey(0);
     }
 
     void onResults(ImageData img)

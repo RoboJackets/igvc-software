@@ -370,7 +370,7 @@ void MainWindow::on_actionOutback_A321_triggered()
 
 void MainWindow::on_actionSimulatedLidar_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated Lidar Data File"), "", tr("Text Files(*.txt)"));
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated Lidar Data File"), "", tr("CSV Files(*.csv)"));
     if(fileName.length() > 0)
     {
         ui->actionLMS_200->setChecked(false);
