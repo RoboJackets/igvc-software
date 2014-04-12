@@ -13,7 +13,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     double Wmax =  0.8;
     for(double W = Wmin; W <= Wmax; W+=delta)
     {
-        SearchMove move(Speed, W);
+        SearchMove move(Speed, W, DeltaT);
         SearchLocation result = getResult(state, move);
         pcl::PointXYZ searchPoint(result.x, result.y,0);
         std::vector<int> pointIdxRadiusSearch;
@@ -27,7 +27,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     {
         for(double W = Wmin; W <= Wmax; W+=delta)
         {
-            SearchMove move = SearchMove(-Speed, W);
+            SearchMove move = SearchMove(-Speed, W, DeltaT);
             SearchLocation result = getResult(state, move);
             pcl::PointXYZ searchPoint = pcl::PointXYZ(result.x, result.y,0);
             std::vector<int> pointIdxRadiusSearch;
@@ -39,7 +39,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
         }
     }
     if(PointTurnsEnabled){
-        SearchMove move(0, TurningSpeed);
+        SearchMove move(0, TurningSpeed, DeltaT);
         SearchLocation result = getResult(state, move);
         pcl::PointXYZ searchPoint(result.x, result.y,0);
         std::vector<int> pointIdxRadiusSearch;
@@ -48,7 +48,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
         {
             acts.push_back(move);
         }
-        move = SearchMove(0, -TurningSpeed);
+        move = SearchMove(0, -TurningSpeed, DeltaT);
         result = getResult(state, move);
         searchPoint = pcl::PointXYZ(result.x, result.y,0);
         pointIdxRadiusSearch.clear();
@@ -64,7 +64,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
 SearchLocation IGVCSearchProblem::getResult(SearchLocation state, SearchMove action)
 {
     SearchLocation result;
-    if(action.W != 0)
+    if(abs(action.W) > 1e-10)
     {
         double w = action.W;
         double R = action.V / action.W;
@@ -90,8 +90,8 @@ SearchLocation IGVCSearchProblem::getResult(SearchLocation state, SearchMove act
     else
     {
         result.theta = state.theta;
-        result.x = state.x + cos(M_PI_2 - result.theta) * action.V * DeltaT;
-        result.y = state.y + sin(M_PI_2 - result.theta) * action.V * DeltaT;
+        result.x = state.x + ( cos(M_PI_2 - result.theta) * action.V * DeltaT );
+        result.y = state.y + ( sin(M_PI_2 - result.theta) * action.V * DeltaT );
     }
     return result;
 }
