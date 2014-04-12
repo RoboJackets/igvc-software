@@ -6,16 +6,16 @@
 class SearchLocation
 {
 public:
-    double x, y, theta;
+    float x, y, theta;
 
-    static constexpr double sameness_threshold = 0.1;
+    static constexpr float sameness_threshold = 0.1;
 
     SearchLocation() { }
-    SearchLocation(double _x, double _y, double _theta);
+    SearchLocation(float _x, float _y, float _theta);
 
     bool operator == (const SearchLocation &other);
     bool operator < (const SearchLocation &other) const;
-    double distTo(SearchLocation other);
+    float distTo(SearchLocation other);
 
     friend std::ostream &operator<< (std::ostream &stream, SearchLocation &loc)
     {

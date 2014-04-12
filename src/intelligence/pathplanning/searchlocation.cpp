@@ -2,7 +2,7 @@
 #include <math.h> // pow() & sqrt()
 #include <cmath> // abs()
 
-SearchLocation::SearchLocation(double _x, double _y, double _theta)
+SearchLocation::SearchLocation(float _x, float _y, float _theta)
 {
     x = _x;
     y = _y;
@@ -31,7 +31,7 @@ bool SearchLocation::operator < (const SearchLocation &other) const
     return false;
 }
 
-double SearchLocation::distTo(SearchLocation other)
+float SearchLocation::distTo(SearchLocation other)
 {
     return sqrt(pow(other.x - x, 2) + pow(other.y - y, 2));
 }
