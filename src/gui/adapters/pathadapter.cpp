@@ -5,6 +5,8 @@
 #include <math.h>
 #include "intelligence/pathplanning/astarplanner.h"
 #include "common/utils/AngleUtils.h"
+#include <math.h>
+#include <common/utils/AngleUtils.h>
 
 PathAdapter::PathAdapter(QWidget *parent) :
     QWidget(parent),
@@ -64,6 +66,7 @@ void PathAdapter::paintEvent(QPaintEvent *)
         std::cout << "x " << round(p1.second.x*30) + startX << " y " << round(p1.second.y*30) + startY << " w " << width << " h " << height << " a " << round(AngleUtils::radsToDeg((M_PI/2)-p1.second.theta)) << " alen " << round(AngleUtils::radsToDeg((M_PI/2)-(p2.second.theta-p1.second.theta))) << std::endl;
    }
     //painter.drawArc(0,0,painter.window().width(),painter.window().height(),0,5760*(16 * 360));
+
 
     //painter.drawPath(dpath);
     painter.end();
