@@ -15,11 +15,15 @@ public:
     explicit PathAdapter(QWidget *parent = 0);
     ~PathAdapter();
 
+protected:
+    void wheelEvent(QWheelEvent* event);
+
 private:
     Ui::PathAdapter *ui;
     path_t path;
     void paintEvent(QPaintEvent *);
     bool pathRecieved;
+    double scale;
 
 signals:
     void setStart(RobotPosition pos);
