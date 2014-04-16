@@ -75,23 +75,23 @@ void PathAdapter::paintEvent(QPaintEvent *)
             // Draw arc
             float R = (move.V / fabs(move.W));
 
-            int x, y, a, alen;
+            double x, y, a, alen;
 
             if(move.W > 0)
             {
                 x = ( location.x ) - R + ( R * cos(location.theta) );
                 y = ( location.y ) - R - ( R * sin(location.theta) );
                 a = AngleUtils::radsToDeg(M_PI - location.theta) * 16;
-                alen = AngleUtils::radsToDeg(-move.W * move.DeltaT) * 16;
+                alen = AngleUtils::radsToDeg(move.W * move.DeltaT) * 16;
                 painter.setPen(Qt::red);
                 std::cout << "arc\tw>0\n\tx = " << x + centerX << " y = " << y + centerY << std::endl;
             }
             else
             {
                 x = ( location.x ) - R - ( R * cos(location.theta) );
-                y = ( location.y ) - R - ( R * sin(location.theta) );
+                y = ( location.y ) - R + ( R * sin(location.theta) );
                 a = AngleUtils::radsToDeg(-location.theta) * 16;
-                alen = AngleUtils::radsToDeg(move.W * move.DeltaT) * 16;
+                alen = AngleUtils::radsToDeg(-move.W * move.DeltaT) * 16;
                 painter.setPen(Qt::green);
                 std::cout << "arc\tw<0\n\tx = " << (x + centerX) << " y = " << (y + centerY) << std::endl;
             }
