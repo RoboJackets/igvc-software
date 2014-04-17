@@ -9,7 +9,8 @@
 
 PathAdapter::PathAdapter(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PathAdapter)
+    ui(new Ui::PathAdapter),
+    center(this->width()/2, this->height()/2)
 {
     ui->setupUi(this);
 
@@ -40,13 +41,13 @@ void PathAdapter::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    int centerX = painter.window().width()/2;
-    int centerY = painter.window().height()/2;
+    int centerX = center.x();
+    int centerY = center.y();
     int height = painter.window().height();
 
     painter.setPen(QColor(127,127,127));
-    painter.drawLine(0, painter.window().height()/2, painter.window().width(), painter.window().height()/2);
-    painter.drawLine(painter.window().width()/2, 0, painter.window().width()/2, painter.window().height());
+    painter.drawLine(0, height - centerY, painter.window().width(), height - centerY);
+    painter.drawLine(centerX, 0, centerX, painter.window().height());
 
     for(auto point : path)
     {
@@ -64,21 +65,20 @@ void PathAdapter::paintEvent(QPaintEvent *)
         else
         {
             // Draw arc
-            drawArc(&painter, location, move, scale);
+            drawArc(&painter, location, move, scale, center);
         }
     }
-    std::cout << std::endl;
 
     painter.end();
 }
 
-void PathAdapter::drawArc(QPainter *painter, SearchLocation dest, SearchMove moveTaken, double scale)
+void PathAdapter::drawArc(QPainter *painter, SearchLocation dest, SearchMove moveTaken, double scale, QPoint origin)
 {
     double R = (moveTaken.V / moveTaken.W ) * scale;
     double cx = ( dest.x * scale ) - R * cos(M_PI - dest.theta);
     double cy = ( dest.y * scale ) - R * sin(M_PI - dest.theta);
-    int scx = painter->window().width() / 2;
-    int scy = painter->window().height() / 2;
+    int scx = origin.x();
+    int scy = origin.y();
     int height = painter->window().height();
     if(moveTaken.W > 0)
         for(double t = M_PI - dest.theta; t <= M_PI - dest.theta + ( moveTaken.W * moveTaken.DeltaT ); t += 0.001)
@@ -93,5 +93,12 @@ void PathAdapter::wheelEvent(QWheelEvent *event)
     scale += 0.01 * event->delta();
     scale = max(scale, 0.);
     scale = min(scale, 100.);
+    this->update();
+}
+
+void PathAdapter::mouseMoveEvent(QMouseEvent *e)
+{
+    center.setX(e->x());
+    center.setY(this->height() - e->y());
     this->update();
 }
