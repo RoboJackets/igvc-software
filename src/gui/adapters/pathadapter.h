@@ -17,15 +17,17 @@ public:
 
 protected:
     void wheelEvent(QWheelEvent* event);
+    void mouseMoveEvent(QMouseEvent *);
 
 private:
     Ui::PathAdapter *ui;
     path_t path;
     bool pathRecieved;
     double scale;
+    QPoint center;
 
     void paintEvent(QPaintEvent *);
-    void drawArc(QPainter *painter, SearchLocation dest, SearchMove moveTaken, double scale);
+    void drawArc(QPainter *painter, SearchLocation dest, SearchMove moveTaken, double scale, QPoint origin);
 
 signals:
     void setStart(RobotPosition pos);
