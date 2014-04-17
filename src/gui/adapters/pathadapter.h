@@ -21,9 +21,11 @@ protected:
 private:
     Ui::PathAdapter *ui;
     path_t path;
-    void paintEvent(QPaintEvent *);
     bool pathRecieved;
     double scale;
+
+    void paintEvent(QPaintEvent *);
+    void drawArc(QPainter *painter, SearchLocation dest, SearchMove moveTaken, double scale);
 
 signals:
     void setStart(RobotPosition pos);
