@@ -2,7 +2,9 @@
 #include <boost/thread/condition_variable.hpp>
 #include <unistd.h>
 
-StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, int fps, string fileName, bool undistort) : _leftVid(leftVideo), _rightVid(rightVideo),
+using namespace cv;
+
+StereoPlayback::StereoPlayback(std::string leftVideo, std::string rightVideo, int fps, std::string fileName, bool undistort) : _leftVid(leftVideo), _rightVid(rightVideo),
     _framesPerSecond(fps), _undistort(undistort), _playbackThread(&StereoPlayback::Run, this)
 {
     if(_undistort)
