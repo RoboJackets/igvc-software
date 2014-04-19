@@ -8,22 +8,19 @@
 #include <hardware/sensors/camera/CameraInfo.h>
 #include <common/utils/timing.h>
 
-using namespace cv;
-using namespace Eigen;
-
-void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols);
-Matrix3d centerImageCoords(int nRows, int nCols);
-Matrix3d RollRotMatrix(double roll);
-Matrix3d PitchRotMatrix(double pitch);
-Matrix3d YawRotMatrix(double yaw);
-Matrix4d HomogRollRotMatrix(double roll);
-Matrix4d HomogPitchRotMatrix(double pitch);
-Matrix4d HomogYawRotMatrix(double yaw);
-Matrix3d RotMat3d(double roll, double pitch, double yaw);
-Matrix4d HomogRotMat3d(double roll, double pitch, double yaw);
-Matrix2d ImgRotMat(double angle);
-Matrix3d HomogImgRotMat(double angle);
-Mat correctDistortion(Mat rawImg, Mat camerMatrix, Mat _distCoeffs);
+void computeOffsets(cv::vector<cv::KeyPoint>& keypoints, Eigen::MatrixXd& Pos, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols);
+Eigen::Matrix3d centerImageCoords(int nRows, int nCols);
+Eigen::Matrix3d RollRotMatrix(double roll);
+Eigen::Matrix3d PitchRotMatrix(double pitch);
+Eigen::Matrix3d YawRotMatrix(double yaw);
+Eigen::Matrix4d HomogRollRotMatrix(double roll);
+Eigen::Matrix4d HomogPitchRotMatrix(double pitch);
+Eigen::Matrix4d HomogYawRotMatrix(double yaw);
+Eigen::Matrix3d RotMat3d(double roll, double pitch, double yaw);
+Eigen::Matrix4d HomogRotMat3d(double roll, double pitch, double yaw);
+Eigen::Matrix2d ImgRotMat(double angle);
+Eigen::Matrix3d HomogImgRotMat(double angle);
+cv::Mat correctDistortion(cv::Mat rawImg, cv::Mat camerMatrix, cv::Mat _distCoeffs);
 
 
 
