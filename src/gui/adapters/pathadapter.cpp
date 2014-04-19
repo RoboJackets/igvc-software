@@ -1,39 +1,27 @@
 #include "pathadapter.h"
 #include "ui_pathadapter.h"
 #include <QPainter>
-#include "intelligence/pathplanning/pathplanner.hpp"
 #include <math.h>
-#include "intelligence/pathplanning/astarplanner.h"
 #include <common/utils/AngleUtils.h>
 #include <QWheelEvent>
 
-PathAdapter::PathAdapter(QWidget *parent) :
+PathAdapter::PathAdapter(PathPlanner *planner, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PathAdapter),
     center(this->width()/2, this->height()/2)
 {
     ui->setupUi(this);
 
+    this->planner = planner;
+    connect(planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
+
     scale = 10;
 
-    AStarPlanner planner;
-    connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
-    connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
-    connect(this, SIGNAL(setEnd(RobotPosition)), &planner, SLOT(OnNewGoalPos(RobotPosition)));
-    connect(this, SIGNAL(setMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), &planner, SLOT(OnNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
-
-    setStart(RobotPosition(0,0,0));
-    setEnd(RobotPosition(10,10,0));
-    pcl::PointCloud<pcl::PointXYZ>::Ptr map(new pcl::PointCloud<pcl::PointXYZ>());
-    for(int x = -10; x < 10; x++)
-        map->push_back(pcl::PointXYZ(x,5,0));
-//    map->push_back(pcl::PointXYZ(100,100,0));
-    setMap(map);
-    path = planner.GetPath();
 }
 
 PathAdapter::~PathAdapter()
 {
+    disconnect(planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
     delete ui;
 }
 
@@ -91,8 +79,8 @@ void PathAdapter::drawArc(QPainter *painter, SearchLocation dest, SearchMove mov
 void PathAdapter::wheelEvent(QWheelEvent *event)
 {
     scale += 0.01 * event->delta();
-    scale = max(scale, 0.);
-    scale = min(scale, 100.);
+    scale = std::max(scale, 0.);
+    scale = std::min(scale, 100.);
     this->update();
 }
 
