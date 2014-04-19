@@ -9,6 +9,7 @@
 #include "testpositiontracker.hpp"
 #include "testgpsutils.h"
 #include "capturegpsandpostracker.hpp"
+#include "testcontroller.h"
 #include "CaptureIMU.hpp"
 #include "testastarplanner.hpp"
 #include <common/config/configmanager.h>
@@ -58,6 +59,7 @@ int main(int argc, const char* argv[])
     RunTestCase(new TestAngleUtils(), args);
     RunTestCase(new TestGPSReader(), args);
     RunTestCase(new CaptureGPSAndPosTracker(), args, false);
+    RunTestCase(new TestController(), args);
     RunTestCase(new CaptureIMU(), args, false);
     RunTestCase(new TestAStarPlanner(), args);
 }
