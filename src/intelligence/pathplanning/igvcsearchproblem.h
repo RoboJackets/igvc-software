@@ -20,6 +20,7 @@ public:
     double TurningSpeed;
     double DeltaT;
     double Baseline;
+    double GoalThreshold;
     bool PointTurnsEnabled;
 
     SearchLocation getStartState()
@@ -32,7 +33,7 @@ public:
 
     bool isGoal(SearchLocation state)
     {
-        return state == Goal;//state.distTo(Goal) < Threshold;
+        return state.distTo(Goal) < GoalThreshold;
     }
 
     double getStepCost(SearchLocation, SearchMove action)
