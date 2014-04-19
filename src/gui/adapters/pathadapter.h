@@ -1,6 +1,6 @@
 #ifndef PATHADAPTER_H
 #define PATHADAPTER_H
-#include <intelligence/pathplanning/astarplanner.h>
+#include <intelligence/pathplanning/pathplanner.hpp>
 #include <QWidget>
 
 namespace Ui {
@@ -12,7 +12,7 @@ class PathAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit PathAdapter(QWidget *parent = 0);
+    explicit PathAdapter(PathPlanner *planner, QWidget *parent = 0 );
     ~PathAdapter();
 
 protected:
@@ -21,6 +21,7 @@ protected:
 
 private:
     Ui::PathAdapter *ui;
+    PathPlanner *planner;
     path_t path;
     bool pathRecieved;
     double scale;
@@ -35,9 +36,9 @@ signals:
     void setMap(pcl::PointCloud<pcl::PointXYZ>::Ptr map);
 
 public slots:
-    void newPath(path_t)
+    void newPath(path_t p)
     {
-        std::cout << "Path of length " << path.size() << " recieved." << std::endl;
+        path = p;
         pathRecieved = true;
     }
 };
