@@ -1,7 +1,6 @@
 #ifndef ANGLEUTILS_H
 #define ANGLEUTILS_H
 
-#endif // ANGLEUTILS_H
 
 #include <cmath>
 
@@ -18,3 +17,5 @@ class AngleUtils
         return rad*(180.0/M_PI);
     }
 };
+
+#endif // ANGLEUTILS_H

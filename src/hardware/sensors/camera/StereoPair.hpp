@@ -5,9 +5,6 @@
 #include <flycapture/FlyCapture2.h>
 #include <opencv2/opencv.hpp>
 
-using namespace cv;
-using namespace FlyCapture2;
-
 class StereoPair
 {
     public:
@@ -15,22 +12,22 @@ class StereoPair
         {
         }
         //TODO this might be causing a memory leak, check to make sure this is the correct way to initialize
-        inline StereoPair(Mat left, Mat right)
+        inline StereoPair(cv::Mat left, cv::Mat right)
         {
             _leftImage = left;
             _rightImage = right;
         }
-        inline Mat& LeftImage()
+        inline cv::Mat& LeftImage()
         {
             return _leftImage;
         }
-        inline Mat& RightImage()
+        inline cv::Mat& RightImage()
         {
             return _rightImage;
         }
     private:
-        Mat _leftImage;
-        Mat _rightImage;
+        cv::Mat _leftImage;
+        cv::Mat _rightImage;
 };
 
 
