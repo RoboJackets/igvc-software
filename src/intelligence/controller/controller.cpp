@@ -18,10 +18,9 @@ Controller::~Controller()
 
 void Controller::onNewGPS(GPSData data)
 {
-    std::cout << "In"<<std::endl;
-    if(GPSUtils::coordsToMeter(currentWaypoint.Lat(), currentWaypoint.Long(), data.Lat(), data.Long()) < 1.0) //need to be within 1 meter radius of the waypoint
+    // need to be within 1 meter radius of the waypoint (see rules)
+    if(GPSUtils::coordsToMeter(currentWaypoint.Lat(), currentWaypoint.Long(), data.Lat(), data.Long()) < 1.0)
     {
-        std::cout << "here" <<std::endl;
         currentWaypoint = _source->getNext();
         onNewWaypoint(currentWaypoint);
     }
