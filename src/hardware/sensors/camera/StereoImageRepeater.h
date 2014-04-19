@@ -11,8 +11,8 @@ class StereoImageRepeater : public StereoSource
         virtual ~StereoImageRepeater();
     protected:
     private:
-        Mat _left;
-        Mat _right;
+        cv::Mat _left;
+        cv::Mat _right;
         boost::thread _thread;
         void thread_run();
 };
