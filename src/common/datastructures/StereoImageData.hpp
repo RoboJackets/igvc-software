@@ -8,7 +8,7 @@ class StereoImageData : public SensorData
 {
   public:
     StereoImageData() {}
-    StereoImageData(Mat& left, Mat& right)
+    StereoImageData(cv::Mat& left, cv::Mat& right)
     {
       _leftImage = left.clone();
       _rightImage = right.clone();
@@ -24,12 +24,12 @@ class StereoImageData : public SensorData
       return ImageData(_leftImage, time());
     }
 
-    Mat& leftMat()
+    cv::Mat& leftMat()
     {
       return _leftImage;
     }
 
-    Mat& rightMat()
+    cv::Mat& rightMat()
     {
       return _rightImage;
     }
@@ -37,8 +37,8 @@ class StereoImageData : public SensorData
     virtual ~StereoImageData() {}
   protected:
   private:
-    Mat _leftImage;
-    Mat _rightImage;
+    cv::Mat _leftImage;
+    cv::Mat _rightImage;
 
 };
 
