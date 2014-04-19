@@ -57,6 +57,7 @@ SOURCES += \
     ../src/intelligence/posetracking/basicpositiontracker.cpp \
     ../src/gui/adapters/positiontrackeradapter.cpp \
     ../src/intelligence/mapping/mapbuilder.cpp \
+    ../src/intelligence/controller/controller.cpp
     ../src/intelligence/pathplanning/astarplanner.cpp \
     ../src/gui/adapters/pathadapter.cpp
 
@@ -125,6 +126,7 @@ HEADERS  += \
     ../src/common/datastructures/robotposition.hpp \
     ../src/gui/adapters/positiontrackeradapter.h \
     ../src/intelligence/mapping/mapbuilder.h \
+    ../src/intelligence/controller/controller.h
     ../src/intelligence/pathplanning/pathplanner.hpp \
     ../src/intelligence/pathplanning/astarplanner.h \
     ../src/gui/adapters/pathadapter.h
