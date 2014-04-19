@@ -7,6 +7,7 @@
 #include "adapters/joystickadapter.h"
 #include "adapters/cameraadapter.h"
 #include "adapters/imuadapter.h"
+#include "adapters/pathadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/nmeacompatiblegps.h>
@@ -83,6 +84,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _mapper = new MapBuilder(_lidar, _posTracker);
 
+    _planner = new AStarPlanner();
+
+    ui->hardwareStatusList->addItem("Path Planner");
+
     updateHardwareStatusIcons();
 
     isRunning = false;
@@ -155,6 +160,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "Position Tracker")
         {
             adapter = new PositionTrackerAdapter(_posTracker);
+        }
+        else if(labelText == "Path Planner")
+        {
+            adapter = new PathAdapter(_planner);
         }
         else
         {
