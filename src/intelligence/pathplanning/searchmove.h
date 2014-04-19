@@ -6,11 +6,11 @@
 class SearchMove
 {
 public:
-    double V, W;
+    double V, W, DeltaT;
 
     SearchMove() {}
 
-    SearchMove(double v, double w);
+    SearchMove(double v, double w, double dt);
 
     bool operator == (const SearchMove &other);
 

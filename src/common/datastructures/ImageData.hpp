@@ -5,7 +5,6 @@
 #include <opencv2/opencv.hpp>
 #include <common/datastructures/SensorData.hpp>
 #include <common/events/Event.hpp>
-
 class ImageData : public SensorData
 {
   public:
