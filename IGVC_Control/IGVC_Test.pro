@@ -24,6 +24,9 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/hardware/serial/ASIOSerialPort.cpp \
     ../src/hardware/sensors/gps/nmea.cpp \
     ../src/intelligence/posetracking/basicpositiontracker.cpp \
+    ../src/intelligence/controller/controller.cpp \
+    ../src/common/utils/GPSWaypointSource.cpp \
+    ../src/hardware/sensors/gps/simulatedgps.cpp
     ../src/hardware/sensors/IMU/Ardupilot.cpp \
     ../src/intelligence/pathplanning/astarplanner.cpp \
     ../src/intelligence/pathplanning/igvcsearchproblem.cpp \
@@ -48,6 +51,10 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
     ../src/hardware/sensors/gps/nmea.hpp \
     ../src/hardware/sensors/gps/GPS.hpp \
+    ../src/tests/testcontroller.h \
+    ../src/intelligence/controller/controller.h \
+    ../src/common/utils/GPSWaypointSource.h \
+    ../src/hardware/sensors/gps/simulatedgps.h
     ../src/tests/CaptureIMU.hpp \
     ../src/hardware/sensors/IMU/Ardupilot.h \
     ../src/hardware/sensors/IMU/IMU.h \
