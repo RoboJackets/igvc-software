@@ -1,8 +1,8 @@
 #include "searchlocation.h"
 #include <math.h> // pow() & sqrt()
-#include <stdlib.h> // abs()
+#include <cmath> // abs()
 
-SearchLocation::SearchLocation(double _x, double _y, double _theta)
+SearchLocation::SearchLocation(float _x, float _y, float _theta)
 {
     x = _x;
     y = _y;
@@ -11,10 +11,10 @@ SearchLocation::SearchLocation(double _x, double _y, double _theta)
 
 bool SearchLocation::operator == (const SearchLocation &other)
 {
-    return abs(x - other.x) < sameness_threshold && abs(y - other.y) < sameness_threshold;// && abs(theta - other.theta) < sameness_threshold;
+    return std::abs(x - other.x) < sameness_threshold && std::abs(y - other.y) < sameness_threshold;// && abs(theta - other.theta) < sameness_threshold;
 }
 
-bool SearchLocation::operator < (const SearchLocation &other)
+bool SearchLocation::operator < (const SearchLocation &other) const
 {
     if(x < other.x)
     {
@@ -31,7 +31,7 @@ bool SearchLocation::operator < (const SearchLocation &other)
     return false;
 }
 
-double SearchLocation::distTo(SearchLocation other)
+float SearchLocation::distTo(SearchLocation other)
 {
     return sqrt(pow(other.x - x, 2) + pow(other.y - y, 2));
 }
