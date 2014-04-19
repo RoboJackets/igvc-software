@@ -57,6 +57,8 @@ SOURCES += \
     ../src/gui/adapters/positiontrackeradapter.cpp \
     ../src/intelligence/mapping/mapbuilder.cpp \
     ../src/intelligence/controller/controller.cpp
+    ../src/intelligence/pathplanning/astarplanner.cpp \
+    ../src/gui/adapters/pathadapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -76,10 +78,10 @@ HEADERS  += \
     ../src/hardware/sensors/lidar/Lidar.h \
     ../src/common/datastructures/VisOdomData.hpp \
     ../src/common/datastructures/StereoImageData.hpp \
-    ../src/common/datastructures/SensorData.h \
+    ../src/common/datastructures/SensorData.hpp \
     ../src/common/datastructures/IMUData.hpp \
     ../src/common/datastructures/ImageData.hpp \
-    ../src/common/datastructures/GPSData.h \
+    ../src/common/datastructures/GPSData.hpp \
     ../src/common/datastructures/DataPoint.hpp \
     ../src/common/datastructures/DataArray.hpp \
     ../src/hardware/serial/ASIOSerialPort.h \
@@ -123,6 +125,9 @@ HEADERS  += \
     ../src/gui/adapters/positiontrackeradapter.h \
     ../src/intelligence/mapping/mapbuilder.h \
     ../src/intelligence/controller/controller.h
+    ../src/intelligence/pathplanning/pathplanner.hpp \
+    ../src/intelligence/pathplanning/astarplanner.h \
+    ../src/gui/adapters/pathadapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -132,7 +137,8 @@ FORMS    += \
     ../src/gui/adapters/cameraadapter.ui \
     ../src/gui/adapters/gpsadapter.ui \
     ../src/gui/adapters/imuadapter.ui \
-    ../src/gui/adapters/positiontrackeradapter.ui
+    ../src/gui/adapters/positiontrackeradapter.ui \
+    ../src/gui/adapters/pathadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
@@ -158,7 +164,7 @@ LIBS += -L/usr/lib/ -lboost_thread -lboost_system
 INCLUDEPATH += /usr/include/pcl-1.7
 DEPENDPATH += /usr/include/pcl-1.7
 
-LIBS += -L/usr/lib -lpcl_common -lpcl_visualization -lpcl_kdtree -lpcl_filters
+LIBS += -L/usr/lib -lpcl_common -lpcl_visualization -lpcl_kdtree -lpcl_filters -lpcl_search
 
 # VTK (PCL Dependency)
 INCLUDEPATH += /usr/include/vtk-5.8
