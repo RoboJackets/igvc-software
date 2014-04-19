@@ -2,8 +2,8 @@
 
 StereoImageRepeater::StereoImageRepeater(std::string pathLeft, std::string pathRight)
 {
-    _left = imread(pathLeft);
-    _right = imread(pathRight);
+    _left = cv::imread(pathLeft);
+    _right = cv::imread(pathRight);
     _thread =  boost::thread(boost::bind(&StereoImageRepeater::thread_run, this));
 }
 
