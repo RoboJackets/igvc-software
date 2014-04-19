@@ -27,6 +27,11 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/intelligence/controller/controller.cpp \
     ../src/common/utils/GPSWaypointSource.cpp \
     ../src/hardware/sensors/gps/simulatedgps.cpp
+    ../src/hardware/sensors/IMU/Ardupilot.cpp \
+    ../src/intelligence/pathplanning/astarplanner.cpp \
+    ../src/intelligence/pathplanning/igvcsearchproblem.cpp \
+    ../src/intelligence/pathplanning/searchlocation.cpp \
+    ../src/intelligence/pathplanning/searchmove.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
     ../src/tests/testpositiontracker.hpp \
@@ -50,6 +55,17 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/intelligence/controller/controller.h \
     ../src/common/utils/GPSWaypointSource.h \
     ../src/hardware/sensors/gps/simulatedgps.h
+    ../src/tests/CaptureIMU.hpp \
+    ../src/hardware/sensors/IMU/Ardupilot.h \
+    ../src/hardware/sensors/IMU/IMU.h \
+    ../src/tests/testastarplanner.hpp \
+    ../src/intelligence/pathplanning/astarplanner.h \
+    ../src/intelligence/pathplanning/GraphSearch.hpp \
+    ../src/intelligence/pathplanning/igvcsearchproblem.h \
+    ../src/intelligence/pathplanning/pathplanner.hpp \
+    ../src/intelligence/pathplanning/searchlocation.h \
+    ../src/intelligence/pathplanning/searchmove.h \
+    ../src/intelligence/pathplanning/SearchProblem.hpp
 
 # libUSB (for LIDAR)
 
