@@ -16,6 +16,7 @@
 #include <hardware/sensors/lidar/Lidar.h>
 #include <intelligence/posetracking/basicpositiontracker.h>
 #include <intelligence/mapping/mapbuilder.h>
+#include <intelligence/pathplanning/astarplanner.h>
 
 namespace Ui {
 class MainWindow;
@@ -99,6 +100,8 @@ private:
     BasicPositionTracker *_posTracker;
 
     MapBuilder *_mapper;
+
+    PathPlanner *_planner;
 
     bool isRunning, isPaused;
 
