@@ -2,6 +2,8 @@
 #include <common/config/configmanager.h>
 
 using namespace std;
+using namespace cv;
+using namespace Eigen;
 
 void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols)
 {
