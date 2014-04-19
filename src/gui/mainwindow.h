@@ -101,6 +101,8 @@ private:
 
     MapBuilder *_mapper;
 
+    PathPlanner *_planner;
+
     bool isRunning, isPaused;
 
     MDIWindow *activeMdiChild();

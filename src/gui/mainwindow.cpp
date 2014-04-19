@@ -84,6 +84,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _mapper = new MapBuilder(_lidar, _posTracker);
 
+    _planner = new AStarPlanner();
+
     ui->hardwareStatusList->addItem("Path Planner");
 
     updateHardwareStatusIcons();
@@ -161,7 +163,7 @@ void MainWindow::openHardwareView(QModelIndex index)
         }
         else if(labelText == "Path Planner")
         {
-            adapter = new PathAdapter();
+            adapter = new PathAdapter(_planner);
         }
         else
         {
