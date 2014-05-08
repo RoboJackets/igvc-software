@@ -20,6 +20,8 @@
 
 #define uchar unsigned char
 
+#include <Servo.h>
+
 /* Communication Protocol
  * The Arduino will loop, maintaining output states, until a new control
  * packet arrives over the serial connection. Recieving a control packet
@@ -104,6 +106,7 @@ void setup()
   pinMode(ESTOP_IN,    INPUT );
   pinMode(BAT_IN,      INPUT );
   Serial.begin(9600);
+  digitalWrite(SAFETY_CTRL, HIGH);
 }
 
 /*
