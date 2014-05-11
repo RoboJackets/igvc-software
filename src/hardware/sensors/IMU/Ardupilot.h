@@ -1,7 +1,7 @@
 #ifndef ARDUPILOT_H
 #define ARDUPILOT_H
 
-#include <hardware/serial/ASIOSerialPort.h>
+#include <hardware/serial/SerialPort.h>
 #include <common/datastructures/IMUData.hpp>
 #include <hardware/sensors/IMU/IMU.h>
 #include <QObject>
@@ -26,7 +26,7 @@ class Ardupilot : public IMU
         void onNewSerialLine(std::string line);
 
     private:
-        ASIOSerialPort ardupilotPort;
+        SerialPort ardupilotPort;
 };
 
 #endif // ARDUPILOT_H

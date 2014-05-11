@@ -15,15 +15,13 @@ volatile int tickDataLeft = 0;
 
 //CHECK THESE
 const float ticksPerRev = 200;
-const float wheelCir = 0.092347; //Meters
+const float wheelCir = 0.092347; // Meters
 const float metersPerTick = wheelCir / ticksPerRev;
 
-//int desiredSpeed = 50; //0-255 PWM
-float desiredSpeed = 0.5; //m/s
-//int desiredSpeed = map(desiredSpeed,0,topSpeed,0,255); m/s
+float desiredSpeedR = 0; // m/s
+float desiredSpeedL = 0; // m/s
 float actualSpeedR;
 float actualSpeedL;
-//int topSpeed = 10; //m/s
 
 byte PWMOutputR;
 byte PWMOutputL;
@@ -32,8 +30,15 @@ long ErrorL[10];
 long PIDR;
 long PIDL;
 
-int PTerm = 0.3;
+float PTerm = 0.3;
 float DTerm = 0.05;
+
+// Serial comm vars
+#define uchar unsigned char
+uchar cmd[4] = {0,0,0,0};
+int numBytesIn = 0;
+boolean cmdHasStarted = false;
+long lastCmdTime;
 
 void setup()
 {
@@ -60,6 +65,7 @@ void setup()
   
   digitalWrite(rightDir, 0); //forward
   digitalWrite(leftDir, 0);
+  lastCmdTime = millis();
 }
 
 void getError()
@@ -75,10 +81,8 @@ void getError()
   actualSpeedR = speeds[0];
   actualSpeedL = speeds[1];
   
-  //actualSpeedR = map(speeds[0],0,topSpeed,0,255);
-  //actualSpeedL = map(speeds[1],0,topSpeed,0,255);
-  ErrorR[0] = desiredSpeed - actualSpeedR;
-  ErrorL[0] = desiredSpeed - actualSpeedL;
+  ErrorR[0] = desiredSpeedR - actualSpeedR;
+  ErrorL[0] = desiredSpeedL - actualSpeedL;
 }
 
 void getSpeed(float speeds1[])
@@ -137,25 +141,29 @@ void calculatePID(void)
 
 void loop()
 {
-  
+  while(Serial.available())
+  {
+    if(Serial.read() == '$')
+    {
+      desiredSpeedL = Serial.parseFloat();
+      desiredSpeedR = Serial.parseFloat();
+      lastCmdTime = millis();
+      Serial.print('$');
+      Serial.print(actualSpeedL);
+      Serial.print(',');
+      Serial.println(actualSpeedR);
+    }
+  }
+  if(lastCmdTime - millis() > 500)
+  {
+    desiredSpeedL = 0;
+    desiredSpeedR = 0;
+  }
   getError();
   calculatePID();
   analogWrite(rightSpeed, PWMOutputR);
   analogWrite(leftSpeed, PWMOutputL);
-  //Serial.print("R:");
-  //Serial.print(actualSpeedR);
-  Serial.print("PWM:");
-  Serial.print(PWMOutputL);
-  Serial.print("  L:");
-  Serial.print(actualSpeedL);
-  Serial.println();
-  
-  //Serial.println(tickDataLeft);
-  
 }
-
-
-
 
 void tickRight()
 {
