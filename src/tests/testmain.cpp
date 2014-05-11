@@ -27,8 +27,9 @@ void RunTestCase(QObject* testCase, std::vector<std::string> args, bool runByDef
     }
 }
 
-int main(int argc, const char* argv[])
-{    
+int main(int argc, char* argv[])
+{
+    QApplication a(argc, argv);
     // Setup arguments vector
     std::vector<std::string> args;
     for(int i = 0; i < argc; i++)
