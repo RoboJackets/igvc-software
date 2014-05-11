@@ -16,9 +16,11 @@ public:
 protected:
     void paintEvent(QPaintEvent *);
 
-signals:
+private:
+    bool _isEnabled;
     
 public slots:
+    void onEStopStatusChanged(bool isEnabled);
     
 };
 
