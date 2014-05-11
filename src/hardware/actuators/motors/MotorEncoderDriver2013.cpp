@@ -7,7 +7,7 @@
 using namespace std;
 
 MotorEncoderDriver2013::MotorEncoderDriver2013()
- : _arduino("/dev/igvc_2013_motor_arduino", 9600)
+ : _arduino("/dev/igvc_motor_arduino", 9600)
 {
     _leftVel = 0;
     _rightVel = 0;

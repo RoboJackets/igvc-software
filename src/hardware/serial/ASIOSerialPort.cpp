@@ -68,19 +68,22 @@ void ASIOSerialPort::stopEvents() {
 void ASIOSerialPort::eventThreadRun() {
     while(isConnected() && _eventsEnabled)
     {
-            char in = read();
-            onNewByte(in);
-            if(in == '\n' || in == '\r')
-            {
-                onNewLine(_line);
-                _line = "";
-            } else {
-                _line += in;
-            }
+
+        char in = read();
+
+        onNewByte(in);
+        if(in == '\n' || in == '\r')
+        {
+            onNewLine(_line);
+            _line = "";
+        } else {
+            _line += in;
+        }
     }
 }
 
 void ASIOSerialPort::close() {
+
     if(_eventsEnabled)
     {
         _eventsEnabled = false;
@@ -90,6 +93,7 @@ void ASIOSerialPort::close() {
     {
         port.close();
     }
+
 }
 
 bool ASIOSerialPort::isConnected() {
@@ -97,15 +101,21 @@ bool ASIOSerialPort::isConnected() {
 }
 
 void ASIOSerialPort::write(std::string s) {
+
     if(isConnected()) boost::asio::write(port, boost::asio::buffer(s.c_str(),s.length()));
+
 }
 
 void ASIOSerialPort::write(char *msg, int length) {
+
     if(isConnected()) boost::asio::write(port, boost::asio::buffer(msg, length));
+
 }
 
 void ASIOSerialPort::write(unsigned char *msg, int length) {
+
     if(isConnected()) boost::asio::write(port, boost::asio::buffer(msg, length));
+
 }
 
 std::string ASIOSerialPort::readln() {
@@ -117,7 +127,9 @@ std::string ASIOSerialPort::readln() {
 
     while(true) {
         try {
+
             boost::asio::read(port, boost::asio::buffer(&c,1));
+
 		} catch(boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
             Logger::Log(LogLevel::Error, "Error reading serial port. Device may have been uplugged.");
             Logger::Log(LogLevel::Error, err.what());
@@ -159,9 +171,12 @@ std::string ASIOSerialPort::readln() {
 char ASIOSerialPort::read() {
     if(!isConnected()) return -1;
 
+
     char in;
     try {
+
         boost::asio::read(port, boost::asio::buffer(&in, 1));
+
     } catch (boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
         Logger::Log(LogLevel::Error, "Error reading serial port. Device may have been uplugged.");
         Logger::Log(LogLevel::Error, err.what());
@@ -175,7 +190,9 @@ char* ASIOSerialPort::read(int numBytes) {
     char* bytes = new char[numBytes];
     for(int i = 0; i < numBytes; i++)
     {
+
         bytes[i] = read();
+
     }
     return bytes;
 }
