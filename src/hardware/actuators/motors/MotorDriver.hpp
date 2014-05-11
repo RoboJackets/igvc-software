@@ -7,20 +7,10 @@ struct MotorCommand
 {
     double leftVel;
     double rightVel;
-    int millis;
-    bool timed;
 
     MotorCommand(double left, double right) :
         leftVel(left),
-        rightVel(right),
-        timed(false)
-    { }
-
-    MotorCommand(double left, double right, int ms) :
-        leftVel(left),
-        rightVel(right),
-        millis(ms),
-        timed(true)
+        rightVel(right)
     { }
 };
 
@@ -36,27 +26,27 @@ public:
     /*
      * Writes the given velocities out the motors.
      */
-    virtual void setVelocities(double left, double right, int millis = 0) = 0;
+    virtual void setVelocities(double left, double right) = 0;
 
     /*
      * Writes the given velocity to the left motors.
      */
-    virtual void setLeftVelocity(double vel, int millis = 0) = 0;
+    virtual void setLeftVelocity(double vel) = 0;
 
     /*
      * Writes the given velocity to the right motors.
      */
-    virtual void setRightVelocity(double vel, int millis = 0) = 0;
+    virtual void setRightVelocity(double vel) = 0;
 
     /*
      * Returns the velocity currently being written to the left motor.
      */
-    virtual double getLeftVelocity() = 0;
+    virtual double getLeftSetVelocity() = 0;
 
     /*
      * Returns the velocity currently being written to the right motor.
      */
-    virtual double getRightVelocity() = 0;
+    virtual double getRightSetVelocity() = 0;
 
     /*
      * Writes zero velocities to both motors.
@@ -67,6 +57,9 @@ public:
      * Returns the connection status of this motor driver.
      */
     virtual bool isOpen() = 0;
+
+signals:
+    void newCurrentVelocities(double left, double right);
 };
 
 #endif // MOTORDRIVER_H
