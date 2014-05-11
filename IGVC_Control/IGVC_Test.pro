@@ -21,7 +21,7 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/common/logger/logger.cpp \
     ../src/common/utils/gpsfilereader.cpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
-    ../src/hardware/serial/ASIOSerialPort.cpp \
+    ../src/hardware/serial/SerialPort.cpp \
     ../src/hardware/sensors/gps/nmea.cpp \
     ../src/intelligence/posetracking/basicpositiontracker.cpp \
     ../src/intelligence/controller/controller.cpp \
@@ -49,7 +49,7 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/intelligence/posetracking/positiontracker.h \
     ../src/intelligence/posetracking/basicpositiontracker.h \
     ../src/hardware/sensors/gps/nmeacompatiblegps.h \
-    ../src/hardware/serial/ASIOSerialPort.h \
+    ../src/hardware/serial/SerialPort.h \
     ../src/hardware/sensors/gps/nmea.hpp \
     ../src/hardware/sensors/gps/GPS.hpp \
     ../src/tests/testcontroller.h \
