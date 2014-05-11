@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui declarative xml serialport
+QT       += core gui declarative xml
 
 TARGET = IGVC_Control
 TEMPLATE = app
@@ -57,7 +57,8 @@ SOURCES += \
     ../src/intelligence/controller/controller.cpp \
     ../src/intelligence/pathplanning/astarplanner.cpp \
     ../src/gui/adapters/pathadapter.cpp \
-    ../src/hardware/actuators/lights/lightcontroller.cpp
+    ../src/hardware/actuators/lights/lightcontroller.cpp \
+    ../src/gui/adapters/lightshieldadapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -127,7 +128,8 @@ HEADERS  += \
     ../src/intelligence/pathplanning/pathplanner.hpp \
     ../src/intelligence/pathplanning/astarplanner.h \
     ../src/gui/adapters/pathadapter.h \
-    ../src/hardware/actuators/lights/lightcontroller.h
+    ../src/hardware/actuators/lights/lightcontroller.h \
+    ../src/gui/adapters/lightshieldadapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -138,7 +140,8 @@ FORMS    += \
     ../src/gui/adapters/gpsadapter.ui \
     ../src/gui/adapters/imuadapter.ui \
     ../src/gui/adapters/positiontrackeradapter.ui \
-    ../src/gui/adapters/pathadapter.ui
+    ../src/gui/adapters/pathadapter.ui \
+    ../src/gui/adapters/lightshieldadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
