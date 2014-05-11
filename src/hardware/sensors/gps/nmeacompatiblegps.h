@@ -8,7 +8,7 @@
 
 #include "GPS.hpp"
 
-#include "hardware/serial/ASIOSerialPort.h"
+#include "hardware/serial/SerialPort.h"
 
 #include <list>
 #include <QObject>
@@ -33,7 +33,7 @@ private slots:
 
 private:
 
-    ASIOSerialPort serialPort; // Serial port for GPS communication
+    SerialPort serialPort; // Serial port for GPS communication
 
 	boost::mutex queueLocker; // mutex for thread-safing the buffer
 
