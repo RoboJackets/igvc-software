@@ -8,6 +8,9 @@
 #include "adapters/cameraadapter.h"
 #include "adapters/imuadapter.h"
 #include "adapters/pathadapter.h"
+#include "adapters/lidaradapter.h"
+#include "adapters/positiontrackeradapter.h"
+#include "adapters/lightshieldadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/nmeacompatiblegps.h>
@@ -19,9 +22,6 @@
 
 #include <QMdiSubWindow>
 #include <QTextEdit>
-#include "adapters/joystickadapter.h"
-#include "adapters/lidaradapter.h"
-#include "adapters/positiontrackeradapter.h"
 #include <QDebug>
 #include <QFileDialog>
 
@@ -54,13 +54,14 @@ MainWindow::MainWindow(QWidget *parent) :
     _motorController = new MotorEncoderDriver2013;
     ui->hardwareStatusList->addItem("Motor Board");
 
+    _lights = new LightController();
+    connect(_lights, SIGNAL(onBatteryLevelChanged(int)), ui->batteryIndicator, SLOT(onBatteryLevelChanged(int)));
+    connect(_lights, SIGNAL(onEStopStatusChanged(bool)), ui->statusImage, SLOT(onEStopStatusChanged(bool)));
+    ui->hardwareStatusList->addItem("Light Controller");
+
     _joystick = new Joystick;
     ui->joystickButton->setEnabled(_joystick->isOpen());
     ui->hardwareStatusList->addItem("Joystick");
-
-    ui->hardwareStatusList->addItem("Map");
-
-    _joystickDriver = new JoystickDriver(_joystick);
 
 //    _lidar = new SimulatedLidar();
     _lidar = new LMS200();
@@ -86,7 +87,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _planner = new AStarPlanner();
 
+    ui->hardwareStatusList->addItem("Map");
+
     ui->hardwareStatusList->addItem("Path Planner");
+
+    _joystickDriver = new JoystickDriver(_joystick);
 
     updateHardwareStatusIcons();
 
@@ -164,6 +169,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "Path Planner")
         {
             adapter = new PathAdapter(_planner);
+        }
+        else if(labelText == "Light Controller")
+        {
+            adapter = new LightShieldAdapter(_lights);
         }
         else
         {
@@ -278,6 +287,7 @@ void MainWindow::on_playButton_clicked()
         ui->stopButton->setVisible(true);
         isRunning = true;
     }
+    _lights->setSafetyLight(isRunning);
 }
 
 void MainWindow::on_stopButton_clicked()
@@ -289,6 +299,7 @@ void MainWindow::on_stopButton_clicked()
         isRunning = false;
         isPaused = false;
     }
+    _lights->setSafetyLight(isRunning);
 }
 
 void MainWindow::on_actionStatus_Bar_toggled(bool checked)
@@ -354,6 +365,7 @@ void MainWindow::updateHardwareStatusIcons()
     ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isOpen() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("IMU", Qt::MatchExactly).at(0)->setIcon(_IMU->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->IsWorking() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Light Controller", Qt::MatchExactly).at(0)->setIcon(_lights->isConnected() ? checkIcon : xIcon);
 }
 
 void MainWindow::on_actionClearLogs_triggered()
