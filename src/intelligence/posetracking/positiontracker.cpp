@@ -54,7 +54,7 @@ Position PositionTracker::DeltaFromMotionCommand(MotorCommand cmd)
     /*
      * TODO - This is doing meters only. We need to convert this translation into GPS coordinates
      */
-    using namespace std;
+    /*using namespace std;
     double V = ( cmd.rightVel + cmd.leftVel ) / 2.0;
     double W = ( cmd.rightVel - cmd.leftVel ) / ConfigManager::Instance().getValue("Robot", "Baseline", 1.0);
     double t = cmd.millis / 1000.0;
@@ -75,7 +75,8 @@ Position PositionTracker::DeltaFromMotionCommand(MotorCommand cmd)
         delta.Longitude = V*t*sin(theta);
     }
     // TODO - handle variances
-    return delta;
+    return delta;*/
+    return Position();
 }
 
 Position PositionTracker::MeasurementFromIMUData(IMUData data)
