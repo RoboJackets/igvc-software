@@ -1,5 +1,5 @@
 
-QT       += testlib xml core gui declarative
+QT       += testlib xml core gui declarative serialport
 
 TARGET = IGVC_Test
 CONFIG   += console
@@ -31,7 +31,8 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/intelligence/pathplanning/astarplanner.cpp \
     ../src/intelligence/pathplanning/igvcsearchproblem.cpp \
     ../src/intelligence/pathplanning/searchlocation.cpp \
-    ../src/intelligence/pathplanning/searchmove.cpp
+    ../src/intelligence/pathplanning/searchmove.cpp \
+    ../src/hardware/actuators/lights/lightcontroller.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
     ../src/tests/testpositiontracker.hpp \
@@ -65,7 +66,8 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/intelligence/pathplanning/pathplanner.hpp \
     ../src/intelligence/pathplanning/searchlocation.h \
     ../src/intelligence/pathplanning/searchmove.h \
-    ../src/intelligence/pathplanning/SearchProblem.hpp
+    ../src/intelligence/pathplanning/SearchProblem.hpp \
+    ../src/hardware/actuators/lights/lightcontroller.h
 
 # libUSB (for LIDAR)
 
