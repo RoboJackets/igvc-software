@@ -14,6 +14,7 @@
 #include <hardware/sensors/camera/StereoSource.hpp>
 #include <hardware/sensors/IMU/IMU.h>
 #include <hardware/sensors/lidar/Lidar.h>
+#include <hardware/actuators/lights/lightcontroller.h>
 #include <intelligence/posetracking/basicpositiontracker.h>
 #include <intelligence/mapping/mapbuilder.h>
 #include <intelligence/pathplanning/astarplanner.h>
@@ -102,6 +103,8 @@ private:
     MapBuilder *_mapper;
 
     PathPlanner *_planner;
+
+    LightController *_lights;
 
     bool isRunning, isPaused;
 
