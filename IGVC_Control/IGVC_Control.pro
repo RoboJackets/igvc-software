@@ -4,12 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-QT += xml
+QT       += core gui declarative xml
 
 TARGET = IGVC_Control
 TEMPLATE = app
-QT += gui declarative
 
 CONFIG += c++11
 
@@ -58,7 +56,9 @@ SOURCES += \
     ../src/intelligence/mapping/mapbuilder.cpp \
     ../src/intelligence/controller/controller.cpp \
     ../src/intelligence/pathplanning/astarplanner.cpp \
-    ../src/gui/adapters/pathadapter.cpp
+    ../src/gui/adapters/pathadapter.cpp \
+    ../src/hardware/actuators/lights/lightcontroller.cpp \
+    ../src/gui/adapters/lightshieldadapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -127,7 +127,9 @@ HEADERS  += \
     ../src/intelligence/controller/controller.h \
     ../src/intelligence/pathplanning/pathplanner.hpp \
     ../src/intelligence/pathplanning/astarplanner.h \
-    ../src/gui/adapters/pathadapter.h
+    ../src/gui/adapters/pathadapter.h \
+    ../src/hardware/actuators/lights/lightcontroller.h \
+    ../src/gui/adapters/lightshieldadapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -138,7 +140,8 @@ FORMS    += \
     ../src/gui/adapters/gpsadapter.ui \
     ../src/gui/adapters/imuadapter.ui \
     ../src/gui/adapters/positiontrackeradapter.ui \
-    ../src/gui/adapters/pathadapter.ui
+    ../src/gui/adapters/pathadapter.ui \
+    ../src/gui/adapters/lightshieldadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc
