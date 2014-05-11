@@ -55,7 +55,7 @@
  */
  
 /* Error Response Packet Format:
- * Length : 
+ * Length : 4 Bytes
  * 0 - STX                                     (ASCII decimal 2)
  * 1 - NAK                                     (ASCII decimal 21)
  * 2 - Error code                              (range 0 - 255)
@@ -64,16 +64,16 @@
 
 void parseControlPacket( uchar pckt[] )
 {
-  digitalWrite(SAFETY_CTRL, pckt[1]);
-  analogWrite(RED_CTRL, pckt[2]);
-  analogWrite(GREEN_CTRL, pckt[3]);
-  analogWrite(BLUE_CTRL, pckt[4]);
-  analogWrite(B1S1_CTRL, pckt[5]);
-  analogWrite(B1S2_CTRL, pckt[6]);
-  analogWrite(B1S3_CTRL, pckt[7]);
-  analogWrite(B2S1_CTRL, pckt[8]);
-  analogWrite(B2S2_CTRL, pckt[9]);
-  analogWrite(B2S3_CTRL, pckt[10]);
+  digitalWrite(SAFETY_CTRL, ( pckt[1] ? LOW : HIGH ) );
+  analogWrite(RED_CTRL,   255 - pckt[2]);
+  analogWrite(GREEN_CTRL, 255 - pckt[3]);
+  analogWrite(BLUE_CTRL,  255 - pckt[4]);
+  analogWrite(B1S1_CTRL,  pckt[5]);
+  analogWrite(B1S2_CTRL,  pckt[6]);
+  analogWrite(B1S3_CTRL,  pckt[7]);
+  analogWrite(B2S1_CTRL,  pckt[8]);
+  analogWrite(B2S2_CTRL,  pckt[9]);
+  analogWrite(B2S3_CTRL,  pckt[10]);
 }
 
 void sendResponsePacket()
@@ -107,6 +107,15 @@ void setup()
   pinMode(BAT_IN,      INPUT );
   Serial.begin(9600);
   digitalWrite(SAFETY_CTRL, HIGH);
+  analogWrite(RED_CTRL, 255);
+  analogWrite(GREEN_CTRL, 255);
+  analogWrite(BLUE_CTRL, 255);
+  analogWrite(B1S1_CTRL, LOW);
+  analogWrite(B1S2_CTRL, LOW);
+  analogWrite(B1S3_CTRL, LOW);
+  analogWrite(B2S1_CTRL, LOW);
+  analogWrite(B2S2_CTRL, LOW);
+  analogWrite(B2S3_CTRL, LOW);
 }
 
 /*
@@ -132,8 +141,8 @@ void loop()
   pckt[0] = first;
   for(int i = 1; i < 12; i++)
   {
-    pckt[i] = Serial.read();
     while(!Serial.available()) {}
+    pckt[i] = Serial.read();
   }
   if(pckt[11] != 4)
   {
