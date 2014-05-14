@@ -46,13 +46,13 @@ void setup()
   
   pinMode(encoderRightData1, INPUT);
   pinMode(encoderRightData2, INPUT);
-  pinMode(encoderLeftData1, INPUT);
-  pinMode(encoderLeftData2, INPUT);
+  pinMode(encoderLeftData1,  INPUT);
+  pinMode(encoderLeftData2,  INPUT);
   
-  digitalWrite(encoderRightData1, 1);
-  digitalWrite(encoderRightData2, 1);
-  digitalWrite(encoderLeftData1, 1);
-  digitalWrite(encoderLeftData2, 1);
+  digitalWrite(encoderRightData1, HIGH);
+  digitalWrite(encoderRightData2, HIGH);
+  digitalWrite(encoderLeftData1,  HIGH);
+  digitalWrite(encoderLeftData2,  HIGH);
   
   pinMode(rightDir, OUTPUT);
   pinMode(rightSpeed, OUTPUT);
@@ -66,26 +66,27 @@ void setup()
   digitalWrite(rightDir, 0); //forward
   digitalWrite(leftDir, 0);
   lastCmdTime = millis();
+  
+  delay(750);
+  
+  Serial.println("Ready");
 }
 
 void getError()
 {
-  byte i = 0;
-  for(i=0;i<9;i++)
+  int i = 0;
+  for(i=9;i>=1;i--)
   {
-      ErrorR[i+1] = ErrorR[i];
-      ErrorL[i+1] = ErrorL[i];
+      ErrorR[i] = ErrorR[i-1];
+      ErrorL[i] = ErrorL[i-1];
   }
-  float speeds[2];
-  getSpeed(speeds);
-  actualSpeedR = speeds[0];
-  actualSpeedL = speeds[1];
+  getSpeed(&actualSpeedL, &actualSpeedR);
   
   ErrorR[0] = desiredSpeedR - actualSpeedR;
   ErrorL[0] = desiredSpeedL - actualSpeedL;
 }
 
-void getSpeed(float speeds1[])
+void getSpeed(float *left, float *right)
 {
   int timeStart = millis();
   int time = millis();
@@ -95,12 +96,10 @@ void getSpeed(float speeds1[])
   {
       time = millis();
   }
-  float retR = ((metersPerTick*abs(tickDataRight-tickDataRightS))*2)/0.1;
-  float retL = ((metersPerTick*abs(tickDataLeft-tickDataLeftS))*2)/0.1;
+  *left = ((metersPerTick*abs(tickDataRight-tickDataRightS))*2)/0.1;
+  *right = ((metersPerTick*abs(tickDataLeft-tickDataLeftS))*2)/0.1;
   tickDataRight = 0;
   tickDataLeft = 0;
-  speeds1[0] = retR;
-  speeds1[1] = retL;
 }
 
 void calculatePID(void)
@@ -149,9 +148,9 @@ void loop()
       desiredSpeedR = Serial.parseFloat();
       lastCmdTime = millis();
       Serial.print('$');
-      Serial.print(actualSpeedL);
+      Serial.print(ErrorL[0]);
       Serial.print(',');
-      Serial.println(actualSpeedR);
+      Serial.println(desiredSpeedL);
     }
   }
   if(lastCmdTime - millis() > 500)
