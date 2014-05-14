@@ -13,7 +13,7 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
     _leftVel = 0;
     _rightVel = 0;
     _maxVel = 2.0;
-    writeVelocities();
+    //writeVelocities();
     if(_arduino.isConnected())
     {
         cout << "Waiting for motor arduino.";
@@ -50,7 +50,8 @@ void MotorEncoderDriver2013::run()
             return;
         }
         writeVelocities();
-        usleep(250000);
+        //usleep(100000);
+        usleep(1500000);
     }
 }
 
@@ -110,7 +111,9 @@ void MotorEncoderDriver2013::writeVelocities()
 
         _portLock.lock();
         _arduino.write(msg.str());
+        std::cout << "Wrote message : " << msg.str() << std::endl;
         std::string ret = _arduino.readln();
+        std::cout << "Recieved line : " << ret << std::endl;
         try {
             if(!ret.empty())
             {
