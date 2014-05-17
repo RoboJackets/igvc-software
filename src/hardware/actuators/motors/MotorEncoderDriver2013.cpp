@@ -51,7 +51,7 @@ void MotorEncoderDriver2013::run()
         }
         writeVelocities();
         //usleep(100000);
-        usleep(1500000);
+        usleep(1000000);
     }
 }
 
@@ -117,8 +117,11 @@ void MotorEncoderDriver2013::writeVelocities()
         try {
             if(!ret.empty())
             {
-                std::string leftStr = ret.substr(ret.find('$'), ret.find(','));
-                std::string rightStr = ret.substr(ret.find(','), ret.find('\n'));
+                size_t dollar = ret.find('$');
+                size_t comma = ret.find(',');
+                size_t end = ret.find('\n');
+                std::string leftStr = ret.substr(dollar+1, comma-dollar-1);
+                std::string rightStr = ret.substr(comma+1, end-comma-1);
                 _leftCurrVel = atof(leftStr.c_str());
                 _rightCurrVel = atof(rightStr.c_str());
                 newCurrentVelocities(_leftCurrVel, _rightCurrVel);
