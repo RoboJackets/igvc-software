@@ -1,15 +1,15 @@
 /*
- * ASIOSerialPort.cpp
+ * SerialPort.cpp
  *
  *  Created on: Nov 8, 2012
  *      Author: Matthew Barulic
  */
 
-#include "ASIOSerialPort.h"
+#include "SerialPort.h"
 #include <iostream>
 #include <common/logger/logger.h>
 
-ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud)
+SerialPort::SerialPort(std::string port_name, size_t baud)
     : port(ioservice)
 {
     try
@@ -46,16 +46,16 @@ ASIOSerialPort::ASIOSerialPort(std::string port_name, size_t baud)
 	_eventRequests = 0;
 }
 
-void ASIOSerialPort::startEvents() {
+void SerialPort::startEvents() {
     _eventRequests++;
     if(!_eventsEnabled)
     {
         _eventsEnabled = true;
-        eventThread = boost::thread(boost::bind(&ASIOSerialPort::eventThreadRun, this));
+        eventThread = boost::thread(boost::bind(&SerialPort::eventThreadRun, this));
     }
 }
 
-void ASIOSerialPort::stopEvents() {
+void SerialPort::stopEvents() {
     _eventRequests--;
     if(_eventRequests == 0)
     {
@@ -65,7 +65,7 @@ void ASIOSerialPort::stopEvents() {
 
 }
 
-void ASIOSerialPort::eventThreadRun() {
+void SerialPort::eventThreadRun() {
     while(isConnected() && _eventsEnabled)
     {
 
@@ -82,7 +82,7 @@ void ASIOSerialPort::eventThreadRun() {
     }
 }
 
-void ASIOSerialPort::close() {
+void SerialPort::close() {
 
     if(_eventsEnabled)
     {
@@ -96,29 +96,29 @@ void ASIOSerialPort::close() {
 
 }
 
-bool ASIOSerialPort::isConnected() {
+bool SerialPort::isConnected() {
 	return port.is_open();
 }
 
-void ASIOSerialPort::write(std::string s) {
+void SerialPort::write(std::string s) {
 
     if(isConnected()) boost::asio::write(port, boost::asio::buffer(s.c_str(),s.length()));
 
 }
 
-void ASIOSerialPort::write(char *msg, int length) {
+void SerialPort::write(char *msg, int length) {
 
     if(isConnected()) boost::asio::write(port, boost::asio::buffer(msg, length));
 
 }
 
-void ASIOSerialPort::write(unsigned char *msg, int length) {
+void SerialPort::write(unsigned char *msg, int length) {
 
     if(isConnected()) boost::asio::write(port, boost::asio::buffer(msg, length));
 
 }
 
-std::string ASIOSerialPort::readln() {
+std::string SerialPort::readln() {
     if(!isConnected()) return "";
 
 	char c;
@@ -135,13 +135,14 @@ std::string ASIOSerialPort::readln() {
             Logger::Log(LogLevel::Error, err.what());
 			return line;
 		}
-		switch(c) {
-		case '\r':
-            _eventsEnabled = true;
-			return line;
-			break;
-		case '\n':
-			return line;
+        switch(c) {
+        case '\r':
+            if(!line.empty())
+                return line;
+            break;
+        case '\n':
+            if(!line.empty())
+                return line;
 			break;
 		default:
 			line += c;
@@ -168,7 +169,7 @@ std::string ASIOSerialPort::readln() {
 	return "";
 }
 
-char ASIOSerialPort::read() {
+char SerialPort::read() {
     if(!isConnected()) return -1;
 
 
@@ -185,7 +186,7 @@ char ASIOSerialPort::read() {
     return in;
 }
 
-char* ASIOSerialPort::read(int numBytes) {
+char* SerialPort::read(int numBytes) {
     if(!isConnected()) return (char*)"";
     char* bytes = new char[numBytes];
     for(int i = 0; i < numBytes; i++)
@@ -197,14 +198,14 @@ char* ASIOSerialPort::read(int numBytes) {
     return bytes;
 }
 
-void ASIOSerialPort::definePacket(char startByte, char endByte)
+void SerialPort::definePacket(char startByte, char endByte)
 {
     _packetStartByte = startByte;
     _packetEndByte = endByte;
     _packetHasBeenDefined = true;
 }
 
-ASIOSerialPort::~ASIOSerialPort() {
+SerialPort::~SerialPort() {
     if(_eventsEnabled)
     {
         _eventsEnabled = false;
