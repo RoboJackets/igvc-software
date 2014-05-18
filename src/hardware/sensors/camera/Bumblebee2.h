@@ -36,6 +36,7 @@ class Bumblebee2 : public StereoSource
         boost::mutex frameLock;
         FlyCapture2::Camera& Cam();
         cv::Mat correctImage(cv::Mat rawImg);
+        virtual bool IsConnected();
     private:
         int StartCamera();
         int CloseCamera();
