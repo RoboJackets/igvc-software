@@ -135,13 +135,14 @@ std::string SerialPort::readln() {
             Logger::Log(LogLevel::Error, err.what());
 			return line;
 		}
-		switch(c) {
-		case '\r':
-            _eventsEnabled = true;
-			return line;
-			break;
-		case '\n':
-			return line;
+        switch(c) {
+        case '\r':
+            if(!line.empty())
+                return line;
+            break;
+        case '\n':
+            if(!line.empty())
+                return line;
 			break;
 		default:
 			line += c;
