@@ -33,8 +33,7 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
     {
         Logger::Log(LogLevel::Warning, "Motor arduino not connected. Commands will be ignored.");
     }
-    //TODO : Encoder access on Arduino-side code
-    _thread = boost::thread(boost::bind(&MotorEncoderDriver2013::run, this));
+    _read = boost::thread(boost::bind(&MotorEncoderDriver2013::run, this));
 }
 
 void MotorEncoderDriver2013::run()
@@ -50,8 +49,7 @@ void MotorEncoderDriver2013::run()
             return;
         }
         writeVelocities();
-        //usleep(100000);
-        usleep(1000000);
+        usleep(10000);
     }
 }
 
@@ -107,13 +105,19 @@ void MotorEncoderDriver2013::writeVelocities()
     {
         std::ostringstream msg;
 
-        msg << '$' << _leftVel << ',' << _rightVel;
+        /*
+         * The newline character below must be there.
+         * In the Arduino code, Serial.parseFloat is used.
+         * This command will slow down significantly if
+         * you do not follow the number with a non-numeric
+         * character. Here, the newline does this for us.
+         */
+
+        msg << '$' << _leftVel << ',' << _rightVel << '\n';
 
         _portLock.lock();
         _arduino.write(msg.str());
-        std::cout << "Wrote message : " << msg.str() << std::endl;
         std::string ret = _arduino.readln();
-        std::cout << "Recieved line : " << ret << std::endl;
         try {
             if(!ret.empty())
             {
