@@ -34,7 +34,8 @@ long lastLoopTime;
 
 // Serial comm vars
 #define uchar unsigned char
-uchar cmd[4] = {0,0,0,0};
+uchar cmd[4] = {
+  0,0,0,0};
 int numBytesIn = 0;
 boolean cmdHasStarted = false;
 long lastCmdTime;
@@ -49,17 +50,17 @@ long lastCmdTime;
 void setup()
 {
   Serial.begin(9600);
-  
+
   pinMode(encoderRightData1, INPUT);
   pinMode(encoderRightData2, INPUT);
   pinMode(encoderLeftData1,  INPUT);
   pinMode(encoderLeftData2,  INPUT);
-  
+
   digitalWrite(encoderRightData1, HIGH);
   digitalWrite(encoderRightData2, HIGH);
   digitalWrite(encoderLeftData1,  HIGH);
   digitalWrite(encoderLeftData2,  HIGH);
-  
+
   pinMode(rightDir, OUTPUT);
   pinMode(rightSpeed, OUTPUT);
   pinMode(rightDisable, OUTPUT);
@@ -68,15 +69,15 @@ void setup()
   pinMode(leftDisable, OUTPUT);
   attachInterrupt(1, tickRight, CHANGE);
   attachInterrupt(0, tickLeft, CHANGE);
-  
-  delay(2000);
-  
+
+  delay(1000);
+
   lastCmdTime = millis();
   lastLoopTime = millis();
-  
+
   digitalWrite(rightDir, 0);
   analogWrite(rightSpeed, 255);
-  
+
   Serial.println();
   Serial.flush();
   Serial.println("Ready");
@@ -87,7 +88,7 @@ boolean gotCommand = false;
 void loop()
 {
   gotCommand = false;
-    long s = millis();
+  long s = millis();
   while(Serial.available())
   {
     if(Serial.read() == '$')
@@ -95,71 +96,68 @@ void loop()
       desiredSpeedL = Serial.parseFloat();
       desiredSpeedR = Serial.parseFloat();
       lastCmdTime = millis();
-      /*Serial.print('$');
-      Serial.print(actualSpeedL);
-      Serial.print(',');
-      //Serial.println(actualSpeedR);*/
       gotCommand = true;
     }
   }
-    long e = millis();
+  long e = millis();
   if(gotCommand)
   {
     Serial.print('$');
     Serial.print(actualSpeedL);
     Serial.print(',');
-    Serial.println(actualSpeedR);;
+    Serial.print(actualSpeedR);
+    Serial.print('\n');
   }
   //Serial.println(tickDataLeft);
-  /*if( millis() - lastCmdTime > 500)
+  if( millis() - lastCmdTime > 500)
   {
     Serial.println("TIMEOUT");
     desiredSpeedL = 0;
     desiredSpeedR = 0;
-  }*/
-  
+  }
+
   float dT_sec = (float)( millis() - lastLoopTime ) / 1000.0;
   lastLoopTime = millis();
   actualSpeedL = ( metersPerTick * tickDataLeft ) / dT_sec;
   actualSpeedR = ( metersPerTick * tickDataRight ) / dT_sec;
-  
+
   tickDataLeft = 0;
   tickDataRight = 0;
 
   delay(50);
-  
+
   float ErrorL = desiredSpeedL - actualSpeedL;
   float ErrorR = desiredSpeedR - actualSpeedR;
-  
+
   float dErrorL = ErrorL - lastErrorL;
   float dErrorR = ErrorR - lastErrorR;
-  
+
   int dPWM_L = (int)( P * ErrorL + D * dErrorL );
   int dPWM_R = (int)( P * ErrorR + D * dErrorR );
-  
+
   PWM_L += dPWM_L;
   PWM_R += dPWM_R;
-  
+
   PWM_L = min(255, max(-255, PWM_L) );
   PWM_R = min(255, max(-255, PWM_R) );
-  
+
   // Deadband
   if( abs(PWM_L) < 10 )
     PWM_L = 0;
   if( abs(PWM_R) < 10 )
     PWM_R = 0;
-  
+
   int dirL = PWM_L < 0;
   int dirR = PWM_R < 0;
-  
+
   int powerL = dirL ? 255 + PWM_L : PWM_L;
   int powerR = dirR ? 255 + PWM_R : PWM_R;
-  
+
   digitalWrite(rightDir, dirR);
   digitalWrite(leftDir, dirL);
   analogWrite(rightSpeed, powerR);
   analogWrite(leftSpeed, powerL);
-  
+
   lastErrorL = ErrorL;
   lastErrorR = ErrorR;
 }
@@ -187,3 +185,4 @@ void tickLeft()
     tickDataLeft--;
   }
 }
+
