@@ -1,7 +1,7 @@
 #ifndef LIGHTCONTROLLER_H
 #define LIGHTCONTROLLER_H
 
-#include <hardware/serial/ASIOSerialPort.h>
+#include <hardware/serial/SerialPort.h>
 #include <QThread>
 #include <QMutex>
 
@@ -75,7 +75,7 @@ private:
     bool _returnPacketBegun;
     int _returnPacketSize;
 
-    ASIOSerialPort _port;
+    SerialPort _port;
 
     bool _safetyIsFlashing;
 
