@@ -12,9 +12,10 @@ const int leftDisable = 8;
 volatile int tickDataRight = 0;
 volatile int tickDataLeft = 0;
 
-const float ticksPerRev = 200.0;
-const float wheelCir = 0.092347; // Meters
+const float ticksPerRev = 1600.0;
+const float wheelCir = 1.11715; // Meters
 const float metersPerTick = wheelCir / ticksPerRev;
+const float DEADBAND = 10;
 
 float desiredSpeedR = 0; // m/s
 float desiredSpeedL = 0; // m/s
@@ -24,7 +25,7 @@ float actualSpeedL;
 float lastErrorL;
 float lastErrorR;
 
-float P = 25;
+float P = 13;
 float D = 0;
 
 int PWM_L = 0;
@@ -142,9 +143,9 @@ void loop()
   PWM_R = min(255, max(-255, PWM_R) );
 
   // Deadband
-  if( abs(PWM_L) < 10 )
+  if( abs(PWM_L) < DEADBAND )
     PWM_L = 0;
-  if( abs(PWM_R) < 10 )
+  if( abs(PWM_R) < DEADBAND )
     PWM_R = 0;
 
   int dirL = PWM_L < 0;
@@ -157,6 +158,10 @@ void loop()
   digitalWrite(leftDir, dirL);
   analogWrite(rightSpeed, powerR);
   analogWrite(leftSpeed, powerL);
+  
+  Serial.print(tickDataLeft);
+  Serial.print('\t');
+  Serial.println(tickDataRight);
 
   lastErrorL = ErrorL;
   lastErrorR = ErrorR;

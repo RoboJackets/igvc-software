@@ -19,6 +19,8 @@ void MotorBoardAdapter::onNewCurrentVelocities(double left, double right)
 {
     ui->label_leftVel->setText(tr("%1").arg(left));
     ui->label_rightVel->setText(tr("%1").arg(right));
+    ui->label_leftCmd->setText(tr("%1").arg(_driver->getLeftSetVelocity()));
+    ui->label_rightCmd->setText(tr("%1").arg(_driver->getRightSetVelocity()));
 }
 
 void MotorBoardAdapter::on_lineEdit_leftVel_returnPressed()
