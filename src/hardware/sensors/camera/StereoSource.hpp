@@ -10,7 +10,9 @@ class StereoSource : public QObject
 {
     Q_OBJECT
 public:
-    StereoSource() : _running(true) {}
+    StereoSource() : _running(true) {
+        qRegisterMetaType<StereoImageData>("StereoImageData");
+    }
     inline bool Running() {return _running;}
     inline void Running(bool newState) {_running = newState;}
     inline void LockImages() {_imagesLock.lock();}
