@@ -11,6 +11,7 @@
 #include "adapters/lidaradapter.h"
 #include "adapters/positiontrackeradapter.h"
 #include "adapters/lightshieldadapter.h"
+#include "adapters/motorboardadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/nmeacompatiblegps.h>
@@ -138,7 +139,11 @@ void MainWindow::openHardwareView(QModelIndex index)
 
         QWidget* adapter;
 
-        if(labelText == "Joystick")
+        if(labelText == "Motor Board")
+        {
+            adapter = new MotorBoardAdapter(_motorController);
+        }
+        else if(labelText == "Joystick")
         {
             adapter = new JoystickAdapter(_joystick);
         }
