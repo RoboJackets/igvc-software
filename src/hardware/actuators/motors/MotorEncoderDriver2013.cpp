@@ -10,6 +10,7 @@ using namespace std;
 MotorEncoderDriver2013::MotorEncoderDriver2013()
  : _arduino("/dev/igvc_motor_arduino", 9600)
 {
+    qRegisterMetaType<MotorCommand>("MotorCommand");
     _leftVel = 0;
     _rightVel = 0;
     _maxVel = 2.0;
@@ -33,7 +34,7 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
     {
         Logger::Log(LogLevel::Warning, "Motor arduino not connected. Commands will be ignored.");
     }
-    _read = boost::thread(boost::bind(&MotorEncoderDriver2013::run, this));
+    _thread = boost::thread(boost::bind(&MotorEncoderDriver2013::run, this));
 }
 
 void MotorEncoderDriver2013::run()
