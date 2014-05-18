@@ -3,21 +3,18 @@
 #include <iostream>
 #include <common/utils/StringUtils.hpp>
 #include <common/logger/logger.h>
+#include <algorithm>
 
 using namespace std;
 
 MotorEncoderDriver2013::MotorEncoderDriver2013()
  : _arduino("/dev/igvc_motor_arduino", 9600)
 {
+    qRegisterMetaType<MotorCommand>("MotorCommand");
     _leftVel = 0;
     _rightVel = 0;
-    _duration = 0;
     _maxVel = 2.0;
-    writeVelocities();
-    _running = true;
-    _pose.x = 0;
-    _pose.y = 0;
-    _pose.theta = 0;
+    //writeVelocities();
     if(_arduino.isConnected())
     {
         cout << "Waiting for motor arduino.";
@@ -37,18 +34,44 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
     {
         Logger::Log(LogLevel::Warning, "Motor arduino not connected. Commands will be ignored.");
     }
-    //TODO : Encoder access on Arduino-side code
-    //_encThread = boost::thread(boost::bind(&MotorEncoderDriver2013::encThreadRun, this));
+    _thread = boost::thread(boost::bind(&MotorEncoderDriver2013::run, this));
 }
 
-double MotorEncoderDriver2013::getLeftVelocity()
+void MotorEncoderDriver2013::run()
+{
+    while(true)
+    {
+        try
+        {
+            boost::this_thread::interruption_point();
+        }
+        catch (boost::thread_interrupted)
+        {
+            return;
+        }
+        writeVelocities();
+        usleep(10000);
+    }
+}
+
+double MotorEncoderDriver2013::getLeftSetVelocity()
 {
     return _leftVel;
 }
 
-double MotorEncoderDriver2013::getRightVelocity()
+double MotorEncoderDriver2013::getRightSetVelocity()
 {
     return _rightVel;
+}
+
+double MotorEncoderDriver2013::getLeftCurrentVelocity()
+{
+    return _leftCurrVel;
+}
+
+double MotorEncoderDriver2013::getRightCurrentVelocity()
+{
+    return _rightCurrVel;
 }
 
 void MotorEncoderDriver2013::stop()
@@ -58,83 +81,64 @@ void MotorEncoderDriver2013::stop()
     writeVelocities();
 }
 
-void MotorEncoderDriver2013::setVelocities(double left, double right, int millis)
+void MotorEncoderDriver2013::setVelocities(double left, double right)
 {
     _leftVel = left;
     _rightVel = right;
-    _duration = millis;
     writeVelocities();
 }
 
-void MotorEncoderDriver2013::setLeftVelocity(double vel, int millis)
+void MotorEncoderDriver2013::setLeftVelocity(double vel)
 {
     _leftVel = vel;
-    _duration = millis;
     writeVelocities();
 }
 
-void MotorEncoderDriver2013::setRightVelocity(double vel, int millis)
+void MotorEncoderDriver2013::setRightVelocity(double vel)
 {
     _rightVel = vel;
-    _duration = millis;
     writeVelocities();
 }
 
 void MotorEncoderDriver2013::writeVelocities()
 {
-    std::ostringstream msg;
-    if(abs(_leftVel) > _maxVel)
-        _leftVel = ( _leftVel > 0 ? 1 : -1) * _maxVel;
-    if(abs(_rightVel) > _maxVel)
-        _rightVel = ( _rightVel > 0 ? 1 : -1) * _maxVel;
+    if(_arduino.isConnected())
+    {
+        std::ostringstream msg;
 
-    int Ldir = std::signbit( _leftVel);
-    int Rdir = std::signbit(_rightVel);
+        /*
+         * The newline character below must be there.
+         * In the Arduino code, Serial.parseFloat is used.
+         * This command will slow down significantly if
+         * you do not follow the number with a non-numeric
+         * character. Here, the newline does this for us.
+         */
 
-    int Lpwm = ( abs( _leftVel) / _maxVel ) * 255;
-    int Rpwm = ( abs(_rightVel) / _maxVel ) * 255;
+        msg << '$' << _leftVel << ',' << _rightVel << '\n';
 
-    if(Ldir) Lpwm = 255 - Lpwm;
-    if(Rdir) Rpwm = 255 - Rpwm;
-
-    //TODO : duration not yet supported on Arduino-side code
-    msg << "SW" << Rdir << " " << Rpwm << " " << Ldir << " " << Lpwm;// << " " << _duration;
-    _portLock.lock();
-    _arduino.write(msg.str());
-    //Logger::Log(LogLevel::Info, msg.str());
-    _portLock.unlock();
+        _portLock.lock();
+        _arduino.write(msg.str());
+        std::string ret = _arduino.readln();
+        try {
+            if(!ret.empty())
+            {
+                size_t dollar = ret.find('$');
+                size_t comma = ret.find(',');
+                size_t end = ret.find('\n');
+                std::string leftStr = ret.substr(dollar+1, comma-dollar-1);
+                std::string rightStr = ret.substr(comma+1, end-comma-1);
+                _leftCurrVel = atof(leftStr.c_str());
+                _rightCurrVel = atof(rightStr.c_str());
+                newCurrentVelocities(_leftCurrVel, _rightCurrVel);
+            }
+        } catch (std::out_of_range) { }
+        _portLock.unlock();
+    }
 }
 
 void MotorEncoderDriver2013::setMotorCommand(MotorCommand cmd)
 {
-    setLeftVelocity(cmd.leftVel, (cmd.timed?cmd.millis:0));
-    setRightVelocity(cmd.rightVel, (cmd.timed?cmd.millis:0));
-}
-
-void MotorEncoderDriver2013::encThreadRun()
-{
-    while(_running)
-    {
-        _portLock.lock();
-        _arduino.write("SR");
-        string line = _arduino.readln();
-        _portLock.unlock();
-        while(line.size() > 6 && line[0] != 'A')
-            line = line.substr(1);
-        if(line.size() < 6)
-            continue;
-        line = line.substr(1);
-        std::vector<string> values = split(line, ' ');
-        if(values.size() < 3)
-            continue;
-        _pose.x = atof(values[0].c_str());
-        _pose.y = atof(values[1].c_str());
-        _pose.theta = atof(values[2].c_str());
-        if(!_running)
-            break;
-        onNewPosition(_pose);
-        usleep(1000);
-    }
+    setVelocities(cmd.leftVel, cmd.rightVel);
 }
 
 bool MotorEncoderDriver2013::isOpen()
@@ -144,8 +148,6 @@ bool MotorEncoderDriver2013::isOpen()
 
 MotorEncoderDriver2013::~MotorEncoderDriver2013()
 {
-    _running = false;
-    _encThread.join();
     stop();
     _arduino.close();
 }

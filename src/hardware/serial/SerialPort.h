@@ -1,10 +1,10 @@
-/*! \file ASIOSerialPort.h
+/*! \file SerialPort.h
  * \date Created on: Nov 8, 2012
  * \author Matthew Barulic
  */
 
-#ifndef ASIOSERIALPORT_H_
-#define ASIOSERIALPORT_H_
+#ifndef SERIALPORT_H_
+#define SERIALPORT_H_
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -13,14 +13,14 @@
 
 /*!
  * \brief Helper class to simplify interfacing with serial port hardware.
- * \headerfile ASIOSerialPort.h <hardware/serial/ASIOSerialPort.h>
+ * \headerfile SerialPort.h <hardware/serial/SerialPort.h>
  */
-class ASIOSerialPort : public  QObject {
+class SerialPort : public  QObject {
     Q_OBJECT
 
 public:
     /*! \brief The constructor takes in the path to the port (eg. "/dev/ttyUSB0") and a baud rate for the connection and opens the connection. */
-	ASIOSerialPort(std::string port_name, size_t baud);
+    SerialPort(std::string port_name, size_t baud);
 
     /*! \brief Starts the thread for triggering events.
      *
@@ -70,7 +70,7 @@ public:
       */
      void definePacket(char startByte, char endByte);
 
-     ~ASIOSerialPort();
+     ~SerialPort();
 
 signals:
      /*! \brief onNewLine Fires every time a new line character is found in the stream.
@@ -108,4 +108,4 @@ private:
     std::string _line;
 };
 
-#endif /* ASIOSERIALPORT_H_ */
+#endif /* SERIALPORT_H_ */
