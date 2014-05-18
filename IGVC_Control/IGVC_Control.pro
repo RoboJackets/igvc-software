@@ -27,7 +27,6 @@ SOURCES += \
     ../src/hardware/sensors/joystick/Joystick.cpp \
     ../src/hardware/sensors/lidar/SimulatedLidar.cpp \
     ../src/hardware/sensors/lidar/NAV200.cpp \
-    ../src/hardware/serial/ASIOSerialPort.cpp \
     ../src/gui/adapters/joystickadapter.cpp \
     ../src/gui/adapters/cameraadapter.cpp \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.cpp \
@@ -59,7 +58,9 @@ SOURCES += \
     ../src/intelligence/pathplanning/astarplanner.cpp \
     ../src/gui/adapters/pathadapter.cpp \
     ../src/hardware/actuators/lights/lightcontroller.cpp \
-    ../src/gui/adapters/lightshieldadapter.cpp
+    ../src/gui/adapters/lightshieldadapter.cpp \
+    ../src/hardware/serial/SerialPort.cpp \
+    ../src/gui/adapters/motorboardadapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -85,7 +86,6 @@ HEADERS  += \
     ../src/common/datastructures/GPSData.hpp \
     ../src/common/datastructures/DataPoint.hpp \
     ../src/common/datastructures/DataArray.hpp \
-    ../src/hardware/serial/ASIOSerialPort.h \
     ../src/gui/adapters/joystickadapter.h \
     ../src/gui/adapters/cameraadapter.h \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.h \
@@ -131,7 +131,9 @@ HEADERS  += \
     ../src/intelligence/pathplanning/astarplanner.h \
     ../src/gui/adapters/pathadapter.h \
     ../src/hardware/actuators/lights/lightcontroller.h \
-    ../src/gui/adapters/lightshieldadapter.h
+    ../src/gui/adapters/lightshieldadapter.h \
+    ../src/hardware/serial/SerialPort.h \
+    ../src/gui/adapters/motorboardadapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -143,7 +145,8 @@ FORMS    += \
     ../src/gui/adapters/imuadapter.ui \
     ../src/gui/adapters/positiontrackeradapter.ui \
     ../src/gui/adapters/pathadapter.ui \
-    ../src/gui/adapters/lightshieldadapter.ui
+    ../src/gui/adapters/lightshieldadapter.ui \
+    ../src/gui/adapters/motorboardadapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc

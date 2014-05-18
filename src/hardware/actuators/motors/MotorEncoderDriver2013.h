@@ -1,16 +1,9 @@
 #ifndef MOTORENCODERDRIVER2013_H
 #define MOTORENCODERDRIVER2013_H
-#include <hardware/serial/ASIOSerialPort.h>
+#include <hardware/serial/SerialPort.h>
 #include <hardware/actuators/motors/MotorDriver.hpp>
 #include <boost/thread.hpp>
 #include <QObject>
-
-struct EncPose
-{
-    double x;
-    double y;
-    double theta;
-};
 
 class MotorEncoderDriver2013 : public MotorDriver
 {
@@ -19,32 +12,36 @@ public:
     MotorEncoderDriver2013();
     virtual ~MotorEncoderDriver2013();
 
-    void setVelocities(double left, double right, int millis = 0);
-    void setLeftVelocity(double vel, int millis = 0);
-    void setRightVelocity(double vel, int millis = 0);
-    double getLeftVelocity();
-    double getRightVelocity();
+    void setVelocities(double left, double right);
+    void setLeftVelocity(double vel);
+    void setRightVelocity(double vel);
+    double getLeftSetVelocity();
+    double getRightSetVelocity();
+
+    double getLeftCurrentVelocity();
+    double getRightCurrentVelocity();
+
     void stop();
 
     void setMotorCommand(MotorCommand);
 
     bool isOpen();
 
-signals:
-    void onNewPosition(EncPose);
+protected:
+    void run();
 
 private:
-    ASIOSerialPort _arduino;
+    SerialPort _arduino;
     double _leftVel;
     double _rightVel;
-    int _duration;
     double _maxVel;
     void writeVelocities();
-    boost::thread _encThread;
     boost::mutex _portLock;
-    void encThreadRun();
-    EncPose _pose;
-    bool _running;
+
+    boost::thread _thread;
+
+    double _leftCurrVel;
+    double _rightCurrVel;
 };
 
 #endif // MOTORENCODERDRIVER2013_H
