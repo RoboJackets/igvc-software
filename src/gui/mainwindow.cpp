@@ -371,6 +371,7 @@ void MainWindow::updateHardwareStatusIcons()
     ui->hardwareStatusList->findItems("IMU", Qt::MatchExactly).at(0)->setIcon(_IMU->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->IsWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Light Controller", Qt::MatchExactly).at(0)->setIcon(_lights->isConnected() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Camera", Qt::MatchExactly).at(0)->setIcon(_stereoSource->IsConnected() ? checkIcon : xIcon);
 }
 
 void MainWindow::on_actionClearLogs_triggered()
