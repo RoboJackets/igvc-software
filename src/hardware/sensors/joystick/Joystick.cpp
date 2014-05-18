@@ -65,10 +65,12 @@ void Joystick::threadRun()
 
         if(event.type == JS_EVENT_BUTTON)
         {
-            _state.buttons[event.number] = event.value;
+            if(event.number < _state.buttons.size())
+                _state.buttons[event.number] = event.value;
         } else if(event.type == JS_EVENT_AXIS)
         {
-            _state.axes[event.number] = event.value;
+            if(event.number < _state.axes.size())
+                _state.axes[event.number] = event.value;
         }
 
         onNewData(_state);
