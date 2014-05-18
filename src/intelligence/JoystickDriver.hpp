@@ -22,8 +22,10 @@ public:
             double maxVel = ConfigManager::Instance().getValue("Joystick", "MaxSpeed", 1.0);
             int leftJoyAxis = ConfigManager::Instance().getValue("Joystick", "LeftAxis", 1);
             int rightJoyAxis = ConfigManager::Instance().getValue("Joystick", "RightAxis", 3);
-            double left = (state.axes[leftJoyAxis]/32767)*maxVel;
-            double right = (state.axes[rightJoyAxis]/32767)*maxVel;
+            bool leftInverted = ConfigManager::Instance().getValue("Joystick", "LeftInverted", true);
+            bool rightInverted = ConfigManager::Instance().getValue("Joystick", "RightInverted", true);
+            double left = (state.axes[leftJoyAxis]/32767.0)*maxVel * (leftInverted ? -1.0 : 1.0);
+            double right = (state.axes[rightJoyAxis]/32767.0)*maxVel * (rightInverted ? -1.0 : 1.0);
             onNewMotorCommand(MotorCommand(left,right));
         });
     }
