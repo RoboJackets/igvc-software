@@ -112,9 +112,13 @@ void MotorEncoderDriver2013::writeVelocities()
          * This command will slow down significantly if
          * you do not follow the number with a non-numeric
          * character. Here, the newline does this for us.
+         *
+         * Checking the E-Stop status prevents the PID
+         * controller from ramping up to full PWM when
+         * the E-Stop is causing all PWMs to map to
+         * 0 m/s.
          */
-
-        msg << '$' << _leftVel << ',' << _rightVel << '\n';
+        msg << '$' << ( _isEnabled ? _leftVel : 0 ) << ',' << ( _isEnabled ? _rightVel : 0 ) << '\n';
 
         _portLock.lock();
         _arduino.write(msg.str());
@@ -150,4 +154,9 @@ MotorEncoderDriver2013::~MotorEncoderDriver2013()
 {
     stop();
     _arduino.close();
+}
+
+void MotorEncoderDriver2013::onEStopStatusChanged(bool isEnabled)
+{
+    _isEnabled = isEnabled;
 }
