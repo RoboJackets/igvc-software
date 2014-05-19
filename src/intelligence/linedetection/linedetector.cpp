@@ -35,16 +35,8 @@ void LineDetector::onImageEvent(ImageData imgd){
     transformPoints();
     toPointCloud();
 
-
-//    pcl::visualization::CloudViewer viewer ("Simple Cloud Viewer");
-//    viewer.showCloud(cloud);
-//    while (!viewer.wasStopped ())
-//    {
-//    }
-
-
     onNewLines(ImageData(transformDst));
-    pcl::io::savePCDFileASCII("line_pcd.pcd", cloud);
+    onNewCloud(cloud);
 }
 
 void LineDetector::transformPoints(){
