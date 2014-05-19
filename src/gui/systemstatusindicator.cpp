@@ -1,6 +1,7 @@
 #include "systemstatusindicator.h"
 #include <QtGui>
 #include <math.h>
+#include <common/logger/logger.h>
 
 SystemStatusIndicator::SystemStatusIndicator(QWidget *parent) :
     QWidget(parent)
@@ -23,4 +24,5 @@ void SystemStatusIndicator::paintEvent(QPaintEvent *)
 void SystemStatusIndicator::onEStopStatusChanged(bool isEnabled)
 {
     _isEnabled = isEnabled;
+    this->update();
 }
