@@ -2,7 +2,6 @@
 #define LINEDETECTOR_H
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
-#include <common/events/Event.hpp>
 #include <common/datastructures/ImageData.hpp>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
@@ -14,17 +13,23 @@
 #include <pcl/point_cloud.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/io.h>
+#include <QObject>
 
-
-class LineDetector
+class LineDetector : public QObject
 {
+
+    Q_OBJECT
+
 public:
-    LineDetector(Event<ImageData> &evtSrc);
-    void onImageEvent(ImageData imgd);
-    LISTENER(LineDetector, onImageEvent, ImageData)
-    Event<ImageData> onNewLines;
-    //Event<pcl::PointCloud> onNewCloud;
+    LineDetector();
     pcl::PointCloud<pcl::PointXYZ> cloud;
+
+public slots:
+    void onImageEvent(ImageData imgd);
+
+signals:
+    void onNewLines(ImageData data);
+    void onNewCloud(pcl::PointCloud<pcl::PointXYZ> data);
 private:
     void blackoutSection(int rowl, int rowu, int coll, int colu);
     void transformPoints();
