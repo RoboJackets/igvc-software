@@ -58,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _lights = new LightController();
     connect(_lights, SIGNAL(onBatteryLevelChanged(int)), ui->batteryIndicator, SLOT(onBatteryLevelChanged(int)));
     connect(_lights, SIGNAL(onEStopStatusChanged(bool)), ui->statusImage, SLOT(onEStopStatusChanged(bool)));
+    connect(_lights, SIGNAL(onEStopStatusChanged(bool)), _motorController, SLOT(onEStopStatusChanged(bool)));
     ui->hardwareStatusList->addItem("Light Controller");
 
     _joystick = new Joystick;

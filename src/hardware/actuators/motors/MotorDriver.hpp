@@ -25,6 +25,7 @@ class MotorDriver : public QObject
     Q_OBJECT
 public slots:
     virtual void setMotorCommand(MotorCommand) = 0;
+    virtual void onEStopStatusChanged(bool isEnabled) = 0;
 
 public:
     virtual ~MotorDriver() { }
