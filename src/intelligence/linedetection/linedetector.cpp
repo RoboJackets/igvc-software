@@ -7,13 +7,11 @@
 using namespace std;
 using namespace cv;
 
-LineDetector::LineDetector(Event<ImageData> &evtSrc)
-    : LonImageEvent(this),
-      max_elem(2),
+LineDetector::LineDetector()
+    : max_elem(2),
       max_kernel_size(2),
       gaussian_size(7)
 {
-    evtSrc+= &LonImageEvent;
     erosion_elem = 2;
     erosion_size = 2;
     dilation_elem = 2;
