@@ -58,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _lights = new LightController();
     connect(_lights, SIGNAL(onBatteryLevelChanged(int)), ui->batteryIndicator, SLOT(onBatteryLevelChanged(int)));
     connect(_lights, SIGNAL(onEStopStatusChanged(bool)), ui->statusImage, SLOT(onEStopStatusChanged(bool)));
+    connect(_lights, SIGNAL(onEStopStatusChanged(bool)), _motorController, SLOT(onEStopStatusChanged(bool)));
     ui->hardwareStatusList->addItem("Light Controller");
 
     _joystick = new Joystick;
@@ -371,6 +372,7 @@ void MainWindow::updateHardwareStatusIcons()
     ui->hardwareStatusList->findItems("IMU", Qt::MatchExactly).at(0)->setIcon(_IMU->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->IsWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Light Controller", Qt::MatchExactly).at(0)->setIcon(_lights->isConnected() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Camera", Qt::MatchExactly).at(0)->setIcon(_stereoSource->IsConnected() ? checkIcon : xIcon);
 }
 
 void MainWindow::on_actionClearLogs_triggered()

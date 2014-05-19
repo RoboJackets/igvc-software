@@ -45,7 +45,7 @@ Position PositionTracker::UpdateWithMotion(Position S, Position Delta)
     return result;
 }
 
-Position PositionTracker::DeltaFromMotionCommand(MotorCommand cmd)
+Position PositionTracker::DeltaFromMotionCommand(MotorCommand)
 {
     /*
      * TODO - Need to make sure this accounts for the time it takes to actually get to where we're going.
