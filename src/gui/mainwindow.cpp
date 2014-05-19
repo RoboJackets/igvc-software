@@ -85,7 +85,13 @@ MainWindow::MainWindow(QWidget *parent) :
     _posTracker = new BasicPositionTracker(_GPS, _IMU);
     ui->hardwareStatusList->addItem("Position Tracker");
 
+    _lineDetector = new LineDetector();
+    connect(_stereoSource, SIGNAL(onNewLeftImage(ImageData)), _lineDetector, SLOT(onImageEvent(ImageData)));
+
     _mapper = new MapBuilder(_lidar, _posTracker);
+    connect(_lidar, SIGNAL(onNewData(LidarState)), _mapper, SLOT(onLidarData(LidarState)));
+    // TOOO - Add slot in MapBuilder for point cloud data.
+    //connect(_lineDetector, SIGNAL(onNewCloud(pcl::PointCloud<pcl::PointXYZ>)), _mapper, SLOT());
 
     _planner = new AStarPlanner();
 
