@@ -24,6 +24,7 @@ public:
     void stop();
 
     void setMotorCommand(MotorCommand);
+    void onEStopStatusChanged(bool isEnabled);
 
     bool isOpen();
 
@@ -42,6 +43,8 @@ private:
 
     double _leftCurrVel;
     double _rightCurrVel;
+
+    bool _isEnabled;
 };
 
 #endif // MOTORENCODERDRIVER2013_H
