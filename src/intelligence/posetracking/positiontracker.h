@@ -87,7 +87,7 @@ private:
      * \param cmd The motion command
      * \return The estimated change in position
      */
-    Position DeltaFromMotionCommand(MotorCommand cmd);
+    Position DeltaFromMotionCommand(MotorCommand);
     /*!
      * \brief MeasurementFromIMUData Generates measurement from IMU data
      * \param data The IMU data to use

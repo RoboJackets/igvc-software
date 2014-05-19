@@ -19,6 +19,7 @@ public:
     inline void UnlockImages() {_imagesLock.unlock();}
     inline void LockRunning() {_runningLock.lock();}
     inline void UnlockRunning() {_runningLock.unlock();}
+    virtual bool IsConnected() = 0;
     virtual ~StereoSource() {}
 
 signals:
