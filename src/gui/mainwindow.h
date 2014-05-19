@@ -18,6 +18,7 @@
 #include <intelligence/posetracking/basicpositiontracker.h>
 #include <intelligence/mapping/mapbuilder.h>
 #include <intelligence/pathplanning/astarplanner.h>
+#include <intelligence/linedetection/linedetector.h>
 
 namespace Ui {
 class MainWindow;
@@ -105,6 +106,8 @@ private:
     PathPlanner *_planner;
 
     LightController *_lights;
+
+    LineDetector *_lineDetector;
 
     bool isRunning, isPaused;
 

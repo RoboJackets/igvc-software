@@ -281,7 +281,8 @@ void ProcessFrame(Image* rawImage, const void* that)
     thisHere.UnlockImages();
     thisHere.frameCount++;
     thisHere.onNewData(thisHere.Images());
-    //thisHere.onNewData(newFrame);
+    thisHere.onNewLeftImage(thisHere.Images().left());
+    thisHere.onNewRightImage(thisHere.Images().right());
     return;
 }
 

@@ -24,6 +24,8 @@ public:
 
 signals:
     void onNewData(StereoImageData);
+    void onNewLeftImage(ImageData image);
+    void onNewRightImage(ImageData image);
 
 private:
     bool _running;
