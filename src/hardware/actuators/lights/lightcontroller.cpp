@@ -42,9 +42,10 @@ void LightController::run()
         }
         else
         {
-            if(ret[1] != _estopStatus)
+            bool estop = !(bool)(ret[1]);
+            if(estop != _estopStatus)
             {
-                _estopStatus = ret[1];
+                _estopStatus = estop;
                 onEStopStatusChanged(_estopStatus);
             }
             if(ret[2] != _batteryLevel)
