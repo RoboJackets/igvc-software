@@ -6,7 +6,7 @@ using namespace std;
 using namespace SickToolbox;
 
 LMS200::LMS200()
-    : _device("/dev/ttyLidar")
+    : _device("/dev/igvc_lidar")
 {
     Logger::Log(LogLevel::Info, "Initializing SICK LMS200 device...");
     try {

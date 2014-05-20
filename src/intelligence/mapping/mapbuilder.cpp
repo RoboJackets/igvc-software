@@ -39,9 +39,8 @@ MapBuilder::~MapBuilder()
 
 void MapBuilder::onLidarData(LidarState state)
 {
-    RobotPosition pose = poseTracker->GetPosition();
-    double lidarOffset_y = ConfigManager::Instance().getValue("MapBuilder", "lidarOffset_y", 0);
-    double lidarOffset_x = ConfigManager::Instance().getValue("MapBuilder", "lidarOffset_x", 0);
+    float lidarOffset_y = ConfigManager::Instance().getValue("MapBuilder", "lidarOffset_y", 0);
+    float lidarOffset_x = ConfigManager::Instance().getValue("MapBuilder", "lidarOffset_x", 0);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_lidar(new pcl::PointCloud<pcl::PointXYZ>);
 
@@ -50,21 +49,32 @@ void MapBuilder::onLidarData(LidarState state)
         if(state.points[i].valid)
         {
             pcl::PointXYZ p;
-            p.x = cos(state.points[i].angle)*state.points[i].distance + lidarOffset_x;
-            p.y = -sin(state.points[i].angle)*state.points[i].distance - lidarOffset_y;
+            p.x = cos(state.points[i].angle)*state.points[i].distance;
+            p.y = -sin(state.points[i].angle)*state.points[i].distance;
             p.z = 0;
             cloud_lidar->points.push_back(p);
         }
     }
 
-    //Transform current cloud to match robot's position (determined via odometry)
+    pcl::PointXY offset;
+    offset.x = lidarOffset_x;
+    offset.y = lidarOffset_y;
+
+    onCloudFrame(cloud_lidar, offset);
+}
+
+void MapBuilder::onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::PointXY sensorOffset)
+{
+    RobotPosition pose = poseTracker->GetPosition();
+
+    //Transform current cloud to match robot's position
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_transformed (new pcl::PointCloud<pcl::PointXYZ>);
-    double mx =  pose.X;
-    double my =  -pose.Y;
+    double mx =  pose.X + sensorOffset.x;
+    double my =  -pose.Y - sensorOffset.y;
     double mt = AngleUtils::degToRads(pose.Heading);
     Eigen::Vector3f translation(mx, my, 0);
     Eigen::Quaternionf rotation(Eigen::AngleAxisf(mt, Eigen::Vector3f::UnitZ()));
-    pcl::transformPointCloud(*cloud_lidar, *cloud_transformed, translation, rotation);
+    pcl::transformPointCloud(*frame, *cloud_transformed, translation, rotation);
 
     // ICP to refine cloud alignment
     if(!firstFrame)
@@ -73,7 +83,7 @@ void MapBuilder::onLidarData(LidarState state)
         pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
         icp.setMaxCorrespondenceDistance(2);
         icp.setMaximumIterations(30);
-        icp.setInputCloud(cloud_transformed);
+        icp.setInputSource(cloud_transformed);
         icp.setInputTarget(cloud);
         pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_aligned (new pcl::PointCloud<pcl::PointXYZ>);
         icp.align(*cloud_aligned);
