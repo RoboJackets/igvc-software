@@ -37,7 +37,6 @@ void LineDetector::onImageEvent(ImageData imgd){
     toPointCloud();
 
     onNewLines(ImageData(transformDst));
-
     pcl::PointXY offset;
     offset.x = ConfigManager::Instance().getValue("Camera", "OffsetX", 0.0f);
     offset.y = ConfigManager::Instance().getValue("Camera", "OffsetY", 0.0f);
