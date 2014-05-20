@@ -60,7 +60,8 @@ SOURCES += \
     ../src/hardware/actuators/lights/lightcontroller.cpp \
     ../src/gui/adapters/lightshieldadapter.cpp \
     ../src/hardware/serial/SerialPort.cpp \
-    ../src/gui/adapters/motorboardadapter.cpp
+    ../src/gui/adapters/motorboardadapter.cpp \
+    ../src/gui/adapters/competitioncontrolleradapter.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -133,7 +134,8 @@ HEADERS  += \
     ../src/hardware/actuators/lights/lightcontroller.h \
     ../src/gui/adapters/lightshieldadapter.h \
     ../src/hardware/serial/SerialPort.h \
-    ../src/gui/adapters/motorboardadapter.h
+    ../src/gui/adapters/motorboardadapter.h \
+    ../src/gui/adapters/competitioncontrolleradapter.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -146,7 +148,8 @@ FORMS    += \
     ../src/gui/adapters/positiontrackeradapter.ui \
     ../src/gui/adapters/pathadapter.ui \
     ../src/gui/adapters/lightshieldadapter.ui \
-    ../src/gui/adapters/motorboardadapter.ui
+    ../src/gui/adapters/motorboardadapter.ui \
+    ../src/gui/adapters/competitioncontrolleradapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc

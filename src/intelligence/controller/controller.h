@@ -12,6 +12,10 @@ public:
     Controller(GPSWaypointSource *source, GPS *gps);
     ~Controller();
     GPSData getCurrentWaypoint();
+    bool isWorking()
+    {
+        return _source->isOpen() && _gps->isOpen();
+    }
 
 signals:
     void onNewWaypoint(GPSData);

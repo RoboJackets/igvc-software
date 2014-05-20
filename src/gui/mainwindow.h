@@ -19,6 +19,8 @@
 #include <intelligence/mapping/mapbuilder.h>
 #include <intelligence/pathplanning/astarplanner.h>
 #include <intelligence/linedetection/linedetector.h>
+#include <intelligence/controller/controller.h>
+#include <common/utils/GPSWaypointSource.h>
 
 namespace Ui {
 class MainWindow;
@@ -70,6 +72,8 @@ private slots:
 
     void on_actionLMS_200_triggered();
 
+    void on_actionLoad_Waypoint_File_triggered();
+
 protected:
     void closeEvent(QCloseEvent *);
 
@@ -104,6 +108,10 @@ private:
     LightController *_lights;
 
     LineDetector *_lineDetector;
+
+    GPSWaypointSource *_waypointSource;
+
+    Controller *_compController;
 
     bool isRunning, isPaused;
 
