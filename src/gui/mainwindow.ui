@@ -371,10 +371,17 @@
     </property>
     <addaction name="actionClearLogs"/>
    </widget>
+   <widget class="QMenu" name="menuWaypoints">
+    <property name="title">
+     <string>Waypoints</string>
+    </property>
+    <addaction name="actionLoad_Waypoint_File"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindow"/>
    <addaction name="menuSensors"/>
    <addaction name="menuLogs"/>
+   <addaction name="menuWaypoints"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionClose">
@@ -467,6 +474,11 @@
    </property>
    <property name="text">
     <string>Simulated</string>
+   </property>
+  </action>
+  <action name="actionLoad_Waypoint_File">
+   <property name="text">
+    <string>Load File</string>
    </property>
   </action>
  </widget>

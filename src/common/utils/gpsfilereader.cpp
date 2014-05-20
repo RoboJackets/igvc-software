@@ -10,6 +10,11 @@ using namespace std;
 // format of GPS coordinate: lat,long\n
 void GPSFileReader::read(string file, queue<GPSData>& gpsList)
 {
+    if(file.empty())
+    {
+        throw GPSFileNotFoundException("Cannot load empty file path.");
+    }
+
     string line = "";
     ifstream infile;
     infile.open(file.c_str());
@@ -18,7 +23,6 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
     {
         stringstream msg;
         msg << "Could not open file (in GPSFileReader): " << file << endl;
-        cout << msg;
         Logger::Log(LogLevel::Error, msg.str());
         throw GPSFileNotFoundException(msg.str());
     }

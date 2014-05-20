@@ -12,6 +12,7 @@
 #include "adapters/positiontrackeradapter.h"
 #include "adapters/lightshieldadapter.h"
 #include "adapters/motorboardadapter.h"
+#include "adapters/competitioncontrolleradapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/nmeacompatiblegps.h>
@@ -97,6 +98,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystickDriver = new JoystickDriver(_joystick);
 
+    _waypointSource = new GPSWaypointSource("");
+
+    _compController = new Controller(_waypointSource, _GPS);
+    ui->hardwareStatusList->addItem("Comp. Controller");
+
     updateHardwareStatusIcons();
 
     isRunning = false;
@@ -181,6 +187,10 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "Light Controller")
         {
             adapter = new LightShieldAdapter(_lights);
+        }
+        else if(labelText == "Comp. Controller")
+        {
+            adapter = new CompetitionControllerAdapter(_compController, _GPS);
         }
         else
         {
@@ -375,6 +385,7 @@ void MainWindow::updateHardwareStatusIcons()
     ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->IsWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Light Controller", Qt::MatchExactly).at(0)->setIcon(_lights->isConnected() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Camera", Qt::MatchExactly).at(0)->setIcon(_stereoSource->IsConnected() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Comp. Controller", Qt::MatchExactly).at(0)->setIcon(_compController->isWorking() ? checkIcon : xIcon);
 }
 
 void MainWindow::on_actionClearLogs_triggered()
@@ -401,7 +412,7 @@ void MainWindow::on_actionOutback_A321_triggered()
 void MainWindow::on_actionSimulatedLidar_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated Lidar Data File"), "", tr("CSV Files(*.csv)"));
-    if(fileName.length() > 0)
+    if(!fileName.isEmpty())
     {
         ui->actionLMS_200->setChecked(false);
         ui->actionSimulatedLidar->setChecked(true);
@@ -422,4 +433,11 @@ void MainWindow::on_actionLMS_200_triggered()
     _mapper->ChangeLidar(_lidar);
     _mapper->Clear();
     updateHardwareStatusIcons();
+}
+
+void MainWindow::on_actionLoad_Waypoint_File_triggered()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Waypoint Data File"), "", tr("CSV Files(*.csv)"));
+    if(!fileName.isEmpty())
+        _waypointSource->openFile(fileName.toStdString());
 }
