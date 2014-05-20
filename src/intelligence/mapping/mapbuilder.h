@@ -30,6 +30,7 @@ signals:
 private slots:
 
     void onLidarData(LidarState state);
+    void onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::PointXY sensorOffset);
 
 private:
 

@@ -65,17 +65,14 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->joystickButton->setEnabled(_joystick->isOpen());
     ui->hardwareStatusList->addItem("Joystick");
 
-//    _lidar = new SimulatedLidar();
     _lidar = new LMS200();
     ui->hardwareStatusList->addItem("LIDAR");
     ui->actionLMS_200->setChecked(true);
 
-    //_stereoSource = new StereoPlayback((QDir::currentPath() + "/../../test_data/video/CompCourse_left0.mpeg").toStdString(),(QDir::currentPath() + "/../../test_data/video/CompCourse_right0.mpeg").toStdString(),20,"",false);
     _stereoSource = new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml");
     ui->hardwareStatusList->addItem("Camera");
 
-//    _GPS = new SimulatedGPS("");
-    _GPS = new NMEACompatibleGPS("/dev/ttyGPS", 19200);
+    _GPS = new NMEACompatibleGPS("/dev/igvc_GPS", 19200);
     ui->actionOutback_A321->setChecked(true);
     ui->hardwareStatusList->addItem("GPS");
 
@@ -90,8 +87,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _mapper = new MapBuilder(_lidar, _posTracker);
     connect(_lidar, SIGNAL(onNewData(LidarState)), _mapper, SLOT(onLidarData(LidarState)));
-    // TOOO - Add slot in MapBuilder for point cloud data.
-    //connect(_lineDetector, SIGNAL(onNewCloud(pcl::PointCloud<pcl::PointXYZ>)), _mapper, SLOT());
+    connect(_lineDetector, SIGNAL(onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)), _mapper, SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
 
     _planner = new AStarPlanner();
 
