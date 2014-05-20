@@ -1,5 +1,6 @@
 #include "linedetector.h"
 #include <common/logger/logger.h>
+#include <common/config/configmanager.h>
 #include <sstream>
 #include <iostream>
 #include <cstdlib>
@@ -36,7 +37,11 @@ void LineDetector::onImageEvent(ImageData imgd){
     toPointCloud();
 
     onNewLines(ImageData(transformDst));
-    onNewCloud(cloud);
+
+    pcl::PointXY offset;
+    offset.x = ConfigManager::Instance().getValue("Camera", "OffsetX", 0.0f);
+    offset.y = ConfigManager::Instance().getValue("Camera", "OffsetY", 0.0f);
+    onNewCloud(cloud.makeShared(), offset);
 }
 
 void LineDetector::transformPoints(){
