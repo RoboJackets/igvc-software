@@ -2,12 +2,28 @@
 
 GPSWaypointSource::GPSWaypointSource(std::string file)
 {
-    GPSFileReader::read(file, _data);
+    openFile(file);
+}
+
+void GPSWaypointSource::openFile(string file)
+{
+    _isOpen = false;
+    try {
+        GPSFileReader::read(file, _data);
+        _isOpen = true;
+    } catch (GPSFileNotFoundException){ }
 }
 
 GPSData GPSWaypointSource::getNext()
 {
-    GPSData temp = _data.front();
-    _data.pop();
-    return temp;
+    if(!_data.empty())
+    {
+        GPSData temp = _data.front();
+        _data.pop();
+        return temp;
+    }
+    else
+    {
+        return GPSData();
+    }
 }
