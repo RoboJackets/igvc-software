@@ -15,10 +15,10 @@ class JoystickDriver : public QObject
 {
     Q_OBJECT
 public:
-    JoystickDriver(Joystick *joystick)
+    JoystickDriver(std::shared_ptr<Joystick> joystick)
         : _joystick(joystick)
     {
-        connect(_joystick, &Joystick::onNewData, [=](JoystickState state){
+        connect(_joystick.get(), &Joystick::onNewData, [=](JoystickState state){
             double maxVel = ConfigManager::Instance().getValue("Joystick", "MaxSpeed", 1.0);
             int leftJoyAxis = ConfigManager::Instance().getValue("Joystick", "LeftAxis", 1);
             int rightJoyAxis = ConfigManager::Instance().getValue("Joystick", "RightAxis", 3);
@@ -36,7 +36,7 @@ signals:
     void onNewMotorCommand(MotorCommand);
 
 private:
-    Joystick *_joystick;
+    std::shared_ptr<Joystick> _joystick;
 };
 
 #endif // JOYSTICKDRIVER_HPP
