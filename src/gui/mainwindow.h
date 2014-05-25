@@ -87,7 +87,8 @@ private:
     QIcon xIcon;
 
     JoystickDriver *_joystickDriver;
-    Joystick *_joystick;
+    std::shared_ptr<Joystick> _joystick;
+    //Joystick *_joystick;
 
     MotorDriver *_motorController;
 

@@ -2,15 +2,15 @@
 #include "ui_joystickadapter.h"
 #include <QGridLayout>
 
-JoystickAdapter::JoystickAdapter(Joystick *joystick, QWidget *parent) :
+JoystickAdapter::JoystickAdapter(std::shared_ptr<Joystick> joystick, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::JoystickAdapter)
 {
     ui->setupUi(this);
-    if(joystick)
+    if(joystick.get())
     {
         _joystick = joystick;
-        connect(_joystick, SIGNAL(onNewData(JoystickState)), this, SLOT(onJoystickData(JoystickState)));
+        connect(_joystick.get(), SIGNAL(onNewData(JoystickState)), this, SLOT(onJoystickData(JoystickState)));
     }
     if(parent)
     {
@@ -20,9 +20,9 @@ JoystickAdapter::JoystickAdapter(Joystick *joystick, QWidget *parent) :
 
 JoystickAdapter::~JoystickAdapter()
 {
-    if(_joystick != nullptr)
+    if(_joystick.get() != nullptr)
     {
-        disconnect(_joystick, SIGNAL(onNewData(JoystickState)), this, SLOT(onJoystickData(JoystickState)));
+        disconnect(_joystick.get(), SIGNAL(onNewData(JoystickState)), this, SLOT(onJoystickData(JoystickState)));
     }
     delete ui;
 }
