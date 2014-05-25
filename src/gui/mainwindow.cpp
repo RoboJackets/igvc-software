@@ -62,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_lights, SIGNAL(onEStopStatusChanged(bool)), _motorController, SLOT(onEStopStatusChanged(bool)));
     ui->hardwareStatusList->addItem("Light Controller");
 
-    _joystick = new Joystick;
+    _joystick = std::shared_ptr<Joystick>(new Joystick);
     ui->joystickButton->setEnabled(_joystick->isOpen());
     ui->hardwareStatusList->addItem("Joystick");
 
@@ -123,7 +123,6 @@ void MainWindow::setupMenus()
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete _joystick;
     delete _posTracker;
     delete _GPS;
     delete _IMU;
