@@ -18,7 +18,7 @@ class JoystickAdapter : public QWidget
     Q_OBJECT
     
 public:
-    explicit JoystickAdapter(Joystick *joystick, QWidget *parent = 0);
+    explicit JoystickAdapter(std::shared_ptr<Joystick> joystick, QWidget *parent = 0);
     ~JoystickAdapter();
 
 protected:
@@ -30,7 +30,7 @@ private slots:
 private:
     Ui::JoystickAdapter *ui;
 
-    Joystick *_joystick;
+    std::shared_ptr<Joystick> _joystick;
 
     JoystickState _state;
 
