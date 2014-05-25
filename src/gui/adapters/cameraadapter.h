@@ -33,10 +33,13 @@ private slots:
 
     void onCameraData(StereoImageData data);
 
+    void on_saveRight_clicked();
+
 private:
     Ui::CameraAdapter *ui;
 
     QImage leftImage;
+    QImage rightImage;
 
     StereoSource *_stereoSource;
 

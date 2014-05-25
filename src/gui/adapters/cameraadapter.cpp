@@ -4,7 +4,9 @@
 #include <QPixmap>
 #include <iostream>
 #include <QGridLayout>
+#include <QDir>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <QDateTime>
 
 CameraAdapter::CameraAdapter(StereoSource *source, QWidget *parent) :
      QWidget(parent),
@@ -35,7 +37,6 @@ CameraAdapter::~CameraAdapter()
 
 void CameraAdapter::onCameraData(StereoImageData data)
 {
-
     if(isVisible())
     {
         _mutex.lock();
@@ -60,7 +61,12 @@ QImage CameraAdapter::CVMat2QImage(cv::Mat img)
 
 void CameraAdapter::on_saveLeft_clicked()
 {
-    leftImage.save("../leftCapture.jpg");
+    leftImage.save("../Images/"+QDateTime::currentDateTime().toString()+"_left.jpg");
+}
+
+void CameraAdapter::on_saveRight_clicked()
+{
+    rightImage.save("../Images/"+QDateTime::currentDateTime().toString()+"_right.jpg");
 }
 
 void CameraAdapter::paintEvent(QPaintEvent *e)
@@ -69,13 +75,10 @@ void CameraAdapter::paintEvent(QPaintEvent *e)
 
     if(gotData){
         leftImage = CVMat2QImage(_data.left().mat());
+        rightImage = CVMat2QImage(_data.right().mat());
         ui->leftFeedLabel->setPixmap(QPixmap::fromImage(leftImage));
-        ui->rightFeedLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.right().mat())));
-//       ui->depthMapLabel->setPixmap(QPixmap::fromImage(CVMat2QImage(_data.depthMap)));
-//       ui->pointCloudLabel->setPixmap(QPixmap::fromImage( CVMat2QImage(_data.pointCloud)));
-
+        ui->rightFeedLabel->setPixmap(QPixmap::fromImage(rightImage));
     }
-
 
     _mutex.unlock();
     QWidget::paintEvent(e);
