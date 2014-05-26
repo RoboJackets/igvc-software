@@ -22,7 +22,7 @@ class CameraAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit CameraAdapter(StereoSource *source, QWidget *parent = 0);
+    explicit CameraAdapter(std::shared_ptr<StereoSource> source, QWidget *parent = 0);
     ~CameraAdapter();
 
 protected:
@@ -41,7 +41,7 @@ private:
     QImage leftImage;
     QImage rightImage;
 
-    StereoSource *_stereoSource;
+    std::shared_ptr<StereoSource> _stereoSource;
 
     StereoImageData _data;
     bool gotData;
