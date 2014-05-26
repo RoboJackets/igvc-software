@@ -2,22 +2,22 @@
 #include "ui_imuadapter.h"
 #include <QPainter>
 
-IMUAdapter::IMUAdapter(IMU *imu, QWidget *parent) :
+IMUAdapter::IMUAdapter(std::shared_ptr<IMU> imu, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::IMUAdapter)
 {
     ui->setupUi(this);
 
-    if(imu)
+    if(imu.get())
     {
         _imu = imu;
-        connect(_imu, SIGNAL(onNewData(IMUData)), this, SLOT(onNewData(IMUData)));
+        connect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewData(IMUData)));
     }
 }
 
 IMUAdapter::~IMUAdapter()
 {
-    disconnect(_imu, SIGNAL(onNewData(IMUData)), this, SLOT(onNewData(IMUData)));
+    disconnect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewData(IMUData)));
     delete ui;
 }
 

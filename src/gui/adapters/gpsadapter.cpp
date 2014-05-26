@@ -2,7 +2,7 @@
 #include "ui_gpsadapter.h"
 #include <cmath>
 
-GPSAdapter::GPSAdapter(GPS *gps, QWidget *parent) :
+GPSAdapter::GPSAdapter(std::shared_ptr<GPS> gps, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GPSAdapter),
     minLat(-5),
@@ -17,8 +17,8 @@ GPSAdapter::GPSAdapter(GPS *gps, QWidget *parent) :
     }
 
     _GPS = gps;
-    if(_GPS != nullptr)
-        connect(_GPS, SIGNAL(onNewData(GPSData)), this, SLOT(onNewData(GPSData)));
+    if(_GPS.get() != nullptr)
+        connect(_GPS.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewData(GPSData)));
     ui->user_Top->setPlainText(QString::number(maxLat));
     ui->user_Right->setPlainText(QString::number(maxLong));
     ui->user_Bottom->setPlainText(QString::number(minLat));
@@ -29,10 +29,10 @@ GPSAdapter::GPSAdapter(GPS *gps, QWidget *parent) :
 
 GPSAdapter::~GPSAdapter()
 {
-    if(_GPS != nullptr)
+    if(_GPS.get() != nullptr)
     {
-        disconnect(_GPS, SIGNAL(onNewData(GPSData)), this, SLOT(onNewData(GPSData)));
-        _GPS = nullptr;
+        disconnect(_GPS.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewData(GPSData)));
+        _GPS.reset();
     }
     delete ui;
 

@@ -1,7 +1,7 @@
 #include "competitioncontrolleradapter.h"
 #include "ui_competitioncontrolleradapter.h"
 
-CompetitionControllerAdapter::CompetitionControllerAdapter(Controller *controller, GPS *gps, QWidget *parent) :
+CompetitionControllerAdapter::CompetitionControllerAdapter(std::shared_ptr<Controller> controller, std::shared_ptr<GPS> gps, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CompetitionControllerAdapter)
 {
@@ -9,8 +9,8 @@ CompetitionControllerAdapter::CompetitionControllerAdapter(Controller *controlle
 
     _compController = controller;
     _gps = gps;
-    if(_gps)
-        connect(_gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
+    if(_gps.get())
+        connect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
 }
 
 void CompetitionControllerAdapter::onNewGPS(GPSData data)
@@ -21,7 +21,7 @@ void CompetitionControllerAdapter::onNewGPS(GPSData data)
 
 CompetitionControllerAdapter::~CompetitionControllerAdapter()
 {
-    if(_gps)
-        disconnect(_gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
+    if(_gps.get())
+        disconnect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
     delete ui;
 }

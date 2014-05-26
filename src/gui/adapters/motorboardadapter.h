@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <hardware/actuators/motors/MotorDriver.hpp>
+#include <memory>
 
 namespace Ui {
 class MotorBoardAdapter;
@@ -13,7 +14,7 @@ class MotorBoardAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit MotorBoardAdapter(MotorDriver *driver, QWidget *parent = 0);
+    explicit MotorBoardAdapter(std::shared_ptr<MotorDriver> driver, QWidget *parent = 0);
     ~MotorBoardAdapter();
 
 public slots:
@@ -27,7 +28,7 @@ private slots:
 private:
     Ui::MotorBoardAdapter *ui;
 
-    MotorDriver *_driver;
+    std::shared_ptr<MotorDriver> _driver;
 };
 
 #endif // MOTORBOARDADAPTER_H

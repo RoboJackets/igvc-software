@@ -6,7 +6,7 @@
 #include <QDebug>
 
 
-LidarAdapter::LidarAdapter(Lidar *lidar, QWidget *parent) :
+LidarAdapter::LidarAdapter(std::shared_ptr<Lidar> lidar, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::LidarAdapter)
 {
@@ -16,14 +16,14 @@ LidarAdapter::LidarAdapter(Lidar *lidar, QWidget *parent) :
     isFit = false;
 
     _lidar = lidar;
-    if(_lidar != nullptr)
-        connect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
+    if(_lidar.get() != nullptr)
+        connect(_lidar.get(), SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
 }
 
 LidarAdapter::~LidarAdapter()
 {
-    if(_lidar != nullptr)
-        disconnect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
+    if(_lidar.get() != nullptr)
+        disconnect(_lidar.get(), SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
     delete ui;
 }
 
