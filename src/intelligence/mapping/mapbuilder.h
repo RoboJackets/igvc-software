@@ -14,7 +14,7 @@ class MapBuilder : public QObject
 {
     Q_OBJECT
 public:
-    MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker);
+    MapBuilder(std::shared_ptr<Lidar> lidar, BasicPositionTracker *poseTracker);
     ~MapBuilder();
     pcl::PointCloud<pcl::PointXYZ>::Ptr getCloud();
     //void saveCloud(std::string path);
@@ -22,7 +22,7 @@ public:
 
     void Clear();
 
-    void ChangeLidar(Lidar *device);
+    void ChangeLidar(std::shared_ptr<Lidar> device);
 
 signals:
     void onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr);
@@ -34,7 +34,7 @@ private slots:
 
 private:
 
-    Lidar *_lidar;
+    std::shared_ptr<Lidar> _lidar;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
     BasicPositionTracker *poseTracker;
     bool firstFrame;

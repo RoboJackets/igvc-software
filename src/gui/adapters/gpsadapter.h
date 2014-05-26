@@ -21,7 +21,7 @@ class GPSAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit GPSAdapter(GPS *gps, QWidget *parent = 0);
+    explicit GPSAdapter(std::shared_ptr<GPS> gps, QWidget *parent = 0);
     void labelPrint();
     void paintEvent(QPaintEvent *event);
     ~GPSAdapter();
@@ -57,7 +57,7 @@ private:
     double minLong;
     double maxLong;
 
-    GPS* _GPS;
+    std::shared_ptr<GPS> _GPS;
 };
 
 
