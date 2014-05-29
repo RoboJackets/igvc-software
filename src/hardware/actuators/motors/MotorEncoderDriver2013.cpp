@@ -78,26 +78,22 @@ void MotorEncoderDriver2013::stop()
 {
     _leftVel = 0;
     _rightVel = 0;
-    writeVelocities();
 }
 
 void MotorEncoderDriver2013::setVelocities(double left, double right)
 {
     _leftVel = left;
     _rightVel = right;
-    writeVelocities();
 }
 
 void MotorEncoderDriver2013::setLeftVelocity(double vel)
 {
     _leftVel = vel;
-    writeVelocities();
 }
 
 void MotorEncoderDriver2013::setRightVelocity(double vel)
 {
     _rightVel = vel;
-    writeVelocities();
 }
 
 void MotorEncoderDriver2013::writeVelocities()
