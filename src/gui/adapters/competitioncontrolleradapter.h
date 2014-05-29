@@ -14,7 +14,7 @@ class CompetitionControllerAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit CompetitionControllerAdapter(Controller *controller, GPS *gps, QWidget *parent = 0);
+    explicit CompetitionControllerAdapter(std::shared_ptr<Controller> controller, std::shared_ptr<GPS> gps, QWidget *parent = 0);
     ~CompetitionControllerAdapter();
 
 public slots:
@@ -23,9 +23,9 @@ public slots:
 private:
     Ui::CompetitionControllerAdapter *ui;
 
-    Controller *_compController;
+    std::shared_ptr<Controller> _compController;
 
-    GPS *_gps;
+    std::shared_ptr<GPS> _gps;
 };
 
 #endif // COMPETITIONCONTROLLERADAPTER_H

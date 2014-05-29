@@ -13,7 +13,7 @@ class BasicPositionTracker : public QObject
 {
     Q_OBJECT
 public:
-    BasicPositionTracker(GPS *gps, IMU *imu);
+    BasicPositionTracker(std::shared_ptr<GPS> gps, std::shared_ptr<IMU> imu);
 
     ~BasicPositionTracker();
 
@@ -21,8 +21,8 @@ public:
 
     void Reset();
 
-    void ChangeGPS(GPS *gps);
-    void ChangeIMU(IMU *imu);
+    void ChangeGPS(std::shared_ptr<GPS> gps);
+    void ChangeIMU(std::shared_ptr<IMU> imu);
 
 signals:
     void onNewPosition(RobotPosition);
@@ -36,8 +36,8 @@ private:
     RobotPosition currentPosition;
     GPSData origin;
 
-    GPS *_gps;
-    IMU *_imu;
+    std::shared_ptr<GPS> _gps;
+    std::shared_ptr<IMU> _imu;
 
     int originPointsRecorded;
 };

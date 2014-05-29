@@ -3,24 +3,24 @@
 #include <common/logger/logger.h>
 #include <common/config/configmanager.h>
 
-BasicPositionTracker::BasicPositionTracker(GPS *gps, IMU *imu)
+BasicPositionTracker::BasicPositionTracker(std::shared_ptr<GPS> gps, std::shared_ptr<IMU> imu)
     : _gps(gps),
       _imu(imu)
 {
     qRegisterMetaType<RobotPosition>("RobotPosition");
     originPointsRecorded = 0;
-    if(_gps != nullptr)
-        connect(_gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
-    if(_imu != nullptr)
-        connect(_imu, SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
+    if(_gps.get() != nullptr)
+        connect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
+    if(_imu.get() != nullptr)
+        connect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
 }
 
 BasicPositionTracker::~BasicPositionTracker()
 {
-    if(_gps != nullptr)
-        disconnect(_gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
-    if(_imu != nullptr)
-        disconnect(_imu, SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
+    if(_gps.get() != nullptr)
+        disconnect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
+    if(_imu.get() != nullptr)
+        disconnect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
 }
 
 RobotPosition BasicPositionTracker::GetPosition()
@@ -36,23 +36,23 @@ void BasicPositionTracker::Reset()
     originPointsRecorded = 0;
 }
 
-void BasicPositionTracker::ChangeGPS(GPS *gps)
+void BasicPositionTracker::ChangeGPS(std::shared_ptr<GPS> gps)
 {
 
-    if(_gps != nullptr)
-        disconnect(_gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
+    if(_gps.get() != nullptr)
+        disconnect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
     _gps = gps;
-    if(_gps != nullptr)
-        connect(_gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
+    if(_gps.get() != nullptr)
+        connect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
 }
 
-void BasicPositionTracker::ChangeIMU(IMU *imu)
+void BasicPositionTracker::ChangeIMU(std::shared_ptr<IMU> imu)
 {
-    if(_imu != nullptr)
-        disconnect(_imu, SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
+    if(_imu.get() != nullptr)
+        disconnect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
     _imu = imu;
-    if(_imu != nullptr)
-        connect(_imu, SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
+    if(_imu.get() != nullptr)
+        connect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
 }
 
 void BasicPositionTracker::onNewGPS(GPSData data)

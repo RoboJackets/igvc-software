@@ -9,7 +9,7 @@ class Controller : public QObject
 {
     Q_OBJECT
 public:
-    Controller(GPSWaypointSource *source, GPS *gps);
+    Controller(std::shared_ptr<GPSWaypointSource> source, std::shared_ptr<GPS> gps);
     ~Controller();
     GPSData getCurrentWaypoint();
     bool isWorking()
@@ -24,8 +24,8 @@ private slots:
     void onNewGPS(GPSData data);
 
 private:
-    GPS *_gps;
-    GPSWaypointSource *_source;
+    std::shared_ptr<GPS> _gps;
+    std::shared_ptr<GPSWaypointSource> _source;
     GPSData currentWaypoint;
 
 };

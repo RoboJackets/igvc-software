@@ -12,7 +12,7 @@ const int leftDisable = 8;
 volatile int tickDataRight = 0;
 volatile int tickDataLeft = 0;
 
-const float ticksPerRev = 1600.0;
+const float ticksPerRev = 7000.0;
 const float wheelCir = 1.11715; // Meters
 const float metersPerTick = wheelCir / ticksPerRev;
 const float DEADBAND = 10;
@@ -25,8 +25,8 @@ float actualSpeedL;
 float lastErrorL;
 float lastErrorR;
 
-float P = 13;
-float D = 0;
+float P = 20;
+float D = -5;
 
 int PWM_L = 0;
 int PWM_R = 0;
@@ -115,6 +115,8 @@ void loop()
     Serial.println("TIMEOUT");
     desiredSpeedL = 0;
     desiredSpeedR = 0;
+    PWM_L = 0;
+    PWM_R = 0;
   }
 
   float dT_sec = (float)( millis() - lastLoopTime ) / 1000.0;
@@ -124,6 +126,10 @@ void loop()
 
   tickDataLeft = 0;
   tickDataRight = 0;
+  
+  //Serial.print(tickDataLeft);
+  //Serial.print('\t');
+  //Serial.println(tickDataRight);
 
   delay(50);
 
@@ -159,10 +165,6 @@ void loop()
   analogWrite(rightSpeed, powerR);
   analogWrite(leftSpeed, powerL);
   
-  Serial.print(tickDataLeft);
-  Serial.print('\t');
-  Serial.println(tickDataRight);
-
   lastErrorL = ErrorL;
   lastErrorR = ErrorR;
 }
@@ -183,11 +185,11 @@ void tickLeft()
 {
   if (digitalRead(encoderLeftData1) == digitalRead(encoderLeftData2))
   {
-    tickDataLeft++;
+    tickDataLeft--;
   }
   else
   {
-    tickDataLeft--;
+    tickDataLeft++;
   }
 }
 

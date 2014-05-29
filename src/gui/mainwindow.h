@@ -86,19 +86,18 @@ private:
     QIcon checkIcon;
     QIcon xIcon;
 
-    JoystickDriver *_joystickDriver;
+    std::shared_ptr<JoystickDriver> _joystickDriver;
     std::shared_ptr<Joystick> _joystick;
-    //Joystick *_joystick;
 
-    MotorDriver *_motorController;
+    std::shared_ptr<MotorDriver> _motorController;
 
-    GPS *_GPS;
+    std::shared_ptr<GPS> _GPS;
 
-    StereoSource *_stereoSource;
+    std::shared_ptr<StereoSource> _stereoSource;
 
-    IMU *_IMU;
+    std::shared_ptr<IMU> _IMU;
 
-    Lidar *_lidar;
+    std::shared_ptr<Lidar> _lidar;
 
     BasicPositionTracker *_posTracker;
 
@@ -110,9 +109,9 @@ private:
 
     LineDetector *_lineDetector;
 
-    GPSWaypointSource *_waypointSource;
+    std::shared_ptr<GPSWaypointSource> _waypointSource;
 
-    Controller *_compController;
+    std::shared_ptr<Controller> _compController;
 
     bool isRunning, isPaused;
 

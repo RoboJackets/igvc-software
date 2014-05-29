@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <hardware/sensors/lidar/Lidar.h>
+#include <memory>
 
 namespace Ui {
 class LidarAdapter;
@@ -17,7 +18,7 @@ class LidarAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit LidarAdapter(Lidar *lidar, QWidget *parent = 0);
+    explicit LidarAdapter(std::shared_ptr<Lidar> lidar, QWidget *parent = 0);
     ~LidarAdapter();
 
 protected:
@@ -35,7 +36,7 @@ private:
 
     int NUMPTS;
 
-    Lidar *_lidar;
+    std::shared_ptr<Lidar> _lidar;
     LidarState _data;
 };
 
