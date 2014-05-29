@@ -18,7 +18,7 @@ class IMUAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit IMUAdapter(IMU *imu, QWidget *parent = 0);
+    explicit IMUAdapter(std::shared_ptr<IMU> imu, QWidget *parent = 0);
     ~IMUAdapter();
 
 private slots:
@@ -29,7 +29,7 @@ private slots:
 private:
     Ui::IMUAdapter *ui;
 
-    IMU *_imu;
+    std::shared_ptr<IMU> _imu;
 
     std::vector<IMUData> _data;
 

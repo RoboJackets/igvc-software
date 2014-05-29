@@ -10,7 +10,7 @@
 #include <pcl/filters/passthrough.h>
 
 
-MapBuilder::MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker)
+MapBuilder::MapBuilder(std::shared_ptr<Lidar> lidar, BasicPositionTracker *poseTracker)
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr _cloud(new pcl::PointCloud<pcl::PointXYZ>);
     _cloud->height = 1;
@@ -19,10 +19,10 @@ MapBuilder::MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker)
     _cloud->points.resize(_cloud->width*_cloud->height);
     firstFrame = true;
 
-    if(lidar)
+    if(lidar.get())
     {
         _lidar = lidar;
-        connect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
+        connect(_lidar.get(), SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
     }
 
     this->poseTracker = poseTracker;
@@ -32,8 +32,8 @@ MapBuilder::MapBuilder(Lidar *lidar, BasicPositionTracker *poseTracker)
 
 MapBuilder::~MapBuilder()
 {
-    if(_lidar)
-        disconnect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
+    if(_lidar.get())
+        disconnect(_lidar.get(), SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
     poseTracker = nullptr;
 }
 
@@ -130,16 +130,16 @@ void MapBuilder::Clear()
     cloud->clear();
 }
 
-void MapBuilder::ChangeLidar(Lidar *device)
+void MapBuilder::ChangeLidar(std::shared_ptr<Lidar> device)
 {
-    if(_lidar != nullptr)
+    if(_lidar.get() != nullptr)
     {
-        disconnect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(lidarState)));
+        disconnect(_lidar.get(), SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(lidarState)));
     }
     _lidar = device;
-    if(_lidar != nullptr)
+    if(_lidar.get() != nullptr)
     {
-        connect(_lidar, SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(lidarState)));
+        connect(_lidar.get(), SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(lidarState)));
     }
 
 }

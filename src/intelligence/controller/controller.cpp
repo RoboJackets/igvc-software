@@ -2,18 +2,18 @@
 #include <common/utils/GPSUtils.h>
 
 
-Controller::Controller(GPSWaypointSource *source, GPS *gps) : _gps(gps)
+Controller::Controller(std::shared_ptr<GPSWaypointSource> source, std::shared_ptr<GPS> gps) : _gps(gps)
 {
     _source = source;
     currentWaypoint = _source->getNext();
-    if(_gps != nullptr)
-        connect(_gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
+    if(_gps.get() != nullptr)
+        connect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
 }
 
 Controller::~Controller()
 {
-    if(_gps != nullptr)
-        disconnect(_gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
+    if(_gps.get() != nullptr)
+        disconnect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
 }
 
 void Controller::onNewGPS(GPSData data)
