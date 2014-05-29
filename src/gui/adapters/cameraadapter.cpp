@@ -8,16 +8,16 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <QDateTime>
 
-CameraAdapter::CameraAdapter(StereoSource *source, QWidget *parent) :
+CameraAdapter::CameraAdapter(std::shared_ptr<StereoSource> source, QWidget *parent) :
      QWidget(parent),
      ui(new Ui::CameraAdapter)
 {
     ui->setupUi(this);
 
-    if(source != nullptr)
+    if(source.get() != nullptr)
     {
         _stereoSource = source;
-        connect(_stereoSource, SIGNAL(onNewData(StereoImageData)), this, SLOT(onCameraData(StereoImageData)));
+        connect(_stereoSource.get(), SIGNAL(onNewData(StereoImageData)), this, SLOT(onCameraData(StereoImageData)));
     }
 
     if(parent)
@@ -30,8 +30,8 @@ CameraAdapter::CameraAdapter(StereoSource *source, QWidget *parent) :
 
 CameraAdapter::~CameraAdapter()
 {
-    if(_stereoSource != nullptr)
-        disconnect(_stereoSource, SIGNAL(onNewData(StereoImageData)), this, SLOT(onCameraData(StereoImageData)));
+    if(_stereoSource.get() != nullptr)
+        disconnect(_stereoSource.get(), SIGNAL(onNewData(StereoImageData)), this, SLOT(onCameraData(StereoImageData)));
     delete ui;
 }
 

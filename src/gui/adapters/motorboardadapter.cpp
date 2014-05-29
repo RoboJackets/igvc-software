@@ -3,18 +3,18 @@
 #include <QPainter>
 #include <iostream>
 
-MotorBoardAdapter::MotorBoardAdapter(MotorDriver *driver, QWidget *parent) :
+MotorBoardAdapter::MotorBoardAdapter(std::shared_ptr<MotorDriver> driver, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MotorBoardAdapter)
 {
     ui->setupUi(this);
     _driver = driver;
-    connect(_driver, SIGNAL(newCurrentVelocities(double,double)), this, SLOT(onNewCurrentVelocities(double,double)));
+    connect(_driver.get(), SIGNAL(newCurrentVelocities(double,double)), this, SLOT(onNewCurrentVelocities(double,double)));
 }
 
 MotorBoardAdapter::~MotorBoardAdapter()
 {
-    disconnect(_driver, SIGNAL(newCurrentVelocities(double,double)), this, SLOT(onNewCurrentVelocities(double,double)));
+    disconnect(_driver.get(), SIGNAL(newCurrentVelocities(double,double)), this, SLOT(onNewCurrentVelocities(double,double)));
     delete ui;
 }
 
