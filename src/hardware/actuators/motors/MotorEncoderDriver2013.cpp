@@ -14,7 +14,6 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
     _leftVel = 0;
     _rightVel = 0;
     _maxVel = 2.0;
-    //writeVelocities();
     if(_arduino.isConnected())
     {
         cout << "Waiting for motor arduino.";
@@ -22,19 +21,18 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
         string line;
         while((line = _arduino.readln()).compare("Ready"))
         {
-            //cout << line << endl;
             cout << ".";
             cout.flush();
             usleep(250);
         }
         cout << endl;
         Logger::Log(LogLevel::Info, "Motor arduino connected.");
+        _thread = boost::thread(boost::bind(&MotorEncoderDriver2013::run, this));
     }
     else
     {
         Logger::Log(LogLevel::Warning, "Motor arduino not connected. Commands will be ignored.");
     }
-    _thread = boost::thread(boost::bind(&MotorEncoderDriver2013::run, this));
 }
 
 void MotorEncoderDriver2013::run()
@@ -118,7 +116,12 @@ void MotorEncoderDriver2013::writeVelocities()
         msg << '$' << _leftVel << ',' << _rightVel << '\n';
 
         _portLock.lock();
-        _arduino.write(msg.str());
+        try{
+            _arduino.write(msg.str());
+        }catch(...){
+            Logger::Log(LogLevel::Error, "Error writing velocities to motors.");
+        }
+
         std::string ret = _arduino.readln();
         try {
             if(!ret.empty())
