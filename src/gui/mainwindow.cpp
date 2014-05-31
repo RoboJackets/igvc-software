@@ -26,6 +26,7 @@
 #include <QTextEdit>
 #include <QDebug>
 #include <QFileDialog>
+#include <QMessageBox>
 
 #include <iostream>
 
@@ -66,7 +67,19 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->joystickButton->setEnabled(_joystick->isOpen());
     ui->hardwareStatusList->addItem("Joystick");
 
-    _lidar = std::shared_ptr<Lidar>(new LMS200());
+    bool lidarTryAgain = true;
+    while(lidarTryAgain)
+    {
+        try {
+            _lidar = std::shared_ptr<Lidar>(new LMS200());
+            break;
+        } catch(SickToolbox::SickTimeoutException)
+        {
+            lidarTryAgain = QMessageBox::critical(this, "LIDAR Failure", "The LIDAR timed out. This can often be fixed by trying again. Would you like to try again?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes;
+        }
+    }
+
+
     ui->hardwareStatusList->addItem("LIDAR");
     ui->actionLMS_200->setChecked(true);
 
