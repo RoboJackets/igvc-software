@@ -31,8 +31,8 @@ SOURCES += \
     ../src/gui/adapters/cameraadapter.cpp \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.cpp \
     ../src/common/utils/StringUtils.cpp \
-    ../src/intelligence/pathplanning/searchlocation.cpp \
-    ../src/intelligence/pathplanning/searchmove.cpp \
+    ../src/common/datastructures/searchlocation.cpp \
+    ../src/common/datastructures/searchmove.cpp \
     ../src/intelligence/pathplanning/igvcsearchproblem.cpp \
     ../src/gui/adapters/lidaradapter.cpp \
     ../src/hardware/sensors/IMU/Ardupilot.cpp \
@@ -61,7 +61,8 @@ SOURCES += \
     ../src/gui/adapters/lightshieldadapter.cpp \
     ../src/hardware/serial/SerialPort.cpp \
     ../src/gui/adapters/motorboardadapter.cpp \
-    ../src/gui/adapters/competitioncontrolleradapter.cpp
+    ../src/gui/adapters/competitioncontrolleradapter.cpp \
+    ../src/intelligence/pathfollowing/pathfollower.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -95,8 +96,8 @@ HEADERS  += \
     ../src/intelligence/JoystickDriver.hpp \
     ../src/intelligence/pathplanning/SearchProblem.hpp \
     ../src/intelligence/pathplanning/GraphSearch.hpp \
-    ../src/intelligence/pathplanning/searchlocation.h \
-    ../src/intelligence/pathplanning/searchmove.h \
+    ../src/common/datastructures/searchlocation.h \
+    ../src/common/datastructures/searchmove.h \
     ../src/intelligence/pathplanning/igvcsearchproblem.h \
     ../src/gui/adapters/lidaradapter.h \
     ../src/hardware/sensors/IMU/Ardupilot.h \
@@ -135,7 +136,10 @@ HEADERS  += \
     ../src/gui/adapters/lightshieldadapter.h \
     ../src/hardware/serial/SerialPort.h \
     ../src/gui/adapters/motorboardadapter.h \
-    ../src/gui/adapters/competitioncontrolleradapter.h
+    ../src/gui/adapters/competitioncontrolleradapter.h \
+    ../src/intelligence/pathfollowing/pathfollower.h \
+    ../src/common/datastructures/PathType.hpp \
+    ../src/common/datastructures/MotorCommand.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \

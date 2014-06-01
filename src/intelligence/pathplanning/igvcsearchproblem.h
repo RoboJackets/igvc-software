@@ -1,8 +1,8 @@
 #ifndef IGVCSEARCHPROBLEM_H
 #define IGVCSEARCHPROBLEM_H
 
-#include "searchlocation.h"
-#include "searchmove.h"
+#include <common/datastructures/searchlocation.h>
+#include <common/datastructures/searchmove.h>
 #include "GraphSearch.hpp"
 #include <vector>
 #include <pcl/visualization/cloud_viewer.h>
