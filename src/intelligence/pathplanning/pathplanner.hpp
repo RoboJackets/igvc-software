@@ -4,8 +4,8 @@
 #include <QObject>
 #include <pcl/common/common.h>
 #include <vector>
-#include "searchlocation.h"
-#include "searchmove.h"
+#include <common/datastructures/searchlocation.h>
+#include <common/datastructures/searchmove.h>
 #include <common/datastructures/robotposition.hpp>
 
 typedef std::vector<std::pair<SearchMove, SearchLocation>> path_t;
