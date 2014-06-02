@@ -116,6 +116,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _planner = std::shared_ptr<PathPlanner>(new AStarPlanner());
 
+    _pathFollower = std::shared_ptr<PathFollower>(new PathFollower());
+
     connect(_compController.get(), &Controller::onNewWaypoint, [=](GPSData waypoint){
         _planner->OnNewGoalPos(_posTracker->WaypointToPosition(waypoint));
     });
@@ -123,6 +125,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_posTracker.get(), SIGNAL(onNewPosition(RobotPosition)), _planner.get(), SLOT(OnNewStartPos(RobotPosition)));
 
     connect(_mapper.get(), SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), _planner.get(), SLOT(OnNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
+
+    connect(_planner.get(), SIGNAL(OnNewPath(path_t)), _pathFollower.get(), SLOT(onNewPath(path_t)));
 
     updateHardwareStatusIcons();
 
@@ -287,16 +291,16 @@ MDIWindow* MainWindow::findWindowWithTitle(QString title)
 
 void MainWindow::on_joystickButton_toggled(bool checked)
 {
-    this->setFocus();
+    ui->joystickButton->setStyleSheet(tr("background-color: %1").arg(checked ? "rgb(0,255,0)" : "default"));
     if(checked)
     {
-        // TODO : disconnect from intelilgence signals
+        if(isRunning)
+            on_stopButton_clicked();
         connect(_joystickDriver.get(), SIGNAL(onNewMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
     }
     else
     {
         disconnect(_joystickDriver.get(), SIGNAL(onNewMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
-        // TODO : connect to intelligence signals
     }
 }
 
@@ -313,12 +317,15 @@ void MainWindow::on_playButton_clicked()
             ui->playButton->setIcon(QIcon(":/images/Play"));
         }
         isPaused = !isPaused;
+        disconnect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
     }
     else
     {
+        ui->joystickButton->setChecked(false);
         ui->playButton->setIcon(QIcon(":/images/Pause"));
         ui->stopButton->setVisible(true);
         isRunning = true;
+        connect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
     }
     _lights->setSafetyLight(isRunning);
 }
@@ -331,6 +338,8 @@ void MainWindow::on_stopButton_clicked()
         ui->stopButton->setVisible(false);
         isRunning = false;
         isPaused = false;
+        disconnect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        _mapper->Clear();
     }
     _lights->setSafetyLight(isRunning);
 }
