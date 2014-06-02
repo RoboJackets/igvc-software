@@ -1,7 +1,7 @@
 #include "lightshieldadapter.h"
 #include "ui_lightshieldadapter.h"
 
-LightShieldAdapter::LightShieldAdapter(LightController *controller, QWidget *parent) :
+LightShieldAdapter::LightShieldAdapter(std::shared_ptr<LightController> controller, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::LightShieldAdapter)
 {
