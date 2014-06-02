@@ -7,7 +7,7 @@
 
 using namespace pcl;
 
-MapAdapter::MapAdapter(MapBuilder *mapper, BasicPositionTracker *posTracker, QWidget *parent) :
+MapAdapter::MapAdapter(std::shared_ptr<MapBuilder> mapper, std::shared_ptr<BasicPositionTracker> posTracker, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MapAdapter),
     _scale(20),
@@ -16,8 +16,8 @@ MapAdapter::MapAdapter(MapBuilder *mapper, BasicPositionTracker *posTracker, QWi
 {
     ui->setupUi(this);
 
-    if(_mapper != nullptr)
-        connect(_mapper, SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), this, SLOT(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
+    if(_mapper.get() != nullptr)
+        connect(_mapper.get(), SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), this, SLOT(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
 }
 
 void MapAdapter::setScale(int scale)
@@ -92,8 +92,8 @@ void MapAdapter::paintEvent(QPaintEvent *)
 MapAdapter::~MapAdapter()
 {
     delete ui;
-    if(_mapper != nullptr)
-        disconnect(_mapper, SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), this, SLOT(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
+    if(_mapper.get() != nullptr)
+        disconnect(_mapper.get(), SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), this, SLOT(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
 }
 
 void MapAdapter::on_scaleSlider_sliderMoved(int position)

@@ -84,3 +84,10 @@ void BasicPositionTracker::onNewIMU(IMUData data)
 
     onNewPosition(currentPosition);
 }
+
+RobotPosition BasicPositionTracker::WaypointToPosition(GPSData waypoint)
+{
+    RobotPosition ret;
+    GPSUtils::coordsToMetricXY(origin.Lat(), origin.Long(), waypoint.Lat(), waypoint.Long(), ret.X, ret.Y);
+    return ret;
+}

@@ -24,6 +24,8 @@ public:
     void ChangeGPS(std::shared_ptr<GPS> gps);
     void ChangeIMU(std::shared_ptr<IMU> imu);
 
+    RobotPosition WaypointToPosition(GPSData waypoint);
+
 signals:
     void onNewPosition(RobotPosition);
     void onOriginPercentage(int);
