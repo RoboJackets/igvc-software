@@ -14,7 +14,7 @@ class MapBuilder : public QObject
 {
     Q_OBJECT
 public:
-    MapBuilder(std::shared_ptr<Lidar> lidar, BasicPositionTracker *poseTracker);
+    MapBuilder(std::shared_ptr<Lidar> lidar, std::shared_ptr<BasicPositionTracker> poseTracker);
     ~MapBuilder();
     pcl::PointCloud<pcl::PointXYZ>::Ptr getCloud();
     //void saveCloud(std::string path);
@@ -36,7 +36,7 @@ private:
 
     std::shared_ptr<Lidar> _lidar;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
-    BasicPositionTracker *poseTracker;
+    std::shared_ptr<BasicPositionTracker> poseTracker;
 };
 
 #endif // MAPPING_H

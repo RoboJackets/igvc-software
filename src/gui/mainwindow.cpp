@@ -57,10 +57,10 @@ MainWindow::MainWindow(QWidget *parent) :
     _motorController = std::shared_ptr<MotorDriver>(new MotorEncoderDriver2013);
     ui->hardwareStatusList->addItem("Motor Board");
 
-    _lights = new LightController();
-    connect(_lights, SIGNAL(onBatteryLevelChanged(int)), ui->batteryIndicator, SLOT(onBatteryLevelChanged(int)));
-    connect(_lights, SIGNAL(onEStopStatusChanged(bool)), ui->statusImage, SLOT(onEStopStatusChanged(bool)));
-    connect(_lights, SIGNAL(onEStopStatusChanged(bool)), _motorController.get(), SLOT(onEStopStatusChanged(bool)));
+    _lights = std::shared_ptr<LightController>(new LightController());
+    connect(_lights.get(), SIGNAL(onBatteryLevelChanged(int)), ui->batteryIndicator, SLOT(onBatteryLevelChanged(int)));
+    connect(_lights.get(), SIGNAL(onEStopStatusChanged(bool)), ui->statusImage, SLOT(onEStopStatusChanged(bool)));
+    connect(_lights.get(), SIGNAL(onEStopStatusChanged(bool)), _motorController.get(), SLOT(onEStopStatusChanged(bool)));
     ui->hardwareStatusList->addItem("Light Controller");
 
     _joystick = std::shared_ptr<Joystick>(new Joystick);
@@ -93,17 +93,15 @@ MainWindow::MainWindow(QWidget *parent) :
     _IMU = std::shared_ptr<IMU>(new Ardupilot());
     ui->hardwareStatusList->addItem("IMU");
 
-    _posTracker = new BasicPositionTracker(_GPS, _IMU);
+    _posTracker = std::shared_ptr<BasicPositionTracker>(new BasicPositionTracker(_GPS, _IMU));
     ui->hardwareStatusList->addItem("Position Tracker");
 
-    _lineDetector = new LineDetector();
-    connect(_stereoSource.get(), SIGNAL(onNewLeftImage(ImageData)), _lineDetector, SLOT(onImageEvent(ImageData)));
+    _lineDetector = std::shared_ptr<LineDetector>(new LineDetector());
+    connect(_stereoSource.get(), SIGNAL(onNewLeftImage(ImageData)), _lineDetector.get(), SLOT(onImageEvent(ImageData)));
 
-    _mapper = new MapBuilder(_lidar, _posTracker);
-    connect(_lidar.get(), SIGNAL(onNewData(LidarState)), _mapper, SLOT(onLidarData(LidarState)));
-    connect(_lineDetector, SIGNAL(onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)), _mapper, SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
-
-    _planner = new AStarPlanner();
+    _mapper = std::shared_ptr<MapBuilder>(new MapBuilder(_lidar, _posTracker));
+    connect(_lidar.get(), SIGNAL(onNewData(LidarState)), _mapper.get(), SLOT(onLidarData(LidarState)));
+    connect(_lineDetector.get(), SIGNAL(onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)), _mapper.get(), SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
 
     ui->hardwareStatusList->addItem("Map");
 
@@ -115,6 +113,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _compController = std::shared_ptr<Controller>(new Controller(_waypointSource, _GPS));
     ui->hardwareStatusList->addItem("Comp. Controller");
+
+    _planner = std::shared_ptr<PathPlanner>(new AStarPlanner());
+
+    connect(_compController.get(), &Controller::onNewWaypoint, [=](GPSData waypoint){
+        _planner->OnNewGoalPos(_posTracker->WaypointToPosition(waypoint));
+    });
+
+    connect(_posTracker.get(), SIGNAL(onNewPosition(RobotPosition)), _planner.get(), SLOT(OnNewStartPos(RobotPosition)));
+
+    connect(_mapper.get(), SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), _planner.get(), SLOT(OnNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
 
     updateHardwareStatusIcons();
 
@@ -136,7 +144,6 @@ void MainWindow::setupMenus()
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete _posTracker;
 }
 
 void MainWindow::openHardwareView(QModelIndex index)
