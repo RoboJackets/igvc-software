@@ -17,7 +17,6 @@ MapBuilder::MapBuilder(std::shared_ptr<Lidar> lidar, BasicPositionTracker *poseT
     _cloud->width = 1024;
     _cloud->is_dense = false;
     _cloud->points.resize(_cloud->width*_cloud->height);
-    firstFrame = true;
 
     if(lidar.get())
     {
@@ -77,7 +76,7 @@ void MapBuilder::onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::Po
     pcl::transformPointCloud(*frame, *cloud_transformed, translation, rotation);
 
     // ICP to refine cloud alignment
-    if(!firstFrame)
+    if(!cloud->empty())
     {
         //Use ICP to fix errors in transformation
         pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
@@ -117,7 +116,6 @@ void MapBuilder::onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::Po
     cloud.swap(cloud_removedDuplicates);
 
     onNewMap(cloud);
-    firstFrame = false;
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr MapBuilder::getCloud()

@@ -86,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _stereoSource = std::shared_ptr<StereoSource>(new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml"));
     ui->hardwareStatusList->addItem("Camera");
 
-    _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/igvc_GPS", 19200));
+    _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/igvc_gps", 19200));
     ui->actionOutback_A321->setChecked(true);
     ui->hardwareStatusList->addItem("GPS");
 
