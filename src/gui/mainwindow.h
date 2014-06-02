@@ -21,6 +21,7 @@
 #include <intelligence/linedetection/linedetector.h>
 #include <intelligence/controller/controller.h>
 #include <common/utils/GPSWaypointSource.h>
+#include <intelligence/pathfollowing/pathfollower.h>
 
 namespace Ui {
 class MainWindow;
@@ -112,6 +113,8 @@ private:
     std::shared_ptr<GPSWaypointSource> _waypointSource;
 
     std::shared_ptr<Controller> _compController;
+
+    std::shared_ptr<PathFollower> _pathFollower;
 
     bool isRunning, isPaused;
 

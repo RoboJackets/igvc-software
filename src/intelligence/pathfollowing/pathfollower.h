@@ -23,7 +23,7 @@ protected:
 
 private:
     path_t _path;
-    int _pathIndex;
+    uint _pathIndex;
     time_t _cmdStartTime;
 
     boost::mutex _pathMutex;
