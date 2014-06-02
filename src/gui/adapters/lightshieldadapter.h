@@ -13,7 +13,7 @@ class LightShieldAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit LightShieldAdapter(LightController *controller, QWidget *parent = 0);
+    explicit LightShieldAdapter(std::shared_ptr<LightController> controller, QWidget *parent = 0);
     ~LightShieldAdapter();
 
 private slots:
@@ -40,7 +40,7 @@ private slots:
 private:
     Ui::LightShieldAdapter *ui;
 
-    LightController *_controller;
+    std::shared_ptr<LightController> _controller;
 };
 
 #endif // LIGHTSHIELDADAPTER_H

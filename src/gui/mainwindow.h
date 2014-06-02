@@ -99,15 +99,15 @@ private:
 
     std::shared_ptr<Lidar> _lidar;
 
-    BasicPositionTracker *_posTracker;
+    std::shared_ptr<BasicPositionTracker> _posTracker;
 
-    MapBuilder *_mapper;
+    std::shared_ptr<MapBuilder> _mapper;
 
-    PathPlanner *_planner;
+    std::shared_ptr<PathPlanner> _planner;
 
-    LightController *_lights;
+    std::shared_ptr<LightController> _lights;
 
-    LineDetector *_lineDetector;
+    std::shared_ptr<LineDetector> _lineDetector;
 
     std::shared_ptr<GPSWaypointSource> _waypointSource;
 

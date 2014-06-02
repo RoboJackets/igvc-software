@@ -3,7 +3,7 @@
 #include <QPainter>
 #include <cmath>
 
-PositionTrackerAdapter::PositionTrackerAdapter(BasicPositionTracker *src, QWidget *parent) :
+PositionTrackerAdapter::PositionTrackerAdapter(std::shared_ptr<BasicPositionTracker> src, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PositionTrackerAdapter),
     posTracker(src),
@@ -14,10 +14,10 @@ PositionTrackerAdapter::PositionTrackerAdapter(BasicPositionTracker *src, QWidge
 {
     ui->setupUi(this);
 
-    if(posTracker != nullptr)
+    if(posTracker.get() != nullptr)
     {
-        connect(posTracker, SIGNAL(onNewPosition(RobotPosition)), this, SLOT(onNewPosition(RobotPosition)));
-        connect(posTracker, SIGNAL(onOriginPercentage(int)), this, SLOT(onOriginPercentage(int)));
+        connect(posTracker.get(), SIGNAL(onNewPosition(RobotPosition)), this, SLOT(onNewPosition(RobotPosition)));
+        connect(posTracker.get(), SIGNAL(onOriginPercentage(int)), this, SLOT(onOriginPercentage(int)));
     }
 
     connect(this, SIGNAL(updateBecauseOfData()), this, SLOT(update()));
@@ -26,11 +26,10 @@ PositionTrackerAdapter::PositionTrackerAdapter(BasicPositionTracker *src, QWidge
 
 PositionTrackerAdapter::~PositionTrackerAdapter()
 {
-    if(posTracker != nullptr)
+    if(posTracker.get() != nullptr)
     {
-        disconnect(posTracker, SIGNAL(onNewPosition(RobotPosition)), this, SLOT(onNewPosition(RobotPosition)));
-        disconnect(posTracker, SIGNAL(onOriginPercentage(int)), this, SLOT(onOriginPercentage(int)));
-        posTracker = nullptr;
+        disconnect(posTracker.get(), SIGNAL(onNewPosition(RobotPosition)), this, SLOT(onNewPosition(RobotPosition)));
+        disconnect(posTracker.get(), SIGNAL(onOriginPercentage(int)), this, SLOT(onOriginPercentage(int)));
     }
     positions.clear();
     delete ui;
