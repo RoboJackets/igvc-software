@@ -5,7 +5,8 @@
 
 MotorBoardAdapter::MotorBoardAdapter(std::shared_ptr<MotorDriver> driver, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::MotorBoardAdapter)
+    ui(new Ui::MotorBoardAdapter),
+    _dataCount(20)
 {
     ui->setupUi(this);
     _driver = driver;
@@ -21,7 +22,7 @@ MotorBoardAdapter::~MotorBoardAdapter()
 void MotorBoardAdapter::onNewCurrentVelocities(double left, double right)
 {
     _data.push_back(VelocityPairs(VelocityPair(_driver->getLeftSetVelocity(), _driver->getRightSetVelocity()), VelocityPair(left, right)));
-    if(_data.size() > 10)
+    if(_data.size() > _dataCount)
         _data.erase(_data.begin());
     update();
 }

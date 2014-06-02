@@ -37,6 +37,8 @@ private:
     std::shared_ptr<MotorDriver> _driver;
 
     std::vector<VelocityPairs> _data;
+
+    int _dataCount;
 };
 
 #endif // MOTORBOARDADAPTER_H
