@@ -12,7 +12,7 @@ class PathAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit PathAdapter(PathPlanner *planner, QWidget *parent = 0 );
+    explicit PathAdapter(std::shared_ptr<PathPlanner> planner, QWidget *parent = 0 );
     ~PathAdapter();
 
 protected:
@@ -21,7 +21,7 @@ protected:
 
 private:
     Ui::PathAdapter *ui;
-    PathPlanner *planner;
+    std::shared_ptr<PathPlanner> planner;
     path_t path;
     bool pathRecieved;
     double scale;
