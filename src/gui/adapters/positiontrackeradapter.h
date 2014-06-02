@@ -14,7 +14,7 @@ class PositionTrackerAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit PositionTrackerAdapter(BasicPositionTracker *src, QWidget *parent = 0);
+    explicit PositionTrackerAdapter(std::shared_ptr<BasicPositionTracker> src, QWidget *parent = 0);
     ~PositionTrackerAdapter();
 
 protected:
@@ -37,7 +37,7 @@ private slots:
 private:
     Ui::PositionTrackerAdapter *ui;
 
-    BasicPositionTracker *posTracker;
+    std::shared_ptr<BasicPositionTracker> posTracker;
 
     std::vector<RobotPosition> positions;
 

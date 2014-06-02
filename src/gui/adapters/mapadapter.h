@@ -20,7 +20,7 @@ class MapAdapter : public QWidget
     Q_OBJECT
     
 public:
-    explicit MapAdapter(MapBuilder *mapper, BasicPositionTracker *posTracker, QWidget *parent = 0);
+    explicit MapAdapter(std::shared_ptr<MapBuilder> mapper, std::shared_ptr<BasicPositionTracker> posTracker, QWidget *parent = 0);
     ~MapAdapter();
 
 protected:
@@ -55,9 +55,9 @@ private:
 
     void paintEvent(QPaintEvent *);
 
-    MapBuilder *_mapper;
+    std::shared_ptr<MapBuilder> _mapper;
 
-    BasicPositionTracker *_posTracker;
+    std::shared_ptr<BasicPositionTracker> _posTracker;
 };
 
 #endif // MAPADAPTER_H
