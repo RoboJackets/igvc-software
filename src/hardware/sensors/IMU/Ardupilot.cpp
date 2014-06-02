@@ -9,7 +9,7 @@
 using namespace std;
 
 Ardupilot::Ardupilot()
- : ardupilotPort("/dev/igvc_IMU", 115200)
+ : ardupilotPort("/dev/igvc_imu", 115200)
 {
     connect(&ardupilotPort, SIGNAL(onNewLine(std::string)), this, SLOT(onNewSerialLine(std::string)));
     ardupilotPort.startEvents();

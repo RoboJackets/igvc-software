@@ -37,7 +37,6 @@ private:
     std::shared_ptr<Lidar> _lidar;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
     BasicPositionTracker *poseTracker;
-    bool firstFrame;
 };
 
 #endif // MAPPING_H
