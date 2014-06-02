@@ -5,7 +5,7 @@
 #include <common/utils/AngleUtils.h>
 #include <QWheelEvent>
 
-PathAdapter::PathAdapter(PathPlanner *planner, QWidget *parent) :
+PathAdapter::PathAdapter(std::shared_ptr<PathPlanner> planner, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PathAdapter),
     center(this->width()/2, this->height()/2)
@@ -13,7 +13,7 @@ PathAdapter::PathAdapter(PathPlanner *planner, QWidget *parent) :
     ui->setupUi(this);
 
     this->planner = planner;
-    connect(planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
+    connect(planner.get(), SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
 
     scale = 10;
 
@@ -21,7 +21,7 @@ PathAdapter::PathAdapter(PathPlanner *planner, QWidget *parent) :
 
 PathAdapter::~PathAdapter()
 {
-    disconnect(planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
+    disconnect(planner.get(), SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
     delete ui;
 }
 
