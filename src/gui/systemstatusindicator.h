@@ -2,6 +2,7 @@
 #define SYSTEMSTATUSINDICATOR_H
 
 #include <QWidget>
+#include <QMutex>
 
 /*!
  * \brief Widget for displaying iconic representation of overall system status
@@ -18,9 +19,13 @@ protected:
 
 private:
     bool _isEnabled;
+    QMutex _paintMutex;
     
 public slots:
     void onEStopStatusChanged(bool isEnabled);
+
+signals:
+    void updateBecauseData();
     
 };
 
