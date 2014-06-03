@@ -159,6 +159,11 @@ void loop()
 
   int powerL = dirL ? 255 + PWM_L : PWM_L;
   int powerR = dirR ? 255 + PWM_R : PWM_R;
+  
+  if(desiredSpeedL == 0)
+    PWM_L = 0;
+  if(desiredSpeedR == 0)
+    PWM_R = 0;
 
   digitalWrite(rightDir, dirR);
   digitalWrite(leftDir, dirL);
