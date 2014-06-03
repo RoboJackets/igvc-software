@@ -79,7 +79,6 @@ MainWindow::MainWindow(QWidget *parent) :
         }
     }
 
-
     ui->hardwareStatusList->addItem("LIDAR");
     ui->actionLMS_200->setChecked(true);
 

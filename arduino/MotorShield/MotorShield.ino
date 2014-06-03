@@ -76,9 +76,6 @@ void setup()
   lastCmdTime = millis();
   lastLoopTime = millis();
 
-  digitalWrite(rightDir, 0);
-  analogWrite(rightSpeed, 255);
-
   Serial.println();
   Serial.flush();
   Serial.println("Ready");
@@ -155,10 +152,10 @@ void loop()
     PWM_R = 0;
 
   int dirL = PWM_L < 0;
-  int dirR = PWM_R < 0;
+  int dirR = PWM_R > 0;
 
   int powerL = dirL ? 255 + PWM_L : PWM_L;
-  int powerR = dirR ? 255 + PWM_R : PWM_R;
+  int powerR = dirR ? 255 - PWM_R : -PWM_R;
   
   if(desiredSpeedL == 0)
     PWM_L = 0;
