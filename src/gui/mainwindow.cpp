@@ -317,7 +317,8 @@ void MainWindow::on_playButton_clicked()
             ui->playButton->setIcon(QIcon(":/images/Play"));
         }
         isPaused = !isPaused;
-        disconnect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        //disconnect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        _motorController->setMotorCommand(MotorCommand(0.,0.));
     }
     else
     {
@@ -325,7 +326,8 @@ void MainWindow::on_playButton_clicked()
         ui->playButton->setIcon(QIcon(":/images/Pause"));
         ui->stopButton->setVisible(true);
         isRunning = true;
-        connect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        //connect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        _motorController->setMotorCommand(MotorCommand(1.,1.));
     }
     _lights->setSafetyLight(isRunning);
 }
@@ -338,7 +340,8 @@ void MainWindow::on_stopButton_clicked()
         ui->stopButton->setVisible(false);
         isRunning = false;
         isPaused = false;
-        disconnect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        //disconnect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        _motorController->setMotorCommand(MotorCommand(0.,0.));
         _mapper->Clear();
     }
     _lights->setSafetyLight(isRunning);
