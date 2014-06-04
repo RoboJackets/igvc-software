@@ -11,6 +11,7 @@ void GPSWaypointSource::openFile(string file)
     try {
         GPSFileReader::read(file, _data);
         _isOpen = true;
+        newFileLoaded();
     } catch (GPSFileNotFoundException){ }
 }
 

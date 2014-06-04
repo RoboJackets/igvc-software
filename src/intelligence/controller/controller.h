@@ -22,6 +22,7 @@ signals:
 
 private slots:
     void onNewGPS(GPSData data);
+    void onNewWaypointFileLoaded();
 
 private:
     std::shared_ptr<GPS> _gps;
