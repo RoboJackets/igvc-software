@@ -6,6 +6,7 @@ Controller::Controller(std::shared_ptr<GPSWaypointSource> source, std::shared_pt
 {
     _source = source;
     currentWaypoint = _source->getNext();
+    connect(_source.get(), SIGNAL(newFileLoaded()), this, SLOT(onNewWaypointFileLoaded()));
     if(_gps.get() != nullptr)
         connect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
 }
@@ -29,4 +30,10 @@ void Controller::onNewGPS(GPSData data)
 GPSData Controller::getCurrentWaypoint()
 {
     return currentWaypoint;
+}
+
+void Controller::onNewWaypointFileLoaded()
+{
+    currentWaypoint = _source->getNext();
+    onNewWaypoint(currentWaypoint);
 }
