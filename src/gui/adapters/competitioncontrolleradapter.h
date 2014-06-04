@@ -19,6 +19,7 @@ public:
 
 public slots:
     void onNewGPS(GPSData data);
+    void onNewWaypoint(GPSData waypoint);
 
 private:
     Ui::CompetitionControllerAdapter *ui;
