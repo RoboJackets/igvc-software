@@ -3,9 +3,11 @@
 
 #include <queue>
 #include "gpsfilereader.h"
+#include <QObject>
 
-class GPSWaypointSource
+class GPSWaypointSource : public QObject
 {
+    Q_OBJECT
 public:
     GPSWaypointSource(std::string file);
     void openFile(std::string file);
@@ -15,6 +17,9 @@ public:
     {
         return _isOpen;
     }
+
+signals:
+    void newFileLoaded();
 
 private:
     std::queue<GPSData> _data;
