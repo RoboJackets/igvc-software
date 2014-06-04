@@ -1,5 +1,6 @@
 #include "astarplanner.h"
 #include <common/config/configmanager.h>
+#include <common/logger/logger.h>
 #include <pcl/kdtree/kdtree_flann.h>
 
 AStarPlanner::AStarPlanner()
@@ -105,6 +106,9 @@ void AStarPlanner::OnNewGoalPos(RobotPosition pos)
 {
     searchproblem.Goal = SearchLocation(pos.X, pos.Y, pos.Heading);
     goalSet = true;
+    std::stringstream msg;
+    msg << "Path planner received new goal pos " << pos;
+    Logger::Log(LogLevel::Debug, msg.str());
     if(!pathIsValid())
         run();
 }
