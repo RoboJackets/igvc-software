@@ -29,6 +29,8 @@ private:
     std::shared_ptr<GPSWaypointSource> _source;
     GPSData currentWaypoint;
 
+    void advanceWaypoint();
+
 };
 
 #endif // CONTROLLER_H

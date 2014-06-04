@@ -112,8 +112,8 @@ void MotorEncoderDriver2013::writeVelocities()
          * the E-Stop is causing all PWMs to map to
          * 0 m/s.
          */
-        //msg << '$' << ( _isEnabled ? _leftVel : 0 ) << ',' << ( _isEnabled ? _rightVel : 0 ) << '\n';
-        msg << '$' << _leftVel << ',' << _rightVel << '\n';
+        msg << '$' << ( _isEnabled ? _leftVel : 0 ) << ',' << ( _isEnabled ? _rightVel : 0 ) << '\n';
+        //msg << '$' << _leftVel << ',' << _rightVel << '\n';
 
         _portLock.lock();
         try{
