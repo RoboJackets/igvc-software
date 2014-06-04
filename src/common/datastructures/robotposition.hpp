@@ -1,6 +1,8 @@
 #ifndef ROBOTPOSITION_HPP
 #define ROBOTPOSITION_HPP
 
+#include <iostream>
+
 /**
  * @brief Represents the position of the robot.
  */
@@ -26,6 +28,12 @@ public:
      * @brief The direction the robot is facing. (Degrees East of North, ie - clockwise)
      */
     double Heading;
+
+    friend std::ostream &operator << (std::ostream &stream, RobotPosition &pos)
+    {
+        stream << "(" << pos.X << "," << pos.Y << "," << pos.Heading << ")";
+        return stream;
+    }
 };
 
 #endif // ROBOTPOSITION_HPP
