@@ -24,7 +24,6 @@ bool ConfigManager::load(std::string path)
         stringstream msg;
         msg << "[ConfigManager] Could not open config file: " << defaultPath;
         Logger::Log(LogLevel::Warning, msg.str());
-        //cout << "[ConfigManager] Could not open config file: " << defaultPath << endl;
         return false;
     }
 
@@ -33,7 +32,7 @@ bool ConfigManager::load(std::string path)
         stringstream msg;
         msg << "[ConfigManager] Could not parse config file: " << defaultPath;
         Logger::Log(LogLevel::Warning, msg.str());
-        //cout << "[ConfigManager] Could not parse config file: " << defaultPath << endl;
+        xmlFile.setContent(tr("<config>\n</config>"));
         return false;
     }
 
@@ -54,7 +53,6 @@ bool ConfigManager::save(string path)
         stringstream msg;
         msg << "[ConfigManager] Could not open file for saving.";
         Logger::Log(LogLevel::Warning, msg.str());
-        //cout << "[ConfigManager] Could not open file for saving." << endl;
         return false;
     }
 

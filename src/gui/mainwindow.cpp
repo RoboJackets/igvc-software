@@ -121,6 +121,13 @@ MainWindow::MainWindow(QWidget *parent) :
         _planner->OnNewGoalPos(_posTracker->WaypointToPosition(waypoint));
     });
 
+    connect(_compController.get(), &Controller::onNewWaypoint, [=](GPSData waypoint){
+        if((int)waypoint.Lat() == 0 && (int)waypoint.Long() == 0)
+        {
+            on_stopButton_clicked();
+        }
+    });
+
     connect(_posTracker.get(), SIGNAL(onNewPosition(RobotPosition)), _planner.get(), SLOT(OnNewStartPos(RobotPosition)));
 
     connect(_mapper.get(), SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), _planner.get(), SLOT(OnNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
@@ -424,6 +431,7 @@ void MainWindow::on_actionClearLogs_triggered()
 void MainWindow::closeEvent(QCloseEvent *e)
 {
     mdiArea->closeAllSubWindows();
+    ConfigManager::Instance().save();
     QMainWindow::closeEvent(e);
 }
 
