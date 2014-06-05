@@ -61,11 +61,13 @@ QImage CameraAdapter::CVMat2QImage(cv::Mat img)
 
 void CameraAdapter::on_saveLeft_clicked()
 {
+    QDir().mkdir("../Images/");
     leftImage.save("../Images/"+QDateTime::currentDateTime().toString()+"_left.jpg");
 }
 
 void CameraAdapter::on_saveRight_clicked()
 {
+    QDir().mkdir("../Images/");
     rightImage.save("../Images/"+QDateTime::currentDateTime().toString()+"_right.jpg");
 }
 
