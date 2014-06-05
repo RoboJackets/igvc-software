@@ -59,7 +59,7 @@ bool AStarPlanner::pathIsValid()
     kdtree.setInputCloud(searchproblem.Map.makeShared());
     std::vector<int> pointIdxRadiusSearch;
     std::vector<float> pointRadiusSquaredDistance;
-    float radius = ConfigManager::Instance().getValue("AStarPLanner", "CollisionThreshold", 1.0);
+    float radius = ConfigManager::Instance().getValue("AStarPlanner", "CollisionThreshold", 1.0);
     for(auto pair : path)
     {
         pcl::PointXYZ point;
