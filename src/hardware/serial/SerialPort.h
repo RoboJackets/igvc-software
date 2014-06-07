@@ -106,6 +106,8 @@ private:
     std::string _packet;
 
     std::string _line;
+
+    std::string _devicePath;
 };
 
 #endif /* SERIALPORT_H_ */
