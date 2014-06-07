@@ -20,6 +20,7 @@ LineDetector::LineDetector()
 }
 
 void LineDetector::onImageEvent(ImageData imgd){
+    QTime t = QDateTime::currentDateTime().time();
     src = imgd.mat();
     dst = src.clone();
     /** Total Average of the pixels in the screen. Used to account for brightness variability. */
@@ -36,11 +37,16 @@ void LineDetector::onImageEvent(ImageData imgd){
     transformPoints();
     toPointCloud();
 
-    onNewLines(ImageData(transformDst));
-    pcl::PointXY offset;
-    offset.x = ConfigManager::Instance().getValue("Camera", "OffsetX", 0.0f);
-    offset.y = ConfigManager::Instance().getValue("Camera", "OffsetY", 0.0f);
-    onNewCloud(cloud.makeShared(), offset);
+   // onNewLines(ImageData(transformDst));
+    onNewLinesMat(transformDst);
+    cout <<"Sending new matrix"<<endl;
+//    pcl::PointXY offset;
+//    offset.x = ConfigManager::Instance().getValue("Camera", "OffsetX", 0.0f);
+//    offset.y = ConfigManager::Instance().getValue("Camera", "OffsetY", 0.0f);
+
+//    onNewCloud(cloud.makeShared(), offset);
+    int timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
+    cout << "Time elapsed: " << timeElapsed <<endl;
 }
 
 void LineDetector::transformPoints(){
@@ -174,9 +180,9 @@ void LineDetector::blackAndWhite(float totalAvg){
 
             }
             else { //Otherwise, set pixel to black
-                dst.at<Vec3b>(i,j)[0] = 0;
-                dst.at<Vec3b>(i,j)[1] = 0;
-                dst.at<Vec3b>(i,j)[2] = 0;
+                dst.at<Vec3b>(i,j)[0] = 100;
+                dst.at<Vec3b>(i,j)[1] = 100;
+                dst.at<Vec3b>(i,j)[2] = 100;//all 0's
             }
         }
     }

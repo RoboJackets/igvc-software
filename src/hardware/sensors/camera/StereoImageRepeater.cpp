@@ -12,11 +12,19 @@ void StereoImageRepeater::thread_run()
     while(true)
     {
         onNewData(StereoImageData(_left, _right));
-        usleep(500);
+        onNewLeftImage(_left);
+        onNewRightImage(_right);
+        usleep(5000000); //500
     }
+}
+
+bool StereoImageRepeater::IsConnected(){
+    return true;
 }
 
 StereoImageRepeater::~StereoImageRepeater()
 {
 
 }
+
+
