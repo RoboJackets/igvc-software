@@ -14,6 +14,12 @@ void StereoImageRepeater::thread_run()
         onNewData(StereoImageData(_left, _right));
         onNewLeftImage(_left);
         onNewRightImage(_right);
+        try {
+            boost::this_thread::interruption_point();
+        } catch (...) {
+            return;
+        }
+
         usleep(5000000); //500
     }
 }
@@ -24,7 +30,8 @@ bool StereoImageRepeater::IsConnected(){
 
 StereoImageRepeater::~StereoImageRepeater()
 {
-
+    _thread.interrupt();
+    _thread.join();
 }
 
 

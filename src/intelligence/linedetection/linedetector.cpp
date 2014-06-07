@@ -40,23 +40,26 @@ void LineDetector::onImageEvent(ImageData imgd){
    // onNewLines(ImageData(transformDst));
     onNewLinesMat(transformDst);
     cout <<"Sending new matrix"<<endl;
-//    pcl::PointXY offset;
-//    offset.x = ConfigManager::Instance().getValue("Camera", "OffsetX", 0.0f);
-//    offset.y = ConfigManager::Instance().getValue("Camera", "OffsetY", 0.0f);
+    pcl::PointXY offset;
+    offset.x = ConfigManager::Instance().getValue("Camera", "OffsetX", 0.0f);
+    offset.y = ConfigManager::Instance().getValue("Camera", "OffsetY", 0.0f);
 
-//    onNewCloud(cloud.makeShared(), offset);
     int timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
+    cout << "Time elapsed: " << timeElapsed <<endl;
+
+    onNewCloud(cloud.makeShared(), offset);
+
+
+    timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
     cout << "Time elapsed: " << timeElapsed <<endl;
 }
 
 void LineDetector::transformPoints(){
-
-    int offset = 100;
     int factor = 5;
     //pcam is where the coordinates are in actual space (in inches right now)
     //pcam = (cv::Mat_<float>(4,2) << offset-12,72, offset, 72, offset, 60,offset -12, 60);
     pcam = (cv::Mat_<float>(4,2) << 4,81, -8, 81, -8, 93,4, 93);
-    pcam = pcam+offset;
+    pcam = pcam+ConfigManager::Instance().getValue("Line Detector", "Disp Offset", 100);
     //p is where they show up as pixels on the camera
     //p = (cv::Mat_<float>(4,2) << 427, 642, 515, 642, 512, 589, 432, 588);
      p= (cv::Mat_<float>(4,2) << 440, 674, 356, 679, 364, 631, 439, 627);
@@ -68,34 +71,14 @@ void LineDetector::transformPoints(){
 }
 
 void LineDetector::toPointCloud(){
-    cloud.width = transformDst.rows*transformDst.cols/2; //change later
-    cloud.height = 1;
-    cloud.points.resize(cloud.width*cloud.height);
-    int i =0;
-
-    //Add points to the cloud if they are white (right now only checking the first
-    //layer)
+    int offset = ConfigManager::Instance().getValue("Line Detector", "Disp Offset", 100);
+    //Add points to the cloud if they are white (right now only checking the first layer)
     for (int r=0; r<transformDst.rows;r++){
         for (int c=0; c<transformDst.cols; c++){
             if (transformDst.at<cv::Vec3b>(r,c)[0]==255){
-                cloud.points[i].x = .0245*(c-100)/2;
-                cloud.points[i].y = .0245*(r-100)/2;
-                cloud.points[i++].z = 1;
+                cloud.points.push_back(pcl::PointXYZ(.0245*(c-offset)/2, .0245*(r-offset)/2, 0));
             }
         }
-    }
-
-    //Plots one meter long lines on x and y for scale
-    for(int r=0; r<21; r++){
-        cloud.points[i].x = 0;
-        cloud.points[i].y = (float) r/20;
-        cloud.points[i++].z = 0;
-    }
-
-    for(int r=0; r<21; r++){
-        cloud.points[i].x = (float) r/20;
-        cloud.points[i].y =0;
-        cloud.points[i++].z = 0;
     }
 
 }
@@ -180,9 +163,9 @@ void LineDetector::blackAndWhite(float totalAvg){
 
             }
             else { //Otherwise, set pixel to black
-                dst.at<Vec3b>(i,j)[0] = 100;
-                dst.at<Vec3b>(i,j)[1] = 100;
-                dst.at<Vec3b>(i,j)[2] = 100;//all 0's
+                dst.at<Vec3b>(i,j)[0] = 0;
+                dst.at<Vec3b>(i,j)[1] = 0;
+                dst.at<Vec3b>(i,j)[2] = 0;//all 0's
             }
         }
     }
@@ -229,18 +212,19 @@ void LineDetector::detectObstacle(int row, int col){
 /**
  *  \brief LineDetector::getAvg gets the average of the relevant pixels
  *  \return the average as a floating point number
+ *  \note This is not really averaging... Not entirely sure what this actually does.
  */
 float LineDetector::getAvg(){
     Vec3b p;
-    float totalAvg = 0;
-    for (int i = src.rows/3; i< 5*src.rows/6; i++){
-        for(int j=src.cols/6; j< 5*src.cols/6; j++){
-            p = dst.at<Vec3b>(i, j);
-            totalAvg += (p[0]+p[1]+p[2])/3;
+        float totalAvg = 0;
+        for (int i = src.rows/3; i< 5*src.rows/6; i++){
+            for(int j=src.cols/6; j< 5*src.cols/6; j++){
+                p = dst.at<Vec3b>(i, j);
+                totalAvg += (p[0]+p[1]+p[2])/3;
+            }
         }
-    }
-    totalAvg = (25*totalAvg)/(src.cols*src.rows*8);
-    return totalAvg;
+        totalAvg = (25*totalAvg)/(src.cols*src.rows*8);
+        return totalAvg;
 }
 
 /**
