@@ -10,7 +10,8 @@
 #include <common/logger/logger.h>
 
 SerialPort::SerialPort(std::string port_name, size_t baud)
-    : port(ioservice)
+    : port(ioservice),
+      _devicePath(port_name)
 {
     try
     {
@@ -83,7 +84,9 @@ void SerialPort::eventThreadRun() {
 }
 
 void SerialPort::close() {
-
+    std::stringstream msg;
+    msg << "Closing port " << _devicePath;
+    Logger::Log(LogLevel::Info, msg.str());
     if(_eventsEnabled)
     {
         _eventsEnabled = false;
@@ -131,7 +134,9 @@ std::string SerialPort::readln() {
             boost::asio::read(port, boost::asio::buffer(&c,1));
 
 		} catch(boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
-            Logger::Log(LogLevel::Error, "Error reading serial port. Device may have been uplugged.");
+            std::stringstream msg;
+            msg << "Error reading " << _devicePath << ". Device may have been unplugged.";
+            Logger::Log(LogLevel::Error, msg.str());
             Logger::Log(LogLevel::Error, err.what());
 			return line;
 		}
