@@ -4,11 +4,14 @@
 #include "pathplanner.hpp"
 #include "GraphSearch.hpp"
 #include "igvcsearchproblem.h"
+#include <boost/thread.hpp>
 
 class AStarPlanner : public PathPlanner
 {
 public:
     AStarPlanner();
+
+    ~AStarPlanner();
 
     path_t GetPath();
 
@@ -29,6 +32,10 @@ protected:
     bool mapSet;
     bool startSet;
     bool goalSet;
+
+    bool replanRequested;
+
+    boost::thread thread;
 
 public slots:
     void OnNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr map);

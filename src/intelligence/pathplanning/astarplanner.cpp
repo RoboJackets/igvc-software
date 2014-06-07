@@ -22,6 +22,14 @@ AStarPlanner::AStarPlanner()
     mapSet = false;
     goalSet = false;
     startSet = false;
+
+    replanRequested = false;
+    thread = boost::thread(boost::bind(&AStarPlanner::run, this));
+}
+
+AStarPlanner::~AStarPlanner()
+{
+
 }
 
 path_t AStarPlanner::GetPath()
@@ -31,19 +39,28 @@ path_t AStarPlanner::GetPath()
 
 void AStarPlanner::run()
 {
-    if(mapSet && startSet && goalSet)
+    while(true)
     {
-        searchproblem.Speed = ConfigManager::Instance().getValue("AStarPlanner", "Velocity", 1.0);
-        searchproblem.DeltaT = ConfigManager::Instance().getValue("AStarPlanner", "DeltaT", 1.0);
-        searchproblem.PointTurnsEnabled = false;
-        searchproblem.Baseline = ConfigManager::Instance().getValue("Robot", "Baseline", 0);
-        searchproblem.Threshold = ConfigManager::Instance().getValue("AStarPlanner", "CollisionRadius", 1.0);
-        searchproblem.GoalThreshold = ConfigManager::Instance().getValue("AStarPlanner", "GoalThreshold", 1.0);
-        auto newpath = GraphSearch::AStar(searchproblem);
-        path.clear();
-        for(int i = 0; i < newpath.getNumberOfSteps(); i++)
-            path.push_back(std::pair<SearchMove,SearchLocation>(newpath.getAction(i), newpath.getState(i+1)));
-        OnNewPath(path);
+        if(mapSet && startSet && goalSet && replanRequested)
+        {
+            searchproblem.Speed = ConfigManager::Instance().getValue("AStarPlanner", "Velocity", 1.0);
+            searchproblem.DeltaT = ConfigManager::Instance().getValue("AStarPlanner", "DeltaT", 1.0);
+            searchproblem.PointTurnsEnabled = false;
+            searchproblem.Baseline = ConfigManager::Instance().getValue("Robot", "Baseline", 1.0);
+            searchproblem.Threshold = ConfigManager::Instance().getValue("AStarPlanner", "CollisionRadius", 1.0);
+            searchproblem.GoalThreshold = ConfigManager::Instance().getValue("AStarPlanner", "GoalThreshold", 1.0);
+            auto newpath = GraphSearch::AStar(searchproblem);
+            path.clear();
+            for(int i = 0; i < newpath.getNumberOfSteps(); i++)
+                path.push_back(std::pair<SearchMove,SearchLocation>(newpath.getAction(i), newpath.getState(i+1)));
+            OnNewPath(path);
+            try {
+                boost::this_thread::interruption_point();
+            } catch(...) {
+                return;
+            }
+        }
+        usleep(300000);
     }
 }
 
@@ -91,7 +108,7 @@ void AStarPlanner::OnNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr map)
     searchproblem.Map = *map;
     mapSet = true;
     if(!pathIsValid())
-        run();
+        replanRequested = true;
 }
 
 void AStarPlanner::OnNewStartPos(RobotPosition pos)
@@ -99,7 +116,7 @@ void AStarPlanner::OnNewStartPos(RobotPosition pos)
     searchproblem.Start = SearchLocation(pos.X, pos.Y, pos.Heading);
     startSet = true;
     if(!pathIsValid())
-        run();
+        replanRequested = true;
 }
 
 void AStarPlanner::OnNewGoalPos(RobotPosition pos)
@@ -110,5 +127,5 @@ void AStarPlanner::OnNewGoalPos(RobotPosition pos)
     msg << "Path planner received new goal pos " << pos;
     Logger::Log(LogLevel::Debug, msg.str());
     if(!pathIsValid())
-        run();
+        replanRequested = true;
 }
