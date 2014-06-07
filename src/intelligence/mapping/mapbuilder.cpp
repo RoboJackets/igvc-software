@@ -110,7 +110,7 @@ void MapBuilder::onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::Po
     pcl::VoxelGrid<pcl::PointXYZ> duplicateRemover;
 
     duplicateRemover.setInputCloud(cloud);
-    duplicateRemover.setLeafSize (0.05f, 0.05f, 0.05f);
+    duplicateRemover.setLeafSize (0.5f, 0.5f, 0.5f);
     duplicateRemover.filter(*cloud_removedDuplicates);
 
     cloud.swap(cloud_removedDuplicates);

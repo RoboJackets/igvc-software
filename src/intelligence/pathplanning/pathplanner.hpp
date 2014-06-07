@@ -13,7 +13,9 @@ typedef std::vector<std::pair<SearchMove, SearchLocation>> path_t;
 class PathPlanner : public QObject {
     Q_OBJECT
 public:
-    PathPlanner() { }
+    PathPlanner() {
+        qRegisterMetaType<path_t>("path_t");
+    }
     virtual ~PathPlanner() { }
 
     virtual path_t GetPath() = 0;

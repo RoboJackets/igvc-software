@@ -43,6 +43,14 @@ void LMS200::thread_run()
             Logger::Log(LogLevel::Error, "Failed to get scan data from SICK LMS200 device.");
             continue;
         }
+        try {
+            if(_device.GetSickStatus() != SickLMS::SICK_STATUS_OK)
+            {
+                Logger::Log(LogLevel::Warning, tr("Sick status is %1").arg(_device.GetSickStatusAsString().c_str()).toStdString());
+            }
+        } catch(...) {
+            Logger::Log(LogLevel::Debug, "Couldn't get SICK status.");
+        }
 
         LidarState state;
         for(uint i = 0; i < num_values_returned; i++)
@@ -74,7 +82,12 @@ LidarState LMS200::GetStateAtTime(timeval)
 
 bool LMS200::IsWorking()
 {
-    return _device.IsInitialized() && _device.GetSickStatus() == SickLMS::SICK_STATUS_OK;
+    try {
+        return _device.IsInitialized() && _device.GetSickStatus() == SickLMS::SICK_STATUS_OK;
+    } catch (...) {
+        Logger::Log(LogLevel::Warning, "Failed to check SICK status.");
+        return false;
+    }
 }
 
 LMS200::~LMS200()
