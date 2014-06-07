@@ -40,6 +40,10 @@ void PathFollower::run()
 
             }
         }
+        else
+        {
+            newMotorCommand(MotorCommand(0,0));
+        }
     }
     _threadIsRunning = false;
 }
