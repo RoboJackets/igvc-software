@@ -12,6 +12,7 @@ class StereoSource : public QObject
 public:
     StereoSource() : _running(true) {
         qRegisterMetaType<StereoImageData>("StereoImageData");
+        qRegisterMetaType<ImageData>("ImageData");
     }
     inline bool Running() {return _running;}
     inline void Running(bool newState) {_running = newState;}
