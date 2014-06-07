@@ -49,7 +49,7 @@ void MapBuilder::onLidarData(LidarState state)
         {
             pcl::PointXYZ p;
             p.x = cos(state.points[i].angle)*state.points[i].distance;
-            p.y = -sin(state.points[i].angle)*state.points[i].distance;
+            p.y = sin(state.points[i].angle)*state.points[i].distance;
             p.z = 0;
             cloud_lidar->points.push_back(p);
         }
@@ -72,7 +72,7 @@ void MapBuilder::onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::Po
     double my =  -pose.Y - sensorOffset.y;
     double mt = AngleUtils::degToRads(pose.Heading);
     Eigen::Vector3f translation(mx, my, 0);
-    Eigen::Quaternionf rotation(Eigen::AngleAxisf(mt, Eigen::Vector3f::UnitZ()));
+    Eigen::Quaternionf rotation(Eigen::AngleAxisf(-mt, Eigen::Vector3f::UnitZ()));
     pcl::transformPointCloud(*frame, *cloud_transformed, translation, rotation);
 
     // ICP to refine cloud alignment
@@ -110,7 +110,8 @@ void MapBuilder::onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::Po
     pcl::VoxelGrid<pcl::PointXYZ> duplicateRemover;
 
     duplicateRemover.setInputCloud(cloud);
-    duplicateRemover.setLeafSize (0.5f, 0.5f, 0.5f);
+    float leafSize = ConfigManager::Instance().getValue("MapBuilder", "VoxelLeafSize", 0.25);
+    duplicateRemover.setLeafSize (leafSize, leafSize, leafSize);
     duplicateRemover.filter(*cloud_removedDuplicates);
 
     cloud.swap(cloud_removedDuplicates);

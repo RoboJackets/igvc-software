@@ -55,14 +55,16 @@ void LineDetector::onImageEvent(ImageData imgd){
 }
 
 void LineDetector::transformPoints(){
-    int factor = 5;
-    //pcam is where the coordinates are in actual space (in inches right now)
+    //pcam is where the coordinates are in actual space (in meters right now)
     //pcam = (cv::Mat_<float>(4,2) << offset-12,72, offset, 72, offset, 60,offset -12, 60);
-    pcam = (cv::Mat_<float>(4,2) << 4,81, -8, 81, -8, 93,4, 93);
-    pcam = pcam+ConfigManager::Instance().getValue("Line Detector", "Disp Offset", 100);
+   // pcam = (cv::Mat_<float>(4,2) << 4,81, -8, 81, -8, 93,4, 93);
+    int squareSize = ConfigManager::Instance().getValue("LineDetector", "SquareSize", 100);
+    pcam = (cv::Mat_<float>(4,2) << transformDst.cols/2 - (squareSize/2),transformDst.rows-squareSize, transformDst.cols/2+(squareSize/2), transformDst.rows-squareSize, transformDst.cols/2-(squareSize/2), transformDst.rows - squareSize*2, transformDst.cols/2+(squareSize/2), transformDst.rows - squareSize*2);
+    //pcam = pcam/0.0245+ConfigManager::Instance().getValue("Line Detector", "Disp Offset", 100);
     //p is where they show up as pixels on the camera
     //p = (cv::Mat_<float>(4,2) << 427, 642, 515, 642, 512, 589, 432, 588);
-     p= (cv::Mat_<float>(4,2) << 440, 674, 356, 679, 364, 631, 439, 627);
+    // p= (cv::Mat_<float>(4,2) << 440, 674, 356, 679, 364, 631, 439, 627);
+     p= (cv::Mat_<float>(4,2) << 344, 646, 668, 636, 415, 496, 619, 488);
     //pcam = pcam*3+450; //This is just so we can see it on the screen
     //Getting the transform
     transformMat = cv::getPerspectiveTransform(p, pcam);
@@ -71,16 +73,17 @@ void LineDetector::transformPoints(){
 }
 
 void LineDetector::toPointCloud(){
-    int offset = ConfigManager::Instance().getValue("Line Detector", "Disp Offset", 100);
+    int squareSize = ConfigManager::Instance().getValue("LineDetector", "SquareSize", 100);
     //Add points to the cloud if they are white (right now only checking the first layer)
     for (int r=0; r<transformDst.rows;r++){
         for (int c=0; c<transformDst.cols; c++){
             if (transformDst.at<cv::Vec3b>(r,c)[0]==255){
-                cloud.points.push_back(pcl::PointXYZ(.0245*(c-offset)/2, .0245*(r-offset)/2, 0));
+                float x = ( c - ( transformDst.cols/2. ) ) / (float)squareSize;
+                float y = ( transformDst.rows - r ) / (float)squareSize;
+                cloud.points.push_back(pcl::PointXYZ(x, y, 0));
             }
         }
     }
-
 }
 
 
@@ -162,6 +165,7 @@ void LineDetector::blackAndWhite(float totalAvg){
                 dst.at<Vec3b>(i,j)[2] = 255;
 
             }
+
             else { //Otherwise, set pixel to black
                 dst.at<Vec3b>(i,j)[0] = 0;
                 dst.at<Vec3b>(i,j)[1] = 0;

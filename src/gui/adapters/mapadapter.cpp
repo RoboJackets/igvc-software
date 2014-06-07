@@ -72,7 +72,7 @@ void MapAdapter::paintEvent(QPaintEvent *)
             for(iter = _map->begin(); iter != _map->end(); iter++)
             {
                 PointXYZ mPoint = (*iter);
-                QPoint sPoint = QPoint((int)(mPoint.x * _scale), (int)(mPoint.y * _scale));
+                QPoint sPoint = QPoint((int)(mPoint.x * _scale), (int)(-mPoint.y * _scale));
                 sPoint += center;
                 // Displays points as 3x3 pixel crosses
                 painter.drawLine(sPoint - QPoint(1,0), sPoint + QPoint(1,0));
