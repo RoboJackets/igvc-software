@@ -29,6 +29,7 @@ public slots:
 
 signals:
     void onNewLines(ImageData data);
+    void onNewLinesMat(cv::Mat mat);
     void onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr data, pcl::PointXY sensorOffset);
 private:
     void blackoutSection(int rowl, int rowu, int coll, int colu);

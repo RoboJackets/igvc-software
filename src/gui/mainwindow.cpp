@@ -17,6 +17,7 @@
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/nmeacompatiblegps.h>
 #include <hardware/sensors/camera/StereoPlayback.h>
+#include <hardware/sensors/camera/StereoImageRepeater.h>
 #include <hardware/sensors/camera/Bumblebee2.h>
 #include <hardware/sensors/IMU/Ardupilot.h>
 #include <hardware/sensors/lidar/SimulatedLidar.h>
@@ -82,7 +83,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->hardwareStatusList->addItem("LIDAR");
     ui->actionLMS_200->setChecked(true);
 
-    _stereoSource = std::shared_ptr<StereoSource>(new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml"));
+ //  _stereoSource = std::shared_ptr<StereoSource>(new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml"));
+    _stereoSource = std::shared_ptr<StereoSource>(new StereoImageRepeater("/home/robojackets/Pictures/img_left1.jpg", "/home/robojackets/Pictures/img_right1.jpg"));
     ui->hardwareStatusList->addItem("Camera");
 
     _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/igvc_gps", 19200));
@@ -97,6 +99,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _lineDetector = std::shared_ptr<LineDetector>(new LineDetector());
     connect(_stereoSource.get(), SIGNAL(onNewLeftImage(ImageData)), _lineDetector.get(), SLOT(onImageEvent(ImageData)));
+
+
 
     _mapper = std::shared_ptr<MapBuilder>(new MapBuilder(_lidar, _posTracker));
     connect(_lidar.get(), SIGNAL(onNewData(LidarState)), _mapper.get(), SLOT(onLidarData(LidarState)));
@@ -195,7 +199,7 @@ void MainWindow::openHardwareView(QModelIndex index)
         }
         else if(labelText == "Camera")
         {
-            adapter = new CameraAdapter(_stereoSource);
+            adapter = new CameraAdapter(_stereoSource, _lineDetector);
         }
         else if(labelText == "IMU")
         {
