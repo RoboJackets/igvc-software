@@ -76,7 +76,7 @@ void MapBuilder::onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::Po
     pcl::transformPointCloud(*frame, *cloud_transformed, translation, rotation);
 
     // ICP to refine cloud alignment
-    if(!cloud->empty())
+    if(false)//!cloud->empty())
     {
         //Use ICP to fix errors in transformation
         pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
