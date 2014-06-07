@@ -7,6 +7,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <hardware/sensors/camera/StereoSource.hpp>
+#include <intelligence/linedetection/linedetector.h>
 
 
 namespace Ui {
@@ -22,7 +23,7 @@ class CameraAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit CameraAdapter(std::shared_ptr<StereoSource> source, QWidget *parent = 0);
+    explicit CameraAdapter(std::shared_ptr<StereoSource> source, std::shared_ptr<LineDetector> source2, QWidget *parent = 0);
     ~CameraAdapter();
 
 protected:
@@ -35,6 +36,8 @@ private slots:
 
     void on_saveRight_clicked();
 
+    void onLineImage(cv::Mat data);
+
 private:
     Ui::CameraAdapter *ui;
 
@@ -42,6 +45,7 @@ private:
     QImage rightImage;
 
     std::shared_ptr<StereoSource> _stereoSource;
+    std::shared_ptr<LineDetector> _lineDetector;
 
     StereoImageData _data;
     bool gotData;

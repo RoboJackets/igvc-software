@@ -9,6 +9,7 @@ class StereoImageRepeater : public StereoSource
     public:
         StereoImageRepeater(std::string pathLeft, std::string pathRight);
         virtual ~StereoImageRepeater();
+        virtual bool IsConnected();
     protected:
     private:
         cv::Mat _left;

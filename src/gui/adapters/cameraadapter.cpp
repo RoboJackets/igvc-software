@@ -8,7 +8,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <QDateTime>
 
-CameraAdapter::CameraAdapter(std::shared_ptr<StereoSource> source, QWidget *parent) :
+CameraAdapter::CameraAdapter(std::shared_ptr<StereoSource> source, std::shared_ptr<LineDetector> source2, QWidget *parent) :
      QWidget(parent),
      ui(new Ui::CameraAdapter)
 {
@@ -18,6 +18,15 @@ CameraAdapter::CameraAdapter(std::shared_ptr<StereoSource> source, QWidget *pare
     {
         _stereoSource = source;
         connect(_stereoSource.get(), SIGNAL(onNewData(StereoImageData)), this, SLOT(onCameraData(StereoImageData)));
+    }
+
+
+
+    if (source2.get() != nullptr)
+    {
+        cout<<"I have a source!"<<endl;
+        _lineDetector = source2;
+        connect(_lineDetector.get(), SIGNAL(onNewLinesMat(cv::Mat)), this, SLOT(onLineImage(cv::Mat)));
     }
 
     if(parent)
@@ -46,6 +55,15 @@ void CameraAdapter::onCameraData(StereoImageData data)
         update();
     }
 }
+
+void CameraAdapter::onLineImage(cv::Mat img){
+    _mutex.lock();
+    rightImage = CVMat2QImage(img);
+    _mutex.unlock();
+   // update();
+}
+
+
 
 
 QImage CameraAdapter::CVMat2QImage(cv::Mat img)
@@ -77,7 +95,7 @@ void CameraAdapter::paintEvent(QPaintEvent *e)
 
     if(gotData){
         leftImage = CVMat2QImage(_data.left().mat());
-        rightImage = CVMat2QImage(_data.right().mat());
+        //rightImage = CVMat2QImage(_data.right().mat());
         ui->leftFeedLabel->setPixmap(QPixmap::fromImage(leftImage));
         ui->rightFeedLabel->setPixmap(QPixmap::fromImage(rightImage));
     }
