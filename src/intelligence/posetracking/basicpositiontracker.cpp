@@ -5,7 +5,8 @@
 
 BasicPositionTracker::BasicPositionTracker(std::shared_ptr<GPS> gps, std::shared_ptr<IMU> imu)
     : _gps(gps),
-      _imu(imu)
+      _imu(imu),
+      currentPosition(0,0,0)
 {
     qRegisterMetaType<RobotPosition>("RobotPosition");
     originPointsRecorded = 0;
