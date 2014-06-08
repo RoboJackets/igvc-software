@@ -22,6 +22,7 @@
 #include <intelligence/controller/controller.h>
 #include <common/utils/GPSWaypointSource.h>
 #include <intelligence/pathfollowing/pathfollower.h>
+#include <intelligence/barrelfinder/barrelfinder.h>
 
 namespace Ui {
 class MainWindow;
@@ -115,6 +116,8 @@ private:
     std::shared_ptr<Controller> _compController;
 
     std::shared_ptr<PathFollower> _pathFollower;
+
+    std::shared_ptr<BarrelFinder> _barrelFinder;
 
     bool isRunning, isPaused;
 

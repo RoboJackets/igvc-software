@@ -1,4 +1,5 @@
 #include "StereoImageRepeater.h"
+#include <common/config/configmanager.h>
 
 StereoImageRepeater::StereoImageRepeater(std::string pathLeft, std::string pathRight)
 {
@@ -19,8 +20,8 @@ void StereoImageRepeater::thread_run()
         } catch (...) {
             return;
         }
-
-        usleep(5000000); //500
+        _fps = ConfigManager::Instance().getValue("ImageRepeater", "FPS", 3);
+        usleep(1000000/_fps);
     }
 }
 

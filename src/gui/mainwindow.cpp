@@ -92,7 +92,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _lineDetector = std::shared_ptr<LineDetector>(new LineDetector());
     connect(_stereoSource.get(), SIGNAL(onNewLeftImage(ImageData)), _lineDetector.get(), SLOT(onImageEvent(ImageData)));
 
-
+    _barrelFinder = std::shared_ptr<BarrelFinder>(new BarrelFinder());
+    connect(_stereoSource.get(), SIGNAL(onNewLeftImage(ImageData)), _barrelFinder.get(), SLOT(onNewImage(ImageData)));
 
     _mapper = std::shared_ptr<MapBuilder>(new MapBuilder(_lidar, _posTracker));
     connect(_lidar.get(), SIGNAL(onNewData(LidarState)), _mapper.get(), SLOT(onLidarData(LidarState)));
