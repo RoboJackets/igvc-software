@@ -21,9 +21,9 @@ LineDetector::LineDetector()
 }
 
 void LineDetector::onImageEvent(ImageData imgd){
-    QTime t = QDateTime::currentDateTime().time();
     src = imgd.mat();
     dst = src.clone();
+    cv::resize(dst, dst, cv::Size(512, 384));
     /** Total Average of the pixels in the screen. Used to account for brightness variability. */
     float totalAvg = getAvg();
 
@@ -126,8 +126,8 @@ void LineDetector::Dilation()
  */
 void LineDetector::blackAndWhite(float totalAvg){
     Vec3b p;
-    int rows = src.rows;
-    int cols = src.cols;
+    int rows = dst.rows;
+    int cols = dst.cols;
 
     //Turn the top quarter of the screen and bottom sixth of the screen black
     //We can disregard these areas - may extend the bottom of the screen slightly later on
@@ -223,13 +223,13 @@ void LineDetector::detectObstacle(int row, int col){
 float LineDetector::getAvg(){
     Vec3b p;
         float totalAvg = 0;
-        for (int i = src.rows/3; i< 5*src.rows/6; i++){
-            for(int j=src.cols/6; j< 5*src.cols/6; j++){
+        for (int i = dst.rows/3; i< 5*dst.rows/6; i++){
+            for(int j=dst.cols/6; j< 5*dst.cols/6; j++){
                 p = dst.at<Vec3b>(i, j);
                 totalAvg += (p[0]+p[1]+p[2])/3;
             }
         }
-        totalAvg = (25*totalAvg)/(src.cols*src.rows*8);
+        totalAvg = (25*totalAvg)/(dst.cols*dst.rows*8);
         return totalAvg;
 }
 
