@@ -17,6 +17,7 @@ void BarrelFinder::onNewImage(ImageData data)
         Logger::Log(LogLevel::Error, "Barrel finder can only work on BGR images!");
 
     cv::Mat img = data.mat();
+    cv::resize(img, img, cv::Size(512, 384));
     cv::Mat binary = cv::Mat(img.rows, img.cols, CV_8UC1);
 
     int bT = ConfigManager::Instance().getValue("BarrelFinder", "blueThresh", 100);
@@ -66,6 +67,7 @@ void BarrelFinder::onNewImage(ImageData data)
         cv::dilate( binary, binary, element );
     }
 
+    cv::imshow("barrel finder", binary);
 
     int minWidth = ConfigManager::Instance().getValue("BarrelFinder", "minWidth", 50);
     for(int r = 0; r < binary.rows; r++)
@@ -147,18 +149,19 @@ void BarrelFinder::onNewImage(ImageData data)
 
     // Transpose back to correct orientation
     cv::transpose(binary, binary);
-    cloud = toPointCloud(binary);
-
+    cv::cvtColor(binary, binary, CV_GRAY2BGR);
     cv::Mat dst(binary.rows, binary.cols, CV_8UC3);
     transformPoints(binary, dst);
-    cloud = toPointCloud(binary);
-    cv::cvtColor(dst, dst, CV_GRAY2BGR);
+    cv::threshold(dst, dst, 1, 255, CV_THRESH_BINARY);
+    cloud = toPointCloud(dst);
+
     onNewLinesMat(dst);
 
     pcl::PointXY offset;
     offset.x = ConfigManager::Instance().getValue("BarrelFinder", "Xoffset", 0);
     offset.y = ConfigManager::Instance().getValue("BarrelFinder", "Yoffset", 0);
     newCloudFrame(cloud.makeShared(), offset);
+
 }
 
 
