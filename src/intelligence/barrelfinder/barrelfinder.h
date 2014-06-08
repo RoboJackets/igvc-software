@@ -13,6 +13,7 @@ public:
 
 signals:
     void newCloudFrame(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
+    void onNewLinesMat(cv::Mat dst);
 
 public slots:
     void onNewImage(ImageData data);
