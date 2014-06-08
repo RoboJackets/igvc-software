@@ -74,8 +74,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionLMS_200->setChecked(true);
 
     //_stereoSource = std::shared_ptr<StereoSource>(new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml"));
-    //_stereoSource = std::shared_ptr<StereoSource>(new StereoImageRepeater("/home/matt/Pictures/img_left0.jpg", "/home/matt/Pictures/img_left0.jpg"));
-    _stereoSource = std::shared_ptr<StereoSource>(new StereoImageRepeater("/home/robojackets/igvc/software/build-IGVC_Control-Desktop_Qt_5_2_1_GCC_64bit-Debug/Sun Jun 8 14:34:28 2014img.jpg", "/home/robojackets/Pictures/img_left0.jpg"));
+    _stereoSource = std::shared_ptr<StereoSource>(new StereoImageRepeater("/home/matt/Pictures/img_left0.jpg", "/home/matt/Pictures/img_left0.jpg"));
+    //_stereoSource = std::shared_ptr<StereoSource>(new StereoImageRepeater("/home/robojackets/igvc/software/build-IGVC_Control-Desktop_Qt_5_2_1_GCC_64bit-Debug/Sun Jun 8 14:34:28 2014img.jpg", "/home/robojackets/Pictures/img_left0.jpg"));
     ui->hardwareStatusList->addItem("Camera");
 
     _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/igvc_gps", 19200));

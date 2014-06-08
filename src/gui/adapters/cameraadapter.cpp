@@ -39,6 +39,7 @@ void CameraAdapter::newLineImage(cv::Mat data)
 {
     if(isVisible())
     {
+       // std::cout << "New line Image" <<std::endl;
         _mutex.lock();
         lineData = data;
         lineImage = CVMat2QImage(data);
