@@ -198,7 +198,9 @@ void transformPoints(Mat &src, Mat &dst){
     //p is where they show up as pixels on the camera
     //p = (cv::Mat_<float>(4,2) << 427, 642, 515, 642, 512, 589, 432, 588);
     // p= (cv::Mat_<float>(4,2) << 440, 674, 356, 679, 364, 631, 439, 627);
-    Mat  p= (cv::Mat_<float>(4,2) << 344, 646, 668, 636, 415, 496, 619, 488);
+    float ratioRows = (float) src.rows/768;
+    float ratioCols = (float) src.cols/1024;
+    Mat  p= (cv::Mat_<float>(4,2) << 344*ratioCols, 646*ratioRows, 668*ratioCols, 636*ratioRows, 415*ratioCols, 496*ratioRows, 619*ratioCols, 488*ratioRows);
     //pcam = pcam*3+450; //This is just so we can see it on the screen
     //Getting the transform
     Mat transformMat = cv::getPerspectiveTransform(p, pcam);

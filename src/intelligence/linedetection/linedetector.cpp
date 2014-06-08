@@ -34,9 +34,9 @@ void LineDetector::onImageEvent(ImageData imgd){
 
     Erosion();
     Dilation();
-
+    cv::Mat transformDst(dst.rows, dst.cols, CV_8UC3);
     transformPoints(dst, transformDst);
-    toPointCloud();
+    cloud = toPointCloud(transformDst);
 
    // onNewLines(ImageData(transformDst));
     onNewLinesMat(transformDst);
@@ -55,38 +55,38 @@ void LineDetector::onImageEvent(ImageData imgd){
 //    cout << "Time elapsed: " << timeElapsed <<endl;
 }
 
-void LineDetector::myTransformPoints(){
-    //pcam is where the coordinates are in actual space (in meters right now)
-    //pcam = (cv::Mat_<float>(4,2) << offset-12,72, offset, 72, offset, 60,offset -12, 60);
-   // pcam = (cv::Mat_<float>(4,2) << 4,81, -8, 81, -8, 93,4, 93);
-    int squareSize = ConfigManager::Instance().getValue("LineDetector", "SquareSize", 100);
-    pcam = (cv::Mat_<float>(4,2) << transformDst.cols/2 - (squareSize/2),transformDst.rows-squareSize, transformDst.cols/2+(squareSize/2), transformDst.rows-squareSize, transformDst.cols/2-(squareSize/2), transformDst.rows - squareSize*2, transformDst.cols/2+(squareSize/2), transformDst.rows - squareSize*2);
-    //pcam = pcam/0.0245+ConfigManager::Instance().getValue("Line Detector", "Disp Offset", 100);
-    //p is where they show up as pixels on the camera
-    //p = (cv::Mat_<float>(4,2) << 427, 642, 515, 642, 512, 589, 432, 588);
-    // p= (cv::Mat_<float>(4,2) << 440, 674, 356, 679, 364, 631, 439, 627);
-     p= (cv::Mat_<float>(4,2) << 344, 646, 668, 636, 415, 496, 619, 488);
-    //pcam = pcam*3+450; //This is just so we can see it on the screen
-    //Getting the transform
-    transformMat = cv::getPerspectiveTransform(p, pcam);
-    //Apply the transform to dst and store result in transformDST
-    cv::warpPerspective(dst, transformDst, transformMat, transformDst.size());
-}
+//void LineDetector::myTransformPoints(){
+//    //pcam is where the coordinates are in actual space (in meters right now)
+//    //pcam = (cv::Mat_<float>(4,2) << offset-12,72, offset, 72, offset, 60,offset -12, 60);
+//   // pcam = (cv::Mat_<float>(4,2) << 4,81, -8, 81, -8, 93,4, 93);
+//    int squareSize = ConfigManager::Instance().getValue("LineDetector", "SquareSize", 100);
+//    pcam = (cv::Mat_<float>(4,2) << transformDst.cols/2 - (squareSize/2),transformDst.rows-squareSize, transformDst.cols/2+(squareSize/2), transformDst.rows-squareSize, transformDst.cols/2-(squareSize/2), transformDst.rows - squareSize*2, transformDst.cols/2+(squareSize/2), transformDst.rows - squareSize*2);
+//    //pcam = pcam/0.0245+ConfigManager::Instance().getValue("Line Detector", "Disp Offset", 100);
+//    //p is where they show up as pixels on the camera
+//    //p = (cv::Mat_<float>(4,2) << 427, 642, 515, 642, 512, 589, 432, 588);
+//    // p= (cv::Mat_<float>(4,2) << 440, 674, 356, 679, 364, 631, 439, 627);
+//     p= (cv::Mat_<float>(4,2) << 344, 646, 668, 636, 415, 496, 619, 488);
+//    //pcam = pcam*3+450; //This is just so we can see it on the screen
+//    //Getting the transform
+//    transformMat = cv::getPerspectiveTransform(p, pcam);
+//    //Apply the transform to dst and store result in transformDST
+//    cv::warpPerspective(dst, transformDst, transformMat, transformDst.size());
+//}
 
-void LineDetector::toPointCloud(){
-    cloud.points.clear();
-    int squareSize = ConfigManager::Instance().getValue("LineDetector", "SquareSize", 100);
-    //Add points to the cloud if they are white (right now only checking the first layer)
-    for (int r=0; r<transformDst.rows;r++){
-        for (int c=0; c<transformDst.cols; c++){
-            if (transformDst.at<cv::Vec3b>(r,c)[0]==255){
-                float x = ( c - ( transformDst.cols/2. ) ) / (float)squareSize;
-                float y = ( transformDst.rows - r ) / (float)squareSize;
-                cloud.points.push_back(pcl::PointXYZ(x, y, 0));
-            }
-        }
-    }
-}
+//void LineDetector::myToPointCloud(){
+//    cloud.points.clear();
+//    int squareSize = ConfigManager::Instance().getValue("LineDetector", "SquareSize", 100);
+//    //Add points to the cloud if they are white (right now only checking the first layer)
+//    for (int r=0; r<transformDst.rows;r++){
+//        for (int c=0; c<transformDst.cols; c++){
+//            if (transformDst.at<cv::Vec3b>(r,c)[0]==255){
+//                float x = ( c - ( transformDst.cols/2. ) ) / (float)squareSize;
+//                float y = ( transformDst.rows - r ) / (float)squareSize;
+//                cloud.points.push_back(pcl::PointXYZ(x, y, 0));
+//            }
+//        }
+//    }
+//}
 
 
 void LineDetector::Erosion()
@@ -149,6 +149,13 @@ void LineDetector::blackAndWhite(float totalAvg){
     //Loops through relevant parts of the image and scans for white lines
     //Also tries to detect obstacles
     int tempAvg;
+    float redUp = ConfigManager::Instance().getValue("LineDetector", "RedUp", 1.7);
+    float redDown = ConfigManager::Instance().getValue("LineDetector", "RedDown", 1.1);
+    float greenUp = ConfigManager::Instance().getValue("LineDetector", "GreenUp", 1.6);
+    float greenDown = ConfigManager::Instance().getValue("LineDetector", "GreenDown", 1.05);
+    float blueUp = ConfigManager::Instance().getValue("LineDetector", "BlueUp", 2.2);
+    float blueDown = ConfigManager::Instance().getValue("LineDetector", "BlueDown", 1.5);
+    int diff = ConfigManager::Instance().getValue("LineDetector", "diff", 20);
     for (int i = rows/3; i< rows*5/6; i++){
         for(int j=0; j< cols; j++){
             tempAvg = totalAvg*(1.1 - i*.1/768);
@@ -156,12 +163,13 @@ void LineDetector::blackAndWhite(float totalAvg){
 
             //If there is a significant amount of red in the pixel, it's most likely an orange cone
             //Get rid of the obstacle
-            if (p[2] > totalAvg*2|| p[2] > 253){
-                detectObstacle(i, j);
-            }
+//            if (p[2] > totalAvg*2|| p[2] > 253){
+//                detectObstacle(i, j);
+//            }
+
             //Filters out the white and makes it pure white
-            if((p[0]>tempAvg*1.5)&& (p[0] < tempAvg*2.2)&& (p[1] < tempAvg*1.6)&&(p[2]>tempAvg*1.1) &&
-                    (p[2]<tempAvg*1.7)&&(p[1]>tempAvg*1.05)&&(abs(p[1] - p[2]) <20)){
+            if((p[0]>tempAvg*blueDown)&& (p[0] < tempAvg*blueUp)&& (p[1] < tempAvg*greenUp)&&(p[2]>tempAvg*redDown) &&
+                    (p[2]<tempAvg*redUp)&&(p[1]>tempAvg*greenDown)&&(abs(p[1] - p[2]) <diff)){
                 dst.at<Vec3b>(i,j)[0] = 255;
                 dst.at<Vec3b>(i,j)[1] = 255;
                 dst.at<Vec3b>(i,j)[2] = 255;
@@ -230,7 +238,7 @@ float LineDetector::getAvg(){
             }
         }
         totalAvg = (25*totalAvg)/(dst.cols*dst.rows*8);
-        std::cout << "Average: "<< totalAvg <<std::endl;
+        //std::cout << "Average: "<< totalAvg <<std::endl;
         return totalAvg;
 }
 
