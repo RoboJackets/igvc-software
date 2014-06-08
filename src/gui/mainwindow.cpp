@@ -73,9 +73,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->hardwareStatusList->addItem("LIDAR");
     ui->actionLMS_200->setChecked(true);
 
-    //_stereoSource = std::shared_ptr<StereoSource>(new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml"));
+    _stereoSource = std::shared_ptr<StereoSource>(new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml"));
     //_stereoSource = std::shared_ptr<StereoSource>(new StereoImageRepeater("/home/matt/Pictures/img_left0.jpg", "/home/matt/Pictures/img_left0.jpg"));
-    _stereoSource = std::shared_ptr<StereoSource>(new StereoImageRepeater("/home/robojackets/igvc/software/build-IGVC_Control-Desktop_Qt_5_2_1_GCC_64bit-Debug/Sun Jun 8 12:08:59 2014img.jpg", "/home/robojackets/Pictures/img_left0.jpg"));
+    //_stereoSource = std::shared_ptr<StereoSource>(new StereoImageRepeater("/home/robojackets/igvc/software/build-IGVC_Control-Desktop_Qt_5_2_1_GCC_64bit-Debug/Sun Jun 8 12:08:36 2014img.jpg", "/home/robojackets/Pictures/img_left0.jpg"));
     ui->hardwareStatusList->addItem("Camera");
 
     _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/igvc_gps", 19200));
@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _mapper = std::shared_ptr<MapBuilder>(new MapBuilder(_lidar, _posTracker));
     connect(_lidar.get(), SIGNAL(onNewData(LidarState)), _mapper.get(), SLOT(onLidarData(LidarState)));
     connect(_lineDetector.get(), SIGNAL(onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)), _mapper.get(), SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
-    connect(_barrelFinder.get(), SIGNAL(newCloudFrame(pcl::PointCloud<pcl::PointXYZ>::ConstPtr, pcl::PointXY)), _mapper.get(), SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
+    connect(_barrelFinder.get(), SIGNAL(newCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointXY)), _mapper.get(), SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
 
     ui->hardwareStatusList->addItem("Map");
 

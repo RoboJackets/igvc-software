@@ -64,6 +64,7 @@ void MapBuilder::onLidarData(LidarState state)
 
 void MapBuilder::onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::PointXY sensorOffset)
 {
+
     RobotPosition pose = poseTracker->GetPosition();
 
     //Transform current cloud to match robot's position
