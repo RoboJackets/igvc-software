@@ -131,7 +131,7 @@ void LineDetector::blackAndWhite(float totalAvg){
 
     //Turn the top quarter of the screen and bottom sixth of the screen black
     //We can disregard these areas - may extend the bottom of the screen slightly later on
-    for (int i = 0; i< rows/3; i++){
+    for (int i = 0; i< rows*4/9; i++){
         for(int j=0; j< cols; j++){
              dst.at<Vec3b>(i,j)[0] = 0;
              dst.at<Vec3b>(i,j)[1] = 0;
@@ -149,27 +149,27 @@ void LineDetector::blackAndWhite(float totalAvg){
     //Loops through relevant parts of the image and scans for white lines
     //Also tries to detect obstacles
     int tempAvg;
-    float redUp = ConfigManager::Instance().getValue("LineDetector", "RedUp", 1.5);
-    float redDown = ConfigManager::Instance().getValue("LineDetector", "RedDown", .6);
+    float redUp = ConfigManager::Instance().getValue("LineDetector", "RedUp", 1.7);
+    float redDown = ConfigManager::Instance().getValue("LineDetector", "RedDown", 1);
     float greenUp = ConfigManager::Instance().getValue("LineDetector", "GreenUp", 1.7);
-    float greenDown = ConfigManager::Instance().getValue("LineDetector", "GreenDown", 1.1);
-    float blueUp = ConfigManager::Instance().getValue("LineDetector", "BlueUp", 2.5);
-    float blueDown = ConfigManager::Instance().getValue("LineDetector", "BlueDown", 1.2);
-    int diff = ConfigManager::Instance().getValue("LineDetector", "diff", 10);
-    for (int i = rows/3; i< rows*5/6; i++){
+    float greenDown = ConfigManager::Instance().getValue("LineDetector", "GreenDown", .8);
+    float blueUp = ConfigManager::Instance().getValue("LineDetector", "BlueUp", 1.7);
+    float blueDown = ConfigManager::Instance().getValue("LineDetector", "BlueDown", 1.1);
+    int diff = ConfigManager::Instance().getValue("LineDetector", "diff", 5);
+    for (int i = rows*4/9; i< rows*5/6; i++){
         for(int j=0; j< cols; j++){
             tempAvg = totalAvg*(1.1 - i*.1/768);
             p = dst.at<Vec3b>(i, j); //Current pixel
 
             //If there is a significant amount of red in the pixel, it's most likely an orange cone
             //Get rid of the obstacle
-//            if (p[2] > totalAvg*2|| p[2] > 253){
-//                detectObstacle(i, j);
-//            }
+            if (p[2] > totalAvg*2|| p[2] > 253){
+                detectObstacle(i, j);
+            }
 
             //Filters out the white and makes it pure white
             if((p[0]>tempAvg*blueDown)&& (p[0] < tempAvg*blueUp)&& (p[1] < tempAvg*greenUp)&&(p[2]>tempAvg*redDown) &&
-                    (p[2]<tempAvg*redUp)&&(p[1]>tempAvg*greenDown)&&(abs(p[1] - p[2]) <diff)){
+                    (p[2]<tempAvg*redUp)&&(p[1]>tempAvg*greenDown)&&(abs(p[1] - p[2]) <tempAvg/diff)){
                 dst.at<Vec3b>(i,j)[0] = 255;
                 dst.at<Vec3b>(i,j)[1] = 255;
                 dst.at<Vec3b>(i,j)[2] = 255;
