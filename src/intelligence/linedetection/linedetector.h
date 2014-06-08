@@ -33,8 +33,8 @@ signals:
     void onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr data, pcl::PointXY sensorOffset);
 private:
     void blackoutSection(int rowl, int rowu, int coll, int colu);
-    void myTransformPoints();
-    void toPointCloud();
+    //void myTransformPoints();
+    //void toPointCloud();
     float getAvg(void);
     void blackAndWhite(float totalAvg);
     int display_dst(int delay);
@@ -61,7 +61,7 @@ private:
 
     const int max_elem;
     const int max_kernel_size;
-    cv::Mat p, pcam, transformDst, transformMat;
+    cv::Mat p, pcam, transformMat;
 
     /**
      * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
