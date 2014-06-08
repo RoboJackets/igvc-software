@@ -17,6 +17,7 @@ void BarrelFinder::onNewImage(ImageData data)
         Logger::Log(LogLevel::Error, "Barrel finder can only work on BGR images!");
 
     cv::Mat img = data.mat();
+    cv::resize(img, img, cv::Size(512, 384));
     cv::Mat binary = cv::Mat(img.rows, img.cols, CV_8UC1);
 
     int bT = ConfigManager::Instance().getValue("BarrelFinder", "blueThresh", 100);
@@ -66,6 +67,7 @@ void BarrelFinder::onNewImage(ImageData data)
         cv::dilate( binary, binary, element );
     }
 
+    cv::imshow("barrel finder", binary);
 
     int minWidth = ConfigManager::Instance().getValue("BarrelFinder", "minWidth", 50);
     for(int r = 0; r < binary.rows; r++)
