@@ -229,6 +229,7 @@ float LineDetector::getAvg(){
             }
         }
         totalAvg = (25*totalAvg)/(src.cols*src.rows*8);
+        std::cout << "Average: "<< totalAvg <<std::endl;
         return totalAvg;
 }
 
