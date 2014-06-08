@@ -8,6 +8,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <QDateTime>
 
+
 CameraAdapter::CameraAdapter(std::shared_ptr<StereoSource> source, std::shared_ptr<LineDetector> source2, QWidget *parent) :
      QWidget(parent),
      ui(new Ui::CameraAdapter)
@@ -62,7 +63,10 @@ void CameraAdapter::newBarrelImage(cv::Mat data)
 QImage CameraAdapter::CVMat2QImage(cv::Mat img)
 {
     cv::Mat temp(img.cols, img.rows, img.type());
-    cv::cvtColor(img, temp, CV_BGR2RGB);
+    if(img.channels() == 3 || img.channels() == 4)
+        cv::cvtColor(img, temp, CV_BGR2RGB);
+    else if(img.channels() == 1)
+        cv::cvtColor(img, img, CV_GRAY2RGB);
 
     QImage dest((uchar*)temp.data,temp.cols,temp.rows, temp.step, QImage::Format_RGB888);
     QImage dest2(dest);
@@ -75,7 +79,7 @@ void CameraAdapter::on_saveLeft_clicked()
     //QDir().mkdir("../Images/");
     //leftImage.save("../Images/"+QDateTime::currentDateTime().toString()+"_left.jpg");
     _mutex.lock();
-    cv::imwrite("img.jpg", _data.leftMat());
+    std::cout << cv::imwrite((QDateTime::currentDateTime().toString()+"img.jpg").toStdString(), _data.leftMat()) << std::endl;
     _mutex.unlock();
 }
 
