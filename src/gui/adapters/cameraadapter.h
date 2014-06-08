@@ -8,6 +8,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <hardware/sensors/camera/StereoSource.hpp>
 #include <intelligence/linedetection/linedetector.h>
+#include <intelligence/barrelfinder/barrelfinder.h>
 
 
 namespace Ui {
