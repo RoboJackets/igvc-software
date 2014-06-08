@@ -74,6 +74,7 @@ void LineDetector::myTransformPoints(){
 }
 
 void LineDetector::toPointCloud(){
+    cloud.points.clear();
     int squareSize = ConfigManager::Instance().getValue("LineDetector", "SquareSize", 100);
     //Add points to the cloud if they are white (right now only checking the first layer)
     for (int r=0; r<transformDst.rows;r++){
