@@ -12,7 +12,7 @@ public:
     BarrelFinder(QObject *parent = 0);
 
 signals:
-    void newCloudFrame(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
+    void newCloudFrame(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud, pcl::PointXY offset);
     void onNewLinesMat(cv::Mat dst);
 
 public slots:
