@@ -39,7 +39,7 @@ void LineDetector::onImageEvent(ImageData imgd){
     cloud = toPointCloud(transformDst);
 
    // onNewLines(ImageData(transformDst));
-    onNewLinesMat(transformDst);
+    onNewLinesMat(dst);
     //cout <<"Sending new matrix"<<endl;
     pcl::PointXY offset;
     offset.x = ConfigManager::Instance().getValue("Camera", "OffsetX", 0.0f);
@@ -149,13 +149,13 @@ void LineDetector::blackAndWhite(float totalAvg){
     //Loops through relevant parts of the image and scans for white lines
     //Also tries to detect obstacles
     int tempAvg;
-    float redUp = ConfigManager::Instance().getValue("LineDetector", "RedUp", 1.7);
-    float redDown = ConfigManager::Instance().getValue("LineDetector", "RedDown", 1.1);
-    float greenUp = ConfigManager::Instance().getValue("LineDetector", "GreenUp", 1.6);
-    float greenDown = ConfigManager::Instance().getValue("LineDetector", "GreenDown", 1.05);
-    float blueUp = ConfigManager::Instance().getValue("LineDetector", "BlueUp", 2.2);
-    float blueDown = ConfigManager::Instance().getValue("LineDetector", "BlueDown", 1.5);
-    int diff = ConfigManager::Instance().getValue("LineDetector", "diff", 20);
+    float redUp = ConfigManager::Instance().getValue("LineDetector", "RedUp", 1.5);
+    float redDown = ConfigManager::Instance().getValue("LineDetector", "RedDown", .6);
+    float greenUp = ConfigManager::Instance().getValue("LineDetector", "GreenUp", 1.7);
+    float greenDown = ConfigManager::Instance().getValue("LineDetector", "GreenDown", 1.1);
+    float blueUp = ConfigManager::Instance().getValue("LineDetector", "BlueUp", 2.5);
+    float blueDown = ConfigManager::Instance().getValue("LineDetector", "BlueDown", 1.2);
+    int diff = ConfigManager::Instance().getValue("LineDetector", "diff", 10);
     for (int i = rows/3; i< rows*5/6; i++){
         for(int j=0; j< cols; j++){
             tempAvg = totalAvg*(1.1 - i*.1/768);
