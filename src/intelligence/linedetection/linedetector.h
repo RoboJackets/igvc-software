@@ -33,7 +33,7 @@ signals:
     void onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr data, pcl::PointXY sensorOffset);
 private:
     void blackoutSection(int rowl, int rowu, int coll, int colu);
-    void transformPoints();
+    void myTransformPoints();
     void toPointCloud();
     float getAvg(void);
     void blackAndWhite(float totalAvg);

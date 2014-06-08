@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <cstdlib>
+#include <common/utils/ImageUtils.h>
 
 using namespace std;
 using namespace cv;
@@ -34,7 +35,7 @@ void LineDetector::onImageEvent(ImageData imgd){
     Erosion();
     Dilation();
 
-    transformPoints();
+    transformPoints(dst, transformDst);
     toPointCloud();
 
    // onNewLines(ImageData(transformDst));
@@ -54,7 +55,7 @@ void LineDetector::onImageEvent(ImageData imgd){
 //    cout << "Time elapsed: " << timeElapsed <<endl;
 }
 
-void LineDetector::transformPoints(){
+void LineDetector::myTransformPoints(){
     //pcam is where the coordinates are in actual space (in meters right now)
     //pcam = (cv::Mat_<float>(4,2) << offset-12,72, offset, 72, offset, 60,offset -12, 60);
    // pcam = (cv::Mat_<float>(4,2) << 4,81, -8, 81, -8, 93,4, 93);
