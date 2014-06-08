@@ -147,17 +147,17 @@ void BarrelFinder::onNewImage(ImageData data)
 
     // Transpose back to correct orientation
     cv::transpose(binary, binary);
-    cv::rectangle(binary, cv::Point(binary.cols/2, binary.rows), cv::Point(binary.cols/2 + 30, binary.rows - 30), cv::Scalar(255));
-    cv::Mat dst;
-    cv::cvtColor(binary, dst, CV_GRAY2BGR);
+
+    cv::Mat dst(binary.rows, binary.cols, CV_8UC3);
     transformPoints(binary, dst);
-    //cloud = toPointCloud(binary);
-    onNewLinesMat(binary);
+    cloud = toPointCloud(binary);
+    cv::cvtColor(dst, dst, CV_GRAY2BGR);
+    onNewLinesMat(dst);
 
-
-    cv::imshow("Barrel Finder", dst);
-
-    newCloudFrame(cloud.makeShared());
+    pcl::PointXY offset;
+    offset.x = ConfigManager::Instance().getValue("BarrelFinder", "Xoffset", 0);
+    offset.y = ConfigManager::Instance().getValue("BarrelFinder", "Yoffset", 0);
+    newCloudFrame(cloud.makeShared(), offset);
 }
 
 
