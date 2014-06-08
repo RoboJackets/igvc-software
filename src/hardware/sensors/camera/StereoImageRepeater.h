@@ -16,6 +16,7 @@ class StereoImageRepeater : public StereoSource
         cv::Mat _right;
         boost::thread _thread;
         void thread_run();
+        float _fps;
 };
 
 #endif // STEREOIMAGEREPEATER_H
