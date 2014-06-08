@@ -7,6 +7,8 @@
 
 #include <hardware/sensors/camera/CameraInfo.h>
 #include <common/utils/timing.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
 void computeOffsets(cv::vector<cv::KeyPoint>& keypoints, Eigen::MatrixXd& Pos, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols);
 Eigen::Matrix3d centerImageCoords(int nRows, int nCols);
@@ -21,6 +23,8 @@ Eigen::Matrix4d HomogRotMat3d(double roll, double pitch, double yaw);
 Eigen::Matrix2d ImgRotMat(double angle);
 Eigen::Matrix3d HomogImgRotMat(double angle);
 cv::Mat correctDistortion(cv::Mat rawImg, cv::Mat camerMatrix, cv::Mat _distCoeffs);
+void transformPoints(cv::Mat &src, cv::Mat &dst);
+pcl::PointCloud<pcl::PointXYZ> toPointCloud(cv::Mat src);
 
 
 

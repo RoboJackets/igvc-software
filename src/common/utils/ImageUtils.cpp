@@ -188,3 +188,36 @@ Mat correctDistortion(Mat rawImg, Mat cameraMatrix, Mat distCoeffs)
   */
   return rview;
 }
+
+void transformPoints(Mat &src, Mat &dst){
+    //pcam is where the coordinates are in actual space (in meters right now)
+    //pcam = (cv::Mat_<float>(4,2) << offset-12,72, offset, 72, offset, 60,offset -12, 60);
+   // pcam = (cv::Mat_<float>(4,2) << 4,81, -8, 81, -8, 93,4, 93);
+    int squareSize = ConfigManager::Instance().getValue("perspectiveTransform", "SquareSize", 100);
+    Mat pcam = (cv::Mat_<float>(4,2) << dst.cols/2 - (squareSize/2),dst.rows-squareSize, dst.cols/2+(squareSize/2), dst.rows-squareSize, dst.cols/2-(squareSize/2), dst.rows - squareSize*2, dst.cols/2+(squareSize/2), dst.rows - squareSize*2);
+    //p is where they show up as pixels on the camera
+    //p = (cv::Mat_<float>(4,2) << 427, 642, 515, 642, 512, 589, 432, 588);
+    // p= (cv::Mat_<float>(4,2) << 440, 674, 356, 679, 364, 631, 439, 627);
+    Mat  p= (cv::Mat_<float>(4,2) << 344, 646, 668, 636, 415, 496, 619, 488);
+    //pcam = pcam*3+450; //This is just so we can see it on the screen
+    //Getting the transform
+    Mat transformMat = cv::getPerspectiveTransform(p, pcam);
+    //Apply the transform to dst and store result in dst
+    cv::warpPerspective(src, dst, transformMat, dst.size());
+}
+
+pcl::PointCloud<pcl::PointXYZ> toPointCloud(Mat src){
+    int squareSize = ConfigManager::Instance().getValue("perspectiveTransform", "SquareSize", 100);
+    pcl::PointCloud<pcl::PointXYZ> cloud;
+    //Add points to the cloud if they are white (right now only checking the first layer)
+    for (int r=0; r<src.rows;r++){
+        for (int c=0; c<src.cols; c++){
+            if (src.at<cv::Vec3b>(r,c)[0]==255){
+                float x = ( c - ( src.cols/2. ) ) / (float)squareSize;
+                float y = ( src.rows - r ) / (float)squareSize;
+                cloud.points.push_back(pcl::PointXYZ(x, y, 0));
+            }
+        }
+    }
+    return cloud;
+}
