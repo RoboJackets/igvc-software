@@ -32,6 +32,8 @@ void BarrelFinder::onNewImage(ImageData data)
 
     cv::cvtColor(img, img, CV_HSV2BGR);
 
+    cv::imshow("colors", img);
+
     cv::Mat binary = cv::Mat(img.rows, img.cols, CV_8UC1);
 
     int bT = ConfigManager::Instance().getValue("BarrelFinder", "blueThresh", 100);
@@ -81,6 +83,8 @@ void BarrelFinder::onNewImage(ImageData data)
         cv::dilate( binary, binary, element );
     }
 
+    cv::imshow("color picked", binary);
+
     int minWidth = ConfigManager::Instance().getValue("BarrelFinder", "minWidth", 50);
     for(int r = 0; r < binary.rows; r++)
     {
@@ -123,6 +127,8 @@ void BarrelFinder::onNewImage(ImageData data)
             }
         }
     }
+
+    cv::imshow("filled ", binary);
 
     int minHeight = ConfigManager::Instance().getValue("BarrelFinder", "minHeight", 75);
 
@@ -168,6 +174,8 @@ void BarrelFinder::onNewImage(ImageData data)
     transformPoints(binary, dst);
     cv::threshold(dst, dst, 0, 255, CV_THRESH_BINARY);
     cloud = toPointCloud(dst);
+
+    cv::imshow("transed", dst);
 
     onNewLinesMat(binary);
 
