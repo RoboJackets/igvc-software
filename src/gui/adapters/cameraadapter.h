@@ -23,32 +23,32 @@ class CameraAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit CameraAdapter(std::shared_ptr<StereoSource> source, std::shared_ptr<LineDetector> source2, QWidget *parent = 0);
+    explicit CameraAdapter(QWidget *parent = 0);
     ~CameraAdapter();
 
 protected:
     void paintEvent(QPaintEvent *e);
-   // void resizeEvent(QResizeEvent *e);
+
+public slots:
+    void newLeftCamImg(ImageData data);
+    void newLineImage(cv::Mat data);
+    void newBarrelImage(cv::Mat data);
+
 private slots:
     void on_saveLeft_clicked();
 
-    void onCameraData(StereoImageData data);
-
     void on_saveRight_clicked();
-
-    void onLineImage(cv::Mat data);
 
 private:
     Ui::CameraAdapter *ui;
 
     QImage leftImage;
-    QImage rightImage;
+    QImage lineImage;
+    QImage barrelImage;
 
-    std::shared_ptr<StereoSource> _stereoSource;
-    std::shared_ptr<LineDetector> _lineDetector;
-
-    StereoImageData _data;
-    bool gotData;
+    ImageData leftData;
+    cv::Mat lineData;
+    cv::Mat barrelData;
 
     boost::mutex _mutex;
 
