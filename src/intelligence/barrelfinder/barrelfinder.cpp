@@ -2,6 +2,7 @@
 #include <common/logger/logger.h>
 #include <common/config/configmanager.h>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <common/utils/ImageUtils.h>
 
 BarrelFinder::BarrelFinder(QObject *parent) :
     QObject(parent)
@@ -131,11 +132,34 @@ void BarrelFinder::onNewImage(ImageData data)
     }
 
 
+    for (int r =0; r<binary.rows; r++){
+        uchar* row = binary.ptr<uchar>(r);
+        for (int c=0; c<binary.cols; c++){
+            if (row[c] && !row[c+1]){
+                row[c]=255;
+            }
+            else
+            {
+                row[c]=0;
+            }
+        }
+    }
 
     // Transpose back to correct orientation
     cv::transpose(binary, binary);
+    cv::rectangle(binary, cv::Point(binary.cols/2, binary.rows), cv::Point(binary.cols/2 + 30, binary.rows - 30), cv::Scalar(255));
+    cv::Mat dst;
+    cv::cvtColor(binary, dst, CV_GRAY2BGR);
+    transformPoints(binary, dst);
+    //cloud = toPointCloud(binary);
+    onNewLinesMat(binary);
 
-    cv::imshow("Barrel Finder", binary);
+
+    cv::imshow("Barrel Finder", dst);
 
     newCloudFrame(cloud.makeShared());
 }
+
+
+
+
