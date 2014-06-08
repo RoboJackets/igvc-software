@@ -9,7 +9,7 @@
 #include <QDateTime>
 
 
-CameraAdapter::CameraAdapter(std::shared_ptr<StereoSource> source, std::shared_ptr<LineDetector> source2, QWidget *parent) :
+CameraAdapter::CameraAdapter(QWidget *parent) :
      QWidget(parent),
      ui(new Ui::CameraAdapter)
 {
@@ -20,8 +20,6 @@ CameraAdapter::CameraAdapter(std::shared_ptr<StereoSource> source, std::shared_p
 
 CameraAdapter::~CameraAdapter()
 {
-    if(_stereoSource.get() != nullptr)
-        disconnect(_stereoSource.get(), SIGNAL(onNewData(StereoImageData)), this, SLOT(onCameraData(StereoImageData)));
     delete ui;
 }
 
@@ -32,7 +30,6 @@ void CameraAdapter::newLeftCamImg(ImageData data)
         _mutex.lock();
         leftData = data;
         leftImage = CVMat2QImage(data.mat());
-        gotData = true;
         _mutex.unlock();
         update();
     }
@@ -46,6 +43,7 @@ void CameraAdapter::newLineImage(cv::Mat data)
         lineData = data;
         lineImage = CVMat2QImage(data);
         _mutex.unlock();
+        update();
     }
 }
 
@@ -57,16 +55,15 @@ void CameraAdapter::newBarrelImage(cv::Mat data)
         barrelData = data;
         barrelImage = CVMat2QImage(data);
         _mutex.unlock();
+        update();
     }
 }
 
 QImage CameraAdapter::CVMat2QImage(cv::Mat img)
 {
     cv::Mat temp(img.cols, img.rows, img.type());
-    if(img.channels() == 3 || img.channels() == 4)
-        cv::cvtColor(img, temp, CV_BGR2RGB);
-    else if(img.channels() == 1)
-        cv::cvtColor(img, img, CV_GRAY2RGB);
+
+    cv::cvtColor(img, temp, CV_BGR2RGB);
 
     QImage dest((uchar*)temp.data,temp.cols,temp.rows, temp.step, QImage::Format_RGB888);
     QImage dest2(dest);
@@ -76,10 +73,8 @@ QImage CameraAdapter::CVMat2QImage(cv::Mat img)
 
 void CameraAdapter::on_saveLeft_clicked()
 {
-    //QDir().mkdir("../Images/");
-    //leftImage.save("../Images/"+QDateTime::currentDateTime().toString()+"_left.jpg");
     _mutex.lock();
-    std::cout << cv::imwrite((QDateTime::currentDateTime().toString()+"img.jpg").toStdString(), _data.leftMat()) << std::endl;
+    cv::imwrite((QDateTime::currentDateTime().toString()+"img.jpg").toStdString(),  leftData.mat());
     _mutex.unlock();
 }
 
@@ -94,7 +89,8 @@ void CameraAdapter::paintEvent(QPaintEvent *e)
     _mutex.lock();
 
     ui->leftFeedLabel->setPixmap(QPixmap::fromImage(leftImage));
-    ui->rightFeedLabel->setPixmap(QPixmap::fromImage(rightImage));
+    ui->rightFeedLabel->setPixmap(QPixmap::fromImage(lineImage));
+    ui->barrelImg_label->setPixmap(QPixmap::fromImage(barrelImage));
 
     _mutex.unlock();
     QWidget::paintEvent(e);
