@@ -151,7 +151,7 @@ void BarrelFinder::onNewImage(ImageData data)
     cv::Mat dst;
     cv::cvtColor(binary, dst, CV_GRAY2BGR);
     transformPoints(binary, dst);
-    //cloud = toPointCloud(binary);
+    cloud = toPointCloud(binary);
     onNewLinesMat(binary);
 
 
