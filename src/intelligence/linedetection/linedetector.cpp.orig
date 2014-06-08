@@ -229,8 +229,12 @@ float LineDetector::getAvg(){
                 totalAvg += (p[0]+p[1]+p[2])/3;
             }
         }
-        totalAvg = (25*totalAvg)/(dst.cols*dst.rows*8);
+<<<<<<< HEAD
+        totalAvg = (25*totalAvg)/(src.cols*src.rows*8);
         std::cout << "Average: "<< totalAvg <<std::endl;
+=======
+        totalAvg = (25*totalAvg)/(dst.cols*dst.rows*8);
+>>>>>>> c808c401d8341694065c5490aa096a8cb6a06954
         return totalAvg;
 }
 
