@@ -39,19 +39,19 @@ void LineDetector::onImageEvent(ImageData imgd){
 
    // onNewLines(ImageData(transformDst));
     onNewLinesMat(transformDst);
-    cout <<"Sending new matrix"<<endl;
+    //cout <<"Sending new matrix"<<endl;
     pcl::PointXY offset;
     offset.x = ConfigManager::Instance().getValue("Camera", "OffsetX", 0.0f);
     offset.y = ConfigManager::Instance().getValue("Camera", "OffsetY", 0.0f);
 
-    int timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
-    cout << "Time elapsed: " << timeElapsed <<endl;
+//    int timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
+//    cout << "Time elapsed: " << timeElapsed <<endl;
 
     onNewCloud(cloud.makeShared(), offset);
 
 
-    timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
-    cout << "Time elapsed: " << timeElapsed <<endl;
+//    timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
+//    cout << "Time elapsed: " << timeElapsed <<endl;
 }
 
 void LineDetector::transformPoints(){
