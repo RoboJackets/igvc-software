@@ -88,7 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _posTracker = std::shared_ptr<BasicPositionTracker>(new BasicPositionTracker(_GPS, _IMU));
     ui->hardwareStatusList->addItem("Position Tracker");
 
-    _lineDetector = std::shared_ptr<LineDetector>(new LineDetector());
+    _lineDetector = std::shared_ptr<LineDetector>(new LineDetector(_posTracker));
     connect(_stereoSource.get(), SIGNAL(onNewLeftImage(ImageData)), _lineDetector.get(), SLOT(onImageEvent(ImageData)));
 
     _barrelFinder = std::shared_ptr<BarrelFinder>(new BarrelFinder());
@@ -96,7 +96,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _mapper = std::shared_ptr<MapBuilder>(new MapBuilder(_lidar, _posTracker));
     connect(_lidar.get(), SIGNAL(onNewData(LidarState)), _mapper.get(), SLOT(onLidarData(LidarState)));
-    connect(_lineDetector.get(), SIGNAL(onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)), _mapper.get(), SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
+    connect(_lineDetector.get(), SIGNAL(onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY, RobotPosition)), _mapper.get(), SLOT(onCloudFrame2(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY, RobotPosition)));
     connect(_barrelFinder.get(), SIGNAL(newCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointXY)), _mapper.get(), SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
 
     ui->hardwareStatusList->addItem("Map");
