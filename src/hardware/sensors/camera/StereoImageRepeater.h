@@ -17,6 +17,7 @@ class StereoImageRepeater : public StereoSource
         boost::thread _thread;
         void thread_run();
         float _fps;
+        bool _connected;
 };
 
 #endif // STEREOIMAGEREPEATER_H
