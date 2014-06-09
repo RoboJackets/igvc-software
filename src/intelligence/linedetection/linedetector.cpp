@@ -15,9 +15,9 @@ LineDetector::LineDetector()
       gaussian_size(7)
 {
     erosion_elem = 2;
-    erosion_size = 2;
+    erosion_size = 3;
     dilation_elem = 2;
-    dilation_size = 1;
+    dilation_size = 2;
 }
 
 void LineDetector::onImageEvent(ImageData imgd){
