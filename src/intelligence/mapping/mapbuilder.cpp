@@ -70,7 +70,7 @@ void MapBuilder::onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::Po
     //Transform current cloud to match robot's position
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_transformed (new pcl::PointCloud<pcl::PointXYZ>);
     double mx =  pose.X + sensorOffset.x;
-    double my =  -pose.Y - sensorOffset.y;
+    double my =  pose.Y + sensorOffset.y;
     double mt = AngleUtils::degToRads(pose.Heading);
     Eigen::Vector3f translation(mx, my, 0);
     Eigen::Quaternionf rotation(Eigen::AngleAxisf(-mt, Eigen::Vector3f::UnitZ()));
