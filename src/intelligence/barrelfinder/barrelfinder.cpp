@@ -18,6 +18,22 @@ void BarrelFinder::onNewImage(ImageData data)
 
     cv::Mat img = data.mat();
     cv::resize(img, img, cv::Size(512, 384));
+
+    cv::cvtColor(img, img, CV_BGR2HSV);
+
+    std::vector<cv::Mat> channels;
+    cv::split(img, channels);
+
+
+    cv::threshold(channels[2], channels[2], 1, 127, CV_THRESH_BINARY);
+    channels[1] += 20;
+
+    cv::merge(channels, img);
+
+    cv::cvtColor(img, img, CV_HSV2BGR);
+
+//    cv::imshow("colors", img);
+
     cv::Mat binary = cv::Mat(img.rows, img.cols, CV_8UC1);
 
     int bT = ConfigManager::Instance().getValue("BarrelFinder", "blueThresh", 100);
@@ -67,7 +83,7 @@ void BarrelFinder::onNewImage(ImageData data)
         cv::dilate( binary, binary, element );
     }
 
-    cv::imshow("barrel finder", binary);
+//    cv::imshow("color picked", binary);
 
     int minWidth = ConfigManager::Instance().getValue("BarrelFinder", "minWidth", 50);
     for(int r = 0; r < binary.rows; r++)
@@ -112,6 +128,8 @@ void BarrelFinder::onNewImage(ImageData data)
         }
     }
 
+//    cv::imshow("filled ", binary);
+
     int minHeight = ConfigManager::Instance().getValue("BarrelFinder", "minHeight", 75);
 
     for(int r = 0; r < binary.rows; r++)
@@ -149,13 +167,17 @@ void BarrelFinder::onNewImage(ImageData data)
 
     // Transpose back to correct orientation
     cv::transpose(binary, binary);
+
     cv::cvtColor(binary, binary, CV_GRAY2BGR);
     cv::Mat dst(binary.rows, binary.cols, CV_8UC3);
+
     transformPoints(binary, dst);
-    cv::threshold(dst, dst, 1, 255, CV_THRESH_BINARY);
+    cv::threshold(dst, dst, 0, 255, CV_THRESH_BINARY);
     cloud = toPointCloud(dst);
 
-    onNewLinesMat(dst);
+//    cv::imshow("transed", dst);
+
+    onNewLinesMat(binary);
 
     pcl::PointXY offset;
     offset.x = ConfigManager::Instance().getValue("BarrelFinder", "Xoffset", 0);
