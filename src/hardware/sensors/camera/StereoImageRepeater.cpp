@@ -10,10 +10,12 @@ StereoImageRepeater::StereoImageRepeater(std::string pathLeft, std::string pathR
         _left = cv::imread(pathLeft);
         _right = cv::imread(pathRight);
         _thread =  boost::thread(boost::bind(&StereoImageRepeater::thread_run, this));
+        _connected = true;
     }
     else
     {
         Logger::Log(LogLevel::Error, "Image repeater could not load one or both of the images.");
+        _connected = false;
     }
 }
 
@@ -35,7 +37,7 @@ void StereoImageRepeater::thread_run()
 }
 
 bool StereoImageRepeater::IsConnected(){
-    return true;
+    return _connected;
 }
 
 StereoImageRepeater::~StereoImageRepeater()
