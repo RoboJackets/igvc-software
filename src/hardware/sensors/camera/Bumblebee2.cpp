@@ -252,7 +252,7 @@ void ProcessFrame(Image* rawImage, const void* that)
         return;
     }
 
-    Bumblebee2::ptgrey2opencv(convertedImage,left);
+    Bumblebee2::ptgrey2opencv(convertedImage,right);
 
     unsigned char* data = savedRaw.GetData();
     for(unsigned int i = 1; i < savedRaw.GetDataSize(); i += 2)
@@ -269,7 +269,7 @@ void ProcessFrame(Image* rawImage, const void* that)
         return;
     }
 
-    Bumblebee2::ptgrey2opencv(convertedImage, right);
+    Bumblebee2::ptgrey2opencv(convertedImage, left);
 
 
     thisHere.LockImages();
