@@ -6,10 +6,11 @@
 #include <cstdlib>
 #include <common/utils/ImageUtils.h>
 
+
 using namespace std;
 using namespace cv;
 
-LineDetector::LineDetector()
+LineDetector::LineDetector(std::shared_ptr<BasicPositionTracker> _posTracker)
     : max_elem(2),
       max_kernel_size(2),
       gaussian_size(7)
@@ -18,9 +19,11 @@ LineDetector::LineDetector()
     erosion_size = 3;
     dilation_elem = 2;
     dilation_size = 2;
+    this->_posTracker = _posTracker;
 }
 
 void LineDetector::onImageEvent(ImageData imgd){
+    RobotPosition pos = _posTracker->GetPosition();
     src = imgd.mat();
     dst = src.clone();
     cv::resize(dst, dst, cv::Size(512, 384));
@@ -48,7 +51,7 @@ void LineDetector::onImageEvent(ImageData imgd){
 //    int timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
 //    cout << "Time elapsed: " << timeElapsed <<endl;
 
-    onNewCloud(cloud.makeShared(), offset);
+    onNewCloud(cloud.makeShared(), offset, pos);
 
 
 //    timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());

@@ -14,6 +14,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/io.h>
 #include <QObject>
+#include <intelligence/posetracking/basicpositiontracker.h>
 
 class LineDetector : public QObject
 {
@@ -21,7 +22,7 @@ class LineDetector : public QObject
     Q_OBJECT
 
 public:
-    LineDetector();
+    LineDetector(std::shared_ptr<BasicPositionTracker> _posTracker);
     pcl::PointCloud<pcl::PointXYZ> cloud;
 
 public slots:
@@ -30,7 +31,7 @@ public slots:
 signals:
     void onNewLines(ImageData data);
     void onNewLinesMat(cv::Mat mat);
-    void onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr data, pcl::PointXY sensorOffset);
+    void onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr data, pcl::PointXY sensorOffset, RobotPosition pos);
 private:
     void blackoutSection(int rowl, int rowu, int coll, int colu);
     //void myTransformPoints();
@@ -42,6 +43,8 @@ private:
 
     void Erosion();
     void Dilation();
+
+    std::shared_ptr<BasicPositionTracker> _posTracker;
 
     /** @brief the VideoCapture of the image/video */
     cv::VideoCapture cap;
