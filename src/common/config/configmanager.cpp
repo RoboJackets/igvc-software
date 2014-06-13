@@ -24,6 +24,7 @@ bool ConfigManager::load(std::string path)
         stringstream msg;
         msg << "[ConfigManager] Could not open config file: " << defaultPath;
         Logger::Log(LogLevel::Warning, msg.str());
+        xmlFile.setContent(tr("<config>\n</config>"));
         return false;
     }
 
