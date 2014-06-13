@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.4"/>
-<title>IGVC: Main Page</title>
+<title>IGVC: Controller Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -38,9 +38,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </script>
   <div id="navrow1" class="tabs">
     <ul class="tablist">
-      <li class="current"><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
-      <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -60,7 +60,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-</div><!-- top -->
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
+      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+    </ul>
+  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -75,15 +82,51 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+</div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#signals">Signals</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_controller-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">IGVC Documentation</div>  </div>
+<div class="title">Controller Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+<div class="dynheader">
+Inheritance diagram for Controller:</div>
+<div class="dyncontent">
+ <div class="center">
+  <img src="class_controller.png" usemap="#Controller_map" alt=""/>
+  <map id="Controller_map" name="Controller_map">
+</map>
+ </div></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="signals"></a>
+Signals</h2></td></tr>
+<tr class="memitem:aec45c958cfca0606b828bc8af3237c8e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aec45c958cfca0606b828bc8af3237c8e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>onNewWaypoint</b> (<a class="el" href="class_g_p_s_data.html">GPSData</a>)</td></tr>
+<tr class="separator:aec45c958cfca0606b828bc8af3237c8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a2e819e96b415010834891a773d94c615"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2e819e96b415010834891a773d94c615"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Controller</b> (std::shared_ptr&lt; <a class="el" href="class_g_p_s_waypoint_source.html">GPSWaypointSource</a> &gt; source, std::shared_ptr&lt; <a class="el" href="class_g_p_s.html">GPS</a> &gt; gps)</td></tr>
+<tr class="separator:a2e819e96b415010834891a773d94c615"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace273ac379ca3a116938f656006cc609"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ace273ac379ca3a116938f656006cc609"></a>
+<a class="el" href="class_g_p_s_data.html">GPSData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getCurrentWaypoint</b> ()</td></tr>
+<tr class="separator:ace273ac379ca3a116938f656006cc609"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae131a43073ed98ec40794705f60f3d82"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae131a43073ed98ec40794705f60f3d82"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isWorking</b> ()</td></tr>
+<tr class="separator:ae131a43073ed98ec40794705f60f3d82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>src/intelligence/controller/<a class="el" href="controller_8h_source.html">controller.h</a></li>
+<li>src/intelligence/controller/controller.cpp</li>
+</ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jun 13 2014 13:30:04 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jun 13 2014 13:29:58 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.4
 </small></address>

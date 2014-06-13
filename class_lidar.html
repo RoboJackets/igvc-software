@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.4"/>
-<title>IGVC: Main Page</title>
+<title>IGVC: Lidar Class Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -38,9 +38,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </script>
   <div id="navrow1" class="tabs">
     <ul class="tablist">
-      <li class="current"><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="index.html"><span>Main&#160;Page</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
-      <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -60,7 +60,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-</div><!-- top -->
+  <div id="navrow2" class="tabs2">
+    <ul class="tablist">
+      <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
+      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
+      <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
+      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
+    </ul>
+  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -75,15 +82,58 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+</div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#signals">Signals</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="class_lidar-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">IGVC Documentation</div>  </div>
+<div class="title">Lidar Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Interface for Lidars.  
+ <a href="class_lidar.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="_lidar_8h_source.html">hardware/sensors/lidar/Lidar.h</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for Lidar:</div>
+<div class="dyncontent">
+ <div class="center">
+  <img src="class_lidar.png" usemap="#Lidar_map" alt=""/>
+  <map id="Lidar_map" name="Lidar_map">
+<area href="class_l_m_s200.html" alt="LMS200" shape="rect" coords="0,112,95,136"/>
+<area href="class_n_a_v200.html" alt="NAV200" shape="rect" coords="105,112,200,136"/>
+<area href="class_simulated_lidar.html" alt="SimulatedLidar" shape="rect" coords="210,112,305,136"/>
+</map>
+ </div></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="signals"></a>
+Signals</h2></td></tr>
+<tr class="memitem:a25b52d08e6f7734530ee218a28504b9a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a25b52d08e6f7734530ee218a28504b9a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>onNewData</b> (<a class="el" href="struct_lidar_state.html">LidarState</a>)</td></tr>
+<tr class="separator:a25b52d08e6f7734530ee218a28504b9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a26eb5ba8a6f1fd961fc5ef4236d7ec6d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a26eb5ba8a6f1fd961fc5ef4236d7ec6d"></a>
+virtual <a class="el" href="struct_lidar_state.html">LidarState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_lidar.html#a26eb5ba8a6f1fd961fc5ef4236d7ec6d">GetState</a> ()=0</td></tr>
+<tr class="memdesc:a26eb5ba8a6f1fd961fc5ef4236d7ec6d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the most recent state acquired from the <a class="el" href="class_lidar.html" title="Interface for Lidars. ">Lidar</a>. <br/></td></tr>
+<tr class="separator:a26eb5ba8a6f1fd961fc5ef4236d7ec6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c43d39ef487fa873a0a386f2e397c2d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4c43d39ef487fa873a0a386f2e397c2d"></a>
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsWorking</b> ()=0</td></tr>
+<tr class="separator:a4c43d39ef487fa873a0a386f2e397c2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Interface for Lidars. </p>
+</div><hr/>The documentation for this class was generated from the following file:<ul>
+<li>src/hardware/sensors/lidar/<a class="el" href="_lidar_8h_source.html">Lidar.h</a></li>
+</ul>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Jun 13 2014 13:30:04 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Jun 13 2014 13:29:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.4
 </small></address>
