@@ -9,6 +9,10 @@
 
 namespace IGVC
 {
+  /*!
+    * \brief Provides access to useful camera parameters.
+    * Deprecated in favor of the ConfigManager. Will be removed soon.
+    */
   class CameraInfo
   {
     public:
@@ -41,6 +45,7 @@ namespace IGVC
       int _pixelsPerColumn;
       double _pixelSideLength;
       double _baseline;
-  };
+  }
+  __attribute__((__deprecated__));
 }
 #endif // CAMERAINFO_H
