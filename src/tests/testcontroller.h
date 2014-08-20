@@ -16,8 +16,8 @@ class TestController: public QObject
 
     void test()
     {
-        GPSWaypointSource *s = new GPSWaypointSource("/home/alchaussee/Desktop/properlyFormedGPSData.txt");
-        GPS *gps = new SimulatedGPS("/home/alchaussee/Desktop/properlyFormedGPSData.txt");
+        std::shared_ptr<GPSWaypointSource> s = std::shared_ptr<GPSWaypointSource>(new GPSWaypointSource("/home/alchaussee/Desktop/properlyFormedGPSData.txt"));
+        std::shared_ptr<GPS> gps = std::shared_ptr<GPS>(new SimulatedGPS("/home/alchaussee/Desktop/properlyFormedGPSData.txt"));
 
         Controller con (s, gps);
         GPSData d = GPSData(33.7871928,-84.4063265);
