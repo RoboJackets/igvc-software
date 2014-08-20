@@ -16,6 +16,7 @@ DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 SOURCES += ../src/tests/testmain.cpp \
     ../src/common/utils/StringUtils.cpp \
+    ../src/common/utils/ImageUtils.cpp \
     ../src/common/logger/logger.cpp \
     ../src/intelligence/linedetection/linedetector.cpp \
     ../src/intelligence/linedetection/transformer.cpp \
@@ -32,8 +33,8 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/hardware/sensors/IMU/Ardupilot.cpp \
     ../src/intelligence/pathplanning/astarplanner.cpp \
     ../src/intelligence/pathplanning/igvcsearchproblem.cpp \
-    ../src/intelligence/pathplanning/searchlocation.cpp \
-    ../src/intelligence/pathplanning/searchmove.cpp \
+    ../src/common/datastructures/searchlocation.cpp \
+    ../src/common/datastructures/searchmove.cpp \
     ../src/hardware/actuators/lights/lightcontroller.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
@@ -69,8 +70,8 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/intelligence/pathplanning/GraphSearch.hpp \
     ../src/intelligence/pathplanning/igvcsearchproblem.h \
     ../src/intelligence/pathplanning/pathplanner.hpp \
-    ../src/intelligence/pathplanning/searchlocation.h \
-    ../src/intelligence/pathplanning/searchmove.h \
+    ../src/common/datastructures/searchlocation.h \
+    ../src/common/datastructures/searchmove.h \
     ../src/intelligence/pathplanning/SearchProblem.hpp \
     ../src/hardware/actuators/lights/lightcontroller.h
 

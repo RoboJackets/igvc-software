@@ -14,8 +14,8 @@ class CaptureGPSAndPosTracker : public QObject
 public:
     CaptureGPSAndPosTracker(QObject *parent = 0)
         : QObject(parent),
-          gps("/dev/ttyGPS", 19200),
-          tracker(&gps, nullptr)
+          gps(new NMEACompatibleGPS("/dev/ttyGPS", 19200)),
+          tracker(gps, nullptr)
     {
         gpsPts = 0;
         ptPts = 0;
@@ -49,7 +49,7 @@ private slots:
         gpsPts++;
         if(gpsPts > GPS_PTS)
         {
-            disconnect(&gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPSData(GPSData)));
+            disconnect(gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPSData(GPSData)));
             gpsfile->close();
         }
     }
@@ -65,7 +65,7 @@ private:
     int gpsPts;
     int ptPts;
 
-    NMEACompatibleGPS gps;
+    std::shared_ptr<NMEACompatibleGPS> gps;
     BasicPositionTracker tracker;
 
 private Q_SLOTS:
@@ -80,7 +80,7 @@ private Q_SLOTS:
         PTOut = new QTextStream(ptfile);
         PTOut->setRealNumberPrecision(15);
 
-        connect(&gps, SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPSData(GPSData)));
+        connect(gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPSData(GPSData)));
         connect(&tracker, SIGNAL(onNewPosition(RobotPosition)), this, SLOT(onNewPosData(RobotPosition)));
 
         while(ptPts <= PT_PTS || gpsPts <= GPS_PTS)

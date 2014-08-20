@@ -5,7 +5,7 @@ using namespace std;
 using namespace cv;
 using namespace Eigen;
 
-void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols)
+void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, int nRows, int nCols)
 {
 
   //Compute Position Information for points
@@ -39,13 +39,13 @@ void computeOffsets(vector<KeyPoint>& keypoints, MatrixXd& Pos, IGVC::CameraInfo
     pos = HomogImgRotMat(roll)*pos; //Correct for roll of image by rotating it back the opposite way
 
 
-    phi = ConfigManager::Instance().getValue("Dimensions", "CameraAngle", 0) - pitch + atan2((derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
-    //phi = derRobot.CameraAngle() - pitch + atan2((600/768 * derCameraInfo.PixelSideLength() * pos(0)), derCameraInfo.FocalLength());
-    theta = atan2((derCameraInfo.PixelSideLength() * pos(1)), derCameraInfo.FocalLength());
-     //theta = atan2((900/1024*derCameraInfo.PixelSideLength() * pos(1)), derCameraInfo.FocalLength());
-    //cout << "first argument in theta is  " <<  derCameraInfo.PixelSideLength() * pos(1) << endl;
+    phi = ConfigManager::Instance().getValue("Dimensions", "CameraAngle", 0) - pitch + atan2((ConfigManager::Instance().getValue("Camera", "PixelSideLength", 0) * pos(0)), ConfigManager::Instance().getValue("Camera", "FocalLength", 0));
+
+    theta = atan2((ConfigManager::Instance().getValue("Camera", "PixelSideLength", 0) * pos(1)), ConfigManager::Instance().getValue("Camera", "FocalLength", 0));
+
+
     xCam = cameraHeight/tan(phi);
-    //xCam = 2.87 + .5588;
+
     yCam = xCam*tan(theta);
 
     std::cout << "xcam is " << xCam << ". yCam is " << yCam << std::endl;
