@@ -105,8 +105,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <a class="code" href="class_capture_g_p_s_and_pos_tracker.html">CaptureGPSAndPosTracker</a>(QObject *parent = 0)</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;        : QObject(parent),</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;          gps(<span class="stringliteral">&quot;/dev/ttyGPS&quot;</span>, 19200),</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;          tracker(&amp;gps, <span class="keyword">nullptr</span>)</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;          gps(<span class="keyword">new</span> <a class="code" href="class_n_m_e_a_compatible_g_p_s.html">NMEACompatibleGPS</a>(<span class="stringliteral">&quot;/dev/ttyGPS&quot;</span>, 19200)),</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;          tracker(gps, <span class="keyword">nullptr</span>)</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    {</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;        gpsPts = 0;</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;        ptPts = 0;</div>
@@ -140,7 +140,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        gpsPts++;</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <span class="keywordflow">if</span>(gpsPts &gt; GPS_PTS)</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        {</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            disconnect(&amp;gps, SIGNAL(onNewData(<a class="code" href="class_g_p_s_data.html">GPSData</a>)), <span class="keyword">this</span>, SLOT(onNewGPSData(<a class="code" href="class_g_p_s_data.html">GPSData</a>)));</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;            disconnect(gps.get(), SIGNAL(onNewData(<a class="code" href="class_g_p_s_data.html">GPSData</a>)), <span class="keyword">this</span>, SLOT(onNewGPSData(<a class="code" href="class_g_p_s_data.html">GPSData</a>)));</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            gpsfile-&gt;close();</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        }</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    }</div>
@@ -156,7 +156,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    <span class="keywordtype">int</span> gpsPts;</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keywordtype">int</span> ptPts;</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <a class="code" href="class_n_m_e_a_compatible_g_p_s.html">NMEACompatibleGPS</a> gps;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    std::shared_ptr&lt;NMEACompatibleGPS&gt; gps;</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <a class="code" href="class_basic_position_tracker.html">BasicPositionTracker</a> tracker;</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="keyword">private</span> Q_SLOTS:</div>
@@ -171,7 +171,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        PTOut = <span class="keyword">new</span> QTextStream(ptfile);</div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        PTOut-&gt;setRealNumberPrecision(15);</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        connect(&amp;gps, SIGNAL(onNewData(<a class="code" href="class_g_p_s_data.html">GPSData</a>)), <span class="keyword">this</span>, SLOT(onNewGPSData(<a class="code" href="class_g_p_s_data.html">GPSData</a>)));</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        connect(gps.get(), SIGNAL(onNewData(<a class="code" href="class_g_p_s_data.html">GPSData</a>)), <span class="keyword">this</span>, SLOT(onNewGPSData(<a class="code" href="class_g_p_s_data.html">GPSData</a>)));</div>
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        connect(&amp;tracker, SIGNAL(onNewPosition(<a class="code" href="class_robot_position.html">RobotPosition</a>)), <span class="keyword">this</span>, SLOT(onNewPosData(<a class="code" href="class_robot_position.html">RobotPosition</a>)));</div>
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        <span class="keywordflow">while</span>(ptPts &lt;= PT_PTS || gpsPts &lt;= GPS_PTS)</div>
@@ -193,7 +193,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Aug 19 2014 15:58:52 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 20 2014 13:48:49 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

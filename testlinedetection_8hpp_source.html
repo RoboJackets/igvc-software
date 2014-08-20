@@ -126,43 +126,43 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    LISTENER(<a class="code" href="class_test_line_detection.html">TestLineDetection</a>, onResults, <a class="code" href="class_image_data.html">ImageData</a>)</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="keyword">private</span> Q_SLOTS:</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordtype">void</span> testCase1()</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    {</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <span class="keywordtype">char</span> videoFile[] = <span class="stringliteral">&quot;../src/intelligence/igvc_cam_data/stills/img_left2.jpg&quot;</span>; <span class="comment">//Still</span></div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="comment">//char videoFile[] = &quot;../src/intelligence/igvc_cam_data/video/CompCourse_left0.mpeg&quot;; //vid</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        cv::VideoCapture cap(videoFile);</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <a class="code" href="class_event.html">Event&lt;ImageData&gt;</a> newImageFrameEvent;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keywordtype">bool</span> success = cap.read(src);</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="keywordflow">if</span>(!success)</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        {</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;            QFAIL(<span class="stringliteral">&quot;Could not load test video.&quot;</span>);</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        }</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <a class="code" href="class_line_detector.html">LineDetector</a> ldl(newImageFrameEvent);</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;       ldl.onNewLines += &amp;LonResults;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keywordflow">while</span> (success){</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            responded = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;            newImageFrameEvent(src);</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;            <span class="comment">// This checks that the LineDetector is actually responding to events</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;            QTRY_VERIFY_WITH_TIMEOUT(responded, 1000);</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;            cv::waitKey(1);</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            success = cap.read(src);</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        }</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    }</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;};</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="preprocessor">#endif // TESTLINEDETECTION_HPP</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="comment">// TODO fix this test case. LineDetector constructor call needs to be updated when LineDetector is cleaned up</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment">//    void testCase1()</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">//    {</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="comment">//        ///NOTE: The directory may not be the same on your computer!</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="comment">//        char videoFile[] = &quot;../src/intelligence/igvc_cam_data/stills/img_left2.jpg&quot;; //Still</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">//        //char videoFile[] = &quot;../src/intelligence/igvc_cam_data/video/CompCourse_left0.mpeg&quot;; //vid</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment">//        cv::VideoCapture cap(videoFile);</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="comment">//        Event&lt;ImageData&gt; newImageFrameEvent;</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="comment">//        bool success = cap.read(src);</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment">//        if(!success)</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="comment">//        {</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="comment">//            QFAIL(&quot;Could not load test video.&quot;);</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">//        }</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment">//        LineDetector ldl(newImageFrameEvent);</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">//       ldl.onNewLines += &amp;LonResults;</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="comment">//        while (success){</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="comment">//            responded = false;</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="comment">//            newImageFrameEvent(src);</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="comment">//            // This checks that the LineDetector is actually responding to events</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="comment">//            QTRY_VERIFY_WITH_TIMEOUT(responded, 1000);</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">//            cv::waitKey(1);</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">//            success = cap.read(src);</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">//        }</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="comment">//    }</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;};</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="preprocessor">#endif // TESTLINEDETECTION_HPP</span></div>
 <div class="ttc" id="class_test_line_detection_html"><div class="ttname"><a href="class_test_line_detection.html">TestLineDetection</a></div><div class="ttdef"><b>Definition:</b> testlinedetection.hpp:10</div></div>
-<div class="ttc" id="class_event_html"><div class="ttname"><a href="class_event.html">Event&lt; ImageData &gt;</a></div></div>
-<div class="ttc" id="class_line_detector_html"><div class="ttname"><a href="class_line_detector.html">LineDetector</a></div><div class="ttdef"><b>Definition:</b> linedetector.h:19</div></div>
 <div class="ttc" id="class_image_data_html"><div class="ttname"><a href="class_image_data.html">ImageData</a></div><div class="ttdef"><b>Definition:</b> ImageData.hpp:8</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Aug 19 2014 15:58:52 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Aug 20 2014 13:48:49 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
