@@ -10,7 +10,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
-void computeOffsets(cv::vector<cv::KeyPoint>& keypoints, Eigen::MatrixXd& Pos, IGVC::CameraInfo& derCameraInfo, int nRows, int nCols);
+void computeOffsets(cv::vector<cv::KeyPoint>& keypoints, Eigen::MatrixXd& Pos, int nRows, int nCols);
 Eigen::Matrix3d centerImageCoords(int nRows, int nCols);
 Eigen::Matrix3d RollRotMatrix(double roll);
 Eigen::Matrix3d PitchRotMatrix(double pitch);

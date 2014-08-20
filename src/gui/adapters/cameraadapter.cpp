@@ -35,26 +35,13 @@ void CameraAdapter::newLeftCamImg(ImageData data)
     }
 }
 
-void CameraAdapter::newLineImage(cv::Mat data)
-{
-    if(isVisible())
-    {
-       // std::cout << "New line Image" <<std::endl;
-        _mutex.lock();
-        lineData = data;
-        lineImage = CVMat2QImage(data);
-        _mutex.unlock();
-        update();
-    }
-}
-
-void CameraAdapter::newBarrelImage(cv::Mat data)
+void CameraAdapter::newRightCamImg(ImageData data)
 {
     if(isVisible())
     {
         _mutex.lock();
-        barrelData = data;
-        barrelImage = CVMat2QImage(data);
+        rightData = data;
+        rightImage = CVMat2QImage(data.mat());
         _mutex.unlock();
         update();
     }
@@ -75,14 +62,15 @@ QImage CameraAdapter::CVMat2QImage(cv::Mat img)
 void CameraAdapter::on_saveLeft_clicked()
 {
     _mutex.lock();
-    cv::imwrite((QDateTime::currentDateTime().toString()+"img.jpg").toStdString(),  leftData.mat());
+    cv::imwrite((QDateTime::currentDateTime().toString()+"_left.jpg").toStdString(),  leftData.mat());
     _mutex.unlock();
 }
 
 void CameraAdapter::on_saveRight_clicked()
 {
-    QDir().mkdir("../Images/");
-    lineImage.save("../Images/"+QDateTime::currentDateTime().toString()+"_right.jpg");
+    _mutex.lock();
+    cv::imwrite((QDateTime::currentDateTime().toString()+"_right.jpg").toStdString(),  rightData.mat());
+    _mutex.unlock();
 }
 
 void CameraAdapter::paintEvent(QPaintEvent *e)
@@ -90,8 +78,7 @@ void CameraAdapter::paintEvent(QPaintEvent *e)
     _mutex.lock();
 
     ui->leftFeedLabel->setPixmap(QPixmap::fromImage(leftImage));
-    ui->rightFeedLabel->setPixmap(QPixmap::fromImage(lineImage));
-    ui->barrelImg_label->setPixmap(QPixmap::fromImage(barrelImage));
+    ui->rightFeedLabel->setPixmap(QPixmap::fromImage(rightImage));
 
     _mutex.unlock();
     QWidget::paintEvent(e);

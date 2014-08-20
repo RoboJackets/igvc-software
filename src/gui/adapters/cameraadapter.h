@@ -32,8 +32,7 @@ protected:
 
 public slots:
     void newLeftCamImg(ImageData data);
-    void newLineImage(cv::Mat data);
-    void newBarrelImage(cv::Mat data);
+    void newRightCamImg(ImageData data);
 
 private slots:
     void on_saveLeft_clicked();
@@ -44,12 +43,10 @@ private:
     Ui::CameraAdapter *ui;
 
     QImage leftImage;
-    QImage lineImage;
-    QImage barrelImage;
+    QImage rightImage;
 
     ImageData leftData;
-    cv::Mat lineData;
-    cv::Mat barrelData;
+    ImageData rightData;
 
     boost::mutex _mutex;
 
