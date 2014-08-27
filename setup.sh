@@ -32,10 +32,10 @@ sudo apt-get install libopencv-dev
 
 
 echo "Installing Qt..."
-wget http://download.qt-project.org/official_releases/online_installers/qt-opensource-linux-x64-1.6.0-4-online.run ~/Downloads
-sudo chmod +X ~/Downloads/qt-opensource-linux-x64-1.6.0-4-online.run
-cd Downloads
-./qt-opensource-linux-x64-1.6.0-4-online.run
+wget http://download.qt-project.org/official_releases/online_installers/qt-opensource-linux-x64-1.6.0-4-online.run -O ~/Downloads/qt-opensource-linux-x64-1.6.0-4-online.run
+cd ~/Downloads
+sudo chmod +x qt-opensource-linux-x64-1.6.0-4-online.run
+sudo ./qt-opensource-linux-x64-1.6.0-4-online.run
 
 
 # Evetually add automatic PTGrey installation
