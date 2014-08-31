@@ -372,8 +372,13 @@ void MainWindow::on_saveConfigButton_clicked()
 
 void MainWindow::on_loadConfigButton_clicked()
 {
+    if(ConfigManager::Instance().hasUnsavedChanges() && QMessageBox::warning(this, "Unsaved Changes in Configuration", "There are unsaved changes in your config file. Would you like to save them now?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+        ConfigManager::Instance().save();
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Configuration File"), "", tr("XML Files(*.xml)"));
-    ConfigManager::Instance().load(fileName.toStdString());
+    if(!fileName.isEmpty())
+    {
+        ConfigManager::Instance().load(fileName.toStdString());
+    }
 }
 
 void MainWindow::on_actionHemisphere_A100_triggered()

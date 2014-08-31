@@ -59,6 +59,7 @@ public:
             stringstream stream;
             stream << defaultVal;
             root.firstChildElement(category.c_str()).firstChildElement(name.c_str()).appendChild(xmlFile.createTextNode(stream.str().c_str()));
+            unsavedChanges = true;
             StructureChanged();
             return defaultVal;
         }
@@ -72,6 +73,7 @@ public:
             stringstream stream;
             stream << defaultVal;
             categoryNode.firstChildElement(name.c_str()).appendChild(xmlFile.createTextNode(stream.str().c_str()));
+            unsavedChanges = true;
             StructureChanged();
             return defaultVal;
         }
@@ -143,6 +145,8 @@ public:
 
         QDomElement categoryNode = root.firstChildElement(category.c_str());
 
+        unsavedChanges = true;
+
         if(categoryNode.isNull())
         {
             cout << "[ConfigManager] No such category." << endl;
@@ -191,6 +195,7 @@ public:
             if(nameInd < categoryNode.childNodes().count())
             {
                 categoryNode.childNodes().at(nameInd).firstChild().setNodeValue(stream.str().c_str());
+                unsavedChanges = true;
             }
         }
     }
@@ -224,6 +229,11 @@ public:
      */
     std::string valueLabel(int categoryInd, int valueInd);
 
+    bool hasUnsavedChanges()
+    {
+        return unsavedChanges;
+    }
+
 signals:
     /*!
      * \brief StructureChanged This signal is emitted every time the structure of the config tree is changed.
@@ -242,6 +252,8 @@ private:
     ConfigManager(ConfigManager const&);
 
     void operator=(ConfigManager const);
+
+    bool unsavedChanges;
 };
 
 #endif // CONFIGMANAGER_H

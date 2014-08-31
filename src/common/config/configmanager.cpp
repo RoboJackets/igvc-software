@@ -61,6 +61,7 @@ bool ConfigManager::save(string path)
 
     xmlFile.save(fileStream, 4);
 
+    unsavedChanges = false;
     return true;
 }
 
