@@ -19,7 +19,29 @@ public:
         : _joystick(joystick)
     {
         connect(_joystick.get(), &Joystick::onNewData, [=](JoystickState state){
+
+            double AbsoluteMaxVel = ConfigManager::Instance().getValue("Joystick", "AbsoluteMaxSpeed", 2.0);
             double maxVel = ConfigManager::Instance().getValue("Joystick", "MaxSpeed", 1.0);
+
+            if(state.buttons[1]) //Button 2
+            {
+                maxVel -= 0.25;
+            }
+            else if(state.buttons[3]) //Button 4
+            {
+                maxVel += 0.25;
+            }
+            if(maxVel > AbsoluteMaxVel)
+            {
+                maxVel = AbsoluteMaxVel;
+            }
+            if(maxVel < 0)
+            {
+                maxVel = 0;
+            }
+
+            ConfigManager::Instance().setValue("Joystick", "MaxSpeed", maxVel);
+
             int leftJoyAxis = ConfigManager::Instance().getValue("Joystick", "LeftAxis", 1);
             int rightJoyAxis = ConfigManager::Instance().getValue("Joystick", "RightAxis", 3);
             bool leftInverted = ConfigManager::Instance().getValue("Joystick", "LeftInverted", true);
@@ -37,6 +59,7 @@ signals:
 
 private:
     std::shared_ptr<Joystick> _joystick;
+
 };
 
 #endif // JOYSTICKDRIVER_HPP
