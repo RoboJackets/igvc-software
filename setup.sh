@@ -4,10 +4,19 @@ sudo apt-get install build-essential
 
 
 echo "Installing the Point Cloud Library..."
-sudo add-apt-repository ppa:v-launchpad-jochen-sprickerhof-de/pcl
-sudo apt-get update
-sudo apt-get install libpcl-all
-
+read -p "NOTE: This will build PCL from source and can take a real long time. Are you sure you want to do this now? (y/n):" yn
+case $yn in
+    [Nn]* ) continue;;
+    [Yy]* ) wget https://github.com/PointCloudLibrary/pcl/archive/pcl-1.7.1.zip -O ~/Downloads/pcl-1.7.1.zip
+            cd ~/Downloads
+            unzip pcl-1.7.1.zip -d ~/pcl
+            cd ~/pcl/pcl-pcl-1.7.1
+            mkdir build
+            cd build
+            cmake -D CMAKE_INSTALL_PREFIX=/usr ..
+            make && sudo make install;;
+    * ) echo "Please answer yes or no.";;
+esac
 
 if [ ! -f /usr/local/include/sicklms-1.0/SickLIDAR.hh ]; then
     echo "Installing the SICK ToolBox..."
