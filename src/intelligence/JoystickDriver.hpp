@@ -22,14 +22,15 @@ public:
 
             double AbsoluteMaxVel = ConfigManager::Instance().getValue("Joystick", "AbsoluteMaxSpeed", 2.0);
             double maxVel = ConfigManager::Instance().getValue("Joystick", "MaxSpeed", 1.0);
+            double maxVelIncr = ConfigManager::Instance().getValue("Joystick", "MaxSpeedIncrement", 0.25);
 
             if(state.buttons[1]) //Button 2
             {
-                maxVel -= 0.25;
+                maxVel -= maxVelIncr;
             }
             else if(state.buttons[3]) //Button 4
             {
-                maxVel += 0.25;
+                maxVel += maxVelIncr;
             }
             if(maxVel > AbsoluteMaxVel)
             {
@@ -41,6 +42,7 @@ public:
             }
 
             ConfigManager::Instance().setValue("Joystick", "MaxSpeed", maxVel);
+            std::cout << maxVel << std::endl;
 
             int leftJoyAxis = ConfigManager::Instance().getValue("Joystick", "LeftAxis", 1);
             int rightJoyAxis = ConfigManager::Instance().getValue("Joystick", "RightAxis", 3);
