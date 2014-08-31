@@ -14,7 +14,8 @@ if [ ! -f /usr/local/include/sicklms-1.0/SickLIDAR.hh ]; then
     # Eventually change it to download the pre-modified tarball:
     # https://owncloud.robojackets.org/public.php?service=files&t=f68716a1e61616aab79297cc6f593eb9
     wget http://downloads.sourceforge.net/project/sicktoolbox/sicktoolbox/1.0.1/sicktoolbox-1.0.1.tar.gz ~/Downloads/
-    tar -zxvf Downloads/sicktoolbox-1.0.1.tar.gz -C ~/
+    wget http://downloads.sourceforge.net/project/sicktoolbox/sicktoolbox/1.0.1/sicktoolbox-1.0.1.tar.gz -O ~/Downloads/sicktoolbox-1.0.1.tar.gz
+    tar -zxvf ~/Downloads/sicktoolbox-1.0.1.tar.gz -C ~/
     cd ~/sicktoolbox-1.0.1/
     ./configure
     # Add includes that prevent the code from building
