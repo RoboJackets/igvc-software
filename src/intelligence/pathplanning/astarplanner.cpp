@@ -72,6 +72,8 @@ bool AStarPlanner::pathIsValid()
         return false;
     if(distanceFromPath(searchproblem.Start) > ConfigManager::Instance().getValue("AStarPlanner", "OnPathThreshold", 0.6))
         return false;
+    if(searchproblem.Map.empty())
+        return true;
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
     kdtree.setInputCloud(searchproblem.Map.makeShared());
     std::vector<int> pointIdxRadiusSearch;
