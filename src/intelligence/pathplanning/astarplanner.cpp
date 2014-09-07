@@ -13,7 +13,7 @@ AStarPlanner::AStarPlanner()
      */
     ConfigManager::Instance().getValue("AStarPlanner", "GoalThreshold", 2.0);
     ConfigManager::Instance().getValue("AStarPlanner", "OnPathThreshold", 0.6);
-    ConfigManager::Instance().getValue("AStarPLanner", "CollisionThreshold", 1.0);
+    ConfigManager::Instance().getValue("AStarPlanner", "CollisionThreshold", 1.0);
     ConfigManager::Instance().getValue("AStarPlanner", "Velocity", 1.0);
     ConfigManager::Instance().getValue("AStarPlanner", "DeltaT", 1.0);
     ConfigManager::Instance().getValue("Robot", "Baseline", 0);
