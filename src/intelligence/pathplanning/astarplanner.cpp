@@ -66,16 +66,18 @@ void AStarPlanner::run()
 
 bool AStarPlanner::pathIsValid()
 {
+    if(searchproblem.Map == nullptr)
+        return false;
     if(path.size() == 0)
         return false;
     if(path[path.size()-1].second.distTo(searchproblem.Goal) > ConfigManager::Instance().getValue("AStarPlanner", "GoalThreshold", 2.0))
         return false;
     if(distanceFromPath(searchproblem.Start) > ConfigManager::Instance().getValue("AStarPlanner", "OnPathThreshold", 0.6))
         return false;
-    if(searchproblem.Map.empty())
+    if(searchproblem.Map->empty())
         return true;
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
-    kdtree.setInputCloud(searchproblem.Map.makeShared());
+    kdtree.setInputCloud(searchproblem.Map);
     std::vector<int> pointIdxRadiusSearch;
     std::vector<float> pointRadiusSquaredDistance;
     float radius = ConfigManager::Instance().getValue("AStarPlanner", "CollisionThreshold", 1.0);
@@ -107,7 +109,7 @@ float AStarPlanner::distanceFromPath(SearchLocation point)
 
 void AStarPlanner::OnNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr map)
 {
-    searchproblem.Map = *map;
+    searchproblem.Map = map;
     mapSet = true;
     if(!pathIsValid())
         replanRequested = true;

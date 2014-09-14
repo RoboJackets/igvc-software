@@ -5,7 +5,7 @@ using namespace pcl;
 std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
 {
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
-    kdtree.setInputCloud(Map.makeShared());
+    kdtree.setInputCloud(Map);
     //cout << "Expanding " << state << endl;
     std::list<SearchMove> acts;
     double delta = 0.05;

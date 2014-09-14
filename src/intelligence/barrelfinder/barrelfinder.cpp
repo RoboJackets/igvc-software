@@ -182,7 +182,7 @@ void BarrelFinder::onNewImage(ImageData data)
     pcl::PointXY offset;
     offset.x = ConfigManager::Instance().getValue("BarrelFinder", "Xoffset", 0);
     offset.y = ConfigManager::Instance().getValue("BarrelFinder", "Yoffset", 0);
-    newCloudFrame(cloud.makeShared(), offset);
+    newCloudFrame(cloud, offset);
 
 }
 

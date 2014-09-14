@@ -208,9 +208,9 @@ void transformPoints(Mat &src, Mat &dst){
     cv::warpPerspective(src, dst, transformMat, dst.size());
 }
 
-pcl::PointCloud<pcl::PointXYZ> toPointCloud(Mat src){
+pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(Mat src){
     int squareSize = ConfigManager::Instance().getValue("perspectiveTransform", "SquareSize", 100);
-    pcl::PointCloud<pcl::PointXYZ> cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
     //Add points to the cloud if they are white (right now only checking the first layer)
 
     for (int r=0; r<src.rows;r++){
@@ -218,7 +218,7 @@ pcl::PointCloud<pcl::PointXYZ> toPointCloud(Mat src){
             if (src.at<cv::Vec3b>(r,c)[0]==255){
                 float x = ( c - ( src.cols/2. ) ) / (float)squareSize;
                 float y = ( src.rows - r ) / (float)squareSize;
-                cloud.points.push_back(pcl::PointXYZ(x, y, 0));
+                cloud->points.push_back(pcl::PointXYZ(x, y, 0));
 
             }
         }

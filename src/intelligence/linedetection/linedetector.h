@@ -23,7 +23,7 @@ class LineDetector : public QObject
 
 public:
     LineDetector(std::shared_ptr<BasicPositionTracker> _posTracker);
-    pcl::PointCloud<pcl::PointXYZ> cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 public slots:
     void onImageEvent(ImageData imgd);
