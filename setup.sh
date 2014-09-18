@@ -1,6 +1,6 @@
 #! /bin/sh
-echo "Installing build-essential..."
-sudo apt-get install build-essential
+echo "Installing basic dependencies..."
+sudo apt-get install build-essential libflann-dev libeigen3-dev python-sphinx python-setuptools doxygen libboost-dev libusb-1.0
 
 
 
