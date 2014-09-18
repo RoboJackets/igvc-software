@@ -30,11 +30,11 @@ case $yn in
     [Nn]* ) wget https://www.dropbox.com/s/r259tr3r726edml/flycapture2-2.6.3.4-i386-pkg.tgz?dl=0 -O ~/Downloads/flycapture2-2.6.3.4-i386-pkg.tgz
             tar -zxvf ~/Downloads/flycapture2-2.6.3.4-i386-pkg.tgz -C ~/
             cd ~/flycapture2-2.6.3.4-i386
-            ./install_flycapture.sh
+            ./install_flycapture.sh;;
     [Yy]* ) wget https://www.dropbox.com/s/aq3f484rbu3xmcx/flycapture2-2.6.3.4-amd64-pkg.tgz?dl=0 -O ~/Downloads/flycapture2-2.6.3.4-amd64-pkg.tgz
             tar -zxvf ~/Downloads/flycapture2-2.6.3.4-amd64-pkg.tgz -C ~/
             cd ~/flycapture2-2.6.3.4-amd64
-            ./install_flycapture.sh
+            ./install_flycapture.sh;;
     * ) echo "Please answer yes or no,";;
 esac
 
