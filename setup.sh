@@ -1,6 +1,15 @@
 #! /bin/sh
+bit64=false
+read -p "Before we get started, are you running a 64-bit machine? (Select no if you are running a 32-bit machine..) (y/n):" yn
+case $yn in
+    [Nn]* ) bit64=false;;
+    [Yy]* ) bit64=true;;
+    * ) echo "Please answer yes or no."
+        exit 1;;
+esac
+
 echo "Installing basic dependencies..."
-sudo apt-get install build-essential libflann-dev libeigen3-dev python-sphinx python-setuptools doxygen libboost-dev libusb-1.0
+sudo apt-get install build-essential libflann-dev libeigen3-dev doxygen libboost-dev libusb-1.0
 
 
 
@@ -25,26 +34,32 @@ fi
 
 echo "Installing PointGrey FlyCapture2..."
 sudo apt-get install libglademm-2.4-1c2a libgtkglextmm-x11-1.2-dev
-read -p "Are you running a 64-bit machine? (Select no if you are running a 32-bit machine.) (y/n):" yn
-case $yn in
-    [Nn]* ) wget https://www.dropbox.com/s/r259tr3r726edml/flycapture2-2.6.3.4-i386-pkg.tgz?dl=0 -O ~/Downloads/flycapture2-2.6.3.4-i386-pkg.tgz
-            tar -zxvf ~/Downloads/flycapture2-2.6.3.4-i386-pkg.tgz -C ~/
-            cd ~/flycapture2-2.6.3.4-i386
-            ./install_flycapture.sh;;
-    [Yy]* ) wget https://www.dropbox.com/s/aq3f484rbu3xmcx/flycapture2-2.6.3.4-amd64-pkg.tgz?dl=0 -O ~/Downloads/flycapture2-2.6.3.4-amd64-pkg.tgz
-            tar -zxvf ~/Downloads/flycapture2-2.6.3.4-amd64-pkg.tgz -C ~/
-            cd ~/flycapture2-2.6.3.4-amd64
-            ./install_flycapture.sh;;
-    * ) echo "Please answer yes or no,";;
-esac
+if "$bit64" -eq true; then
+    wget https://www.dropbox.com/s/aq3f484rbu3xmcx/flycapture2-2.6.3.4-amd64-pkg.tgz?dl=0 -O ~/Downloads/flycapture2-2.6.3.4-amd64-pkg.tgz
+    tar -zxvf ~/Downloads/flycapture2-2.6.3.4-amd64-pkg.tgz -C ~/
+    cd ~/flycapture2-2.6.3.4-amd64
+    ./install_flycapture.sh
+else
+    wget https://www.dropbox.com/s/r259tr3r726edml/flycapture2-2.6.3.4-i386-pkg.tgz?dl=0 -O ~/Downloads/flycapture2-2.6.3.4-i386-pkg.tgz
+    tar -zxvf ~/Downloads/flycapture2-2.6.3.4-i386-pkg.tgz -C ~/
+    cd ~/flycapture2-2.6.3.4-i386
+    ./install_flycapture.sh
+fi
 
 
 
 echo "Installing Qt..."
-wget http://download.qt-project.org/official_releases/online_installers/qt-opensource-linux-x64-1.6.0-4-online.run -O ~/Downloads/qt-opensource-linux-x64-1.6.0-4-online.run
-cd ~/Downloads
-sudo chmod +x qt-opensource-linux-x64-1.6.0-4-online.run
-sudo ./qt-opensource-linux-x64-1.6.0-4-online.run
+if "$bit64" -eq true; then
+    wget http://download.qt-project.org/official_releases/online_installers/qt-opensource-linux-x64-1.6.0-4-online.run -O ~/Downloads/qt-opensource-linux-x64-1.6.0-4-online.run
+    cd ~/Downloads
+    sudo chmod +x qt-opensource-linux-x64-1.6.0-4-online.run
+    sudo ./qt-opensource-linux-x64-1.6.0-4-online.run
+else
+    wget http://download.qt-project.org/official_releases/online_installers/qt-opensource-linux-x86-1.6.0-4-online.run -O ~/Downloads/qt-opensource-linux-x86-1.6.0-4-online.run
+    cd ~/Downloads
+    sudo chmod +x qt-opensource-linux-x86-1.6.0-4-online.run
+    sudo ./qt-opensource-linux-x86-1.6.0-4-online.run
+fi
 
 
 
