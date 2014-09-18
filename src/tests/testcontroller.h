@@ -16,8 +16,8 @@ class TestController: public QObject
 
     void test()
     {
-        std::shared_ptr<GPSWaypointSource> s = std::shared_ptr<GPSWaypointSource>(new GPSWaypointSource("/home/alchaussee/Desktop/properlyFormedGPSData.txt"));
-        std::shared_ptr<GPS> gps = std::shared_ptr<GPS>(new SimulatedGPS("/home/alchaussee/Desktop/properlyFormedGPSData.txt"));
+        std::shared_ptr<GPSWaypointSource> s = std::shared_ptr<GPSWaypointSource>(new GPSWaypointSource("../test_data/GPSFileReader-testData/Successful/properlyFormedGPSData.txt"));
+        std::shared_ptr<GPS> gps = std::shared_ptr<GPS>(new SimulatedGPS("../test_data/GPSFileReader-testData/Successful/properlyFormedGPSData.txt"));
 
         Controller con (s, gps);
         GPSData d = GPSData(33.7871928,-84.4063265);
@@ -25,7 +25,7 @@ class TestController: public QObject
         //QCOMPARE(d.Long(), con.getCurrentWaypoint().Long());
 
 
-         std::cout << "CON "<<con.getCurrentWaypoint().Lat() << " " << con.getCurrentWaypoint().Long() << std::endl;
+         //std::cout << "CON "<<con.getCurrentWaypoint().Lat() << " " << con.getCurrentWaypoint().Long() << std::endl;
          //std::cout << "GPS "<<gps->GetState().Lat() << " " << gps->GetState().Long() << std::endl;
          QTest::qWait(30000);
 
