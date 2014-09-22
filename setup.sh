@@ -9,7 +9,7 @@ case $yn in
 esac
 
 echo "Installing basic dependencies..."
-sudo apt-get install build-essential libflann-dev libeigen3-dev doxygen libboost-dev libusb-1.0
+sudo apt-get install build-essential libflann-dev libeigen3-dev doxygen libboost-all-dev libusb-1.0 libvtk5-dev libopenni-dev
 
 
 
@@ -50,15 +50,15 @@ fi
 
 echo "Installing Qt..."
 if "$bit64" -eq true; then
-    wget http://download.qt-project.org/official_releases/online_installers/qt-opensource-linux-x64-1.6.0-4-online.run -O ~/Downloads/qt-opensource-linux-x64-1.6.0-4-online.run
+    wget https://www.dropbox.com/s/wezjapkizzn47js/qt-opensource-linux-x64-1.6.0-5-online.run?dl=0 -O ~/Downloads/qt-opensource-linux-x64-1.6.0-5-online.run
     cd ~/Downloads
-    sudo chmod +x qt-opensource-linux-x64-1.6.0-4-online.run
-    sudo ./qt-opensource-linux-x64-1.6.0-4-online.run
+    sudo chmod +x qt-opensource-linux-x64-1.6.0-5-online.run
+    sudo ./qt-opensource-linux-x64-1.6.0-5-online.run
 else
-    wget http://download.qt-project.org/official_releases/online_installers/qt-opensource-linux-x86-1.6.0-4-online.run -O ~/Downloads/qt-opensource-linux-x86-1.6.0-4-online.run
+    wget https://www.dropbox.com/s/qhjtlb8fzpr8sv3/qt-opensource-linux-x86-1.6.0-5-online.run?dl=0 -O ~/Downloads/qt-opensource-linux-x86-1.6.0-5-online.run
     cd ~/Downloads
-    sudo chmod +x qt-opensource-linux-x86-1.6.0-4-online.run
-    sudo ./qt-opensource-linux-x86-1.6.0-4-online.run
+    sudo chmod +x qt-opensource-linux-x86-1.6.0-5-online.run
+    sudo ./qt-opensource-linux-x86-1.6.0-5-online.run
 fi
 
 
@@ -73,7 +73,7 @@ case $yn in
             cd ~/pcl/pcl-pcl-1.7.1
             mkdir build
             cd build
-            cmake -D CMAKE_INSTALL_PREFIX=/usr ..
+            cmake -D CMAKE_INSTALL_PREFIX=/usr CMAKE_BUILD_TYPE=Release ..
             make && sudo make install;;
     * ) echo "Please answer yes or no.";;
 esac
