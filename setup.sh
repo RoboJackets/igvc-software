@@ -8,6 +8,8 @@ case $yn in
         exit 1;;
 esac
 
+sudo apt-get update
+
 echo "Installing basic dependencies..."
 sudo apt-get install build-essential libflann-dev libeigen3-dev doxygen libboost-all-dev libusb-1.0 libvtk5-dev libopenni-dev
 
