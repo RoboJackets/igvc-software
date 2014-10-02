@@ -193,20 +193,13 @@ void LineDetector::detectObstacle(int row, int col){
 /**
  *  \brief LineDetector::getAvg gets the average of the relevant pixels
  *  \return the average as a floating point number
- *  \note This is not really averaging... Not entirely sure what this actually does.
  */
 float LineDetector::getAvg(){
-    Vec3b p;
-        float totalAvg = 0;
-        for (int i = dst.rows/3; i< 5*dst.rows/6; i++){
-            for(int j=dst.cols/6; j< 5*dst.cols/6; j++){
-                p = dst.at<Vec3b>(i, j);
-                totalAvg += (p[0]+p[1]+p[2])/3;
-            }
-        }
-        totalAvg = (25*totalAvg)/(dst.cols*dst.rows*8);
-        //std::cout << "Average: "<< totalAvg <<std::endl;
-        return totalAvg;
+    Mat region = dst(Range(dst.rows/6, 5*dst.rows/6), Range(dst.cols/6, 5*dst.cols/6));
+    Scalar sumScalar = cv::sum(region);
+    float avg = sumScalar[0] + sumScalar[1] + sumScalar[2];
+    avg /= dst.rows * dst.cols * dst.channels();
+    return avg;
 }
 
 /**
