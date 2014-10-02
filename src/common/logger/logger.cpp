@@ -7,13 +7,12 @@ Logger::Logger()
 {
     QDir dir;
     dir.mkdir(QDir::currentPath() + "/Logs/");
-    std::stringstream stream;
-    stream << QDir::currentPath().toStdString();
-    stream << "/Logs/Log_";
-    stream << QDateTime::currentDateTime().toString("yyyy-M-d_hh-mm-ss-zzz").toStdString();
-    stream << ".txt";
-    std::cout << stream.str() << std::endl;
-    _fileOutStream.open(stream.str().c_str());
+    std::string logpath = QDir::currentPath().toStdString() +
+            "/Logs/Log_" +
+            QDateTime::currentDateTime().toString("yyy-M-d_hh-mm-ss-zzz").toStdString() +
+            ".txt";
+    std::cout << logpath << std::endl;
+    _fileOutStream.open(logpath.c_str());
     _statusBar = 0;
 }
 
