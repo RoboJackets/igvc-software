@@ -63,8 +63,7 @@ SOURCES += \
     ../src/gui/adapters/motorboardadapter.cpp \
     ../src/gui/adapters/competitioncontrolleradapter.cpp \
     ../src/intelligence/pathfollowing/pathfollower.cpp \
-    ../src/intelligence/barrelfinder/barrelfinder.cpp \
-    ../src/gui/timerindicator.cpp
+    ../src/intelligence/barrelfinder/barrelfinder.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -142,8 +141,7 @@ HEADERS  += \
     ../src/intelligence/pathfollowing/pathfollower.h \
     ../src/common/datastructures/PathType.hpp \
     ../src/common/datastructures/MotorCommand.hpp \
-    ../src/intelligence/barrelfinder/barrelfinder.h \
-    ../src/gui/timerindicator.h
+    ../src/intelligence/barrelfinder/barrelfinder.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \

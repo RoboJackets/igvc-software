@@ -28,6 +28,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QTimer>
 
 #include <iostream>
 #include "timerindicator.h"
@@ -136,10 +137,12 @@ MainWindow::MainWindow(QWidget *parent) :
     isPaused = false;
     ui->stopButton->setVisible(false);
 
-    QLabel* timer = new TimerIndicator();
-    ui->statusBar->addPermanentWidget(timer);
-    QLabel* l = new QLabel("hi");
-    ui->statusBar->addPermanentWidget(l);
+    timeLabel = new QLabel("Time: 0:00:00");
+    ui->statusBar->addPermanentWidget(timeLabel);
+    qtimer = new QTimer(this);
+    connect(qtimer, SIGNAL(timeout()), this, SLOT(updateTimer()));
+    qtimer->start(1000);
+    curTime = 0;
 }
 
 void MainWindow::setupMenus()
@@ -355,6 +358,8 @@ void MainWindow::on_stopButton_clicked()
         _mapper->Clear();
     }
     _lights->setSafetyLight(isRunning);
+    curTime = 0;
+    timeLabel->setText("Time: 0:00:00");
 }
 
 void MainWindow::on_actionStatus_Bar_toggled(bool checked)
@@ -488,4 +493,20 @@ void MainWindow::on_actionLoad_Waypoint_File_triggered()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Waypoint Data File"), "", tr("CSV Files(*.csv)"));
     if(!fileName.isEmpty())
         _waypointSource->openFile(fileName.toStdString());
+}
+
+void MainWindow::updateTimer()
+{
+    if(isRunning && !isPaused)
+    {
+        curTime++;
+        int hour = curTime/3600;
+        int second = curTime % 3600;
+        int minute = second/60;
+        second = second % 60;
+
+        QString str;
+        str.sprintf("Time: %d:%02d:%02d", hour, minute, second);
+        timeLabel->setText(str);
+    }
 }
