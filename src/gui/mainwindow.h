@@ -24,6 +24,7 @@
 #include <intelligence/pathfollowing/pathfollower.h>
 #include <intelligence/barrelfinder/barrelfinder.h>
 #include <QLabel>
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
@@ -77,6 +78,8 @@ private slots:
 
     void on_actionLoad_Waypoint_File_triggered();
 
+    void updateTimer();
+
 protected:
     void closeEvent(QCloseEvent *);
 
@@ -121,14 +124,14 @@ private:
     std::shared_ptr<BarrelFinder> _barrelFinder;
 
     bool isRunning, isPaused;
-    double startTime;
+    int curTime;
     QLabel* timeLabel;
+    QTimer* qtimer;
 
     MDIWindow *activeMdiChild();
     void setupMenus();
     MDIWindow* findWindowWithTitle(QString title);
     void updateHardwareStatusIcons();
-    void update();
 };
 
 #endif // MAINWINDOW_H
