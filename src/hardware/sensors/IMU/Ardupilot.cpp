@@ -41,9 +41,7 @@ void Ardupilot::onNewSerialLine(string line)
         }
         else
         {
-            stringstream msg;
-            msg << "IMU could not parse line : " << line;
-            Logger::Log(LogLevel::Warning, msg.str());
+            Logger::Log(LogLevel::Warning, "[Ardupilot] Could not parse line: " + line);
         }
     }
 }

@@ -31,7 +31,6 @@ private slots:
 
     void onLidarData(LidarState state);
     void onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::PointXY sensorOffset);
-    void onCloudFrame2(pcl::PointCloud<pcl::PointXYZ>::Ptr frame, pcl::PointXY sensorOffset, RobotPosition pos);
 
 private:
 
