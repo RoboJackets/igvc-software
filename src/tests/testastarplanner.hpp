@@ -21,35 +21,29 @@ public slots:
     }
 
 private slots:
-    void initTest() {
+    void init() {
         pathRecieved = false;
     }
 
     void testNoObstacles() {
-
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
         connect(this, SIGNAL(setEnd(RobotPosition)), &planner, SLOT(OnNewGoalPos(RobotPosition)));
         connect(this, SIGNAL(setMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), &planner, SLOT(OnNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
 
-        std::cout << "Start" << std::endl;
         setStart(RobotPosition(0,0,0));
-        std::cout << "End" << std::endl;
         setEnd(RobotPosition(10,10,0));
         pcl::PointCloud<pcl::PointXYZ>::Ptr map(new pcl::PointCloud<pcl::PointXYZ>());
         map->push_back(pcl::PointXYZ(100,100,100));
-        std::cout << "Here" << std::endl;
         QBENCHMARK_ONCE {
             setMap(map);
         }
-        std::cout << "There" << std::endl;
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 300);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 350);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << "\t" << pair.first.V << ", " << pair.first.W << std::endl;
 
-        std::cout << "This" << std::endl;
         path_t path = planner.GetPath();
         QVERIFY2(path[path.size()-1].second.distTo(SearchLocation(10,10,0)) < 2.0, "Path does not really reach the goal.");
     }
@@ -70,7 +64,7 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 5);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
@@ -92,7 +86,7 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 5);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
@@ -114,7 +108,7 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 5);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
@@ -135,7 +129,7 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 5);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
         QVERIFY2(planner.GetPath().size() == 0, "Unsolvable problem generated a non-zero length path.");

@@ -43,6 +43,7 @@ void AStarPlanner::run()
     {
         if(mapSet && startSet && goalSet && replanRequested)
         {
+            replanRequested = false;
             searchproblem.Speed = ConfigManager::Instance().getValue("AStarPlanner", "Velocity", 1.0);
             searchproblem.DeltaT = ConfigManager::Instance().getValue("AStarPlanner", "DeltaT", 1.0);
             searchproblem.PointTurnsEnabled = false;

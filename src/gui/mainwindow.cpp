@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "adapters/timer.h"
+
 #include "adapters/joystickadapter.h"
 #include "adapters/mapadapter.h"
 #include "adapters/gpsadapter.h"
@@ -367,6 +369,8 @@ void MainWindow::on_actionStatus_Bar_toggled(bool checked)
     {
         ui->statusBar->show();
         Logger::setSatusBar(ui->statusBar);
+        QWidget* timer = new Timer();
+        ui->statusBar->addWidget(timer);
     }
     else
     {
