@@ -22,7 +22,7 @@ class LineDetector : public QObject
 
 public:
     LineDetector();
-    pcl::PointCloud<pcl::PointXYZ> cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 public slots:
     void onImageEvent(ImageData imgd);
