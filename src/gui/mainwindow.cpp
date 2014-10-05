@@ -30,6 +30,7 @@
 #include <QMessageBox>
 
 #include <iostream>
+#include "timerindicator.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -134,6 +135,11 @@ MainWindow::MainWindow(QWidget *parent) :
     isRunning = false;
     isPaused = false;
     ui->stopButton->setVisible(false);
+
+    QLabel* timer = new TimerIndicator();
+    ui->statusBar->addPermanentWidget(timer);
+    QLabel* l = new QLabel("hi");
+    ui->statusBar->addPermanentWidget(l);
 }
 
 void MainWindow::setupMenus()

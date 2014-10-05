@@ -23,6 +23,7 @@
 #include <common/utils/GPSWaypointSource.h>
 #include <intelligence/pathfollowing/pathfollower.h>
 #include <intelligence/barrelfinder/barrelfinder.h>
+#include <QLabel>
 
 namespace Ui {
 class MainWindow;
@@ -120,11 +121,14 @@ private:
     std::shared_ptr<BarrelFinder> _barrelFinder;
 
     bool isRunning, isPaused;
+    double startTime;
+    QLabel* timeLabel;
 
     MDIWindow *activeMdiChild();
     void setupMenus();
     MDIWindow* findWindowWithTitle(QString title);
     void updateHardwareStatusIcons();
+    void update();
 };
 
 #endif // MAINWINDOW_H
