@@ -31,7 +31,6 @@
 #include <QTimer>
 
 #include <iostream>
-#include "timerindicator.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
