@@ -21,10 +21,9 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
 
     if(!infile.is_open())
     {
-        stringstream msg;
-        msg << "Could not open file (in GPSFileReader): " << file << endl;
-        Logger::Log(LogLevel::Error, msg.str());
-        throw GPSFileNotFoundException(msg.str());
+        string msg = "[GPSFileReader] Could not open file: " + file;
+        Logger::Log(LogLevel::Error, msg);
+        throw GPSFileNotFoundException(msg);
     }
 
     int lineIndex = 1;
@@ -38,10 +37,9 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
             //file validation
             if (tokens.size() != 2)
             {
-                stringstream msg;
-                msg << "GPSFileReader: Entry at line " << lineIndex << " is malformed. (Size != 2)" << endl;
-                Logger::Log(LogLevel::Error, msg.str());
-                throw GPSFileFormatException(msg.str());
+                string msg = "[GPSFileReader] Entry at line " + to_string(lineIndex) + " is malformed. (Size != 2)";
+                Logger::Log(LogLevel::Error, msg);
+                throw GPSFileFormatException(msg);
             }
 
             GPSData newData;
@@ -51,17 +49,15 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
             //coordinate validation
             if (abs(newData.Lat()) > 90)
             {
-                stringstream msg;
-                msg << "GPSFileReader: Latitude at line " << lineIndex << " is not a valid latitude (" << newData.Lat() << ")" << endl;
-                Logger::Log(LogLevel::Error, msg.str());
-                throw GPSFileFormatException(msg.str());
+                string msg = "[GPSFileReader] Latitude at line " + to_string(lineIndex) + " is not a valid latitude (" + to_string(newData.Lat()) + ").";
+                Logger::Log(LogLevel::Error, msg);
+                throw GPSFileFormatException(msg);
             }
             if (abs(newData.Long()) > 180)
             {
-                stringstream msg;
-                msg << "GPSFileReader: Longitude at line " << lineIndex << " is not a valid longitude (" << newData.Long() << ")" << endl;
-                Logger::Log(LogLevel::Error, msg.str());
-                throw GPSFileFormatException(msg.str());
+                string msg = "[GPSFileReader] Longitude at line " + to_string(lineIndex) + " is not a valid longitude (" + to_string(newData.Long()) + ").";
+                Logger::Log(LogLevel::Error, msg);
+                throw GPSFileFormatException(msg);
             }
             gpsList.push(newData);
             lineIndex++;

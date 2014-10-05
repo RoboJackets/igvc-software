@@ -21,18 +21,14 @@ bool ConfigManager::load(std::string path)
 
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        stringstream msg;
-        msg << "[ConfigManager] Could not open config file: " << defaultPath;
-        Logger::Log(LogLevel::Warning, msg.str());
+        Logger::Log(LogLevel::Warning, "[ConfigManager] Could not open config file: " + defaultPath);
         xmlFile.setContent(tr("<config>\n</config>"));
         return false;
     }
 
     if(!xmlFile.setContent(&file))
     {
-        stringstream msg;
-        msg << "[ConfigManager] Could not parse config file: " << defaultPath;
-        Logger::Log(LogLevel::Warning, msg.str());
+        Logger::Log(LogLevel::Warning, "[ConfigManager] Could not parse config file: " + defaultPath);
         xmlFile.setContent(tr("<config>\n</config>"));
         return false;
     }
@@ -51,9 +47,7 @@ bool ConfigManager::save(string path)
 
     if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
-        stringstream msg;
-        msg << "[ConfigManager] Could not open file for saving.";
-        Logger::Log(LogLevel::Warning, msg.str());
+        Logger::Log(LogLevel::Warning, "[ConfigManager] Could not open file for saving.");
         return false;
     }
 
