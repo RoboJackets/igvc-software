@@ -23,6 +23,8 @@
 #include <common/utils/GPSWaypointSource.h>
 #include <intelligence/pathfollowing/pathfollower.h>
 #include <intelligence/barrelfinder/barrelfinder.h>
+#include <QLabel>
+#include <QTimer>
 
 namespace Ui {
 class MainWindow;
@@ -76,6 +78,8 @@ private slots:
 
     void on_actionLoad_Waypoint_File_triggered();
 
+    void updateTimer();
+
 protected:
     void closeEvent(QCloseEvent *);
 
@@ -120,6 +124,9 @@ private:
     std::shared_ptr<BarrelFinder> _barrelFinder;
 
     bool isRunning, isPaused;
+    int curTime;
+    QLabel* timeLabel;
+    QTimer* qtimer;
 
     MDIWindow *activeMdiChild();
     void setupMenus();
