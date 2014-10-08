@@ -20,15 +20,15 @@ public:
     {
         connect(_joystick.get(), &Joystick::onNewData, [=](JoystickState state){
 
-            double AbsoluteMaxVel = ConfigManager::Instance().getValue("Joystick", "AbsoluteMaxSpeed", 2.0);
+            double AbsoluteMaxVel = ConfigManager::Instance().getValue("Joystick", "AbsoluteMaxSpeed", 1.0);
             double maxVel = ConfigManager::Instance().getValue("Joystick", "MaxSpeed", 1.0);
-            double maxVelIncr = ConfigManager::Instance().getValue("Joystick", "MaxSpeedIncrement", 0.25);
+            double maxVelIncr = ConfigManager::Instance().getValue("Joystick", "MaxSpeedIncrement", 0.1);
 
             if(state.buttons[1]) //Button 2
             {
                 maxVel -= maxVelIncr;
             }
-            else if(state.buttons[3]) //Button 4
+            else if(state.buttons[3]) //Button 4ff
             {
                 maxVel += maxVelIncr;
             }
