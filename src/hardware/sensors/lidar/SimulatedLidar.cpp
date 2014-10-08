@@ -52,7 +52,7 @@ LidarState SimulatedLidar::GetState()
     return _data;
 }
 
-bool SimulatedLidar::IsWorking()
+bool SimulatedLidar::isWorking()
 {
     return true;
 }

@@ -50,5 +50,5 @@ void Ardupilot::onNewSerialLine(string line)
 
 bool Ardupilot::isWorking()
 {
-    return ardupilotPort.isConnected();
+    return ardupilotPort.isWorking();
 }
