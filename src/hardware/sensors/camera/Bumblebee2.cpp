@@ -309,7 +309,7 @@ Mat Bumblebee2::correctImage(Mat rawImg)
   return correctDistortion(rawImg, _cameraMatrix, _distCoeffs);
 }
 
-bool Bumblebee2::IsConnected()
+bool Bumblebee2::isWorking()
 {
     return _cam.IsConnected();
 }

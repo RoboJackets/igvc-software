@@ -14,7 +14,7 @@ public:
     GPSData getCurrentWaypoint();
     bool isWorking()
     {
-        return _source->isOpen() && _gps->isOpen();
+        return _source->isOpen() && _gps->isWorking();
     }
 
 signals:

@@ -416,13 +416,13 @@ void MainWindow::on_actionSimulatedGPS_triggered()
 
 void MainWindow::updateHardwareStatusIcons()
 {
-    ui->hardwareStatusList->findItems("GPS", Qt::MatchExactly).at(0)->setIcon(_GPS->isOpen() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("GPS", Qt::MatchExactly).at(0)->setIcon(_GPS->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isOpen() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("IMU", Qt::MatchExactly).at(0)->setIcon(_IMU->isWorking() ? checkIcon : xIcon);
-    ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->IsWorking() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Light Controller", Qt::MatchExactly).at(0)->setIcon(_lights->isConnected() ? checkIcon : xIcon);
-    ui->hardwareStatusList->findItems("Camera", Qt::MatchExactly).at(0)->setIcon(_stereoSource->IsConnected() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Camera", Qt::MatchExactly).at(0)->setIcon(_stereoSource->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Comp. Controller", Qt::MatchExactly).at(0)->setIcon(_compController->isWorking() ? checkIcon : xIcon);
 }
 

@@ -14,7 +14,7 @@ MotorEncoderDriver2013::MotorEncoderDriver2013()
     _leftVel = 0;
     _rightVel = 0;
     _maxVel = 2.0;
-    if(_arduino.isConnected())
+    if(_arduino.isWorking())
     {
         cout << "Waiting for motor arduino.";
         cout.flush();
@@ -96,7 +96,7 @@ void MotorEncoderDriver2013::setRightVelocity(double vel)
 
 void MotorEncoderDriver2013::writeVelocities()
 {
-    if(_arduino.isConnected())
+    if(_arduino.isWorking())
     {
         std::ostringstream msg;
 
@@ -147,7 +147,7 @@ void MotorEncoderDriver2013::setMotorCommand(MotorCommand cmd)
 
 bool MotorEncoderDriver2013::isOpen()
 {
-    return _arduino.isConnected();
+    return _arduino.isWorking();
 }
 
 MotorEncoderDriver2013::~MotorEncoderDriver2013()

@@ -37,7 +37,7 @@ LidarState NAV200::GetState()
     return LidarState();
 }
 
-bool NAV200::IsWorking()
+bool NAV200::isWorking()
 {
     return true;
 }

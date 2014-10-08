@@ -141,7 +141,8 @@ HEADERS  += \
     ../src/intelligence/pathfollowing/pathfollower.h \
     ../src/common/datastructures/PathType.hpp \
     ../src/common/datastructures/MotorCommand.hpp \
-    ../src/intelligence/barrelfinder/barrelfinder.h
+    ../src/intelligence/barrelfinder/barrelfinder.h \
+    ../src/common/module.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \

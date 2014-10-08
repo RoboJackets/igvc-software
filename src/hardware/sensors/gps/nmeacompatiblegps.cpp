@@ -16,7 +16,7 @@ NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
     :serialPort(devicePath, baudRate),
 	stateQueue()
 {
-    if(serialPort.isConnected())
+    if(serialPort.isWorking())
     {
         Logger::Log(LogLevel::Info, "GPS Initialized");
         connect(&serialPort, SIGNAL(onNewLine(std::string)), this, SLOT(onNewSerialLine(std::string)));
@@ -60,8 +60,8 @@ bool NMEACompatibleGPS::StateIsAvailable() {
 	return !stateQueue.empty();
 }
 
-bool NMEACompatibleGPS::isOpen() {
-    return serialPort.isConnected();
+bool NMEACompatibleGPS::isWorking() {
+    return serialPort.isWorking();
 }
 
 NMEACompatibleGPS::~NMEACompatibleGPS() {

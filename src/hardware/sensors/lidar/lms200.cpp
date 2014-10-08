@@ -80,7 +80,7 @@ LidarState LMS200::GetStateAtTime(timeval)
     return LidarState();
 }
 
-bool LMS200::IsWorking()
+bool LMS200::isWorking()
 {
     try {
         return _device.IsInitialized() && _device.GetSickStatus() == SickLMS::SICK_STATUS_OK;

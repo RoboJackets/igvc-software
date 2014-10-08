@@ -9,13 +9,13 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <string>
-#include <QObject>
+#include <common/module.hpp>
 
 /*!
  * \brief Helper class to simplify interfacing with serial port hardware.
  * \headerfile SerialPort.h <hardware/serial/SerialPort.h>
  */
-class SerialPort : public  QObject {
+class SerialPort : public Module {
     Q_OBJECT
 
 public:
@@ -38,7 +38,7 @@ public:
 	void close();
 
     /*! \brief Returns true if the serial port is connected and open */
-	bool isConnected();
+    bool isWorking();
 
     /*! \brief Writes the given string to the serial port. */
 	void write(std::string msg);
