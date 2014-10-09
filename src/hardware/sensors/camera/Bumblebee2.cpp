@@ -296,11 +296,7 @@ void Bumblebee2::Images(Mat& l, Mat& r)
 
 void PrintError( FlyCapture2::Error error )
 {
-    std::stringstream msg;
-    msg << "[Bumblebee2] ";
-    msg << error.GetDescription();
-    Logger::Log(LogLevel::Error, msg.str());
-//    error.PrintErrorTrace();
+    Logger::Log(LogLevel::Error, string("[Bumblebee2] ") + error.GetDescription());
 }
 
 

@@ -87,11 +87,9 @@ void SimulatedLidar::loadFile(const char *path)
         }
         file.close();
     } else {
-        stringstream msg;
-        msg << "Could not open file: ";
-        msg << path;
+        string msg = "[SimulatedLidar] Could not open file: ";
         QErrorMessage errmsg;
-        errmsg.showMessage(msg.str().c_str());
+        errmsg.showMessage((msg + path).c_str());
         errmsg.exec();
     }
     _data = state;

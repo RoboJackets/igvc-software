@@ -10,7 +10,7 @@
 using namespace std;
 using namespace cv;
 
-LineDetector::LineDetector(std::shared_ptr<BasicPositionTracker> _posTracker)
+LineDetector::LineDetector()
     : max_elem(2),
       max_kernel_size(2),
       gaussian_size(7)
@@ -19,11 +19,9 @@ LineDetector::LineDetector(std::shared_ptr<BasicPositionTracker> _posTracker)
     erosion_size = 3;
     dilation_elem = 2;
     dilation_size = 2;
-    this->_posTracker = _posTracker;
 }
 
 void LineDetector::onImageEvent(ImageData imgd){
-    RobotPosition pos = _posTracker->GetPosition();
     src = imgd.mat();
     dst = src.clone();
     cv::resize(dst, dst, cv::Size(512, 384));
@@ -51,46 +49,12 @@ void LineDetector::onImageEvent(ImageData imgd){
 //    int timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
 //    cout << "Time elapsed: " << timeElapsed <<endl;
 
-    onNewCloud(cloud.makeShared(), offset, pos);
+    onNewCloud(cloud.makeShared(), offset);
 
 
 //    timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
 //    cout << "Time elapsed: " << timeElapsed <<endl;
 }
-
-//void LineDetector::myTransformPoints(){
-//    //pcam is where the coordinates are in actual space (in meters right now)
-//    //pcam = (cv::Mat_<float>(4,2) << offset-12,72, offset, 72, offset, 60,offset -12, 60);
-//   // pcam = (cv::Mat_<float>(4,2) << 4,81, -8, 81, -8, 93,4, 93);
-//    int squareSize = ConfigManager::Instance().getValue("LineDetector", "SquareSize", 100);
-//    pcam = (cv::Mat_<float>(4,2) << transformDst.cols/2 - (squareSize/2),transformDst.rows-squareSize, transformDst.cols/2+(squareSize/2), transformDst.rows-squareSize, transformDst.cols/2-(squareSize/2), transformDst.rows - squareSize*2, transformDst.cols/2+(squareSize/2), transformDst.rows - squareSize*2);
-//    //pcam = pcam/0.0245+ConfigManager::Instance().getValue("Line Detector", "Disp Offset", 100);
-//    //p is where they show up as pixels on the camera
-//    //p = (cv::Mat_<float>(4,2) << 427, 642, 515, 642, 512, 589, 432, 588);
-//    // p= (cv::Mat_<float>(4,2) << 440, 674, 356, 679, 364, 631, 439, 627);
-//     p= (cv::Mat_<float>(4,2) << 344, 646, 668, 636, 415, 496, 619, 488);
-//    //pcam = pcam*3+450; //This is just so we can see it on the screen
-//    //Getting the transform
-//    transformMat = cv::getPerspectiveTransform(p, pcam);
-//    //Apply the transform to dst and store result in transformDST
-//    cv::warpPerspective(dst, transformDst, transformMat, transformDst.size());
-//}
-
-//void LineDetector::myToPointCloud(){
-//    cloud.points.clear();
-//    int squareSize = ConfigManager::Instance().getValue("LineDetector", "SquareSize", 100);
-//    //Add points to the cloud if they are white (right now only checking the first layer)
-//    for (int r=0; r<transformDst.rows;r++){
-//        for (int c=0; c<transformDst.cols; c++){
-//            if (transformDst.at<cv::Vec3b>(r,c)[0]==255){
-//                float x = ( c - ( transformDst.cols/2. ) ) / (float)squareSize;
-//                float y = ( transformDst.rows - r ) / (float)squareSize;
-//                cloud.points.push_back(pcl::PointXYZ(x, y, 0));
-//            }
-//        }
-//    }
-//}
-
 
 void LineDetector::Erosion()
 {
@@ -229,20 +193,13 @@ void LineDetector::detectObstacle(int row, int col){
 /**
  *  \brief LineDetector::getAvg gets the average of the relevant pixels
  *  \return the average as a floating point number
- *  \note This is not really averaging... Not entirely sure what this actually does.
  */
 float LineDetector::getAvg(){
-    Vec3b p;
-        float totalAvg = 0;
-        for (int i = dst.rows/3; i< 5*dst.rows/6; i++){
-            for(int j=dst.cols/6; j< 5*dst.cols/6; j++){
-                p = dst.at<Vec3b>(i, j);
-                totalAvg += (p[0]+p[1]+p[2])/3;
-            }
-        }
-        totalAvg = (25*totalAvg)/(dst.cols*dst.rows*8);
-        //std::cout << "Average: "<< totalAvg <<std::endl;
-        return totalAvg;
+    Mat region = dst(Range(dst.rows/6, 5*dst.rows/6), Range(dst.cols/6, 5*dst.cols/6));
+    Scalar sumScalar = cv::sum(region);
+    float avg = sumScalar[0] + sumScalar[1] + sumScalar[2];
+    avg /= dst.rows * dst.cols * dst.channels();
+    return avg;
 }
 
 /**

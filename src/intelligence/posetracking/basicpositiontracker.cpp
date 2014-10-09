@@ -4,9 +4,9 @@
 #include <common/config/configmanager.h>
 
 BasicPositionTracker::BasicPositionTracker(std::shared_ptr<GPS> gps, std::shared_ptr<IMU> imu)
-    : _gps(gps),
-      _imu(imu),
-      currentPosition(0,0,0)
+    : currentPosition(0,0,0),
+      _gps(gps),
+      _imu(imu)
 {
     qRegisterMetaType<RobotPosition>("RobotPosition");
     originPointsRecorded = 0;
@@ -67,11 +67,9 @@ void BasicPositionTracker::onNewGPS(GPSData data)
         onOriginPercentage((int)( ( (double)originPointsRecorded/(double)numPointsForOrigin) * 100 ));
         if(originPointsRecorded == numPointsForOrigin)
         {
-            std::stringstream msg;
             origin.Lat(origin.Lat() / (double)numPointsForOrigin);
             origin.Long(origin.Long() / (double)numPointsForOrigin);
-            msg << "Position tracker origin found : LAT " << origin.Lat() << "\tLONG " << origin.Long();
-            Logger::Log(LogLevel::Info, msg.str());
+            Logger::Log(LogLevel::Info, "[BasicPositionTracker] Origin found: LAT " + std::to_string(origin.Lat()) + "\tLONG " + std::to_string(origin.Long()));
         }
         return;
     }
