@@ -28,7 +28,7 @@ public:
             {
                 maxVel -= maxVelIncr;
             }
-            else if(state.buttons[3]) //Button 4ff
+            else if(state.buttons[3]) //Button 4
             {
                 maxVel += maxVelIncr;
             }
@@ -42,7 +42,6 @@ public:
             }
 
             ConfigManager::Instance().setValue("Joystick", "MaxSpeed", maxVel);
-            std::cout << maxVel << std::endl;
 
             int leftJoyAxis = ConfigManager::Instance().getValue("Joystick", "LeftAxis", 1);
             int rightJoyAxis = ConfigManager::Instance().getValue("Joystick", "RightAxis", 3);
