@@ -50,9 +50,7 @@ void Joystick::threadRun()
             // Poll error
             if(errno != EINTR)
             {
-                std::stringstream msg;
-                msg << "Joystick poll error: " << errno;
-                Logger::Log(LogLevel::Warning, msg.str());
+                Logger::Log(LogLevel::Warning, "[Joystick] Poll error: " + to_string(errno));
                 continue;
             }
         }

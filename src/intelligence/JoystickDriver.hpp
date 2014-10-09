@@ -20,9 +20,9 @@ public:
     {
         connect(_joystick.get(), &Joystick::onNewData, [=](JoystickState state){
 
-            double AbsoluteMaxVel = ConfigManager::Instance().getValue("Joystick", "AbsoluteMaxSpeed", 2.0);
+            double AbsoluteMaxVel = ConfigManager::Instance().getValue("Joystick", "AbsoluteMaxSpeed", 1.0);
             double maxVel = ConfigManager::Instance().getValue("Joystick", "MaxSpeed", 1.0);
-            double maxVelIncr = ConfigManager::Instance().getValue("Joystick", "MaxSpeedIncrement", 0.25);
+            double maxVelIncr = ConfigManager::Instance().getValue("Joystick", "MaxSpeedIncrement", 0.1);
 
             if(state.buttons[1]) //Button 2
             {
@@ -42,7 +42,6 @@ public:
             }
 
             ConfigManager::Instance().setValue("Joystick", "MaxSpeed", maxVel);
-            std::cout << maxVel << std::endl;
 
             int leftJoyAxis = ConfigManager::Instance().getValue("Joystick", "LeftAxis", 1);
             int rightJoyAxis = ConfigManager::Instance().getValue("Joystick", "RightAxis", 3);

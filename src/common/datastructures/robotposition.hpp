@@ -34,6 +34,10 @@ public:
         stream << "(" << pos.X << "," << pos.Y << "," << pos.Heading << ")";
         return stream;
     }
+
+    std::string toString() {
+        return "(" + std::to_string(X) + "," + std::to_string(Y) + "," + std::to_string(Heading) + ")";
+    }
 };
 
 #endif // ROBOTPOSITION_HPP

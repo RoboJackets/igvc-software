@@ -125,9 +125,7 @@ void AStarPlanner::OnNewGoalPos(RobotPosition pos)
 {
     searchproblem.Goal = SearchLocation(pos.X, pos.Y, pos.Heading);
     goalSet = true;
-    std::stringstream msg;
-    msg << "Path planner received new goal pos " << pos;
-    Logger::Log(LogLevel::Debug, msg.str());
+    Logger::Log(LogLevel::Debug, "[AStarPlanner] Received new goal pos " + pos.toString());
     if(!pathIsValid())
         replanRequested = true;
 }

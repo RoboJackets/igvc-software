@@ -10,14 +10,10 @@ SimulatedGPS::SimulatedGPS(std::string file) : _running(true)
         GPSFileReader::read(file, _data);
         _open = true;
     } catch (GPSFileNotFoundException) {
-        std::stringstream msg;
-        msg << "[SimulatedGPS] Could not find file : " << file;
-        Logger::Log(LogLevel::Error, msg.str());
+        Logger::Log(LogLevel::Error, "[SimulatedGPS] Could not find file: " + file);
         _open = false;
     } catch (GPSFileFormatException) {
-        std::stringstream msg;
-        msg << "[SimulatedGPS] File " << file << " is not formatted correctly.";
-        Logger::Log(LogLevel::Error, msg.str());
+        Logger::Log(LogLevel::Error, "[SimulatedGPS] File " + file + " is not formatted correctly.");
         _open = false;
     }
     _delay = 100000;
