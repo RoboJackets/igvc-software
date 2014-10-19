@@ -11,7 +11,7 @@ BarrelFinder::BarrelFinder(QObject *parent) :
 
 void BarrelFinder::onNewImage(ImageData data)
 {
-    cloud.clear();
+    cloud->clear();
 
     if(data.mat().channels() != 3)
         Logger::Log(LogLevel::Error, "Barrel finder can only work on BGR images!");
