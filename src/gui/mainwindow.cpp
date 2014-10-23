@@ -13,6 +13,7 @@
 #include "adapters/lightshieldadapter.h"
 #include "adapters/motorboardadapter.h"
 #include "adapters/competitioncontrolleradapter.h"
+#include "adapters/logvieweradapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/nmeacompatiblegps.h>
@@ -439,6 +440,21 @@ void MainWindow::updateHardwareStatusIcons()
 void MainWindow::on_actionClearLogs_triggered()
 {
     Logger::Clear();
+}
+
+void MainWindow::on_actionLogViewer_triggered()
+{
+    MDIWindow *newWindow = new MDIWindow;
+    newWindow->setWindowTitle("Log Viewer");
+    newWindow->setLayout(new QGridLayout);
+
+    QWidget* adapter;
+    adapter = new LogViewerAdapter();
+
+    newWindow->layout()->addWidget(adapter);
+
+    mdiArea->addSubWindow(newWindow);
+    newWindow->show();
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)

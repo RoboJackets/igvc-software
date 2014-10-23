@@ -70,6 +70,10 @@ private slots:
 
     void on_actionClearLogs_triggered();
 
+    void on_actionLogViewer_triggered();
+
+    void on_actionTestWindow_triggered();
+
     void on_actionOutback_A321_triggered();
 
     void on_actionSimulatedLidar_triggered();
