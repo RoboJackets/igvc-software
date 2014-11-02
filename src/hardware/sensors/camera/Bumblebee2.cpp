@@ -8,6 +8,7 @@ using namespace cv;
 
 Bumblebee2::Bumblebee2(string fileName): frameCount(0), frameLock(), _images(), _cam()
 {
+    _moduleName = "Camera";
   //qRegisterMetaType<ImageData>("ImageData");
   FileStorage fs(fileName, FileStorage::READ); // Read the settings
   fs["Camera_Matrix"] >> _cameraMatrix;

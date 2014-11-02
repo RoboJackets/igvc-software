@@ -16,6 +16,7 @@ NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
     :serialPort(devicePath, baudRate),
 	stateQueue()
 {
+    _moduleName = "GPS";
     if(serialPort.isWorking())
     {
         Logger::Log(LogLevel::Info, "GPS Initialized");

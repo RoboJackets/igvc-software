@@ -15,6 +15,7 @@ using namespace std;
 
 NAV200::NAV200()
 {
+    _moduleName = "LIDAR";
     _numPoints = 1024;
 
     _ctx = NULL;

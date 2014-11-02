@@ -6,6 +6,7 @@
 
 SimulatedGPS::SimulatedGPS(std::string file) : _running(true)
 {
+    _moduleName = "GPS";
     try {
         GPSFileReader::read(file, _data);
         _open = true;

@@ -11,6 +11,7 @@ using namespace std;
 Ardupilot::Ardupilot()
  : ardupilotPort("/dev/igvc_imu", 115200)
 {
+    _moduleName = "IMU";
     connect(&ardupilotPort, SIGNAL(onNewLine(std::string)), this, SLOT(onNewSerialLine(std::string)));
     ardupilotPort.startEvents();
 }

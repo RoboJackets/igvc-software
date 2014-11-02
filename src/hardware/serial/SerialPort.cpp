@@ -13,6 +13,7 @@ SerialPort::SerialPort(std::string port_name, size_t baud)
     : port(ioservice),
       _devicePath(port_name)
 {
+    _moduleName = "Serial";
     try
     {
         port.open(port_name);
