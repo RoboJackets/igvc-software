@@ -63,7 +63,8 @@ SOURCES += \
     ../src/gui/adapters/motorboardadapter.cpp \
     ../src/gui/adapters/competitioncontrolleradapter.cpp \
     ../src/intelligence/pathfollowing/pathfollower.cpp \
-    ../src/intelligence/barrelfinder/barrelfinder.cpp
+    ../src/intelligence/barrelfinder/barrelfinder.cpp \
+    ../src/gui/adapters/adapterfactory.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -142,7 +143,8 @@ HEADERS  += \
     ../src/common/datastructures/PathType.hpp \
     ../src/common/datastructures/MotorCommand.hpp \
     ../src/intelligence/barrelfinder/barrelfinder.h \
-    ../src/common/module.hpp
+    ../src/common/module.hpp \
+    ../src/gui/adapters/adapterfactory.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -169,7 +171,7 @@ DEPENDPATH += /usr/include
 
 # libUSB (for LIDAR)
 
-LIBS += -L/usr/lib/x86_64-linux-gnu/ -lusb-1.0
+LIBS += -lusb-1.0
 
 INCLUDEPATH += /usr/lib/x86_64-linux-gnu
 DEPENDPATH += /usr/lib/x86_64-linux-gnu

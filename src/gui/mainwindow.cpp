@@ -190,7 +190,7 @@ void MainWindow::openHardwareView(QModelIndex index)
 	}
         else if(labelText == "Map")
         {
-            adapter = new MapAdapter(_mapper, _posTracker);
+            adapter = new MapAdapter(_mapper);
         }
         else if(labelText == "GPS")
         {
@@ -428,7 +428,7 @@ void MainWindow::updateHardwareStatusIcons()
 {
     ui->hardwareStatusList->findItems("GPS", Qt::MatchExactly).at(0)->setIcon(_GPS->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
-    ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isOpen() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("IMU", Qt::MatchExactly).at(0)->setIcon(_IMU->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Light Controller", Qt::MatchExactly).at(0)->setIcon(_lights->isConnected() ? checkIcon : xIcon);

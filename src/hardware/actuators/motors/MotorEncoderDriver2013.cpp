@@ -10,6 +10,7 @@ using namespace std;
 MotorEncoderDriver2013::MotorEncoderDriver2013()
  : _arduino("/dev/igvc_motor_arduino", 9600)
 {
+    _moduleName = "MotorDriver";
     qRegisterMetaType<MotorCommand>("MotorCommand");
     _leftVel = 0;
     _rightVel = 0;
@@ -142,7 +143,7 @@ void MotorEncoderDriver2013::setMotorCommand(MotorCommand cmd)
     setVelocities(cmd.leftVel, cmd.rightVel);
 }
 
-bool MotorEncoderDriver2013::isOpen()
+bool MotorEncoderDriver2013::isWorking()
 {
     return _arduino.isWorking();
 }

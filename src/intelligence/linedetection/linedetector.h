@@ -13,9 +13,9 @@
 #include <pcl/point_cloud.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/io.h>
-#include <QObject>
+#include <common/module.hpp>
 
-class LineDetector : public QObject
+class LineDetector : public Module
 {
 
     Q_OBJECT
@@ -23,6 +23,8 @@ class LineDetector : public QObject
 public:
     LineDetector();
     pcl::PointCloud<pcl::PointXYZ> cloud;
+
+    bool isWorking();
 
 public slots:
     void onImageEvent(ImageData imgd);

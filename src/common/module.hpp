@@ -20,6 +20,12 @@ public:
      */
     virtual bool isWorking() = 0;
 
+    virtual std::string moduleName() {
+        return _moduleName;
+    }
+
+protected:
+    std::string _moduleName;
 };
 
 #endif // MODULE_HPP

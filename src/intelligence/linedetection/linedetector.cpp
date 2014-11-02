@@ -15,10 +15,15 @@ LineDetector::LineDetector()
       max_kernel_size(2),
       gaussian_size(7)
 {
+    _moduleName = "LineDetector";
     erosion_elem = 2;
     erosion_size = 3;
     dilation_elem = 2;
     dilation_size = 2;
+}
+
+bool LineDetector::isWorking() {
+    return true;
 }
 
 void LineDetector::onImageEvent(ImageData imgd){

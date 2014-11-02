@@ -9,6 +9,7 @@
 SimulatedLidar::SimulatedLidar()
     : _data()
 {
+    _moduleName = "LIDAR";
     _running = true;
     _thread = boost::thread(boost::bind(&SimulatedLidar::thread_run, this));
     _delay = 500000;
