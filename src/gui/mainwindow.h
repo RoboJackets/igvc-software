@@ -6,7 +6,6 @@
 #include "configtreemodel.h"
 #include "mdiwindow.h"
 #include <QMdiArea>
-#include <QSignalMapper>
 #include "hardware/sensors/joystick/Joystick.h"
 #include "hardware/actuators/motors/MotorEncoderDriver2013.h"
 #include "intelligence/JoystickDriver.hpp"
