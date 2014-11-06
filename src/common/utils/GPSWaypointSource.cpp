@@ -2,6 +2,7 @@
 
 GPSWaypointSource::GPSWaypointSource(std::string file)
 {
+    _moduleName = "Waypoint Source";
     openFile(file);
 }
 

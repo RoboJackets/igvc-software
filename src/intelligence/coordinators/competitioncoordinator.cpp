@@ -32,7 +32,8 @@ CompetitionCoordinator::CompetitionCoordinator() {
     shared_ptr<AStarPlanner> planner(new AStarPlanner());
     shared_ptr<LineDetector> lineDetector(new LineDetector());
     shared_ptr<BarrelFinder> barrelFinder(new BarrelFinder());
-    shared_ptr<Controller> controller(new Controller(0, gps));
+    shared_ptr<GPSWaypointSource> waypointSource(new GPSWaypointSource(""));
+    shared_ptr<Controller> controller(new Controller(waypointSource, gps));
     shared_ptr<PathFollower> pathFollower(new PathFollower());
 
     QObject::connect(camera.get(), SIGNAL(onNewLeftImage(ImageData)), barrelFinder.get(), SLOT(onNewImage(ImageData)));
@@ -51,7 +52,6 @@ CompetitionCoordinator::CompetitionCoordinator() {
 
     QObject::connect(planner.get(), SIGNAL(OnNewPath(path_t)), pathFollower.get(), SLOT(onNewPath(path_t)));
 
-
     modules.push_back(gps);
     modules.push_back(camera);
     modules.push_back(imu);
@@ -63,6 +63,7 @@ CompetitionCoordinator::CompetitionCoordinator() {
     modules.push_back(barrelFinder);
     modules.push_back(controller);
     modules.push_back(pathFollower);
+    modules.push_back(waypointSource);
 }
 
 CompetitionCoordinator::~CompetitionCoordinator() {
