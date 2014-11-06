@@ -59,11 +59,11 @@ void AStarPlanner::run()
             for(int i = 0; i < newpath.getNumberOfSteps(); i++)
                 path.push_back(std::pair<SearchMove,SearchLocation>(newpath.getAction(i), newpath.getState(i+1)));
             OnNewPath(path);
-            try {
-                boost::this_thread::interruption_point();
-            } catch(...) {
-                return;
-            }
+        }
+        try {
+            boost::this_thread::interruption_point();
+        } catch(...) {
+            return;
         }
         usleep(300000);
     }
