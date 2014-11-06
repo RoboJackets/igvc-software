@@ -26,6 +26,7 @@ private slots:
     }
 
     void testNoObstacles() {
+        std::cout << "Running Test No Obstacles" << std::endl;
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
@@ -49,6 +50,7 @@ private slots:
     }
 
     void testWithObstacles() {
+        std::cout << "Running Test Obstacles" << std::endl;
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
@@ -71,6 +73,7 @@ private slots:
     }
 
     void testWithObstacles2() {
+        std::cout << "Running Test Obstacles2" << std::endl;
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
@@ -93,6 +96,7 @@ private slots:
     }
 
     void testWithObstacles3() {
+        std::cout << "Running Test Obstacles3" << std::endl;
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
@@ -115,6 +119,7 @@ private slots:
     }
 
     void testUnsolvable() {
+        std::cout << "Running Test Unsolvable" << std::endl;
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
@@ -126,7 +131,7 @@ private slots:
         pcl::PointCloud<pcl::PointXYZ>::Ptr map(new pcl::PointCloud<pcl::PointXYZ>());
         for(double theta = 0; theta < 2*M_PI; theta+=0.1)
             map->push_back(pcl::PointXYZ(cos(theta),sin(theta),0));
-        QBENCHMARK {
+        QBENCHMARK_ONCE {
             setMap(map);
         }
         QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
