@@ -85,8 +85,8 @@ Position PositionTracker::MeasurementFromIMUData(IMUData data)
     // http://www.movable-type.co.uk/scripts/latlong.html#destPoint
 
     Position measurement;
-    double time = data.time() - prevIMUTime;
-    prevIMUTime = data.time();
+    double time = data.getTimeSeconds() - prevIMUTime;
+    prevIMUTime = data.getTimeSeconds();
     double lat1 = _current_estimate.Latitude;
     double lon1 = _current_estimate.Latitude;
     double hed1 = _current_estimate.Heading;
@@ -125,7 +125,7 @@ void PositionTracker::OnGPSData(GPSData data)
 void PositionTracker::OnIMUData(IMUData data)
 {
     if(prevIMUTime == 0)
-        prevIMUTime = data.time();
+        prevIMUTime = data.getTimeSeconds();
     else
         _current_estimate = UpdateWithMeasurement(_current_estimate, MeasurementFromIMUData(data));
 }
