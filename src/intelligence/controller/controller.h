@@ -3,18 +3,20 @@
 #include <hardware/sensors/gps/GPS.hpp>
 #include <common/utils/GPSWaypointSource.h>
 #include <QObject>
+#include <common/module.hpp>
 
 
-class Controller : public QObject
+class Controller : public Module
 {
-    Q_OBJECT
+Q_OBJECT
+
 public:
     Controller(std::shared_ptr<GPSWaypointSource> source, std::shared_ptr<GPS> gps);
     ~Controller();
     GPSData getCurrentWaypoint();
     bool isWorking()
     {
-        return _source->isOpen() && _gps->isWorking();
+        return _source.get() && _gps.get() && _source->isOpen() && _gps->isWorking();
     }
 
 signals:

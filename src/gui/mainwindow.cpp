@@ -1,18 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "adapters/adapterfactory.h"
 #include "adapters/joystickadapter.h"
-#include "adapters/mapadapter.h"
-#include "adapters/gpsadapter.h"
-#include "adapters/joystickadapter.h"
-#include "adapters/cameraadapter.h"
-#include "adapters/imuadapter.h"
-#include "adapters/pathadapter.h"
-#include "adapters/lidaradapter.h"
-#include "adapters/positiontrackeradapter.h"
-#include "adapters/lightshieldadapter.h"
 #include "adapters/motorboardadapter.h"
-#include "adapters/competitioncontrolleradapter.h"
+#include "adapters/lightshieldadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
 #include <hardware/sensors/gps/nmeacompatiblegps.h>
@@ -31,6 +23,8 @@
 #include <QTimer>
 
 #include <iostream>
+
+#include <intelligence/coordinators/competitioncoordinator.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -59,78 +53,33 @@ MainWindow::MainWindow(QWidget *parent) :
     _motorController = std::shared_ptr<MotorDriver>(new MotorEncoderDriver2013);
     ui->hardwareStatusList->addItem("Motor Board");
 
+    _joystick = std::shared_ptr<Joystick>(new Joystick);
+    ui->joystickButton->setEnabled(_joystick->isOpen());
+    ui->hardwareStatusList->addItem("Joystick");
+
     _lights = std::shared_ptr<LightController>(new LightController());
     connect(_lights.get(), SIGNAL(onBatteryLevelChanged(int)), ui->batteryIndicator, SLOT(onBatteryLevelChanged(int)));
     connect(_lights.get(), SIGNAL(onEStopStatusChanged(bool)), ui->statusImage, SLOT(onEStopStatusChanged(bool)));
     connect(_lights.get(), SIGNAL(onEStopStatusChanged(bool)), _motorController.get(), SLOT(onEStopStatusChanged(bool)));
     ui->hardwareStatusList->addItem("Light Controller");
 
-    _joystick = std::shared_ptr<Joystick>(new Joystick);
-    ui->joystickButton->setEnabled(_joystick->isOpen());
-    ui->hardwareStatusList->addItem("Joystick");
+    _coordinator = new CompetitionCoordinator();
 
-    _lidar = std::shared_ptr<Lidar>(new LMS200());
-
-    ui->hardwareStatusList->addItem("LIDAR");
     ui->actionLMS_200->setChecked(true);
 
-    _stereoSource = std::shared_ptr<StereoSource>(new Bumblebee2("/home/robojackets/igvc/software/src/hardware/sensors/camera/calib/out_camera_data.xml"));
-    ui->hardwareStatusList->addItem("Camera");
-
-    _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/igvc_gps", 19200));
     ui->actionOutback_A321->setChecked(true);
-    ui->hardwareStatusList->addItem("GPS");
-
-    _IMU = std::shared_ptr<IMU>(new Ardupilot());
-    ui->hardwareStatusList->addItem("IMU");
-
-    _posTracker = std::shared_ptr<BasicPositionTracker>(new BasicPositionTracker(_GPS, _IMU));
-    ui->hardwareStatusList->addItem("Position Tracker");
-
-    _lineDetector = std::shared_ptr<LineDetector>(new LineDetector());
-    connect(_stereoSource.get(), SIGNAL(onNewLeftImage(ImageData)), _lineDetector.get(), SLOT(onImageEvent(ImageData)));
-
-    _barrelFinder = std::shared_ptr<BarrelFinder>(new BarrelFinder());
-    connect(_stereoSource.get(), SIGNAL(onNewLeftImage(ImageData)), _barrelFinder.get(), SLOT(onNewImage(ImageData)));
-
-    _mapper = std::shared_ptr<MapBuilder>(new MapBuilder(_lidar, _posTracker));
-    connect(_lidar.get(), SIGNAL(onNewData(LidarState)), _mapper.get(), SLOT(onLidarData(LidarState)));
-    connect(_lineDetector.get(), SIGNAL(onNewCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)), _mapper.get(), SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
-    connect(_barrelFinder.get(), SIGNAL(newCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointXY)), _mapper.get(), SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
-
-    ui->hardwareStatusList->addItem("Map");
-
-    ui->hardwareStatusList->addItem("Path Planner");
 
     _joystickDriver = std::shared_ptr<JoystickDriver>(new JoystickDriver(_joystick));
 
-    _waypointSource = std::shared_ptr<GPSWaypointSource>(new GPSWaypointSource(""));
+//    FIXME : This functionality needs to be restored.
+//    connect(_compController.get(), &Controller::onNewWaypoint, [=](GPSData waypoint){
+//        if((int)waypoint.Lat() == 0 && (int)waypoint.Long() == 0)
+//        {
+//            on_stopButton_clicked();
+//        }
+//    });
 
-    _compController = std::shared_ptr<Controller>(new Controller(_waypointSource, _GPS));
-    ui->hardwareStatusList->addItem("Comp. Controller");
-
-    _planner = std::shared_ptr<PathPlanner>(new AStarPlanner());
-
-    _pathFollower = std::shared_ptr<PathFollower>(new PathFollower());
-
-    connect(_compController.get(), &Controller::onNewWaypoint, [=](GPSData waypoint){
-        _planner->OnNewGoalPos(_posTracker->WaypointToPosition(waypoint));
-    });
-
-    connect(_compController.get(), &Controller::onNewWaypoint, [=](GPSData waypoint){
-        if((int)waypoint.Lat() == 0 && (int)waypoint.Long() == 0)
-        {
-            on_stopButton_clicked();
-        }
-    });
-
-    connect(_posTracker.get(), SIGNAL(onNewPosition(RobotPosition)), _planner.get(), SLOT(OnNewStartPos(RobotPosition)));
-
-    connect(_mapper.get(), SIGNAL(onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)), _planner.get(), SLOT(OnNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr)));
-
-    connect(_planner.get(), SIGNAL(OnNewPath(path_t)), _pathFollower.get(), SLOT(onNewPath(path_t)));
-
-    updateHardwareStatusIcons();
+    updateHardwareStatusList();
 
     isRunning = false;
     isPaused = false;
@@ -157,6 +106,7 @@ void MainWindow::setupMenus()
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete _coordinator;
 }
 
 void MainWindow::openHardwareView(QModelIndex index)
@@ -183,52 +133,18 @@ void MainWindow::openHardwareView(QModelIndex index)
         else if(labelText == "Joystick")
         {
             adapter = new JoystickAdapter(_joystick);
-        }
-        else if(labelText == "LIDAR")
-        {
-            adapter = new LidarAdapter(_lidar);
-	}
-        else if(labelText == "Map")
-        {
-            adapter = new MapAdapter(_mapper);
-        }
-        else if(labelText == "GPS")
-        {
-            adapter = new GPSAdapter(_GPS);
-        }
-        else if(labelText == "Camera")
-        {
-            adapter = new CameraAdapter();
-            connect(_stereoSource.get(), SIGNAL(onNewLeftImage(ImageData)), adapter, SLOT(newLeftCamImg(ImageData)));
-            connect(_lineDetector.get(), SIGNAL(onNewLinesMat(cv::Mat)), adapter, SLOT(newLineImage(cv::Mat)));
-            connect(_barrelFinder.get(), SIGNAL(onNewLinesMat(cv::Mat)), adapter, SLOT(newBarrelImage(cv::Mat)));
-        }
-        else if(labelText == "IMU")
-        {
-            adapter = new IMUAdapter(_IMU);
-        }
-        else if(labelText == "Position Tracker")
-        {
-            adapter = new PositionTrackerAdapter(_posTracker);
-        }
-        else if(labelText == "Path Planner")
-        {
-            adapter = new PathAdapter(_planner);
-        }
-        else if(labelText == "Light Controller")
-        {
+        } else if(labelText == "Light Controller") {
             adapter = new LightShieldAdapter(_lights);
-        }
-        else if(labelText == "Comp. Controller")
-        {
-            adapter = new CompetitionControllerAdapter(_compController, _GPS);
-        }
-        else
-        {
-            adapter = new QWidget();
+        } else {
+            shared_ptr<Module> module = _coordinator->getModuleWithName(labelText.toStdString());
+            if(module.get())
+                adapter = AdapterFactory::getAdapterForModule(module);
+            else
+                adapter = new QWidget();
         }
 
         newWindow->layout()->addWidget(adapter);
+        newWindow->setMinimumSize(adapter->minimumSize());
 
         mdiArea->addSubWindow(newWindow);
         newWindow->show();
@@ -354,7 +270,7 @@ void MainWindow::on_stopButton_clicked()
         isPaused = false;
         //disconnect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
         _motorController->setMotorCommand(MotorCommand(0.,0.));
-        _mapper->Clear();
+//        _mapper->Clear();
     }
     _lights->setSafetyLight(isRunning);
     curTime = 0;
@@ -396,10 +312,10 @@ void MainWindow::on_actionHemisphere_A100_triggered()
     ui->actionSimulatedGPS->setChecked(false);
     ui->actionHemisphere_A100->setChecked(true);
     ui->actionOutback_A321->setChecked(false);
-    _GPS.reset();
-    _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/ttyGPS", 4800));
-    _posTracker->ChangeGPS(_GPS);
-    updateHardwareStatusIcons();
+//    _GPS.reset();
+//    _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/ttyGPS", 4800));
+//    _posTracker->ChangeGPS(_GPS);
+    updateHardwareStatusList();
 }
 
 void MainWindow::on_actionSimulatedGPS_triggered()
@@ -417,23 +333,22 @@ void MainWindow::on_actionSimulatedGPS_triggered()
 //            if(p != nullptr)
 //                p->close();
 //        }
-        _GPS.reset();
-        _GPS = std::shared_ptr<GPS>(new SimulatedGPS(fileName.toStdString()));
-        _posTracker->ChangeGPS(_GPS);
-        updateHardwareStatusIcons();
+//        _GPS.reset();
+//        _GPS = std::shared_ptr<GPS>(new SimulatedGPS(fileName.toStdString()));
+//        _posTracker->ChangeGPS(_GPS);
+        updateHardwareStatusList();
     }
 }
 
-void MainWindow::updateHardwareStatusIcons()
+void MainWindow::updateHardwareStatusList()
 {
-    ui->hardwareStatusList->findItems("GPS", Qt::MatchExactly).at(0)->setIcon(_GPS->isWorking() ? checkIcon : xIcon);
-    ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isOpen() ? checkIcon : xIcon);
+    ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isWorking() ? checkIcon : xIcon);
-    ui->hardwareStatusList->findItems("IMU", Qt::MatchExactly).at(0)->setIcon(_IMU->isWorking() ? checkIcon : xIcon);
-    ui->hardwareStatusList->findItems("LIDAR", Qt::MatchExactly).at(0)->setIcon(_lidar->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Light Controller", Qt::MatchExactly).at(0)->setIcon(_lights->isConnected() ? checkIcon : xIcon);
-    ui->hardwareStatusList->findItems("Camera", Qt::MatchExactly).at(0)->setIcon(_stereoSource->isWorking() ? checkIcon : xIcon);
-    ui->hardwareStatusList->findItems("Comp. Controller", Qt::MatchExactly).at(0)->setIcon(_compController->isWorking() ? checkIcon : xIcon);
+    for(shared_ptr<Module> module : _coordinator->getModules()) {
+        ui->hardwareStatusList->addItem(module->moduleName().c_str());
+        ui->hardwareStatusList->findItems(module->moduleName().c_str(), Qt::MatchExactly).at(0)->setIcon(module->isWorking() ? checkIcon : xIcon);
+    }
 }
 
 void MainWindow::on_actionClearLogs_triggered()
@@ -453,10 +368,10 @@ void MainWindow::on_actionOutback_A321_triggered()
     ui->actionSimulatedGPS->setChecked(false);
     ui->actionHemisphere_A100->setChecked(false);
     ui->actionOutback_A321->setChecked(true);
-    _GPS.reset();
-    _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/ttyGPS", 19200));
-    _posTracker->ChangeGPS(_GPS);
-    updateHardwareStatusIcons();
+//    _GPS.reset();
+//    _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/ttyGPS", 19200));
+//    _posTracker->ChangeGPS(_GPS);
+    updateHardwareStatusList();
 }
 
 void MainWindow::on_actionSimulatedLidar_triggered()
@@ -468,11 +383,11 @@ void MainWindow::on_actionSimulatedLidar_triggered()
         ui->actionSimulatedLidar->setChecked(true);
         auto newDevice = std::shared_ptr<Lidar>(new SimulatedLidar);
         ((SimulatedLidar*)newDevice.get())->loadFile(fileName.toStdString().c_str());
-        _mapper->ChangeLidar(newDevice);
-        _mapper->Clear();
-        _lidar.reset();
-        _lidar = newDevice;
-        updateHardwareStatusIcons();
+//        _mapper->ChangeLidar(newDevice);
+//        _mapper->Clear();
+//        _lidar.reset();
+//        _lidar = newDevice;
+        updateHardwareStatusList();
     }
 }
 
@@ -480,18 +395,18 @@ void MainWindow::on_actionLMS_200_triggered()
 {
     ui->actionLMS_200->setChecked(true);
     ui->actionSimulatedLidar->setChecked(false);
-    _lidar.reset();
-    _lidar = std::shared_ptr<Lidar>(new LMS200);
-    _mapper->ChangeLidar(_lidar);
-    _mapper->Clear();
-    updateHardwareStatusIcons();
+//    _lidar.reset();
+//    _lidar = std::shared_ptr<Lidar>(new LMS200);
+//    _mapper->ChangeLidar(_lidar);
+//    _mapper->Clear();
+    updateHardwareStatusList();
 }
 
 void MainWindow::on_actionLoad_Waypoint_File_triggered()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Waypoint Data File"), "", tr("CSV Files(*.csv)"));
-    if(!fileName.isEmpty())
-        _waypointSource->openFile(fileName.toStdString());
+//    if(!fileName.isEmpty())
+//        _waypointSource->openFile(fileName.toStdString());
 }
 
 void MainWindow::updateTimer()

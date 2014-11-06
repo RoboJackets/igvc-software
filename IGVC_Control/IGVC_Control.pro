@@ -64,7 +64,8 @@ SOURCES += \
     ../src/gui/adapters/competitioncontrolleradapter.cpp \
     ../src/intelligence/pathfollowing/pathfollower.cpp \
     ../src/intelligence/barrelfinder/barrelfinder.cpp \
-    ../src/gui/adapters/adapterfactory.cpp
+    ../src/gui/adapters/adapterfactory.cpp \
+    ../src/intelligence/coordinators/competitioncoordinator.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -144,7 +145,9 @@ HEADERS  += \
     ../src/common/datastructures/MotorCommand.hpp \
     ../src/intelligence/barrelfinder/barrelfinder.h \
     ../src/common/module.hpp \
-    ../src/gui/adapters/adapterfactory.h
+    ../src/gui/adapters/adapterfactory.h \
+    ../src/intelligence/coordinators/coordinator.hpp \
+    ../src/intelligence/coordinators/competitioncoordinator.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \

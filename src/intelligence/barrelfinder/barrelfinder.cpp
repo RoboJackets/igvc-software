@@ -6,6 +6,7 @@
 
 BarrelFinder::BarrelFinder(QObject *parent)
 {
+    _moduleName = "Barrel Finder";
 }
 
 bool BarrelFinder::isWorking() {
@@ -13,7 +14,7 @@ bool BarrelFinder::isWorking() {
 }
 
 void BarrelFinder::onNewImage(ImageData data)
-{
+{   
     cloud.clear();
 
     if(data.mat().channels() != 3)

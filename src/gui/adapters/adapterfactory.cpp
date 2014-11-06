@@ -11,12 +11,7 @@
 #include <adapters/positiontrackeradapter.h>
 #include <adapters/competitioncontrolleradapter.h>
 
-AdapterFactory::AdapterFactory()
-{
-}
-
-
-QWidget* getAdapterForModule(std::shared_ptr<Module> module, QWidget *parent = 0) {
+QWidget* AdapterFactory::getAdapterForModule(std::shared_ptr<Module> module, QWidget *parent) {
     std::string name = module->moduleName();
     if(name == "Joystick")
         return new JoystickAdapter(dynamic_pointer_cast<Joystick>(module), parent);

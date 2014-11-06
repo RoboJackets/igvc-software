@@ -1,14 +1,13 @@
 #ifndef ADAPTERFACTORY_H
 #define ADAPTERFACTORY_H
 #include <QWidget>
+#include <memory>
 #include <common/module.hpp>
 
 class AdapterFactory
 {
 public:
-    AdapterFactory();
-
-    QWidget* getAdapterForModule(const Module &module);
+    static QWidget* getAdapterForModule(std::shared_ptr<Module> module, QWidget *parent = 0);
 
 };
 
