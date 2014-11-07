@@ -29,11 +29,8 @@ AStarPlanner::AStarPlanner()
 
 AStarPlanner::~AStarPlanner()
 {
-    std::cout << "here" << std::endl;
     thread.interrupt();
-    std::cout << "there" << std::endl;
     thread.join();
-    std::cout << "y" << std::endl;
 }
 
 path_t AStarPlanner::GetPath()
