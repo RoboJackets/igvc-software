@@ -21,7 +21,7 @@ public slots:
     }
 
 private slots:
-    void initTest() {
+    void init() {
         pathRecieved = false;
     }
 
@@ -39,7 +39,7 @@ private slots:
         QBENCHMARK_ONCE {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 1);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 350);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << "\t" << pair.first.V << ", " << pair.first.W << std::endl;
@@ -64,7 +64,7 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 5);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
@@ -86,7 +86,7 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 5);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
@@ -108,7 +108,7 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 5);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
@@ -129,7 +129,7 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 5);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
         QVERIFY2(planner.GetPath().size() == 0, "Unsolvable problem generated a non-zero length path.");

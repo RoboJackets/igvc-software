@@ -54,7 +54,8 @@ void LineDetector::onImageEvent(ImageData imgd){
 //    int timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());
 //    cout << "Time elapsed: " << timeElapsed <<endl;
 
-    onNewCloud(cloud.makeShared(), offset);
+
+    onNewCloud(cloud, offset);
 
 
 //    timeElapsed = t.msecsTo(QDateTime::currentDateTime().time());

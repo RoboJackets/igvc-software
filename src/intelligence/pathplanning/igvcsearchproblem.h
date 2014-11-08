@@ -12,7 +12,7 @@ class IGVCSearchProblem : public SearchProblem<SearchLocation, SearchMove>
 {
 public:
 
-    pcl::PointCloud<pcl::PointXYZ> Map;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr Map;
     SearchLocation Start;
     SearchLocation Goal;
     double Threshold;

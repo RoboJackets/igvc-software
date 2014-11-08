@@ -22,7 +22,7 @@ class LineDetector : public Module
 
 public:
     LineDetector();
-    pcl::PointCloud<pcl::PointXYZ> cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
     bool isWorking();
 
