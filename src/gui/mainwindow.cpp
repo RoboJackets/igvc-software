@@ -312,9 +312,7 @@ void MainWindow::on_actionHemisphere_A100_triggered()
     ui->actionSimulatedGPS->setChecked(false);
     ui->actionHemisphere_A100->setChecked(true);
     ui->actionOutback_A321->setChecked(false);
-//    _GPS.reset();
-//    _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/ttyGPS", 4800));
-//    _posTracker->ChangeGPS(_GPS);
+    _coordinator->changeGPS(std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/ttyGPS", 4800)));
     updateHardwareStatusList();
 }
 
@@ -326,6 +324,7 @@ void MainWindow::on_actionSimulatedGPS_triggered()
         ui->actionSimulatedGPS->setChecked(true);
         ui->actionHemisphere_A100->setChecked(false);
         ui->actionOutback_A321->setChecked(false);
+        _coordinator->changeGPS(std::shared_ptr<GPS>(new SimulatedGPS(fileName.toStdString())));
 //        MDIWindow *window = findWindowWithTitle("GPS");
 //        if( window != nullptr)
 //        {
@@ -333,15 +332,14 @@ void MainWindow::on_actionSimulatedGPS_triggered()
 //            if(p != nullptr)
 //                p->close();
 //        }
-//        _GPS.reset();
-//        _GPS = std::shared_ptr<GPS>(new SimulatedGPS(fileName.toStdString()));
-//        _posTracker->ChangeGPS(_GPS);
         updateHardwareStatusList();
     }
 }
 
 void MainWindow::updateHardwareStatusList()
 {
+    ui->hardwareStatusList->clear();
+    ui->hardwareStatusList->addItems(QStringList({"Joystick","Motor Board","Light Controller"}));
     ui->hardwareStatusList->findItems("Joystick", Qt::MatchExactly).at(0)->setIcon(_joystick->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Motor Board", Qt::MatchExactly).at(0)->setIcon(_motorController->isWorking() ? checkIcon : xIcon);
     ui->hardwareStatusList->findItems("Light Controller", Qt::MatchExactly).at(0)->setIcon(_lights->isConnected() ? checkIcon : xIcon);
@@ -368,9 +366,7 @@ void MainWindow::on_actionOutback_A321_triggered()
     ui->actionSimulatedGPS->setChecked(false);
     ui->actionHemisphere_A100->setChecked(false);
     ui->actionOutback_A321->setChecked(true);
-//    _GPS.reset();
-//    _GPS = std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/ttyGPS", 19200));
-//    _posTracker->ChangeGPS(_GPS);
+    _coordinator->changeGPS(std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/ttyGPS", 19200)));
     updateHardwareStatusList();
 }
 
@@ -383,10 +379,7 @@ void MainWindow::on_actionSimulatedLidar_triggered()
         ui->actionSimulatedLidar->setChecked(true);
         auto newDevice = std::shared_ptr<Lidar>(new SimulatedLidar);
         ((SimulatedLidar*)newDevice.get())->loadFile(fileName.toStdString().c_str());
-//        _mapper->ChangeLidar(newDevice);
-//        _mapper->Clear();
-//        _lidar.reset();
-//        _lidar = newDevice;
+        _coordinator->changeLidar(newDevice);
         updateHardwareStatusList();
     }
 }
@@ -395,10 +388,7 @@ void MainWindow::on_actionLMS_200_triggered()
 {
     ui->actionLMS_200->setChecked(true);
     ui->actionSimulatedLidar->setChecked(false);
-//    _lidar.reset();
-//    _lidar = std::shared_ptr<Lidar>(new LMS200);
-//    _mapper->ChangeLidar(_lidar);
-//    _mapper->Clear();
+    _coordinator->changeLidar(std::shared_ptr<Lidar>(new LMS200));
     updateHardwareStatusList();
 }
 
@@ -407,6 +397,7 @@ void MainWindow::on_actionLoad_Waypoint_File_triggered()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Waypoint Data File"), "", tr("CSV Files(*.csv)"));
 //    if(!fileName.isEmpty())
 //        _waypointSource->openFile(fileName.toStdString());
+    cerr << "NOT IMPLEMENTED YET" << endl;
 }
 
 void MainWindow::updateTimer()

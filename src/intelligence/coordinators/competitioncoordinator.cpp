@@ -81,3 +81,35 @@ shared_ptr<Module> CompetitionCoordinator::getModuleWithName(string name) {
     }
     return shared_ptr<Module>(0);
 }
+
+void CompetitionCoordinator::changeLidar(std::shared_ptr<Module> lidar) {
+    auto pos = find("LIDAR");
+    if(pos != modules.end())
+        modules.erase(pos);
+    modules.push_back(lidar);
+    auto mapperPos = find("MapBuilder");
+    if(mapperPos != modules.end()) {
+        shared_ptr<MapBuilder> mapper = dynamic_pointer_cast<MapBuilder>(*mapperPos);
+        mapper->ChangeLidar(dynamic_pointer_cast<Lidar>(lidar));
+        mapper->Clear();
+    }
+}
+void CompetitionCoordinator::changeGPS(std::shared_ptr<Module> gps) {
+    auto pos = find("GPS");
+    if(pos != modules.end())
+        modules.erase(pos);
+    modules.push_back(gps);
+    auto trackerPos = find("PositionTracker");
+    if(trackerPos != modules.end()) {
+        shared_ptr<BasicPositionTracker> tracker = dynamic_pointer_cast<BasicPositionTracker>(*trackerPos);
+        tracker->ChangeGPS(dynamic_pointer_cast<GPS>(gps));
+    }
+}
+
+module_list_t::iterator CompetitionCoordinator::find(string name) {
+    for(auto iter = modules.begin(); iter != modules.end(); iter++) {
+        if((*iter)->moduleName() == name)
+            return iter;
+    }
+    return modules.end();
+}
