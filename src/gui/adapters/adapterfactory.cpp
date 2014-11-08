@@ -37,5 +37,5 @@ QWidget* AdapterFactory::getAdapterForModule(shared_ptr<Module> module, QWidget 
     if(name == "PositionTracker")
         return new PositionTrackerAdapter(dynamic_pointer_cast<BasicPositionTracker>(module), parent);
 
-    return new QWidget();
+    return nullptr;
 }

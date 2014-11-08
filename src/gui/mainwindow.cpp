@@ -124,7 +124,7 @@ void MainWindow::openHardwareView(QModelIndex index)
         newWindow->setWindowTitle(labelText);
         newWindow->setLayout(new QGridLayout);
 
-        QWidget* adapter;
+        QWidget* adapter = nullptr;
 
         if(labelText == "Motor Board")
         {
@@ -139,15 +139,15 @@ void MainWindow::openHardwareView(QModelIndex index)
             shared_ptr<Module> module = _coordinator->getModuleWithName(labelText.toStdString());
             if(module.get())
                 adapter = AdapterFactory::getAdapterForModule(module);
-            else
-                adapter = new QWidget();
         }
 
-        newWindow->layout()->addWidget(adapter);
-        newWindow->setMinimumSize(adapter->minimumSize());
+        if(adapter != nullptr) {
+            newWindow->layout()->addWidget(adapter);
+            newWindow->setMinimumSize(adapter->minimumSize());
 
-        mdiArea->addSubWindow(newWindow);
-        newWindow->show();
+            mdiArea->addSubWindow(newWindow);
+            newWindow->show();
+        }
     }
 
     updateWindowMenu();
