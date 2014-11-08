@@ -24,7 +24,7 @@ Eigen::Matrix2d ImgRotMat(double angle);
 Eigen::Matrix3d HomogImgRotMat(double angle);
 cv::Mat correctDistortion(cv::Mat rawImg, cv::Mat camerMatrix, cv::Mat _distCoeffs);
 void transformPoints(cv::Mat &src, cv::Mat &dst);
-pcl::PointCloud<pcl::PointXYZ> toPointCloud(cv::Mat src);
+pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
 
 
 

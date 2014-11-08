@@ -5,9 +5,14 @@ using namespace pcl;
 std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
 {
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
-    kdtree.setInputCloud(Map.makeShared());
-    //cout << "Expanding " << state << endl;
     std::list<SearchMove> acts;
+
+    if(Map == nullptr || Map->empty())
+        return acts;
+
+    kdtree.setInputCloud(Map);
+    //cout << "Expanding " << state << endl;
+
     double delta = 0.05;
     double Wmin = -0.8;
     double Wmax =  0.8;

@@ -14,8 +14,8 @@ bool BarrelFinder::isWorking() {
 }
 
 void BarrelFinder::onNewImage(ImageData data)
-{   
-    cloud.clear();
+{
+    cloud->clear();
 
     if(data.mat().channels() != 3)
         Logger::Log(LogLevel::Error, "Barrel finder can only work on BGR images!");
@@ -186,7 +186,7 @@ void BarrelFinder::onNewImage(ImageData data)
     pcl::PointXY offset;
     offset.x = ConfigManager::Instance().getValue("BarrelFinder", "Xoffset", 0);
     offset.y = ConfigManager::Instance().getValue("BarrelFinder", "Yoffset", 0);
-    newCloudFrame(cloud.makeShared(), offset);
+    newCloudFrame(cloud, offset);
 
 }
 

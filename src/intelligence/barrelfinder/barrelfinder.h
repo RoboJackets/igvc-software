@@ -21,7 +21,7 @@ public slots:
     void onNewImage(ImageData data);
 
 private:
-    pcl::PointCloud<pcl::PointXYZ> cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 };
 
