@@ -11,16 +11,23 @@
 #include <adapters/positiontrackeradapter.h>
 #include <adapters/competitioncontrolleradapter.h>
 
-QWidget* AdapterFactory::getAdapterForModule(std::shared_ptr<Module> module, QWidget *parent) {
-    std::string name = module->moduleName();
+using namespace std;
+
+QWidget* AdapterFactory::getAdapterForModule(shared_ptr<Module> module, QWidget *parent) {
+    string name = module->moduleName();
     if(name == "Joystick")
         return new JoystickAdapter(dynamic_pointer_cast<Joystick>(module), parent);
     if(name == "LIDAR")
         return new LidarAdapter(dynamic_pointer_cast<Lidar>(module), parent);
     if(name == "IMU")
         return new IMUAdapter(dynamic_pointer_cast<IMU>(module), parent);
-    if(name == "Camera")
-        return new CameraAdapter(parent);
+    if(name == "Camera") {
+        CameraAdapter* adapter = new CameraAdapter(parent);
+        shared_ptr<StereoSource> source = dynamic_pointer_cast<StereoSource>(module);
+        QObject::connect(source.get(), SIGNAL(onNewLeftImage(ImageData)), adapter, SLOT(newLeftCamImg(ImageData)));
+        QObject::connect(source.get(), SIGNAL(onNewRightImage(ImageData)), adapter, SLOT(newRightCamImg(ImageData)));
+        return adapter;
+    }
     if(name == "GPS")
         return new GPSAdapter(dynamic_pointer_cast<GPS>(module), parent);
     if(name == "MapBuilder")
