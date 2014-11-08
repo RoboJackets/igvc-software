@@ -143,7 +143,6 @@ void MainWindow::openHardwareView(QModelIndex index)
 
         if(adapter != nullptr) {
             newWindow->layout()->addWidget(adapter);
-            newWindow->setMinimumSize(adapter->minimumSize());
 
             mdiArea->addSubWindow(newWindow);
             newWindow->show();
