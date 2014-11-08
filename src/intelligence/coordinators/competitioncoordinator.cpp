@@ -52,6 +52,16 @@ CompetitionCoordinator::CompetitionCoordinator() {
 
     QObject::connect(planner.get(), SIGNAL(OnNewPath(path_t)), pathFollower.get(), SLOT(onNewPath(path_t)));
 
+    QObject::connect(pathFollower.get(), &PathFollower::newMotorCommand, [=](MotorCommand cmd) {
+        emit newMotorCommand(cmd);
+    });
+
+    QObject::connect(controller.get(), &Controller::onNewWaypoint, [=](GPSData data){
+        if(data.Lat() == 0 && data.Long() == 0) {
+            emit finished();
+        }
+    });
+
     modules.push_back(gps);
     modules.push_back(camera);
     modules.push_back(imu);

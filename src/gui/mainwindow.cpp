@@ -71,13 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystickDriver = std::shared_ptr<JoystickDriver>(new JoystickDriver(_joystick));
 
-//    FIXME : This functionality needs to be restored.
-//    connect(_compController.get(), &Controller::onNewWaypoint, [=](GPSData waypoint){
-//        if((int)waypoint.Lat() == 0 && (int)waypoint.Long() == 0)
-//        {
-//            on_stopButton_clicked();
-//        }
-//    });
+    connect(_coordinator, SIGNAL(finished()), this, SLOT(on_stopButton_clicked()));
 
     updateHardwareStatusList();
 
@@ -244,7 +238,7 @@ void MainWindow::on_playButton_clicked()
             ui->playButton->setIcon(QIcon(":/images/Play"));
         }
         isPaused = !isPaused;
-        //disconnect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        disconnect(_coordinator, SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
         _motorController->setMotorCommand(MotorCommand(0.,0.));
     }
     else
@@ -253,7 +247,7 @@ void MainWindow::on_playButton_clicked()
         ui->playButton->setIcon(QIcon(":/images/Pause"));
         ui->stopButton->setVisible(true);
         isRunning = true;
-        //connect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        connect(_coordinator, SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
         _motorController->setMotorCommand(MotorCommand(1.,1.));
     }
     _lights->setSafetyLight(isRunning);
@@ -267,9 +261,8 @@ void MainWindow::on_stopButton_clicked()
         ui->stopButton->setVisible(false);
         isRunning = false;
         isPaused = false;
-        //disconnect(_pathFollower.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        disconnect(_coordinator, SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
         _motorController->setMotorCommand(MotorCommand(0.,0.));
-//        _mapper->Clear();
     }
     _lights->setSafetyLight(isRunning);
     curTime = 0;
