@@ -5,6 +5,7 @@
 
 class CompetitionCoordinator : public Coordinator
 {
+    Q_OBJECT
 public:
     CompetitionCoordinator();
 
@@ -17,6 +18,9 @@ public:
 public slots:
     virtual void changeLidar(std::shared_ptr<Module>);
     virtual void changeGPS(std::shared_ptr<Module>);
+
+signals:
+    void newMotorCommand(MotorCommand cmd);
 
 private:
     module_list_t modules;
