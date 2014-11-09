@@ -96,34 +96,33 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;opencv2/opencv.hpp&gt;</span></div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;eigen3/Eigen/Dense&gt;</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;hardware/sensors/camera/CameraInfo.h&gt;</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;common/utils/timing.h&gt;</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;pcl/point_cloud.h&gt;</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;pcl/point_types.h&gt;</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="keywordtype">void</span> computeOffsets(cv::vector&lt;cv::KeyPoint&gt;&amp; keypoints, Eigen::MatrixXd&amp; Pos, <span class="keywordtype">int</span> nRows, <span class="keywordtype">int</span> nCols);</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;Eigen::Matrix3d centerImageCoords(<span class="keywordtype">int</span> nRows, <span class="keywordtype">int</span> nCols);</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;Eigen::Matrix3d RollRotMatrix(<span class="keywordtype">double</span> roll);</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;Eigen::Matrix3d PitchRotMatrix(<span class="keywordtype">double</span> pitch);</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;Eigen::Matrix3d YawRotMatrix(<span class="keywordtype">double</span> yaw);</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;Eigen::Matrix4d HomogRollRotMatrix(<span class="keywordtype">double</span> roll);</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;Eigen::Matrix4d HomogPitchRotMatrix(<span class="keywordtype">double</span> pitch);</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;Eigen::Matrix4d HomogYawRotMatrix(<span class="keywordtype">double</span> yaw);</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;Eigen::Matrix3d RotMat3d(<span class="keywordtype">double</span> roll, <span class="keywordtype">double</span> pitch, <span class="keywordtype">double</span> yaw);</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;Eigen::Matrix4d HomogRotMat3d(<span class="keywordtype">double</span> roll, <span class="keywordtype">double</span> pitch, <span class="keywordtype">double</span> yaw);</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;Eigen::Matrix2d ImgRotMat(<span class="keywordtype">double</span> angle);</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;Eigen::Matrix3d HomogImgRotMat(<span class="keywordtype">double</span> angle);</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;cv::Mat correctDistortion(cv::Mat rawImg, cv::Mat camerMatrix, cv::Mat _distCoeffs);</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keywordtype">void</span> transformPoints(cv::Mat &amp;src, cv::Mat &amp;dst);</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;pcl::PointCloud&lt;pcl::PointXYZ&gt; toPointCloud(cv::Mat src);</div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;common/utils/timing.h&gt;</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;pcl/point_cloud.h&gt;</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;pcl/point_types.h&gt;</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;</div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keywordtype">void</span> computeOffsets(cv::vector&lt;cv::KeyPoint&gt;&amp; keypoints, Eigen::MatrixXd&amp; Pos, <span class="keywordtype">int</span> nRows, <span class="keywordtype">int</span> nCols);</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;Eigen::Matrix3d centerImageCoords(<span class="keywordtype">int</span> nRows, <span class="keywordtype">int</span> nCols);</div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;Eigen::Matrix3d RollRotMatrix(<span class="keywordtype">double</span> roll);</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;Eigen::Matrix3d PitchRotMatrix(<span class="keywordtype">double</span> pitch);</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;Eigen::Matrix3d YawRotMatrix(<span class="keywordtype">double</span> yaw);</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;Eigen::Matrix4d HomogRollRotMatrix(<span class="keywordtype">double</span> roll);</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;Eigen::Matrix4d HomogPitchRotMatrix(<span class="keywordtype">double</span> pitch);</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;Eigen::Matrix4d HomogYawRotMatrix(<span class="keywordtype">double</span> yaw);</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;Eigen::Matrix3d RotMat3d(<span class="keywordtype">double</span> roll, <span class="keywordtype">double</span> pitch, <span class="keywordtype">double</span> yaw);</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;Eigen::Matrix4d HomogRotMat3d(<span class="keywordtype">double</span> roll, <span class="keywordtype">double</span> pitch, <span class="keywordtype">double</span> yaw);</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;Eigen::Matrix2d ImgRotMat(<span class="keywordtype">double</span> angle);</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;Eigen::Matrix3d HomogImgRotMat(<span class="keywordtype">double</span> angle);</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;cv::Mat correctDistortion(cv::Mat rawImg, cv::Mat camerMatrix, cv::Mat _distCoeffs);</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keywordtype">void</span> transformPoints(cv::Mat &amp;src, cv::Mat &amp;dst);</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;pcl::PointCloud&lt;pcl::PointXYZ&gt;::Ptr toPointCloud(cv::Mat src);</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#endif // IMAGEUTILS_H</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#endif // IMAGEUTILS_H</span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Aug 20 2014 13:48:49 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Nov 8 2014 22:43:05 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

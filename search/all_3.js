@@ -12,7 +12,5 @@ var searchData=
   ['delegate',['Delegate',['../class_delegate.html',1,'']]],
   ['dfs',['DFS',['../class_graph_search.html#aa932e20474de25c3166e3f84e7d2e336',1,'GraphSearch']]],
   ['disconnect',['disconnect',['../class_joystick.html#ae90929675939cc07fe267d4bd6fa3132',1,'Joystick']]],
-  ['distance',['distance',['../class_lidar_point.html#ad1306b35fee773ab78e4462c7035830c',1,'LidarPoint']]],
-  ['dphi',['dPhi',['../class_i_g_v_c_1_1_camera_info.html#a2828860db8668bcea8d4485b4b6ef7c7',1,'IGVC::CameraInfo']]],
-  ['dtheta',['dTheta',['../class_i_g_v_c_1_1_camera_info.html#a29f1a58b79ddf760e22132aeba2d51c4',1,'IGVC::CameraInfo']]]
+  ['distance',['distance',['../class_lidar_point.html#ad1306b35fee773ab78e4462c7035830c',1,'LidarPoint']]]
 ];

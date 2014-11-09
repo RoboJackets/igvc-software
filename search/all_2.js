@@ -1,7 +1,6 @@
 var searchData=
 [
   ['cameraadapter',['CameraAdapter',['../class_camera_adapter.html',1,'']]],
-  ['camerainfo',['CameraInfo',['../class_i_g_v_c_1_1_camera_info.html',1,'IGVC']]],
   ['capturegpsandpostracker',['CaptureGPSAndPosTracker',['../class_capture_g_p_s_and_pos_tracker.html',1,'']]],
   ['captureimu',['CaptureIMU',['../class_capture_i_m_u.html',1,'']]],
   ['categorylabel',['categoryLabel',['../class_config_manager.html#ad53cf8cb8fc8957bbcba5ee8d4f7d1c1',1,'ConfigManager']]],

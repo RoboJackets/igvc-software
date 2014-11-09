@@ -113,9 +113,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        stream &lt;&lt; <span class="stringliteral">&quot;(&quot;</span> &lt;&lt; pos.<a class="code" href="class_robot_position.html#a7913ba1a375ce3a47caa1241a9517740">X</a> &lt;&lt; <span class="stringliteral">&quot;,&quot;</span> &lt;&lt; pos.<a class="code" href="class_robot_position.html#af65cdb185df8a5d48e144271941ac977">Y</a> &lt;&lt; <span class="stringliteral">&quot;,&quot;</span> &lt;&lt; pos.<a class="code" href="class_robot_position.html#a0b55ab385658729d05826e2b2650e5ac">Heading</a> &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>;</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        <span class="keywordflow">return</span> stream;</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    }</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;};</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">#endif // ROBOTPOSITION_HPP</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    std::string toString() {</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        <span class="keywordflow">return</span> <span class="stringliteral">&quot;(&quot;</span> + std::to_string(<a class="code" href="class_robot_position.html#a7913ba1a375ce3a47caa1241a9517740">X</a>) + <span class="stringliteral">&quot;,&quot;</span> + std::to_string(<a class="code" href="class_robot_position.html#af65cdb185df8a5d48e144271941ac977">Y</a>) + <span class="stringliteral">&quot;,&quot;</span> + std::to_string(Heading) + <span class="stringliteral">&quot;)&quot;</span>;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    }</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;};</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="preprocessor">#endif // ROBOTPOSITION_HPP</span></div>
 <div class="ttc" id="class_robot_position_html_af65cdb185df8a5d48e144271941ac977"><div class="ttname"><a href="class_robot_position.html#af65cdb185df8a5d48e144271941ac977">RobotPosition::Y</a></div><div class="ttdeci">double Y</div><div class="ttdoc">The vertical component of the robot&#39;s position. Positive Y points North. </div><div class="ttdef"><b>Definition:</b> robotposition.hpp:25</div></div>
 <div class="ttc" id="class_robot_position_html"><div class="ttname"><a href="class_robot_position.html">RobotPosition</a></div><div class="ttdoc">Represents the position of the robot. </div><div class="ttdef"><b>Definition:</b> robotposition.hpp:9</div></div>
 <div class="ttc" id="class_robot_position_html_a7913ba1a375ce3a47caa1241a9517740"><div class="ttname"><a href="class_robot_position.html#a7913ba1a375ce3a47caa1241a9517740">RobotPosition::X</a></div><div class="ttdeci">double X</div><div class="ttdoc">The horizontal component of the robot&#39;s positon. </div><div class="ttdef"><b>Definition:</b> robotposition.hpp:20</div></div>
@@ -123,7 +127,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Aug 20 2014 13:48:49 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Nov 8 2014 22:43:05 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

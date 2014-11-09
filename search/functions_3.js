@@ -7,7 +7,5 @@ var searchData=
   ['decodeutctime',['decodeUTCTime',['../namespacenmea.html#a0954bb446c3ac71e5b9118baa4b2f07c',1,'nmea']]],
   ['definepacket',['definePacket',['../class_serial_port.html#a0766052d6f4126d9e4891542393108e3',1,'SerialPort']]],
   ['dfs',['DFS',['../class_graph_search.html#aa932e20474de25c3166e3f84e7d2e336',1,'GraphSearch']]],
-  ['disconnect',['disconnect',['../class_joystick.html#ae90929675939cc07fe267d4bd6fa3132',1,'Joystick']]],
-  ['dphi',['dPhi',['../class_i_g_v_c_1_1_camera_info.html#a2828860db8668bcea8d4485b4b6ef7c7',1,'IGVC::CameraInfo']]],
-  ['dtheta',['dTheta',['../class_i_g_v_c_1_1_camera_info.html#a29f1a58b79ddf760e22132aeba2d51c4',1,'IGVC::CameraInfo']]]
+  ['disconnect',['disconnect',['../class_joystick.html#ae90929675939cc07fe267d4bd6fa3132',1,'Joystick']]]
 ];
