@@ -1,7 +1,7 @@
 #include "Bumblebee2.h"
 
-//#include <dc1394/conversions.h>
 #include <common/logger/logger.h>
+#include <common/config/configmanager.h>
 
 using namespace FlyCapture2;
 using namespace cv;
@@ -14,6 +14,12 @@ Bumblebee2::Bumblebee2(string fileName): frameCount(0), frameLock(), _images(), 
   fs["Distortion_Coefficients"] >> _distCoeffs;
   if ( StartCamera() != 0 )
       Logger::Log(LogLevel::Error, "Camera failed to initialize.");
+
+  ConfigManager &configManager = ConfigManager::Instance();
+  configManager.setValue("Camera", "FocalLength", 0.0038);
+  configManager.setValue("Camera", "PixelSideLength", 0.00000465);
+  configManager.setValue("Camera", "PixelsPerRow", 1024);
+  configManager.setValue("Camera", "Baseline", 0.12);
 }
 
 int Bumblebee2::StartCamera()
