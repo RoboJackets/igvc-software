@@ -25,6 +25,9 @@ signals:
 public slots:
     virtual void changeLidar(std::shared_ptr<Module>) { }
     virtual void changeGPS(std::shared_ptr<Module>) { }
+    virtual void run() { }
+    virtual void pause() { }
+    virtual void stop() { }
 };
 
 #endif // COORDINATOR_HPP
