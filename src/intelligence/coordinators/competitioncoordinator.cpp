@@ -23,7 +23,7 @@
 using namespace std;
 
 CompetitionCoordinator::CompetitionCoordinator() {
-    shared_ptr<GPS> gps(new NMEACompatibleGPS("/dev/igvc_gps", 9600));
+    shared_ptr<GPS> gps(new NMEACompatibleGPS("/dev/igvc_gps", 19200));
     shared_ptr<StereoSource> camera(new Bumblebee2());
     shared_ptr<IMU> imu(new Ardupilot());
     shared_ptr<Lidar> lidar(new LMS200());
