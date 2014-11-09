@@ -26,7 +26,6 @@ private slots:
     }
 
     void testNoObstacles() {
-        std::cout << "Running Test No Obstacles" << std::endl;
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
@@ -50,7 +49,6 @@ private slots:
     }
 
     void testWithObstacles() {
-        std::cout << "Running Test Obstacles" << std::endl;
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
@@ -66,14 +64,13 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3750);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
     }
 
     void testWithObstacles2() {
-        std::cout << "Running Test Obstacles2" << std::endl;
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
@@ -96,7 +93,6 @@ private slots:
     }
 
     void testWithObstacles3() {
-        std::cout << "Running Test Obstacles3" << std::endl;
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
@@ -112,14 +108,13 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 6000);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
     }
 
     void testUnsolvable() {
-        std::cout << "Running Test Unsolvable" << std::endl;
         AStarPlanner planner;
         connect(&planner, SIGNAL(OnNewPath(path_t)), this, SLOT(newPath(path_t)));
         connect(this, SIGNAL(setStart(RobotPosition)), &planner, SLOT(OnNewStartPos(RobotPosition)));
