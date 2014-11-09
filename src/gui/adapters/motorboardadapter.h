@@ -38,7 +38,7 @@ private:
 
     std::vector<VelocityPairs> _data;
 
-    int _dataCount;
+    unsigned int _dataCount;
 };
 
 #endif // MOTORBOARDADAPTER_H

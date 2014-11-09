@@ -5,7 +5,6 @@
 #include <common/datastructures/searchmove.h>
 #include "GraphSearch.hpp"
 #include <vector>
-#include <pcl/visualization/cloud_viewer.h>
 #include <pcl/kdtree/kdtree_flann.h>
 
 class IGVCSearchProblem : public SearchProblem<SearchLocation, SearchMove>

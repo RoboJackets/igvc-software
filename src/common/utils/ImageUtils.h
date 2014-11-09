@@ -5,7 +5,6 @@
 #include <opencv2/opencv.hpp>
 #include <eigen3/Eigen/Dense>
 
-#include <hardware/sensors/camera/CameraInfo.h>
 #include <common/utils/timing.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
