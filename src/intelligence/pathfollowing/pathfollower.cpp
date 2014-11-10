@@ -2,7 +2,7 @@
 #include <time.h>
 #include <common/config/configmanager.h>
 
-PathFollower::PathFollower(QObject *parent)
+PathFollower::PathFollower(QObject *)
 {
     _moduleName = "PathFollower";
     _threadIsRunning = false;
