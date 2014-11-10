@@ -97,7 +97,8 @@ Inheritance diagram for SimulatedGPS:</div>
  <div class="center">
   <img src="class_simulated_g_p_s.png" usemap="#SimulatedGPS_map" alt=""/>
   <map id="SimulatedGPS_map" name="SimulatedGPS_map">
-<area href="class_g_p_s.html" title="Interface for GPS devices. " alt="GPS" shape="rect" coords="0,56,91,80"/>
+<area href="class_g_p_s.html" title="Interface for GPS devices. " alt="GPS" shape="rect" coords="0,112,91,136"/>
+<area href="class_module.html" title="The Module class is the base class for all of the nodes in our event graph. " alt="Module" shape="rect" coords="0,56,91,80"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -114,13 +115,16 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <a class="el" href="class_g_p_s_data.html">GPSData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simulated_g_p_s.html#aec6e6bd8fcd375362736df22cf518fe3">GetState</a> ()</td></tr>
 <tr class="memdesc:aec6e6bd8fcd375362736df22cf518fe3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the most recent state acquired from the <a class="el" href="class_g_p_s.html" title="Interface for GPS devices. ">GPS</a> device. <br/></td></tr>
 <tr class="separator:aec6e6bd8fcd375362736df22cf518fe3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6341921750274cc5bae9a162749c609c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6341921750274cc5bae9a162749c609c"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simulated_g_p_s.html#a6341921750274cc5bae9a162749c609c">isOpen</a> ()</td></tr>
-<tr class="memdesc:a6341921750274cc5bae9a162749c609c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the device is connected and communicating. <br/></td></tr>
-<tr class="separator:a6341921750274cc5bae9a162749c609c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85d2782bfed6609f32b682047077e444"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simulated_g_p_s.html#a85d2782bfed6609f32b682047077e444">isWorking</a> ()</td></tr>
+<tr class="memdesc:a85d2782bfed6609f32b682047077e444"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gives the status of this module.  <a href="#a85d2782bfed6609f32b682047077e444">More...</a><br/></td></tr>
+<tr class="separator:a85d2782bfed6609f32b682047077e444"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0cbcc4c3d5ea06d44e7db4f1ec5bccac"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0cbcc4c3d5ea06d44e7db4f1ec5bccac"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setHz</b> (double Hz)</td></tr>
 <tr class="separator:a0cbcc4c3d5ea06d44e7db4f1ec5bccac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_module"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_class_module')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_module.html">Module</a></td></tr>
+<tr class="memitem:a50265f80b1d30af8ac00aaa2f7207d3d inherit pub_methods_class_module"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a50265f80b1d30af8ac00aaa2f7207d3d"></a>
+virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><b>moduleName</b> ()</td></tr>
+<tr class="separator:a50265f80b1d30af8ac00aaa2f7207d3d inherit pub_methods_class_module"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -128,7 +132,40 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a2b7902174578d3c3255918764a2169c6 inherit signals_class_g_p_s"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2b7902174578d3c3255918764a2169c6"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>onNewData</b> (<a class="el" href="class_g_p_s_data.html">GPSData</a>)</td></tr>
 <tr class="separator:a2b7902174578d3c3255918764a2169c6 inherit signals_class_g_p_s"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_class_module"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_class_module')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_module.html">Module</a></td></tr>
+<tr class="memitem:a5f25901fffec20f46f4f49c4ff2cbb5d inherit pro_attribs_class_module"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5f25901fffec20f46f4f49c4ff2cbb5d"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>_moduleName</b></td></tr>
+<tr class="separator:a5f25901fffec20f46f4f49c4ff2cbb5d inherit pro_attribs_class_module"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a85d2782bfed6609f32b682047077e444"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool SimulatedGPS::isWorking </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gives the status of this module. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if this module is working correctly. False otherwise. </dd></dl>
+
+<p>Implements <a class="el" href="class_module.html#ac3c2585aa77d779f01e71ad6b4482d84">Module</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/hardware/sensors/gps/<a class="el" href="simulatedgps_8h_source.html">simulatedgps.h</a></li>
 <li>src/hardware/sensors/gps/simulatedgps.cpp</li>
@@ -136,7 +173,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>onNewData</b> (<a cla
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 8 2014 22:43:13 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 9 2014 19:28:07 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

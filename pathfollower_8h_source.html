@@ -92,44 +92,48 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef PATHFOLLOWER_H</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define PATHFOLLOWER_H</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;QObject&gt;</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;common/module.hpp&gt;</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;common/datastructures/PathType.hpp&gt;</span></div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;boost/thread.hpp&gt;</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;common/datastructures/MotorCommand.hpp&gt;</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
-<div class="line"><a name="l00009"></a><span class="lineno"><a class="line" href="class_path_follower.html">    9</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_path_follower.html">PathFollower</a> : <span class="keyword">public</span> QObject</div>
+<div class="line"><a name="l00009"></a><span class="lineno"><a class="line" href="class_path_follower.html">    9</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_path_follower.html">PathFollower</a> : <span class="keyword">public</span> <a class="code" href="class_module.html">Module</a></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;{</div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;    Q_OBJECT</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    <span class="keyword">explicit</span> <a class="code" href="class_path_follower.html">PathFollower</a>(QObject *parent = 0);</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;signals:</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    <span class="keywordtype">void</span> newMotorCommand(<a class="code" href="struct_motor_command.html">MotorCommand</a> cmd);</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keyword">public</span> slots:</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <span class="keywordtype">void</span> onNewPath(path_t path);</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordtype">void</span> run();</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    path_t _path;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    uint _pathIndex;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    time_t _cmdStartTime;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    boost::mutex _pathMutex;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    boost::thread _thread;</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keywordtype">bool</span> _threadIsRunning;</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;};</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_path_follower.html#a93bda6f1ec12c68703581b3fba2ed7a7">isWorking</a>();</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;signals:</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <span class="keywordtype">void</span> newMotorCommand(<a class="code" href="struct_motor_command.html">MotorCommand</a> cmd);</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="keyword">public</span> slots:</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="keywordtype">void</span> onNewPath(path_t path);</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    <span class="keywordtype">void</span> run();</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    path_t _path;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    uint _pathIndex;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    time_t _cmdStartTime;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    boost::mutex _pathMutex;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    boost::thread _thread;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="keywordtype">bool</span> _threadIsRunning;</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#endif // PATHFOLLOWER_H</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;};</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#endif // PATHFOLLOWER_H</span></div>
+<div class="ttc" id="class_module_html"><div class="ttname"><a href="class_module.html">Module</a></div><div class="ttdoc">The Module class is the base class for all of the nodes in our event graph. </div><div class="ttdef"><b>Definition:</b> module.hpp:11</div></div>
 <div class="ttc" id="struct_motor_command_html"><div class="ttname"><a href="struct_motor_command.html">MotorCommand</a></div><div class="ttdef"><b>Definition:</b> MotorCommand.hpp:4</div></div>
+<div class="ttc" id="class_path_follower_html_a93bda6f1ec12c68703581b3fba2ed7a7"><div class="ttname"><a href="class_path_follower.html#a93bda6f1ec12c68703581b3fba2ed7a7">PathFollower::isWorking</a></div><div class="ttdeci">bool isWorking()</div><div class="ttdoc">Gives the status of this module. </div><div class="ttdef"><b>Definition:</b> pathfollower.cpp:11</div></div>
 <div class="ttc" id="class_path_follower_html"><div class="ttname"><a href="class_path_follower.html">PathFollower</a></div><div class="ttdef"><b>Definition:</b> pathfollower.h:9</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 8 2014 22:43:05 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

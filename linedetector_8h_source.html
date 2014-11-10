@@ -103,9 +103,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &lt;pcl/point_cloud.h&gt;</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &lt;pcl/io/pcd_io.h&gt;</span></div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;pcl/io/io.h&gt;</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &lt;QObject&gt;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &lt;common/module.hpp&gt;</span></div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;</div>
-<div class="line"><a name="l00017"></a><span class="lineno"><a class="line" href="class_line_detector.html">   17</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_line_detector.html">LineDetector</a> : <span class="keyword">public</span> QObject</div>
+<div class="line"><a name="l00017"></a><span class="lineno"><a class="line" href="class_line_detector.html">   17</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_line_detector.html">LineDetector</a> : <span class="keyword">public</span> <a class="code" href="class_module.html">Module</a></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;{</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    Q_OBJECT</div>
@@ -114,48 +114,52 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <a class="code" href="class_line_detector.html">LineDetector</a>();</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    pcl::PointCloud&lt;pcl::PointXYZ&gt;::Ptr cloud;</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">public</span> slots:</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_line_detector.html#a3bb5694971d1487405adc42573ea9d7b">onImageEvent</a>(<a class="code" href="class_image_data.html">ImageData</a> imgd);</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;signals:</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keywordtype">void</span> onNewLines(<a class="code" href="class_image_data.html">ImageData</a> data);</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keywordtype">void</span> onNewLinesMat(cv::Mat mat);</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keywordtype">void</span> onNewCloud(pcl::PointCloud&lt;pcl::PointXYZ&gt;::Ptr data, pcl::PointXY sensorOffset);</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">private</span>:</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordtype">void</span> blackoutSection(<span class="keywordtype">int</span> rowl, <span class="keywordtype">int</span> rowu, <span class="keywordtype">int</span> coll, <span class="keywordtype">int</span> colu);</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keywordtype">float</span> getAvg(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordtype">void</span> blackAndWhite(<span class="keywordtype">float</span> totalAvg);</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordtype">int</span> display_dst(<span class="keywordtype">int</span> delay);</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordtype">void</span> detectObstacle(<span class="keywordtype">int</span> i, <span class="keywordtype">int</span> j);</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordtype">void</span> Erosion();</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordtype">void</span> Dilation();</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    cv::VideoCapture cap;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="comment">//For the erosion/dilation stuff</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="comment"></span>    <span class="keywordtype">int</span> erosion_elem;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keywordtype">int</span> erosion_size;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordtype">int</span> dilation_elem;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordtype">int</span> dilation_size;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> max_elem;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> max_kernel_size;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    cv::Mat p, pcam, transformMat;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> gaussian_size;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    cv::Mat src;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;    cv::Mat dst;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;};</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="preprocessor">#endif // LINEDETECTOR_H</span></div>
-<div class="ttc" id="class_line_detector_html_a3bb5694971d1487405adc42573ea9d7b"><div class="ttname"><a href="class_line_detector.html#a3bb5694971d1487405adc42573ea9d7b">LineDetector::onImageEvent</a></div><div class="ttdeci">void onImageEvent(ImageData imgd)</div><div class="ttdef"><b>Definition:</b> linedetector.cpp:24</div></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_line_detector.html#a32749de8099262c8e590860de888981f">isWorking</a>();</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keyword">public</span> slots:</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_line_detector.html#a3bb5694971d1487405adc42573ea9d7b">onImageEvent</a>(<a class="code" href="class_image_data.html">ImageData</a> imgd);</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;signals:</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keywordtype">void</span> onNewLines(<a class="code" href="class_image_data.html">ImageData</a> data);</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="keywordtype">void</span> onNewLinesMat(cv::Mat mat);</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordtype">void</span> onNewCloud(pcl::PointCloud&lt;pcl::PointXYZ&gt;::Ptr data, pcl::PointXY sensorOffset);</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">private</span>:</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordtype">void</span> blackoutSection(<span class="keywordtype">int</span> rowl, <span class="keywordtype">int</span> rowu, <span class="keywordtype">int</span> coll, <span class="keywordtype">int</span> colu);</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordtype">float</span> getAvg(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordtype">void</span> blackAndWhite(<span class="keywordtype">float</span> totalAvg);</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <span class="keywordtype">int</span> display_dst(<span class="keywordtype">int</span> delay);</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keywordtype">void</span> detectObstacle(<span class="keywordtype">int</span> i, <span class="keywordtype">int</span> j);</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordtype">void</span> Erosion();</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keywordtype">void</span> Dilation();</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    cv::VideoCapture cap;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="comment">//For the erosion/dilation stuff</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment"></span>    <span class="keywordtype">int</span> erosion_elem;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keywordtype">int</span> erosion_size;</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keywordtype">int</span> dilation_elem;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keywordtype">int</span> dilation_size;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> max_elem;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> max_kernel_size;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    cv::Mat p, pcam, transformMat;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keyword">const</span> <span class="keywordtype">int</span> gaussian_size;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    cv::Mat src;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    cv::Mat dst;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;};</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="preprocessor">#endif // LINEDETECTOR_H</span></div>
+<div class="ttc" id="class_line_detector_html_a3bb5694971d1487405adc42573ea9d7b"><div class="ttname"><a href="class_line_detector.html#a3bb5694971d1487405adc42573ea9d7b">LineDetector::onImageEvent</a></div><div class="ttdeci">void onImageEvent(ImageData imgd)</div><div class="ttdef"><b>Definition:</b> linedetector.cpp:29</div></div>
 <div class="ttc" id="class_line_detector_html"><div class="ttname"><a href="class_line_detector.html">LineDetector</a></div><div class="ttdef"><b>Definition:</b> linedetector.h:17</div></div>
+<div class="ttc" id="class_module_html"><div class="ttname"><a href="class_module.html">Module</a></div><div class="ttdoc">The Module class is the base class for all of the nodes in our event graph. </div><div class="ttdef"><b>Definition:</b> module.hpp:11</div></div>
+<div class="ttc" id="class_line_detector_html_a32749de8099262c8e590860de888981f"><div class="ttname"><a href="class_line_detector.html#a32749de8099262c8e590860de888981f">LineDetector::isWorking</a></div><div class="ttdeci">bool isWorking()</div><div class="ttdoc">Gives the status of this module. </div><div class="ttdef"><b>Definition:</b> linedetector.cpp:25</div></div>
 <div class="ttc" id="class_image_data_html"><div class="ttname"><a href="class_image_data.html">ImageData</a></div><div class="ttdef"><b>Definition:</b> ImageData.hpp:8</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 8 2014 22:43:05 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

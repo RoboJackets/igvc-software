@@ -100,7 +100,8 @@ Inheritance diagram for AStarPlanner:</div>
  <div class="center">
   <img src="class_a_star_planner.png" usemap="#AStarPlanner_map" alt=""/>
   <map id="AStarPlanner_map" name="AStarPlanner_map">
-<area href="class_path_planner.html" alt="PathPlanner" shape="rect" coords="0,56,88,80"/>
+<area href="class_path_planner.html" alt="PathPlanner" shape="rect" coords="0,112,88,136"/>
+<area href="class_module.html" title="The Module class is the base class for all of the nodes in our event graph. " alt="Module" shape="rect" coords="0,56,88,80"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -131,6 +132,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aa96217cbdc9da63d42e5aa0b593384d9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa96217cbdc9da63d42e5aa0b593384d9"></a>
 path_t&#160;</td><td class="memItemRight" valign="bottom"><b>GetPath</b> ()</td></tr>
 <tr class="separator:aa96217cbdc9da63d42e5aa0b593384d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73cd40694430189fda7c57e1e1cac9e9"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_a_star_planner.html#a73cd40694430189fda7c57e1e1cac9e9">isWorking</a> ()</td></tr>
+<tr class="memdesc:a73cd40694430189fda7c57e1e1cac9e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gives the status of this module.  <a href="#a73cd40694430189fda7c57e1e1cac9e9">More...</a><br/></td></tr>
+<tr class="separator:a73cd40694430189fda7c57e1e1cac9e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_module"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_class_module')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_module.html">Module</a></td></tr>
+<tr class="memitem:a50265f80b1d30af8ac00aaa2f7207d3d inherit pub_methods_class_module"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a50265f80b1d30af8ac00aaa2f7207d3d"></a>
+virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><b>moduleName</b> ()</td></tr>
+<tr class="separator:a50265f80b1d30af8ac00aaa2f7207d3d inherit pub_methods_class_module"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -165,6 +173,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>replanRequested</b></
 <tr class="memitem:ac1be1eb8ad7dd0a5f80cd51b8a7525f9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac1be1eb8ad7dd0a5f80cd51b8a7525f9"></a>
 boost::thread&#160;</td><td class="memItemRight" valign="bottom"><b>thread</b></td></tr>
 <tr class="separator:ac1be1eb8ad7dd0a5f80cd51b8a7525f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_class_module"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_class_module')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_module.html">Module</a></td></tr>
+<tr class="memitem:a5f25901fffec20f46f4f49c4ff2cbb5d inherit pro_attribs_class_module"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5f25901fffec20f46f4f49c4ff2cbb5d"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>_moduleName</b></td></tr>
+<tr class="separator:a5f25901fffec20f46f4f49c4ff2cbb5d inherit pro_attribs_class_module"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -174,6 +186,34 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>OnNewPath</b> (path_t
 <tr class="separator:ab6e1d6e03dd23ef0f311c40cb1199028 inherit signals_class_path_planner"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a73cd40694430189fda7c57e1e1cac9e9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool AStarPlanner::isWorking </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gives the status of this module. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if this module is working correctly. False otherwise. </dd></dl>
+
+<p>Implements <a class="el" href="class_module.html#ac3c2585aa77d779f01e71ad6b4482d84">Module</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="ad137c7bba53032a491af2ac0de603eac"></a>
 <div class="memitem">
 <div class="memproto">
@@ -253,7 +293,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>OnNewPath</b> (path_t
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 8 2014 22:43:06 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 9 2014 19:28:00 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

@@ -98,6 +98,7 @@ Inheritance diagram for GPSWaypointSource:</div>
  <div class="center">
   <img src="class_g_p_s_waypoint_source.png" usemap="#GPSWaypointSource_map" alt=""/>
   <map id="GPSWaypointSource_map" name="GPSWaypointSource_map">
+<area href="class_module.html" title="The Module class is the base class for all of the nodes in our event graph. " alt="Module" shape="rect" coords="0,56,130,80"/>
 </map>
  </div></div>
 <table class="memberdecls">
@@ -118,10 +119,50 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>openFile</b> (std::st
 <tr class="memitem:a4df64a175aed11145e973feb86c644fb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4df64a175aed11145e973feb86c644fb"></a>
 <a class="el" href="class_g_p_s_data.html">GPSData</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getNext</b> ()</td></tr>
 <tr class="separator:a4df64a175aed11145e973feb86c644fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade758167d049781116af69d56ebddbba"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ade758167d049781116af69d56ebddbba"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isOpen</b> ()</td></tr>
-<tr class="separator:ade758167d049781116af69d56ebddbba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d2a7af2b5976125703c82d7ac22203c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_g_p_s_waypoint_source.html#a2d2a7af2b5976125703c82d7ac22203c">isWorking</a> ()</td></tr>
+<tr class="memdesc:a2d2a7af2b5976125703c82d7ac22203c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gives the status of this module.  <a href="#a2d2a7af2b5976125703c82d7ac22203c">More...</a><br/></td></tr>
+<tr class="separator:a2d2a7af2b5976125703c82d7ac22203c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_module"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_class_module')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_module.html">Module</a></td></tr>
+<tr class="memitem:a50265f80b1d30af8ac00aaa2f7207d3d inherit pub_methods_class_module"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a50265f80b1d30af8ac00aaa2f7207d3d"></a>
+virtual std::string&#160;</td><td class="memItemRight" valign="bottom"><b>moduleName</b> ()</td></tr>
+<tr class="separator:a50265f80b1d30af8ac00aaa2f7207d3d inherit pub_methods_class_module"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_attribs_class_module"><td colspan="2" onclick="javascript:toggleInherit('pro_attribs_class_module')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_module.html">Module</a></td></tr>
+<tr class="memitem:a5f25901fffec20f46f4f49c4ff2cbb5d inherit pro_attribs_class_module"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a5f25901fffec20f46f4f49c4ff2cbb5d"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>_moduleName</b></td></tr>
+<tr class="separator:a5f25901fffec20f46f4f49c4ff2cbb5d inherit pro_attribs_class_module"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="a2d2a7af2b5976125703c82d7ac22203c"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool GPSWaypointSource::isWorking </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gives the status of this module. </p>
+<dl class="section return"><dt>Returns</dt><dd>True if this module is working correctly. False otherwise. </dd></dl>
+
+<p>Implements <a class="el" href="class_module.html#ac3c2585aa77d779f01e71ad6b4482d84">Module</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>src/common/utils/<a class="el" href="_g_p_s_waypoint_source_8h_source.html">GPSWaypointSource.h</a></li>
 <li>src/common/utils/GPSWaypointSource.cpp</li>
@@ -129,7 +170,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>isOpen</b> ()</td></t
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 8 2014 22:43:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 9 2014 19:28:02 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

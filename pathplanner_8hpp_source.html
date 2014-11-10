@@ -92,7 +92,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef PATHPLANNER_HPP</span></div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor"></span><span class="preprocessor">#define PATHPLANNER_HPP</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;QObject&gt;</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;common/module.hpp&gt;</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;pcl/common/common.h&gt;</span></div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;common/datastructures/searchlocation.h&gt;</span></div>
@@ -101,7 +101,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;</div>
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">typedef</span> std::vector&lt;std::pair&lt;SearchMove, SearchLocation&gt;&gt; path_t;</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
-<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="class_path_planner.html">   13</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_path_planner.html">PathPlanner</a> : <span class="keyword">public</span> QObject {</div>
+<div class="line"><a name="l00013"></a><span class="lineno"><a class="line" href="class_path_planner.html">   13</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_path_planner.html">PathPlanner</a> : <span class="keyword">public</span> <a class="code" href="class_module.html">Module</a> {</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    Q_OBJECT</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="keyword">public</span>:</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    <a class="code" href="class_path_planner.html">PathPlanner</a>() {</div>
@@ -123,10 +123,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#endif // PATHPLANNER_HPP</span></div>
 <div class="ttc" id="class_path_planner_html"><div class="ttname"><a href="class_path_planner.html">PathPlanner</a></div><div class="ttdef"><b>Definition:</b> pathplanner.hpp:13</div></div>
 <div class="ttc" id="class_robot_position_html"><div class="ttname"><a href="class_robot_position.html">RobotPosition</a></div><div class="ttdoc">Represents the position of the robot. </div><div class="ttdef"><b>Definition:</b> robotposition.hpp:9</div></div>
+<div class="ttc" id="class_module_html"><div class="ttname"><a href="class_module.html">Module</a></div><div class="ttdoc">The Module class is the base class for all of the nodes in our event graph. </div><div class="ttdef"><b>Definition:</b> module.hpp:11</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 8 2014 22:43:05 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

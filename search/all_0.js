@@ -1,6 +1,7 @@
 var searchData=
 [
   ['accel',['accel',['../class_robot_position.html#ac91015f6b011e8facec0cf4b7e5b1129',1,'RobotPosition']]],
+  ['adapterfactory',['AdapterFactory',['../class_adapter_factory.html',1,'']]],
   ['angle',['angle',['../class_lidar_point.html#abe16a5fcef0d34edc8152ceb6ad5154d',1,'LidarPoint']]],
   ['angleutils',['AngleUtils',['../class_angle_utils.html',1,'']]],
   ['angvel',['angVel',['../class_robot_position.html#a4b2fdd4e27ce42189ebecfd1f5e3d386',1,'RobotPosition']]],

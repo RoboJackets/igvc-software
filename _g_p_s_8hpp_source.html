@@ -95,9 +95,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;time.h&gt;</span></div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &lt;common/datastructures/GPSData.hpp&gt;</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;QObject&gt;</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &lt;common/module.hpp&gt;</span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
-<div class="line"><a name="l00017"></a><span class="lineno"><a class="line" href="class_g_p_s.html">   17</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_g_p_s.html">GPS</a> : <span class="keyword">public</span> QObject</div>
+<div class="line"><a name="l00017"></a><span class="lineno"><a class="line" href="class_g_p_s.html">   17</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_g_p_s.html">GPS</a> : <span class="keyword">public</span> <a class="code" href="class_module.html">Module</a></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;{</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    Q_OBJECT</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
@@ -112,21 +112,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        <span class="keyword">virtual</span> <a class="code" href="class_g_p_s_data.html">GPSData</a> <a class="code" href="class_g_p_s.html#a949ea16db8491c5d9a3b453b84263d99">GetState</a>() = 0;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_p_s.html#a501e2dadaa9659f45d5599abcac3b09d">StateIsAvailable</a>() = 0;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="class_g_p_s.html#a00eed8dae37299e4718a2f358889a24c">isOpen</a>() = 0;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;};</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* GPS_HPP_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;};</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* GPS_HPP_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="class_g_p_s_html"><div class="ttname"><a href="class_g_p_s.html">GPS</a></div><div class="ttdoc">Interface for GPS devices. </div><div class="ttdef"><b>Definition:</b> GPS.hpp:17</div></div>
-<div class="ttc" id="class_g_p_s_html_a00eed8dae37299e4718a2f358889a24c"><div class="ttname"><a href="class_g_p_s.html#a00eed8dae37299e4718a2f358889a24c">GPS::isOpen</a></div><div class="ttdeci">virtual bool isOpen()=0</div><div class="ttdoc">Return true if the device is connected and communicating. </div></div>
 <div class="ttc" id="class_g_p_s_html_a501e2dadaa9659f45d5599abcac3b09d"><div class="ttname"><a href="class_g_p_s.html#a501e2dadaa9659f45d5599abcac3b09d">GPS::StateIsAvailable</a></div><div class="ttdeci">virtual bool StateIsAvailable()=0</div><div class="ttdoc">Return true if there is at least one state in the buffer. </div></div>
+<div class="ttc" id="class_module_html"><div class="ttname"><a href="class_module.html">Module</a></div><div class="ttdoc">The Module class is the base class for all of the nodes in our event graph. </div><div class="ttdef"><b>Definition:</b> module.hpp:11</div></div>
 <div class="ttc" id="class_g_p_s_data_html"><div class="ttname"><a href="class_g_p_s_data.html">GPSData</a></div><div class="ttdef"><b>Definition:</b> GPSData.hpp:18</div></div>
 <div class="ttc" id="class_g_p_s_html_a949ea16db8491c5d9a3b453b84263d99"><div class="ttname"><a href="class_g_p_s.html#a949ea16db8491c5d9a3b453b84263d99">GPS::GetState</a></div><div class="ttdeci">virtual GPSData GetState()=0</div><div class="ttdoc">Returns the most recent state acquired from the GPS device. </div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 8 2014 22:43:05 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

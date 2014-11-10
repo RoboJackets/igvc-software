@@ -106,41 +106,44 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    path_t GetPath();</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_a_star_planner.html#acfdfdaa9a2a9822e1d692f71ec021d6e">run</a>();</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_a_star_planner.html#ad137c7bba53032a491af2ac0de603eac">pathIsValid</a>();</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keywordtype">float</span> distanceFromPath(<a class="code" href="class_search_location.html">SearchLocation</a> point);</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_a_star_planner.html#a73cd40694430189fda7c57e1e1cac9e9">isWorking</a>();</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="class_a_star_planner.html#acfdfdaa9a2a9822e1d692f71ec021d6e">run</a>();</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_a_star_planner.html#ad137c7bba53032a491af2ac0de603eac">pathIsValid</a>();</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <a class="code" href="class_i_g_v_c_search_problem.html">IGVCSearchProblem</a> searchproblem;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    path_t path;</div>
-<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="class_a_star_planner.html#ae6acfa5c66270b1959331867ae84df95">   32</a></span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_a_star_planner.html#ae6acfa5c66270b1959331867ae84df95">mapSet</a>;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="keywordtype">bool</span> startSet;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordtype">bool</span> goalSet;</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordtype">bool</span> replanRequested;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    <span class="keywordtype">float</span> distanceFromPath(<a class="code" href="class_search_location.html">SearchLocation</a> point);</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <a class="code" href="class_i_g_v_c_search_problem.html">IGVCSearchProblem</a> searchproblem;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    path_t path;</div>
+<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="class_a_star_planner.html#ae6acfa5c66270b1959331867ae84df95">   34</a></span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="class_a_star_planner.html#ae6acfa5c66270b1959331867ae84df95">mapSet</a>;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keywordtype">bool</span> startSet;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keywordtype">bool</span> goalSet;</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    boost::thread thread;</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keywordtype">bool</span> replanRequested;</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">public</span> slots:</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keywordtype">void</span> OnNewMap(pcl::PointCloud&lt;pcl::PointXYZ&gt;::Ptr map);</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keywordtype">void</span> OnNewStartPos(<a class="code" href="class_robot_position.html">RobotPosition</a> pos);</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keywordtype">void</span> OnNewGoalPos(<a class="code" href="class_robot_position.html">RobotPosition</a> pos);</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;};</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="preprocessor">#endif // ASTARPLANNER_H</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    boost::thread thread;</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="keyword">public</span> slots:</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keywordtype">void</span> OnNewMap(pcl::PointCloud&lt;pcl::PointXYZ&gt;::Ptr map);</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keywordtype">void</span> OnNewStartPos(<a class="code" href="class_robot_position.html">RobotPosition</a> pos);</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    <span class="keywordtype">void</span> OnNewGoalPos(<a class="code" href="class_robot_position.html">RobotPosition</a> pos);</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;};</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="preprocessor">#endif // ASTARPLANNER_H</span></div>
 <div class="ttc" id="class_path_planner_html"><div class="ttname"><a href="class_path_planner.html">PathPlanner</a></div><div class="ttdef"><b>Definition:</b> pathplanner.hpp:13</div></div>
-<div class="ttc" id="class_a_star_planner_html_acfdfdaa9a2a9822e1d692f71ec021d6e"><div class="ttname"><a href="class_a_star_planner.html#acfdfdaa9a2a9822e1d692f71ec021d6e">AStarPlanner::run</a></div><div class="ttdeci">void run()</div><div class="ttdef"><b>Definition:</b> astarplanner.cpp:40</div></div>
+<div class="ttc" id="class_a_star_planner_html_acfdfdaa9a2a9822e1d692f71ec021d6e"><div class="ttname"><a href="class_a_star_planner.html#acfdfdaa9a2a9822e1d692f71ec021d6e">AStarPlanner::run</a></div><div class="ttdeci">void run()</div><div class="ttdef"><b>Definition:</b> astarplanner.cpp:46</div></div>
+<div class="ttc" id="class_a_star_planner_html_a73cd40694430189fda7c57e1e1cac9e9"><div class="ttname"><a href="class_a_star_planner.html#a73cd40694430189fda7c57e1e1cac9e9">AStarPlanner::isWorking</a></div><div class="ttdeci">bool isWorking()</div><div class="ttdoc">Gives the status of this module. </div><div class="ttdef"><b>Definition:</b> astarplanner.cpp:36</div></div>
 <div class="ttc" id="class_robot_position_html"><div class="ttname"><a href="class_robot_position.html">RobotPosition</a></div><div class="ttdoc">Represents the position of the robot. </div><div class="ttdef"><b>Definition:</b> robotposition.hpp:9</div></div>
-<div class="ttc" id="class_a_star_planner_html_ad137c7bba53032a491af2ac0de603eac"><div class="ttname"><a href="class_a_star_planner.html#ad137c7bba53032a491af2ac0de603eac">AStarPlanner::pathIsValid</a></div><div class="ttdeci">bool pathIsValid()</div><div class="ttdoc">Checks if the path is still valid with the current searchproblem. </div><div class="ttdef"><b>Definition:</b> astarplanner.cpp:68</div></div>
+<div class="ttc" id="class_a_star_planner_html_ad137c7bba53032a491af2ac0de603eac"><div class="ttname"><a href="class_a_star_planner.html#ad137c7bba53032a491af2ac0de603eac">AStarPlanner::pathIsValid</a></div><div class="ttdeci">bool pathIsValid()</div><div class="ttdoc">Checks if the path is still valid with the current searchproblem. </div><div class="ttdef"><b>Definition:</b> astarplanner.cpp:74</div></div>
 <div class="ttc" id="class_i_g_v_c_search_problem_html"><div class="ttname"><a href="class_i_g_v_c_search_problem.html">IGVCSearchProblem</a></div><div class="ttdef"><b>Definition:</b> igvcsearchproblem.h:10</div></div>
 <div class="ttc" id="class_a_star_planner_html"><div class="ttname"><a href="class_a_star_planner.html">AStarPlanner</a></div><div class="ttdef"><b>Definition:</b> astarplanner.h:9</div></div>
-<div class="ttc" id="class_a_star_planner_html_ae6acfa5c66270b1959331867ae84df95"><div class="ttname"><a href="class_a_star_planner.html#ae6acfa5c66270b1959331867ae84df95">AStarPlanner::mapSet</a></div><div class="ttdeci">bool mapSet</div><div class="ttdef"><b>Definition:</b> astarplanner.h:32</div></div>
+<div class="ttc" id="class_a_star_planner_html_ae6acfa5c66270b1959331867ae84df95"><div class="ttname"><a href="class_a_star_planner.html#ae6acfa5c66270b1959331867ae84df95">AStarPlanner::mapSet</a></div><div class="ttdeci">bool mapSet</div><div class="ttdef"><b>Definition:</b> astarplanner.h:34</div></div>
 <div class="ttc" id="class_search_location_html"><div class="ttname"><a href="class_search_location.html">SearchLocation</a></div><div class="ttdef"><b>Definition:</b> searchlocation.h:6</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Nov 8 2014 22:43:05 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
