@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_lights.get(), SIGNAL(onEStopStatusChanged(bool)), _motorController.get(), SLOT(onEStopStatusChanged(bool)));
     ui->hardwareStatusList->addItem("Light Controller");
 
-    _coordinator = new CompetitionCoordinator();
+    _coordinator = unique_ptr<Coordinator>(new CompetitionCoordinator());
 
     ui->actionLMS_200->setChecked(true);
 
@@ -71,7 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _joystickDriver = std::shared_ptr<JoystickDriver>(new JoystickDriver(_joystick));
 
-    connect(_coordinator, SIGNAL(finished()), this, SLOT(on_stopButton_clicked()));
+    connect(_coordinator.get(), SIGNAL(finished()), this, SLOT(on_stopButton_clicked()));
 
     updateHardwareStatusList();
 
@@ -100,7 +100,6 @@ void MainWindow::setupMenus()
 MainWindow::~MainWindow()
 {
     delete ui;
-    delete _coordinator;
 }
 
 void MainWindow::openHardwareView(QModelIndex index)
@@ -238,7 +237,7 @@ void MainWindow::on_playButton_clicked()
             ui->playButton->setIcon(QIcon(":/images/Play"));
         }
         isPaused = !isPaused;
-        disconnect(_coordinator, SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        disconnect(_coordinator.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
         _motorController->setMotorCommand(MotorCommand(0.,0.));
     }
     else
@@ -247,7 +246,7 @@ void MainWindow::on_playButton_clicked()
         ui->playButton->setIcon(QIcon(":/images/Pause"));
         ui->stopButton->setVisible(true);
         isRunning = true;
-        connect(_coordinator, SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        connect(_coordinator.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
         _motorController->setMotorCommand(MotorCommand(1.,1.));
     }
     _lights->setSafetyLight(isRunning);
@@ -261,7 +260,7 @@ void MainWindow::on_stopButton_clicked()
         ui->stopButton->setVisible(false);
         isRunning = false;
         isPaused = false;
-        disconnect(_coordinator, SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
+        disconnect(_coordinator.get(), SIGNAL(newMotorCommand(MotorCommand)), _motorController.get(), SLOT(setMotorCommand(MotorCommand)));
         _motorController->setMotorCommand(MotorCommand(0.,0.));
     }
     _lights->setSafetyLight(isRunning);

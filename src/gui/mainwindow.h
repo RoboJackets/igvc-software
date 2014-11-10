@@ -87,7 +87,7 @@ private:
 
     std::shared_ptr<LightController> _lights;
 
-    Coordinator* _coordinator;
+    std::unique_ptr<Coordinator> _coordinator;
 
     bool isRunning, isPaused;
     int curTime;
