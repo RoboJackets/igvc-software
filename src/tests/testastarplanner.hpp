@@ -64,7 +64,7 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3750);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
@@ -108,7 +108,7 @@ private slots:
         QBENCHMARK {
             setMap(map);
         }
-        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
+        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 6000);
         std::cout << "Path of length " << planner.GetPath().size() << " recieved." << std::endl;
 //        for(auto pair : planner.GetPath())
 //            std::cout << "\t" << pair.second.x << ", " << pair.second.y << std::endl;
@@ -126,7 +126,7 @@ private slots:
         pcl::PointCloud<pcl::PointXYZ>::Ptr map(new pcl::PointCloud<pcl::PointXYZ>());
         for(double theta = 0; theta < 2*M_PI; theta+=0.1)
             map->push_back(pcl::PointXYZ(cos(theta),sin(theta),0));
-        QBENCHMARK {
+        QBENCHMARK_ONCE {
             setMap(map);
         }
         QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);
