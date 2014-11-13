@@ -60,17 +60,17 @@ bool nmea::decodeGPRMC(const std::string& line, GPSData& state)
 	{
 		case 'A':
 		{
-			state.Quality(GPS_QUALITY_NON_DIFF);
+            state.Quality(GPS_QUALITY_SPS);
 			break;
 		}
 		case 'V':
 		{
-			state.Quality(GPS_QUALITY_NOFIX);
+            state.Quality(GPS_QUALITY_INVALID);
 			break;
 		}
 		default:
 		{
-			state.Quality(GPS_QUALITY_UNKNOWN);
+            state.Quality(GPS_QUALITY_INVALID);
 			break;
 		}
 	}
@@ -139,48 +139,17 @@ bool nmea::decodeGPGGA(const std::string& line, GPSData& state)
 
 	decodeUTCTime(splitvec[1]);
 
-	const char LatHemi = splitvec[3][0];
-//	state.lat = decodeLatitude(splitvec[2], LatHemi);
+    const char LatHemi = splitvec[3][0];
     state.Lat(decodeLatitude(splitvec[2], LatHemi));
 
-	const char LonHemi = splitvec[5][0];
-//	state.lon = decodeLongitude(splitvec[4], LonHemi);
+    const char LonHemi = splitvec[5][0];
     state.Long(decodeLongitude(splitvec[4], LonHemi));
 
-	const char gpsQuality = splitvec[6][0];
-	switch(gpsQuality)
-	{
-		case '0':
-		{
-			state.Quality(GPS_QUALITY_NOFIX);
-			break;
-		}
-		case '1':
-		{
-			state.Quality(GPS_QUALITY_NON_DIFF);
-			break;
-		}
-		case '2':
-		{
-			state.Quality(GPS_QUALITY_WAAS);
-			break;
-		}
-		case '6':
-		{
-			state.Quality(GPS_QUALITY_ESTIMATED);
-			break;
-		}
-		default:
-		{
-			state.Quality(GPS_QUALITY_UNKNOWN);
-			break;
-		}
-	}
+    state.Quality((GPS_QUALITY)boost::lexical_cast<int>(splitvec[6][0]));
 
-//	const std::string& numsat = splitvec[7];
-//	state.num_sat = boost::lexical_cast<int>(numsat.c_str());
+    state.NumSats(boost::lexical_cast<int>(splitvec[7].c_str()));
 
-//	const std::string& horizDilutionPrec = splitvec[8];
+    state.HDOP(boost::lexical_cast<float>(splitvec[8].c_str()));
 //	const std::string& sealevelheight = splitvec[9];
 //	const std::string& geoidalheight = splitvec[10];
 //	const std::string& diffgps = splitvec[11];

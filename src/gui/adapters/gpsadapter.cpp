@@ -56,6 +56,42 @@ void GPSAdapter::labelPrint() {
     horizontalFactor = ui->GraphicsHolder->width() / (maxLong - minLong);
     verticalFactor = ui->GraphicsHolder->height() / (maxLat - minLat);
 
+    ui->label_NumSat->setText(QString::number(numSats));
+    QString qualityString;
+    switch(quality) {
+    case GPS_QUALITY_INVALID:
+        qualityString = "INVALID";
+        break;
+    case GPS_QUALITY_SPS:
+        qualityString = "SPS";
+        break;
+    case GPS_QUALITY_DGPS:
+        qualityString = "DGPS";
+        break;
+    case GPS_QUALITY_PPS:
+        qualityString = "PPS";
+        break;
+    case GPS_QUALITY_RTK:
+        qualityString = "RTK";
+        break;
+    case GPS_QUALITY_Float_RTK:
+        qualityString = "Float RTK";
+        break;
+    case GPS_QUALITY_Estimated:
+        qualityString = "Estimated";
+        break;
+    case GPS_QULAITY_Manual:
+        qualityString = "Manual";
+        break;
+    case GPS_QUALITY_Simulation:
+        qualityString = "Simulation";
+        break;
+    default:
+        qualityString = "";
+        break;
+    }
+
+    ui->label_quality->setText(qualityString);
 }
 
 void GPSAdapter::onNewData(GPSData data) {
@@ -68,6 +104,10 @@ void GPSAdapter::onNewData(GPSData data) {
     //assign new data
     coordinates[0][0] = data.Lat();
     coordinates[0][1] = data.Long();
+
+    quality = data.Quality();
+
+    numSats = data.NumSats();
 
     //print data label
     labelPrint();

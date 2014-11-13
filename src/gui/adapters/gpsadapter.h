@@ -57,6 +57,9 @@ private:
     double minLong;
     double maxLong;
 
+    GPS_QUALITY quality;
+    int numSats;
+
     std::shared_ptr<GPS> _GPS;
 };
 
