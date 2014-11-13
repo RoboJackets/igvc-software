@@ -1,19 +1,26 @@
 #include "Bumblebee2.h"
 
-//#include <dc1394/conversions.h>
 #include <common/logger/logger.h>
+#include <common/config/configmanager.h>
 
 using namespace FlyCapture2;
 using namespace cv;
 
 Bumblebee2::Bumblebee2(string fileName): frameCount(0), frameLock(), _images(), _cam()
 {
+    _moduleName = "Camera";
   //qRegisterMetaType<ImageData>("ImageData");
   FileStorage fs(fileName, FileStorage::READ); // Read the settings
   fs["Camera_Matrix"] >> _cameraMatrix;
   fs["Distortion_Coefficients"] >> _distCoeffs;
   if ( StartCamera() != 0 )
       Logger::Log(LogLevel::Error, "Camera failed to initialize.");
+
+  ConfigManager &configManager = ConfigManager::Instance();
+  configManager.setValue("Camera", "FocalLength", 0.0038);
+  configManager.setValue("Camera", "PixelSideLength", 0.00000465);
+  configManager.setValue("Camera", "PixelsPerRow", 1024);
+  configManager.setValue("Camera", "Baseline", 0.12);
 }
 
 int Bumblebee2::StartCamera()
@@ -305,7 +312,7 @@ Mat Bumblebee2::correctImage(Mat rawImg)
   return correctDistortion(rawImg, _cameraMatrix, _distCoeffs);
 }
 
-bool Bumblebee2::IsConnected()
+bool Bumblebee2::isWorking()
 {
     return _cam.IsConnected();
 }

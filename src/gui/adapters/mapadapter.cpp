@@ -7,12 +7,11 @@
 
 using namespace pcl;
 
-MapAdapter::MapAdapter(std::shared_ptr<MapBuilder> mapper, std::shared_ptr<BasicPositionTracker> posTracker, QWidget *parent) :
+MapAdapter::MapAdapter(std::shared_ptr<MapBuilder> mapper, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MapAdapter),
     _scale(20),
-    _mapper(mapper),
-    _posTracker(posTracker)
+    _mapper(mapper)
 {
     ui->setupUi(this);
 
@@ -51,7 +50,7 @@ void MapAdapter::paintEvent(QPaintEvent *)
     posPen.setWidth(3);
     painter.setPen(posPen);
 //    painter.setPen(Qt::red);
-    RobotPosition pos = _posTracker->GetPosition();
+    RobotPosition pos = _mapper->getCurrentPosition();
     QPointF posMark = _scale * QPointF(pos.X, -pos.Y) + center;
     double radius = _scale * 0.32/2;
     painter.drawEllipse(posMark, radius, radius);

@@ -4,9 +4,9 @@
 #include <hardware/sensors/camera/StereoPair.hpp>
 #include <common/datastructures/StereoImageData.hpp>
 #include <boost/thread/thread.hpp>
-#include <QObject>
+#include <common/module.hpp>
 
-class StereoSource : public QObject
+class StereoSource : public Module
 {
     Q_OBJECT
 public:
@@ -20,7 +20,6 @@ public:
     inline void UnlockImages() {_imagesLock.unlock();}
     inline void LockRunning() {_runningLock.lock();}
     inline void UnlockRunning() {_runningLock.unlock();}
-    virtual bool IsConnected() = 0;
     virtual ~StereoSource() {}
 
 signals:

@@ -6,25 +6,13 @@
 #include "configtreemodel.h"
 #include "mdiwindow.h"
 #include <QMdiArea>
-#include <QSignalMapper>
 #include "hardware/sensors/joystick/Joystick.h"
 #include "hardware/actuators/motors/MotorEncoderDriver2013.h"
 #include "intelligence/JoystickDriver.hpp"
-#include <hardware/sensors/gps/GPS.hpp>
-#include <hardware/sensors/camera/StereoSource.hpp>
-#include <hardware/sensors/IMU/IMU.h>
-#include <hardware/sensors/lidar/Lidar.h>
 #include <hardware/actuators/lights/lightcontroller.h>
-#include <intelligence/posetracking/basicpositiontracker.h>
-#include <intelligence/mapping/mapbuilder.h>
-#include <intelligence/pathplanning/astarplanner.h>
-#include <intelligence/linedetection/linedetector.h>
-#include <intelligence/controller/controller.h>
-#include <common/utils/GPSWaypointSource.h>
-#include <intelligence/pathfollowing/pathfollower.h>
-#include <intelligence/barrelfinder/barrelfinder.h>
 #include <QLabel>
 #include <QTimer>
+#include <intelligence/coordinators/coordinator.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -97,31 +85,9 @@ private:
 
     std::shared_ptr<MotorDriver> _motorController;
 
-    std::shared_ptr<GPS> _GPS;
-
-    std::shared_ptr<StereoSource> _stereoSource;
-
-    std::shared_ptr<IMU> _IMU;
-
-    std::shared_ptr<Lidar> _lidar;
-
-    std::shared_ptr<BasicPositionTracker> _posTracker;
-
-    std::shared_ptr<MapBuilder> _mapper;
-
-    std::shared_ptr<PathPlanner> _planner;
-
     std::shared_ptr<LightController> _lights;
 
-    std::shared_ptr<LineDetector> _lineDetector;
-
-    std::shared_ptr<GPSWaypointSource> _waypointSource;
-
-    std::shared_ptr<Controller> _compController;
-
-    std::shared_ptr<PathFollower> _pathFollower;
-
-    std::shared_ptr<BarrelFinder> _barrelFinder;
+    std::unique_ptr<Coordinator> _coordinator;
 
     bool isRunning, isPaused;
     int curTime;
@@ -131,7 +97,7 @@ private:
     MDIWindow *activeMdiChild();
     void setupMenus();
     MDIWindow* findWindowWithTitle(QString title);
-    void updateHardwareStatusIcons();
+    void updateHardwareStatusList();
 };
 
 #endif // MAINWINDOW_H

@@ -12,6 +12,7 @@
 
 MapBuilder::MapBuilder(std::shared_ptr<Lidar> lidar, std::shared_ptr<BasicPositionTracker> poseTracker)
 {
+    _moduleName = "MapBuilder";
     pcl::PointCloud<pcl::PointXYZ>::Ptr _cloud(new pcl::PointCloud<pcl::PointXYZ>);
     _cloud->height = 1;
     _cloud->width = 1024;
@@ -34,6 +35,14 @@ MapBuilder::~MapBuilder()
     if(_lidar.get())
         disconnect(_lidar.get(), SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
     poseTracker = nullptr;
+}
+
+bool MapBuilder::isWorking() {
+    return true;
+}
+
+RobotPosition MapBuilder::getCurrentPosition() {
+    return poseTracker->GetPosition();
 }
 
 void MapBuilder::onLidarData(LidarState state)

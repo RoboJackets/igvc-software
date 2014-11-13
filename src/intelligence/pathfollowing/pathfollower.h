@@ -1,16 +1,18 @@
 #ifndef PATHFOLLOWER_H
 #define PATHFOLLOWER_H
 
-#include <QObject>
+#include <common/module.hpp>
 #include <common/datastructures/PathType.hpp>
 #include <boost/thread.hpp>
 #include <common/datastructures/MotorCommand.hpp>
 
-class PathFollower : public QObject
+class PathFollower : public Module
 {
     Q_OBJECT
 public:
     explicit PathFollower(QObject *parent = 0);
+
+    bool isWorking();
 
 signals:
     void newMotorCommand(MotorCommand cmd);

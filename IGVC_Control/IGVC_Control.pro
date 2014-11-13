@@ -39,7 +39,6 @@ SOURCES += \
     ../src/gui/adapters/mapadapter.cpp \
     ../src/hardware/sensors/gps/simulatedgps.cpp \
     ../src/common/utils/ImageUtils.cpp \
-    ../src/hardware/sensors/camera/CameraInfo.cpp \
     ../src/gui/adapters/gpsadapter.cpp \
     ../src/hardware/sensors/camera/StereoPlayback.cpp \
     ../src/hardware/sensors/camera/StereoImageRepeater.cpp \
@@ -63,7 +62,9 @@ SOURCES += \
     ../src/gui/adapters/motorboardadapter.cpp \
     ../src/gui/adapters/competitioncontrolleradapter.cpp \
     ../src/intelligence/pathfollowing/pathfollower.cpp \
-    ../src/intelligence/barrelfinder/barrelfinder.cpp
+    ../src/intelligence/barrelfinder/barrelfinder.cpp \
+    ../src/gui/adapters/adapterfactory.cpp \
+    ../src/intelligence/coordinators/competitioncoordinator.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -106,7 +107,6 @@ HEADERS  += \
     ../src/hardware/sensors/gps/simulatedgps.h \
     ../src/hardware/sensors/IMU/IMU.h \
     ../src/common/utils/ImageUtils.h \
-    ../src/hardware/sensors/camera/CameraInfo.h \
     ../src/gui/adapters/gpsadapter.h \
     ../src/hardware/sensors/camera/StereoSource.hpp \
     ../src/hardware/sensors/camera/StereoPlayback.h \
@@ -141,7 +141,11 @@ HEADERS  += \
     ../src/intelligence/pathfollowing/pathfollower.h \
     ../src/common/datastructures/PathType.hpp \
     ../src/common/datastructures/MotorCommand.hpp \
-    ../src/intelligence/barrelfinder/barrelfinder.h
+    ../src/intelligence/barrelfinder/barrelfinder.h \
+    ../src/common/module.hpp \
+    ../src/gui/adapters/adapterfactory.h \
+    ../src/intelligence/coordinators/coordinator.hpp \
+    ../src/intelligence/coordinators/competitioncoordinator.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
@@ -168,7 +172,7 @@ DEPENDPATH += /usr/include
 
 # libUSB (for LIDAR)
 
-LIBS += -L/usr/lib/x86_64-linux-gnu/ -lusb-1.0
+LIBS += -lusb-1.0
 
 INCLUDEPATH += /usr/lib/x86_64-linux-gnu
 DEPENDPATH += /usr/lib/x86_64-linux-gnu

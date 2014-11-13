@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 #include <time.h>
-#include <QObject>
+#include <common/module.hpp>
 
 class LidarPoint
 {
@@ -51,7 +51,7 @@ struct LidarState
  * \brief Interface for Lidars.
  * \headerfile Lidar.h <hardware/sensors/lidar/Lidar.h>
  */
-class Lidar : public QObject
+class Lidar : public Module
 {
     Q_OBJECT
 public:
@@ -66,8 +66,6 @@ public:
      * \brief Returns the most recent state acquired from the Lidar.
      */
     virtual LidarState GetState() = 0;
-
-    virtual bool IsWorking() = 0;
 
 signals:
     void onNewData(LidarState);

@@ -5,6 +5,7 @@
 
 AStarPlanner::AStarPlanner()
 {
+    _moduleName = "PathPlanner";
     /*
      * These ConfigManager calls just make sure the config values get added
      * to the file even if the algorithm doesn't run. This is simply for
@@ -30,6 +31,11 @@ AStarPlanner::AStarPlanner()
 AStarPlanner::~AStarPlanner()
 {
 
+}
+
+bool AStarPlanner::isWorking()
+{
+    return true;
 }
 
 path_t AStarPlanner::GetPath()
