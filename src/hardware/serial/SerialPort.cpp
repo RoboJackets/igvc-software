@@ -13,6 +13,7 @@ SerialPort::SerialPort(std::string port_name, size_t baud)
     : port(ioservice),
       _devicePath(port_name)
 {
+    _moduleName = "Serial";
     try
     {
         port.open(port_name);
@@ -25,7 +26,7 @@ SerialPort::SerialPort(std::string port_name, size_t baud)
         //exit(1);
 	}
 
-    if(isConnected())
+    if(isWorking())
     {
         try {
             port.set_option(boost::asio::serial_port_base::baud_rate(baud));
@@ -67,7 +68,7 @@ void SerialPort::stopEvents() {
 }
 
 void SerialPort::eventThreadRun() {
-    while(isConnected() && _eventsEnabled)
+    while(isWorking() && _eventsEnabled)
     {
 
         char in = read();
@@ -92,37 +93,37 @@ void SerialPort::close() {
         _eventsEnabled = false;
         eventThread.join();
     }
-    if(isConnected())
+    if(isWorking())
     {
         port.close();
     }
 
 }
 
-bool SerialPort::isConnected() {
+bool SerialPort::isWorking() {
 	return port.is_open();
 }
 
 void SerialPort::write(std::string s) {
 
-    if(isConnected()) boost::asio::write(port, boost::asio::buffer(s.c_str(),s.length()));
+    if(isWorking()) boost::asio::write(port, boost::asio::buffer(s.c_str(),s.length()));
 
 }
 
 void SerialPort::write(char *msg, int length) {
 
-    if(isConnected()) boost::asio::write(port, boost::asio::buffer(msg, length));
+    if(isWorking()) boost::asio::write(port, boost::asio::buffer(msg, length));
 
 }
 
 void SerialPort::write(unsigned char *msg, int length) {
 
-    if(isConnected()) boost::asio::write(port, boost::asio::buffer(msg, length));
+    if(isWorking()) boost::asio::write(port, boost::asio::buffer(msg, length));
 
 }
 
 std::string SerialPort::readln() {
-    if(!isConnected()) return "";
+    if(!isWorking()) return "";
 
 	char c;
 	std::string line;
@@ -175,7 +176,7 @@ std::string SerialPort::readln() {
 }
 
 char SerialPort::read() {
-    if(!isConnected()) return -1;
+    if(!isWorking()) return -1;
 
 
     char in;
@@ -192,7 +193,7 @@ char SerialPort::read() {
 }
 
 char* SerialPort::read(int numBytes) {
-    if(!isConnected()) return (char*)"";
+    if(!isWorking()) return (char*)"";
     char* bytes = new char[numBytes];
     for(int i = 0; i < numBytes; i++)
     {

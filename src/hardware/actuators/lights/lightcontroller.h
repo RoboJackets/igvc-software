@@ -60,7 +60,7 @@ public:
 
     bool isConnected()
     {
-        return _port.isConnected();
+        return _port.isWorking();
     }
 
 signals:

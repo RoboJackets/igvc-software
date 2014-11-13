@@ -8,7 +8,7 @@ LightController::LightController()
     _underglowRedChannel = _underglowGreenChannel = _underglowBlueChannel = 0;
     _underglowBar1Sec1 = _underglowBar1Sec2 = _underglowBar1Sec3 = 0;
     _underglowBar2Sec1 = _underglowBar2Sec2 = _underglowBar2Sec3 = 0;
-    if( !_port.isConnected() )
+    if( !_port.isWorking() )
     {
         return;
     }

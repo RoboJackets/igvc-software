@@ -1,14 +1,14 @@
 #ifndef IMU_H
 #define IMU_H
 
-#include <QObject>
+#include <common/module.hpp>
 #include <common/datastructures/IMUData.hpp>
 
 /*!
  * \brief Interface for IMU devices.
  * \headerfile IMU.h <hardware/sensors/IMU/IMU.h>
  */
-class IMU : public QObject
+class IMU : public Module
 {
     Q_OBJECT
 signals:
@@ -17,9 +17,6 @@ public:
     IMU() {
         qRegisterMetaType<IMUData>("IMUData");
     }
-
-    /*! \brief Returns true if the device is working correctly. */
-    virtual bool isWorking() = 0;
 };
 
 

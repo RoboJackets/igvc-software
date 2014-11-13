@@ -1,7 +1,7 @@
 #ifndef PATHPLANNER_HPP
 #define PATHPLANNER_HPP
 
-#include <QObject>
+#include <common/module.hpp>
 #include <pcl/common/common.h>
 #include <vector>
 #include <common/datastructures/searchlocation.h>
@@ -10,7 +10,7 @@
 
 typedef std::vector<std::pair<SearchMove, SearchLocation>> path_t;
 
-class PathPlanner : public QObject {
+class PathPlanner : public Module {
     Q_OBJECT
 public:
     PathPlanner() {

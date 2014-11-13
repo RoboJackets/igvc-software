@@ -5,12 +5,13 @@
 #include <pcl/point_types.h>
 #include <pcl/io/file_io.h>
 #include <intelligence/posetracking/basicpositiontracker.h>
+#include <common/module.hpp>
 
 /*!
  * \brief Maps the course from sensor data.
  * \author Al Chaussee
  */
-class MapBuilder : public QObject
+class MapBuilder : public Module
 {
     Q_OBJECT
 public:
@@ -23,6 +24,10 @@ public:
     void Clear();
 
     void ChangeLidar(std::shared_ptr<Lidar> device);
+
+    bool isWorking();
+
+    RobotPosition getCurrentPosition();
 
 signals:
     void onNewMap(pcl::PointCloud<pcl::PointXYZ>::Ptr);

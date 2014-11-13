@@ -1,10 +1,10 @@
 #ifndef MOTORDRIVER_H
 #define MOTORDRIVER_H
 
-#include <QObject>
+#include <common/module.hpp>
 #include <common/datastructures/MotorCommand.hpp>
 
-class MotorDriver : public QObject
+class MotorDriver : public Module
 {
     Q_OBJECT
 public slots:
@@ -43,11 +43,6 @@ public:
      * Writes zero velocities to both motors.
      */
     virtual void stop() = 0;
-
-    /*
-     * Returns the connection status of this motor driver.
-     */
-    virtual bool isOpen() = 0;
 
 signals:
     void newCurrentVelocities(double left, double right);
