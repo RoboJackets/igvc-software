@@ -33,8 +33,7 @@ NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
 void NMEACompatibleGPS::onNewSerialLine(string line) {
     GPSData state;
     if(parseLine(line, state)) {
-        // TODO set time
-//        gettimeofday(&state.laptoptime, NULL);
+        // TODO scale variances based on HDOP && NumSats
 
         boost::mutex::scoped_lock lock(queueLocker);
         stateQueue.push_back(state);
@@ -46,8 +45,8 @@ void NMEACompatibleGPS::onNewSerialLine(string line) {
 }
 
 bool NMEACompatibleGPS::parseLine(std::string line, GPSData &state) {
-	return nmea::decodeGPGGA(line, state) ||
-		   nmea::decodeGPRMC(line, state);
+    return nmea::decodeGPGGA(line, state);/* ||
+           nmea::decodeGPRMC(line, state);*/
 }
 
 GPSData NMEACompatibleGPS::GetState() {
