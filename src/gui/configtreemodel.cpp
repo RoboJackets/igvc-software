@@ -74,6 +74,25 @@ void ConfigTreeModel::populateModel()
     }
 }
 
+void ConfigTreeModel::updateModel()
+{
+    ConfigManager &config = ConfigManager::Instance();
+    int row = 0;
+    for(int cInd = 0; cInd < config.numberOfCategories(); cInd++)
+    {
+        for(int vInd = 0; vInd < config.numberOfValues(cInd); vInd++)
+        {
+            QStandardItem *node = new QStandardItem(config.valueLabel(cInd, vInd).c_str());
+            node->setFlags(node->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable);
+            QStandardItem *item = _model.item(row,2);
+            item->setText(config.valueLabel(cInd, vInd).c_str());
+            _model.setItem(row ,2, item);
+            row++;
+        }
+        row++;
+    }
+}
+
 QStandardItemModel* ConfigTreeModel::model()
 {
     return &_model;
