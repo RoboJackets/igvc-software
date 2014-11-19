@@ -18,6 +18,8 @@ public:
      */
     void populateModel();
 
+    void updateModel();
+
     QStandardItemModel* model();
 
 public slots:
