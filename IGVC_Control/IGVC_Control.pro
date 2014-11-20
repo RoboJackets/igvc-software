@@ -39,7 +39,6 @@ SOURCES += \
     ../src/gui/adapters/mapadapter.cpp \
     ../src/hardware/sensors/gps/simulatedgps.cpp \
     ../src/common/utils/ImageUtils.cpp \
-    ../src/hardware/sensors/camera/CameraInfo.cpp \
     ../src/gui/adapters/gpsadapter.cpp \
     ../src/hardware/sensors/camera/StereoPlayback.cpp \
     ../src/hardware/sensors/camera/StereoImageRepeater.cpp \
@@ -64,8 +63,13 @@ SOURCES += \
     ../src/gui/adapters/competitioncontrolleradapter.cpp \
     ../src/intelligence/pathfollowing/pathfollower.cpp \
     ../src/intelligence/barrelfinder/barrelfinder.cpp \
+<<<<<<< HEAD
     ../src/gui/adapters/logvieweradapter.cpp \
     ../src/common/logger/customhighlighter.cpp
+=======
+    ../src/gui/adapters/adapterfactory.cpp \
+    ../src/intelligence/coordinators/competitioncoordinator.cpp
+>>>>>>> upstream/master
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -108,7 +112,6 @@ HEADERS  += \
     ../src/hardware/sensors/gps/simulatedgps.h \
     ../src/hardware/sensors/IMU/IMU.h \
     ../src/common/utils/ImageUtils.h \
-    ../src/hardware/sensors/camera/CameraInfo.h \
     ../src/gui/adapters/gpsadapter.h \
     ../src/hardware/sensors/camera/StereoSource.hpp \
     ../src/hardware/sensors/camera/StereoPlayback.h \
@@ -145,7 +148,11 @@ HEADERS  += \
     ../src/common/datastructures/MotorCommand.hpp \
     ../src/intelligence/barrelfinder/barrelfinder.h \
     ../src/gui/adapters/logvieweradapter.h \
-    ../src/common/logger/customhighlighter.h
+    ../src/common/logger/customhighlighter.h \
+    ../src/common/module.hpp \
+    ../src/gui/adapters/adapterfactory.h \
+    ../src/intelligence/coordinators/coordinator.hpp \
+    ../src/intelligence/coordinators/competitioncoordinator.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \

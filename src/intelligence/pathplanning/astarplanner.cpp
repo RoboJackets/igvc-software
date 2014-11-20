@@ -5,6 +5,7 @@
 
 AStarPlanner::AStarPlanner()
 {
+    _moduleName = "PathPlanner";
     /*
      * These ConfigManager calls just make sure the config values get added
      * to the file even if the algorithm doesn't run. This is simply for
@@ -29,7 +30,13 @@ AStarPlanner::AStarPlanner()
 
 AStarPlanner::~AStarPlanner()
 {
+    thread.interrupt();
+    thread.join();
+}
 
+bool AStarPlanner::isWorking()
+{
+    return true;
 }
 
 path_t AStarPlanner::GetPath()
@@ -54,12 +61,13 @@ void AStarPlanner::run()
             path.clear();
             for(int i = 0; i < newpath.getNumberOfSteps(); i++)
                 path.push_back(std::pair<SearchMove,SearchLocation>(newpath.getAction(i), newpath.getState(i+1)));
+            replanRequested = false;
             OnNewPath(path);
-            try {
-                boost::this_thread::interruption_point();
-            } catch(...) {
-                return;
-            }
+        }
+        try {
+            boost::this_thread::interruption_point();
+        } catch(...) {
+            return;
         }
         usleep(300000);
     }

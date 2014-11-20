@@ -15,6 +15,8 @@ public:
 
     path_t GetPath();
 
+    bool isWorking();
+
 protected:
     /** Runs AStar on the given search problem. The 'path' variable will be updated with the resulting path. */
     void run();

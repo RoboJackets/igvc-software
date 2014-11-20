@@ -8,13 +8,13 @@
 
 #include <time.h>
 #include <common/datastructures/GPSData.hpp>
-#include <QObject>
+#include <common/module.hpp>
 
 /*!
  * \brief Interface for GPS devices.
  * \headerfile GPS.hpp <hardware/sensors/gps/GPS.hpp>
  */
-class GPS : public QObject
+class GPS : public Module
 {
     Q_OBJECT
 
@@ -35,11 +35,6 @@ public:
      * \brief Return true if there is at least one state in the buffer.
 	 */
 	virtual bool StateIsAvailable() = 0;
-
-    /*!
-     * \brief Return true if the device is connected and communicating.
-     */
-    virtual bool isOpen() = 0;
 };
 
 

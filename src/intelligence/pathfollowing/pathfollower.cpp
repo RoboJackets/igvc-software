@@ -2,10 +2,15 @@
 #include <time.h>
 #include <common/config/configmanager.h>
 
-PathFollower::PathFollower(QObject *parent) :
-    QObject(parent)
+PathFollower::PathFollower(QObject *)
 {
+    _moduleName = "PathFollower";
     _threadIsRunning = false;
+}
+
+bool PathFollower::isWorking()
+{
+    return true;
 }
 
 void PathFollower::onNewPath(path_t path)

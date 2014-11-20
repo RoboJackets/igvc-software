@@ -10,11 +10,12 @@ using namespace std;
 MotorEncoderDriver2013::MotorEncoderDriver2013()
  : _arduino("/dev/igvc_motor_arduino", 9600)
 {
+    _moduleName = "MotorDriver";
     qRegisterMetaType<MotorCommand>("MotorCommand");
     _leftVel = 0;
     _rightVel = 0;
     _maxVel = 2.0;
-    if(_arduino.isConnected())
+    if(_arduino.isWorking())
     {
         cout << "Waiting for motor arduino.";
         cout.flush();
@@ -96,7 +97,7 @@ void MotorEncoderDriver2013::setRightVelocity(double vel)
 
 void MotorEncoderDriver2013::writeVelocities()
 {
-    if(_arduino.isConnected())
+    if(_arduino.isWorking())
     {
         /*
          * The newline character below must be there.
@@ -142,9 +143,9 @@ void MotorEncoderDriver2013::setMotorCommand(MotorCommand cmd)
     setVelocities(cmd.leftVel, cmd.rightVel);
 }
 
-bool MotorEncoderDriver2013::isOpen()
+bool MotorEncoderDriver2013::isWorking()
 {
-    return _arduino.isConnected();
+    return _arduino.isWorking();
 }
 
 MotorEncoderDriver2013::~MotorEncoderDriver2013()

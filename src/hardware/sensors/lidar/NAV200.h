@@ -14,7 +14,7 @@ public:
     NAV200();
     ~NAV200();
     LidarState GetState();
-    bool IsWorking();
+    bool isWorking();
 
 private:
     boost::thread _iothread;

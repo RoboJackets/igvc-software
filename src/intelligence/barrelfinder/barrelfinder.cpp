@@ -4,9 +4,13 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <common/utils/ImageUtils.h>
 
-BarrelFinder::BarrelFinder(QObject *parent) :
-    QObject(parent)
+BarrelFinder::BarrelFinder(QObject *)
 {
+    _moduleName = "Barrel Finder";
+}
+
+bool BarrelFinder::isWorking() {
+    return true;
 }
 
 void BarrelFinder::onNewImage(ImageData data)

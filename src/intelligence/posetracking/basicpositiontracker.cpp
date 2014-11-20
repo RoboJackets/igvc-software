@@ -8,6 +8,7 @@ BasicPositionTracker::BasicPositionTracker(std::shared_ptr<GPS> gps, std::shared
       _gps(gps),
       _imu(imu)
 {
+    _moduleName = "PositionTracker";
     qRegisterMetaType<RobotPosition>("RobotPosition");
     originPointsRecorded = 0;
     if(_gps.get() != nullptr)
@@ -22,6 +23,11 @@ BasicPositionTracker::~BasicPositionTracker()
         disconnect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
     if(_imu.get() != nullptr)
         disconnect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
+}
+
+bool BasicPositionTracker::isWorking()
+{
+    return true;
 }
 
 RobotPosition BasicPositionTracker::GetPosition()
