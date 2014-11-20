@@ -8,6 +8,10 @@ namespace Ui {
 class LogViewerAdapter;
 }
 
+/*!
+ * \brief Widget for viewing log files.
+ * \author Matthew Keezer
+ */
 class LogViewerAdapter : public QWidget
 {
     Q_OBJECT

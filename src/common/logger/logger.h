@@ -72,6 +72,8 @@ public:
 
     static void Clear();
 
+    static QString getCurrentLogPath();
+
 private:
 
     static std::string dateTimeStr();
@@ -81,6 +83,8 @@ private:
     std::ofstream _fileOutStream;
 
     QStatusBar *_statusBar;
+
+    static std::string _currentLogPath;
 
     Logger();
 
