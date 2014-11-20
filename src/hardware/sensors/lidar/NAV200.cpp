@@ -15,6 +15,7 @@ using namespace std;
 
 NAV200::NAV200()
 {
+    _moduleName = "LIDAR";
     _numPoints = 1024;
 
     _ctx = NULL;
@@ -37,7 +38,7 @@ LidarState NAV200::GetState()
     return LidarState();
 }
 
-bool NAV200::IsWorking()
+bool NAV200::isWorking()
 {
     return true;
 }

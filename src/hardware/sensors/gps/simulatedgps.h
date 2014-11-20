@@ -13,7 +13,7 @@ public:
 
     bool StateIsAvailable();
     GPSData GetState();
-    bool isOpen();
+    bool isWorking();
 
     ~SimulatedGPS();
 

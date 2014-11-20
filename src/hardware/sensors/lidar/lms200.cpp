@@ -8,6 +8,7 @@ using namespace SickToolbox;
 LMS200::LMS200()
     : _device("/dev/igvc_lidar")
 {
+    _moduleName = "LIDAR";
     Logger::Log(LogLevel::Info, "Initializing SICK LMS200 device...");
     try {
         _device.Initialize(SickLMS::SICK_BAUD_9600);
@@ -80,7 +81,7 @@ LidarState LMS200::GetStateAtTime(timeval)
     return LidarState();
 }
 
-bool LMS200::IsWorking()
+bool LMS200::isWorking()
 {
     try {
         return _device.IsInitialized() && _device.GetSickStatus() == SickLMS::SICK_STATUS_OK;

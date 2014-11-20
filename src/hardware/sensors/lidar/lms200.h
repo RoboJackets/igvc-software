@@ -14,7 +14,7 @@ public:
     LidarState GetState();
     LidarState GetStateAtTime(timeval);
 
-    bool IsWorking();
+    bool isWorking();
 
 private:
     SickToolbox::SickLMS _device;

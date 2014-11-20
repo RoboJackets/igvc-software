@@ -25,7 +25,7 @@ public:
 	GPSData GetState();
     GPSData GetStateAtTime(timeval);
 	bool StateIsAvailable();
-    bool isOpen();
+    bool isWorking();
     ~NMEACompatibleGPS();
 
 private slots:

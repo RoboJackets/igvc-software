@@ -3,7 +3,7 @@
 
 #include <boost/thread.hpp>
 #include <vector>
-#include <QObject>
+#include <common/module.hpp>
 
 using namespace std;
 
@@ -19,7 +19,7 @@ class JoystickState {
  * \author Matthew Barulic
  * \headerfile Joystick.h <hardware/sensors/joystick/Joystick.h>
  */
-class Joystick : public QObject
+class Joystick : public Module
 {
 Q_OBJECT
 public:
@@ -39,6 +39,10 @@ public:
      *  \note Some devices may label physical buttons (such as d-pads) as axes.
      */
     int NumButtons();
+
+    bool isWorking() {
+        return isOpen();
+    }
 
 signals:
     void onNewData(JoystickState);

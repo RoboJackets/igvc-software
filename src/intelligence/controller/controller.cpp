@@ -4,9 +4,12 @@
 
 Controller::Controller(std::shared_ptr<GPSWaypointSource> source, std::shared_ptr<GPS> gps) : _gps(gps)
 {
+    _moduleName = "Controller";
     _source = source;
-    currentWaypoint = _source->getNext();
-    connect(_source.get(), SIGNAL(newFileLoaded()), this, SLOT(onNewWaypointFileLoaded()));
+    if(_source.get() != nullptr) {
+        currentWaypoint = _source->getNext();
+        connect(_source.get(), SIGNAL(newFileLoaded()), this, SLOT(onNewWaypointFileLoaded()));
+    }
     if(_gps.get() != nullptr)
         connect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
 }

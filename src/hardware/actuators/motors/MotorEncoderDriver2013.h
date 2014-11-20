@@ -26,7 +26,7 @@ public:
     void setMotorCommand(MotorCommand);
     void onEStopStatusChanged(bool isEnabled);
 
-    bool isOpen();
+    bool isWorking();
 
 protected:
     void run();

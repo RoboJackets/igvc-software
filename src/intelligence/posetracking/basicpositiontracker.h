@@ -4,12 +4,12 @@
 #include <hardware/sensors/gps/GPS.hpp>
 #include <hardware/sensors/IMU/IMU.h>
 #include <common/datastructures/robotposition.hpp>
-#include <QObject>
+#include <common/module.hpp>
 
 /**
  * @brief Tracks the robots position relative to it's starting location in meters.
  */
-class BasicPositionTracker : public QObject
+class BasicPositionTracker : public Module
 {
     Q_OBJECT
 public:
@@ -25,6 +25,8 @@ public:
     void ChangeIMU(std::shared_ptr<IMU> imu);
 
     RobotPosition WaypointToPosition(GPSData waypoint);
+
+    bool isWorking();
 
 signals:
     void onNewPosition(RobotPosition);
