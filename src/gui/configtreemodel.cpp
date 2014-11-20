@@ -31,6 +31,9 @@ ConfigTreeModel::ConfigTreeModel(QObject *)
     connect(&ConfigManager::Instance(), &ConfigManager::StructureChanged, [=](){
         populateModel();
     });
+    connect(&ConfigManager::Instance(), &ConfigManager::ValueUpdated, [=](){
+        updateModel();
+    });
 }
 
 void ConfigTreeModel::dataWasChanged(QStandardItem *item)
@@ -77,19 +80,14 @@ void ConfigTreeModel::populateModel()
 void ConfigTreeModel::updateModel()
 {
     ConfigManager &config = ConfigManager::Instance();
-    int row = 0;
     for(int cInd = 0; cInd < config.numberOfCategories(); cInd++)
     {
+        QStandardItem *item = _model.item(cInd,0);
         for(int vInd = 0; vInd < config.numberOfValues(cInd); vInd++)
         {
-            QStandardItem *node = new QStandardItem(config.valueLabel(cInd, vInd).c_str());
-            node->setFlags(node->flags() & ~Qt::ItemIsSelectable & ~Qt::ItemIsEditable);
-            QStandardItem *item = _model.item(row,2);
-            item->setText(config.valueLabel(cInd, vInd).c_str());
-            _model.setItem(row ,2, item);
-            row++;
+            QStandardItem *child = item->child(vInd, 1);
+            child->setText(config.getValue(cInd, vInd, std::string()).c_str());
         }
-        row++;
     }
 }
 

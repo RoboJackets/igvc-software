@@ -169,6 +169,7 @@ public:
         }
 
         variableNode.firstChild().setNodeValue(stream.str().c_str());
+        ValueUpdated();
     }
 
     /*!
@@ -196,6 +197,7 @@ public:
             {
                 categoryNode.childNodes().at(nameInd).firstChild().setNodeValue(stream.str().c_str());
                 unsavedChanges = true;
+                ValueUpdated();
             }
         }
     }
@@ -239,6 +241,8 @@ signals:
      * \brief StructureChanged This signal is emitted every time the structure of the config tree is changed.
      */
     void StructureChanged();
+
+    void ValueUpdated();
 
 protected:
 
