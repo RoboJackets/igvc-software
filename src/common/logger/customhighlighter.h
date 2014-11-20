@@ -8,6 +8,10 @@
 #include <QVector>
 #include <QColor>
 
+/*!
+ * \brief Custom syntax highlighter class for highlighting keywords and lines
+ * \author Matthew Keezer
+ */
 class CustomHighlighter : public QSyntaxHighlighter
  {
      Q_OBJECT
@@ -16,6 +20,10 @@ class CustomHighlighter : public QSyntaxHighlighter
      CustomHighlighter(QTextDocument *parent = 0);
 
  protected:
+     /*!
+      * \brief For each line, highlight keyword or line based on rules
+      * \param text
+      */
      void highlightBlock(const QString &text);
 
  private:

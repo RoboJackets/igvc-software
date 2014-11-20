@@ -25,7 +25,7 @@ CustomHighlighter::CustomHighlighter(QTextDocument *parent)
         highlightingRules.append(rule);
     }
 
-    errorFormat.setForeground(Qt::red);
+    errorFormat.setForeground(QColor(255,100,100));
     errorFormat.setFontWeight(QFont::Light);
     QStringList customRedKeywordPatterns;
     customRedKeywordPatterns << "\\bError\\b";
@@ -35,7 +35,7 @@ CustomHighlighter::CustomHighlighter(QTextDocument *parent)
         highlightingRules.append(rule);
     }
 
-    warningFormat.setForeground(Qt::darkYellow);
+    warningFormat.setForeground(Qt::yellow);
     warningFormat.setFontWeight(QFont::Light);
     QStringList customDarkYellowKeywordPatterns;
     customDarkYellowKeywordPatterns << "\\bWarning\\b";
@@ -45,7 +45,7 @@ CustomHighlighter::CustomHighlighter(QTextDocument *parent)
         highlightingRules.append(rule);
     }
 
-    infoFormat.setForeground(Qt::darkBlue);
+    infoFormat.setForeground(Qt::white);
     infoFormat.setFontWeight(QFont::Light);
     QStringList customDarkBlueKeywordPatterns;
     customDarkBlueKeywordPatterns << "\\bInfo\\b";
@@ -90,6 +90,7 @@ void CustomHighlighter::highlightBlock(const QString &text)
         int index = expression.indexIn(text);
         while (index >= 0) {
             int length = expression.matchedLength();
+            // Highlight the whole line if the keyword is error, warning, or info
             if(rule.format == errorFormat
                     || rule.format == warningFormat
                     || rule.format == infoFormat) {
