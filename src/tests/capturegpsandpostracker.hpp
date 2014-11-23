@@ -14,9 +14,10 @@ class CaptureGPSAndPosTracker : public QObject
 public:
     CaptureGPSAndPosTracker(QObject *parent = 0)
         : QObject(parent),
-          gps(new NMEACompatibleGPS("/dev/ttyGPS", 19200)),
+          gps(new NMEACompatibleGPS("/dev/igvc_gps", 19200)),
           tracker(gps, nullptr)
     {
+        qRegisterMetaType<std::string>("std::string");
         gpsPts = 0;
         ptPts = 0;
         PT_PTS = 1800;
@@ -45,7 +46,7 @@ private slots:
 
     void onNewGPSData(GPSData d)
     {
-        (*GPSOut) << d.Lat() << "," << d.Long() << "\n";
+        (*GPSOut) << d << "\n";
         gpsPts++;
         if(gpsPts > GPS_PTS)
         {
@@ -86,6 +87,7 @@ private Q_SLOTS:
         while(ptPts <= PT_PTS || gpsPts <= GPS_PTS)
         {
             usleep(500);
+            std::cout << "running" << std::endl;
         }
     }
 };

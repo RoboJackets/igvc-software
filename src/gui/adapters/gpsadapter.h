@@ -59,6 +59,7 @@ private:
 
     GPS_QUALITY quality;
     int numSats;
+    float hdop;
 
     std::shared_ptr<GPS> _GPS;
 };

@@ -92,6 +92,8 @@ void GPSAdapter::labelPrint() {
     }
 
     ui->label_quality->setText(qualityString);
+
+    ui->label_hdop->setText(QString::number(hdop));
 }
 
 void GPSAdapter::onNewData(GPSData data) {
@@ -108,6 +110,8 @@ void GPSAdapter::onNewData(GPSData data) {
     quality = data.Quality();
 
     numSats = data.NumSats();
+
+    hdop = data.HDOP();
 
     //print data label
     labelPrint();
