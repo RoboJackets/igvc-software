@@ -3,6 +3,7 @@
 
 #include "SensorData.hpp"
 #include <common/utils/gaussianvariable.hpp>
+#include <QTextStream>
 
 /*
  * An enumeration of GPS quality states.
@@ -140,7 +141,7 @@ public:
         _NumSats = val;
     }
 
-    inline void HDOP(int val)
+    inline void HDOP(float val)
     {
         _HDOP = val;
     }
@@ -155,7 +156,12 @@ public:
 
     friend std::ostream &operator<< (std::ostream &stream, GPSData &data)
     {
-        stream << "(" << data.Lat() << ", " << data.Long() << ")";
+        stream << std::setprecision(15) << data.Lat() << ',' << data.Long() << ',' << data.NumSats() << ',' << (int)data.Quality()  << ',' << data.HDOP();
+        return stream;
+    }
+
+    friend QTextStream &operator<< (QTextStream &stream, GPSData &data) {
+        stream << qSetRealNumberPrecision(15) << data.Lat() << ',' << data.Long() << ',' << data.NumSats() << ',' << (int)data.Quality()  << ',' << data.HDOP();
         return stream;
     }
 

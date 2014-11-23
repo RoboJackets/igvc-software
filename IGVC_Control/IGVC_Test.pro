@@ -73,14 +73,15 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/common/datastructures/searchlocation.h \
     ../src/common/datastructures/searchmove.h \
     ../src/intelligence/pathplanning/SearchProblem.hpp \
-    ../src/hardware/actuators/lights/lightcontroller.h
+    ../src/hardware/actuators/lights/lightcontroller.h \
+    ../src/common/module.hpp
 
 INCLUDEPATH += /usr/include
 DEPENDPATH += /usr/include
 
 # libUSB (for LIDAR)
 
-LIBS += -L/usr/lib/x86_64-linux-gnu/ -lusb-1.0
+LIBS += -lusb-1.0
 
 INCLUDEPATH += /usr/lib/x86_64-linux-gnu
 DEPENDPATH += /usr/lib/x86_64-linux-gnu

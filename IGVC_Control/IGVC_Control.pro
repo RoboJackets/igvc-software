@@ -64,7 +64,8 @@ SOURCES += \
     ../src/intelligence/pathfollowing/pathfollower.cpp \
     ../src/intelligence/barrelfinder/barrelfinder.cpp \
     ../src/gui/adapters/adapterfactory.cpp \
-    ../src/intelligence/coordinators/competitioncoordinator.cpp
+    ../src/intelligence/coordinators/competitioncoordinator.cpp \
+    ../src/intelligence/posetracking/kalmanpositiontracker.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
@@ -145,7 +146,8 @@ HEADERS  += \
     ../src/common/module.hpp \
     ../src/gui/adapters/adapterfactory.h \
     ../src/intelligence/coordinators/coordinator.hpp \
-    ../src/intelligence/coordinators/competitioncoordinator.h
+    ../src/intelligence/coordinators/competitioncoordinator.h \
+    ../src/intelligence/posetracking/kalmanpositiontracker.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
