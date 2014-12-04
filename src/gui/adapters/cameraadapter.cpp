@@ -45,7 +45,7 @@ void CameraAdapter::newRightCamImg(ImageData data)
         rightData = data;
         rightImage = CVMat2QImage(data.mat());
         _mutex.unlock();
-        fps = 1/(abs(data.time() - prevTime));
+        fps = 1.0/(abs(data.time() - prevTime));
         prevTime = data.time();
         update();
     }
