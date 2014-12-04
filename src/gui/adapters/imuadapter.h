@@ -34,6 +34,9 @@ private:
     std::vector<IMUData> _data;
 
     bool _lock;
+
+    int prevTime;
+    int fps;
 };
 
 #endif // IMUADAPTER_H
