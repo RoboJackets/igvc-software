@@ -85,13 +85,13 @@ Position PositionTracker::MeasurementFromIMUData(IMUData data)
     // http://www.movable-type.co.uk/scripts/latlong.html#destPoint
 
     Position measurement;
-    double time = data.getTimeSeconds() - prevIMUTime;
+    double time  = data.getTimeSeconds() - prevIMUTime;
     prevIMUTime = data.getTimeSeconds();
     double lat1 = _current_estimate.Latitude;
     double lon1 = _current_estimate.Latitude;
     double hed1 = _current_estimate.Heading;
-    double dx = data.X * time*time;
-    double dy = data.Y * time*time;
+    double dx = data.X * time*time/2;
+    double dy = data.Y * time*time/2;
     double d = sqrt(dx*dx + dy*dy); // Distance travelled
     double R = 6378137; // radius of Earth
     measurement.Latitude = asin(sin(lat1)*cos(d/R)+cos(lat1)*sin(d/R)*cos(hed1));
@@ -125,7 +125,7 @@ void PositionTracker::OnGPSData(GPSData data)
 void PositionTracker::OnIMUData(IMUData data)
 {
     if(prevIMUTime == 0)
-        prevIMUTime = data.getTimeSeconds();
+        prevIMUTime = data.getTimeMicroSeconds();
     else
         _current_estimate = UpdateWithMeasurement(_current_estimate, MeasurementFromIMUData(data));
 }
