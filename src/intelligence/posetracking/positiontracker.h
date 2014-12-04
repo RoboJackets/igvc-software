@@ -105,7 +105,7 @@ private:
 
     void OnIMUData(IMUData data);
 
-    double prevIMUTime;
+    unsigned long long prevIMUTime;
 
 public:
     LISTENER(PositionTracker, OnGPSData, GPSData)

@@ -32,10 +32,8 @@ NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
 
 void NMEACompatibleGPS::onNewSerialLine(string line) {
     GPSData state;
+    state.setTime();
     if(parseLine(line, state)) {
-        // TODO set time
-//        gettimeofday(&state.laptoptime, NULL);
-
         boost::mutex::scoped_lock lock(queueLocker);
         stateQueue.push_back(state);
         if(stateQueue.size() > maxBufferLength) {
