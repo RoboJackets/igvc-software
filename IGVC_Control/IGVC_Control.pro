@@ -46,7 +46,6 @@ SOURCES += \
     ../src/gui/adapters/imuadapter.cpp \
     ../src/hardware/sensors/lidar/lms200.cpp \
     ../src/intelligence/linedetection/linedetector.cpp \
-    ../src/intelligence/posetracking/positiontracker.cpp \
     ../src/common/utils/GPSWaypointSource.cpp \
     ../src/common/utils/gpsfilereader.cpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
@@ -117,7 +116,6 @@ HEADERS  += \
     ../src/gui/adapters/imuadapter.h \
     ../src/hardware/sensors/lidar/lms200.h \
     ../src/intelligence/linedetection/linedetector.h \
-    ../src/intelligence/posetracking/positiontracker.h \
     ../src/common/utils/gaussianvariable.hpp \
     ../src/common/datastructures/GPSData.hpp \
     ../src/common/utils/GPSUtils.h \
@@ -147,7 +145,8 @@ HEADERS  += \
     ../src/gui/adapters/adapterfactory.h \
     ../src/intelligence/coordinators/coordinator.hpp \
     ../src/intelligence/coordinators/competitioncoordinator.h \
-    ../src/intelligence/posetracking/kalmanpositiontracker.h
+    ../src/intelligence/posetracking/kalmanpositiontracker.h \
+    ../src/common/utils/timing.h
 
 FORMS    += \
     ../src/gui/mainwindow.ui \
