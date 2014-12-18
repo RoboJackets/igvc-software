@@ -52,8 +52,8 @@ private:
 
     QImage CVMat2QImage(cv::Mat img);
 
-    int prevTime;
-    int fps;
+    double prevTime;
+    double fps;
 };
 
 #endif // CAMERAADAPTER_H
