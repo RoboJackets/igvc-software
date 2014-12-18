@@ -35,8 +35,8 @@ private:
 
     bool _lock;
 
-    int prevTime;
-    int fps;
+    double prevTime;
+    double fps;
 };
 
 #endif // IMUADAPTER_H
