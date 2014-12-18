@@ -146,7 +146,8 @@ HEADERS  += \
     ../src/intelligence/coordinators/coordinator.hpp \
     ../src/intelligence/coordinators/competitioncoordinator.h \
     ../src/intelligence/posetracking/kalmanpositiontracker.h \
-    ../src/common/utils/timing.h
+    ../src/common/utils/timing.h \
+    ../src/intelligence/posetracking/positiontracker.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \

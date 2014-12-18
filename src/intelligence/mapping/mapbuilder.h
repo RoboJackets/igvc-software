@@ -4,7 +4,7 @@
 #include "hardware/sensors/lidar/Lidar.h"
 #include <pcl/point_types.h>
 #include <pcl/io/file_io.h>
-#include <intelligence/posetracking/basicpositiontracker.h>
+#include <intelligence/posetracking/positiontracker.hpp>
 #include <common/module.hpp>
 
 /*!
@@ -15,7 +15,7 @@ class MapBuilder : public Module
 {
     Q_OBJECT
 public:
-    MapBuilder(std::shared_ptr<Lidar> lidar, std::shared_ptr<BasicPositionTracker> poseTracker);
+    MapBuilder(std::shared_ptr<Lidar> lidar, std::shared_ptr<PositionTracker> poseTracker);
     ~MapBuilder();
     pcl::PointCloud<pcl::PointXYZ>::Ptr getCloud();
     //void saveCloud(std::string path);
@@ -41,7 +41,7 @@ private:
 
     std::shared_ptr<Lidar> _lidar;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
-    std::shared_ptr<BasicPositionTracker> poseTracker;
+    std::shared_ptr<PositionTracker> poseTracker;
 };
 
 #endif // MAPPING_H

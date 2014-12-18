@@ -4,25 +4,19 @@
 #include <common/config/configmanager.h>
 
 BasicPositionTracker::BasicPositionTracker(std::shared_ptr<GPS> gps, std::shared_ptr<IMU> imu)
-    : currentPosition(0,0,0),
-      _gps(gps),
-      _imu(imu)
+    : currentPosition(0,0,0)
 {
     _moduleName = "PositionTracker";
     qRegisterMetaType<RobotPosition>("RobotPosition");
     originPointsRecorded = 0;
-    if(_gps.get() != nullptr)
-        connect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
-    if(_imu.get() != nullptr)
-        connect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
+    if(gps.get() != nullptr)
+        connect(gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onGPSData(GPSData)));
+    if(imu.get() != nullptr)
+        connect(imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onIMUData(IMUData)));
 }
 
 BasicPositionTracker::~BasicPositionTracker()
 {
-    if(_gps.get() != nullptr)
-        disconnect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
-    if(_imu.get() != nullptr)
-        disconnect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
 }
 
 bool BasicPositionTracker::isWorking()
@@ -30,7 +24,7 @@ bool BasicPositionTracker::isWorking()
     return true;
 }
 
-RobotPosition BasicPositionTracker::GetPosition()
+const RobotPosition &BasicPositionTracker::GetPosition()
 {
     return currentPosition;
 }
@@ -43,26 +37,7 @@ void BasicPositionTracker::Reset()
     originPointsRecorded = 0;
 }
 
-void BasicPositionTracker::ChangeGPS(std::shared_ptr<GPS> gps)
-{
-
-    if(_gps.get() != nullptr)
-        disconnect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
-    _gps = gps;
-    if(_gps.get() != nullptr)
-        connect(_gps.get(), SIGNAL(onNewData(GPSData)), this, SLOT(onNewGPS(GPSData)));
-}
-
-void BasicPositionTracker::ChangeIMU(std::shared_ptr<IMU> imu)
-{
-    if(_imu.get() != nullptr)
-        disconnect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
-    _imu = imu;
-    if(_imu.get() != nullptr)
-        connect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewIMU(IMUData)));
-}
-
-void BasicPositionTracker::onNewGPS(GPSData data)
+void BasicPositionTracker::onGPSData(GPSData data)
 {
     int numPointsForOrigin = ConfigManager::Instance().getValue("BasicPoseTracker", "PointsForOrigin", 300);
     if(originPointsRecorded < numPointsForOrigin)
@@ -83,7 +58,7 @@ void BasicPositionTracker::onNewGPS(GPSData data)
     onNewPosition(currentPosition);
 }
 
-void BasicPositionTracker::onNewIMU(IMUData data)
+void BasicPositionTracker::onIMUData(IMUData data)
 {
     currentPosition.Heading = ( (data.Yaw < 0) ? data.Yaw + 360 : data.Yaw );
 

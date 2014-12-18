@@ -77,12 +77,10 @@ bool nmea::decodeGPRMC(const std::string& line, GPSData& state)
 
 	try
 	{
-	const char LatHemi = splitvec[4][0];
-//	state.lat = decodeLatitude(splitvec[3], LatHemi);
+    const char LatHemi = splitvec[4][0];
     state.Lat(decodeLatitude(splitvec[3], LatHemi));
 
-	const char LonHemi = splitvec[6][0];
-//	state.lon = decodeLongitude(splitvec[5], LonHemi);
+    const char LonHemi = splitvec[6][0];
     state.Long(decodeLongitude(splitvec[5], LonHemi));
 
 	}
@@ -94,15 +92,13 @@ bool nmea::decodeGPRMC(const std::string& line, GPSData& state)
 	try
 	{
 		double speedKTS = boost::lexical_cast<double>(splitvec[7].c_str());
-		double speedms = speedKTS  * .514444444444444444;
-//		state.speedoverground = speedms;
+        double speedms = speedKTS  * .514444444444444444;
         state.Speed(speedms);
 	}
 	catch(...)
 	{
 		return false;
-	}
-//	state.courseoverground = boost::lexical_cast<double>(splitvec[8].c_str());
+    }
     state.Heading(boost::lexical_cast<double>(splitvec[8].c_str()));
 
 //	std::string utcdate = splitvec[9];
@@ -150,6 +146,10 @@ bool nmea::decodeGPGGA(const std::string& line, GPSData& state)
     state.NumSats(boost::lexical_cast<int>(splitvec[7].c_str()));
 
     state.HDOP(boost::lexical_cast<float>(splitvec[8].c_str()));
+
+    state.LatVar(1.1005e-11 * state.HDOP() - 7.6854e-12 );
+    state.LongVar(5.5776e-10 * state.HDOP() - -3.9038e-10);
+
 //	const std::string& sealevelheight = splitvec[9];
 //	const std::string& geoidalheight = splitvec[10];
 //	const std::string& diffgps = splitvec[11];
