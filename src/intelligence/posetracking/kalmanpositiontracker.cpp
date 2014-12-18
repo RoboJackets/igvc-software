@@ -40,7 +40,13 @@ void KalmanPositionTracker::onGPSData(GPSData data) {
         // HDOP is too high (measurement is worthlessly inaccurate), so we'll just ignore it.
         return;
     }
-    if(int numOriginPointsNeeded = ConfigManager::Instance().getValue("KalmanPositionTracker", "OriginPointsNeeded", 300) > _numOriginPointsRecorded) {
+    if(data.Quality() == GPS_QUALITY_INVALID) {
+        // Ignore all GPS measurements with invalid data (ie. no satelites)
+        return;
+    }
+    int numOriginPointsNeeded = ConfigManager::Instance().getValue("KalmanPositionTracker", "OriginPointsNeeded", 300);
+    if(_numOriginPointsRecorded < numOriginPointsNeeded) {
+        std::cout << numOriginPointsNeeded << std::endl;
         // Find our starting origin by averaging the first n points.
         // NOTE: this assumes the robot is still during this process
         _origin.Lat(_origin.Lat() + data.Lat());
@@ -94,7 +100,12 @@ void KalmanPositionTracker::emitCurrentEstimate() {
 
     _currentEstimate.Heading = _currentInternalEstimate.Heading;
 
-    GPSUtils::coordsToMetricXY(_origin.Lat(), _origin.Long(), _currentInternalEstimate.Latitude, _currentInternalEstimate.Longitude, _currentEstimate.X, _currentEstimate.Y);
+    if(_numOriginPointsRecorded > ConfigManager::Instance().getValue("KalmanPositionTracker", "OriginPointsNeeded", 300)) {
+        GPSUtils::coordsToMetricXY(_origin.Lat(), _origin.Long(), _currentInternalEstimate.Latitude, _currentInternalEstimate.Longitude, _currentEstimate.X, _currentEstimate.Y);
+    } else {
+        _currentEstimate.X = 0.0;
+        _currentEstimate.Y = 0.0;
+    }
 
     emit onNewPosition(_currentEstimate);
 }
