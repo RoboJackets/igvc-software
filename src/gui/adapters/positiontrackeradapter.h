@@ -2,7 +2,7 @@
 #define POSITIONTRACKERADAPTER_H
 
 #include <QWidget>
-#include <intelligence/posetracking/basicpositiontracker.h>
+#include <intelligence/posetracking/positiontracker.hpp>
 #include <vector>
 
 namespace Ui {
@@ -14,7 +14,7 @@ class PositionTrackerAdapter : public QWidget
     Q_OBJECT
 
 public:
-    explicit PositionTrackerAdapter(std::shared_ptr<BasicPositionTracker> src, QWidget *parent = 0);
+    explicit PositionTrackerAdapter(std::shared_ptr<PositionTracker> src, QWidget *parent = 0);
     ~PositionTrackerAdapter();
 
 protected:
@@ -37,7 +37,7 @@ private slots:
 private:
     Ui::PositionTrackerAdapter *ui;
 
-    std::shared_ptr<BasicPositionTracker> posTracker;
+    std::shared_ptr<PositionTracker> posTracker;
 
     std::vector<RobotPosition> positions;
 

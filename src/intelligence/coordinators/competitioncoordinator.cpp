@@ -4,7 +4,7 @@
 #include <hardware/sensors/camera/StereoSource.hpp>
 #include <hardware/sensors/IMU/IMU.h>
 #include <hardware/sensors/lidar/Lidar.h>
-#include <intelligence/posetracking/basicpositiontracker.h>
+#include <intelligence/posetracking/kalmanpositiontracker.h>
 #include <intelligence/mapping/mapbuilder.h>
 #include <intelligence/pathplanning/astarplanner.h>
 #include <intelligence/linedetection/linedetector.h>
@@ -19,6 +19,7 @@
 #include <hardware/sensors/IMU/Ardupilot.h>
 #include <hardware/sensors/lidar/SimulatedLidar.h>
 #include <hardware/sensors/lidar/lms200.h>
+#include <common/utils/GPSUtils.h>
 
 using namespace std;
 
@@ -27,7 +28,7 @@ CompetitionCoordinator::CompetitionCoordinator() {
     shared_ptr<StereoSource> camera(new Bumblebee2());
     shared_ptr<IMU> imu(new Ardupilot());
     shared_ptr<Lidar> lidar(new LMS200());
-    shared_ptr<BasicPositionTracker> posTracker(new BasicPositionTracker(gps, imu));
+    shared_ptr<PositionTracker> posTracker(new KalmanPositionTracker(imu, gps));
     shared_ptr<MapBuilder> mapBuilder(new MapBuilder(lidar, posTracker));
     shared_ptr<AStarPlanner> planner(new AStarPlanner());
     shared_ptr<LineDetector> lineDetector(new LineDetector());
@@ -43,7 +44,10 @@ CompetitionCoordinator::CompetitionCoordinator() {
     QObject::connect(barrelFinder.get(), SIGNAL(newCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr, pcl::PointXY)), mapBuilder.get(), SLOT(onCloudFrame(pcl::PointCloud<pcl::PointXYZ>::Ptr,pcl::PointXY)));
 
     QObject::connect(controller.get(), &Controller::onNewWaypoint, [=](GPSData waypoint){
-        planner->OnNewGoalPos(posTracker->WaypointToPosition(waypoint));
+        RobotPosition pos;
+        auto trackerOrigin = posTracker->GetOrigin();
+        GPSUtils::coordsToMetricXY(trackerOrigin.Lat(), trackerOrigin.Long(), waypoint.Lat(), waypoint.Long(), pos.X, pos.Y);
+        planner->OnNewGoalPos(pos);
     });
 
     QObject::connect(posTracker.get(), SIGNAL(onNewPosition(RobotPosition)), planner.get(), SLOT(OnNewStartPos(RobotPosition)));
@@ -106,13 +110,24 @@ void CompetitionCoordinator::changeLidar(std::shared_ptr<Module> lidar) {
 }
 void CompetitionCoordinator::changeGPS(std::shared_ptr<Module> gps) {
     auto pos = find("GPS");
-    if(pos != modules.end())
-        modules.erase(pos);
-    modules.push_back(gps);
     auto trackerPos = find("PositionTracker");
+    if(pos != modules.end()) {
+        if(trackerPos != modules.end()) {
+            QObject::disconnect(dynamic_pointer_cast<GPS>(*pos).get(), SIGNAL(onNewData(GPSData)),
+                                dynamic_pointer_cast<PositionTracker>(*trackerPos).get(), SLOT(onGPSData(GPSData)));
+        }
+        modules.erase(pos);
+    }
+    modules.push_back(gps);
+    /*
+     * Adding and removing modules from the modules
+     * list changes the index of the PositionTracker
+     * module, so we need to find its new position.
+     */
+    trackerPos = find("PositionTracker");
     if(trackerPos != modules.end()) {
-        shared_ptr<BasicPositionTracker> tracker = dynamic_pointer_cast<BasicPositionTracker>(*trackerPos);
-        tracker->ChangeGPS(dynamic_pointer_cast<GPS>(gps));
+        shared_ptr<PositionTracker> tracker = dynamic_pointer_cast<PositionTracker>(*trackerPos);
+        QObject::connect(dynamic_pointer_cast<GPS>(gps).get(), SIGNAL(onNewData(GPSData)), tracker.get(), SLOT(onGPSData(GPSData)));
     }
 }
 

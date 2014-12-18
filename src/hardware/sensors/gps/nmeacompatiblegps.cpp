@@ -33,8 +33,6 @@ NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
 void NMEACompatibleGPS::onNewSerialLine(string line) {
     GPSData state;
     if(parseLine(line, state)) {
-        // TODO scale variances based on HDOP && NumSats
-
         boost::mutex::scoped_lock lock(queueLocker);
         stateQueue.push_back(state);
         if(stateQueue.size() > maxBufferLength) {

@@ -10,7 +10,7 @@
 #include <pcl/filters/passthrough.h>
 
 
-MapBuilder::MapBuilder(std::shared_ptr<Lidar> lidar, std::shared_ptr<BasicPositionTracker> poseTracker)
+MapBuilder::MapBuilder(std::shared_ptr<Lidar> lidar, std::shared_ptr<PositionTracker> poseTracker)
 {
     _moduleName = "MapBuilder";
     pcl::PointCloud<pcl::PointXYZ>::Ptr _cloud(new pcl::PointCloud<pcl::PointXYZ>);
