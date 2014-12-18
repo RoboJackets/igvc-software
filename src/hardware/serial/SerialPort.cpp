@@ -46,6 +46,7 @@ SerialPort::SerialPort(std::string port_name, size_t baud)
     _hasEncounteredStartByte = false;
 	_line = "";
 	_eventRequests = 0;
+    _eventsEnabled = false;
 }
 
 void SerialPort::startEvents() {
