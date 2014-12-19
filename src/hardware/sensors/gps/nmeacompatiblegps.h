@@ -40,8 +40,6 @@ private:
 	size_t maxBufferLength; // maximum number of states to be stored in the buffer
 
 	std::list<GPSData> stateQueue; // buffer of the latest maxBufferLength states. This is a std::list instead of a std::queue because of the need to iterate to retrieve a state at a given timestamp
-
-	bool parseLine(std::string line, GPSData &state); // parses a line from the GPS device
 };
 
 #endif /* HEMISPHEREA100GPS_H_ */

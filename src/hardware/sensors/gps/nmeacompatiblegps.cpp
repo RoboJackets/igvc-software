@@ -32,19 +32,17 @@ NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
 
 void NMEACompatibleGPS::onNewSerialLine(string line) {
     GPSData state;
-    if(parseLine(line, state)) {
+    try {
+        nmea::decodeGPGGA(line, state);
         boost::mutex::scoped_lock lock(queueLocker);
         stateQueue.push_back(state);
         if(stateQueue.size() > maxBufferLength) {
             stateQueue.pop_front();
         }
         onNewData(state);
+    } catch(const nmea::bad_nmea_sentence &e) {
+        Logger::Log(LogLevel::Warning, e.what());
     }
-}
-
-bool NMEACompatibleGPS::parseLine(std::string line, GPSData &state) {
-    return nmea::decodeGPGGA(line, state);/* ||
-           nmea::decodeGPRMC(line, state);*/
 }
 
 GPSData NMEACompatibleGPS::GetState() {
