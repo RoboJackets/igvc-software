@@ -88,8 +88,6 @@ HEADERS  += \
     ../src/common/datastructures/IMUData.hpp \
     ../src/common/datastructures/ImageData.hpp \
     ../src/common/datastructures/GPSData.hpp \
-    ../src/common/datastructures/DataPoint.hpp \
-    ../src/common/datastructures/DataArray.hpp \
     ../src/gui/adapters/joystickadapter.h \
     ../src/gui/adapters/cameraadapter.h \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.h \
