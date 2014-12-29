@@ -9,6 +9,7 @@ Inlined because I'm lazy and because it will probably boost efficiency since it 
 ***/
 inline double  seconds_since_IGVCpoch()
 {
+    // FIXME This is complete nonsense.
     using boost::gregorian::date;
     using boost::posix_time::ptime;
     using boost::posix_time::microsec_clock;

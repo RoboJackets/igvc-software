@@ -46,7 +46,6 @@ void KalmanPositionTracker::onGPSData(GPSData data) {
     }
     int numOriginPointsNeeded = ConfigManager::Instance().getValue("KalmanPositionTracker", "OriginPointsNeeded", 300);
     if(_numOriginPointsRecorded < numOriginPointsNeeded) {
-        std::cout << numOriginPointsNeeded << std::endl;
         // Find our starting origin by averaging the first n points.
         // NOTE: this assumes the robot is still during this process
         _origin.Lat(_origin.Lat() + data.Lat());
@@ -80,9 +79,13 @@ void KalmanPositionTracker::predict() {
     for(unsigned int i = 1; i < _GPSDataBuffer.size(); i++) {
         GPSData &a = _GPSDataBuffer[i-1];
         GPSData &b = _GPSDataBuffer[i];
+        std::cout << b.time() << "\t" << a.time() << std::endl;
         latVel += ( b.Lat() - a.Lat() ) / (b.time() - a.time());
         lonVel += ( b.Long() - a.Long()) / (b.time() - a.time());
     }
+
+//    std::cout << latVel << "\t" << lonVel << std::endl;
+
     latVel /= (double)_GPSDataBuffer.size();
     lonVel /= (double)_GPSDataBuffer.size();
 
@@ -100,12 +103,15 @@ void KalmanPositionTracker::emitCurrentEstimate() {
 
     _currentEstimate.Heading = _currentInternalEstimate.Heading;
 
-    if(_numOriginPointsRecorded > ConfigManager::Instance().getValue("KalmanPositionTracker", "OriginPointsNeeded", 300)) {
+    if(_numOriginPointsRecorded >= ConfigManager::Instance().getValue("KalmanPositionTracker", "OriginPointsNeeded", 300)) {
         GPSUtils::coordsToMetricXY(_origin.Lat(), _origin.Long(), _currentInternalEstimate.Latitude, _currentInternalEstimate.Longitude, _currentEstimate.X, _currentEstimate.Y);
     } else {
         _currentEstimate.X = 0.0;
         _currentEstimate.Y = 0.0;
     }
+
+//    std::cout << _currentInternalEstimate.Latitude << "\t" << _currentInternalEstimate.Longitude << std::endl;
+//    std::cout << _currentEstimate.X << "\t" << _currentEstimate.Y << std::endl;
 
     emit onNewPosition(_currentEstimate);
 }

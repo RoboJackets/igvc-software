@@ -309,7 +309,7 @@ void MainWindow::on_actionHemisphere_A100_triggered()
 
 void MainWindow::on_actionSimulatedGPS_triggered()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated GPS Data File"), "", tr("Text Files(*.txt)"));
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Simulated GPS Data File"), "", tr("Comma Separated Values Files(*.csv)"));
     if(fileName.length() > 0)
     {
         ui->actionSimulatedGPS->setChecked(true);
