@@ -35,7 +35,7 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
             vector<string> tokens = split(line, ',');
 
             //file validation
-            if (tokens.size() != 2)
+            if (tokens.size() != 5)
             {
                 string msg = "[GPSFileReader] Entry at line " + to_string(lineIndex) + " is malformed. (Size != 2)";
                 Logger::Log(LogLevel::Error, msg);
@@ -45,6 +45,9 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
             GPSData newData;
             newData.Lat(atof(tokens.at(0).c_str()));
             newData.Long(atof(tokens.at(1).c_str()));
+            newData.NumSats(atof(tokens.at(2).c_str()));
+            newData.Quality((GPS_QUALITY)atoi(tokens.at(3).c_str()));
+            newData.HDOP(atof(tokens.at(4).c_str()));
 
             //coordinate validation
             if (abs(newData.Lat()) > 90)
