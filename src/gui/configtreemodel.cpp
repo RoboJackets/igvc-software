@@ -31,6 +31,9 @@ ConfigTreeModel::ConfigTreeModel(QObject *)
     connect(&ConfigManager::Instance(), &ConfigManager::StructureChanged, [=](){
         populateModel();
     });
+    connect(&ConfigManager::Instance(), &ConfigManager::ValueUpdated, [=](){
+        updateModel();
+    });
 }
 
 void ConfigTreeModel::dataWasChanged(QStandardItem *item)
@@ -70,6 +73,20 @@ void ConfigTreeModel::populateModel()
             row.append(valueLabelNode);
             row.append(valueValueNode);
             categoryNode->appendRow(row);
+        }
+    }
+}
+
+void ConfigTreeModel::updateModel()
+{
+    ConfigManager &config = ConfigManager::Instance();
+    for(int cInd = 0; cInd < config.numberOfCategories(); cInd++)
+    {
+        QStandardItem *item = _model.item(cInd,0);
+        for(int vInd = 0; vInd < config.numberOfValues(cInd); vInd++)
+        {
+            QStandardItem *child = item->child(vInd, 1);
+            child->setText(config.getValue(cInd, vInd, std::string()).c_str());
         }
     }
 }
