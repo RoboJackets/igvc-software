@@ -23,22 +23,10 @@ class GPSAdapter : public QWidget
 public:
     explicit GPSAdapter(std::shared_ptr<GPS> gps, QWidget *parent = 0);
     void labelPrint();
-    void paintEvent(QPaintEvent *event);
     ~GPSAdapter();
 
 private slots:
-    void on_user_Top_textChanged();
-
-    void on_user_Right_textChanged();
-
-    void on_user_Bottom_textChanged();
-
-    void on_user_Left_textChanged();
-
     void onNewData(GPSData data);
-
-Q_SIGNALS:
-    void updateBecauseNewData();
 
 private:
 
@@ -50,12 +38,6 @@ private:
      */
     double coordinates[5][2];
     QLabel dataLabel;
-    double horizontalFactor;
-    double verticalFactor;
-    double minLat;
-    double maxLat;
-    double minLong;
-    double maxLong;
 
     std::shared_ptr<GPS> _GPS;
 };
