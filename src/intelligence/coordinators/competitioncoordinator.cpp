@@ -29,11 +29,11 @@ CompetitionCoordinator::CompetitionCoordinator() {
     shared_ptr<Lidar> lidar = make_shared<LMS200>();
     shared_ptr<BasicPositionTracker> posTracker = make_shared<BasicPositionTracker>(gps, imu);
     shared_ptr<MapBuilder> mapBuilder = make_shared<MapBuilder>(lidar, posTracker);
-    shared_ptr<AStarPlanner> planner = make_shared<AStarPlaner>();
+    shared_ptr<AStarPlanner> planner = make_shared<AStarPlanner>();
     shared_ptr<LineDetector> lineDetector = make_shared<LineDetector>();
     shared_ptr<BarrelFinder> barrelFinder = make_shared<BarrelFinder>();
     shared_ptr<GPSWaypointSource> waypointSource = make_shared<GPSWaypointSource>("");
-    shared_ptr<Controller> controller = make_shared<Controller>(waypointSoure, gps);
+    shared_ptr<Controller> controller = make_shared<Controller>(waypointSource, gps);
     shared_ptr<PathFollower> pathFollower = make_shared<PathFollower>();
 
     QObject::connect(camera.get(), SIGNAL(onNewLeftImage(ImageData)), barrelFinder.get(), SLOT(onNewImage(ImageData)));
