@@ -104,8 +104,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::openHardwareView(QModelIndex index)
 {
-    QString labelText = ui->hardwareStatusList->item(index.row())->text();
-    if(MDIWindow* window = findWindowWithTitle(labelText))
+    openHardwareView(ui->hardwareStatusList->item(index.row())->text());
+}
+
+void MainWindow::openHardwareView(QString label)
+{
+    if(MDIWindow* window = findWindowWithTitle(label))
     {
         if(!window->isVisible())
             window->show();
@@ -114,22 +118,22 @@ void MainWindow::openHardwareView(QModelIndex index)
     {
         using namespace std;
         MDIWindow *newWindow = new MDIWindow;
-        newWindow->setWindowTitle(labelText);
+        newWindow->setWindowTitle(label);
         newWindow->setLayout(new QGridLayout);
 
         QWidget* adapter = nullptr;
 
-        if(labelText == "Motor Board")
+        if(label == "Motor Board")
         {
             adapter = new MotorBoardAdapter(_motorController);
         }
-        else if(labelText == "Joystick")
+        else if(label == "Joystick")
         {
             adapter = new JoystickAdapter(_joystick);
-        } else if(labelText == "Light Controller") {
+        } else if(label == "Light Controller") {
             adapter = new LightShieldAdapter(_lights);
         } else {
-            shared_ptr<Module> module = _coordinator->getModuleWithName(labelText.toStdString());
+            shared_ptr<Module> module = _coordinator->getModuleWithName(label.toStdString());
             if(module.get())
                 adapter = AdapterFactory::getAdapterForModule(module);
         }
@@ -304,6 +308,7 @@ void MainWindow::on_actionHemisphere_A100_triggered()
     ui->actionHemisphere_A100->setChecked(true);
     ui->actionOutback_A321->setChecked(false);
     _coordinator->changeGPS(std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/ttyGPS", 4800)));
+    restartAdapter("GPS");
     updateHardwareStatusList();
 }
 
@@ -316,13 +321,7 @@ void MainWindow::on_actionSimulatedGPS_triggered()
         ui->actionHemisphere_A100->setChecked(false);
         ui->actionOutback_A321->setChecked(false);
         _coordinator->changeGPS(std::shared_ptr<GPS>(new SimulatedGPS(fileName.toStdString())));
-//        MDIWindow *window = findWindowWithTitle("GPS");
-//        if( window != nullptr)
-//        {
-//            QWidget* p = (QWidget*)window->parent();
-//            if(p != nullptr)
-//                p->close();
-//        }
+        restartAdapter("GPS");
         updateHardwareStatusList();
     }
 }
@@ -358,6 +357,7 @@ void MainWindow::on_actionOutback_A321_triggered()
     ui->actionHemisphere_A100->setChecked(false);
     ui->actionOutback_A321->setChecked(true);
     _coordinator->changeGPS(std::shared_ptr<GPS>(new NMEACompatibleGPS("/dev/ttyGPS", 19200)));
+    restartAdapter(tr("GPS"));
     updateHardwareStatusList();
 }
 
@@ -369,8 +369,9 @@ void MainWindow::on_actionSimulatedLidar_triggered()
         ui->actionLMS_200->setChecked(false);
         ui->actionSimulatedLidar->setChecked(true);
         auto newDevice = std::shared_ptr<Lidar>(new SimulatedLidar);
-        ((SimulatedLidar*)newDevice.get())->loadFile(fileName.toStdString().c_str());
+        dynamic_pointer_cast<SimulatedLidar>(newDevice)->loadFile(fileName.toStdString().c_str());
         _coordinator->changeLidar(newDevice);
+        restartAdapter(tr("LIDAR"));
         updateHardwareStatusList();
     }
 }
@@ -380,6 +381,7 @@ void MainWindow::on_actionLMS_200_triggered()
     ui->actionLMS_200->setChecked(true);
     ui->actionSimulatedLidar->setChecked(false);
     _coordinator->changeLidar(std::shared_ptr<Lidar>(new LMS200));
+    restartAdapter(tr("LIDAR"));
     updateHardwareStatusList();
 }
 
@@ -404,5 +406,15 @@ void MainWindow::updateTimer()
         QString str;
         str.sprintf("Time: %d:%02d:%02d", hour, minute, second);
         timeLabel->setText(str);
+    }
+}
+
+void MainWindow::restartAdapter(QString title)
+{
+    MDIWindow *window = findWindowWithTitle(title);
+    if( window != nullptr)
+    {
+        ((QMdiSubWindow*)window->parent())->close();
+        openHardwareView(title);
     }
 }
