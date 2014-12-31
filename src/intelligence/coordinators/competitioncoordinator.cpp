@@ -24,18 +24,18 @@
 using namespace std;
 
 CompetitionCoordinator::CompetitionCoordinator() {
-    shared_ptr<GPS> gps(new NMEACompatibleGPS("/dev/igvc_gps", 19200));
-    shared_ptr<StereoSource> camera(new Bumblebee2());
-    shared_ptr<IMU> imu(new Ardupilot());
-    shared_ptr<Lidar> lidar(new LMS200());
-    shared_ptr<PositionTracker> posTracker(new KalmanPositionTracker(imu, gps));
-    shared_ptr<MapBuilder> mapBuilder(new MapBuilder(lidar, posTracker));
-    shared_ptr<AStarPlanner> planner(new AStarPlanner());
-    shared_ptr<LineDetector> lineDetector(new LineDetector());
-    shared_ptr<BarrelFinder> barrelFinder(new BarrelFinder());
-    shared_ptr<GPSWaypointSource> waypointSource(new GPSWaypointSource(""));
-    shared_ptr<Controller> controller(new Controller(waypointSource, gps));
-    shared_ptr<PathFollower> pathFollower(new PathFollower());
+    shared_ptr<GPS> gps = make_shared<NMEACompatibleGPS>("/dev/igvc_gps", 19200);
+    shared_ptr<StereoSource> camera = make_shared<Bumblebee2>();
+    shared_ptr<IMU> imu = make_shared<Ardupilot>();
+    shared_ptr<Lidar> lidar = make_shared<LMS200>();
+    shared_ptr<PositionTracker> posTracker = make_shared<KalmanPositionTracker>(imu, gps);
+    shared_ptr<MapBuilder> mapBuilder = make_shared<MapBuilder>(lidar, posTracker);
+    shared_ptr<AStarPlanner> planner = make_shared<AStarPlanner>();
+    shared_ptr<LineDetector> lineDetector = make_shared<LineDetector>();
+    shared_ptr<BarrelFinder> barrelFinder = make_shared<BarrelFinder>();
+    shared_ptr<GPSWaypointSource> waypointSource = make_shared<GPSWaypointSource>("");
+    shared_ptr<Controller> controller = make_shared<Controller>(waypointSource, gps);
+    shared_ptr<PathFollower> pathFollower = make_shared<PathFollower>();
 
     QObject::connect(camera.get(), SIGNAL(onNewLeftImage(ImageData)), barrelFinder.get(), SLOT(onNewImage(ImageData)));
     QObject::connect(camera.get(), SIGNAL(onNewLeftImage(ImageData)), lineDetector.get(), SLOT(onImageEvent(ImageData)));
