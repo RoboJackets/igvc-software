@@ -104,7 +104,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    <span class="keywordtype">void</span> testUpdateFromGPS()</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    {</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;        <a class="code" href="class_position_tracker.html">PositionTracker</a> tracker;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;        <a class="code" href="class_event.html">Event&lt;GPSData&gt;</a> testEvent;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;        Event&lt;GPSData&gt; testEvent;</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;        testEvent += &amp;tracker.LOnGPSData;</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;        <span class="keyword">auto</span> start = tracker.GetPosition();</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;        <span class="keyword">auto</span> data = <a class="code" href="class_g_p_s_data.html">GPSData</a>(1,1,M_PI_2,0);</div>
@@ -125,7 +125,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordtype">void</span> testUpdateFromIMU_NoAccel()</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    {</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        <a class="code" href="class_position_tracker.html">PositionTracker</a> tracker;</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        <a class="code" href="class_event.html">Event&lt;IMUData&gt;</a> testEvent;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        Event&lt;IMUData&gt; testEvent;</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        testEvent += &amp;tracker.LOnIMUData;</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        <span class="keyword">auto</span> start = tracker.GetPosition();</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="keyword">auto</span> data = <a class="code" href="class_i_m_u_data.html">IMUData</a>(0,0,0,0,0,0);</div>
@@ -137,7 +137,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keywordtype">void</span> testUpdateFromIMU_AccelX()</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    {</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <a class="code" href="class_position_tracker.html">PositionTracker</a> tracker;</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <a class="code" href="class_event.html">Event&lt;IMUData&gt;</a> testEvent;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        Event&lt;IMUData&gt; testEvent;</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        testEvent += &amp;tracker.LOnIMUData;</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        testEvent(<a class="code" href="class_i_m_u_data.html">IMUData</a>(0,0,0,0,0,0));</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="keyword">auto</span> start = tracker.GetPosition();</div>
@@ -164,7 +164,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <span class="keywordtype">void</span> testUpdateFromIMU_AccelY()</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    {</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <a class="code" href="class_position_tracker.html">PositionTracker</a> tracker;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        <a class="code" href="class_event.html">Event&lt;IMUData&gt;</a> testEvent;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        Event&lt;IMUData&gt; testEvent;</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        testEvent += &amp;tracker.LOnIMUData;</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        testEvent(<a class="code" href="class_i_m_u_data.html">IMUData</a>(0,0,0,0,0,0));</div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="keyword">auto</span> start = tracker.GetPosition();</div>
@@ -191,15 +191,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;};</div>
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="preprocessor">#endif // TESTPOSITIONTRACKER_HPP</span></div>
-<div class="ttc" id="class_event_html"><div class="ttname"><a href="class_event.html">Event</a></div><div class="ttdoc">The Event class. </div><div class="ttdef"><b>Definition:</b> Event.hpp:26</div></div>
 <div class="ttc" id="class_test_position_tracker_html"><div class="ttname"><a href="class_test_position_tracker.html">TestPositionTracker</a></div><div class="ttdef"><b>Definition:</b> testpositiontracker.hpp:9</div></div>
-<div class="ttc" id="class_position_tracker_html"><div class="ttname"><a href="class_position_tracker.html">PositionTracker</a></div><div class="ttdoc">Class for tracking robot&#39;s position. </div><div class="ttdef"><b>Definition:</b> positiontracker.h:62</div></div>
+<div class="ttc" id="class_position_tracker_html"><div class="ttname"><a href="class_position_tracker.html">PositionTracker</a></div><div class="ttdef"><b>Definition:</b> positiontracker.hpp:9</div></div>
 <div class="ttc" id="class_i_m_u_data_html"><div class="ttname"><a href="class_i_m_u_data.html">IMUData</a></div><div class="ttdef"><b>Definition:</b> IMUData.hpp:6</div></div>
-<div class="ttc" id="class_g_p_s_data_html"><div class="ttname"><a href="class_g_p_s_data.html">GPSData</a></div><div class="ttdef"><b>Definition:</b> GPSData.hpp:18</div></div>
+<div class="ttc" id="class_g_p_s_data_html"><div class="ttname"><a href="class_g_p_s_data.html">GPSData</a></div><div class="ttdef"><b>Definition:</b> GPSData.hpp:23</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 10 2015 16:06:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

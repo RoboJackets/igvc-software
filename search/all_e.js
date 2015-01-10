@@ -10,7 +10,6 @@ var searchData=
   ['pointcloudadder',['PointCloudAdder',['../class_point_cloud_adder.html',1,'']]],
   ['pointclouddisp',['PointCloudDisp',['../class_point_cloud_disp.html',1,'']]],
   ['populatemodel',['populateModel',['../class_config_tree_model.html#ad3fb7e61d962604d17a52fe859897270',1,'ConfigTreeModel']]],
-  ['position',['Position',['../class_position.html',1,'']]],
   ['positiontracker',['PositionTracker',['../class_position_tracker.html',1,'']]],
   ['positiontrackeradapter',['PositionTrackerAdapter',['../class_position_tracker_adapter.html',1,'']]],
   ['processimage',['processImage',['../class_grass_odometer.html#a76f91cd77402168725d943903d7cf443',1,'GrassOdometer']]],

@@ -155,7 +155,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        QBENCHMARK {</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;            setMap(map);</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        }</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3750);</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;Path of length &quot;</span> &lt;&lt; planner.GetPath().size() &lt;&lt; <span class="stringliteral">&quot; recieved.&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="comment">//        for(auto pair : planner.GetPath())</span></div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="comment">//            std::cout &lt;&lt; &quot;\t&quot; &lt;&lt; pair.second.x &lt;&lt; &quot;, &quot; &lt;&lt; pair.second.y &lt;&lt; std::endl;</span></div>
@@ -199,7 +199,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;        QBENCHMARK {</div>
 <div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;            setMap(map);</div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        }</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 6000);</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        std::cout &lt;&lt; <span class="stringliteral">&quot;Path of length &quot;</span> &lt;&lt; planner.GetPath().size() &lt;&lt; <span class="stringliteral">&quot; recieved.&quot;</span> &lt;&lt; std::endl;</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="comment">//        for(auto pair : planner.GetPath())</span></div>
 <div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="comment">//            std::cout &lt;&lt; &quot;\t&quot; &lt;&lt; pair.second.x &lt;&lt; &quot;, &quot; &lt;&lt; pair.second.y &lt;&lt; std::endl;</span></div>
@@ -217,7 +217,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;        pcl::PointCloud&lt;pcl::PointXYZ&gt;::Ptr map(<span class="keyword">new</span> pcl::PointCloud&lt;pcl::PointXYZ&gt;());</div>
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;        <span class="keywordflow">for</span>(<span class="keywordtype">double</span> theta = 0; theta &lt; 2*M_PI; theta+=0.1)</div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;            map-&gt;push_back(pcl::PointXYZ(cos(theta),sin(theta),0));</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;        QBENCHMARK {</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;        QBENCHMARK_ONCE {</div>
 <div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;            setMap(map);</div>
 <div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;        }</div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;        QTRY_VERIFY_WITH_TIMEOUT(pathRecieved, 3000);</div>
@@ -235,7 +235,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 10 2015 16:06:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

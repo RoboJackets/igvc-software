@@ -63,7 +63,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="namespaces.html"><span>Namespace&#160;List</span></a></li>
-      <li><a href="namespacemembers.html"><span>Namespace&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -83,6 +82,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
 <div class="title">nmea Namespace Reference</div>  </div>
@@ -92,22 +92,22 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>Contains helper methods for interpreting messages received from devices following the NMEA <a class="el" href="class_g_p_s.html" title="Interface for GPS devices. ">GPS</a> standard.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classnmea_1_1bad__nmea__sentence.html">bad_nmea_sentence</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a8d39980a13e7377e72debc62800cf416"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8d39980a13e7377e72debc62800cf416"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>decodeGPRMC</b> (const std::string &amp;line, <a class="el" href="class_g_p_s_data.html">GPSData</a> &amp;state)</td></tr>
-<tr class="separator:a8d39980a13e7377e72debc62800cf416"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aef5570865e90870c579e3f8ed615a1a7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenmea.html#aef5570865e90870c579e3f8ed615a1a7">decodeGPRMT</a> (const std::string &amp;)</td></tr>
-<tr class="separator:aef5570865e90870c579e3f8ed615a1a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38bf2456f6c31dac96b58d156cfeafa9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a38bf2456f6c31dac96b58d156cfeafa9"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>decodeGPGGA</b> (const std::string &amp;line, <a class="el" href="class_g_p_s_data.html">GPSData</a> &amp;state)</td></tr>
-<tr class="separator:a38bf2456f6c31dac96b58d156cfeafa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a096e29264500d232c08ef178da725c00"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenmea.html#a096e29264500d232c08ef178da725c00">decodeGPGSA</a> (const std::string &amp;)</td></tr>
-<tr class="separator:a096e29264500d232c08ef178da725c00"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4dbb03208a1ca71af2a72bb102b843c6"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenmea.html#a4dbb03208a1ca71af2a72bb102b843c6">decodeGPGSV</a> (const std::string &amp;)</td></tr>
-<tr class="separator:a4dbb03208a1ca71af2a72bb102b843c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0954bb446c3ac71e5b9118baa4b2f07c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespacenmea.html#a0954bb446c3ac71e5b9118baa4b2f07c">decodeUTCTime</a> (const std::string &amp;)</td></tr>
+<tr class="memitem:a0954bb446c3ac71e5b9118baa4b2f07c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0954bb446c3ac71e5b9118baa4b2f07c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>decodeUTCTime</b> (const std::string &amp;)</td></tr>
 <tr class="separator:a0954bb446c3ac71e5b9118baa4b2f07c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed6dde4641eef89e570a04d59629e8ed"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aed6dde4641eef89e570a04d59629e8ed"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>decodeGPRMC</b> (const std::string &amp;line, <a class="el" href="class_g_p_s_data.html">GPSData</a> &amp;state)</td></tr>
+<tr class="separator:aed6dde4641eef89e570a04d59629e8ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee5dd837705d74e9d4323c1d46c37424"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aee5dd837705d74e9d4323c1d46c37424"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>decodeGPGGA</b> (const std::string &amp;line, <a class="el" href="class_g_p_s_data.html">GPSData</a> &amp;state)</td></tr>
+<tr class="separator:aee5dd837705d74e9d4323c1d46c37424"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f71126ad84d20b24e5833b7639468a9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7f71126ad84d20b24e5833b7639468a9"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><b>decodeLatitude</b> (const std::string &amp;val, const char hemi)</td></tr>
 <tr class="separator:a7f71126ad84d20b24e5833b7639468a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -117,79 +117,10 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>decodeLongitude</b>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Contains helper methods for interpreting messages received from devices following the NMEA <a class="el" href="class_g_p_s.html" title="Interface for GPS devices. ">GPS</a> standard. </p>
-</div><h2 class="groupheader">Function Documentation</h2>
-<a class="anchor" id="a096e29264500d232c08ef178da725c00"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool nmea::decodeGPGSA </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<dl class="section note"><dt>Note</dt><dd>Not implemented </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a4dbb03208a1ca71af2a72bb102b843c6"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool nmea::decodeGPGSV </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<dl class="section note"><dt>Note</dt><dd>Not implemented </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="aef5570865e90870c579e3f8ed615a1a7"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool nmea::decodeGPRMT </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<dl class="section note"><dt>Note</dt><dd>Not implemented </dd></dl>
-
-</div>
-</div>
-<a class="anchor" id="a0954bb446c3ac71e5b9118baa4b2f07c"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void nmea::decodeUTCTime </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<dl class="section note"><dt>Note</dt><dd>Not implemented </dd></dl>
-
-</div>
-</div>
-</div><!-- contents -->
+</div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 9 2014 19:28:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 10 2015 16:06:19 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

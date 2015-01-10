@@ -103,7 +103,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="class_point_cloud_adder.html">   12</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_point_cloud_adder.html">PointCloudAdder</a></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;{</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;  <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <a class="code" href="class_point_cloud_adder.html">PointCloudAdder</a>(<a class="code" href="class_event.html">Event&lt;PC&gt;</a>* event1, <a class="code" href="class_event.html">Event&lt;PC&gt;</a>* event2)</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <a class="code" href="class_point_cloud_adder.html">PointCloudAdder</a>(Event&lt;PC&gt;* event1, Event&lt;PC&gt;* event2)</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;        : _cloud1Received(<span class="keyword">false</span>),</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;          _cloud2Received(<span class="keyword">false</span>),</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;          LonNewSource1(<span class="keyword">this</span>),</div>
@@ -115,7 +115,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    LISTENER(<a class="code" href="class_point_cloud_adder.html">PointCloudAdder</a>, onNewSource1, PC);</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    LISTENER(<a class="code" href="class_point_cloud_adder.html">PointCloudAdder</a>, onNewSource2, PC);</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <a class="code" href="class_event.html">Event&lt;PC&gt;</a> onBothData;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    Event&lt;PC&gt; onBothData;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="class_point_cloud_adder.html">PointCloudAdder</a>() {}</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;  <span class="keyword">private</span>:</div>
@@ -155,12 +155,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;};</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="preprocessor">#endif // POINTCLOUDADDER_H</span></div>
-<div class="ttc" id="class_event_html"><div class="ttname"><a href="class_event.html">Event&lt; PC &gt;</a></div></div>
 <div class="ttc" id="class_point_cloud_adder_html"><div class="ttname"><a href="class_point_cloud_adder.html">PointCloudAdder</a></div><div class="ttdef"><b>Definition:</b> PointCloudAdder.hpp:12</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 10 2015 16:06:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

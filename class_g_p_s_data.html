@@ -104,15 +104,9 @@ Inheritance diagram for GPSData:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a368d4e8ab96a2c3245f67535d0f09efc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a368d4e8ab96a2c3245f67535d0f09efc"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>GPSData</b> (double latitude, double longitude)</td></tr>
-<tr class="separator:a368d4e8ab96a2c3245f67535d0f09efc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a849eddfe6f49a3eb1334d926f4513836"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a849eddfe6f49a3eb1334d926f4513836"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>GPSData</b> (double latitude, double longitude, double heading, double speed)</td></tr>
-<tr class="separator:a849eddfe6f49a3eb1334d926f4513836"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a736a316a25994bff12ef7249aac4b7bf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a736a316a25994bff12ef7249aac4b7bf"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>GPSData</b> (double latitude, double longitude, double heading, double speed, double time)</td></tr>
-<tr class="separator:a736a316a25994bff12ef7249aac4b7bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96a9e83a85d12a92d80f4c7a491736cd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a96a9e83a85d12a92d80f4c7a491736cd"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>GPSData</b> (double latitude=0, double longitude=0, double heading=0, double speed=0, double time=0, int numSats=0, GPS_QUALITY quality=GPS_QUALITY_INVALID, float hdop=0)</td></tr>
+<tr class="separator:a96a9e83a85d12a92d80f4c7a491736cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a470e8fa573f7e1fad4cd3d72ca453d3a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a470e8fa573f7e1fad4cd3d72ca453d3a"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><b>Lat</b> ()</td></tr>
 <tr class="separator:a470e8fa573f7e1fad4cd3d72ca453d3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -140,6 +134,12 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>SpeedVar</b> ()</td
 <tr class="memitem:a6c3c6bac9e44e43dd7bd18f64f886c75"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6c3c6bac9e44e43dd7bd18f64f886c75"></a>
 GPS_QUALITY&#160;</td><td class="memItemRight" valign="bottom"><b>Quality</b> ()</td></tr>
 <tr class="separator:a6c3c6bac9e44e43dd7bd18f64f886c75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cb3ca83aee6ba4f05ce1aa7699c2d03"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3cb3ca83aee6ba4f05ce1aa7699c2d03"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>NumSats</b> ()</td></tr>
+<tr class="separator:a3cb3ca83aee6ba4f05ce1aa7699c2d03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aacefdf13c5573070ee6cdc78a6d82296"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aacefdf13c5573070ee6cdc78a6d82296"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>HDOP</b> ()</td></tr>
+<tr class="separator:aacefdf13c5573070ee6cdc78a6d82296"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d2877697c9b2539c9c747b4388bf4af"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4d2877697c9b2539c9c747b4388bf4af"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>Lat</b> (double val)</td></tr>
 <tr class="separator:a4d2877697c9b2539c9c747b4388bf4af"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -152,9 +152,27 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>Heading</b> (double v
 <tr class="memitem:a8024f368a1f8126fcd9c946e40a75982"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8024f368a1f8126fcd9c946e40a75982"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>Speed</b> (double val)</td></tr>
 <tr class="separator:a8024f368a1f8126fcd9c946e40a75982"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a091c7cc8c00e2f1106d579418ccc177f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a091c7cc8c00e2f1106d579418ccc177f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>LatVar</b> (double val)</td></tr>
+<tr class="separator:a091c7cc8c00e2f1106d579418ccc177f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a76bf43193f3fee1f574f3013eed7acee"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a76bf43193f3fee1f574f3013eed7acee"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>LongVar</b> (double val)</td></tr>
+<tr class="separator:a76bf43193f3fee1f574f3013eed7acee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a681178459946f519d8cb352cc5a3affd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a681178459946f519d8cb352cc5a3affd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>HeadingVar</b> (double val)</td></tr>
+<tr class="separator:a681178459946f519d8cb352cc5a3affd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b70ea02d49ff1b25e6ecb7e6d560680"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7b70ea02d49ff1b25e6ecb7e6d560680"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>SpeedVar</b> (double val)</td></tr>
+<tr class="separator:a7b70ea02d49ff1b25e6ecb7e6d560680"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a945da0b7a30b21eaabbecf3e48fa927c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a945da0b7a30b21eaabbecf3e48fa927c"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>Quality</b> (GPS_QUALITY val)</td></tr>
 <tr class="separator:a945da0b7a30b21eaabbecf3e48fa927c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed766b278b022be2407efea34c36213b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aed766b278b022be2407efea34c36213b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>NumSats</b> (int val)</td></tr>
+<tr class="separator:aed766b278b022be2407efea34c36213b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afef46c512d1910318a80b4f897f55499"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afef46c512d1910318a80b4f897f55499"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>HDOP</b> (float val)</td></tr>
+<tr class="separator:afef46c512d1910318a80b4f897f55499"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9ab4ac7d6fbbab5a8e2e7d0047dbd6b9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9ab4ac7d6fbbab5a8e2e7d0047dbd6b9"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator==</b> (<a class="el" href="class_g_p_s_data.html">GPSData</a> other)</td></tr>
 <tr class="separator:a9ab4ac7d6fbbab5a8e2e7d0047dbd6b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -171,6 +189,9 @@ Friends</h2></td></tr>
 <tr class="memitem:a41aeb18b18c3093b40993e54e1144fc6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a41aeb18b18c3093b40993e54e1144fc6"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (std::ostream &amp;stream, <a class="el" href="class_g_p_s_data.html">GPSData</a> &amp;data)</td></tr>
 <tr class="separator:a41aeb18b18c3093b40993e54e1144fc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10d24c4600761d4f68c8dbe1ebf15757"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a10d24c4600761d4f68c8dbe1ebf15757"></a>
+QTextStream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (QTextStream &amp;stream, <a class="el" href="class_g_p_s_data.html">GPSData</a> &amp;data)</td></tr>
+<tr class="separator:a10d24c4600761d4f68c8dbe1ebf15757"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/common/datastructures/<a class="el" href="_g_p_s_data_8hpp_source.html">GPSData.hpp</a></li>
@@ -178,7 +199,7 @@ std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operato
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 9 2014 19:28:02 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 10 2015 16:06:12 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

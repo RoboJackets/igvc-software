@@ -103,7 +103,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="class_lidar_based_obstacle_hider.html">   12</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_lidar_based_obstacle_hider.html">LidarBasedObstacleHider</a></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;{</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <a class="code" href="class_lidar_based_obstacle_hider.html">LidarBasedObstacleHider</a>(<a class="code" href="class_lidar.html">Lidar</a>* lidar, <a class="code" href="class_event.html">Event&lt;Mat&gt;</a>* source)</div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <a class="code" href="class_lidar_based_obstacle_hider.html">LidarBasedObstacleHider</a>(<a class="code" href="class_lidar.html">Lidar</a>* lidar, Event&lt;Mat&gt;* source)</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;       : LOnNewLidar(<span class="keyword">this</span>),</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;         LOnNewFrame(<span class="keyword">this</span>)</div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    {</div>
@@ -116,7 +116,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;            lidar-&gt;onNewData += &amp;LOnNewLidar;</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;        (*source) += &amp;LOnNewFrame;</div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    }</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <a class="code" href="class_event.html">Event&lt;Mat&gt;</a> OnNewProcessedFrame;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    Event&lt;Mat&gt; OnNewProcessedFrame;</div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keyword">private</span>:</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keywordtype">void</span> OnNewLidar(<a class="code" href="struct_lidar_state.html">LidarState</a> data)</div>
@@ -159,19 +159,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;};</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="preprocessor">#endif // LIDARBASEDOBSTACLEHIDER_HPP_INCLUDED</span></div>
-<div class="ttc" id="struct_lidar_state_html"><div class="ttname"><a href="struct_lidar_state.html">LidarState</a></div><div class="ttdoc">A struct that represents a data packet from the Lidar device. </div><div class="ttdef"><b>Definition:</b> Lidar.h:44</div></div>
-<div class="ttc" id="class_event_html"><div class="ttname"><a href="class_event.html">Event&lt; Mat &gt;</a></div></div>
-<div class="ttc" id="class_lidar_point_html_a7ea82c0472265119390609570d4db876"><div class="ttname"><a href="class_lidar_point.html#a7ea82c0472265119390609570d4db876">LidarPoint::valid</a></div><div class="ttdeci">bool valid</div><div class="ttdoc">If false, the other members are not meaningful. </div><div class="ttdef"><b>Definition:</b> Lidar.h:26</div></div>
-<div class="ttc" id="class_lidar_point_html"><div class="ttname"><a href="class_lidar_point.html">LidarPoint</a></div><div class="ttdef"><b>Definition:</b> Lidar.h:13</div></div>
+<div class="ttc" id="struct_lidar_state_html"><div class="ttname"><a href="struct_lidar_state.html">LidarState</a></div><div class="ttdoc">A struct that represents a data packet from the Lidar device. </div><div class="ttdef"><b>Definition:</b> Lidar.h:46</div></div>
+<div class="ttc" id="class_lidar_point_html_a7ea82c0472265119390609570d4db876"><div class="ttname"><a href="class_lidar_point.html#a7ea82c0472265119390609570d4db876">LidarPoint::valid</a></div><div class="ttdeci">bool valid</div><div class="ttdoc">If false, the other members are not meaningful. </div><div class="ttdef"><b>Definition:</b> Lidar.h:28</div></div>
+<div class="ttc" id="class_lidar_point_html"><div class="ttname"><a href="class_lidar_point.html">LidarPoint</a></div><div class="ttdef"><b>Definition:</b> Lidar.h:15</div></div>
 <div class="ttc" id="_lidar_8h_html"><div class="ttname"><a href="_lidar_8h.html">Lidar.h</a></div></div>
 <div class="ttc" id="class_lidar_based_obstacle_hider_html"><div class="ttname"><a href="class_lidar_based_obstacle_hider.html">LidarBasedObstacleHider</a></div><div class="ttdef"><b>Definition:</b> LidarBasedObstacleHider.hpp:12</div></div>
-<div class="ttc" id="class_lidar_point_html_ad1306b35fee773ab78e4462c7035830c"><div class="ttname"><a href="class_lidar_point.html#ad1306b35fee773ab78e4462c7035830c">LidarPoint::distance</a></div><div class="ttdeci">float distance</div><div class="ttdoc">Distance in meters. </div><div class="ttdef"><b>Definition:</b> Lidar.h:35</div></div>
-<div class="ttc" id="class_lidar_html"><div class="ttname"><a href="class_lidar.html">Lidar</a></div><div class="ttdoc">Interface for Lidars. </div><div class="ttdef"><b>Definition:</b> Lidar.h:54</div></div>
-<div class="ttc" id="class_lidar_point_html_abe16a5fcef0d34edc8152ceb6ad5154d"><div class="ttname"><a href="class_lidar_point.html#abe16a5fcef0d34edc8152ceb6ad5154d">LidarPoint::angle</a></div><div class="ttdeci">float angle</div><div class="ttdoc">Angle in radians counterclockwise from right, with the LEDs pointing forward. </div><div class="ttdef"><b>Definition:</b> Lidar.h:29</div></div>
+<div class="ttc" id="class_lidar_point_html_ad1306b35fee773ab78e4462c7035830c"><div class="ttname"><a href="class_lidar_point.html#ad1306b35fee773ab78e4462c7035830c">LidarPoint::distance</a></div><div class="ttdeci">float distance</div><div class="ttdoc">Distance in meters. </div><div class="ttdef"><b>Definition:</b> Lidar.h:37</div></div>
+<div class="ttc" id="class_lidar_html"><div class="ttname"><a href="class_lidar.html">Lidar</a></div><div class="ttdoc">Interface for Lidars. </div><div class="ttdef"><b>Definition:</b> Lidar.h:56</div></div>
+<div class="ttc" id="class_lidar_point_html_abe16a5fcef0d34edc8152ceb6ad5154d"><div class="ttname"><a href="class_lidar_point.html#abe16a5fcef0d34edc8152ceb6ad5154d">LidarPoint::angle</a></div><div class="ttdeci">float angle</div><div class="ttdoc">Angle in radians counterclockwise from right, with the LEDs pointing forward. </div><div class="ttdef"><b>Definition:</b> Lidar.h:31</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 10 2015 16:06:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

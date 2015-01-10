@@ -131,8 +131,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="comment">//Private functions being tested</span></div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <span class="keywordtype">double</span> <a class="code" href="class_robot_position.html#a9fc327a0e3b207cba1f3bb530c032334">avgSpeed</a>(<span class="keywordtype">double</span> end, <span class="keywordtype">double</span> start);</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="keywordtype">double</span> avgHeading(<span class="keywordtype">double</span> end, <span class="keywordtype">double</span> start);</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keywordtype">double</span> linInterp(<span class="keywordtype">double</span> time, <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; attr);</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordtype">double</span> rateOfChange(<span class="keywordtype">int</span> ind, <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; attr);</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keywordtype">double</span> linInterp(<span class="keywordtype">double</span> time, DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; attr);</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordtype">double</span> rateOfChange(<span class="keywordtype">int</span> ind, DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; attr);</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="keywordtype">double</span> latAtTime(<span class="keywordtype">double</span> time);</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keywordtype">double</span> longAtTime(<span class="keywordtype">double</span> time);</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keywordtype">double</span> speedAtTime(<span class="keywordtype">double</span> time);</div>
@@ -150,21 +150,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        GPSData VisOdom2GPS(VisOdomData in);</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keywordtype">void</span> print(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; Lat(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; Long(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; Heading(<span class="keywordtype">void</span>);</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; Speed(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; Lat(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; Long(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; Heading(<span class="keywordtype">void</span>);</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt;&amp; Speed(<span class="keywordtype">void</span>);</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keywordtype">bool</span> try_lock();</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <span class="keywordtype">void</span> lock();</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        <span class="keywordtype">void</span> unlock();</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt; _Lat;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt;  _Long;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt; _Speed;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt; _Heading;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt; _Roll;</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt; _Pitch;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        <a class="code" href="class_data_array.html">DataArray</a>&lt;<a class="code" href="class_data_point.html">DataPoint</a> &lt;<span class="keywordtype">double</span>&gt; &gt; _Yaw;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt; _Lat;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt;  _Long;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt; _Speed;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt; _Heading;</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt; _Roll;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt; _Pitch;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        DataArray&lt;DataPoint &lt;<span class="keywordtype">double</span>&gt; &gt; _Yaw;</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    private:</div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        IGVC::Sensors::<a class="code" href="class_g_p_s.html">GPS</a>* _GPS;</div>
@@ -181,21 +181,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="class_g_p_s_html"><div class="ttname"><a href="class_g_p_s.html">GPS</a></div><div class="ttdoc">Interface for GPS devices. </div><div class="ttdef"><b>Definition:</b> GPS.hpp:17</div></div>
 <div class="ttc" id="class_robot_position_html_aee95f1a0705c4ee2edbdae3db89b5428"><div class="ttname"><a href="class_robot_position.html#aee95f1a0705c4ee2edbdae3db89b5428">RobotPosition::update</a></div><div class="ttdeci">int update(GPSData)</div><div class="ttdef"><b>Definition:</b> RobotPosition.cpp:163</div></div>
 <div class="ttc" id="class_i_m_u_html"><div class="ttname"><a href="class_i_m_u.html">IMU</a></div><div class="ttdoc">Interface for IMU devices. </div><div class="ttdef"><b>Definition:</b> IMU.h:11</div></div>
-<div class="ttc" id="class_data_array_html"><div class="ttname"><a href="class_data_array.html">DataArray</a></div><div class="ttdef"><b>Definition:</b> DataArray.hpp:6</div></div>
 <div class="ttc" id="class_grass_odometer_html"><div class="ttname"><a href="class_grass_odometer.html">GrassOdometer</a></div><div class="ttdef"><b>Definition:</b> GrassOdometer.h:23</div></div>
-<div class="ttc" id="class_data_point_html"><div class="ttname"><a href="class_data_point.html">DataPoint</a></div><div class="ttdef"><b>Definition:</b> DataPoint.hpp:5</div></div>
 <div class="ttc" id="class_robot_position_html"><div class="ttname"><a href="class_robot_position.html">RobotPosition</a></div><div class="ttdoc">Represents the position of the robot. </div><div class="ttdef"><b>Definition:</b> robotposition.hpp:9</div></div>
 <div class="ttc" id="class_robot_position_html_a4b2fdd4e27ce42189ebecfd1f5e3d386"><div class="ttname"><a href="class_robot_position.html#a4b2fdd4e27ce42189ebecfd1f5e3d386">RobotPosition::angVel</a></div><div class="ttdeci">double angVel(int Index)</div><div class="ttdef"><b>Definition:</b> RobotPosition.cpp:104</div></div>
 <div class="ttc" id="class_robot_position_html_a36850b11b16e97dd16c8e05194d03f07"><div class="ttname"><a href="class_robot_position.html#a36850b11b16e97dd16c8e05194d03f07">RobotPosition::push</a></div><div class="ttdeci">void push(GPSData newData)</div><div class="ttdef"><b>Definition:</b> RobotPosition.cpp:53</div></div>
 <div class="ttc" id="class_i_m_u_data_html"><div class="ttname"><a href="class_i_m_u_data.html">IMUData</a></div><div class="ttdef"><b>Definition:</b> IMUData.hpp:6</div></div>
-<div class="ttc" id="class_g_p_s_data_html"><div class="ttname"><a href="class_g_p_s_data.html">GPSData</a></div><div class="ttdef"><b>Definition:</b> GPSData.hpp:18</div></div>
+<div class="ttc" id="class_g_p_s_data_html"><div class="ttname"><a href="class_g_p_s_data.html">GPSData</a></div><div class="ttdef"><b>Definition:</b> GPSData.hpp:23</div></div>
 <div class="ttc" id="class_robot_position_html_a9fc327a0e3b207cba1f3bb530c032334"><div class="ttname"><a href="class_robot_position.html#a9fc327a0e3b207cba1f3bb530c032334">RobotPosition::avgSpeed</a></div><div class="ttdeci">double avgSpeed(double end, double start)</div><div class="ttdef"><b>Definition:</b> RobotPosition.cpp:143</div></div>
 <div class="ttc" id="class_vis_odom_data_html"><div class="ttname"><a href="class_vis_odom_data.html">VisOdomData</a></div><div class="ttdef"><b>Definition:</b> VisOdomData.hpp:8</div></div>
 <div class="ttc" id="class_robot_position_html_ac91015f6b011e8facec0cf4b7e5b1129"><div class="ttname"><a href="class_robot_position.html#ac91015f6b011e8facec0cf4b7e5b1129">RobotPosition::accel</a></div><div class="ttdeci">double accel(int Index)</div><div class="ttdef"><b>Definition:</b> RobotPosition.cpp:86</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 10 2015 16:06:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

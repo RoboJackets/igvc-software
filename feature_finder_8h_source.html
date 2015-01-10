@@ -110,7 +110,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    <span class="keyword">private</span>:</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;        <span class="keywordtype">void</span> setDefaultBMState(Ptr&lt;CvStereoBMState&gt;&amp;);</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;        <span class="comment">//Event&lt;StereoPair&gt; onNewFrame;</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;        <a class="code" href="class_event.html">Event&lt;Mat&gt;</a> onNewDepthMap;</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;        Event&lt;Mat&gt; onNewDepthMap;</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;        cv::StereoBM _stereo;</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        Mat _disparityMap;</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;        boost::mutex _useLock;</div>
@@ -118,13 +118,12 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#endif // FEATUREFINDER_H</span></div>
 <div class="ttc" id="class_stereo_source_html"><div class="ttname"><a href="class_stereo_source.html">StereoSource</a></div><div class="ttdef"><b>Definition:</b> StereoSource.hpp:9</div></div>
-<div class="ttc" id="class_event_html"><div class="ttname"><a href="class_event.html">Event&lt; Mat &gt;</a></div></div>
 <div class="ttc" id="class_stereo_pair_html"><div class="ttname"><a href="class_stereo_pair.html">StereoPair</a></div><div class="ttdef"><b>Definition:</b> StereoPair.hpp:8</div></div>
 <div class="ttc" id="classfeature_finder_html"><div class="ttname"><a href="classfeature_finder.html">featureFinder</a></div><div class="ttdef"><b>Definition:</b> featureFinder.h:11</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 10 2015 16:06:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

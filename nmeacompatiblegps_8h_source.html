@@ -123,24 +123,22 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="keywordtype">size_t</span> maxBufferLength; <span class="comment">// maximum number of states to be stored in the buffer</span></div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        std::list&lt;GPSData&gt; stateQueue; <span class="comment">// buffer of the latest maxBufferLength states. This is a std::list instead of a std::queue because of the need to iterate to retrieve a state at a given timestamp</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordtype">bool</span> parseLine(std::string line, <a class="code" href="class_g_p_s_data.html">GPSData</a> &amp;state); <span class="comment">// parses a line from the GPS device</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;};</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* HEMISPHEREA100GPS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;};</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* HEMISPHEREA100GPS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="class_serial_port_html"><div class="ttname"><a href="class_serial_port.html">SerialPort</a></div><div class="ttdoc">Helper class to simplify interfacing with serial port hardware. </div><div class="ttdef"><b>Definition:</b> SerialPort.h:18</div></div>
 <div class="ttc" id="class_g_p_s_html"><div class="ttname"><a href="class_g_p_s.html">GPS</a></div><div class="ttdoc">Interface for GPS devices. </div><div class="ttdef"><b>Definition:</b> GPS.hpp:17</div></div>
-<div class="ttc" id="class_n_m_e_a_compatible_g_p_s_html_af31801d480f0ac523240630659f1279b"><div class="ttname"><a href="class_n_m_e_a_compatible_g_p_s.html#af31801d480f0ac523240630659f1279b">NMEACompatibleGPS::GetState</a></div><div class="ttdeci">GPSData GetState()</div><div class="ttdoc">Returns the most recent state acquired from the GPS device. </div><div class="ttdef"><b>Definition:</b> nmeacompatiblegps.cpp:53</div></div>
-<div class="ttc" id="class_g_p_s_data_html"><div class="ttname"><a href="class_g_p_s_data.html">GPSData</a></div><div class="ttdef"><b>Definition:</b> GPSData.hpp:18</div></div>
+<div class="ttc" id="class_n_m_e_a_compatible_g_p_s_html_af31801d480f0ac523240630659f1279b"><div class="ttname"><a href="class_n_m_e_a_compatible_g_p_s.html#af31801d480f0ac523240630659f1279b">NMEACompatibleGPS::GetState</a></div><div class="ttdeci">GPSData GetState()</div><div class="ttdoc">Returns the most recent state acquired from the GPS device. </div><div class="ttdef"><b>Definition:</b> nmeacompatiblegps.cpp:48</div></div>
+<div class="ttc" id="class_g_p_s_data_html"><div class="ttname"><a href="class_g_p_s_data.html">GPSData</a></div><div class="ttdef"><b>Definition:</b> GPSData.hpp:23</div></div>
 <div class="ttc" id="class_n_m_e_a_compatible_g_p_s_html"><div class="ttname"><a href="class_n_m_e_a_compatible_g_p_s.html">NMEACompatibleGPS</a></div><div class="ttdoc">For connecting to the Hemisphere A100 GPS device. </div><div class="ttdef"><b>Definition:</b> nmeacompatiblegps.h:20</div></div>
 <div class="ttc" id="_g_p_s_8hpp_html"><div class="ttname"><a href="_g_p_s_8hpp.html">GPS.hpp</a></div></div>
-<div class="ttc" id="class_n_m_e_a_compatible_g_p_s_html_a42329d45ab2f63765bbad74a281add22"><div class="ttname"><a href="class_n_m_e_a_compatible_g_p_s.html#a42329d45ab2f63765bbad74a281add22">NMEACompatibleGPS::StateIsAvailable</a></div><div class="ttdeci">bool StateIsAvailable()</div><div class="ttdoc">Return true if there is at least one state in the buffer. </div><div class="ttdef"><b>Definition:</b> nmeacompatiblegps.cpp:60</div></div>
-<div class="ttc" id="class_n_m_e_a_compatible_g_p_s_html_a094b92c2e19128ee65e50f457270900b"><div class="ttname"><a href="class_n_m_e_a_compatible_g_p_s.html#a094b92c2e19128ee65e50f457270900b">NMEACompatibleGPS::isWorking</a></div><div class="ttdeci">bool isWorking()</div><div class="ttdoc">Gives the status of this module. </div><div class="ttdef"><b>Definition:</b> nmeacompatiblegps.cpp:64</div></div>
+<div class="ttc" id="class_n_m_e_a_compatible_g_p_s_html_a42329d45ab2f63765bbad74a281add22"><div class="ttname"><a href="class_n_m_e_a_compatible_g_p_s.html#a42329d45ab2f63765bbad74a281add22">NMEACompatibleGPS::StateIsAvailable</a></div><div class="ttdeci">bool StateIsAvailable()</div><div class="ttdoc">Return true if there is at least one state in the buffer. </div><div class="ttdef"><b>Definition:</b> nmeacompatiblegps.cpp:55</div></div>
+<div class="ttc" id="class_n_m_e_a_compatible_g_p_s_html_a094b92c2e19128ee65e50f457270900b"><div class="ttname"><a href="class_n_m_e_a_compatible_g_p_s.html#a094b92c2e19128ee65e50f457270900b">NMEACompatibleGPS::isWorking</a></div><div class="ttdeci">bool isWorking()</div><div class="ttdoc">Gives the status of this module. </div><div class="ttdef"><b>Definition:</b> nmeacompatiblegps.cpp:59</div></div>
 <div class="ttc" id="_serial_port_8h_html"><div class="ttname"><a href="_serial_port_8h.html">SerialPort.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 10 2015 16:06:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

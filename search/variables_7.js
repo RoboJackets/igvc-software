@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['valid',['valid',['../class_lidar_point.html#a7ea82c0472265119390609570d4db876',1,'LidarPoint']]]
+  ['x',['X',['../class_robot_position.html#a7913ba1a375ce3a47caa1241a9517740',1,'RobotPosition']]]
 ];

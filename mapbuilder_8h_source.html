@@ -95,14 +95,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="_lidar_8h.html">hardware/sensors/lidar/Lidar.h</a>&quot;</span></div>
 <div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;pcl/point_types.h&gt;</span></div>
 <div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;pcl/io/file_io.h&gt;</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;intelligence/posetracking/basicpositiontracker.h&gt;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;intelligence/posetracking/positiontracker.hpp&gt;</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;common/module.hpp&gt;</span></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
 <div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="class_map_builder.html">   14</a></span>&#160;<span class="keyword">class </span><a class="code" href="class_map_builder.html">MapBuilder</a> : <span class="keyword">public</span> <a class="code" href="class_module.html">Module</a></div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;{</div>
 <div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    Q_OBJECT</div>
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <a class="code" href="class_map_builder.html">MapBuilder</a>(std::shared_ptr&lt;Lidar&gt; lidar, std::shared_ptr&lt;BasicPositionTracker&gt; poseTracker);</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    <a class="code" href="class_map_builder.html">MapBuilder</a>(std::shared_ptr&lt;Lidar&gt; lidar, std::shared_ptr&lt;PositionTracker&gt; poseTracker);</div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    ~<a class="code" href="class_map_builder.html">MapBuilder</a>();</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    pcl::PointCloud&lt;pcl::PointXYZ&gt;::Ptr getCloud();</div>
 <div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="comment">//void saveCloud(std::string path);</span></div>
@@ -128,11 +128,11 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    std::shared_ptr&lt;Lidar&gt; _lidar;</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    pcl::PointCloud&lt;pcl::PointXYZ&gt;::Ptr cloud;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    std::shared_ptr&lt;BasicPositionTracker&gt; poseTracker;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    std::shared_ptr&lt;PositionTracker&gt; poseTracker;</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;};</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="preprocessor">#endif // MAPPING_H</span></div>
-<div class="ttc" id="struct_lidar_state_html"><div class="ttname"><a href="struct_lidar_state.html">LidarState</a></div><div class="ttdoc">A struct that represents a data packet from the Lidar device. </div><div class="ttdef"><b>Definition:</b> Lidar.h:44</div></div>
+<div class="ttc" id="struct_lidar_state_html"><div class="ttname"><a href="struct_lidar_state.html">LidarState</a></div><div class="ttdoc">A struct that represents a data packet from the Lidar device. </div><div class="ttdef"><b>Definition:</b> Lidar.h:46</div></div>
 <div class="ttc" id="_lidar_8h_html"><div class="ttname"><a href="_lidar_8h.html">Lidar.h</a></div></div>
 <div class="ttc" id="class_robot_position_html"><div class="ttname"><a href="class_robot_position.html">RobotPosition</a></div><div class="ttdoc">Represents the position of the robot. </div><div class="ttdef"><b>Definition:</b> robotposition.hpp:9</div></div>
 <div class="ttc" id="class_map_builder_html_aef8a58e6eb6417eab6590a69a0c15722"><div class="ttname"><a href="class_map_builder.html#aef8a58e6eb6417eab6590a69a0c15722">MapBuilder::isWorking</a></div><div class="ttdeci">bool isWorking()</div><div class="ttdoc">Gives the status of this module. </div><div class="ttdef"><b>Definition:</b> mapbuilder.cpp:40</div></div>
@@ -141,7 +141,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Nov 9 2014 19:27:59 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Jan 10 2015 16:06:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
