@@ -89,9 +89,9 @@ void CameraAdapter::paintEvent(QPaintEvent *e)
     ui->leftFeedLabel->setPixmap(QPixmap::fromImage(leftImage));
     ui->rightFeedLabel->setPixmap(QPixmap::fromImage(rightImage));
     QString str;
-    str.sprintf("FPS %f", fpsRight);
+    str.sprintf("FPS %03d", (int)fpsRight);
     ui->rightFpsLabel->setText(str);
-    str.sprintf("FPS %f", fpsLeft);
+    str.sprintf("FPS %03d", (int)fpsLeft);
     ui->leftFpsLabel->setText(str);
 
     _mutex.unlock();
