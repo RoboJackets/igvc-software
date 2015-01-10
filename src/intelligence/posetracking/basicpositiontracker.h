@@ -5,6 +5,7 @@
 #include <hardware/sensors/IMU/IMU.h>
 #include <common/datastructures/robotposition.hpp>
 #include <common/module.hpp>
+#include <memory>
 
 /**
  * @brief Tracks the robots position relative to it's starting location in meters.

@@ -1,19 +1,25 @@
 #ifndef SENSORDATA_H
 #define SENSORDATA_H
 
-#include <common/utils/timing.h>
 #include <boost/cstdint.hpp>
+#include <chrono>
+
 class SensorData
 {
     private:
         long long int MicroSeconds;
         static const int U_SEC_PER_SEC = 1000000;
+        unsigned long long int microseconds_since_IGVCpoch() {
+            return std::chrono::high_resolution_clock::now().time_since_epoch() /
+            std::chrono::microseconds(1);
+        }
+
     public:
-        SensorData() : MicroSeconds(micro_seconds_since_IGVCpoch()) { }
+        SensorData() : MicroSeconds(microseconds_since_IGVCpoch()) { }
         SensorData(double time_s) : MicroSeconds(time_s * U_SEC_PER_SEC) { }
         SensorData(long long time_us) : MicroSeconds(time_us) { }
         void setTime() {
-            MicroSeconds = micro_seconds_since_IGVCpoch();
+            MicroSeconds = microseconds_since_IGVCpoch();
         }
         void setTimeSeconds(double time_s) {
             MicroSeconds = (long long int) (time_s * U_SEC_PER_SEC);

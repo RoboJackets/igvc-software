@@ -125,7 +125,7 @@ void PositionTracker::OnGPSData(GPSData data)
 void PositionTracker::OnIMUData(IMUData data)
 {
     if(prevIMUTime == 0)
-        prevIMUTime = data.getTimeMicroSeconds();
+        prevIMUTime = data.getTimeSeconds();
     else
         _current_estimate = UpdateWithMeasurement(_current_estimate, MeasurementFromIMUData(data));
 }
