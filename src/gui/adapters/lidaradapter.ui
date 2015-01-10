@@ -95,6 +95,22 @@
      </property>
     </spacer>
    </item>
+   <item alignment="Qt::AlignRight">
+    <widget class="QLabel" name="fpsLabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>FPS 000</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources/>
