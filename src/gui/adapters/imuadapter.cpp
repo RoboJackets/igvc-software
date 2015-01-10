@@ -79,6 +79,6 @@ void IMUAdapter::paintEvent(QPaintEvent *)
         ui->labelZ->setText(tr("Z: %1").arg(recent.Z));
     }
     QString str;
-    str.sprintf("FPS %f", fps);
+    str.sprintf("FPS %03d", (int)fps);
     ui->fpsLabel->setText(str);
 }
