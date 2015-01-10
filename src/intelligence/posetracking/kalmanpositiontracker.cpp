@@ -47,7 +47,7 @@ void KalmanPositionTracker::onGPSData(GPSData data) {
     int numOriginPointsNeeded = ConfigManager::Instance().getValue("KalmanPositionTracker", "OriginPointsNeeded", 300);
     if(_numOriginPointsRecorded < numOriginPointsNeeded) {
         // Find our starting origin by averaging the first n points.
-        // NOTE: this assumes the robot is still during this process
+        // This assumes the robot is still during this process
         _origin.Lat(_origin.Lat() + data.Lat());
         _origin.Long(_origin.Long() + data.Long());
         _numOriginPointsRecorded++;
