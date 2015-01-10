@@ -92,7 +92,7 @@ void LidarAdapter::paintEvent(QPaintEvent *)
         }
     }
     QString str;
-    str.sprintf("FPS %f", fps);
+    str.sprintf("FPS %03d", (int)fps);
     ui->fpsLabel->setText(str);
 }
 
