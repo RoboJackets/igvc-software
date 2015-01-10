@@ -6,6 +6,7 @@
 #include <QPainter>
 #include <QLabel>
 #include <hardware/sensors/gps/GPS.hpp>
+#include <memory>
 
 
 namespace Ui {

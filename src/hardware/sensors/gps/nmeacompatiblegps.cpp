@@ -32,7 +32,6 @@ NMEACompatibleGPS::NMEACompatibleGPS(string devicePath, uint baudRate)
 
 void NMEACompatibleGPS::onNewSerialLine(string line) {
     GPSData state;
-    state.setTime();
     if(parseLine(line, state)) {
         boost::mutex::scoped_lock lock(queueLocker);
         stateQueue.push_back(state);

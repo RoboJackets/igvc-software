@@ -1,6 +1,7 @@
 #include "imuadapter.h"
 #include "ui_imuadapter.h"
 #include <QPainter>
+#include <iostream>
 
 IMUAdapter::IMUAdapter(std::shared_ptr<IMU> imu, QWidget *parent) :
     QWidget(parent),
@@ -26,6 +27,7 @@ void IMUAdapter::onNewData(IMUData data)
     _data.push_back(data);
     if(_data.size() > 10)
         _data.erase(_data.begin());
+    std::cout << "IMU Timestamp: " << data.getTimeMicroSeconds() << std::endl;
     update();
 }
 
