@@ -17,8 +17,10 @@ CameraAdapter::CameraAdapter(QWidget *parent) :
 
     connect(ui->saveLeft,SIGNAL(released()),SLOT(on_saveLeft_clicked()));
 
-    prevTime = 0;
-    fps = 0;
+    prevTimeRight = 0;
+    prevTimeLeft = 0;
+    fpsRight = 0;
+    fpsLeft = 0;
 }
 
 CameraAdapter::~CameraAdapter()
@@ -34,6 +36,8 @@ void CameraAdapter::newLeftCamImg(ImageData data)
         leftData = data;
         leftImage = CVMat2QImage(data.mat());
         _mutex.unlock();
+        fpsLeft = 1.0/(data.time() - prevTimeLeft);
+        prevTimeLeft = data.time();
         update();
     }
 }
@@ -46,8 +50,8 @@ void CameraAdapter::newRightCamImg(ImageData data)
         rightData = data;
         rightImage = CVMat2QImage(data.mat());
         _mutex.unlock();
-        fps = 1.0/(data.time() - prevTime);
-        prevTime = data.time();
+        fpsRight = 1.0/(data.time() - prevTimeRight);
+        prevTimeRight = data.time();
         update();
     }
 }
@@ -85,8 +89,10 @@ void CameraAdapter::paintEvent(QPaintEvent *e)
     ui->leftFeedLabel->setPixmap(QPixmap::fromImage(leftImage));
     ui->rightFeedLabel->setPixmap(QPixmap::fromImage(rightImage));
     QString str;
-    str.sprintf("FPS %f", fps);
-    ui->fpsLabel->setText(str);
+    str.sprintf("FPS %f", fpsRight);
+    ui->rightFpsLabel->setText(str);
+    str.sprintf("FPS %f", fpsLeft);
+    ui->leftFpsLabel->setText(str);
 
     _mutex.unlock();
     QWidget::paintEvent(e);
