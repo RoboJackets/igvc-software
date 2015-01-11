@@ -5,6 +5,7 @@
 #include <ostream>
 #include <common/utils/gaussianvariable.hpp>
 #include <QTextStream>
+#include <iomanip>
 
 /*
  * An enumeration of GPS quality states.

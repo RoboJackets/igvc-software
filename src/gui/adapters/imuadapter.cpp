@@ -29,8 +29,8 @@ void IMUAdapter::onNewData(IMUData data)
     _data.push_back(data);
     if(_data.size() > 10)
         _data.erase(_data.begin());
-    fps = 1.0/(data.time() - prevTime);
-    prevTime = data.time();
+    fps = 1.0/(data.getTimeSeconds() - prevTime);
+    prevTime = data.getTimeSeconds();
     update();
 }
 

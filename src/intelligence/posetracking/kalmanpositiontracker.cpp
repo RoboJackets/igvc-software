@@ -1,5 +1,4 @@
 #include "kalmanpositiontracker.h"
-#include <common/utils/timing.h>
 #include <common/utils/GPSUtils.h>
 #include <common/config/configmanager.h>
 #include <common/logger/logger.h>
@@ -19,8 +18,9 @@ KalmanPositionTracker::~KalmanPositionTracker()
 }
 
 bool KalmanPositionTracker::isWorking() {
-
-    return (seconds_since_IGVCpoch() - _lastIMUTime) < 1.0 && (seconds_since_IGVCpoch() - _lastGPSTime) < 1.0;
+    using namespace std::chrono;
+    auto seconds_since_epoch = (system_clock::now().time_since_epoch() * system_clock::period::num / system_clock::period::den).count();
+    return (seconds_since_epoch - _lastIMUTime) < 1.0 && (seconds_since_epoch - _lastGPSTime) < 1.0;
 }
 
 void KalmanPositionTracker::Reset() {
@@ -29,7 +29,7 @@ void KalmanPositionTracker::Reset() {
 }
 
 void KalmanPositionTracker::onIMUData(IMUData data) {
-    _lastIMUTime = data.time();
+    _lastIMUTime = data.getTimeMicroSeconds();
     _currentInternalEstimate.Heading = data.Yaw;
     _currentInternalEstimate.Heading.Variance = 0.0;
     emitCurrentEstimate();
@@ -61,7 +61,7 @@ void KalmanPositionTracker::onGPSData(GPSData data) {
         return;
     }
     predict();
-    _lastGPSTime = data.time();
+    _lastGPSTime = data.getTimeMicroSeconds();
     _currentInternalEstimate.Latitude = ( _currentInternalEstimate.Latitude*data.LatVar() + data.Lat()*_currentInternalEstimate.Latitude.Variance ) / (_currentInternalEstimate.Latitude.Variance+data.LatVar());
     _currentInternalEstimate.Longitude = ( _currentInternalEstimate.Longitude*data.LongVar() + data.Long()*_currentInternalEstimate.Longitude.Variance ) / (_currentInternalEstimate.Longitude.Variance+data.LongVar());
     _currentInternalEstimate.Latitude.Variance = ( 1.0 / (1.0/_currentInternalEstimate.Latitude.Variance + 1.0 / data.LatVar()) );
@@ -79,9 +79,9 @@ void KalmanPositionTracker::predict() {
     for(unsigned int i = 1; i < _GPSDataBuffer.size(); i++) {
         GPSData &a = _GPSDataBuffer[i-1];
         GPSData &b = _GPSDataBuffer[i];
-        std::cout << b.time() << "\t" << a.time() << std::endl;
-        latVel += ( b.Lat() - a.Lat() ) / (b.time() - a.time());
-        lonVel += ( b.Long() - a.Long()) / (b.time() - a.time());
+        std::cout << b.getTimeMicroSeconds() << "\t" << a.getTimeMicroSeconds() << std::endl;
+        latVel += ( b.Lat() - a.Lat() ) / (b.getTimeSeconds() - a.getTimeSeconds());
+        lonVel += ( b.Long() - a.Long()) / (b.getTimeSeconds() - a.getTimeSeconds());
     }
 
 //    std::cout << latVel << "\t" << lonVel << std::endl;
@@ -89,7 +89,8 @@ void KalmanPositionTracker::predict() {
     latVel /= (double)_GPSDataBuffer.size();
     lonVel /= (double)_GPSDataBuffer.size();
 
-    double time = seconds_since_IGVCpoch();
+    //FIXME
+    double time = 0;//seconds_since_IGVCpoch();
     double deltaTime = time - _lastGPSTime;
 
     _currentInternalEstimate.Latitude = _currentInternalEstimate.Latitude + (latVel * deltaTime);
