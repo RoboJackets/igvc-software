@@ -4,6 +4,7 @@
 #include <hardware/sensors/gps/GPS.hpp>
 #include <hardware/sensors/IMU/IMU.h>
 #include "positiontracker.hpp"
+#include <memory>
 
 /**
  * @brief Tracks the robots position relative to it's starting location in meters.
