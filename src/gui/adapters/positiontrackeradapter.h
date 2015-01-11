@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <intelligence/posetracking/positiontracker.hpp>
 #include <vector>
+#include <memory>
 
 namespace Ui {
 class PositionTrackerAdapter;

@@ -6,6 +6,7 @@
 #include <common/datastructures/robotposition.hpp>
 #include <hardware/sensors/IMU/IMU.h>
 #include <hardware/sensors/gps/GPS.hpp>
+#include <memory>
 
 class KalmanPositionTracker : public PositionTracker
 {
@@ -43,8 +44,8 @@ private:
 
     RobotPosition _currentEstimate;
 
-    double _lastGPSTime;
-    double _lastIMUTime;
+    long long _lastGPSTime;
+    long long _lastIMUTime;
 
     std::array<GPSData, 5> _GPSDataBuffer;
 

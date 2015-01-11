@@ -36,8 +36,8 @@ void CameraAdapter::newLeftCamImg(ImageData data)
         leftData = data;
         leftImage = CVMat2QImage(data.mat());
         _mutex.unlock();
-        fpsLeft = 1.0/(data.time() - prevTimeLeft);
-        prevTimeLeft = data.time();
+        fpsLeft = 1.0/(data.getTimeSeconds() - prevTimeLeft);
+        prevTimeLeft = data.getTimeSeconds();
         update();
     }
 }
@@ -50,8 +50,8 @@ void CameraAdapter::newRightCamImg(ImageData data)
         rightData = data;
         rightImage = CVMat2QImage(data.mat());
         _mutex.unlock();
-        fpsRight = 1.0/(data.time() - prevTimeRight);
-        prevTimeRight = data.time();
+        fpsRight = 1.0/(data.getTimeSeconds() - prevTimeRight);
+        prevTimeRight = data.getTimeSeconds();
         update();
     }
 }
