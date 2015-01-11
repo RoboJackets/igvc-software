@@ -2,6 +2,7 @@
 #define GPSDATA_H
 
 #include "SensorData.hpp"
+#include <ostream>
 #include <common/utils/gaussianvariable.hpp>
 #include <QTextStream>
 

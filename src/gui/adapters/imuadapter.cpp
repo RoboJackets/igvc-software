@@ -1,6 +1,7 @@
 #include "imuadapter.h"
 #include "ui_imuadapter.h"
 #include <QPainter>
+#include <iostream>
 
 IMUAdapter::IMUAdapter(std::shared_ptr<IMU> imu, QWidget *parent) :
     QWidget(parent),
