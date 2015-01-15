@@ -16,12 +16,12 @@ class StereoImageData : public SensorData
 
     ImageData left()
     {
-      return ImageData(_leftImage, time());
+      return ImageData(_leftImage, getTimeMicroSeconds());
     }
 
     ImageData right()
     {
-      return ImageData(_leftImage, time());
+      return ImageData(_leftImage, getTimeMicroSeconds());
     }
 
     cv::Mat& leftMat()

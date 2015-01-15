@@ -38,6 +38,9 @@ private:
 
     std::shared_ptr<Lidar> _lidar;
     LidarState _data;
+
+    double prevTime;
+    double fps;
 };
 
 #endif // LIDARADAPTER_H

@@ -4,18 +4,16 @@
 
 #include <opencv2/opencv.hpp>
 #include <common/datastructures/SensorData.hpp>
-#include <common/events/Event.hpp>
+
 class ImageData : public SensorData
 {
   public:
-    ImageData() {}
+    ImageData(): SensorData() {}
     ImageData(cv::Mat image): SensorData(), _img(image) {}
-    ImageData(cv::Mat image, double time): SensorData(time),_img(image) {}
-    ImageData deepCopy() { return ImageData(_img.clone(),time()); }
+    ImageData(cv::Mat image, long long int time_us): SensorData(time_us), _img(image) {}
+    ImageData deepCopy() { return ImageData(_img.clone(), getTimeMicroSeconds()); }
     cv::Mat& mat() {return _img;}
     virtual ~ImageData() {}
-
-
 
   private:
     cv::Mat _img;

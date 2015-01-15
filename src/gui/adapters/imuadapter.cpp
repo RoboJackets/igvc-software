@@ -1,6 +1,7 @@
 #include "imuadapter.h"
 #include "ui_imuadapter.h"
 #include <QPainter>
+#include <iostream>
 
 IMUAdapter::IMUAdapter(std::shared_ptr<IMU> imu, QWidget *parent) :
     QWidget(parent),
@@ -13,6 +14,8 @@ IMUAdapter::IMUAdapter(std::shared_ptr<IMU> imu, QWidget *parent) :
         _imu = imu;
         connect(_imu.get(), SIGNAL(onNewData(IMUData)), this, SLOT(onNewData(IMUData)));
     }
+    prevTime = 0;
+    fps = 0;
 }
 
 IMUAdapter::~IMUAdapter()
@@ -26,6 +29,8 @@ void IMUAdapter::onNewData(IMUData data)
     _data.push_back(data);
     if(_data.size() > 10)
         _data.erase(_data.begin());
+    fps = 1.0/(data.getTimeSeconds() - prevTime);
+    prevTime = data.getTimeSeconds();
     update();
 }
 
@@ -74,4 +79,7 @@ void IMUAdapter::paintEvent(QPaintEvent *)
         ui->labelY->setText(tr("Y: %1").arg(recent.Y));
         ui->labelZ->setText(tr("Z: %1").arg(recent.Z));
     }
+    QString str;
+    str.sprintf("FPS %03d", (int)fps);
+    ui->fpsLabel->setText(str);
 }

@@ -18,6 +18,8 @@ LidarAdapter::LidarAdapter(std::shared_ptr<Lidar> lidar, QWidget *parent) :
     _lidar = lidar;
     if(_lidar.get() != nullptr)
         connect(_lidar.get(), SIGNAL(onNewData(LidarState)), this, SLOT(onLidarData(LidarState)));
+    prevTime = 0;
+    fps = 0;
 }
 
 LidarAdapter::~LidarAdapter()
@@ -89,11 +91,16 @@ void LidarAdapter::paintEvent(QPaintEvent *)
                        centerY - sin(point.angle) * mag * minDimension * .5);
         }
     }
+    QString str;
+    str.sprintf("FPS %03d", (int)fps);
+    ui->fpsLabel->setText(str);
 }
 
 void LidarAdapter::onLidarData(LidarState state)
 {
     _data = state;
+    fps = 1.0/(state.timestamp.tv_sec - prevTime);
+    prevTime = state.timestamp.tv_sec;
     update();
 }
 

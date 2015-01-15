@@ -40,6 +40,8 @@ private slots:
 
     void openHardwareView(QModelIndex index);
 
+    void openHardwareView(QString label);
+
     void on_joystickButton_toggled(bool checked);
 
     void on_playButton_clicked();
@@ -100,6 +102,8 @@ private:
     void setupMenus();
     MDIWindow* findWindowWithTitle(QString title);
     void updateHardwareStatusList();
+
+    void restartAdapter(QString title);
 };
 
 #endif // MAINWINDOW_H

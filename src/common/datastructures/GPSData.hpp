@@ -2,45 +2,39 @@
 #define GPSDATA_H
 
 #include "SensorData.hpp"
+#include <ostream>
 #include <common/utils/gaussianvariable.hpp>
+#include <QTextStream>
+#include <iomanip>
 
 /*
  * An enumeration of GPS quality states.
  */
 enum GPS_QUALITY {
-	GPS_QUALITY_NOFIX=0,
-	GPS_QUALITY_NON_DIFF=1,
-	GPS_QUALITY_WAAS=2,
-	GPS_QUALITY_ESTIMATED=6,
-	GPS_QUALITY_UNKNOWN=7
+    GPS_QUALITY_INVALID=0,
+    GPS_QUALITY_SPS=1,
+    GPS_QUALITY_DGPS=2,
+    GPS_QUALITY_PPS=3,
+    GPS_QUALITY_RTK=4,
+    GPS_QUALITY_Float_RTK=5,
+    GPS_QUALITY_Estimated=6,
+    GPS_QULAITY_Manual=7,
+    GPS_QUALITY_Simulation=8
 };
 
 class GPSData : public SensorData
 {
 public:
 
-    inline GPSData()
-        : SensorData()
-    {
-        _Lat = 0;
-        _Long = 0;
-        _Heading = 0;
-        _Speed = 0;
-    }
-
-    // for use with gpsfilereader only
-    inline GPSData(double latitude, double longitude): SensorData(), _Lat(latitude), _Long(longitude),
-      _Heading(), _Speed()
-    {
-    }
-
-    inline GPSData(double latitude, double longitude, double heading, double speed): SensorData(), _Lat(latitude), _Long(longitude),
-      _Heading(heading), _Speed(speed)
-    {
-    }
-
-    inline GPSData(double latitude, double longitude, double heading, double speed, double time): SensorData(time), _Lat(latitude),
-     _Long(longitude), _Heading(heading), _Speed(speed)
+    inline GPSData(double latitude=0, double longitude=0, double heading=0, double speed=0, double time=0, int numSats=0, GPS_QUALITY quality=GPS_QUALITY_INVALID, float hdop=0)
+        : SensorData(time),
+          _Lat(latitude),
+          _Long(longitude),
+          _Heading(heading),
+          _Speed(speed),
+          _quality(quality),
+          _NumSats(numSats),
+          _HDOP(hdop)
     {
     }
 
@@ -89,6 +83,16 @@ public:
         return _quality;
     }
 
+    inline int NumSats()
+    {
+        return _NumSats;
+    }
+
+    inline float HDOP()
+    {
+        return _HDOP;
+    }
+
     inline void Lat(double val)
     {
         _Lat = val;
@@ -109,7 +113,6 @@ public:
         _Speed = val;
     }
 
-    /*
     inline void  LatVar(double val)
     {
         _Lat.Variance = val;
@@ -129,10 +132,20 @@ public:
     {
         _Speed.Variance = val;
     }
-*/
+
     inline void Quality(GPS_QUALITY val)
     {
         _quality = val;
+    }
+
+    inline void NumSats(int val)
+    {
+        _NumSats = val;
+    }
+
+    inline void HDOP(float val)
+    {
+        _HDOP = val;
     }
 
     bool operator == (GPSData other)
@@ -145,7 +158,12 @@ public:
 
     friend std::ostream &operator<< (std::ostream &stream, GPSData &data)
     {
-        stream << "(" << data.Lat() << ", " << data.Long() << ")";
+        stream << std::setprecision(15) << data.Lat() << ',' << data.Long() << ',' << data.NumSats() << ',' << (int)data.Quality()  << ',' << data.HDOP();
+        return stream;
+    }
+
+    friend QTextStream &operator<< (QTextStream &stream, GPSData &data) {
+        stream << qSetRealNumberPrecision(15) << data.Lat() << ',' << data.Long() << ',' << data.NumSats() << ',' << (int)data.Quality()  << ',' << data.HDOP();
         return stream;
     }
 
@@ -155,6 +173,8 @@ public:
         GaussianVariable<double> _Heading;
         GaussianVariable<double> _Speed;
         GPS_QUALITY _quality;
+        int _NumSats;
+        float _HDOP; // http://en.wikipedia.org/wiki/Dilution_of_precision_(GPS)
 
 };
 

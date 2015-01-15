@@ -37,21 +37,6 @@ public:
 
 class GraphSearch
 {
-private:
-    template <class DataType>
-    static bool setContainsElement(set<DataType> &_set, DataType _element)
-    {
-        for(typename set<DataType>::iterator it = _set.begin(); it != _set.end(); it++)
-        {
-            DataType e = *it;
-            if(e == _element)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
 
 public:
     /** Runs Depth-First graph search on the given search problem */
@@ -72,7 +57,7 @@ public:
             Path<StateType, ActionType> path = frontier.top();
             frontier.pop();
 
-            if(!setContainsElement(expanded, path.getLastState()))
+            if( expanded.find(path.getLastState()) == expanded.end() )// expanded does not contain path's last state
             {
                 expanded.insert(path.getLastState());
 
@@ -119,7 +104,7 @@ public:
             Path<StateType, ActionType> path = frontier.front();
             frontier.pop();
 
-            if(!setContainsElement(expanded, path.getLastState()))
+            if( expanded.find(path.getLastState()) == expanded.end() ) // expanded does not contain path's last state
             {
 
                 expanded.insert(path.getLastState());
@@ -168,7 +153,7 @@ public:
             Path<StateType, ActionType> path = frontier.top();
             frontier.pop();
 
-            if(!setContainsElement(expanded, path.getLastState()))
+            if( expanded.find(path.getLastState()) == expanded.end() ) // expanded does not contain path's last state
             {
                 StateType last = path.getLastState();
                 expanded.insert(last);

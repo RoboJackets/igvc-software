@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <hardware/sensors/IMU/IMU.h>
 #include <vector>
+#include <memory>
 
 namespace Ui {
 class IMUAdapter;
@@ -34,6 +35,9 @@ private:
     std::vector<IMUData> _data;
 
     bool _lock;
+
+    double prevTime;
+    double fps;
 };
 
 #endif // IMUADAPTER_H
