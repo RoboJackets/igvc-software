@@ -3,45 +3,43 @@
 
 #include <hardware/sensors/gps/GPS.hpp>
 #include <hardware/sensors/IMU/IMU.h>
-#include <common/datastructures/robotposition.hpp>
-#include <common/module.hpp>
+#include "positiontracker.hpp"
+#include <memory>
 
 /**
  * @brief Tracks the robots position relative to it's starting location in meters.
  */
-class BasicPositionTracker : public Module
+class BasicPositionTracker : public PositionTracker
 {
     Q_OBJECT
 public:
-    BasicPositionTracker(std::shared_ptr<GPS> gps, std::shared_ptr<IMU> imu);
+    BasicPositionTracker(std::shared_ptr<GPS> gps = std::shared_ptr<GPS>(nullptr), std::shared_ptr<IMU> imu = std::shared_ptr<IMU>(nullptr));
 
     ~BasicPositionTracker();
 
-    RobotPosition GetPosition();
+    const RobotPosition &GetPosition();
 
     void Reset();
-
-    void ChangeGPS(std::shared_ptr<GPS> gps);
-    void ChangeIMU(std::shared_ptr<IMU> imu);
 
     RobotPosition WaypointToPosition(GPSData waypoint);
 
     bool isWorking();
+
+    const GPSData &GetOrigin() {
+        return origin;
+    }
 
 signals:
     void onNewPosition(RobotPosition);
     void onOriginPercentage(int);
 
 private slots:
-    void onNewGPS(GPSData data);
-    void onNewIMU(IMUData data);
+    void onGPSData(GPSData data);
+    void onIMUData(IMUData data);
 
 private:
     RobotPosition currentPosition;
     GPSData origin;
-
-    std::shared_ptr<GPS> _gps;
-    std::shared_ptr<IMU> _imu;
 
     int originPointsRecorded;
 };

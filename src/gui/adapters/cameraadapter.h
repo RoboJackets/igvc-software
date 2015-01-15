@@ -51,6 +51,11 @@ private:
     boost::mutex _mutex;
 
     QImage CVMat2QImage(cv::Mat img);
+
+    double prevTimeRight;
+    double prevTimeLeft;
+    double fpsRight;
+    double fpsLeft;
 };
 
 #endif // CAMERAADAPTER_H

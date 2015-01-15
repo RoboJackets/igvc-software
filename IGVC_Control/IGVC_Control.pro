@@ -46,7 +46,6 @@ SOURCES += \
     ../src/gui/adapters/imuadapter.cpp \
     ../src/hardware/sensors/lidar/lms200.cpp \
     ../src/intelligence/linedetection/linedetector.cpp \
-    ../src/intelligence/posetracking/positiontracker.cpp \
     ../src/common/utils/GPSWaypointSource.cpp \
     ../src/common/utils/gpsfilereader.cpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
@@ -63,19 +62,15 @@ SOURCES += \
     ../src/gui/adapters/competitioncontrolleradapter.cpp \
     ../src/intelligence/pathfollowing/pathfollower.cpp \
     ../src/intelligence/barrelfinder/barrelfinder.cpp \
-<<<<<<< HEAD
     ../src/gui/adapters/logvieweradapter.cpp \
-    ../src/common/logger/customhighlighter.cpp
-=======
+    ../src/common/logger/customhighlighter.cpp \
     ../src/gui/adapters/adapterfactory.cpp \
-    ../src/intelligence/coordinators/competitioncoordinator.cpp
->>>>>>> upstream/master
+    ../src/intelligence/coordinators/competitioncoordinator.cpp \
+    ../src/intelligence/posetracking/kalmanpositiontracker.cpp
 
 HEADERS  += \
     ../src/common/config/configmanager.h \
     ../src/common/logger/logger.h \
-    ../src/common/events/Event.hpp \
-    ../src/common/events/Delegate.hpp \
     ../src/gui/systemstatusindicator.h \
     ../src/gui/mdiwindow.h \
     ../src/gui/mainwindow.h \
@@ -93,8 +88,6 @@ HEADERS  += \
     ../src/common/datastructures/IMUData.hpp \
     ../src/common/datastructures/ImageData.hpp \
     ../src/common/datastructures/GPSData.hpp \
-    ../src/common/datastructures/DataPoint.hpp \
-    ../src/common/datastructures/DataArray.hpp \
     ../src/gui/adapters/joystickadapter.h \
     ../src/gui/adapters/cameraadapter.h \
     ../src/hardware/actuators/motors/MotorEncoderDriver2013.h \
@@ -121,7 +114,6 @@ HEADERS  += \
     ../src/gui/adapters/imuadapter.h \
     ../src/hardware/sensors/lidar/lms200.h \
     ../src/intelligence/linedetection/linedetector.h \
-    ../src/intelligence/posetracking/positiontracker.h \
     ../src/common/utils/gaussianvariable.hpp \
     ../src/common/datastructures/GPSData.hpp \
     ../src/common/utils/GPSUtils.h \
@@ -152,7 +144,9 @@ HEADERS  += \
     ../src/common/module.hpp \
     ../src/gui/adapters/adapterfactory.h \
     ../src/intelligence/coordinators/coordinator.hpp \
-    ../src/intelligence/coordinators/competitioncoordinator.h
+    ../src/intelligence/coordinators/competitioncoordinator.h \
+    ../src/intelligence/posetracking/kalmanpositiontracker.h \
+    ../src/intelligence/posetracking/positiontracker.hpp
 
 FORMS    += \
     ../src/gui/mainwindow.ui \

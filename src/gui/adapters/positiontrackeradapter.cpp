@@ -3,7 +3,7 @@
 #include <QPainter>
 #include <cmath>
 
-PositionTrackerAdapter::PositionTrackerAdapter(std::shared_ptr<BasicPositionTracker> src, QWidget *parent) :
+PositionTrackerAdapter::PositionTrackerAdapter(std::shared_ptr<PositionTracker> src, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PositionTrackerAdapter),
     posTracker(src),

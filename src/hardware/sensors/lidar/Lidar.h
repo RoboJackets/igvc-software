@@ -10,6 +10,8 @@
 #include <time.h>
 #include <common/module.hpp>
 
+// TODO Refactor LidarState and LidarPoint into the DataStructures folder
+
 class LidarPoint
 {
 public:

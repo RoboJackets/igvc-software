@@ -2,7 +2,6 @@
 #include <string.h>
 #include <iostream>
 #include <sstream>
-#include <common/utils/timing.h>
 #include <common/utils/StringUtils.hpp>
 #include <common/logger/logger.h>
 

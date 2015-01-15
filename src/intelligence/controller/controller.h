@@ -4,7 +4,7 @@
 #include <common/utils/GPSWaypointSource.h>
 #include <QObject>
 #include <common/module.hpp>
-
+#include <memory>
 
 class Controller : public Module
 {
