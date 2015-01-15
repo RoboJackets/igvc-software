@@ -2,6 +2,7 @@
 #include "ui_positiontrackeradapter.h"
 #include <QPainter>
 #include <cmath>
+#include <algorithm>
 
 PositionTrackerAdapter::PositionTrackerAdapter(std::shared_ptr<PositionTracker> src, QWidget *parent) :
     QWidget(parent),
@@ -77,6 +78,12 @@ void PositionTrackerAdapter::paintEvent(QPaintEvent *)
             RobotPosition p = positions[i];
             int x = ( p.X - minx ) * xscale;
             int y = h - ( ( p.Y - miny ) * yscale );
+
+            auto percentage = (double)i / (double)positions.size();
+            auto brightness = std::max((int)(percentage*255),25);
+            std::cout << brightness << std::endl;
+            pen.setColor(QColor(0, 0, 0, brightness));
+            painter.setPen(pen);
             painter.drawLine(lastx+margin, lasty+margin, x+margin, y+margin);
             lastx = x;
             lasty = y;
