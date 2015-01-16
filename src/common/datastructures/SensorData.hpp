@@ -7,9 +7,9 @@
 class SensorData
 {
     private:
-        long long int MicroSeconds;
+        unsigned long int MicroSeconds;
         static const int U_SEC_PER_SEC = 1000000;
-        unsigned long long int microseconds_since_IGVCpoch() {
+        unsigned long int microseconds_since_IGVCpoch() {
             return std::chrono::high_resolution_clock::now().time_since_epoch() /
             std::chrono::microseconds(1);
         }
@@ -17,20 +17,20 @@ class SensorData
     public:
         SensorData() : MicroSeconds(microseconds_since_IGVCpoch()) { }
         SensorData(double time_s) : MicroSeconds(time_s * U_SEC_PER_SEC) { }
-        SensorData(long long time_us) : MicroSeconds(time_us) { }
+        SensorData(unsigned long time_us) : MicroSeconds(time_us) { }
         void setTime() {
             MicroSeconds = microseconds_since_IGVCpoch();
         }
         void setTimeSeconds(double time_s) {
-            MicroSeconds = (long long int) (time_s * U_SEC_PER_SEC);
+            MicroSeconds = (unsigned long int) (time_s * U_SEC_PER_SEC);
         }
-        void setTimeMicroSeconds(long long int time_us) {
+        void setTimeMicroSeconds(unsigned long int time_us) {
             MicroSeconds = time_us;
         }
-        double getTimeSeconds() {
-            return MicroSeconds / (double) U_SEC_PER_SEC;
+        double getTimeSeconds() const {
+            return (double) MicroSeconds / 1000000.0;
         }
-        long long int getTimeMicroSeconds() {
+        unsigned long int getTimeMicroSeconds() const {
             return MicroSeconds;
         }
 

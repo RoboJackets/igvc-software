@@ -81,7 +81,6 @@ void PositionTrackerAdapter::paintEvent(QPaintEvent *)
 
             auto percentage = (double)i / (double)positions.size();
             auto brightness = std::max((int)(percentage*255),25);
-            std::cout << brightness << std::endl;
             pen.setColor(QColor(0, 0, 0, brightness));
             painter.setPen(pen);
             painter.drawLine(lastx+margin, lasty+margin, x+margin, y+margin);

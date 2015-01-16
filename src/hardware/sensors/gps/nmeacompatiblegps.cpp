@@ -45,7 +45,7 @@ void NMEACompatibleGPS::onNewSerialLine(string line) {
     }
 }
 
-GPSData NMEACompatibleGPS::GetState() {
+const GPSData &NMEACompatibleGPS::GetState() {
 	boost::mutex::scoped_lock lock(queueLocker);
 	GPSData state = stateQueue.back();
 	stateQueue.remove(state);

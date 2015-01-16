@@ -21,7 +21,7 @@ GPSData GPSWaypointSource::getNext()
     if(!_data.empty())
     {
         GPSData temp = _data.front();
-        _data.pop();
+        _data.erase(_data.begin());
         return temp;
     }
     else

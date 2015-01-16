@@ -19,7 +19,7 @@ class GPS : public Module
     Q_OBJECT
 
 signals:
-    void onNewData(GPSData);
+    void onNewData(const GPSData &);
 
 public:
     GPS() { qRegisterMetaType<GPSData>("GPSData"); }
@@ -29,7 +29,7 @@ public:
     /*!
      * \brief Returns the most recent state acquired from the GPS device.
 	 */
-	virtual GPSData GetState() = 0;
+    virtual const GPSData &GetState() = 0;
 
     /*!
      * \brief Return true if there is at least one state in the buffer.
