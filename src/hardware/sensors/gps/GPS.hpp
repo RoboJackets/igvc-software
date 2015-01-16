@@ -29,7 +29,7 @@ public:
     /*!
      * \brief Returns the most recent state acquired from the GPS device.
 	 */
-    virtual const GPSData &GetState() = 0;
+    virtual GPSData GetState() = 0;
 
     /*!
      * \brief Return true if there is at least one state in the buffer.
