@@ -28,7 +28,7 @@ bool SimulatedGPS::StateIsAvailable()
     return _open && _data.size() > 0;
 }
 
-const GPSData &SimulatedGPS::GetState()
+GPSData SimulatedGPS::GetState()
 {
     if(_data.size() == 0)
         return GPSData();

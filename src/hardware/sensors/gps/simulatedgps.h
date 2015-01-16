@@ -12,7 +12,7 @@ public:
     SimulatedGPS(std::string file);
 
     bool StateIsAvailable();
-    const GPSData &GetState();
+    GPSData GetState();
     bool isWorking();
 
     ~SimulatedGPS();
