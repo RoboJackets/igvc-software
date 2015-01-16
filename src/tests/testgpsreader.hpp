@@ -20,7 +20,7 @@ class TestGPSReader: public QObject
 private Q_SLOTS:
     void testProperFormat()
     {
-        std::queue<GPSData> q;
+        std::vector<GPSData> q;
         try {
         GPSFileReader::read("../test_data/GPSFileReader-testData/Successful/properlyFormedGPSData.txt", q);
         } catch (...) {
@@ -39,7 +39,7 @@ private Q_SLOTS:
     void testTooFewFields()
     {
         try {
-            std::queue<GPSData> q;
+            std::vector<GPSData> q;
             GPSFileReader::read("../test_data/GPSFileReader-testData/Unsuccessful/tooFewFields.txt", q);
         } catch(GPSFileFormatException) {
             // Test successful!
@@ -51,7 +51,7 @@ private Q_SLOTS:
     void testTooManyFields()
     {
         try {
-            std::queue<GPSData> q;
+            std::vector<GPSData> q;
             GPSFileReader::read("../test_data/GPSFileReader-testData/Unsuccessful/tooManyFields.txt", q);
         } catch(GPSFileFormatException) {
             // Test successful!
@@ -63,7 +63,7 @@ private Q_SLOTS:
     void testImproperValue()
     {
         try {
-            std::queue<GPSData> q;
+            std::vector<GPSData> q;
             GPSFileReader::read("../test_data/GPSFileReader-testData/Unsuccessful/improperValue.txt", q);
         } catch(GPSFileFormatException) {
             // Test successful!

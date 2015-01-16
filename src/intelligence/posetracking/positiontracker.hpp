@@ -25,7 +25,7 @@ signals:
 
 public slots:
     virtual void onIMUData(IMUData) = 0;
-    virtual void onGPSData(GPSData) = 0;
+    virtual void onGPSData(const GPSData &) = 0;
 };
 
 #endif // POSITIONTRACKER_HPP

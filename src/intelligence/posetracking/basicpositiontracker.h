@@ -34,7 +34,7 @@ signals:
     void onOriginPercentage(int);
 
 private slots:
-    void onGPSData(GPSData data);
+    void onGPSData(const GPSData &data);
     void onIMUData(IMUData data);
 
 private:

@@ -2,6 +2,7 @@
 #define GAUSSIANVARIABLE_H
 
 #include <cmath>
+#include <iostream>
 
 /*
  * Represents a Gaussian Distribution with mean = value and sigma^2 = variance.
@@ -19,6 +20,36 @@ public:
     {
     }
 
+    GaussianVariable(const GaussianVariable &other)
+        : Value(other.Value),
+          Variance(other.Variance)
+    {
+        std::cout << "copy" << std::endl;
+    }
+
+    GaussianVariable(GaussianVariable &&other)
+        : Value(other.Value),
+          Variance(other.Variance)
+    {
+        std::cout << "move" << std::endl;
+    }
+
+    GaussianVariable& operator=(const GaussianVariable &other)
+    {
+        Value = other.Value;
+        Variance = other.Variance;
+        std::cout << "copy assign" << std::endl;
+        return *this;
+    }
+
+    GaussianVariable& operator=(GaussianVariable &&other)
+    {
+        Value = other.Value;
+        Variance = other.Variance;
+        std::cout << "move assignment" << std::endl;
+        return *this;
+    }
+
     double ProbabilityOfValue(T val)
     {
         using namespace std;
@@ -27,6 +58,7 @@ public:
 
     GaussianVariable& operator=(T val)
     {
+        std::cout << "value assignment" << std::endl;
         Value = val;
         return *this;
     }

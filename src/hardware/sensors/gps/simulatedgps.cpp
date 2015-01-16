@@ -9,6 +9,7 @@ SimulatedGPS::SimulatedGPS(std::string file) : _running(true)
     _moduleName = "GPS";
     try {
         GPSFileReader::read(file, _data);
+        std::cout << _data[0].LatVar() << std::endl;
         _open = true;
     } catch (GPSFileNotFoundException) {
         Logger::Log(LogLevel::Error, "[SimulatedGPS] Could not find file: " + file);
@@ -18,6 +19,7 @@ SimulatedGPS::SimulatedGPS(std::string file) : _running(true)
         _open = false;
     }
     _delay = 100000;
+    _index = 0;
     _thread = boost::thread(boost::bind(&SimulatedGPS::threadRun, this));
 }
 
@@ -26,16 +28,17 @@ bool SimulatedGPS::StateIsAvailable()
     return _open && _data.size() > 0;
 }
 
-GPSData SimulatedGPS::GetState()
+const GPSData &SimulatedGPS::GetState()
 {
     if(_data.size() == 0)
         return GPSData();
 
+    _index++;
+    _index %= _data.size();
 
-    _data.push(_data.front()); //Readd point to back of queue to allow cycling through log file
-    GPSData temp = _data.front();
-    _data.pop();
-    return temp;
+//    std::cout << _data[_index].LatVar() << std::endl;
+
+    return _data[_index];
 }
 
 bool SimulatedGPS::isWorking()
@@ -49,7 +52,9 @@ void SimulatedGPS::threadRun()
     {
         if(_data.size() > 0)
         {
-            onNewData(GetState());
+            GPSData data = GetState();
+            data.setTimeMicroSeconds(std::chrono::high_resolution_clock::now().time_since_epoch() / std::chrono::microseconds(1));
+            onNewData(data);
         }
         usleep(_delay);
     }
