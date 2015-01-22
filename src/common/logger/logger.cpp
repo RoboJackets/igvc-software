@@ -2,6 +2,7 @@
 #include <QDir>
 
 Logger *Logger::_instance;
+std::string Logger::_currentLogPath;
 
 Logger::Logger()
 {
@@ -11,6 +12,7 @@ Logger::Logger()
             "/Logs/Log_" +
             QDateTime::currentDateTime().toString("yyy-M-d_hh-mm-ss-zzz").toStdString() +
             ".txt";
+    _currentLogPath = logpath;
     std::cout << logpath << std::endl;
     _fileOutStream.open(logpath.c_str());
     _statusBar = 0;
@@ -38,4 +40,9 @@ void Logger::Clear()
         if(!QFile(files[i]).remove())
             Log(LogLevel::Error, "Could not clear all log files.");
     Log(LogLevel::Info, "Log files cleared.");
+}
+
+QString Logger::getCurrentLogPath()
+{
+    return QString::fromStdString(_currentLogPath);
 }
