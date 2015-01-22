@@ -62,6 +62,8 @@ SOURCES += \
     ../src/gui/adapters/competitioncontrolleradapter.cpp \
     ../src/intelligence/pathfollowing/pathfollower.cpp \
     ../src/intelligence/barrelfinder/barrelfinder.cpp \
+    ../src/gui/adapters/logvieweradapter.cpp \
+    ../src/common/logger/customhighlighter.cpp \
     ../src/gui/adapters/adapterfactory.cpp \
     ../src/intelligence/coordinators/competitioncoordinator.cpp \
     ../src/intelligence/posetracking/kalmanpositiontracker.cpp
@@ -137,6 +139,8 @@ HEADERS  += \
     ../src/common/datastructures/PathType.hpp \
     ../src/common/datastructures/MotorCommand.hpp \
     ../src/intelligence/barrelfinder/barrelfinder.h \
+    ../src/gui/adapters/logvieweradapter.h \
+    ../src/common/logger/customhighlighter.h \
     ../src/common/module.hpp \
     ../src/gui/adapters/adapterfactory.h \
     ../src/intelligence/coordinators/coordinator.hpp \
@@ -156,7 +160,8 @@ FORMS    += \
     ../src/gui/adapters/pathadapter.ui \
     ../src/gui/adapters/lightshieldadapter.ui \
     ../src/gui/adapters/motorboardadapter.ui \
-    ../src/gui/adapters/competitioncontrolleradapter.ui
+    ../src/gui/adapters/competitioncontrolleradapter.ui \
+    ../src/gui/adapters/logvieweradapter.ui
 
 RESOURCES += \
     ../src/gui/resources.qrc

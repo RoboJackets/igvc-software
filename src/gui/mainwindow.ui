@@ -370,6 +370,7 @@
      <string>Logs</string>
     </property>
     <addaction name="actionClearLogs"/>
+    <addaction name="actionLogViewer"/>
    </widget>
    <widget class="QMenu" name="menuWaypoints">
     <property name="title">
@@ -479,6 +480,19 @@
   <action name="actionLoad_Waypoint_File">
    <property name="text">
     <string>Load File</string>
+   </property>
+  </action>
+  <action name="actionLogViewer">
+   <property name="text">
+    <string>Viewer</string>
+   </property>
+   <property name="toolTip">
+    <string>View Log Files</string>
+   </property>
+  </action>
+  <action name="actionTestWindow">
+   <property name="text">
+    <string>TestWindow</string>
    </property>
   </action>
  </widget>

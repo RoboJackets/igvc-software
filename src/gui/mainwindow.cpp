@@ -4,6 +4,8 @@
 #include "adapters/adapterfactory.h"
 #include "adapters/joystickadapter.h"
 #include "adapters/motorboardadapter.h"
+#include "adapters/competitioncontrolleradapter.h"
+#include "adapters/logvieweradapter.h"
 #include "adapters/lightshieldadapter.h"
 
 #include <hardware/sensors/gps/simulatedgps.h>
@@ -342,6 +344,21 @@ void MainWindow::updateHardwareStatusList()
 void MainWindow::on_actionClearLogs_triggered()
 {
     Logger::Clear();
+}
+
+void MainWindow::on_actionLogViewer_triggered()
+{
+    MDIWindow *newWindow = new MDIWindow;
+    newWindow->setWindowTitle("Log Viewer");
+    newWindow->setLayout(new QGridLayout);
+
+    QWidget* adapter;
+    adapter = new LogViewerAdapter();
+
+    newWindow->layout()->addWidget(adapter);
+
+    mdiArea->addSubWindow(newWindow);
+    newWindow->show();
 }
 
 void MainWindow::closeEvent(QCloseEvent *e)
