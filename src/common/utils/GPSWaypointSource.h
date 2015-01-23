@@ -22,7 +22,7 @@ signals:
     void newFileLoaded();
 
 private:
-    std::queue<GPSData> _data;
+    std::vector<GPSData> _data;
     bool _isOpen;
 };
 

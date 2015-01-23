@@ -19,8 +19,6 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/common/utils/ImageUtils.cpp \
     ../src/common/logger/logger.cpp \
     ../src/intelligence/linedetection/linedetector.cpp \
-    ../src/intelligence/linedetection/transformer.cpp \
-    ../src/intelligence/posetracking/positiontracker.cpp \
     ../src/common/config/configmanager.cpp \
     ../src/common/utils/gpsfilereader.cpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
@@ -38,11 +36,9 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/hardware/actuators/lights/lightcontroller.cpp
 
 HEADERS += ../src/tests/teststringutils.hpp \
-    ../src/tests/testpositiontracker.hpp \
     ../src/tests/testgpsutils.h \
     ../src/tests/testgpsreader.hpp \
     ../src/tests/testangleutils.h \
-    ../src/tests/capturegpsandpostracker.hpp \
     ../src/common/config/configmanager.h \
     ../src/common/logger/logger.h \
     ../src/common/utils/GPSUtils.h \
@@ -57,7 +53,6 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/hardware/sensors/gps/GPS.hpp \
     ../src/tests/testlinedetection.hpp \
     ../src/intelligence/linedetection/linedetector.h \
-    ../src/intelligence/linedetection/transformer.h \
     ../src/tests/testcontroller.h \
     ../src/intelligence/controller/controller.h \
     ../src/common/utils/GPSWaypointSource.h \
@@ -74,7 +69,8 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/common/datastructures/searchmove.h \
     ../src/intelligence/pathplanning/SearchProblem.hpp \
     ../src/hardware/actuators/lights/lightcontroller.h \
-    ../src/common/module.hpp
+    ../src/common/module.hpp \
+    ../src/intelligence/posetracking/positiontracker.hpp
 
 INCLUDEPATH += /usr/include
 DEPENDPATH += /usr/include

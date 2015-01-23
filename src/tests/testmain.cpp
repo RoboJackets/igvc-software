@@ -6,9 +6,7 @@
 #include <algorithm>
 #include <iostream>
 #include "teststringutils.hpp"
-#include "testpositiontracker.hpp"
 #include "testgpsutils.h"
-#include "capturegpsandpostracker.hpp"
 #include "testcontroller.h"
 #include "CaptureIMU.hpp"
 #include "testastarplanner.hpp"
@@ -55,11 +53,9 @@ int main(int argc, char* argv[])
     // Execute selected test cases
     RunTestCase(new TestStringUtils(), args);
     RunTestCase(new TestLineDetection(), args);
-    RunTestCase(new TestPositionTracker(), args);
     RunTestCase(new TestGPSUtils(), args);
     RunTestCase(new TestAngleUtils(), args);
     RunTestCase(new TestGPSReader(), args);
-    RunTestCase(new CaptureGPSAndPosTracker(), args, false);
     RunTestCase(new TestController(), args);
     RunTestCase(new CaptureIMU(), args, false);
     RunTestCase(new TestAStarPlanner(), args);

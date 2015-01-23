@@ -22,7 +22,7 @@ class NMEACompatibleGPS: public GPS
     Q_OBJECT
 public:
     NMEACompatibleGPS(std::string devicePath, uint baudRate);
-	GPSData GetState();
+    GPSData GetState();
     GPSData GetStateAtTime(timeval);
 	bool StateIsAvailable();
     bool isWorking();
