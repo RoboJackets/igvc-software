@@ -11,7 +11,7 @@ var indexSectionsWithContent =
   1: "abcfgijklmnoprstv",
   2: "n",
   3: "glns",
-  4: "abcdgilnoprsuvw",
+  4: "abcdghilnoprsuvw",
   5: "adhimrvxy"
 };
 

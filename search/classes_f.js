@@ -6,7 +6,5 @@ var searchData=
   ['testgpsreader',['TestGPSReader',['../class_test_g_p_s_reader.html',1,'']]],
   ['testgpsutils',['TestGPSUtils',['../class_test_g_p_s_utils.html',1,'']]],
   ['testlinedetection',['TestLineDetection',['../class_test_line_detection.html',1,'']]],
-  ['testpositiontracker',['TestPositionTracker',['../class_test_position_tracker.html',1,'']]],
-  ['teststringutils',['TestStringUtils',['../class_test_string_utils.html',1,'']]],
-  ['transformer',['transformer',['../classtransformer.html',1,'']]]
+  ['teststringutils',['TestStringUtils',['../class_test_string_utils.html',1,'']]]
 ];

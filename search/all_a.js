@@ -11,5 +11,6 @@ var searchData=
   ['linedetector',['LineDetector',['../class_line_detector.html',1,'']]],
   ['lms200',['LMS200',['../class_l_m_s200.html',1,'']]],
   ['load',['load',['../class_config_manager.html#a02b5b5d969ad3d896ba7fd7f7a13bc4e',1,'ConfigManager']]],
-  ['logger',['Logger',['../class_logger.html',1,'']]]
+  ['logger',['Logger',['../class_logger.html',1,'']]],
+  ['logvieweradapter',['LogViewerAdapter',['../class_log_viewer_adapter.html',1,'']]]
 ];

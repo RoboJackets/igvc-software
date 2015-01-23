@@ -9,5 +9,6 @@ var searchData=
   ['lightshieldadapter',['LightShieldAdapter',['../class_light_shield_adapter.html',1,'']]],
   ['linedetector',['LineDetector',['../class_line_detector.html',1,'']]],
   ['lms200',['LMS200',['../class_l_m_s200.html',1,'']]],
-  ['logger',['Logger',['../class_logger.html',1,'']]]
+  ['logger',['Logger',['../class_logger.html',1,'']]],
+  ['logvieweradapter',['LogViewerAdapter',['../class_log_viewer_adapter.html',1,'']]]
 ];

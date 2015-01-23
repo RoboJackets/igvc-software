@@ -1,7 +1,6 @@
 var searchData=
 [
   ['cameraadapter',['CameraAdapter',['../class_camera_adapter.html',1,'']]],
-  ['capturegpsandpostracker',['CaptureGPSAndPosTracker',['../class_capture_g_p_s_and_pos_tracker.html',1,'']]],
   ['captureimu',['CaptureIMU',['../class_capture_i_m_u.html',1,'']]],
   ['colorrange',['ColorRange',['../class_color_range.html',1,'']]],
   ['competitioncontrolleradapter',['CompetitionControllerAdapter',['../class_competition_controller_adapter.html',1,'']]],
@@ -10,5 +9,6 @@ var searchData=
   ['configtreeitem',['ConfigTreeItem',['../class_config_tree_item.html',1,'']]],
   ['configtreemodel',['ConfigTreeModel',['../class_config_tree_model.html',1,'']]],
   ['controller',['Controller',['../class_controller.html',1,'']]],
-  ['coordinator',['Coordinator',['../class_coordinator.html',1,'']]]
+  ['coordinator',['Coordinator',['../class_coordinator.html',1,'']]],
+  ['customhighlighter',['CustomHighlighter',['../class_custom_highlighter.html',1,'']]]
 ];

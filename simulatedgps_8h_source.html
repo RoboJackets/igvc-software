@@ -117,25 +117,27 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="keywordtype">void</span> threadRun();</div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    std::queue&lt;GPSData&gt; _data;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    std::vector&lt;GPSData&gt; _data;</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keywordtype">bool</span> _running;</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keywordtype">int</span> _delay;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;};</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keywordtype">int</span> _index;</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#endif // SIMULATEDGPS_H</span></div>
-<div class="ttc" id="class_simulated_g_p_s_html_a85d2782bfed6609f32b682047077e444"><div class="ttname"><a href="class_simulated_g_p_s.html#a85d2782bfed6609f32b682047077e444">SimulatedGPS::isWorking</a></div><div class="ttdeci">bool isWorking()</div><div class="ttdoc">Gives the status of this module. </div><div class="ttdef"><b>Definition:</b> simulatedgps.cpp:41</div></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;};</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#endif // SIMULATEDGPS_H</span></div>
+<div class="ttc" id="class_simulated_g_p_s_html_a85d2782bfed6609f32b682047077e444"><div class="ttname"><a href="class_simulated_g_p_s.html#a85d2782bfed6609f32b682047077e444">SimulatedGPS::isWorking</a></div><div class="ttdeci">bool isWorking()</div><div class="ttdoc">Gives the status of this module. </div><div class="ttdef"><b>Definition:</b> simulatedgps.cpp:44</div></div>
 <div class="ttc" id="class_g_p_s_html"><div class="ttname"><a href="class_g_p_s.html">GPS</a></div><div class="ttdoc">Interface for GPS devices. </div><div class="ttdef"><b>Definition:</b> GPS.hpp:17</div></div>
-<div class="ttc" id="class_simulated_g_p_s_html_aec6e6bd8fcd375362736df22cf518fe3"><div class="ttname"><a href="class_simulated_g_p_s.html#aec6e6bd8fcd375362736df22cf518fe3">SimulatedGPS::GetState</a></div><div class="ttdeci">GPSData GetState()</div><div class="ttdoc">Returns the most recent state acquired from the GPS device. </div><div class="ttdef"><b>Definition:</b> simulatedgps.cpp:29</div></div>
+<div class="ttc" id="class_simulated_g_p_s_html_aec6e6bd8fcd375362736df22cf518fe3"><div class="ttname"><a href="class_simulated_g_p_s.html#aec6e6bd8fcd375362736df22cf518fe3">SimulatedGPS::GetState</a></div><div class="ttdeci">GPSData GetState()</div><div class="ttdoc">Returns the most recent state acquired from the GPS device. </div><div class="ttdef"><b>Definition:</b> simulatedgps.cpp:31</div></div>
 <div class="ttc" id="class_simulated_g_p_s_html"><div class="ttname"><a href="class_simulated_g_p_s.html">SimulatedGPS</a></div><div class="ttdef"><b>Definition:</b> simulatedgps.h:9</div></div>
-<div class="ttc" id="class_g_p_s_data_html"><div class="ttname"><a href="class_g_p_s_data.html">GPSData</a></div><div class="ttdef"><b>Definition:</b> GPSData.hpp:23</div></div>
+<div class="ttc" id="class_g_p_s_data_html"><div class="ttname"><a href="class_g_p_s_data.html">GPSData</a></div><div class="ttdef"><b>Definition:</b> GPSData.hpp:26</div></div>
 <div class="ttc" id="_g_p_s_8hpp_html"><div class="ttname"><a href="_g_p_s_8hpp.html">GPS.hpp</a></div></div>
-<div class="ttc" id="class_simulated_g_p_s_html_a59de2eee9f7b24cca95fdefd55cafe8c"><div class="ttname"><a href="class_simulated_g_p_s.html#a59de2eee9f7b24cca95fdefd55cafe8c">SimulatedGPS::StateIsAvailable</a></div><div class="ttdeci">bool StateIsAvailable()</div><div class="ttdoc">Return true if there is at least one state in the buffer. </div><div class="ttdef"><b>Definition:</b> simulatedgps.cpp:24</div></div>
+<div class="ttc" id="class_simulated_g_p_s_html_a59de2eee9f7b24cca95fdefd55cafe8c"><div class="ttname"><a href="class_simulated_g_p_s.html#a59de2eee9f7b24cca95fdefd55cafe8c">SimulatedGPS::StateIsAvailable</a></div><div class="ttdeci">bool StateIsAvailable()</div><div class="ttdoc">Return true if there is at least one state in the buffer. </div><div class="ttdef"><b>Definition:</b> simulatedgps.cpp:26</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 10 2015 16:06:09 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 22 2015 20:19:52 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>

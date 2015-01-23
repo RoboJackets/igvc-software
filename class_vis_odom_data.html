@@ -125,12 +125,27 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>deltaTime</b> (void
 ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>print</b> (ostream &amp;stream)</td></tr>
 <tr class="separator:a28136ae83f672b377ed5ddc37b4964ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_sensor_data"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_class_sensor_data')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_sensor_data.html">SensorData</a></td></tr>
-<tr class="memitem:ad3c9c27e08061146946f53a9e6ea106d inherit pub_methods_class_sensor_data"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad3c9c27e08061146946f53a9e6ea106d"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>SensorData</b> (double time_ms)</td></tr>
-<tr class="separator:ad3c9c27e08061146946f53a9e6ea106d inherit pub_methods_class_sensor_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0f9d510c57fc0aa9a87acb5298efa1a inherit pub_methods_class_sensor_data"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af0f9d510c57fc0aa9a87acb5298efa1a"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><b>time</b> ()</td></tr>
-<tr class="separator:af0f9d510c57fc0aa9a87acb5298efa1a inherit pub_methods_class_sensor_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73aa54a6c82c3985cbd014323a782651 inherit pub_methods_class_sensor_data"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a73aa54a6c82c3985cbd014323a782651"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>SensorData</b> (double time_s)</td></tr>
+<tr class="separator:a73aa54a6c82c3985cbd014323a782651 inherit pub_methods_class_sensor_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace1fbd480f393103df739a56789a374f inherit pub_methods_class_sensor_data"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ace1fbd480f393103df739a56789a374f"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>SensorData</b> (unsigned long time_us)</td></tr>
+<tr class="separator:ace1fbd480f393103df739a56789a374f inherit pub_methods_class_sensor_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9491567a2ac24d80ba91de52ae043b0 inherit pub_methods_class_sensor_data"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa9491567a2ac24d80ba91de52ae043b0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setTime</b> ()</td></tr>
+<tr class="separator:aa9491567a2ac24d80ba91de52ae043b0 inherit pub_methods_class_sensor_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2af3153e89f4dd92ef05c2405f51bd1 inherit pub_methods_class_sensor_data"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af2af3153e89f4dd92ef05c2405f51bd1"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setTimeSeconds</b> (double time_s)</td></tr>
+<tr class="separator:af2af3153e89f4dd92ef05c2405f51bd1 inherit pub_methods_class_sensor_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac7a700b13bc76bc51bfafcd3b1efec5 inherit pub_methods_class_sensor_data"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aac7a700b13bc76bc51bfafcd3b1efec5"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setTimeMicroSeconds</b> (unsigned long int time_us)</td></tr>
+<tr class="separator:aac7a700b13bc76bc51bfafcd3b1efec5 inherit pub_methods_class_sensor_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2db4356db0a1b16eb4c9923b3d6ef64d inherit pub_methods_class_sensor_data"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2db4356db0a1b16eb4c9923b3d6ef64d"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>getTimeSeconds</b> () const </td></tr>
+<tr class="separator:a2db4356db0a1b16eb4c9923b3d6ef64d inherit pub_methods_class_sensor_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6da3a54383683bb11a2141b03dd4e0a inherit pub_methods_class_sensor_data"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac6da3a54383683bb11a2141b03dd4e0a"></a>
+unsigned long int&#160;</td><td class="memItemRight" valign="bottom"><b>getTimeMicroSeconds</b> () const </td></tr>
+<tr class="separator:ac6da3a54383683bb11a2141b03dd4e0a inherit pub_methods_class_sensor_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>src/common/datastructures/<a class="el" href="_vis_odom_data_8hpp_source.html">VisOdomData.hpp</a></li>
@@ -138,7 +153,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>time</b> ()</td></t
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Jan 10 2015 16:06:19 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Jan 22 2015 20:20:03 for IGVC by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.6
 </small></address>
