@@ -8,7 +8,7 @@
 using namespace std;
 
 // format of GPS coordinate: lat,long\n
-void GPSFileReader::read(string file, queue<GPSData>& gpsList)
+void GPSFileReader::read(string file, vector<GPSData>& gpsList)
 {
     if(file.empty())
     {
@@ -48,6 +48,10 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
             newData.NumSats(atof(tokens.at(2).c_str()));
             newData.Quality((GPS_QUALITY)atoi(tokens.at(3).c_str()));
             newData.HDOP(atof(tokens.at(4).c_str()));
+            newData.LatVar(1.1005e-1 * newData.HDOP() - 7.6854e-2 );
+            newData.LongVar(5.5776 * newData.HDOP() - -3.9038);
+
+            std::cout << newData.LatVar() << "\t" << newData.LongVar() << std::endl;
 
             //coordinate validation
             if (abs(newData.Lat()) > 90)
@@ -62,7 +66,7 @@ void GPSFileReader::read(string file, queue<GPSData>& gpsList)
                 Logger::Log(LogLevel::Error, msg);
                 throw GPSFileFormatException(msg);
             }
-            gpsList.push(newData);
+            gpsList.push_back(newData);
             lineIndex++;
         }
     }

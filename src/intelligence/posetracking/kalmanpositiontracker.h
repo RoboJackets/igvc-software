@@ -30,7 +30,7 @@ public:
 
 public slots:
     void onIMUData(IMUData);
-    void onGPSData(GPSData);
+    void onGPSData(const GPSData &);
 
 private:
     class TrackerPose {
@@ -47,7 +47,7 @@ private:
     long long _lastGPSTime;
     long long _lastIMUTime;
 
-    std::array<GPSData, 5> _GPSDataBuffer;
+    std::array<GPSData, 30> _GPSDataBuffer;
 
     GPSData _origin;
     int _numOriginPointsRecorded;

@@ -3,15 +3,13 @@
 
 #include <QtTest>
 #include <intelligence/linedetection/linedetector.h>
-#include <intelligence/linedetection/transformer.h>
 #include <iostream>
-#include <common/events/Event.hpp>
 
 class TestLineDetection: public QObject
 {
     Q_OBJECT
 public:
-    TestLineDetection() : LonResults(this) { }
+    TestLineDetection() { }
 
 private:
     cv::Mat src, lines;
@@ -32,9 +30,9 @@ private:
     }
 
 
-    LISTENER(TestLineDetection, onResults, ImageData)
+//    LISTENER(TestLineDetection, onResults, ImageData)
 
-private Q_SLOTS:
+//private Q_SLOTS:
     // TODO fix this test case. LineDetector constructor call needs to be updated when LineDetector is cleaned up
 //    void testCase1()
 //    {
