@@ -2,7 +2,6 @@
 #define TRANSFORMER_H
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/highgui/highgui.hpp"
-#include <common/events/Event.hpp>
 #include <common/datastructures/ImageData.hpp>
 
 #include <common/logger/logger.h>
@@ -20,10 +19,8 @@
 class transformer
 {
 public:
-    transformer(Event<ImageData> &evtSrc);
+    transformer();
     void onImageEvent(ImageData imgd);
-    LISTENER(transformer, onImageEvent, ImageData);
-    Event<ImageData> onNewLines;
 
 private:
     cv::Mat src, dst;

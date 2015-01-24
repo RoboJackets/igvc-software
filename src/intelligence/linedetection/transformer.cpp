@@ -4,10 +4,8 @@
 
 using namespace std;
 
-transformer::transformer(Event<ImageData> &evtSrc)
-    :LonImageEvent(this)
+transformer::transformer()
 {
-    evtSrc += &LonImageEvent;
     //TODO here put in the coordinates of pc1-pc2
     //As measured in real life
     int offset = 0; //20
@@ -55,7 +53,7 @@ void transformer::onImageEvent(ImageData imgd){
      cloud->points[0].z = 2.0;
      cloud->points[3].z = -2.0;
      cloud->points[6].z = 4.0;
-    onNewLines(ImageData(dst));
+//    onNewLines(ImageData(dst));
 
 }
 
