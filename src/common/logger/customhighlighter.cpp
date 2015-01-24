@@ -1,4 +1,4 @@
-#import "customhighlighter.h"
+#include "customhighlighter.h"
 
 
 CustomHighlighter::CustomHighlighter(QTextDocument *parent)
