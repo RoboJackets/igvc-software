@@ -44,9 +44,9 @@ void LineDetector::onImageEvent(ImageData imgd){
     transformPoints(dst, transformDst);
     cloud = toPointCloud(transformDst);
 
-   // onNewLines(ImageData(transformDst));
+    onNewLines(ImageData(transformDst));
     onNewLinesMat(dst);
-    //cout <<"Sending new matrix"<<endl;
+    cout <<"Sending new matrix"<<endl;
     pcl::PointXY offset;
     offset.x = ConfigManager::Instance().getValue("Camera", "OffsetX", 0.0f);
     offset.y = ConfigManager::Instance().getValue("Camera", "OffsetY", 0.0f);
