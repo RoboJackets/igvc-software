@@ -210,7 +210,7 @@ void transformPoints(Mat &src, Mat &dst){
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(Mat src){
     int squareSize = ConfigManager::Instance().getValue("perspectiveTransform", "SquareSize", 100);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     //Add points to the cloud if they are white (right now only checking the first layer)
 
     for (int r=0; r<src.rows;r++){
