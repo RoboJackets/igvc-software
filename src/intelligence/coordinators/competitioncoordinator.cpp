@@ -25,7 +25,7 @@ using namespace std;
 
 CompetitionCoordinator::CompetitionCoordinator() {
     shared_ptr<GPS> gps = make_shared<NMEACompatibleGPS>("/dev/igvc_gps", 19200);
-    shared_ptr<StereoSource> camera = make_shared<Bumblebee2>();
+    shared_ptr<StereoSource> camera = make_shared<Bumblebee2>("../src/hardware/sensors/camera/calib/out_camera_data.xml");
     shared_ptr<IMU> imu = make_shared<Ardupilot>();
     shared_ptr<Lidar> lidar = make_shared<LMS200>();
     shared_ptr<PositionTracker> posTracker = make_shared<KalmanPositionTracker>(imu, gps);
