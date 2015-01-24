@@ -26,10 +26,12 @@ private:
 
     void threadRun();
 
-    std::queue<GPSData> _data;
+    std::vector<GPSData> _data;
     bool _running;
 
     int _delay;
+
+    int _index;
 
 };
 

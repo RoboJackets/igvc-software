@@ -3,7 +3,6 @@
 
 #include <QtTest>
 #include <intelligence/linedetection/linedetector.h>
-#include <intelligence/linedetection/transformer.h>
 #include <iostream>
 
 class TestLineDetection: public QObject
@@ -33,6 +32,8 @@ public slots:
         lines = img.mat();
         DisplayImages();
     }
+
+//    LISTENER(TestLineDetection, onResults, ImageData)
 
 private Q_SLOTS:
     // TODO fix this test case. LineDetector constructor call needs to be updated when LineDetector is cleaned up

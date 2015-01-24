@@ -10,7 +10,7 @@ class ImageData : public SensorData
   public:
     ImageData(): SensorData() {}
     ImageData(cv::Mat image): SensorData(), _img(image) {}
-    ImageData(cv::Mat image, long long int time_us): SensorData(time_us), _img(image) {}
+    ImageData(cv::Mat image, unsigned long int time_us): SensorData(time_us), _img(image) {}
     ImageData deepCopy() { return ImageData(_img.clone(), getTimeMicroSeconds()); }
     cv::Mat& mat() {return _img;}
     virtual ~ImageData() {}

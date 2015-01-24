@@ -8,7 +8,7 @@ using namespace std;
 class GPSFileReader
 {
 public:
-    static void read(string file, queue<GPSData>& gpsList);
+    static void read(string file, vector<GPSData> &gpsList);
 
 private:
 };
