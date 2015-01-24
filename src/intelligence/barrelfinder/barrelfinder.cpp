@@ -5,6 +5,7 @@
 #include <common/utils/ImageUtils.h>
 
 BarrelFinder::BarrelFinder(QObject *)
+     : cloud(new pcl::PointCloud<pcl::PointXYZ>)
 {
     _moduleName = "Barrel Finder";
 }
