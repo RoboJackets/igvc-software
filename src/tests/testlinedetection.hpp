@@ -16,10 +16,16 @@ private:
     bool responded;
     void DisplayImages()
     {
+        if(!lines.empty()) {
+
+            cv::imshow("Filter Practice", lines);
+        }
         //Show transformed image
-        cv::imshow("Filter Practice", lines);
         //Show original image in a different window
-        cv::imshow("Original", src);
+        if(!src.empty()) {
+
+            cv::imshow("Original", src);
+        }
     }
 
 signals:
@@ -40,14 +46,16 @@ private Q_SLOTS:
     void testCase1()
     {
         ///NOTE: The directory may not be the same on your computer!
-        char videoFile[] = "../src/intelligence/igvc_cam_data/stills/img_left2.jpg"; //Still
+        char videoFile[] = "../test_data/stills/Sun Jun 8 12:08:34 2014img.jpg"; //Still
         //char videoFile[] = "../src/intelligence/igvc_cam_data/video/CompCourse_left0.mpeg"; //vid
 
         LineDetector ldl;
         connect(&ldl, SIGNAL(onNewLines(ImageData)), this, SLOT(onResults(ImageData)));
         connect(this, SIGNAL(setImageEvent(ImageData)), &ldl, SLOT(onImageEvent(ImageData)));
 
-        setImageEvent(cv::imread(videoFile));
+        src = cv::imread(videoFile);
+
+        setImageEvent(src);
 //        ldl.onNewLines += &LonResults;
 
         bool success = true;
