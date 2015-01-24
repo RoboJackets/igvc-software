@@ -6,6 +6,7 @@
 #include <common/utils/gaussianvariable.hpp>
 #include <QTextStream>
 #include <iomanip>
+#include <iostream>
 
 /*
  * An enumeration of GPS quality states.
@@ -26,69 +27,94 @@ class GPSData : public SensorData
 {
 public:
 
-    inline GPSData(double latitude=0, double longitude=0, double heading=0, double speed=0, double time=0, int numSats=0, GPS_QUALITY quality=GPS_QUALITY_INVALID, float hdop=0)
-        : SensorData(time),
+    GPSData(double latitude=0, double longitude=0, double heading=0, double speed=0, int numSats=0, GPS_QUALITY quality=GPS_QUALITY_INVALID, float hdop=0)
+        : SensorData(),
           _Lat(latitude),
           _Long(longitude),
           _Heading(heading),
           _Speed(speed),
-          _quality(quality),
+          _Quality(quality),
           _NumSats(numSats),
           _HDOP(hdop)
     {
     }
 
-    inline double Lat()
+    GPSData(const GPSData &other)
+        : SensorData(other.getTimeMicroSeconds()),
+          _Lat(other.Lat()),
+          _Long(other.Long()),
+          _Heading(other.Heading()),
+          _Speed(other.Speed()),
+          _Quality(other.Quality()),
+          _NumSats(other.NumSats()),
+          _HDOP(other.HDOP())
+    {
+    }
+
+    GPSData(GPSData &&other)
+        : SensorData(other.getTimeMicroSeconds()),
+          _Lat(other.Lat()),
+          _Long(other.Long()),
+          _Heading(other.Heading()),
+          _Speed(other.Speed()),
+          _Quality(other.Quality()),
+          _NumSats(other.NumSats()),
+          _HDOP(other.HDOP())
+    {
+
+    }
+
+    inline double Lat() const
     {
         return _Lat;
     }
 
-    inline double Long()
+    inline double Long() const
     {
         return _Long;
     }
 
-    inline double Heading()
+    inline double Heading() const
     {
         return _Heading;
     }
 
-    inline double Speed()
+    inline double Speed() const
     {
         return _Speed;
     }
 
-    inline double LatVar()
+    inline double LatVar() const
     {
         return _Lat.Variance;
     }
 
-    inline double LongVar()
+    inline double LongVar() const
     {
         return _Long.Variance;
     }
 
-    inline double HeadingVar()
+    inline double HeadingVar() const
     {
         return _Heading.Variance;
     }
 
-    inline double SpeedVar()
+    inline double SpeedVar() const
     {
         return _Speed.Variance;
     }
 
-    inline GPS_QUALITY Quality()
+    inline GPS_QUALITY Quality() const
     {
-        return _quality;
+        return _Quality;
     }
 
-    inline int NumSats()
+    inline int NumSats() const
     {
         return _NumSats;
     }
 
-    inline float HDOP()
+    inline float HDOP() const
     {
         return _HDOP;
     }
@@ -135,7 +161,7 @@ public:
 
     inline void Quality(GPS_QUALITY val)
     {
-        _quality = val;
+        _Quality = val;
     }
 
     inline void NumSats(int val)
@@ -148,7 +174,20 @@ public:
         _HDOP = val;
     }
 
-    bool operator == (GPSData other)
+    GPSData &operator=(const GPSData &other)
+    {
+        setTimeMicroSeconds(other.getTimeMicroSeconds());
+        _Lat=other.Lat();
+        _Long=other.Long();
+        _Heading=other.Heading();
+        _Speed=other.Speed();
+        _Quality=other.Quality();
+        _NumSats=other.NumSats();
+        _HDOP=other.HDOP();
+        return *this;
+    }
+
+    bool operator == (const GPSData &other) const
     {
         return _Lat == other.Lat() &&
                _Long == other.Long() &&
@@ -156,13 +195,14 @@ public:
                _Speed == other.Speed();
     }
 
-    friend std::ostream &operator<< (std::ostream &stream, GPSData &data)
+    friend std::ostream &operator<< (std::ostream &stream, const GPSData &data)
     {
         stream << std::setprecision(15) << data.Lat() << ',' << data.Long() << ',' << data.NumSats() << ',' << (int)data.Quality()  << ',' << data.HDOP();
         return stream;
     }
 
-    friend QTextStream &operator<< (QTextStream &stream, GPSData &data) {
+    friend QTextStream &operator<< (QTextStream &stream, const GPSData &data)
+    {
         stream << qSetRealNumberPrecision(15) << data.Lat() << ',' << data.Long() << ',' << data.NumSats() << ',' << (int)data.Quality()  << ',' << data.HDOP();
         return stream;
     }
@@ -172,7 +212,7 @@ public:
         GaussianVariable<double> _Long;
         GaussianVariable<double> _Heading;
         GaussianVariable<double> _Speed;
-        GPS_QUALITY _quality;
+        GPS_QUALITY _Quality;
         int _NumSats;
         float _HDOP; // http://en.wikipedia.org/wiki/Dilution_of_precision_(GPS)
 

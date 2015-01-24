@@ -64,7 +64,7 @@ void LineDetector::onImageEvent(ImageData imgd){
 
 void LineDetector::Erosion()
 {
-  int erosion_type;
+  int erosion_type = MORPH_ELLIPSE;
   if( erosion_elem == 0 ){ erosion_type = MORPH_RECT; }
   else if( erosion_elem == 1 ){ erosion_type = MORPH_CROSS; }
   else if( erosion_elem == 2) { erosion_type = MORPH_ELLIPSE; }
@@ -79,7 +79,7 @@ void LineDetector::Erosion()
 /** Dilation enhances the white lines */
 void LineDetector::Dilation()
 {
-  int dilation_type;
+  int dilation_type = MORPH_ELLIPSE;
   if( dilation_elem == 0 ){ dilation_type = MORPH_RECT; }
   else if( dilation_elem == 1 ){ dilation_type = MORPH_CROSS; }
   else if( dilation_elem == 2) { dilation_type = MORPH_ELLIPSE; }

@@ -37,7 +37,7 @@ void BasicPositionTracker::Reset()
     originPointsRecorded = 0;
 }
 
-void BasicPositionTracker::onGPSData(GPSData data)
+void BasicPositionTracker::onGPSData(const GPSData &data)
 {
     int numPointsForOrigin = ConfigManager::Instance().getValue("BasicPoseTracker", "PointsForOrigin", 300);
     if(originPointsRecorded < numPointsForOrigin)
