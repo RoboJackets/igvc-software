@@ -20,7 +20,6 @@ SOURCES += ../src/tests/testmain.cpp \
     ../src/common/logger/logger.cpp \
     ../src/intelligence/linedetection/linedetector.cpp \
     ../src/intelligence/linedetection/transformer.cpp \
-    ../src/intelligence/posetracking/positiontracker.cpp \
     ../src/common/config/configmanager.cpp \
     ../src/common/utils/gpsfilereader.cpp \
     ../src/hardware/sensors/gps/nmeacompatiblegps.cpp \
@@ -49,7 +48,6 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/common/utils/AngleUtils.h \
     ../src/common/utils/gpsfilereader.h \
     ../src/common/utils/StringUtils.hpp \
-    ../src/intelligence/posetracking/positiontracker.h \
     ../src/intelligence/posetracking/basicpositiontracker.h \
     ../src/hardware/sensors/gps/nmeacompatiblegps.h \
     ../src/hardware/serial/SerialPort.h \
