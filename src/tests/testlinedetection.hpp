@@ -11,7 +11,7 @@ class TestLineDetection: public QObject
 {
     Q_OBJECT
 public:
-    TestLineDetection() : LonResults(this) { }
+    TestLineDetection() { }
 
 private:
     cv::Mat src, lines;
@@ -24,6 +24,10 @@ private:
         cv::imshow("Original", src);
     }
 
+signals:
+    void setImageEvent(ImageData img);
+
+public slots:
     void onResults(ImageData img)
     {
         responded = true;
@@ -31,38 +35,34 @@ private:
         DisplayImages();
     }
 
-
-    LISTENER(TestLineDetection, onResults, ImageData)
-
 private Q_SLOTS:
     // TODO fix this test case. LineDetector constructor call needs to be updated when LineDetector is cleaned up
-//    void testCase1()
-//    {
-//        ///NOTE: The directory may not be the same on your computer!
-//        char videoFile[] = "../src/intelligence/igvc_cam_data/stills/img_left2.jpg"; //Still
-//        //char videoFile[] = "../src/intelligence/igvc_cam_data/video/CompCourse_left0.mpeg"; //vid
+    void testCase1()
+    {
+        ///NOTE: The directory may not be the same on your computer!
+        char videoFile[] = "../src/intelligence/igvc_cam_data/stills/img_left2.jpg"; //Still
+        //char videoFile[] = "../src/intelligence/igvc_cam_data/video/CompCourse_left0.mpeg"; //vid
 
-//        cv::VideoCapture cap(videoFile);
-//        Event<ImageData> newImageFrameEvent;
-//        bool success = cap.read(src);
+        if(!success)
+        {
+            QFAIL("Could not load test video.");
+        }
+        LineDetector ldl;
+        connect(&ldl, SIGNAL(onNewLines(ImageData)), this, SLOT(onResults(ImageData)));
+        connect(this, SIGNAL(setImageEvent(ImageData)), &ldl, SLOT(onImageEvent(ImageData)));
 
-//        if(!success)
-//        {
-//            QFAIL("Could not load test video.");
-//        }
+        setImageEvent(cv::imread(videoFile));
+//        ldl.onNewLines += &LonResults;
 
-//        LineDetector ldl(newImageFrameEvent);
-//       ldl.onNewLines += &LonResults;
-
-//        while (success){
-//            responded = false;
-//            newImageFrameEvent(src);
-//            // This checks that the LineDetector is actually responding to events
+        while (success){
+            responded = false;
+            newImageFrameEvent(src);
+            // This checks that the LineDetector is actually responding to events
 //            QTRY_VERIFY_WITH_TIMEOUT(responded, 1000);
-//            cv::waitKey(1);
-//            success = cap.read(src);
-//        }
-//    }
+            cv::waitKey(0);
+            success = cap.read(src);
+        }
+    }
 };
 
 #endif // TESTLINEDETECTION_HPP
