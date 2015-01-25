@@ -7,12 +7,16 @@ project(igvc)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  igvc_msgs
 )
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
 find_package(OpenCV REQUIRED)
-find_package(Eigen REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
+set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -95,6 +99,7 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  include
 )
 
 ## Declare a cpp library
@@ -161,3 +166,7 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+
+add_subdirectory(src/motor_controller)
+add_subdirectory(src/serial)
