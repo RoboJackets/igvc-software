@@ -13,6 +13,7 @@ find_package(catkin REQUIRED
 add_message_files(
   DIRECTORY msg
   FILES
+  velocity_pair.msg
 )
 
 # Generate added messages and services with any dependencies listed here
