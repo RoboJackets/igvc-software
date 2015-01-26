@@ -170,3 +170,4 @@ include_directories(
 
 add_subdirectory(src/motor_controller)
 add_subdirectory(src/serial)
+add_subdirectory(src/joystick_driver)
