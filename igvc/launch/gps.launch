@@ -1,0 +1,6 @@
+<launch>
+    <node name="nmea_serial_driver" pkg="nmea_navsat_driver" type="nmea_serial_driver" output="screen" respawn="false">
+        <param name="port" type="str" value="/dev/igvc_gps" />
+        <param name="baud" type="int" value="0" />
+    </node>
+</launch>
