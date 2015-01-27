@@ -42,6 +42,8 @@ int main(int argc, char** argv)
         {
             sensor_msgs::Imu msg;
             
+            msg.header.frame_id = "/world";
+            
             try
             {
                 auto roll = stof(tokens[1]);
