@@ -66,6 +66,8 @@ string SerialPort::readln()
         char in = read();
         if(in == '\n')
             return line;
+        if(in == '\r')
+            return line;
         line = line + in;
     }
 }
