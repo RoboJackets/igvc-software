@@ -8,7 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   igvc_msgs
-  nmea_navsat_driver
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -173,3 +172,4 @@ add_subdirectory(src/motor_controller)
 add_subdirectory(src/serial)
 add_subdirectory(src/joystick_driver)
 add_subdirectory(src/ardupilot)
+add_subdirectory(src/bumblebee2)
