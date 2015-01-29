@@ -7,7 +7,10 @@ int main(int argc, char** argv)
     
     ros::NodeHandle nh;
     
-    Bumblebee2 camera{};
+    Bumblebee2 camera{nh};
+
+    if(!camera.isOpen())
+        return 1;
     
     ROS_INFO_STREAM("Bumblebee2 started.");
     

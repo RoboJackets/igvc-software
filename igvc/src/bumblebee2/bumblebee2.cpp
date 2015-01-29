@@ -1,10 +1,14 @@
 #include "bumblebee2.h"
 #include <exception>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
 
 using namespace std;
 using namespace FlyCapture2;
+using namespace ros;
 
-Bumblebee2::Bumblebee2()
+Bumblebee2::Bumblebee2(NodeHandle &handle)
+    : _it(handle)
 {
     try
     {
@@ -12,7 +16,11 @@ Bumblebee2::Bumblebee2()
     } catch(const char* s) {
         ROS_ERROR_STREAM("Bumblebee2 failed to initialize.");
         ROS_ERROR_STREAM(s);
+        return;
     }
+
+    _left_pub = _it.advertise("/stereo/left/image_raw", 1);
+    _right_pub = _it.advertise("/stereo/right/image_raw", 1);
 }
 
 Bumblebee2::~Bumblebee2()
@@ -24,6 +32,11 @@ Bumblebee2::~Bumblebee2()
         ROS_ERROR_STREAM("Bumblebee2 failed to close.");
         ROS_ERROR_STREAM(s); 
     }
+}
+
+bool Bumblebee2::isOpen()
+{
+    return _cam.IsConnected();
 }
 
 void Bumblebee2::startCamera()
@@ -130,6 +143,61 @@ void Bumblebee2::closeCamera()
 
 void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callbackData)
 {
-    ROS_INFO_STREAM("ProcessFrame called.");
-    cout << "PFRAME" << endl;
+    //Image* fake;
+    Bumblebee2&  self = *((Bumblebee2*)callbackData);
+    
+    Image savedRaw;
+    Error error;
+
+    error = savedRaw.DeepCopy((const Image*) rawImage);
+    if (error != PGRERROR_OK)
+        throw error.GetDescription();
+
+    // Get the raw image dimensions
+    PixelFormat pixFormat;
+    unsigned int rows, cols, stride;
+    savedRaw.GetDimensions( &rows, &cols, &stride, &pixFormat );
+
+    // Create a converted image
+    Image convertedImage;
+
+    // Convert the raw image
+    error = savedRaw.Convert( PIXEL_FORMAT_BGR, &convertedImage );
+    if (error != PGRERROR_OK)
+        throw error.GetDescription();
+
+    // convertedImage is now the right image.
+
+    sensor_msgs::Image right;
+    right.height = convertedImage.GetRows();
+    right.width = convertedImage.GetCols();
+    right.encoding = sensor_msgs::image_encodings::BGR8;
+    right.step = convertedImage.GetStride();
+    right.data.reserve(convertedImage.GetDataSize());
+    for(int i = 0; i < convertedImage.GetDataSize(); i++)
+        right.data.push_back(convertedImage.GetData()[i]);
+
+    unsigned char* data = savedRaw.GetData();
+    for(unsigned int i = 1; i < savedRaw.GetDataSize(); i += 2)
+        swap(data[i], data[i-1]);
+
+    error = savedRaw.Convert( PIXEL_FORMAT_BGR, &convertedImage );
+    if (error != PGRERROR_OK)
+        throw error.GetDescription();
+
+    // convertedImage is now the left image.
+    
+    sensor_msgs::Image left;
+    left.height = convertedImage.GetRows();
+    left.width = convertedImage.GetCols();
+    left.encoding = sensor_msgs::image_encodings::BGR8;
+    left.step = convertedImage.GetStride();
+    left.data.reserve(convertedImage.GetDataSize());
+    for(int i = 0; i < convertedImage.GetDataSize(); i++)
+        left.data.push_back(convertedImage.GetData()[i]);
+
+    self._left_pub.publish(left);
+    self._right_pub.publish(right);
+
+    return;
 }
