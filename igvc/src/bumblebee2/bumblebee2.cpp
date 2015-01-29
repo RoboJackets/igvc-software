@@ -1,26 +1,32 @@
 #include "bumblebee2.h"
-#include <iostream>
-#include <ros/console.h>
+#include <exception>
 
 using namespace std;
 using namespace FlyCapture2;
 
 Bumblebee2::Bumblebee2()
 {
-    ROS_INFO_STREAM("WTF IS HAPPENING");
-    if(startCamera() != 0)
+    try
     {
+        startCamera();
+    } catch(const char* s) {
         ROS_ERROR_STREAM("Bumblebee2 failed to initialize.");
-        cout << "PROBLEM" << endl;
+        ROS_ERROR_STREAM(s);
     }
 }
 
 Bumblebee2::~Bumblebee2()
 {
-    closeCamera();
+    try
+    {
+        closeCamera();
+    } catch(const char* s) {
+        ROS_ERROR_STREAM("Bumblebee2 failed to close.");
+        ROS_ERROR_STREAM(s); 
+    }
 }
 
-int Bumblebee2::startCamera()
+void Bumblebee2::startCamera()
 {
     constexpr Mode k_fmt7Mode = MODE_3;
     constexpr PixelFormat k_fmt7PixFmt = PIXEL_FORMAT_RAW16;
@@ -30,32 +36,20 @@ int Bumblebee2::startCamera()
     unsigned int numCameras;
     error = busMgr.GetNumOfCameras(&numCameras);
     if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return -1;
-    }
+        throw error.GetDescription();
 
     if ( numCameras < 1 )
-    {
-        ROS_ERROR_STREAM("No camera connected.");
-        return -1;
-    }
+        throw "No camera connected.";
 
     PGRGuid guid;
     error = busMgr.GetCameraFromIndex(0, &guid);
     if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return -1;
-    }
+        throw error.GetDescription();
 
     // Connect to a camera
     error = _cam.Connect(&guid);
     if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return -1;
-    }
+        throw error.GetDescription();
 
     // Query for available Format 7 modes
     Format7Info fmt7Info;
@@ -63,10 +57,7 @@ int Bumblebee2::startCamera()
     fmt7Info.mode = k_fmt7Mode;
     error = _cam.GetFormat7Info( &fmt7Info, &supported );
     if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return -1;
-    }
+        throw error.GetDescription();
 
     Format7ImageSettings fmt7ImageSettings;
     fmt7ImageSettings.mode = k_fmt7Mode;
@@ -85,16 +76,10 @@ int Bumblebee2::startCamera()
         &valid,
         &fmt7PacketInfo );
     if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return -1;
-    }
+        throw error.GetDescription();
 
     if ( !valid )
-    {
-        // Settings are not valid
-        return -1;
-    }
+        throw "Invalid Settings.";
 
     // Set the settings to the camera
     error = _cam.SetFormat7Configuration(
@@ -105,13 +90,10 @@ int Bumblebee2::startCamera()
     float dat;
     _cam.GetFormat7Configuration(&fmt7ImageSettings, &dis, &dat);
 
-    std::cout << "Packet Size set to " << dis <<" should be "<< (fmt7PacketInfo.recommendedBytesPerPacket>>1)<< std::endl;
+    cout << "Packet Size set to " << dis <<" should be " << (fmt7PacketInfo.recommendedBytesPerPacket>>1)<< endl;
 
     if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return -1;
-    }
+        throw error.GetDescription();
 
 
     //Set Frame Rate
@@ -120,23 +102,16 @@ int Bumblebee2::startCamera()
 
     error = _cam.GetProperty( &frmRate );
     if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return -1;
-    }
-    printf( "Frame rate is %3.2f fps\n", frmRate.absValue );
+        throw error.GetDescription();
+    cout << "Frame rate is " << frmRate.absValue << " fps." << endl;
 
     // Start capturing images
     error = _cam.StartCapture(&ProcessFrame, this);
     if (error != PGRERROR_OK)
-    {
-        PrintError( error );
-        return -1;
-    }
-    return 0;
+        throw error.GetDescription();
 }
 
-int Bumblebee2::closeCamera()
+void Bumblebee2::closeCamera()
 {
     if(_cam.IsConnected())
     {
@@ -144,25 +119,13 @@ int Bumblebee2::closeCamera()
         // Stop capturing images
         error = _cam.StopCapture();
         if (error != PGRERROR_OK)
-        {
-            PrintError( error );
-            return -1;
-        }
+            throw error.GetDescription();
 
         // Disconnect the camera
         error = _cam.Disconnect();
         if (error != PGRERROR_OK)
-        {
-            PrintError( error );
-            return -1;
-        }
+            throw error.GetDescription();
     }
-    return 0;
-}
-
-void Bumblebee2::PrintError(const Error& error)
-{
-    ROS_ERROR_STREAM(error.GetDescription());
 }
 
 void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callbackData)

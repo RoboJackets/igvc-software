@@ -12,11 +12,9 @@ public:
     
 private:
 
-    int startCamera();
+    void startCamera();
     
-    int closeCamera();
-    
-    void PrintError(const FlyCapture2::Error& error);
+    void closeCamera();
     
     FlyCapture2::Camera _cam;
     
