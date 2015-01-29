@@ -7,13 +7,11 @@ int main(int argc, char** argv)
     
     ros::NodeHandle nh;
     
-    Bumblebee2 camera();
+    Bumblebee2 camera{};
     
     ROS_INFO_STREAM("Bumblebee2 started.");
     
     ros::spin();
-    
-    ROS_INFO_STREAM("Cleaning up bumblebee2.");
     
     return 0;
 }
