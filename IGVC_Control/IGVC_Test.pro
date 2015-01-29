@@ -45,7 +45,6 @@ HEADERS += ../src/tests/teststringutils.hpp \
     ../src/common/utils/AngleUtils.h \
     ../src/common/utils/gpsfilereader.h \
     ../src/common/utils/StringUtils.hpp \
-    ../src/intelligence/posetracking/positiontracker.h \
     ../src/intelligence/posetracking/basicpositiontracker.h \
     ../src/hardware/sensors/gps/nmeacompatiblegps.h \
     ../src/hardware/serial/SerialPort.h \
