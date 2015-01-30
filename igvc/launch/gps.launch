@@ -1,3 +1,9 @@
+<!-- gps.launch -->
+<!--
+    This file launches the GPS driver node with
+    the appropriate settings defined for our
+    GPS model.
+    -->
 <launch>
     <node name="nmea_serial_driver" pkg="nmea_navsat_driver" type="nmea_serial_driver" output="screen" respawn="false">
         <param name="port" type="str" value="/dev/igvc_gps" />
