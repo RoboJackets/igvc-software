@@ -1,0 +1,9 @@
+<!-- rosbag.launch -->
+<!--
+    This file will launch the rosbag recorder and will log all topics
+    excluding some of the duplicate image_transport topics.
+    -->
+<launch>
+  <node pkg="rosbag" type="record" name="record" machine="muri-laptop" output="screen"
+    args="-a -x '(.*)compressedDepth(.*)|(.*)theora(.*)' " />
+</launch>

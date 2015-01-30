@@ -1,3 +1,11 @@
+<!-- joystick_driver.launch -->
+<!--
+    This file launches the joy node and a custom
+    interpreter node that maps joystick inputs
+    to robot actions.
+    Use this file to start remote control of the
+    robot.
+    -->
 <launch>
     <!-- Joystick node -->
     <node name="joy_node" pkg="joy" type="joy_node" output="screen" respawn="false">

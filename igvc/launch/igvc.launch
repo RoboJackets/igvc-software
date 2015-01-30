@@ -1,0 +1,16 @@
+<!-- igvc.launch -->
+<!--
+    This file will launch the default node configuration for
+    a competition run. All sensors and default intelligence
+    nodes will be started.
+    -->
+<launch>
+    <include file="$(find igvc)/launch/gps.launch" />
+    
+    <node name="ardupilot" pkg="igvc" type="ardupilot" output="screen" respawn="false" />
+    
+    <node name="bumblebee2" pkg="igvc" type="bumblebee2" output="screen" respawn="false" />
+    
+    <node name="motor_controller" pkg="igvc" type="bumblebee2" output="screen" respawn="false" />
+    
+</launch>
