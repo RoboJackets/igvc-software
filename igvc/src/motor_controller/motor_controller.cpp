@@ -36,12 +36,22 @@ int main(int argc, char** argv)
     
     SerialPort port(device_path, baud_rate);
     
+    auto line = port.readln();
+    while(ros::ok() && line.compare("Ready"))
+    {
+        ROS_INFO_STREAM("Waiting for arduino. " << line);
+        line = port.readln();
+        usleep(250);
+    }
+    
     ros::Rate rate(10);
     while(ros::ok() && port.isOpen())
     {
         ros::spinOnce();
         
         string msg = "$" + to_string(cmd.left_velocity) + "," + to_string(cmd.right_velocity) + "\n";
+        
+        ROS_INFO_STREAM(msg);
         
         port.write(msg);
         
@@ -58,6 +68,8 @@ int main(int argc, char** argv)
                 igvc_msgs::velocity_pair enc_msg;
                 enc_msg.left_velocity = atof(leftStr.c_str());
                 enc_msg.right_velocity = atof(rightStr.c_str());
+            } else {
+                ROS_ERROR_STREAM("Empty return from arduino.\t" << ret);
             }
         } catch (std::out_of_range) { }
         

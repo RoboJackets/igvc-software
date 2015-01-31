@@ -30,12 +30,12 @@ void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
     bool leftInverted, rightInverted;
     nhp->param(string("leftAxis"), leftJoyAxis, 1);
     nhp->param(string("rightAxis"), rightJoyAxis, 3);
-    nhp->param(string("leftInverted"), leftInverted, true);
-    nhp->param(string("rightInverted"), rightInverted, true);
+    nhp->param(string("leftInverted"), leftInverted, false);
+    nhp->param(string("rightInverted"), rightInverted, false);
     
     igvc_msgs::velocity_pair cmd;
-    cmd.left_velocity = (msg->axes[leftJoyAxis]/32767.0)*maxVel * (leftInverted ? -1.0 : 1.0);
-    cmd.right_velocity = (msg->axes[rightJoyAxis]/32767.0)*maxVel * (rightInverted ? -1.0 : 1.0);
+    cmd.left_velocity = msg->axes[leftJoyAxis]*maxVel * (leftInverted ? -1.0 : 1.0);
+    cmd.right_velocity = msg->axes[rightJoyAxis]*maxVel * (rightInverted ? -1.0 : 1.0);
     
     cmd_pub.publish(cmd);
 }
