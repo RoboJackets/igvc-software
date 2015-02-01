@@ -4,14 +4,22 @@
 #include <string>
 #include <igvc_msgs/velocity_pair.h>
 #include <igvc/SerialPort.h>
+#include <std_msgs/Bool.h>
 
 using namespace std;
 
 igvc_msgs::velocity_pair cmd;
 
+bool enabled;
+
 void cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg)
 {
     cmd = *msg;
+}
+
+void enabledCallback(const std_msgs::BoolConstPtr& msg)
+{
+    enabled = msg->data;
 }
 
 int main(int argc, char** argv)
@@ -19,14 +27,12 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "motor_controller");
     ros::NodeHandle nh;
     ros::NodeHandle nhp("~");
-    
-    std::string cmd_topic_name;
-    nhp.param(string("cmd_topic"), cmd_topic_name, string("/motors"));
-    ros::Subscriber cmd_sub = nh.subscribe(cmd_topic_name, 1, cmdCallback);
-    
-    std::string enc_topic_name;
-    nhp.param(string("enc_topic"), enc_topic_name, string("/encoders"));
-    ros::Publisher enc_pub = nh.advertise<igvc_msgs::velocity_pair>(enc_topic_name, 1000);
+
+    ros::Subscriber cmd_sub = nh.subscribe("/motors", 1, cmdCallback);
+
+    ros::Subscriber enabled_sub = nh.subscribe("/robot_enabled", 1, enabledCallback);
+
+    ros::Publisher enc_pub = nh.advertise<igvc_msgs::velocity_pair>("/encoders", 1000);
     
     std::string device_path;
     nhp.param(string("device"), device_path, string("/dev/igvc_motor_arduino"));
@@ -41,7 +47,7 @@ int main(int argc, char** argv)
     {
         ros::spinOnce();
         
-        string msg = "$" + to_string(cmd.left_velocity) + "," + to_string(cmd.right_velocity) + "\n";
+        string msg = "$" + (enabled?to_string(cmd.left_velocity):0) + "," + (enabled?to_string(cmd.right_velocity):0) + "\n";
         
         port.write(msg);
         
@@ -58,6 +64,7 @@ int main(int argc, char** argv)
                 igvc_msgs::velocity_pair enc_msg;
                 enc_msg.left_velocity = atof(leftStr.c_str());
                 enc_msg.right_velocity = atof(rightStr.c_str());
+                enc_pub.publish(enc_msg);
             }
         } catch (std::out_of_range) { }
         
