@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 
         port.write(msg, 12);
 
-        unsigned char *ret = (unsigned char*)_port.read(4);
+        unsigned char *ret = (unsigned char*)port.read(4);
 
         if(ret[0] != 2 || ret[3] != 4)
             ROS_ERROR_STREAM("Bad format for return packet.");
