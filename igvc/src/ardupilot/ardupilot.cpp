@@ -5,18 +5,9 @@
 #include <vector>
 #include <sstream>
 #include <tf/transform_datatypes.h>
+#include <igvc/StringUtils.hpp>
 
 using namespace std;
-
-vector<string> split(const string &s, const char &delim) {
-    vector<string> elems;
-    stringstream ss(s);
-    string item;
-    while (getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
 
 int main(int argc, char** argv)
 {
