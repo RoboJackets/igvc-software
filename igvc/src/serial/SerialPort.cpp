@@ -5,7 +5,8 @@ using namespace std;
 using namespace boost::asio;
 
 SerialPort::SerialPort(string device, int baud)
-    : port(ioservice)
+    : port(ioservice),
+      path(device)
 {
     try
     {
@@ -39,7 +40,19 @@ bool SerialPort::isOpen()
 
 void SerialPort::write(string msg)
 {
-    if(port.is_open()) boost::asio::write(port, boost::asio::buffer(msg.c_str(),msg.length()));
+    if(port.is_open())
+        boost::asio::write(port, boost::asio::buffer(msg.c_str(),msg.length()));
+}
+
+void SerialPort::write(char *buffer, int length)
+{
+    boost::asio::write(port, boost::asio::buffer(buffer, length));
+}
+
+void SerialPort::write(unsigned char *buffer, int length)
+{
+    if(port.is_open())
+        boost::asio::write(port, boost::asio::buffer(buffer, length));
 }
 
 char SerialPort::read()
@@ -58,6 +71,16 @@ char SerialPort::read()
     return in;
 }
 
+char* SerialPort::read(int numBytes)
+{
+    if(!port.is_open())
+        return (char*)"";
+    char* bytes = new char[numBytes];
+    for(int i = 0; i < numBytes; i++)
+        bytes[i] = read();
+    return bytes;
+}
+
 string SerialPort::readln()
 {
     string line = "";
@@ -70,4 +93,9 @@ string SerialPort::readln()
             return line;
         line = line + in;
     }
+}
+
+string SerialPort::devicePath()
+{
+    return path;
 }
