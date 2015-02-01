@@ -11,6 +11,6 @@
     
     <node name="bumblebee2" pkg="igvc" type="bumblebee2" output="screen" respawn="false" />
     
-    <node name="motor_controller" pkg="igvc" type="bumblebee2" output="screen" respawn="false" />
+    <!--<node name="motor_controller" pkg="igvc" type="bumblebee2" output="screen" respawn="false" />-->
     
 </launch>
