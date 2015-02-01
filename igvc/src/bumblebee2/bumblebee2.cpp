@@ -103,7 +103,7 @@ void Bumblebee2::startCamera()
     float dat;
     _cam.GetFormat7Configuration(&fmt7ImageSettings, &dis, &dat);
 
-    cout << "Packet Size set to " << dis <<" should be " << (fmt7PacketInfo.recommendedBytesPerPacket>>1)<< endl;
+    ROS_INFO_STREAM("Packet Size set to " << dis << " should be " << (fmt7PacketInfo.recommendedBytesPerPacket>>1));
 
     if (error != PGRERROR_OK)
         throw error.GetDescription();
@@ -116,7 +116,7 @@ void Bumblebee2::startCamera()
     error = _cam.GetProperty( &frmRate );
     if (error != PGRERROR_OK)
         throw error.GetDescription();
-    cout << "Frame rate is " << frmRate.absValue << " fps." << endl;
+    ROS_INFO_STREAM("Frame rate is " << frmRate.absValue << " fps.");
 
     // Start capturing images
     error = _cam.StartCapture(&ProcessFrame, this);
