@@ -16,6 +16,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
+find_package(PCL REQUIRED)
 
 set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
@@ -100,6 +101,7 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
   include
 )
 
@@ -176,3 +178,4 @@ add_subdirectory(src/ardupilot)
 add_subdirectory(src/bumblebee2)
 add_subdirectory(src/light_controller)
 add_subdirectory(src/waypoint_source)
+add_subdirectory(src/pathplanner)
