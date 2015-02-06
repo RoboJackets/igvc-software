@@ -13,6 +13,7 @@
 #ArdupilotIgnores
 /2013/software/src/sensors/ardupilot/config.mk
 /src/hardware/sensors/ardupilot/config.mk
+/sandbox/ardupilot/config.mk
 
 *~
 
@@ -24,3 +25,6 @@
 
 #Doxygen
 /docs/
+
+#rosdoc_lite
+/doc/
