@@ -10,7 +10,7 @@ using namespace std;
 
 igvc_msgs::velocity_pair cmd;
 
-bool enabled;
+bool enabled = false;
 
 void cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg)
 {
@@ -49,13 +49,15 @@ int main(int argc, char** argv)
         line = port.readln();
         usleep(250);
     }
+
+    ROS_INFO_STREAM("Motor Controller ready.");
     
     ros::Rate rate(10);
     while(ros::ok() && port.isOpen())
     {
         ros::spinOnce();
         
-        string msg = "$" + (enabled?to_string(cmd.left_velocity):0) + "," + (enabled?to_string(cmd.right_velocity):0) + "\n";
+        string msg = "$" + to_string(enabled?cmd.left_velocity:0.0) + "," + to_string(enabled?cmd.right_velocity:0.0) + "\n";
         
         ROS_INFO_STREAM(msg);
         
