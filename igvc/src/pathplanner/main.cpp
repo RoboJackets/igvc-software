@@ -10,6 +10,7 @@
 #include <tf/transform_datatypes.h>
 #include <mutex>
 #include <pcl_conversions/pcl_conversions.h>
+#include <algorithm>
 
 using namespace std;
 
@@ -49,6 +50,10 @@ int main(int argc, char** argv)
 
     disp_path_pub = nh.advertise<nav_msgs::Path>("/path_display", 1);
 
+    nav_msgs::Path disp_path_msg;
+    disp_path_msg.header.stamp = ros::Time::now();
+    disp_path_msg.header.frame_id = "base_footprint";
+
     ros::Rate rate(3);
     while(ros::ok())
     {
@@ -56,6 +61,18 @@ int main(int argc, char** argv)
 
         planning_mutex.lock();
         // TODO replan if needed.
+        auto path = GraphSearch::AStar(search_problem);
+
+        for(auto loc : *(path.getStates()))
+        {
+            geometry_msgs::PoseStamped pose;
+            pose.header.stamp = disp_path_msg.header.stamp;
+            pose.header.frame_id = disp_path_msg.header.frame_id;
+            pose.pose.position.x = loc.x;
+            pose.pose.position.y = loc.y;
+            disp_path_msg.poses.push_back(pose);
+        }
+
         planning_mutex.unlock();
 
         rate.sleep();
