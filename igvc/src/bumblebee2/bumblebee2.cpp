@@ -22,7 +22,7 @@ Bumblebee2::Bumblebee2(NodeHandle &handle)
 
     _left_pub = _it.advertise("/stereo/left/image_raw", 1);
     _right_pub = _it.advertise("/stereo/right/image_raw", 1);
-    _leftInfo_pub = handle.advertise<sensor_msgs::CameraInfo>("/stero/left/camera_info", 1);
+    _leftInfo_pub = handle.advertise<sensor_msgs::CameraInfo>("/stereo/left/camera_info", 1);
     _rightInfo_pub = handle.advertise<sensor_msgs::CameraInfo>("/stereo/right/camera_info", 1);
 }
 
@@ -139,14 +139,17 @@ void Bumblebee2::startCamera()
 
     leftInfo.height = fmt7Info.maxHeight;
     leftInfo.width = fmt7Info.maxWidth;
-    rightInfo.K.assign(0);
-    rightInfo.K[0] = (double)6.365349743891542e+02;
-    rightInfo.K[2] = (double)5.133425025803425e+02;
-    rightInfo.K[4] = (double)6.330737197108180e+02;
-    rightInfo.K[5] = (double)3.820620732916243e+02;
-    rightInfo.K[8] = 1.0;
+    leftInfo.K.assign(0);
+    leftInfo.K[0] = (double)6.365349743891542e+02;
+    leftInfo.K[2] = (double)5.133425025803425e+02;
+    leftInfo.K[4] = (double)6.330737197108180e+02;
+    leftInfo.K[5] = (double)3.820620732916243e+02;
+    leftInfo.K[8] = 1.0;
     leftInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
     leftInfo.D = {0.057997474980893,-0.075630120106270, 0, 0, 0};
+//    leftInfo.roi.height = leftInfo.height;
+//    leftInfo.roi.width = leftInfo.width;
+//    leftInfo.roi.do_rectify = true;
 }
 
 void Bumblebee2::closeCamera()
@@ -194,6 +197,7 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
     // convertedImage is now the right image.
 
     self.rightInfo.header.stamp = ros::Time::now();
+    self.rightInfo.header.seq+=1;
 
     sensor_msgs::Image right;
     right.height = convertedImage.GetRows();
@@ -215,6 +219,7 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
     // convertedImage is now the left image.
     
     self.leftInfo.header.stamp = ros::Time::now();
+    self.leftInfo.header.seq+=1;
 
     sensor_msgs::Image left;
     left.height = convertedImage.GetRows();
