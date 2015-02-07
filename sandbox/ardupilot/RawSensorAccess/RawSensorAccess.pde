@@ -100,11 +100,6 @@ void setup() {
 	hal.console->printf("!\n");
 }
 
-Vector3f prevAccels;
-double prevRoll;
-double prevPitch;
-double prevHeading;
-
 void loop()
 {
 #if WITH_GPS
@@ -114,9 +109,10 @@ void loop()
 	ahrs.update();
 	compass.read();
 
-	Vector3f accelVals = ahrs.get_accel_ef();
+	Vector3f accelVals = ins.get_accel();
+	
+	Vector3f gyroVals = ahrs.get_gyro();
 
-	accelVals.z += GRAVITY_MSS;
 	Vector3f filteredVals;
 	filteredVals.x = (abs(accelVals.x) > 0.005 ? accelVals.x : 0.0);
 	filteredVals.y = (abs(accelVals.y) > 0.005 ? accelVals.y : 0.0);
@@ -125,21 +121,7 @@ void loop()
 	double heading = compass.calculate_heading(ahrs.get_dcm_matrix());
 	heading = heading*180.0/3.1415;
 	
-	if( prevAccels.x != filteredVals.x ||
-		prevAccels.y != filteredVals.y ||
-		prevAccels.z != filteredVals.z ||
-		prevRoll != ahrs.roll ||
-		prevPitch != ahrs.pitch ||
-		prevHeading != heading )
-	{
-		hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f \n"),ahrs.roll*180.0/M_PI,ahrs.pitch*180.0/M_PI,heading, filteredVals.x, filteredVals.y, filteredVals.z);
-		prevAccels.x = filteredVals.x;
-		prevAccels.y = filteredVals.y;
-		prevAccels.z = filteredVals.z;
-		prevRoll = ahrs.roll;
-		prevPitch = ahrs.pitch;
-		prevHeading = heading;
-	}
+	hal.console->printf_P( PSTR("A %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f %4.2f\n"),ahrs.roll*180.0/M_PI,ahrs.pitch*180.0/M_PI,heading, filteredVals.x, filteredVals.y, filteredVals.z, gyroVals.x, gyroVals.y, gyroVals.z);
 
 	
 }
