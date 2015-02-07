@@ -24,6 +24,11 @@ private:
     image_transport::ImageTransport _it;
     image_transport::Publisher _left_pub;
     image_transport::Publisher _right_pub;
+    ros::Publisher _leftInfo_pub;
+    ros::Publisher _rightInfo_pub;
+
+    sensor_msgs::CameraInfo rightInfo;
+    sensor_msgs::CameraInfo leftInfo;
     
     static void ProcessFrame(FlyCapture2::Image* rawImage, const void* callbackData);
 };

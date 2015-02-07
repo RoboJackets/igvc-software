@@ -14,6 +14,6 @@
     
     <node name="ardupilot" pkg="igvc" type="ardupilot" />
     
-    <node name="bumblebee2" pkg="igvc" type="bumblebee2" />
+    <include file="$(find igvc)/launch/camera.launch" />
     
 </launch>
