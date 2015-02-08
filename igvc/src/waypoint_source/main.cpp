@@ -1,17 +1,19 @@
 #include <ros/ros.h>
-#include <sensor_msgs/NavSatFix.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/PointStamped.h>
 #include <fstream>
 #include <igvc/StringUtils.hpp>
-#include <igvc/GPSUtils.h>
+#include <gps_common/conversions.h>
+#include <string>
 
 using namespace std;
-using namespace sensor_msgs;
+using namespace geometry_msgs;
 
 ros::Publisher waypoint_pub;
-std::vector<NavSatFix> waypoints;
-NavSatFix current_waypoint;
+vector<PointStamped> waypoints;
+PointStamped current_waypoint;
 
-void loadWaypointsFile(string path, vector<NavSatFix>& waypoints)
+void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
 {
     if(path.empty())
     {
@@ -44,23 +46,35 @@ void loadWaypointsFile(string path, vector<NavSatFix>& waypoints)
                 return;
             }
 
-            NavSatFix data;
-            data.latitude = atof(tokens[0].c_str());
-            data.longitude = atof(tokens[1].c_str());
+            auto lat = stof(tokens[0]);
+            auto lon = stof(tokens[1]);
 
-            waypoints.push_back(data);
+            PointStamped p;
+
+            gps_common::UTM(lat, lon, &(p.point.x), &(p.point.y));
+
+            waypoints.push_back(p);
         }
 
         lineIndex++;
     }
 }
 
-void fixCallback(const NavSatFixConstPtr& msg)
+double distanceBetweenPoints(const Point &p1, const Point &p2)
 {
-    if(GPSUtils::coordsToMeter(msg->latitude, msg->longitude, current_waypoint.latitude, current_waypoint.longitude) < 1.0)
+    return sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y));
+}
+
+void positionCallback(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg)
+{
+    if(distanceBetweenPoints(msg->pose.pose.position, current_waypoint.point) < 1.0)
     {
-        current_waypoint = waypoints[0];
+        auto seq = current_waypoint.header.seq + 1;
+        current_waypoint = waypoints.front();
         waypoints.erase(waypoints.begin());
+        current_waypoint.header.stamp = ros::Time::now();
+        current_waypoint.header.seq = seq;
+        current_waypoint.header.frame_id = "base_footprint";
         waypoint_pub.publish(current_waypoint);
     }
 }
@@ -83,9 +97,9 @@ int main(int argc, char** argv)
         waypoints.erase(waypoints.begin());
         waypoint_pub.publish(current_waypoint);
 
-        nh.advertise<NavSatFix>("/waypoint", 1);
+        nh.advertise<PointStamped>("/waypoint", 1);
 
-        nh.subscribe("/fix", 1, fixCallback);
+        nh.subscribe("/robot_pose_ekf/odom_combined", 1, positionCallback);
 
         ros::spin();
     }
