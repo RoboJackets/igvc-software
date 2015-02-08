@@ -32,10 +32,14 @@ void position_callback(const geometry_msgs::PoseWithCovarianceStampedConstPtr& m
     search_problem.Start.x = msg->pose.pose.position.x;
     search_problem.Start.y = msg->pose.pose.position.y;
     tf::Quaternion q{msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w};
-    tf::Matrix3x3 m{q};
-    double roll, pitch, yaw;
-    m.getRPY(roll, pitch, yaw);
-    search_problem.Start.theta = yaw;
+    search_problem.Start.theta = tf::getYaw(q);
+}
+
+void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
+{
+    lock_guard<mutex> lock(planning_mutex);
+    search_problem.Goal.x = msg->point.x;
+    search_problem.Goal.y = msg->point.y;
 }
 
 int main(int argc, char** argv)
@@ -48,6 +52,8 @@ int main(int argc, char** argv)
 
     nh.subscribe("robot_pose_ekf/odom_combined", 1, position_callback);
 
+    nh.subscribe("/waypoint", 1, waypoint_callback);
+
     disp_path_pub = nh.advertise<nav_msgs::Path>("/path_display", 1);
 
     ros::Rate rate(3);
@@ -56,7 +62,7 @@ int main(int argc, char** argv)
         ros::spinOnce();
 
         planning_mutex.lock();
-        // TODO replan if needed.
+        // TODO only replan if needed.
         auto path = GraphSearch::AStar(search_problem);
 
         if(disp_path_pub.getNumSubscribers() > 0)
