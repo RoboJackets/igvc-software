@@ -146,7 +146,7 @@ include_directories(
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
 #   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
+#   FILES_MATCHING PATTERN "*.h")
 #   PATTERN ".svn" EXCLUDE
 # )
 
@@ -179,3 +179,4 @@ add_subdirectory(src/bumblebee2)
 add_subdirectory(src/light_controller)
 add_subdirectory(src/waypoint_source)
 add_subdirectory(src/pathplanner)
+add_subdirectory(src/line_detection)
