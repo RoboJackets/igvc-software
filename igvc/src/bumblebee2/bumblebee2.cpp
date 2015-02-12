@@ -126,8 +126,8 @@ void Bumblebee2::startCamera()
     if (error != PGRERROR_OK)
         throw error.GetDescription();
 
-    rightInfo.height = fmt7Info.maxHeight;
-    rightInfo.width = fmt7Info.maxWidth;
+    rightInfo.height = 768;
+    rightInfo.width = 1024;
     rightInfo.K.assign(0);
     rightInfo.K[0] = (double)6.354259461656430e+02;
     rightInfo.K[2] = (double)5.089888715971588e+02;
@@ -137,8 +137,8 @@ void Bumblebee2::startCamera()
     rightInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
     rightInfo.D = {0.045253327365644,-0.061253391712329, 0, 0, 0};
 
-    leftInfo.height = fmt7Info.maxHeight;
-    leftInfo.width = fmt7Info.maxWidth;
+    leftInfo.height = 768;
+    leftInfo.width = 1024;
     leftInfo.K.assign(0);
     leftInfo.K[0] = (double)6.365349743891542e+02;
     leftInfo.K[2] = (double)5.133425025803425e+02;
@@ -147,9 +147,6 @@ void Bumblebee2::startCamera()
     leftInfo.K[8] = 1.0;
     leftInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
     leftInfo.D = {0.057997474980893,-0.075630120106270, 0, 0, 0};
-//    leftInfo.roi.height = leftInfo.height;
-//    leftInfo.roi.width = leftInfo.width;
-//    leftInfo.roi.do_rectify = true;
 }
 
 void Bumblebee2::closeCamera()
@@ -198,8 +195,11 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
 
     self.rightInfo.header.stamp = ros::Time::now();
     self.rightInfo.header.seq+=1;
+    self.rightInfo.header.frame_id = "right";
 
     sensor_msgs::Image right;
+    right.header.stamp = self.rightInfo.header.stamp;
+//    right.header.frame_id = "right";
     right.height = convertedImage.GetRows();
     right.width = convertedImage.GetCols();
     right.encoding = sensor_msgs::image_encodings::BGR8;
@@ -218,10 +218,13 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
 
     // convertedImage is now the left image.
     
-    self.leftInfo.header.stamp = ros::Time::now();
+    self.leftInfo.header.stamp = self.rightInfo.header.stamp;
     self.leftInfo.header.seq+=1;
+    self.leftInfo.header.frame_id = "left";
 
     sensor_msgs::Image left;
+    left.header.stamp = self.leftInfo.header.stamp;
+//    left.header.frame_id = "right";
     left.height = convertedImage.GetRows();
     left.width = convertedImage.GetCols();
     left.encoding = sensor_msgs::image_encodings::BGR8;
