@@ -193,13 +193,12 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
 
     // convertedImage is now the right image.
 
-    self.rightInfo.header.stamp = ros::Time::now();
+    self.rightInfo.header.stamp = (ros::Time)rawImage->GetMetadata().embeddedTimeStamp;
     self.rightInfo.header.seq+=1;
     self.rightInfo.header.frame_id = "right";
 
     sensor_msgs::Image right;
     right.header.stamp = self.rightInfo.header.stamp;
-//    right.header.frame_id = "right";
     right.height = convertedImage.GetRows();
     right.width = convertedImage.GetCols();
     right.encoding = sensor_msgs::image_encodings::BGR8;
@@ -223,8 +222,7 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
     self.leftInfo.header.frame_id = "left";
 
     sensor_msgs::Image left;
-    left.header.stamp = self.leftInfo.header.stamp;
-//    left.header.frame_id = "right";
+    left.header.stamp = self.rightInfo.header.stamp;
     left.height = convertedImage.GetRows();
     left.width = convertedImage.GetCols();
     left.encoding = sensor_msgs::image_encodings::BGR8;
