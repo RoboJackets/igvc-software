@@ -7,6 +7,9 @@
 #include <tf/transform_datatypes.h>
 #include <igvc/StringUtils.hpp>
 
+#define GRAVITY_MSS 9.80665
+#define DEG_TO_RAD (3.14159265/180.0)
+
 using namespace std;
 
 int main(int argc, char** argv)
@@ -29,26 +32,29 @@ int main(int argc, char** argv)
         
         auto tokens = split(line, ' ');
         
-        if(tokens.size() == 7)
+        if(tokens.size() == 10)
         {
             sensor_msgs::Imu msg;
             
-            msg.header.frame_id = "/world";
+            msg.header.frame_id = "/imu";
+            msg.header.stamp = ros::Time::now();
             
             try
             {
-                auto roll = stof(tokens[1]);
-                auto pitch = stof(tokens[2]);
-                auto yaw = stof(tokens[3]);
+                auto roll = stof(tokens[1]) * DEG_TO_RAD;
+                auto pitch = stof(tokens[2]) * DEG_TO_RAD;
+                auto yaw = stof(tokens[3]) * DEG_TO_RAD;
                 
                 msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
                 
                 msg.linear_acceleration.x = stof(tokens[4]);
                 msg.linear_acceleration.y = stof(tokens[5]);
                 msg.linear_acceleration.z = stof(tokens[6]);
-                
-                // Indicate that no angular velocities are available
-                msg.angular_velocity_covariance[0] = -1;
+
+                msg.angular_velocity.x = stof(tokens[7]);
+                msg.angular_velocity.y = stof(tokens[8]);
+                msg.angular_velocity.z = stof(tokens[9]);
+
             } catch(const invalid_argument &e) {
                 ROS_ERROR_STREAM("Exception in parsing IMU message.");
                 ROS_ERROR_STREAM(e.what());
