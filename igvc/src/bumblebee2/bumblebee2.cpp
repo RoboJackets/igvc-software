@@ -115,8 +115,8 @@ void Bumblebee2::startCamera()
     //Set Frame Rate
     Property frmRate;
     frmRate.type = FRAME_RATE;
-
-    error = _cam.GetProperty( &frmRate );
+    frmRate.absValue = 20;
+    error = _cam.SetProperty(&frmRate);
     if (error != PGRERROR_OK)
         throw error.GetDescription();
     ROS_INFO_STREAM("Frame rate is " << frmRate.absValue << " fps.");
@@ -129,13 +129,13 @@ void Bumblebee2::startCamera()
     rightInfo.height = fmt7Info.maxHeight;
     rightInfo.width = fmt7Info.maxWidth;
     rightInfo.K.assign(0);
-    rightInfo.K[0] = (double)6.354259461656430e+02;
-    rightInfo.K[2] = (double)5.089888715971588e+02;
-    rightInfo.K[4] = (double)6.325006633906235e+02;
-    rightInfo.K[5] = (double)3.823732097059457e+02;
+    rightInfo.K[0] = (double)8.1999041286087140e+02;
+    rightInfo.K[2] = (double)5.1150000000000000e+02;
+    rightInfo.K[4] = (double)8.1999041286087140e+02;
+    rightInfo.K[5] = (double)3.8350000000000000e+02;
     rightInfo.K[8] = 1.0;
     rightInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
-    rightInfo.D = {0.045253327365644,-0.061253391712329, 0, 0, 0};
+    rightInfo.D = {-3.8092851682730261e-01,2.6987102010509012e-01, 0, 0, -1.2248394979815531e-01};
 
     leftInfo.height = fmt7Info.maxHeight;
     leftInfo.width = fmt7Info.maxWidth;
@@ -226,7 +226,7 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
         left.data.push_back(convertedImage.GetData()[i]);
 
     self._left_pub.publish(left);
-    self._leftInfo_pub.publish(self.leftInfo);
+    self._leftInfo_pub.publish(self.rightInfo);
     self._right_pub.publish(right);
     self._rightInfo_pub.publish(self.rightInfo);
 
