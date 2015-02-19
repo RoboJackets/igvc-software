@@ -11,10 +11,10 @@
 using namespace std;
 using namespace cv;
 
+
 cv_bridge::CvImagePtr cv_ptr;
 
 void img_callback(const sensor_msgs::ImageConstPtr& msg) {
-	
 	try
 	{
 		cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8") -> image);

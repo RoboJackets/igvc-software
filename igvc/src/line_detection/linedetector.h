@@ -1,7 +1,7 @@
 #ifndef LINEDETECTOR_H
 #define LINEDETECTOR_H
-#include "opencv2/imgproc/imgproc.hpp"
-#include "opencv2/highgui/highgui.hpp"
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
@@ -16,7 +16,7 @@
 #include <flycapture/FlyCapture2.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
-#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
 
 class LineDetector
 {
