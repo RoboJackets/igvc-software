@@ -9,7 +9,7 @@ using namespace FlyCapture2;
 using namespace ros;
 
 Bumblebee2::Bumblebee2(NodeHandle &handle)
-    : _it(handle)
+    : _it(handle), cameraManagerLeft(handle, "bumblebee2/left", "file:///home/robojackets/catkin_ws/src/igvc-software/sandbox/bumblebee2/camera_calib_left.yml"), cameraManagerRight(handle, "bumblebee2/right", "file:///home/robojackets/catkin_ws/src/igvc-software/sandbox/bumblebee2/camera_calib_right.yml")
 {
     try
     {
@@ -126,27 +126,45 @@ void Bumblebee2::startCamera()
     if (error != PGRERROR_OK)
         throw error.GetDescription();
 
-    rightInfo.height = 768;
-    rightInfo.width = 1024;
-    rightInfo.K.assign(0);
-    rightInfo.K[0] = (double)8.1999041286087140e+02;
-    rightInfo.K[2] = (double)5.1150000000000000e+02;
-    rightInfo.K[4] = (double)8.1999041286087140e+02;
-    rightInfo.K[5] = (double)3.8350000000000000e+02;
-    rightInfo.K[8] = 1.0;
-    rightInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
-    rightInfo.D = {-3.8092851682730261e-01,2.6987102010509012e-01, 0, 0, -1.2248394979815531e-01};
+//    rightInfo.height = 768;
+//    rightInfo.width = 1024;
+//    rightInfo.K.assign(0);
+//    rightInfo.K[0] = 843.531932;
+//    rightInfo.K[2] = 497.097324;
+//    rightInfo.K[4] = 846.804718;
+//    rightInfo.K[5] = 388.731818;
+//    rightInfo.K[8] = 1.0;
+//    rightInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
+//    rightInfo.D = {-0.350316,0.152068, 0.001214, 0.001129, 0.0};
+//    rightInfo.R[0] = 0.997458;
+//    rightInfo.R[1] = 0.007311;
+//    rightInfo.R[2] = -0.070875;
+//    rightInfo.R[3] = -0.007232;
+//    rightInfo.R[4] = 0.999973;
+//    rightInfo.R[5] = 0.001370;
+//    rightInfo.R[6] = 0.070883;
+//    rightInfo.R[7] = -0.000854;
+//    rightInfo.R[8] = 0.997484;
 
-    leftInfo.height = 768;
-    leftInfo.width = 1024;
-    leftInfo.K.assign(0);
-    leftInfo.K[0] = (double)6.365349743891542e+02;
-    leftInfo.K[2] = (double)5.133425025803425e+02;
-    leftInfo.K[4] = (double)6.330737197108180e+02;
-    leftInfo.K[5] = (double)3.820620732916243e+02;
-    leftInfo.K[8] = 1.0;
-    leftInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
-    leftInfo.D = {0.057997474980893,-0.075630120106270, 0, 0, 0};
+//    leftInfo.height = 768;
+//    leftInfo.width = 1024;
+//    leftInfo.K.assign(0);
+//    leftInfo.K[0] = 842.675555;
+//    leftInfo.K[2] = 539.051968;
+//    leftInfo.K[4] = 846.223291;
+//    leftInfo.K[5] = 385.413255;
+//    leftInfo.K[8] = 1.0;
+//    leftInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
+//    leftInfo.D = {-0.347188, 0.144269, 0.000624, -0.000270, 0.000000};
+//    leftInfo.R[0] = 0.996584;
+//    leftInfo.R[1] = 0.006763;
+//    leftInfo.R[2] = -0.082312;
+//    leftInfo.R[3] = -0.006855;
+//    leftInfo.R[4] = 0.999976;
+//    leftInfo.R[5] = -0.000831;
+//    leftInfo.R[6] = 0.082304;
+//    leftInfo.R[7] = 0.001392;
+//    leftInfo.R[8] = 0.996606;
 }
 
 void Bumblebee2::closeCamera()
@@ -193,9 +211,9 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
 
     // convertedImage is now the right image.
 
-    self.rightInfo.header.stamp = (ros::Time)rawImage->GetMetadata().embeddedTimeStamp;
-    self.rightInfo.header.seq+=1;
-    self.rightInfo.header.frame_id = "right";
+//    self.rightInfo.header.stamp = (ros::Time)rawImage->GetMetadata().embeddedTimeStamp;
+//    self.rightInfo.header.seq+=1;
+//    self.rightInfo.header.frame_id = "right";
 
     sensor_msgs::Image right;
     right.header.stamp = self.rightInfo.header.stamp;
@@ -217,9 +235,9 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
 
     // convertedImage is now the left image.
     
-    self.leftInfo.header.stamp = self.rightInfo.header.stamp;
-    self.leftInfo.header.seq+=1;
-    self.leftInfo.header.frame_id = "left";
+//    self.leftInfo.header.stamp = self.rightInfo.header.stamp;
+//    self.leftInfo.header.seq+=1;
+//    self.leftInfo.header.frame_id = "left";
 
     sensor_msgs::Image left;
     left.header.stamp = self.rightInfo.header.stamp;
@@ -232,9 +250,9 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
         left.data.push_back(convertedImage.GetData()[i]);
 
     self._left_pub.publish(left);
-    self._leftInfo_pub.publish(self.rightInfo);
+    self._leftInfo_pub.publish(self.cameraManagerLeft.getCameraInfo());
     self._right_pub.publish(right);
-    self._rightInfo_pub.publish(self.rightInfo);
+    self._rightInfo_pub.publish(self.cameraManagerRight.getCameraInfo());
 
     return;
 }
