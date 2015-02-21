@@ -11,5 +11,6 @@
 		<remap from="right/image_raw" to="stereo/right/image_raw" />
 		<remap from="left/camera_info" to="stereo/left/camera_info" />
 		<remap from="right/camera_info" to="stereo/right/camera_info" />
+		<remap from="right/setcamera_info" to="stereo/right/camera_info" />
 	</node>
 </launch>
