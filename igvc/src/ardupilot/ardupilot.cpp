@@ -45,10 +45,10 @@ int main(int argc, char** argv)
                 auto pitch = stof(tokens[2]) * DEG_TO_RAD;
                 auto yaw = stof(tokens[3]) * DEG_TO_RAD;
                 
-                msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
+                msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, -yaw);
                 
                 msg.linear_acceleration.x = stof(tokens[4]);
-                msg.linear_acceleration.y = stof(tokens[5]);
+                msg.linear_acceleration.y = -stof(tokens[5]);
                 msg.linear_acceleration.z = stof(tokens[6]);
 
                 msg.angular_velocity.x = stof(tokens[7]);
