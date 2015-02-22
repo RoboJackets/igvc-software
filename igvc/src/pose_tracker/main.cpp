@@ -66,6 +66,16 @@ void imu_callback(const sensor_msgs::ImuConstPtr& msg)
 void gps_callback(const nav_msgs::OdometryConstPtr& msg)
 {
     gps = *msg;
+
+    tf_listener->waitForTransform("base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(10.0));
+    geometry_msgs::PoseStamped p;
+    p.header.stamp = msg->header.stamp;
+    p.header.frame_id = msg->header.frame_id;
+    p.pose = msg->pose.pose;
+    geometry_msgs::PoseStamped transformed;
+    tf_listener->transformPose("base_footprint", p, transformed);
+    gps.pose.pose = transformed.pose;
+
     if(first)
     {
         origin = gps.pose.pose.position;
