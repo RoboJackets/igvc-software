@@ -14,29 +14,29 @@ ros::Publisher pose_pub;
 std::unique_ptr<TransformBroadcaster> tf_broadcaster;
 std::unique_ptr<TransformListener> tf_listener;
 
-sensor_msgs::Imu imu;
+geometry_msgs::Quaternion orientation;
 nav_msgs::Odometry gps;
 
 geometry_msgs::Point origin;
 bool first = true;
 
-bool imuIsValid()
+bool orientationIsValid()
 {
-    return imu.orientation.w != 0 ||
-           imu.orientation.x != 0 ||
-           imu.orientation.y != 0 ||
-           imu.orientation.z != 0;
+    return orientation.w != 0 ||
+           orientation.x != 0 ||
+           orientation.y != 0 ||
+           orientation.z != 0;
 }
 
 void publish_pose()
 {
-    if(!imuIsValid())
+    if(!orientationIsValid())
         return;
     geometry_msgs::PoseStamped pose;
     pose.header.frame_id = "/base_footprint";
     pose.pose.position.x = gps.pose.pose.position.x;
     pose.pose.position.y = gps.pose.pose.position.y;
-    pose.pose.orientation = imu.orientation;
+    pose.pose.orientation = orientation;
     pose_pub.publish(pose);
 
     Transform transform;
@@ -51,15 +51,14 @@ void publish_pose()
 
 void imu_callback(const sensor_msgs::ImuConstPtr& msg)
 {
-    imu = *msg;
     geometry_msgs::QuaternionStamped q;
     q.header.stamp = ros::Time(0);
-    q.header.frame_id = imu.header.frame_id;
-    q.quaternion = imu.orientation;
-    tf_listener->waitForTransform("base_footprint", imu.header.frame_id, ros::Time(0), ros::Duration(10.0));
+    q.header.frame_id = msg->header.frame_id;
+    q.quaternion = msg->orientation;
+    tf_listener->waitForTransform("base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(10.0));
     geometry_msgs::QuaternionStamped transformed;
     tf_listener->transformQuaternion("base_footprint", q, transformed);
-    imu.orientation = transformed.quaternion;
+    orientation = transformed.quaternion;
 
     publish_pose();
 }
