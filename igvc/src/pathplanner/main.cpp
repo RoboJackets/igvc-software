@@ -6,7 +6,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include "GraphSearch.hpp"
 #include "igvcsearchproblem.h"
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_datatypes.h>
 #include <mutex>
 #include <pcl_conversions/pcl_conversions.h>
@@ -26,12 +26,13 @@ void map_callback(const sensor_msgs::PointCloud2ConstPtr &msg)
     pcl::fromROSMsg(*msg, *search_problem.Map);
 }
 
-void position_callback(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg)
+void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
 {
     lock_guard<mutex> lock(planning_mutex);
-    search_problem.Start.x = msg->pose.pose.position.x;
-    search_problem.Start.y = msg->pose.pose.position.y;
-    tf::Quaternion q{msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w};
+    search_problem.Start.x = msg->pose.position.x;
+    search_problem.Start.y = msg->pose.position.y;
+    tf::Quaternion q;
+    tf::quaternionMsgToTF(msg->pose.orientation, q);
     search_problem.Start.theta = tf::getYaw(q);
 }
 
