@@ -3,6 +3,7 @@
 #include <ros/publisher.h>
 #include <flycapture/FlyCapture2.h>
 #include <image_transport/image_transport.h>
+#include <camera_info_manager/camera_info_manager.h>
 
 class Bumblebee2
 {
@@ -29,6 +30,9 @@ private:
 
     sensor_msgs::CameraInfo rightInfo;
     sensor_msgs::CameraInfo leftInfo;
+
+    camera_info_manager::CameraInfoManager cameraManagerLeft;
+    camera_info_manager::CameraInfoManager cameraManagerRight;
     
     static void ProcessFrame(FlyCapture2::Image* rawImage, const void* callbackData);
 };
