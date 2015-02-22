@@ -1,11 +1,5 @@
 <launch>
 
-<node name="gps_conv" pkg="gps_common" type="utm_odometry_node">
-  <remap from="odom" to="vo"/>
-  <param name="rot_covariance" value="99999" />
-  <param name="frame_id" value="base_footprint" />
-</node>
-
 <node pkg="robot_pose_ekf" type="robot_pose_ekf" name="robot_pose_ekf">
   <param name="output_frame" value="odom"/>
   <param name="freq" value="50.0"/>
