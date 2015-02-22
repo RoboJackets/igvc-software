@@ -24,7 +24,7 @@
     <joint name="imu" type="fixed">
         <parent link="base_link"/>
         <child link="imu"/>
-        <origin xyz="0 -0.11 1.083" rpy="0 0 0"/>
+        <origin xyz="0 -0.11 1.083" rpy="0 0 -1.570796326"/>
         <axis xyz="0 0 0"/>
     </joint>
     
