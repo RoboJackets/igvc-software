@@ -41,6 +41,12 @@ int main(int argc, char** argv)
     nhp.param(string("baud_rate"), baud_rate, 9600);
     
     SerialPort port(device_path, baud_rate);
+
+    if(!port.isOpen())
+    {
+        ROS_ERROR_STREAM("Motor Controller serial port failed to open.");
+        return -1;
+    }
     
     auto line = port.readln();
     while(ros::ok() && line.compare("Ready"))
