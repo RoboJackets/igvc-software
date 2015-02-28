@@ -33,6 +33,8 @@ private:
     void blackAndWhite(float totalAvg);
     int display_dst(int delay);
     void detectObstacle(int i, int j);
+    
+    void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
     void Erosion();
     void Dilation();
