@@ -14,7 +14,8 @@ using namespace cv;
 
 cv_bridge::CvImagePtr cv_ptr;
 
-void img_callback(const sensor_msgs::ImageConstPtr& msg) {
+void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
+    _filt_img.publish(msg);
 	try
 	{
 		cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8") -> image);
@@ -37,7 +38,7 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
     dilation_elem = 2;
     dilation_size = 2;
 
-    _src_img = _it.subscribe("/stereo/left/image_raw", 1, img_callback);
+    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
 	_filt_img = _it.advertise("/filt_img", 1);
 }
 
