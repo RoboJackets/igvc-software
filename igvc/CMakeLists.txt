@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   igvc_msgs
   image_transport
   cv_bridge
+  camera_info_manager
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)

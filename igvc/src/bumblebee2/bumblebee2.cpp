@@ -9,7 +9,8 @@ using namespace FlyCapture2;
 using namespace ros;
 
 Bumblebee2::Bumblebee2(NodeHandle &handle)
-    : _it(handle)
+    : _it(handle), cameraManagerLeft(handle, "bumblebee2/left", "file:///home/robojackets/catkin_ws/src/igvc-software/sandbox/bumblebee2/camera_calib_left.yml"),
+      cameraManagerRight(handle, "bumblebee2/right", "file:///home/robojackets/catkin_ws/src/igvc-software/sandbox/bumblebee2/camera_calib_right.yml")
 {
     try
     {
@@ -115,8 +116,8 @@ void Bumblebee2::startCamera()
     //Set Frame Rate
     Property frmRate;
     frmRate.type = FRAME_RATE;
-
-    error = _cam.GetProperty( &frmRate );
+    frmRate.absValue = 20;
+    error = _cam.SetProperty(&frmRate);
     if (error != PGRERROR_OK)
         throw error.GetDescription();
     ROS_INFO_STREAM("Frame rate is " << frmRate.absValue << " fps.");
@@ -125,31 +126,6 @@ void Bumblebee2::startCamera()
     error = _cam.StartCapture(&ProcessFrame, this);
     if (error != PGRERROR_OK)
         throw error.GetDescription();
-
-    rightInfo.height = fmt7Info.maxHeight;
-    rightInfo.width = fmt7Info.maxWidth;
-    rightInfo.K.assign(0);
-    rightInfo.K[0] = (double)6.354259461656430e+02;
-    rightInfo.K[2] = (double)5.089888715971588e+02;
-    rightInfo.K[4] = (double)6.325006633906235e+02;
-    rightInfo.K[5] = (double)3.823732097059457e+02;
-    rightInfo.K[8] = 1.0;
-    rightInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
-    rightInfo.D = {0.045253327365644,-0.061253391712329, 0, 0, 0};
-
-    leftInfo.height = fmt7Info.maxHeight;
-    leftInfo.width = fmt7Info.maxWidth;
-    leftInfo.K.assign(0);
-    leftInfo.K[0] = (double)6.365349743891542e+02;
-    leftInfo.K[2] = (double)5.133425025803425e+02;
-    leftInfo.K[4] = (double)6.330737197108180e+02;
-    leftInfo.K[5] = (double)3.820620732916243e+02;
-    leftInfo.K[8] = 1.0;
-    leftInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
-    leftInfo.D = {0.057997474980893,-0.075630120106270, 0, 0, 0};
-//    leftInfo.roi.height = leftInfo.height;
-//    leftInfo.roi.width = leftInfo.width;
-//    leftInfo.roi.do_rectify = true;
 }
 
 void Bumblebee2::closeCamera()
@@ -196,10 +172,8 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
 
     // convertedImage is now the right image.
 
-    self.rightInfo.header.stamp = ros::Time::now();
-    self.rightInfo.header.seq+=1;
-
     sensor_msgs::Image right;
+    right.header.stamp = self.rightInfo.header.stamp;
     right.height = convertedImage.GetRows();
     right.width = convertedImage.GetCols();
     right.encoding = sensor_msgs::image_encodings::BGR8;
@@ -217,11 +191,9 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
         throw error.GetDescription();
 
     // convertedImage is now the left image.
-    
-    self.leftInfo.header.stamp = ros::Time::now();
-    self.leftInfo.header.seq+=1;
 
     sensor_msgs::Image left;
+    left.header.stamp = self.rightInfo.header.stamp;
     left.height = convertedImage.GetRows();
     left.width = convertedImage.GetCols();
     left.encoding = sensor_msgs::image_encodings::BGR8;
@@ -231,9 +203,9 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
         left.data.push_back(convertedImage.GetData()[i]);
 
     self._left_pub.publish(left);
-    self._leftInfo_pub.publish(self.leftInfo);
+    self._leftInfo_pub.publish(self.cameraManagerLeft.getCameraInfo());
     self._right_pub.publish(right);
-    self._rightInfo_pub.publish(self.rightInfo);
+    self._rightInfo_pub.publish(self.cameraManagerRight.getCameraInfo());
 
     return;
 }
