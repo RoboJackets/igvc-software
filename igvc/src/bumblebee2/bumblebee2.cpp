@@ -9,7 +9,8 @@ using namespace FlyCapture2;
 using namespace ros;
 
 Bumblebee2::Bumblebee2(NodeHandle &handle)
-    : _it(handle), cameraManagerLeft(handle, "bumblebee2/left", "file:///home/robojackets/catkin_ws/src/igvc-software/sandbox/bumblebee2/camera_calib_left.yml"), cameraManagerRight(handle, "bumblebee2/right", "file:///home/robojackets/catkin_ws/src/igvc-software/sandbox/bumblebee2/camera_calib_right.yml")
+    : _it(handle), cameraManagerLeft(handle, "bumblebee2/left", "file:///home/robojackets/catkin_ws/src/igvc-software/sandbox/bumblebee2/camera_calib_left.yml"),
+      cameraManagerRight(handle, "bumblebee2/right", "file:///home/robojackets/catkin_ws/src/igvc-software/sandbox/bumblebee2/camera_calib_right.yml")
 {
     try
     {
@@ -125,46 +126,6 @@ void Bumblebee2::startCamera()
     error = _cam.StartCapture(&ProcessFrame, this);
     if (error != PGRERROR_OK)
         throw error.GetDescription();
-
-//    rightInfo.height = 768;
-//    rightInfo.width = 1024;
-//    rightInfo.K.assign(0);
-//    rightInfo.K[0] = 843.531932;
-//    rightInfo.K[2] = 497.097324;
-//    rightInfo.K[4] = 846.804718;
-//    rightInfo.K[5] = 388.731818;
-//    rightInfo.K[8] = 1.0;
-//    rightInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
-//    rightInfo.D = {-0.350316,0.152068, 0.001214, 0.001129, 0.0};
-//    rightInfo.R[0] = 0.997458;
-//    rightInfo.R[1] = 0.007311;
-//    rightInfo.R[2] = -0.070875;
-//    rightInfo.R[3] = -0.007232;
-//    rightInfo.R[4] = 0.999973;
-//    rightInfo.R[5] = 0.001370;
-//    rightInfo.R[6] = 0.070883;
-//    rightInfo.R[7] = -0.000854;
-//    rightInfo.R[8] = 0.997484;
-
-//    leftInfo.height = 768;
-//    leftInfo.width = 1024;
-//    leftInfo.K.assign(0);
-//    leftInfo.K[0] = 842.675555;
-//    leftInfo.K[2] = 539.051968;
-//    leftInfo.K[4] = 846.223291;
-//    leftInfo.K[5] = 385.413255;
-//    leftInfo.K[8] = 1.0;
-//    leftInfo.distortion_model = sensor_msgs::distortion_models::PLUMB_BOB;
-//    leftInfo.D = {-0.347188, 0.144269, 0.000624, -0.000270, 0.000000};
-//    leftInfo.R[0] = 0.996584;
-//    leftInfo.R[1] = 0.006763;
-//    leftInfo.R[2] = -0.082312;
-//    leftInfo.R[3] = -0.006855;
-//    leftInfo.R[4] = 0.999976;
-//    leftInfo.R[5] = -0.000831;
-//    leftInfo.R[6] = 0.082304;
-//    leftInfo.R[7] = 0.001392;
-//    leftInfo.R[8] = 0.996606;
 }
 
 void Bumblebee2::closeCamera()
@@ -211,10 +172,6 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
 
     // convertedImage is now the right image.
 
-//    self.rightInfo.header.stamp = (ros::Time)rawImage->GetMetadata().embeddedTimeStamp;
-//    self.rightInfo.header.seq+=1;
-//    self.rightInfo.header.frame_id = "right";
-
     sensor_msgs::Image right;
     right.header.stamp = self.rightInfo.header.stamp;
     right.height = convertedImage.GetRows();
@@ -234,10 +191,6 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
         throw error.GetDescription();
 
     // convertedImage is now the left image.
-    
-//    self.leftInfo.header.stamp = self.rightInfo.header.stamp;
-//    self.leftInfo.header.seq+=1;
-//    self.leftInfo.header.frame_id = "left";
 
     sensor_msgs::Image left;
     left.header.stamp = self.rightInfo.header.stamp;
