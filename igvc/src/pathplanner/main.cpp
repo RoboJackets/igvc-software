@@ -11,10 +11,13 @@
 #include <mutex>
 #include <pcl_conversions/pcl_conversions.h>
 #include <algorithm>
+#include <igvc_msgs/action_path.h>
 
 using namespace std;
 
 ros::Publisher disp_path_pub;
+
+ros::Publisher act_path_pub;
 
 IGVCSearchProblem search_problem;
 
@@ -57,11 +60,15 @@ int main(int argc, char** argv)
 
     disp_path_pub = nh.advertise<nav_msgs::Path>("/path_display", 1);
 
+    act_path_pub = nh.advertise<igvc_msgs::action_path>("/path", 1);
+
+    double baseline = 0.7275;
+
     search_problem.Map = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
     search_problem.GoalThreshold = 1.0;
     search_problem.Threshold = 0.36375;
     search_problem.Speed = 0.25;
-    search_problem.Baseline = 0.7275;
+    search_problem.Baseline = baseline;
     search_problem.DeltaT = 0.25;
 
     ros::Rate rate(3);
@@ -95,6 +102,22 @@ int main(int argc, char** argv)
                 disp_path_msg.poses.push_back(pose);
             }
             disp_path_pub.publish(disp_path_msg);
+
+            igvc_msgs::action_path act_path_msg;
+            act_path_msg.header.stamp = ros::Time::now();
+            act_path_msg.header.frame_id = "map";
+            for(auto action : *(path.getActions()))
+            {
+                igvc_msgs::velocity_pair vels;
+                vels.header.stamp = act_path_msg.header.stamp;
+                vels.header.frame_id = act_path_msg.header.frame_id;
+                double radius = action.V / action.W;
+                vels.left_velocity = (radius - baseline/2.) * action.W;
+                vels.right_velocity = (radius + baseline/2.) * action.W;
+                vels.duration = action.DeltaT;
+                act_path_msg.actions.push_back(vels);
+            }
+            act_path_pub.publish(act_path_msg);
         }
 
         planning_mutex.unlock();
