@@ -11,6 +11,7 @@ using namespace tf;
 using namespace std;
 
 ros::Publisher pose_pub;
+ros::Publisher origin_pub;
 std::unique_ptr<TransformBroadcaster> tf_broadcaster;
 std::unique_ptr<TransformListener> tf_listener;
 
@@ -104,7 +105,19 @@ int main(int argc, char** argv)
 
     pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/odom_combined", 1);
 
-    ros::spin();
+    origin_pub = nh.advertise<geometry_msgs::PoseStamped>("/map_origin", 1);
+
+    ros::Rate rate(1); // 1 Hz
+    while(ros::ok())
+    {
+        ros::spinOnce();
+
+        geometry_msgs::PointStamped msg;
+        msg.header.stamp = ros::Time::now();
+        msg.header.frame_id = "/world";
+        msg.point = origin;
+        origin_pub.publish(msg);
+    }
 
     return 0;
 }
