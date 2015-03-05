@@ -14,6 +14,7 @@ using namespace ros;
 ros::Publisher waypoint_pub;
 vector<PointStamped> waypoints;
 PointStamped current_waypoint;
+Point map_origin;
 
 mutex current_mutex;
 
@@ -76,9 +77,17 @@ void positionCallback(const geometry_msgs::PoseWithCovarianceStampedConstPtr& ms
     {
         // advance to next waypoint.
         current_waypoint = waypoints.front();
+        current_waypoint.point.x -= map_origin.x;
+        current_waypoint.point.y -= map_origin.y;
         if(waypoints.size() > 1)
             waypoints.erase(waypoints.begin());
     }
+}
+
+void originCallback(const geometry_msgs::PointStampedConstPtr& msg)
+{
+    lock_guard<mutex> lock(current_mutex);
+    map_origin = msg->point;
 }
 
 int main(int argc, char** argv)
@@ -97,7 +106,9 @@ int main(int argc, char** argv)
 
     waypoint_pub = nh.advertise<PointStamped>("/waypoint", 1);
 
-    nh.subscribe("/robot_pose_ekf/odom_combined", 1, positionCallback);
+    ros::Subscriber odom_sub = nh.subscribe("/robot_pose_ekf/odom_combined", 1, positionCallback);
+
+    ros::Subscriber origin_sub = nh.subscribe("/map_origin", 1, originCallback);
 
     loadWaypointsFile(path, waypoints);
 
