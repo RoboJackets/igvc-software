@@ -5,13 +5,17 @@
 #include <igvc/StringUtils.hpp>
 #include <gps_common/conversions.h>
 #include <string>
+#include <mutex>
 
 using namespace std;
 using namespace geometry_msgs;
+using namespace ros;
 
 ros::Publisher waypoint_pub;
 vector<PointStamped> waypoints;
 PointStamped current_waypoint;
+
+mutex current_mutex;
 
 void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
 {
@@ -67,15 +71,13 @@ double distanceBetweenPoints(const Point &p1, const Point &p2)
 
 void positionCallback(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg)
 {
+    lock_guard<mutex> lock(current_mutex);
     if(distanceBetweenPoints(msg->pose.pose.position, current_waypoint.point) < 1.0)
     {
-        auto seq = current_waypoint.header.seq + 1;
+        // advance to next waypoint.
         current_waypoint = waypoints.front();
-        waypoints.erase(waypoints.begin());
-        current_waypoint.header.stamp = ros::Time::now();
-        current_waypoint.header.seq = seq;
-        current_waypoint.header.frame_id = "base_footprint";
-        waypoint_pub.publish(current_waypoint);
+        if(waypoints.size() > 1)
+            waypoints.erase(waypoints.begin());
     }
 }
 
@@ -86,22 +88,38 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::NodeHandle nhp("~");
 
+    ROS_INFO_STREAM("Has param: " << nhp.hasParam("file"));
+
     string path;
     nhp.getParam("file", path);
 
-    loadWaypointsFile("", waypoints);
+    ROS_INFO_STREAM("Loading waypoints from " << path);
+
+    waypoint_pub = nh.advertise<PointStamped>("/waypoint", 1);
+
+    nh.subscribe("/robot_pose_ekf/odom_combined", 1, positionCallback);
+
+    loadWaypointsFile(path, waypoints);
 
     if(!waypoints.empty())
     {
-        current_waypoint = waypoints[0];
-        waypoints.erase(waypoints.begin());
-        waypoint_pub.publish(current_waypoint);
+        ROS_INFO_STREAM(waypoints.size() << " waypoints found.");
+        current_waypoint = waypoints.front();
+        Rate rate(1); // 1 Hz
+        while(ros::ok())
+        {
+            ROS_INFO("publishing current waypoint...");
+            lock_guard<mutex> lock(current_mutex);
+            current_waypoint.header.stamp = ros::Time::now();
+            current_waypoint.header.seq++;
+            current_waypoint.header.frame_id = "map";
+            waypoint_pub.publish(current_waypoint);
 
-        nh.advertise<PointStamped>("/waypoint", 1);
-
-        nh.subscribe("/robot_pose_ekf/odom_combined", 1, positionCallback);
-
-        ros::spin();
+            ros::spinOnce();
+            rate.sleep();
+        }
+    } else {
+        ROS_ERROR("No valid waypoint entries found.");
     }
 
     return 0;

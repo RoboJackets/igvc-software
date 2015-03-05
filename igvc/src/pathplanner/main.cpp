@@ -49,18 +49,32 @@ int main(int argc, char** argv)
 
     ros::NodeHandle nh;
 
-    nh.subscribe("/map", 1, map_callback);
+    ros::Subscriber map_sub = nh.subscribe("/map", 1, map_callback);
 
-    nh.subscribe("robot_pose_ekf/odom_combined", 1, position_callback);
+    ros::Subscriber pose_sub = nh.subscribe("/robot_pose_ekf/odom_combined", 1, position_callback);
 
-    nh.subscribe("/waypoint", 1, waypoint_callback);
+    ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
 
     disp_path_pub = nh.advertise<nav_msgs::Path>("/path_display", 1);
+
+    search_problem.Map = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
+    search_problem.GoalThreshold = 1.0;
+    search_problem.Threshold = 0.36375;
+    search_problem.Speed = 0.25;
+    search_problem.Baseline = 0.7275;
+    search_problem.DeltaT = 0.25;
 
     ros::Rate rate(3);
     while(ros::ok())
     {
         ros::spinOnce();
+
+        /* Do not attempt to plan a path if the path length would be greater than 100ft (~30m).
+         * This should only happen when we have received either a waypoint or position estimate, but not both.
+         * Long paths take forever to compute, and will freeze up this node.
+         */
+        if(search_problem.Start.distTo(search_problem.Goal) > 30)
+            continue;
 
         planning_mutex.lock();
         // TODO only replan if needed.
@@ -70,7 +84,7 @@ int main(int argc, char** argv)
         {
             nav_msgs::Path disp_path_msg;
             disp_path_msg.header.stamp = ros::Time::now();
-            disp_path_msg.header.frame_id = "base_footprint";
+            disp_path_msg.header.frame_id = "map";
             for(auto loc : *(path.getStates()))
             {
                 geometry_msgs::PoseStamped pose;
