@@ -39,6 +39,9 @@ private:
     void Erosion();
     void Dilation();
 
+    void transformPoints(cv::Mat &src, cv::Mat &dst);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
+
     /** @brief the VideoCapture of the image/video */
     cv::VideoCapture cap;
 
@@ -72,7 +75,7 @@ private:
     /**
      * @brief dst contains the new, processed image that isolates the lines
      */
-    cv::Mat dst;
+    cv::Mat *dst;
 
     // ROS COMMUNICATION
 	image_transport::ImageTransport _it;
