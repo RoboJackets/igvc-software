@@ -4,9 +4,9 @@
     excluding some of the duplicate image_transport topics.
     -->
 <launch>
-    <node pkg="rosbag" type="record" name="record" output="screen"
-    args="-a -x '(.*)compressedDepth(.*)|(.*)theora(.*)' " />
-    
     <!--<node pkg="rosbag" type="record" name="record" output="screen"
-    args="-e /stereo/(left|right)/(camera_info|image_raw)" />-->
+    args="-a -x '(.*)compressedDepth(.*)|(.*)theora(.*)' " />-->
+    
+    <node pkg="rosbag" type="record" name="record" output="screen"
+    args="-e /stereo/(left|right)/(camera_info|image_raw)" />
 </launch>
