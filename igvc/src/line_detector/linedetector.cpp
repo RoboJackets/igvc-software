@@ -11,21 +11,64 @@
 using namespace std;
 using namespace cv;
 
-
 cv_bridge::CvImagePtr cv_ptr;
 
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
-    _filt_img.publish(msg);
-	try
-	{
-		cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8") -> image);
-		cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-	}
-	catch (cv_bridge::Exception& e)
-	{
-		ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
-	}
+
+    cv_ptr = cv_bridge::toCvCopy(msg, "");
+     /// Convert to grayscale
+//     cvtColor( cv_ptr->image, cv_ptr->image, CV_BGR2GRAY );
+
+     /// Apply Histogram Equalization
+//     equalizeHist( cv_ptr->image, cv_ptr->image );
+
+    GaussianBlur(cv_ptr->image, cv_ptr->image, Size(11, 11), 0);
+
+    typedef Vec<unsigned char, 3> pixel;
+    Mat imgmat = cv_ptr->image;
+//    auto it = imgmat.begin<pixel>();
+
+    Vec3b p;
+    int rows = imgmat.rows;
+    int cols = imgmat.cols;
+
+    int grey;
+    //Turn the top quarter of the screen and bottom sixth of the screen black
+    //We can disregard these areas - may extend the bottom of the screen slightly later on
+    for (int i = 0; i< rows; i++){
+        for(int j=0; j< cols; j++) {
+            grey = imgmat.at<Vec3b>(i, j)[0];
+            if (grey < 200) {
+                imgmat.at<Vec3b>(i, j)[0] = 0;
+                imgmat.at<Vec3b>(i, j)[1] = 0;
+                imgmat.at<Vec3b>(i, j)[2] = 0;
+            } else {
+                imgmat.at<Vec3b>(i, j)[1] = grey;
+                imgmat.at<Vec3b>(i, j)[2] = grey;
+            }
+        }
+    }
+
+    Erosion(&imgmat);
+//    while(it != imgmat.end<pixel>()) {
+//        pixel p = *it;
+//        p[2] = 0;
+//        it++;
+//    }
+//    Mat kernal = (Mat_<double>(3, 3) << 1, 0, 0, 0, 0, 0, -1);
+//    kernal = kernal/9;
+//    filter2D(cv_ptr->image, cv_ptr->image, -1, kernal);
+
+
+    cv_ptr->image = imgmat;
+    _filt_img.publish(cv_ptr->toImageMsg());
+//    _filt_img.publish(imgmat);
 }
+
+//void LineDetector::FindLines(CvImagePtr cv_ptr) {
+
+
+//}
 
 LineDetector::LineDetector(ros::NodeHandle &handle)
     : max_elem(2),
@@ -34,7 +77,7 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
 	  _it(handle)
 {
     erosion_elem = 2;
-    erosion_size = 3;
+    erosion_size = 1;
     dilation_elem = 2;
     dilation_size = 2;
 
@@ -60,7 +103,7 @@ void LineDetector::onImageEvent() {
     /** Separates the pixels into black(not lines) and white (lines) */
     blackAndWhite(totalAvg);
 
-    Erosion();
+//    Erosion();
     Dilation();
     cv::Mat transformDst(dst.rows, dst.cols, CV_8UC3);
     //transformPoints(dst, transformDst);
@@ -88,8 +131,7 @@ void LineDetector::onImageEvent() {
 //    cout << "Time elapsed: " << timeElapsed <<endl;
 }
 
-void LineDetector::Erosion()
-{
+void LineDetector::Erosion(Mat* dst) {
   int erosion_type = MORPH_ELLIPSE;
   if( erosion_elem == 0 ){ erosion_type = MORPH_RECT; }
   else if( erosion_elem == 1 ){ erosion_type = MORPH_CROSS; }
@@ -99,7 +141,7 @@ void LineDetector::Erosion()
                                        Size( 2*erosion_size + 1, 2*erosion_size+1 ),
                                        Point( erosion_size, erosion_size ) );
   // Apply the erosion operation
-  erode( dst, dst, element );
+  erode( *dst, *dst, element );
 }
 
 /** Dilation enhances the white lines */

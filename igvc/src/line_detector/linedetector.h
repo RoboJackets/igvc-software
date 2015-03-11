@@ -28,6 +28,7 @@ public:
     void onImageEvent();
 
 private:
+//    void findLines(cv_bridge::Cv_ImagePtr cv_ptr);
     void blackoutSection(int rowl, int rowu, int coll, int colu);
     float getAvg(void);
     void blackAndWhite(float totalAvg);
@@ -36,7 +37,7 @@ private:
     
     void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
-    void Erosion();
+    void Erosion(cv::Mat* dst);
     void Dilation();
 
     /** @brief the VideoCapture of the image/video */
