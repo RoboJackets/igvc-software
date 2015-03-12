@@ -28,9 +28,6 @@ private:
     ros::Publisher _leftInfo_pub;
     ros::Publisher _rightInfo_pub;
 
-    sensor_msgs::CameraInfo rightInfo;
-    sensor_msgs::CameraInfo leftInfo;
-
     camera_info_manager::CameraInfoManager cameraManagerLeft;
     camera_info_manager::CameraInfoManager cameraManagerRight;
     
