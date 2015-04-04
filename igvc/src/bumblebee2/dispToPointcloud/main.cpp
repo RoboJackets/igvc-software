@@ -60,14 +60,14 @@ void dispCallback(const stereo_msgs::DisparityImage& msg)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "disp");
+    ros::init(argc, argv, "dispToPointcloud");
     
     ros::NodeHandle nh;
     
 	image_transport::ImageTransport _it(nh);
 
     _depth_pub = _it.advertise("/depthImage", 1);
-    _pointcloud_pub = nh.advertise<PointCloud>("/pointcloud", 1);
+    _pointcloud_pub = nh.advertise<PointCloud>("/pointcloud/camera", 1);
 
     ros::Subscriber disp_sub = nh.subscribe("/disparity", 1, dispCallback);
 

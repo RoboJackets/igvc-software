@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   igvc_msgs
   image_transport
   camera_info_manager
+  laser_geometry
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -181,3 +182,4 @@ add_subdirectory(src/light_controller)
 add_subdirectory(src/waypoint_source)
 add_subdirectory(src/pathplanner)
 add_subdirectory(src/bumblebee2/dispToPointcloud)
+add_subdirectory(src/sick_tim551)
