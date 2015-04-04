@@ -23,4 +23,6 @@
 		<param name="speckle_size"              type="int"      value="30"/>
 		<param name="speckle_range"             type="int"      value="31"/>
 	</node>
+
+	<node name="dispToPointcloud" pkg="igvc" type="dispToPointcloud" />
 </launch>
