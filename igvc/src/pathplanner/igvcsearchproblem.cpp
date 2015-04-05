@@ -7,11 +7,11 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
     std::list<SearchMove> acts;
 
-    if(Map == nullptr || Map->empty())
+    if(Map == nullptr)
         return acts;
 
-    kdtree.setInputCloud(Map);
-    //cout << "Expanding " << state << endl;
+    if(!Map->empty())
+        kdtree.setInputCloud(Map);
 
     double delta = 0.05;
     double Wmin = -0.8;
@@ -23,7 +23,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
         pcl::PointXYZ searchPoint(result.x, result.y,0);
         std::vector<int> pointIdxRadiusSearch;
         std::vector<float> pointRadiusSquaredDistance;
-        if ( kdtree.radiusSearch(searchPoint, Threshold, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0 )
+        if ( Map->empty() || kdtree.radiusSearch(searchPoint, Threshold, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0 )
         {
             acts.push_back(move);
         }
@@ -37,7 +37,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
             pcl::PointXYZ searchPoint = pcl::PointXYZ(result.x, result.y,0);
             std::vector<int> pointIdxRadiusSearch;
             std::vector<float> pointRadiusSquaredDistance;
-            if ( kdtree.radiusSearch(searchPoint, Threshold, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0 )
+            if ( Map->empty() || kdtree.radiusSearch(searchPoint, Threshold, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0 )
             {
                 acts.push_back(move);
             }
@@ -49,7 +49,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
         pcl::PointXYZ searchPoint(result.x, result.y,0);
         std::vector<int> pointIdxRadiusSearch;
         std::vector<float> pointRadiusSquaredDistance;
-        if ( kdtree.radiusSearch(searchPoint, Threshold, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0 )
+        if ( Map->empty() || kdtree.radiusSearch(searchPoint, Threshold, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0 )
         {
             acts.push_back(move);
         }
@@ -63,6 +63,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
             acts.push_back(move);
         }
     }
+
     return acts;
 }
 
