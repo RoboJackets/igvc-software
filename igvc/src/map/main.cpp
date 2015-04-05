@@ -15,7 +15,7 @@ void nodeCallback(const sensor_msgs::PointCloud2::ConstPtr &msg)
 {
     sensor_msgs::PointCloud transformed;
     sensor_msgs::convertPointCloud2ToPointCloud(*msg, transformed);
-    tf_listener->transformPointCloud("/mapper",transformed,transformed);
+    tf_listener->transformPointCloud("/map",transformed,transformed);
 
     sensor_msgs::PointCloud2 transformed2;
     sensor_msgs::convertPointCloudToPointCloud2(transformed, transformed2);
