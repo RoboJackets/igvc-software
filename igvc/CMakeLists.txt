@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   camera_info_manager
   laser_geometry
+  tf
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -183,3 +184,4 @@ add_subdirectory(src/waypoint_source)
 add_subdirectory(src/pathplanner)
 add_subdirectory(src/bumblebee2/dispToPointcloud)
 add_subdirectory(src/sick_tim551)
+add_subdirectory(src/map)
