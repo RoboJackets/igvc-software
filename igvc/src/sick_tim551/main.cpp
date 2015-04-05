@@ -7,7 +7,6 @@
 #include <laser_geometry/laser_geometry.h>
 
 ros::Publisher _pointcloud_pub;
-typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 laser_geometry::LaserProjection proj;
 
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
