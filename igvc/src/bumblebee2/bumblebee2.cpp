@@ -174,7 +174,7 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
 
     sensor_msgs::Image right;
     right.header.stamp = ros::Time::now();
-    right.header.frame_id = "/right";
+    right.header.frame_id = "/camera_right";
     right.height = convertedImage.GetRows();
     right.width = convertedImage.GetCols();
     right.encoding = sensor_msgs::image_encodings::BGR8;
@@ -195,7 +195,7 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
 
     sensor_msgs::Image left;
     left.header.stamp = right.header.stamp;
-    left.header.frame_id = "/left";
+    left.header.frame_id = "/camera_left";
     left.height = convertedImage.GetRows();
     left.width = convertedImage.GetCols();
     left.encoding = sensor_msgs::image_encodings::BGR8;
@@ -205,12 +205,12 @@ void Bumblebee2::ProcessFrame(FlyCapture2::Image* rawImage, const void* callback
         left.data.push_back(convertedImage.GetData()[i]);
         
     sensor_msgs::CameraInfo cl = self.cameraManagerLeft.getCameraInfo();
-    cl.header.frame_id = "/left";
+    cl.header.frame_id = "/camera_left";
     cl.header.stamp = right.header.stamp;
     self.cameraManagerLeft.setCameraInfo(cl);
 
     sensor_msgs::CameraInfo cr = self.cameraManagerRight.getCameraInfo();
-    cr.header.frame_id = "/right";
+    cr.header.frame_id = "/camera_right";
     cr.header.stamp = right.header.stamp;
     self.cameraManagerRight.setCameraInfo(cr);
 
