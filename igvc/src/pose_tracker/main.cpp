@@ -47,7 +47,7 @@ void publish_pose()
     transform.setRotation(q);
     tf_broadcaster->sendTransform(StampedTransform(transform, ros::Time::now(), "map", "base_footprint"));
 
-    ROS_INFO_STREAM("POSE " << pose.pose.position.x << " " << pose.pose.position.y);
+//    ROS_INFO_STREAM("POSE " << pose.pose.position.x << " " << pose.pose.position.y);
 }
 
 void imu_callback(const sensor_msgs::ImuConstPtr& msg)
@@ -59,7 +59,12 @@ void imu_callback(const sensor_msgs::ImuConstPtr& msg)
     tf_listener->waitForTransform("base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(10.0));
     geometry_msgs::QuaternionStamped transformed;
     tf_listener->transformQuaternion("base_footprint", q, transformed);
-    orientation = transformed.quaternion;
+    orientation = msg->orientation;//transformed.quaternion;
+
+//    tf::Quaternion quat_transformed;
+//    tf::quaternionMsgToTF(transformed.quaternion, quat_transformed);
+//    quat_transformed *= tf::createQuaternionFromYaw(3.14/4.);
+//    tf::quaternionTFToMsg(quat_transformed, orientation);
 
     publish_pose();
 }
@@ -70,7 +75,7 @@ void gps_callback(const nav_msgs::OdometryConstPtr& msg)
 
     tf_listener->waitForTransform("base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(10.0));
     geometry_msgs::PoseStamped p;
-    p.header.stamp = msg->header.stamp;
+    p.header.stamp = ros::Time(0);//msg->header.stamp;
     p.header.frame_id = msg->header.frame_id;
     p.pose = msg->pose.pose;
     geometry_msgs::PoseStamped transformed;
@@ -101,11 +106,11 @@ int main(int argc, char** argv)
 
     ros::Subscriber imu_sub = nh.subscribe("/imu", 1, imu_callback);
 
-    ros::Subscriber gps_sub = nh.subscribe("/vo", 1, gps_callback);
+    ros::Subscriber gps_sub = nh.subscribe("/gps_odom", 1, gps_callback);
 
     pose_pub = nh.advertise<geometry_msgs::PoseStamped>("/odom_combined", 1);
 
-    origin_pub = nh.advertise<geometry_msgs::PoseStamped>("/map_origin", 1);
+    origin_pub = nh.advertise<geometry_msgs::PointStamped>("/map_origin", 1);
 
     ros::Rate rate(1); // 1 Hz
     while(ros::ok())
