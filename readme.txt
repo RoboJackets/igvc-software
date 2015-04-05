@@ -1,4 +1,4 @@
-Latest revision : Jun. 20, 2014
+Latest revision :Feb. 5, 2015
 
 Welcome to the RoboJackets IGVC software repo!
 This document will give you a brief description of the repo's layout and some simple instructions for building the documentation and project. For more detailed information, please visit wiki.robojackets.org
@@ -12,33 +12,19 @@ III Building Code
 
 
 I. Folder Structure
-The repo's root folder contains 7 folders and 1 file.
+The repo is comprised of two ROS packages and one sandbox folder for miscelaneous resources.
 FOLDERS
- * 2013
-    This folder is a copy of the software repo as it stood at the end of the 2013 season. Many changes occurred in the project setup since then. This folder is there as an easy access point to the old code base.
- * arduino
-    This folder contains the code that runs on the arduino boards on the robot. These can be edited via gedit, but it is recommended that you use the Arduino IDE (www.arduino.cc) to build and upload the code to an arduino board.
- * ardupilot
-    This folder contains the code that runs on the Ardupilot IMU device. This folder includes the Ardupilot library and make systems for building & deploying the code.
- * IGVC_Control
-    This folder contains the project description files for Qt Creator.
- * src
-    This folder contains the C++ source code that runs on the on-board laptop. The folder hierarchy under /src is very deep, but relatively self explanatory.
- * test_data
-    This folder contains test data including images, videos, sensor logs, etc.
- * udev
-    This folder contains udev rules used by our code to identify serial devices.
-FILES
- * Doxyfile
-    This is the configuration file for the doxygen documentation generation system (www.doxygen.org)
+ * igvc
+    This is the primary ROS package that houses all of our source code.
+ * igvc_msgs
+    This package defines custom message types for our code.
+ * sandbox
+    This folder contains miscelaneous resources. This includes source code for our robot's Arduinos and Ardupilot IMU, udev rules for our robot's hardware, and other files.
 
 
 II. Building Documentation
-To generate the documentation for our laptop-side source code, run the following command from the repo's root folder:
-...$ doxygen Doxyfile
-This will create a /docs folder in the repo's root directory which will contain HTML and LaTex versions of the documentation. To generate PDF documentation, run the following command from /docs/latex/
-...$ make
+Documentation for our code can be generated via the rosdoc_lite tool.
 
 
 III. Building Code
-The easiest way to build the laptop-side code is to use Qt Creator (www.qt-project.org) to open /IGVC_Control/IGVC_Control.pro, configure the project with the standard settings, and click the build button (hammer icon).
+This repository should be cloned into the src directory of a catkin workspace. Use `catkin_make` in the workspace directory to build the code. Dependencies can be installed with `rosdep install igvc`. (NOTE: Be sure to `source devel/setup.sh` before referencing the igvc or igvc_msgs packages.)
