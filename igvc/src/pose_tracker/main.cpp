@@ -46,8 +46,6 @@ void publish_pose()
     quaternionMsgToTF(pose.pose.orientation, q);
     transform.setRotation(q);
     tf_broadcaster->sendTransform(StampedTransform(transform, ros::Time::now(), "map", "base_footprint"));
-
-//    ROS_INFO_STREAM("POSE " << pose.pose.position.x << " " << pose.pose.position.y);
 }
 
 void imu_callback(const sensor_msgs::ImuConstPtr& msg)
@@ -60,13 +58,6 @@ void imu_callback(const sensor_msgs::ImuConstPtr& msg)
     geometry_msgs::QuaternionStamped transformed;
     tf_listener->transformQuaternion("base_footprint", q, transformed);
     orientation = msg->orientation;//transformed.quaternion;
-
-//    tf::Quaternion quat_transformed;
-//    tf::quaternionMsgToTF(transformed.quaternion, quat_transformed);
-//    quat_transformed *= tf::createQuaternionFromYaw(3.14/4.);
-//    tf::quaternionTFToMsg(quat_transformed, orientation);
-
-    publish_pose();
 }
 
 void gps_callback(const nav_msgs::OdometryConstPtr& msg)
@@ -75,7 +66,7 @@ void gps_callback(const nav_msgs::OdometryConstPtr& msg)
 
     tf_listener->waitForTransform("base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(10.0));
     geometry_msgs::PoseStamped p;
-    p.header.stamp = ros::Time(0);//msg->header.stamp;
+    p.header.stamp = ros::Time(0);
     p.header.frame_id = msg->header.frame_id;
     p.pose = msg->pose.pose;
     geometry_msgs::PoseStamped transformed;
@@ -91,7 +82,6 @@ void gps_callback(const nav_msgs::OdometryConstPtr& msg)
         gps.pose.pose.position.y -= origin.y;
         gps.pose.pose.position.z -= origin.z;
     }
-    publish_pose();
 }
 
 int main(int argc, char** argv)
@@ -112,7 +102,14 @@ int main(int argc, char** argv)
 
     origin_pub = nh.advertise<geometry_msgs::PointStamped>("/map_origin", 1);
 
-    ros::Rate rate(1); // 1 Hz
+    // Publish initial pose
+    orientation.x = 0;
+    orientation.y = 0;
+    orientation.z = 1;
+    orientation.w = 0;
+    publish_pose();
+
+    ros::Rate rate(20); // 20 Hz
     while(ros::ok())
     {
         ros::spinOnce();
@@ -122,6 +119,10 @@ int main(int argc, char** argv)
         msg.header.frame_id = "/world";
         msg.point = origin;
         origin_pub.publish(msg);
+
+        publish_pose();
+
+        rate.sleep();
     }
 
     return 0;
