@@ -176,7 +176,7 @@ public:
             }
         }
 
-//        cout << __func__ << " Error: Could not find a solution." << endl;
+        cout << __func__ << " Error: Could not find a solution." << endl;
         Path<StateType, ActionType> empty;
         return empty;
     }
