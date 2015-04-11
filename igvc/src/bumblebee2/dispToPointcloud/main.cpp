@@ -21,10 +21,10 @@ void dispCallback(const stereo_msgs::DisparityImage& msg)
     auto basline = 0.102;
     std::vector<unsigned char> data = msg.image.data;
     sensor_msgs::Image depthImage = msg.image;
-    depthImage.header.frame_id = "/left";
+    depthImage.header.frame_id = "/camera_left";
 
     PointCloud::Ptr cloud (new PointCloud);
-    cloud->header.frame_id = "/left";
+    cloud->header.frame_id = "/camera_left";
     cloud->height = msg.image.height;
     cloud->width = msg.image.width;
 
