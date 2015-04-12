@@ -8,7 +8,7 @@
 class Bumblebee2
 {
 public:
-    Bumblebee2(ros::NodeHandle &handle);
+    Bumblebee2(ros::NodeHandle &handle, std::string path);
     
     ~Bumblebee2();
     
