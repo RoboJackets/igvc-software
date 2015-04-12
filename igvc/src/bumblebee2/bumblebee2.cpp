@@ -8,9 +8,9 @@ using namespace std;
 using namespace FlyCapture2;
 using namespace ros;
 
-Bumblebee2::Bumblebee2(NodeHandle &handle)
-    : _it(handle), cameraManagerLeft(handle, "bumblebee2/left", "file:///home/alchaussee/Desktop/igvc/src/igvc-software/sandbox/bumblebee2/camera_calib_left.yml"),
-      cameraManagerRight(handle, "bumblebee2/right", "file:///home/alchaussee/Desktop/igvc/src/igvc-software/sandbox/bumblebee2/camera_calib_right.yml")
+Bumblebee2::Bumblebee2(NodeHandle &handle, string path)
+    : _it(handle), cameraManagerLeft(handle, "bumblebee2/left", path + "src/igvc-software/sandbox/bumblebee2/camera_calib_left.yml"),
+      cameraManagerRight(handle, "bumblebee2/right", path + "src/igvc-software/sandbox/bumblebee2/camera_calib_right.yml")
 {
     try
     {

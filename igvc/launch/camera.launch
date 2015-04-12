@@ -4,7 +4,9 @@
     -->
 <launch>
     <!-- Camera Node -->
-	<node name="bumblebee2" pkg="igvc" type="bumblebee2" />
+	<node name="bumblebee2" pkg="igvc" type="bumblebee2">
+	    <param name="path" type="string" value="file:///home/robojackets/catkin_ws/"/>
+	</node>
 
 	<node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">
 		<remap from="left/image_raw" to="stereo/left/image_raw" />
