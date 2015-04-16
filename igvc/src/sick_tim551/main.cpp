@@ -13,6 +13,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
     sensor_msgs::PointCloud2 cloud;
     proj.projectLaser(*msg, cloud);
+    cloud.header.frame_id = "/lidar";
     _pointcloud_pub.publish(cloud);
 }
 
