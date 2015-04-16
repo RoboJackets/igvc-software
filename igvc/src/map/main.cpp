@@ -6,6 +6,8 @@
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
 #include <sensor_msgs/point_cloud_conversion.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/io/pcd_io.h>
 
 sensor_msgs::PointCloud2 cloud;
 ros::Publisher _pointcloud_pub;
@@ -17,6 +19,7 @@ void nodeCallback(const sensor_msgs::PointCloud2::ConstPtr &msg)
     {
         sensor_msgs::PointCloud transformed;
         sensor_msgs::convertPointCloud2ToPointCloud(*msg, transformed);
+        transformed.header.stamp = ros::Time(0);
         tf_listener->transformPointCloud("/map",transformed,transformed);
 
         sensor_msgs::PointCloud2 transformed2;
@@ -24,6 +27,15 @@ void nodeCallback(const sensor_msgs::PointCloud2::ConstPtr &msg)
         sensor_msgs::PointCloud2 output;
         pcl::concatenatePointCloud(transformed2, cloud, output);
         cloud = output;
+
+//        pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
+//        sor.setInputCloud(cloud);
+//        sor.setLeafSize (0.01f, 0.01f, 0.01f);
+//        sor.filter(*cloud);
+
+
+//        pcl::PCDWriter w;
+//        w.write("pointcloud_map.pcd", cloud, Eigen::Vector4f::Zero(), Eigen::Quaternionf::Identity(), false);
         _pointcloud_pub.publish(cloud);
     }
     catch (int e)
@@ -67,6 +79,8 @@ int main(int argc, char** argv)
     cloud.header.frame_id = "/map";
 
     _pointcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/pointcloud/map", 1);
+
+    tf_listener->waitForTransform("/map", "/lidar", ros::Time(0), ros::Duration(5));
 
 	ros::spin();
 }
