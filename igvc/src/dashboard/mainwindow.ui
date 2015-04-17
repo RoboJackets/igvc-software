@@ -14,17 +14,14 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="label">
+   <widget class="Speedometer" name="widget" native="true">
     <property name="geometry">
      <rect>
-      <x>350</x>
-      <y>260</y>
-      <width>67</width>
-      <height>17</height>
+      <x>230</x>
+      <y>100</y>
+      <width>341</width>
+      <height>261</height>
      </rect>
-    </property>
-    <property name="text">
-     <string>I'm a gui!</string>
     </property>
    </widget>
   </widget>
@@ -40,6 +37,14 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>Speedometer</class>
+   <extends>QWidget</extends>
+   <header>speedometer.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
