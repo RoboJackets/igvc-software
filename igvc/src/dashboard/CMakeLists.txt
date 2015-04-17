@@ -14,5 +14,5 @@ QT5_WRAP_UI(UIS_HDRS
     mainwindow.ui
 )
 
-add_executable(dashboard main.cpp mainwindow.cpp mainwindow.ui)
+add_executable(dashboard main.cpp mainwindow.cpp mainwindow.ui speedometer.cpp qnode.cpp)
 target_link_libraries(dashboard ${catkin_LIBRARIES} Qt5::Widgets Qt5::Core Qt5::Gui)
