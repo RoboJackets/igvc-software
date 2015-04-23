@@ -30,10 +30,12 @@ public:
 private:
 //    void findLines(cv_bridge::Cv_ImagePtr cv_ptr);
     void blackoutSection(int rowl, int rowu, int coll, int colu);
+    void blackoutSection(cv::Mat &imgmat, int rowl, int rowu, int coll, int colu);
     float getAvg(void);
+    float getAvg(cv::Mat &imgmat);
     void blackAndWhite(float totalAvg);
     int display_dst(int delay);
-    void detectObstacle(int i, int j);
+    void detectObstacle(int i, int j, cv::Mat* dst);
     
     void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
@@ -42,6 +44,14 @@ private:
 
     void transformPoints(cv::Mat &src, cv::Mat &dst);
     pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
+
+    void backgroundSubtractor();
+    void houghLines();
+    void horzVertEdgeDet();
+	void blobFinder();
+    void helperSearch(void *totvis, void *input, int i, int j, cv::Mat *imgmat, int thresh);
+    bool helperContains(std::tuple<int, int> pos, void *vis);
+	bool adjWhite(int i, int j, cv::Mat *img, int thresh);
 
     /** @brief the VideoCapture of the image/video */
     cv::VideoCapture cap;
