@@ -29,6 +29,10 @@ int main(int argc, char** argv)
 
   time_point<high_resolution_clock> cmd_start_time;
 
+  ros::NodeHandle n;
+
+  ros::Publisher cmd_pub = n.advertise<velocity_pair>("/motors", 1);
+
   ros::Rate rate(60);
   while(ros::ok())
   {
@@ -40,14 +44,14 @@ int main(int argc, char** argv)
       {
         if(path_reset)
         {
-          // TODO send motor commands
+          cmd_pub.publish(path->actions[path_index]);
           cmd_start_time = high_resolution_clock::now();
         }
         auto elapsed_time = high_resolution_clock::now() -  cmd_start_time;
         if(duration_cast<seconds>(elapsed_time).count() > path->actions[path_index].duration)
         {
           path_index++;
-          // TODO send motor commands
+          cmd_pub.publish(path->actions[path_index]);
           cmd_start_time = high_resolution_clock::now();
         }
       }
