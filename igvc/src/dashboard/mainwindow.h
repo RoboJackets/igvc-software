@@ -18,6 +18,7 @@ public:
 
 public slots:
     void onNewVelocity(float velocity);
+    void onNewNodesList(QStringList nodes);
 
 private:
     Ui::MainWindow *ui;
