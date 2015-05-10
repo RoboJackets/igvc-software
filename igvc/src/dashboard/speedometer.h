@@ -9,15 +9,14 @@ class Speedometer : public QWidget
 public:
     explicit Speedometer(QWidget *parent = 0);
 
-    float value;
+public slots:
+    void setValue(float value);
 
 protected:
-    void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
+    void paintEvent(QPaintEvent *event) override;
 
-signals:
-
-public slots:
-
+private:
+    float value;
 };
 
 #endif // SPEEDOMETER_H

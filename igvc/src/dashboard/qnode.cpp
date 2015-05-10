@@ -1,4 +1,6 @@
 #include "qnode.h"
+#include <ros/master.h>
+#include <QStringList>
 
 using namespace std;
 
@@ -21,6 +23,7 @@ QNode::~QNode()
 bool QNode::init()
 {
     ros::init(argc, argv,"dashboard");
+
     if(!ros::master::check()) {
         return false;
     }
@@ -35,6 +38,20 @@ bool QNode::init()
 
 void QNode::run()
 {
+    ros::Rate rate(1);
+    while(ros::ok())
+    {
+        ros::spinOnce();
+        ros::V_string nodes;
+        if(ros::master::getNodes(nodes))
+        {
+            QStringList nodesList;
+            for(auto node : nodes)
+                nodesList.append(QString(node.c_str()));
+            newNodesList(nodesList);
+        }
+        rate.sleep();
+    }
     ros::spin();
 
     cout << "ROS shutting down. Closing dashboard GUI." << endl;
