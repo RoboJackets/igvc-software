@@ -32,6 +32,10 @@ bool QNode::init()
 
     encoder_subscriber = nh->subscribe("encoders", 1, &QNode::encoderCallback, this);
 
+    battery_subscriber = nh->subscribe("battery", 1, &QNode::batteryCallback, this);
+
+    log_subscriber = nh->subscribe("/rosout_agg", 1, &QNode::logCallback, this);
+
     start();
     return true;
 }
@@ -61,4 +65,12 @@ void QNode::run()
 void QNode::encoderCallback(const igvc_msgs::velocity_pair &msg)
 {
     emit newVelocityData(fabs((msg.left_velocity + msg.right_velocity) / 2.));
+}
+
+void QNode::batteryCallback(const std_msgs::UInt8 &msg) {
+    emit newBatteryLevel(msg.data);
+}
+
+void QNode::logCallback(const rosgraph_msgs::LogConstPtr &msg) {
+    emit newRosoutMessage(QString((msg->name + ": " + msg->msg).c_str()));
 }

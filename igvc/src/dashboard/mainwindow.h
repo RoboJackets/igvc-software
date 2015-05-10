@@ -17,7 +17,6 @@ public:
     ~MainWindow();
 
 public slots:
-    void onNewVelocity(float velocity);
     void onNewNodesList(QStringList nodes);
 
 private:
