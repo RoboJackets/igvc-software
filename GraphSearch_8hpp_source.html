@@ -84,7 +84,7 @@
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keywordflow">while</span>(!frontier.empty())</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        {</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> path = frontier.top();</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> <a class="code" href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a> = frontier.top();</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;            frontier.pop();</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;            <span class="keywordflow">if</span>( expanded.find(path.<a class="code" href="classPath.html#a26bcff30b2f337a2fd5d1742f11d1b25">getLastState</a>()) == expanded.end() )<span class="comment">// expanded does not contain path&#39;s last state</span></div>
@@ -93,7 +93,7 @@
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                <span class="keywordflow">if</span>(problem.<a class="code" href="classSearchProblem.html#afdb882f6d900f01511f8b408917d7dfb">isGoal</a>(path.<a class="code" href="classPath.html#a26bcff30b2f337a2fd5d1742f11d1b25">getLastState</a>()))</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                {</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                    <span class="keywordflow">return</span> path;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                    <span class="keywordflow">return</span> <a class="code" href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a>;</div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                }</div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                list&lt;ActionType&gt; legalActions = problem.<a class="code" href="classSearchProblem.html#abd890c989ddb7a071e9ae25f127e74db">getActions</a>(path.<a class="code" href="classPath.html#a26bcff30b2f337a2fd5d1742f11d1b25">getLastState</a>());</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                StateType last = path.<a class="code" href="classPath.html#a26bcff30b2f337a2fd5d1742f11d1b25">getLastState</a>();</div>
@@ -103,7 +103,7 @@
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                    ActionType action = (*it);</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                    StateType result = problem.<a class="code" href="classSearchProblem.html#aa53d5bd1def822b79833d310be88321c">getResult</a>(last, action);</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                    <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> newPath(path);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                    <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> <a class="code" href="path__follower_2main_8cpp.html#a832442ceb87ee62c596864ff00d36e2c">newPath</a>(path);</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                    newPath.<a class="code" href="classPath.html#aa73c0c1d58e459a51329a8cbfb179a69">addAction</a>(action);</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                    newPath.<a class="code" href="classPath.html#aeeee6264a3e8eaf413f5dba76ac3a264">addState</a>(result);</div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                    frontier.push(newPath);</div>
@@ -130,7 +130,7 @@
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keywordflow">while</span>(!frontier.empty())</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        {</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;            <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> path = frontier.front();</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;            <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> <a class="code" href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a> = frontier.front();</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;            frontier.pop();</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;            <span class="keywordflow">if</span>( expanded.find(path.<a class="code" href="classPath.html#a26bcff30b2f337a2fd5d1742f11d1b25">getLastState</a>()) == expanded.end() ) <span class="comment">// expanded does not contain path&#39;s last state</span></div>
@@ -140,7 +140,7 @@
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;                <span class="keywordflow">if</span>(problem.<a class="code" href="classSearchProblem.html#afdb882f6d900f01511f8b408917d7dfb">isGoal</a>(path.<a class="code" href="classPath.html#a26bcff30b2f337a2fd5d1742f11d1b25">getLastState</a>()))</div>
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                {</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;                    <span class="keywordflow">return</span> path;</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;                    <span class="keywordflow">return</span> <a class="code" href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a>;</div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                }</div>
 <div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                list&lt;ActionType&gt; legalActions = problem.<a class="code" href="classSearchProblem.html#abd890c989ddb7a071e9ae25f127e74db">getActions</a>(path.<a class="code" href="classPath.html#a26bcff30b2f337a2fd5d1742f11d1b25">getLastState</a>());</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                StateType last = path.<a class="code" href="classPath.html#a26bcff30b2f337a2fd5d1742f11d1b25">getLastState</a>();</div>
@@ -150,7 +150,7 @@
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;                    ActionType action = (*it);</div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;                    StateType result = problem.<a class="code" href="classSearchProblem.html#aa53d5bd1def822b79833d310be88321c">getResult</a>(last, action);</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;                    <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> newPath(path);</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;                    <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> <a class="code" href="path__follower_2main_8cpp.html#a832442ceb87ee62c596864ff00d36e2c">newPath</a>(path);</div>
 <div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                    newPath.<a class="code" href="classPath.html#aa73c0c1d58e459a51329a8cbfb179a69">addAction</a>(action);</div>
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;                    newPath.<a class="code" href="classPath.html#aeeee6264a3e8eaf413f5dba76ac3a264">addState</a>(result);</div>
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;                    frontier.push(newPath);</div>
@@ -178,7 +178,7 @@
 <div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;</div>
 <div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;        <span class="keywordflow">while</span>(!frontier.empty())</div>
 <div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        {</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;            <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> path = frontier.top();</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;            <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> <a class="code" href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a> = frontier.top();</div>
 <div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;            frontier.pop();</div>
 <div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;</div>
 <div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;            <span class="keywordflow">if</span>( expanded.find(path.<a class="code" href="classPath.html#a26bcff30b2f337a2fd5d1742f11d1b25">getLastState</a>()) == expanded.end() ) <span class="comment">// expanded does not contain path&#39;s last state</span></div>
@@ -188,7 +188,7 @@
 <div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;</div>
 <div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;                <span class="keywordflow">if</span>(problem.<a class="code" href="classSearchProblem.html#afdb882f6d900f01511f8b408917d7dfb">isGoal</a>(last))</div>
 <div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;                {</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                    <span class="keywordflow">return</span> path;</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                    <span class="keywordflow">return</span> <a class="code" href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a>;</div>
 <div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;                }</div>
 <div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;                list&lt;ActionType&gt; legalActions = problem.<a class="code" href="classSearchProblem.html#abd890c989ddb7a071e9ae25f127e74db">getActions</a>(last);</div>
 <div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;</div>
@@ -196,7 +196,7 @@
 <div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;                {</div>
 <div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;                    ActionType action = (*it);</div>
 <div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;                    StateType result = problem.<a class="code" href="classSearchProblem.html#aa53d5bd1def822b79833d310be88321c">getResult</a>(last, action);</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;                    <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> newPath(path);</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;                    <a class="code" href="classPath.html">Path&lt;StateType, ActionType&gt;</a> <a class="code" href="path__follower_2main_8cpp.html#a832442ceb87ee62c596864ff00d36e2c">newPath</a>(path);</div>
 <div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;                    newPath.<a class="code" href="classPath.html#aa73c0c1d58e459a51329a8cbfb179a69">addAction</a>(action);</div>
 <div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;                    newPath.<a class="code" href="classPath.html#aeeee6264a3e8eaf413f5dba76ac3a264">addState</a>(result);</div>
 <div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;                    frontier.push(newPath);</div>
@@ -213,6 +213,8 @@
 <div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;<span class="preprocessor">#endif // GRAPHSEARCH_HPP_INCLUDED</span></div>
 <div class="ttc" id="classGraphSearch_html_a1f4ffe074819d20793a28d5b3ae6e08e"><div class="ttname"><a href="classGraphSearch.html#a1f4ffe074819d20793a28d5b3ae6e08e">GraphSearch::BFS</a></div><div class="ttdeci">static Path&lt; StateType, ActionType &gt; BFS(SearchProblem&lt; StateType, ActionType &gt; &amp;problem)</div><div class="ttdef"><b>Definition:</b> <a href="GraphSearch_8hpp_source.html#l00091">GraphSearch.hpp:91</a></div></div>
 <div class="ttc" id="classPath_html_aa73c0c1d58e459a51329a8cbfb179a69"><div class="ttname"><a href="classPath.html#aa73c0c1d58e459a51329a8cbfb179a69">Path::addAction</a></div><div class="ttdeci">void addAction(ActionType action)</div><div class="ttdef"><b>Definition:</b> <a href="SearchProblem_8hpp_source.html#l00025">SearchProblem.hpp:25</a></div></div>
+<div class="ttc" id="path__follower_2main_8cpp_html_a832442ceb87ee62c596864ff00d36e2c"><div class="ttname"><a href="path__follower_2main_8cpp.html#a832442ceb87ee62c596864ff00d36e2c">newPath</a></div><div class="ttdeci">void newPath(const action_pathConstPtr &amp;msg)</div><div class="ttdef"><b>Definition:</b> <a href="path__follower_2main_8cpp_source.html#l00017">path_follower/main.cpp:17</a></div></div>
+<div class="ttc" id="path__follower_2main_8cpp_html_a282428b6a35cae22683fe402521c8737"><div class="ttname"><a href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a></div><div class="ttdeci">action_pathConstPtr path</div><div class="ttdef"><b>Definition:</b> <a href="path__follower_2main_8cpp_source.html#l00011">path_follower/main.cpp:11</a></div></div>
 <div class="ttc" id="classSearchProblem_html_ab942327290da0d49d08ef50dbd4ef981"><div class="ttname"><a href="classSearchProblem.html#ab942327290da0d49d08ef50dbd4ef981">SearchProblem::getStartState</a></div><div class="ttdeci">virtual StateType getStartState()=0</div></div>
 <div class="ttc" id="classSearchProblem_html_afdb882f6d900f01511f8b408917d7dfb"><div class="ttname"><a href="classSearchProblem.html#afdb882f6d900f01511f8b408917d7dfb">SearchProblem::isGoal</a></div><div class="ttdeci">virtual bool isGoal(StateType tate)=0</div></div>
 <div class="ttc" id="classSearchProblem_html"><div class="ttname"><a href="classSearchProblem.html">SearchProblem</a></div><div class="ttdef"><b>Definition:</b> <a href="SearchProblem_8hpp_source.html#l00081">SearchProblem.hpp:81</a></div></div>
@@ -235,7 +237,7 @@
 <hr size="1"><div style="align: right;">
 <a href="http://wiki.ros.org/igvc">igvc</a><br />
 Author(s): Matthew Barulic <matthew.barulic@gmail.com>, Al Chaussee <chaussee.al@gmail.com></br />
-<small>autogenerated on Sat Apr 11 2015 16:23:10</small>
+<small>autogenerated on Sun May 10 2015 16:18:45</small>
 </div>
 </body>
 </html>

@@ -39,7 +39,7 @@
 <div class="line"><a name="l00008"></a><span class="lineno"><a class="line" href="classBumblebee2.html">    8</a></span>&#160;<span class="keyword">class </span><a class="code" href="classBumblebee2.html">Bumblebee2</a></div>
 <div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;{</div>
 <div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;    <a class="code" href="classBumblebee2.html#a1de5242ea180c0a29a2f177976a13762">Bumblebee2</a>(ros::NodeHandle &amp;handle);</div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;    <a class="code" href="classBumblebee2.html#a260e6ad0d8723e214ce3a6ce8b88e780">Bumblebee2</a>(ros::NodeHandle &amp;handle, std::string <a class="code" href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a>);</div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;    </div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    <a class="code" href="classBumblebee2.html#a5acc9a36e060a787a2258c52fdbd43fa">~Bumblebee2</a>();</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    </div>
@@ -64,13 +64,14 @@
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    </div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classBumblebee2.html#ab5bddad0c9857cf891dad3392578695d">ProcessFrame</a>(FlyCapture2::Image* rawImage, <span class="keyword">const</span> <span class="keywordtype">void</span>* callbackData);</div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;};</div>
-<div class="ttc" id="classBumblebee2_html_a1de5242ea180c0a29a2f177976a13762"><div class="ttname"><a href="classBumblebee2.html#a1de5242ea180c0a29a2f177976a13762">Bumblebee2::Bumblebee2</a></div><div class="ttdeci">Bumblebee2(ros::NodeHandle &amp;handle)</div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8cpp_source.html#l00011">bumblebee2.cpp:11</a></div></div>
 <div class="ttc" id="classBumblebee2_html_a29b84d4d275d456a237f7ee71db49510"><div class="ttname"><a href="classBumblebee2.html#a29b84d4d275d456a237f7ee71db49510">Bumblebee2::isOpen</a></div><div class="ttdeci">bool isOpen()</div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8cpp_source.html#l00041">bumblebee2.cpp:41</a></div></div>
+<div class="ttc" id="path__follower_2main_8cpp_html_a282428b6a35cae22683fe402521c8737"><div class="ttname"><a href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a></div><div class="ttdeci">action_pathConstPtr path</div><div class="ttdef"><b>Definition:</b> <a href="path__follower_2main_8cpp_source.html#l00011">path_follower/main.cpp:11</a></div></div>
 <div class="ttc" id="classBumblebee2_html_a5acc9a36e060a787a2258c52fdbd43fa"><div class="ttname"><a href="classBumblebee2.html#a5acc9a36e060a787a2258c52fdbd43fa">Bumblebee2::~Bumblebee2</a></div><div class="ttdeci">~Bumblebee2()</div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8cpp_source.html#l00030">bumblebee2.cpp:30</a></div></div>
 <div class="ttc" id="classBumblebee2_html"><div class="ttname"><a href="classBumblebee2.html">Bumblebee2</a></div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8h_source.html#l00008">bumblebee2.h:8</a></div></div>
 <div class="ttc" id="classBumblebee2_html_ad50d27dae2c1fa57d32cc609a0cfdb1c"><div class="ttname"><a href="classBumblebee2.html#ad50d27dae2c1fa57d32cc609a0cfdb1c">Bumblebee2::_cam</a></div><div class="ttdeci">FlyCapture2::Camera _cam</div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8h_source.html#l00023">bumblebee2.h:23</a></div></div>
 <div class="ttc" id="classBumblebee2_html_a190da141069dae847f37f03e686f178a"><div class="ttname"><a href="classBumblebee2.html#a190da141069dae847f37f03e686f178a">Bumblebee2::closeCamera</a></div><div class="ttdeci">void closeCamera()</div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8cpp_source.html#l00131">bumblebee2.cpp:131</a></div></div>
 <div class="ttc" id="classBumblebee2_html_ae20abf1ccf3778276f54f62c63d84a47"><div class="ttname"><a href="classBumblebee2.html#ae20abf1ccf3778276f54f62c63d84a47">Bumblebee2::_rightInfo_pub</a></div><div class="ttdeci">ros::Publisher _rightInfo_pub</div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8h_source.html#l00029">bumblebee2.h:29</a></div></div>
+<div class="ttc" id="classBumblebee2_html_a260e6ad0d8723e214ce3a6ce8b88e780"><div class="ttname"><a href="classBumblebee2.html#a260e6ad0d8723e214ce3a6ce8b88e780">Bumblebee2::Bumblebee2</a></div><div class="ttdeci">Bumblebee2(ros::NodeHandle &amp;handle, std::string path)</div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8cpp_source.html#l00011">bumblebee2.cpp:11</a></div></div>
 <div class="ttc" id="classBumblebee2_html_a8045481d75572feb739b4bce22d79e4c"><div class="ttname"><a href="classBumblebee2.html#a8045481d75572feb739b4bce22d79e4c">Bumblebee2::cameraManagerRight</a></div><div class="ttdeci">camera_info_manager::CameraInfoManager cameraManagerRight</div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8h_source.html#l00032">bumblebee2.h:32</a></div></div>
 <div class="ttc" id="classBumblebee2_html_a25c2ecadbbed0c7d1e0e2555583f255b"><div class="ttname"><a href="classBumblebee2.html#a25c2ecadbbed0c7d1e0e2555583f255b">Bumblebee2::_it</a></div><div class="ttdeci">image_transport::ImageTransport _it</div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8h_source.html#l00025">bumblebee2.h:25</a></div></div>
 <div class="ttc" id="classBumblebee2_html_ab5bddad0c9857cf891dad3392578695d"><div class="ttname"><a href="classBumblebee2.html#ab5bddad0c9857cf891dad3392578695d">Bumblebee2::ProcessFrame</a></div><div class="ttdeci">static void ProcessFrame(FlyCapture2::Image *rawImage, const void *callbackData)</div><div class="ttdef"><b>Definition:</b> <a href="bumblebee2_8cpp_source.html#l00148">bumblebee2.cpp:148</a></div></div>
@@ -85,7 +86,7 @@
 <hr size="1"><div style="align: right;">
 <a href="http://wiki.ros.org/igvc">igvc</a><br />
 Author(s): Matthew Barulic <matthew.barulic@gmail.com>, Al Chaussee <chaussee.al@gmail.com></br />
-<small>autogenerated on Sat Apr 11 2015 16:23:10</small>
+<small>autogenerated on Sun May 10 2015 16:18:45</small>
 </div>
 </body>
 </html>

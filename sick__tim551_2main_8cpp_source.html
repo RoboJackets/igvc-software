@@ -44,24 +44,25 @@
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;{</div>
 <div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;    sensor_msgs::PointCloud2 <a class="code" href="map_2main_8cpp.html#a54637f798761d16209cb165379893dcc">cloud</a>;</div>
 <div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <a class="code" href="sick__tim551_2main_8cpp.html#ad67a309102cb2c8329044c4d151c0900">proj</a>.projectLaser(*msg, cloud);</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    <a class="code" href="sick__tim551_2main_8cpp.html#acfdcf04fca1b8aa37d93419e2415b72c">_pointcloud_pub</a>.publish(cloud);</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;}</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
-<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="sick__tim551_2main_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">   19</a></span>&#160;<span class="keywordtype">int</span> <a class="code" href="sick__tim551_2main_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>** argv)</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;{</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    ros::init(argc, argv, <span class="stringliteral">&quot;lidar&quot;</span>);</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    ros::NodeHandle nh;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <a class="code" href="sick__tim551_2main_8cpp.html#acfdcf04fca1b8aa37d93419e2415b72c">_pointcloud_pub</a> = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="stringliteral">&quot;/pointcloud/lidar&quot;</span>, 1);</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    ros::Subscriber scan_sub = nh.subscribe(<span class="stringliteral">&quot;/scan&quot;</span>, 1, <a class="code" href="sick__tim551_2main_8cpp.html#a6f5386d5817272cf36b772542744eccb">scanCallback</a>);</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    ros::spin();</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;}</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
-<div class="ttc" id="map_2main_8cpp_html_a54637f798761d16209cb165379893dcc"><div class="ttname"><a href="map_2main_8cpp.html#a54637f798761d16209cb165379893dcc">cloud</a></div><div class="ttdeci">sensor_msgs::PointCloud2 cloud</div><div class="ttdef"><b>Definition:</b> <a href="map_2main_8cpp_source.html#l00010">map/main.cpp:10</a></div></div>
-<div class="ttc" id="sick__tim551_2main_8cpp_html_a3c04138a5bfe5d72780bb7e82a18e627"><div class="ttname"><a href="sick__tim551_2main_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a></div><div class="ttdeci">int main(int argc, char **argv)</div><div class="ttdef"><b>Definition:</b> <a href="sick__tim551_2main_8cpp_source.html#l00019">sick_tim551/main.cpp:19</a></div></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    cloud.header.frame_id = <span class="stringliteral">&quot;/lidar&quot;</span>;</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;    <a class="code" href="sick__tim551_2main_8cpp.html#acfdcf04fca1b8aa37d93419e2415b72c">_pointcloud_pub</a>.publish(cloud);</div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;}</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
+<div class="line"><a name="l00020"></a><span class="lineno"><a class="line" href="sick__tim551_2main_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">   20</a></span>&#160;<span class="keywordtype">int</span> <a class="code" href="sick__tim551_2main_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>** argv)</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;{</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    ros::init(argc, argv, <span class="stringliteral">&quot;lidar&quot;</span>);</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    ros::NodeHandle nh;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <a class="code" href="sick__tim551_2main_8cpp.html#acfdcf04fca1b8aa37d93419e2415b72c">_pointcloud_pub</a> = nh.advertise&lt;sensor_msgs::PointCloud2&gt;(<span class="stringliteral">&quot;/pointcloud/lidar&quot;</span>, 1);</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    ros::Subscriber scan_sub = nh.subscribe(<span class="stringliteral">&quot;/scan&quot;</span>, 1, <a class="code" href="sick__tim551_2main_8cpp.html#a6f5386d5817272cf36b772542744eccb">scanCallback</a>);</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    ros::spin();</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;}</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
+<div class="ttc" id="map_2main_8cpp_html_a54637f798761d16209cb165379893dcc"><div class="ttname"><a href="map_2main_8cpp.html#a54637f798761d16209cb165379893dcc">cloud</a></div><div class="ttdeci">sensor_msgs::PointCloud2 cloud</div><div class="ttdef"><b>Definition:</b> <a href="map_2main_8cpp_source.html#l00012">map/main.cpp:12</a></div></div>
+<div class="ttc" id="sick__tim551_2main_8cpp_html_a3c04138a5bfe5d72780bb7e82a18e627"><div class="ttname"><a href="sick__tim551_2main_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a></div><div class="ttdeci">int main(int argc, char **argv)</div><div class="ttdef"><b>Definition:</b> <a href="sick__tim551_2main_8cpp_source.html#l00020">sick_tim551/main.cpp:20</a></div></div>
 <div class="ttc" id="sick__tim551_2main_8cpp_html_ad67a309102cb2c8329044c4d151c0900"><div class="ttname"><a href="sick__tim551_2main_8cpp.html#ad67a309102cb2c8329044c4d151c0900">proj</a></div><div class="ttdeci">laser_geometry::LaserProjection proj</div><div class="ttdef"><b>Definition:</b> <a href="sick__tim551_2main_8cpp_source.html#l00010">sick_tim551/main.cpp:10</a></div></div>
 <div class="ttc" id="sick__tim551_2main_8cpp_html_a6f5386d5817272cf36b772542744eccb"><div class="ttname"><a href="sick__tim551_2main_8cpp.html#a6f5386d5817272cf36b772542744eccb">scanCallback</a></div><div class="ttdeci">void scanCallback(const sensor_msgs::LaserScan::ConstPtr &amp;msg)</div><div class="ttdef"><b>Definition:</b> <a href="sick__tim551_2main_8cpp_source.html#l00012">sick_tim551/main.cpp:12</a></div></div>
 <div class="ttc" id="sick__tim551_2main_8cpp_html_acfdcf04fca1b8aa37d93419e2415b72c"><div class="ttname"><a href="sick__tim551_2main_8cpp.html#acfdcf04fca1b8aa37d93419e2415b72c">_pointcloud_pub</a></div><div class="ttdeci">ros::Publisher _pointcloud_pub</div><div class="ttdef"><b>Definition:</b> <a href="sick__tim551_2main_8cpp_source.html#l00009">sick_tim551/main.cpp:9</a></div></div>
@@ -71,7 +72,7 @@
 <hr size="1"><div style="align: right;">
 <a href="http://wiki.ros.org/igvc">igvc</a><br />
 Author(s): Matthew Barulic <matthew.barulic@gmail.com>, Al Chaussee <chaussee.al@gmail.com></br />
-<small>autogenerated on Sat Apr 11 2015 16:23:10</small>
+<small>autogenerated on Sun May 10 2015 16:18:45</small>
 </div>
 </body>
 </html>

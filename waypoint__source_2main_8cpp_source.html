@@ -49,7 +49,7 @@
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;</div>
 <div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="waypoint__source_2main_8cpp.html#ac0b51fa096a252d2f6c7411bdb529aca">   19</a></span>&#160;mutex <a class="code" href="waypoint__source_2main_8cpp.html#ac0b51fa096a252d2f6c7411bdb529aca">current_mutex</a>;</div>
 <div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
-<div class="line"><a name="l00021"></a><span class="lineno"><a class="line" href="waypoint__source_2main_8cpp.html#ab2c3239b47e445287a284b17165e7729">   21</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="waypoint__source_2main_8cpp.html#ab2c3239b47e445287a284b17165e7729">loadWaypointsFile</a>(<span class="keywordtype">string</span> path, vector&lt;PointStamped&gt;&amp; <a class="code" href="waypoint__source_2main_8cpp.html#a53da56cb71f4e9464ebb4c0916cf4746">waypoints</a>)</div>
+<div class="line"><a name="l00021"></a><span class="lineno"><a class="line" href="waypoint__source_2main_8cpp.html#ab2c3239b47e445287a284b17165e7729">   21</a></span>&#160;<span class="keywordtype">void</span> <a class="code" href="waypoint__source_2main_8cpp.html#ab2c3239b47e445287a284b17165e7729">loadWaypointsFile</a>(<span class="keywordtype">string</span> <a class="code" href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a>, vector&lt;PointStamped&gt;&amp; <a class="code" href="waypoint__source_2main_8cpp.html#a53da56cb71f4e9464ebb4c0916cf4746">waypoints</a>)</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;{</div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="keywordflow">if</span>(path.empty())</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    {</div>
@@ -130,7 +130,7 @@
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    ROS_INFO_STREAM(<span class="stringliteral">&quot;Has param: &quot;</span> &lt;&lt; nhp.hasParam(<span class="stringliteral">&quot;file&quot;</span>));</div>
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keywordtype">string</span> path;</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a>;</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    nhp.getParam(<span class="stringliteral">&quot;file&quot;</span>, path);</div>
 <div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    ROS_INFO_STREAM(<span class="stringliteral">&quot;Loading waypoints from &quot;</span> &lt;&lt; path);</div>
@@ -167,6 +167,7 @@
 <div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;}</div>
 <div class="ttc" id="waypoint__source_2main_8cpp_html_ac0b51fa096a252d2f6c7411bdb529aca"><div class="ttname"><a href="waypoint__source_2main_8cpp.html#ac0b51fa096a252d2f6c7411bdb529aca">current_mutex</a></div><div class="ttdeci">mutex current_mutex</div><div class="ttdef"><b>Definition:</b> <a href="waypoint__source_2main_8cpp_source.html#l00019">waypoint_source/main.cpp:19</a></div></div>
+<div class="ttc" id="path__follower_2main_8cpp_html_a282428b6a35cae22683fe402521c8737"><div class="ttname"><a href="path__follower_2main_8cpp.html#a282428b6a35cae22683fe402521c8737">path</a></div><div class="ttdeci">action_pathConstPtr path</div><div class="ttdef"><b>Definition:</b> <a href="path__follower_2main_8cpp_source.html#l00011">path_follower/main.cpp:11</a></div></div>
 <div class="ttc" id="waypoint__source_2main_8cpp_html_a53da56cb71f4e9464ebb4c0916cf4746"><div class="ttname"><a href="waypoint__source_2main_8cpp.html#a53da56cb71f4e9464ebb4c0916cf4746">waypoints</a></div><div class="ttdeci">vector&lt; PointStamped &gt; waypoints</div><div class="ttdef"><b>Definition:</b> <a href="waypoint__source_2main_8cpp_source.html#l00015">waypoint_source/main.cpp:15</a></div></div>
 <div class="ttc" id="waypoint__source_2main_8cpp_html_a3c04138a5bfe5d72780bb7e82a18e627"><div class="ttname"><a href="waypoint__source_2main_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a></div><div class="ttdeci">int main(int argc, char **argv)</div><div class="ttdef"><b>Definition:</b> <a href="waypoint__source_2main_8cpp_source.html#l00093">waypoint_source/main.cpp:93</a></div></div>
 <div class="ttc" id="waypoint__source_2main_8cpp_html_a5f4b8855852418b348414bacad077a34"><div class="ttname"><a href="waypoint__source_2main_8cpp.html#a5f4b8855852418b348414bacad077a34">current_waypoint</a></div><div class="ttdeci">PointStamped current_waypoint</div><div class="ttdef"><b>Definition:</b> <a href="waypoint__source_2main_8cpp_source.html#l00016">waypoint_source/main.cpp:16</a></div></div>
@@ -185,7 +186,7 @@
 <hr size="1"><div style="align: right;">
 <a href="http://wiki.ros.org/igvc">igvc</a><br />
 Author(s): Matthew Barulic <matthew.barulic@gmail.com>, Al Chaussee <chaussee.al@gmail.com></br />
-<small>autogenerated on Sat Apr 11 2015 16:23:10</small>
+<small>autogenerated on Sun May 10 2015 16:18:45</small>
 </div>
 </body>
 </html>
