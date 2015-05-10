@@ -11,11 +11,13 @@ Speedometer::Speedometer(QWidget *parent) :
     QWidget(parent),
     value(0)
 {
-//    QTimer *timer = new QTimer(this);
-//    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
-//    timer->start(100);
+    resize(200,125);
+}
 
-    resize(200,200);
+void Speedometer::setValue(float value)
+{
+    this->value = value;
+    update();
 }
 
 void Speedometer::paintEvent(QPaintEvent *event)
@@ -31,12 +33,12 @@ void Speedometer::paintEvent(QPaintEvent *event)
 
     QColor needleColor(0,0,0);
 
-    auto side = qMin(width(), height());
+    auto side = 200;
     auto time = QTime::currentTime();
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.translate(width() / 2, height() / 2);
+    painter.translate(width() / 2, height()-25);
     painter.scale(side / 200.0, side / 200.0);
 
     painter.setPen(Qt::NoPen);
@@ -53,11 +55,13 @@ void Speedometer::paintEvent(QPaintEvent *event)
     painter.drawText(QRectF(-text_width/2., -40, 100, 20), text);
 
     for (int j = 0; j < 30; ++j) {
-        painter.setPen(QColor(255-((255./30.)*j),(255./30.)*j,0));
-        if ((j % 5) != 0)
+        if ((j % 5) != 0) {
+            painter.setPen(QColor(255 - ((255. / 30.) * j), (255. / 30.) * j, 0));
             painter.drawLine(92, 0, 96, 0);
-        else
+        } else {
+            painter.setPen(QColor(0,0,0));
             painter.drawLine(84, 0, 96, 0);
+        }
         painter.rotate(-6.0);
     }
 }

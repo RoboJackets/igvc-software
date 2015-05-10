@@ -25,6 +25,8 @@ signals:
 
     void newVelocityData(float velocity);
 
+    void newNodesList(QStringList nodes);
+
 private:
     std::unique_ptr<ros::NodeHandle> nh;
 

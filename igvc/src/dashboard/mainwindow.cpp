@@ -9,6 +9,7 @@ MainWindow::MainWindow(int argc, char **argv) :
     ui->setupUi(this);
 
     connect(&node, SIGNAL(newVelocityData(float)), this, SLOT(onNewVelocity(float)));
+    connect(&node, SIGNAL(newNodesList(QStringList)), this, SLOT(onNewNodesList(QStringList)));
 
     if(node.init())
         std::cout << "ROS node initialized." << std::endl;
@@ -23,6 +24,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::onNewVelocity(float velocity)
 {
-    ui->widget->value = velocity;
-    ui->widget->update();
+    ui->widget->setValue(velocity);
+}
+
+void MainWindow::onNewNodesList(QStringList nodes)
+{
+    ui->listWidget->clear();
+    for(auto node : nodes)
+        ui->listWidget->addItem(node);
 }
