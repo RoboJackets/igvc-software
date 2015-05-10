@@ -24,8 +24,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::onNewVelocity(float velocity)
 {
-    ui->widget->value = velocity;
-    ui->widget->update();
+    ui->widget->setValue(velocity);
 }
 
 void MainWindow::onNewNodesList(QStringList nodes)

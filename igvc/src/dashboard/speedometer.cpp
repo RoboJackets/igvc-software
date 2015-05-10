@@ -14,6 +14,12 @@ Speedometer::Speedometer(QWidget *parent) :
     resize(200,125);
 }
 
+void Speedometer::setValue(float value)
+{
+    this->value = value;
+    update();
+}
+
 void Speedometer::paintEvent(QPaintEvent *event)
 {
     static const QPoint needle[4] = {
