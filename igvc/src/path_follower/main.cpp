@@ -33,7 +33,9 @@ int main(int argc, char** argv)
 
   ros::Publisher cmd_pub = n.advertise<velocity_pair>("/motors", 1);
 
-  ros::Rate rate(60);
+  ros::Subscriber path_sub = n.subscribe("path", 1, newPath);
+
+  ros::Rate rate(120);
   while(ros::ok())
   {
     ros::spinOnce();
@@ -46,13 +48,23 @@ int main(int argc, char** argv)
         {
           cmd_pub.publish(path->actions[path_index]);
           cmd_start_time = high_resolution_clock::now();
+          path_reset = false;
         }
         auto elapsed_time = high_resolution_clock::now() -  cmd_start_time;
         if(duration_cast<seconds>(elapsed_time).count() > path->actions[path_index].duration)
         {
-          path_index++;
-          cmd_pub.publish(path->actions[path_index]);
-          cmd_start_time = high_resolution_clock::now();
+            if(path_index < path->actions.size() - 1)
+            {
+                path_index++;
+                cmd_pub.publish(path->actions[path_index]);
+                cmd_start_time = high_resolution_clock::now();
+            } else {
+                velocity_pair vel;
+                vel.left_velocity = 0.;
+                vel.right_velocity = 0.;
+                cmd_pub.publish(vel);
+                path.reset();
+            }
         }
       }
     }
