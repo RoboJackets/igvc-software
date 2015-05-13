@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
+#include <pcl_ros/transforms.h>
 #include <ros/publisher.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
@@ -20,6 +21,7 @@ void nodeCallback(const sensor_msgs::PointCloud2::ConstPtr &msg)
         sensor_msgs::PointCloud transformed;
         sensor_msgs::convertPointCloud2ToPointCloud(*msg, transformed);
         transformed.header.stamp = ros::Time(0);
+
         tf_listener->transformPointCloud("/map",transformed,transformed);
 
         sensor_msgs::PointCloud2 transformed2;
@@ -28,15 +30,7 @@ void nodeCallback(const sensor_msgs::PointCloud2::ConstPtr &msg)
         pcl::concatenatePointCloud(transformed2, cloud, output);
         cloud = output;
 
-//        pcl::VoxelGrid<pcl::PCLPointCloud2> sor;
-//        sor.setInputCloud(cloud);
-//        sor.setLeafSize (0.01f, 0.01f, 0.01f);
-//        sor.filter(*cloud);
-
-
-//        pcl::PCDWriter w;
-//        w.write("pointcloud_map.pcd", cloud, Eigen::Vector4f::Zero(), Eigen::Quaternionf::Identity(), false);
-        _pointcloud_pub.publish(cloud);
+         _pointcloud_pub.publish(cloud);
     }
     catch (int e)
     {
