@@ -1,0 +1,8 @@
+<!-- map.launch -->
+<launch>
+    <!-- Map Node -->
+	<node name="mapper" pkg="igvc" type="map">
+		<param name="topics" type="string" value="/pointcloud/lidar_filtered"/>
+	</node>
+
+</launch>

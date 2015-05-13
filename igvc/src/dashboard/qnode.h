@@ -5,6 +5,9 @@
 #include <ros/ros.h>
 #include <memory>
 #include <igvc_msgs/velocity_pair.h>
+#include <std_msgs/UInt8.h>
+#include <rosgraph_msgs/Log.h>
+#include <QString>
 
 class QNode : public QThread
 {
@@ -20,15 +23,29 @@ public:
 
     void encoderCallback(const igvc_msgs::velocity_pair& msg);
 
+    void batteryCallback(const std_msgs::UInt8& msg);
+
+    void logCallback(const rosgraph_msgs::LogConstPtr& msg);
+
 signals:
     void rosShutdown();
 
     void newVelocityData(float velocity);
 
+    void newNodesList(QStringList nodes);
+
+    void newBatteryLevel(int percent);
+
+    void newRosoutMessage(QString message);
+
 private:
     std::unique_ptr<ros::NodeHandle> nh;
 
     ros::Subscriber encoder_subscriber;
+
+    ros::Subscriber battery_subscriber;
+
+    ros::Subscriber log_subscriber;
 
     int argc;
     char** argv;

@@ -8,12 +8,18 @@ MainWindow::MainWindow(int argc, char **argv) :
 {
     ui->setupUi(this);
 
-    connect(&node, SIGNAL(newVelocityData(float)), this, SLOT(onNewVelocity(float)));
+    connect(&node, SIGNAL(newVelocityData(float)), ui->speedometer, SLOT(setValue(float)));
+    connect(&node, SIGNAL(newNodesList(QStringList)), this, SLOT(onNewNodesList(QStringList)));
+    connect(&node, SIGNAL(newBatteryLevel(int)), ui->batteryBar, SLOT(setValue(int)));
+    connect(&node, SIGNAL(rosShutdown()), this, SLOT(close()));
+    connect(&node, SIGNAL(newRosoutMessage(QString)), ui->statusbar, SLOT(showMessage(QString)));
 
     if(node.init())
         std::cout << "ROS node initialized." << std::endl;
     else
         std::cerr << "ROS node failed to initialize." << std::endl;
+
+    ui->batteryBar->setMaximum(255);
 }
 
 MainWindow::~MainWindow()
@@ -21,8 +27,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::onNewVelocity(float velocity)
+void MainWindow::onNewNodesList(QStringList nodes)
 {
-    ui->widget->value = velocity;
-    ui->widget->update();
+    ui->nodesListWidget->clear();
+    for(auto node : nodes)
+        ui->nodesListWidget->addItem(node);
 }
