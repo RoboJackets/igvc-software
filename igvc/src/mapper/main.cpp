@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
+#include <pcl_ros/transforms.h>
 #include <ros/publisher.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
@@ -77,6 +78,7 @@ int main(int argc, char** argv)
     _pointcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/map", 1);
 
     tf_listener->waitForTransform("/map", "/lidar", ros::Time(0), ros::Duration(5));
+	//Probably want to wait for other transforms that mapper will need like camera, camera_left, camera_right
 
 	ros::spin();
 }
