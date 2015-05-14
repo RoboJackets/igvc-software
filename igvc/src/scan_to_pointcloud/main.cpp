@@ -19,11 +19,11 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "lidar");
+    ros::init(argc, argv, "scan_to_pointcloud");
 
     ros::NodeHandle nh;
 
-    _pointcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/pointcloud/lidar", 1);
+    _pointcloud_pub = nh.advertise<sensor_msgs::PointCloud2>("/scan/pointcloud", 1);
 
     ros::Subscriber scan_sub = nh.subscribe("/scan", 1, scanCallback);
 
