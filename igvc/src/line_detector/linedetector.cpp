@@ -32,8 +32,9 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 	{
 		ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
 	}
-	onImageEvent();
-	return;
+	if (onImageEvent()) { // If primary method returns true, stop
+	    return;
+    } // if not, use other method
 
     cv_ptr = cv_bridge::toCvCopy(msg, "");
 	
@@ -60,7 +61,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 	inRange(imgmat, Scalar(150, 150, 150), Scalar(255, 255, 255), test3);
 	cv::Mat test4;
 	cvtColor(test3, test4, CV_GRAY2BGR);
-	imgmat = imgmat & test4;
+	//imgmat = imgmat & test4;
 	inRange(imgmat, Scalar(0, 0, 0), Scalar(255, 255, 150), test3);
 	cvtColor(test3, test4, CV_GRAY2BGR);
 	//imgmat = imgmat & test4;
@@ -155,7 +156,7 @@ bool LineDetector::isWorking() {
     return true;
 }
 
-void LineDetector::onImageEvent() {
+bool LineDetector::onImageEvent() {
 
     dst = &cv_ptr->image;
     cv::resize(*dst, *dst, cv::Size(1024, 768));
@@ -177,6 +178,9 @@ void LineDetector::onImageEvent() {
 	vector<Vec4i> lines;
 	HoughLinesP(*dst, lines, 1, (M_PI/180), 40, 30, 10);
 	cvtColor(*dst, *dst, CV_GRAY2BGR);
+    if (lines.size() > 200) {
+        return false; // If there are too many lines detected, use other method
+    }
 	for( size_t i = 0; i < lines.size(); i++ )
     {
         line( *dst, Point(lines[i][0], lines[i][1]),
@@ -186,9 +190,6 @@ void LineDetector::onImageEvent() {
     int cols = dst->cols;
 	int rb2 = rows - (rows / 10);
 	blackoutSection(*dst, rb2, rows, 0, cols);
-
-//    Erosion();
-    //Dilation();
     cv::Mat transformDst(dst->rows, dst->cols, CV_8UC3);
     transformPoints(*dst, transformDst);
     _filt_img.publish(cv_ptr->toImageMsg());
@@ -198,6 +199,8 @@ void LineDetector::onImageEvent() {
     pcl::PointXY offset;
     offset.x = 0.0f;
     offset.y = 0.0f;
+
+    return true;
 
 	// TODO REPLACE WITH ROS COMMUNICATION
     //onNewCloud(cloud, offset);
@@ -271,12 +274,12 @@ void LineDetector::blackAndWhite(float totalAvg){
             //If there is a significant amount of red in the pixel, it's most likely an orange cone
             //Get rid of the obstacle
             if (/*p[2] > totalAvg*2 && */p[2] > 253){
-                //detectObstacle(i, j, dst);
+                detectObstacle(i, j, dst);
             }
 
             //Filters out the white and makes it pure white
-            if((p[0]>tempAvg*blueDown) && (p[0] < tempAvg*blueUp) || (p[0] < 20 && p[1] < 20 && p[2] < 20) /*&& (p[1] < tempAvg*greenUp) && (p[2]>tempAvg*redDown)
-                    && (p[2]<tempAvg*redUp) && (p[1]>tempAvg*greenDown) && (abs(p[1] - p[2]) <tempAvg/diff)*/) {
+            if((p[0]>tempAvg*blueDown) && (p[0] < tempAvg*blueUp) || (p[0] < 20 && p[1] < 20 && p[2] < 20) && (p[1] < tempAvg*greenUp) && (p[2]>tempAvg*redDown)
+                    && (p[2]<tempAvg*redUp) && (p[1]>tempAvg*greenDown) && (abs(p[1] - p[2]) <tempAvg/diff)) {
                 dst->at<Vec3b>(i,j)[0] = 255;
                 dst->at<Vec3b>(i,j)[1] = 255;
                 dst->at<Vec3b>(i,j)[2] = 255;
