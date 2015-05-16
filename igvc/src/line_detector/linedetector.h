@@ -25,7 +25,7 @@ public:
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
     bool isWorking();
-    void onImageEvent();
+    bool onImageEvent();
 
 private:
 //    void findLines(cv_bridge::Cv_ImagePtr cv_ptr);
