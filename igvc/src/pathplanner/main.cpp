@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <ros/subscriber.h>
 #include <ros/publisher.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
 #include "GraphSearch.hpp"
@@ -9,9 +8,11 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_datatypes.h>
 #include <mutex>
-#include <pcl_conversions/pcl_conversions.h>
 #include <algorithm>
 #include <igvc_msgs/action_path.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_ros/point_cloud.h>
 
 using namespace std;
 
@@ -23,10 +24,10 @@ IGVCSearchProblem search_problem;
 
 mutex planning_mutex;
 
-void map_callback(const sensor_msgs::PointCloud2ConstPtr &msg)
+void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
 {
     lock_guard<mutex> lock(planning_mutex);
-    pcl::fromROSMsg(*msg, *search_problem.Map);
+    *search_problem.Map = *msg;
 }
 
 void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
@@ -64,7 +65,7 @@ int main(int argc, char** argv)
 
     double baseline = 0.7275;
 
-    search_problem.Map = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
+    search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
     search_problem.GoalThreshold = 1.0;
     search_problem.Threshold = 0.36375;
     search_problem.Speed = 0.25;
