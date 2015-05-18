@@ -36,6 +36,8 @@ bool QNode::init()
 
     log_subscriber = nh->subscribe("/rosout_agg", 1, &QNode::logCallback, this);
 
+    map_subscriber = nh->subscribe("/map", 1, &QNode::mapCallback, this);
+
     start();
     return true;
 }
@@ -73,4 +75,8 @@ void QNode::batteryCallback(const std_msgs::UInt8 &msg) {
 
 void QNode::logCallback(const rosgraph_msgs::LogConstPtr &msg) {
     emit newRosoutMessage(QString((msg->name + ": " + msg->msg).c_str()));
+}
+
+void QNode::mapCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
+    emit newMap(msg);
 }

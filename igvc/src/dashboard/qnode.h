@@ -8,6 +8,7 @@
 #include <std_msgs/UInt8.h>
 #include <rosgraph_msgs/Log.h>
 #include <QString>
+#include <pcl_ros/point_cloud.h>
 
 class QNode : public QThread
 {
@@ -27,6 +28,8 @@ public:
 
     void logCallback(const rosgraph_msgs::LogConstPtr& msg);
 
+    void mapCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg);
+
 signals:
     void rosShutdown();
 
@@ -38,6 +41,8 @@ signals:
 
     void newRosoutMessage(QString message);
 
+    void newMap(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &map);
+
 private:
     std::unique_ptr<ros::NodeHandle> nh;
 
@@ -46,6 +51,8 @@ private:
     ros::Subscriber battery_subscriber;
 
     ros::Subscriber log_subscriber;
+
+    ros::Subscriber map_subscriber;
 
     int argc;
     char** argv;

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>963</width>
+    <height>569</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,22 +20,46 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QLabel" name="label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>250</width>
+            <height>16777215</height>
+           </size>
+          </property>
           <property name="text">
            <string>Running Nodes:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QListWidget" name="nodesListWidget"/>
+         <widget class="QListWidget" name="nodesListWidget">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="gridLayoutWidget">
-       <layout class="QGridLayout" name="gridLayout"/>
+      <widget class="MapWidget" name="mapWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
       </widget>
      </widget>
     </item>
@@ -104,7 +128,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>963</width>
      <height>25</height>
     </rect>
    </property>
@@ -116,6 +140,12 @@
    <class>Speedometer</class>
    <extends>QWidget</extends>
    <header>speedometer.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MapWidget</class>
+   <extends>QWidget</extends>
+   <header>mapwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
