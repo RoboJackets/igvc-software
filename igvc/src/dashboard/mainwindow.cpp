@@ -13,6 +13,7 @@ MainWindow::MainWindow(int argc, char **argv) :
     connect(&node, SIGNAL(newBatteryLevel(int)), ui->batteryBar, SLOT(setValue(int)));
     connect(&node, SIGNAL(rosShutdown()), this, SLOT(close()));
     connect(&node, SIGNAL(newRosoutMessage(QString)), ui->statusbar, SLOT(showMessage(QString)));
+    connect(&node, SIGNAL(newMap(pcl::PointCloud<pcl::PointXYZ>::ConstPtr)), ui->mapWidget, SLOT(setMap(pcl::PointCloud<pcl::PointXYZ>::ConstPtr)));
 
     if(node.init())
         std::cout << "ROS node initialized." << std::endl;
