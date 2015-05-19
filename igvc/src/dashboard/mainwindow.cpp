@@ -21,6 +21,7 @@ MainWindow::MainWindow(int argc, char **argv) :
         std::cerr << "ROS node failed to initialize." << std::endl;
 
     ui->batteryBar->setMaximum(255);
+
 }
 
 MainWindow::~MainWindow()
@@ -33,4 +34,10 @@ void MainWindow::onNewNodesList(QStringList nodes)
     ui->nodesListWidget->clear();
     for(auto node : nodes)
         ui->nodesListWidget->addItem(node);
+}
+
+void MainWindow::showEvent(QShowEvent *e)
+{
+    QList<int> sizes = {250, ui->splitter->width() - 250};
+    ui->splitter->setSizes(sizes);
 }
