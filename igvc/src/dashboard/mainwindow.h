@@ -19,6 +19,9 @@ public:
 public slots:
     void onNewNodesList(QStringList nodes);
 
+protected:
+    void showEvent(QShowEvent *e) override;
+
 private:
     Ui::MainWindow *ui;
 
