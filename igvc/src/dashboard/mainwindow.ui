@@ -49,6 +49,15 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="autoScroll">
+           <bool>false</bool>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::NoSelection</enum>
+          </property>
          </widget>
         </item>
        </layout>
@@ -87,6 +96,25 @@
         </property>
         <property name="format">
          <string>Battery %p%</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="estopLabel">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(255, 0, 0);</string>
+        </property>
+        <property name="text">
+         <string>EStop</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
