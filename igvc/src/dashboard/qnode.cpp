@@ -38,6 +38,8 @@ bool QNode::init()
 
     map_subscriber = nh->subscribe("/map", 1, &QNode::mapCallback, this);
 
+    estop_subscriber = nh->subscribe("/robot_enabled", 1, &QNode::estopCallback, this);
+
     start();
     return true;
 }
@@ -79,4 +81,8 @@ void QNode::logCallback(const rosgraph_msgs::LogConstPtr &msg) {
 
 void QNode::mapCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
     emit newMap(msg);
+}
+
+void QNode::estopCallback(const std_msgs::BoolConstPtr &msg) {
+    emit newEstopStatus(msg->data);
 }

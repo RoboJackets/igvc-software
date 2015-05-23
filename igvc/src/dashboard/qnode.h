@@ -9,6 +9,7 @@
 #include <rosgraph_msgs/Log.h>
 #include <QString>
 #include <pcl_ros/point_cloud.h>
+#include <std_msgs/Bool.h>
 
 class QNode : public QThread
 {
@@ -30,6 +31,8 @@ public:
 
     void mapCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg);
 
+    void estopCallback(const std_msgs::BoolConstPtr &msg);
+
 signals:
     void rosShutdown();
 
@@ -43,6 +46,8 @@ signals:
 
     void newMap(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &map);
 
+    void newEstopStatus(bool enabled);
+
 private:
     std::unique_ptr<ros::NodeHandle> nh;
 
@@ -53,6 +58,8 @@ private:
     ros::Subscriber log_subscriber;
 
     ros::Subscriber map_subscriber;
+
+    ros::Subscriber estop_subscriber;
 
     int argc;
     char** argv;
