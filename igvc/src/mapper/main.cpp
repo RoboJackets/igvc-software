@@ -36,7 +36,7 @@ void nodeCallback(const PointCloud<PointXYZ>::ConstPtr &msg)
 {
     PointCloud<PointXYZ> transformed;
     tf::StampedTransform transform;
-    if(frames_seen.find(msg->header.frame_id) != frames_seen.end())
+    if(frames_seen.find(msg->header.frame_id) == frames_seen.end())
     {
         frames_seen.insert(msg->header.frame_id);
         tf_listener->waitForTransform("/map", msg->header.frame_id, Time(0), Duration(5));
