@@ -13,13 +13,16 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
+#include <set>
 
 using namespace std;
 using namespace pcl;
+using namespace ros;
 
 PointCloud<PointXYZ>::Ptr map_cloud;
-ros::Publisher _pointcloud_pub;
+Publisher _pointcloud_pub;
 tf::TransformListener *tf_listener;
+set<string> frames_seen;
 
 void filterOutDuplicates(PointCloud<PointXYZ>::ConstPtr cloud)
 {
@@ -33,7 +36,12 @@ void nodeCallback(const PointCloud<PointXYZ>::ConstPtr &msg)
 {
     PointCloud<PointXYZ> transformed;
     tf::StampedTransform transform;
-    tf_listener->lookupTransform("/map", msg->header.frame_id, ros::Time(0), transform);
+    if(frames_seen.find(msg->header.frame_id) != frames_seen.end())
+    {
+        frames_seen.push_back(msg->header.frame_id);
+        tf_listener->waitForTransform("/map", msg->header.frame_id, Time(0), Duration(5));
+    }
+    tf_listener->lookupTransform("/map", msg->header.frame_id, Time(0), transform);
     pcl_ros::transformPointCloud(*msg, transformed, transform);
 
     *map_cloud += transformed;
@@ -45,17 +53,18 @@ void nodeCallback(const PointCloud<PointXYZ>::ConstPtr &msg)
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "mapper");
+    map_cloud = PointCloud<PointXYZ>::Ptr(new PointCloud<PointXYZ>());
 
-    ros::NodeHandle nh;
+    init(argc, argv, "mapper");
+
+    NodeHandle nh;
     tf_listener = new tf::TransformListener();
 
-    std::string topics;
-    std::string delimiter = " ";
+    string topics;
 
-    std::list<ros::Subscriber> subs;
+    list<Subscriber> subs;
 
-    ros::NodeHandle pNh("~");
+    NodeHandle pNh("~");
 
     if(!pNh.hasParam("topics"))
         ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
@@ -78,8 +87,5 @@ int main(int argc, char** argv)
 
     _pointcloud_pub = nh.advertise<PointCloud<PointXYZ> >("/map", 1);
 
-    tf_listener->waitForTransform("/map", "/lidar", ros::Time(0), ros::Duration(5));
-	//Probably want to wait for other transforms that mapper will need like camera, camera_left, camera_right
-
-	ros::spin();
+    spin();
 }
