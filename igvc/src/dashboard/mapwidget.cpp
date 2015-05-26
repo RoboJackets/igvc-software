@@ -18,15 +18,17 @@ void MapWidget::setMap(PointCloud<PointXYZ>::ConstPtr value)
 
 void MapWidget::paintEvent(QPaintEvent *)
 {
+    QPainter painter(this);
+
     if(map->empty())
     {
         return;
     }
 
-    float minx = map->at(0).x;
-    float maxx = map->at(0).x;
-    float miny = map->at(0).y;
-    float maxy = map->at(0).y;
+    auto minx = map->at(0).x;
+    auto maxx = map->at(0).x;
+    auto miny = map->at(0).y;
+    auto maxy = map->at(0).y;
     for(auto point : *map)
     {
         minx = min(minx, point.x);
@@ -38,13 +40,12 @@ void MapWidget::paintEvent(QPaintEvent *)
     auto viewWidth = maxx - minx;
     auto viewHeight = maxy - miny;
 
-    QPainter painter(this);
     painter.setPen(Qt::black);
     for(auto point : *map)
     {
         // Draw point
-        auto x = (point.x - minx) / viewWidth;
-        auto y = (point.y - miny) / viewHeight;
+        auto x = ((point.x - minx) / viewWidth) * this->width();
+        auto y = ((point.y - miny) / viewHeight) * this->height();
         painter.drawEllipse(QPointF(x,y), 3, 3);
     }
 }
