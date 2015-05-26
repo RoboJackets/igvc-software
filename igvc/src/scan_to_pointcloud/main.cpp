@@ -5,32 +5,47 @@
 #include <pcl_ros/point_cloud.h>
 #include <sensor_msgs/LaserScan.h>
 #include <laser_geometry/laser_geometry.h>
+#include <pcl/kdtree/kdtree_flann.h>
 
-ros::Publisher _pointcloud_pub;
-laser_geometry::LaserProjection proj;
+using namespace pcl;
+using namespace ros;
+using namespace std;
+
+Publisher _pointcloud_pub;
+laser_geometry::LaserProjection projection;
 
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
 
     sensor_msgs::PointCloud2 cloud;
-    proj.projectLaser(*msg, cloud);
+    projection.projectLaser(*msg, cloud);
     cloud.header.frame_id = "/lidar";
 
-    pcl::PointCloud<pcl::PointXYZ> cloud_for_pub;
-    pcl::fromROSMsg(cloud, cloud_for_pub);
+    PointCloud<PointXYZ>::Ptr cloud_for_pub(new PointCloud<PointXYZ>());
+    fromROSMsg(cloud, *cloud_for_pub);
 
-    _pointcloud_pub.publish(cloud_for_pub);
+    {
+        KdTreeFLANN<PointXYZ> kdtree;
+        kdtree.setInputCloud(cloud_for_pub);
+        vector<int> pointIndeces;
+        vector<float> squaredDistances;
+        kdtree.radiusSearch(PointXYZ(0,0,0), 0.5, pointIndeces, squaredDistances);
+        for(auto idx : pointIndeces)
+            cloud_for_pub->erase(cloud_for_pub->begin() + idx);
+    }
+
+    _pointcloud_pub.publish(*cloud_for_pub);
 }
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "scan_to_pointcloud");
+    init(argc, argv, "scan_to_pointcloud");
 
-    ros::NodeHandle nh;
+    NodeHandle nh;
 
-    _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/scan/pointcloud", 1);
+    _pointcloud_pub = nh.advertise<PointCloud<PointXYZ> >("/scan/pointcloud", 1);
 
-    ros::Subscriber scan_sub = nh.subscribe("/scan", 1, scanCallback);
+    Subscriber scan_sub = nh.subscribe("/scan", 1, scanCallback);
 
-    ros::spin();
+    spin();
 }
