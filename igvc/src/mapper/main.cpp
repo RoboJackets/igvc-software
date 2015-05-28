@@ -44,7 +44,7 @@ void nodeCallback(const PointCloud<PointXYZ>::ConstPtr &msg)
     tf_listener->lookupTransform("/map", msg->header.frame_id, Time(0), transform);
     pcl_ros::transformPointCloud(*msg, transformed, transform);
 
-    *map_cloud += transformed;
+//    *map_cloud += transformed;
 
     filterOutDuplicates(map_cloud);
 

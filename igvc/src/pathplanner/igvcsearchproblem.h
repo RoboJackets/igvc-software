@@ -21,6 +21,9 @@ public:
     double Baseline;
     double GoalThreshold;
     bool PointTurnsEnabled;
+    double MinimumOmega;
+    double MaximumOmega;
+    double DeltaOmega;
 
     SearchLocation getStartState()
     {

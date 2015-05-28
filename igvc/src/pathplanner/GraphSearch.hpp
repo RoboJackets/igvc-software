@@ -106,7 +106,6 @@ public:
 
             if( expanded.find(path.getLastState()) == expanded.end() ) // expanded does not contain path's last state
             {
-
                 expanded.insert(path.getLastState());
 
                 if(problem.isGoal(path.getLastState()))
@@ -155,6 +154,7 @@ public:
 
             if( expanded.find(path.getLastState()) == expanded.end() ) // expanded does not contain path's last state
             {
+
                 StateType last = path.getLastState();
                 expanded.insert(last);
 

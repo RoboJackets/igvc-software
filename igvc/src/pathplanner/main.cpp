@@ -27,12 +27,14 @@ mutex planning_mutex;
 void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
 {
     lock_guard<mutex> lock(planning_mutex);
+    cout << "Map received." << endl;
     *search_problem.Map = *msg;
 }
 
 void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
 {
     lock_guard<mutex> lock(planning_mutex);
+    cout << "Position received." << endl;
     search_problem.Start.x = msg->pose.position.x;
     search_problem.Start.y = msg->pose.position.y;
     tf::Quaternion q;
@@ -43,6 +45,7 @@ void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
     lock_guard<mutex> lock(planning_mutex);
+    cout << "Waypoing received." << endl;
     search_problem.Goal.x = msg->point.x;
     search_problem.Goal.y = msg->point.y;
 }
@@ -55,7 +58,7 @@ int main(int argc, char** argv)
 
     ros::Subscriber map_sub = nh.subscribe("/map", 1, map_callback);
 
-    ros::Subscriber pose_sub = nh.subscribe("/robot_pose_ekf/odom_combined", 1, position_callback);
+    ros::Subscriber pose_sub = nh.subscribe("/odom_combined", 1, position_callback);
 
     ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
 
@@ -70,7 +73,10 @@ int main(int argc, char** argv)
     search_problem.Threshold = 0.36375;
     search_problem.Speed = 0.25;
     search_problem.Baseline = baseline;
-    search_problem.DeltaT = 0.25;
+    search_problem.DeltaT = 0.5;
+    search_problem.MinimumOmega = -0.8;
+    search_problem.MaximumOmega = 0.8;
+    search_problem.DeltaOmega = 0.5;
 
     ros::Rate rate(3);
     while(ros::ok())
@@ -81,12 +87,18 @@ int main(int argc, char** argv)
          * This should only happen when we have received either a waypoint or position estimate, but not both.
          * Long paths take forever to compute, and will freeze up this node.
          */
-        if(search_problem.Start.distTo(search_problem.Goal) > 30)
+        auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal);
+        if(distance_to_goal == 0 || distance_to_goal > 30)
             continue;
+
+        cout << search_problem.Start << " --> " << search_problem.Goal << endl;
 
         planning_mutex.lock();
         // TODO only replan if needed.
         auto path = GraphSearch::AStar(search_problem);
+
+        cout << path.getNumberOfSteps() << " steps in path." << endl;
+        cout << path.getLastState().distTo(search_problem.Start) << "m from dest." << endl;
 
         if(disp_path_pub.getNumSubscribers() > 0)
         {
