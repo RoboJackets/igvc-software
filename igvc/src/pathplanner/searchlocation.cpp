@@ -16,19 +16,13 @@ bool SearchLocation::operator == (const SearchLocation &other)
 
 bool SearchLocation::operator < (const SearchLocation &other) const
 {
-    if(x < other.x)
-    {
-        return true;
-    }
-    else if(y < other.y)
-    {
-        return true;
-    }
-    else if(theta < other.theta)
-    {
-        return true;
-    }
-    return false;
+    if(x != other.x)
+        return  x < other.x;
+    else if(y != other.y)
+        return  y < other.y;
+    else if(theta != other.theta)
+        return  theta < other.theta;
+    return  false;
 }
 
 float SearchLocation::distTo(SearchLocation other)

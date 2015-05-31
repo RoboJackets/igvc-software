@@ -35,6 +35,7 @@ public:
 
     bool isGoal(SearchLocation state)
     {
+        std::cout << state << std::endl;
         return state.distTo(Goal) < GoalThreshold;
     }
 

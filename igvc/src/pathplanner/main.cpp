@@ -39,7 +39,7 @@ void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
     search_problem.Start.y = msg->pose.position.y;
     tf::Quaternion q;
     tf::quaternionMsgToTF(msg->pose.orientation, q);
-    search_problem.Start.theta = tf::getYaw(q);
+    search_problem.Start.theta = M_PI_2 - tf::getYaw(q);
 }
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
@@ -91,14 +91,9 @@ int main(int argc, char** argv)
         if(distance_to_goal == 0 || distance_to_goal > 30)
             continue;
 
-        cout << search_problem.Start << " --> " << search_problem.Goal << endl;
-
         planning_mutex.lock();
         // TODO only replan if needed.
         auto path = GraphSearch::AStar(search_problem);
-
-        cout << path.getNumberOfSteps() << " steps in path." << endl;
-        cout << path.getLastState().distTo(search_problem.Start) << "m from dest." << endl;
 
         if(disp_path_pub.getNumSubscribers() > 0)
         {
