@@ -20,6 +20,8 @@ ros::Publisher disp_path_pub;
 
 ros::Publisher act_path_pub;
 
+ros::Publisher expanded_pub;
+
 IGVCSearchProblem search_problem;
 
 mutex planning_mutex;
@@ -50,6 +52,19 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
     search_problem.Goal.y = msg->point.y;
 }
 
+void expanded_callback(const set<SearchLocation> &expanded)
+{
+    if(expanded_pub.getNumSubscribers() > 0)
+    {
+        pcl::PointCloud<pcl::PointXYZ> cloud;
+        cloud.header.frame_id = "/map";
+        for(auto location : expanded)
+            cloud.points.push_back(pcl::PointXYZ(location.x,location.y,0));
+
+        expanded_pub.publish(cloud);
+    }
+}
+
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "pathplanner");
@@ -66,6 +81,8 @@ int main(int argc, char** argv)
 
     act_path_pub = nh.advertise<igvc_msgs::action_path>("/path", 1);
 
+    expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/expanded", 1);
+
     double baseline = 0.7275;
 
     search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
@@ -73,10 +90,10 @@ int main(int argc, char** argv)
     search_problem.Threshold = 0.36375;
     search_problem.Speed = 0.25;
     search_problem.Baseline = baseline;
-    search_problem.DeltaT = 0.5;
+    search_problem.DeltaT = 0.75;
     search_problem.MinimumOmega = -0.8;
     search_problem.MaximumOmega = 0.8;
-    search_problem.DeltaOmega = 0.5;
+    search_problem.DeltaOmega = 0.25;
 
     ros::Rate rate(3);
     while(ros::ok())
@@ -93,7 +110,7 @@ int main(int argc, char** argv)
 
         planning_mutex.lock();
         // TODO only replan if needed.
-        auto path = GraphSearch::AStar(search_problem);
+        auto path = GraphSearch::AStar(search_problem, expanded_callback);
 
         if(disp_path_pub.getNumSubscribers() > 0)
         {

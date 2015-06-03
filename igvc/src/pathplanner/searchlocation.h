@@ -13,9 +13,9 @@ public:
     SearchLocation() { }
     SearchLocation(float _x, float _y, float _theta);
 
-    bool operator == (const SearchLocation &other);
+    bool operator == (const SearchLocation &other) const;
     bool operator < (const SearchLocation &other) const;
-    float distTo(SearchLocation other);
+    float distTo(SearchLocation other) const;
 
     friend std::ostream &operator<< (std::ostream &stream, const SearchLocation &loc)
     {
