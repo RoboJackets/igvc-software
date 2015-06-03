@@ -135,7 +135,7 @@ public:
 
     /** Runs A* graph search on the given search problem */
     template <class StateType, class ActionType>
-    static Path<StateType, ActionType> AStar(SearchProblem<StateType, ActionType> &problem)
+    static Path<StateType, ActionType> AStar(SearchProblem<StateType, ActionType> &problem, void(*expandedCallback)(const set<StateType>&))
     {
 
         set<StateType> expanded;
@@ -152,12 +152,10 @@ public:
             Path<StateType, ActionType> path = frontier.top();
             frontier.pop();
 
-            if( expanded.find(path.getLastState()) == expanded.end() ) // expanded does not contain path's last state
+            auto last = path.getLastState();
+
+            if( expanded.insert(last).second) // expanded does not contain path's last state
             {
-
-                StateType last = path.getLastState();
-                expanded.insert(last);
-
                 if(problem.isGoal(last))
                 {
                     return path;
@@ -174,6 +172,7 @@ public:
                     frontier.push(newPath);
                 }
             }
+            expandedCallback(expanded);
         }
 
         cout << __func__ << " Error: Could not find a solution." << endl;
