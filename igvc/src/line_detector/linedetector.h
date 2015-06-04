@@ -26,6 +26,7 @@ public:
 
     bool isWorking();
     bool primaryMethod();
+	bool otherMethod(const sensor_msgs::ImageConstPtr& msg, cv_bridge::CvImagePtr cv_ptr);
 
 private:
 //    void findLines(cv_bridge::Cv_ImagePtr cv_ptr);
