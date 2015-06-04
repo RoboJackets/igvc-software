@@ -12,6 +12,7 @@
 #include <opencv2/video/video.hpp>
 #include <opencv2/opencv.hpp>
 #include <sensor_msgs/image_encodings.h>
+#include <pcl_ros/point_cloud.h>
 
 using namespace std;
 using namespace cv;
@@ -21,6 +22,7 @@ Ptr<BackgroundSubtractor> bg;
 cv::Mat fore;
 cv::Mat back;
 int refresh;
+typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 	try
@@ -32,7 +34,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 	{
 		ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
 	}
-	if (onImageEvent()) { // If primary method returns true, stop
+	if (primaryMethod()) { // If primary method returns true, stop
 	    return;
     } // if not, use other method
 
@@ -102,6 +104,8 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
             Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
     }
 	blackoutSection(imgmat, rb2, rows, 0, cols);
+    rb = rb + 10;
+	blackoutSection(imgmat, 0, rb, 0, cols);
 
 	//cvtColor(imgmat, imgmat, CV_BGR2GRAY);
 	/*cv::Mat skel(imgmat.size(), CV_8UC1, cv::Scalar(0));
@@ -132,6 +136,10 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 	//cvtColor(cv_ptr->image, cv_ptr->image, CV_GRAY2BGR);
     _filt_img.publish(cv_ptr->toImageMsg());
 //    _filt_img.publish(imgmat);
+
+    cout <<"Sending new matrix"<<endl;
+
+    _line_cloud.publish(cloud);
 }
 
 LineDetector::LineDetector(ros::NodeHandle &handle)
@@ -150,13 +158,14 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
     _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
     //_src_img = _it.subscribe("/left/image_color", 1, &LineDetector::img_callback, this);
 	_filt_img = _it.advertise("/filt_img", 1);
+    _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
 }
 
 bool LineDetector::isWorking() {
     return true;
 }
 
-bool LineDetector::onImageEvent() {
+bool LineDetector::primaryMethod() {
 
     dst = &cv_ptr->image;
     cv::resize(*dst, *dst, cv::Size(1024, 768));
@@ -181,24 +190,25 @@ bool LineDetector::onImageEvent() {
     if (lines.size() > 200) {
         return false; // If there are too many lines detected, use other method
     }
+    int rows = dst->rows;
+    int cols = dst->cols;
+	//blackoutSection(*dst, 0, rows, 0, cols);
 	for( size_t i = 0; i < lines.size(); i++ )
     {
         line( *dst, Point(lines[i][0], lines[i][1]),
             Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
     }
-    int rows = dst->rows;
-    int cols = dst->cols;
 	int rb2 = rows - (rows / 10);
 	blackoutSection(*dst, rb2, rows, 0, cols);
     cv::Mat transformDst(dst->rows, dst->cols, CV_8UC3);
     transformPoints(*dst, transformDst);
     _filt_img.publish(cv_ptr->toImageMsg());
     cloud = toPointCloud(transformDst);
+		
 
     cout <<"Sending new matrix"<<endl;
-    pcl::PointXY offset;
-    offset.x = 0.0f;
-    offset.y = 0.0f;
+
+    _line_cloud.publish(cloud);
 
     return true;
 
@@ -413,6 +423,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
 			}
 		}
 	}
+	cloud->header.frame_id = "Some Header";
 	return cloud;
 }
 
