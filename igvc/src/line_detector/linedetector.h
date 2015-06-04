@@ -25,7 +25,7 @@ public:
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
     bool isWorking();
-    bool onImageEvent();
+    bool primaryMethod();
 
 private:
 //    void findLines(cv_bridge::Cv_ImagePtr cv_ptr);
@@ -91,6 +91,7 @@ private:
     // ROS COMMUNICATION
 	image_transport::ImageTransport _it;
 	image_transport::Publisher _filt_img;
+	ros::Publisher _line_cloud;
 	image_transport::Subscriber _src_img;
 };
 #endif // LINEDETECTOR_H
