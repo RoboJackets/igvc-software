@@ -36,8 +36,35 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 	}
 	if (primaryMethod()) { // If primary method returns true, stop
 	    return;
-    } // if not, use other method
+    } else { // if not, use other method
+		otherMethod(msg, cv_ptr);
+	}
+}
 
+LineDetector::LineDetector(ros::NodeHandle &handle)
+    : max_elem(2),
+      max_kernel_size(2),
+      gaussian_size(7),
+	  _it(handle)
+{
+    erosion_elem = 2;
+    erosion_size = 1;
+    dilation_elem = 2;
+    dilation_size = 2;
+    bg = new BackgroundSubtractorMOG2();
+	refresh = 0;
+
+    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
+    //_src_img = _it.subscribe("/left/image_color", 1, &LineDetector::img_callback, this);
+	_filt_img = _it.advertise("/filt_img", 1);
+    _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
+}
+
+bool LineDetector::isWorking() {
+    return true;
+}
+
+bool LineDetector::otherMethod(const sensor_msgs::ImageConstPtr& msg, cv_bridge::CvImagePtr cv_ptr) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
 	
     //cv::resize(cv_ptr->image, cv_ptr->image, cv::Size(562, 384));
@@ -140,29 +167,6 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cout <<"Sending new matrix"<<endl;
 
     _line_cloud.publish(cloud);
-}
-
-LineDetector::LineDetector(ros::NodeHandle &handle)
-    : max_elem(2),
-      max_kernel_size(2),
-      gaussian_size(7),
-	  _it(handle)
-{
-    erosion_elem = 2;
-    erosion_size = 1;
-    dilation_elem = 2;
-    dilation_size = 2;
-    bg = new BackgroundSubtractorMOG2();
-	refresh = 0;
-
-    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
-    //_src_img = _it.subscribe("/left/image_color", 1, &LineDetector::img_callback, this);
-	_filt_img = _it.advertise("/filt_img", 1);
-    _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
-}
-
-bool LineDetector::isWorking() {
-    return true;
 }
 
 bool LineDetector::primaryMethod() {
