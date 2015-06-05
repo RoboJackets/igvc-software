@@ -30,7 +30,7 @@ int refresh;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
-    cerr << "CALLBACK CALLED" << endl;
+//    cerr << "CALLBACK CALLED" << endl;
 
     cv_ptr = cv_bridge::toCvCopy(msg, "");
 
@@ -255,7 +255,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 
 
 
-    cerr << "just published to line_cloud" << endl;
+//    cerr << "just published to line_cloud" << endl;
 }
 
 void LineDetector::RemoveNonMax(vector<Mat>& images) {
