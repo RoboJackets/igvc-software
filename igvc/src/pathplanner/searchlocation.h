@@ -17,7 +17,7 @@ public:
     bool operator < (const SearchLocation &other) const;
     float distTo(SearchLocation other);
 
-    friend std::ostream &operator<< (std::ostream &stream, SearchLocation &loc)
+    friend std::ostream &operator<< (std::ostream &stream, const SearchLocation &loc)
     {
         stream << "(" << loc.x << "," << loc.y << "," << loc.theta << ")";
         return stream;
