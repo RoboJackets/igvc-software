@@ -690,7 +690,7 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
     bg = new BackgroundSubtractorMOG2();
 	refresh = 0;
 
-    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
+    _src_img = _it.subscribe("/stereo/left/image_rect_color", 1, &LineDetector::img_callback, this);
 //    _src_img = _it.subscribe("/left/image_color", 1, &LineDetector::img_callback, this);
 	_filt_img = _it.advertise("/filt_img", 1);
     _filt_img1 = _it.advertise("/filt_img1", 1);
