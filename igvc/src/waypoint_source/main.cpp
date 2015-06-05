@@ -18,6 +18,25 @@ Point map_origin;
 
 mutex current_mutex;
 
+double dmsToDec(string dms)
+{
+    auto qMarkIter = dms.find('?');
+    auto aposIter = dms.find('\'');
+    auto qouteIter = dms.find('\"');
+    auto degrees = stod(dms.substr(0, qMarkIter));
+    auto minutes = stod(dms.substr(qMarkIter+1, aposIter));
+    auto seconds = stod(dms.substr(aposIter+1, qouteIter));
+    auto dirChar = dms[dms.size() - 1];
+
+    degrees += minutes * 60.0;
+    degrees += seconds * 3600.0;
+
+    if(dirChar == 'W' || dirChar == 'S')
+        degrees *= -1;
+
+    return degrees;
+}
+
 void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
 {
     if(path.empty())
@@ -51,8 +70,15 @@ void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
                 return;
             }
 
-            auto lat = stof(tokens[0]);
-            auto lon = stof(tokens[1]);
+            double lat, lon;
+            if(tokens[0].find('?') != string::npos)
+                lat = dmsToDec(tokens[0]);
+            else
+                lat = stod(tokens[0]);
+            if(tokens[1].find('?') != string::npos)
+                lon  = dmsToDec(tokens[1]);
+            else
+                lon = stod(tokens[1]);
 
             PointStamped p;
 
