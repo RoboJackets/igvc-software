@@ -16,4 +16,6 @@
     
     <include file="$(find igvc)/launch/camera.launch" />
     
+    <include file="$(find igvc)/launch/lidar.launch" />
+    
 </launch>
