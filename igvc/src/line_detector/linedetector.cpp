@@ -30,6 +30,7 @@ int refresh;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
+    cerr << "CALLBACK CALLED" << endl;
 
     cv_ptr = cv_bridge::toCvCopy(msg, "");
 
@@ -88,7 +89,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 //    rectangle(ground_dst, Point(0, ground_dst.rows/2), Point(ground_dst.cols, ground_dst.rows), Scalar(255, 255, 255), CV_FILLED);
 
 // Ground Slicer
-    grnd = grnd(Rect(0, grnd.rows/3, grnd.cols, 2*grnd.rows/3));
+//    grnd = grnd(Rect(0, grnd.rows/3, grnd.cols, 2*grnd.rows/3));
 //    grnd = returnWhite(grnd);
 
 // Squish
@@ -199,7 +200,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 //    cout << "results[1].type(): " << results[1].type() << endl;
 //    cout << "fit_img.type(): " << fin_img.type() << endl;
     cv_ptr->image = fin_img; // + fadedimage;
-    _filt_img8.publish(cv_ptr->toImageMsg());
+    _filt_img.publish(cv_ptr->toImageMsg());
 //    cv_ptr->image = results[7];// + fadedimage;
 //    _filt_img3.publish(cv_ptr->toImageMsg());
 //    cv_ptr->image = results[0];// + fadedimage;
@@ -217,33 +218,44 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 //    cout << "last print" << endl;
 //    cout << "results[1].type(): " << results[1].type() << endl;
 //    cout << "fit_img.type(): " << fin_img.type() << endl;
-    cv_ptr->image = results[0] + fadedimage;
-    _filt_img.publish(cv_ptr->toImageMsg());
-    cv_ptr->image = results[1] + fadedimage;
-    _filt_img1.publish(cv_ptr->toImageMsg());
-    cv_ptr->image = results[2] + fadedimage;
-    _filt_img2.publish(cv_ptr->toImageMsg());
-    cv_ptr->image = results[3] + fadedimage;
-    _filt_img3.publish(cv_ptr->toImageMsg());
-    cv_ptr->image = results[4] + fadedimage;
-    _filt_img4.publish(cv_ptr->toImageMsg());
-    cv_ptr->image = results[5] + fadedimage;
-    _filt_img5.publish(cv_ptr->toImageMsg());
-    cv_ptr->image = results[6] + fadedimage;
-    _filt_img6.publish(cv_ptr->toImageMsg());
-    cv_ptr->image = results[7] + fadedimage;
-    _filt_img7.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = results[0] + fadedimage;
+//    _filt_img.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = results[1] + fadedimage;
+//    _filt_img1.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = results[2] + fadedimage;
+//    _filt_img2.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = results[3] + fadedimage;
+//    _filt_img3.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = results[4] + fadedimage;
+//    _filt_img4.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = results[5] + fadedimage;
+//    _filt_img5.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = results[6] + fadedimage;
+//    _filt_img6.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = results[7] + fadedimage;
+//    _filt_img7.publish(cv_ptr->toImageMsg());
 //
 //    for(Mat r : results)
 //        fin_img = max(fin_img, r);
 
-    int rows = fin_img.rows;
-    int cols = fin_img.cols;
+    int rows = dview_dst.rows;
+    int cols = dview_dst.cols;
 	cv::Mat transformDst(rows, cols, CV_8UC3);
+//    transformPoints(fin_img, transformDst);
+//    cerr << "transformDst rows: " << transformDst.rows << " cols: " << transformDst.cols << endl;
+    resize(fin_img, fin_img, Size(dview_dst.cols, dview_dst.rows), 0, 0, INTER_LANCZOS4);
     transformPoints(fin_img, transformDst);
-    cloud = toPointCloud(transformDst);
-
+    transformDst.convertTo(grnd, CV_8UC3);
+    cloud = toPointCloud(grnd);
     _line_cloud.publish(cloud);
+
+//    cerr << "fi_img rows: " << fin_img.rows << " cols: " << fin_img.cols << endl;
+    cv_ptr->image = grnd;
+    _filt_img1.publish(cv_ptr->toImageMsg());
+
+
+
+    cerr << "just published to line_cloud" << endl;
 }
 
 void LineDetector::RemoveNonMax(vector<Mat>& images) {
@@ -666,19 +678,19 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
     bg = new BackgroundSubtractorMOG2();
 	refresh = 0;
 
-    //_src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
-    _src_img = _it.subscribe("/left/image_color", 1, &LineDetector::img_callback, this);
+    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
+//    _src_img = _it.subscribe("/left/image_color", 1, &LineDetector::img_callback, this);
 	_filt_img = _it.advertise("/filt_img", 1);
     _filt_img1 = _it.advertise("/filt_img1", 1);
     _filt_img2 = _it.advertise("/filt_img2", 1);
-    _filt_img3 = _it.advertise("/filt_img3", 1);
-    _filt_img4 = _it.advertise("/filt_img4", 1);
-    _filt_img5 = _it.advertise("/filt_img5", 1);
-    _filt_img6 = _it.advertise("/filt_img6", 1);
-    _filt_img7 = _it.advertise("/filt_img7", 1);
-    _filt_img8 = _it.advertise("/filt_img8", 1);
+//    _filt_img3 = _it.advertise("/filt_img3", 1);
+//    _filt_img4 = _it.advertise("/filt_img4", 1);
+//    _filt_img5 = _it.advertise("/filt_img5", 1);
+//    _filt_img6 = _it.advertise("/filt_img6", 1);
+//    _filt_img7 = _it.advertise("/filt_img7", 1);
+//    _filt_img8 = _it.advertise("/filt_img8", 1);
     _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
-    
+
 }
 
 bool LineDetector::otherMethod(const sensor_msgs::ImageConstPtr& msg, cv_bridge::CvImagePtr cv_ptr) {
@@ -1033,7 +1045,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
 			}
 		}
 	}
-	cloud->header.frame_id = "Some Header";
+	cloud->header.frame_id = "base_footprint";
 	return cloud;
 }
 
