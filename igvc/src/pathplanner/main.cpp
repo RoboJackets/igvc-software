@@ -20,6 +20,8 @@ ros::Publisher disp_path_pub;
 
 ros::Publisher act_path_pub;
 
+ros::Publisher expanded_pub;
+
 IGVCSearchProblem search_problem;
 
 mutex planning_mutex;
@@ -27,24 +29,40 @@ mutex planning_mutex;
 void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
 {
     lock_guard<mutex> lock(planning_mutex);
+    cout << "Map received." << endl;
     *search_problem.Map = *msg;
 }
 
 void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
 {
     lock_guard<mutex> lock(planning_mutex);
+    cout << "Position received." << endl;
     search_problem.Start.x = msg->pose.position.x;
     search_problem.Start.y = msg->pose.position.y;
     tf::Quaternion q;
     tf::quaternionMsgToTF(msg->pose.orientation, q);
-    search_problem.Start.theta = tf::getYaw(q);
+    search_problem.Start.theta = M_PI_2 - tf::getYaw(q);
 }
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
     lock_guard<mutex> lock(planning_mutex);
+    cout << "Waypoing received." << endl;
     search_problem.Goal.x = msg->point.x;
     search_problem.Goal.y = msg->point.y;
+}
+
+void expanded_callback(const set<SearchLocation> &expanded)
+{
+    if(expanded_pub.getNumSubscribers() > 0)
+    {
+        pcl::PointCloud<pcl::PointXYZ> cloud;
+        cloud.header.frame_id = "/map";
+        for(auto location : expanded)
+            cloud.points.push_back(pcl::PointXYZ(location.x,location.y,0));
+
+        expanded_pub.publish(cloud);
+    }
 }
 
 int main(int argc, char** argv)
@@ -55,13 +73,15 @@ int main(int argc, char** argv)
 
     ros::Subscriber map_sub = nh.subscribe("/map", 1, map_callback);
 
-    ros::Subscriber pose_sub = nh.subscribe("/robot_pose_ekf/odom_combined", 1, position_callback);
+    ros::Subscriber pose_sub = nh.subscribe("/odom_combined", 1, position_callback);
 
     ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
 
     disp_path_pub = nh.advertise<nav_msgs::Path>("/path_display", 1);
 
     act_path_pub = nh.advertise<igvc_msgs::action_path>("/path", 1);
+
+    expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/expanded", 1);
 
     double baseline = 0.7275;
 
@@ -70,7 +90,10 @@ int main(int argc, char** argv)
     search_problem.Threshold = 0.36375;
     search_problem.Speed = 0.25;
     search_problem.Baseline = baseline;
-    search_problem.DeltaT = 0.25;
+    search_problem.DeltaT = 0.75;
+    search_problem.MinimumOmega = -0.8;
+    search_problem.MaximumOmega = 0.8;
+    search_problem.DeltaOmega = 0.25;
 
     ros::Rate rate(3);
     while(ros::ok())
@@ -81,12 +104,13 @@ int main(int argc, char** argv)
          * This should only happen when we have received either a waypoint or position estimate, but not both.
          * Long paths take forever to compute, and will freeze up this node.
          */
-        if(search_problem.Start.distTo(search_problem.Goal) > 30)
+        auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal);
+        if(distance_to_goal == 0 || distance_to_goal > 30)
             continue;
 
         planning_mutex.lock();
         // TODO only replan if needed.
-        auto path = GraphSearch::AStar(search_problem);
+        auto path = GraphSearch::AStar(search_problem, expanded_callback);
 
         if(disp_path_pub.getNumSubscribers() > 0)
         {

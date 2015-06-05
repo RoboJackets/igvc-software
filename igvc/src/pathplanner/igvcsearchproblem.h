@@ -21,6 +21,9 @@ public:
     double Baseline;
     double GoalThreshold;
     bool PointTurnsEnabled;
+    double MinimumOmega;
+    double MaximumOmega;
+    double DeltaOmega;
 
     SearchLocation getStartState()
     {
@@ -37,9 +40,14 @@ public:
 
     double getStepCost(SearchLocation, SearchMove action)
     {
-        double R = abs(action.V) / abs(action.W);
-        double theta = abs(action.W) * DeltaT;
-        return R*theta;
+        if(action.W <= 1e-10)
+        {
+            return action.V * DeltaT;
+        } else {
+            double R = abs(action.V) / abs(action.W);
+            double theta = abs(action.W) * DeltaT;
+            return R*theta;
+        }
     }
 
     double getHeuristicCost(SearchLocation state)

@@ -13,9 +13,9 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     if(!Map->empty())
         kdtree.setInputCloud(Map);
 
-    double delta = 0.05;
-    double Wmin = -0.8;
-    double Wmax =  0.8;
+    double delta = DeltaOmega;
+    double Wmin = MinimumOmega;
+    double Wmax =  MaximumOmega;
     for(double W = Wmin; W <= Wmax; W+=delta)
     {
         SearchMove move(Speed, W, DeltaT);
