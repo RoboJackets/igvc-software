@@ -24,7 +24,7 @@ double dmsToDec(string dms)
     auto aposIter = dms.find('\'');
     auto qouteIter = dms.find('\"');
     auto degrees = stod(dms.substr(0, qMarkIter));
-    auto minutes = stod(dms.substr(qmarkIter+1, aposIter));
+    auto minutes = stod(dms.substr(qMarkIter+1, aposIter));
     auto seconds = stod(dms.substr(aposIter+1, qouteIter));
     auto dirChar = dms[dms.size() - 1];
 
