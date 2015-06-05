@@ -28,3 +28,7 @@
 
 #rosdoc_lite
 /doc/
+
+#JetBrains Clion
+*/.idea/
+/.idea/

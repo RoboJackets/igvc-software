@@ -11,6 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   cv_bridge
   camera_info_manager
+  laser_geometry
+  tf
+  pcl_ros
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -18,9 +21,9 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
-find_package(PCL REQUIRED)
+find_package(PCL REQUIRED filters)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-g -std=c++11 ${CMAKE_CXX_FLAGS}")
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -182,3 +185,9 @@ add_subdirectory(src/light_controller)
 add_subdirectory(src/waypoint_source)
 add_subdirectory(src/pathplanner)
 add_subdirectory(src/line_detector)
+add_subdirectory(src/bumblebee2/dispToPointcloud)
+add_subdirectory(src/scan_to_pointcloud)
+add_subdirectory(src/mapper)
+add_subdirectory(src/pose_tracker)
+add_subdirectory(src/dashboard)
+add_subdirectory(src/path_follower)

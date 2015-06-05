@@ -8,7 +8,7 @@
 class Bumblebee2
 {
 public:
-    Bumblebee2(ros::NodeHandle &handle);
+    Bumblebee2(ros::NodeHandle &handle, std::string path);
     
     ~Bumblebee2();
     
@@ -27,9 +27,6 @@ private:
     image_transport::Publisher _right_pub;
     ros::Publisher _leftInfo_pub;
     ros::Publisher _rightInfo_pub;
-
-    sensor_msgs::CameraInfo rightInfo;
-    sensor_msgs::CameraInfo leftInfo;
 
     camera_info_manager::CameraInfoManager cameraManagerLeft;
     camera_info_manager::CameraInfoManager cameraManagerRight;

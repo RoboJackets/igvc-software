@@ -8,13 +8,13 @@
 
 using namespace std;
 
-igvc_msgs::velocity_pair cmd;
+igvc_msgs::velocity_pair current_motor_command;
 
 bool enabled = false;
 
 void cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg)
 {
-    cmd = *msg;
+    current_motor_command = *msg;
 }
 
 void enabledCallback(const std_msgs::BoolConstPtr& msg)
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
     {
         ros::spinOnce();
         
-        string msg = "$" + to_string(enabled?cmd.left_velocity:0.0) + "," + to_string(enabled?cmd.right_velocity:0.0) + "\n";
+        string msg = "$" + to_string(enabled?current_motor_command.left_velocity:0.0) + "," + to_string(enabled?current_motor_command.right_velocity:0.0) + "\n";
         
         ROS_INFO_STREAM(msg);
         
