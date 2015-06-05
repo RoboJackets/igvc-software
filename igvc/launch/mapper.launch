@@ -5,7 +5,7 @@
 
     <!-- Map Node -->
     <node name="mapper" pkg="igvc" type="mapper" output="screen">
-            <param name="topics" type="string" value="/scan/pointcloud"/>
+            <param name="topics" type="string" value="/scan/pointcloud /line_cloud"/>
     </node>
 
 </launch>
