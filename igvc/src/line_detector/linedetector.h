@@ -17,6 +17,7 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
+#include <vector>
 
 class LineDetector
 {
@@ -53,6 +54,14 @@ private:
     void helperSearch(void *totvis, void *input, int i, int j, cv::Mat *imgmat, int thresh);
     bool helperContains(std::tuple<int, int> pos, void *vis);
 	bool adjWhite(int i, int j, cv::Mat *img, int thresh);
+    bool InNature(cv::Mat& img, int r, int c, int size);
+    void Dilation();
+
+    void drawWhite(cv::Mat &image);
+    cv::Mat applyFilter(cv::Mat &image, const cv::Mat &kernal);
+    cv::Mat getGeometricMean(cv::Mat &img, cv::Mat &kernal);
+    void removeBlobs(std::vector<cv::Mat> images, cv::Mat& fin_img);
+    void binary(cv::Mat& src, cv::Mat& dst);
 
     /** @brief the VideoCapture of the image/video */
     cv::VideoCapture cap;
@@ -93,6 +102,14 @@ private:
 	image_transport::ImageTransport _it;
 	image_transport::Publisher _filt_img;
 	ros::Publisher _line_cloud;
+    image_transport::Publisher _filt_img1;
+    image_transport::Publisher _filt_img2;
+    image_transport::Publisher _filt_img3;
+    image_transport::Publisher _filt_img4;
+    image_transport::Publisher _filt_img5;
+    image_transport::Publisher _filt_img6;
+    image_transport::Publisher _filt_img7;
+    image_transport::Publisher _filt_img8;
 	image_transport::Subscriber _src_img;
 };
 #endif // LINEDETECTOR_H
