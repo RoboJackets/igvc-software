@@ -34,9 +34,10 @@ void publish_pose()
     if(!orientationIsValid())
         return;
     geometry_msgs::PoseStamped pose;
-    pose.header.frame_id = "/base_footprint";
+    pose.header.frame_id = "/map";
     pose.pose.position.x = gps.pose.pose.position.x;
     pose.pose.position.y = gps.pose.pose.position.y;
+    pose.pose.position.z = 0.0;
     pose.pose.orientation = orientation;
     pose_pub.publish(pose);
 
