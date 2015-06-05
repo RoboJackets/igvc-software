@@ -1,7 +1,5 @@
 <!-- waypoint_source.launch -->
-<!--
 
-    -->
 <launch>
 
     <node name="waypoint_source" pkg="igvc" type="waypoint_source" output="screen" >

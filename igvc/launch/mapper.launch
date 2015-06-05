@@ -1,8 +1,11 @@
 <!-- map.launch -->
 <launch>
+    <!-- Pose Tracker -->
+    <node name="pose_tracker" pkg="igvc" type="pose_tracker" output="screen" />
+
     <!-- Map Node -->
-	<node name="mapper" pkg="igvc" type="mapper" output="screen">
-		<param name="topics" type="string" value="/scan/pointcloud"/>
-	</node>
+    <node name="mapper" pkg="igvc" type="mapper" output="screen">
+            <param name="topics" type="string" value="/scan/pointcloud"/>
+    </node>
 
 </launch>
