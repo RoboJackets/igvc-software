@@ -6,6 +6,8 @@
     <link name="imu" />
     <link name="camera" />
     <link name="lidar" />
+	<link name="camera_left" />
+	<link name="camera_right" />
     
     <joint name="groundToDriveWheelMidpoint" type="fixed">
         <parent link="base_footprint"/>
@@ -38,7 +40,21 @@
     <joint name="lidar" type="fixed">
         <parent link="base_link"/>
         <child link="lidar"/>
-        <origin xyz="0 0.52 0.243" rpy="0 0 0"/>
+        <origin xyz="0 0.52 0.243" rpy="0 0 1.5707"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+
+    <joint name="camera_left" type="fixed">
+        <parent link="camera"/>
+        <child link="camera_left"/>
+        <origin xyz="-0.051 0 0" rpy="0 0 0"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+
+    <joint name="camera_right" type="fixed">
+        <parent link="camera"/>
+        <child link="camera_right"/>
+        <origin xyz="0.051 0 0" rpy="0 0 0"/>
         <axis xyz="0 0 0"/>
     </joint>
 </robot>

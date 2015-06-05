@@ -10,6 +10,8 @@
 #include <queue>
 #include <algorithm>
 #include <vector>
+#include <functional>
+#include <algorithm>
 
 using namespace std;
 using namespace cv;
@@ -29,32 +31,48 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
 
     Mat grnd = (cv_ptr->image).clone();
+    Mat dview_dst = (cv_ptr->image).clone();
     Mat nature_dst = (cv_ptr->image).clone();
     Mat squish_dst = (cv_ptr->image).clone();
 
-    const double cannyLowerBound = 20;
-    const double cannyUpperBound = 60;
+    const double cannyLowerBound = 60;
+    const double cannyUpperBound = 100;
     const int cannyApertureSize = 3;
     const bool cannyL2gradient = false;
 
 //// Nature Detector
-//    cvtColor(color1_dst, nature_dst, CV_BGR2GRAY);
+//    cvtColor(grnd, nature_dst, CV_BGR2GRAY);
 //    Canny(nature_dst, nature_dst, cannyLowerBound, cannyUpperBound, cannyApertureSize, cannyL2gradient);
-
+////    blur(nature_dst, nature_dst, Size(5, 5));
+//    Mat binnature_dst;
+//    threshold(nature_dst, binnature_dst, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
+//    dilate(binnature_dst, binnature_dst, Mat(), Point(-1, -1), 4);
+////    erode(binnature_dst, binnature_dst, Mat(), Point(-1, -1), 30);
+////    dilate(binnature_dst, binnature_dst, Mat(), Point(-1, -1), 3);
+////    erode(binnature_dst, binnature_dst, Mat(), Point(-1, -1), 4);
+////    dilate(binnature_dst, binnature_dst, Mat(), Point(-1, -1), 5);
+////    erode(binnature_dst, binnature_dst, Mat(), Point(-1, -1), 6);
+//    cvtColor(binnature_dst, binnature_dst, CV_GRAY2BGR);
+//    cvtColor(nature_dst, nature_dst, CV_GRAY2BGR);
+//
+//    cv_ptr->image = nature_dst;
+//    _filt_img.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = binnature_dst;
+//    _filt_img1.publish(cv_ptr->toImageMsg());
 //// Ground Detector
 //    cvtColor(color1_dst, ground_dst, CV_BGR2GRAY);
 //    rectangle(ground_dst, Point(0,0), Point(ground_dst.cols, ground_dst.rows/2), Scalar(0, 0, 0), CV_FILLED);
 //    rectangle(ground_dst, Point(0, ground_dst.rows/2), Point(ground_dst.cols, ground_dst.rows), Scalar(255, 255, 255), CV_FILLED);
 
 // Ground Slicer
-    grnd = grnd(Rect(0, grnd.rows/2, grnd.cols, grnd.rows/2));
+    grnd = grnd(Rect(0, grnd.rows/3, grnd.cols, 2*grnd.rows/3));
 //    grnd = returnWhite(grnd);
-//
-//// Down View
-//    transformPoints(color1_dst, dview_dst);
 
 // Squish
     resize(grnd, squish_dst, Size(3*grnd.cols/linewidthpixels, 3*grnd.rows/linewidthpixels), 0, 0, INTER_LANCZOS4);
+
+//// Down View
+    transformPoints(squish_dst, grnd);
 
     float karray[3][9][9] = {
             {
@@ -77,24 +95,24 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                     { 1,  1,  1, .5,  0,  0,  0,  0,  0},
                     { 1, .5,  0,  0,  0,  0,  0,  0,  0},
                     { 0,  0,  0,  0,  0,  0,  0,  0,  0}
-            }, {
-                    {-1, -1, -1, -1, -1, -1, -1,  1,  1},
-                    {-1, -1, -1, -1, -1, -1,  1,  1,  1},
-                    {-1, -1, -1, -1, -1,  1,  1,  1,  0},
-                    {-1, -1, -1, -1,  1,  1,  1,  0,  0},
-                    {-1, -1, -1,  1,  1,  1,  0,  0,  0},
-                    {-1, -1,  1,  1,  1,  0,  0,  0,  0},
-                    {-1,  1,  1,  1,  0,  0,  0,  0,  0},
-                    { 1,  1,  1,  0,  0,  0,  0,  0,  0},
-                    { 1,  1,  0,  0,  0,  0,  0,  0,  0}
+            },  {
+                    {-.89,-.89,-.89,-.89,-.89,-.89,-.89,   1,   1},
+                    {-.89,-.89,-.89,-.89,-.89,-.89,   1,   1,   1},
+                    {-.89,-.89,-.89,-.89,-.89,   1,   1,   1,   0},
+                    {-.89,-.89,-.89,-.89,   1,   1,   1,   0,   0},
+                    {-.89,-.89,-.89,   1,   1,   1,   0,   0,   0},
+                    {-.89,-.89,   1,   1,   1,   0,   0,   0,   0},
+                    {-.89,   1,   1,   1,   0,   0,   0,   0,   0},
+                    {   1,   1,   1,   0,   0,   0,   0,   0,   0},
+                    {   1,   1,   0,   0,   0,   0,   0,   0,   0}
             }
     };
     Mat kernal1(9, 9, CV_32FC1, karray[0]);
     kernal1 /= 27;
     Mat kernal2(9, 9, CV_32FC1, karray[1]);
-    kernal2 /= 27;
+    kernal2 /= 25;
     Mat kernal3(9, 9, CV_32FC1, karray[2]);
-    kernal3 /= 27;
+    kernal3 /= 25;
 
     Mat kernal4 = kernal2.t();
     Mat kernal5 = kernal1.t();
@@ -120,37 +138,361 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     results.push_back(getGeometricMean(testimage, kernal7));
     results.push_back(getGeometricMean(testimage, kernal8));
 
-    Mat fin_img = testimage.clone();
-    removeBlobs(results, fin_img);
-    cv_ptr->image = fin_img;
-    _filt_img.publish(cv_ptr->toImageMsg());
 
-//    drawWhite(fin_img);
-    Mat bgr[3];
-    split(fin_img, bgr);
-    Mat binary;
-    threshold(bgr[0], binary, 4, 255, 0);
+    Mat fadedimage = testimage/5;
+    Mat fin_img = results[0].clone();
 //
-    cvtColor(binary, binary, CV_GRAY2BGR);
-    cv_ptr->image = binary;
-    _filt_img8.publish(cv_ptr->toImageMsg());
-//
-//    cv_ptr->image = results[0];
+//    cv_ptr->image = results[7];// + fadedimage;
 //    _filt_img.publish(cv_ptr->toImageMsg());
-//    cv_ptr->image = results[1];
+//    cv_ptr->image = results[0];// + fadedimage;
 //    _filt_img1.publish(cv_ptr->toImageMsg());
-//    cv_ptr->image = results[2];
+//    cv_ptr->image = results[1];// + fadedimage;
 //    _filt_img2.publish(cv_ptr->toImageMsg());
-//    cv_ptr->image = results[3];
+
+    subtractOrthog(results);
+    fin_img = results[0].clone();
+
+//    cout << "results[1].type(): " << results[1].type() << endl;
+//    cout << "fit_img.type(): " << fin_img.type() << endl;
+
+    RemoveNonMax(results);
+
+//    cout << "Removed NonMax" << endl;
+
+    int threshval = 3;
+    Mat bgr[3];
+    for(int i = 0; i < results.size(); i++) {
+        Mat bgr[3];
+        split(results[i], bgr);
+        threshold(bgr[0], results[i], threshval, 255, CV_THRESH_BINARY);
+        cvtColor(results[i], results[i], CV_GRAY2BGR);
+    }
+
+//    cout << "results[1].type(): " << results[1].type() << endl;
+//    cout << "fit_img.type(): " << fin_img.type() << endl;
+    EnforceContinuity(results, fin_img);
+//    cerr << "Continuity has been enforced" << endl;
+//    drawWhite(fin_img);
+//    cout << "results[1].type(): " << results[1].type() << endl;
+//    cout << "fit_img.type(): " << fin_img.type() << endl;
+    cv_ptr->image = fin_img; // + fadedimage;
+    _filt_img8.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = results[7];// + fadedimage;
 //    _filt_img3.publish(cv_ptr->toImageMsg());
-//    cv_ptr->image = results[4];
+//    cv_ptr->image = results[0];// + fadedimage;
 //    _filt_img4.publish(cv_ptr->toImageMsg());
-//    cv_ptr->image = results[5];
+//    cv_ptr->image = results[1];// + fadedimage;
 //    _filt_img5.publish(cv_ptr->toImageMsg());
-//    cv_ptr->image = results[6];
-//    _filt_img6.publish(cv_ptr->toImageMsg());
-//    cv_ptr->image = results[7];
-//    _filt_img7.publish(cv_ptr->toImageMsg());
+
+//    cout << "about to iterate over results" << endl;
+//    for(Mat& r : results)
+//        cvtColor(r, r, CV_GRAY2BGR);
+//    cout << "last print" << endl;
+//    cout << "results[1].type(): " << results[1].type() << endl;
+//    cout << "fit_img.type(): " << fin_img.type() << endl;
+    cv_ptr->image = results[0] + fadedimage;
+    _filt_img.publish(cv_ptr->toImageMsg());
+    cv_ptr->image = results[1] + fadedimage;
+    _filt_img1.publish(cv_ptr->toImageMsg());
+    cv_ptr->image = results[2] + fadedimage;
+    _filt_img2.publish(cv_ptr->toImageMsg());
+    cv_ptr->image = results[3] + fadedimage;
+    _filt_img3.publish(cv_ptr->toImageMsg());
+    cv_ptr->image = results[4] + fadedimage;
+    _filt_img4.publish(cv_ptr->toImageMsg());
+    cv_ptr->image = results[5] + fadedimage;
+    _filt_img5.publish(cv_ptr->toImageMsg());
+    cv_ptr->image = results[6] + fadedimage;
+    _filt_img6.publish(cv_ptr->toImageMsg());
+    cv_ptr->image = results[7] + fadedimage;
+    _filt_img7.publish(cv_ptr->toImageMsg());
+//
+//    for(Mat r : results)
+//        fin_img = max(fin_img, r);
+}
+
+void LineDetector::RemoveNonMax(vector<Mat>& images) {
+    Mat maxRes = images[0].clone();
+    for(Mat& r : images) {
+        maxRes = max(maxRes, r);
+    }
+    for(Mat& r : images) {
+        r = r - (r != maxRes);
+    }
+}
+
+typedef struct Node {struct Node* prev; Point point; int length;} Node;
+
+void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
+//    cerr << "Enforcing Continuity" << endl;
+    int iterations = 300;
+    int minpathlength = 20;
+    Mat gradient = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC1);
+    Mat fin_img = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC3);
+    for(int i = 0; i < directions.size(); i++) {
+        Mat bgr[3];
+        split(directions[i], bgr);
+//        cerr << "Oring gradient and directions[" << i << "]" << endl;
+//        cerr << "gradient r: " << gradient.rows << " c: " <<gradient.cols<<" type: " << gradient.type() <<endl;
+//        cerr << "directions r: " << directions[i].rows << " c: " <<directions[i].cols<< " type: " << directions[i].type() <<endl;
+        bitwise_and(bgr[0], (0b00000001 << i), bgr[0]);
+        bitwise_or(gradient, bgr[0], gradient);
+    }
+//    cout << "gradient complete: " << endl << gradient << endl;
+    auto getneighbors = [](Node* n, Mat& gradient) {
+        auto similarbits = [](unsigned char a, unsigned char b) {
+            return ((a == b) | (a == b << 1) | (a == b >> 1) | (129 == (a | b)));
+        };
+        vector <Node*> neighbors;
+        if(!n) return neighbors;
+        Point p = n->point;
+        const unsigned char g = gradient.at<uchar>(p);
+        bool forward = true;
+        int px = n->prev ? (n->point.x > n->prev->point.x ? 1 : -1) : n->length;
+        int py = n->prev ? (n->point.y > n->prev->point.y ? 1 : -1) : n->length;
+
+        if (g & 0b00010000) {           // forward -> y new < y old
+            if (py > 0) forward = false;
+            px = 0;
+            py = -2;
+        } else if (g & 0b00000001) {    // forward -> x new > x old
+            if(px < 0) forward = false;
+            px = 2;
+            py = 0;
+        } else if (g & 0b00000010) {    // forward -> x new > x old
+            if(px < 0) forward = false;
+            px = 2;
+            py = -1;
+        } else if (g & 0b00000100) {    // forward -> x new > x old
+            if(px < 0 || py > 0) forward = false;
+            px = 2;
+            py = -2;
+        } else if (g & 0b00001000) {    // forward -> y new < y old
+            if(py > 0) forward = false;
+            px = 1;
+            py = -2;
+        } else if (g & 0b00100000) {    // forward -> y new < y old
+            if(py > 0) forward = false;
+            px = -1;
+            py = -2;
+        } else if (g & 0b01000000) {    // forward -> y new < y old
+            if(px > 0 || py > 0) forward = false;
+            px = -2;                   //            x new < x old
+            py = -2;
+        } else if (g & 0b10000000) {    // forward -> x new < x old
+            if(px > 0) forward = false;
+            px = -2;
+            py = -1;
+        }
+        if(!forward) {
+            px *= -1;
+            py *= -1;
+        }
+        if (g) {
+            for (int dx = -1; dx < 2; dx++) {
+                for (int dy = -1; dy < 2; dy++) {
+                    Point newp(p.x + px + dx, p.y + py + dy);
+                    if (newp.x < gradient.cols &&
+                        newp.x >= 0 &&
+                        newp.y < gradient.rows &&
+                        newp.y >= 0)
+                        if (similarbits(gradient.at<uchar>(newp), g)) {
+//                            cerr << "similarbits n->length: " << n->length << endl;
+                            neighbors.push_back(new Node{n, newp, (n->length > 0) ? (n->length + 1) : (n->length - 1)});
+                        }
+
+                }
+            }
+        }
+//        cerr << endl;
+//        cerr << "returning current: " << p << " and neighbors: ";
+//        for(Node*& neighbor : neighbors)
+//            cerr << neighbor->point << ", ";
+//        cerr << endl;
+//        cerr << "gradient: " << (int) gradient.at<uchar>(p) << "dir: x=" << px << " y=" << py << endl;
+        gradient.at<uchar>(p) = 0;
+//        cout << "g after del: " << (int) gradient.at<uchar>(p) << endl;
+
+        return neighbors;
+    };
+
+    Mat randlineinds;
+//    cerr << "Findina Non Zeros" << endl;
+    findNonZero(gradient, randlineinds);
+//    cerr << "Random Shuffling" << endl;
+    randShuffle(randlineinds);
+//    cerr << "randlineinds.total()" << randlineinds.total() << endl;
+
+    for(int i = 0; i < iterations && i < randlineinds.total(); i++) {
+//        cerr << "Iteration: " << i << " of graph search" << endl;
+        Mat gradientcopy = gradient.clone();
+        vector<Node*> frontier;
+        Node* start = new Node {NULL, randlineinds.at<Point>(i), 1};
+        Node* trats = new Node {NULL, randlineinds.at<Point>(i), -1};
+        frontier.push_back(trats);
+        frontier.push_back(start);
+
+        Node* current = start;
+        Node* bestpathforward = start;
+        Node* bestpathbackward = trats;
+
+        bool forward = false;
+        while(!frontier.empty()) {
+            current = frontier.back();
+            frontier.pop_back();
+//            cerr << "current length: " << current->length << endl;
+            if (current->length > 0) {
+                if (current->length > bestpathforward->length)
+                    bestpathforward = current;
+            } else {
+                if (current->length < bestpathbackward->length)
+                    bestpathbackward = current;
+            }
+
+            vector<Node*> neighbors = getneighbors(current, gradientcopy);
+            if(neighbors.empty()) continue;
+            for(Node*& n : neighbors)
+                frontier.push_back(n);
+        }
+//        cerr << endl << endl;
+//        cerr << "Current node: point: " << current->point << " prev: " << current->prev << "len: " << current->length << endl;
+//        cerr << "gradient: " << (int) gradientcopy.at<uchar>(current->point) << endl;
+//        cerr << "forward: " << forward << endl;
+//        cerr << "BestF node: point: " << bestpathforward->point << " prev: " << bestpathforward->prev << "len: " << bestpathforward->length << endl;
+//        cerr << "BestB node: point: " << bestpathbackward->point << " prev: " << bestpathbackward->prev << "len: " << bestpathbackward->length << endl;
+//        cerr << "frontier: " ;
+//        for (auto f : frontier)
+//            cerr << f << ", ";
+//        cerr << endl;
+//        char c;
+//        cin >> c;
+
+//        cerr <<  " bpb->point == trats->pount" << (bool) (bestpathbackward->point == trats->point) << endl;
+//        cerr <<  " bpf->len" << bestpathforward->length << endl;
+//        cerr <<  " bpb->len" << bestpathbackward->length << " point: " << bestpathbackward->point << endl;
+//        char c;
+//        cin >> c;
+        if(bestpathforward->length - bestpathbackward->length > minpathlength) {
+//            cerr << "adding a line: ";
+            current = bestpathforward;
+            while (current) {
+                fin_img.at<Vec3b>(current->point) = Vec3b(255, 255, 255);
+                current = current->prev;
+            }
+            current = bestpathbackward;
+            while (current) {
+                fin_img.at<Vec3b>(current->point) = Vec3b(255, 255, 255);
+                current = current->prev;
+            }
+        }
+    }
+
+//    cerr << "Graph search complete, setting out and returning" << endl;
+    dilate(fin_img, out, Mat(), Point(-1, -1), 1);
+//    vector<Mat> neighborvotes(8);
+//    vector<Mat> kernal(8);
+//
+//    float karray[3][9][9] = {
+//            {
+//                    { 0,  0,  0,  0,  0,  0,  0,  0,  0},
+//                    { 0,  0,  0,  0,  0,  0,  0,  0,  0},
+//                    { 0,  0,  0,  0,  0,  0,  0,  0,  0},
+//                    { 1,  1,  1,  1,  1,  1,  1,  1,  1},
+//                    { 0,  0,  0,  0,  0,  0,  0,  0,  0},
+//                    { 1,  1,  1,  1,  1,  1,  1,  1,  1},
+//                    { 0,  0,  0,  0,  0,  0,  0,  0,  0},
+//                    { 0,  0,  0,  0,  0,  0,  0,  0,  0},
+//                    { 0,  0,  0,  0,  0,  0,  0,  0,  0}
+//            }, {
+//                    { 0,  0,  0,  0,  0,  0,  0,  0,  0},
+//                    { 0,  0,  0,  0,  0,  0,  0,  1,  1},
+//                    { 0,  0,  0,  0,  0,  1,  1,  0,  0},
+//                    { 0,  0,  0,  1,  1,  0,  0,  0,  1},
+//                    { 0,  1,  1,  0,  0,  0,  1,  1,  0},
+//                    { 1,  0,  0,  0,  1,  1,  0,  0,  0},
+//                    { 0,  0,  1,  1,  0,  0,  0,  0,  0},
+//                    { 1,  1,  0,  0,  0,  0,  0,  0,  0},
+//                    { 0,  0,  0,  0,  0,  0,  0,  0,  0}
+//            },  {
+//                    {  0,  0,  0,  0,  0,  0,  0,  1,  0},
+//                    {  0,  0,  0,  0,  0,  0,  1,  0,  1},
+//                    {  0,  0,  0,  0,  0,  1,  0,  1,  0},
+//                    {  0,  0,  0,  0,  1,  0,  1,  0,  0},
+//                    {  0,  0,  0,  1,  0,  1,  0,  0,  0},
+//                    {  0,  0,  1,  0,  1,  0,  0,  0,  0},
+//                    {  0,  1,  0,  1,  0,  0,  0,  0,  0},
+//                    {  1,  0,  1,  0,  0,  0,  0,  0,  0},
+//                    {  0,  1,  0,  0,  0,  0,  0,  0,  0}
+//        }
+//   };
+//// float karray[3][13][13] = {
+////   {
+////           { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////           { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////           { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////           { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 1,.7,.3, 0, 0, 0, 0, 0, 0, 0,.3,.7, 1},
+////            { 1, 1, 1, 1,.7,.3, 1,.3,.7, 1, 1, 1, 1},
+////            { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+////            { 1, 1, 1, 1,.7,.3, 1,.3,.7, 1, 1, 1, 1},
+////            { 1,.7,.3, 0, 0, 0, 0, 0, 0, 0,.3,.7, 1},
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////    }, {
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,.9, 1},
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,.7, 1, 1},
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0,.5, 1, 1, 1},
+////            { 0, 0, 0, 0, 0, 0, 0, 0,.3, 1, 1, 1, 1},
+////            { 0, 0, 0, 0, 0, 0, 1,.1, 1, 1, 1, 1, 1},
+////            { 0,.1,.3,.5,.7,.9, 1,.9,.7,.5,.3,.1, 0},
+////            { 1, 1, 1, 1, 1,.1, 1, 0, 0, 0, 0, 0, 0},
+////            { 1, 1, 1, 1,.3, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 1, 1, 1,.5, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 1, 1,.7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 1,.9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////    }, {
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
+////            { 0, 0, 0, 0, 0, 0, 0, 0, 0,.6, 1, 1, 1},
+////            { 0, 0, 0, 0, 0, 0, 0, 0,.2, 1, 1, 1, 1},
+////            { 0, 0, 0, 0, 0, 0, 0, 0,.8, 1, 1,.6, 0},
+////            { 0, 0, 0, 0, 0, 0, 0,.4, 1,.8,.2, 0, 0},
+////            { 0, 0, 0, 0, 0, 0, 1, 1,.4, 0, 0, 0, 0},
+////            { 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+////            { 0, 0, 0, 0,.4, 1, 1, 0, 0, 0, 0, 0, 0},
+////            { 0, 0,.2,.8, 1,.4, 0, 0, 0, 0, 0, 0, 0},
+////            { 0,.6, 1, 1,.8, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 1, 1, 1, 1,.2, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 1, 1, 1,.6, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////            { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+////    }};
+//
+//    kernal[0] = Mat(13, 13, CV_32FC1, karray[0]) / 18;
+//    kernal[1] = Mat(13, 13, CV_32FC1, karray[1]) / 18;
+//    kernal[2] = Mat(13, 13, CV_32FC1, karray[2]) / 16;
+//
+//    kernal[3] = kernal[1].t();
+//    kernal[4] = kernal[0].t();
+//
+//    flip(kernal[3], kernal[5], 0);
+//    flip(kernal[2], kernal[6], 0);
+//    flip(kernal[1], kernal[7], 0);
+//
+//    for(int i = 0; i < directions.size(); i++) {
+//        neighborvotes[i]  = applyFilter(directions[(i + kernal.size() - 1) % kernal.size()], kernal[(i + kernal.size() - 1) % kernal.size()]);
+//        neighborvotes[i] += applyFilter(directions[i], kernal[i]);
+//        neighborvotes[i] += applyFilter(directions[(i + 1) % kernal.size()], kernal[(i + 1) % kernal.size()]);
+//    }
+//
+//    out = neighborvotes[0].clone();
+//    for(int i = 1; i < directions.size(); i++) {
+//        out = max(out, neighborvotes[i]);
+//    }
+//
+//    return;
 }
 
 Mat LineDetector::getGeometricMean(Mat &image, Mat &kernal) {
@@ -162,36 +504,15 @@ Mat LineDetector::getGeometricMean(Mat &image, Mat &kernal) {
     filtered1 = applyFilter(image, kernal);
     filtered2 = applyFilter(image, kernal2);
 
-//    cv_ptr->image = image;
-//    _filt_img.publish(cv_ptr->toImageMsg());
-
     filtered1.convertTo(filtered1, CV_16UC3, 1);
     filtered2.convertTo(filtered2, CV_16UC3, 1);
 
     result = filtered1.mul(filtered2);
-
-//    cv_ptr->image = filtered1;
-//    _filt_img1.publish(cv_ptr->toImageMsg());
-//    cv_ptr->image = filtered2;
-//    _filt_img2.publish(cv_ptr->toImageMsg());
-//
-//    cv_ptr->image = result;
-//    _filt_img7.publish(cv_ptr->toImageMsg());
-
     result.convertTo(result, CV_8UC3, 1.0/256);
-//
-//    cv_ptr->image = result;
-//    _filt_img8.publish(cv_ptr->toImageMsg());
 
     return result;
 };
-//Mat* LineDetector::sumFilters(Mat& image, vector<Mat> kernal) {
-//
-//}
 
-//Mat LineDetector::skeleton(Mat &image) {
-//
-//}
 Mat LineDetector::applyFilter(Mat &image, const Mat &kernal) {
     Mat fin_img;
     vector<Mat> newchannel(3);
@@ -208,42 +529,25 @@ Mat LineDetector::applyFilter(Mat &image, const Mat &kernal) {
 
 bool operator<(const Vec3f& s1, const Vec3f& s2) {
     return s1[0] < s2[0];
-//    double diff = 0;
-//    for(int i = 0; i < 3; i++) {
-//        diff += s1[i] - s2[i];
-//    }
-//    return diff < 0;
 }
-void LineDetector::removeBlobs(vector<Mat> images, Mat& fin_img) {
-    for (int r = 0; r < fin_img.rows; r++) {
-        for(int c = 0; c < fin_img.cols; c++) {
+
+void LineDetector::subtractOrthog(vector<Mat>& images) {
+    for (int r = 0; r < images[0].rows; r++) {
+        for(int c = 0; c < images[0].cols; c++) {
+            Vec3b blackpixel(0, 0, 0);
             Vec3b maxdiff(0, 0, 0);
             Vec3b smax(0, 0, 0);
-            for(int i = 0; i < images.size()/2; i++){
-//                cerr << "About to process r=" << r << " c=" << c << " i=" << i << endl;
+            for(int i = 0; i < images.size(); i++){
                 Vec3b s1 = images[i].at<Vec3b>(r, c);
-                Vec3b s2 = images[i+images.size()/2].at<Vec3b>(r, c);
-                if(maxdiff < (s1-s2)) {
-                    maxdiff = s1-s2;
-                    smax = s1;
-                }
-                if(maxdiff < (s2-s1)) {
-                    maxdiff = s2-s1;
-                    smax = s2;
-                }
-//                cerr << "smax=" << maxdiff << endl;
+                Vec3b s2 = images[(i+images.size()/2) % images.size()].at<Vec3b>(r, c);
+                images[i].at<Vec3b>(r, c) = s1 - s2;
             }
-            fin_img.at<Vec3b>(r, c) = smax;
-//            cerr << "next col" << endl;
         }
-//        cerr << "next row" << endl;
     }
-//    cerr << "returning" << endl;
 }
 
-
 int threshold_value = 0;
-int threshold_type = 3;;
+int threshold_type = 3;
 int const max_value = 255;
 int const max_type = 4;
 int const max_BINARY_value = 255;

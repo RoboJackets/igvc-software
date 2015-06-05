@@ -7,7 +7,13 @@ int main(int argc, char** argv)
     
     ros::NodeHandle nh;
     
-    Bumblebee2 camera{nh};
+    std::string path;
+    ros::NodeHandle pNh("~");
+    if(!pNh.hasParam("path"))
+        ROS_ERROR_STREAM("no parameter path");
+    pNh.getParam("path", path);
+    
+    Bumblebee2 camera{nh,path};
 
     if(!camera.isOpen())
         return 1;

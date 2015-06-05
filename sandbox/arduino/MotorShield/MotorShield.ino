@@ -12,8 +12,8 @@ const int leftDisable = 8;
 volatile int tickDataRight = 0;
 volatile int tickDataLeft = 0;
 
-const float ticksPerRev = 7000.0;
-const float wheelCir = 1.11715; // Meters
+const float ticksPerRev = 6000.0;
+const float wheelCir = 1.092; // Meters
 const float metersPerTick = wheelCir / ticksPerRev;
 const float DEADBAND = 10;
 

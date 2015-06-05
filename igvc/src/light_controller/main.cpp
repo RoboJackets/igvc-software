@@ -2,7 +2,7 @@
 #include <igvc/SerialPort.h>
 #include <igvc_msgs/lights.h>
 #include <std_msgs/Bool.h>
-#include <std_msgs/Int8.h>
+#include <std_msgs/UInt8.h>
 
 igvc_msgs::lights state;
 
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 
     ros::Publisher enabled_pub = nh.advertise<std_msgs::Bool>("/robot_enabled", 1);
 
-    ros::Publisher battery_pub = nh.advertise<std_msgs::Int8>("/battery", 1);
+    ros::Publisher battery_pub = nh.advertise<std_msgs::UInt8>("/battery", 1);
 
     ROS_INFO_STREAM("Light controller ready.");
 
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 
             enabled_pub.publish(estop_msg);
 
-            std_msgs::Int8 battery_msg;
+            std_msgs::UInt8 battery_msg;
             battery_msg.data = ret[2];
 
             battery_pub.publish(battery_msg);
