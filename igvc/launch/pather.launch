@@ -1,0 +1,12 @@
+<!-- map.launch -->
+<launch>
+    <!-- Waypoints -->
+    <node name="waypoint_source" pkg="igvc" type="waypoint_source" output="screen" />
+
+    <!-- Planner -->
+    <node name="path_planner" pkg="igvc" type="pathplanner" output="screen" />
+
+    <!-- Follower -->
+    <node name="path_follower" pkg="igvc" type="path_follower" output="screen" />
+
+</launch>

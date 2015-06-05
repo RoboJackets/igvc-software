@@ -1,0 +1,60 @@
+<robot name="test_platform">
+    
+    <link name="base_footprint" />
+    <link name="base_link" />
+    <link name="gps" />
+    <link name="imu" />
+    <link name="camera" />
+    <link name="lidar" />
+	<link name="camera_left" />
+	<link name="camera_right" />
+    
+    <joint name="groundToDriveWheelMidpoint" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 0.17" rpy="0 0 0"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+    
+    <joint name="gps" type="fixed">
+        <parent link="base_link"/>
+        <child link="gps"/>
+        <origin xyz="0 0.28 0.30" rpy="0 0 0"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+    
+    <joint name="imu" type="fixed">
+        <parent link="base_link"/>
+        <child link="imu"/>
+        <origin xyz="0 -0.18 1.22" rpy="0 0 0"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+    
+    <joint name="camera" type="fixed">
+        <parent link="base_link"/>
+        <child link="camera"/>
+        <origin xyz="0 -0.18 1.34" rpy="-0.3491 0 0"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+    
+    <joint name="lidar" type="fixed">
+        <parent link="base_link"/>
+        <child link="lidar"/>
+        <origin xyz="0 0.83 0.455" rpy="0 0 1.5707"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+
+    <joint name="camera_left" type="fixed">
+        <parent link="camera"/>
+        <child link="camera_left"/>
+        <origin xyz="-0.051 0 0" rpy="0 0 0"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+
+    <joint name="camera_right" type="fixed">
+        <parent link="camera"/>
+        <child link="camera_right"/>
+        <origin xyz="0.051 0 0" rpy="0 0 0"/>
+        <axis xyz="0 0 0"/>
+    </joint>
+</robot>
