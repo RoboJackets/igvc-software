@@ -91,8 +91,8 @@ void loop()
   {
     if(Serial.read() == '$')
     {
-      desiredSpeedL = Serial.parseFloat();
-      desiredSpeedR = Serial.parseFloat();
+      desiredSpeedL = -1*Serial.parseFloat();
+      desiredSpeedR = -1*Serial.parseFloat();
       lastCmdTime = millis();
       gotCommand = true;
     }
@@ -187,11 +187,11 @@ void tickLeft()
 {
   if (digitalRead(encoderLeftData1) == digitalRead(encoderLeftData2))
   {
-    tickDataLeft--;
+    tickDataLeft++;
   }
   else
   {
-    tickDataLeft++;
+    tickDataLeft--;
   }
 }
 
