@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   igvc_msgs
   image_transport
+  cv_bridge
   camera_info_manager
   laser_geometry
   tf
@@ -150,7 +151,7 @@ include_directories(
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
 #   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
+#   FILES_MATCHING PATTERN "*.h")
 #   PATTERN ".svn" EXCLUDE
 # )
 
@@ -183,6 +184,7 @@ add_subdirectory(src/bumblebee2)
 add_subdirectory(src/light_controller)
 add_subdirectory(src/waypoint_source)
 add_subdirectory(src/pathplanner)
+add_subdirectory(src/line_detector)
 add_subdirectory(src/bumblebee2/dispToPointcloud)
 add_subdirectory(src/scan_to_pointcloud)
 add_subdirectory(src/mapper)
