@@ -28,7 +28,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
             acts.push_back(move);
         }
     }
-    if(acts.size() == 0)
+    if(ReverseEnabled && acts.size() == 0)
     {
         for(double W = Wmin; W <= Wmax; W+=delta)
         {
