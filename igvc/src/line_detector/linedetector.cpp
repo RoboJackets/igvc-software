@@ -442,6 +442,9 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
                 current = current->prev;
             }
         }
+        Mat channels[3];
+        split(fin_img, channels);
+        out = channels[0];
     }
 
 //    cerr << "Graph search complete, setting out and returning" << endl;
@@ -696,18 +699,17 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
     bg = new BackgroundSubtractorMOG2();
 	refresh = 0;
 
-//    _src_img = _it.subscribe("/stereo/left/image_rect_color", 1, &LineDetector::img_callback, this);
-    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
-//    _src_img = _it.subscribe("/left/image_color", 1, &LineDetector::img_callback, this);
-	_filt_img = _it.advertise("/filt_img", 1);
-    _filt_img1 = _it.advertise("/filt_img1", 1);
-    _filt_img2 = _it.advertise("/filt_img2", 1);
-    _filt_img3 = _it.advertise("/filt_img3", 1);
-    _filt_img4 = _it.advertise("/filt_img4", 1);
-    _filt_img5 = _it.advertise("/filt_img5", 1);
-    _filt_img6 = _it.advertise("/filt_img6", 1);
-    _filt_img7 = _it.advertise("/filt_img7", 1);
-    _filt_img8 = _it.advertise("/filt_img8", 1);
+    _src_img = _it.subscribe("/stereo/left/image_rect_color", 1, &LineDetector::img_callback, this);
+//    _src_img = _it.subscribe("/left/image_raw", 1, &LineDetector::img_callback, this);
+//	_filt_img = _it.advertise("/filt_img", 1);
+//    _filt_img1 = _it.advertise("/filt_img1", 1);
+//    _filt_img2 = _it.advertise("/filt_img2", 1);
+//    _filt_img3 = _it.advertise("/filt_img3", 1);
+//    _filt_img4 = _it.advertise("/filt_img4", 1);
+//    _filt_img5 = _it.advertise("/filt_img5", 1);
+//    _filt_img6 = _it.advertise("/filt_img6", 1);
+//    _filt_img7 = _it.advertise("/filt_img7", 1);
+//    _filt_img8 = _it.advertise("/filt_img8", 1);
     _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
 
 }
