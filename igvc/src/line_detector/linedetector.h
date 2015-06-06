@@ -18,6 +18,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
 #include <vector>
+#include <tf/transform_listener.h>
 
 class LineDetector
 {
@@ -113,5 +114,6 @@ private:
     image_transport::Publisher _filt_img7;
     image_transport::Publisher _filt_img8;
 	image_transport::Subscriber _src_img;
+    tf::TransformListener tf_listener;
 };
 #endif // LINEDETECTOR_H
