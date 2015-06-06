@@ -21,6 +21,7 @@ public:
     double Baseline;
     double GoalThreshold;
     bool PointTurnsEnabled;
+    bool ReverseEnabled;
     double MinimumOmega;
     double MaximumOmega;
     double DeltaOmega;

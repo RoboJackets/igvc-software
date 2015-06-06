@@ -41,7 +41,7 @@ void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
     search_problem.Start.y = msg->pose.position.y;
     tf::Quaternion q;
     tf::quaternionMsgToTF(msg->pose.orientation, q);
-    search_problem.Start.theta = M_PI_2 - tf::getYaw(q);
+    search_problem.Start.theta = - tf::getYaw(q);
 }
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
@@ -83,17 +83,19 @@ int main(int argc, char** argv)
 
     expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/expanded", 1);
 
-    double baseline = 0.7275;
+    double baseline = 0.93;
 
     search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
-    search_problem.GoalThreshold = 1.0;
-    search_problem.Threshold = 0.36375;
+    search_problem.GoalThreshold = 0.5;
+    search_problem.Threshold = 0.65;
     search_problem.Speed = 0.25;
     search_problem.Baseline = baseline;
     search_problem.DeltaT = 0.75;
-    search_problem.MinimumOmega = -0.8;
-    search_problem.MaximumOmega = 0.8;
-    search_problem.DeltaOmega = 0.25;
+    search_problem.MinimumOmega = -0.81;
+    search_problem.MaximumOmega = 0.81;
+    search_problem.DeltaOmega = 0.4;
+    search_problem.PointTurnsEnabled = false;
+    search_problem.ReverseEnabled = false;
 
     ros::Rate rate(3);
     while(ros::ok())
