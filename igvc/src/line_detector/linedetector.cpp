@@ -31,6 +31,11 @@ cv::Mat back;
 int refresh;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
+constexpr double radians(double degrees)
+{
+    return degrees / 180.0 * M_PI;
+}
+
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cerr << "CALLBACK CALLED" << endl;
     cv_ptr = cv_bridge::toCvCopy(msg, "");
@@ -97,7 +102,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     resize(grnd, squish_dst, Size(3*grnd.cols/linewidthpixels, 3*grnd.rows/linewidthpixels), 0, 0, INTER_LANCZOS4);
 
 //// Down View
-    transformPoints(squish_dst, grnd);
+//    transformPoints(squish_dst, grnd);
 
     float karray[3][9][9] = {
             {
@@ -1059,13 +1064,14 @@ void LineDetector::transformPoints(Mat &src, Mat &dst){
 PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/camera", "/base_footprint", ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_footprint", "/camera", ros::Time(0), transform);
     double roll, pitch, yaw;
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
     auto origin_z = transform.getOrigin().getZ();
     auto origin_y = transform.getOrigin().getY();
-    auto HFOV = 66.0;
-    auto VFOV = 47.6;
+    auto HFOV = radians(66.0);
+    auto VFOV = radians(47.6);
+    pitch = -roll; // Because conventions are different and I'm in the middle of comp, and give me a break.
     for(int r = 0; r < src.rows; r++)
     {
         uchar *row = src.ptr<uchar>(r);
