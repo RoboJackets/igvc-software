@@ -22,6 +22,7 @@
 
 using namespace std;
 using namespace cv;
+using namespace pcl;
 
 cv_bridge::CvImagePtr cv_ptr;
 Ptr<BackgroundSubtractor> bg;
@@ -681,7 +682,8 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
     : max_elem(2),
       max_kernel_size(2),
       gaussian_size(7),
-	  _it(handle)
+      _it(handle),
+      tf_listener(handle)
 {
     erosion_elem = 2;
     erosion_size = 1;
@@ -1044,19 +1046,33 @@ void LineDetector::transformPoints(Mat &src, Mat &dst){
 	cv::warpPerspective(src, dst, transformMat, dst.size());
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
-	int squareSize = 100;
-	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-	//Add points to the cloud if they are white (right now only checking the first layer)
-	for (int r=0; r<src.rows;r++){
-		for (int c=0; c<src.cols; c++){
-			if (src.at<cv::Vec3b>(r,c)[0]==255){
-				float x = ( c - ( src.cols/2. ) ) / (float)squareSize;
-				float y = ( src.rows - r ) / (float)squareSize;
-				cloud->points.push_back(pcl::PointXYZ(x, y, 0));
-			}
-		}
-	}
+PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
+    PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
+    tf::StampedTransform transform;
+    tf_listener.lookupTransform("/camera", "/base_footprint", ros::Time(0), transform);
+    double roll, pitch, yaw;
+    tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
+    auto origin_z = transform.getOrigin().getZ();
+    auto origin_y = transform.getOrigin().getY();
+    auto HFOV = 66.0;
+    auto VFOV = 47.6;
+    for(int r = 0; r < src.rows; r++)
+    {
+        uchar *row = src.ptr<uchar>(r);
+        for(int c = 0; c < src.cols; c++)
+        {
+            if(row[c] > 0)
+            {
+                auto pitch_offset = ((float)(r-src.rows/2) / src.rows) * VFOV;
+                auto y = origin_z /tan(pitch + pitch_offset) + origin_y;
+
+                auto theta = ((float)(c-src.cols/2) / src.cols) * HFOV;
+                auto x = y * tan(theta);
+
+                cloud->points.push_back(PointXYZ(x, y, 0));
+            }
+        }
+    }
 	cloud->header.frame_id = "base_footprint";
 	return cloud;
 }
