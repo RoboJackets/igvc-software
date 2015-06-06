@@ -44,20 +44,20 @@ void publish_pose()
     Transform transform;
     transform.setOrigin(Vector3(pose.pose.position.x, pose.pose.position.y, 0.0));
     Quaternion q;
-    quaternionMsgToTF(pose.pose.orientation, q);
+    quaternionMsgToTF(orientation, q);
     transform.setRotation(q);
     tf_broadcaster->sendTransform(StampedTransform(transform, ros::Time::now(), "map", "base_footprint"));
 }
 
 void imu_callback(const sensor_msgs::ImuConstPtr& msg)
 {
-    geometry_msgs::QuaternionStamped q;
-    q.header.stamp = ros::Time(0);
-    q.header.frame_id = msg->header.frame_id;
-    q.quaternion = msg->orientation;
-    tf_listener->waitForTransform("base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(10.0));
-    geometry_msgs::QuaternionStamped transformed;
-    tf_listener->transformQuaternion("base_footprint", q, transformed);
+//    geometry_msgs::QuaternionStamped q;
+//    q.header.stamp = ros::Time(0);
+//    q.header.frame_id = msg->header.frame_id;
+//    q.quaternion = msg->orientation;
+//    tf_listener->waitForTransform("base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(10.0));
+//    geometry_msgs::QuaternionStamped transformed;
+//    tf_listener->transformQuaternion("base_footprint", q, transformed);
     orientation = msg->orientation;//transformed.quaternion;
 }
 
