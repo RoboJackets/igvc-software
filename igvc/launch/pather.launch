@@ -1,7 +1,7 @@
 <!-- map.launch -->
 <launch>
     <!-- Waypoints -->
-    <node name="waypoint_source" pkg="igvc" type="waypoint_source" output="screen" />
+    <include file="$(find igvc)/launch/waypoint_source.launch" />
 
     <!-- Planner -->
     <node name="path_planner" pkg="igvc" type="pathplanner" output="screen" />
