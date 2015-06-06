@@ -18,6 +18,7 @@
 #include <vector>
 #include <functional>
 #include <algorithm>
+#include <memory>
 
 using namespace std;
 using namespace cv;
@@ -268,7 +269,18 @@ void LineDetector::RemoveNonMax(vector<Mat>& images) {
     }
 }
 
-typedef struct Node {struct Node* prev; Point point; int length;} Node;
+typedef struct Node {
+    shared_ptr<struct Node> prev;
+    Point point;
+    int length;
+
+    Node(shared_ptr<struct Node> pr, Point po, int l)
+    {
+        prev = pr;
+        point = po;
+        length = l;
+    }
+} Node;
 
 void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
 //    cerr << "Enforcing Continuity" << endl;
@@ -286,11 +298,11 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
         bitwise_or(gradient, bgr[0], gradient);
     }
 //    cout << "gradient complete: " << endl << gradient << endl;
-    auto getneighbors = [](Node* n, Mat& gradient) {
+    auto getneighbors = [](shared_ptr<Node> n, Mat& gradient) {
         auto similarbits = [](unsigned char a, unsigned char b) {
             return ((a == b) | (a == b << 1) | (a == b >> 1) | (129 == (a | b)));
         };
-        vector <Node*> neighbors;
+        vector <shared_ptr<Node> > neighbors;
         if(!n) return neighbors;
         Point p = n->point;
         const unsigned char g = gradient.at<uchar>(p);
@@ -345,7 +357,7 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
                         newp.y >= 0)
                         if (similarbits(gradient.at<uchar>(newp), g)) {
 //                            cerr << "similarbits n->length: " << n->length << endl;
-                            neighbors.push_back(new Node{n, newp, (n->length > 0) ? (n->length + 1) : (n->length - 1)});
+                            neighbors.push_back(make_shared<Node>(n, newp, (n->length > 0) ? (n->length + 1) : (n->length - 1)));
                         }
 
                 }
@@ -373,15 +385,15 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
     for(int i = 0; i < iterations && i < randlineinds.total(); i++) {
 //        cerr << "Iteration: " << i << " of graph search" << endl;
         Mat gradientcopy = gradient.clone();
-        vector<Node*> frontier;
-        Node* start = new Node {NULL, randlineinds.at<Point>(i), 1};
-        Node* trats = new Node {NULL, randlineinds.at<Point>(i), -1};
+        vector<shared_ptr<Node> > frontier;
+        shared_ptr<Node> start = make_shared<Node>(nullptr, randlineinds.at<Point>(i), 1);
+        shared_ptr<Node> trats = make_shared<Node>(nullptr, randlineinds.at<Point>(i), -1);
         frontier.push_back(trats);
         frontier.push_back(start);
 
-        Node* current = start;
-        Node* bestpathforward = start;
-        Node* bestpathbackward = trats;
+        shared_ptr<Node> current = start;
+        shared_ptr<Node> bestpathforward = start;
+        shared_ptr<Node> bestpathbackward = trats;
 
         bool forward = false;
         while(!frontier.empty()) {
@@ -396,9 +408,9 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
                     bestpathbackward = current;
             }
 
-            vector<Node*> neighbors = getneighbors(current, gradientcopy);
+            vector<shared_ptr<Node>> neighbors = getneighbors(current, gradientcopy);
             if(neighbors.empty()) continue;
-            for(Node*& n : neighbors)
+            for(shared_ptr<Node>& n : neighbors)
                 frontier.push_back(n);
         }
 //        cerr << endl << endl;
@@ -678,7 +690,7 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
     bg = new BackgroundSubtractorMOG2();
 	refresh = 0;
 
-    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
+    _src_img = _it.subscribe("/stereo/left/image_rect_color", 1, &LineDetector::img_callback, this);
 //    _src_img = _it.subscribe("/left/image_color", 1, &LineDetector::img_callback, this);
 	_filt_img = _it.advertise("/filt_img", 1);
     _filt_img1 = _it.advertise("/filt_img1", 1);
