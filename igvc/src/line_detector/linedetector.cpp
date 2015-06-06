@@ -32,7 +32,7 @@ int refresh;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
-//    cerr << "CALLBACK CALLED" << endl;
+    cerr << "CALLBACK CALLED" << endl;
     cv_ptr = cv_bridge::toCvCopy(msg, "");
 
 	// UNCOMMENT THESE LINES TO RUN OTHER METHOD
@@ -199,6 +199,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 //    cout << "results[1].type(): " << results[1].type() << endl;
 //    cout << "fit_img.type(): " << fin_img.type() << endl;
     EnforceContinuity(results, fin_img);
+
 //    cerr << "Continuity has been enforced" << endl;
 //    drawWhite(fin_img);
 //    cout << "results[1].type(): " << results[1].type() << endl;
@@ -281,7 +282,7 @@ typedef struct Node {
 } Node;
 
 void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
-//    cerr << "Enforcing Continuity" << endl;
+    cerr << "Enforcing Continuity" << endl;
     int iterations = 300;
     int minpathlength = 20;
     Mat gradient = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC1);
@@ -442,6 +443,9 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
                 current = current->prev;
             }
         }
+        cv_ptr->image = fin_img;
+        cerr << "Publishing to filt_img" << endl;
+        _filt_img.publish(cv_ptr->toImageMsg());
         Mat channels[3];
         split(fin_img, channels);
         out = channels[0];
@@ -699,9 +703,9 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
     bg = new BackgroundSubtractorMOG2();
 	refresh = 0;
 
-    _src_img = _it.subscribe("/stereo/left/image_rect_color", 1, &LineDetector::img_callback, this);
+    _src_img = _it.subscribe("/left/image_rect_color", 1, &LineDetector::img_callback, this);
 //    _src_img = _it.subscribe("/left/image_raw", 1, &LineDetector::img_callback, this);
-//	_filt_img = _it.advertise("/filt_img", 1);
+	_filt_img = _it.advertise("/filt_img", 1);
 //    _filt_img1 = _it.advertise("/filt_img1", 1);
 //    _filt_img2 = _it.advertise("/filt_img2", 1);
 //    _filt_img3 = _it.advertise("/filt_img3", 1);
