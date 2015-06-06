@@ -59,7 +59,7 @@ private:
 
     void drawWhite(cv::Mat &image);
     cv::Mat applyFilter(cv::Mat &image, const cv::Mat &kernal);
-    cv::Mat getGeometricMean(cv::Mat &img, cv::Mat &kernal);
+    std::vector<cv::Mat> getGeometricMean(cv::Mat &img, std::vector<cv::Mat> &kernals);
     void subtractOrthog(std::vector<cv::Mat>& images);
     void RemoveNonMax(std::vector<cv::Mat>& images);
     void EnforceContinuity(std::vector<cv::Mat>& directions, cv::Mat& out);

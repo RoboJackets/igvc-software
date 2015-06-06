@@ -32,7 +32,6 @@ typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 //    cerr << "CALLBACK CALLED" << endl;
-
     cv_ptr = cv_bridge::toCvCopy(msg, "");
 
 	// UNCOMMENT THESE LINES TO RUN OTHER METHOD
@@ -132,6 +131,8 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                     {   1,   1,   0,   0,   0,   0,   0,   0,   0}
             }
     };
+
+    vector<Mat> kernals;
     Mat kernal1(9, 9, CV_32FC1, karray[0]);
     kernal1 /= 27;
     Mat kernal2(9, 9, CV_32FC1, karray[1]);
@@ -150,21 +151,21 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     flip(kernal3, kernal7, 0);
     flip(kernal2, kernal8, 0);
 
+    kernals.push_back(kernal1);
+    kernals.push_back(kernal2);
+    kernals.push_back(kernal3);
+    kernals.push_back(kernal4);
+    kernals.push_back(kernal5);
+    kernals.push_back(kernal6);
+    kernals.push_back(kernal7);
+    kernals.push_back(kernal8);
+
     Mat testimage = squish_dst;
 //    Mat testimage = imread("/home/thaeds/Robojackets/rosigvc/catkin_ws/build/testimage.jpg");
 
-    vector<Mat> results;
-    results.push_back(getGeometricMean(testimage, kernal1));
-    results.push_back(getGeometricMean(testimage, kernal2));
-    results.push_back(getGeometricMean(testimage, kernal3));
-    results.push_back(getGeometricMean(testimage, kernal4));
-    results.push_back(getGeometricMean(testimage, kernal5));
-    results.push_back(getGeometricMean(testimage, kernal6));
-    results.push_back(getGeometricMean(testimage, kernal7));
-    results.push_back(getGeometricMean(testimage, kernal8));
+    vector<Mat> results = getGeometricMean(testimage, kernals);
 
-
-    Mat fadedimage = testimage/5;
+    Mat fadedimage = testimage/2;
     Mat fin_img = results[0].clone();
 //
 //    cv_ptr->image = results[7];// + fadedimage;
@@ -193,6 +194,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
         cvtColor(results[i], results[i], CV_GRAY2BGR);
     }
 
+
 //    cout << "results[1].type(): " << results[1].type() << endl;
 //    cout << "fit_img.type(): " << fin_img.type() << endl;
     EnforceContinuity(results, fin_img);
@@ -200,8 +202,6 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 //    drawWhite(fin_img);
 //    cout << "results[1].type(): " << results[1].type() << endl;
 //    cout << "fit_img.type(): " << fin_img.type() << endl;
-    cv_ptr->image = fin_img; // + fadedimage;
-    _filt_img.publish(cv_ptr->toImageMsg());
 //    cv_ptr->image = results[7];// + fadedimage;
 //    _filt_img3.publish(cv_ptr->toImageMsg());
 //    cv_ptr->image = results[0];// + fadedimage;
@@ -241,18 +241,15 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 
     int rows = dview_dst.rows;
     int cols = dview_dst.cols;
-	cv::Mat transformDst(rows, cols, CV_8UC3);
 //    transformPoints(fin_img, transformDst);
 //    cerr << "transformDst rows: " << transformDst.rows << " cols: " << transformDst.cols << endl;
     resize(fin_img, fin_img, Size(dview_dst.cols, dview_dst.rows), 0, 0, INTER_LANCZOS4);
-    transformPoints(fin_img, transformDst);
-    transformDst.convertTo(grnd, CV_8UC3);
-    cloud = toPointCloud(grnd);
+    cloud = toPointCloud(fin_img);
     _line_cloud.publish(cloud);
 
 //    cerr << "fi_img rows: " << fin_img.rows << " cols: " << fin_img.cols << endl;
-    cv_ptr->image = grnd;
-    _filt_img1.publish(cv_ptr->toImageMsg());
+//    cv_ptr->image = grnd;
+//    _filt_img1.publish(cv_ptr->toImageMsg());
 
 
 
@@ -447,7 +444,7 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
     }
 
 //    cerr << "Graph search complete, setting out and returning" << endl;
-    dilate(fin_img, out, Mat(), Point(-1, -1), 1);
+//    dilate(fin_img, out, Mat(), Point(-1, -1), 1);
 //    vector<Mat> neighborvotes(8);
 //    vector<Mat> kernal(8);
 //
@@ -554,22 +551,30 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
 //    return;
 }
 
-Mat LineDetector::getGeometricMean(Mat &image, Mat &kernal) {
+vector<Mat> LineDetector::getGeometricMean(Mat& image, vector<Mat> &kernals) {
     Mat filtered1, filtered2;
-    Mat result(image.rows, image.cols, CV_16UC3);
-    Mat kernal2 = kernal.clone();
-    flip(kernal, kernal2, -1);
+    vector<Mat> results;
 
-    filtered1 = applyFilter(image, kernal);
-    filtered2 = applyFilter(image, kernal2);
+    for(int i = 0; i < kernals.size(); i++) {
+        Mat kernal2 = kernals[i].clone();
+        Mat normmat;
+        flip(kernals[i], kernal2, -1);
 
-    filtered1.convertTo(filtered1, CV_16UC3, 1);
-    filtered2.convertTo(filtered2, CV_16UC3, 1);
+        filtered1 = applyFilter(image, kernals[i]);
+        filtered2 = applyFilter(image, kernal2);
 
-    result = filtered1.mul(filtered2);
-    result.convertTo(result, CV_8UC3, 1.0/256);
 
-    return result;
+        filtered1.convertTo(filtered1, CV_16UC3, 1);
+        filtered2.convertTo(filtered2, CV_16UC3, 1);
+
+        results.push_back(filtered1.mul(filtered2));
+        results[i].convertTo(results[i], CV_8UC3, 1.0 / 256);
+    }
+
+//    char c;
+//    cin >> c;
+
+    return results;
 };
 
 Mat LineDetector::applyFilter(Mat &image, const Mat &kernal) {
@@ -582,7 +587,6 @@ Mat LineDetector::applyFilter(Mat &image, const Mat &kernal) {
     }
 
     merge(newchannel, fin_img);
-//    normalize(fin_img, fin_img, 0, 255, NORM_MINMAX, -1);
     return fin_img;
 }
 
@@ -690,17 +694,18 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
     bg = new BackgroundSubtractorMOG2();
 	refresh = 0;
 
-    _src_img = _it.subscribe("/stereo/left/image_rect_color", 1, &LineDetector::img_callback, this);
+//    _src_img = _it.subscribe("/stereo/left/image_rect_color", 1, &LineDetector::img_callback, this);
+    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
 //    _src_img = _it.subscribe("/left/image_color", 1, &LineDetector::img_callback, this);
 	_filt_img = _it.advertise("/filt_img", 1);
     _filt_img1 = _it.advertise("/filt_img1", 1);
     _filt_img2 = _it.advertise("/filt_img2", 1);
-//    _filt_img3 = _it.advertise("/filt_img3", 1);
-//    _filt_img4 = _it.advertise("/filt_img4", 1);
-//    _filt_img5 = _it.advertise("/filt_img5", 1);
-//    _filt_img6 = _it.advertise("/filt_img6", 1);
-//    _filt_img7 = _it.advertise("/filt_img7", 1);
-//    _filt_img8 = _it.advertise("/filt_img8", 1);
+    _filt_img3 = _it.advertise("/filt_img3", 1);
+    _filt_img4 = _it.advertise("/filt_img4", 1);
+    _filt_img5 = _it.advertise("/filt_img5", 1);
+    _filt_img6 = _it.advertise("/filt_img6", 1);
+    _filt_img7 = _it.advertise("/filt_img7", 1);
+    _filt_img8 = _it.advertise("/filt_img8", 1);
     _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
 
 }
@@ -803,7 +808,6 @@ bool LineDetector::otherMethod(const sensor_msgs::ImageConstPtr& msg, cv_bridge:
 	//cvtColor(cv_ptr->image, cv_ptr->image, CV_BGR2GRAY);
 	//cvtColor(cv_ptr->image, cv_ptr->image, CV_GRAY2BGR);
     _filt_img.publish(cv_ptr->toImageMsg());
-//    _filt_img.publish(imgmat);
     cloud = toPointCloud(transformDst);
 
     cout <<"Sending new matrix"<<endl;
