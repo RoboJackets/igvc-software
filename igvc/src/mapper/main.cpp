@@ -14,6 +14,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 #include <set>
+#include <climits>
 
 using namespace std;
 using namespace pcl;
@@ -28,7 +29,24 @@ void filterOutDuplicates(PointCloud<PointXYZ>::ConstPtr cloud)
 {
     VoxelGrid<PointXYZ> filter;
     filter.setInputCloud(cloud);
-    filter.setLeafSize(0.01f, 0.01f, 0.01f);
+
+    auto minx = cloud->at(0).x;
+    auto maxx =  cloud->at(0).x;
+    auto miny = cloud->at(0).y;
+    auto maxy = cloud->at(0).y;
+    for(auto point : *cloud)
+    {
+        minx = min(minx, point.x);
+        maxx = max(maxx, point.x);
+        miny = min(miny, point.y);
+        maxy = max(maxy, point.y);
+    }
+    auto xrange = maxx - minx;
+    auto yrange = maxy - miny;
+
+    auto size = (xrange > yrange ? xrange : yrange) / INT_MAX;
+
+    filter.setLeafSize(size, size, size);
     filter.filter(*map_cloud);
 }
 
