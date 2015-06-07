@@ -107,7 +107,7 @@ int main(int argc, char** argv)
          * Long paths take forever to compute, and will freeze up this node.
          */
         auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal);
-        if(distance_to_goal == 0 || distance_to_goal > 30)
+        if(distance_to_goal == 0 /*|| distance_to_goal > 30*/)
             continue;
 
         planning_mutex.lock();

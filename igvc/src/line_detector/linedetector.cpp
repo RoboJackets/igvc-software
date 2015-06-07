@@ -1072,7 +1072,7 @@ PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
     auto HFOV = radians(66.0);
     auto VFOV = radians(47.6);
     pitch = -roll; // Because conventions are different and I'm in the middle of comp, and give me a break.
-    for(int r = 0; r < src.rows; r++)
+    for(int r = src.rows/2; r < src.rows; r++)
     {
         uchar *row = src.ptr<uchar>(r);
         for(int c = 0; c < src.cols; c++)

@@ -29,9 +29,10 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
         kdtree.setInputCloud(cloud_for_pub);
         vector<int> pointIndeces;
         vector<float> squaredDistances;
-        kdtree.radiusSearch(PointXYZ(0,0,0), 0.5, pointIndeces, squaredDistances);
+        kdtree.radiusSearch(PointXYZ(0,0,0), 1.0, pointIndeces, squaredDistances);
+        std::sort(pointIndeces.begin(), pointIndeces.end(), std::greater<int>()); // sort into descending order
         for(auto idx : pointIndeces)
-            cloud_for_pub->erase(cloud_for_pub->begin() + idx);
+            cloud_for_pub->erase(cloud_for_pub->points.begin() + idx);
     }
 
     _pointcloud_pub.publish(*cloud_for_pub);

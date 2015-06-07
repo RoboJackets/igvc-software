@@ -3,6 +3,6 @@
     <!-- Lidar Node -->
 	<node name="sick_tim551_2050001" pkg="sick_tim" type="sick_tim551_2050001" />
 
-	<node name="scan_to_pointcloud" pkg="igvc" type="scan_to_pointcloud" />
+        <node name="scan_to_pointcloud" pkg="igvc" type="scan_to_pointcloud" output="screen" />
 
 </launch>
