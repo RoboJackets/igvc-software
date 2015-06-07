@@ -15,7 +15,7 @@ volatile int tickDataLeft = 0;
 const float ticksPerRev = 6000.0;
 const float wheelCir = 1.092; // Meters
 const float metersPerTick = wheelCir / ticksPerRev;
-const float DEADBAND = 10;
+const float DEADBAND = 2;
 
 float desiredSpeedR = 0; // m/s
 float desiredSpeedL = 0; // m/s
@@ -26,7 +26,7 @@ float lastErrorL;
 float lastErrorR;
 
 float P = 20;
-float D = -5;
+float D = 10;
 
 int PWM_L = 0;
 int PWM_R = 0;
@@ -42,7 +42,7 @@ boolean cmdHasStarted = false;
 long lastCmdTime;
 
 /* TODO
- * 1 - fix deadband (maybe bigger?)
+ * 1 - fix deadband (maybe bigger?) you fuckers knew what you were doing
  * 2 - push command speed
  * 3 - fix timeout
  */

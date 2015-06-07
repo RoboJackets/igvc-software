@@ -1,5 +1,5 @@
 #include <ros/ros.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
 #include <fstream>
 #include <igvc/StringUtils.hpp>
@@ -96,17 +96,24 @@ double distanceBetweenPoints(const Point &p1, const Point &p2)
     return sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y));
 }
 
-void positionCallback(const geometry_msgs::PoseWithCovarianceStampedConstPtr& msg)
+void positionCallback(const geometry_msgs::PoseStampedConstPtr& msg)
 {
+    cerr << "Waypoint Source called back" << endl;
     lock_guard<mutex> lock(current_mutex);
-    if(distanceBetweenPoints(msg->pose.pose.position, current_waypoint.point) < 1.0)
+    PointStamped cur = current_waypoint;
+    cur.point.x -= map_origin.x;
+    cur.point.y -= map_origin.y;
+
+    if(distanceBetweenPoints(msg->pose.position, cur.point) < 1.0)
     {
         // advance to next waypoint.
+        ROS_INFO("NEXT WAYPOINT **********");
+        cerr << "Waypoint Source thinks its close to waypoint" << endl;
         current_waypoint = waypoints.front();
-        current_waypoint.point.x -= map_origin.x;
-        current_waypoint.point.y -= map_origin.y;
-        if(waypoints.size() > 1)
+        if(waypoints.size() > 1) {
             waypoints.erase(waypoints.begin());
+            cerr << "Waypoint Source moving to next" << endl;
+        }
     }
 }
 
@@ -132,7 +139,7 @@ int main(int argc, char** argv)
 
     waypoint_pub = nh.advertise<PointStamped>("/waypoint", 1);
 
-    ros::Subscriber odom_sub = nh.subscribe("/robot_pose_ekf/odom_combined", 1, positionCallback);
+    ros::Subscriber odom_sub = nh.subscribe("/odom_combined", 1, positionCallback);
 
     ros::Subscriber origin_sub = nh.subscribe("/map_origin", 1, originCallback);
 

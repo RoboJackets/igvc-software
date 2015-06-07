@@ -88,12 +88,12 @@ int main(int argc, char** argv)
     search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
     search_problem.GoalThreshold = 0.5;
     search_problem.Threshold = 0.65;
-    search_problem.Speed = 0.25;
+    search_problem.Speed = 0.35;
     search_problem.Baseline = baseline;
     search_problem.DeltaT = 0.75;
-    search_problem.MinimumOmega = -0.81;
-    search_problem.MaximumOmega = 0.81;
-    search_problem.DeltaOmega = 0.4;
+    search_problem.MinimumOmega = -0.41;
+    search_problem.MaximumOmega = 0.41;
+    search_problem.DeltaOmega = 0.2;
     search_problem.PointTurnsEnabled = false;
     search_problem.ReverseEnabled = false;
 
@@ -139,8 +139,8 @@ int main(int argc, char** argv)
                 vels.header.stamp = act_path_msg.header.stamp;
                 vels.header.frame_id = act_path_msg.header.frame_id;
                 double radius = action.V / action.W;
-                vels.left_velocity = (radius - baseline/2.) * action.W;
-                vels.right_velocity = (radius + baseline/2.) * action.W;
+                vels.right_velocity = (radius - baseline/2.) * action.W;
+                vels.left_velocity = (radius + baseline/2.) * action.W;
                 vels.duration = action.DeltaT;
                 act_path_msg.actions.push_back(vels);
             }
