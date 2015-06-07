@@ -17,6 +17,7 @@ bool path_reset = false;
 void newPath(const action_pathConstPtr &msg)
 {
   lock_guard<mutex> lock(mutex);
+  ROS_INFO("Follower got path");
   path = msg;
   path_index = 0;
   path_reset = true;
@@ -33,7 +34,7 @@ int main(int argc, char** argv)
 
   ros::Publisher cmd_pub = n.advertise<velocity_pair>("/motors", 1);
 
-  ros::Subscriber path_sub = n.subscribe("path", 1, newPath);
+  ros::Subscriber path_sub = n.subscribe("/path", 1, newPath);
 
   ros::Rate rate(120);
   while(ros::ok())
@@ -42,21 +43,33 @@ int main(int argc, char** argv)
 
     { //scope for mutex lock
       lock_guard<mutex> lock(mutex);
+
       if(path.get() != nullptr)
       {
-        if(path_reset)
+        auto elapsed_time = high_resolution_clock::now() -  cmd_start_time;
+        if(path->actions.empty())
+        {
+            ROS_INFO("Path empty.");
+            velocity_pair vel;
+            vel.left_velocity = 0.;
+            vel.right_velocity = 0.;
+            cmd_pub.publish(vel);
+            path.reset();
+
+        }
+        else if(path_reset)
         {
           cmd_pub.publish(path->actions[path_index]);
           cmd_start_time = high_resolution_clock::now();
           path_reset = false;
         }
-        auto elapsed_time = high_resolution_clock::now() -  cmd_start_time;
-        if(duration_cast<seconds>(elapsed_time).count() > path->actions[path_index].duration)
+        else if(duration_cast<seconds>(elapsed_time).count() > path->actions[path_index].duration)
         {
             if(path_index < path->actions.size() - 1)
             {
                 path_index++;
                 cmd_pub.publish(path->actions[path_index]);
+                ROS_INFO("Command Published.");
                 cmd_start_time = high_resolution_clock::now();
             } else {
                 velocity_pair vel;
