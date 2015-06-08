@@ -29,7 +29,7 @@ tf::TransformListener *tf_listener;
 set<string> frames_seen;
 
 // Map of topic : cloud
-map<string, PointCloud<PointXYZ>::ConstPtr> frames;
+map<string, PointCloud<PointXYZ> > frames;
 
 void publish_map()
 {
@@ -37,7 +37,7 @@ void publish_map()
 
     for(auto cloud : frames)
     {
-        *map_cloud += *(cloud.second);
+        *map_cloud += cloud.second;
     }
 
     _pointcloud_pub.publish(map_cloud);
@@ -58,7 +58,7 @@ void frame_callback(const PointCloud<PointXYZ>::ConstPtr &msg, const string &top
         point.z = 0;
     }
 
-    frames[topic] = msg;
+    frames[topic] = transformed;
 
     publish_map();
 }
