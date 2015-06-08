@@ -52,6 +52,9 @@ void filterOutDuplicates(PointCloud<PointXYZ>::Ptr cloud)
     for(auto idx : indecesToRemove)
         cloud->erase(cloud->points.begin() + idx);
 
+    /*
+     * This code suddenly started erasing all the points in the cloud during comp, so we wrote the woefully inefficient code above.
+     */
     /*VoxelGrid<PointXYZ> filter;
     filter.setInputCloud(cloud);
 
@@ -86,7 +89,7 @@ void filterOutDuplicates(PointCloud<PointXYZ>::Ptr cloud)
     map_cloud->swap(newcloud);*/
 }
 
-void nodeCallback(const PointCloud<PointXYZ>::ConstPtr &msg)
+void frame_callback(const PointCloud<PointXYZ>::ConstPtr &msg)
 {
     ROS_INFO("NODECALLBACK");
     PointCloud<PointXYZ> transformed;
@@ -140,7 +143,7 @@ int main(int argc, char** argv)
     for(auto topic : tokens)
     {
         ROS_INFO_STREAM("Mapper subscribing to " << topic);
-        subs.push_back(nh.subscribe(topic, 1, nodeCallback));
+        subs.push_back(nh.subscribe(topic, 1, frame_callback));
     }
 
     map_cloud->header.frame_id = "/map";

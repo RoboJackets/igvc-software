@@ -4,7 +4,7 @@
     <node name="pose_tracker" pkg="igvc" type="pose_tracker" output="screen" />
 
     <!-- Map Node -->
-    <node name="mapper" pkg="igvc" type="mapper" output="screen">
+    <node name="mapper" pkg="igvc" type="local_mapper" output="screen">
             <param name="topics" type="string" value="/scan/pointcloud /line_cloud"/>
     </node>
 
