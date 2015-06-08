@@ -3,6 +3,7 @@
 #include <igvc_msgs/velocity_pair.h>
 #include <mutex>
 #include <chrono>
+#include <igvc_msgs/lights.h>
 
 using namespace igvc_msgs;
 using namespace std;
@@ -34,7 +35,15 @@ int main(int argc, char** argv)
 
   ros::Publisher cmd_pub = n.advertise<velocity_pair>("/motors", 1);
 
+  ros::Publisher lights_pub = n.advertise<lights>("/lights", 1);
+
   ros::Subscriber path_sub = n.subscribe("/path", 1, newPath);
+
+  sleep(1);
+
+  lights lights_cmd;
+  lights_cmd.safety_flashing = true;
+  lights_pub.publish(lights_cmd);
 
   ros::Rate rate(120);
   while(ros::ok())
@@ -84,6 +93,10 @@ int main(int argc, char** argv)
 
     rate.sleep();
   }
+
+  lights_cmd.safety_flashing = false;
+  lights_pub.publish(lights_cmd);
+  ros::spinOnce();
 
   return 0;
 }
