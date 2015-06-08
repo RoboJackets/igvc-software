@@ -6,6 +6,7 @@
 #include "GraphSearch.hpp"
 #include <vector>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <functional>
 
 class IGVCSearchProblem : public SearchProblem<SearchLocation, SearchMove>
 {
@@ -17,7 +18,7 @@ public:
     double Threshold;
     double Speed;
     double TurningSpeed;
-    double DeltaT;
+    std::function<double(double)> DeltaT;
     double Baseline;
     double GoalThreshold;
     bool PointTurnsEnabled;
@@ -36,17 +37,17 @@ public:
 
     bool isGoal(SearchLocation state)
     {
-        return state.distTo(Goal) < GoalThreshold;
+        return state.distTo(Goal) < GoalThreshold || state.distTo(Start) > 10;
     }
 
     double getStepCost(SearchLocation, SearchMove action)
     {
         if(action.W <= 1e-10)
         {
-            return action.V * DeltaT;
+            return action.V * action.DeltaT;
         } else {
             double R = abs(action.V) / abs(action.W);
-            double theta = abs(action.W) * DeltaT;
+            double theta = abs(action.W) * action.DeltaT;
             return R*theta;
         }
     }
