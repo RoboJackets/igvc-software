@@ -7,6 +7,8 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
     std::list<SearchMove> acts;
 
+    auto deltat = DeltaT(state.distTo(Start));
+
     if(Map == nullptr)
         return acts;
 
@@ -18,7 +20,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     double Wmax =  MaximumOmega;
     for(double W = Wmin; W <= Wmax; W+=delta)
     {
-        SearchMove move(Speed, W, DeltaT);
+        SearchMove move(Speed, W, deltat);
         SearchLocation result = getResult(state, move);
         pcl::PointXYZ searchPoint(result.x, result.y,0);
         std::vector<int> pointIdxRadiusSearch;
@@ -32,7 +34,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     {
         for(double W = Wmin; W <= Wmax; W+=delta)
         {
-            SearchMove move = SearchMove(-Speed, W, DeltaT);
+            SearchMove move = SearchMove(-Speed, W, deltat);
             SearchLocation result = getResult(state, move);
             pcl::PointXYZ searchPoint = pcl::PointXYZ(result.x, result.y,0);
             std::vector<int> pointIdxRadiusSearch;
@@ -44,7 +46,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
         }
     }
     if(PointTurnsEnabled){
-        SearchMove move(0, TurningSpeed, DeltaT);
+        SearchMove move(0, TurningSpeed, deltat);
         SearchLocation result = getResult(state, move);
         pcl::PointXYZ searchPoint(result.x, result.y,0);
         std::vector<int> pointIdxRadiusSearch;
@@ -53,7 +55,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
         {
             acts.push_back(move);
         }
-        move = SearchMove(0, -TurningSpeed, DeltaT);
+        move = SearchMove(0, -TurningSpeed, deltat);
         result = getResult(state, move);
         searchPoint = pcl::PointXYZ(result.x, result.y,0);
         pointIdxRadiusSearch.clear();
@@ -78,7 +80,7 @@ SearchLocation IGVCSearchProblem::getResult(SearchLocation state, SearchMove act
         double ICCy = state.y - ( R * sin(M_PI - state.theta) );
         using namespace Eigen;
         Matrix3d T;
-        double wdt = w*DeltaT;
+        double wdt = w*action.DeltaT;
         T << cos(wdt), sin(wdt), 0, -sin(wdt), cos(wdt), 0, 0, 0, 1;
         Vector3d a(state.x - ICCx, state.y - ICCy, state.theta);
         Vector3d b = T*a;
@@ -96,8 +98,8 @@ SearchLocation IGVCSearchProblem::getResult(SearchLocation state, SearchMove act
     else
     {
         result.theta = state.theta;
-        result.x = state.x + ( cos(M_PI_2 - result.theta) * action.V * DeltaT );
-        result.y = state.y + ( sin(M_PI_2 - result.theta) * action.V * DeltaT );
+        result.x = state.x + ( cos(M_PI_2 - result.theta) * action.V * action.DeltaT );
+        result.y = state.y + ( sin(M_PI_2 - result.theta) * action.V * action.DeltaT );
     }
     return result;
 }

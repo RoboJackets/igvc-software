@@ -93,7 +93,9 @@ int main(int argc, char** argv)
     search_problem.Threshold = 0.5;
     search_problem.Speed = 1.0;
     search_problem.Baseline = baseline;
-    search_problem.DeltaT = 1.0;
+    search_problem.DeltaT = [](double distToStart)->double {
+        return 0.66*(log2(distToStart + 1) + 0.1);
+    };
     search_problem.MinimumOmega = -0.6;
     search_problem.MaximumOmega = 0.61;
     search_problem.DeltaOmega = 0.5;
