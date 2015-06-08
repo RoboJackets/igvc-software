@@ -39,15 +39,13 @@ int main(int argc, char** argv)
 
   ros::Subscriber path_sub = n.subscribe("/path", 1, newPath);
 
-  sleep(1);
-
   lights lights_cmd;
   lights_cmd.safety_flashing = true;
-  lights_pub.publish(lights_cmd);
 
   ros::Rate rate(120);
   while(ros::ok())
   {
+    lights_pub.publish(lights_cmd);
     ros::spinOnce();
 
     { //scope for mutex lock
@@ -93,10 +91,6 @@ int main(int argc, char** argv)
 
     rate.sleep();
   }
-
-  lights_cmd.safety_flashing = false;
-  lights_pub.publish(lights_cmd);
-  ros::spinOnce();
 
   return 0;
 }

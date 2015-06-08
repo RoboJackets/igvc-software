@@ -56,7 +56,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     // 3. A section of a line has two other line sections adjascent to it
     // 4. We know roughly how wide a line is going to be
 
-    const int linewidthpixels = 11;
+    const int linewidthpixels = 13;
     const int edgethreshold = 15;
 
     Mat grnd = (cv_ptr->image).clone();

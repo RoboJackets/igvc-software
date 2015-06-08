@@ -6,9 +6,12 @@
 
 igvc_msgs::lights state;
 
+ros::Time lastCmdTime;
+
 void lights_callback(const igvc_msgs::lightsConstPtr &msg)
 {
     state = *msg;
+    lastCmdTime = ros::Time::now();
 }
 
 int main(int argc, char** argv)
@@ -38,6 +41,8 @@ int main(int argc, char** argv)
     ros::Rate rate(10);
     while(ros::ok() && port.isOpen())
     {
+        if( (ros::Time::now() - lastCmdTime).toSec() > 2.0)
+            state.safety_flashing = false;
         unsigned char msg[12] = {2,
                          state.safety_flashing,
                          state.underglow_color[0],
@@ -73,6 +78,7 @@ int main(int argc, char** argv)
         }
 
         rate.sleep();
+        ros::spinOnce();
     }
 
     return 0;

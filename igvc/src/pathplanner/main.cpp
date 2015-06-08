@@ -26,6 +26,8 @@ IGVCSearchProblem search_problem;
 
 mutex planning_mutex;
 
+bool received_waypoint = false;
+
 void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
 {
     lock_guard<mutex> lock(planning_mutex);
@@ -47,9 +49,10 @@ void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
     lock_guard<mutex> lock(planning_mutex);
-    cout << "Waypoing received." << endl;
     search_problem.Goal.x = msg->point.x;
     search_problem.Goal.y = msg->point.y;
+    cout << "Waypoing received. " << search_problem.Goal.x << ", " << search_problem.Goal.y << endl;
+    received_waypoint = true;
 }
 
 void expanded_callback(const set<SearchLocation> &expanded)
@@ -86,14 +89,14 @@ int main(int argc, char** argv)
     double baseline = 0.93;
 
     search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
-    search_problem.GoalThreshold = 0.5;
-    search_problem.Threshold = 0.65;
-    search_problem.Speed = 0.35;
+    search_problem.GoalThreshold = 1.0;
+    search_problem.Threshold = 0.5;
+    search_problem.Speed = 1.0;
     search_problem.Baseline = baseline;
-    search_problem.DeltaT = 0.75;
-    search_problem.MinimumOmega = -0.41;
-    search_problem.MaximumOmega = 0.41;
-    search_problem.DeltaOmega = 0.2;
+    search_problem.DeltaT = 1.0;
+    search_problem.MinimumOmega = -0.6;
+    search_problem.MaximumOmega = 0.61;
+    search_problem.DeltaOmega = 0.5;
     search_problem.PointTurnsEnabled = false;
     search_problem.ReverseEnabled = false;
 
@@ -107,7 +110,7 @@ int main(int argc, char** argv)
          * Long paths take forever to compute, and will freeze up this node.
          */
         auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal);
-        if(distance_to_goal == 0 /*|| distance_to_goal > 30*/)
+        if(!received_waypoint || distance_to_goal == 0 || distance_to_goal > 60)
             continue;
 
         planning_mutex.lock();
@@ -119,6 +122,8 @@ int main(int argc, char** argv)
             nav_msgs::Path disp_path_msg;
             disp_path_msg.header.stamp = ros::Time::now();
             disp_path_msg.header.frame_id = "map";
+            if(path.getStates()->empty())
+                path.getStates()->push_back(search_problem.Start);
             for(auto loc : *(path.getStates()))
             {
                 geometry_msgs::PoseStamped pose;
