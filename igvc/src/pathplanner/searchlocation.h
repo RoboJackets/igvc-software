@@ -8,7 +8,7 @@ class SearchLocation
 public:
     float x, y, theta;
 
-    static constexpr float sameness_threshold = 0.1;
+    static constexpr float sameness_threshold = 0.005;
 
     SearchLocation() { }
     SearchLocation(float _x, float _y, float _theta);

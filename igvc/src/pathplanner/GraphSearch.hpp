@@ -147,7 +147,8 @@ public:
             frontier.push(p);
         }
 
-        while(!frontier.empty())
+        auto iteration = 0;
+        while(!frontier.empty() && iteration < 6000)
         {
             Path<StateType, ActionType> path = frontier.top();
             frontier.pop();
@@ -172,6 +173,7 @@ public:
                     frontier.push(newPath);
                 }
             }
+            iteration++;
             expandedCallback(expanded);
         }
 

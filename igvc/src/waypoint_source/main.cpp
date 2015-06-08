@@ -98,7 +98,6 @@ double distanceBetweenPoints(const Point &p1, const Point &p2)
 
 void positionCallback(const geometry_msgs::PoseStampedConstPtr& msg)
 {
-    cerr << "Waypoint Source called back" << endl;
     lock_guard<mutex> lock(current_mutex);
     PointStamped cur = current_waypoint;
     cur.point.x -= map_origin.x;
@@ -107,8 +106,6 @@ void positionCallback(const geometry_msgs::PoseStampedConstPtr& msg)
     if(distanceBetweenPoints(msg->pose.position, cur.point) < 1.0)
     {
         // advance to next waypoint.
-        ROS_INFO("NEXT WAYPOINT **********");
-        cerr << "Waypoint Source thinks its close to waypoint" << endl;
         current_waypoint = waypoints.front();
         if(waypoints.size() > 1) {
             waypoints.erase(waypoints.begin());
@@ -152,7 +149,6 @@ int main(int argc, char** argv)
         Rate rate(1); // 1 Hz
         while(ros::ok())
         {
-            ROS_INFO("publishing current waypoint...");
             {
                 lock_guard<mutex> lock(current_mutex);
                 auto waypoint_for_pub = current_waypoint;

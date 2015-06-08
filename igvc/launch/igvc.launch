@@ -8,7 +8,7 @@
     <include file="$(find igvc)/launch/robot_state_publisher.launch" />
     
     <!-- LIGHT CONTROLLER -->
-    <node name="light_controller" pkg="igvc" type="light_controller" />
+    <node name="light_controller" pkg="igvc" type="light_controller" output="screen"/>
     
     <!-- MOTOR CONTROLLER -->
     <node name="motor_controller" pkg="igvc" type="motor_controller" />
