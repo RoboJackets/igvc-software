@@ -16,24 +16,37 @@ laser_geometry::LaserProjection projection;
 
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
+    sensor_msgs::LaserScan scanData = *msg;
+
+    auto rangeIsValid = [&scanData](float range) {
+        return !isnan(range) && range > scanData.range_min && range < scanData.range_max;
+    };
+
+    for(auto i = 0; i < scanData.ranges.size(); i++)
+    {
+        float& range = scanData.ranges[i];
+        if(range > scanData.range_max || range < scanData.range_min)
+            continue;
+        // Too close
+        if(range < 0.75)
+            range = scanData.range_max + 1;
+        // Too far
+        else if(range > 4.0)
+            range = scanData.range_max + 1;
+        // No valid neighboors
+        else if((i == 0 || !rangeIsValid(scanData.ranges[i-1])) && (i == (scanData.ranges.size()-1) || !rangeIsValid(scanData.ranges[i+1])))
+            range = scanData.range_max + 1;
+        // No close neighboors
+        else if((i == 0 || abs(scanData.ranges[i-1] - range) > 0.2) && (i == (scanData.ranges.size()-1) || abs(scanData.ranges[i+1] - range) > 0.2))
+            range = scanData.range_max + 1;
+    }
 
     sensor_msgs::PointCloud2 cloud;
-    projection.projectLaser(*msg, cloud);
+    projection.projectLaser(scanData, cloud);
     cloud.header.frame_id = "/lidar";
 
     PointCloud<PointXYZ>::Ptr cloud_for_pub(new PointCloud<PointXYZ>());
     fromROSMsg(cloud, *cloud_for_pub);
-
-    {
-        KdTreeFLANN<PointXYZ> kdtree;
-        kdtree.setInputCloud(cloud_for_pub);
-        vector<int> pointIndeces;
-        vector<float> squaredDistances;
-        kdtree.radiusSearch(PointXYZ(0,0,0), 1.0, pointIndeces, squaredDistances);
-        std::sort(pointIndeces.begin(), pointIndeces.end(), std::greater<int>()); // sort into descending order
-        for(auto idx : pointIndeces)
-            cloud_for_pub->erase(cloud_for_pub->points.begin() + idx);
-    }
 
     _pointcloud_pub.publish(*cloud_for_pub);
 }
