@@ -136,7 +136,7 @@ void LineDetector::RemoveNonMax(vector<Mat>& images) {
     for(Mat& r : images) {
         r = r - (r != maxRes); // FICME: What? Image = Image - bool?
     }
-}`
+}
 
 typedef struct Node {
     shared_ptr<struct Node> prev;
