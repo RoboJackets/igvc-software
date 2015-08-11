@@ -11,8 +11,9 @@ using namespace cv;
 
 Mat DetectLines(Mat& source_image, int lineThickness, int lineLength, int lineAnchor, int lineContinue);
 Mat WhitenessFilter(Mat& hsv_image);
-vector<Mat> PassFilters(Mat image, vector<Mat> kernals);
+vector<Mat> PassFilters(Mat image, vector<Mat> kernels);
 vector<Mat> MultiplyByComplements(vector<Mat> images, vector<Mat> complements);
+void initLineDetection();
 
 // 4 sliders
     // line thickness in pixels
@@ -31,6 +32,8 @@ int lineLength;
 const char* windowName = "LineDetection";
 
 Mat src_img;
+vector<Mat> kernels;
+vector<Mat> kernelComplements;
 
 void SliderCallback(int, void*) {
     cout << "Calling DetectLines" << endl;
@@ -42,6 +45,8 @@ int main(int argc, char* argv[]) {
     if(argc != 2) {cout << "ERROR, 1 argument expected, the file path of an image" << endl; return -1;}
     src_img = imread(argv[1]);
     if(!src_img.data) {cout << "ERROR, unable to load image: " << argv[1] << endl; return -1;}
+
+    initLineDetection();
 
     // Initialize Variables
     lineThickness = 0;
@@ -67,24 +72,20 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-Mat DetectLines(Mat& source_image, int lineThickness, int lineLength, int lineAnchor, int lineContinue) {
-    bool init = true;
-    static vector<Mat> kernals;
-    static vector<Mat> kernalComplements;
-    if(init) {
-        cout << "DetectLines::Initing" << endl;
-        float karray[2][9][9] = {
-                {
-                        {-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1, -1},
-                        {-1,   -1,   -1,   -1,   -1,   -1,   -1, -1, -1},
-                        {-1,   -1,   -1,   -1,   -1,   -1, -1, -1, -1},
-                        {1,    1,    1,    1,    1, 1, 1, 1, 1},
-                        {1,    1,    1,    1, 1, 1, 1, 1,  1},
-                        {1,    1,    1, 1, 1, 1,  1, 1, 1},
-                        {0,    0, 0, 0,  0, 0, 0, 0, 0},
-                        {0, 0,  0, 0, 0, 0, 0, 0, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 0, 0}
-                },
+void initLineDetection() {
+  cout << "DetectLines::Initing" << endl;
+  float karray[2][9][9] = {
+      {
+          {-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1, -1},
+          {-1,   -1,   -1,   -1,   -1,   -1,   -1, -1, -1},
+          {-1,   -1,   -1,   -1,   -1,   -1, -1, -1, -1},
+          {1,    1,    1,    1,    1, 1, 1, 1, 1},
+          {1,    1,    1,    1, 1, 1, 1, 1,  1},
+          {1,    1,    1, 1, 1, 1,  1, 1, 1},
+          {0,    0, 0, 0,  0, 0, 0, 0, 0},
+          {0, 0,  0, 0, 0, 0, 0, 0, 0},
+          {0, 0, 0, 0, 0, 0, 0, 0, 0}
+      },
 //                {
 //                        {-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1, -1},
 //                        {-1,   -1,   -1,   -1,   -1,   -1,   -1, 0,  1},
@@ -96,54 +97,57 @@ Mat DetectLines(Mat& source_image, int lineThickness, int lineLength, int lineAn
 //                        {1, .5, 0, 0, 0, 0, 0, 0, 0},
 //                        {0, 0, 0, 0, 0, 0, 0, 0, 0}
 //                },
-                {
-                        {-.89, -.89, -.89, -.89, -.89, -.89, -.89, 1,  1},
-                        {-.89, -.89, -.89, -.89, -.89, -.89, 1,  1,  1},
-                        {-.89, -.89, -.89, -.89, -.89, 1,  1,  1,  0},
-                        {-.89, -.89, -.89, -.89, 1, 1, 1, 0, 0},
-                        {-.89, -.89, -.89, 1, 1, 1, 0, 0,  0},
-                        {-.89, -.89, 1, 1, 1, 0,  0, 0, 0},
-                        {-.89, 1, 1, 1,  0, 0, 0, 0, 0},
-                        {1, 1,  1, 0, 0, 0, 0, 0, 0},
-                        {1, 1, 0, 0, 0, 0, 0, 0, 0}
-                }
-        };
+      {
+          {-.89, -.89, -.89, -.89, -.89, -.89, -.89, 1,  1},
+          {-.89, -.89, -.89, -.89, -.89, -.89, 1,  1,  1},
+          {-.89, -.89, -.89, -.89, -.89, 1,  1,  1,  0},
+          {-.89, -.89, -.89, -.89, 1, 1, 1, 0, 0},
+          {-.89, -.89, -.89, 1, 1, 1, 0, 0,  0},
+          {-.89, -.89, 1, 1, 1, 0,  0, 0, 0},
+          {-.89, 1, 1, 1,  0, 0, 0, 0, 0},
+          {1, 1,  1, 0, 0, 0, 0, 0, 0},
+          {1, 1, 0, 0, 0, 0, 0, 0, 0}
+      }
+  };
 
-        Mat kernal1(9, 9, CV_32FC1, karray[0]);
-        kernal1 /= 27;
-//        Mat kernal2(9, 9, CV_32FC1, karray[1]);
-//        kernal2 /= 25;
-        Mat kernal3(9, 9, CV_32FC1, karray[2]);
-        kernal3 /= 25;
+  cout << "m1" << endl;
 
-//        Mat kernal4 = kernal2.t();
-        Mat kernal5 = kernal1.t();
+  Mat kernel1(9, 9, CV_32FC1, karray[0]);
+  kernel1 /= 27;
+//        Mat kernel2(9, 9, CV_32FC1, karray[1]);
+//        kernel2 /= 25;
+  Mat kernel3(9, 9, CV_32FC1, karray[1]);
+  kernel3 /= 25;
 
-//        Mat kernal6;
-        Mat kernal7;
-//        Mat kernal8;
+//        Mat kernel4 = kernel2.t();
+  Mat kernel5 = kernel1.t();
 
-//        flip(kernal4, kernal6, 0);
-        flip(kernal3, kernal7, 0);
-//        flip(kernal2, kernal8, 0);
+//        Mat kernel6;
+  Mat kernel7;
+//        Mat kernel8;
 
-        kernals = {
-                kernal1,
-//                kernal2,
-                kernal3,
-//                kernal4,
-                kernal5,
-//                kernal6,
-                kernal7,
-//                kernal8
-        };
-        for(int i = 0; i < kernals.size(); i++) {
-            Mat kernalComplement;
-            flip(kernals[i], kernalComplement, -1);
-            kernalComplements.push_back(kernalComplement);
-        }
-        init = false;
-    }
+//        flip(kernel4, kernel6, 0);
+  flip(kernel3, kernel7, 0);
+//        flip(kernel2, kernel8, 0);
+
+  kernels = {
+      kernel1,
+//                kernel2,
+      kernel3,
+//                kernel4,
+      kernel5,
+//                kernel6,
+      kernel7,
+//                kernel8
+  };
+  for(size_t i = 0; i < kernels.size(); i++) {
+    Mat kernelComplement;
+    flip(kernels[i], kernelComplement, -1);
+    kernelComplements.push_back(kernelComplement);
+  }
+}
+
+Mat DetectLines(Mat& source_image, int lineThickness, int lineLength, int lineAnchor, int lineContinue) {
 
     // Resize the image such that the lines are approximitely 3 pixels wide
     cout << "DetectLines::Reducing Image" << endl;
@@ -159,15 +163,15 @@ Mat DetectLines(Mat& source_image, int lineThickness, int lineLength, int lineAn
     cout << "DetectLines::Filtering Whiteness" << endl;
     Mat whiteness_image = WhitenessFilter(hsv_image);
 
-    // Pass directional kernals over image
-    cout << "DetectLines::Filtering kernals" << endl;
-    vector<Mat> filterKernals = PassFilters(whiteness_image, kernals);
+    // Pass directional kernels over image
+    cout << "DetectLines::Filtering kernels" << endl;
+    vector<Mat> filterKernals = PassFilters(whiteness_image, kernels);
 
-    // Pass directional kernal complements over image (same edge, rotated 180 degrees, 3 pixels between edge and complement)
+    // Pass directional kernel complements over image (same edge, rotated 180 degrees, 3 pixels between edge and complement)
     cout << "DetectLines::Filtering complements" << endl;
-    vector<Mat> filterComplements = PassFilters(whiteness_image, kernalComplements);
+    vector<Mat> filterComplements = PassFilters(whiteness_image, kernelComplements);
 
-    // Multiply the results of kernal filter by its complement
+    // Multiply the results of kernel filter by its complement
     cout << "DetectLines::Multiplying Results" << endl;
     vector<Mat> geometricResults = MultiplyByComplements(filterKernals, filterComplements);
 
@@ -195,11 +199,11 @@ Mat WhitenessFilter(Mat& hsv_image) {
     return result;
 }
 
-vector<Mat> PassFilters(Mat image, vector<Mat> kernals) {
+vector<Mat> PassFilters(Mat image, vector<Mat> kernels) {
     vector<Mat> results;
-    for(int i = 0; i < kernals.size(); i++) {
+    for(size_t i = 0; i < kernels.size(); i++) {
         Mat result;
-        filter2D(image, result, -1, kernals[i]);
+        filter2D(image, result, -1, kernels[i]);
         results.push_back(result);
     }
 
@@ -208,7 +212,7 @@ vector<Mat> PassFilters(Mat image, vector<Mat> kernals) {
 
 vector<Mat> MultiplyByComplements(vector<Mat> images, vector<Mat> complements) {
     vector<Mat> results;
-    for(int i = 0; i < images.size(); i++) {
+    for(size_t i = 0; i < images.size(); i++) {
         Mat result = Mat::zeros(images[0].size(), CV_16UC1);
         result = images[i].mul(complements[i]);
         result.convertTo(result, CV_8UC1, 1.0/255);
