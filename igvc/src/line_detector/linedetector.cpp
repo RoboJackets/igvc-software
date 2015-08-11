@@ -31,13 +31,13 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 
     Mat grnd = (cv_ptr->image).clone();
     Mat dview_dst = (cv_ptr->image).clone();
-    Mat nature_dst = (cv_ptr->image).clone();
     Mat squish_dst = (cv_ptr->image).clone();
 
 // Squish
     resize(grnd, squish_dst, Size(3*grnd.cols/linewidthpixels, 3*grnd.rows/linewidthpixels), 0, 0, INTER_LANCZOS4);
 
 
+    // TODO: move these constant definitions outside of the callback.
     float karray[3][9][9] = {
             {
                     {-1, -1, -1, -1, -1, -1, -1, -1, -1},
@@ -72,6 +72,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
             }
     };
 
+    // TODO: Should also move these constant operations outside of the callback
     vector<Mat> kernals;
     Mat kernal1(9, 9, CV_32FC1, karray[0]);
     kernal1 /= 27;
@@ -80,6 +81,9 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     Mat kernal3(9, 9, CV_32FC1, karray[2]);
     kernal3 /= 25;
 
+    /*
+     * Why transpose kernel 2?
+     */
     Mat kernal4 = kernal2.t();
     Mat kernal5 = kernal1.t();
 
@@ -104,11 +108,8 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 
     vector<Mat> results = getGeometricMean(testimage, kernals);
 
-    Mat fadedimage = testimage/2;
-    Mat fin_img = results[0].clone();
-
     subtractOrthog(results);
-    fin_img = results[0].clone();
+    Mat fin_img = results[0].clone();
 
     RemoveNonMax(results);
 
@@ -133,9 +134,9 @@ void LineDetector::RemoveNonMax(vector<Mat>& images) {
         maxRes = max(maxRes, r);
     }
     for(Mat& r : images) {
-        r = r - (r != maxRes);
+        r = r - (r != maxRes); // FICME: What? Image = Image - bool?
     }
-}
+}`
 
 typedef struct Node {
     shared_ptr<struct Node> prev;
@@ -296,8 +297,7 @@ vector<Mat> LineDetector::getGeometricMean(Mat& image, vector<Mat> &kernals) {
     vector<Mat> results;
 
     for(size_t i = 0; i < kernals.size(); i++) {
-        Mat kernal2 = kernals[i].clone();
-        Mat normmat;
+        Mat kernal2;
         flip(kernals[i], kernal2, -1);
 
         filtered1 = applyFilter(image, kernals[i]);
@@ -357,62 +357,6 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
 	  _filt_img = _it.advertise("/filt_img", 1);
     _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
 
-}
-
-/**
- *  \brief LineDetector::detectObstacle detects orange and bright white obstacles
- *  \param col the column of the left of the obstacle
- */
-void LineDetector::detectObstacle(int row, int col, cv::Mat* dst){
-    Vec3b p = dst->at<Vec3b>(row,col);
-    int row2 = row;
-    int col2 = col;
-
-    //While the pixel is still orange, turn it black
-    //Then on to the next one, by row
-    while (p[2] > 100 /*&& (p[1] < 150 || p[1] > 250)*/){
-        dst->at<Vec3b>(row2, col)[0] = 0;
-        dst->at<Vec3b>(row2, col)[1] = 0;
-        dst->at<Vec3b>(row2, col)[2] = 0;
-        p = dst->at<Vec3b>(++row2, col);
-    }
-    p = dst->at<Vec3b>(row,col);
-
-    //While the pixel is still orange, turn it black
-    //Then on to the next one, by column
-    while (p[2] > 100 /*&& (p[1] < 150 || p[1] > 250)*/){
-        dst->at<Vec3b>(row, col2)[0] = 0;
-        dst->at<Vec3b>(row, col2)[1] = 0;
-        dst->at<Vec3b>(row, col2)[2] = 0;
-        p = dst->at<Vec3b>(row, ++col2);
-    }
-
-    //Turn everything in that block we just found black
-    for(int i = row+1; i<row2;i++){
-        for (int j = col+1; j<col2; j++){
-            dst->at<Vec3b>(i,j)[0] = 0;
-            dst->at<Vec3b>(i,j)[1] = 0;
-            dst->at<Vec3b>(i,j)[2] = 0;
-        }
-    }
-}
-
-/**
- *  \brief LineDetector::blackoutSection turns a section of the image black
- *  \param rowl the lower row bound
- *  \param rowu the upper row bound
- *  \param coll the left column bound
- *  \param colu the right column bound
- */
-void LineDetector::blackoutSection(int rowl, int rowu, int coll, int colu){
-
-    for (int i=rowl;i<=rowu;i++){
-        for (int j = coll; j<=colu; j++){
-            dst->at<Vec3b>(i,j)[0] = 0;
-            dst->at<Vec3b>(i,j)[1] = 0;
-            dst->at<Vec3b>(i,j)[2] = 0;
-        }
-    }
 }
 
 PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){

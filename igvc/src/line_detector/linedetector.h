@@ -27,10 +27,6 @@ public:
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
-
-    void blackoutSection(int rowl, int rowu, int coll, int colu);
-
-    void detectObstacle(int i, int j, cv::Mat* dst);
     
     void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
