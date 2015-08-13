@@ -9,7 +9,7 @@
 #include <iostream>
 #include <vector>
 
-#define KERNAL_COUNT 4
+#define KERNAL_COUNT 8
 
 using namespace std;
 using namespace cv;
@@ -84,7 +84,7 @@ void initLineDetection() {
     lineAnchor = 1;
     lineContinue = 20;
     lineLength = 1;
-    float karray[2][9][9] = {
+    float karray[3][9][9] = {
             {
                     {-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1, -1},
                     {-1,   -1,   -1,   -1,   -1,   -1,   -1, -1, -1},
@@ -96,17 +96,17 @@ void initLineDetection() {
                     {0, 0, 0, 0, 0, 0, 0, 0, 0},
                     {0, 0, 0, 0, 0, 0, 0, 0, 0}
             },
-//                {
-//                        {-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1, -1},
-//                        {-1,   -1,   -1,   -1,   -1,   -1,   -1, 0,  1},
-//                        {-1,   -1,   -1,   -1,   -1,   0,  1,  1,  1},
-//                        {-1,   -1,   -1,   0,    1, 1, 1, 1, 1},
-//                        {-1,   0,    1,    1, 1, 1, 1, .5, 0},
-//                        {1,    1,    1, 1, 1, .5, 0, 0, 0},
-//                        {1,    1, 1, .5, 0, 0, 0, 0, 0},
-//                        {1, .5, 0, 0, 0, 0, 0, 0, 0},
-//                        {0, 0, 0, 0, 0, 0, 0, 0, 0}
-//                },
+                {
+                        {-1,   -1,   -1,   -1,   -1,   -1,   -1,   -1, -1},
+                        {-1,   -1,   -1,   -1,   -1,   -1,   -1, 0,  1},
+                        {-1,   -1,   -1,   -1,   -1,   0,  1,  1,  1},
+                        {-1,   -1,   -1,   0,    1, 1, 1, 1, 1},
+                        {-1,   0,    1,    1, 1, 1, 1, .5, 0},
+                        {1,    1,    1, 1, 1, .5, 0, 0, 0},
+                        {1,    1, 1, .5, 0, 0, 0, 0, 0},
+                        {1, .5, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 0, 0}
+                },
             {
                     {-.89, -.89, -.89, -.89, -.89, -.89, -.89, 1,  1},
                     {-.89, -.89, -.89, -.89, -.89, -.89, 1,  1,  1},
@@ -122,30 +122,30 @@ void initLineDetection() {
 
     Mat kernel1(9, 9, CV_32FC1, karray[0]);
     kernel1 /= 27;
-    //        Mat kernel2(9, 9, CV_32FC1, karray[1]);
-    //        kernel2 /= 25;
-    Mat kernel3(9, 9, CV_32FC1, karray[1]);
+    Mat kernel2(9, 9, CV_32FC1, karray[1]);
+    kernel2 /= 25;
+    Mat kernel3(9, 9, CV_32FC1, karray[2]);
     kernel3 /= 25;
 
-    //        Mat kernel4 = kernel2.t();
+    Mat kernel4 = kernel2.t();
     Mat kernel5 = kernel1.t();
 
-    //        Mat kernel6;
+    Mat kernel6;
     Mat kernel7;
-    //        Mat kernel8;
+    Mat kernel8;
 
-    //        flip(kernel4, kernel6, 0);
+    flip(kernel4, kernel6, 0);
     flip(kernel3, kernel7, 0);
-    //        flip(kernel2, kernel8, 0);
+    flip(kernel2, kernel8, 0);
 
     kernels[0] = kernel1.clone();
-    //                kernel2,
-    kernels[1] = kernel3.clone();
-    //                kernel4,
-    kernels[2] = kernel5.clone();
-    //                kernel6,
-    kernels[3] = kernel7.clone();
-    //                kernel8
+    kernels[1] = kernel2.clone();
+    kernels[2] = kernel3.clone();
+    kernels[3] = kernel4.clone();
+    kernels[4] = kernel5.clone();
+    kernels[5] = kernel6.clone();
+    kernels[6] = kernel7.clone();
+    kernels[7] = kernel8.clone();
 
     for (int i = 0; i < KERNAL_COUNT; i++) {
         Mat kernelComplement;
