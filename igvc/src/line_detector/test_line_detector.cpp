@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
     initLineDetection();
 
     // Create the window
-    namedWindow(windowName, 1);
+    namedWindow(windowName, WINDOW_NORMAL);
 
     // Add the sliders
     createTrackbar("Line Thickness (pixels)", windowName, &lineThickness, lineThickness_slider_max, SliderCallback);
