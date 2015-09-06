@@ -50,6 +50,7 @@
   <run_depend>laser_geometry</run_depend>
   <run_depend>stereo_image_proc</run_depend>
   <run_depend>sick_tim</run_depend>
+  <run_depend>camera_info_manager</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
