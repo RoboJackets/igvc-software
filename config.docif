@@ -51,7 +51,7 @@ GH_EMAIL_VAR="GIT_EMAIL"
 # Reccomended to leave as default (not set)
 # This will act as the 'current directory' within the project
 # This will need to be changed in the dockerfile as well to take effect. (use a custom one!)
-# DOCKER_PROJECT_ROOT="/home/developer/project"
+DOCKER_PROJECT_ROOT="/home/developer/project"
 
 # The git clone root INSIDE THE DOCKER CONTAINER
 GIT_CLONE_ROOT="${DOCKER_PROJECT_ROOT}/src"
@@ -82,6 +82,7 @@ SETUP_SHA_FILES=()
 SETUP_SHA_FILES+=("./.gitmodules")
 SETUP_SHA_FILES+=("./config.docif")
 SETUP_SHA_FILES+=("./util/indigo-setup.sh")
+
 
 # @REQUIRED
 # Commands to run when testing. Each index will have it's own status token
