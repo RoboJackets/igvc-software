@@ -12,9 +12,4 @@
 
     <node name="webcam" pkg="igvc" type="webcam">
     </node>
-
-    <node pkg="image_proc" type="image_proc" name="image_proc">
-    <remap from="image_raw" to="usb_cam/image_raw" />
-    <remap from="camera_info" to="usb_cam/camera_info" />
-    </node>
 </launch>
