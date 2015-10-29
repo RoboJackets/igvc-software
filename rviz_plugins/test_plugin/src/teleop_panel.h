@@ -35,7 +35,7 @@
 
 class QLineEdit;
 
-namespace rviz_plugin_tutorials
+namespace teleop
 {
 
 class DriveWidget;
