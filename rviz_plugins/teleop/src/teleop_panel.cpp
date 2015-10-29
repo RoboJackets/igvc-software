@@ -41,7 +41,7 @@
 #include "drive_widget.h"
 #include "teleop_panel.h"
 
-namespace rviz_plugin_tutorials
+namespace teleop
 {
 
 // BEGIN_TUTORIAL
@@ -64,8 +64,8 @@ TeleopPanel::TeleopPanel( QWidget* parent )
   // Next we lay out the "output topic" text entry field using a
   // QLabel and a QLineEdit in a QHBoxLayout.
   QHBoxLayout* topic_layout = new QHBoxLayout;
-  topic_layout->addWidget( new QLabel( "Output Topic:" ));
   output_topic_editor_ = new QLineEdit;
+  topic_layout->addWidget( output_topic_editor_ );
   topic_layout->addWidget( output_topic_editor_ );
 
   // Then create the control widget.
@@ -196,5 +196,5 @@ void TeleopPanel::load( const rviz::Config& config )
 // loadable by pluginlib::ClassLoader must have these two lines
 // compiled in its .cpp file, outside of any namespace scope.
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(rviz_plugin_tutorials::TeleopPanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(teleop::TeleopPanel,rviz::Panel )
 // END_TUTORIAL

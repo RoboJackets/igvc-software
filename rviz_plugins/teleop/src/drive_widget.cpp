@@ -35,7 +35,7 @@
 
 #include "drive_widget.h"
 
-namespace rviz_plugin_tutorials
+namespace teleop
 {
 
 // BEGIN_TUTORIAL
