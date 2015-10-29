@@ -31,7 +31,7 @@
 
 #include <QWidget>
 
-namespace rviz_plugin_tutorials
+namespace teleop
 {
 
 // BEGIN_TUTORIAL
