@@ -24,15 +24,16 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     Mat image = (cv_ptr->image).clone();
 
-    // All of my code goes here
-    Mat img_overhead = imread("overhead.jpg", CV_LOAD_IMAGE_GRAYSCALE );
-    Mat img_normal = imread("normal.jpg", CV_LOAD_IMAGE_GRAYSCALE );
-    
+    // All of our code goes here
+    Mat img_overhead = imread("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/overhead.jpg", CV_LOAD_IMAGE_COLOR);
+    Mat img_normal = imread("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/normal.jpg", CV_LOAD_IMAGE_COLOR);
+
+
 
     // namedWindow("calcHist Demo", CV_WINDOW_AUTOSIZE );
     // imshow("calcHist Demo", histImage );
 
-    cv_ptr->image = img_normal;
+    cv_ptr->image = img_overhead;
     _new_img.publish(cv_ptr->toImageMsg());
 }
 
