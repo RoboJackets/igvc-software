@@ -17,3 +17,6 @@ Possible solutions:
 	
 Things to be aware of:
 	path is constantly being replanning at the moment (order of miliseconds)
+
+
+
