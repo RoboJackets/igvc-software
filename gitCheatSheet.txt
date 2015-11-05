@@ -1,0 +1,13 @@
+git pull - pull most recent code
+git status - check status of changed files
+git add . - add all currently modified and created files to a list to be commited
+git commit -m "MESSAGE HERE" - pack the added files from the above commant into a commit with a message of what has changed
+git push - push the commit package to the remote source (github.com)
+
+When you want to start making changes make sure to "git pull" so you're up to date with code changes from other membersgit pull - pull most recent code
+git status - check status of changed files
+git add . - add all currently modified and created files to a list to be commited
+git commit -m "MESSAGE HERE" - pack the added files from the above commant into a commit with a message of what has changed
+git push - push the commit package to the remote source (github.com)
+
+When you want to start making changes make sure to "git pull" so you're up to date with code changes from other members
