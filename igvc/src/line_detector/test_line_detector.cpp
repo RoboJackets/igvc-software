@@ -194,6 +194,25 @@ void DetectLines(int lineThickness, int lineLength, int lineAnchor, int lineCont
         threshold(kernelResults[i], kernelResults[i], ((float)lineContinue*lineContinue)/255, 255, CV_THRESH_BINARY);
         bitwise_or(working, kernelResults[i], working);
     }
+	
+	// Hough Probabilistic Line Detection
+	int erosion_type = MORPH_CROSS;
+	int erosion_size = 1;
+	Mat element = getStructuringElement( erosion_type,
+                                       Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+                                       Point( erosion_size, erosion_size ) );
+	erode(working, working, element);
+	dilate(working, working, element);
+
+	vector<Vec4i> lines;
+	HoughLinesP(working, lines, 1, CV_PI/180, 80, (double) lineLength, (double) lineAnchor);
+	cvtColor(working, working, CV_GRAY2BGR);
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+        line( working, Point(lines[i][0], lines[i][1]),
+            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
+    }
+
     resize(working, dst_img, src_img.size(), src_img.type());
     //cerr << "lineContinue: " << lineContinue << endl;
 }
