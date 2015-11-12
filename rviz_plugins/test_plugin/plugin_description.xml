@@ -1,0 +1,9 @@
+<library path="lib/libtest_plugin">
+  <class name="teleop/Teleop"
+         type="teleop::TeleopPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget allowing simple diff-drive style robot base control.
+    </description>
+  </class>
+</library>
