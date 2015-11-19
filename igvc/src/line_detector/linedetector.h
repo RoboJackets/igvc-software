@@ -35,9 +35,8 @@ private:
     void initLineDetection();
 
     void DetectLines(int lineThickness, int lineLength, int lineAnchor, int lineContinue);
-    void WhitenessFilter(Mat& hsv_image, Mat& result);
-    void MultiplyByComplements(Mat* images, Mat* complements, Mat* results);
-    void initLineDetection();
+    void WhitenessFilter(cv::Mat& hsv_image, cv::Mat& result);
+    void MultiplyByComplements(cv::Mat* images, cv::Mat* complements, cv::Mat* results);
 
     // line thickness in pixels
     int lineThickness;
@@ -52,6 +51,7 @@ private:
 
     cv::Mat src_img;
     cv::Mat dst_img;
+    cv::Mat fin_img;
     cv::Mat kernels[KERNAL_COUNT];
     cv::Mat kernelComplements[KERNAL_COUNT];
     cv::Mat working;
@@ -62,7 +62,7 @@ private:
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
 
-    void EnforceContinuity(std::vector<cv::Mat>& directions, cv::Mat& out);
+    void EnforceContinuity(cv::Mat* directions, cv::Mat& out);
 
     // ROS COMMUNICATION
     image_transport::ImageTransport _it;

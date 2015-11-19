@@ -21,6 +21,7 @@ constexpr double radians(double degrees)
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cerr << "CALLBACK CALLED" << endl;
     cv_ptr = cv_bridge::toCvCopy(msg, "");
+    src_img = cv_ptr->image;
 
     // What separates lines from other objects?
     // 1. Lines are whiter than their surroundings
@@ -29,9 +30,9 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     // 4. We know roughly how wide a line is going to be
 
     DetectLines(lineThickness, lineLength, lineAnchor, lineContinue);
-    EnforceContinuity(results, fin_img);
+    EnforceContinuity(kernelResults, fin_img);
 
-    resize(fin_img, fin_img, Size(dview_dst.cols, dview_dst.rows), 0, 0, INTER_LANCZOS4);
+    resize(fin_img, fin_img, Size(src_img.cols, src_img.rows), 0, 0, INTER_LANCZOS4);
     cloud = toPointCloud(fin_img);
     _line_cloud.publish(cloud);
 }
@@ -49,19 +50,19 @@ typedef struct Node {
     }
 } Node;
 
-void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
+void LineDetector::EnforceContinuity(Mat* directions, Mat& out) {
     cerr << "Enforcing Continuity" << endl;
     unsigned int iterations = 300;
     int minpathlength = 20;
     Mat gradient = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC1);
     Mat fin_img = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC3);
-    for(size_t i = 0; i < directions.size(); i++) {
+    for(size_t i = 0; i < KERNAL_COUNT; i++) {
         Mat bgr[3];
         split(directions[i], bgr);
         bitwise_and(bgr[0], (0b00000001 << i), bgr[0]);
         bitwise_or(gradient, bgr[0], gradient);
     }
-
+    cerr << "Reached checkpoint 1" << endl;
     auto getneighbors = [](shared_ptr<Node> n, Mat& gradient) {
         auto similarbits = [](unsigned char a, unsigned char b) {
             return ((a == b) | (a == b << 1) | (a == b >> 1) | (129 == (a | b)));
@@ -130,6 +131,7 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
 
         return neighbors;
     };
+    cerr << "Reached checkpoint 2" << endl;
 
     Mat randlineinds;
 
@@ -137,6 +139,7 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
 
     randShuffle(randlineinds);
 
+    cerr << "Reached checkpoint 3" << endl;
     for(size_t i = 0; i < iterations && i < randlineinds.total(); i++) {
 
         Mat gradientcopy = gradient.clone();
@@ -188,14 +191,12 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
         split(fin_img, channels);
         out = channels[0];
     }
+    cerr << "Reached checkpoint 4" << endl;
 }
 
 LineDetector::LineDetector(ros::NodeHandle &handle)
-    : max_elem(2),
-      max_kernel_size(2),
-      gaussian_size(7),
-      _it(handle),
-      tf_listener(handle)
+      : _it(handle)
+      , tf_listener(handle)
 {
     _src_img = _it.subscribe("/left/image_rect_color", 1, &LineDetector::img_callback, this);
 	  _filt_img = _it.advertise("/filt_img", 1);
@@ -207,7 +208,7 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
 PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", "/camera", ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
     double roll, pitch, yaw;
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
     auto origin_z = transform.getOrigin().getZ();
@@ -236,7 +237,7 @@ PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
 	return cloud;
 }
 
-void initLineDetection() {
+void LineDetector::initLineDetection() {
     //cerr << "DetectLines::Initing" << endl;
     lineThickness = 20;
     lineAnchor = 1;
@@ -313,8 +314,7 @@ void initLineDetection() {
 }
 
 
-void DetectLines(int lineThickness, int lineLength, int lineAnchor, int lineContinue) {
-    src_img = imread(filename);
+void LineDetector::DetectLines(int lineThickness, int lineLength, int lineAnchor, int lineContinue) {
     dst_img = Mat::zeros(src_img.size(), src_img.type());
 
     // Resize the image such that the lines are approximately 3 pixels wide
@@ -357,7 +357,7 @@ void DetectLines(int lineThickness, int lineLength, int lineAnchor, int lineCont
     //cerr << "lineContinue: " << lineContinue << endl;
 }
 
-void WhitenessFilter(Mat& hsv_image, Mat& fin_img) {
+void LineDetector::WhitenessFilter(Mat& hsv_image, Mat& fin_img) {
     Mat result = 255 * Mat::ones(hsv_image.size(), CV_16UC1);
     Mat tmp;
     hsv_image.convertTo(tmp, CV_16UC3, 1.0);
@@ -368,7 +368,7 @@ void WhitenessFilter(Mat& hsv_image, Mat& fin_img) {
     result.convertTo(fin_img, CV_8UC1, 1.0/255);
 }
 
-void MultiplyByComplements(Mat* images, Mat* complements, Mat* results) {
+void LineDetector::MultiplyByComplements(Mat* images, Mat* complements, Mat* results) {
     for(size_t i = 0; i < KERNAL_COUNT; i++) {
         Mat image;
         Mat complement;
