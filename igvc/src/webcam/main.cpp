@@ -24,8 +24,8 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
     Mat image = (cv_ptr->image).clone();
 
     // All of our code goes here
-    Mat img_overhead = imread("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/overhead.jpg", CV_LOAD_IMAGE_COLOR);
-    Mat img_normal = imread("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/normal.jpg", CV_LOAD_IMAGE_COLOR);
+    Mat img_overhead = imread("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/overhead.png", CV_LOAD_IMAGE_COLOR);
+    Mat img_normal = imread("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/normal.png", CV_LOAD_IMAGE_COLOR);
 
     //-- Step 1: Detect the keypoints using SURF Detector
     int minHessian = 400;
@@ -68,7 +68,7 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
     std::vector< DMatch > good_matches;
 
     for (int i = 0; i < descriptors_overhead.rows; i++) {
-        if (matches[i].distance < 3*min_dist) {
+        if (matches[i].distance < 3 * min_dist) {
             good_matches.push_back(matches[i]);
         }
     }
@@ -84,10 +84,12 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
 
     for (int i = 0; i < good_matches.size(); i++) {
         //-- Get the keypoints from the good matches
-        obj.push_back(keypoints_overhead[ good_matches[i].queryIdx ].pt);
-        scene.push_back(keypoints_normal[ good_matches[i].trainIdx ].pt);
+        obj.push_back(keypoints_overhead[good_matches[i].queryIdx].pt);
+        scene.push_back(keypoints_normal[good_matches[i].trainIdx].pt);
     }
 
+    cv::imwrite("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/matches.jpg", img_matches);
+    std::cerr << obj << std::endl << scene << std::endl << std::endl;
     Mat H = findHomography(obj, scene, CV_RANSAC, 3);
 
     //-- Get the corners from the image_1 (the object to be "detected")
@@ -101,14 +103,12 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
     perspectiveTransform(obj_corners, scene_corners, H);
 
     //-- Draw lines between the corners (the mapped object in the scene - image_2)
-    line(img_matches, scene_corners[0] + Point2f(img_overhead.cols, 0), scene_corners[1] + Point2f(img_overhead.cols, 0), Scalar(0, 255, 0), 4);
-    line(img_matches, scene_corners[1] + Point2f(img_overhead.cols, 0), scene_corners[2] + Point2f(img_overhead.cols, 0), Scalar(0, 255, 0), 4);
-    line(img_matches, scene_corners[2] + Point2f(img_overhead.cols, 0), scene_corners[3] + Point2f(img_overhead.cols, 0), Scalar(0, 255, 0), 4);
-    line(img_matches, scene_corners[3] + Point2f(img_overhead.cols, 0), scene_corners[0] + Point2f(img_overhead.cols, 0), Scalar(0, 255, 0), 4);
+    // line(img_matches, scene_corners[0] + Point2f(img_overhead.cols, 0), scene_corners[1] + Point2f(img_overhead.cols, 0), Scalar(0, 255, 0), 4);
+    // line(img_matches, scene_corners[1] + Point2f(img_overhead.cols, 0), scene_corners[2] + Point2f(img_overhead.cols, 0), Scalar(0, 255, 0), 4);
+    // line(img_matches, scene_corners[2] + Point2f(img_overhead.cols, 0), scene_corners[3] + Point2f(img_overhead.cols, 0), Scalar(0, 255, 0), 4);
+    // line(img_matches, scene_corners[3] + Point2f(img_overhead.cols, 0), scene_corners[0] + Point2f(img_overhead.cols, 0), Scalar(0, 255, 0), 4);
 
     std::cerr << "H = " << std::endl << H << std::endl << std::endl;
-
-    cv::imwrite("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/matches.jpg", img_matches);
 
     Mat img_transformed;
     warpPerspective(img_normal, img_transformed, H, img_transformed.size());
