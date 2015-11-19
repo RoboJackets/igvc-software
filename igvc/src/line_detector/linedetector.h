@@ -19,6 +19,11 @@
 #include <opencv2/core/core.hpp>
 #include <vector>
 #include <tf/transform_listener.h>
+#include <opencv2/opencv.hpp>
+#include <iostream>
+#include <vector>
+
+#define KERNAL_COUNT 8
 
 class LineDetector
 {
@@ -27,43 +32,37 @@ public:
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
+    void initLineDetection();
 
-    void blackoutSection(int rowl, int rowu, int coll, int colu);
+    void DetectLines(int lineThickness, int lineLength, int lineAnchor, int lineContinue);
+    void WhitenessFilter(cv::Mat& hsv_image, cv::Mat& result);
+    void MultiplyByComplements(cv::Mat* images, cv::Mat* complements, cv::Mat* results);
 
-    void detectObstacle(int i, int j, cv::Mat* dst);
-    
+    // line thickness in pixels
+    int lineThickness;
+    // line threshold to be a start
+    int lineAnchor;
+    // line threshold to continue
+    int lineContinue;
+    // line length minimum to consider
+    int lineLength;
+
+    const int linewidthpixels = 13;
+
+    cv::Mat src_img;
+    cv::Mat dst_img;
+    cv::Mat fin_img;
+    cv::Mat kernels[KERNAL_COUNT];
+    cv::Mat kernelComplements[KERNAL_COUNT];
+    cv::Mat working;
+    cv::Mat kernelResults[KERNAL_COUNT];
+    cv::Mat complementResults[KERNAL_COUNT];
+
     void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
 
-    void helperSearch(void *totvis, void *input, int i, int j, cv::Mat *imgmat, int thresh);
-    bool helperContains(std::tuple<int, int> pos, void *vis);
-    bool adjWhite(int i, int j, cv::Mat *img, int thresh);
-
-    cv::Mat applyFilter(cv::Mat &image, const cv::Mat &kernal);
-    std::vector<cv::Mat> getGeometricMean(cv::Mat &img, std::vector<cv::Mat> &kernals);
-    void subtractOrthog(std::vector<cv::Mat>& images);
-    void RemoveNonMax(std::vector<cv::Mat>& images);
-    void EnforceContinuity(std::vector<cv::Mat>& directions, cv::Mat& out);
-
-    const int max_elem;
-    const int max_kernel_size;
-    cv::Mat p;
-
-    /**
-     * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
-     * @note Must be odd!
-     */
-    const int gaussian_size;
-
-    /**
-     * @brief src contains the original, unprocessed image
-     */
-    cv::Mat src;
-    /**
-     * @brief dst contains the new, processed image that isolates the lines
-     */
-    cv::Mat *dst;
+    void EnforceContinuity(cv::Mat* directions, cv::Mat& out);
 
     // ROS COMMUNICATION
     image_transport::ImageTransport _it;
