@@ -13,6 +13,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
+#include "IntermediatePath.hpp"
 
 using namespace std;
 
@@ -118,7 +119,7 @@ int main(int argc, char** argv)
         planning_mutex.lock();
         // TODO only replan if needed.
         auto path = GraphSearch::AStar(search_problem, expanded_callback);
-
+	path = IntermediatePath::selectOptimalPath(path, search_problem);//added
         if(disp_path_pub.getNumSubscribers() > 0)
         {
             nav_msgs::Path disp_path_msg;
