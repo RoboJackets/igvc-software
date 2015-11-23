@@ -24,9 +24,9 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
     Mat image = (cv_ptr->image).clone();
 
     // All of our code goes here
-    Mat img_overhead = imread("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/overhead.png", CV_LOAD_IMAGE_COLOR);
-    Mat img_normal = imread("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/normal.png", CV_LOAD_IMAGE_COLOR);
-
+    //Mat img_overhead = imread("/home/robojackets/Desktop/igvc/src/igvc-software/igvc/src/webcam/overhead.jpg", CV_LOAD_IMAGE_COLOR);
+    Mat img_normal = imread("/home/robojackets/Desktop/igvc/src/igvc-software/igvc/src/webcam/normal.jpg", CV_LOAD_IMAGE_COLOR);
+/*
     //-- Step 1: Detect the keypoints using SURF Detector
     int minHessian = 400;
 
@@ -77,27 +77,37 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
     drawMatches(img_overhead, keypoints_overhead, img_normal, keypoints_normal,
          good_matches, img_matches, Scalar::all(-1), Scalar::all(-1),
          vector<char>(), DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
-
+*/
     //-- Localize the object
     std::vector<Point2f> obj;
     std::vector<Point2f> scene;
 
+    obj.push_back(Point2f(200, 200));
+    obj.push_back(Point2f(600, 200));
+    obj.push_back(Point2f(200, 600));
+    obj.push_back(Point2f(600, 600));
+
+    scene.push_back(Point2f(240, 415));
+    scene.push_back(Point2f(725, 415));
+    scene.push_back(Point2f(115, 540));
+    scene.push_back(Point2f(805, 540));
+/*
     for (int i = 0; i < good_matches.size(); i++) {
         //-- Get the keypoints from the good matches
         obj.push_back(keypoints_overhead[good_matches[i].queryIdx].pt);
         scene.push_back(keypoints_normal[good_matches[i].trainIdx].pt);
     }
-
-    cv::imwrite("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/matches.jpg", img_matches);
-    std::cerr << obj << std::endl << scene << std::endl << std::endl;
-    Mat H = findHomography(obj, scene, CV_RANSAC, 3);
+*/
+    //cv::imwrite("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/matches.jpg", img_matches);
+    //std::cerr << obj << std::endl << scene << std::endl << std::endl;
+    Mat H = findHomography(scene, obj, CV_RANSAC, 3);
 
     //-- Get the corners from the image_1 (the object to be "detected")
     std::vector<Point2f> obj_corners(4);
     obj_corners[0] = cvPoint(0,0);
-    obj_corners[1] = cvPoint(img_overhead.cols, 0);
-    obj_corners[2] = cvPoint(img_overhead.cols, img_overhead.rows);
-    obj_corners[3] = cvPoint(0, img_overhead.rows);
+    obj_corners[1] = cvPoint(800, 0);
+    obj_corners[2] = cvPoint(800, 800);
+    obj_corners[3] = cvPoint(0, 800);
     std::vector<Point2f> scene_corners(4);
 
     perspectiveTransform(obj_corners, scene_corners, H);
@@ -109,11 +119,12 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
     // line(img_matches, scene_corners[3] + Point2f(img_overhead.cols, 0), scene_corners[0] + Point2f(img_overhead.cols, 0), Scalar(0, 255, 0), 4);
 
     std::cerr << "H = " << std::endl << H << std::endl << std::endl;
+    //std::cerr << "img_normal = " << std::endl << img_normal << std::endl << std::endl;
 
     Mat img_transformed;
     warpPerspective(img_normal, img_transformed, H, img_transformed.size());
 
-    cv::imwrite("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/transformed.jpg", img_transformed);
+    cv::imwrite("/home/robojackets/Desktop/igvc/src/igvc-software/igvc/src/webcam/transformed.jpg", img_transformed);
 
     cv_ptr->image = img_transformed;
     _new_img.publish(cv_ptr->toImageMsg());
