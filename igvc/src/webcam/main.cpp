@@ -25,7 +25,7 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
 
     // All of our code goes here
     //Mat img_overhead = imread("/home/robojackets/Desktop/igvc/src/igvc-software/igvc/src/webcam/overhead.jpg", CV_LOAD_IMAGE_COLOR);
-    Mat img_normal = imread("/home/robojackets/Desktop/igvc/src/igvc-software/igvc/src/webcam/normal.jpg", CV_LOAD_IMAGE_COLOR);
+    Mat img_normal = imread("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/normal.jpg", CV_LOAD_IMAGE_COLOR);
 /*
     //-- Step 1: Detect the keypoints using SURF Detector
     int minHessian = 400;
@@ -124,7 +124,7 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
     Mat img_transformed;
     warpPerspective(img_normal, img_transformed, H, img_transformed.size());
 
-    cv::imwrite("/home/robojackets/Desktop/igvc/src/igvc-software/igvc/src/webcam/transformed.jpg", img_transformed);
+    cv::imwrite("/home/nareddyt/Desktop/IGVC/src/igvc-software/igvc/src/webcam/transformed.jpg", img_transformed);
 
     cv_ptr->image = img_transformed;
     _new_img.publish(cv_ptr->toImageMsg());
