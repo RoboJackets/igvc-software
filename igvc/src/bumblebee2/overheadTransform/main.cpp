@@ -49,13 +49,13 @@ void callback(const sensor_msgs::ImageConstPtr& msg) {
 }
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "webcam");
+    ros::init(argc, argv, "overheadTransform");
     ros::NodeHandle nh;
 
     ros::Subscriber sub = nh.subscribe("/left/image_rect_color", 1, callback);
 
     image_transport::ImageTransport _it(nh);
-    _new_img = _it.advertise("/new_img", 1);
+    _new_img = _it.advertise("/overhead", 1);
 
     ros::spin();
 }
