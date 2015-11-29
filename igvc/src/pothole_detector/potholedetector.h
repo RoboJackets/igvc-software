@@ -19,6 +19,7 @@
 #include <opencv2/core/core.hpp>
 #include <vector>
 #include <tf/transform_listener.h>
+#include <opencv2/opencv.hpp>
 
 class PotholeDetector
 {
@@ -27,9 +28,10 @@ public:
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
+    void camera_info_callback(const sensor_msgs::CameraInfoPtr& msg);
     void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
-    //pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
 
     /**
      * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
@@ -49,8 +51,13 @@ private:
     // ROS COMMUNICATION
     image_transport::ImageTransport _it;
     image_transport::Publisher _pothole_filt_img;
+    image_transport::Publisher _pothole_thres;
     image_transport::Subscriber _src_img;
+    ros::Subscriber _camera_info;
     ros::Publisher _pothole_cloud;
     tf::TransformListener tf_listener;
+
+    cv::Mat src;
+    cv::Mat src_gray;
 };
 #endif // POTHOLEDETECTOR_H
