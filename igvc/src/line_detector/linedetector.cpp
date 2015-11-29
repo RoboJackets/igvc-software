@@ -9,6 +9,7 @@ using namespace std;
 using namespace cv;
 using namespace pcl;
 
+
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
@@ -20,121 +21,20 @@ constexpr double radians(double degrees)
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cerr << "CALLBACK CALLED" << endl;
     cv_ptr = cv_bridge::toCvCopy(msg, "");
+    src_img = cv_ptr->image;
 
-	// What separates lines from other objects?
+    // What separates lines from other objects?
     // 1. Lines are whiter than their surroundings
     // 2. Lines are on the ground
     // 3. A section of a line has two other line sections adjascent to it
     // 4. We know roughly how wide a line is going to be
 
-    const int linewidthpixels = 13;
+    DetectLines(lineThickness, lineLength, lineAnchor, lineContinue);
+    EnforceContinuity(kernelResults, fin_img);
 
-    Mat grnd = (cv_ptr->image).clone();
-    Mat dview_dst = (cv_ptr->image).clone();
-    Mat nature_dst = (cv_ptr->image).clone();
-    Mat squish_dst = (cv_ptr->image).clone();
-
-// Squish
-    resize(grnd, squish_dst, Size(3*grnd.cols/linewidthpixels, 3*grnd.rows/linewidthpixels), 0, 0, INTER_LANCZOS4);
-
-
-    float karray[3][9][9] = {
-            {
-                    {-1, -1, -1, -1, -1, -1, -1, -1, -1},
-                    {-1, -1, -1, -1, -1, -1, -1, -1, -1},
-                    {-1, -1, -1, -1, -1, -1, -1, -1, -1},
-                    { 1,  1,  1,  1,  1,  1,  1,  1,  1},
-                    { 1,  1,  1,  1,  1,  1,  1,  1,  1},
-                    { 1,  1,  1,  1,  1,  1,  1,  1,  1},
-                    { 0,  0,  0,  0,  0,  0,  0,  0,  0},
-                    { 0,  0,  0,  0,  0,  0,  0,  0,  0},
-                    { 0,  0,  0,  0,  0,  0,  0,  0,  0}
-            }, {
-                    {-1, -1, -1, -1, -1, -1, -1, -1, -1},
-                    {-1, -1, -1, -1, -1, -1, -1,  0,  1},
-                    {-1, -1, -1, -1, -1,  0,  1,  1,  1},
-                    {-1, -1, -1,  0,  1,  1,  1,  1,  1},
-                    {-1,  0,  1,  1,  1,  1,  1, .5,  0},
-                    { 1,  1,  1,  1,  1, .5,  0,  0,  0},
-                    { 1,  1,  1, .5,  0,  0,  0,  0,  0},
-                    { 1, .5,  0,  0,  0,  0,  0,  0,  0},
-                    { 0,  0,  0,  0,  0,  0,  0,  0,  0}
-            },  {
-                    {-.89,-.89,-.89,-.89,-.89,-.89,-.89,   1,   1},
-                    {-.89,-.89,-.89,-.89,-.89,-.89,   1,   1,   1},
-                    {-.89,-.89,-.89,-.89,-.89,   1,   1,   1,   0},
-                    {-.89,-.89,-.89,-.89,   1,   1,   1,   0,   0},
-                    {-.89,-.89,-.89,   1,   1,   1,   0,   0,   0},
-                    {-.89,-.89,   1,   1,   1,   0,   0,   0,   0},
-                    {-.89,   1,   1,   1,   0,   0,   0,   0,   0},
-                    {   1,   1,   1,   0,   0,   0,   0,   0,   0},
-                    {   1,   1,   0,   0,   0,   0,   0,   0,   0}
-            }
-    };
-
-    vector<Mat> kernals;
-    Mat kernal1(9, 9, CV_32FC1, karray[0]);
-    kernal1 /= 27;
-    Mat kernal2(9, 9, CV_32FC1, karray[1]);
-    kernal2 /= 25;
-    Mat kernal3(9, 9, CV_32FC1, karray[2]);
-    kernal3 /= 25;
-
-    Mat kernal4 = kernal2.t();
-    Mat kernal5 = kernal1.t();
-
-    Mat kernal6;
-    Mat kernal7;
-    Mat kernal8;
-
-    flip(kernal4, kernal6, 0);
-    flip(kernal3, kernal7, 0);
-    flip(kernal2, kernal8, 0);
-
-    kernals.push_back(kernal1);
-    kernals.push_back(kernal2);
-    kernals.push_back(kernal3);
-    kernals.push_back(kernal4);
-    kernals.push_back(kernal5);
-    kernals.push_back(kernal6);
-    kernals.push_back(kernal7);
-    kernals.push_back(kernal8);
-
-    Mat testimage = squish_dst;
-
-    vector<Mat> results = getGeometricMean(testimage, kernals);
-
-    Mat fadedimage = testimage/2;
-    Mat fin_img = results[0].clone();
-
-    subtractOrthog(results);
-    fin_img = results[0].clone();
-
-    RemoveNonMax(results);
-
-    int threshval = 3;
-    for(size_t i = 0; i < results.size(); i++) {
-        Mat bgr[3];
-        split(results[i], bgr);
-        threshold(bgr[0], results[i], threshval, 255, CV_THRESH_BINARY);
-        cvtColor(results[i], results[i], CV_GRAY2BGR);
-    }
-
-    EnforceContinuity(results, fin_img);
-
-    resize(fin_img, fin_img, Size(dview_dst.cols, dview_dst.rows), 0, 0, INTER_LANCZOS4);
+    resize(fin_img, fin_img, Size(src_img.cols, src_img.rows), 0, 0, INTER_LANCZOS4);
     cloud = toPointCloud(fin_img);
     _line_cloud.publish(cloud);
-}
-
-void LineDetector::RemoveNonMax(vector<Mat>& images) {
-    Mat maxRes = images[0].clone();
-    for(Mat& r : images) {
-        maxRes = max(maxRes, r);
-    }
-    for(Mat& r : images) {
-        r = r - (r != maxRes);
-    }
 }
 
 typedef struct Node {
@@ -150,19 +50,19 @@ typedef struct Node {
     }
 } Node;
 
-void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
+void LineDetector::EnforceContinuity(Mat* directions, Mat& out) {
     cerr << "Enforcing Continuity" << endl;
     unsigned int iterations = 300;
     int minpathlength = 20;
     Mat gradient = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC1);
     Mat fin_img = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC3);
-    for(size_t i = 0; i < directions.size(); i++) {
+    for(size_t i = 0; i < KERNAL_COUNT; i++) {
         Mat bgr[3];
         split(directions[i], bgr);
         bitwise_and(bgr[0], (0b00000001 << i), bgr[0]);
         bitwise_or(gradient, bgr[0], gradient);
     }
-
+    cerr << "Reached checkpoint 1" << endl;
     auto getneighbors = [](shared_ptr<Node> n, Mat& gradient) {
         auto similarbits = [](unsigned char a, unsigned char b) {
             return ((a == b) | (a == b << 1) | (a == b >> 1) | (129 == (a | b)));
@@ -231,6 +131,7 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
 
         return neighbors;
     };
+    cerr << "Reached checkpoint 2" << endl;
 
     Mat randlineinds;
 
@@ -238,6 +139,7 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
 
     randShuffle(randlineinds);
 
+    cerr << "Reached checkpoint 3" << endl;
     for(size_t i = 0; i < iterations && i < randlineinds.total(); i++) {
 
         Mat gradientcopy = gradient.clone();
@@ -289,136 +191,24 @@ void LineDetector::EnforceContinuity(vector<Mat>& directions, Mat& out) {
         split(fin_img, channels);
         out = channels[0];
     }
-}
-
-vector<Mat> LineDetector::getGeometricMean(Mat& image, vector<Mat> &kernals) {
-    Mat filtered1, filtered2;
-    vector<Mat> results;
-
-    for(size_t i = 0; i < kernals.size(); i++) {
-        Mat kernal2 = kernals[i].clone();
-        Mat normmat;
-        flip(kernals[i], kernal2, -1);
-
-        filtered1 = applyFilter(image, kernals[i]);
-        filtered2 = applyFilter(image, kernal2);
-
-
-        filtered1.convertTo(filtered1, CV_16UC3, 1);
-        filtered2.convertTo(filtered2, CV_16UC3, 1);
-
-        results.push_back(filtered1.mul(filtered2));
-        results[i].convertTo(results[i], CV_8UC3, 1.0 / 256);
-    }
-
-    return results;
-};
-
-Mat LineDetector::applyFilter(Mat &image, const Mat &kernal) {
-    Mat fin_img;
-    vector<Mat> newchannel(3);
-    vector<Mat> oldchannel(3);
-    split(image, oldchannel);
-    for(int i = 0; i < 3; i++) {
-        filter2D(oldchannel[i], newchannel[i], -1, kernal);
-    }
-
-    merge(newchannel, fin_img);
-    return fin_img;
-}
-
-bool operator<(const Vec3f& s1, const Vec3f& s2) {
-    return s1[0] < s2[0];
-}
-
-void LineDetector::subtractOrthog(vector<Mat>& images) {
-    for (int r = 0; r < images[0].rows; r++) {
-        for(int c = 0; c < images[0].cols; c++) {
-            Vec3b blackpixel(0, 0, 0);
-            Vec3b maxdiff(0, 0, 0);
-            Vec3b smax(0, 0, 0);
-            for(size_t i = 0; i < images.size(); i++){
-                Vec3b s1 = images[i].at<Vec3b>(r, c);
-                Vec3b s2 = images[(i+images.size()/2) % images.size()].at<Vec3b>(r, c);
-                images[i].at<Vec3b>(r, c) = s1 - s2;
-            }
-        }
-    }
+    cerr << "Reached checkpoint 4" << endl;
 }
 
 LineDetector::LineDetector(ros::NodeHandle &handle)
-    : max_elem(2),
-      max_kernel_size(2),
-      gaussian_size(7),
-      _it(handle),
-      tf_listener(handle)
+      : _it(handle)
+      , tf_listener(handle)
 {
     _src_img = _it.subscribe("/left/image_rect_color", 1, &LineDetector::img_callback, this);
 	  _filt_img = _it.advertise("/filt_img", 1);
     _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
-
+    initLineDetection();
 }
 
-/**
- *  \brief LineDetector::detectObstacle detects orange and bright white obstacles
- *  \param col the column of the left of the obstacle
- */
-void LineDetector::detectObstacle(int row, int col, cv::Mat* dst){
-    Vec3b p = dst->at<Vec3b>(row,col);
-    int row2 = row;
-    int col2 = col;
-
-    //While the pixel is still orange, turn it black
-    //Then on to the next one, by row
-    while (p[2] > 100 /*&& (p[1] < 150 || p[1] > 250)*/){
-        dst->at<Vec3b>(row2, col)[0] = 0;
-        dst->at<Vec3b>(row2, col)[1] = 0;
-        dst->at<Vec3b>(row2, col)[2] = 0;
-        p = dst->at<Vec3b>(++row2, col);
-    }
-    p = dst->at<Vec3b>(row,col);
-
-    //While the pixel is still orange, turn it black
-    //Then on to the next one, by column
-    while (p[2] > 100 /*&& (p[1] < 150 || p[1] > 250)*/){
-        dst->at<Vec3b>(row, col2)[0] = 0;
-        dst->at<Vec3b>(row, col2)[1] = 0;
-        dst->at<Vec3b>(row, col2)[2] = 0;
-        p = dst->at<Vec3b>(row, ++col2);
-    }
-
-    //Turn everything in that block we just found black
-    for(int i = row+1; i<row2;i++){
-        for (int j = col+1; j<col2; j++){
-            dst->at<Vec3b>(i,j)[0] = 0;
-            dst->at<Vec3b>(i,j)[1] = 0;
-            dst->at<Vec3b>(i,j)[2] = 0;
-        }
-    }
-}
-
-/**
- *  \brief LineDetector::blackoutSection turns a section of the image black
- *  \param rowl the lower row bound
- *  \param rowu the upper row bound
- *  \param coll the left column bound
- *  \param colu the right column bound
- */
-void LineDetector::blackoutSection(int rowl, int rowu, int coll, int colu){
-
-    for (int i=rowl;i<=rowu;i++){
-        for (int j = coll; j<=colu; j++){
-            dst->at<Vec3b>(i,j)[0] = 0;
-            dst->at<Vec3b>(i,j)[1] = 0;
-            dst->at<Vec3b>(i,j)[2] = 0;
-        }
-    }
-}
 
 PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", "/camera", ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
     double roll, pitch, yaw;
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
     auto origin_z = transform.getOrigin().getZ();
@@ -447,81 +237,146 @@ PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
 	return cloud;
 }
 
-void LineDetector::helperSearch(void *totvis, void *input, int i, int j, cv::Mat *imgmat, int thresh) {
-    vector< tuple<int, int> > *totalvisited = (vector< tuple<int, int> >*)totvis;
-    vector< tuple<int, int> > *visited = (vector< tuple<int, int> >*)input;
-    if (!helperContains(tuple<int, int>(i, j), visited) && !helperContains(tuple<int, int>(i, j), totalvisited)) {
-		visited->push_back( tuple<int, int>(i, j) );
-		totalvisited->push_back( tuple<int, int>(i, j) );
-	} else {
-		return;
-	}
-	if (visited->size() > 500) {
-		return;
-	}
-    for (int k=0; k<5; k+=4) {
-        if (i-2+k < 0 || i-2+k >= imgmat->rows || j < 0 || j >= imgmat->cols) {
-            continue;
-        }
-        if (adjWhite(i-2+k, j, imgmat, thresh)) {
-            helperSearch(totalvisited, visited, i-2+k, j, imgmat, thresh);
-        }
-	}
-	for (int k=0; k<3; k+=2) {
-        if (i-2+k < 0 || i-2+k >= imgmat->rows || j+2 < 0 || j+2 >= imgmat->cols) {
-            continue;
-        }
-        if (adjWhite(i-2+k, j+2, imgmat, thresh)) {
-            helperSearch(totalvisited, visited, i-2+k, j+2, imgmat, thresh);
-        }
-	}
+void LineDetector::initLineDetection() {
+    //cerr << "DetectLines::Initing" << endl;
+    lineThickness = 20;
+    lineAnchor = 1;
+    lineContinue = 20;
+    lineLength = 1;
+    float karray[3][9][9] = {
+            {
+                    {-1,   -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1},
+                    {-1,   -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1},
+                    {-1,   -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1},
+                    {1,     1,     1,     1,     1,     1,     1,     1,     1},
+                    {1,     1,     1,     1,     1,     1,     1,     1,     1},    
+                    {1,     1,     1,     1,     1,     1,     1,     1,     1},    
+                    {0,     0,     0,     0,     0,     0,     0,     0,     0},    
+                    {0,     0,     0,     0,     0,     0,     0,     0,     0},    
+                    {0,     0,     0,     0,     0,     0,     0,     0,     0}
+            },     
+            {
+                    {-1,   -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1},    
+                    {-1,   -1,    -1,    -1,    -1,    -1,    -1,     0,     1},    
+                    {-1,   -1,    -1,    -1,    -1,     0,     1,     1,     1},    
+                    {-1,   -1,    -1,     0,     1,     1,     1,     1,     1},    
+                    {-1,    0,     1,     1,     1,     1,     1,    .5,     0},    
+                    {1,     1,     1,     1,     1,    .5,     0,     0,     0},    
+                    {1,     1,     1,    .5,     0,     0,     0,     0,     0},    
+                    {1,    .5,     0,     0,     0,     0,     0,     0,     0},    
+                    {0,     0,     0,     0,     0,     0,     0,     0,     0}
+            },
+            {
+                    {-.89,-.89, -.89,  -.89,  -.89,  -.89,  -.89,     1,     1},    
+                    {-.89,-.89, -.89,  -.89,  -.89,  -.89,     1,     1,     1},    
+                    {-.89,-.89, -.89,  -.89,  -.89,     1,     1,     1,     0},    
+                    {-.89,-.89, -.89,  -.89,     1,     1,     1,     0,     0},    
+                    {-.89,-.89, -.89,     1,     1,     1,     0,     0,     0},    
+                    {-.89,-.89,    1,     1,     1,     0,     0,     0,     0},    
+                    {-.89,  1,     1,     1,     0,     0,     0,     0,     0},    
+                    {1,     1,     1,     0,     0,     0,     0,     0,     0},    
+                    {1,     1,     0,     0,     0,     0,     0,     0,     0}
+            }
+    };
+
+    Mat kernel1(9, 9, CV_32FC1, karray[0]);
+    kernel1 /= 27;
+    Mat kernel2(9, 9, CV_32FC1, karray[1]);
+    kernel2 /= 25;
+    Mat kernel3(9, 9, CV_32FC1, karray[2]);
+    kernel3 /= 25;
+
+    Mat kernel4 = kernel2.t();
+    Mat kernel5 = kernel1.t();
+
+    Mat kernel6;
+    Mat kernel7;
+    Mat kernel8;
+
+    flip(kernel4, kernel6, 0);
+    flip(kernel3, kernel7, 0);
+    flip(kernel2, kernel8, 0);
+
+    kernels[0] = kernel1.clone();
+    kernels[1] = kernel2.clone();
+    kernels[2] = kernel3.clone();
+    kernels[3] = kernel4.clone();
+    kernels[4] = kernel5.clone();
+    kernels[5] = kernel6.clone();
+    kernels[6] = kernel7.clone();
+    kernels[7] = kernel8.clone();
+
+    for (int i = 0; i < KERNAL_COUNT; i++) {
+        Mat kernelComplement;
+        flip(kernels[i], kernelComplement, -1);
+        kernelComplements[i] = kernelComplement.clone();
+    }
 }
 
-bool LineDetector::adjWhite(int i, int j, cv::Mat *img, int thresh) {
-	int grey;
-	int scal = 1;
-	for (int k = -1; k < 2; k++) {
-		int n = i+(k*scal);
-		int m = j;
-        if (n < 0 || n >= img->rows || m < 0 || m >= img->cols) {
-            continue;
-        }
-        grey = img->at<Vec3b>(n, m)[0];
-        if (grey >= thresh) {
-            return true;
-        }
-	}
-	for (int k = -1; k < 2; k++) {
-		int n = i+(k*scal);
-		int m = j+scal;
-        if (n < 0 || n >= img->rows || m < 0 || m >= img->cols) {
-            continue;
-        }
-        grey = img->at<Vec3b>(n, m)[0];
-        if (grey >= thresh) {
-            return true;
-        }
-	}
-	for (int k = -1; k < 2; k++) {
-		int n = i+(k*scal);
-		int m = j-scal;
-        if (n < 0 || n >= img->rows || m < 0 || m >= img->cols) {
-            continue;
-        }
-        grey = img->at<Vec3b>(n, m)[0];
-        if (grey >= thresh) {
-            return true;
-        }
-	}
-	return false;
+
+void LineDetector::DetectLines(int lineThickness, int lineLength, int lineAnchor, int lineContinue) {
+    dst_img = Mat::zeros(src_img.size(), src_img.type());
+
+    // Resize the image such that the lines are approximately 3 pixels wide
+    //cerr << "DetectLines::Reducing Image" << endl;
+    lineThickness = max(1, lineThickness); // 0 thickness doesn't make sense
+    resize(src_img, working, Size(3*src_img.cols/lineThickness, 3*src_img.rows/lineThickness), 0, 0, INTER_LANCZOS4);
+
+    // Convert the image into HSV space to make processing white lines easier
+    //cerr << "DetectLines::Converting to HSV" << endl;
+    cvtColor(working, working, CV_BGR2HSV);
+
+    // Calculate each pixel's "whiteness" defined as value*(255-saturation);
+    //cerr << "DetectLines::Filtering Whiteness" << endl;
+    WhitenessFilter(working, working);
+
+    // Pass directional kernels over image
+    //cerr << "DetectLines::Filtering kernels" << endl;
+    for(size_t i = 0; i < KERNAL_COUNT; i++)
+        filter2D(working, kernelResults[i], -1, kernels[i]);
+
+    // Pass directional kernel complements over image (same edge, rotated 180 degrees, 3 pixels between edge and complement)
+    //cerr << "DetectLines::Filtering complements" << endl;
+    for(size_t i = 0; i < KERNAL_COUNT; i++)
+        filter2D(working, complementResults[i], -1, kernelComplements[i]);
+
+    // Multiply the results of kernel filter by its complement
+    //cerr << "DetectLines::Multiplying Results" << endl;
+    MultiplyByComplements(kernelResults, complementResults, kernelResults);
+
+    // LineDrawing implementation reduces detection to single pixel wide lines of a minimum width
+//    Mat* detectedLines = new Mat(LineDrawing(geometricResults, lineAnchor, lineContinue, lineLength));
+
+    working = Mat::zeros(kernelResults[0].size(), kernelResults[0].type());
+    //cerr << "DetectLines::Thresholding Results" << endl;
+    for(int i = 0; i < KERNAL_COUNT; i++) {
+        threshold(kernelResults[i], kernelResults[i], ((float)lineContinue*lineContinue)/255, 255, CV_THRESH_BINARY);
+        bitwise_or(working, kernelResults[i], working);
+    }
+    resize(working, dst_img, src_img.size(), src_img.type());
+    //cerr << "lineContinue: " << lineContinue << endl;
 }
 
-bool LineDetector::helperContains(tuple<int, int> pos, void *vis) {
-    vector< tuple<int, int> > *visited = (vector< tuple<int, int> >*)vis;
-    for (size_t i=0; i<visited->size(); i++) {
-        if (visited->at(i) == pos) {
-            return true;
-        }
-	}
-    return false;
+void LineDetector::WhitenessFilter(Mat& hsv_image, Mat& fin_img) {
+    Mat result = 255 * Mat::ones(hsv_image.size(), CV_16UC1);
+    Mat tmp;
+    hsv_image.convertTo(tmp, CV_16UC3, 1.0);
+    Mat channel[3];
+    split(tmp, channel);
+    result = result - channel[1];
+    result = result.mul(channel[2]);
+    result.convertTo(fin_img, CV_8UC1, 1.0/255);
 }
+
+void LineDetector::MultiplyByComplements(Mat* images, Mat* complements, Mat* results) {
+    for(size_t i = 0; i < KERNAL_COUNT; i++) {
+        Mat image;
+        Mat complement;
+        Mat result = Mat::zeros(images[0].size(), CV_16UC1);
+        images[i].convertTo(image, CV_16UC1, 1.0);
+        complements[i].convertTo(complement, CV_16UC1, 1.0);
+        result = image.mul(complement);
+        result.convertTo(results[i], CV_8UC1, 1.0/255); // TODO figure this const out
+    }
+}
+
