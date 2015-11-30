@@ -51,7 +51,7 @@ GH_EMAIL_VAR="GIT_EMAIL"
 # Reccomended to leave as default (not set)
 # This will act as the 'current directory' within the project
 # This will need to be changed in the dockerfile as well to take effect. (use a custom one!)
-DOCKER_PROJECT_ROOT="/home/developer/project"
+DOCKER_PROJECT_ROOT="/root/project"
 
 # The git clone root INSIDE THE DOCKER CONTAINER
 GIT_CLONE_ROOT="${DOCKER_PROJECT_ROOT}/src"
@@ -71,7 +71,7 @@ GIT_CLONE_ROOT="${DOCKER_PROJECT_ROOT}/src"
 
 # The script to set up the environment, by default ubuntu.
 # YOU WILL NEED TO USE SUDO TO GET ROOT PRIVLEGES HERE
-SETUP_COMMAND="sudo ./src/util/indigo-setup.sh"
+SETUP_COMMAND="./src/util/indigo-setup.sh"
 # SETUP_COMMAND="./ubuntu-setup-script"
 
 # DOCIF can cache baseimages, if you give it files that will force a rebuild if changed.
@@ -89,12 +89,12 @@ SETUP_SHA_FILES+=("./util/indigo-setup.sh")
 # Commands are in this format
 # COMMAND; SHORT_NAME; DESCRIPTION
 TEST_COMMANDS=()
-TEST_COMMANDS+=( 'make;compile;A check to see if the code compiles' )
+TEST_COMMANDS+=( 'catkin_make;compile;A check to see if the code compiles' )
 
 # @RECCOMENDED
 # Clean command. Cleans the build files so there is no way the previous build can interfere. Add if you run
 # into issues
-CLEAN_COMMAND="catkin clean || true"
+CLEAN_COMMAND="catkin_make clean || true"
 # Other options are `gradle clean`, `mvn clean`, or `rm -rf build`
 
 # Environmental variables to make available to the build environment
