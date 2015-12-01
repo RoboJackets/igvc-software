@@ -89,6 +89,7 @@ SETUP_SHA_FILES+=("./util/indigo-setup.sh")
 # Commands are in this format
 # COMMAND; SHORT_NAME; DESCRIPTION
 TEST_COMMANDS=()
+TEST_COMMANDS+=( 'catkin_make igvc_msgs_gencpp;hack;A dummy test to fix broken dependencies' )
 TEST_COMMANDS+=( 'catkin_make;compile;A check to see if the code compiles' )
 
 # @RECCOMENDED
