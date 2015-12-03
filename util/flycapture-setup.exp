@@ -51,4 +51,46 @@ Would you like to continue and install all the FlyCapture2 SDK packages?\r
 # Be generous
 sleep 1
 send -- "y\r"
+
+expect -exact "Would you like to add a udev entry to allow access to IEEE-1394 and USB hardware?\r
+If this is not ran then your cameras may be only accessible by running flycap as sudo.\r
+(y/n)\$ "
+# Be generous
+sleep 1
+send -- "y\r"
+
+expect -exact "\r
+This script will assist users in configuring their udev rules to allow\r
+access to 1394 and USB devices. The script will create a udev rule which\r
+will add the 1394 cards and USB devices to a group called pgrimaging.\r
+The user may also choose to restart the udev daemon. All of this can be done\r
+manually as well.  Please note that this script will change the permissions\r
+for all IEEE1394 devices including hard drives and web cams. It will allow\r
+the user to read and modify data on any IEEE1394 device.\r
+\r
+\r
+Enter the name of the user to add to this user group.\r
+\$ "
+sleep 1
+send -- "root\r"
+expect -exact "root\r
+Is this user name ok?: root\r
+(y/n)\$ "
+sleep 1
+send -- "y\r"
+expect -exact "y\r
+\r
+Add user root to group pgrimaging.\r
+Is this ok?:\r
+(y/n)\$ "
+sleep 1
+send -- "y\r"
+expect -exact "y\r
+\r
+Writing the udev rules file.\r
+\r
+Do you want to restart the udev daemon?\r
+(y/n)\$ "
+sleep 1
+send -- "n\r"
 expect eof
