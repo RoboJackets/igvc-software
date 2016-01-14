@@ -15,7 +15,7 @@ PUSH_BASEIMAGE="true"
 # @REQUIRED
 # The github repository location, for sendings status updates to
 # This is CASE SENSITIVE!!
-GITHUB_REPO='jgkamat/igvc-software'
+GITHUB_REPO='RoboJackets/igvc-software'
 
 # The url to point to when a status check is pending.
 # Will point to https://github.com/jgkamat/DoCIF if unset.
