@@ -78,10 +78,11 @@ SETUP_COMMAND="./src/util/indigo-setup.sh"
 # Include the setup script itself, as well as any dependency files
 # Leaving this blank will turn off caching
 SETUP_SHA_FILES=()
- # This file should be included unless you leave this variable completely blank, forcing a rebuild when DoCIF is updated
+# This file should be included unless you leave this variable completely blank, forcing a rebuild when DoCIF is updated
 SETUP_SHA_FILES+=("./.gitmodules")
 SETUP_SHA_FILES+=("./config.docif")
 SETUP_SHA_FILES+=("./util/indigo-setup.sh")
+SETUP_SHA_FILES+=("./igvc/package.xml")
 
 
 # @REQUIRED
