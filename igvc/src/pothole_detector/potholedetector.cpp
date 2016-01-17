@@ -54,6 +54,10 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
     // TODO tune circle radii for actual potholes
     HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows/8, 50, 10, 30, 50);
 
+    for (std::vector<Vec3f>::const_iterator i = circles.begin(); i != circles.end(); ++i) {
+        std::cout << *i << ' ';
+    }
+
     Mat cloudMat = Mat::zeros(orig.rows, orig.cols, CV_32F);
     /// Put the circles into a matrix
     for( size_t i = 0; i < circles.size(); i++ )
@@ -80,6 +84,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
 
         int radius = cvRound(circles[i][2]);
         circle(cloudMat, center, radius, Scalar(255), 1, 8, 0);
+        circle(src, center, radius, Scalar(255), 1, 8, 0);
     }
 
     cvtColor(src_gray, src_gray, CV_GRAY2BGR);
