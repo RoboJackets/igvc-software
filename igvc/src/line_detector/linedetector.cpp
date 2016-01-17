@@ -4,6 +4,8 @@
 #include <sensor_msgs/image_encodings.h>
 #include <pcl_ros/point_cloud.h>
 #include <queue>
+#include <chrono>
+#include <ctime>
 
 using namespace std;
 using namespace cv;
@@ -13,6 +15,8 @@ using namespace pcl;
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
+void EnforceLength(Mat, int);
+
 constexpr double radians(double degrees)
 {
     return degrees / 180.0 * M_PI;
@@ -20,6 +24,10 @@ constexpr double radians(double degrees)
 
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cerr << "CALLBACK CALLED" << endl;
+
+    chrono::time_point<chrono::system_clock> start, end; // instantiate time to use
+    start = chrono::system_clock::now();
+
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src_img = cv_ptr->image;
 
@@ -32,9 +40,16 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     DetectLines(lineThickness, lineLength, lineAnchor, lineContinue);
     EnforceContinuity(kernelResults, fin_img);
 
+    EnforceLength(fin_img, 20);
+
     resize(fin_img, fin_img, Size(src_img.cols, src_img.rows), 0, 0, INTER_LANCZOS4);
-    cloud = toPointCloud(fin_img);
-    _line_cloud.publish(cloud);
+//    cloud = toPointCloud(fin_img);
+//    _line_cloud.publish(cloud);
+
+    end = chrono::system_clock::now();
+    chrono::duration<double> elapsedTime = end - start;
+
+    cout<<elapsedTime.count();
 }
 
 typedef struct Node {
@@ -56,6 +71,8 @@ void LineDetector::EnforceContinuity(Mat* directions, Mat& out) {
     int minpathlength = 20;
     Mat gradient = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC1);
     Mat fin_img = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC3);
+
+
     for(size_t i = 0; i < KERNAL_COUNT; i++) {
         Mat bgr[3];
         split(directions[i], bgr);
@@ -198,7 +215,8 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
       : _it(handle)
       , tf_listener(handle)
 {
-    _src_img = _it.subscribe("/left/image_rect_color", 1, &LineDetector::img_callback, this);
+     cout<<"Running"<<endl;
+    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
 	  _filt_img = _it.advertise("/filt_img", 1);
     _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
     initLineDetection();
@@ -380,3 +398,21 @@ void LineDetector::MultiplyByComplements(Mat* images, Mat* complements, Mat* res
     }
 }
 
+
+void EnforceLength(Mat img, int length) {
+    // Thresholding the line length using the area of the contours
+    vector<vector<Point>> contours;
+    vector<vector<Point>> contoursThreshold;
+    vector<Vec4i> hierarchy;
+    findContours(img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+
+    for (int i = 0; i < contours.size(); ++i) {
+        double tempCArea = contourArea(contours[i]);
+        if (tempCArea < length * 3) {
+            contoursThreshold.push_back(contours[i]);
+        }
+    }
+
+    Scalar color(0, 0, 0);
+    drawContours(img, contoursThreshold, -1, color, 3);
+}
