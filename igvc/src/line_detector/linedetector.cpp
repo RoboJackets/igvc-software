@@ -38,7 +38,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     // 4. We know roughly how wide a line is going to be
 
     DetectLines(lineThickness, lineLength, lineAnchor, lineContinue);
-    EnforceContinuity(kernelResults, fin_img);
+    //EnforceContinuity(kernelResults, fin_img);
 
     EnforceLength(fin_img, 20);
 
@@ -406,7 +406,7 @@ void EnforceLength(Mat img, int length) {
     vector<Vec4i> hierarchy;
     findContours(img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
-    for (int i = 0; i < contours.size(); ++i) {
+    for (unsigned int i = 0; i < contours.size(); ++i) {
         double tempCArea = contourArea(contours[i]);
         if (tempCArea < length * 3) {
             contoursThreshold.push_back(contours[i]);
