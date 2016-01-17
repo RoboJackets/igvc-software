@@ -91,11 +91,12 @@ int main(int argc, char** argv)
 
     search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
     search_problem.GoalThreshold = 1.0;
-    search_problem.Threshold = 0.5;
+    search_problem.Threshold = 0.8;
     search_problem.Speed = 1.0;
     search_problem.Baseline = baseline;
     search_problem.DeltaT = [](double distToStart)->double {
-        return 0.66*(log2(distToStart + 1) + 0.1);
+        //return 0.66*(log2(distToStart + 1) + 0.1);
+        return 0.4;
     };
     search_problem.MinimumOmega = -0.6;
     search_problem.MaximumOmega = 0.61;
@@ -119,7 +120,6 @@ int main(int argc, char** argv)
         planning_mutex.lock();
         // TODO only replan if needed.
         auto path = GraphSearch::AStar(search_problem, expanded_callback);
-	path = IntermediatePath::selectOptimalPath(path, search_problem);//added
         if(disp_path_pub.getNumSubscribers() > 0)
         {
             nav_msgs::Path disp_path_msg;
