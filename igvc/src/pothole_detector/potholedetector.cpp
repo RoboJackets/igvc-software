@@ -17,10 +17,15 @@ typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 //Want mostly (>50%) white pixels (values around >200) in the matrix
 //60x60x200ish = 720,000/2 = ~400000
 const int sumThreshold = 400000;
+const int sizeThreshold = 200;
 
 constexpr double radians(double degrees)
 {
     return degrees / 180.0 * M_PI;
+}
+
+constexpr int getDiff(int a, int b) {
+    return abs(a - b);
 }
 
 void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
@@ -48,45 +53,63 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
 
     threshold(src_gray, src_gray, thresh, 255, THRESH_BINARY);
 
-    GaussianBlur(src_gray, src_gray, Size(gaussian_size, gaussian_size), 2, 2);
+    GaussianBlur(src_gray, src_gray, Size(gaussian_size, gaussian_size), 100, 100);
 
-    vector<Vec3f> circles;
-    // TODO tune circle radii for actual potholes
-    HoughCircles( src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows/8, 50, 10, 30, 50);
+    vector<vector<Point>> contours;
+    findContours(src_gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
-    for (std::vector<Vec3f>::const_iterator i = circles.begin(); i != circles.end(); ++i) {
-        std::cout << *i << ' ';
+    // Filter smaller contours
+    for (unsigned int i = 0; i < contours.size(); i++) {
+        vector<Point> curCont = contours[i];
+        if (curCont.size() <= sizeThreshold) {
+            contours.erase(contours.begin() + i);
+            i--;
+        }
     }
+
+    // Get min / max Y and X
+    int minY = 10000;
+    int minX;
+    int maxY = 0;
+    int maxX;
+    for (unsigned int i = 0; i < contours.size(); i++) {
+        for (Point p : contours[i]) {
+            int y = p.y;
+            if (y > maxY) {
+                maxY = y;
+                maxX = p.x;
+            } else if (y < minY) {
+                minY = y;
+                minX = p.x;
+            }
+        }
+
+        // Delete if there is orange below or above
+        Vec3b intensityAbove = orig.at<Vec3b>(minX, minY - 5);
+        uchar greenAbove = intensityAbove.val[1];
+        uchar redAbove = intensityAbove.val[2];
+        Vec3b intensityBelow = orig.at<Vec3b>(maxX, maxY + 5);
+        uchar greenBelow = intensityBelow.val[1];
+        uchar redBelow = intensityBelow.val[2];
+        if (getDiff(greenAbove, 125) > 50 && getDiff(redAbove, 240) > 50 && getDiff(greenBelow, 125) > 50 && getDiff(redBelow, 240) > 50) {    // Play with these thresholds
+            contours.erase(contours.begin() + i);
+            i--;
+        }
+
+        // Delete if the contour itself is orange
+        Vec3b intensity = orig.at<Vec3b>((minX + maxX) / 2, (minY + maxY) / 2);
+        uchar green = intensity.val[1];
+        uchar red = intensity.val[2];
+        if (getDiff(green, 125) > 50 && getDiff(red, 240) > 50) {    // Play with these thresholds
+            contours.erase(contours.begin() + i);
+            i--;
+        }
+    }
+
+    /// Draw contours 
+    drawContours(src, contours, -1, Scalar(255), 2, 8);
 
     Mat cloudMat = Mat::zeros(orig.rows, orig.cols, CV_32F);
-    /// Put the circles into a matrix
-    for( size_t i = 0; i < circles.size(); i++ )
-    {
-        Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-
-        //If circle center is too close to bottom and right edge of image
-        if(center.x+30 >= src_gray.cols || center.y+30 >= src_gray.rows)
-        {
-            continue;
-        }
-
-        //Get 60x60 matrix around circle center
-        cv::Rect myROI(center.x - 30 >= 0 ? center.x-30 : 0, center.y - 30 >= 0 ? center.y-30 : 0, 60, 60);
-        Mat roi = src_gray(myROI);
-
-        //If the sum of all the pixels in the 60x60 mat is less than sumThreshold
-        //Then this circle is not encompassing mostly white pixels
-        double sum = cv::sum(roi)[0];
-        if(sum < sumThreshold)
-        {
-            continue;
-        }
-
-        int radius = cvRound(circles[i][2]);
-        circle(cloudMat, center, radius, Scalar(255), 1, 8, 0);
-        circle(src, center, radius, Scalar(255), 1, 8, 0);
-    }
-
     cvtColor(src_gray, src_gray, CV_GRAY2BGR);
 
     cv_bridge::CvImage out_msg;
