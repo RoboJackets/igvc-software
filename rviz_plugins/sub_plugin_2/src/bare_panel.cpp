@@ -1,7 +1,6 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLineEdit>
-
 #include "bare_panel.h"
 #include <string>
 
@@ -9,21 +8,30 @@ namespace bare
 {
 
 void BarePanel::subCallback(const igvc_msgs::velocity_pair& msg) {
-	std::string str=std::to_string((msg.left_velocity+msg.right_velocity)/2);
-	QString qstr = QString::fromStdString(str);
-	velocity_label->setText(qstr);
-	std::string str2=std::to_string(msg.left_velocity);
-	QString qstr2 = QString::fromStdString(str2);
-	velocity_left_label->setText(qstr2);
-	std::string str3=std::to_string(msg.right_velocity);
-	QString qstr3 = QString::fromStdString(str3);
-	velocity_right_label->setText(qstr3);	
+	speed = (msg.left_velocity+msg.right_velocity)/2;
+	std::string str=std::to_string(speed);
+	speedometer->setValue(speed);
+	// QString qstr = QString::fromStdString(str);
+	// velocity_label->setText(qstr);
+	// std::string str2=std::to_string(msg.left_velocity);
+	// QString qstr2 = QString::fromStdString(str2);
+	// velocity_left_label->setText(qstr2);
+	// std::string str3=std::to_string(msg.right_velocity);
+	// QString qstr3 = QString::fromStdString(str3);
+	// velocity_right_label->setText(qstr3);	
 }
+
 
 BarePanel::BarePanel( QWidget* parent )
   : rviz::Panel( parent )
 {
-	QHBoxLayout* velocity_layout = new QHBoxLayout;
+	speedometer = new Speedometer(parent);
+	QHBoxLayout* speedDisp = new QHBoxLayout;
+	speedDisp->addWidget( new QLabel( "SPEEDOMETER"));
+	speedDisp->addWidget(speedometer);
+
+
+	/*QHBoxLayout* velocity_layout = new QHBoxLayout;
 	velocity_layout->addWidget( new QLabel( "VELOCITY:" ) );
 	velocity_label = new QLabel("COOLBEFORE");
 	velocity_layout->addWidget( velocity_label );
@@ -37,11 +45,12 @@ BarePanel::BarePanel( QWidget* parent )
 	velocity_right_layout->addWidget( new QLabel( "VELOCITY_RIGHT:" ) );
 	velocity_right_label = new QLabel("COOLBEFORE");
 	velocity_right_layout->addWidget( velocity_right_label );
-
+*/
 	QVBoxLayout* layout = new QVBoxLayout;
-	layout->addLayout( velocity_layout );
+	/*layout->addLayout( velocity_layout );
 	layout->addLayout( velocity_left_layout );
-	layout->addLayout( velocity_right_layout);
+	layout->addLayout( velocity_right_layout);*/
+	layout->addLayout( speedDisp);
 	setLayout( layout );
 
 

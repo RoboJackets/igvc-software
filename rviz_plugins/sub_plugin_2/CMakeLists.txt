@@ -17,10 +17,12 @@ add_definitions(-DQT_NO_KEYWORDS)
 
 qt4_wrap_cpp(MOC_FILES
   src/bare_panel.h
+  src/speedometer.h
 )
 
 set(SOURCE_FILES
-  src/bare_panel.cpp 
+  src/bare_panel.cpp
+  src/speedometer.cpp
   ${MOC_FILES}
 )
 
@@ -28,4 +30,4 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${OGRE_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${OGRE_LIBRARIES}${QWT_LIBRARIES})
