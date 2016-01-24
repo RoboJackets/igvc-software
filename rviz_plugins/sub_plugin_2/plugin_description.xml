@@ -1,5 +1,5 @@
 <library path="lib/libsub_plugin_2">
-  <class name="bare/SubTest"
+  <class name="bare/Speedometer"
          type="bare::BarePanel"
          base_class_type="rviz::Panel">
     <description>
