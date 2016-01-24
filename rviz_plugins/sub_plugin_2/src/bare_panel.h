@@ -5,10 +5,11 @@
 #include <QLabel>
 #include <QApplication>
 
+
 #include <igvc_msgs/velocity_pair.h>
 
 #include <rviz/panel.h>
-
+#include "speedometer.h"
 class QLineEdit;
 
 namespace bare
@@ -22,6 +23,8 @@ namespace bare
 
     private:
       void subCallback(const igvc_msgs::velocity_pair &msg);
+      double speed;
+      Speedometer* speedometer;
 
     public Q_SLOTS:
 
