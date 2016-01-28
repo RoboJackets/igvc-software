@@ -94,15 +94,14 @@ int main(int argc, char** argv)
     search_problem.Speed = 1.0;
     search_problem.Baseline = baseline;
     search_problem.DeltaT = [](double distToStart)->double {
-        //return 0.66*(log2(distToStart + 1) + 0.1);
-        return 0.4;
+        return 0.66*(log2(distToStart + 1) + 0.1);
     };
     search_problem.MinimumOmega = -0.6;
     search_problem.MaximumOmega = 0.61;
     search_problem.DeltaOmega = 0.5;
     search_problem.PointTurnsEnabled = false;
     search_problem.ReverseEnabled = false;
-	search_problem.maxODeltaT = 0.1; //value for obstacle detection
+	search_problem.maxODeltaT = 0.1;
 
     ros::Rate rate(3);
     while(ros::ok())
