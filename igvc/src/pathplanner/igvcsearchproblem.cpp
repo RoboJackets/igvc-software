@@ -13,7 +13,6 @@ bool IGVCSearchProblem::isActionValid(SearchMove move, pcl::KdTreeFLANN<pcl::Poi
 		pcl::PointXYZ searchPoint(result.x , result.y ,0);
 		std::vector<int> pointIdxRadiusSearch;
    		std::vector<float> pointRadiusSquaredDistance;
-		std::cout << current << endl;
 		int neighboorsCount = kdtree.nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
 		if(neighboorsCount > 0) {
 			if(pointRadiusSquaredDistance[0] <= Threshold) {
