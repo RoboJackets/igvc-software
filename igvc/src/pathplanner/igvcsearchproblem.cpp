@@ -6,13 +6,14 @@ bool IGVCSearchProblem::isActionValid(SearchMove move, pcl::KdTreeFLANN<pcl::Poi
 {
 	auto deltat = move.DeltaT;
 	double current = 0.0;
-	while(current != deltat) {
-		current = (current + maxODeltaT) >= deltat ? deltat : (current + maxODeltaT);
+	while(current < (deltat + maxODeltaT)) {
+		current = current > deltat ? deltat : (current + maxODeltaT);
 		move.DeltaT = current;
     	SearchLocation result = getResult(start_state, move);
 		pcl::PointXYZ searchPoint(result.x , result.y ,0);
 		std::vector<int> pointIdxRadiusSearch;
    		std::vector<float> pointRadiusSquaredDistance;
+		std::cout << current << endl;
 		int neighboorsCount = kdtree.nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
 		if(neighboorsCount > 0) {
 			if(pointRadiusSquaredDistance[0] <= Threshold) {
