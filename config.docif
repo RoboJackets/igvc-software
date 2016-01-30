@@ -92,6 +92,7 @@ SETUP_SHA_FILES+=("./igvc/package.xml")
 TEST_COMMANDS=()
 TEST_COMMANDS+=( 'catkin_make igvc_msgs_gencpp;hack;A dummy test to fix broken dependencies' )
 TEST_COMMANDS+=( 'catkin_make;compile;A check to see if the code compiles' )
+TEST_COMMANDS+=( 'catkin_make run_tests;tests;A check to see if the tests pass' )
 
 # @RECCOMENDED
 # Clean command. Cleans the build files so there is no way the previous build can interfere. Add if you run
