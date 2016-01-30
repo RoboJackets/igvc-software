@@ -12,6 +12,8 @@ ros::NodeHandle *nhp;
 
 void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
+    ROS_INFO("CALLBACK");
+
     double absoluteMaxVel, maxVel, maxVelIncr;
     nhp->param(string("absoluteMaxVel"), absoluteMaxVel, 1.0);
     nhp->param(string("maxVel"), maxVel, 1.0);
@@ -49,7 +51,7 @@ int main(int argc, char** argv)
     cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
     
     ros::Subscriber joy_sub = nh.subscribe("/joy", 1, joyCallback);
-    
+
     ros::spin();
     
     delete nhp;
