@@ -18,12 +18,10 @@ public:
     }
 
     void motorsCallback(const igvc_msgs::velocity_pair::ConstPtr& msg) {
-      received = true;
     }
 
 protected:
     virtual void SetUp() {
-      received = false;
       while(!IsNodeReady()) {
         ros::spinOnce();
       }
@@ -40,22 +38,72 @@ protected:
     ros::NodeHandle handle;
     ros::Publisher mock_joy_pub;
     ros::Subscriber motor_sub;
-    bool received;
 
 };
 
-TEST_F(TestJoystickDriver, TestJoystickDriver) {
-  ros::Rate rate(1);
-
+TEST_F(TestJoystickDriver, FullForward) {
   sensor_msgs::Joy joy_msg;
   joy_msg.axes = {0, 1.0, 0, 1.0};
   joy_msg.buttons = {0, 0, 0, 0};
   mock_joy_pub.publish(joy_msg);
 
-  rate.sleep(); // Give message time to send
-  ros::spinOnce();
+  const igvc_msgs::velocity_pair::ConstPtr& response = ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
 
-  EXPECT_TRUE(received);
+  EXPECT_TRUE(response.get() != nullptr);
+  EXPECT_EQ(response->left_velocity, 1.0);
+  EXPECT_EQ(response->right_velocity, 1.0);
+}
+
+TEST_F(TestJoystickDriver, FullReverse) {
+  sensor_msgs::Joy joy_msg;
+  joy_msg.axes = {0, -1.0, 0, -1.0};
+  joy_msg.buttons = {0, 0, 0, 0};
+  mock_joy_pub.publish(joy_msg);
+
+  const igvc_msgs::velocity_pair::ConstPtr& response = ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
+
+  EXPECT_TRUE(response.get() != nullptr);
+  EXPECT_EQ(response->left_velocity, -1.0);
+  EXPECT_EQ(response->right_velocity, -1.0);
+}
+
+TEST_F(TestJoystickDriver, SpinRight) {
+  sensor_msgs::Joy joy_msg;
+  joy_msg.axes = {0, 1.0, 0, -1.0};
+  joy_msg.buttons = {0, 0, 0, 0};
+  mock_joy_pub.publish(joy_msg);
+
+  const igvc_msgs::velocity_pair::ConstPtr& response = ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
+
+  EXPECT_TRUE(response.get() != nullptr);
+  EXPECT_EQ(response->left_velocity, 1.0);
+  EXPECT_EQ(response->right_velocity, -1.0);
+}
+
+TEST_F(TestJoystickDriver, SpinLeft) {
+  sensor_msgs::Joy joy_msg;
+  joy_msg.axes = {0, -1.0, 0, 1.0};
+  joy_msg.buttons = {0, 0, 0, 0};
+  mock_joy_pub.publish(joy_msg);
+
+  const igvc_msgs::velocity_pair::ConstPtr& response = ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
+
+  EXPECT_TRUE(response.get() != nullptr);
+  EXPECT_EQ(response->left_velocity, -1.0);
+  EXPECT_EQ(response->right_velocity, 1.0);
+}
+
+TEST_F(TestJoystickDriver, HalfSpeedForward) {
+  sensor_msgs::Joy joy_msg;
+  joy_msg.axes = {0, 0.5, 0, 0.5};
+  joy_msg.buttons = {0, 0, 0, 0};
+  mock_joy_pub.publish(joy_msg);
+
+  const igvc_msgs::velocity_pair::ConstPtr& response = ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
+
+  EXPECT_TRUE(response.get() != nullptr);
+  EXPECT_EQ(response->left_velocity, 0.5);
+  EXPECT_EQ(response->right_velocity, 0.5);
 }
 
 int main(int argc, char **argv) {

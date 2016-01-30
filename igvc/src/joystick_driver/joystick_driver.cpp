@@ -12,8 +12,6 @@ ros::NodeHandle *nhp;
 
 void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
-    ROS_INFO("CALLBACK");
-
     double absoluteMaxVel, maxVel, maxVelIncr;
     nhp->param(string("absoluteMaxVel"), absoluteMaxVel, 1.0);
     nhp->param(string("maxVel"), maxVel, 1.0);
