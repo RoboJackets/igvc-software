@@ -1,13 +1,13 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLineEdit>
-#include "bare_panel.h"
+#include "speed_panel.h"
 #include <string>
 
-namespace bare
+namespace rviz_plugins
 {
 
-void BarePanel::subCallback(const igvc_msgs::velocity_pair& msg) {
+void SpeedPanel::subCallback(const igvc_msgs::velocity_pair& msg) {
 	speed = (msg.left_velocity+msg.right_velocity)/2;
 	std::string str=std::to_string(speed);
 	speedometer->setValue(speed);
@@ -22,7 +22,7 @@ void BarePanel::subCallback(const igvc_msgs::velocity_pair& msg) {
 }
 
 
-BarePanel::BarePanel( QWidget* parent )
+SpeedPanel::SpeedPanel( QWidget* parent )
   : rviz::Panel( parent )
 {
 	speedometer = new Speedometer(parent);
@@ -54,7 +54,7 @@ BarePanel::BarePanel( QWidget* parent )
 	setLayout( layout );
 
 
-	sub = nh_.subscribe("/encoders", 1, &BarePanel::subCallback, this);
+	sub = nh_.subscribe("/encoders", 1, &SpeedPanel::subCallback, this);
 
 	//connect( this, SIGNAL( changeText() ), output_topic_editor_, SLOT( setTextLabel() ));
 }
@@ -62,4 +62,4 @@ BarePanel::BarePanel( QWidget* parent )
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(bare::BarePanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(rviz_plugins::SpeedPanel,rviz::Panel )

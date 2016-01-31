@@ -39,7 +39,7 @@ void Speedometer::paintEvent(QPaintEvent *event)
     QColor needleColor(0,0,0);
 
     auto side = 200;
-    auto time = QTime::currentTime();
+    //auto time = QTime::currentTime();
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
