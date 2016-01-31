@@ -3,7 +3,7 @@
          type="bare::BarePanel"
          base_class_type="rviz::Panel">
     <description>
-      A panel widget that displats the eStop status.
+      A panel widget that displays the eStop status.
     </description>
   </class>
 </library>

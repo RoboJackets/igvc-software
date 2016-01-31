@@ -21,10 +21,6 @@ namespace bare
     private:
       void subCallback(const std_msgs::Bool &msg);
 
-    public Q_SLOTS:
-
-    protected Q_SLOTS:
-
     protected:
       ros::Subscriber sub;
       ros::NodeHandle nh_;
