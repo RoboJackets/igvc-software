@@ -15,7 +15,7 @@ using namespace pcl;
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
-void EnforceLength(Mat, int);
+void EnforceLength(Mat&, int);
 
 constexpr double radians(double degrees)
 {
@@ -38,9 +38,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     // 4. We know roughly how wide a line is going to be
 
     DetectLines(lineThickness, lineLength, lineAnchor, lineContinue);
-    EnforceContinuity(kernelResults, fin_img);
-
-    EnforceLength(fin_img, 20);
+//    EnforceContinuity(kernelResults, fin_img);
 
     resize(fin_img, fin_img, Size(src_img.cols, src_img.rows), 0, 0, INTER_LANCZOS4);
 //    cloud = toPointCloud(fin_img);
@@ -259,7 +257,7 @@ void LineDetector::initLineDetection() {
     //cerr << "DetectLines::Initing" << endl;
     lineThickness = 20;
     lineAnchor = 1;
-    lineContinue = 20;
+    lineContinue = 23;
     lineLength = 1;
     float karray[3][9][9] = {
             {
@@ -371,6 +369,23 @@ void LineDetector::DetectLines(int lineThickness, int lineLength, int lineAnchor
         threshold(kernelResults[i], kernelResults[i], ((float)lineContinue*lineContinue)/255, 255, CV_THRESH_BINARY);
         bitwise_or(working, kernelResults[i], working);
     }
+
+    cerr<<"working type is "<<working.type()<<endl<<endl;
+
+    EnforceLength(working, 30);
+
+    cvtColor(working, working, CV_GRAY2BGR);
+
+    cerr<<"working type is "<<working.type()<<endl;
+    cerr<<"working size is "<<working.size()<<endl;
+
+    cerr<<"src type is "<<src_img.type()<<endl;
+    cerr<<"src size is "<<src_img.size()<<endl;
+
+    cerr<<"dst type is "<<dst_img.type()<<endl;
+    cerr<<"dst size is "<<dst_img.size()<<endl;
+
+
     resize(working, dst_img, src_img.size(), src_img.type());
     //cerr << "lineContinue: " << lineContinue << endl;
 }
@@ -399,16 +414,25 @@ void LineDetector::MultiplyByComplements(Mat* images, Mat* complements, Mat* res
 }
 
 
-void EnforceLength(Mat img, int length) {
+void EnforceLength(Mat& img, int length) {
+
+    cout<<"I am in Enforce Length function call"<<endl<<endl;
+
     // Thresholding the line length using the area of the contours
     vector<vector<Point>> contours;
     vector<vector<Point>> contoursThreshold;
     vector<Vec4i> hierarchy;
-    findContours(img, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
-    for (int i = 0; i < contours.size(); ++i) {
-        double tempCArea = contourArea(contours[i]);
-        if (tempCArea < length * 3) {
+    cout<<"entering find contours"<<endl<<endl;
+
+    cerr<<"img type is "<<img.type()<<endl<<endl;
+
+    findContours(img, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+
+    cout<<"exiting find contours"<<endl<<endl;
+
+    for (unsigned int i = 0; i < contours.size(); ++i) {
+        if ((int) contours[i].size() < length) {
             contoursThreshold.push_back(contours[i]);
         }
     }
