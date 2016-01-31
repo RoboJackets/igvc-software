@@ -6,4 +6,11 @@
       A panel widget that displays the eStop status.
     </description>
   </class>
+  <class name="bare/speedometer"
+         type="rviz_plugins::SpeedPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget allowing simple diff-drive style robot base control.
+    </description>
+  </class>
 </library>

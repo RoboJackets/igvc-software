@@ -12,14 +12,14 @@
 #include "speedometer.h"
 class QLineEdit;
 
-namespace bare
+namespace rviz_plugins
 {
 
-  class BarePanel: public rviz::Panel
+  class SpeedPanel: public rviz::Panel
   {
     Q_OBJECT
     public:
-      BarePanel( QWidget* parent = 0 );
+      SpeedPanel( QWidget* parent = 0 );
 
     private:
       void subCallback(const igvc_msgs::velocity_pair &msg);
