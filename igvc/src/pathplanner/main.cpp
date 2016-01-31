@@ -102,6 +102,7 @@ int main(int argc, char** argv)
     search_problem.DeltaOmega = 0.5;
     search_problem.PointTurnsEnabled = false;
     search_problem.ReverseEnabled = false;
+	search_problem.maxODeltaT = 0.1;
 
     ros::Rate rate(3);
     while(ros::ok())
