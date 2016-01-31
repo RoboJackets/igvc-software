@@ -35,7 +35,7 @@
 
 #include "drive_widget.h"
 
-namespace teleop
+namespace test_plugins
 {
 
 // BEGIN_TUTORIAL

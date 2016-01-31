@@ -7,7 +7,7 @@
 
 class QLineEdit;
 
-namespace bare
+namespace test_plugins
 {
 
   class BarePanel: public rviz::Panel

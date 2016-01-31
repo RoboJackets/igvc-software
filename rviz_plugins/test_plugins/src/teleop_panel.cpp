@@ -41,7 +41,7 @@
 #include "drive_widget.h"
 #include "teleop_panel.h"
 
-namespace teleop
+namespace test_plugins
 {
 
 // BEGIN_TUTORIAL
@@ -196,5 +196,5 @@ void TeleopPanel::load( const rviz::Config& config )
 // loadable by pluginlib::ClassLoader must have these two lines
 // compiled in its .cpp file, outside of any namespace scope.
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(teleop::TeleopPanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(test_plugins::TeleopPanel,rviz::Panel )
 // END_TUTORIAL

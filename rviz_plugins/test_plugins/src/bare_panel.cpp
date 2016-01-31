@@ -7,7 +7,7 @@
 
 #include "bare_panel.h"
 
-namespace bare
+namespace test_plugins
 {
 
 BarePanel::BarePanel( QWidget* parent )
@@ -28,4 +28,4 @@ BarePanel::BarePanel( QWidget* parent )
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(bare::BarePanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(test_plugins::BarePanel,rviz::Panel)

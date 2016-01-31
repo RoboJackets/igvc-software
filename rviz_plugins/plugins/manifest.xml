@@ -1,13 +1,13 @@
 <package>
-  <description brief="RViz plugin tutorials">
+  <description brief="Rviz plugins for IGVC control">
 
-     Tutorials showing how to write plugins for RViz.
+     Extra panels for robot status updates
 
   </description>
-  <author>Dave Hershberger</author>
-  <license>BSD</license>
+  <author>Robojackets</author>
+  <license>CC3</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/rviz_plugin_tutorials</url>
+  <url>http://noruts.com/</url>
   <depend package="rviz"/>
   <depend package="tf"/>
   <depend package="message_filters"/>

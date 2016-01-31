@@ -26,13 +26,17 @@ add_definitions(-DQT_NO_KEYWORDS)
 qt4_wrap_cpp(MOC_FILES
   src/drive_widget.h
   src/teleop_panel.h
+  src/bare_panel.h
+  src/sub_panel.h
 )
 
 ## Here we specify the list of source files, including the output of
 ## the previous command which is stored in ``${MOC_FILES}``.
 set(SOURCE_FILES
   src/drive_widget.cpp
-  src/teleop_panel.cpp 
+  src/teleop_panel.cpp
+  src/bare_panel.cpp
+  src/sub_panel.cpp
   ${MOC_FILES}
 )
 

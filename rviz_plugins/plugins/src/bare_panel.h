@@ -2,14 +2,12 @@
 #define BARE_PANEL_H
 
 #include <ros/ros.h>
-#include <QLabel>
-#include <std_msgs/UInt8.h>
 
 #include <rviz/panel.h>
 
 class QLineEdit;
 
-namespace bare
+namespace rviz_plugins
 {
 
   class BarePanel: public rviz::Panel
@@ -18,9 +16,6 @@ namespace bare
     public:
       BarePanel( QWidget* parent = 0 );
 
-    private:
-      void subCallback(const std_msgs::UInt8 &msg);
-
     public Q_SLOTS:
 
     protected Q_SLOTS:
@@ -28,7 +23,7 @@ namespace bare
     protected:
       ros::Subscriber sub;
       ros::NodeHandle nh_;
-      QLabel* output_topic_editor_;
+      QLineEdit* output_topic_editor_;
 
   };
 
