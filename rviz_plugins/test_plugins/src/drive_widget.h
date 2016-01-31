@@ -31,7 +31,7 @@
 
 #include <QWidget>
 
-namespace teleop
+namespace test_plugins
 {
 
 // BEGIN_TUTORIAL

@@ -3,23 +3,27 @@
 
 #include <ros/ros.h>
 #include <QLabel>
-#include <std_msgs/Bool.h>
+#include <std_msgs/UInt8.h>
 
 #include <rviz/panel.h>
 
 class QLineEdit;
 
-namespace bare
+namespace rviz_plugins
 {
 
-  class BarePanel: public rviz::Panel
+  class SubPanel: public rviz::Panel
   {
     Q_OBJECT
     public:
-      BarePanel( QWidget* parent = 0 );
+      SubPanel( QWidget* parent = 0 );
 
     private:
-      void subCallback(const std_msgs::Bool &msg);
+      void subCallback(const std_msgs::UInt8 &msg);
+
+    public Q_SLOTS:
+
+    protected Q_SLOTS:
 
     protected:
       ros::Subscriber sub;

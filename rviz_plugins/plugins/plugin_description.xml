@@ -1,6 +1,6 @@
-<library path="lib/libeStop_plugin">
+<library path="lib/libplugins">
   <class name="bare/eStop"
-         type="bare::BarePanel"
+         type="rviz_plugins::EStopPanel"
          base_class_type="rviz::Panel">
     <description>
       A panel widget that displays the eStop status.

@@ -35,7 +35,7 @@
 
 class QLineEdit;
 
-namespace teleop
+namespace test_plugins
 {
 
 class DriveWidget;

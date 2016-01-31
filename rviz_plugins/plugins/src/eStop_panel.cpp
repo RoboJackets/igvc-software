@@ -4,12 +4,12 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
-#include "bare_panel.h"
+#include "eStop_panel.h"
 
-namespace bare
+namespace rviz_plugins
 {
 
-void BarePanel::subCallback(const std_msgs::Bool& msg) {
+void EStopPanel::subCallback(const std_msgs::Bool& msg) {
 	if (msg.data) {
 		output_topic_editor_->setStyleSheet("QLabel {color : green;}");
 		output_topic_editor_->setText("enabled");
@@ -20,7 +20,7 @@ void BarePanel::subCallback(const std_msgs::Bool& msg) {
 	}
 }
 
-BarePanel::BarePanel( QWidget* parent )
+EStopPanel::EStopPanel( QWidget* parent )
   : rviz::Panel( parent )
 {
 	QHBoxLayout* topic_layout = new QHBoxLayout;
@@ -32,7 +32,7 @@ BarePanel::BarePanel( QWidget* parent )
 	layout->addLayout( topic_layout );
 	setLayout( layout );
 
-	sub = nh_.subscribe("/robot_enabled", 1, &BarePanel::subCallback, this);
+	sub = nh_.subscribe("/robot_enabled", 1, &EStopPanel::subCallback, this);
 
 	//connect( this, SIGNAL( changeText() ), output_topic_editor_, SLOT( setTextLabel() ));
 }
@@ -40,4 +40,4 @@ BarePanel::BarePanel( QWidget* parent )
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(bare::BarePanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(rviz_plugins::EStopPanel,rviz::Panel )

@@ -14,11 +14,15 @@ link_directories( ${OGRE_LIBRARY_DIRS} )
 add_definitions(-DQT_NO_KEYWORDS)
 
 qt4_wrap_cpp(MOC_FILES
+  src/eStop_panel.h
   src/bare_panel.h
+  src/sub_panel.h
 )
 
 set(SOURCE_FILES
-  src/bare_panel.cpp 
+  src/eStop_panel.cpp
+  src/bare_panel.cpp
+  src/sub_panel.cpp
   ${MOC_FILES}
 )
 
