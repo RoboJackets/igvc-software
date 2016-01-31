@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
     
     ros::Subscriber joy_sub = nh.subscribe("/joy", 1, joyCallback);
-    
+
     ros::spin();
     
     delete nhp;
