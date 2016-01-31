@@ -3,7 +3,6 @@
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QLineEdit>
 
 #include "bare_panel.h"
 
@@ -26,13 +25,12 @@ BarePanel::BarePanel( QWidget* parent )
 {
 	QHBoxLayout* topic_layout = new QHBoxLayout;
 	topic_layout->addWidget( new QLabel( "eStop Status:" ) );
-	output_topic_editor_ = new QLabel("TEST");
+	output_topic_editor_ = new QLabel("No Signal");
 	topic_layout->addWidget( output_topic_editor_ );
 
 	QVBoxLayout* layout = new QVBoxLayout;
 	layout->addLayout( topic_layout );
 	setLayout( layout );
-	output_topic_editor_->setText("COOLBEFORE");
 
 	sub = nh_.subscribe("/robot_enabled", 1, &BarePanel::subCallback, this);
 
