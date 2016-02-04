@@ -26,7 +26,8 @@ public:
     double MinimumOmega;
     double MaximumOmega;
     double DeltaOmega;
-
+    double maxODeltaT;
+	
     SearchLocation getStartState()
     {
         return Start;
@@ -56,6 +57,8 @@ public:
     {
         return state.distTo(Goal);
     }
+
+    bool isActionValid(SearchMove move, pcl::KdTreeFLANN<pcl::PointXYZ> &kdtree, SearchLocation start_state);
 };
 
 #endif // IGVCSEARCHPROBLEM_H
