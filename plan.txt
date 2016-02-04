@@ -1,0 +1,22 @@
+https://github.com/RoboJackets/igvc-software/issues/47
+
+Terminology:
+	goal = waypoint in distance
+
+Problem:
+	as we get closer to goal, we plan too much and the path planner constantly thinks it has found a better path
+
+
+Possible solutions:
+	replan less often overall
+	check if there are obstacles we are avoiding? if not, then replan less often
+	figure out why it's oscillating and change that logic
+		it thinks the new path is better, so why does it think that?
+	compare to the previous path that is currently being followed (adjusted for movement since then) and decide if the new path is that much better (but how much?)
+	
+	
+Things to be aware of:
+	path is constantly being replanning at the moment (order of miliseconds)
+
+
+
