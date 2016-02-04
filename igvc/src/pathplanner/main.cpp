@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 
     search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
     search_problem.GoalThreshold = 1.0;
-    search_problem.Threshold = 0.8;
+    search_problem.Threshold = 0.5;
     search_problem.Speed = 1.0;
     search_problem.Baseline = baseline;
     search_problem.DeltaT = [](double distToStart)->double {
