@@ -13,10 +13,6 @@ using namespace pcl;
 
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
-//Used to threshold the sum of a 60x60 matrix whose values are between 0-255
-//Want mostly (>50%) white pixels (values around >200) in the matrix
-//60x60x200ish = 720,000/2 = ~400000
-const int sumThreshold = 400000;
 const int sizeThreshold = 200;
 const int rOrange = 190;
 const int gOrange = 60;
@@ -35,15 +31,19 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
 {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src = cv_ptr->image.clone();
+    int height = src.rows;
+    int width = src.cols;
 
     //Crops the image (removes sky)
     cv::Rect myROI(0, src.rows/2 - 100, src.cols, src.rows/2 - 50);
     src = src(myROI);
-    Mat orig = src.clone();
 
     cvtColor(src, src_gray, CV_BGR2GRAY);
 
-    //Find the mean and stddev of the grayscale image in order to do adaptive thresholding
+    /*
+     * Find the mean and stddev of the grayscale
+     * image in order to do adaptive thresholding
+     */
     Mat mean;
     Mat stddev;
     meanStdDev(src_gray, mean, stddev);
@@ -62,84 +62,88 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
     vector<vector<Point>> contours;
     findContours(src_gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
-    // Filter smaller contours
+    // Filter false positives - small contours and cone stripes
     for (vector<vector<Point>>::iterator it = contours.begin();
             it != contours.end(); ++it) {
-        vector<Point> curCont = *it;
-        if (curCont.size() <= sizeThreshold) {
-            contours.erase(it);
-            --it;
-        }
-    }
-    for (vector<vector<Point>>::iterator it = contours.begin();
-            it != contours.end(); ++it) {
-        // Get min / max Y and X
-        int minY = 10000;
-        int minX = 10000;
-        int maxY = 0;
-        int maxX = 0;
-        for (Point p : *it) {
-            int x = p.x;
-            if (x > maxX) {
-                maxX = x;
+        if ((*it).size() > sizeThreshold) {
+            // Find center in x frame
+            int minY = height;
+            int minX = width;
+            int maxY = 0;
+            int maxX = 0;
+            for (Point p : *it) {
+                int x = p.x;
+                if (x > maxX) {
+                    maxX = x;
+                }
+                if (x < minX) {
+                    minX = x;
+                }
             }
-            if (x < minX) {
-                minX = x;
-            }
-        }
+            int centerX = (minX + maxX) / 2;
 
-        int centerX = (minX + maxX) / 2;
-
-        for (Point p : *it) {
-            int x = p.x;
-            int y = p.y;
-            if (x == centerX && y > maxY) {
-                maxY = y;
-            }
-            if (x == centerX && y < minY) {
-                minY = y;
-            }
-        }
-
-        if (minY - 35 >= 0) {
-            // Delete if there is orange below or above
-            int blueAbove = 0;
-            int greenAbove = 0;
-            int redAbove = 0;
-            int blueBelow = 0;
-            int greenBelow = 0;
-            int redBelow = 0;
-            for (int j = 5; j < 36; j++) {
-                blueAbove += orig.at<Vec3b>(minY - j, centerX)[0];
-                greenAbove += orig.at<Vec3b>(minY - j, centerX)[1];
-                redAbove += orig.at<Vec3b>(minY - j, centerX)[2];
-                blueBelow += orig.at<Vec3b>(maxY + j, centerX)[0];
-                greenBelow += orig.at<Vec3b>(maxY + j, centerX)[1];
-                redBelow += orig.at<Vec3b>(maxY + j, centerX)[2];
-            }
-            blueAbove /= 30;
-            greenAbove /= 30;
-            redAbove /= 30;
-            blueBelow /= 30;
-            greenBelow /= 30;
-            redBelow /= 30;
-            if (getDiff(redAbove, rOrange) < 50
-                    && getDiff(greenAbove, gOrange) < 50
-                    && getDiff(blueAbove, bOrange) < 50
-                    && getDiff(redBelow, rOrange) < 50
-                    && getDiff(greenBelow, gOrange) < 50
-                    && getDiff(blueBelow, bOrange) < 50) {
-                contours.erase(it);
-                --it;
+            // Find centers of top and bottom edges
+            for (Point p : *it) {
+                int x = p.x;
+                int y = p.y;
+                if (x == centerX && y > maxY) {
+                    maxY = y;
+                }
+                if (x == centerX && y < minY) {
+                    minY = y;
+                }
             }
 
-            // Delete if the contour itself is orange
-            Vec3b intensity = orig.at<Vec3b>((minY + maxY) / 2, centerX);
-            uchar blue = intensity.val[0];
-            uchar green = intensity.val[1];
-            uchar red = intensity.val[2];
-            if (getDiff(red, rOrange) < 50 && getDiff(green, gOrange) < 50
-                    && getDiff(blue, bOrange) < 50) {
+            // Check if contour is within bounds of image
+            if (minY - 35 >= 0) {
+
+                // Average rgb values above and below the contour
+                int blueAbove = 0;
+                int greenAbove = 0;
+                int redAbove = 0;
+                int blueBelow = 0;
+                int greenBelow = 0;
+                int redBelow = 0;
+                Vec3b currentPixel;
+                for (int j = 5; j < 36; j++) {
+                    currentPixel = src.at<Vec3b>(minY - j, centerX);
+                    blueAbove += currentPixel[0];
+                    greenAbove += currentPixel[1];
+                    redAbove += currentPixel[2];
+                    currentPixel = src.at<Vec3b>(maxY + j, centerX);
+                    blueBelow += currentPixel[0];
+                    greenBelow += currentPixel[1];
+                    redBelow += currentPixel[2];
+                }
+                blueAbove /= 30;
+                greenAbove /= 30;
+                redAbove /= 30;
+                blueBelow /= 30;
+                greenBelow /= 30;
+                redBelow /= 30;
+
+                // Filter out contours with orange above and below
+                if (getDiff(redAbove, rOrange) < 50
+                        && getDiff(greenAbove, gOrange) < 50
+                        && getDiff(blueAbove, bOrange) < 50
+                        && getDiff(redBelow, rOrange) < 50
+                        && getDiff(greenBelow, gOrange) < 50
+                        && getDiff(blueBelow, bOrange) < 50) {
+                    contours.erase(it);
+                    --it;
+                }
+
+                // Delete if the contour itself is orange
+                Vec3b intensity = src.at<Vec3b>((minY + maxY) / 2, centerX);
+                uchar blue = intensity.val[0];
+                uchar green = intensity.val[1];
+                uchar red = intensity.val[2];
+                if (getDiff(red, rOrange) < 50 && getDiff(green, gOrange) < 50
+                        && getDiff(blue, bOrange) < 50) {
+                    contours.erase(it);
+                    --it;
+                }
+            } else {
                 contours.erase(it);
                 --it;
             }
@@ -148,16 +152,13 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
             --it;
         }
     }
-    /// Draw contours 
-    drawContours(src, contours, -1, Scalar(255), 2, 8);
 
-    Mat cloudMat = Mat::zeros(orig.rows, orig.cols, CV_32F);
-    cvtColor(src_gray, src_gray, CV_GRAY2BGR);
+    Mat cloudMat = Mat::zeros(height, width, CV_32F);
 
     cv_bridge::CvImage out_msg;
     out_msg.header   = msg->header;
     out_msg.encoding = msg->encoding;
-    out_msg.image    = src_gray;
+    out_msg.image    = src;
 
     cv_ptr->image = src;
     _pothole_filt_img.publish(cv_ptr->toImageMsg());
