@@ -13,4 +13,11 @@
       A panel widget allowing simple diff-drive style robot base control.
     </description>
   </class>
+  <class name="bare/battery"
+         type="rviz_plugins::BatPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget displaying battery level.
+    </description>
+  </class>
 </library>
