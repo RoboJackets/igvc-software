@@ -20,4 +20,11 @@
       A panel widget displaying battery level.
     </description>
   </class>
+  <class name="bare/uptime"
+         type="rviz_plugins::TimePanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget displaying uptime.
+    </description>
+  </class>
 </library>
