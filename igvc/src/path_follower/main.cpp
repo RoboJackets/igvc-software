@@ -12,7 +12,7 @@ using namespace chrono;
 action_pathConstPtr path;
 mutex path_mutex;
 
-int path_index = 0;
+size_t path_index = 0;
 bool path_reset = false;
 
 void newPath(const action_pathConstPtr &msg)

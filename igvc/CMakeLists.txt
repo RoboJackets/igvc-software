@@ -166,14 +166,11 @@ include_directories(
 ## Testing ##
 #############
 
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_igvc.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
-
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
+if(CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+    add_rostest_gtest(TestJoystickDriver test/test_joystick_driver.test src/tests/test_joystick_driver.cpp)
+    target_link_libraries(TestJoystickDriver ${catkin_LIBRARIES})
+endif()
 
 
 add_subdirectory(src/motor_controller)
