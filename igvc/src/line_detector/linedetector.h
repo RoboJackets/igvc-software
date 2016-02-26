@@ -34,18 +34,17 @@ public:
 private:
     void initLineDetection();
 
-    void DetectLines(int lineThickness, int lineLength, int lineAnchor, int lineContinue);
+    void DetectLines(int lineThickness);
     void WhitenessFilter(cv::Mat& hsv_image, cv::Mat& result);
     void MultiplyByComplements(cv::Mat* images, cv::Mat* complements, cv::Mat* results);
+    void EnforceLength(cv::Mat& img, int length);
+
+
 
     // line thickness in pixels
     int lineThickness;
-    // line threshold to be a start
-    int lineAnchor;
     // line threshold to continue
-    int lineContinue;
-    // line length minimum to consider
-    int lineLength;
+    int lineLengthThreshold;
 
     const int linewidthpixels = 13;
 
@@ -61,8 +60,6 @@ private:
     void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
-
-    void EnforceContinuity(cv::Mat* directions, cv::Mat& out);
 
     // ROS COMMUNICATION
     image_transport::ImageTransport _it;
