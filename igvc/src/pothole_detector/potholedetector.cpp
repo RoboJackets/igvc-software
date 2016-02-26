@@ -21,9 +21,9 @@ const int minRadius = 10;
 // Radius for averaging pixels in a circle around the center
 const int whiteSampleRadius = 30;
 // Size for filtering out contours that are too small
-const int sizeThreshold = 200;
+const int contourSizeThreshold = 200;
 
-// TODO
+// Thresholds for detecting orange barrels
 const int lightROrange = 230;
 const int lightGOrange = 180;
 const int lightBOrange = 180;
@@ -159,14 +159,14 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
         // Find contours within this small region of interest around the circle
         // Use an offset to align with the entire src image (which has a cropped sky)
         vector<vector<Point>> contours;
-        Point offset(center.x - (cropSize * 2), center.y - cropSize);
+        Point offset(xStart, yStart);
         findContours(src_gray_roiAroundCircle, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE, offset);
 
         // Here is the start of our code to filter out false positives....... :/
         // Traverse through each single contour first
         for (vector<vector<Point>>::iterator it = contours.begin(); it != contours.end(); ++it) {
             // Filter out contours that are too small
-            if ((*it).size() > sizeThreshold) {
+            if ((*it).size() > contourSizeThreshold) {
                 int minY = src_gray.rows;
                 int minX = src_gray.cols;
                 int maxY = 0;
@@ -213,9 +213,9 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                     redAbove += currentPixel[2];
 
                     // Draw the sampling on src
-                    currentPixel[0] = 0;
-                    currentPixel[1] = 0;
-                    currentPixel[2] = 0;
+                    currentPixel[0] = 230;
+                    currentPixel[1] = 30;
+                    currentPixel[2] = 30;
                     src.at<Vec3b>(minY - j, centerX) = currentPixel;
 
                     currentPixel = src.at<Vec3b>(maxY + j, centerX);
@@ -224,9 +224,9 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                     redBelow += currentPixel[2];
 
                     // Draw the sampling on src
-                    currentPixel[0] = 0;
-                    currentPixel[1] = 0;
-                    currentPixel[2] = 0;
+                    currentPixel[0] = 230;
+                    currentPixel[1] = 30;
+                    currentPixel[2] = 30;
                     src.at<Vec3b>(maxY + j, centerX) = currentPixel;
                 }
                 blueAbove /= 30;
