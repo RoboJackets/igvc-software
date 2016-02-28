@@ -21,6 +21,8 @@ qt4_wrap_cpp(MOC_FILES
   src/speedometer.h
   src/bat_panel.h
   src/time_panel.h
+  src/launch_panel.h
+  src/my_thread.h
 )
 
 set(SOURCE_FILES
@@ -29,6 +31,8 @@ set(SOURCE_FILES
   src/speedometer.cpp
   src/bat_panel.cpp
   src/time_panel.cpp
+  src/launch_panel.cpp
+  src/my_thread.cpp
   ${MOC_FILES}
 )
 
