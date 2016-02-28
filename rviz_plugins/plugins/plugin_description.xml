@@ -27,4 +27,11 @@
       A panel widget displaying uptime.
     </description>
   </class>
+  <class name="bare/launch"
+         type="rviz_plugins::LaunchPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget to starting launch files.
+    </description>
+  </class>
 </library>
