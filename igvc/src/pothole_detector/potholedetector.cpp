@@ -23,14 +23,6 @@ const int whiteSampleRadius = 30;
 // Size for filtering out contours that are too small
 const int contourSizeThreshold = 200;
 
-// Thresholds for detecting orange barrels
-const int lightROrange = 230;
-const int lightGOrange = 180;
-const int lightBOrange = 180;
-const int darkROrange = 140;
-const int darkGOrange = 50;
-const int darkBOrange = 40;
-
 int getDiff(int a, int b) {
     return abs(a - b);
 }
@@ -86,10 +78,12 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     vector<Vec3f> circles;
     HoughCircles(src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows / 8, 50, 10, minRadius, maxRadius);
 
+    // All the contours that will be published to the pointcloud
+    vector<vector<Point>> allContours;
+
     // Traverse through all the circles, and do more detection for each one
     for(size_t i = 0; i < circles.size(); i++ ) {
         Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-        int radius = circles[i][2];
 
         // If the circle is too close to the top / bottom edges, filter
         if (center.y <= 100 || center.y >= src_gray.rows - 100) {
@@ -141,20 +135,15 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                 }
             }
         }
-        bluePotholeAverage /= (3.141592 * whiteSampleRadius * whiteSampleRadius);
-        greenPotholeAverage /= (3.141592 * whiteSampleRadius * whiteSampleRadius);
-        redPotholeAverage /= (3.141592 * whiteSampleRadius * whiteSampleRadius);
+        bluePotholeAverage /= (M_PI * whiteSampleRadius * whiteSampleRadius);
+        greenPotholeAverage /= (M_PI * whiteSampleRadius * whiteSampleRadius);
+        redPotholeAverage /= (M_PI * whiteSampleRadius * whiteSampleRadius);
 
         // Our adaptive thresholding comes into play here.
         // Filter out the circle if the average color of the image is not an offset less than the average color of the center circle sample.
         if (bluePotholeAverage - blueImageAverage < 75 || greenPotholeAverage - greenImageAverage < 40 || redPotholeAverage - redImageAverage < 20) {
             continue;
         }
-
-        // Draw these sampling points on the image
-        rectangle(src, roiAroundCircle, Scalar(255), 2, 8, 0);
-        circle(src, center, whiteSampleRadius, Scalar(255), 1, 8, 0);
-        circle(src, center, radius, Scalar(255), 2, 8, 0);
 
         // Find contours within this small region of interest around the circle
         // Use an offset to align with the entire src image (which has a cropped sky)
@@ -212,22 +201,10 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                     greenAbove += currentPixel[1];
                     redAbove += currentPixel[2];
 
-                    // Draw the sampling on src
-                    currentPixel[0] = 230;
-                    currentPixel[1] = 30;
-                    currentPixel[2] = 30;
-                    src.at<Vec3b>(minY - j, centerX) = currentPixel;
-
                     currentPixel = src.at<Vec3b>(maxY + j, centerX);
                     blueBelow += currentPixel[0];
                     greenBelow += currentPixel[1];
                     redBelow += currentPixel[2];
-
-                    // Draw the sampling on src
-                    currentPixel[0] = 230;
-                    currentPixel[1] = 30;
-                    currentPixel[2] = 30;
-                    src.at<Vec3b>(maxY + j, centerX) = currentPixel;
                 }
                 blueAbove /= 30;
                 greenAbove /= 30;
@@ -239,26 +216,10 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                 // We now have the average color of the line above and below the contour.
                 // Use these averages to determine if the contour is a white strip on the traffic barrel.
                 // Aka if there is orange above and below the contour, filter it!
-                if (redAbove > greenAbove + 50 && redAbove > blueAbove + 50 && redBelow > greenBelow + 50 && redBelow > blueBelow + 50) {
+                if (redAbove > greenAbove + 50 && redAbove > blueAbove + 50
+                        && redBelow > greenBelow + 50 && redBelow > blueBelow + 50) {
                     contours.erase(it);
                     --it;
-                } else {
-                    // Determine the color in the middle of the contour
-                    Vec3b intensity = src.at<Vec3b>((minY + maxY) / 2, centerX);
-                    uchar blue = intensity.val[0];
-                    uchar green = intensity.val[1];
-                    uchar red = intensity.val[2];
-
-                    // Delete if the middle of the contour itself is orange.
-                    if ((getDiff(red, darkROrange) < 50
-                            && getDiff(green, darkGOrange) < 50
-                            && getDiff(blue, darkBOrange) < 50)
-                            || (getDiff(red, lightROrange) < 50
-                            && getDiff(green, lightGOrange) < 50
-                            && getDiff(blue, lightBOrange) < 50)) {
-                        contours.erase(it);
-                        --it;
-                    }
                 }
             } else {
                 contours.erase(it);
@@ -266,16 +227,14 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
             }
         }
 
-        // Print out the average bgr values for debuging
-        // cerr << "ALL: " + to_string(blueImageAverage) + ", " + to_string(greenImageAverage) + ", " + to_string(redImageAverage) << endl;
-        // cerr << "POTHOLE: " + to_string(bluePotholeAverage) + ", " + to_string(greenPotholeAverage) + ", " + to_string(redPotholeAverage) << endl;
-
-        // Draw all the contours on the src image
-        drawContours(src, contours, -1, Scalar(20, 236, 27), 3, 8);
-
-        // Get a pointcloud of the points using a transform
-        cloud = toPointCloud(contours, orig.rows, orig.cols);
+        // Push all of the remaining good points to the main vector of contours
+        for (vector<Point> goodContour : contours) {
+            allContours.push_back(goodContour);
+        }
     }
+
+    // Convert the contours to a pointcloud
+    cloud = toPointCloud(allContours, orig.rows, orig.cols);
 
     cv_bridge::CvImage out_msg;
     out_msg.header   = msg->header;
@@ -285,50 +244,46 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv_ptr->image = src;
     _pothole_filt_img.publish(cv_ptr->toImageMsg());
     _pothole_thres.publish(out_msg.toImageMsg());
-
-    // FIXME
-    // _pothole_cloud.publish(cloud);
+    _pothole_cloud.publish(cloud);
 }
 
 PotholeDetector::PotholeDetector(ros::NodeHandle &handle)
     : gaussian_size(7),
       _it(handle),
       tf_listener(handle) {
-    _src_img = _it.subscribe("/stereo/right/image_raw", 1, &PotholeDetector::img_callback, this);
+    _src_img = _it.subscribe("/left/image_rect_color", 1, &PotholeDetector::img_callback, this);
     _pothole_filt_img = _it.advertise("/pothole_filt_img", 1);
     _pothole_thres = _it.advertise("/pothole_thres", 1);
     _pothole_cloud = handle.advertise<PCLCloud>("/pothole_cloud", 100);
 }
 
-PointCloud<PointXYZ>::Ptr PotholeDetector::toPointCloud(vector<vector<Point>> contours, int height, int width) {
+PointCloud<PointXYZ>::Ptr PotholeDetector::toPointCloud(vector<vector<Point>> &contours, int height, int width) {
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
-    // FIXME
-    // tf::StampedTransform transform;
-    // tf_listener.lookupTransform("/base_footprint", "/stereo/right/image_raw", ros::Time(0), transform);
-    // double roll, pitch, yaw;
-    // tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
-    // auto origin_z = transform.getOrigin().getZ();
-    // auto origin_y = transform.getOrigin().getY();
-    // auto HFOV = toRadians(66.0);
-    // auto VFOV = toRadians(47.6);
-    // pitch = -roll;
-    // // Because conventions are different and I'm in the middle of comp, and give me a break.
-    //
-    // for (vector<vector<Point>>::iterator it = contours.begin(); it != contours.end(); ++it) {
-    //     for (Point p : *it) {
-    //         int xP = p.x;
-    //         int yP = p.y + (height / 2 - 100);
-    //
-    //         auto pitch_offset = ((float) (yP - height / 2) / height) * VFOV;
-    //         auto y = origin_z /tan(pitch + pitch_offset) + origin_y;
-    //
-    //         auto theta = ((float) (xP - width / 2) / width) * HFOV;
-    //         auto x = y * tan(theta);
-    //
-    //         cloud->points.push_back(PointXYZ(x, y, 0));
-    //     }
-    // }
-    //
-	// cloud->header.frame_id = "base_footprint";
+    tf::StampedTransform transform;
+    tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
+    double roll, pitch, yaw;
+    tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
+    auto origin_z = transform.getOrigin().getZ();
+    auto origin_y = transform.getOrigin().getY();
+    auto HFOV = toRadians(66.0);
+    auto VFOV = toRadians(47.6);
+    pitch = -roll;
+
+    for (vector<Point> contour : contours) {
+        for (Point p : contour) {
+            int xP = p.x;
+            int yP = p.y + (height / 2 - 100);
+
+            auto pitch_offset = ((float) (yP - height / 2) / height) * VFOV;
+            auto y = origin_z /tan(pitch + pitch_offset) + origin_y;
+
+            auto theta = ((float) (xP - width / 2) / width) * HFOV;
+            auto x = y * tan(theta);
+
+            cloud->points.push_back(PointXYZ(x, y, 0));
+        }
+    }
+
+	cloud->header.frame_id = "base_footprint";
 	return cloud;
 }
