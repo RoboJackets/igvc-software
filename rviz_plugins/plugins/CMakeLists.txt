@@ -19,12 +19,22 @@ qt4_wrap_cpp(MOC_FILES
   src/eStop_panel.h
   src/speed_panel.h
   src/speedometer.h
+  src/bat_panel.h
+  src/time_panel.h
+  src/launch_panel.h
+  src/my_thread.h
+  src/node_panel.h
 )
 
 set(SOURCE_FILES
   src/eStop_panel.cpp
   src/speed_panel.cpp
   src/speedometer.cpp
+  src/bat_panel.cpp
+  src/time_panel.cpp
+  src/launch_panel.cpp
+  src/my_thread.cpp
+  src/node_panel.cpp
   ${MOC_FILES}
 )
 
