@@ -34,4 +34,11 @@
       A panel widget to starting launch files.
     </description>
   </class>
+  <class name="bare/node"
+         type="rviz_plugins::NodePanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget to starting ros nodes.
+    </description>
+  </class>
 </library>
