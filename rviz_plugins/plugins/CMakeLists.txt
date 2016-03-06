@@ -23,6 +23,7 @@ qt4_wrap_cpp(MOC_FILES
   src/time_panel.h
   src/launch_panel.h
   src/my_thread.h
+  src/node_panel.h
 )
 
 set(SOURCE_FILES
@@ -33,6 +34,7 @@ set(SOURCE_FILES
   src/time_panel.cpp
   src/launch_panel.cpp
   src/my_thread.cpp
+  src/node_panel.cpp
   ${MOC_FILES}
 )
 
