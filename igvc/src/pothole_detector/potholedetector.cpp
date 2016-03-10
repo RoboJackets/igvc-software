@@ -1,11 +1,4 @@
 #include "potholedetector.h"
-#include <opencv2/video/video.hpp>
-#include <sensor_msgs/image_encodings.h>
-#include <pcl_ros/point_cloud.h>
-#include <camera_info_manager/camera_info_manager.h>
-#include <math.h>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
 
 using namespace std;
 using namespace cv;
