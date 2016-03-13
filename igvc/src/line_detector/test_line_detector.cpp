@@ -6,6 +6,8 @@
 // g++ `pkg-config --cflags opencv` -o test_line_detector test_line_detector.cpp `pkg-config --libs opencv` -std=c++11
 
 #include <opencv2/opencv.hpp>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
 #include <vector>
 
@@ -194,6 +196,41 @@ void DetectLines(int lineThickness, int lineLength, int lineAnchor, int lineCont
         threshold(kernelResults[i], kernelResults[i], ((float)lineContinue*lineContinue)/255, 255, CV_THRESH_BINARY);
         bitwise_or(working, kernelResults[i], working);
     }
+	
+	// Hough Probabilistic Line Detection
+	int erosion_type = MORPH_CROSS;
+	int erosion_size = 1;
+	Mat element = getStructuringElement( erosion_type,
+                                       Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+                                       Point( erosion_size, erosion_size ) );
+
+	vector<Vec4i> lines;
+
+        // Thresholding the line length using the area of the contours
+        vector<vector<Point>> contours;
+        vector<vector<Point>> contoursThreshold;
+        vector<Vec4i> hierarchy;
+        findContours(working, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+
+        for (int i = 0; i < contours.size(); ++i) {
+          double tempCArea = contourArea(contours[i]);
+          if (tempCArea >= lineLength * lineThickness) {
+            contoursThreshold.push_back(contours[i]);
+          }
+        }
+
+	cvtColor(working, working, CV_GRAY2BGR);
+
+        Scalar color(255, 0, 0);
+        drawContours(working, contoursThreshold, -1, color, 3);
+
+
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+        line( working, Point(lines[i][0], lines[i][1]),
+            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 3, 8 );
+    }
+
     resize(working, dst_img, src_img.size(), src_img.type());
     //cerr << "lineContinue: " << lineContinue << endl;
 }
