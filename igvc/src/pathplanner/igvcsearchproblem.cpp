@@ -2,6 +2,27 @@
 
 using namespace pcl;
 
+bool IGVCSearchProblem::isActionValid(SearchMove move, pcl::KdTreeFLANN<pcl::PointXYZ> &kdtree, SearchLocation start_state) 
+{
+	auto deltat = move.DeltaT;
+	double current = 0.0;
+	while(current < (deltat + maxODeltaT)) {
+		current = current > deltat ? deltat : (current + maxODeltaT);
+		move.DeltaT = current;
+    	SearchLocation result = getResult(start_state, move);
+		pcl::PointXYZ searchPoint(result.x , result.y ,0);
+		std::vector<int> pointIdxRadiusSearch;
+   		std::vector<float> pointRadiusSquaredDistance;
+		int neighboorsCount = kdtree.nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
+		if(neighboorsCount > 0) {
+			if(pointRadiusSquaredDistance[0] <= Threshold) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
 {
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
@@ -21,11 +42,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     for(double W = Wmin; W <= Wmax; W+=delta)
     {
         SearchMove move(Speed, W, deltat);
-        SearchLocation result = getResult(state, move);
-        pcl::PointXYZ searchPoint(result.x, result.y,0);
-        std::vector<int> pointIdxRadiusSearch;
-        std::vector<float> pointRadiusSquaredDistance;
-        if ( Map->empty() || kdtree.radiusSearch(searchPoint, Threshold, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0 )
+        if (Map->empty() || isActionValid(move, kdtree, state))
         {
             acts.push_back(move);
         }
@@ -35,11 +52,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
         for(double W = Wmin; W <= Wmax; W+=delta)
         {
             SearchMove move = SearchMove(-Speed, W, deltat);
-            SearchLocation result = getResult(state, move);
-            pcl::PointXYZ searchPoint = pcl::PointXYZ(result.x, result.y,0);
-            std::vector<int> pointIdxRadiusSearch;
-            std::vector<float> pointRadiusSquaredDistance;
-            if ( Map->empty() || kdtree.radiusSearch(searchPoint, Threshold, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0 )
+            if ( Map->empty() || isActionValid(move, kdtree, state))
             {
                 acts.push_back(move);
             }
@@ -47,20 +60,12 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     }
     if(PointTurnsEnabled){
         SearchMove move(0, TurningSpeed, deltat);
-        SearchLocation result = getResult(state, move);
-        pcl::PointXYZ searchPoint(result.x, result.y,0);
-        std::vector<int> pointIdxRadiusSearch;
-        std::vector<float> pointRadiusSquaredDistance;
-        if ( Map->empty() || kdtree.radiusSearch(searchPoint, Threshold, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0 )
+        if ( Map->empty() || isActionValid(move, kdtree, state))
         {
             acts.push_back(move);
         }
         move = SearchMove(0, -TurningSpeed, deltat);
-        result = getResult(state, move);
-        searchPoint = pcl::PointXYZ(result.x, result.y,0);
-        pointIdxRadiusSearch.clear();
-        pointRadiusSquaredDistance.clear();
-        if ( kdtree.radiusSearch(searchPoint, Threshold, pointIdxRadiusSearch, pointRadiusSquaredDistance) == 0 )
+        if (isActionValid(move, kdtree, state))
         {
             acts.push_back(move);
         }
