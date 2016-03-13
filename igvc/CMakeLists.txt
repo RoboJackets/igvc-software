@@ -169,7 +169,9 @@ include_directories(
 if(CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
     add_rostest_gtest(TestJoystickDriver test/test_joystick_driver.test src/tests/test_joystick_driver.cpp)
+    add_rostest_gtest(TestPathPlanner test/test_pathplanner.test src/tests/test_pathplanner.cpp)
     target_link_libraries(TestJoystickDriver ${catkin_LIBRARIES})
+    target_link_libraries(TestPathPlanner ${catkin_LIBRARIES})
 endif()
 
 
