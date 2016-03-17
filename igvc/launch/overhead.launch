@@ -1,8 +1,0 @@
-<!-- camera.launch -->
-<!--
-    
-    -->
-<launch>
-    <!-- Camera Node -->
-    <node name="overheadTransform" pkg="igvc" type="overheadTransform" />
-</launch>
