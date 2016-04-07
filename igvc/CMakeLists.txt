@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   laser_geometry
   tf
   pcl_ros
+  rviz
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -193,3 +194,4 @@ add_subdirectory(src/dashboard)
 add_subdirectory(src/path_follower)
 add_subdirectory(src/pidtester)
 add_subdirectory(src/local_mapper)
+add_subdirectory(src/rviz_plugins)
