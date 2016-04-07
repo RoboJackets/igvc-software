@@ -4,6 +4,8 @@
 #include <sensor_msgs/image_encodings.h>
 #include <pcl_ros/point_cloud.h>
 #include <queue>
+#include <chrono>
+#include <ctime>
 
 using namespace std;
 using namespace cv;
@@ -19,9 +21,13 @@ constexpr double radians(double degrees)
 }
 
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
-    cerr << "CALLBACK CALLED" << endl;
+    // chrono::time_point<chrono::system_clock> start, end; // instantiate time to use
+    // start = chrono::system_clock::now();
+
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src_img = cv_ptr->image;
+    dst_img = Mat::zeros(src_img.size(), src_img.type());
+    fin_img = Mat::zeros(src_img.size(), src_img.type());
 
     // What separates lines from other objects?
     // 1. Lines are whiter than their surroundings
@@ -29,12 +35,23 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     // 3. A section of a line has two other line sections adjascent to it
     // 4. We know roughly how wide a line is going to be
 
-    DetectLines(lineThickness, lineLength, lineAnchor, lineContinue);
-    EnforceContinuity(kernelResults, fin_img);
+    DetectLines(lineThickness);
 
-    resize(fin_img, fin_img, Size(src_img.cols, src_img.rows), 0, 0, INTER_LANCZOS4);
+    EnforceLength(working, lineLengthThreshold);
+
+    resize(working, fin_img, Size(src_img.cols, src_img.rows), 0, 0, INTER_LANCZOS4);
+
     cloud = toPointCloud(fin_img);
     _line_cloud.publish(cloud);
+
+    cvtColor(fin_img, fin_img, CV_GRAY2BGR);
+    cv_ptr->image = fin_img;
+    _filt_img.publish(cv_ptr->toImageMsg());
+
+    // end = chrono::system_clock::now();
+    // chrono::duration<double> elapsedTime = end - start;
+
+    // cerr<<elapsedTime.count();
 }
 
 typedef struct Node {
@@ -50,155 +67,12 @@ typedef struct Node {
     }
 } Node;
 
-void LineDetector::EnforceContinuity(Mat* directions, Mat& out) {
-    cerr << "Enforcing Continuity" << endl;
-    unsigned int iterations = 300;
-    int minpathlength = 20;
-    Mat gradient = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC1);
-    Mat fin_img = Mat::zeros(directions[0].rows, directions[0].cols, CV_8UC3);
-    for(size_t i = 0; i < KERNAL_COUNT; i++) {
-        Mat bgr[3];
-        split(directions[i], bgr);
-        bitwise_and(bgr[0], (0b00000001 << i), bgr[0]);
-        bitwise_or(gradient, bgr[0], gradient);
-    }
-    cerr << "Reached checkpoint 1" << endl;
-    auto getneighbors = [](shared_ptr<Node> n, Mat& gradient) {
-        auto similarbits = [](unsigned char a, unsigned char b) {
-            return ((a == b) | (a == b << 1) | (a == b >> 1) | (129 == (a | b)));
-        };
-        vector <shared_ptr<Node> > neighbors;
-        if(!n) return neighbors;
-        Point p = n->point;
-        const unsigned char g = gradient.at<uchar>(p);
-        bool forward = true;
-        int px = n->prev ? (n->point.x > n->prev->point.x ? 1 : -1) : n->length;
-        int py = n->prev ? (n->point.y > n->prev->point.y ? 1 : -1) : n->length;
-
-        if (g & 0b00010000) {           // forward -> y new < y old
-            if (py > 0) forward = false;
-            px = 0;
-            py = -2;
-        } else if (g & 0b00000001) {    // forward -> x new > x old
-            if(px < 0) forward = false;
-            px = 2;
-            py = 0;
-        } else if (g & 0b00000010) {    // forward -> x new > x old
-            if(px < 0) forward = false;
-            px = 2;
-            py = -1;
-        } else if (g & 0b00000100) {    // forward -> x new > x old
-            if(px < 0 || py > 0) forward = false;
-            px = 2;
-            py = -2;
-        } else if (g & 0b00001000) {    // forward -> y new < y old
-            if(py > 0) forward = false;
-            px = 1;
-            py = -2;
-        } else if (g & 0b00100000) {    // forward -> y new < y old
-            if(py > 0) forward = false;
-            px = -1;
-            py = -2;
-        } else if (g & 0b01000000) {    // forward -> y new < y old
-            if(px > 0 || py > 0) forward = false;
-            px = -2;                   //            x new < x old
-            py = -2;
-        } else if (g & 0b10000000) {    // forward -> x new < x old
-            if(px > 0) forward = false;
-            px = -2;
-            py = -1;
-        }
-        if(!forward) {
-            px *= -1;
-            py *= -1;
-        }
-        if (g) {
-            for (int dx = -1; dx < 2; dx++) {
-                for (int dy = -1; dy < 2; dy++) {
-                    Point newp(p.x + px + dx, p.y + py + dy);
-                    if (newp.x < gradient.cols &&
-                        newp.x >= 0 &&
-                        newp.y < gradient.rows &&
-                        newp.y >= 0)
-                        if (similarbits(gradient.at<uchar>(newp), g)) {
-                            neighbors.push_back(make_shared<Node>(n, newp, (n->length > 0) ? (n->length + 1) : (n->length - 1)));
-                        }
-
-                }
-            }
-        }
-        gradient.at<uchar>(p) = 0;
-
-        return neighbors;
-    };
-    cerr << "Reached checkpoint 2" << endl;
-
-    Mat randlineinds;
-
-    findNonZero(gradient, randlineinds);
-
-    randShuffle(randlineinds);
-
-    cerr << "Reached checkpoint 3" << endl;
-    for(size_t i = 0; i < iterations && i < randlineinds.total(); i++) {
-
-        Mat gradientcopy = gradient.clone();
-        vector<shared_ptr<Node> > frontier;
-        shared_ptr<Node> start = make_shared<Node>(nullptr, randlineinds.at<Point>(i), 1);
-        shared_ptr<Node> trats = make_shared<Node>(nullptr, randlineinds.at<Point>(i), -1);
-        frontier.push_back(trats);
-        frontier.push_back(start);
-
-        shared_ptr<Node> current = start;
-        shared_ptr<Node> bestpathforward = start;
-        shared_ptr<Node> bestpathbackward = trats;
-
-        while(!frontier.empty()) {
-            current = frontier.back();
-            frontier.pop_back();
-
-            if (current->length > 0) {
-                if (current->length > bestpathforward->length)
-                    bestpathforward = current;
-            } else {
-                if (current->length < bestpathbackward->length)
-                    bestpathbackward = current;
-            }
-
-            vector<shared_ptr<Node>> neighbors = getneighbors(current, gradientcopy);
-            if(neighbors.empty()) continue;
-            for(shared_ptr<Node>& n : neighbors)
-                frontier.push_back(n);
-        }
-
-        if(bestpathforward->length - bestpathbackward->length > minpathlength) {
-
-            current = bestpathforward;
-            while (current) {
-                fin_img.at<Vec3b>(current->point) = Vec3b(255, 255, 255);
-                current = current->prev;
-            }
-            current = bestpathbackward;
-            while (current) {
-                fin_img.at<Vec3b>(current->point) = Vec3b(255, 255, 255);
-                current = current->prev;
-            }
-        }
-        cv_ptr->image = fin_img;
-        cerr << "Publishing to filt_img" << endl;
-        _filt_img.publish(cv_ptr->toImageMsg());
-        Mat channels[3];
-        split(fin_img, channels);
-        out = channels[0];
-    }
-    cerr << "Reached checkpoint 4" << endl;
-}
-
 LineDetector::LineDetector(ros::NodeHandle &handle)
       : _it(handle)
       , tf_listener(handle)
 {
-    _src_img = _it.subscribe("/left/image_rect_color", 1, &LineDetector::img_callback, this);
+     cout<<"Running"<<endl;
+    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
 	  _filt_img = _it.advertise("/filt_img", 1);
     _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
     initLineDetection();
@@ -233,16 +107,15 @@ PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
             }
         }
     }
-	cloud->header.frame_id = "base_footprint";
-	return cloud;
+    cloud->header.frame_id = "base_footprint";
+    return cloud;
 }
 
 void LineDetector::initLineDetection() {
-    //cerr << "DetectLines::Initing" << endl;
+    cerr << "DetectLines::Initing" << endl;
     lineThickness = 20;
-    lineAnchor = 1;
-    lineContinue = 20;
-    lineLength = 1;
+    lineLengthThreshold = 30;
+
     float karray[3][9][9] = {
             {
                     {-1,   -1,    -1,    -1,    -1,    -1,    -1,    -1,    -1},
@@ -314,8 +187,7 @@ void LineDetector::initLineDetection() {
 }
 
 
-void LineDetector::DetectLines(int lineThickness, int lineLength, int lineAnchor, int lineContinue) {
-    dst_img = Mat::zeros(src_img.size(), src_img.type());
+void LineDetector::DetectLines(int lineThickness) {
 
     // Resize the image such that the lines are approximately 3 pixels wide
     //cerr << "DetectLines::Reducing Image" << endl;
@@ -344,17 +216,13 @@ void LineDetector::DetectLines(int lineThickness, int lineLength, int lineAnchor
     //cerr << "DetectLines::Multiplying Results" << endl;
     MultiplyByComplements(kernelResults, complementResults, kernelResults);
 
-    // LineDrawing implementation reduces detection to single pixel wide lines of a minimum width
-//    Mat* detectedLines = new Mat(LineDrawing(geometricResults, lineAnchor, lineContinue, lineLength));
-
     working = Mat::zeros(kernelResults[0].size(), kernelResults[0].type());
     //cerr << "DetectLines::Thresholding Results" << endl;
     for(int i = 0; i < KERNAL_COUNT; i++) {
-        threshold(kernelResults[i], kernelResults[i], ((float)lineContinue*lineContinue)/255, 255, CV_THRESH_BINARY);
+        // threshold(kernelResults[i], kernelResults[i], ((float)lineContinue*lineContinue)/255, 255, CV_THRESH_BINARY);
+        adaptiveThreshold(kernelResults[i], kernelResults[i], 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY, 9, -1.85);
         bitwise_or(working, kernelResults[i], working);
     }
-    resize(working, dst_img, src_img.size(), src_img.type());
-    //cerr << "lineContinue: " << lineContinue << endl;
 }
 
 void LineDetector::WhitenessFilter(Mat& hsv_image, Mat& fin_img) {
@@ -380,3 +248,22 @@ void LineDetector::MultiplyByComplements(Mat* images, Mat* complements, Mat* res
     }
 }
 
+
+void LineDetector::EnforceLength(Mat& img, int length) {
+    // Thresholding the line length using the area of the contours
+    vector<vector<Point>> contours;
+    vector<vector<Point>> contoursThreshold;
+    vector<Vec4i> hierarchy;
+
+    Mat copy = img.clone();
+    findContours(copy, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+
+    for (unsigned int i = 0; i < contours.size(); ++i) {
+        if ((int) contours[i].size() < length) {
+            contoursThreshold.push_back(contours[i]);
+        }
+    }
+
+    Scalar color(0, 0, 0);
+    drawContours(img, contoursThreshold, -1, color, 3);
+}
