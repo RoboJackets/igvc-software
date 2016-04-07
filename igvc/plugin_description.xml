@@ -1,0 +1,44 @@
+<library path="lib/librviz_plugins">
+  <class name="rviz_plguins/eStop"
+         type="EStopPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget that displays the eStop status.
+    </description>
+  </class>
+  <class name="rviz_plguins/speedometer"
+         type="SpeedPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget allowing simple diff-drive style robot base control.
+    </description>
+  </class>
+  <class name="rviz_plguins/battery"
+         type="BatPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget displaying battery level.
+    </description>
+  </class>
+  <class name="rviz_plguins/uptime"
+         type="TimePanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget displaying uptime.
+    </description>
+  </class>
+  <class name="rviz_plguins/launch"
+         type="LaunchPanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget to starting launch files.
+    </description>
+  </class>
+  <class name="rviz_plguins/node"
+         type="NodePanel"
+         base_class_type="rviz::Panel">
+    <description>
+      A panel widget to starting ros nodes.
+    </description>
+  </class>
+</library>
