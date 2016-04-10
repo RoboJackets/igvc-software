@@ -4,6 +4,9 @@
 #include "speed_panel.h"
 #include <string>
 
+namespace rviz_plugins
+{
+
 void SpeedPanel::subCallback(const igvc_msgs::velocity_pair& msg) {
 	speed = (msg.left_velocity+msg.right_velocity)/2;
 	std::string str=std::to_string(speed);
@@ -56,5 +59,7 @@ SpeedPanel::SpeedPanel( QWidget* parent )
 	//connect( this, SIGNAL( changeText() ), output_topic_editor_, SLOT( setTextLabel() ));
 }
 
+}
+
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(SpeedPanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(rviz_plugins::SpeedPanel,rviz::Panel )

@@ -15,6 +15,9 @@
 
 #include "node_panel.h"
 
+namespace rviz_plugins
+{
+
 void NodePanel::handleButton() {
 	MyThread* myThread = new MyThread();
 	QString cmd = "rosrun igvc " + output_topic_editor_->currentText();
@@ -51,5 +54,7 @@ NodePanel::NodePanel( QWidget* parent )
 	setLayout( layout );
 }
 
+}
+
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(NodePanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(rviz_plugins::NodePanel,rviz::Panel )

@@ -6,6 +6,9 @@
 
 #include "time_panel.h"
 
+namespace rviz_plugins
+{
+
 void TimePanel::timeCallback(const std_msgs::UInt8& msg) {
 	char buf[80];
 	struct tm tstruct;
@@ -35,5 +38,7 @@ TimePanel::TimePanel( QWidget* parent )
 	//connect( this, SIGNAL( changeText() ), output_topic_editor_, SLOT( setTextLabel() ));
 }
 
+}
+
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(TimePanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(rviz_plugins::TimePanel,rviz::Panel )

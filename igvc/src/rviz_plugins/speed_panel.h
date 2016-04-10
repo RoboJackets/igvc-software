@@ -12,6 +12,9 @@
 #include "speedometer.h"
 class QLineEdit;
 
+namespace rviz_plugins
+{
+
 class SpeedPanel: public rviz::Panel
 {
   Q_OBJECT
@@ -35,5 +38,7 @@ class SpeedPanel: public rviz::Panel
     QLabel* velocity_left_label;
 
 };
+
+}
 
 #endif // BARE_PANEL_H
