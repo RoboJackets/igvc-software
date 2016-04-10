@@ -9,6 +9,9 @@
 
 class QLineEdit;
 
+namespace rviz_plugins
+{
+
 class EStopPanel: public rviz::Panel
 {
   Q_OBJECT
@@ -24,5 +27,7 @@ class EStopPanel: public rviz::Panel
     QLabel* output_topic_editor_;
 
 };
+
+}
 
 #endif // BARE_PANEL_H

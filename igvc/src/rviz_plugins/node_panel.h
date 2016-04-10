@@ -14,6 +14,9 @@
 #include <QPushButton>
 #include <QComboBox>
 
+namespace rviz_plugins
+{
+
 class NodePanel: public rviz::Panel
 {
   Q_OBJECT
@@ -36,5 +39,7 @@ class NodePanel: public rviz::Panel
     QPushButton *m_button;
 
 };
+
+}
 
 #endif // BARE_PANEL_H

@@ -11,6 +11,9 @@
 
 class QLineEdit;
 
+namespace rviz_plugins
+{
+
 class TimePanel: public rviz::Panel
 {
   Q_OBJECT
@@ -31,5 +34,7 @@ class TimePanel: public rviz::Panel
     time_t start;
 
 };
+
+}
 
 #endif // BARE_PANEL_H

@@ -15,6 +15,9 @@
 
 #include "launch_panel.h"
 
+namespace rviz_plugins
+{
+
 void LaunchPanel::handleButton() {
 	MyThread* myThread = new MyThread();
 	QString cmd = "roslaunch igvc " + output_topic_editor_->currentText();
@@ -52,5 +55,7 @@ LaunchPanel::LaunchPanel( QWidget* parent )
 	setLayout( layout );
 }
 
+}
+
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(LaunchPanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(rviz_plugins::LaunchPanel,rviz::Panel )

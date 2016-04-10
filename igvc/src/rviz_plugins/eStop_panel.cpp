@@ -6,6 +6,9 @@
 
 #include "eStop_panel.h"
 
+namespace rviz_plugins
+{
+
 void EStopPanel::subCallback(const std_msgs::Bool& msg) {
 	if (msg.data) {
 		output_topic_editor_->setStyleSheet("QLabel {color : green;}");
@@ -34,5 +37,7 @@ EStopPanel::EStopPanel( QWidget* parent )
 	//connect( this, SIGNAL( changeText() ), output_topic_editor_, SLOT( setTextLabel() ));
 }
 
+}
+
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(EStopPanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(rviz_plugins::EStopPanel,rviz::Panel )

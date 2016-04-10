@@ -6,6 +6,9 @@
 
 #include "bat_panel.h"
 
+namespace rviz_plugins
+{
+
 void BatPanel::batCallback(const std_msgs::UInt8& msg) {
 	char str[4];
 	sprintf(str, "%u", msg.data);
@@ -30,5 +33,7 @@ BatPanel::BatPanel( QWidget* parent )
 	//connect( this, SIGNAL( changeText() ), output_topic_editor_, SLOT( setTextLabel() ));
 }
 
+}
+
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(BatPanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(rviz_plugins::BatPanel,rviz::Panel )
