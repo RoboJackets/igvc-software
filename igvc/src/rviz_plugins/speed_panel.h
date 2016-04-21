@@ -1,5 +1,5 @@
-#ifndef BARE_PANEL_H
-#define BARE_PANEL_H
+#ifndef SPEED_PANEL_H
+#define SPEED_PANEL_H
 
 #include <ros/ros.h>
 #include <QLabel>
@@ -41,4 +41,4 @@ class SpeedPanel: public rviz::Panel
 
 }
 
-#endif // BARE_PANEL_H
+#endif // SPEED_PANEL_H

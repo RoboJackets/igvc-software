@@ -1,5 +1,5 @@
-#ifndef BARE_PANEL_H
-#define BARE_PANEL_H
+#ifndef ESTOP_PANEL_H
+#define ESTOP_PANEL_H
 
 #include <ros/ros.h>
 #include <QLabel>
@@ -30,4 +30,4 @@ class EStopPanel: public rviz::Panel
 
 }
 
-#endif // BARE_PANEL_H
+#endif // ESTOP_PANEL_H

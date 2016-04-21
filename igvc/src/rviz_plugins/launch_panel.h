@@ -1,5 +1,5 @@
-#ifndef BARE_PANEL_H
-#define BARE_PANEL_H
+#ifndef LAUNCH_PANEL_H
+#define LAUNCH_PANEL_H
 
 #include <ros/ros.h>
 #include <QLabel>
@@ -42,4 +42,4 @@ class LaunchPanel: public rviz::Panel
 
 }
 
-#endif // BARE_PANEL_H
+#endif // LAUNCH_PANEL_H

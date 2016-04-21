@@ -1,5 +1,5 @@
-#ifndef BARE_PANEL_H
-#define BARE_PANEL_H
+#ifndef BAT_PANEL_H
+#define BAT_PANEL_H
 
 #include <ros/ros.h>
 #include <QLabel>
@@ -34,4 +34,4 @@ class BatPanel: public rviz::Panel
 
 }
 
-#endif // BARE_PANEL_H
+#endif // BAT_PANEL_H
