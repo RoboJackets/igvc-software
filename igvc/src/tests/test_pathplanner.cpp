@@ -13,11 +13,10 @@
 #include <algorithm>
 #include "../pathplanner/SearchProblem.hpp"
 #include <pcl/kdtree/kdtree_flann.h>
+//#include <transform_datatypes.h>
 
 class TestPathPlanner : public testing::Test {
 
-	
-	// motor_sub(handle.subscribe("/motors", 1, &TestJoystickDriver::motorsCallback, this)
 public:
     TestPathPlanner()
       : handle(),
@@ -73,7 +72,7 @@ protected:
 TEST_F(TestPathPlanner, returnsPath) {
   	//map publish
     pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-    map_cloud->points.push_back (pcl::PointXYZ(1.0,0.0,0.0));
+    //map_cloud->points.push_back (pcl::PointXYZ(1.0,0.0,0.0));
     mock_map_pub.publish(map_cloud);
     
     // pose publish
@@ -136,6 +135,7 @@ TEST_F(TestPathPlanner, waypointTooFar) {
     
     const nav_msgs::Path::ConstPtr& disp_path_resp = ros::topic::waitForMessage<nav_msgs::Path>(disp_path_sub.getTopic(), ros::Duration(1));
     EXPECT_TRUE(disp_path_resp.get() == nullptr);
+    
 }
 
 TEST_F(TestPathPlanner, straightPath) {
@@ -172,32 +172,31 @@ TEST_F(TestPathPlanner, straightPath) {
     const nav_msgs::Path::ConstPtr& disp_path_resp = ros::topic::waitForMessage<nav_msgs::Path>(disp_path_sub.getTopic(), ros::Duration(1));
     EXPECT_TRUE(disp_path_resp.get() != nullptr);
     
-    //EXPECT_TRUE(disp_path_resp->poses[0].pose.position == *pose);
-    std::cerr << "left = " << path_resp->actions[0].left_velocity << std::endl;
-    std::cerr << "right = " << path_resp->actions[0].right_velocity << std::endl;
-    //EXPECT_TRUE(path_resp->actions[0].left_velocity >= 1.18);
-    //EXPECT_TRUE(path_resp->actions[0].right_velocity >= 1.18);
+    EXPECT_TRUE(path_resp->actions[0].left_velocity >= 0.8);
+    EXPECT_TRUE(path_resp->actions[0].right_velocity >= 0.8);
 }
 
 TEST_F(TestPathPlanner, test) {
   	//map publish
     pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-    map_cloud->points.push_back (pcl::PointXYZ(1.0,0.0,0.0));
+    //map_cloud->points.push_back (pcl::PointXYZ(1.0,0.0,0.0));
     mock_map_pub.publish(map_cloud);
-    
     // pose publish
     geometry_msgs::PoseStamped::Ptr pose (new geometry_msgs::PoseStamped);
     pose->pose.position.x = 0.0;
     pose->pose.position.y = 0.0;
     pose->pose.position.z = 0.0;
     pose->pose.orientation.x = 1.0;
+    pose->pose.orientation.y = 0.0;
+    pose->pose.orientation.z = 0.0;
+    pose->pose.orientation.w = 0.0;
     mock_pose_pub.publish(pose);
     
     
     //waypoint publish
     geometry_msgs::PointStamped::Ptr waypoint (new geometry_msgs::PointStamped);
-    waypoint->point.x = 2.0;
-    waypoint->point.y = 0.0;
+    waypoint->point.x = 3.0;
+    waypoint->point.y = 10.0;
     waypoint->point.z = 0.0;
     mock_waypoint_pub.publish(waypoint);
     
@@ -211,8 +210,6 @@ TEST_F(TestPathPlanner, test) {
     const nav_msgs::Path::ConstPtr& disp_path_resp = ros::topic::waitForMessage<nav_msgs::Path>(disp_path_sub.getTopic(), ros::Duration(1));
     EXPECT_TRUE(disp_path_resp.get() != nullptr);
     
-    //EXPECT_TRUE(disp_path_resp->poses[0].pose.position == *pose);
-    
     pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
     kdtree.setInputCloud(expanded_resp);
     std::vector<int> pointIdxRadiusSearch;
@@ -222,10 +219,8 @@ TEST_F(TestPathPlanner, test) {
     	kdtree.nearestKSearch(current, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
     	EXPECT_TRUE(pointRadiusSquaredDistance[0] >= 0.5);
     }
-    
     EXPECT_TRUE(path_resp->actions[0].left_velocity != 0.0);
     EXPECT_TRUE(path_resp->actions[0].right_velocity != 0.0);
-    //geometry_msgs::Point temp = disp_path_resp->poses[0].pose.position;
 }
 
 int main(int argc, char **argv) {
