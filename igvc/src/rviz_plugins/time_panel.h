@@ -1,5 +1,5 @@
-#ifndef BARE_PANEL_H
-#define BARE_PANEL_H
+#ifndef TIME_PANEL_H
+#define TIME_PANEL_H
 
 #include <ros/ros.h>
 #include <QLabel>
@@ -37,4 +37,4 @@ class TimePanel: public rviz::Panel
 
 }
 
-#endif // BARE_PANEL_H
+#endif // TIME_PANEL_H

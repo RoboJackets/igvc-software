@@ -1,5 +1,5 @@
-#ifndef BARE_PANEL_H
-#define BARE_PANEL_H
+#ifndef NODE_PANEL_H
+#define NODE_PANEL_H
 
 #include <ros/ros.h>
 #include <QLabel>
@@ -42,4 +42,4 @@ class NodePanel: public rviz::Panel
 
 }
 
-#endif // BARE_PANEL_H
+#endif // NODE_PANEL_H
