@@ -31,7 +31,7 @@ TimePanel::TimePanel( QWidget* parent )
 	QVBoxLayout* layout = new QVBoxLayout;
 	layout->addLayout( topic_layout );
 	setLayout( layout );
-	output_topic_editor_->setText("COOLBEFORE");
+	output_topic_editor_->setText("No Signal");
 
 	sub = nh_.subscribe("/battery", 1, &TimePanel::timeCallback, this);
 
