@@ -11,6 +11,9 @@
 
 #include "my_thread.h"
 
+#include "num_button.h"
+
+#include <QVBoxLayout>
 #include <QPushButton>
 #include <QComboBox>
 
@@ -24,6 +27,7 @@ class NodePanel: public rviz::Panel
     NodePanel( QWidget* parent = 0 );
 
   private Q_SLOTS:
+    void closeNode(int num);
     void handleButton();
 
   public Q_SLOTS:
@@ -37,6 +41,11 @@ class NodePanel: public rviz::Panel
     time_t start;
     bool doOnce;
     QPushButton *m_button;
+    NumButton *close_btn;
+    NumButton *test_btn;
+    std::vector<MyThread*> myThreads;
+    int curThread;
+    QVBoxLayout* layout;
 
 };
 

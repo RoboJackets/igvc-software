@@ -34,7 +34,7 @@ LaunchPanel::LaunchPanel( QWidget* parent )
 	start = time(0);
 
 	QHBoxLayout* topic_layout = new QHBoxLayout;
-	QDir recoredDir("../../igvc/launch/");
+	QDir recoredDir("igvc/launch/");
 	recoredDir.setNameFilters(QStringList()<<"*.launch");
     QStringList allFiles = recoredDir.entryList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst);
 	output_topic_editor_ = new QComboBox();
