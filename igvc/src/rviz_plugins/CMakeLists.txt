@@ -21,6 +21,7 @@ qt4_wrap_cpp(MOC_FILES
 	launch_panel.h
 	my_thread.h
 	node_panel.h
+	num_button.h
 )
 
 set(SOURCE_FILES
@@ -32,6 +33,7 @@ set(SOURCE_FILES
 	launch_panel.cpp
 	my_thread.cpp
 	node_panel.cpp
+	num_button.cpp
 	${MOC_FILES})
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})

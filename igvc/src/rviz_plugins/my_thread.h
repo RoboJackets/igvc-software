@@ -11,6 +11,7 @@ protected:
 
 public:
     void setCmd(const char*);
+    void close();
 
     public Q_SLOTS:
 
@@ -18,4 +19,5 @@ public:
 
 protected:
     char cmd[100];
+    QProcess* proc;
 };

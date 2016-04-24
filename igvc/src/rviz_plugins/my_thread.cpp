@@ -16,7 +16,7 @@ using namespace std;
 
 void MyThread::run()
 {
-	QProcess* proc = new QProcess();
+	proc = new QProcess();
 	std::string strCmd(cmd);
 	std::string test = ("gnome-terminal -x bash -c \"" + strCmd + "\"");
 	const char* cstrCmd = test.c_str();
@@ -27,4 +27,9 @@ void MyThread::run()
 void MyThread::setCmd(const char* command)
 {
 	std::strcpy (cmd, command);
+}
+
+void MyThread::close()
+{
+	proc->close();
 }
