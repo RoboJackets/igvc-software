@@ -40,6 +40,8 @@ public:
      * \return An array containing the read bytes.
      */
     char* read(int numBytes);
+
+    void flush();
     
     /*! \brief Reads bytes from the serial port until \n or \r is found.
      * \return String containing the bytes read excluding the newline.
