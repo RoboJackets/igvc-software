@@ -75,6 +75,7 @@ void setup()
 
   lastCmdTime = millis();
   lastLoopTime = millis();
+  float dT_sec;
 
   Serial.println();
   Serial.flush();
@@ -86,7 +87,6 @@ boolean gotCommand = false;
 void loop()
 {
   gotCommand = false;
-  long s = millis();
   while(Serial.available())
   {
     if(Serial.read() == '$')
@@ -97,13 +97,14 @@ void loop()
       gotCommand = true;
     }
   }
-  long e = millis();
   if(gotCommand)
   {
     Serial.print('$');
     Serial.print(actualSpeedL);
     Serial.print(',');
     Serial.print(actualSpeedR);
+    Serial.print(',');
+    Serial.print(dT);
     Serial.print('\n');
   }
   //Serial.println(tickDataLeft);
@@ -116,7 +117,7 @@ void loop()
     PWM_R = 0;
   }
 
-  float dT_sec = (float)( millis() - lastLoopTime ) / 1000.0;
+  dT_sec = (float)( millis() - lastLoopTime ) / 1000.0;
   lastLoopTime = millis();
   actualSpeedL = ( metersPerTick * tickDataLeft ) / dT_sec;
   actualSpeedR = ( metersPerTick * tickDataRight ) / dT_sec;
