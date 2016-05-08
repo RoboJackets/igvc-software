@@ -47,15 +47,7 @@ int main(int argc, char** argv)
         ROS_ERROR_STREAM("Motor Controller serial port failed to open.");
         return -1;
     }
-    
-    auto line = port.readln();
-    while(ros::ok() && line.compare("Ready"))
-    {
-        ROS_INFO_STREAM("Waiting for arduino. " << line);
-        line = port.readln();
-        usleep(250);
-    }
-
+    port.flush();
     ROS_INFO_STREAM("Motor Controller ready.");
     
     ros::Rate rate(10);
@@ -71,7 +63,6 @@ int main(int argc, char** argv)
         port.write(msg);
         
         string ret = port.readln();
-        
         try {
             if(!ret.empty())
             {

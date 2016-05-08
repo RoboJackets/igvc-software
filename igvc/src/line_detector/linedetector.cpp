@@ -72,7 +72,7 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
       , tf_listener(handle)
 {
      cout<<"Running"<<endl;
-    _src_img = _it.subscribe("/stereo/left/image_raw", 1, &LineDetector::img_callback, this);
+    _src_img = _it.subscribe("/left/image_rect_color", 1, &LineDetector::img_callback, this);
 	  _filt_img = _it.advertise("/filt_img", 1);
     _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
     initLineDetection();
