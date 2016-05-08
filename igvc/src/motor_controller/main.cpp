@@ -68,7 +68,7 @@ int main(int argc, char** argv)
             {
                 size_t dollar = ret.find('$');
                 size_t comma = ret.find(',');
-                size_t comma2 = ret.find(',');
+                size_t comma2 = ret.find_last_of(',');
                 size_t end = ret.find('\n');
                 string leftStr = ret.substr(dollar+1, comma-dollar-1);
                 string rightStr = ret.substr(comma+1, comma2-comma-1);
