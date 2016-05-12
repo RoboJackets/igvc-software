@@ -39,12 +39,12 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 
     EnforceLength(working, lineLengthThreshold);
 
-    cvtColor(working, working, CV_GRAY2BGR);
     resize(working, fin_img, Size(src_img.cols, src_img.rows), 0, 0, INTER_LANCZOS4);
 
     cloud = toPointCloud(fin_img);
     _line_cloud.publish(cloud);
 
+    cvtColor(fin_img, fin_img, CV_GRAY2BGR);
     cv_ptr->image = fin_img;
     _filt_img.publish(cv_ptr->toImageMsg());
 
