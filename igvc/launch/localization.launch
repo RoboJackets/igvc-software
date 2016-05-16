@@ -41,7 +41,7 @@
       <!-- input remapping -->
       <remap from="/imu/data" to="/imu"/>
       <remap from="/odometry/filtered" to="/odometry"/>
-      <remap from="/gps/fix" to="/gps_odom"/>
+      <remap from="/gps/fix" to="/fix"/>
 
       <!-- can do output remapping also -->
 
