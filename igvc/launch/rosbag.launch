@@ -5,5 +5,5 @@
     -->
 <launch>
     <node pkg="rosbag" type="record" name="record" output="screen"
-    args="-a -x '(.*)image_raw(.*)|(.*)image_mono(.*)|(.*)points(.*)|(.*)disparity(.*)' " />
+    args="-a -x '(.*)image(.*)*'" /> <!-- (?<!/left/image_rect_color)$' " /> -->
 </launch>

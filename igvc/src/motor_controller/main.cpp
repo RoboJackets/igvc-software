@@ -47,15 +47,7 @@ int main(int argc, char** argv)
         ROS_ERROR_STREAM("Motor Controller serial port failed to open.");
         return -1;
     }
-    
-    auto line = port.readln();
-    while(ros::ok() && line.compare("Ready"))
-    {
-        ROS_INFO_STREAM("Waiting for arduino. " << line);
-        line = port.readln();
-        usleep(250);
-    }
-
+    port.flush();
     ROS_INFO_STREAM("Motor Controller ready.");
     
     ros::Rate rate(10);
@@ -71,18 +63,20 @@ int main(int argc, char** argv)
         port.write(msg);
         
         string ret = port.readln();
-        
         try {
             if(!ret.empty())
             {
                 size_t dollar = ret.find('$');
                 size_t comma = ret.find(',');
+                size_t comma2 = ret.find_last_of(',');
                 size_t end = ret.find('\n');
                 string leftStr = ret.substr(dollar+1, comma-dollar-1);
-                string rightStr = ret.substr(comma+1, end-comma-1);
+                string rightStr = ret.substr(comma+1, comma2-comma-1);
+                string deltaT = ret.substr(comma2+1, end-comma2-1);
                 igvc_msgs::velocity_pair enc_msg;
                 enc_msg.left_velocity = atof(leftStr.c_str());
                 enc_msg.right_velocity = atof(rightStr.c_str());
+                enc_msg.duration = atof(deltaT.c_str());
                 enc_pub.publish(enc_msg);
             } else {
                 ROS_ERROR_STREAM("Empty return from arduino.\t" << ret);

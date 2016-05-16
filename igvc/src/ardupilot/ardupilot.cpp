@@ -36,7 +36,7 @@ int main(int argc, char** argv)
         {
             sensor_msgs::Imu msg;
             
-            msg.header.frame_id = "/imu";
+            msg.header.frame_id = "imu";
             msg.header.stamp = ros::Time::now();
             
             try

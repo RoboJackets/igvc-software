@@ -28,6 +28,11 @@ SerialPort::SerialPort(string device, int baud)
     }
 }
 
+void SerialPort::flush()
+{
+    ::tcflush(port.lowest_layer().native_handle(), TCIOFLUSH);
+}
+
 SerialPort::~SerialPort()
 {
     port.close();
@@ -86,7 +91,7 @@ string SerialPort::readln()
     string line = "";
     while(true)
     {
-        char in = read();
+        char in = read();	
         if(in == '\n')
             return line;
         if(in == '\r')
