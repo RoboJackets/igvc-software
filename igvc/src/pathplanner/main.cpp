@@ -112,6 +112,8 @@ int main(int argc, char** argv)
          * Long paths take forever to compute, and will freeze up this node.
          */
         auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal);
+        cerr<<"dist: "<<distance_to_goal<<endl<<"waypoint: "<<received_waypoint<<endl;
+        cerr<<"num pub: "<<disp_path_pub.getNumSubscribers()<<endl;
         if(!received_waypoint || distance_to_goal == 0 || distance_to_goal > 60)
             continue;
 
@@ -119,7 +121,7 @@ int main(int argc, char** argv)
         // TODO only replan if needed.
         auto path = GraphSearch::AStar(search_problem, expanded_callback);
 
-        if(disp_path_pub.getNumSubscribers() > 0)
+        if(act_path_pub.getNumSubscribers() > 0)
         {
             nav_msgs::Path disp_path_msg;
             disp_path_msg.header.stamp = ros::Time::now();
