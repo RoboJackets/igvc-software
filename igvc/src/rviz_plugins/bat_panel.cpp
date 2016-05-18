@@ -4,18 +4,18 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 
-#include "bare_panel.h"
+#include "bat_panel.h"
 
-namespace bare
+namespace rviz_plugins
 {
 
-void BarePanel::subCallback(const std_msgs::UInt8& msg) {
+void BatPanel::batCallback(const std_msgs::UInt8& msg) {
 	char str[4];
 	sprintf(str, "%u", msg.data);
 	output_topic_editor_->setText(str);
 }
 
-BarePanel::BarePanel( QWidget* parent )
+BatPanel::BatPanel( QWidget* parent )
   : rviz::Panel( parent )
 {
 	QHBoxLayout* topic_layout = new QHBoxLayout;
@@ -26,9 +26,9 @@ BarePanel::BarePanel( QWidget* parent )
 	QVBoxLayout* layout = new QVBoxLayout;
 	layout->addLayout( topic_layout );
 	setLayout( layout );
-	output_topic_editor_->setText("COOLBEFORE");
+	output_topic_editor_->setText("No Signal");
 
-	sub = nh_.subscribe("/battery", 1, &BarePanel::subCallback, this);
+	sub = nh_.subscribe("/battery", 1, &BatPanel::batCallback, this);
 
 	//connect( this, SIGNAL( changeText() ), output_topic_editor_, SLOT( setTextLabel() ));
 }
@@ -36,4 +36,4 @@ BarePanel::BarePanel( QWidget* parent )
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(bare::BarePanel,rviz::Panel )
+PLUGINLIB_EXPORT_CLASS(rviz_plugins::BatPanel,rviz::Panel )
