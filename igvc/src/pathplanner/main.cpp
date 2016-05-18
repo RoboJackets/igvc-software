@@ -101,6 +101,7 @@ int main(int argc, char** argv)
     search_problem.DeltaOmega = 0.5;
     search_problem.PointTurnsEnabled = false;
     search_problem.ReverseEnabled = false;
+	search_problem.maxODeltaT = 0.1;
 
     ros::Rate rate(3);
     while(ros::ok())
@@ -120,7 +121,6 @@ int main(int argc, char** argv)
         planning_mutex.lock();
         // TODO only replan if needed.
         auto path = GraphSearch::AStar(search_problem, expanded_callback);
-
         if(act_path_pub.getNumSubscribers() > 0)
         {
             nav_msgs::Path disp_path_msg;
@@ -163,3 +163,4 @@ int main(int argc, char** argv)
 
     return 0;
 }
+

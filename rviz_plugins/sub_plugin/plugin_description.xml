@@ -1,9 +1,0 @@
-<library path="lib/libsub_plugin">
-  <class name="bare/SubTest"
-         type="bare::BarePanel"
-         base_class_type="rviz::Panel">
-    <description>
-      A panel widget allowing simple diff-drive style robot base control.
-    </description>
-  </class>
-</library>
