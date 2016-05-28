@@ -7,6 +7,7 @@
 #include <vector>
 #include <pcl/kdtree/kdtree_flann.h>
 #include <functional>
+#include <math.h>
 
 class IGVCSearchProblem : public SearchProblem<SearchLocation, SearchMove>
 {
@@ -27,6 +28,8 @@ public:
     double MaximumOmega;
     double DeltaOmega;
     double maxODeltaT;
+    double alpha = 4;
+    double beta = 2;
 	
     SearchLocation getStartState()
     {
@@ -42,15 +45,21 @@ public:
     }
 
     double getStepCost(SearchLocation, SearchMove action)
-    {
-        if(action.W <= 1e-10)
-        {
-            return action.V * action.DeltaT;
+    {   
+        double pathLength = 0;
+        if(action.W <= 1e-10) {  
+            pathLength = action.V * action.DeltaT;
         } else {
             double R = abs(action.V) / abs(action.W);
             double theta = abs(action.W) * action.DeltaT;
-            return R*theta;
+            pathLength = R*theta;
         }
+        if (action.distToObs < 10) {
+        /*cerr << action.distToObs << endl;
+        cerr << alpha*exp((Threshold-action.distToObs)*beta)+1 << endl;
+        cerr << "----------" << endl;*/
+        }
+        return pathLength*(alpha*exp((Threshold-action.distToObs)*beta)+1); //adding cost to paths close to threshold TODO: LAUNCH PARAMETERS!
     }
 
     double getHeuristicCost(SearchLocation state)
@@ -58,7 +67,7 @@ public:
         return state.distTo(Goal);
     }
 
-    bool isActionValid(SearchMove move, pcl::KdTreeFLANN<pcl::PointXYZ> &kdtree, SearchLocation start_state);
+    bool isActionValid(SearchMove& move, pcl::KdTreeFLANN<pcl::PointXYZ> &kdtree, SearchLocation start_state);
 };
 
 #endif // IGVCSEARCHPROBLEM_H
