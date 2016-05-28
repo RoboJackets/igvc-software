@@ -2,11 +2,13 @@
 #define SEARCHMOVE_H
 
 #include <iostream>
+#include <limits>
 
 class SearchMove
 {
 public:
     double V, W, DeltaT;
+    double distToObs = std::numeric_limits<double>::max();
 
     SearchMove() {}
 
