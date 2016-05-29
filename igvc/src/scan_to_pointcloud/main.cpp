@@ -28,7 +28,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
         if(range > scanData.range_max || range < scanData.range_min)
             continue;
         // Too close
-        if(range < 0.75)
+        if(range < 0.4)
             range = scanData.range_max + 1;
         // Too far
         else if(range > 4.0)

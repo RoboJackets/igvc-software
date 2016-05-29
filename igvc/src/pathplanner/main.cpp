@@ -51,7 +51,7 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
     lock_guard<mutex> lock(planning_mutex);
     search_problem.Goal.x = msg->point.x;
     search_problem.Goal.y = msg->point.y;
-    cout << "Waypoing received. " << search_problem.Goal.x << ", " << search_problem.Goal.y << endl;
+    cout << "Waypoint received. " << search_problem.Goal.x << ", " << search_problem.Goal.y << endl;
     received_waypoint = true;
 }
 
@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 
     search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
     search_problem.GoalThreshold = 1.0;
-    search_problem.Threshold = 0.5;
+    search_problem.Threshold = 0.50;
     search_problem.Speed = 1.0;
     search_problem.Baseline = baseline;
     search_problem.DeltaT = [](double distToStart)->double {
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     };
     search_problem.MinimumOmega = -0.6;
     search_problem.MaximumOmega = 0.61;
-    search_problem.DeltaOmega = 0.5;
+    search_problem.DeltaOmega = 0.3; //wat
     search_problem.PointTurnsEnabled = false;
     search_problem.ReverseEnabled = false;
 	search_problem.maxODeltaT = 0.1;
@@ -120,7 +120,8 @@ int main(int argc, char** argv)
 
         planning_mutex.lock();
         // TODO only replan if needed.
-        auto path = GraphSearch::AStar(search_problem, expanded_callback);
+        Path <SearchLocation, SearchMove> path;
+        path = GraphSearch::AStar(search_problem, expanded_callback);
         if(act_path_pub.getNumSubscribers() > 0)
         {
             nav_msgs::Path disp_path_msg;
