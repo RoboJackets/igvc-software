@@ -16,6 +16,7 @@ add_message_files(
   velocity_pair.msg
   lights.msg
   action_path.msg
+  system_stats.msg
 )
 
 # Generate added messages and services with any dependencies listed here
