@@ -9,5 +9,7 @@
     </node>
 
     <node pkg="rosbag" type="record" name="record" output="screen"
-    args="-a -x '(.*)image(.*)*'" /> <!-- (?<!/left/image_rect_color)$' " /> -->
+    args="-a -x '(.*)image(.*)*'" />
+    <node pkg="rosbag" type="record" name="record_image" output="screen"
+    args="-e '/usb_cam/image_raw'" />
 </launch>
