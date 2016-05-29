@@ -20,10 +20,11 @@ constexpr double radians(double degrees)
     return degrees / 180.0 * M_PI;
 }
 
-void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
+void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
     // chrono::time_point<chrono::system_clock> start, end; // instantiate time to use
     // start = chrono::system_clock::now();
 
+    cam.fromCameraInfo(cam_info);
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src_img = cv_ptr->image;
     dst_img = Mat::zeros(src_img.size(), src_img.type());
@@ -59,38 +60,41 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
       , tf_listener(handle)
 {
      cout<<"Running"<<endl;
-    _src_img = _it.subscribe("/left/image_rect_color", 1, &LineDetector::img_callback, this);
-	  _filt_img = _it.advertise("/filt_img", 1);
+    _src_img = _it.subscribeCamera("/usb_cam/image_raw", 1, &LineDetector::img_callback, this);
+    _filt_img = _it.advertise("/filt_img", 1);
     _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
     initLineDetection();
 }
 
 
-PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
+PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(const Mat& src){
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
     tf::StampedTransform transform;
     tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
-    double roll, pitch, yaw;
+    /*std::vector<cv::Point> nonZeroPixels;
+	 @todo fix so findNonZeroes works
+    cv::findNonZero(src, nonZeroPixels);
+    for(const cv::Point& pixel : nonZeroPixels) {
+        cloud->points.push_back(PointFromPixel(pixel, transform));
+    }
+	*/
+    
+    /*double roll, pitch, yaw;
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
     auto origin_z = transform.getOrigin().getZ();
     auto origin_y = transform.getOrigin().getY();
-    auto HFOV = radians(66.0);
+    auto HFOV = radians(97.0);
     auto VFOV = radians(47.6);
     pitch = -roll; // Because conventions are different and I'm in the middle of comp, and give me a break.
+    */
     for(int r = src.rows/2; r < src.rows; r++)
     {
-        uchar *row = src.ptr<uchar>(r);
+        const uchar *row = src.ptr<uchar>(r);
         for(int c = 0; c < src.cols; c++)
         {
             if(row[c] > 0)
             {
-                auto pitch_offset = ((float)(r-src.rows/2) / src.rows) * VFOV;
-                auto y = origin_z /tan(pitch + pitch_offset) + origin_y;
-
-                auto theta = ((float)(c-src.cols/2) / src.cols) * HFOV;
-                auto x = y * tan(theta);
-
-                cloud->points.push_back(PointXYZ(x, y, 0));
+        	cloud->points.push_back(PointFromPixel(cv::Point(c, r), transform));
             }
         }
     }
@@ -242,7 +246,7 @@ void LineDetector::EnforceLength(Mat& img, int length) {
     vector<vector<Point>> contoursThreshold;
     vector<Vec4i> hierarchy;
 
-    rectangle(img, Point(0, 0), Point(copy.cols - 1, copy.rows - 1), Scalar(0, 0, 0));
+    rectangle(img, Point(0, 0), Point(img.cols - 1, img.rows - 1), Scalar(0, 0, 0));
     Mat copy = img.clone();
     findContours(copy, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
@@ -254,4 +258,14 @@ void LineDetector::EnforceLength(Mat& img, int length) {
 
     Scalar color(0, 0, 0);
     drawContours(img, contoursThreshold, -1, color, -1);
+}
+
+// @todo add this to a util class
+pcl::PointXYZ LineDetector::PointFromPixel(const cv::Point& pixel, const tf::Transform& cameraFrameToWorldFrame) {
+    cv::Point3d cameraRay = cam.projectPixelTo3dRay(pixel);
+    tf::Point worldCameraOrigin = cameraFrameToWorldFrame * tf::Vector3(0, 0, 0);
+    tf::Point worldCameraStep = cameraFrameToWorldFrame * tf::Vector3(cameraRay.x, cameraRay.y, cameraRay.z) - worldCameraOrigin;
+    double zScale = -worldCameraOrigin.z()/worldCameraStep.z();
+    tf::Point ret = worldCameraOrigin + zScale * worldCameraStep;
+    return pcl::PointXYZ(ret.x(), ret.y(), 0);
 }

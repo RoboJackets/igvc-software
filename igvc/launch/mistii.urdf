@@ -33,7 +33,7 @@
     <joint name="camera" type="fixed">
         <parent link="base_link"/>
         <child link="camera"/>
-        <origin xyz="0 -0.18 1.34" rpy="-0.3491 0 0"/>
+        <origin xyz="0 -0.18 1.34" rpy="-1.9199 0 0"/>
         <axis xyz="0 0 0"/>
     </joint>
     
