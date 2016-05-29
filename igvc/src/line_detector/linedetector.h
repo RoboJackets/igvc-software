@@ -15,6 +15,7 @@
 #include <ros/publisher.h>
 #include <flycapture/FlyCapture2.h>
 #include <image_transport/image_transport.h>
+#include <image_geometry/pinhole_camera_model.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
 #include <vector>
@@ -57,15 +58,18 @@ private:
     cv::Mat kernelResults[KERNAL_COUNT];
     cv::Mat complementResults[KERNAL_COUNT];
 
-    void img_callback(const sensor_msgs::ImageConstPtr& msg);
+    void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(const cv::Mat& src);
 
     // ROS COMMUNICATION
     image_transport::ImageTransport _it;
     image_transport::Publisher _filt_img;
-    image_transport::Subscriber _src_img;
+    image_transport::CameraSubscriber _src_img;
+    image_geometry::PinholeCameraModel cam;
+
     ros::Publisher _line_cloud;
     tf::TransformListener tf_listener;
+    pcl::PointXYZ PointFromPixel(const cv::Point&, const tf::Transform& worldFrameFromCameraFrame);
 };
 #endif // LINEDETECTOR_H
