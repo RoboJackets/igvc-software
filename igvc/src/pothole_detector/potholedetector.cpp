@@ -244,7 +244,7 @@ PotholeDetector::PotholeDetector(ros::NodeHandle &handle)
     : gaussian_size(7),
       _it(handle),
       tf_listener(handle) {
-    _src_img = _it.subscribe("/left/image_rect_color", 1, &PotholeDetector::img_callback, this);
+    _src_img = _it.subscribe("/usb_cam/image_raw", 1, &PotholeDetector::img_callback, this);
     _pothole_filt_img = _it.advertise("/pothole_filt_img", 1);
     _pothole_thres = _it.advertise("/pothole_thres", 1);
     _pothole_cloud = handle.advertise<PCLCloud>("/pothole_cloud", 100);
