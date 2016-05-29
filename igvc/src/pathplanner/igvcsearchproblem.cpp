@@ -1,5 +1,5 @@
 #include "igvcsearchproblem.h"
-
+#include <math.h>
 
 using namespace pcl;
 
@@ -11,7 +11,8 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, pcl::KdTreeFLANN<pcl::Po
 		current = current > deltat ? deltat : (current + maxODeltaT);
 		move.DeltaT = current;
     	SearchLocation result = getResult(start_state, move);
-		pcl::PointXYZ searchPoint(result.x , result.y ,0);
+    	double radius = 0.5;
+		pcl::PointXYZ searchPoint(result.x + radius * cos(result.theta) , result.y + radius * sin(result.theta) ,0);
 		std::vector<int> pointIdxRadiusSearch;
    		std::vector<float> pointRadiusSquaredDistance;
 		int neighboorsCount = kdtree.nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
