@@ -179,7 +179,7 @@ void LineDetector::DetectLines(int lineThickness) {
     // Resize the image such that the lines are approximately 3 pixels wide
     //cerr << "DetectLines::Reducing Image" << endl;
     lineThickness = max(1, lineThickness); // 0 thickness doesn't make sense
-    resize(src_img, working, Size(3*src_img.cols/lineThickness, 3*src_img.rows/lineThickness), 0, 0, INTER_LANCZOS4);
+    resize(src_img, working, Size(3*src_img.cols/lineThickness, 3*src_img.rows/lineThickness), 0, 0, CV_INTER_AREA);
 
     // Convert the image into HSV space to make processing white lines easier
     //cerr << "DetectLines::Converting to HSV" << endl;
@@ -242,6 +242,7 @@ void LineDetector::EnforceLength(Mat& img, int length) {
     vector<vector<Point>> contoursThreshold;
     vector<Vec4i> hierarchy;
 
+    rectangle(img, Point(0, 0), Point(copy.cols - 1, copy.rows - 1), Scalar(0, 0, 0));
     Mat copy = img.clone();
     findContours(copy, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
