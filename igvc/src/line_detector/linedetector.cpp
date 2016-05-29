@@ -54,19 +54,6 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     // cerr<<elapsedTime.count();
 }
 
-typedef struct Node {
-    shared_ptr<struct Node> prev;
-    Point point;
-    int length;
-
-    Node(shared_ptr<struct Node> pr, Point po, int l)
-    {
-        prev = pr;
-        point = po;
-        length = l;
-    }
-} Node;
-
 LineDetector::LineDetector(ros::NodeHandle &handle)
       : _it(handle)
       , tf_listener(handle)
@@ -114,7 +101,7 @@ PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat src){
 void LineDetector::initLineDetection() {
     cerr << "DetectLines::Initing" << endl;
     lineThickness = 20;
-    lineLengthThreshold = 30;
+    lineLengthThreshold = 40;
 
     float karray[3][9][9] = {
             {
@@ -265,5 +252,5 @@ void LineDetector::EnforceLength(Mat& img, int length) {
     }
 
     Scalar color(0, 0, 0);
-    drawContours(img, contoursThreshold, -1, color, 3);
+    drawContours(img, contoursThreshold, -1, color, -1);
 }

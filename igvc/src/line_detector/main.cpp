@@ -7,7 +7,7 @@ int main(int argc, char** argv)
     
     ros::NodeHandle nh;
 
-	LineDetector det{nh};
+    LineDetector det{nh};
     
     ROS_INFO_STREAM("Line Detector started.");
     
