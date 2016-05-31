@@ -36,9 +36,7 @@ void publish_map()
     map_cloud->clear();
 
     for(auto cloud : frames)
-    {
         *map_cloud += cloud.second;
-    }
 
     _pointcloud_pub.publish(map_cloud);
 }

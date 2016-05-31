@@ -37,13 +37,11 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
     std::list<SearchMove> acts;
 
     auto deltat = DeltaT(state.distTo(Start));
-
     if(Map == nullptr)
         return acts;
-
-    if(!Map->empty())
+    if(!Map->empty()){
         kdtree.setInputCloud(Map);
-
+    }
     double delta = DeltaOmega;
     double Wmin = MinimumOmega;
     double Wmax =  MaximumOmega;
@@ -78,7 +76,6 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
             acts.push_back(move);
         }
     }
-
     return acts;
 }
 
