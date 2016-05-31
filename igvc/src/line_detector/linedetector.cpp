@@ -104,8 +104,8 @@ PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(const Mat& src){
 
 void LineDetector::initLineDetection() {
     cerr << "DetectLines::Initing" << endl;
-    lineThickness = 20;
-    lineLengthThreshold = 40;
+    lineThickness = 13;
+    lineLengthThreshold = 25;
 
     float karray[3][9][9] = {
             {
