@@ -28,7 +28,6 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sen
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src_img = cv_ptr->image;
     dst_img = Mat::zeros(src_img.size(), src_img.type());
-    fin_img = Mat::zeros(src_img.size(), src_img.type());
 
     // What separates lines from other objects?
     // 1. Lines are whiter than their surroundings
@@ -37,16 +36,16 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sen
     // 4. We know roughly how wide a line is going to be
 
     DetectLines(lineThickness);
+    std::vector<std::vector<cv::Point>> contoursThreshold;
+    EnforceLength(working, lineLengthThreshold, contoursThreshold);
 
-    EnforceLength(working, lineLengthThreshold);
+    //resize(working, fin_img, Size(src_img.cols, src_img.rows), 0, 0, INTER_LANCZOS4);
 
-    resize(working, fin_img, Size(src_img.cols, src_img.rows), 0, 0, INTER_LANCZOS4);
-
-    cloud = toPointCloud(fin_img);
+    cloud = toPointCloud(contoursThreshold);
     _line_cloud.publish(cloud);
 
-    cvtColor(fin_img, fin_img, CV_GRAY2BGR);
-    cv_ptr->image = fin_img;
+    cvtColor(working, working, CV_GRAY2BGR);
+    cv_ptr->image = working;
     _filt_img.publish(cv_ptr->toImageMsg());
 
     // end = chrono::system_clock::now();
@@ -67,34 +66,16 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
 }
 
 
-PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(const Mat& src){
+PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(const std::vector<std::vector<cv::Point>>& lineContours){
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
     tf::StampedTransform transform;
     tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
-    /*std::vector<cv::Point> nonZeroPixels;
-	 @todo fix so findNonZeroes works
-    cv::findNonZero(src, nonZeroPixels);
-    for(const cv::Point& pixel : nonZeroPixels) {
-        cloud->points.push_back(PointFromPixel(pixel, transform));
-    }
-	*/
-    
-    /*double roll, pitch, yaw;
-    tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
-    auto origin_z = transform.getOrigin().getZ();
-    auto origin_y = transform.getOrigin().getY();
-    auto HFOV = radians(97.0);
-    auto VFOV = radians(47.6);
-    pitch = -roll; // Because conventions are different and I'm in the middle of comp, and give me a break.
-    */
-    for(int r = src.rows/2; r < src.rows; r++)
-    {
-        const uchar *row = src.ptr<uchar>(r);
-        for(int c = 0; c < src.cols; c++)
-        {
-            if(row[c] > 0)
-            {
-        	cloud->points.push_back(PointFromPixel(cv::Point(c, r), transform));
+    double scale = lineThickness / 3.0;
+    for(const std::vector<cv::Point>& contour : lineContours) {
+        for(const cv::Point& point : contour) {
+            if(point.y * scale > src_img.rows / 2) {
+                cv::Point pixel(scale * point.x, scale * point.y);
+                cloud->points.push_back(PointFromPixel(pixel, transform));
             }
         }
     }
@@ -240,10 +221,11 @@ void LineDetector::MultiplyByComplements(Mat* images, Mat* complements, Mat* res
 }
 
 
-void LineDetector::EnforceLength(Mat& img, int length) {
+void LineDetector::EnforceLength(Mat& img, int length, std::vector<std::vector<cv::Point>>& contoursThreshold) {
     // Thresholding the line length using the area of the contours
     vector<vector<Point>> contours;
-    vector<vector<Point>> contoursThreshold;
+    vector<vector<Point>> smallContours;
+    contoursThreshold.clear();
     vector<Vec4i> hierarchy;
 
     rectangle(img, Point(0, 0), Point(img.cols - 1, img.rows - 1), Scalar(0, 0, 0));
@@ -251,13 +233,15 @@ void LineDetector::EnforceLength(Mat& img, int length) {
     findContours(copy, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 
     for (unsigned int i = 0; i < contours.size(); ++i) {
-        if ((int) contours[i].size() < length) {
+        if ((int) contours[i].size() > length) {
             contoursThreshold.push_back(contours[i]);
+        } else {
+            smallContours.push_back(contours[i]);
         }
     }
 
     Scalar color(0, 0, 0);
-    drawContours(img, contoursThreshold, -1, color, -1);
+    drawContours(img, smallContours, -1, color, -1);
 }
 
 // @todo add this to a util class
