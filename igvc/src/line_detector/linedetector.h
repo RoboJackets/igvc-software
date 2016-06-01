@@ -38,7 +38,7 @@ private:
     void DetectLines(int lineThickness);
     void WhitenessFilter(cv::Mat& hsv_image, cv::Mat& result);
     void MultiplyByComplements(cv::Mat* images, cv::Mat* complements, cv::Mat* results);
-    void EnforceLength(cv::Mat& img, int length);
+    void EnforceLength(cv::Mat& img, int length, std::vector<std::vector<cv::Point>>& contoursThreshold);
 
 
 
@@ -60,7 +60,7 @@ private:
 
     void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(const cv::Mat& src);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(const std::vector<std::vector<cv::Point>>& lineContours);
 
     // ROS COMMUNICATION
     image_transport::ImageTransport _it;
@@ -70,6 +70,6 @@ private:
 
     ros::Publisher _line_cloud;
     tf::TransformListener tf_listener;
-    pcl::PointXYZ PointFromPixel(const cv::Point&, const tf::Transform& worldFrameFromCameraFrame);
+    pcl::PointXYZ PointFromPixel(const cv::Point& pixel, const tf::Transform& worldFrameFromCameraFrame);
 };
 #endif // LINEDETECTOR_H
