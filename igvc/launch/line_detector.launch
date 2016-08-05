@@ -1,8 +1,0 @@
-<!-- line_detector.launch -->
-<!--
-    This file will launch the default node configuration for
-    a competition run. All sensors, hardware-interface, and generic state nodes are launched here.
-    -->
-<launch>
-    <node name="linedetector" pkg="igvc" type="linedetector" output="screen"/>
-</launch>
