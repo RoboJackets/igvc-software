@@ -43,7 +43,7 @@ boolean cmdHasStarted = false;
 long lastCmdTime;
 
 /* TODO
- * 1 - fix deadband (maybe bigger?) you fuckers knew what you were doing
+ * 1 - fix deadband (maybe bigger?)
  * 2 - push command speed
  * 3 - fix timeout
  */
