@@ -31,7 +31,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
         if(range < 0.4)
             range = scanData.range_max + 1;
         // Too far
-        else if(range > 4.0)
+        else if(range > 6.0)
             range = scanData.range_max + 1;
         // No valid neighbors
         else if((i == 0 || !rangeIsValid(scanData.ranges[i-1])) && (i == (scanData.ranges.size()-1) || !rangeIsValid(scanData.ranges[i+1])))
