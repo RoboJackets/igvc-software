@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 # Find the QtWidgets library
-find_package(Qt5Core 5.2 REQUIRED)
-find_package(Qt5Gui 5.2 REQUIRED)
-find_package(Qt5Widgets 5.2 REQUIRED)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
