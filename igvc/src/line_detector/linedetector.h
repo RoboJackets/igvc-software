@@ -29,7 +29,7 @@
 class LineDetector
 {
 public:
-    LineDetector(ros::NodeHandle &handle);
+    LineDetector(ros::NodeHandle &handle, const std::string& topic);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
@@ -40,14 +40,13 @@ private:
     void MultiplyByComplements(cv::Mat* images, cv::Mat* complements, cv::Mat* results);
     void EnforceLength(cv::Mat& img, int length, std::vector<std::vector<cv::Point>>& contoursThreshold);
 
-
-
+    std::string topic;
     // line thickness in pixels
     int lineThickness;
     // line threshold to continue
     int lineLengthThreshold;
 
-    const int linewidthpixels = 13;
+    const int linewidthpixels = 16;
 
     cv::Mat src_img;
     cv::Mat dst_img;
