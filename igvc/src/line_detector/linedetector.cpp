@@ -27,6 +27,23 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sen
     cam.fromCameraInfo(cam_info);
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src_img = cv_ptr->image;
+    /*if (topic == "/usb_cam_left/image_raw") {
+	for(int y=0; y<src_img.rows;y++) {
+	    for(int x=src_img.cols*3.0/4; x<src_img.cols; x++) {
+	        src_img.at<Vec3b>(Point(x,y))[0] = 0;
+		src_img.at<Vec3b>(Point(x,y))[1] = 0;
+		src_img.at<Vec3b>(Point(x,y))[2] = 0;
+	    }
+	}
+    } else {
+	for(int y=0; y<src_img.rows;y++) {
+	    for(int x=0; x<src_img.cols/4.0; x++) {
+	        src_img.at<Vec3b>(Point(x,y))[0] = 0;
+		src_img.at<Vec3b>(Point(x,y))[1] = 0;
+		src_img.at<Vec3b>(Point(x,y))[2] = 0;
+	    }
+	}
+    }*/	
     dst_img = Mat::zeros(src_img.size(), src_img.type());
 
     // What separates lines from other objects?
@@ -74,10 +91,8 @@ PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(const std::vector<std::vect
     double scale = lineThickness / 3.0;
     for(const std::vector<cv::Point>& contour : lineContours) {
         for(const cv::Point& point : contour) {
-            if(point.y * scale > src_img.rows / 2) {
                 cv::Point pixel(scale * point.x, scale * point.y);
                 cloud->points.push_back(PointFromPixel(pixel, transform));
-            }
         }
     }
     cloud->header.frame_id = "base_footprint";
@@ -86,7 +101,7 @@ PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(const std::vector<std::vect
 
 void LineDetector::initLineDetection() {
     cerr << "DetectLines::Initing" << endl;
-    lineThickness = 13;
+    lineThickness = 22;
     lineLengthThreshold = 25;
 
     float karray[3][9][9] = {
