@@ -29,7 +29,7 @@ public:
     double DeltaOmega;
     double maxODeltaT;
     double alpha = 4;
-    double beta = 3;
+    double beta = 5;
 	
     SearchLocation getStartState()
     {
