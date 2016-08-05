@@ -20,7 +20,7 @@
     <node name="ardupilot" pkg="igvc" type="ardupilot" />
     
     <!-- CAMERA -->
-    <include file="$(find igvc)/launch/camera.launch" />
+    <include file="$(find igvc)/launch/centercamera.launch" />
     
     <!-- LIDAR -->
     <include file="$(find igvc)/launch/lidar.launch" />
