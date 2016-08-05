@@ -54,14 +54,15 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sen
     // cerr<<elapsedTime.count();
 }
 
-LineDetector::LineDetector(ros::NodeHandle &handle)
+LineDetector::LineDetector(ros::NodeHandle &handle, const std::string& topic)
       : _it(handle)
       , tf_listener(handle)
+      , topic(topic)
 {
      cout<<"Running"<<endl;
-    _src_img = _it.subscribeCamera("/usb_cam/image_raw", 1, &LineDetector::img_callback, this);
-    _filt_img = _it.advertise("/filt_img", 1);
-    _line_cloud = handle.advertise<PCLCloud>("/line_cloud", 100);
+    _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::img_callback, this);
+    _filt_img = _it.advertise(topic + "/filt_img", 1);
+    _line_cloud = handle.advertise<PCLCloud>(topic + "/line_cloud", 100);
     initLineDetection();
 }
 
@@ -69,7 +70,7 @@ LineDetector::LineDetector(ros::NodeHandle &handle)
 PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(const std::vector<std::vector<cv::Point>>& lineContours){
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_footprint", topic, ros::Time(0), transform);
     double scale = lineThickness / 3.0;
     for(const std::vector<cv::Point>& contour : lineContours) {
         for(const cv::Point& point : contour) {
