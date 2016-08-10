@@ -33,42 +33,20 @@ public:
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
-    void initLineDetection();
+    cv::Mat src_img, working, fin_img;
 
-    void DetectLines(int lineThickness);
-    void WhitenessFilter(cv::Mat& hsv_image, cv::Mat& result);
-    void MultiplyByComplements(cv::Mat* images, cv::Mat* complements, cv::Mat* results);
-    void EnforceLength(cv::Mat& img, int length, std::vector<std::vector<cv::Point>>& contoursThreshold);
+    void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
+    pcl::PointXYZ PointFromPixel(const cv::Point&, const tf::Transform&);
 
-    std::string topic;
-    // line thickness in pixels
-    int lineThickness;
-    // line threshold to continue
-    int lineLengthThreshold;
-
-    const int linewidthpixels = 16;
-
-    cv::Mat src_img;
-    cv::Mat dst_img;
-    cv::Mat fin_img;
-    cv::Mat kernels[KERNAL_COUNT];
-    cv::Mat kernelComplements[KERNAL_COUNT];
-    cv::Mat working;
-    cv::Mat kernelResults[KERNAL_COUNT];
-    cv::Mat complementResults[KERNAL_COUNT];
-
-    void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam);
-
-    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(const std::vector<std::vector<cv::Point>>& lineContours);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
 
     // ROS COMMUNICATION
+    std::string topic;
     image_transport::ImageTransport _it;
     image_transport::Publisher _filt_img;
     image_transport::CameraSubscriber _src_img;
-    image_geometry::PinholeCameraModel cam;
-
     ros::Publisher _line_cloud;
     tf::TransformListener tf_listener;
-    pcl::PointXYZ PointFromPixel(const cv::Point& pixel, const tf::Transform& worldFrameFromCameraFrame);
+    image_geometry::PinholeCameraModel cam;
 };
 #endif // LINEDETECTOR_H
