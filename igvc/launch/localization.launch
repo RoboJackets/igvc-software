@@ -1,0 +1,50 @@
+<!-- localization.launch -->
+<!--
+    This file launches a localization node that
+    fuses all movement data (wheel odometry, IMU,
+    GPS) into one filtered model for increased
+    accuracy of all the constituent parts.
+    -->
+<launch>
+
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true" output="screen">
+
+      <param name="frequency" value="30"/>
+
+      <!-- delay time could be useful but defaults to 0 -->
+      <param name="delay" value="0"/>
+
+      <!-- does ardupilot account for magnetic declination? -->
+      <param name="magnetic_declination_radians" value="0"/>
+
+      <!-- for if the IMU (after magnetic declination adjustment)
+           does not read 0 -->
+      <param name="yaw_offset" value="0"/>
+
+      <!-- this assumes we are in a planar environment
+           can we do this? -->
+      <param name="two_d_mode" value="true"/>
+
+      <!-- sets altitude to 0 -->
+      <param name="zero_altitude" value="true"/>
+
+      <!-- broadcasts the transform world_fram->utm -->
+      <param name="broadcast_utm_transform" value="false"/>
+
+      <!-- decides whether odometry data is all converted back to
+           lat/long measurements -->
+      <param name="publish_filtered_gps" value="true"/>
+
+      <!-- setting a datum for local reference frame -->
+      <rosparam param="datum">[0, 0, 0.0, map, base_link]</rosparam>
+
+      <!-- input remapping -->
+      <remap from="/imu/data" to="/imu"/>
+      <remap from="/odometry/filtered" to="/odometry"/>
+      <remap from="/gps/fix" to="/fix"/>
+
+      <!-- can do output remapping also -->
+
+    </node>
+
+</launch>
