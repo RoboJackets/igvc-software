@@ -38,10 +38,6 @@ Join the chat at https://gitter.im/RoboJackets/igvc-software
     	- imu \<sensor_msgs::Imu\>
     - Devices:
     	- /dev/igvc_imu
-* **bumblebee2**
-    *Replaced by ros node "usb_cam_node"*
-* **dashboard**
-    *Replaced by rviz and rviz_plugins*
 * **joystick_driver**
     *Configures joystick controls*
     - Publishes:
