@@ -3,7 +3,6 @@
 #include <geometry_msgs/PointStamped.h>
 #include <fstream>
 #include <igvc/StringUtils.hpp>
-#include <gps_common/conversions.h>
 #include <string>
 #include <mutex>
 
@@ -82,7 +81,8 @@ void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
 
             PointStamped p;
 
-            gps_common::UTM(lat, lon, &(p.point.x), &(p.point.y));
+            // NEEDS TO BE REPLACED FOR KENETIC
+            //gps_common::UTM(lat, lon, &(p.point.x), &(p.point.y));
 
             waypoints.push_back(p);
         }
