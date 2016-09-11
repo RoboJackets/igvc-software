@@ -5,6 +5,7 @@
 #include <igvc/StringUtils.hpp>
 #include <string>
 #include <mutex>
+#include "conversion.h"
 
 using namespace std;
 using namespace geometry_msgs;
@@ -14,7 +15,6 @@ ros::Publisher waypoint_pub;
 vector<PointStamped> waypoints;
 PointStamped current_waypoint;
 Point map_origin;
-
 mutex current_mutex;
 
 double dmsToDec(string dms)
@@ -81,8 +81,7 @@ void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
 
             PointStamped p;
 
-            // NEEDS TO BE REPLACED FOR KENETIC
-            //gps_common::UTM(lat, lon, &(p.point.x), &(p.point.y));
+            UTM(lat, lon, &(p.point.x), &(p.point.y));
 
             waypoints.push_back(p);
         }
