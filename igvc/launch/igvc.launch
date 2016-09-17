@@ -13,9 +13,6 @@
     <!-- pot hole detector -->
     <include file="$(find igvc)/launch/pothole_detector.launch" />
 
-    <!-- waypoint -->
-    <include file="$(find igvc)/launch/waypoint_source.launch" />
-
     <!-- mapper -->
     <include file="$(find igvc)/launch/mapper.launch" />
 
