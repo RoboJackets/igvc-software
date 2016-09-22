@@ -1,4 +1,3 @@
-
 # RoboJackets IGVC [![Build Status](https://circleci.com/gh/RoboJackets/igvc-software.svg?&style=shield)](https://circleci.com/gh/RoboJackets/igvc-software)
 
 Welcome to the RoboJackets IGVC software repo!
