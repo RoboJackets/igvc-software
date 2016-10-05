@@ -17,9 +17,9 @@ void VisionTut::img_callback(const sensor_msgs::ImageConstPtr& msg)
 	cv::resize(working, working, cv::Size(524, 524), 0, 0, CV_INTER_AREA);
     fin_img = cv::Mat::zeros(src_img.size(), src_img.type());
 	
-	cv::blur(working, working, cv::Size(3,3));
+	cv::GaussianBlur(working, working, cv::Size(0,0), 2.0);
 	
-	cv::Canny(working, working, 100, 100*3, 3);
+	cv::Canny(working, working, 45, 45*3, 3);
 
 	std::vector<cv::Vec4i> lines;
     cv::HoughLinesP(working, lines, 1.0, CV_PI/180, 80, 35, 15);
