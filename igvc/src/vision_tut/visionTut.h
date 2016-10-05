@@ -11,7 +11,7 @@ public:
 	VisionTut(ros::NodeHandle &handle);
 
 private:
-	cv::Mat src_img, fin_img;
+	cv::Mat src_img, working, fin_img;
 
 	void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
 
