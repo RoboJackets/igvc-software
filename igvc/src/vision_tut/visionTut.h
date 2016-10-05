@@ -13,11 +13,10 @@ public:
 private:
 	cv::Mat src_img, working, fin_img;
 
-	void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
+	void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
 	image_transport::ImageTransport it;
 	image_transport::Publisher pub;
 	cv_bridge::CvImagePtr cv_ptr;
-    image_geometry::PinholeCameraModel cam;
-    image_transport::CameraSubscriber _src_img;
+    image_transport::Subscriber sub;
 };

@@ -3,13 +3,12 @@
 VisionTut::VisionTut(ros::NodeHandle &handle)
 	: it(handle)
 {
-	_src_img = it.subscribeCamera("/stereo/left/image_raw", 1, &VisionTut::img_callback, this);
+	sub = it.subscribe("/stereo/left/image_raw", 1, &VisionTut::img_callback, this);
 	pub = it.advertise("/stereo/left/filt_img", 1);
 }
 
-void VisionTut::img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info)
+void VisionTut::img_callback(const sensor_msgs::ImageConstPtr& msg)
 {
-    cam.fromCameraInfo(cam_info);
 	cv_ptr = cv_bridge::toCvCopy(msg, "");
 	src_img = cv_ptr->image;
 
