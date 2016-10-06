@@ -27,17 +27,15 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
     linearVelocities.z = 0;
 
     if (abs(rightVelocity - leftVelocity) > 1e-6) {
-        float turnRadius = velocity / angularVelocity;
-        linearVelocities.y = turnRadius * (1 - cos(deltaTheta));
-        linearVelocities.x = turnRadius * sin(deltaTheta);
+        linearVelocities.y = velocity * sin(deltaTheta);
+        linearVelocities.x = velocity * cos(deltaTheta);
     } else {
         // limit where turn radius is infinite (ie. straight line)
         linearVelocities.y = 0;
         linearVelocities.x = velocity;
     }
 
-    theta += deltaTheta;
-
+    // set angular velocities - assuming 2D operation
     geometry_msgs::Vector3 angularVelocities;
     angularVelocities.x = 0.0;
     angularVelocities.y = 0.0;
@@ -47,43 +45,17 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
     odom.twist.twist.linear = linearVelocities;
     odom.twist.twist.angular = angularVelocities;
 
-    odom.pose.pose.position.x += linearVelocities.x * deltaT;
-    odom.pose.pose.position.y += linearVelocities.y * deltaT;
-    odom.pose.pose.orientation = tf::createQuaternionMsgFromYaw(theta);
+    // update global positions
+    float dist = pow( pow(linearVelocities.x * deltaT, 2) + pow(linearVelocities.y * deltaT, 2) , .5);
+    x += dist * cos(yaw);
+    y += dist * sin(yaw);
+    yaw += deltaTheta;
 
-    odom.header.seq += 1;
-    ros::Time currentTime = ros::Time::now(); // published message time should match tf publisher
-    odom.header.stamp = currentTime;
+    // enter message info for global position
+    odom.pose.pose.position.x = x;
+    odom.pose.pose.position.y = y;
+    odom.pose.pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
 
-    pub.publish(odom);
-
-    // publish the tf using the published odom message
-    odom_tf.header.stamp = ros::Time::now();
-    odom_tf.transform.translation.x = odom.pose.pose.position.x;
-    odom_tf.transform.translation.y = odom.pose.pose.position.y;
-    odom_tf.transform.translation.z = 0;
-    odom_tf.transform.rotation = odom.pose.pose.orientation;
-    odom_broadcaster.sendTransform(odom_tf);
-}
-
-Odometer::Odometer(ros::NodeHandle& nh) {
-    sub = nh.subscribe("/encoders", 10, &Odometer::enc_callback, this);
-    pub = nh.advertise<nav_msgs::Odometry>("/wheel_odometry", 10);
-
-    // initializing default odom message
-    odom.header.seq = 0;
-    odom.child_frame_id = "base_link";
-    odom.header.frame_id = "wheel_odom";
-
-    // initializing default odom tf
-    odom_tf.header.frame_id = "wheel_odom";
-    odom_tf.child_frame_id = "base_link";
-
-    // initialize position - map published is relative to position at time t=0
-    theta = 0;
-    odom.pose.pose.position.x = 0;
-    odom.pose.pose.position.y = 0;
-    odom.pose.pose.position.z = 0;
 
     // Row-major representation of the 6x6 covariance matrix
     // The orientation parameters use a fixed-axis representation.
@@ -108,4 +80,44 @@ Odometer::Odometer(ros::NodeHandle& nh) {
             1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6,
             1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6
     };
+
+
+    // setting sequence of message
+    odom.header.seq = seq++;
+
+    // setting reference frames
+    odom.child_frame_id = "base_link";
+    odom.header.frame_id = "wheel_odom";
+
+    // set time then publish
+    odom.header.stamp = ros::Time::now();
+    pub.publish(odom);
+
+
+    // publish the tf using the published odom message
+    geometry_msgs::TransformStamped odom_tf;
+    odom_tf.header.stamp = ros::Time::now();
+    odom_tf.transform.translation.x = odom.pose.pose.position.x;
+    odom_tf.transform.translation.y = odom.pose.pose.position.y;
+    odom_tf.transform.translation.z = 0;
+    odom_tf.transform.rotation = odom.pose.pose.orientation;
+
+    // initializing default odom tf
+    odom_tf.header.frame_id = "wheel_odom";
+    odom_tf.child_frame_id = "base_link";
+
+    odom_broadcaster.sendTransform(odom_tf);
+}
+
+Odometer::Odometer(ros::NodeHandle& nh) {
+    sub = nh.subscribe("/encoders", 10, &Odometer::enc_callback, this);
+    pub = nh.advertise<nav_msgs::Odometry>("/wheel_odometry", 10);
+
+    // initializing sequence number for messages
+    seq = 0;
+
+    // initialize position - map published is relative to position at time t=0
+    x = 0;
+    y = 0;
+    yaw = 0;
 }
