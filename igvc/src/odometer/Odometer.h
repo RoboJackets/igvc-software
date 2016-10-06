@@ -8,14 +8,21 @@ class Odometer {
 public:
     Odometer(ros::NodeHandle&);
 private:
+    // ros infastructure
     ros::Publisher pub;
     ros::Subscriber sub;
-    nav_msgs::Odometry odom;
     tf::TransformBroadcaster odom_broadcaster;
-    geometry_msgs::TransformStamped odom_tf;
-    const float WHEEL_SEPARATION = 1.0;
-    float theta;
+    int seq;
 
+    // robot constant
+    const float WHEEL_SEPARATION = 0.59436;
+
+    // keeping track of global position
+    float x;
+    float y;
+    float yaw;
+
+    // callback for encoder subscriber
     void enc_callback(const igvc_msgs::velocity_pair&);
 };
 #endif
