@@ -46,9 +46,11 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
     odom.twist.twist.angular = angularVelocities;
 
     // update global positions
-    float dist = pow( pow(linearVelocities.x * deltaT, 2) + pow(linearVelocities.y * deltaT, 2) , .5);
-    x += dist * cos(yaw);
-    y += dist * sin(yaw);
+    // note x and y velocities are local reference frame - convert to global then increment poition
+    float dx = linearVelocities.x * deltaT;
+    float dy = linearVelocities.y * deltaT;
+    x += dx * cos(yaw) - dy * sin(yaw);
+    y += dx * sin(yaw) + dy * cos(yaw);
     yaw += deltaTheta;
 
     // enter message info for global position
