@@ -88,8 +88,8 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
     odom.header.seq = seq++;
 
     // setting reference frames
-    odom.child_frame_id = "base_link";
     odom.header.frame_id = "wheel_odom";
+    odom.child_frame_id = "base_link";
 
     // set time then publish
     odom.header.stamp = ros::Time::now();

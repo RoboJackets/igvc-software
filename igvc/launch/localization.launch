@@ -21,8 +21,7 @@
            does not read 0 -->
       <param name="yaw_offset" value="0"/>
 
-      <!-- this assumes we are in a planar environment
-           can we do this? -->
+      <!-- this assumes we are in a planar environment -->
       <param name="two_d_mode" value="true"/>
 
       <!-- sets altitude to 0 -->
@@ -33,18 +32,58 @@
 
       <!-- decides whether odometry data is all converted back to
            lat/long measurements -->
-      <param name="publish_filtered_gps" value="true"/>
+      <param name="publish_filtered_gps" value="false"/>
+
+      <!-- if true uses yaw angle from the input odom source -->
+      <param name="use_odometry_yaw" value="false"/>
 
       <!-- setting a datum for local reference frame -->
       <rosparam param="datum">[0, 0, 0.0, map, base_link]</rosparam>
 
       <!-- input remapping -->
       <remap from="/imu/data" to="/imu"/>
-      <remap from="/odometry/filtered" to="/odometry"/>
       <remap from="/gps/fix" to="/fix"/>
 
       <!-- can do output remapping also -->
 
+    </node>
+
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se">
+      <param name="frequency" value="30"/>
+      <param name="two_d_mode" value="true"/>
+
+      <!-- wheel odometry -->
+      <param name="odom0" value="/wheel_odometry"/>
+      <param name="odom0_differential" value="true"/>
+      <rosparam param="odom0_config">[true,  true, false,
+                               false, false, true,
+                               true,  true,  false,
+                               false, false, true,
+                               false, false, false]</rosparam>
+
+      <!-- IMU -->
+      <param name="imu0" value="/imu"/>
+      <!-- order of fused parameters:
+               X, Y, Z,
+               roll, pitch, yaw,
+               X velocity, Y velocity, Z velocity,
+               roll velocity, pitch velocity, yaw velocity,
+               X acceleration, Y acceleration, Z acceleration -->
+      <rosparam param="imu0_config">[false, false, false,
+                                 true,  true,  true,
+                                 false, false, false,
+                                 true,  true,  true,
+                                 true,  true,  true]</rosparam>
+      <param name="imu0_differential" value="false"/>
+ 
+      <!-- gps from above navstat_transform -->
+      <param name="odom1" value="/odometry/gps"/>
+      <rosparam param="odom1_config">[true, true, false,
+                               false, false, false,
+                               false, false, false,
+                               false, false, false,
+                               false, false, false]</rosparam>
+      <param name="odom1_differential" value="false"/>
     </node>
 
 </launch>
