@@ -1,2 +1,3 @@
 add_executable(joystick_driver joystick_driver.cpp)
+add_dependencies(joystick_driver igvc_msgs_gencpp)
 target_link_libraries(joystick_driver ${catkin_LIBRARIES})
