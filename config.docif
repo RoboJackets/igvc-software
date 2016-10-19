@@ -4,6 +4,7 @@
 #
 # This is just a shell file that is sourced by DoCIF scripts.
 
+
 # @REQUIRED
 # A docker baseimage repostiory. Create one on the docker hub
 BASEIMAGE_REPO="robojackets/igvc-baseimage"
