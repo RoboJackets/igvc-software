@@ -4,6 +4,7 @@
 #
 # This is just a shell file that is sourced by DoCIF scripts.
 
+
 # @REQUIRED
 # A docker baseimage repostiory. Create one on the docker hub
 BASEIMAGE_REPO="robojackets/igvc-baseimage"
@@ -90,7 +91,6 @@ SETUP_SHA_FILES+=("./igvc/package.xml")
 # Commands are in this format
 # COMMAND; SHORT_NAME; DESCRIPTION
 TEST_COMMANDS=()
-TEST_COMMANDS+=( 'catkin_make igvc_msgs_gencpp;hack;A dummy test to fix broken dependencies' )
 TEST_COMMANDS+=( 'catkin_make;compile;A check to see if the code compiles' )
 TEST_COMMANDS+=( 'catkin_make run_tests;tests;A check to see if the tests pass' )
 
