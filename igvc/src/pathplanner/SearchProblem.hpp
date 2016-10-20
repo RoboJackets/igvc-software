@@ -4,6 +4,7 @@
 #include <list>
 #include <algorithm>
 #include <iterator>
+#include <stdexcept>
 
 template <class StateType, class ActionType>
 class Path
@@ -13,10 +14,8 @@ private:
     std::list<ActionType> actions;
 public:
     Path(){ }
-    Path(const Path<StateType, ActionType>& p)
+    Path(const Path<StateType, ActionType>& p) : states(p.states), actions(p.actions)
     {
-        states = std::list<StateType>(p.states);
-        actions = std::list<ActionType>(p.actions);
     }
     void addState(StateType state)
     {
@@ -29,19 +28,19 @@ public:
     void setState(StateType state, int index)
     {
         if(index < 0 || index >= states.size())
-            throw "Index out of bounds!";
+            throw std::out_of_range("Index out of bounds!");
         states[index] = state;
     }
     void setAction(ActionType action, int index)
     {
         if(index < 0 || index >= actions.size())
-            throw "Index out of bounds!";
+            throw std::out_of_range("Index out of bounds!");
         actions[index] = action;
     }
     StateType getState(unsigned int index)
     {
         if(index < 0 || index >= states.size())
-            throw "Index out of bounds!";
+            throw std::out_of_range("Index out of bounds!");
 
         typename std::list<StateType>::iterator iter = states.begin();
         std::advance(iter, index);
@@ -50,7 +49,7 @@ public:
     ActionType getAction(unsigned int index)
     {
         if(index < 0 || index >= actions.size())
-            throw "Index out of bounds!";
+            throw std::out_of_range("Index out of bounds!");
         typename std::list<ActionType>::iterator iter = actions.begin();
         std::advance(iter, index);
         return *iter;
@@ -65,6 +64,8 @@ public:
     }
     StateType getLastState()
     {
+		if (states.empty())
+			throw std::out_of_range("Cannot call back() on empty list.");
         return states.back();
     }
     int getNumberOfSteps()
