@@ -1,6 +1,6 @@
 # You can change this to any version of ubuntu with little consequence
-FROM ros:indigo
-MAINTAINER Jay Kamat github@jgkamat.33mail.com
+FROM ros:kinetic
+MAINTAINER Jay Kamat jaygkamat@gmail.com
 
 # This dockerimage will serve as a 'static' base for this DoCIF project
 
