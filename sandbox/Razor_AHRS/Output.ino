@@ -5,7 +5,7 @@ void output_angles()
 {
   if (output_format == OUTPUT__FORMAT_BINARY)
   {
-    float ypr[3];  
+    float ypr[3];
     ypr[0] = TO_DEG(yaw);
     ypr[1] = TO_DEG(pitch);
     ypr[2] = TO_DEG(roll);
@@ -94,6 +94,44 @@ void output_sensors_binary()
   Serial.write((byte*) gyro, 12);
 }
 
+void output_sensor_angles()
+{
+  if (output_format == OUTPUT__FORMAT_BINARY)
+    output_sensor_angles_binary();
+  else if (output_format == OUTPUT__FORMAT_TEXT)
+    output_sensor_angles_text();
+}
+
+void output_sensor_angles_binary()
+{
+  Serial.write((byte*) accel, 12);
+  Serial.write((byte*) gyro, 12);
+
+  float ypr[3];
+  ypr[0] = TO_DEG(yaw);
+  ypr[1] = TO_DEG(pitch);
+  ypr[2] = TO_DEG(roll);
+  Serial.write((byte*) ypr, 12);
+}
+
+void output_sensor_angles_text()
+{
+  Serial.print("#A-"); Serial.print(raw_or_calibrated); Serial.print('=');
+  Serial.print(accel[0]); Serial.print(",");
+  Serial.print(accel[1]); Serial.print(",");
+  Serial.print(accel[2]); Serial.println();
+
+  Serial.print("#G-"); Serial.print(raw_or_calibrated); Serial.print('=');
+  Serial.print(gyro[0]); Serial.print(",");
+  Serial.print(gyro[1]); Serial.print(",");
+  Serial.print(gyro[2]); Serial.println();
+
+  Serial.print("#YPR=");
+  Serial.print(TO_DEG(yaw)); Serial.print(",");
+  Serial.print(TO_DEG(pitch)); Serial.print(",");
+  Serial.print(TO_DEG(roll)); Serial.println();
+}
+
 void output_sensors()
 {
   if (output_mode == OUTPUT__MODE_SENSORS_RAW)
@@ -129,4 +167,3 @@ void output_sensors()
     }
   }
 }
-

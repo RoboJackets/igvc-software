@@ -180,6 +180,7 @@
 #define OUTPUT__MODE_SENSORS_CALIB 2 // Outputs calibrated sensor values for all 9 axes
 #define OUTPUT__MODE_SENSORS_RAW 3 // Outputs raw (uncalibrated) sensor values for all 9 axes
 #define OUTPUT__MODE_SENSORS_BOTH 4 // Outputs calibrated AND raw sensor values for all 9 axes
+#define OUTPUT__MODE_BOTH_CALIB 5 // Outputs yaw/pitch/roll in degrees and the calibrated sensor values for accel and gyro
 // Output format definitions (do not change)
 #define OUTPUT__FORMAT_TEXT 0 // Outputs data as text
 #define OUTPUT__FORMAT_BINARY 1 // Outputs data as binary float
@@ -543,6 +544,16 @@ void loop()
           else if (format_param == 'b') // Output values in _b_inary format
             output_format = OUTPUT__FORMAT_BINARY;
         }
+        else if (output_param == 'a') // Output _a_ll values (calibrate and RPY)
+        {
+          char format_param = readChar();
+
+          output_mode = OUTPUT__MODE_BOTH_CALIB;
+          if (format_param == 't') // Output values in _t_ext format
+            output_format = OUTPUT__FORMATE_BINARY;
+          else if (format_param == 'b') // Output values in _b_inary format
+            output_format = OUTPUT__FORMAT_BINARY;
+        }
         else if (output_param == '0') // Disable continuous streaming output
         {
           turn_output_stream_off();
@@ -611,8 +622,22 @@ void loop()
       
       if (output_stream_on || output_single_on) output_angles();
     }
+    else if (output_mode == OUTPUT__MODE_BOTH_CALIB)  // Output calibrate sensors and RPY
+    {
+      // Apply sensor calibration
+      compensate_sensor_errors();
+
+      // Run DCM algorithm
+      Compass_Heading(); // Calculate magnetic heading
+      Matrix_update();
+      Normalize();
+      Drift_correction();
+      Euler_angles();
+
+      if (output_stream_on || output_single_on) output_sensor_angles();
+    }
     else  // Output sensor values
-    {      
+    {
       if (output_stream_on || output_single_on) output_sensors();
     }
     
