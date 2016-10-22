@@ -550,7 +550,7 @@ void loop()
 
           output_mode = OUTPUT__MODE_BOTH_CALIB;
           if (format_param == 't') // Output values in _t_ext format
-            output_format = OUTPUT__FORMATE_BINARY;
+            output_format = OUTPUT__FORMAT_BINARY;
           else if (format_param == 'b') // Output values in _b_inary format
             output_format = OUTPUT__FORMAT_BINARY;
         }
