@@ -116,12 +116,12 @@ void output_sensor_angles_binary()
 
 void output_sensor_angles_text()
 {
-  Serial.print("#A-"); Serial.print(raw_or_calibrated); Serial.print('=');
+  Serial.print("#A-"); Serial.print('C'); Serial.print('=');
   Serial.print(accel[0]); Serial.print(",");
   Serial.print(accel[1]); Serial.print(",");
   Serial.print(accel[2]); Serial.println();
 
-  Serial.print("#G-"); Serial.print(raw_or_calibrated); Serial.print('=');
+  Serial.print("#G-"); Serial.print('C'); Serial.print('=');
   Serial.print(gyro[0]); Serial.print(",");
   Serial.print(gyro[1]); Serial.print(",");
   Serial.print(gyro[2]); Serial.println();
