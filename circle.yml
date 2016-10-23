@@ -30,7 +30,7 @@ dependencies:
 # The test phase dosen't actually run tests. We need the caching from the deploy step.
 test:
   override:
-    - ./DoCIF/commands/exit.sh
+    - ./external/DoCIF/commands/exit.sh
 
 deployment:
   github:
