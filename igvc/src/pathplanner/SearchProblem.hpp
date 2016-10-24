@@ -64,8 +64,8 @@ public:
     }
     StateType getLastState() const
     {
-		if (states.empty())
-			throw std::out_of_range("Cannot call back() on empty list.");
+        if (states.empty())
+            throw std::out_of_range("Cannot call back() on empty list.");
         return states.back();
     }
     int getNumberOfSteps() const
