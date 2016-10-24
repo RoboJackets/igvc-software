@@ -66,7 +66,6 @@ struct FrontierTraits <StateType, ActionType, std::queue>
 
 class GraphSearch
 {
-
 public:
 	// Runs a generic search that DFS and BSF can call.
 	// Getting this to work with the current implementation of A* is possible, but difficult.
@@ -79,46 +78,45 @@ public:
 		set<StateType> expanded;
         frontier_type frontier;
 
-        {
-            Path<StateType, ActionType> p;
-            p.addState(problem.getStartState());
-            frontier.push(p);
-        }
+		{
+		    Path<StateType, ActionType> p;
+		    p.addState(problem.getStartState());
+		    frontier.push(p);
+		}
 
-        while(!frontier.empty())
-        {
-            Path<StateType, ActionType> path = frontier_traits::PopNextElement(frontier);
+		while(!frontier.empty())
+		{
+		    Path<StateType, ActionType> path = frontier_traits::PopNextElement(frontier);
+		    auto const lastState = path.getLastState();
 
-			auto const lastState = path.getLastState();
+		    // expanded does not contain path's last state
+		    if(expanded.find(lastState) == expanded.cend())
+		    {
+				expanded.insert(lastState);
 
-			// expanded does not contain path's last state
-            if(expanded.find(lastState) == expanded.cend())
-			{
-                expanded.insert(lastState);
+				if(problem.isGoal(lastState))
+				{
+					return path;
+				}
 
-                if(problem.isGoal(lastState))
-                {
-                    return path;
-                }
-                
 				auto legalActions = problem.getActions(lastState);
 
-                for(auto it = legalActions.cbegin(); it != legalActions.cend(); ++it)
-                {
-                    ActionType action = (*it);
-                    StateType result = problem.getResult(lastState, action);
+				for(auto it = legalActions.cbegin(); it != legalActions.cend(); ++it)
+				{
+					ActionType action = (*it);
+					StateType result = problem.getResult(lastState, action);
 
-                    Path<StateType, ActionType> newPath(path);
-                    newPath.addAction(action);
-                    newPath.addState(result);
-                    frontier.push(newPath);
-                }
-            }
-        }
+					Path<StateType, ActionType> newPath(path);
+					newPath.addAction(action);
+					newPath.addState(result);
+					frontier.push(newPath);
+				}
+		    }
+		}
 
-        cerr << __func__ << " Error: Could not find a solution." << endl;
-        Path<StateType, ActionType> empty;
-        return empty;
+		cerr << __func__ << " Error: Could not find a solution." << endl;
+		Path<StateType, ActionType> empty;
+		return empty;
 	}
 
 
@@ -140,7 +138,6 @@ public:
     template <class StateType, class ActionType>
     static Path<StateType, ActionType> AStar(SearchProblem<StateType, ActionType> &problem, void(*expandedCallback)(const set<StateType>&))
     {
-
         set<StateType> expanded;
         priority_queue< Path<StateType, ActionType>, vector<Path<StateType, ActionType> >, PathComparator<StateType, ActionType> > frontier((PathComparator<StateType,ActionType>(&problem)));
 
