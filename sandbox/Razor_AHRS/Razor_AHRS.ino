@@ -73,7 +73,7 @@
       "#oat" - Output CALIBRATED SENSOR data of accelerometer and gyros in TEXT format.
                One frame consist of three lines - one for RPY, accel, gyro
       "#oab" - Output CALIBRATED SENSOR data of accelerometer and gyros in BINARY format.
-               One frame consist of two 3x3 float values and one RPY 3x4 (24 bytes + 12 bytes = bytes long)
+               One frame consist of two 3x3 float values and one RPY 3x4 (24 bytes + 12 bytes = 36 bytes long)
       
       // Error message output        
       "#oe0" - Disable ERROR message output.
