@@ -93,9 +93,8 @@ string SerialPort::readln()
         char in = read();	
         if(in == '\n')
             return line;
-        if(in == '\r')
-            return line;
-        line = line + in;
+        if(in != '\r') // if using return char - new line will follow - do not terminate early
+            line = line + in;
     }
 }
 
