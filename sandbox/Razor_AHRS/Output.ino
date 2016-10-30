@@ -118,20 +118,20 @@ void output_sensors_and_angles_binary()
 void output_sensors_and_angles_text()
 {
   Serial.print("#A-"); Serial.print('C'); Serial.print('=');
-  Serial.print(GRAVITY_MS_REF(Accel_Vector[0])); Serial.print(",");
-  Serial.print(GRAVITY_MS_REF(Accel_Vector[1])); Serial.print(",");
-  Serial.print(GRAVITY_MS_REF(Accel_Vector[2])); Serial.println();
+  Serial.print(GRAVITY_MS_REF(Accel_Vector[0]), 4); Serial.print(",");
+  Serial.print(GRAVITY_MS_REF(Accel_Vector[1]), 4); Serial.print(",");
+  Serial.print(GRAVITY_MS_REF(Accel_Vector[2]), 4); Serial.println();
 
   Serial.print("#G-"); Serial.print('C'); Serial.print('=');
-  Serial.print(Gyro_Vector[0]); Serial.print(",");
-  Serial.print(Gyro_Vector[1]); Serial.print(",");
-  Serial.print(Gyro_Vector[2]); Serial.println();
+  Serial.print(Gyro_Vector[0], 4); Serial.print(",");
+  Serial.print(Gyro_Vector[1], 4); Serial.print(",");
+  Serial.print(Gyro_Vector[2], 4); Serial.println();
 
   Serial.print("#YPR=");
   Serial.print(TO_DEG(yaw)); Serial.print(",");
   Serial.print(TO_DEG(pitch)); Serial.print(",");
   Serial.print(TO_DEG(roll)); Serial.println();
-  
+
 }
 
 void output_sensors()
