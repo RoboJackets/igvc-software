@@ -14,8 +14,7 @@ SerialPort::SerialPort(string device, int baud)
     } catch(...){}
     
     if( !port.is_open() ) {
-        cerr << "Could not open serial port " << device << endl;
-        return;
+        throw runtime_error("Could not open serial port " + device);
     }
     
     try
@@ -24,7 +23,8 @@ SerialPort::SerialPort(string device, int baud)
         port.set_option(boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
         port.set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
     } catch(...) {
-        cerr << "Could not set options on serial port " << device << endl;
+        port.close();
+        throw runtime_error("Could not open serial port " + device);
     }
 }
 
@@ -69,9 +69,8 @@ char SerialPort::read()
     {
         boost::asio::read(port, buffer(&in, 1));
     } catch (boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
-        cerr << "Error reading serial port." << endl;
-        cerr << err.what() << endl;
-        return 0;
+        port.close();
+        throw runtime_error("Error reading serial port");
     }
     return in;
 }
@@ -94,9 +93,8 @@ string SerialPort::readln()
         char in = read();	
         if(in == '\n')
             return line;
-        if(in == '\r')
-            return line;
-        line = line + in;
+        if(in != '\r') // if using return char - new line will follow - do not terminate early
+            line = line + in;
     }
 }
 
