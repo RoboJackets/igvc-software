@@ -19,7 +19,6 @@ private:
     cv::Mat src_img, working, fin_img;
 
     void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
-    pcl::PointXYZ PointFromPixel(const cv::Point&, const tf::Transform&);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
 
