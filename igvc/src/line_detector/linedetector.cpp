@@ -1,7 +1,4 @@
 #include "linedetector.h"
-#include <opencv2/video/video.hpp>
-#include <opencv2/opencv.hpp>
-#include <sensor_msgs/image_encodings.h>
 #include <pcl_ros/point_cloud.h>
 #include <queue>
 #include <chrono>
@@ -10,7 +7,6 @@
 using namespace std;
 using namespace cv;
 using namespace pcl;
-
 
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
