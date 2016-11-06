@@ -1,8 +1,6 @@
 #include "linedetector.h"
 #include <pcl_ros/point_cloud.h>
-#include <queue>
-#include <chrono>
-#include <ctime>
+#include <igvc/CVUtils.hpp>
 
 using namespace std;
 using namespace cv;
@@ -64,14 +62,4 @@ PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat img){
     }
     cloud->header.frame_id = "base_footprint";
     return cloud;
-}
-
-// @todo add this to a util class
-pcl::PointXYZ LineDetector::PointFromPixel(const cv::Point& pixel, const tf::Transform& cameraFrameToWorldFrame) {
-    cv::Point3d cameraRay = cam.projectPixelTo3dRay(pixel);
-    tf::Point worldCameraOrigin = cameraFrameToWorldFrame * tf::Vector3(0, 0, 0);
-    tf::Point worldCameraStep = cameraFrameToWorldFrame * tf::Vector3(cameraRay.x, cameraRay.y, cameraRay.z) - worldCameraOrigin;
-    double zScale = -worldCameraOrigin.z()/worldCameraStep.z();
-    tf::Point ret = worldCameraOrigin + zScale * worldCameraStep;
-    return pcl::PointXYZ(ret.x(), ret.y(), 0);
 }
