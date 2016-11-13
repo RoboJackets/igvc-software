@@ -21,12 +21,11 @@
 
 class PotholeDetector {
 public:
-    PotholeDetector(ros::NodeHandle &handle);
+    PotholeDetector(ros::NodeHandle &handle, const std::string& topic);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
-    void camera_info_callback(const sensor_msgs::CameraInfoPtr& msg);
-    void img_callback(const sensor_msgs::ImageConstPtr& msg);
+    void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(std::vector<std::vector<cv::Point>> &contours, int height, int width);
 
@@ -49,10 +48,11 @@ private:
     image_transport::ImageTransport _it;
     image_transport::Publisher _pothole_filt_img;
     image_transport::Publisher _pothole_thres;
-    image_transport::Subscriber _src_img;
+    image_transport::CameraSubscriber _src_img;
     ros::Subscriber _camera_info;
     ros::Publisher _pothole_cloud;
     tf::TransformListener tf_listener;
+    std::string topic;
 
     cv::Mat src;
     cv::Mat src_gray;
