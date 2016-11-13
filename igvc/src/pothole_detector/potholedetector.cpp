@@ -1,4 +1,6 @@
 #include "potholedetector.h"
+#include <pcl_ros/point_cloud.h>
+#include <igvc/CVUtils.hpp>
 
 using namespace std;
 using namespace cv;
@@ -18,10 +20,6 @@ const int contourSizeThreshold = 200;
 
 int getDiff(int a, int b) {
     return abs(a - b);
-}
-
-double toRadians(double degrees) {
-    return degrees / 180.0 * M_PI;
 }
 
 void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
@@ -256,24 +254,15 @@ PointCloud<PointXYZ>::Ptr PotholeDetector::toPointCloud(vector<vector<Point>> &c
     tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
     double roll, pitch, yaw;
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
-    auto origin_z = transform.getOrigin().getZ();
-    auto origin_y = transform.getOrigin().getY();
-    auto HFOV = toRadians(66.0);
-    auto VFOV = toRadians(47.6);
+    double origin_z = transform.getOrigin().getZ();
+    double origin_y = transform.getOrigin().getY();
+    double HFOV = toRadians(66.0);
+    double VFOV = toRadians(47.6);
     pitch = -roll;
 
     for (vector<Point> contour : contours) {
         for (Point p : contour) {
-            int xP = p.x;
-            int yP = p.y + (height / 2 - 100);
-
-            auto pitch_offset = ((float) (yP - height / 2) / height) * VFOV;
-            auto y = origin_z /tan(pitch + pitch_offset) + origin_y;
-
-            auto theta = ((float) (xP - width / 2) / width) * HFOV;
-            auto x = y * tan(theta);
-
-            cloud->points.push_back(PointXYZ(x, y, 0));
+            cloud->points.push_back(PointFromPixelNoCam(p, height, width, HFOV, VFOV, origin_z, origin_y, pitch));
         }
     }
 
