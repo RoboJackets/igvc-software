@@ -18,7 +18,8 @@ public:
 private:
     cv::Mat src_img, working, fin_img;
 
-    void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
+    void info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
+    void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
 
@@ -26,9 +27,11 @@ private:
     std::string topic;
     image_transport::ImageTransport _it;
     image_transport::Publisher _filt_img;
-    image_transport::CameraSubscriber _src_img;
+    image_transport::Subscriber _src_img;
+    image_transport::CameraSubscriber _src_img_info;
     ros::Publisher _line_cloud;
     tf::TransformListener tf_listener;
     image_geometry::PinholeCameraModel cam;
+    bool hasInfo = false;
 };
 #endif // LINEDETECTOR_H

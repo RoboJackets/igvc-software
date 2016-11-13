@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <ros/publisher.h>
 #include <image_transport/image_transport.h>
+#include <image_geometry/pinhole_camera_model.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
 #include <vector>
@@ -11,6 +12,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/video/video.hpp>
 #include <sensor_msgs/image_encodings.h>
+#include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <camera_info_manager/camera_info_manager.h>
 #include <math.h>
