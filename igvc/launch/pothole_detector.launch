@@ -1,6 +1,6 @@
 <!-- pothole_detector.launch -->
 <launch>
-    <!-- <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+  <!-- <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
         <param name="video_device" value="/dev/video0" />
         <param name="image_width" value="640" />
         <param name="image_height" value="480" />
@@ -9,5 +9,7 @@
         <param name="io_method" value="mmap"/>
     </node> -->
 
-    <node name="potholedetector" pkg="igvc" type="potholedetector" output="screen"/>
+    <node name="potholedetector" pkg="igvc" type="potholedetector" output="screen" >
+            <param name="topic" type="string" value="/usb_cam_center"/>
+    </node>
 </launch>
