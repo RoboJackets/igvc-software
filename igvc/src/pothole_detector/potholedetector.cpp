@@ -24,10 +24,12 @@ double toRadians(double degrees) {
     return degrees / 180.0 * M_PI;
 }
 
-void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
+void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
+
     Mat orig = cv_ptr->image.clone();
     src = cv_ptr->image.clone();
+
 
     // Crops the image (removes sky)
     int topCrop = src.rows / 2 - 100;
@@ -240,20 +242,21 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     _pothole_cloud.publish(cloud);
 }
 
-PotholeDetector::PotholeDetector(ros::NodeHandle &handle)
+PotholeDetector::PotholeDetector(ros::NodeHandle &handle, const std::string& topic)
     : gaussian_size(7),
       _it(handle),
-      tf_listener(handle) {
-    _src_img = _it.subscribe("/usb_cam/image_raw", 1, &PotholeDetector::img_callback, this);
-    _pothole_filt_img = _it.advertise("/pothole_filt_img", 1);
-    _pothole_thres = _it.advertise("/pothole_thres", 1);
-    _pothole_cloud = handle.advertise<PCLCloud>("/pothole_cloud", 100);
+      tf_listener(handle),
+      topic(topic) {
+    _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &PotholeDetector::img_callback, this);
+    _pothole_filt_img = _it.advertise(topic + "/pothole_filt_img", 1);
+    _pothole_thres = _it.advertise(topic + "/pothole_thres", 1);
+    _pothole_cloud = handle.advertise<PCLCloud>(topic + "/pothole_cloud", 100);
 }
 
 PointCloud<PointXYZ>::Ptr PotholeDetector::toPointCloud(vector<vector<Point>> &contours, int height, int width) {
     PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_footprint", topic, ros::Time(0), transform);
     double roll, pitch, yaw;
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
     auto origin_z = transform.getOrigin().getZ();
