@@ -5,12 +5,12 @@
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
-constexpr double radians(double degrees) {
-    return degrees / 180.0 * M_PI;
+void LineDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
+    cam.fromCameraInfo(cam_info);
+    img_callback(msg);
 }
 
-void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
-    cam.fromCameraInfo(cam_info);
+void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src_img = cv_ptr->image;
 
@@ -39,8 +39,11 @@ LineDetector::LineDetector(ros::NodeHandle &handle, const std::string& topic)
       , tf_listener(handle)
       , topic(topic)
 {
-     std::cout<<"Running"<<std::endl;
-    _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::img_callback, this);
+     if (!hasInfo) {
+        _src_img = _it.subscribe("stereo/left/image_raw", 1, &LineDetector::img_callback, this);
+     } else {
+        _src_img_info = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::info_img_callback, this);
+     }
     _filt_img = _it.advertise(topic + "/filt_img", 1);
     _line_cloud = handle.advertise<PCLCloud>(topic + "/line_cloud", 100);
 }
@@ -48,11 +51,22 @@ LineDetector::LineDetector(ros::NodeHandle &handle, const std::string& topic)
 pcl::PointCloud<pcl::PointXYZ>::Ptr LineDetector::toPointCloud(cv::Mat img){
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", topic, ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
     for(int r = img.rows/2; r < img.rows; r++) {
         for(int c = 0; c < img.cols; c++) {
             if(img.at<uchar>(r, c) > 0) {
-                cloud->points.push_back(PointFromPixel(cv::Point(c, r), transform, cam));
+                if (!hasInfo) {
+                    double roll, pitch, yaw;
+                    tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
+                    double origin_z = transform.getOrigin().getZ();
+                    double origin_y = transform.getOrigin().getY();
+                    double HFOV = toRadians(66.0);
+                    double VFOV = toRadians(47.6);
+                    pitch = -roll;
+                    cloud->points.push_back(PointFromPixelNoCam(cv::Point(c, r), img.cols, img.rows, HFOV, VFOV, origin_z, origin_y, pitch));
+                } else {
+                    cloud->points.push_back(PointFromPixel(cv::Point(c, r), transform, cam));
+                }
             }
         }
     }
