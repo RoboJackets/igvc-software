@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CVUTILS_H
+#define CVUTILS_H
 
 pcl::PointXYZ PointFromPixel(const cv::Point& pixel, const tf::Transform& cameraFrameToWorldFrame, image_geometry::PinholeCameraModel cam) {
     cv::Point3d cameraRay = cam.projectPixelTo3dRay(pixel);
@@ -24,3 +25,5 @@ pcl::PointXYZ PointFromPixelNoCam(const cv::Point& p, int height, int width, dou
 double toRadians(double degrees) {
     return degrees / 180.0 * M_PI;
 }
+
+#endif // CVUTILS_H

@@ -19,20 +19,16 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
-using namespace std;
-using namespace cv;
-using namespace pcl;
-
 class PotholeDetector {
 public:
     PotholeDetector(ros::NodeHandle &handle);
-    PointCloud<pcl::PointXYZ>::Ptr cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
     void camera_info_callback(const sensor_msgs::CameraInfoPtr& msg);
     void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
-    PointCloud<PointXYZ>::Ptr toPointCloud(vector<vector<Point>> &contours, int height, int width);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(std::vector<std::vector<cv::Point>> &contours, int height, int width);
 
     /**
      * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
@@ -58,7 +54,7 @@ private:
     ros::Publisher _pothole_cloud;
     tf::TransformListener tf_listener;
 
-    Mat src;
-    Mat src_gray;
+    cv::Mat src;
+    cv::Mat src_gray;
 };
 #endif // POTHOLEDETECTOR_H
