@@ -37,20 +37,20 @@ public:
             throw std::out_of_range("Index out of bounds!");
         actions[index] = action;
     }
-    StateType getState(unsigned int index)
+    StateType getState(unsigned int index) const
     {
         if(index < 0 || index >= states.size())
             throw std::out_of_range("Index out of bounds!");
 
-        typename std::list<StateType>::iterator iter = states.begin();
+        auto iter = states.cbegin();
         std::advance(iter, index);
         return *iter;
     }
-    ActionType getAction(unsigned int index)
+    ActionType getAction(unsigned int index) const
     {
         if(index < 0 || index >= actions.size())
             throw std::out_of_range("Index out of bounds!");
-        typename std::list<ActionType>::iterator iter = actions.begin();
+        auto iter = actions.cbegin();
         std::advance(iter, index);
         return *iter;
     }
@@ -62,19 +62,19 @@ public:
     {
         return &actions;
     }
-    StateType getLastState()
+    StateType getLastState() const
     {
-		if (states.empty())
-			throw std::out_of_range("Cannot call back() on empty list.");
+        if (states.empty())
+            throw std::out_of_range("Cannot call back() on empty list.");
         return states.back();
     }
-    int getNumberOfSteps()
+    int getNumberOfSteps() const
     {
         return actions.size();
     }
-    bool containsState(StateType state)
+    bool containsState(StateType state) const
     {
-        return (find(states.begin(), states.end(), state) != states.end());
+        return (find(states.cbegin(), states.cend(), state) != states.cend());
     }
 };
 
