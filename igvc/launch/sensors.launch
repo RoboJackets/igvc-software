@@ -16,9 +16,6 @@
     <!-- GPS -->
     <include file="$(find igvc)/launch/gps.launch" />
     
-    <!-- IMU -->
-    <node name="ardupilot" pkg="igvc" type="ardupilot" />
-    
     <!-- CAMERA -->
     <include file="$(find igvc)/launch/center_camera.launch" />
     
