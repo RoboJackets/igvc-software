@@ -27,7 +27,11 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
         line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), cv::Scalar(255, 255, 255), 3, 8);
     }
 
-    cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam);
+    if (hasInfo) {
+        cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam);
+    } else {
+        cloud = toPointCloud(tf_listener, MatToContours(fin_img), fin_img.size().height, fin_img.size().width);
+    }
     _line_cloud.publish(cloud);
 
     cv_ptr->image = fin_img;
