@@ -223,7 +223,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const 
     }
 
     // Convert the contours to a pointcloud
-    cloud = toPointCloud(allContours, orig.rows, orig.cols);
+    cloud = toPointCloud(tf_listener, allContours, orig.rows, orig.cols);
 
     cv_bridge::CvImage out_msg;
     out_msg.header   = msg->header;
@@ -245,26 +245,4 @@ PotholeDetector::PotholeDetector(ros::NodeHandle &handle, const std::string& top
     _pothole_filt_img = _it.advertise(topic + "/pothole_filt_img", 1);
     _pothole_thres = _it.advertise(topic + "/pothole_thres", 1);
     _pothole_cloud = handle.advertise<PCLCloud>(topic + "/pothole_cloud", 100);
-}
-
-pcl::PointCloud<pcl::PointXYZ>::Ptr PotholeDetector::toPointCloud(std::vector<std::vector<cv::Point>> &contours, int height, int width) {
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", topic, ros::Time(0), transform);
-    double roll, pitch, yaw;
-    tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
-    double origin_z = transform.getOrigin().getZ();
-    double origin_y = transform.getOrigin().getY();
-    double HFOV = toRadians(66.0);
-    double VFOV = toRadians(47.6);
-    pitch = -roll;
-
-    for (std::vector<cv::Point> contour : contours) {
-        for (cv::Point p : contour) {
-            cloud->points.push_back(PointFromPixelNoCam(p, height, width, HFOV, VFOV, origin_z, origin_y, pitch));
-        }
-    }
-
-	cloud->header.frame_id = "base_footprint";
-	return cloud;
 }
