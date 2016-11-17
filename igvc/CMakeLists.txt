@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   igvc_msgs
+  image_geometry
   image_transport
   cv_bridge
   camera_info_manager
