@@ -27,8 +27,7 @@ public:
 private:
     void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(std::vector<std::vector<cv::Point>> &contours, int height, int width);
-
+    
     /**
      * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
      * @note Must be odd!

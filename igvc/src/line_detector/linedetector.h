@@ -21,11 +21,10 @@ private:
     void info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
     void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(cv::Mat src);
 
     // ROS COMMUNICATION
-    std::string topic;
     image_transport::ImageTransport _it;
+    std::string topic;
     image_transport::Publisher _filt_img;
     image_transport::Subscriber _src_img;
     image_transport::CameraSubscriber _src_img_info;
