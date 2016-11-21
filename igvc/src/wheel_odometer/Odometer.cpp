@@ -1,12 +1,10 @@
 #include <ros/ros.h>
-#include <iostream>
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_broadcaster.h>
 #include <math.h>
 #include <igvc_msgs/velocity_pair.h>
 #include "Odometer.h"
 
-using namespace std;
 
 /**
  * Coneverts wheel velocities to odometry message using trigonometry for calculations
@@ -26,7 +24,7 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
     geometry_msgs::Vector3 linearVelocities;
     linearVelocities.z = 0;
 
-    if (abs(rightVelocity - leftVelocity) > 1e-6) {
+    if (abs(rightVelocity - leftVelocity) > 1e-4) {  // 1e-4 is the point where less of a difference is straight
         linearVelocities.y = velocity * sin(deltaTheta);
         linearVelocities.x = velocity * cos(deltaTheta);
     } else {
@@ -73,14 +71,14 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
             .01, .01, .01, .01, .01, .01
     };
     // the position covariance takes same form as twist covariance above
-    // TODO replace with calculated values
+    // this grows without bounds as error accumulates - disregard exact reading with high variance
     odom.pose.covariance = {
-            1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6,
-            1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6,
-            1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6,
-            1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6,
-            1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6,
-            1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6
+             1e6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6,
+            1e-6,  1e6, 1e-6, 1e-6, 1e-6, 1e-6,
+            1e-6, 1e-6,  1e6, 1e-6, 1e-6, 1e-6,
+            1e-6, 1e-6, 1e-6,  1e6, 1e-6, 1e-6,
+            1e-6, 1e-6, 1e-6, 1e-6,  1e6, 1e-6,
+            1e-6, 1e-6, 1e-6, 1e-6, 1e-6,  1e6
     };
 
 
