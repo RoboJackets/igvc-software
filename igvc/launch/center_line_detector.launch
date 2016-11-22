@@ -2,7 +2,7 @@
 <launch>
     <node name="linedetectorcenter" pkg="igvc" type="linedetector" output="screen" >
 	<param name="topic" type="string" value="/usb_cam_center"/>
-    </node> -->
+    </node>
 <!--
     <node name="linedetectorleft" pkg="igvc" type="linedetector" output="screen" >
 	<param name="topic" type="string" value="/usb_cam_left"/>

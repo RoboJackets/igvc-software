@@ -1,43 +1,37 @@
 #include "linedetector.h"
-#include <opencv2/video/video.hpp>
-#include <opencv2/opencv.hpp>
-#include <sensor_msgs/image_encodings.h>
 #include <pcl_ros/point_cloud.h>
-#include <queue>
-#include <chrono>
-#include <ctime>
-
-using namespace std;
-using namespace cv;
-using namespace pcl;
-
+#include <igvc/CVUtils.hpp>
 
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
-constexpr double radians(double degrees) {
-    return degrees / 180.0 * M_PI;
+void LineDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
+    cam.fromCameraInfo(cam_info);
+    img_callback(msg);
 }
 
-void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
-    cam.fromCameraInfo(cam_info);
+void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src_img = cv_ptr->image;
 
-    resize(src_img, src_img, Size(524, 524), 0, 0, CV_INTER_AREA);
-    fin_img = Mat::zeros(src_img.size(), src_img.type());
+    cv::resize(src_img, src_img, cv::Size(524, 524), 0, 0, CV_INTER_AREA);
+    fin_img = cv::Mat::zeros(src_img.size(), src_img.type());
 
-    GaussianBlur(src_img, working, Size(0,0), 2.0);
+    cv::GaussianBlur(src_img, working, cv::Size(0,0), 2.0);
 
-    Canny(working, working, 45, 135, 3);
+    cv::Canny(working, working, 45, 135, 3);
 
-    vector<Vec4i> lines;
-    HoughLinesP(working, lines, 1.0, CV_PI/180, 80, 35, 15);
+    std::vector<cv::Vec4i> lines;
+    cv::HoughLinesP(working, lines, 1.0, CV_PI/180, 80, 35, 15);
     for (size_t i = 0; i < lines.size(); ++i) {
-        line(fin_img, Point(lines[i][0], lines[i][1]), Point(lines[i][2], lines[i][3]), Scalar(255, 255, 255), 3, 8);
+        line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), cv::Scalar(255, 255, 255), 3, 8);
     }
 
-    cloud = toPointCloud(fin_img);
+    if (hasInfo) {
+        cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam);
+    } else {
+        cloud = toPointCloud(tf_listener, MatToContours(fin_img), fin_img.size().height, fin_img.size().width);
+    }
     _line_cloud.publish(cloud);
 
     cv_ptr->image = fin_img;
@@ -46,36 +40,16 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sen
 
 LineDetector::LineDetector(ros::NodeHandle &handle, const std::string& topic)
       : _it(handle)
-      , tf_listener(handle)
       , topic(topic)
+      , tf_listener(handle)
 {
-     cout<<"Running"<<endl;
-    _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::img_callback, this);
+     if (!hasInfo) {
+        _src_img = _it.subscribe("stereo/left/image_raw", 1, &LineDetector::img_callback, this);
+     } else {
+        _src_img_info = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::info_img_callback, this);
+     }
     _filt_img = _it.advertise(topic + "/filt_img", 1);
     _line_cloud = handle.advertise<PCLCloud>(topic + "/line_cloud", 100);
 }
 
-PointCloud<PointXYZ>::Ptr LineDetector::toPointCloud(Mat img){
-    PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
-    tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", topic, ros::Time(0), transform);
-    for(int r = img.rows/2; r < img.rows; r++) {
-        for(int c = 0; c < img.cols; c++) {
-            if(img.at<uchar>(r, c) > 0) {
-                cloud->points.push_back(PointFromPixel(Point(c, r), transform));
-            }
-        }
-    }
-    cloud->header.frame_id = "base_footprint";
-    return cloud;
-}
 
-// @todo add this to a util class
-pcl::PointXYZ LineDetector::PointFromPixel(const cv::Point& pixel, const tf::Transform& cameraFrameToWorldFrame) {
-    cv::Point3d cameraRay = cam.projectPixelTo3dRay(pixel);
-    tf::Point worldCameraOrigin = cameraFrameToWorldFrame * tf::Vector3(0, 0, 0);
-    tf::Point worldCameraStep = cameraFrameToWorldFrame * tf::Vector3(cameraRay.x, cameraRay.y, cameraRay.z) - worldCameraOrigin;
-    double zScale = -worldCameraOrigin.z()/worldCameraStep.z();
-    tf::Point ret = worldCameraOrigin + zScale * worldCameraStep;
-    return pcl::PointXYZ(ret.x(), ret.y(), 0);
-}

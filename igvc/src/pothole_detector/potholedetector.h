@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <ros/publisher.h>
 #include <image_transport/image_transport.h>
+#include <image_geometry/pinhole_camera_model.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/core.hpp>
 #include <vector>
@@ -11,27 +12,22 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/video/video.hpp>
 #include <sensor_msgs/image_encodings.h>
+#include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <camera_info_manager/camera_info_manager.h>
 #include <math.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
-using namespace std;
-using namespace cv;
-using namespace pcl;
-
 class PotholeDetector {
 public:
-    PotholeDetector(ros::NodeHandle &handle);
-    PointCloud<pcl::PointXYZ>::Ptr cloud;
+    PotholeDetector(ros::NodeHandle &handle, const std::string& topic);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
-    void camera_info_callback(const sensor_msgs::CameraInfoPtr& msg);
-    void img_callback(const sensor_msgs::ImageConstPtr& msg);
+    void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
 
-    PointCloud<PointXYZ>::Ptr toPointCloud(vector<vector<Point>> &contours, int height, int width);
-
+    
     /**
      * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
      * @note Must be odd!
@@ -51,12 +47,13 @@ private:
     image_transport::ImageTransport _it;
     image_transport::Publisher _pothole_filt_img;
     image_transport::Publisher _pothole_thres;
-    image_transport::Subscriber _src_img;
+    image_transport::CameraSubscriber _src_img;
     ros::Subscriber _camera_info;
     ros::Publisher _pothole_cloud;
     tf::TransformListener tf_listener;
+    std::string topic;
 
-    Mat src;
-    Mat src_gray;
+    cv::Mat src;
+    cv::Mat src_gray;
 };
 #endif // POTHOLEDETECTOR_H
