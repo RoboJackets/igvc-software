@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+  <name>igvc_gazebo</name>
+  <version>1.0.0</version>
+  <description>
+    igvc_gazebo is used with Gazebo to simulate the IGVC platform
+  </description>
+
+  <maintainer email="jgibson37@gatech.edu">Jason Gibson</maintainer>
+  <license>BSD</license>
+
+  <author email="jgibson37@gatech.edu">Jason Gibson</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>gazebo_ros</run_depend>
+  <run_depend>gazebo_ros_control</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>hector_gazebo_plugins</run_depend>
+  <run_depend>hector_gazebo_worlds</run_depend>
+  <run_depend>joy</run_depend>
+</package>
