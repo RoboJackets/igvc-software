@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<launch>
+  <arg name="namespace" default="igvc"/>
+  <arg name="world_name" default="worlds/empty_sky.world"/>
+  <arg name="cmd_timeout" default="0.5"/>
+
+  <!-- parameter for other programs to use to know if we are in simulation ro real world-->
+  <!--<param name="autorally_simulation" value"true"/> -->
+
+  <!-- Vehicle pose -->
+  <arg name="x" default="0"/>
+  <arg name="y" default="0"/>
+  <arg name="z" default="0"/>
+  <arg name="roll" default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw" default="0"/>
+
+  <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
+  
+  <!-- Remap to same topics as the actual robot -->
+  <!--<remap from="/$(arg namespace)/imu" to="/imu/imu" />-->
+  
+  <group ns="$(arg namespace)">
+    <!-- Create the world. -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="world_name" value="igvc_world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
+      <arg name="paused" value="false"/>
+      <arg name="use_sim_time" value="true"/>
+      <arg name="gui" value="true"/>
+      <arg name="headless" value="false"/>
+      <arg name="debug" value="false"/>
+    </include>
+        
+    <!-- Spawn the vehicle. -->
+    <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
+          args="-file $(find igvc_description)/urdf/Jaymii.urdf
+                -gazebo_namespace /$(arg namespace)/gazebo
+                -urdf -model Jaymii
+                -x $(arg x) -y $(arg y) -z $(arg z)
+                -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+  </group>
+</launch>
