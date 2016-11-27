@@ -1,4 +1,3 @@
- <!-- hard coded paths to .dae files needs to be fixed -->
  <robot name="Jaymii" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <!-- base link must have geometry so its axis display in rviz-->
   <link name="base_link">
@@ -23,7 +22,6 @@
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
         <mesh filename="model://urdf/meshes/Body.dae"/>
-        <!--<mesh filename="model://urdf/meshes/Body.dae"/>-->
       </geometry>
     </visual>
     <collision>
