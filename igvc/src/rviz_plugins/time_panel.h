@@ -1,3 +1,5 @@
+#ifndef Q_MOC_RUN
+
 #ifndef TIME_PANEL_H
 #define TIME_PANEL_H
 
@@ -38,3 +40,5 @@ class TimePanel: public rviz::Panel
 }
 
 #endif // TIME_PANEL_H
+
+#endif
