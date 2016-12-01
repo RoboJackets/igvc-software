@@ -28,7 +28,14 @@
       <arg name="headless" value="false"/>
       <arg name="debug" value="false"/>
     </include>
-        
+
+    <!-- needed for rviz -->
+    <param name="robot_description" command="cat $(find igvc_description)/urdf/Jaymii.urdf" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+    
+    <!-- convert laser scan to point cloud for LIDAR -->
+    <node name="scan_to_pointcloud" pkg="igvc" type="scan_to_pointcloud" output="screen" />
+
     <!-- Spawn the vehicle. -->
     <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
           args="-file $(find igvc_description)/urdf/Jaymii.urdf
