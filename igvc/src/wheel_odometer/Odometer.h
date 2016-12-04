@@ -1,0 +1,28 @@
+#ifndef ODOMETER_H
+#define ODOMETER_H
+#include <ros/ros.h>
+#include <tf/transform_broadcaster.h>
+#include <igvc_msgs/velocity_pair.h>
+
+class Odometer {
+public:
+    Odometer(ros::NodeHandle&);
+private:
+    // ros infastructure
+    ros::Publisher pub;
+    ros::Subscriber sub;
+    tf::TransformBroadcaster odom_broadcaster;
+    int seq;
+
+    // robot constant
+    const float WHEEL_SEPARATION = 0.59436;
+
+    // keeping track of global position
+    float x;
+    float y;
+    float yaw;
+
+    // callback for encoder subscriber
+    void enc_callback(const igvc_msgs::velocity_pair&);
+};
+#endif
