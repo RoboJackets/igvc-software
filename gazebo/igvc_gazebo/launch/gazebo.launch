@@ -2,7 +2,7 @@
 
 <launch>
   <arg name="namespace" default="igvc"/>
-  <arg name="world_name" default="worlds/empty_sky.world"/>
+  <arg name="world_name" default="$(find igvc_description)/urdf/igvc.world"/>
   <arg name="cmd_timeout" default="0.5"/>
 
   <!-- Vehicle pose -->
@@ -21,7 +21,7 @@
   <group ns="$(arg namespace)">
     <!-- Create the world. -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-      <arg name="world_name" value="igvc_world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
+      <arg name="world_name" value="$(arg world_name)"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
       <arg name="paused" value="false"/>
       <arg name="use_sim_time" value="true"/>
       <arg name="gui" value="true"/>
