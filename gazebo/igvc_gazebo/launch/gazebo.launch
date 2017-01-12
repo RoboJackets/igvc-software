@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
+  <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
   <arg name="namespace" default="igvc"/>
   <arg name="world_name" default="$(find igvc_description)/urdf/igvc.world"/>
   <arg name="cmd_timeout" default="0.5"/>
@@ -12,8 +13,6 @@
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0"/>
-
-  <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
   
   <!-- Remap to same topics as the actual robot -->
   <!--<remap from="/$(arg namespace)/imu" to="/imu/imu" />-->
