@@ -1,3 +1,5 @@
+#ifndef Q_MOC_RUN
+
 #ifndef NODE_PANEL_H
 #define NODE_PANEL_H
 
@@ -52,3 +54,5 @@ class NodePanel: public rviz::Panel
 }
 
 #endif // NODE_PANEL_H
+
+#endif
