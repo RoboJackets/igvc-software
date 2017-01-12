@@ -1,3 +1,5 @@
+#ifndef Q_MOC_RUN
+
 #ifndef LAUNCH_PANEL_H
 #define LAUNCH_PANEL_H
 
@@ -43,3 +45,5 @@ class LaunchPanel: public rviz::Panel
 }
 
 #endif // LAUNCH_PANEL_H
+
+#endif
