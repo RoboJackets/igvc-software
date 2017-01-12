@@ -1,8 +1,6 @@
 #include "potholedetector.h"
-
-using namespace std;
-using namespace cv;
-using namespace pcl;
+#include <pcl_ros/point_cloud.h>
+#include <igvc/CVUtils.hpp>
 
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
@@ -20,18 +18,16 @@ int getDiff(int a, int b) {
     return abs(a - b);
 }
 
-double toRadians(double degrees) {
-    return degrees / 180.0 * M_PI;
-}
-
-void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
+void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
-    Mat orig = cv_ptr->image.clone();
+
+    cv::Mat orig = cv_ptr->image.clone();
     src = cv_ptr->image.clone();
+
 
     // Crops the image (removes sky)
     int topCrop = src.rows / 2 - 100;
-    Rect roiNoSky(0, topCrop, src.cols, src.rows - topCrop);
+    cv::Rect roiNoSky(0, topCrop, src.cols, src.rows - topCrop);
     src = src(roiNoSky);
 
     // Determine the average of blue, green, and red pixels in the entire picture in order to do adaptive thresholding.
@@ -41,7 +37,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     double redImageAverage = 0;
     for (int i = 0; i <= src.cols; i++) {
         for (int j = 0; j <= src.rows; j++) {
-            Vec3b currentPixel = src.at<Vec3b>(j, i);
+            cv::Vec3b currentPixel = src.at<cv::Vec3b>(j, i);
             blueImageAverage += currentPixel[0];
             greenImageAverage += currentPixel[1];
             redImageAverage += currentPixel[2];
@@ -55,8 +51,8 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cvtColor(src, src_gray, CV_BGR2GRAY);
 
     // Find the mean and stddev of the grayscale image in order to do adaptive thresholding
-    Mat mean;
-    Mat stddev;
+    cv::Mat mean;
+    cv::Mat stddev;
     meanStdDev(src_gray, mean, stddev);
     double thresh = mean.at<double>(0,0) + (stddev.at<double>(0,0) * 2);
     if(thresh > 254) {
@@ -64,19 +60,19 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     }
 
     // Threshold and adaptive blur of the grayscale image
-    threshold(src_gray, src_gray, thresh, 255, THRESH_BINARY);
-    GaussianBlur(src_gray, src_gray, Size(gaussian_size, gaussian_size), 2, 2);
+    threshold(src_gray, src_gray, thresh, 255, cv::THRESH_BINARY);
+    GaussianBlur(src_gray, src_gray, cv::Size(gaussian_size, gaussian_size), 2, 2);
 
     // Detect circles on the image
-    vector<Vec3f> circles;
+    std::vector<cv::Vec3f> circles;
     HoughCircles(src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows / 8, 50, 10, minRadius, maxRadius);
 
     // All the contours that will be published to the pointcloud
-    vector<vector<Point>> allContours;
+    std::vector<std::vector<cv::Point>> allContours;
 
     // Traverse through all the circles, and do more detection for each one
     for(size_t i = 0; i < circles.size(); i++ ) {
-        Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+        cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 
         // If the circle is too close to the top / bottom edges, filter
         if (center.y <= 100 || center.y >= src_gray.rows - 100) {
@@ -110,8 +106,8 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
         }
 
         // Create the rectangle and an src_gray with only that region of interest
-        Rect roiAroundCircle(xStart, yStart, xWidth, yHeight);
-        Mat src_gray_roiAroundCircle = src_gray(roiAroundCircle);
+        cv::Rect roiAroundCircle(xStart, yStart, xWidth, yHeight);
+        cv::Mat src_gray_roiAroundCircle = src_gray(roiAroundCircle);
 
         // Average up all the pixels in a circle around the center of the pothole.
         double bluePotholeAverage = 0;
@@ -121,7 +117,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
             for (int j = -whiteSampleRadius; j <= whiteSampleRadius; j++) {
                 // Equation to only check points in a circle...
                 if (i * i + j * j <= whiteSampleRadius * whiteSampleRadius) {
-                    Vec3b currentPixel = src.at<Vec3b>(j + center.y, i + center.x);
+                    cv::Vec3b currentPixel = src.at<cv::Vec3b>(j + center.y, i + center.x);
                     bluePotholeAverage += currentPixel[0];
                     greenPotholeAverage += currentPixel[1];
                     redPotholeAverage += currentPixel[2];
@@ -140,13 +136,13 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 
         // Find contours within this small region of interest around the circle
         // Use an offset to align with the entire src image (which has a cropped sky)
-        vector<vector<Point>> contours;
-        Point offset(xStart, yStart);
+        std::vector<std::vector<cv::Point>> contours;
+        cv::Point offset(xStart, yStart);
         findContours(src_gray_roiAroundCircle, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE, offset);
 
         // Here is the start of our code to filter out false positives....... :/
         // Traverse through each single contour first
-        for (vector<vector<Point>>::iterator it = contours.begin(); it != contours.end(); ++it) {
+        for (std::vector<std::vector<cv::Point>>::iterator it = contours.begin(); it != contours.end(); ++it) {
             // Filter out contours that are too small
             if ((*it).size() > contourSizeThreshold) {
                 int minY = src_gray.rows;
@@ -155,7 +151,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                 int maxX = 0;
 
                 // For each contour, find the min and max X coordinates by traversing through all the points.
-                for (Point p : *it) {
+                for (cv::Point p : *it) {
                     int x = p.x;
                     if (x > maxX) {
                         maxX = x;
@@ -169,7 +165,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                 int centerX = (minX + maxX) / 2;
 
                 // Find top and bottom points that correspond to the centerX (so get the y values)
-                for (Point p : *it) {
+                for (cv::Point p : *it) {
                     int x = p.x;
                     int y = p.y;
                     if (x == centerX && y > maxY) {
@@ -187,14 +183,14 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                 int blueBelow = 0;
                 int greenBelow = 0;
                 int redBelow = 0;
-                Vec3b currentPixel;
+                cv::Vec3b currentPixel;
                 for (int j = 5; j < 36; j++) {
-                    currentPixel = src.at<Vec3b>(minY - j, centerX);
+                    currentPixel = src.at<cv::Vec3b>(minY - j, centerX);
                     blueAbove += currentPixel[0];
                     greenAbove += currentPixel[1];
                     redAbove += currentPixel[2];
 
-                    currentPixel = src.at<Vec3b>(maxY + j, centerX);
+                    currentPixel = src.at<cv::Vec3b>(maxY + j, centerX);
                     blueBelow += currentPixel[0];
                     greenBelow += currentPixel[1];
                     redBelow += currentPixel[2];
@@ -221,13 +217,13 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
         }
 
         // Push all of the remaining good points to the main vector of contours
-        for (vector<Point> goodContour : contours) {
+        for (std::vector<cv::Point> goodContour : contours) {
             allContours.push_back(goodContour);
         }
     }
 
     // Convert the contours to a pointcloud
-    cloud = toPointCloud(allContours, orig.rows, orig.cols);
+    cloud = toPointCloud(tf_listener, allContours, orig.rows, orig.cols);
 
     cv_bridge::CvImage out_msg;
     out_msg.header   = msg->header;
@@ -240,43 +236,13 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     _pothole_cloud.publish(cloud);
 }
 
-PotholeDetector::PotholeDetector(ros::NodeHandle &handle)
+PotholeDetector::PotholeDetector(ros::NodeHandle &handle, const std::string& topic)
     : gaussian_size(7),
       _it(handle),
-      tf_listener(handle) {
-    _src_img = _it.subscribe("/usb_cam/image_raw", 1, &PotholeDetector::img_callback, this);
-    _pothole_filt_img = _it.advertise("/pothole_filt_img", 1);
-    _pothole_thres = _it.advertise("/pothole_thres", 1);
-    _pothole_cloud = handle.advertise<PCLCloud>("/pothole_cloud", 100);
-}
-
-PointCloud<PointXYZ>::Ptr PotholeDetector::toPointCloud(vector<vector<Point>> &contours, int height, int width) {
-    PointCloud<PointXYZ>::Ptr cloud(new PointCloud<PointXYZ>);
-    tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
-    double roll, pitch, yaw;
-    tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
-    auto origin_z = transform.getOrigin().getZ();
-    auto origin_y = transform.getOrigin().getY();
-    auto HFOV = toRadians(66.0);
-    auto VFOV = toRadians(47.6);
-    pitch = -roll;
-
-    for (vector<Point> contour : contours) {
-        for (Point p : contour) {
-            int xP = p.x;
-            int yP = p.y + (height / 2 - 100);
-
-            auto pitch_offset = ((float) (yP - height / 2) / height) * VFOV;
-            auto y = origin_z /tan(pitch + pitch_offset) + origin_y;
-
-            auto theta = ((float) (xP - width / 2) / width) * HFOV;
-            auto x = y * tan(theta);
-
-            cloud->points.push_back(PointXYZ(x, y, 0));
-        }
-    }
-
-	cloud->header.frame_id = "base_footprint";
-	return cloud;
+      tf_listener(handle),
+      topic(topic) {
+    _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &PotholeDetector::img_callback, this);
+    _pothole_filt_img = _it.advertise(topic + "/pothole_filt_img", 1);
+    _pothole_thres = _it.advertise(topic + "/pothole_thres", 1);
+    _pothole_cloud = handle.advertise<PCLCloud>(topic + "/pothole_cloud", 100);
 }

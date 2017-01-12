@@ -1,28 +1,25 @@
 <!-- igvc.launch -->
 <!--
-    This file will launch the default node configuration for
-    a competition run. All sensors, hardware-interface, and generic state nodes are launched here.
+    This file will launch all launch files necessary to run the robot in
+    a competition run.
     -->
 <launch>
-    <!-- TF -->
-    <include file="$(find igvc)/launch/robot_state_publisher.launch" />
-    
-    <!-- LIGHT CONTROLLER -->
-    <node name="light_controller" pkg="igvc" type="light_controller" output="screen"/>
-    
-    <!-- MOTOR CONTROLLER -->
-    <node name="motor_controller" pkg="igvc" type="motor_controller" />
+    <!-- sensors -->
+    <include file="$(find igvc)/launch/sensors.launch" />
 
-    <!-- GPS -->
-    <include file="$(find igvc)/launch/gps.launch" />
-    
-    <!-- IMU -->
-    <node name="ardupilot" pkg="igvc" type="ardupilot" />
-    
-    <!-- CAMERA -->
-    <include file="$(find igvc)/launch/centercamera.launch" />
-    
-    <!-- LIDAR -->
-    <include file="$(find igvc)/launch/lidar.launch" />
-    
+    <!-- center line detector -->
+    <include file="$(find igvc)/launch/center_line_detector.launch" />
+
+    <!-- pot hole detector -->
+    <include file="$(find igvc)/launch/pothole_detector.launch" />
+
+    <!-- mapper -->
+    <include file="$(find igvc)/launch/mapper.launch" />
+
+    <!-- pather -->
+    <include file="$(find igvc)/launch/pather.launch" />
+
+    <!-- not included yet are odometer.launch, localization.launch, side
+         cameras, side linedetectors. They are not currently required -->
+
 </launch>

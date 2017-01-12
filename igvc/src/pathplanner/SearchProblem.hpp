@@ -4,6 +4,7 @@
 #include <list>
 #include <algorithm>
 #include <iterator>
+#include <stdexcept>
 
 template <class StateType, class ActionType>
 class Path
@@ -13,10 +14,8 @@ private:
     std::list<ActionType> actions;
 public:
     Path(){ }
-    Path(const Path<StateType, ActionType>& p)
+    Path(const Path<StateType, ActionType>& p) : states(p.states), actions(p.actions)
     {
-        states = std::list<StateType>(p.states);
-        actions = std::list<ActionType>(p.actions);
     }
     void addState(StateType state)
     {
@@ -29,29 +28,29 @@ public:
     void setState(StateType state, int index)
     {
         if(index < 0 || index >= states.size())
-            throw "Index out of bounds!";
+            throw std::out_of_range("Index out of bounds!");
         states[index] = state;
     }
     void setAction(ActionType action, int index)
     {
         if(index < 0 || index >= actions.size())
-            throw "Index out of bounds!";
+            throw std::out_of_range("Index out of bounds!");
         actions[index] = action;
     }
-    StateType getState(unsigned int index)
+    StateType getState(unsigned int index) const
     {
         if(index < 0 || index >= states.size())
-            throw "Index out of bounds!";
+            throw std::out_of_range("Index out of bounds!");
 
-        typename std::list<StateType>::iterator iter = states.begin();
+        auto iter = states.cbegin();
         std::advance(iter, index);
         return *iter;
     }
-    ActionType getAction(unsigned int index)
+    ActionType getAction(unsigned int index) const
     {
         if(index < 0 || index >= actions.size())
-            throw "Index out of bounds!";
-        typename std::list<ActionType>::iterator iter = actions.begin();
+            throw std::out_of_range("Index out of bounds!");
+        auto iter = actions.cbegin();
         std::advance(iter, index);
         return *iter;
     }
@@ -63,17 +62,19 @@ public:
     {
         return &actions;
     }
-    StateType getLastState()
+    StateType getLastState() const
     {
+        if (states.empty())
+            throw std::out_of_range("Cannot call back() on empty list.");
         return states.back();
     }
-    int getNumberOfSteps()
+    int getNumberOfSteps() const
     {
         return actions.size();
     }
-    bool containsState(StateType state)
+    bool containsState(StateType state) const
     {
-        return (find(states.begin(), states.end(), state) != states.end());
+        return (find(states.cbegin(), states.cend(), state) != states.cend());
     }
 };
 

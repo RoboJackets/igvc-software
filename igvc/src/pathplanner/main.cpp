@@ -31,14 +31,12 @@ bool received_waypoint = false;
 void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
 {
     lock_guard<mutex> lock(planning_mutex);
-    cout << "Map received." << endl;
     *search_problem.Map = *msg;
 }
 
 void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
 {
     lock_guard<mutex> lock(planning_mutex);
-    cout << "Position received." << endl;
     search_problem.Start.x = msg->pose.position.x;
     search_problem.Start.y = msg->pose.position.y;
     tf::Quaternion q;
@@ -113,8 +111,6 @@ int main(int argc, char** argv)
          * Long paths take forever to compute, and will freeze up this node.
          */
         auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal);
-        cerr<<"dist: "<<distance_to_goal<<endl<<"waypoint: "<<received_waypoint<<endl;
-        cerr<<"num pub: "<<disp_path_pub.getNumSubscribers()<<endl;
         if(!received_waypoint || distance_to_goal == 0 || distance_to_goal > 60)
             continue;
 
