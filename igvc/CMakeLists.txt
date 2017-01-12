@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   igvc_msgs
+  image_geometry
   image_transport
   cv_bridge
   camera_info_manager
@@ -177,7 +178,6 @@ endif()
 add_subdirectory(src/motor_controller)
 add_subdirectory(src/serial)
 add_subdirectory(src/joystick_driver)
-add_subdirectory(src/ardupilot)
 add_subdirectory(src/light_controller)
 add_subdirectory(src/waypoint_source)
 add_subdirectory(src/pathplanner)
@@ -188,7 +188,8 @@ add_subdirectory(src/pose_tracker)
 add_subdirectory(src/path_follower)
 add_subdirectory(src/pidtester)
 add_subdirectory(src/local_mapper)
-#add_subdirectory(src/rviz_plugins)
+add_subdirectory(src/rviz_plugins)
 add_subdirectory(src/pothole_detector)
-add_subdirectory(src/odometer)
+add_subdirectory(src/wheel_odometer)
 #add_subdirectory(src/system_stats)
+add_subdirectory(src/imu)

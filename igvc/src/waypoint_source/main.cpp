@@ -3,9 +3,9 @@
 #include <geometry_msgs/PointStamped.h>
 #include <fstream>
 #include <igvc/StringUtils.hpp>
-#include <gps_common/conversions.h>
 #include <string>
 #include <mutex>
+#include "conversion.h"
 
 using namespace std;
 using namespace geometry_msgs;
@@ -15,7 +15,6 @@ ros::Publisher waypoint_pub;
 vector<PointStamped> waypoints;
 PointStamped current_waypoint;
 Point map_origin;
-
 mutex current_mutex;
 
 double dmsToDec(string dms)
@@ -82,7 +81,7 @@ void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
 
             PointStamped p;
 
-            gps_common::UTM(lat, lon, &(p.point.x), &(p.point.y));
+            UTM(lat, lon, &(p.point.x), &(p.point.y));
 
             waypoints.push_back(p);
         }

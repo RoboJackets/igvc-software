@@ -1,3 +1,5 @@
+#ifndef Q_MOC_RUN
+
 #ifndef ESTOP_PANEL_H
 #define ESTOP_PANEL_H
 
@@ -31,3 +33,5 @@ class EStopPanel: public rviz::Panel
 }
 
 #endif // ESTOP_PANEL_H
+
+#endif
