@@ -7,8 +7,8 @@
 #include <igvc/StringUtils.hpp>
 
 #define DEG_TO_RAD (3.14159265/180.0)
+#define HALF_TO_FULL_CIRCLE_ANGLE(ang) (((ang) < 0) ? ((ang) + 360) : (ang))
 
-using namespace std;
 
 int main(int argc, char** argv)
 {
@@ -25,31 +25,31 @@ int main(int argc, char** argv)
 
     // send a sync request and listen to response - after that the stream should restart
     port.write("#oe0#oat#o1#s12"); // turn on output stream - set output type - request synch token
-    string syncResponse = port.readln();
+    std::string syncResponse = port.readln();
+
     int syncCounter = 0;
-    while (syncResponse != "#SYNCH12") {
+    while (syncResponse != "#SYNCH12" && port.isOpen()) {
         // try to sync again after first time failed - no more than 10 times
         usleep(1000); // sleep for 1 ms
         port.write("#oe0#oat#o1#s12");
         syncResponse = port.readln();
         if (syncCounter++ > 10)
             // give up and terminate node
-            throw runtime_error("failed to sync IMU");
+            throw std::runtime_error("failed to sync IMU");
     }
 
     int seq = 0; // sequence of published messgaes - should be monatomicly increasing
-    float yawInitial = 0; // initial yaw orientation for publishing relative yaw angle
 
     while(ros::ok() && port.isOpen()) {
         ros::spinOnce();
 
         // read the values
-        string accel = port.readln();
-        string gyro = port.readln();
-        string rpy = port.readln();
+        std::string accel = port.readln();
+        std::string gyro = port.readln();
+        std::string rpy = port.readln();
 
         // parse the strings read
-        vector<string> accelTokens = split(accel, '=');
+        std::vector<std::string> accelTokens = split(accel, '=');
         if (accelTokens.size() == 2) {
             accel = accelTokens.at(1);
             accelTokens = split(accel, ',');
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
             ROS_ERROR_STREAM("Improperly formatted IMU message - accelerometer data");
         }
 
-        vector<string> gyroTokens = split(gyro, '=');
+        std::vector<std::string> gyroTokens = split(gyro, '=');
         if (gyroTokens.size() == 2) {
             gyro = gyroTokens.at(1);
             gyroTokens = split(gyro, ',');
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
             ROS_ERROR_STREAM("Improperly formatted IMU message - gyroscope data");
         }
 
-        vector<string> rpyTokens = split(rpy, '=');
+        std::vector<std::string> rpyTokens = split(rpy, '=');
         if (rpyTokens.size() == 2) {
             rpy = rpyTokens.at(1);
             rpyTokens = split(rpy, ',');
@@ -98,21 +98,20 @@ int main(int argc, char** argv)
                     1e-6, 1e-6, 0.02
             };
 
-            float yaw = -stof(rpyTokens[0]) * DEG_TO_RAD;
-            float pitch = stof(rpyTokens[1]) * DEG_TO_RAD;
-            float roll = stof(rpyTokens[2]) * DEG_TO_RAD;
-            if (seq == 0)
-                yawInitial = yaw; // first time sets initial yaw
-            msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yawInitial - yaw);
+            float yaw = HALF_TO_FULL_CIRCLE_ANGLE(-stof(rpyTokens[0])) * DEG_TO_RAD;
+            float pitch = HALF_TO_FULL_CIRCLE_ANGLE(stof(rpyTokens[1])) * DEG_TO_RAD;
+            float roll = HALF_TO_FULL_CIRCLE_ANGLE(stof(rpyTokens[2])) * DEG_TO_RAD;
+            msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
             msg.orientation_covariance = {
                     0.0025,   1e-6,   1e-6,
                       1e-6, 0.0025,   1e-6,
                       1e-6,   1e-6, 0.0025
             };
-        } catch(const invalid_argument &e) {
+        } catch(const std::invalid_argument &e) {
             ROS_ERROR_STREAM("Exception in parsing IMU message.");
             ROS_ERROR_STREAM(e.what());
         }
+
 
         pub.publish(msg);
     }
