@@ -12,55 +12,25 @@
     </scene>
 
     <!-- A global light source -->
-    <light name='sun' type='directional'>
-      <cast_shadows>1</cast_shadows>
-      <pose frame=''>0 0 10 0 -0 0</pose>
-      <diffuse>0.8 0.8 0.8 1</diffuse>
-      <specular>0.1 0.1 0.1 1</specular>
-      <attenuation>
-        <range>1000</range>
-        <constant>0.9</constant>
-        <linear>0.01</linear>
-        <quadratic>0.001</quadratic>
-      </attenuation>
-      <direction>-0.5 0.5 -1</direction>
-    </light>
+    <include>
+      <uri>model:///urdf/models/sun</uri>
+    </include>
     <!-- A ground plane -->
-    <model name="grass_plane">
-    <static>true</static>
-    <link name="link">
-      <collision name="collision">
-        <geometry>
-          <plane>
-            <normal>0 0 1</normal>
-            <size>100 100</size>
-          </plane>
-        </geometry>
-        <surface>
-          <friction>
-            <ode>
-              <mu>100</mu>
-              <mu2>50</mu2>
-            </ode>
-          </friction>
-        </surface>
-      </collision>
-      <visual name="visual">
-        <cast_shadows>false</cast_shadows>
-        <geometry>
-          <plane>
-            <normal>0 0 1</normal>
-            <size>100 100</size>
-          </plane>
-        </geometry>
-        <material>
-          <script>
-            <uri>model://urdf/gazebo.material</uri>
-            <name>Gazebo/Grass</name>
-          </script>
-        </material>
-      </visual>
-    </link>
-  </model>
+    <include>
+      <uri>model:///urdf/models/grass_plane</uri>
+    </include>
+    <!-- barrels -->
+    <include>
+      <uri>model://construction_barrel</uri>
+      <name>construction_barrel</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>2.0 2.0 0.0 0 0 0</pose> 
+    </include>
+    <include>
+      <uri>model://construction_barrel</uri>
+      <name>construction_barrel1</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>4.0 4.0 0.0 0 0 0</pose> 
+    </include>
+    <!-- pothole -->
+    
   </world>
 </sdf>
