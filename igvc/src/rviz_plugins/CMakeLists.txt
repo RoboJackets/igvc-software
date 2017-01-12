@@ -1,6 +1,7 @@
-find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 find_package(catkin REQUIRED COMPONENTS rviz)
-include(${QT_USE_FILE})
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -12,7 +13,7 @@ link_directories( ${OGRE_LIBRARY_DIRS} )
 
 add_definitions(-DQT_NO_KEYWORDS)
 
-qt4_wrap_cpp(MOC_FILES
+qt5_wrap_cpp(MOC_FILES
 	eStop_panel.h
 	speed_panel.h
 	speedometer.h
@@ -38,4 +39,4 @@ set(SOURCE_FILES
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${QT_LIBRARIES} ${OGRE_LIBRARY_DIRS})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Widgets_LIBRARIES} ${OGRE_LIBRARY_DIRS})
