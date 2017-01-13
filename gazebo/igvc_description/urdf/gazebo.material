@@ -1,6 +1,6 @@
 import * from "grid.material"
 
-material Gazebo/Grass
+material Gazebo/igvc_field
 {
   technique
   {
@@ -14,7 +14,7 @@ material Gazebo/Grass
       {
         texture ground_grass_texture.jpg
         filtering trilinear
-	      scale .01 .01
+	      scale 1 1
       }
     }
   }
