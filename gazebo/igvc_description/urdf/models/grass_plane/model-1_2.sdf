@@ -30,7 +30,10 @@
         <material>
           <script>
             <uri>model://urdf/gazebo.material</uri>
+            <!-- has tenitive potholes and lines
             <name>Gazebo/igvc_field</name>
+            -->
+            <name>Gazebo/Grass</name>
           </script>
         </material>
       </visual>
