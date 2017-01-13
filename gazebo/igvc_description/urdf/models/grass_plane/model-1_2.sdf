@@ -30,7 +30,7 @@
         <material>
           <script>
             <uri>model://urdf/gazebo.material</uri>
-            <name>Gazebo/Grass</name>
+            <name>Gazebo/igvc_field</name>
           </script>
         </material>
       </visual>
