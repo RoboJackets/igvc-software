@@ -4,6 +4,6 @@
     -->
 <launch>
     <!--<param name="robot_description" command="cat $(find igvc)/launch/test_platform.urdf" />-->\
-    <param name="robot_description" command="cat $(find igvc)/launch/mistii.urdf" />
+    <param name="robot_description" command="cat $(find igvc_description)/urdf/Jaymii.urdf"/>
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 </launch>
