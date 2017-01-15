@@ -178,15 +178,15 @@
       </plugin>
     </sensor>
   </gazebo>
-  <link name="main_camera_link">
+  <link name="center_camera_link">
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
       </geometry>
     </visual>
   </link>
-  <gazebo reference="main_camera_link">
-    <sensor name="main_camera" type="camera">
+  <gazebo reference="center_camera_link">
+    <sensor name="center_camera" type="camera">
         <camera>
           <horizontal_fov>1.2290609</horizontal_fov>
           <image>
@@ -341,6 +341,10 @@
   </link>
 
   <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/igvc</robotNamespace>
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType> http://gazebosim.org/tutorials/?tut=ros_control
+    </plugin>
     <plugin filename="libhector_gazebo_ros_imu.so" name="imu">
       <robotNamespace>/igvc</robotNamespace>
       <serviceName>/imu/calibrate</serviceName>
@@ -398,10 +402,10 @@
     <parent link="body"/>
     <child link="gps_link"/>
   </joint>
-  <joint name="body_to_main_camera" type="fixed">
+  <joint name="body_to_center_camera" type="fixed">
     <origin xyz="0.15 0 1.2" rpy="0 0 0" />
     <parent link="body"/>
-    <child link="main_camera_link"/>
+    <child link="center_camera_link"/>
   </joint>
   <joint name="body_to_left_camera" type="fixed">
     <origin xyz="0.0 0.4 0.4" rpy="0 0.174533 0.785398" />
