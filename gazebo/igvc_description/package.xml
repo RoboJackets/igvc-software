@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>igvc_description</name>
+  <version>1.0.0</version>
+  <description>
+    igvc_description contains the description of the IGVC Jaymii platform
+  </description>
+  
+  <maintainer email="jgibson37@gatech.edu">Jason Gibson</maintainer>
+  <license>BSD</license>
+
+  <author email="jgibson37@gatech.edu">Jason Gibson</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <run_depend>rviz</run_depend>
+
+</package>
