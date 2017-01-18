@@ -93,6 +93,8 @@ SETUP_SHA_FILES+=("./igvc/package.xml")
 TEST_COMMANDS=()
 TEST_COMMANDS+=( 'catkin_make;compile;A check to see if the code compiles' )
 TEST_COMMANDS+=( 'catkin_make run_tests && catkin_test_results;tests;A check to see if the tests pass' )
+TEST_COMMANDS+=( 'dmesg;dmesg;temporarily keep dmesg output to see if we have memory problems' )
+TEST_COMMANDS+=( 'ps aux --sort=-%mem | awk '"'"'NR<=10{print $0}'"'"';memory;Log memory usage' )
 
 # @RECCOMENDED
 # Clean command. Cleans the build files so there is no way the previous build can interfere. Add if you run
