@@ -1,5 +1,3 @@
-#ifndef Q_MOC_RUN
-
 #ifndef SPEED_PANEL_H
 #define SPEED_PANEL_H
 
@@ -44,5 +42,3 @@ class SpeedPanel: public rviz::Panel
 }
 
 #endif // SPEED_PANEL_H
-
-#endif

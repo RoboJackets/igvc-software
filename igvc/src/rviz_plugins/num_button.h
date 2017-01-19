@@ -1,5 +1,3 @@
-#ifndef Q_MOC_RUN
-
 #ifndef NUM_BUTTON_H
 #define NUM_BUTTON_H
 
@@ -39,5 +37,3 @@ class NumButton: public QPushButton
 }
 
 #endif // NUM_BUTTON_H
-
-#endif
