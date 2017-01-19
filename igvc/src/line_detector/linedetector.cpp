@@ -44,7 +44,7 @@ LineDetector::LineDetector(ros::NodeHandle &handle, const std::string& topic)
       , tf_listener(handle)
 {
      if (!hasInfo) {
-        _src_img = _it.subscribe("stereo/left/image_raw", 1, &LineDetector::img_callback, this);
+        _src_img = _it.subscribe(topic + "/image_raw", 1, &LineDetector::img_callback, this);
      } else {
         _src_img_info = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::info_img_callback, this);
      }
