@@ -1,8 +1,9 @@
 <?xml version="1.0"?>
 
 <launch>
+  <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
   <arg name="namespace" default="igvc"/>
-  <arg name="world_name" default="worlds/empty_sky.world"/>
+  <arg name="world_name" default="$(find igvc_description)/urdf/igvc.world"/>
   <arg name="cmd_timeout" default="0.5"/>
 
   <!-- Vehicle pose -->
@@ -12,8 +13,6 @@
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0"/>
-
-  <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
   
   <!-- Remap to same topics as the actual robot -->
   <!--<remap from="/$(arg namespace)/imu" to="/imu/imu" />-->
@@ -21,14 +20,21 @@
   <group ns="$(arg namespace)">
     <!-- Create the world. -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-      <arg name="world_name" value="igvc_world"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
+      <arg name="world_name" value="$(arg world_name)"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
       <arg name="paused" value="false"/>
       <arg name="use_sim_time" value="true"/>
       <arg name="gui" value="true"/>
       <arg name="headless" value="false"/>
       <arg name="debug" value="false"/>
     </include>
-        
+
+    <!-- needed for rviz -->
+    <param name="robot_description" command="cat $(find igvc_description)/urdf/Jaymii.urdf" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+    
+    <!-- convert laser scan to point cloud for LIDAR -->
+    <node name="scan_to_pointcloud" pkg="igvc" type="scan_to_pointcloud" output="screen" />
+
     <!-- Spawn the vehicle. -->
     <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
           args="-file $(find igvc_description)/urdf/Jaymii.urdf

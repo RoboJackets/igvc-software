@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+    <scene>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+    <ambient>1.0 1.0 1.0 1.0</ambient>
+    <shadows>true</shadows>
+    </scene>
+
+    <!-- A global light source -->
+    <include>
+      <uri>model:///urdf/models/sun</uri>
+    </include>
+    <!-- A ground plane -->
+    <include>
+      <uri>model:///urdf/models/grass_plane</uri>
+    </include>
+    <!-- barrels -->
+    <include>
+      <uri>model://construction_barrel</uri>
+      <name>construction_barrel</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>2.0 2.0 0.0 0 0 0</pose> 
+    </include>
+    <include>
+      <uri>model://construction_barrel</uri>
+      <name>construction_barrel1</name> <!-- THE NAME MUST BE UNIQUE-->
+      <pose>4.0 4.0 0.0 0 0 0</pose> 
+    </include>
+    <!-- pothole -->
+    
+  </world>
+</sdf>

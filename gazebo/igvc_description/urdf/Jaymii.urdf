@@ -11,6 +11,13 @@
   <gazebo reference="base_link">
     <material>Gazebo/Grey</material>
   </gazebo>
+  <link name="base_footprint" />
+  <joint name="groundToDriveWheelMidpoint" type="fixed">
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+        <origin xyz="0 0 0.17" rpy="0 0 0"/>
+        <axis xyz="0 0 0"/>
+    </joint>
 
   <link name="body">
     <inertial>
@@ -130,24 +137,27 @@
       </geometry>
     </collision>
   </link>
-  <link name="lidar_link">
+  <link name="lidar">
     <visual>
       <geometry>
         <cylinder radius="0.05" length="0.1"/>
       </geometry>
     </visual>
   </link>
-  <gazebo reference="lidar_link">
+  <gazebo reference="lidar">
     <sensor type="ray" name="lidar">
       <visualize>true</visualize>
       <update_rate>15</update_rate>
       <ray>
-        <noise>
         <!-- Use gaussian noise -->
+        <!--
+        <noise>
         <type>gaussian</type>
         <mean>0.0</mean>
         <stddev>0.02</stddev>
+        
       </noise>
+      -->
         <scan>
           <horizontal>
             <samples>270</samples>
@@ -162,6 +172,10 @@
           <resolution>0.02</resolution>
         </range>
       </ray>
+      <plugin name="lidar_plugin" filename="libgazebo_ros_laser.so">
+        <topicName>/scan</topicName>
+        <frameName>/lidar</frameName>
+      </plugin>
     </sensor>
   </gazebo>
   <link name="main_camera_link">
@@ -326,6 +340,43 @@
     </visual>
   </link>
 
+  <gazebo>
+    <plugin filename="libhector_gazebo_ros_imu.so" name="imu">
+      <robotNamespace>/igvc</robotNamespace>
+      <serviceName>/imu/calibrate</serviceName>
+      <updateRate>200.0</updateRate>
+      <bodyName>imu_link</bodyName>
+      <frameId>imu_link</frameId>
+      <topicName>imu</topicName>
+      <rpyOffset>0 0 0</rpyOffset>
+      <xyzOffset>0 0 0</xyzOffset>
+      <gaussianNoise>0.00000001</gaussianNoise>
+      <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
+      <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
+      <accelGaussianNoise>0.00000001 0.00000001 0.00000001</accelGaussianNoise>
+      <rateDrift>0.0 0.0 0.0</rateDrift>
+      <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
+      <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
+      <headingDrift>0.0 0.0 0.0</headingDrift>
+      <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
+      <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
+    </plugin>
+    <plugin filename="libhector_gazebo_ros_gps.so" name="gps">
+      <updateRate>20.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <frameId>base_link</frameId>
+      <topicName>gpsRoverStatus</topicName>
+      <velocityTopicName>fix_velocity</velocityTopicName>
+      <referenceLatitude>33.774497</referenceLatitude>
+      <referenceLongitude>-84.405001</referenceLongitude>
+      <referenceAltitude>309.0</referenceAltitude>
+      <drift>0.001 0.001 0.001</drift>
+      <gaussianNoise>0.0001 0.0001 0.0001</gaussianNoise>
+      <velocityDrift>0 0 0</velocityDrift>
+      <velocityGaussianNoise>0.005 0.005 0.05</velocityGaussianNoise>
+    </plugin>
+  </gazebo>
+
   <joint name="base_link_to_body" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0" />
     <axis xyz="0 -1 -1"/>
@@ -335,7 +386,7 @@
   <joint name="body_to_lidar" type="fixed">
     <origin xyz="0.45 0 0.5" rpy="0 0 0" />
     <parent link="body"/>
-    <child link="lidar_link"/>
+    <child link="lidar"/>
   </joint>
   <joint name="body_to_imu" type="fixed">
     <origin xyz="0.25 0 0.5" rpy="0 0 0" />
