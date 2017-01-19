@@ -35,9 +35,9 @@ void filterOutDuplicates(PointCloud<PointXYZ>::Ptr cloud)
 {
     vector<int> indecesToRemove;
 
-    for(int i = 0; i < cloud->size(); i++)
+    for(unsigned int i = 0; i < cloud->size(); i++)
     {
-        for(int j = i+1; j < cloud->size(); j++)
+        for(unsigned int j = i+1; j < cloud->size(); j++)
         {
             if(distance(cloud->points[i], cloud->points[j]) < 0.10)
             {
