@@ -4,8 +4,6 @@
 #include <igvc_msgs/velocity_pair.h>
 #include <sensor_msgs/Joy.h>
 
-using namespace std;
-
 ros::Publisher cmd_pub;
 
 ros::NodeHandle *nhp;
@@ -13,25 +11,25 @@ ros::NodeHandle *nhp;
 void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
     double absoluteMaxVel, maxVel, maxVelIncr;
-    nhp->param(string("absoluteMaxVel"), absoluteMaxVel, 1.0);
-    nhp->param(string("maxVel"), maxVel, 1.6);
-    nhp->param(string("maxVelIncr"), maxVelIncr, 0.1);
+    nhp->param(std::string("absoluteMaxVel"), absoluteMaxVel, 1.0);
+    nhp->param(std::string("maxVel"), maxVel, 1.6);
+    nhp->param(std::string("maxVelIncr"), maxVelIncr, 0.1);
     
     if(msg->buttons[1])
         maxVel -= maxVelIncr;
     else if(msg->buttons[3])
         maxVel += maxVelIncr;
-    maxVel = min(maxVel, absoluteMaxVel);
-    maxVel = max(maxVel, 0.0);
+    maxVel = std::min(maxVel, absoluteMaxVel);
+    maxVel = std::max(maxVel, 0.0);
     
     nhp->setParam("maxVel", maxVel);
     
     int leftJoyAxis, rightJoyAxis;
     bool leftInverted, rightInverted;
-    nhp->param(string("leftAxis"), leftJoyAxis, 1);
-    nhp->param(string("rightAxis"), rightJoyAxis, 3);
-    nhp->param(string("leftInverted"), leftInverted, false);
-    nhp->param(string("rightInverted"), rightInverted, false);
+    nhp->param(std::string("leftAxis"), leftJoyAxis, 1);
+    nhp->param(std::string("rightAxis"), rightJoyAxis, 3);
+    nhp->param(std::string("leftInverted"), leftInverted, false);
+    nhp->param(std::string("rightInverted"), rightInverted, false);
     
     igvc_msgs::velocity_pair cmd;
     cmd.left_velocity = msg->axes[leftJoyAxis]*maxVel * (leftInverted ? -1.0 : 1.0);

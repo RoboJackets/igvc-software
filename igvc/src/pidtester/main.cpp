@@ -4,10 +4,6 @@
 #include <fstream>
 #include <chrono>
 
-using namespace std;
-using namespace igvc_msgs;
-using namespace ros;
-
 bool enabled = false;
 
 void enabled_callback(const std_msgs::BoolConstPtr &msg)
@@ -17,13 +13,13 @@ void enabled_callback(const std_msgs::BoolConstPtr &msg)
 
 int main(int argc, char** argv)
 {
-    init(argc, argv, "pidtester");
+    ros::init(argc, argv, "pidtester");
 
-    NodeHandle nh;
+    ros::NodeHandle nh;
 
     ros::Subscriber enabled_sub = nh.subscribe("/robot_enabled", 1, enabled_callback);
 
-    Publisher cmd_pub = nh.advertise<velocity_pair>("/motors", 1);
+    ros::Publisher cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
 
     while(!enabled)
     {
@@ -34,14 +30,14 @@ int main(int argc, char** argv)
 
     auto duration = 5.0;
 
-    velocity_pair cmd;
+    igvc_msgs::velocity_pair cmd;
     cmd.duration = duration;
     cmd.left_velocity = 1.0;
     cmd.right_velocity = 1.0;
 
     cmd_pub.publish(cmd);
 
-    spinOnce();
+    ros::spinOnce();
     sleep((__useconds_t)(duration));
 
     cmd.left_velocity = 0.0;
@@ -49,7 +45,7 @@ int main(int argc, char** argv)
 
     cmd_pub.publish(cmd);
 
-    spin();
+    ros::spin();
 
     return 0;
 }
