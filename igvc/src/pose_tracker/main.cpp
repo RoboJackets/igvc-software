@@ -7,13 +7,10 @@
 #include <memory>
 #include <iostream>
 
-using namespace tf;
-using namespace std;
-
 ros::Publisher pose_pub;
 ros::Publisher origin_pub;
-std::unique_ptr<TransformBroadcaster> tf_broadcaster;
-std::unique_ptr<TransformListener> tf_listener;
+std::unique_ptr<tf::TransformBroadcaster> tf_broadcaster;
+std::unique_ptr<tf::TransformListener> tf_listener;
 
 geometry_msgs::Quaternion orientation;
 nav_msgs::Odometry gps;
@@ -41,12 +38,12 @@ void publish_pose()
     pose.pose.orientation = orientation;
     pose_pub.publish(pose);
 
-    Transform transform;
-    transform.setOrigin(Vector3(pose.pose.position.x, pose.pose.position.y, 0.0));
-    Quaternion q;
-    quaternionMsgToTF(orientation, q);
+    tf::Transform transform;
+    transform.setOrigin(tf::Vector3(pose.pose.position.x, pose.pose.position.y, 0.0));
+    tf::Quaternion q;
+    tf::quaternionMsgToTF(orientation, q);
     transform.setRotation(q);
-    tf_broadcaster->sendTransform(StampedTransform(transform, ros::Time::now(), "map", "base_footprint"));
+    tf_broadcaster->sendTransform(tf::StampedTransform(transform, ros::Time::now(), "map", "base_footprint"));
 }
 
 void imu_callback(const sensor_msgs::ImuConstPtr& msg)
@@ -89,9 +86,9 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "pose_tracker");
 
-    tf_broadcaster = std::unique_ptr<TransformBroadcaster>(new TransformBroadcaster);
+    tf_broadcaster = std::unique_ptr<tf::TransformBroadcaster>(new tf::TransformBroadcaster);
     
-    tf_listener = std::unique_ptr<TransformListener>(new TransformListener);
+    tf_listener = std::unique_ptr<tf::TransformListener>(new tf::TransformListener);
 
     ros::NodeHandle nh;
 
