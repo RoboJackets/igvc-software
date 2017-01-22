@@ -1,8 +1,6 @@
 #include "igvcsearchproblem.h"
 #include <math.h>
 
-using namespace pcl;
-
 bool IGVCSearchProblem::isActionValid(SearchMove& move, pcl::KdTreeFLANN<pcl::PointXYZ> &kdtree, SearchLocation start_state) 
 {
 	auto deltat = move.DeltaT;

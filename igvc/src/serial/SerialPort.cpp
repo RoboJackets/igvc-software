@@ -1,10 +1,7 @@
 #include <igvc/SerialPort.h>
 #include <iostream>
 
-using namespace std;
-using namespace boost::asio;
-
-SerialPort::SerialPort(string device, int baud)
+SerialPort::SerialPort(std::string device, int baud)
     : port(ioservice),
       path(device)
 {
@@ -14,7 +11,7 @@ SerialPort::SerialPort(string device, int baud)
     } catch(...){}
     
     if( !port.is_open() ) {
-        throw runtime_error("Could not open serial port " + device);
+        throw std::runtime_error("Could not open serial port " + device);
     }
     
     try
@@ -24,7 +21,7 @@ SerialPort::SerialPort(string device, int baud)
         port.set_option(boost::asio::serial_port_base::stop_bits(boost::asio::serial_port_base::stop_bits::one));
     } catch(...) {
         port.close();
-        throw runtime_error("Could not open serial port " + device);
+        throw std::runtime_error("Could not open serial port " + device);
     }
 }
 
@@ -43,7 +40,7 @@ bool SerialPort::isOpen()
     return port.is_open();
 }
 
-void SerialPort::write(string msg)
+void SerialPort::write(std::string msg)
 {
     if(port.is_open())
         boost::asio::write(port, boost::asio::buffer(msg.c_str(),msg.length()));
@@ -67,10 +64,10 @@ char SerialPort::read()
     char in;
     try
     {
-        boost::asio::read(port, buffer(&in, 1));
+        boost::asio::read(port, boost::asio::buffer(&in, 1));
     } catch (boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >& err) {
         port.close();
-        throw runtime_error("Error reading serial port");
+        throw std::runtime_error("Error reading serial port");
     }
     return in;
 }
@@ -85,9 +82,9 @@ char* SerialPort::read(int numBytes)
     return bytes;
 }
 
-string SerialPort::readln()
+std::string SerialPort::readln()
 {
-    string line = "";
+    std::string line = "";
     while(true)
     {
         char in = read();	
@@ -98,7 +95,7 @@ string SerialPort::readln()
     }
 }
 
-string SerialPort::devicePath()
+std::string SerialPort::devicePath()
 {
     return path;
 }
