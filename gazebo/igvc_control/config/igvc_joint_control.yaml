@@ -1,0 +1,15 @@
+igvc:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50  
+
+  # effort Controllers ---------------------------------------
+  left_wheel_effort_controller:
+    type: effort_controllers/JointEffortController
+    joint: axle_to_left_wheel
+    pid: {p: 100.0, i: 0.01, d: 10.0}
+  right_wheel_effort_controller:
+    type: effort_controllers/JointEffortController
+    joint: axle_to_right_wheel
+    pid: {p: 100.0, i: 0.01, d: 10.0}
