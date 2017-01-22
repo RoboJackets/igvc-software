@@ -178,14 +178,14 @@
       </plugin>
     </sensor>
   </gazebo>
-  <link name="center_camera_link">
+  <link name="usb_cam_center">
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
       </geometry>
     </visual>
   </link>
-  <gazebo reference="center_camera_link">
+  <gazebo reference="usb_cam_center">
     <sensor name="center_camera" type="camera">
         <camera>
           <horizontal_fov>1.2290609</horizontal_fov>
@@ -227,14 +227,14 @@
         </plugin>
       </sensor>
   </gazebo>
-  <link name="left_camera_link">
+  <link name="usb_cam_left">
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
       </geometry>
     </visual>
   </link>
-  <gazebo reference="left_camera_link">
+  <gazebo reference="usb_cam_left">
     <sensor name="left_camera" type="camera">
         <camera>
           <horizontal_fov>1.0472</horizontal_fov>
@@ -276,14 +276,14 @@
         </plugin>
       </sensor>
   </gazebo>
-  <link name="right_camera_link">
+  <link name="usb_cam_right">
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
       </geometry>
     </visual>
   </link>
-  <gazebo reference="right_camera_link">
+  <gazebo reference="usb_cam_right">
     <sensor name="right_camera" type="camera">
         <camera>
           <horizontal_fov>1.0472</horizontal_fov>
@@ -405,17 +405,17 @@
   <joint name="body_to_center_camera" type="fixed">
     <origin xyz="0.15 0 1.2" rpy="0 0 0" />
     <parent link="body"/>
-    <child link="center_camera_link"/>
+    <child link="usb_cam_center"/>
   </joint>
   <joint name="body_to_left_camera" type="fixed">
     <origin xyz="0.0 0.4 0.4" rpy="0 0.174533 0.785398" />
     <parent link="body"/>
-    <child link="left_camera_link"/>
+    <child link="usb_cam_left"/>
   </joint>
   <joint name="body_to_right_camera" type="fixed">
     <origin xyz="0.0 -0.4 0.4" rpy="0 0.174533 -0.785398" />
     <parent link="body"/>
-    <child link="right_camera_link"/>
+    <child link="usb_cam_right"/>
   </joint>
   <joint name="body_to_axle" type="fixed">
     <parent link="body"/>

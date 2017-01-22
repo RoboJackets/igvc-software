@@ -223,7 +223,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const 
     }
 
     // Convert the contours to a pointcloud
-    cloud = toPointCloud(tf_listener, allContours, orig.rows, orig.cols);
+    cloud = toPointCloud(tf_listener, allContours, orig.rows, orig.cols, topic);
 
     cv_bridge::CvImage out_msg;
     out_msg.header   = msg->header;
