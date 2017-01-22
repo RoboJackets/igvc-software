@@ -11,7 +11,7 @@
 using namespace std;
 using namespace cv;
 
-string window = "test canny";
+std::string window = "test canny";
 int cannyThresh;
 int cannyThresh_max = 100;
 int lengthThresh;

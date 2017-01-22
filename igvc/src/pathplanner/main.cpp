@@ -14,8 +14,6 @@
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 
-using namespace std;
-
 ros::Publisher disp_path_pub;
 
 ros::Publisher act_path_pub;
@@ -24,19 +22,19 @@ ros::Publisher expanded_pub;
 
 IGVCSearchProblem search_problem;
 
-mutex planning_mutex;
+std::mutex planning_mutex;
 
 bool received_waypoint = false;
 
 void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
 {
-    lock_guard<mutex> lock(planning_mutex);
+    std::lock_guard<std::mutex> lock(planning_mutex);
     *search_problem.Map = *msg;
 }
 
 void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
 {
-    lock_guard<mutex> lock(planning_mutex);
+    std::lock_guard<std::mutex> lock(planning_mutex);
     search_problem.Start.x = msg->pose.position.x;
     search_problem.Start.y = msg->pose.position.y;
     tf::Quaternion q;
@@ -46,7 +44,7 @@ void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
-    lock_guard<mutex> lock(planning_mutex);
+    std::lock_guard<std::mutex> lock(planning_mutex);
     search_problem.Goal.x = msg->point.x;
     search_problem.Goal.y = msg->point.y;
     cout << "Waypoint received. " << search_problem.Goal.x << ", " << search_problem.Goal.y << endl;

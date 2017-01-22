@@ -7,17 +7,13 @@
 #include <mutex>
 #include "conversion.h"
 
-using namespace std;
-using namespace geometry_msgs;
-using namespace ros;
-
 ros::Publisher waypoint_pub;
-vector<PointStamped> waypoints;
-PointStamped current_waypoint;
-Point map_origin;
-mutex current_mutex;
+std::vector<geometry_msgs::PointStamped> waypoints;
+geometry_msgs::PointStamped current_waypoint;
+geometry_msgs::Point map_origin;
+std::mutex current_mutex;
 
-double dmsToDec(string dms)
+double dmsToDec(std::string dms)
 {
     auto qMarkIter = dms.find('?');
     auto aposIter = dms.find('\'');
@@ -36,7 +32,7 @@ double dmsToDec(string dms)
     return degrees;
 }
 
-void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
+void loadWaypointsFile(std::string path, std::vector<geometry_msgs::PointStamped>& waypoints)
 {
     if(path.empty())
     {
@@ -44,7 +40,7 @@ void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
         return;
     }
 
-    ifstream file;
+    std::ifstream file;
     file.open(path.c_str());
 
     if(!file.is_open())
@@ -53,7 +49,7 @@ void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
         return;
     }
 
-    string line = "";
+    std::string line = "";
     auto lineIndex = 1;
     while(!file.eof())
     {
@@ -61,7 +57,7 @@ void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
 
         if(!line.empty())
         {
-            vector<string> tokens = split(line, ',');
+            std::vector<std::string> tokens = split(line, ',');
 
             if(tokens.size() != 2)
             {
@@ -70,16 +66,16 @@ void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
             }
 
             double lat, lon;
-            if(tokens[0].find('?') != string::npos)
+            if(tokens[0].find('?') != std::string::npos)
                 lat = dmsToDec(tokens[0]);
             else
                 lat = stod(tokens[0]);
-            if(tokens[1].find('?') != string::npos)
+            if(tokens[1].find('?') != std::string::npos)
                 lon  = dmsToDec(tokens[1]);
             else
                 lon = stod(tokens[1]);
 
-            PointStamped p;
+            geometry_msgs::PointStamped p;
 
             UTM(lat, lon, &(p.point.x), &(p.point.y));
 
@@ -90,15 +86,15 @@ void loadWaypointsFile(string path, vector<PointStamped>& waypoints)
     }
 }
 
-double distanceBetweenPoints(const Point &p1, const Point &p2)
+double distanceBetweenPoints(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2)
 {
     return sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y));
 }
 
 void positionCallback(const geometry_msgs::PoseStampedConstPtr& msg)
 {
-    lock_guard<mutex> lock(current_mutex);
-    PointStamped cur = current_waypoint;
+    std::lock_guard<std::mutex> lock(current_mutex);
+    geometry_msgs::PointStamped cur = current_waypoint;
     cur.point.x -= map_origin.x;
     cur.point.y -= map_origin.y;
 
@@ -108,14 +104,14 @@ void positionCallback(const geometry_msgs::PoseStampedConstPtr& msg)
         current_waypoint = waypoints.front();
         if(waypoints.size() > 1) {
             waypoints.erase(waypoints.begin());
-            cerr << "Waypoint Source moving to next" << endl;
+            std::cerr << "Waypoint Source moving to next" << std::endl;
         }
     }
 }
 
 void originCallback(const geometry_msgs::PointStampedConstPtr& msg)
 {
-    lock_guard<mutex> lock(current_mutex);
+    std::lock_guard<std::mutex> lock(current_mutex);
     map_origin = msg->point;
 }
 
@@ -128,12 +124,12 @@ int main(int argc, char** argv)
 
     ROS_INFO_STREAM("Has param: " << nhp.hasParam("file"));
 
-    string path;
+    std::string path;
     nhp.getParam("file", path);
 
     ROS_INFO_STREAM("Loading waypoints from " << path);
 
-    waypoint_pub = nh.advertise<PointStamped>("/waypoint", 1);
+    waypoint_pub = nh.advertise<geometry_msgs::PointStamped>("/waypoint", 1);
 
     ros::Subscriber odom_sub = nh.subscribe("/odom_combined", 1, positionCallback);
 
@@ -145,11 +141,11 @@ int main(int argc, char** argv)
     {
         ROS_INFO_STREAM(waypoints.size() << " waypoints found.");
         current_waypoint = waypoints.front();
-        Rate rate(1); // 1 Hz
+        ros::Rate rate(1); // 1 Hz
         while(ros::ok())
         {
             {
-                lock_guard<mutex> lock(current_mutex);
+                std::lock_guard<std::mutex> lock(current_mutex);
                 auto waypoint_for_pub = current_waypoint;
                 waypoint_for_pub.header.stamp = ros::Time::now();
                 waypoint_for_pub.header.seq++;
