@@ -15,7 +15,9 @@
   <arg name="yaw" default="0"/>
   
   <!-- Remap to same topics as the actual robot -->
-  <!--<remap from="/$(arg namespace)/imu" to="/imu/imu" />-->
+  <remap from="/$(arg namespace)/imu" to="/imu" />
+
+  <remap from="/$(arg namespace)/gpsRoverStatus" to="/gps_odom" />
   
   <group ns="$(arg namespace)">
     <!-- Create the world. -->
