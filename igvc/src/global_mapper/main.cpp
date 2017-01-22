@@ -17,10 +17,10 @@ std::set<std::string> frames_seen;
 bool firstFrame;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input) {
-    if (!fistFrame) {
+    if (!firstFrame) {
         pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
-        icp.setMaxCorrespondenceDistance(2); // tunable parameters - figure out later
-        icp.setMaximumIterations(30);        //
+       // icp.setMaxCorrespondenceDistance(2); // tunable parameters - figure out later
+       // icp.setMaximumIterations(30);        //
         icp.setInputSource(input);
         icp.setInputTarget(global_map);
         pcl::PointCloud<pcl::PointXYZ> Final;
@@ -28,12 +28,13 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input) {
         *global_map += Final;
     } else {
         *global_map += *input;
+        firstFrame = false;
     }
 }
 
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
 {
-    pcl::PointCloud<pcl::PointXYZ>::Ptr transformed;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr transformed = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
     tf::StampedTransform transform;
     if(frames_seen.find(msg->header.frame_id) == frames_seen.end())
     {
@@ -87,7 +88,7 @@ int main(int argc, char** argv)
 
     _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/map", 1);
 
-    firstFrame = false;
+    firstFrame = true;
 
     ros::spin();
 }
