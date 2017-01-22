@@ -43,7 +43,7 @@ std::vector<std::vector<cv::Point>> MatToContours(const cv::Mat img) {
 pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_listener, std::vector<std::vector<cv::Point>> contours, image_geometry::PinholeCameraModel cam) {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_footprint", "/center_camera_link", ros::Time(0), transform);
 
     for (std::vector<cv::Point> contour : contours) {
         for (cv::Point p : contour) {
@@ -58,7 +58,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_liste
 pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_listener, std::vector<std::vector<cv::Point>> contours, int height, int width) {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", "/camera_left", ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_footprint", "/center_camera_link", ros::Time(0), transform);
     double roll, pitch, yaw;
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
     double origin_z = transform.getOrigin().getZ();
