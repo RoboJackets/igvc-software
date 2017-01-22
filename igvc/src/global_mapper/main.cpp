@@ -14,14 +14,21 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr global_map;
 ros::Publisher _pointcloud_pub;
 tf::TransformListener *tf_listener;
 std::set<std::string> frames_seen;
+bool firstFrame;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input) {
-    pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
-    icp.setInputSource(input);
-    icp.setInputTarget(global_map);
-    pcl::PointCloud<pcl::PointXYZ> Final;
-    icp.align(Final);
-    *global_map = Final;
+    if (!fistFrame) {
+        pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
+        icp.setMaxCorrespondenceDistance(2); // tunable parameters - figure out later
+        icp.setMaximumIterations(30);        //
+        icp.setInputSource(input);
+        icp.setInputTarget(global_map);
+        pcl::PointCloud<pcl::PointXYZ> Final;
+        icp.align(Final);
+        *global_map += Final;
+    } else {
+        *global_map += *input;
+    }
 }
 
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
@@ -79,6 +86,8 @@ int main(int argc, char** argv)
     global_map->header.frame_id = "/map";
 
     _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/map", 1);
+
+    firstFrame = false;
 
     ros::spin();
 }
