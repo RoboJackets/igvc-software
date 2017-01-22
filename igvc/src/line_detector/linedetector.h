@@ -31,6 +31,6 @@ private:
     ros::Publisher _line_cloud;
     tf::TransformListener tf_listener;
     image_geometry::PinholeCameraModel cam;
-    bool hasInfo = false;
+    bool hasInfo = true;
 };
 #endif // LINEDETECTOR_H
