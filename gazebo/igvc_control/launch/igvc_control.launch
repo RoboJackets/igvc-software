@@ -7,10 +7,7 @@
   <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
     output="screen" ns="/igvc" args="left_wheel_effort_controller right_wheel_effort_controller joint_state_controller"/>
 
-  <!-- convert joint states to TF transforms for rviz, etc -->
-  <!--<param name="robot_description" command="cat $(find igvc_description)/urdf/Jaymii.urdf" />
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"
-    respawn="false" output="screen">
-  </node>-->
+  <node name="jaymii_control" pkg="igvc_control" type="jaymii_control">
+  </node>
 
 </launch>
