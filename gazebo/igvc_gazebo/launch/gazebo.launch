@@ -42,5 +42,7 @@
                 -urdf -model Jaymii
                 -x $(arg x) -y $(arg y) -z $(arg z)
                 -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
-  </group>
+    </group>
+    
+    <include file="$(find igvc_control)/launch/igvc_control.launch" />
 </launch>
