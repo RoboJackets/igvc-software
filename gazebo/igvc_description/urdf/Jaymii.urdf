@@ -339,7 +339,7 @@
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/igvc</robotNamespace>
-      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType> http://gazebosim.org/tutorials/?tut=ros_control
+      <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
     </plugin>
     <plugin filename="libhector_gazebo_ros_imu.so" name="imu">
       <robotNamespace>/igvc</robotNamespace>

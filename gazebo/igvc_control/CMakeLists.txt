@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  include
 )
 
 install(DIRECTORY launch/
@@ -28,6 +27,6 @@ install(DIRECTORY config/
    FILES_MATCHING PATTERN "*.yaml"
 )
 
-add_executable(jaymii_control src/jaymii_control.cpp)
+add_executable(jaymii_control node/jaymii_control.cpp)
 add_dependencies(jaymii_control igvc_msgs_gencpp)
 target_link_libraries(jaymii_control ${catkin_LIBRARIES})
