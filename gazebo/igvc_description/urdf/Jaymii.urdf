@@ -215,7 +215,7 @@
           <cameraName>usb_cam_center</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>camera_link</frameName>
+          <frameName>usb_cam_center</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -263,7 +263,7 @@
           <cameraName>usb_cam_left</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>camera_link</frameName>
+          <frameName>usb_cam_left</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -311,7 +311,7 @@
           <cameraName>usb_cam_right</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>camera_link</frameName>
+          <frameName>usb_cam_right</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -346,7 +346,7 @@
       <serviceName>/imu/calibrate</serviceName>
       <updateRate>200.0</updateRate>
       <bodyName>imu_link</bodyName>
-      <frameId>imu_link</frameId>
+      <frameId>/imu</frameId>
       <topicName>imu</topicName>
       <rpyOffset>0 0 0</rpyOffset>
       <xyzOffset>0 0 0</xyzOffset>
@@ -364,7 +364,7 @@
     <plugin filename="libhector_gazebo_ros_gps.so" name="gps">
       <updateRate>20.0</updateRate>
       <bodyName>base_link</bodyName>
-      <frameId>base_link</frameId>
+      <frameId>gps</frameId>
       <topicName>gps_odom</topicName>
       <velocityTopicName>fix_velocity</velocityTopicName>
       <referenceLatitude>33.774497</referenceLatitude>
@@ -411,8 +411,8 @@
     <child link="lidar"/>
   </joint>
   <joint name="body_to_imu" type="fixed">
-    <origin xyz="0.25 0 0.5" rpy="0 0 0" />
-    <parent link="body"/>
+    <origin xyz="0.0 1.3462 0.0 " rpy="0 0 0" />
+    <parent link="axle"/>
     <child link="imu_link"/>
   </joint>
   <joint name="body_to_gps" type="fixed">
