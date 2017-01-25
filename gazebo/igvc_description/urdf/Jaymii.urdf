@@ -365,7 +365,7 @@
       <updateRate>20.0</updateRate>
       <bodyName>base_link</bodyName>
       <frameId>base_link</frameId>
-      <topicName>gpsRoverStatus</topicName>
+      <topicName>gps_odom</topicName>
       <velocityTopicName>fix_velocity</velocityTopicName>
       <referenceLatitude>33.774497</referenceLatitude>
       <referenceLongitude>-84.405001</referenceLongitude>
