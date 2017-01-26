@@ -411,7 +411,7 @@
     <child link="lidar"/>
   </joint>
   <joint name="body_to_imu" type="fixed">
-    <origin xyz="0.0 1.3462 0.0 " rpy="0 0 0" />
+    <origin xyz="0.0 1.3462 0.0 " rpy="-1.5708 0 0" />
     <parent link="axle"/>
     <child link="imu_link"/>
   </joint>
