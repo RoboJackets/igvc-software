@@ -5,4 +5,6 @@
 
         <node name="scan_to_pointcloud" pkg="igvc" type="scan_to_pointcloud" output="screen" />
 
+        <node name="scan_to_image" pkg="igvc" type="scan_to_image" output="screen" />
+
 </launch>
