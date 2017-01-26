@@ -14,6 +14,8 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src_img = cv_ptr->image;
 
+    cv::cvtColor(src_img, src_img, CV_BGR2GRAY);
+
     cv::resize(src_img, src_img, cv::Size(524, 524), 0, 0, CV_INTER_AREA);
     fin_img = cv::Mat::zeros(src_img.size(), src_img.type());
 
@@ -33,6 +35,8 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
         cloud = toPointCloud(tf_listener, MatToContours(fin_img), fin_img.size().height, fin_img.size().width, topic);
     }
     _line_cloud.publish(cloud);
+    
+    cv::cvtColor(fin_img, fin_img, CV_GRAY2BGR);    
 
     cv_ptr->image = fin_img;
     _filt_img.publish(cv_ptr->toImageMsg());
