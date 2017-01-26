@@ -177,7 +177,7 @@
       </plugin>
     </sensor>
   </gazebo>
-  <link name="usb_cam_center">
+  <link name="center_camera_link">
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
@@ -213,7 +213,7 @@
         <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
           <alwaysOn>true</alwaysOn>
           <updateRate>30.0</updateRate>
-          <cameraName>usb_cam_center</cameraName>
+          <cameraName>center_camera_link</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>center_camera_optical</frameName>
@@ -226,7 +226,7 @@
         </plugin>
       </sensor>
   </gazebo>
-  <link name="usb_cam_left">
+  <link name="left_camera_link">
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
@@ -262,7 +262,7 @@
         <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
           <alwaysOn>true</alwaysOn>
           <updateRate>30.0</updateRate>
-          <cameraName>usb_cam_left</cameraName>
+          <cameraName>left_camera_link</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>left_camera_optical</frameName>
@@ -275,7 +275,7 @@
         </plugin>
       </sensor>
   </gazebo>
-  <link name="usb_cam_right">
+  <link name="right_camera_link">
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
@@ -311,7 +311,7 @@
         <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
           <alwaysOn>true</alwaysOn>
           <updateRate>30.0</updateRate>
-          <cameraName>usb_cam_right</cameraName>
+          <cameraName>right_camera_link</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
           <frameName>right_camera_optical</frameName>
@@ -425,17 +425,17 @@
   <joint name="body_to_center_camera" type="fixed">
     <origin xyz="0.15 0 1.2" rpy="0 0 0" />
     <parent link="body"/>
-    <child link="usb_cam_center"/>
+    <child link="center_camera_link"/>
   </joint>
   <joint name="body_to_left_camera" type="fixed">
     <origin xyz="0.0 0.4 0.4" rpy="0 0.174533 0.785398" />
     <parent link="body"/>
-    <child link="usb_cam_left"/>
+    <child link="left_camera_link"/>
   </joint>
   <joint name="body_to_right_camera" type="fixed">
     <origin xyz="0.0 -0.4 0.4" rpy="0 0.174533 -0.785398" />
     <parent link="body"/>
-    <child link="usb_cam_right"/>
+    <child link="right_camera_link"/>
   </joint>
   <joint name="body_to_axle" type="fixed">
     <parent link="body"/>
