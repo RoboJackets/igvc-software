@@ -4,30 +4,26 @@
 #include <fstream>
 #include <chrono>
 
-using namespace std;
-using namespace igvc_msgs;
-using namespace ros;
-
 bool enabled = false;
 
-ofstream file;
+std::ofstream file;
 
-void encoder_callback(const velocity_pairConstPtr &msg)
+void encoder_callback(const igvc_msgs::velocity_pairConstPtr &msg)
 {
-    file << msg->left_velocity << ", " << msg->right_velocity << endl;
+    file << msg->left_velocity << ", " << msg->right_velocity << std::endl;
 }
 
 int main(int argc, char** argv)
 {
-    init(argc, argv, "encrecord");
+    ros::init(argc, argv, "encrecord");
 
-    NodeHandle nh;
+    ros::NodeHandle nh;
 
     ros::Subscriber encoder_sub = nh.subscribe("/encoders", 10, encoder_callback);
 
     file.open("/home/robojackets/Desktop/data.csv");
 
-    spin();
+    ros::spin();
 
     return 0;
 }

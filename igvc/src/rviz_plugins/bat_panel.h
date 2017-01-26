@@ -1,5 +1,3 @@
-#ifndef Q_MOC_RUN
-
 #ifndef BAT_PANEL_H
 #define BAT_PANEL_H
 
@@ -37,5 +35,3 @@ class BatPanel: public rviz::Panel
 }
 
 #endif // BAT_PANEL_H
-
-#endif

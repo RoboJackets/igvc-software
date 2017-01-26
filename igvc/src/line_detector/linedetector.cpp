@@ -28,9 +28,9 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     }
 
     if (hasInfo) {
-        cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam);
+        cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
     } else {
-        cloud = toPointCloud(tf_listener, MatToContours(fin_img), fin_img.size().height, fin_img.size().width);
+        cloud = toPointCloud(tf_listener, MatToContours(fin_img), fin_img.size().height, fin_img.size().width, topic);
     }
     _line_cloud.publish(cloud);
 
@@ -44,7 +44,7 @@ LineDetector::LineDetector(ros::NodeHandle &handle, const std::string& topic)
       , tf_listener(handle)
 {
      if (!hasInfo) {
-        _src_img = _it.subscribe("stereo/left/image_raw", 1, &LineDetector::img_callback, this);
+        _src_img = _it.subscribe(topic + "/image_raw", 1, &LineDetector::img_callback, this);
      } else {
         _src_img_info = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::info_img_callback, this);
      }
