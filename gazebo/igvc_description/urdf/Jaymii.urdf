@@ -184,6 +184,7 @@
       </geometry>
     </visual>
   </link>
+  <link name="center_camera_optical"/>
   <gazebo reference="center_camera_link">
     <sensor name="center_camera" type="camera">
         <camera>
@@ -215,7 +216,7 @@
           <cameraName>usb_cam_center</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>usb_cam_center</frameName>
+          <frameName>center_camera_optical</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -232,6 +233,7 @@
       </geometry>
     </visual>
   </link>
+  <link name="left_camera_optical"/>
   <gazebo reference="left_camera_link">
     <sensor name="left_camera" type="camera">
         <camera>
@@ -263,7 +265,7 @@
           <cameraName>usb_cam_left</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>usb_cam_left</frameName>
+          <frameName>left_camera_optical</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -280,6 +282,7 @@
       </geometry>
     </visual>
   </link>
+  <link name="right_camera_optical"/>
   <gazebo reference="right_camera_link">
     <sensor name="right_camera" type="camera">
         <camera>
@@ -311,7 +314,7 @@
           <cameraName>usb_cam_right</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>usb_cam_right</frameName>
+          <frameName>right_camera_optical</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -320,7 +323,7 @@
           <distortionT2>0.0</distortionT2>
         </plugin>
       </sensor>
-  </gazebo>
+    </gazebo>
   <link name="imu_link">
     <visual>
       <geometry>
@@ -335,7 +338,6 @@
       </geometry>
     </visual>
   </link>
-
   <gazebo>
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/igvc</robotNamespace>
@@ -462,6 +464,21 @@
     <parent link="body"/>
     <child link="back_ball"/>
     <origin xyz="-0.381 0 -0.0125" rpy="0 0 0" />
+  </joint>
+  <joint name="camera_center_optical_joint" type="fixed">
+    <parent link="center_camera_link"/>
+    <child link="center_camera_optical"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+  </joint>
+  <joint name="camera_right_optical_joint" type="fixed">
+    <parent link="right_camera_link"/>
+    <child link="right_camera_optical"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+  </joint>
+  <joint name="camera_left_optical_joint" type="fixed">
+    <parent link="left_camera_link"/>
+    <child link="left_camera_optical"/>
+    <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
   <!-- this is where the actual ball joints are added-->
   <gazebo>
