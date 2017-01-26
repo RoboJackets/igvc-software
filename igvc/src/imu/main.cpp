@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
     sleep(1); // sleeping thread for 1 seconds to let IMU set up
 
-    SerialPort port("/dev/ttyUSB0", 57600); // TODO set up udev rules
+    SerialPort port("/dev/igvc_imu", 57600);
     port.flush();
 
     // send a sync request and listen to response - after that the stream should restart

@@ -15,7 +15,9 @@
   <arg name="yaw" default="0"/>
   
   <!-- Remap to same topics as the actual robot -->
-  <!--<remap from="/$(arg namespace)/imu" to="/imu/imu" />-->
+  <remap from="/$(arg namespace)/usb_cam_center" to="/usb_cam_center" />
+  <remap from="/$(arg namespace)/usb_cam_left" to="/usb_cam_left" />
+  <remap from="/$(arg namespace)/usb_cam_right" to="/usb_cam_right" />
   
   <group ns="$(arg namespace)">
     <!-- Create the world. -->
@@ -23,7 +25,7 @@
       <arg name="world_name" value="$(arg world_name)"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
       <arg name="paused" value="false"/>
       <arg name="use_sim_time" value="true"/>
-      <arg name="gui" value="true"/>
+      <arg name="gui" value="false"/>
       <arg name="headless" value="false"/>
       <arg name="debug" value="false"/>
     </include>
