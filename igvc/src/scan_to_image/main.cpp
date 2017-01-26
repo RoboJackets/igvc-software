@@ -1,6 +1,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <image_transport/image_transport.h>
+#include <iostream>
 #include <mutex>
 #include <opencv/cv.h>
 #include <pcl/point_types.h>
@@ -15,7 +16,7 @@
 const char* const lidar_frame = "/lidar";
 const char* const lidar_topic = "/scan/pointcloud";
 const char* const camera_frame = "/main_camera_link";
-const char* const camera_topic = "/usb_cam_center/image_raw";
+const char* const camera_topic = "/igvc/usb_cam_center/image_raw";
 const char* const image_topic = "/scan/image";
 
 std::mutex cloud_mutex;
@@ -50,7 +51,7 @@ void cameraCallback(const sensor_msgs::ImageConstPtr& image_msg, const sensor_ms
     }
 
     cv_bridge::CvImagePtr input_bridge = cv_bridge::toCvCopy(image_msg, "");
-    cv::Mat image = input_bridge->image;
+    cv::Mat& image = input_bridge->image;
     image_geometry::PinholeCameraModel cam_model;
     cam_model.fromCameraInfo(info_msg);
 
@@ -65,6 +66,7 @@ void cameraCallback(const sensor_msgs::ImageConstPtr& image_msg, const sensor_ms
             pixel.val[0] = 0;
             pixel.val[1] = 0;
             pixel.val[2] = 0;
+            image.at<cv::Vec3b>(cam_point) = pixel;
         }
     }
     image_pub.publish(input_bridge->toImageMsg());
