@@ -19,7 +19,7 @@
   <remap from="/$(arg namespace)/usb_cam_right" to="/usb_cam_right" />
   <remap from="/$(arg namespace)/usb_cam_left" to="/usb_cam_left" />
   <remap from="/$(arg namespace)/imu" to="/imu" />
-  <remap from="/$(arg namespace)/gpsRoverStatus" to="/gpsRoverStatus" />
+  <remap from="/$(arg namespace)/gps_odom" to="/gps_odom" />
   
   <group ns="$(arg namespace)">
     <!-- Create the world. -->
