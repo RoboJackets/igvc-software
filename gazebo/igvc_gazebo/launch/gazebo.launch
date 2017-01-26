@@ -16,8 +16,10 @@
   
   <!-- Remap to same topics as the actual robot -->
   <remap from="/$(arg namespace)/usb_cam_center" to="/usb_cam_center" />
-  <remap from="/$(arg namespace)/usb_cam_left" to="/usb_cam_left" />
   <remap from="/$(arg namespace)/usb_cam_right" to="/usb_cam_right" />
+  <remap from="/$(arg namespace)/usb_cam_left" to="/usb_cam_left" />
+  <remap from="/$(arg namespace)/imu" to="/imu" />
+  <remap from="/$(arg namespace)/gps_odom" to="/gps_odom" />
   
   <group ns="$(arg namespace)">
     <!-- Create the world. -->
@@ -44,5 +46,7 @@
                 -urdf -model Jaymii
                 -x $(arg x) -y $(arg y) -z $(arg z)
                 -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
-  </group>
+    </group>
+    
+    <include file="$(find igvc_control)/launch/igvc_control.launch" />
 </launch>
