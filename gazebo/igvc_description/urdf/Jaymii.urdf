@@ -5,7 +5,6 @@
       <geometry>
         <box size="0.01 0.01 0.01"/>
       </geometry>
-      <material name="chassis_mat"/>
     </visual>
   </link>
   <gazebo reference="base_link">
@@ -15,7 +14,7 @@
   <joint name="groundToDriveWheelMidpoint" type="fixed">
         <parent link="base_footprint"/>
         <child link="base_link"/>
-        <origin xyz="0 0 0.17" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <axis xyz="0 0 0"/>
     </joint>
 
@@ -324,14 +323,14 @@
         </plugin>
       </sensor>
     </gazebo>
-  <link name="imu_link">
+  <link name="imu">
     <visual>
       <geometry>
         <box size="0.1 0.1 0.1"/>
       </geometry>
     </visual>
   </link>
-  <link name="gps_link">
+  <link name="gps">
     <visual>
       <geometry>
         <cylinder length="0.05" radius="0.1"/>
@@ -347,8 +346,8 @@
       <robotNamespace>/igvc</robotNamespace>
       <serviceName>/imu/calibrate</serviceName>
       <updateRate>200.0</updateRate>
-      <bodyName>imu_link</bodyName>
-      <frameId>/imu</frameId>
+      <bodyName>imu</bodyName>
+      <frameId>imu</frameId>
       <topicName>imu</topicName>
       <rpyOffset>0 0 0</rpyOffset>
       <xyzOffset>0 0 0</xyzOffset>
@@ -366,8 +365,8 @@
     <plugin filename="libhector_gazebo_ros_gps.so" name="gps">
       <updateRate>20.0</updateRate>
       <bodyName>base_link</bodyName>
-      <frameId>gps</frameId>
-      <topicName>gps_odom</topicName>
+      <frameId>base_link</frameId>
+      <topicName>fix</topicName>
       <velocityTopicName>fix_velocity</velocityTopicName>
       <referenceLatitude>33.774497</referenceLatitude>
       <referenceLongitude>-84.405001</referenceLongitude>
@@ -413,14 +412,14 @@
     <child link="lidar"/>
   </joint>
   <joint name="body_to_imu" type="fixed">
-    <origin xyz="0.0 1.3462 0.0 " rpy="-1.5708 0 0" />
-    <parent link="axle"/>
-    <child link="imu_link"/>
+    <origin xyz="0 0 1.3" rpy="0 0 -1.5708" />
+    <parent link="body"/>
+    <child link="imu"/>
   </joint>
   <joint name="body_to_gps" type="fixed">
-    <origin xyz="0.25 0.1 0.5" rpy="0 0 0" />
+    <origin xyz="0.25 0.1 0.5" rpy="0 0 0" /> <!-- -1.5708 -->
     <parent link="body"/>
-    <child link="gps_link"/>
+    <child link="gps"/>
   </joint>
   <joint name="body_to_center_camera" type="fixed">
     <origin xyz="0.15 0 1.2" rpy="0 0 0" />
@@ -446,13 +445,13 @@
     <parent link="axle"/>
     <child link="left_wheel"/>
     <axis xyz="0 0 -1" rpy="0 0 0" />
-    <origin xyz="0 0 0.3175" rpy="0 0 0" />
+    <origin xyz="0 0 -0.3175" rpy="0 0 0" />
   </joint>
   <joint name="axle_to_right_wheel" type="continuous">
     <parent link="axle"/>
     <child link="right_wheel"/>
     <axis xyz="0 0 -1" rpy="0 0 0" />
-    <origin xyz="0 0 -0.3175" rpy="0 0 0" />
+    <origin xyz="0 0 0.3175" rpy="0 0 0" />
   </joint>
   <!--must have a joint so it is not assumed to be the base link but the ball joint not in URDF must add it in gazebo tag-->
   <joint name="body_to_front_ball" type="floating">

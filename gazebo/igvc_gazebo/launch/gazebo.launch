@@ -19,7 +19,8 @@
   <remap from="/$(arg namespace)/usb_cam_right" to="/usb_cam_right" />
   <remap from="/$(arg namespace)/usb_cam_left" to="/usb_cam_left" />
   <remap from="/$(arg namespace)/imu" to="/imu" />
-  <remap from="/$(arg namespace)/gps_odom" to="/gps_odom" />
+  <!--<remap from="/$(arg namespace)/odom" to="/odom" />-->
+  <!--<remap from="/$(arg namespace)/gps_odom" to="/gps_odom" />-->
   
   <group ns="$(arg namespace)">
     <!-- Create the world. -->
@@ -27,7 +28,7 @@
       <arg name="world_name" value="$(arg world_name)"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
       <arg name="paused" value="false"/>
       <arg name="use_sim_time" value="true"/>
-      <arg name="gui" value="false"/>
+      <arg name="gui" value="true"/>
       <arg name="headless" value="false"/>
       <arg name="debug" value="false"/>
     </include>
@@ -46,6 +47,18 @@
                 -urdf -model Jaymii
                 -x $(arg x) -y $(arg y) -z $(arg z)
                 -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+
+      <node name="waypoint_source" pkg="igvc" type="waypoint_source" output="screen" >
+        <param name="file" value="$(find igvc_control)/config/waypoints.csv" />
+      </node>
+
+      <node name="pose_tracker" pkg="igvc" type="pose_tracker" output="screen" />
+
+      <node name="gps_conv" pkg="gps_common" type="utm_odometry_node">
+        <remap from="/$(arg namespace)/odom" to="/gps_odom" />
+        <param name="rot_covariance" value="99999" />
+        <param name="frame_id" value="gps" />
+      </node>
     </group>
     
     <include file="$(find igvc_control)/launch/igvc_control.launch" />
