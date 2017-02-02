@@ -10,9 +10,9 @@ const int maxRadius = 50;
 const int minRadius = 10;
 
 // Radius for averaging pixels in a circle around the center
-const int whiteSampleRadius = 30;
+const int whiteSampleRadius = 5;
 // Size for filtering out contours that are too small
-const int contourSizeThreshold = 200;
+const int contourSizeThreshold = 100;
 
 int getDiff(int a, int b) {
     return abs(a - b);
@@ -26,7 +26,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const 
 
 
     // Crops the image (removes sky)
-    int topCrop = src.rows / 2 - 100;
+    int topCrop = src.rows / 2;// - 100;
     cv::Rect roiNoSky(0, topCrop, src.cols, src.rows - topCrop);
     src = src(roiNoSky);
 
@@ -48,17 +48,15 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const 
     redImageAverage /= (src.rows * src.cols);
 
     // Converts the image into grayscale, storing it in src_gray
-    cvtColor(src, src_gray, CV_BGR2GRAY);
-
+    cv::cvtColor(src, src_gray, CV_BGR2GRAY);
     // Find the mean and stddev of the grayscale image in order to do adaptive thresholding
     cv::Mat mean;
     cv::Mat stddev;
     meanStdDev(src_gray, mean, stddev);
-    double thresh = mean.at<double>(0,0) + (stddev.at<double>(0,0) * 2);
+    double thresh = mean.at<double>(0,0);
     if(thresh > 254) {
         thresh = 254;
     }
-
     // Threshold and adaptive blur of the grayscale image
     threshold(src_gray, src_gray, thresh, 255, cv::THRESH_BINARY);
     GaussianBlur(src_gray, src_gray, cv::Size(gaussian_size, gaussian_size), 2, 2);
@@ -69,13 +67,12 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const 
 
     // All the contours that will be published to the pointcloud
     std::vector<std::vector<cv::Point>> allContours;
-
     // Traverse through all the circles, and do more detection for each one
     for(size_t i = 0; i < circles.size(); i++ ) {
         cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 
         // If the circle is too close to the top / bottom edges, filter
-        if (center.y <= 100 || center.y >= src_gray.rows - 100) {
+        if (center.y <= 100 || center.y >= src_gray.rows - 10) {
             continue;
         }
 
@@ -228,9 +225,10 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const 
     cv_bridge::CvImage out_msg;
     out_msg.header   = msg->header;
     out_msg.encoding = msg->encoding;
-    out_msg.image    = src;
+    out_msg.image    = src_gray;
 
-    cv_ptr->image = src;
+    cv::cvtColor(src_gray, src_gray, CV_GRAY2BGR);
+    cv_ptr->image = src_gray;
     _pothole_filt_img.publish(cv_ptr->toImageMsg());
     _pothole_thres.publish(out_msg.toImageMsg());
     _pothole_cloud.publish(cloud);
