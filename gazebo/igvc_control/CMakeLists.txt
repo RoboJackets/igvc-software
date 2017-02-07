@@ -8,9 +8,10 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 catkin_package()
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  std_msgs
-  igvc_msgs
+	rospy
+  	roscpp
+  	std_msgs
+  	igvc_msgs
 )
 
 include_directories(
@@ -30,3 +31,14 @@ install(DIRECTORY config/
 add_executable(jaymii_control node/jaymii_control.cpp)
 add_dependencies(jaymii_control igvc_msgs_gencpp)
 target_link_libraries(jaymii_control ${catkin_LIBRARIES})
+
+catkin_install_python(
+        PROGRAMS
+        scripts/controller_spawner.py
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+install(PROGRAMS
+        scripts/spawn_jaymii.sh
+        scripts/controller_spawner.py
+DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
