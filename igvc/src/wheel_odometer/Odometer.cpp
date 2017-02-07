@@ -102,8 +102,8 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
     odom_tf.transform.rotation = odom.pose.pose.orientation;
 
     // initializing default odom tf
-    odom_tf.header.frame_id = "wheel_odom";
-    odom_tf.child_frame_id = "base_link";
+    odom_tf.header.frame_id = "base_link";
+    odom_tf.child_frame_id = "wheel_odom";
 
     odom_broadcaster.sendTransform(odom_tf);
 }
