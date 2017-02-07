@@ -3,6 +3,7 @@
 #include <sensor_msgs/JointState.h>
 #include <igvc_msgs/velocity_pair.h>
 #include <algorithm>
+#include <chrono>
 
 double speed_set_point_left = 0.0;
 double speed_set_point_right = 0.0;
@@ -57,6 +58,9 @@ int main(int argc, char **argv) {
 
     auto stateSub = handle.subscribe("/igvc/joint_states", 1, jointStateCallback);
 
+    std::chrono::time_point<std::chrono::system_clock> prev, now;
+    prev = std::chrono::system_clock::now();
+
     ros::Rate rate{30};
     while(ros::ok()) {
         ros::spinOnce();
@@ -91,8 +95,12 @@ int main(int argc, char **argv) {
         igvc_msgs::velocity_pair speed_measured;
         speed_measured.left_velocity = speed_measured_left;
         speed_measured.right_velocity = speed_measured_right;
+        now = std::chrono::system_clock::now();
+        std::chrono::duration<double> duration = now-prev;
+        speed_measured.duration = duration.count();
         wheelSpeedPublisher.publish(speed_measured);
         rate.sleep();
+        prev = now;
     }
 
     return 0;
