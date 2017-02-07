@@ -371,6 +371,7 @@
       <referenceLatitude>33.774497</referenceLatitude>
       <referenceLongitude>-84.405001</referenceLongitude>
       <referenceAltitude>309.0</referenceAltitude>
+      <referenceHeading>90</referenceHeading>
       <drift>0.001 0.001 0.001</drift>
       <gaussianNoise>0.0001 0.0001 0.0001</gaussianNoise>
       <velocityDrift>0 0 0</velocityDrift>
