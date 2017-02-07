@@ -22,7 +22,11 @@
   <!--<remap from="/$(arg namespace)/odom" to="/odom" />-->
   <!--<remap from="/$(arg namespace)/gps_odom" to="/gps_odom" />-->
   
+
+
   <group ns="$(arg namespace)">
+    <node name="spawn_platform_script" pkg="igvc_control" type="spawn_jaymii.sh" />
+
     <!-- Create the world. -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
       <arg name="world_name" value="$(arg world_name)"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
@@ -40,26 +44,21 @@
     <!-- convert laser scan to point cloud for LIDAR -->
     <node name="scan_to_pointcloud" pkg="igvc" type="scan_to_pointcloud" output="screen" />
 
-    <!-- Spawn the vehicle. -->
-    <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
-          args="-file $(find igvc_description)/urdf/Jaymii.urdf
-                -gazebo_namespace /$(arg namespace)/gazebo
-                -urdf -model Jaymii
-                -x $(arg x) -y $(arg y) -z $(arg z)
-                -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
-
       <node name="waypoint_source" pkg="igvc" type="waypoint_source" output="screen" >
         <param name="file" value="$(find igvc_control)/config/waypoints.csv" />
       </node>
 
-      <node name="pose_tracker" pkg="igvc" type="pose_tracker" output="screen" />
+      <!--<node name="pose_tracker" pkg="igvc" type="pose_tracker" output="screen" />-->
 
       <node name="gps_conv" pkg="gps_common" type="utm_odometry_node">
         <remap from="/$(arg namespace)/odom" to="/gps_odom" />
         <param name="rot_covariance" value="99999" />
         <param name="frame_id" value="gps" />
       </node>
+
+
     </group>
     
     <include file="$(find igvc_control)/launch/igvc_control.launch" />
+
 </launch>
