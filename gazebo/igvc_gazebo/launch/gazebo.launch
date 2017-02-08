@@ -20,7 +20,7 @@
   <remap from="/$(arg namespace)/usb_cam_left" to="/usb_cam_left" />
   <remap from="/$(arg namespace)/imu" to="/imu" />
   <!--<remap from="/$(arg namespace)/odom" to="/odom" />-->
-  <remap from="/$(arg namespace)/fix" to="/fix" />-->
+  <remap from="/$(arg namespace)/fix" to="/fix" />
   
 
 
