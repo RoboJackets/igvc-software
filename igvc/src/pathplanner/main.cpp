@@ -57,9 +57,9 @@ void expanded_callback(const set<SearchLocation> &expanded)
     {
         pcl::PointCloud<pcl::PointXYZ> cloud;
         cloud.header.frame_id = "/map";
-        for(auto location : expanded)
+        for(auto location : expanded) {
             cloud.points.push_back(pcl::PointXYZ(location.x,location.y,0));
-
+        }
         expanded_pub.publish(cloud);
     }
 }
@@ -133,7 +133,6 @@ int main(int argc, char** argv)
                 disp_path_msg.poses.push_back(pose);
             }
             disp_path_pub.publish(disp_path_msg);
-
             igvc_msgs::action_path act_path_msg;
             act_path_msg.header.stamp = ros::Time::now();
             act_path_msg.header.frame_id = "map";
