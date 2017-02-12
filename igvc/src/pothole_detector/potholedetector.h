@@ -1,13 +1,9 @@
 #ifndef POTHOLEDETECTOR_H
 #define POTHOLEDETECTOR_H
 
-#include <pcl/point_types.h>
-#include <pcl_ros/point_cloud.h>
-#include <image_transport/image_transport.h>
-#include <image_geometry/pinhole_camera_model.h>
-#include <cv_bridge/cv_bridge.h>
+#include "igvc/CVInclude.h"
+
 #include <vector>
-#include <tf/transform_listener.h>
 
 class PotholeDetector
 {
