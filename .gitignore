@@ -33,3 +33,10 @@
 #JetBrains Clion
 */.idea/
 /.idea/
+
+#Camera Calibration
+/sandbox/camera_calibration/CMakeFiles
+/sandbox/camera_calibration/CMakeCache.txt
+/sandbox/camera_calibration/cmake_install.cmake
+/sandbox/camera_calibration/Makefile
+
