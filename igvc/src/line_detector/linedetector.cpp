@@ -21,10 +21,10 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 
     cv::GaussianBlur(src_img, working, cv::Size(0,0), 2.0);
 
-    cv::Canny(working, working, 45, 135, 3);
+    cv::Canny(working, working, cannyThresh1, cannyThresh2, 3);
 
     std::vector<cv::Vec4i> lines;
-    cv::HoughLinesP(working, lines, 1.0, CV_PI/180, 80, 35, 15);
+    cv::HoughLinesP(working, lines, 1.0, CV_PI/180, houghThreshold, houghMinLineLength, houghMaxLineGap);
     for (size_t i = 0; i < lines.size(); ++i) {
         line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), cv::Scalar(255, 255, 255), 3, 8);
     }
@@ -54,6 +54,13 @@ LineDetector::LineDetector(ros::NodeHandle &handle, const std::string& topic)
      }
     _filt_img = _it.advertise(topic + "/filt_img", 1);
     _line_cloud = handle.advertise<PCLCloud>(topic + "/line_cloud", 100);
+
+
+    handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh1", cannyThresh1);
+    handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh2", cannyThresh2);
+    handle.getParam(ros::this_node::getName() + "/config/line/houghThreshold", houghThreshold);
+    handle.getParam(ros::this_node::getName() + "/config/line/houghMinLineLength", houghMinLineLength);
+    handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);
 }
 
 
