@@ -39,9 +39,9 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     if(frames_seen.find(msg->header.frame_id) == frames_seen.end())
     {
         frames_seen.insert(msg->header.frame_id);
-        tf_listener->waitForTransform("/map", msg->header.frame_id, ros::Time(0), ros::Duration(5));
+        tf_listener->waitForTransform("/odom", msg->header.frame_id, ros::Time(0), ros::Duration(5));
     }
-    tf_listener->lookupTransform("/map", msg->header.frame_id, ros::Time(0), transform);
+    tf_listener->lookupTransform("/odom", msg->header.frame_id, ros::Time(0), transform);
     pcl_ros::transformPointCloud(*msg, *transformed, transform);
     for (auto point : *transformed) {
         point.z = 0;
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
         subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ> >(topic, 1, boost::bind(frame_callback, _1, topic)));
     }
 
-    global_map->header.frame_id = "/map";
+    global_map->header.frame_id = "/odom";
 
     _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/map", 1);
 
