@@ -1,5 +1,4 @@
 #include "potholedetector.h"
-#include <pcl_ros/point_cloud.h>
 #include <igvc/CVUtils.hpp>
 
 cv_bridge::CvImagePtr cv_ptr;
@@ -13,10 +12,6 @@ const int minRadius = 10;
 const int whiteSampleRadius = 5;
 // Size for filtering out contours that are too small
 const int contourSizeThreshold = 100;
-
-int getDiff(int a, int b) {
-    return abs(a - b);
-}
 
 void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");

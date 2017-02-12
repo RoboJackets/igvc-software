@@ -1,5 +1,6 @@
 #ifndef LINEDETECTOR_H
 #define LINEDETECTOR_H
+
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <image_transport/image_transport.h>

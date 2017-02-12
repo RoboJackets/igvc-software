@@ -1,47 +1,28 @@
 #ifndef POTHOLEDETECTOR_H
 #define POTHOLEDETECTOR_H
 
-#include <ros/ros.h>
-#include <ros/publisher.h>
+#include <pcl/point_types.h>
+#include <pcl_ros/point_cloud.h>
 #include <image_transport/image_transport.h>
 #include <image_geometry/pinhole_camera_model.h>
 #include <cv_bridge/cv_bridge.h>
-#include <opencv2/core/core.hpp>
 #include <vector>
 #include <tf/transform_listener.h>
-#include <opencv2/opencv.hpp>
-#include <opencv2/video/video.hpp>
-#include <sensor_msgs/image_encodings.h>
-#include <pcl/point_types.h>
-#include <pcl_ros/point_cloud.h>
-#include <camera_info_manager/camera_info_manager.h>
-#include <math.h>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
 
-class PotholeDetector {
+class PotholeDetector
+{
 public:
     PotholeDetector(ros::NodeHandle &handle, const std::string& topic);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
     void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
-
     
     /**
      * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
      * @note Must be odd!
      */
     const int gaussian_size;
-
-    /**
-     * @brief src contains the original, unprocessed image
-     */
-    //cv::Mat src;
-    /**
-     * @brief dst contains the new, processed image that isolates the lines
-     */
-    //cv::Mat *dst;
 
     // ROS COMMUNICATION
     image_transport::ImageTransport _it;
