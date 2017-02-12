@@ -1,7 +1,6 @@
 <!-- map.launch -->
 <launch>
-    <!-- Pose Tracker -->
-    <node name="pose_tracker" pkg="igvc" type="pose_tracker" output="screen" />
+    <include file="$(find igvc)/launch/localization.launch" />
 
     <!-- Map Node -->
     <node name="mapper" pkg="igvc" type="global_mapper" output="screen">

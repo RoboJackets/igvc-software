@@ -7,6 +7,8 @@
     -->
 <launch>
 
+    <include file="$(find igvc)/launch/wheel_odometry.launch" />
+
     <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true" output="screen">
 
       <param name="frequency" value="30"/>
