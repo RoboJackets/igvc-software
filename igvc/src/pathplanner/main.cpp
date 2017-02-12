@@ -39,7 +39,7 @@ void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
     search_problem.Start.y = msg->pose.position.y;
     tf::Quaternion q;
     tf::quaternionMsgToTF(msg->pose.orientation, q);
-    search_problem.Start.theta = - tf::getYaw(q);
+    search_problem.Start.theta = -tf::getYaw(q) + 1.5708;
 }
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
