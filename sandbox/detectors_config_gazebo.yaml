@@ -1,36 +1,32 @@
 # Configuration values for our OpenCV nodes tuned for a GAZEBO SIMULATION
-config: {
+config:
 
   # Pothole Detector configuration values
-  pothole: {
+  pothole:
 
     # Radii for hough circle detector
-    minRadius: 10,
-    maxRadius: 50,
+    minRadius: 10
+    maxRadius: 50
 
     # Radius for averaging pixels in a circle around the center
-    whiteSampleRadius: 5,
+    whiteSampleRadius: 5
 
     # Size for filtering out contours that are too small
-    contourSizeThreshold: 100,
+    contourSizeThreshold: 100
 
     # Adaptive thresholding of colors to filter out non-potholes
-    blueAdaptiveThreshold: 75,
-    greenAdaptiveThreshold: 40,
+    blueAdaptiveThreshold: 75
+    greenAdaptiveThreshold: 40
     redAdaptiveThreshold: 20
-  },
 
   # Line dectector configuration values
-  line: {
+  line:
 
     # Canny edge detector thresholds
-    cannyThresh1: 45,
-    cannyThresh2: 135,
+    cannyThresh1: 45
+    cannyThresh2: 135
 
     # HoughCirclesP tunable values
-    houghThreshold: 80,
-    houghMinLineLength: 35,
+    houghThreshold: 80
+    houghMinLineLength: 35
     houghMaxLineGap: 15
-  }
-
-}
