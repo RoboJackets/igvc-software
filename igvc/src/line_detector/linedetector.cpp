@@ -28,9 +28,9 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     }
 
     if (hasInfo) {
-        cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam);
+        cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
     } else {
-        cloud = toPointCloud(tf_listener, MatToContours(fin_img), fin_img.size().height, fin_img.size().width);
+        cloud = toPointCloud(tf_listener, MatToContours(fin_img), fin_img.size().height, fin_img.size().width, topic);
     }
     _line_cloud.publish(cloud);
 
