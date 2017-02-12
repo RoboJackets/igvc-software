@@ -1,5 +1,4 @@
 #include "linedetector.h"
-#include <pcl_ros/point_cloud.h>
 #include <igvc/CVUtils.hpp>
 
 cv_bridge::CvImagePtr cv_ptr;

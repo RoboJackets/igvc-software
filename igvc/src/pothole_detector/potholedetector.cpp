@@ -19,7 +19,6 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const 
     cv::Mat orig = cv_ptr->image.clone();
     src = cv_ptr->image.clone();
 
-
     // Crops the image (removes sky)
     int topCrop = src.rows / 2;// - 100;
     cv::Rect roiNoSky(0, topCrop, src.cols, src.rows - topCrop);
