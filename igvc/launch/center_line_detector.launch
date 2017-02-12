@@ -1,7 +1,8 @@
 <!-- line_detector.launch -->
 <launch>
     <node name="linedetectorcenter" pkg="igvc" type="linedetector" output="screen" >
-	<param name="topic" type="string" value="/usb_cam_center"/>
+		<param name="topic" type="string" value="/usb_cam_center"/>
+		<rosparam file="$(find igvc)/../sandbox/detectors_config_gazebo.yaml" />
     </node>
 <!--
     <node name="linedetectorleft" pkg="igvc" type="linedetector" output="screen" >
