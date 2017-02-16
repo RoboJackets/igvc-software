@@ -39,7 +39,7 @@ void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
     search_problem.Start.y = msg->pose.position.y;
     tf::Quaternion q;
     tf::quaternionMsgToTF(msg->pose.orientation, q);
-    search_problem.Start.theta = -tf::getYaw(q) + 1.5708;
+    search_problem.Start.theta = -tf::getYaw(q);
 }
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
@@ -141,9 +141,14 @@ int main(int argc, char** argv)
                 igvc_msgs::velocity_pair vels;
                 vels.header.stamp = act_path_msg.header.stamp;
                 vels.header.frame_id = act_path_msg.header.frame_id;
-                double radius = action.V / action.W;
-                vels.right_velocity = (radius - baseline/2.) * action.W;
-                vels.left_velocity = (radius + baseline/2.) * action.W;
+                if(action.W != 0) {
+                    double radius = action.V / action.W;
+                    vels.right_velocity = (radius - baseline/2.) * action.W;
+                    vels.left_velocity = (radius + baseline/2.) * action.W;
+                } else {
+                    vels.right_velocity = 1.0;
+                    vels.left_velocity = 1.0;
+                }
                 vels.duration = action.DeltaT;
                 act_path_msg.actions.push_back(vels);
             }
