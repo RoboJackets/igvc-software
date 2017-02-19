@@ -1,11 +1,7 @@
 #ifndef LINEDETECTOR_H
 #define LINEDETECTOR_H
-#include <pcl/point_types.h>
-#include <pcl/point_cloud.h>
-#include <image_transport/image_transport.h>
-#include <image_geometry/pinhole_camera_model.h>
-#include <cv_bridge/cv_bridge.h>
-#include <tf/transform_listener.h>
+
+#include "igvc/CVInclude.h"
 
 #define KERNAL_COUNT 8
 
@@ -40,4 +36,5 @@ private:
     int houghMinLineLength;
     int houghMaxLineGap;
 };
+
 #endif // LINEDETECTOR_H
