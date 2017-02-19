@@ -1,4 +1,6 @@
-#pragma once
+#ifndef GPSUTILS_H
+#define GPSUTILS_H
+
 #include <math.h>
 #include <cmath>
 
@@ -45,3 +47,5 @@ namespace GPSUtils
             dY = std::copysign(1.0, lat2-lat1) * coordsToMeter(lat1, lon1, lat2, lon1);
         }
 };
+
+#endif

@@ -29,4 +29,5 @@ private:
     image_geometry::PinholeCameraModel cam;
     bool hasInfo = true;
 };
+
 #endif // LINEDETECTOR_H
