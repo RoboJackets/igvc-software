@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 2.8)
+project( solvepnp )
+find_package( OpenCV REQUIRED )
+add_executable( solvepnp solvepnp.cpp )
+target_link_libraries( solvepnp ${OpenCV_LIBS} )
