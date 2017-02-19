@@ -5,9 +5,11 @@
     -->
 <launch>
     <node name="linedetectorleft" pkg="igvc" type="linedetector" output="screen" >
-	<param name="topic" type="string" value="usb_cam_left" />
-</node>
+		<param name="topic" type="string" value="usb_cam_left" />
+		<rosparam file="$(find igvc)/../sandbox/detectors_config_gazebo.yaml" />
+	</node>
     <node name="linedetectorright" pkg="igvc" type="linedetector" output="screen">
-	<param name="topic" type="string" value="usb_cam_right" />
-</node>
+		<param name="topic" type="string" value="usb_cam_right" />
+		<rosparam file="$(find igvc)/../sandbox/detectors_config_gazebo.yaml" />
+	</node>
 </launch>

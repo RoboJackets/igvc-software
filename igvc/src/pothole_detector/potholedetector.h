@@ -32,5 +32,14 @@ private:
 
     cv::Mat src;
     cv::Mat src_gray;
+
+    // Tuning parameters
+    int maxRadius;
+    int minRadius;
+    int whiteSampleRadius;
+    int contourSizeThreshold;
+    int blueAdaptiveThreshold;
+    int greenAdaptiveThreshold;
+    int redAdaptiveThreshold;
 };
 #endif // POTHOLEDETECTOR_H
