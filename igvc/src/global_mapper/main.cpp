@@ -19,8 +19,8 @@ bool firstFrame;
 void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input) {
     if (!firstFrame) {
         pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
-       // icp.setMaxCorrespondenceDistance(2); // tunable parameters - figure out later
-       // icp.setMaximumIterations(30);        //
+        icp.setMaxCorrespondenceDistance(0.5); // tunable parameters - figure out later
+        icp.setMaximumIterations(30);        //
         icp.setInputSource(input);
         icp.setInputTarget(global_map);
         pcl::PointCloud<pcl::PointXYZ> Final;
