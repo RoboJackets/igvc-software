@@ -71,7 +71,7 @@ void gps_callback(const nav_msgs::OdometryConstPtr& msg)
     tf_listener->transformPose("base_footprint", p, transformed);
     gps.pose.pose = transformed.pose;
 
-    if(first)
+    if(first)// TODO this is nonsense, with GPS noise this will become inaccurate  
     {
         origin = gps.pose.pose.position;
         first = false;
