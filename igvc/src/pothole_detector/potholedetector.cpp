@@ -1,20 +1,14 @@
 #include "potholedetector.h"
-#include <pcl_ros/point_cloud.h>
 #include <igvc/CVUtils.hpp>
 
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
-
-int getDiff(int a, int b) {
-    return abs(a - b);
-}
 
 void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
 
     cv::Mat orig = cv_ptr->image.clone();
     src = cv_ptr->image.clone();
-
 
     // Crops the image (removes sky)
     int topCrop = src.rows / 2;// - 100;
