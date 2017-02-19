@@ -4,15 +4,6 @@
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
-// Radii for hough circle detector
-const int maxRadius = 50;
-const int minRadius = 10;
-
-// Radius for averaging pixels in a circle around the center
-const int whiteSampleRadius = 5;
-// Size for filtering out contours that are too small
-const int contourSizeThreshold = 100;
-
 void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
 
@@ -121,7 +112,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const 
 
         // Our adaptive thresholding comes into play here.
         // Filter out the circle if the average color of the image is not an offset less than the average color of the center circle sample.
-        if (bluePotholeAverage - blueImageAverage < 75 || greenPotholeAverage - greenImageAverage < 40 || redPotholeAverage - redImageAverage < 20) {
+        if (bluePotholeAverage - blueImageAverage < blueAdaptiveThreshold || greenPotholeAverage - greenImageAverage < greenAdaptiveThreshold || redPotholeAverage - redImageAverage < redAdaptiveThreshold) {
             continue;
         }
 
@@ -135,7 +126,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const 
         // Traverse through each single contour first
         for (std::vector<std::vector<cv::Point>>::iterator it = contours.begin(); it != contours.end(); ++it) {
             // Filter out contours that are too small
-            if ((*it).size() > contourSizeThreshold) {
+            if ((*it).size() > (unsigned int)(contourSizeThreshold)) {
                 int minY = src_gray.rows;
                 int minX = src_gray.cols;
                 int maxY = 0;
@@ -237,4 +228,13 @@ PotholeDetector::PotholeDetector(ros::NodeHandle &handle, const std::string& top
     _pothole_filt_img = _it.advertise(topic + "/pothole_filt_img", 1);
     _pothole_thres = _it.advertise(topic + "/pothole_thres", 1);
     _pothole_cloud = handle.advertise<PCLCloud>(topic + "/pothole_cloud", 100);
+
+    // Import tuning parameters from yaml file (file specified in launch file)
+    handle.getParam(ros::this_node::getName() + "/config/pothole/minRadius", minRadius);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/maxRadius", maxRadius);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/whiteSampleRadius", whiteSampleRadius);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/contourSizeThreshold", contourSizeThreshold);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/blueAdaptiveThreshold", blueAdaptiveThreshold);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/greenAdaptiveThreshold", greenAdaptiveThreshold);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/redAdaptiveThreshold", redAdaptiveThreshold);
 }

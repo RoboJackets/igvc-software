@@ -28,6 +28,13 @@ private:
     tf::TransformListener tf_listener;
     image_geometry::PinholeCameraModel cam;
     bool hasInfo = true;
+
+    // Tuning parameters loaded from YAML file (file specified in launch file)
+    int cannyThresh1;
+    int cannyThresh2;
+    int houghThreshold;
+    int houghMinLineLength;
+    int houghMaxLineGap;
 };
 
 #endif // LINEDETECTOR_H
