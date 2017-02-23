@@ -183,7 +183,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="center_camera_optical"/>
+  <link name="optical_cam_center"/>
   <gazebo reference="usb_cam_center">
     <sensor name="center_camera" type="camera">
         <camera>
@@ -215,7 +215,7 @@
           <cameraName>usb_cam_center</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>center_camera_optical</frameName>
+          <frameName>optical_cam_center</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -232,7 +232,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="left_camera_optical"/>
+  <link name="optical_cam_left"/>
   <gazebo reference="usb_cam_left">
     <sensor name="left_camera" type="camera">
         <camera>
@@ -264,7 +264,7 @@
           <cameraName>usb_cam_left</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>left_camera_optical</frameName>
+          <frameName>optical_cam_left</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -281,7 +281,7 @@
       </geometry>
     </visual>
   </link>
-  <link name="right_camera_optical"/>
+  <link name="optical_cam_right"/>
   <gazebo reference="usb_cam_right">
     <sensor name="right_camera" type="camera">
         <camera>
@@ -313,7 +313,7 @@
           <cameraName>usb_cam_right</cameraName>
           <imageTopicName>image_raw</imageTopicName>
           <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>right_camera_optical</frameName>
+          <frameName>optical_cam_right</frameName>
           <hackBaseline>0.07</hackBaseline>
           <distortionK1>0.0</distortionK1>
           <distortionK2>0.0</distortionK2>
@@ -461,19 +461,19 @@
     <child link="back_ball"/>
     <origin xyz="-0.381 0 -0.0125" rpy="0 0 0" />
   </joint>
-  <joint name="optical_cam_center" type="fixed">
+  <joint name="optical_cam_center_joint" type="fixed">
     <parent link="usb_cam_center"/>
-    <child link="center_camera_optical"/>
+    <child link="optical_cam_center"/>
     <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
-  <joint name="optical_cam_right" type="fixed">
+  <joint name="optical_cam_right_joint" type="fixed">
     <parent link="usb_cam_right"/>
-    <child link="right_camera_optical"/>
+    <child link="optical_cam_right"/>
     <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
-  <joint name="optical_cam_left" type="fixed">
+  <joint name="optical_cam_left_joint" type="fixed">
     <parent link="usb_cam_left"/>
-    <child link="left_camera_optical"/>
+    <child link="optical_cam_left"/>
     <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
   <!-- this is where the actual ball joints are added-->
