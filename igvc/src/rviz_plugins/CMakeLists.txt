@@ -3,6 +3,7 @@ find_package(Qt5Gui REQUIRED)
 find_package(Qt5Widgets REQUIRED)
 find_package(catkin REQUIRED COMPONENTS rviz)
 
+
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
@@ -38,5 +39,6 @@ set(SOURCE_FILES
 	${MOC_FILES})
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
+add_dependencies(${PROJECT_NAME} igvc_msgs_gencpp)
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Widgets_LIBRARIES} ${OGRE_LIBRARY_DIRS})
