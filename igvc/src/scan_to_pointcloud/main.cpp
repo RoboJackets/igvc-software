@@ -1,11 +1,9 @@
 #include <ros/ros.h>
 #include <ros/publisher.h>
-#include <cmath>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <sensor_msgs/LaserScan.h>
 #include <laser_geometry/laser_geometry.h>
-#include <pcl/kdtree/kdtree_flann.h>
 
 ros::Publisher _pointcloud_pub;
 laser_geometry::LaserProjection projection;

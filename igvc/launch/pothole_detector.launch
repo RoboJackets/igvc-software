@@ -10,6 +10,7 @@
     </node> -->
 
     <node name="potholedetector" pkg="igvc" type="potholedetector" output="screen" >
-            <param name="topic" type="string" value="/usb_cam_center"/>
+        <param name="topic" type="string" value="/usb_cam_center"/>
+        <rosparam file="$(find igvc)/../sandbox/detectors_config_gazebo.yaml" />
     </node>
 </launch>
