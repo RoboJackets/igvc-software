@@ -84,8 +84,8 @@ SearchLocation IGVCSearchProblem::getResult(SearchLocation state, SearchMove act
     {
         double w = action.W;
         double R = action.V / action.W;
-        double ICCx = state.x - ( R * cos(M_PI - state.theta) );
-        double ICCy = state.y - ( R * sin(M_PI - state.theta) );
+        double ICCx = state.x - ( R * sin(state.theta) );
+        double ICCy = state.y - ( R * cos(state.theta) );
         using namespace Eigen;
         Matrix3d T;
         double wdt = w*action.DeltaT;
@@ -106,8 +106,8 @@ SearchLocation IGVCSearchProblem::getResult(SearchLocation state, SearchMove act
     else
     {
         result.theta = state.theta;
-        result.x = state.x + ( cos(M_PI_2 - result.theta) * action.V * action.DeltaT );
-        result.y = state.y + ( sin(M_PI_2 - result.theta) * action.V * action.DeltaT );
+        result.x = state.x + ( sin(M_PI_2 - result.theta) * action.V * action.DeltaT );
+        result.y = state.y + ( cos(M_PI_2 - result.theta) * action.V * action.DeltaT );
     }
     return result;
 }
