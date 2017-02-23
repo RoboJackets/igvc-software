@@ -11,16 +11,20 @@ double speed_measured_left = 0.0;
 double speed_measured_right = 0.0;
 double speed_last_error_left = 0.0;
 double speed_last_error_right = 0.0;
-double speed_P_left = -3.0;
-double speed_P_right = -3.0;
+double speed_P_left = -10.0;
+double speed_P_right = -10.0;
 double speed_D_left = -0.5;
 double speed_D_right = -0.5;
 
 constexpr double wheel_radius = 0.3429;
 
 void speedCallback(const igvc_msgs::velocity_pair::ConstPtr& msg) {
-    speed_set_point_left = msg->left_velocity;
-    speed_set_point_right = msg->right_velocity;
+    if(msg->left_velocity == msg->left_velocity) {
+        speed_set_point_left = msg->left_velocity;
+    }
+    if(msg->right_velocity == msg->right_velocity) {
+        speed_set_point_right = msg->right_velocity;
+    }
 }
 
 void jointStateCallback(const sensor_msgs::JointStateConstPtr &msg) {
@@ -78,13 +82,7 @@ int main(int argc, char **argv) {
         auto effort_right = speed_P_right* error_right - speed_D_right * dError_right;
 
         //ROS_INFO_STREAM("Publishing effort: " << effort_right);
-        ROS_INFO_STREAM("left: " << speed_set_point_left << " right: " << speed_set_point_right);
-        if(effort_left > 10) {
-            effort_left = 10;
-        }
-        if(effort_right > 10) {
-            effort_right = 10;
-        }
+        ROS_INFO_STREAM("left: " << effort_left << " right: " << effort_right);
         std_msgs::Float64 left_wheel_message;
         std_msgs::Float64 right_wheel_message;
         left_wheel_message.data = effort_left;

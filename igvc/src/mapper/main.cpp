@@ -1,21 +1,7 @@
-#include <ros/ros.h>
-#include <stdlib.h>
-#include <ros/publisher.h>
-#include <tf/tf.h>
-#include <tf/transform_listener.h>
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <algorithm>
-#include <iterator>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl/filters/voxel_grid.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
-#include <set>
-#include <climits>
-#include <pcl/common/geometry.h>
+
+// #include <pcl/filters/voxel_grid.h>
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr map_cloud;
 ros::Publisher _pointcloud_pub;
