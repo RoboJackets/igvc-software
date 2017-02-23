@@ -1,4 +1,6 @@
-#pragma once
+#ifndef STRINGUTILS_H
+#define STRINGUTILS_H
+
 #include <vector>
 #include <sstream>
 
@@ -11,3 +13,5 @@ std::vector<std::string> split(const std::string &s, const char &delim) {
     }
     return elems;
 }
+
+#endif
