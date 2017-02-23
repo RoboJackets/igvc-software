@@ -39,9 +39,6 @@
       <!-- if true uses yaw angle from the input odom source -->
       <param name="use_odometry_yaw" value="false"/>
 
-      <!-- setting a datum for local reference frame -->
-      <rosparam param="datum">[0, 0, 0.0, map, base_link]</rosparam>
-
       <!-- input remapping -->
       <remap from="/imu/data" to="/imu"/>
       <remap from="/gps/fix" to="/fix"/>
