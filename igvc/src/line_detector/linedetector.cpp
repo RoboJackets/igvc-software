@@ -13,15 +13,24 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src_img = cv_ptr->image;
 
+    // Convert image to grayscale
     cv::cvtColor(src_img, src_img, CV_BGR2GRAY);
+
+    // Crops the image (removes sky)
+    int topCrop = 2 * src_img.rows / 3;// - 100;
+    cv::Rect roiNoSky(0, topCrop, src_img.cols, src_img.rows - topCrop);
+    src_img = src_img(roiNoSky);
 
     cv::resize(src_img, src_img, cv::Size(524, 524), 0, 0, CV_INTER_AREA);
     fin_img = cv::Mat::zeros(src_img.size(), src_img.type());
 
+    // Gaussian Blur
     cv::GaussianBlur(src_img, working, cv::Size(0,0), 2.0);
 
+    // Detect edges
     cv::Canny(working, working, cannyThresh1, cannyThresh2, 3);
 
+    // Find lines
     std::vector<cv::Vec4i> lines;
     cv::HoughLinesP(working, lines, 1.0, CV_PI/180, houghThreshold, houghMinLineLength, houghMaxLineGap);
     for (size_t i = 0; i < lines.size(); ++i) {
