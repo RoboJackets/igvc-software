@@ -1,9 +1,0 @@
-<!--<?xml version="1.0"?>
-
-<launch>
-  <arg name="namespace" default="autorally_platform"/>
-  <group ns="$(arg namespace)">
-    <param name="robot_description" file="$(find igvc_description)/urdf/Jaymii.urdf"/>
-  </group>
-</launch>
--->
