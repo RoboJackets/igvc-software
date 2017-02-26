@@ -2,36 +2,32 @@
 #define BAT_PANEL_H
 
 #include <ros/ros.h>
-#include <QLabel>
 #include <std_msgs/UInt8.h>
+#include <QLabel>
 
 #include <rviz/panel.h>
 
 class QLineEdit;
 
-namespace rviz_plugins
-{
+namespace rviz_plugins {
 
-class BatPanel: public rviz::Panel
-{
-  Q_OBJECT
-  public:
-    BatPanel( QWidget* parent = 0 );
+class BatPanel : public rviz::Panel {
+    Q_OBJECT
+public:
+    BatPanel(QWidget* parent = 0);
 
-  private:
-    void batCallback(const std_msgs::UInt8 &msg);
+private:
+    void batCallback(const std_msgs::UInt8& msg);
 
-  public Q_SLOTS:
+public Q_SLOTS:
 
-  protected Q_SLOTS:
+protected Q_SLOTS:
 
-  protected:
+protected:
     ros::Subscriber sub;
     ros::NodeHandle nh_;
     QLabel* output_topic_editor_;
-
 };
-
 }
 
-#endif // BAT_PANEL_H
+#endif  // BAT_PANEL_H

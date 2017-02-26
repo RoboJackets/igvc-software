@@ -5,17 +5,18 @@
 
 #include <vector>
 
-class PotholeDetector
-{
+class PotholeDetector {
 public:
-    PotholeDetector(ros::NodeHandle &handle, const std::string& topic);
+    PotholeDetector(ros::NodeHandle& handle, const std::string& topic);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
-    void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
-    
+    void img_callback(const sensor_msgs::ImageConstPtr& msg,
+                      const sensor_msgs::CameraInfoConstPtr& cam_info);
+
     /**
-     * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
+     * @brief gaussian_size The size of the Gaussian blur. The bigger the
+     * greater the blur
      * @note Must be odd!
      */
     const int gaussian_size;
@@ -42,4 +43,4 @@ private:
     int greenAdaptiveThreshold;
     int redAdaptiveThreshold;
 };
-#endif // POTHOLEDETECTOR_H
+#endif  // POTHOLEDETECTOR_H

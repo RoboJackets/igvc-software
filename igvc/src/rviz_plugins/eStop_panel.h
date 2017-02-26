@@ -2,32 +2,28 @@
 #define ESTOP_PANEL_H
 
 #include <ros/ros.h>
-#include <QLabel>
 #include <std_msgs/Bool.h>
+#include <QLabel>
 
 #include <rviz/panel.h>
 
 class QLineEdit;
 
-namespace rviz_plugins
-{
+namespace rviz_plugins {
 
-class EStopPanel: public rviz::Panel
-{
-  Q_OBJECT
-  public:
-    EStopPanel( QWidget* parent = 0 );
+class EStopPanel : public rviz::Panel {
+    Q_OBJECT
+public:
+    EStopPanel(QWidget* parent = 0);
 
-  private:
-    void subCallback(const std_msgs::Bool &msg);
+private:
+    void subCallback(const std_msgs::Bool& msg);
 
-  protected:
+protected:
     ros::Subscriber sub;
     ros::NodeHandle nh_;
     QLabel* output_topic_editor_;
-
 };
-
 }
 
-#endif // ESTOP_PANEL_H
+#endif  // ESTOP_PANEL_H

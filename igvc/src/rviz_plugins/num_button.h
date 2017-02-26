@@ -2,38 +2,33 @@
 #define NUM_BUTTON_H
 
 #include <ros/ros.h>
-#include <QLabel>
 #include <std_msgs/UInt8.h>
+#include <QLabel>
 
 #include <rviz/panel.h>
 
 #include <ctime>
 
-#include <QVBoxLayout>
-#include <QPushButton>
 #include <QComboBox>
+#include <QPushButton>
+#include <QVBoxLayout>
 
-namespace rviz_plugins
-{
+namespace rviz_plugins {
 
-class NumButton: public QPushButton
-{
-  Q_OBJECT
-  public:
-    NumButton(const QString &text, QWidget *parent = 0, int n = 0);
+class NumButton : public QPushButton {
+    Q_OBJECT
+public:
+    NumButton(const QString& text, QWidget* parent = 0, int n = 0);
 
-  public Q_SLOTS:
+public Q_SLOTS:
     void emitNum();
 
-  Q_SIGNALS:
+Q_SIGNALS:
     void numClicked(int num);
 
-  private:
+private:
     int num;
-  
-
 };
-
 }
 
-#endif // NUM_BUTTON_H
+#endif  // NUM_BUTTON_H
