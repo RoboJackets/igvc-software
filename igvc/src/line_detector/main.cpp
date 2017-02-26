@@ -7,11 +7,11 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh;
     ros::NodeHandle pNh("~");
     std::string topic;
-    if(!pNh.hasParam("topic"))
-        ROS_WARN_STREAM("No topics specified for line detector. No map will be generated.");
+    if (!pNh.hasParam("topic"))
+        ROS_WARN_STREAM(
+            "No topics specified for line detector. No map will be generated.");
 
     pNh.getParam("topic", topic);
-
 
     LineDetector det{nh, topic};
 

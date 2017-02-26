@@ -1,28 +1,27 @@
-#include <ros/ros.h>
 #include <igvc_msgs/velocity_pair.h>
+#include <ros/ros.h>
 #include <std_msgs/Bool.h>
-#include <fstream>
 #include <chrono>
+#include <fstream>
 
 bool enabled = false;
 
-void enabled_callback(const std_msgs::BoolConstPtr &msg)
-{
+void enabled_callback(const std_msgs::BoolConstPtr& msg) {
     enabled = msg->data;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     ros::init(argc, argv, "pidtester");
 
     ros::NodeHandle nh;
 
-    ros::Subscriber enabled_sub = nh.subscribe("/robot_enabled", 1, enabled_callback);
+    ros::Subscriber enabled_sub =
+        nh.subscribe("/robot_enabled", 1, enabled_callback);
 
-    ros::Publisher cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
+    ros::Publisher cmd_pub =
+        nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
 
-    while(!enabled)
-    {
+    while (!enabled) {
         ros::spinOnce();
     }
 

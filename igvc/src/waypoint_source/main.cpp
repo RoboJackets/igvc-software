@@ -1,10 +1,10 @@
-#include <ros/ros.h>
-#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <ros/ros.h>
 #include <fstream>
 #include <igvc/StringUtils.hpp>
-#include <string>
 #include <mutex>
+#include <string>
 #include "conversion.h"
 
 ros::Publisher waypoint_pub;
@@ -13,29 +13,27 @@ geometry_msgs::PointStamped current_waypoint;
 geometry_msgs::Point map_origin;
 std::mutex current_mutex;
 
-double dmsToDec(std::string dms)
-{
+double dmsToDec(std::string dms) {
     auto qMarkIter = dms.find('?');
     auto aposIter = dms.find('\'');
     auto qouteIter = dms.find('\"');
     auto degrees = stod(dms.substr(0, qMarkIter));
-    auto minutes = stod(dms.substr(qMarkIter+1, aposIter));
-    auto seconds = stod(dms.substr(aposIter+1, qouteIter));
+    auto minutes = stod(dms.substr(qMarkIter + 1, aposIter));
+    auto seconds = stod(dms.substr(aposIter + 1, qouteIter));
     auto dirChar = dms[dms.size() - 1];
 
     degrees += minutes / 60.0;
     degrees += seconds / 3600.0;
 
-    if(dirChar == 'W' || dirChar == 'S')
+    if (dirChar == 'W' || dirChar == 'S')
         degrees *= -1;
 
     return degrees;
 }
 
-void loadWaypointsFile(std::string path, std::vector<geometry_msgs::PointStamped>& waypoints)
-{
-    if(path.empty())
-    {
+void loadWaypointsFile(std::string path,
+                       std::vector<geometry_msgs::PointStamped>& waypoints) {
+    if (path.empty()) {
         ROS_ERROR_STREAM("Could not load empty file path.");
         return;
     }
@@ -43,35 +41,33 @@ void loadWaypointsFile(std::string path, std::vector<geometry_msgs::PointStamped
     std::ifstream file;
     file.open(path.c_str());
 
-    if(!file.is_open())
-    {
+    if (!file.is_open()) {
         ROS_INFO_STREAM("Could not open file: " << path);
         return;
     }
 
     std::string line = "";
     auto lineIndex = 1;
-    while(!file.eof())
-    {
+    while (!file.eof()) {
         getline(file, line);
 
-        if(!line.empty())
-        {
+        if (!line.empty()) {
             std::vector<std::string> tokens = split(line, ',');
 
-            if(tokens.size() != 2)
-            {
-                ROS_ERROR_STREAM(path << ":" << lineIndex << " - " << tokens.size() << " tokens instead of 2.");
+            if (tokens.size() != 2) {
+                ROS_ERROR_STREAM(path << ":" << lineIndex << " - "
+                                      << tokens.size()
+                                      << " tokens instead of 2.");
                 return;
             }
 
             double lat, lon;
-            if(tokens[0].find('?') != std::string::npos)
+            if (tokens[0].find('?') != std::string::npos)
                 lat = dmsToDec(tokens[0]);
             else
                 lat = stod(tokens[0]);
-            if(tokens[1].find('?') != std::string::npos)
-                lon  = dmsToDec(tokens[1]);
+            if (tokens[1].find('?') != std::string::npos)
+                lon = dmsToDec(tokens[1]);
             else
                 lon = stod(tokens[1]);
 
@@ -86,37 +82,33 @@ void loadWaypointsFile(std::string path, std::vector<geometry_msgs::PointStamped
     }
 }
 
-double distanceBetweenPoints(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2)
-{
-    return sqrt((p2.x-p1.x)*(p2.x-p1.x) + (p2.y-p1.y)*(p2.y-p1.y));
+double distanceBetweenPoints(const geometry_msgs::Point& p1,
+                             const geometry_msgs::Point& p2) {
+    return sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
 }
 
-void positionCallback(const geometry_msgs::PoseStampedConstPtr& msg)
-{
+void positionCallback(const geometry_msgs::PoseStampedConstPtr& msg) {
     std::lock_guard<std::mutex> lock(current_mutex);
     geometry_msgs::PointStamped cur = current_waypoint;
     cur.point.x -= map_origin.x;
     cur.point.y -= map_origin.y;
 
-    if(distanceBetweenPoints(msg->pose.position, cur.point) < 1.0)
-    {
+    if (distanceBetweenPoints(msg->pose.position, cur.point) < 1.0) {
         // advance to next waypoint.
         current_waypoint = waypoints.front();
-        if(waypoints.size() > 1) {
+        if (waypoints.size() > 1) {
             waypoints.erase(waypoints.begin());
             std::cerr << "Waypoint Source moving to next" << std::endl;
         }
     }
 }
 
-void originCallback(const geometry_msgs::PointStampedConstPtr& msg)
-{
+void originCallback(const geometry_msgs::PointStampedConstPtr& msg) {
     std::lock_guard<std::mutex> lock(current_mutex);
     map_origin = msg->point;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     ros::init(argc, argv, "waypoint_source");
 
     ros::NodeHandle nh;
@@ -131,19 +123,18 @@ int main(int argc, char** argv)
 
     waypoint_pub = nh.advertise<geometry_msgs::PointStamped>("/waypoint", 1);
 
-    ros::Subscriber odom_sub = nh.subscribe("/odom_combined", 1, positionCallback);
+    ros::Subscriber odom_sub =
+        nh.subscribe("/odom_combined", 1, positionCallback);
 
     ros::Subscriber origin_sub = nh.subscribe("/map_origin", 1, originCallback);
 
     loadWaypointsFile(path, waypoints);
 
-    if(!waypoints.empty())
-    {
+    if (!waypoints.empty()) {
         ROS_INFO_STREAM(waypoints.size() << " waypoints found.");
         current_waypoint = waypoints.front();
-        ros::Rate rate(1); // 1 Hz
-        while(ros::ok())
-        {
+        ros::Rate rate(1);  // 1 Hz
+        while (ros::ok()) {
             {
                 std::lock_guard<std::mutex> lock(current_mutex);
                 auto waypoint_for_pub = current_waypoint;
