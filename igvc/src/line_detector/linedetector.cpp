@@ -34,8 +34,11 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     std::vector<cv::Vec4i> lines;
     cv::HoughLinesP(working, lines, 1.0, CV_PI/180, houghThreshold, houghMinLineLength, houghMaxLineGap);
     for (size_t i = 0; i < lines.size(); ++i) {
-        line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), cv::Scalar(255, 255, 255), 3, 8);
+        cv::line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), cv::Scalar(255, 255, 255), 3, 8);
     }
+
+    cv::Mat black = cv::Mat::zeros(cv::Size(src_img.cols, topCrop), src_img.type());
+    cv::vconcat(black, fin_img, fin_img);
 
     if (hasInfo) {
         cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
