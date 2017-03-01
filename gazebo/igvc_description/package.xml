@@ -12,11 +12,12 @@
   <author email="jgibson37@gatech.edu">Jason Gibson</author>
 
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>joint_state_controller</build_depend>
+  <build_depend>effort_controllers</build_depend>
   <run_depend>joint_state_publisher</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>gazebo_ros</run_depend>
   <run_depend>gazebo_ros_control</run_depend>
-  <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>tf</run_depend>
   <run_depend>hector_gazebo_plugins</run_depend>
