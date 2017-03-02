@@ -4,20 +4,20 @@
 
 class MyThread : public QThread
 {
-    Q_OBJECT
+  Q_OBJECT
 
 protected:
-    void run();
+  void run();
 
 public:
-    void setCmd(const char*);
-    void close();
+  void setCmd(const char*);
+  void close();
 
-    public Q_SLOTS:
+public Q_SLOTS:
 
-    protected Q_SLOTS:
+protected Q_SLOTS:
 
 protected:
-    char cmd[100];
-    QProcess* proc;
+  char cmd[100];
+  QProcess* proc;
 };
