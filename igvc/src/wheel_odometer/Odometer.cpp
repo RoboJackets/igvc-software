@@ -1,15 +1,17 @@
-#include <ros/ros.h>
-#include <nav_msgs/Odometry.h>
-#include <tf/transform_broadcaster.h>
-#include <math.h>
-#include <igvc_msgs/velocity_pair.h>
 #include "Odometer.h"
-
+#include <igvc_msgs/velocity_pair.h>
+#include <math.h>
+#include <nav_msgs/Odometry.h>
+#include <ros/ros.h>
+#include <tf/transform_broadcaster.h>
 
 /**
- * Coneverts wheel velocities to odometry message using trigonometry for calculations
- * In the ros coordinate convention x is forward, y is leftward, and z is upward relative to the robot
- * The position is published in an absolute reference frame relative to the initial position
+ * Coneverts wheel velocities to odometry message using trigonometry for
+ * calculations
+ * In the ros coordinate convention x is forward, y is leftward, and z is upward
+ * relative to the robot
+ * The position is published in an absolute reference frame relative to the
+ * initial position
  * The velocities (twist) is in a reference frame relative to the robot
 */
 void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
@@ -24,7 +26,8 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
     geometry_msgs::Vector3 linearVelocities;
     linearVelocities.z = 0;
 
-    if (abs(rightVelocity - leftVelocity) > 1e-4) {  // 1e-4 is the point where less of a difference is straight
+    // 1e-4 is the point where less of a difference is straight
+    if (abs(rightVelocity - leftVelocity) > 1e-4) {
         linearVelocities.y = velocity * sin(deltaTheta);
         linearVelocities.x = velocity * cos(deltaTheta);
     } else {
@@ -44,7 +47,8 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
     odom.twist.twist.angular = angularVelocities;
 
     // update global positions
-    // note x and y velocities are local reference frame - convert to global then increment poition
+    // note x and y velocities are local reference frame - convert to global
+    // then increment poition
     float dx = linearVelocities.x * deltaT;
     float dy = linearVelocities.y * deltaT;
     x += dx * cos(yaw) - dy * sin(yaw);
@@ -56,30 +60,30 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
     odom.pose.pose.position.y = y;
     odom.pose.pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
 
-
     // Row-major representation of the 6x6 covariance matrix
     // The orientation parameters use a fixed-axis representation.
     // In order, the parameters are:
-    // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
+    // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z
+    // axis)
     odom.twist.covariance = {
-            0.02, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4,
-            1e-4, 0.25, 1e-4, 1e-4, 1e-4, 1e-4,
-            1e-4, 1e-4,  1e6, 1e-4, 1e-4, 1e-4,
-            1e-4, 1e-4, 1e-4,  1e6, 1e-4, 1e-4,
-            1e-4, 1e-4, 1e-4, 1e-4,  1e6, 1e-4,
-            1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 0.62
+        0.02, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4,
+        1e-4, 0.25, 1e-4, 1e-4, 1e-4, 1e-4,
+        1e-4, 1e-4, 1e6,  1e-4, 1e-4, 1e-4,
+        1e-4, 1e-4, 1e-4, 1e6,  1e-4, 1e-4,
+        1e-4, 1e-4, 1e-4, 1e-4, 1e6,  1e-4,
+        1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 0.62
     };
     // the position covariance takes same form as twist covariance above
-    // this grows without bounds as error accumulates - disregard exact reading with high variance
+    // this grows without bounds as error accumulates - disregard exact reading
+    // with high variance
     odom.pose.covariance = {
-             1e6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6,
-            1e-6,  1e6, 1e-6, 1e-6, 1e-6, 1e-6,
-            1e-6, 1e-6,  1e6, 1e-6, 1e-6, 1e-6,
-            1e-6, 1e-6, 1e-6,  1e6, 1e-6, 1e-6,
-            1e-6, 1e-6, 1e-6, 1e-6,  1e6, 1e-6,
-            1e-6, 1e-6, 1e-6, 1e-6, 1e-6,  1e6
+        1e6,  1e-6, 1e-6, 1e-6, 1e-6, 1e-6,
+        1e-6, 1e6,  1e-6, 1e-6, 1e-6, 1e-6,
+        1e-6, 1e-6, 1e6,  1e-6, 1e-6, 1e-6,
+        1e-6, 1e-6, 1e-6, 1e6,  1e-6, 1e-6,
+        1e-6, 1e-6, 1e-6, 1e-6, 1e6,  1e-6,
+        1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e6
     };
-
 
     // setting sequence of message
     odom.header.seq = seq++;
@@ -91,7 +95,6 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg) {
     // set time then publish
     odom.header.stamp = ros::Time::now();
     pub.publish(odom);
-
 
     // publish the tf using the published odom message
     geometry_msgs::TransformStamped odom_tf;
@@ -124,7 +127,7 @@ Odometer::Odometer(ros::NodeHandle& nh) {
 int main(int argc, char** argv) {
     ros::init(argc, argv, "wheel_odom");
     ros::NodeHandle nh;
- 
+
     Odometer odom(nh);
 
     ROS_INFO_STREAM("wheel odometry node has started");

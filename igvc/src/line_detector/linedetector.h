@@ -5,18 +5,17 @@
 
 #define KERNAL_COUNT 8
 
-class LineDetector
-{
+class LineDetector {
 public:
-    LineDetector(ros::NodeHandle &handle, const std::string& topic);
+    LineDetector(ros::NodeHandle& handle, const std::string& topic);
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
     cv::Mat src_img, working, fin_img;
 
-    void info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
+    void info_img_callback(const sensor_msgs::ImageConstPtr& msg,
+                           const sensor_msgs::CameraInfoConstPtr& cam_info);
     void img_callback(const sensor_msgs::ImageConstPtr& msg);
-
 
     // ROS COMMUNICATION
     image_transport::ImageTransport _it;
@@ -37,4 +36,4 @@ private:
     int houghMaxLineGap;
 };
 
-#endif // LINEDETECTOR_H
+#endif  // LINEDETECTOR_H

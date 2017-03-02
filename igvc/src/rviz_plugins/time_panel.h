@@ -2,8 +2,8 @@
 #define TIME_PANEL_H
 
 #include <ros/ros.h>
-#include <QLabel>
 #include <std_msgs/UInt8.h>
+#include <QLabel>
 
 #include <rviz/panel.h>
 
@@ -11,30 +11,26 @@
 
 class QLineEdit;
 
-namespace rviz_plugins
-{
+namespace rviz_plugins {
 
-class TimePanel: public rviz::Panel
-{
-  Q_OBJECT
-  public:
-    TimePanel( QWidget* parent = 0 );
+class TimePanel : public rviz::Panel {
+    Q_OBJECT
+public:
+    TimePanel(QWidget* parent = 0);
 
-  private:
-    void timeCallback(const std_msgs::UInt8 &msg);
+private:
+    void timeCallback(const std_msgs::UInt8& msg);
 
-  public Q_SLOTS:
+public Q_SLOTS:
 
-  protected Q_SLOTS:
+protected Q_SLOTS:
 
-  protected:
+protected:
     ros::Subscriber sub;
     ros::NodeHandle nh_;
     QLabel* output_topic_editor_;
     time_t start;
-
 };
-
 }
 
-#endif // TIME_PANEL_H
+#endif  // TIME_PANEL_H

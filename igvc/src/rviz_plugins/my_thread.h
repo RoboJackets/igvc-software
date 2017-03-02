@@ -2,8 +2,7 @@
 
 #include <QProcess>
 
-class MyThread : public QThread
-{
+class MyThread : public QThread {
     Q_OBJECT
 
 protected:
@@ -13,9 +12,9 @@ public:
     void setCmd(const char*);
     void close();
 
-    public Q_SLOTS:
+public Q_SLOTS:
 
-    protected Q_SLOTS:
+protected Q_SLOTS:
 
 protected:
     char cmd[100];

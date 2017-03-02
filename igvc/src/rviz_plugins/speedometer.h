@@ -3,20 +3,19 @@
 
 #include <QWidget>
 
-class Speedometer : public QWidget
-{
+class Speedometer : public QWidget {
     Q_OBJECT
 public:
-    explicit Speedometer(QWidget *parent = 0);
+    explicit Speedometer(QWidget* parent = 0);
     void setValue(float value);
     void setMaxValue(float maxVal);
 
 protected:
-    void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent* event) override;
 
 private:
     float value;
     float maxVal;
 };
 
-#endif // SPEEDOMETER_H
+#endif  // SPEEDOMETER_H
