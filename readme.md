@@ -25,7 +25,7 @@ Documentation for our code can be generated via the rosdoc_lite tool.
 
 
 ## Building Code
-This repository should be cloned into the src directory of a catkin workspace. Use `catkin_make` in the workspace directory to build the code. Dependencies can be installed with `rosdep install igvc`. (NOTE: Be sure to `source devel/setup.sh` before referencing the igvc or igvc_msgs packages.)
+This repository should be cloned into the src directory of a catkin workspace. Use `catkin_make` in the workspace directory to build the code. Dependencies can be installed by `rosdep install packageName` on packages igvc, igvc_control, and igvc_description . (NOTE: Be sure to `source devel/setup.sh` before referencing the igvc or igvc_msgs packages.)
 
 Join the chat at https://robojackets.slack.com/
 
