@@ -60,6 +60,7 @@
   <run_depend>pluginlib</run_depend>
   <run_depend>class_loader</run_depend>
   <run_depend>image_geometry</run_depend>
+  <run_depend>gps_common</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
