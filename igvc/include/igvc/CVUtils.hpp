@@ -43,7 +43,7 @@ std::vector<std::vector<cv::Point>> MatToContours(const cv::Mat img) {
 pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_listener, std::vector<std::vector<cv::Point>> contours, image_geometry::PinholeCameraModel cam, std::string topic) {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", topic, ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_link", topic, ros::Time(0), transform);
 
     for (std::vector<cv::Point> contour : contours) {
         for (cv::Point p : contour) {
@@ -51,14 +51,14 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_liste
         }
     }
 
-    cloud->header.frame_id = "base_footprint";
+    cloud->header.frame_id = "base_link";
     return cloud;
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_listener, std::vector<std::vector<cv::Point>> contours, int height, int width, std::string topic) {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", topic, ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_link", topic, ros::Time(0), transform);
     double roll, pitch, yaw;
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
     double origin_z = transform.getOrigin().getZ();
@@ -73,7 +73,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_liste
         }
     }
 
-    cloud->header.frame_id = "base_footprint";
+    cloud->header.frame_id = "base_link";
     return cloud;
 }
 
