@@ -2,8 +2,8 @@
 #define LAUNCH_PANEL_H
 
 #include <ros/ros.h>
-#include <QLabel>
 #include <std_msgs/UInt8.h>
+#include <QLabel>
 
 #include <rviz/panel.h>
 
@@ -11,35 +11,32 @@
 
 #include "my_thread.h"
 
-#include <QPushButton>
 #include <QComboBox>
+#include <QPushButton>
 
 namespace rviz_plugins
 {
-
-class LaunchPanel: public rviz::Panel
+class LaunchPanel : public rviz::Panel
 {
   Q_OBJECT
-  public:
-    LaunchPanel( QWidget* parent = 0 );
+public:
+  LaunchPanel(QWidget* parent = 0);
 
-  private Q_SLOTS:
-    void handleButton();
+private Q_SLOTS:
+  void handleButton();
 
-  public Q_SLOTS:
+public Q_SLOTS:
 
-  protected Q_SLOTS:
+protected Q_SLOTS:
 
-  protected:
-    ros::Subscriber sub;
-    ros::NodeHandle nh_;
-    QComboBox* output_topic_editor_;
-    time_t start;
-    bool doOnce;
-    QPushButton *m_button;
-
+protected:
+  ros::Subscriber sub;
+  ros::NodeHandle nh_;
+  QComboBox* output_topic_editor_;
+  time_t start;
+  bool doOnce;
+  QPushButton* m_button;
 };
-
 }
 
-#endif // LAUNCH_PANEL_H
+#endif  // LAUNCH_PANEL_H
