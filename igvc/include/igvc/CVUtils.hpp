@@ -3,15 +3,10 @@
 
 pcl::PointXYZ PointFromPixel(const cv::Point& pixel, const tf::Transform& cameraFrameToWorldFrame, image_geometry::PinholeCameraModel cam) {
     cv::Point3d cameraRay = cam.projectPixelTo3dRay(pixel);
-    //ROS_INFO_STREAM("cameraRay: " << cameraRay);
     tf::Point worldCameraOrigin = cameraFrameToWorldFrame * tf::Vector3(0, 0, 0);
-    //ROS_INFO_STREAM("worldCameraOrigin: " << worldCameraOrigin.x() << " " << worldCameraOrigin.y() << " " << worldCameraOrigin.z());
     tf::Point worldCameraStep = cameraFrameToWorldFrame * tf::Vector3(cameraRay.x, cameraRay.y, cameraRay.z) - worldCameraOrigin;
-    //ROS_INFO_STREAM("worldCameraStep: " << worldCameraStep.x() << " " << worldCameraStep.y() << " " << worldCameraStep.z());
-    double zScale = worldCameraOrigin.z()/worldCameraStep.z();
-    //ROS_INFO_STREAM("zScale: " << zScale);
+    double zScale = -worldCameraOrigin.z()/worldCameraStep.z();
     tf::Point ret = worldCameraOrigin + zScale * worldCameraStep;
-    //ROS_INFO_STREAM("ret: " << ret.x() << " " << ret.y());
     return pcl::PointXYZ(ret.x(), ret.y(), 0);
 }
 
@@ -33,7 +28,7 @@ double toRadians(double degrees) {
 
 std::vector<std::vector<cv::Point>> MatToContours(const cv::Mat img) {
     std::vector<std::vector<cv::Point>> contours;
-    for(int r = img.rows/2; r < img.rows; r++) {
+    for(int r = 0; r < img.rows; r++) {
         std::vector<cv::Point> currentCont;
         for(int c = 0; c < img.cols; c++) {
             if(img.at<uchar>(r, c) > 0) {
