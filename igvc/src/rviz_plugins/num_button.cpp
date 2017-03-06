@@ -3,29 +3,27 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 
-#include <string>
-#include <iostream>
 #include <cstdio>
+#include <iostream>
 #include <memory>
+#include <string>
 #include <thread>
 
-#include <QStringList>
 #include <QDir>
+#include <QStringList>
 
 #include "num_button.h"
 
 namespace rviz_plugins
 {
-
-NumButton::NumButton( const QString &text, QWidget *parent, int n )
-  : QPushButton( text, parent )
+NumButton::NumButton(const QString &text, QWidget *parent, int n) : QPushButton(text, parent)
 {
-	num = n;
-    connect(this, SIGNAL (clicked()), this, SLOT (emitNum()));
+  num = n;
+  connect(this, SIGNAL(clicked()), this, SLOT(emitNum()));
 }
 
-void NumButton::emitNum() {
-	Q_EMIT numClicked(num);
+void NumButton::emitNum()
+{
+  Q_EMIT numClicked(num);
 }
-
 }
