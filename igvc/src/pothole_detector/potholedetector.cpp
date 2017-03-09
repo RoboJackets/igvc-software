@@ -34,7 +34,6 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
             redImageAverage += currentPixel[2];
         }
     }
-  }
   blueImageAverage /= (src.rows * src.cols);
   greenImageAverage /= (src.rows * src.cols);
   redImageAverage /= (src.rows * src.cols);
