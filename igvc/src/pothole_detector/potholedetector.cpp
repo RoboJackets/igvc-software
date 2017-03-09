@@ -4,14 +4,20 @@
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
-void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
+
+void PotholeDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
+    cam.fromCameraInfo(cam_info);
+    img_callback(msg);
+}
+
+void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
 
     cv::Mat orig = cv_ptr->image.clone();
     src = cv_ptr->image.clone();
 
     // Crops the image (removes sky)
-    int topCrop = src.rows / 2;// - 100;
+    int topCrop = 2 * src.rows / 3;
     cv::Rect roiNoSky(0, topCrop, src.cols, src.rows - topCrop);
     src = src(roiNoSky);
 
@@ -204,8 +210,21 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg, const 
         }
     }
 
+    // Re-fill sky area of image with black
+    cv::Mat black = cv::Mat::zeros(cv::Size(src_gray.cols, topCrop), src_gray.type());
+    cv::vconcat(black, src_gray, src_gray);
+
+    // Shift contour coordinates down to account for black sky space
+    for (std::vector<cv::Point> &cont : allContours) {
+        for (cv::Point &p : cont) {
+            p.y += topCrop;
+        }
+    }
+
+
+
     // Convert the contours to a pointcloud
-    cloud = toPointCloud(tf_listener, allContours, orig.rows, orig.cols, topic);
+    cloud = toPointCloud(tf_listener, allContours, cam, topic);
 
     cv_bridge::CvImage out_msg;
     out_msg.header   = msg->header;
@@ -224,7 +243,7 @@ PotholeDetector::PotholeDetector(ros::NodeHandle &handle, const std::string& top
       _it(handle),
       tf_listener(handle),
       topic(topic) {
-    _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &PotholeDetector::img_callback, this);
+    _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &PotholeDetector::info_img_callback, this);
     _pothole_filt_img = _it.advertise(topic + "/pothole_filt_img", 1);
     _pothole_thres = _it.advertise(topic + "/pothole_thres", 1);
     _pothole_cloud = handle.advertise<PCLCloud>(topic + "/pothole_cloud", 100);
