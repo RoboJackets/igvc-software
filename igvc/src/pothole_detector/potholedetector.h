@@ -8,8 +8,8 @@
 class PotholeDetector
 {
 public:
-  PotholeDetector(ros::NodeHandle& handle, const std::string& topic);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+    PotholeDetector(ros::NodeHandle &handle, const std::string& topic);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
     void info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
@@ -44,4 +44,4 @@ private:
     int greenAdaptiveThreshold;
     int redAdaptiveThreshold;
 };
-#endif  // POTHOLEDETECTOR_H
+#endif // POTHOLEDETECTOR_H
