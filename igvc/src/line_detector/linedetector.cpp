@@ -11,7 +11,6 @@ void LineDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg,
   img_callback(msg);
 }
 
-<<<<<<< HEAD
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv_ptr = cv_bridge::toCvCopy(msg, "");
     src_img = cv_ptr->image;
