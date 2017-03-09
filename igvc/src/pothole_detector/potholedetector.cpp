@@ -4,32 +4,35 @@
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
-void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
-                                   const sensor_msgs::CameraInfoConstPtr& cam_info)
-{
-  cv_ptr = cv_bridge::toCvCopy(msg, "");
 
-  cv::Mat orig = cv_ptr->image.clone();
-  src = cv_ptr->image.clone();
+void PotholeDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
+    cam.fromCameraInfo(cam_info);
+    img_callback(msg);
+}
 
-  // Crops the image (removes sky)
-  int topCrop = src.rows / 2;  // - 100;
-  cv::Rect roiNoSky(0, topCrop, src.cols, src.rows - topCrop);
-  src = src(roiNoSky);
+void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
+    cv_ptr = cv_bridge::toCvCopy(msg, "");
 
-  // Determine the average of blue, green, and red pixels in the entire picture in order to do adaptive thresholding.
-  // Therefore, we can account for sunny / cloudy days.
-  double blueImageAverage = 0;
-  double greenImageAverage = 0;
-  double redImageAverage = 0;
-  for (int i = 0; i <= src.cols; i++)
-  {
-    for (int j = 0; j <= src.rows; j++)
-    {
-      cv::Vec3b currentPixel = src.at<cv::Vec3b>(j, i);
-      blueImageAverage += currentPixel[0];
-      greenImageAverage += currentPixel[1];
-      redImageAverage += currentPixel[2];
+    cv::Mat orig = cv_ptr->image.clone();
+    src = cv_ptr->image.clone();
+
+    // Crops the image (removes sky)
+    int topCrop = 2 * src.rows / 3;
+    cv::Rect roiNoSky(0, topCrop, src.cols, src.rows - topCrop);
+    src = src(roiNoSky);
+
+    // Determine the average of blue, green, and red pixels in the entire picture in order to do adaptive thresholding.
+    // Therefore, we can account for sunny / cloudy days.
+    double blueImageAverage = 0;
+    double greenImageAverage = 0;
+    double redImageAverage = 0;
+    for (int i = 0; i <= src.cols; i++) {
+        for (int j = 0; j <= src.rows; j++) {
+            cv::Vec3b currentPixel = src.at<cv::Vec3b>(j, i);
+            blueImageAverage += currentPixel[0];
+            greenImageAverage += currentPixel[1];
+            redImageAverage += currentPixel[2];
+        }
     }
   }
   blueImageAverage /= (src.rows * src.cols);
@@ -229,15 +232,21 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
       }
     }
 
-    // Push all of the remaining good points to the main vector of contours
-    for (std::vector<cv::Point> goodContour : contours)
-    {
-      allContours.push_back(goodContour);
-    }
-  }
+    // Re-fill sky area of image with black
+    cv::Mat black = cv::Mat::zeros(cv::Size(src_gray.cols, topCrop), src_gray.type());
+    cv::vconcat(black, src_gray, src_gray);
 
-  // Convert the contours to a pointcloud
-  cloud = toPointCloud(tf_listener, allContours, orig.rows, orig.cols, topic);
+    // Shift contour coordinates down to account for black sky space
+    for (std::vector<cv::Point> &cont : allContours) {
+        for (cv::Point &p : cont) {
+            p.y += topCrop;
+        }
+    }
+
+
+
+    // Convert the contours to a pointcloud
+    cloud = toPointCloud(tf_listener, allContours, cam, topic);
 
   cv_bridge::CvImage out_msg;
   out_msg.header = msg->header;
@@ -251,20 +260,22 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
   _pothole_cloud.publish(cloud);
 }
 
-PotholeDetector::PotholeDetector(ros::NodeHandle& handle, const std::string& topic)
-  : gaussian_size(7), _it(handle), tf_listener(handle), topic(topic)
-{
-  _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &PotholeDetector::img_callback, this);
-  _pothole_filt_img = _it.advertise(topic + "/pothole_filt_img", 1);
-  _pothole_thres = _it.advertise(topic + "/pothole_thres", 1);
-  _pothole_cloud = handle.advertise<PCLCloud>(topic + "/pothole_cloud", 100);
+PotholeDetector::PotholeDetector(ros::NodeHandle &handle, const std::string& topic)
+    : gaussian_size(7),
+      _it(handle),
+      tf_listener(handle),
+      topic(topic) {
+    _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &PotholeDetector::info_img_callback, this);
+    _pothole_filt_img = _it.advertise(topic + "/pothole_filt_img", 1);
+    _pothole_thres = _it.advertise(topic + "/pothole_thres", 1);
+    _pothole_cloud = handle.advertise<PCLCloud>(topic + "/pothole_cloud", 100);
 
-  // Import tuning parameters from yaml file (file specified in launch file)
-  handle.getParam(ros::this_node::getName() + "/config/pothole/minRadius", minRadius);
-  handle.getParam(ros::this_node::getName() + "/config/pothole/maxRadius", maxRadius);
-  handle.getParam(ros::this_node::getName() + "/config/pothole/whiteSampleRadius", whiteSampleRadius);
-  handle.getParam(ros::this_node::getName() + "/config/pothole/contourSizeThreshold", contourSizeThreshold);
-  handle.getParam(ros::this_node::getName() + "/config/pothole/blueAdaptiveThreshold", blueAdaptiveThreshold);
-  handle.getParam(ros::this_node::getName() + "/config/pothole/greenAdaptiveThreshold", greenAdaptiveThreshold);
-  handle.getParam(ros::this_node::getName() + "/config/pothole/redAdaptiveThreshold", redAdaptiveThreshold);
+    // Import tuning parameters from yaml file (file specified in launch file)
+    handle.getParam(ros::this_node::getName() + "/config/pothole/minRadius", minRadius);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/maxRadius", maxRadius);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/whiteSampleRadius", whiteSampleRadius);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/contourSizeThreshold", contourSizeThreshold);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/blueAdaptiveThreshold", blueAdaptiveThreshold);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/greenAdaptiveThreshold", greenAdaptiveThreshold);
+    handle.getParam(ros::this_node::getName() + "/config/pothole/redAdaptiveThreshold", redAdaptiveThreshold);
 }
