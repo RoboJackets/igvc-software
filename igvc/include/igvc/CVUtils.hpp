@@ -65,28 +65,4 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_liste
     return cloud;
 }
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_listener, std::vector<std::vector<cv::Point>> contours, int height, int width, std::string topic) {
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    tf::StampedTransform transform;
-    std::string topicCopy = topic;
-    replace(topicCopy, "usb", "optical");
-    tf_listener.lookupTransform("/base_footprint", topicCopy, ros::Time(0), transform);
-    double roll, pitch, yaw;
-    tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
-    double origin_z = transform.getOrigin().getZ();
-    double origin_y = transform.getOrigin().getY();
-    double HFOV = toRadians(66.0);
-    double VFOV = toRadians(47.6);
-    pitch = -roll;
-
-    for (std::vector<cv::Point> contour : contours) {
-        for (cv::Point p : contour) {
-            cloud->points.push_back(PointFromPixelNoCam(p, height, width, HFOV, VFOV, origin_z, origin_y, pitch));
-        }
-    }
-
-    cloud->header.frame_id = "base_footprint";
-    return cloud;
-}
-
 #endif // CVUTILS_H
