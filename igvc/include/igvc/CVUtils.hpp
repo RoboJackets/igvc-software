@@ -40,10 +40,20 @@ std::vector<std::vector<cv::Point>> MatToContours(const cv::Mat img) {
     return contours;
 }
 
+bool replace(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = str.find(from);
+    if(start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
+}
+
 pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_listener, std::vector<std::vector<cv::Point>> contours, image_geometry::PinholeCameraModel cam, std::string topic) {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", "/optical_cam_center", ros::Time(0), transform);
+    std::string topicCopy = topic;
+    replace(topicCopy, "usb", "optical");
+    tf_listener.lookupTransform("/base_footprint", topicCopy, ros::Time(0), transform);
 
     for (std::vector<cv::Point> contour : contours) {
         for (cv::Point p : contour) {
@@ -58,7 +68,9 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_liste
 pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_listener, std::vector<std::vector<cv::Point>> contours, int height, int width, std::string topic) {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
     tf::StampedTransform transform;
-    tf_listener.lookupTransform("/base_footprint", "/optical_cam_center", ros::Time(0), transform);
+    std::string topicCopy = topic;
+    replace(topicCopy, "usb", "optical");
+    tf_listener.lookupTransform("/base_footprint", topicCopy, ros::Time(0), transform);
     double roll, pitch, yaw;
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
     double origin_z = transform.getOrigin().getZ();
