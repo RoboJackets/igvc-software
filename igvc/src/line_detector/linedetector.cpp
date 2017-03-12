@@ -43,13 +43,8 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     // Re-fill sky area of image with black
     cv::Mat black = cv::Mat::zeros(cv::Size(src_img.cols, topCrop), src_img.type());
     cv::vconcat(black, fin_img, fin_img);
-
-
-    if (hasInfo) {
-        cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
-    } else {
-        cloud = toPointCloud(tf_listener, MatToContours(fin_img), fin_img.size().height, fin_img.size().width, topic);
-    }
+    
+    cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
     _line_cloud.publish(cloud);
     
     cv::cvtColor(fin_img, fin_img, CV_GRAY2BGR);    
@@ -61,20 +56,14 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 LineDetector::LineDetector(ros::NodeHandle& handle, const std::string& topic)
   : _it(handle), topic(topic), tf_listener(handle)
 {
-  if (!hasInfo)
-  {
-    _src_img = _it.subscribe(topic + "/image_raw", 1, &LineDetector::img_callback, this);
-  }
-  else
-  {
-    _src_img_info = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::info_img_callback, this);
-  }
-  _filt_img = _it.advertise(topic + "/filt_img", 1);
-  _line_cloud = handle.advertise<PCLCloud>(topic + "/line_cloud", 100);
 
-  handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh1", cannyThresh1);
-  handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh2", cannyThresh2);
-  handle.getParam(ros::this_node::getName() + "/config/line/houghThreshold", houghThreshold);
-  handle.getParam(ros::this_node::getName() + "/config/line/houghMinLineLength", houghMinLineLength);
-  handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);
+    _src_img_info = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::info_img_callback, this);
+    _filt_img = _it.advertise(topic + "/filt_img", 1);
+    _line_cloud = handle.advertise<PCLCloud>(topic + "/line_cloud", 100);
+
+    handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh1", cannyThresh1);
+    handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh2", cannyThresh2);
+    handle.getParam(ros::this_node::getName() + "/config/line/houghThreshold", houghThreshold);
+    handle.getParam(ros::this_node::getName() + "/config/line/houghMinLineLength", houghMinLineLength);
+    handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);
 }
