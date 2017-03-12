@@ -17,7 +17,13 @@ int main(int argc, char** argv)
 
   ROS_INFO_STREAM("Line Detector started.");
 
-  ros::spin();
+  // Rate is number of refreshes per second
+  ros::Rate rate(5.);
+  while (ros::ok())
+  {
+    ros::spinOnce();
+    rate.sleep();
+  }
 
   return 0;
 }
