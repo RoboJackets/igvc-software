@@ -54,12 +54,14 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 
     // Detect circles on the image
     std::vector<cv::Vec3f> circles;
-    HoughCircles(src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows / 8, 50, 10, minRadius, maxRadius);
+    //cvHoughCircles(CvArr* image, void* circle_storage, int method, double dp, double min_dist, double param1=100, double param2=100, int min_radius=0, int max_radius=0 )
+    HoughCircles(src_gray, circles, CV_HOUGH_GRADIENT, 1, orig.rows / 8, 50, 10, minRadius, maxRadius);
 
     // All the contours that will be published to the pointcloud
     std::vector<std::vector<cv::Point>> allContours;
     // Traverse through all the circles, and do more detection for each one
     for(size_t i = 0; i < circles.size(); i++ ) {
+
         cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 
         // If the circle is too close to the top / bottom edges, filter
@@ -92,6 +94,10 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
         if (yHeight + yStart > src_gray.rows) {
             yHeight = src_gray.rows - yStart;
         }
+
+
+        circle(src_gray, center, circles[i][2], 255, 5);
+
 
         // Create the rectangle and an src_gray with only that region of interest
         cv::Rect roiAroundCircle(xStart, yStart, xWidth, yHeight);
@@ -163,6 +169,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                         minY = y;
                     }
                 }
+                int centerY = (minY + maxY) / 2;
 
                 // Average rgb values in a line above and below the contour
                 int blueAbove = 0;
@@ -195,6 +202,41 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                 // Aka if there is orange above and below the contour, filter it!
                 if (redAbove > greenAbove + 50 && redAbove > blueAbove + 50
                         && redBelow > greenBelow + 50 && redBelow > blueBelow + 50) {
+                    contours.erase(it);
+                    --it;
+                }
+
+                // Average rgb values in a line left and right of the contour
+                int blueLeft = 0;
+                int greenLeft = 0;
+                int redLeft = 0;
+                int blueRight = 0;
+                int greenRight = 0;
+                int redRight = 0;
+                cv::Vec3b currentPixelLR;
+                for (int j = 5; j < 36; j++) {
+                    currentPixelLR = src.at<cv::Vec3b>(centerY, minX - j);
+                    blueLeft += currentPixelLR[0];
+                    greenLeft += currentPixelLR[1];
+                    redLeft += currentPixelLR[2];
+
+                    currentPixelLR = src.at<cv::Vec3b>(centerY, maxX + j);
+                    blueRight += currentPixelLR[0];
+                    greenRight += currentPixelLR[1];
+                    redRight += currentPixelLR[2];
+                }
+                blueLeft /= 30;
+                greenLeft /= 30;
+                redLeft /= 30;
+                blueRight /= 30;
+                greenRight /= 30;
+                redRight /= 30;
+
+                // We now have the average color of the line above and below the contour.
+                // Use these averages to determine if the contour is a white strip on the traffic barrel.
+                // Aka if there is orange above and below the contour, filter it!
+                if (greenLeft > redLeft + 50 && greenLeft > blueLeft + 50
+                        && greenRight > redRight + 50 && greenRight > blueRight + 50) {
                     contours.erase(it);
                     --it;
                 }
