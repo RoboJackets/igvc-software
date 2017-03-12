@@ -4,9 +4,11 @@
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
-void LineDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info) {
-    cam.fromCameraInfo(cam_info);
-    img_callback(msg);
+void LineDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg,
+                                     const sensor_msgs::CameraInfoConstPtr& cam_info)
+{
+  cam.fromCameraInfo(cam_info);
+  img_callback(msg);
 }
 
 void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
@@ -51,16 +53,13 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     _filt_img.publish(cv_ptr->toImageMsg());
 }
 
-LineDetector::LineDetector(ros::NodeHandle &handle, const std::string& topic)
-      : _it(handle)
-      , topic(topic)
-      , tf_listener(handle)
+LineDetector::LineDetector(ros::NodeHandle& handle, const std::string& topic)
+  : _it(handle), topic(topic), tf_listener(handle)
 {
 
     _src_img_info = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::info_img_callback, this);
     _filt_img = _it.advertise(topic + "/filt_img", 1);
     _line_cloud = handle.advertise<PCLCloud>(topic + "/line_cloud", 100);
-
 
     handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh1", cannyThresh1);
     handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh2", cannyThresh2);
@@ -68,5 +67,3 @@ LineDetector::LineDetector(ros::NodeHandle &handle, const std::string& topic)
     handle.getParam(ros::this_node::getName() + "/config/line/houghMinLineLength", houghMinLineLength);
     handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);
 }
-
-

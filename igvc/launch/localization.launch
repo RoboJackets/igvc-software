@@ -7,6 +7,8 @@
     -->
 <launch>
 
+    <include file="$(find igvc)/launch/wheel_odometry.launch" />
+
     <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true" output="screen">
 
       <param name="frequency" value="30"/>
@@ -36,9 +38,6 @@
 
       <!-- if true uses yaw angle from the input odom source -->
       <param name="use_odometry_yaw" value="false"/>
-
-      <!-- setting a datum for local reference frame -->
-      <rosparam param="datum">[0, 0, 0.0, map, base_link]</rosparam>
 
       <!-- input remapping -->
       <remap from="/imu/data" to="/imu"/>
