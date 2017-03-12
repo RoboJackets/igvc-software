@@ -26,7 +26,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input) {
         pcl::PointCloud<pcl::PointXYZ> Final;
         icp.align(Final);
         *global_map += Final;
-    } else {
+    } else if (!input->points.empty()) {
         *global_map += *input;
         firstFrame = false;
     }
