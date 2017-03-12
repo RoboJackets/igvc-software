@@ -18,7 +18,12 @@ int main(int argc, char** argv)
   ROS_INFO_STREAM("Line Detector started.");
 
   // Rate is number of refreshes per second
-  ros::Rate rate(5.);
+  float freq = 5;
+  if (pNh.hasParam("freq"))
+  {
+    pNh.getParam("freq", freq);
+  }
+  ros::Rate rate(freq);
   while (ros::ok())
   {
     ros::spinOnce();
