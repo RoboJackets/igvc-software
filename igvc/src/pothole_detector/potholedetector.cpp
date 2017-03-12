@@ -44,7 +44,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv::Mat mean;
     cv::Mat stddev;
     meanStdDev(src_gray, mean, stddev);
-    double thresh = mean.at<double>(0,0);
+    double thresh = mean.at<double>(0,0) + (stddev.at<double>(0,0) * 1.5);
     if(thresh > 254) {
         thresh = 254;
     }
@@ -125,6 +125,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
         // Our adaptive thresholding comes into play here.
         // Filter out the circle if the average color of the image is not an offset less than the average color of the center circle sample.
         if (bluePotholeAverage - blueImageAverage < blueAdaptiveThreshold || greenPotholeAverage - greenImageAverage < greenAdaptiveThreshold || redPotholeAverage - redImageAverage < redAdaptiveThreshold) {
+            ROS_INFO_STREAM("Removing due to adaptive threshold");
             continue;
         }
 
@@ -202,6 +203,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                 // Aka if there is orange above and below the contour, filter it!
                 if (redAbove > greenAbove + 50 && redAbove > blueAbove + 50
                         && redBelow > greenBelow + 50 && redBelow > blueBelow + 50) {
+                    ROS_INFO_STREAM("Removing due to vertical elimination");
                     contours.erase(it);
                     --it;
                 }
@@ -215,12 +217,12 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                 int redRight = 0;
                 cv::Vec3b currentPixelLR;
                 for (int j = 5; j < 36; j++) {
-                    currentPixelLR = src.at<cv::Vec3b>(centerY, minX - j);
+                    currentPixelLR = src.at<cv::Vec3b>(centerY, centerX - j);
                     blueLeft += currentPixelLR[0];
                     greenLeft += currentPixelLR[1];
                     redLeft += currentPixelLR[2];
 
-                    currentPixelLR = src.at<cv::Vec3b>(centerY, maxX + j);
+                    currentPixelLR = src.at<cv::Vec3b>(centerY, centerY + j);
                     blueRight += currentPixelLR[0];
                     greenRight += currentPixelLR[1];
                     redRight += currentPixelLR[2];
@@ -232,11 +234,12 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                 greenRight /= 30;
                 redRight /= 30;
 
-                // We now have the average color of the line above and below the contour.
-                // Use these averages to determine if the contour is a white strip on the traffic barrel.
-                // Aka if there is orange above and below the contour, filter it!
+                // We now have the average color of the line to the left and the right of the contour.
+                // Use these averages to determine if the contour is a line rather than a pothole.
+                // Aka if there is green to the left and the right of the contour, filter it!
                 if (greenLeft > redLeft + 50 && greenLeft > blueLeft + 50
                         && greenRight > redRight + 50 && greenRight > blueRight + 50) {
+                    ROS_INFO_STREAM("Removing due to horizontal elimination");
                     contours.erase(it);
                     --it;
                 }
