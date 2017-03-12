@@ -17,6 +17,7 @@ private:
   void info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
   void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
+
   // ROS COMMUNICATION
   image_transport::ImageTransport _it;
   std::string topic;
@@ -26,7 +27,6 @@ private:
   ros::Publisher _line_cloud;
   tf::TransformListener tf_listener;
   image_geometry::PinholeCameraModel cam;
-  bool hasInfo = true;
 
   // Tuning parameters loaded from YAML file (file specified in launch file)
   int cannyThresh1;

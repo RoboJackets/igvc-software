@@ -63,7 +63,8 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
         cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 
         // If the circle is too close to the top / bottom edges, filter
-        if (center.y <= 100 || center.y >= src_gray.rows - 10) {
+        if (center.y <= 100 || center.y >= src_gray.rows - 100) {
+            // Note: bounds must be greater than a gap of 36, else invalid memory reference 
             continue;
         }
 
@@ -151,7 +152,6 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
 
                 // Determine the center x
                 int centerX = (minX + maxX) / 2;
-
                 // Find top and bottom points that correspond to the centerX (so get the y values)
                 for (cv::Point p : *it) {
                     int x = p.x;
@@ -163,6 +163,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
                         minY = y;
                     }
                 }
+
 
                 // Average rgb values in a line above and below the contour
                 int blueAbove = 0;
