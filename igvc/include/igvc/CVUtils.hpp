@@ -10,20 +10,23 @@ pcl::PointXYZ PointFromPixel(const cv::Point& pixel, const tf::Transform& camera
     return pcl::PointXYZ(ret.x(), ret.y(), 0);
 }
 
-pcl::PointXYZ PointFromPixelNoCam(const cv::Point& p, int height, int width, double HFOV, double VFOV, double origin_z, double origin_y, double pitch) {
-    int xP = p.x;
-    int yP = p.y + (height / 2 - 100);
+pcl::PointXYZ PointFromPixelNoCam(const cv::Point& p, int height, int width, double HFOV, double VFOV, double origin_z,
+                                  double origin_y, double pitch)
+{
+  int xP = p.x;
+  int yP = p.y + (height / 2 - 100);
 
-    double pitch_offset = ((float) (yP - height / 2) / height) * VFOV;
-    double y = origin_z /tan(pitch + pitch_offset) + origin_y;
+  double pitch_offset = ((float)(yP - height / 2) / height) * VFOV;
+  double y = origin_z / tan(pitch + pitch_offset) + origin_y;
 
-    double theta = ((float) (xP - width / 2) / width) * HFOV;
-    double x = y * tan(theta);
-    return pcl::PointXYZ(x, y, 0);
+  double theta = ((float)(xP - width / 2) / width) * HFOV;
+  double x = y * tan(theta);
+  return pcl::PointXYZ(x, y, 0);
 }
 
-double toRadians(double degrees) {
-    return degrees / 180.0 * M_PI;
+double toRadians(double degrees)
+{
+  return degrees / 180.0 * M_PI;
 }
 
 std::vector<std::vector<cv::Point>> MatToContours(const cv::Mat img) {
@@ -35,9 +38,9 @@ std::vector<std::vector<cv::Point>> MatToContours(const cv::Mat img) {
                 currentCont.push_back(cv::Point(c, r));
             }
         }
-        contours.push_back(currentCont);
-    }
-    return contours;
+    contours.push_back(currentCont);
+  }
+  return contours;
 }
 
 bool replace(std::string& str, const std::string& from, const std::string& to) {
@@ -53,15 +56,17 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_liste
     tf::StampedTransform transform;
     std::string topicCopy = topic;
     replace(topicCopy, "usb", "optical");
-    tf_listener.lookupTransform("/base_footprint", topicCopy, ros::Time(0), transform);
+    tf_listener.lookupTransform("/base_link", topicCopy, ros::Time(0), transform);
 
-    for (std::vector<cv::Point> contour : contours) {
-        for (cv::Point p : contour) {
-            cloud->points.push_back(PointFromPixel(p, transform, cam));
-        }
+  for (std::vector<cv::Point> contour : contours)
+  {
+    for (cv::Point p : contour)
+    {
+      cloud->points.push_back(PointFromPixel(p, transform, cam));
     }
+  }
 
-    cloud->header.frame_id = "base_footprint";
+    cloud->header.frame_id = "base_link";
     return cloud;
 }
 
