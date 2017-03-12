@@ -9,7 +9,6 @@ class LineDetector
 {
 public:
   LineDetector(ros::NodeHandle& handle, const std::string& topic);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
   cv::Mat src_img, working, fin_img;
