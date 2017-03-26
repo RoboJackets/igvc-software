@@ -15,18 +15,20 @@ ros::Publisher _pointcloud_pub;
 tf::TransformListener *tf_listener;
 std::set<std::string> frames_seen;
 bool firstFrame;
+double maxCorrDist;
+int maxIter;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input) {
     if (!firstFrame) {
         pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
-        icp.setMaxCorrespondenceDistance(0.5); // tunable parameters - figure out later
-        icp.setMaximumIterations(30);        //
+        icp.setMaxCorrespondenceDistance(maxCorrDist); // tunable parameters - figure out later
+        icp.setMaximumIterations(maxIter);        //
         icp.setInputSource(input);
         icp.setInputTarget(global_map);
         pcl::PointCloud<pcl::PointXYZ> Final;
         icp.align(Final);
         *global_map += Final;
-    } else {
+    } else if (!input->points.empty()) {
         *global_map += *input;
         firstFrame = false;
     }
@@ -59,6 +61,7 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "global_mapper");
 
     ros::NodeHandle nh;
+
     tf_listener = new tf::TransformListener();
 
     std::string topics;
@@ -71,7 +74,8 @@ int main(int argc, char** argv)
         ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
 
     pNh.getParam("topics", topics);
-
+    pNh.getParam("max_correspondence_distance", maxCorrDist);
+    pNh.getParam("max_iterations", maxIter);
     if(topics.empty())
         ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
 
