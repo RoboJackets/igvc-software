@@ -1,13 +1,13 @@
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <sensor_msgs/NavSatFix.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <tf/transform_listener.h>
 #include <fstream>
 #include <igvc/StringUtils.hpp>
 #include <mutex>
 #include <string>
-#include <tf/transform_listener.h>
 #include "conversion.h"
 
 ros::Publisher waypoint_pub;

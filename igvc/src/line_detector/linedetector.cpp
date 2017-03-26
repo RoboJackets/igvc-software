@@ -11,65 +11,66 @@ void LineDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg,
   img_callback(msg);
 }
 
-void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
-    cv_ptr = cv_bridge::toCvCopy(msg, "");
-    src_img = cv_ptr->image;
+void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
+{
+  cv_ptr = cv_bridge::toCvCopy(msg, "");
+  src_img = cv_ptr->image;
 
-    // Convert image to grayscale
-    cv::cvtColor(src_img, src_img, CV_BGR2GRAY);
+  // Convert image to grayscale
+  cv::cvtColor(src_img, src_img, CV_BGR2GRAY);
 
-    // Crops the image (removes sky)
-    int topCrop = 2 * src_img.rows / 3;
-    cv::Rect roiNoSky(0, topCrop, src_img.cols, src_img.rows - topCrop);
-    src_img = src_img(roiNoSky);
+  // Crops the image (removes sky)
+  int topCrop = 2 * src_img.rows / 3;
+  cv::Rect roiNoSky(0, topCrop, src_img.cols, src_img.rows - topCrop);
+  src_img = src_img(roiNoSky);
 
-    // Create blank canvas
-    fin_img = cv::Mat::zeros(src_img.size(), src_img.type());
+  // Create blank canvas
+  fin_img = cv::Mat::zeros(src_img.size(), src_img.type());
 
-    // Gaussian Blur
-    cv::GaussianBlur(src_img, working, cv::Size(0,0), 2.0);
+  // Gaussian Blur
+  cv::GaussianBlur(src_img, working, cv::Size(0, 0), 2.0);
 
-    // Detect edges
-    cv::Canny(working, working, cannyThresh1, cannyThresh2, 3);
+  // Detect edges
+  cv::Canny(working, working, cannyThresh1, cannyThresh2, 3);
 
-    // Find lines
-    std::vector<cv::Vec4i> lines;
-    cv::HoughLinesP(working, lines, 1.0, CV_PI/180, houghThreshold, houghMinLineLength, houghMaxLineGap);
-    for (size_t i = 0; i < lines.size(); ++i) {
-        cv::line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), cv::Scalar(255, 255, 255), 3, 8);
-    }
+  // Find lines
+  std::vector<cv::Vec4i> lines;
+  cv::HoughLinesP(working, lines, 1.0, CV_PI / 180, houghThreshold, houghMinLineLength, houghMaxLineGap);
+  for (size_t i = 0; i < lines.size(); ++i)
+  {
+    cv::line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]),
+             cv::Scalar(255, 255, 255), 3, 8);
+  }
 
+  // Re-fill sky area of image with black
+  cv::Mat black = cv::Mat::zeros(cv::Size(src_img.cols, topCrop), src_img.type());
+  cv::vconcat(black, fin_img, fin_img);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
-    // Re-fill sky area of image with black
-    cv::Mat black = cv::Mat::zeros(cv::Size(src_img.cols, topCrop), src_img.type());
-    cv::vconcat(black, fin_img, fin_img);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
-    
-    cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
+  cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
 
-    // Limit how far the points are plotted in the cloud
-    capPointCloud(cloud, maxDistance);
-    
-    _line_cloud.publish(cloud);
-    
-    cv::cvtColor(fin_img, fin_img, CV_GRAY2BGR);    
+  // Limit how far the points are plotted in the cloud
+  capPointCloud(cloud, maxDistance);
 
-    cv_ptr->image = fin_img;
-    _filt_img.publish(cv_ptr->toImageMsg());
+  _line_cloud.publish(cloud);
+
+  cv::cvtColor(fin_img, fin_img, CV_GRAY2BGR);
+
+  cv_ptr->image = fin_img;
+  _filt_img.publish(cv_ptr->toImageMsg());
 }
 
 LineDetector::LineDetector(ros::NodeHandle& handle, const std::string& topic)
   : _it(handle), topic(topic), tf_listener(handle)
 {
+  _src_img_info = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::info_img_callback, this);
+  _filt_img = _it.advertise(topic + "/filt_img", 1);
+  _line_cloud = handle.advertise<PCLCloud>(topic + "/line_cloud", 100);
 
-    _src_img_info = _it.subscribeCamera(topic + "/image_raw", 1, &LineDetector::info_img_callback, this);
-    _filt_img = _it.advertise(topic + "/filt_img", 1);
-    _line_cloud = handle.advertise<PCLCloud>(topic + "/line_cloud", 100);
-
-    handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh1", cannyThresh1);
-    handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh2", cannyThresh2);
-    handle.getParam(ros::this_node::getName() + "/config/line/houghThreshold", houghThreshold);
-    handle.getParam(ros::this_node::getName() + "/config/line/houghMinLineLength", houghMinLineLength);
-    handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);
-    handle.getParam(ros::this_node::getName() + "/config/line/maxDistance", maxDistance);
+  handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh1", cannyThresh1);
+  handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh2", cannyThresh2);
+  handle.getParam(ros::this_node::getName() + "/config/line/houghThreshold", houghThreshold);
+  handle.getParam(ros::this_node::getName() + "/config/line/houghMinLineLength", houghMinLineLength);
+  handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);
+  handle.getParam(ros::this_node::getName() + "/config/line/maxDistance", maxDistance);
 }

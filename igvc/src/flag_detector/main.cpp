@@ -3,13 +3,13 @@
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "flagdetector");
+  ros::init(argc, argv, "flagdetector");
 
-    ros::NodeHandle nh;
+  ros::NodeHandle nh;
 
-	FlagDetector det{nh};
+  FlagDetector det{ nh };
 
-    ros::spin();
+  ros::spin();
 
-    return 0;
+  return 0;
 }
