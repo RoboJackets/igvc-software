@@ -190,5 +190,9 @@ add_subdirectory(src/pothole_detector)
 add_subdirectory(src/wheel_odometer)
 #add_subdirectory(src/system_stats)
 add_subdirectory(src/imu)
+<<<<<<< HEAD
 add_subdirectory(src/global_mapper)
 #add_subdirectory(src/scan_to_image)
+=======
+add_subdirectory(src/flag_detector)
+>>>>>>> master
