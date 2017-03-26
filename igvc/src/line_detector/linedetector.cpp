@@ -45,6 +45,10 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv::vconcat(black, fin_img, fin_img);
     
     cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
+
+    // Limit how far the points are plotted in the cloud
+    capPointCloud(cloud, maxDistance);
+    
     _line_cloud.publish(cloud);
     
     cv::cvtColor(fin_img, fin_img, CV_GRAY2BGR);    
@@ -66,4 +70,5 @@ LineDetector::LineDetector(ros::NodeHandle& handle, const std::string& topic)
     handle.getParam(ros::this_node::getName() + "/config/line/houghThreshold", houghThreshold);
     handle.getParam(ros::this_node::getName() + "/config/line/houghMinLineLength", houghMinLineLength);
     handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);
+    handle.getParam(ros::this_node::getName() + "/config/line/maxDistance", maxDistance);
 }

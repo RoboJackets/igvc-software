@@ -24,11 +24,6 @@ pcl::PointXYZ PointFromPixelNoCam(const cv::Point& p, int height, int width, dou
   return pcl::PointXYZ(x, y, 0);
 }
 
-double toRadians(double degrees)
-{
-  return degrees / 180.0 * M_PI;
-}
-
 std::vector<std::vector<cv::Point>> MatToContours(const cv::Mat img) {
     std::vector<std::vector<cv::Point>> contours;
     for(int r = 0; r < img.rows; r++) {
@@ -49,6 +44,17 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
         return false;
     str.replace(start_pos, from.length(), to);
     return true;
+}
+
+void capPointCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud, int cap) {
+  pcl::PointCloud<pcl::PointXYZ>::iterator it;
+  for (it = cloud->begin(); it < cloud->end();) {
+    if (it->x > cap) {
+      it = cloud->erase(it);
+    } else {
+      it++;
+    }
+  }
 }
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener &tf_listener, std::vector<std::vector<cv::Point>> contours, image_geometry::PinholeCameraModel cam, std::string topic) {
