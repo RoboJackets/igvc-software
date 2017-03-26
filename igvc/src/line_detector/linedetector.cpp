@@ -43,6 +43,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     // Re-fill sky area of image with black
     cv::Mat black = cv::Mat::zeros(cv::Size(src_img.cols, topCrop), src_img.type());
     cv::vconcat(black, fin_img, fin_img);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
     
     cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
 
