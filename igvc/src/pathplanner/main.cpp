@@ -1,6 +1,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <igvc_msgs/action_path.h>
+#include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -32,13 +33,13 @@ void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
   *search_problem.Map = *msg;
 }
 
-void position_callback(const geometry_msgs::PoseStampedConstPtr& msg)
+void position_callback(const nav_msgs::OdometryConstPtr& msg)
 {
   std::lock_guard<std::mutex> lock(planning_mutex);
-  search_problem.Start.x = msg->pose.position.x;
-  search_problem.Start.y = msg->pose.position.y;
+  search_problem.Start.x = msg->pose.pose.position.x;
+  search_problem.Start.y = msg->pose.pose.position.y;
   tf::Quaternion q;
-  tf::quaternionMsgToTF(msg->pose.orientation, q);
+  tf::quaternionMsgToTF(msg->pose.pose.orientation, q);
   search_problem.Start.theta = -tf::getYaw(q);
 }
 
@@ -73,7 +74,7 @@ int main(int argc, char** argv)
 
   ros::Subscriber map_sub = nh.subscribe("/map", 1, map_callback);
 
-  ros::Subscriber pose_sub = nh.subscribe("/odom_combined", 1, position_callback);
+  ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, position_callback);
 
   ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
 

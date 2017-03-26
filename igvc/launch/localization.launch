@@ -7,6 +7,8 @@
     -->
 <launch>
 
+    <include file="$(find igvc)/launch/wheel_odometry.launch" />
+
     <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true" output="screen">
 
       <param name="frequency" value="30"/>
@@ -28,17 +30,13 @@
       <param name="zero_altitude" value="true"/>
 
       <!-- broadcasts the transform world_fram->utm -->
-      <param name="broadcast_utm_transform" value="false"/>
+      <param name="broadcast_utm_transform" value="true"/>
 
-      <!-- decides whether odometry data is all converted back to
-           lat/long measurements -->
-      <param name="publish_filtered_gps" value="false"/>
+      <!-- publishes the lat and long of the robot position -->
+      <param name="publish_filtered_gps" value="true"/>
 
       <!-- if true uses yaw angle from the input odom source -->
       <param name="use_odometry_yaw" value="false"/>
-
-      <!-- setting a datum for local reference frame -->
-      <rosparam param="datum">[0, 0, 0.0, map, base_link]</rosparam>
 
       <!-- input remapping -->
       <remap from="/imu/data" to="/imu"/>
