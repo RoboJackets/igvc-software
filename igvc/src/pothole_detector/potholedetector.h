@@ -12,7 +12,8 @@ public:
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
-  void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
+  void info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
+  void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
   /**
    * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
@@ -25,9 +26,10 @@ private:
   image_transport::Publisher _pothole_filt_img;
   image_transport::Publisher _pothole_thres;
   image_transport::CameraSubscriber _src_img;
-  ros::Subscriber _camera_info;
   ros::Publisher _pothole_cloud;
   tf::TransformListener tf_listener;
+  image_transport::CameraSubscriber _src_img_info;
+  image_geometry::PinholeCameraModel cam;
   std::string topic;
 
   cv::Mat src;

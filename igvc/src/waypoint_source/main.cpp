@@ -1,6 +1,9 @@
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <tf/transform_listener.h>
 #include <fstream>
 #include <igvc/StringUtils.hpp>
 #include <mutex>
@@ -91,14 +94,14 @@ double distanceBetweenPoints(const geometry_msgs::Point& p1, const geometry_msgs
   return sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
 }
 
-void positionCallback(const geometry_msgs::PoseStampedConstPtr& msg)
+void positionCallback(const nav_msgs::OdometryConstPtr& msg)
 {
   std::lock_guard<std::mutex> lock(current_mutex);
   geometry_msgs::PointStamped cur = current_waypoint;
   cur.point.x -= map_origin.x;
   cur.point.y -= map_origin.y;
 
-  if (distanceBetweenPoints(msg->pose.position, cur.point) < 1.0)
+  if (distanceBetweenPoints(msg->pose.pose.position, cur.point) < 1.0)
   {
     // advance to next waypoint.
     current_waypoint = waypoints.front();
@@ -110,10 +113,20 @@ void positionCallback(const geometry_msgs::PoseStampedConstPtr& msg)
   }
 }
 
-void originCallback(const geometry_msgs::PointStampedConstPtr& msg)
+void originCallback(const sensor_msgs::NavSatFixConstPtr& msg)
 {
   std::lock_guard<std::mutex> lock(current_mutex);
-  map_origin = msg->point;
+  tf::TransformListener tf_listener;
+  tf::StampedTransform transform;
+  geometry_msgs::Point position;
+  UTM(msg->latitude, msg->longitude, &(position.x), &(position.y));
+  tf_listener.waitForTransform("/odom", "/base_link", ros::Time(0), ros::Duration(3.0));
+  tf_listener.lookupTransform("/odom", "/base_link", ros::Time(0), transform);
+  geometry_msgs::TransformStamped result;
+  tf::transformStampedTFToMsg(transform, result);
+  position.x -= result.transform.translation.x;
+  position.y -= result.transform.translation.y;
+  map_origin = position;
 }
 
 int main(int argc, char** argv)
@@ -132,9 +145,9 @@ int main(int argc, char** argv)
 
   waypoint_pub = nh.advertise<geometry_msgs::PointStamped>("/waypoint", 1);
 
-  ros::Subscriber odom_sub = nh.subscribe("/odom_combined", 1, positionCallback);
+  ros::Subscriber odom_sub = nh.subscribe("/odometry/filtered", 1, positionCallback);
 
-  ros::Subscriber origin_sub = nh.subscribe("/map_origin", 1, originCallback);
+  ros::Subscriber origin_sub = nh.subscribe("/gps/filtered", 1, originCallback);
 
   loadWaypointsFile(path, waypoints);
 
@@ -150,7 +163,7 @@ int main(int argc, char** argv)
         auto waypoint_for_pub = current_waypoint;
         waypoint_for_pub.header.stamp = ros::Time::now();
         waypoint_for_pub.header.seq++;
-        waypoint_for_pub.header.frame_id = "map";
+        waypoint_for_pub.header.frame_id = "odom";
         waypoint_for_pub.point.x -= map_origin.x;
         waypoint_for_pub.point.y -= map_origin.y;
         waypoint_pub.publish(waypoint_for_pub);

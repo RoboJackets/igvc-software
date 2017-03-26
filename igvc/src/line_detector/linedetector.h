@@ -9,7 +9,6 @@ class LineDetector
 {
 public:
   LineDetector(ros::NodeHandle& handle, const std::string& topic);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
   cv::Mat src_img, working, fin_img;
@@ -26,7 +25,6 @@ private:
   ros::Publisher _line_cloud;
   tf::TransformListener tf_listener;
   image_geometry::PinholeCameraModel cam;
-  bool hasInfo = true;
 
   // Tuning parameters loaded from YAML file (file specified in launch file)
   int cannyThresh1;
@@ -34,6 +32,7 @@ private:
   int houghThreshold;
   int houghMinLineLength;
   int houghMaxLineGap;
+  int maxDistance;
 };
 
 #endif  // LINEDETECTOR_H

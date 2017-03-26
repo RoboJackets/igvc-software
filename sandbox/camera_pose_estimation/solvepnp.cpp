@@ -77,8 +77,8 @@ int main()
   cv::Rodrigues(rvec, rMat);
 
   // Get CameraToWlrd matrix
-  //cv::hconcat(rMat.inv(), -1 * rMat.inv() * tvec, cameraToWorld);
-  transpose(rMat,rMat);
+  // cv::hconcat(rMat.inv(), -1 * rMat.inv() * tvec, cameraToWorld);
+  transpose(rMat, rMat);
   cv::hconcat(rMat, -1 * rMat * tvec, cameraToWorld);
 
   std::cout << "rMat: " << rMat << std::endl;

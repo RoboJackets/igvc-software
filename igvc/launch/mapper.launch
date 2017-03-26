@@ -1,11 +1,12 @@
 <!-- map.launch -->
 <launch>
-    <!-- Pose Tracker -->
-    <node name="pose_tracker" pkg="igvc" type="pose_tracker" output="screen" />
+    <include file="$(find igvc)/launch/localization.launch" />
 
     <!-- Map Node -->
-    <node name="mapper" pkg="igvc" type="local_mapper" output="screen">
+    <node name="mapper" pkg="igvc" type="global_mapper" output="screen">
             <param name="topics" type="string" value="/scan/pointcloud /usb_cam_center/line_cloud /usb_cam_left/line_cloud /usb_cam_right/line_cloud /pothole_cloud"/>
+            <param name="max_correspondence_distance" type="double" value="0.5"/>
+            <param name="max_iterations" type="int" value="30"/>
     </node>
 
 </launch>
