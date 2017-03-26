@@ -120,12 +120,10 @@ void originCallback(const sensor_msgs::NavSatFixConstPtr& msg)
   tf::StampedTransform transform;
   geometry_msgs::Point position;
   UTM(msg->latitude, msg->longitude, &(position.x), &(position.y));
-  ROS_INFO_STREAM("/odom exists " << tf_listener.frameExists("odom"));
   tf_listener.waitForTransform("/odom", "/base_link", ros::Time(0), ros::Duration(3.0));
   tf_listener.lookupTransform("/odom", "/base_link", ros::Time(0), transform);
   geometry_msgs::TransformStamped result;
   tf::transformStampedTFToMsg(transform, result);
-  ROS_INFO_STREAM(result.transform.translation.x << " " << result.transform.translation.y);
   position.x -= result.transform.translation.x;
   position.y -= result.transform.translation.y;
   map_origin = position;
@@ -147,7 +145,7 @@ int main(int argc, char** argv)
 
   waypoint_pub = nh.advertise<geometry_msgs::PointStamped>("/waypoint", 1);
 
-  ros::Subscriber odom_sub = nh.subscribe("/odometry/filter", 1, positionCallback);
+  ros::Subscriber odom_sub = nh.subscribe("/odometry/filtered", 1, positionCallback);
 
   ros::Subscriber origin_sub = nh.subscribe("/gps/filtered", 1, originCallback);
 
