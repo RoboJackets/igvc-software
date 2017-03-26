@@ -44,13 +44,17 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg) {
     cv::Mat black = cv::Mat::zeros(cv::Size(src_img.cols, topCrop), src_img.type());
     cv::vconcat(black, fin_img, fin_img);
 
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
     if (hasInfo) {
         cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
     } else {
         cloud = toPointCloud(tf_listener, MatToContours(fin_img), fin_img.size().height, fin_img.size().width, topic);
     }
-    _line_cloud.publish(cloud);
+
+    if (!cloud->points.empty()) {
+        _line_cloud.publish(cloud);
+    }
     
     cv::cvtColor(fin_img, fin_img, CV_GRAY2BGR);    
 
