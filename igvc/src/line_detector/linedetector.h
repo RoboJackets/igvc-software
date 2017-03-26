@@ -16,7 +16,6 @@ private:
   void info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
   void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
-
   // ROS COMMUNICATION
   image_transport::ImageTransport _it;
   std::string topic;

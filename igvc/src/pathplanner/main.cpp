@@ -1,8 +1,8 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <igvc_msgs/action_path.h>
-#include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
