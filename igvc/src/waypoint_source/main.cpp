@@ -163,7 +163,7 @@ int main(int argc, char** argv)
         auto waypoint_for_pub = current_waypoint;
         waypoint_for_pub.header.stamp = ros::Time::now();
         waypoint_for_pub.header.seq++;
-        waypoint_for_pub.header.frame_id = "odom";
+        waypoint_for_pub.header.frame_id = "map";
         waypoint_for_pub.point.x -= map_origin.x;
         waypoint_for_pub.point.y -= map_origin.y;
         waypoint_pub.publish(waypoint_for_pub);
