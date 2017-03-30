@@ -57,7 +57,7 @@ void expanded_callback(const set<SearchLocation>& expanded)
   if (expanded_pub.getNumSubscribers() > 0)
   {
     pcl::PointCloud<pcl::PointXYZ> cloud;
-    cloud.header.frame_id = "/map";
+    cloud.header.frame_id = "/odom";
     for (auto location : expanded)
     {
       cloud.points.push_back(pcl::PointXYZ(location.x, location.y, 0));
@@ -120,7 +120,7 @@ int main(int argc, char** argv)
     {
       nav_msgs::Path disp_path_msg;
       disp_path_msg.header.stamp = ros::Time::now();
-      disp_path_msg.header.frame_id = "map";
+      disp_path_msg.header.frame_id = "odom";
       if (path.getStates()->empty())
         path.getStates()->push_back(search_problem.Start);
       for (auto loc : *(path.getStates()))
@@ -135,7 +135,7 @@ int main(int argc, char** argv)
       disp_path_pub.publish(disp_path_msg);
       igvc_msgs::action_path act_path_msg;
       act_path_msg.header.stamp = ros::Time::now();
-      act_path_msg.header.frame_id = "map";
+      act_path_msg.header.frame_id = "odom";
       for (auto action : *(path.getActions()))
       {
         igvc_msgs::velocity_pair vels;

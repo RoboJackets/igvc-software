@@ -11,10 +11,10 @@ double speed_measured_left = 0.0;
 double speed_measured_right = 0.0;
 double speed_last_error_left = 0.0;
 double speed_last_error_right = 0.0;
-double speed_P_left = -70.0;
-double speed_P_right = -70.0;
-double speed_D_left = 1.5;
-double speed_D_right = 1.5;
+double speed_P_left = -20.0;
+double speed_P_right = -20.0;
+double speed_D_left = 1.0;
+double speed_D_right = 1.0;
 
 constexpr double wheel_radius = 0.3429;
 
