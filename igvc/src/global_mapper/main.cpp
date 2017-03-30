@@ -94,7 +94,7 @@ int main(int argc, char **argv)
     subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ> >(topic, 1, boost::bind(frame_callback, _1, topic)));
   }
 
-  global_map->header.frame_id = "/map";
+  global_map->header.frame_id = "/odom";
 
   _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/map", 1);
 
