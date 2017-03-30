@@ -23,8 +23,8 @@ config:
   line:
 
     # Canny edge detector thresholds
-    cannyThresh1: 45
-    cannyThresh2: 135
+    cannyThresh: 30
+    ratio: 3
 
     # HoughLinesP tunable values
     houghThreshold: 80
