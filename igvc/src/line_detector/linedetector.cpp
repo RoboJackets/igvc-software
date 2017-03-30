@@ -28,7 +28,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
   fin_img = cv::Mat::zeros(src_img.size(), src_img.type());
 
   // Gaussian Blur
-  cv::GaussianBlur(src_img, working, cv::Size(0, 0), 2.0);
+  cv::GaussianBlur(src_img, working, cv::Size(3, 3), 2.0);
 
   // Detect edges
   cv::Canny(working, working, cannyThresh, cannyThresh*ratio, 3);
