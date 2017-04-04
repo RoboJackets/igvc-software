@@ -120,13 +120,14 @@ void originCallback(const sensor_msgs::NavSatFixConstPtr& msg)
   tf::StampedTransform transform;
   geometry_msgs::Point position;
   UTM(msg->latitude, msg->longitude, &(position.x), &(position.y));
-  tf_listener.waitForTransform("/odom", "/base_link", ros::Time(0), ros::Duration(3.0));
-  tf_listener.lookupTransform("/odom", "/base_link", ros::Time(0), transform);
-  geometry_msgs::TransformStamped result;
-  tf::transformStampedTFToMsg(transform, result);
-  position.x -= result.transform.translation.x;
-  position.y -= result.transform.translation.y;
-  map_origin = position;
+  if(tf_listener.waitForTransform("/odom", "/base_link", ros::Time(0), ros::Duration(3.0))) {
+    tf_listener.lookupTransform("/odom", "/base_link", ros::Time(0), transform);
+    geometry_msgs::TransformStamped result;
+    tf::transformStampedTFToMsg(transform, result);
+    position.x -= result.transform.translation.x;
+    position.y -= result.transform.translation.y;
+    map_origin = position;
+  }
 }
 
 int main(int argc, char** argv)

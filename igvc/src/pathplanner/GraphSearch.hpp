@@ -163,7 +163,7 @@ public:
         {
           return path;
         }
-        list<ActionType> legalActions = problem.getActions(last);
+        list<ActionType> legalActions = problem.getActions(last, problem.getStartState());
 
         for (typename list<ActionType>::iterator it = legalActions.begin(); it != legalActions.end(); it++)
         {
