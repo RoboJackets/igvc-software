@@ -1,11 +1,16 @@
 #include "igvcsearchproblem.h"
 #include <math.h>
 
+SearchLocation robot_position;
+
 bool IGVCSearchProblem::isActionValid(SearchMove& move, pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree,
                                       SearchLocation start_state)
 {
   auto deltat = move.DeltaT;
   double current = 0.0;
+  if(abs(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > 12) {
+    return true;
+  }
   while (current < (deltat + maxODeltaT))
   {
     current = current > deltat ? deltat : (current + maxODeltaT);
@@ -35,11 +40,11 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, pcl::KdTreeFLANN<pcl::Po
   return true;
 }
 
-std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state)
+std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, SearchLocation local_robot_position)
 {
   pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
   std::list<SearchMove> acts;
-
+  robot_position = local_robot_position;
   auto deltat = DeltaT(state.distTo(Start));
   if (Map == nullptr)
     return acts;
