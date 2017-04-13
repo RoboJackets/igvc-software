@@ -68,25 +68,32 @@ void expanded_callback(const set<SearchLocation>& expanded)
   }
 }
 
+// length in meters of an occupancy grid cell
+const double square_size = 0.02;
+// total size of the grid in meters 30 = 15 meters of each side of the robot
+const double occupancy_grid_size = 30;
+
 void occupancy_grid_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
 {
   memset(occupancy_grid, 0, sizeof(occupancy_grid));
+  int maximum_index = occupancy_grid_size / square_size;
+  int c = search_problem.Threshold / square_size;
   for (pcl::PointXYZ point : *msg)
   {
-    int x = (point.x - search_problem.Start.x) / 0.02 + 750;
-    int y = (point.y - search_problem.Start.y) / 0.02 + 750;
-    if (x < 1500 && x >= 0 && y < 1500 && y >= 0)
+    int x = (point.x - search_problem.Start.x) / square_size + maximum_index / 2;
+    int y = (point.y - search_problem.Start.y) / square_size + maximum_index / 2;
+    if (x < maximum_index && x >= 0 && y < maximum_index && y >= 0)
     {
-      int c = 40;
       int x_start = x - c > 0 ? x - c : 0;
-      int x_end = x + c < 1500 ? x + c : 1500;
+      int x_end = x + c < maximum_index ? x + c : maximum_index;
       int y_start = y - c > 0 ? y - c : 0;
-      int y_end = y + c < 1500 ? y + c : 1500;
+      int y_end = y + c < maximum_index ? y + c : maximum_index;
       for (int x_temp = x_start; x_temp < x_end; x_temp++)
       {
         for (int y_temp = y_start; y_temp < y_end; y_temp++)
         {
-          if (sqrt(pow((x_start + x_end) / 2 - x_temp, 2) + pow((y_start + y_end) / 2 - y_temp, 2)) * 0.02 <= 0.65)
+          // this allows for a circle approximation based on an obstacle point
+          if (sqrt(pow((x_start + x_end) / 2 - x_temp, 2) + pow((y_start + y_end) / 2 - y_temp, 2)) * square_size <= search_problem.Threshold)
           {
             occupancy_grid[x_temp][y_temp] = 1;
           }
@@ -118,7 +125,7 @@ int main(int argc, char** argv)
 
   search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
   search_problem.GoalThreshold = 1.0;
-  search_problem.Threshold = 0.50;
+  search_problem.Threshold = 0.65;
   search_problem.Speed = 1.0;
   search_problem.Baseline = baseline;
   search_problem.DeltaT = [](double distToStart) -> double { return 0.66 * (log2(distToStart + 1) + 0.1); };

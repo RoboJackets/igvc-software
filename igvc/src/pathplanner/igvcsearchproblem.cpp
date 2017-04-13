@@ -36,14 +36,15 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
   }*/
   auto deltat = move.DeltaT;
   double current = 0.0;
+  int maximum_index = occupancy_grid_size / square_size;
   while (current < (deltat + maxODeltaT))
   {
     current = current > deltat ? deltat : (current + maxODeltaT);
     move.DeltaT = current;
     SearchLocation result = getResult(start_state, move);
-    int x = (result.x - robot_position.x) / 0.02 + 750;
-    int y = (result.y - robot_position.y) / 0.02 + 750;
-    if (x < 1500 && x > 0 && y < 1500 && y > 0 && occupancy_grid[x][y])
+    int x = (result.x - robot_position.x) / square_size + maximum_index / 2;
+    int y = (result.y - robot_position.y) / square_size + maximum_index / 2;
+    if (x < maximum_index && x > 0 && y < maximum_index && y > 0 && occupancy_grid[x][y])
     {
       return false;
     }
