@@ -71,7 +71,9 @@ public:
     return state.distTo(Goal);
   }
 
-  bool isActionValid(SearchMove& move, pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, SearchLocation start_state);
+  bool isActionValid(SearchMove& move, SearchLocation start_state);
 };
+
+extern unsigned char occupancy_grid[1500][1500];
 
 #endif  // IGVCSEARCHPROBLEM_H

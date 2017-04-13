@@ -25,6 +25,8 @@ IGVCSearchProblem search_problem;
 
 std::mutex planning_mutex;
 
+unsigned char occupancy_grid[1500][1500];
+
 bool received_waypoint = false;
 
 void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
@@ -63,6 +65,34 @@ void expanded_callback(const set<SearchLocation>& expanded)
       cloud.points.push_back(pcl::PointXYZ(location.x, location.y, 0));
     }
     expanded_pub.publish(cloud);
+  }
+}
+
+void occupancy_grid_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
+{
+  memset(occupancy_grid, 0, sizeof(occupancy_grid));
+  for (pcl::PointXYZ point : *msg)
+  {
+    int x = (point.x - search_problem.Start.x) / 0.02 + 750;
+    int y = (point.y - search_problem.Start.y) / 0.02 + 750;
+    if (x < 1500 && x >= 0 && y < 1500 && y >= 0)
+    {
+      int c = 40;
+      int x_start = x - c > 0 ? x - c : 0;
+      int x_end = x + c < 1500 ? x + c : 1500;
+      int y_start = y - c > 0 ? y - c : 0;
+      int y_end = y + c < 1500 ? y + c : 1500;
+      for (int x_temp = x_start; x_temp < x_end; x_temp++)
+      {
+        for (int y_temp = y_start; y_temp < y_end; y_temp++)
+        {
+          if (sqrt(pow((x_start + x_end) / 2 - x_temp, 2) + pow((y_start + y_end) / 2 - y_temp, 2)) * 0.02 <= 0.65)
+          {
+            occupancy_grid[x_temp][y_temp] = 1;
+          }
+        }
+      }
+    }
   }
 }
 
@@ -115,6 +145,7 @@ int main(int argc, char** argv)
     planning_mutex.lock();
     // TODO only replan if needed.
     Path<SearchLocation, SearchMove> path;
+    occupancy_grid_callback(search_problem.Map);
     path = GraphSearch::AStar(search_problem, expanded_callback);
     if (act_path_pub.getNumSubscribers() > 0)
     {
