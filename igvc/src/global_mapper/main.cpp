@@ -45,9 +45,21 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
     std::cout << "Map size: " << global_map->size() << std::endl;
   }
   else if (!input->points.empty())
-  {
-    *global_map += *input;
-    octree.setInputCloud(global_map); //Initial octree
+  { 
+    octree.setInputCloud(global_map);
+    pcl::PointCloud<pcl::PointXYZ> initial = *input;
+    for (unsigned int i = 0; i < initial.size(); ++i)
+    {
+      pcl::PointXYZ searchPoint(initial[i].x, initial[i].y, initial[i].z);
+      std::vector<int> indices;
+      std::vector<float> distances;
+      if (octree.radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
+      {
+        octree.addPointToCloud(searchPoint, global_map);
+      }
+    }
+    //*global_map += *input;
+    //octree.setInputCloud(global_map); //Initial octree
     firstFrame = false;
   }
 }
