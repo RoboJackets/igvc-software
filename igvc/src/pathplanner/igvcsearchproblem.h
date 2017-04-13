@@ -76,4 +76,9 @@ public:
 
 extern unsigned char occupancy_grid[1500][1500];
 
+// length in meters of an occupancy grid cell
+extern const double square_size;
+// total size of the grid in meters 30 = 15 meters of each side of the robot
+extern const double occupancy_grid_size; 
+
 #endif  // IGVCSEARCHPROBLEM_H
