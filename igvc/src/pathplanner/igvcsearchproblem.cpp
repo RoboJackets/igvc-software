@@ -44,9 +44,11 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
     SearchLocation result = getResult(start_state, move);
     int x = (result.x - robot_position.x) / square_size + maximum_index / 2;
     int y = (result.y - robot_position.y) / square_size + maximum_index / 2;
-    if (x < maximum_index && x > 0 && y < maximum_index && y > 0 && occupancy_grid[x][y])
+    if (x < maximum_index && x > 0 && y < maximum_index && y > 0 && occupancy_grid[x][y] == 255)
     {
       return false;
+    } else if(x < maximum_index && x > 0 && y < maximum_index && y > 0 && occupancy_grid[x][y] != 0 && occupancy_grid[x][y] != 255) {
+      move.distToObs = occupancy_grid[x][y] / 255 * Threshold + Threshold;
     }
   }
   return true;
