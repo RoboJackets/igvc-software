@@ -32,11 +32,8 @@ private:
   int houghThreshold;
   int houghMinLineLength;
   int houghMaxLineGap;
-<<<<<<< HEAD
   int pixelSeparation;
-=======
   int maxDistance;
->>>>>>> 16d5eb737a3b4ccaac9a83fead1a0da02e989c0a
 };
 
 #endif  // LINEDETECTOR_H
