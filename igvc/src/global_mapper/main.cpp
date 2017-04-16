@@ -13,12 +13,13 @@
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr global_map;
 ros::Publisher _pointcloud_pub;
+ros::Publisher _pointcloud_incremental_pub;
 tf::TransformListener *tf_listener;
 std::set<std::string> frames_seen;
 bool firstFrame;
 double maxCorrDist;
 int maxIter;
-pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree(128.0f);    //TODO: resolution?
+pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree(.01f);    //TODO: resolution?
 double searchRadius;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
@@ -31,6 +32,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
     icp.setInputSource(input);
     icp.setInputTarget(global_map);
     pcl::PointCloud<pcl::PointXYZ> Final;
+    pcl::PointCloud<pcl::PointXYZ> new_points;
     icp.align(Final);
     for (unsigned int i = 0; i < Final.size(); ++i)
     {
@@ -40,8 +42,10 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
       if (octree.radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
       {
         octree.addPointToCloud(searchPoint, global_map);
+        new_points.push_back(searchPoint);
       }
     }
+    _pointcloud_incremental_pub.publish(new_points);
     std::cout << "Map size: " << global_map->size() << std::endl;
   }
   else if (!input->points.empty())
@@ -58,8 +62,6 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
         octree.addPointToCloud(searchPoint, global_map);
       }
     }
-    //*global_map += *input;
-    //octree.setInputCloud(global_map); //Initial octree
     firstFrame = false;
   }
 }
@@ -124,6 +126,7 @@ int main(int argc, char **argv)
   global_map->header.frame_id = "/odom";
 
   _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/map", 1);
+  _pointcloud_incremental_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/map/incremental", 1);
 
   firstFrame = true;
 

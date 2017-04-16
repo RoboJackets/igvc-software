@@ -28,8 +28,8 @@ config:
 
     # HoughLinesP tunable values
     houghThreshold: 80
-    houghMinLineLength: 35
-    houghMaxLineGap: 15
+    houghMinLineLength: 30
+    houghMaxLineGap: 5
 
     # The maximum forward distance from the robot to plot points in meters
     maxDistance: 8
