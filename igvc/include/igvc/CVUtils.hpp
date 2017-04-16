@@ -27,6 +27,38 @@ pcl::PointXYZ PointFromPixelNoCam(const cv::Point& p, int height, int width, dou
   return pcl::PointXYZ(x, y, 0);
 }
 
+cv::Mat ResizeCameraImage(cv::Mat oldImg, int width, int height) {
+  // Resize image
+  cv::Mat retVal;
+  cv::resize(oldImg, retVal, cv::Size(width, height), 0, 0, cv::INTER_LINEAR);
+  return retVal;
+}
+
+sensor_msgs::CameraInfo ResizeCameraInfo(sensor_msgs::CameraInfoConstPtr oldCamInfo, int width, int height)
+{
+  // Change camera info
+  boost::array<double, 9ul> newK = oldCamInfo->K;
+  newK[0] *= (double)width / (double)oldCamInfo->width;
+  newK[2] *= (double)width / (double)oldCamInfo->width;
+  newK[4] *= (double)height / (double)oldCamInfo->height;
+  newK[5] *= (double)height / (double)oldCamInfo->height;
+  boost::array<double, 12ul> newP = oldCamInfo->P;
+  newP[0] *= (double)width / (double)oldCamInfo->width;
+  newP[2] *= (double)width / (double)oldCamInfo->width;
+  newP[3] = 0;
+  newP[5] *= (double)height / (double)oldCamInfo->height;
+  newP[6] *= (double)height / (double)oldCamInfo->height;
+  newP[7] = 0;
+
+  // Update newCamInfo object
+  sensor_msgs::CameraInfo cam_info_rsz = *oldCamInfo;
+  cam_info_rsz.K = newK;
+  cam_info_rsz.P = newP;
+  cam_info_rsz.width = width;
+  cam_info_rsz.height = height;
+  return cam_info_rsz;
+}
+
 std::vector<std::vector<cv::Point>> MatToContours(const cv::Mat img)
 {
   std::vector<std::vector<cv::Point>> contours;
