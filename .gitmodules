@@ -1,3 +1,6 @@
 [submodule "external/DoCIF"]
 	path = external/DoCIF
 	url = https://github.com/jgkamat/DoCIF.git
+[submodule "external/usb_cam"]
+	path = external/usb_cam
+	url = https://github.com/bosch-ros-pkg/usb_cam.git
