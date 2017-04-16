@@ -25,6 +25,8 @@ IGVCSearchProblem search_problem;
 
 std::mutex planning_mutex;
 
+unsigned char occupancy_grid[1500][1500];
+
 bool received_waypoint = false;
 
 void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
@@ -63,6 +65,46 @@ void expanded_callback(const set<SearchLocation>& expanded)
       cloud.points.push_back(pcl::PointXYZ(location.x, location.y, 0));
     }
     expanded_pub.publish(cloud);
+  }
+}
+
+// length in meters of an occupancy grid cell
+const double square_size = 0.02;
+// total size of the grid in meters 30 = 15 meters of each side of the robot
+const double occupancy_grid_size = 20;
+
+void occupancy_grid_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
+{
+  memset(occupancy_grid, 0, sizeof(occupancy_grid));
+  int maximum_index = occupancy_grid_size / square_size;
+  int c =  2 * search_problem.Threshold / square_size;
+  for (pcl::PointXYZ point : *msg)
+  {
+    int x = (point.x - search_problem.Start.x) / square_size + maximum_index / 2;
+    int y = (point.y - search_problem.Start.y) / square_size + maximum_index / 2;
+    if (x < maximum_index && x >= 0 && y < maximum_index && y >= 0)
+    {
+      int x_start = x - c > 0 ? x - c : 0;
+      int x_end = x + c < maximum_index ? x + c : maximum_index;
+      int y_start = y - c > 0 ? y - c : 0;
+      int y_end = y + c < maximum_index ? y + c : maximum_index;
+      for (int x_temp = x_start; x_temp < x_end; x_temp++)
+      {
+        for (int y_temp = y_start; y_temp < y_end; y_temp++)
+        {
+          // this allows for a circle approximation based on an obstacle point
+          double distance = sqrt(pow((x_start + x_end) / 2 - x_temp, 2) + pow((y_start + y_end) / 2 - y_temp, 2)) * square_size;
+          int distance_approximate = 510 - distance / search_problem.Threshold * 255;
+          if (distance <= search_problem.Threshold)
+          {
+            occupancy_grid[x_temp][y_temp] = 255;
+          } else if (distance <= search_problem.Threshold * 2 && occupancy_grid[x_temp][y_temp] < distance_approximate) {
+            //cout << distance_approximate << endl;
+            occupancy_grid[x_temp][y_temp] = distance_approximate;
+          }
+        }
+      }
+    }
   }
 }
 
@@ -115,6 +157,7 @@ int main(int argc, char** argv)
     planning_mutex.lock();
     // TODO only replan if needed.
     Path<SearchLocation, SearchMove> path;
+    occupancy_grid_callback(search_problem.Map);
     path = GraphSearch::AStar(search_problem, expanded_callback);
     if (act_path_pub.getNumSubscribers() > 0)
     {
