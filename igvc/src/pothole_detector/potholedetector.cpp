@@ -4,8 +4,14 @@
 cv_bridge::CvImagePtr cv_ptr;
 typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 
-void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
-                                   const sensor_msgs::CameraInfoConstPtr& cam_info)
+void PotholeDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg,
+                                        const sensor_msgs::CameraInfoConstPtr& cam_info)
+{
+  cam.fromCameraInfo(cam_info);
+  img_callback(msg);
+}
+
+void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
 {
   cv_ptr = cv_bridge::toCvCopy(msg, "");
 
@@ -13,7 +19,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
   src = cv_ptr->image.clone();
 
   // Crops the image (removes sky)
-  int topCrop = src.rows / 2;  // - 100;
+  int topCrop = 2 * src.rows / 3;
   cv::Rect roiNoSky(0, topCrop, src.cols, src.rows - topCrop);
   src = src(roiNoSky);
 
@@ -42,7 +48,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
   cv::Mat mean;
   cv::Mat stddev;
   meanStdDev(src_gray, mean, stddev);
-  double thresh = mean.at<double>(0, 0);
+  double thresh = mean.at<double>(0, 0) + (stddev.at<double>(0, 0) * 1.5);
   if (thresh > 254)
   {
     thresh = 254;
@@ -53,7 +59,9 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
 
   // Detect circles on the image
   std::vector<cv::Vec3f> circles;
-  HoughCircles(src_gray, circles, CV_HOUGH_GRADIENT, 1, src_gray.rows / 8, 50, 10, minRadius, maxRadius);
+  // cvHoughCircles(CvArr* image, void* circle_storage, int method, double dp, double min_dist, double param1=100,
+  // double param2=100, int min_radius=0, int max_radius=0 )
+  HoughCircles(src_gray, circles, CV_HOUGH_GRADIENT, 1, orig.rows / 8, 50, 10, minRadius, maxRadius);
 
   // All the contours that will be published to the pointcloud
   std::vector<std::vector<cv::Point>> allContours;
@@ -63,8 +71,9 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
     cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 
     // If the circle is too close to the top / bottom edges, filter
-    if (center.y <= 100 || center.y >= src_gray.rows - 10)
+    if (center.y <= 100 || center.y >= src_gray.rows - 100)
     {
+      // Note: bounds must be greater than a gap of 36, else invalid memory reference
       continue;
     }
 
@@ -98,6 +107,8 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
     {
       yHeight = src_gray.rows - yStart;
     }
+
+    circle(src_gray, center, circles[i][2], 255, 5);
 
     // Create the rectangle and an src_gray with only that region of interest
     cv::Rect roiAroundCircle(xStart, yStart, xWidth, yHeight);
@@ -169,7 +180,6 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
 
         // Determine the center x
         int centerX = (minX + maxX) / 2;
-
         // Find top and bottom points that correspond to the centerX (so get the y values)
         for (cv::Point p : *it)
         {
@@ -184,6 +194,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
             minY = y;
           }
         }
+        int centerY = (minY + maxY) / 2;
 
         // Average rgb values in a line above and below the contour
         int blueAbove = 0;
@@ -221,6 +232,43 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
           contours.erase(it);
           --it;
         }
+
+        // Average rgb values in a line left and right of the contour
+        int blueLeft = 0;
+        int greenLeft = 0;
+        int redLeft = 0;
+        int blueRight = 0;
+        int greenRight = 0;
+        int redRight = 0;
+        cv::Vec3b currentPixelLR;
+        for (int j = 5; j < 36; j++)
+        {
+          currentPixelLR = src.at<cv::Vec3b>(centerY, centerX - j);
+          blueLeft += currentPixelLR[0];
+          greenLeft += currentPixelLR[1];
+          redLeft += currentPixelLR[2];
+
+          currentPixelLR = src.at<cv::Vec3b>(centerY, centerY + j);
+          blueRight += currentPixelLR[0];
+          greenRight += currentPixelLR[1];
+          redRight += currentPixelLR[2];
+        }
+        blueLeft /= 30;
+        greenLeft /= 30;
+        redLeft /= 30;
+        blueRight /= 30;
+        greenRight /= 30;
+        redRight /= 30;
+
+        // We now have the average color of the line to the left and the right of the contour.
+        // Use these averages to determine if the contour is a line rather than a pothole.
+        // Aka if there is green to the left and the right of the contour, filter it!
+        if (greenLeft > redLeft + 50 && greenLeft > blueLeft + 50 && greenRight > redRight + 50 &&
+            greenRight > blueRight + 50)
+        {
+          contours.erase(it);
+          --it;
+        }
       }
       else
       {
@@ -236,8 +284,21 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
     }
   }
 
+  // Re-fill sky area of image with black
+  cv::Mat black = cv::Mat::zeros(cv::Size(src_gray.cols, topCrop), src_gray.type());
+  cv::vconcat(black, src_gray, src_gray);
+
+  // Shift contour coordinates down to account for black sky space
+  for (std::vector<cv::Point>& cont : allContours)
+  {
+    for (cv::Point& p : cont)
+    {
+      p.y += topCrop;
+    }
+  }
+
   // Convert the contours to a pointcloud
-  cloud = toPointCloud(tf_listener, allContours, orig.rows, orig.cols, topic);
+  cloud = toPointCloud(tf_listener, allContours, cam, topic);
 
   cv_bridge::CvImage out_msg;
   out_msg.header = msg->header;
@@ -254,7 +315,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg,
 PotholeDetector::PotholeDetector(ros::NodeHandle& handle, const std::string& topic)
   : gaussian_size(7), _it(handle), tf_listener(handle), topic(topic)
 {
-  _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &PotholeDetector::img_callback, this);
+  _src_img = _it.subscribeCamera(topic + "/image_raw", 1, &PotholeDetector::info_img_callback, this);
   _pothole_filt_img = _it.advertise(topic + "/pothole_filt_img", 1);
   _pothole_thres = _it.advertise(topic + "/pothole_thres", 1);
   _pothole_cloud = handle.advertise<PCLCloud>(topic + "/pothole_cloud", 100);

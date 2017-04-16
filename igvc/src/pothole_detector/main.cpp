@@ -15,6 +15,18 @@ int main(int argc, char** argv)
   PotholeDetector det{ nh, topic };
 
   ROS_INFO_STREAM("Pothole detector started");
+  // Rate is number of refreshes per second
+  float freq = 5;
+  if (pNh.hasParam("freq"))
+  {
+    pNh.getParam("freq", freq);
+  }
+  ros::Rate rate(freq);
+  while (ros::ok())
+  {
+    ros::spinOnce();
+    rate.sleep();
+  }
 
   ros::spin();
 
