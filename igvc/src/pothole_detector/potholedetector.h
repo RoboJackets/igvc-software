@@ -1,68 +1,47 @@
 #ifndef POTHOLEDETECTOR_H
 #define POTHOLEDETECTOR_H
 
-#include <ros/ros.h>
-#include <ros/publisher.h>
-#include <image_transport/image_transport.h>
-#include <image_geometry/pinhole_camera_model.h>
-#include <cv_bridge/cv_bridge.h>
-#include <opencv2/core/core.hpp>
-#include <vector>
-#include <tf/transform_listener.h>
-#include <opencv2/opencv.hpp>
-#include <opencv2/video/video.hpp>
-#include <sensor_msgs/image_encodings.h>
-#include <pcl/point_types.h>
-#include <pcl_ros/point_cloud.h>
-#include <camera_info_manager/camera_info_manager.h>
-#include <math.h>
-#include <cv_bridge/cv_bridge.h>
-#include <sensor_msgs/image_encodings.h>
+#include "igvc/CVInclude.h"
 
-class PotholeDetector {
+#include <vector>
+
+class PotholeDetector
+{
 public:
-    PotholeDetector(ros::NodeHandle &handle, const std::string& topic);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+  PotholeDetector(ros::NodeHandle& handle, const std::string& topic);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
 private:
-    void img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
+  void info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
+  void img_callback(const sensor_msgs::ImageConstPtr& msg);
 
-    
-    /**
-     * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
-     * @note Must be odd!
-     */
-    const int gaussian_size;
+  /**
+   * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
+   * @note Must be odd!
+   */
+  const int gaussian_size;
 
-    /**
-     * @brief src contains the original, unprocessed image
-     */
-    //cv::Mat src;
-    /**
-     * @brief dst contains the new, processed image that isolates the lines
-     */
-    //cv::Mat *dst;
+  // ROS COMMUNICATION
+  image_transport::ImageTransport _it;
+  image_transport::Publisher _pothole_filt_img;
+  image_transport::Publisher _pothole_thres;
+  image_transport::CameraSubscriber _src_img;
+  ros::Publisher _pothole_cloud;
+  tf::TransformListener tf_listener;
+  image_transport::CameraSubscriber _src_img_info;
+  image_geometry::PinholeCameraModel cam;
+  std::string topic;
 
-    // ROS COMMUNICATION
-    image_transport::ImageTransport _it;
-    image_transport::Publisher _pothole_filt_img;
-    image_transport::Publisher _pothole_thres;
-    image_transport::CameraSubscriber _src_img;
-    ros::Subscriber _camera_info;
-    ros::Publisher _pothole_cloud;
-    tf::TransformListener tf_listener;
-    std::string topic;
+  cv::Mat src;
+  cv::Mat src_gray;
 
-    cv::Mat src;
-    cv::Mat src_gray;
-
-    // Tuning parameters
-    int maxRadius;
-    int minRadius;
-    int whiteSampleRadius;
-    int contourSizeThreshold;
-    int blueAdaptiveThreshold;
-    int greenAdaptiveThreshold;
-    int redAdaptiveThreshold;
+  // Tuning parameters
+  int maxRadius;
+  int minRadius;
+  int whiteSampleRadius;
+  int contourSizeThreshold;
+  int blueAdaptiveThreshold;
+  int greenAdaptiveThreshold;
+  int redAdaptiveThreshold;
 };
-#endif // POTHOLEDETECTOR_H
+#endif  // POTHOLEDETECTOR_H
