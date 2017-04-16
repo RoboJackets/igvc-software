@@ -1,9 +1,10 @@
 #include "Odometer.h"
 #include <igvc_msgs/velocity_pair.h>
+#include <igvc_msgs/velocity_pair.h>
 #include <math.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
-#include <tf/transform_broadcaster.h>
+#include "Odometer.h"
 
 /**
  * Coneverts wheel velocities to odometry message using trigonometry for calculations
@@ -82,20 +83,6 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
   // set time then publish
   odom.header.stamp = ros::Time::now();
   pub.publish(odom);
-
-  // publish the tf using the published odom message
-  geometry_msgs::TransformStamped odom_tf;
-  odom_tf.header.stamp = ros::Time::now();
-  odom_tf.transform.translation.x = odom.pose.pose.position.x;
-  odom_tf.transform.translation.y = odom.pose.pose.position.y;
-  odom_tf.transform.translation.z = 0;
-  odom_tf.transform.rotation = odom.pose.pose.orientation;
-
-  // initializing default odom tf
-  odom_tf.header.frame_id = "base_link";
-  odom_tf.child_frame_id = "wheel_odom";
-
-  odom_broadcaster.sendTransform(odom_tf);
 }
 
 Odometer::Odometer(ros::NodeHandle& nh)

@@ -27,7 +27,7 @@ void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
   int leftJoyAxis, rightJoyAxis;
   bool leftInverted, rightInverted;
   nhp->param(std::string("leftAxis"), leftJoyAxis, 1);
-  nhp->param(std::string("rightAxis"), rightJoyAxis, 3);
+  nhp->param(std::string("rightAxis"), rightJoyAxis, 4);
   nhp->param(std::string("leftInverted"), leftInverted, false);
   nhp->param(std::string("rightInverted"), rightInverted, false);
 

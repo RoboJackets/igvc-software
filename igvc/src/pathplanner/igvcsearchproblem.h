@@ -34,7 +34,7 @@ public:
   {
     return Start;
   }
-  std::list<SearchMove> getActions(SearchLocation state);
+  std::list<SearchMove> getActions(SearchLocation state, SearchLocation robot_position);
 
   SearchLocation getResult(SearchLocation state, SearchMove action);
 

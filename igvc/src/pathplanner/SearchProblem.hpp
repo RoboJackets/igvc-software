@@ -86,7 +86,7 @@ class SearchProblem
 {
 public:
   virtual StateType getStartState() = 0;
-  virtual std::list<ActionType> getActions(StateType state) = 0;
+  virtual std::list<ActionType> getActions(StateType state, StateType robot_position) = 0;
   virtual StateType getResult(StateType state, ActionType action) = 0;
   virtual bool isGoal(StateType tate) = 0;
   virtual double getStepCost(StateType state, ActionType action)

@@ -15,37 +15,37 @@
 #define lowerLeftXImage 0
 #define lowerLeftYImage 360
 
-#define upperLeftXWorld -84.5
-#define upperLeftYWorld -66
-#define upperLeftZWorld 120.5
-#define upperRightXWorld 35
-#define upperRightYWorld -54.75
-#define upperRightZWorld 120.5
-#define lowerRightXWorld 33.5
-#define lowerRightYWorld -3.5
-#define lowerRightZWorld 120.5
-#define lowerLeftXWorld 67.5
+#define upperLeftXWorld -213
+#define upperLeftYWorld -80.5
+#define upperLeftZWorld 130.5
+#define upperRightXWorld 64
+#define upperRightYWorld -64.5
+#define upperRightZWorld 130.5
+#define lowerRightXWorld 27.5
+#define lowerRightYWorld 0
+#define lowerRightZWorld 10
+#define lowerLeftXWorld -57.75
 #define lowerLeftYWorld 0
-#define lowerLeftZWorld 100
+#define lowerLeftZWorld -11.75
 
 int main()
 {
   // Camera Matrix
   cv::Mat cameraMatrix(3, 3, cv::DataType<double>::type);
-  cameraMatrix.at<double>(0, 0) = 833.532112;
-  cameraMatrix.at<double>(0, 2) = 352.183485;
-  cameraMatrix.at<double>(1, 1) = 837.763183;
-  cameraMatrix.at<double>(1, 2) = 264.724999;
+  cameraMatrix.at<double>(0, 0) = 632.669618;
+  cameraMatrix.at<double>(0, 2) = 309.950711;
+  cameraMatrix.at<double>(1, 1) = 636.320948;
+  cameraMatrix.at<double>(1, 2) = 248.322083;
   cameraMatrix.at<double>(2, 2) = 1.000000;
 
   std::cout << "Initial camera matrix: " << cameraMatrix << std::endl;
 
   // Distortion coefficients
   cv::Mat distCoeffs(5, 1, cv::DataType<double>::type);
-  distCoeffs.at<double>(0) = 0.072489;
-  distCoeffs.at<double>(1) = 0.109291;
-  distCoeffs.at<double>(2) = 0.014877;
-  distCoeffs.at<double>(3) = 0.003510;
+  distCoeffs.at<double>(0) = 0.166100;
+  distCoeffs.at<double>(1) = -0.220931;
+  distCoeffs.at<double>(2) = 0.020491;
+  distCoeffs.at<double>(3) = -0.002593;
   distCoeffs.at<double>(4) = 0.000000;
 
   std::cout << "Distortion coefficients: " << distCoeffs << std::endl;
@@ -77,7 +77,9 @@ int main()
   cv::Rodrigues(rvec, rMat);
 
   // Get CameraToWlrd matrix
-  cv::hconcat(rMat.inv(), -1 * rMat.inv() * tvec, cameraToWorld);
+  // cv::hconcat(rMat.inv(), -1 * rMat.inv() * tvec, cameraToWorld);
+  transpose(rMat, rMat);
+  cv::hconcat(rMat, -1 * rMat * tvec, cameraToWorld);
 
   std::cout << "rMat: " << rMat << std::endl;
   std::cout << "tvec: " << tvec << std::endl;
