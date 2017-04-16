@@ -48,19 +48,22 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
   cv::HoughLinesP(working, lines, 1.0, CV_PI / 180, houghThreshold, houghMinLineLength, houghMaxLineGap);
   for (size_t i = 0; i < lines.size(); ++i)
   {
-<<<<<<< HEAD
+    /*
     cv::LineIterator it(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), 8);
     for (int j = 0; j < it.count; j++, it++) 
     {
       if (i % pixelSeparation == 0) 
+    cv::LineIterator it(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), 8);
+    for (int j = 0; j < it.count; j++, it++) 
+    {
+      if (i % pixelSeparation != 0) 
       {
         (*it)[0] = 0;
       }
     }
-=======
+    */
     cv::line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]),
              cv::Scalar(255, 255, 255), 1, 4);
->>>>>>> 16d5eb737a3b4ccaac9a83fead1a0da02e989c0a
   }
 
   // Re-fill sky area of image with black
@@ -93,9 +96,6 @@ LineDetector::LineDetector(ros::NodeHandle& handle, const std::string& topic)
   handle.getParam(ros::this_node::getName() + "/config/line/houghThreshold", houghThreshold);
   handle.getParam(ros::this_node::getName() + "/config/line/houghMinLineLength", houghMinLineLength);
   handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);
-<<<<<<< HEAD
   handle.getParam(ros::this_node::getName() + "/config/line/pixelSeparation", pixelSeparation);
-=======
   handle.getParam(ros::this_node::getName() + "/config/line/maxDistance", maxDistance);
->>>>>>> 16d5eb737a3b4ccaac9a83fead1a0da02e989c0a
 }
