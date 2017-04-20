@@ -27,8 +27,8 @@ private:
   image_geometry::PinholeCameraModel cam;
 
   // Tuning parameters loaded from YAML file (file specified in launch file)
-  int cannyThresh1;
-  int cannyThresh2;
+  int cannyThresh;
+  int ratio;
   int houghThreshold;
   int houghMinLineLength;
   int houghMaxLineGap;

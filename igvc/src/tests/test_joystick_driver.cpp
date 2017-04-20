@@ -47,7 +47,7 @@ protected:
 TEST_F(TestJoystickDriver, FullForward)
 {
   sensor_msgs::Joy joy_msg;
-  joy_msg.axes = { 0, 1.0, 0, 1.0 };
+  joy_msg.axes = { 0, 1.0, 0, 0, 1.0 };
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
@@ -62,7 +62,7 @@ TEST_F(TestJoystickDriver, FullForward)
 TEST_F(TestJoystickDriver, FullReverse)
 {
   sensor_msgs::Joy joy_msg;
-  joy_msg.axes = { 0, -1.0, 0, -1.0 };
+  joy_msg.axes = { 0, -1.0, 0, 0, -1.0 };
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
@@ -77,7 +77,7 @@ TEST_F(TestJoystickDriver, FullReverse)
 TEST_F(TestJoystickDriver, SpinRight)
 {
   sensor_msgs::Joy joy_msg;
-  joy_msg.axes = { 0, 1.0, 0, -1.0 };
+  joy_msg.axes = { 0, 1.0, 0, 0, -1.0 };
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
@@ -92,7 +92,7 @@ TEST_F(TestJoystickDriver, SpinRight)
 TEST_F(TestJoystickDriver, SpinLeft)
 {
   sensor_msgs::Joy joy_msg;
-  joy_msg.axes = { 0, -1.0, 0, 1.0 };
+  joy_msg.axes = { 0, -1.0, 0, 0, 1.0 };
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
@@ -107,7 +107,7 @@ TEST_F(TestJoystickDriver, SpinLeft)
 TEST_F(TestJoystickDriver, HalfSpeedForward)
 {
   sensor_msgs::Joy joy_msg;
-  joy_msg.axes = { 0, 0.5, 0, 0.5 };
+  joy_msg.axes = { 0, 0.5, 0, 0, 0.5 };
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 

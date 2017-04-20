@@ -34,10 +34,20 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
   fin_img = cv::Mat::zeros(src_img.size(), src_img.type());
 
   // Gaussian Blur
-  cv::GaussianBlur(src_img, working, cv::Size(0, 0), 2.0);
+  cv::GaussianBlur(src_img, working, cv::Size(3, 3), 2.0);
 
   // Detect edges
-  cv::Canny(working, working, cannyThresh1, cannyThresh2, 3);
+  cv::Canny(working, working, cannyThresh, cannyThresh*ratio, 3);
+
+  // Erosion and dilation
+  int kernel_size = 3;
+  cv::Mat erosion_kernal = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(kernel_size, kernel_size));
+  cv::dilate(working, working, erosion_kernal);
+  cv::dilate(working, working, erosion_kernal);
+  cv::dilate(working, working, erosion_kernal);
+  cv::erode(working, working, erosion_kernal);
+  cv::erode(working, working, erosion_kernal);
+  cv::erode(working, working, erosion_kernal);
 
   // Find lines
   std::vector<cv::Vec4i> lines;
@@ -45,7 +55,8 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
   for (size_t i = 0; i < lines.size(); ++i)
   {
     cv::line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]),
-             cv::Scalar(255, 255, 255), 3, 8);
+             cv::Scalar(255, 255, 255), 1, 4);
+    //std::cout<<(lines[i][0]-lines[i][2])<< " " <<(lines[i][1]-lines[i][3]) << std::endl;
   }
 
   // Re-fill sky area of image with black
@@ -73,8 +84,8 @@ LineDetector::LineDetector(ros::NodeHandle& handle, const std::string& topic)
   _filt_img = _it.advertise(topic + "/filt_img", 1);
   _line_cloud = handle.advertise<PCLCloud>(topic + "/line_cloud", 100);
 
-  handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh1", cannyThresh1);
-  handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh2", cannyThresh2);
+  handle.getParam(ros::this_node::getName() + "/config/line/cannyThresh", cannyThresh);
+  handle.getParam(ros::this_node::getName() + "/config/line/ratio", ratio);
   handle.getParam(ros::this_node::getName() + "/config/line/houghThreshold", houghThreshold);
   handle.getParam(ros::this_node::getName() + "/config/line/houghMinLineLength", houghMinLineLength);
   handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);

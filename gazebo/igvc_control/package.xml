@@ -23,6 +23,10 @@
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>roslib</build_depend>
   <build_depend>gazebo_ros</build_depend>
+  <build_depend>joint_state_controller</build_depend>
+  <build_depend>effort_controllers</build_depend>
+  <run_depend>joint_state_publisher</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>std_msgs</run_depend>
