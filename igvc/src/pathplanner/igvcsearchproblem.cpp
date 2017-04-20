@@ -20,8 +20,8 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
                               result.y + offsetToCenter * sin(result.theta), 0);
     std::vector<int> pointIdxRadiusSearch;
     std::vector<float> pointRadiusSquaredDistance;
-    int neighboorsCount = kdtree.nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
-    if (neighboorsCount > 0)
+    int neighborsCount = kdtree.nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
+    if (neighborsCount > 0)
     {
       double temp = pow(pointRadiusSquaredDistance[0], .5);
       if (temp < move.distToObs)
