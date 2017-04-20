@@ -77,7 +77,7 @@ void occupancy_grid_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg
 {
   memset(occupancy_grid, 0, sizeof(occupancy_grid));
   int maximum_index = occupancy_grid_size / square_size;
-  int c =  2 * search_problem.Threshold / square_size;
+  int c =  3 * search_problem.Threshold / square_size;
   for (pcl::PointXYZ point : *msg)
   {
     int x = (point.x - search_problem.Start.x) / square_size + maximum_index / 2;
@@ -98,7 +98,7 @@ void occupancy_grid_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg
           if (distance <= search_problem.Threshold)
           {
             occupancy_grid[x_temp][y_temp] = 255;
-          } else if (distance <= search_problem.Threshold * 2 && occupancy_grid[x_temp][y_temp] < distance_approximate) {
+          } else if (distance <= search_problem.Threshold * 3 && occupancy_grid[x_temp][y_temp] < distance_approximate) {
             //cout << distance_approximate << endl;
             occupancy_grid[x_temp][y_temp] = distance_approximate;
           }
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
   search_problem.Threshold = 0.50;
   search_problem.Speed = 1.0;
   search_problem.Baseline = baseline;
-  search_problem.DeltaT = [](double distToStart) -> double { return 0.66 * (log2(distToStart + 1) + 0.1); };
+  search_problem.DeltaT = [](double distToStart, double distToGoal) -> double { return -((distToStart + distToGoal) / 7 / (pow((distToStart + distToGoal) / 2, 2)) * pow(distToStart - (distToStart + distToGoal) / 2, 2)) + (distToStart + distToGoal) / 7 + 0.1; };
   search_problem.MinimumOmega = -0.6;
   search_problem.MaximumOmega = 0.61;
   search_problem.DeltaOmega = 0.3;  // wat
