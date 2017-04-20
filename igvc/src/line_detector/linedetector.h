@@ -14,7 +14,7 @@ private:
   cv::Mat src_img, working, fin_img;
 
   void info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
-  void img_callback(const sensor_msgs::ImageConstPtr& msg);
+  void img_callback(const cv::Mat msg, const sensor_msgs::ImageConstPtr& origMsg);
 
   // ROS COMMUNICATION
   image_transport::ImageTransport _it;
