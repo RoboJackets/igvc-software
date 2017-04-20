@@ -18,7 +18,7 @@ public:
   double Threshold;
   double Speed;
   double TurningSpeed;
-  std::function<double(double)> DeltaT;
+  std::function<double(double, double)> DeltaT;
   double Baseline;
   double GoalThreshold;
   bool PointTurnsEnabled;

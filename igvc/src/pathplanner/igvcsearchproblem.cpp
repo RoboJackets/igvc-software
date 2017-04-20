@@ -59,7 +59,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
   // pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
   std::list<SearchMove> acts;
   robot_position = local_robot_position;
-  auto deltat = DeltaT(state.distTo(Start));
+  auto deltat = DeltaT(state.distTo(Start), state.distTo(Goal));
   if (Map == nullptr)
     return acts;
   /*if (!Map->empty())
