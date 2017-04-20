@@ -5,6 +5,7 @@
 #include <pcl/registration/icp.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
+#include <pcl/octree/octree_search.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <stdlib.h>
@@ -12,28 +13,55 @@
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr global_map;
 ros::Publisher _pointcloud_pub;
+ros::Publisher _pointcloud_incremental_pub;
 tf::TransformListener *tf_listener;
 std::set<std::string> frames_seen;
 bool firstFrame;
 double maxCorrDist;
 int maxIter;
+pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree(.01f);    //TODO: resolution?
+double searchRadius;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 {
   if (!firstFrame)
   {
     pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
-    icp.setMaxCorrespondenceDistance(maxCorrDist);  // tunable parameters - figure out later
-    icp.setMaximumIterations(maxIter);              //
+    icp.setMaxCorrespondenceDistance(maxCorrDist); 
+    icp.setMaximumIterations(maxIter);             
     icp.setInputSource(input);
     icp.setInputTarget(global_map);
     pcl::PointCloud<pcl::PointXYZ> Final;
+    pcl::PointCloud<pcl::PointXYZ> new_points;
     icp.align(Final);
-    *global_map += Final;
+    for (unsigned int i = 0; i < Final.size(); ++i)
+    {
+      pcl::PointXYZ searchPoint(Final[i].x, Final[i].y, Final[i].z);
+      std::vector<int> indices;
+      std::vector<float> distances;
+      if (octree.radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
+      {
+        octree.addPointToCloud(searchPoint, global_map);
+        new_points.push_back(searchPoint);
+      }
+    }
+    _pointcloud_incremental_pub.publish(new_points);
+    std::cout << "Map size: " << global_map->size() << std::endl;
   }
   else if (!input->points.empty())
-  {
-    *global_map += *input;
+  { 
+    octree.setInputCloud(global_map);
+    pcl::PointCloud<pcl::PointXYZ> initial = *input;
+    for (unsigned int i = 0; i < initial.size(); ++i)
+    {
+      pcl::PointXYZ searchPoint(initial[i].x, initial[i].y, initial[i].z);
+      std::vector<int> indices;
+      std::vector<float> distances;
+      if (octree.radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
+      {
+        octree.addPointToCloud(searchPoint, global_map);
+      }
+    }
     firstFrame = false;
   }
 }
@@ -82,6 +110,7 @@ int main(int argc, char **argv)
   pNh.getParam("topics", topics);
   pNh.getParam("max_correspondence_distance", maxCorrDist);
   pNh.getParam("max_iterations", maxIter);
+  pNh.getParam("search_radius", searchRadius);
   if (topics.empty())
     ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
 
@@ -97,6 +126,7 @@ int main(int argc, char **argv)
   global_map->header.frame_id = "/odom";
 
   _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/map", 1);
+  _pointcloud_incremental_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/map/incremental", 1);
 
   firstFrame = true;
 
