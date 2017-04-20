@@ -64,6 +64,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
     */
     cv::line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]),
              cv::Scalar(255, 255, 255), 1, 4);
+    //std::cout<<(lines[i][0]-lines[i][2])<< " " <<(lines[i][1]-lines[i][3]) << std::endl;
   }
 
   // Re-fill sky area of image with black
