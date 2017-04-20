@@ -13,7 +13,7 @@ public:
 
 private:
   void info_img_callback(const sensor_msgs::ImageConstPtr& msg, const sensor_msgs::CameraInfoConstPtr& cam_info);
-  void img_callback(const sensor_msgs::ImageConstPtr& msg);
+  void img_callback(const cv::Mat msg_img, const sensor_msgs::ImageConstPtr& msg);
 
   /**
    * @brief gaussian_size The size of the Gaussian blur. The bigger the greater the blur
