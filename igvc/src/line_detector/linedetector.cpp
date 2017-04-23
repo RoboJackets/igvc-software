@@ -54,6 +54,20 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
   cv::HoughLinesP(working, lines, 1.0, CV_PI / 180, houghThreshold, houghMinLineLength, houghMaxLineGap);
   for (size_t i = 0; i < lines.size(); ++i)
   {
+    /*
+    cv::LineIterator it(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), 8);
+    for (int j = 0; j < it.count; j++, it++) 
+    {
+      if (i % pixelSeparation == 0) 
+    cv::LineIterator it(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), 8);
+    for (int j = 0; j < it.count; j++, it++) 
+    {
+      if (i % pixelSeparation != 0) 
+      {
+        (*it)[0] = 0;
+      }
+    }
+    */
     cv::line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]),
              cv::Scalar(255, 255, 255), 1, 4);
     //std::cout<<(lines[i][0]-lines[i][2])<< " " <<(lines[i][1]-lines[i][3]) << std::endl;
@@ -89,5 +103,6 @@ LineDetector::LineDetector(ros::NodeHandle& handle, const std::string& topic)
   handle.getParam(ros::this_node::getName() + "/config/line/houghThreshold", houghThreshold);
   handle.getParam(ros::this_node::getName() + "/config/line/houghMinLineLength", houghMinLineLength);
   handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);
+  handle.getParam(ros::this_node::getName() + "/config/line/pixelSeparation", pixelSeparation);
   handle.getParam(ros::this_node::getName() + "/config/line/maxDistance", maxDistance);
 }

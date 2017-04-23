@@ -1,26 +1,46 @@
 <!-- camera.launch -->
-<!-- Select the camera you would like to launch by running the command "roslaunch igvc camera.launch camera:=[left, right, or center]" -->
+<!-- Select the camera you would like to launch by executing the command "roslaunch igvc camera.launch camera#:=[left, right, or center]" 
+Note: you can launch multiple cameras if you give additional arguments
+Ex: "roslaunch igvc camera.launch camera1:=left camera2:=right camera3:= center" -->
 <launch>
-	<arg name="camera"/>
-	<arg name="camera_num" value="usb_cam_center"/>
-	<!-- set value to usb_cam_left -->
-	<group if="$(eval arg('camera') == 'left')">
-		<param name="camera_num" value="usb_cam_left"/>
+	<arg name="camera1" default="none"/>
+	<arg name="camera2" default="none"/>
+	<arg name="camera3" default="none"/>
+	<arg name="select1" value="usb_cam_$(arg camera1)"/>
+	<arg name="select2" value="usb_cam_$(arg camera2)"/>
+	<arg name="select3" value="usb_cam_$(arg camera3)"/>
+	<group if="$(eval arg('camera1') != 'none')">
+		<node name="$(arg select1)" pkg="usb_cam" type="usb_cam_node">
+		    <param name="path" type="string" value="file:///home/robojackets/catkin_ws/"/>
+		    <param name="video_device" type="string" value="/dev/igvc_$(arg select1)" />
+		    <param name="pixel_format" type="string" value="yuyv" />
+		    <param name="camera_frame_id" type="string" value="/$(arg select1)" />
+	 	    <param name="camera_info_url" type="string" value="file://$(find igvc)/../sandbox/camera_config/$(arg select1).yaml" />
+		    <param name="camera_name" type="string" value="$(arg select1)" />
+		</node>
 	</group>
-	<!-- set value to usb_cam_right -->
-	<group if="$(eval arg('camera') == 'right')">
-		<param name="camera_num" value="usb_cam_right"/>
+	<group if="$(eval arg('camera2') != 'none')">
+		<node name="$(arg select2)" pkg="usb_cam" type="usb_cam_node">
+		    <param name="path" type="string" value="file:///home/robojackets/catkin_ws/"/>
+		    <param name="video_device" type="string" value="/dev/igvc_$(arg select2)" />
+		    <param name="pixel_format" type="string" value="yuyv" />
+		    <param name="camera_frame_id" type="string" value="/$(arg select2)" />
+	 	    <param name="camera_info_url" type="string" value="file://$(find igvc)/../sandbox/camera_config/$(arg select2).yaml" />
+		    <param name="camera_name" type="string" value="$(arg select2)" />
+		</node>
 	</group>
-	<!-- set value to usb_cam_center -->
-	<group if="$(eval arg('camera') == 'center')">
-		<param name="camera_num" value="usb_cam_center"/>
+	<group if="$(eval arg('camera3') != 'none')">
+		<node name="$(arg select3)" pkg="usb_cam" type="usb_cam_node">
+		    <param name="path" type="string" value="file:///home/robojackets/catkin_ws/"/>
+		    <param name="video_device" type="string" value="/dev/igvc_$(arg select3)" />
+		    <param name="pixel_format" type="string" value="yuyv" />
+		    <param name="camera_frame_id" type="string" value="/$(arg select3)" />
+	 	    <param name="camera_info_url" type="string" value="file://$(find igvc)/../sandbox/camera_config/$(arg select3).yaml" />
+		    <param name="camera_name" type="string" value="$(arg select3)" />
+		</node>
 	</group>
-	<node name="$(arg camera_num)" pkg="usb_cam" type="usb_cam_node">
-	    <param name="path" type="string" value="file:///home/robojackets/catkin_ws/"/>
-	    <param name="video_device" type="string" value="/dev/igvc_$(arg camera_num)" />
-	    <param name="pixel_format" type="string" value="yuyv" />
-	    <param name="camera_frame_id" type="string" value="/$(arg camera_num)" />
- 	    <param name="camera_info_url" type="string" value="file://$(find igvc)/../sandbox/camera_config/$(arg camera_num).yaml" />
-	    <param name="camera_name" type="string" value="$(arg camera_num)" />
-	</node>
+<<<<<<< HEAD
 </launch>
+=======
+</launch>
+>>>>>>> 8a25ab79f573255298ed4cc5a4a79a8a9f0e99e5
