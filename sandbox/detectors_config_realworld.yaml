@@ -33,3 +33,4 @@ config:
 
     # The maximum forward distance from the robot to plot points in meters
     maxDistance: 8
+    outputLineSpcaing: 5
