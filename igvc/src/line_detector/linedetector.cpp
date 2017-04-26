@@ -55,9 +55,9 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
   for (size_t i = 0; i < lines.size(); ++i)
   {
     cv::LineIterator it(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), 8);
-    for (int i = 0; i < it.count; ++i, ++it)
+    for (int j = 0; j < it.count; ++j, ++it)
     {
-      if (i % outputLineSpacing == 0)
+      if (j % outputLineSpacing == 0)
         fin_img.at<uchar>(it.pos()) = 255;
     }
   }
