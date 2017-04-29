@@ -5,7 +5,7 @@ SearchLocation robot_position;
 
 bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_state)
 {
-  /*auto deltat = move.DeltaT;
+  auto deltat = move.DeltaT;
   double current = 0.0;
   if(abs(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > 16) {
     return true;
@@ -20,7 +20,7 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
                               result.y + offsetToCenter * sin(result.theta), 0);
     std::vector<int> pointIdxRadiusSearch;
     std::vector<float> pointRadiusSquaredDistance;
-    int neighborsCount = kdtree.nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
+    int neighborsCount = octree.nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
     if (neighborsCount > 0)
     {
       double temp = pow(pointRadiusSquaredDistance[0], .5);
@@ -29,26 +29,9 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
         move.distToObs = temp;
       }
       if (move.distToObs <= Threshold)
-      {
+      { 
         return false;
       }
-    }
-  }*/
-  auto deltat = move.DeltaT;
-  double current = 0.0;
-  int maximum_index = occupancy_grid_size / square_size;
-  while (current < (deltat + maxODeltaT))
-  {
-    current = current > deltat ? deltat : (current + maxODeltaT);
-    move.DeltaT = current;
-    SearchLocation result = getResult(start_state, move);
-    int x = (result.x - robot_position.x) / square_size + maximum_index / 2;
-    int y = (result.y - robot_position.y) / square_size + maximum_index / 2;
-    if (x < maximum_index && x > 0 && y < maximum_index && y > 0 && occupancy_grid[x][y] == 255)
-    {
-      return false;
-    } else if(x < maximum_index && x > 0 && y < maximum_index && y > 0 && occupancy_grid[x][y] != 0 && occupancy_grid[x][y] != 255) {
-      move.distToObs = occupancy_grid[x][y] / 255 * Threshold + Threshold;
     }
   }
   return true;
@@ -56,23 +39,18 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
 
 std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, SearchLocation local_robot_position)
 {
-  // pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
   std::list<SearchMove> acts;
   robot_position = local_robot_position;
   auto deltat = DeltaT(state.distTo(Start), state.distTo(Goal));
-  if (Map == nullptr)
+  if (octree.getTreeDepth() == 0)
     return acts;
-  /*if (!Map->empty())
-  {
-    kdtree.setInputCloud(Map);
-  }*/
   double delta = DeltaOmega;
   double Wmin = MinimumOmega;
   double Wmax = MaximumOmega;
   for (double W = Wmin; W <= Wmax; W += delta)
   {
     SearchMove move(Speed, W, deltat);
-    if (Map->empty() || isActionValid(move, state))
+    if (isActionValid(move, state))
     {
       acts.push_back(move);
     }
@@ -82,7 +60,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
     for (double W = Wmin; W <= Wmax; W += delta)
     {
       SearchMove move = SearchMove(-Speed, W, deltat);
-      if (Map->empty() || isActionValid(move, state))
+      if (isActionValid(move, state))
       {
         acts.push_back(move);
       }
@@ -91,7 +69,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
   if (PointTurnsEnabled)
   {
     SearchMove move(0, TurningSpeed, deltat);
-    if (Map->empty() || isActionValid(move, state))
+    if (isActionValid(move, state))
     {
       acts.push_back(move);
     }
