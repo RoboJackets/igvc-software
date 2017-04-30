@@ -415,12 +415,12 @@
     <child link="imu"/>
   </joint>
   <joint name="body_to_gps" type="fixed">
-    <origin xyz="0.25 0.1 0.5" rpy="0 0 0" /> <!-- -1.5708 -->
+    <origin xyz="0 0.1166876 0.5225542" rpy="0 0 0" /> <!-- -1.5708 -->
     <parent link="body"/>
     <child link="gps"/>
   </joint>
   <joint name="body_to_center_camera" type="fixed">
-    <origin xyz="0.15 0 1.2" rpy="0 0 0" />
+    <origin xyz="0.05 0 1.3843" rpy="0 0 0" />
     <parent link="body"/>
     <child link="usb_cam_center"/>
   </joint>
@@ -443,24 +443,24 @@
     <parent link="axle"/>
     <child link="left_wheel"/>
     <axis xyz="0 0 -1" rpy="0 0 0" />
-    <origin xyz="0 0 -0.3175" rpy="0 0 0" />
+    <origin xyz="0 0 -0.3177286" rpy="0 0 0" />
   </joint>
   <joint name="axle_to_right_wheel" type="continuous">
     <parent link="axle"/>
     <child link="right_wheel"/>
     <axis xyz="0 0 -1" rpy="0 0 0" />
-    <origin xyz="0 0 0.3175" rpy="0 0 0" />
+    <origin xyz="0 0 0.3177286" rpy="0 0 0" />
   </joint>
   <!--must have a joint so it is not assumed to be the base link but the ball joint not in URDF must add it in gazebo tag-->
   <joint name="body_to_front_ball" type="floating">
     <parent link="body"/>
     <child link="front_ball"/>
-    <origin xyz="0.381 0 -0.0125" rpy="0 0 0" />
+    <origin xyz="0.385064 0 -0.0125" rpy="0 0 0" />
   </joint>
   <joint name="body_to_back_ball" type="floating">
     <parent link="body"/>
     <child link="back_ball"/>
-    <origin xyz="-0.381 0 -0.0125" rpy="0 0 0" />
+    <origin xyz="-0.385064 0 -0.0125" rpy="0 0 0" />
   </joint>
   <joint name="optical_cam_center_joint" type="fixed">
     <parent link="usb_cam_center"/>
