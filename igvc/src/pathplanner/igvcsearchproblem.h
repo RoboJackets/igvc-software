@@ -2,7 +2,7 @@
 #define IGVCSEARCHPROBLEM_H
 
 #include <math.h>
-#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/octree/octree_search.h>
 #include <functional>
 #include <vector>
 #include "GraphSearch.hpp"
@@ -74,11 +74,6 @@ public:
   bool isActionValid(SearchMove& move, SearchLocation start_state);
 };
 
-extern unsigned char occupancy_grid[1500][1500];
-
-// length in meters of an occupancy grid cell
-extern const double square_size;
-// total size of the grid in meters 30 = 15 meters of each side of the robot
-extern const double occupancy_grid_size; 
+extern pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree;
 
 #endif  // IGVCSEARCHPROBLEM_H
