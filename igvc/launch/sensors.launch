@@ -17,7 +17,9 @@
     <include file="$(find igvc)/launch/gps.launch" />
     
     <!-- CAMERA -->
-    <include file="$(find igvc)/launch/center_camera.launch" />
+    <include file="$(find igvc)/launch/camera.launch">
+        <arg name="camera" value="center" />
+    </include>
     
     <!-- LIDAR -->
     <include file="$(find igvc)/launch/lidar.launch" />
