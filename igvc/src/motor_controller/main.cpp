@@ -81,7 +81,7 @@ int main(int argc, char** argv)
       }
       else
       {
-        ROS_ERROR_STREAM("Empty return from arduino.\t" << ret);
+        ROS_ERROR_STREAM("Empty return from motor arduino.\t" << ret);
       }
     }
     catch (std::out_of_range)
