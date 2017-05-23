@@ -110,7 +110,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener& tf_liste
   tf::StampedTransform transform;
   std::string topicCopy = topic;
   replace(topicCopy, "usb", "optical");
-  tf_listener.lookupTransform("/base_link", topicCopy, ros::Time(0), transform);
+  tf_listener.lookupTransform("/base_footprint", topicCopy, ros::Time(0), transform);
 
   for (std::vector<cv::Point> contour : contours)
   {
@@ -120,7 +120,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener& tf_liste
     }
   }
 
-  cloud->header.frame_id = "base_link";
+  cloud->header.frame_id = "base_footprint";
   return cloud;
 }
 
