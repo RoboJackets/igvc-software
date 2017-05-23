@@ -12,9 +12,10 @@ const int leftDisable = 8;
 volatile int tickDataRight = 0;
 volatile int tickDataLeft = 0;
 
-const float ticksPerRev = 6000.0;
+const float ticksPerRev = 400.0;
+const float gearRatio = 18.0;
 const float wheelCir = 1.092; // Meters
-const float metersPerTick = wheelCir / ticksPerRev;
+const float metersPerTick = wheelCir / (ticksPerRev * gearRatio);
 const float DEADBAND = 2;
 
 float desiredSpeedR = 0; // m/s
@@ -25,8 +26,8 @@ float actualSpeedL;
 float lastErrorL;
 float lastErrorR;
 
-float P = 20;
-float D = 10;
+float P = 15;
+float D = 0;
 
 int PWM_L = 0;
 int PWM_R = 0;
@@ -92,8 +93,8 @@ void loop()
   {
     if(Serial.read() == '$')
     {
-      desiredSpeedL = -1*Serial.parseFloat();
-      desiredSpeedR = -1*Serial.parseFloat();
+      desiredSpeedL = Serial.parseFloat();
+      desiredSpeedR = Serial.parseFloat();
       lastCmdTime = millis();
       gotCommand = true;
     }
@@ -168,7 +169,7 @@ void loop()
   digitalWrite(leftDir, dirL);
   analogWrite(rightSpeed, powerR);
   analogWrite(leftSpeed, powerL);
-  
+
   lastErrorL = ErrorL;
   lastErrorR = ErrorR;
 }
