@@ -42,15 +42,13 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
   std::list<SearchMove> acts;
   robot_position = local_robot_position;
   auto deltat = DeltaT(state.distTo(Start), state.distTo(Goal));
-  if (octree.getTreeDepth() == 0)
-    return acts;
   double delta = DeltaOmega;
   double Wmin = MinimumOmega;
   double Wmax = MaximumOmega;
   for (double W = Wmin; W <= Wmax; W += delta)
   {
     SearchMove move(Speed, W, deltat);
-    if (isActionValid(move, state))
+    if (octree.getTreeDepth() == 0 || isActionValid(move, state))
     {
       acts.push_back(move);
     }
@@ -60,7 +58,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
     for (double W = Wmin; W <= Wmax; W += delta)
     {
       SearchMove move = SearchMove(-Speed, W, deltat);
-      if (isActionValid(move, state))
+      if (octree.getTreeDepth() == 0 || isActionValid(move, state))
       {
         acts.push_back(move);
       }
@@ -69,12 +67,12 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
   if (PointTurnsEnabled)
   {
     SearchMove move(0, TurningSpeed, deltat);
-    if (isActionValid(move, state))
+    if (octree.getTreeDepth() == 0 || isActionValid(move, state))
     {
       acts.push_back(move);
     }
     move = SearchMove(0, -TurningSpeed, deltat);
-    if (isActionValid(move, state))
+    if (octree.getTreeDepth() == 0 || isActionValid(move, state))
     {
       acts.push_back(move);
     }
@@ -111,8 +109,8 @@ SearchLocation IGVCSearchProblem::getResult(SearchLocation state, SearchMove act
   else
   {
     result.theta = state.theta;
-    result.x = state.x + (sin(M_PI_2 - result.theta) * action.V * action.DeltaT);
-    result.y = state.y + (cos(M_PI_2 - result.theta) * action.V * action.DeltaT);
+    result.x = state.x + (cos(-result.theta) * action.V * action.DeltaT);
+    result.y = state.y + (sin(-result.theta) * action.V * action.DeltaT);
   }
   return result;
 }
