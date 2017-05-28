@@ -24,10 +24,10 @@ config:
 
     # Canny edge detector thresholds
     cannyThresh: 30
-    ratio: 3
+    ratio: 5
 
     # HoughLinesP tunable values
-    houghThreshold: 80
+    houghThreshold: 120
     houghMinLineLength: 30
     houghMaxLineGap: 5
 
