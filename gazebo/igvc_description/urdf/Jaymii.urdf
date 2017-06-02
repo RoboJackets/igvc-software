@@ -409,7 +409,7 @@
     <child link="lidar"/>
   </joint>
   <joint name="base_footprint_to_imu" type="fixed">
-    <origin xyz="0.12192 0 0.9525" rpy="0 0 0" />
+    <origin xyz="0.0 0 0.9525" rpy="0 0 0" />
     <parent link="base_footprint"/>
     <child link="imu"/>
   </joint>
