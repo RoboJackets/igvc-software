@@ -1,7 +1,7 @@
 <!-- camera.launch -->
 <!-- Usage: "roslaunch igvc camera.launch camera:=[left,right,center]" -->
 <launch>
-	<arg name="camera" default="left,right,center" />
+	<arg name="camera" default="center" />
 	
 	<group if="$(eval 'center' in arg('camera'))">
 		<node name="usb_cam_center" pkg="usb_cam" type="usb_cam_node">
