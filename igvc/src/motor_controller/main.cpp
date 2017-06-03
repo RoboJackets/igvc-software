@@ -74,7 +74,7 @@ int main(int argc, char** argv)
         std::string rightStr = ret.substr(comma + 1, comma2 - comma - 1);
         std::string deltaT = ret.substr(comma2 + 1, end - comma2 - 1);
         igvc_msgs::velocity_pair enc_msg;
-        enc_msg.left_velocity = atof(leftStr.c_str());
+        enc_msg.left_velocity = atof(leftStr.c_str()) + 0.3;
         enc_msg.right_velocity = atof(rightStr.c_str());
         enc_msg.duration = atof(deltaT.c_str());
         enc_pub.publish(enc_msg);

@@ -1,0 +1,9 @@
+<launch>
+    <!-- LIGHT CONTROLLER -->
+    <node name="light_controller" pkg="igvc" type="light_controller" output="screen"/>
+    
+    <!-- MOTOR CONTROLLER -->
+    <node name="motor_controller" pkg="igvc" type="motor_controller" />
+
+    <node name="path_follower" pkg="igvc" type="path_follower" output="screen" />
+</launch>

@@ -38,7 +38,7 @@ igvc_msgs::velocity_pair get_velocity(igvc_msgs::velocity_pair desired_velocity)
   //std::cout << "desired left = " << desired_velocity.left_velocity << " right = " << desired_velocity.right_velocity << " duration = " << desired_velocity.duration << std::endl;
   //std::cout << " result left = " << result.left_velocity << " right = " << result.right_velocity << std::endl;
   result.duration = desired_velocity.duration;
-  return result;
+  return desired_velocity;
 }
 
 int main(int argc, char** argv)
