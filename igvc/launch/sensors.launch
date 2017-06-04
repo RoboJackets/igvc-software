@@ -23,5 +23,8 @@
     
     <!-- LIDAR -->
     <include file="$(find igvc)/launch/lidar.launch" />
+
+    <!-- LIDAR -->
+    <include file="$(find igvc)/launch/imu.launch" />
     
 </launch>

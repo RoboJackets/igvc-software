@@ -10,10 +10,5 @@
         <param name="baud" type="int" value="19200" />
     </node>
 
-    <node name="gps_conv" pkg="gps_common" type="utm_odometry_node">
-      <remap from="odom" to="gps_odom"/>
-      <param name="rot_covariance" value="99999" />
-      <param name="frame_id" value="gps" />
-    </node>
 
 </launch>
