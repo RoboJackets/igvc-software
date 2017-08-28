@@ -7,7 +7,8 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
 {
   auto deltat = move.DeltaT;
   double current = 0.0;
-  if(abs(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > 16) {
+  if (abs(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > 16)
+  {
     return true;
   }
   while (current < (deltat + maxODeltaT))
@@ -29,7 +30,7 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
         move.distToObs = temp;
       }
       if (move.distToObs <= Threshold)
-      { 
+      {
         return false;
       }
     }

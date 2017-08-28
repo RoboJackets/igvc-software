@@ -3,10 +3,10 @@
 #include <igvc_msgs/action_path.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
+#include <pcl/octree/octree_search.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
-#include <pcl/octree/octree_search.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <ros/subscriber.h>
@@ -39,11 +39,13 @@ unsigned int current_index = 0;
 void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
 {
   std::lock_guard<std::mutex> planning_lock(planning_mutex);
-  if (!msg->points.empty()) 
+  if (!msg->points.empty())
   {
-    while(current_index < msg->size()) 
+    while (current_index < msg->size())
     {
-      octree.addPointToCloud(pcl::PointXYZ(msg->points[current_index].x, msg->points[current_index].y, msg->points[current_index].z), global_map);
+      octree.addPointToCloud(
+          pcl::PointXYZ(msg->points[current_index].x, msg->points[current_index].y, msg->points[current_index].z),
+          global_map);
       current_index++;
     }
     if (path_planner_map_pub.getNumSubscribers() > 0)
@@ -112,12 +114,16 @@ int main(int argc, char** argv)
 
   double baseline = 0.93;
 
-  //search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
+  // search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
   search_problem.GoalThreshold = 1.0;
   search_problem.Threshold = 0.5;
   search_problem.Speed = 1.0;
   search_problem.Baseline = baseline;
-  search_problem.DeltaT = [](double distToStart, double distToGoal) -> double { return -((distToStart + distToGoal) / 7 / (pow((distToStart + distToGoal) / 2, 2)) * pow(distToStart - (distToStart + distToGoal) / 2, 2)) + (distToStart + distToGoal) / 7 + 0.3; };
+  search_problem.DeltaT = [](double distToStart, double distToGoal) -> double {
+    return -((distToStart + distToGoal) / 7 / (pow((distToStart + distToGoal) / 2, 2)) *
+             pow(distToStart - (distToStart + distToGoal) / 2, 2)) +
+           (distToStart + distToGoal) / 7 + 0.3;
+  };
   search_problem.MinimumOmega = -0.6;
   search_problem.MaximumOmega = 0.61;
   search_problem.DeltaOmega = 0.3;  // wat
