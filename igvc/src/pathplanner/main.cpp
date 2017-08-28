@@ -100,9 +100,9 @@ int main(int argc, char** argv)
 
   act_path_pub = nh.advertise<igvc_msgs::action_path>("/path", 1);
 
-  expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/expanded", 1);
+  expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/expanded", 1);
 
-  path_planner_map_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/path_planner_incremental", 1);
+  path_planner_map_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/path_planner_incremental", 1);
 
   double baseline = 0.93;
 
