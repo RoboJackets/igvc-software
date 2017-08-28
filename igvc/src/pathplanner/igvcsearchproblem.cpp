@@ -21,7 +21,7 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
                               result.y + offsetToCenter * sin(result.theta), 0);
     std::vector<int> pointIdxRadiusSearch;
     std::vector<float> pointRadiusSquaredDistance;
-    int neighborsCount = octree.nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
+    int neighborsCount = Octree->nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
     if (neighborsCount > 0)
     {
       double temp = pow(pointRadiusSquaredDistance[0], .5);
@@ -49,7 +49,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
   for (double W = Wmin; W <= Wmax; W += delta)
   {
     SearchMove move(Speed, W, deltat);
-    if (octree.getTreeDepth() == 0 || isActionValid(move, state))
+    if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
     {
       acts.push_back(move);
     }
@@ -59,7 +59,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
     for (double W = Wmin; W <= Wmax; W += delta)
     {
       SearchMove move = SearchMove(-Speed, W, deltat);
-      if (octree.getTreeDepth() == 0 || isActionValid(move, state))
+      if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
       {
         acts.push_back(move);
       }
@@ -68,12 +68,12 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
   if (PointTurnsEnabled)
   {
     SearchMove move(0, TurningSpeed, deltat);
-    if (octree.getTreeDepth() == 0 || isActionValid(move, state))
+    if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
     {
       acts.push_back(move);
     }
     move = SearchMove(0, -TurningSpeed, deltat);
-    if (octree.getTreeDepth() == 0 || isActionValid(move, state))
+    if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
     {
       acts.push_back(move);
     }
