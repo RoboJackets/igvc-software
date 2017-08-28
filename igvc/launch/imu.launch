@@ -1,6 +1,4 @@
 <!-- imu.launch -->
 <launch>
-    <node name="imu" pkg="igvc" type="imu">
-    	<param name="frame_id" value="imu" />
-    </node>
+    <node name="imu" pkg="igvc" type="imu"/>
 </launch>
