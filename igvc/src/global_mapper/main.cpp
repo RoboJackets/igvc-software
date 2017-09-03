@@ -19,7 +19,7 @@ std::set<std::string> frames_seen;
 bool firstFrame;
 double maxCorrDist;
 int maxIter;
-pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree(.01f);  // TODO: resolution?
+pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree(.01f);
 double searchRadius;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
