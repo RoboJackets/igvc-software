@@ -58,7 +58,7 @@ void loadWaypointsFile(std::string path, std::vector<geometry_msgs::PointStamped
   {
     getline(file, line);
 
-    if (!line.empty())
+    if (!line.empty() && line[0] != '#')
     {
       std::vector<std::string> tokens = split(line, ',');
 

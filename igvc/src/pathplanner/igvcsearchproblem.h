@@ -13,6 +13,7 @@ class IGVCSearchProblem : public SearchProblem<SearchLocation, SearchMove>
 {
 public:
   pcl::PointCloud<pcl::PointXYZ>::Ptr Map;
+  pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>::Ptr Octree;
   SearchLocation Start;
   SearchLocation Goal;
   double Threshold;
@@ -73,7 +74,5 @@ public:
 
   bool isActionValid(SearchMove& move, SearchLocation start_state);
 };
-
-extern pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree;
 
 #endif  // IGVCSEARCHPROBLEM_H

@@ -27,7 +27,8 @@ pcl::PointXYZ PointFromPixelNoCam(const cv::Point& p, int height, int width, dou
   return pcl::PointXYZ(x, y, 0);
 }
 
-cv::Mat ResizeCameraImage(cv::Mat oldImg, int width, int height) {
+cv::Mat ResizeCameraImage(cv::Mat oldImg, int width, int height)
+{
   // Resize image
   cv::Mat retVal;
   cv::resize(oldImg, retVal, cv::Size(width, height), 0, 0, cv::INTER_LINEAR);

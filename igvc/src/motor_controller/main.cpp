@@ -57,7 +57,7 @@ int main(int argc, char** argv)
                       std::to_string(enabled ? current_motor_command.right_velocity : 0.0) + "\n";
 
     if (fabs(current_motor_command.left_velocity) > 0 || fabs(current_motor_command.right_velocity) > 0)
-      ROS_INFO_STREAM(msg);
+      ROS_ERROR_STREAM("msg to motor arduino $lv,rv\n" << msg);
 
     port.write(msg);
 
