@@ -404,22 +404,22 @@
     <child link="body"/>
   </joint>
   <joint name="base_footprint_to_lidar" type="fixed">
-    <origin xyz="0.50038 0 0.69596" rpy="0 0 0" />
+    <origin xyz="0.4572 0 0.9525" rpy="0 0 0" />
     <parent link="base_footprint"/>
     <child link="lidar"/>
   </joint>
   <joint name="base_footprint_to_imu" type="fixed">
-    <origin xyz="0.12192 0 0.64516" rpy="0 0 0" />
+    <origin xyz="0.0 0 0.9525" rpy="0 0 3.141" />
     <parent link="base_footprint"/>
     <child link="imu"/>
   </joint>
   <joint name="base_footprint_to_gps" type="fixed">
-    <origin xyz="-0.04572 0.2032 0.7112" rpy="0 0 0" /> <!-- -1.5708 -->
+    <origin xyz="-0.04572 0.2032 0.9525" rpy="0 0 0" /> <!-- -1.5708 -->
     <parent link="base_footprint"/>
     <child link="gps"/>
   </joint>
   <joint name="base_footprint_to_center_camera" type="fixed">
-    <origin xyz="0.03302 0 1.5875" rpy="0 0 0" />
+    <origin xyz="0.03302 0 1.7145" rpy="0 0 0" />
     <parent link="base_footprint"/>
     <child link="usb_cam_center"/>
   </joint>

@@ -43,7 +43,7 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
   cv::GaussianBlur(src_img, working, cv::Size(3, 3), 2.0);
 
   // Detect edges
-  cv::Canny(working, working, cannyThresh, cannyThresh*ratio, 3);
+  cv::Canny(working, working, cannyThresh, cannyThresh * ratio, 3);
 
   // Erosion and dilation
   int kernel_size = 3;

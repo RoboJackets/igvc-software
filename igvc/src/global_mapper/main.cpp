@@ -1,11 +1,11 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/octree/octree_search.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
-#include <pcl/octree/octree_search.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <stdlib.h>
@@ -19,7 +19,7 @@ std::set<std::string> frames_seen;
 bool firstFrame;
 double maxCorrDist;
 int maxIter;
-pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree(.01f);    //TODO: resolution?
+pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree(.01f);
 double searchRadius;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
@@ -27,8 +27,8 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
   if (!firstFrame)
   {
     pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
-    icp.setMaxCorrespondenceDistance(maxCorrDist); 
-    icp.setMaximumIterations(maxIter);             
+    icp.setMaxCorrespondenceDistance(maxCorrDist);
+    icp.setMaximumIterations(maxIter);
     icp.setInputSource(input);
     icp.setInputTarget(global_map);
     pcl::PointCloud<pcl::PointXYZ> Final;
@@ -50,7 +50,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
     std::cout << "Map size: " << global_map->size() << std::endl;
   }
   else if (!input->points.empty())
-  { 
+  {
     octree.setInputCloud(global_map);
     pcl::PointCloud<pcl::PointXYZ> initial = *input;
     for (unsigned int i = 0; i < initial.size(); ++i)
@@ -121,12 +121,12 @@ int main(int argc, char **argv)
   for (auto topic : tokens)
   {
     ROS_INFO_STREAM("Mapper subscribing to " << topic);
-    subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ> >(topic, 1, boost::bind(frame_callback, _1, topic)));
+    subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(topic, 1, boost::bind(frame_callback, _1, topic)));
   }
 
   global_map->header.frame_id = "/odom";
 
-  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/map", 1);
+  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/map", 1);
   _pointcloud_incremental_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/map/incremental", 1);
 
   firstFrame = true;
