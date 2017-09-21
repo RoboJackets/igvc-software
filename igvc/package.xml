@@ -4,8 +4,8 @@
   <version>0.0.0</version>
   <description>The RoboJackets' IGVC code base</description>
 
-  <maintainer email="matthew.barulic@gmail.com">Matthew Barulic</maintainer>
-  <maintainer email="chaussee.al@gmail.com">Al Chaussee</maintainer>
+  <maintainer email="justin_zheng@gatech.edu">Justin Zheng</maintainer>
+  <maintainer email="jgibson37@gatech.edu">Jason Gibson</maintainer>
 
   <!-- One license tag required, multiple allowed, one license per tag -->
   <!-- Commonly used license strings: -->
@@ -33,6 +33,8 @@
   <!--   <run_depend>message_runtime</run_depend> -->
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
+
+  <!-- Required-->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
@@ -45,23 +47,22 @@
   <build_depend>pluginlib</build_depend>
   <build_depend>class_loader</build_depend>
   <build_depend>image_geometry</build_depend>
+
+  <!-- Required -->
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>joystick_drivers</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>pcl_conversions</run_depend>
-  <run_depend>laser_geometry</run_depend>
-  <run_depend>stereo_image_proc</run_depend>
-  <run_depend>sick_tim</run_depend>
-  <run_depend>camera_info_manager</run_depend>
   <run_depend>rviz</run_depend>
-  <run_depend>class_loader</run_depend>
-  <run_depend>pluginlib</run_depend>
-  <run_depend>class_loader</run_depend>
   <run_depend>image_geometry</run_depend>
-  <run_depend>gps_common</run_depend>
   <run_depend>robot_localization</run_depend>
+  <run_depend>pluginlib</run_depend>
+  <run_depend>laser_geometry</run_depend>
+
+  <!-- Builds from source -->
+  <run_depend>gps_common</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
