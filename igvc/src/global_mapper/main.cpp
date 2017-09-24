@@ -19,7 +19,7 @@ std::set<std::string> frames_seen;
 bool firstFrame;
 double maxCorrDist;
 int maxIter;
-pcl::octree::OctreePointCloudSearch<pcl::PointXYZ> octree(.01f);    //TODO: resolution?
+pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>::Ptr octree;
 double searchRadius;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
@@ -39,9 +39,10 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
       pcl::PointXYZ searchPoint(Final[i].x, Final[i].y, Final[i].z);
       std::vector<int> indices;
       std::vector<float> distances;
-      if (octree.radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
+      if (octree->radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
       {
-        octree.addPointToCloud(searchPoint, global_map);
+        //isVoxelOccupiedAtPoint?
+        octree->addPointToCloud(searchPoint, global_map);
         new_points.push_back(searchPoint);
       }
     }
@@ -50,16 +51,16 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
   }
   else if (!input->points.empty())
   { 
-    octree.setInputCloud(global_map);
+    octree->setInputCloud(global_map);
     pcl::PointCloud<pcl::PointXYZ> initial = *input;
     for (unsigned int i = 0; i < initial.size(); ++i)
     {
       pcl::PointXYZ searchPoint(initial[i].x, initial[i].y, initial[i].z);
       std::vector<int> indices;
       std::vector<float> distances;
-      if (octree.radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
+      if (octree->radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
       {
-        octree.addPointToCloud(searchPoint, global_map);
+        octree->addPointToCloud(searchPoint, global_map);
       }
     }
     firstFrame = false;
@@ -93,17 +94,14 @@ int main(int argc, char **argv)
   global_map = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
   ros::init(argc, argv, "global_mapper");
-
   ros::NodeHandle nh;
-
   tf_listener = new tf::TransformListener();
 
   std::string topics;
-
   std::list<ros::Subscriber> subs;
+  double octree_resolution;
 
   ros::NodeHandle pNh("~");
-
   if (!pNh.hasParam("topics"))
     ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
 
@@ -111,8 +109,11 @@ int main(int argc, char **argv)
   pNh.getParam("max_correspondence_distance", maxCorrDist);
   pNh.getParam("max_iterations", maxIter);
   pNh.getParam("search_radius", searchRadius);
+  pNh.getParam("octree_resolution", octree_resolution);
   if (topics.empty())
     ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
+
+  octree = pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>::Ptr(new pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>(octree_resolution));
 
   std::istringstream iss(topics);
   std::vector<std::string> tokens{ std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>() };
