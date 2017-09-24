@@ -8,6 +8,7 @@
             <param name="max_correspondence_distance" type="double" value="0.1"/>
             <param name="max_iterations" type="int" value="30"/>
             <param name="search_radius" type="double" value="0.03"/>
+            <param name="octree_resolution" type="double" value="0.01" />
     </node>
 
 </launch>
