@@ -5,11 +5,14 @@ using namespace std;
 
 int main() {
     RJRobot robot;
-
     cout << "Robot ready!" << endl;
+    try {
+        robot.SetFloodlight(true);
+    } catch(exception){
+    }
+
 
     robot.SetMotor(MotorPort::B, 200);
-
     for(int i = 0; i < 4; i++) {
         robot.SetMotor(MotorPort::A, 200);
         robot.Wait(1000ms);
