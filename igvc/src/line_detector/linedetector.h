@@ -32,7 +32,6 @@ private:
   int houghThreshold;
   int houghMinLineLength;
   int houghMaxLineGap;
-  int pixelSeparation;
   int maxDistance;
 };
 

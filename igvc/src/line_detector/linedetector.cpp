@@ -19,7 +19,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
   // Convert image to grayscale
   cv::cvtColor(src_img, src_img, CV_BGR2GRAY);
 
-  // Crops the imagep (removes sky)
+  // Crops the image (removes sky)
   int topCrop = 2 * src_img.rows / 3;
   cv::Rect roiNoSky(0, topCrop, src_img.cols, src_img.rows - topCrop);
   src_img = src_img(roiNoSky);
