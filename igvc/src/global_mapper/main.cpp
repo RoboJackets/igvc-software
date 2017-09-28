@@ -37,11 +37,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
     for (unsigned int i = 0; i < Final.size(); ++i)
     {
       pcl::PointXYZ searchPoint(Final[i].x, Final[i].y, Final[i].z);
-      std::vector<int> indices;
-      std::vector<float> distances;
-      if (octree->radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
-      {
-        //isVoxelOccupiedAtPoint?
+      if (!octree->isVoxelOccupiedAtPoint(searchPoint)) {
         octree->addPointToCloud(searchPoint, global_map);
         new_points.push_back(searchPoint);
       }
@@ -56,10 +52,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
     for (unsigned int i = 0; i < initial.size(); ++i)
     {
       pcl::PointXYZ searchPoint(initial[i].x, initial[i].y, initial[i].z);
-      std::vector<int> indices;
-      std::vector<float> distances;
-      if (octree->radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
-      {
+      if (!octree->isVoxelOccupiedAtPoint(searchPoint)) {
         octree->addPointToCloud(searchPoint, global_map);
       }
     }
