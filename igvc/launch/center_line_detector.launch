@@ -1,7 +1,6 @@
 <!-- line_detector.launch -->
 <launch>
     <node name="linedetectorcenter" pkg="igvc" type="linedetector" output="screen" >
-        <param name="pixelSeparation" type="double" value="1"/>
 		<param name="topic" type="string" value="/usb_cam_center"/>
 		<param name="freq" type="int" value="30"/>
 		<rosparam file="$(find igvc)/../sandbox/detectors_config_gazebo.yaml" />
