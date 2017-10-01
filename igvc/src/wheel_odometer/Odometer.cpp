@@ -78,7 +78,7 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
 
   // setting reference frames
   odom.header.frame_id = "wheel_odom";
-  odom.child_frame_id = "base_link";
+  odom.child_frame_id = "base_footprint";
 
   // set time then publish
   odom.header.stamp = ros::Time::now();

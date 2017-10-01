@@ -1,11 +1,11 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/octree/octree_search.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
-#include <pcl/octree/octree_search.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <stdlib.h>
@@ -27,8 +27,8 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
   if (!firstFrame)
   {
     pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
-    icp.setMaxCorrespondenceDistance(maxCorrDist); 
-    icp.setMaximumIterations(maxIter);             
+    icp.setMaxCorrespondenceDistance(maxCorrDist);
+    icp.setMaximumIterations(maxIter);
     icp.setInputSource(input);
     icp.setInputTarget(global_map);
     pcl::PointCloud<pcl::PointXYZ> Final;
@@ -42,6 +42,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
         new_points.push_back(searchPoint);
       }
     }
+    new_points.header.frame_id = "/odom";
     _pointcloud_incremental_pub.publish(new_points);
     std::cout << "Map size: " << global_map->size() << std::endl;
   }
@@ -114,12 +115,12 @@ int main(int argc, char **argv)
   for (auto topic : tokens)
   {
     ROS_INFO_STREAM("Mapper subscribing to " << topic);
-    subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ> >(topic, 1, boost::bind(frame_callback, _1, topic)));
+    subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(topic, 1, boost::bind(frame_callback, _1, topic)));
   }
 
   global_map->header.frame_id = "/odom";
 
-  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/map", 1);
+  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/map", 1);
   _pointcloud_incremental_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/map/incremental", 1);
 
   firstFrame = true;

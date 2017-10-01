@@ -3,6 +3,7 @@
 #include <igvc_msgs/action_path.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
+#include <pcl/octree/octree_search.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
@@ -21,18 +22,33 @@ ros::Publisher act_path_pub;
 
 ros::Publisher expanded_pub;
 
+ros::Publisher path_planner_map_pub;
+
 IGVCSearchProblem search_problem;
 
 std::mutex planning_mutex;
 
-unsigned char occupancy_grid[1500][1500];
-
 bool received_waypoint = false;
+
+unsigned int current_index = 0;
 
 void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
 {
-  std::lock_guard<std::mutex> lock(planning_mutex);
-  *search_problem.Map = *msg;
+  std::lock_guard<std::mutex> planning_lock(planning_mutex);
+  if (!msg->points.empty())
+  {
+    while (current_index < msg->size())
+    {
+      search_problem.Octree->addPointToCloud(
+          pcl::PointXYZ(msg->points[current_index].x, msg->points[current_index].y, msg->points[current_index].z),
+          search_problem.Map);
+      current_index++;
+    }
+    if (path_planner_map_pub.getNumSubscribers() > 0)
+    {
+      path_planner_map_pub.publish(search_problem.Map);
+    }
+  }
 }
 
 void position_callback(const nav_msgs::OdometryConstPtr& msg)
@@ -68,46 +84,6 @@ void expanded_callback(const set<SearchLocation>& expanded)
   }
 }
 
-// length in meters of an occupancy grid cell
-const double square_size = 0.02;
-// total size of the grid in meters 30 = 15 meters of each side of the robot
-const double occupancy_grid_size = 20;
-
-void occupancy_grid_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
-{
-  memset(occupancy_grid, 0, sizeof(occupancy_grid));
-  int maximum_index = occupancy_grid_size / square_size;
-  int c =  3 * search_problem.Threshold / square_size;
-  for (pcl::PointXYZ point : *msg)
-  {
-    int x = (point.x - search_problem.Start.x) / square_size + maximum_index / 2;
-    int y = (point.y - search_problem.Start.y) / square_size + maximum_index / 2;
-    if (x < maximum_index && x >= 0 && y < maximum_index && y >= 0)
-    {
-      int x_start = x - c > 0 ? x - c : 0;
-      int x_end = x + c < maximum_index ? x + c : maximum_index;
-      int y_start = y - c > 0 ? y - c : 0;
-      int y_end = y + c < maximum_index ? y + c : maximum_index;
-      for (int x_temp = x_start; x_temp < x_end; x_temp++)
-      {
-        for (int y_temp = y_start; y_temp < y_end; y_temp++)
-        {
-          // this allows for a circle approximation based on an obstacle point
-          double distance = sqrt(pow((x_start + x_end) / 2 - x_temp, 2) + pow((y_start + y_end) / 2 - y_temp, 2)) * square_size;
-          int distance_approximate = 510 - distance / search_problem.Threshold * 255;
-          if (distance <= search_problem.Threshold)
-          {
-            occupancy_grid[x_temp][y_temp] = 255;
-          } else if (distance <= search_problem.Threshold * 3 && occupancy_grid[x_temp][y_temp] < distance_approximate) {
-            //cout << distance_approximate << endl;
-            occupancy_grid[x_temp][y_temp] = distance_approximate;
-          }
-        }
-      }
-    }
-  }
-}
-
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "pathplanner");
@@ -124,16 +100,25 @@ int main(int argc, char** argv)
 
   act_path_pub = nh.advertise<igvc_msgs::action_path>("/path", 1);
 
-  expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/expanded", 1);
+  expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/expanded", 1);
+
+  path_planner_map_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/path_planner_incremental", 1);
 
   double baseline = 0.93;
 
   search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
+  search_problem.Map->header.frame_id = "/odom";
+  search_problem.Octree = boost::make_shared<pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>>(0.1);
+  search_problem.Octree->setInputCloud(search_problem.Map);
   search_problem.GoalThreshold = 1.0;
-  search_problem.Threshold = 0.50;
+  search_problem.Threshold = 0.5;
   search_problem.Speed = 1.0;
   search_problem.Baseline = baseline;
-  search_problem.DeltaT = [](double distToStart, double distToGoal) -> double { return -((distToStart + distToGoal) / 7 / (pow((distToStart + distToGoal) / 2, 2)) * pow(distToStart - (distToStart + distToGoal) / 2, 2)) + (distToStart + distToGoal) / 7 + 0.1; };
+  search_problem.DeltaT = [](double distToStart, double distToGoal) -> double {
+    return -((distToStart + distToGoal) / 7 / (pow((distToStart + distToGoal) / 2, 2)) *
+             pow(distToStart - (distToStart + distToGoal) / 2, 2)) +
+           (distToStart + distToGoal) / 7 + 0.3;
+  };
   search_problem.MinimumOmega = -0.6;
   search_problem.MaximumOmega = 0.61;
   search_problem.DeltaOmega = 0.3;  // wat
@@ -157,7 +142,6 @@ int main(int argc, char** argv)
     planning_mutex.lock();
     // TODO only replan if needed.
     Path<SearchLocation, SearchMove> path;
-    occupancy_grid_callback(search_problem.Map);
     path = GraphSearch::AStar(search_problem, expanded_callback);
     if (act_path_pub.getNumSubscribers() > 0)
     {

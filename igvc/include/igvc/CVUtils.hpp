@@ -27,7 +27,8 @@ pcl::PointXYZ PointFromPixelNoCam(const cv::Point& p, int height, int width, dou
   return pcl::PointXYZ(x, y, 0);
 }
 
-cv::Mat ResizeCameraImage(cv::Mat oldImg, int width, int height) {
+cv::Mat ResizeCameraImage(cv::Mat oldImg, int width, int height)
+{
   // Resize image
   cv::Mat retVal;
   cv::resize(oldImg, retVal, cv::Size(width, height), 0, 0, cv::INTER_LINEAR);
@@ -110,7 +111,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener& tf_liste
   tf::StampedTransform transform;
   std::string topicCopy = topic;
   replace(topicCopy, "usb", "optical");
-  tf_listener.lookupTransform("/base_link", topicCopy, ros::Time(0), transform);
+  tf_listener.lookupTransform("/base_footprint", topicCopy, ros::Time(0), transform);
 
   for (std::vector<cv::Point> contour : contours)
   {
@@ -120,7 +121,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr toPointCloud(tf::TransformListener& tf_liste
     }
   }
 
-  cloud->header.frame_id = "base_link";
+  cloud->header.frame_id = "base_footprint";
   return cloud;
 }
 
