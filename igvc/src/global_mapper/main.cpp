@@ -10,8 +10,9 @@
 #include <ros/ros.h>
 #include <stdlib.h>
 #include <string>
+#include <queue>
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr global_map;
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr global_map;
 ros::Publisher _pointcloud_pub;
 ros::Publisher _pointcloud_incremental_pub;
 tf::TransformListener *tf_listener;
@@ -19,24 +20,46 @@ std::set<std::string> frames_seen;
 bool firstFrame;
 double maxCorrDist;
 int maxIter;
-pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>::Ptr octree;
+pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr octree;
 double searchRadius;
+double octree_resolution;
 
-void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
+//Probabilistic mapping
+std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> pointcloud_list;
+int queue_window_size;
+
+void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
 {
+  if (pointcloud_list.size() < queue_window_size)
+  {
+    pointcloud_list.push_back(input);
+  } 
+  if (pointcloud_list.size() == queue_window_size)
+  {
+    //Probabilistic calculations here
+    pcl::PointCloud<pcl::PointXYZRGB> local_pc;
+    pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB> local_octree(octree_resolution);
+
+    //Remove first pointcloud
+    pointcloud_list.erase(pointcloud_list.begin());
+  }
   if (!firstFrame)
   {
-    pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
+    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
     icp.setMaxCorrespondenceDistance(maxCorrDist);
     icp.setMaximumIterations(maxIter);
     icp.setInputSource(input);
     icp.setInputTarget(global_map);
-    pcl::PointCloud<pcl::PointXYZ> Final;
-    pcl::PointCloud<pcl::PointXYZ> new_points;
+    pcl::PointCloud<pcl::PointXYZRGB> Final;
+    pcl::PointCloud<pcl::PointXYZRGB> new_points;
     icp.align(Final);
     for (unsigned int i = 0; i < Final.size(); ++i)
     {
-      pcl::PointXYZ searchPoint(Final[i].x, Final[i].y, Final[i].z);
+      pcl::PointXYZRGB searchPoint(255, 0, 0);
+      searchPoint.x = Final[i].x;
+      searchPoint.y = Final[i].y;
+      searchPoint.z = Final[i].z;
+
       if (!octree->isVoxelOccupiedAtPoint(searchPoint)) {
         octree->addPointToCloud(searchPoint, global_map);
         new_points.push_back(searchPoint);
@@ -49,10 +72,14 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
   else if (!input->points.empty())
   { 
     octree->setInputCloud(global_map);
-    pcl::PointCloud<pcl::PointXYZ> initial = *input;
+    pcl::PointCloud<pcl::PointXYZRGB> initial = *input;
     for (unsigned int i = 0; i < initial.size(); ++i)
     {
-      pcl::PointXYZ searchPoint(initial[i].x, initial[i].y, initial[i].z);
+      pcl::PointXYZRGB searchPoint(255, 0, 0);
+      searchPoint.x = initial[i].x;
+      searchPoint.y = initial[i].y;
+      searchPoint.z = initial[i].z;
+
       if (!octree->isVoxelOccupiedAtPoint(searchPoint)) {
         octree->addPointToCloud(searchPoint, global_map);
       }
@@ -64,7 +91,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
 {
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
-      pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
   tf::StampedTransform transform;
   if (frames_seen.find(msg->header.frame_id) == frames_seen.end())
   {
@@ -78,14 +105,18 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     point.z = 0;
   }
 
-  icp_transform(transformed);
+  //Convert PointXYZ to PointXYZRGB
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_rgb = 
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+  pcl::copyPointCloud(*transformed, *transformed_rgb);
+  icp_transform(transformed_rgb );
 
   _pointcloud_pub.publish(global_map);
 }
 
 int main(int argc, char **argv)
 {
-  global_map = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
+  global_map = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
 
   ros::init(argc, argv, "global_mapper");
   ros::NodeHandle nh;
@@ -93,7 +124,6 @@ int main(int argc, char **argv)
 
   std::string topics;
   std::list<ros::Subscriber> subs;
-  double octree_resolution;
 
   ros::NodeHandle pNh("~");
   if (!pNh.hasParam("topics"))
@@ -104,11 +134,11 @@ int main(int argc, char **argv)
   pNh.getParam("max_iterations", maxIter);
   pNh.getParam("search_radius", searchRadius);
   pNh.getParam("octree_resolution", octree_resolution);
+  pNh.getParam("queue_window_size", queue_window_size);
   if (topics.empty())
     ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
 
-  octree = pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>::Ptr(new pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>(octree_resolution));
-
+  octree = pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr(new pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>(octree_resolution));
   std::istringstream iss(topics);
   std::vector<std::string> tokens{ std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>() };
 
@@ -120,8 +150,8 @@ int main(int argc, char **argv)
 
   global_map->header.frame_id = "/odom";
 
-  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/map", 1);
-  _pointcloud_incremental_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/map/incremental", 1);
+  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
+  _pointcloud_incremental_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map/incremental", 1);
 
   firstFrame = true;
 
