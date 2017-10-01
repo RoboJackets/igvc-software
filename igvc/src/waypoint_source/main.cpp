@@ -58,7 +58,7 @@ void loadWaypointsFile(std::string path, std::vector<geometry_msgs::PointStamped
   {
     getline(file, line);
 
-    if (!line.empty())
+    if (!line.empty() && line[0] != '#')
     {
       std::vector<std::string> tokens = split(line, ',');
 
@@ -120,9 +120,9 @@ void originCallback(const sensor_msgs::NavSatFixConstPtr& msg)
   tf::StampedTransform transform;
   geometry_msgs::Point position;
   UTM(msg->latitude, msg->longitude, &(position.x), &(position.y));
-  if (tf_listener.waitForTransform("/odom", "/base_link", ros::Time(0), ros::Duration(3.0)))
+  if (tf_listener.waitForTransform("/odom", "/base_footprint", ros::Time(0), ros::Duration(3.0)))
   {
-    tf_listener.lookupTransform("/odom", "/base_link", ros::Time(0), transform);
+    tf_listener.lookupTransform("/odom", "/base_footprint", ros::Time(0), transform);
     geometry_msgs::TransformStamped result;
     tf::transformStampedTFToMsg(transform, result);
     position.x -= result.transform.translation.x;

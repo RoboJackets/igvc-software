@@ -47,6 +47,7 @@
     </node>
 
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se">
+      <param name="base_link_frame" value="base_footprint"/>
       <param name="frequency" value="30"/>
       <param name="two_d_mode" value="true"/>
 
