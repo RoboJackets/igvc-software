@@ -80,7 +80,7 @@
       <inertia  ixx="0.994968" ixy="-0.100194"  ixz="0.0"  iyy="0.994968"  iyz="0.0"  izz="-1.0" />
     </inertial>
     <visual>
-      <geometry> 
+      <geometry>
         <mesh filename="model://urdf/meshes/Wheel.dae"/>
       </geometry>
     </visual>
@@ -373,20 +373,20 @@
   <transmission name="trans_left_wheel">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="axle_to_left_wheel">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor1">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
   <transmission name="trans_right_wheel">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="axle_to_right_wheel">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor1">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
@@ -512,5 +512,5 @@
         </ode>
       </physics>
     </joint>
-  </gazebo>  
+  </gazebo>
 </robot>
