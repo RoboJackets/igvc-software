@@ -24,6 +24,7 @@ int maxIter;
 pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr octree;
 double searchRadius;
 double octree_resolution;
+double probability_thresh;
 
 //Probabilistic mapping
 std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> pointcloud_list;
@@ -42,7 +43,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
     pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB> local_octree(octree_resolution);
 
     local_octree.setInputCloud(local_pc);
-    for (int i = 0; i < pointcloud_list.size(); i++)
+    for (unsigned int i = 0; i < pointcloud_list.size(); i++)
     {
       for (auto point : (*pointcloud_list[i]))
       {
@@ -58,8 +59,12 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
           int point_idx;
           float dist;
           local_octree.approxNearestSearch(point, point_idx, dist);
-          local_pc->points[point_idx].g = local_pc->points[point_idx].g + 50;
-          local_pc->points[point_idx].b = local_pc->points[point_idx].b + 50;
+          local_pc->points[point_idx].g = local_pc->points[point_idx].g + (int)(255.0 / queue_window_size);
+          local_pc->points[point_idx].b = local_pc->points[point_idx].b + (int)(255.0 / queue_window_size);
+          if (!firstFrame && local_pc->points[point_idx].g > probability_thresh * 255.0)
+          {
+            octree->addPointToCloud(local_pc->points[point_idx], global_map);
+          }
         }
       }
     }
@@ -70,7 +75,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
     //Remove first pointcloud
     pointcloud_list.erase(pointcloud_list.begin());
   }
-  if (!firstFrame)
+  /*if (!firstFrame)
   {
     pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
     icp.setMaxCorrespondenceDistance(maxCorrDist);
@@ -88,7 +93,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
       searchPoint.z = Final[i].z;
 
       if (!octree->isVoxelOccupiedAtPoint(searchPoint)) {
-        octree->addPointToCloud(searchPoint, global_map);
+      //  octree->addPointToCloud(searchPoint, global_map);
         new_points.push_back(searchPoint);
       }
     }
@@ -96,7 +101,8 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
     _pointcloud_incremental_pub.publish(new_points);
     std::cout << "Map size: " << global_map->size() << std::endl;
   }
-  else if (!input->points.empty())
+  else if (!input->points.empty())*/
+  if (firstFrame && !input->points.empty())
   { 
     octree->setInputCloud(global_map);
     pcl::PointCloud<pcl::PointXYZRGB> initial = *input;
@@ -162,6 +168,7 @@ int main(int argc, char **argv)
   pNh.getParam("search_radius", searchRadius);
   pNh.getParam("octree_resolution", octree_resolution);
   pNh.getParam("queue_window_size", queue_window_size);
+  pNh.getParam("probability_thresh", probability_thresh);
   if (topics.empty())
     ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
 
