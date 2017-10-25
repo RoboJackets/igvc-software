@@ -57,15 +57,22 @@ int main(int argc, char** argv)
                       std::to_string(enabled ? current_motor_command.right_velocity : 0.0) + "\n";
 
     if (fabs(current_motor_command.left_velocity) > 0 || fabs(current_motor_command.right_velocity) > 0)
-      ROS_ERROR_STREAM("msg to motor arduino $lv,rv\n" << msg);
-
+    {//std::cout << "push" << msg << std::endl;
+          //ROS_INFO_STREAM(msg);
+    }
+    ROS_INFO_STREAM("Writing");
+    std::cout << msg << std::endl;
     port.write(msg);
+    ROS_INFO_STREAM("Wrote");
 
     std::string ret = port.readln();
+    ROS_INFO_STREAM("Reading serial data");
     try
     {
       if (!ret.empty())
       {
+        ROS_INFO_STREAM("Parsing serial data");
+      	std::cout << "return " << ret << std::endl;
         size_t dollar = ret.find('$');
         size_t comma = ret.find(',');
         size_t comma2 = ret.find_last_of(',');
@@ -78,6 +85,7 @@ int main(int argc, char** argv)
         enc_msg.right_velocity = atof(rightStr.c_str());
         enc_msg.duration = atof(deltaT.c_str());
         enc_pub.publish(enc_msg);
+        ROS_INFO_STREAM("Publish encoder value");
       }
       else
       {
@@ -90,4 +98,5 @@ int main(int argc, char** argv)
 
     rate.sleep();
   }
+  ROS_INFO_STREAM("????????????");
 }

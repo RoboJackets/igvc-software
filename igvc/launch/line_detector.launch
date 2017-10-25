@@ -2,7 +2,7 @@
 <!-- Usage: "roslaunch igvc line_detector.launch camera:=[left,right,center]" -->
 <launch>
 
-    <arg name="camera" default="left,right,center" />
+    <arg name="camera" default="center" />
     <arg name="configfile" value="$(find igvc)/../sandbox/detectors_config_gazebo.yaml" />
 
     <group if="$(eval 'center' in arg('camera'))">
