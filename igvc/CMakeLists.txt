@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   image_transport
   cv_bridge
-  camera_info_manager
   laser_geometry
   tf
   pcl_ros
@@ -188,7 +187,6 @@ add_subdirectory(src/pidtester)
 add_subdirectory(src/rviz_plugins)
 add_subdirectory(src/pothole_detector)
 add_subdirectory(src/wheel_odometer)
-#add_subdirectory(src/system_stats)
 add_subdirectory(src/imu)
 add_subdirectory(src/global_mapper)
 add_subdirectory(src/flag_detector)
