@@ -7,14 +7,20 @@ typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 void LineDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg,
                                      const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
-  cam.fromCameraInfo(cam_info);
-  img_callback(msg);
+  cv_bridge::CvImagePtr cv_copy;
+  cv_copy = cv_bridge::toCvCopy(msg, "");
+  cv::Mat img = cv_copy->image;
+
+  img = ResizeCameraImage(img, 640, 360);
+  sensor_msgs::CameraInfo cam_info_rsz = ResizeCameraInfo(cam_info, 640, 360);
+
+  cam.fromCameraInfo(cam_info_rsz);
+  img_callback(img, msg);
 }
 
-void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
+void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageConstPtr& origMsg)
 {
-  cv_ptr = cv_bridge::toCvCopy(msg, "");
-  src_img = cv_ptr->image;
+  src_img = msg_img;
 
   // Convert image to grayscale
   cv::cvtColor(src_img, src_img, CV_BGR2GRAY);
@@ -31,7 +37,7 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
   cv::GaussianBlur(src_img, working, cv::Size(3, 3), 2.0);
 
   // Detect edges
-  cv::Canny(working, working, cannyThresh, cannyThresh*ratio, 3);
+  cv::Canny(working, working, cannyThresh, cannyThresh * ratio, 3);
 
   // Erosion and dilation
   int kernel_size = 3;
@@ -48,23 +54,12 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
   cv::HoughLinesP(working, lines, 1.0, CV_PI / 180, houghThreshold, houghMinLineLength, houghMaxLineGap);
   for (size_t i = 0; i < lines.size(); ++i)
   {
-    /*
     cv::LineIterator it(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), 8);
-    for (int j = 0; j < it.count; j++, it++) 
+    for (int j = 0; j < it.count; ++j, ++it)
     {
-      if (i % pixelSeparation == 0) 
-    cv::LineIterator it(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), 8);
-    for (int j = 0; j < it.count; j++, it++) 
-    {
-      if (i % pixelSeparation != 0) 
-      {
-        (*it)[0] = 0;
-      }
+      if (j % outputLineSpacing == 0)
+        fin_img.at<uchar>(it.pos()) = 255;
     }
-    */
-    cv::line(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]),
-             cv::Scalar(255, 255, 255), 1, 4);
-    //std::cout<<(lines[i][0]-lines[i][2])<< " " <<(lines[i][1]-lines[i][3]) << std::endl;
   }
 
   // Re-fill sky area of image with black
@@ -80,9 +75,9 @@ void LineDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
   _line_cloud.publish(cloud);
 
   cv::cvtColor(fin_img, fin_img, CV_GRAY2BGR);
-
-  cv_ptr->image = fin_img;
-  _filt_img.publish(cv_ptr->toImageMsg());
+  cv_bridge::CvImagePtr newPtr = cv_bridge::toCvCopy(origMsg, "");
+  newPtr->image = fin_img;
+  _filt_img.publish(newPtr->toImageMsg());
 }
 
 LineDetector::LineDetector(ros::NodeHandle& handle, const std::string& topic)
@@ -99,4 +94,5 @@ LineDetector::LineDetector(ros::NodeHandle& handle, const std::string& topic)
   handle.getParam(ros::this_node::getName() + "/config/line/houghMaxLineGap", houghMaxLineGap);
   handle.getParam(ros::this_node::getName() + "/config/line/pixelSeparation", pixelSeparation);
   handle.getParam(ros::this_node::getName() + "/config/line/maxDistance", maxDistance);
+  handle.getParam(ros::this_node::getName() + "/config/line/outputLineSpacing", outputLineSpacing);
 }

@@ -3,12 +3,12 @@
 
 SearchLocation robot_position;
 
-bool IGVCSearchProblem::isActionValid(SearchMove& move, pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree,
-                                      SearchLocation start_state)
+bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_state)
 {
   auto deltat = move.DeltaT;
   double current = 0.0;
-  if(abs(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > 12) {
+  if (abs(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > 16)
+  {
     return true;
   }
   while (current < (deltat + maxODeltaT))
@@ -21,15 +21,13 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, pcl::KdTreeFLANN<pcl::Po
                               result.y + offsetToCenter * sin(result.theta), 0);
     std::vector<int> pointIdxRadiusSearch;
     std::vector<float> pointRadiusSquaredDistance;
-    int neighborsCount = kdtree.nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
+    int neighborsCount = Octree->nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
     if (neighborsCount > 0)
     {
       double temp = pow(pointRadiusSquaredDistance[0], .5);
       if (temp < move.distToObs)
       {
-        // cerr << "Temp: " << temp << endl;
         move.distToObs = temp;
-        // cerr << "distToObs: " << move.distToObs << endl;
       }
       if (move.distToObs <= Threshold)
       {
@@ -42,23 +40,16 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, pcl::KdTreeFLANN<pcl::Po
 
 std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, SearchLocation local_robot_position)
 {
-  pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
   std::list<SearchMove> acts;
   robot_position = local_robot_position;
-  auto deltat = DeltaT(state.distTo(Start));
-  if (Map == nullptr)
-    return acts;
-  if (!Map->empty())
-  {
-    kdtree.setInputCloud(Map);
-  }
+  auto deltat = DeltaT(state.distTo(Start), state.distTo(Goal));
   double delta = DeltaOmega;
   double Wmin = MinimumOmega;
   double Wmax = MaximumOmega;
   for (double W = Wmin; W <= Wmax; W += delta)
   {
     SearchMove move(Speed, W, deltat);
-    if (Map->empty() || isActionValid(move, kdtree, state))
+    if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
     {
       acts.push_back(move);
     }
@@ -68,7 +59,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
     for (double W = Wmin; W <= Wmax; W += delta)
     {
       SearchMove move = SearchMove(-Speed, W, deltat);
-      if (Map->empty() || isActionValid(move, kdtree, state))
+      if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
       {
         acts.push_back(move);
       }
@@ -77,12 +68,12 @@ std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, Search
   if (PointTurnsEnabled)
   {
     SearchMove move(0, TurningSpeed, deltat);
-    if (Map->empty() || isActionValid(move, kdtree, state))
+    if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
     {
       acts.push_back(move);
     }
     move = SearchMove(0, -TurningSpeed, deltat);
-    if (isActionValid(move, kdtree, state))
+    if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
     {
       acts.push_back(move);
     }
@@ -119,8 +110,8 @@ SearchLocation IGVCSearchProblem::getResult(SearchLocation state, SearchMove act
   else
   {
     result.theta = state.theta;
-    result.x = state.x + (sin(M_PI_2 - result.theta) * action.V * action.DeltaT);
-    result.y = state.y + (cos(M_PI_2 - result.theta) * action.V * action.DeltaT);
+    result.x = state.x + (cos(-result.theta) * action.V * action.DeltaT);
+    result.y = state.y + (sin(-result.theta) * action.V * action.DeltaT);
   }
   return result;
 }

@@ -39,8 +39,4 @@ Ex: "roslaunch igvc camera.launch camera1:=left camera2:=right camera3:= center"
 		    <param name="camera_name" type="string" value="$(arg select3)" />
 		</node>
 	</group>
-<<<<<<< HEAD
 </launch>
-=======
-</launch>
->>>>>>> 8a25ab79f573255298ed4cc5a4a79a8a9f0e99e5

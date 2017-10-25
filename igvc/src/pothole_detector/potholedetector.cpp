@@ -7,16 +7,21 @@ typedef pcl::PointCloud<pcl::PointXYZ> PCLCloud;
 void PotholeDetector::info_img_callback(const sensor_msgs::ImageConstPtr& msg,
                                         const sensor_msgs::CameraInfoConstPtr& cam_info)
 {
-  cam.fromCameraInfo(cam_info);
-  img_callback(msg);
+  cv_bridge::CvImagePtr cv_copy;
+  cv_copy = cv_bridge::toCvCopy(msg, "");
+  cv::Mat img = cv_copy->image;
+
+  // img = ResizeCameraImage(img, 640, 360);
+  sensor_msgs::CameraInfo cam_info_rsz = *cam_info;  // ResizeCameraInfo(cam_info, 640, 360);
+
+  cam.fromCameraInfo(cam_info_rsz);
+  img_callback(img, msg);
 }
 
-void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
+void PotholeDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageConstPtr& msg)
 {
-  cv_ptr = cv_bridge::toCvCopy(msg, "");
-
-  cv::Mat orig = cv_ptr->image.clone();
-  src = cv_ptr->image.clone();
+  cv::Mat orig = msg_img.clone();
+  src = msg_img.clone();
 
   // Crops the image (removes sky)
   int topCrop = 2 * src.rows / 3;
@@ -71,14 +76,14 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
     cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
 
     // If the circle is too close to the top / bottom edges, filter
-    if (center.y <= 100 || center.y >= src_gray.rows - 100)
+    if (center.y <= 36 || center.y >= src_gray.rows - 36)
     {
-      // Note: bounds must be greater than a gap of 36, else invalid memory reference
+      // Note: bounds must be greater than a gap of 36, else invalid memory reference and SEG FAULT
       continue;
     }
 
     // If the circle is too close to the left / right edges, filter
-    if (center.x <= 100 || center.x >= src_gray.cols - 100)
+    if (center.x <= (double)src_gray.cols / 9.0 || center.x >= src_gray.cols - (double)src_gray.cols / 9.0)
     {
       continue;
     }
@@ -306,6 +311,7 @@ void PotholeDetector::img_callback(const sensor_msgs::ImageConstPtr& msg)
   out_msg.image = src_gray;
 
   cv::cvtColor(src_gray, src_gray, CV_GRAY2BGR);
+  cv_ptr = cv_bridge::toCvCopy(msg, "");
   cv_ptr->image = src_gray;
   _pothole_filt_img.publish(cv_ptr->toImageMsg());
   _pothole_thres.publish(out_msg.toImageMsg());
