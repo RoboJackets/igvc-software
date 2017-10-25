@@ -11,13 +11,6 @@
     <material>Gazebo/Grey</material>
   </gazebo>
   <link name="base_footprint" />
-  <joint name="groundToDriveWheelMidpoint" type="fixed">
-        <parent link="base_footprint"/>
-        <child link="base_link"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <axis xyz="0 0 0"/>
-    </joint>
-
   <link name="body">
     <inertial>
       <origin xyz="0 0 0" />
@@ -87,7 +80,7 @@
       <inertia  ixx="0.994968" ixy="-0.100194"  ixz="0.0"  iyy="0.994968"  iyz="0.0"  izz="-1.0" />
     </inertial>
     <visual>
-      <geometry> 
+      <geometry>
         <mesh filename="model://urdf/meshes/Wheel.dae"/>
       </geometry>
     </visual>
@@ -380,48 +373,54 @@
   <transmission name="trans_left_wheel">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="axle_to_left_wheel">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor1">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
   <transmission name="trans_right_wheel">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="axle_to_right_wheel">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor1">
-      <hardwareInterface>EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
 
 
-  <joint name="base_link_to_body" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="base_link"/>
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.12" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <joint name="base_footprint_to_body" type="fixed">
+    <origin xyz="0 0 0.12" rpy="0 0 0" />
+    <parent link="base_footprint"/>
     <child link="body"/>
   </joint>
-  <joint name="body_to_lidar" type="fixed">
-    <origin xyz="0.45 0 0.5" rpy="0 0 0" />
-    <parent link="body"/>
+  <joint name="base_footprint_to_lidar" type="fixed">
+    <origin xyz="0.4572 0 0.9525" rpy="0 0 0" />
+    <parent link="base_footprint"/>
     <child link="lidar"/>
   </joint>
-  <joint name="body_to_imu" type="fixed">
-    <origin xyz="0 0 1.3" rpy="0 0 0" />
-    <parent link="body"/>
+  <joint name="base_footprint_to_imu" type="fixed">
+    <origin xyz="0.0 0 0.9525" rpy="0 0 3.141" />
+    <parent link="base_footprint"/>
     <child link="imu"/>
   </joint>
-  <joint name="body_to_gps" type="fixed">
-    <origin xyz="0.25 0.1 0.5" rpy="0 0 0" /> <!-- -1.5708 -->
-    <parent link="body"/>
+  <joint name="base_footprint_to_gps" type="fixed">
+    <origin xyz="-0.04572 0.2032 0.9525" rpy="0 0 0" /> <!-- -1.5708 -->
+    <parent link="base_footprint"/>
     <child link="gps"/>
   </joint>
-  <joint name="body_to_center_camera" type="fixed">
-    <origin xyz="0.15 0 1.2" rpy="0 0 0" />
-    <parent link="body"/>
+  <joint name="base_footprint_to_center_camera" type="fixed">
+    <origin xyz="0.03302 0 1.7145" rpy="0 0 0" />
+    <parent link="base_footprint"/>
     <child link="usb_cam_center"/>
   </joint>
   <joint name="body_to_left_camera" type="fixed">
@@ -434,33 +433,33 @@
     <parent link="body"/>
     <child link="usb_cam_right"/>
   </joint>
-  <joint name="body_to_axle" type="fixed">
-    <parent link="body"/>
+  <joint name="base_footprint_to_axle" type="fixed">
+    <parent link="base_footprint"/>
     <child link="axle"/>
-    <origin xyz="0 0 0.0508" rpy="1.5708 0 0" />
+    <origin xyz="0 0 0.1651" rpy="1.5708 0 0" />
   </joint>
   <joint name="axle_to_left_wheel" type="continuous">
     <parent link="axle"/>
     <child link="left_wheel"/>
     <axis xyz="0 0 -1" rpy="0 0 0" />
-    <origin xyz="0 0 -0.3175" rpy="0 0 0" />
+    <origin xyz="0 0 -0.32004" rpy="0 0 0" />
   </joint>
   <joint name="axle_to_right_wheel" type="continuous">
     <parent link="axle"/>
     <child link="right_wheel"/>
     <axis xyz="0 0 -1" rpy="0 0 0" />
-    <origin xyz="0 0 0.3175" rpy="0 0 0" />
+    <origin xyz="0 0 0.32004" rpy="0 0 0" />
   </joint>
   <!--must have a joint so it is not assumed to be the base link but the ball joint not in URDF must add it in gazebo tag-->
-  <joint name="body_to_front_ball" type="floating">
-    <parent link="body"/>
+  <joint name="base_footprint_to_front_ball" type="floating">
+    <parent link="base_footprint"/>
     <child link="front_ball"/>
-    <origin xyz="0.381 0 -0.0125" rpy="0 0 0" />
+    <origin xyz="0.385064 0 0.1016" rpy="0 0 0" />
   </joint>
-  <joint name="body_to_back_ball" type="floating">
-    <parent link="body"/>
+  <joint name="base_footprint_to_back_ball" type="floating">
+    <parent link="base_footprint"/>
     <child link="back_ball"/>
-    <origin xyz="-0.381 0 -0.0125" rpy="0 0 0" />
+    <origin xyz="-0.385064 0 0.1016" rpy="0 0 0" />
   </joint>
   <joint name="optical_cam_center_joint" type="fixed">
     <parent link="usb_cam_center"/>
@@ -513,5 +512,5 @@
         </ode>
       </physics>
     </joint>
-  </gazebo>  
+  </gazebo>
 </robot>
