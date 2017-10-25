@@ -56,8 +56,8 @@ int main(int argc, char** argv)
     std::string msg = "$" + std::to_string(enabled ? current_motor_command.left_velocity : 0.0) + "," +
                       std::to_string(enabled ? current_motor_command.right_velocity : 0.0) + "\n";
 
-    if (current_motor_command.left_velocity > 0 || current_motor_command.right_velocity > 0)
-      ROS_INFO_STREAM(msg);
+    if (fabs(current_motor_command.left_velocity) > 0 || fabs(current_motor_command.right_velocity) > 0)
+      ROS_ERROR_STREAM("msg to motor arduino $lv,rv\n" << msg);
 
     port.write(msg);
 
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
       }
       else
       {
-        ROS_ERROR_STREAM("Empty return from arduino.\t" << ret);
+        ROS_ERROR_STREAM("Empty return from motor arduino.\t" << ret);
       }
     }
     catch (std::out_of_range)
