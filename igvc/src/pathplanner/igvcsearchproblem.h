@@ -2,7 +2,7 @@
 #define IGVCSEARCHPROBLEM_H
 
 #include <math.h>
-#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/octree/octree_search.h>
 #include <functional>
 #include <vector>
 #include "GraphSearch.hpp"
@@ -13,12 +13,13 @@ class IGVCSearchProblem : public SearchProblem<SearchLocation, SearchMove>
 {
 public:
   pcl::PointCloud<pcl::PointXYZ>::Ptr Map;
+  pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>::Ptr Octree;
   SearchLocation Start;
   SearchLocation Goal;
   double Threshold;
   double Speed;
   double TurningSpeed;
-  std::function<double(double)> DeltaT;
+  std::function<double(double, double)> DeltaT;
   double Baseline;
   double GoalThreshold;
   bool PointTurnsEnabled;
@@ -71,7 +72,7 @@ public:
     return state.distTo(Goal);
   }
 
-  bool isActionValid(SearchMove& move, pcl::KdTreeFLANN<pcl::PointXYZ>& kdtree, SearchLocation start_state);
+  bool isActionValid(SearchMove& move, SearchLocation start_state);
 };
 
 #endif  // IGVCSEARCHPROBLEM_H

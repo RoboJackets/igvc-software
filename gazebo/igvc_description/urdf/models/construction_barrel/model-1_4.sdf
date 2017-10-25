@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<sdf version="1.2">
+<sdf version="1.4">
   <model name='construction_barrel'>
     <link name='link'>
       <gravity>1</gravity>

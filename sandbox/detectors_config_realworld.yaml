@@ -23,8 +23,8 @@ config:
   line:
 
     # Canny edge detector thresholds
-    cannyThresh1: 45
-    cannyThresh2: 135
+    cannyThresh: 45
+    ratio: 135
 
     # HoughLinesP tunable values
     houghThreshold: 80
@@ -33,3 +33,5 @@ config:
 
     # The maximum forward distance from the robot to plot points in meters
     maxDistance: 8
+
+    outputLineSpcaing: 5
