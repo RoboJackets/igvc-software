@@ -34,7 +34,6 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
 
-  <!-- Required-->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
@@ -48,7 +47,6 @@
   <build_depend>class_loader</build_depend>
   <build_depend>image_geometry</build_depend>
 
-  <!-- Required -->
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>image_transport</run_depend>
