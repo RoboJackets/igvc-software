@@ -34,6 +34,7 @@
   <!-- Use test_depend for packages you need only for testing: -->
   <!--   <test_depend>gtest</test_depend> -->
 
+  <!-- Build dependencies -->
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>std_msgs</build_depend>
@@ -47,12 +48,14 @@
   <build_depend>class_loader</build_depend>
   <build_depend>image_geometry</build_depend>
 
+  <!-- Run dependencies -->
   <run_depend>roscpp</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>joystick_drivers</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>pcl_conversions</run_depend>
+  <run_depend>camera_info_manager</run_depend>
   <run_depend>rviz</run_depend>
   <run_depend>image_geometry</run_depend>
   <run_depend>robot_localization</run_depend>
