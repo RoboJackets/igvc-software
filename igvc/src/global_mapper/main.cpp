@@ -47,6 +47,8 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
     {
       for (auto point : (*pointcloud_list[i]))
       {
+        //G and B represent the probability, they are the same value
+        //Add a point to the local octree if we haven't seen it before
         if (!local_octree.isVoxelOccupiedAtPoint(point))
         {
           point.r = 255;
@@ -55,14 +57,17 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
           local_octree.addPointToCloud(point, local_pc);
         } else
         {
-          //increase probability of the point in the voxel
+          //Increase probability of the point in the voxel if we see it again
           int point_idx;
           float dist;
           local_octree.approxNearestSearch(point, point_idx, dist);
-          local_pc->points[point_idx].g = local_pc->points[point_idx].g + (int)(255.0 / queue_window_size);
-          local_pc->points[point_idx].b = local_pc->points[point_idx].b + (int)(255.0 / queue_window_size);
-          if (!firstFrame && local_pc->points[point_idx].g > probability_thresh * 255.0)
+          //If the probability is less than the threshold, increase the probability
+          if (local_pc->points[point_idx].g < probability_thresh * 255.0) {
+            local_pc->points[point_idx].g = local_pc->points[point_idx].g + (int)(255.0 / queue_window_size);
+            local_pc->points[point_idx].b = local_pc->points[point_idx].b + (int)(255.0 / queue_window_size);
+          } else if (!firstFrame && local_pc->points[point_idx].g >= probability_thresh * 255.0)
           {
+            //Add the point to the global map if its probability is greater than or equal to the threshold
             octree->addPointToCloud(local_pc->points[point_idx], global_map);
           }
         }
@@ -75,33 +80,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
     //Remove first pointcloud
     pointcloud_list.erase(pointcloud_list.begin());
   }
-  /*if (!firstFrame)
-  {
-    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
-    icp.setMaxCorrespondenceDistance(maxCorrDist);
-    icp.setMaximumIterations(maxIter);
-    icp.setInputSource(input);
-    icp.setInputTarget(global_map);
-    pcl::PointCloud<pcl::PointXYZRGB> Final;
-    pcl::PointCloud<pcl::PointXYZRGB> new_points;
-    icp.align(Final);
-    for (unsigned int i = 0; i < Final.size(); ++i)
-    {
-      pcl::PointXYZRGB searchPoint(255, 0, 0);
-      searchPoint.x = Final[i].x;
-      searchPoint.y = Final[i].y;
-      searchPoint.z = Final[i].z;
 
-      if (!octree->isVoxelOccupiedAtPoint(searchPoint)) {
-      //  octree->addPointToCloud(searchPoint, global_map);
-        new_points.push_back(searchPoint);
-      }
-    }
-    new_points.header.frame_id = "/odom";
-    _pointcloud_incremental_pub.publish(new_points);
-    std::cout << "Map size: " << global_map->size() << std::endl;
-  }
-  else if (!input->points.empty())*/
   if (firstFrame && !input->points.empty())
   { 
     octree->setInputCloud(global_map);
