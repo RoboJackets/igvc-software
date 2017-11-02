@@ -32,8 +32,8 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
 
   // Crops the image (removes sky)
   int topCrop = 2 * src_img.rows / 3;
-  // cv::Rect roiNoSky(0, topCrop, src_img.cols, src_img.rows - topCrop);
-  // src_img = src_img(roiNoSky);
+  cv::Rect roiNoSky(0, topCrop, src_img.cols, src_img.rows - topCrop);
+  src_img = src_img(roiNoSky);
 
   // Create blank canvas
   cv::Mat working2 = cv::Mat::zeros(src_img.size(), src_img.type());

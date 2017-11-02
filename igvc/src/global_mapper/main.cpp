@@ -10,11 +10,9 @@
 #include <ros/ros.h>
 #include <stdlib.h>
 #include <string>
-#include <queue>
 
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr global_map;
 ros::Publisher _pointcloud_pub;
-ros::Publisher _pointcloud_incremental_pub;
 ros::Publisher _pointcloud_prob_pub;
 tf::TransformListener *tf_listener;
 std::set<std::string> frames_seen;
@@ -27,7 +25,8 @@ double octree_resolution;
 double probability_thresh;
 
 //Probabilistic mapping
-std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> pointcloud_list;
+//std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> pointcloud_list;
+std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> pointcloud_list;
 int queue_window_size;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
@@ -43,9 +42,12 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
     pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB> local_octree(octree_resolution);
 
     local_octree.setInputCloud(local_pc);
+
+    std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>::iterator it = pointcloud_list.begin();
     for (unsigned int i = 0; i < pointcloud_list.size(); i++)
     {
-      for (auto point : (*pointcloud_list[i]))
+      //for (auto point : (*pointcloud_list[i]))
+      for (auto point : (**it))
       {
         //G and B represent the probability, they are the same value
         //Add a point to the local octree if we haven't seen it before
@@ -65,32 +67,35 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
           if (local_pc->points[point_idx].g < probability_thresh * 255.0) {
             local_pc->points[point_idx].g = local_pc->points[point_idx].g + (int)(255.0 / queue_window_size);
             local_pc->points[point_idx].b = local_pc->points[point_idx].b + (int)(255.0 / queue_window_size);
-          } else if (!firstFrame && local_pc->points[point_idx].g >= probability_thresh * 255.0)
+          } else if (!firstFrame && local_pc->points[point_idx].g >= probability_thresh * 255.0 
+              && !octree->isVoxelOccupiedAtPoint(local_pc->points[point_idx]))
           {
             //Add the point to the global map if its probability is greater than or equal to the threshold
             octree->addPointToCloud(local_pc->points[point_idx], global_map);
           }
         }
       }
+      it++;
     }
 
     (*local_pc).header.frame_id = "/odom";
     _pointcloud_prob_pub.publish(*local_pc);
 
     //Remove first pointcloud
-    pointcloud_list.erase(pointcloud_list.begin());
+    //pointcloud_list.erase(pointcloud_list.begin());
+    pointcloud_list.pop_front();
+    std::cout << "Map size: " << global_map->size() << std::endl;
   }
 
   if (firstFrame && !input->points.empty())
   { 
     octree->setInputCloud(global_map);
-    pcl::PointCloud<pcl::PointXYZRGB> initial = *input;
-    for (unsigned int i = 0; i < initial.size(); ++i)
+    for (unsigned int i = 0; i < input->size(); ++i)
     {
       pcl::PointXYZRGB searchPoint(255, 0, 0);
-      searchPoint.x = initial[i].x;
-      searchPoint.y = initial[i].y;
-      searchPoint.z = initial[i].z;
+      searchPoint.x = input->points[i].x;
+      searchPoint.y = input->points[i].y;
+      searchPoint.z = input->points[i].z;
 
       if (!octree->isVoxelOccupiedAtPoint(searchPoint)) {
         octree->addPointToCloud(searchPoint, global_map);
@@ -164,7 +169,6 @@ int main(int argc, char **argv)
   global_map->header.frame_id = "/odom";
 
   _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
-  _pointcloud_incremental_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map/incremental", 1);
   _pointcloud_prob_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/prob", 1);
 
   firstFrame = true;
