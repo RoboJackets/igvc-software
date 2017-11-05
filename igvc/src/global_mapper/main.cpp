@@ -15,7 +15,6 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr global_map;
 ros::Publisher _pointcloud_pub;
 ros::Publisher _pointcloud_prob_pub;
 tf::TransformListener *tf_listener;
-std::set<std::string> frames_seen;
 bool firstFrame;
 double maxCorrDist;
 int maxIter;
@@ -110,25 +109,23 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
     pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
   tf::StampedTransform transform;
-  if (frames_seen.find(msg->header.frame_id) == frames_seen.end())
+  if (tf_listener->waitForTransform("/odom", msg->header.frame_id, ros::Time(0), ros::Duration(5)))
   {
-    frames_seen.insert(msg->header.frame_id);
-    tf_listener->waitForTransform("/odom", msg->header.frame_id, ros::Time(0), ros::Duration(5));
-  }
-  tf_listener->lookupTransform("/odom", msg->header.frame_id, ros::Time(0), transform);
-  pcl_ros::transformPointCloud(*msg, *transformed, transform);
-  for (auto point : *transformed)
-  {
-    point.z = 0;
-  }
+    tf_listener->lookupTransform("/odom", msg->header.frame_id, ros::Time(0), transform);
+    pcl_ros::transformPointCloud(*msg, *transformed, transform);
+    for (auto point : *transformed)
+    {
+      point.z = 0;
+    }
 
-  //Convert PointXYZ to PointXYZRGB
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_rgb = 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
-  pcl::copyPointCloud(*transformed, *transformed_rgb);
-  icp_transform(transformed_rgb );
+    //Convert PointXYZ to PointXYZRGB
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_rgb = 
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+    pcl::copyPointCloud(*transformed, *transformed_rgb);
+    icp_transform(transformed_rgb );
 
-  _pointcloud_pub.publish(global_map);
+    _pointcloud_pub.publish(global_map);
+  }
 }
 
 int main(int argc, char **argv)
