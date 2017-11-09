@@ -31,11 +31,12 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
   if (pointcloud_list.size() < queue_window_size)
   {
     pointcloud_list.push_back(input);
-  } 
+  }
   if (pointcloud_list.size() == queue_window_size)
   {
-    //Probabilistic calculations here
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr local_pc = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+    // Probabilistic calculations here
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr local_pc =
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB> local_octree(octree_resolution);
 
     local_octree.setInputCloud(local_pc);
@@ -44,27 +45,28 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
     {
       for (auto point : (**it))
       {
-        //G and B represent the probability, they are the same value
-        //Add a point to the local octree if we haven't seen it before
+        // G and B represent the probability, they are the same value
+        // Add a point to the local octree if we haven't seen it before
         if (!local_octree.isVoxelOccupiedAtPoint(point))
         {
           point.r = 255;
           point.g = 0;
           point.b = 0;
           local_octree.addPointToCloud(point, local_pc);
-        } else
+        }
+        else
         {
-          //Increase probability of the point in the voxel if we see it again
+          // Increase probability of the point in the voxel if we see it again
           int point_idx;
           float dist;
           local_octree.approxNearestSearch(point, point_idx, dist);
-          //If the probability is less than the threshold, increase the probability
+          // If the probability is less than the threshold, increase the probability
           local_pc->points[point_idx].g = local_pc->points[point_idx].g + (int)(255.0 / queue_window_size);
           local_pc->points[point_idx].b = local_pc->points[point_idx].b + (int)(255.0 / queue_window_size);
-          if (local_pc->points[point_idx].g >= probability_thresh * 255.0 
-              && !octree->isVoxelOccupiedAtPoint(local_pc->points[point_idx]))
+          if (local_pc->points[point_idx].g >= probability_thresh * 255.0 &&
+              !octree->isVoxelOccupiedAtPoint(local_pc->points[point_idx]))
           {
-            //Add the point to the global map if its probability is greater than or equal to the threshold
+            // Add the point to the global map if its probability is greater than or equal to the threshold
             octree->addPointToCloud(local_pc->points[point_idx], global_map);
           }
         }
@@ -74,13 +76,13 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
     (*local_pc).header.frame_id = "/odom";
     _pointcloud_prob_pub.publish(*local_pc);
 
-    //Remove first pointcloud
+    // Remove first pointcloud
     pointcloud_list.pop_front();
     std::cout << "Map size: " << global_map->size() << std::endl;
   }
 
   if (firstFrame && !input->points.empty())
-  { 
+  {
     octree->setInputCloud(global_map);
     for (unsigned int i = 0; i < input->size(); ++i)
     {
@@ -89,7 +91,8 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
       searchPoint.y = input->points[i].y;
       searchPoint.z = input->points[i].z;
 
-      if (!octree->isVoxelOccupiedAtPoint(searchPoint)) {
+      if (!octree->isVoxelOccupiedAtPoint(searchPoint))
+      {
         octree->addPointToCloud(searchPoint, global_map);
       }
     }
@@ -100,7 +103,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
 {
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
-    pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
+      pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
   tf::StampedTransform transform;
   if (tf_listener->waitForTransform("/odom", msg->header.frame_id, ros::Time(0), ros::Duration(5)))
   {
@@ -111,14 +114,16 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
       point.z = 0;
     }
 
-    //Convert PointXYZ to PointXYZRGB
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_rgb = 
-      pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+    // Convert PointXYZ to PointXYZRGB
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_rgb =
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::copyPointCloud(*transformed, *transformed_rgb);
-    icp_transform(transformed_rgb );
+    icp_transform(transformed_rgb);
 
     _pointcloud_pub.publish(global_map);
-  } else {
+  }
+  else
+  {
     ROS_WARN_STREAM("Could not find transform to odom");
   }
 }
@@ -148,7 +153,8 @@ int main(int argc, char **argv)
   if (topics.empty())
     ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
 
-  octree = pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr(new pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>(octree_resolution));
+  octree = pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr(
+      new pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>(octree_resolution));
   std::istringstream iss(topics);
   std::vector<std::string> tokens{ std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>() };
 
