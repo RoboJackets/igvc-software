@@ -23,8 +23,6 @@ double searchRadius;
 double octree_resolution;
 double probability_thresh;
 
-//Probabilistic mapping
-//std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> pointcloud_list;
 std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> pointcloud_list;
 int queue_window_size;
 
@@ -42,10 +40,8 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
 
     local_octree.setInputCloud(local_pc);
 
-    std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>::iterator it = pointcloud_list.begin();
-    for (unsigned int i = 0; i < pointcloud_list.size(); i++)
+    for (auto it = pointcloud_list.begin(); it != pointcloud_list.end(); it++)
     {
-      //for (auto point : (*pointcloud_list[i]))
       for (auto point : (**it))
       {
         //G and B represent the probability, they are the same value
@@ -63,10 +59,9 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
           float dist;
           local_octree.approxNearestSearch(point, point_idx, dist);
           //If the probability is less than the threshold, increase the probability
-          if (local_pc->points[point_idx].g < probability_thresh * 255.0) {
-            local_pc->points[point_idx].g = local_pc->points[point_idx].g + (int)(255.0 / queue_window_size);
-            local_pc->points[point_idx].b = local_pc->points[point_idx].b + (int)(255.0 / queue_window_size);
-          } else if (!firstFrame && local_pc->points[point_idx].g >= probability_thresh * 255.0 
+          local_pc->points[point_idx].g = local_pc->points[point_idx].g + (int)(255.0 / queue_window_size);
+          local_pc->points[point_idx].b = local_pc->points[point_idx].b + (int)(255.0 / queue_window_size);
+          if (local_pc->points[point_idx].g >= probability_thresh * 255.0 
               && !octree->isVoxelOccupiedAtPoint(local_pc->points[point_idx]))
           {
             //Add the point to the global map if its probability is greater than or equal to the threshold
@@ -74,14 +69,12 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
           }
         }
       }
-      it++;
     }
 
     (*local_pc).header.frame_id = "/odom";
     _pointcloud_prob_pub.publish(*local_pc);
 
     //Remove first pointcloud
-    //pointcloud_list.erase(pointcloud_list.begin());
     pointcloud_list.pop_front();
     std::cout << "Map size: " << global_map->size() << std::endl;
   }
@@ -125,6 +118,8 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     icp_transform(transformed_rgb );
 
     _pointcloud_pub.publish(global_map);
+  } else {
+    ROS_WARN_STREAM("Could not find transform to odom");
   }
 }
 
