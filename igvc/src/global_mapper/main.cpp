@@ -10,10 +10,12 @@
 #include <ros/ros.h>
 #include <stdlib.h>
 #include <string>
+#include <std_msgs/Int64.h>
 
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr global_map;
 ros::Publisher _pointcloud_pub;
 ros::Publisher _pointcloud_prob_pub;
+ros::Publisher _pointcloud_size_pub;
 tf::TransformListener *tf_listener;
 bool firstFrame;
 double maxCorrDist;
@@ -28,11 +30,11 @@ int queue_window_size;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
 {
-  if (pointcloud_list.size() < queue_window_size)
+  if (pointcloud_list.size() < (unsigned int) queue_window_size)
   {
     pointcloud_list.push_back(input);
   }
-  if (pointcloud_list.size() == queue_window_size)
+  if (pointcloud_list.size() == (unsigned int) queue_window_size)
   {
     // Probabilistic calculations here
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr local_pc =
@@ -78,7 +80,11 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
 
     // Remove first pointcloud
     pointcloud_list.pop_front();
-    std::cout << "Map size: " << global_map->size() << std::endl;
+
+    // Publish map size
+    std_msgs::Int64 size_msg;
+    size_msg.data = global_map->size();
+    _pointcloud_size_pub.publish(size_msg);
   }
 
   if (firstFrame && !input->points.empty())
@@ -168,6 +174,7 @@ int main(int argc, char **argv)
 
   _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
   _pointcloud_prob_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/prob", 1);
+  _pointcloud_size_pub = nh.advertise<std_msgs::Int64>("/map_size", 1);
 
   firstFrame = true;
 
