@@ -30,11 +30,11 @@ int queue_window_size;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
 {
-  if (pointcloud_list.size() < (unsigned int) queue_window_size)
+  if (pointcloud_list.size() < static_cast<unsigned int>(queue_window_size))
   {
     pointcloud_list.push_back(input);
   }
-  if (pointcloud_list.size() == (unsigned int) queue_window_size)
+  if (pointcloud_list.size() == static_cast<unsigned int>(queue_window_size))
   {
     // Probabilistic calculations here
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr local_pc =
