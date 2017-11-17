@@ -1,0 +1,9 @@
+<library path="lib/libigvc_rviz_plugins">
+    <class name="igvc_rviz_plugins/ExamplePanel"
+           type="igvc_rviz_plugins::ExamplePanel"
+           base_class_type="rviz::Panel">
+        <description>
+            Example panel for getting started
+        </description>
+    </class>
+</library>
