@@ -80,7 +80,7 @@
       <inertia  ixx="0.994968" ixy="-0.100194"  ixz="0.0"  iyy="0.994968"  iyz="0.0"  izz="-1.0" />
     </inertial>
     <visual>
-      <geometry> 
+      <geometry>
         <mesh filename="model://urdf/meshes/Wheel.dae"/>
       </geometry>
     </visual>
@@ -139,7 +139,7 @@
   <gazebo reference="lidar">
     <sensor type="ray" name="lidar">
       <visualize>true</visualize>
-      <update_rate>15</update_rate>
+      <update_rate>3</update_rate>
       <ray>
         <!-- Use gaussian noise -->
         <!--
@@ -151,15 +151,15 @@
       -->
         <scan>
           <horizontal>
-            <samples>270</samples>
-            <resolution>1</resolution>
-            <min_angle>-2.35619</min_angle>
-            <max_angle>2.35619</max_angle>
+            <samples>333</samples>
+            <resolution>0.925</resolution>
+            <min_angle>-3.14159265359</min_angle>
+            <max_angle>3.14159265359</max_angle>
           </horizontal>
         </scan>
         <range>
           <min>0.05</min>
-          <max>10</max>
+          <max>30</max>
           <resolution>0.02</resolution>
         </range>
       </ray>
@@ -512,5 +512,5 @@
         </ode>
       </physics>
     </joint>
-  </gazebo>  
+  </gazebo>
 </robot>
