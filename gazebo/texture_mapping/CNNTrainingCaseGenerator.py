@@ -22,6 +22,7 @@ def genBasicCourse(x):
         create_line(2000, 4000 - int(pixLength/2), length, width, alpha_channel)
         
         img_RGBA = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
+
         numObst = rand.randint(2,6)
         centerList = []
         for eachObs in range(numObst):
