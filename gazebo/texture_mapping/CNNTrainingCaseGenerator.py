@@ -9,20 +9,32 @@ ground_plane_size = 90
 
 image_size = 4000
 
-def genCourse():
-    blank_image = np.zeros((image_size,image_size,3))
-    b_channel, g_channel, r_channel = cv2.split(blank_image)
-    alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255
-    
-    width = rand.randint(3,7)
-    pixWidth = convert_distance_to_pixel(width)
-    length = rand.randint(20,86)
-    length = 85
-    pixLength = convert_distance_to_pixel(length)
-    create_line(2000, 4000 - int(pixLength/2), length, width, alpha_channel)
-    
-    img_RGBA = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
-    cv2.imwrite("blended_texture.png", img_RGBA)
+def genCourse(x):
+    for each in range(x):
+        blank_image = np.zeros((image_size,image_size,3))
+        b_channel, g_channel, r_channel = cv2.split(blank_image)
+        alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255
+        
+        width = rand.randint(3,7)
+        pixWidth = convert_distance_to_pixel(width)
+        length = rand.randint(20,86)
+        pixLength = convert_distance_to_pixel(length)
+        create_line(2000, 4000 - int(pixLength/2), length, width, alpha_channel)
+        
+        img_RGBA = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
+        numObst = rand.randint(2,6)
+        centerList = []
+        for eachObs in range(numObst):
+            pixelRadius = convert_distance_to_pixel(.15)
+            centerX = rand.randint(int(2000 + pixelRadius), int(2000 + pixWidth - pixelRadius))
+            centerY = rand.randint(int(4000 - pixLength + pixelRadius), int(4000 - pixelRadius))
+            while ((centerX, centerY) in centerList):
+                centerX = rand.randint(int(2000 + pixelRadius), int(2000 + pixWidth - pixelRadius))
+                centerY = rand.randint(int(4000 - pixLength + pixelRadius), int(4000 - pixelRadius))
+            centerList.append((centerX,centerY))
+            cv2.circle(img_RGBA, (centerX,centerY), 10, (255,255,255,255),-1)
+
+        cv2.imwrite("blended_texture" + str(each) + ".png", img_RGBA)
     
     
     
@@ -66,6 +78,6 @@ def create_line(startX, startY, width, length, alpha_channel):
 
 
 def main():
-    genCourse()
+    genCourse(5)
 if __name__=='__main__':
     main()
