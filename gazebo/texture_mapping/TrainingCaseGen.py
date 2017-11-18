@@ -5,7 +5,7 @@ import random as rand
 from math import sqrt, atan, degrees
 
 ground_plane_size = 90
-
+pot_hole_radius = .15
 image_size = 4000
 
 def genIntermediateCourse():
@@ -32,25 +32,27 @@ def genBasicCourse(x):
         b_channel, g_channel, r_channel = cv2.split(blank_image)
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255
         
-        width = rand.randint(3,7)
+        width = rand.randint(1,3)
         pixWidth = convert_distance_to_pixel(width)
         length = rand.randint(20,86)
-        length = 90
-        pixLength = convert_distance_to_pixel(length)
-        create_line(int(image_size / 2), image_size - int(pixLength/2), length, width, alpha_channel)
+        create_line(int(image_size / 2), image_size, length, width, alpha_channel)
         
         img_RGBA = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
         numObst = rand.randint(2,6)
         centerList = []
+        pixelRadius = convert_distance_to_pixel(.15)
         for eachObs in range(numObst):
-            pixelRadius = convert_distance_to_pixel(.15)
-            centerX = rand.randint(int((image_size / 2)+ pixelRadius), int(int(image_size / 2) + pixWidth - pixelRadius))
-            centerY = rand.randint(int((image_size / 2) - pixLength + pixelRadius), int(image_size - pixelRadius))
+            f = image_size / 2 + convert_distance_to_pixel(rand.uniform(pot_hole_radius, width - pot_hole_radius))
+            centerX = int(f)
+            print ("X: " + str(f))
+            f = image_size - convert_distance_to_pixel(rand.uniform(pot_hole_radius, length - pot_hole_radius))
+            print ("Y: " + str(f))
+            centerY = int(f)
             while ((centerX, centerY) in centerList):
-                centerX = rand.randint(int((image_size / 2) + pixelRadius), int(int(image_size / 2) + pixWidth - pixelRadius))
-                centerY = rand.randint(int((image_size) - pixLength + pixelRadius), int(image_size - pixelRadius))
+                centerX = convert_distance_to_pixel(rand.uniform(1 + pot_hole_radius, 3 - pot_hole_radius))
+                centerY = convert_distance_to_pixel(rand.uniform(20 + pot_hole_radius, 86 - pot_hole_radius))
             centerList.append((centerX,centerY))
-            cv2.circle(img_RGBA, (centerX,centerY), 10, (255,255,255,255),-1)
+            cv2.circle(img_RGBA, (centerX,centerY), pixelRadius, (255,255,255,255),-1)
 
         cv2.imwrite("basicCourse" + str(each) + ".png", img_RGBA)
     
@@ -90,16 +92,15 @@ def convert_pixel_to_distance(pixel1X, pixel1Y, pixel2X, pixel2Y):
 def convert_distance_to_pixel(distance):
     return int(round(distance * (float(image_size) / ground_plane_size)))
 
-def create_line(startX, startY, width, length, alpha_channel):
-    half_width = float(width) / 2
-    for i in range(startY - convert_distance_to_pixel(half_width), startY + convert_distance_to_pixel(half_width)):
-        for j in range(startX, startX + convert_distance_to_pixel(length)):
+def create_line(startX, startY, length, width, alpha_channel):
+    for i in range(startY - convert_distance_to_pixel(length), startY):
+        for j in range(startX, startX + convert_distance_to_pixel(width)):
             alpha_channel[i, j] = 0
     return alpha_channel
 
 
 def main():
-    genBasicCourse(5)
+    genBasicCourse(6)
     genIntermediateCourse()
     
 if __name__=='__main__':
