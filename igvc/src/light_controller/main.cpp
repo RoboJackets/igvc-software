@@ -55,10 +55,14 @@ int main(int argc, char **argv)
                               state.underglow_brightness[4],
                               state.underglow_brightness[5],
                               4 };
-
+    //ROS_INFO_STREAM("msg");
+    for(int i = 0; i < 12; i++) {
+      //ROS_INFO_STREAM(msg[i]);
+    }
     port.write(msg, 12);
 
     unsigned char *ret = (unsigned char *)port.read(4);
+    //ROS_INFO_STREAM("ret = " << ret);
 
     if (ret[0] != 2 || ret[3] != 4)
       ROS_ERROR_STREAM("Bad format for return packet.");
@@ -68,6 +72,7 @@ int main(int argc, char **argv)
     {
       std_msgs::Bool estop_msg;
       estop_msg.data = !(bool)(ret[1]);
+      //ROS_INFO_STREAM("port = " << !(bool)(ret[1]) << " " << ret[1]);
 
       enabled_pub.publish(estop_msg);
 
