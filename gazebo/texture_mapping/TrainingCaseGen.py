@@ -35,6 +35,7 @@ def genBasicCourse(x):
         width = rand.randint(3,7)
         pixWidth = convert_distance_to_pixel(width)
         length = rand.randint(20,86)
+        length = 85
         pixLength = convert_distance_to_pixel(length)
         create_line(2000, 4000 - int(pixLength/2), length, width, alpha_channel)
         
@@ -60,7 +61,6 @@ def create_circle(centerX, centerY, radiusIn, radiusOut, orientationStart, orien
     for i in range(centerX - convert_distance_to_pixel(radiusOut), centerX + convert_distance_to_pixel(radiusOut)):
         for j in range(centerY - convert_distance_to_pixel(radiusOut), centerY + convert_distance_to_pixel(radiusOut)):
             distance = convert_pixel_to_distance(centerX, centerY, i, j)
-            # gets angle from our defined zero (right)
             theta = -1
             if i - centerX != 0:
                 theta = degrees(atan((float(j) - centerY)/(i - centerX)))
@@ -92,13 +92,14 @@ def convert_distance_to_pixel(distance):
 def create_line(startX, startY, width, length, alpha_channel):
     half_width = float(width) / 2
     for i in range(startY - convert_distance_to_pixel(half_width), startY + convert_distance_to_pixel(half_width)):
+        print(str(i) + "StartX: " + str(startX) + " StartY: " + str(startY) + " width: " + str(width) + " length: " + str(length))
         for j in range(startX, startX + convert_distance_to_pixel(length)):
             alpha_channel[i, j] = 0
     return alpha_channel
 
 
 def main():
-    genBasicCourse(5)
+    genBasicCourse(1)
     genIntermediateCourse()
 if __name__=='__main__':
     main()
