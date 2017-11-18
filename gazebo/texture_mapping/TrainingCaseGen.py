@@ -6,23 +6,47 @@ from math import sqrt, atan, degrees
 
 ground_plane_size = 90
 
-image_size = image_size
+image_size = 4000
 
-def genIntermediateCourse():
-    blank_image = np.zeros((image_size,image_size,3))
-    b_channel, g_channel, r_channel = cv2.split(blank_image)
-    alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255
-    
-    outerRad = rand.randint(10, 15);
-    innerRad = outerRad - 2;
-    centerRad = innerRad - 1;
+def genIntermediateCourse(x):
+    for each in range(x):
+        blank_image = np.zeros((image_size,image_size,3))
+        b_channel, g_channel, r_channel = cv2.split(blank_image)
+        alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255
+        
+        outerRad = rand.randint(10, 15);
+        innerRad = outerRad - 2;
+        centerRad = innerRad - 1;
 
-    create_circle(convert_distance_to_pixel(39.2), int(image_size / 2), innerRad, outerRad, 225, 220, alpha_channel, 0)
-    create_circle(convert_distance_to_pixel(39.2), int(image_size / 2), 0, centerRad, 0, 360, alpha_channel, 0)
-    create_circle(convert_distance_to_pixel(39.2), int(image_size / 2), centerRad, innerRad, 250, 290, alpha_channel, 0)
+        slitAngle = rand.randint(5, 300)
+        openEntrance = slitAngle + rand.randint(5, 30)
+        create_circle(int(image_size/2), int(image_size / 2), innerRad, outerRad, slitAngle, slitAngle - 5, alpha_channel, 0)
+        create_circle(int(image_size/2), int(image_size / 2), 0, centerRad, 0, 360, alpha_channel, 0)
+        create_circle(int(image_size/2), int(image_size / 2), centerRad, innerRad, openEntrance, openEntrance + 40, alpha_channel, 0)
 
-    img_RGBA = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
-    cv2.imwrite("blended_texture.png", img_RGBA)
+        img_RGBA = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
+        numObst = rand.randint(6,10)
+        centerList = []
+
+        pixelRadius = convert_distance_to_pixel(.15)
+        centerRadPix = convert_distance_to_pixel(centerRad)
+        for eachObs in range(numObst):
+            pointPixDist = rand.uniform(0, centerRadPix - pixelRadius)
+            centerX = rand.uniform(-pointPixDist, pointPixDist)
+            if(rand.randint(0,10) / 10.0 > 0.5):
+                centerY = (sqrt(pointPixDist**2 - centerX**2))
+            else:
+                centerY = -sqrt(pointPixDist** - centerX**2) 
+            while ((centerX, centerY) in centerList):
+                pointPixDist = rand.randint(0, centerRadPix)
+                centerX = rand.randint(-pointPixDist, pointPixDist)
+                if(rand.randint(0,10) / 10.0 > 0.5):
+                    centerY = (sqrt(pointPixDist**2 - centerX**2))
+                else:
+                    centerY = -sqrt(pointPixDist**2 - centerX**2) 
+            centerList.append((int(centerX),int(centerY)))
+            cv2.circle(img_RGBA, (int(centerX),int(centerY)), int(pixelRadius), (255,255,255,255),-1)
+        cv2.imwrite("blended_texture" + str(each) + ".png", img_RGBA)
 
 
 
@@ -34,9 +58,7 @@ def genBasicCourse(x):
         
         width = rand.randint(3,7)
         pixWidth = convert_distance_to_pixel(width)
-        length = rand.randint(20,86)
-        length = 85
-        
+        length = rand.randint(20,86)        
         pixLength = convert_distance_to_pixel(length)
         create_line(int(image_size / 2), image_size - int(pixLength/2), length, width, alpha_channel)
         
@@ -51,7 +73,7 @@ def genBasicCourse(x):
                 centerX = rand.randint(int((image_size / 2) + pixelRadius), int(int(image_size / 2) + pixWidth - pixelRadius))
                 centerY = rand.randint(int((image_size) - pixLength + pixelRadius), int(image_size - pixelRadius))
             centerList.append((centerX,centerY))
-            cv2.circle(img_RGBA, (centerX,centerY), 10, (255,255,255,255),-1)
+            cv2.circle(img_RGBA, (centerX,centerY), pixelRadius, (255,255,255,255),-1)
 
         cv2.imwrite("basicCourse" + str(each) + ".png", img_RGBA)
     
@@ -100,8 +122,8 @@ def create_line(startX, startY, width, length, alpha_channel):
 
 
 def main():
-    genBasicCourse(1)
-    genIntermediateCourse()
+    #genBasicCourse(1)
+    genIntermediateCourse(5)
     
 if __name__=='__main__':
     main()
