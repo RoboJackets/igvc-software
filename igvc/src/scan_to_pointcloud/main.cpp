@@ -16,7 +16,9 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     return !std::isnan(range) && range > scanData.range_min && range < scanData.range_max;
   };
 
-  for (unsigned int i = 0; i < scanData.ranges.size(); i++)
+  /*
+
+    for (unsigned int i = 0; i < scanData.ranges.size(); i++)
   {
     float& range = scanData.ranges[i];
     if (range > scanData.range_max || range < scanData.range_min)
@@ -26,7 +28,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
       range = scanData.range_max + 1;
     // Too far
     else if (range > 6.0)
-      range = scanData.range_max + 1;
+3      range = scanData.range_max + 1;
     // No valid neighbors
     else if ((i == 0 || !rangeIsValid(scanData.ranges[i - 1])) &&
              (i == (scanData.ranges.size() - 1) || !rangeIsValid(scanData.ranges[i + 1])))
@@ -35,7 +37,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     else if ((i == 0 || abs(scanData.ranges[i - 1] - range) > 0.2) &&
              (i == (scanData.ranges.size() - 1) || abs(scanData.ranges[i + 1] - range) > 0.2))
       range = scanData.range_max + 1;
-  }
+      }*/
 
   sensor_msgs::PointCloud2 cloud;
   projection.projectLaser(scanData, cloud);
@@ -52,7 +54,7 @@ int main(int argc, char** argv)
 
   ros::NodeHandle nh;
 
-  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/scan/pointcloud", 1);
+  _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/pc2", 1);
 
   ros::Subscriber scan_sub = nh.subscribe("/scan", 1, scanCallback);
 
