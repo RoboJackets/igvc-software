@@ -10,8 +10,6 @@ double x_offset, y_offset, y_size, x_size;
 void point_cloud_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg) {
   pcl::PointCloud<pcl::PointXYZ> result;
   for(auto it = msg->points.begin(); it != msg->points.end(); it++) {
-    // ROS_INFO_STREAM("x = " << it->x << " y = " << it->y);
-    // ROS_INFO_STREAM(it->x + x_offset << " < " << x_size << " && " << it->x + x_offset << " > " << -x_size);
     if(!((it->x + x_offset < x_size && it->x + x_offset > -x_size) &&
          (it->y + y_offset < y_size && it->y + y_offset > -y_size))) {
       result.push_back(*it);
