@@ -7,6 +7,4 @@
       <param name="frame_id"            type="string" value="lidar"/>
       <param name="rotation_speed"    type="int" value="3"/>
     </node>
-    <remap from="/pc2" to="/scan/pointcloud"/>
-
 </launch>
