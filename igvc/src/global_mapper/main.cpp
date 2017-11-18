@@ -45,7 +45,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
         new_points.push_back(searchPoint);
       }
     }
-    new_points.header.frame_id = "/odom";
+    new_points.header.frame_id = "/lidar";
     _pointcloud_incremental_pub.publish(new_points);
     std::cout << "Map size: " << global_map->size() << std::endl;
   }
