@@ -5,6 +5,8 @@
       <param name="serial_port"         type="string" value="/dev/igvc_lidar"/>
       <param name="serial_baudrate"     type="int"    value="115200"/>
       <param name="frame_id"            type="string" value="lidar"/>
-      <param name="rotation_speed"    type="int" value="3"/>
+      <param name="rotation_speed"    type="int" value="10"/>
     </node>
+
+    <include file="$(find igvc)/launch/filter_lidar.launch" />w
 </launch>
