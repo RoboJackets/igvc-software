@@ -9,7 +9,7 @@ ground_plane_size = 90
 
 image_size = 4000
 
-def genCourse(x):
+def genBasicCourse(x):
     for each in range(x):
         blank_image = np.zeros((image_size,image_size,3))
         b_channel, g_channel, r_channel = cv2.split(blank_image)
@@ -34,7 +34,7 @@ def genCourse(x):
             centerList.append((centerX,centerY))
             cv2.circle(img_RGBA, (centerX,centerY), 10, (255,255,255,255),-1)
 
-        cv2.imwrite("blended_texture" + str(each) + ".png", img_RGBA)
+        cv2.imwrite("basicCourse" + str(each) + ".png", img_RGBA)
     
     
     
@@ -78,6 +78,6 @@ def create_line(startX, startY, width, length, alpha_channel):
 
 
 def main():
-    genCourse(5)
+    genBasicCourse(5)
 if __name__=='__main__':
     main()
