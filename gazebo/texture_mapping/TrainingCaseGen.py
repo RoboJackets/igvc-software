@@ -44,9 +44,7 @@ def genBasicCourse(x):
         for eachObs in range(numObst):
             f = image_size / 2 + convert_distance_to_pixel(rand.uniform(pot_hole_radius, width - pot_hole_radius))
             centerX = int(f)
-            print ("X: " + str(f))
             f = image_size - convert_distance_to_pixel(rand.uniform(pot_hole_radius, length - pot_hole_radius))
-            print ("Y: " + str(f))
             centerY = int(f)
             while ((centerX, centerY) in centerList):
                 centerX = convert_distance_to_pixel(rand.uniform(1 + pot_hole_radius, 3 - pot_hole_radius))
