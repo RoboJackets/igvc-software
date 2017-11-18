@@ -45,9 +45,9 @@ int main(int argc, char** argv)
     ros::spinOnce();
 
     // read the values
+    std::string rpy = port.readln();
     std::string accel = port.readln();
     std::string gyro = port.readln();
-    std::string rpy = port.readln();
 
     // parse the strings read
     std::vector<std::string> accelTokens = split(accel, '=');
