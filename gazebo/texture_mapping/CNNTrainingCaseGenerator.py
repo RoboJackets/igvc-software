@@ -1,3 +1,5 @@
+import sys
+sys.path.append('/usr/local/lib/python2.7/site-packages')
 import cv2
 import networkx as nx
 import numpy as np
@@ -9,20 +11,21 @@ ground_plane_size = 90
 
 image_size = 4000
 
-def genCourse():
-    blank_image = np.zeros((image_size,image_size,3))
-    b_channel, g_channel, r_channel = cv2.split(blank_image)
-    alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255
-    
-    width = rand.randint(3,7)
-    pixWidth = convert_distance_to_pixel(width)
-    length = rand.randint(20,86)
-    length = 85
-    pixLength = convert_distance_to_pixel(length)
-    create_line(2000, 4000 - int(pixLength/2), length, width, alpha_channel)
-    
-    img_RGBA = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
-    cv2.imwrite("blended_texture.png", img_RGBA)
+def genCourse(x):
+    for each in range(x):
+        blank_image = np.zeros((image_size,image_size,3))
+        b_channel, g_channel, r_channel = cv2.split(blank_image)
+        alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255
+        
+        width = rand.randint(3,7)
+        pixWidth = convert_distance_to_pixel(width)
+        length = rand.randint(20,86)
+        length = 85
+        pixLength = convert_distance_to_pixel(length)
+        create_line(2000, 4000 - int(pixLength/2), length, width, alpha_channel)
+        
+        img_RGBA = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
+        cv2.imwrite("blended_texture" + str(each) + ".png", img_RGBA)
     
     
     
@@ -66,6 +69,6 @@ def create_line(startX, startY, width, length, alpha_channel):
 
 
 def main():
-    genCourse()
+    genCourse(5)
 if __name__=='__main__':
     main()
