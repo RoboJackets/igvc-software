@@ -6,7 +6,7 @@ from math import sqrt, atan, degrees
 
 ground_plane_size = 90
 
-image_size = image_size
+image_size = 4000
 
 def genIntermediateCourse():
     blank_image = np.zeros((image_size,image_size,3))
