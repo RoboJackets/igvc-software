@@ -6,7 +6,7 @@ from math import sqrt, atan, degrees
 
 ground_plane_size = 90
 
-image_size = 4000
+image_size = image_size
 
 def genIntermediateCourse():
     blank_image = np.zeros((image_size,image_size,3))
@@ -17,9 +17,9 @@ def genIntermediateCourse():
     innerRad = outerRad - 2;
     centerRad = innerRad - 1;
 
-    create_circle(convert_distance_to_pixel(39.2), image_size / 2, innerRad, outerRad, 225, 220, alpha_channel, 0)
-    create_circle(convert_distance_to_pixel(39.2), image_size / 2, 0, centerRad, 0, 360, alpha_channel, 0)
-    create_circle(convert_distance_to_pixel(39.2), image_size / 2, centerRad, innerRad, 250, 290, alpha_channel, 0)
+    create_circle(convert_distance_to_pixel(39.2), int(image_size / 2), innerRad, outerRad, 225, 220, alpha_channel, 0)
+    create_circle(convert_distance_to_pixel(39.2), int(image_size / 2), 0, centerRad, 0, 360, alpha_channel, 0)
+    create_circle(convert_distance_to_pixel(39.2), int(image_size / 2), centerRad, innerRad, 250, 290, alpha_channel, 0)
 
     img_RGBA = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
     cv2.imwrite("blended_texture.png", img_RGBA)
@@ -36,19 +36,20 @@ def genBasicCourse(x):
         pixWidth = convert_distance_to_pixel(width)
         length = rand.randint(20,86)
         length = 85
+        
         pixLength = convert_distance_to_pixel(length)
-        create_line(2000, 4000 - int(pixLength/2), length, width, alpha_channel)
+        create_line(int(image_size / 2), image_size - int(pixLength/2), length, width, alpha_channel)
         
         img_RGBA = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
         numObst = rand.randint(2,6)
         centerList = []
         for eachObs in range(numObst):
             pixelRadius = convert_distance_to_pixel(.15)
-            centerX = rand.randint(int(2000 + pixelRadius), int(2000 + pixWidth - pixelRadius))
-            centerY = rand.randint(int(4000 - pixLength + pixelRadius), int(4000 - pixelRadius))
+            centerX = rand.randint(int((image_size / 2)+ pixelRadius), int(int(image_size / 2) + pixWidth - pixelRadius))
+            centerY = rand.randint(int((image_size / 2) - pixLength + pixelRadius), int(image_size - pixelRadius))
             while ((centerX, centerY) in centerList):
-                centerX = rand.randint(int(2000 + pixelRadius), int(2000 + pixWidth - pixelRadius))
-                centerY = rand.randint(int(4000 - pixLength + pixelRadius), int(4000 - pixelRadius))
+                centerX = rand.randint(int((image_size / 2) + pixelRadius), int(int(image_size / 2) + pixWidth - pixelRadius))
+                centerY = rand.randint(int((image_size) - pixLength + pixelRadius), int(image_size - pixelRadius))
             centerList.append((centerX,centerY))
             cv2.circle(img_RGBA, (centerX,centerY), 10, (255,255,255,255),-1)
 
@@ -101,5 +102,6 @@ def create_line(startX, startY, width, length, alpha_channel):
 def main():
     genBasicCourse(1)
     genIntermediateCourse()
+    
 if __name__=='__main__':
     main()
