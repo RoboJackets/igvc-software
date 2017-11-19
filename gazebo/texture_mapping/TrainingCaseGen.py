@@ -38,14 +38,23 @@ def genIntermediateCourse(x):
             if(rand.randint(0,10) / 10.0 > 0.5):
                 centerY = int(sqrt(pointPixDist**2 - centerX**2))
             else:
-                centerY = int(-sqrt(pointPixDist**2 - centerX**2)) 
-            while ((centerX, centerY) in centerList):
-                pointPixDist = rand.randint(0, centerRadPix - pixelRadius)
-                centerX = rand.randint(-pointPixDist, pointPixDist)
-                if(rand.randint(0,10) / 10.0 > 0.5):
-                    centerY = int(sqrt(pointPixDist**2 - centerX**2))
+                centerY = int(-sqrt(pointPixDist**2 - centerX**2))
+            done = False
+            i = 0;
+            while(not done):
+                if (i != len(centerList)):
+                    eachPot = centerList[i]
+                    if (convert_pixel_to_distance(centerX, centerY, eachPot[0], eachPot[1]) <= 1.80):
+                        centerX = int(rand.uniform(-pointPixDist, pointPixDist))
+                        if(rand.randint(0,10) / 10.0 > 0.5):
+                            centerY = int(sqrt(pointPixDist**2 - centerX**2))
+                        else:
+                            centerY = int(-sqrt(pointPixDist**2 - centerX**2))                        
+                        i = 0
+                    else:
+                        i += 1
                 else:
-                    centerY = int(-sqrt(pointPixDist**2 - centerX**2)) 
+                    done = True
             centerList.append((centerX, centerY))
             cv2.circle(img_RGBA, (int(image_size / 2) + centerX,int(image_size / 2) + centerY), int(pixelRadius), (255,255,255,255),-1)
         centerList = []
@@ -55,14 +64,23 @@ def genIntermediateCourse(x):
             if(rand.randint(0,10) / 10.0 > 0.5):
                 centerY = int(sqrt(pointPixDist**2 - centerX**2))
             else:
-                centerY = int(-sqrt(pointPixDist**2 - centerX**2)) 
-            while ((centerX, centerY) in centerList):
-                pointPixDist = rand.randint(0, centerRadPix - pixelRadius)
-                centerX = rand.randint(-pointPixDist, pointPixDist)
-                if(rand.randint(0,10) / 10.0 > 0.5):
-                    centerY = int(sqrt(pointPixDist**2 - centerX**2))
+                centerY = int(-sqrt(pointPixDist**2 - centerX**2))
+            done = False
+            i = 0
+            while(not done):
+                if (i != len(centerList)):
+                    eachPot = centerList[i]
+                    if (convert_pixel_to_distance(centerX, centerY, eachPot[0], eachPot[1]) <= 1.80):
+                        centerX = int(rand.uniform(-pointPixDist, pointPixDist))
+                        if(rand.randint(0,10) / 10.0 > 0.5):
+                            centerY = int(sqrt(pointPixDist**2 - centerX**2))
+                        else:
+                            centerY = int(-sqrt(pointPixDist**2 - centerX**2))                        
+                        i = 0
+                    else:
+                        i += 1
                 else:
-                    centerY = int(-sqrt(pointPixDist**2 - centerX**2)) 
+                    done = True
             centerList.append((centerX, centerY))
             cv2.circle(img_RGBA, (int(image_size / 2) + centerX,int(image_size / 2) + centerY), int(pixelRadius), (255,255,255,255),-1)
         cv2.imwrite("blended_texture" + str(each) + ".png", img_RGBA)
@@ -153,8 +171,8 @@ def create_line(startX, startY, length, width, alpha_channel):
 
 
 def main():
-    genBasicCourse(4)
-    #genIntermediateCourse(5)
+    #genBasicCourse(4)
+    genIntermediateCourse(5)
     
 if __name__=='__main__':
     main()
