@@ -75,7 +75,7 @@ def genBasicCourse(x):
         b_channel, g_channel, r_channel = cv2.split(blank_image)
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255
         
-        width = rand.randint(1,3)
+        width = rand.randint(3,6)
         pixWidth = convert_distance_to_pixel(width)
 
         length = rand.randint(20,86)
@@ -90,10 +90,22 @@ def genBasicCourse(x):
             centerX = int(f)
             f = image_size - convert_distance_to_pixel(rand.uniform(pot_hole_radius, length - pot_hole_radius))
             centerY = int(f)
-            while ((centerX, centerY) in centerList):
-                centerX = convert_distance_to_pixel(rand.uniform(1 + pot_hole_radius, 3 - pot_hole_radius))
-                centerY = convert_distance_to_pixel(rand.uniform(20 + pot_hole_radius, 86 - pot_hole_radius))
-            centerList.append((centerX,centerY))
+            newHole = (centerX,centerY)
+            done = False
+            i = 0
+            while(not done):
+                if (i != len(centerList)):
+                    eachPot = centerList[i]
+                    if (convert_pixel_to_distance(newHole[0], newHole[1], eachPot[0], eachPot[1]) <= 1.80):
+                        centerX = convert_distance_to_pixel(rand.uniform(1 + pot_hole_radius, 3 - pot_hole_radius))
+                        centerY = convert_distance_to_pixel(rand.uniform(20 + pot_hole_radius, 86 - pot_hole_radius))
+                        newHole = (centerX,centerY)
+                        i = 0
+                    else:
+                        i += 1
+                else:
+                    done = True
+            centerList.append(newHole)
             cv2.circle(img_RGBA, (centerX,centerY), pixelRadius, (255,255,255,255),-1)
 
         cv2.imwrite("basicCourse" + str(each) + ".png", img_RGBA)
@@ -141,8 +153,8 @@ def create_line(startX, startY, length, width, alpha_channel):
 
 
 def main():
-    #genBasicCourse(1)
-    genIntermediateCourse(5)
+    genBasicCourse(4)
+    #genIntermediateCourse(5)
     
 if __name__=='__main__':
     main()
