@@ -101,7 +101,7 @@ int main(int argc, char** argv)
       msg.angular_velocity.z = stof(gyroTokens[2]);
       msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
 
-      float yaw = HALF_TO_FULL_CIRCLE_ANGLE(-stof(rpyTokens[0])) * DEG_TO_RAD;
+      float yaw = HALF_TO_FULL_CIRCLE_ANGLE(-(stof(rpyTokens[0]) + 90)) * DEG_TO_RAD;
       float pitch = HALF_TO_FULL_CIRCLE_ANGLE(-stof(rpyTokens[1])) * DEG_TO_RAD;
       float roll = HALF_TO_FULL_CIRCLE_ANGLE(stof(rpyTokens[2]) + 180) * DEG_TO_RAD;
 
