@@ -46,7 +46,7 @@ def genIntermediateCourse(x):
                     centerY = -sqrt(pointPixDist**2 - centerX**2) 
             centerList.append((int(centerX),int(centerY)))
             cv2.circle(img_RGBA, (int(centerX),int(centerY)), int(pixelRadius), (255,255,255,255),-1)
-        cv2.imwrite("blended_texture" + str(each) + ".png", img_RGBA)
+        cv2.imwrite("intermediateCourse" + str(each) + ".png", img_RGBA)
 
 
 
