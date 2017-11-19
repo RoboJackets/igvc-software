@@ -26,17 +26,18 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZ>::Ptr input)
 {
   if (!firstFrame)
   {
-    pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
+    /*pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
     icp.setMaxCorrespondenceDistance(maxCorrDist);
     icp.setMaximumIterations(maxIter);
     icp.setInputSource(input);
     icp.setInputTarget(global_map);
     pcl::PointCloud<pcl::PointXYZ> Final;
+
+    icp.align(Final);*/
     pcl::PointCloud<pcl::PointXYZ> new_points;
-    icp.align(Final);
-    for (unsigned int i = 0; i < Final.size(); ++i)
+    for (unsigned int i = 0; i < input->points.size(); ++i)
     {
-      pcl::PointXYZ searchPoint(Final[i].x, Final[i].y, Final[i].z);
+      pcl::PointXYZ searchPoint(input->points[i].x, input->points[i].y, input->points[i].z);
       std::vector<int> indices;
       std::vector<float> distances;
       if (octree.radiusSearch(searchPoint, searchRadius, indices, distances, 1) == 0)
