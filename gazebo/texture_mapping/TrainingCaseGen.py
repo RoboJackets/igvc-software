@@ -8,6 +8,7 @@ ground_plane_size = 90
 pot_hole_radius = .15
 image_size = 4000
 
+
 def genIntermediateCourse():
     blank_image = np.zeros((image_size,image_size,3))
     b_channel, g_channel, r_channel = cv2.split(blank_image)
