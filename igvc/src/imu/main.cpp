@@ -106,6 +106,14 @@ int main(int argc, char** argv)
       float roll = HALF_TO_FULL_CIRCLE_ANGLE(stof(rpyTokens[2]) + 180) * DEG_TO_RAD;
 
       msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
+
+      // removing gravity vector from accelerations
+      tf::Transform gravityTransform(tf::Quaternion(roll, pitch, yaw));
+      tf::Vector3 gravityVector = gravityTransform(tf::Vector3(0,0,9.81));
+      msg.linear_acceleration.x += gravityVector.getX();
+      msg.linear_acceleration.y += gravityVector.getY();
+      msg.linear_acceleration.z += gravityVector.getZ();
+
       msg.orientation_covariance = { 0.0025, 1e-6, 1e-6, 1e-6, 0.0025, 1e-6, 1e-6, 1e-6, 0.0025 };
     }
     catch (const std::invalid_argument& e)
