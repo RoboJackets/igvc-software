@@ -15,7 +15,7 @@ def genIntermediateCourse(x):
         alpha_channel = np.ones(b_channel.shape, dtype=b_channel.dtype) * 255
         
         outerRad = rand.randint(10, 15);
-        innerRad = outerRad - 3;
+        innerRad = outerRad - 2;
         centerRad = innerRad - 1;
 
         slitAngle = rand.randint(5, 300)
@@ -30,42 +30,23 @@ def genIntermediateCourse(x):
 
         pixelRadius = convert_distance_to_pixel(.15)
         centerRadPix = convert_distance_to_pixel(centerRad)
-        innerRadPix = convert_distance_to_pixel(innerRad)
-        outerRadPix = convert_distance_to_pixel(outerRad)
         for eachObs in range(numObst):
-            pointPixDist = rand.uniform(0, centerRadPix - pixelRadius-67)
-            centerX = int(rand.uniform(-pointPixDist, pointPixDist))
+            pointPixDist = rand.uniform(0, centerRadPix - pixelRadius)
+            centerX = rand.uniform(-pointPixDist, pointPixDist)
             if(rand.randint(0,10) / 10.0 > 0.5):
-                centerY = int(sqrt(pointPixDist**2 - centerX**2))
+                centerY = (sqrt(pointPixDist**2 - centerX**2))
             else:
-                centerY = int(-sqrt(pointPixDist**2 - centerX**2)) 
+                centerY = -sqrt(pointPixDist** - centerX**2) 
             while ((centerX, centerY) in centerList):
-                pointPixDist = rand.randint(0, centerRadPix - pixelRadius)
+                pointPixDist = rand.randint(0, centerRadPix)
                 centerX = rand.randint(-pointPixDist, pointPixDist)
                 if(rand.randint(0,10) / 10.0 > 0.5):
-                    centerY = int(sqrt(pointPixDist**2 - centerX**2))
+                    centerY = (sqrt(pointPixDist**2 - centerX**2))
                 else:
-                    centerY = int(-sqrt(pointPixDist**2 - centerX**2)) 
-            centerList.append((centerX, centerY))
-            cv2.circle(img_RGBA, (int(image_size / 2) + centerX,int(image_size / 2) + centerY), int(pixelRadius), (255,255,255,255),-1)
-        centerList = []
-        for eachObs in range(numObst):
-            pointPixDist = rand.uniform(innerRadPix + pixelRadius + 67, outerRadPix - pixelRadius-67)
-            centerX = int(rand.uniform(-pointPixDist, pointPixDist))
-            if(rand.randint(0,10) / 10.0 > 0.5):
-                centerY = int(sqrt(pointPixDist**2 - centerX**2))
-            else:
-                centerY = int(-sqrt(pointPixDist**2 - centerX**2)) 
-            while ((centerX, centerY) in centerList):
-                pointPixDist = rand.randint(0, centerRadPix - pixelRadius)
-                centerX = rand.randint(-pointPixDist, pointPixDist)
-                if(rand.randint(0,10) / 10.0 > 0.5):
-                    centerY = int(sqrt(pointPixDist**2 - centerX**2))
-                else:
-                    centerY = int(-sqrt(pointPixDist**2 - centerX**2)) 
-            centerList.append((centerX, centerY))
-            cv2.circle(img_RGBA, (int(image_size / 2) + centerX,int(image_size / 2) + centerY), int(pixelRadius), (255,255,255,255),-1)
-        cv2.imwrite("blended_texture" + str(each) + ".png", img_RGBA)
+                    centerY = -sqrt(pointPixDist**2 - centerX**2) 
+            centerList.append((int(centerX),int(centerY)))
+            cv2.circle(img_RGBA, (int(centerX),int(centerY)), int(pixelRadius), (255,255,255,255),-1)
+        cv2.imwrite("intermediateCourse" + str(each) + ".png", img_RGBA)
 
 
 
@@ -158,3 +139,4 @@ def main():
     
 if __name__=='__main__':
     main()
+
