@@ -2,10 +2,13 @@ import cv2
 import numpy as np
 import pylab as pl
 import random as rand
-from math import sqrt, atan, degrees
+from math import sqrt, atan, degrees, sin, cos
 
+#size of field, meters
 ground_plane_size = 90
 pot_hole_radius = .30
+
+#size of image, pixels
 image_size = 4000
 
 def genIntermediateCourse(x):
@@ -32,6 +35,7 @@ def genIntermediateCourse(x):
         centerRadPix = convert_distance_to_pixel(centerRad)
         innerRadPix = convert_distance_to_pixel(innerRad)
         outerRadPix = convert_distance_to_pixel(outerRad)
+        num = 1
         for eachObs in range(numObst):
             pointPixDist = rand.uniform(0, centerRadPix - pixelRadius-67)
             centerX = int(rand.uniform(-pointPixDist, pointPixDist))
@@ -45,17 +49,15 @@ def genIntermediateCourse(x):
                 if (i != len(centerList)):
                     eachPot = centerList[i]
                     if (convert_pixel_to_distance(centerX, centerY, eachPot[0], eachPot[1]) <= 1.80):
-                        centerX = int(rand.uniform(-pointPixDist, pointPixDist))
-                        if(rand.randint(0,10) / 10.0 > 0.5):
-                            centerY = int(sqrt(pointPixDist**2 - centerX**2))
-                        else:
-                            centerY = int(-sqrt(pointPixDist**2 - centerX**2))                        
+                        centerX += centerX - eachPot[0];
+                        centerY += centerY - eachPot[1];
                         i = 0
                     else:
                         i += 1
                 else:
                     done = True
             centerList.append((centerX, centerY))
+            num += 1
             cv2.circle(img_RGBA, (int(image_size / 2) + centerX,int(image_size / 2) + centerY), int(pixelRadius), (255,255,255,255),-1)
         centerList = []
         for eachObs in range(numObst):
@@ -71,18 +73,24 @@ def genIntermediateCourse(x):
                 if (i != len(centerList)):
                     eachPot = centerList[i]
                     if (convert_pixel_to_distance(centerX, centerY, eachPot[0], eachPot[1]) <= 1.80):
-                        centerX = int(rand.uniform(-pointPixDist, pointPixDist))
-                        if(rand.randint(0,10) / 10.0 > 0.5):
-                            centerY = int(sqrt(pointPixDist**2 - centerX**2))
-                        else:
-                            centerY = int(-sqrt(pointPixDist**2 - centerX**2))                        
+                        centerX += centerX - eachPot[0];
+                        centerY += centerY - eachPot[1];
+                        if (centerY < 0 and centerX < 0):
+                            if (convert_pixel_to_distance(centerX, centerY, eachPot[0], eachPot[1]) > 
+                            centerY += outerRadPix - centerY + pot_hole_radius
+                        elif (centerY > 0 and centerX < 0):
+                            centerY -= centerY - outerRadPix - pot_hole_radius
+                        elif (centerY <= 0 and centerX > 0):
+                            centerX = centerX
+                        elif (centerY >= 0 and centerX < 0):
+                            centerX = centerX   
                         i = 0
                     else:
                         i += 1
                 else:
                     done = True
-            centerList.append((centerX, centerY))
-            cv2.circle(img_RGBA, (int(image_size / 2) + centerX,int(image_size / 2) + centerY), int(pixelRadius), (255,255,255,255),-1)
+            centerList.append((int(centerX), int(centerY)))
+            cv2.circle(img_RGBA, ((int(image_size / 2) + centerX),int((image_size / 2) + centerY)), int(pixelRadius), (255,255,255,255),-1)
         cv2.imwrite("blended_texture" + str(each) + ".png", img_RGBA)
 
 
@@ -115,7 +123,7 @@ def genBasicCourse(x):
                 if (i != len(centerList)):
                     eachPot = centerList[i]
                     if (convert_pixel_to_distance(newHole[0], newHole[1], eachPot[0], eachPot[1]) <= 1.80):
-                        centerX = convert_distance_to_pixel(rand.uniform(1 + pot_hole_radius, 3 - pot_hole_radius))
+                        centerX = centerX + 1.8
                         centerY = convert_distance_to_pixel(rand.uniform(20 + pot_hole_radius, 86 - pot_hole_radius))
                         newHole = (centerX,centerY)
                         i = 0
