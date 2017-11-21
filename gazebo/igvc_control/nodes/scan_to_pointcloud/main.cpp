@@ -18,7 +18,7 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     return !std::isnan(range) && range > scanData.range_min && range < scanData.range_max;
   };
 
-    for (unsigned int i = 0; i < scanData.ranges.size(); i++)
+  for (unsigned int i = 0; i < scanData.ranges.size(); i++)
   {
     float& range = scanData.ranges[i];
     if (range > scanData.range_max || range < scanData.range_min)
