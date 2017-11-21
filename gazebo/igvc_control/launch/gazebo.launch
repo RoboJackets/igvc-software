@@ -46,7 +46,10 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 
     <!-- convert laser scan to point cloud for LIDAR -->
-    <node name="scan_to_pointcloud" pkg="igvc" type="scan_to_pointcloud" output="screen" />
+    <node name="scan_to_pointcloud" pkg="igvc_control" type="scan_to_pointcloud" output="screen" >
+      <param name="min_dist" value="0.1"/>
+      <param name="neighbor_dist" value="0.2"/>
+    </node>
 
     </group>
 
