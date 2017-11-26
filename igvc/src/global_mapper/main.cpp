@@ -42,7 +42,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::stri
   //Temp
   queue_window_size = map_it->second.second;
 
-  if (pointcloud_list->size() < (unsigned int) queue_window_size)
+  if (pointcloud_list.size() < static_cast<unsigned int>(queue_window_size))
   {
     //icp
     /*pcl::PointCloud<pcl::PointXYZRGB>::Ptr Final;
@@ -64,7 +64,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::stri
     pointcloud_list->push_back(input);
 
   }
-  if (pointcloud_list->size() == (unsigned int) queue_window_size)
+  if (pointcloud_list.size() == static_cast<unsigned int>(queue_window_size))
   {
     // Probabilistic calculations here
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr local_pc =
