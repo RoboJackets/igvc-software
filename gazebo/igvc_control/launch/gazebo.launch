@@ -50,9 +50,7 @@
       <param name="min_dist" value="0.1"/>
       <param name="neighbor_dist" value="0.2"/>
     </node>
-    <include file="$(find igvc)/launch/filter_lidar.launch" />
-
   </group>
-
-    <include file="$(find igvc_control)/launch/igvc_control.launch" />
+  <include file="$(find igvc)/launch/filter_lidar.launch" />
+  <include file="$(find igvc_control)/launch/igvc_control.launch" />
 </launch>
