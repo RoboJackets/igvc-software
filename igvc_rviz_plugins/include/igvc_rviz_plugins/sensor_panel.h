@@ -8,6 +8,8 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <QLabel>
+#include <QBasicTimer>
+#include <QObject>
 
 /*
  * All of our panels need to be under the igvc_rviz_plugins namespace.
@@ -41,6 +43,9 @@ protected:
     ros::Subscriber camCenter_sub;
 	ros::Subscriber camLeft_sub;
 	ros::Subscriber camRight_sub;
+
+	QBasicTimer *sensor_timer;
+	QLabel *label, *label2, *label3, *label4, *label5, *label6;
     
 
 
@@ -56,13 +61,14 @@ protected:
 	void camLeft_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
 	void camRight_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
 	void gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
-
     /**
      * If you need to paint custom graphics on your panel, uncomment and implement the paintEvent method.
      * You can find out more about this method here: http://doc.qt.io/qt-5/qwidget.html#paintEvent
      */
 //    void paintEvent(QPaintEvent *event) override;
 
+private:
+	void timer();
 };
 
 }

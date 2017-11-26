@@ -8,7 +8,6 @@
 namespace igvc_rviz_plugins {
 
 
-
 sensor_panel::sensor_panel(QWidget *parent)
   : rviz::Panel(parent) // Base class constructor
 {
@@ -16,12 +15,16 @@ sensor_panel::sensor_panel(QWidget *parent)
     ros::NodeHandle nh;
 
     // Initialize a label for displaying some data
-    QLabel* label = new QLabel("IMU Placehold:\n");
-	QLabel* label2 = new QLabel("Lidar Sensors Placehold\n");
-	QLabel* label3 = new QLabel("CamCenter Placehold\n");
-	QLabel* label4 = new QLabel("CamLeft Placehold\n");
-	QLabel* label5 = new QLabel("CamRight Placehold\n");
-	QLabel* label6 = new QLabel("GPS Placehold");
+    label = new QLabel("IMU: Placehold\n");
+	label2 = new QLabel("Lidar Sensors: Placehold\n");
+	label3 = new QLabel("CamCenter: Placehold\n");
+	label4 = new QLabel("CamLeft: Placehold\n");
+	label5 = new QLabel("CamRight: Placehold\n");
+	label6 = new QLabel("GPS: Placehold");
+
+	*sensor_timer = QBasicTimer();
+
+	 
 
     /* Initialize our subscriber to listen to the /speed topic.
     * Note the use of boost::bind, which allows us to give the callback a pointer to our UI label.
@@ -44,6 +47,8 @@ sensor_panel::sensor_panel(QWidget *parent)
 	layout->addWidget(label5);
 	layout->addWidget(label6);
     setLayout(layout);
+    sensor_timer->start(250, sensor_timer);
+    sensor_panel::timer();
 }
 
 void sensor_panel::imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label) {
@@ -100,6 +105,19 @@ void sensor_panel::gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLab
 	else {
 		label->setText("GPS: Disabled");
 	}
+}
+
+void sensor_panel::timer(){
+		if(!timer->isActive()){
+			label->setText("IMU: Disabled");
+			label2->setText("Lidar: Disabled");
+			label3->setText("Center Center: Disabled");
+			label4->setText(": Disabled");
+			label5->setText("GPS: Disabled");
+			label6->setText("GPS: Disabled");
+			//set all labels to disabled
+		    sensor_timer->start(250, sensor_timer);
+		}
 }
 
 //void ExamplePanel::paintEvent(QPaintEvent *event)  {
