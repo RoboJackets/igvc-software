@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string>
 #include <std_msgs/Int64.h>
+#include <unordered_map>
+#include <utility>
 
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr global_map;
 ros::Publisher _pointcloud_pub;
@@ -25,16 +27,44 @@ double searchRadius;
 double octree_resolution;
 double probability_thresh;
 
-std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> pointcloud_list;
-int queue_window_size;
+std::unordered_map<std::string, std::pair<std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>*,int>> topic_pc_list;
+std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* pointcloud_list;
 
-void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
+int queue_window_size;
+std::vector<int> queue_window_sizes;
+
+void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::string &topic)
 {
-  if (pointcloud_list.size() < (unsigned int) queue_window_size)
+  //Retrieve pointcloud list pointer from unordered map
+  auto map_it = topic_pc_list.find(topic);
+  pointcloud_list = map_it->second.first;
+
+  //Temp
+  queue_window_size = map_it->second.second;
+
+  if (pointcloud_list->size() < (unsigned int) queue_window_size)
   {
-    pointcloud_list.push_back(input);
+    //icp
+    /*pcl::PointCloud<pcl::PointXYZRGB>::Ptr Final;
+    if (!firstFrame && global_map->size() > 0)
+    {
+      pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
+      icp.setMaxCorrespondenceDistance(maxCorrDist);
+      icp.setMaximumIterations(maxIter);
+      icp.setInputSource(input);
+      icp.setInputTarget(global_map);
+      //pcl::PointCloud<pcl::PointXYZ> Final;
+      pcl::PointCloud<pcl::PointXYZRGB> new_points;
+      icp.align(*Final);
+      pointcloud_list->push_back(Final);
+    } else
+    {
+      pointcloud_list->push_back(input);
+    }*/
+    pointcloud_list->push_back(input);
+
   }
-  if (pointcloud_list.size() == (unsigned int) queue_window_size)
+  if (pointcloud_list->size() == (unsigned int) queue_window_size)
   {
     // Probabilistic calculations here
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr local_pc =
@@ -43,7 +73,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
 
     local_octree.setInputCloud(local_pc);
 
-    for (auto it = pointcloud_list.begin(); it != pointcloud_list.end(); it++)
+    for (auto it = pointcloud_list->begin(); it != pointcloud_list->end(); it++)
     {
       for (auto point : (**it))
       {
@@ -79,7 +109,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input)
     _pointcloud_prob_pub.publish(*local_pc);
 
     // Remove first pointcloud
-    pointcloud_list.pop_front();
+    pointcloud_list->pop_front();
 
     // Publish map size
     std_msgs::Int64 size_msg;
@@ -124,7 +154,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_rgb =
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::copyPointCloud(*transformed, *transformed_rgb);
-    icp_transform(transformed_rgb);
+    icp_transform(transformed_rgb, topic);
 
     _pointcloud_pub.publish(global_map);
   }
@@ -156,6 +186,7 @@ int main(int argc, char **argv)
   pNh.getParam("octree_resolution", octree_resolution);
   pNh.getParam("queue_window_size", queue_window_size);
   pNh.getParam("probability_thresh", probability_thresh);
+  pNh.getParam("queue_window_sizes", queue_window_sizes);
   if (topics.empty())
     ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
 
@@ -164,10 +195,20 @@ int main(int argc, char **argv)
   std::istringstream iss(topics);
   std::vector<std::string> tokens{ std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>() };
 
+  if (tokens.size() != queue_window_sizes.size())
+  {
+    std::cout << tokens.size() << " " << queue_window_sizes.size() << std::endl;
+    ROS_ERROR_STREAM("Queue window size does not match topic list size");
+    return 0;
+  }
+
+  int count = 0;
   for (auto topic : tokens)
   {
     ROS_INFO_STREAM("Mapper subscribing to " << topic);
     subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(topic, 1, boost::bind(frame_callback, _1, topic)));
+    topic_pc_list.insert({topic, std::make_pair(new std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>, queue_window_sizes[count])});
+    count++;
   }
 
   global_map->header.frame_id = "/odom";
