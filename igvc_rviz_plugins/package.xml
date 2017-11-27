@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<package>
+  <name>igvc_rviz_plugins</name>
+  <version>0.0.0</version>
+  <description>Rviz plugins for IGVC</description>
+
+  <maintainer email="matthew.barulic@gmail.com">Matthew Barulic</maintainer>
+  <maintainer email="chaussee.al@gmail.com">Al Chaussee</maintainer>
+
+  <license>MIT</license>
+
+  <url type="website">http://www.robojackets.org</url>
+  <url type="website">http://www.github.com/robojackets/igvc-software</url>
+  <url type="website">http://robojackets.github.io/igvc-software</url>
+  <url type="website">http://www.noruts.com</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>rviz</build_depend>
+  <build_depend>igvc_msgs</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>rviz</run_depend>
+  <run_depend>igvc_msgs</run_depend>
+
+  <export>
+    <rviz plugin="${prefix}/plugin_description.xml"/>
+  </export>
+</package>
