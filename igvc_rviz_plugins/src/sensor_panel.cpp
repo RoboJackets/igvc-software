@@ -1,6 +1,8 @@
 #include <igvc_rviz_plugins/sensor_panel.h>
 #include <QVBoxLayout>
 #include <pluginlib/class_list_macros.h>
+//#include <std>
+//#include "rjTimer.h"
 
 /*
  * Just as in the header, everything needs to happen in the igvc_rviz_plugins namespace.
@@ -14,6 +16,7 @@ sensor_panel::sensor_panel(QWidget *parent)
     // Panels are allowed to interact with NodeHandles directly just like ROS nodes.
     ros::NodeHandle nh;
 
+
     // Initialize a label for displaying some data
     label = new QLabel("IMU: Placehold\n");
 	label2 = new QLabel("Lidar Sensors: Placehold\n");
@@ -22,9 +25,17 @@ sensor_panel::sensor_panel(QWidget *parent)
 	label5 = new QLabel("CamRight: Placehold\n");
 	label6 = new QLabel("GPS: Placehold");
 
-	*sensor_timer = QBasicTimer();
-
-	 
+	/*
+	*Makes timer that repeats every interval seconds
+	*When timer goes off, it calls the timer method
+	*/
+	const int interval = 500;
+	sensor_timer = new QTimer();
+	sensor_timer->setSingleShot(false);//repeats
+	sensor_timer->setInterval(interval);//goes off every 250 milliseconds
+	//calls timer whenever sensor_timer goes off
+	QObject::connect(sensor_timer, SIGNAL(timeout()),
+					this, SLOT(timer()));
 
     /* Initialize our subscriber to listen to the /speed topic.
     * Note the use of boost::bind, which allows us to give the callback a pointer to our UI label.
@@ -47,85 +58,54 @@ sensor_panel::sensor_panel(QWidget *parent)
 	layout->addWidget(label5);
 	layout->addWidget(label6);
     setLayout(layout);
-    sensor_timer->start(250, sensor_timer);
-    sensor_panel::timer();
+    timer();//inits to disabled
 }
 
 void sensor_panel::imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label) {
-    // Create the new contents of the label based on the speed message.
-    ROS_INFO_STREAM("WORKS!");
-    if(msg){
-        // Set the contents of the label.
-        label->setText("IMU: Enabled"/*.c_str()*/);
-    }
-    else{
-        label->setText("IMU: Disabled"/*.c_str()*/);
-    }
+    label->setText("IMU: Enabled"/*.c_str()*/);
 }
 
 void sensor_panel::lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label) {
-	if (msg) {
-		(*label).setText("Lidar: Enabled");
-	}
-	else {
-		(*label).setText("Lidar: Disabled");
-	}
+	(*label).setText("Lidar: Enabled");
 }
 
 void sensor_panel::camCenter_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label) {
-	if (msg) {
-		(*label).setText("Center Camera: Enabled");
-	}
-	else {
-		(*label).setText("Center Camera: Disabled");
-	}
+	(*label).setText("Center Camera: Enabled");
 }
 
 void sensor_panel::camLeft_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label) {
-	if (msg) {
-		(*label).setText("Left Camera: Enabled");
-	}
-	else {
-		(*label).setText("Left Camera: Disabled");
-	}
+	(*label).setText("Left Camera: Enabled");
 }
 
 void sensor_panel::camRight_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label) {
-	if (msg) {
-		(*label).setText("Right Camera: Enabled");
-	}
-	else {
-		(*label).setText("Right Camera: Disabled");
-	}
+	(*label).setText("Right Camera: Enabled");
 }
 void sensor_panel::gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label) {
-	if (msg) {
-		label->setText("GPS: Enabled");
-	}
-	else {
-		label->setText("GPS: Disabled");
-	}
+	label->setText("GPS: Enabled");
 }
 
+/*
+*Sets all of the labels to Disabled
+*/
+void sensor_panel::reset_labels(){
+	label->setText("IMU: Disabled");
+	label2->setText("Lidar: Disabled");
+	label3->setText("Center Camera: Disabled");
+	label4->setText("Left Camera: Disabled");
+	label5->setText("Right Camera: Disabled");
+	label6->setText("GPS: Disabled");
+
+}
+
+/*
+*Sets the labels to Disabled, and then restarts the timer
+*/
 void sensor_panel::timer(){
-		if(!timer->isActive()){
-			label->setText("IMU: Disabled");
-			label2->setText("Lidar: Disabled");
-			label3->setText("Center Center: Disabled");
-			label4->setText(": Disabled");
-			label5->setText("GPS: Disabled");
-			label6->setText("GPS: Disabled");
-			//set all labels to disabled
-		    sensor_timer->start(250, sensor_timer);
-		}
+	reset_labels();
+	sensor_timer->start();
 }
 
-//void ExamplePanel::paintEvent(QPaintEvent *event)  {
-//
-//}
-
 }
-// imu_sub = nh.subscribe("/imu", 1, &sensor_panel::imu_callback, this);
 
 
 /*

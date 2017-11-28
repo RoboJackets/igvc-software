@@ -8,8 +8,9 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <QLabel>
-#include <QBasicTimer>
+#include <QTimer>
 #include <QObject>
+
 
 /*
  * All of our panels need to be under the igvc_rviz_plugins namespace.
@@ -19,7 +20,7 @@ namespace igvc_rviz_plugins {
 /*
  * Each panel is a subclass of rviz::Panel
  */
-class sensor_panel : public rviz::Panel {
+class sensor_panel : public rviz::Panel{
 /*
  * rviz is based on QT, so our panels need to be QObjects, which requires this macro keyword.
  */
@@ -31,6 +32,9 @@ public:
      * @param parent The parent widget, which will be responsible for the lifetime of this widget.
      */
     sensor_panel(QWidget *parent = 0);
+
+public slots:
+	void timer();
 
 protected:
     /*
@@ -44,7 +48,7 @@ protected:
 	ros::Subscriber camLeft_sub;
 	ros::Subscriber camRight_sub;
 
-	QBasicTimer *sensor_timer;
+	QTimer *sensor_timer;
 	QLabel *label, *label2, *label3, *label4, *label5, *label6;
     
 
@@ -61,14 +65,16 @@ protected:
 	void camLeft_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
 	void camRight_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
 	void gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
+    
+    void reset_labels();
+
+
     /**
      * If you need to paint custom graphics on your panel, uncomment and implement the paintEvent method.
      * You can find out more about this method here: http://doc.qt.io/qt-5/qwidget.html#paintEvent
      */
 //    void paintEvent(QPaintEvent *event) override;
 
-private:
-	void timer();
 };
 
 }
