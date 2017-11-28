@@ -8,9 +8,9 @@
 #include <pcl_ros/transforms.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
+#include <std_msgs/Int64.h>
 #include <stdlib.h>
 #include <string>
-#include <std_msgs/Int64.h>
 #include <unordered_map>
 #include <utility>
 
@@ -27,24 +27,24 @@ double searchRadius;
 double octree_resolution;
 double probability_thresh;
 
-std::unordered_map<std::string, std::pair<std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>*,int>> topic_pc_list;
-std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* pointcloud_list;
+std::unordered_map<std::string, std::pair<std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> *, int>> topic_pc_list;
+std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> *pointcloud_list;
 
 int queue_window_size;
 std::vector<int> queue_window_sizes;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::string &topic)
 {
-  //Retrieve pointcloud list pointer from unordered map
+  // Retrieve pointcloud list pointer from unordered map
   auto map_it = topic_pc_list.find(topic);
   pointcloud_list = map_it->second.first;
 
-  //Temp
+  // Temp
   queue_window_size = map_it->second.second;
 
-  if (pointcloud_list.size() < static_cast<unsigned int>(queue_window_size))
+  if (pointcloud_list->size() < static_cast<unsigned int>(queue_window_size))
   {
-    //icp
+    // icp
     /*pcl::PointCloud<pcl::PointXYZRGB>::Ptr Final;
     if (!firstFrame && global_map->size() > 0)
     {
@@ -62,9 +62,8 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::stri
       pointcloud_list->push_back(input);
     }*/
     pointcloud_list->push_back(input);
-
   }
-  if (pointcloud_list.size() == static_cast<unsigned int>(queue_window_size))
+  if (pointcloud_list->size() == static_cast<unsigned int>(queue_window_size))
   {
     // Probabilistic calculations here
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr local_pc =
@@ -207,7 +206,8 @@ int main(int argc, char **argv)
   {
     ROS_INFO_STREAM("Mapper subscribing to " << topic);
     subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(topic, 1, boost::bind(frame_callback, _1, topic)));
-    topic_pc_list.insert({topic, std::make_pair(new std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>, queue_window_sizes[count])});
+    topic_pc_list.insert(
+        { topic, std::make_pair(new std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>, queue_window_sizes[count]) });
     count++;
   }
 
