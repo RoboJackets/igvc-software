@@ -79,7 +79,7 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
 
   // Find lines
   std::vector<cv::Vec4i> lines2;
-  cv::HoughLinesP(working2, lines2, 1.0, CV_PI / 180, houghThreshold, houghMinLineLength*2, houghMaxLineGap);
+  cv::HoughLinesP(working2, lines2, 1.0, CV_PI / 180, houghThreshold, houghMinLineLength * 2, houghMaxLineGap);
   for (size_t i = 0; i < lines2.size(); ++i)
   {
     cv::LineIterator it(fin_img, cv::Point(lines2[i][0], lines2[i][1]), cv::Point(lines2[i][2], lines2[i][3]), 8);
@@ -91,8 +91,8 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
   }
 
   // Re-fill sky area of image with black
-   cv::Mat black = cv::Mat::zeros(cv::Size(src_img.cols, topCrop), src_img.type());
-   cv::vconcat(black, fin_img, fin_img);
+  cv::Mat black = cv::Mat::zeros(cv::Size(src_img.cols, topCrop), src_img.type());
+  cv::vconcat(black, fin_img, fin_img);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
   cloud = toPointCloud(tf_listener, MatToContours(fin_img), cam, topic);
