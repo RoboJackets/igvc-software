@@ -7,9 +7,13 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <string>
 #include <QLabel>
 #include <QTimer>
 #include <QObject>
+
+#define INTERVAL 250
+#define NUMSENSORS 6
 
 
 /*
@@ -49,7 +53,8 @@ protected:
 	ros::Subscriber camRight_sub;
 
 	QTimer *sensor_timer;
-	QLabel *label, *label2, *label3, *label4, *label5, *label6;
+    QLabel* labels[NUMSENSORS];//list of pointers to labels
+    bool isActive[NUMSENSORS];//list of activity for sensors
     
 
 
@@ -66,14 +71,9 @@ protected:
 	void camRight_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
 	void gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
     
+private: 
     void reset_labels();
-
-
-    /**
-     * If you need to paint custom graphics on your panel, uncomment and implement the paintEvent method.
-     * You can find out more about this method here: http://doc.qt.io/qt-5/qwidget.html#paintEvent
-     */
-//    void paintEvent(QPaintEvent *event) override;
+    void set_label(int i, bool b);    
 
 };
 
