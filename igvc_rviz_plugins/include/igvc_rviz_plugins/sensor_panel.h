@@ -47,10 +47,10 @@ protected:
   ros::Subscriber imu_sub;
   ros::Subscriber lidar_sub;
   ros::Subscriber gps_sub;
-  ros::Subscriber camCenter_sub;
+  ros::Subscriber cam_center_sub;
 
   QTimer *sensor_timer;
-  std::map<std::string, QObject::QLabel*> labels;// map of pointers to labels
+  std::map<std::string, QObject::QLabel> labels;// map of pointers to labels
   bool isActive[NUMSENSORS]; // list of activity for sensors
 
   /**
@@ -61,15 +61,13 @@ protected:
   void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
   void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label);
   //void gps_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
-  void cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
-  void cam_left_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
-  void cam_right_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
-  void gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
+  void cam_center_callback(const sensaor_msgs::ImageConstPtr &msg, QLabel *label);
+  void gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
 
 
 private:
   void reset_labels();
-  void set_label(std::string s, bool b);
+  void set_label(auto *s, bool b);
 };
 }
 
