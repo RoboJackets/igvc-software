@@ -24,4 +24,9 @@
   <run_depend>hector_gazebo_worlds</run_depend>
   <run_depend>joy</run_depend>
   <run_depend>rviz</run_depend>
+  
+  <export>
+    <gazebo_ros gazebo_model_path="${prefix}/urdf/models"/>
+    <gazebo_ros gazebo_media_path="${prefix}/urdf/models"/>
+  </export>
 </package>
