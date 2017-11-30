@@ -32,6 +32,7 @@ std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> *pointcloud_list;
 
 int queue_window_size;
 std::vector<int> queue_window_sizes;
+bool use_icp;
 
 void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::string &topic)
 {
@@ -45,23 +46,23 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::stri
   if (pointcloud_list->size() < static_cast<unsigned int>(queue_window_size))
   {
     // icp
-    /*pcl::PointCloud<pcl::PointXYZRGB>::Ptr Final;
-    if (!firstFrame && global_map->size() > 0)
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Final =
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+    if (!firstFrame && global_map->size() > 0 && use_icp)
     {
       pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
       icp.setMaxCorrespondenceDistance(maxCorrDist);
       icp.setMaximumIterations(maxIter);
       icp.setInputSource(input);
       icp.setInputTarget(global_map);
-      //pcl::PointCloud<pcl::PointXYZ> Final;
       pcl::PointCloud<pcl::PointXYZRGB> new_points;
       icp.align(*Final);
       pointcloud_list->push_back(Final);
-    } else
+    }
+    else
     {
       pointcloud_list->push_back(input);
-    }*/
-    pointcloud_list->push_back(input);
+    }
   }
   if (pointcloud_list->size() == static_cast<unsigned int>(queue_window_size))
   {
@@ -186,6 +187,7 @@ int main(int argc, char **argv)
   pNh.getParam("queue_window_size", queue_window_size);
   pNh.getParam("probability_thresh", probability_thresh);
   pNh.getParam("queue_window_sizes", queue_window_sizes);
+  pNh.getParam("use_icp", use_icp);
   if (topics.empty())
     ROS_WARN_STREAM("No topics specified for mapper. No map will be generated.");
 
