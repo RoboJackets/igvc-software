@@ -48,8 +48,6 @@ protected:
   ros::Subscriber lidar_sub;
   ros::Subscriber gps_sub;
   ros::Subscriber camCenter_sub;
-  ros::Subscriber camLeft_sub;
-  ros::Subscriber camRight_sub;
 
   QTimer *sensor_timer;
   QLabel *labels[NUMSENSORS];  // list of pointers to labels
