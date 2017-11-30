@@ -1,7 +1,0 @@
-set(_CATKIN_CURRENT_PACKAGE "igvc_rviz_plugins")
-set(igvc_rviz_plugins_MAINTAINER "Matthew Barulic <matthew.barulic@gmail.com>, Al Chaussee <chaussee.al@gmail.com>")
-set(igvc_rviz_plugins_DEPRECATED "")
-set(igvc_rviz_plugins_VERSION "0.0.0")
-set(igvc_rviz_plugins_BUILD_DEPENDS "roscpp" "rviz" "igvc_msgs")
-set(igvc_rviz_plugins_RUN_DEPENDS "roscpp" "rviz" "igvc_msgs")
-set(igvc_rviz_plugins_BUILDTOOL_DEPENDS "catkin")
