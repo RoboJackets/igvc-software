@@ -1,8 +1,6 @@
 #include <igvc_rviz_plugins/sensor_panel.h>
 #include <pluginlib/class_list_macros.h>
 #include <QVBoxLayout>
-//#include <std>
-//#include "rjTimer.h"
 
 /*
  * Just as in the header, everything needs to happen in the igvc_rviz_plugins namespace.
@@ -16,18 +14,17 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
 
   // Initialize a label for displaying some data
 
-  labels[0] = new QLabel("IMU: Placehold\n");
-  labels[1] = new QLabel("Lidar Sensors: Placehold\n");
-  labels[2] = new QLabel("CamCenter: Placehold\n");
-  labels[3] = new QLabel("CamLeft: Placehold\n");
-  labels[4] = new QLabel("CamRight: Placehold\n");
-  labels[5] = new QLabel("GPS: Placehold");
+  labels["IMU"] = new QLabel("IMU: Placehold\n");
+  labels["Lidar"] = new QLabel("Lidar Sensors: Placehold\n");
+  labels["Center Camera"] = new QLabel("CamCenter: Placehold\n");
+  labels["Left Camera"] = new QLabel("CamLeft: Placehold\n");
+  labels["Right Camera"] = new QLabel("CamRight: Placehold\n");
+  labels["GPS"] = new QLabel("GPS: Placehold");
 
   /*
   *Makes timer that repeats every interval seconds
   *When timer goes off, it calls the timer method
   */
-  // const int interval = 500;
   sensor_timer = new QTimer();
   sensor_timer->setSingleShot(false);   // repeats
   sensor_timer->setInterval(INTERVAL);  // goes off every 250 milliseconds
@@ -65,7 +62,7 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
 
 void sensor_panel::imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label)
 {
-  label->setText("IMU: Enabled" /*.c_str()*/);
+  label->setText("IMU: Enabled");
   isActive[0] = true;
 }
 
@@ -75,19 +72,19 @@ void sensor_panel::lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, Q
   isActive[1] = true;
 }
 
-void sensor_panel::camCenter_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
+void sensor_panel::cam_Center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
 {
   label->setText("Center Camera: Enabled");
   isActive[2] = true;
 }
 
-void sensor_panel::camLeft_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
+void sensor_panel::cam_Left_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
 {
   label->setText("Left Camera: Enabled");
   isActive[3] = true;
 }
 
-void sensor_panel::camRight_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
+void sensor_panel::cam_Right_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
 {
   label->setText("Right Camera: Enabled");
   isActive[4] = true;
@@ -103,13 +100,13 @@ void sensor_panel::gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLab
 */
 void sensor_panel::reset_labels()
 {
-  for (int i = 0; i < NUMSENSORS; i++)
+  for (bool b : isActive)
   {
-    if (!isActive[i])
+    if (!b)
     {
-      set_label(i, isActive[i]);  // set to false on second time
+      set_label(i, b);  // set to false on second time
     }
-    isActive[i] = false;  // clear all statuses
+    b = false;  // clear all statuses
   }
 }
 

@@ -63,9 +63,9 @@ protected:
   void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
   void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label);
   void gps_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
-  void camCenter_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
-  void camLeft_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
-  void camRight_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
+  void cam_Center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
+  void cam_Left_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
+  void cam_Right_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
   void gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
 
 private:
