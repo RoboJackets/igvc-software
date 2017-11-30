@@ -34,17 +34,17 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   /* Initialize our subscriber to listen to the /speed topic.
   * Note the use of boost::bind, which allows us to give the callback a pointer to our UI label.
   */
-  imu_sub = nh.subscribe<sensor_msgs::Imu>("/imu", 1, boost::bind(&sensor_panel::imu_callback, this, _1, labels[0]));
+  imu_sub = nh.subscribe<sensor_msgs::Imu>("/imu", 1, boost::bind(&sensor_panel::imu_callback, this, _1, labels["IMU"]));
   lidar_sub = nh.subscribe<sensor_msgs::PointCloud2>("/scan/pointcloud", 1,
-                                                     boost::bind(&sensor_panel::lidar_callback, this, _1, labels[1]));
+                                                     boost::bind(&sensor_panel::lidar_callback, this, _1, labels["Lidar"]));
   camCenter_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_center/image_raw", 1,
-                                                   boost::bind(&sensor_panel::camCenter_callback, this, _1, labels[2]));
+                                                   boost::bind(&sensor_panel::camCenter_callback, this, _1, labels["Center Camera"]));
   camLeft_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_left/image_raw", 1,
-                                                 boost::bind(&sensor_panel::camLeft_callback, this, _1, labels[3]));
+                                                 boost::bind(&sensor_panel::camLeft_callback, this, _1, labels["Left Camera"]));
   camRight_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_right/image_raw", 1,
-                                                  boost::bind(&sensor_panel::camRight_callback, this, _1, labels[4]));
+                                                  boost::bind(&sensor_panel::camRight_callback, this, _1, labels["Right Camera"]));
   gps_sub =
-      nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1, boost::bind(&sensor_panel::gps2_callback, this, _1, labels[5]));
+      nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1, boost::bind(&sensor_panel::gps2_callback, this, _1, labels["GPS"]));
 
   /* Use QT layouts to add widgets to the panel.
   * Here, we're using a VBox layout, which allows us to stack all of our widgets vertically.
@@ -52,9 +52,9 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   QVBoxLayout *layout = new QVBoxLayout;
 
   // adds all the widgets to the layout
-  for (int i = 0; i < NUMSENSORS; i++)
+  for (QLabel *label : labels.begin())
   {
-    layout->addWidget(labels[i]);
+    layout->addWidget(label);
   }
   setLayout(layout);
   timer();  // inits to disabled
