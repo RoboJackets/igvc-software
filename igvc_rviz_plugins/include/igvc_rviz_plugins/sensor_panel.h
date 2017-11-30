@@ -50,8 +50,8 @@ protected:
   ros::Subscriber camCenter_sub;
 
   QTimer *sensor_timer;
-  QLabel *labels[NUMSENSORS];  // list of pointers to labels
-  bool isActive[NUMSENSORS];   // list of activity for sensors
+  std::map<std::string, QObject::QLabel*> labels;// map of pointers to labels
+  bool isActive[NUMSENSORS]; // list of activity for sensors
 
   /**
    * Declare any ROS callbacks you need here. Be sure to create a parameter for any UI elements you need to update.
@@ -69,7 +69,7 @@ protected:
 
 private:
   void reset_labels();
-  void set_label(int i, bool b);
+  void set_label(std::string s, bool b);
 };
 }
 
