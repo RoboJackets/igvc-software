@@ -3,80 +3,75 @@
 
 #include <ros/ros.h>
 #include <rviz/panel.h>
-#include <sensor_msgs/Imu.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/Imu.h>
 #include <sensor_msgs/NavSatFix.h>
-#include <string>
+#include <sensor_msgs/PointCloud2.h>
 #include <QLabel>
-#include <QTimer>
 #include <QObject>
+#include <QTimer>
+#include <string>
 
 #define INTERVAL 250
 #define NUMSENSORS 6
 
-
 /*
  * All of our panels need to be under the igvc_rviz_plugins namespace.
  */
-namespace igvc_rviz_plugins {
-
+namespace igvc_rviz_plugins
+{
 /*
  * Each panel is a subclass of rviz::Panel
  */
-class sensor_panel : public rviz::Panel{
-/*
- * rviz is based on QT, so our panels need to be QObjects, which requires this macro keyword.
- */
-Q_OBJECT
+class sensor_panel : public rviz::Panel
+{
+  /*
+   * rviz is based on QT, so our panels need to be QObjects, which requires this macro keyword.
+   */
+  Q_OBJECT
 public:
-
-    /**
-     * This is a standard QWidget constructor.
-     * @param parent The parent widget, which will be responsible for the lifetime of this widget.
-     */
-    sensor_panel(QWidget *parent = 0);
+  /**
+   * This is a standard QWidget constructor.
+   * @param parent The parent widget, which will be responsible for the lifetime of this widget.
+   */
+  sensor_panel(QWidget *parent = 0);
 
 public slots:
-	void timer();
+  void timer();
 
 protected:
-    /*
-     * Be sure to make any publishers / subscribers members of the class. This will keep them alive throughout
-     * the lifetime of the widget.
-     */
-    ros::Subscriber imu_sub;
-    ros::Subscriber lidar_sub;
-    ros::Subscriber gps_sub;
-    ros::Subscriber camCenter_sub;
-	ros::Subscriber camLeft_sub;
-	ros::Subscriber camRight_sub;
+  /*
+   * Be sure to make any publishers / subscribers members of the class. This will keep them alive throughout
+   * the lifetime of the widget.
+   */
+  ros::Subscriber imu_sub;
+  ros::Subscriber lidar_sub;
+  ros::Subscriber gps_sub;
+  ros::Subscriber camCenter_sub;
+  ros::Subscriber camLeft_sub;
+  ros::Subscriber camRight_sub;
 
-	QTimer *sensor_timer;
-    QLabel* labels[NUMSENSORS];//list of pointers to labels
-    bool isActive[NUMSENSORS];//list of activity for sensors
-    
+  QTimer *sensor_timer;
+  QLabel *labels[NUMSENSORS];  // list of pointers to labels
+  bool isActive[NUMSENSORS];   // list of activity for sensors
 
+  /**
+   * Declare any ROS callbacks you need here. Be sure to create a parameter for any UI elements you need to update.
+   * @param msg The ROS message that triggers this callback.
+   * @param label A QT label whose text we will update based on the message contents.
+   */
+  void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
+  void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label);
+  void gps_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
+  void camCenter_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
+  void camLeft_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
+  void camRight_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
+  void gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
 
-    /**
-     * Declare any ROS callbacks you need here. Be sure to create a parameter for any UI elements you need to update.
-     * @param msg The ROS message that triggers this callback.
-     * @param label A QT label whose text we will update based on the message contents.
-     */
-    void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
-    void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label);
-    void gps_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
-    void camCenter_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
-	void camLeft_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
-	void camRight_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
-	void gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
-    
-private: 
-    void reset_labels();
-    void set_label(int i, bool b);    
-
+private:
+  void reset_labels();
+  void set_label(int i, bool b);
 };
-
 }
 
-#endif //SENSORPANEL_H
+#endif  // SENSORPANEL_H

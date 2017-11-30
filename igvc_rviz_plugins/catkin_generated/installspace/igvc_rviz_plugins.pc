@@ -1,8 +1,0 @@
-prefix=/home/aaron/catkin_ws/install
-
-Name: igvc_rviz_plugins
-Description: Description of igvc_rviz_plugins
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/aaron/catkin_ws/install/lib -ligvc_rviz_plugins
-Requires: roscpp rviz igvc_msgs
