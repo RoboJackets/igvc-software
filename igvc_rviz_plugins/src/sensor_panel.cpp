@@ -113,7 +113,7 @@ void sensor_panel::reset_labels()
 /*
 *Sets the label at the i position to active status of b
 */
-void sensor_panel::set_label(int i, bool b)
+void sensor_panel::set_label(std::string s, bool b)
 {
   std::string active, msg;
   if (b)
@@ -124,30 +124,7 @@ void sensor_panel::set_label(int i, bool b)
   {
     active = "Disabled";
   }
-  if (i == 0)
-  {
-    msg = "IMU: ";
-  }
-  else if (i == 1)
-  {
-    msg = "Lidar: ";
-  }
-  else if (i == 2)
-  {
-    msg = "Center Camera: ";
-  }
-  else if (i == 3)
-  {
-    msg = "Left Camera: ";
-  }
-  else if (i == 4)
-  {
-    msg = "Right Camera: ";
-  }
-  else if (i == 5)
-  {
-    msg = "GPS: ";
-  }
+  msg = msg +": ";
 
   labels[i]->setText((msg + active).c_str());
 }
