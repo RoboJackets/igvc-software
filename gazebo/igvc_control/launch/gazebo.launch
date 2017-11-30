@@ -13,7 +13,7 @@
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0"/>
-  
+
   <!-- Remap to same topics as the actual robot -->
   <remap from="/$(arg namespace)/usb_cam_center" to="/usb_cam_center" />
   <remap from="/$(arg namespace)/usb_cam_right" to="/usb_cam_right" />
@@ -21,7 +21,7 @@
   <remap from="/$(arg namespace)/imu" to="/imu" />
   <!--<remap from="/$(arg namespace)/odom" to="/odom" />-->
   <remap from="/$(arg namespace)/fix" to="/fix" />
-  
+
 
 
   <group ns="$(arg namespace)">
@@ -44,11 +44,13 @@
     <!-- needed for rviz -->
     <param name="robot_description" command="cat $(find igvc_description)/urdf/Jaymii.urdf" />
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
-    
-    <!-- convert laser scan to point cloud for LIDAR -->
-    <node name="scan_to_pointcloud" pkg="igvc" type="scan_to_pointcloud" output="screen" />
 
-    </group>
-    
-    <include file="$(find igvc_control)/launch/igvc_control.launch" />
+    <!-- convert laser scan to point cloud for LIDAR -->
+    <node name="scan_to_pointcloud" pkg="igvc_control" type="scan_to_pointcloud" output="screen" >
+      <param name="min_dist" value="0.1"/>
+      <param name="neighbor_dist" value="0.2"/>
+    </node>
+  </group>
+  <include file="$(find igvc)/launch/filter_lidar.launch" />
+  <include file="$(find igvc_control)/launch/igvc_control.launch" />
 </launch>
