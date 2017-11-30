@@ -72,24 +72,24 @@ void sensor_panel::lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, Q
   isActive[1] = true;
 }
 
-void sensor_panel::cam_Center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
+void sensor_panel::cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
 {
   label->setText("Center Camera: Enabled");
   isActive[2] = true;
 }
 
-void sensor_panel::cam_Left_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
+void sensor_panel::cam_left_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
 {
   label->setText("Left Camera: Enabled");
   isActive[3] = true;
 }
 
-void sensor_panel::cam_Right_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
+void sensor_panel::cam_right_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
 {
   label->setText("Right Camera: Enabled");
   isActive[4] = true;
 }
-void sensor_panel::gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label)
+void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label)
 {
   label->setText("GPS: Enabled");
   isActive[5] = true;
