@@ -14,12 +14,12 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
 
   // Initialize a label for displaying some data
 
-  labels.insert( std::pair<std::string, QObject::QLabel> ("IMU",  new QLabel("IMU: Placehold\n") ) );
-  labels.insert( std::pair<std::string, QObject::QLabel> ("Lidar", new QLabel("Lidar Sensors: Placehold\n") ) );
-  labels.insert( std::pair<std::string, QObject::QLabel> ("Center Camera", new QLabel("CamCenter: Placehold\n") ) );
-  labels.insert( std::pair<std::string, QObject::QLabel> ("Left Camera", new QLabel("CamLeft: Placehold\n") ) );
-  labels.insert( std::pair<std::string, QObject::QLabel> ("Right Camera", new QLabel("CamRight: Placehold\n") ) );
-  labels.insert( std::pair<std::string, QObject::QLabel> ("GPS", new QLabel("GPS: Placehold") ) );
+  labels.insert( std::pair<std::string, QObject::QLabel*> ("IMU",  new QLabel("IMU: Placehold\n") ) );
+  labels.insert( std::pair<std::string, QObject::QLabel*> ("Lidar", new QLabel("Lidar Sensors: Placehold\n") ) );
+  labels.insert( std::pair<std::string, QObject::QLabel*> ("Center Camera", new QLabel("CamCenter: Placehold\n") ) );
+  labels.insert( std::pair<std::string, QObject::QLabel*> ("Left Camera", new QLabel("CamLeft: Placehold\n") ) );
+  labels.insert( std::pair<std::string, QObject::QLabel*> ("Right Camera", new QLabel("CamRight: Placehold\n") ) );
+  labels.insert( std::pair<std::string, QObject::QLabel*> ("GPS", new QLabel("GPS: Placehold") ) );
 
   /*
   *Makes timer that repeats every interval seconds
