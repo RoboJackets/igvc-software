@@ -12,7 +12,7 @@
 #include <QTimer>
 #include <string>
 
-#define INTERVAL 250
+#define INTERVAL 250//in milliseconds
 #define NUMSENSORS 6
 
 /*
@@ -60,9 +60,12 @@ protected:
    */
   void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
   void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label);
-  void gps_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
+  //void gps_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
   void cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
-  void gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
+  void cam_left_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
+  void cam_right_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
+  void gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
+
 
 private:
   void reset_labels();
