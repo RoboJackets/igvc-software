@@ -7,15 +7,21 @@ set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
 
 catkin_package()
 
+find_package(Eigen3 REQUIRED)
+find_package(PCL REQUIRED filters)
 find_package(catkin REQUIRED COMPONENTS
-	rospy
-  	roscpp
-  	std_msgs
-  	igvc_msgs
+  rospy
+  roscpp
+  std_msgs
+  igvc_msgs
+  laser_geometry
+  pcl_ros
 )
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
+  include
 )
 
 install(DIRECTORY launch/
@@ -28,10 +34,6 @@ install(DIRECTORY config/
    FILES_MATCHING PATTERN "*.yaml"
 )
 
-add_executable(jaymii_control node/jaymii_control.cpp)
-add_dependencies(jaymii_control igvc_msgs_gencpp)
-target_link_libraries(jaymii_control ${catkin_LIBRARIES})
-
 catkin_install_python(
         PROGRAMS
         scripts/controller_spawner.py
@@ -42,3 +44,6 @@ install(PROGRAMS
         scripts/spawn_jaymii.sh
         scripts/controller_spawner.py
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+add_subdirectory(nodes/control)
+add_subdirectory(nodes/scan_to_pointcloud)

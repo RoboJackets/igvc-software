@@ -1,7 +1,11 @@
 <!-- lidar.launch -->
 <launch>
     <!-- Lidar Node -->
-	<node name="sick_tim551_2050001" pkg="sick_tim" type="sick_tim551_2050001" />
-
-        <node name="scan_to_pointcloud" pkg="igvc" type="scan_to_pointcloud" output="screen" />
+    <node name="sweep_node"	pkg="sweep_ros"  type="sweep_node" output="screen">
+      <param name="serial_port"         type="string" value="/dev/igvc_lidar"/>
+      <param name="serial_baudrate"     type="int"    value="115200"/>
+      <param name="frame_id"            type="string" value="lidar"/>
+      <param name="rotation_speed"    type="int" value="3"/>
+    </node>
+    <include file="$(find igvc)/launch/filter_lidar.launch" />
 </launch>
