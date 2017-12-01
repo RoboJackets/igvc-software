@@ -12,8 +12,7 @@
 #include <QTimer>
 #include <string>
 
-#define INTERVAL 250//in milliseconds
-#define NUMSENSORS 6
+#define INTERVAL 400//in milliseconds
 
 /*
  * All of our panels need to be under the igvc_rviz_plugins namespace.
@@ -47,11 +46,13 @@ protected:
   ros::Subscriber imu_sub;
   ros::Subscriber lidar_sub;
   ros::Subscriber gps_sub;
-  ros::Subscriber camCenter_sub;
+  ros::Subscriber cam_center_sub;
+  ros::Subscriber cam_left_sub;
+  ros::Subscriber cam_right_sub;
 
   QTimer *sensor_timer;
-  std::map<std::string, QObject::QLabel*> labels;// map of pointers to labels
-  bool isActive[NUMSENSORS]; // list of activity for sensors
+  std::map<std::string, QLabel *> labels;// map of pointers to labels
+  bool *isActive; // list of activity for sensors
 
   /**
    * Declare any ROS callbacks you need here. Be sure to create a parameter for any UI elements you need to update.
@@ -69,7 +70,6 @@ protected:
 
 private:
   void reset_labels();
-  void set_label(std::string s, bool b);
 };
 }
 
