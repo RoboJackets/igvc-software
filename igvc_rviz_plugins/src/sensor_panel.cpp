@@ -79,25 +79,14 @@ void sensor_panel::cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QL
   isActive[2] = true;
 }
 
-void sensor_panel::cam_left_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
+void sensor_panel::gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label)
 {
-  label->setText("Left Camera: Enabled");
+  label->setText("GPS: Enabled");
   isActive[3] = true;
 }
 
-void sensor_panel::cam_right_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
-{
-  label->setText("Right Camera: Enabled");
-  isActive[4] = true;
-}
-void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label)
-{
-  label->setText("GPS: Enabled");
-  isActive[5] = true;
-}
-
 /*
-*Sets all of the activity statuses to disabled, and sets labels to diabled if already disabled
+*Sets all of the activity statuses to disabled, and sets labels to disabled if already disabled
 */
 void sensor_panel::reset_labels()
 {
