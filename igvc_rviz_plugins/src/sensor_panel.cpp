@@ -12,14 +12,15 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   // Panels are allowed to interact with NodeHandles directly just like ROS nodes.
   ros::NodeHandle nh;
 
-  // Initialize a label for displaying some data
+  // Initialize all labels for displaying some data
+  labels["IMU"] = new QLabel("IMU: Placehold\n");
+  labels["Lidar"] = new QLabel("Lidar: Placehold\n");
+  labels["Center Camera"] = new QLabel("Center Camera: Placehold\n");
+  labels["Left Camera"] = new QLabel("Left Camera: Placehold\n");
+  labels["Right Camera"] = new QLabel("Right Camera: Placehold\n");
+  labels["GPS"] = new QLabel("GPS: Placehold\n");
 
-  labels.insert( std::pair<std::string, QObject::QLabel*> ("IMU",  new QLabel("IMU: Placehold\n") ) );
-  labels.insert( std::pair<std::string, QObject::QLabel*> ("Lidar", new QLabel("Lidar Sensors: Placehold\n") ) );
-  labels.insert( std::pair<std::string, QObject::QLabel*> ("Center Camera", new QLabel("CamCenter: Placehold\n") ) );
-  labels.insert( std::pair<std::string, QObject::QLabel*> ("Left Camera", new QLabel("CamLeft: Placehold\n") ) );
-  labels.insert( std::pair<std::string, QObject::QLabel*> ("Right Camera", new QLabel("CamRight: Placehold\n") ) );
-  labels.insert( std::pair<std::string, QObject::QLabel*> ("GPS", new QLabel("GPS: Placehold") ) );
+  isActive = new bool [labels.size()];
 
   /*
   *Makes timer that repeats every interval seconds
@@ -37,14 +38,14 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   imu_sub = nh.subscribe<sensor_msgs::Imu>("/imu", 1, boost::bind(&sensor_panel::imu_callback, this, _1, labels["IMU"]));
   lidar_sub = nh.subscribe<sensor_msgs::PointCloud2>("/scan/pointcloud", 1,
                                                      boost::bind(&sensor_panel::lidar_callback, this, _1, labels["Lidar"]));
-  camCenter_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_center/image_raw", 1,
-                                                   boost::bind(&sensor_panel::camCenter_callback, this, _1, labels["Center Camera"]));
-  camLeft_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_left/image_raw", 1,
-                                                 boost::bind(&sensor_panel::camLeft_callback, this, _1, labels["Left Camera"]));
-  camRight_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_right/image_raw", 1,
-                                                  boost::bind(&sensor_panel::camRight_callback, this, _1, labels["Right Camera"]));
+  cam_center_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_center/image_raw", 1,
+                                                   boost::bind(&sensor_panel::cam_center_callback, this, _1, labels["Center Camera"]));
+  cam_left_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_left/image_raw", 1,
+                                                 boost::bind(&sensor_panel::cam_left_callback, this, _1, labels["Left Camera"]));
+  cam_right_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_right/image_raw", 1,
+                                                  boost::bind(&sensor_panel::cam_right_callback, this, _1, labels["Right Camera"]));
   gps_sub =
-      nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1, boost::bind(&sensor_panel::gps2_callback, this, _1, labels["GPS"]));
+      nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1, boost::bind(&sensor_panel::gps_callback, this, _1, labels["GPS"]));
 
   /* Use QT layouts to add widgets to the panel.
   * Here, we're using a VBox layout, which allows us to stack all of our widgets vertically.
@@ -52,9 +53,9 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   QVBoxLayout *layout = new QVBoxLayout;
 
   // adds all the widgets to the layout
-  for (QLabel *label : labels.begin())
+  for (std::pair<std::string, QLabel *> pear : labels)
   {
-    layout->addWidget(label);
+    layout->addWidget(pear.second);
   }
   setLayout(layout);
   timer();  // inits to disabled
@@ -100,33 +101,14 @@ void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabe
 */
 void sensor_panel::reset_labels()
 {
-  for (bool b : isActive)
-  {
-    if (!b)
-    {
-      set_label(i, b);  // set to false on second time
-    }
-    b = false;  // clear all statuses
-  }
-}
-
-/*
-*Sets the label at the i position to active status of b
-*/
-void sensor_panel::set_label(std::string s, bool b)
-{
-  std::string active, msg;
-  if (b)
-  {
-    active = "Enabled";
-  }
-  else
-  {
-    active = "Disabled";
-  }
-  msg = msg +": ";
-
-  labels[i]->setText((msg + active).c_str());
+	int i = 0;//index of label's corresponding bool
+  	for (std::pair<std::string, QLabel *> pear : labels){
+		if(!isActive[i]){
+			pear.second->setText((pear.first+": Disabled").c_str());
+		}
+		isActive[i] = false;
+		i++;
+	}
 }
 
 /*
