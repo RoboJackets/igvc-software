@@ -1,9 +1,10 @@
-#ifndef PROJECT_EXAMPLEPANEL_H//
-#define PROJECT_EXAMPLEPANEL_H
+#ifndef PROJECT_WAYPOINTPANEL_H
+#define PROJECT_WAYPOINTPANEL_H
 
 #include <ros/ros.h>
 #include <rviz/panel.h>
-#include <igvc_msgs/velocity_pair.h>
+#include <geometry_msgs/PointStamped.h>
+#include <nav_msgs/Odometry.h>
 #include <QLabel>
 
 /*
@@ -14,32 +15,39 @@ namespace igvc_rviz_plugins {
 /*
  * Each panel is a subclass of rviz::Panel
  */
-class ExamplePanel : public rviz::Panel {
+class WaypointPanel : public rviz::Panel {
 /*
  * rviz is based on QT, so our panels need to be QObjects, which requires this macro keyword.
  */
 Q_OBJECT
 public:
 
+    double robot_x;
+    double robot_y;
+    double way_x;
+    double way_y;
+
     /**
      * This is a standard QWidget constructor.
      * @param parent The parent widget, which will be responsible for the lifetime of this widget.
      */
-    ExamplePanel(QWidget *parent = 0);
+    WaypointPanel(QWidget *parent = 0);
 
 protected:
     /*
      * Be sure to make any publishers / subscribers members of the class. This will keep them alive throughout
      * the lifetime of the widget.
      */
-    ros::Subscriber speed_subscriber;
+    ros::Subscriber waypoint_subscriber;
+    ros::Subscriber robot_position_subscriber;
 
     /**
      * Declare any ROS callbacks you need here. Be sure to create a parameter for any UI elements you need to update.
      * @param msg The ROS message that triggers this callback.
      * @param label A QT label whose text we will update based on the message contents.
      */
-    void speed_callback(const igvc_msgs::velocity_pairConstPtr &msg, QLabel *label);
+    void waypoint_callback(const geometry_msgs::PointStampedConstPtr &msg, QLabel *label);
+    void robot_position_callback(const nav_msgs::OdometryConstPtr &msg, QLabel *label);
 
     /**
      * If you need to paint custom graphics on your panel, uncomment and implement the paintEvent method.
@@ -51,4 +59,4 @@ protected:
 
 }
 
-#endif //PROJECT_EXAMPLEPANEL_H
+#endif //PROJECT_WAYPOINTPANEL_H
