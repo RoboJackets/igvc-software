@@ -34,12 +34,9 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   * Note the use of boost::bind, which allows us to give the callback a pointer to our UI label.
   */
   imu_sub = nh.subscribe<sensor_msgs::Imu>("/imu", 1, boost::bind(&sensor_panel::imu_callback, this, _1, labels["IMU"]));
-  lidar_sub = nh.subscribe<sensor_msgs::PointCloud2>("/scan/pointcloud", 1,
-                                                     boost::bind(&sensor_panel::lidar_callback, this, _1, labels["Lidar"]));
-  cam_center_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_center/image_raw", 1,
-                                                   boost::bind(&sensor_panel::cam_center_callback, this, _1, labels["Center Camera"]));
-  gps_sub =
-      nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1, boost::bind(&sensor_panel::gps_callback, this, _1, labels["GPS"]));
+  lidar_sub = nh.subscribe<sensor_msgs::PointCloud2>("/scan/pointcloud", 1, boost::bind(&sensor_panel::lidar_callback, this, _1, labels["Lidar"]));
+  cam_center_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_center/image_raw", 1, boost::bind(&sensor_panel::cam_center_callback, this, _1, labels["Center Camera"]));
+  gps_sub = nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1, boost::bind(&sensor_panel::gps_callback, this, _1, labels["GPS"]));
 
   /* Use QT layouts to add widgets to the panel.
   * Here, we're using a VBox layout, which allows us to stack all of our widgets vertically.
@@ -89,7 +86,9 @@ void sensor_panel::reset_labels()
 		if(!isActive[i]){
 			pear.second->setText((pear.first+": Disabled").c_str());
 		}
-		isActive[i] = false;
+    else{
+		  isActive[i] = false;
+    }
 		i++;
 	}
 }

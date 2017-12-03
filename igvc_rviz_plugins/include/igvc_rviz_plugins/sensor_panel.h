@@ -12,7 +12,7 @@
 #include <QTimer>
 #include <string>
 
-#define INTERVAL 400//in milliseconds
+#define INTERVAL 250//in milliseconds
 
 /*
  * All of our panels need to be under the igvc_rviz_plugins namespace.
