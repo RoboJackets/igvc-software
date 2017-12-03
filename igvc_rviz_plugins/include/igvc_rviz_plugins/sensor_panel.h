@@ -47,8 +47,6 @@ protected:
   ros::Subscriber lidar_sub;
   ros::Subscriber gps_sub;
   ros::Subscriber cam_center_sub;
-  ros::Subscriber cam_left_sub;
-  ros::Subscriber cam_right_sub;
 
   QTimer *sensor_timer;
   std::map<std::string, QLabel *> labels;// map of pointers to labels
@@ -61,9 +59,8 @@ protected:
    */
   void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
   void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label);
-  //void gps_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
-  void cam_center_callback(const sensaor_msgs::ImageConstPtr &msg, QLabel *label);
-  void gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
+  void cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
+  void gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
 
 
 private:
