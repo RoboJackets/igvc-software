@@ -16,8 +16,6 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   labels["IMU"] = new QLabel("IMU: Placehold\n");
   labels["Lidar"] = new QLabel("Lidar: Placehold\n");
   labels["Center Camera"] = new QLabel("Center Camera: Placehold\n");
-  labels["Left Camera"] = new QLabel("Left Camera: Placehold\n");
-  labels["Right Camera"] = new QLabel("Right Camera: Placehold\n");
   labels["GPS"] = new QLabel("GPS: Placehold\n");
 
   isActive = new bool [labels.size()];
@@ -40,10 +38,6 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
                                                      boost::bind(&sensor_panel::lidar_callback, this, _1, labels["Lidar"]));
   cam_center_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_center/image_raw", 1,
                                                    boost::bind(&sensor_panel::cam_center_callback, this, _1, labels["Center Camera"]));
-  cam_left_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_left/image_raw", 1,
-                                                 boost::bind(&sensor_panel::cam_left_callback, this, _1, labels["Left Camera"]));
-  cam_right_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_right/image_raw", 1,
-                                                  boost::bind(&sensor_panel::cam_right_callback, this, _1, labels["Right Camera"]));
   gps_sub =
       nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1, boost::bind(&sensor_panel::gps_callback, this, _1, labels["GPS"]));
 
@@ -79,7 +73,7 @@ void sensor_panel::cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QL
   isActive[2] = true;
 }
 
-void sensor_panel::gps2_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label)
+void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label)
 {
   label->setText("GPS: Enabled");
   isActive[3] = true;
