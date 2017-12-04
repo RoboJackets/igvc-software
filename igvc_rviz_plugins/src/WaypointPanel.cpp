@@ -4,7 +4,6 @@
 #include <QVBoxLayout>
 #include <pluginlib/class_list_macros.h>
 
-
 /*
  * Just as in the header, everything needs to happen in the igvc_rviz_plugins namespace.
  */
@@ -35,25 +34,40 @@ WaypointPanel::WaypointPanel(QWidget *parent)
 
 void WaypointPanel::waypoint_callback(const geometry_msgs::PointStampedConstPtr &msg, QLabel *label) {
     // Create the new contents of the label based on the speed message.
-    double x = msg->point.x - robot_x;
-    double y = msg->point.y - robot_y;
-    double distance = sqrt(pow(x, 2) + pow(y, 2));
-    double angle = atan2(y, x) * 180 / M_PI;
-    double roll, pitch, yaw;
-    tf::Matrix3x3 m(msg->pose.pose.orientation);
-    m.getRPY(roll, pitch, yaw);
-    auto text = "X: " + std::to_string(x) + "\n" +
-                "Y: " + std::to_string(y) + "\n" +
-                "Distance: " + std::to_string(distance) + "\n" +
-                "Angle: " + std::to_string(angle - yaw) + " degrees";
-    // Set the contents of the label.
-    label->setText(text.c_str());
+    way_x = msg->point.x - robot_x;
+    way_y = msg->point.y - robot_y;
+
+
+    
+
+    //bt::btMatrix3x3 m(msg->pose.pose.orientation);
+    //m.getEulerYPR(yaw, pitch, roll);
+    
 }
 
 void WaypointPanel::robot_position_callback(const nav_msgs::OdometryConstPtr &msg, QLabel *label) {
+    double distance = sqrt(pow(way_x, 2) + pow(way_y, 2));
+    double angle = atan2(way_y, way_x) * 180 / M_PI;
+
     robot_x = msg->pose.pose.position.x;
     robot_y = msg->pose.pose.position.y;
-    robot_
+
+    double qx = msg->pose.pose.orientation.x;
+    double qy = msg->pose.pose.orientation.y;
+    double qz = msg->pose.pose.orientation.z;
+    double qw = msg->pose.pose.orientation.w;
+    double siny = 2.0 * (qw * qz + qx * qy);
+    double cosy = 1.0 - 2.0 * (qy * qy + qz * qz);
+    double yaw = atan2(siny, cosy);
+
+    auto text = "X: " + std::to_string(way_x) + "\n" +
+                "Y: " + std::to_string(way_y) + "\n" +
+                "Distance: " + std::to_string(distance) + "\n" +
+                "Angle: " + std::to_string(angle - yaw) + " degrees\n" +
+                "Yaw: " + std::to_string(yaw) + " degrees";
+    // Set the contents of the label.
+    label->setText(text.c_str());
+
 }
 
 //void ExamplePanel::paintEvent(QPaintEvent *event)  {

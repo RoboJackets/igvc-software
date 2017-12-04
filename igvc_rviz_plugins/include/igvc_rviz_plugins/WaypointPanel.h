@@ -22,10 +22,10 @@ class WaypointPanel : public rviz::Panel {
 Q_OBJECT
 public:
 
-    double robot_x;
-    double robot_y;
     double way_x;
     double way_y;
+    double robot_x;
+    double robot_y;
 
     /**
      * This is a standard QWidget constructor.
