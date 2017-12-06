@@ -8,6 +8,8 @@
 ros::Publisher _pointcloud_pub;
 laser_geometry::LaserProjection projection;
 
+double min_dist, neighbor_dist;
+
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
   sensor_msgs::LaserScan scanData = *msg;
@@ -16,24 +18,21 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     return !std::isnan(range) && range > scanData.range_min && range < scanData.range_max;
   };
 
-    for (unsigned int i = 0; i < scanData.ranges.size(); i++)
+  for (unsigned int i = 0; i < scanData.ranges.size(); i++)
   {
     float& range = scanData.ranges[i];
     if (range > scanData.range_max || range < scanData.range_min)
       continue;
     // Too close
-    if (range < 0.1)
+    if (range < min_dist)
       range = scanData.range_max + 1;
-    // Too far
-    /*else if (range > 6.0)
-      range = scanData.range_max + 1;*/
     // No valid neighbors
     else if ((i == 0 || !rangeIsValid(scanData.ranges[i - 1])) &&
              (i == (scanData.ranges.size() - 1) || !rangeIsValid(scanData.ranges[i + 1])))
       range = scanData.range_max + 1;
     // No close neighbors
-    else if ((i == 0 || abs(scanData.ranges[i - 1] - range) > 0.2) &&
-             (i == (scanData.ranges.size() - 1) || abs(scanData.ranges[i + 1] - range) > 0.2))
+    else if ((i == 0 || abs(scanData.ranges[i - 1] - range) > neighbor_dist) &&
+             (i == (scanData.ranges.size() - 1) || abs(scanData.ranges[i + 1] - range) > neighbor_dist))
       range = scanData.range_max + 1;
   }
 
@@ -49,6 +48,11 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "scan_to_pointcloud");
+
+  ros::NodeHandle pNh("~");
+
+  pNh.getParam("min_dist", min_dist);
+  pNh.getParam("neighbor_dist", neighbor_dist);
 
   ros::NodeHandle nh;
 

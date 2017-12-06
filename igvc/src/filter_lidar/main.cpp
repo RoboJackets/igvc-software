@@ -5,16 +5,15 @@
 
 ros::Publisher _pointcloud_pub;
 
-double x_offset, y_offset, y_size, x_size;
+double x_offset, y_offset, y_size, x_size, max_dist;
 
 void point_cloud_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
 {
   pcl::PointCloud<pcl::PointXYZ> result;
   for (auto it = msg->points.begin(); it != msg->points.end(); it++)
   {
-    if (!((it->x + x_offset < x_size && it->x + x_offset > -x_size) &&
-          (it->y + y_offset < y_size && it->y + y_offset > -y_size)) &&
-        sqrt(pow(it->x, 2) + pow(it->y, 2)) < 15)
+    if (!(abs(it->x + x_offset) < x_size && abs(it->y + y_offset) < y_size) &&
+        sqrt(pow(it->x, 2) + pow(it->y, 2)) < max_dist)
     {
       result.push_back(*it);
     }
@@ -34,6 +33,7 @@ int main(int argc, char** argv)
   pNh.getParam("y_offset", y_offset);
   pNh.getParam("x_size", x_size);
   pNh.getParam("y_size", y_size);
+  pNh.getParam("max_dist", max_dist);
 
   _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/scan/pointcloud", 1);
 
