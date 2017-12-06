@@ -7,6 +7,5 @@
       <param name="frame_id"            type="string" value="lidar"/>
       <param name="rotation_speed"    type="int" value="5"/>
     </node>
-
-    <include file="$(find igvc)/launch/filter_lidar.launch" />w
+    <include file="$(find igvc)/launch/filter_lidar.launch" />
 </launch>

@@ -373,20 +373,20 @@
   <transmission name="trans_left_wheel">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="axle_to_left_wheel">
-      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor1">
-      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
   <transmission name="trans_right_wheel">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="axle_to_right_wheel">
-      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
     </joint>
     <actuator name="motor1">
-      <hardwareInterface>hardwareInterface/EffortJointInterface</hardwareInterface>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>

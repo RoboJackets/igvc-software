@@ -2,9 +2,10 @@
 
 <launch>
   <node name="filter_lidar" pkg="igvc" type="filter_lidar" output="screen">
-      <param name="x_offset" value="0.4972"/>
+      <param name="x_offset" value="0.4572"/>
       <param name="y_offset" value="0"/>
       <param name="x_size" value="1.2"/>
       <param name="y_size" value="20"/>
+      <param name="max_dist" value="15"/>
     </node>
 </launch>
