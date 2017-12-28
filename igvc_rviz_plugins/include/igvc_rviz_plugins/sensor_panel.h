@@ -15,9 +15,9 @@
 #define INTERVAL 250//in milliseconds
 
 typedef struct LabelManager{
-  QTimer *sensor_timer;
-  std::map<std::string, QLabel *> labels;// map of pointers to labels
-  bool *isActive; // list of activity for corresponding sensors in map
+  std::map<std::string, QLabel* > labels;// map of pointers to labels
+  QTimer* sensor_timer;// timer used to check activity of sensors
+  bool* isActive; // list of activity for corresponding sensors in map
 } LabelManager;
 
 /*
@@ -58,10 +58,10 @@ protected:
   /**
    * Callbacks for each sensor.
    */
-  void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
-  void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label);
-  void cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label);
-  void gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label);
+  void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel* label);
+  void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel* label);
+  void cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel* label);
+  void gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel* label);
 
 
 private:
