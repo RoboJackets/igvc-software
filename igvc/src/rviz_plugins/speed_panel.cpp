@@ -25,7 +25,7 @@ SpeedPanel::SpeedPanel(QWidget* parent) : rviz::Panel(parent)
 {
   speedometer = new Speedometer(parent);
   QHBoxLayout* speedDisp = new QHBoxLayout;
-  speedDisp->addWidget(new QLabel("THIS IS A TESET"));
+  speedDisp->addWidget(new QLabel("SPEEDOMETER"));
   speedDisp->addWidget(speedometer);
 
   /*QHBoxLayout* velocity_layout = new QHBoxLayout;
