@@ -15,9 +15,15 @@
 #define INTERVAL 250//in milliseconds
 
 typedef struct LabelManager{
-  std::map<std::string, QLabel* > labels;// map of pointers to labels
-  QTimer* sensor_timer;// timer used to check activity of sensors
-  bool* isActive; // list of activity for corresponding sensors in map
+  //Map holding lables and their names. Strings used for the text of labels.
+  std::map<std::string, QLabel* > labels;
+
+  // timer used to check activity of sensors
+  QTimer* sensor_timer;
+
+  // list of activity statuses for corresponding sensors in map
+  bool* isActive; 
+
 } LabelManager;
 
 /*

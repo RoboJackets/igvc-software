@@ -28,8 +28,9 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   *When timer goes off, it calls the timer method
   */
   lm.sensor_timer = new QTimer();
-  lm.sensor_timer->setSingleShot(false);   // repeats
+  lm.sensor_timer->setSingleShot(false);   // will repeat
   lm.sensor_timer->setInterval(INTERVAL);  // goes off every 250 milliseconds
+  
   // calls timer whenever sensor_timer goes off
   QObject::connect(lm.sensor_timer, SIGNAL(timeout()), this, SLOT(timer()));
 
