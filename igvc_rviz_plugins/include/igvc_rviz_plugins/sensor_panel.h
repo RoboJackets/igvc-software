@@ -14,6 +14,12 @@
 
 #define INTERVAL 250//in milliseconds
 
+typedef struct LabelManager{
+  QTimer *sensor_timer;
+  std::map<std::string, QLabel *> labels;// map of pointers to labels
+  bool *isActive; // list of activity for corresponding sensors in map
+} LabelManager;
+
 /*
  * All of our panels need to be under the igvc_rviz_plugins namespace.
  */
@@ -40,22 +46,17 @@ public slots:
 
 protected:
   /*
-   * Be sure to make any publishers / subscribers members of the class. This will keep them alive throughout
-   * the lifetime of the widget.
+   * Subscribers for each sensor. 
    */
   ros::Subscriber imu_sub;
   ros::Subscriber lidar_sub;
   ros::Subscriber gps_sub;
   ros::Subscriber cam_center_sub;
 
-  QTimer *sensor_timer;
-  std::map<std::string, QLabel *> labels;// map of pointers to labels
-  bool *isActive; // list of activity for sensors
+  LabelManager lm;
 
   /**
-   * Declare any ROS callbacks you need here. Be sure to create a parameter for any UI elements you need to update.
-   * @param msg The ROS message that triggers this callback.
-   * @param label A QT label whose text we will update based on the message contents.
+   * Callbacks for each sensor.
    */
   void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label);
   void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label);
