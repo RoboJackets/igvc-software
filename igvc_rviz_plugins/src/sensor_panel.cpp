@@ -9,26 +9,29 @@ namespace igvc_rviz_plugins
 {
 sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class constructor
 {
-  // Panels are allowed to interact with NodeHandles directly just like ROS nodes.
+  //Init all variables
   ros::NodeHandle nh;
+  QVBoxLayout* layout = new QVBoxLayout();//layouts hold widgets
+  lm = {};//LabelManager initialized
 
-  // Initialize all labels for displaying some data
+  // all labels for displaying data
   lm.labels["IMU"] = new QLabel("IMU: Placehold\n");
   lm.labels["Lidar"] = new QLabel("Lidar: Placehold\n");
   lm.labels["Center Camera"] = new QLabel("Center Camera: Placehold\n");
   lm.labels["GPS"] = new QLabel("GPS: Placehold\n");
 
-  lm.isActive = new bool [lm.labels.size()];
+  lm.isActive = new bool[lm.labels.size()];//make shared pointer of same size as labels
+
 
   /*
   *Makes timer that repeats every interval seconds
   *When timer goes off, it calls the timer method
   */
-  sensor_timer = new QTimer();
-  sensor_timer->setSingleShot(false);   // repeats
-  sensor_timer->setInterval(INTERVAL);  // goes off every 250 milliseconds
+  lm.sensor_timer = new QTimer();
+  lm.sensor_timer->setSingleShot(false);   // repeats
+  lm.sensor_timer->setInterval(INTERVAL);  // goes off every 250 milliseconds
   // calls timer whenever sensor_timer goes off
-  QObject::connect(sensor_timer, SIGNAL(timeout()), this, SLOT(timer()));
+  QObject::connect(lm.sensor_timer, SIGNAL(timeout()), this, SLOT(timer()));
 
   /* Initialize our subscriber to listen to the /speed topic.
   * Note the use of boost::bind, which allows us to give the callback a pointer to our UI label.
@@ -38,13 +41,9 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   cam_center_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_center/image_raw", 1, boost::bind(&sensor_panel::cam_center_callback, this, _1, lm.labels["Center Camera"]));
   gps_sub = nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1, boost::bind(&sensor_panel::gps_callback, this, _1, lm.labels["GPS"]));
 
-  /* Use QT layouts to add widgets to the panel.
-  * Here, we're using a VBox layout, which allows us to stack all of our widgets vertically.
-  */
-  QVBoxLayout *layout = new QVBoxLayout;
-
+  
   // adds all the widgets to the layout
-  for (std::pair<std::string, QLabel *> pear : lm.labels)
+  for (std::pair<std::string, QLabel* > pear : lm.labels)
   {
     layout->addWidget(pear.second);
   }
@@ -52,25 +51,25 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   timer();  // inits to disabled
 }
 
-void sensor_panel::imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label)
+void sensor_panel::imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel* label)
 {
   label->setText("IMU: Enabled");
   lm.isActive[0] = true;
 }
 
-void sensor_panel::lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label)
+void sensor_panel::lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel* label)
 {
   label->setText("Lidar: Enabled");
   lm.isActive[1] = true;
 }
 
-void sensor_panel::cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
+void sensor_panel::cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel* label)
 {
   label->setText("Center Camera: Enabled");
   lm.isActive[2] = true;
 }
 
-void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label)
+void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel* label)
 {
   label->setText("GPS: Enabled");
   lm.isActive[3] = true;
@@ -82,7 +81,7 @@ void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabe
 void sensor_panel::reset_labels()
 {
 	int i = 0;//index of label's corresponding bool
-  	for (std::pair<std::string, QLabel *> pear : lm.labels){
+    for (std::pair<std::string, QLabel* > pear : lm.labels){
 		if(!lm.isActive[i]){
 			pear.second->setText((pear.first+": Disabled").c_str());
 		}
@@ -99,7 +98,7 @@ void sensor_panel::reset_labels()
 void sensor_panel::timer()
 {
   reset_labels();
-  sensor_timer->start();
+  lm.sensor_timer->start();
 }
 }
 
