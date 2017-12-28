@@ -13,12 +13,12 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   ros::NodeHandle nh;
 
   // Initialize all labels for displaying some data
-  labels["IMU"] = new QLabel("IMU: Placehold\n");
-  labels["Lidar"] = new QLabel("Lidar: Placehold\n");
-  labels["Center Camera"] = new QLabel("Center Camera: Placehold\n");
-  labels["GPS"] = new QLabel("GPS: Placehold\n");
+  lm.labels["IMU"] = new QLabel("IMU: Placehold\n");
+  lm.labels["Lidar"] = new QLabel("Lidar: Placehold\n");
+  lm.labels["Center Camera"] = new QLabel("Center Camera: Placehold\n");
+  lm.labels["GPS"] = new QLabel("GPS: Placehold\n");
 
-  isActive = new bool [labels.size()];
+  lm.isActive = new bool [lm.labels.size()];
 
   /*
   *Makes timer that repeats every interval seconds
@@ -33,10 +33,10 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   /* Initialize our subscriber to listen to the /speed topic.
   * Note the use of boost::bind, which allows us to give the callback a pointer to our UI label.
   */
-  imu_sub = nh.subscribe<sensor_msgs::Imu>("/imu", 1, boost::bind(&sensor_panel::imu_callback, this, _1, labels["IMU"]));
-  lidar_sub = nh.subscribe<sensor_msgs::PointCloud2>("/scan/pointcloud", 1, boost::bind(&sensor_panel::lidar_callback, this, _1, labels["Lidar"]));
-  cam_center_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_center/image_raw", 1, boost::bind(&sensor_panel::cam_center_callback, this, _1, labels["Center Camera"]));
-  gps_sub = nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1, boost::bind(&sensor_panel::gps_callback, this, _1, labels["GPS"]));
+  imu_sub = nh.subscribe<sensor_msgs::Imu>("/imu", 1, boost::bind(&sensor_panel::imu_callback, this, _1, lm.labels["IMU"]));
+  lidar_sub = nh.subscribe<sensor_msgs::PointCloud2>("/scan/pointcloud", 1, boost::bind(&sensor_panel::lidar_callback, this, _1, lm.labels["Lidar"]));
+  cam_center_sub = nh.subscribe<sensor_msgs::Image>("/usb_cam_center/image_raw", 1, boost::bind(&sensor_panel::cam_center_callback, this, _1, lm.labels["Center Camera"]));
+  gps_sub = nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1, boost::bind(&sensor_panel::gps_callback, this, _1, lm.labels["GPS"]));
 
   /* Use QT layouts to add widgets to the panel.
   * Here, we're using a VBox layout, which allows us to stack all of our widgets vertically.
@@ -44,7 +44,7 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   QVBoxLayout *layout = new QVBoxLayout;
 
   // adds all the widgets to the layout
-  for (std::pair<std::string, QLabel *> pear : labels)
+  for (std::pair<std::string, QLabel *> pear : lm.labels)
   {
     layout->addWidget(pear.second);
   }
@@ -55,25 +55,25 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
 void sensor_panel::imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label)
 {
   label->setText("IMU: Enabled");
-  isActive[0] = true;
+  lm.isActive[0] = true;
 }
 
 void sensor_panel::lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label)
 {
   label->setText("Lidar: Enabled");
-  isActive[1] = true;
+  lm.isActive[1] = true;
 }
 
 void sensor_panel::cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
 {
   label->setText("Center Camera: Enabled");
-  isActive[2] = true;
+  lm.isActive[2] = true;
 }
 
 void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label)
 {
   label->setText("GPS: Enabled");
-  isActive[3] = true;
+  lm.isActive[3] = true;
 }
 
 /*
@@ -82,12 +82,12 @@ void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabe
 void sensor_panel::reset_labels()
 {
 	int i = 0;//index of label's corresponding bool
-  	for (std::pair<std::string, QLabel *> pear : labels){
-		if(!isActive[i]){
+  	for (std::pair<std::string, QLabel *> pear : lm.labels){
+		if(!lm.isActive[i]){
 			pear.second->setText((pear.first+": Disabled").c_str());
 		}
     else{
-		  isActive[i] = false;
+		  lm.isActive[i] = false;
     }
 		i++;
 	}
