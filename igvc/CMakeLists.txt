@@ -6,6 +6,7 @@ project(igvc)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  rospy
   std_msgs
   igvc_msgs
   image_geometry
@@ -30,7 +31,7 @@ set(CMAKE_CXX_FLAGS "-g -std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -192,3 +193,4 @@ add_subdirectory(src/imu)
 add_subdirectory(src/global_mapper)
 add_subdirectory(src/flag_detector)
 add_subdirectory(src/filter_lidar)
+#add_subdirectory(src/cnn)
