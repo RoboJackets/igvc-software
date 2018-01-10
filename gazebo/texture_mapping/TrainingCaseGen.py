@@ -57,9 +57,9 @@ def genIntermediateCourse(x):
         
         openEntrance = rand.randint(10, 328)
         barrierLocation = rand.randint(0, openEntrance)
-		barrierLocation1 = rand.randint(openEntrance + intermediate_entrance_size, 360)
-		if (rand.randint(1,3) == 1):
-			barrierLocation = barrierLocation1
+        barrierLocation1 = rand.randint(openEntrance + intermediate_entrance_size, 360)
+        if (rand.randint(1,3) == 1):
+            barrierLocation = barrierLocation1
         create_circle(center, center, innerRad, outerRad, 0, 360, alpha_channel, 0)
         create_circle(center, center, 0, innerRad, openEntrance + intermediate_entrance_size, openEntrance, alpha_channel, 0)
         x0 = int(center + convert_distance_to_pixel(cos(barrierLocation*(360/(2 * 3.14)))*innerRad))
