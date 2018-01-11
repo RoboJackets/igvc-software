@@ -12,19 +12,13 @@
 #include <QTimer>
 #include <string>
 
-#define INTERVAL 250//in milliseconds
+#define INTERVAL 250  // in milliseconds
 
-typedef struct LabelManager{
-  //Map holding lables and their names. Strings used for the text of labels.
-  std::map<std::string, QLabel* > labels;
-
-  // timer used to check activity of sensors
-  QTimer* sensor_timer;
-
-  // list of activity statuses for corresponding sensors in map
-  bool* isActive; 
-
-} LabelManager;
+typedef struct LabelSet
+{
+  QLabel *label;
+  bool status;
+} LabelSet;
 
 /*
  * All of our panels need to be under the igvc_rviz_plugins namespace.
@@ -52,23 +46,23 @@ public slots:
 
 protected:
   /*
-   * Subscribers for each sensor. 
+   * Subscribers for each sensor.
    */
   ros::Subscriber imu_sub;
   ros::Subscriber lidar_sub;
   ros::Subscriber gps_sub;
   ros::Subscriber cam_center_sub;
 
-  LabelManager lm;
+  QTimer *sensor_timer;
+  std::map<std::string, LabelSet> labels;
 
   /**
    * Callbacks for each sensor.
    */
-  void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel* label);
-  void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel* label);
-  void cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel* label);
-  void gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel* label);
-
+  void imu_callback(const sensor_msgs::ImuConstPtr &msg, LabelSet ls);
+  void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, LabelSet ls);
+  void cam_center_callback(const sensor_msgs::ImageConstPtr &msg, LabelSet ls);
+  void gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, LabelSet ls);
 
 private:
   void reset_labels();
