@@ -114,24 +114,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::stri
     size_msg.data = global_map->size();
     _pointcloud_size_pub.publish(size_msg);
   }
-
-  if (firstFrame && !input->points.empty())
-  {
-    octree->setInputCloud(global_map);
-    for (unsigned int i = 0; i < input->size(); ++i)
-    {
-      pcl::PointXYZRGB searchPoint(255, 0, 0);
-      searchPoint.x = input->points[i].x;
-      searchPoint.y = input->points[i].y;
-      searchPoint.z = input->points[i].z;
-
-      if (!octree->isVoxelOccupiedAtPoint(searchPoint))
-      {
-        octree->addPointToCloud(searchPoint, global_map);
-      }
-    }
-    firstFrame = false;
-  }
+  firstFrame = false;
 }
 
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
@@ -190,6 +173,7 @@ int main(int argc, char **argv)
 
   octree = pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr(
       new pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>(octree_resolution));
+  octree->setInputCloud(global_map);
   std::istringstream iss(topics);
   std::vector<std::string> tokens{ std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>() };
 
