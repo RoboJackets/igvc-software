@@ -26,33 +26,33 @@
     X axis pointing forward (towards the short edge with the connector holes)
     Y axis pointing to the right
     and Z axis pointing down.
-    
+
   Positive yaw   : clockwise
   Positive roll  : right wing down
   Positive pitch : nose up
-  
+
   Transformation order: first yaw then pitch then roll.
 */
 
 /*
   Serial commands that the firmware understands:
-  
+
   "#o<params>" - Set OUTPUT mode and parameters. The available options are:
-  
+
       // Streaming output
       "#o0" - DISABLE continuous streaming output. Also see #f below.
       "#o1" - ENABLE continuous streaming output.
-      
+
       // Angles output
       "#ob" - Output angles in BINARY format (yaw/pitch/roll as binary float, so one output frame
               is 3x4 = 12 bytes long).
       "#ot" - Output angles in TEXT format (Output frames have form like "#YPR=-142.28,-5.38,33.52",
               followed by carriage return and line feed [\r\n]).
-      
+
       // Sensor calibration
       "#oc" - Go to CALIBRATION output mode.
       "#on" - When in calibration mode, go on to calibrate NEXT sensor.
-      
+
       // Sensor data output
       "#osct" - Output CALIBRATED SENSOR data of all 9 axes in TEXT format.
                 One frame consist of three lines - one for each sensor: acc, mag, gyr.
@@ -74,32 +74,32 @@
                One frame consist of three lines - one for RPY, accel, gyro
       "#oab" - Output CALIBRATED SENSOR data of accelerometer and gyros in BINARY format.
                One frame consist of two 3x3 float values and one RPY 3x4 (24 bytes + 12 bytes = 36 bytes long)
-      
-      // Error message output        
+
+      // Error message output
       "#oe0" - Disable ERROR message output.
       "#oe1" - Enable ERROR message output.
-    
-    
+
+
   "#f" - Request one output frame - useful when continuous output is disabled and updates are
          required in larger intervals only. Though #f only requests one reply, replies are still
          bound to the internal 20ms (50Hz) time raster. So worst case delay that #f can add is 19.99ms.
-         
-         
+
+
   "#s<xy>" - Request synch token - useful to find out where the frame boundaries are in a continuous
          binary stream or to see if tracker is present and answering. The tracker will send
          "#SYNCH<xy>\r\n" in response (so it's possible to read using a readLine() function).
          x and y are two mandatory but arbitrary bytes that can be used to find out which request
          the answer belongs to.
-          
-          
+
+
   ("#C" and "#D" - Reserved for communication with optional Bluetooth module.)
-  
+
   Newline characters are not required. So you could send "#ob#o1#s", which
   would set binary output mode, enable continuous streaming output and request
   a synch token all at once.
-  
+
   The status LED will be on if streaming output is enabled and off otherwise.
-  
+
   Byte order of binary output is little-endian: least significant byte comes first.
 */
 
@@ -170,11 +170,11 @@ boolean output_errors = false;  // true or false
 // Accelerometer
 // "accel x,y,z (min/max) = X_MIN/X_MAX  Y_MIN/Y_MAX  Z_MIN/Z_MAX"
 #define ACCEL_X_MIN ((float) -264)
-#define ACCEL_X_MAX ((float) 246)
-#define ACCEL_Y_MIN ((float) -248)
-#define ACCEL_Y_MAX ((float) 263)
-#define ACCEL_Z_MIN ((float) -269)
-#define ACCEL_Z_MAX ((float) 229)
+#define ACCEL_X_MAX ((float) 255)
+#define ACCEL_Y_MIN ((float) -264)
+#define ACCEL_Y_MAX ((float) 279)
+#define ACCEL_Z_MIN ((float) -289)
+#define ACCEL_Z_MAX ((float) 230)
 
 // Magnetometer (standard calibration mode) - unused (extended instead)
 // "magn x,y,z (min/max) = X_MIN/X_MAX  Y_MIN/Y_MAX  Z_MIN/Z_MAX"
@@ -188,8 +188,8 @@ boolean output_errors = false;  // true or false
 // Magnetometer (extended calibration mode)
 // uses extended magnetometer calibration (compensates hard & soft iron errors)
 #define CALIBRATION__MAGN_USE_EXTENDED true
-const float magn_ellipsoid_center[3] = {119.847, -54.9638, -57.8612};
-const float magn_ellipsoid_transform[3][3] = {{0.936968, 0.0114267, 0.0116152}, {0.0114267, 0.955169, -0.0109237}, {0.0116152, -0.0109237, 0.996041}};
+const float magn_ellipsoid_center[3] = {-2.08620, -14.2146, -274.974};
+const float magn_ellipsoid_transform[3][3] = {{0.844458, 0.0428071, 0.0123553}, {0.0428071, 0.936638, 0.0203989}, {0.0123553, 0.0203989, 0.988038}};
 
 // Gyroscope
 // "gyro x,y,z (current/average) = .../OFFSET_X  .../OFFSET_Y  .../OFFSET_Z
@@ -324,24 +324,24 @@ void reset_sensor_fusion() {
 
   read_sensors();
   timestamp = millis();
-  
+
   // GET PITCH
   // Using y-z-plane-component/x-component of gravity vector
   pitch = -atan2(accel[0], sqrt(accel[1] * accel[1] + accel[2] * accel[2]));
-	
+
   // GET ROLL
-  // Compensate pitch of gravity vector 
+  // Compensate pitch of gravity vector
   Vector_Cross_Product(temp1, accel, xAxis);
   Vector_Cross_Product(temp2, xAxis, temp1);
   // Normally using x-z-plane-component/y-component of compensated gravity vector
   // roll = atan2(temp2[1], sqrt(temp2[0] * temp2[0] + temp2[2] * temp2[2]));
   // Since we compensated for pitch, x-z-plane-component equals z-component:
   roll = atan2(temp2[1], temp2[2]);
-  
+
   // GET YAW
   Compass_Heading();
   yaw = MAG_Heading;
-  
+
   // Init rotation matrix
   init_rotation_matrix(DCM_Matrix, yaw, pitch, roll);
 }
@@ -377,7 +377,7 @@ void check_reset_calibration_session()
 
   // Reset this calibration session?
   if (!reset_calibration_session_flag) return;
-  
+
   // Reset acc and mag calibration variables
   for (int i = 0; i < 3; i++) {
     accel_min[i] = accel_max[i] = accel[i];
@@ -387,7 +387,7 @@ void check_reset_calibration_session()
   // Reset gyro calibration variables
   gyro_num_samples = 0;  // Reset gyro calibration averaging
   gyro_average[0] = gyro_average[1] = gyro_average[2] = 0.0f;
-  
+
   reset_calibration_session_flag = false;
 }
 
@@ -414,7 +414,7 @@ void setup()
 {
   // Init serial output
   Serial.begin(OUTPUT__BAUD_RATE);
-  
+
   // Init status LED
   pinMode (STATUS_LED_PIN, OUTPUT);
   digitalWrite(STATUS_LED_PIN, LOW);
@@ -425,7 +425,7 @@ void setup()
   Accel_Init();
   Magn_Init();
   Gyro_Init();
-  
+
   // Read sensors, init DCM algorithm
   delay(20);  // Give sensors enough time to collect data
   reset_sensor_fusion();
@@ -455,7 +455,7 @@ void loop()
         byte id[2];
         id[0] = readChar();
         id[1] = readChar();
-        
+
         // Reply with synch message
         Serial.print("#SYNCH");
         Serial.write(id, 2);
@@ -568,14 +568,14 @@ void loop()
     {
       // Apply sensor calibration
       compensate_sensor_errors();
-    
+
       // Run DCM algorithm
       Compass_Heading(); // Calculate magnetic heading
       Matrix_update();
       Normalize();
       Drift_correction();
       Euler_angles();
-      
+
       if (output_stream_on || output_single_on) output_angles();
     }
     else if (output_mode == OUTPUT__MODE_BOTH_CALIB)  // Output calibrate sensors and RPY
@@ -596,9 +596,9 @@ void loop()
     {
       if (output_stream_on || output_single_on) output_sensors();
     }
-    
+
     output_single_on = false;
-    
+
 #if DEBUG__PRINT_LOOP_TIME == true
     Serial.print("loop time (ms) = ");
     Serial.println(millis() - timestamp);
