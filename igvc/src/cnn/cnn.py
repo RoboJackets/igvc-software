@@ -11,13 +11,23 @@ import tensorflow as tf
 
 class CNN:
 
-    def __init__(self, subscriber_topic, publisher_topic, model_filename):
+    def __init__(self, subscriber_topic, publisher_topic, model_filename, resize_width,
+            resize_height, force_cpu):
+        self.graph = self.load_graph(model_filename)
+        config = tf.ConfigProto(
+                        device_count = {'GPU': 0}
+        )
+        if force_cpu:
+            self.sess = tf.Session(config=config,graph=self.graph)
+        else:
+            self.sess = tf.Session(graph=self.graph)
+
+        self.resize_width = resize_width
+        self.resize_height = resize_height
+
         self.publisher = rospy.Publisher(publisher_topic, Image)
         self.subscriber = rospy.Subscriber(subscriber_topic, Image, self.image_callback, queue_size=1)
         self.bridge = CvBridge()
-
-        self.graph = self.load_graph(model_filename)
-        self.sess = tf.Session(graph=self.graph)
         
 
 
@@ -43,6 +53,7 @@ class CNN:
         except CvBridgeError as e:
             print(e)
         cv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+        cv_image = cv2.resize(cv_image, (self.resize_width, self.resize_height))
         im = np.asarray(cv_image)
 
         image_pl = self.graph.get_tensor_by_name('Placeholder_1:0')
@@ -63,9 +74,13 @@ class CNN:
 
 if __name__ == '__main__':
     rospy.init_node('cnn')
-    #image_topic = rospy.get_param('/image_topic')
-    #image_sub
-    CNN('/usb_cam_center/image_raw', '/semantic_segmentation', '/home/dominicpattison/Documents/robojackets/vision/KittiSeg/test_frozen_model.pb')
+    image_topic = rospy.get_param('/image_topic')
+    image_resize_width = rospy.get_param('/image_resize_width')
+    image_resize_height = rospy.get_param('/image_resize_height')
+    model_path = rospy.get_param('/model_path')
+    force_cpu = rospy.get_param('/force_cpu')
+    CNN(image_topic, '/semantic_segmentation', model_path, image_resize_width,
+            image_resize_height, force_cpu)
 
     try:
         rospy.spin()
