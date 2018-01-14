@@ -51,9 +51,7 @@
   <run_depend>joystick_drivers</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>pcl_conversions</run_depend>
-  <run_depend>laser_geometry</run_depend>
   <run_depend>stereo_image_proc</run_depend>
-  <run_depend>sick_tim</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>rviz</run_depend>
   <run_depend>class_loader</run_depend>
