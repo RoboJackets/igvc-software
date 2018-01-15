@@ -58,13 +58,24 @@ void WaypointPanel::robot_position_callback(const nav_msgs::OdometryConstPtr &ms
     double qw = msg->pose.pose.orientation.w;
     double siny = 2.0 * (qw * qz + qx * qy);
     double cosy = 1.0 - 2.0 * (qy * qy + qz * qz);
-    double yaw = atan2(siny, cosy);
+    // double sinr = 2.0 * (qw * qx + qy * qz);
+    // double cosr = 1.0 - 2.0 * (qx * qx + qy * qy);
+    // double sinp = 2.0 * (qw * qy - qz * qx);
+    // double pitch;
+    // if (fabs(sinp) >= 1) {
+    //     pitch = copysign(M_PI / 2, sinp);
+    // } else {
+    //     pitch = asin(sinp);
+    // }
+
+    // double roll = atan2(sinr, cosr);
+    double yaw = atan2(siny, cosy) * 180 / M_PI;
 
     auto text = "X: " + std::to_string(way_x) + "\n" +
                 "Y: " + std::to_string(way_y) + "\n" +
                 "Distance: " + std::to_string(distance) + "\n" +
                 "Angle: " + std::to_string(angle - yaw) + " degrees\n" +
-                "Yaw: " + std::to_string(yaw) + " degrees";
+                "Yaw: " + std::to_string(yaw) + " degrees\n";
     // Set the contents of the label.
     label->setText(text.c_str());
 

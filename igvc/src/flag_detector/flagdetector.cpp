@@ -1,5 +1,4 @@
 #include "flagdetector.h"
-#include <camera_info_manager/camera_info_manager.h>
 #include <cv_bridge/cv_bridge.h>
 #include <math.h>
 #include <pcl_ros/point_cloud.h>
