@@ -1,4 +1,8 @@
+<<<<<<< HEAD
+ATTRS{idVendor}=="19a2", ATTRS{idProduct}=="5001", ATTRS{bcdDevice}=="0109", MODE="0666", SYMLINK+="igvc_lidar"
+=======
 SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", ATTRS{bcdDevice}=="1000", SYMLINK+="igvc_lidar", GROUP="plugdev", MODE="0666"
+>>>>>>> 8faa3055b77b28e026af1da8614d5f552dcf1c1e
 SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001",ATTRS{serial}=="A105BMON", SYMLINK+="igvc_imu"
 KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0825", ATTRS{bcdDevice}=="0012", ATTRS{serial}=="21AD0B10", SYMLINK+="igvc_usb_cam_right"
 KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0825", ATTRS{bcdDevice}=="0012", ATTRS{serial}=="DA101B10", SYMLINK+="igvc_usb_cam_left"
