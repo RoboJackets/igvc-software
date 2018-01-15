@@ -15,11 +15,12 @@ root = false
 
 # Unix-style newlines with a newline ending every file
 [*]
+charset = utf-8
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 indent_style = space
-indent_size = 2
+indent_size = 4
 
 # Use 4 spaces for most files
 indent_style = space
@@ -35,4 +36,20 @@ indent_size = 2
 # Makefiles are required to use tabs
 [{makefile, Makefile}]
 indent_style = tab
+indent_size = 4
+
+# cpp files
+[*.{c,h,cpp,hpp,ino,test}]
+indent_size = 2
+
+# launch files
+[*.{launch}]
+indent_size = 2
+
+# gazebo files
+[*.{xml,sdf,config,urdf,material,world}]
+indent_size = 2
+
+# python files
+[*.{py}]
 indent_size = 4
