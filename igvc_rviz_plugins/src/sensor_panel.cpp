@@ -26,11 +26,11 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   sensor_timer->setSingleShot(false);   // will repeat
   sensor_timer->setInterval(INTERVAL);  // goes off every 250 milliseconds
 
-  // calls timer whenever sensor_timer goes off
-  QObject::connect(sensor_timer, SIGNAL(timeout()), this, SLOT(timer()));
+  // calls reset_labels whenever sensor_timer goes off
+  QObject::connect(sensor_timer, SIGNAL(timeout()), this, SLOT(reset_labels()));
 
-  /* Initialize our subscriber to listen to the /speed topic.
-  * Note the use of boost::bind, which allows us to give the callback a pointer to our UI label.
+  /* Initialize subscribers to listen to topic corresponding with each sensor.
+  * use boost::bind to update labels with each call.
   */
   imu_sub =
       nh.subscribe<sensor_msgs::Imu>("/imu", 1, boost::bind(&sensor_panel::imu_callback, this, _1, labels["IMU"]));
@@ -48,7 +48,7 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
     layout->addWidget(pear.second.label);
   }
   setLayout(layout);
-  timer();  // inits to disabled
+  reset_labels();  // inits all to disabled
 }
 
 void sensor_panel::imu_callback(const sensor_msgs::ImuConstPtr &msg, LabelSet ls)
@@ -76,10 +76,13 @@ void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, Label
 }
 
 /*
-*Sets all of the activity statuses to disabled, and sets labels to disabled if already disabled
+*Sets all of the activity statuses to disabled,
+*and sets labels to disabled if already disabled
 */
 void sensor_panel::reset_labels()
 {
+  static int counter = 0;
+
   for (std::pair<std::string, LabelSet> pear : labels)
   {
     if (!pear.second.status)
@@ -91,15 +94,7 @@ void sensor_panel::reset_labels()
       pear.second.status = false;
     }
   }
-}
-
-/*
-*Sets the labels to Disabled, and then restarts the timer
-*/
-void sensor_panel::timer()
-{
-  reset_labels();
-  sensor_timer->start();
+  counter++;
 }
 }
 
