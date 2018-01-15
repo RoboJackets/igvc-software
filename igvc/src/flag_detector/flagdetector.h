@@ -1,6 +1,5 @@
 #ifndef FLAGDETECTOR_H
 #define FLAGDETECTOR_H
-#include <camera_info_manager/camera_info_manager.h>
 #include <cv_bridge/cv_bridge.h>
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
