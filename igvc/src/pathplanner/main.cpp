@@ -40,7 +40,7 @@ void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
     while (current_index < msg->size())
     {
       search_problem.Octree->addPointToCloud(
-          pcl::PointXYZ(msg->points[current_index].x, msg->points[current_index].y, msg->points[current_index].z),
+          pcl::PointXYZ(msg->points[current_index].x, msg->points[current_index].y, 0),
           search_problem.Map);
       current_index++;
     }
@@ -140,7 +140,6 @@ int main(int argc, char** argv)
       continue;
 
     planning_mutex.lock();
-    // TODO only replan if needed.
     Path<SearchLocation, SearchMove> path;
     path = GraphSearch::AStar(search_problem, expanded_callback);
     if (act_path_pub.getNumSubscribers() > 0)
