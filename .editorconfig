@@ -24,7 +24,6 @@ indent_size = 4
 
 # Use 4 spaces for most files
 indent_style = space
-indent_size = 2
 max_line_length = 120
 
 
@@ -36,7 +35,6 @@ indent_size = 2
 # Makefiles are required to use tabs
 [{makefile, Makefile}]
 indent_style = tab
-indent_size = 4
 
 # cpp files
 [*.{c,h,cpp,hpp,ino,test}]
