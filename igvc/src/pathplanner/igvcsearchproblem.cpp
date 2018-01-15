@@ -16,14 +16,15 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
     current = current > deltat ? deltat : (current + maxODeltaT);
     move.DeltaT = current;
     SearchLocation result = getResult(start_state, move);
-    pcl::PointXYZ searchPoint(result.x, result.y, 0);
+    double offsetToCenter = 0.33;
+    pcl::PointXYZ searchPoint(result.x + offsetToCenter * cos(result.theta),
+                              result.y + offsetToCenter * sin(result.theta), 0);
     std::vector<int> pointIdxRadiusSearch;
     std::vector<float> pointRadiusSquaredDistance;
     int neighborsCount = Octree->nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
     if (neighborsCount > 0)
     {
-      pcl::PointXYZ point = Octree->getInputCloud()->at(pointIdxRadiusSearch[0]);
-      float distance = sqrt(pow(point.x - result.x, 2) + pow(point.y - result.y, 2));
+      float distance = sqrt(pointRadiusSquaredDistance[0]);
       if (distance < move.distToObs)
       {
         move.distToObs = distance;
