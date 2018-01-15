@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+
 <!-- map.launch -->
 <launch>
     <!-- Waypoints -->
@@ -15,6 +17,15 @@
           <param name="point_turns_enabled" type="bool" value="false"/>
           <param name="reverse_enabled" type="bool" value="false"/>
           <param name="max_obstacle_delta_t" type="double" value="0.1"/>
+
+          <!-- distance in meters to flag point as valid without checking obstacles -->
+          <!-- used for efficiency purposes -->
+          <param name="bounding_distance" type="double" value="15"/>
+
+          <!-- points are weighted based off of cloest obstacle -->
+          <!-- weight = length * (alpha * exp((threshold - dist)*beta) + 1 -->
+          <param name="alpha" type="double" value="4"/>
+          <param name="beta" type="double" value="5"/>
     </node>
 
     <!-- Follower -->

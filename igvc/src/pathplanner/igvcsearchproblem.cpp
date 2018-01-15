@@ -7,13 +7,13 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
 {
   auto deltat = move.DeltaT;
   double current = 0.0;
-  if (sqrt(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > 15)
+  if (sqrt(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > BoundingDistance)
   {
     return true;
   }
-  while (current < (deltat + maxODeltaT))
+  while (current < (deltat + MaxObstacleDeltaT))
   {
-    current = current > deltat ? deltat : (current + maxODeltaT);
+    current = current > deltat ? deltat : (current + MaxObstacleDeltaT);
     move.DeltaT = current;
     SearchLocation result = getResult(start_state, move);
     double offsetToCenter = 0.33;
