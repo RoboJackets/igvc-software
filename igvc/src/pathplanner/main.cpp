@@ -113,7 +113,7 @@ int main(int argc, char** argv)
   search_problem.Octree = boost::make_shared<pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>>(0.1);
   search_problem.Octree->setInputCloud(search_problem.Map);
 
-  if(!pNh.hasParam("goal_threshold") || !pNh.hasParam("threshold") || !pNh.hasParam("speed") || !pNh.hasParam("baseline") || !pNh.hasParam("minimum_omega") || !pNh.hasParam("maximum_omega") || !pNh.hasParam("delta_omega") || !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled") || !pNh.hasParam("max_obstacle_delta_t")) {
+  if(!pNh.hasParam("goal_threshold") || !pNh.hasParam("threshold") || !pNh.hasParam("speed") || !pNh.hasParam("baseline") || !pNh.hasParam("minimum_omega") || !pNh.hasParam("maximum_omega") || !pNh.hasParam("delta_omega") || !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled") || !pNh.hasParam("max_obstacle_delta_t") || !pNh.hasParam("alpha") || !pNh.hasParam("beta") || !pNh.hasParam("bounding_distance")) {
     ROS_ERROR_STREAM("path planner does not have all required parameters");
     ROS_ERROR_STREAM("path planner does not have all required parameters");
     ROS_ERROR_STREAM("path planner does not have all required parameters");
@@ -133,7 +133,10 @@ int main(int argc, char** argv)
   pNh.getParam("delta_omega", search_problem.DeltaOmega);
   pNh.getParam("point_turns_enabled", search_problem.PointTurnsEnabled);
   pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
-  pNh.getParam("max_obstacle_delta_t", search_problem.maxODeltaT);
+  pNh.getParam("max_obstacle_delta_t", search_problem.MaxObstacleDeltaT);
+  pNh.getParam("alpha", search_problem.Alpha);
+  pNh.getParam("beta", search_problem.Beta);
+  pNh.getParam("bounding_distance", search_problem.BoundingDistance);
 
   ros::Rate rate(3);
   while (ros::ok())
