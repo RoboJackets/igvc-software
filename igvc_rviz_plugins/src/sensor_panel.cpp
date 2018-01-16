@@ -13,10 +13,10 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   QVBoxLayout *layout = new QVBoxLayout();  // layouts hold widgets
 
   // all labels for displaying data
-  labels["IMU"] = { new QLabel("IMU: Placehold\n"), false };
-  labels["Lidar"] = { new QLabel("Lidar: Placehold\n"), false };
-  labels["Center Camera"] = { new QLabel("Center Camera: Placehold\n"), false };
-  labels["GPS"] = { new QLabel("GPS: Placehold\n"), false };
+  labels["IMU"] = new QLabel("IMU: Disabled\n");
+  labels["Lidar"] = new QLabel("Lidar: Disabled\n");
+  labels["Center Camera"] = new QLabel("Center Camera: Disabled\n");
+  labels["GPS"] = new QLabel("GPS: Disabled\n");
 
   /*
   *Makes timer that repeats every interval seconds
@@ -43,58 +43,59 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
                                                  boost::bind(&sensor_panel::gps_callback, this, _1, labels["GPS"]));
 
   // adds all the widgets to the layout
-  for (std::pair<std::string, LabelSet> pear : labels)
+  for (std::pair<std::string, QLabel *> pear : labels)
   {
-    layout->addWidget(pear.second.label);
+    layout->addWidget(pear.second);
   }
   setLayout(layout);
-  reset_labels();  // inits all to disabled
+  sensor_timer->start();
 }
 
-void sensor_panel::imu_callback(const sensor_msgs::ImuConstPtr &msg, LabelSet ls)
+void sensor_panel::imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label)
 {
-  ls.label->setText("IMU: Enabled");
-  ls.status = true;
+  label->setText("IMU: Enabled ");
 }
 
-void sensor_panel::lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, LabelSet ls)
+void sensor_panel::lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label)
 {
-  ls.label->setText("Lidar: Enabled");
-  ls.status = true;
+  label->setText("Lidar: Enabled ");
 }
 
-void sensor_panel::cam_center_callback(const sensor_msgs::ImageConstPtr &msg, LabelSet ls)
+void sensor_panel::cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
 {
-  ls.label->setText("Center Camera: Enabled");
-  ls.status = true;
+  label->setText("Center Camera: Enabled ");
 }
 
-void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, LabelSet ls)
+void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label)
 {
-  ls.label->setText("GPS: Enabled");
-  ls.status = true;
+  label->setText("GPS: Enabled ");
 }
 
 /*
-*Sets all of the activity statuses to disabled,
-*and sets labels to disabled if already disabled
+*Uses trailing space to figure out if a sensor is inactive
+*No trailing space means the sensor was inactive for the whole timer cycle
 */
 void sensor_panel::reset_labels()
 {
-  static int counter = 0;
-
-  for (std::pair<std::string, LabelSet> pear : labels)
+  int index;
+  for (std::pair<std::string, QLabel *> pear : labels)
   {
-    if (!pear.second.status)
+    // convert QString to std::string
+    std::string str = pear.second->text().toUtf8().constData();
+
+    // if has trailing space, was updated this cycle
+    if ((index = str.find("Enabled ")) != -1)
     {
-      pear.second.label->setText((pear.first + ": Disabled").c_str());
+      str = str.substr(0, index);
+      pear.second->setText((pear.first + ": Enabled").c_str());
     }
-    else
+    // If has no trailing space, then was not updated this cycle
+    else if ((index = str.find("Enabled")) != -1)
     {
-      pear.second.status = false;
+      str = str.substr(0, index);
+      pear.second->setText((pear.first + ": Disabled").c_str());
     }
   }
-  counter++;
 }
 }
 
