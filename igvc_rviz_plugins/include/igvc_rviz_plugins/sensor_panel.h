@@ -14,12 +14,6 @@
 
 #define INTERVAL 250  // in milliseconds
 
-typedef struct LabelSet
-{
-  QLabel *label;
-  bool status;
-} LabelSet;
-
 /*
  * All of our panels need to be under the igvc_rviz_plugins namespace.
  */
@@ -54,15 +48,15 @@ protected:
   ros::Subscriber cam_center_sub;
 
   QTimer *sensor_timer;
-  std::map<std::string, LabelSet> labels;
+  std::map<std::string, QLabel *> labels;
 
   /**
    * Callbacks for each sensor.
    */
-  void imu_callback(const sensor_msgs::ImuConstPtr &msg, LabelSet ls);
-  void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, LabelSet ls);
-  void cam_center_callback(const sensor_msgs::ImageConstPtr &msg, LabelSet ls);
-  void gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, LabelSet ls);
+  void imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *ls);
+  void lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *ls);
+  void cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *ls);
+  void gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *ls);
 };
 }
 
