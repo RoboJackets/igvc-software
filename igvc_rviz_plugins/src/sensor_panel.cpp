@@ -45,6 +45,7 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   // adds all the widgets to the layout
   for (std::pair<std::string, QLabel *> pear : labels)
   {
+    pear.second->setStyleSheet(red);
     layout->addWidget(pear.second);
   }
   setLayout(layout);
@@ -54,21 +55,25 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
 void sensor_panel::imu_callback(const sensor_msgs::ImuConstPtr &msg, QLabel *label)
 {
   label->setText("IMU: Enabled ");
+  label->setStyleSheet(green);
 }
 
 void sensor_panel::lidar_callback(const sensor_msgs::PointCloud2ConstPtr &msg, QLabel *label)
 {
   label->setText("Lidar: Enabled ");
+  label->setStyleSheet(green);
 }
 
 void sensor_panel::cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *label)
 {
   label->setText("Center Camera: Enabled ");
+  label->setStyleSheet(green);
 }
 
 void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *label)
 {
   label->setText("GPS: Enabled ");
+  label->setStyleSheet(green);
 }
 
 /*
@@ -94,6 +99,7 @@ void sensor_panel::reset_labels()
     {
       str = str.substr(0, index);
       pear.second->setText((pear.first + ": Disabled").c_str());
+      pear.second->setStyleSheet(red);
     }
   }
 }
