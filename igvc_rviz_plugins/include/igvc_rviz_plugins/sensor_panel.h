@@ -9,6 +9,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <QLabel>
 #include <QObject>
+#include <QString>
 #include <QTimer>
 #include <string>
 
@@ -50,6 +51,8 @@ protected:
   QTimer *sensor_timer;
   std::map<std::string, QLabel *> labels;
 
+  const QString green = "QLabel { background-color : green; color : black; font: bold 14px;}";
+  const QString red = "QLabel { background-color : red; color : black; font: bold 14px; }";
   /**
    * Callbacks for each sensor.
    */
