@@ -6,4 +6,13 @@
             Example panel for getting started
         </description>
     </class>
+
+    <class name="igvc_rviz_plugins/sensor_panel"
+           type="igvc_rviz_plugins::sensor_panel"
+           base_class_type="rviz::Panel">
+        <description>
+            Panel to show status of all sensors.
+        </description>
+    </class>
+
 </library>
