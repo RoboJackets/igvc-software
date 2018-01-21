@@ -392,63 +392,36 @@
   </transmission>
 
 
-  <joint name="base_footprint_to_base_link" type="fixed">
-    <parent link="base_footprint"/>
-    <child link="base_link"/>
-    <origin xyz="0 0 0.12" rpy="0 0 0"/>
+  <joint name="imu_to_base_footprint" type="fixed">
+    <parent link="imu"/>
+    <child link="base_footprint"/>
+    <origin xyz="0 0 -.633" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <joint name="base_footprint_to_body" type="fixed">
-    <origin xyz="0 0 0.12" rpy="0 0 0" />
-    <parent link="base_footprint"/>
-    <child link="body"/>
-  </joint>
-  <joint name="base_footprint_to_lidar" type="fixed">
-    <origin xyz="0.4572 0 0.9525" rpy="0 0 0" />
-    <parent link="base_footprint"/>
+  <joint name="imu_to_lidar" type="fixed">
+    <origin xyz=".276 -.029 .029" rpy="0 0 0" />
+    <parent link="imu"/>
     <child link="lidar"/>
   </joint>
-  <joint name="base_footprint_to_imu" type="fixed">
-    <origin xyz="0.0 0 0.9525" rpy="0 0 3.141" />
-    <parent link="base_footprint"/>
-    <child link="imu"/>
-  </joint>
-  <joint name="base_footprint_to_gps" type="fixed">
-    <origin xyz="-0.04572 0.2032 0.9525" rpy="0 0 0" /> <!-- -1.5708 -->
-    <parent link="base_footprint"/>
-    <child link="gps"/>
-  </joint>
-  <joint name="base_footprint_to_center_camera" type="fixed">
-    <origin xyz="0.03302 0 1.7145" rpy="0 0 0" />
-    <parent link="base_footprint"/>
+  <joint name="imu_to_center_camera" type="fixed">
+    <origin xyz="-.056 0 .937" rpy="0 0 0" />
+    <parent link="imu"/>
     <child link="usb_cam_center"/>
   </joint>
-  <joint name="body_to_left_camera" type="fixed">
-    <origin xyz="0.0 0.4 0.4" rpy="0 0.174533 0.785398" />
-    <parent link="body"/>
-    <child link="usb_cam_left"/>
-  </joint>
-  <joint name="body_to_right_camera" type="fixed">
-    <origin xyz="0.0 -0.4 0.4" rpy="0 0.174533 -0.785398" />
-    <parent link="body"/>
-    <child link="usb_cam_right"/>
-  </joint>
-  <joint name="base_footprint_to_axle" type="fixed">
-    <parent link="base_footprint"/>
-    <child link="axle"/>
-    <origin xyz="0 0 0.1651" rpy="1.5708 0 0" />
-  </joint>
-  <joint name="axle_to_left_wheel" type="continuous">
-    <parent link="axle"/>
+  <joint name="imu_to_left_wheel" type="fixed">
+    <origin xyz="-.287 .444 -.465" rpy="0 0 3.141" />
+    <parent link="imu"/>
     <child link="left_wheel"/>
-    <axis xyz="0 0 -1" rpy="0 0 0" />
-    <origin xyz="0 0 -0.32004" rpy="0 0 0" />
   </joint>
-  <joint name="axle_to_right_wheel" type="continuous">
-    <parent link="axle"/>
+  <joint name="imu_to_right_wheel" type="fixed">
+    <origin xyz="-.287 -.438 -.465" rpy="0 0 0" /> <!-- -1.5708 -->
+    <parent link="imu"/>
     <child link="right_wheel"/>
-    <axis xyz="0 0 -1" rpy="0 0 0" />
-    <origin xyz="0 0 0.32004" rpy="0 0 0" />
+  </joint>
+  <joint name="imu_to_gps" type="fixed">
+    <origin xyz="-.044 .214 0" rpy="0 0 0" /> <!-- -1.5708 -->
+    <parent link="imu"/>
+    <child link="gps"/>
   </joint>
   <!--must have a joint so it is not assumed to be the base link but the ball joint not in URDF must add it in gazebo tag-->
   <joint name="base_footprint_to_front_ball" type="floating">
