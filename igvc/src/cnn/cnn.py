@@ -7,6 +7,7 @@ import scipy
 import scipy.misc
 import numpy as np
 import tensorflow as tf
+from timeit import default_timer as timer
 
 
 class CNN:
@@ -25,9 +26,9 @@ class CNN:
         self.resize_width = resize_width
         self.resize_height = resize_height
 
-        self.publisher = rospy.Publisher(publisher_topic, Image)
-        self.subscriber = rospy.Subscriber(subscriber_topic, Image, self.image_callback, queue_size=1)
         self.bridge = CvBridge()
+        self.publisher = rospy.Publisher(publisher_topic, Image, queue_size=1)
+        self.subscriber = rospy.Subscriber(subscriber_topic, Image, self.image_callback, queue_size=1, buff_size=10**8)
         
 
 
@@ -48,6 +49,7 @@ class CNN:
 
 
     def image_callback(self, image_msg):
+        start = timer()
         try:
             cv_image = self.bridge.imgmsg_to_cv2(image_msg, "bgr8")
         except CvBridgeError as e:
@@ -68,6 +70,8 @@ class CNN:
         im_threshold = np.uint8(255*im_threshold)
         cv_output = cv2.cvtColor(im_threshold, cv2.COLOR_GRAY2BGR)
         self.publisher.publish(self.bridge.cv2_to_imgmsg(cv_output, 'bgr8'))
+        print timer() - start
+
 
 
 
