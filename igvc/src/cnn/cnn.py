@@ -69,7 +69,9 @@ class CNN:
         im_threshold = output_image > threshold
         im_threshold = np.uint8(255*im_threshold)
         cv_output = cv2.cvtColor(im_threshold, cv2.COLOR_GRAY2BGR)
-        self.publisher.publish(self.bridge.cv2_to_imgmsg(cv_output, 'bgr8'))
+        msg_out = self.bridge.cv2_to_imgmsg(cv_output, 'bgr8')
+        msg_out.header.stamp = image_msg.header.stamp
+        self.publisher.publish(msg_out)
         print timer() - start
 
 
