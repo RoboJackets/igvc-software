@@ -4,15 +4,25 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <std_msgs/Int64.h>
 #include <stdlib.h>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <utility>
+
+struct WatchedPointcloud
+{
+  std::string topic_name;
+  std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> *window;
+  int window_size;
+  double probability_threshold;
+};
 
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr global_map;
 ros::Publisher _pointcloud_pub;
@@ -25,23 +35,20 @@ int maxIter;
 pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr octree;
 double searchRadius;
 double octree_resolution;
-double probability_thresh;
 
-std::unordered_map<std::string, std::pair<std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> *, int>> topic_pc_map;
+std::unordered_map<std::string, std::shared_ptr<WatchedPointcloud>> topic_pc_map;
 
 std::vector<int> queue_window_sizes;
+std::vector<double> probability_thresholds;
 bool use_icp;
 
-void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::string &topic)
+void filter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::string &topic)
 {
   // Retrieve pointcloud list pointer from unordered map
-  auto map_it = topic_pc_map.find(topic);
-  std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> *pointcloud_list = map_it->second.first;
+  auto current_watched = topic_pc_map.find(topic)->second;
+  std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> *pointcloud_list = current_watched->window;
 
-  // Temp
-  int queue_window_size = map_it->second.second;
-
-  if (pointcloud_list->size() < static_cast<unsigned int>(queue_window_size))
+  if (pointcloud_list->size() < static_cast<unsigned int>(current_watched->window_size))
   {
     // icp
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr Final =
@@ -62,7 +69,7 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::stri
       pointcloud_list->push_back(input);
     }
   }
-  if (pointcloud_list->size() == static_cast<unsigned int>(queue_window_size))
+  if (pointcloud_list->size() == static_cast<unsigned int>(current_watched->window_size))
   {
     // Probabilistic calculations here
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr local_pc =
@@ -91,9 +98,9 @@ void icp_transform(pcl::PointCloud<pcl::PointXYZRGB>::Ptr input, const std::stri
           float dist;
           local_octree.approxNearestSearch(point, point_idx, dist);
           // If the probability is less than the threshold, increase the probability
-          local_pc->points[point_idx].g = local_pc->points[point_idx].g + (int)(255.0 / queue_window_size);
-          local_pc->points[point_idx].b = local_pc->points[point_idx].b + (int)(255.0 / queue_window_size);
-          if (local_pc->points[point_idx].g >= probability_thresh * 255.0 &&
+          local_pc->points[point_idx].g = local_pc->points[point_idx].g + (int)(255.0 / current_watched->window_size);
+          local_pc->points[point_idx].b = local_pc->points[point_idx].b + (int)(255.0 / current_watched->window_size);
+          if (local_pc->points[point_idx].g >= current_watched->probability_threshold * 255.0 &&
               !octree->isVoxelOccupiedAtPoint(local_pc->points[point_idx]))
           {
             // Add the point to the global map if its probability is greater than or equal to the threshold
@@ -122,9 +129,10 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
   tf::StampedTransform transform;
-  if (tf_listener->waitForTransform("/odom", msg->header.frame_id, ros::Time(0), ros::Duration(5.0)))
+  ros::Time time = pcl_conversions::fromPCL(msg->header.stamp);
+  if (tf_listener->waitForTransform("/odom", msg->header.frame_id, time, ros::Duration(5.0)))
   {
-    tf_listener->lookupTransform("/odom", msg->header.frame_id, ros::Time(0), transform);
+    tf_listener->lookupTransform("/odom", msg->header.frame_id, time, transform);
     pcl_ros::transformPointCloud(*msg, *transformed, transform);
     for (auto point : *transformed)
     {
@@ -135,7 +143,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformed_rgb =
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     pcl::copyPointCloud(*transformed, *transformed_rgb);
-    icp_transform(transformed_rgb, topic);
+    filter(transformed_rgb, topic);
 
     _pointcloud_pub.publish(global_map);
   }
@@ -165,7 +173,7 @@ int main(int argc, char **argv)
   pNh.getParam("max_iterations", maxIter);
   pNh.getParam("search_radius", searchRadius);
   pNh.getParam("octree_resolution", octree_resolution);
-  pNh.getParam("probability_thresh", probability_thresh);
+  pNh.getParam("probability_thresholds", probability_thresholds);
   pNh.getParam("queue_window_sizes", queue_window_sizes);
   pNh.getParam("use_icp", use_icp);
   if (topics.empty())
@@ -177,20 +185,24 @@ int main(int argc, char **argv)
   std::istringstream iss(topics);
   std::vector<std::string> tokens{ std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>() };
 
-  if (tokens.size() != queue_window_sizes.size())
+  if (tokens.size() != queue_window_sizes.size() || tokens.size() != probability_thresholds.size())
   {
-    std::cout << tokens.size() << " " << queue_window_sizes.size() << std::endl;
-    ROS_ERROR_STREAM("Queue window size does not match topic list size");
+    std::cout << tokens.size() << " " << queue_window_sizes.size() << " " << probability_thresholds.size() << std::endl;
+    ROS_ERROR_STREAM("Queue window size, number of topics, and probability thresholds size does not match");
     return 0;
   }
 
   int count = 0;
-  for (auto topic : tokens)
+  for (std::string topic : tokens)
   {
     ROS_INFO_STREAM("Mapper subscribing to " << topic);
     subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(topic, 1, boost::bind(frame_callback, _1, topic)));
-    topic_pc_map.insert(
-        { topic, std::make_pair(new std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>, queue_window_sizes[count]) });
+    std::shared_ptr<WatchedPointcloud> current = std::make_shared<WatchedPointcloud>();
+    current->topic_name = topic;
+    current->window = new std::list<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>;
+    current->window_size = queue_window_sizes[count];
+    current->probability_threshold = probability_thresholds[count];
+    topic_pc_map.insert({ topic, current });
     count++;
   }
 
