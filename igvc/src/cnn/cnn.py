@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 import rospy
 import cv2
+from image_geometry import PinholeCameraModel
+import tf as ros_tf
 from sensor_msgs.msg import Image
+from sensor_msgs.msg import CameraInfo
+from sensor_msgs.msg import PointCloud
+from geometry_msgs.msg import Point32
 from cv_bridge import CvBridge, CvBridgeError
 import scipy
 import scipy.misc
@@ -25,11 +30,51 @@ class CNN:
 
         self.resize_width = resize_width
         self.resize_height = resize_height
-
         self.bridge = CvBridge()
-        self.publisher = rospy.Publisher(publisher_topic, Image, queue_size=1)
+
+	try:
+            camera_info = rospy.wait_for_message('/usb_cam_center/camera_info', CameraInfo, timeout=5)
+        except(rospy.ROSException), e:
+            print "Camera info topic not available"
+            print e
+            exit()
+
+        # width and height adjust factors
+        waf = float(resize_width) / camera_info.width
+        haf = float(resize_height) / camera_info.height
+        camera_info.height = resize_height
+        camera_info.width = resize_width
+
+        # adjust the camera matrix
+        K = camera_info.K
+        camera_info.K = (K[0]*waf,         0.,  K[2]*waf,
+                                0.,  K[4]*haf,  K[5]*haf,
+                                0.,        0.,         1.)
+
+        # adjust the projection matrix
+        P = camera_info.P
+        camera_info.P = (P[0]*waf,        0.,  P[2]*waf,  0.,
+                               0.,  P[5]*haf,  P[6]*haf,  0.,
+                               0.,        0.,        1.,  0.)
+
+        self.camera_model = PinholeCameraModel()
+        self.camera_model.fromCameraInfo(camera_info)
+        print camera_info
+
+        transform_listener = ros_tf.TransformListener()
+        transform_listener.waitForTransform('/base_footprint', '/optical_cam_center', rospy.Time(0), rospy.Duration(5.0))
+        cam_transform_translation, cam_transform_rotation = transform_listener.lookupTransform('/base_footprint', '/optical_cam_center', rospy.Time(0))
+        self.cam_transform_rotation_matrix = ros_tf.transformations.quaternion_matrix(cam_transform_rotation)[:-1,:-1]
+        self.cam_transform_translation = np.asarray(cam_transform_translation)
+        print self.cam_transform_translation
+        print self.cam_transform_rotation_matrix
+
+        self.im_publisher = rospy.Publisher(publisher_topic, Image, queue_size=1)
+        self.cloud_publisher = rospy.Publisher("/semantic_segmentation_cloud", PointCloud, queue_size=1)
         self.subscriber = rospy.Subscriber(subscriber_topic, Image, self.image_callback, queue_size=1, buff_size=10**8)
         
+
+
 
 
     def load_graph(self, frozen_graph_filename):
@@ -45,6 +90,22 @@ class CNN:
             # Since we load everything in a new graph, this is not needed
             tf.import_graph_def(graph_def, name='')
         return graph
+
+
+
+    def image_to_point_cloud(self, input_image):
+        half_rows = np.size(input_image, axis=0) / float(2)
+        world_points = []
+        for r,c in zip(*input_image.nonzero()):
+            if r < half_rows:
+                continue
+            ray = np.asarray( self.camera_model.projectPixelTo3dRay( (c,r) ) )
+            ray_in_world = np.matmul( self.cam_transform_rotation_matrix, ray )
+            scale = -self.cam_transform_translation[2] / ray_in_world[2]
+            world_point = scale * ray_in_world + self.cam_transform_translation
+            world_points.append( Point32( world_point[0], world_point[1], world_point[2] ) )
+
+        return world_points
 
 
 
@@ -67,11 +128,19 @@ class CNN:
 
         threshold = 0.5
         im_threshold = output_image > threshold
+        world_points = self.image_to_point_cloud(im_threshold)
+
         im_threshold = np.uint8(255*im_threshold)
         cv_output = cv2.cvtColor(im_threshold, cv2.COLOR_GRAY2BGR)
         msg_out = self.bridge.cv2_to_imgmsg(cv_output, 'bgr8')
         msg_out.header.stamp = image_msg.header.stamp
-        self.publisher.publish(msg_out)
+        self.im_publisher.publish(msg_out)
+
+        cloud_msg = PointCloud()
+        cloud_msg.header.stamp = image_msg.header.stamp
+        cloud_msg.header.frame_id = 'base_footprint'
+        cloud_msg.points = world_points
+        self.cloud_publisher.publish(cloud_msg)
         print timer() - start
 
 
