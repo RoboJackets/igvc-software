@@ -4,12 +4,6 @@
     excluding some of the duplicate image_transport topics.
     -->
 <launch>
-    <node pkg="igvc" type="system_stats" name="system_stats" output="screen">
-        <param name="frequency" value="10"/>
-    </node>
-
     <node pkg="rosbag" type="record" name="record" output="screen"
-    args="-a -x '(.*)image(.*)*'" />
-    <node pkg="rosbag" type="record" name="record_image" output="screen"
-    args="-e '/usb_cam/image_raw'" />
+    args="-a -x '(.*)image(.*)*' /usb_cam_center/image_raw/compressed" />
 </launch>
