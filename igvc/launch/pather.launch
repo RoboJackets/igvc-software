@@ -10,7 +10,7 @@
           <param name="goal_threshold" type="double" value="1.0"/>
           <param name="threshold" type="double" value="0.5"/>
           <param name="speed" type="double" value="1.0"/>
-          <param name="baseline" type="double" value="0.93"/>
+          E<param name="baseline" type="double" value="0.88"/>
           <param name="minimum_omega" type="double" value="-0.6"/>
           <param name="maximum_omega" type="double" value="0.61"/>
           <param name="delta_omega" type="double" value="0.3"/>
