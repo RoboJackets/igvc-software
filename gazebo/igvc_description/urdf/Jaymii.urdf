@@ -404,7 +404,7 @@
     <child link="lidar"/>
   </joint>
   <joint name="imu_to_center_camera" type="fixed">
-    <origin xyz="-.056 0 .937" rpy="0 0 0" />
+    <origin xyz="-.056 0 .937" rpy="0 1.03 0" />
     <parent link="imu"/>
     <child link="usb_cam_center"/>
   </joint>
