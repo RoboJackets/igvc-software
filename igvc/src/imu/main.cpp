@@ -45,9 +45,9 @@ int main(int argc, char** argv)
     ros::spinOnce();
 
     // read the values
+    std::string rpy = port.readln();
     std::string accel = port.readln();
     std::string gyro = port.readln();
-    std::string rpy = port.readln();
 
     // parse the strings read
     std::vector<std::string> accelTokens = split(accel, '=');
@@ -92,19 +92,28 @@ int main(int argc, char** argv)
     try
     {
       msg.linear_acceleration.x = stof(accelTokens[0]);
-      msg.linear_acceleration.y = -stof(accelTokens[1]);  // must be negative - IMU defines y positive as right
-      msg.linear_acceleration.z = -stof(accelTokens[2]);  // must be negative - IMU defines z positive as down
+      msg.linear_acceleration.y = stof(accelTokens[1]);
+      msg.linear_acceleration.z = stof(accelTokens[2]);
       msg.linear_acceleration_covariance = { 0.04, 1e-6, 1e-6, 1e-6, 0.04, 1e-6, 1e-6, 1e-6, 0.04 };
 
       msg.angular_velocity.x = stof(gyroTokens[0]);
-      msg.angular_velocity.y = -stof(gyroTokens[1]);
-      msg.angular_velocity.z = -stof(gyroTokens[2]);
+      msg.angular_velocity.y = stof(gyroTokens[1]);
+      msg.angular_velocity.z = stof(gyroTokens[2]);
       msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
 
-      float yaw = HALF_TO_FULL_CIRCLE_ANGLE(-stof(rpyTokens[0])) * DEG_TO_RAD;
-      float pitch = HALF_TO_FULL_CIRCLE_ANGLE(stof(rpyTokens[1])) * DEG_TO_RAD;
-      float roll = HALF_TO_FULL_CIRCLE_ANGLE(stof(rpyTokens[2])) * DEG_TO_RAD;
+      float yaw = HALF_TO_FULL_CIRCLE_ANGLE(-(stof(rpyTokens[0]) + 90)) * DEG_TO_RAD;
+      float pitch = HALF_TO_FULL_CIRCLE_ANGLE(-stof(rpyTokens[1])) * DEG_TO_RAD;
+      float roll = HALF_TO_FULL_CIRCLE_ANGLE(stof(rpyTokens[2]) + 180) * DEG_TO_RAD;
+
       msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
+
+      // removing gravity vector from accelerations
+      tf::Transform gravityTransform(tf::Quaternion(roll, pitch, yaw));
+      tf::Vector3 gravityVector = gravityTransform(tf::Vector3(0,0,9.81));
+      msg.linear_acceleration.x += gravityVector.getX();
+      msg.linear_acceleration.y += gravityVector.getY();
+      msg.linear_acceleration.z += gravityVector.getZ();
+
       msg.orientation_covariance = { 0.0025, 1e-6, 1e-6, 1e-6, 0.0025, 1e-6, 1e-6, 1e-6, 0.0025 };
     }
     catch (const std::invalid_argument& e)
