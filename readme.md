@@ -18,6 +18,12 @@ FOLDERS
     *This package defines custom message types for our code.*
  * **sandbox**
     *This folder contains miscelaneous resources. This includes source code for our robot's Arduinos and Ardupilot IMU, udev rules for our robot's hardware, and other files.*
+ * **gazebo**
+    *This folder contains two packages that are used to run gazebo*
+    * **igvc_description**
+        *This package contains the URDF and the models that are spawned into gazebo*
+    * **igvc_control**
+        *This package contains the code necessary to control our robot in simulation*
 
 
 ## Building Documentation
@@ -27,126 +33,26 @@ Documentation for our code can be generated via the rosdoc_lite tool.
 ## Building Code
 This repository should be cloned into the src directory of a catkin workspace. Use `catkin_make` in the workspace directory to build the code. Dependencies can be installed by `rosdep install packageName` on packages igvc, igvc_control, and igvc_description . (NOTE: Be sure to `source devel/setup.sh` before referencing the igvc or igvc_msgs packages.)
 
+For a guide on installing our code please go to [our guide](https://wiki.robojackets.org/IGVC_Software_Installation_Instructions)
+
 Join the chat at https://robojackets.slack.com/
 
+## Running Gazebo
+You can get started with the IGVC code base right away by launching our simulator!
 
-## Node Overview
-* **ardupilot**
-	*Used for reading velocity and acceleration of robot from IMU*
-    - Publishes:
-    	- imu \<sensor_msgs::Imu\>
-    - Devices:
-    	- /dev/igvc_imu
-* **joystick_driver**
-    *Configures joystick controls*
-    - Publishes:
-    	- motors \<igvc_msgs::velocity_pair\>
-    - Subscribes:
-    	- joy \<sensor_msgs::Joy::ConstPtr\>
-* **light_controller**
-    *Controls Lights and EStop*
-    - Publishes:
-    	- robot_enabled \<Bool\>
-    	- battery \<UInt8\>
-    - Subscribes:
-    	- lights \<igvc_msgs::lightsConstPtr\>
-    - Devices:
-        - /dev/igvc_light_arduino
-* **line_detector**
-    *Processes image data to find the white lines*
-    - Publishes:
-    	- filt_img \<sensor_msgs::ImageConstPtr\>
-    	- line_cloud \<PCLCloud\>
-    - Subscribes:
-    	- image_raw \<sensor_msgs::ImageConstPtr\>
-* **local_mapper**
-    *Transforms one or more given point clouds locally*
-    - Publishes:
-    	- map \<PointCloud\<PointXYZ\>\>
-    - Subscribes:
-    	- (dynamic) \<PointCloud\<PointXYZ\>::ConstPtr\>
-* **mapper**
-    *Transforms one or more given point clouds*
-    - Publishes:
-    	- map \<PointCloud\<PointXYZ\>\>
-    - Subscribes:
-    	- (dynamic) \<PointCloud\<PointXYZ\>::ConstPtr\>
-* **motor_controller**
-    *Processes data from motors and encoders*
-    - Publishes:
-    	- encoders \<igvc_msgs::velocity_pair\>
-    - Subscribes:
-    	- motors \<igvc_msgs::velocity_pair::ConstPtr\>
-    	- robot_enabled \<std_msgs::BoolConstPtr\>
-    - Devices:
-        - /dev/igvc_motor_arduino
-* **odometer**
-    *Converts wheel velocities to odometry message*
-    - Publishes:
-    	- odometry \<nav_msgs::Odometry\>
-    - Subscribes:
-    	- encoders \<igvc_msgs::velocity_pair\>
-* **path_follower**
-    *Sends instructions to motors from the current path*
-    - Publishes:
-    	- motors \<velocity_pair\>
-    	- lights \<lights\>
-    - Subscribes:
-    	- path \<action_pathConstPtr\>
-* **pathplanner**
-    *Finds the best path based on current orientation, map, and waypoint*
-    - Publishes:
-    	- path_display \<nav_msgs::Path\>
-    	- path \<igvc_msgs::action_path\>
-    	- expanded \<pcl::PointCloud\<pcl::PointXYZ\>\>
-    - Subscribes:
-    	- map \<pcl::PointCloud\<pcl::PointXYZ\>::ConstPtr\>
-    	- odom_combined \<geometry_msgs::PoseStampedConstPtr\>
-    	- waypoint \<geometry_msgs::PointStampedConstPtr\>
-* **pidtester**
-    *Tests pid by setting velocity to 1 then back to 0*
-    - Publishes:
-    	- motors \<velocity_pair\>
-    - Subscribes:
-    	- robot_enabled \<std_msgs:BoolConstPtr\>
-    	- encoders \<velocity_pairConstPtr\>
-* **pose_tracker**
-    *Transforms orientation and position based on imu and gps*
-    - Publishes:
-    	- odom_combined \<geometry_msgs::PoseStamped\>
-    	- map_origin \<geometry_msgs::PointStamped\>
-    - Subscribes:
-        - imu \<sensor_msgs::ImuConstPtr\>
-        - gps_odom \<nav_msgs::OdometryConstPtr\>
-* **pothole_detector**
-    - Publishes:
-    	- pothole_filt_img \<sensor_msgs::ImageConstPtr\>
-    	- pothole_thres \<sensor_msgs::ImageConstPtr\>
-    	- pothole_cloud \<PCLCloud\>
-    - Subscribes:
-    	- usb_cam/image_raw \<sensor_msgs::ImageConstPtr\>
-* **rviz_plugins**
-    *Custom plugins for rviz*
-    - Subscribes:
-    	- battery \<std_msgs::UInt8\>
-    	- robot_enabled \<std_msgs:Bool\>
-    	- encoders \<igvc_msgs::velocity_pair\>
-* **scan_to_pointcloud**
-    *Converts Lidar scan to point cloud*
-    - Publishes:
-    	- scan/pointcloud \<PointCloud\<PointXYZ\>\>
-    - Subscribes:
-    	- scan \<sensor_msgs::LaserScan::ConstPtr\>
-* **serial**
-* **system_stats**
-* **tests**
-    - Publishes:
-    	- joy \<sensor_msgs::Joy\>
-    - Subscribes:
-    	- motors \<igvc_msgs::velocity_pair::ConstPtr\>
-* **waypoint_source**
-    - Publishes:
-    	- waypoint \<PointStamped\>
-    - Subscribes:
-    	- odom_combined \<geometry_msgs::PoseStampedConstPtr\>
-    	- map_origin \<geometry_msgs::PointStampedConstPtr\>
+The following command will load our platform into a simulated IGVC course:
+```
+roslaunch igvc_control gazebo.launch
+```
+Then, the following command will start our mapper
+```
+roslaunch igvc mapper.launch
+```
+Next, run the following command to start our pathing node and navigate around the course autonomously
+```
+roslaunch igvc path.launch
+```
+Alternatively, you can control the car manually with a USB gamepad with this command:
+```
+roslaunch igvc joystick_driver.launch
+```
