@@ -5,5 +5,5 @@
     -->
 <launch>
     <node pkg="rosbag" type="record" name="record" output="screen"
-    args="/battery /encoders /fix /gps/filtered /pc2 /scan/pointcloud /imu /joint_states /lights /motors /robot_enabled /tf /tf_static /usb_cam_center/camera_info /usb_cam_center/image_raw/compressed /vel /waypoint /time_reference" />
+    args="/battery /encoders /fix /pc2 /scan/pointcloud /imu /joint_states /lights /motors /robot_enabled /tf /tf_static /usb_cam_center/camera_info /usb_cam_center/image_raw/compressed /vel /waypoint /time_reference" />
 </launch>
