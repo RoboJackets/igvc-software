@@ -8,7 +8,6 @@
  *  - Set winner to Empty
  */
 
-
 /**
  * placeMarker
  * @param r unsigned integer, row coordinate where marker should be placed
@@ -20,7 +19,6 @@
  * @note Be sure to call updateWinner after placing the marker
  */
 
-
 /**
  * getMarker
  * @param r unsigned integer, row coordinate of place to read
@@ -28,19 +26,16 @@
  * @return marker contained at <r,c>
  */
 
-
 /**
  * isOver
  * @return true if the game is over, false otherwise
  * @note The game is over if no more moves can be made or if one player has won the game
  */
 
-
 /**
  * getWinner
  * @return The current winner, or Empty if tie or in-progress game
  */
-
 
 /**
  * locationToIndex
@@ -50,7 +45,6 @@
  * @note data should be row-ordered, so each row of the board should be
  *       saved contiguously in data immediately following the row above it.
  */
-
 
 /**
  * updateWinner
@@ -66,4 +60,3 @@
  *         if cell[i,2-i]=player then rdiag++
  *       if row=n or col=n or diag=n or rdiag=n then winner=player
  */
-

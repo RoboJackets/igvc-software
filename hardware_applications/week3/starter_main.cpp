@@ -1,13 +1,11 @@
-#include <iostream>
 #include <STSL/RJRobot.h>
+#include <iostream>
 
 using namespace std;
 
-int main() {
+int main()
+{
+  RJRobot robot;
 
-    RJRobot robot;
-
-
-
-    return 0;
+  return 0;
 }

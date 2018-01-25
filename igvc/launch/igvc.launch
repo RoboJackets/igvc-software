@@ -1,25 +1,31 @@
 <!-- igvc.launch -->
+<!-- replace vision files to run on nuc? others go on other computer -->
 <!--
     This file will launch all launch files necessary to run the robot in
     a competition run.
     -->
 <launch>
-    <!-- sensors -->
-    <include file="$(find igvc)/launch/sensors.launch" />
 
-    <!-- center line detector -->
-    <include file="$(find igvc)/launch/line_detector.launch">
+    <machine name= "master" address = "10.44.44.1" env-loader="/opt/ros/kinetic/env.sh">
+    <machine name = "slave" address = "10.44.44.2" env-loader="/opt/ros/kinetic/env.sh">
+
+    <!-- sensors -->
+    <include machine = "slave" file="$(find igvc)/launch/sensors.launch" />
+
+
+    <!-- center line detector REPLACE -->
+    <include machine = "slave" default = true file="$(find igvc)/launch/line_detector.launch">
         <arg name="camera" value="center" />
     </include>
 
-    <!-- pot hole detector -->
-    <include file="$(find igvc)/launch/pothole_detector.launch" />
+    <!-- pot hole detector REPLACE-->
+    <include machine = "slave" default = true file="$(find igvc)/launch/pothole_detector.launch" />
 
     <!-- mapper -->
-    <include file="$(find igvc)/launch/mapper.launch" />
+    <include machine = "slave" default = false file="$(find igvc)/launch/mapper.launch" />
 
     <!-- pather -->
-    <include file="$(find igvc)/launch/pather.launch" />
+    <include machine = "slave" default = false file="$(find igvc)/launch/pather.launch" />
 
     <!-- not included yet are odometer.launch, localization.launch, side
          cameras, side linedetectors. They are not currently required -->

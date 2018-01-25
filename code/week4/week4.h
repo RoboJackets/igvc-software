@@ -1,6 +1,6 @@
 #include <iostream>
-#include <vector>
 #include <memory>
+#include <vector>
 
 // assigns the value 5 to the passed in variable (will fail)
 void no_ptr_method(int num);
@@ -14,22 +14,31 @@ int* heap_method();
 int* static_method();
 
 // a helper struct to print out when it is created and deleted
-struct object {
-    object() { std::cout << "creating object\n";  } // called when created
-    ~object() { std::cout << "deleting object\n";  } // called when destroyed
+struct object
+{
+  object()
+  {
+    std::cout << "creating object\n";
+  }  // called when created
+  ~object()
+  {
+    std::cout << "deleting object\n";
+  }  // called when destroyed
 };
 
 // a helper struct to show why static cast is useful
-struct A {
-    // a 4 byte member
-    int member1;
+struct A
+{
+  // a 4 byte member
+  int member1;
 };
 
 // a helper struct to show why static cast is useful
-struct B {
-    // 4 1 byte members
-    char member1;
-    char member2;
-    char member3;
-    char member4;
+struct B
+{
+  // 4 1 byte members
+  char member1;
+  char member2;
+  char member3;
+  char member4;
 };

@@ -3,10 +3,11 @@
 
 #include <array>
 
-enum class Marker {
-    Empty,
-    X,
-    O
+enum class Marker
+{
+  Empty,
+  X,
+  O
 };
 
 /* Task: Create and implement a class, Board, which represents a TicTacToe playing board
@@ -28,6 +29,4 @@ enum class Marker {
  *
  */
 
-
-
-#endif //WEEK6_BOARD_H
+#endif  // WEEK6_BOARD_H

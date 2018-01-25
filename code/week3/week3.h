@@ -1,9 +1,9 @@
 #pragma once
 
-#include <iostream>
 #include <stdlib.h>
-#include <vector>
-#include <array>
 #include <algorithm>
+#include <array>
+#include <iostream>
 #include <iterator>
 #include <numeric>
+#include <vector>
