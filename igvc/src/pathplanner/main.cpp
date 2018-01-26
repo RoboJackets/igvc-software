@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 
   if(!pNh.hasParam("goal_threshold") || !pNh.hasParam("threshold") || !pNh.hasParam("speed") || !pNh.hasParam("baseline") || !pNh.hasParam("minimum_omega") || !pNh.hasParam("maximum_omega") || !pNh.hasParam("delta_omega") || !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled") || !pNh.hasParam("max_obstacle_delta_t") || !pNh.hasParam("alpha") || !pNh.hasParam("beta") || !pNh.hasParam("bounding_distance")) {
     ROS_ERROR_STREAM("path planner does not have all required parameters");
-    ros::shutdown();
+    return 0;
   }
 
   pNh.getParam("goal_threshold", search_problem.GoalThreshold);
