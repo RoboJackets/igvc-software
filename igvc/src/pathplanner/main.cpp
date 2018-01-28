@@ -40,8 +40,7 @@ void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
     while (current_index < msg->size())
     {
       search_problem.Octree->addPointToCloud(
-          pcl::PointXYZ(msg->points[current_index].x, msg->points[current_index].y, 0),
-          search_problem.Map);
+          pcl::PointXYZ(msg->points[current_index].x, msg->points[current_index].y, 0), search_problem.Map);
       current_index++;
     }
     if (path_planner_map_pub.getNumSubscribers() > 0)
@@ -113,7 +112,12 @@ int main(int argc, char** argv)
   search_problem.Octree = boost::make_shared<pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>>(0.1);
   search_problem.Octree->setInputCloud(search_problem.Map);
 
-  if(!pNh.hasParam("goal_threshold") || !pNh.hasParam("threshold") || !pNh.hasParam("speed") || !pNh.hasParam("baseline") || !pNh.hasParam("minimum_omega") || !pNh.hasParam("maximum_omega") || !pNh.hasParam("delta_omega") || !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled") || !pNh.hasParam("max_obstacle_delta_t") || !pNh.hasParam("alpha") || !pNh.hasParam("beta") || !pNh.hasParam("bounding_distance")) {
+  if (!pNh.hasParam("goal_threshold") || !pNh.hasParam("threshold") || !pNh.hasParam("speed") ||
+      !pNh.hasParam("baseline") || !pNh.hasParam("minimum_omega") || !pNh.hasParam("maximum_omega") ||
+      !pNh.hasParam("delta_omega") || !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled") ||
+      !pNh.hasParam("max_obstacle_delta_t") || !pNh.hasParam("alpha") || !pNh.hasParam("beta") ||
+      !pNh.hasParam("bounding_distance"))
+  {
     ROS_ERROR_STREAM("path planner does not have all required parameters");
     return 0;
   }
@@ -125,7 +129,7 @@ int main(int argc, char** argv)
   search_problem.DeltaT = [](double distToStart, double distToGoal) -> double {
     return -((distToStart + distToGoal) / 7 / (pow((distToStart + distToGoal) / 2, 2)) *
              pow(distToStart - (distToStart + distToGoal) / 2, 2)) +
-            (distToStart + distToGoal) / 7 + 0.3;
+           (distToStart + distToGoal) / 7 + 0.3;
   };
   pNh.getParam("minimum_omega", search_problem.MinimumOmega);
   pNh.getParam("maximum_omega", search_problem.MaximumOmega);
