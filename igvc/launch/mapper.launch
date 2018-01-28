@@ -5,9 +5,15 @@
     <!-- Map Node -->
     <node name="mapper" pkg="igvc" type="global_mapper" output="screen">
             <param name="topics" type="string" value="/scan/pointcloud /usb_cam_center/line_cloud /usb_cam_left/line_cloud /usb_cam_right/line_cloud /pothole_cloud"/>
+            <rosparam param="queue_window_sizes"> [5, 5, 5, 5, 5] </rosparam>
+            <!-- should be a double between 0 and 1 -->
+            <rosparam param="probability_thresholds"> [0.2, 0.0, 0.2, 0.2, 0.2] </rosparam>
             <param name="max_correspondence_distance" type="double" value="0.1"/>
             <param name="max_iterations" type="int" value="30"/>
             <param name="search_radius" type="double" value="0.03"/>
+            <param name="octree_resolution" type="double" value="0.1" />
+            <param name="queue_window_size" type="int" value="10" />
+            <param name="use_icp" type="bool" value="false" />
     </node>
 
 </launch>
