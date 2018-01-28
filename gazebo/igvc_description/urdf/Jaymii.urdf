@@ -1,16 +1,6 @@
  <robot name="Jaymii" xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <!-- base link must have geometry so its axis display in rviz-->
-  <link name="base_link">
-    <visual>
-      <geometry>
-        <box size="0.01 0.01 0.01"/>
-      </geometry>
-    </visual>
-  </link>
-  <gazebo reference="base_link">
-    <material>Gazebo/Grey</material>
-  </gazebo>
   <link name="base_footprint" />
+  <!--
   <link name="body">
     <inertial>
       <origin xyz="0 0 0" />
@@ -34,6 +24,7 @@
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
   </gazebo>
+  -->
   <link name="axle">
     <inertial>
       <origin xyz="0 0 0" />
@@ -218,104 +209,6 @@
         </plugin>
       </sensor>
   </gazebo>
-  <link name="usb_cam_left">
-    <visual>
-      <geometry>
-        <box size="0.1 0.1 0.1"/>
-      </geometry>
-    </visual>
-  </link>
-  <link name="optical_cam_left"/>
-  <gazebo reference="usb_cam_left">
-    <sensor name="left_camera" type="camera">
-        <camera>
-          <horizontal_fov>1.0472</horizontal_fov>
-          <image>
-            <width>1280</width>
-            <height>720</height>
-          </image>
-          <clip>
-            <near>0.1</near>
-            <far>100</far>
-          </clip>
-          <!--
-          <distortion>
-            <k1>-0.25</k1>
-            <k2>0.12</k2>
-            <k3>0.0</k3>
-            <p1>-0.00028</p1>
-            <p2>-0.00005</p2>
-            <center>0.5 0.5</center>
-          </distortion>
-          -->
-        </camera>
-        <always_on>1</always_on>
-        <update_rate>30</update_rate>
-        <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-          <alwaysOn>true</alwaysOn>
-          <updateRate>30.0</updateRate>
-          <cameraName>usb_cam_left</cameraName>
-          <imageTopicName>image_raw</imageTopicName>
-          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>optical_cam_left</frameName>
-          <hackBaseline>0.07</hackBaseline>
-          <distortionK1>0.0</distortionK1>
-          <distortionK2>0.0</distortionK2>
-          <distortionK3>0.0</distortionK3>
-          <distortionT1>0.0</distortionT1>
-          <distortionT2>0.0</distortionT2>
-        </plugin>
-      </sensor>
-  </gazebo>
-  <link name="usb_cam_right">
-    <visual>
-      <geometry>
-        <box size="0.1 0.1 0.1"/>
-      </geometry>
-    </visual>
-  </link>
-  <link name="optical_cam_right"/>
-  <gazebo reference="usb_cam_right">
-    <sensor name="right_camera" type="camera">
-        <camera>
-          <horizontal_fov>1.0472</horizontal_fov>
-          <image>
-            <width>1280</width>
-            <height>720</height>
-          </image>
-          <clip>
-            <near>0.1</near>
-            <far>100</far>
-          </clip>
-          <!--
-          <distortion>
-            <k1>-0.25</k1>
-            <k2>0.12</k2>
-            <k3>0.0</k3>
-            <p1>-0.00028</p1>
-            <p2>-0.00005</p2>
-            <center>0.5 0.5</center>
-          </distortion>
-          -->
-        </camera>
-        <always_on>1</always_on>
-        <update_rate>30</update_rate>
-        <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-          <alwaysOn>true</alwaysOn>
-          <updateRate>30.0</updateRate>
-          <cameraName>usb_cam_right</cameraName>
-          <imageTopicName>image_raw</imageTopicName>
-          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-          <frameName>optical_cam_right</frameName>
-          <hackBaseline>0.07</hackBaseline>
-          <distortionK1>0.0</distortionK1>
-          <distortionK2>0.0</distortionK2>
-          <distortionK3>0.0</distortionK3>
-          <distortionT1>0.0</distortionT1>
-          <distortionT2>0.0</distortionT2>
-        </plugin>
-      </sensor>
-    </gazebo>
   <link name="imu">
     <visual>
       <geometry>
@@ -391,7 +284,12 @@
     </actuator>
   </transmission>
 
-
+  <joint name="imu_to_axle" type="fixed">
+    <parent link="imu"/>
+    <child link="axle"/>
+    <origin xyz="-.287 -.003 -.465" rpy="1.5708 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
   <joint name="imu_to_base_footprint" type="fixed">
     <parent link="imu"/>
     <child link="base_footprint"/>
@@ -408,14 +306,14 @@
     <parent link="imu"/>
     <child link="usb_cam_center"/>
   </joint>
-  <joint name="imu_to_left_wheel" type="fixed">
-    <origin xyz="-.287 .444 -.465" rpy="0 0 3.141" />
-    <parent link="imu"/>
+  <joint name="axle_to_left_wheel" type="fixed">
+    <origin xyz="0 0 .222" rpy="0 0 3.141" />
+    <parent link="axle"/>
     <child link="left_wheel"/>
   </joint>
-  <joint name="imu_to_right_wheel" type="fixed">
-    <origin xyz="-.287 -.438 -.465" rpy="0 0 0" /> <!-- -1.5708 -->
-    <parent link="imu"/>
+  <joint name="axle_to_right_wheel" type="fixed">
+    <origin xyz="0 0 -.219" rpy="0 0 0" /> <!-- -1.5708 -->
+    <parent link="axle"/>
     <child link="right_wheel"/>
   </joint>
   <joint name="imu_to_gps" type="fixed">
@@ -424,13 +322,13 @@
     <child link="gps"/>
   </joint>
   <!--must have a joint so it is not assumed to be the base link but the ball joint not in URDF must add it in gazebo tag-->
-  <joint name="base_footprint_to_front_ball" type="floating">
-    <parent link="base_footprint"/>
+  <joint name="imu_to_front_ball" type="floating">
+    <parent link="imu"/>
     <child link="front_ball"/>
     <origin xyz="0.385064 0 0.1016" rpy="0 0 0" />
   </joint>
-  <joint name="base_footprint_to_back_ball" type="floating">
-    <parent link="base_footprint"/>
+  <joint name="imu_to_back_ball" type="floating">
+    <parent link="imu"/>
     <child link="back_ball"/>
     <origin xyz="-0.385064 0 0.1016" rpy="0 0 0" />
   </joint>
@@ -439,22 +337,12 @@
     <child link="optical_cam_center"/>
     <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
-  <joint name="optical_cam_right_joint" type="fixed">
-    <parent link="usb_cam_right"/>
-    <child link="optical_cam_right"/>
-    <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
-  </joint>
-  <joint name="optical_cam_left_joint" type="fixed">
-    <parent link="usb_cam_left"/>
-    <child link="optical_cam_left"/>
-    <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
-  </joint>
-  <!-- this is where the actual ball joints are added-->
+  <!-- this is where the actual ball joints are added
   <gazebo>
-    <joint name='body_to_back_ball' type='ball'>
-      <parent>body</parent>
+    <joint name='base_footprint_to_back_ball' type='ball'>
+      <parent>base_footprint</parent>
       <child>back_ball</child>
-      <pose frame=''>0 0 0 0 -0 0</pose>
+      <pose frame=''>0 0 0 0 0 0</pose>
       <physics>
         <ode>
           <limit>
@@ -468,10 +356,10 @@
         </ode>
       </physics>
     </joint>
-    <joint name='body_to_front_ball' type='ball'>
-      <parent>body</parent>
+    <joint name='base_footprint_to_front_ball' type='ball'>
+      <parent>base_footprint</parent>
       <child>front_ball</child>
-      <pose frame=''>0 0 0 0 -0 0</pose>
+      <pose frame=''>0 0 0 0 0 0</pose>
       <physics>
         <ode>
           <limit>
@@ -486,4 +374,5 @@
       </physics>
     </joint>
   </gazebo>
+-->
 </robot>
