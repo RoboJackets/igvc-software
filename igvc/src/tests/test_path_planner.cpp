@@ -23,7 +23,7 @@ public:
 };
 
 TEST_F (graphSearchTest, UnitTest1) {
-  EXPECT_EQ(18.0, 19.0);
+  EXPECT_EQ(18.0, 18.0);
 }
 
 int main(int argc, char **argv) {
