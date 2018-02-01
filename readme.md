@@ -50,7 +50,7 @@ roslaunch igvc mapper.launch
 ```
 Next, run the following command to start our pathing node and navigate around the course autonomously
 ```
-roslaunch igvc path.launch
+roslaunch igvc pather.launch
 ```
 Alternatively, you can control the car manually with a USB gamepad with this command:
 ```
