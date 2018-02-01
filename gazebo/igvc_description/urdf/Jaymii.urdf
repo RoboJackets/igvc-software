@@ -19,12 +19,24 @@
       </geometry>
     </collision>
   </link>
+-->
+  <!-- base link must have geometry so its axis display in rviz-->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </visual>
+  </link>
+  <gazebo reference="base_link">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
   <gazebo reference="body">
     <material>Gazebo/Grey</material>
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
   </gazebo>
-  -->
   <link name="axle">
     <inertial>
       <origin xyz="0 0 0" />
@@ -284,6 +296,12 @@
     </actuator>
   </transmission>
 
+<joint name="base_link_to_imu" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
   <joint name="imu_to_axle" type="fixed">
     <parent link="imu"/>
     <child link="axle"/>
@@ -307,12 +325,12 @@
     <child link="usb_cam_center"/>
   </joint>
   <joint name="axle_to_left_wheel" type="fixed">
-    <origin xyz="0 0 .222" rpy="0 0 3.141" />
+    <origin xyz="0 0 -.39" rpy="0 0 3.141" />
     <parent link="axle"/>
     <child link="left_wheel"/>
   </joint>
   <joint name="axle_to_right_wheel" type="fixed">
-    <origin xyz="0 0 -.219" rpy="0 0 0" /> <!-- -1.5708 -->
+    <origin xyz="0 0 .39" rpy="0 0 0" /> <!-- -1.5708 -->
     <parent link="axle"/>
     <child link="right_wheel"/>
   </joint>
@@ -321,26 +339,32 @@
     <parent link="imu"/>
     <child link="gps"/>
   </joint>
+  <!--
+  <joint name="imu_to_body" type="fixed">
+    <origin xyz="-.5 -.5 0" rpy="0 0 0" /> -1.5708
+    <parent link="imu"/>
+    <child link="body"/>
+  </joint>
+-->
   <!--must have a joint so it is not assumed to be the base link but the ball joint not in URDF must add it in gazebo tag-->
   <joint name="imu_to_front_ball" type="floating">
     <parent link="imu"/>
     <child link="front_ball"/>
-    <origin xyz="0.385064 0 0.1016" rpy="0 0 0" />
+    <origin xyz=".39 0 -.53" rpy="0 0 0" />
   </joint>
   <joint name="imu_to_back_ball" type="floating">
     <parent link="imu"/>
     <child link="back_ball"/>
-    <origin xyz="-0.385064 0 0.1016" rpy="0 0 0" />
+    <origin xyz="-.39 0 -.53" rpy="0 0 0" />
   </joint>
   <joint name="optical_cam_center_joint" type="fixed">
     <parent link="usb_cam_center"/>
     <child link="optical_cam_center"/>
     <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
-  <!-- this is where the actual ball joints are added
   <gazebo>
-    <joint name='base_footprint_to_back_ball' type='ball'>
-      <parent>base_footprint</parent>
+    <joint name='imu_to_back_ball' type='ball'>
+      <parent>imu</parent>
       <child>back_ball</child>
       <pose frame=''>0 0 0 0 0 0</pose>
       <physics>
@@ -356,8 +380,8 @@
         </ode>
       </physics>
     </joint>
-    <joint name='base_footprint_to_front_ball' type='ball'>
-      <parent>base_footprint</parent>
+    <joint name='imu_to_front_ball' type='ball'>
+      <parent>imu</parent>
       <child>front_ball</child>
       <pose frame=''>0 0 0 0 0 0</pose>
       <physics>
@@ -374,5 +398,4 @@
       </physics>
     </joint>
   </gazebo>
--->
 </robot>
