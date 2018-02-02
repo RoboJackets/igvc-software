@@ -13,9 +13,10 @@ void point_cloud_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
   double old_size = x_size;
   for (auto it = msg->points.begin(); it != msg->points.end(); it++)
   {
-  	if (it->x < 0) {
-  		x_size += back_buffer;
-  	} 
+    if (it->x < 0)
+    {
+      x_size += back_buffer;
+    }
     if (!(abs(it->x + x_offset) < x_size && abs(it->y + y_offset) < y_size) &&
         sqrt(pow(it->x, 2) + pow(it->y, 2)) < max_dist)
     {
