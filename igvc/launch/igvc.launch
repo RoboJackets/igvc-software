@@ -12,28 +12,37 @@
  Otherwise need username and password
  some reason the machine tag isn't recognized-->
 
-    <machine name= "master" default = "false" address = "10.44.44.1" user = "robojackets" password = "robojackets" env-loader="/opt/ros/kinetic/env.sh"/>
-    <machine name = "slave" default = "true" address = "10.44.44.2" user = "robojackets" password = "robojackets" env-loader="/opt/ros/kinetic/env.sh"/>
-    <machine name = "Aaron" default = "false" address = "10.44.44.6" env-loader="/opt/ros/kinetic/env.sh"/>
+    <machine name="master" address="10.44.44.1" env-loader="/opt/ros/kinetic/env.sh" user="robojackets" password="robojackets"/>
+    <machine name="Aaron" address="10.44.44.6" env-loader="/opt/ros/kinetic/env.sh" user="aaron" password="Aaron@1$"/>
+
 
     <!-- sensors -->
-    <include machine = "slave" file="$(find igvc)/launch/sensors.launch" />
-
+    <include file="$(find igvc)/launch/sensors.launch"/>
 
     <!-- center line detector REPLACE -->
     <include file="$(find igvc)/launch/line_detector.launch">
-        <arg name="camera" value="center" machine = "slave"/>
+        <arg name="camera" value="center"/>
     </include>
 
-    <!-- pot hole detector REPLACE-->
-    <include file="$(find igvc)/launch/pothole_detector.launch" machine = "slave" />
+    <!--  Group of launch files to be run on slave  -->
+    <group>
+        <machine name="slave" address="10.44.44.2" env-loader="/opt/ros/kinetic/env.sh" user="robojackets" password="robojackets"/>
+        <include file="$(find igvc)/launch/pothole_detector.launch"/>
+        <include file="$(find igvc)/launch/mapper.launch"/>
+        <include file="$(find igvc)/launch/pather.launch"/>
 
-    <!-- mapper -->
-    <include file="$(find igvc)/launch/mapper.launch" machine = "slave" />
 
-    <!-- pather -->
-    <include file="$(find igvc)/launch/pather.launch" machine = "slave" />
+        <!-- Master paths
+        pot hole detector REPLACE
+        <include file="$(find igvc)/launch/pothole_detector.launch"/>
 
+         mapper
+        <include file="$(find igvc)/launch/mapper.launch"/>
+
+        pather
+        <include file="$(find igvc)/launch/pather.launch"/>
+        -->
+    </group>
     <!-- not included yet are odometer.launch, localization.launch, side cameras, side linedetectors. They are not currently required -->
 
 </launch>
