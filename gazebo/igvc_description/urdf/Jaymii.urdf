@@ -294,24 +294,24 @@
       <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
-  </transmission>
-
-<joint name="base_link_to_imu" type="fixed">
-    <parent link="base_link"/>
-    <child link="imu"/>
+  </transmission
+  >
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+  <joint name="base_footprint_to_imu" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="imu"/>
+    <origin xyz="0 0 -.633" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
   <joint name="imu_to_axle" type="fixed">
     <parent link="imu"/>
     <child link="axle"/>
     <origin xyz="-.287 -.003 -.465" rpy="1.5708 0 0"/>
-    <axis xyz="0 0 0"/>
-  </joint>
-  <joint name="imu_to_base_footprint" type="fixed">
-    <parent link="imu"/>
-    <child link="base_footprint"/>
-    <origin xyz="0 0 -.633" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
   <joint name="imu_to_lidar" type="fixed">
@@ -324,14 +324,16 @@
     <parent link="imu"/>
     <child link="usb_cam_center"/>
   </joint>
-  <joint name="axle_to_left_wheel" type="fixed">
-    <origin xyz="0 0 -.39" rpy="0 0 3.141" />
+  <joint name="axle_to_left_wheel" type="continuous">
+    <origin xyz="0 0 -.39" rpy="0 0 0" />
     <parent link="axle"/>
+    <axis xyz="0 0 -1" rpy="0 0 0"/>
     <child link="left_wheel"/>
   </joint>
-  <joint name="axle_to_right_wheel" type="fixed">
+  <joint name="axle_to_right_wheel" type="continuous">
     <origin xyz="0 0 .39" rpy="0 0 0" /> <!-- -1.5708 -->
     <parent link="axle"/>
+     <axis xyz="0 0 -1" rpy="0 0 0"/>
     <child link="right_wheel"/>
   </joint>
   <joint name="imu_to_gps" type="fixed">
