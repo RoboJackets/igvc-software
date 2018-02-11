@@ -6,16 +6,6 @@
     -->
 <launch>
 
-<!-- connect using command:
- ssh -oHostKeyAlgorithms='ssh-rsa' robojackets@10.44.44.2
- Should set up ssh keys. Ros requires authentication method
- Otherwise need username and password
- some reason the machine tag isn't recognized-->
-
-    <machine name="master" address="10.44.44.1" env-loader="/opt/ros/kinetic/env.sh" user="robojackets" password="robojackets"/>
-    <machine name="Aaron" address="10.44.44.6" env-loader="/opt/ros/kinetic/env.sh" user="aaron" password="Aaron@1$"/>
-
-
     <!-- sensors -->
     <include file="$(find igvc)/launch/sensors.launch"/>
 
@@ -24,25 +14,15 @@
         <arg name="camera" value="center"/>
     </include>
 
-    <!--  Group of launch files to be run on slave  -->
-    <group>
-        <machine name="slave" address="10.44.44.2" env-loader="/opt/ros/kinetic/env.sh" user="robojackets" password="robojackets"/>
-        <include file="$(find igvc)/launch/pothole_detector.launch"/>
-        <include file="$(find igvc)/launch/mapper.launch"/>
-        <include file="$(find igvc)/launch/pather.launch"/>
+    <!-- Master paths -->
+    pot hole detector REPLACE
+    <include file="$(find igvc)/launch/pothole_detector.launch"/>
 
+     <!-- mapper -->
+    <include file="$(find igvc)/launch/mapper.launch"/>
 
-        <!-- Master paths
-        pot hole detector REPLACE
-        <include file="$(find igvc)/launch/pothole_detector.launch"/>
-
-         mapper
-        <include file="$(find igvc)/launch/mapper.launch"/>
-
-        pather
-        <include file="$(find igvc)/launch/pather.launch"/>
-        -->
-    </group>
+    <!-- pather -->
+    <include file="$(find igvc)/launch/pather.launch"/>
     <!-- not included yet are odometer.launch, localization.launch, side cameras, side linedetectors. They are not currently required -->
 
 </launch>
