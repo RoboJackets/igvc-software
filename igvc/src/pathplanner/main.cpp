@@ -157,7 +157,7 @@ int main(int argc, char** argv)
     planning_mutex.lock();
     Path<SearchLocation, SearchMove> path;
     path = GraphSearch::AStar(search_problem, expanded_callback);
-    if (act_path_pub.getNumSubscribers() > 0)
+    if (act_path_pub.getNumSubscribers() > 0 || disp_path_pub.getNumSubscribers() > 0)
     {
       nav_msgs::Path disp_path_msg;
       disp_path_msg.header.stamp = ros::Time::now();
