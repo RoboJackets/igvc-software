@@ -29,6 +29,9 @@
     </node>
 
     <!-- Follower -->
-    <node name="path_follower" pkg="igvc" type="path_follower" output="screen" />
+    <node name="path_follower" pkg="igvc" type="path_follower" output="screen" >
+	    <param name="max_vel" type="double" value="1.6"/>
+	    <param name="axle_length" type="double" value="0.8"/>
+    </node>
 
 </launch>
