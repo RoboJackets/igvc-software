@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+
+<!-- map.launch -->
+<launch>
+
+    <!-- Planner -->
+    <node name="speed_compare" pkg="igvc" type="speed_compare" output="screen" />
+
+</launch>
