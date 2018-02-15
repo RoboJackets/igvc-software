@@ -1,25 +1,5 @@
  <robot name="Jaymii" xmlns:xacro="http://www.ros.org/wiki/xacro">
   <link name="base_footprint" />
-  <!--
-  <link name="body">
-    <inertial>
-      <origin xyz="0 0 0" />
-      <mass value="50.0" />
-      <inertia  ixx="0.0" ixy="0.0"  ixz="1.0"  iyy="0.0"  iyz="0.0"  izz="0.0" />
-    </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <mesh filename="model://urdf/meshes/Body.dae"/>
-      </geometry>
-    </visual>
-    <collision>
-      <geometry>
-        <mesh filename="model://urdf/meshes/Body.dae"/>
-      </geometry>
-    </collision>
-  </link>
--->
   <!-- base link must have geometry so its axis display in rviz-->
   <link name="base_link">
     <visual>
@@ -294,8 +274,7 @@
       <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
-  </transmission
-  >
+  </transmission>
   <joint name="base_footprint_to_base_link" type="fixed">
     <parent link="base_footprint"/>
     <child link="base_link"/>
@@ -310,7 +289,7 @@
   </joint>
   <joint name="imu_to_axle" type="fixed">
     <parent link="imu"/>
-    <child link="axle"/>
+    <child link="axle"/<name />
     <origin xyz="-.287 -.003 -.465" rpy="1.5708 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
