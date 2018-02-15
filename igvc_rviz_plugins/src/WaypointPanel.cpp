@@ -45,8 +45,7 @@ void WaypointPanel::robot_position_callback(const nav_msgs::OdometryConstPtr &ms
     auto text = "X: " + std::to_string(way_x) + "\n" +
                 "Y: " + std::to_string(way_y) + "\n" +
                 "Distance: " + std::to_string(distance) + "\n" +
-                "Angle: " + std::to_string(angle - yaw) + " degrees\n" +
-                "Yaw: " + std::to_string(yaw) + " degrees\n";
+                "Angle: " + std::to_string(angle - yaw) + " degrees\n";
     
     label->setText(text.c_str());
 
