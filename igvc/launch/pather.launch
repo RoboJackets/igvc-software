@@ -1,10 +1,32 @@
+<?xml version="1.0"?>
+
 <!-- map.launch -->
 <launch>
     <!-- Waypoints -->
     <include file="$(find igvc)/launch/waypoint_source.launch" />
 
     <!-- Planner -->
-    <node name="path_planner" pkg="igvc" type="pathplanner" output="screen" />
+    <node name="path_planner" pkg="igvc" type="pathplanner" output="screen" >
+          <param name="goal_threshold" type="double" value="1.0"/>
+          <param name="threshold" type="double" value="0.5"/>
+          <param name="speed" type="double" value="1.0"/>
+          <param name="baseline" type="double" value="0.88"/>
+          <param name="minimum_omega" type="double" value="-0.6"/>
+          <param name="maximum_omega" type="double" value="0.61"/>
+          <param name="delta_omega" type="double" value="0.3"/>
+          <param name="point_turns_enabled" type="bool" value="false"/>
+          <param name="reverse_enabled" type="bool" value="false"/>
+          <param name="max_obstacle_delta_t" type="double" value="0.1"/>
+
+          <!-- distance in meters to flag point as valid without checking obstacles -->
+          <!-- used for efficiency purposes -->
+          <param name="bounding_distance" type="double" value="15"/>
+
+          <!-- points are weighted based off of cloest obstacle -->
+          <!-- weight = length * (alpha * exp((threshold - dist)*beta) + 1 -->
+          <param name="alpha" type="double" value="4"/>
+          <param name="beta" type="double" value="5"/>
+    </node>
 
     <!-- Follower -->
     <node name="path_follower" pkg="igvc" type="path_follower" output="screen" />

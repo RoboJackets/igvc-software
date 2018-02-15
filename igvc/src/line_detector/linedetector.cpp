@@ -22,8 +22,13 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
 {
   src_img = msg_img;
 
+  cv::Mat colors[3];
+  split(src_img, colors);
+
+  src_img = colors[2];
+
   // Convert image to grayscale
-  cv::cvtColor(src_img, src_img, CV_BGR2GRAY);
+  // cv::cvtColor(src_img, src_img, CV_BGR2GRAY);
 
   // Crops the image (removes sky)
   int topCrop = 2 * src_img.rows / 3;
@@ -31,6 +36,7 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
   src_img = src_img(roiNoSky);
 
   // Create blank canvas
+  cv::Mat working2 = cv::Mat::zeros(src_img.size(), src_img.type());
   fin_img = cv::Mat::zeros(src_img.size(), src_img.type());
 
   // Gaussian Blur
@@ -44,8 +50,6 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
   cv::Mat erosion_kernal = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(kernel_size, kernel_size));
   cv::dilate(working, working, erosion_kernal);
   cv::dilate(working, working, erosion_kernal);
-  cv::dilate(working, working, erosion_kernal);
-  cv::erode(working, working, erosion_kernal);
   cv::erode(working, working, erosion_kernal);
   cv::erode(working, working, erosion_kernal);
 
@@ -54,7 +58,31 @@ void LineDetector::img_callback(const cv::Mat msg_img, const sensor_msgs::ImageC
   cv::HoughLinesP(working, lines, 1.0, CV_PI / 180, houghThreshold, houghMinLineLength, houghMaxLineGap);
   for (size_t i = 0; i < lines.size(); ++i)
   {
-    cv::LineIterator it(fin_img, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), 8);
+    cv::LineIterator it(working2, cv::Point(lines[i][0], lines[i][1]), cv::Point(lines[i][2], lines[i][3]), 8);
+    for (int j = 0; j < it.count; ++j, ++it)
+    {
+      if (j % outputLineSpacing == 0)
+        working2.at<uchar>(it.pos()) = 255;
+    }
+  }
+
+  // Erosion and dilation
+  // cv::dilate(working2, working2, erosion_kernal);
+  // cv::dilate(working2, working2, erosion_kernal);
+  // cv::erode(working2, working2, erosion_kernal);
+  // cv::erode(working2, working2, erosion_kernal);
+  // cv::erode(working2, working2, erosion_kernal);
+  // cv::erode(working2, working2, erosion_kernal);
+
+  // Detect edges
+  // cv::Canny(working2, working2, cannyThresh, cannyThresh*ratio, 3);
+
+  // Find lines
+  std::vector<cv::Vec4i> lines2;
+  cv::HoughLinesP(working2, lines2, 1.0, CV_PI / 180, houghThreshold, houghMinLineLength * 2, houghMaxLineGap);
+  for (size_t i = 0; i < lines2.size(); ++i)
+  {
+    cv::LineIterator it(fin_img, cv::Point(lines2[i][0], lines2[i][1]), cv::Point(lines2[i][2], lines2[i][3]), 8);
     for (int j = 0; j < it.count; ++j, ++it)
     {
       if (j % outputLineSpacing == 0)
