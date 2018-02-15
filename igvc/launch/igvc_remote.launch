@@ -1,0 +1,47 @@
+<!-- igvc.launch -->
+<!-- replace vision files to run on nuc? others go on other computer -->
+<!--
+    This file will launch all launch files necessary to run the robot in
+    a competition run.
+    -->
+<launch>
+
+<!-- connect using command:
+ ssh -oHostKeyAlgorithms='ssh-rsa' robojackets@10.44.44.2
+ or
+ ssh -oHostKeyAlgorithms='ssh-rsa' slave
+ Should set up ssh keys.
+ -->
+
+    <machine name="master" address="10.44.44.1" env-loader="/opt/ros/kinetic/env.sh" user="robojackets" password="robojackets"/>
+    <machine name="Aaron" address="localhost" default="true" env-loader="/opt/ros/kinetic/env.sh" user="aaron" password="Aaron@1$"/>
+
+    <!-- This section is launched on the local machine -->
+
+
+    <!-- sensors -->
+    <include file="$(find igvc)/launch/sensors.launch"/>
+
+    <!-- center line detector REPLACE -->
+    <include file="$(find igvc)/launch/line_detector.launch">
+        <arg name="camera" value="center"/>
+    </include>
+
+
+
+    <!-- After Slave machine tag, will crash if not connected to Slave -->
+    <!-- Substitution args cannot be used for remote launching -->
+    <machine name="slave" default = "false" address="10.44.44.2" env-loader="/opt/ros/kinetic/env.sh" user="robojackets" password="robojackets"/>
+
+    <!-- Master paths -->
+    pot hole detector REPLACE
+    <include file="pothole_detector.launch"/>
+
+    <!-- mapper -->
+    <include file="mapper.launch"/>
+
+    <!-- pather -->
+    <include file="pather.launch"/>
+    <!-- not included yet are odometer.launch, localization.launch, side cameras, side linedetectors. They are not currently required -->
+
+</launch>

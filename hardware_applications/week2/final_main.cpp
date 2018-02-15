@@ -1,0 +1,18 @@
+#include <STSL/RJRobot.h>
+#include <iostream>
+#include "final_helpers.h"
+
+using namespace std;
+
+int main()
+{
+  RJRobot robot;
+
+  cout << "Robot ready!" << endl;
+
+  string commands = "forward backward left right left forward waitForButton stop";
+
+  executeCommandString(robot, commands);
+
+  return 0;
+}
