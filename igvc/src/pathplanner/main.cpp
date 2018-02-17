@@ -40,8 +40,7 @@ void map_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
     while (current_index < msg->size())
     {
       search_problem.Octree->addPointToCloud(
-          pcl::PointXYZ(msg->points[current_index].x, msg->points[current_index].y, msg->points[current_index].z),
-          search_problem.Map);
+          pcl::PointXYZ(msg->points[current_index].x, msg->points[current_index].y, 0), search_problem.Map);
       current_index++;
     }
     if (path_planner_map_pub.getNumSubscribers() > 0)
@@ -106,25 +105,41 @@ int main(int argc, char** argv)
 
   double baseline = 0.93;
 
+  ros::NodeHandle pNh("~");
+
   search_problem.Map = pcl::PointCloud<pcl::PointXYZ>().makeShared();
   search_problem.Map->header.frame_id = "/odom";
   search_problem.Octree = boost::make_shared<pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>>(0.1);
   search_problem.Octree->setInputCloud(search_problem.Map);
-  search_problem.GoalThreshold = 1.0;
-  search_problem.Threshold = 0.5;
-  search_problem.Speed = 1.0;
-  search_problem.Baseline = baseline;
+
+  if (!pNh.hasParam("goal_threshold") || !pNh.hasParam("threshold") || !pNh.hasParam("speed") ||
+      !pNh.hasParam("baseline") || !pNh.hasParam("minimum_omega") || !pNh.hasParam("maximum_omega") ||
+      !pNh.hasParam("delta_omega") || !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled") ||
+      !pNh.hasParam("max_obstacle_delta_t") || !pNh.hasParam("alpha") || !pNh.hasParam("beta") ||
+      !pNh.hasParam("bounding_distance"))
+  {
+    ROS_ERROR_STREAM("path planner does not have all required parameters");
+    return 0;
+  }
+
+  pNh.getParam("goal_threshold", search_problem.GoalThreshold);
+  pNh.getParam("threshold", search_problem.Threshold);
+  pNh.getParam("speed", search_problem.Speed);
+  pNh.getParam("baseline", search_problem.Baseline);
   search_problem.DeltaT = [](double distToStart, double distToGoal) -> double {
     return -((distToStart + distToGoal) / 7 / (pow((distToStart + distToGoal) / 2, 2)) *
              pow(distToStart - (distToStart + distToGoal) / 2, 2)) +
            (distToStart + distToGoal) / 7 + 0.3;
   };
-  search_problem.MinimumOmega = -0.6;
-  search_problem.MaximumOmega = 0.61;
-  search_problem.DeltaOmega = 0.3;  // wat
-  search_problem.PointTurnsEnabled = false;
-  search_problem.ReverseEnabled = false;
-  search_problem.maxODeltaT = 0.1;
+  pNh.getParam("minimum_omega", search_problem.MinimumOmega);
+  pNh.getParam("maximum_omega", search_problem.MaximumOmega);
+  pNh.getParam("delta_omega", search_problem.DeltaOmega);
+  pNh.getParam("point_turns_enabled", search_problem.PointTurnsEnabled);
+  pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
+  pNh.getParam("max_obstacle_delta_t", search_problem.MaxObstacleDeltaT);
+  pNh.getParam("alpha", search_problem.Alpha);
+  pNh.getParam("beta", search_problem.Beta);
+  pNh.getParam("bounding_distance", search_problem.BoundingDistance);
 
   ros::Rate rate(3);
   while (ros::ok())
@@ -140,7 +155,6 @@ int main(int argc, char** argv)
       continue;
 
     planning_mutex.lock();
-    // TODO only replan if needed.
     Path<SearchLocation, SearchMove> path;
     path = GraphSearch::AStar(search_problem, expanded_callback);
     if (act_path_pub.getNumSubscribers() > 0)
