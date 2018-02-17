@@ -289,7 +289,7 @@
   </joint>
   <joint name="imu_to_axle" type="fixed">
     <parent link="imu"/>
-    <child link="axle"/<name />
+    <child link="axle"/>
     <origin xyz="-.287 -.003 -.465" rpy="1.5708 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
