@@ -11,15 +11,19 @@ std::ofstream file;
 void enabled_callback(const std_msgs::BoolConstPtr& msg)
 {
   enabled = msg->data;
+  if (enabled) {
+  	  ROS_INFO_STREAM("The robot is enabled. Data will be written");
+  } else { 
+	  ROS_INFO_STREAM("The robot is disabled. Data will not be written.");
+  }
 }
 
 void motors_callback(const igvc_msgs::velocity_pair& msg) {
-  //save to file??
   if(enabled) {
-    file << msg.left_velocity << ", " << msg.right_velocity << ", ";
-    file << msg.header.stamp.toSec() << std::endl;
+  	ROS_INFO_STREAM("Data stored");
+    file << msg.header.stamp.toSec() << ", ";
+    file << msg.left_velocity << ", " << msg.right_velocity << ", " << std::endl;
   }
-  ROS_INFO_STREAM("ITS WORKING");
 }
 
 int main(int argc, char** argv)
@@ -32,7 +36,8 @@ int main(int argc, char** argv)
 
   ros::Subscriber motors_sub = nh.subscribe("/motors", 1, motors_callback);
 
-  file.open("./speed_data.csv");
+  file.open("/home/robojackets/Desktop/speed_data.csv");
+  file << "timestamp, left_velocity, right_velocity" << std::endl;
 
 
 /*
