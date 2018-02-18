@@ -7,7 +7,6 @@
 bool enabled = false;
 std::ofstream file;
 
-
 void enabled_callback(const std_msgs::BoolConstPtr& msg)
 {
   enabled = msg->data;
@@ -21,10 +20,14 @@ void enabled_callback(const std_msgs::BoolConstPtr& msg)
 void motors_callback(const igvc_msgs::velocity_pair& msg) {
   if(enabled) {
   	ROS_INFO_STREAM("Data stored");
-    file << msg.header.stamp.toSec() << ", ";
+    file << ("%.20f", msg.header.stamp.toSec()) << ", ";
     file << msg.left_velocity << ", " << msg.right_velocity << ", " << std::endl;
+  } else {
+    ROS_INFO_STREAM("Robot disabled, not writing data");
   }
 }
+
+
 
 int main(int argc, char** argv)
 {
@@ -41,7 +44,7 @@ int main(int argc, char** argv)
 
 
 /*
-  while (!enabled)
+  while (!enabled)d
   {
     ros::spinOnce();
   }
