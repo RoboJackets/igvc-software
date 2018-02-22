@@ -20,7 +20,7 @@ void enabled_callback(const std_msgs::BoolConstPtr& msg)
 void motors_callback(const igvc_msgs::velocity_pair& msg) {
   if(enabled) {
   	ROS_INFO_STREAM("Data stored");
-    file << ("%.20f", msg.header.stamp.toSec()) << ", ";
+    file << ("%.20f", msg.header.stamp.sec) << ", ";
     file << msg.left_velocity << ", " << msg.right_velocity << ", " << std::endl;
   } else {
     ROS_INFO_STREAM("Robot disabled, not writing data");
