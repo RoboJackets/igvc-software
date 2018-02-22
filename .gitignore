@@ -31,6 +31,9 @@
 #rosdoc_lite
 /doc/
 
+#Speed_compare
+/sandbox/speed_node
+
 #JetBrains Clion
 */.idea/
 /.idea/
