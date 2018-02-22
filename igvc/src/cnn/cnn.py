@@ -69,6 +69,8 @@ class CNN:
         print self.cam_transform_translation
         print self.cam_transform_rotation_matrix
 
+        self.init_point_cloud_array()
+
         self.im_publisher = rospy.Publisher(publisher_topic, Image, queue_size=1)
         self.cloud_publisher = rospy.Publisher("/semantic_segmentation_cloud", PointCloud, queue_size=1)
         self.subscriber = rospy.Subscriber(subscriber_topic, Image, self.image_callback, queue_size=1, buff_size=10**8)
@@ -93,12 +95,24 @@ class CNN:
 
 
 
+    def init_point_cloud_array(self):
+        world_points_array = np.empty( (self.resize_height,self.resize_width) ,dtype=object)
+        for r,c in np.ndindex(self.resize_height,self.resize_width):
+            ray = np.asarray( self.camera_model.projectPixelTo3dRay( (c,r) ) )
+            ray_in_world = np.matmul( self.cam_transform_rotation_matrix, ray )
+            scale = -self.cam_transform_translation[2] / ray_in_world[2]
+            world_point = scale * ray_in_world + self.cam_transform_translation
+            world_points_array[r,c] = Point32( world_point[0], world_point[1], world_point[2] )
+        self.world_point_array = world_points_array
+
+
+
     def image_to_point_cloud(self, input_image):
         half_rows = np.size(input_image, axis=0) / float(2)
         world_points = []
         for r,c in zip(*input_image.nonzero()):
-            if r < half_rows:
-                continue
+            #if r < half_rows:
+            #    continue
             ray = np.asarray( self.camera_model.projectPixelTo3dRay( (c,r) ) )
             ray_in_world = np.matmul( self.cam_transform_rotation_matrix, ray )
             scale = -self.cam_transform_translation[2] / ray_in_world[2]
@@ -128,7 +142,7 @@ class CNN:
 
         threshold = 0.5
         im_threshold = output_image > threshold
-        world_points = self.image_to_point_cloud(im_threshold)
+        world_points = self.world_point_array[im_threshold].tolist()
 
         im_threshold = np.uint8(255*im_threshold)
         cv_output = cv2.cvtColor(im_threshold, cv2.COLOR_GRAY2BGR)
