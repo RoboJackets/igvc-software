@@ -40,16 +40,16 @@ void encoders_callback(const igvc_msgs::velocity_pair& msg) {
     file << time_diff.sec << "." << time_diff.nsec << ", ";
     file << msg.left_velocity << ", " << msg.right_velocity << ", ";
     file << target_left_vel << "," << target_right_vel << std::endl;
-      } else {
-        ROS_INFO_STREAM("Robot disabled, not writing data");
-      }
-    }
+  } else {
+    ROS_INFO_STREAM("Robot disabled, not writing data");
+  }
+}
     
     
     
-    int main(int argc, char** argv)
-    {
-      ros::init(argc, argv, "pidtester");"
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "pidtester");
 
   ros::NodeHandle nh;
 
@@ -61,7 +61,7 @@ void encoders_callback(const igvc_msgs::velocity_pair& msg) {
 
   ros::Subscriber encoders_sub = nh.subscribe("/encoders", 1, encoders_callback);
 
-  file.open("/home/robojackets/Desktop/speed_data.csv");
+  file.open("./../../../sandbox/speed_data.csv");
   file << "timestamp, left_velocity, right_velocity, target_left_velocity, target_right_velocity" << std::endl;
 
 
