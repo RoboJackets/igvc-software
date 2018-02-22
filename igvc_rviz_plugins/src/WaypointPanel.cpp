@@ -3,6 +3,7 @@
 #include <igvc_rviz_plugins/WaypointPanel.h>
 #include <QVBoxLayout>
 #include <pluginlib/class_list_macros.h>
+#include <tf/LinearMath/Matrix3x3.h>
 
 namespace igvc_rviz_plugins {
 
@@ -27,7 +28,7 @@ void WaypointPanel::waypoint_callback(const geometry_msgs::PointStampedConstPtr 
 }
 
 void WaypointPanel::robot_position_callback(const nav_msgs::OdometryConstPtr &msg, QLabel *label) {
-    double distance = sqrt(pow(way_x, 2) + pow(way_y, 2));
+    double distance = std::hypot(way_x, way_y);
     double angle = atan2(way_y, way_x) * 180 / M_PI;
 
     robot_x = msg->pose.pose.position.x;
@@ -37,10 +38,14 @@ void WaypointPanel::robot_position_callback(const nav_msgs::OdometryConstPtr &ms
     double qy = msg->pose.pose.orientation.y;
     double qz = msg->pose.pose.orientation.z;
     double qw = msg->pose.pose.orientation.w;
-    double siny = 2.0 * (qw * qz + qx * qy);
-    double cosy = 1.0 - 2.0 * (qy * qy + qz * qz);
 
-    double yaw = atan2(siny, cosy) * 180 / M_PI;
+    tf::Quaternion q(qx, qy, qz, qw);
+    tf::Matrix3x3 m(q);
+    double roll, pitch, yaw;
+    m.getRPY(roll, pitch, yaw);
+
+
+    //double yaw = atan2(siny, cosy) * 180 / M_PI;
 
     auto text = "X: " + std::to_string(way_x) + "\n" +
                 "Y: " + std::to_string(way_y) + "\n" +
