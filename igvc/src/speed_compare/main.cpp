@@ -63,6 +63,7 @@ int main(int argc, char** argv)
 
   std::string location;
   pNh.getParam("file", location);
+  ROS_INFO_STREAM(location);
   file.open(location);
   file << "timestamp, left_velocity, right_velocity, target_left_velocity, target_right_velocity" << std::endl;
 
