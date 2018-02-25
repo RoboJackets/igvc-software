@@ -37,8 +37,8 @@ void encoders_callback(const igvc_msgs::velocity_pair& msg) {
   if(enabled) {
     ROS_INFO_STREAM("Data stored");
     ros::Duration time_diff = msg.header.stamp - start_time;
-    file << time_diff.sec << "." << time_diff.nsec << ", ";
-    file << msg.left_velocity << ", " << msg.right_velocity << ", ";
+    file << time_diff.sec << "." << time_diff.nsec << ",";
+    file << msg.left_velocity << "," << msg.right_velocity << ",";
     file << target_left_vel << "," << target_right_vel << std::endl;
   } else {
     ROS_INFO_STREAM("Robot disabled, not writing data");
