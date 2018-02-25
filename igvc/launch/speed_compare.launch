@@ -4,10 +4,10 @@
 <launch>
 
     <!-- Planner -->
-    <include file="$(find igvc)/sandbox/speed_data.csv" />
+    <!--<include file="$(find igvc)/sandbox/speed_data.csv" />-->
 
     <node name="speed_compare" pkg="igvc" type="speed_compare" output="screen">
-    	
+    	<param name = "file" type = "string" value = "$(find igvc)/sandbox/speed_data.csv" />
     </node>
 
 </launch>

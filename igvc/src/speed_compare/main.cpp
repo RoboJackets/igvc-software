@@ -15,7 +15,7 @@ void enabled_callback(const std_msgs::BoolConstPtr& msg)
   enabled = msg->data;
   if (enabled) {
   	  ROS_INFO_STREAM("The robot is enabled. Data will be written");
-  } else { 
+  } else {
 	  ROS_INFO_STREAM("The robot is disabled. Data will not be written.");
   }
 }
@@ -44,24 +44,26 @@ void encoders_callback(const igvc_msgs::velocity_pair& msg) {
     ROS_INFO_STREAM("Robot disabled, not writing data");
   }
 }
-    
-    
-    
+
+
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "pidtester");
 
   ros::NodeHandle nh;
+  ros::NodeHandle pNh("~");
+
 
   start_time = ros::Time::now();
 
   ros::Subscriber enabled_sub = nh.subscribe("/robot_enabled", 1, enabled_callback);
-
   ros::Subscriber motors_sub = nh.subscribe("/motors", 1, motors_callback);
-
   ros::Subscriber encoders_sub = nh.subscribe("/encoders", 1, encoders_callback);
 
-  file.open("./../../../sandbox/speed_data.csv");
+  std::string location;
+  pNh.getParam("file", location);
+  file.open(location);
   file << "timestamp, left_velocity, right_velocity, target_left_velocity, target_right_velocity" << std::endl;
 
 
