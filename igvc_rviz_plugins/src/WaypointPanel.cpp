@@ -29,7 +29,7 @@ void WaypointPanel::waypoint_callback(const geometry_msgs::PointStampedConstPtr 
 
 void WaypointPanel::robot_position_callback(const nav_msgs::OdometryConstPtr &msg, QLabel *label) {
     double distance = std::hypot(way_x, way_y);
-    double angle = atan2(way_y, way_x) * 180 / M_PI;
+    double odomToWayPointAngle = atan2(way_y, way_x) * 180 / M_PI;
 
     robot_x = msg->pose.pose.position.x;
     robot_y = msg->pose.pose.position.y;
@@ -44,13 +44,10 @@ void WaypointPanel::robot_position_callback(const nav_msgs::OdometryConstPtr &ms
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
 
-
-    //double yaw = atan2(siny, cosy) * 180 / M_PI;
-
     auto text = "X: " + std::to_string(way_x) + "\n" +
                 "Y: " + std::to_string(way_y) + "\n" +
                 "Distance: " + std::to_string(distance) + "\n" +
-                "Angle: " + std::to_string(angle - yaw) + " degrees\n";
+                "Angle: " + std::to_string(odomToWayPointAngle - yaw) + " degrees\n";
     
     label->setText(text.c_str());
 
