@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 
       // removing gravity vector from accelerations
       tf::Transform gravityTransform(tf::Quaternion(roll, pitch, yaw));
-      tf::Vector3 gravityVector = gravityTransform(tf::Vector3(0,0,9.81));
+      tf::Vector3 gravityVector = gravityTransform(tf::Vector3(0, 0, 9.81));
       msg.linear_acceleration.x += gravityVector.getX();
       msg.linear_acceleration.y += gravityVector.getY();
       msg.linear_acceleration.z += gravityVector.getZ();

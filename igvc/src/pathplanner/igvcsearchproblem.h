@@ -27,9 +27,10 @@ public:
   double MinimumOmega;
   double MaximumOmega;
   double DeltaOmega;
-  double maxODeltaT;
-  double alpha = 4;
-  double beta = 5;
+  double MaxObstacleDeltaT;
+  double Alpha;
+  double Beta;
+  double BoundingDistance;
 
   SearchLocation getStartState()
   {
@@ -60,11 +61,10 @@ public:
     if (action.distToObs < 10)
     {
       /*cerr << action.distToObs << endl;
-      cerr << alpha*exp((Threshold-action.distToObs)*beta)+1 << endl;
+      cerr << Alpha*exp((Threshold-action.distToObs)*Beta)+1 << endl;
       cerr << "----------" << endl;*/
     }
-    return pathLength * (alpha * exp((Threshold - action.distToObs) * beta) +
-                         1);  // adding cost to paths close to threshold TODO: LAUNCH PARAMETERS!
+    return pathLength * (Alpha * exp((Threshold - action.distToObs) * Beta) + 1);
   }
 
   double getHeuristicCost(SearchLocation state)
