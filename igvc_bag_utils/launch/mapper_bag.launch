@@ -2,7 +2,7 @@
     <!--<node name="imu_remap" pkg="igvc_bag_utils" type="imu_remap" output="screen">
     </node>-->
 
-    <node pkg="rosbag" type="play" name="player" output="screen" args="-l $(env BAG_LOC)">
+    <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(env BAG_LOC)">
           <remap from="/map" to="/map_old"/>
           <remap from="/odometry/filtered" to="/odometry/filtered_old"/>
           <remap from="/odometry/gps" to="/odometry/gps_old"/>
