@@ -16,9 +16,6 @@ private:
   tf::TransformBroadcaster odom_broadcaster;
   int seq;
 
-  // robot constant
-  const float WHEEL_SEPARATION = 0.59436;
-
   // keeping track of global position
   float x;
   float y;

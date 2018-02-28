@@ -6,6 +6,8 @@
 #include <ros/ros.h>
 #include "Odometer.h"
 
+double wheel_separation;
+
 /**
  * Coneverts wheel velocities to odometry message using trigonometry for calculations
  * In the ros coordinate convention x is forward, y is leftward, and z is upward relative to the robot
@@ -18,7 +20,7 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
   float rightVelocity = msg.right_velocity;
   float deltaT = msg.duration;
 
-  float angularVelocity = (rightVelocity - leftVelocity) / WHEEL_SEPARATION;
+  float angularVelocity = (rightVelocity - leftVelocity) / wheel_separation;
   float deltaTheta = angularVelocity * deltaT;
   float velocity = (rightVelocity + leftVelocity) / 2;
 
@@ -103,6 +105,10 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "wheel_odom");
   ros::NodeHandle nh;
+
+  ros::NodeHandle pNh("~");
+
+  pNh.param("wheel_separation", wheel_separation, 0.83);
 
   Odometer odom(nh);
 
