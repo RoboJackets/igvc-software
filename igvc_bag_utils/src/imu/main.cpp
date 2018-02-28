@@ -13,8 +13,11 @@ void imu_callback(const sensor_msgs::Imu::ConstPtr& msg) {
   result.header.frame_id = msg->header.frame_id;
   result.header.stamp = msg->header.stamp;
   result.header.seq = msg->header.seq;
+  result.linear_acceleration = msg->linear_acceleration;
   result.linear_acceleration_covariance = msg->linear_acceleration_covariance;
+  result.angular_velocity = msg->angular_velocity;
   result.angular_velocity_covariance = msg->angular_velocity_covariance;
+  result.orientation = msg->orientation;
   result.orientation_covariance = msg->orientation_covariance;
 
   result.linear_acceleration_covariance[0] = x;
