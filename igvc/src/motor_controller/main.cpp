@@ -77,6 +77,7 @@ int main(int argc, char** argv)
         enc_msg.left_velocity = atof(leftStr.c_str());
         enc_msg.right_velocity = atof(rightStr.c_str());
         enc_msg.duration = atof(deltaT.c_str());
+        enc_msg.header.stamp = ros::Time::now();
         enc_pub.publish(enc_msg);
       }
       else
