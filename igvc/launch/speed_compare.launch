@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<!-- map.launch -->
+<launch>
+
+    <!-- Planner -->
+    <!--<include file="$(find igvc)/sandbox/speed_data.csv" />-->
+
+    <node name="speed_compare" pkg="igvc" type="speed_compare" output="screen">
+    	<param name = "file" type = "string" value = "$(find igvc)/../sandbox/speed_data.csv" />
+    </node>
+
+</launch>

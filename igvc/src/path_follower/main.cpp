@@ -55,12 +55,15 @@ int main(int argc, char** argv)
           igvc_msgs::velocity_pair vel;
           vel.left_velocity = 0.;
           vel.right_velocity = 0.;
+          vel.header.stamp = ros::Time::now();
           cmd_pub.publish(vel);
           path.reset();
         }
         else if (path_reset)
         {
-          cmd_pub.publish(path->actions[path_index]);
+          igvc_msgs::velocity_pair vel = path->actions[path_index];
+          vel.header.stamp = ros::Time::now();
+          cmd_pub.publish(vel);
           cmd_start_time = std::chrono::high_resolution_clock::now();
           path_reset = false;
         }
@@ -70,7 +73,9 @@ int main(int argc, char** argv)
           if (path_index < path->actions.size() - 1)
           {
             path_index++;
-            cmd_pub.publish(path->actions[path_index]);
+            igvc_msgs::velocity_pair vel = path->actions[path_index];
+            vel.header.stamp = ros::Time::now();
+            cmd_pub.publish(vel);
             ROS_INFO("Command Published.");
             cmd_start_time = std::chrono::high_resolution_clock::now();
           }
@@ -79,6 +84,7 @@ int main(int argc, char** argv)
             igvc_msgs::velocity_pair vel;
             vel.left_velocity = 0.;
             vel.right_velocity = 0.;
+            vel.header.stamp = ros::Time::now();
             cmd_pub.publish(vel);
             path.reset();
           }
