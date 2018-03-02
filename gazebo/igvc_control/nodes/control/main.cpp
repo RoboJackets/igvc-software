@@ -2,6 +2,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Bool.h>
 #include <algorithm>
 #include <chrono>
 
@@ -64,6 +65,12 @@ int main(int argc, char **argv)
   ros::Publisher rightWheelEffortPublisher =
       handle.advertise<std_msgs::Float64>("/igvc/right_wheel_effort_controller/command", 1);
   ros::Publisher wheelSpeedPublisher = handle.advertise<igvc_msgs::velocity_pair>("/encoders", 1);
+
+  // Publish that the robot is enabled
+  ros::Publisher enabled_pub = handle.advertise<std_msgs::Bool>("/robot_enabled", 1, /* latch = */ true);
+  std_msgs::Bool enabled_msg;
+  enabled_msg.data = true;
+  enabled_pub.publish(enabled_msg);
 
   auto speedSub = handle.subscribe("/motors", 1, speedCallback);
 
