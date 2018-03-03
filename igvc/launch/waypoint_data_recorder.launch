@@ -1,0 +1,8 @@
+<!-- waypoint_data_recorder.launch -->
+<launch>
+    <node name="waypoint_data_recorder" pkg="igvc" type="waypoint_data_recorder" output="screen" >
+    	<param name="file" value="/home/robojackets/Desktop/waypoint_data2.csv" />
+    </node>
+
+
+</launch>

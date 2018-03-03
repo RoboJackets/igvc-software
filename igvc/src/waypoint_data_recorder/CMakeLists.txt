@@ -1,0 +1,3 @@
+add_executable(waypoint_data_recorder main.cpp)
+add_dependencies(waypoint_data_recorder igvc_msgs_gencpp)
+target_link_libraries(waypoint_data_recorder ${catkin_LIBRARIES} )
