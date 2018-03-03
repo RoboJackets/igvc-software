@@ -3,11 +3,11 @@
 <launch>
   <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
   <arg name="namespace" default="igvc"/>
-  <!-- Switch with commented line below for better performance
+  <!-- Switch with commented line below for better performance -->
   <arg name="world_name" default="$(find igvc_description)/urdf/real_igvc.world"/>
-   -->
-
+<!--
   <arg name="world_name" default="$(find igvc_description)/urdf/igvc.world"/>
+-->
   <arg name="cmd_timeout" default="0.5"/>
 
 
