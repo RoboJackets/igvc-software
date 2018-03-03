@@ -16,13 +16,27 @@ void imu_callback(const sensor_msgs::Imu::ConstPtr& msg) {
   result.linear_acceleration = msg->linear_acceleration;
   result.linear_acceleration_covariance = msg->linear_acceleration_covariance;
   result.angular_velocity = msg->angular_velocity;
-  result.angular_velocity_covariance = msg->angular_velocity_covariance;
   result.orientation = msg->orientation;
+  result.angular_velocity_covariance = msg->angular_velocity_covariance;
   result.orientation_covariance = msg->orientation_covariance;
 
-  result.linear_acceleration_covariance[0] = x;
-  result.linear_acceleration_covariance[4] = y;
-  result.linear_acceleration_covariance[8] = z;
+  //sult.linear_acceleration_covariance[0] = x;
+  //sult.linear_acceleration_covariance[4] = y;
+  //sult.linear_acceleration_covariance[8] = z;
+
+  //result.orientation_covariance[0] = x;
+  //result.orientation_covariance[4] = y;
+  //result.orientation_covariance[8] = z;
+  //result.angular_velocity_covariance[0] = x;
+  //result.angular_velocity_covariance[4] = y;
+  //result.angular_velocity_covariance[8] = z;
+  /*double sum = 0;
+  for(int i = 0; i < 9; i++) {
+    sum += result.angular_velocity_covariance[i];
+  }
+  for(int i = 0; i < 9; i++) {
+    result.angular_velocity_covariance[i] = result.angular_velocity_covariance[i] / sum;
+    }*/
   pub.publish(result);
 }
 
