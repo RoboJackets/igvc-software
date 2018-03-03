@@ -15,10 +15,10 @@
     <include>
       <uri>model:///urdf/models/sun</uri>
     </include>
-    <!-- A ground plane -->
+    <!-- The terrain, slows down a lot -->
     <include>
-      <uri>model:///urdf/models/grass_plane</uri>
-    </include> -->
+      <uri>model:///urdf/models/terrain</uri>
+    </include>
     <!-- barrels -->
     <include>
       <uri>model:///urdf/models/construction_barrel</uri>
