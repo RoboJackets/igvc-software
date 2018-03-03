@@ -5,7 +5,9 @@ from image_geometry import PinholeCameraModel
 import tf as ros_tf
 from sensor_msgs.msg import Image
 from sensor_msgs.msg import CameraInfo
-from sensor_msgs.msg import PointCloud
+from sensor_msgs.msg import PointCloud2
+from sensor_msgs.msg import PointField
+import sensor_msgs.point_cloud2 as pc2
 from geometry_msgs.msg import Point32
 from cv_bridge import CvBridge, CvBridgeError
 import scipy
@@ -32,7 +34,7 @@ class CNN:
         self.resize_height = resize_height
         self.bridge = CvBridge()
 
-	try:
+        try:
             camera_info = rospy.wait_for_message('/usb_cam_center/camera_info', CameraInfo, timeout=5)
         except(rospy.ROSException), e:
             print "Camera info topic not available"
@@ -72,21 +74,21 @@ class CNN:
         self.init_point_cloud_array()
 
         self.im_publisher = rospy.Publisher(publisher_topic, Image, queue_size=1)
-        self.cloud_publisher = rospy.Publisher("/semantic_segmentation_cloud", PointCloud, queue_size=1)
+        self.cloud_publisher = rospy.Publisher("/semantic_segmentation_cloud", PointCloud2, queue_size=1)
         self.subscriber = rospy.Subscriber(subscriber_topic, Image, self.image_callback, queue_size=1, buff_size=10**8)
-        
+
 
 
 
 
     def load_graph(self, frozen_graph_filename):
-        # We load the protobuf file from the disk and parse it to retrieve the 
+        # We load the protobuf file from the disk and parse it to retrieve the
         # unserialized graph_def
         with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
             graph_def = tf.GraphDef()
             graph_def.ParseFromString(f.read())
 
-        # Then, we import the graph_def into a new Graph and returns it 
+        # Then, we import the graph_def into a new Graph and returns it
         with tf.Graph().as_default() as graph:
             # The name var will prefix every op/nodes in your graph
             # Since we load everything in a new graph, this is not needed
@@ -102,25 +104,8 @@ class CNN:
             ray_in_world = np.matmul( self.cam_transform_rotation_matrix, ray )
             scale = -self.cam_transform_translation[2] / ray_in_world[2]
             world_point = scale * ray_in_world + self.cam_transform_translation
-            world_points_array[r,c] = Point32( world_point[0], world_point[1], world_point[2] )
+            world_points_array[r,c] = (world_point[0], world_point[1], world_point[2])
         self.world_point_array = world_points_array
-
-
-
-    def image_to_point_cloud(self, input_image):
-        half_rows = np.size(input_image, axis=0) / float(2)
-        world_points = []
-        for r,c in zip(*input_image.nonzero()):
-            #if r < half_rows:
-            #    continue
-            ray = np.asarray( self.camera_model.projectPixelTo3dRay( (c,r) ) )
-            ray_in_world = np.matmul( self.cam_transform_rotation_matrix, ray )
-            scale = -self.cam_transform_translation[2] / ray_in_world[2]
-            world_point = scale * ray_in_world + self.cam_transform_translation
-            world_points.append( Point32( world_point[0], world_point[1], world_point[2] ) )
-
-        return world_points
-
 
 
     def image_callback(self, image_msg):
@@ -150,10 +135,21 @@ class CNN:
         msg_out.header.stamp = image_msg.header.stamp
         self.im_publisher.publish(msg_out)
 
-        cloud_msg = PointCloud()
+        points = world_points
+        cloud_msg = PointCloud2()
         cloud_msg.header.stamp = image_msg.header.stamp
         cloud_msg.header.frame_id = 'base_footprint'
-        cloud_msg.points = world_points
+        cloud_msg.height = 1
+        cloud_msg.width = len(world_points)
+        cloud_msg.fields = [
+            PointField('x', 0, PointField.FLOAT32, 1),
+            PointField('y', 4, PointField.FLOAT32, 1),
+            PointField('z', 8, PointField.FLOAT32, 1)]
+        cloud_msg.is_bigendian = False
+        cloud_msg.point_step = 12
+        cloud_msg.row_step = 3 * len(world_points)
+        cloud_msg.data = np.asarray(world_points, np.float32).tostring()
+
         self.cloud_publisher.publish(cloud_msg)
         print timer() - start
 
