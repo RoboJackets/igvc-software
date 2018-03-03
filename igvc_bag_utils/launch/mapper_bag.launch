@@ -1,8 +1,8 @@
 <launch>
     <node name="imu_remap" pkg="igvc_bag_utils" type="imu_remap" output="screen">
-          <param name="x" type="double" value="0.25" />
-          <param name="y" type="double" value="0.25" />
-          <param name="z" type="double" value="0.25" />
+          <param name="x" type="double" value="0.5" />
+          <param name="y" type="double" value="0.5" />
+          <param name="z" type="double" value="0.5" />
     </node>
 
     <include file="$(find igvc)/launch/filter_lidar.launch" />
@@ -17,6 +17,7 @@
           <remap from="/gps/filtered" to="/gps/filtered_old"/>
           <remap from="/imu" to="/imu_old"/>
           <remap from="/scan/pointcloud" to="/scan/pointcloud_old"/>
+          <remap from="/tf" to="/tf_old"/>
     </node>
     <param name="use_sim_time" value="true"/>
 </launch>
