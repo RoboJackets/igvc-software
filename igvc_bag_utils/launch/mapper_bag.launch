@@ -6,6 +6,7 @@
     </node>
 
     <include file="$(find igvc)/launch/filter_lidar.launch" />
+    <include file="$(find igvc)/launch/compressed_to_raw.launch" />
 
     <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(env BAG_LOC)">
           <remap from="/map" to="/map_old"/>
