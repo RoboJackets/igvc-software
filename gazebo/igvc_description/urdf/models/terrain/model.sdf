@@ -6,7 +6,7 @@
       <collision name="collision">
         <geometry>
           <heightmap>
-              <uri>model://urdf/models/terrain/custom.png</uri>
+              <uri>model://urdf/models/terrain/test(33).png</uri>
               <size>100 100 2</size>
               <pos>0 0 0</pos>
           </heightmap>
@@ -24,7 +24,7 @@
         <cast_shadows>false</cast_shadows>
         <geometry>
           <heightmap>
-              <uri>model://urdf/models/terrain/custom.png</uri>
+              <uri>model://urdf/models/terrain/test(33).png</uri>
               <size>100 100 2</size>
               <pos>0 0 0</pos>
           </heightmap>
