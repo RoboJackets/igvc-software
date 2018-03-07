@@ -7,10 +7,9 @@ std::string fileName;
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
-	std::ofstream datacsv;
+    std::ofstream datacsv;
     datacsv.open (fileName, std::ios_base::app | std::ios_base::out);
     datacsv << std::to_string(msg->point.x) + ", " + std::to_string(msg->point.y) + ",\n";
-    datacsv.close();
 }
 
 int main(int argc, char** argv)
