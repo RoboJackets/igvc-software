@@ -16,6 +16,9 @@ geometry_msgs::PointStamped current_waypoint;
 geometry_msgs::Point map_origin;
 std::mutex current_mutex;
 
+float waypointFilterXArray[5] = {3.4e38, 3.4e38, 3.4e38, 3.4e38, 3.4e38};
+float waypointFilterYArray[5] = {3.4e38, 3.4e38, 3.4e38, 3.4e38, 3.4e38};
+
 double dmsToDec(std::string dms)
 {
   auto qMarkIter = dms.find('?');
@@ -109,6 +112,10 @@ void positionCallback(const nav_msgs::OdometryConstPtr& msg)
     {
       waypoints.erase(waypoints.begin());
       std::cerr << "Waypoint Source moving to next" << std::endl;
+      for (int i = 0; i < 5; i++) {
+        waypointFilterXArray[i] = 3.4e38;
+        waypointFilterYArray[i] = 3.4e38;
+      }
     }
   }
 }
@@ -129,6 +136,26 @@ void originCallback(const sensor_msgs::NavSatFixConstPtr& msg)
     position.y -= result.transform.translation.y;
     map_origin = position;
   }
+}
+
+
+float waypointFilter(float newEntry, float filteringArray[]) {
+  float sum = 0.0;
+  if (filteringArray[0] == 3.8e38) {
+    for (int i = 0; i < 5; i++) {
+      filteringArray[i] = newEntry;
+      sum += newEntry;
+    }
+  } else {
+      for (int i = 0; i < 4; i++) {
+        filteringArray[i] = filteringArray[i + 1];
+        sum+= filteringArray[i];
+      }
+      filteringArray[4] = newEntry;
+      sum += newEntry;
+  }
+  return sum / 5;
+
 }
 
 int main(int argc, char** argv)
@@ -167,7 +194,9 @@ int main(int argc, char** argv)
         waypoint_for_pub.header.seq++;
         waypoint_for_pub.header.frame_id = "odom";
         waypoint_for_pub.point.x -= map_origin.x;
+        waypoint_for_pub.point.x = waypointFilter(waypoint_for_pub.point.x, waypointFilterXArray);
         waypoint_for_pub.point.y -= map_origin.y;
+        waypoint_for_pub.point.y = waypointFilter(waypoint_for_pub.point.y, waypointFilterYArray);
         waypoint_pub.publish(waypoint_for_pub);
       }
 
