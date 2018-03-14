@@ -4,10 +4,6 @@
     excluding some of the duplicate image_transport topics.
     -->
 <launch>
-    <node pkg="igvc" type="system_stats" name="system_stats" output="screen">
-        <param name="frequency" value="10"/>
-    </node>
-
     <node pkg="rosbag" type="record" name="record" output="screen"
-    args="/battery /encoders /fix /gps_odom /scan /imu  /joint_states /lights /line_cloud /map /map_origin /motors /odom_combined /path_display /scan/pointcloud /robot_enabled /sick_tim551_2050001/parameter_descriptions /tf /tf_static /sick_tim551_2050001/parameter_updates /usb_cam_center/camera_info /usb_cam_center/image_raw /vel /waypoint /time_reference" />
+    args="/battery /encoders /fix /pc2 /scan/pointcloud /imu /joint_states /lights /motors /robot_enabled /tf /tf_static /usb_cam_center/camera_info /usb_cam_center/image_raw/compressed /vel /waypoint /time_reference" />
 </launch>
