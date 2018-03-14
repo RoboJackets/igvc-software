@@ -7,13 +7,13 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
 {
   auto deltat = move.DeltaT;
   double current = 0.0;
-  if (abs(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > 16)
+  if (sqrt(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > BoundingDistance)
   {
     return true;
   }
-  while (current < (deltat + maxODeltaT))
+  while (current < (deltat + MaxObstacleDeltaT))
   {
-    current = current > deltat ? deltat : (current + maxODeltaT);
+    current = current > deltat ? deltat : (current + MaxObstacleDeltaT);
     move.DeltaT = current;
     SearchLocation result = getResult(start_state, move);
     double offsetToCenter = 0.33;
@@ -24,10 +24,10 @@ bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_sta
     int neighborsCount = Octree->nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
     if (neighborsCount > 0)
     {
-      double temp = pow(pointRadiusSquaredDistance[0], .5);
-      if (temp < move.distToObs)
+      float distance = sqrt(pointRadiusSquaredDistance[0]);
+      if (distance < move.distToObs)
       {
-        move.distToObs = temp;
+        move.distToObs = distance;
       }
       if (move.distToObs <= Threshold)
       {
