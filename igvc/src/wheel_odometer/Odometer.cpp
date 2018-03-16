@@ -16,8 +16,8 @@ double wheel_separation;
 */
 void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
 {
-  float leftVelocity = msg.left_velocity * 0.8;
-  float rightVelocity = msg.right_velocity * 0.8;
+  float leftVelocity = msg.left_velocity;
+  float rightVelocity = msg.right_velocity;
   float deltaT = msg.duration;
 
   float angularVelocity = (rightVelocity - leftVelocity) / wheel_separation;
@@ -66,7 +66,7 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
   // The orientation parameters use a fixed-axis representation.
   // In order, the parameters are:
   // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
-  odom.twist.covariance = { 0.3, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 0.25, 1e-4, 1e-4, 1e-4, 1e-4,
+  odom.twist.covariance = { 0.02, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 0.25, 1e-4, 1e-4, 1e-4, 1e-4,
                             1e-4, 1e-4, 1e6,  1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e6,  1e-4, 1e-4,
                             1e-4, 1e-4, 1e-4, 1e-4, 1e6,  1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 0.62 };
   // the position covariance takes same form as twist covariance above
