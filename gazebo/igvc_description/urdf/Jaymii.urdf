@@ -88,7 +88,7 @@
     <inertial>
       <origin xyz="0 0 0" />
       <mass value="1.0" />
-      <inertia  ixx="10.0" ixy="-0.0000004"  ixz="0.1"  iyy="0.0"  iyz="-0.0000004"  izz="0.0" />
+      <inertia  ixx="0.0" ixy="-0.0000004"  ixz="0.1"  iyy="0.0"  iyz="-0.0000004"  izz="0.0" />
     </inertial>
     <visual>
       <geometry>
