@@ -1,0 +1,15 @@
+<launch>
+    <include file="$(find igvc)/launch/localization.launch" />
+
+    <!-- Map Node -->
+    <node name="new_mapper" pkg="igvc" type="global_mapper" output="screen">
+
+            <param name="occupancy_grid_length" type="int" value="100" />
+            <param name="occupancy_grid_width" type="int" value="100" />
+            <param name="occupancy_grid_resolution" type="double" value="0.5" />
+            <param name="start_X" type="double" value="50"/>
+            <param name="start_Y" type+"double" value="10"/>
+
+    </node>
+
+</launch>
