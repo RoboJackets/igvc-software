@@ -4,8 +4,10 @@
 #include <ros/ros.h>
 #include <stdlib.h>
 #include <Eigen/Core>
+#include <opencv2/opencv.hpp>
 
 ros::Publisher pointcloud_pub;
+cv::Mat published_map; // get to work
 Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> global_map;
 double resolution;
 double position [2] = {0, 0};
@@ -14,12 +16,17 @@ int width;
 
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
 {
+  //transform pointcloud into the occupancy grid, no filtering right now
   bool offMap = false;
-  for(pcl::PointXYZRGB point : msg) // how to iterate through all points??
+  //for(pcl::PointXYZRGB point : msg) // how to iterate through all points??
+  //cv::Mat frame(msg->points);
+  pcl::PointCloud<pcl::PointXYZ>::const_iterator point;
+  for (point = msg->points.begin(); point < msg->points.end(); point++)
   {
     //assuming is meters from robot origin
-    double x = point.x / resolution;
-    double y = point.y / resolution;
+    //transform coordinates
+    double x = point->x / resolution;
+    double y = point->y / resolution;
 
     x += position[0];
     y += position[1];
@@ -31,6 +38,9 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
       offMap = true;
     }
   }
+
+
+  pointcloud_pub.publish(published_map);
 }
 
 int main(int argc, char **argv)
@@ -59,7 +69,12 @@ int main(int argc, char **argv)
   position[0] = start_x / resolution;
   position[1] = start_y / resolution;
   //global_map = Eigen::Matrix<float, Dynamic, Dynamic>(length, width);
-  global_map = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>(length, width);
+
+  published_map(length, width, 2.0, cv::Scalar(0,0,0)); // I cant instatiate this
+  //https://docs.opencv.org/2.4/doc/tutorials/core/mat_the_basic_image_container/mat_the_basic_image_container.html
+  global_map(published_map.data()); // i can't instantiate this either
+  //https://stackoverflow.com/questions/14783329/opencv-cvmat-and-eigenmatrix
+
   //will need to change when subscribe to multiple topics
   std::list<std::string> tokens = {topics};
   for (std:: string t : tokens)
@@ -67,6 +82,7 @@ int main(int argc, char **argv)
     ROS_INFO_STREAM("Mapper subscribing to " << t);
     subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(t, 1,boost::bind(frame_callback, _1, t)));
   }
+  pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
 
   ros::spin();
 }
