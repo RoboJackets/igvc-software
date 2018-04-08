@@ -7,20 +7,19 @@
 class SearchMove
 {
 public:
-  double V, W, DeltaT;
-  double distToObs = std::numeric_limits<double>::max();
+  double X, Y;
 
   SearchMove()
   {
   }
 
-  SearchMove(double v, double w, double dt);
+  SearchMove(double x, double y);
 
   bool operator==(const SearchMove &other);
 
   friend std::ostream &operator<<(std::ostream &stream, SearchMove &move)
   {
-    stream << "(<" << move.V << "," << move.W << ">";
+    stream << "(<" << move.X << "," << move.Y << ">";
     return stream;
   }
 };
