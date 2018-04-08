@@ -9,6 +9,10 @@
 ros::Publisher pointcloud_pub;
 cv::Mat published_map; // get to work
 Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic> global_map;
+tf::StampedTransform lidar_trans;
+tf::StampedTransform cam_trans;
+
+
 double resolution;
 double position [2] = {0, 0};
 int length;
@@ -54,6 +58,9 @@ int main(int argc, char **argv)
 
   ros::NodeHandle pNh("~");
 
+   tf_listener = new tf::TransformListener();
+
+
   double start_x;
   double start_y;
 
@@ -70,9 +77,9 @@ int main(int argc, char **argv)
   position[1] = start_y / resolution;
   //global_map = Eigen::Matrix<float, Dynamic, Dynamic>(length, width);
 
-  published_map(length, width, 2.0, cv::Scalar(0,0,0)); // I cant instatiate this
+  published_map(length, width, CV_32FC1, const cv::Scalar(0,0,0)); // I cant instatiate this
   //https://docs.opencv.org/2.4/doc/tutorials/core/mat_the_basic_image_container/mat_the_basic_image_container.html
-  global_map(published_map.data()); // i can't instantiate this either
+  global_map(published_map.data()); // I can't instantiate this either
   //https://stackoverflow.com/questions/14783329/opencv-cvmat-and-eigenmatrix
 
   //will need to change when subscribe to multiple topics
