@@ -6,6 +6,7 @@
 #include <Eigen/Core>
 #include <opencv2/opencv.hpp>
 #include <pcl_ros/transforms.h>
+#include <igvc_msgs>
 
 ros::Publisher pointcloud_pub;
 cv::Mat published_map; // get to work
@@ -53,8 +54,8 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     }
   }
 
-  //won;t work until we make a message to publish
-  pointcloud_pub.publish(published_map);
+  //won't work until we make a message to publish
+  //pointcloud_pub.publish(published_map);
   //pointcloud_pub.publish(&global_map);
 }
 
