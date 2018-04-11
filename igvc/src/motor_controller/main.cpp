@@ -52,11 +52,13 @@ int main(int argc, char** argv)
 
   nhp.param("precision", precision, 1);
 
-  double p_l, p_r, d_l, d_r;
+  double p_l, p_r, d_l, d_r, i_l, i_r;
   nhp.param("p_l", p_l, 3.0);
   nhp.param("p_r", p_r, 3.0);
   nhp.param("d_l", d_l, 0.0);
   nhp.param("d_r", d_r, 0.0);
+  nhp.param("i_r", i_r, 0.0);
+  nhp.param("i_l", i_l, 0.0);
 
   ROS_INFO_STREAM("Opening port");
   SerialPort port(device_path, baud_rate);
@@ -74,11 +76,13 @@ int main(int argc, char** argv)
 
   std::string p_values = "#P" + toBoundedString(p_l) + "," + toBoundedString(p_r) + "\n";
   std::string d_values = "#D" + toBoundedString(d_l) + "," + toBoundedString(d_r) + "\n";
+  std::string i_values = "#I" + toBoundedString(i_l) + "," + toBoundedString(i_r) + "\n";
 
   bool valid_values_p = false;
   bool valid_values_d = false;
+  bool valid_values_i = false;
 
-  while(ros::ok() && !valid_values_p && !valid_values_d) {
+  while(ros::ok() && (!valid_values_p || !valid_values_d || !valid_values_i)) {
     ros::spinOnce();
     ROS_INFO_STREAM("sending PID values to board");
     if(!valid_values_p) {
@@ -87,11 +91,15 @@ int main(int argc, char** argv)
     if(!valid_values_d) {
       port.write(d_values);
     }
-    for(int i = 0; i < 2; i++) {
+    if(!valid_values_i) {
+      port.write(i_values);
+    }
+    for(int i = 0; i < 3; i++) {
       std::string ret = port.readln();
       if(!ret.empty() && ret.at(0) == '#' && ret.at(1) != 'E') {
         size_t p_loc = ret.find('P');
         size_t d_loc = ret.find('D');
+        size_t i_loc = ret.find('I');
         size_t end = ret.find('\n');
         if(p_loc != std::string::npos) {
           std::vector<std::string> vals = split(ret.substr(p_loc + 1, end), ',');
@@ -106,14 +114,22 @@ int main(int argc, char** argv)
           ROS_INFO_STREAM("d ret = " << ret);
           if(vals.size() == 2) {
             valid_values_d = true;
-            valid_values_d = (stod(vals.at(0)) == p_l) && valid_values_d;
-            valid_values_d = (stod(vals.at(1)) == p_r) && valid_values_d;
+            valid_values_d = (stod(vals.at(0)) == d_l) && valid_values_d;
+            valid_values_d = (stod(vals.at(1)) == d_r) && valid_values_d;
+          }
+        } else if(i_loc != std::string::npos) {
+          std::vector<std::string> vals = split(ret.substr(i_loc + 1, end), ',');
+          ROS_INFO_STREAM("i ret = " << ret);
+          if(vals.size() == 2) {
+            valid_values_i = true;
+            valid_values_i = (stod(vals.at(0)) == i_l) && valid_values_i;
+            valid_values_i = (stod(vals.at(1)) == i_r) && valid_values_i;
           }
         } else {
           ROS_INFO_STREAM("recieved unknown string while setting PID values " << ret);
         }
-      } else {
-        ROS_ERROR_STREAM("Empty return from motor arduino while sending PID values.\t");
+      } else if(ret.empty()) {
+        ROS_ERROR_STREAM("Empty return from motor arduino while sending PID values.\t" << ret);
       }
     }
     rate.sleep();
