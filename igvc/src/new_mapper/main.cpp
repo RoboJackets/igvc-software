@@ -6,7 +6,7 @@
 #include <Eigen/Core>
 #include <opencv2/opencv.hpp>
 #include <pcl_ros/transforms.h>
-#include <igvc_msgs>
+//#include <igvc_msgs>
 
 ros::Publisher pointcloud_pub;
 cv::Mat published_map; // get to work
@@ -55,6 +55,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   }
 
   //won't work until we make a message to publish
+  //igvc_msgs::map map = new igvc_msgs::map();
   //pointcloud_pub.publish(published_map);
   //pointcloud_pub.publish(&global_map);
 }
@@ -110,10 +111,10 @@ int main(int argc, char **argv)
 
 
   //TODO: Initialize the map variables, not working
-  global_map = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>(length, width);
-  //published_map(length, width, CV_32FC1, const cv::Scalar(0,0,0)); // I cant instatiate this
+  //global_map = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>(length, width);
+  published_map(length, width, CV_8UC1); // I cant instatiate this
   //https://docs.opencv.org/2.4/doc/tutorials/core/mat_the_basic_image_container/mat_the_basic_image_container.html
-  //global_map(published_map.data()); // I can't instantiate this either
+  global_map(published_map.data()); // I can't instantiate this either
   //https://stackoverflow.com/questions/14783329/opencv-cvmat-and-eigenmatrix
 
   pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
