@@ -42,16 +42,19 @@ int main(int argc, char** argv)
   ros::Publisher battery_pub = nh.advertise<std_msgs::UInt8>("/battery", 1);
 
   std::string device_path;
-  nhp.param(std::string("device"), device_path, std::string("/dev/igvc_motor_arduino"));
+  nhp.param(std::string("device"), device_path, std::string("/dev/igvc_motor_board"));
 
   int baud_rate;
   nhp.param(std::string("baud_rate"), baud_rate, 9600);
 
-  nhp.param("precision", precision, 2);
+  int messages_to_read;
+  nhp.param(std::string("messages_to_read"), messages_to_read, 3);
+
+  nhp.param("precision", precision, 1);
 
   double p_l, p_r, d_l, d_r;
-  nhp.param("p_l", p_l, 1.0);
-  nhp.param("p_r", p_r, 1.0);
+  nhp.param("p_l", p_l, 3.0);
+  nhp.param("p_r", p_r, 3.0);
   nhp.param("d_l", d_l, 0.0);
   nhp.param("d_r", d_r, 0.0);
 
@@ -72,17 +75,21 @@ int main(int argc, char** argv)
   std::string p_values = "#P" + toBoundedString(p_l) + "," + toBoundedString(p_r) + "\n";
   std::string d_values = "#D" + toBoundedString(d_l) + "," + toBoundedString(d_r) + "\n";
 
-  bool valid_values = false;
+  bool valid_values_p = false;
+  bool valid_values_d = false;
 
-  while(ros::ok() && !valid_values) {
+  while(ros::ok() && !valid_values_p && !valid_values_d) {
     ros::spinOnce();
     ROS_INFO_STREAM("sending PID values to board");
-    port.write(p_values);
-    port.write(d_values);
+    if(!valid_values_p) {
+      port.write(p_values);
+    }
+    if(!valid_values_d) {
+      port.write(d_values);
+    }
     for(int i = 0; i < 2; i++) {
       std::string ret = port.readln();
-      if(!ret.empty()) {
-        valid_values = true;
+      if(!ret.empty() && ret.at(0) == '#' && ret.at(1) != 'E') {
         size_t p_loc = ret.find('P');
         size_t d_loc = ret.find('D');
         size_t end = ret.find('\n');
@@ -90,15 +97,17 @@ int main(int argc, char** argv)
           std::vector<std::string> vals = split(ret.substr(p_loc + 1, end), ',');
           ROS_INFO_STREAM("p ret = " << ret);
           if(vals.size() == 2) {
-            valid_values = (stod(vals.at(0)) == p_l) && valid_values;
-            valid_values = (stod(vals.at(1)) == p_r) && valid_values;
+            valid_values_p = true;
+            valid_values_p = (stod(vals.at(0)) == p_l) && valid_values_p;
+            valid_values_p = (stod(vals.at(1)) == p_r) && valid_values_p;
           }
         } else if(d_loc != std::string::npos) {
           std::vector<std::string> vals = split(ret.substr(d_loc + 1, end), ',');
           ROS_INFO_STREAM("d ret = " << ret);
           if(vals.size() == 2) {
-            valid_values = (stod(vals.at(0)) == p_l) && valid_values;
-            valid_values = (stod(vals.at(1)) == p_r) && valid_values;
+            valid_values_d = true;
+            valid_values_d = (stod(vals.at(0)) == p_l) && valid_values_d;
+            valid_values_d = (stod(vals.at(1)) == p_r) && valid_values_d;
           }
         } else {
           ROS_INFO_STREAM("recieved unknown string while setting PID values " << ret);
@@ -121,7 +130,9 @@ int main(int argc, char** argv)
     std::string ret = port.readln();
     size_t dollar = ret.find('$');
     size_t pound = ret.find('#');
-    while (dollar != std::string::npos || pound != std::string::npos) {
+    int count = 0;
+    while ((dollar != std::string::npos || pound != std::string::npos) && count <= messages_to_read) {
+      count++;
       size_t end = ret.find('\n');
       std::vector<std::string> tokens;
       if(dollar != std::string::npos) {
@@ -132,9 +143,8 @@ int main(int argc, char** argv)
       }
 
       if(tokens.size() <= 0) {
-        ROS_INFO_STREAM("invalid number of tokens from motor arduino");
+        ROS_INFO_STREAM("invalid number of tokens from motor board");
       } else {
-        ROS_INFO_STREAM("ret = " << ret);
         if(pound != std::string::npos) {
           if(ret.at(1) == 'I') {
             // imu message
@@ -142,22 +152,31 @@ int main(int argc, char** argv)
             std_msgs::UInt8 battery_msg;
             battery_msg.data = atoi(tokens.at(0).c_str());
             battery_pub.publish(battery_msg);
+            std_msgs::Bool enabled_msg;
+            //ROS_INFO_STREAM("battery " << "val = |" << tokens.at(1)  << "| " << ret);
+            enabled_msg.data = tokens.at(1) == "1";
+            enabled = enabled_msg.data;
+            enabled_pub.publish(enabled_msg);
+          } else if(ret.at(1) == 'E') {
+            ROS_ERROR_STREAM(ret);
+            count--;
           }
         } else if(dollar != std::string::npos) {
           igvc_msgs::velocity_pair enc_msg;
           enc_msg.left_velocity = atof(tokens.at(0).c_str());
           enc_msg.right_velocity = atof(tokens.at(1).c_str());
           enc_msg.duration = atof(tokens.at(2).c_str());
+          enc_msg.header.stamp = ros::Time::now();
           enc_pub.publish(enc_msg);
-          std_msgs::Bool enabled_msg;
-          enabled_msg.data = tokens.at(3) == "1";
-          enabled_pub.publish(enabled_msg);
+        } else {
+          ROS_INFO_STREAM("unknown message from motor board " << ret);
         }
       }
       ret = port.readln();
       dollar = ret.find('$');
       pound = ret.find('#');
     }
+    rate.sleep();
   }
-  rate.sleep();
+
 }
