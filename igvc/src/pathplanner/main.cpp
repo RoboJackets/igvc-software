@@ -3,11 +3,9 @@
 
 
 #include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <igvc_msgs/action_path.h>
+#include <igvc_msgs/map.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
-#include <pcl/octree/octree_search.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
@@ -24,11 +22,7 @@
 
 ros::Publisher disp_path_pub;
 
-ros::Publisher act_path_pub;
-
 ros::Publisher expanded_pub;
-
-ros::Publisher path_planner_map_pub;
 
 IGVCSearchProblemDiscrete search_problem;
 
@@ -38,23 +32,13 @@ bool received_waypoint = false;
 
 unsigned int current_index = 0;
 
-void map_callback(const sensor_msgs::ImageConstPtr& msg)
+void map_callback(const igvc_msgs::mapConstPtr& msg)
 {
   std::lock_guard<std::mutex> planning_lock(planning_mutex);
   cv_bridge::CvImageConstPtr cv_ptr;
-  cv_ptr = cv_bridge::toCvShare(msg, "mono8");
+  cv_ptr = cv_bridge::toCvShare(msg->image, msg, "mono8");
   cv::Mat img = cv_ptr->image;
   // TODO verify that image is not destructed
-}
-
-void position_callback(const nav_msgs::OdometryConstPtr& msg)
-{
-  std::lock_guard<std::mutex> lock(planning_mutex);
-  search_problem.Start.X = msg->pose.pose.position.x;
-  search_problem.Start.Y = msg->pose.pose.position.y;
-  tf::Quaternion q;
-  tf::quaternionMsgToTF(msg->pose.pose.orientation, q);
-  search_problem.Start.Theta = -tf::getYaw(q);
 }
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
@@ -88,17 +72,11 @@ int main(int argc, char** argv)
 
   ros::Subscriber map_sub = nh.subscribe("/map", 1, map_callback);
 
-  ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, position_callback);
-
   ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
 
-  disp_path_pub = nh.advertise<nav_msgs::Path>("/path_display", 1);
-
-  act_path_pub = nh.advertise<igvc_msgs::action_path>("/path", 1);
+  disp_path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 
   expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/expanded", 1);
-
-  path_planner_map_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/path_planner_incremental", 1);
 
   ros::NodeHandle pNh("~");
 
@@ -126,25 +104,21 @@ int main(int argc, char** argv)
     planning_mutex.lock();
     Path<SearchLocation, SearchMove> path;
     path = GraphSearch::AStar(search_problem, expanded_callback);
-    if (act_path_pub.getNumSubscribers() > 0)
+    nav_msgs::Path disp_path_msg;
+    disp_path_msg.header.stamp = ros::Time::now();
+    disp_path_msg.header.frame_id = "odom";
+    if (path.getStates()->empty())
+      path.getStates()->push_back(search_problem.Start);
+    for (auto loc : *(path.getStates()))
     {
-      nav_msgs::Path disp_path_msg;
-      disp_path_msg.header.stamp = ros::Time::now();
-      disp_path_msg.header.frame_id = "odom";
-      if (path.getStates()->empty())
-        path.getStates()->push_back(search_problem.Start);
-      for (auto loc : *(path.getStates()))
-      {
-        geometry_msgs::PoseStamped pose;
-        pose.header.stamp = disp_path_msg.header.stamp;
-        pose.header.frame_id = disp_path_msg.header.frame_id;
-        pose.pose.position.x = loc.X;
-        pose.pose.position.y = loc.Y;
-        disp_path_msg.poses.push_back(pose);
-      }
-      disp_path_pub.publish(disp_path_msg);
+      geometry_msgs::PoseStamped pose;
+      pose.header.stamp = disp_path_msg.header.stamp;
+      pose.header.frame_id = disp_path_msg.header.frame_id;
+      pose.pose.position.x = loc.X;
+      pose.pose.position.y = loc.Y;
+      disp_path_msg.poses.push_back(pose);
     }
-
+    disp_path_pub.publish(disp_path_msg);
     planning_mutex.unlock();
 
     rate.sleep();
