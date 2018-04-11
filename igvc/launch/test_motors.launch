@@ -1,7 +1,10 @@
 <launch>
-    <!-- LIGHT CONTROLLER -->
-    <node name="light_controller" pkg="igvc" type="light_controller" output="screen"/>
-
     <!-- MOTOR CONTROLLER -->
-    <node name="motor_controller" pkg="igvc" type="motor_controller" output="screen"/>
+    <node name="motor_controller" pkg="igvc" type="motor_controller" output="screen">
+          <param name="p_l" type="double" value="8.0"/>
+          <param name="p_r" type="double" value="8.0"/>
+          <param name="d_l" type="double" value="1.0"/>
+          <param name="d_r" type="double" value="1.0"/>
+          <param name="messages_to_read" type="int" value="3"/>
+    </node>
 </launch>
