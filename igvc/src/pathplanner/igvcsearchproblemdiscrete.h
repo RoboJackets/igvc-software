@@ -32,7 +32,7 @@ public:
 
   bool isGoal(SearchLocation state)
   {
-    return state == Goal;
+    return sqrt(pow(state.X - Goal.X, 2) + pow(state.Y - Goal.Y, 2)) < GoalThreshold;
   }
 
   double getStepCost(SearchLocation location, SearchMove action)
