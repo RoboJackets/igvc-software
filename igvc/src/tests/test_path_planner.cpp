@@ -58,7 +58,7 @@ protected:
   ros::Subscriber path_sub;
 };
 
-TEST_F(TestPathPlanner, EmptyMap)
+/*TEST_F(TestPathPlanner, EmptyMap)
 {
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
@@ -72,16 +72,64 @@ TEST_F(TestPathPlanner, EmptyMap)
   image_bridge.toImageMsg(image_message);
   map.image = image_message;
 
+  map.x_position = 0.0;
+  map.y_position = 0.0;
+  map.theta = M_PI / 4;
+
   mock_map_pub.publish(map);
 
   geometry_msgs::PointStamped waypoint;
-  waypoint.point.x = 10;
-  waypoint.point.y = 10;
+  waypoint.point.x = 9;
+  waypoint.point.y = 9;
   mock_waypoint_pub.publish(waypoint);
 
   const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
 
   EXPECT_TRUE(response.get() != nullptr);
+  for(double i = 0; i < 9; i++) {
+    EXPECT_EQ(i, response->poses[i].pose.position.x);
+    EXPECT_EQ(i, response->poses[i].pose.position.y);
+  }
+  }*/
+
+TEST_F(TestPathPlanner, AvoidsObstacle)
+{
+  igvc_msgs::map map;
+  cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
+  map_image.at<uchar>(8,8) = 255;
+  map_image.at<uchar>(7,8) = 255;
+  map.header.stamp = ros::Time::now();
+
+  std_msgs::Header image_header;
+  image_header.stamp = ros::Time::now();
+
+  cv_bridge::CvImage image_bridge = cv_bridge::CvImage(image_header, sensor_msgs::image_encodings::MONO8, map_image);
+  sensor_msgs::Image image_message;
+  image_bridge.toImageMsg(image_message);
+  map.image = image_message;
+
+  map.x_position = 0.0;
+  map.y_position = 0.0;
+  map.theta = M_PI / 4;
+
+  mock_map_pub.publish(map);
+
+  geometry_msgs::PointStamped waypoint;
+  waypoint.point.x = 9;
+  waypoint.point.y = 9;
+  mock_waypoint_pub.publish(waypoint);
+
+  const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
+
+  EXPECT_TRUE(response.get() != nullptr);
+  EXPECT_EQ(response->poses[0].pose.position.x, 0);
+  EXPECT_EQ(response->poses[0].pose.position.y, 0);
+  for(double i = 0; i < 9; i++) {
+    EXPECT_EQ(response->poses[i + 1].pose.position.x, i + 1);
+    EXPECT_EQ(response->poses[i + 1].pose.position.y, i);
+  }
+  EXPECT_EQ(response->poses[10].pose.position.x, 9);
+  EXPECT_EQ(response->poses[10].pose.position.y, 9);
 }
 
 int main(int argc, char** argv)
