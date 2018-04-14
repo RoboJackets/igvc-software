@@ -17,7 +17,7 @@ public:
   cv_bridge::CvImageConstPtr Map;
   SearchLocation Start;
   SearchLocation Goal;
-  double Threshold;
+  double CSpace;
   double GoalThreshold;
   bool PointTurnsEnabled;
   bool ReverseEnabled;
