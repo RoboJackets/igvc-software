@@ -84,17 +84,19 @@ int main(int argc, char** argv)
 
   ros::NodeHandle pNh("~");
 
-  if (!pNh.hasParam("goal_threshold") || !pNh.hasParam("threshold") ||
-      !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled"))
+  if (!pNh.hasParam("goal_threshold") || !pNh.hasParam("c_space") ||
+      !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled") ||
+      !pNh.hasParam("probability_threshold"))
   {
     ROS_ERROR_STREAM("path planner does not have all required parameters");
     return 0;
   }
 
   pNh.getParam("goal_threshold", search_problem.GoalThreshold);
-  pNh.getParam("threshold", search_problem.Threshold);
+  pNh.getParam("c_space", search_problem.CSpace);
   pNh.getParam("point_turns_enabled", search_problem.PointTurnsEnabled);
   pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
+  pNh.getParam("probability_threshold", search_problem.ReverseEnabled);
 
   ros::Rate rate(10);
   while (ros::ok())

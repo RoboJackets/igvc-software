@@ -7,7 +7,7 @@ bool IGVCSearchProblemDiscrete::isActionValid(SearchMove& move, SearchLocation s
   double y = start_state.Y + move.Y;
   std::cout << "x = " << x << " y = " << y;
   std::cout << " width = " << Map->image.size().width << " height = " << Map->image.size().height << " val " << static_cast<int>(Map->image.at<uchar>(x, y));
-  if(x < 0 || y < 0 || x >= Map->image.size().width || y >= Map->image.size().height || Map->image.at<uchar>(x, y) > (255 * Threshold)) {
+  if(x < 0 || y < 0 || x >= Map->image.size().width || y >= Map->image.size().height || Map->image.at<uchar>(x, y) > (255 * CSpace)) {
     cout << " false" << std::endl;
     return false;
   }

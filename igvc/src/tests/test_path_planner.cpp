@@ -58,8 +58,11 @@ protected:
   ros::Subscriber path_sub;
 };
 
-/*TEST_F(TestPathPlanner, EmptyMap)
+TEST_F(TestPathPlanner, EmptyMap)
 {
+  handle.setParam("/threshold", 0.1);
+  handle.setParam("/goal_threshold", 0.1);
+
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
   map.header.stamp = ros::Time::now();
@@ -90,10 +93,13 @@ protected:
     EXPECT_EQ(i, response->poses[i].pose.position.x);
     EXPECT_EQ(i, response->poses[i].pose.position.y);
   }
-  }*/
+}
 
 TEST_F(TestPathPlanner, AvoidsObstacle)
 {
+  handle.setParam("/threshold", 0.1);
+  handle.setParam("/goal_threshold", 0.1);
+
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
   map_image.at<uchar>(8,8) = 255;
