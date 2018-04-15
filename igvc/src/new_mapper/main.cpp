@@ -24,24 +24,20 @@ tf::TransformListener *tf_listener;
 std::string topics;
 Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>* eigenRep;
 
-double resolution;
+float resolution;
+float orientation;
 int x;
 int y;
 int length_y;
 int width_x;
-float orientation;
-
-//class Matrix;
 
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
 {
   //transform pointcloud into the occupancy grid, no filtering right now
   bool offMap = false;
-  //cv::Mat frame(msg->points);
 
   //make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
-
 
     if (msg->header.frame_id == "/scan/pointcloud") {
     pcl_ros::transformPointCloud(*msg, *transformed, lidar_trans);
@@ -49,8 +45,6 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   } else {
     pcl_ros::transformPointCloud(*msg, *transformed, cam_trans);
   }
-
-
 
   pcl::PointCloud<pcl::PointXYZ>::const_iterator point;
   for (point = transformed->begin(); point < transformed->points.end(); point++)
@@ -79,7 +73,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   msgBoi.length = length_y;
   msgBoi.width = width_x;
   msgBoi.resolution = resolution;
-  msgBoi.theta = orientation;
+  msgBoi.orientation = orientation;
   map_pub.publish(imageBoi);
 }
 
