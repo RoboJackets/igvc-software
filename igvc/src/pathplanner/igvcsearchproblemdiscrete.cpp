@@ -5,19 +5,19 @@ bool IGVCSearchProblemDiscrete::isActionValid(SearchMove& move, SearchLocation s
 {
   double x = start_state.X + move.X;
   double y = start_state.Y + move.Y;
-  std::cout << "x = " << x << " y = " << y;
-  std::cout << " width = " << Map->image.size().width << " height = " << Map->image.size().height << " val " << static_cast<int>(Map->image.at<uchar>(x, y));
+  //std::cout << "x = " << x << " y = " << y;
+  //std::cout << " width = " << Map->image.size().width << " height = " << Map->image.size().height << " val " << static_cast<int>(Map->image.at<uchar>(x, y));
   if(x < 0 || y < 0 || x >= Map->image.size().width || y >= Map->image.size().height || Map->image.at<uchar>(x, y) > (255 * CSpace)) {
-    cout << " false" << std::endl;
+    //cout << " false" << std::endl;
     return false;
   }
-  cout << " true" << std::endl;
+  //cout << " true" << std::endl;
   return true;
 }
 
 std::list<SearchMove> IGVCSearchProblemDiscrete::getActions(SearchLocation state, SearchLocation robot_position)
 {
-  std::cout << state.X << "," << state.Y << "," << state.Theta << std::endl;
+  //std::cout << state.X << "," << state.Y << "," << state.Theta << std::endl;
   std::list<SearchMove> acts;
   double theta = state.Theta;
   double thetaThreshold = 0.1;
@@ -55,7 +55,7 @@ std::list<SearchMove> IGVCSearchProblemDiscrete::getActions(SearchLocation state
     acts.push_back(SearchMove(0, -1));
   }
   acts.remove_if([this, state](SearchMove m){ return !isActionValid(m, state); });
-  cout << acts.size() << endl;
+  //cout << acts.size() << endl;
   return acts;
 }
 
@@ -64,8 +64,8 @@ SearchLocation IGVCSearchProblemDiscrete::getResult(SearchLocation state, Search
   SearchLocation result;
   result.X = state.X;
   result.Y = state.Y;
-  cout << "action X = " << action.X << " y = " << action.Y << std::endl;
-  cout << "result before X = " << result.X << " y = " << result.Y << std::endl;
+  //cout << "action X = " << action.X << " y = " << action.Y << std::endl;
+  //cout << "result before X = " << result.X << " y = " << result.Y << std::endl;
   result.X += action.X;
   result.Y += action.Y;
   if(result.X != 0)  {
@@ -73,6 +73,6 @@ SearchLocation IGVCSearchProblemDiscrete::getResult(SearchLocation state, Search
   } else {
     result.Theta = result.Y == 1 ? M_PI / 4 : 3 * M_PI / 2;
   }
-  cout << "result after X = " << result.X << " y = " << result.Y << std::endl;
+  //cout << "result after X = " << result.X << " y = " << result.Y << std::endl;
   return result;
 }

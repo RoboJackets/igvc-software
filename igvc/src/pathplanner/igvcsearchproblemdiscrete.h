@@ -34,7 +34,7 @@ public:
   bool isGoal(SearchLocation state)
   {
     // scale by grid resolution
-    std::cout << "distance = " << sqrt(pow(state.X - Goal.X, 2) + pow(state.Y - Goal.Y, 2))  << std::endl;
+    // std::cout << "distance = " << sqrt(pow(state.X - Goal.X, 2) + pow(state.Y - Goal.Y, 2))  << std::endl;
     return sqrt(pow(state.X - Goal.X, 2) + pow(state.Y - Goal.Y, 2)) < GoalThreshold;
   }
 
