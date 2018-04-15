@@ -128,12 +128,8 @@ int main(int argc, char **argv)
   }
 
 
-  //TODO: Initialize the map variables, not working
-  //global_map = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>(length, width);
   published_map = new cv::Mat(length_y, width_x, CV_8UC1); // I cant instatiate this
-  //https://docs.opencv.org/2.4/doc/tutorials/core/mat_the_basic_image_container/mat_the_basic_image_container.html
   eigenRep = new Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>((char*) published_map, length_y, width_x);
-  //https://stackoverflow.com/questions/14783329/opencv-cvmat-and-eigenmatrix
 
   map_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
 
