@@ -24,8 +24,8 @@ tf::TransformListener *tf_listener;
 std::string topics;
 Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>* eigenRep;
 
-float resolution;
-float orientation;
+double resolution;
+double orientation;
 int x;
 int y;
 int length_y;
@@ -74,7 +74,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   msgBoi.width = width_x;
   msgBoi.resolution = resolution;
   msgBoi.orientation = orientation;
-  map_pub.publish(imageBoi);
+  map_pub.publish(msgBoi);
 }
 
 int main(int argc, char **argv)
@@ -94,15 +94,19 @@ int main(int argc, char **argv)
   pNh.getParam("topics", topics);
   pNh.getParam("occupancy_grid_length", length_y);
   pNh.getParam("occupancy_grid_width", width_x);
-  pNh.getParam("qoccupancy_grid_resolution", resolution);
+  pNh.getParam("occupancy_grid_resolution", resolution);
   pNh.getParam("start_X", start_x);
   pNh.getParam("start_Y", start_y);
   pNh.getParam("orientation", orientation);
-
+  ROS_INFO_STREAM("cv::Mat length: " << length_y << "  width: " << width_x << "  resolution: " << resolution);
+  double temp_l = length_y / resolution;
+  double temp_w = width_x / resolution;
+  ROS_INFO_STREAM("cv::Mat length: " << temp_l << "  width: " << temp_w  << "  resolution: " << resolution);
   length_y = (int) std::round(length_y / resolution);
   width_x = (int) std::round(width_x / resolution);
   x = (int) std::round(start_x / resolution);
   y = (int) std::round(start_y / resolution);
+  ROS_INFO_STREAM("cv::Mat length: " << length_y << "  width: " << width_x << "  resolution: " << resolution);
 
   //set up tokens and get list of subscribers
   std::istringstream iss(topics);
@@ -131,7 +135,7 @@ int main(int argc, char **argv)
   published_map = new cv::Mat(length_y, width_x, CV_8UC1); // I cant instatiate this
   eigenRep = new Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>((char*) published_map, length_y, width_x);
 
-  map_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
+  map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
 
   ros::spin();
 }
