@@ -10,12 +10,13 @@
 #include <igvc_msgs/velocity_pair.h>
 #include <igvc_msgs/map.h>
 #include <sensor_msgs/Image.h>
+#include <cv_bridge/cv_bridge.h>
 
 
 //#include <igvc_msgs>
 
 igvc_msgs::map current_map_msg;
-cv_bridge::CvImage img_bridge;
+cv_bridge::CvImagePtr cv_ptr;
 sensor_msgs::Image img_msg; // >> message to be sent
 
 ros::Publisher pointcloud_pub;
@@ -29,6 +30,7 @@ double resolution;
 double position [2];
 int length_y;
 int width_x;
+float orientation;
 
 Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>* eigenRep;
 
@@ -69,10 +71,9 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     }
   }
 
-  //won't work until we make a message to publish
-  //igvc_msgs::map map = new igvc_msgs::map();
-  //pointcloud_pub.publish(published_map);
-  //pointcloud_pub.publish(&global_map);
+  igvc_msgs::map msgBoi;
+  sensor_msgs::Image imageBoi;
+
 }
 
 int main(int argc, char **argv)
