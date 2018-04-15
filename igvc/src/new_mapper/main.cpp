@@ -7,7 +7,16 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <pcl_ros/transforms.h>
+#include <igvc_msgs/velocity_pair.h>
+#include <igvc_msgs/map.h>
+#include <sensor_msgs/Image.h>
+
+
 //#include <igvc_msgs>
+
+igvc_msgs::map current_map_msg;
+cv_bridge::CvImage img_bridge;
+sensor_msgs::Image img_msg; // >> message to be sent
 
 ros::Publisher pointcloud_pub;
 cv::Mat published_map; // get to work
