@@ -1,7 +1,8 @@
-sensor_msgs/Image image
 Header header
-int[] position
-float resolution
-float theta
-int length
-int width
+sensor_msgs/Image image
+float32 resolution
+float32 theta
+uint32 length
+uint32 width
+uint32 x
+uint32 y

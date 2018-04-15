@@ -10,6 +10,8 @@
 #include <igvc_msgs/velocity_pair.h>
 #include <igvc_msgs/map.h>
 #include <sensor_msgs/Image.h>
+#include <cv_bridge/cv_bridge.h>
+
 
 
 //#include <igvc_msgs>
@@ -18,21 +20,22 @@ igvc_msgs::map current_map_msg;
 cv_bridge::CvImage img_bridge;
 sensor_msgs::Image img_msg; // >> message to be sent
 
-ros::Publisher pointcloud_pub;
+ros::Publisher map_pub;
 cv::Mat* published_map; // get to work
 tf::StampedTransform lidar_trans;
 tf::StampedTransform cam_trans;
 tf::TransformListener *tf_listener;
 std::string topics;
+Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>* eigenRep;
 
 double resolution;
-double position [2];
+double theta;
+int x;
+int y;
 int length_y;
 int width_x;
 
-Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>* eigenRep;
-
-class Matrix;
+//class Matrix;
 
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
 {
@@ -43,7 +46,8 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   //make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed = pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
-  if (msg->header.frame_id == "/scan/pointcloud") {
+
+    if (msg->header.frame_id == "/scan/pointcloud") {
     pcl_ros::transformPointCloud(*msg, *transformed, lidar_trans);
 
   } else {
@@ -55,24 +59,32 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   pcl::PointCloud<pcl::PointXYZ>::const_iterator point;
   for (point = transformed->begin(); point < transformed->points.end(); point++)
   {
-    int x = (int) std::round((point->x / resolution) + position[0]);
-    int y = (int) std::round((point->y / resolution) + position[1]);
+    int point_x = (int) std::round((point->x / resolution) + x);
+    int point_y = (int) std::round((point->y / resolution) + y);
 
-    if(x > 0 && y > 0 && x < length_y && y < width_x)
+    if(point_x > 0 && point_y > 0 && point_x < length_y && y < width_x)
     {
-        (*(eigenRep))(x,y) = 1.0;
+        (*(eigenRep))(point_x,point_y) = 255;
     } else if(!offMap){
       ROS_WARN_STREAM("Some points out of range, won't be put on map.");
       offMap = true;
-
-
     }
   }
 
-  //won't work until we make a message to publish
-  //igvc_msgs::map map = new igvc_msgs::map();
-  //pointcloud_pub.publish(published_map);
-  //pointcloud_pub.publish(&global_map);
+  //make image message from img bridge
+  std_msgs::Header header; // empty header
+  header.stamp = ros::Time::now(); // time
+  img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, *published_map);
+  img_bridge.toImageMsg(img_msg); // from cv_bridge to sensor_msgs::Image
+  img_msg.header = header;
+  //set fields of map message
+  current_map_msg.header = header;
+  current_map_msg.image = img_msg;
+  current_map_msg.length = length_y;
+  current_map_msg.width = width_x;
+  current_map_msg.theta = theta;
+  current_map_msg.resolution = resolution;
+  map_pub.publish(img_msg);
 }
 
 int main(int argc, char **argv)
@@ -95,11 +107,13 @@ int main(int argc, char **argv)
   pNh.getParam("qoccupancy_grid_resolution", resolution);
   pNh.getParam("start_X", start_x);
   pNh.getParam("start_Y", start_y);
+  pNh.getParam("theta", theta);
+
 
   length_y = (int) std::round(length_y / resolution);
   width_x = (int) std::round(width_x / resolution);
-  position[0] = (int) std::round(start_x / resolution);
-  position[1] = (int) std::round(start_y / resolution);
+  x = (int) std::round(start_x / resolution);
+  y = (int) std::round(start_y / resolution);
 
   //set up tokens and get list of subscribers
   std::istringstream iss(topics);
@@ -132,7 +146,7 @@ int main(int argc, char **argv)
   eigenRep = new Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>((char*) published_map, length_y, width_x);
   //https://stackoverflow.com/questions/14783329/opencv-cvmat-and-eigenmatrix
 
-  pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
+  map_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
 
   ros::spin();
 }
