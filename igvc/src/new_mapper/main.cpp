@@ -12,13 +12,9 @@
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 
-
-
-//#include <igvc_msgs>
-
-igvc_msgs::map current_map_msg;
+igvc_msgs::map msgBoi;
 cv_bridge::CvImage img_bridge;
-sensor_msgs::Image img_msg; // >> message to be sent
+sensor_msgs::Image imageBoi; // >> message to be sent
 
 ros::Publisher map_pub;
 cv::Mat* published_map; // get to work
@@ -29,11 +25,11 @@ std::string topics;
 Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>* eigenRep;
 
 double resolution;
-double theta;
 int x;
 int y;
 int length_y;
 int width_x;
+float orientation;
 
 //class Matrix;
 
@@ -75,16 +71,16 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   std_msgs::Header header; // empty header
   header.stamp = ros::Time::now(); // time
   img_bridge = cv_bridge::CvImage(header, sensor_msgs::image_encodings::MONO8, *published_map);
-  img_bridge.toImageMsg(img_msg); // from cv_bridge to sensor_msgs::Image
-  img_msg.header = header;
+  img_bridge.toImageMsg(imageBoi); // from cv_bridge to sensor_msgs::Image
+  imageBoi.header = header;
   //set fields of map message
-  current_map_msg.header = header;
-  current_map_msg.image = img_msg;
-  current_map_msg.length = length_y;
-  current_map_msg.width = width_x;
-  current_map_msg.theta = theta;
-  current_map_msg.resolution = resolution;
-  map_pub.publish(img_msg);
+  msgBoi.header = header;
+  msgBoi.image = imageBoi;
+  msgBoi.length = length_y;
+  msgBoi.width = width_x;
+  msgBoi.resolution = resolution;
+  msgBoi.theta = orientation;
+  map_pub.publish(imageBoi);
 }
 
 int main(int argc, char **argv)
@@ -107,8 +103,7 @@ int main(int argc, char **argv)
   pNh.getParam("qoccupancy_grid_resolution", resolution);
   pNh.getParam("start_X", start_x);
   pNh.getParam("start_Y", start_y);
-  pNh.getParam("theta", theta);
-
+  pNh.getParam("orientation", orientation);
 
   length_y = (int) std::round(length_y / resolution);
   width_x = (int) std::round(width_x / resolution);
