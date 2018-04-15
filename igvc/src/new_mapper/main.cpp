@@ -5,12 +5,13 @@
 #include <stdlib.h>
 #include <Eigen/Core>
 #include <opencv2/opencv.hpp>
+#include <opencv2/core/eigen.hpp>
 #include <pcl_ros/transforms.h>
 //#include <igvc_msgs>
 
 ros::Publisher pointcloud_pub;
 cv::Mat published_map; // get to work
-Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>> global_map;
+Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic> global_holder;
 tf::StampedTransform lidar_trans;
 tf::StampedTransform cam_trans;
 tf::TransformListener *tf_listener;
@@ -49,7 +50,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
 
     if(x > 0 && y > 0 && x < length && y < width)
     {
-      global_map(x, y) = 1.0;
+      global_holder(x, y) = 1.0;
     } else if(!offMap){
       ROS_WARN_STREAM("Some points out of range, won't be put on map.");
       offMap = true;
@@ -114,10 +115,10 @@ int main(int argc, char **argv)
 
   //TODO: Initialize the map variables, not working
   //global_map = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>(length, width);
-  published_map = cv::Mat(length, width, CV_8UC1, 0.0);
+  published_map = cv::Mat(length, width, CV_8UC1); // I cant instatiate this
   //https://docs.opencv.org/2.4/doc/tutorials/core/mat_the_basic_image_container/mat_the_basic_image_container.html
-  global_map = Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>>(published_map.data, length, width); // I can't instantiate this either
-    //https://stackoverflow.com/questions/14783329/opencv-cvmat-and-eigenmatrix
+  cv::cv2eigen(published_map, global_holder); // I can't instantiate this either
+  //https://stackoverflow.com/questions/14783329/opencv-cvmat-and-eigenmatrix
 
   pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
 
