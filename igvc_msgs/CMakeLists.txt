@@ -7,8 +7,6 @@ find_package(catkin REQUIRED
   std_msgs
   sensor_msgs
   geometry_msgs
-  #opencv2
-  #Eigen
 )
 
 # Generate messages in the 'msg' folder
@@ -27,8 +25,6 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   sensor_msgs
-  #opencv2
-  #Eigen
 )
 
 catkin_package()
