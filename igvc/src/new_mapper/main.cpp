@@ -96,6 +96,7 @@ int main(int argc, char **argv)
   pNh.getParam("qoccupancy_grid_resolution", resolution);
   pNh.getParam("start_X", start_x);
   pNh.getParam("start_Y", start_y);
+  pNh.getParam("orientation", orientation);
 
   length_y = (int) std::round(length_y / resolution);
   width_x = (int) std::round(width_x / resolution);
