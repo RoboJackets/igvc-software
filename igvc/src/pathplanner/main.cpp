@@ -38,7 +38,7 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
   cv_bridge::CvImageConstPtr cv_ptr;
   cv_ptr = cv_bridge::toCvShare(msg->image, msg, "mono8");
   search_problem.Map = cv_ptr;
-  ROS_INFO_STREAM(cv_ptr->image);
+  //ROS_INFO_STREAM(cv_ptr->image);
 
   search_problem.Start.X = msg->x_position;
   search_problem.Start.Y = msg->y_position;
@@ -122,12 +122,12 @@ int main(int argc, char** argv)
       pose.header.frame_id = path_msg.header.frame_id;
       pose.pose.position.x = loc.X;
       pose.pose.position.y = loc.Y;
-      ROS_INFO_STREAM("path poses = " << loc.X << ", " << loc.Y);
+      //ROS_INFO_STREAM("path poses = " << loc.X << ", " << loc.Y);
       path_msg.poses.push_back(pose);
     }
     path_pub.publish(path_msg);
     planning_mutex.unlock();
-    ROS_INFO_STREAM("clear");
+    //ROS_INFO_STREAM("clear");
     rate.sleep();
   }
 
