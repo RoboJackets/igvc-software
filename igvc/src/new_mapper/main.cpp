@@ -10,8 +10,7 @@
 //#include <igvc_msgs>
 
 ros::Publisher pointcloud_pub;
-cv::Mat published_map; // get to work
-Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic> global_holder;
+cv::Mat* published_map; // get to work
 tf::StampedTransform lidar_trans;
 tf::StampedTransform cam_trans;
 tf::TransformListener *tf_listener;
@@ -19,8 +18,10 @@ std::string topics;
 
 double resolution;
 double position [2];
-int length;
-int width;
+int length_y;
+int width_x;
+
+Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>* eigenRep;
 
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
 {
@@ -46,12 +47,14 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     int x = (int) std::round((point->x / resolution) + position[0]);
     int y = (int) std::round((point->y / resolution) + position[1]);
 
-    if(x > 0 && y > 0 && x < length && y < width)
+    if(x > 0 && y > 0 && x < length_y && y < width_x)
     {
-      global_holder(x, y) = 1.0;
+        (*(eigenRep))(x,y) = 1.0;
     } else if(!offMap){
       ROS_WARN_STREAM("Some points out of range, won't be put on map.");
       offMap = true;
+
+
     }
   }
 
@@ -76,14 +79,14 @@ int main(int argc, char **argv)
   double start_y;
 
   pNh.getParam("topics", topics);
-  pNh.getParam("occupancy_grid_length", length);
-  pNh.getParam("occupancy_grid_width", width);
+  pNh.getParam("occupancy_grid_length", length_y);
+  pNh.getParam("occupancy_grid_width", width_x);
   pNh.getParam("qoccupancy_grid_resolution", resolution);
   pNh.getParam("start_X", start_x);
   pNh.getParam("start_Y", start_y);
 
-  length = (int) std::round(length / resolution);
-  width = (int) std::round(width / resolution);
+  length_y = (int) std::round(length_y / resolution);
+  width_x = (int) std::round(width_x / resolution);
   position[0] = (int) std::round(start_x / resolution);
   position[1] = (int) std::round(start_y / resolution);
 
@@ -113,9 +116,9 @@ int main(int argc, char **argv)
 
   //TODO: Initialize the map variables, not working
   //global_map = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>(length, width);
-  published_map = cv::Mat(length, width, CV_8UC1); // I cant instatiate this
+  published_map = new cv::Mat(length_y, width_x, CV_8UC1); // I cant instatiate this
   //https://docs.opencv.org/2.4/doc/tutorials/core/mat_the_basic_image_container/mat_the_basic_image_container.html
-  cv::cv2eigen(published_map, global_holder); // I can't instantiate this either
+  eigenRep = new Eigen::Map<Eigen::Matrix<char, Eigen::Dynamic, Eigen::Dynamic>>((char*) published_map, length_y, width_x);
   //https://stackoverflow.com/questions/14783329/opencv-cvmat-and-eigenmatrix
 
   pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map", 1);
