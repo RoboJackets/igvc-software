@@ -17,8 +17,10 @@ public:
   cv_bridge::CvImageConstPtr Map;
   SearchLocation Start;
   SearchLocation Goal;
+  double Resolution;
   double CSpace;
   double GoalThreshold;
+  double ProbabilityThreshold;
   bool PointTurnsEnabled;
   bool ReverseEnabled;
 
@@ -33,18 +35,15 @@ public:
 
   bool isGoal(SearchLocation state)
   {
-    // scale by grid resolution
-    // std::cout << "distance = " << sqrt(pow(state.X - Goal.X, 2) + pow(state.Y - Goal.Y, 2))  << std::endl;
-    return sqrt(pow(state.X - Goal.X, 2) + pow(state.Y - Goal.Y, 2)) < GoalThreshold;
+    return sqrt(pow(state.X - Goal.X, 2) + pow(state.Y - Goal.Y, 2)) * Resolution < GoalThreshold;
   }
 
   double getStepCost(SearchLocation location, SearchMove action)
   {
-    // scale by grid resolution
     if(abs(action.X) == 1 && abs(action.Y) == 1) {
-      return sqrt(2);
+      return sqrt(2) * Resolution;
     } else if(action.X != 0 || action.Y != 0) {
-      return 1;
+      return 1 * Resolution;
     } else {
       return 0;
     }
@@ -52,10 +51,11 @@ public:
 
   double getHeuristicCost(SearchLocation state)
   {
-    return state.distTo(Goal);
+    return state.distTo(Goal, Resolution);
   }
 
   bool isActionValid(SearchMove& move, SearchLocation start_state);
+
 };
 
 #endif  // IGVCSEARCHPROBLEM_H

@@ -60,9 +60,6 @@ protected:
 
 TEST_F(TestPathPlanner, EmptyMap)
 {
-  handle.setParam("/threshold", 0.1);
-  handle.setParam("/goal_threshold", 0.1);
-
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
   map.header.stamp = ros::Time::now();
@@ -75,6 +72,7 @@ TEST_F(TestPathPlanner, EmptyMap)
   image_bridge.toImageMsg(image_message);
   map.image = image_message;
 
+  map.resolution = 0.1;
   map.x_position = 0.0;
   map.y_position = 0.0;
   map.theta = M_PI / 4;
@@ -89,21 +87,19 @@ TEST_F(TestPathPlanner, EmptyMap)
   const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
 
   EXPECT_TRUE(response.get() != nullptr);
-  for(double i = 0; i < 9; i++) {
+  EXPECT_EQ(response->poses.size(), 7);
+  EXPECT_EQ(response->poses.size(), 7);
+  for(double i = 0; i < 7; i++) {
     EXPECT_EQ(i, response->poses[i].pose.position.x);
     EXPECT_EQ(i, response->poses[i].pose.position.y);
   }
 }
 
-TEST_F(TestPathPlanner, AvoidsObstacle)
+TEST_F(TestPathPlanner, CheckGoalThreshold)
 {
-  handle.setParam("/threshold", 0.1);
-  handle.setParam("/goal_threshold", 0.1);
 
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
-  map_image.at<uchar>(8,8) = 255;
-  map_image.at<uchar>(7,8) = 255;
   map.header.stamp = ros::Time::now();
 
   std_msgs::Header image_header;
@@ -117,6 +113,44 @@ TEST_F(TestPathPlanner, AvoidsObstacle)
   map.x_position = 0.0;
   map.y_position = 0.0;
   map.theta = M_PI / 4;
+  map.resolution = 0.1;
+
+  mock_map_pub.publish(map);
+
+  geometry_msgs::PointStamped waypoint;
+  waypoint.point.x = 9;
+  waypoint.point.y = 0;
+  mock_waypoint_pub.publish(waypoint);
+
+  const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
+
+  EXPECT_TRUE(response.get() != nullptr);
+  EXPECT_EQ(response->poses.size(), 6);
+  for(double i = 0; i < 6; i++) {
+    EXPECT_EQ(i, response->poses[i].pose.position.x);
+    EXPECT_EQ(0, response->poses[i].pose.position.y);
+  }
+}
+
+TEST_F(TestPathPlanner, AvoidsObstacle)
+{
+  igvc_msgs::map map;
+  cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
+  map_image.at<uchar>(3,3) = 255;
+  map.header.stamp = ros::Time::now();
+
+  std_msgs::Header image_header;
+  image_header.stamp = ros::Time::now();
+
+  cv_bridge::CvImage image_bridge = cv_bridge::CvImage(image_header, sensor_msgs::image_encodings::MONO8, map_image);
+  sensor_msgs::Image image_message;
+  image_bridge.toImageMsg(image_message);
+  map.image = image_message;
+
+  map.x_position = 0.0;
+  map.y_position = 0.0;
+  map.theta = M_PI / 4;
+  map.resolution = 0.1;
 
   mock_map_pub.publish(map);
 
@@ -128,14 +162,7 @@ TEST_F(TestPathPlanner, AvoidsObstacle)
   const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
 
   EXPECT_TRUE(response.get() != nullptr);
-  EXPECT_EQ(response->poses[0].pose.position.x, 0);
-  EXPECT_EQ(response->poses[0].pose.position.y, 0);
-  for(double i = 0; i < 9; i++) {
-    EXPECT_EQ(response->poses[i + 1].pose.position.x, i + 1);
-    EXPECT_EQ(response->poses[i + 1].pose.position.y, i);
-  }
-  EXPECT_EQ(response->poses[10].pose.position.x, 9);
-  EXPECT_EQ(response->poses[10].pose.position.y, 9);
+  EXPECT_EQ(response->poses.size(), 11);
 }
 
 int main(int argc, char** argv)

@@ -43,6 +43,7 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
   search_problem.Start.X = msg->x_position;
   search_problem.Start.Y = msg->y_position;
   search_problem.Start.Theta = msg->theta;
+  search_problem.Resolution = msg->resolution;
 }
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
@@ -96,14 +97,15 @@ int main(int argc, char** argv)
   pNh.getParam("c_space", search_problem.CSpace);
   pNh.getParam("point_turns_enabled", search_problem.PointTurnsEnabled);
   pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
-  pNh.getParam("probability_threshold", search_problem.ReverseEnabled);
+  pNh.getParam("probability_threshold", search_problem.ProbabilityThreshold);
+  pNh.getParam("resolution", search_problem.Resolution);
 
   ros::Rate rate(10);
   while (ros::ok())
   {
     ros::spinOnce();
 
-    auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal);
+    auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
     if (!received_waypoint || distance_to_goal == 0 || distance_to_goal > 60)
       continue;
 
@@ -127,7 +129,6 @@ int main(int argc, char** argv)
     }
     path_pub.publish(path_msg);
     planning_mutex.unlock();
-    //ROS_INFO_STREAM("clear");
     rate.sleep();
   }
 

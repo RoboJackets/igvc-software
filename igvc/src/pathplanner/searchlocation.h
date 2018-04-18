@@ -17,7 +17,7 @@ public:
 
   bool operator==(const SearchLocation &other) const;
   bool operator<(const SearchLocation &other) const;
-  float distTo(SearchLocation other) const;
+  float distTo(SearchLocation other, double resolution) const;
 
   friend std::ostream &operator<<(std::ostream &stream, const SearchLocation &loc)
   {
