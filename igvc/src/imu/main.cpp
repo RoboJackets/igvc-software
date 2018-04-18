@@ -9,6 +9,14 @@
 #define DEG_TO_RAD (3.14159265 / 180.0)
 #define HALF_TO_FULL_CIRCLE_ANGLE(ang) (((ang) < 0) ? ((ang) + 360) : (ang))
 
+std::list<double> x_accel;
+std::list<double> y_accel;
+std::list<double> z_accel;
+
+double x_avg;
+double y_avg;
+double z_avg;
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "imu");
@@ -91,29 +99,56 @@ int main(int argc, char** argv)
 
     try
     {
-      msg.linear_acceleration.x = stof(accelTokens[0]);
-      msg.linear_acceleration.y = stof(accelTokens[1]);
-      msg.linear_acceleration.z = stof(accelTokens[2]);
+      double cur_x = stof(accelTokens[0]);
+      double cur_y = stof(accelTokens[1]);
+      double cur_z = stof(accelTokens[2]);
       msg.linear_acceleration_covariance = { 0.04, 1e-6, 1e-6, 1e-6, 0.04, 1e-6, 1e-6, 1e-6, 0.04 };
+
+      int num = 500;
+
+      x_accel.push_back(cur_x);
+      if(x_accel.size() > num) {
+        double front = x_accel.front();
+        x_accel.pop_front();
+        x_avg -= front / num;
+      }
+      x_avg += cur_x / num;
+
+      z_accel.push_back(cur_z);
+      if(z_accel.size() > num) {
+        double front = z_accel.front();
+        z_accel.pop_front();
+        z_avg -= front / num;
+      }
+      z_avg += cur_z / num;
+
+      y_accel.push_back(cur_y);
+      if(y_accel.size() > num) {
+        double front = y_accel.front();
+        y_accel.pop_front();
+        y_avg -= front / num;
+      }
+      y_avg += cur_y / num;
+
+      msg.linear_acceleration.x = cur_x - x_avg;
+      msg.linear_acceleration.y = cur_y - y_avg;
+      msg.linear_acceleration.z = cur_z - z_avg;
+
 
       msg.angular_velocity.x = stof(gyroTokens[0]);
       msg.angular_velocity.y = stof(gyroTokens[1]);
       msg.angular_velocity.z = stof(gyroTokens[2]);
       msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
 
-      float yaw = HALF_TO_FULL_CIRCLE_ANGLE(-(stof(rpyTokens[0]) + 90)) * DEG_TO_RAD;
+      float yaw = HALF_TO_FULL_CIRCLE_ANGLE(-(stof(rpyTokens[0]) - 100)) * DEG_TO_RAD;
       float pitch = HALF_TO_FULL_CIRCLE_ANGLE(-stof(rpyTokens[1])) * DEG_TO_RAD;
       float roll = HALF_TO_FULL_CIRCLE_ANGLE(stof(rpyTokens[2]) + 180) * DEG_TO_RAD;
 
+      std::cout << "y raw: " << stof(rpyTokens[0]) - 100 << std::endl;
+      std::cout << "y diff: " << stof(rpyTokens[0]) << std::endl;
+      std::cout << "y corr: " << stof(rpyTokens[0]) << std::endl;
+
       msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
-
-      // removing gravity vector from accelerations
-      tf::Transform gravityTransform(tf::Quaternion(roll, pitch, yaw));
-      tf::Vector3 gravityVector = gravityTransform(tf::Vector3(0, 0, 9.81));
-      msg.linear_acceleration.x += gravityVector.getX();
-      msg.linear_acceleration.y += gravityVector.getY();
-      msg.linear_acceleration.z += gravityVector.getZ();
-
       msg.orientation_covariance = { 0.0025, 1e-6, 1e-6, 1e-6, 0.0025, 1e-6, 1e-6, 1e-6, 0.0025 };
     }
     catch (const std::invalid_argument& e)
