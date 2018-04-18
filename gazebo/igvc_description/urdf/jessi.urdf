@@ -275,6 +275,8 @@
       <mechanicalReduction>1</mechanicalReduction>
     </actuator>
   </transmission>
+
+
   <joint name="base_footprint_to_base_link" type="fixed">
     <parent link="base_footprint"/>
     <child link="base_link"/>
@@ -284,7 +286,7 @@
   <joint name="base_footprint_to_imu" type="fixed">
     <parent link="base_footprint"/>
     <child link="imu"/>
-    <origin xyz="0 0 .633" rpy="0 0 0"/>
+    <origin xyz="-1.02 0.165 1.499" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
   <joint name="imu_to_axle" type="fixed">
@@ -293,14 +295,14 @@
     <origin xyz="-.287 -.003 -.465" rpy="1.5708 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
-  <joint name="imu_to_lidar" type="fixed">
-    <origin xyz=".276 -.029 .029" rpy="0 0 0" />
-    <parent link="imu"/>
+  <joint name="base_footprint_to_lidar" type="fixed">
+    <origin xyz=".610 -.013 .597" rpy="0 0 0" />
+    <parent link="base_footprint"/>
     <child link="lidar"/>
   </joint>
-  <joint name="imu_to_center_camera" type="fixed">
-    <origin xyz="-.056 0 .937" rpy="0 .8 0" />
-    <parent link="imu"/>
+  <joint name="base_footprint_to_center_camera" type="fixed">
+    <origin xyz="-.102 0 1.499" rpy="0 .8 0" />
+    <parent link="base_footprint"/>
     <child link="usb_cam_center"/>
   </joint>
   <joint name="axle_to_left_wheel" type="continuous">
@@ -315,9 +317,9 @@
      <axis xyz="0 0 -1" rpy="0 0 0"/>
     <child link="right_wheel"/>
   </joint>
-  <joint name="imu_to_gps" type="fixed">
-    <origin xyz="-.044 .214 0" rpy="0 0 0" /> <!-- -1.5708 -->
-    <parent link="imu"/>
+  <joint name="base_footprint_to_gps" type="fixed">
+    <origin xyz="-.102 .178 1.499" rpy="0 0 0" /> <!-- -1.5708 -->
+    <parent link="base_footprint"/>
     <child link="gps"/>
   </joint>
   <!--
@@ -331,7 +333,7 @@
   <joint name="imu_to_front_ball" type="floating">
     <parent link="imu"/>
     <child link="front_ball"/>
-    <origin xyz=".39 0 -.53" rpy="0 0 0" />
+    <origin xyz=".39 -0 -.53" rpy="0 0 0" />
   </joint>
   <joint name="imu_to_back_ball" type="floating">
     <parent link="imu"/>
