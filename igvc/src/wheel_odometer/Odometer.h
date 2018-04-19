@@ -17,7 +17,7 @@ private:
   int seq;
 
   // robot constant
-  const float WHEEL_SEPARATION = 0.59436;
+  double wheel_sep;
 
   // keeping track of global position
   float x;
