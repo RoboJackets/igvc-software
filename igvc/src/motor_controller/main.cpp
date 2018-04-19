@@ -1,6 +1,6 @@
 #include <igvc/SerialPort.h>
 #include <igvc_msgs/velocity_pair.h>
-#include <std_msgs/UInt8.h>
+#include <std_msgs/Bool.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <ros/subscriber.h>
@@ -162,9 +162,9 @@ int main(int argc, char** argv)
           if(ret.at(1) == 'I') {
             // imu message
           } else if(ret.at(1) == 'V') {
-            std_msgs::UInt8 battery_msg;
-            double voltage = atod(tokens.at(0).c_str());
-            battery_msg.data = voltage
+            std_msgs::Float64 battery_msg;
+            double voltage = atof(tokens.at(0).c_str());
+            battery_msg.data = voltage;
             battery_pub.publish(battery_msg);
             if(voltage < 24) {
               ROS_ERROR_STREAM("Battery voltage dangerously low");
