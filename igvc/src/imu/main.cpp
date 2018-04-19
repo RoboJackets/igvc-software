@@ -23,6 +23,11 @@ int main(int argc, char** argv)
 
   ros::NodeHandle nh;
 
+  int samples;
+  double yaw_offset;
+  nh.param("samples" , samples, 500);
+  nh.param("yaw_offset" , yaw_offset, 0.0);
+
   ros::Publisher pub = nh.advertise<sensor_msgs::Imu>("/imu", 1000);
 
   sleep(1);  // sleeping thread for 1 seconds to let IMU set up
@@ -104,31 +109,29 @@ int main(int argc, char** argv)
       double cur_z = stof(accelTokens[2]);
       msg.linear_acceleration_covariance = { 0.04, 1e-6, 1e-6, 1e-6, 0.04, 1e-6, 1e-6, 1e-6, 0.04 };
 
-      int num = 500;
-
       x_accel.push_back(cur_x);
-      if(x_accel.size() > num) {
+      if(x_accel.size() > samples) {
         double front = x_accel.front();
         x_accel.pop_front();
-        x_avg -= front / num;
+        x_avg -= front / samples;
       }
-      x_avg += cur_x / num;
+      x_avg += cur_x / samples;
 
       z_accel.push_back(cur_z);
-      if(z_accel.size() > num) {
+      if(z_accel.size() > samples) {
         double front = z_accel.front();
         z_accel.pop_front();
-        z_avg -= front / num;
+        z_avg -= front / samples;
       }
-      z_avg += cur_z / num;
+      z_avg += cur_z / samples;
 
       y_accel.push_back(cur_y);
-      if(y_accel.size() > num) {
+      if(y_accel.size() > samples) {
         double front = y_accel.front();
         y_accel.pop_front();
-        y_avg -= front / num;
+        y_avg -= front / samples;
       }
-      y_avg += cur_y / num;
+      y_avg += cur_y / samples;
 
       msg.linear_acceleration.x = cur_x - x_avg;
       msg.linear_acceleration.y = cur_y - y_avg;
@@ -140,13 +143,9 @@ int main(int argc, char** argv)
       msg.angular_velocity.z = stof(gyroTokens[2]);
       msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
 
-      float yaw = HALF_TO_FULL_CIRCLE_ANGLE(-(stof(rpyTokens[0]) - 100)) * DEG_TO_RAD;
+      float yaw = HALF_TO_FULL_CIRCLE_ANGLE(-(stof(rpyTokens[0]) - 90 - yaw_offset)) * DEG_TO_RAD;
       float pitch = HALF_TO_FULL_CIRCLE_ANGLE(-stof(rpyTokens[1])) * DEG_TO_RAD;
       float roll = HALF_TO_FULL_CIRCLE_ANGLE(stof(rpyTokens[2]) + 180) * DEG_TO_RAD;
-
-      std::cout << "y raw: " << stof(rpyTokens[0]) - 100 << std::endl;
-      std::cout << "y diff: " << stof(rpyTokens[0]) << std::endl;
-      std::cout << "y corr: " << stof(rpyTokens[0]) << std::endl;
 
       msg.orientation = tf::createQuaternionMsgFromRollPitchYaw(roll, pitch, yaw);
       msg.orientation_covariance = { 0.0025, 1e-6, 1e-6, 1e-6, 0.0025, 1e-6, 1e-6, 1e-6, 0.0025 };
