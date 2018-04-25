@@ -18,6 +18,7 @@ public:
   TestNewMapper()
     : handle()
     , mock_map_pub(handle.advertise<sensor_msgs::Joy>("/map", 1))
+    , mock_localization_pub(handle.advertise<msgs::OdometryConstPtr>("/SOME TOPIC"))
     , lidar_sub(handle.subscribe("/scan/pointcloud", 1, &TestNewMapper::lidarCallback, this))
     , cam_sub(handle.subscribe("/usb_cam_center/line_cloud", 1, &TestNewMapper::camCallBack, this))
     , pothole_sub(handle.subscribe("/pothole_cloud", 1, &TestNewMapper::potholeCallback, this))
@@ -37,6 +38,7 @@ public:
 protected:
   virtual void SetUp()
   {
+    //init node with specific ros params??
     while (!IsNodeReady())
     {
       ros::spinOnce();
@@ -45,6 +47,7 @@ protected:
 
   virtual void TearDown()
   {
+      //kill node?
   }
 
   bool IsNodeReady()
@@ -52,7 +55,7 @@ protected:
     return (mock_map_pub.getNumSubscribers() > 0) &&
      (lidar_sub.getNumPublishers() > 0) &&
      (cam_sub.getNumPublishers() > 0) &&
-     (pothole_sub.getNumPublishers() > 0)
+     (pothole_sub.getNumPublishers() > 0);
   }
 
   ros::NodeHandle handle;
@@ -62,16 +65,27 @@ protected:
 
 TEST_Lidar(TestNewMapper, FullForward)
 {
-  sensor_msgs::Joy joy_msg;
-  joy_msg.axes = { 0, 1.0, 0, 1.0 };
-  joy_msg.buttons = { 0, 0, 0, 0 };
-  mock_joy_pub.publish(joy_msg);
+  const pcl::PointCloud<pcl::PointXYZ>::ConstPtr lidar_msg;
+  pcl::PointXYZ point(1,1,1);
+  lidar_msg.append(point);
+  // init some message to set location
+  // don;t know the type some tf trnform message
+  // publish some message to change location
+  // source code:
+  // http://docs.ros.org/diamondback/api/tf/html/c++/tf_8cpp_source.html
+  // should affect tf transform
+  // nav_msgs::OdometryConstPtr
+  mock_lidar_pub.publish(lidar_msg);
 
-  const igvc_msgs::velocity_pair::ConstPtr& response =
-      ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
-
+  const igvc_msgs::map::ConstPtr& response =
+      ros::topic::waitForMessage<const pcl::PointCloud<pcl::PointXYZ>::ConstPtr>(lidar_sub.getTopic(), ros::Duration(1));
+  //get point at expected x and y, check for 255 probability
+  // makes a sensor_msgs::Image var, need x and y
+  // need to go from sensor_msgs::Image to cv::Mat
+  int step = response->image.step;
+  int expected x =
   EXPECT_TRUE(response.get() != nullptr);
-  EXPECT_EQ(response->left_velocity, 1.0);
+  EXPECT_EQ(response->image, 1.0);
   EXPECT_EQ(response->right_velocity, 1.0);
 }
 
