@@ -84,6 +84,7 @@ SETUP_SHA_FILES+=("./.gitmodules")
 SETUP_SHA_FILES+=("./config.docif")
 SETUP_SHA_FILES+=("./util/setup.sh")
 SETUP_SHA_FILES+=("./igvc/package.xml")
+SETUP_SHA_FILES+=("./util/docker/Dockerfile")
 
 
 # @REQUIRED
