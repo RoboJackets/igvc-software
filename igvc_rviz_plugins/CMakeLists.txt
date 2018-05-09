@@ -31,11 +31,15 @@ include_directories(
 )
 
 set (rviz_plugins_SRCS
-    src/ExamplePanel.cpp src/sensor_panel.cpp
+    src/ExamplePanel.cpp
+    src/sensor_panel.cpp
+    src/WaypointPanel.cpp
 )
 
 set (rviz_plugins_HDRS
-    include/igvc_rviz_plugins/ExamplePanel.h include/igvc_rviz_plugins/sensor_panel.h
+    include/igvc_rviz_plugins/ExamplePanel.h
+    include/igvc_rviz_plugins/sensor_panel.h
+    include/igvc_rviz_plugins/WaypointPanel.h
 )
 
 qt5_wrap_cpp(rviz_plugins_MOCS ${rviz_plugins_HDRS})
