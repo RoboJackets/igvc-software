@@ -15,4 +15,12 @@
         </description>
     </class>
 
+    <class name="igvc_rviz_plugins/WaypointPanel"
+           type="igvc_rviz_plugins::WaypointPanel"
+           base_class_type="rviz::Panel">
+        <description>
+           Panel to show the direction and distance to waypoint.
+        </description>
+    </class>
+
 </library>
