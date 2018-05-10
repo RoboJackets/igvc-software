@@ -1,16 +1,15 @@
+#include <cv_bridge/cv_bridge.h>  // for eigen to cv ish
 #include <gtest/gtest.h>
 #include <igvc_msgs/map.h>
+#include <pcl_ros/transforms.h>  // to check transforms
 #include <ros/ros.h>
-#include <pcl_ros/transforms.h> // to check transforms
-#include <opencv2/opencv.hpp> // for cv::Mat
-#include <opencv2/core/eigen.hpp> // for cv to eigen ish
-#include <cv_bridge/cv_bridge.h> // for eigen to cv ish
+#include <opencv2/core/eigen.hpp>  // for cv to eigen ish
+#include <opencv2/opencv.hpp>      // for cv::Mat
 
 // messages for mapper
 //   /scan/pointcloud
 //   /usb_cam_center/line_cloud
 //   /pothole_cloud
-
 
 class TestNewMapper : public testing::Test
 {
@@ -38,7 +37,7 @@ public:
 protected:
   virtual void SetUp()
   {
-    //init node with specific ros params??
+    // init node with specific ros params??
     while (!IsNodeReady())
     {
       ros::spinOnce();
@@ -47,15 +46,13 @@ protected:
 
   virtual void TearDown()
   {
-      //kill node?
+    // kill node?
   }
 
   bool IsNodeReady()
   {
-    return (mock_map_pub.getNumSubscribers() > 0) &&
-     (lidar_sub.getNumPublishers() > 0) &&
-     (cam_sub.getNumPublishers() > 0) &&
-     (pothole_sub.getNumPublishers() > 0);
+    return (mock_map_pub.getNumSubscribers() > 0) && (lidar_sub.getNumPublishers() > 0) &&
+           (cam_sub.getNumPublishers() > 0) && (pothole_sub.getNumPublishers() > 0);
   }
 
   ros::NodeHandle handle;
@@ -66,7 +63,7 @@ protected:
 TEST_Lidar(TestNewMapper, FullForward)
 {
   const pcl::PointCloud<pcl::PointXYZ>::ConstPtr lidar_msg;
-  pcl::PointXYZ point(1,1,1);
+  pcl::PointXYZ point(1, 1, 1);
   lidar_msg.append(point);
   // init some message to set location
   // don;t know the type some tf trnform message
@@ -77,15 +74,13 @@ TEST_Lidar(TestNewMapper, FullForward)
   // nav_msgs::OdometryConstPtr
   mock_lidar_pub.publish(lidar_msg);
 
-  const igvc_msgs::map::ConstPtr& response =
-      ros::topic::waitForMessage<const pcl::PointCloud<pcl::PointXYZ>::ConstPtr>(lidar_sub.getTopic(), ros::Duration(1));
-  //get point at expected x and y, check for 255 probability
+  const igvc_msgs::map::ConstPtr &response = ros::topic::waitForMessage<const pcl::PointCloud<pcl::PointXYZ>::ConstPtr>(
+      lidar_sub.getTopic(), ros::Duration(1));
+  // get point at expected x and y, check for 255 probability
   // makes a sensor_msgs::Image var, need x and y
   // need to go from sensor_msgs::Image to cv::Mat
   int step = response->image.step;
-  int expected x =
-  EXPECT_TRUE(response.get() != nullptr);
+  int expected x = EXPECT_TRUE(response.get() != nullptr);
   EXPECT_EQ(response->image, 1.0);
   EXPECT_EQ(response->right_velocity, 1.0);
 }
-
