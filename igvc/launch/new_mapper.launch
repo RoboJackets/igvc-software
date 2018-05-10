@@ -7,8 +7,8 @@
             <param name="occupancy_grid_length" type="int" value="200" />
             <param name="occupancy_grid_width" type="int" value="200" />
             <param name="occupancy_grid_resolution" type="double" value="0.1" />
-            <param name="start_X" type="double" value="50"/>
-            <param name="start_Y" type="double" value="10"/>
+            <param name="start_X" type="double" value="100"/>
+            <param name="start_Y" type="double" value="100"/>
             <param name="orientation" type="double" value="0.0"/>
             <param name="debug" type="bool" value="true"/>
 

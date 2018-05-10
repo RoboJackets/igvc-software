@@ -1,15 +1,15 @@
+#include <cv_bridge/cv_bridge.h>
+#include <igvc_msgs/map.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
+#include <sensor_msgs/Image.h>
 #include <stdlib.h>
 #include <Eigen/Core>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
-#include <cv_bridge/cv_bridge.h>
-#include <igvc_msgs/map.h>
-#include <sensor_msgs/Image.h>
 
 igvc_msgs::map msgBoi;  // >> message to be sent
 cv_bridge::CvImage img_bridge;
@@ -26,8 +26,8 @@ Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>> *eigenR
 
 double resolution;
 double orientation;
-int x; // start x location
-int y; // start y location
+int x;  // start x location
+int y;  // start y location
 int length_y;
 int width_x;
 bool debug;
@@ -35,8 +35,8 @@ bool debug;
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
 {
   // transform pointcloud into the occupancy grid, no filtering right now
+
   bool offMap = false;
-  ROS_INFO_STREAM("\nIn callback");
 
   // make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
@@ -51,37 +51,26 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     pcl_ros::transformPointCloud(*msg, *transformed, cam_trans);
   }
 
-  ROS_INFO_STREAM("\nTransformed pointcloud\n");
   pcl::PointCloud<pcl::PointXYZ>::const_iterator point;
   for (point = transformed->begin(); point < transformed->points.end(); point++)
   {
-    ROS_INFO_STREAM("Looking at point");
     int point_x = (int)std::round((point->x / resolution) + x);
     int point_y = (int)std::round((point->y / resolution) + y);
-    ROS_INFO_STREAM("did math 1");
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && y < width_x)
     {
-      ROS_INFO_STREAM("point is on map");
-        //I think we are seg-faulting? I believe this is the right syntax though
-        (*eigenRep)(point_y, point_x) = (unsigned char) 255; // Breaks for some reason
-        //(*eigenRep)(point_x, point_y) = (unsigned char) 255;
-      ROS_INFO_STREAM("SUCCESSSS");
+      published_map->at<char>(point_x, point_y) = (unsigned char)255;
     }
     else if (!offMap)
     {
       ROS_WARN_STREAM("Some points out of range, won't be put on map.");
       offMap = true;
-    } else {
-        ROS_INFO_STREAM("off map is bad");
     }
   }
-  ROS_INFO_STREAM("TRANSORMED POINTS (CRASHES BEFORE THIS NORMALLY)");
   // make image message from img bridge
 
   img_bridge = cv_bridge::CvImage(msgBoi.header, sensor_msgs::image_encodings::MONO8, *published_map);
-  ROS_INFO_STREAM("BRIDGED IMAGE");
-  img_bridge.toImageMsg(imageBoi);  // from cv_bridge to sensor_msgs::Image
-  ros::Time time = ros::Time::now(); // so times are exact same
+  img_bridge.toImageMsg(imageBoi);    // from cv_bridge to sensor_msgs::Image
+  ros::Time time = ros::Time::now();  // so times are exact same
   imageBoi.header.stamp = time;
   // set fields of map message
   msgBoi.header.stamp = time;
@@ -91,12 +80,11 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   msgBoi.resolution = resolution;
   msgBoi.orientation = orientation;
   map_pub.publish(msgBoi);
-  ROS_INFO_STREAM("MADE MESSAGE");
-  if (debug){
-      debug_pub.publish(imageBoi);
-      ROS_INFO_STREAM("It published");
+  if (debug)
+  {
+    debug_pub.publish(imageBoi);
+    ROS_INFO_STREAM("TRANSORMED POINTS (CRASHES BEFORE THIS NORMALLY)");
   }
-  ROS_INFO_STREAM("FINISHED CALLBACK\n");
 }
 
 int main(int argc, char **argv)
@@ -121,7 +109,7 @@ int main(int argc, char **argv)
   pNh.getParam("orientation", orientation);
   pNh.getParam("debug", debug);
 
-  //convert from meters to grid
+  // convert from meters to grid
   length_y = (int)std::round(length_y / resolution);
   width_x = (int)std::round(width_x / resolution);
   x = (int)std::round(start_x / resolution);
@@ -150,13 +138,13 @@ int main(int argc, char **argv)
   }
 
   published_map = new cv::Mat(length_y, width_x, CV_8UC1);
-  eigenRep =
-      new Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>>((unsigned char *)published_map, length_y, width_x);
+  eigenRep = new Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>>(
+      (unsigned char *)published_map, width_x, length_y);
 
-    map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
-  if(debug){
-     ROS_INFO_STREAM("It advertised");
-     debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
+  map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
+  if (debug)
+  {
+    debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
   }
 
   ros::spin();
