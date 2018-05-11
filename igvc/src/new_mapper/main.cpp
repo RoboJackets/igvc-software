@@ -56,12 +56,12 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   ros::Time time = ros::Time::now();
   if (msg->header.frame_id == "/scan/pointcloud")
   {
-      tf_listener->lookupTransform("/base_footprint", "/scan/pointcloud", time, lidar_trans);  //update transform to change location in map
+      //tf_listener->lookupTransform("/odom", "/scan/pointcloud", time, lidar_trans);  //update transform to change location in map
       pcl_ros::transformPointCloud(*msg, *transformed, lidar_trans);
   }
   else
   {
-      tf_listener->lookupTransform("/base_footprint", "/usb_cam_center/line_cloud", time, cam_trans);
+      //tf_listener->lookupTransform("/odom", "/usb_cam_center/line_cloud", time, cam_trans);
       pcl_ros::transformPointCloud(*msg, *transformed, cam_trans);
   }
 
