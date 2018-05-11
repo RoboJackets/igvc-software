@@ -37,7 +37,7 @@ bool debug;
 double cur_x;
 double cur_y;
 
-void odom_callback(nav_msgs::Odometry::ConstPtr &msg) {
+void odom_callback(const nav_msgs::Odometry::ConstPtr &msg) {
     cur_x = msg->pose.pose.position.x;
     cur_y = msg->pose.pose.position.y;
 }
@@ -99,6 +99,10 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   map_pub.publish(msgBoi);
   if (debug)
   {
+    published_map->at<char>(x + (int)std::round(cur_x), y + (int)std::round(cur_y)) = (unsigned char)125;
+    published_map->at<char>(x + (int)std::round(cur_x) + 1, y + (int)std::round(cur_y)) = (unsigned char)125;
+    published_map->at<char>(x + (int)std::round(cur_x), y + (int)std::round(cur_y) + 1) = (unsigned char)125;
+    published_map->at<char>(x + (int)std::round(cur_x) + 1, y + (int)std::round(cur_y) + 1) = (unsigned char)125;
     debug_pub.publish(imageBoi);
     ROS_INFO_STREAM("\n\nTRANSORMED " << count << " POINTS\n\n");
     pcl::PointCloud<pcl::PointXYZ>::Ptr fromOcuGrid=
