@@ -1,71 +1,44 @@
 #define _USE_MATH_DEFINES
 
-#include <igvc_msgs/lights.h>
 #include <igvc_msgs/velocity_pair.h>
+#include <igvc_msgs/igvc_path.h>
 #include <nav_msgs/Odometry.h>
-#include <nav_msgs/Path.h>
 #include <ros/ros.h>
 #include <tf/transform_datatypes.h>
-#include <chrono>
 #include <cmath>
 #include <iostream>
 #include <mutex>
-
-const float threshold = 0.1;
+#include <Eigen/Dense>
 
 ros::Publisher cmd_pub;
+ros::Publisher target_pub;
 
-nav_msgs::PathConstPtr path;
+igvc_msgs::igvc_pathConstPtr path;
 std::mutex path_mutex;
+double path_resolution;
 
-size_t path_index = 0;
+double max_vel, axle_length, lookahead_dist, threshold;
 
-double max_vel, axle_length;
-
-void path_callback(const nav_msgs::PathConstPtr& msg)
+void path_callback(const igvc_msgs::igvc_pathConstPtr& msg)
 {
   std::lock_guard<std::mutex> lock(path_mutex);
+  path_resolution = msg->path_resolution;
   ROS_INFO("Follower got path");
   path = msg;
-  path_index = 0;
 }
 
 void get_wheel_speeds(igvc_msgs::velocity_pair& vel, double d, double theta)
 {
-  if (theta > M_PI + threshold)
-  {
-    theta -= 2 * M_PI;
-  }
-  else if (theta < -M_PI - threshold)
-  {
-    theta += 2 * M_PI;
-  }
-
-  if (std::abs(theta) < threshold)
-  {
-    vel.left_velocity = max_vel;
+  if(std::abs(theta) < threshold) {
     vel.right_velocity = max_vel;
-    return;
-  }
-  if (theta > M_PI / 4 || theta < -M_PI / 4)
-  {
-    if (theta > 0)
-    {
-      vel.left_velocity = -max_vel;
-      vel.right_velocity = max_vel;
-    }
-    else
-    {
-      vel.left_velocity = max_vel;
-      vel.right_velocity = -max_vel;
-    }
+    vel.left_velocity = max_vel;
     return;
   }
 
   double turn_radius = std::abs(d / (2 * std::sin(theta)));
   double outer_wheel = max_vel;
   double inner_wheel = outer_wheel * (turn_radius - (axle_length / 2)) / (turn_radius + (axle_length / 2));
-  
+
   if (theta > 0)
   {
     vel.left_velocity = inner_wheel;
@@ -84,13 +57,14 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   {
     return;
   }
-  if (path->poses.empty() || path_index == path->poses.size())
+  if (path->poses.empty())
   {
     ROS_INFO("Path empty.");
     igvc_msgs::velocity_pair vel;
     vel.left_velocity = 0.;
     vel.right_velocity = 0.;
     cmd_pub.publish(vel);
+    // TODO what do?
     path.reset();
     return;
   }
@@ -101,22 +75,38 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   tf::quaternionMsgToTF(msg->pose.pose.orientation, q);
   float cur_theta = -tf::getYaw(q) + M_PI / 2;
   cur_theta = cur_theta > 2 * M_PI ? cur_theta - 2 * M_PI : cur_theta;
-    
-  float tar_x = path->poses[path_index].pose.position.x;
-  float tar_y = path->poses[path_index].pose.position.y;
 
-  while (std::abs(cur_x - tar_x) + std::abs(cur_y - tar_y) < threshold)
-  {
-    ++path_index;
-    if (path_index == path->poses.size())
-    {
-      // relying on the next odom update to stop the robot
-      // if odom is slow, this may overshoot the target
-      return;
-    }
-    tar_x = path->poses[path_index].pose.position.x;
-    tar_y = path->poses[path_index].pose.position.y;
+  float tar_x, tar_y;
+
+  ROS_INFO_STREAM("poses = " << path->poses.size() << " < " << lookahead_dist / path_resolution);
+
+  if(path->poses.size() > lookahead_dist / path_resolution) {
+    double path_index = lookahead_dist / path_resolution;
+
+    geometry_msgs::Point point = path->poses[ceil(path_index)].pose.position;
+    //ROS_INFO_STREAM("point 1 = " << point.x << ", " << point.y);
+    Eigen::Vector3d first(point.x,point.y, 0);
+    point = path->poses[floor(path_index)].pose.position;
+    //ROS_INFO_STREAM("point 2 = " << point.x << ", " << point.y);
+    Eigen::Vector3d second(point.x,point.y, 0);
+    Eigen::Vector3d slope = first - second;
+    double distance = distance-(long)distance;
+    slope *= distance;
+    slope += first;
+    tar_x = slope[0];
+    tar_y = slope[1];
+  } else {
+    tar_x = path->poses[path->poses.size()].pose.position.x;
+    tar_y = path->poses[path->poses.size()].pose.position.y;
   }
+
+  geometry_msgs::PointStamped target_point;
+  target_point.point.x = tar_x;
+  target_point.point.y = tar_y;
+  target_point.header.frame_id = "/odom";
+  target_point.header.stamp = ros::Time::now();
+  target_pub.publish(target_point);
+
 
   double d = std::sqrt(std::pow(tar_x - cur_x, 2) + std::pow(tar_y - cur_y, 2));
   double ang = std::atan2(tar_x - cur_x, tar_y - cur_y);
@@ -126,6 +116,7 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   igvc_msgs::velocity_pair vel;
   get_wheel_speeds(vel, d, theta);
 
+  ROS_INFO_STREAM(vel.left_velocity << ", " << vel.right_velocity);
   cmd_pub.publish(vel);
 }
 
@@ -133,22 +124,21 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "path_follower");
 
-  ros::NodeHandle n;
+  ros::NodeHandle nh;
+  ros::NodeHandle pNh("~");
 
-  n.param(std::string("max_vel"), max_vel, 1.6);
-  n.param(std::string("axle_length"), axle_length, 0.8);
+  pNh.param(std::string("max_vel"), max_vel, 1.6);
+  pNh.param(std::string("axle_length"), axle_length, 0.8);
+  pNh.param(std::string("lookahead_dist"), lookahead_dist, 0.8);
+  pNh.param(std::string("threshold"), lookahead_dist, 0.1);
 
-  cmd_pub = n.advertise<igvc_msgs::velocity_pair>("/motors", 1);
+  cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
+  target_pub = nh.advertise<geometry_msgs::PointStamped>("/target_point", 1);
 
-  ros::Publisher lights_pub = n.advertise<igvc_msgs::lights>("/lights", 1);
+  ros::Subscriber path_sub = nh.subscribe("/path_display", 1, path_callback);
 
-  ros::Subscriber path_sub = n.subscribe("/path_display", 1, path_callback);
+  ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, position_callback);
 
-  ros::Subscriber pose_sub = n.subscribe("/odometry/filtered", 1, position_callback);
-
-  igvc_msgs::lights lights_cmd;
-  lights_cmd.safety_flashing = true;
-  lights_pub.publish(lights_cmd);
 
   ros::spin();
 

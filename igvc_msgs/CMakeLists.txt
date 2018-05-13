@@ -17,12 +17,14 @@ add_message_files(
   lights.msg
   action_path.msg
   system_stats.msg
+  igvc_path.msg
 )
 
 # Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
   std_msgs
+  geometry_msgs
 )
 
 catkin_package()
