@@ -1,43 +1,34 @@
 #include <cv_bridge/cv_bridge.h>  // for eigen to cv ish
 #include <gtest/gtest.h>
 #include <igvc_msgs/map.h>
+#include <pcl/point_cloud.h>
+#include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>  // to check transforms
 #include <ros/ros.h>
 #include <opencv2/core/eigen.hpp>  // for cv to eigen ish
 #include <opencv2/opencv.hpp>      // for cv::Mat
-
-// messages for mapper
-//   /scan/pointcloud
-//   /usb_cam_center/line_cloud
-//   /pothole_cloud
+#include <nav_msgs/Odometry.h>
+#include <tf/transform_broadcaster.h>
+#include <cv_bridge/cv_bridge.h>
 
 class TestNewMapper : public testing::Test
 {
 public:
   TestNewMapper()
     : handle()
-    , mock_map_pub(handle.advertise<sensor_msgs::Joy>("/map", 1))
-    , mock_localization_pub(handle.advertise<msgs::OdometryConstPtr>("/SOME TOPIC"))
-    , lidar_sub(handle.subscribe("/scan/pointcloud", 1, &TestNewMapper::lidarCallback, this))
-    , cam_sub(handle.subscribe("/usb_cam_center/line_cloud", 1, &TestNewMapper::camCallBack, this))
-    , pothole_sub(handle.subscribe("/pothole_cloud", 1, &TestNewMapper::potholeCallback, this))
+    , mock_localization_pub(handle.advertise<nav_msgs::Odometry>("/odometry/filtered", 1))
+    , mock_lidar_pub(handle.advertise<pcl::PointCloud<pcl::PointXYZ>>("/scan/pointcloud", 1))
+    , mock_camera_pub(handle.advertise<pcl::PointCloud<pcl::PointXYZ>>("/usb_cam_center/line_cloud", 1))
+    , map_sub(handle.subscribe("/map", 1, &TestNewMapper::map_callback, this))
   {
   }
 
-  void lidarCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
-  {
-  }
-  void camCallBack(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
-  {
-  }
-  void potholeCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
-  {
+  void map_callback(const igvc_msgs::mapConstPtr& msg) {
   }
 
 protected:
   virtual void SetUp()
   {
-    // init node with specific ros params??
     while (!IsNodeReady())
     {
       ros::spinOnce();
@@ -46,41 +37,69 @@ protected:
 
   virtual void TearDown()
   {
-    // kill node?
   }
 
   bool IsNodeReady()
   {
-    return (mock_map_pub.getNumSubscribers() > 0) && (lidar_sub.getNumPublishers() > 0) &&
-           (cam_sub.getNumPublishers() > 0) && (pothole_sub.getNumPublishers() > 0);
+    return (mock_camera_pub.getNumSubscribers() > 0) &&
+      (mock_localization_pub.getNumSubscribers() > 0) &&
+      (mock_lidar_pub.getNumSubscribers() > 0) &&
+      (map_sub.getNumPublishers() > 0);
   }
 
   ros::NodeHandle handle;
-  ros::Publisher mock_joy_pub;
-  ros::Subscriber motor_sub;
+  ros::Publisher mock_localization_pub;
+  ros::Publisher mock_lidar_pub;
+  ros::Publisher mock_camera_pub;
+  ros::Subscriber map_sub;
 };
 
-TEST_Lidar(TestNewMapper, FullForward)
+TEST_F(TestNewMapper, OriginCheck)
 {
-  const pcl::PointCloud<pcl::PointXYZ>::ConstPtr lidar_msg;
-  pcl::PointXYZ point(1, 1, 1);
-  lidar_msg.append(point);
-  // init some message to set location
-  // don;t know the type some tf trnform message
-  // publish some message to change location
-  // source code:
-  // http://docs.ros.org/diamondback/api/tf/html/c++/tf_8cpp_source.html
-  // should affect tf transform
-  // nav_msgs::OdometryConstPtr
-  mock_lidar_pub.publish(lidar_msg);
+  nav_msgs::Odometry odom_msg;
+  odom_msg.pose.pose.position.x = 0;
+  odom_msg.pose.pose.position.y = 0;
+  odom_msg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
+  mock_localization_pub.publish(odom_msg);
 
-  const igvc_msgs::map::ConstPtr &response = ros::topic::waitForMessage<const pcl::PointCloud<pcl::PointXYZ>::ConstPtr>(
-      lidar_sub.getTopic(), ros::Duration(1));
+  pcl::PointCloud<pcl::PointXYZ> cloud_msg;
+  pcl::PointXYZ point(0, 0, 0);
+  cloud_msg.points.push_back(point);
+  cloud_msg.header.frame_id = "/lidar";
+  mock_lidar_pub.publish(cloud_msg);
+
+  tf::TransformBroadcaster br;
+  tf::StampedTransform transform;
+  transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+  tf::Quaternion q;
+  q.setRPY(0, 0, 0);
+  transform.setRotation(q);
+  transform.child_frame_id_ = "/base_footprint";
+  transform.frame_id_ = "/lidar";
+  transform.stamp_ = ros::Time::now();
+  br.sendTransform(transform);
+
+  // http://docs.ros.org/diamondback/api/tf/html/c++/tf_8cpp_source.html
+
+  const igvc_msgs::map::ConstPtr &response = ros::topic::waitForMessage<igvc_msgs::map>(map_sub.getTopic(), ros::Duration(5));
   // get point at expected x and y, check for 255 probability
   // makes a sensor_msgs::Image var, need x and y
   // need to go from sensor_msgs::Image to cv::Mat
-  int step = response->image.step;
-  int expected x = EXPECT_TRUE(response.get() != nullptr);
-  EXPECT_EQ(response->image, 1.0);
-  EXPECT_EQ(response->right_velocity, 1.0);
+  ASSERT_TRUE(response.get() != nullptr);
+  const sensor_msgs::Image img = response->image;
+  cv::Mat map = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::MONO8)->image;
+  ASSERT_EQ(map.at<uchar>(250, 250), (uchar)255);
+}
+
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "test_new_mapper");
+  testing::InitGoogleTest(&argc, argv);
+
+  ros::AsyncSpinner spinner(1);
+  spinner.start();
+  int ret = RUN_ALL_TESTS();
+  spinner.stop();
+  ros::shutdown();
+  return ret;
 }

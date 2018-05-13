@@ -11,6 +11,7 @@
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include <nav_msgs/Odometry.h>
+#include "tf/transform_datatypes.h"
 
 igvc_msgs::map msgBoi;  // >> message to be sent
 cv_bridge::CvImage img_bridge;
@@ -21,16 +22,15 @@ ros::Publisher debug_pub;
 ros::Subscriber odom_sub;
 ros::Publisher debug_pcl_pub;
 cv::Mat *published_map;  // matrix will be publishing
-tf::StampedTransform lidar_trans;
-tf::StampedTransform cam_trans;
+std::map<std::string, tf::StampedTransform> transforms;
 tf::TransformListener *tf_listener;
 std::string topics;
 Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>> *eigenRep;
 
 double resolution;
 double orientation;
-int x;  // start x location
-int y;  // start y location
+int start_x;  // start x location
+int start_y;  // start y location
 int length_y;
 int width_x;
 bool debug;
@@ -40,6 +40,11 @@ double cur_y;
 void odom_callback(const nav_msgs::Odometry::ConstPtr &msg) {
     cur_x = msg->pose.pose.position.x;
     cur_y = msg->pose.pose.position.y;
+    tf::Quaternion quat;
+    tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
+    double roll, pitch, yaw;
+    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+    orientation = yaw;
 }
 
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
@@ -54,27 +59,38 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
   ros::Time time = ros::Time::now();
-  if (msg->header.frame_id == "/scan/pointcloud")
-  {
-      //tf_listener->lookupTransform("/odom", "/scan/pointcloud", time, lidar_trans);  //update transform to change location in map
-      pcl_ros::transformPointCloud(*msg, *transformed, lidar_trans);
+  if(transforms.find(topic) == transforms.end()) {
+    if(tf_listener->waitForTransform("base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(3.0))) {
+      std::cout << "\n\ngetting transform for " << topic << "\n\n" << std::endl;
+      tf::StampedTransform transform;
+      tf_listener->lookupTransform("/base_footprint", msg->header.frame_id, ros::Time(0), transform);
+      transforms.insert(std::pair<std::string, tf::StampedTransform>(topic, transform));
+    } else {
+      ROS_ERROR_STREAM("\n\nfailed to find transform using empty transform\n\n");
+      tf::StampedTransform transform;
+      transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+      tf::Quaternion q;
+      q.setRPY(0, 0, 0);
+      transform.setRotation(q);
+      transform.child_frame_id_ = "/base_footprint";
+      transform.frame_id_ = "/lidar";
+      transform.stamp_ = ros::Time::now();
+      transforms.insert(std::pair<std::string, tf::StampedTransform>(topic, transform));
+    }
   }
-  else
-  {
-      //tf_listener->lookupTransform("/odom", "/usb_cam_center/line_cloud", time, cam_trans);
-      pcl_ros::transformPointCloud(*msg, *transformed, cam_trans);
-  }
+  pcl_ros::transformPointCloud(*msg, *transformed, transforms.at(topic));
 
   pcl::PointCloud<pcl::PointXYZ>::const_iterator point;
   for (point = transformed->begin(); point < transformed->points.end(); point++)
   {
-    int point_x = (int)std::round((point->x / resolution) + x);
+    int point_x = (int)std::round((point->x / resolution) + start_x);
     point_x = (int)std::round(point_x + cur_x);
-    int point_y = (int)std::round((point->y / resolution) + y);
+    int point_y = (int)std::round((point->y / resolution) + start_y);
     point_y = (int)std::round(point_y + cur_y);
-    if (point_x >= 0 && point_y >= 0 && point_x < length_y && y < width_x)
+    ROS_INFO_STREAM("point = " << point_x << "," << point_y);
+    if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
-      published_map->at<char>(point_x, point_y) = (unsigned char)255;
+      published_map->at<uchar>(point_x, point_y) = (uchar)255;
       count++;
     }
     else if (!offMap)
@@ -99,23 +115,26 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   map_pub.publish(msgBoi);
   if (debug)
   {
-    published_map->at<char>(x + (int)std::round(cur_x), y + (int)std::round(cur_y)) = (unsigned char)125;
-    published_map->at<char>(x + (int)std::round(cur_x) + 1, y + (int)std::round(cur_y)) = (unsigned char)125;
-    published_map->at<char>(x + (int)std::round(cur_x), y + (int)std::round(cur_y) + 1) = (unsigned char)125;
-    published_map->at<char>(x + (int)std::round(cur_x) + 1, y + (int)std::round(cur_y) + 1) = (unsigned char)125;
+    published_map->at<uchar>(start_x + (int)std::round(cur_x), start_y + (int)std::round(cur_y)) = (uchar)125;
+    published_map->at<uchar>(start_x + (int)std::round(cur_x) + 1, start_y + (int)std::round(cur_y)) = (uchar)125;
+    published_map->at<uchar>(start_x + (int)std::round(cur_x), start_y + (int)std::round(cur_y) + 1) = (uchar)125;
+    published_map->at<uchar>(start_x + (int)std::round(cur_x) + 1, start_y + (int)std::round(cur_y) + 1) = (uchar)125;
     debug_pub.publish(imageBoi);
     ROS_INFO_STREAM("\n\nTRANSORMED " << count << " POINTS\n\n");
-    pcl::PointCloud<pcl::PointXYZ>::Ptr fromOcuGrid=
-              pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
-      for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
-          for(int j = 0; j < length_y; j++){
-              if(published_map->at<char>(i, j) == (unsigned char)255) {
-                  pcl::PointXYZ p(i * resolution, j*resolution, 0);
-                  fromOcuGrid->points.push_back(p);
-              }
-          }
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid=
+              pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+    for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
+      for(int j = 0; j < length_y; j++){
+        if(published_map->at<uchar>(i, j) != (uchar)0) {
+          //ROS_INFO_STREAM("p " << i << "," << j);
+          pcl::PointXYZRGB p(i * resolution, j*resolution, 0);
+          p.r = published_map->at<uchar>(i, j);
+          fromOcuGrid->points.push_back(p);
+        }
       }
-      debug_pcl_pub.publish(fromOcuGrid);
+    }
+    fromOcuGrid->header.frame_id = "/odom";
+    debug_pcl_pub.publish(fromOcuGrid);
   }
 }
 
@@ -128,24 +147,31 @@ int main(int argc, char **argv)
   std::list<ros::Subscriber> subs;
   tf_listener = new tf::TransformListener();
 
-  double start_x;
-  double start_y;
+  double cont_start_x;
+  double cont_start_y;
+
+  if(!pNh.hasParam("topics") && !pNh.hasParam("occupancy_grid_length") &&
+     !pNh.hasParam("occupancy_grid_length") && !pNh.hasParam("occupancy_grid_resolution") &&
+     !pNh.hasParam("start_X") & !pNh.hasParam("start_Y") &&
+     !pNh.hasParam("debug")) {
+    ROS_ERROR_STREAM("missing parameters exiting");
+    return 0;
+  }
 
   // assumes all params inputted in meters
   pNh.getParam("topics", topics);
   pNh.getParam("occupancy_grid_length", length_y);
   pNh.getParam("occupancy_grid_width", width_x);
   pNh.getParam("occupancy_grid_resolution", resolution);
-  pNh.getParam("start_X", start_x);
-  pNh.getParam("start_Y", start_y);
-  pNh.getParam("orientation", orientation);
+  pNh.getParam("start_X", cont_start_x);
+  pNh.getParam("start_Y", cont_start_y);
   pNh.getParam("debug", debug);
 
   // convert from meters to grid
   length_y = (int)std::round(length_y / resolution);
   width_x = (int)std::round(width_x / resolution);
-  x = (int)std::round(start_x / resolution);
-  y = (int)std::round(start_y / resolution);
+  start_x = (int)std::round(cont_start_x / resolution);
+  start_y = (int)std::round(cont_start_y / resolution);
   ROS_INFO_STREAM("cv::Mat length: " << length_y << "  width: " << width_x << "  resolution: " << resolution);
 
   // set up tokens and get list of subscribers
@@ -159,35 +185,27 @@ int main(int argc, char **argv)
     subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(topic, 1, boost::bind(frame_callback, _1, topic)));
   }
 
-  // init transforms
-  ros::Time time = ros::Time::now();
-  if (tf_listener->waitForTransform("/base_footprint", "/scan/pointcloud", time, ros::Duration(5.0)))
-  {
-    tf_listener->lookupTransform("/base_footprint", "/scan/pointcloud", time, lidar_trans);
-  }
-  if (tf_listener->waitForTransform("/base_footprint", "/usb_cam_center/line_cloud", time, ros::Duration(5.0)))
-  {
-    tf_listener->lookupTransform("/base_footprint", "/usb_cam_center/line_cloud", time, cam_trans);
-  }
-
   published_map = new cv::Mat(length_y, width_x, CV_8UC1);
   eigenRep = new Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>>(
       (unsigned char *)published_map, width_x, length_y);
 
-  map_pub = nh.advertise<igvc_msgs::map>("/new_map", 1);
+  map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
+
   if (debug)
   {
 
     debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
-    debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/map_debug_pcl", 1);
+    debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
     for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
         for(int j = 0; j < length_y; j++){
             if(i == 0 || i == width_x - 1 || j == 0 || j == length_y - 1) {
-                published_map->at<char>(i, j) = (unsigned char)255;
+              published_map->at<uchar>(i, j) = (uchar)255;
             }
         }
     }
   }
+
+  ROS_INFO("\n\ngot here \n\n");
 
   ros::spin();
 }
