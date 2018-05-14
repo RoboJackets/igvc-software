@@ -56,6 +56,17 @@ protected:
 
 TEST_F(TestNewMapper, OriginCheck)
 {
+  tf::TransformBroadcaster br;
+  tf::StampedTransform transform;
+  transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+  tf::Quaternion q;
+  q.setRPY(0, 0, 0);
+  transform.setRotation(q);
+  transform.child_frame_id_ = "/base_footprint";
+  transform.frame_id_ = "/lidar";
+  transform.stamp_ = ros::Time::now();
+  br.sendTransform(transform);
+
   nav_msgs::Odometry odom_msg;
   odom_msg.pose.pose.position.x = 0;
   odom_msg.pose.pose.position.y = 0;
@@ -67,17 +78,6 @@ TEST_F(TestNewMapper, OriginCheck)
   cloud_msg.points.push_back(point);
   cloud_msg.header.frame_id = "/lidar";
   mock_lidar_pub.publish(cloud_msg);
-
-  tf::TransformBroadcaster br;
-  tf::StampedTransform transform;
-  transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
-  tf::Quaternion q;
-  q.setRPY(0, 0, 0);
-  transform.setRotation(q);
-  transform.child_frame_id_ = "/base_footprint";
-  transform.frame_id_ = "/lidar";
-  transform.stamp_ = ros::Time::now();
-  br.sendTransform(transform);
 
   // http://docs.ros.org/diamondback/api/tf/html/c++/tf_8cpp_source.html
 
