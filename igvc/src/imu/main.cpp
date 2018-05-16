@@ -8,6 +8,7 @@
 #include <freespace/freespace.h>
 #include <freespace/freespace_util.h>
 #include <geometry_msgs/Vector3.h>
+#include <Eigen/Dense>
 
 #define DEG_TO_RAD (3.14159265 / 180.0)
 #define HALF_TO_FULL_CIRCLE_ANGLE(ang) (((ang) < 0) ? ((ang) + 360) : (ang))
@@ -63,14 +64,14 @@ int main(int argc, char** argv)
   request.dataModeControlV2Request.outputStatus = 0; // 0 to change 1 to read
   request.dataModeControlV2Request.mode = 4; // Full Motion On
   request.dataModeControlV2Request.packetSelect = 8; // MotionEngine Output
-  request.dataModeControlV2Request.formatSelect = 1; // Format 0
-  request.dataModeControlV2Request.ff0 = 1; // Enable acceleration
-  request.dataModeControlV2Request.ff1 = 1; // Enable acceleration no gravity
-  request.dataModeControlV2Request.ff2 = 1; // Enable angular velocity
-  request.dataModeControlV2Request.ff3 = 1; // Enable Magnetometer
-  request.dataModeControlV2Request.ff4 = 1; // Enable inclination
-  request.dataModeControlV2Request.ff5 = 1; // Enable compass heading
-  request.dataModeControlV2Request.ff6 = 1; // Enable Angular Position(XYZW)
+  request.dataModeControlV2Request.formatSelect = 0; // Format 0
+  request.dataModeControlV2Request.ff0 = 0; // Enable Pointer
+  request.dataModeControlV2Request.ff1 = 1; // Enable Linear Acceleration
+  request.dataModeControlV2Request.ff2 = 1; // Enable Linear Acceleration, No Gravity
+  request.dataModeControlV2Request.ff3 = 1; // Enable Angular Velocity
+  request.dataModeControlV2Request.ff4 = 1; // Enable Magnetometer
+  request.dataModeControlV2Request.ff5 = 0; // Enable Temperature
+  request.dataModeControlV2Request.ff6 = 1; // Enable Angular Position (WXYZ)
   request.dataModeControlV2Request.ff7 = 0; // Nothing
   ret = freespace_sendMessage(ids[0], &request);
   if(ret != FREESPACE_SUCCESS) {
@@ -114,7 +115,10 @@ int main(int argc, char** argv)
     if(ret != FREESPACE_SUCCESS) {
       ROS_ERROR_STREAM("failed to read acceleration " << ret);
     }
-
+    Eigen::Vector3d accel_vec(accel_msg.x,-accel_msg.y,accel_msg.z);
+    Eigen::Matrix3d T;
+    T << cos(M_PI), -sin(M_PI), 0, sin(M_PI), cos(M_PI), 0, 0, 0, 1;
+    Eigen::Vector3d rotated_accel = T * accel_vec;
 
     MultiAxisSensor orientation_msg;
     ret = freespace_util_getAngPos(&response.motionEngineOutput, &orientation_msg);
@@ -127,6 +131,9 @@ int main(int argc, char** argv)
     if(ret != FREESPACE_SUCCESS) {
       ROS_ERROR_STREAM("failed to read angular velocity " << ret);
     }
+    T << 1, 0, 0, 0, cos(M_PI), -sin(M_PI), 0, sin(M_PI), cos(M_PI);
+    Eigen::Vector3d angular_vel_vec(angular_vel_msg.x,angular_vel_msg.y,angular_vel_msg.z);
+    Eigen::Vector3d rotated_angular_vel = T * angular_vel_vec;
 
     MultiAxisSensor magnetometer_msg;
     ret = freespace_util_getMagnetometer(&response.motionEngineOutput, &magnetometer_msg);
@@ -140,13 +147,13 @@ int main(int argc, char** argv)
     msg.header.stamp = ros::Time::now();
     msg.header.seq = seq++;
 
-    msg.linear_acceleration.x = accel_msg.x;
-    msg.linear_acceleration.y = accel_msg.y;
-    msg.linear_acceleration.z = accel_msg.z;
+    msg.linear_acceleration.x = rotated_accel[0];
+    msg.linear_acceleration.y = rotated_accel[1];
+    msg.linear_acceleration.z = rotated_accel[2];
 
-    msg.angular_velocity.x = angular_vel_msg.x;
-    msg.angular_velocity.y = angular_vel_msg.y;
-    msg.angular_velocity.z = angular_vel_msg.z;
+    msg.angular_velocity.x = rotated_angular_vel[0];
+    msg.angular_velocity.y = rotated_angular_vel[1];
+    msg.angular_velocity.z = rotated_angular_vel[2];
     msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
 
     geometry_msgs::Quaternion orientation;
