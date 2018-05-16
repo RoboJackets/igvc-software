@@ -166,8 +166,13 @@ int main(int argc, char** argv)
             // imu message
           } else if(ret.at(1) == 'V') {
             std_msgs::UInt8 battery_msg;
-            battery_msg.data = atoi(tokens.at(0).c_str());
+            int voltage = atoi(tokens.at(0).c_str());
+            battery_msg.data = voltage;
             battery_pub.publish(battery_msg);
+            //ROS_INFO_STREAM("battery voltage = " << battery_msg.data);
+            if(battery_msg.data < 24) {
+              //ROS_ERROR_STREAM("battery voltage is dangerously low" << battery_msg.data);
+            }
             std_msgs::Bool enabled_msg;
             //ROS_INFO_STREAM("battery " << "val = |" << tokens.at(1)  << "| " << ret);
             enabled_msg.data = tokens.at(1) == "1";
