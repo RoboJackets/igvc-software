@@ -6,3 +6,4 @@ KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", ATTRS{bcdDe
 SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303",ATTRS{bcdDevice}=="0300", SYMLINK+="igvc_gps"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", ATTRS{serial}=="95437313335351119031", SYMLINK+="igvc_light_arduino"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="2a03", ATTRS{idProduct}=="0043", ATTRS{serial}=="955303436343511031F1", SYMLINK+="igvc_motor_arduino"
+SUBSYSTEM=="usb", ATTR{idVendor}=="1d5a", MODE="0666"
