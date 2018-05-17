@@ -1,25 +1,12 @@
-#include <igvc/SerialPort.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <tf/transform_datatypes.h>
-#include <igvc/StringUtils.hpp>
 #include <vector>
 #include <freespace/freespace.h>
 #include <freespace/freespace_util.h>
 #include <geometry_msgs/Vector3.h>
 #include <Eigen/Dense>
-
-#define DEG_TO_RAD (3.14159265 / 180.0)
-#define HALF_TO_FULL_CIRCLE_ANGLE(ang) (((ang) < 0) ? ((ang) + 360) : (ang))
-
-std::list<double> x_accel;
-std::list<double> y_accel;
-std::list<double> z_accel;
-
-double x_avg;
-double y_avg;
-double z_avg;
 
 int main(int argc, char** argv)
 {
