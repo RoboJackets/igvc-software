@@ -38,9 +38,9 @@ bool debug;
 double cur_x;
 double cur_y;
 
-std::tuple<int, int> rotate(int x, int y) {
-  int newX = std::round(x * cos(orientation) + y * -1 * sin(orientation));
-  int newY = std::round(x * sin(orientation) + y * cos(orientation));
+std::tuple<double, double> rotate(double x, double y) {
+  double newX = x * cos(orientation) + y * -1 * sin(orientation);
+  double newY = x * sin(orientation) + y * cos(orientation);
   return (std::make_tuple(newX, newY));
 }
 
@@ -51,6 +51,7 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr &msg) {
     tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
     double roll, pitch, yaw;
     tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+    ROS_INFO_STREAM("orientation " << yaw);
     orientation = yaw;
 }
 
@@ -67,7 +68,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
 
   ros::Time time = ros::Time::now();
   if(transforms.find(topic) == transforms.end()) {
-    if(tf_listener->waitForTransform("base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(3.0))) {
+    if(tf_listener->waitForTransform("/base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(3.0))) {
       ROS_INFO_STREAM("\n\ngetting transform for " << topic << "\n\n");
       tf::StampedTransform transform;
       tf_listener->lookupTransform("/base_footprint", msg->header.frame_id, ros::Time(0), transform);
@@ -91,16 +92,16 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
 
   for (point = transformed->begin(); point < transformed->points.end(); point++)
   {
-    int point_x = (int)std::round((point->x));
-    int point_y = (int)std::round((point->y));
-    std::tie(point_x, point_y) = rotate(point_x, point_y);
-    point_x = (int)std::round(point_x / resolution + cur_x / resolution + start_x);
-    point_y = (int)std::round(point_y / resolution + cur_y / resolution + start_y);
-    ROS_INFO_STREAM("\npoint = " << point_x << "," << point_y << "\n");
+    //ROS_INFO_STREAM("points starts at " << point->x << "," << point->y);
+    double x_loc, y_loc;
+    std::tie(x_loc, y_loc) = rotate(point->x, point->y);
+    //ROS_INFO_STREAM("rotated " << x_loc << "," << y_loc);
+    int point_x = static_cast<int>(std::round(x_loc / resolution + cur_x / resolution + start_x));
+    int point_y = static_cast<int>(std::round(y_loc / resolution + cur_y / resolution + start_y));
+    //ROS_INFO_STREAM("point = " << point_x << "," << point_y);
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
-      ROS_INFO_STREAM("\npre rotation point at " << point_x << "," << point_y << "\n");
-      ROS_INFO_STREAM("\nputting point at " << point_x << "," << point_y << "\n");
+      //ROS_INFO_STREAM("putting point at " << point_x << "," << point_y);
       published_map->at<uchar>(point_x, point_y) = (uchar)255;
       count++;
     }
@@ -128,21 +129,19 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   if (debug)
   {
     debug_pub.publish(imageBoi);
-    ROS_INFO_STREAM("\n\nTRANSORMED " << count << " POINTS\n\n");
-    ROS_INFO_STREAM("\n The robot is located at " << cur_x << "," << cur_y << "," << orientation << "\n");
+    ROS_INFO_STREAM("\nThe robot is located at " << cur_x << "," << cur_y << "," << orientation);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid=
               pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
       for(int j = 0; j < length_y; j++){
         if(published_map->at<uchar>(i, j) == (uchar)255) {
-          //ROS_INFO_STREAM("p " << (i - start_x) * resolution << "," << (j - start_y) * resolution);
-          pcl::PointXYZRGB p(i * resolution - start_x, j * resolution - start_y, 0);
-          p.r = published_map->at<uchar>(i, j);
+          pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
+          p.x = (i - start_x) * resolution;
+          p.y = (j - start_y) * resolution;
           fromOcuGrid->points.push_back(p);
         }
       }
     }
-    ROS_INFO_STREAM("size = " << fromOcuGrid->points.size());
     fromOcuGrid->header.frame_id = "/odom";
     fromOcuGrid->header.stamp = msg->header.stamp;
     debug_pcl_pub.publish(fromOcuGrid);
@@ -208,13 +207,13 @@ int main(int argc, char **argv)
 
     debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
     debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
-    for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
+    /*for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
       for(int j = 0; j < length_y; j++){
         if(i == 0 || i == width_x - 1 || j == 0 || j == length_y - 1) {
           published_map->at<uchar>(i, j) = (uchar)255;
         }
       }
-    }
+      }*/
   }
 
   ros::spin();
