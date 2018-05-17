@@ -122,7 +122,7 @@ int main(int argc, char** argv)
             valid_values_i = (stod(vals.at(0)) == i_l) && valid_values_i;
             valid_values_i = (stod(vals.at(1)) == i_r) && valid_values_i;
           }
-        } else {
+        } else if(ret.at(1) != 'V') {
           ROS_ERROR_STREAM("Recieved unknown string while setting PID values " << ret);
         }
       } else if(ret.empty()) {
