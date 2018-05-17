@@ -102,7 +102,7 @@ int main(int argc, char** argv)
     if(ret != FREESPACE_SUCCESS) {
       ROS_ERROR_STREAM("failed to read acceleration " << ret);
     }
-    Eigen::Vector3d accel_vec(accel_msg.x, -accel_msg.y, accel_msg.z);
+    Eigen::Vector3d accel_vec(accel_msg.x,-accel_msg.y,accel_msg.z);
     Eigen::Matrix3d T;
     T << cos(M_PI), -sin(M_PI), 0, sin(M_PI), cos(M_PI), 0, 0, 0, 1;
     Eigen::Vector3d rotated_accel = T * accel_vec;
@@ -118,7 +118,8 @@ int main(int argc, char** argv)
     if(ret != FREESPACE_SUCCESS) {
       ROS_ERROR_STREAM("failed to read angular velocity " << ret);
     }
-    Eigen::Vector3d angular_vel_vec(angular_vel_msg.x, -angular_vel_msg.y, angular_vel_msg.z);
+    T << 1, 0, 0, 0, cos(M_PI), -sin(M_PI), 0, sin(M_PI), cos(M_PI);
+    Eigen::Vector3d angular_vel_vec(angular_vel_msg.x,angular_vel_msg.y,angular_vel_msg.z);
     Eigen::Vector3d rotated_angular_vel = T * angular_vel_vec;
 
     MultiAxisSensor magnetometer_msg;
