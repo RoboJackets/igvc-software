@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <stdlib.h>
+#include <math.h>
 #include <Eigen/Core>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
@@ -36,6 +37,12 @@ int width_x;
 bool debug;
 double cur_x;
 double cur_y;
+
+std::tuple<int, int> rotate(int x, int y) {
+  int newX = std::round(x * cos(orientation) + y * -1 * sin(orientation));
+  int newY = std::round(x * sin(orientation) + y * cos(orientation));
+  return (std::make_tuple(newX, newY));
+}
 
 void odom_callback(const nav_msgs::Odometry::ConstPtr &msg) {
     cur_x = msg->pose.pose.position.x;
@@ -81,15 +88,19 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   pcl_ros::transformPointCloud(*msg, *transformed, transforms.at(topic));
 
   pcl::PointCloud<pcl::PointXYZ>::const_iterator point;
+
   for (point = transformed->begin(); point < transformed->points.end(); point++)
   {
-    int point_x = (int)std::round((point->x / resolution) + start_x);
-    point_x = (int)std::round(point_x + cur_x);
-    int point_y = (int)std::round((point->y / resolution) + start_y);
-    point_y = (int)std::round(point_y + cur_y);
-    //ROS_INFO_STREAM("point = " << point_x << "," << point_y);
+    int point_x = (int)std::round((point->x));
+    int point_y = (int)std::round((point->y));
+    std::tie(point_x, point_y) = rotate(point_x, point_y);
+    point_x = (int)std::round(point_x / resolution + cur_x / resolution + start_x);
+    point_y = (int)std::round(point_y / resolution + cur_y / resolution + start_y);
+    ROS_INFO_STREAM("\npoint = " << point_x << "," << point_y << "\n");
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
+      ROS_INFO_STREAM("\npre rotation point at " << point_x << "," << point_y << "\n");
+      ROS_INFO_STREAM("\nputting point at " << point_x << "," << point_y << "\n");
       published_map->at<uchar>(point_x, point_y) = (uchar)255;
       count++;
     }
@@ -99,6 +110,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
       offMap = true;
     }
   }
+  published_map->at<uchar>(start_x + cur_x / resolution, start_y + cur_y / resolution) = (uchar)100;
   // make image message from img bridge
 
   img_bridge = cv_bridge::CvImage(msgBoi.header, sensor_msgs::image_encodings::MONO8, *published_map);
@@ -117,6 +129,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   {
     debug_pub.publish(imageBoi);
     ROS_INFO_STREAM("\n\nTRANSORMED " << count << " POINTS\n\n");
+    ROS_INFO_STREAM("\n The robot is located at " << cur_x << "," << cur_y << "," << orientation << "\n");
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid=
               pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
@@ -163,6 +176,7 @@ int main(int argc, char **argv)
   pNh.getParam("occupancy_grid_resolution", resolution);
   pNh.getParam("start_X", cont_start_x);
   pNh.getParam("start_Y", cont_start_y);
+  pNh.getParam("orientation", orientation);
   pNh.getParam("debug", debug);
 
   // convert from meters to grid
