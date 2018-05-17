@@ -74,7 +74,7 @@ TEST_F(TestNewMapper, OriginCheck)
   mock_localization_pub.publish(odom_msg);
 
   pcl::PointCloud<pcl::PointXYZ> cloud_msg;
-  pcl::PointXYZ point(0, 0, 0);
+  pcl::PointXYZ point(0, 1, 0);
   cloud_msg.points.push_back(point);
   cloud_msg.header.frame_id = "/lidar";
   mock_lidar_pub.publish(cloud_msg);
@@ -88,7 +88,7 @@ TEST_F(TestNewMapper, OriginCheck)
   ASSERT_TRUE(response.get() != nullptr);
   const sensor_msgs::Image img = response->image;
   cv::Mat map = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::MONO8)->image;
-  ASSERT_EQ(map.at<uchar>(250, 250), (uchar)255);
+  ASSERT_EQ(map.at<uchar>(250, 255), (uchar)255);
 }
 
 int main(int argc, char** argv)
