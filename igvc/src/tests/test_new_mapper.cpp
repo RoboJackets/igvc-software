@@ -89,6 +89,7 @@ TEST_F(TestNewMapper, OriginCheck)
   const sensor_msgs::Image img = response->image;
   cv::Mat map = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::MONO8)->image;
   ASSERT_EQ(map.at<uchar>(250, 255), (uchar)255);
+  ASSERT_EQ(map.at<uchar>(250, 250), (uchar)100);
 }
 
 int main(int argc, char** argv)
