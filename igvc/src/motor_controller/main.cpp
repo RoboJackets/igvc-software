@@ -1,10 +1,10 @@
 #include <igvc/SerialPort.h>
 #include <igvc_msgs/velocity_pair.h>
-#include <std_msgs/UInt8.h>
+#include <std_msgs/Bool.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <ros/subscriber.h>
-#include <std_msgs/Bool.h>
+#include <std_msgs/Float64.h>
 #include <string>
 #include <vector>
 #include <igvc/StringUtils.hpp>
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 
   ros::Publisher enabled_pub = nh.advertise<std_msgs::Bool>("/robot_enabled", 1);
 
-  ros::Publisher battery_pub = nh.advertise<std_msgs::UInt8>("/battery", 1);
+  ros::Publisher battery_pub = nh.advertise<std_msgs::Float64>("/battery", 1);
 
   std::string device_path;
   nhp.param(std::string("device"), device_path, std::string("/dev/igvc_motor_board"));
@@ -60,9 +60,7 @@ int main(int argc, char** argv)
   nhp.param("i_r", i_r, 0.0);
   nhp.param("i_l", i_l, 0.0);
 
-  ROS_INFO_STREAM("Opening port");
   SerialPort port(device_path, baud_rate);
-  ROS_INFO_STREAM("Opened port");
 
   if (!port.isOpen())
   {
@@ -84,7 +82,6 @@ int main(int argc, char** argv)
 
   while(ros::ok() && (!valid_values_p || !valid_values_d || !valid_values_i)) {
     ros::spinOnce();
-    ROS_INFO_STREAM("sending PID values to board");
     if(!valid_values_p) {
       port.write(p_values);
     }
@@ -103,7 +100,7 @@ int main(int argc, char** argv)
         size_t end = ret.find('\n');
         if(p_loc != std::string::npos) {
           std::vector<std::string> vals = split(ret.substr(p_loc + 1, end), ',');
-          ROS_INFO_STREAM("p ret = " << ret);
+          ROS_INFO_STREAM("Successfully set p values");
           if(vals.size() == 2) {
             valid_values_p = true;
             valid_values_p = (stod(vals.at(0)) == p_l) && valid_values_p;
@@ -111,7 +108,7 @@ int main(int argc, char** argv)
           }
         } else if(d_loc != std::string::npos) {
           std::vector<std::string> vals = split(ret.substr(d_loc + 1, end), ',');
-          ROS_INFO_STREAM("d ret = " << ret);
+          ROS_INFO_STREAM("Successfully set d values");
           if(vals.size() == 2) {
             valid_values_d = true;
             valid_values_d = (stod(vals.at(0)) == d_l) && valid_values_d;
@@ -119,22 +116,22 @@ int main(int argc, char** argv)
           }
         } else if(i_loc != std::string::npos) {
           std::vector<std::string> vals = split(ret.substr(i_loc + 1, end), ',');
-          ROS_INFO_STREAM("i ret = " << ret);
+          ROS_INFO_STREAM("Successfully set i values");
           if(vals.size() == 2) {
             valid_values_i = true;
             valid_values_i = (stod(vals.at(0)) == i_l) && valid_values_i;
             valid_values_i = (stod(vals.at(1)) == i_r) && valid_values_i;
           }
         } else {
-          ROS_INFO_STREAM("recieved unknown string while setting PID values " << ret);
+          ROS_ERROR_STREAM("Recieved unknown string while setting PID values " << ret);
         }
       } else if(ret.empty()) {
-        ROS_ERROR_STREAM("Empty return from motor arduino while sending PID values.\t" << ret);
+        ROS_ERROR_STREAM("Empty return from motor board while sending PID values.\t" << ret);
       }
     }
     rate.sleep();
   }
-  ROS_INFO_STREAM("sucessfully sent PID values");
+  ROS_INFO_STREAM("Sucessfully set all PID values");
 
   while (ros::ok() && port.isOpen()) {
     ros::spinOnce();
@@ -159,22 +156,20 @@ int main(int argc, char** argv)
       }
 
       if(tokens.size() <= 0) {
-        ROS_INFO_STREAM("invalid number of tokens from motor board");
+        ROS_INFO_STREAM("Invalid number of tokens from motor board");
       } else {
         if(pound != std::string::npos) {
           if(ret.at(1) == 'I') {
             // imu message
           } else if(ret.at(1) == 'V') {
-            std_msgs::UInt8 battery_msg;
-            int voltage = atoi(tokens.at(0).c_str());
+            std_msgs::Float64 battery_msg;
+            double voltage = atof(tokens.at(0).c_str());
             battery_msg.data = voltage;
             battery_pub.publish(battery_msg);
-            //ROS_INFO_STREAM("battery voltage = " << battery_msg.data);
-            if(battery_msg.data < 24) {
-              //ROS_ERROR_STREAM("battery voltage is dangerously low" << battery_msg.data);
+            if(voltage < 24) {
+              ROS_ERROR_STREAM("Battery voltage dangerously low");
             }
             std_msgs::Bool enabled_msg;
-            //ROS_INFO_STREAM("battery " << "val = |" << tokens.at(1)  << "| " << ret);
             enabled_msg.data = tokens.at(1) == "1";
             enabled = enabled_msg.data;
             enabled_pub.publish(enabled_msg);
@@ -190,7 +185,7 @@ int main(int argc, char** argv)
           enc_msg.header.stamp = ros::Time::now();
           enc_pub.publish(enc_msg);
         } else {
-          ROS_INFO_STREAM("unknown message from motor board " << ret);
+          ROS_ERROR_STREAM("Unknown message from motor board " << ret);
         }
       }
       ret = port.readln();
