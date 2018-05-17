@@ -18,7 +18,7 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
   float rightVelocity = msg.right_velocity;
   float deltaT = msg.duration;
 
-  float angularVelocity = (rightVelocity - leftVelocity) / WHEEL_SEPARATION;
+  float angularVelocity = (rightVelocity - leftVelocity) / wheel_sep;
   float deltaTheta = angularVelocity * deltaT;
   float velocity = (rightVelocity + leftVelocity) / 2;
 
@@ -87,6 +87,8 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
 
 Odometer::Odometer(ros::NodeHandle& nh)
 {
+  nh.param("wheel_sep", wheel_sep, 0.52);
+
   sub = nh.subscribe("/encoders", 10, &Odometer::enc_callback, this);
   pub = nh.advertise<nav_msgs::Odometry>("/wheel_odometry", 10);
 

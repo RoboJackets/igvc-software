@@ -333,12 +333,12 @@
   <joint name="imu_to_front_ball" type="floating">
     <parent link="imu"/>
     <child link="front_ball"/>
-    <origin xyz=".39 -0 -.53" rpy="0 0 0" />
+    <origin xyz=".39 0.0 -.53" rpy="0 0 0" />
   </joint>
   <joint name="imu_to_back_ball" type="floating">
     <parent link="imu"/>
     <child link="back_ball"/>
-    <origin xyz="-.85 0 -.53" rpy="0 0 0" />
+    <origin xyz="-.85 0.0 -.53" rpy="0 0 0" />
   </joint>
   <joint name="optical_cam_center_joint" type="fixed">
     <parent link="usb_cam_center"/>
