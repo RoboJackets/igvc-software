@@ -21,7 +21,7 @@
 
       <!-- for if the IMU (after magnetic declination adjustment)
            does not read 0 -->
-      <param name="yaw_offset" value="0"/>
+      <param name="yaw_offset" value="1.62114167757"/>
 
       <!-- this assumes we are in a planar environment -->
       <param name="two_d_mode" value="true"/>
