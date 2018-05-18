@@ -78,23 +78,28 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
 
   float tar_x, tar_y;
 
-  ROS_INFO_STREAM("poses = " << path->poses.size() << " < " << lookahead_dist / path_resolution);
-
-  if(path->poses.size() > lookahead_dist / path_resolution) {
-    double path_index = lookahead_dist / path_resolution;
-
-    geometry_msgs::Point point = path->poses[ceil(path_index)].pose.position;
-    //ROS_INFO_STREAM("point 1 = " << point.x << ", " << point.y);
-    Eigen::Vector3d first(point.x,point.y, 0);
-    point = path->poses[floor(path_index)].pose.position;
-    //ROS_INFO_STREAM("point 2 = " << point.x << ", " << point.y);
-    Eigen::Vector3d second(point.x,point.y, 0);
-    Eigen::Vector3d slope = first - second;
-    double distance = distance-(long)distance;
-    slope *= distance;
-    slope += first;
-    tar_x = slope[0];
-    tar_y = slope[1];
+  if(path->poses.size() > lookahead_dist / (path_resolution * sqrt(2))) {
+    double path_index = 0;
+    double distance = 0;
+    bool cont = true;
+    while(cont && path_index < path->poses.size() - 1) {
+      geometry_msgs::Point point1 = path->poses[path_index].pose.position;
+      geometry_msgs::Point point2 = path->poses[path_index].pose.position;
+      double increment = sqrt(pow(point2.x - point1.x, 2) + pow(point2.y - point2.y, 2));
+      if(distance > lookahead_dist) {
+        cont = false;
+        Eigen::Vector3d first(point1.x,point1.y, 0);
+        Eigen::Vector3d second(point2.x,point2.y, 0);
+        Eigen::Vector3d slope = first - second;
+        slope *= lookahead_dist;
+        slope += first;
+        tar_x = slope[0];
+        tar_y = slope[1];
+      } else {
+        path_index++;
+        distance += increment;
+      }
+    }
   } else {
     tar_x = path->poses[path->poses.size()].pose.position.x;
     tar_y = path->poses[path->poses.size()].pose.position.y;
