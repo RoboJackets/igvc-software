@@ -13,7 +13,6 @@ StateEstimator::StateEstimator() :
   gpsQ_(),
   imuQ_(),
   lastIMUT_(),
-  lastIMUTcb_(),
   nh_("~")
 {
 
@@ -94,12 +93,12 @@ void StateEstimator::optimizationLoop()
     lastImu = imuQ_.pop();
 
   // setting up the IMU integration
-  boost::shared_ptr<gtsam::PreintegrationParams> preintegrationParams =  PreintegrationParams::MakeSharedU(9.80511); // magnitude of gravity looked up from wolframalpha
+  boost::shared_ptr<gtsam::PreintegrationParams> preintegrationParams =  PreintegrationParams::MakeSharedU(0); // 9.80511); // magnitude of gravity looked up from wolframalpha
   preintegrationParams->accelerometerCovariance = 1e-2 * I_3x3;
   preintegrationParams->gyroscopeCovariance = 1e-3 * I_3x3;
   preintegrationParams->integrationCovariance = 1e-4 * I_3x3;
 
-  boost::shared_ptr<gtsam::PreintegratedImuMeasurements> imuIntegrator(preintegrationParams, prevBias);
+  PreintegratedImuMeasurements imuIntegrator(preintegrationParams, prevBias);
 
   // now we loop and let use the queues to grab messages
   while (ros::ok())
@@ -112,7 +111,7 @@ void StateEstimator::optimizationLoop()
     while (!imuQ_.empty() && ROS_TIME(imuQ_.back()) > (startTime + 0.1*imuKey))
     {
       imu = imuQ_.pop();
-      dt = ROS_TIME(imu) - lastImuT;
+      double dt = ROS_TIME(imu) - lastImuT;
       lastImuT = ROS_TIME(imu);
       imuIntegrator.integrateMeasurement(
           Vector3(imu->linear_acceleration.x, imu->linear_acceleration.y, imu->linear_acceleration.z),
