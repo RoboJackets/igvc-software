@@ -124,7 +124,6 @@ int main(int argc, char** argv)
       pose.header.frame_id = path_msg.header.frame_id;
       pose.pose.position.x = loc.X;
       pose.pose.position.y = loc.Y;
-      //ROS_INFO_STREAM("path poses = " << loc.X << ", " << loc.Y);
       path_msg.poses.push_back(pose);
     }
     path_pub.publish(path_msg);
