@@ -18,6 +18,7 @@ add_message_files(
   action_path.msg
   system_stats.msg
   map.msg
+  igvc_path.msg
 )
 
 # Generate added messages and services with any dependencies listed here
@@ -25,6 +26,7 @@ generate_messages(
   DEPENDENCIES
   std_msgs
   sensor_msgs
+  geometry_msgs
 )
 
 catkin_package()
