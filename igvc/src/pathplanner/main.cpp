@@ -40,9 +40,9 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
   search_problem.Map = cv_ptr;
   //ROS_INFO_STREAM(cv_ptr->image);
 
-  search_problem.Start.X = msg->x_position;
-  search_problem.Start.Y = msg->y_position;
-  search_problem.Start.Theta = msg->theta;
+  search_problem.Start.X = msg->x;
+  search_problem.Start.Y = msg->y;
+  search_problem.Start.Theta = msg->orientation;
   search_problem.Resolution = msg->resolution;
 }
 
