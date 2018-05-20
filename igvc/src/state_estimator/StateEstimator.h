@@ -36,12 +36,23 @@ private:
   ThreadedQueue<sensor_msgs::NavSatFixConstPtr> gpsQ_;
   ThreadedQueue<sensor_msgs::ImuConstPtr> imuQ_;
 
-  double lastIMUT_;
+  double lastImuT_;
+  std::list<sensor_msgs::ImuConstPtr> imuMeasurements_;
   double accelBiasSigma_, gyroBiasSigma_;
   double gpsSigma_;
 
+  gtsam::PreintegratedImuMeasurements imuIntegrator_;
+
   GeographicLib::LocalCartesian enu_; /// Object to put lat/lon coordinates into local cartesian
   gtsam::Pose3 imuToGps_;
+
+  // variables for passing the state between threads
+  mutable std::mutex mutex_;
+  bool doneFirstOpt_;
+  gtsam::Pose3 prevPose_;
+  gtsam::Vector3 prevVel_;
+  gtsam::imuBias::ConstantBias prevBias_;
+  double currentTime_;
 
   // convenience function for taking a message pointer and returning the time stamp as a double
   template<class T>
