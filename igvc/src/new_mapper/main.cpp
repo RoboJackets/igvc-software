@@ -37,6 +37,7 @@ int width_x;
 bool debug;
 double cur_x;
 double cur_y;
+bool update = true;
 
 std::tuple<double, double> rotate(double x, double y) {
   double newX = x * cos(orientation) + y * -1 * sin(orientation);
@@ -45,14 +46,16 @@ std::tuple<double, double> rotate(double x, double y) {
 }
 
 void odom_callback(const nav_msgs::Odometry::ConstPtr &msg) {
+  if(update) {
     cur_x = msg->pose.pose.position.x;
     cur_y = msg->pose.pose.position.y;
     tf::Quaternion quat;
     tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
     double roll, pitch, yaw;
     tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-    ROS_INFO_STREAM("orientation " << yaw);
     orientation = yaw;
+    update = false;
+  }
 }
 
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
@@ -125,11 +128,14 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   msgBoi.width = width_x;
   msgBoi.resolution = resolution;
   msgBoi.orientation = orientation;
+  ROS_INFO_STREAM("robot location " << cur_x / resolution << ", " << cur_y / resolution);
+  msgBoi.x = std::round(cur_x / resolution);
+  msgBoi.y = std::round(cur_y / resolution);
   map_pub.publish(msgBoi);
   if (debug)
   {
     debug_pub.publish(imageBoi);
-    ROS_INFO_STREAM("\nThe robot is located at " << cur_x << "," << cur_y << "," << orientation);
+    //ROS_INFO_STREAM("\nThe robot is located at " << cur_x << "," << cur_y << "," << orientation);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid=
               pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
@@ -146,6 +152,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     fromOcuGrid->header.stamp = msg->header.stamp;
     debug_pcl_pub.publish(fromOcuGrid);
   }
+  update = true;
 }
 
 int main(int argc, char **argv)
