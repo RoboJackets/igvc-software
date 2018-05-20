@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="state_estimator" pkg="igvc" type="StateEstimator" output="screen">
+    <remap from="state_estimator/gps" to="/fix" />
+    <remap from="state_estimator/imu" to="/imu" />
+  </node>
+</launch>
