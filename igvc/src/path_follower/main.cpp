@@ -80,7 +80,6 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   float tar_x, tar_y;
   geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
   if(get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist) {
-    ROS_INFO("got here");
     double path_index = 0;
     double distance = 0;
     bool cont = true;
@@ -103,7 +102,6 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
       }
     }
   } else {
-    ROS_INFO("else");
     tar_x = end.x;
     tar_y = end.y;
   }
@@ -124,7 +122,6 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   igvc_msgs::velocity_pair vel;
   get_wheel_speeds(vel, d, theta);
 
-  ROS_INFO_STREAM(vel.left_velocity << ", " << vel.right_velocity);
   cmd_pub.publish(vel);
 }
 
@@ -142,7 +139,7 @@ int main(int argc, char** argv)
   cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
   target_pub = nh.advertise<geometry_msgs::PointStamped>("/target_point", 1);
 
-  ros::Subscriber path_sub = nh.subscribe("/path_display", 1, path_callback);
+  ros::Subscriber path_sub = nh.subscribe("/path", 1, path_callback);
 
   ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, position_callback);
 
