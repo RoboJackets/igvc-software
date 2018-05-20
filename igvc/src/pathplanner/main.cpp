@@ -38,19 +38,19 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
   cv_bridge::CvImageConstPtr cv_ptr;
   cv_ptr = cv_bridge::toCvShare(msg->image, msg, "mono8");
   search_problem.Map = cv_ptr;
-  //ROS_INFO_STREAM(cv_ptr->image);
 
   search_problem.Start.X = msg->x;
   search_problem.Start.Y = msg->y;
-  search_problem.Start.Theta = msg->orientation;
+  search_problem.Start.Theta = std::round(msg->orientation / (M_PI / 4)) * (M_PI / 4);
+  ROS_INFO_STREAM("Start position " << search_problem.Start.X << "," << search_problem.Start.Y << " theta = " << search_problem.Start.Theta);
   search_problem.Resolution = msg->resolution;
 }
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
   std::lock_guard<std::mutex> lock(planning_mutex);
-  search_problem.Goal.X = msg->point.x;
-  search_problem.Goal.Y = msg->point.y;
+  search_problem.Goal.X = msg->point.x / search_problem.Resolution;
+  search_problem.Goal.Y = msg->point.y / search_problem.Resolution;
   ROS_INFO_STREAM("Waypoint received. " << search_problem.Goal.X << ", " << search_problem.Goal.Y);
   received_waypoint = true;
 }
@@ -122,8 +122,8 @@ int main(int argc, char** argv)
       geometry_msgs::PoseStamped pose;
       pose.header.stamp = path_msg.header.stamp;
       pose.header.frame_id = path_msg.header.frame_id;
-      pose.pose.position.x = loc.X;
-      pose.pose.position.y = loc.Y;
+      pose.pose.position.x = loc.X * search_problem.Resolution;
+      pose.pose.position.y = loc.Y * search_problem.Resolution;
       path_msg.poses.push_back(pose);
     }
     path_pub.publish(path_msg);
