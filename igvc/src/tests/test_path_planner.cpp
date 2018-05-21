@@ -59,7 +59,6 @@ protected:
 
 TEST_F(TestPathPlanner, EmptyMap)
 {
-  sleep(1);
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
   map.header.stamp = ros::Time::now();
@@ -72,7 +71,6 @@ TEST_F(TestPathPlanner, EmptyMap)
   image_bridge.toImageMsg(image_message);
   map.image = image_message;
 
- map.resolution = 0.1;
   map.resolution = 0.1;
   map.x = 0.0;
   map.y = 0.0;
@@ -87,6 +85,8 @@ TEST_F(TestPathPlanner, EmptyMap)
   waypoint.point.y = 1.0;
   mock_waypoint_pub.publish(waypoint);
 
+  sleep(1);
+
   const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(response.get() != nullptr);
   ASSERT_EQ(response->poses.size(), 8);
@@ -97,7 +97,6 @@ TEST_F(TestPathPlanner, EmptyMap)
 }
 
 TEST_F(TestPathPlanner, TestDifferentStartLocation) {
-  sleep(1);
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
   map.header.stamp = ros::Time::now();
@@ -113,8 +112,8 @@ TEST_F(TestPathPlanner, TestDifferentStartLocation) {
   map.resolution = 0.1;
   map.x = 3;
   map.y = 3;
-  map.x_initial = 0.0;
-  map.y_initial = 0.0;
+  map.x_initial = 0;
+  map.y_initial = 0;
   map.orientation = M_PI / 4;
 
   mock_map_pub.publish(map);
@@ -123,6 +122,8 @@ TEST_F(TestPathPlanner, TestDifferentStartLocation) {
   waypoint.point.x = 1.0;
   waypoint.point.y = 1.0;
   mock_waypoint_pub.publish(waypoint);
+
+  sleep(1);
 
   const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
 
@@ -135,7 +136,6 @@ TEST_F(TestPathPlanner, TestDifferentStartLocation) {
 }
 
 TEST_F(TestPathPlanner, TestInitialLocationOffset) {
-  sleep(1);
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
   map.header.stamp = ros::Time::now();
@@ -162,6 +162,8 @@ TEST_F(TestPathPlanner, TestInitialLocationOffset) {
   waypoint.point.y = 1.0;
   mock_waypoint_pub.publish(waypoint);
 
+  sleep(1);
+
   const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
 
   ASSERT_TRUE(response.get() != nullptr);
@@ -174,7 +176,6 @@ TEST_F(TestPathPlanner, TestInitialLocationOffset) {
 
 TEST_F(TestPathPlanner, AvoidsObstacle)
 {
-  sleep(1);
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
   map_image.at<uchar>(3,4) = 255;
@@ -201,6 +202,8 @@ TEST_F(TestPathPlanner, AvoidsObstacle)
   waypoint.point.x = 1.0;
   waypoint.point.y = 1.0;
   mock_waypoint_pub.publish(waypoint);
+
+  sleep(1);
 
   const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
 
@@ -231,14 +234,94 @@ TEST_F(TestPathPlanner, AvoidsObstacle)
   EXPECT_NEAR(response->poses[7].pose.position.x, 0.7, 0.01);
   EXPECT_NEAR(response->poses[7].pose.position.y, 0.3, 0.01);
 
-  EXPECT_NEAR(response->poses[8].pose.position.x, 0.8, 0.01);
+  EXPECT_NEAR(response->poses[8].pose.position.x, 0.7, 0.01);
   EXPECT_NEAR(response->poses[8].pose.position.y, 0.4, 0.01);
 
-  EXPECT_NEAR(response->poses[9].pose.position.x, 0.9, 0.01);
+  EXPECT_NEAR(response->poses[9].pose.position.x, 0.7, 0.01);
   EXPECT_NEAR(response->poses[9].pose.position.y, 0.5, 0.01);
 
-  EXPECT_NEAR(response->poses[10].pose.position.x, 0.9, 0.01);
+  EXPECT_NEAR(response->poses[10].pose.position.x, 0.8, 0.01);
   EXPECT_NEAR(response->poses[10].pose.position.y, 0.6, 0.01);
+}
+
+TEST_F(TestPathPlanner, EmptyMapHorizontal)
+{
+  igvc_msgs::map map;
+  cv::Mat map_image = cv::Mat(50, 50, CV_8UC1, 0.0);
+  map.header.stamp = ros::Time::now();
+
+  std_msgs::Header image_header;
+  image_header.stamp = ros::Time::now();
+
+  cv_bridge::CvImage image_bridge = cv_bridge::CvImage(image_header, sensor_msgs::image_encodings::MONO8, map_image);
+  sensor_msgs::Image image_message;
+  image_bridge.toImageMsg(image_message);
+  map.image = image_message;
+
+  map.resolution = 0.2;
+  map.x = 5;
+  map.y = 0;
+  map.x_initial = 0;
+  map.y_initial = 0;
+  map.orientation = M_PI / 2;
+
+  mock_map_pub.publish(map);
+
+  geometry_msgs::PointStamped waypoint;
+  waypoint.point.x = 1.0;
+  waypoint.point.y = 2.0;
+  mock_waypoint_pub.publish(waypoint);
+
+  sleep(1);
+
+  const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
+  ASSERT_TRUE(response.get() != nullptr);
+  ASSERT_EQ(response->poses.size(), 9);
+  for(double i = 0; i < 9; i++) {
+    EXPECT_NEAR(1, response->poses[i].pose.position.x, 0.001);
+    EXPECT_NEAR(i / 5, response->poses[i].pose.position.y, 0.001);
+  }
+}
+
+TEST_F(TestPathPlanner, EmptyMapLarge)
+{
+  igvc_msgs::map map;
+  cv::Mat map_image = cv::Mat(500, 500, CV_8UC1, 0.0);
+  map.header.stamp = ros::Time::now();
+
+  std_msgs::Header image_header;
+  image_header.stamp = ros::Time::now();
+
+  cv_bridge::CvImage image_bridge = cv_bridge::CvImage(image_header, sensor_msgs::image_encodings::MONO8, map_image);
+  sensor_msgs::Image image_message;
+  image_bridge.toImageMsg(image_message);
+  map.image = image_message;
+
+  map.resolution = 0.2;
+  map.x = 250;
+  map.y = 250;
+  map.x_initial = 250;
+  map.y_initial = 250;
+  map.orientation = M_PI / 2;
+
+  mock_map_pub.publish(map);
+
+  geometry_msgs::PointStamped waypoint;
+  waypoint.point.x = -0.278;
+  waypoint.point.y = 11.08;
+  mock_waypoint_pub.publish(waypoint);
+
+  sleep(1);
+
+  const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(5));
+  ASSERT_TRUE(response.get() != nullptr);
+  ASSERT_EQ(response->poses.size(), 54);
+  EXPECT_NEAR(0, response->poses[0].pose.position.x, 0.001);
+  EXPECT_NEAR(0, response->poses[0].pose.position.y, 0.001);
+  for(double i = 1; i < 10; i++) {
+    EXPECT_NEAR(0, response->poses[i].pose.position.x, 0.001);
+    EXPECT_NEAR(i / 5, response->poses[i].pose.position.y, 0.001);
+  }
 }
 
 int main(int argc, char** argv)

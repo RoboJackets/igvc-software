@@ -34,7 +34,7 @@ std::list<SearchMove> IGVCSearchProblemDiscrete::getActions(SearchLocation state
     jump_size = 1 - jump_size;
   }
   int dist = max(std::round(jump_size * 10), 1.0);
-  dist = 1;
+  //std::cout << state << std::endl;
   //std::cout << "theta = " << theta << " ";
   if(abs(theta) < thetaThreshold) {
     //std::cout << "1" <<std::endl;
@@ -80,6 +80,9 @@ std::list<SearchMove> IGVCSearchProblemDiscrete::getActions(SearchLocation state
     std::cout << "\n\n\n\n\nfail" << theta << "\n\n\n\n\n" << std::endl;
   }
   acts.remove_if([this, state](SearchMove m){ return !isActionValid(m, state); });
+  /*for(auto loc : acts) {
+    cout << loc << endl;
+    }*/
   return acts;
 }
 
@@ -106,7 +109,9 @@ SearchLocation IGVCSearchProblemDiscrete::getResult(SearchLocation state, Search
     result.Theta = -M_PI/2;
   } else if(action.X > 0 && action.Y < 0) {
     result.Theta = -M_PI/4;
+  } else {
+    std::cout << "\n\n\n\n\nfail" << action << "\n\n\n\n\n" << std::endl;
   }
-  //std::cout << " x,y = " << action.X << ", " << action.Y << ", " << result.Theta;
+  //std::cout << state << " x,y = " << action.X << ", " << action.Y << ", " << result.Theta << std::endl;
   return result;
 }

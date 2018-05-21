@@ -4,7 +4,7 @@
 
 bool SearchLocation::operator==(const SearchLocation &other) const
 {
-  return X == other.X && Y - other.Y && Theta == other.Theta;
+  return X == other.X && Y == other.Y && Theta == other.Theta;
 }
 
 bool SearchLocation::operator<(const SearchLocation &other) const
