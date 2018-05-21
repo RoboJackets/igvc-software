@@ -37,6 +37,8 @@ unsigned int current_index = 0;
 
 double initial_x, initial_y;
 
+pcl::PointCloud<pcl::PointXYZ> expanded_cloud;
+
 void map_callback(const igvc_msgs::mapConstPtr& msg)
 {
   std::lock_guard<std::mutex> planning_lock(planning_mutex);
@@ -62,21 +64,13 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
   received_waypoint = true;
 }
 
-void expanded_callback(const set<SearchLocation>& expanded)
+void expanded_callback(const SearchLocation& location)
 {
-  if (expanded_pub.getNumSubscribers() > 0)
-  {
-    std_msgs::Int32 size_msg;
-    size_msg.data = expanded.size();
-    expanded_size_pub.publish(size_msg);
-    pcl::PointCloud<pcl::PointXYZ> cloud;
-    cloud.header.frame_id = "/odom";
-    for (auto location : expanded)
-    {
-      cloud.points.push_back(pcl::PointXYZ((location.X - initial_x) * search_problem.Resolution, (location.Y - initial_y) * search_problem.Resolution, location.Theta));
-    }
-    expanded_pub.publish(cloud);
-  }
+  expanded_cloud.points.push_back(pcl::PointXYZ((location.X - initial_x) * search_problem.Resolution, (location.Y - initial_y) * search_problem.Resolution, location.Theta));
+  expanded_pub.publish(expanded_cloud);
+  std_msgs::Int32 size_msg;
+  size_msg.data = expanded_cloud.size();
+  expanded_size_pub.publish(size_msg);
 }
 
 int main(int argc, char** argv)
@@ -96,6 +90,8 @@ int main(int argc, char** argv)
   expanded_size_pub = nh.advertise<std_msgs::Int32>("/expanded_size", 1);
 
   ros::NodeHandle pNh("~");
+
+  expanded_cloud.header.frame_id = "/odom";
 
   if (!pNh.hasParam("goal_threshold") || !pNh.hasParam("c_space") ||
       !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled") ||
@@ -140,6 +136,7 @@ int main(int argc, char** argv)
       path_msg.poses.push_back(pose);
     }
     path_pub.publish(path_msg);
+    expanded_cloud.clear();
     planning_mutex.unlock();
     rate.sleep();
   }
