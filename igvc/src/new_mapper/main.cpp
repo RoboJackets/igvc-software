@@ -128,9 +128,11 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   msgBoi.width = width_x;
   msgBoi.resolution = resolution;
   msgBoi.orientation = orientation;
-  ROS_INFO_STREAM("robot location " << cur_x / resolution << ", " << cur_y / resolution);
-  msgBoi.x = std::round(cur_x / resolution);
-  msgBoi.y = std::round(cur_y / resolution);
+  ROS_INFO_STREAM("robot location " << std::round(cur_x / resolution) + start_x << ", " << std::round(cur_y / resolution) + start_y);
+  msgBoi.x = std::round(cur_x / resolution) + start_x;
+  msgBoi.y = std::round(cur_y / resolution) + start_y;
+  msgBoi.x_initial = start_x;
+  msgBoi.y_initial = start_y;
   map_pub.publish(msgBoi);
   if (debug)
   {
