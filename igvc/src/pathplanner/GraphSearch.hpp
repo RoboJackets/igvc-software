@@ -150,13 +150,12 @@ public:
     }
 
     auto iteration = 0;
-    while (!frontier.empty() && iteration < 6000)
+    while (!frontier.empty() && iteration < 20000)
     {
       Path<StateType, ActionType> path = frontier.top();
       frontier.pop();
 
       auto last = path.getLastState();
-      //std::cout << last.X << ", " << last.Y << ", " << last.Theta << std::endl;
 
       if (expanded.insert(last).second)  // expanded does not contain path's last state
       {
@@ -180,7 +179,7 @@ public:
       expandedCallback(last);
     }
 
-    cout << __func__ << " Error: Could not find a solution.n after " << iteration << "iterations" << endl;
+    cout << __func__ << " Error: Could not find a solution after " << iteration << " iterations" << endl;
     Path<StateType, ActionType> empty;
     return empty;
   }

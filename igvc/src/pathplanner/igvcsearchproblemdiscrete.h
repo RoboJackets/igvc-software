@@ -36,12 +36,12 @@ public:
 
   bool isGoal(SearchLocation state)
   {
-    return sqrt(pow(state.X - Goal.X, 2) + pow(state.Y - Goal.Y, 2)) * Resolution < GoalThreshold || state.distTo(Start, Resolution) > 10;
+    return state.distTo(Goal, Resolution) < GoalThreshold; //|| state.distTo(Start, Resolution) > 10;
   }
 
   double getStepCost(SearchLocation location, SearchMove action)
   {
-    if(abs(action.X) > 0 && abs(action.Y) > 0) {
+    if(action.X != 0 && action.Y != 0) {
       return sqrt(pow(action.X, 2) + pow(action.Y, 2)) * Resolution;
     } else if(action.X != 0) {
       return abs(action.X) * Resolution;
@@ -66,7 +66,7 @@ public:
     } else {
       theta = y > 0 ? M_PI / 2 : -M_PI / 2;
     }
-    return state.distTo(Goal, Resolution) + (abs(theta - state.Theta) / M_PI) * 10 * Resolution;
+    return state.distTo(Goal, Resolution);// + (abs(theta - state.Theta) / M_PI) * 10 * Resolution;
   }
 
   bool isActionValid(SearchMove& move, SearchLocation start_state);
