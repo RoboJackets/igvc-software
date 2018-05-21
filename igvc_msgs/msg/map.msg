@@ -6,3 +6,5 @@ uint32 length
 uint32 width
 uint32 x
 uint32 y
+uint32 x_initial
+uint32 y_initial
