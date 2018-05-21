@@ -58,8 +58,8 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
   std::lock_guard<std::mutex> lock(planning_mutex);
-  search_problem.Goal.X = msg->point.x / search_problem.Resolution + initial_x;
-  search_problem.Goal.Y = msg->point.y / search_problem.Resolution + initial_y;
+  search_problem.Goal.X = std::round(msg->point.x / search_problem.Resolution) + initial_x;
+  search_problem.Goal.Y = std::round(msg->point.y / search_problem.Resolution) + initial_y;
   ROS_INFO_STREAM("Waypoint received. grid cell = " << search_problem.Goal.X << ", " << search_problem.Goal.Y);
   received_waypoint = true;
 }
@@ -106,7 +106,6 @@ int main(int argc, char** argv)
   pNh.getParam("point_turns_enabled", search_problem.PointTurnsEnabled);
   pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
   pNh.getParam("probability_threshold", search_problem.ProbabilityThreshold);
-  pNh.getParam("resolution", search_problem.Resolution);
 
   ros::Rate rate(10);
   while (ros::ok())
