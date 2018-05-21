@@ -36,20 +36,15 @@ public:
 
   bool isGoal(SearchLocation state)
   {
-    return state.distTo(Goal, Resolution) < GoalThreshold; //|| state.distTo(Start, Resolution) > 10;
+    return state.distTo(Goal, Resolution) < GoalThreshold || state.distTo(Start, Resolution) > 10;
   }
 
   double getStepCost(SearchLocation location, SearchMove action)
   {
-    if(action.X != 0 && action.Y != 0) {
-      return sqrt(pow(action.X, 2) + pow(action.Y, 2)) * Resolution;
-    } else if(action.X != 0) {
-      return abs(action.X) * Resolution;
-    } else if(action.Y != 0) {
-      return abs(action.Y) * Resolution;
-    } else {
-      return 0;
-    }
+    SearchLocation result;
+    result.X = location.X + action.X;
+    result.Y = location.Y + action.Y;
+    return result.distTo(location, Resolution);
   }
 
   double getHeuristicCost(SearchLocation state)
@@ -66,7 +61,8 @@ public:
     } else {
       theta = y > 0 ? M_PI / 2 : -M_PI / 2;
     }
-    return state.distTo(Goal, Resolution);// + (abs(theta - state.Theta) / M_PI) * 10 * Resolution;
+
+    return state.distTo(Goal, Resolution) + (abs(theta - state.Theta) / M_PI) * 5 * Resolution;
   }
 
   bool isActionValid(SearchMove& move, SearchLocation start_state);

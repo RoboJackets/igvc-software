@@ -156,7 +156,6 @@ public:
       frontier.pop();
 
       auto last = path.getLastState();
-
       if (expanded.insert(last).second)  // expanded does not contain path's last state
       {
         if (problem.isGoal(last))
