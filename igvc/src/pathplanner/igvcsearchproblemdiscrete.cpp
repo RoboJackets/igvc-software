@@ -62,7 +62,6 @@ std::list<SearchMove> IGVCSearchProblemDiscrete::getActions(SearchLocation state
     //std::cout << "7"<<std::endl;
     acts.push_back(SearchMove(-1, -1));
     acts.push_back(SearchMove(0, -1));
-    acts.push_back(SearchMove(1, -1));
   } else if(abs(abs(theta) - M_PI / 4) < thetaThreshold) {
     //std::cout << "8"<<std::endl;
     acts.push_back(SearchMove(1, 0));
