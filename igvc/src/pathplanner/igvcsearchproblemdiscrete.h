@@ -23,6 +23,7 @@ public:
   double ProbabilityThreshold;
   bool PointTurnsEnabled;
   bool ReverseEnabled;
+  double DistanceToGoal;
 
   SearchLocation getStartState()
   {
@@ -65,7 +66,7 @@ public:
     } else {
       theta = y > 0 ? M_PI / 2 : -M_PI / 2;
     }
-    return state.distTo(Goal, Resolution) + abs(theta - state.Theta) * 5 * Resolution;
+    return state.distTo(Goal, Resolution) + (abs(theta - state.Theta) / M_PI) * 10 * Resolution;
   }
 
   bool isActionValid(SearchMove& move, SearchLocation start_state);
