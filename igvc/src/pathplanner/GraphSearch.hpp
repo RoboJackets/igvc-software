@@ -156,6 +156,7 @@ public:
       frontier.pop();
 
       auto last = path.getLastState();
+      //std::cout << last.X << ", " << last.Y << ", " << last.Theta << std::endl;
 
       if (expanded.insert(last).second)  // expanded does not contain path's last state
       {
@@ -179,7 +180,7 @@ public:
       expandedCallback(expanded);
     }
 
-    cout << __func__ << " Error: Could not find a solution." << endl;
+    cout << __func__ << " Error: Could not find a solution.n after " << iteration << "iterations" << endl;
     Path<StateType, ActionType> empty;
     return empty;
   }

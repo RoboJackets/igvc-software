@@ -35,7 +35,7 @@ public:
 
   bool isGoal(SearchLocation state)
   {
-    return sqrt(pow(state.X - Goal.X, 2) + pow(state.Y - Goal.Y, 2)) * Resolution < GoalThreshold;
+    return sqrt(pow(state.X - Goal.X, 2) + pow(state.Y - Goal.Y, 2)) * Resolution < GoalThreshold || state.distTo(Start, Resolution) > 10;
   }
 
   double getStepCost(SearchLocation location, SearchMove action)

@@ -32,6 +32,8 @@ bool received_waypoint = false;
 
 unsigned int current_index = 0;
 
+double initial_x, initial_y;
+
 void map_callback(const igvc_msgs::mapConstPtr& msg)
 {
   std::lock_guard<std::mutex> planning_lock(planning_mutex);
@@ -41,6 +43,8 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
 
   search_problem.Start.X = msg->x;
   search_problem.Start.Y = msg->y;
+  initial_x = msg->x_initial;
+  initial_y = msg->y_initial;
   search_problem.Start.Theta = std::round(msg->orientation / (M_PI / 4)) * (M_PI / 4);
   ROS_INFO_STREAM("Start position " << search_problem.Start.X << "," << search_problem.Start.Y << " theta = " << search_problem.Start.Theta);
   search_problem.Resolution = msg->resolution;
@@ -49,9 +53,9 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
   std::lock_guard<std::mutex> lock(planning_mutex);
-  search_problem.Goal.X = msg->point.x / search_problem.Resolution;
-  search_problem.Goal.Y = msg->point.y / search_problem.Resolution;
-  ROS_INFO_STREAM("Waypoint received. " << search_problem.Goal.X << ", " << search_problem.Goal.Y);
+  search_problem.Goal.X = msg->point.x / search_problem.Resolution + initial_x;
+  search_problem.Goal.Y = msg->point.y / search_problem.Resolution + initial_y;
+  ROS_INFO_STREAM("Waypoint received. grid cell = " << search_problem.Goal.X << ", " << search_problem.Goal.Y);
   received_waypoint = true;
 }
 
@@ -63,7 +67,7 @@ void expanded_callback(const set<SearchLocation>& expanded)
     cloud.header.frame_id = "/odom";
     for (auto location : expanded)
     {
-      cloud.points.push_back(pcl::PointXYZ(location.X, location.Y, 0));
+      cloud.points.push_back(pcl::PointXYZ((location.X - initial_x) * search_problem.Resolution, (location.Y - initial_y) * search_problem.Resolution, location.Theta));
     }
     expanded_pub.publish(cloud);
   }
@@ -122,8 +126,8 @@ int main(int argc, char** argv)
       geometry_msgs::PoseStamped pose;
       pose.header.stamp = path_msg.header.stamp;
       pose.header.frame_id = path_msg.header.frame_id;
-      pose.pose.position.x = loc.X * search_problem.Resolution;
-      pose.pose.position.y = loc.Y * search_problem.Resolution;
+      pose.pose.position.x = (loc.X - initial_x) * search_problem.Resolution;
+      pose.pose.position.y = (loc.Y - initial_y) * search_problem.Resolution;
       path_msg.poses.push_back(pose);
     }
     path_pub.publish(path_msg);
