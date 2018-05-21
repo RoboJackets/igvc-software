@@ -40,10 +40,12 @@ public:
 
   double getStepCost(SearchLocation location, SearchMove action)
   {
-    if(abs(action.X) == 1 && abs(action.Y) == 1) {
-      return sqrt(2) * Resolution;
-    } else if(action.X != 0 || action.Y != 0) {
-      return 1 * Resolution;
+    if(abs(action.X) > 0 && abs(action.Y) > 0) {
+      return sqrt(pow(action.X, 2) + pow(action.Y, 2)) * Resolution;
+    } else if(action.X != 0) {
+      return abs(action.X) * Resolution;
+    } else if(action.Y != 0) {
+      return abs(action.Y) * Resolution;
     } else {
       return 0;
     }
@@ -51,7 +53,19 @@ public:
 
   double getHeuristicCost(SearchLocation state)
   {
-    return state.distTo(Goal, Resolution);
+    double theta;
+    double x = Goal.X - state.X;
+    double y = Goal.Y - state.Y;
+    if(x > 0) {
+      theta = atan(y/x);
+    } else if(y > 0) {
+      theta = atan(y/x) + M_PI;
+    } else if(y < 0) {
+      theta = atan(y / x) - M_PI;
+    } else {
+      theta = y > 0 ? M_PI / 2 : -M_PI / 2;
+    }
+    return state.distTo(Goal, Resolution) + abs(theta - state.Theta) * 5 * Resolution;
   }
 
   bool isActionValid(SearchMove& move, SearchLocation start_state);
