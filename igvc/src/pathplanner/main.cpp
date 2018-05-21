@@ -17,12 +17,15 @@
 #include <mutex>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
+#include <std_msgs/Int32.h>
 #include "GraphSearch.hpp"
 #include "igvcsearchproblemdiscrete.h"
 
 ros::Publisher path_pub;
 
 ros::Publisher expanded_pub;
+
+ros::Publisher expanded_size_pub;
 
 IGVCSearchProblemDiscrete search_problem;
 
@@ -63,6 +66,9 @@ void expanded_callback(const set<SearchLocation>& expanded)
 {
   if (expanded_pub.getNumSubscribers() > 0)
   {
+    std_msgs::Int32 size_msg;
+    size_msg.data = expanded.size();
+    expanded_size_pub.publish(size_msg);
     pcl::PointCloud<pcl::PointXYZ> cloud;
     cloud.header.frame_id = "/odom";
     for (auto location : expanded)
@@ -86,6 +92,8 @@ int main(int argc, char** argv)
   path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 
   expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/expanded", 1);
+
+  expanded_size_pub = nh.advertise<std_msgs::Int32>("/expanded_size", 1);
 
   ros::NodeHandle pNh("~");
 
@@ -115,6 +123,7 @@ int main(int argc, char** argv)
 
     planning_mutex.lock();
     Path<SearchLocation, SearchMove> path;
+    search_problem.DistanceToGoal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
     path = GraphSearch::AStar(search_problem, expanded_callback);
     nav_msgs::Path path_msg;
     path_msg.header.stamp = ros::Time::now();

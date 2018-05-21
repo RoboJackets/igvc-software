@@ -27,46 +27,52 @@ std::list<SearchMove> IGVCSearchProblemDiscrete::getActions(SearchLocation state
   std::list<SearchMove> acts;
   double theta = state.Theta;
   double thetaThreshold = 0.1;
+  double jump_size = (DistanceToGoal - state.distTo(Goal, Resolution)) / DistanceToGoal;
+  if(jump_size > 0.5) {
+    jump_size -= 0.5;
+  }
+  int dist = max(std::round(jump_size * 10), 1.0);
   //std::cout << "theta = " << theta << " ";
   if(abs(theta) < thetaThreshold) {
     //std::cout << "1" <<std::endl;
-    acts.push_back(SearchMove(1, 1));
-    acts.push_back(SearchMove(1, 0));
-    acts.push_back(SearchMove(1, -1));
+    acts.push_back(SearchMove(dist, dist));
+    acts.push_back(SearchMove(dist, 0));
+    acts.push_back(SearchMove(dist, -dist));
   } else if(abs(theta - M_PI / 4) < thetaThreshold) {
     //std::cout << "2"<<std::endl;
-    acts.push_back(SearchMove(1, 1));
-    acts.push_back(SearchMove(1, 0));
-    acts.push_back(SearchMove(0, 1));
+    acts.push_back(SearchMove(dist, dist));
+    acts.push_back(SearchMove(dist, 0));
+    acts.push_back(SearchMove(0, dist));
   } else if(abs(theta - M_PI / 2) < thetaThreshold) {
     //std::cout << "3"<<std::endl;
-    acts.push_back(SearchMove(1, 1));
-    acts.push_back(SearchMove(0, 1));
-    acts.push_back(SearchMove(-1, 1));
+    acts.push_back(SearchMove(dist, dist));
+    acts.push_back(SearchMove(0, dist));
+    acts.push_back(SearchMove(-dist, dist));
   } else if(abs(theta - 3 * M_PI / 4) < thetaThreshold) {
     //std::cout << "4"<<std::endl;
-    acts.push_back(SearchMove(0, 1));
-    acts.push_back(SearchMove(-1, 1));
-    acts.push_back(SearchMove(-1, 0));
+    acts.push_back(SearchMove(0, dist));
+    acts.push_back(SearchMove(-dist, dist));
+    acts.push_back(SearchMove(-dist, 0));
   } else if(abs(abs(theta) - M_PI) < thetaThreshold) {
     //std::cout << "5"<<std::endl;
-    acts.push_back(SearchMove(-1, 0));
-    acts.push_back(SearchMove(-1, 1));
-    acts.push_back(SearchMove(-1, -1));
+    acts.push_back(SearchMove(-dist, 0));
+    acts.push_back(SearchMove(-dist, dist));
+    acts.push_back(SearchMove(-dist, -dist));
   } else if(abs(abs(theta) - 3 * M_PI / 4) < thetaThreshold) {
     //std::cout << "6"<<std::endl;
-    acts.push_back(SearchMove(-1, -1));
-    acts.push_back(SearchMove(-1, 0));
-    acts.push_back(SearchMove(0, -1));
+    acts.push_back(SearchMove(-dist, -dist));
+    acts.push_back(SearchMove(-dist, 0));
+    acts.push_back(SearchMove(0, -dist));
   } else if(abs(abs(theta) - M_PI / 2) < thetaThreshold) {
     //std::cout << "7"<<std::endl;
-    acts.push_back(SearchMove(-1, -1));
-    acts.push_back(SearchMove(0, -1));
+    acts.push_back(SearchMove(-dist, -dist));
+    acts.push_back(SearchMove(0, -dist));
+    acts.push_back(SearchMove(dist, -dist));
   } else if(abs(abs(theta) - M_PI / 4) < thetaThreshold) {
     //std::cout << "8"<<std::endl;
-    acts.push_back(SearchMove(1, 0));
-    acts.push_back(SearchMove(1, -1));
-    acts.push_back(SearchMove(0, -1));
+    acts.push_back(SearchMove(dist, 0));
+    acts.push_back(SearchMove(dist, -dist));
+    acts.push_back(SearchMove(0, -dist));
   } else {
     std::cout << "\n\n\n\n\nfail\n\n\n\n\n" << std::endl;
   }
@@ -81,21 +87,21 @@ SearchLocation IGVCSearchProblemDiscrete::getResult(SearchLocation state, Search
   result.Y = state.Y;
   result.X += action.X;
   result.Y += action.Y;
-  if(action.X == 1 && action.Y == 0) {
+  if(action.X > 0 && action.Y == 0) {
     result.Theta = 0;
-  } else if(action.X == 1 && action.Y == 1) {
+  } else if(action.X > 0 && action.Y > 0) {
     result.Theta = M_PI/4;
-  } else if(action.X == 0 && action.Y == 1) {
+  } else if(action.X == 0 && action.Y > 0) {
     result.Theta = M_PI/2;
-  } else if(action.X == -1 && action.Y == 1) {
+  } else if(action.X < 0 && action.Y > 0) {
     result.Theta = 3 * M_PI/4;
-  } else if(action.X == -1 && action.Y == 0) {
+  } else if(action.X < 0 && action.Y == 0) {
     result.Theta = M_PI;
-  } else if(action.X == -1 && action.Y == -1) {
+  } else if(action.X < 0 && action.Y < 0) {
     result.Theta = -3*M_PI/4;
-  } else if(action.X == 0 && action.Y == -1) {
+  } else if(action.X == 0 && action.Y < 0) {
     result.Theta = -M_PI/2;
-  } else if(action.X == 1 && action.Y == -1) {
+  } else if(action.X > 0 && action.Y < 0) {
     result.Theta = -M_PI/4;
   }
   //std::cout << " x,y = " << action.X << ", " << action.Y << ", " << result.Theta;
