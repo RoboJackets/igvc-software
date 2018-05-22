@@ -107,7 +107,7 @@ int main(int argc, char** argv)
   pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
   pNh.getParam("probability_threshold", search_problem.ProbabilityThreshold);
 
-  ros::Rate rate(10);
+  ros::Rate rate(40.0);
   while (ros::ok())
   {
     ros::spinOnce();
@@ -123,8 +123,6 @@ int main(int argc, char** argv)
     nav_msgs::Path path_msg;
     path_msg.header.stamp = ros::Time::now();
     path_msg.header.frame_id = "odom";
-    if (path.getStates()->empty())
-      path.getStates()->push_back(search_problem.Start);
     for (auto loc : *(path.getStates()))
     {
       geometry_msgs::PoseStamped pose;
