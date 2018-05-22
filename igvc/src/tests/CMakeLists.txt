@@ -6,3 +6,6 @@ target_link_libraries(TestNewMapper ${catkin_LIBRARIES})
 
 add_rostest_gtest(TestPathPlanner test/test_path_planner.test test_path_planner.cpp)
 target_link_libraries(TestPathPlanner ${catkin_LIBRARIES})
+
+add_rostest_gtest(TestPathFollower test/test_path_follower.test test_path_follower.cpp)
+target_link_libraries(TestPathFollower ${catkin_LIBRARIES})
