@@ -53,8 +53,6 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   tf::quaternionMsgToTF(msg->pose.pose.orientation, q);
   float cur_theta = tf::getYaw(q);
 
-  ROS_INFO_STREAM("theta = " << cur_theta);
-
   float tar_x, tar_y, tar_theta;
   geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
   if(get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist) {
