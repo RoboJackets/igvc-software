@@ -2,22 +2,40 @@
 
 void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path& trajectory, Eigen::Vector3d cur_pos, Eigen::Vector3d target) {
 
-  Eigen::Vector3d action;
-  getAction(action, cur_pos, target);
 
-  vel.left_velocity = action[0] - action[1] * axle_length / 2;
-  vel.right_velocity = action[0] + action[1] * axle_length / 2;
+  double dt = rollOutTime / 10;
+  for(int i = 0; i < 10; i++) {
+    std::cout << "cur_pos = " << cur_pos[0] << ", " << cur_pos[1] << ", " << cur_pos[2] << std::endl;
+    std::cout << "target = " << target[0] << ", " << target[1] << ", " << target[2] << std::endl;
+    Eigen::Vector3d action;
+    getAction(action, cur_pos, target);
+    action[2] = dt;
+    std::cout << "action = " << action[0] << ", " << action[1] << ", " << action[2] << std::endl;
 
-  Eigen::Vector3d end_pos;
-  getResult(end_pos, cur_pos, action);
+    vel.left_velocity = action[0] - action[1] * axle_length / 2;
+    vel.right_velocity = action[0] + action[1] * axle_length / 2;
 
-  geometry_msgs::PoseStamped pose;
-  pose.pose.position.x = end_pos[0];
-  pose.pose.position.y = end_pos[1];
-  trajectory.poses.push_back(pose);
+    Eigen::Vector3d end_pos;
+    getResult(end_pos, cur_pos, action);
+    std::cout << "end_pos = " << end_pos[0] << ", " << end_pos[1] << ", " << end_pos[2] << std::endl;
+
+    geometry_msgs::PoseStamped start;
+    start.pose.position.x = cur_pos[0];
+    start.pose.position.y = cur_pos[1];
+    trajectory.poses.push_back(start);
+
+    geometry_msgs::PoseStamped pose;
+    pose.pose.position.x = end_pos[0];
+    pose.pose.position.y = end_pos[1];
+    trajectory.poses.push_back(pose);
+    std::cout << std::endl;
+    cur_pos = end_pos;
+  }
+  std::cout << "\n end" << std::endl;
+
 }
 
-void SmoothControl::getAction(Eigen::Vector3d result, Eigen::Vector3d cur_pos, Eigen::Vector3d target) {
+void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, Eigen::Vector3d target) {
   double delta, theta;
   Eigen::Vector3d slope = target - cur_pos;
   if(slope[0] == 0) {
@@ -45,7 +63,7 @@ void SmoothControl::getAction(Eigen::Vector3d result, Eigen::Vector3d cur_pos, E
 }
 
 
-void SmoothControl::getResult(Eigen::Vector3d result, Eigen::Vector3d cur_pos, Eigen::Vector3d action) {
+void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, Eigen::Vector3d action) {
   double v = action[0];
   double w = action[1];
   double dt = action[2];

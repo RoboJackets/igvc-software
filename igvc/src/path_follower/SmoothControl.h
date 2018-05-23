@@ -18,7 +18,7 @@ public:
 
   void getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path& trajectory, Eigen::Vector3d cur_pos, Eigen::Vector3d target);
 private:
-  void getAction(Eigen::Vector3d result, Eigen::Vector3d cur_pos, Eigen::Vector3d target);
-  void getResult(Eigen::Vector3d result, Eigen::Vector3d cur_pos, Eigen::Vector3d action);
+  void getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, Eigen::Vector3d target);
+  void getResult(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, Eigen::Vector3d action);
 };
 #endif
