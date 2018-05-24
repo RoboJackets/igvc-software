@@ -16,7 +16,7 @@ ros::Publisher trajectory_pub;
 
 nav_msgs::PathConstPtr path;
 
-double lookahead_dist;
+double lookahead_dist, maximum_vel;
 
 SmoothControl controller;
 
@@ -74,7 +74,6 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
         slope += first;
         tar_x = slope[0];
         tar_y = slope[1];
-        tar_theta = atan2(slope[1], slope[0]);
       } else {
         path_index++;
         distance += increment;
@@ -83,8 +82,23 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   } else {
     tar_x = end.x;
     tar_y = end.y;
-    tar_theta = atan2(tar_y - cur_y, tar_x - cur_x);
   }
+
+  double yDiff = tar_y - cur_y;
+  double xDiff = tar_x - cur_x;
+
+  ROS_INFO_STREAM("diff = " << xDiff << ", " << yDiff);
+  if(xDiff == 0) {
+    tar_theta = tar_y - cur_y > 0 ? M_PI : -M_PI;
+  } else {
+    tar_theta = atan((tar_y - cur_y) / (tar_x - cur_x));
+    if(xDiff < 0 && yDiff > 0) {
+      tar_theta += M_PI;
+    } else if(xDiff < 0 && yDiff < 0) {
+      tar_theta -= M_PI;
+    }
+  }
+
 
   ros::Time time = ros::Time::now();
 
@@ -106,6 +120,14 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   Eigen::Vector3d target(tar_x, tar_y, tar_theta);
   controller.getTrajectory(vel, trajectory_msg, cur_pos, target);
 
+  ROS_INFO_STREAM("target theta = " << tar_theta);
+
+  if(vel.right_velocity > maximum_vel || vel.left_velocity > maximum_vel) {
+    ROS_ERROR_STREAM("Large velocity output stopping " << vel.right_velocity << ", " << vel.left_velocity);
+    vel.right_velocity = 0;
+    vel.left_velocity = 0;
+  }
+
   cmd_pub.publish(vel);
   trajectory_pub.publish(trajectory_msg);
 }
@@ -117,12 +139,13 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  pNh.param(std::string("max_vel"), controller.v, 1.0);
+  pNh.param(std::string("target_v"), controller.v, 1.0);
   pNh.param(std::string("axle_length"), controller.axle_length, 0.52);
-  pNh.param(std::string("lookahead_dist"), lookahead_dist, 2.0);
   pNh.param(std::string("k1"), controller.k1, 1.0);
   pNh.param(std::string("k2"), controller.k2, 3.0);
   pNh.param(std::string("roll_out_time"), controller.rollOutTime, 2.0);
+  pNh.param(std::string("lookahead_dist"), lookahead_dist, 2.0);
+  pNh.param(std::string("maximum_vel"), maximum_vel, 1.6);
 
   ros::Subscriber path_sub = nh.subscribe("/path", 1, path_callback);
 

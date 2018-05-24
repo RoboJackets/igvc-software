@@ -1,8 +1,6 @@
 #include "SmoothControl.h"
 
 void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path& trajectory, Eigen::Vector3d cur_pos, Eigen::Vector3d target) {
-
-
   double dt = rollOutTime / 10;
   for(int i = 0; i < 10; i++) {
     std::cout << "cur_pos = " << cur_pos[0] << ", " << cur_pos[1] << ", " << cur_pos[2] << std::endl;
@@ -12,17 +10,21 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path&
     action[2] = dt;
     std::cout << "action = " << action[0] << ", " << action[1] << ", " << action[2] << std::endl;
 
-    vel.left_velocity = action[0] - action[1] * axle_length / 2;
-    vel.right_velocity = action[0] + action[1] * axle_length / 2;
+    if(i == 0) {
+      vel.left_velocity = action[0] - action[1] * axle_length / 2;
+      vel.right_velocity = action[0] + action[1] * axle_length / 2;
+    }
 
     Eigen::Vector3d end_pos;
     getResult(end_pos, cur_pos, action);
     std::cout << "end_pos = " << end_pos[0] << ", " << end_pos[1] << ", " << end_pos[2] << std::endl;
 
-    geometry_msgs::PoseStamped start;
-    start.pose.position.x = cur_pos[0];
-    start.pose.position.y = cur_pos[1];
-    trajectory.poses.push_back(start);
+    if(i == 0) {
+      geometry_msgs::PoseStamped start;
+      start.pose.position.x = cur_pos[0];
+      start.pose.position.y = cur_pos[1];
+      trajectory.poses.push_back(start);
+    }
 
     geometry_msgs::PoseStamped pose;
     pose.pose.position.x = end_pos[0];
@@ -52,6 +54,9 @@ void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, 
     delta = -atan2(slope[1], slope[0]) + cur_pos[2];
   }
 
+  std::cout << "slope = "<< slope[0] << ", " << slope[1] << std::endl;
+  std::cout << "theta = " << theta << " delta = " << delta << std::endl;
+
   double d = sqrt(pow(target[0] - cur_pos[0], 2) + pow(target[1] - cur_pos[1], 2));
 
   double K = k2 * (delta - atan(k1*theta));
@@ -62,12 +67,14 @@ void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, 
   result[1] = w;
 }
 
-
 void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, Eigen::Vector3d action) {
+
+  std::cout << "get result v = " << action[0] << " w = " << action[1] << std::endl;
   double v = action[0];
   double w = action[1];
   double dt = action[2];
-  if (abs(w) > 1e-10)
+  std::cout << "abs(w)" << std::abs(w) << " < " << 1e-10 << std::endl;
+  if (std::abs(w) > 1e-10)
   {
     double R = v / w;
     double ICCx = cur_pos[0] - (R * sin(cur_pos[2]));
@@ -83,16 +90,17 @@ void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, 
     result[0] = c[0];
     result[1] = c[1];
     result[2] = c[2];
-    while (result[2] < 0)
+    std::cout << "result theta = " << c[2] << std::endl;
+    while (result[2] < -M_PI)
       result[2] += 2 * M_PI;
-    while (result[2] > 2 * M_PI)
+    while (result[2] > M_PI)
       result[2] -= 2 * M_PI;
   }
   else
   {
+    std::cout << "straight" << std::endl;
     result[0] = cur_pos[0] + (cos(cur_pos[2]) * v * dt);
     result[1] = cur_pos[1] + (sin(cur_pos[2]) * v * dt);
     result[2] = cur_pos[2];
   }
-
 }
