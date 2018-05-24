@@ -9,6 +9,33 @@ using symbol_shorthand::B; // bias
 using symbol_shorthand::G; // GPS position
 
 
+/**
+ * A class for constraining yaw given a direct measurement
+ */
+class UnaryRotationFactor : public NoiseModelFactor1<Pose3>
+{
+  double yaw_; // the measurement itself
+
+public:
+  typedef boost::shared_ptr<UnaryRotationFactor> shared_ptr;
+
+  UnaryRotationFactor(Key k, double yaw, const SharedNoiseModel& model) :
+    yaw_(yaw), NoiseModelFactor1<Pose3>(model, k)
+  {}
+
+  virtual gtsam::NonlinearFactor::shared_ptr clone() const {
+    return boost::static_pointer_cast<gtsam::NonlinearFactor>(
+        gtsam::NonlinearFactor::shared_ptr(new UnaryRotationFactor(*this)));
+  }
+
+  Vector evaluateError(const Pose3& q, boost::optional<Matrix&> H = boost::none) const
+  {
+    if (H) (*H) = (Matrix(1,6) << 0.0, 0.0, 1.0, 0.0, 0.0, 0.0).finished();
+    return (Vector(1) << (q.rotation().yaw() - yaw_)).finished();
+  }
+};
+
+
 StateEstimator::StateEstimator() :
   gpsQ_(),
   imuQ_(),
@@ -28,7 +55,7 @@ StateEstimator::StateEstimator() :
 
 
   // setting up the IMU integration for IMU message thread
-  boost::shared_ptr<gtsam::PreintegrationParams> preintegrationParams =  PreintegrationParams::MakeSharedU(0); // 9.80511); // magnitude of gravity looked up from wolframalpha
+  boost::shared_ptr<gtsam::PreintegrationParams> preintegrationParams =  PreintegrationParams::MakeSharedU(9.80511); // magnitude of gravity looked up from wolframalpha
   preintegrationParams->accelerometerCovariance = 1e-2 * I_3x3;
   preintegrationParams->gyroscopeCovariance = 1e-3 * I_3x3;
   preintegrationParams->integrationCovariance = 1e-4 * I_3x3;
@@ -126,7 +153,7 @@ void StateEstimator::optimizationLoop()
   }
 
   // setting up the IMU integration
-  boost::shared_ptr<gtsam::PreintegrationParams> preintegrationParams =  PreintegrationParams::MakeSharedU(0); // 9.80511); // magnitude of gravity looked up from wolframalpha
+  boost::shared_ptr<gtsam::PreintegrationParams> preintegrationParams =  PreintegrationParams::MakeSharedU(9.80511); // magnitude of gravity looked up from wolframalpha
   preintegrationParams->accelerometerCovariance = 1e-2 * I_3x3;
   preintegrationParams->gyroscopeCovariance = 1e-3 * I_3x3;
   preintegrationParams->integrationCovariance = 1e-4 * I_3x3;
@@ -169,6 +196,15 @@ void StateEstimator::optimizationLoop()
       newFactors.add(imuf);
       newFactors.add( BetweenFactor<imuBias::ConstantBias>( B(imuKey-1), B(imuKey), imuBias::ConstantBias(),
             noiseModel::Diagonal::Sigmas( sqrt(imuIntegrator.deltaTij()) * noiseModelBetweenBias) ) );
+
+      Rot3 orientation = Rot3::Quaternion(
+          imu->orientation.w,
+          imu->orientation.x,
+          imu->orientation.y,
+          imu->orientation.z);
+      newFactors.add( UnaryRotationFactor(X(imuKey), orientation.yaw(),
+            noiseModel::Diagonal::Sigmas( (Vector(1) << 0.085).finished() )) );
+
       NavState cur(prevPose, prevVel);
       NavState next = imuIntegrator.predict(cur, prevBias);
       prevPose = next.pose();
@@ -183,7 +219,6 @@ void StateEstimator::optimizationLoop()
       newTimestamps[V(imuKey)] = 0.1*imuKey;
       newTimestamps[B(imuKey)] = 0.1*imuKey;
       //std::cout << "adding timestamp t=" << imuKey << std::endl;
-			std::cout << "adding imu: " << imuKey << std::endl;
       ++imuKey;
       optimize = true;
     }
@@ -200,7 +235,6 @@ void StateEstimator::optimizationLoop()
       // we should maybe do a check on the GPS to make sure it's valid
       newFactors.add( GPSFactor(G(gpsKey), Point3(E,N,U), gpsNoise) );
       newFactors.add( BetweenFactor<Pose3>(X(gpsKey), G(gpsKey), imuToGps_, imuToGpsFactorNoise) );
-			std::cout << "adding G(" << gpsKey << ")"<< std::endl;
       ++gpsKey;
     }
 
