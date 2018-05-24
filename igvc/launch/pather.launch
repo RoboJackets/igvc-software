@@ -16,9 +16,12 @@
 
     <!-- Follower -->
     <node name="path_follower" pkg="igvc" type="path_follower" output="screen" >
-        <param name="max_vel" type="double" value="1.0"/>
+        <param name="maximum_vel" type="double" value="2.0"/>
+        <param name="target_v" type="double" value="1.0"/>
         <param name="axle_length" type="double" value="0.52"/>
         <param name="lookahead_dist" type="double" value="2.0"/>
+        <param name="k1" type="double" value="0.5"/>
+        <param name="k2" type="double" value="1.0"/>
     </node>
 
 </launch>

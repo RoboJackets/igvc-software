@@ -8,6 +8,8 @@
 #include <cmath>
 #include <Eigen/Dense>
 
+// http://www-personal.umich.edu/~jongjinp/papers/Park-icra-11.pdf
+
 class SmoothControl
 {
 public:
