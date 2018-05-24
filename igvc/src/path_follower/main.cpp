@@ -87,16 +87,11 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   double yDiff = tar_y - cur_y;
   double xDiff = tar_x - cur_x;
 
-  ROS_INFO_STREAM("diff = " << xDiff << ", " << yDiff);
+  //ROS_INFO_STREAM("diff = " << xDiff << ", " << yDiff);
   if(xDiff == 0) {
     tar_theta = tar_y - cur_y > 0 ? M_PI : -M_PI;
   } else {
-    tar_theta = atan((tar_y - cur_y) / (tar_x - cur_x));
-    if(xDiff < 0 && yDiff > 0) {
-      tar_theta += M_PI;
-    } else if(xDiff < 0 && yDiff < 0) {
-      tar_theta -= M_PI;
-    }
+    tar_theta = atan2((tar_y - cur_y), (tar_x - cur_x));
   }
 
 
@@ -120,7 +115,7 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   Eigen::Vector3d target(tar_x, tar_y, tar_theta);
   controller.getTrajectory(vel, trajectory_msg, cur_pos, target);
 
-  ROS_INFO_STREAM("target theta = " << tar_theta);
+  //ROS_INFO_STREAM("target theta = " << tar_theta);
 
   if(vel.right_velocity > maximum_vel || vel.left_velocity > maximum_vel) {
     ROS_ERROR_STREAM("Large velocity output stopping " << vel.right_velocity << ", " << vel.left_velocity);
