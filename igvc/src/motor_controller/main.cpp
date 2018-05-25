@@ -13,6 +13,10 @@
 
 igvc_msgs::velocity_pair current_motor_command;
 
+double battery_avg = 0;
+double battery_avg_num = 100;
+std::list<double> battery_vals;
+
 bool enabled = false;
 int precision;
 
@@ -164,9 +168,15 @@ int main(int argc, char** argv)
           } else if(ret.at(1) == 'V') {
             std_msgs::Float64 battery_msg;
             double voltage = atof(tokens.at(0).c_str());
-            battery_msg.data = voltage;
+            battery_vals.push_back(voltage);
+            if(battery_vals.size() > battery_avg_num) {
+              battery_avg -= battery_vals.front() / battery_avg_num;
+              battery_vals.pop_front();
+            }
+            battery_avg += voltage / battery_avg_num;
+            battery_msg.data = battery_avg;
             battery_pub.publish(battery_msg);
-            if(voltage < 24) {
+            if(battery_avg < 24 && battery_vals.size() > battery_avg_num) {
               ROS_ERROR_STREAM("Battery voltage dangerously low");
             }
             std_msgs::Bool enabled_msg;
