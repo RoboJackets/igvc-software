@@ -4,5 +4,6 @@
       <param name="samples" type="int" value="500"/>
       <!-- note: offset is in degrees -->
       <param name="yaw_offset" type="double" value="0.0"/>
+      <!-- old yaw values -->
     </node>
 </launch>
