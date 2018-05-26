@@ -7,6 +7,7 @@
 #include <freespace/freespace_util.h>
 #include <geometry_msgs/Vector3.h>
 #include <Eigen/Dense>
+#include <std_msgs/Float64.h>
 
 int main(int argc, char** argv)
 {
@@ -22,6 +23,7 @@ int main(int argc, char** argv)
   ros::Publisher imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1000);
 
   ros::Publisher raw_mag_pub = nh.advertise<geometry_msgs::Vector3>("/mag_raw", 1000);
+  ros::Publisher raw_yaw = nh.advertise<std_msgs::Float64>("/raw_yaw", 1);
 
   int ret = freespace_init();
   if(ret != FREESPACE_SUCCESS) {
@@ -143,11 +145,15 @@ int main(int argc, char** argv)
     msg.angular_velocity.z = rotated_angular_vel[2];
     msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
 
+    tf::Quaternion pre_rotated(orientation_msg.x, orientation_msg.y, orientation_msg.z, orientation_msg.w);
+    tf::Quaternion rotation = tf::createQuaternionFromRPY(0, 0, yaw_offset);
+    tf::Quaternion rotated = rotation * pre_rotated;
+
     geometry_msgs::Quaternion orientation;
-    orientation.x = orientation_msg.x;
-    orientation.y = orientation_msg.y;
-    orientation.z = orientation_msg.z;
-    orientation.w = orientation_msg.w;
+    orientation.x = rotated.x();
+    orientation.y = rotated.y();
+    orientation.z = rotated.z();
+    orientation.w = rotated.w();
 
     msg.orientation = orientation;
     msg.orientation_covariance = { 0.0025, 1e-6, 1e-6, 1e-6, 0.0025, 1e-6, 1e-6, 1e-6, 0.0025 };
