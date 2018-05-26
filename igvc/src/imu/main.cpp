@@ -14,16 +14,15 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "imu");
 
   ros::NodeHandle nh;
+  ros::NodeHandle pNh("~");
 
-  int samples;
   double yaw_offset;
-  nh.param("samples" , samples, 500);
-  nh.param("yaw_offset" , yaw_offset, 0.0);
+  pNh.param("yaw_offset" , yaw_offset, 0.0);
 
   ros::Publisher imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1000);
 
   ros::Publisher raw_mag_pub = nh.advertise<geometry_msgs::Vector3>("/mag_raw", 1000);
-  ros::Publisher raw_yaw = nh.advertise<std_msgs::Float64>("/raw_yaw", 1);
+  ros::Publisher raw_yaw_pub = nh.advertise<std_msgs::Float64>("/raw_yaw", 1);
 
   int ret = freespace_init();
   if(ret != FREESPACE_SUCCESS) {
@@ -147,7 +146,15 @@ int main(int argc, char** argv)
 
     tf::Quaternion pre_rotated(orientation_msg.x, orientation_msg.y, orientation_msg.z, orientation_msg.w);
     tf::Quaternion rotation = tf::createQuaternionFromRPY(0, 0, yaw_offset);
+
+    double roll, pitch, yaw;
+    tf::Matrix3x3(pre_rotated).getRPY(roll, pitch, yaw);
+    std_msgs::Float64 raw_yaw_msg;
+    raw_yaw_msg.data = yaw;
+    raw_yaw_pub.publish(raw_yaw_msg);
+
     tf::Quaternion rotated = rotation * pre_rotated;
+
 
     geometry_msgs::Quaternion orientation;
     orientation.x = rotated.x();
