@@ -33,7 +33,7 @@ std::list<SearchMove> IGVCSearchProblemDiscrete::getActions(SearchLocation state
   if(jump_size > 0.5) {
     jump_size = 1 - jump_size;
   }
-  int dist = max(std::round(jump_size * 10), 1.0);
+  int dist = max(std::round(jump_size * MaxJumpSize), 1.0);
   //std::cout << state << std::endl;
   //std::cout << "theta = " << theta << " ";
   if(abs(theta) < thetaThreshold) {

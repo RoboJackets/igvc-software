@@ -78,6 +78,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "pathplanner");
 
   ros::NodeHandle nh;
+  ros::NodeHandle pNh("~");
 
   ros::Subscriber map_sub = nh.subscribe("/map", 1, map_callback);
 
@@ -88,8 +89,6 @@ int main(int argc, char** argv)
   expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/expanded", 1);
 
   expanded_size_pub = nh.advertise<std_msgs::Int32>("/expanded_size", 1);
-
-  ros::NodeHandle pNh("~");
 
   expanded_cloud.header.frame_id = "/odom";
 
@@ -106,6 +105,7 @@ int main(int argc, char** argv)
   pNh.getParam("point_turns_enabled", search_problem.PointTurnsEnabled);
   pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
   pNh.getParam("probability_threshold", search_problem.ProbabilityThreshold);
+  pNh.param(std::string("max_jump_size"), search_problem.MaxJumpSize, 10.0);
 
   ros::Rate rate(40.0);
   while (ros::ok())
