@@ -24,6 +24,7 @@ public:
   bool PointTurnsEnabled;
   bool ReverseEnabled;
   double DistanceToGoal;
+  double MaxJumpSize;
 
   SearchLocation getStartState()
   {
