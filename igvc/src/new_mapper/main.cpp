@@ -105,7 +105,10 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
       //ROS_INFO_STREAM("putting point at " << point_x << "," << point_y);
-      published_map->at<uchar>(point_x, point_y) = (uchar)255;
+      if(published_map->at<uchar>(point_x, point_y) < 250) {
+        published_map->at<uchar>(point_x, point_y) += (uchar)125;
+      }
+
       count++;
     }
     else if (!offMap)
@@ -142,7 +145,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
               pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
       for(int j = 0; j < length_y; j++){
-        if(published_map->at<uchar>(i, j) == (uchar)255) {
+        if(published_map->at<uchar>(i, j) >= (uchar)200) {
           pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
           p.x = (i - start_x) * resolution;
           p.y = (j - start_y) * resolution;
