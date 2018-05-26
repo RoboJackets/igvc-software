@@ -3,12 +3,12 @@
 void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path& trajectory, Eigen::Vector3d cur_pos, Eigen::Vector3d target) {
   double dt = rollOutTime / 10;
   for(int i = 0; i < 10; i++) {
-    std::cout << "cur_pos = " << cur_pos[0] << ", " << cur_pos[1] << ", " << cur_pos[2] << std::endl;
-    std::cout << "target = " << target[0] << ", " << target[1] << ", " << target[2] << std::endl;
+    //std::cout << "cur_pos = " << cur_pos[0] << ", " << cur_pos[1] << ", " << cur_pos[2] << std::endl;
+    //std::cout << "target = " << target[0] << ", " << target[1] << ", " << target[2] << std::endl;
     Eigen::Vector3d action;
     getAction(action, cur_pos, target);
     action[2] = dt;
-    std::cout << "action = " << action[0] << ", " << action[1] << ", " << action[2] << std::endl;
+    //std::cout << "action = " << action[0] << ", " << action[1] << ", " << action[2] << std::endl;
 
     if(i == 0) {
       vel.left_velocity = action[0] - action[1] * axle_length / 2;
@@ -17,7 +17,7 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path&
 
     Eigen::Vector3d end_pos;
     getResult(end_pos, cur_pos, action);
-    std::cout << "end_pos = " << end_pos[0] << ", " << end_pos[1] << ", " << end_pos[2] << std::endl;
+    //std::cout << "end_pos = " << end_pos[0] << ", " << end_pos[1] << ", " << end_pos[2] << std::endl;
 
     if(i == 0) {
       geometry_msgs::PoseStamped start;
@@ -30,17 +30,17 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path&
     pose.pose.position.x = end_pos[0];
     pose.pose.position.y = end_pos[1];
     trajectory.poses.push_back(pose);
-    std::cout << std::endl;
+    //std::cout << std::endl;
     cur_pos = end_pos;
   }
-  std::cout << "\n end" << std::endl;
+  //std::cout << "\n end" << std::endl;
 
 }
 
 void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, Eigen::Vector3d target) {
   double delta, theta;
   Eigen::Vector3d slope = target - cur_pos;
-  std::cout << "atan2 = " << atan2(slope[1], slope[0]) << std::endl;
+  //std::cout << "atan2 = " << atan2(slope[1], slope[0]) << std::endl;
   if(slope[0] == 0) {
     theta = slope[1] > 0 ? -M_PI/2 : M_PI/2;
     theta += cur_pos[2];
@@ -56,8 +56,8 @@ void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, 
 
   delta = theta;
 
-  std::cout << "slope = "<< slope[0] << ", " << slope[1] << std::endl;
-  std::cout << "theta = " << theta << " delta = " << delta << std::endl;
+  //std::cout << "slope = "<< slope[0] << ", " << slope[1] << std::endl;
+  //std::cout << "theta = " << theta << " delta = " << delta << std::endl;
 
   double d = sqrt(pow(target[0] - cur_pos[0], 2) + pow(target[1] - cur_pos[1], 2));
 
