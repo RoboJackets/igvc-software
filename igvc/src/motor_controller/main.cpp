@@ -176,7 +176,7 @@ int main(int argc, char** argv)
             battery_avg += voltage / battery_avg_num;
             battery_msg.data = battery_avg;
             battery_pub.publish(battery_msg);
-            if(battery_avg < 24 && battery_vals.size() > battery_avg_num) {
+            if(battery_avg < 23.5 && battery_vals.size() >= battery_avg_num) {
               ROS_ERROR_STREAM("Battery voltage dangerously low");
             }
             std_msgs::Bool enabled_msg;
