@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     }
 
     MultiAxisSensor accel_msg;
-    ret = freespace_util_getAccNoGravity(&response.motionEngineOutput, &accel_msg);
+    ret = freespace_util_getAcceleration(&response.motionEngineOutput, &accel_msg);
     if(ret != FREESPACE_SUCCESS) {
       ROS_ERROR_STREAM("failed to read acceleration " << ret);
     }

@@ -1,8 +1,12 @@
 <!-- imu.launch -->
 <launch>
     <node name="imu" pkg="igvc" type="imu" output="screen" >
-      <param name="yaw_offset" type="double" value="-2.8440947155"/>
+      <param name="yaw_offset" type="double" value="2.87548612285"/>
       <!-- old yaw values -->
       <!-- 1 x 2.85023247974 -->
+      <!-- 1x -2.8440947155 -->
+      <!-- 2.7091530674 -->
+      <!-- 3.11713869703 -->
+      <!-- 2.87548612285 -->
     </node>
 </launch>
