@@ -2,11 +2,13 @@
 #define SEARCHLOCATION_H
 
 #include <iostream>
+#include <list>
 
 class SearchLocation
 {
 public:
-  float X, Y, Theta;
+  std::list<float> PrevTheta;
+  float X, Y, Theta, ThetaChange;
 
   static constexpr float sameness_threshold = 0.005;
 

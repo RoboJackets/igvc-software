@@ -106,6 +106,7 @@ int main(int argc, char** argv)
   pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
   pNh.getParam("probability_threshold", search_problem.ProbabilityThreshold);
   pNh.param(std::string("max_jump_size"), search_problem.MaxJumpSize, 10.0);
+  pNh.param(std::string("theta_filter"), search_problem.ThetaFilter, 5.0);
 
   ros::Rate rate(40.0);
   while (ros::ok())
