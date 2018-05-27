@@ -4,6 +4,9 @@
 bool IGVCSearchProblemDiscrete::isActionValid(SearchMove& move, SearchLocation start_state)
 {
   //std::cout << start_state.X + move.X << "," << start_state.Y + move.Y;
+  if(start_state.ThetaChange + (move.Theta - start_state.Theta) > M_PI/2) {
+    return false;
+  }
   double x = start_state.X + move.X;
   double y = start_state.Y + move.Y;
   if(x < 0 || y < 0 || x >= Map->image.size().width || y >= Map->image.size().height) {
@@ -95,6 +98,17 @@ SearchLocation IGVCSearchProblemDiscrete::getResult(SearchLocation state, Search
     result.Theta = -M_PI/4;
   } else {
     std::cerr << "\n\n\n\n\nfail" << action << "\n\n\n\n\n" << std::endl;
+  }
+  if(state.PrevTheta.size() < 5) {
+    result.PrevTheta = std::copy(state.PrevTheta.begin(), state.PrevTheta.end(), result.PrevTheta.begin());
+    result.ThetaChange = state.ThetaChange + result.Theta;
+    result.PrevTheta.push_back(result.Theta);
+  } else {
+    double theta = state.PrevTheta.top();
+    state.Theta.pop_front();
+    result.PrevTheta = std::copy(state.PrevTheta.begin(), state.PrevTheta.end(), result.PrevTheta.begin());
+    result.ThetaChange = state.ThetaChange + result.Theta - theta;
+    result.ThetaChange.push_back(result.Theta);
   }
   return result;
 }

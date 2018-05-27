@@ -25,6 +25,7 @@ public:
   bool ReverseEnabled;
   double DistanceToGoal;
   double MaxJumpSize;
+  double ThetaFilter;
 
   SearchLocation getStartState()
   {
@@ -63,7 +64,7 @@ public:
       theta = y > 0 ? M_PI / 2 : -M_PI / 2;
     }
 
-    return state.distTo(Goal, Resolution) + (abs(theta - state.Theta) / M_PI) * 5 * Resolution;
+    return state.distTo(Goal, Resolution) + (abs(theta - state.Theta) / M_PI) * ThetaFilter * Resolution;
   }
 
   bool isActionValid(SearchMove& move, SearchLocation start_state);

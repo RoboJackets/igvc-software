@@ -150,7 +150,7 @@ public:
     }
 
     auto iteration = 0;
-    while (!frontier.empty() && iteration < 20000)
+    while (!frontier.empty() && iteration < 4000)
     {
       Path<StateType, ActionType> path = frontier.top();
       frontier.pop();
