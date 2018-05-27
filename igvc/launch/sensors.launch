@@ -7,11 +7,8 @@
     <!-- TF -->
     <include file="$(find igvc)/launch/robot_state_publisher.launch" />
 
-    <!-- LIGHT CONTROLLER -->
-    <node name="light_controller" pkg="igvc" type="light_controller" output="screen"/>
-
     <!-- MOTOR CONTROLLER -->
-    <node name="motor_controller" pkg="igvc" type="motor_controller" />
+    <include file="$(find igvc)/launch/motor_controller.launch" />
 
     <!-- GPS -->
     <include file="$(find igvc)/launch/gps.launch" />

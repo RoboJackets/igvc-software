@@ -76,6 +76,7 @@
                                  true,  true,  true]</rosparam>
       <param name="imu0_differential" value="false"/>
       <param name="imu0_remove_gravitational_acceleration" value="false" />
+      <param name="publish_acceleration" value="true" />
 
       <!-- gps from above navstat_transform -->
       <param name="odom1" value="/odometry/gps"/>

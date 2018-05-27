@@ -23,6 +23,14 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>message_generation</build_depend>
 
+  <!--Not sure if works, may need to be changed -->
+  <buildtool_depend>Eigen</buildtool_depend>
+  <buildtool_depend>opencv2</buildtool_depend>
+  <buildtool_depend>sensor_msgs</buildtool_depend>
+
+
+
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
