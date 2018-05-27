@@ -107,6 +107,8 @@ int main(int argc, char** argv)
   pNh.getParam("probability_threshold", search_problem.ProbabilityThreshold);
   pNh.param(std::string("max_jump_size"), search_problem.MaxJumpSize, 10.0);
   pNh.param(std::string("theta_filter"), search_problem.ThetaFilter, 5.0);
+  pNh.param(std::string("max_theta_change"), search_problem.MaxThetaChange, 5.0);
+  pNh.param(std::string("theta_change_window"), search_problem.ThetaChangeWindow, 5.0);
 
   ros::Rate rate(40.0);
   while (ros::ok())

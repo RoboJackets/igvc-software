@@ -4,7 +4,8 @@
 bool IGVCSearchProblemDiscrete::isActionValid(SearchMove& move, SearchLocation start_state)
 {
   //std::cout << start_state.X + move.X << "," << start_state.Y + move.Y;
-  if(start_state.ThetaChange + (move.Theta - start_state.Theta) > M_PI/2) {
+  SearchLocation result = getResult(start_state, move);
+  if(abs(result.ThetaChange) > MaxThetaChange) {
     return false;
   }
   double x = start_state.X + move.X;
@@ -99,16 +100,17 @@ SearchLocation IGVCSearchProblemDiscrete::getResult(SearchLocation state, Search
   } else {
     std::cerr << "\n\n\n\n\nfail" << action << "\n\n\n\n\n" << std::endl;
   }
-  if(state.PrevTheta.size() < 5) {
-    result.PrevTheta = std::copy(state.PrevTheta.begin(), state.PrevTheta.end(), result.PrevTheta.begin());
-    result.ThetaChange = state.ThetaChange + result.Theta;
+  if(state.PrevTheta.size() < ThetaChangeWindow) {
+    std::copy(state.PrevTheta.begin(), state.PrevTheta.end(), result.PrevTheta.begin());
+    result.ThetaChange = state.ThetaChange + result.Theta - state.Theta;
     result.PrevTheta.push_back(result.Theta);
   } else {
-    double theta = state.PrevTheta.top();
-    state.Theta.pop_front();
-    result.PrevTheta = std::copy(state.PrevTheta.begin(), state.PrevTheta.end(), result.PrevTheta.begin());
-    result.ThetaChange = state.ThetaChange + result.Theta - theta;
-    result.ThetaChange.push_back(result.Theta);
+    double theta = state.PrevTheta.front();
+    state.PrevTheta.pop_front();
+    std::copy(state.PrevTheta.begin(), state.PrevTheta.end(), result.PrevTheta.begin());
+    result.ThetaChange = state.ThetaChange + result.Theta - theta - state.Theta;
+    result.PrevTheta.push_back(result.Theta);
   }
+  //std::cout << "Theta Change = " << state.ThetaChange << " " << result.Theta << " " << result.ThetaChange << std::endl;
   return result;
 }

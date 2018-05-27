@@ -26,6 +26,8 @@ public:
   double DistanceToGoal;
   double MaxJumpSize;
   double ThetaFilter;
+  double MaxThetaChange;
+  double ThetaChangeWindow;
 
   SearchLocation getStartState()
   {
