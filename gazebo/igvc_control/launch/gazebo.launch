@@ -3,8 +3,11 @@
 <launch>
   <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
   <arg name="namespace" default="igvc"/>
+  <!-- Switch with commented line below for better performance -->
+  <!--<arg name="world_name" default="$(find igvc_description)/urdf/real_igvc.world"/>-->
   <arg name="world_name" default="$(find igvc_description)/urdf/igvc.world"/>
   <arg name="cmd_timeout" default="0.5"/>
+
 
   <!-- Vehicle pose -->
   <arg name="x" default="0"/>
@@ -42,7 +45,7 @@
     </include>
 
     <!-- needed for rviz -->
-    <param name="robot_description" command="cat $(find igvc_description)/urdf/Jaymii.urdf" />
+    <param name="robot_description" command="cat $(find igvc_description)/urdf/jessi.urdf" />
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 
     <!-- convert laser scan to point cloud for LIDAR -->
