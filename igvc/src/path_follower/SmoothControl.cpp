@@ -2,7 +2,7 @@
 
 void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path& trajectory, Eigen::Vector3d cur_pos, Eigen::Vector3d target) {
   double dt = rollOutTime / 10;
-  for(int i = 0; i < 10; i++) {
+  for(int i = 0; i < 15; i++) {
     //std::cout << "cur_pos = " << cur_pos[0] << ", " << cur_pos[1] << ", " << cur_pos[2] << std::endl;
     //std::cout << "target = " << target[0] << ", " << target[1] << ", " << target[2] << std::endl;
     Eigen::Vector3d action;
@@ -42,10 +42,24 @@ void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, 
   Eigen::Vector3d slope = target - cur_pos;
   //std::cout << "atan2 = " << atan2(slope[1], slope[0]) << std::endl;
   if(slope[0] == 0) {
-    theta = slope[1] > 0 ? -M_PI/2 : M_PI/2;
-    theta += cur_pos[2];
+    delta = slope[1] > 0 ? -M_PI/2 : M_PI/2;
+    delta += cur_pos[2];
   } else {
-    theta = -atan2(slope[1], slope[0]) + cur_pos[2];
+    delta = -atan2(slope[1], slope[0]) + cur_pos[2];
+  }
+  while(delta > M_PI) {
+    delta -= 2 * M_PI;
+  }
+  while(delta < -M_PI) {
+    delta += 2 * M_PI;
+  }
+
+  slope = cur_pos - target;
+  if(slope[0] == 0) {
+    theta = slope[1] > 0 ? -M_PI/2 : M_PI/2;
+    theta += target[2];
+  } else {
+    theta = -atan2(slope[1], slope[0]) + target[2];
   }
   while(theta > M_PI) {
     theta -= 2 * M_PI;
@@ -53,8 +67,6 @@ void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, 
   while(theta < -M_PI) {
     theta += 2 * M_PI;
   }
-
-  delta = theta;
 
   //std::cout << "slope = "<< slope[0] << ", " << slope[1] << std::endl;
   //std::cout << "theta = " << theta << " delta = " << delta << std::endl;
