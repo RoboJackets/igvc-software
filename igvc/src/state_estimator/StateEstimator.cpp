@@ -45,24 +45,46 @@ StateEstimator::StateEstimator() :
   doneFirstOpt_(false),
   nh_("~")
 {
+  double gpsX, gpsY, gpsZ;
+  nh_.param("GPS_offset_x", gpsX, -0.044);
+  nh_.param("GPS_offset_y", gpsY,  0.214);
+  nh_.param("GPS_offset_z", gpsZ,  0.0);
+  imuToGps_ = Pose3(Rot3::identity(), Point3(gpsX, gpsY, gpsZ));
 
-  imuToGps_ = Pose3(Rot3::identity(), Point3(-.044, .214, 0));
 
-  posePub_ = nh_.advertise<nav_msgs::Odometry>("pose", 1);
+  nh_.param("gravity_magnitude",           gravityMagnitude_, 9.80511);
+  nh_.param("accelerometer_noise_sigma",   accelSigma_,       1e-2);
+  nh_.param("gyroscope_noise_sigma",       gyroSigma_,        1e-3);
+  nh_.param("imu_integration_noise_sigma", imuIntSigma_,      1e-4);
 
-  imuSub_ = nh_.subscribe("imu", 600, &StateEstimator::imuCallback, this);
-  gpsSub_ = nh_.subscribe("gps", 300, &StateEstimator::gpsCallback, this);
-
+  nh_.param("accelerometer_bias_noise_sigma", accelBSigma_, 2e-4);
+  nh_.param("gyroscope_bias_noise_sigma",     gyroBSigma_,  3e-5);
+  nh_.param("yaw_noise_sigma",                yawSigma_,    0.085);
 
   // setting up the IMU integration for IMU message thread
-  boost::shared_ptr<gtsam::PreintegrationParams> preintegrationParams =  PreintegrationParams::MakeSharedU(9.80511); // magnitude of gravity looked up from wolframalpha
-  preintegrationParams->accelerometerCovariance = 1e-2 * I_3x3;
-  preintegrationParams->gyroscopeCovariance = 1e-3 * I_3x3;
-  preintegrationParams->integrationCovariance = 1e-4 * I_3x3;
-
-  imuBias::ConstantBias b( (Vector(6) << 0, 0, 0, 0, 0, 0).finished() );
+  boost::shared_ptr<gtsam::PreintegrationParams> preintegrationParams =  PreintegrationParams::MakeSharedU(gravityMagnitude_); // magnitude of gravity looked up from wolframalpha for ATL
+  preintegrationParams->accelerometerCovariance = accelSigma_ * I_3x3;
+  preintegrationParams->gyroscopeCovariance = gyroSigma_ * I_3x3;
+  preintegrationParams->integrationCovariance = imuIntSigma_ * I_3x3;
+  imuBias::ConstantBias b( (Vector(6) << 0, 0, 0, 0, 0, 0).finished() ); // initial guess of imu bias
   imuIntegrator_ = PreintegratedImuMeasurements(preintegrationParams, b);
 
+  nh_.param("gps_noise_sigma", gpsSigma_, 0.5);
+  // how much history is kept for smoothing over - not currently used (ie. all history is kept)
+  nh_.param("optimization_lag", optLag_,  1.0);
+  nh_.param("imu_frequency",    imuFreq_, 125.); // approximate imu frequency - not super important to be accurate
+
+  nh_.param("prior_pose_orientation_noise_sigma", priorOSigma_, 0.25);
+  nh_.param("prior_pose_position_noise_sigma",    priorPSigma_, 0.1);
+  nh_.param("prior_velocity_noise_sigma",         priorVSigma_, 0.1);
+  nh_.param("prior_accelerometer_bias_sigma",     priorABias_,  0.8);
+  nh_.param("prior_gyroscope_bias_sigma",         priorGBias_,  0.8);
+
+  nh_.param("gps_transform_noise_sigma", gpsTSigma_, 5e-2);
+
+  posePub_ = nh_.advertise<nav_msgs::Odometry>("pose", 1);
+  imuSub_ = nh_.subscribe("imu", 600, &StateEstimator::imuCallback, this);
+  gpsSub_ = nh_.subscribe("gps", 300, &StateEstimator::gpsCallback, this);
 
   std::thread thread(&StateEstimator::optimizationLoop, this);
   ros::spin();
@@ -74,7 +96,7 @@ void StateEstimator::optimizationLoop()
   ISAM2Params parameters;
   //parameters.relinearizeThreshold = 0.0; // Set the relin threshold to zero such that the batch estimate is recovered
   //parameters.relinearizeSkip = 1; // Relinearize every time
-  gtsam::IncrementalFixedLagSmoother graph(1., parameters);
+  gtsam::IncrementalFixedLagSmoother graph(optLag_, parameters);
 
   double startTime;
   sensor_msgs::ImuConstPtr lastImu;
@@ -89,13 +111,12 @@ void StateEstimator::optimizationLoop()
   FixedLagSmoother::KeyTimestampMap priorTimestamps;
 
   sensor_msgs::NavSatFixConstPtr fix = gpsQ_.pop();
-
   startTime = ROS_TIME(fix);
   enu_.Reset(fix->latitude, fix->longitude, fix->altitude);
 
   sensor_msgs::ImuConstPtr imu = imuQ_.pop();
   lastImu = imu;
-  lastImuT = ROS_TIME(imu) - 1/125.;
+  lastImuT = ROS_TIME(imu) - 1/imuFreq_;
   Rot3 initialOrientation = Rot3::Quaternion(
       imu->orientation.w,
       imu->orientation.x,
@@ -104,22 +125,23 @@ void StateEstimator::optimizationLoop()
 
   // we set out initial position to the origin and assume we are stationary
   Pose3 x0(initialOrientation, Point3(0,0,0));
-  PriorFactor<Pose3> priorPose(X(0), x0,
-      noiseModel::Diagonal::Sigmas( (Vector(6) << 0.25,0.25,0.25, 0.01, 0.01, 0.01).finished() ));
+  PriorFactor<Pose3> priorPose(X(0), x0, noiseModel::Diagonal::Sigmas(
+        (Vector(6) << priorOSigma_, priorOSigma_, priorOSigma_, priorPSigma_, priorPSigma_, priorPSigma_).finished() ));
   priorFactors.add(priorPose);
 
   Vector3 v0 = Vector3(0,0,0);
   PriorFactor<Vector3> priorVel(V(0), v0,
-      noiseModel::Diagonal::Sigmas( (Vector(3) << 0.01, 0.01, 0.01).finished() ));
+      noiseModel::Diagonal::Sigmas( (Vector(3) << priorVSigma_, priorVSigma_, priorVSigma_).finished() ));
   priorFactors.add(priorVel);
 
   imuBias::ConstantBias b0( (Vector(6) << 0, 0, 0, 0, 0, 0).finished() );
-  PriorFactor<imuBias::ConstantBias> priorBias(B(0), b0,
-      noiseModel::Diagonal::Sigmas( (Vector(6) << 0.4, 0.4, 0.4, 0.2, 0.2, 0.2).finished() ));
+  PriorFactor<imuBias::ConstantBias> priorBias(B(0), b0, noiseModel::Diagonal::Sigmas(
+        (Vector(6) << priorABias_, priorABias_, priorABias_, priorGBias_, priorGBias_, priorGBias_).finished() ));
   priorFactors.add(priorBias);
 
 
-  noiseModel::Diagonal::shared_ptr imuToGpsFactorNoise = noiseModel::Diagonal::Sigmas( (Vector(6) << 1e-2, 1e-2, 1e-2, 3e-2, 3e-2, 3e-2).finished() );
+  noiseModel::Diagonal::shared_ptr imuToGpsFactorNoise = noiseModel::Diagonal::Sigmas(
+      (Vector(6) << gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_).finished() );
   priorFactors.add( BetweenFactor<Pose3>(X(0), G(0), imuToGps_, imuToGpsFactorNoise) );
 
   priorVariables.insert(X(0), x0);
@@ -131,13 +153,6 @@ void StateEstimator::optimizationLoop()
   priorTimestamps[G(0)] = 0;
   priorTimestamps[V(0)] = 0;
   priorTimestamps[B(0)] = 0;
-
-      std::cout << "X(" << 0 << "): " << priorTimestamps[X(0)] << std::endl;
-      std::cout << "G(" << 0 << "): " << priorTimestamps[G(0)] << std::endl;
-      std::cout << "V(" << 0 << "): " << priorTimestamps[V(0)] << std::endl;
-      std::cout << "B(" << 0 << "): " << priorTimestamps[B(0)] << std::endl;
-
-  std::cout << "adding timestamp t=0" << std::endl;
 
   graph.update(priorFactors, priorVariables); //, priorTimestamps);
 
@@ -153,17 +168,16 @@ void StateEstimator::optimizationLoop()
   }
 
   // setting up the IMU integration
-  boost::shared_ptr<gtsam::PreintegrationParams> preintegrationParams =  PreintegrationParams::MakeSharedU(9.80511); // magnitude of gravity looked up from wolframalpha
-  preintegrationParams->accelerometerCovariance = 1e-2 * I_3x3;
-  preintegrationParams->gyroscopeCovariance = 1e-3 * I_3x3;
-  preintegrationParams->integrationCovariance = 1e-4 * I_3x3;
+  boost::shared_ptr<gtsam::PreintegrationParams> preintegrationParams =  PreintegrationParams::MakeSharedU(gravityMagnitude_);
+  preintegrationParams->accelerometerCovariance = accelSigma_ * I_3x3;
+  preintegrationParams->gyroscopeCovariance = gyroSigma_ * I_3x3;
+  preintegrationParams->integrationCovariance = imuIntSigma_ * I_3x3;
 
   PreintegratedImuMeasurements imuIntegrator(preintegrationParams, prevBias);
 
-  Vector noiseModelBetweenBias = (Vector(6) << 2e-4,2e-4,2e-4, 3e-5,3e-5,3e-5).finished();
-
-  // TODO make this a launch params
-  SharedDiagonal gpsNoise = noiseModel::Diagonal::Sigmas(Vector3(1.5, 1.5, 4.5));
+  Vector noiseModelBetweenBias =
+    (Vector(6) << accelBSigma_, accelBSigma_, accelBSigma_, gyroBSigma_, gyroBSigma_, gyroBSigma_).finished();
+  SharedDiagonal gpsNoise = noiseModel::Diagonal::Sigmas(Vector3(gpsSigma_, gpsSigma_, 3*gpsSigma_));
 
   NonlinearFactorGraph newFactors;
   Values newVariables;
@@ -174,13 +188,13 @@ void StateEstimator::optimizationLoop()
   {
     bool optimize = false;
 
-
     // integrate imu messages
     while (!imuQ_.empty() && ROS_TIME(imuQ_.back()) > (startTime + 0.1*imuKey) && !optimize)
     {
       double curTime = startTime + 0.1*imuKey;
       // we reset the integrator, then integrate
       imuIntegrator.resetIntegrationAndSetBias(prevBias);
+
       while (ROS_TIME(lastImu) < curTime)
       {
         double dt = ROS_TIME(lastImu) - lastImuT;
@@ -191,6 +205,7 @@ void StateEstimator::optimizationLoop()
         lastImuT = ROS_TIME(lastImu);
         lastImu = imuQ_.pop();
       }
+
       // now put this into the graph
       ImuFactor imuf( X(imuKey-1), V(imuKey-1), X(imuKey), V(imuKey), B(imuKey-1), imuIntegrator );
       newFactors.add(imuf);
@@ -198,12 +213,13 @@ void StateEstimator::optimizationLoop()
             noiseModel::Diagonal::Sigmas( sqrt(imuIntegrator.deltaTij()) * noiseModelBetweenBias) ) );
 
       Rot3 orientation = Rot3::Quaternion(
-          imu->orientation.w,
-          imu->orientation.x,
-          imu->orientation.y,
-          imu->orientation.z);
+          lastImu->orientation.w,
+          lastImu->orientation.x,
+          lastImu->orientation.y,
+          lastImu->orientation.z);
+      //std::cout << "adding orientation: " << orientation.xyz() << std::endl;
       newFactors.add( UnaryRotationFactor(X(imuKey), orientation.yaw(),
-            noiseModel::Diagonal::Sigmas( (Vector(1) << 0.085).finished() )) );
+            noiseModel::Diagonal::Sigmas( (Vector(1) << yawSigma_).finished() )) );
 
       NavState cur(prevPose, prevVel);
       NavState next = imuIntegrator.predict(cur, prevBias);
@@ -213,12 +229,15 @@ void StateEstimator::optimizationLoop()
       newVariables.insert(G(imuKey), prevPose.compose(imuToGps_));
       newVariables.insert(V(imuKey), prevVel);
       newVariables.insert(B(imuKey), prevBias);
+
+      Pose3 temp = prevPose.compose(imuToGps_);
+      std::cout << "imu(" << imuKey << "): " << temp.x() << " " << temp.y() << " " << temp.z() << std::endl;
+
       // for marginalizing out past the time window
       newTimestamps[X(imuKey)] = 0.1*imuKey;
       newTimestamps[G(imuKey)] = 0.1*imuKey;
       newTimestamps[V(imuKey)] = 0.1*imuKey;
       newTimestamps[B(imuKey)] = 0.1*imuKey;
-      //std::cout << "adding timestamp t=" << imuKey << std::endl;
       ++imuKey;
       optimize = true;
     }
@@ -235,6 +254,7 @@ void StateEstimator::optimizationLoop()
       // we should maybe do a check on the GPS to make sure it's valid
       newFactors.add( GPSFactor(G(gpsKey), Point3(E,N,U), gpsNoise) );
       newFactors.add( BetweenFactor<Pose3>(X(gpsKey), G(gpsKey), imuToGps_, imuToGpsFactorNoise) );
+      std::cout << "gps(" << gpsKey << "): " << E << " " << N << " " << U << std::endl;
       ++gpsKey;
     }
 
@@ -243,11 +263,6 @@ void StateEstimator::optimizationLoop()
     try
     {
       graph.update(newFactors, newVariables); //, newTimestamps);
-
-      //for(const FixedLagSmoother::KeyTimestampMap::value_type& key_timestamp: graph.timestamps()) {
-        //std::cout << "key: " << key_timestamp.first << "  Time: " << key_timestamp.second << std::endl;
-      //}
-
 
       prevPose = graph.calculateEstimate<Pose3>(X(imuKey-1));
       prevVel = graph.calculateEstimate<Vector3>(V(imuKey-1));
@@ -304,7 +319,7 @@ void StateEstimator::imuCallback(sensor_msgs::ImuConstPtr imu)
 
   if (!doneFirstOpt) return;
 
-  double dt = (lastImuT_ == 0) ? 1/125. : ROS_TIME(imu) - lastImuT_;
+  double dt = (lastImuT_ == 0) ? 1/imuFreq_ : ROS_TIME(imu) - lastImuT_;
   lastImuT_ = ROS_TIME(imu);
 
   bool newState = false;
@@ -367,8 +382,6 @@ void StateEstimator::imuCallback(sensor_msgs::ImuConstPtr imu)
 	pose.twist.twist.angular.z = imu->angular_velocity.z + prevBias.gyroscope().z();
 
 	posePub_.publish(pose);
-
-
 }
 
 StateEstimator::~StateEstimator() {}

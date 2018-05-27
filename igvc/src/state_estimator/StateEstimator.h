@@ -38,8 +38,15 @@ private:
 
   double lastImuT_;
   std::list<sensor_msgs::ImuConstPtr> imuMeasurements_;
+
+  // parameters
+  double accelSigma_, gyroSigma_, imuIntSigma_, accelBSigma_, gyroBSigma_, gravityMagnitude_;
   double accelBiasSigma_, gyroBiasSigma_;
-  double gpsSigma_;
+  double gpsSigma_, yawSigma_;
+  double optLag_;
+  double imuFreq_;
+  double priorOSigma_, priorPSigma_, priorVSigma_, priorABias_, priorGBias_;
+  double gpsTSigma_;
 
   gtsam::PreintegratedImuMeasurements imuIntegrator_;
 
