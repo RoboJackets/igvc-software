@@ -56,11 +56,13 @@ void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, 
 
   slope = cur_pos - target;
   if(slope[0] == 0) {
-    theta = slope[1] > 0 ? -M_PI/2 : M_PI/2;
-    theta += target[2];
+    theta = slope[1] > 0 ? M_PI/2 : -M_PI/2;
+    theta -= target[2];
   } else {
-    theta = -atan2(slope[1], slope[0]) + target[2];
+    theta = atan2(slope[1], slope[0]) - target[2];
   }
+  theta += M_PI;
+  theta = -theta;
   while(theta > M_PI) {
     theta -= 2 * M_PI;
   }
