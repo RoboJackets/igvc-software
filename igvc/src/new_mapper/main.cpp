@@ -106,7 +106,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     {
       //ROS_INFO_STREAM("putting point at " << point_x << "," << point_y);
       if(published_map->at<uchar>(point_x, point_y) < 250) {
-        published_map->at<uchar>(point_x, point_y) += (uchar)125;
+        published_map->at<uchar>(point_x, point_y) += (uchar)84;
       }
 
       count++;
@@ -219,13 +219,17 @@ int main(int argc, char **argv)
 
     debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
     debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
-    /*for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
-      for(int j = 0; j < length_y; j++){
-        if(i == 0 || i == width_x - 1 || j == 0 || j == length_y - 1) {
-          published_map->at<uchar>(i, j) = (uchar)255;
-        }
+    //for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
+    ROS_INFO_STREAM("inital map set up");
+    for(int j = 230; j < 400; j++){
+      ROS_INFO_STREAM("j = " << j);
+      published_map->at<uchar>(j, 242) = (uchar)255;
+      if(j < 340) {
+        published_map->at<uchar>(j, 260) = (uchar)255;
       }
-      }*/
+
+    }
+      //}
   }
 
   ros::spin();
