@@ -55,8 +55,18 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
 
   float tar_x, tar_y, tar_theta;
   geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
+  double path_index = 0;
+  double closest = std::abs(get_distance(cur_x, cur_y, path->poses[0].pose.position.x, path->poses[0].pose.position.y));
+  double temp = std::abs(get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
+  while(path_index < path->poses.size() && temp <= closest) {
+    if(temp < closest) {
+      closest = temp;
+    }
+    path_index++;
+    temp = std::abs(get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
+  }
+
   if(get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist) {
-    double path_index = 0;
     double distance = 0;
     bool cont = true;
     while(cont && path_index < path->poses.size() - 1) {
@@ -69,8 +79,13 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
         Eigen::Vector3d first(point1.x,point1.y, 0);
         Eigen::Vector3d second(point2.x,point2.y, 0);
         Eigen::Vector3d slope = second - first;
+        //ROS_INFO_STREAM("first = " << first[0] << ", " << first[1]);
+        //ROS_INFO_STREAM("slope = " << slope[0] << ", " << slope[1]);
+        //ROS_INFO_STREAM("look = " << lookahead_dist << " dista = " << distance);
+        //ROS_INFO_STREAM("increment = " << increment << " look - dist = " << (distance - lookahead_dist) + increment);
         slope /= increment;
-        slope *= lookahead_dist - distance;
+        slope *= (distance - lookahead_dist) + increment;
+        //ROS_INFO_STREAM("slope2 = " << slope[0] << ", " << slope[1]);
         slope += first;
         tar_x = slope[0];
         tar_y = slope[1];
@@ -113,11 +128,14 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   Eigen::Vector3d target(tar_x, tar_y, tar_theta);
   controller.getTrajectory(vel, trajectory_msg, cur_pos, target);
 
+  ROS_INFO_STREAM("distance = " << get_distance(tar_x, tar_y, cur_x, cur_y));
+
   if(vel.right_velocity > maximum_vel || vel.left_velocity > maximum_vel) {
     ROS_ERROR_STREAM("Large velocity output stopping " << vel.right_velocity << ", " << vel.left_velocity);
     vel.right_velocity = 0;
     vel.left_velocity = 0;
   }
+  //ROS_INFO_STREAM("target " << tar_x << " " << tar_y << "\n");
 
   cmd_pub.publish(vel);
   trajectory_pub.publish(trajectory_msg);
