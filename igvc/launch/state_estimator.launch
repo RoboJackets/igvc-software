@@ -4,10 +4,6 @@
     <remap from="state_estimator/gps" to="/fix" />
     <remap from="state_estimator/imu" to="/imu" />
 
-    <param name="GPS_offset_x" type="double" value="-0.044"/>
-    <param name="GPS_offset_y" type="double" value="0.214"/>
-    <param name="GPS_offset_z" type="double" value="0.0"/>
-
     <param name="gravity_magnitude" type="double" value="9.80511" />
     <param name="accelerometer_noise_sigma" type="double" value="1e-2" />
     <param name="gyroscope_noise_sigma" type="double" value="1e-3" />

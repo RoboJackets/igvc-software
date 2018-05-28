@@ -1,5 +1,6 @@
 #include "StateEstimator.h"
 #include <thread>
+#include <tf/transform_listener.h>
 
 using namespace gtsam;
 // Convenience for named keys
@@ -45,12 +46,15 @@ StateEstimator::StateEstimator() :
   doneFirstOpt_(false),
   nh_("~")
 {
-  double gpsX, gpsY, gpsZ;
-  nh_.param("GPS_offset_x", gpsX, -0.044);
-  nh_.param("GPS_offset_y", gpsY,  0.214);
-  nh_.param("GPS_offset_z", gpsZ,  0.0);
-  imuToGps_ = Pose3(Rot3::identity(), Point3(gpsX, gpsY, gpsZ));
-
+  // get imu to gps transform
+  tf::TransformListener tfListener;
+  tf::StampedTransform transform;
+  ros::Time now = ros::Time::now();
+  tfListener.waitForTransform("/imu", "/gps", now, ros::Duration(3.0));
+  tfListener.lookupTransform("/imu", "/gps", now, transform);
+  tf::Vector3 imuGpsP = transform.getOrigin();
+  tf::Quaternion imuGpsR = transform.getRotation();
+  imuToGps_ = Pose3(Rot3(imuGpsR.w(), imuGpsR.x(), imuGpsR.y(), imuGpsR.z()), Point3(imuGpsP.x(), imuGpsP.y(), imuGpsP.z()));
 
   nh_.param("gravity_magnitude",           gravityMagnitude_, 9.80511);
   nh_.param("accelerometer_noise_sigma",   accelSigma_,       1e-2);
@@ -106,9 +110,9 @@ void StateEstimator::optimizationLoop()
   
 
   // first we will initialize the graph with appropriate priors
-  NonlinearFactorGraph priorFactors;
-  Values priorVariables;
-  FixedLagSmoother::KeyTimestampMap priorTimestamps;
+  NonlinearFactorGraph newFactors;
+  Values newVariables;
+  FixedLagSmoother::KeyTimestampMap newTimestamps;
 
   sensor_msgs::NavSatFixConstPtr fix = gpsQ_.pop();
   startTime = ROS_TIME(fix);
@@ -127,34 +131,34 @@ void StateEstimator::optimizationLoop()
   Pose3 x0(initialOrientation, Point3(0,0,0));
   PriorFactor<Pose3> priorPose(X(0), x0, noiseModel::Diagonal::Sigmas(
         (Vector(6) << priorOSigma_, priorOSigma_, priorOSigma_, priorPSigma_, priorPSigma_, priorPSigma_).finished() ));
-  priorFactors.add(priorPose);
+  newFactors.add(priorPose);
 
   Vector3 v0 = Vector3(0,0,0);
   PriorFactor<Vector3> priorVel(V(0), v0,
       noiseModel::Diagonal::Sigmas( (Vector(3) << priorVSigma_, priorVSigma_, priorVSigma_).finished() ));
-  priorFactors.add(priorVel);
+  newFactors.add(priorVel);
 
   imuBias::ConstantBias b0( (Vector(6) << 0, 0, 0, 0, 0, 0).finished() );
   PriorFactor<imuBias::ConstantBias> priorBias(B(0), b0, noiseModel::Diagonal::Sigmas(
         (Vector(6) << priorABias_, priorABias_, priorABias_, priorGBias_, priorGBias_, priorGBias_).finished() ));
-  priorFactors.add(priorBias);
+  newFactors.add(priorBias);
 
 
   noiseModel::Diagonal::shared_ptr imuToGpsFactorNoise = noiseModel::Diagonal::Sigmas(
       (Vector(6) << gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_).finished() );
-  priorFactors.add( BetweenFactor<Pose3>(X(0), G(0), imuToGps_, imuToGpsFactorNoise) );
+  newFactors.add( BetweenFactor<Pose3>(X(0), G(0), imuToGps_, imuToGpsFactorNoise) );
 
-  priorVariables.insert(X(0), x0);
-  priorVariables.insert(V(0), v0);
-  priorVariables.insert(B(0), b0);
-  priorVariables.insert(G(0), x0.compose(imuToGps_));
+  newVariables.insert(X(0), x0);
+  newVariables.insert(V(0), v0);
+  newVariables.insert(B(0), b0);
+  newVariables.insert(G(0), x0.compose(imuToGps_));
 
-  priorTimestamps[X(0)] = 0;
-  priorTimestamps[G(0)] = 0;
-  priorTimestamps[V(0)] = 0;
-  priorTimestamps[B(0)] = 0;
+  newTimestamps[X(0)] = 0;
+  newTimestamps[G(0)] = 0;
+  newTimestamps[V(0)] = 0;
+  newTimestamps[B(0)] = 0;
 
-  graph.update(priorFactors, priorVariables); //, priorTimestamps);
+  graph.update(newFactors, newVariables); //, newTimestamps);
 
   Pose3 prevPose = prevPose_ = x0;
   Vector3 prevVel = prevVel_ = v0;
@@ -179,9 +183,9 @@ void StateEstimator::optimizationLoop()
     (Vector(6) << accelBSigma_, accelBSigma_, accelBSigma_, gyroBSigma_, gyroBSigma_, gyroBSigma_).finished();
   SharedDiagonal gpsNoise = noiseModel::Diagonal::Sigmas(Vector3(gpsSigma_, gpsSigma_, 3*gpsSigma_));
 
-  NonlinearFactorGraph newFactors;
-  Values newVariables;
-  FixedLagSmoother::KeyTimestampMap newTimestamps;
+  newFactors.resize(0);
+  newVariables.clear();
+  newTimestamps.clear();
 
   // now we loop and let use the queues to grab messages
   while (ros::ok())
@@ -363,25 +367,25 @@ void StateEstimator::imuCallback(sensor_msgs::ImuConstPtr imu)
   pose.header.frame_id = "odom";
   pose.child_frame_id = "base_link";
 
-	Vector4 q = currentState.quaternion().coeffs();
-	pose.pose.pose.orientation.x = q[0];
-	pose.pose.pose.orientation.y = q[1];
-	pose.pose.pose.orientation.z = q[2];
-	pose.pose.pose.orientation.w = q[3];
+  Vector4 q = currentState.quaternion().coeffs();
+  pose.pose.pose.orientation.x = q[0];
+  pose.pose.pose.orientation.y = q[1];
+  pose.pose.pose.orientation.z = q[2];
+  pose.pose.pose.orientation.w = q[3];
 
-	pose.pose.pose.position.x = currentState.position().x();
-	pose.pose.pose.position.y = currentState.position().y();
-	pose.pose.pose.position.z = currentState.position().z();
+  pose.pose.pose.position.x = currentState.position().x();
+  pose.pose.pose.position.y = currentState.position().y();
+  pose.pose.pose.position.z = currentState.position().z();
 
-	pose.twist.twist.linear.x = currentState.velocity().x();
-	pose.twist.twist.linear.y = currentState.velocity().y();
-	pose.twist.twist.linear.z = currentState.velocity().z();
+  pose.twist.twist.linear.x = currentState.velocity().x();
+  pose.twist.twist.linear.y = currentState.velocity().y();
+  pose.twist.twist.linear.z = currentState.velocity().z();
 	
-	pose.twist.twist.angular.x = imu->angular_velocity.x + prevBias.gyroscope().x();
-	pose.twist.twist.angular.y = imu->angular_velocity.y + prevBias.gyroscope().y();
-	pose.twist.twist.angular.z = imu->angular_velocity.z + prevBias.gyroscope().z();
+  pose.twist.twist.angular.x = imu->angular_velocity.x + prevBias.gyroscope().x();
+  pose.twist.twist.angular.y = imu->angular_velocity.y + prevBias.gyroscope().y();
+  pose.twist.twist.angular.z = imu->angular_velocity.z + prevBias.gyroscope().z();
 
-	posePub_.publish(pose);
+  posePub_.publish(pose);
 }
 
 StateEstimator::~StateEstimator() {}
