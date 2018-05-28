@@ -101,19 +101,23 @@ SearchLocation IGVCSearchProblemDiscrete::getResult(SearchLocation state, Search
   }
   result.PrevTheta.resize(ThetaChangeWindow);
   double thetaDiff;
-  double thetaThreshold = 0.1;
-  if(state.Theta - M_PI < thetaThreshold) {
-    thetaDiff = result.Theta < 0 ? result.Theta + M_PI : result.Theta - M_PI;
-  } else if(result.Theta - M_PI < thetaThreshold) {
-    thetaDiff = state.Theta < 0 ? -M_PI - state.Theta : M_PI - state.Theta;
+  if(std::abs(state.Theta - M_PI) < 0.1) {
+    thetaDiff = result.Theta > 0 ? result.Theta - M_PI : result.Theta + M_PI;
+  } else if(std::abs(result.Theta - M_PI) < 0.1) {
+    thetaDiff = state.Theta > 0 ? M_PI - state.Theta : -M_PI - state.Theta;
+  } else if(state.Theta < 0 && result.Theta > 0) {
+    thetaDiff = state.Theta + M_PI - result.Theta;
+  } else if(state.Theta > 0 && result.Theta < 0) {
+    thetaDiff = result.Theta + M_PI - state.Theta;
   } else {
     thetaDiff = result.Theta - state.Theta;
   }
+  //std::cout << "Theta diff = " << thetaDiff << std::endl;
   if(state.PrevTheta.size() < ThetaChangeWindow) {
     std::copy(state.PrevTheta.begin(), state.PrevTheta.end(), result.PrevTheta.begin());
     result.ThetaChange = state.ThetaChange + thetaDiff;
     result.PrevTheta.push_back(thetaDiff);
-    //std::cout << "Theta Change = " << state.ThetaChange << " " << result.Theta << " " << state.Theta  << " "  << result.ThetaChange << "\n" << std::endl;
+    //std::cout << "Theta Change = " << state.ThetaChange << " " << thetaDiff  << " "  << result.ThetaChange << "\n" << std::endl;
   } else {
     double theta = state.PrevTheta.front();
     state.PrevTheta.pop_front();
