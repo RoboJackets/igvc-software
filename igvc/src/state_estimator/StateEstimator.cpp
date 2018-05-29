@@ -11,11 +11,11 @@ using symbol_shorthand::G; // GPS position
 
 
 /**
- * A class for constraining yaw given a direct measurement
+ * A class for constraining yaw given a direct measurement (from the imu)
  */
 class UnaryRotationFactor : public NoiseModelFactor1<Pose3>
 {
-  double yaw_; // the measurement itself
+  double yaw_;
 
 public:
   typedef boost::shared_ptr<UnaryRotationFactor> shared_ptr;
@@ -94,9 +94,14 @@ StateEstimator::StateEstimator() :
   ros::spin();
 }
 
+/**
+ * gtsam-based optimization loop. gtsam optimization takes constraints between variables (pose X, velocity V, imu bias B)
+ * and initial guesses of the values of those variables and performs nonlinear optimization to find the 'most likely'
+ * state of the variables.
+ */
 void StateEstimator::optimizationLoop()
 {
-
+  // setting up the optimization graph
   ISAM2Params parameters;
   //parameters.relinearizeThreshold = 0.0; // Set the relin threshold to zero such that the batch estimate is recovered
   //parameters.relinearizeSkip = 1; // Relinearize every time
@@ -114,10 +119,12 @@ void StateEstimator::optimizationLoop()
   Values newVariables;
   FixedLagSmoother::KeyTimestampMap newTimestamps;
 
+  // set out start time and start position from which all other gps measurements are relative to
   sensor_msgs::NavSatFixConstPtr fix = gpsQ_.pop();
   startTime = ROS_TIME(fix);
   enu_.Reset(fix->latitude, fix->longitude, fix->altitude);
 
+  // getting an orientation measurement from the imu for an initial guess of the orientation
   sensor_msgs::ImuConstPtr imu = imuQ_.pop();
   lastImu = imu;
   lastImuT = ROS_TIME(imu) - 1/imuFreq_;
@@ -127,11 +134,15 @@ void StateEstimator::optimizationLoop()
       imu->orientation.y,
       imu->orientation.z);
 
-  // we set out initial position to the origin and assume we are stationary
+  // we set out initial position to the origin and assume we are stationary with no initial imu bias
   Pose3 x0(initialOrientation, Point3(0,0,0));
   PriorFactor<Pose3> priorPose(X(0), x0, noiseModel::Diagonal::Sigmas(
         (Vector(6) << priorOSigma_, priorOSigma_, priorOSigma_, priorPSigma_, priorPSigma_, priorPSigma_).finished() ));
   newFactors.add(priorPose);
+
+  noiseModel::Diagonal::shared_ptr imuToGpsFactorNoise = noiseModel::Diagonal::Sigmas(
+      (Vector(6) << gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_).finished() );
+  newFactors.add( BetweenFactor<Pose3>(X(0), G(0), imuToGps_, imuToGpsFactorNoise) );
 
   Vector3 v0 = Vector3(0,0,0);
   PriorFactor<Vector3> priorVel(V(0), v0,
@@ -144,10 +155,7 @@ void StateEstimator::optimizationLoop()
   newFactors.add(priorBias);
 
 
-  noiseModel::Diagonal::shared_ptr imuToGpsFactorNoise = noiseModel::Diagonal::Sigmas(
-      (Vector(6) << gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_, gpsTSigma_).finished() );
-  newFactors.add( BetweenFactor<Pose3>(X(0), G(0), imuToGps_, imuToGpsFactorNoise) );
-
+  // initiali guesses of initial variables
   newVariables.insert(X(0), x0);
   newVariables.insert(V(0), v0);
   newVariables.insert(B(0), b0);
@@ -158,6 +166,7 @@ void StateEstimator::optimizationLoop()
   newTimestamps[V(0)] = 0;
   newTimestamps[B(0)] = 0;
 
+  // update the graph with the priors
   graph.update(newFactors, newVariables); //, newTimestamps);
 
   Pose3 prevPose = prevPose_ = x0;
@@ -192,7 +201,7 @@ void StateEstimator::optimizationLoop()
   {
     bool optimize = false;
 
-    // integrate imu messages
+    // integrate imu messages and add them to the graph
     while (!imuQ_.empty() && ROS_TIME(imuQ_.back()) > (startTime + 0.1*imuKey) && !optimize)
     {
       double curTime = startTime + 0.1*imuKey;
@@ -216,15 +225,16 @@ void StateEstimator::optimizationLoop()
       newFactors.add( BetweenFactor<imuBias::ConstantBias>( B(imuKey-1), B(imuKey), imuBias::ConstantBias(),
             noiseModel::Diagonal::Sigmas( sqrt(imuIntegrator.deltaTij()) * noiseModelBetweenBias) ) );
 
+      // add an orientation factor from the last imu message orientation - yaw only
       Rot3 orientation = Rot3::Quaternion(
           lastImu->orientation.w,
           lastImu->orientation.x,
           lastImu->orientation.y,
           lastImu->orientation.z);
-      //std::cout << "adding orientation: " << orientation.xyz() << std::endl;
       newFactors.add( UnaryRotationFactor(X(imuKey), orientation.yaw(),
             noiseModel::Diagonal::Sigmas( (Vector(1) << yawSigma_).finished() )) );
 
+      // predict the state forward using the previously integrated imu measurements and use those as initial guesses of the variables values
       NavState cur(prevPose, prevVel);
       NavState next = imuIntegrator.predict(cur, prevBias);
       prevPose = next.pose();
@@ -234,10 +244,6 @@ void StateEstimator::optimizationLoop()
       newVariables.insert(V(imuKey), prevVel);
       newVariables.insert(B(imuKey), prevBias);
 
-      Pose3 temp = prevPose.compose(imuToGps_);
-      std::cout << "imu(" << imuKey << "): " << temp.x() << " " << temp.y() << " " << temp.z() << std::endl;
-
-      // for marginalizing out past the time window
       newTimestamps[X(imuKey)] = 0.1*imuKey;
       newTimestamps[G(imuKey)] = 0.1*imuKey;
       newTimestamps[V(imuKey)] = 0.1*imuKey;
@@ -258,7 +264,6 @@ void StateEstimator::optimizationLoop()
       // we should maybe do a check on the GPS to make sure it's valid
       newFactors.add( GPSFactor(G(gpsKey), Point3(E,N,U), gpsNoise) );
       newFactors.add( BetweenFactor<Pose3>(X(gpsKey), G(gpsKey), imuToGps_, imuToGpsFactorNoise) );
-      std::cout << "gps(" << gpsKey << "): " << E << " " << N << " " << U << std::endl;
       ++gpsKey;
     }
 
@@ -352,12 +357,14 @@ void StateEstimator::imuCallback(sensor_msgs::ImuConstPtr imu)
   }
   else
   {
+    // just updating the previous integration
     imuIntegrator_.integrateMeasurement(
         Vector3(imu->linear_acceleration.x, imu->linear_acceleration.y, imu->linear_acceleration.z),
         Vector3(imu->angular_velocity.x, imu->angular_velocity.y, imu->angular_velocity.z),
         dt);
   }
 
+  // predict forward to get the next state
   NavState prevState(prevPose, prevVel);
   NavState currentState = imuIntegrator_.predict(prevState, prevBias);
 
