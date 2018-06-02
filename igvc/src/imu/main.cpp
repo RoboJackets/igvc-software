@@ -23,6 +23,7 @@ int main(int argc, char** argv)
 
   ros::Publisher raw_mag_pub = nh.advertise<geometry_msgs::Vector3>("/mag_raw", 1000);
   ros::Publisher raw_yaw_pub = nh.advertise<std_msgs::Float64>("/raw_yaw", 1);
+  ros::Publisher raw_imu_pub = nh.advertise<sensor_msgs::Imu>("/imu_raw_accel", 1000);
 
   int ret = freespace_init();
   if(ret != FREESPACE_SUCCESS) {
@@ -99,18 +100,22 @@ int main(int argc, char** argv)
     }
 
     MultiAxisSensor accel_msg;
+    MultiAxisSensor accel_raw_msg;
     ret = freespace_util_getAccNoGravity(&response.motionEngineOutput, &accel_msg);
-    //ret = freespace_util_getAcceleration(&response.motionEngineOutput, &accel_msg);
+    ret = freespace_util_getAcceleration(&response.motionEngineOutput, &accel_raw_msg);
     if(ret != FREESPACE_SUCCESS) {
       ROS_ERROR_STREAM("failed to read acceleration " << ret);
     }
     Eigen::Vector3d accel_vec(accel_msg.x,-accel_msg.y,accel_msg.z);
+    Eigen::Vector3d accel_raw_vec(accel_raw_msg.x,-accel_raw_msg.y,accel_raw_msg.z);
     Eigen::Matrix3d T;
     //T << cos(M_PI), 0, sin(M_PI), 0, 1, 0, -sin(M_PI), 0, cos(M_PI);
     T << 1, 0, 0, 0, cos(M_PI / 2), -sin(M_PI / 2), 0, sin(M_PI / 2), cos(M_PI / 2);
     Eigen::Vector3d rotated_accel = T * accel_vec;
+    Eigen::Vector3d rotated_raw_accel = T * accel_raw_vec;
     T << cos(M_PI), sin(M_PI), 0, -sin(M_PI), cos(M_PI), 0, 0, 0, 1;
     rotated_accel = T * rotated_accel;
+    accel_raw_vec = T * rotated_raw_accel;
 
     MultiAxisSensor orientation_msg;
     ret = freespace_util_getAngPos(&response.motionEngineOutput, &orientation_msg);
@@ -177,6 +182,38 @@ int main(int argc, char** argv)
     raw_mag.z = magnetometer_msg.z;
 
     raw_mag_pub.publish(raw_mag);
+
+    sensor_msgs::Imu msg_raw;
+    msg_raw.header.frame_id = "imu";
+    msg_raw.header.stamp = msg.header.stamp;
+    msg_raw.header.seq = seq;
+
+    msg_raw.linear_acceleration.x = rotated_raw_accel[0];
+    msg_raw.linear_acceleration.y = rotated_raw_accel[1];
+    msg_raw.linear_acceleration.z = rotated_raw_accel[2];
+
+    msg_raw.angular_velocity.x = rotated_angular_vel[0];
+    msg_raw.angular_velocity.y = rotated_angular_vel[1];
+    msg_raw.angular_velocity.z = rotated_angular_vel[2];
+    msg_raw.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
+
+    tf::Quaternion pre_rotated_raw(orientation_msg.x, orientation_msg.y, orientation_msg.z, orientation_msg.w);
+    tf::Quaternion rotation_raw = tf::createQuaternionFromRPY(M_PI / 2, M_PI, yaw_offset);
+
+    tf::Matrix3x3(pre_rotated).getRPY(roll, pitch, yaw);
+
+    tf::Quaternion rotated_raw = rotation_raw * pre_rotated;
+
+    geometry_msgs::Quaternion orientation_raw;
+    orientation_raw.x = rotated_raw.x();
+    orientation_raw.y = rotated_raw.y();
+    orientation_raw.z = rotated_raw.z();
+    orientation_raw.w = rotated_raw.w();
+
+    msg_raw.orientation = orientation;
+    msg_raw.orientation_covariance = { 0.0025, 1e-6, 1e-6, 1e-6, 0.0025, 1e-6, 1e-6, 1e-6, 0.0025 };
+
+    raw_imu_pub.publish(msg_raw);
 
   }
   return 0;
