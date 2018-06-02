@@ -20,12 +20,14 @@ class CNN:
             resize_height, force_cpu):
         self.graph = self.load_graph(model_filename)
         config = tf.ConfigProto(
-                        device_count = {'GPU': 0}
+                        device_count = {'GPU': 1}
         )
-        if force_cpu:
-            self.sess = tf.Session(config=config,graph=self.graph)
-        else:
-            self.sess = tf.Session(graph=self.graph)
+        #if force_cpu:
+        #    self.sess = tf.Session(config=config,graph=self.graph)
+        #else:
+        config.gpu_options.allow_growth = True
+        self.sess = tf.Session(config=config,graph=self.graph)
+	
 
         self.resize_width = resize_width
         self.resize_height = resize_height
