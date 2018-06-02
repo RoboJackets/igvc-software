@@ -167,7 +167,7 @@ int main(int argc, char** argv)
     orientation.w = rotated.w();
 
     msg.orientation = orientation;
-    msg.orientation_covariance = { 0.0025, 1e-6, 1e-6, 1e-6, 0.0025, 1e-6, 1e-6, 1e-6, 0.0025 };
+    msg.orientation_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
 
     imu_pub.publish(msg);
 
