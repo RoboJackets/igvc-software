@@ -30,6 +30,8 @@ Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>> *eigenR
 
 double resolution;
 double orientation;
+double _roll;
+double _pitch;
 int start_x;  // start x location
 int start_y;  // start y location
 int length_y;
@@ -40,8 +42,8 @@ double cur_y;
 bool update = true;
 
 std::tuple<double, double> rotate(double x, double y) {
-  double newX = x * cos(orientation) + y * -1 * sin(orientation);
-  double newY = x * sin(orientation) + y * cos(orientation);
+  double newX = x * cos(orientation)*cos(_pitch) + y * (cos(orientation)*sin(_pitch)*sin(_roll) - sin(orientation)*cos(_roll));
+  double newY = x * sin(orientation)*cos(_pitch) + y * (sin(orientation)*sin(_pitch)*sin(_roll) + cos(orientation)*cos(_roll));
   return (std::make_tuple(newX, newY));
 }
 
@@ -54,6 +56,8 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr &msg) {
     double roll, pitch, yaw;
     tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
     orientation = yaw;
+    _roll = roll;
+    _pitch = pitch;
     update = false;
   }
 }
@@ -98,6 +102,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     //ROS_INFO_STREAM("points starts at " << point->x << "," << point->y);
     double x_loc, y_loc;
     std::tie(x_loc, y_loc) = rotate(point->x, point->y);
+
     //ROS_INFO_STREAM("rotated " << x_loc << "," << y_loc);
     int point_x = static_cast<int>(std::round(x_loc / resolution + cur_x / resolution + start_x));
     int point_y = static_cast<int>(std::round(y_loc / resolution + cur_y / resolution + start_y));
@@ -176,7 +181,7 @@ int main(int argc, char **argv)
      !pNh.hasParam("occupancy_grid_length") && !pNh.hasParam("occupancy_grid_resolution") &&
      !pNh.hasParam("start_X") & !pNh.hasParam("start_Y") &&
      !pNh.hasParam("debug")) {
-    ROS_ERROR_STREAM("missing parameters exiting");
+    ROS_ERROR_STREAM("missing parameters; exiting");
     return 0;
   }
 
@@ -212,20 +217,20 @@ int main(int argc, char **argv)
   eigenRep = new Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>>(
       (unsigned char *)published_map, width_x, length_y);
 
-  map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
+  map_pub = nh.advertise<igvc_msgs::map>("/1map", 1);
 
   if (debug)
   {
 
-    debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
-    debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
+    debug_pub = nh.advertise<sensor_msgs::Image>("/1map_debug", 1);
+    debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/1map_debug_pcl", 1);
     //for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
     ROS_INFO_STREAM("inital map set up");
     for(int j = 230; j < 400; j++){
       ROS_INFO_STREAM("j = " << j);
-      published_map->at<uchar>(j, 242) = (uchar)255;
+      //published_map->at<uchar>(j, 242) = (uchar)255;
       if(j < 340) {
-        published_map->at<uchar>(j, 260) = (uchar)255;
+        //published_map->at<uchar>(j, 260) = (uchar)255;
       }
 
     }
