@@ -40,7 +40,7 @@ public:
 
   bool isGoal(SearchLocation state)
   {
-    return state.distTo(Goal, Resolution) < GoalThreshold || state.distTo(Start, Resolution) > 10;
+    return state.distTo(Goal, Resolution) < GoalThreshold || state.distTo(Start, Resolution) > 7;
   }
 
   double getStepCost(SearchLocation location, SearchMove action)
