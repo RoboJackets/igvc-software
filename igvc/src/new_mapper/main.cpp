@@ -30,6 +30,8 @@ Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>> *eigenR
 
 double resolution;
 double orientation;
+double _roll;
+double _pitch;
 int start_x;  // start x location
 int start_y;  // start y location
 int length_y;
@@ -40,8 +42,8 @@ double cur_y;
 bool update = true;
 
 std::tuple<double, double> rotate(double x, double y) {
-  double newX = x * cos(orientation) + y * -1 * sin(orientation);
-  double newY = x * sin(orientation) + y * cos(orientation);
+  double newX = x * cos(orientation)*cos(_pitch) + y * (cos(orientation)*sin(_pitch)*sin(_roll) - sin(orientation)*cos(_roll));
+  double newY = x * sin(orientation)*cos(_pitch) + y * (sin(orientation)*sin(_pitch)*sin(_roll) + cos(orientation)*cos(_roll));
   return (std::make_tuple(newX, newY));
 }
 
@@ -54,6 +56,8 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr &msg) {
     double roll, pitch, yaw;
     tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
     orientation = yaw;
+    _roll = roll;
+    _pitch = pitch;
     update = false;
   }
 }
@@ -98,6 +102,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     //ROS_INFO_STREAM("points starts at " << point->x << "," << point->y);
     double x_loc, y_loc;
     std::tie(x_loc, y_loc) = rotate(point->x, point->y);
+
     //ROS_INFO_STREAM("rotated " << x_loc << "," << y_loc);
     int point_x = static_cast<int>(std::round(x_loc / resolution + cur_x / resolution + start_x));
     int point_y = static_cast<int>(std::round(y_loc / resolution + cur_y / resolution + start_y));
@@ -107,8 +112,8 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
       //ROS_INFO_STREAM("putting point at " << point_x << "," << point_y);
       if(published_map->at<uchar>(point_x, point_y) < 230) {
         if(topic == "/semantic_segmentation_cloud") {
-          if(sqrt(pow(point_x - cur_x / resolution - start_y, 2) + pow(point_y - cur_y / resolution - start_x, 2)) * resolution < 4) {
-            published_map->at<uchar>(point_x, point_y) += (uchar)20;
+          if(sqrt(pow(point_x - cur_x / resolution - start_y, 2) + pow(point_y - cur_y / resolution - start_x, 2)) * resolution < 3) {
+            published_map->at<uchar>(point_x, point_y) += (uchar)51;
           }
         } else {
           published_map->at<uchar>(point_x, point_y) += (uchar)125;
@@ -183,7 +188,7 @@ int main(int argc, char **argv)
      !pNh.hasParam("occupancy_grid_length") && !pNh.hasParam("occupancy_grid_resolution") &&
      !pNh.hasParam("start_X") & !pNh.hasParam("start_Y") &&
      !pNh.hasParam("debug")) {
-    ROS_ERROR_STREAM("missing parameters exiting");
+    ROS_ERROR_STREAM("missing parameters; exiting");
     return 0;
   }
 
