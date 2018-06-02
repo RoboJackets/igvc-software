@@ -105,8 +105,14 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
       //ROS_INFO_STREAM("putting point at " << point_x << "," << point_y);
-      if(published_map->at<uchar>(point_x, point_y) < 250) {
-        published_map->at<uchar>(point_x, point_y) += (uchar)84;
+      if(published_map->at<uchar>(point_x, point_y) < 230) {
+        if(topic == "/semantic_segmentation_cloud") {
+          if(sqrt(pow(point_x - cur_x / resolution - start_y, 2) + pow(point_y - cur_y / resolution - start_x, 2)) * resolution < 4) {
+            published_map->at<uchar>(point_x, point_y) += (uchar)20;
+          }
+        } else {
+          published_map->at<uchar>(point_x, point_y) += (uchar)125;
+        }
       }
 
       count++;
@@ -145,7 +151,8 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
               pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
       for(int j = 0; j < length_y; j++){
-        if(published_map->at<uchar>(i, j) >= (uchar)200) {
+        if(published_map->at<uchar>(i, j) >= (uchar)178) {
+          //published_map->at<uchar>(i, j) = published_map->at<uchar>(i, j) - 1;
           pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
           p.x = (i - start_x) * resolution;
           p.y = (j - start_y) * resolution;
@@ -216,20 +223,14 @@ int main(int argc, char **argv)
 
   if (debug)
   {
-
     debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
     debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
-    //for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
     ROS_INFO_STREAM("inital map set up");
-    for(int j = 230; j < 400; j++){
-      ROS_INFO_STREAM("j = " << j);
-      published_map->at<uchar>(j, 242) = (uchar)255;
-      if(j < 340) {
-        published_map->at<uchar>(j, 260) = (uchar)255;
-      }
-
+    for(int j = 250; j < 400; j++){
+      //published_map->at<uchar>(243, j) = (uchar)255;
+      //published_map->at<uchar>(257, j) = (uchar)255;
     }
-      //}
+
   }
 
   ros::spin();
