@@ -231,7 +231,7 @@ int main(int argc, char **argv)
     debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
     debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
     ROS_INFO_STREAM("inital map set up");
-    for(int j = 250; j < 400; j++){
+    for(int j = 50; j < 400; j++){
       //published_map->at<uchar>(243, j) = (uchar)255;
       //published_map->at<uchar>(257, j) = (uchar)255;
     }

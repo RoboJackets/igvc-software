@@ -24,7 +24,8 @@ void point_cloud_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& msg)
     }
     x_size = old_size;
   }
-  result.header.frame_id = "/lidar";
+  result.header.frame_id = msg->header.frame_id;
+  result.header.stamp = msg->header.stamp;
   _pointcloud_pub.publish(result);
 }
 
