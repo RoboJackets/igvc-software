@@ -102,7 +102,7 @@ int main(int argc, char** argv)
     MultiAxisSensor accel_msg;
     MultiAxisSensor accel_raw_msg;
 
-    ret = freespace_util_getAcceleration(&response.motionEngineOutput, &accel_msg);
+    ret = freespace_util_getAccNoGravity(&response.motionEngineOutput, &accel_msg);
     ret = freespace_util_getAcceleration(&response.motionEngineOutput, &accel_raw_msg);
     if(ret != FREESPACE_SUCCESS) {
       ROS_ERROR_STREAM("failed to read acceleration " << ret);
@@ -137,7 +137,7 @@ int main(int argc, char** argv)
     Ty << cos(pitchT), 0, sin(pitchT), 0, 1, 0, -sin(pitchT), 0, cos(pitchT);
     Tx << 1, 0, 0, 0, cos(yawT), -sin(yawT), 0, sin(yawT), cos(yawT);
     Tt = Ty;
-    Eigen::Vector3d angular_vel_vec(angular_vel_msg.x,angular_vel_msg.y,angular_vel_msg.z);
+    Eigen::Vector3d angular_vel_vec(angular_vel_msg.x,angular_vel_msg.y,-angular_vel_msg.z);
     Eigen::Vector3d rotated_angular_vel = angular_vel_vec;
 
     MultiAxisSensor magnetometer_msg;
@@ -172,7 +172,8 @@ int main(int argc, char** argv)
 
     tf::Matrix3x3(rotated).getRPY(roll, pitch, yaw);
     ROS_INFO_STREAM("rotated = " << roll << " " << pitch << " " << yaw);
-
+    tf::Matrix3x3(pre_rotated).getRPY(roll,pitch,yaw);
+    yaw = -yaw;
     geometry_msgs::Quaternion orientation;
     orientation.x = rotated.x();
     orientation.y = rotated.y();
