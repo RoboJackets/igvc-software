@@ -24,7 +24,7 @@
       <param name="yaw_offset" value="0"/>
 
       <!-- this assumes we are in a planar environment -->
-      <param name="two_d_mode" value="true"/>
+      <param name="two_d_mode" value="false"/>
 
       <!-- sets altitude to 0 -->
       <param name="zero_altitude" value="true"/>
