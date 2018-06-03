@@ -1,8 +1,8 @@
 <launch>
     <node name="imu_remap" pkg="igvc_bag_utils" type="imu_remap" output="screen">
-          <param name="x" type="double" value="0.5" />
-          <param name="y" type="double" value="0.5" />
-          <param name="z" type="double" value="0.5" />
+          <param name="x" type="double" value="0.0025" />
+          <param name="y" type="double" value="0.0025" />
+          <param name="z" type="double" value="0.0025" />
     </node>
 
     <include file="$(find igvc)/launch/filter_lidar.launch" />
