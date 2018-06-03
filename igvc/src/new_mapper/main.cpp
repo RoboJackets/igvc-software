@@ -42,8 +42,10 @@ double cur_y;
 bool update = true;
 
 std::tuple<double, double> rotate(double x, double y) {
-  double newX = x * cos(orientation)*cos(_pitch) + y * (cos(orientation)*sin(_pitch)*sin(_roll) - sin(orientation)*cos(_roll));
-  double newY = x * sin(orientation)*cos(_pitch) + y * (sin(orientation)*sin(_pitch)*sin(_roll) + cos(orientation)*cos(_roll));
+  //double newX = x * cos(orientation)*cos(_pitch) + y * (cos(orientation)*sin(_pitch)*sin(_roll) - sin(orientation)*cos(_roll));
+  // double newY = x * sin(orientation)*cos(_pitch) + y * (sin(orientation)*sin(_pitch)*sin(_roll) + cos(orientation)*cos(_roll));
+  double newX = x * cos(orientation) + y*sin(orientation);
+  double newY = x * sin(orientation) + y*cos(orientation);
   return (std::make_tuple(newX, newY));
 }
 
