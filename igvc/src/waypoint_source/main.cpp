@@ -168,6 +168,9 @@ int main(int argc, char** argv)
         waypoint_for_pub.header.frame_id = "odom";
         waypoint_for_pub.point.x -= map_origin.x;
         waypoint_for_pub.point.y -= map_origin.y;
+        //double temp = -waypoint_for_pub.point.x;
+        //waypoint_for_pub.point.x = waypoint_for_pub.point.y;
+        //waypoint_for_pub.point.y = temp;
         waypoint_pub.publish(waypoint_for_pub);
       }
 
