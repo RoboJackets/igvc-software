@@ -21,7 +21,7 @@
 
       <!-- for if the IMU (after magnetic declination adjustment)
            does not read 0 -->
-      <param name="yaw_offset" value="0"/>
+      <param name="yaw_offset" value="1.62114167757"/>
 
       <!-- this assumes we are in a planar environment -->
       <param name="two_d_mode" value="true"/>
@@ -76,6 +76,7 @@
                                  true,  true,  true]</rosparam>
       <param name="imu0_differential" value="false"/>
       <param name="imu0_remove_gravitational_acceleration" value="false" />
+      <param name="publish_acceleration" value="true" />
 
       <!-- gps from above navstat_transform -->
       <param name="odom1" value="/odometry/gps"/>
