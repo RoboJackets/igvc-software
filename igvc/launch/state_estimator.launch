@@ -4,24 +4,56 @@
     <remap from="state_estimator/gps" to="/fix" />
     <remap from="state_estimator/imu" to="/imu" />
 
+    <!-- the magnitude of local gravity - sometimes filtered out by imu -->
     <param name="gravity_magnitude" type="double" value="9.80511" />
-    <param name="accelerometer_noise_sigma" type="double" value="1e-2" />
-    <param name="gyroscope_noise_sigma" type="double" value="1e-3" />
-    <param name="imu_integration_noise_sigma" type="double" value="1e-4" />
 
-    <param name="accelerometer_bias_noise_sigma" type="double" value="2e-4" />
-    <param name="gyroscope_bias_noise_sigma" type="double" value="3e-5" />
+    <!-- Gaussian noise of the accelerometer readings (sigma) -->
+    <param name="accelerometer_noise_sigma" type="double" value="4.0" />
+
+    <!-- Gaussian noise of the gyroscope readings (sigma) -->
+    <param name="gyroscope_noise_sigma" type="double" value="5e-2" />
+
+    <!-- Gaussian noise of the process noise in integrating imu values (sigma) -->
+    <param name="imu_integration_noise_sigma" type="double" value="1e-3" />
+
+    <!-- Gaussian noise of the yaw readings from the imu (sigma) -->
     <param name="yaw_noise_sigma" type="double" value="0.085" />
 
-    <param name="gps_noise_sigma" type="double" value="0.5" />
+    <!-- Gaussian noise of the gps measurements (sigma) -->
+    <param name="gps_noise_sigma" type="double" value="0.25" />
+
+    <!-- Gaussian noise of the accelerometer bias between factors (10hz) (sigma)
+         this controls how fast the bias is expected to wander -->
+    <param name="accelerometer_bias_noise_sigma" type="double" value="2e-4" />
+
+    <!-- Gaussian noise of the gyroscope bias between factors (10hz) (sigma)
+         this controls how fast the bias is expected to wander -->
+    <param name="gyroscope_bias_noise_sigma" type="double" value="3e-5" />
+
+
+    <!-- lag for the optimizer - length in seconds of history we optimize over
+         currently not fully implemented -->
     <param name="optimization_lag" type="double" value="1.0" />
+
+    <!-- expected imu frequency - not really important -->
     <param name="imu_frequency" type="double" value="125.0" />
 
+    <!-- Gaussian noise of the initial orientation guess (sigma) -->
     <param name="prior_pose_orientation_noise_sigma" type="double" value="0.25" />
+
+    <!-- Gaussian noise of the initial position guess (sigma) -->
     <param name="prior_pose_position_noise_sigma" type="double" value="0.1" />
+
+    <!-- Gaussian noise of the initial velocity guess (sigma) -->
     <param name="prior_velocity_noise_sigma" type="double" value="0.1" />
+
+    <!-- Gaussian noise of the initial accelerometer guess (sigma) -->
     <param name="prior_accelerometer_bias_sigma" type="double" value="0.8" />
+
+    <!-- Gaussian noise of the initial gyroscope guess (sigma) -->
     <param name="prior_gyroscope_bias_sigma" type="double" value="0.8" />
+
+    <!-- Gaussian noise of the imu-gps transform (sigma) -->
     <param name="gps_transform_noise_sigma" type="double" value="5e-2" />
   </node>
 </launch>

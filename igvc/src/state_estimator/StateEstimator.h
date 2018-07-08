@@ -38,6 +38,7 @@ private:
 
   double lastImuT_;
   std::list<sensor_msgs::ImuConstPtr> imuMeasurements_;
+  gtsam::PreintegratedImuMeasurements imuIntegrator_;
 
   // parameters
   double accelSigma_, gyroSigma_, imuIntSigma_, accelBSigma_, gyroBSigma_, gravityMagnitude_;
@@ -48,10 +49,9 @@ private:
   double priorOSigma_, priorPSigma_, priorVSigma_, priorABias_, priorGBias_;
   double gpsTSigma_;
 
-  gtsam::PreintegratedImuMeasurements imuIntegrator_;
 
   GeographicLib::LocalCartesian enu_; /// Object to put lat/lon coordinates into local cartesian
-  gtsam::Pose3 imuToGps_;
+  gtsam::Pose3 imuToGps_; // imu->gps transform
 
   // variables for passing the state between threads
   mutable std::mutex mutex_;
