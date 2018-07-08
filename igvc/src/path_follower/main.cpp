@@ -1,13 +1,13 @@
 #define _USE_MATH_DEFINES
 
 #include <igvc_msgs/velocity_pair.h>
-#include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
 #include <ros/ros.h>
 #include <tf/transform_datatypes.h>
+#include <Eigen/Dense>
 #include <cmath>
 #include <iostream>
-#include <Eigen/Dense>
 #include "SmoothControl.h"
 
 ros::Publisher cmd_pub;
@@ -26,7 +26,8 @@ void path_callback(const nav_msgs::PathConstPtr& msg)
   path = msg;
 }
 
-double get_distance(double x1, double y1, double x2, double y2) {
+double get_distance(double x1, double y1, double x2, double y2)
+{
   return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
@@ -57,44 +58,55 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
   double path_index = 0;
   double closest = std::abs(get_distance(cur_x, cur_y, path->poses[0].pose.position.x, path->poses[0].pose.position.y));
-  double temp = std::abs(get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
-  while(path_index < path->poses.size() && temp <= closest) {
-    if(temp < closest) {
+  double temp = std::abs(
+      get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
+  while (path_index < path->poses.size() && temp <= closest)
+  {
+    if (temp < closest)
+    {
       closest = temp;
     }
     path_index++;
-    temp = std::abs(get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
+    temp = std::abs(
+        get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
   }
 
-  if(get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist) {
+  if (get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist)
+  {
     double distance = 0;
     bool cont = true;
-    while(cont && path_index < path->poses.size() - 1) {
+    while (cont && path_index < path->poses.size() - 1)
+    {
       geometry_msgs::Point point1, point2;
       point1 = path->poses[path_index].pose.position;
       point2 = path->poses[path_index + 1].pose.position;
       double increment = get_distance(point1.x, point1.y, point2.x, point2.y);
-      if(distance + increment > lookahead_dist) {
+      if (distance + increment > lookahead_dist)
+      {
         cont = false;
-        Eigen::Vector3d first(point1.x,point1.y, 0);
-        Eigen::Vector3d second(point2.x,point2.y, 0);
+        Eigen::Vector3d first(point1.x, point1.y, 0);
+        Eigen::Vector3d second(point2.x, point2.y, 0);
         Eigen::Vector3d slope = second - first;
-        //ROS_INFO_STREAM("first = " << first[0] << ", " << first[1]);
-        //ROS_INFO_STREAM("slope = " << slope[0] << ", " << slope[1]);
-        //ROS_INFO_STREAM("look = " << lookahead_dist << " dista = " << distance);
-        //ROS_INFO_STREAM("increment = " << increment << " look - dist = " << (distance - lookahead_dist) + increment);
+        // ROS_INFO_STREAM("first = " << first[0] << ", " << first[1]);
+        // ROS_INFO_STREAM("slope = " << slope[0] << ", " << slope[1]);
+        // ROS_INFO_STREAM("look = " << lookahead_dist << " dista = " << distance);
+        // ROS_INFO_STREAM("increment = " << increment << " look - dist = " << (distance - lookahead_dist) + increment);
         slope /= increment;
         slope *= (distance - lookahead_dist) + increment;
-        //ROS_INFO_STREAM("slope2 = " << slope[0] << ", " << slope[1]);
+        // ROS_INFO_STREAM("slope2 = " << slope[0] << ", " << slope[1]);
         slope += first;
         tar_x = slope[0];
         tar_y = slope[1];
-      } else {
+      }
+      else
+      {
         path_index++;
         distance += increment;
       }
     }
-  } else {
+  }
+  else
+  {
     tar_x = end.x;
     tar_y = end.y;
   }
@@ -102,9 +114,12 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   double yDiff = tar_y - cur_y;
   double xDiff = tar_x - cur_x;
 
-  if(xDiff == 0) {
+  if (xDiff == 0)
+  {
     tar_theta = yDiff > 0 ? M_PI : -M_PI;
-  } else {
+  }
+  else
+  {
     tar_theta = atan2((yDiff), (xDiff));
   }
 
@@ -130,12 +145,13 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
 
   ROS_INFO_STREAM("distance = " << get_distance(tar_x, tar_y, cur_x, cur_y));
 
-  if(vel.right_velocity > maximum_vel || vel.left_velocity > maximum_vel) {
+  if (vel.right_velocity > maximum_vel || vel.left_velocity > maximum_vel)
+  {
     ROS_ERROR_STREAM("Large velocity output stopping " << vel.right_velocity << ", " << vel.left_velocity);
     vel.right_velocity = 0;
     vel.left_velocity = 0;
   }
-  //ROS_INFO_STREAM("target " << tar_x << " " << tar_y << "\n");
+  // ROS_INFO_STREAM("target " << tar_x << " " << tar_y << "\n");
 
   cmd_pub.publish(vel);
   trajectory_pub.publish(trajectory_msg);

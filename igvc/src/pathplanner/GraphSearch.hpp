@@ -136,7 +136,7 @@ public:
   /** Runs A* graph search on the given search problem */
   template <class StateType, class ActionType>
   static Path<StateType, ActionType> AStar(SearchProblem<StateType, ActionType> &problem,
-                                           void (*expandedCallback)(const StateType&))
+                                           void (*expandedCallback)(const StateType &))
   {
     set<StateType> expanded;
     priority_queue<Path<StateType, ActionType>, vector<Path<StateType, ActionType>>,

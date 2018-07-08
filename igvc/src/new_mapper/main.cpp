@@ -1,5 +1,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <igvc_msgs/map.h>
+#include <math.h>
+#include <nav_msgs/Odometry.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
@@ -7,11 +9,9 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <stdlib.h>
-#include <math.h>
 #include <Eigen/Core>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
-#include <nav_msgs/Odometry.h>
 #include "tf/transform_datatypes.h"
 
 igvc_msgs::map msgBoi;  // >> message to be sent
@@ -41,16 +41,21 @@ double cur_x;
 double cur_y;
 bool update = true;
 
-std::tuple<double, double> rotate(double x, double y) {
-  //double newX = x * cos(orientation)*cos(_pitch) + y * (cos(orientation)*sin(_pitch)*sin(_roll) - sin(orientation)*cos(_roll));
-  // double newY = x * sin(orientation)*cos(_pitch) + y * (sin(orientation)*sin(_pitch)*sin(_roll) + cos(orientation)*cos(_roll));
-  double newX = x * cos(orientation) + y*sin(orientation);
-  double newY = x * sin(orientation) + y*cos(orientation);
+std::tuple<double, double> rotate(double x, double y)
+{
+  // double newX = x * cos(orientation)*cos(_pitch) + y * (cos(orientation)*sin(_pitch)*sin(_roll) -
+  // sin(orientation)*cos(_roll));
+  // double newY = x * sin(orientation)*cos(_pitch) + y * (sin(orientation)*sin(_pitch)*sin(_roll) +
+  // cos(orientation)*cos(_roll));
+  double newX = x * cos(orientation) + y * sin(orientation);
+  double newY = x * sin(orientation) + y * cos(orientation);
   return (std::make_tuple(newX, newY));
 }
 
-void odom_callback(const nav_msgs::Odometry::ConstPtr &msg) {
-  if(update) {
+void odom_callback(const nav_msgs::Odometry::ConstPtr &msg)
+{
+  if (update)
+  {
     cur_x = msg->pose.pose.position.x;
     cur_y = msg->pose.pose.position.y;
     tf::Quaternion quat;
@@ -76,13 +81,17 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
   ros::Time time = ros::Time::now();
-  if(transforms.find(topic) == transforms.end()) {
-    if(tf_listener->waitForTransform("/base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(3.0))) {
+  if (transforms.find(topic) == transforms.end())
+  {
+    if (tf_listener->waitForTransform("/base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(3.0)))
+    {
       ROS_INFO_STREAM("\n\ngetting transform for " << topic << "\n\n");
       tf::StampedTransform transform;
       tf_listener->lookupTransform("/base_footprint", msg->header.frame_id, ros::Time(0), transform);
       transforms.insert(std::pair<std::string, tf::StampedTransform>(topic, transform));
-    } else {
+    }
+    else
+    {
       ROS_ERROR_STREAM("\n\nfailed to find transform using empty transform\n\n");
       tf::StampedTransform transform;
       transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
@@ -101,23 +110,30 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
 
   for (point = transformed->begin(); point < transformed->points.end(); point++)
   {
-    //ROS_INFO_STREAM("points starts at " << point->x << "," << point->y);
+    // ROS_INFO_STREAM("points starts at " << point->x << "," << point->y);
     double x_loc, y_loc;
     std::tie(x_loc, y_loc) = rotate(point->x, point->y);
 
-    //ROS_INFO_STREAM("rotated " << x_loc << "," << y_loc);
+    // ROS_INFO_STREAM("rotated " << x_loc << "," << y_loc);
     int point_x = static_cast<int>(std::round(x_loc / resolution + cur_x / resolution + start_x));
     int point_y = static_cast<int>(std::round(y_loc / resolution + cur_y / resolution + start_y));
-    //ROS_INFO_STREAM("point = " << point_x << "," << point_y);
+    // ROS_INFO_STREAM("point = " << point_x << "," << point_y);
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
-      //ROS_INFO_STREAM("putting point at " << point_x << "," << point_y);
-      if(published_map->at<uchar>(point_x, point_y) < 230) {
-        if(topic == "/semantic_segmentation_cloud") {
-          if(sqrt(pow(point_x - cur_x / resolution - start_y, 2) + pow(point_y - cur_y / resolution - start_x, 2)) * resolution < 3) {
+      // ROS_INFO_STREAM("putting point at " << point_x << "," << point_y);
+      if (published_map->at<uchar>(point_x, point_y) < 230)
+      {
+        if (topic == "/semantic_segmentation_cloud")
+        {
+          if (sqrt(pow(point_x - cur_x / resolution - start_y, 2) + pow(point_y - cur_y / resolution - start_x, 2)) *
+                  resolution <
+              3)
+          {
             published_map->at<uchar>(point_x, point_y) += (uchar)51;
           }
-        } else {
+        }
+        else
+        {
           published_map->at<uchar>(point_x, point_y) += (uchar)125;
         }
       }
@@ -134,8 +150,8 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   // make image message from img bridge
 
   img_bridge = cv_bridge::CvImage(msgBoi.header, sensor_msgs::image_encodings::MONO8, *published_map);
-  img_bridge.toImageMsg(imageBoi);    // from cv_bridge to sensor_msgs::Image
-  time = ros::Time::now();  // so times are exact same
+  img_bridge.toImageMsg(imageBoi);  // from cv_bridge to sensor_msgs::Image
+  time = ros::Time::now();          // so times are exact same
   imageBoi.header.stamp = time;
   // set fields of map message
   msgBoi.header.stamp = time;
@@ -144,7 +160,8 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   msgBoi.width = width_x;
   msgBoi.resolution = resolution;
   msgBoi.orientation = orientation;
-  ROS_INFO_STREAM("robot location " << std::round(cur_x / resolution) + start_x << ", " << std::round(cur_y / resolution) + start_y);
+  ROS_INFO_STREAM("robot location " << std::round(cur_x / resolution) + start_x << ", "
+                                    << std::round(cur_y / resolution) + start_y);
   msgBoi.x = std::round(cur_x / resolution) + start_x;
   msgBoi.y = std::round(cur_y / resolution) + start_y;
   msgBoi.x_initial = start_x;
@@ -153,13 +170,16 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   if (debug)
   {
     debug_pub.publish(imageBoi);
-    //ROS_INFO_STREAM("\nThe robot is located at " << cur_x << "," << cur_y << "," << orientation);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid=
-              pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
-    for(int i = 0; i < width_x; i++){ // init frame so edges are easily visible
-      for(int j = 0; j < length_y; j++){
-        if(published_map->at<uchar>(i, j) >= (uchar)178) {
-          //published_map->at<uchar>(i, j) = published_map->at<uchar>(i, j) - 1;
+    // ROS_INFO_STREAM("\nThe robot is located at " << cur_x << "," << cur_y << "," << orientation);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+    for (int i = 0; i < width_x; i++)
+    {  // init frame so edges are easily visible
+      for (int j = 0; j < length_y; j++)
+      {
+        if (published_map->at<uchar>(i, j) >= (uchar)178)
+        {
+          // published_map->at<uchar>(i, j) = published_map->at<uchar>(i, j) - 1;
           pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
           p.x = (i - start_x) * resolution;
           p.y = (j - start_y) * resolution;
@@ -186,10 +206,10 @@ int main(int argc, char **argv)
   double cont_start_x;
   double cont_start_y;
 
-  if(!pNh.hasParam("topics") && !pNh.hasParam("occupancy_grid_length") &&
-     !pNh.hasParam("occupancy_grid_length") && !pNh.hasParam("occupancy_grid_resolution") &&
-     !pNh.hasParam("start_X") & !pNh.hasParam("start_Y") &&
-     !pNh.hasParam("debug")) {
+  if (!pNh.hasParam("topics") && !pNh.hasParam("occupancy_grid_length") && !pNh.hasParam("occupancy_grid_length") &&
+      !pNh.hasParam("occupancy_grid_resolution") && !pNh.hasParam("start_X") & !pNh.hasParam("start_Y") &&
+      !pNh.hasParam("debug"))
+  {
     ROS_ERROR_STREAM("missing parameters; exiting");
     return 0;
   }
@@ -232,12 +252,6 @@ int main(int argc, char **argv)
   {
     debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
     debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
-    ROS_INFO_STREAM("inital map set up");
-    for(int j = 50; j < 400; j++){
-      //published_map->at<uchar>(243, j) = (uchar)255;
-      //published_map->at<uchar>(257, j) = (uchar)255;
-    }
-
   }
 
   ros::spin();

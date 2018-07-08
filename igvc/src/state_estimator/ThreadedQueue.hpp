@@ -1,9 +1,8 @@
-#include <queue>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+#include <queue>
 
-
-template<class T>
+template <class T>
 class ThreadedQueue
 {
 private:
@@ -12,11 +11,13 @@ private:
   std::condition_variable c;
 
 public:
-  ThreadedQueue() :
-    q(), m(), c()
-  {}
+  ThreadedQueue() : q(), m(), c()
+  {
+  }
 
-  ~ThreadedQueue() {}
+  ~ThreadedQueue()
+  {
+  }
 
   T front()
   {
@@ -41,7 +42,7 @@ public:
   {
     // blocks until an element is available
     std::unique_lock<std::mutex> lock(m);
-    c.wait( lock, [&]{ return !q.empty(); } );
+    c.wait(lock, [&] { return !q.empty(); });
     T t = q.front();
     q.pop();
     return t;

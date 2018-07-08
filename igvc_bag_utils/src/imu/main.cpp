@@ -8,7 +8,8 @@ double x;
 double y;
 double z;
 
-void imu_callback(const sensor_msgs::Imu::ConstPtr& msg) {
+void imu_callback(const sensor_msgs::Imu::ConstPtr& msg)
+{
   sensor_msgs::Imu result;
   result.header.frame_id = msg->header.frame_id;
   result.header.stamp = msg->header.stamp;
@@ -20,16 +21,16 @@ void imu_callback(const sensor_msgs::Imu::ConstPtr& msg) {
   result.angular_velocity_covariance = msg->angular_velocity_covariance;
   result.orientation_covariance = msg->orientation_covariance;
 
-  //sult.linear_acceleration_covariance[0] = x;
-  //sult.linear_acceleration_covariance[4] = y;
-  //sult.linear_acceleration_covariance[8] = z;
+  // sult.linear_acceleration_covariance[0] = x;
+  // sult.linear_acceleration_covariance[4] = y;
+  // sult.linear_acceleration_covariance[8] = z;
 
-  //result.orientation_covariance[0] = x;
-  //result.orientation_covariance[4] = y;
-  //result.orientation_covariance[8] = z;
-  //result.angular_velocity_covariance[0] = x;
-  //result.angular_velocity_covariance[4] = y;
-  //result.angular_velocity_covariance[8] = z;
+  // result.orientation_covariance[0] = x;
+  // result.orientation_covariance[4] = y;
+  // result.orientation_covariance[8] = z;
+  // result.angular_velocity_covariance[0] = x;
+  // result.angular_velocity_covariance[4] = y;
+  // result.angular_velocity_covariance[8] = z;
   /*double sum = 0;
   for(int i = 0; i < 9; i++) {
     sum += result.angular_velocity_covariance[i];
@@ -40,7 +41,8 @@ void imu_callback(const sensor_msgs::Imu::ConstPtr& msg) {
   pub.publish(result);
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   ros::init(argc, argv, "imu_remap");
 
   ros::NodeHandle nh;
@@ -57,5 +59,4 @@ int main(int argc, char** argv) {
   ros::spin();
 
   return 0;
-
 }

@@ -1,7 +1,7 @@
 // convolve over the map
 // update the map based on incremental updates and update the convolve
 
-
+#include <cv_bridge/cv_bridge.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <igvc_msgs/map.h>
 #include <nav_msgs/Odometry.h>
@@ -12,12 +12,11 @@
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <ros/subscriber.h>
+#include <sensor_msgs/Image.h>
+#include <std_msgs/Int32.h>
 #include <tf/transform_datatypes.h>
 #include <algorithm>
 #include <mutex>
-#include <sensor_msgs/Image.h>
-#include <cv_bridge/cv_bridge.h>
-#include <std_msgs/Int32.h>
 #include "GraphSearch.hpp"
 #include "igvcsearchproblemdiscrete.h"
 
@@ -51,7 +50,8 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
   initial_x = msg->x_initial;
   initial_y = msg->y_initial;
   search_problem.Start.Theta = std::round(msg->orientation / (M_PI / 4)) * (M_PI / 4);
-  ROS_INFO_STREAM("Start position " << search_problem.Start.X << "," << search_problem.Start.Y << " theta = " << search_problem.Start.Theta);
+  ROS_INFO_STREAM("Start position " << search_problem.Start.X << "," << search_problem.Start.Y
+                                    << " theta = " << search_problem.Start.Theta);
   search_problem.Resolution = msg->resolution;
 }
 
@@ -66,7 +66,8 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 
 void expanded_callback(const SearchLocation& location)
 {
-  expanded_cloud.points.push_back(pcl::PointXYZ((location.X - initial_x) * search_problem.Resolution, (location.Y - initial_y) * search_problem.Resolution, location.Theta));
+  expanded_cloud.points.push_back(pcl::PointXYZ((location.X - initial_x) * search_problem.Resolution,
+                                                (location.Y - initial_y) * search_problem.Resolution, location.Theta));
   expanded_pub.publish(expanded_cloud);
   std_msgs::Int32 size_msg;
   size_msg.data = expanded_cloud.size();
@@ -92,9 +93,8 @@ int main(int argc, char** argv)
 
   expanded_cloud.header.frame_id = "/odom";
 
-  if (!pNh.hasParam("goal_threshold") || !pNh.hasParam("c_space") ||
-      !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled") ||
-      !pNh.hasParam("probability_threshold"))
+  if (!pNh.hasParam("goal_threshold") || !pNh.hasParam("c_space") || !pNh.hasParam("point_turns_enabled") ||
+      !pNh.hasParam("reverse_enabled") || !pNh.hasParam("probability_threshold"))
   {
     ROS_ERROR_STREAM("path planner does not have all required parameters");
     return 0;

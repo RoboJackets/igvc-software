@@ -1,15 +1,15 @@
+#include <cv_bridge/cv_bridge.h>
+#include <geometry_msgs/PointStamped.h>
 #include <gtest/gtest.h>
 #include <igvc_msgs/map.h>
-#include <ros/ros.h>
+#include <nav_msgs/Path.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
-#include <nav_msgs/Path.h>
-#include <sensor_msgs/Image.h>
-#include <geometry_msgs/PointStamped.h>
-#include <opencv2/core/mat.hpp>
-#include <sensor_msgs/PointCloud2.h>
 #include <pcl_conversions/pcl_conversions.h>
-#include <cv_bridge/cv_bridge.h>
+#include <ros/ros.h>
+#include <sensor_msgs/Image.h>
+#include <sensor_msgs/PointCloud2.h>
+#include <opencv2/core/mat.hpp>
 
 class TestPathPlanner : public testing::Test
 {
@@ -46,8 +46,8 @@ protected:
 
   bool IsNodeReady()
   {
-    return (mock_map_pub.getNumSubscribers() > 0) && (mock_waypoint_pub.getNumSubscribers() > 0)
-      && (expanded_sub.getNumPublishers() > 0) && (path_sub.getNumPublishers() > 0);
+    return (mock_map_pub.getNumSubscribers() > 0) && (mock_waypoint_pub.getNumSubscribers() > 0) &&
+           (expanded_sub.getNumPublishers() > 0) && (path_sub.getNumPublishers() > 0);
   }
 
   ros::NodeHandle handle;
@@ -87,16 +87,19 @@ TEST_F(TestPathPlanner, EmptyMap)
 
   sleep(1);
 
-  const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
+  const nav_msgs::Path::ConstPtr& response =
+      ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(response.get() != nullptr);
   ASSERT_EQ(response->poses.size(), 8);
-  for(double i = 0; i < 8; i++) {
+  for (double i = 0; i < 8; i++)
+  {
     EXPECT_NEAR(i / 10, response->poses[i].pose.position.x, 0.001);
     EXPECT_NEAR(i / 10, response->poses[i].pose.position.y, 0.001);
   }
 }
 
-TEST_F(TestPathPlanner, TestDifferentStartLocation) {
+TEST_F(TestPathPlanner, TestDifferentStartLocation)
+{
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
   map.header.stamp = ros::Time::now();
@@ -125,17 +128,20 @@ TEST_F(TestPathPlanner, TestDifferentStartLocation) {
 
   sleep(1);
 
-  const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
+  const nav_msgs::Path::ConstPtr& response =
+      ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
 
   ASSERT_TRUE(response.get() != nullptr);
   ASSERT_EQ(response->poses.size(), 5);
-  for(double i = 3; i < 8; i++) {
+  for (double i = 3; i < 8; i++)
+  {
     EXPECT_NEAR(i / 10, response->poses[i - 3].pose.position.x, 0.001);
     EXPECT_NEAR(i / 10, response->poses[i - 3].pose.position.y, 0.001);
   }
 }
 
-TEST_F(TestPathPlanner, TestInitialLocationOffset) {
+TEST_F(TestPathPlanner, TestInitialLocationOffset)
+{
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
   map.header.stamp = ros::Time::now();
@@ -164,11 +170,13 @@ TEST_F(TestPathPlanner, TestInitialLocationOffset) {
 
   sleep(1);
 
-  const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
+  const nav_msgs::Path::ConstPtr& response =
+      ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
 
   ASSERT_TRUE(response.get() != nullptr);
   ASSERT_EQ(response->poses.size(), 5);
-  for(double i = 3; i < 8; i++) {
+  for (double i = 3; i < 8; i++)
+  {
     EXPECT_NEAR(i / 10, response->poses[i - 3].pose.position.x, 0.001);
     EXPECT_NEAR(i / 10, response->poses[i - 3].pose.position.y, 0.001);
   }
@@ -178,7 +186,7 @@ TEST_F(TestPathPlanner, AvoidsObstacle)
 {
   igvc_msgs::map map;
   cv::Mat map_image = cv::Mat(10, 10, CV_8UC1, 0.0);
-  map_image.at<uchar>(3,4) = 255;
+  map_image.at<uchar>(3, 4) = 255;
   map.header.stamp = ros::Time::now();
 
   std_msgs::Header image_header;
@@ -205,7 +213,8 @@ TEST_F(TestPathPlanner, AvoidsObstacle)
 
   sleep(1);
 
-  const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
+  const nav_msgs::Path::ConstPtr& response =
+      ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
 
   ASSERT_TRUE(response.get() != nullptr);
   ASSERT_EQ(response->poses.size(), 11);
@@ -274,10 +283,12 @@ TEST_F(TestPathPlanner, EmptyMapHorizontal)
 
   sleep(1);
 
-  const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
+  const nav_msgs::Path::ConstPtr& response =
+      ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(response.get() != nullptr);
   ASSERT_EQ(response->poses.size(), 9);
-  for(double i = 0; i < 9; i++) {
+  for (double i = 0; i < 9; i++)
+  {
     EXPECT_NEAR(1, response->poses[i].pose.position.x, 0.001);
     EXPECT_NEAR(i / 5, response->poses[i].pose.position.y, 0.001);
   }
@@ -313,12 +324,14 @@ TEST_F(TestPathPlanner, EmptyMapLarge)
 
   sleep(1);
 
-  const nav_msgs::Path::ConstPtr& response = ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(5));
+  const nav_msgs::Path::ConstPtr& response =
+      ros::topic::waitForMessage<nav_msgs::Path>(path_sub.getTopic(), ros::Duration(5));
   ASSERT_TRUE(response.get() != nullptr);
   ASSERT_EQ(response->poses.size(), 54);
   EXPECT_NEAR(0, response->poses[0].pose.position.x, 0.001);
   EXPECT_NEAR(0, response->poses[0].pose.position.y, 0.001);
-  for(double i = 1; i < 10; i++) {
+  for (double i = 1; i < 10; i++)
+  {
     EXPECT_NEAR(0, response->poses[i].pose.position.x, 0.001);
     EXPECT_NEAR(i / 5, response->poses[i].pose.position.y, 0.001);
   }

@@ -1,13 +1,4 @@
 <?xml version="1.0"?>
-<!--Dist from center of LIDAR
-        to front: 3.625"
-        to back: 26.25"
-        to left: 15.5"
-        to right: 14.5"
-    Woodi Dimensions:
-        Left to Right: 30"
-        Front to Back: 30"
--->
 
 <launch>
   <node name="filter_lidar" pkg="igvc" type="filter_lidar" output="screen">
