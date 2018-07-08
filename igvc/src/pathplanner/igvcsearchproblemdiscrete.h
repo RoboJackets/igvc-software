@@ -1,12 +1,12 @@
 #ifndef IGVCSEARCHPROBLEM_H
 #define IGVCSEARCHPROBLEM_H
 
+#include <cv_bridge/cv_bridge.h>
 #include <math.h>
 #include <pcl/octree/octree_search.h>
 #include <functional>
-#include <vector>
 #include <opencv2/core/core.hpp>
-#include <cv_bridge/cv_bridge.h>
+#include <vector>
 #include "GraphSearch.hpp"
 #include "searchlocation.h"
 #include "searchmove.h"
@@ -56,13 +56,20 @@ public:
     double theta;
     double x = Goal.X - state.X;
     double y = Goal.Y - state.Y;
-    if(x > 0) {
-      theta = atan(y/x);
-    } else if(y > 0) {
-      theta = atan(y/x) + M_PI;
-    } else if(y < 0) {
+    if (x > 0)
+    {
+      theta = atan(y / x);
+    }
+    else if (y > 0)
+    {
+      theta = atan(y / x) + M_PI;
+    }
+    else if (y < 0)
+    {
       theta = atan(y / x) - M_PI;
-    } else {
+    }
+    else
+    {
       theta = y > 0 ? M_PI / 2 : -M_PI / 2;
     }
 
@@ -70,7 +77,6 @@ public:
   }
 
   bool isActionValid(SearchMove& move, SearchLocation start_state);
-
 };
 
 #endif  // IGVCSEARCHPROBLEM_H

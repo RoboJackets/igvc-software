@@ -1,9 +1,9 @@
-#include <gtest/gtest.h>
-#include <ros/ros.h>
-#include <nav_msgs/Path.h>
 #include <geometry_msgs/PointStamped.h>
-#include <nav_msgs/Odometry.h>
+#include <gtest/gtest.h>
 #include <igvc_msgs/velocity_pair.h>
+#include <nav_msgs/Odometry.h>
+#include <nav_msgs/Path.h>
+#include <ros/ros.h>
 #include <tf/transform_datatypes.h>
 
 class TestPathFollower : public testing::Test
@@ -15,7 +15,7 @@ public:
     , mock_pose_pub(handle.advertise<nav_msgs::Odometry>("/odometry/filtered", 1))
     , target_sub(handle.subscribe("/target_point", 1, &TestPathFollower::targetCallback, this))
     , motors_sub(handle.subscribe("/motors", 1, &TestPathFollower::motorsCallback, this))
-      //, trajectory_sub(handle.subscribe("/trajectory", 1, &TestPathFollower::trajectoryCallback, this))
+  //, trajectory_sub(handle.subscribe("/trajectory", 1, &TestPathFollower::trajectoryCallback, this))
   {
   }
 
@@ -46,9 +46,9 @@ protected:
 
   bool IsNodeReady()
   {
-    return (mock_path_pub.getNumSubscribers() > 0) && (mock_pose_pub.getNumSubscribers() > 0)
-      && (target_sub.getNumPublishers() > 0) && (motors_sub.getNumPublishers() > 0);
-      /*&& (trajectory_sub.getNumPublishers() > 0);*/
+    return (mock_path_pub.getNumSubscribers() > 0) && (mock_pose_pub.getNumSubscribers() > 0) &&
+           (target_sub.getNumPublishers() > 0) && (motors_sub.getNumPublishers() > 0);
+    /*&& (trajectory_sub.getNumPublishers() > 0);*/
   }
 
   ros::NodeHandle handle;
@@ -56,7 +56,7 @@ protected:
   ros::Publisher mock_pose_pub;
   ros::Subscriber target_sub;
   ros::Subscriber motors_sub;
-  //ros::Subscriber trajectory_sub;
+  // ros::Subscriber trajectory_sub;
 };
 
 /*TEST_F(TestPathFollower, Testpx)
@@ -86,11 +86,13 @@ protected:
   odom_msg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   mock_pose_pub.publish(odom_msg);
 
-  const geometry_msgs::PointStamped::ConstPtr& target_resp = ros::topic::waitForMessage<geometry_msgs::PointStamped>(target_sub.getTopic(), ros::Duration(1));
+  const geometry_msgs::PointStamped::ConstPtr& target_resp =
+ros::topic::waitForMessage<geometry_msgs::PointStamped>(target_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(target_resp.get() != nullptr);
   // should be 2.0
 
-  const igvc_msgs::velocity_pair::ConstPtr& motors_resp = ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motors_sub.getTopic(), ros::Duration(1));
+  const igvc_msgs::velocity_pair::ConstPtr& motors_resp =
+ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motors_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(motors_resp.get() != nullptr);
   // should be 1.0 1.0
 }
@@ -122,11 +124,13 @@ TEST_F(TestPathFollower, Testpxpy)
   odom_msg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   mock_pose_pub.publish(odom_msg);
 
-  const geometry_msgs::PointStamped::ConstPtr& target_resp = ros::topic::waitForMessage<geometry_msgs::PointStamped>(target_sub.getTopic(), ros::Duration(1));
+  const geometry_msgs::PointStamped::ConstPtr& target_resp =
+ros::topic::waitForMessage<geometry_msgs::PointStamped>(target_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(target_resp.get() != nullptr);
   // should be
 
-  const igvc_msgs::velocity_pair::ConstPtr& motors_resp = ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motors_sub.getTopic(), ros::Duration(1));
+  const igvc_msgs::velocity_pair::ConstPtr& motors_resp =
+ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motors_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(motors_resp.get() != nullptr);
   // should be 0.804569 1.19543
 }
@@ -158,11 +162,13 @@ TEST_F(TestPathFollower, Testpy)
   odom_msg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   mock_pose_pub.publish(odom_msg);
 
-  const geometry_msgs::PointStamped::ConstPtr& target_resp = ros::topic::waitForMessage<geometry_msgs::PointStamped>(target_sub.getTopic(), ros::Duration(1));
+  const geometry_msgs::PointStamped::ConstPtr& target_resp =
+ros::topic::waitForMessage<geometry_msgs::PointStamped>(target_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(target_resp.get() != nullptr);
   // should be (0,2)
 
-  const igvc_msgs::velocity_pair::ConstPtr& motors_resp = ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motors_sub.getTopic(), ros::Duration(1));
+  const igvc_msgs::velocity_pair::ConstPtr& motors_resp =
+ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motors_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(motors_resp.get() != nullptr);
   // should be 0.84456 1.155435
 }*/
@@ -194,11 +200,13 @@ TEST_F(TestPathFollower, Testpxny)
   odom_msg.pose.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0, 0, 0);
   mock_pose_pub.publish(odom_msg);
 
-  const geometry_msgs::PointStamped::ConstPtr& target_resp = ros::topic::waitForMessage<geometry_msgs::PointStamped>(target_sub.getTopic(), ros::Duration(1));
+  const geometry_msgs::PointStamped::ConstPtr& target_resp =
+      ros::topic::waitForMessage<geometry_msgs::PointStamped>(target_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(target_resp.get() != nullptr);
   // should be
 
-  const igvc_msgs::velocity_pair::ConstPtr& motors_resp = ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motors_sub.getTopic(), ros::Duration(1));
+  const igvc_msgs::velocity_pair::ConstPtr& motors_resp =
+      ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motors_sub.getTopic(), ros::Duration(1));
   ASSERT_TRUE(motors_resp.get() != nullptr);
   // should be
 }

@@ -27,7 +27,7 @@ class CNN:
         #else:
         config.gpu_options.allow_growth = True
         self.sess = tf.Session(config=config,graph=self.graph)
-	
+
 
         self.resize_width = resize_width
         self.resize_height = resize_height
@@ -122,25 +122,6 @@ class CNN:
 
         threshold = 0.5
         im_threshold = output_image > threshold
-
-        for row in im_threshold:
-            line = False
-            it = np.nditer(row, flags=['f_index'])
-            while not it.finished:
-                if it[0] == 1 and not line:
-                    line = True
-                    start = it.index
-                elif it[0] == 0 and line:
-                    line = False
-                    for i in range(it.index - 1, start - 1, -1):
-                        if i != (start + it.index - 1) / 2:
-                            row[i] = 0
-                it.iternext()
-            if line:
-                line = False
-                for i in range(start, row.size):
-                    if i != (start + row.size - 1) / 2:
-                        row[i] = 0
 
         world_points = self.world_point_array[im_threshold]
 

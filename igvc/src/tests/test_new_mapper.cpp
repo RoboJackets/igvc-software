@@ -1,15 +1,15 @@
 #include <cv_bridge/cv_bridge.h>  // for eigen to cv ish
+#include <cv_bridge/cv_bridge.h>
 #include <gtest/gtest.h>
 #include <igvc_msgs/map.h>
+#include <nav_msgs/Odometry.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>  // to check transforms
 #include <ros/ros.h>
+#include <tf/transform_broadcaster.h>
 #include <opencv2/core/eigen.hpp>  // for cv to eigen ish
 #include <opencv2/opencv.hpp>      // for cv::Mat
-#include <nav_msgs/Odometry.h>
-#include <tf/transform_broadcaster.h>
-#include <cv_bridge/cv_bridge.h>
 
 class TestNewMapper : public testing::Test
 {
@@ -23,7 +23,8 @@ public:
   {
   }
 
-  void map_callback(const igvc_msgs::mapConstPtr& msg) {
+  void map_callback(const igvc_msgs::mapConstPtr& msg)
+  {
   }
 
 protected:
@@ -41,10 +42,8 @@ protected:
 
   bool IsNodeReady()
   {
-    return (mock_camera_pub.getNumSubscribers() > 0) &&
-      (mock_localization_pub.getNumSubscribers() > 0) &&
-      (mock_lidar_pub.getNumSubscribers() > 0) &&
-      (map_sub.getNumPublishers() > 0);
+    return (mock_camera_pub.getNumSubscribers() > 0) && (mock_localization_pub.getNumSubscribers() > 0) &&
+           (mock_lidar_pub.getNumSubscribers() > 0) && (map_sub.getNumPublishers() > 0);
   }
 
   ros::NodeHandle handle;
@@ -81,7 +80,8 @@ TEST_F(TestNewMapper, OriginCheck)
 
   // http://docs.ros.org/diamondback/api/tf/html/c++/tf_8cpp_source.html
 
-  const igvc_msgs::map::ConstPtr &response = ros::topic::waitForMessage<igvc_msgs::map>(map_sub.getTopic(), ros::Duration(5));
+  const igvc_msgs::map::ConstPtr& response =
+      ros::topic::waitForMessage<igvc_msgs::map>(map_sub.getTopic(), ros::Duration(5));
   // get point at expected x and y, check for 255 probability
   // makes a sensor_msgs::Image var, need x and y
   // need to go from sensor_msgs::Image to cv::Mat

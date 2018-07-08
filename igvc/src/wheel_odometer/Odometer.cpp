@@ -71,12 +71,9 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
                             1e-4, 1e-4, 1e-4, 1e-4, 1e6,  1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 0.62 };
   // the position covariance takes same form as twist covariance above
   // this grows without bounds as error accumulates - disregard exact reading with high variance
-  odom.pose.covariance = { 0.01,  1e-6, 1e-6, 1e-6, 1e-6, 1e-6,
-                           1e-6, 0.01,  1e-6, 1e-6, 1e-6, 1e-6,
-                           1e-6, 1e-6, 1e6,  1e-6, 1e-6, 1e-6,
-                           1e-6, 1e-6, 1e-6, 1e6,  1e-6, 1e-6,
-                           1e-6, 1e-6, 1e-6, 1e-6, 1e6,  1e-6,
-                           1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e6 };
+  odom.pose.covariance = { 0.01, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 0.01, 1e-6, 1e-6, 1e-6, 1e-6,
+                           1e-6, 1e-6, 1e6,  1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e6,  1e-6, 1e-6,
+                           1e-6, 1e-6, 1e-6, 1e-6, 1e6,  1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e6 };
 
   // setting sequence of message
   odom.header.seq = seq++;
