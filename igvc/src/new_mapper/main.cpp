@@ -110,34 +110,17 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
 
   for (point = transformed->begin(); point < transformed->points.end(); point++)
   {
-    // ROS_INFO_STREAM("points starts at " << point->x << "," << point->y);
     double x_loc, y_loc;
     std::tie(x_loc, y_loc) = rotate(point->x, point->y);
 
-    // ROS_INFO_STREAM("rotated " << x_loc << "," << y_loc);
     int point_x = static_cast<int>(std::round(x_loc / resolution + cur_x / resolution + start_x));
     int point_y = static_cast<int>(std::round(y_loc / resolution + cur_y / resolution + start_y));
-    // ROS_INFO_STREAM("point = " << point_x << "," << point_y);
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
-      // ROS_INFO_STREAM("putting point at " << point_x << "," << point_y);
       if (published_map->at<uchar>(point_x, point_y) < 230)
       {
-        if (topic == "/semantic_segmentation_cloud")
-        {
-          if (sqrt(pow(point_x - cur_x / resolution - start_y, 2) + pow(point_y - cur_y / resolution - start_x, 2)) *
-                  resolution <
-              3)
-          {
-            published_map->at<uchar>(point_x, point_y) += (uchar)51;
-          }
-        }
-        else
-        {
           published_map->at<uchar>(point_x, point_y) += (uchar)125;
-        }
       }
-
       count++;
     }
     else if (!offMap)
@@ -146,9 +129,6 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
       offMap = true;
     }
   }
-  published_map->at<uchar>(start_x + cur_x / resolution, start_y + cur_y / resolution) = (uchar)100;
-  // make image message from img bridge
-
   img_bridge = cv_bridge::CvImage(msgBoi.header, sensor_msgs::image_encodings::MONO8, *published_map);
   img_bridge.toImageMsg(imageBoi);  // from cv_bridge to sensor_msgs::Image
   time = ros::Time::now();          // so times are exact same
@@ -174,12 +154,11 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     for (int i = 0; i < width_x; i++)
-    {  // init frame so edges are easily visible
+    {
       for (int j = 0; j < length_y; j++)
       {
         if (published_map->at<uchar>(i, j) >= (uchar)178)
         {
-          // published_map->at<uchar>(i, j) = published_map->at<uchar>(i, j) - 1;
           pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
           p.x = (i - start_x) * resolution;
           p.y = (j - start_y) * resolution;
