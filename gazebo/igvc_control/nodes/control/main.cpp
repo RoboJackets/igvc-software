@@ -61,9 +61,9 @@ int main(int argc, char **argv)
   ros::NodeHandle handle;
 
   ros::Publisher leftWheelEffortPublisher =
-      handle.advertise<std_msgs::Float64>("/igvc/left_wheel_effort_controller/command", 1);
+      handle.advertise<std_msgs::Float64>("/left_wheel_effort_controller/command", 1);
   ros::Publisher rightWheelEffortPublisher =
-      handle.advertise<std_msgs::Float64>("/igvc/right_wheel_effort_controller/command", 1);
+      handle.advertise<std_msgs::Float64>("/right_wheel_effort_controller/command", 1);
   ros::Publisher wheelSpeedPublisher = handle.advertise<igvc_msgs::velocity_pair>("/encoders", 1);
 
   // Publish that the robot is enabled
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
 
   auto speedSub = handle.subscribe("/motors", 1, speedCallback);
 
-  auto stateSub = handle.subscribe("/igvc/joint_states", 1, jointStateCallback);
+  auto stateSub = handle.subscribe("/joint_states", 1, jointStateCallback);
 
   std::chrono::time_point<std::chrono::system_clock> prev, now;
   prev = std::chrono::system_clock::now();

@@ -34,16 +34,5 @@ install(DIRECTORY config/
    FILES_MATCHING PATTERN "*.yaml"
 )
 
-catkin_install_python(
-        PROGRAMS
-        scripts/controller_spawner.py
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
-
-install(PROGRAMS
-        scripts/spawn_jaymii.sh
-        scripts/controller_spawner.py
-DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
-
 add_subdirectory(nodes/control)
 add_subdirectory(nodes/scan_to_pointcloud)
