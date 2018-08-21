@@ -1,11 +1,13 @@
+<?xml version="1.0"?>
+
 <launch>
 
   <!-- Load joint controller configurations from YAML file to parameter server -->
   <rosparam file="$(find igvc_control)/config/igvc_joint_control.yaml" command="load"/>
 
-  <!-- load the controllers -->
-  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-    output="screen" ns="/igvc" args="left_wheel_effort_controller right_wheel_effort_controller joint_state_controller --shutdown-timeout 1"/>
+  <!-- load controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner"
+    args="$(find igvc_control)/config/igvc_joint_control.yaml"/>
 
   <node name="igvc_control" pkg="igvc_control" type="control">
   </node>
