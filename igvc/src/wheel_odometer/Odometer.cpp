@@ -6,6 +6,8 @@
 #include <ros/ros.h>
 #include "Odometer.h"
 
+double wheel_separation;
+
 /**
  * Coneverts wheel velocities to odometry message using trigonometry for calculations
  * In the ros coordinate convention x is forward, y is leftward, and z is upward relative to the robot
@@ -18,14 +20,14 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
   float rightVelocity = msg.right_velocity;
   float deltaT = msg.duration;
 
-  float angularVelocity = (rightVelocity - leftVelocity) / WHEEL_SEPARATION;
+  float angularVelocity = (rightVelocity - leftVelocity) / wheel_sep;
   float deltaTheta = angularVelocity * deltaT;
   float velocity = (rightVelocity + leftVelocity) / 2;
 
   geometry_msgs::Vector3 linearVelocities;
   linearVelocities.z = 0;
 
-  if (abs(rightVelocity - leftVelocity) > 1e-4)
+  if (fabs(rightVelocity - leftVelocity) > 1e-4)
   {  // 1e-4 is the point where less of a difference is straight
     linearVelocities.y = velocity * sin(deltaTheta);
     linearVelocities.x = velocity * cos(deltaTheta);
@@ -69,7 +71,7 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
                             1e-4, 1e-4, 1e-4, 1e-4, 1e6,  1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 0.62 };
   // the position covariance takes same form as twist covariance above
   // this grows without bounds as error accumulates - disregard exact reading with high variance
-  odom.pose.covariance = { 1e6,  1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e6,  1e-6, 1e-6, 1e-6, 1e-6,
+  odom.pose.covariance = { 0.01, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 0.01, 1e-6, 1e-6, 1e-6, 1e-6,
                            1e-6, 1e-6, 1e6,  1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e6,  1e-6, 1e-6,
                            1e-6, 1e-6, 1e-6, 1e-6, 1e6,  1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e6 };
 
@@ -87,6 +89,8 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
 
 Odometer::Odometer(ros::NodeHandle& nh)
 {
+  nh.param("wheel_sep", wheel_sep, 0.52);
+
   sub = nh.subscribe("/encoders", 10, &Odometer::enc_callback, this);
   pub = nh.advertise<nav_msgs::Odometry>("/wheel_odometry", 10);
 
@@ -103,6 +107,10 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "wheel_odom");
   ros::NodeHandle nh;
+
+  ros::NodeHandle pNh("~");
+
+  pNh.param("wheel_separation", wheel_separation, 0.83);
 
   Odometer odom(nh);
 

@@ -136,7 +136,7 @@ public:
   /** Runs A* graph search on the given search problem */
   template <class StateType, class ActionType>
   static Path<StateType, ActionType> AStar(SearchProblem<StateType, ActionType> &problem,
-                                           void (*expandedCallback)(const set<StateType> &))
+                                           void (*expandedCallback)(const StateType &))
   {
     set<StateType> expanded;
     priority_queue<Path<StateType, ActionType>, vector<Path<StateType, ActionType>>,
@@ -150,13 +150,12 @@ public:
     }
 
     auto iteration = 0;
-    while (!frontier.empty() && iteration < 6000)
+    while (!frontier.empty() && iteration < 4000)
     {
       Path<StateType, ActionType> path = frontier.top();
       frontier.pop();
 
       auto last = path.getLastState();
-
       if (expanded.insert(last).second)  // expanded does not contain path's last state
       {
         if (problem.isGoal(last))
@@ -176,10 +175,10 @@ public:
         }
       }
       iteration++;
-      expandedCallback(expanded);
+      expandedCallback(last);
     }
 
-    cout << __func__ << " Error: Could not find a solution." << endl;
+    cout << __func__ << " Error: Could not find a solution after " << iteration << " iterations" << endl;
     Path<StateType, ActionType> empty;
     return empty;
   }

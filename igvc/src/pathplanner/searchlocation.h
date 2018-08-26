@@ -2,26 +2,28 @@
 #define SEARCHLOCATION_H
 
 #include <iostream>
+#include <list>
 
 class SearchLocation
 {
 public:
-  float x, y, theta;
+  std::list<float> PrevTheta;
+  float X, Y, Theta, ThetaChange;
 
   static constexpr float sameness_threshold = 0.005;
 
   SearchLocation()
   {
   }
-  SearchLocation(float _x, float _y, float _theta);
+  SearchLocation(float X, float Y, float Theta);
 
   bool operator==(const SearchLocation &other) const;
   bool operator<(const SearchLocation &other) const;
-  float distTo(SearchLocation other) const;
+  float distTo(SearchLocation other, double resolution) const;
 
   friend std::ostream &operator<<(std::ostream &stream, const SearchLocation &loc)
   {
-    stream << "(" << loc.x << "," << loc.y << "," << loc.theta << ")";
+    stream << "(" << loc.X << "," << loc.Y << "," << loc.Theta << ")";
     return stream;
   }
 };

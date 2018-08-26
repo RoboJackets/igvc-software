@@ -33,7 +33,6 @@ bool firstFrame;
 double maxCorrDist;
 int maxIter;
 pcl::octree::OctreePointCloudSearch<pcl::PointXYZRGB>::Ptr octree;
-double searchRadius;
 double octree_resolution;
 
 std::unordered_map<std::string, std::shared_ptr<WatchedPointcloud>> topic_pc_map;
@@ -171,7 +170,6 @@ int main(int argc, char **argv)
   pNh.getParam("topics", topics);
   pNh.getParam("max_correspondence_distance", maxCorrDist);
   pNh.getParam("max_iterations", maxIter);
-  pNh.getParam("search_radius", searchRadius);
   pNh.getParam("octree_resolution", octree_resolution);
   pNh.getParam("probability_thresholds", probability_thresholds);
   pNh.getParam("queue_window_sizes", queue_window_sizes);
