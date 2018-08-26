@@ -1,13 +1,12 @@
 #include "searchmove.h"
 
-SearchMove::SearchMove(double v, double w, double dt)
+SearchMove::SearchMove(double x, double y)
 {
-  V = v;
-  W = w;
-  DeltaT = dt;
+  X = x;
+  Y = y;
 }
 
 bool SearchMove::operator==(const SearchMove &other)
 {
-  return (V == other.V) && (W == other.W) && (DeltaT == other.DeltaT);
+  return (X == other.X) && (Y == other.Y);
 }

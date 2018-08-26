@@ -1,8 +1,8 @@
 #include <igvc_msgs/velocity_pair.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
-#include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
+#include <std_msgs/Float64.h>
 #include <algorithm>
 #include <chrono>
 
