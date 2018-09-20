@@ -125,15 +125,51 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
 
   ros::Time time = ros::Time::now();
 
-  geometry_msgs::PointStamped target_point;
-  target_point.header.frame_id = "/odom";
-  target_point.header.stamp = time;
-  target_point.point.x = tar_x;
-  target_point.point.y = tar_y;
-  target_pub.publish(target_point);
-
-  igvc_msgs::velocity_pair vel;
-  vel.header.stamp = time;
+      if (path.get() != nullptr)
+      {
+        auto elapsed_time = std::chrono::high_resolution_clock::now() - cmd_start_time;
+        if (path->actions.empty())
+        {
+          ROS_INFO("Path empty.");
+          igvc_msgs::velocity_pair vel;
+          vel.left_velocity = 0.;
+          vel.right_velocity = 0.;
+          vel.header.stamp = ros::Time::now();
+          cmd_pub.publish(vel);
+          path.reset();
+        }
+        else if (path_reset)
+        {
+          igvc_msgs::velocity_pair vel = path->actions[path_index];
+          vel.header.stamp = ros::Time::now();
+          cmd_pub.publish(vel);
+          cmd_start_time = std::chrono::high_resolution_clock::now();
+          path_reset = false;
+        }
+        else if (std::chrono::duration_cast<std::chrono::seconds>(elapsed_time).count() >
+                 path->actions[path_index].duration)
+        {
+          if (path_index < path->actions.size() - 1)
+          {
+            path_index++;
+            igvc_msgs::velocity_pair vel = path->actions[path_index];
+            vel.header.stamp = ros::Time::now();
+            cmd_pub.publish(vel);
+            ROS_INFO("Command Published.");
+            cmd_start_time = std::chrono::high_resolution_clock::now();
+          }
+          else
+          {
+            igvc_msgs::velocity_pair vel;
+            vel.left_velocity = 0.;
+            vel.right_velocity = 0.;
+            vel.header.stamp = ros::Time::now();
+            cmd_pub.publish(vel);
+            path.reset();
+          }
+        }
+      }
+    }
 
   nav_msgs::Path trajectory_msg;
   trajectory_msg.header.stamp = ros::Time::now();
