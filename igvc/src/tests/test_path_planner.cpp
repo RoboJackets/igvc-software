@@ -11,6 +11,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <opencv2/core/mat.hpp>
 
+<<<<<<< HEAD
 class TestPathPlanner : public testing::Test
 {
 public:
