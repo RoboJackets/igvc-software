@@ -9,7 +9,7 @@
     <arg name="yaw" default="0"/>
     <!-- Spawn the vehicle. -->
     <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
-          args="-file $(find igvc_description)/urdf/Jaymii.urdf
+          args="-file $(find igvc_description)/urdf/jessi.urdf
                 -gazebo_namespace /gazebo
                 -urdf -model Jessi
                 -x $(arg x) -y $(arg y) -z $(arg z)
