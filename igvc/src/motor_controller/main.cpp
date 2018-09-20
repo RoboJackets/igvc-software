@@ -176,16 +176,19 @@ int main(int argc, char** argv)
       std::vector<std::string> tokens;
       if (dollar != std::string::npos)
       {
-        tokens = split(ret.substr(dollar + 1, end), ',');
-      }
-      if (pound != std::string::npos)
-      {
-        tokens = split(ret.substr(pound + 2, end), ',');
-      }
-
-      if (tokens.size() <= 0)
-      {
-        ROS_INFO_STREAM("Invalid number of tokens from motor board");
+        size_t dollar = ret.find('$');
+        size_t comma = ret.find(',');
+        size_t comma2 = ret.find_last_of(',');
+        size_t end = ret.find('\n');
+        std::string leftStr = ret.substr(dollar + 1, comma - dollar - 1);
+        std::string rightStr = ret.substr(comma + 1, comma2 - comma - 1);
+        std::string deltaT = ret.substr(comma2 + 1, end - comma2 - 1);
+        igvc_msgs::velocity_pair enc_msg;
+        enc_msg.left_velocity = atof(leftStr.c_str());
+        enc_msg.right_velocity = atof(rightStr.c_str());
+        enc_msg.duration = atof(deltaT.c_str());
+        enc_msg.header.stamp = ros::Time::now();
+        enc_pub.publish(enc_msg);
       }
       else
       {
