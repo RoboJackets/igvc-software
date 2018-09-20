@@ -16,7 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
   laser_geometry
   tf
   pcl_ros
-  rviz
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -175,17 +174,5 @@ if(CATKIN_ENABLE_TESTING)
 endif()
 
 
-add_subdirectory(src/motor_controller)
-add_subdirectory(src/serial)
-add_subdirectory(src/joystick_driver)
-add_subdirectory(src/light_controller)
-add_subdirectory(src/waypoint_source)
-add_subdirectory(src/pathplanner)
-add_subdirectory(src/path_follower)
-add_subdirectory(src/pidtester)
-add_subdirectory(src/rviz_plugins)
-add_subdirectory(src/wheel_odometer)
 add_subdirectory(src/imu)
-add_subdirectory(src/global_mapper)
 add_subdirectory(src/filter_lidar)
-add_subdirectory(src/speed_compare)

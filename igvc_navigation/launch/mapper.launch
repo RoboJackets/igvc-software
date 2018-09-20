@@ -2,7 +2,7 @@
     <include file="$(find igvc)/launch/localization.launch" />
 
     <!-- Map Node -->
-    <node name="new_mapper" pkg="igvc" type="new_mapper" output="screen">
+    <node name="mapper" pkg="igvc" type="mapper" output="screen">
             <param name="topics" type="string" value="/scan/pointcloud /semantic_segmentation_cloud"/>
             <param name="occupancy_grid_length" type="int" value="50" />
             <param name="occupancy_grid_width" type="int" value="50" />
