@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(igvc)
+project(igvc_perception)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -174,5 +174,4 @@ if(CATKIN_ENABLE_TESTING)
 endif()
 
 
-add_subdirectory(src/imu)
 add_subdirectory(src/filter_lidar)

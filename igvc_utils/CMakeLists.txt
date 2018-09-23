@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(igvc)
+project(igvc_utils)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -168,15 +168,14 @@ include_directories(
 ## Testing ##
 #############
 
-if(CATKIN_ENABLE_TESTING)
-    find_package(rostest REQUIRED)
-    add_subdirectory(src/tests)
-endif()
+#if(CATKIN_ENABLE_TESTING)
+#    find_package(rostest REQUIRED)
+#    add_subdirectory(src/tests)
+#endif()
 
 
-add_subdirectory(src/mapper)
-add_subdirectory(src/path_follower)
-add_subdirectory(src/path_planner)
-add_subdirectory(src/state_estimator)
-add_subdirectory(src/waypoint_source)
-add_subdirectory(src/wheel_odometer)
+add_subdirectory(src/light_controller)
+add_subdirectory(src/pid_tester)
+add_subdirectory(src/serial)
+add_subdirectory(src/speed_compare)
+add_subdirectory(src/project)

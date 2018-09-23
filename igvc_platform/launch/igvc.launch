@@ -5,21 +5,23 @@
     -->
 <launch>
     <!-- sensors -->
-    <include file="$(find igvc)/launch/sensors.launch" />
+    <include file="$(find igvc_perception)/launch/sensors.launch" />
 
     <!-- center line detector -->
+    <!-- file does not exist -->
     <include file="$(find igvc)/launch/line_detector.launch">
         <arg name="camera" value="center" />
     </include>
 
     <!-- pot hole detector -->
+    <!-- file does not exist -->
     <include file="$(find igvc)/launch/pothole_detector.launch" />
 
     <!-- mapper -->
-    <include file="$(find igvc)/launch/mapper.launch" />
+    <include file="$(find igvc_navigation)/launch/mapper.launch" />
 
     <!-- pather -->
-    <include file="$(find igvc)/launch/pather.launch" />
+    <include file="$(find igvc_navigation)/launch/pather.launch" />
 
     <!-- not included yet are odometer.launch, localization.launch, side
          cameras, side linedetectors. They are not currently required -->

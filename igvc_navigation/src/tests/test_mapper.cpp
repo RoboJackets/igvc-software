@@ -11,15 +11,15 @@
 #include <opencv2/core/eigen.hpp>  // for cv to eigen ish
 #include <opencv2/opencv.hpp>      // for cv::Mat
 
-class TestNewMapper : public testing::Test
+class TestMapper : public testing::Test
 {
 public:
-  TestNewMapper()
+  TestMapper()
     : handle()
     , mock_localization_pub(handle.advertise<nav_msgs::Odometry>("/odometry/filtered", 1))
     , mock_lidar_pub(handle.advertise<pcl::PointCloud<pcl::PointXYZ>>("/scan/pointcloud", 1))
     , mock_camera_pub(handle.advertise<pcl::PointCloud<pcl::PointXYZ>>("/usb_cam_center/line_cloud", 1))
-    , map_sub(handle.subscribe("/map", 1, &TestNewMapper::map_callback, this))
+    , map_sub(handle.subscribe("/map", 1, &TestMapper::map_callback, this))
   {
   }
 
@@ -53,7 +53,7 @@ protected:
   ros::Subscriber map_sub;
 };
 
-TEST_F(TestNewMapper, OriginCheck)
+TEST_F(TestMapper, OriginCheck)
 {
   tf::TransformBroadcaster br;
   tf::StampedTransform transform;
@@ -93,7 +93,7 @@ TEST_F(TestNewMapper, OriginCheck)
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "test_new_mapper");
+  ros::init(argc, argv, "test_mapper");
   testing::InitGoogleTest(&argc, argv);
 
   ros::AsyncSpinner spinner(1);
