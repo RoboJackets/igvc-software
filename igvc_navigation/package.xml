@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>igvc</name>
+  <name>igvc_navigation</name>
   <version>0.0.0</version>
   <description>The RoboJackets' IGVC code base</description>
 
