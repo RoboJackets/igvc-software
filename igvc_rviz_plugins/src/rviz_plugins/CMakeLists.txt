@@ -15,27 +15,33 @@ link_directories( ${OGRE_LIBRARY_DIRS} )
 add_definitions(-DQT_NO_KEYWORDS)
 
 qt5_wrap_cpp(MOC_FILES
+  bat_panel.h
 	eStop_panel.h
+  example_panel.h
+  launch_panel.h
+  my_thread.h
+  node_panel.h
+  num_button.h
+  sensor_panel.h
+  speedometer.h
 	speed_panel.h
-	speedometer.h
-	bat_panel.h
 	time_panel.h
-	launch_panel.h
-	my_thread.h
-	node_panel.h
-	num_button.h
+  waypoint_panel.h
 )
 
 set(SOURCE_FILES
+  bat_panel.cpp
 	eStop_panel.cpp
-	speed_panel.cpp
-	speedometer.cpp
-	bat_panel.cpp
+  example_panel.cpp
+  launch_panel.cpp
+  my_thread.cpp
+  node_panel.cpp
+  num_button.cpp
+  sensor_panel.cpp
+  speedometer.cpp
+  speed_panel.cpp
 	time_panel.cpp
-	launch_panel.cpp
-	my_thread.cpp
-	node_panel.cpp
-	num_button.cpp
+  waypoint_panel.cpp
 	${MOC_FILES})
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
