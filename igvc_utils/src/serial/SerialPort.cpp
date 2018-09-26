@@ -1,4 +1,4 @@
-#include <igvc/SerialPort.h>
+#include <igvc_utils/SerialPort.h>
 #include <iostream>
 
 SerialPort::SerialPort(std::string device, int baud) : port(ioservice), path(device)
