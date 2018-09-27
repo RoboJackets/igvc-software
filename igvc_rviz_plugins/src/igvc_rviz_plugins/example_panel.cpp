@@ -1,4 +1,4 @@
-#include <igvc_rviz_plugins/ExamplePanel.h>
+#include <igvc_rviz_plugins/example_panel.h>
 #include <pluginlib/class_list_macros.h>
 #include <QVBoxLayout>
 

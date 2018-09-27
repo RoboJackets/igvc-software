@@ -4,7 +4,7 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 
-#include "bat_panel.h"
+#include <igvc_rviz_plugins/bat_panel.h>
 
 namespace rviz_plugins
 {

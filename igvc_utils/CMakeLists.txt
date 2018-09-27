@@ -93,7 +93,7 @@ catkin_python_setup()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES igvc
 #  CATKIN_DEPENDS roscpp std_msgs
 #  DEPENDS system_lib
@@ -111,7 +111,6 @@ include_directories(
   ${PCL_INCLUDE_DIRS}
   include
 )
-
 ## Declare a cpp library
 # add_library(igvc
 #   src/${PROJECT_NAME}/igvc.cpp
