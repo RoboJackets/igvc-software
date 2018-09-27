@@ -4,7 +4,7 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 
-#include "time_panel.h"
+#include <igvc_rviz_plugins/time_panel.h>
 
 namespace rviz_plugins
 {

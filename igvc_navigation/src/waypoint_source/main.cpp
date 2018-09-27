@@ -5,7 +5,7 @@
 #include <sensor_msgs/NavSatFix.h>
 #include <tf/transform_listener.h>
 #include <fstream>
-#include <igvc/StringUtils.hpp>
+#include <igvc_utils/StringUtils.hpp>
 #include <mutex>
 #include <string>
 #include "conversion.h"

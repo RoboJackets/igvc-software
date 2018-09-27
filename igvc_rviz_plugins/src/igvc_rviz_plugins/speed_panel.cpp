@@ -1,4 +1,4 @@
-#include "speed_panel.h"
+#include <igvc_rviz_plugins/speed_panel.h>
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QVBoxLayout>

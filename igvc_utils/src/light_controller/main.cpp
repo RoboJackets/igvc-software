@@ -1,4 +1,4 @@
-#include <igvc/SerialPort.h>
+#include <igvc_utils/SerialPort.h>
 #include <igvc_msgs/lights.h>
 #include <ros/ros.h>
 #include <std_msgs/Bool.h>
