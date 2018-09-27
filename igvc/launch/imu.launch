@@ -1,4 +1,0 @@
-<!-- imu.launch -->
-<launch>
-    <node name="imu" pkg="igvc" type="imu"/>
-</launch>
