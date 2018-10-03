@@ -28,6 +28,8 @@ IGVCSearchProblem search_problem;
 
 std::mutex planning_mutex;
 
+double max_goal_distance, verbosity_threshold;
+
 bool received_waypoint = false;
 
 unsigned int current_index = 0;
@@ -116,7 +118,7 @@ int main(int argc, char** argv)
       !pNh.hasParam("baseline") || !pNh.hasParam("minimum_omega") || !pNh.hasParam("maximum_omega") ||
       !pNh.hasParam("delta_omega") || !pNh.hasParam("point_turns_enabled") || !pNh.hasParam("reverse_enabled") ||
       !pNh.hasParam("max_obstacle_delta_t") || !pNh.hasParam("alpha") || !pNh.hasParam("beta") ||
-      !pNh.hasParam("bounding_distance"))
+      !pNh.hasParam("bounding_distance") || !pNh.hasParam("max_goal_distance") || !pNh.hasParam("verbosity_threshold"))
   {
     ROS_ERROR_STREAM("path planner does not have all required parameters");
     return 0;
@@ -141,6 +143,9 @@ int main(int argc, char** argv)
   pNh.getParam("beta", search_problem.Beta);
   pNh.getParam("bounding_distance", search_problem.BoundingDistance);
 
+  pNh.getParam("max_goal_distance", max_goal_distance); // maximum distance for which search performed
+  pNh.getParam("verbosity_threshold", verbosity_threshold); // threshold at which distance warnings are printed
+
   ros::Rate rate(3);
   while (ros::ok())
   {
@@ -151,8 +156,12 @@ int main(int argc, char** argv)
      * Long paths take forever to compute, and will freeze up this node.
      */
     auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal);
-    if (!received_waypoint || distance_to_goal == 0 || distance_to_goal > 60)
+    if (!received_waypoint || distance_to_goal == 0 || distance_to_goal > max_goal_distance)
       continue;
+
+    if (distance_to_goal >= verbosity_threshold) {
+        ROS_WARN("PROCESSING SEARCH FOR LARGE GOAL DISTANCE [%f]", distance_to_goal);
+    }
 
     planning_mutex.lock();
     Path<SearchLocation, SearchMove> path;
