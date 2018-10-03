@@ -191,10 +191,10 @@ int main(int argc, char** argv)
     //orientation.w = quaternion_raw.w();
     tf::Quaternion quaternion_mag;
     quaternion_mag.setRPY(0,0,heading);
-    orientation.x = quaternion.x();
-    orientation.y = quaternion.y();
-    orientation.z = quaternion.z();
-    orientation.w = quaternion.w();
+    orientation.x = quaternion_mag.x();
+    orientation.y = quaternion_mag.y();
+    orientation.z = quaternion_mag.z();
+    orientation.w = quaternion_mag.w();
 
     msg.orientation = orientation;
     msg.orientation_covariance = { 0.0025, 1E-6, 1E-6, 1E-6, 0.0025, 1E-6, 1E-6, 1E-6, 0.0025 };
