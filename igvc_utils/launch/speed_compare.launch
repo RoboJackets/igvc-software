@@ -2,7 +2,7 @@
 
 <launch>
 
-    <node name="speed_compare" pkg="igvc" type="speed_compare" output="screen">
+    <node name="speed_compare" pkg="igvc_utils" type="speed_compare" output="screen">
     	<param name = "file" type = "string" value = "$(find igvc)/../sandbox/speed_compare/speed_data.csv" />
     </node>
 

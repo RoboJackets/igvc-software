@@ -14,7 +14,7 @@
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0"/>
 
-  <node name="waypoint_source" pkg="igvc" type="waypoint_source" output="screen" >
+  <node name="waypoint_source" pkg="igvc_navigation" type="waypoint_source" output="screen" >
       <param name="file" value="$(find igvc_control)/config/waypoints.csv" />
   </node>
 
@@ -38,6 +38,6 @@
     <param name="neighbor_dist" value="0.2"/>
   </node>
   <include file="$(find igvc_description)/launch/spawn_jaymii.launch" />
-  <include file="$(find igvc)/launch/filter_lidar.launch" />
+  <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
   <include file="$(find igvc_control)/launch/igvc_control.launch" />
 </launch>

@@ -9,5 +9,5 @@
       <param name="sample_rate"    type="int" value="1000"/>
       <param name="distance_threshold"    type="double" value="50"/>
     </node>
-    <include file="$(find igvc)/launch/filter_lidar.launch" />
+    <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
 </launch>
