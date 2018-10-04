@@ -198,7 +198,7 @@ int main(int argc, char** argv)
           {
             // imu message
           }
-          else if (ret.at(1) == 'V')
+          else if (ret.at(1) == 'V') // battery message
           {
             std_msgs::Float64 battery_msg;
             double voltage = atof(tokens.at(0).c_str());
