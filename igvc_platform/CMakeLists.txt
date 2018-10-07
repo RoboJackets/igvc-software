@@ -13,7 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   cv_bridge
   camera_info_manager
-  laser_geometry
   tf
   pcl_ros
   igvc_utils
@@ -22,8 +21,6 @@ find_package(catkin REQUIRED COMPONENTS
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package(OpenCV REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
 find_package(PCL REQUIRED filters)
 
 set(CMAKE_CXX_FLAGS "-g -std=c++11 -Wall ${CMAKE_CXX_FLAGS}")

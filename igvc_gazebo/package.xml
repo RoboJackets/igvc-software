@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package>
-  <name>igvc_control</name>
+  <name>igvc_gazebo</name>
   <version>1.0.0</version>
   <description>
-    igvc_control contains the files realting to the control of the robot
+    igvc_control contains the files realting to the control of the robot in simulation
   </description>
 
   <maintainer email="jgibson37@gatech.edu">Jason Gibson</maintainer>

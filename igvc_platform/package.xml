@@ -36,6 +36,7 @@
 
   <!-- Build dependencies -->
   <buildtool_depend>catkin</buildtool_depend>
+
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
@@ -47,7 +48,6 @@
   <build_depend>pluginlib</build_depend>
   <build_depend>class_loader</build_depend>
   <build_depend>image_geometry</build_depend>
-  <build_depend>igvc_utils</build_depend>
 
   <!-- Run dependencies -->
   <run_depend>roscpp</run_depend>
@@ -56,15 +56,10 @@
   <run_depend>image_transport</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>pcl_conversions</run_depend>
-  <run_depend>stereo_image_proc</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>image_geometry</run_depend>
-  <run_depend>robot_localization</run_depend>
   <run_depend>pluginlib</run_depend>
-  <run_depend>laser_geometry</run_depend>
   <run_depend>nmea_navsat_driver</run_depend>
-
-  <!-- Builds from source -->
   <run_depend>gps_common</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
