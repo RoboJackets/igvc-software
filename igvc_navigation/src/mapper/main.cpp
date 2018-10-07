@@ -119,7 +119,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     {
       if (published_map->at<uchar>(point_x, point_y) < 230)
       {
-          published_map->at<uchar>(point_x, point_y) += (uchar)125;
+        published_map->at<uchar>(point_x, point_y) += (uchar)125;
       }
       count++;
     }

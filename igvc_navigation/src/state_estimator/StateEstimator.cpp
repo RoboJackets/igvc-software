@@ -4,10 +4,10 @@
 
 using namespace gtsam;
 // Convenience for named keys
-using symbol_shorthand::X;  // position
-using symbol_shorthand::V;  // velocity
 using symbol_shorthand::B;  // bias
 using symbol_shorthand::G;  // GPS position
+using symbol_shorthand::V;  // velocity
+using symbol_shorthand::X;  // position
 
 /**
  * A class for constraining yaw given a direct measurement

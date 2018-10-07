@@ -29,6 +29,6 @@ protected:
   ros::NodeHandle nh_;
   QLabel* output_topic_editor_;
 };
-}
+}  // namespace rviz_plugins
 
 #endif  // BAT_PANEL_H

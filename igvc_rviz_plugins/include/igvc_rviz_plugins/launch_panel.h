@@ -37,6 +37,6 @@ protected:
   bool doOnce;
   QPushButton* m_button;
 };
-}
+}  // namespace rviz_plugins
 
 #endif  // LAUNCH_PANEL_H

@@ -19,9 +19,9 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   labels["GPS"] = new QLabel("GPS: Disabled\n");
 
   /*
-  *Makes timer that repeats every interval seconds
-  *When timer goes off, it calls the timer method
-  */
+   *Makes timer that repeats every interval seconds
+   *When timer goes off, it calls the timer method
+   */
   sensor_timer = new QTimer();
   sensor_timer->setSingleShot(false);   // will repeat
   sensor_timer->setInterval(INTERVAL);  // goes off every 250 milliseconds
@@ -30,15 +30,15 @@ sensor_panel::sensor_panel(QWidget *parent) : rviz::Panel(parent)  // Base class
   QObject::connect(sensor_timer, SIGNAL(timeout()), this, SLOT(reset_labels()));
 
   /* Initialize subscribers to listen to topic corresponding with each sensor.
-  * use boost::bind to update labels with each call.
-  */
+   * use boost::bind to update labels with each call.
+   */
   imu_sub =
       nh.subscribe<sensor_msgs::Imu>("/imu", 1, boost::bind(&sensor_panel::imu_callback, this, _1, labels["IMU"]));
   lidar_sub = nh.subscribe<sensor_msgs::PointCloud2>(
       "/scan/pointcloud", 1, boost::bind(&sensor_panel::lidar_callback, this, _1, labels["Lidar"]));
-  cam_center_sub =
-      nh.subscribe<sensor_msgs::Image>("/usb_cam_center/image_raw", 1, boost::bind(&sensor_panel::cam_center_callback,
-                                                                                   this, _1, labels["Center Camera"]));
+  cam_center_sub = nh.subscribe<sensor_msgs::Image>(
+      "/usb_cam_center/image_raw", 1,
+      boost::bind(&sensor_panel::cam_center_callback, this, _1, labels["Center Camera"]));
   gps_sub = nh.subscribe<sensor_msgs::NavSatFix>("/fix", 1,
                                                  boost::bind(&sensor_panel::gps_callback, this, _1, labels["GPS"]));
 
@@ -77,9 +77,9 @@ void sensor_panel::gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabe
 }
 
 /*
-*Uses trailing space to figure out if a sensor is inactive
-*No trailing space means the sensor was inactive for the whole timer cycle
-*/
+ *Uses trailing space to figure out if a sensor is inactive
+ *No trailing space means the sensor was inactive for the whole timer cycle
+ */
 void sensor_panel::reset_labels()
 {
   int index;
@@ -103,7 +103,7 @@ void sensor_panel::reset_labels()
     }
   }
 }
-}
+}  // namespace igvc_rviz_plugins
 
 /*
  * IMPORTANT! This macro must be filled out correctly for your panel class.

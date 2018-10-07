@@ -27,6 +27,6 @@ protected:
   void waypoint_callback(const geometry_msgs::PointStampedConstPtr &msg, QLabel *label);
   void robot_position_callback(const nav_msgs::OdometryConstPtr &msg, QLabel *label);
 };
-}
+}  // namespace igvc_rviz_plugins
 
 #endif
