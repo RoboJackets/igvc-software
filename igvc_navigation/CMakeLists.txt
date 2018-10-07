@@ -12,8 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   image_transport
   cv_bridge
-  camera_info_manager
-  laser_geometry
   tf
   pcl_ros
   igvc_utils

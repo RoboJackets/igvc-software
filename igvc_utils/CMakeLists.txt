@@ -9,21 +9,9 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   igvc_msgs
-  image_geometry
-  image_transport
-  cv_bridge
-  camera_info_manager
-  laser_geometry
-  tf
-  pcl_ros
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-find_package(OpenCV REQUIRED)
-find_package(Eigen3 REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
-find_package(PCL REQUIRED filters)
 
 set(CMAKE_CXX_FLAGS "-g -std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
 
@@ -173,8 +161,6 @@ include_directories(
 #endif()
 
 
-add_subdirectory(src/light_controller)
 add_subdirectory(src/pid_tester)
 add_subdirectory(src/serial)
 add_subdirectory(src/speed_compare)
-add_subdirectory(src/project)
