@@ -87,7 +87,7 @@ int main(int argc, char** argv)
   port.flush();
   ROS_INFO_STREAM("Motor Board ready.");
 
-  ros::Rate rate(10);
+  ros::Rate rate(20);
 
   std::string p_values = "#P" + toBoundedString(p_l) + "," + toBoundedString(p_r) + "\n";
   std::string d_values = "#D" + toBoundedString(d_l) + "," + toBoundedString(d_r) + "\n";
@@ -166,13 +166,14 @@ int main(int argc, char** argv)
     while ((dollar != std::string::npos || pound != std::string::npos) && count <= messages_to_read)
     {
       count++;
-      size_t end = ret.find('\n');
+      //size_t end = ret.find('\n');
+      size_t end = ret.size();
       std::vector<std::string> tokens;
 
-      if(ret.size() <= 0 || end == std::string::npos) {
-        ROS_INFO_STREAM("Invalid number of tokens from motor board");
-      } else if(pound != std::string::npos) {
-        tokens = split(ret.substr(dollar + 1, end), ',');
+      if(ret.size() <= 0) {
+        ROS_INFO_STREAM("Invalid number of tokens from motor board, ret: " << ret);
+        } else if(pound != std::string::npos) {
+        tokens = split(ret.substr(pound + 2, end), ',');
         switch(ret.at(1)) {
         case 'I':
           //imu message
@@ -207,7 +208,7 @@ int main(int argc, char** argv)
           count--;
           break;
 
-        case default:
+        default:
           ROS_ERROR_STREAM("unknown response: " << ret);
           count--;
           break;
