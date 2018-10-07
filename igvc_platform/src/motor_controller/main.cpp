@@ -1,5 +1,5 @@
-#include <igvc_utils/SerialPort.h>
 #include <igvc_msgs/velocity_pair.h>
+#include <igvc_utils/SerialPort.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <ros/subscriber.h>
@@ -30,6 +30,18 @@ std::string toBoundedString(double input)
   std::stringstream stream;
   stream << std::fixed << std::setprecision(precision) << input;
   return stream.str();
+}
+
+bool validateValues(std::string ret, int loc, int end, double left, double right) {
+  std::vector<std::string> vals = split(ret.substr(loc + 1, end), ',');
+  ROS_INFO_STREAM("Successfully set p values");
+  bool valid_values = true;
+  if (vals.size() == 2)
+  {
+    valid_values = (stod(vals.at(0)) == left);
+    valid_values = (stod(vals.at(1)) == right) && valid_values;
+  }
+  return valid_values;
 }
 
 int main(int argc, char** argv)
@@ -85,9 +97,9 @@ int main(int argc, char** argv)
   bool valid_values_d = false;
   bool valid_values_i = false;
 
+  // Set the PID and values, sends values down and recieves them copied back to ensure success
   while (ros::ok() && (!valid_values_p || !valid_values_d || !valid_values_i))
   {
-    ros::spinOnce();
     if (!valid_values_p)
     {
       port.write(p_values);
@@ -111,36 +123,18 @@ int main(int argc, char** argv)
         size_t end = ret.find('\n');
         if (p_loc != std::string::npos)
         {
-          std::vector<std::string> vals = split(ret.substr(p_loc + 1, end), ',');
-          ROS_INFO_STREAM("Successfully set p values");
-          if (vals.size() == 2)
-          {
-            valid_values_p = true;
-            valid_values_p = (stod(vals.at(0)) == p_l) && valid_values_p;
-            valid_values_p = (stod(vals.at(1)) == p_r) && valid_values_p;
-          }
+          valid_values_p = validateValues(ret, p_loc, end, p_l, p_r);
+          ROS_INFO("Successfully set P values");
         }
         else if (d_loc != std::string::npos)
         {
-          std::vector<std::string> vals = split(ret.substr(d_loc + 1, end), ',');
-          ROS_INFO_STREAM("Successfully set d values");
-          if (vals.size() == 2)
-          {
-            valid_values_d = true;
-            valid_values_d = (stod(vals.at(0)) == d_l) && valid_values_d;
-            valid_values_d = (stod(vals.at(1)) == d_r) && valid_values_d;
-          }
+          valid_values_d = validateValues(ret, d_loc, end, d_l, d_r);
+          ROS_INFO("Successfully set D values");
         }
         else if (i_loc != std::string::npos)
         {
-          std::vector<std::string> vals = split(ret.substr(i_loc + 1, end), ',');
-          ROS_INFO_STREAM("Successfully set i values");
-          if (vals.size() == 2)
-          {
-            valid_values_i = true;
-            valid_values_i = (stod(vals.at(0)) == i_l) && valid_values_i;
-            valid_values_i = (stod(vals.at(1)) == i_r) && valid_values_i;
-          }
+          valid_values_i = validateValues(ret, i_loc, end, i_l, i_r);
+          ROS_INFO("Successfully set I values");
         }
         else if (ret.at(1) != 'V')
         {
@@ -156,9 +150,9 @@ int main(int argc, char** argv)
   }
   ROS_INFO_STREAM("Sucessfully set all PID values");
 
+  // sends down motor commands and recieves multiple responses back
   while (ros::ok() && port.isOpen())
   {
-    ros::spinOnce();
     std::string msg = "$" + (enabled ? toBoundedString(current_motor_command.left_velocity) : toBoundedString(0.0)) +
                       "," + (enabled ? toBoundedString(current_motor_command.right_velocity) : toBoundedString(0.0)) +
                       "\n";
@@ -174,45 +168,30 @@ int main(int argc, char** argv)
       count++;
       size_t end = ret.find('\n');
       std::vector<std::string> tokens;
-      if (dollar != std::string::npos)
-      {
-        size_t dollar = ret.find('$');
-        size_t comma = ret.find(',');
-        size_t comma2 = ret.find_last_of(',');
-        size_t end = ret.find('\n');
-        std::string leftStr = ret.substr(dollar + 1, comma - dollar - 1);
-        std::string rightStr = ret.substr(comma + 1, comma2 - comma - 1);
-        std::string deltaT = ret.substr(comma2 + 1, end - comma2 - 1);
-        igvc_msgs::velocity_pair enc_msg;
-        enc_msg.left_velocity = atof(leftStr.c_str());
-        enc_msg.right_velocity = atof(rightStr.c_str());
-        enc_msg.duration = atof(deltaT.c_str());
-        enc_msg.header.stamp = ros::Time::now();
-        enc_pub.publish(enc_msg);
-      }
-      else
-      {
-        if (pound != std::string::npos)
-        {
-          if (ret.at(1) == 'I')
+
+      if(ret.size() <= 0 || end == std::string::npos) {
+        ROS_INFO_STREAM("Invalid number of tokens from motor board");
+      } else if(pound != std::string::npos) {
+        tokens = split(ret.substr(dollar + 1, end), ',');
+        switch(ret.at(1)) {
+        case 'I':
+          //imu message
+          break;
+
+        case 'V':
           {
-            // imu message
-          }
-          else if (ret.at(1) == 'V')
-          {
+            // recieves battery message and publishes it, also checks for robot enabled
             std_msgs::Float64 battery_msg;
             double voltage = atof(tokens.at(0).c_str());
             battery_vals.push_back(voltage);
-            if (battery_vals.size() > battery_avg_num)
-            {
+            if(battery_vals.size() > battery_avg_num) {
               battery_avg -= battery_vals.front() / battery_avg_num;
               battery_vals.pop_front();
             }
             battery_avg += voltage / battery_avg_num;
             battery_msg.data = battery_avg;
             battery_pub.publish(battery_msg);
-            if (battery_avg < 23.5 && battery_vals.size() >= battery_avg_num)
-            {
+            if(battery_avg < 23.5 && battery_vals.size() >= battery_avg_num) {
               ROS_ERROR_STREAM("Battery voltage dangerously low");
             }
             std_msgs::Bool enabled_msg;
@@ -220,30 +199,37 @@ int main(int argc, char** argv)
             enabled = enabled_msg.data;
             enabled_pub.publish(enabled_msg);
           }
-          else if (ret.at(1) == 'E')
-          {
-            ROS_ERROR_STREAM(ret);
-            count--;
-          }
+          break;
+
+        case 'E':
+          // prints unknown error to terminal
+          ROS_ERROR_STREAM("MBED error: " << ret);
+          count--;
+          break;
+
+        case default:
+          ROS_ERROR_STREAM("unknown response: " << ret);
+          count--;
+          break;
         }
-        else if (dollar != std::string::npos)
-        {
-          igvc_msgs::velocity_pair enc_msg;
-          enc_msg.left_velocity = atof(tokens.at(0).c_str());
-          enc_msg.right_velocity = atof(tokens.at(1).c_str());
-          enc_msg.duration = atof(tokens.at(2).c_str());
-          enc_msg.header.stamp = ros::Time::now();
-          enc_pub.publish(enc_msg);
-        }
-        else
-        {
-          ROS_ERROR_STREAM("Unknown message from motor board " << ret);
-        }
+      } else if(dollar != std::string::npos) {
+        // handles encoder feedback
+        tokens = split(ret.substr(pound + 2, end), ',');
+        igvc_msgs::velocity_pair enc_msg;
+        enc_msg.left_velocity = atof(tokens.at(0).c_str());
+        enc_msg.right_velocity = atof(tokens.at(1).c_str());
+        enc_msg.duration = atof(tokens.at(2).c_str());
+        enc_msg.header.stamp = ros::Time::now();
+        enc_pub.publish(enc_msg);
+      } else {
+        // unknown error message
+        ROS_ERROR_STREAM("Unknown message from motor board " << ret);
       }
       ret = port.readln();
       dollar = ret.find('$');
       pound = ret.find('#');
     }
+    ros::spinOnce();
     rate.sleep();
   }
 }
