@@ -14,8 +14,8 @@
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0"/>
 
-  <node name="waypoint_source" pkg="igvc" type="waypoint_source" output="screen" >
-      <param name="file" value="$(find igvc_control)/config/waypoints.csv" />
+  <node name="waypoint_source" pkg="igvc_navigation" type="waypoint_source" output="screen" >
+      <param name="file" value="$(find igvc_gazebo)/config/waypoints.csv" />
   </node>
 
   <!-- Create the world. -->
@@ -33,11 +33,11 @@
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
 
   <!-- convert laser scan to point cloud for LIDAR -->
-  <node name="scan_to_pointcloud" pkg="igvc_control" type="scan_to_pointcloud" output="screen" >
+  <node name="scan_to_pointcloud" pkg="igvc_gazebo" type="scan_to_pointcloud" output="screen" >
     <param name="min_dist" value="0.1"/>
     <param name="neighbor_dist" value="0.2"/>
   </node>
   <include file="$(find igvc_description)/launch/spawn_jaymii.launch" />
-  <include file="$(find igvc)/launch/filter_lidar.launch" />
-  <include file="$(find igvc_control)/launch/igvc_control.launch" />
+  <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
+  <include file="$(find igvc_gazebo)/launch/igvc_control.launch" />
 </launch>
