@@ -47,11 +47,12 @@ void WaypointPanel::robot_position_callback(const nav_msgs::OdometryConstPtr &ms
   double roll, pitch, yaw;
   m.getRPY(roll, pitch, yaw);
 
-  auto text = "X: " + std::to_string(way_x) + "\n" + "Y: " + std::to_string(way_y) + "\n" + "Distance: " +
-              std::to_string(distance) + "\n" + "Angle: " + std::to_string(odomToWayPointAngle - yaw) + " degrees\n";
+  auto text = "X: " + std::to_string(way_x) + "\n" + "Y: " + std::to_string(way_y) + "\n" +
+              "Distance: " + std::to_string(distance) + "\n" + "Angle: " + std::to_string(odomToWayPointAngle - yaw) +
+              " degrees\n";
 
   label->setText(text.c_str());
 }
-}
+}  // namespace igvc_rviz_plugins
 
 PLUGINLIB_EXPORT_CLASS(igvc_rviz_plugins::WaypointPanel, rviz::Panel)

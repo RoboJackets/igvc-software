@@ -1,6 +1,5 @@
 #include "Odometer.h"
 #include <igvc_msgs/velocity_pair.h>
-#include <igvc_msgs/velocity_pair.h>
 #include <math.h>
 #include <nav_msgs/Odometry.h>
 #include <ros/ros.h>
@@ -13,7 +12,7 @@ double wheel_separation;
  * In the ros coordinate convention x is forward, y is leftward, and z is upward relative to the robot
  * The position is published in an absolute reference frame relative to the initial position
  * The velocities (twist) is in a reference frame relative to the robot
-*/
+ */
 void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
 {
   float leftVelocity = msg.left_velocity;

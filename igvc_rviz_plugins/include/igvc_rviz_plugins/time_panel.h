@@ -32,6 +32,6 @@ protected:
   QLabel* output_topic_editor_;
   time_t start;
 };
-}
+}  // namespace rviz_plugins
 
 #endif  // TIME_PANEL_H

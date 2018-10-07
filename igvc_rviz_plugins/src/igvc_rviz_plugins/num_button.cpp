@@ -26,4 +26,4 @@ void NumButton::emitNum()
 {
   Q_EMIT numClicked(num);
 }
-}
+}  // namespace rviz_plugins

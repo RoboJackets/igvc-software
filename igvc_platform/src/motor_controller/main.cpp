@@ -32,7 +32,8 @@ std::string toBoundedString(double input)
   return stream.str();
 }
 
-bool validateValues(std::string ret, int loc, int end, double left, double right) {
+bool validateValues(std::string ret, int loc, int end, double left, double right)
+{
   std::vector<std::string> vals = split(ret.substr(loc + 1, end), ',');
   ROS_INFO_STREAM("Successfully set p values");
   bool valid_values = true;
@@ -166,33 +167,39 @@ int main(int argc, char** argv)
     while ((dollar != std::string::npos || pound != std::string::npos) && count <= messages_to_read)
     {
       count++;
-      //size_t end = ret.find('\n');
+      // size_t end = ret.find('\n');
       size_t end = ret.size();
       std::vector<std::string> tokens;
 
-      if(ret.size() <= 0) {
+      if (ret.size() <= 0)
+      {
         ROS_INFO_STREAM("Invalid number of tokens from motor board, ret: " << ret);
-        } else if(pound != std::string::npos) {
+      }
+      else if (pound != std::string::npos)
+      {
         tokens = split(ret.substr(pound + 2, end), ',');
-        switch(ret.at(1)) {
-        case 'I':
-          //imu message
-          break;
+        switch (ret.at(1))
+        {
+          case 'I':
+            // imu message
+            break;
 
-        case 'V':
+          case 'V':
           {
             // recieves battery message and publishes it, also checks for robot enabled
             std_msgs::Float64 battery_msg;
             double voltage = atof(tokens.at(0).c_str());
             battery_vals.push_back(voltage);
-            if(battery_vals.size() > battery_avg_num) {
+            if (battery_vals.size() > battery_avg_num)
+            {
               battery_avg -= battery_vals.front() / battery_avg_num;
               battery_vals.pop_front();
             }
             battery_avg += voltage / battery_avg_num;
             battery_msg.data = battery_avg;
             battery_pub.publish(battery_msg);
-            if(battery_avg < 23.5 && battery_vals.size() >= battery_avg_num) {
+            if (battery_avg < 23.5 && battery_vals.size() >= battery_avg_num)
+            {
               ROS_ERROR_STREAM("Battery voltage dangerously low");
             }
             std_msgs::Bool enabled_msg;
@@ -202,18 +209,20 @@ int main(int argc, char** argv)
           }
           break;
 
-        case 'E':
-          // prints unknown error to terminal
-          ROS_ERROR_STREAM("MBED error: " << ret);
-          count--;
-          break;
+          case 'E':
+            // prints unknown error to terminal
+            ROS_ERROR_STREAM("MBED error: " << ret);
+            count--;
+            break;
 
-        default:
-          ROS_ERROR_STREAM("unknown response: " << ret);
-          count--;
-          break;
+          default:
+            ROS_ERROR_STREAM("unknown response: " << ret);
+            count--;
+            break;
         }
-      } else if(dollar != std::string::npos) {
+      }
+      else if (dollar != std::string::npos)
+      {
         // handles encoder feedback
         tokens = split(ret.substr(pound + 2, end), ',');
         igvc_msgs::velocity_pair enc_msg;
@@ -222,7 +231,9 @@ int main(int argc, char** argv)
         enc_msg.duration = atof(tokens.at(2).c_str());
         enc_msg.header.stamp = ros::Time::now();
         enc_pub.publish(enc_msg);
-      } else {
+      }
+      else
+      {
         // unknown error message
         ROS_ERROR_STREAM("Unknown message from motor board " << ret);
       }
