@@ -175,7 +175,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "new_mapper");
+  ros::init(argc, argv, "mapper");
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
