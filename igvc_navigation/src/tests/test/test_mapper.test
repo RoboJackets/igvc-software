@@ -1,5 +1,5 @@
 <launch>
-  <node name="new_mapper" pkg="igvc" type="new_mapper" output="screen" required="true">
+  <node name="mapper" pkg="igvc" type="mapper" output="screen" required="true">
             <param name="topics" type="string" value="/scan/pointcloud /usb_cam_center/line_cloud"/>
             <param name="occupancy_grid_length" type="int" value="100" />
             <param name="occupancy_grid_width" type="int" value="100" />
@@ -10,5 +10,5 @@
             <param name="debug" type="bool" value="true"/>
 
     </node>
-  <test test-name="test_new_mapper" pkg="igvc" type="TestNewMapper"/>
+  <test test-name="test_mapper" pkg="igvc" type="TestNewMapper"/>
 </launch>
