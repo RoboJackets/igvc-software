@@ -3,7 +3,7 @@
 <!-- map.launch -->
 <launch>
     <!-- Waypoints -->
-    <include file="$(find igvc_navigation)/launch/waypoint_source.launch" />
+    <!-- <include file="$(find igvc_navigation)/launch/waypoint_source.launch" /> -->
 
     <!-- Planner -->
     <node name="path_planner" pkg="igvc_navigation" type="pathplanner" output="screen" >
