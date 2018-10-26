@@ -1,0 +1,17 @@
+<launch>
+
+    <!-- Vehicle pose -->
+    <arg name="x" default="0"/>
+    <arg name="y" default="0"/>
+    <arg name="z" default="0"/>
+    <arg name="roll" default="0.0"/>
+    <arg name="pitch" default="0.0"/>
+    <arg name="yaw" default="0"/>
+    <!-- Spawn the vehicle. -->
+    <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
+          args="-file $(find igvc_description)/urdf/jessi.urdf
+                -gazebo_namespace /gazebo
+                -urdf -model Jessi
+                -x $(arg x) -y $(arg y) -z $(arg z)
+                -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+</launch>

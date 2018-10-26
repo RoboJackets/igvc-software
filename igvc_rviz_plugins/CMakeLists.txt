@@ -31,15 +31,33 @@ include_directories(
 )
 
 set (rviz_plugins_SRCS
-    src/ExamplePanel.cpp
-    src/sensor_panel.cpp
-    src/WaypointPanel.cpp
+        src/igvc_rviz_plugins/bat_panel.cpp
+        src/igvc_rviz_plugins/eStop_panel.cpp
+        src/igvc_rviz_plugins/example_panel.cpp
+        src/igvc_rviz_plugins/launch_panel.cpp
+        src/igvc_rviz_plugins/my_thread.cpp
+        src/igvc_rviz_plugins/node_panel.cpp
+        src/igvc_rviz_plugins/num_button.cpp
+        src/igvc_rviz_plugins/sensor_panel.cpp
+        src/igvc_rviz_plugins/speedometer.cpp
+        src/igvc_rviz_plugins/speed_panel.cpp
+        src/igvc_rviz_plugins/time_panel.cpp
+        src/igvc_rviz_plugins/waypoint_panel.cpp
 )
 
 set (rviz_plugins_HDRS
-    include/igvc_rviz_plugins/ExamplePanel.h
-    include/igvc_rviz_plugins/sensor_panel.h
-    include/igvc_rviz_plugins/WaypointPanel.h
+        include/igvc_rviz_plugins/bat_panel.h
+        include/igvc_rviz_plugins/eStop_panel.h
+        include/igvc_rviz_plugins/example_panel.h
+        include/igvc_rviz_plugins/launch_panel.h
+        include/igvc_rviz_plugins/my_thread.h
+        include/igvc_rviz_plugins/node_panel.h
+        include/igvc_rviz_plugins/num_button.h
+        include/igvc_rviz_plugins/sensor_panel.h
+        include/igvc_rviz_plugins/speedometer.h
+        include/igvc_rviz_plugins/speed_panel.h
+        include/igvc_rviz_plugins/time_panel.h
+        include/igvc_rviz_plugins/waypoint_panel.h
 )
 
 qt5_wrap_cpp(rviz_plugins_MOCS ${rviz_plugins_HDRS})

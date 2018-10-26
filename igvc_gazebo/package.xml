@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<package>
+  <name>igvc_gazebo</name>
+  <version>1.0.0</version>
+  <description>
+    igvc_control contains the files realting to the control of the robot in simulation
+  </description>
+
+  <maintainer email="jgibson37@gatech.edu">Jason Gibson</maintainer>
+  <license>BSD</license>
+
+  <author email="jgibson37@gatech.edu">Jason Gibson</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>nav_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>pcl_conversions</build_depend>
+  <build_depend>pcl_ros</build_depend>
+  <build_depend>tf</build_depend>
+  <build_depend>cmake_modules</build_depend>
+  <build_depend>dynamic_reconfigure</build_depend>
+  <build_depend>roslib</build_depend>
+  <build_depend>gazebo_ros</build_depend>
+  <build_depend>joint_state_controller</build_depend>
+  <build_depend>effort_controllers</build_depend>
+  <run_depend>joint_state_publisher</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>pcl_conversions</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>laser_geometry</run_depend>
+  <run_depend>nav_msgs</run_depend>
+  <run_depend>sensor_msgs</run_depend>
+  <run_depend>nodelet</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>dynamic_reconfigure</run_depend>
+  <run_depend>roslib</run_depend>
+  <run_depend>gazebo_ros</run_depend>
+</package>

@@ -61,6 +61,6 @@ protected:
   void cam_center_callback(const sensor_msgs::ImageConstPtr &msg, QLabel *ls);
   void gps_callback(const sensor_msgs::NavSatFixConstPtr &msg, QLabel *ls);
 };
-}
+}  // namespace igvc_rviz_plugins
 
 #endif  // SENSORPANEL_H
