@@ -43,11 +43,7 @@ bool update = true;
 
 std::tuple<double, double> rotate(double x, double y)
 {
-  // double newX = x * cos(orientation)*cos(_pitch) + y * (cos(orientation)*sin(_pitch)*sin(_roll) -
-  // sin(orientation)*cos(_roll));
-  // double newY = x * sin(orientation)*cos(_pitch) + y * (sin(orientation)*sin(_pitch)*sin(_roll) +
-  // cos(orientation)*cos(_roll));
-  double newX = x * cos(orientation) + y * sin(orientation);
+  double newX = x * cos(orientation) - y * sin(orientation);
   double newY = x * sin(orientation) + y * cos(orientation);
   return (std::make_tuple(newX, newY));
 }
@@ -133,8 +129,8 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   img_bridge.toImageMsg(imageBoi);  // from cv_bridge to sensor_msgs::Image
   time = ros::Time::now();          // so times are exact same
   imageBoi.header.stamp = time;
-  // set fields of map message
   msgBoi.header.stamp = time;
+  msgBoi.header.frame_id = "/odom";
   msgBoi.image = imageBoi;
   msgBoi.length = length_y;
   msgBoi.width = width_x;
