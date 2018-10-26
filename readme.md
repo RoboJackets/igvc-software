@@ -58,7 +58,7 @@ roslaunch igvc_navigation mapper.launch plot_rviz:=true
 **Navigate the course:**
 Next, run the following command to start our pathing node and navigate around the course autonomously
 ```
-roslaunch igvc_navigation pather.launch
+roslaunch igvc_navigation pather.launch simulation:=true
 ```
 
 Alternatively, you can control the car manually with a USB gamepad with this command:
