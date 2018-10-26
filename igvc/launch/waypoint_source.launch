@@ -1,8 +1,0 @@
-<!-- waypoint_source.launch -->
-
-<launch>
-
-    <node name="waypoint_source" pkg="igvc" type="waypoint_source" output="screen" >
-        <param name="file" value="$(find igvc)/../sandbox/waypoints.csv" />
-    </node>
-</launch>

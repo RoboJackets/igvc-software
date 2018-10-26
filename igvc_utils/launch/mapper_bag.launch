@@ -1,0 +1,24 @@
+<launch>
+    <node name="imu_remap" pkg="igvc_bag_utils" type="imu_remap" output="screen">
+          <param name="x" type="double" value="0.0025" />
+          <param name="y" type="double" value="0.0025" />
+          <param name="z" type="double" value="0.0025" />
+    </node>
+
+    <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
+    <include file="$(find igvc_perception)/launch/compressed_to_raw.launch" />
+
+    <node pkg="rosbag" type="play" name="player" output="screen" args="--clock $(env BAG_LOC)">
+          <remap from="/map" to="/map_old"/>
+          <remap from="/odometry/filtered" to="/odometry/filtered_old"/>
+          <remap from="/odometry/gps" to="/odometry/gps_old"/>
+          <remap from="/wheel_odometry" to="/wheel_odometry_old"/>
+          <remap from="/diagnostics" to="/diagnostics_old"/>
+          <remap from="/prob" to="/prob_old"/>
+          <remap from="/gps/filtered" to="/gps/filtered_old"/>
+          <remap from="/imu" to="/imu_old"/>
+          <remap from="/scan/pointcloud" to="/scan/pointcloud_old"/>
+          <remap from="/tf" to="/tf_old"/>
+    </node>
+    <param name="use_sim_time" value="true"/>
+</launch>

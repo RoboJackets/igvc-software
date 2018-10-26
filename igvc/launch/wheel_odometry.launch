@@ -1,4 +1,0 @@
-<!-- odometer.launch -->
-<launch>
-    <node name="odometer" pkg="igvc" type="odometer" output="screen" />
-</launch>

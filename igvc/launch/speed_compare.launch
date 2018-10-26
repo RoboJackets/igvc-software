@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-
-<launch>
-
-    <node name="speed_compare" pkg="igvc" type="speed_compare" output="screen">
-    	<param name = "file" type = "string" value = "$(find igvc)/../sandbox/speed_compare/speed_data.csv" />
-    </node>
-
-</launch>

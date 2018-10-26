@@ -23,6 +23,8 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>message_generation</build_depend>
 
+  <buildtool_depend>sensor_msgs</buildtool_depend>
+  <buildtool_depend>geometry_msgs</buildtool_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
