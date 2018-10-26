@@ -40,18 +40,27 @@ Join the chat at https://robojackets.slack.com/
 ## Running Gazebo
 You can get started with the IGVC code base right away by launching our simulator!
 
+**Load up Jessii:**
 The following command will load our platform into a simulated IGVC course:
 ```
-roslaunch igvc_control gazebo.launch
+roslaunch igvc_gazebo gazebo.launch
 ```
+**Map the surrounding environment:**
 Then, the following command will start our mapper
 ```
-roslaunch igvc mapper.launch
+roslaunch igvc_navigation mapper.launch
 ```
+To obtain a visualization of the robot's sensor readings, the occupancy grid, and its planned path, set the `plot_rviz` flag to `true`:
+```
+roslaunch igvc_navigation mapper.launch plot_rviz:=true
+```
+
+**Navigate the course:**
 Next, run the following command to start our pathing node and navigate around the course autonomously
 ```
-roslaunch igvc pather.launch
+roslaunch igvc_navigation pather.launch simulation:=true
 ```
+
 Alternatively, you can control the car manually with a USB gamepad with this command:
 ```
 roslaunch igvc joystick_driver.launch

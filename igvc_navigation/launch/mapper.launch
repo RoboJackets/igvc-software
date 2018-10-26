@@ -12,4 +12,10 @@
             <param name="debug" type="bool" value="true"/>
     </node>
 
+    <arg name="plot_rviz" default="false"/>
+
+    <group if="$(arg plot_rviz)">
+        <node name="jessii_rviz" pkg="rviz" type="rviz" args="-d $(find igvc_rviz_plugins)/configs/jessii_conf.rviz"/>
+    </group>
+
 </launch>
