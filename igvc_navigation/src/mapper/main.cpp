@@ -1,3 +1,5 @@
+// TODO: High level information of node.
+
 #include <cv_bridge/cv_bridge.h>
 #include <igvc_msgs/map.h>
 #include <math.h>
@@ -37,7 +39,7 @@ int start_y;  // start y location
 int length_y;
 int width_x;
 bool debug;
-double cur_x;
+double cur_x; // TODO: Change name, relative to start_x.
 double cur_y;
 bool update = true;
 
@@ -69,16 +71,19 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
 {
   // transform pointcloud into the occupancy grid, no filtering right now
 
-  bool offMap = false;
+  bool offMap = false; // Flag to show if a calculated location is off the map
   int count = 0;
 
   // make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
+  // TODO: time should be based on message timestamp.
   ros::Time time = ros::Time::now();
+  // Check if static transform already exists for this topic.
   if (transforms.find(topic) == transforms.end())
   {
+    // Wait for transform between frame_id (ex. /scan/pointcloud) and base_footprint.
     if (tf_listener->waitForTransform("/base_footprint", msg->header.frame_id, ros::Time(0), ros::Duration(3.0)))
     {
       ROS_INFO_STREAM("\n\ngetting transform for " << topic << "\n\n");
@@ -89,6 +94,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     else
     {
       ROS_ERROR_STREAM("\n\nfailed to find transform using empty transform\n\n");
+      // TODO: Remove this, this node shouldn't work if there's no transform.
       tf::StampedTransform transform;
       transform.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
       tf::Quaternion q;
@@ -100,8 +106,10 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
       transforms.insert(std::pair<std::string, tf::StampedTransform>(topic, transform));
     }
   }
+  // Apply transformation to msg points using the transform for this topic.
   pcl_ros::transformPointCloud(*msg, *transformed, transforms.at(topic));
 
+  // TODO: Change point to point_iter or point_it.
   pcl::PointCloud<pcl::PointXYZ>::const_iterator point;
 
   for (point = transformed->begin(); point < transformed->points.end(); point++)
@@ -109,10 +117,15 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     double x_loc, y_loc;
     std::tie(x_loc, y_loc) = rotate(point->x, point->y);
 
+    // TODO: Clear up these variable names. x_point, x_robot, etc.
     int point_x = static_cast<int>(std::round(x_loc / resolution + cur_x / resolution + start_x));
     int point_y = static_cast<int>(std::round(y_loc / resolution + cur_y / resolution + start_y));
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
+      // TODO: NO MAGIC NUMBERS.
+      // TODO: Have variables for probability thresholds/steps.
+      // TODO: Investigate decay, potentially use CV_16U, decrement at a certain rate.
+      // TODO: Potentially change
       if (published_map->at<uchar>(point_x, point_y) < 230)
       {
         published_map->at<uchar>(point_x, point_y) += (uchar)125;
@@ -155,6 +168,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
       {
         if (published_map->at<uchar>(i, j) >= (uchar)178)
         {
+          // Set x y coordinates as the center of the grid cell.
           pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
           p.x = (i - start_x) * resolution;
           p.y = (j - start_y) * resolution;
@@ -181,7 +195,7 @@ int main(int argc, char **argv)
   double cont_start_x;
   double cont_start_y;
 
-  if (!pNh.hasParam("topics") && !pNh.hasParam("occupancy_grid_length") && !pNh.hasParam("occupancy_grid_length") &&
+  if (!pNh.hasParam("topics") && !pNh.hasParam("occupancy_grid_width") && !pNh.hasParam("occupancy_grid_length") &&
       !pNh.hasParam("occupancy_grid_resolution") && !pNh.hasParam("start_X") & !pNh.hasParam("start_Y") &&
       !pNh.hasParam("debug"))
   {
