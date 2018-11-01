@@ -226,7 +226,6 @@ int main(int argc, char **argv)
   pNh.getParam("start_X", cont_start_x);
   pNh.getParam("start_Y", cont_start_y);
   pNh.getParam("increment_step", increment_step);
-  pNh.getParam("orientation", orientation);
   pNh.getParam("debug", debug);
 
   // convert from meters to grid
