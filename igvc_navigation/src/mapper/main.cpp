@@ -1,4 +1,4 @@
-// TODO: High level information of node.
+// Subscribes to Point Cloud Data, updates the occupancy grid, then publishes the data.
 
 #include <cv_bridge/cv_bridge.h>
 #include <igvc_msgs/map.h>
@@ -16,20 +16,17 @@
 #include <opencv2/opencv.hpp>
 #include "tf/transform_datatypes.h"
 #include <limits.h>
+#include <pcl_conversions/pcl_conversions.h>
 
-igvc_msgs::map msgBoi;  // >> message to be sent
 cv_bridge::CvImage img_bridge;
-sensor_msgs::Image imageBoi;  // >> image in the message
 
 ros::Publisher map_pub;
 ros::Publisher debug_pub;
-ros::Subscriber odom_sub;
 ros::Publisher debug_pcl_pub;
-cv::Mat *published_map;  // matrix will be publishing
+ros::Subscriber odom_sub;
+std::unique_ptr<cv::Mat> published_map;  // matrix will be publishing
 std::map<std::string, tf::StampedTransform> transforms;
-tf::TransformListener *tf_listener;
-std::string topics;
-Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>> *eigenRep;
+std::unique_ptr<tf::TransformListener> tf_listener;
 
 double resolution;
 double orientation;
@@ -39,12 +36,18 @@ int start_x;  // start x location
 int start_y;  // start y location
 int length_y;
 int width_x;
-int occupancy_grid_threshold;
+uchar occupancy_grid_threshold;
 int increment_step;
 bool debug;
-double x_robot; // TODO: Change name, relative to start_x.
-double y_robot;
 bool update = true;
+
+struct Position
+{
+    double x;
+    double y;
+};
+
+Position robot_pos;
 
 std::tuple<double, double> rotate(double x, double y)
 {
@@ -57,8 +60,8 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr &msg)
 {
   if (update)
   {
-    x_robot = msg->pose.pose.position.x;
-    y_robot = msg->pose.pose.position.y;
+    robot_pos.x = msg->pose.pose.position.x;
+    robot_pos.y = msg->pose.pose.position.y;
     tf::Quaternion quat;
     tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
     double roll, pitch, yaw;
@@ -70,25 +73,24 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr &msg)
   }
 }
 
-void setMsgValues(ros::Time time)
+void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp)
 {
-  imageBoi.header.stamp = time;
-  msgBoi.header.stamp = time;
-  msgBoi.header.frame_id = "/odom";
-  msgBoi.image = imageBoi;
-  msgBoi.length = length_y;
-  msgBoi.width = width_x;
-  msgBoi.resolution = resolution;
-  msgBoi.orientation = orientation;
-  msgBoi.x = std::round(x_robot / resolution) + start_x;
-  msgBoi.y = std::round(y_robot / resolution) + start_y;
-  msgBoi.x_initial = start_x;
-  msgBoi.y_initial = start_y;
+  pcl_conversions::fromPCL(pcl_stamp, image.header.stamp);
+  pcl_conversions::fromPCL(pcl_stamp, message.header.stamp);
+  message.header.frame_id = "/odom";
+  message.image = image;
+  message.length = length_y;
+  message.width = width_x;
+  message.resolution = resolution;
+  message.orientation = orientation;
+  message.x = std::round(robot_pos.x / resolution) + start_x;
+  message.y = std::round(robot_pos.y / resolution) + start_y;
+  message.x_initial = start_x;
+  message.y_initial = start_y;
 }
 
-void handlePointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr transformed) {
-  bool offMap = false; // Flag to show if a calculated location is off the map
-  int count = 0;
+void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed) {
+  int offMapCount = 0;
 
   pcl::PointCloud<pcl::PointXYZ>::const_iterator point_iter;
 
@@ -97,27 +99,27 @@ void handlePointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr transformed) {
     double x_point_raw, y_point_raw;
     std::tie(x_point_raw, y_point_raw) = rotate(point_iter->x, point_iter->y);
 
-    // TODO: Clear up these variable names. x_point, x_robot, etc.
-    int point_x = static_cast<int>(std::round(x_point_raw / resolution + x_robot / resolution + start_x));
-    int point_y = static_cast<int>(std::round(y_point_raw / resolution + y_robot / resolution + start_y));
+    int point_x = static_cast<int>(std::round(x_point_raw / resolution + robot_pos.x / resolution + start_x));
+    int point_y = static_cast<int>(std::round(y_point_raw / resolution + robot_pos.y / resolution + start_y));
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
-      // TODO: Have variables for probability thresholds/steps.
       // TODO: Investigate decay, potentially use CV_16U, decrement at a certain rate.
       // TODO: Potentially change
-      published_map->at<uchar>(point_x, point_y) += (uchar)increment_step;
-      // Fix Overflow
-      if (published_map->at<uchar>(point_x, point_y) < 0)
+      if (published_map->at<uchar>(point_x, point_y) <= UCHAR_MAX - (uchar)increment_step)
       {
+        published_map->at<uchar>(point_x, point_y) += (uchar)increment_step;
+      } else {
         published_map->at<uchar>(point_x, point_y) = UCHAR_MAX;
       }
-      count++;
     }
-    else if (!offMap)
+    else
     {
-      ROS_WARN_STREAM("Some points out of range, won't be put on map.");
-      offMap = true;
+        offMapCount++;
     }
+  }
+  if (offMapCount > 0)
+  {
+    ROS_WARN_STREAM(offMapCount << " points were off the map");
   }
 }
 
@@ -135,10 +137,10 @@ void checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &
     else
     {
       ROS_ERROR_STREAM("\n\nfailed to find transform using empty transform\n\n");
-      // TODO: Remove this, this node shouldn't work if there's no transform.
     }
   }
 }
+
 
 
 void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
@@ -149,25 +151,25 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
-  // TODO: time should be based on message timestamp.
-  ros::Time time = ros::Time::now();
   // Check if static transform already exists for this topic.
   checkExistsStaticTransform(msg, topic);
 
   // Apply transformation to msg points using the transform for this topic.
   pcl_ros::transformPointCloud(*msg, *transformed, transforms.at(topic));
-  handlePointCloud(transformed);
+  updateOccupancyGrid(transformed);
 
-  img_bridge = cv_bridge::CvImage(msgBoi.header, sensor_msgs::image_encodings::MONO8, *published_map);
-  img_bridge.toImageMsg(imageBoi);  // from cv_bridge to sensor_msgs::Image
-  time = ros::Time::now();          // so times are exact same
-  setMsgValues(time);
-  ROS_INFO_STREAM("robot location " << std::round(x_robot / resolution) + start_x << ", "
-                                    << std::round(y_robot / resolution) + start_y);
-  map_pub.publish(msgBoi);
+  igvc_msgs::map message;  // >> message to be sent
+  sensor_msgs::Image image;  // >> image in the message
+  img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, *published_map);
+  img_bridge.toImageMsg(image);  // from cv_bridge to sensor_msgs::Image
+
+  setMsgValues(message, image, msg->header.stamp);
+  map_pub.publish(message);
   if (debug)
   {
-    debug_pub.publish(imageBoi);
+    ROS_INFO_STREAM("robot location " << std::round(robot_pos.x / resolution) + start_x << ", "
+                                      << std::round(robot_pos.y / resolution) + start_y);
+    debug_pub.publish(image);
     // ROS_INFO_STREAM("\nThe robot is located at " << x_robot << "," << y_robot << "," << orientation);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
@@ -175,7 +177,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     {
       for (int j = 0; j < length_y; j++)
       {
-        if (published_map->at<uchar>(i, j) >= (uchar)occupancy_grid_threshold)
+        if (published_map->at<uchar>(i, j) >= occupancy_grid_threshold)
         {
           // Set x y coordinates as the center of the grid cell.
           pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
@@ -198,12 +200,14 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "mapper");
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
+  std::string topics;
 
   std::list<ros::Subscriber> subs;
-  tf_listener = new tf::TransformListener();
+  tf_listener = std::unique_ptr<tf::TransformListener>(new tf::TransformListener());
 
   double cont_start_x;
   double cont_start_y;
+  int cont_occupancy_grid_threshold;
 
   if (!(pNh.hasParam("topics") && pNh.hasParam("occupancy_grid_width") && pNh.hasParam("occupancy_grid_length") &&
       pNh.hasParam("occupancy_grid_resolution") && pNh.hasParam("start_X") && pNh.hasParam("start_Y") &&
@@ -218,7 +222,7 @@ int main(int argc, char **argv)
   pNh.getParam("occupancy_grid_length", length_y);
   pNh.getParam("occupancy_grid_width", width_x);
   pNh.getParam("occupancy_grid_resolution", resolution);
-  pNh.getParam("occupancy_grid_threshold", occupancy_grid_threshold);
+  pNh.getParam("occupancy_grid_threshold", cont_occupancy_grid_threshold);
   pNh.getParam("start_X", cont_start_x);
   pNh.getParam("start_Y", cont_start_y);
   pNh.getParam("increment_step", increment_step);
@@ -226,10 +230,11 @@ int main(int argc, char **argv)
   pNh.getParam("debug", debug);
 
   // convert from meters to grid
-  length_y = (int)std::round(length_y / resolution);
-  width_x = (int)std::round(width_x / resolution);
-  start_x = (int)std::round(cont_start_x / resolution);
-  start_y = (int)std::round(cont_start_y / resolution);
+  length_y = static_cast<int>(std::round(length_y / resolution));
+  width_x = static_cast<int>(std::round(width_x / resolution));
+  start_x = static_cast<int>(std::round(cont_start_x / resolution));
+  start_y = static_cast<int>(std::round(cont_start_y / resolution));
+  occupancy_grid_threshold = static_cast<uchar>(cont_occupancy_grid_threshold);
   ROS_INFO_STREAM("cv::Mat length: " << length_y << "  width: " << width_x << "  resolution: " << resolution);
 
   // set up tokens and get list of subscribers
@@ -237,15 +242,13 @@ int main(int argc, char **argv)
   std::vector<std::string> tokens{ std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>() };
   odom_sub = nh.subscribe("/odometry/filtered", 1, odom_callback);
 
-  for (std::string topic : tokens)
+  for (const std::string &topic : tokens)
   {
     ROS_INFO_STREAM("Mapper subscribing to " << topic);
     subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(topic, 1, boost::bind(frame_callback, _1, topic)));
   }
 
-  published_map = new cv::Mat(length_y, width_x, CV_8UC1);
-  eigenRep = new Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>>(
-      (unsigned char *)published_map, width_x, length_y);
+  published_map = std::unique_ptr<cv::Mat>(new cv::Mat(length_y, width_x, CV_8UC1));
 
   map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
 
