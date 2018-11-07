@@ -236,11 +236,13 @@ int main(int argc, char **argv)
 
     double cont_start_x;
     double cont_start_y;
+    double decay_period;
     int cont_occupancy_grid_threshold;
 
     if (!(pNh.hasParam("topics") && pNh.hasParam("occupancy_grid_width") && pNh.hasParam("occupancy_grid_length") &&
           pNh.hasParam("occupancy_grid_resolution") && pNh.hasParam("start_X") && pNh.hasParam("start_Y") &&
-          pNh.hasParam("increment_step") && pNh.hasParam("occupancy_grid_threshold") && pNh.hasParam("debug"))) {
+          pNh.hasParam("increment_step") && pNh.hasParam("occupancy_grid_threshold") && pNh.hasParam("decay_period") &&
+          pNh.hasParam("debug"))) {
         ROS_ERROR_STREAM("missing parameters; exiting");
         return 0;
     }
@@ -251,6 +253,7 @@ int main(int argc, char **argv)
     pNh.getParam("occupancy_grid_width", width_x);
     pNh.getParam("occupancy_grid_resolution", resolution);
     pNh.getParam("occupancy_grid_threshold", cont_occupancy_grid_threshold);
+    pNh.getParam("decay_period", decay_period);
     pNh.getParam("start_X", cont_start_x);
     pNh.getParam("start_Y", cont_start_y);
     pNh.getParam("increment_step", increment_step);
@@ -275,7 +278,7 @@ int main(int argc, char **argv)
     }
 
     // Timer for map decay
-    ros::Timer timer = nh.createTimer(ros::Duration(0.1), decayMap);
+    ros::Timer timer = nh.createTimer(ros::Duration(decay_period), decayMap);
 
     published_map = std::unique_ptr<cv::Mat>(new cv::Mat(length_y, width_x, CV_8UC1));
 
