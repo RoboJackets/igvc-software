@@ -8,6 +8,7 @@
             <param name="occupancy_grid_width" type="int" value="50" />
             <param name="occupancy_grid_resolution" type="double" value="0.2" />
             <param name="occupancy_grid_threshold" type="int" value="178" />
+            <param name="decay_period" type="double" value="0.1" />
             <param name="start_X" type="double" value="25"/>
             <param name="start_Y" type="double" value="25"/>
             <param name="increment_step" type="int" value="125"/>
