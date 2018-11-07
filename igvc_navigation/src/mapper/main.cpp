@@ -32,6 +32,7 @@ double resolution;
 double orientation;
 double _roll;
 double _pitch;
+double transform_max_wait_time;
 int start_x;  // start x location
 int start_y;  // start y location
 int length_y;
@@ -74,8 +75,8 @@ void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
     ros::Time messageTimeStamp;
     pcl_conversions::fromPCL(msg->header.stamp, messageTimeStamp);
     try {
-        tf_listener->waitForTransform("/odom", "/base_footprint", messageTimeStamp, ros::Duration(1.0));
-        tf_listener->lookupTransform("/odom", "/base_footprint", messageTimeStamp, transform);
+        tf_listener->waitForTransform("/odom", "/base_link", messageTimeStamp, ros::Duration(transform_max_wait_time));
+        tf_listener->lookupTransform("/odom", "/base_link", messageTimeStamp, transform);
     } catch (tf::TransformException &ex) {
         ROS_ERROR("%s", ex.what());
     }
@@ -242,7 +243,7 @@ int main(int argc, char **argv)
     if (!(pNh.hasParam("topics") && pNh.hasParam("occupancy_grid_width") && pNh.hasParam("occupancy_grid_length") &&
           pNh.hasParam("occupancy_grid_resolution") && pNh.hasParam("start_X") && pNh.hasParam("start_Y") &&
           pNh.hasParam("increment_step") && pNh.hasParam("occupancy_grid_threshold") && pNh.hasParam("decay_period") &&
-          pNh.hasParam("debug"))) {
+          pNh.hasParam("transform_max_wait_time") && pNh.hasParam("debug"))) {
         ROS_ERROR_STREAM("missing parameters; exiting");
         return 0;
     }
@@ -254,6 +255,7 @@ int main(int argc, char **argv)
     pNh.getParam("occupancy_grid_resolution", resolution);
     pNh.getParam("occupancy_grid_threshold", cont_occupancy_grid_threshold);
     pNh.getParam("decay_period", decay_period);
+    pNh.getParam("transform_max_wait_time", transform_max_wait_time);
     pNh.getParam("start_X", cont_start_x);
     pNh.getParam("start_Y", cont_start_y);
     pNh.getParam("increment_step", increment_step);
