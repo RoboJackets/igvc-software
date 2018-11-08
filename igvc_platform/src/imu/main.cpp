@@ -1,3 +1,4 @@
+//TODO: Write general documentation for node
 #include <freespace/freespace.h>
 #include <freespace/freespace_util.h>
 #include <geometry_msgs/Vector3.h>
@@ -9,6 +10,7 @@
 #include <Eigen/Dense>
 #include <vector>
 
+// TODO: Move code into separate functions.
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "imu");
@@ -16,11 +18,13 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
+  // TODO: Remove yaw offset.
   double yaw_offset;
   pNh.param("yaw_offset", yaw_offset, 0.0);
 
   ros::Publisher imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1000);
 
+  // TODO: Remove unused publishers (Check to see what EKF needs. Gravity cancelled out?)
   ros::Publisher raw_mag_pub = nh.advertise<geometry_msgs::Vector3>("/mag_raw", 1000);
   ros::Publisher raw_yaw_pub = nh.advertise<std_msgs::Float64>("/raw_yaw", 1);
   ros::Publisher raw_imu_pub = nh.advertise<sensor_msgs::Imu>("/imu_raw_accel", 1000);
@@ -32,6 +36,7 @@ int main(int argc, char** argv)
     return 0;
   }
 
+  // TODO: What is 5?
   FreespaceDeviceId ids[5];
   int num_found = 0;
   ret = freespace_getDeviceList(ids, 5, &num_found);
@@ -48,7 +53,7 @@ int main(int argc, char** argv)
     ROS_ERROR_STREAM("failure to connect to device " << ret);
   }
 
-  int seq = 0;  // sequence of published messgaes - should be monatomicly increasing
+  int seq = 0;  // sequence of published messages - should be monotonically increasing
 
   freespace_message request;
   request.messageType = FREESPACE_MESSAGE_DATAMODECONTROLV2REQUEST;
@@ -97,6 +102,7 @@ int main(int argc, char** argv)
   {
     ros::spinOnce();
 
+    // Read the IMU message every loop. Timeout after 1000 milliseconds.
     ret = freespace_readMessage(ids[0], &response, 1000);
     if (ret != FREESPACE_SUCCESS)
     {
@@ -120,13 +126,20 @@ int main(int argc, char** argv)
     MultiAxisSensor accel_raw_msg;
 
     ret = freespace_util_getAccNoGravity(&response.motionEngineOutput, &accel_msg);
+    if (ret != FREESPACE_SUCCESS)
+    {
+      ROS_ERROR_STREAM("failed to read acceleration no gravity." << ret);
+    }
+
     ret = freespace_util_getAcceleration(&response.motionEngineOutput, &accel_raw_msg);
     if (ret != FREESPACE_SUCCESS)
     {
-      ROS_ERROR_STREAM("failed to read acceleration " << ret);
+      ROS_ERROR_STREAM("failed to read acceleration." << ret);
     }
 
     Eigen::Vector3d accel_raw_vec(accel_raw_msg.x, accel_raw_msg.y, accel_raw_msg.z);
+
+    // TODO: Explain this.
     Eigen::Vector3d accel_vec(accel_msg.x, -accel_msg.y, -accel_msg.z);
 
     // Get filtered orientation measurement (TODO: Is this ENU?).
@@ -138,6 +151,7 @@ int main(int argc, char** argv)
     }
     tf::Quaternion quaternion_raw(orientation_msg.x, orientation_msg.y, orientation_msg.z, orientation_msg.w);
     double roll, pitch, yaw;
+    // TODO: Make sure these are in the same coordinate frame as the robot.
     tf::Matrix3x3(quaternion_raw).getRPY(roll, pitch, yaw);
     ROS_INFO("Filtered heading: %f", yaw);
 
@@ -149,6 +163,7 @@ int main(int argc, char** argv)
       ROS_ERROR_STREAM("failed to read angular velocity " << ret);
     }
 
+    // TODO: Explain transformation.
     Eigen::Vector3d angular_vel_raw_vec(angular_vel_msg.x, angular_vel_msg.y, angular_vel_msg.z);
     Eigen::Vector3d angular_vel_vec(angular_vel_msg.x, -angular_vel_msg.y, -angular_vel_msg.z);
 
@@ -157,12 +172,15 @@ int main(int argc, char** argv)
     ret = freespace_util_getMagnetometer(&response.motionEngineOutput, &magnetometer_msg);
     if (ret != FREESPACE_SUCCESS)
     {
-      ROS_ERROR_STREAM("failed to read raw magnetometer velocity " << ret);
+      // TODO: Find unit in documentation.
+      ROS_ERROR_STREAM("failed to read raw magnetometer values" << ret);
     }
 
+    // Calculate heading with magnetometer reading.
     double heading = atan2(magnetometer_msg.y, magnetometer_msg.x);
     ROS_INFO("Magnetometer heading: %f", heading);
 
+    // TODO: Change variable name.
     if (fabs(yaw - heading) > 0.0872665 /*==5 degrees*/) {
       ROS_WARN("Magnetometer heading and filtered yaw measurement disagree by > 5 degrees.");
     }
@@ -173,15 +191,20 @@ int main(int argc, char** argv)
     msg.header.stamp = ros::Time::now();
     msg.header.seq = seq++;
 
+    // TODO: Tune values, parameterize.
     msg.linear_acceleration.x = accel_vec[0];
     msg.linear_acceleration.y = accel_vec[1];
     msg.linear_acceleration.z = accel_vec[2];
-    msg.linear_acceleration_covariance = { 0.01, 1e-6, 1e-6, 1e-6, 0.01, 1e-6, 1e-6, 1e-6, 0.01 };
+    msg.linear_acceleration_covariance = { 0.01, 1e-6, 1e-6,
+                                           1e-6, 0.01, 1e-6,
+                                           1e-6, 1e-6, 0.01 };
 
     msg.angular_velocity.x = angular_vel_vec[0];
     msg.angular_velocity.y = angular_vel_vec[1];
     msg.angular_velocity.z = angular_vel_vec[2];
-    msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
+    msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6,
+                                        1e-6, 0.02, 1e-6,
+                                        1e-6, 1e-6, 0.02 };
 
 
     geometry_msgs::Quaternion orientation;
@@ -189,6 +212,8 @@ int main(int argc, char** argv)
     //orientation.y = quaternion_raw.y();
     //orientation.z = quaternion_raw.z();
     //orientation.w = quaternion_raw.w();
+    // This assumes flat ground and uses magnetometer for absolute heading.
+    // TODO: This assumption may not hold when we switch to 3D lidar, and stop using flat ground assumption
     tf::Quaternion quaternion_mag;
     quaternion_mag.setRPY(0,0,heading);
     orientation.x = quaternion_mag.x();
@@ -196,8 +221,11 @@ int main(int argc, char** argv)
     orientation.z = quaternion_mag.z();
     orientation.w = quaternion_mag.w();
 
+    // TODO: Tune and parameterize.
     msg.orientation = orientation;
-    msg.orientation_covariance = { 0.0025, 1E-6, 1E-6, 1E-6, 0.0025, 1E-6, 1E-6, 1E-6, 0.0025 };
+    msg.orientation_covariance = { 0.0025, 1e-6, 1e-6,
+                                   1e-6, 0.0025, 1e-6,
+                                   1e-6, 1e-6, 0.0025 };
 
     imu_pub.publish(msg);
 
@@ -210,15 +238,21 @@ int main(int argc, char** argv)
     msg_raw.linear_acceleration.x = accel_raw_vec[0];
     msg_raw.linear_acceleration.y = accel_raw_vec[1];
     msg_raw.linear_acceleration.z = accel_raw_vec[2];
-    msg_raw.linear_acceleration_covariance = { 0.005, 1e-6, 1e-6, 1e-6, 0.005, 1e-6, 1e-6, 1e-6, 0.005 };
+    msg_raw.linear_acceleration_covariance = { 0.005, 1e-6, 1e-6,
+                                               1e-6, 0.005, 1e-6,
+                                               1e-6, 1e-6, 0.005 };
 
     msg_raw.angular_velocity.x = angular_vel_raw_vec[0];
     msg_raw.angular_velocity.y = angular_vel_raw_vec[1];
     msg_raw.angular_velocity.z = angular_vel_raw_vec[2];
-    msg_raw.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
+    msg_raw.angular_velocity_covariance = { 0.02, 1e-6, 1e-6,
+                                            1e-6, 0.02, 1e-6,
+                                            1e-6, 1e-6, 0.02 };
 
     msg_raw.orientation = orientation;
-    msg_raw.orientation_covariance = { 0.0025, 1e-6, 1e-6, 1e-6, 0.0025, 1e-6, 1e-6, 1e-6, 0.0025 };
+    msg_raw.orientation_covariance = { 0.0025, 1e-6, 1e-6,
+                                       1e-6, 0.0025, 1e-6,
+                                       1e-6, 1e-6, 0.0025 };
 
     raw_imu_pub.publish(msg_raw);
   }
