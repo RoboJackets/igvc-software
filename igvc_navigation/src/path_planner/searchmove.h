@@ -17,9 +17,9 @@ public:
 
   bool operator==(const SearchMove &other);
 
-  friend std::ostream &operator<<(std::ostream &stream, SearchMove &move)
+  friend std::ostream &operator<<(std::ostream &stream, const SearchMove &move)
   {
-    stream << "(<" << move.X << "," << move.Y << ">";
+    stream << "(<" << move.X << "," << move.Y << ">)";
     return stream;
   }
 };
