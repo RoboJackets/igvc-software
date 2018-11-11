@@ -1,16 +1,44 @@
 #ifndef GRAPHSEARCH_HPP_INCLUDED
 #define GRAPHSEARCH_HPP_INCLUDED
 
+/**
+ * Generalized implementation of multiple Search Algorithms using the abstraction set up in the
+ * problem section of the code
+ */
+
 #include <algorithm>
 #include <iostream>
 #include <list>
 #include <queue>
 #include <set>
 #include <stack>
+#include <map> // TODO move to unordered map
 
 #include "SearchProblem.hpp"
 
 using namespace std;
+
+template <class StateType, class ActionType>
+class StateComparator {
+private:
+  SearchProblem<StateType, ActionType> *_problem;
+
+public:
+  StateComparator(SearchProblem<StateType, ActionType> *problem) {
+    _problem = problem;
+  }
+
+  bool operator()(StateType &s1, StateType &s2) {
+    double c1 = s1.cost;
+    c1 += _problem->getHeuristicCost(s1);
+
+    double c2 = s2.cost;
+    c2 += _problem->getHeuristicCost(s2);
+
+    return (c1 > c2);
+  }
+};
+
 
 template <class StateType, class ActionType>
 class PathComparator
@@ -133,55 +161,67 @@ public:
     return GenericSearch<StateType, ActionType, std::queue>(problem);
   }
 
+  template <class StateType, class ActionType> static void reconstructPath(Path<StateType, ActionType> &path,
+                  std::map<StateType, std::pair<StateType, ActionType>> &predecessorList,
+                  StateType finalState) {
+    StateType cur_state = finalState;
+    while (predecessorList.find(cur_state) != predecessorList.end()) {
+      auto pair = predecessorList[cur_state];
+      path.addStateActionRev(pair.first, pair.second);
+      cur_state = path.getState(0);
+    }
+    path.setPathCost(finalState.cost);
+  }
+
+
   /** Runs A* graph search on the given search problem */
   template <class StateType, class ActionType>
   static Path<StateType, ActionType> AStar(SearchProblem<StateType, ActionType> &problem,
-                                           void (*expandedCallback)(const StateType &))
-  {
+                                           void (*expandedCallback)(const StateType &), int maxIter) {
     set<StateType> expanded;
-    priority_queue<Path<StateType, ActionType>, vector<Path<StateType, ActionType>>,
-                   PathComparator<StateType, ActionType>>
-        frontier((PathComparator<StateType, ActionType>(&problem)));
+    priority_queue<StateType, vector<StateType>, StateComparator<StateType, ActionType>> frontier(
+        (StateComparator<StateType, ActionType>(&problem)));
 
-    {
-      Path<StateType, ActionType> p;
-      p.addState(problem.getStartState());
-      frontier.push(p);
+    std::map<StateType, std::pair<StateType, ActionType>> predecessorList;
+
+    if(maxIter == 0) {
+      maxIter = std::numeric_limits<int>::max();
     }
+
+    frontier.push(problem.getStartState());
 
     auto iteration = 0;
-    while (!frontier.empty() && iteration < 4000)
-    {
-      Path<StateType, ActionType> path = frontier.top();
+    while (!frontier.empty() && iteration < maxIter) {
+      StateType last = frontier.top();
       frontier.pop();
 
-      auto last = path.getLastState();
-      if (expanded.insert(last).second)  // expanded does not contain path's last state
-      {
-        if (problem.isGoal(last))
-        {
+      if (expanded.insert(last).second) {
+        if (problem.isGoal(last)) {
+          Path<StateType, ActionType> path;
+          reconstructPath(path, predecessorList, last);
           return path;
         }
-        list<ActionType> legalActions = problem.getActions(last, problem.getStartState());
+        list<ActionType> legalActions = problem.getActions(last);
 
-        for (typename list<ActionType>::iterator it = legalActions.begin(); it != legalActions.end(); it++)
-        {
+        for (typename list<ActionType>::iterator it = legalActions.begin();
+             it != legalActions.end(); it++) {
           ActionType action = (*it);
           StateType result = problem.getResult(last, action);
-          Path<StateType, ActionType> newPath(path);
-          newPath.addAction(action);
-          newPath.addState(result);
-          frontier.push(newPath);
+          frontier.push(result);
+          if (!(result == problem.getStartState())) {
+            predecessorList.insert(std::make_pair(result, std::make_pair(last, action)));
+          }
         }
       }
-      iteration++;
       expandedCallback(last);
+      iteration++;
     }
 
-    cout << __func__ << " Error: Could not find a solution after " << iteration << " iterations" << endl;
+    cout << __func__ << " Error: A* Could not find a solution. after " << iteration << " iterations"
+         << endl;
     Path<StateType, ActionType> empty;
     return empty;
   }
-};
 
+};
 #endif  // GRAPHSEARCH_HPP_INCLUDED

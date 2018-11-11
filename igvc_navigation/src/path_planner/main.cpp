@@ -1,5 +1,7 @@
-// convolve over the map
-// update the map based on incremental updates and update the convolve
+/*
+
+ * TODO explain
+ */
 
 #include <cv_bridge/cv_bridge.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -18,7 +20,7 @@
 #include <algorithm>
 #include <mutex>
 #include "GraphSearch.hpp"
-#include "igvcsearchproblemdiscrete.h"
+#include "igvcsearchproblem.h"
 
 ros::Publisher path_pub;
 
@@ -26,7 +28,7 @@ ros::Publisher expanded_pub;
 
 ros::Publisher expanded_size_pub;
 
-IGVCSearchProblemDiscrete search_problem;
+IGVCSearchProblem search_problem;
 
 std::mutex planning_mutex;
 
@@ -100,6 +102,9 @@ int main(int argc, char** argv)
     return 0;
   }
 
+  double rateTime;
+  int maxIter;
+
   pNh.getParam("goal_threshold", search_problem.GoalThreshold);
   pNh.getParam("c_space", search_problem.CSpace);
   pNh.getParam("point_turns_enabled", search_problem.PointTurnsEnabled);
@@ -109,20 +114,26 @@ int main(int argc, char** argv)
   pNh.param(std::string("theta_filter"), search_problem.ThetaFilter, 5.0);
   pNh.param(std::string("max_theta_change"), search_problem.MaxThetaChange, 5.0);
   pNh.param(std::string("theta_change_window"), search_problem.ThetaChangeWindow, 5.0);
+  pNh.param(std::string("heuristic_inflation"), search_problem.HeuristicInflation, 1.2);
+  pNh.param(std::string("maximum_distance"), search_problem.HeuristicInflation, 1.2);
+  pNh.param(std::string("rate"), rateTime, 20.0);
+  pNh.param(std::string("maximum_iterations"), maxIter, 0);
 
-  ros::Rate rate(40.0);
+  ros::Rate rate(rateTime);
   while (ros::ok())
   {
     ros::spinOnce();
 
     auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
-    if (!received_waypoint || distance_to_goal == 0 || distance_to_goal > 60)
+    if (!received_waypoint || distance_to_goal == 0 || distance_to_goal > 60) {
+      ROS_ERROR_STREAM("waypoint too far away: " << distance_to_goal << " meters away");
       continue;
+    }
 
     planning_mutex.lock();
     Path<SearchLocation, SearchMove> path;
     search_problem.DistanceToGoal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
-    path = GraphSearch::AStar(search_problem, expanded_callback);
+    path = GraphSearch::AStar(search_problem, expanded_callback, maxIter);
     nav_msgs::Path path_msg;
     path_msg.header.stamp = ros::Time::now();
     path_msg.header.frame_id = "odom";
