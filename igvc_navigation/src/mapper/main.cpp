@@ -13,6 +13,7 @@
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include "tf/transform_datatypes.h"
+#include <igvc_utils/RobotState.hpp>
 
 igvc_msgs::map msgBoi;  // >> message to be sent
 cv_bridge::CvImage img_bridge;
@@ -29,22 +30,18 @@ std::string topics;
 Eigen::Map<Eigen::Matrix<unsigned char, Eigen::Dynamic, Eigen::Dynamic>> *eigenRep;
 
 double resolution;
-double orientation;
-double _roll;
-double _pitch;
 int start_x;  // start x location
 int start_y;  // start y location
 int length_y;
 int width_x;
 bool debug;
-double cur_x;
-double cur_y;
 bool update = true;
+RobotState state;
 
 std::tuple<double, double> rotate(double x, double y)
 {
-  double newX = x * cos(orientation) - y * sin(orientation);
-  double newY = x * sin(orientation) + y * cos(orientation);
+  double newX = x * cos(state.yaw) - y * sin(state.y);
+  double newY = x * sin(state.y) + y * cos(state.y);
   return (std::make_tuple(newX, newY));
 }
 
@@ -52,15 +49,7 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr &msg)
 {
   if (update)
   {
-    cur_x = msg->pose.pose.position.x;
-    cur_y = msg->pose.pose.position.y;
-    tf::Quaternion quat;
-    tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
-    double roll, pitch, yaw;
-    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-    orientation = yaw;
-    _roll = roll;
-    _pitch = pitch;
+    state.setState(msg);
     update = false;
   }
 }
@@ -109,8 +98,8 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     double x_loc, y_loc;
     std::tie(x_loc, y_loc) = rotate(point->x, point->y);
 
-    int point_x = static_cast<int>(std::round(x_loc / resolution + cur_x / resolution + start_x));
-    int point_y = static_cast<int>(std::round(y_loc / resolution + cur_y / resolution + start_y));
+    int point_x = static_cast<int>(std::round(x_loc / resolution + state.x / resolution + start_x));
+    int point_y = static_cast<int>(std::round(y_loc / resolution + state.y / resolution + start_y));
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
       if (published_map->at<uchar>(point_x, point_y) < 230)
@@ -135,18 +124,18 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   msgBoi.length = length_y;
   msgBoi.width = width_x;
   msgBoi.resolution = resolution;
-  msgBoi.orientation = orientation;
-  ROS_INFO_STREAM("robot location " << std::round(cur_x / resolution) + start_x << ", "
-                                    << std::round(cur_y / resolution) + start_y);
-  msgBoi.x = std::round(cur_x / resolution) + start_x;
-  msgBoi.y = std::round(cur_y / resolution) + start_y;
+  msgBoi.orientation = state.yaw;
+  ROS_INFO_STREAM("robot location " << std::round(state.x) + start_x << ", "
+                                    << std::round(state.y / resolution) + start_y);
+  msgBoi.x = std::round(state.x / resolution) + state.x;
+  msgBoi.y = std::round(state.y / resolution) + state.y;
   msgBoi.x_initial = start_x;
   msgBoi.y_initial = start_y;
   map_pub.publish(msgBoi);
   if (debug)
   {
     debug_pub.publish(imageBoi);
-    // ROS_INFO_STREAM("\nThe robot is located at " << cur_x << "," << cur_y << "," << orientation);
+    // ROS_INFO_STREAM("\nThe robot is located at " << state.x << "," << state.y << "," << orientation);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     for (int i = 0; i < width_x; i++)
@@ -196,7 +185,6 @@ int main(int argc, char **argv)
   pNh.getParam("occupancy_grid_resolution", resolution);
   pNh.getParam("start_X", cont_start_x);
   pNh.getParam("start_Y", cont_start_y);
-  pNh.getParam("orientation", orientation);
   pNh.getParam("debug", debug);
 
   // convert from meters to grid
