@@ -19,7 +19,7 @@
 #include <mutex>
 #include "GraphSearch.hpp"
 #include "igvcsearchproblemdiscrete.h"
-#include <igvc_utils/paramUtils.hpp>
+#include <igvc_utils/NodeUtils.hpp>
 
 ros::Publisher path_pub;
 
@@ -101,11 +101,11 @@ int main(int argc, char** argv)
     return 0;
   }
 
-  igvc::getParam(pNh, "goal_threshold", search_problem.GoalThreshold);
   igvc::getParam(pNh, "c_space", search_problem.CSpace);
-  igvc::getParam(pNh, "point_turns_enabled", search_problem.PointTurnsEnabled);
-  igvc::getParam(pNh, "reverse_enabled", search_problem.ReverseEnabled);
   igvc::getParam(pNh, "probability_threshold", search_problem.ProbabilityThreshold);
+  igvc::param(pNh, "goal_threshold", search_problem.GoalThreshold, 1.0);
+  igvc::param(pNh, "point_turns_enabled", search_problem.PointTurnsEnabled, false);
+  igvc::param(pNh, "reverse_enabled", search_problem.ReverseEnabled, false);
   igvc::param(pNh, "max_jump_size", search_problem.MaxJumpSize, 10.0);
   igvc::param(pNh, "theta_filter", search_problem.ThetaFilter, 5.0);
   igvc::param(pNh, "max_theta_change", search_problem.MaxThetaChange, 5.0);

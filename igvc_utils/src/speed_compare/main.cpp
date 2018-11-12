@@ -3,7 +3,7 @@
 #include <std_msgs/Bool.h>
 #include <chrono>
 #include <fstream>
-#include <igvc_utils/paramUtils.hpp>
+#include <igvc_utils/NodeUtils.hpp>
 
 bool enabled = false;
 bool first = true;

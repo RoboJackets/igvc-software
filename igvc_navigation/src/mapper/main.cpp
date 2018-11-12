@@ -13,7 +13,7 @@
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include "tf/transform_datatypes.h"
-#include <igvc_utils/paramUtils.hpp>
+#include <igvc_utils/NodeUtils.hpp>
 
 igvc_msgs::map msgBoi;  // >> message to be sent
 cv_bridge::CvImage img_bridge;
@@ -183,7 +183,6 @@ int main(int argc, char **argv)
   double cont_start_y;
 
   // assumes all params inputted in meters
-  igvc::getParam(pNh, "topics", topics);
   igvc::getParam(pNh, "topics", topics);
   igvc::getParam(pNh, "occupancy_grid_length", length_y);
   igvc::getParam(pNh, "occupancy_grid_width", width_x);
