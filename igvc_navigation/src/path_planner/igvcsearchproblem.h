@@ -14,6 +14,7 @@
 class IGVCSearchProblem : public SearchProblem<SearchLocation, SearchMove>
 {
 public:
+  // make sure these follow style
   cv_bridge::CvImageConstPtr Map;
   SearchLocation Start;
   SearchLocation Goal;
@@ -23,6 +24,7 @@ public:
   double ProbabilityThreshold;
   bool PointTurnsEnabled;
   bool ReverseEnabled;
+  // TODO distance to goal from start
   double DistanceToGoal;
   double MaxJumpSize;
   double ThetaFilter;

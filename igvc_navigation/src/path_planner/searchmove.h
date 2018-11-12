@@ -1,6 +1,11 @@
 #ifndef SEARCHMOVE_H
 #define SEARCHMOVE_H
 
+/*
+ * Defines an action for the search problem
+ * X,Y are the changes that are anticipated
+ */
+
 #include <iostream>
 #include <limits>
 
