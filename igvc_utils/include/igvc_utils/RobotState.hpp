@@ -37,6 +37,11 @@ public:
     {
       return {x, y, yaw};
     }
+
+    bool operator== (const RobotState& other)
+    {
+      return std::tie(x, y, roll, pitch, yaw) == std::tie(other.x, other.y, other.roll, other.pitch, other.yaw);
+    }
 };
 
 std::ostream &operator<<(std::ostream &out, const RobotState &state)
