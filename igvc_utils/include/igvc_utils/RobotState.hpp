@@ -19,23 +19,23 @@ public:
     RobotState()
     = default;
 
-    RobotState(nav_msgs::Odometry::ConstPtr msg)
+    explicit RobotState(const nav_msgs::Odometry::ConstPtr &msg)
     {
       setState(msg);
     }
 
-    void setState(nav_msgs::Odometry::ConstPtr msg)
+    void setState(const nav_msgs::Odometry::ConstPtr &msg)
     {
       x = msg->pose.pose.position.x;
       y = msg->pose.pose.position.y;
-      tf::Quaternion quat;
-      tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
-      tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
+      tf::Quaternion quaternion;
+      tf::quaternionMsgToTF(msg->pose.pose.orientation, quaternion);
+      tf::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
     }
 
     Eigen::Vector3d getVector3d()
     {
-      return Eigen::Vector3d(x, y, yaw);
+      return {x, y, yaw};
     }
 };
 
