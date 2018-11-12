@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   igvc_msgs
   laser_geometry
   pcl_ros
+  igvc_utils
 )
 
 include_directories(
