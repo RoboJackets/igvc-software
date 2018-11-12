@@ -9,7 +9,10 @@
 
 namespace igvc
 {
-    void resolveError(const std::string &string);
+    void resolveError(const std::string &param_name) {
+      ROS_ERROR_STREAM("Missing parameter " << param_name << "... exiting");
+      exit(EXIT_FAILURE);
+    }
 
     template<class T>
     void param(const ros::NodeHandle pNh, const std::string &param_name, T &param_val, const T &default_val)
@@ -27,10 +30,6 @@ namespace igvc
       }
     }
 
-    void resolveError(const std::string &param_name) {
-      ROS_ERROR_STREAM("Missing parameter " << param_name << "... exiting");
-      exit(EXIT_FAILURE);
-    }
 }
 #endif
 

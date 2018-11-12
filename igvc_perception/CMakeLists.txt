@@ -5,18 +5,18 @@ project(igvc_perception)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-   roscpp
-   rospy
-   std_msgs
-   igvc_msgs
-   image_geometry
-   image_transport
-   cv_bridge
-   camera_info_manager
-   laser_geometry
-   tf
-   pcl_ros
-   igvc_utils
+  roscpp
+  rospy
+  std_msgs
+  igvc_msgs
+  image_geometry
+  image_transport
+  cv_bridge
+  camera_info_manager
+  laser_geometry
+  tf
+  pcl_ros
+  igvc_utils
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -106,9 +106,9 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-        ${catkin_INCLUDE_DIRS}
-        ${PCL_INCLUDE_DIRS}
-        include
+   ${catkin_INCLUDE_DIRS}
+   ${PCL_INCLUDE_DIRS}
+   include
 )
 
 ## Declare a cpp library
@@ -168,8 +168,8 @@ include_directories(
 #############
 
 if (CATKIN_ENABLE_TESTING)
-    find_package(rostest REQUIRED)
-    add_subdirectory(src/tests)
+ find_package(rostest REQUIRED)
+ add_subdirectory(src/tests)
 endif ()
 
 
