@@ -1,5 +1,4 @@
 /*
-
  * TODO explain
  */
 
@@ -30,6 +29,7 @@ ros::Publisher expanded_size_pub;
 
 IGVCSearchProblem search_problem;
 
+
 std::mutex planning_mutex;
 
 bool received_waypoint = false;
@@ -40,6 +40,9 @@ double initial_x, initial_y;
 
 pcl::PointCloud<pcl::PointXYZ> expanded_cloud;
 
+/*
+ * Updates the map used when planning
+ */
 void map_callback(const igvc_msgs::mapConstPtr& msg)
 {
   std::lock_guard<std::mutex> planning_lock(planning_mutex);
@@ -57,15 +60,27 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
   search_problem.Resolution = msg->resolution;
 }
 
+/*
+ * Upates the waypoint position
+ */
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
-{
+{ // TODO we should not be able to plan outside out grid
   std::lock_guard<std::mutex> lock(planning_mutex);
   search_problem.Goal.X = std::round(msg->point.x / search_problem.Resolution) + initial_x;
   search_problem.Goal.Y = std::round(msg->point.y / search_problem.Resolution) + initial_y;
   ROS_INFO_STREAM("Waypoint received. grid cell = " << search_problem.Goal.X << ", " << search_problem.Goal.Y);
+  double distance_to_goal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
+  if(distance_to_goal > 100) {
+    ROS_WARN_STREAM("Planning to waypoint more than 100 meters away: distance = " << distance_to_goal);
+  }
   received_waypoint = true;
 }
 
+
+/*
+ * NOT A ROS CALLBACK
+ * publishes the points that have been expanded for visualization and the size of the expanded points
+ */
 void expanded_callback(const SearchLocation& location)
 {
   expanded_cloud.points.push_back(pcl::PointXYZ((location.X - initial_x) * search_problem.Resolution,
@@ -95,6 +110,7 @@ int main(int argc, char** argv)
 
   expanded_cloud.header.frame_id = "/odom";
 
+  // TODO update to include the new parameters
   if (!pNh.hasParam("goal_threshold") || !pNh.hasParam("c_space") || !pNh.hasParam("point_turns_enabled") ||
       !pNh.hasParam("reverse_enabled") || !pNh.hasParam("probability_threshold"))
   {
@@ -104,18 +120,20 @@ int main(int argc, char** argv)
 
   double rateTime;
   int maxIter;
-
+  // should have parameter for both X and Y c space once orientation is accounted for
+  // TODO units
   pNh.getParam("goal_threshold", search_problem.GoalThreshold);
   pNh.getParam("c_space", search_problem.CSpace);
   pNh.getParam("point_turns_enabled", search_problem.PointTurnsEnabled);
   pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
   pNh.getParam("probability_threshold", search_problem.ProbabilityThreshold);
-  pNh.param(std::string("max_jump_size"), search_problem.MaxJumpSize, 10.0);
+  pNh.param("max_jump_size", search_problem.MaxJumpSize, 10.0);
   pNh.param(std::string("theta_filter"), search_problem.ThetaFilter, 5.0);
+  // TODO what unit is this in??
   pNh.param(std::string("max_theta_change"), search_problem.MaxThetaChange, 5.0);
   pNh.param(std::string("theta_change_window"), search_problem.ThetaChangeWindow, 5.0);
   pNh.param(std::string("heuristic_inflation"), search_problem.HeuristicInflation, 1.2);
-  pNh.param(std::string("maximum_distance"), search_problem.HeuristicInflation, 1.2);
+  pNh.param(std::string("maximum_distance"), search_problem.MaximumDistance, 20.0);
   pNh.param(std::string("rate"), rateTime, 20.0);
   pNh.param(std::string("maximum_iterations"), maxIter, 0);
 
@@ -124,9 +142,8 @@ int main(int argc, char** argv)
   {
     ros::spinOnce();
 
-    auto distance_to_goal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
-    if (!received_waypoint || distance_to_goal == 0 || distance_to_goal > 60) {
-      ROS_ERROR_STREAM("waypoint too far away: " << distance_to_goal << " meters away");
+    // do not plan if you do not have a waypoint
+    if (!received_waypoint) {
       continue;
     }
 
@@ -135,10 +152,11 @@ int main(int argc, char** argv)
     search_problem.DistanceToGoal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
     path = GraphSearch::AStar(search_problem, expanded_callback, maxIter);
     nav_msgs::Path path_msg;
+    // TODO timestamp why
     path_msg.header.stamp = ros::Time::now();
     path_msg.header.frame_id = "odom";
     for (auto loc : *(path.getStates()))
-    {
+      {// publish path with theta for cool viz
       geometry_msgs::PoseStamped pose;
       pose.header.stamp = path_msg.header.stamp;
       pose.header.frame_id = path_msg.header.frame_id;

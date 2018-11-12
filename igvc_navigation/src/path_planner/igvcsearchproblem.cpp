@@ -1,6 +1,9 @@
 #include "igvcsearchproblem.h"
 #include <math.h>
 
+
+// TODO update to include orientation when calculting CSpace
+// TODO what if I jump over an obstacle
 bool IGVCSearchProblem::isActionValid(const SearchMove& move, const SearchLocation& start_state)
 {
   SearchLocation result = getResult(start_state, move);
@@ -17,6 +20,9 @@ bool IGVCSearchProblem::isActionValid(const SearchMove& move, const SearchLocati
   double min_val;
   double max_val;
   double sep = CSpace / Resolution;
+
+  // TODO how does this function worik
+  // implicit cast, TODO check a thing we want to do
   cv::Mat subsection =
       Map->image(cv::Range(max(x - sep, 0.0), min(static_cast<int>(std::round(x + sep)) + 1, Map->image.size().height)),
                  cv::Range(max(y - sep, 0.0), min(static_cast<int>(std::round(y + sep)) + 1, Map->image.size().width)));
@@ -32,7 +38,9 @@ std::list<SearchMove> IGVCSearchProblem::getActions(const SearchLocation& state)
 {
   std::list<SearchMove> acts;
   double theta = state.Theta;
+  // TODO this should not be needed
   double thetaThreshold = 0.1;
+  // TODO is this an issue
   double jump_size = (DistanceToGoal - state.distTo(Goal, Resolution)) / DistanceToGoal;
   if (jump_size > 0.5)
   {

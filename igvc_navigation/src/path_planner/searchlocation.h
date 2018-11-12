@@ -1,6 +1,14 @@
 #ifndef SEARCHLOCATION_H
 #define SEARCHLOCATION_H
 
+/*
+ * Class used to define state for the search problem
+ * X,Y,Theta define the state of the vehicle
+ * PrevTheta is a list of previous theta changes
+ * ThetaChange is the current accumulation of the theta changes
+ * cost is the current path cost at that node
+ */
+
 #include <iostream>
 #include <list>
 
@@ -10,8 +18,6 @@ public:
   std::list<double> PrevTheta;
   double X, Y, Theta, ThetaChange;
   double cost;
-
-  static constexpr double sameness_threshold = 0.005;
 
   SearchLocation()
   {
