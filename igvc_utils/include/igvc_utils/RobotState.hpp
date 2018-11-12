@@ -1,27 +1,26 @@
-//
-// Created by oswinso on 11/11/18.
-//
-
 #ifndef ROBOTSTATE_H
 #define ROBOTSTATE_H
 
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
+#include <Eigen/Dense>
 
 class RobotState
 {
 public:
-    double x, y, roll, pitch, yaw;
-    RobotState()
-    {
-      x = 0;
-      y = 0;
-      roll = 0;
-      pitch = 0;
-      yaw = 0;
-    }
+    double x{0};
+    double y{0};
+    double roll{0};
+    double pitch{0};
+    double yaw{0};
 
-    RobotState(nav_msgs::Odometry::ConstPtr msg) {
+    friend std::ostream &operator<<(std::ostream &out, const RobotState &state);
+
+    RobotState()
+    = default;
+
+    RobotState(nav_msgs::Odometry::ConstPtr msg)
+    {
       setState(msg);
     }
 
@@ -33,6 +32,17 @@ public:
       tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
       tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
     }
+
+    Eigen::Vector3d getVector3d()
+    {
+      return Eigen::Vector3d(x, y, yaw);
+    }
 };
+
+std::ostream &operator<<(std::ostream &out, const RobotState &state)
+{
+  out << "(" << state.x << ", " << state.y << ", " << state.yaw << ")";
+  return out;
+}
 
 #endif //ROBOTSTATE_H

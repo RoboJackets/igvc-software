@@ -125,17 +125,17 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   msgBoi.width = width_x;
   msgBoi.resolution = resolution;
   msgBoi.orientation = state.yaw;
-  ROS_INFO_STREAM("robot location " << std::round(state.x) + start_x << ", "
+  ROS_INFO_STREAM("robot location " << std::round(state.x / resolution) + start_x << ", "
                                     << std::round(state.y / resolution) + start_y);
-  msgBoi.x = std::round(state.x / resolution) + state.x;
-  msgBoi.y = std::round(state.y / resolution) + state.y;
+  msgBoi.x = std::round(state.x / resolution) + start_x;
+  msgBoi.y = std::round(state.y / resolution) + start_y;
   msgBoi.x_initial = start_x;
   msgBoi.y_initial = start_y;
   map_pub.publish(msgBoi);
   if (debug)
   {
     debug_pub.publish(imageBoi);
-    // ROS_INFO_STREAM("\nThe robot is located at " << state.x << "," << state.y << "," << orientation);
+    // ROS_INFO_STREAM("\nThe robot is located at " << state);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
     for (int i = 0; i < width_x; i++)
