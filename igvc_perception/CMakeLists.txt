@@ -5,17 +5,18 @@ project(igvc_perception)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-  igvc_msgs
-  image_geometry
-  image_transport
-  cv_bridge
-  camera_info_manager
-  laser_geometry
-  tf
-  pcl_ros
+   roscpp
+   rospy
+   std_msgs
+   igvc_msgs
+   image_geometry
+   image_transport
+   cv_bridge
+   camera_info_manager
+   laser_geometry
+   tf
+   pcl_ros
+   igvc_utils
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -91,10 +92,10 @@ catkin_python_setup()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES igvc
-#  CATKIN_DEPENDS roscpp std_msgs
-#  DEPENDS system_lib
+        #  INCLUDE_DIRS include
+        #  LIBRARIES igvc
+        #  CATKIN_DEPENDS roscpp std_msgs
+        #  DEPENDS system_lib
 )
 
 ###########
@@ -105,9 +106,9 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS}
-  include
+        ${catkin_INCLUDE_DIRS}
+        ${PCL_INCLUDE_DIRS}
+        include
 )
 
 ## Declare a cpp library
@@ -166,10 +167,10 @@ include_directories(
 ## Testing ##
 #############
 
-if(CATKIN_ENABLE_TESTING)
+if (CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
     add_subdirectory(src/tests)
-endif()
+endif ()
 
 
 add_subdirectory(src/filter_lidar)
