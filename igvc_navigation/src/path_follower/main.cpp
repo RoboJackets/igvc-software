@@ -48,12 +48,14 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     return;
   }
 
+  // get relevant odemetry information from the odom msg
   float cur_x = msg->pose.pose.position.x;
   float cur_y = msg->pose.pose.position.y;
   tf::Quaternion q;
   tf::quaternionMsgToTF(msg->pose.pose.orientation, q);
   float cur_theta = tf::getYaw(q);
 
+  // find the closest starting point along the path.
   float tar_x, tar_y, tar_theta;
   geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
   double path_index = 0;
@@ -71,10 +73,15 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
         get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
   }
 
+  // find furthest point along trajectory that isn't further than the
+  // lookahead distance
+
+
   if (get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist)
   {
     double distance = 0;
     bool cont = true;
+
     while (cont && path_index < path->poses.size() - 1)
     {
       geometry_msgs::Point point1, point2;
@@ -111,17 +118,39 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     tar_y = end.y;
   }
 
-  double yDiff = tar_y - cur_y;
-  double xDiff = tar_x - cur_x;
+  // determining the target theta
+  // get i and j components of vector to target point from current point, a.k.a. line of sight (los)
+  double slope_x = tar_y - cur_y;
+  double slope_y = tar_y - cur_y;
 
-  if (xDiff == 0)
+  Eigen::Vector3d los(slope_x, slope_y, 0); // line of sight
+
+  // get i and j components of target orientation vector (res_orientation)
+  double distance = 0;
+  geometry_msgs::Point point1, point2;
+  int last_point_idx = 0;
+  while (last_point_idx < path->poses.size() - 1)
   {
-    tar_theta = yDiff > 0 ? M_PI : -M_PI;
+    point1 = path->poses[last_point_idx].pose.position;
+    point2 = path->poses[last_point_idx + 1].pose.position;
+    double increment = get_distance(point1.x, point1.y, point2.x, point2.y);
+    if (distance + increment > lookahead_dist) {break;}
+
+    last_point_idx++;
+    distance += increment;
   }
-  else
-  {
-    tar_theta = atan2((yDiff), (xDiff));
-  }
+
+  double pose_x = point2.x - point1.x;
+  double pose_y = point2.y - point1.y;
+
+
+  los.normalize();
+  Eigen::Vector3d res_orientation(pose_x, pose_y, 0); // resultant orientation
+  res_orientation.normalize();
+
+  Eigen::Vector3d delta_orientation = res_orientation - los;
+
+  tar_theta = atan2(delta_orientation[1], delta_orientation[0]);
 
   ros::Time time = ros::Time::now();
 
