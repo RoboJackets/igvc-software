@@ -55,7 +55,7 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   double path_index = 0;
   double closest = std::abs(get_distance(state.x, state.y, path->poses[0].pose.position.x, path->poses[0].pose.position.y));
   double temp = std::abs(
-          get_distance(state.x, state.y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
+      get_distance(state.x, state.y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
   while (path_index < path->poses.size() && temp <= closest)
   {
     if (temp < closest)
@@ -64,7 +64,7 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     }
     path_index++;
     temp = std::abs(
-            get_distance(state.x, state.y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
+        get_distance(state.x, state.y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
   }
 
   if (get_distance(state.x, state.y, end.x, end.y) > lookahead_dist)
