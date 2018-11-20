@@ -40,8 +40,8 @@ RobotState state;
 
 std::tuple<double, double> rotate(double x, double y)
 {
-  double newX = x * cos(state.yaw) - y * sin(state.y);
-  double newY = x * sin(state.y) + y * cos(state.y);
+  double newX = x * cos(state.yaw) - y * sin(state.yaw);
+  double newY = x * sin(state.yaw) + y * cos(state.yaw);
   return (std::make_tuple(newX, newY));
 }
 
