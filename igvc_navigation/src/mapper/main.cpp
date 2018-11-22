@@ -15,6 +15,7 @@
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include "tf/transform_datatypes.h"
+#include <igvc_utils/RobotState.hpp>
 #include <limits.h>
 #include <pcl_conversions/pcl_conversions.h>
 
@@ -23,15 +24,11 @@ cv_bridge::CvImage img_bridge;
 ros::Publisher map_pub;
 ros::Publisher debug_pub;
 ros::Publisher debug_pcl_pub;
-//ros::Subscriber odom_sub;
 std::unique_ptr<cv::Mat> published_map;  // matrix will be publishing
 std::map<std::string, tf::StampedTransform> transforms;
 std::unique_ptr<tf::TransformListener> tf_listener;
 
 double resolution;
-double orientation;
-double _roll;
-double _pitch;
 double transform_max_wait_time;
 int start_x;  // start x location
 int start_y;  // start y location
@@ -40,35 +37,14 @@ int width_x;
 uchar occupancy_grid_threshold;
 int increment_step;
 bool debug;
-//bool update = true;
-
-struct Position
-{
-    double x;
-    double y;
-};
-
-Position robot_pos;
+RobotState state;
 
 std::tuple<double, double> rotate(double x, double y)
 {
-    double newX = x * cos(orientation) - y * sin(orientation);
-    double newY = x * sin(orientation) + y * cos(orientation);
-    return (std::make_tuple(newX, newY));
+  double newX = x * cos(state.yaw) - y * sin(state.yaw);
+  double newY = x * sin(state.yaw) + y * cos(state.yaw);
+  return (std::make_tuple(newX, newY));
 }
-
-//void odom_callback(const nav_msgs::Odometry::ConstPtr &msg)
-//{
-//    robot_pos.x = msg->pose.pose.position.x;
-//    robot_pos.y = msg->pose.pose.position.y;
-//    tf::Quaternion quat;
-//    tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
-//    double roll, pitch, yaw;
-//    tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
-//    orientation = yaw;
-//    _roll = roll;
-//    _pitch = pitch;
-//}
 
 void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
     tf::StampedTransform transform;
@@ -80,13 +56,7 @@ void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
     } catch (tf::TransformException &ex) {
         ROS_ERROR("%s", ex.what());
     }
-    robot_pos.x = transform.getOrigin().x();
-    robot_pos.y = transform.getOrigin().y();
-    double roll, pitch, yaw;
-    tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
-    orientation = yaw;
-    _roll = roll;
-    _pitch = pitch;
+    state.setState(msg);
 }
 
 void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp)
@@ -98,9 +68,9 @@ void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t p
     message.length = length_y;
     message.width = width_x;
     message.resolution = resolution;
-    message.orientation = orientation;
-    message.x = std::round(robot_pos.x / resolution) + start_x;
-    message.y = std::round(robot_pos.y / resolution) + start_y;
+    message.orientation = state.yaw;
+    message.x = std::round(state.x / resolution) + start_x;
+    message.y = std::round(state.y / resolution) + start_y;
     message.x_initial = start_x;
     message.y_initial = start_y;
 }
@@ -115,11 +85,9 @@ void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed)
         double x_point_raw, y_point_raw;
         std::tie(x_point_raw, y_point_raw) = rotate(point_iter->x, point_iter->y);
 
-        int point_x = static_cast<int>(std::round(x_point_raw / resolution + robot_pos.x / resolution + start_x));
-        int point_y = static_cast<int>(std::round(y_point_raw / resolution + robot_pos.y / resolution + start_y));
+        int point_x = static_cast<int>(std::round(x_point_raw / resolution + state.x / resolution + start_x));
+        int point_y = static_cast<int>(std::round(y_point_raw / resolution + state.y / resolution + start_y));
         if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x) {
-            // TODO: Investigate decay, potentially use CV_16U, decrement at a certain rate.
-            // TODO: Potentially change
             if (published_map->at<uchar>(point_x, point_y) <= UCHAR_MAX - (uchar) increment_step) {
                 published_map->at<uchar>(point_x, point_y) += (uchar) increment_step;
             } else {
@@ -200,10 +168,8 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     setMsgValues(message, image, msg->header.stamp);
     map_pub.publish(message);
     if (debug) {
-        ROS_INFO_STREAM("robot location " << std::round(robot_pos.x / resolution) + start_x << ", "
-                                          << std::round(robot_pos.y / resolution) + start_y);
         debug_pub.publish(image);
-        // ROS_INFO_STREAM("\nThe robot is located at " << x_robot << "," << y_robot << "," << orientation);
+        // ROS_INFO_STREAM("\nThe robot is located at " << state);
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
                 pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
         for (int i = 0; i < width_x; i++) {
@@ -223,7 +189,6 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     }
 //  update = true;
 }
-
 
 int main(int argc, char **argv)
 {
@@ -272,9 +237,9 @@ int main(int argc, char **argv)
     // set up tokens and get list of subscribers
     std::istringstream iss(topics);
     std::vector<std::string> tokens{std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>()};
-//    odom_sub = nh.subscribe("/odometry/filtered", 1, odom_callback);
 
-    for (const std::string &topic : tokens) {
+    for (const std::string &topic : tokens)
+    {
         ROS_INFO_STREAM("Mapper subscribing to " << topic);
         subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(topic, 1, boost::bind(frame_callback, _1, topic)));
     }
@@ -286,10 +251,11 @@ int main(int argc, char **argv)
 
     map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
 
-    if (debug) {
-        debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
-        debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
-    }
+  if (debug)
+  {
+    debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
+    debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
+  }
 
-    ros::spin();
+  ros::spin();
 }
