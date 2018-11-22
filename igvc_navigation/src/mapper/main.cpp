@@ -2,22 +2,11 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <igvc_msgs/map.h>
-#include <math.h>
 #include <nav_msgs/Odometry.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
-#include <ros/publisher.h>
-#include <ros/ros.h>
-#include <sensor_msgs/Image.h>
-#include <stdlib.h>
-#include <Eigen/Core>
-#include <opencv2/core/eigen.hpp>
-#include <opencv2/opencv.hpp>
-#include "tf/transform_datatypes.h"
 #include <igvc_utils/RobotState.hpp>
-#include <limits.h>
-#include <pcl_conversions/pcl_conversions.h>
 
 cv_bridge::CvImage img_bridge;
 
@@ -56,7 +45,7 @@ void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
     } catch (tf::TransformException &ex) {
         ROS_ERROR("%s", ex.what());
     }
-    state.setState(msg);
+    state.setState(transform);
 }
 
 void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp)
@@ -245,7 +234,10 @@ int main(int argc, char **argv)
     }
 
     // Timer for map decay
-    ros::Timer timer = nh.createTimer(ros::Duration(decay_period), decayMap);
+    if (decay_period > 0)
+    {
+        ros::Timer timer = nh.createTimer(ros::Duration(decay_period), decayMap);
+    }
 
     published_map = std::unique_ptr<cv::Mat>(new cv::Mat(length_y, width_x, CV_8UC1));
 
