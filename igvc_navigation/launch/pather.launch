@@ -18,6 +18,7 @@
         <param name="theta_filter" type="double" value="1.5"/>
         <param name="max_theta_change" type="double" value="0.8"/>
         <param name="theta_change_window" type="double" value="3.0"/>
+        <param name="maximum_distance" type="double" value="60.0"/>
     </node>
 
     <!-- Follower -->
@@ -26,7 +27,7 @@
         <param name="target_v" type="double" value="0.6"/>
         <param name="axle_length" type="double" value="0.52"/>
         <param name="lookahead_dist" type="double" value="1.8"/>
-        <param name="k1" type="double" value="0.5"/>
+        <param name="k1" type="double" value="0.8"/>
         <param name="k2" type="double" value="1.0"/>
     </node>
 

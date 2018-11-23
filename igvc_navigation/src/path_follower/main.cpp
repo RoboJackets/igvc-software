@@ -22,17 +22,40 @@ SmoothControl controller;
 
 void path_callback(const nav_msgs::PathConstPtr& msg)
 {
-  ROS_INFO("Follower got path");
+  ROS_INFO_STREAM("Follower got path. Size: " << msg->poses.size());
   path = msg;
 }
 
 double get_distance(double x1, double y1, double x2, double y2)
 {
+  /**
+  Calculates euclidian distance between two points
+  */
   return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+}
+
+void computeAngle(float& angle, Eigen::Vector3d vec2, Eigen::Vector3d vec1)
+{
+  /**
+  Computes the egocentric polar angle of vec2 wrt vec1 in 2D, that is:
+    - clockwise: negative
+    - counter-clockwise: positive
+
+  source: https://stackoverflow.com/questions/14066933/direct-way-of-computing-clockwise-angle-between-2-vectors
+  */
+
+  double dot = vec2[0]*vec1[0] + vec2[1]*vec1[1]; // dot product - proportional to cos
+  double det = vec2[0]*vec1[1] - vec2[1]*vec1[0]; // determinant - proportional to sin
+
+  angle = atan2(det, dot);
 }
 
 void position_callback(const nav_msgs::OdometryConstPtr& msg)
 {
+  /**
+  Constructs a new trajectory to follow using the current path msg and publishes
+  the first velocity command from this trajectory.
+  */
   if (path.get() == nullptr)
   {
     return;
@@ -48,20 +71,35 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     return;
   }
 
-  // get relevant odemetry information from the odom msg
+  // Current pose
   float cur_x = msg->pose.pose.position.x;
   float cur_y = msg->pose.pose.position.y;
   tf::Quaternion q;
   tf::quaternionMsgToTF(msg->pose.pose.orientation, q);
-  float cur_theta = tf::getYaw(q);
+  float orientation = tf::getYaw(q);
 
-  // find the closest starting point along the path.
-  float tar_x, tar_y, tar_theta;
+  // target position
+  float tar_x, tar_y;
+
+  /**
+  Find the index of the closest point on the path.
+  */
   geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
   double path_index = 0;
-  double closest = std::abs(get_distance(cur_x, cur_y, path->poses[0].pose.position.x, path->poses[0].pose.position.y));
-  double temp = std::abs(
-      get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
+  double closest = get_distance(
+                       cur_x,
+                       cur_y,
+                       path->poses[0].pose.position.x,
+                       path->poses[0].pose.position.y
+                    );
+
+  double temp = get_distance(
+                    cur_x,
+                    cur_y,
+                    path->poses[path_index].pose.position.x,
+                    path->poses[path_index].pose.position.y
+                );
+
   while (path_index < path->poses.size() && temp <= closest)
   {
     if (temp < closest)
@@ -69,17 +107,22 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
       closest = temp;
     }
     path_index++;
-    temp = std::abs(
-        get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
+    temp = get_distance(
+               cur_x,
+               cur_y,
+               path->poses[path_index].pose.position.x,
+               path->poses[path_index].pose.position.y
+           );
   }
 
-  // find furthest point along trajectory that isn't further than the
-  // lookahead distance
-
-
+  /**
+  Find the furthest point along trajectory that isn't further than the
+  lookahead distance. This is the target position.
+  */
   if (get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist)
   {
-    double distance = 0;
+    double distance = 0; // Eigen::Vector3d init_orientation = los - heading;
+  // cur_theta = orientation - std::atan2(init_orientation[1], init_orientation[0]);
     bool cont = true;
 
     while (cont && path_index < path->poses.size() - 1)
@@ -87,20 +130,23 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
       geometry_msgs::Point point1, point2;
       point1 = path->poses[path_index].pose.position;
       point2 = path->poses[path_index + 1].pose.position;
-      double increment = get_distance(point1.x, point1.y, point2.x, point2.y);
+      double increment = get_distance(
+                            point1.x,
+                            point1.y,
+                            point2.x,
+                            point2.y
+                        );
+
       if (distance + increment > lookahead_dist)
       {
         cont = false;
         Eigen::Vector3d first(point1.x, point1.y, 0);
         Eigen::Vector3d second(point2.x, point2.y, 0);
         Eigen::Vector3d slope = second - first;
-        // ROS_INFO_STREAM("first = " << first[0] << ", " << first[1]);
-        // ROS_INFO_STREAM("slope = " << slope[0] << ", " << slope[1]);
-        // ROS_INFO_STREAM("look = " << lookahead_dist << " dista = " << distance);
-        // ROS_INFO_STREAM("increment = " << increment << " look - dist = " << (distance - lookahead_dist) + increment);
+
         slope /= increment;
         slope *= (distance - lookahead_dist) + increment;
-        // ROS_INFO_STREAM("slope2 = " << slope[0] << ", " << slope[1]);
+
         slope += first;
         tar_x = slope[0];
         tar_y = slope[1];
@@ -118,42 +164,74 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     tar_y = end.y;
   }
 
-  // determining the target theta
-  // get i and j components of vector to target point from current point, a.k.a. line of sight (los)
-  double slope_x = tar_y - cur_y;
+  /**
+  Calculate the line of sight (los) from the robot to the target position in
+  vector format.
+  */
+  double slope_x = tar_x - cur_x;
   double slope_y = tar_y - cur_y;
 
   Eigen::Vector3d los(slope_x, slope_y, 0); // line of sight
+  los.normalize();
 
+  /**
+  Calculate cur_theta, the angle between the los and the current robot heading,
+  adjusted for the robot's current orientation in space.
+  */
+  // get current robot heading in vector format
+  Eigen::Vector3d heading(std::cos(orientation), std::sin(orientation), 0);
+
+  float cur_theta;
+  computeAngle(cur_theta, los, heading);
+  // cur_theta = orientation - cur_theta;
+
+  // Eigen::Vector3d init_orientation = los - heading;
+  // cur_theta = orientation - std::atan2(init_orientation[1], init_orientation[0]);
+
+
+  /**
+  Calculate target theta (tar_theta), the angle between the los and the target
+  pose, adjusted for the robot's current orientation in space.
+  */
   // get i and j components of target orientation vector (res_orientation)
   double distance = 0;
   geometry_msgs::Point point1, point2;
-  int last_point_idx = 0;
-  while (last_point_idx < path->poses.size() - 1)
+  unsigned int path_idx = 0;
+  while (path_idx < path->poses.size() - 1)
   {
-    point1 = path->poses[last_point_idx].pose.position;
-    point2 = path->poses[last_point_idx + 1].pose.position;
-    double increment = get_distance(point1.x, point1.y, point2.x, point2.y);
-    if (distance + increment > lookahead_dist) {break;}
+    point1 = path->poses[path_idx].pose.position;
+    point2 = path->poses[path_idx + 1].pose.position;
+    double increment = get_distance(
+                            point1.x,
+                            point1.y,
+                            point2.x,
+                            point2.y
+                        );
 
-    last_point_idx++;
+    if (distance + increment > lookahead_dist) { break; }
+
+    path_idx++;
     distance += increment;
   }
 
   double pose_x = point2.x - point1.x;
   double pose_y = point2.y - point1.y;
 
+  Eigen::Vector3d tar_orientation(pose_x, pose_y, 0); // target orientation
+  tar_orientation.normalize();
 
-  los.normalize();
-  Eigen::Vector3d res_orientation(pose_x, pose_y, 0); // resultant orientation
-  res_orientation.normalize();
+  float tar_theta;
+  computeAngle(tar_theta, los, tar_orientation);
+  // tar_theta = cur_theta + tar_theta
 
-  Eigen::Vector3d delta_orientation = res_orientation - los;
+  // Eigen::Vector3d delta_orientation = tar_orientation - los;
+  // tar_theta = orientation - atan2(delta_orientation[1], delta_orientation[0]);
 
-  tar_theta = atan2(delta_orientation[1], delta_orientation[0]);
+  ROS_INFO_STREAM("Orientation:" << orientation << " DELTA: " << cur_theta << " THETA: " << tar_theta);
 
   ros::Time time = ros::Time::now();
 
+  // publish target position
   geometry_msgs::PointStamped target_point;
   target_point.header.frame_id = "/odom";
   target_point.header.stamp = time;
@@ -161,26 +239,38 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   target_point.point.y = tar_y;
   target_pub.publish(target_point);
 
+  /**
+  Obtain smooth control law from the controller. This includes a smooth
+  trajectory for visualization purposes and an immediate velocity command.
+  */
   igvc_msgs::velocity_pair vel;
   vel.header.stamp = time;
 
   nav_msgs::Path trajectory_msg;
-  trajectory_msg.header.stamp = ros::Time::now();
+  trajectory_msg.header.stamp = time;
   trajectory_msg.header.frame_id = "/odom";
 
   Eigen::Vector3d cur_pos(cur_x, cur_y, cur_theta);
   Eigen::Vector3d target(tar_x, tar_y, tar_theta);
   controller.getTrajectory(vel, trajectory_msg, cur_pos, target);
 
-  ROS_INFO_STREAM("distance = " << get_distance(tar_x, tar_y, cur_x, cur_y));
+  ROS_INFO_STREAM("Distance: "
+                  << get_distance(tar_x, tar_y, cur_x, cur_y)
+                  << "m.");
 
-  if (vel.right_velocity > maximum_vel || vel.left_velocity > maximum_vel)
+  // make sure maximum velocity not exceeded
+  if (std::max(vel.right_velocity, vel.left_velocity) > maximum_vel)
   {
-    ROS_ERROR_STREAM("Large velocity output stopping " << vel.right_velocity << ", " << vel.left_velocity);
+    ROS_ERROR_STREAM("Maximum velocity exceeded. Right: "
+                            << vel.right_velocity
+                            << ", Left: "
+                            << vel.left_velocity
+                            << ", Max: "
+                            << maximum_vel
+                            << "Stopping robot...");
     vel.right_velocity = 0;
     vel.left_velocity = 0;
   }
-  // ROS_INFO_STREAM("target " << tar_x << " " << tar_y << "\n");
 
   cmd_pub.publish(vel);
   trajectory_pub.publish(trajectory_msg);
