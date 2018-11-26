@@ -26,11 +26,13 @@ public:
   double v;
 
   void getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path& trajectory,
-        Eigen::Vector3d cur_pos, Eigen::Vector3d target);
+        Eigen::Vector3d cur_pos, Eigen::Vector3d target, Eigen::Vector2d egocentric_heading);
 
 private:
-  void getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, Eigen::Vector3d target);
-  void getResult(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, Eigen::Vector3d action);
+  void getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos,
+        Eigen::Vector3d target, Eigen::Vector2d egocentric_heading);
+  void getResult(Eigen::Vector3d& result, Eigen::Vector2d& egocentric_heading,
+        Eigen::Vector3d cur_pos, Eigen::Vector3d action);
   void fitToPolar(double& angle);
 };
 #endif

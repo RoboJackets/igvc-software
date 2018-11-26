@@ -1,13 +1,13 @@
 #include "SmoothControl.h"
 
 void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path& trajectory,
-        Eigen::Vector3d cur_pos, Eigen::Vector3d target)
+        Eigen::Vector3d cur_pos, Eigen::Vector3d target, Eigen::Vector2d egocentric_heading)
 {
   double dt = rollOutTime / 10;
   for (int i = 0; i < 15; i++)
   {
     Eigen::Vector3d action;
-    getAction(action, cur_pos, target);
+    getAction(action, cur_pos, target, egocentric_heading);
     action[2] = dt;
 
     if (i == 0)
@@ -17,7 +17,7 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path&
     }
 
     Eigen::Vector3d end_pos;
-    getResult(end_pos, cur_pos, action);
+    getResult(end_pos, egocentric_heading, cur_pos, action);
 
     if (i == 0)
     {
@@ -35,16 +35,19 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path&
   }
 }
 
-void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, Eigen::Vector3d target)
+void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos,
+        Eigen::Vector3d target, Eigen::Vector2d egocentric_heading)
 {
   /**
   Computes the radius of curvature to obtain a new angular velocity value.
+
+
   */
-  double delta = cur_pos[2], theta = target[2];
+  double delta = egocentric_heading[0], theta = egocentric_heading[1];
 
   // adjust both angles to lie between -PI and PI
-  // fitToPolar(delta);
-  // fitToPolar(theta);
+  fitToPolar(delta);
+  fitToPolar(theta);
 
   // calculate the radius of curvature, K
   double d = sqrt(pow(target[0] - cur_pos[0], 2) + pow(target[1] - cur_pos[1], 2));
@@ -58,8 +61,8 @@ void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos, 
   result[1] = w;
 }
 
-void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector3d cur_pos,
-            Eigen::Vector3d action)
+void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector2d& egocentric_heading,
+        Eigen::Vector3d cur_pos, Eigen::Vector3d action)
 {
   /**
   Obtains the resultant pose given the current velocity and angular velocity command.
@@ -80,6 +83,7 @@ void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector3d cur_pos,
     Vector3d a(cur_pos[0] - ICCx, cur_pos[1] - ICCy, cur_pos[2]);
     Vector3d b = T * a;
     Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
+    egocentric_heading[0] += wdt; // update delta
 
     result[0] = c[0];
     result[1] = c[1];
