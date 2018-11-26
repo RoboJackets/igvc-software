@@ -34,7 +34,7 @@ double get_distance(double x1, double y1, double x2, double y2)
   return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
-void computeAngle(float& angle, Eigen::Vector3d vec2, Eigen::Vector3d vec1)
+void compute_angle(float& angle, Eigen::Vector3d vec2, Eigen::Vector3d vec1)
 {
   /**
   Computes the egocentric polar angle of vec2 wrt vec1 in 2D, that is:
@@ -181,13 +181,9 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   // get current robot heading in vector format
   Eigen::Vector3d heading(std::cos(orientation), std::sin(orientation), 0);
 
+  //get egocentric polar angle of los relative to heading
   float cur_theta;
-  computeAngle(cur_theta, los, heading);
-  // cur_theta = orientation - cur_theta;
-
-  // Eigen::Vector3d init_orientation = los - heading;
-  // cur_theta = orientation - std::atan2(init_orientation[1], init_orientation[0]);
-
+  compute_angle(cur_theta, los, heading);
 
   /**
   Calculate target theta (tar_theta), the angle between the los and the target
@@ -220,14 +216,9 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   Eigen::Vector3d tar_orientation(pose_x, pose_y, 0); // target orientation
   tar_orientation.normalize();
 
+  // get egocentric polar angle of los relative to target orientation
   float tar_theta;
-  computeAngle(tar_theta, los, tar_orientation);
-  // tar_theta = cur_theta + tar_theta
-
-  // Eigen::Vector3d delta_orientation = tar_orientation - los;
-  // tar_theta = orientation - atan2(delta_orientation[1], delta_orientation[0]);
-
-  ROS_INFO_STREAM("Orientation:" << orientation << " DELTA: " << cur_theta << " THETA: " << tar_theta);
+  compute_angle(tar_theta, los, tar_orientation);
 
   ros::Time time = ros::Time::now();
 
@@ -250,9 +241,12 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   trajectory_msg.header.stamp = time;
   trajectory_msg.header.frame_id = "/odom";
 
-  Eigen::Vector3d cur_pos(cur_x, cur_y, cur_theta);
-  Eigen::Vector3d target(tar_x, tar_y, tar_theta);
-  controller.getTrajectory(vel, trajectory_msg, cur_pos, target);
+  Eigen::Vector3d cur_pos(cur_x, cur_y, orientation);
+  Eigen::Vector3d target(tar_x, tar_y, orientation - cur_theta + tar_theta);
+
+  Eigen::Vector2d egocentric_heading(cur_theta, tar_theta);
+
+  controller.getTrajectory(vel, trajectory_msg, cur_pos, target, egocentric_heading);
 
   ROS_INFO_STREAM("Distance: "
                   << get_distance(tar_x, tar_y, cur_x, cur_y)

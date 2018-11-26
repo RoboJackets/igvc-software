@@ -197,7 +197,7 @@ Visualization Manager:
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.05000000074505806
+      Size (m): 0.10000000149011612
       Style: Flat Squares
       Topic: /map_debug_pcl
       Unreliable: false
@@ -252,25 +252,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 31.93840789794922
+      Distance: 23.002674102783203
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.6911298632621765
-        Y: 19.52309226989746
-        Z: -10.225789070129395
+        X: -0.7615700960159302
+        Y: 7.300470352172852
+        Z: -5.000775337219238
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.16520357131958
+      Pitch: 1.5597963333129883
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.4703984260559082
+      Yaw: 1.300398588180542
     Saved:
       - Class: rviz/Orbit
         Distance: 10.23285961151123
