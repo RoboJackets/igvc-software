@@ -40,9 +40,9 @@ void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos,
 {
   /**
   Computes the radius of curvature to obtain a new angular velocity value.
-
-
   */
+
+  // get egocentric polar coordinates for delta and theta
   double delta = egocentric_heading[0], theta = egocentric_heading[1];
 
   // adjust both angles to lie between -PI and PI
@@ -66,6 +66,10 @@ void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector2d& egocentr
 {
   /**
   Obtains the resultant pose given the current velocity and angular velocity command.
+  Makes extensive use of differential drive odometry equations to calculate resultant
+  pose
+
+  Source: http://www8.cs.umu.se/kurser/5DV122/HT13/material/Hellstrom-ForwardKinematics.pdf
   */
   double v = action[0];
   double w = action[1];
@@ -73,9 +77,11 @@ void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector2d& egocentr
 
   if (std::abs(w) > 1e-10)
   {
+    // calculate instantaneous center of curvature
     double R = v / w;
     double ICCx = cur_pos[0] - (R * sin(cur_pos[2]));
     double ICCy = cur_pos[1] + (R * cos(cur_pos[2]));
+
     using namespace Eigen;
     Matrix3d T;
     double wdt = w * dt;
@@ -83,6 +89,7 @@ void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector2d& egocentr
     Vector3d a(cur_pos[0] - ICCx, cur_pos[1] - ICCy, cur_pos[2]);
     Vector3d b = T * a;
     Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
+
     egocentric_heading[0] += wdt; // update delta
 
     result[0] = c[0];
