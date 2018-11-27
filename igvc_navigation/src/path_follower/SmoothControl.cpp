@@ -90,6 +90,8 @@ void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector2d& egocentr
     Vector3d b = T * a;
     Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
 
+
+    // TODO correct delta and theta updates to implement same heading calculation as in path_follower
     egocentric_heading[0] += wdt; // update delta
 
     result[0] = c[0];
