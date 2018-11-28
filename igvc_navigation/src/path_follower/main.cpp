@@ -26,36 +26,37 @@ void path_callback(const nav_msgs::PathConstPtr& msg)
   path = msg;
 }
 
+/**
+Calculates euclidian distance between two points
+*/
 double get_distance(double x1, double y1, double x2, double y2)
 {
-  /**
-  Calculates euclidian distance between two points
-  */
+
   return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
+/**
+Computes the egocentric polar angle of vec2 wrt vec1 in 2D, that is:
+  - clockwise: negative
+  - counter-clockwise: positive
+
+source: https://stackoverflow.com/questions/14066933/direct-way-of-computing-clockwise-angle-between-2-vectors
+*/
 void compute_angle(float& angle, Eigen::Vector3d vec2, Eigen::Vector3d vec1)
 {
-  /**
-  Computes the egocentric polar angle of vec2 wrt vec1 in 2D, that is:
-    - clockwise: negative
-    - counter-clockwise: positive
-
-  source: https://stackoverflow.com/questions/14066933/direct-way-of-computing-clockwise-angle-between-2-vectors
-  */
-
   double dot = vec2[0]*vec1[0] + vec2[1]*vec1[1]; // dot product - proportional to cos
   double det = vec2[0]*vec1[1] - vec2[1]*vec1[0]; // determinant - proportional to sin
 
   angle = atan2(det, dot);
 }
 
+
+/**
+Constructs a new trajectory to follow using the current path msg and publishes
+the first velocity command from this trajectory.
+*/
 void position_callback(const nav_msgs::OdometryConstPtr& msg)
 {
-  /**
-  Constructs a new trajectory to follow using the current path msg and publishes
-  the first velocity command from this trajectory.
-  */
   if (path.get() == nullptr)
   {
     return;
@@ -77,6 +78,8 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   tf::Quaternion q;
   tf::quaternionMsgToTF(msg->pose.pose.orientation, q);
   float orientation = tf::getYaw(q);
+
+  Eigen::Vector3d cur_pos(cur_x, cur_y, orientation);
 
   // target position
   float tar_x, tar_y;
@@ -121,8 +124,7 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   */
   if (get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist)
   {
-    double distance = 0; // Eigen::Vector3d init_orientation = los - heading;
-  // cur_theta = orientation - std::atan2(init_orientation[1], init_orientation[0]);
+    double distance = 0;
     bool cont = true;
 
     while (cont && path_index < path->poses.size() - 1)
@@ -176,7 +178,6 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
 
   /**
   Calculate cur_theta, the angle between the los and the current robot heading,
-  adjusted for the robot's current orientation in space.
   */
   // get current robot heading in vector format
   Eigen::Vector3d heading(std::cos(orientation), std::sin(orientation), 0);
@@ -241,7 +242,6 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   trajectory_msg.header.stamp = time;
   trajectory_msg.header.frame_id = "/odom";
 
-  Eigen::Vector3d cur_pos(cur_x, cur_y, orientation);
   Eigen::Vector3d target(tar_x, tar_y, orientation - cur_theta + tar_theta);
 
   Eigen::Vector2d egocentric_heading(cur_theta, tar_theta);
@@ -282,7 +282,7 @@ int main(int argc, char** argv)
   pNh.param(std::string("k1"), controller.k1, 1.0);
   pNh.param(std::string("k2"), controller.k2, 3.0);
   pNh.param(std::string("roll_out_time"), controller.rollOutTime, 2.0);
-  pNh.param(std::string("lookahead_dist"), lookahead_dist, 2.0);
+  pNh.param(std::string("lookahead_dist"), controller.lookahead_dist, 2.0);
   pNh.param(std::string("maximum_vel"), maximum_vel, 1.6);
 
   ros::Subscriber path_sub = nh.subscribe("/path", 1, path_callback);
