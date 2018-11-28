@@ -1,51 +1,51 @@
 #include "SmoothControl.h"
 
-void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path& trajectory,
-        Eigen::Vector3d cur_pos, Eigen::Vector3d target, Eigen::Vector2d egocentric_heading)
-{
-  double dt = rollOutTime / 10;
-  for (int i = 0; i < 15; i++)
-  {
-    Eigen::Vector3d action;
-    getAction(action, cur_pos, target, egocentric_heading);
-    action[2] = dt;
-
-    if (i == 0)
-    {
-      vel.left_velocity = action[0] - action[1] * axle_length / 2;
-      vel.right_velocity = action[0] + action[1] * axle_length / 2;
-    }
-
-    Eigen::Vector3d end_pos;
-    getResult(end_pos, egocentric_heading, cur_pos, action);
-
-    if (i == 0)
-    {
-      geometry_msgs::PoseStamped start;
-      start.pose.position.x = cur_pos[0];
-      start.pose.position.y = cur_pos[1];
-      trajectory.poses.push_back(start);
-    }
-
-    geometry_msgs::PoseStamped pose;
-    pose.pose.position.x = end_pos[0];
-    pose.pose.position.y = end_pos[1];
-    trajectory.poses.push_back(pose);
-    cur_pos = end_pos;
-  }
-}
+// void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path& trajectory,
+//         Eigen::Vector3d cur_pos, Eigen::Vector3d target, Eigen::Vector2d egocentric_heading)
+// {
+//   double dt = rollOutTime / 10;
+//   for (int i = 0; i < 15; i++)
+//   {
+//     Eigen::Vector3d action;
+//     getAction(action, cur_pos, target, egocentric_heading);
+//     action[2] = dt;
+//
+//     if (i == 0)
+//     {
+//       vel.left_velocity = action[0] - action[1] * axle_length / 2;
+//       vel.right_velocity = action[0] + action[1] * axle_length / 2;
+//     }
+//
+//     Eigen::Vector3d end_pos;
+//     getResult(end_pos, egocentric_heading, cur_pos, action);
+//
+    // if (i == 0)
+    // {
+    //   geometry_msgs::PoseStamped start;
+    //   start.pose.position.x = cur_pos[0];
+    //   start.pose.position.y = cur_pos[1];
+    //   trajectory.poses.push_back(start);
+    // }
+//
+    // geometry_msgs::PoseStamped pose;
+    // pose.pose.position.x = end_pos[0];
+    // pose.pose.position.y = end_pos[1];
+    // trajectory.poses.push_back(pose);
+    // cur_pos = end_pos;
+//   }
+// }
 
 void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathConstPtr path,
     nav_msgs::Path& trajectory, Eigen::Vector3d cur_pos)
 {
     this->cur_pos << cur_pos;
 
-    // TODO: Create intiialize method
-    double pathIndex;
-    pathIndex = getClosestPosition(path);
+    // TODO: Create initialize_variables() method
+    int path_index;
+    path_index = getClosestPosition(path);
     getTargetPosition(path, path_index);
     getLineOfSightAndHeading();
-    getEgocentricAngles(path);
+    getEgocentricAngles(path, path_index);
 
     double dt = rollOutTime/10;
 
@@ -57,10 +57,77 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
 
         if (i == 0)
         {
-          vel.left_velocity = action[0] - action[1] * axle_length / 2;
-          vel.right_velocity = action[0] + action[1] * axle_length / 2;
+            geometry_msgs::PoseStamped start;
+            start.pose.position.x = cur_pos[0];
+            start.pose.position.y = cur_pos[1];
+            trajectory.poses.push_back(start);
+
+            vel.left_velocity = action[0] - action[1] * axle_length / 2;
+            vel.right_velocity = action[0] + action[1] * axle_length / 2;
         }
+
+        getResult(path, action);
+
+        geometry_msgs::PoseStamped pose;
+        pose.pose.position.x = cur_pos[0];
+        pose.pose.position.y = cur_pos[1];
+        trajectory.poses.push_back(pose);
     }
+}
+
+
+/**
+Obtains the resultant pose given the current velocity and angular velocity command.
+Makes extensive use of differential drive odometry equations to calculate resultant
+pose
+
+Source: http://www8.cs.umu.se/kurser/5DV122/HT13/material/Hellstrom-ForwardKinematics.pdf
+
+update cur_pos, cur_theta, and tar_theta to reflect `action`'s impact
+*/
+void SmoothControl::getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d action)
+{
+    double v = action[0];
+    double w = action[1];
+    double dt = action[2];
+
+    if (std::abs(w) > 1e-10)
+    {
+      // calculate instantaneous center of curvature
+      double R = v / w;
+      double ICCx = cur_pos[0] - (R * sin(cur_pos[2]));
+      double ICCy = cur_pos[1] + (R * cos(cur_pos[2]));
+
+      using namespace Eigen;
+      Matrix3d T;
+      double wdt = w * dt;
+      T << cos(wdt), -sin(wdt), 0, sin(wdt), cos(wdt), 0, 0, 0, 1;
+      Vector3d a(cur_pos[0] - ICCx, cur_pos[1] - ICCy, cur_pos[2]);
+      Vector3d b = T * a;
+      Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
+      // // TODO correct delta and theta updates to implement same heading calculation as in path_follower
+      // egocentric_heading[0] += wdt; // update delta
+
+      // update current pose
+      fitToPolar(c[2]);
+      cur_pos[0] = c[0];
+      cur_pos[1] = c[1];
+      cur_pos[2] = c[2];
+
+
+    }
+    else
+    {
+      cur_pos[0] = cur_pos[0] + (cos(cur_pos[2]) * v * dt);
+      cur_pos[1] = cur_pos[1] + (sin(cur_pos[2]) * v * dt);
+      cur_pos[2] = cur_pos[2];
+    }
+
+    int path_index = getClosestPosition(path);
+    getTargetPosition(path, path_index);
+    getLineOfSightAndHeading();
+    getEgocentricAngles(path, path_index);
+
 }
 
 void SmoothControl::getAction(Eigen::Vector3d& result)
@@ -90,7 +157,7 @@ Calculate cur_theta, the angle between the los and the current robot heading.
 Calculate target theta (tar_theta), the angle between the los and the target
 pose.
 */
-void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path)
+void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path, int path_index)
 {
     //get egocentric polar angle of los relative to heading
     float cur_theta;
@@ -100,11 +167,10 @@ void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path)
     // get i and j components of target orientation vector (res_orientation)
     double distance = 0;
     geometry_msgs::Point point1, point2;
-    int path_idx = 0;
-    while (path_idx < path->poses.size() - 1)
+    while (path_index < path->poses.size() - 1)
     {
-      point1 = path->poses[path_idx].pose.position;
-      point2 = path->poses[path_idx + 1].pose.position;
+      point1 = path->poses[path_index].pose.position;
+      point2 = path->poses[path_index + 1].pose.position;
       double increment = get_distance(
                               point1.x,
                               point1.y,
@@ -114,7 +180,7 @@ void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path)
 
       if (distance + increment > lookahead_dist) { break; }
 
-      path_idx++;
+      path_index++;
       distance += increment;
     }
 
@@ -155,7 +221,7 @@ void SmoothControl::getLineOfSightAndHeading()
 Find the furthest point along trajectory that isn't further than the
 lookahead distance. This is the target position.
 */
-void SmoothControl::getTargetPosition(nav_msgs::PathConstPtr path, double path_index)
+void SmoothControl::getTargetPosition(nav_msgs::PathConstPtr path, int path_index)
 {
     // target position
     float tar_x, tar_y;
@@ -252,27 +318,27 @@ int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
 /**
 Computes the radius of curvature to obtain a new angular velocity value.
 */
-void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos,
-        Eigen::Vector3d target, Eigen::Vector2d egocentric_heading)
-{
-  // get egocentric polar coordinates for delta and theta
-  double delta = egocentric_heading[0], theta = egocentric_heading[1];
-
-  // adjust both angles to lie between -PI and PI
-  fitToPolar(delta);
-  fitToPolar(theta);
-
-  // calculate the radius of curvature, K
-  double d = sqrt(pow(target[0] - cur_pos[0], 2) + pow(target[1] - cur_pos[1], 2));
-  double K = k2 * (delta - atan(-k1 * theta));
-  K += (1 + (k1 / (1 + pow(k1 * theta, 2)))) * sin(delta);
-  K /= -d;
-
-  // calculate angular velocity using radius of curvature
-  double w = K * v;
-  result[0] = v;
-  result[1] = w;
-}
+// void SmoothControl::getAction(Eigen::Vector3d& result, Eigen::Vector3d cur_pos,
+//         Eigen::Vector3d target, Eigen::Vector2d egocentric_heading)
+// {
+//   // get egocentric polar coordinates for delta and theta
+//   double delta = egocentric_heading[0], theta = egocentric_heading[1];
+//
+//   // adjust both angles to lie between -PI and PI
+//   fitToPolar(delta);
+//   fitToPolar(theta);
+//
+//   // calculate the radius of curvature, K
+//   double d = sqrt(pow(target[0] - cur_pos[0], 2) + pow(target[1] - cur_pos[1], 2));
+//   double K = k2 * (delta - atan(-k1 * theta));
+//   K += (1 + (k1 / (1 + pow(k1 * theta, 2)))) * sin(delta);
+//   K /= -d;
+//
+//   // calculate angular velocity using radius of curvature
+//   double w = K * v;
+//   result[0] = v;
+//   result[1] = w;
+// }
 
 /**
 Obtains the resultant pose given the current velocity and angular velocity command.
@@ -281,45 +347,45 @@ pose
 
 Source: http://www8.cs.umu.se/kurser/5DV122/HT13/material/Hellstrom-ForwardKinematics.pdf
 */
-void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector2d& egocentric_heading,
-        Eigen::Vector3d cur_pos, Eigen::Vector3d action)
-{
-  double v = action[0];
-  double w = action[1];
-  double dt = action[2];
-
-  if (std::abs(w) > 1e-10)
-  {
-    // calculate instantaneous center of curvature
-    double R = v / w;
-    double ICCx = cur_pos[0] - (R * sin(cur_pos[2]));
-    double ICCy = cur_pos[1] + (R * cos(cur_pos[2]));
-
-    using namespace Eigen;
-    Matrix3d T;
-    double wdt = w * dt;
-    T << cos(wdt), -sin(wdt), 0, sin(wdt), cos(wdt), 0, 0, 0, 1;
-    Vector3d a(cur_pos[0] - ICCx, cur_pos[1] - ICCy, cur_pos[2]);
-    Vector3d b = T * a;
-    Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
-
-
-    // TODO correct delta and theta updates to implement same heading calculation as in path_follower
-    egocentric_heading[0] += wdt; // update delta
-
-    result[0] = c[0];
-    result[1] = c[1];
-    result[2] = c[2];
-
-    fitToPolar(result[2]);
-  }
-  else
-  {
-    result[0] = cur_pos[0] + (cos(cur_pos[2]) * v * dt);
-    result[1] = cur_pos[1] + (sin(cur_pos[2]) * v * dt);
-    result[2] = cur_pos[2];
-  }
-}
+// void SmoothControl::getResult(Eigen::Vector3d& result, Eigen::Vector2d& egocentric_heading,
+//         Eigen::Vector3d cur_pos, Eigen::Vector3d action)
+// {
+//   double v = action[0];
+//   double w = action[1];
+//   double dt = action[2];
+//
+//   if (std::abs(w) > 1e-10)
+//   {
+//     // calculate instantaneous center of curvature
+//     double R = v / w;
+//     double ICCx = cur_pos[0] - (R * sin(cur_pos[2]));
+//     double ICCy = cur_pos[1] + (R * cos(cur_pos[2]));
+//
+//     using namespace Eigen;
+//     Matrix3d T;
+//     double wdt = w * dt;
+//     T << cos(wdt), -sin(wdt), 0, sin(wdt), cos(wdt), 0, 0, 0, 1;
+//     Vector3d a(cur_pos[0] - ICCx, cur_pos[1] - ICCy, cur_pos[2]);
+//     Vector3d b = T * a;
+//     Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
+//
+//
+//     // TODO correct delta and theta updates to implement same heading calculation as in path_follower
+//     egocentric_heading[0] += wdt; // update delta
+//
+//     result[0] = c[0];
+//     result[1] = c[1];
+//     result[2] = c[2];
+//
+//     fitToPolar(result[2]);
+//   }
+//   else
+//   {
+//     result[0] = cur_pos[0] + (cos(cur_pos[2]) * v * dt);
+//     result[1] = cur_pos[1] + (sin(cur_pos[2]) * v * dt);
+//     result[2] = cur_pos[2];
+//   }
+// }
 
 /* TODO: move these methods into NodeUtils */
 
