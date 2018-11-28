@@ -79,157 +79,159 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   tf::quaternionMsgToTF(msg->pose.pose.orientation, q);
   float orientation = tf::getYaw(q);
 
-  Eigen::Vector3d cur_pos(cur_x, cur_y, orientation);
+
 
   // target position
-  float tar_x, tar_y;
+  // float tar_x, tar_y;
 
   /**
   Find the index of the closest point on the path.
   */
-  geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
-  double path_index = 0;
-  double closest = get_distance(
-                       cur_x,
-                       cur_y,
-                       path->poses[0].pose.position.x,
-                       path->poses[0].pose.position.y
-                    );
-
-  double temp = get_distance(
-                    cur_x,
-                    cur_y,
-                    path->poses[path_index].pose.position.x,
-                    path->poses[path_index].pose.position.y
-                );
-
-  while (path_index < path->poses.size() && temp <= closest)
-  {
-    if (temp < closest)
-    {
-      closest = temp;
-    }
-    path_index++;
-    temp = get_distance(
-               cur_x,
-               cur_y,
-               path->poses[path_index].pose.position.x,
-               path->poses[path_index].pose.position.y
-           );
-  }
+  // geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
+  // double path_index = 0;
+  // double closest = get_distance(
+  //                      cur_x,
+  //                      cur_y,
+  //                      path->poses[0].pose.position.x,
+  //                      path->poses[0].pose.position.y
+  //                   );
+  //
+  // double temp = get_distance(
+  //                   cur_x,
+  //                   cur_y,
+  //                   path->poses[path_index].pose.position.x,
+  //                   path->poses[path_index].pose.position.y
+  //               );
+  //
+  // while (path_index < path->poses.size() && temp <= closest)
+  // {
+  //   if (temp < closest)
+  //   {
+  //     closest = temp;
+  //   }
+  //   path_index++;
+  //   temp = get_distance(
+  //              cur_x,
+  //              cur_y,
+  //              path->poses[path_index].pose.position.x,
+  //              path->poses[path_index].pose.position.y
+  //          );
+  // }
 
   /**
   Find the furthest point along trajectory that isn't further than the
   lookahead distance. This is the target position.
   */
-  if (get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist)
-  {
-    double distance = 0;
-    bool cont = true;
-
-    while (cont && path_index < path->poses.size() - 1)
-    {
-      geometry_msgs::Point point1, point2;
-      point1 = path->poses[path_index].pose.position;
-      point2 = path->poses[path_index + 1].pose.position;
-      double increment = get_distance(
-                            point1.x,
-                            point1.y,
-                            point2.x,
-                            point2.y
-                        );
-
-      if (distance + increment > lookahead_dist)
-      {
-        cont = false;
-        Eigen::Vector3d first(point1.x, point1.y, 0);
-        Eigen::Vector3d second(point2.x, point2.y, 0);
-        Eigen::Vector3d slope = second - first;
-
-        slope /= increment;
-        slope *= (distance - lookahead_dist) + increment;
-
-        slope += first;
-        tar_x = slope[0];
-        tar_y = slope[1];
-      }
-      else
-      {
-        path_index++;
-        distance += increment;
-      }
-    }
-  }
-  else
-  {
-    tar_x = end.x;
-    tar_y = end.y;
-  }
+  // if (get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist)
+  // {
+  //   double distance = 0;
+  //   bool cont = true;
+  //
+  //   while (cont && path_index < path->poses.size() - 1)
+  //   {
+  //     geometry_msgs::Point point1, point2;
+  //     point1 = path->poses[path_index].pose.position;
+  //     point2 = path->poses[path_index + 1].pose.position;
+  //     double increment = get_distance(
+  //                           point1.x,
+  //                           point1.y,
+  //                           point2.x,
+  //                           point2.y
+  //                       );
+  //
+  //     if (distance + increment > lookahead_dist)
+  //     {
+  //       cont = false;
+  //       Eigen::Vector3d first(point1.x, point1.y, 0);
+  //       Eigen::Vector3d second(point2.x, point2.y, 0);
+  //       Eigen::Vector3d slope = second - first;
+  //
+  //       slope /= increment;
+  //       slope *= (distance - lookahead_dist) + increment;
+  //
+  //       slope += first;
+  //       tar_x = slope[0];
+  //       tar_y = slope[1];
+  //     }
+  //     else
+  //     {
+  //       path_index++;
+  //       distance += increment;
+  //     }
+  //   }
+  // }
+  // else
+  // {
+  //   tar_x = end.x;
+  //   tar_y = end.y;
+  // }
 
   /**
   Calculate the line of sight (los) from the robot to the target position in
   vector format.
   */
-  double slope_x = tar_x - cur_x;
-  double slope_y = tar_y - cur_y;
-
-  Eigen::Vector3d los(slope_x, slope_y, 0); // line of sight
-  los.normalize();
-
-  /**
-  Calculate cur_theta, the angle between the los and the current robot heading,
-  */
-  // get current robot heading in vector format
-  Eigen::Vector3d heading(std::cos(orientation), std::sin(orientation), 0);
-
-  //get egocentric polar angle of los relative to heading
-  float cur_theta;
-  compute_angle(cur_theta, los, heading);
+  // double slope_x = tar_x - cur_x;
+  // double slope_y = tar_y - cur_y;
+  //
+  // Eigen::Vector3d los(slope_x, slope_y, 0); // line of sight
+  // los.normalize();
+  //
+  // /**
+  // Calculate cur_theta, the angle between the los and the current robot heading,
+  // */
+  // // get current robot heading in vector format
+  // Eigen::Vector3d heading(std::cos(orientation), std::sin(orientation), 0);
+  //
+  // //get egocentric polar angle of los relative to heading
+  // float cur_theta;
+  // compute_angle(cur_theta, los, heading);
 
   /**
   Calculate target theta (tar_theta), the angle between the los and the target
   pose, adjusted for the robot's current orientation in space.
   */
   // get i and j components of target orientation vector (res_orientation)
-  double distance = 0;
-  geometry_msgs::Point point1, point2;
-  unsigned int path_idx = 0;
-  while (path_idx < path->poses.size() - 1)
-  {
-    point1 = path->poses[path_idx].pose.position;
-    point2 = path->poses[path_idx + 1].pose.position;
-    double increment = get_distance(
-                            point1.x,
-                            point1.y,
-                            point2.x,
-                            point2.y
-                        );
-
-    if (distance + increment > lookahead_dist) { break; }
-
-    path_idx++;
-    distance += increment;
-  }
-
-  double pose_x = point2.x - point1.x;
-  double pose_y = point2.y - point1.y;
-
-  Eigen::Vector3d tar_orientation(pose_x, pose_y, 0); // target orientation
-  tar_orientation.normalize();
+  // double distance = 0;
+  // geometry_msgs::Point point1, point2;
+  // unsigned int path_idx = 0;
+  // while (path_idx < path->poses.size() - 1)
+  // {
+  //   point1 = path->poses[path_idx].pose.position;
+  //   point2 = path->poses[path_idx + 1].pose.position;
+  //   double increment = get_distance(
+  //                           point1.x,
+  //                           point1.y,
+  //                           point2.x,
+  //                           point2.y
+  //                       );
+  //
+  //   if (distance + increment > lookahead_dist) { break; }
+  //
+  //   path_idx++;
+  //   distance += increment;
+  // }
+  //
+  // double pose_x = point2.x - point1.x;
+  // double pose_y = point2.y - point1.y;
+  //
+  // Eigen::Vector3d tar_orientation(pose_x, pose_y, 0); // target orientation
+  // tar_orientation.normalize();
 
   // get egocentric polar angle of los relative to target orientation
-  float tar_theta;
-  compute_angle(tar_theta, los, tar_orientation);
+  // float tar_theta;
+  // compute_angle(tar_theta, los, tar_orientation);
+
+  Eigen::Vector3d cur_pos(cur_x, cur_y, orientation);
 
   ros::Time time = ros::Time::now();
 
   // publish target position
-  geometry_msgs::PointStamped target_point;
-  target_point.header.frame_id = "/odom";
-  target_point.header.stamp = time;
-  target_point.point.x = tar_x;
-  target_point.point.y = tar_y;
-  target_pub.publish(target_point);
+  // geometry_msgs::PointStamped target_point;
+  // target_point.header.frame_id = "/odom";
+  // target_point.header.stamp = time;
+  // target_point.point.x = tar_x;
+  // target_point.point.y = tar_y;
+  // target_pub.publish(target_point);
 
   /**
   Obtain smooth control law from the controller. This includes a smooth
@@ -242,15 +244,15 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   trajectory_msg.header.stamp = time;
   trajectory_msg.header.frame_id = "/odom";
 
-  Eigen::Vector3d target(tar_x, tar_y, orientation - cur_theta + tar_theta);
+  // Eigen::Vector3d target(tar_x, tar_y, orientation - cur_theta + tar_theta);
 
-  Eigen::Vector2d egocentric_heading(cur_theta, tar_theta);
+  // Eigen::Vector2d egocentric_heading(cur_theta, tar_theta);
 
-  controller.getTrajectory(vel, trajectory_msg, cur_pos, target, egocentric_heading);
+  controller.getTrajectory(vel, path, trajectory_msg, cur_pos);
 
-  ROS_INFO_STREAM("Distance: "
-                  << get_distance(tar_x, tar_y, cur_x, cur_y)
-                  << "m.");
+  // ROS_INFO_STREAM("Distance: "
+  //                 << get_distance(tar_x, tar_y, cur_x, cur_y)
+  //                 << "m.");
 
   // make sure maximum velocity not exceeded
   if (std::max(vel.right_velocity, vel.left_velocity) > maximum_vel)
