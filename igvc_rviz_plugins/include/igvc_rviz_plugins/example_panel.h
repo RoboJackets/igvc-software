@@ -47,6 +47,6 @@ protected:
    */
   //    void paintEvent(QPaintEvent *event) override;
 };
-}
+}  // namespace igvc_rviz_plugins
 
 #endif  // PROJECT_EXAMPLEPANEL_H

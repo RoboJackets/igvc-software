@@ -37,7 +37,7 @@ EStopPanel::EStopPanel(QWidget* parent) : rviz::Panel(parent)
 
   // connect( this, SIGNAL( changeText() ), output_topic_editor_, SLOT( setTextLabel() ));
 }
-}
+}  // namespace rviz_plugins
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(rviz_plugins::EStopPanel, rviz::Panel)

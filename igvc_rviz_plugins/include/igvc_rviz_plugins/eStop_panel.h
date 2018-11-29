@@ -25,6 +25,6 @@ protected:
   ros::NodeHandle nh_;
   QLabel* output_topic_editor_;
 };
-}
+}  // namespace rviz_plugins
 
 #endif  // ESTOP_PANEL_H

@@ -54,7 +54,7 @@ LaunchPanel::LaunchPanel(QWidget* parent) : rviz::Panel(parent)
   layout->addLayout(topic_layout);
   setLayout(layout);
 }
-}
+}  // namespace rviz_plugins
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(rviz_plugins::LaunchPanel, rviz::Panel)

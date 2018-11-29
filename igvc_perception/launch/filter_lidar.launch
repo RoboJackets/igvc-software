@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <launch>
-  <node name="filter_lidar" pkg="igvc" type="filter_lidar" output="screen">
+  <node name="filter_lidar" pkg="igvc_perception" type="filter_lidar" output="screen">
       <param name="x_offset" value=".29"/>
       <param name="y_offset" value=".03"/>
       <param name="x_size" value=".4"/>

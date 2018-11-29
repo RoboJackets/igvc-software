@@ -55,13 +55,11 @@
   <run_depend>image_transport</run_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>pcl_conversions</run_depend>
-  <run_depend>stereo_image_proc</run_depend>
   <run_depend>camera_info_manager</run_depend>
   <run_depend>image_geometry</run_depend>
   <run_depend>robot_localization</run_depend>
   <run_depend>pluginlib</run_depend>
   <run_depend>laser_geometry</run_depend>
-  <run_depend>nmea_navsat_driver</run_depend>
   <run_depend>python-tensorflow-pip</run_depend>
 
   <!-- Builds from source -->

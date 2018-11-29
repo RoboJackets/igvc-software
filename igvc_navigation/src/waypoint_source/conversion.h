@@ -53,10 +53,9 @@ static inline void UTM(double lat, double lon, double *x, double *y)
   // compute the easting-northing coordinates
   *x = UTM_FE +
        UTM_K0 * V * (A + (1 - T + C) * pow(A, 3) / 6 + (5 - 18 * T + T * T + 72 * C - 58 * UTM_EP2) * pow(A, 5) / 120);
-  *y = fn +
-       UTM_K0 * (M +
-                 V * tlat * (A * A / 2 + (5 - T + 9 * C + 4 * C * C) * pow(A, 4) / 24 +
-                             ((61 - 58 * T + T * T + 600 * C - 330 * UTM_EP2) * pow(A, 6) / 720)));
+  *y = fn + UTM_K0 * (M + V * tlat *
+                              (A * A / 2 + (5 - T + 9 * C + 4 * C * C) * pow(A, 4) / 24 +
+                               ((61 - 58 * T + T * T + 600 * C - 330 * UTM_EP2) * pow(A, 6) / 720)));
 
   return;
 }

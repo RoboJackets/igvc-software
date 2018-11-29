@@ -46,6 +46,6 @@ protected:
   int curThread;
   QVBoxLayout* layout;
 };
-}
+}  // namespace rviz_plugins
 
 #endif  // NODE_PANEL_H

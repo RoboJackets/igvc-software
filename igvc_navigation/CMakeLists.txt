@@ -12,8 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
   image_geometry
   image_transport
   cv_bridge
-  camera_info_manager
-  laser_geometry
   tf
   pcl_ros
   igvc_utils
@@ -171,7 +169,7 @@ include_directories(
 
 if(CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
-    add_subdirectory(src/tests)
+    #add_subdirectory(src/tests)
 endif()
 
 

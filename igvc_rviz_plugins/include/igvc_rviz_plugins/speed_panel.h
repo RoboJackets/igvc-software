@@ -35,6 +35,6 @@ protected:
   QLabel* velocity_right_label;
   QLabel* velocity_left_label;
 };
-}
+}  // namespace rviz_plugins
 
 #endif  // SPEED_PANEL_H

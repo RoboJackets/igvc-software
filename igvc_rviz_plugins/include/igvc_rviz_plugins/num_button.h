@@ -30,6 +30,6 @@ Q_SIGNALS:
 private:
   int num;
 };
-}
+}  // namespace rviz_plugins
 
 #endif  // NUM_BUTTON_H

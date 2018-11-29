@@ -45,6 +45,6 @@ void coordsToMetricXY(double lat1, double lon1, double lat2, double lon2, double
   dX = std::copysign(1.0, lon2 - lon1) * coordsToMeter(lat1, lon1, lat1, lon2);
   dY = std::copysign(1.0, lat2 - lat1) * coordsToMeter(lat1, lon1, lat2, lon1);
 }
-};
+};  // namespace GPSUtils
 
 #endif
