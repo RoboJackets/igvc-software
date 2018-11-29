@@ -259,11 +259,11 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   {
     ROS_ERROR_STREAM("Maximum velocity exceeded. Right: "
                             << vel.right_velocity
-                            << ", Left: "
+                            << "(m/s), Left: "
                             << vel.left_velocity
-                            << ", Max: "
+                            << "(m/s), Max: "
                             << maximum_vel
-                            << "Stopping robot...");
+                            << "(m/s) ... Stopping robot...");
     vel.right_velocity = 0;
     vel.left_velocity = 0;
   }

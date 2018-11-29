@@ -1,53 +1,22 @@
 #include "SmoothControl.h"
 
-// void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::Path& trajectory,
-//         Eigen::Vector3d cur_pos, Eigen::Vector3d target, Eigen::Vector2d egocentric_heading)
-// {
-//   double dt = rollOutTime / 10;
-//   for (int i = 0; i < 15; i++)
-//   {
-//     Eigen::Vector3d action;
-//     getAction(action, cur_pos, target, egocentric_heading);
-//     action[2] = dt;
-//
-//     if (i == 0)
-//     {
-//       vel.left_velocity = action[0] - action[1] * axle_length / 2;
-//       vel.right_velocity = action[0] + action[1] * axle_length / 2;
-//     }
-//
-//     Eigen::Vector3d end_pos;
-//     getResult(end_pos, egocentric_heading, cur_pos, action);
-//
-    // if (i == 0)
-    // {
-    //   geometry_msgs::PoseStamped start;
-    //   start.pose.position.x = cur_pos[0];
-    //   start.pose.position.y = cur_pos[1];
-    //   trajectory.poses.push_back(start);
-    // }
-//
-    // geometry_msgs::PoseStamped pose;
-    // pose.pose.position.x = end_pos[0];
-    // pose.pose.position.y = end_pos[1];
-    // trajectory.poses.push_back(pose);
-    // cur_pos = end_pos;
-//   }
-// }
-
 void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathConstPtr path,
     nav_msgs::Path& trajectory, Eigen::Vector3d cur_pos)
 {
     this->cur_pos << cur_pos;
 
     // TODO: Create initialize_variables() method
-    int path_index;
+    unsigned int path_index;
     path_index = getClosestPosition(path);
     getTargetPosition(path, path_index);
     getLineOfSightAndHeading();
     getEgocentricAngles(path, path_index);
 
     double dt = rollOutTime/10;
+
+    using namespace std;
+
+    cout << "Generating Trajectory" << endl;
 
     for (int i = 0; i < 15; i++)
     {
@@ -58,8 +27,8 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
         if (i == 0)
         {
             geometry_msgs::PoseStamped start;
-            start.pose.position.x = cur_pos[0];
-            start.pose.position.y = cur_pos[1];
+            start.pose.position.x = this->cur_pos[0];
+            start.pose.position.y = this->cur_pos[1];
             trajectory.poses.push_back(start);
 
             vel.left_velocity = action[0] - action[1] * axle_length / 2;
@@ -69,27 +38,35 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
         getResult(path, action);
 
         geometry_msgs::PoseStamped pose;
-        pose.pose.position.x = cur_pos[0];
-        pose.pose.position.y = cur_pos[1];
+        pose.pose.position.x = this->cur_pos[0];
+        pose.pose.position.y = this->cur_pos[1];
         trajectory.poses.push_back(pose);
     }
+
+    cout << "Finished generating trajectory" << endl;
 }
 
 
 /**
-Obtains the resultant pose given the current velocity and angular velocity command.
+Estimates the resultant pose given the current velocity and angular velocity
+command for visualization purposes. Additionally, updates the egocentric polar
+angles [delta, theta].
+
 Makes extensive use of differential drive odometry equations to calculate resultant
-pose
+pose.
 
 Source: http://www8.cs.umu.se/kurser/5DV122/HT13/material/Hellstrom-ForwardKinematics.pdf
-
-update cur_pos, cur_theta, and tar_theta to reflect `action`'s impact
 */
 void SmoothControl::getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d action)
 {
     double v = action[0];
     double w = action[1];
     double dt = action[2];
+
+    Eigen::Vector3d resultant_pose;
+
+    Eigen::Vector3d cur_pos;
+    cur_pos << this->cur_pos;
 
     if (std::abs(w) > 1e-10)
     {
@@ -105,24 +82,20 @@ void SmoothControl::getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d actio
       Vector3d a(cur_pos[0] - ICCx, cur_pos[1] - ICCy, cur_pos[2]);
       Vector3d b = T * a;
       Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
-      // // TODO correct delta and theta updates to implement same heading calculation as in path_follower
-      // egocentric_heading[0] += wdt; // update delta
-
-      // update current pose
       fitToPolar(c[2]);
-      cur_pos[0] = c[0];
-      cur_pos[1] = c[1];
-      cur_pos[2] = c[2];
 
-
+      resultant_pose << c[0], c[1], c[2];
     }
     else
     {
-      cur_pos[0] = cur_pos[0] + (cos(cur_pos[2]) * v * dt);
-      cur_pos[1] = cur_pos[1] + (sin(cur_pos[2]) * v * dt);
-      cur_pos[2] = cur_pos[2];
+      resultant_pose << cur_pos[0] + (cos(cur_pos[2]) * v * dt), \
+                        cur_pos[1] + (sin(cur_pos[2]) * v * dt), \
+                        cur_pos[2];
     }
 
+    this->cur_pos << resultant_pose;
+
+    // update delta and theta
     int path_index = getClosestPosition(path);
     getTargetPosition(path, path_index);
     getLineOfSightAndHeading();
@@ -130,6 +103,9 @@ void SmoothControl::getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d actio
 
 }
 
+/**
+Computes the radius of curvature to obtain a new angular velocity value.
+*/
 void SmoothControl::getAction(Eigen::Vector3d& result)
 {
     // get egocentric polar coordinates for delta and theta
@@ -145,7 +121,7 @@ void SmoothControl::getAction(Eigen::Vector3d& result)
     K += (1 + (k1 / (1 + pow(k1 * theta, 2)))) * sin(delta);
     K /= -d;
 
-    // calculate angular velocity using radius of curvature
+    // calculate angular velocity using radius of curvature and target velocity
     double w = K * v;
     result[0] = v;
     result[1] = w;
@@ -281,7 +257,6 @@ Find the index of the closest point on the path.
 */
 int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
 {
-    geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
     int path_index = 0;
     double closest = get_distance(
                          cur_pos[0],
