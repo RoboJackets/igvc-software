@@ -92,10 +92,10 @@ catkin_python_setup()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-    #  INCLUDE_DIRS include
-    #  LIBRARIES igvc
-    #  CATKIN_DEPENDS roscpp std_msgs
-    #  DEPENDS system_lib
+#  INCLUDE_DIRS include
+#  LIBRARIES igvc
+#  CATKIN_DEPENDS roscpp std_msgs
+#  DEPENDS system_lib
 )
 
 ###########
@@ -106,9 +106,9 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-   ${catkin_INCLUDE_DIRS}
-   ${PCL_INCLUDE_DIRS}
-   include
+  ${catkin_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
+  include
 )
 
 ## Declare a cpp library
@@ -167,9 +167,9 @@ include_directories(
 ## Testing ##
 #############
 
-if (CATKIN_ENABLE_TESTING)
- find_package(rostest REQUIRED)
- add_subdirectory(src/tests)
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_subdirectory(src/tests)
 endif ()
 
 
