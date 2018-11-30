@@ -154,7 +154,7 @@ Visualization Manager:
     - Alpha: 1
       Buffer Length: 1
       Class: rviz/Path
-      Color: 25; 255; 0
+      Color: 255; 255; 0
       Enabled: true
       Head Diameter: 0.30000001192092896
       Head Length: 0.20000000298023224
@@ -309,4 +309,4 @@ Window Geometry:
     collapsed: false
   Width: 2426
   X: 134
-  Y: 55
+  Y: 0
