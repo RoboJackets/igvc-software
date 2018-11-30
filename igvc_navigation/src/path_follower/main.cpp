@@ -8,6 +8,7 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <iostream>
+#include <igvc_utils/RobotState.hpp>
 #include "SmoothControl.h"
 
 ros::Publisher cmd_pub;
@@ -47,19 +48,14 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     path.reset();
     return;
   }
+  RobotState state(msg);
 
-  float cur_x = msg->pose.pose.position.x;
-  float cur_y = msg->pose.pose.position.y;
-  tf::Quaternion q;
-  tf::quaternionMsgToTF(msg->pose.pose.orientation, q);
-  float cur_theta = tf::getYaw(q);
-
-  float tar_x, tar_y, tar_theta;
+  RobotState target;
   geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
   double path_index = 0;
-  double closest = std::abs(get_distance(cur_x, cur_y, path->poses[0].pose.position.x, path->poses[0].pose.position.y));
+  double closest = std::abs(get_distance(state.x, state.y, path->poses[0].pose.position.x, path->poses[0].pose.position.y));
   double temp = std::abs(
-      get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
+      get_distance(state.x, state.y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
   while (path_index < path->poses.size() && temp <= closest)
   {
     if (temp < closest)
@@ -68,10 +64,10 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     }
     path_index++;
     temp = std::abs(
-        get_distance(cur_x, cur_y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
+        get_distance(state.x, state.y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
   }
 
-  if (get_distance(cur_x, cur_y, end.x, end.y) > lookahead_dist)
+  if (get_distance(state.x, state.y, end.x, end.y) > lookahead_dist)
   {
     double distance = 0;
     bool cont = true;
@@ -95,8 +91,8 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
         slope *= (distance - lookahead_dist) + increment;
         // ROS_INFO_STREAM("slope2 = " << slope[0] << ", " << slope[1]);
         slope += first;
-        tar_x = slope[0];
-        tar_y = slope[1];
+        target.x = slope[0];
+        target.y = slope[1];
       }
       else
       {
@@ -107,20 +103,20 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   }
   else
   {
-    tar_x = end.x;
-    tar_y = end.y;
+    target.x = end.x;
+    target.y = end.y;
   }
 
-  double yDiff = tar_y - cur_y;
-  double xDiff = tar_x - cur_x;
+  double yDiff = target.x - state.y;
+  double xDiff = target.y - state.x;
 
   if (xDiff == 0)
   {
-    tar_theta = yDiff > 0 ? M_PI : -M_PI;
+    target.yaw = yDiff > 0 ? M_PI : -M_PI;
   }
   else
   {
-    tar_theta = atan2((yDiff), (xDiff));
+    target.yaw = atan2((yDiff), (xDiff));
   }
 
   ros::Time time = ros::Time::now();
@@ -128,8 +124,8 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   geometry_msgs::PointStamped target_point;
   target_point.header.frame_id = "/odom";
   target_point.header.stamp = time;
-  target_point.point.x = tar_x;
-  target_point.point.y = tar_y;
+  target_point.point.x = target.x;
+  target_point.point.y = target.y;
   target_pub.publish(target_point);
 
   igvc_msgs::velocity_pair vel;
@@ -139,11 +135,9 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   trajectory_msg.header.stamp = ros::Time::now();
   trajectory_msg.header.frame_id = "/odom";
 
-  Eigen::Vector3d cur_pos(cur_x, cur_y, cur_theta);
-  Eigen::Vector3d target(tar_x, tar_y, tar_theta);
-  controller.getTrajectory(vel, trajectory_msg, cur_pos, target);
+  controller.getTrajectory(vel, trajectory_msg, state.getVector3d(), target.getVector3d());
 
-  ROS_INFO_STREAM("distance = " << get_distance(tar_x, tar_y, cur_x, cur_y));
+  ROS_INFO_STREAM("distance = " << get_distance(target.x, target.y, state.x, state.y));
 
   if (vel.right_velocity > maximum_vel || vel.left_velocity > maximum_vel)
   {
@@ -151,7 +145,7 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     vel.right_velocity = 0;
     vel.left_velocity = 0;
   }
-  // ROS_INFO_STREAM("target " << tar_x << " " << tar_y << "\n");
+  // ROS_INFO_STREAM("target " << target.x << " " << target.y << "\n");
 
   cmd_pub.publish(vel);
   trajectory_pub.publish(trajectory_msg);
