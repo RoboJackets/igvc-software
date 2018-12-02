@@ -16,10 +16,10 @@
 #include <std_msgs/Int32.h>
 #include <tf/transform_datatypes.h>
 #include <algorithm>
+#include <igvc_utils/NodeUtils.hpp>
 #include <mutex>
 #include "GraphSearch.hpp"
 #include "igvcsearchproblemdiscrete.h"
-#include <igvc_utils/NodeUtils.hpp>
 
 ros::Publisher path_pub;
 
