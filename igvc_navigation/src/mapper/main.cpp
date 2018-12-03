@@ -35,23 +35,20 @@ std::tuple<double, double> rotate(double x, double y)
   return (std::make_tuple(newX, newY));
 }
 
+// Updates state with latest tf transform using the timestamp of the pcl::PointCloud msg
 void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
 {
   tf::StampedTransform transform;
   ros::Time messageTimeStamp;
   pcl_conversions::fromPCL(msg->header.stamp, messageTimeStamp);
-  try
+  if (tf_listener->waitForTransform("/odom", "/base_link", messageTimeStamp, ros::Duration(transform_max_wait_time)))
   {
-    tf_listener->waitForTransform("/odom", "/base_link", messageTimeStamp, ros::Duration(transform_max_wait_time));
     tf_listener->lookupTransform("/odom", "/base_link", messageTimeStamp, transform);
+    state.setState(transform);
   }
-  catch (tf::TransformException &ex)
-  {
-    ROS_ERROR("%s", ex.what());
-  }
-  state.setState(transform);
 }
 
+// Populates igvc_msgs::map message with information from sensor_msgs::Image and the timestamp from pcl_stamp
 void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp)
 {
   pcl_conversions::fromPCL(pcl_stamp, image.header.stamp);
@@ -68,6 +65,7 @@ void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t p
   message.y_initial = start_y;
 }
 
+// Updates the occupancy grid using information from the pcl::PointCloud transformed
 void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed)
 {
   int offMapCount = 0;
@@ -83,6 +81,7 @@ void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed)
     int point_y = static_cast<int>(std::round(y_point_raw / resolution + state.y / resolution + start_y));
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
     {
+      // Check for overflow
       if (published_map->at<uchar>(point_x, point_y) <= UCHAR_MAX - (uchar)increment_step)
       {
         published_map->at<uchar>(point_x, point_y) += (uchar)increment_step;
@@ -103,6 +102,7 @@ void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed)
   }
 }
 
+// Checks if transform from base_footprint to msg.header.frame_id exists
 void checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
 {
   if (transforms.find(topic) == transforms.end())
@@ -124,6 +124,7 @@ void checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &
   }
 }
 
+// Decays map by 1 universally on callback
 void decayMap(const ros::TimerEvent &)
 {
   int nRows = published_map->rows;
@@ -198,7 +199,6 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
     fromOcuGrid->header.stamp = msg->header.stamp;
     debug_pcl_pub.publish(fromOcuGrid);
   }
-  //  update = true;
 }
 
 int main(int argc, char **argv)
