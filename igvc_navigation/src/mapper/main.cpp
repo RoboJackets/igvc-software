@@ -2,11 +2,20 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <igvc_msgs/map.h>
+#include <math.h>
 #include <nav_msgs/Odometry.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
+#include <ros/publisher.h>
+#include <ros/ros.h>
+#include <sensor_msgs/Image.h>
+#include <stdlib.h>
+#include <Eigen/Core>
 #include <igvc_utils/RobotState.hpp>
+#include <opencv2/core/eigen.hpp>
+#include <opencv2/opencv.hpp>
+#include "tf/transform_datatypes.h"
 
 cv_bridge::CvImage img_bridge;
 
