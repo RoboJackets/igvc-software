@@ -10,9 +10,9 @@
 
 cv_bridge::CvImage img_bridge;
 
-ros::Publisher map_pub;
-ros::Publisher debug_pub;
-ros::Publisher debug_pcl_pub;
+ros::Publisher map_pub;                  // Publishes map
+ros::Publisher debug_pub;                // Debug version of above
+ros::Publisher debug_pcl_pub;            // Publishes map as individual PCL points
 std::unique_ptr<cv::Mat> published_map;  // matrix will be publishing
 std::map<std::string, tf::StampedTransform> transforms;
 std::unique_ptr<tf::TransformListener> tf_listener;
