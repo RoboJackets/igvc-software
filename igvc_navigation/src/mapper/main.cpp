@@ -10,10 +10,11 @@
 #include <sensor_msgs/Image.h>
 #include <stdlib.h>
 #include <Eigen/Core>
+#include <igvc_utils/NodeUtils.hpp>
+#include <igvc_utils/RobotState.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include "tf/transform_datatypes.h"
-#include <igvc_utils/RobotState.hpp>
 
 igvc_msgs::map msgBoi;  // >> message to be sent
 cv_bridge::CvImage img_bridge;
@@ -170,22 +171,14 @@ int main(int argc, char **argv)
   double cont_start_x;
   double cont_start_y;
 
-  if (!pNh.hasParam("topics") && !pNh.hasParam("occupancy_grid_length") && !pNh.hasParam("occupancy_grid_length") &&
-      !pNh.hasParam("occupancy_grid_resolution") && !pNh.hasParam("start_X") & !pNh.hasParam("start_Y") &&
-      !pNh.hasParam("debug"))
-  {
-    ROS_ERROR_STREAM("missing parameters; exiting");
-    return 0;
-  }
-
   // assumes all params inputted in meters
-  pNh.getParam("topics", topics);
-  pNh.getParam("occupancy_grid_length", length_y);
-  pNh.getParam("occupancy_grid_width", width_x);
-  pNh.getParam("occupancy_grid_resolution", resolution);
-  pNh.getParam("start_X", cont_start_x);
-  pNh.getParam("start_Y", cont_start_y);
-  pNh.getParam("debug", debug);
+  igvc::getParam(pNh, "topics", topics);
+  igvc::getParam(pNh, "occupancy_grid_length", length_y);
+  igvc::getParam(pNh, "occupancy_grid_width", width_x);
+  igvc::getParam(pNh, "occupancy_grid_resolution", resolution);
+  igvc::getParam(pNh, "start_X", cont_start_x);
+  igvc::getParam(pNh, "start_Y", cont_start_y);
+  igvc::getParam(pNh, "debug", debug);
 
   // convert from meters to grid
   length_y = (int)std::round(length_y / resolution);
