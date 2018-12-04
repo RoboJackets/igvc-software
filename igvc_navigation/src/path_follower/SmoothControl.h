@@ -33,12 +33,12 @@ public:
         nav_msgs::Path& trajectory, Eigen::Vector3d cur_pos);
 
 private:
-  Eigen::Vector3d _los;
-  Eigen::Vector3d _heading;
-  Eigen::Vector3d _tar_orientation;
+  Eigen::Vector3d los_;
+  Eigen::Vector3d heading_;
+  Eigen::Vector3d tar_orientation_;
 
-  double _delta;
-  double _theta;
+  double delta_;
+  double theta_;
 
   void getAction(Eigen::Vector3d& result);
   void getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d action);

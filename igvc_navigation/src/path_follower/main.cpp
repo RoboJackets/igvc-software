@@ -9,6 +9,8 @@
 #include <tf/transform_datatypes.h>
 #include <Eigen/Dense>
 #include <cmath>
+#include <igvc_utils/RobotState.hpp>
+#include <igvc_utils/NodeUtils.hpp>
 #include <iostream>
 #include "SmoothControl.h"
 
@@ -21,26 +23,19 @@ geometry_msgs::PointStampedConstPtr waypoint;
 
 double stop_dist, maximum_vel;
 
+bool debug;
+
 SmoothControl controller;
 
 void path_callback(const nav_msgs::PathConstPtr& msg)
 {
-  ROS_INFO_STREAM("Follower got path. Size: " << msg->poses.size());
+  if (debug) { ROS_INFO_STREAM("Follower got path. Size: " << msg->poses.size()); }
   path = msg;
 }
 
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
   waypoint = msg;
-}
-
-/**
-Calculates euclidian distance between two points
-*/
-double get_distance(double x1, double y1, double x2, double y2)
-{
-
-  return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
 /**
@@ -64,9 +59,6 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     return;
   }
 
-  double end_x = waypoint->point.x;
-  double end_y = waypoint->point.y;
-
   // Current pose
   float cur_x = msg->pose.pose.position.x;
   float cur_y = msg->pose.pose.position.y;
@@ -75,10 +67,10 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   float orientation = tf::getYaw(q);
   Eigen::Vector3d cur_pos(cur_x, cur_y, orientation);
 
-  double goal_dist = get_distance(cur_x, cur_y, end_x, end_y);
+  double goal_dist = igvc::get_distance(cur_x, cur_y, waypoint->point.x, waypoint->point.y);
   ROS_INFO_STREAM("Distance to waypoint: " << goal_dist << "(m.)");
 
-  ros::Time time = ros::Time::now();
+  ros::Time time = msg->header.stamp;
   igvc_msgs::velocity_pair vel; // immediate velocity command
   vel.header.stamp = time;
 
@@ -107,7 +99,8 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
       trajectory_pub.publish(trajectory_msg);
 
       // publish target position
-      double tar_x = controller.target[0], tar_y = controller.target[1];
+      double tar_x = controller.target[0];
+      double tar_y = controller.target[1];
       geometry_msgs::PointStamped target_point;
       target_point.header.frame_id = "/odom";
       target_point.header.stamp = time;
@@ -115,14 +108,14 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
       target_point.point.y = tar_y;
       target_pub.publish(target_point);
 
-      ROS_INFO_STREAM("Distance to target: "
-                       << get_distance(tar_x, tar_y, cur_x, cur_y) << "(m.)");
+      if (debug) { ROS_INFO_STREAM("Distance to target: "
+                       << igvc::get_distance(tar_x, tar_y, cur_x, cur_y) << "(m.)"); }
   }
 
 
 
   // make sure maximum velocity not exceeded
-  if (std::max(vel.right_velocity, vel.left_velocity) > maximum_vel)
+  if (std::max(std::abs(vel.right_velocity), std::abs(vel.left_velocity)) > maximum_vel)
   {
     ROS_ERROR_STREAM("Maximum velocity exceeded. Right: "
                      << vel.right_velocity
@@ -145,15 +138,18 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  pNh.param(std::string("target_v"), controller.v, 1.0);
-  pNh.param(std::string("axle_length"), controller.axle_length, 0.52);
-  pNh.param(std::string("k1"), controller.k1, 1.0);
-  pNh.param(std::string("k2"), controller.k2, 3.0);
-  pNh.param(std::string("roll_out_time"), controller.rollOutTime, 2.0);
-  pNh.param(std::string("lookahead_dist"), controller.lookahead_dist, 2.0);
+  // load controller parameters
+  igvc::param(pNh, "target_v", controller.v, 1.0);
+  igvc::param(pNh, "axle_length", controller.axle_length, 0.52);
+  igvc::param(pNh, "k1", controller.k1, 1.0);
+  igvc::param(pNh, "k2", controller.k2, 3.0);
+  igvc::param(pNh, "roll_out_time", controller.rollOutTime, 2.0);
+  igvc::param(pNh, "lookahead_dist", controller.lookahead_dist, 2.0);
 
-  pNh.param(std::string("maximum_vel"), maximum_vel, 1.6);
-  pNh.param(std::string("stop_dist"), stop_dist, 0.9);
+  // load global parameters
+  igvc::param(pNh, "maximum_vel", maximum_vel, 1.6);
+  igvc::param(pNh, "stop_dist", stop_dist, 0.9);
+  igvc::param(pNh, "debug", debug, true);
 
   ros::Subscriber path_sub = nh.subscribe("/path", 1, path_callback);
   ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, position_callback);

@@ -104,7 +104,7 @@ Computes the radius of curvature to obtain a new angular velocity value.
 void SmoothControl::getAction(Eigen::Vector3d& result)
 {
     // get egocentric polar coordinates for delta and theta
-    double delta = _delta, theta = _theta;
+    double delta = delta_, theta = theta_;
 
     // adjust both angles to lie between -PI and PI
     fitToPolar(delta);
@@ -131,8 +131,8 @@ void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path, unsigned in
 {
     //get egocentric polar angle of los relative to heading
     double delta;
-    compute_angle(delta, _los, _heading);
-    this->_delta = delta;
+    compute_angle(delta, los_, heading_);
+    this->delta_ = delta;
 
     // get i and j components of target orientation vector (res_orientation)
     double distance = 0;
@@ -159,12 +159,12 @@ void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path, unsigned in
 
     Eigen::Vector3d tar_orientation(pose_x, pose_y, 0); // target orientation
     tar_orientation.normalize();
-    this->_tar_orientation << tar_orientation;
+    this->tar_orientation_ << tar_orientation;
 
     // get egocentric polar angle of los relative to target orientation
     double theta;
-    compute_angle(theta, _los, _tar_orientation);
-    this->_theta = theta;
+    compute_angle(theta, los_, tar_orientation_);
+    this->theta_ = theta;
 
 }
 
@@ -179,11 +179,11 @@ void SmoothControl::getLineOfSightAndHeading()
 
     Eigen::Vector3d los(slope_x, slope_y, 0); // line of sight
     los.normalize();
-    this->_los << los;
+    this->los_ << los;
 
     // get current robot heading in vector format
     Eigen::Vector3d heading(std::cos(cur_pos[2]), std::sin(cur_pos[2]), 0);
-    this->_heading << heading;
+    this->heading_ << heading;
 }
 
 

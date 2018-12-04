@@ -17,6 +17,7 @@
 #include <std_msgs/Int32.h>
 #include <tf/transform_datatypes.h>
 #include <algorithm>
+#include <igvc_utils/NodeUtils.hpp>
 #include <mutex>
 #include "GraphSearch.hpp"
 #include "igvcsearchproblem.h"
@@ -120,22 +121,21 @@ int main(int argc, char** argv)
 
   double rateTime;
   int maxIter;
-  // should have parameter for both X and Y c space once orientation is accounted for
-  // TODO units
-  pNh.getParam("goal_threshold", search_problem.GoalThreshold);
-  pNh.getParam("c_space", search_problem.CSpace);
-  pNh.getParam("point_turns_enabled", search_problem.PointTurnsEnabled);
-  pNh.getParam("reverse_enabled", search_problem.ReverseEnabled);
-  pNh.getParam("probability_threshold", search_problem.ProbabilityThreshold);
-  pNh.param("max_jump_size", search_problem.MaxJumpSize, 10.0);
-  pNh.param(std::string("theta_filter"), search_problem.ThetaFilter, 5.0);
+  igvc::getParam(pNh, "goal_threshold", search_problem.GoalThreshold);
+  igvc::getParam(pNh, "c_space", search_problem.CSpace);
+  igvc::getParam(pNh, "point_turns_enabled", search_problem.PointTurnsEnabled);
+  igvc::getParam(pNh, "reverse_enabled", search_problem.ReverseEnabled);
+  igvc::getParam(pNh, "probability_threshold", search_problem.ProbabilityThreshold);
+
+  igvc::param(pNh, "max_jump_size", search_problem.MaxJumpSize, 10.0);
+  igvc::param(pNh, "theta_filter", search_problem.ThetaFilter, 5.0);
   // TODO what unit is this in??
-  pNh.param(std::string("max_theta_change"), search_problem.MaxThetaChange, 5.0);
-  pNh.param(std::string("theta_change_window"), search_problem.ThetaChangeWindow, 5.0);
-  pNh.param(std::string("heuristic_inflation"), search_problem.HeuristicInflation, 1.2);
-  pNh.param(std::string("maximum_distance"), search_problem.MaximumDistance, 20.0);
-  pNh.param(std::string("rate"), rateTime, 20.0);
-  pNh.param(std::string("maximum_iterations"), maxIter, 0);
+  igvc::param(pNh, "max_theta_change", search_problem.MaxThetaChange, 5.0);
+  igvc::param(pNh, "theta_change_window", search_problem.ThetaChangeWindow, 5.0);
+  igvc::param(pNh, "heuristic_inflation", search_problem.HeuristicInflation, 1.2);
+  igvc::param(pNh, "maximum_distance", search_problem.MaximumDistance, 20.0);
+  igvc::param(pNh, "rate", rateTime, 20.0);
+  igvc::param(pNh, "maximum_iterations", maxIter, 0);
 
   ros::Rate rate(rateTime);
   while (ros::ok())
