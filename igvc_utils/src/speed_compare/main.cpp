@@ -3,6 +3,7 @@
 #include <std_msgs/Bool.h>
 #include <chrono>
 #include <fstream>
+#include <igvc_utils/NodeUtils.hpp>
 
 bool enabled = false;
 bool first = true;
@@ -61,7 +62,7 @@ int main(int argc, char** argv)
   ros::Subscriber encoders_sub = nh.subscribe("/encoders", 1, encoders_callback);
 
   std::string location;
-  pNh.getParam("file", location);
+  igvc::getParam(pNh, "file", location);
   file.open(location);
   file << "timestamp, left_velocity, right_velocity, target_left_velocity, target_right_velocity" << std::endl;
 
