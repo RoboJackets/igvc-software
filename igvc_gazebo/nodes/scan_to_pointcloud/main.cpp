@@ -4,6 +4,7 @@
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
+#include <igvc_utils/NodeUtils.hpp>
 
 ros::Publisher _pointcloud_pub;
 laser_geometry::LaserProjection projection;
@@ -51,8 +52,8 @@ int main(int argc, char** argv)
 
   ros::NodeHandle pNh("~");
 
-  pNh.getParam("min_dist", min_dist);
-  pNh.getParam("neighbor_dist", neighbor_dist);
+  igvc::getParam(pNh, "min_dist", min_dist);
+  igvc::getParam(pNh, "neighbor_dist", neighbor_dist);
 
   ros::NodeHandle nh;
 
