@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <Eigen/Core>
 #include <igvc_utils/NodeUtils.hpp>
+#include <igvc_utils/RobotState.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include "tf/transform_datatypes.h"
