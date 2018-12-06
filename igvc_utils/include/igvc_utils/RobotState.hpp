@@ -33,6 +33,12 @@ public:
       tf::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
     }
 
+    void setState(const tf::StampedTransform &transform) {
+        x = transform.getOrigin().x();
+        y = transform.getOrigin().y();
+        tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
+    }
+
     Eigen::Vector3d getVector3d()
     {
       return {x, y, yaw};

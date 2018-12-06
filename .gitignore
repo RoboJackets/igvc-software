@@ -37,6 +37,9 @@
 */.idea/
 /.idea/
 
+# CMake
+*/cmake-build-*/
+
 #Camera Calibration
 /sandbox/camera_pose_estimation/CMakeFiles
 /sandbox/camera_pose_estimation/CMakeCache.txt
