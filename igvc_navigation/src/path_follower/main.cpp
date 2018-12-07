@@ -1,8 +1,8 @@
 #define _USE_MATH_DEFINES
 
-#include <igvc_msgs/velocity_pair.h>
-#include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <igvc_msgs/velocity_pair.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
 #include <ros/ros.h>
@@ -10,6 +10,7 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <igvc_utils/NodeUtils.hpp>
+#include <igvc_utils/RobotState.hpp>
 #include <iostream>
 #include "SmoothControl.h"
 
@@ -28,7 +29,10 @@ SmoothControl controller;
 
 void path_callback(const nav_msgs::PathConstPtr& msg)
 {
-  if (debug) { ROS_INFO_STREAM("Follower got path. Size: " << msg->poses.size()); }
+  if (debug)
+  {
+    ROS_INFO_STREAM("Follower got path. Size: " << msg->poses.size());
+  }
   path = msg;
 }
 
@@ -70,64 +74,62 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   ROS_INFO_STREAM("Distance to waypoint: " << goal_dist << "(m.)");
 
   ros::Time time = msg->header.stamp;
-  igvc_msgs::velocity_pair vel; // immediate velocity command
+  igvc_msgs::velocity_pair vel;  // immediate velocity command
   vel.header.stamp = time;
 
   if (goal_dist <= stop_dist)
   {
-      /**
-      Stop when the robot is a set distance away from the waypoint
-      */
-      ROS_INFO_STREAM(">>>WAYPOINT REACHED...STOPPING<<<");
-      vel.right_velocity = 0;
-      vel.left_velocity = 0;
-      // make path null to stop planning until path generated
-      // for new waypoint
-      path = nullptr;
-  } else {
-      /**
-      Obtain smooth control law from the controller. This includes a smooth
-      trajectory for visualization purposes and an immediate velocity command.
-      */
-      nav_msgs::Path trajectory_msg;
-      trajectory_msg.header.stamp = time;
-      trajectory_msg.header.frame_id = "/odom";
-
-      controller.getTrajectory(vel, path, trajectory_msg, cur_pos);
-      // publish trajectory
-      trajectory_pub.publish(trajectory_msg);
-
-      // publish target position
-      double tar_x = controller.target[0];
-      double tar_y = controller.target[1];
-      geometry_msgs::PointStamped target_point;
-      target_point.header.frame_id = "/odom";
-      target_point.header.stamp = time;
-      target_point.point.x = tar_x;
-      target_point.point.y = tar_y;
-      target_pub.publish(target_point);
-
-      if (debug) { ROS_INFO_STREAM("Distance to target: "
-                       << igvc::get_distance(tar_x, tar_y, cur_x, cur_y) << "(m.)"); }
+    /**
+    Stop when the robot is a set distance away from the waypoint
+    */
+    ROS_INFO_STREAM(">>>WAYPOINT REACHED...STOPPING<<<");
+    vel.right_velocity = 0;
+    vel.left_velocity = 0;
+    // make path null to stop planning until path generated
+    // for new waypoint
+    path = nullptr;
   }
+  else
+  {
+    /**
+    Obtain smooth control law from the controller. This includes a smooth
+    trajectory for visualization purposes and an immediate velocity command.
+    */
+    nav_msgs::Path trajectory_msg;
+    trajectory_msg.header.stamp = time;
+    trajectory_msg.header.frame_id = "/odom";
 
+    controller.getTrajectory(vel, path, trajectory_msg, cur_pos);
+    // publish trajectory
+    trajectory_pub.publish(trajectory_msg);
 
+    // publish target position
+    double tar_x = controller.target[0];
+    double tar_y = controller.target[1];
+    geometry_msgs::PointStamped target_point;
+    target_point.header.frame_id = "/odom";
+    target_point.header.stamp = time;
+    target_point.point.x = tar_x;
+    target_point.point.y = tar_y;
+    target_pub.publish(target_point);
+
+    if (debug)
+    {
+      ROS_INFO_STREAM("Distance to target: " << igvc::get_distance(tar_x, tar_y, cur_x, cur_y) << "(m.)");
+    }
+  }
 
   // make sure maximum velocity not exceeded
   if (std::max(std::abs(vel.right_velocity), std::abs(vel.left_velocity)) > maximum_vel)
   {
-    ROS_ERROR_STREAM("Maximum velocity exceeded. Right: "
-                     << vel.right_velocity
-                     << "(m/s), Left: "
-                     << vel.left_velocity
-                     << "(m/s), Max: "
-                     << maximum_vel
-                     << "(m/s) ... Stopping robot...");
+    ROS_ERROR_STREAM("Maximum velocity exceeded. Right: " << vel.right_velocity << "(m/s), Left: " << vel.left_velocity
+                                                          << "(m/s), Max: " << maximum_vel
+                                                          << "(m/s) ... Stopping robot...");
     vel.right_velocity = 0;
     vel.left_velocity = 0;
   }
 
-  cmd_pub.publish(vel); // pub velocity command
+  cmd_pub.publish(vel);  // pub velocity command
 }
 
 int main(int argc, char** argv)
