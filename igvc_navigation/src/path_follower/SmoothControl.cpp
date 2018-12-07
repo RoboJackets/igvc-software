@@ -4,6 +4,7 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
     nav_msgs::Path& trajectory, Eigen::Vector3d cur_pos)
 {
     this->cur_pos << cur_pos;
+    this->init_pos_ << cur_pos;
 
     unsigned int path_index;
     path_index = getClosestPosition(path);
@@ -11,9 +12,16 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
     getLineOfSightAndHeading();
     getEgocentricAngles(path, path_index);
 
-    double dt = rollOutTime/10;
+    // distance to target
+    double tar_dist = igvc::get_distance(cur_pos[0],
+                                         cur_pos[1],
+                                         target[0],
+                                         target[1]);
+    // calculate timestep 
+    double est_time = tar_dist/v;
+    double dt = est_time/granularity;
 
-    for (int i = 0; i < 15; i++)
+    for (int i = 0; i < granularity; i++)
     {
         Eigen::Vector3d action;
         getAction(action);
@@ -31,6 +39,13 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
         }
 
         getResult(path, action);
+
+        // don't visualize trajectory past the motion target
+        double dist_from_start = igvc::get_distance(cur_pos[0],
+                                                    cur_pos[1],
+                                                    init_pos_[0],
+                                                    init_pos_[1]);
+        if (dist_from_start > tar_dist) { return; }
 
         geometry_msgs::PoseStamped pose;
         pose.pose.position.x = this->cur_pos[0];
@@ -53,7 +68,7 @@ void SmoothControl::getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d actio
 
     if (std::abs(w) > 1e-10)
     {
-      // calculate instantaneous center of curvature
+      // calculate instantaneous center of curvature (ICC = [ICCx, ICCy])
       double R = v / w;
       double ICCx = cur_pos[0] - (R * sin(cur_pos[2]));
       double ICCy = cur_pos[1] + (R * cos(cur_pos[2]));
