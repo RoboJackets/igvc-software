@@ -9,7 +9,6 @@
 #include <tf/transform_datatypes.h>
 #include <Eigen/Dense>
 #include <cmath>
-#include <igvc_utils/RobotState.hpp>
 #include <igvc_utils/NodeUtils.hpp>
 #include <iostream>
 #include "SmoothControl.h"

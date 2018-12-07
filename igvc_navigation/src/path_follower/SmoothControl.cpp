@@ -5,7 +5,6 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
 {
     this->cur_pos << cur_pos;
 
-    // TODO: Create initialize_variables() method
     unsigned int path_index;
     path_index = getClosestPosition(path);
     getTargetPosition(path, path_index);
@@ -41,17 +40,6 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
 
 }
 
-
-/**
-Estimates the resultant pose given the current velocity and angular velocity
-command for visualization purposes. Additionally, updates the egocentric polar
-angles [delta, theta].
-
-Makes extensive use of differential drive odometry equations to calculate resultant
-pose.
-
-Source: http://www8.cs.umu.se/kurser/5DV122/HT13/material/Hellstrom-ForwardKinematics.pdf
-*/
 void SmoothControl::getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d action)
 {
     double v = action[0];
@@ -77,7 +65,7 @@ void SmoothControl::getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d actio
       Vector3d a(cur_pos[0] - ICCx, cur_pos[1] - ICCy, cur_pos[2]);
       Vector3d b = T * a;
       Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
-      fitToPolar(c[2]);
+      igvc::fit_to_polar(c[2]);
 
       resultant_pose << c[0], c[1], c[2];
     }
@@ -98,17 +86,14 @@ void SmoothControl::getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d actio
 
 }
 
-/**
-Computes the radius of curvature to obtain a new angular velocity value.
-*/
 void SmoothControl::getAction(Eigen::Vector3d& result)
 {
     // get egocentric polar coordinates for delta and theta
     double delta = delta_, theta = theta_;
 
     // adjust both angles to lie between -PI and PI
-    fitToPolar(delta);
-    fitToPolar(theta);
+    igvc::fit_to_polar(delta);
+    igvc::fit_to_polar(theta);
 
     // calculate the radius of curvature, K
     double d = sqrt(pow(target[0] - cur_pos[0], 2) + pow(target[1] - cur_pos[1], 2));
@@ -122,16 +107,11 @@ void SmoothControl::getAction(Eigen::Vector3d& result)
     result[1] = w;
 }
 
-/**
-Calculates egocentric polar angles for smooth control law calculations:
-    - delta, the angle between the line of sight and the current robot heading.
-    - theta, the angle between the line of sight and the target heading
-*/
 void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path, unsigned int path_index)
 {
     //get egocentric polar angle of los relative to heading
     double delta;
-    compute_angle(delta, los_, heading_);
+    igvc::compute_angle(delta, los_, heading_);
     this->delta_ = delta;
 
     // get i and j components of target orientation vector (res_orientation)
@@ -141,7 +121,7 @@ void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path, unsigned in
     {
       point1 = path->poses[path_index].pose.position;
       point2 = path->poses[path_index + 1].pose.position;
-      double increment = get_distance(
+      double increment = igvc::get_distance(
                               point1.x,
                               point1.y,
                               point2.x,
@@ -163,15 +143,11 @@ void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path, unsigned in
 
     // get egocentric polar angle of los relative to target orientation
     double theta;
-    compute_angle(theta, los_, tar_orientation_);
+    igvc::compute_angle(theta, los_, tar_orientation_);
     this->theta_ = theta;
 
 }
 
-/**
-Calculate the line of sight (los) from the robot to the target position as
-well as the current robot heading in vector format
-*/
 void SmoothControl::getLineOfSightAndHeading()
 {
     double slope_x = target[0] - cur_pos[0];
@@ -186,11 +162,6 @@ void SmoothControl::getLineOfSightAndHeading()
     this->heading_ << heading;
 }
 
-
-/**
-Find the furthest point along trajectory that isn't further than the
-lookahead distance. This is the target position.
-*/
 void SmoothControl::getTargetPosition(nav_msgs::PathConstPtr path, unsigned int path_index)
 {
     // target position
@@ -198,7 +169,7 @@ void SmoothControl::getTargetPosition(nav_msgs::PathConstPtr path, unsigned int 
 
     geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
 
-    if (get_distance(cur_pos[0], cur_pos[1], end.x, end.y) > lookahead_dist)
+    if (igvc::get_distance(cur_pos[0], cur_pos[1], end.x, end.y) > lookahead_dist)
     {
       double distance = 0;
       bool cont = true;
@@ -208,7 +179,7 @@ void SmoothControl::getTargetPosition(nav_msgs::PathConstPtr path, unsigned int 
         geometry_msgs::Point point1, point2;
         point1 = path->poses[path_index].pose.position;
         point2 = path->poses[path_index + 1].pose.position;
-        double increment = get_distance(
+        double increment = igvc::get_distance(
                               point1.x,
                               point1.y,
                               point2.x,
@@ -246,20 +217,17 @@ void SmoothControl::getTargetPosition(nav_msgs::PathConstPtr path, unsigned int 
     target << tar_x, tar_y, 0;
 }
 
-/**
-Find the index of the closest point on the path.
-*/
 unsigned int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
 {
     unsigned int path_index = 0;
-    double closest = get_distance(
+    double closest = igvc::get_distance(
                          cur_pos[0],
                          cur_pos[1],
                          path->poses[0].pose.position.x,
                          path->poses[0].pose.position.y
                       );
 
-    double temp = get_distance(
+    double temp = igvc::get_distance(
                       cur_pos[0],
                       cur_pos[1],
                       path->poses[path_index].pose.position.x,
@@ -273,7 +241,7 @@ unsigned int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
         closest = temp;
       }
       path_index++;
-      temp = get_distance(
+      temp = igvc::get_distance(
                  cur_pos[0],
                  cur_pos[1],
                  path->poses[path_index].pose.position.x,
@@ -282,39 +250,4 @@ unsigned int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
     }
 
     return path_index;
-}
-
-/* TODO: move these methods into NodeUtils */
-
-/**
-Adjust angle to lie within the polar range [-PI, PI]
-*/
-void SmoothControl::fitToPolar(double& angle) {
-    while (angle > M_PI)
-      angle -= 2 * M_PI;
-    while (angle < -M_PI)
-      angle += 2 * M_PI;
-}
-
-/**
-Calculates euclidian distance between two points
-*/
-double SmoothControl::get_distance(double x1, double y1, double x2, double y2)
-{
-  return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
-}
-
-/**
-Computes the egocentric polar angle of vec2 wrt vec1 in 2D, that is:
-  - clockwise: negative
-  - counter-clockwise: positive
-
-source: https://stackoverflow.com/questions/14066933/direct-way-of-computing-clockwise-angle-between-2-vectors
-*/
-void SmoothControl::compute_angle(double& angle, Eigen::Vector3d vec2, Eigen::Vector3d vec1)
-{
-  double dot = vec2[0]*vec1[0] + vec2[1]*vec1[1]; // dot product - proportional to cos
-  double det = vec2[0]*vec1[1] - vec2[1]*vec1[0]; // determinant - proportional to sin
-
-  angle = atan2(det, dot);
 }
