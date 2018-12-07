@@ -12,11 +12,11 @@ https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 
 #define _USE_MATH_DEFINES
 
-#include <igvc_utils/NodeUtils.hpp>
 #include <igvc_msgs/velocity_pair.h>
 #include <nav_msgs/Path.h>
 #include <Eigen/Dense>
 #include <cmath>
+#include <igvc_utils/NodeUtils.hpp>
 
 class SmoothControl
 {
@@ -42,8 +42,8 @@ public:
   @param[in] trajectory msg to store visualization trajectory in
   @param[in] cur_pos current position of the robot
   */
-  void getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathConstPtr path,
-        nav_msgs::Path& trajectory, Eigen::Vector3d cur_pos);
+  void getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathConstPtr path, nav_msgs::Path& trajectory,
+                     Eigen::Vector3d cur_pos);
 
 private:
   Eigen::Vector3d los_;
