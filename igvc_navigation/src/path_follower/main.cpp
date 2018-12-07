@@ -144,7 +144,7 @@ int main(int argc, char** argv)
   igvc::param(pNh, "axle_length", controller.axle_length, 0.52);
   igvc::param(pNh, "k1", controller.k1, 1.0);
   igvc::param(pNh, "k2", controller.k2, 3.0);
-  igvc::param(pNh, "roll_out_time", controller.rollOutTime, 2.0);
+  igvc::param(pNh, "granularity", controller.granularity, 2.0);
   igvc::param(pNh, "lookahead_dist", controller.lookahead_dist, 2.0);
 
   // load global parameters

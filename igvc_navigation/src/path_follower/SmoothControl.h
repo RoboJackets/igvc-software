@@ -23,7 +23,7 @@ class SmoothControl
 public:
   double k1, k2;
   double axle_length;
-  double rollOutTime;
+  double granularity;
   double v;
   double lookahead_dist;
 
@@ -48,6 +48,7 @@ public:
 private:
   Eigen::Vector3d los_;
   Eigen::Vector3d heading_;
+  Eigen::Vector3d init_pos_;
   Eigen::Vector3d tar_orientation_;
 
   double delta_;
