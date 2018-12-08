@@ -63,14 +63,9 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   }
 
   // Current pose
-  float cur_x = msg->pose.pose.position.x;
-  float cur_y = msg->pose.pose.position.y;
-  tf::Quaternion q;
-  tf::quaternionMsgToTF(msg->pose.pose.orientation, q);
-  float orientation = tf::getYaw(q);
-  Eigen::Vector3d cur_pos(cur_x, cur_y, orientation);
+  RobotState cur_pos(msg);
 
-  double goal_dist = igvc::get_distance(cur_x, cur_y, waypoint->point.x, waypoint->point.y);
+  double goal_dist = cur_pos.distTo(waypoint->point.x, waypoint->point.y);
   ROS_INFO_STREAM("Distance to waypoint: " << goal_dist << "(m.)");
 
   ros::Time time = msg->header.stamp;
@@ -99,23 +94,23 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     trajectory_msg.header.stamp = time;
     trajectory_msg.header.frame_id = "/odom";
 
+    controller.cur_pos = cur_pos;
     controller.getTrajectory(vel, path, trajectory_msg, cur_pos);
     // publish trajectory
     trajectory_pub.publish(trajectory_msg);
 
     // publish target position
-    double tar_x = controller.target[0];
-    double tar_y = controller.target[1];
+    RobotState target = controller.target;
     geometry_msgs::PointStamped target_point;
     target_point.header.frame_id = "/odom";
     target_point.header.stamp = time;
-    target_point.point.x = tar_x;
-    target_point.point.y = tar_y;
+    target_point.point.x = target.x;
+    target_point.point.y = target.y;
     target_pub.publish(target_point);
 
     if (debug)
     {
-      ROS_INFO_STREAM("Distance to target: " << igvc::get_distance(tar_x, tar_y, cur_x, cur_y) << "(m.)");
+      ROS_INFO_STREAM("Distance to target: " << cur_pos.distTo(target) << "(m.)");
     }
   }
 
