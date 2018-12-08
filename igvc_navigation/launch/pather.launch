@@ -18,6 +18,7 @@
         <param name="theta_filter" type="double" value="1.5"/>
         <param name="max_theta_change" type="double" value="0.8"/>
         <param name="theta_change_window" type="double" value="3.0"/>
+        <!-- Max distance to a goal node -->
         <param name="maximum_distance" type="double" value="100.0"/>
     </node>
 
@@ -31,7 +32,7 @@
         <!-- granularity with which to visualize planned trajectories -->
         <param name="granularity" type="int" value="100"/>
         <!-- How far away robot should be from the waypoint before it stops -->
-        <param name="stop_dist" type="double" value="0.9"/>
+        <param name="stop_dist" type="double" value="0.90"/>
         <!-- Smooth Control Parameters -->
         <param name="target_v" type="double" value="0.4"/>
         <param name="k1" type="double" value="1.8"/>

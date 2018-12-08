@@ -11,8 +11,8 @@
             <!-- Set decay_period to 0 to disable decay -->
             <param name="decay_period" type="double" value="60" />
             <param name="transform_max_wait_time" type="double" value="0.5" />
-            <param name="start_X" type="double" value="25"/>
-            <param name="start_Y" type="double" value="25"/>
+            <param name="start_X" type="double" value="100"/>
+            <param name="start_Y" type="double" value="100"/>
             <param name="increment_step" type="int" value="125"/>
             <param name="debug" type="bool" value="true"/>
     </node>

@@ -17,6 +17,7 @@ https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 #include <Eigen/Dense>
 #include <cmath>
 #include <igvc_utils/NodeUtils.hpp>
+#include <igvc_utils/RobotState.hpp>
 
 class SmoothControl
 {
@@ -27,8 +28,8 @@ public:
   double v;
   double lookahead_dist;
 
-  Eigen::Vector3d cur_pos;
-  Eigen::Vector3d target;
+  RobotState cur_pos;
+  RobotState target;
 
   /**
   Generate an immediate velocity command and visualize a smooth control trajectory
@@ -43,12 +44,13 @@ public:
   @param[in] cur_pos current position of the robot
   */
   void getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathConstPtr path, nav_msgs::Path& trajectory,
-                     Eigen::Vector3d cur_pos);
+                     RobotState cur_pos);
 
 private:
+  RobotState init_pos_;
+
   Eigen::Vector3d los_;
   Eigen::Vector3d heading_;
-  Eigen::Vector3d init_pos_;
   Eigen::Vector3d tar_orientation_;
 
   double delta_;
