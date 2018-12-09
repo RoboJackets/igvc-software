@@ -74,11 +74,31 @@ public:
     */
     char read();
 
+    /**
+    Getter for IP address
+
+    @return ip address as string
+    */
+    std::string getIPAddress();
+
+    /**
+    Getter for port number
+
+    @return port as int
+    */
+    int getPort();
+    /**
+    Determine whether the socket is open
+
+    @return boolean denoting whether or not the socket is open
+    */
+    bool isOpen();
+
 
 private:
-    boost::asio::io_service ioservice;
-    boost::asio::ip::address ip_address;
-    boost::asio::ip::tcp::socket s;
+    boost::asio::io_service ioservice; // provides core io functionality
+    boost::asio::ip::address ip_address; // ip address object
+    boost::asio::ip::tcp::socket s; // socket used for communication
 
 };
 
