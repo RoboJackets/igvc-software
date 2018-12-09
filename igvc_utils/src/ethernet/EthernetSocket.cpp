@@ -12,13 +12,12 @@ EthernetSocket::EthernetSocket(std::string ip_addr, int port) :
     {
         s.open(boost::asio::ip::tcp::v4());
     } catch (...) {
-        throw std::runtime_error("Could not open connection: "
-                + ip_addr + ", port: " + std::to_string(port));
     }
 
     if (!s.is_open())
-    throw std::runtime_error("Could not open connection: "
-            + ip_addr + ", port: " + std::to_string(port));
+        throw std::runtime_error("Could not open connection: "
+                + ip_addr + ", port: " + std::to_string(port));
+
     // bind socket to an endpoint
     s.bind(endpoint);
 
