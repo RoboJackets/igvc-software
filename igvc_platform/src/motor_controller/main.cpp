@@ -1,4 +1,5 @@
 #include <igvc_msgs/velocity_pair.h>
+#include <igvc_utils/EthernetSocket.h>
 #include <igvc_utils/SerialPort.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
@@ -59,11 +60,23 @@ int main(int argc, char** argv)
 
   ros::Publisher battery_pub = nh.advertise<std_msgs::Float64>("/battery", 1);
 
-  std::string device_path;
-  nhp.param(std::string("device"), device_path, std::string("/dev/igvc_motor_board"));
+  // === Ethernet changes
 
-  int baud_rate;
-  nhp.param(std::string("baud_rate"), baud_rate, 9600);
+  std::string ip_addr;
+  nhp.getParam("ip_addr", ip_addr);
+
+  int ethport;
+  nhp.getParam("port", ethport);
+
+  EthernetSocket port(ip_addr, ethport);
+
+  // ===
+
+  // std::string device_path;
+  // nhp.param(std::string("device"), device_path, std::string("/dev/igvc_motor_board"));
+  //
+  // int baud_rate;
+  // nhp.param(std::string("baud_rate"), baud_rate, 9600);
 
   int messages_to_read;
   nhp.param(std::string("messages_to_read"), messages_to_read, 3);
@@ -78,7 +91,7 @@ int main(int argc, char** argv)
   nhp.param("i_r", i_r, 0.0);
   nhp.param("i_l", i_l, 0.0);
 
-  SerialPort port(device_path, baud_rate);
+  // SerialPort port(device_path, baud_rate);
 
   if (!port.isOpen())
   {
