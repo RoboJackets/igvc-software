@@ -1,6 +1,8 @@
 <launch>
     <!-- MOTOR CONTROLLER -->
     <node name="motor_controller" pkg="igvc_platform" type="motor_controller" output="screen">
+          <param name="ip_addr" type="string" value="192.168.120"/>
+          <param name="port" type="int" value="7"/>
           <param name="p_l" type="double" value="30.0"/>
           <param name="p_r" type="double" value="30.0"/>
           <param name="d_l" type="double" value="2.0"/>
