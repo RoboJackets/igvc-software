@@ -1,10 +1,10 @@
 /**
-* An abstraction of boost::ip::tcp to ease communication with
-* ethernet devices
-*
-* date created: December 8th, 2018
-* author: Alejandro Escontrela
-*/
+ * An abstraction of boost::ip::tcp to ease communication with
+ * ethernet devices
+ *
+ * date created: December 8th, 2018
+ * author: Alejandro Escontrela
+ */
 
 #ifndef ETHERNETSOCKET_H
 #define ETHERNETSOCKET_H
@@ -20,86 +20,90 @@
 class EthernetSocket
 {
 public:
-    bool connected;
+  bool connected;
 
-    /**
-    Constructor opens the socket using the tcp v4 protocol and binds it to an
-    endpoint. This endpoint is constructed using the specified ip address and
-    port, providing the socket with a unique address.
+  /**
+  Constructor opens the socket using the tcp v4 protocol and binds it to an
+  endpoint. This endpoint is constructed using the specified ip address and
+  port, providing the socket with a unique address.
 
-    @param[in] ip_addr ip address to communicate with
-    @param[in] port port to communicate through
-    @throw std::runtime_error is socket couldn't open or connect
-    */
-    EthernetSocket(std::string ip_addr, int port);
+  @param[in] ip_addr ip address to communicate with
+  @param[in] port port to communicate through
+  @throw std::runtime_error is socket couldn't open or connect
+  */
+  EthernetSocket(std::string ip_addr, int port);
+  /**
+  Shut down the socket
+  */
+  ~EthernetSocket();
 
-    ~EthernetSocket();
+  /**
+  Transmit a std::string to the endpoint
 
-    /**
-    Transmit a std::string to the endpoint
+  @param[in] msg the string to transmit
+  */
+  void write(std::string msg);
+  /**
+  Transmit a (signed) char array of specified length to the endpoint.
+  @param[in] buffer char array to send
+  @param[in] length length of char array
+  */
+  void write(char* buffer, int length);
+  /**
+  Transmit a (unsigned) char array of specified length to the endpoint.
+  @param[in] buffer char array to send
+  @param[in] length length of char array
+  */
+  void write(unsigned char* buffer, int length);
+  /**
+  Read chars from the buffer until a newline character is encountered.
 
-    @param[in] msg the string to transmit
-    */
-    void write(std::string msg);
-    /**
-    Transmit a (signed) char array of specified length to the endpoint.
-    @param[in] buffer char array to send
-    @param[in] length length of char array
-    */
-    void write(char* buffer, int length);
-    /**
-    Transmit a (unsigned) char array of specified length to the endpoint.
-    @param[in] buffer char array to send
-    @param[in] length length of char array
-    */
-    void write(unsigned char* buffer, int length);
-    /**
-    Read chars from the buffer until a newline character is encountered.
+  @return a string of the characters read
+  */
+  std::string readln();
+  /**
+  Read a specified number of bytes from the socket. Return a char array
+  containing the read bytes.
 
-    @return a string of the characters read
-    */
-    std::string readln();
-    /**
-    Read a specified number of bytes from the socket. Return a char array
-    containing the read bytes.
+  @param[in] numBytes number of bytes to read from the buffer
+  @return a char array containing the read bytes
+  */
+  char* read(int numBytes);
+  /**
+  Read one byte from the socket. Return a char containing the read byte.
 
-    @param[in] numBytes number of bytes to read from the buffer
-    @return a char array containing the read bytes
-    */
-    char* read(int numBytes);
-    /**
-    Read one byte from the socket. Return a char containing the read byte.
+  @return the read byte
+  */
+  char read();
 
-    @return the read byte
-    */
-    char read();
+  /**
+  Getter for IP address
 
-    /**
-    Getter for IP address
+  @return ip address as string
+  */
+  std::string getIPAddress();
 
-    @return ip address as string
-    */
-    std::string getIPAddress();
+  /**
+  Getter for port number
 
-    /**
-    Getter for port number
+  @return port as int
+  */
+  int getPort();
+  /**
+  Determine whether the socket is open
 
-    @return port as int
-    */
-    int getPort();
-    /**
-    Determine whether the socket is open
-
-    @return boolean denoting whether or not the socket is open
-    */
-    bool isOpen();
-
+  @return boolean denoting whether or not the socket is open
+  */
+  bool isOpen();
+  /**
+  Cancel all asynchronous calls on the socket
+  */
+  void flush();
 
 private:
-    boost::asio::io_service ioservice; // provides core io functionality
-    boost::asio::ip::address ip_address; // ip address object
-    boost::asio::ip::tcp::socket s; // socket used for communication
-
+  boost::asio::io_service ioservice;    // provides core io functionality
+  boost::asio::ip::address ip_address;  // ip address object
+  boost::asio::ip::tcp::socket sock;    // socket used for communication
 };
 
 #endif
