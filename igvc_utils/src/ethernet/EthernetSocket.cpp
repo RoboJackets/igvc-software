@@ -37,11 +37,6 @@ EthernetSocket::EthernetSocket(std::string ip_addr, int port) :
     }
 }
 
-bool EthernetSocket::isOpen()
-{
-    return s.is_open();
-}
-
 void EthernetSocket::write(std::string msg)
 {
     if (s.is_open())
@@ -103,4 +98,19 @@ std::string EthernetSocket::readln()
         if (in != '\r')
             line = line + in;
     }
+}
+
+std::string EthernetSocket::getIPAddress()
+{
+    return this->ip_address.to_string();
+}
+
+int EthernetSocket::getPort()
+{
+    return static_cast<int>(this->s.remote_endpoint().port());
+}
+
+bool EthernetSocket::isOpen()
+{
+    return s.is_open();
 }
