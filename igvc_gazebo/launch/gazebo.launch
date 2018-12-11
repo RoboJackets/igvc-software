@@ -41,5 +41,5 @@
   <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
 
   <include file="$(find igvc_gazebo)/launch/igvc_control.launch" />
->>>>>>> launch_fix:igvc_gazebo/igvc_control/launch/gazebo.launch
+
 </launch>
