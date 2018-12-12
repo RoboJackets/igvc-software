@@ -9,12 +9,12 @@
 #ifndef ETHERNETSOCKET_H
 #define ETHERNETSOCKET_H
 
-#include <boost/asio.hpp>
 #include <boost/array.hpp>
+#include <boost/asio.hpp>
 #include <igvc_utils/NodeUtils.hpp>
 #include <memory>
-#include <string>
 #include <sstream>
+#include <string>
 
 /**
  * The <code>EthernetSocket</code> class provides a wrapper for the
@@ -75,8 +75,8 @@ public:
   std::string getBoostVersion();
 
 private:
-  boost::asio::io_service io_service;    // provides core io functionality
-  std::unique_ptr<boost::asio::ip::tcp::socket> sock; // tcp connection socket
+  boost::asio::io_service io_service;                  // provides core io functionality
+  std::unique_ptr<boost::asio::ip::tcp::socket> sock;  // tcp connection socket
 };
 
 #endif
