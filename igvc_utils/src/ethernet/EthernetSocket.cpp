@@ -1,127 +1,71 @@
 #include <igvc_utils/EthernetSocket.h>
 #include <iostream>
 
-EthernetSocket::EthernetSocket(std::string ip_addr, int port) : sock(ioservice)
+using boost::asio::ip::tcp;
+
+EthernetSocket::EthernetSocket(std::string ip_addr, int port)
 {
-  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ip_addr),
-                                          static_cast<unsigned short>(port));
+  // resolve all possible endpoints
+  tcp::resolver resolver(io_service);
+  tcp::resolver::query query(ip_addr, std::to_string(port));
+  tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
-  try
-  {
-    sock.open(boost::asio::ip::tcp::v4());
-  }
-  catch (...)
-  {
-  }
-
-  if (!sock.is_open())
-    throw std::runtime_error("Could not open connection: " + ip_addr + ", port: " + std::to_string(port));
-
-  // bind socket to an endpoint
-  sock.bind(endpoint);
-
-  // connect the socket to the specified endpoint
-  connected = true;
-  try
-  {
-    sock.connect(endpoint);
-  }
-  catch (...)
-  {
-    connected = false;
-  }
-
-  if (!connected)
-  {
-    throw std::runtime_error("Could not connect to ip address: " + ip_addr + ", port: " + std::to_string(port));
-  }
+  // look through endpoints and hit socket's connect() member function until
+  // a successful TCP connection is established
+  this->sock = igvc::make_unique<tcp::socket>(io_service);
+  boost::asio::connect(*sock, endpoint_iterator);
 }
 
 EthernetSocket::~EthernetSocket()
 {
-  sock.shutdown(boost::asio::ip::tcp::socket::shutdown_send);
+  // shut down the TCP connection
+  this->sock->shutdown(boost::asio::ip::tcp::socket::shutdown_send);
 }
 
-void EthernetSocket::write(std::string msg)
+void EthernetSocket::sendMessage(std::string message)
 {
-  if (sock.is_open())
-    sock.send(boost::asio::buffer(msg.c_str(), msg.length()));
+  boost::system::error_code error;
+  // Create boost buffer from string and send to TCP endpoint
+  boost::asio::write(*sock, boost::asio::buffer(message, sizeof(message)), error);
 }
 
-void EthernetSocket::write(char* buffer, int length)
+std::string EthernetSocket::readMessage()
 {
-  if (sock.is_open())
-    sock.send(boost::asio::buffer(buffer, length));
-}
+  // read data from TCP connection
+  boost::array<char, 128> buf;
+  boost::system::error_code error;
 
-void EthernetSocket::write(unsigned char* buffer, int length)
-{
-  if (sock.is_open())
-    sock.send(boost::asio::buffer(buffer, length));
-}
+  size_t len = sock->read_some(boost::asio::buffer(buf), error);
+  std::string reading(buf.begin(), buf.end()); // get string from buffer iter
 
-char EthernetSocket::read()
-{
-  if (!sock.is_open())
-    return -1;
-
-  // read one character on the socket
-  char in;
-  try
+  if (error == boost::asio::error::eof)
   {
-    sock.receive(boost::asio::buffer(&in, 1));
+    std::cout << "TCP Connection closed by peer: Disconnecting" << std::endl;
   }
-  catch (
-      boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::system::system_error> >&
-          err)
+  else if(error)
   {
-    sock.shutdown(boost::asio::ip::tcp::socket::shutdown_send);
-    throw std::runtime_error("Error reading socket");
+    throw boost::system::system_error(error);
   }
-  return in;
+
+  return reading;
 }
 
-char* EthernetSocket::read(int numBytes)
+std::string EthernetSocket::getIP()
 {
-  if (!sock.is_open())
-    return (char*)"";
-
-  char* bytes = new char[numBytes];
-  for (int i = 0; i < numBytes; i++)
-    bytes[i] = read();
-
-  return bytes;
-}
-
-std::string EthernetSocket::readln()
-{
-  std::string line = "";
-  while (true)
-  {
-    char in = read();
-    if (in == '\n')
-      return line;
-    if (in != '\r')
-      line = line + in;
-  }
-}
-
-std::string EthernetSocket::getIPAddress()
-{
-  return this->ip_address.to_string();
+  return sock->remote_endpoint().address().to_string();
 }
 
 int EthernetSocket::getPort()
 {
-  return static_cast<int>(this->sock.remote_endpoint().port());
+  return static_cast<int>(sock->remote_endpoint().port());
 }
 
-bool EthernetSocket::isOpen()
+std::string EthernetSocket::getBoostVersion()
 {
-  return sock.is_open();
-}
+  std::stringstream version;
+  version << BOOST_VERSION / 100000     << "."  // major version
+          << BOOST_VERSION / 100 % 1000 << "."  // minor version
+          << BOOST_VERSION % 100;               // patch level
 
-void EthernetSocket::flush()
-{
-  sock.cancel();
+  return version.str();
 }

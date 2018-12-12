@@ -10,7 +10,11 @@
 #define ETHERNETSOCKET_H
 
 #include <boost/asio.hpp>
+#include <boost/array.hpp>
+#include <igvc_utils/NodeUtils.hpp>
+#include <memory>
 #include <string>
+#include <sstream>
 
 /**
  * The <code>EthernetSocket</code> class provides a wrapper for the
@@ -20,8 +24,6 @@
 class EthernetSocket
 {
 public:
-  bool connected;
-
   /**
   Constructor opens the socket using the tcp v4 protocol and binds it to an
   endpoint. This endpoint is constructed using the specified ip address and
@@ -42,46 +44,21 @@ public:
 
   @param[in] msg the string to transmit
   */
-  void write(std::string msg);
+  void sendMessage(std::string message);
+
   /**
-  Transmit a (signed) char array of specified length to the endpoint.
-  @param[in] buffer char array to send
-  @param[in] length length of char array
-  */
-  void write(char* buffer, int length);
-  /**
-  Transmit a (unsigned) char array of specified length to the endpoint.
-  @param[in] buffer char array to send
-  @param[in] length length of char array
-  */
-  void write(unsigned char* buffer, int length);
-  /**
-  Read chars from the buffer until a newline character is encountered.
+  read a message from the TCP connections
 
   @return a string of the characters read
   */
-  std::string readln();
-  /**
-  Read a specified number of bytes from the socket. Return a char array
-  containing the read bytes.
-
-  @param[in] numBytes number of bytes to read from the buffer
-  @return a char array containing the read bytes
-  */
-  char* read(int numBytes);
-  /**
-  Read one byte from the socket. Return a char containing the read byte.
-
-  @return the read byte
-  */
-  char read();
+  std::string readMessage();
 
   /**
   Getter for IP address
 
   @return ip address as string
   */
-  std::string getIPAddress();
+  std::string getIP();
 
   /**
   Getter for port number
@@ -89,21 +66,17 @@ public:
   @return port as int
   */
   int getPort();
-  /**
-  Determine whether the socket is open
 
-  @return boolean denoting whether or not the socket is open
-  */
-  bool isOpen();
   /**
-  Cancel all asynchronous calls on the socket
+  Get version of boost used by this library
+
+  @return version number in major_version.minor_version.patch_level format
   */
-  void flush();
+  std::string getBoostVersion();
 
 private:
-  boost::asio::io_service ioservice;    // provides core io functionality
-  boost::asio::ip::address ip_address;  // ip address object
-  boost::asio::ip::tcp::socket sock;    // socket used for communication
+  boost::asio::io_service io_service;    // provides core io functionality
+  std::unique_ptr<boost::asio::ip::tcp::socket> sock; // tcp connection socket
 };
 
 #endif
