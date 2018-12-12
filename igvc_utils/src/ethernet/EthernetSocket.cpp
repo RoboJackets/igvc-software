@@ -36,13 +36,13 @@ std::string EthernetSocket::readMessage()
   boost::system::error_code error;
 
   size_t len = sock->read_some(boost::asio::buffer(buf), error);
-  std::string reading(buf.begin(), buf.end()); // get string from buffer iter
+  std::string reading(buf.begin(), buf.end());  // get string from buffer iter
 
   if (error == boost::asio::error::eof)
   {
     std::cout << "TCP Connection closed by peer: Disconnecting" << std::endl;
   }
-  else if(error)
+  else if (error)
   {
     throw boost::system::system_error(error);
   }
@@ -63,7 +63,7 @@ int EthernetSocket::getPort()
 std::string EthernetSocket::getBoostVersion()
 {
   std::stringstream version;
-  version << BOOST_VERSION / 100000     << "."  // major version
+  version << BOOST_VERSION / 100000 << "."      // major version
           << BOOST_VERSION / 100 % 1000 << "."  // minor version
           << BOOST_VERSION % 100;               // patch level
 
