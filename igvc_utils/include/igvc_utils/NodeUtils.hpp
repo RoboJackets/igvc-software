@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <Eigen/Dense>
+#include <tuple>
 
 namespace igvc
 {
@@ -29,9 +30,26 @@ void getParam(const ros::NodeHandle &pNh, const std::string &param_name, T &para
 /**
 Calculates euclidian distance between two points
 */
-inline double get_distance(double x1, double y1, double x2, double y2)
+template<typename T>
+inline T get_distance(T x1, T y1, T x2, T y2)
 {
   return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+}
+
+/**
+Calculates euclidian distance between two points, taking tuples for each
+(x,y) point as argument
+*/
+template<typename T>
+inline T get_distance(std::tuple<T,T> p1, std::tuple<T,T> p2)
+{
+    T x1,y1;
+    std::tie(x1,y1) = p1;
+
+    T x2,y2;
+    std::tie(x2, y2) = p2;
+
+    return ((float) sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2)));
 }
 
 /**
