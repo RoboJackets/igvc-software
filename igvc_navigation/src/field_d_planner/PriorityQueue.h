@@ -1,55 +1,222 @@
 /**
-Priority queue to hold all locally inconsistent nodes to be expanded in the
-graph search problem. Inherits std::priority_queue.
+Priority Queue implementation for Field D* path planning algorithm.
+
+The PriorityQueue class orders states based on ascending order of key value.
+Because the key value of each state contains two quantities a lexicographic
+ordering is used, where key(s) < key(s') iff the first element of key(s) is less
+than the first element of key(s') or the first element of key(s) equals the first
+element of key(s') and the second element of key(s) is less than the second
+element of key(s').
+
+Each State is composed of the following:
+1. x and y index representing the node on the graph
+2. f-value and g-value
 
 Author: Alejandro Escontrela <aescontrela3@gatech.edu>
-Date Created: Dec. 15th, 2018
+Date Created: December 20th, 2018
+
+Sources:
+
+Field D* [Dave Ferguson, Anthony Stentz]
+https://pdfs.semanticscholar.org/58f3/bc8c12ee8df30b3e9564fdd071e729408653.pdf
+
+D* Lite [Sven Koenig, Maxim Likhachev]
+http://idm-lab.org/bib/abstracts/papers/aaai02b.pdf
+
+Optimal and Efficient Path Planning for Unknown and Dynamic Environments  (D*)
+[Anthony Stentz]
+https://pdfs.semanticscholar.org/77e9/b970024bc5da2b726491823f7d617a303811.pdf
+
+Because this software was written
+         during christmas:
+
+                 *
+                 ^
+                ^^^
+               ^^^^^
+              ^^^#^^^
+             ^^^^^$^^^
+            ^^^^^^^^^^^
+           ^^J^^^^^^^0^^
+          ^^^^^^^^^^^^^^^
+         ^^^^^@^^^^^^^^^&^
+        ^^^^^^^^^^^^^^^^^^^
+            ||       ||
+            ||       ||
+        ||_______________||
+
+ yes, some of the ascii characters
+           are ornaments
+
 */
 
-#include <queue>
+#ifndef PRIORITYQUEUE_H
+#define PRIORITYQUEUE_H
+
+#include <set>
 #include <tuple>
-#include <vector>
 #include <string>
 #include <sstream>
+#include <utility>
+#include <algorithm>
+#include <functional>
+
 #include "Node.h"
-#include "NodeCompare.hpp"
 
-
-class PriorityQueue : public std::priority_queue<Node, std::vector<Node>, NodeCompare>
+/**
+  key defined as <f1(s), f2(s)>
+  where...
+  f1(s) = min(g(s), rhs(s)) + h(s_start, s) + K_M
+  f2(s)min(g(s), rhs(s))
+*/
+struct Key
 {
+    float f1;
+    float f2;
 
+    Key(float f1, float f2)
+    {
+        this->f1 = f1;
+        this->f2 = f2;
+    }
+
+    Key(std::tuple<float,float> k)
+    {
+        this->f1 = std::get<0>(k);
+        this->f2 = std::get<1>(k);
+    }
+
+    // overloaded assignment operator
+    Key& operator=(const Key &other)
+    {
+        this->f1 = other.f1;
+        this->f2 = other.f2;
+
+        return *this;
+    }
+
+    // lexicograhpic ordering of keys
+    bool operator<(const Key& other) const
+    {
+        if (this->f1 < other.f1)
+            return true;
+        else if (this->f1 == other.f1)
+            return this->f2 < other.f2;
+        else
+            return false;
+    }
+
+    bool operator<=(const Key& other) const
+    {
+        if (this->f1 < other.f1)
+            return true;
+        else if (this->f1 == other.f1)
+            return this->f2 <= other.f2;
+        else
+            return false;
+    }
+
+    // Keys equal if their corresponding values are equal
+    bool operator==(const Key &other) const
+    {
+        return (this->f1 == other.f1) && (this->f2 == other.f2);
+    }
+};
+
+class PriorityQueue
+{
 public:
 
     /**
-    Remove Node from priority queue. O(n)
-
-    @param[in] s Node to remove
-    @return whether or not Node was found
+    Default no-arg constructor for priority queue. Initializes priority queue
+    with compFunctor Comparator. This comparator sorts the priority queue based
+    on the lexicographic ordering of the key values.
     */
-    bool remove(Node s);
+    PriorityQueue();
+    /**
+    Checks whether or not the priority queue contains a state with the specified
+    index.
+
+    @param[in] ind tuple representing the indices of the state
+    @return whether or not the priority queue contains an entry for that state
+    */
+    bool contains(Node n); // O(n)
+    /**
+    Insert a state into the priority queue.
+
+    @param[in] item state to insert into the priority queue
+    */
+    void insert(Node n, Key k); // O(n)
 
     /**
-    Return string representation of the items in the priority queue. O(n)
+    Remove an item from the priority queue for the specified node.
 
-    @return string of items in the priority queue
+    @param[in] n node to remove from the priority queue
+    @return whether such an item was found and removed
     */
-    std::string toString();
+    bool remove(Node n); // O(n)
+    /**
+    Pops the top (least-cost) state from the priority queue. This has the effect of
+    reducing the size of the priority queue by one. If the priority queue is
+    empty, nothing happens.
+    */
+    void pop(); // O(1)
+    /**
+    Returns the key of the least cost state from the priority queue
+
+    @return least-cost key from the priority queue
+    */
+    Key topKey(); // O(1)
+    /**
+    Returns the node of the least cost state from the priority queue
+
+    @return least-cost node from the priority queue
+    */
+    Node topNode(); // O(1)
+    /**
+    Returns current size of the priority queue.
+
+    @return number of states in priority queue
+    */
+    int size(); // O(1)
 
     /**
-    Update item sharing the same key as the specified item in the priority queue
-    O(n)
+    Represents a string representation of the priority queue:
 
-    @param[in] Item to update in priority queue
-    @return whether or not item was successfully updated
+    for each state in pq:
+        stream << [x,y,f: f-val,g: g-val] << std::endl
+
+    @return string representation of priority queue
     */
-    bool update(Node n);
+    std::string str() const; // O(n)
+
+
+private:
 
     /**
-    Check if priority_queue contains item with key. O(n)
+    Finds first state in the priority queue with the specified index. If found,
+    returns an iterator to this state in the priority queue. Otherwise, returns
+    iterator to the end of the priority queue.
 
-    @param[in] key string to check for
-    @return whether or not the priority queue contains that item
+    @param[in] ind index of state to find in the priority queue
+    @return iterator to the found element or iterator to end of priority queue if no such element found
     */
-    bool contains(Node n);
+    std::set<std::pair<Node,Key>>::iterator find(Node n);
 
+    // Declaring the type of Predicate that accepts 2 pairs and returns a bool
+    typedef std::function<bool(std::pair<Node,Key>, std::pair<Node,Key>)> Comparator;
+    // Defining a lambda function to compare two entries. Compares using key.
+    Comparator compFunctor =
+            [](std::pair<Node,Key> elem1, std::pair<Node,Key> elem2)
+            {
+                // Comparison logic for priority queue entries
+                return elem1.second <= elem2.second;
+            };
+
+    std::set<std::pair<Node,Key>, Comparator> pq;
 };
+
+std::ostream& operator<<(std::ostream& stream, const PriorityQueue& pq);
+std::ostream& operator<<(std::ostream& stream, const Key& k);
+
+#endif

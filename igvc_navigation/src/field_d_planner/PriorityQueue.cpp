@@ -1,49 +1,97 @@
 #include "PriorityQueue.h"
 
-bool PriorityQueue::remove(std::string s)
-{
-    for (auto it = this->c.begin(); it != this->c.end(); it ++ )
-    {
-        if ((it->key).compare(s) == 0)
-        {
-            this->c.erase(it);
-            return true;
-        }
-    }
+PriorityQueue::PriorityQueue() : pq(compFunctor) {}
 
-    return false;
+bool PriorityQueue::contains(Node n)
+{
+    return this->find(n) != pq.end();
 }
 
-std::string PriorityQueue::toString()
+void PriorityQueue::insert(Node n, Key k)
+{
+    pq.insert(std::make_pair(n,k));
+}
+
+bool PriorityQueue::remove(Node n)
+{
+    auto it = this->find(n);
+
+    if (it == pq.end()) // no such item exists
+        return false;
+
+    pq.erase(it);
+    return true;
+
+}
+
+void PriorityQueue::pop()
+{
+    if (this->size() <= 0)
+        return;
+
+    pq.erase(pq.begin());
+}
+
+Key PriorityQueue::topKey()
+{
+    std::pair<Node,Key> e = *(pq.begin());
+    return e.second;
+}
+
+Node PriorityQueue::topNode()
+{
+    std::pair<Node,Key> e = *(pq.begin());
+    return e.first;
+}
+
+int PriorityQueue::size()
+{
+    return pq.size();
+}
+
+std::string PriorityQueue::str() const
 {
     std::stringstream ss;
-    for (auto it = this->c.begin(); it != this->c.end(); it ++ )
+    ss << "{";
+    for (auto it = pq.begin(); it != pq.end(); it++)
     {
-        ss << it->key << " [ f: "<< std::get<0>(it->value) << ", g: " << std::get<1>(it->value) << "]\n";
+        ss << "<" << it->first << ", " << it->second << ">";
+
+        // add commas and new lines responsibly
+        if ((it != pq.end()) && (std::next(it) != pq.end()))
+            ss << ",\n";
     }
+    ss << "}";
 
     return ss.str();
 }
 
-bool PriorityQueue::update(Item i)
+std::set<std::pair<Node,Key>>::iterator PriorityQueue::find(Node n)
 {
-    bool success = this->remove(i.key);
-    if (success)
-        this->push(i);
+    std::set<std::pair<Node,Key>>::iterator it = std::find_if(pq.begin(), pq.end(), \
+            [n](std::pair<Node,Key> const& e)
+            {
+                return e.first.getIndex() == n.getIndex();
+            });
 
-    return success;
+    return it;
 }
 
-bool PriorityQueue::contains(std::string key)
+std::ostream& operator<<(std::ostream& stream,
+                     const PriorityQueue& pq)
 {
-    for (auto it = this->c.begin(); it != this->c.end(); it ++ )
-    {
-        if ((it->key).compare(key) == 0)
-        {
-            return true;
-        }
-    }
+    stream << pq.str();
+    return stream;
+}
 
-    return false;
+std::ostream& operator<<(std::ostream& stream, const Key& k)
+{
+    stream << "[" << k.f1 << ", " << k.f2 << "]";
+    return stream;
+}
 
+std::ostream& operator<<(std::ostream& stream, const std::pair<Node,Key>& e)
+{
+    stream << "<" << e.first << ", " << e.second << ">";
+    return stream;
 }

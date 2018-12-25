@@ -1,51 +1,99 @@
 #include "Node.h"
 
-Node::Node(float x, float y, std::tuple<Cell,Cell,Cell,Cell> cells)
+Node::Node(bool valid)
+{
+    this->valid = valid;
+}
+
+Node::Node(int x, int y)
 {
     this->x = x;
     this->y = y;
-    this->cells = cells;
-
     this->ind = std::make_tuple(x,y);
 }
 
-Node::Node(float x, float y, std::tuple<Cell,Cell,Cell,Cell> cells, float g, float rhs)
+Node::Node(std::tuple<int,int> ind)
+{
+    int x,y;
+    std::tie(x,y) = ind;
+    this->x = x;
+    this->y = y;
+    this->ind = std::make_tuple(x,y);
+}
+
+Node::~Node()
+{
+
+}
+
+void Node::setIndex(std::tuple<int,int> ind)
+{
+    this->x = std::get<0>(ind);
+    this->y = std::get<1>(ind);
+
+    this->ind = std::make_tuple(this->x, this->y);
+}
+
+void Node::setIndex(int x, int y)
 {
     this->x = x;
     this->y = y;
-    this->cells = cells;
-    this->g = g;
-    this->rhs = rhs;
-
-    this->ind = std::make_tuple(x,y);
+    this->ind = std::make_tuple(this->x, this->y);
 }
 
-std::tuple<float,float> Node::getCoords()
+std::tuple<int,int> Node::getIndex() const
 {
     return this->ind;
 }
 
-std::tuple<Cell,Cell,Cell,Cell> Node::getCells()
+void Node::setBptr(std::tuple<int,int> bptr)
 {
-    return this->cells;
+    this->bptr = bptr;
 }
 
-float Node::getCost()
+std::tuple<int,int> Node::getBptr() const
 {
-    return this->g;
+    return this->bptr;
 }
 
-float Node::getRHS()
+bool Node::operator==(const Node &other) const
 {
-    return this->rhs;
+    return this->getIndex() == other.getIndex();
 }
 
-void Node::setCost(float val)
+bool Node::operator!=(const Node &other) const
 {
-    this->g = val;
+    return !(*this == other);
 }
 
-void Node::setRHS(float val)
+Node& Node::operator= (const Node &node)
 {
-    this->rhs = val;
+    // do the copy
+    std::tie(this->x,this->y) = node.getIndex();
+    this->ind = node.getIndex();
+    this->bptr = node.getBptr();
+
+    // return the existing object so we can chain this operator
+    return *this;
 }
+
+std::ostream& operator<<(std::ostream& stream, const Node& n)
+{
+    int x,y;
+    std::tie(x,y) = n.getIndex();
+    stream << "[" << x << ", " << y << "]";
+    return stream;
+ }
+
+std::ostream& operator<<(std::ostream& stream,
+                     const std::unordered_set<Node>& uset)
+{
+    stream << "{";
+    for(auto const& i : uset)
+    {
+        stream << i << ", ";
+    }
+    stream << "}";
+
+    return stream;
+ }
