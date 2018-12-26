@@ -1,14 +1,32 @@
 /**
-D* lite path planner implementation. D* lite is an incremental search
-algorithm that keeps track of previous search results to recaculate a new path
-when cell traversal costs have changed.
+D* lite path planner implementation.
 
-the DLitePlanner interfaces with the Graph object to calculate the optimal
+D* lite is an incremental search algorithm that keeps track of data from previous
+searches to speed up replanning. The first search through the grid space is
+equivalent to A*, with nodes in the priority queue ordered by a path cost estimate:
+    f(s) = g(s) + h(s_start, s)
+
+When the graph is updated with new sensor information and the path needs replanning,
+comparatively few nodes need expanding to re-calculate the optimal path.
+
+The DLitePlanner interfaces with the Graph object to calculate the optimal
 path through the occupancy grid in an eight-connected grid space. This means
 that each node has 8 neighbors and can only travel to those eight neighbors.
 
 Author: Alejandro Escontrela <aescontrela3@gatech.edu>
 Date Created: December 22nd, 2018
+
+Sources:
+D* Lite [Sven Koenig, Maxim Likhachev]
+http://idm-lab.org/bib/abstracts/papers/aaai02b.pdf
+
+Optimal and Efficient Path Planning for Unknown and Dynamic Environments  (D*)
+[Anthony Stentz]
+https://pdfs.semanticscholar.org/77e9/b970024bc5da2b726491823f7d617a303811.pdf
+
+MIT Advanced Lecture 1: Incremental Path Planning
+[MIT OCW]
+https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robotics-spring-2016/videos-for-advanced-lectures/advanced-lecture-1/
 */
 
 #ifndef FIELDDPLANNER_H
@@ -77,41 +95,28 @@ public:
     @return number of nodes expanded in graph search
     */
     int computeShortestPath();
+    /**
+    Updates nodes around cells whose occupancy values have changed. Takes into
+    account the cspace of the robot. This step is performed after the robot
+    moves and the occupancy grid is updated with new sensor information
 
-    /**
-    Returns g-value for a node s
+    @return the number of nodes updated
     */
-    float getG(Node s);
+    int updateNodesAroundUpdatedCells();
     /**
-    Returns rhs value for a node s
+    Constructs the optimal path through the search space by greedily choosing
+    the next node that minimizes c(s,s') + g(s'). Ties are broken arbitrarily.
     */
-    float getRHS(Node s);
-
+    void constructOptimalPath();
     /**
-    Tries to insert an entry into the unordered map. If an entry with that key
-    already exists, overrides the value with the new g and rhs values.
+    Tries to insert an entry into the unordered map. If an entry for that key
+    (Node) already exists, overrides the value with specified g and rhs vals.
 
     @param[in] s key to create entry for
     @param[in] g g value for entry
     @param[in] rhs rhs value for entry
     */
     void insert_or_assign(Node s, float g, float rhs);
-
-    /**
-    Updates nodes around cells whose occupancy values have changed while taking
-    into account c-space. This step is performed after the robot moves and the
-    occupancy grid is updated with new sensor information
-
-    @return the number of nodes updated
-    */
-    int updateNodesAroundUpdatedCells();
-
-    /**
-    Constructs the optimal path through the search space by greedily choosing
-    the next node that minimizes c(s,s') + g(s').
-    */
-    void constructOptimalPath();
-
     /**
     Checks whether a specified node is within range of the goal node. This 'range'
     is specified by the GOAL_RANGE instance variable.
@@ -120,8 +125,20 @@ public:
     @return whether or not node s is within range of the goal
     */
     bool isWithinRangeOfGoal(Node s);
+    /**
+    Returns g-value for a node s
 
+    @param[in] s Node to get g-value for
+    @return g-value
+    */
+    float getG(Node s);
+    /**
+    Returns rhs value for a node s
 
+    @param[in] s Node to get rhs-value for
+    @return rhs-value
+    */
+    float getRHS(Node s);
 
 private:
     // hashed map contains all nodes and <g,rhs> values in search

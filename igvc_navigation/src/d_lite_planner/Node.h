@@ -8,18 +8,6 @@ optimal path.
 
 Author: Alejandro Escontrela <aescontrela3@gatech.edu>
 Date: Dec. 15th, 2018
-
-Sources:
-
-Field D* [Dave Ferguson, Anthony Stentz]
-https://pdfs.semanticscholar.org/58f3/bc8c12ee8df30b3e9564fdd071e729408653.pdf
-
-D* Lite [Sven Koenig, Maxim Likhachev]
-http://idm-lab.org/bib/abstracts/papers/aaai02b.pdf
-
-Optimal and Efficient Path Planning for Unknown and Dynamic Environments  (D*)
-[Anthony Stentz]
-https://pdfs.semanticscholar.org/77e9/b970024bc5da2b726491823f7d617a303811.pdf
 */
 
 #ifndef NODE_H

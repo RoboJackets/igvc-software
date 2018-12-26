@@ -33,10 +33,7 @@ void DLitePlanner::updateNode(Node s)
 
     /**
     looks for a node in the priority queue and removes it if found
-    same as calling:
-
-    if PQ.contains(s)
-        PQ.remove(s)
+    same as calling: if PQ.contains(s) PQ.remove(s);
     */
     PQ.remove(s);
 
@@ -65,17 +62,9 @@ int DLitePlanner::computeShortestPath()
 {
     int numNodesExpanded = 0;
 
-    // std::cout << "Start Expanding" << std::endl;
-    // std::cout << "Start Node: " << graph.Start << std::endl;
-    // std::cout << "Goal Node: " << graph.Goal << std::endl;
-
     while((PQ.topKey() < calculateKey(graph.Start)) || (getRHS(graph.Start) != getG(graph.Start)))
     {
         numNodesExpanded++;
-
-        // std::cout << "PQ: " << PQ << std::endl;
-        // std::cout << "Start Key: " << calculateKey(graph.Start) << std::endl;
-
 
         Node topNode = PQ.topNode();
         Key topKey = PQ.topKey();
@@ -88,10 +77,9 @@ int DLitePlanner::computeShortestPath()
         else if (getG(topNode) > getRHS(topNode))
         {
             // locally overconsistent case. This node is now favorable.
-
             // make node locally consistent by setting g = rhs
             insert_or_assign(topNode, getRHS(topNode), getRHS(topNode)); // update node's standing in unordered map
-
+            // propagate changes to neighboring nodes
             for (Node nbr : graph.nbrs(topNode)) updateNode(nbr);
         }
         else
@@ -112,47 +100,13 @@ int DLitePlanner::computeShortestPath()
     return numNodesExpanded;
 }
 
-float DLitePlanner::getG(Node s)
-{
-    // return g value if node has been looked at before (is in unordered map)
-    // otherwise, return infinity
-    if (umap.find(s) != umap.end())
-        return std::get<0>(umap.at(s));
-    else
-        return std::numeric_limits<float>::infinity();
-}
-
-float DLitePlanner::getRHS(Node s)
-{
-    // return rhs value if node has been looked at before (is in unordered map)
-    // otherwise, return infinity
-    if (umap.find(s) != umap.end())
-        return std::get<1>(umap.at(s));
-    else
-        return std::numeric_limits<float>::infinity();
-}
-
-void DLitePlanner::insert_or_assign(Node s, float g, float rhs)
-{
-    // re-assigns value of node in unordered map or inserts new entry if
-    // node not found
-
-    if (umap.find(s) != umap.end())
-        umap.erase(s);
-
-    umap.insert(std::make_pair(s, std::make_tuple(g, rhs)));
-}
-
 int DLitePlanner::updateNodesAroundUpdatedCells()
 {
     int numNodesUpdated = 0;
 
     for (std::tuple<int,int> cellUpdate : graph.updatedCells)
     {
-        std::vector<Node> affectedNodes = \
-                graph.getNodesAroundCellWithCSpace(cellUpdate);
-
-        for (Node n : affectedNodes)
+        for (Node n : graph.getNodesAroundCellWithCSpace(cellUpdate))
         {
             if (umap.find(n) == umap.end()) // node hasn't been explored yet. Leave alone
                 continue;
@@ -172,8 +126,6 @@ void DLitePlanner::constructOptimalPath()
 
     Node currNode = graph.Start;
     Node goalNode = graph.Goal;
-
-    std::cout << "Constructing Optimal Path: " << "Start -> " << currNode << " Goal  -> " << goalNode << std::endl;
 
     do
     {
@@ -195,11 +147,19 @@ void DLitePlanner::constructOptimalPath()
                 tempNode = nbr;
             }
         }
-        std::cout << " --> Curr Node: " << currNode << " - Cost: " << minCost << " - Valid: " << isWithinRangeOfGoal(currNode) << " <--";
-
         currNode = tempNode;
 
     } while(!isWithinRangeOfGoal(currNode));
+}
+
+void DLitePlanner::insert_or_assign(Node s, float g, float rhs)
+{
+    // re-assigns value of node in unordered map or inserts new entry if
+    // node not found
+    if (umap.find(s) != umap.end())
+        umap.erase(s);
+
+    umap.insert(std::make_pair(s, std::make_tuple(g, rhs)));
 }
 
 bool DLitePlanner::isWithinRangeOfGoal(Node s)
@@ -216,4 +176,24 @@ bool DLitePlanner::isWithinRangeOfGoal(Node s)
     bool satisfiesYBounds = (y >= (goal_y - sep)) && (y <= (goal_y + sep));
 
     return satisfiesXBounds && satisfiesYBounds;
+}
+
+float DLitePlanner::getG(Node s)
+{
+    // return g value if node has been looked at before (is in unordered map)
+    // otherwise, return infinity
+    if (umap.find(s) != umap.end())
+        return std::get<0>(umap.at(s));
+    else
+        return std::numeric_limits<float>::infinity();
+}
+
+float DLitePlanner::getRHS(Node s)
+{
+    // return rhs value if node has been looked at before (is in unordered map)
+    // otherwise, return infinity
+    if (umap.find(s) != umap.end())
+        return std::get<1>(umap.at(s));
+    else
+        return std::numeric_limits<float>::infinity();
 }

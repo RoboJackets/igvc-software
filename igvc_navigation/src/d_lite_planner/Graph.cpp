@@ -28,8 +28,8 @@ void Graph::initializeGraph(const igvc_msgs::mapConstPtr& msg)
     this->Resolution = msg->resolution;
     this->Start.setIndex(msg->x, msg->y);
 
-    // initially, the prev_map and the current map are the same
-    this->Map = cv_bridge::toCvCopy(msg->image, "mono8");
+    // set the current map equal to the input message's map
+    Map = cv_bridge::toCvCopy(msg->image, "mono8");
 }
 
 void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
