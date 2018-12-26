@@ -15,39 +15,28 @@ Each State is composed of the following:
 Author: Alejandro Escontrela <aescontrela3@gatech.edu>
 Date Created: December 20th, 2018
 
-Sources:
+                    Because this software was written
+                         during christmas 2018:
 
-Field D* [Dave Ferguson, Anthony Stentz]
-https://pdfs.semanticscholar.org/58f3/bc8c12ee8df30b3e9564fdd071e729408653.pdf
+                                     *
+                                     ^
+                                    ^^^
+                                   ^^^^^
+                                  ^^^#^^^
+                                 ^^^^^$^^^
+                                ^^^^^^^^^^^
+                               ^^J^^^^^^^0^^
+                              ^^^^^^^^^^^^^^^
+                             ^^^^^@^^^^^^^^^&^
+                            ^^^^^^^^^^^^^^^^^^^
+                                ||       ||
+                                ||       ||
+                            ||_______________||
 
-D* Lite [Sven Koenig, Maxim Likhachev]
-http://idm-lab.org/bib/abstracts/papers/aaai02b.pdf
+                     yes, some of the ascii characters
+                               are ornaments
 
-Optimal and Efficient Path Planning for Unknown and Dynamic Environments  (D*)
-[Anthony Stentz]
-https://pdfs.semanticscholar.org/77e9/b970024bc5da2b726491823f7d617a303811.pdf
-
-Because this software was written
-         during christmas:
-
-                 *
-                 ^
-                ^^^
-               ^^^^^
-              ^^^#^^^
-             ^^^^^$^^^
-            ^^^^^^^^^^^
-           ^^J^^^^^^^0^^
-          ^^^^^^^^^^^^^^^
-         ^^^^^@^^^^^^^^^&^
-        ^^^^^^^^^^^^^^^^^^^
-            ||       ||
-            ||       ||
-        ||_______________||
-
- yes, some of the ascii characters
-           are ornaments
-
+                                                - Alejandro 
 */
 
 #ifndef PRIORITYQUEUE_H

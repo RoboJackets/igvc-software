@@ -104,7 +104,7 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "incremental_planner");
+  ros::init(argc, argv, "d_lite_planner");
 
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
@@ -114,7 +114,7 @@ int main(int argc, char** argv)
   ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
 
   // publish path for path_follower
-  path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
+  path_pub = nh.advertise<nav_msgs::Path>("/path_sim", 1);
 
   double rateTime;
   double CSpace;
@@ -144,16 +144,9 @@ int main(int argc, char** argv)
 
       // don't plan unless the map has been initialized
       if (!initialized_map)
-      {
           continue;
-      }
       else
-      {
-          ROS_INFO_STREAM("UPDATING GRAPH!");
           dlite.graph.updateGraph(map);
-          ROS_INFO_STREAM("UPDATED!");
-
-      }
 
       // don't plan unless a goal node has been set
       if (!received_waypoint)
