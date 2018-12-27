@@ -32,31 +32,36 @@ pcl::PointCloud<pcl::PointXYZ> expanded_cloud;
 
 igvc_msgs::mapConstPtr map; // Most up-to-date map
 DLitePlanner dlite; // D* Lite path planner
-std::tuple<int,int> currGoal; // Search problem goal //TODO update goal
 float Resolution; // Occupancy Grid Resolution
 int x_initial, y_initial; // Index for initial x and y location in search space
-double maximum_distance;
 
-bool received_waypoint = false; // true if the graph currently has a valid goal
-bool initialized_map = false; // true if the grap has been initialized
+double maximum_distance; // maximum distance to goal node before warning messages spit out
+double CSpace; // configuration space
+double goal_range; // distance from goal at which a node is considered the goal
+double rateTime; // path planning/replanning rate
 
+bool initialize_search = true; // set to true if the search problem must be initialized
+bool initialize_graph = true; // set to true if the graph must be initialized
+
+bool initial_goal_set = false; // true if the first goal has been set
+bool goal_changed = false; // the goal node changed and the graph must be re-initialized
 
 /**
     Set the current map to be used by the D* Lite search problem. The initial
-    map is used to perform the initial (A*) search through the occupancy grid.
-    All maps thereafter are used to update edge costs for the search problem.
+    map is used to perform the first search through the occupancy grid (equivalent
+    to A*). All maps thereafter are used to update edge costs for the search problem.
 */
 void map_callback(const igvc_msgs::mapConstPtr& msg)
 {
       std::lock_guard<std::mutex> planning_lock(planning_mutex);
       map = msg; // update current map
 
-      if (!initialized_map)
+      if (initialize_graph)
       {
           x_initial = static_cast<int>(msg->x_initial); // initial x coord of graph search problem
           y_initial = static_cast<int>(msg->y_initial); // initial y coord of graph search problem
           dlite.graph.initializeGraph(msg);
-          initialized_map = true;
+          initialize_graph = false;
       }
 }
 
@@ -71,12 +76,17 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
     int goal_x, goal_y;
     goal_x = static_cast<int>(std::round(msg->point.x / dlite.graph.Resolution)) + x_initial;
     goal_y = static_cast<int>(std::round(msg->point.y / dlite.graph.Resolution)) + y_initial;
-    currGoal = std::make_tuple(goal_x, goal_y);
-    dlite.graph.setGoal(currGoal);
 
-    float distance_to_goal = dlite.graph.euclidian_heuristic(currGoal);
+    std::tuple<int,int> newGoal = std::make_tuple(goal_x, goal_y);
 
-    ROS_INFO_STREAM("Waypoint received. Search Problem Goal = " << goal_x
+    if (dlite.graph.Goal.getIndex() != newGoal)
+        goal_changed = true; // re-initialize graph search problem
+
+    dlite.graph.setGoal(newGoal);
+
+    float distance_to_goal = dlite.graph.euclidian_heuristic(newGoal) * dlite.graph.Resolution;
+
+    ROS_INFO_STREAM((goal_changed ? "New" : "Same") << " waypoint received. Search Problem Goal = " << goal_x
                     << ", " << goal_y << ". Distance: "
                     << distance_to_goal << "m.");
 
@@ -84,7 +94,7 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
       ROS_WARN_STREAM("Planning to waypoint more than " << maximum_distance
                       << "m. away - distance = " << distance_to_goal);
 
-    received_waypoint = true;
+    initial_goal_set = true;
 }
 
 
@@ -102,6 +112,7 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 //   expanded_size_pub.publish(size_msg);
 // }
 
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "d_lite_planner");
@@ -114,11 +125,7 @@ int main(int argc, char** argv)
   ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
 
   // publish path for path_follower
-  path_pub = nh.advertise<nav_msgs::Path>("/path_sim", 1);
-
-  double rateTime;
-  double CSpace;
-  double goal_range;
+  path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 
   igvc::getParam(pNh, "c_space", CSpace);
   igvc::getParam(pNh, "maximum_distance", maximum_distance);
@@ -132,7 +139,7 @@ int main(int argc, char** argv)
   // expanded_size_pub = nh.advertise<std_msgs::Int32>("/expanded_size", 1);
   // expanded_cloud.header.frame_id = "/odom";
 
-  bool initialize_search = true;
+
   int numNodesUpdated;
   int numNodesExpanded;
 
@@ -143,17 +150,25 @@ int main(int argc, char** argv)
       ros::spinOnce(); // handle subscriber callbacks
 
       // don't plan unless the map has been initialized
-      if (!initialized_map)
+      if (initialize_graph)
           continue;
       else
           dlite.graph.updateGraph(map);
 
       // don't plan unless a goal node has been set
-      if (!received_waypoint)
+      if (!initial_goal_set)
         continue;
 
       if (initialize_search)
           dlite.initialize();
+
+      if (goal_changed)
+      {
+          ROS_INFO_STREAM("New Goal Received. Initializing Search...");
+          dlite.reinitialize();
+          initialize_search = true;
+          goal_changed = false;
+      }
 
       numNodesUpdated = dlite.updateNodesAroundUpdatedCells();
       ROS_INFO_STREAM(numNodesUpdated << " nodes updated");
@@ -162,7 +177,7 @@ int main(int argc, char** argv)
       {
           numNodesExpanded = dlite.computeShortestPath();
           ROS_INFO_STREAM(numNodesExpanded << " nodes expanded");
-          initialize_search = false;
+          if (initialize_search) initialize_search = false;
       }
 
       dlite.constructOptimalPath();

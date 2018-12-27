@@ -1,9 +1,15 @@
 /**
 The graph contains the nodes and cells that set the foundation of the search
-problem.In Field D*, Nodes are located on the corners of grid cells (as opposed to the
+problem.
+
+In Field D*, Nodes are located on the corners of grid cells (as opposed to the
 center, like in A*, D*, or D*lite).
 
 The Graph object provides an interface for the occupancy grid, as well as nodes.
+To facilitate the search problem, the graph operates under a unit-cell assumption,
+meaning that each cell has side lengths of 1m. The `Resolution` parameter specifies
+the conversion between the unit cell and the actual cell dimensions. i.e. if Resolution
+is 0.2 then each cell actually has side dimensions of 0.2m.
 
 Author: Alejandro Escontrela <aescontrela3@gatech.edu>
 Date Created: December 16, 2018

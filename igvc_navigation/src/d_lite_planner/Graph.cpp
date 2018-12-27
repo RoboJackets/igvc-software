@@ -27,6 +27,7 @@ void Graph::initializeGraph(const igvc_msgs::mapConstPtr& msg)
     this->width = msg->width;
     this->Resolution = msg->resolution;
     this->Start.setIndex(msg->x, msg->y);
+    this->K_M = 0; // reset the key modifuer
 
     // set the current map equal to the input message's map
     Map = cv_bridge::toCvCopy(msg->image, "mono8");
