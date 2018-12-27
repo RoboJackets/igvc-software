@@ -77,6 +77,12 @@ public:
     */
     void initialize();
     /**
+    Clears the previous search's contents and re-initializes the search problem.
+    Clears the Node cache (umap), the priority queue, and all cell updates that
+    occured in the previous timestep.
+    */
+    void reinitialize();
+    /**
     Updates a node's standing in the graph search problem. Update dependant upon
     the node's g value and rhs value relative to each other.
 

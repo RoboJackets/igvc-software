@@ -36,7 +36,7 @@ Date Created: December 20th, 2018
                      yes, some of the ascii characters
                                are ornaments
 
-                                                - Alejandro 
+                                                - Alejandro
 */
 
 #ifndef PRIORITYQUEUE_H
@@ -136,7 +136,10 @@ public:
     @param[in] item state to insert into the priority queue
     */
     void insert(Node n, Key k); // O(n)
-
+    /**
+    Clears the priority queue's contents.
+    */
+    void clear();
     /**
     Remove an item from the priority queue for the specified node.
 

@@ -26,6 +26,15 @@ void DLitePlanner::initialize()
     PQ.insert(graph.Goal, calculateKey(graph.Goal));
 }
 
+void DLitePlanner::reinitialize()
+{
+    umap.clear();
+    PQ.clear();
+    graph.updatedCells.clear();
+
+    this->initialize();
+}
+
 void DLitePlanner::updateNode(Node s)
 {
     if (umap.find(s) == umap.end()) // s never visited before, add to unordered map
@@ -141,7 +150,7 @@ void DLitePlanner::constructOptimalPath()
                 continue;
 
             tempCost = graph.getTraversalCost(currNode, nbr) + getG(nbr);
-            if (tempCost < minCost)
+            if (tempCost <= minCost)
             {
                 minCost = tempCost;
                 tempNode = nbr;

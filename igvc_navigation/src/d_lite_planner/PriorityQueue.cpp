@@ -12,6 +12,11 @@ void PriorityQueue::insert(Node n, Key k)
     pq.insert(std::make_pair(n,k));
 }
 
+void PriorityQueue::clear()
+{
+    pq.clear();
+}
+
 bool PriorityQueue::remove(Node n)
 {
     auto it = this->find(n);
