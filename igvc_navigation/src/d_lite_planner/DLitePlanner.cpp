@@ -106,6 +106,7 @@ int DLitePlanner::computeShortestPath()
             for (Node n : toPropagate) updateNode(n);
         }
     }
+
     return numNodesExpanded;
 }
 
@@ -205,4 +206,15 @@ float DLitePlanner::getRHS(Node s)
         return std::get<1>(umap.at(s));
     else
         return std::numeric_limits<float>::infinity();
+}
+
+std::vector<std::tuple<int,int>> DLitePlanner::getExplored()
+{
+    std::vector<std::tuple<int,int>> explored;
+    for (std::pair<Node, std::tuple<float,float>> e : umap)
+    {
+        explored.push_back(e.first.getIndex());
+    }
+
+    return explored;
 }

@@ -4,35 +4,35 @@ Solves for an optimal path using the D* Lite incremental search algorithm.
 D* Lite implementation details can be found in DLitePlanner.h
 */
 
-#include <geometry_msgs/PoseStamped.h>
-#include <igvc_msgs/map.h>
 #include <nav_msgs/Path.h>
+#include <igvc_msgs/map.h>
+#include <std_msgs/Int32.h>
+#include <sensor_msgs/Image.h>
+#include <geometry_msgs/PoseStamped.h>
+
+#include <ros/ros.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
-#include <ros/ros.h>
-#include <sensor_msgs/Image.h>
-#include <std_msgs/Int32.h>
-#include <tf/transform_datatypes.h>
 #include <igvc_utils/NodeUtils.hpp>
-#include <mutex>
+#include <tf/transform_datatypes.h>
 
+#include <mutex>
 #include <tuple>
 #include <vector>
 #include "Graph.h"
 #include "DLitePlanner.h"
 
-ros::Publisher path_pub;
-
 std::mutex planning_mutex;
 
-ros::Publisher expanded_pub;
-ros::Publisher expanded_size_pub;
+ros::Publisher path_pub;
+
+bool publish_expanded; // publish a pointcloud of nodes expanded in the search
 pcl::PointCloud<pcl::PointXYZ> expanded_cloud;
+ros::Publisher expanded_pub;
 
 igvc_msgs::mapConstPtr map; // Most up-to-date map
 DLitePlanner dlite; // D* Lite path planner
-float Resolution; // Occupancy Grid Resolution
 int x_initial, y_initial; // Index for initial x and y location in search space
 
 double maximum_distance; // maximum distance to goal node before warning messages spit out
@@ -45,6 +45,29 @@ bool initialize_graph = true; // set to true if the graph must be initialized
 
 bool initial_goal_set = false; // true if the first goal has been set
 bool goal_changed = false; // the goal node changed and the graph must be re-initialized
+
+//-------------------------- Helper Methods ----------------------------//
+
+/*
+ * publishes the nodes that have been expanded for visualization
+ */
+void expanded_callback(const std::vector<std::tuple<int,int>>& inds)
+{
+    expanded_cloud.clear();
+    expanded_cloud.header.frame_id = "odom";
+
+    for (std::tuple<int,int> ind : inds)
+    {
+        float p_x = static_cast<float>(std::get<0>(ind) - x_initial) * map->resolution;
+        float p_y = static_cast<float>(std::get<1>(ind) - y_initial) * map->resolution;
+
+        expanded_cloud.points.push_back(pcl::PointXYZ(p_x,p_y,-0.05f));
+    }
+
+    expanded_pub.publish(expanded_cloud);
+}
+
+//--------------------------- ROS Callbacks ----------------------------//
 
 /**
     Set the current map to be used by the D* Lite search problem. The initial
@@ -97,21 +120,7 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
     initial_goal_set = true;
 }
 
-
-/*
- * NOT A ROS CALLBACK
- * publishes the points that have been expanded for visualization and the size of the expanded points
- */
-// void expanded_callback(const SearchLocation& location)
-// {
-//   expanded_cloud.points.push_back(pcl::PointXYZ((location.X - initial_x) * search_problem.Resolution,
-//                                                 (location.Y - initial_y) * search_problem.Resolution, location.Theta));
-//   expanded_pub.publish(expanded_cloud);
-//   std_msgs::Int32 size_msg;
-//   size_msg.data = expanded_cloud.size();
-//   expanded_size_pub.publish(size_msg);
-// }
-
+//----------------------------- main ----------------------------------//
 
 int main(int argc, char** argv)
 {
@@ -131,14 +140,15 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, "maximum_distance", maximum_distance);
   igvc::getParam(pNh, "rate", rateTime);
   igvc::getParam(pNh, "goal_range", goal_range);
+  igvc::getParam(pNh, "publish_expanded", publish_expanded);
 
   dlite.graph.setCSpace(static_cast<float>(CSpace));
   dlite.GOAL_DIST = static_cast<float>(goal_range);
 
-  // expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/expanded", 1);
+  // publish a 2D pointcloud of expanded nodes for visualization
+  expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/expanded", 1);
+  expanded_cloud.header.frame_id = "odom";
   // expanded_size_pub = nh.advertise<std_msgs::Int32>("/expanded_size", 1);
-  // expanded_cloud.header.frame_id = "/odom";
-
 
   int numNodesUpdated;
   int numNodesExpanded;
@@ -175,14 +185,17 @@ int main(int argc, char** argv)
 
       if ((numNodesUpdated > 0) || initialize_search)
       {
+          ros::Time begin = ros::Time::now();
           numNodesExpanded = dlite.computeShortestPath();
-          ROS_INFO_STREAM(numNodesExpanded << " nodes expanded");
+          double elapsed = (ros::Time::now() - begin).toSec();
+          ROS_INFO_STREAM(numNodesExpanded << " nodes expanded in " << elapsed << "s.");
           if (initialize_search) initialize_search = false;
       }
 
       dlite.constructOptimalPath();
-      ROS_INFO_STREAM("Optimal Path Found");
 
+      if (publish_expanded)
+        expanded_callback(dlite.getExplored());
 
       nav_msgs::Path path_msg;
       path_msg.header.stamp = ros::Time::now();
@@ -190,7 +203,6 @@ int main(int argc, char** argv)
 
       for (std::tuple<int,int> point : dlite.path)
       {
-
           auto it = path_msg.poses.begin();
           geometry_msgs::PoseStamped pose;
           pose.header.stamp = path_msg.header.stamp;
@@ -201,44 +213,8 @@ int main(int argc, char** argv)
       }
 
       path_pub.publish(path_msg);
-
       rate.sleep();
-      // ROS_INFO_STREAM("Length: " << dlite.graph.length << " Width: " << dlite.graph.width
-      //                 << " Resolution: " << dlite.graph.Resolution << " Start: "
-      //                 << dlite.graph.Start.getIndex() << " Goal: " << dlite.graph.Goal.getIndex());
-
   }
-  // while (ros::ok())
-  // {
-  //   ros::spinOnce();
-  //
-  //   // do not plan if you do not have a waypoint
-  //   if (!received_waypoint) {
-  //     continue;
-  //   }
-  //
-  //   planning_mutex.lock();
-  //   Path<SearchLocation, SearchMove> path;
-  //   search_problem.DistanceToGoal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
-  //   path = GraphSearch::AStar(search_problem, expanded_callback, maxIter);
-  //   nav_msgs::Path path_msg;
-  //   // TODO timestamp why
-  //   path_msg.header.stamp = ros::Time::now();
-  //   path_msg.header.frame_id = "odom";
-  //   for (auto loc : *(path.getStates()))
-  //     {// publish path with theta for cool viz
-  //     geometry_msgs::PoseStamped pose;
-  //     pose.header.stamp = path_msg.header.stamp;
-  //     pose.header.frame_id = path_msg.header.frame_id;
-  //     pose.pose.position.x = (loc.X - initial_x) * search_problem.Resolution;
-  //     pose.pose.position.y = (loc.Y - initial_y) * search_problem.Resolution;
-  //     path_msg.poses.push_back(pose);
-  //   }
-  //   path_pub.publish(path_msg);
-  //   expanded_cloud.clear();
-  //   planning_mutex.unlock();
-  //   rate.sleep();
-  // }
 
   return 0;
 }

@@ -10,6 +10,7 @@ Panels:
         - /TF1
         - /Path1
         - /PointCloud21
+        - /PointCloud22
       Splitter Ratio: 0.5
     Tree Height: 983
   - Class: rviz/Selection
@@ -227,6 +228,36 @@ Visualization Manager:
       Topic: /path
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 1
+        Min Value: 1
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 0; 95; 255
+      Color Transformer: FlatColor
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 100; 100; 255
+      Max Intensity: 4096
+      Min Color: 100; 100; 255
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.10000000149011612
+      Style: Spheres
+      Topic: /expanded
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -252,25 +283,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 23.002674102783203
+      Distance: 36.24102783203125
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.7615700960159302
-        Y: 7.300470352172852
-        Z: -5.000775337219238
+        X: -4.617710590362549
+        Y: 7.662335395812988
+        Z: -10.816880226135254
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.5597963333129883
+      Pitch: 1.5697963237762451
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.300398588180542
+      Yaw: 2.125396728515625
     Saved:
       - Class: rviz/Orbit
         Distance: 10.23285961151123
@@ -309,4 +340,4 @@ Window Geometry:
     collapsed: false
   Width: 2426
   X: 134
-  Y: 0
+  Y: 55
