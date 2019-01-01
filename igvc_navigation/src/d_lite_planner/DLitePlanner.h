@@ -145,6 +145,13 @@ public:
     @return rhs-value
     */
     float getRHS(Node s);
+    /**
+    Returns list of indices of expanded nodes, that is, the indices of the
+    nodes contained in the unordered map.
+
+    @return vector of nodes in the unordered map
+    */
+    std::vector<std::tuple<int,int>> getExplored();
 
 private:
     // hashed map contains all nodes and <g,rhs> values in search
