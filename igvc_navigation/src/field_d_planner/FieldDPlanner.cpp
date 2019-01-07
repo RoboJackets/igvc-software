@@ -200,15 +200,11 @@ void FieldDPlanner::constructOptimalPath()
     std::tuple<float,float> curr_pos = graph.Start.getIndex();
 
     float minCost;
-    float tempCost;
-    std::tuple<float,float> temp_pos;
 
     do
     {
         start_it = path.begin();
-        path.insert(start_it, curr_pos);
 
-        for (std::tuple<Node,Node> connbr : graph.connbrs())
 
     } while(!isWithinRangeOfGoal(curr_pos) && (minCost != std::numeric_limits<float>::infinity()));
 
