@@ -33,33 +33,37 @@ float FieldDPlanner::computeCost(Node s, Node s_a, Node s_b)
     // traversal cost of node s and s1, a non-diaginal neighbor of s
     // in units of (cost/distance)
     float b = graph.getTraversalCost(s,s1);
+
+    float g_s1 = getG(s1);
+    float g_s2 = getG(s2);
+
     if (std::min(c,b) == std::numeric_limits<float>::infinity())
     {
         // infinite traversal cost, cells likely occupied
         return std::numeric_limits<float>::infinity();
     }
-    else if (getG(s1) <= getG(s2))
+    else if (g_s1 <= g_s2)
     {
         // cheapest to travel directly to nearest neighbor (non-diagonal)
-        return std::min(c,b) + getG(s1);
+        return std::min(c,b) + g_s1;
     }
     else
     {
-        float f = getG(s1) - getG(s2); // cost of going from s1 to s2
+        float f = g_s1 - g_s2; // cost of going from s1 to s2
 
         if (f <= b)
         {
             if (c <= f)
             {
                 // cheapest to go directly to diagonal cell
-                return c * sqrt(2.0f) + getG(s2);
+                return c * sqrt(2.0f) + g_s2;
             }
             else
             {
                 // travel along diagonal to point along edge
                 float toComp = f / sqrt(std::pow(c,2.0f) - std::pow(f,2.0f));
                 float y = std::min(toComp, 1.0f);
-                return c * sqrt(1 + std::pow(y,2.0f)) + (f * (1 - y)) + getG(s2);
+                return c * sqrt(1 + std::pow(y,2.0f)) + (f * (1 - y)) + g_s2;
             }
         }
         else
@@ -67,14 +71,14 @@ float FieldDPlanner::computeCost(Node s, Node s_a, Node s_b)
             if (c <= b)
             {
                 // cheapest to go directly to diagonal cell
-                return c * sqrt(2.0f) + getG(s2);
+                return c * sqrt(2.0f) + g_s2;
             }
             else
             {
                 // travel along edge then to s2
                 float toComp = b / sqrt(std::pow(c,2.0f) - std::pow(b,2.0f));
                 float x = 1 - std::min(toComp, 1.0f);
-                return c * sqrt(1 + std::pow(1 - x, 2.0f)) + (b * x) + getG(s2);
+                return c * sqrt(1 + std::pow(1 - x, 2.0f)) + (b * x) + g_s2;
             }
         }
     }
@@ -199,20 +203,207 @@ void FieldDPlanner::constructOptimalPath()
 
     std::tuple<float,float> curr_pos = graph.Start.getIndex();
 
-    float minCost;
+    float min_cost;
 
-    do
+    if (isVertex(curr_pos))
     {
-        start_it = path.begin();
+        path_additions pa = getNextPositionsFromVertex(curr_pos);
+        path.insert(path.end(), pa.first.begin(), pa.first.end());
+        min_cost = pa.second;
+    }
 
+    // do
+    // {
+    //     start_it = path.begin();
+    // } while(!isWithinRangeOfGoal(curr_pos) && (minCost != std::numeric_limits<float>::infinity()));
 
-    } while(!isWithinRangeOfGoal(curr_pos) && (minCost != std::numeric_limits<float>::infinity()));
-
-    if (minCost == std::numeric_limits<float>::infinity())
+    if (min_cost == std::numeric_limits<float>::infinity())
         path.clear();
 }
 
+bool FieldDPlanner::isVertex(std::tuple<float,float> p)
+{
+    float x,y;
+    std::tie(x,y) = p;
 
+    bool bothInts = (ceilf(x) == x) && (ceilf(y) == y);
+    bool satisfiesXBounds = (x >= 0) && (x <= graph.length);
+    bool satisfiesYBounds = (y >= 0) && (y <= graph.width);
+
+    return bothInts && satisfiesXBounds && satisfiesYBounds;
+}
+
+FieldDPlanner::path_additions FieldDPlanner::getNextPositionsFromVertex(std::tuple<float,float> p)
+{
+    std::vector<std::tuple<float,float>> positions; // positions to add to path
+
+    Node s = Node(static_cast<std::tuple<int,int>>(p)); // start node
+
+    // temporary variables to hold during search.
+    float temp_x, temp_y;
+    float temp_cost;
+
+    // variables corresponding to minimum cost path from s
+    Node min_s1, min_s2;
+    float min_x, min_y;
+    float min_cost = std::numeric_limits<float>::infinity();
+
+    for (std::tuple<Node,Node> connbr : graph.connbrs(s))
+    {
+        // consecutive neighbors
+        Node s_a, s_b;
+        std::tie(s_a, s_b) = connbr;
+
+        Node s1, s2;
+        if (graph.isDiagonal(s, s_a))
+        {
+            s1 = s_b;
+            s2 = s_a;
+        }
+        else
+        {
+            s1 = s_a;
+            s2 = s_b;
+        }
+
+        // traversal cost of node s and a diagonal node s2
+        float c = graph.getTraversalCost(s,s2);
+        // traversal cost of node s and s1, a non-diaginal neighbor of s
+        float b = graph.getTraversalCost(s,s1);
+
+        float g_s1 = getG(s1);
+        float g_s2 = getG(s2);
+
+        if (std::min(c,b) == std::numeric_limits<float>::infinity())
+        {
+            // infinite traversal cost, cells likely occupied
+            temp_cost = std::numeric_limits<float>::infinity();
+            temp_x = temp_y = 0.0f;
+        }
+        else if (g_s1 <= g_s2)
+        {
+            // cheapest to travel directly to nearest neighbor (non-diagonal)
+            temp_cost = std::min(c,b) + g_s1;
+            temp_x = 1.0f;
+            temp_y = 0.0f;
+        }
+        else
+        {
+            float f = g_s1 - g_s2; // cost of going from s1 to s2
+
+            if (f <= b)
+            {
+                if (c <= f)
+                {
+                    // cheapest to go directly to diagonal cell
+                    temp_cost = c * sqrt(2.0f) + g_s2;
+                    temp_x = temp_y = 1.0f;
+                }
+                else
+                {
+                    // travel along diagonal to point along edge
+                    float toComp = f / sqrt(std::pow(c,2.0f) - std::pow(f,2.0f));
+                    temp_x = 1.0f;
+                    temp_y = std::min(toComp, 1.0f);
+                    temp_cost = c * sqrt(1 + std::pow(temp_y,2.0f)) + (f * (1 - temp_y)) + g_s2;
+                }
+            }
+            else
+            {
+                if (c <= b)
+                {
+                    // cheapest to go directly to diagonal cell
+                    temp_cost = c * sqrt(2.0f) + g_s2;
+                    temp_x = temp_y = 1.0f;
+                }
+                else
+                {
+                    // travel along edge then to s2. In practice, this results
+                    // in the addition of two points to the path. one for
+                    // (orig_x + x, orig_y) and another for (orig_x + 1, orig_y + 1)
+                    float toComp = b / sqrt(std::pow(c,2.0f) - std::pow(b,2.0f));
+                    temp_x = 1 - std::min(toComp, 1.0f);
+                    temp_y = 0.0f;
+                    temp_cost = c * sqrt(1 + std::pow(1 - temp_x, 2.0f)) + (b * temp_x) + g_s2;
+                }
+            }
+        }
+
+        // obtain the minimum cost traversal
+        if (temp_cost < min_cost)
+        {
+            min_cost = temp_cost;
+            min_x = temp_x;
+            min_y = temp_y;
+            min_s1 = s1;
+            min_s2 = s2;
+        }
+    }
+
+    // CASE 0: no valid path found (infinite cost/no consecutive neighbors)
+    if (min_cost == std::numeric_limits<float>::infinity())
+    {
+        return std::make_pair(positions, min_cost);
+    }
+
+    // calculate the multiplier for the positions to be added to the path. This
+    // step is required because x and y calculations are peformed independently of
+    // the consecutive neighbors used to obtain these values. As such, x_multiplier
+    // and y_multiplier account for this.
+    int s_x, s_y;
+    std::tie(s_x, s_y) = s.getIndex();
+    int s1_x, s1_y;
+    std::tie(s1_x, s1_y) = min_s1.getIndex();
+    int s2_x, s2_y;
+    std::tie(s2_x, s2_y) = min_s2.getIndex();
+
+    int x_multiplier,y_multiplier;
+    bool flip = false;
+
+    if (s1_x != s_x) // nearest neighbor lies to left or right of s
+    {
+        x_multiplier = ((s1_x - s_x) > 0) ? 1 : -1;
+        y_multiplier = ((s2_y - s_y) > 0) ? 1 : -1;
+    }
+    else // nearest neighbor lies above of below s
+    {
+        flip = true;
+        y_multiplier = ((s1_y - s_y) > 0) ? 1 : -1;
+        x_multiplier = ((s2_x - s_x) > 0) ? 1 : -1;
+    }
+
+    if ((min_x > 0) && (min_x < 1) && (min_y == 0.0f))
+    {
+        // CASE 1: travel along x then cut to s2
+        if (flip)
+        {
+            float temp = min_x;
+            min_x = min_y;
+            min_y = temp;
+        }
+        min_x *= x_multiplier;
+        min_y *= y_multiplier;
+        positions.push_back(std::make_tuple(s_x + min_x, s_y + min_y));
+        positions.push_back(std::make_tuple(s_x + x_multiplier, s_y + y_multiplier));
+    }
+    else
+    {
+        // CASE 2: travel directly to diagonal node (s2)
+        // CASE 3: travel to nearest node
+        // CASE 4: travel to point along edge
+        if (flip)
+        {
+            float temp = min_x;
+            min_x = min_y;
+            min_y = temp;
+        }
+        min_x *= x_multiplier;
+        min_y *= y_multiplier;
+        positions.push_back(std::make_tuple(s_x + min_x, s_y + min_y));
+    }
+
+    return std::make_pair(positions, min_cost);
+}
 
 void FieldDPlanner::insert_or_assign(Node s, float g, float rhs)
 {
