@@ -90,8 +90,6 @@ void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
             it_map++;
         }
     }
-
-    std::cout << "Updated cells: " << this->updatedCells.size() << std::endl;
 }
 
 bool Graph::isValidNode(Node s)
@@ -284,17 +282,16 @@ std::vector<std::tuple<Node, Node>> Graph::connbrs(Node s)
 {
     // get neighbors of current node, including invalid nodes
     std::vector<Node> neighbors = nbrs(s, true);
-
-    Node sp; // most clockwise neighbor
-    Node spp;
-
     std::vector<std::tuple<Node,Node>> connbrs;
+
+    Node sp;
+    Node spp;
 
     // first 7 consecutive neighbor pairs
     for (size_t i = 0; i < neighbors.size() - 1; i++)
     {
-        sp = neighbors[i];
-        spp = neighbors[i+1];
+        sp = neighbors[i]; // most clockwise neighbor
+        spp = neighbors[i+1];;
 
         // if both nodes valid, make a tuple and put it at the front of the list
         if (isValidNode(sp) && isValidNode(spp))
@@ -354,7 +351,7 @@ float Graph::getC(Node s, Node s_prime)
     else
     {
         // cell is unuccupied, diagonal cost is euclidian distance
-        return DIAGONAL_COST;
+        return TRAVERSAL_COST;
     }
 }
 
@@ -413,7 +410,7 @@ float Graph::getB(Node s, Node s_prime)
     else
     {
         // cell is unuccupied, diagonal cost is euclidian distance (1)
-        return EDGE_COST;
+        return TRAVERSAL_COST;
     }
 }
 
@@ -450,11 +447,19 @@ float Graph::getTraversalCost(Node s, Node s_prime)
 {
     float cost;
     if (isDiagonal(s, s_prime))
-        cost = getC(s, s_prime);
+        cost = getC(s, s_prime) * DIAGONAL_DISTANCE;
     else
-        cost = getB(s, s_prime);
+        cost = getB(s, s_prime) * EDGE_DISTANCE;
 
     return cost;
+}
+
+float Graph::getMinTraversalCost(Node s)
+{
+    float min_cost = std::numeric_limits<float>::infinity();
+    for (Node nbr : this->nbrs(s))
+        min_cost = std::min(min_cost, this->getTraversalCost(s, nbr));
+    return min_cost;
 }
 
 float Graph::euclidian_heuristic(Node s)
