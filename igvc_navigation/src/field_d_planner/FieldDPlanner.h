@@ -49,6 +49,7 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #include <vector>
 #include <limits>
 #include <cmath>
+#include <math.h>
 
 class FieldDPlanner
 {
@@ -58,6 +59,7 @@ public:
     Graph graph;
 
     std::vector<std::tuple<float,float>> path;
+    typedef std::pair<std::vector<std::tuple<float,float>>,float> path_additions;
 
     float GOAL_DIST = 0.95f;
 
@@ -132,6 +134,17 @@ public:
     the next node that minimizes c(s,s') + g(s'). Ties are broken arbitrarily.
     */
     void constructOptimalPath();
+    /**
+    returns true if position p is a vertex on the graph. Alternatively, returns
+    false if it's an edge.
+
+    @param[in] p position to check
+    @return whether or not p is a vertex
+    */
+    bool isVertex(std::tuple<float,float> p);
+    /**
+    */
+    path_additions getNextPositionsFromVertex(std::tuple<float,float> p);
     /**
     Tries to insert an entry into the unordered map. If an entry for that key
     (Node) already exists, overrides the value with specified g and rhs vals.
