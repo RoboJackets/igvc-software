@@ -1,23 +1,30 @@
 /**
-D* lite path planner implementation.
+Field D* incremental path planner implementation
 
-D* lite is an incremental search algorithm that keeps track of data from previous
-searches to speed up replanning. The first search through the grid space is
-equivalent to A*, with nodes in the priority queue ordered by a path cost estimate:
+Field D* is an incremental search algorithm utilizes past search information to
+perform fast replanning. Like with D* Lite, the initial search through the grid
+space is equivalent to A*, with nodes in the priority queue ordered by a path cost estimate:
     f(s) = g(s) + h(s_start, s)
 
 When the graph is updated with new sensor information and the path needs replanning,
 comparatively few nodes need expanding to re-calculate the optimal path.
 
-The DLitePlanner interfaces with the Graph object to calculate the optimal
-path through the occupancy grid in an eight-connected grid space. This means
-that each node has 8 neighbors and can only travel to those eight neighbors.
+Field D* extends D* Lite by allowing travel not only to the eight surrounding
+neigbors, but also to the continuous space along the edge formed by two consecutive
+neighbors. This allows for the generation of smoother, more optimal paths through
+the grid space.
 
 Author: Alejandro Escontrela <aescontrela3@gatech.edu>
-Date Created: December 22nd, 2018
+Date Created: January 1st, 2019 {Happy New Year! └╏ ･ ᗜ ･ ╏┐ }
 
 Sources:
-D* Lite [Sven Koenig, Maxim Likhachev]
+The Field D* Algorithm for Improved Path Planning and
+Replanning in Uniform and Non-Uniform Cost Environments
+[Dave Ferguson, Anthony Stentz]
+https://pdfs.semanticscholar.org/58f3/bc8c12ee8df30b3e9564fdd071e729408653.pdf
+
+D* Lite
+[Sven Koenig, Maxim Likhachev]
 http://idm-lab.org/bib/abstracts/papers/aaai02b.pdf
 
 Optimal and Efficient Path Planning for Unknown and Dynamic Environments  (D*)
@@ -29,8 +36,9 @@ MIT Advanced Lecture 1: Incremental Path Planning
 https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robotics-spring-2016/videos-for-advanced-lectures/advanced-lecture-1/
 */
 
-#ifndef DLITEPLANNER_H
-#define DLITEPLANNER_H
+
+#ifndef FIELDDPLANNER_H
+#define FIELDDPLANNER_H
 
 #include "igvc_navigation/Graph.h"
 #include "igvc_navigation/Node.h"
@@ -42,32 +50,44 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #include <limits>
 #include <cmath>
 
-class DLitePlanner
+class FieldDPlanner
 {
 public:
     // Graph contains methods to deal with Node(s) as well as updated occupancy
     // grid cells
     Graph graph;
 
-    std::vector<std::tuple<int,int>> path;
+    std::vector<std::tuple<float,float>> path;
 
     float GOAL_DIST = 0.95f;
 
-    DLitePlanner();
-    ~DLitePlanner();
+    FieldDPlanner();
+    ~FieldDPlanner();
 
     /**
-    Calculate the key for a node S.
+    Calculate the key for a node s. The key is used for organizing nodes in the
+    priority queue.
 
     key defined as <f1(s), f2(s)>
     where...
-    f1(s) = min(g(s), rhs(s)) + h(s_start, s) + K_M
-    f2(s)min(g(s), rhs(s))
+        f1(s) = min(g(s), rhs(s)) + h(s_start, s) + K_M
+        f2(s) = min(g(s), rhs(s))
 
     @param[in] s Node to calculate key for
     @return calculated key
     */
     Key calculateKey(Node s);
+    /**
+    Computes minimum path cost of s given any two consecutive neigbors s_a and
+    s_b. X and Y values dependant upon the traversal cost to the diagonal node and
+    the vertical/horizontal node as well as the relative g-values of both nodes.
+
+    @param[in] s Node to calculate cost for
+    @param[in] s_a consecutive neighbor #1 of s
+    @param[in] s_b consecutive neighbor #2 of s
+    @return path cost of node s
+    */
+    float computeCost(Node s, Node s_a, Node s_b);
     /**
     Initializes the graph search problem by setting g and rhs values for start
     node equal to infinity. For goal node, sets g value to infinity and rhs value
@@ -128,7 +148,7 @@ public:
     @param[in] s Node to check
     @return whether or not node s is within range of the goal
     */
-    bool isWithinRangeOfGoal(Node s);
+    bool isWithinRangeOfGoal(std::tuple<float,float> p);
     /**
     Returns g-value for a node s
 
@@ -150,13 +170,15 @@ public:
     @return vector of nodes in the unordered map
     */
     std::vector<std::tuple<int,int>> getExplored();
-
 private:
-    // hashed map contains all nodes and <g,rhs> values in search
+    // this hashed map contains key-value pairs mapping from all
+    // expanded nodes to their corresponding g and rhs values
     std::unordered_map<Node,std::tuple<float,float>> umap;
     // priority queue contains all locally inconsistent nodes whose values
     // need updating
     PriorityQueue PQ;
+
 };
+
 
 #endif

@@ -1,7 +1,5 @@
 #include "DLitePlanner.h"
 
-//TODO remove std::cout and iostream from import list
-
 DLitePlanner::DLitePlanner() {}
 
 DLitePlanner::~DLitePlanner() {}
@@ -69,7 +67,14 @@ void DLitePlanner::updateNode(Node s)
 
 int DLitePlanner::computeShortestPath()
 {
+    // if the start node is occupied, return immediately. By definition, a path
+    // does not exist if the start node is occupied.
+    if (graph.getMinTraversalCost(graph.Start) == std::numeric_limits<float>::infinity())
+        return 0;
+
     int numNodesExpanded = 0;
+
+    std::cout << "Top Node: " << PQ.topNode() << " - Top Vals: <" << getG(PQ.topNode()) << ", " << getRHS(PQ.topNode()) << "> - Top Key: " << PQ.topKey() << std::endl;
 
     while((PQ.topKey() < calculateKey(graph.Start)) || (getRHS(graph.Start) != getG(graph.Start)))
     {
@@ -85,7 +90,7 @@ int DLitePlanner::computeShortestPath()
         }
         else if (getG(topNode) > getRHS(topNode))
         {
-            // locally overconsistent case. This node is now favorable.
+            // locally overconsistent case. This node is now more favorable.
             // make node locally consistent by setting g = rhs
             insert_or_assign(topNode, getRHS(topNode), getRHS(topNode)); // update node's standing in unordered map
             // propagate changes to neighboring nodes
@@ -135,16 +140,21 @@ void DLitePlanner::constructOptimalPath()
     std::vector<std::tuple<int,int>>::iterator start_it;
 
     Node currNode = graph.Start;
-    Node goalNode = graph.Goal;
 
+    float minCost;
+    float tempCost;
+    Node tempNode;
+
+    // greedily move from one node to the next, selecting the node s' that
+    // minimizes: g(s') + c(s,s')
+    // if no valid neighbor nodes can be traveled to (all have cost inf), then
+    // an empty path is returned.
     do
     {
         start_it = path.begin();
         path.insert(start_it, currNode.getIndex());
 
-        float minCost = std::numeric_limits<float>::infinity();
-        float tempCost;
-        Node tempNode;
+        minCost = std::numeric_limits<float>::infinity();
         for (Node nbr : graph.nbrs(currNode))
         {
             if (umap.find(nbr) == umap.end()) // node has not been explored yet
@@ -159,7 +169,11 @@ void DLitePlanner::constructOptimalPath()
         }
         currNode = tempNode;
 
-    } while(!isWithinRangeOfGoal(currNode));
+    } while(!isWithinRangeOfGoal(currNode) && (minCost != std::numeric_limits<float>::infinity()));
+
+    // no valid path found. Return empty path
+    if (minCost == std::numeric_limits<float>::infinity())
+        path.clear();
 }
 
 void DLitePlanner::insert_or_assign(Node s, float g, float rhs)

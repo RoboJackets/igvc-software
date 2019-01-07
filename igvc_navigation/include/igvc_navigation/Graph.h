@@ -54,8 +54,9 @@ public:
     float Resolution; // grid resolution
     float CSpace; // configuration space
 
-    float DIAGONAL_COST = (float) sqrt(2);
-    float EDGE_COST = 1;
+    float DIAGONAL_DISTANCE = (float) sqrt(2);
+    float EDGE_DISTANCE = 1;
+    float TRAVERSAL_COST = 1;
 
     // k_m, as defined in the D* lite paper, keeps track of the robot's movement
     // in the grid space and increased new node's key vaues by k_m as to maintain
@@ -158,7 +159,8 @@ public:
     std::vector<std::tuple<Node, Node>> connbrs(Node s);
     /**
     Returns traversal cost of node s and a diagonal node s'. If cell or any of its
-    surrounding CSpace is occupied, infinity is returned.
+    surrounding CSpace is occupied, infinity is returned. If not occupied,
+    TRAVERSAL_COST is returned, which is in units of (cost/distance).
 
     @param[in] s reference node
     @param[in] s_prime diagonal node
@@ -169,7 +171,8 @@ public:
     /**
     Returns traversal cost of node s and s', a non-diaginal (vertical or
     horizontal) neighbor of s. Cost taken to be the maximum cost of
-    two cells neighboring the edge.
+    two cells neighboring the edge. If not occupied, TRAVERSAL_COST is returned,
+     which is in units of (cost/distance).
 
     @param[in] s reference node
     @param[in] s_prime diagonal node
@@ -199,6 +202,13 @@ public:
     @param[in] s_prime neighbor of s
     */
     float getTraversalCost(Node s, Node s_prime);
+    /**
+    Gets minimum traversal cost from a node s to any neighboring node.
+
+    @param[in] s Node to get minimum traversal cost for
+    @return minimum traversal cost
+    */
+    float getMinTraversalCost(Node s);
     /**
     Calculates euclidian distance between the start node 'Start' and the
     specified node s. This will be used as the focussing heuristic.
