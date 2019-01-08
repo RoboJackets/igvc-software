@@ -103,6 +103,16 @@ public:
     */
     bool isValidNode(Node s);
     /**
+    Determines whether or not a (continuous) position is valid. A position is
+    considered valid if it lies within the graph. This method is useful for any-
+    angle path planning algorithms that must linearly interpolate to travel to
+    non-vertex positions along the graph (i.e. Field D*).
+
+    @param[in] p position on the graph
+    @return whether or not the position is valid
+    */
+    bool isValidPosition(std::tuple<float,float> p);
+    /**
     Determines whether or not a cell is valid based off of its index. As with
     the Node, the only condition that would render a node invalid is if it is
     out of bounds

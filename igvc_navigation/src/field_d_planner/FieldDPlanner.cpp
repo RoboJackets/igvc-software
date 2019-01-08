@@ -198,21 +198,27 @@ int FieldDPlanner::updateNodesAroundUpdatedCells()
 void FieldDPlanner::constructOptimalPath()
 {
     path.clear();
-    // iterator to the start of the path vector
-    std::vector<std::tuple<float,float>>::iterator start_it;
 
     std::tuple<float,float> curr_pos = graph.Start.getIndex();
+    path.push_back(curr_pos);
 
     float min_cost;
 
-    if (isVertex(curr_pos))
-    {
-        path_additions pa = getNextPositionsFromVertex(curr_pos);
-        path.insert(path.end(), pa.first.begin(), pa.first.end());
-        min_cost = pa.second;
-    }
+    path_additions pa;
 
-    // do
+    if (isVertex(curr_pos))
+        pa = getNextPositionsFromVertex(curr_pos);
+    else
+        pa = getNextPositionsFromEdge(curr_pos);
+
+    // append new positions to the end of path
+    path.insert(path.end(), pa.first.begin(), pa.first.end());
+    min_cost = pa.second;
+
+
+
+
+    // dostd::ostream& operator<<(std::ostream& stream, const Key& k)
     // {
     //     start_it = path.begin();
     // } while(!isWithinRangeOfGoal(curr_pos) && (minCost != std::numeric_limits<float>::infinity()));
@@ -405,6 +411,177 @@ FieldDPlanner::path_additions FieldDPlanner::getNextPositionsFromVertex(std::tup
     return std::make_pair(positions, min_cost);
 }
 
+FieldDPlanner::path_additions FieldDPlanner::getNextPositionsFromEdge(std::tuple<float,float> p)
+{
+    path_additions pa;
+
+    return pa;
+}
+
+std::vector<ContinuousNeighbors> FieldDPlanner::getContinuousNeighbors(std::tuple<float,float> p)
+{
+    std::vector<ContinuousNeighbors> CNs;
+
+    // determine whether p lies on an edge along the x axis (y is an integer)
+    // or on an edge along the y axis (x is an integer)
+    float x,y;
+    std::tie(x,y) = p;
+
+    ContinuousNeighbors CN;
+    std::tuple<float,float> s_a;
+    std::tuple<float,float> s_b;
+    float cost_s_a;
+    float cost_s_b;
+
+    // if y is an integer this means p lies along an x edge
+    if (ceilf(y) == y)
+    {
+        // imaginary nodes and their linearly interpolated path cost
+        float scaler = fmodf(std::abs(x),floorf(std::abs(x))); // how far along the edge p lies relative to neighbors
+        if (x < 0)
+            scaler = (1 - scaler);
+        std::tuple<float,float> in1 = std::make_tuple(x,y+1); // imaginary node 1
+        float cost_in1 = scaler * getG(Node(static_cast<std::tuple<int,int>>(std::make_tuple(ceilf(x),y+1)))) \
+                         + (1 - scaler) * getG(Node(static_cast<std::tuple<int,int>>(std::make_tuple(floorf(x),y+1)))); // linear interpolation happens here
+        std::tuple<float,float> in2 = std::make_tuple(x,y-1); // imaginary node 2
+        float cost_in2 = scaler * getG(Node(static_cast<std::tuple<int,int>>(std::make_tuple(ceilf(x),y-1)))) \
+                         + (1 - scaler) * getG(Node(static_cast<std::tuple<int,int>>(std::make_tuple(floorf(x),y-1)))); // linear interpolation happens here
+
+        // 8 possible pairs of continuous neighbors when node lies along an edge
+        s_a = std::make_tuple(ceilf(x),y);
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        s_b = std::make_tuple(ceilf(x),y+1);
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(s_a, s_b, cost_s_a, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_a = std::make_tuple(ceilf(x),y+1);
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        CN.setValues(s_a, in1, cost_s_a, cost_in1);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_b = std::make_tuple(floorf(x), y+1);
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(in1, s_b, cost_in1, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_a = std::make_tuple(floorf(x),y+1);
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        s_b = std::make_tuple(floorf(x),y);
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(s_a, s_b, cost_s_a, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_a = std::make_tuple(floorf(x),y);
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        s_b = std::make_tuple(floorf(x),y-1);
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(s_a, s_b, cost_s_a, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_a = std::make_tuple(floorf(x),y-1);
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        CN.setValues(s_a, in2, cost_s_a, cost_in2);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_b = std::make_tuple(ceilf(x), y-1);
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(in2, s_b, cost_in2, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_a = std::make_tuple(ceilf(x),y-1);
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        s_b = std::make_tuple(ceilf(x),y);
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(s_a, s_b, cost_s_a, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+    }
+    else
+    {
+        // imaginary nodes and their linearly interpolated path cost
+        float scaler = fmodf(std::abs(y),floorf(std::abs(y))); // how far along the edge p lies relative to neighbors
+        if (y < 0)
+            scaler = (1 - scaler);
+        std::tuple<float,float> in1 = std::make_tuple(x+1,y); // imaginary node 1
+        float cost_in1 = scaler * getG(Node(static_cast<std::tuple<int,int>>(std::make_tuple(x+1,ceilf(y))))) \
+                         + (1 - scaler) * getG(Node(static_cast<std::tuple<int,int>>(std::make_tuple(x+1,floorf(y))))); // linear interpolation happens here
+        std::tuple<float,float> in2 = std::make_tuple(x-1,y); // imaginary node 2
+        float cost_in2 = scaler * getG(Node(static_cast<std::tuple<int,int>>(std::make_tuple(x-1,ceilf(y))))) \
+                         + (1 - scaler) * getG(Node(static_cast<std::tuple<int,int>>(std::make_tuple(x-1,floorf(y))))); // linear interpolation happens here
+
+        s_a = std::make_tuple(x,floorf(y));
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        s_b = std::make_tuple(x+1,floorf(y));
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(s_a, s_b, cost_s_a, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_a = std::make_tuple(x+1,floorf(y));
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        CN.setValues(s_a, in1, cost_s_a, cost_in1);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_b = std::make_tuple(x+1, ceilf(y));
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(in1, s_b, cost_in1, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_a = std::make_tuple(x+1, ceilf(y));
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        s_b = std::make_tuple(x, ceilf(y));
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(s_a, s_b, cost_s_a, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_a = std::make_tuple(x,ceilf(y));
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        s_b = std::make_tuple(x-1,ceilf(y));
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(s_a, s_b, cost_s_a, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_a = std::make_tuple(x-1,ceilf(y));
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        CN.setValues(s_a, in2, cost_s_a, cost_in2);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_b = std::make_tuple(x-1, floorf(y));
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(in2, s_b, cost_in2, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+
+        s_a = std::make_tuple(x-1,floorf(y));
+        cost_s_a = getG(Node(static_cast<std::tuple<int,int>>(s_a)));
+        s_b = std::make_tuple(x,floorf(y));
+        cost_s_b = getG(Node(static_cast<std::tuple<int,int>>(s_b)));
+        CN.setValues(s_a, s_b, cost_s_a, cost_s_b);
+        if (isValidContinuousNeighbors(CN))
+            CNs.push_back(CN);
+    }
+
+    return CNs;
+}
+
+bool FieldDPlanner::isValidContinuousNeighbors(ContinuousNeighbors CN)
+{
+    return graph.isValidPosition(CN.s_a) && graph.isValidPosition(CN.s_b);
+}
+
 void FieldDPlanner::insert_or_assign(Node s, float g, float rhs)
 {
     // re-assigns value of node in unordered map or inserts new entry if
@@ -460,4 +637,10 @@ std::vector<std::tuple<int,int>> FieldDPlanner::getExplored()
     }
 
     return explored;
+}
+
+std::ostream& operator<<(std::ostream& stream, const ContinuousNeighbors& CN)
+{
+    stream << "[<" << CN.s_a << ", " << CN.s_b << ">, c: <" << CN.cost_s_a << ", " << CN.cost_s_b << ">]";
+    return stream;
 }
