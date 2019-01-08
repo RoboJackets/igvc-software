@@ -100,6 +100,15 @@ bool Graph::isValidNode(Node s)
     return (x<=length) && (y<=width) && (x>=0) && (y>=0);
 }
 
+bool Graph::isValidPosition(std::tuple<float,float> p)
+{
+    float x,y;
+    std::tie(x,y) = p;
+    // with [row,col] indexing
+    return (x<=static_cast<float>(length)) && (y<=static_cast<float>(width)) \
+            && (x>=0.0f) && (y>=0.0f);
+}
+
 bool Graph::isValidCell(std::tuple<int,int> ind)
 {
     int x,y;
