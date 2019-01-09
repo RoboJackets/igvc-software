@@ -18,7 +18,10 @@
 igvc_msgs::velocity_pair current_motor_command;
 double battery_avg = 0;
 double battery_avg_num = 100;
+
+double min_battery_voltage;
 std::list<double> battery_vals;
+double p_l, p_r, d_l, d_r, i_l, i_r; // PID Values
 
 bool enabled = false;
 int precision;
@@ -65,8 +68,7 @@ bool validateValues(std::string ret, int loc, int end, double left, double right
 /**
 Sets PID values
 */
-void setPID(EthernetSocket& sock, ros::Rate &rate,
-    double p_l, double p_r, double d_l, double d_r, double i_l, double i_r)
+void setPID(EthernetSocket& sock, ros::Rate &rate)
 {
   std::string p_values = "#P" + toBoundedString(p_l) + "," + toBoundedString(p_r) + "\n";
   std::string d_values = "#D" + toBoundedString(d_l) + "," + toBoundedString(d_r) + "\n";
@@ -137,6 +139,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
+  // /motors topic contains motor velocity commands provided by path follower
   ros::Subscriber cmd_sub = nh.subscribe("/motors", 1, cmdCallback);
 
   ros::Publisher enc_pub = nh.advertise<igvc_msgs::velocity_pair>("/encoders", 1000);
@@ -154,22 +157,18 @@ int main(int argc, char** argv)
                   << "\n\tPort: " << std::to_string(tcpport));
 
   int messages_to_read;
+  int min_battery_voltage;
   pNh.param(std::string("messages_to_read"), messages_to_read, 3);
-
+  igvc::getParam(pNh, std::string("min_battery_voltage"), min_battery_voltage);
   pNh.param(std::string("precision"), precision, 1);
 
-  double p_l, p_r, d_l, d_r, i_l, i_r;
-  pNh.param(std::string("p_l"), p_l, 3.0);
-  pNh.param(std::string("p_r"), p_r, 3.0);
-  pNh.param(std::string("d_l"), d_l, 0.0);
-  pNh.param(std::string("d_r"), d_r, 0.0);
-  pNh.param(std::string("i_r"), i_r, 0.0);
-  pNh.param(std::string("i_l"), i_l, 0.0);
-
-  ROS_INFO_STREAM("Setting PID Values:"
-                  << "\n\t P => L: " << p_l << " R: " << p_r
-                  << "\n\t D => L: " << d_l << " R: " << d_r
-                  << "\n\t I => L: " << i_l << " R: " << i_r);
+  // PID variables
+  igvc::getParam(pNh, std::string("p_l"), p_l);
+  igvc::getParam(pNh, std::string("p_r"), p_r);
+  igvc::getParam(pNh, std::string("d_l"), d_l);
+  igvc::getParam(pNh, std::string("d_r"), d_r);
+  igvc::getParam(pNh, std::string("i_r"), i_r);
+  igvc::getParam(pNh, std::string("i_l"), i_l);
 
   EthernetSocket sock(ip_addr, tcpport);
 
@@ -181,21 +180,27 @@ int main(int argc, char** argv)
 
   ROS_INFO_STREAM("Motor Board ready.");
 
-  ros::Rate rate(40);
+  ros::Rate rate(100);
+  rate.sleep();
 
-  setPID(sock, rate, p_l, p_r, d_l, d_r, i_l, i_r);
+  ROS_INFO_STREAM("Setting PID Values:"
+                  << "\n\t P => L: " << p_l << " R: " << p_r
+                  << "\n\t D => L: " << d_l << " R: " << d_r
+                  << "\n\t I => L: " << i_l << " R: " << i_r);
+  setPID(sock, rate); // Set motor's PID Values
 
   // sends down motor commands and recieves multiple responses back
   // while (ros::ok() && port.isOpen())
   while (ros::ok())
   {
+    // construct motor command to send to motorboard (server)
     std::string msg = "$" + (enabled ? toBoundedString(current_motor_command.left_velocity) : toBoundedString(0.0)) +
                       "," + (enabled ? toBoundedString(current_motor_command.right_velocity) : toBoundedString(0.0)) +
                       "\n";
     // send motor command
     sock.sendMessage(msg);
 
-    // receive response
+    // read response from server
     std::string ret = sock.readMessage();
     size_t dollar = ret.find('$');
     size_t pound = ret.find('#');
@@ -235,9 +240,11 @@ int main(int argc, char** argv)
             battery_msg.data = battery_avg;
             battery_pub.publish(battery_msg);
             //TODO get rid of magic number '23.5'
-            if (battery_avg < 23.5 && battery_vals.size() >= battery_avg_num)
+            if (battery_avg < min_battery_voltage && battery_vals.size() >= battery_avg_num)
             {
-              ROS_ERROR_STREAM("Battery voltage dangerously low");
+              ROS_ERROR_STREAM("Battery voltage dangerously low:"
+                               << "\n\tCurr. Voltage: " << battery_avg
+                               << "\n\tMin. Voltage: " << min_battery_voltage);
             }
             std_msgs::Bool enabled_msg;
             enabled_msg.data = tokens.at(1) == "1";
