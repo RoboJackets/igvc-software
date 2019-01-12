@@ -3,12 +3,15 @@
     This file launches the particle_filter node which performs robot localization
     -->
 <launch>
-    <node pkg="particle_filter" type="particle_filter" name="particle_filter" output="screen">
+    <node pkg="igvc_navigation" type="particle_filter" name="particle_filter" output="screen">
         <param name="buffer_size" type="int" value="128"/>
         <param name="num_particles" type="int" value="32"/>
         <param name="transform_max_wait_time" type="double" value="0.1"/>
         //In seconds
         <param name="axle_length" type="double" value="0.52"/>
+        <param name="motor_std_dev" type="double" value="0.1"/>
+        <param name="initial_pos_std_dev" type="double" value="0.1"/>
+        <param name="initial_yaw_std_dev" type="double" value="0.1"/>
         <param name="debug" type="bool" value="true"/>
     </node>
 </launch>
