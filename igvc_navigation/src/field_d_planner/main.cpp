@@ -33,7 +33,7 @@ pcl::PointCloud<pcl::PointXYZRGB> expanded_cloud;
 ros::Publisher expanded_pub;
 
 igvc_msgs::mapConstPtr map; // Most up-to-date map
-FieldDPlanner field_d; // D* Lite path planner
+FieldDPlanner planner; // D* Lite path planner
 int x_initial, y_initial; // Index for initial x and y location in search space
 
 double maximum_distance; // maximum distance to goal node before warning messages spit out
@@ -65,7 +65,7 @@ void expanded_callback(const std::vector<std::tuple<int,int>>& inds)
         p.y = static_cast<float>(std::get<1>(ind) - y_initial) * map->resolution;
         p.z = -0.05f;
 
-        if (field_d.getG(Node(std::get<0>(ind), std::get<1>(ind))) == std::numeric_limits<float>::infinity())
+        if (planner.getG(Node(std::get<0>(ind), std::get<1>(ind))) == std::numeric_limits<float>::infinity())
         {
             uint8_t r = 255, g = 0, b = 0;    // Example: Red color
             uint32_t rgb = ((uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b);
@@ -100,7 +100,7 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
       {
           x_initial = static_cast<int>(msg->x_initial); // initial x coord of graph search problem
           y_initial = static_cast<int>(msg->y_initial); // initial y coord of graph search problem
-          field_d.graph.initializeGraph(msg);
+          planner.graph.initializeGraph(msg);
           initialize_graph = false;
       }
 }
@@ -114,17 +114,17 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
     std::lock_guard<std::mutex> lock(planning_mutex);
 
     int goal_x, goal_y;
-    goal_x = static_cast<int>(std::round(msg->point.x / field_d.graph.Resolution)) + x_initial;
-    goal_y = static_cast<int>(std::round(msg->point.y / field_d.graph.Resolution)) + y_initial;
+    goal_x = static_cast<int>(std::round(msg->point.x / planner.graph.Resolution)) + x_initial;
+    goal_y = static_cast<int>(std::round(msg->point.y / planner.graph.Resolution)) + y_initial;
 
     std::tuple<int,int> newGoal = std::make_tuple(goal_x, goal_y);
 
-    if (field_d.graph.Goal.getIndex() != newGoal)
+    if (planner.graph.Goal.getIndex() != newGoal)
         goal_changed = true; // re-initialize graph search problem
 
-    field_d.graph.setGoal(newGoal);
+    planner.graph.setGoal(newGoal);
 
-    float distance_to_goal = field_d.graph.euclidian_heuristic(newGoal) * field_d.graph.Resolution;
+    float distance_to_goal = planner.graph.euclidian_heuristic(newGoal) * planner.graph.Resolution;
 
     ROS_INFO_STREAM((goal_changed ? "New" : "Same") << " waypoint received. Search Problem Goal = " << goal_x
                     << ", " << goal_y << ". Distance: "
@@ -159,8 +159,8 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, "goal_range", goal_range);
   igvc::getParam(pNh, "publish_expanded", publish_expanded);
 
-  field_d.graph.setCSpace(static_cast<float>(CSpace));
-  field_d.GOAL_DIST = static_cast<float>(goal_range);
+  planner.graph.setCSpace(static_cast<float>(CSpace));
+  planner.GOAL_DIST = static_cast<float>(goal_range);
 
   // publish a 2D pointcloud of expanded nodes for visualization
   expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded", 1);
@@ -180,53 +180,53 @@ int main(int argc, char** argv)
       if (initialize_graph)
           continue;
       else
-          field_d.graph.updateGraph(map);
+          planner.graph.updateGraph(map);
 
       // don't plan unless a goal node has been set
       if (!initial_goal_set)
           continue;
 
       if (initialize_search)
-          field_d.initialize();
+          planner.initialize();
 
       if (goal_changed)
       {
           ROS_INFO_STREAM("New Goal Received. Initializing Search...");
-          field_d.reinitialize();
+          planner.reinitialize();
           initialize_search = true;
           goal_changed = false;
       }
 
-      numNodesUpdated = field_d.updateNodesAroundUpdatedCells();
+      numNodesUpdated = planner.updateNodesAroundUpdatedCells();
 
       if (numNodesUpdated > 0) ROS_INFO_STREAM(numNodesUpdated << " nodes updated");
       if ((numNodesUpdated > 0) || initialize_search)
       {
           ros::Time begin = ros::Time::now();
-          numNodesExpanded = field_d.computeShortestPath();
+          numNodesExpanded = planner.computeShortestPath();
+
           double elapsed = (ros::Time::now() - begin).toSec();
           ROS_INFO_STREAM(numNodesExpanded << " nodes expanded in " << elapsed << "s.");
           if (initialize_search) initialize_search = false;
       }
 
-      field_d.constructOptimalPath();
-
       if (publish_expanded)
-        expanded_callback(field_d.getExplored());
+        expanded_callback(planner.getExplored());
+
+      planner.constructOptimalPath();
 
       nav_msgs::Path path_msg;
       path_msg.header.stamp = ros::Time::now();
       path_msg.header.frame_id = "odom";
 
-      for (std::tuple<int,int> point : field_d.path)
+      for (std::tuple<float,float> point : planner.path)
       {
-          auto it = path_msg.poses.begin();
           geometry_msgs::PoseStamped pose;
           pose.header.stamp = path_msg.header.stamp;
           pose.header.frame_id = path_msg.header.frame_id;
-          pose.pose.position.x = (std::get<0>(point) - x_initial) * field_d.graph.Resolution;
-          pose.pose.position.y = (std::get<1>(point) - y_initial) * field_d.graph.Resolution;
-          path_msg.poses.insert(it, pose);
+          pose.pose.position.x = (std::get<0>(point) - x_initial) * planner.graph.Resolution;
+          pose.pose.position.y = (std::get<1>(point) - y_initial) * planner.graph.Resolution;
+          path_msg.poses.push_back(pose);
       }
 
       path_pub.publish(path_msg);
