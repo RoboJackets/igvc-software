@@ -180,8 +180,7 @@ int main(int argc, char** argv)
 
   ROS_INFO_STREAM("Motor Board ready.");
 
-  ros::Rate rate(100);
-  rate.sleep();
+  ros::Rate rate(120);
 
   ROS_INFO_STREAM("Setting PID Values:"
                   << "\n\t P => L: " << p_l << " R: " << p_r
@@ -189,8 +188,10 @@ int main(int argc, char** argv)
                   << "\n\t I => L: " << i_l << " R: " << i_r);
   setPID(sock, rate); // Set motor's PID Values
 
+
   // sends down motor commands and recieves multiple responses back
   // while (ros::ok() && port.isOpen())
+  ros::Time begin = ros::Time::now(); // begin interval
   while (ros::ok())
   {
     // construct motor command to send to motorboard (server)
@@ -202,6 +203,11 @@ int main(int argc, char** argv)
 
     // read response from server
     std::string ret = sock.readMessage();
+
+    double elapsed = (ros::Time::now() - begin).toSec();
+
+    ROS_INFO_STREAM("Read:" << ret << ", Elapsed: " << elapsed << "s.");
+
     size_t dollar = ret.find('$');
     size_t pound = ret.find('#');
     int count = 0;
@@ -239,7 +245,6 @@ int main(int argc, char** argv)
             battery_avg += voltage / battery_avg_num;
             battery_msg.data = battery_avg;
             battery_pub.publish(battery_msg);
-            //TODO get rid of magic number '23.5'
             if (battery_avg < min_battery_voltage && battery_vals.size() >= battery_avg_num)
             {
               ROS_ERROR_STREAM("Battery voltage dangerously low:"
@@ -256,12 +261,12 @@ int main(int argc, char** argv)
           case 'E':
             // prints unknown error to terminal
             ROS_ERROR_STREAM("MBED error: " << ret);
-            count--;
+            count++;
             break;
 
           default:
             ROS_ERROR_STREAM("unknown response: " << ret);
-            count--;
+            count++;
             break;
         }
       }
@@ -285,6 +290,7 @@ int main(int argc, char** argv)
       dollar = ret.find('$');
       pound = ret.find('#');
     }
+    begin = ros::Time::now();
     ros::spinOnce();
     rate.sleep();
   }
