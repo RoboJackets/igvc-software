@@ -1,5 +1,6 @@
 #ifndef ROBOTSTATE_H
 #define ROBOTSTATE_H
+#pragma once
 
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
@@ -22,6 +23,11 @@ public:
   explicit RobotState(const nav_msgs::Odometry::ConstPtr &msg)
   {
     setState(msg);
+  }
+
+  explicit RobotState(const tf::StampedTransform &transform)
+  {
+    setState(transform);
   }
 
   // set state using an odometry msg

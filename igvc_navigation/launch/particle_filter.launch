@@ -1,0 +1,9 @@
+<!-- localization.launch -->
+<!--
+    This file launches the particle_filter node which performs robot localization
+    -->
+<launch>
+    <node pkg="particle_filter" type="particle_filter" name="particle_filter" output="screen">
+      <param name="buffer_size" value="128"/>
+    </node>
+</launch>
