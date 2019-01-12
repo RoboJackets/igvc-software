@@ -2,37 +2,51 @@
 #include "particle_filter_base.h"
 
 /**
- * Propagates all particles using the the odometry model
+ * Calculates state delta using the the odometry model
  * Equations from https://robotics.stackexchange.com/questions/1653/calculate-position-of-differential-drive-robot
- * @param particles
- * @param state
- * @param motor_command
- * @param deltaT
+ * @param[in/out] state Starting state, modified to contain delta
+ * @param[in] motor_command motor command from encoder
  */
-void BasicParticleFilter::ProposalDistribution(std::vector<Particle> particles,
-                                               const igvc_msgs::velocity_pair &motor_command,
-                                               const ros::Duration &deltaT)
+void BasicParticleFilter::ProposalDistribution(RobotState& state,
+                                               const igvc_msgs::velocity_pair &motor_command)
 {
-  for (Particle particle : particles)
-  {
-    double left_delta = motor_command.left_velocity * deltaT.toSec();
-    double right_delta = motor_command.right_velocity * deltaT.toSec();
-    // If basically going straight
-    if (fabs(left_delta - right_delta) < 1.0e-6)
-    {
-      particle.state.x = particle.state.x + left_delta * cos(particle.state.yaw);
-      particle.state.y = particle.state.y + right_delta * sin(particle.state.yaw);
-    }
-    else
-    {
-      double r = axle_length * (left_delta + right_delta) / (2 * (right_delta - left_delta));
-      double wd = (right_delta - left_delta) / axle_length;
-      particle.state.x = particle.state.x + r * sin(wd + particle.state.yaw) - r * sin(particle.state.yaw);
-      particle.state.y = particle.state.y - r * cos(wd + particle.state.yaw) + r * cos(particle.state.yaw);
-      particle.state.yaw = particle.state.yaw + wd;
-      igvc::fit_to_polar(particle.state.yaw);
-    }
-  }
+      double left_delta = motor_command.left_velocity * motor_command.duration;
+      double right_delta = motor_command.right_velocity * motor_command.duration;
+      // If basically going straight
+      if (fabs(left_delta - right_delta) < 1.0e-6)
+      {
+        state.x = state.x + left_delta * cos(state.yaw);
+        state.y = state.y + right_delta * sin(state.yaw);
+      }
+      else
+      {
+        double r = axle_length * (left_delta + right_delta) / (2 * (right_delta - left_delta));
+        double wd = (right_delta - left_delta) / axle_length;
+        state.x = state.x + r * sin(wd + state.yaw) - r * sin(state.yaw);
+        state.y = state.y - r * cos(wd + state.yaw) + r * cos(state.yaw);
+        state.yaw = state.yaw + wd;
+        igvc::fit_to_polar(state.yaw);
+      }
+//  for (Particle particle : particles)
+//  {
+//    double left_delta = motor_command.left_velocity * motor_command.duration;
+//    double right_delta = motor_command.right_velocity * motor_command.duration;
+//    // If basically going straight
+//    if (fabs(left_delta - right_delta) < 1.0e-6)
+//    {
+//      particle.state.x = particle.state.x + left_delta * cos(particle.state.yaw);
+//      particle.state.y = particle.state.y + right_delta * sin(particle.state.yaw);
+//    }
+//    else
+//    {
+//      double r = axle_length * (left_delta + right_delta) / (2 * (right_delta - left_delta));
+//      double wd = (right_delta - left_delta) / axle_length;
+//      particle.state.x = particle.state.x + r * sin(wd + particle.state.yaw) - r * sin(particle.state.yaw);
+//      particle.state.y = particle.state.y - r * cos(wd + particle.state.yaw) + r * cos(particle.state.yaw);
+//      particle.state.yaw = particle.state.yaw + wd;
+//      igvc::fit_to_polar(particle.state.yaw);
+//    }
+//  }
 }
 
 /**

@@ -20,14 +20,12 @@ public:
     double axle_length;
 
     /**
-     * Propagates all particles using the proposal distribution. Called during the callback of the motor command subscriber
-     * @param[in/out] particle The particles to be used for sampling
-     * @param[in] state The state at the time of the motor command.
-     * @param[in] motor_command The motor command
-     * @param[in] deltaT The time between the previous motor command and the current command
+     * Returns a RobotState containing the deltas
+     * ignore: Propagates all particles using the proposal distribution. Called during the callback of the motor command subscriber
+     * @param[in/out] state The state at the time of the motor command.
+     * @param[in] motor_command The motor command from encoder
      */
-    virtual void ProposalDistribution(std::vector<Particle> particles, const igvc_msgs::velocity_pair &motor_command,
-                                      const ros::Duration &deltaT) = 0;
+    virtual void ProposalDistribution(RobotState& state, const igvc_msgs::velocity_pair &motor_command) = 0;
 
     /**
      * Generates the weights for each particle. Defined as the proposal distribution / target distribution.
@@ -36,7 +34,7 @@ public:
      */
     virtual void getWeights(const pcl::PointCloud<pcl::PointXYZ> &pointCloud, std::vector<Particle> particles) = 0;
 
-    void resample_points(std::vector<struct Particle> particles, int num_particles);
+    void resample_points(std::vector<struct Particle>& particles);
 private:
     // TODO: Use this
     double variance;
@@ -47,11 +45,12 @@ private:
  * @param[in, out] particles
  * @param[in] num_particles
  */
-void ParticleFilterBase::resample_points(std::vector<struct Particle> particles, int num_particles)
+void ParticleFilterBase::resample_points(std::vector<struct Particle>& particles)
 {
   // Create array of cumulative weights
   std::vector<double> cum_weights;
-  cum_weights.reserve(num_particles + 1);
+  auto num_particles = particles.size();
+  cum_weights.reserve(num_particles +1);
   cum_weights.emplace_back(0);
   for (int i = 0; i < num_particles; i++) {
     cum_weights.emplace_back(cum_weights[i] + particles[i].weight);

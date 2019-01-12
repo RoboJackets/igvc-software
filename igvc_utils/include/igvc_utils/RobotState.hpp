@@ -15,6 +15,7 @@ public:
   double roll{ 0 };
   double pitch{ 0 };
   double yaw{ 0 };
+  ros::Time stamp{ 0 };
 
   friend std::ostream &operator<<(std::ostream &out, const RobotState &state);
 
@@ -25,7 +26,7 @@ public:
     setState(msg);
   }
 
-  explicit RobotState(const tf::StampedTransform &transform)
+  explicit RobotState(const tf::StampedTransform &transform, ros::Time stamp) : stamp(stamp)
   {
     setState(transform);
   }

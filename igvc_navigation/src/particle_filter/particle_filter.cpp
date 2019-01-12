@@ -1,45 +1,126 @@
-#include <igvc_utils/RobotState.hpp>
-#include <boost/circular_buffer.hpp>
 #include <igvc_msgs/velocity_pair.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
-#include "particle_filter_base.h"
+#include <boost/circular_buffer.hpp>
+#include <igvc_utils/RobotState.hpp>
 #include "basic_particle_filter.h"
+#include "particle_filter_base.h"
 
 class ParticleFilterNode
 {
 public:
-    void motor_callback(const igvc_msgs::velocity_pair& motor_command);
-    void pc_callback(const pcl::PointCloud<pcl::PointXYZ>& pointCloud);
-    int buffer_size;
-    double transform_max_wait_time;
-    boost::circular_buffer <struct Point> point_buffer;
-    std::unique_ptr<tf::TransformListener> tf_listener;
-    std::unique_ptr<ParticleFilterBase> particle_filter;
+  void motor_callback(const igvc_msgs::velocity_pair &motor_command);
+
+  void pc_callback(const pcl::PointCloud<pcl::PointXYZ> &pointCloud);
+
+  std::vector<Particle> particles;
+  double transform_max_wait_time;
+  boost::circular_buffer<RobotState> delta_buffer;
+  std::unique_ptr<tf::TransformListener> tf_listener;
+  std::unique_ptr<ParticleFilterBase> particle_filter;
+
+  ParticleFilterNode(int num_particles, int buffer_size, double transform_max_wait_time)
+    : particles(num_particles, Particle()), delta_buffer(buffer_size), transform_max_wait_time(transform_max_wait_time)
+  {
+  }
+private:
+    int find_closest_delta(const ros::Time& stamp);
 };
 
-void ParticleFilterNode::motor_callback(const igvc_msgs::velocity_pair& motor_command) {
-  // Stamped pls? So I can TF:waitForTransform, then call a odometry model to get the actual changed positions
+std::unique_ptr<ParticleFilterNode> particle_filter_node;
+
+/**
+ * Callback for motor commands. Calls `particle_filter->ProposalDistribution` to get state deltas, and adds them to
+ * the delta_buffer
+ * @param motor_command motor commands from encoders
+ */
+void ParticleFilterNode::motor_callback(const igvc_msgs::velocity_pair &motor_command)
+{
   tf::StampedTransform transform;
-  if (tf_listener->waitForTransform("/odom", "/base_link", motor_command.header.stamp, ros::Duration(transform_max_wait_time)))
+  if (tf_listener->waitForTransform("/odom", "/base_link", motor_command.header.stamp,
+                                    ros::Duration(transform_max_wait_time)))
   {
     tf_listener->lookupTransform("/odom", "/base_link", motor_command.header.stamp, transform);
-  } else {
+  }
+  else
+  {
     // TODO: How to handle if doesn't find it?
     // Currently will just get the latest one, shouldn't make that large of an error?
+    ROS_ERROR_STREAM("Failed lookupTransform, using latest one");
     tf_listener->lookupTransform("/odom", "/base_link", ros::Time(0), transform);
   }
-  RobotState state(transform);
+  RobotState state(transform, motor_command.header.stamp);
+  particle_filter_node->particle_filter->ProposalDistribution(state, motor_command);
+  delta_buffer.push_back(state);
 }
 
-void ParticleFilterNode::pc_callback(const pcl::PointCloud<pcl::PointXYZ>& pointCloud) {
-  // Search for closest one using binary search
-//  pointCloud.time or something
-//  int end_pos = findClosestTransform()
+/**
+ * Callback for lidar data. Finds corresponding delta in `delta_buffer`, consumes all deltas to propogate particles,
+ * calculates weights, then resamples the particles.
+ *
+ * @param pointCloud pointcloud from lidar callback
+ */
+void ParticleFilterNode::pc_callback(const pcl::PointCloud<pcl::PointXYZ> &pointcloud)
+{
+  ros::Time stamp;
+  pcl_conversions::fromPCL(pointcloud.header.stamp, stamp);
+  int end_pos = find_closest_delta(stamp);
 
+  // Accumulate all deltas into a single delta
+  RobotState accumulated(delta_buffer[0]);
+  for (int i = 1; i < end_pos; i++)
+  {
+    accumulated.x += delta_buffer[i].x;
+    accumulated.y += delta_buffer[i].y;
+    accumulated.yaw += delta_buffer[i].yaw;
+  }
 
+  // Propogate the particles using the delta
+  for (Particle particle : particles)
+  {
+    particle.state.x += accumulated.x;
+    particle.state.y += accumulated.y;
+    particle.state.yaw += accumulated.yaw;
+  }
+
+  // Compute weights using propagated particles
+  particle_filter_node->particle_filter->getWeights(pointcloud, particles);
+
+  // Resample
+  particle_filter_node->particle_filter->resample_points(particles);
 }
+
+struct CompareTime
+{
+    ros::Time asTime(const RobotState& state) const
+    {
+      return state.stamp;
+    }
+
+    ros::Time asTime(const ros::Time& stamp) const
+    {
+      return stamp;
+    }
+
+    template< typename T1, typename T2>
+    bool operator()(T1 const& t1, T2 const& t2) const
+    {
+      return asTime(t1) < asTime(t2);
+    }
+};
+
+// Should I be returning iterator here instead of the index? Or is it preoptimization?
+/**
+ * Finds the closest
+ * @param stamp timestamp to search for
+ * @return index of the element in `delta_buffer` that has equal or larger timestamp
+ */
+int ParticleFilterNode::find_closest_delta(const ros::Time& stamp) {
+  auto end_it = std::lower_bound(delta_buffer.begin(), delta_buffer.end(), stamp, CompareTime());
+  return static_cast<int>(end_it - delta_buffer.begin());
+}
+
 
 int main(int argc, char **argv)
 {
@@ -47,22 +128,23 @@ int main(int argc, char **argv)
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  ParticleFilterNode particle_filter_node;
-  particle_filter_node.particle_filter = std::unique_ptr<ParticleFilterBase>(new BasicParticleFilter());
+  int buffer_size, num_particles;
+  double transform_max_wait_time, axle_length;
+  igvc::getParam(pNh, "buffer_size", buffer_size);
+  igvc::getParam(pNh, "num_particles", num_particles);
+  igvc::getParam(pNh, "transform_max_wait_time", transform_max_wait_time);
+  igvc::getParam(pNh, "axle_length", axle_length);
 
-  igvc::getParam(pNh, "buffer_size", particle_filter_node.buffer_size);
-  igvc::getParam(pNh, "transform_max_wait_time", particle_filter_node.transform_max_wait_time);
-  igvc::getParam(pNh, "axle_length", particle_filter_node.particle_filter->axle_length);
-  igvc::getParam(pNh, "occupancy_grid_length", particle_filter_node.particle_filter->length_y);
-  igvc::getParam(pNh, "occupancy_grid_width", particle_filter_node.particle_filter->width_x);
-  igvc::getParam(pNh, "occupancy_grid_resolution", particle_filter_node.particle_filter->resolution);
-  igvc::getParam(pNh, "start_X", particle_filter_node.particle_filter->cont_start_x);
-  igvc::getParam(pNh, "start_Y", particle_filter_node.particle_filter->cont_start_y);
+  particle_filter_node =
+      std::unique_ptr<ParticleFilterNode>(new ParticleFilterNode(num_particles, buffer_size, transform_max_wait_time));
+  particle_filter_node->particle_filter = std::unique_ptr<ParticleFilterBase>(new BasicParticleFilter());
+  particle_filter_node->particle_filter->axle_length = axle_length;
 
-  particle_filter_node.tf_listener = std::unique_ptr<tf::TransformListener>(new tf::TransformListener());
+  particle_filter_node->tf_listener = std::unique_ptr<tf::TransformListener>(new tf::TransformListener());
 
-  ros::Subscriber motor_sub = nh.subscribe("/encoders", 1, &ParticleFilterNode::motor_callback, &particle_filter_node);
-  ros::Subscriber pc_sub = nh.subscribe("/pc2", 1, &ParticleFilterNode::pc_callback, &particle_filter_node);
+  ros::Subscriber motor_sub =
+      nh.subscribe("/encoders", 1, &ParticleFilterNode::motor_callback, particle_filter_node.get());
+  ros::Subscriber pc_sub = nh.subscribe("/pc2", 1, &ParticleFilterNode::pc_callback, particle_filter_node.get());
 
   ros::spin();
 
