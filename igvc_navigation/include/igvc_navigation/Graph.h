@@ -54,9 +54,9 @@ public:
     float Resolution; // grid resolution
     float CSpace; // configuration space
 
-    float DIAGONAL_DISTANCE = (float) sqrt(2);
-    float EDGE_DISTANCE = 1;
-    float TRAVERSAL_COST = 1;
+    float DIAGONAL_DISTANCE = (float) sqrt(2.0f);
+    float EDGE_DISTANCE = 1.0f;
+    float TRAVERSAL_COST = 1.0f;
 
     // k_m, as defined in the D* lite paper, keeps track of the robot's movement
     // in the grid space and increased new node's key vaues by k_m as to maintain
@@ -210,8 +210,17 @@ public:
 
     @param[in] s node to get traversal cost through
     @param[in] s_prime neighbor of s
+    @return cost of traversing from s to s_prime
     */
     float getTraversalCost(Node s, Node s_prime);
+    /**
+    Get cost of traversing from one continuous position on the graph p to another
+    continuous position p_prime
+    @param[in] p continuous position on the graph
+    @param[in] p_prime another continuous position on the graph
+    @return cost of traversing from p to p_prime
+    */
+    float getContinuousTraversalCost(std::tuple<float,float> p, std::tuple<float,float> p_prime);
     /**
     Gets minimum traversal cost from a node s to any neighboring node.
 

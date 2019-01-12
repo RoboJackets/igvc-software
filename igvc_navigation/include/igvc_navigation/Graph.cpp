@@ -323,12 +323,13 @@ float Graph::getC(Node s, Node s_prime)
     std::tuple<int,int> cellInd;
     uchar cellVal;
 
-    int x1, y1;
+    int x1, y1; // indices of s
     std::tie(x1,y1) = s.getIndex();
 
-    int x2,y2;
+    int x2,y2; // indices of s'
     std::tie(x2,y2) = s_prime.getIndex();
 
+    // get orientation of s_prime relative to s. Used to locate containing cell
     int x_diff = x2-x1;
     int y_diff = y2-y1;
 
@@ -349,19 +350,9 @@ float Graph::getC(Node s, Node s_prime)
         cellInd = std::make_tuple(x1, y1-1); // bottom right cell
     }
 
+    // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
     cellVal = getValWithCSpace(cellInd);
-
-    // #TODO get rid of magic number
-    if (cellVal > 178)
-    {
-        // cell is occupied, infinite traversal cost
-        return std::numeric_limits<float>::infinity();
-    }
-    else
-    {
-        // cell is unuccupied, diagonal cost is euclidian distance
-        return TRAVERSAL_COST;
-    }
+    return (cellVal > 178) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST;    // #TODO get rid of magic number
 }
 
 float Graph::getB(Node s, Node s_prime)
@@ -369,10 +360,8 @@ float Graph::getB(Node s, Node s_prime)
     // each edge has 2 neighboring cells
     std::tuple<int,int> cellInd1;
     std::tuple<int,int> cellInd2;
-    float cellVal1;
-    float cellVal2;
 
-    float maxCellVal;
+    float maxCellVal; // maximum occupied status of both neighboring cells
 
     int x1, y1;
     std::tie(x1,y1) = s.getIndex();
@@ -404,64 +393,51 @@ float Graph::getB(Node s, Node s_prime)
         cellInd2 = std::make_tuple(x1, y1-1); // bottom right cell
     }
 
-
-    cellVal1 = getValWithCSpace(cellInd1);
-    cellVal2 = getValWithCSpace(cellInd2);
-
-    maxCellVal = std::max(cellVal1, cellVal2);
-
-    // #TODO get rid of magic number
-    if (maxCellVal > 178)
-    {
-        // cell is occupied, infinite traversal cost
-        return std::numeric_limits<float>::infinity();
-    }
-    else
-    {
-        // cell is unuccupied, diagonal cost is euclidian distance (1)
-        return TRAVERSAL_COST;
-    }
+    // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
+    maxCellVal = std::max(getValWithCSpace(cellInd1), getValWithCSpace(cellInd2));
+    return (maxCellVal > 178) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST;
 }
 
 float Graph::getValWithCSpace(std::tuple<int,int> ind)
 {
-    float cost;
+    // invalid cells have infinite travel cost
+    if (!isValidCell(ind))
+        return 255.0f;
 
-    if (isValidCell(ind))
-    {
-        int x,y;
-        std::tie(x,y) = ind;
+    int x,y;
+    std::tie(x,y) = ind;
 
-        int sep = CSpace/Resolution + 1;
+    int sep = CSpace/Resolution + 1; // number of cells accounted for with CSpace
 
-        cv::Mat subsection =
-          Map->image(cv::Range(std::max(x - sep, 0), std::min(x + sep + 1, Map->image.size().height)),
-                     cv::Range(std::max(y - sep, 0), std::min(y + sep + 1, Map->image.size().width)));
+    // get a slice around the cell (ind) with the desired cspace
+    cv::Mat subsection =
+      Map->image(cv::Range(std::max(x - sep, 0), std::min(x + sep + 1, Map->image.size().height)),
+                 cv::Range(std::max(y - sep, 0), std::min(y + sep + 1, Map->image.size().width)));
 
-         double min_val;
-         double max_val;
-         cv::minMaxLoc(subsection, &min_val, &max_val);
+    // get the value of the most occupied cell in the slice
+    double min_val;
+    double max_val;
+    cv::minMaxLoc(subsection, &min_val, &max_val);
 
-         cost = static_cast<float>(max_val);
-    }
-    else
-    {
-        cost = (float) 255;
-    }
-
-    return cost;
+    return static_cast<float>(max_val);
 }
 
 float Graph::getTraversalCost(Node s, Node s_prime)
 {
-    float cost;
     if (isDiagonal(s, s_prime))
-        cost = getC(s, s_prime) * DIAGONAL_DISTANCE;
+        return getC(s, s_prime) * DIAGONAL_DISTANCE;
     else
-        cost = getB(s, s_prime) * EDGE_DISTANCE;
-
-    return cost;
+        return getB(s, s_prime) * EDGE_DISTANCE;
 }
+
+float Graph::getContinuousTraversalCost(std::tuple<float,float> p, std::tuple<float,float> p_prime)
+{
+    // get the traversal cost for the cell that contains p and p'
+    Node s(std::make_tuple(lroundf(std::get<0>(p)),lroundf(std::get<1>(p))));
+    Node s_prime(std::make_tuple(lroundf(std::get<0>(p_prime)),lroundf(std::get<1>(p_prime))));
+    return isDiagonal(s,s_prime) ? getC(s, s_prime) : getB(s, s_prime);
+}
+
 
 float Graph::getMinTraversalCost(Node s)
 {
@@ -491,7 +467,7 @@ std::vector<Node> Graph::getNodesAroundCellWithCSpace(std::tuple<int,int> cellIn
     int x,y;
     std::tie(x,y) = cellInd;
 
-    int sep = (CSpace/Resolution) + 1;
+    int sep = (CSpace/Resolution) + 1; // number of cells on all sides that constitute C-space
 
     std::vector<Node> toUpdate;
 

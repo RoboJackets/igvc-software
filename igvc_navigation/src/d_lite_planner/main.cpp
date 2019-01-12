@@ -214,16 +214,16 @@ int main(int argc, char** argv)
           if (initialize_search) initialize_search = false;
       }
 
-      dlite.constructOptimalPath();
-
       if (publish_expanded)
         expanded_callback(dlite.getExplored());
+
+      dlite.constructOptimalPath();
 
       nav_msgs::Path path_msg;
       path_msg.header.stamp = ros::Time::now();
       path_msg.header.frame_id = "odom";
 
-      for (std::tuple<int,int> point : dlite.path)
+      for (std::tuple<float,float> point : dlite.path)
       {
           auto it = path_msg.poses.begin();
           geometry_msgs::PoseStamped pose;
