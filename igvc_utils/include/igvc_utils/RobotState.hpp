@@ -26,6 +26,8 @@ public:
     setState(msg);
   }
 
+  explicit RobotState(double x, double y, double yaw) : x(x), y(y), yaw(yaw) {}
+
   explicit RobotState(const tf::StampedTransform &transform, ros::Time stamp) : stamp(stamp)
   {
     setState(transform);

@@ -10,32 +10,34 @@
 class ParticleFilterNode
 {
 public:
-  void motor_callback(const igvc_msgs::velocity_pair &motor_command);
+  void motor_callback(const igvc_msgs::velocity_pair& motor_command);
 
-  void pc_callback(const pcl::PointCloud<pcl::PointXYZ> &pointCloud);
+  void pc_callback(const pcl::PointCloud<pcl::PointXYZ>& pointCloud);
 
-  std::vector<Particle> particles;
   double transform_max_wait_time;
   boost::circular_buffer<RobotState> delta_buffer;
   std::unique_ptr<tf::TransformListener> tf_listener;
   std::unique_ptr<ParticleFilterBase> particle_filter;
+  ros::Publisher particle_pcl_pub;
 
-  ParticleFilterNode(int num_particles, int buffer_size, double transform_max_wait_time)
-    : particles(num_particles, Particle()), delta_buffer(buffer_size), transform_max_wait_time(transform_max_wait_time)
+  ParticleFilterNode(int buffer_size, double transform_max_wait_time)
+    : transform_max_wait_time(transform_max_wait_time), delta_buffer(buffer_size)
   {
   }
+
 private:
-    int find_closest_delta(const ros::Time& stamp);
+  int find_closest_delta(const ros::Time& stamp);
 };
 
 std::unique_ptr<ParticleFilterNode> particle_filter_node;
+bool DEBUG = false;
 
 /**
  * Callback for motor commands. Calls `particle_filter->ProposalDistribution` to get state deltas, and adds them to
  * the delta_buffer
  * @param motor_command motor commands from encoders
  */
-void ParticleFilterNode::motor_callback(const igvc_msgs::velocity_pair &motor_command)
+void ParticleFilterNode::motor_callback(const igvc_msgs::velocity_pair& motor_command)
 {
   tf::StampedTransform transform;
   if (tf_listener->waitForTransform("/odom", "/base_link", motor_command.header.stamp,
@@ -61,7 +63,7 @@ void ParticleFilterNode::motor_callback(const igvc_msgs::velocity_pair &motor_co
  *
  * @param pointCloud pointcloud from lidar callback
  */
-void ParticleFilterNode::pc_callback(const pcl::PointCloud<pcl::PointXYZ> &pointcloud)
+void ParticleFilterNode::pc_callback(const pcl::PointCloud<pcl::PointXYZ>& pointcloud)
 {
   ros::Time stamp;
   pcl_conversions::fromPCL(pointcloud.header.stamp, stamp);
@@ -69,15 +71,18 @@ void ParticleFilterNode::pc_callback(const pcl::PointCloud<pcl::PointXYZ> &point
 
   // Accumulate all deltas into a single delta
   RobotState accumulated(delta_buffer[0]);
-  for (int i = 1; i < end_pos; i++)
+  for (auto i = 1; i < end_pos; i++)
   {
     accumulated.x += delta_buffer[i].x;
     accumulated.y += delta_buffer[i].y;
     accumulated.yaw += delta_buffer[i].yaw;
   }
 
+  // Erase from start to iterator
+  delta_buffer.erase_begin(static_cast<unsigned long>(end_pos));
+
   // Propogate the particles using the delta
-  for (Particle particle : particles)
+  for (Particle particle : particle_filter_node->particle_filter->particles)
   {
     particle.state.x += accumulated.x;
     particle.state.y += accumulated.y;
@@ -85,29 +90,45 @@ void ParticleFilterNode::pc_callback(const pcl::PointCloud<pcl::PointXYZ> &point
   }
 
   // Compute weights using propagated particles
-  particle_filter_node->particle_filter->getWeights(pointcloud, particles);
+  particle_filter_node->particle_filter->getWeights(pointcloud, particle_filter_node->particle_filter->particles);
 
   // Resample
-  particle_filter_node->particle_filter->resample_points(particles);
+  particle_filter_node->particle_filter->resample_points(particle_filter_node->particle_filter->particles);
+
+  if (DEBUG)
+  {
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr particle_pcl =
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+    for (Particle particle : particle_filter_node->particle_filter->particles)
+    {
+      pcl::PointXYZRGB p(255, 255, 255);
+      p.x = static_cast<float>(particle.state.x);
+      p.y = static_cast<float>(particle.state.y);
+      particle_pcl->points.emplace_back(p);
+    }
+    particle_pcl->header.frame_id = "/odom";
+    particle_pcl->header.stamp = pointcloud.header.stamp;
+    particle_pcl_pub.publish(particle_pcl);
+  }
 }
 
 struct CompareTime
 {
-    ros::Time asTime(const RobotState& state) const
-    {
-      return state.stamp;
-    }
+  ros::Time asTime(const RobotState& state) const
+  {
+    return state.stamp;
+  }
 
-    ros::Time asTime(const ros::Time& stamp) const
-    {
-      return stamp;
-    }
+  ros::Time asTime(const ros::Time& stamp) const
+  {
+    return stamp;
+  }
 
-    template< typename T1, typename T2>
-    bool operator()(T1 const& t1, T2 const& t2) const
-    {
-      return asTime(t1) < asTime(t2);
-    }
+  template <typename T1, typename T2>
+  bool operator()(T1 const& t1, T2 const& t2) const
+  {
+    return asTime(t1) < asTime(t2);
+  }
 };
 
 // Should I be returning iterator here instead of the index? Or is it preoptimization?
@@ -116,28 +137,33 @@ struct CompareTime
  * @param stamp timestamp to search for
  * @return index of the element in `delta_buffer` that has equal or larger timestamp
  */
-int ParticleFilterNode::find_closest_delta(const ros::Time& stamp) {
+int ParticleFilterNode::find_closest_delta(const ros::Time& stamp)
+{
   auto end_it = std::lower_bound(delta_buffer.begin(), delta_buffer.end(), stamp, CompareTime());
   return static_cast<int>(end_it - delta_buffer.begin());
 }
 
-
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   ros::init(argc, argv, "particle_filter");
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
   int buffer_size, num_particles;
-  double transform_max_wait_time, axle_length;
+  double transform_max_wait_time, axle_length, motor_std_dev, initial_pos_std_dev, initial_yaw_std_dev;
   igvc::getParam(pNh, "buffer_size", buffer_size);
   igvc::getParam(pNh, "num_particles", num_particles);
   igvc::getParam(pNh, "transform_max_wait_time", transform_max_wait_time);
   igvc::getParam(pNh, "axle_length", axle_length);
+  igvc::getParam(pNh, "motor_std_dev", motor_std_dev);
+  igvc::getParam(pNh, "initial_pos_std_dev", initial_pos_std_dev);
+  igvc::getParam(pNh, "initial_yaw_std_dev", initial_yaw_std_dev);
+  igvc::param(pNh, "debug", DEBUG, false);
 
   particle_filter_node =
-      std::unique_ptr<ParticleFilterNode>(new ParticleFilterNode(num_particles, buffer_size, transform_max_wait_time));
-  particle_filter_node->particle_filter = std::unique_ptr<ParticleFilterBase>(new BasicParticleFilter());
+      std::unique_ptr<ParticleFilterNode>(new ParticleFilterNode(buffer_size, transform_max_wait_time));
+  particle_filter_node->particle_filter = std::unique_ptr<ParticleFilterBase>(
+      new BasicParticleFilter(motor_std_dev, num_particles, initial_pos_std_dev, initial_yaw_std_dev));
   particle_filter_node->particle_filter->axle_length = axle_length;
 
   particle_filter_node->tf_listener = std::unique_ptr<tf::TransformListener>(new tf::TransformListener());
@@ -145,6 +171,11 @@ int main(int argc, char **argv)
   ros::Subscriber motor_sub =
       nh.subscribe("/encoders", 1, &ParticleFilterNode::motor_callback, particle_filter_node.get());
   ros::Subscriber pc_sub = nh.subscribe("/pc2", 1, &ParticleFilterNode::pc_callback, particle_filter_node.get());
+
+  if (DEBUG)
+  {
+    particle_filter_node->particle_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/particle_pcl", 1);
+  }
 
   ros::spin();
 
