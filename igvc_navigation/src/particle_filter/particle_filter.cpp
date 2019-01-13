@@ -27,8 +27,8 @@ public:
   }
 
 private:
-  template <class T>
-  int find_closest(const ros::Time& stamp, boost::circular_buffer<T> buffer);
+  int find_closest(const ros::Time& stamp, boost::circular_buffer<RobotState> buffer);
+  int find_closest(const ros::Time& stamp, boost::circular_buffer<igvc_msgs::mapConstPtr> buffer);
 };
 
 std::unique_ptr<ParticleFilterNode> particle_filter_node;
@@ -41,6 +41,7 @@ bool DEBUG = false;
  */
 void ParticleFilterNode::motor_callback(const igvc_msgs::velocity_pair& motor_command)
 {
+  //ROS_INFO("motor callback");
   tf::StampedTransform transform;
   if (tf_listener->waitForTransform("/odom", "/base_link", motor_command.header.stamp,
                                     ros::Duration(transform_max_wait_time)))
@@ -52,11 +53,17 @@ void ParticleFilterNode::motor_callback(const igvc_msgs::velocity_pair& motor_co
     // TODO: How to handle if doesn't find it?
     // Currently will just get the latest one, shouldn't make that large of an error?
     ROS_ERROR_STREAM("Failed lookupTransform, using latest one");
-    tf_listener->lookupTransform("/odom", "/base_link", ros::Time(0), transform);
+    try {
+      tf_listener->lookupTransform("/odom", "/base_link", ros::Time(0), transform);
+    } catch (tf::TransformException &ex) {
+      ROS_ERROR("%s", ex.what());
+      return;
+    }
   }
   RobotState state(transform, motor_command.header.stamp);
   particle_filter_node->particle_filter->ProposalDistribution(state, motor_command);
   delta_buffer.push_back(state);
+  //ROS_INFO("end motor callback");
 }
 
 void ParticleFilterNode::map_callback(const igvc_msgs::mapConstPtr map)
@@ -74,56 +81,75 @@ void ParticleFilterNode::map_callback(const igvc_msgs::mapConstPtr map)
  */
 void ParticleFilterNode::pc_callback(const pcl::PointCloud<pcl::PointXYZ>& pointcloud)
 {
-  ros::Time stamp;
-  pcl_conversions::fromPCL(pointcloud.header.stamp, stamp);
-  int end_pos = find_closest<RobotState>(stamp, delta_buffer);
-
-  // Accumulate all deltas into a single delta
-  RobotState accumulated(delta_buffer[0]);
-  for (auto i = 1; i < end_pos; i++)
-  {
-    accumulated.x += delta_buffer[i].x;
-    accumulated.y += delta_buffer[i].y;
-    accumulated.yaw += delta_buffer[i].yaw;
-  }
-
-  // Propogate the particles using the delta
-  for (Particle particle : particle_filter_node->particle_filter->particles)
-  {
-    particle.state.x += accumulated.x;
-    particle.state.y += accumulated.y;
-    particle.state.yaw += accumulated.yaw;
-  }
-  // Erase from start to iterator
-  delta_buffer.erase_begin(static_cast<unsigned long>(end_pos));
-
-  // Repeat above for map LOL
-  end_pos = find_closest<igvc_msgs::mapConstPtr>(stamp, map_buffer);
-
-  // Compute weights using propagated particles
-  particle_filter_node->particle_filter->getWeights(pointcloud, particle_filter_node->particle_filter->particles,
-                                                    map_buffer[end_pos]);
-
-  delta_buffer.erase_begin(static_cast<unsigned long>(end_pos));
-
-  // Resample
-  particle_filter_node->particle_filter->resample_points(particle_filter_node->particle_filter->particles);
-
-  if (DEBUG)
-  {
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr particle_pcl =
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
-    for (Particle particle : particle_filter_node->particle_filter->particles)
-    {
-      pcl::PointXYZRGB p(255, 255, 255);
-      p.x = static_cast<float>(particle.state.x);
-      p.y = static_cast<float>(particle.state.y);
-      particle_pcl->points.emplace_back(p);
+  //ROS_INFO("start of pc_callback");
+  try {
+    ros::Time stamp;
+    pcl_conversions::fromPCL(pointcloud.header.stamp, stamp);
+    int delta_end_pos = find_closest(stamp, delta_buffer);
+    if (delta_end_pos == -1) {
+      if (delta_buffer.empty()) {
+        ROS_ERROR_STREAM("Couldn't find deltas");
+        return; // No deltas, rip
+      }
+      delta_end_pos = delta_buffer.size() - 1;
     }
-    particle_pcl->header.frame_id = "/odom";
-    particle_pcl->header.stamp = pointcloud.header.stamp;
-    particle_pcl_pub.publish(particle_pcl);
+
+    // Accumulate all deltas into a single delta
+    RobotState accumulated;
+    //ROS_INFO_STREAM("---------------------------------------------------------");
+    //ROS_INFO_STREAM("Num points in delta_buffer: " << delta_end_pos);
+    for (auto i = 0; i < delta_end_pos; i++) {
+      accumulated.x += delta_buffer[i].x;
+      accumulated.y += delta_buffer[i].y;
+      accumulated.yaw += delta_buffer[i].yaw;
+    }
+    // Propogate the particles using the delta
+    particle_filter_node->particle_filter->propagateParticles(accumulated);
+
+    // Repeat above for map LOL
+    int map_end_pos = find_closest(stamp, map_buffer);
+    if (map_end_pos == -1) {
+      if (map_buffer.empty()) {
+        ROS_ERROR_STREAM("Couldn't find map");
+        return; // No map rip
+      }
+      map_end_pos = map_buffer.size() - 1; // Use latest one if can't find.
+    }
+    //ROS_INFO_STREAM("Matching pcl: " << std::setprecision(4) << stamp);
+    //ROS_INFO_STREAM("With deltas : " << std::setprecision(4) << delta_buffer[delta_end_pos].stamp);
+    //ROS_INFO_STREAM("With map    : " << std::setprecision(4) << map_buffer[map_end_pos]->header.stamp);
+    //ROS_INFO_STREAM("pcl - map   :" << std::setprecision(8) << stamp - map_buffer[map_end_pos]->header.stamp);
+    //ROS_INFO_STREAM("pcl - delta :" << std::setprecision(8) << stamp - delta_buffer[delta_end_pos].stamp);
+    //ROS_INFO_STREAM("---------------------------------------------------------");
+    // Compute weights using propagated particles
+    particle_filter_node->particle_filter->getWeights(pointcloud, map_buffer[map_end_pos]);
+    delta_buffer.erase_begin(static_cast<unsigned long>(delta_end_pos));
+    // Erase from start to iterator
+    map_buffer.erase_begin(static_cast<unsigned long>(map_end_pos));
+
+    // Resample
+    particle_filter_node->particle_filter->resample_points();
+
+    if (DEBUG) {
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr particle_pcl =
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+      for (Particle particle : particle_filter_node->particle_filter->particles) {
+        pcl::PointXYZRGB p(255, 255, 255);
+        p.x = static_cast<float>(particle.state.x);
+        p.y = static_cast<float>(particle.state.y);
+        particle_pcl->points.emplace_back(p);
+      }
+      particle_pcl->header.frame_id = "/odom";
+      particle_pcl->header.stamp = pointcloud.header.stamp;
+      particle_pcl_pub.publish(particle_pcl);
+    }
+  } catch (const std::exception& ex) {
+    ROS_ERROR("1 %s", ex.what());
+  } catch (...) {
+    std::exception_ptr p = std::current_exception();
+    std::clog << (p ? p.__cxa_exception_type()->name() : "null") << std::endl;
   }
+  //ROS_INFO("End of pc_callback");
 }
 
 struct CompareTime
@@ -156,10 +182,31 @@ struct CompareTime
  * @param stamp timestamp to search for
  * @return index of the element in `delta_buffer` that has equal or larger timestamp
  */
-template <class T>
-int ParticleFilterNode::find_closest(const ros::Time& stamp, boost::circular_buffer<T> buffer)
+int ParticleFilterNode::find_closest(const ros::Time& stamp, boost::circular_buffer<RobotState> buffer)
 {
+  if (buffer.empty()) {
+    ROS_DEBUG_STREAM("Empty, returning from find_closest RobotState");
+    return -1;
+  }
   auto end_it = std::lower_bound(buffer.begin(), buffer.end(), stamp, CompareTime());
+  if (end_it == buffer.end()) {
+    ROS_ERROR_STREAM("Couldn't find Robotstate. Last value was " << std::setprecision(4) << buffer.at(buffer.size() - 1).stamp);
+    return -1;
+  }
+  return static_cast<int>(end_it - buffer.begin());
+}
+
+int ParticleFilterNode::find_closest(const ros::Time& stamp, boost::circular_buffer<igvc_msgs::mapConstPtr> buffer)
+{
+  if (buffer.empty()) {
+    ROS_DEBUG_STREAM("Empty, returning from find_closest map");
+    return -1;
+  }
+  auto end_it = std::lower_bound(buffer.begin(), buffer.end(), stamp, CompareTime());
+  if (end_it == buffer.end()) {
+    ROS_ERROR_STREAM("Couldn't find map. Last value was " << std::setprecision(4) << buffer.at(buffer.size() - 1)->header.stamp);
+    return -1;
+  }
   return static_cast<int>(end_it - buffer.begin());
 }
 
@@ -197,7 +244,6 @@ int main(int argc, char** argv)
   {
     particle_filter_node->particle_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/particle_pcl", 1);
   }
-
   ros::spin();
 
   return 0;

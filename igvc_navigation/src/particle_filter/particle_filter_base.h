@@ -36,9 +36,11 @@ public:
    * @param pointCloud pointcloud from the lidar callback
    * @param particles particles to calculate the weights for
    */
-  virtual void getWeights(const pcl::PointCloud<pcl::PointXYZ>& pointCloud, std::vector<Particle> particles, igvc_msgs::mapConstPtr map_ptr) = 0;
+  virtual void getWeights(const pcl::PointCloud<pcl::PointXYZ>& pointCloud, igvc_msgs::mapConstPtr map_ptr) = 0;
 
-  void resample_points(std::vector<struct Particle>& particles);
+  void propagateParticles(const RobotState& delta);
+
+  void resample_points();
 
   explicit ParticleFilterBase(double motor_std_dev, int num_particles, double initial_pos_std_dev, double initial_yaw_std_dev)
     : motor_std_dev(motor_std_dev), initial_pos_std_dev(initial_pos_std_dev), initial_yaw_std_dev(initial_yaw_std_dev) {

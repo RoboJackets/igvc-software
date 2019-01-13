@@ -10,27 +10,35 @@
  */
 void BasicParticleFilter::ProposalDistribution(RobotState &state, const igvc_msgs::velocity_pair &motor_command)
 {
+  // TODO: Each particle should get a different one lol
   std::random_device rd;
   std::mt19937 e2(rd());
   std::normal_distribution<> dist(0, motor_std_dev);
-  double gaussian_noise = dist(e2);
-  double left_delta = (motor_command.left_velocity + gaussian_noise) * motor_command.duration;
-  double right_delta = (motor_command.right_velocity + gaussian_noise) * motor_command.duration;
+  double gaussian_noise_left = dist(e2);
+  double gaussian_noise_right = dist(e2);
+  // ROS_INFO_STREAM("Duration: " << motor_command.duration);
+  double left_delta = (motor_command.left_velocity + gaussian_noise_left) * motor_command.duration;
+  double right_delta = (motor_command.right_velocity + gaussian_noise_right) * motor_command.duration;
   // If basically going straight
   if (fabs(left_delta - right_delta) < 1.0e-6)
   {
-    state.x = state.x + left_delta * cos(state.yaw);
-    state.y = state.y + right_delta * sin(state.yaw);
+    //state.x = state.x + left_delta * cos(state.yaw);
+    //state.y = state.y + right_delta * sin(state.yaw);
+    state.x += left_delta * cos(state.yaw);
+    state.y += right_delta * sin(state.yaw);
   }
   else
   {
     double r = axle_length * (left_delta + right_delta) / (2 * (right_delta - left_delta));
     double wd = (right_delta - left_delta) / axle_length;
-    state.x = state.x + r * sin(wd + state.yaw) - r * sin(state.yaw);
-    state.y = state.y - r * cos(wd + state.yaw) + r * cos(state.yaw);
-    state.yaw = state.yaw + wd;
+    state.x += r * sin(wd + state.yaw) - r * sin(state.yaw);
+    state.y += - r * cos(wd + state.yaw) + r * cos(state.yaw);
+    state.yaw += wd;
     igvc::fit_to_polar(state.yaw);
   }
+  //ROS_INFO_STREAM("Duration: " << motor_command.duration << " Left: " << motor_command.left_velocity
+  //                             << " Right: " << motor_command.right_velocity << " left_delta: " << std::setprecision(2)
+  //                             << left_delta << " right_delta: " << right_delta);
   //  for (Particle particle : particles)
   //  {
   //    double left_delta = motor_command.left_velocity * motor_command.duration;
@@ -58,26 +66,31 @@ void BasicParticleFilter::ProposalDistribution(RobotState &state, const igvc_msg
  * @param pointCloud pointcloud from the lidar callback
  * @param particles particles to calculate the weights for
  */
-void BasicParticleFilter::getWeights(const pcl::PointCloud<pcl::PointXYZ> &pointCloud, std::vector<Particle> particles,
-                                     igvc_msgs::mapConstPtr map_ptr)
+void BasicParticleFilter::getWeights(const pcl::PointCloud<pcl::PointXYZ> &pointCloud, igvc_msgs::mapConstPtr map_ptr)
 {
+  //ROS_INFO("In weights");
+  //ROS_INFO_STREAM("map_ptr == nullptr: " << (map_ptr == nullptr));
   cv_bridge::CvImageConstPtr cv_ptr;
-//  cv_ptr = cv_bridge::toCvShare(particle.map->image, particle.map, "mono8");
+  //  cv_ptr = cv_bridge::toCvShare(particle.map->image, particle.map, "mono8");
   cv_ptr = cv_bridge::toCvShare(map_ptr->image, map_ptr, "mono8");
   for (Particle &particle : particles)
   {
     particle.weight = 0;
     pcl::PointCloud<pcl::PointXYZ>::const_iterator point_iter;
-    for (point_iter = pointCloud.begin(); point_iter < pointCloud.points.end(); point_iter++)
+    for (point_iter = pointCloud.points.begin(); point_iter < pointCloud.points.end(); point_iter++)
     {
       double point_x = particle.state.x + point_iter->x;
       double point_y = particle.state.y + point_iter->y;
-      int point_grid_x = static_cast<int>(std::round(point_x / particle.map->resolution + particle.map->x_initial));
-      int point_grid_y = static_cast<int>(std::round(point_y / particle.map->resolution + particle.map->y_initial));
-
+      // int point_grid_x = static_cast<int>(std::round(point_x / particle.map->resolution + particle.map->x_initial));
+      // int point_grid_y = static_cast<int>(std::round(point_y / particle.map->resolution + particle.map->y_initial));
+      int point_grid_x = static_cast<int>(std::round(point_x / map_ptr->resolution + map_ptr->x_initial));
+      int point_grid_y = static_cast<int>(std::round(point_y / map_ptr->resolution + map_ptr->y_initial));
+      // ROS_INFO("4");
       addToParticleWeight(particle, point_grid_x, point_grid_y, cv_ptr);
+      // ROS_INFO("5");
     }
   }
+  //ROS_INFO("Out of weights");
 }
 
 /**
@@ -93,5 +106,13 @@ void BasicParticleFilter::addToParticleWeight(Particle &particle, int grid_x, in
 {
   // Get all grid cells between particle and pointcloud point using Bressenham's line algorithm
   // TODO: Use gaussian
+  if (grid_x >= image_ptr->image.cols)
+  {
+    // ROS_ERROR("GOTTEM 1");
+  }
+  if (grid_y >= image_ptr->image.rows)
+  {
+    // ROS_ERROR("GOTTEM 2");
+  }
   particle.weight += image_ptr->image.at<uchar>(grid_x, grid_y);
 }
