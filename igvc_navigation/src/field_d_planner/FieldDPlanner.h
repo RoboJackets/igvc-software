@@ -83,7 +83,10 @@ public:
     // grid cells
     Graph graph;
 
+    // optimal path to the goal node
     std::vector<std::tuple<float,float>> path;
+
+    // path additions made by one step of constructOptimalPath()
     typedef std::pair<std::vector<std::tuple<float,float>>,float> path_additions;
 
     float GOAL_DIST = 0.95f;
@@ -109,12 +112,16 @@ public:
     s_b. X and Y values dependant upon the traversal cost to the diagonal node and
     the vertical/horizontal node as well as the relative g-values of both nodes.
 
+    Additionally, this method returns the x and y traversal distances calculating
+    by linearly interpolating the path costs of the consecutive neighbors s_a, s_b
+    while considering the traversal cost to reach them.
+
     @param[in] s Node to calculate cost for
     @param[in] s_a consecutive neighbor #1 of s
     @param[in] s_b consecutive neighbor #2 of s
-    @return path cost of node s
+    @return tuple containing the following: <path_cost, x, y>
     */
-    float computeCost(Node s, Node s_a, Node s_b);
+    std::tuple<float,float,float> computeCost(Node s, Node s_a, Node s_b);
     /**
     Initializes the graph search problem by setting g and rhs values for start
     node equal to infinity. For goal node, sets g value to infinity and rhs value
@@ -159,24 +166,6 @@ public:
     the next node that minimizes c(s,s') + g(s'). Ties are broken arbitrarily.
     */
     void constructOptimalPath();
-    /**
-    TODO:make private
-    returns true if position p is a vertex on the graph. Alternatively, returns
-    false if it's an edge.
-
-    @param[in] p position to check
-    @return whether or not p is a vertex
-    */
-    bool isVertex(std::tuple<float,float> p);
-    /**
-    TODO: make private
-    Helper method for path reconstruction process. Finds the next path
-    position(s) when planning is performed from a vertex on the graph.
-
-    @param[in] p position on graph to plan from
-    @return vector containing next position(s) and movement cost
-    */
-    path_additions getNextPositionsFromVertex(std::tuple<float,float> p);
     /**
     TODO: make private
     Helper method for path reconstruction process. Finds the next path position(s)
@@ -229,15 +218,6 @@ public:
     */
     void insert_or_assign(Node s, float g, float rhs);
     /**
-    TODO: make private
-    Checks whether a specified node is within range of the goal node. This 'range'
-    is specified by the GOAL_RANGE instance variable.
-
-    @param[in] s Node to check
-    @return whether or not node s is within range of the goal
-    */
-    bool isWithinRangeOfGoal(std::tuple<float,float> p);
-    /**
     Returns g-value for a node s
 
     @param[in] s Node to get g-value for
@@ -265,6 +245,45 @@ private:
     // priority queue contains all locally inconsistent nodes whose values
     // need updating
     PriorityQueue PQ;
+
+    /**
+    Re-order these methods in FieldDPlanner.cpp
+    */
+
+    /**
+    Checks whether a specified node is within range of the goal node. This 'range'
+    is specified by the GOAL_RANGE instance variable.
+
+    @param[in] s Node to check
+    @return whether or not node s is within range of the goal
+    */
+    bool isWithinRangeOfGoal(std::tuple<float,float> p);
+    /**
+    returns true if position p is a vertex on the graph. Alternatively, returns
+    false if it's an edge.
+
+    @param[in] p position to check
+    @return whether or not p is a vertex
+    */
+    bool isVertex(std::tuple<float,float> p);
+    /**
+    Helper method for path reconstruction process. Finds the next path
+    position(s) when planning is performed from a vertex on the graph.
+
+    @param[in] p position on graph to plan from
+    @return vector containing next position(s) and movement cost
+    */
+    path_additions getPathAdditionsFromVertex(std::tuple<float,float> p);
+    /**
+    Computes the path cost of a non-vertex position p by linearly interpolating
+    the path cost of the nearest two neighbors.
+
+    @param[in] edge position to calculate path cost for
+    @return linearly interpolated path cost
+    */
+    float getEdgePositionCost(std::tuple<float,float> p);
+
+    // std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> FieldDPlanner::getEdgeConnbrs(std::tuple<float,float> p);
 
 };
 
