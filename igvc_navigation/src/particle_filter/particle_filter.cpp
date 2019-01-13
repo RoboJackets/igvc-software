@@ -11,12 +11,11 @@ class ParticleFilterNode
 {
 public:
   void motor_callback(igvc_msgs::velocity_pairConstPtr motor_command);
-  void pc_callback(const pcl::PointCloud<pcl::PointXYZ>& pointCloud);
+  void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pointCloud);
   void map_callback(igvc_msgs::mapConstPtr map);
 
-  // TODO: USE A FUCKING TIME SYNCRHONIZER
   double transform_max_wait_time;
-  boost::circular_buffer<VeloStatePair> delta_buffer;
+  boost::circular_buffer<igvc_msgs::velocity_pairConstPtr> delta_buffer;
   boost::circular_buffer<igvc_msgs::mapConstPtr> map_buffer;
   std::unique_ptr<tf::TransformListener> tf_listener;
   std::unique_ptr<ParticleFilterBase> particle_filter;
@@ -28,10 +27,11 @@ public:
   }
 
 private:
-  boost::circular_buffer<VeloStatePair >::iterator find_closest(
-      const ros::Time& stamp, boost::circular_buffer<VeloStatePair> buffer);
+  boost::circular_buffer<igvc_msgs::velocity_pairConstPtr>::iterator find_closest(const ros::Time& stamp,
+                                                               boost::circular_buffer<igvc_msgs::velocity_pairConstPtr> buffer);
   boost::circular_buffer<igvc_msgs::mapConstPtr>::iterator
   find_closest(const ros::Time& stamp, boost::circular_buffer<igvc_msgs::mapConstPtr> buffer);
+  void check_synchronize();
   void publish_map(const ros::Time& stamp);
   void publish_map(uint64_t stamp);
 };
@@ -70,9 +70,10 @@ void ParticleFilterNode::motor_callback(igvc_msgs::velocity_pairConstPtr motor_c
   }
   RobotState state(transform, motor_command->header.stamp);
   // particle_filter_node->particle_filter->ProposalDistribution(state, motor_command);
-  delta_buffer.push_back(std::make_pair(motor_command, state));
+  delta_buffer.push_back(motor_command);
   // ROS_INFO("end motor callback");
-  if (DEBUG) {
+  if (DEBUG)
+  {
     publish_map(motor_command->header.stamp);
   }
 }
@@ -90,78 +91,71 @@ void ParticleFilterNode::map_callback(const igvc_msgs::mapConstPtr map)
  *
  * @param pointCloud pointcloud from lidar callback
  */
-void ParticleFilterNode::pc_callback(const pcl::PointCloud<pcl::PointXYZ>& pointcloud)
+void ParticleFilterNode::pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pointcloud)
 {
-  // ROS_INFO("start of pc_callback");
-  try
+  if (delta_buffer.empty())
   {
-    if (delta_buffer.empty())
-    {
-      ROS_ERROR_STREAM("Couldn't find deltas");
-      return;  // No deltas, rip
-    }
-    ros::Time stamp;
-    pcl_conversions::fromPCL(pointcloud.header.stamp, stamp);
-    boost::circular_buffer<VeloStatePair>::iterator delta_end_it = find_closest(stamp, delta_buffer);
-
-    // ROS_INFO_STREAM("---------------------------------------------------------");
-    // ROS_INFO_STREAM("Num points in delta_buffer: " << delta_end_it);
-    // Propogate the particles using the delta
-    particle_filter_node->particle_filter->propagateParticles(delta_buffer.begin(), delta_end_it);
-
-    // Repeat above for map LOL
-    boost::circular_buffer<igvc_msgs::mapConstPtr>::iterator map_end_it = find_closest(stamp, map_buffer);
-    if (map_buffer.empty())
-    {
-      ROS_ERROR_STREAM("Couldn't find map");
-      return;  // No map rip
-    }
-    igvc_msgs::mapConstPtr map_ptr;
-    if(map_end_it == map_buffer.end()) {
-      //ROS_ERROR_STREAM("Using last value");
-      map_ptr = map_buffer.back();
-    } else {
-      map_ptr = *map_end_it;
-    }
-    // ROS_INFO_STREAM("Matching pcl: " << std::setprecision(4) << stamp);
-    // ROS_INFO_STREAM("With deltas : " << std::setprecision(4) << delta_buffer[delta_end_it].stamp);
-    // ROS_INFO_STREAM("With map    : " << std::setprecision(4) << map_buffer[map_end_pos]->header.stamp);
-    // ROS_INFO_STREAM("pcl - map   :" << std::setprecision(8) << stamp - map_ptr->header.stamp);
-    VeloStatePair velpair;
-    if (delta_end_it == delta_buffer.end())
-    {
-      velpair = delta_buffer.back();
-    } else {
-      velpair = *delta_end_it;
-    }
-     //ROS_INFO_STREAM("pcl - delta :" << std::setprecision(8) << stamp - velpair.first->header.stamp);
-    // ROS_INFO_STREAM("---------------------------------------------------------");
-    // Compute weights using propagated particles
-    particle_filter_node->particle_filter->getWeights(pointcloud, map_ptr);
-    delta_buffer.erase(delta_buffer.begin(), delta_end_it);
-    // Erase from start to iterator
-    map_buffer.erase(map_buffer.begin(), map_end_it);
-
-    // Resample
-    particle_filter_node->particle_filter->resample_points();
-
-    if (DEBUG) {
-      publish_map(pointcloud.header.stamp);
-    }
+    ROS_ERROR_STREAM("Couldn't find deltas");
+    return;  // No deltas, rip
   }
-  catch (const std::exception& ex)
+  ros::Time stamp;
+  pcl_conversions::fromPCL(pointcloud->header.stamp, stamp);
+  boost::circular_buffer<igvc_msgs::velocity_pairConstPtr>::iterator delta_end_it = find_closest(stamp, delta_buffer);
+
+  // ROS_INFO_STREAM("---------------------------------------------------------");
+  // ROS_INFO_STREAM("Num points in delta_buffer: " << delta_end_it);
+  // Propogate the particles using the delta
+  particle_filter_node->particle_filter->propagateParticles(delta_buffer.begin(), delta_end_it);
+
+  // Repeat above for map LOL
+  boost::circular_buffer<igvc_msgs::mapConstPtr>::iterator map_end_it = find_closest(stamp, map_buffer);
+  if (map_buffer.empty())
   {
-    ROS_ERROR("1 %s", ex.what());
+    ROS_ERROR_STREAM("Couldn't find map");
+    return;  // No map rip
   }
-  catch (...)
+  igvc_msgs::mapConstPtr map_ptr;
+  if (map_end_it == map_buffer.end())
   {
-    std::exception_ptr p = std::current_exception();
-    std::clog << (p ? p.__cxa_exception_type()->name() : "null") << std::endl;
+    // ROS_ERROR_STREAM("Using last value");
+    map_ptr = map_buffer.back();
   }
-  // ROS_INFO("End of pc_callback");
+  else
+  {
+    map_ptr = *map_end_it;
+  }
+  // ROS_INFO_STREAM("Matching pcl: " << std::setprecision(4) << stamp);
+  // ROS_INFO_STREAM("With deltas : " << std::setprecision(4) << delta_buffer[delta_end_it].stamp);
+  // ROS_INFO_STREAM("With map    : " << std::setprecision(4) << map_buffer[map_end_pos]->header.stamp);
+  // ROS_INFO_STREAM("pcl - map   :" << std::setprecision(8) << stamp - map_ptr->header.stamp);
+  igvc_msgs::velocity_pairConstPtr velpair;
+  if (delta_end_it == delta_buffer.end())
+  {
+    velpair = delta_buffer.back();
+  }
+  else
+  {
+    velpair = *delta_end_it;
+  }
+  // ROS_INFO_STREAM("pcl - delta :" << std::setprecision(8) << stamp - velpair.first->header.stamp);
+  // ROS_INFO_STREAM("---------------------------------------------------------");
+  // Compute weights using propagated particles
+  particle_filter_node->particle_filter->getWeights(pointcloud, map_ptr);
+  delta_buffer.erase(delta_buffer.begin(), delta_end_it);
+  // Erase from start to iterator
+  map_buffer.erase(map_buffer.begin(), map_end_it);
+
+  // Resample
+  particle_filter_node->particle_filter->resample_points();
+
+  if (DEBUG)
+  {
+    publish_map(pointcloud->header.stamp);
+  }
 }
 
-void ParticleFilterNode::publish_map(const ros::Time& ros_stamp) {
+void ParticleFilterNode::publish_map(const ros::Time& ros_stamp)
+{
   uint64_t pcl_stamp;
   pcl_conversions::toPCL(ros_stamp, pcl_stamp);
   publish_map(pcl_stamp);
@@ -169,7 +163,7 @@ void ParticleFilterNode::publish_map(const ros::Time& ros_stamp) {
 void ParticleFilterNode::publish_map(uint64_t pcl_stamp)
 {
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr particle_pcl =
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+      pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
   for (Particle particle : particle_filter_node->particle_filter->particles)
   {
     pcl::PointXYZRGB p(255, 255, 255);
@@ -184,9 +178,9 @@ void ParticleFilterNode::publish_map(uint64_t pcl_stamp)
 
 struct CompareTime
 {
-  ros::Time asTime(const std::pair<igvc_msgs::velocity_pairConstPtr, RobotState>& pair) const
+  ros::Time asTime(const igvc_msgs::velocity_pairConstPtr vel) const
   {
-    return pair.first->header.stamp;
+    return vel->header.stamp;
   }
 
   ros::Time asTime(const igvc_msgs::mapConstPtr& map) const
@@ -212,8 +206,8 @@ struct CompareTime
  * @param stamp timestamp to search for
  * @return index of the element in `delta_buffer` that has equal or larger timestamp
  */
-boost::circular_buffer<VeloStatePair>::iterator ParticleFilterNode::find_closest(
-    const ros::Time& stamp, boost::circular_buffer<VeloStatePair> buffer)
+boost::circular_buffer<igvc_msgs::velocity_pairConstPtr>::iterator
+ParticleFilterNode::find_closest(const ros::Time& stamp, boost::circular_buffer<igvc_msgs::velocity_pairConstPtr> buffer)
 {
   if (buffer.empty())
   {
@@ -223,7 +217,7 @@ boost::circular_buffer<VeloStatePair>::iterator ParticleFilterNode::find_closest
   auto end_it = std::lower_bound(buffer.begin(), buffer.end(), stamp, CompareTime());
   if (end_it == buffer.end())
   {
-    //ROS_ERROR_STREAM("Couldn't find Robotstate. Last value was " << std::setprecision(4)
+    // ROS_ERROR_STREAM("Couldn't find Robotstate. Last value was " << std::setprecision(4)
     //                                                             << buffer.at(buffer.size() - 1).first->header.stamp);
   }
   return end_it;
@@ -240,7 +234,7 @@ ParticleFilterNode::find_closest(const ros::Time& stamp, boost::circular_buffer<
   auto end_it = std::lower_bound(buffer.begin(), buffer.end(), stamp, CompareTime());
   if (end_it == buffer.end())
   {
-    //ROS_ERROR_STREAM("Couldn't find map. Last value was " << std::setprecision(4)
+    // ROS_ERROR_STREAM("Couldn't find map. Last value was " << std::setprecision(4)
     //                                                      << buffer.at(buffer.size() - 1)->header.stamp);
   }
   return end_it;

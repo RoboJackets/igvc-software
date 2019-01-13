@@ -15,8 +15,6 @@ struct Particle
   double weight;
 };
 
-using VeloStatePair = std::pair<igvc_msgs::velocity_pairConstPtr, RobotState>;
-
 class ParticleFilterBase
 {
 public:
@@ -32,17 +30,17 @@ public:
    * @param[in] state The state at the time of the motor command.
    * @param[in] motor_command The motor command from encoder
    */
-  virtual void proposal_distribution(const RobotState& state, const igvc_msgs::velocity_pairConstPtr& motor_command) = 0;
+  virtual void proposal_distribution(const igvc_msgs::velocity_pairConstPtr& motor_command) = 0;
 
   /**
    * Generates the weights for each particle. Defined as the proposal distribution / target distribution.
    * @param pointCloud pointcloud from the lidar callback
    * @param particles particles to calculate the weights for
    */
-  virtual void getWeights(const pcl::PointCloud<pcl::PointXYZ>& pointCloud, igvc_msgs::mapConstPtr map_ptr) = 0;
+  virtual void getWeights(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pointCloud, igvc_msgs::mapConstPtr map_ptr) = 0;
 
-  void propagateParticles(const boost::circular_buffer<VeloStatePair>::iterator& start,
-                          const boost::circular_buffer<VeloStatePair>::iterator& end);
+  void propagateParticles(const boost::circular_buffer<igvc_msgs::velocity_pairConstPtr>::iterator& start,
+                          const boost::circular_buffer<igvc_msgs::velocity_pairConstPtr>::iterator& end);
 
   void resample_points();
 

@@ -39,11 +39,11 @@ void ParticleFilterBase::resample_points()
   particles.swap(sampled_particles);
 }
 
-void ParticleFilterBase::propagateParticles(const boost::circular_buffer<VeloStatePair>::iterator& start,
-                                            const boost::circular_buffer<VeloStatePair>::iterator& end) {
-  for(boost::circular_buffer<VeloStatePair>::iterator i = start; i < end; i++)
+void ParticleFilterBase::propagateParticles(const boost::circular_buffer<igvc_msgs::velocity_pairConstPtr>::iterator& start,
+                                            const boost::circular_buffer<igvc_msgs::velocity_pairConstPtr>::iterator& end) {
+  for(boost::circular_buffer<igvc_msgs::velocity_pairConstPtr>::iterator i = start; i < end; i++)
   {
-    proposal_distribution(start->second, start->first);
+    proposal_distribution(*i);
   }
   // ROS_INFO_STREAM("After: " << particles[0].state);
 }
