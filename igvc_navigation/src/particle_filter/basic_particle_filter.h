@@ -7,7 +7,7 @@
 class BasicParticleFilter : public ParticleFilterBase
 {
 public:
-  void ProposalDistribution(RobotState &state, const igvc_msgs::velocity_pair &motor_command) override;
+  void proposal_distribution(const RobotState& state, const igvc_msgs::velocity_pairConstPtr& motor_command) override;
   void getWeights(const pcl::PointCloud<pcl::PointXYZ> &pointCloud, igvc_msgs::mapConstPtr map_ptr) override;
 
   explicit BasicParticleFilter(double motor_std_dev, int num_particles, double initial_pos_std_dev, double initial_yaw_std_dev)

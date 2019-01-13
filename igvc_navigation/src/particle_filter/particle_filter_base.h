@@ -4,6 +4,7 @@
 #include <igvc_msgs/map.h>
 #include <igvc_msgs/velocity_pair.h>
 #include <pcl_ros/point_cloud.h>
+#include <boost/circular_buffer.hpp>
 #include <igvc_utils/RobotState.hpp>
 #include <random>
 
@@ -13,6 +14,8 @@ struct Particle
   igvc_msgs::mapPtr map;
   double weight;
 };
+
+using VeloStatePair = std::pair<igvc_msgs::velocity_pairConstPtr, RobotState>;
 
 class ParticleFilterBase
 {
@@ -26,10 +29,10 @@ public:
    * Returns a RobotState containing the deltas
    * ignore: Propagates all particles using the proposal distribution. Called during the callback of the motor command
    * subscriber
-   * @param[in/out] state The state at the time of the motor command.
+   * @param[in] state The state at the time of the motor command.
    * @param[in] motor_command The motor command from encoder
    */
-  virtual void ProposalDistribution(RobotState& state, const igvc_msgs::velocity_pair& motor_command) = 0;
+  virtual void proposal_distribution(const RobotState& state, const igvc_msgs::velocity_pairConstPtr& motor_command) = 0;
 
   /**
    * Generates the weights for each particle. Defined as the proposal distribution / target distribution.
@@ -38,12 +41,15 @@ public:
    */
   virtual void getWeights(const pcl::PointCloud<pcl::PointXYZ>& pointCloud, igvc_msgs::mapConstPtr map_ptr) = 0;
 
-  void propagateParticles(const RobotState& delta);
+  void propagateParticles(const boost::circular_buffer<VeloStatePair>::iterator& start,
+                          const boost::circular_buffer<VeloStatePair>::iterator& end);
 
   void resample_points();
 
-  explicit ParticleFilterBase(double motor_std_dev, int num_particles, double initial_pos_std_dev, double initial_yaw_std_dev)
-    : motor_std_dev(motor_std_dev), initial_pos_std_dev(initial_pos_std_dev), initial_yaw_std_dev(initial_yaw_std_dev) {
+  explicit ParticleFilterBase(double motor_std_dev, int num_particles, double initial_pos_std_dev,
+                              double initial_yaw_std_dev)
+    : motor_std_dev(motor_std_dev), initial_pos_std_dev(initial_pos_std_dev), initial_yaw_std_dev(initial_yaw_std_dev)
+  {
     particles.reserve(static_cast<unsigned long>(num_particles));
 
     std::random_device rd;
@@ -51,12 +57,12 @@ public:
     std::normal_distribution<> dist1(0, initial_pos_std_dev);
     std::normal_distribution<> dist2(0, initial_yaw_std_dev);
 
-    for(int i = 0; i < num_particles; i++)
+    for (int i = 0; i < num_particles; i++)
     {
       double x = dist1(e2);
       double y = dist1(e2);
       double yaw = dist2(e2);
-      particles.emplace_back(Particle {RobotState(x, y, yaw), nullptr, 0});
+      particles.emplace_back(Particle{ RobotState(x, y, yaw), nullptr, 0 });
     }
   };
 };
