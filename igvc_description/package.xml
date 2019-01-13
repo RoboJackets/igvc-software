@@ -5,7 +5,7 @@
   <description>
     igvc_description contains the description of the IGVC Jaymii platform
   </description>
-  
+
   <maintainer email="jgibson37@gatech.edu">Jason Gibson</maintainer>
   <license>BSD</license>
 
@@ -14,6 +14,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>joint_state_controller</build_depend>
   <build_depend>effort_controllers</build_depend>
+  <build_depend>velodyne_description</build_depend>
   <run_depend>joint_state_publisher</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>gazebo_ros</run_depend>
@@ -24,7 +25,8 @@
   <run_depend>hector_gazebo_worlds</run_depend>
   <run_depend>joy</run_depend>
   <run_depend>rviz</run_depend>
-  
+  <run_depend>velodyne_description</run_depend>
+
   <export>
     <gazebo_ros gazebo_model_path="${prefix}/urdf/models"/>
     <gazebo_ros gazebo_media_path="${prefix}/urdf/models"/>

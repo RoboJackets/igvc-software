@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+
+<launch>
+  <env name="GAZEBO_MODEL_PATH" value="$(find igvc_description)"/>
+  <arg name="world_name" default="$(find igvc_description)/urdf/worlds/qualification.world"/>
+  <arg name="cmd_timeout" default="0.5"/>
+  <arg name="track" default="0"/>
+
+  <!-- Vehicle pose -->
+  <arg name="x" value="0"/>
+  <arg name="y" value="$(eval arg('track') * 10)"/>
+  <arg name="z" value="0"/>
+  <arg name="roll" value="0.0"/>
+  <arg name="pitch" value="0.0"/>
+  <arg name="yaw" value="0"/>
+
+  <node name="waypoint_source" pkg="igvc_navigation" type="waypoint_source" output="screen" >
+      <param name="file" value="$(find igvc_gazebo)/config/waypoints.csv" />
+  </node>
+
+  <!-- Create the world. -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)"/> <!-- Note: the world_name is with respect to GAZEBO_RESOURCE_PATH environmental variable -->
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="gui" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+
+  <!-- convert laser scan to point cloud for LIDAR -->
+  <!--<node name="scan_to_pointcloud" pkg="igvc_gazebo" type="scan_to_pointcloud" output="screen" >
+    <param name="min_dist" value="0.1"/>
+    <param name="neighbor_dist" value="0.2"/>
+  </node>-->
+  <include file="$(find igvc_description)/launch/spawn_jaymii.launch">
+      <arg name="x" value="$(arg x)"/>
+      <arg name="y" value="$(arg y)"/>
+      <arg name="z" value="$(arg z)"/>
+      <arg name="roll" value="$(arg roll)"/>
+      <arg name="pitch" value="$(arg pitch)"/>
+      <arg name="yaw" value="$(arg yaw)"/>
+  </include>
+  <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
+
+  <include file="$(find igvc_gazebo)/launch/igvc_control.launch" />
+</launch>
