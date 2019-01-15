@@ -435,6 +435,7 @@ float Graph::getContinuousTraversalCost(std::tuple<float,float> p, std::tuple<fl
     // get the traversal cost for the cell that contains p and p'
     Node s(std::make_tuple(lroundf(std::get<0>(p)),lroundf(std::get<1>(p))));
     Node s_prime(std::make_tuple(lroundf(std::get<0>(p_prime)),lroundf(std::get<1>(p_prime))));
+
     return isDiagonal(s,s_prime) ? getC(s, s_prime) : getB(s, s_prime);
 }
 
