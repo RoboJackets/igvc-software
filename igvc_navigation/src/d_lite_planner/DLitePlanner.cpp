@@ -78,11 +78,10 @@ int DLitePlanner::computeShortestPath()
 
     while((PQ.topKey() < calculateKey(graph.Start)) || (getRHS(graph.Start) != getG(graph.Start)))
     {
-        numNodesExpanded++;
-
         Node topNode = PQ.topNode();
         Key topKey = PQ.topKey();
         PQ.pop();
+        numNodesExpanded++;
 
         if (topKey < calculateKey(topNode))
         {

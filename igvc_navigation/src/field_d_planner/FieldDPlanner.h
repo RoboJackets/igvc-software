@@ -51,31 +51,6 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #include <cmath>
 #include <math.h>
 
-struct ContinuousNeighbors
-{
-    ContinuousNeighbors() {}
-    ContinuousNeighbors(std::tuple<float,float> s_a, std::tuple<float,float> s_b, float cost_s_a, float cost_s_b)
-    {
-        this->s_a = s_a;
-        this->s_b = s_b;
-        this->cost_s_a = cost_s_a;
-        this->cost_s_b = cost_s_b;
-    }
-
-    void setValues(std::tuple<float,float> s_a, std::tuple<float,float> s_b, float cost_s_a, float cost_s_b)
-    {
-        this->s_a = s_a;
-        this->s_b = s_b;
-        this->cost_s_a = cost_s_a;
-        this->cost_s_b = cost_s_b;
-    }
-    std::tuple<float,float> s_a; // position of continuous neighbor 1
-    std::tuple<float,float> s_b; // position of continuous neighbor 2
-
-    float cost_s_a; // path cost of s_a
-    float cost_s_b; // path cost of s_b
-};
-
 class FieldDPlanner
 {
 public:
@@ -167,48 +142,6 @@ public:
     */
     void constructOptimalPath();
     /**
-    TODO: make private
-    Helper method for path reconstruction process. Finds the next path position(s)
-    when planning from an edge on the graph.
-
-    @param[in] p edge on graph to plan from
-    @return vector containing the next positions(s) and movement cost
-    */
-    path_additions getNextPositionsFromEdge(std::tuple<float,float> p);
-    /**
-    TODO: make private
-    TODO: is there a better way of doing this?
-    Gathers the continuous neighbors of an edge position. This involves the
-    creation of two "imaginary nodes", which are not actually nodes but instead
-    lie along an edge on the graph. The path cost of an imaginary node is calculated
-    by linearly interpolating the path costs of the two nearby nodes.
-
-                            s5        s4
-                            #* * * *#* * * *# s3
-                            *       *       *
-                        in1 X       X s     X in2
-                            *       *       *
-                            #* * * *#* * * *#
-                          s6        s1      s2
-
-    Here, s is the position whose consectutive neighbors we are trying to gather.
-    in1 and in2 are two imaginary nodes whose path costs were calculated through
-    the linear interpolation of s2,s3 and s5,s6, respectively.
-
-    @param[in] p position to gather nearest neighbors for.
-    @return vector of ContinuousNeighbors objects for each valid consecutive neighbors pair found
-    */
-    std::vector<ContinuousNeighbors> getContinuousNeighbors(std::tuple<float,float> p);
-    /**
-    TODO: make private
-    Returns true if ContinuousNeighbors object contains valid neighbors (don't
-    lie outside of graph).
-
-    @param[in] cn ContinuousNeighbors object to check
-    @return whether ContinuousNeighbors is valid or invalid
-    */
-    bool isValidContinuousNeighbors(ContinuousNeighbors CN);
-    /**
     Tries to insert an entry into the unordered map. If an entry for that key
     (Node) already exists, overrides the value with specified g and rhs vals.
 
@@ -282,11 +215,35 @@ private:
     @return linearly interpolated path cost
     */
     float getEdgePositionCost(std::tuple<float,float> p);
+    /**
+    Gets consecutive neighbor pairs of an edge node. An edge node is defines as a
+    node that does not lie a vertex but instead lies along some conitnuous position
+    along an edge. Edge nodes are also referred to as 'positions' throughout
+    this code.
 
-    // std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> FieldDPlanner::getEdgeConnbrs(std::tuple<float,float> p);
+    @param[in] p position to get connbrs for
+    @param[out] output vector of connbrs pairs
+    */
+    std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> getEdgeConnbrs(std::tuple<float,float> p);
+    /**
+    Helper method for path reconstruction process. Finds the next path position(s)
+    when planning from an edge on the graph.
+
+    @param[in] p edge on graph to plan from
+    @return vector containing the next positions(s) and movement cost
+    */
+    path_additions getPathAdditionsFromEdge(std::tuple<float,float> p);
+    /**
+    Compute the path cost of edge position p and the corresponding x and y
+    traversal distances to the next optimal position along the path.
+
+    @param[in] p position to calculate cost for
+    @param[in] p_a consecutive neighbor #1 of s
+    @param[in] p_b consecutive neighbor #2 of s
+    @return tuple containing <cost,x,y>
+    */
+    std::tuple<float,float,float> computeCostContinuous(std::tuple<float,float> p, std::tuple<float,float> p_a, std::tuple<float,float> p_b);
 
 };
-
-std::ostream& operator<<(std::ostream& stream, const ContinuousNeighbors& CN);
 
 #endif
