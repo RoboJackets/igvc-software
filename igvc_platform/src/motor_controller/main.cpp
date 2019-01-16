@@ -16,11 +16,11 @@
 #include <vector>
 
 igvc_msgs::velocity_pair current_motor_command;
-double battery_avg = 0;
-double battery_avg_num = 100;
 
 double min_battery_voltage;
-std::list<double> battery_vals;
+double battery_avg = 20;
+double battery_alpha = 0.9; // exponentially weighted moving voltage average update value
+
 double p_l, p_r, d_l, d_r, i_l, i_r; // PID Values
 
 bool enabled = false;
@@ -236,23 +236,23 @@ int main(int argc, char** argv)
             // recieves battery message and publishes it, also checks for robot enabled
             std_msgs::Float64 battery_msg;
             double voltage = atof(tokens.at(0).c_str());
-            battery_vals.push_back(voltage);
-            if (battery_vals.size() > battery_avg_num)
-            {
-              battery_avg -= battery_vals.front() / battery_avg_num;
-              battery_vals.pop_front();
-            }
-            battery_avg += voltage / battery_avg_num;
+
+            battery_avg = battery_alpha * battery_avg + (1 - battery_alpha) * voltage;
+
             battery_msg.data = battery_avg;
             battery_pub.publish(battery_msg);
-            if (battery_avg < min_battery_voltage && battery_vals.size() >= battery_avg_num)
+            if (battery_avg < min_battery_voltage)
             {
               ROS_ERROR_STREAM("Battery voltage dangerously low:"
                                << "\n\tCurr. Voltage: " << battery_avg
                                << "\n\tMin. Voltage: " << min_battery_voltage);
             }
+            else
+            {
+              ROS_INFO_STREAM("voltage: " << battery_avg);
+            }
             std_msgs::Bool enabled_msg;
-            enabled_msg.data = tokens.at(1) == "1";
+            enabled_msg.data = std::stoi(tokens.at(1)) == 1;
             enabled = enabled_msg.data;
             enabled_pub.publish(enabled_msg);
           }
