@@ -1,7 +1,12 @@
 #include "octomapper.h"
 
+#include <octomap/octomap.h>
+#include <octomap_ros/conversions.h>
+
+// TODO: How to convert OcTree to occupancy grid?
 Octomapper::Octomapper(ros::NodeHandle pNh)
 {
+  igvc::getParam(pNh, "octree/resolution", m_octree_resolution);
   igvc::getParam(pNh, "sensor_model/hit", m_prob_hit);
   igvc::getParam(pNh, "sensor_model/miss", m_prob_miss);
   igvc::getParam(pNh, "sensor_model/min", m_thresh_min);
@@ -10,15 +15,25 @@ Octomapper::Octomapper(ros::NodeHandle pNh)
   igvc::getParam(pNh, "ground_filter/distance_threshold", m_ransac_distance_threshold);
   igvc::getParam(pNh, "ground_filter/eps_angle", m_ransac_eps_angle);
   igvc::getParam(pNh, "ground_filter/plane_distance", m_ground_filter_plane_dist);
+  igvc::getParam(pNh, "map/length", m_map_length);
+  igvc::getParam(pNh, "map/width", m_map_width);
+  std::string map_encoding;
+  igvc::getParam(pNh, "map/encoding", map_encoding);
+  if (map_encoding == "CV_8UC1") {
+    m_map_encoding = CV_8UC1;
+  } else {
+    m_map_encoding = CV_8UC1;
+  }
 }
 
 void Octomapper::create_octree(boost::shared_ptr<octomap::OcTree> tree)
 {
-  tree = boost::make_shared<octomap::OcTree>();
+  tree = boost::make_shared<octomap::OcTree>(m_octree_resolution);
   tree->setProbHit(m_prob_hit);
   tree->setProbMiss(m_prob_miss);
   tree->setClampingThresMin(m_thresh_min);
   tree->setClampingThresMax(m_thresh_max);
+  tree->enableChangeDetection(true);
 }
 
 void PCL_to_Octomap(const pcl::PointCloud<pcl::PointXYZ>& pcl, octomap::Pointcloud& octo)
@@ -28,25 +43,43 @@ void PCL_to_Octomap(const pcl::PointCloud<pcl::PointXYZ>& pcl, octomap::Pointclo
   octomap::pointCloud2ToOctomap(pc2, octo);
 }
 
-void Octomapper::insert_scan(const tf::Point& sensor_pos_tf, boost::shared_ptr<octomap::OcTree> map,
+void Octomapper::get_updated_map(struct pc_map_pair& pc_map_pair)
+{
+  if (pc_map_pair.map == nullptr)
+  {
+    create_map(pc_map_pair.map);
+  }
+  for (auto it = pc_map_pair.octree->changedKeysBegin(); it != pc_map_pair.octree->changedKeysEnd(); ++it)
+  {
+    // TODO: Do we want the lowest depth here?
+    octomap::OcTreeNode* node = pc_map_pair.octree->search(it->first, 0);
+    pc_map_pair.map->at(it->first.k)
+  }
+}
+
+void Octomapper::create_map(boost::shared_ptr<cv::Mat>& map_ptr)
+{
+  map_ptr = boost::make_shared<cv::Mat>(m_map_length, m_map_width, m_map_encoding);
+}
+
+void Octomapper::insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair,
                              const pcl::PointCloud<pcl::PointXYZ>& ground,
                              const pcl::PointCloud<pcl::PointXYZ>& nonground) const
 {
   octomap::point3d sensor_pos = octomap::pointTfToOctomap(sensor_pos_tf);
-  octomap::OcTree a(*map);
 
   // Convert from PCL_point_cloud to octomap point cloud
   octomap::Pointcloud octo_cloud;
   PCL_to_Octomap(nonground, octo_cloud);
 
   // TODO: Do we need to discretize to speed up? Probably not, since non occupied is so small
-  map->insertPointCloud(octo_cloud, sensor_pos, m_max_range, false, false);
+  pc_map_pair.octree->insertPointCloud(octo_cloud, sensor_pos, m_max_range, false, false);
 
   octomap::KeySet free_cells;
   octomap::KeyRay key_ray;
   octomap::OcTreeKey end_key;
 
-  for (PCL_point_cloud::const_iterator it = ground.begin(); it != ground.end(); ++it)
+  for (auto it = ground.begin(); it != ground.end(); ++it)
   {
     octomap::point3d point(it->x, it->y, it->z);
 
@@ -56,12 +89,12 @@ void Octomapper::insert_scan(const tf::Point& sensor_pos_tf, boost::shared_ptr<o
       point = sensor_pos + (point - sensor_pos).normalized() * m_max_range;
     }
 
-    if (map->computeRayKeys(sensor_pos, point, key_ray))
+    if (pc_map_pair.octree->computeRayKeys(sensor_pos, point, key_ray))
     {
       free_cells.insert(key_ray.begin(), key_ray.end());
     }
 
-    if (map->coordToKeyChecked(point, end_key))
+    if (pc_map_pair.octree->coordToKeyChecked(point, end_key))
     {
       //  updateMinKey?? updateMaxKey??
     }
@@ -70,10 +103,10 @@ void Octomapper::insert_scan(const tf::Point& sensor_pos_tf, boost::shared_ptr<o
       ROS_ERROR_STREAM("Could not generate Key for endpoint" << point);
     }
   }
-  for (octomap::KeySet::iterator it = free_cells.begin(), end = free_cells.end(); it != end; ++it)
-  {
-    map->updateNode(*it, false);
+  for (const auto &free_cell : free_cells) {
+    pc_map_pair.octree->updateNode(free_cell, false);
   }
+  // TODO: When to generate occupancy grid?
 }
 
 void Octomapper::filter_ground_plane(const PCL_point_cloud& raw_pc, PCL_point_cloud& ground,
@@ -112,7 +145,7 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud& raw_pc, PCL_point_cl
     {
       seg.setInputCloud(cloud_filtered);
       seg.segment(*inliers, *coefficients);
-      if (inliers->indices.size() == 0)
+      if (inliers->indices.empty())
       {
         ROS_INFO("PCL segmentation did not find a plane.");
         break;
@@ -124,7 +157,7 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud& raw_pc, PCL_point_cl
       if (std::abs(coefficients->values.at(3)) < m_ransac_distance_threshold)
       {
         ROS_DEBUG("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
-                  cloud_filtered.size(), coefficients->values.at(0), coefficients->values.at(1),
+                  cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
                   coefficients->values.at(2), coefficients->values.at(3));
         extract.setNegative(false);
         extract.filter(ground);
