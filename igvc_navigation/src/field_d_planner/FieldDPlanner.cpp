@@ -36,36 +36,11 @@ void FieldDPlanner::reinitialize()
 
 void FieldDPlanner::updateNode(Node s)
 {
-    if (umap.find(s) == umap.end()) // s never visited before, add to unordered map
-        umap.insert(std::make_pair(s, std::make_tuple(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity())));
-
     /**
     looks for node s in the Ø and removes it if found
     -> same as calling: if PQ.contains(s) PQ.remove(s);
     */
     PQ.remove(s);
-
-    if (s != graph.Goal)
-    {
-        float minRHS = std::numeric_limits<float>::infinity();
-        Node s_a, s_b; // consecutive neighbors of s
-
-        for (std::tuple<Node, Node> connbr : graph.connbrs(s))
-        {
-            std::tie(s_a, s_b) = connbr;
-            if ((umap.find(s_a) == umap.end()) || (umap.find(s_b) == umap.end()))
-                continue; // continue  if either connbr was never visited before
-            float tempCost;
-            std::tie(tempCost, std::ignore, std::ignore) = this->computeCostContinuous(static_cast<std::tuple<float,float>>(s.getIndex()),
-                                                                              static_cast<std::tuple<float,float>>(s_a.getIndex()),
-                                                                              static_cast<std::tuple<float,float>>(s_b.getIndex()));
-            minRHS = std::min(minRHS, tempCost);
-        }
-
-        std::cout << minRHS << ", " << getG(s);
-        // update Node s' RHS value
-        insert_or_assign(s, getG(s), minRHS);
-    }
 
     // insert node into priority queue if it is locally inconsistent
     if (getG(s) != getRHS(s))
@@ -78,34 +53,66 @@ int FieldDPlanner::computeShortestPath()
 
     while((PQ.topKey() < calculateKey(graph.Start)) || (getRHS(graph.Start) != getG(graph.Start)))
     {
-        Node topNode = PQ.topNode();
-        Key topKey = PQ.topKey();
-        PQ.pop();
+        Node s = PQ.topNode();
         numNodesExpanded++;
 
-        float g = getG(topNode);
-        float rhs = getRHS(topNode);
-
-        if (topKey < calculateKey(topNode))
-        {
-            PQ.insert(topNode, calculateKey(topNode));
-        }
-        else if (g > rhs)
+        if (getG(s) > getRHS(s))
         {
             // locally overconsistent case. This node is now more favorable.
-            insert_or_assign(topNode, rhs, rhs); // make node locally consistent by setting g = rhs
-            for (Node nbr : graph.nbrs(topNode)) updateNode(nbr);
+            insert_or_assign(s, getRHS(s), getRHS(s)); // make node locally consistent by setting g = rhs
+            PQ.pop();
+
+            for (Node sp : graph.nbrs(s))
+            {
+                if (umap.find(sp) == umap.end()) // neighbor never visited before, add to unordered map
+                    umap.insert(std::make_pair(sp, std::make_tuple(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity())));
+
+                float cck_cost;
+                std::tie(cck_cost, std::ignore, std::ignore) = this->computeCostContinuous(sp, s, graph.ccknbr(sp, s));
+                if (getRHS(sp) > cck_cost)
+                {
+                    sp.setBptr(s.getIndex());
+                    insert_or_assign(sp, getG(sp), cck_cost);
+                }
+                float ck_cost;
+                std::tie(ck_cost, std::ignore, std::ignore) = this->computeCostContinuous(sp, s, graph.cknbr(sp, s));
+                if (getRHS(sp) > ck_cost)
+                {
+                    sp.setBptr(graph.cknbr(sp, s).getIndex());
+                    insert_or_assign(sp, getG(sp), ck_cost);
+                }
+                updateNode(sp);
+            }
         }
         else
         {
+
             // locally underconsistent case. This node is now less favorable
             // make node locally consistent or overconsistent by setting g = inf
-            insert_or_assign(topNode, std::numeric_limits<float>::infinity(), rhs);
-            // propagate changes to neighbors and to topNode
-            std::vector<Node> toPropagate = graph.nbrs(topNode);
-            toPropagate.push_back(topNode);
-
-            for (Node n : toPropagate) updateNode(n);
+            insert_or_assign(s, std::numeric_limits<float>::infinity(), getRHS(s));
+            for (Node sp : graph.nbrs(s))
+            {
+                std::tuple<int,int> sp_bptr = findBptr(sp);
+                if ((sp_bptr == s.getIndex()) || (sp_bptr == graph.cknbr(sp,s).getIndex()))
+                {
+                    float minRHS = std::numeric_limits<float>::infinity();
+                    float tempRHS;
+                    Node new_bptr;
+                    for (Node spp : graph.nbrs(sp))
+                    {
+                        std::tie(tempRHS, std::ignore, std::ignore) = this->computeCostContinuous(sp, spp, graph.ccknbr(sp, spp));
+                        if (tempRHS < minRHS)
+                        {
+                            minRHS = tempRHS;
+                            new_bptr = spp;
+                        }
+                    }
+                    sp.setBptr(new_bptr.getIndex());
+                    insert_or_assign(sp, getG(sp), minRHS);
+                    updateNode(sp);
+                }
+            }
+            updateNode(s);
         }
     }
     return numNodesExpanded;
@@ -114,22 +121,29 @@ int FieldDPlanner::computeShortestPath()
 int FieldDPlanner::updateNodesAroundUpdatedCells()
 {
     int numNodesUpdated = 0;
-    std::cout << "Nodes with upated cell values: {" << std::endl;
     for (std::tuple<int,int> cellUpdate : graph.updatedCells)
     {
-        for (Node n : graph.getNodesAroundCellWithCSpace(cellUpdate))
+        for (Node s : graph.getNodesAroundCellWithCSpace(cellUpdate))
         {
+            if (umap.find(s) == umap.end()) // Update node if it's already been expanded
+                umap.insert(std::make_pair(s, std::make_tuple(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity())));
 
-            if (umap.find(n) == umap.end()) // Update node if it's already been expanded
+            if (s == graph.Goal)
                 continue;
 
-            std::cout << "\t[" << n << "], new rhs: ,";
-            updateNode(n);
-            std::cout << std::endl;
+            float minRHS = std::numeric_limits<float>::infinity();
+            float tempRHS;
+            for (Node sp : graph.nbrs(s))
+            {
+                std::tie(tempRHS, std::ignore, std::ignore) = this->computeCostContinuous(s, sp, graph.ccknbr(s, sp));
+                minRHS = std::min(tempRHS, minRHS);
+            }
+            insert_or_assign(s, getG(s), minRHS);
+
+            updateNode(s);
             numNodesUpdated++;
         }
     }
-    std::cout << "}" << std::endl;
     return numNodesUpdated;
 }
 
@@ -195,9 +209,7 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(std::tuple<float,f
             if ((umap.find(s_a) == umap.end()) || (umap.find(s_b) == umap.end()))
                 continue;
 
-            std::tie(temp_cost, temp_x, temp_y) = this->computeCostContinuous(static_cast<std::tuple<float,float>>(s.getIndex()),
-                                                                              static_cast<std::tuple<float,float>>(s_a.getIndex()),
-                                                                              static_cast<std::tuple<float,float>>(s_b.getIndex()));
+            std::tie(temp_cost, temp_x, temp_y) = this->computeCostContinuous(s, s_a, s_b);
 
             if (temp_cost < cost)
             {
@@ -285,6 +297,13 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(std::tuple<float,f
     return std::make_pair(positions, cost);
 }
 
+std::tuple<float,float,float> FieldDPlanner::computeCostContinuous(Node s, Node s_a, Node s_b)
+{
+    return this->computeCostContinuous(static_cast<std::tuple<float,float>>(s.getIndex()),
+                                       static_cast<std::tuple<float,float>>(s_a.getIndex()),
+                                       static_cast<std::tuple<float,float>>(s_b.getIndex()));
+}
+
 std::tuple<float,float,float> FieldDPlanner::computeCostContinuous(std::tuple<float,float> p, std::tuple<float,float> p_a, std::tuple<float,float> p_b)
 {
     std::tuple<float,float> p1; // nearest neighbor
@@ -295,19 +314,19 @@ std::tuple<float,float,float> FieldDPlanner::computeCostContinuous(std::tuple<fl
     else // p_a is nearest neighbor
         std::tie(p1,p2) = std::make_tuple(p_a,p_b);
 
-    // traversal cost of position p and a diagonal position p2
-    // in units of (cost/distance)
-    float c = graph.getContinuousTraversalCost(p, p2);
-    // traversal cost of position p and p1, a non-diaginal neighbor of p
-    // in units of (cost/distance)
-    float b = graph.getContinuousTraversalCost(p,p1);
-
     float g_p1 = getEdgePositionCost(p1); // path cost of edge neighbor
     float g_p2 = getEdgePositionCost(p2); // path cost of diagonal neighbor
 
     float d_p1 = igvc::get_distance(p,p1); // distance to nearest neighbor
     float d_p2 = igvc::get_distance(p,p2); // distance to diagonal
     float d_n = igvc::get_distance(p1,p2); // distance between consecutive neighbors (edge length)
+
+    // traversal cost of position p and a diagonal position p2
+    // in units of (cost/distance)
+    float c = graph.getContinuousTraversalCost(p, p2);
+    // traversal cost of position p and p1, a non-diaginal neighbor of p
+    // in units of (cost/distance)
+    float b = graph.getContinuousTraversalCost(p,p1);
 
     // travel distances
     float x = 0.0f;
@@ -343,10 +362,10 @@ std::tuple<float,float,float> FieldDPlanner::computeCostContinuous(std::tuple<fl
             else
             {
                 // travel along diagonal to point along edge
-                float toComp = f / sqrt(std::pow(c,2.0f) - std::pow(f,2.0f));
+                float toComp = f / sqrtf(std::pow(c,2.0f) - std::pow(f,2.0f));
                 x = d_p1;
                 y = std::min(toComp, d_n);
-                v_s =  c * sqrt(std::pow(d_p1,2.0f) + std::pow(y,2.0f)) + (f * (d_n - y)) + g_p2;
+                v_s =  c * sqrtf(std::pow(d_p1,2.0f) + std::pow(y,2.0f)) + (f * (d_n - y)) + g_p2;
             }
         }
         else
@@ -361,9 +380,9 @@ std::tuple<float,float,float> FieldDPlanner::computeCostContinuous(std::tuple<fl
             else
             {
                 // travel along edge then to s2
-                float toComp = b / sqrt(std::pow(c,2.0f) - std::pow(b,2.0f));
+                float toComp = b / sqrtf(std::pow(c,2.0f) - std::pow(b,2.0f));
                 x = d_p1 - std::min(toComp, d_p1);
-                v_s =  c * sqrt(std::pow(d_n, 2.0f) + std::pow(d_p1 - x, 2.0f)) + (b * x) + g_p2;
+                v_s =  c * sqrtf(std::pow(d_n, 2.0f) + std::pow(d_p1 - x, 2.0f)) + (b * x) + g_p2;
             }
         }
     }
@@ -497,4 +516,14 @@ std::vector<std::tuple<int,int>> FieldDPlanner::getExplored()
         explored.push_back(e.first.getIndex());
 
     return explored;
+}
+
+std::tuple<int,int> FieldDPlanner::findBptr(Node s)
+{
+    auto search = umap.find(s);
+    if (search != umap.end()) {
+        return search->first.getBptr();
+    } else {
+        return std::make_tuple(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
+    }
 }
