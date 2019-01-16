@@ -18,7 +18,7 @@
 igvc_msgs::velocity_pair current_motor_command;
 
 double min_battery_voltage;
-double battery_avg = 20;
+double battery_avg;
 double battery_alpha = 0.9; // exponentially weighted moving voltage average update value
 
 double p_l, p_r, d_l, d_r, i_l, i_r; // PID Values
@@ -162,6 +162,8 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, std::string("min_battery_voltage"), min_battery_voltage);
   pNh.param(std::string("precision"), precision, 1);
 
+  battery_avg = min_battery_voltage;
+
   // PID variables
   igvc::getParam(pNh, std::string("p_l"), p_l);
   igvc::getParam(pNh, std::string("p_r"), p_r);
@@ -246,10 +248,6 @@ int main(int argc, char** argv)
               ROS_ERROR_STREAM("Battery voltage dangerously low:"
                                << "\n\tCurr. Voltage: " << battery_avg
                                << "\n\tMin. Voltage: " << min_battery_voltage);
-            }
-            else
-            {
-              ROS_INFO_STREAM("voltage: " << battery_avg);
             }
             std_msgs::Bool enabled_msg;
             enabled_msg.data = std::stoi(tokens.at(1)) == 1;
