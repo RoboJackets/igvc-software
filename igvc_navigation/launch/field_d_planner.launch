@@ -36,7 +36,7 @@
         <param name="target_v" type="double" value="0.4"/>
         <param name="k1" type="double" value="1.8"/>
         <param name="k2" type="double" value="5"/>
-        <param name="debug" type="bool" value="true"/>
+        <param name="debug" type="bool" value="false"/>
     </node>
 
 </launch>

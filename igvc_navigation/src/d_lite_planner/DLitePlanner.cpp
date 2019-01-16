@@ -74,8 +74,6 @@ int DLitePlanner::computeShortestPath()
 
     int numNodesExpanded = 0;
 
-    std::cout << "Top Node: " << PQ.topNode() << " - Top Vals: <" << getG(PQ.topNode()) << ", " << getRHS(PQ.topNode()) << "> - Top Key: " << PQ.topKey() << std::endl;
-
     while((PQ.topKey() < calculateKey(graph.Start)) || (getRHS(graph.Start) != getG(graph.Start)))
     {
         Node topNode = PQ.topNode();
