@@ -200,14 +200,6 @@ private:
     */
     bool isVertex(std::tuple<float,float> p);
     /**
-    Helper method for path reconstruction process. Finds the next path
-    position(s) when planning is performed from a vertex on the graph.
-
-    @param[in] p position on graph to plan from
-    @return vector containing next position(s) and movement cost
-    */
-    path_additions getPathAdditionsFromVertex(std::tuple<float,float> p);
-    /**
     Computes the path cost of a non-vertex position p by linearly interpolating
     the path cost of the nearest two neighbors.
 
@@ -227,20 +219,25 @@ private:
     std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> getEdgeConnbrs(std::tuple<float,float> p);
     /**
     Helper method for path reconstruction process. Finds the next path position(s)
-    when planning from an edge on the graph.
+    when planning from a vertex or an edge position on the graph.
 
     @param[in] p edge on graph to plan from
     @return vector containing the next positions(s) and movement cost
     */
-    path_additions getPathAdditionsFromEdge(std::tuple<float,float> p);
+    path_additions getPathAdditions(std::tuple<float,float> p);
     /**
-    Compute the path cost of edge position p and the corresponding x and y
-    traversal distances to the next optimal position along the path.
+    Computes minimum path cost of s given any two consecutive neigbors p_a and
+    p_b. X and Y values dependant upon the traversal cost to the diagonal node and
+    the vertical/horizontal node as well as the relative g-values of both nodes.
+
+    Additionally, this method returns the x and y traversal distances. Traversal
+    distances calculated by linearly interpolating the path costs of the consecutive
+    neighboring positions p_a, p_b while considering the traversal cost to reach them.
 
     @param[in] p position to calculate cost for
-    @param[in] p_a consecutive neighbor #1 of s
-    @param[in] p_b consecutive neighbor #2 of s
-    @return tuple containing <cost,x,y>
+    @param[in] p_a consecutive neighbor #1 of p
+    @param[in] p_b consecutive neighbor #2 of p
+    @return tuple of float containing <path cost,x,y>
     */
     std::tuple<float,float,float> computeCostContinuous(std::tuple<float,float> p, std::tuple<float,float> p_a, std::tuple<float,float> p_b);
 
