@@ -49,7 +49,7 @@ inline T get_distance(std::tuple<T,T> p1, std::tuple<T,T> p2)
     T x2,y2;
     std::tie(x2, y2) = p2;
 
-    return ((float) sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2)));
+    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
 /**
