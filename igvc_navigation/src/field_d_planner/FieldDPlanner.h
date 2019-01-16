@@ -240,7 +240,15 @@ private:
     @return tuple of float containing <path cost,x,y>
     */
     std::tuple<float,float,float> computeCostContinuous(std::tuple<float,float> p, std::tuple<float,float> p_a, std::tuple<float,float> p_b);
+    std::tuple<float,float,float> computeCostContinuous(Node p, Node p_a, Node p_b);
 
+    /**
+    Finds the backpointer of Node s in the unordered map
+
+    @param[in] s node to find backpointer for
+    @return backpointer
+    */
+    std::tuple<int,int> findBptr(Node s);
 };
 
 #endif
