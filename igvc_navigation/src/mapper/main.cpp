@@ -39,7 +39,7 @@ int increment_step;
 bool debug;
 RobotState state;
 
-Octomapper octomapper;
+std::unique_ptr<Octomapper> octomapper;
 pc_map_pair pc_map_pair;
 
 std::tuple<double, double> rotate(double x, double y)
@@ -277,6 +277,7 @@ void publish(cv::Mat map, uint64_t stamp)
 
 void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc)
 {
+  ROS_INFO("Got Pointcloud");
   // make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
@@ -298,10 +299,12 @@ void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc)
   odom_to_lidar.mult(state.transform, transforms.at("/scan/pointcloud").inverse());
 
   pcl::transformPointCloud(*transformed, *transformed, transform_to_odom);
-  octomapper.insert_scan(odom_to_lidar.getOrigin(), pc_map_pair, transformed);
+  octomapper->insert_scan(odom_to_lidar.getOrigin(), pc_map_pair, *transformed);
 
+  ROS_INFO("Publishing");
   // Publish map
-  publish(*pc_map_pair.map, pc->header.stamp);
+  octomapper->get_updated_map(pc_map_pair);
+  publish(*(pc_map_pair.map), pc->header.stamp);
 }
 
 
@@ -320,8 +323,8 @@ int main(int argc, char **argv)
   double decay_period;
   int cont_occupancy_grid_threshold;
 
-  octomapper = Octomapper(pNh);
-  octomapper.create_octree(pc_map_pair.octree);
+  octomapper = std::unique_ptr<Octomapper>(new Octomapper(pNh));
+  octomapper->create_octree(pc_map_pair);
 
   // assumes all params inputted in meters
   igvc::getParam(pNh, "topics", topics);

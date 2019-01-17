@@ -26,7 +26,7 @@ Octomapper::Octomapper(ros::NodeHandle pNh)
   }
 }
 
-void Octomapper::create_octree(boost::shared_ptr<octomap::OcTree> tree)
+void Octomapper::create_octree()
 {
   tree = boost::make_shared<octomap::OcTree>(m_octree_resolution);
   tree->setProbHit(m_prob_hit);
@@ -43,21 +43,21 @@ void PCL_to_Octomap(const pcl::PointCloud<pcl::PointXYZ>& pcl, octomap::Pointclo
   octomap::pointCloud2ToOctomap(pc2, octo);
 }
 
-void Octomapper::get_updated_map(struct pc_map_pair& pc_map_pair)
+void Octomapper::get_updated_map(struct pc_map_pair& pc_map_pair) const
 {
-  if (pc_map_pair.map == nullptr)
-  {
-    create_map(pc_map_pair.map);
-  }
-  for (auto it = pc_map_pair.octree->changedKeysBegin(); it != pc_map_pair.octree->changedKeysEnd(); ++it)
-  {
-    // TODO: Do we want the lowest depth here?
-    octomap::OcTreeNode* node = pc_map_pair.octree->search(it->first, 0);
-    pc_map_pair.map->at(it->first.k)
-  }
+  //if (pc_map_pair.map == nullptr)
+  //{
+  //  create_map(pc_map_pair.map);
+  //}
+  //for (auto it = pc_map_pair.octree->changedKeysBegin(); it != pc_map_pair.octree->changedKeysEnd(); ++it)
+  //{
+  //  // TODO: Do we want the lowest depth here?
+  //  octomap::OcTreeNode* node = pc_map_pair.octree->search(it->first, 0);
+  //  pc_map_pair.map->at(it->first.k)
+  //}
 }
 
-void Octomapper::create_map(boost::shared_ptr<cv::Mat>& map_ptr)
+void Octomapper::create_map(boost::shared_ptr<cv::Mat>& map_ptr) const
 {
   map_ptr = boost::make_shared<cv::Mat>(m_map_length, m_map_width, m_map_encoding);
 }

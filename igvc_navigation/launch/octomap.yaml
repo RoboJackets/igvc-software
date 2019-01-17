@@ -1,5 +1,5 @@
 octree:
-  resolution: 0.1
+  resolution: 0.2
 sensor_model:
   hit: 0.6
   miss: 0.4
@@ -7,7 +7,7 @@ sensor_model:
   max: 0.9
 ground_filter:
   iterations: 100
-  distance_threshold: 0.04
+  distance_threshold: 0.25
   eps_angle: 0.15
   plane_distance: 0.07
 map:

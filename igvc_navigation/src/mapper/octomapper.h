@@ -35,15 +35,15 @@ class Octomapper
 public:
   using PCL_point_cloud = pcl::PointCloud<pcl::PointXYZ>;
 
-  explicit Octomapper(ros::NodeHandle pNh = ros::NodeHandle("~"));
-  void create_octree(boost::shared_ptr<octomap::OcTree> tree);
+  explicit Octomapper(ros::NodeHandle pNh);
+  void create_octree(pc_map_pair& pair) const;
   void insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair,
-                   const PCL_point_cloud::ConstPtr& raw_pc) const;
+                   const PCL_point_cloud& raw_pc) const;
+  void get_updated_map(struct pc_map_pair& pc_map_pair) const;
 
 private:
   void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground) const;
-  void get_updated_map(struct pc_map_pair& pc_map_pair) const;
-  void create_map(boost::shared_ptr<cv::Mat>& map_ptr) const;
+  void create_map(pc_map_pair& pair) const;
 
   ros::NodeHandle pNh;
   double m_octree_resolution;
