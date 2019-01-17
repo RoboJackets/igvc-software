@@ -50,7 +50,8 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
   initial_x = msg->x_initial;
   initial_y = msg->y_initial;
   search_problem.Start.Theta = std::round(msg->orientation / (M_PI / 4)) * (M_PI / 4);
-  ROS_INFO_STREAM("Start position " << search_problem.Start.X << "," << search_problem.Start.Y << " theta = " << search_problem.Start.Theta);
+  ROS_INFO_STREAM("Start position " << search_problem.Start.X << "," << search_problem.Start.Y
+                                    << " theta = " << search_problem.Start.Theta);
   search_problem.Resolution = msg->resolution;
 }
 
