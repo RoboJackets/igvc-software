@@ -17,7 +17,6 @@
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include "tf/transform_datatypes.h"
-#include "octomapper.h"
 
 cv_bridge::CvImage img_bridge;
 
@@ -38,9 +37,6 @@ uchar occupancy_grid_threshold;
 int increment_step;
 bool debug;
 RobotState state;
-
-Octomapper octomapper;
-pc_map_pair pc_map_pair;
 
 std::tuple<double, double> rotate(double x, double y)
 {
@@ -204,7 +200,6 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
 
   // Apply transformation to msg points using the transform for this topic.
   pcl_ros::transformPointCloud(*msg, *transformed, transforms.at(topic));
-
   updateOccupancyGrid(transformed);
 
   igvc_msgs::map message;    // >> message to be sent
@@ -240,71 +235,6 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   }
 }
 
-void publish(cv::Mat map, uint64_t stamp)
-{
-  igvc_msgs::map message;    // >> message to be sent
-  sensor_msgs::Image image;  // >> image in the message
-  img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, map);
-  img_bridge.toImageMsg(image);  // from cv_bridge to sensor_msgs::Image
-
-  setMsgValues(message, image, stamp);
-  map_pub.publish(message);
-  if (debug)
-  {
-    debug_pub.publish(image);
-    // ROS_INFO_STREAM("\nThe robot is located at " << state);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
-    for (int i = 0; i < width_x; i++)
-    {
-      for (int j = 0; j < length_y; j++)
-      {
-        if (published_map->at<uchar>(i, j) >= occupancy_grid_threshold)
-        {
-          // Set x y coordinates as the center of the grid cell.
-          pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
-          p.x = (i - start_x) * resolution;
-          p.y = (j - start_y) * resolution;
-          fromOcuGrid->points.push_back(p);
-        }
-      }
-    }
-    fromOcuGrid->header.frame_id = "/odom";
-    fromOcuGrid->header.stamp = stamp;
-    debug_pcl_pub.publish(fromOcuGrid);
-  }
-}
-
-void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc)
-{
-  // make transformed clouds
-  pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
-      pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
-
-  // Check if static transform already exists for this topic.
-  checkExistsStaticTransform(pc, "/scan/pointcloud");
-
-  // Lookup transform form Ros Localization for position
-  getOdomTransform(pc);
-
-  // Apply transformation from lidar to base_link aka robot pose
-  pcl_ros::transformPointCloud(*pc, *transformed, transforms.at("/scan/pointcloud"));
-
-  Eigen::Affine3f transform_to_odom = Eigen::Affine3f::Identity();
-  // TODO: Is this backward?
-  transform_to_odom.rotate(Eigen::AngleAxisf(state.yaw, Eigen::Vector3f::UnitZ()));
-
-  tf::Transform odom_to_lidar;
-  odom_to_lidar.mult(state.transform, transforms.at("/scan/pointcloud").inverse());
-
-  pcl::transformPointCloud(*transformed, *transformed, transform_to_odom);
-  octomapper.insert_scan(odom_to_lidar.getOrigin(), pc_map_pair, transformed);
-
-  // Publish map
-  publish(*pc_map_pair.map, pc->header.stamp);
-}
-
-
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "mapper");
@@ -319,9 +249,6 @@ int main(int argc, char **argv)
   double cont_start_y;
   double decay_period;
   int cont_occupancy_grid_threshold;
-
-  octomapper = Octomapper(pNh);
-  octomapper.create_octree(pc_map_pair.octree);
 
   // assumes all params inputted in meters
   igvc::getParam(pNh, "topics", topics);
@@ -344,7 +271,21 @@ int main(int argc, char **argv)
   occupancy_grid_threshold = static_cast<uchar>(cont_occupancy_grid_threshold);
   ROS_INFO_STREAM("cv::Mat length: " << length_y << "  width: " << width_x << "  resolution: " << resolution);
 
-  ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>("/scan/pointcloud", 1, &pc_callback);
+  // set up tokens and get list of subscribers
+  std::istringstream iss(topics);
+  std::vector<std::string> tokens{ std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>() };
+
+  for (const std::string &topic : tokens)
+  {
+    ROS_INFO_STREAM("Mapper subscribing to " << topic);
+    subs.push_back(nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(topic, 1, boost::bind(frame_callback, _1, topic)));
+  }
+
+  // Timer for map decay
+  if (decay_period > 0)
+  {
+    ros::Timer timer = nh.createTimer(ros::Duration(decay_period), decayMap);
+  }
 
   published_map = std::unique_ptr<cv::Mat>(new cv::Mat(length_y, width_x, CV_8UC1));
 
