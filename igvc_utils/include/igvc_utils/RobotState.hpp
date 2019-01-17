@@ -12,9 +12,11 @@ class RobotState
 public:
   double x{ 0 };
   double y{ 0 };
+  double z{ 0 };
   double roll{ 0 };
   double pitch{ 0 };
   double yaw{ 0 };
+  tf::StampedTransform transform;
   ros::Time stamp{ 0 };
 
   friend std::ostream &operator<<(std::ostream &out, const RobotState &state);
@@ -38,9 +40,13 @@ public:
   {
     x = msg->pose.pose.position.x;
     y = msg->pose.pose.position.y;
+    z = msg->pose.pose.position.z;
     tf::Quaternion quaternion;
     tf::quaternionMsgToTF(msg->pose.pose.orientation, quaternion);
     tf::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
+
+    transform.setRotation(quaternion);
+    transform.setOrigin(tf::Vector3(x, y, z));
   }
 
   // set state via a transform
@@ -48,6 +54,7 @@ public:
   {
     x = transform.getOrigin().x();
     y = transform.getOrigin().y();
+    z = transform.getOrigin().z();
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
   }
 

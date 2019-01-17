@@ -1,0 +1,16 @@
+octree:
+  resolution: 0.1
+sensor_model:
+  hit: 0.6
+  miss: 0.4
+  min: 0.1
+  max: 0.9
+ground_filter:
+  iterations: 100
+  distance_threshold: 0.04
+  eps_angle: 0.15
+  plane_distance: 0.07
+map:
+  length: 200
+  width: 200
+  encoding: "CV_8UC1"
