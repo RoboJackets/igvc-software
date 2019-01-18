@@ -240,7 +240,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   }
 }
 
-void publish(cv::Mat map, uint64_t stamp)
+void publish(const cv::Mat& map, uint64_t stamp)
 {
   igvc_msgs::map message;    // >> message to be sent
   sensor_msgs::Image image;  // >> image in the message
@@ -253,20 +253,34 @@ void publish(cv::Mat map, uint64_t stamp)
   {
     debug_pub.publish(image);
     // ROS_INFO_STREAM("\nThe robot is located at " << state);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
+    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr fromOcuGrid =
+        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr(new pcl::PointCloud<pcl::PointXYZRGBA>());
     for (int i = 0; i < width_x; i++)
     {
       for (int j = 0; j < length_y; j++)
       {
-        if (published_map->at<uchar>(i, j) >= occupancy_grid_threshold)
+        pcl::PointXYZRGBA p;
+        uchar prob = map.at<uchar>(i, j);
+        if (prob > 127+16)
         {
-          // Set x y coordinates as the center of the grid cell.
-          pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
-          p.x = (i - start_x) * resolution;
-          p.y = (j - start_y) * resolution;
-          fromOcuGrid->points.push_back(p);
+          p = pcl::PointXYZRGBA();
+          p.r = 0;
+          p.g = static_cast<uint8_t>((prob - 127) * 2);
+          p.b = prob;
+          p.a = static_cast<uint8_t>((prob - 127) * 2);
         }
+        if (prob < 127 - 16)
+        {
+          p = pcl::PointXYZRGBA();
+          p.r = prob;
+          p.g = 0;
+          p.b = static_cast<uint8_t>((127 - prob) * 2);
+          p.a = static_cast<uint8_t>((127 - prob) * 2);
+        }
+        // Set x y coordinates as the center of the grid cell.
+        p.x = (i - width_x/2) * resolution;
+        p.y = (j - width_x/2) * resolution;
+        fromOcuGrid->points.push_back(p);
       }
     }
     fromOcuGrid->header.frame_id = "/odom";
@@ -277,7 +291,7 @@ void publish(cv::Mat map, uint64_t stamp)
 
 void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc)
 {
-  ROS_INFO("Got Pointcloud");
+//  ROS_INFO("Got Pointcloud");
   // make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
@@ -296,12 +310,15 @@ void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc)
   transform_to_odom.rotate(Eigen::AngleAxisf(state.yaw, Eigen::Vector3f::UnitZ()));
 
   tf::Transform odom_to_lidar;
+//  ROS_INFO_STREAM("State.transform: " << state.transform.getOrigin().x() << ", " << state.transform.getOrigin().y() << ", " << state.transform.getOrigin().z());
+  tf::Transform temp = transforms.at("/scan/pointcloud").inverse();
+//  ROS_INFO_STREAM("State.transform: " << temp.getOrigin().x() << ", " << temp.getOrigin().y() << ", " << temp.getOrigin().z());
   odom_to_lidar.mult(state.transform, transforms.at("/scan/pointcloud").inverse());
 
   pcl::transformPointCloud(*transformed, *transformed, transform_to_odom);
   octomapper->insert_scan(odom_to_lidar.getOrigin(), pc_map_pair, *transformed);
 
-  ROS_INFO("Publishing");
+//  ROS_INFO("Publishing");
   // Publish map
   octomapper->get_updated_map(pc_map_pair);
   publish(*(pc_map_pair.map), pc->header.stamp);
@@ -356,7 +373,7 @@ int main(int argc, char **argv)
   if (debug)
   {
     debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
-    debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
+    debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGBA>>("/map_debug_pcl", 1);
   }
 
   ros::spin();

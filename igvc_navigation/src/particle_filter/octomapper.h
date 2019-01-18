@@ -36,9 +36,9 @@ public:
 
   explicit Octomapper(ros::NodeHandle pNh = ros::NodeHandle("~"));
   void create_octree(boost::shared_ptr<octomap::OcTree> tree);
-  void insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair,
-                               const pcl::PointCloud<pcl::PointXYZ>& ground,
-                               const pcl::PointCloud<pcl::PointXYZ>& nonground) const;
+  void Octomapper::insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair,
+                             const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& raw_pc) const;
+  void Octomapper::filter_range(const pcl::PointCloud<pcl::PointXYZ>& raw_pc, pcl::PointCloud<pcl::PointXYZ>& within_range) const;
 
 private:
   void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground) const;

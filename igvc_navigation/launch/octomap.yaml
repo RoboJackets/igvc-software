@@ -7,10 +7,12 @@ sensor_model:
   max: 0.9
 ground_filter:
   iterations: 100
-  distance_threshold: 0.25
+  distance_threshold: 0.5
   eps_angle: 0.15
   plane_distance: 0.07
 map:
+  # In units of meters, not cells
+  # width = width / resolution
   length: 200
   width: 200
   encoding: "CV_8UC1"

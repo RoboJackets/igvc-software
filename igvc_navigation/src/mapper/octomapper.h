@@ -43,6 +43,7 @@ public:
 
 private:
   void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground) const;
+  void filter_range(const pcl::PointCloud<pcl::PointXYZ>& raw_pc, pcl::PointCloud<pcl::PointXYZ>& within_range) const;
   void create_map(pc_map_pair& pair) const;
 
   ros::NodeHandle pNh;
