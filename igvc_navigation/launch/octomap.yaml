@@ -8,9 +8,9 @@ sensor_model:
   max_range: 60
 ground_filter:
   iterations: 100
-  distance_threshold: 0.2
+  distance_threshold: 0.15
   eps_angle: 0.15
-  plane_distance: 0.07
+  plane_distance: 0.04
 map:
   # In units of meters, not cells
   # width = width / resolution

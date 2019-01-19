@@ -1,5 +1,4 @@
 #include "octomapper.h"
-#include "../particle_filter/octomapper.h"
 
 #include <octomap/octomap.h>
 #include <octomap_ros/conversions.h>

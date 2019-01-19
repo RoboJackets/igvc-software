@@ -20,6 +20,7 @@
 #include <tf_conversions/tf_eigen.h>
 #include "octomapper.h"
 #include <visualization_msgs/Marker.h>
+#include <signal.h>
 
 cv_bridge::CvImage img_bridge;
 
@@ -344,18 +345,29 @@ void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
 
 //  ROS_INFO("Publishing");
   // Publish map
-  ROS_INFO_STREAM("octomap tree size1: " << pc_map_pair.octree->getNumLeafNodes());
+//  ROS_INFO_STREAM("octomap tree size1: " << pc_map_pair.octree->getNumLeafNodes());
   octomapper->get_updated_map(pc_map_pair);
-  ROS_INFO_STREAM("octomap tree size2: " << pc_map_pair.octree->getNumLeafNodes());
+//  ROS_INFO_STREAM("octomap tree size2: " << pc_map_pair.octree->getNumLeafNodes());
   publish(*(pc_map_pair.map), pc->header.stamp);
 }
 
+void node_cleanup(int sig)
+{
+  published_map.reset();
+  published_map.reset();
+  octomapper.reset();
+  ros::shutdown();
+  tf_listener.reset();
+  ros::shutdown();
+}
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "mapper");
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
   std::string topics;
+
+  signal(SIGINT, node_cleanup);
 
   std::list<ros::Subscriber> subs;
   tf_listener = std::unique_ptr<tf::TransformListener>(new tf::TransformListener());
