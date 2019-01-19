@@ -22,32 +22,26 @@ EthernetSocket::~EthernetSocket()
   this->sock->shutdown(boost::asio::ip::tcp::socket::shutdown_send);
 }
 
-void EthernetSocket::sendMessage(std::string message)
+void EthernetSocket::sendMessage(char* message, size_t len)
 {
   boost::system::error_code error;
   // Create boost buffer from string and send to TCP endpoint
-  boost::asio::write(*sock, boost::asio::buffer(message, sizeof(message)), error);
+  boost::asio::write(*sock, boost::asio::buffer(message, len), error);
 }
 
-std::string EthernetSocket::readMessage()
+size_t EthernetSocket::readMessage(unsigned char (&buffer) [256])
 {
   // read data from TCP connection
-  boost::array<char, 128> buf;
   boost::system::error_code error;
 
-  size_t len = sock->read_some(boost::asio::buffer(buf), error);
-  std::string reading(buf.begin(), buf.end());  // get string from buffer iter
+  size_t len = sock->read_some(boost::asio::buffer(buffer, sizeof(buffer) - 1), error);
 
-  if (error == boost::asio::error::eof)
-  {
-    std::cout << "TCP Connection closed by peer: Disconnecting" << std::endl;
-  }
+  if (error == boost::asio::error::eof) // connection closed by server
+    len = 0;
   else if (error)
-  {
     throw boost::system::system_error(error);
-  }
 
-  return reading;
+  return len;
 }
 
 std::string EthernetSocket::getIP()
