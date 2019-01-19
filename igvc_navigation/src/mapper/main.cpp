@@ -410,8 +410,8 @@ int main(int argc, char **argv) {
   if (debug) {
     debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
     debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
-    ground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/ground_pcl", 1);
-    nonground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/nonground_pcl", 1);
+    ground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/ground_pcl", 1);
+    nonground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/nonground_pcl", 1);
     sensor_pub = nh.advertise<visualization_msgs::Marker>("/sensor_pos", 1);
   }
 

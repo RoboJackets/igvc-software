@@ -169,8 +169,6 @@ include_directories(
 # )
 
 #############
-## Testing ##
-#############
 
 if(CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
@@ -185,3 +183,4 @@ add_subdirectory(src/state_estimator)
 add_subdirectory(src/waypoint_source)
 add_subdirectory(src/wheel_odometer)
 add_subdirectory(src/particle_filter)
+add_subdirectory(src/icp)
