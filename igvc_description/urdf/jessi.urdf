@@ -136,6 +136,11 @@
           <resolution>0.02</resolution>
         </range>
       </ray>
+      <noise>
+        <type>gaussian</type>
+        <mean>0.0</mean>
+        <stddev>0.2</stddev>
+      </noise>
       <plugin name="lidar_plugin" filename="libgazebo_ros_block_laser.so">
         <topicName>/scan</topicName>
         <frameName>/lidar</frameName>
@@ -227,10 +232,10 @@
       <topicName>/imu</topicName>
       <rpyOffset>0 0 0</rpyOffset>
       <xyzOffset>0 0 0</xyzOffset>
-      <gaussianNoise>0.00000001</gaussianNoise>
-      <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
-      <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
-      <accelGaussianNoise>0.00000001 0.00000001 0.00000001</accelGaussianNoise>
+      <gaussianNoise>0.0000001</gaussianNoise>
+      <accelDrift>0.0000001 0.0000001 0.0000001</accelDrift>
+      <accelDriftFrequency>0.0000001 0.0000001 0.0000001</accelDriftFrequency>
+      <accelGaussianNoise>0.0000001 0.0000001 0.0000001</accelGaussianNoise>
       <rateDrift>0.0 0.0 0.0</rateDrift>
       <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
       <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
@@ -249,10 +254,10 @@
       <referenceLatitude>33.774497</referenceLatitude>
       <referenceLongitude>-84.405001</referenceLongitude>
       <referenceAltitude>309.0</referenceAltitude>
-      <drift>0.001 0.001 0.001</drift>
-      <gaussianNoise>0.0001 0.0001 0.0001</gaussianNoise>
-      <velocityDrift>0 0 0</velocityDrift>
-      <velocityGaussianNoise>0.005 0.005 0.05</velocityGaussianNoise>
+      <drift>0.01 0.01 0.01</drift>
+      <gaussianNoise>0.15 0.15 0.15</gaussianNoise>
+      <velocityDrift>0.5 0.5 0.5</velocityDrift>
+      <velocityGaussianNoise>0.05 0.05 0.05</velocityGaussianNoise>
     </plugin>
   </gazebo>
 
