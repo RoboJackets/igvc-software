@@ -16,14 +16,19 @@
 #include <igvc_utils/RobotState.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
-#include "tf/transform_datatypes.h"
+#include <tf/transform_datatypes.h>
+#include <tf_conversions/tf_eigen.h>
 #include "octomapper.h"
+#include <visualization_msgs/Marker.h>
 
 cv_bridge::CvImage img_bridge;
 
 ros::Publisher map_pub;                  // Publishes map
 ros::Publisher debug_pub;                // Debug version of above
 ros::Publisher debug_pcl_pub;            // Publishes map as individual PCL points
+ros::Publisher ground_pub;            // Publishes map as individual PCL points
+ros::Publisher nonground_pub;            // Publishes map as individual PCL points
+ros::Publisher sensor_pub;            // Publishes map as individual PCL points
 std::unique_ptr<cv::Mat> published_map;  // matrix will be publishing
 std::map<std::string, tf::StampedTransform> transforms;
 std::unique_ptr<tf::TransformListener> tf_listener;
@@ -38,12 +43,12 @@ uchar occupancy_grid_threshold;
 int increment_step;
 bool debug;
 RobotState state;
+RobotState state2;
 
 std::unique_ptr<Octomapper> octomapper;
 pc_map_pair pc_map_pair;
 
-std::tuple<double, double> rotate(double x, double y)
-{
+std::tuple<double, double> rotate(double x, double y) {
   double newX = x * cos(state.yaw) - y * sin(state.yaw);
   double newY = x * sin(state.yaw) + y * cos(state.yaw);
   return (std::make_tuple(newX, newY));
@@ -53,15 +58,16 @@ std::tuple<double, double> rotate(double x, double y)
  * Updates <code>RobotState state</code> with the latest tf transform using the timestamp of the message passed in
  * @param msg <code>pcl::PointCloud</code> message with the timestamp used for looking up the tf transform
  */
-void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
-{
+void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
   tf::StampedTransform transform;
+  tf::StampedTransform transform2;
   ros::Time messageTimeStamp;
   pcl_conversions::fromPCL(msg->header.stamp, messageTimeStamp);
-  if (tf_listener->waitForTransform("/odom", "/base_link", messageTimeStamp, ros::Duration(transform_max_wait_time)))
-  {
+  if (tf_listener->waitForTransform("/odom", "/base_link", messageTimeStamp, ros::Duration(transform_max_wait_time))) {
     tf_listener->lookupTransform("/odom", "/base_link", messageTimeStamp, transform);
     state.setState(transform);
+    tf_listener->lookupTransform("/odom", "/lidar", messageTimeStamp, transform2);
+    state2.setState(transform2);
   }
 }
 
@@ -73,8 +79,7 @@ void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
  * @param image image containing map data to be put into <code>message</code>
  * @param pcl_stamp time stamp from the pcl to be used for <code>message</code>
  */
-void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp)
-{
+void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp) {
   pcl_conversions::fromPCL(pcl_stamp, image.header.stamp);
   pcl_conversions::fromPCL(pcl_stamp, message.header.stamp);
   message.header.frame_id = "/odom";
@@ -93,38 +98,29 @@ void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t p
  * Updates the occupancy grid using information from the <code>pcl::PointCloud transformed</code>
  * @param transformed Reference to pointcloud containing information from lidar / segmentation.
  */
-void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed)
-{
+void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed) {
   int offMapCount = 0;
 
   pcl::PointCloud<pcl::PointXYZ>::const_iterator point_iter;
 
-  for (point_iter = transformed->begin(); point_iter < transformed->points.end(); point_iter++)
-  {
+  for (point_iter = transformed->begin(); point_iter < transformed->points.end(); point_iter++) {
     double x_point_raw, y_point_raw;
     std::tie(x_point_raw, y_point_raw) = rotate(point_iter->x, point_iter->y);
 
     int point_x = static_cast<int>(std::round(x_point_raw / resolution + state.x / resolution + start_x));
     int point_y = static_cast<int>(std::round(y_point_raw / resolution + state.y / resolution + start_y));
-    if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x)
-    {
+    if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x) {
       // Check for overflow
-      if (published_map->at<uchar>(point_x, point_y) <= UCHAR_MAX - (uchar)increment_step)
-      {
-        published_map->at<uchar>(point_x, point_y) += (uchar)increment_step;
-      }
-      else
-      {
+      if (published_map->at<uchar>(point_x, point_y) <= UCHAR_MAX - (uchar) increment_step) {
+        published_map->at<uchar>(point_x, point_y) += (uchar) increment_step;
+      } else {
         published_map->at<uchar>(point_x, point_y) = UCHAR_MAX;
       }
-    }
-    else
-    {
+    } else {
       offMapCount++;
     }
   }
-  if (offMapCount > 0)
-  {
+  if (offMapCount > 0) {
     ROS_WARN_STREAM(offMapCount << " points were off the map");
   }
 }
@@ -134,22 +130,17 @@ void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed)
  * @param msg
  * @param topic
  */
-void checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
-{
-  if (transforms.find(topic) == transforms.end())
-  {
+void checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic) {
+  if (transforms.find(topic) == transforms.end()) {
     // Wait for transform between frame_id (ex. /scan/pointcloud) and base_footprint.
     ros::Time messageTimeStamp;
     pcl_conversions::fromPCL(msg->header.stamp, messageTimeStamp);
-    if (tf_listener->waitForTransform("/base_footprint", msg->header.frame_id, messageTimeStamp, ros::Duration(3.0)))
-    {
+    if (tf_listener->waitForTransform("/base_footprint", msg->header.frame_id, messageTimeStamp, ros::Duration(3.0))) {
       ROS_INFO_STREAM("\n\ngetting transform for " << topic << "\n\n");
       tf::StampedTransform transform;
       tf_listener->lookupTransform("/base_footprint", msg->header.frame_id, messageTimeStamp, transform);
       transforms.insert(std::pair<std::string, tf::StampedTransform>(topic, transform));
-    }
-    else
-    {
+    } else {
       ROS_ERROR_STREAM("\n\nfailed to find transform using empty transform\n\n");
     }
   }
@@ -158,26 +149,21 @@ void checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &
 /**
  * Decays map by 1 universally on callback
  */
-void decayMap(const ros::TimerEvent &)
-{
+void decayMap(const ros::TimerEvent &) {
   int nRows = published_map->rows;
   int nCols = published_map->cols;
 
-  if (published_map->isContinuous())
-  {
+  if (published_map->isContinuous()) {
     nCols *= nRows;
     nRows = 1;
   }
   int i, j;
   uchar *p;
-  for (i = 0; i < nRows; i++)
-  {
+  for (i = 0; i < nRows; i++) {
     p = published_map->ptr<uchar>(i);
-    for (j = 0; j < nCols; j++)
-    {
-      if (p[j] > 0)
-      {
-        p[j] -= (uchar)1;
+    for (j = 0; j < nCols; j++) {
+      if (p[j] > 0) {
+        p[j] -= (uchar) 1;
       }
     }
   }
@@ -188,8 +174,7 @@ void decayMap(const ros::TimerEvent &)
  * @param msg pointcloud information
  * @param topic topic which the pointcloud came from
  */
-void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
-{
+void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic) {
   // transform pointcloud into the occupancy grid, no filtering right now
 
   // make transformed clouds
@@ -214,18 +199,14 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
 
   setMsgValues(message, image, msg->header.stamp);
   map_pub.publish(message);
-  if (debug)
-  {
+  if (debug) {
     debug_pub.publish(image);
     // ROS_INFO_STREAM("\nThe robot is located at " << state);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
-    for (int i = 0; i < width_x; i++)
-    {
-      for (int j = 0; j < length_y; j++)
-      {
-        if (published_map->at<uchar>(i, j) >= occupancy_grid_threshold)
-        {
+    for (int i = 0; i < width_x; i++) {
+      for (int j = 0; j < length_y; j++) {
+        if (published_map->at<uchar>(i, j) >= occupancy_grid_threshold) {
           // Set x y coordinates as the center of the grid cell.
           pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
           p.x = (i - start_x) * resolution;
@@ -240,8 +221,7 @@ void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const s
   }
 }
 
-void publish(const cv::Mat& map, uint64_t stamp)
-{
+void publish(const cv::Mat &map, uint64_t stamp) {
   igvc_msgs::map message;    // >> message to be sent
   sensor_msgs::Image image;  // >> image in the message
   img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, map);
@@ -249,48 +229,59 @@ void publish(const cv::Mat& map, uint64_t stamp)
 
   setMsgValues(message, image, stamp);
   map_pub.publish(message);
-  if (debug)
-  {
+  if (debug) {
     debug_pub.publish(image);
     // ROS_INFO_STREAM("\nThe robot is located at " << state);
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr fromOcuGrid =
-        pcl::PointCloud<pcl::PointXYZRGBA>::Ptr(new pcl::PointCloud<pcl::PointXYZRGBA>());
-    for (int i = 0; i < width_x; i++)
-    {
-      for (int j = 0; j < length_y; j++)
-      {
-        pcl::PointXYZRGBA p;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
+        boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
+    for (int i = 0; i < width_x; i++) {
+      for (int j = 0; j < length_y; j++) {
+        pcl::PointXYZRGB p;
         uchar prob = map.at<uchar>(i, j);
-        if (prob > 127+16)
-        {
-          p = pcl::PointXYZRGBA();
+        if (prob > 127) {
+          p = pcl::PointXYZRGB();
+          p.x = (i - width_x / 2) * resolution;
+          p.y = (j - length_y / 2) * resolution;
           p.r = 0;
           p.g = static_cast<uint8_t>((prob - 127) * 2);
-          p.b = prob;
-          p.a = static_cast<uint8_t>((prob - 127) * 2);
-        }
-        if (prob < 127 - 16)
-        {
-          p = pcl::PointXYZRGBA();
-          p.r = prob;
+          p.b = 0;
+          fromOcuGrid->points.push_back(p);
+//          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
+        } else if (prob < 127) {
+          p = pcl::PointXYZRGB();
+          p.x = (i - width_x / 2) * resolution;
+          p.y = (j - length_y / 2) * resolution;
+          p.r = 0;
           p.g = 0;
           p.b = static_cast<uint8_t>((127 - prob) * 2);
-          p.a = static_cast<uint8_t>((127 - prob) * 2);
+          fromOcuGrid->points.push_back(p);
+//          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
+        } else if (prob == 127) {
         }
         // Set x y coordinates as the center of the grid cell.
-        p.x = (i - width_x/2) * resolution;
-        p.y = (j - width_x/2) * resolution;
-        fromOcuGrid->points.push_back(p);
       }
     }
     fromOcuGrid->header.frame_id = "/odom";
     fromOcuGrid->header.stamp = stamp;
+//    ROS_INFO_STREAM("Size: " << fromOcuGrid->points.size() << " / " << (width_x * length_y));
     debug_pcl_pub.publish(fromOcuGrid);
   }
 }
 
-void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc)
-{
+void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
+  // Pass through filter to only keep ones closest to us
+    pcl::PointCloud<pcl::PointXYZ>::Ptr small(new pcl::PointCloud<pcl::PointXYZ>);
+    float radius = 30;
+    float distanceFromSphereCenterPoint;
+    bool pointIsWithinSphere;
+    bool addPointToFilteredCloud;
+    for (int point_i = 0; point_i < pc->size(); ++point_i) {
+      distanceFromSphereCenterPoint = pc->at(point_i).x * pc->at(point_i).x + pc->at(point_i).y * pc->at(point_i).y + pc->at(point_i).z * pc->at(point_i).z;
+      pointIsWithinSphere = distanceFromSphereCenterPoint <= radius;
+      if (pointIsWithinSphere) {
+        small->push_back(pc->at(point_i));
+      }
+    }
 //  ROS_INFO("Got Pointcloud");
   // make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
@@ -303,30 +294,64 @@ void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc)
   getOdomTransform(pc);
 
   // Apply transformation from lidar to base_link aka robot pose
-  pcl_ros::transformPointCloud(*pc, *transformed, transforms.at("/scan/pointcloud"));
+  pcl_ros::transformPointCloud(*small, *transformed, transforms.at("/scan/pointcloud"));
+  pcl_ros::transformPointCloud(*transformed, *transformed, state.transform);
 
-  Eigen::Affine3f transform_to_odom = Eigen::Affine3f::Identity();
-  // TODO: Is this backward?
-  transform_to_odom.rotate(Eigen::AngleAxisf(state.yaw, Eigen::Vector3f::UnitZ()));
+//  Eigen::Affine3f transform_to_odom = Eigen::Affine3f::Identity();
+//  // TODO: Is this backward?
+//  transform_to_odom.rotate(Eigen::AngleAxisf(state.yaw, Eigen::Vector3f::UnitZ()));
+//  Eigen::Affine3d transform_to_odom;
+//  tf::transformTFToEigen(state.transform.inverse(), transform_to_odom);
 
-  tf::Transform odom_to_lidar;
 //  ROS_INFO_STREAM("State.transform: " << state.transform.getOrigin().x() << ", " << state.transform.getOrigin().y() << ", " << state.transform.getOrigin().z());
-  tf::Transform temp = transforms.at("/scan/pointcloud").inverse();
 //  ROS_INFO_STREAM("State.transform: " << temp.getOrigin().x() << ", " << temp.getOrigin().y() << ", " << temp.getOrigin().z());
-  odom_to_lidar.mult(state.transform, transforms.at("/scan/pointcloud").inverse());
 
-  pcl::transformPointCloud(*transformed, *transformed, transform_to_odom);
-  octomapper->insert_scan(odom_to_lidar.getOrigin(), pc_map_pair, *transformed);
+  pcl::PointCloud<pcl::PointXYZ> ground;
+  pcl::PointCloud<pcl::PointXYZ> nonground;
+
+//  pcl::transformPointCloud(*transformed, *transformed2, transform_to_odom);
+  octomapper->filter_ground_plane(*transformed, ground, nonground);
+
+  ground.header.frame_id = "/odom";
+  transformed->header.frame_id = "/odom";
+  nonground.header.frame_id = "/odom";
+  ground.header.stamp = pc->header.stamp;
+  transformed->header.stamp = pc->header.stamp;
+  nonground.header.stamp = pc->header.stamp;
+
+  nonground_pub.publish(nonground);
+  ground_pub.publish(ground);
+
+  visualization_msgs::Marker points;
+  points.header.frame_id = "/odom";
+  points.header.stamp = ros::Time::now();
+  points.pose.position.x = state2.transform.getOrigin().getX();
+  points.pose.position.y = state2.transform.getOrigin().getY();
+  points.pose.position.z = state2.transform.getOrigin().getZ();
+
+  points.action = visualization_msgs::Marker::ADD;
+  points.id = 0;
+  points.type = visualization_msgs::Marker::CUBE;
+  points.scale.x = 0.05;
+  points.scale.y = 0.05;
+  points.scale.z = 0.05;
+  points.color.g = 1.0f;
+  points.color.a = 1.0;
+
+  sensor_pub.publish(points);
+
+  octomapper->insert_scan(state2.transform.getOrigin(), pc_map_pair, *transformed);
 
 //  ROS_INFO("Publishing");
   // Publish map
+  ROS_INFO_STREAM("octomap tree size1: " << pc_map_pair.octree->getNumLeafNodes());
   octomapper->get_updated_map(pc_map_pair);
+  ROS_INFO_STREAM("octomap tree size2: " << pc_map_pair.octree->getNumLeafNodes());
   publish(*(pc_map_pair.map), pc->header.stamp);
 }
 
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   ros::init(argc, argv, "mapper");
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
@@ -370,10 +395,12 @@ int main(int argc, char **argv)
 
   map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
 
-  if (debug)
-  {
+  if (debug) {
     debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
-    debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGBA>>("/map_debug_pcl", 1);
+    debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
+    ground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/ground_pcl", 1);
+    nonground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/nonground_pcl", 1);
+    sensor_pub = nh.advertise<visualization_msgs::Marker>("/sensor_pos", 1);
   }
 
   ros::spin();

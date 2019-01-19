@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   image_transport
   cv_bridge
   tf
+  tf_conversions
   pcl_ros
   igvc_utils
   octomap_ros

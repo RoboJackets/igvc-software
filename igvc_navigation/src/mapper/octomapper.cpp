@@ -11,12 +11,14 @@ Octomapper::Octomapper(ros::NodeHandle pNh) {
   igvc::getParam(pNh, "sensor_model/miss", m_prob_miss);
   igvc::getParam(pNh, "sensor_model/min", m_thresh_min);
   igvc::getParam(pNh, "sensor_model/max", m_thresh_max);
+  igvc::getParam(pNh, "sensor_model/max_range", m_max_range);
   igvc::getParam(pNh, "ground_filter/iterations", m_ransac_iterations);
   igvc::getParam(pNh, "ground_filter/distance_threshold", m_ransac_distance_threshold);
   igvc::getParam(pNh, "ground_filter/eps_angle", m_ransac_eps_angle);
   igvc::getParam(pNh, "ground_filter/plane_distance", m_ground_filter_plane_dist);
   igvc::getParam(pNh, "map/length", m_map_length);
   igvc::getParam(pNh, "map/width", m_map_width);
+  igvc::getParam(pNh, "map/log_odds_default", m_odds_sum_default);
   std::string map_encoding;
   igvc::getParam(pNh, "map/encoding", map_encoding);
   if (map_encoding == "CV_8UC1") {
@@ -104,7 +106,7 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
 //  ROS_INFO_STREAM("MinKey: " << key_to_string(minKey) << ", Max: " << key_to_string(maxKey));
   std::vector<std::vector<float>> odds_sum(m_map_length / m_octree_resolution,
                                            std::vector<float>(m_map_width / m_octree_resolution,
-                                                              0.5));  // TODO: Are these the right
+                                                              m_odds_sum_default));  // TODO: Are these the right
   for (octomap::OcTree::iterator it = pc_map_pair.octree->begin(), end = pc_map_pair.octree->end(); it != end; ++it) {
     // If this is a leaf at max depth, then only update that node
     if (it.getDepth() == pc_map_pair.octree->getTreeDepth()) {
@@ -134,8 +136,8 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
   }
 
   // Transfer from log odds to normal probability
-  for (int i = 0; i < m_map_length; i++) {
-    for (int j = 0; j < m_map_width; j++) {
+  for (int i = 0; i < m_map_length / m_octree_resolution; i++) {
+    for (int j = 0; j < m_map_width / m_octree_resolution; j++) {
       pc_map_pair.map->at<uchar>(i, j) = toCharProb(fromLogOdds(odds_sum[i][j]));
     }
   }
@@ -168,8 +170,7 @@ void Octomapper::insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair 
 //  ROS_INFO("Inserting pointcloud");
 //  ROS_INFO_STREAM("Num points: " << octo_cloud.size());
   // TODO: Do we need to discretize to speed up? Probably not, since non occupied is so small
-//  pc_map_pair.octree->insertPointCloud(octo_cloud, sensor_pos, m_max_range, false, false);
-//  ROS_INFO("Done inserting pointcloud");
+  pc_map_pair.octree->insertPointCloud(octo_cloud, sensor_pos, m_max_range, false, false);
 
   octomap::KeySet free_cells;
   octomap::KeyRay key_ray;
@@ -209,7 +210,7 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cl
 
   if (raw_pc.size() < 50) {
     // Hacky algorithm to detect ground
-    ROS_ERROR("Pointcloud while filtering too small, skipping");
+    ROS_ERROR_STREAM("Pointcloud while filtering too small, skipping" << raw_pc.size());
     nonground = raw_pc;
   } else {
     // Plane detection for ground removal

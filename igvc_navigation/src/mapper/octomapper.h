@@ -40,9 +40,9 @@ public:
   void insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair,
                    const PCL_point_cloud& raw_pc) const;
   void get_updated_map(struct pc_map_pair& pc_map_pair) const;
+  void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground) const;
 
 private:
-  void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground) const;
   void filter_range(const pcl::PointCloud<pcl::PointXYZ>& raw_pc, pcl::PointCloud<pcl::PointXYZ>& within_range) const;
   void create_map(pc_map_pair& pair) const;
 
@@ -60,6 +60,7 @@ private:
   int m_map_length;
   int m_map_width;
   int m_map_encoding;
+  float m_odds_sum_default;
 
   // std::unique_ptr<tf::MessageFilter<PCL_point_cloud>> msg_filter;
 };

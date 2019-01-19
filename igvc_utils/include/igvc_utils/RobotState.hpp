@@ -56,6 +56,7 @@ public:
     y = transform.getOrigin().y();
     z = transform.getOrigin().z();
     tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
+    this->transform = transform;
   }
 
   // set state via a 3D Eigen vector
