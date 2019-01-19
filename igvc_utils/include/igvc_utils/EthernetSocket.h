@@ -44,14 +44,14 @@ public:
 
   @param[in] msg the string to transmit
   */
-  void sendMessage(std::string message);
+  void sendMessage(char* message, size_t len);
 
   /**
   read a message from the TCP connections
 
-  @return a string of the characters read
+  @return a char array of the characters read
   */
-  std::string readMessage();
+  size_t readMessage(unsigned char (&buffer) [256]);
 
   /**
   Getter for IP address

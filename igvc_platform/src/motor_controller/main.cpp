@@ -1,30 +1,31 @@
 #include <igvc_msgs/velocity_pair.h>
 #include <igvc_utils/EthernetSocket.h>
-#include <igvc_utils/SerialPort.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <ros/subscriber.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float64.h>
 
-#include <igvc_utils/StringUtils.hpp>
 #include <igvc_utils/NodeUtils.hpp>
 
 #include <iomanip>
-#include <sstream>
 #include <string>
-#include <vector>
+
+/* nanopb header files for protobuffer encoding/decoding */
+#include <igvc_platform/nanopb/pb_encode.h>
+#include <igvc_platform/nanopb/pb_decode.h>
+#include <igvc_platform/nanopb/pb_common.h>
+#include "igvc_platform/nanopb/protos/igvc.pb.h" // compiled protobuf definition
 
 igvc_msgs::velocity_pair current_motor_command;
 
 double min_battery_voltage;
 double battery_avg;
-double battery_alpha = 0.9; // exponentially weighted moving voltage average update value
+// alpha value for voltage exponentially weighted moving average
+// approximate # of timesteps average taken over = 1 / (1-alpha)
+double battery_alpha = 0.9;
 
 double p_l, p_r, d_l, d_r, i_l, i_r; // PID Values
-
-bool enabled = false;
-int precision;
 
 /**
 get current motor command from the /motors topic
@@ -37,97 +38,96 @@ void cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg)
 }
 
 /**
-Convert input to fixed length string whose numeric values have fixed precision
-
-@param[in] input value to fixed length string representation of
-@return string representation of input with a fized length
-*/
-std::string toBoundedString(double input)
-{
-  std::stringstream stream;
-  stream << std::fixed << std::setprecision(precision) << input;
-  return stream.str();
-}
-
-/**
-Validate that the returned values match those values sent to the MBed
-*/
-bool validateValues(std::string ret, int loc, int end, double left, double right)
-{
-  // split string by ','. The first two substrings correspond to the values for
-  // the left and right motor
-  std::vector<std::string> vals = split(ret.substr(loc + 1, end), ',');
-  ROS_INFO_STREAM("Checking recieved values for: " << ret.at(loc));
-
-
-  return (vals.size() == 2)
-         && (std::stod(vals.at(0)) == left)
-         && (std::stod(vals.at(1)) == right);
-}
-
-/**
 Sets PID values
 */
 void setPID(EthernetSocket& sock, ros::Rate &rate)
 {
-  std::string p_values = "#P" + toBoundedString(p_l) + "," + toBoundedString(p_r) + "\n";
-  std::string d_values = "#D" + toBoundedString(d_l) + "," + toBoundedString(d_r) + "\n";
-  std::string i_values = "#I" + toBoundedString(i_l) + "," + toBoundedString(i_r) + "\n";
+  bool valid_values = false; // pid values have been set correctly
 
-  bool valid_values_p = false;
-  bool valid_values_d = false;
-  bool valid_values_i = false;
+  /* This is the buffer where we will store the request message. */
+  uint8_t requestbuffer[256];
+  size_t message_length;
+  bool status;
 
-  // Sends PID values via ethernet and recieves them back to ensure proper setting
-  while (ros::ok() && (!valid_values_p || !valid_values_d || !valid_values_i))
+  /* allocate space for the request message to the server */
+  RequestMessage request = RequestMessage_init_zero;
+
+  /* Create a stream that will write to our buffer. */
+  pb_ostream_t ostream = pb_ostream_from_buffer(requestbuffer, sizeof(requestbuffer));
+
+  /* indicate that pid fields will contain values */
+  request.has_p_l = true;
+  request.has_p_r = true;
+  request.has_i_l = true;
+  request.has_i_r = true;
+  request.has_d_l = true;
+  request.has_d_r = true;
+  request.has_speed_l = false;
+  request.has_speed_r = false;
+
+  /* fill in the message fields */
+  request.p_l = static_cast<float>(p_l);
+  request.p_r = static_cast<float>(p_r);
+  request.i_l = static_cast<float>(i_l);
+  request.i_r = static_cast<float>(i_r);
+  request.d_l = static_cast<float>(d_l);
+  request.d_r = static_cast<float>(d_r);
+
+  /* encode the protobuffer */
+  status = pb_encode(&ostream, RequestMessage_fields, &request);
+  message_length = ostream.bytes_written;
+
+  /* check for any errors.. */
+  if (!status)
   {
-    if (!valid_values_p)
-    {
-      sock.sendMessage(p_values);
-    }
-    if (!valid_values_d)
-    {
-      sock.sendMessage(d_values);
-    }
-    if (!valid_values_i)
-    {
-      sock.sendMessage(i_values);
-    }
-    for (int i = 0; i < 3; i++)
-    {
-      std::string ret = sock.readMessage();
-      if (!ret.empty() && ret.at(0) == '#' && ret.at(1) != 'E')
-      {
-        size_t p_loc = ret.find('P');
-        size_t d_loc = ret.find('D');
-        size_t i_loc = ret.find('I');
-        size_t end = ret.find('\n');
+      ROS_ERROR_STREAM("Encoding failed: " << PB_GET_ERROR(&ostream));
+      ros::shutdown();
+  }
 
-        if (p_loc != std::string::npos && !valid_values_p)
-        {
-          valid_values_p = validateValues(ret, p_loc, end, p_l, p_r);
-          if (valid_values_p) { ROS_INFO("Successfully set P values"); }
-        }
-        else if (d_loc != std::string::npos && !valid_values_d)
-        {
-          valid_values_d = validateValues(ret, d_loc, end, d_l, d_r);
-          if (valid_values_d) { ROS_INFO("Successfully set D values"); }
-        }
-        else if (i_loc != std::string::npos && !valid_values_i)
-        {
-          valid_values_i = validateValues(ret, i_loc, end, i_l, i_r);
-          if (valid_values_i) { ROS_INFO("Successfully set I values"); }
-        }
-        else if (ret.at(1) != 'V')
-        {
-          ROS_ERROR_STREAM("Recieved unknown string while setting PID values " << ret);
-        }
-      }
-      else if (ret.empty())
-      {
-        ROS_ERROR_STREAM("Empty return from motor board while sending PID values.\t" << ret);
-      }
+  size_t n; // n is the response from socket: 0 means connection closed, otherwise n = num bytes read
+  uint8_t buffer[256]; // buffer to read response into
+  // unsigned char responsebuffer[256];
+
+  /* Send PID values via ethernet and recieve response to ensure proper setting */
+  while (ros::ok() && !valid_values)
+  {
+    sock.sendMessage(reinterpret_cast<char*>(requestbuffer), message_length);
+
+    memset(buffer, 0, sizeof(buffer));
+    n = sock.readMessage(buffer); // blocks until data is read
+    // memcpy(responsebuffer, buffer, sizeof(responsebuffer));
+
+    if (n == 0)
+    {
+        ROS_ERROR_STREAM("Connection closed by server");
+        ros::shutdown();
     }
+
+    /* Allocate space for the decoded message. */
+    ResponseMessage response = ResponseMessage_init_zero;
+
+    /* Create a stream that reads from the buffer. */
+    pb_istream_t istream = pb_istream_from_buffer(buffer, n);
+
+    /* decode the message. */
+    status = pb_decode(&istream, ResponseMessage_fields, &response);
+
+    /* check for any errors.. */
+    if (!status)
+    {
+        ROS_ERROR_STREAM("Decoding Failed: " << PB_GET_ERROR(&istream));
+        ros::shutdown();
+    }
+
+    ROS_INFO_STREAM("P_L: " << static_cast<double>(response.p_l) << ", P_R: " << static_cast<double>(response.p_r));
+
+    valid_values = (static_cast<double>(response.p_l) == p_l) && \
+                   (static_cast<double>(response.p_r) == p_r) && \
+                   (static_cast<double>(response.i_l) == i_l) && \
+                   (static_cast<double>(response.i_r) == i_r) && \
+                   (static_cast<double>(response.d_l) == d_l) && \
+                   (static_cast<double>(response.d_r) == d_r);
+
     rate.sleep();
   }
   ROS_INFO_STREAM("Sucessfully set all PID values");
@@ -156,11 +156,8 @@ int main(int argc, char** argv)
                   << "\n\tIP: " << ip_addr
                   << "\n\tPort: " << std::to_string(tcpport));
 
-  int messages_to_read;
   int min_battery_voltage;
-  pNh.param(std::string("messages_to_read"), messages_to_read, 3);
   igvc::getParam(pNh, std::string("min_battery_voltage"), min_battery_voltage);
-  pNh.param(std::string("precision"), precision, 1);
 
   battery_avg = min_battery_voltage;
 
@@ -182,7 +179,7 @@ int main(int argc, char** argv)
 
   ROS_INFO_STREAM("Motor Board ready.");
 
-  ros::Rate rate(120);
+  ros::Rate rate(20);
 
   ROS_INFO_STREAM("Setting PID Values:"
                   << "\n\t P => L: " << p_l << " R: " << p_r
@@ -191,105 +188,105 @@ int main(int argc, char** argv)
   setPID(sock, rate); // Set motor's PID Values
 
 
-  // sends down motor commands and recieves multiple responses back
-  // while (ros::ok() && port.isOpen())
-  ros::Time begin = ros::Time::now(); // begin interval
+  // send motor commands
   while (ros::ok())
   {
-    // construct motor command to send to motorboard (server)
-    std::string msg = "$" + (enabled ? toBoundedString(current_motor_command.left_velocity) : toBoundedString(0.0)) +
-                      "," + (enabled ? toBoundedString(current_motor_command.right_velocity) : toBoundedString(0.0)) +
-                      "\n";
-    // send motor command
-    sock.sendMessage(msg);
+      /* This is the buffer where we will store the request message. */
+      uint8_t requestbuffer[256];
+      size_t message_length;
+      bool status;
 
-    // read response from server
-    std::string ret = sock.readMessage();
+      /* allocate space for the request message to the server */
+      RequestMessage request = RequestMessage_init_zero;
 
-    double elapsed = (ros::Time::now() - begin).toSec();
+      /* Create a stream that will write to our buffer. */
+      pb_ostream_t ostream = pb_ostream_from_buffer(requestbuffer, sizeof(requestbuffer));
 
-    ROS_INFO_STREAM("Read:" << ret << ", Elapsed: " << elapsed << "s.");
+      /* indicate that pid fields will contain values */
+      request.has_p_l = false;
+      request.has_p_r = false;
+      request.has_i_l = false;
+      request.has_i_r = false;
+      request.has_d_l = false;
+      request.has_d_r = false;
+      request.has_speed_l = true;
+      request.has_speed_r = true;
 
-    size_t dollar = ret.find('$');
-    size_t pound = ret.find('#');
-    int count = 0;
-    while ((dollar != std::string::npos || pound != std::string::npos) && count <= messages_to_read)
-    {
-      count++;
-      // size_t end = ret.find('\n');
-      size_t end = ret.size();
-      std::vector<std::string> tokens;
+      /* fill in the message fields */
+      request.speed_l = static_cast<float>(current_motor_command.left_velocity);
+      request.speed_r = static_cast<float>(current_motor_command.right_velocity);
 
-      if (ret.size() <= 0)
+      /* encode the protobuffer */
+      status = pb_encode(&ostream, RequestMessage_fields, &request);
+      message_length = ostream.bytes_written;
+
+      /* check for any errors.. */
+      if (!status)
       {
-        ROS_INFO_STREAM("Invalid number of tokens from motor board, ret: " << ret);
+          ROS_ERROR_STREAM("Encoding failed: " << PB_GET_ERROR(&ostream));
+          ros::shutdown();
       }
-      else if (pound != std::string::npos)
+
+      /* Send the message strapped to a pigeon's leg! */
+      sock.sendMessage(reinterpret_cast<char*>(requestbuffer), message_length);
+
+      /* Read response from the server */
+      size_t n; // n is the response from socket: 0 means connection closed, otherwise n = num bytes read
+      uint8_t buffer[256]; // buffer to read response into
+
+      memset(buffer, 0, sizeof(buffer));
+      /* read from the buffer */
+      n = sock.readMessage(buffer); // blocks until data is read
+
+      if (n == 0)
       {
-        tokens = split(ret.substr(pound + 2, end), ',');
-        switch (ret.at(1))
-        {
-          case 'I':
-            // imu message
-            break;
-
-          case 'V':
-          {
-            // recieves battery message and publishes it, also checks for robot enabled
-            std_msgs::Float64 battery_msg;
-            double voltage = atof(tokens.at(0).c_str());
-
-            battery_avg = battery_alpha * battery_avg + (1 - battery_alpha) * voltage;
-
-            battery_msg.data = battery_avg;
-            battery_pub.publish(battery_msg);
-            if (battery_avg < min_battery_voltage)
-            {
-              ROS_ERROR_STREAM("Battery voltage dangerously low:"
-                               << "\n\tCurr. Voltage: " << battery_avg
-                               << "\n\tMin. Voltage: " << min_battery_voltage);
-            }
-            std_msgs::Bool enabled_msg;
-            enabled_msg.data = std::stoi(tokens.at(1)) == 1;
-            enabled = enabled_msg.data;
-            enabled_pub.publish(enabled_msg);
-          }
-          break;
-
-          case 'E':
-            // prints unknown error to terminal
-            ROS_ERROR_STREAM("MBED error: " << ret);
-            count++;
-            break;
-
-          default:
-            ROS_ERROR_STREAM("unknown response: " << ret);
-            count++;
-            break;
-        }
+          ROS_ERROR_STREAM("Connection closed by server");
+          ros::shutdown();
       }
-      else if (dollar != std::string::npos)
+
+      /* Allocate space for the decoded message. */
+      ResponseMessage response = ResponseMessage_init_zero;
+
+      /* Create a stream that reads from the buffer. */
+      pb_istream_t istream = pb_istream_from_buffer(buffer, n);
+
+      /* decode the message. */
+      status = pb_decode(&istream, ResponseMessage_fields, &response);
+
+      /* check for any errors.. */
+      if (!status)
       {
-        // handles encoder feedback
-        tokens = split(ret.substr(pound + 2, end), ',');
-        igvc_msgs::velocity_pair enc_msg;
-        enc_msg.left_velocity = atof(tokens.at(0).c_str());
-        enc_msg.right_velocity = atof(tokens.at(1).c_str());
-        enc_msg.duration = atof(tokens.at(2).c_str());
-        enc_msg.header.stamp = ros::Time::now();
-        enc_pub.publish(enc_msg);
+          ROS_ERROR_STREAM("Decoding Failed: " << PB_GET_ERROR(&istream));
+          ros::shutdown();
       }
-      else
+
+      /* update the exponentially weighted moving voltage average and publish */
+      std_msgs::Float64 battery_msg;
+      battery_avg = battery_alpha * battery_avg + (1 - battery_alpha) * response.voltage;
+      battery_msg.data = battery_avg;
+      battery_pub.publish(battery_msg);
+      if (battery_avg < min_battery_voltage)
       {
-        // unknown error message
-        ROS_ERROR_STREAM("Unknown message from motor board " << ret);
+        ROS_ERROR_STREAM("Battery voltage dangerously low:"
+                         << "\n\tCurr. Voltage: " << battery_avg
+                         << "\n\tMin. Voltage: " << min_battery_voltage);
       }
-      ret = sock.readMessage();
-      dollar = ret.find('$');
-      pound = ret.find('#');
-    }
-    begin = ros::Time::now();
-    ros::spinOnce();
-    rate.sleep();
+
+      std_msgs::Bool enabled_msg;
+      enabled_msg.data = response.estop;
+      enabled_pub.publish(enabled_msg);
+
+      /* publish encoder feedback */
+      igvc_msgs::velocity_pair enc_msg;
+      enc_msg.left_velocity = response.speed_l;
+      enc_msg.right_velocity = response.speed_r;
+      enc_msg.duration = response.dt_sec;
+      enc_msg.header.stamp = ros::Time::now();
+      enc_pub.publish(enc_msg);
+
+      ROS_ERROR_STREAM("Rate: " << response.dt_sec << "s.");
+
+      ros::spinOnce();
+      rate.sleep();
   }
 }
