@@ -106,11 +106,6 @@ int main(int argc, char **argv)
 
     effort_left += speed_P_left * error_left + speed_D_left * dError_left;
 
-    ROS_INFO_STREAM("set point " << speed_set_point_left);
-    ROS_INFO_STREAM("actual speed = " << speed_measured_left);
-    ROS_INFO_STREAM("error_left = " << error_left);
-    ROS_INFO_STREAM("dError left = " << dError_left << "\n");
-
     auto error_right = speed_set_point_right - speed_measured_right;
     auto dError_right = error_right - speed_last_error_right;
     speed_last_error_right = error_right;
@@ -118,7 +113,7 @@ int main(int argc, char **argv)
     effort_right += speed_P_right * error_right + speed_D_right * dError_right;
 
     // ROS_INFO_STREAM("Publishing effort: " << effort_right);
-    ROS_INFO_STREAM("left: " << effort_left << " right: " << effort_right);
+    //ROS_INFO_STREAM("left: " << effort_left << " right: " << effort_right);
     std_msgs::Float64 left_wheel_message;
     std_msgs::Float64 right_wheel_message;
     if(speed_set_point_left == 0) {
