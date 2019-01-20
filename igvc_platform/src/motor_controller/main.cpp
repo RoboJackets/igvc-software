@@ -7,23 +7,22 @@
 #include <std_msgs/Float64.h>
 
 #include <igvc_utils/NodeUtils.hpp>
-
-#include <iomanip>
 #include <string>
 
-/* nanopb header files for protobuffer encoding/decoding */
+// nanopb header files for protobuffer encoding/decoding
 #include <igvc_platform/nanopb/pb_encode.h>
 #include <igvc_platform/nanopb/pb_decode.h>
 #include <igvc_platform/nanopb/pb_common.h>
 #include "igvc_platform/nanopb/protos/igvc.pb.h" // compiled protobuf definition
 
-igvc_msgs::velocity_pair current_motor_command;
+igvc_msgs::velocity_pair current_motor_command; // desired motor velocities
+double frequency; // communicate frequency with the mbed
 
-double min_battery_voltage;
-double battery_avg;
 // alpha value for voltage exponentially weighted moving average
 // approximate # of timesteps average taken over = 1 / (1-alpha)
 double battery_alpha = 0.9;
+double min_battery_voltage;
+double battery_avg;
 
 double p_l, p_r, d_l, d_r, i_l, i_r; // PID Values
 
@@ -62,8 +61,6 @@ void setPID(EthernetSocket& sock, ros::Rate &rate)
   request.has_i_r = true;
   request.has_d_l = true;
   request.has_d_r = true;
-  request.has_speed_l = false;
-  request.has_speed_r = false;
 
   /* fill in the message fields */
   request.p_l = static_cast<float>(p_l);
@@ -171,22 +168,21 @@ int main(int argc, char** argv)
 
   EthernetSocket sock(ip_addr, tcpport);
 
-  std::cout << "Using Boost " << sock.getBoostVersion() << std::endl;
+  ROS_INFO_STREAM("Using Boost " << sock.getBoostVersion());
 
   ROS_INFO_STREAM("Successfully Connected to TCP Host:"
                   << "\n\tIP: " << sock.getIP()
                   << "\n\tPort: " << sock.getPort());
 
-  ROS_INFO_STREAM("Motor Board ready.");
-
-  ros::Rate rate(20);
+  igvc::getParam(pNh, std::string("frequency"), frequency);
+  ros::Rate rate(frequency);
 
   ROS_INFO_STREAM("Setting PID Values:"
                   << "\n\t P => L: " << p_l << " R: " << p_r
                   << "\n\t D => L: " << d_l << " R: " << d_r
                   << "\n\t I => L: " << i_l << " R: " << i_r);
-  setPID(sock, rate); // Set motor's PID Values
 
+  setPID(sock, rate); // Set PID Values on mbed
 
   // send motor commands
   while (ros::ok())
@@ -202,13 +198,7 @@ int main(int argc, char** argv)
       /* Create a stream that will write to our buffer. */
       pb_ostream_t ostream = pb_ostream_from_buffer(requestbuffer, sizeof(requestbuffer));
 
-      /* indicate that pid fields will contain values */
-      request.has_p_l = false;
-      request.has_p_r = false;
-      request.has_i_l = false;
-      request.has_i_r = false;
-      request.has_d_l = false;
-      request.has_d_r = false;
+      /* indicate that speed fields will contain values */
       request.has_speed_l = true;
       request.has_speed_r = true;
 
@@ -265,6 +255,7 @@ int main(int argc, char** argv)
       battery_avg = battery_alpha * battery_avg + (1 - battery_alpha) * response.voltage;
       battery_msg.data = battery_avg;
       battery_pub.publish(battery_msg);
+
       if (battery_avg < min_battery_voltage)
       {
         ROS_ERROR_STREAM("Battery voltage dangerously low:"
@@ -284,7 +275,7 @@ int main(int argc, char** argv)
       enc_msg.header.stamp = ros::Time::now();
       enc_pub.publish(enc_msg);
 
-      ROS_ERROR_STREAM("Rate: " << response.dt_sec << "s.");
+      ROS_INFO_STREAM("Rate: " << response.dt_sec << "s.");
 
       ros::spinOnce();
       rate.sleep();

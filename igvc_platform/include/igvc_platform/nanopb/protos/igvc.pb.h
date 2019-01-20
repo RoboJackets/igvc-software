@@ -62,6 +62,8 @@ typedef struct _ResponseMessage {
 } ResponseMessage;
 
 /* Default values for struct fields */
+extern const float RequestMessage_speed_l_default;
+extern const float RequestMessage_speed_r_default;
 
 /* Initializer values for message structs */
 #define ResponseMessage_init_default             {false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0, false, 0}
