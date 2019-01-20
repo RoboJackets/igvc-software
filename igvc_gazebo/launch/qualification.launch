@@ -9,7 +9,7 @@
   <!-- Vehicle pose -->
   <arg name="x" value="0"/>
   <arg name="y" value="$(eval arg('track') * 10)"/>
-  <arg name="z" value="0"/>
+  <arg name="z" value="0.5"/>
   <arg name="roll" value="0.0"/>
   <arg name="pitch" value="0.0"/>
   <arg name="yaw" value="0"/>
@@ -44,4 +44,5 @@
   <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
 
   <include file="$(find igvc_gazebo)/launch/igvc_control.launch" />
+
 </launch>
