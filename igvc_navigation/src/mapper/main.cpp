@@ -356,7 +356,6 @@ void node_cleanup(int sig)
   published_map.reset();
   published_map.reset();
   octomapper.reset();
-  ros::shutdown();
   tf_listener.reset();
   ros::shutdown();
 }
