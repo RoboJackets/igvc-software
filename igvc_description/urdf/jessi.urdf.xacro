@@ -25,7 +25,7 @@
   <xacro:property name="drive_shock_vel_limit" value="5.0"/>
 
   <!-- casters -->
-  <xacro:property name="caster_radius" value="${0.1016 / 2}"/>
+  <xacro:property name="caster_radius" value="0.1016"/>
   <!-- TODO -->
   <xacro:property name="caster_mass" value="1.0"/>
   <xacro:property name="caster_forward" value="0.612978"/>
@@ -37,7 +37,7 @@
 
   <!-- camera params -->
   <xacro:property name="camera_y" value="0.0"/>
-  <xacro:property name="camera_x" value="0.0"/>
+  <xacro:property name="camera_x" value="0.216371"/>
   <xacro:property name="camera_pitch" value="0.0"/>
   <xacro:property name="camera_height" value="1.354330"/>
 
@@ -49,12 +49,12 @@
   <!-- gps -->
   <xacro:property name="gps_height" value="1.354330"/>
   <xacro:property name="gps_y" value="0.198120"/>
-  <xacro:property name="gps_x" value="0.0"/>
+  <xacro:property name="gps_x" value="0.216371"/>
 
   <!-- imu -->
   <xacro:property name="imu_height" value="1.354330"/>
   <xacro:property name="imu_y" value="-0.198120"/>
-  <xacro:property name="imu_x" value="0.0"/>
+  <xacro:property name="imu_x" value="0.216371"/>
 
   <!-- gives small geometry so it show up in rviz -->
   <xacro:macro name="null_link">
@@ -349,7 +349,7 @@
   <joint name="base_link_to_body" type="fixed">
     <parent link="base_link"/>
     <child link="body"/>
-    <origin xyz="0.2 0.0 0.2" rpy="0 0 ${M_PI / 2}"/>
+    <origin xyz="0.2 0.0 0.17" rpy="0 0 ${M_PI / 2}"/>
     <axis xyz="0 0 0"/>
   </joint>
 
