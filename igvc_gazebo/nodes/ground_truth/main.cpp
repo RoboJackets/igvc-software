@@ -9,6 +9,7 @@
 ros::Publisher ground_truth_pub, diff_pub, angle_diff_pub;
 std::mutex mutex;
 nav_msgs::Odometry prev_gt;
+nav_msgs::Odometry og_pose;
 
 void state_estimate_callback(const nav_msgs::Odometry::ConstPtr& msg) {
   std::lock_guard<std::mutex> planning_lock(mutex);
@@ -51,7 +52,8 @@ void state_estimate_callback(const nav_msgs::Odometry::ConstPtr& msg) {
 void ground_truth_callback(const nav_msgs::Odometry::ConstPtr& msg) {
   std::lock_guard<std::mutex> planning_lock(mutex);
   nav_msgs::Odometry result;
-  result.pose = msg->pose;
+  result.pose.pose.position.x = msg->pose.pose.position.x - og_pose.pose.pose.position.x;
+  result.pose.pose.position.y = msg->pose.pose.position.y - og_pose.pose.pose.position.y;
   result.twist = msg->twist;
   result.header = msg->header;
   result.child_frame_id = "base_link";
@@ -59,6 +61,9 @@ void ground_truth_callback(const nav_msgs::Odometry::ConstPtr& msg) {
 
   ground_truth_pub.publish(result);
   result = prev_gt;
+  if(og_pose.header.stamp.toSec() < 2.0) {
+    og_pose.pose = msg->pose;
+  }
 }
 
 int main(int argc, char** argv) {
