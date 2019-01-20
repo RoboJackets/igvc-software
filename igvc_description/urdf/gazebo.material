@@ -39,7 +39,7 @@ material Gazebo/Texture_qualification
       }
       texture_unit
       {
-        texture textures/qualification_course_test.png
+        texture textures/qualification_course.png
         colour_op alpha_blend
       }
       texture_unit
