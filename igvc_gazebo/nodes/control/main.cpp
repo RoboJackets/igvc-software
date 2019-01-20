@@ -33,7 +33,7 @@ void speedCallback(const igvc_msgs::velocity_pair::ConstPtr &msg)
 
 void jointStateCallback(const sensor_msgs::JointStateConstPtr &msg)
 {
-  auto iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "axle_to_left_wheel" });
+  auto iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "left_axle" });
 
   if (iter != msg->name.end())
   {
@@ -42,7 +42,7 @@ void jointStateCallback(const sensor_msgs::JointStateConstPtr &msg)
     speed_measured_left = (msg->velocity[index]) * (wheel_radius);
   }
 
-  iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "axle_to_right_wheel" });
+  iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "right_axle" });
 
   if (iter != msg->name.end())
   {
@@ -65,6 +65,17 @@ int main(int argc, char **argv)
   ros::Publisher rightWheelEffortPublisher =
       handle.advertise<std_msgs::Float64>("/right_wheel_effort_controller/command", 1);
   ros::Publisher wheelSpeedPublisher = handle.advertise<igvc_msgs::velocity_pair>("/encoders", 1);
+
+  ros::Publisher rightWheelShockPublisher =
+    handle.advertise<std_msgs::Float64>("right_wheel_shock_controller/command", 1, true);
+  ros::Publisher leftWheelShockPublisher =
+    handle.advertise<std_msgs::Float64>("left_wheel_shock_controller/command", 1, true);
+
+  std_msgs::Float64 shock_set_point;
+  shock_set_point.data = 0.0;
+  rightWheelShockPublisher.publish(shock_set_point);
+  leftWheelShockPublisher.publish(shock_set_point);
+
 
   // Publish that the robot is enabled
   ros::Publisher enabled_pub = handle.advertise<std_msgs::Bool>("/robot_enabled", 1, /* latch = */ true);
