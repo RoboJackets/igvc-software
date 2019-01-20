@@ -30,7 +30,6 @@ void ICP::pc_callback(const pcl::PointCloud<pcl::PointXYZ>::Ptr &pc) {
     Eigen::Affine3d affine;
     affine.matrix() = icp.getFinalTransformation().cast<double>();
     tf::transformEigenToTF(affine, trans);
-    trans.
 
     ros::Time messageTimeStamp;
     pcl_conversions::fromPCL(pc->header.stamp, messageTimeStamp);

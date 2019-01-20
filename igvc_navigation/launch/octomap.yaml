@@ -13,7 +13,7 @@ ground_filter:
   plane_distance: 0.04
 map:
   # In units of meters, not cells
-  # width = width / resolution
+  # width of grid = width / resolution
   length: 200
   width: 200
   encoding: "CV_8UC1"

@@ -237,7 +237,6 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cl
     if (inliers->indices.empty()) {
       ROS_INFO("PCL segmentation did not find a plane.");
     } else {
-      if (std::abs(coefficients->values.at(3)) < m_ransac_distance_threshold) {
         ROS_DEBUG("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
                  cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
                  coefficients->values.at(2), coefficients->values.at(3));
@@ -255,11 +254,6 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cl
           *cloud_filtered = out;
         }
         ground_plane_found = true;
-      } else {
-        ROS_INFO("Horizontal plane (not ground) found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
-                 cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
-                 coefficients->values.at(2), coefficients->values.at(3));
-      }
     }
 //    ROS_INFO_STREAM("Cloud_filtered Points: " << cloud_filtered->size());
 //    ROS_INFO_STREAM("ground points: " << ground.size());

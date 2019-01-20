@@ -37,19 +37,32 @@ public:
 
   explicit Octomapper(ros::NodeHandle pNh);
   void create_octree(pc_map_pair& pair) const;
-  void insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair,
-                   const PCL_point_cloud& raw_pc) const;
-  void get_updated_map(struct pc_map_pair& pc_map_pair) const;
+  void insert_scan(pc_map_pair& pc_map_pair, octomap::KeySet& free_cells, octomap::KeySet& occupied_cells) const;
+  void get_updated_map(pc_map_pair& pc_map_pair) const;
   void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground) const;
+  void separate_occupied(octomap::KeySet& free_cells, octomap::KeySet& occupied_cells, const tf::Point& sensor_pos_tf,
+                         const pc_map_pair& pair, const pcl::PointCloud<pcl::PointXYZ>& ground,
+                         const pcl::PointCloud<pcl::PointXYZ>& nonground) const;
+  float sensor_model(const pc_map_pair& pair, const octomap::KeySet& free_cells,
+                     const octomap::KeySet& occupied_cells) const;
 
 private:
   void filter_range(const pcl::PointCloud<pcl::PointXYZ>& raw_pc, pcl::PointCloud<pcl::PointXYZ>& within_range) const;
   void create_map(pc_map_pair& pair) const;
+  void compute_voxels(const octomap::OcTree& tree, const octomap::Pointcloud& scan, const octomap::Pointcloud& ground,
+                      const octomap::point3d& origin, octomap::KeySet& free_cells,
+                      octomap::KeySet& occupied_cells) const;
+  float to_logodds(float p)
+  {
+    return log(p / (1 - p));
+  }
 
   ros::NodeHandle pNh;
   double m_octree_resolution;
   double m_prob_hit;
   double m_prob_miss;
+  double m_prob_hit_logodds;
+  double m_prob_miss_logodds;
   double m_thresh_min;
   double m_thresh_max;
   double m_max_range;
