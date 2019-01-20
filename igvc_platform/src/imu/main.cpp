@@ -1,4 +1,5 @@
-//TODO: Write general documentation for node
+// This node reads and publishes IMU data from the FSM-9 IMU.
+
 #include <freespace/freespace.h>
 #include <freespace/freespace_util.h>
 #include <geometry_msgs/Vector3.h>
@@ -10,25 +11,12 @@
 #include <Eigen/Dense>
 #include <vector>
 
-// TODO: Move code into separate functions.
-int main(int argc, char** argv)
+/** A function for initializing a single FSM-9 IMU. This function sets up the IMU
+  * such that it returns expected measurements (ex. linear acceleration, angular velocity, etc.).
+  * \param ids an array for storing the identified IMU device ID.
+  */ 
+int initializeIMU(FreespaceDeviceId* ids)
 {
-  ros::init(argc, argv, "imu");
-
-  ros::NodeHandle nh;
-  ros::NodeHandle pNh("~");
-
-  // TODO: Remove yaw offset.
-  double yaw_offset;
-  pNh.param("yaw_offset", yaw_offset, 0.0);
-
-  ros::Publisher imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1000);
-
-  // TODO: Remove unused publishers (Check to see what EKF needs. Gravity cancelled out?)
-  ros::Publisher raw_mag_pub = nh.advertise<geometry_msgs::Vector3>("/mag_raw", 1000);
-  ros::Publisher raw_yaw_pub = nh.advertise<std_msgs::Float64>("/raw_yaw", 1);
-  ros::Publisher raw_imu_pub = nh.advertise<sensor_msgs::Imu>("/imu_raw_accel", 1000);
-
   int ret = freespace_init();
   if (ret != FREESPACE_SUCCESS)
   {
@@ -36,10 +24,9 @@ int main(int argc, char** argv)
     return 0;
   }
 
-  // TODO: What is 5?
-  FreespaceDeviceId ids[5];
+  // Initialize freespace device (we expect only 1).
   int num_found = 0;
-  ret = freespace_getDeviceList(ids, 5, &num_found);
+  ret = freespace_getDeviceList(ids, 1, &num_found);
   if (num_found <= 0)
   {
     ROS_ERROR_STREAM("failed to connect to IMU found no devices");
@@ -51,9 +38,8 @@ int main(int argc, char** argv)
   if (ret != FREESPACE_SUCCESS)
   {
     ROS_ERROR_STREAM("failure to connect to device " << ret);
+    return 0;
   }
-
-  int seq = 0;  // sequence of published messages - should be monotonically increasing
 
   freespace_message request;
   request.messageType = FREESPACE_MESSAGE_DATAMODECONTROLV2REQUEST;
@@ -76,27 +62,52 @@ int main(int argc, char** argv)
     ROS_ERROR_STREAM("failed to send message");
   }
 
+  return ret;
+}
+
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "imu");
+
+  ros::NodeHandle nh;
+  ros::NodeHandle pNh("~");
+
+  // Get matrix to correct IMU orientation.
+  std::vector<double> imu_orientation_correction;
+  nh.getParam("imu_orientation_correction", imu_orientation_correction);
+
+  // Get threshold value for triggering a warning when the deviation between the filtered
+  // heading and magnetometer heading becomes too large.
+  double heading_dev_thresh_deg;
+  nh.getParam("heading_dev_thresh_deg", heading_dev_thresh_deg);
+
+  // There should be 9 elements (3x3 matrix).
+  if (imu_orientation_correction.size() != 9) {
+    ROS_ERROR_STREAM("IMU orientation correction matrix does not have 9 elements (3x3).");
+    return 0;
+  }
+
+  // Populate an Eigen matrix.
+  Eigen::Matrix3d correction_mat(imu_orientation_correction.data());
+
+  // Publish imu data without gravity for EKF localization.
+  ros::Publisher imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1000);
+
+  // Publish imu data with gravity for factor graph implementation.
+  ros::Publisher imu_raw_pub = nh.advertise<sensor_msgs::Imu>("/imu_raw", 1000);
+
+  // sequence of published messages - should be monotonically increasing.
+  int seq = 0;
+
+  // Initialize IMU.
+  FreespaceDeviceId ids[1];
+  int ret = initializeIMU(ids);
+  if (ret != FREESPACE_SUCCESS) {
+    return 0;
+  }
+
+  // Variable to store data that is read from the IMU.
   freespace_message response;
-  ret = freespace_readMessage(ids[0], &response, 1000);
-  if (ret != FREESPACE_SUCCESS)
-  {
-    if (ret == FREESPACE_ERROR_TIMEOUT)
-    {
-      ROS_ERROR_STREAM("failed to read IMU TIMEOUT");
-    }
-    else
-    {
-      ROS_ERROR_STREAM("failed to read IMU" << ret);
-    }
-  }
-  if (response.messageType == FREESPACE_MESSAGE_DATAMODECONTROLV2RESPONSE)
-  {
-    ROS_INFO_STREAM("got response" << response.dataModeControlV2Response.modeActual);
-  }
-  else
-  {
-    ROS_ERROR_STREAM("got invalid type " << response.messageType);
-  }
 
   while (ros::ok())
   {
@@ -138,11 +149,11 @@ int main(int argc, char** argv)
     }
 
     Eigen::Vector3d accel_raw_vec(accel_raw_msg.x, accel_raw_msg.y, accel_raw_msg.z);
+    accel_raw_vec = correction_mat * accel_raw_vec;
 
-    // TODO: Explain this.
-    Eigen::Vector3d accel_vec(accel_msg.x, -accel_msg.y, -accel_msg.z);
+    Eigen::Vector3d accel_vec(accel_msg.x, accel_msg.y, accel_msg.z);
+    accel_vec = correction_mat * accel_vec;
 
-    // Get filtered orientation measurement (TODO: Is this ENU?).
     MultiAxisSensor orientation_msg;
     ret = freespace_util_getAngPos(&response.motionEngineOutput, &orientation_msg);
     if (ret != FREESPACE_SUCCESS)
@@ -151,7 +162,6 @@ int main(int argc, char** argv)
     }
     tf::Quaternion quaternion_raw(orientation_msg.x, orientation_msg.y, orientation_msg.z, orientation_msg.w);
     double roll, pitch, yaw;
-    // TODO: Make sure these are in the same coordinate frame as the robot.
     tf::Matrix3x3(quaternion_raw).getRPY(roll, pitch, yaw);
     ROS_INFO("Filtered heading: %f", yaw);
 
@@ -163,26 +173,23 @@ int main(int argc, char** argv)
       ROS_ERROR_STREAM("failed to read angular velocity " << ret);
     }
 
-    // TODO: Explain transformation.
-    Eigen::Vector3d angular_vel_raw_vec(angular_vel_msg.x, angular_vel_msg.y, angular_vel_msg.z);
-    Eigen::Vector3d angular_vel_vec(angular_vel_msg.x, -angular_vel_msg.y, -angular_vel_msg.z);
+    Eigen::Vector3d angular_vel_vec(angular_vel_msg.x, angular_vel_msg.y, angular_vel_msg.z);
+    angular_vel_vec = correction_mat * angular_vel_vec;
 
     // Get magnetometer measurement and convert to heading.
     MultiAxisSensor magnetometer_msg;
     ret = freespace_util_getMagnetometer(&response.motionEngineOutput, &magnetometer_msg);
     if (ret != FREESPACE_SUCCESS)
     {
-      // TODO: Find unit in documentation.
       ROS_ERROR_STREAM("failed to read raw magnetometer values" << ret);
     }
 
     // Calculate heading with magnetometer reading.
-    double heading = atan2(magnetometer_msg.y, magnetometer_msg.x);
-    ROS_INFO("Magnetometer heading: %f", heading);
+    double yaw_mag = atan2(magnetometer_msg.y, magnetometer_msg.x);
+    ROS_INFO("Magnetometer heading: %f", yaw_mag);
 
-    // TODO: Change variable name.
-    if (fabs(yaw - heading) > 0.0872665 /*==5 degrees*/) {
-      ROS_WARN("Magnetometer heading and filtered yaw measurement disagree by > 5 degrees.");
+    if (fabs(yaw - yaw_mag) > heading_dev_thresh_deg * M_PI / 180.0) {
+      ROS_WARN("Magnetometer heading and filtered yaw measurement disagree by > %f degrees.", heading_dev_thresh_deg);
     }
 
     // Publish sensor messages with corrected transformation.
@@ -215,7 +222,7 @@ int main(int argc, char** argv)
     // This assumes flat ground and uses magnetometer for absolute heading.
     // TODO: This assumption may not hold when we switch to 3D lidar, and stop using flat ground assumption
     tf::Quaternion quaternion_mag;
-    quaternion_mag.setRPY(0,0,heading);
+    quaternion_mag.setRPY(0,0,yaw_mag);
     orientation.x = quaternion_mag.x();
     orientation.y = quaternion_mag.y();
     orientation.z = quaternion_mag.z();
@@ -242,9 +249,9 @@ int main(int argc, char** argv)
                                                1e-6, 0.005, 1e-6,
                                                1e-6, 1e-6, 0.005 };
 
-    msg_raw.angular_velocity.x = angular_vel_raw_vec[0];
-    msg_raw.angular_velocity.y = angular_vel_raw_vec[1];
-    msg_raw.angular_velocity.z = angular_vel_raw_vec[2];
+    msg_raw.angular_velocity.x = angular_vel_vec[0];
+    msg_raw.angular_velocity.y = angular_vel_vec[1];
+    msg_raw.angular_velocity.z = angular_vel_vec[2];
     msg_raw.angular_velocity_covariance = { 0.02, 1e-6, 1e-6,
                                             1e-6, 0.02, 1e-6,
                                             1e-6, 1e-6, 0.02 };
@@ -254,7 +261,7 @@ int main(int argc, char** argv)
                                        1e-6, 0.0025, 1e-6,
                                        1e-6, 1e-6, 0.0025 };
 
-    raw_imu_pub.publish(msg_raw);
+    imu_raw_pub.publish(msg_raw);
   }
   return 0;
 }
