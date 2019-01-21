@@ -31,7 +31,7 @@ private:
   boost::shared_ptr<tf::Transform> get_lidar_transform();
   bool m_debug;
   double m_transform_max_wait_time, m_update_time_thresh, m_start_x, m_start_y, m_start_z;
-  boost::shared_ptr<tf::Pose> m_last_pose;
+  std::shared_ptr<tf::Pose> m_last_pose;
   boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr> m_pc_buf;
   boost::circular_buffer<nav_msgs::OdometryConstPtr> m_pose_buf;
   boost::shared_ptr<tf::StampedTransform> m_lidar_transform;
@@ -120,7 +120,7 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx)
   // Get pose difference
   if (m_last_pose == nullptr)
   {
-    m_last_pose = boost::make_shared<tf::Stamped<tf::Pose>>(m_start_x, m_start_y, m_start_z);
+    m_last_pose = std::make_shared<tf::Stamped<tf::Pose>>(tf::Pose(tf::createIdentityQuaternion(), tf::Vector3(m_start_x, m_start_y, m_start_z)), ros::Time(), m_odom_frame);
   }
   tf::Stamped<tf::Pose> cur_pose;
   tf::poseMsgToTF(m_pose_buf[pose_idx]->pose.pose, cur_pose);
@@ -170,6 +170,9 @@ int main(int argc, char** argv)
   bool debug;
   igvc::getParam(pNh, "transform_max_wait_time", transform_max_wait_time);
   igvc::getParam(pNh, "update_time_threshold", update_time_threshold);
+  igvc::getParam(pNh, "start_x", start_x);
+  igvc::getParam(pNh, "start_y", start_y);
+  igvc::getParam(pNh, "start_z", start_z);
   igvc::param(pNh, "debug", debug, false);
 
   pf_node = std::unique_ptr<ParticleFilterNode>(

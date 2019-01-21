@@ -106,7 +106,7 @@ public:
    * @param state
    * @return
    */
-  RobotState operator+=(Eigen::Matrix<double, 6, 1> state)
+  void operator+=(Eigen::Matrix<double, 6, 1> state)
   {
     transform.setOrigin(tf::Vector3(x() + state(0), y() + state(1), z() + state(2)));
     double r, p, y;
@@ -133,36 +133,36 @@ public:
   }
 };
 
-double RobotState::x() const
+inline double RobotState::x() const
 {
   return transform.getOrigin().x();
 }
 
-double RobotState::y() const
+inline double RobotState::y() const
 {
   return transform.getOrigin().y();
 }
 
-double RobotState::z() const
+inline double RobotState::z() const
 {
   return transform.getOrigin().z();
 }
 
-double RobotState::roll() const
+inline double RobotState::roll() const
 {
   double r, p, y;
   transform.getBasis().getRPY(r, p, y);
   return r;
 }
 
-double RobotState::pitch() const
+inline double RobotState::pitch() const
 {
   double r, p, y;
   transform.getBasis().getRPY(r, p, y);
   return p;
 }
 
-double RobotState::yaw() const
+inline double RobotState::yaw() const
 {
   double r, p, y;
   transform.getBasis().getRPY(r, p, y);

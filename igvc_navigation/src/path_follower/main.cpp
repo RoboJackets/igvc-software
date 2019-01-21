@@ -104,8 +104,8 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     geometry_msgs::PointStamped target_point;
     target_point.header.frame_id = "/odom";
     target_point.header.stamp = time;
-    target_point.point.x = target.x;
-    target_point.point.y = target.y;
+    target_point.point.x = target.x();
+    target_point.point.y = target.y();
     target_pub.publish(target_point);
 
     if (debug)
