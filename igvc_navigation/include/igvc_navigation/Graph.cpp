@@ -42,7 +42,7 @@ void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
     this->K_M += igvc::get_distance(oldStart, newStart);
     this->Start.setIndex(std::make_tuple(static_cast<int>(msg->x), static_cast<int>(msg->y)));
 
-    this->updatedCells.clear();
+    this->updatedCells.clear(); // clear the vector of cells that need updating
 
     // get the most recently observed map (occupancy grid)
     cv_bridge::CvImagePtr currMap = cv_bridge::toCvCopy(msg->image, "mono8");
@@ -288,25 +288,17 @@ std::vector<std::tuple<Node, Node>> Graph::connbrs(Node s)
     std::vector<Node> neighbors = nbrs(s, true);
     std::vector<std::tuple<Node,Node>> connbrs;
 
-    Node sp;
-    Node spp;
-
     // first 7 consecutive neighbor pairs
     for (size_t i = 0; i < neighbors.size() - 1; i++)
     {
-        sp = neighbors[i]; // most clockwise neighbor
-        spp = neighbors[i+1];;
-
         // if both nodes valid, make a tuple and put it at the front of the list
-        if (isValidNode(sp) && isValidNode(spp))
-            connbrs.push_back(std::make_tuple(sp,spp));
+        if (isValidNode(neighbors[i]) && isValidNode(neighbors[i+1]))
+            connbrs.push_back(std::make_tuple(neighbors[i],neighbors[i+1]));
     }
 
     // last consecutive neighbor pair [s8->s1]
-    sp = neighbors[neighbors.size()-1];
-    spp = neighbors[0];
-    if (isValidNode(sp) && isValidNode(spp))
-        connbrs.push_back(std::make_tuple(sp,spp));
+    if (isValidNode(neighbors[neighbors.size()-1]) && isValidNode(neighbors[0]))
+        connbrs.push_back(std::make_tuple(neighbors[neighbors.size()-1],neighbors[0]));
 
     return connbrs;
 }
@@ -428,8 +420,10 @@ float Graph::getTraversalCost(Node s, Node s_prime)
 float Graph::getContinuousTraversalCost(std::tuple<float,float> p, std::tuple<float,float> p_prime)
 {
     // get the traversal cost for the cell that contains p and p'
-    Node s(std::make_tuple(lroundf(std::get<0>(p)),lroundf(std::get<1>(p))));
-    Node s_prime(std::make_tuple(lroundf(std::get<0>(p_prime)),lroundf(std::get<1>(p_prime))));
+    Node s(std::make_tuple(static_cast<int>(roundf(std::get<0>(p))),
+                           static_cast<int>(roundf(std::get<1>(p)))));
+    Node s_prime(std::make_tuple(static_cast<int>(roundf(std::get<0>(p_prime))),
+                                 static_cast<int>(roundf(std::get<1>(p_prime)))));
 
     return isDiagonal(s,s_prime) ? getC(s, s_prime) : getB(s, s_prime);
 }
@@ -444,9 +438,7 @@ float Graph::getMinTraversalCost(Node s)
 
 float Graph::euclidian_heuristic(Node s)
 {
-    std::tuple<float,float> start_f = Start.getIndex();
-    std::tuple<float,float> s_f = s.getIndex();
-    return igvc::get_distance(start_f, s_f);
+    return this->euclidian_heuristic(s.getIndex());
 }
 
 float Graph::euclidian_heuristic(std::tuple<int,int> ind)
