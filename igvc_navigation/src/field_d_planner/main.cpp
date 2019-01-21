@@ -198,8 +198,8 @@ int main(int argc, char** argv)
       }
 
       numNodesUpdated = planner.updateNodesAroundUpdatedCells();
-
       if (numNodesUpdated > 0) ROS_INFO_STREAM(numNodesUpdated << " nodes updated");
+
       if ((numNodesUpdated > 0) || initialize_search)
       {
           ros::Time begin = ros::Time::now();

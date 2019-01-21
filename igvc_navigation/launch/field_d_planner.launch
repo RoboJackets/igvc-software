@@ -22,6 +22,7 @@
     </node>
 
     <!-- Follower -->
+    <!-- Follower -->
     <node name="path_follower" pkg="igvc_navigation" type="path_follower" output="screen" >
         <!-- Maxmimum velocity allowed before stopping motors -->
         <param name="maximum_vel" type="double" value="2.0"/>
@@ -38,5 +39,6 @@
         <param name="k2" type="double" value="5"/>
         <param name="debug" type="bool" value="false"/>
     </node>
+
 
 </launch>

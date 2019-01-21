@@ -2,12 +2,10 @@
 
 Graph::Graph()
 {
-
 }
 
 Graph::~Graph()
 {
-
 }
 
 void Graph::setCSpace(float CSpace)
@@ -40,7 +38,7 @@ void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
     std::tuple<float,float> oldStart = std::make_tuple(static_cast<float>(std::get<0>(this->Start.getIndex())), \
                                                        static_cast<float>(std::get<1>(this->Start.getIndex())));
 
-    // update the heuristic adjustment value to account for the robot's new pos
+    // update the key modifier value to account for the robot's new pos
     this->K_M += igvc::get_distance(oldStart, newStart);
     this->Start.setIndex(std::make_tuple(static_cast<int>(msg->x), static_cast<int>(msg->y)));
 
@@ -71,10 +69,7 @@ void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
         {
             uchar curr_val = *it_new;
             uchar map_val = *it_map;
-
-            //TODO get rid of this magic number. The point is that if current
-            // map differs significantly from the previous map, then the edge
-            // costs must be re-adjusted
+            // store index of updated cell if occupancy grid values differ
             if (curr_val != map_val)
             {
                 int pos = it_map - start_it;
@@ -321,7 +316,7 @@ float Graph::getC(Node s, Node s_prime)
     // index of cell between s and s_prime. s and s_prime assumed to be
     // diagonal neighbors
     std::tuple<int,int> cellInd;
-    uchar cellVal;
+    float cellVal;
 
     int x1, y1; // indices of s
     std::tie(x1,y1) = s.getIndex();
@@ -352,7 +347,7 @@ float Graph::getC(Node s, Node s_prime)
 
     // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
     cellVal = getValWithCSpace(cellInd);
-    return (cellVal > 178) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST;    // #TODO get rid of magic number
+    return (cellVal > 178) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST; // #TODO get rid of magic number
 }
 
 float Graph::getB(Node s, Node s_prime)
@@ -438,7 +433,6 @@ float Graph::getContinuousTraversalCost(std::tuple<float,float> p, std::tuple<fl
 
     return isDiagonal(s,s_prime) ? getC(s, s_prime) : getB(s, s_prime);
 }
-
 
 float Graph::getMinTraversalCost(Node s)
 {

@@ -97,17 +97,17 @@ int FieldDPlanner::computeShortestPath()
                 {
                     float minRHS = std::numeric_limits<float>::infinity();
                     float tempRHS;
-                    Node new_bptr;
+                    std::tuple<int,int> new_bptr;
                     for (Node spp : graph.nbrs(sp))
                     {
                         std::tie(tempRHS, std::ignore, std::ignore) = this->computeCostContinuous(sp, spp, graph.ccknbr(sp, spp));
                         if (tempRHS < minRHS)
                         {
                             minRHS = tempRHS;
-                            new_bptr = spp;
+                            new_bptr = spp.getIndex();
                         }
                     }
-                    sp.setBptr(new_bptr.getIndex());
+                    sp.setBptr(new_bptr);
                     insert_or_assign(sp, getG(sp), minRHS);
                     updateNode(sp);
                 }
@@ -126,7 +126,7 @@ int FieldDPlanner::updateNodesAroundUpdatedCells()
         for (Node s : graph.getNodesAroundCellWithCSpace(cellUpdate))
         {
             if (umap.find(s) == umap.end()) // Update node if it's already been expanded
-                umap.insert(std::make_pair(s, std::make_tuple(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity())));
+                continue;
 
             if (s == graph.Goal)
                 continue;
@@ -138,6 +138,7 @@ int FieldDPlanner::updateNodesAroundUpdatedCells()
                 std::tie(tempRHS, std::ignore, std::ignore) = this->computeCostContinuous(s, sp, graph.ccknbr(s, sp));
                 minRHS = std::min(tempRHS, minRHS);
             }
+            s.setBptr(findBptr(s));
             insert_or_assign(s, getG(s), minRHS);
 
             updateNode(s);
@@ -218,17 +219,17 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(std::tuple<float,f
                 y = temp_y;
                 if (graph.isDiagonal(s, s_a))
                     std::tie(p1,p2) = std::make_tuple(static_cast<std::tuple<float,float>>(s_b.getIndex()),
-                                                        static_cast<std::tuple<float,float>>(s_a.getIndex()));
+                                                      static_cast<std::tuple<float,float>>(s_a.getIndex()));
                 else
                     std::tie(p1,p2) = std::make_tuple(static_cast<std::tuple<float,float>>(s_a.getIndex()),
-                                                        static_cast<std::tuple<float,float>>(s_b.getIndex()));
+                                                      static_cast<std::tuple<float,float>>(s_b.getIndex()));
 
             }
         }
     }
     else
     {
-        std::tuple<float,float> p_a,p_b;
+        std::tuple<float,float> p_a,p_b; // temp positions
         for (std::pair<std::tuple<float,float>,std::tuple<float,float>> connbr : getEdgeConnbrs(p))
         {
             std::tie(p_a, p_b) = connbr;
@@ -314,7 +315,7 @@ std::tuple<float,float,float> FieldDPlanner::computeCostContinuous(std::tuple<fl
     else // p_a is nearest neighbor
         std::tie(p1,p2) = std::make_tuple(p_a,p_b);
 
-    float g_p1 = getEdgePositionCost(p1); // path cost of edge neighbor
+    float g_p1 = getEdgePositionCost(p1); // path cost of nearest neighbor
     float g_p2 = getEdgePositionCost(p2); // path cost of diagonal neighbor
 
     float d_p1 = igvc::get_distance(p,p1); // distance to nearest neighbor
@@ -404,6 +405,11 @@ float FieldDPlanner::getEdgePositionCost(std::tuple<float,float> p)
     float d = igvc::get_distance(p_a,p_b); // distance between neighbors
     float d_a = igvc::get_distance(p,p_a); // distance to first neighbor
     float d_b = igvc::get_distance(p,p_b); // distance to second neighbor
+
+    // normalize distances to sum to 1
+    d_a = d_a / (d);
+    d_b = d_b / (d);
+    d = 1.0f;
 
     float g_a = getG(Node(static_cast<std::tuple<int,int>>(p_a))); // path cost of p_a
     float g_b = getG(Node(static_cast<std::tuple<int,int>>(p_b))); // path cost of p_b
