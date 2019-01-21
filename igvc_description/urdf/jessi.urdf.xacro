@@ -42,8 +42,9 @@
   <xacro:property name="camera_height" value="1.354330"/>
 
   <!-- lidar params -->
-  <xacro:property name="lidar_pitch" value="0.0"/>
-  <xacro:property name="lidar_forward" value="0.680364"/>
+  <xacro:property name="lidar_pitch" value="0.174533"/>
+  <!-- actual 0.680364 -->
+  <xacro:property name="lidar_forward" value="0.80364"/>
   <xacro:property name="lidar_height" value="0.237121"/>
 
   <!-- gps -->
