@@ -50,8 +50,8 @@ std::unique_ptr<Octomapper> octomapper;
 pc_map_pair pc_map_pair;
 
 std::tuple<double, double> rotate(double x, double y) {
-  double newX = x * cos(state.yaw) - y * sin(state.yaw);
-  double newY = x * sin(state.yaw) + y * cos(state.yaw);
+  double newX = x * cos(state.yaw()) - y * sin(state.yaw());
+  double newY = x * sin(state.yaw()) + y * cos(state.yaw());
   return (std::make_tuple(newX, newY));
 }
 
@@ -88,9 +88,8 @@ void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t p
   message.length = length_y;
   message.width = width_x;
   message.resolution = resolution;
-  message.orientation = state.yaw;
-  message.x = std::round(state.x / resolution) + start_x;
-  message.y = std::round(state.y / resolution) + start_y;
+  message.orientation = state.yaw(); message.x = std::round(state.x() / resolution) + start_x;
+  message.y = std::round(state.y() / resolution) + start_y;
   message.x_initial = start_x;
   message.y_initial = start_y;
 }
@@ -108,8 +107,8 @@ void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed)
     double x_point_raw, y_point_raw;
     std::tie(x_point_raw, y_point_raw) = rotate(point_iter->x, point_iter->y);
 
-    int point_x = static_cast<int>(std::round(x_point_raw / resolution + state.x / resolution + start_x));
-    int point_y = static_cast<int>(std::round(y_point_raw / resolution + state.y / resolution + start_y));
+    int point_x = static_cast<int>(std::round(x_point_raw / resolution + state.x() / resolution + start_x));
+    int point_y = static_cast<int>(std::round(y_point_raw / resolution + state.y() / resolution + start_y));
     if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x) {
       // Check for overflow
       if (published_map->at<uchar>(point_x, point_y) <= UCHAR_MAX - (uchar) increment_step) {
@@ -271,18 +270,17 @@ void publish(const cv::Mat &map, uint64_t stamp) {
 
 void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
   // Pass through filter to only keep ones closest to us
-    pcl::PointCloud<pcl::PointXYZ>::Ptr small(new pcl::PointCloud<pcl::PointXYZ>);
-    float radius = 30;
-    float distanceFromSphereCenterPoint;
-    bool pointIsWithinSphere;
-    bool addPointToFilteredCloud;
-    for (int point_i = 0; point_i < pc->size(); ++point_i) {
-      distanceFromSphereCenterPoint = pc->at(point_i).x * pc->at(point_i).x + pc->at(point_i).y * pc->at(point_i).y + pc->at(point_i).z * pc->at(point_i).z;
-      pointIsWithinSphere = distanceFromSphereCenterPoint <= radius;
-      if (pointIsWithinSphere) {
-        small->push_back(pc->at(point_i));
-      }
+  pcl::PointCloud<pcl::PointXYZ>::Ptr small(new pcl::PointCloud<pcl::PointXYZ>);
+  float radius = 30;
+  float distanceFromSphereCenterPoint;
+  bool pointIsWithinSphere;
+  for (int point_i = 0; point_i < pc->size(); ++point_i) {
+    distanceFromSphereCenterPoint = pc->at(point_i).x * pc->at(point_i).x + pc->at(point_i).y * pc->at(point_i).y + pc->at(point_i).z * pc->at(point_i).z;
+    pointIsWithinSphere = distanceFromSphereCenterPoint <= radius;
+    if (pointIsWithinSphere) {
+      small->push_back(pc->at(point_i));
     }
+  }
 //  ROS_INFO("Got Pointcloud");
   // make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
@@ -300,7 +298,7 @@ void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
 
 //  Eigen::Affine3f transform_to_odom = Eigen::Affine3f::Identity();
 //  // TODO: Is this backward?
-//  transform_to_odom.rotate(Eigen::AngleAxisf(state.yaw, Eigen::Vector3f::UnitZ()));
+//  transform_to_odom.rotate(Eigen::AngleAxisf(state.yaw(), Eigen::Vector3f::UnitZ()));
 //  Eigen::Affine3d transform_to_odom;
 //  tf::transformTFToEigen(state.transform.inverse(), transform_to_odom);
 

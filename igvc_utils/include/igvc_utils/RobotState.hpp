@@ -10,13 +10,13 @@
 class RobotState
 {
 public:
-  double x{ 0 };
-  double y{ 0 };
-  double z{ 0 };
-  double roll{ 0 };
-  double pitch{ 0 };
-  double yaw{ 0 };
-  tf::StampedTransform transform;
+  // double x{ 0 };
+  // double y{ 0 };
+  // double z{ 0 };
+  // double roll{ 0 };
+  // double pitch{ 0 };
+  // double yaw{ 0 };
+  tf::Transform transform;
   ros::Time stamp{ 0 };
 
   friend std::ostream &operator<<(std::ostream &out, const RobotState &state);
@@ -28,23 +28,37 @@ public:
     setState(msg);
   }
 
-  explicit RobotState(double x, double y, double yaw) : x(x), y(y), yaw(yaw) {}
-
-  explicit RobotState(const tf::StampedTransform &transform, ros::Time stamp) : stamp(stamp)
+  explicit RobotState(double x, double y, double yaw)
   {
-    setState(transform);
+    transform.setOrigin(tf::Vector3(x, y, 0));
+    tf::Matrix3x3 rot;
+    rot.setRPY(0, 0, yaw);
+    transform.setBasis(rot);
   }
+
+  explicit RobotState(const tf::StampedTransform &stamped_transform, ros::Time stamp)
+    : transform(stamped_transform), stamp(stamp)
+  {
+  }
+
+  explicit RobotState(const tf::Transform& transform) : transform(transform) { }
+
+  double x() const;
+  double y() const;
+  double z() const;
+  double roll() const;
+  double pitch() const;
+  double yaw() const;
 
   // set state using an odometry msg
   void setState(const nav_msgs::Odometry::ConstPtr &msg)
   {
-    x = msg->pose.pose.position.x;
-    y = msg->pose.pose.position.y;
-    z = msg->pose.pose.position.z;
+    double x = msg->pose.pose.position.x;
+    double y = msg->pose.pose.position.y;
+    double z = msg->pose.pose.position.z;
+//    tf::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
     tf::Quaternion quaternion;
     tf::quaternionMsgToTF(msg->pose.pose.orientation, quaternion);
-    tf::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
-
     transform.setRotation(quaternion);
     transform.setOrigin(tf::Vector3(x, y, z));
   }
@@ -52,53 +66,113 @@ public:
   // set state via a transform
   void setState(const tf::StampedTransform &transform)
   {
-    x = transform.getOrigin().x();
-    y = transform.getOrigin().y();
-    z = transform.getOrigin().z();
-    tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
     this->transform = transform;
   }
 
   // set state via a 3D Eigen vector
   void setState(const Eigen::Vector3d pose)
   {
-    x = pose[0];
-    y = pose[1];
-    yaw = pose[2];
+    transform.setOrigin(tf::Vector3(pose[0], pose[1], 0));
+    tf::Matrix3x3 rot = transform.getBasis();
+    double r, p, y;
+    rot.getRPY(r, p, y);
+    rot.setEulerYPR(r, p, pose[2]);
+    transform.setBasis(rot);
   }
 
-  Eigen::Vector3d getVector3d()
+  Eigen::Vector3d getVector3d() const
   {
-    return { x, y, yaw };
+    return { x(), y(), yaw() };
   }
 
   bool operator==(const RobotState &other)
   {
-    return std::tie(x, y, roll, pitch, yaw) == std::tie(other.x, other.y, other.roll, other.pitch, other.yaw);
+    return transform == other.transform;
+  }
+
+  void operator*=(const tf::Transform other)
+  {
+    transform *= other;
+  }
+
+  RobotState operator*(const RobotState& other) const
+  {
+    RobotState combined(transform * other.transform);
+    return combined;
+  }
+
+  /**
+   * Adds the state vector to the current transform. Use case is adding noise.
+   * @param state
+   * @return
+   */
+  RobotState operator+=(Eigen::Matrix<double, 6, 1> state)
+  {
+    transform.setOrigin(tf::Vector3(x() + state(0), y() + state(1), z() + state(2)));
+    double r, p, y;
+    transform.getBasis().getRPY(r, p, y);
+    transform.getBasis().setRPY(r + state(3), p + state(4), y + state(5));
   }
 
   /**
   returns the euclidian distance from the current robot position to a
   specified position [x2,y2]
   */
-  double distTo(double x2, double y2)
+  double distTo(double x2, double y2) const
   {
-    return igvc::get_distance(this->x, this->y, x2, y2);
+    return igvc::get_distance(this->x(), this->y(), x2, y2);
   }
 
   /**
   returns the euclidian distance from the current robot position to another
   RobotState
   */
-  double distTo(RobotState other)
+  double distTo(RobotState other) const
   {
-    return igvc::get_distance(this->x, this->y, other.x, other.y);
+    return igvc::get_distance(this->x(), this->y(), other.x(), other.y());
   }
 };
 
+double RobotState::x() const
+{
+  return transform.getOrigin().x();
+}
+
+double RobotState::y() const
+{
+  return transform.getOrigin().y();
+}
+
+double RobotState::z() const
+{
+  return transform.getOrigin().z();
+}
+
+double RobotState::roll() const
+{
+  double r, p, y;
+  transform.getBasis().getRPY(r, p, y);
+  return r;
+}
+
+double RobotState::pitch() const
+{
+  double r, p, y;
+  transform.getBasis().getRPY(r, p, y);
+  return p;
+}
+
+double RobotState::yaw() const
+{
+  double r, p, y;
+  transform.getBasis().getRPY(r, p, y);
+  return y;
+}
+
+
 inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
 {
-  out << "(" << state.x << ", " << state.y << ", " << state.yaw << ")";
+  out << "(" << state.x() << ", " << state.y() << ", " << state.yaw() << ")";
   return out;
 }
 

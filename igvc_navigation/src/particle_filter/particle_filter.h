@@ -1,10 +1,10 @@
 #ifndef PROJECT_PARTICLE_FILTER_H
 #define PROJECT_PARTICLE_FILTER_H
 
-#include <igvc_utils/RobotState.hpp>
-#include "octomapper.h"
 #include <std_msgs/Float64.h>
+#include <igvc_utils/RobotState.hpp>
 #include <random>
+#include "octomapper.h"
 
 struct Particle
 {
@@ -16,12 +16,13 @@ struct Particle
 class Particle_filter
 {
 public:
-  explicit Particle_filter(const ros::NodeHandle &pNh) : pNh(pNh), m_octomapper(pNh)
+  explicit Particle_filter(const ros::NodeHandle& pNh) : pNh(pNh), m_octomapper(pNh)
   {
     igvc::getParam(pNh, "particle_filter/num_particles", m_num_particles);
     m_particles.reserve(static_cast<unsigned long>(m_num_particles));
   }
-  void update(const tf::Transform& diff, const boost::array<double, 36>& covariance, const pcl::PointCloud<pcl::PointXYZ>& pc);
+  void update(const tf::Transform& diff, const boost::array<double, 36>& covariance,
+              const pcl::PointCloud<pcl::PointXYZ>& pc, const tf::Transform& lidar_to_base);
 
 private:
   int m_num_particles{};
