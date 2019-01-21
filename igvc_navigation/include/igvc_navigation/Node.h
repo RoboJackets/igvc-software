@@ -125,7 +125,7 @@ std::ostream& operator<< (std::ostream& stream, const Node& n);
 // ostream operator for std::unordered_set of Node
 std::ostream& operator<<(std::ostream& stream, const std::unordered_set<Node>& uset);
 
-// Re-defined hash method for nodes
+// Re-defined hash method for nodes. Used for maintaining unordered map.
 namespace std
 {
     template <>

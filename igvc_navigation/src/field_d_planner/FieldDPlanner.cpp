@@ -8,7 +8,7 @@ Key FieldDPlanner::calculateKey(Node s)
     // obtain g-values and rhs-values for node s
     float g = getG(s);
     float rhs = getRHS(s);
-    return Key(std::min(g, rhs) + graph.euclidian_heuristic(s) + graph.K_M, std::min(g, rhs));
+    return Key(std::min(g, rhs) + graph.euclidian_heuristic(s), std::min(g, rhs));
 }
 
 void FieldDPlanner::initialize()
@@ -36,6 +36,24 @@ void FieldDPlanner::reinitialize()
 
 void FieldDPlanner::updateNode(Node s)
 {
+    if (umap.find(s) == umap.end())
+      umap.insert(std::make_pair(s, std::make_tuple(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity())));
+
+    if (s != graph.Goal)
+    {
+      float minRHS = std::numeric_limits<float>::infinity();
+      float tempRHS;
+      for (std::tuple<Node,Node> connbr : graph.connbrs(s))
+      {
+        std::tie(tempRHS, std::ignore, std::ignore) = computeCostContinuous(s, std::get<0>(connbr), std::get<1>(connbr));
+        minRHS = std::min(tempRHS,minRHS);
+      }
+
+      insert_or_assign(s, getG(s), minRHS);
+    }
+
+    std::cout << ", g: " << getG(s) << ", rhs: " << getRHS(s);
+    std::cout << ", key: " << calculateKey(s);
     /**
     looks for node s in the Ø and removes it if found
     -> same as calling: if PQ.contains(s) PQ.remove(s);
@@ -44,75 +62,45 @@ void FieldDPlanner::updateNode(Node s)
 
     // insert node into priority queue if it is locally inconsistent
     if (getG(s) != getRHS(s))
+    {
+        std::cout << " inserted";
         PQ.insert(s, calculateKey(s));
+    }
+
+    std::cout << std::endl;
 }
 
 int FieldDPlanner::computeShortestPath()
 {
     int numNodesExpanded = 0;
 
+    std::cout << "Start Key: " << calculateKey(graph.Start) << std::endl;
+    std::cout << "Top Key: " << PQ.topKey() << std::endl;
+
     while((PQ.topKey() < calculateKey(graph.Start)) || (getRHS(graph.Start) != getG(graph.Start)))
     {
         Node s = PQ.topNode();
+        PQ.pop();
         numNodesExpanded++;
 
         if (getG(s) > getRHS(s))
         {
             // locally overconsistent case. This node is now more favorable.
-            insert_or_assign(s, getRHS(s), getRHS(s)); // make node locally consistent by setting g = rhs
-            PQ.pop();
-
+            insert_or_assign(s, getRHS(s), getRHS(s));
             for (Node sp : graph.nbrs(s))
-            {
-                if (umap.find(sp) == umap.end()) // neighbor never visited before, add to unordered map
-                    umap.insert(std::make_pair(sp, std::make_tuple(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity())));
-
-                float cck_cost;
-                std::tie(cck_cost, std::ignore, std::ignore) = this->computeCostContinuous(sp, s, graph.ccknbr(sp, s));
-                if (getRHS(sp) > cck_cost)
-                {
-                    sp.setBptr(s.getIndex());
-                    insert_or_assign(sp, getG(sp), cck_cost);
-                }
-                float ck_cost;
-                std::tie(ck_cost, std::ignore, std::ignore) = this->computeCostContinuous(sp, s, graph.cknbr(sp, s));
-                if (getRHS(sp) > ck_cost)
-                {
-                    sp.setBptr(graph.cknbr(sp, s).getIndex());
-                    insert_or_assign(sp, getG(sp), ck_cost);
-                }
                 updateNode(sp);
-            }
         }
         else
         {
-
             // locally underconsistent case. This node is now less favorable
             // make node locally consistent or overconsistent by setting g = inf
             insert_or_assign(s, std::numeric_limits<float>::infinity(), getRHS(s));
-            for (Node sp : graph.nbrs(s))
-            {
-                std::tuple<int,int> sp_bptr = findBptr(sp);
-                if ((sp_bptr == s.getIndex()) || (sp_bptr == graph.cknbr(sp,s).getIndex()))
-                {
-                    float minRHS = std::numeric_limits<float>::infinity();
-                    float tempRHS;
-                    std::tuple<int,int> new_bptr;
-                    for (Node spp : graph.nbrs(sp))
-                    {
-                        std::tie(tempRHS, std::ignore, std::ignore) = this->computeCostContinuous(sp, spp, graph.ccknbr(sp, spp));
-                        if (tempRHS < minRHS)
-                        {
-                            minRHS = tempRHS;
-                            new_bptr = spp.getIndex();
-                        }
-                    }
-                    sp.setBptr(new_bptr);
-                    insert_or_assign(sp, getG(sp), minRHS);
-                    updateNode(sp);
-                }
-            }
-            updateNode(s);
+
+            std::vector<Node> propagateChangesTo = graph.nbrs(s);
+            propagateChangesTo.push_back(s);
+
+            for (Node sp : propagateChangesTo)
+                updateNode(sp);
         }
     }
     return numNodesExpanded;
@@ -125,22 +113,12 @@ int FieldDPlanner::updateNodesAroundUpdatedCells()
     {
         for (Node s : graph.getNodesAroundCellWithCSpace(cellUpdate))
         {
-            if (umap.find(s) == umap.end()) // Update node if it's already been expanded
+            if (umap.find(s) == umap.end()) // ignore node's that haven't been explored
                 continue;
-
             if (s == graph.Goal)
                 continue;
 
-            float minRHS = std::numeric_limits<float>::infinity();
-            float tempRHS;
-            for (Node sp : graph.nbrs(s))
-            {
-                std::tie(tempRHS, std::ignore, std::ignore) = this->computeCostContinuous(s, sp, graph.ccknbr(s, sp));
-                minRHS = std::min(tempRHS, minRHS);
-            }
-            s.setBptr(findBptr(s));
-            insert_or_assign(s, getG(s), minRHS);
-
+            std::cout << "updating node: ";
             updateNode(s);
             numNodesUpdated++;
         }
@@ -522,14 +500,4 @@ std::vector<std::tuple<int,int>> FieldDPlanner::getExplored()
         explored.push_back(e.first.getIndex());
 
     return explored;
-}
-
-std::tuple<int,int> FieldDPlanner::findBptr(Node s)
-{
-    auto search = umap.find(s);
-    if (search != umap.end()) {
-        return search->first.getBptr();
-    } else {
-        return std::make_tuple(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
-    }
 }
