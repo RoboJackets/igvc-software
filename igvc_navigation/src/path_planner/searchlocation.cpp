@@ -29,7 +29,7 @@ bool SearchLocation::operator<(const SearchLocation &other) const
   }
 }
 
-float SearchLocation::distTo(SearchLocation other, double resolution) const
+double SearchLocation::distTo(const SearchLocation& other, double resolution) const
 {
   return sqrt(pow(other.X - X, 2) + pow(other.Y - Y, 2)) * resolution;
 }
