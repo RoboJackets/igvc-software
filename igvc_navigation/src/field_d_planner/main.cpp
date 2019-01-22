@@ -197,18 +197,15 @@ int main(int argc, char** argv)
           goal_changed = false;
       }
 
+      // conmpute the shortest path by expanding inconsistent nodes
+      ros::Time begin = ros::Time::now();
+      numNodesExpanded = planner.computeShortestPath();
+      double elapsed = (ros::Time::now() - begin).toSec();
+      ROS_INFO_STREAM(numNodesExpanded << " nodes expanded in " << elapsed << "s.");
+
+      // update nodes with changed edge costs
       numNodesUpdated = planner.updateNodesAroundUpdatedCells();
       if (numNodesUpdated > 0) ROS_INFO_STREAM(numNodesUpdated << " nodes updated");
-
-      if ((numNodesUpdated > 0) || initialize_search)
-      {
-          ros::Time begin = ros::Time::now();
-          numNodesExpanded = planner.computeShortestPath();
-
-          double elapsed = (ros::Time::now() - begin).toSec();
-          ROS_INFO_STREAM(numNodesExpanded << " nodes expanded in " << elapsed << "s.");
-          if (initialize_search) initialize_search = false;
-      }
 
       if (publish_expanded)
         expanded_callback(planner.getExplored());

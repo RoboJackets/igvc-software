@@ -381,7 +381,7 @@ float Graph::getB(Node s, Node s_prime)
     }
 
     // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
-    maxCellVal = std::max(getValWithCSpace(cellInd1), getValWithCSpace(cellInd2));
+    maxCellVal = std::min(getValWithCSpace(cellInd1), getValWithCSpace(cellInd2));
     return (maxCellVal > 178) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST;
 }
 
