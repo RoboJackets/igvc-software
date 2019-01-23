@@ -234,8 +234,8 @@
       <xyzOffset>0 0 0</xyzOffset>
       <gaussianNoise>0.000001</gaussianNoise>
       <accelDrift>0.00001 0.00001 0.00001</accelDrift>
-      <accelDriftFrequency>0.00001 0.00001 0.00001</accelDriftFrequency>
-      <accelGaussianNoise>0.00001 0.00001 0.00001</accelGaussianNoise>
+      <accelDriftFrequency>0.000001 0.000001 0.000001</accelDriftFrequency>
+      <accelGaussianNoise>0.000001 0.000001 0.000001</accelGaussianNoise>
       <rateDrift>0.0 0.0 0.0</rateDrift>
       <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
       <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
@@ -254,8 +254,8 @@
       <referenceLatitude>33.774497</referenceLatitude>
       <referenceLongitude>-84.405001</referenceLongitude>
       <referenceAltitude>309.0</referenceAltitude>
-      <drift>0.01 0.01 0.01</drift>
-      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+      <drift>0.0001 0.0001 0.0001</drift>
+      <gaussianNoise>0.001 0.001 0.001</gaussianNoise>
       <velocityDrift>0.05 0.05 0.05</velocityDrift>
       <velocityGaussianNoise>0.05 0.05 0.05</velocityGaussianNoise>
     </plugin>

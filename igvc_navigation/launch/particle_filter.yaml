@@ -1,7 +1,7 @@
 particle_filter:
-  num_particles: 32
-  resample_threshold: 0.5   #From 0 to 1
-  covariance_coefficient: 0.5
+  num_particles: 64
+  resample_threshold: 0.8   #From 0 to 1
+  covariance_coefficient: 0.8
 visualization:
   hue: #0 to 360
     start: 257.0
@@ -28,3 +28,5 @@ fused_topic: "/odometry/filtered"
 odometry_frame: "/odom"
 base_frame: "/base_footprint"
 lidar_frame: "/lidar"
+parent_frame: "/odom"
+child_frame: "/particle_filter"

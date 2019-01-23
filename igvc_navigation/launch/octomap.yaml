@@ -2,13 +2,13 @@ octree:
   resolution: 0.2
   lazy_evaluation: false
 sensor_model:
-  hit: 0.6
-  miss: 0.45
-  min: 0.05
-  max: 0.95
+  hit: 0.9
+  miss: 0.1
+  min: 0.01
+  max: 0.99
   max_range: 60
-  mismatch_penalty: 10
-  empty_coeff: 0.1
+  mismatch_penalty: 80
+  empty_coeff: 0.01
 ground_filter:
   iterations: 100
   distance_threshold: 0.15
@@ -19,6 +19,8 @@ map:
   # width of grid = width / resolution
   length_x: 200
   width_y: 200
+  length: 200
+  width: 200
   start_x: 100
   start_y: 100
   encoding: "CV_8UC1"

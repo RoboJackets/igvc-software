@@ -16,6 +16,8 @@
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
 
+#include <gperftools/profiler.h>
+
 class ParticleFilterNode {
 public:
   ParticleFilterNode(double transform_max_wait_time, double update_time_thresh, double start_x, double start_y,
@@ -35,13 +37,14 @@ public:
   ros::Publisher m_map_pcl_debug_pub;
   std::string m_base_frame, m_lidar_frame;
   std::string m_lidar_topic, m_fused_topic, m_odom_frame;
+  std::string m_parent_frame, m_child_frame;
 
 private:
   void check_update();
 
   void update(int pose_idx, int pc_idx, const ros::Time &stamp);
 
-  void publish(const ros::Time &stamp);
+  void publish(const ros::Time &stamp, const tf::Transform& odom_to_base);
 
   void get_lidar_transform();
 
@@ -49,7 +52,6 @@ private:
   bool m_initialised = false;
   double m_update_time_thresh, m_start_x, m_start_y, m_start_z;
   std::shared_ptr<tf::Stamped<tf::Pose>> m_last_pose;
-  tf::TransformBroadcaster br;
   cv_bridge::CvImage m_img_bridge;
   boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr> m_pc_buf;
   boost::circular_buffer<nav_msgs::OdometryConstPtr> m_pose_buf;
@@ -78,6 +80,7 @@ void ParticleFilterNode::pose_callback(const nav_msgs::OdometryConstPtr &pose) {
  * Compares m_pose_buf and m_pc_buf; Will update with every lidar, but needs to match the correct pose with it
  */
 void ParticleFilterNode::check_update() {
+  ProfilerStart("particle_filter");
 //  ROS_INFO_STREAM("pc buf size: " << m_pc_buf.size() << " pose buf size: " << m_pose_buf.size());
   // Needs both buffers to have at least one element
   if (m_pc_buf.empty() || m_pose_buf.empty()) {
@@ -98,6 +101,7 @@ void ParticleFilterNode::check_update() {
       return;
     }
   }
+  ProfilerStop();
 }
 
 /**
@@ -149,6 +153,9 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
   m_particle_filter->update(diff, m_pose_buf[pose_idx]->pose.covariance, transformed_pc, *m_lidar_transform);
 //  ROS_INFO("5");
 
+  // Publish newest iteration of particle filter
+  publish(stamp, cur_pose);
+
   // Delete buffer till index
   m_pose_buf.erase_begin(static_cast<unsigned long>(pose_idx + 1));
   m_pc_buf.erase_begin(static_cast<unsigned long>(pc_idx + 1));
@@ -156,12 +163,10 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
   // Update last pose
   *m_last_pose = cur_pose;
 
-  // Publish newest iteration of particle filter
-  publish(stamp);
 //  ROS_INFO("Done with update in particle_filter_node");
 }
 
-void ParticleFilterNode::publish(const ros::Time &stamp) {
+void ParticleFilterNode::publish(const ros::Time &stamp, const tf::Transform& odom_to_base) {
   // Publish map form best particle
   igvc_msgs::map message;    // >> message to be sent
   sensor_msgs::Image image;  // >> image in the message
@@ -184,6 +189,10 @@ void ParticleFilterNode::publish(const ros::Time &stamp) {
 
   // Publish map
   m_map_pub.publish(message);
+
+  // Publish tf transform
+  static tf::TransformBroadcaster br;
+  br.sendTransform(tf::StampedTransform(m_particle_filter->m_best_particle.state.transform, stamp, m_parent_frame, m_child_frame));
 
   if (m_debug)
   {
@@ -264,6 +273,8 @@ int main(int argc, char **argv) {
   igvc::getParam(pNh, "odometry_frame", pf_node->m_odom_frame);
   igvc::getParam(pNh, "base_frame", pf_node->m_base_frame);
   igvc::getParam(pNh, "lidar_frame", pf_node->m_lidar_frame);
+  igvc::getParam(pNh, "parent_frame", pf_node->m_parent_frame);
+  igvc::getParam(pNh, "child_frame", pf_node->m_child_frame);
 
   pf_node->m_particle_filter = std::unique_ptr<Particle_filter>(new Particle_filter(pNh));
 

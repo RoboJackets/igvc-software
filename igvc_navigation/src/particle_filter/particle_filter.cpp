@@ -3,8 +3,7 @@
 #include <tf/transform_broadcaster.h>
 #include <octomap_ros/conversions.h>
 
-Particle_filter::Particle_filter(const ros::NodeHandle& pNh) : pNh(pNh), m_octomapper(pNh)
-{
+Particle_filter::Particle_filter(const ros::NodeHandle &pNh) : pNh(pNh), m_octomapper(pNh) {
   ros::NodeHandle nh; // Can I do this or do I need to pass it in?
 
   float resample_threshold;
@@ -19,11 +18,10 @@ Particle_filter::Particle_filter(const ros::NodeHandle& pNh) : pNh(pNh), m_octom
   igvc::getParam(pNh, "visualization/lightness/end", m_viz_light_end);
   igvc::getParam(pNh, "debug", m_debug);
 
-  m_inverse_resample_threshold = 1/(resample_threshold * m_num_particles);
+  m_inverse_resample_threshold = 1 / (resample_threshold * m_num_particles);
 
   ROS_INFO_STREAM("Num Particles: " << m_num_particles);
-  if (m_debug)
-  {
+  if (m_debug) {
     m_particle_pub = nh.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 1);
     m_ground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/particle_filter/ground_debug", 1);
     m_nonground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/particle_filter/nonground_debug", 1);
@@ -34,12 +32,10 @@ Particle_filter::Particle_filter(const ros::NodeHandle& pNh) : pNh(pNh), m_octom
   }
 }
 
-void Particle_filter::initialize_particles(const tf::Transform& pose)
-{
+void Particle_filter::initialize_particles(const tf::Transform &pose) {
   // Wait for first EKF?
   m_particles.reserve(static_cast<unsigned long>(m_num_particles));
-  for (int i = 0; i < m_num_particles; ++i)
-  {
+  for (int i = 0; i < m_num_particles; ++i) {
     Particle p;
     p.state.transform = pose;
     m_octomapper.create_octree(p.pair);
@@ -86,27 +82,31 @@ void Particle_filter::initialize_particles(const tf::Transform& pose)
 //  fuckOcc.publish(debug_pcl2);
 //}
 
-void Particle_filter::update(const tf::Transform& diff, const boost::array<double, 36>& covariance,
-                             const pcl::PointCloud<pcl::PointXYZ>& pc, const tf::Transform& lidar_to_base)
-{
+void Particle_filter::update(const tf::Transform &diff, const boost::array<double, 36> &covariance,
+                             const pcl::PointCloud<pcl::PointXYZ> &pc, const tf::Transform &lidar_to_base) {
   // Create noise distribution from covariance to sample from
   boost::array<double, 36> cov_copy(covariance);
   Eigen::Map<Eigen::Matrix<double, 6, 6>> eigen_cov(cov_copy.data());
-  Normal_random_variable uncertainty {eigen_cov};
+//  for (int i = 0; i < 6; ++i) {
+//    ROS_INFO_STREAM(covariance[6 * i] << ", " << covariance[6 * i + 1] << ", " << covariance[6 * i + 2] << ", "
+//                                      << covariance[6 * i + 3] << ", " << covariance[6 * i + 4] << ", "
+//                                      << covariance[6 * i + 5] << ", ");
+//  }
+  Normal_random_variable uncertainty{eigen_cov};
 
 
   // Separate pc to ground and nonground
   pcl::PointCloud<pcl::PointXYZ> ground, nonground;
   m_octomapper.filter_ground_plane(pc, ground, nonground);
 
-  float weight_sum = 0;
-  float highest_weight =0 ;
-  int highest_weight_idx = 0;
+  float highest_weight = 0;
+  size_t highest_weight_idx = 0;
+  float lowest_weight = 1.0e10;
+  size_t lowest_weight_idx = 0;
   // For each particle in particles
 //  ROS_INFO_STREAM("1");
   static tf::TransformBroadcaster br;
-  for (size_t i = 0; i < m_particles.size(); ++i)
-  {
+  for (size_t i = 0; i < m_particles.size(); ++i) {
     // TODO: Add Scanmatching
     // TODO: Add CUDA or OpenMP?
     // Sample new particle from old using pose and covariance
@@ -139,7 +139,8 @@ void Particle_filter::update(const tf::Transform& diff, const boost::array<doubl
     octomap::KeySet free, occupied;
     tf::Transform odom_to_lidar = m_particles[i].state.transform * lidar_to_base;
 
-    m_octomapper.separate_occupied(free, occupied, odom_to_lidar.getOrigin(), m_particles[i].pair, transformed_ground, transformed_nonground);
+    m_octomapper.separate_occupied(free, occupied, odom_to_lidar.getOrigin(), m_particles[i].pair, transformed_ground,
+                                   transformed_nonground);
     // ========================START OF DEBUG=========================================================
 //    visualize_key(free, occupied, m_particles[i].pair, pc.header.stamp);
 //    octomap::Pointcloud nonground_octo;
@@ -153,17 +154,25 @@ void Particle_filter::update(const tf::Transform& diff, const boost::array<doubl
     // Calculate weight using sensor model
     m_particles[i].weight = m_octomapper.sensor_model(m_particles[i].pair, free, occupied);
 //    ROS_INFO_STREAM("Weight of " << i << " : " << m_particles[i].weight);
-    m_particles[i].weight = m_particles[i].weight < 0 ? 0 : m_particles[i].weight; // TODO: Does this ruin performance?
-    weight_sum += m_particles[i].weight;\
     // Look for highest weight particle
-    if (m_particles[i].weight > highest_weight)
-    {
+    if (m_particles[i].weight > highest_weight) {
       highest_weight = m_particles[i].weight;
       highest_weight_idx = i;
+    } else if (m_particles[i].weight < lowest_weight) {
+      lowest_weight = m_particles[i].weight;
+      lowest_weight_idx = i;
     }
 
     // Update map
     m_octomapper.insert_scan(m_particles[i].pair, free, occupied);
+  }
+  // Move weights to >= 0
+  highest_weight -= lowest_weight;
+  float weight_sum = 0;
+  for (Particle& p : m_particles)
+  {
+    p.weight -= lowest_weight;
+    weight_sum += p.weight;
   }
   // Move octomap and weight of particle to best_particle
   m_best_particle.state = m_particles[highest_weight_idx].state;
@@ -176,33 +185,27 @@ void Particle_filter::update(const tf::Transform& diff, const boost::array<doubl
   // calculate Neff
   float inverse_n_eff = 0;
   float squared_weight_sum = weight_sum * weight_sum;
-  for (Particle& p : m_particles)
-  {
-    inverse_n_eff += (p.weight*p.weight)/squared_weight_sum;
+  for (Particle &p : m_particles) {
+    inverse_n_eff += (p.weight * p.weight) / squared_weight_sum;
   }
   // if Neff < thresh then resample
-  if (inverse_n_eff > m_inverse_resample_threshold)
-  {
-    if (m_debug)
-    {
-      ROS_INFO_STREAM("inverse N_eff (" << inverse_n_eff << ")  >  inverse resample threshold (" << m_inverse_resample_threshold << ")");
-      ROS_INFO_STREAM("Performing resampling");
+  if (inverse_n_eff > m_inverse_resample_threshold) {
+    if (m_debug) {
+      ROS_INFO_STREAM("Performing resampling. N_eff: " << inverse_n_eff << " / " << m_inverse_resample_threshold);
     }
     resample_particles();
   } else {
-    ROS_INFO_STREAM("inverse N_eff (" << inverse_n_eff << ")  <  inverse resample threshold (" << m_inverse_resample_threshold << ")");
+    ROS_INFO_STREAM("N_eff: " << inverse_n_eff << " / " << m_inverse_resample_threshold);
   }
 
   // Update map of best particle for use
   m_octomapper.get_updated_map(m_best_particle.pair);
 
   // Debug publish all particles
-  if (m_debug)
-  {
+  if (m_debug) {
     visualization_msgs::MarkerArray marker_arr;
     int i = 0;
-    for (const Particle& particle : m_particles)
-    {
+    for (const Particle &particle : m_particles) {
       visualization_msgs::Marker marker;
       marker.type = visualization_msgs::Marker::ARROW;
       marker.scale.x = 0.2;
@@ -227,8 +230,7 @@ void Particle_filter::update(const tf::Transform& diff, const boost::array<doubl
       marker.color.r = static_cast<float>(r);
       marker.color.g = static_cast<float>(g);
       marker.color.b = static_cast<float>(b);
-      if (fabs(particle.weight - highest_weight) < 1.0e-8)
-      {
+      if (fabs(particle.weight - highest_weight) < 1.0e-8) {
         marker.color.r = 1.0;
         marker.color.g = 0;
         marker.color.b = 0;
@@ -242,14 +244,12 @@ void Particle_filter::update(const tf::Transform& diff, const boost::array<doubl
 }
 
 
-void Particle_filter::resample_particles()
-{
+void Particle_filter::resample_particles() {
   // Create array of cumulative weights
   std::vector<double> cum_weights;
   cum_weights.reserve(static_cast<unsigned long>(m_num_particles));
   cum_weights.emplace_back(m_particles[0].weight);
-  for (int i = 1; i < m_num_particles; i++)
-  {
+  for (int i = 1; i < m_num_particles; i++) {
     cum_weights.emplace_back(cum_weights[i - 1] + m_particles[i].weight);
   }
   // cum_weights[num_particles-1] is cumulative total
@@ -262,11 +262,9 @@ void Particle_filter::resample_particles()
   // Resample using starting_pointer + i*pointer_width
   std::vector<struct Particle> sampled_particles;
   sampled_particles.reserve(static_cast<unsigned long>(m_num_particles));
-  for (int i = 0; i < m_num_particles; i++)
-  {
+  for (int i = 0; i < m_num_particles; i++) {
     int index = 0;
-    while (cum_weights[index] < starting_pointer + i * pointer_width)
-    {
+    while (cum_weights[index] < starting_pointer + i * pointer_width) {
       index++;
     }
     // Found cum_weights[index] >= stating_pointer + i * pointer_width, add that point to the array
@@ -276,14 +274,12 @@ void Particle_filter::resample_particles()
   m_particles.swap(sampled_particles);
 }
 
-double map_range(double inp_start, double inp_end, double out_start, double out_end, double inp)
-{
-  return (inp - inp_start)*(out_end - out_start)/(inp_end - inp_start) + out_start;
+double map_range(double inp_start, double inp_end, double out_start, double out_end, double inp) {
+  return (inp - inp_start) * (out_end - out_start) / (inp_end - inp_start) + out_start;
 }
 
 // Do a proper map function
-void Particle_filter::map_weight_to_rgb(float weight, double *r, double *g, double *b)
-{
+void Particle_filter::map_weight_to_rgb(float weight, double *r, double *g, double *b) {
   double h = map_range(0, m_total_weight, m_viz_hue_start, m_viz_hue_end, weight);
   h = h > m_viz_hue_max ? h - m_viz_hue_max : h;
   double s = map_range(0, m_total_weight, m_viz_sat_start, m_viz_sat_end, weight);
