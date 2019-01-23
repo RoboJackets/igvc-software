@@ -49,6 +49,10 @@ public:
   double roll() const;
   double pitch() const;
   double yaw() const;
+  double quat_x() const;
+  double quat_y() const;
+  double quat_z() const;
+  double quat_w() const;
 
   // set state using an odometry msg
   void setState(const nav_msgs::Odometry::ConstPtr &msg)
@@ -168,6 +172,11 @@ inline double RobotState::yaw() const
   transform.getBasis().getRPY(r, p, y);
   return y;
 }
+
+inline double RobotState::quat_x() const { return transform.getRotation().x(); }
+inline double RobotState::quat_y() const { return transform.getRotation().y(); }
+inline double RobotState::quat_z() const { return transform.getRotation().z(); }
+inline double RobotState::quat_w() const { return transform.getRotation().w(); }
 
 
 inline std::ostream &operator<<(std::ostream &out, const RobotState &state)

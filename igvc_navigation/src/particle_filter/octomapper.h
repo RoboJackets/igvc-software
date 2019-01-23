@@ -1,3 +1,4 @@
+#pragma once
 #ifndef PROJECT_OCTOMAPPER_H
 #define PROJECT_OCTOMAPPER_H
 
@@ -42,16 +43,20 @@ public:
   void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground) const;
   void separate_occupied(octomap::KeySet& free_cells, octomap::KeySet& occupied_cells, const tf::Point& sensor_pos_tf,
                          const pc_map_pair& pair, const pcl::PointCloud<pcl::PointXYZ>& ground,
-                         const pcl::PointCloud<pcl::PointXYZ>& nonground) const;
+                         const pcl::PointCloud<pcl::PointXYZ>& nonground);
   float sensor_model(const pc_map_pair& pair, const octomap::KeySet& free_cells,
                      const octomap::KeySet& occupied_cells) const;
+  int length_x() { return m_map_length_grid; }
+  int width_y() { return m_map_width_grid; }
+  int start_x() { return m_map_start_x; }
+  int start_y() { return m_map_start_y; }
+  double resolution() { return m_octree_resolution; } // TODO: Different resolution for octree / map?
 
 private:
-  void filter_range(const pcl::PointCloud<pcl::PointXYZ>& raw_pc, pcl::PointCloud<pcl::PointXYZ>& within_range) const;
   void create_map(pc_map_pair& pair) const;
   void compute_voxels(const octomap::OcTree& tree, const octomap::Pointcloud& scan, const octomap::Pointcloud& ground,
                       const octomap::point3d& origin, octomap::KeySet& free_cells,
-                      octomap::KeySet& occupied_cells) const;
+                      octomap::KeySet& occupied_cells);
   float to_logodds(float p)
   {
     return log(p / (1 - p));
@@ -59,10 +64,13 @@ private:
 
   ros::NodeHandle pNh;
   double m_octree_resolution;
+  bool m_lazy_eval;
   double m_prob_hit;
   double m_prob_miss;
   double m_prob_hit_logodds;
   double m_prob_miss_logodds;
+  double m_penalty;
+  double m_sensor_empty_coeff;
   double m_thresh_min;
   double m_thresh_max;
   double m_max_range;
@@ -70,10 +78,15 @@ private:
   double m_ransac_distance_threshold;
   double m_ransac_eps_angle;
   float m_ground_filter_plane_dist;
-  int m_map_length;
-  int m_map_width;
+  int m_map_length; // In m, not grid units
+  int m_map_width; // Actual grid cells = length / resolution
+  int m_map_length_grid;
+  int m_map_width_grid;
+  int m_map_start_x; // In m, not grid units
+  int m_map_start_y;
   int m_map_encoding;
   float m_odds_sum_default;
+  std::vector<octomap::KeyRay> m_keyrays;
 
   // std::unique_ptr<tf::MessageFilter<PCL_point_cloud>> msg_filter;
 };

@@ -95,37 +95,6 @@ void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t p
 }
 
 /**
- * Updates the occupancy grid using information from the <code>pcl::PointCloud transformed</code>
- * @param transformed Reference to pointcloud containing information from lidar / segmentation.
- */
-void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed) {
-  int offMapCount = 0;
-
-  pcl::PointCloud<pcl::PointXYZ>::const_iterator point_iter;
-
-  for (point_iter = transformed->begin(); point_iter < transformed->points.end(); point_iter++) {
-    double x_point_raw, y_point_raw;
-    std::tie(x_point_raw, y_point_raw) = rotate(point_iter->x, point_iter->y);
-
-    int point_x = static_cast<int>(std::round(x_point_raw / resolution + state.x() / resolution + start_x));
-    int point_y = static_cast<int>(std::round(y_point_raw / resolution + state.y() / resolution + start_y));
-    if (point_x >= 0 && point_y >= 0 && point_x < length_y && start_y < width_x) {
-      // Check for overflow
-      if (published_map->at<uchar>(point_x, point_y) <= UCHAR_MAX - (uchar) increment_step) {
-        published_map->at<uchar>(point_x, point_y) += (uchar) increment_step;
-      } else {
-        published_map->at<uchar>(point_x, point_y) = UCHAR_MAX;
-      }
-    } else {
-      offMapCount++;
-    }
-  }
-  if (offMapCount > 0) {
-    ROS_WARN_STREAM(offMapCount << " points were off the map");
-  }
-}
-
-/**
  * Checks if transform from base_footprint to msg.header.frame_id exists
  * @param msg
  * @param topic
@@ -145,82 +114,6 @@ void checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &
     }
   }
 }
-
-/**
- * Decays map by 1 universally on callback
- */
-void decayMap(const ros::TimerEvent &) {
-  int nRows = published_map->rows;
-  int nCols = published_map->cols;
-
-  if (published_map->isContinuous()) {
-    nCols *= nRows;
-    nRows = 1;
-  }
-  int i, j;
-  uchar *p;
-  for (i = 0; i < nRows; i++) {
-    p = published_map->ptr<uchar>(i);
-    for (j = 0; j < nCols; j++) {
-      if (p[j] > 0) {
-        p[j] -= (uchar) 1;
-      }
-    }
-  }
-}
-
-/**
- * Callback for updates on lidar / segmentation PCL topics. Updates the occupancy grid, then publishes it.
- * @param msg pointcloud information
- * @param topic topic which the pointcloud came from
- */
-void frame_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic) {
-  // transform pointcloud into the occupancy grid, no filtering right now
-
-  // make transformed clouds
-  pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
-      pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
-
-  // Check if static transform already exists for this topic.
-  checkExistsStaticTransform(msg, topic);
-
-  // Lookup transform form Ros Localization for position
-  getOdomTransform(msg);
-
-  // Apply transformation to msg points using the transform for this topic.
-  pcl_ros::transformPointCloud(*msg, *transformed, transforms.at(topic));
-
-  updateOccupancyGrid(transformed);
-
-  igvc_msgs::map message;    // >> message to be sent
-  sensor_msgs::Image image;  // >> image in the message
-  img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, *published_map);
-  img_bridge.toImageMsg(image);  // from cv_bridge to sensor_msgs::Image
-
-  setMsgValues(message, image, msg->header.stamp);
-  map_pub.publish(message);
-  if (debug) {
-    debug_pub.publish(image);
-    // ROS_INFO_STREAM("\nThe robot is located at " << state);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr(new pcl::PointCloud<pcl::PointXYZRGB>());
-    for (int i = 0; i < width_x; i++) {
-      for (int j = 0; j < length_y; j++) {
-        if (published_map->at<uchar>(i, j) >= occupancy_grid_threshold) {
-          // Set x y coordinates as the center of the grid cell.
-          pcl::PointXYZRGB p(255, published_map->at<uchar>(i, j), published_map->at<uchar>(i, j));
-          p.x = (i - start_x) * resolution;
-          p.y = (j - start_y) * resolution;
-          fromOcuGrid->points.push_back(p);
-        }
-      }
-    }
-    fromOcuGrid->header.frame_id = "/odom";
-    fromOcuGrid->header.stamp = msg->header.stamp;
-    debug_pcl_pub.publish(fromOcuGrid);
-  }
-}
-
 void publish(const cv::Mat &map, uint64_t stamp) {
   igvc_msgs::map message;    // >> message to be sent
   sensor_msgs::Image image;  // >> image in the message

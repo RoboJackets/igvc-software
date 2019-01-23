@@ -232,10 +232,10 @@
       <topicName>/imu</topicName>
       <rpyOffset>0 0 0</rpyOffset>
       <xyzOffset>0 0 0</xyzOffset>
-      <gaussianNoise>0.0000001</gaussianNoise>
-      <accelDrift>0.0000001 0.0000001 0.0000001</accelDrift>
-      <accelDriftFrequency>0.0000001 0.0000001 0.0000001</accelDriftFrequency>
-      <accelGaussianNoise>0.0000001 0.0000001 0.0000001</accelGaussianNoise>
+      <gaussianNoise>0.000001</gaussianNoise>
+      <accelDrift>0.00001 0.00001 0.00001</accelDrift>
+      <accelDriftFrequency>0.00001 0.00001 0.00001</accelDriftFrequency>
+      <accelGaussianNoise>0.00001 0.00001 0.00001</accelGaussianNoise>
       <rateDrift>0.0 0.0 0.0</rateDrift>
       <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
       <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
@@ -255,9 +255,18 @@
       <referenceLongitude>-84.405001</referenceLongitude>
       <referenceAltitude>309.0</referenceAltitude>
       <drift>0.01 0.01 0.01</drift>
-      <gaussianNoise>0.15 0.15 0.15</gaussianNoise>
-      <velocityDrift>0.5 0.5 0.5</velocityDrift>
+      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+      <velocityDrift>0.05 0.05 0.05</velocityDrift>
       <velocityGaussianNoise>0.05 0.05 0.05</velocityGaussianNoise>
+    </plugin>
+
+    <plugin filename="libgazebo_ros_p3d.so" name="ground_truth">
+      <updateRate>100.0</updateRate>
+      <bodyName>base_link</bodyName>
+      <topicName>ground_truth/state</topicName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <frameName>world</frameName>
+      <alwaysOn>true</alwaysOn>
     </plugin>
   </gazebo>
 

@@ -1,0 +1,30 @@
+particle_filter:
+  num_particles: 32
+  resample_threshold: 0.5   #From 0 to 1
+  covariance_coefficient: 0.5
+visualization:
+  hue: #0 to 360
+    start: 257.0
+    end: 12.0
+  saturation: # 0 to 100
+    start: 75
+    end: 100
+  lightness:
+    start: 70
+    end: 60
+transform_max_wait_time: 1 # Seconds I think?
+update_time_threshold: 0.1
+start_x: 100
+start_y: 100
+start_z: 0
+
+particle_filter_buffer_size: 64
+pose_buffer_size: 64
+
+debug: true
+
+lidar_topic: "/scan/pointcloud"
+fused_topic: "/odometry/filtered"
+odometry_frame: "/odom"
+base_frame: "/base_footprint"
+lidar_frame: "/lidar"
