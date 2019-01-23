@@ -20,7 +20,7 @@ void Graph::setGoal(std::tuple<int,int> Goal)
 
 void Graph::initializeGraph(const igvc_msgs::mapConstPtr& msg)
 {
-
+    this->updatedCells.clear();
     this->length = msg->length;
     this->width = msg->width;
     this->Resolution = msg->resolution;
@@ -123,6 +123,16 @@ bool Graph::isDiagonal(Node s, Node s_prime)
     int y_diff = std::abs(y2-y1);
 
     return (x_diff == 1) && (y_diff == 1);
+}
+
+bool Graph::isDiagonalContinuous(const std::tuple<float,float>& p, const std::tuple<float,float>& p_prime)
+{
+    float x,y;
+    std::tie(x,y) = p;
+    float x_prime, y_prime;
+    std::tie(x_prime, y_prime) = p_prime;
+
+    return (std::get<0>(p) != std::get<0>(p_prime)) && (std::get<1>(p) != std::get<1>(p_prime));
 }
 
 std::vector<Node> Graph::nbrs(Node s, bool include_invalid)
@@ -291,6 +301,7 @@ std::vector<std::tuple<Node, Node>> Graph::connbrs(Node s)
     // first 7 consecutive neighbor pairs
     for (size_t i = 0; i < neighbors.size() - 1; i++)
     {
+        assert(!isDiagonal(neighbors[i],neighbors[i+1]));
         // if both nodes valid, make a tuple and put it at the front of the list
         if (isValidNode(neighbors[i]) && isValidNode(neighbors[i+1]))
             connbrs.push_back(std::make_tuple(neighbors[i],neighbors[i+1]));
@@ -320,6 +331,8 @@ float Graph::getC(Node s, Node s_prime)
     int x_diff = x2-x1;
     int y_diff = y2-y1;
 
+    assert((std::abs(x_diff) == 1) && (std::abs(y_diff) == 1));
+
     if ((x_diff == 1) && (y_diff == 1))
     {
         cellInd = std::make_tuple(x1,y1); // top right cell
@@ -339,7 +352,7 @@ float Graph::getC(Node s, Node s_prime)
 
     // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
     cellVal = getValWithCSpace(cellInd);
-    return (cellVal > 178) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST; // #TODO get rid of magic number
+    return (cellVal > 150) ? std::numeric_limits<float>::infinity() : (TRAVERSAL_COST + (cellVal/255.0f)); // #TODO get rid of magic number
 }
 
 float Graph::getB(Node s, Node s_prime)
@@ -358,6 +371,8 @@ float Graph::getB(Node s, Node s_prime)
 
     int x_diff = x2-x1;
     int y_diff = y2-y1;
+
+    assert((std::abs(x_diff) == 1 && y_diff == 0) || (x_diff == 0 && std::abs(y_diff) == 1));
 
     if ((x_diff == 1) && (y_diff == 0))
     {
@@ -382,7 +397,7 @@ float Graph::getB(Node s, Node s_prime)
 
     // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
     maxCellVal = std::min(getValWithCSpace(cellInd1), getValWithCSpace(cellInd2));
-    return (maxCellVal > 178) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST;
+    return (maxCellVal > 150) ? std::numeric_limits<float>::infinity() : (TRAVERSAL_COST + (maxCellVal/255.0f));
 }
 
 float Graph::getValWithCSpace(std::tuple<int,int> ind)
@@ -419,11 +434,24 @@ float Graph::getTraversalCost(Node s, Node s_prime)
 
 float Graph::getContinuousTraversalCost(std::tuple<float,float> p, std::tuple<float,float> p_prime)
 {
-    // get the traversal cost for the cell that contains p and p'
-    Node s(std::make_tuple(static_cast<int>(roundf(std::get<0>(p))),
-                           static_cast<int>(roundf(std::get<1>(p)))));
-    Node s_prime(std::make_tuple(static_cast<int>(roundf(std::get<0>(p_prime))),
-                                 static_cast<int>(roundf(std::get<1>(p_prime)))));
+    float x,y;
+    std::tie(x,y) = p;
+    float x_prime,y_prime;
+    std::tie(x_prime,y_prime) = p_prime;
+
+    // round p to get a reference node
+    Node s(std::make_tuple(static_cast<int>(roundf(x)),
+                           static_cast<int>(roundf(y))));
+
+    // get relative distance between p_prime and p. Note: ceil0 is biased away from 0
+    float x_diff = igvc::ceil0(x_prime - x);
+    float y_diff = igvc::ceil0(y_prime - y);
+
+    assert((x_diff != 0) || (y_diff !=0));
+    assert((std::fabs(x_diff) <= 1) && (std::fabs(y_diff) <= 1));
+
+    Node s_prime(std::make_tuple(static_cast<int>(roundf(x) + x_diff),
+                                 static_cast<int>(roundf(y) + y_diff)));
 
     return isDiagonal(s,s_prime) ? getC(s, s_prime) : getB(s, s_prime);
 }

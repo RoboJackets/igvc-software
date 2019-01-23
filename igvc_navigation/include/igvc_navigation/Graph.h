@@ -18,6 +18,8 @@ Date Created: December 16, 2018
 #ifndef GRAPH_H
 #define GRAPH_H
 
+// #define NDEBUG # TODO: uncomment for production
+
 #include "igvc_utils/NodeUtils.hpp"
 #include "Node.h"
 
@@ -29,6 +31,7 @@ Date Created: December 16, 2018
 #include <tuple>
 #include <cmath>
 #include <limits>
+#include <assert.h>
 
 class Graph
 {
@@ -129,13 +132,22 @@ public:
     */
     bool isDiagonal(Node s, Node s_prime);
     /**
+    Determines whether a continuous positon p_prime is "diagonal" to p. Note that
+    diagonal in this case simply means that position p_prime does not lie vertical
+    or horizontal to p.
+
+    @param[in] p reference position
+    @param[in] p_prime position to check for diagonality
+    @return whether or not p_prime is diagonal to p
+    */
+    bool isDiagonalContinuous(const std::tuple<float,float>& p, const std::tuple<float,float>& p_prime);
+    /**
     Returns neighbors of node s on an eight-grid layout. That is, on average,
     each node s has 8 neighbors.
 
     @return vector containing the 8 neighbors of node s. When there is no neighbord
             (as is the case on corners or along edges), a null value is returned
     */
-
     std::vector<Node> nbrs(Node s, bool include_invalid = false);
     /**
     Returns first counter-clockwise neighbor of node s and a neighbor node
