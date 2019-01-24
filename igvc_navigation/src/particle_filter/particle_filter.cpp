@@ -166,6 +166,7 @@ void Particle_filter::update(const tf::Transform &diff, const boost::array<doubl
     // Update map
     m_octomapper.insert_scan(m_particles[i].pair, free, occupied);
   }
+  ROS_INFO_STREAM(lowest_weight << " -> " << highest_weight);
   // Move weights to >= 0
   highest_weight -= lowest_weight;
   float weight_sum = 0;

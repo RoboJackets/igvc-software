@@ -7,7 +7,7 @@ sensor_model:
   min: 0.01
   max: 0.99
   max_range: 60
-  mismatch_penalty: 80
+  mismatch_penalty: 100
   empty_coeff: 0.01
 ground_filter:
   iterations: 100

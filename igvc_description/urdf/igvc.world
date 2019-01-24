@@ -11,6 +11,10 @@
     <shadows>true</shadows>
     </scene>
 
+    <physics type="ode">
+      <real_time_update_rate>100</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
+    </physics>
     <!-- A global light source -->
     <include>
       <uri>model:///urdf/models/sun</uri>
