@@ -12,12 +12,9 @@ double speed_measured_left = 0.0;
 double speed_measured_right = 0.0;
 double speed_last_error_left = 0.0;
 double speed_last_error_right = 0.0;
-double speed_P_left = -20.0;
-double speed_P_right = -20.0;
-double speed_D_left = 1;
-double speed_D_right = 1;
+double effort_right, effort_left;
 
-constexpr double wheel_radius = 0.3429;
+double speed_P_left, speed_P_right, speed_D_left, speed_D_right, wheel_radius;
 
 void speedCallback(const igvc_msgs::velocity_pair::ConstPtr &msg)
 {
@@ -33,7 +30,7 @@ void speedCallback(const igvc_msgs::velocity_pair::ConstPtr &msg)
 
 void jointStateCallback(const sensor_msgs::JointStateConstPtr &msg)
 {
-  auto iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "axle_to_left_wheel" });
+  auto iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "left_axle" });
 
   if (iter != msg->name.end())
   {
@@ -42,7 +39,7 @@ void jointStateCallback(const sensor_msgs::JointStateConstPtr &msg)
     speed_measured_left = (msg->velocity[index]) * (wheel_radius);
   }
 
-  iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "axle_to_right_wheel" });
+  iter = std::find(msg->name.begin(), msg->name.end(), std::string{ "right_axle" });
 
   if (iter != msg->name.end())
   {
@@ -59,12 +56,31 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "jaymii_controller");
 
   ros::NodeHandle handle;
+  ros::NodeHandle pNh("~");
 
   ros::Publisher leftWheelEffortPublisher =
       handle.advertise<std_msgs::Float64>("/left_wheel_effort_controller/command", 1);
   ros::Publisher rightWheelEffortPublisher =
       handle.advertise<std_msgs::Float64>("/right_wheel_effort_controller/command", 1);
   ros::Publisher wheelSpeedPublisher = handle.advertise<igvc_msgs::velocity_pair>("/encoders", 1);
+
+  ros::Publisher rightWheelShockPublisher =
+    handle.advertise<std_msgs::Float64>("right_wheel_shock_controller/command", 1, true);
+  ros::Publisher leftWheelShockPublisher =
+    handle.advertise<std_msgs::Float64>("left_wheel_shock_controller/command", 1, true);
+
+  std_msgs::Float64 shock_set_point;
+  shock_set_point.data = 0.0;
+  rightWheelShockPublisher.publish(shock_set_point);
+  leftWheelShockPublisher.publish(shock_set_point);
+
+  double rate_var;
+  pNh.param("speed_P_left", speed_P_left, 5.0);
+  pNh.param("speed_P_right", speed_P_right, 5.0);
+  pNh.param("speed_D_left", speed_D_left, 1.0);
+  pNh.param("speed_D_right", speed_D_right, 1.0);
+  pNh.param("wheel_radius", wheel_radius, 0.3);
+  pNh.param("rate", rate_var, 60.0);
 
   // Publish that the robot is enabled
   ros::Publisher enabled_pub = handle.advertise<std_msgs::Bool>("/robot_enabled", 1, /* latch = */ true);
@@ -76,41 +92,51 @@ int main(int argc, char **argv)
 
   auto stateSub = handle.subscribe("/joint_states", 1, jointStateCallback);
 
-  std::chrono::time_point<std::chrono::system_clock> prev, now;
-  prev = std::chrono::system_clock::now();
+  ros::Time prev, now;
+  prev = ros::Time::now();
 
-  ros::Rate rate{ 30 };
+  ros::Rate rate{ rate_var };
   while (ros::ok())
   {
     ros::spinOnce();
 
-    auto error_left = speed_measured_left - speed_set_point_left;
+    auto error_left = speed_set_point_left - speed_measured_left;
     auto dError_left = error_left - speed_last_error_left;
+    speed_last_error_left = error_left;
 
-    auto effort_left = speed_P_left * error_left - speed_D_left * dError_left;
+    effort_left += speed_P_left * error_left + speed_D_left * dError_left;
 
-    // ROS_INFO_STREAM("Publishing effort: " << effort_left);
-
-    auto error_right = speed_measured_right - speed_set_point_right;
+    auto error_right = speed_set_point_right - speed_measured_right;
     auto dError_right = error_right - speed_last_error_right;
+    speed_last_error_right = error_right;
 
-    auto effort_right = speed_P_right * error_right - speed_D_right * dError_right;
+    effort_right += speed_P_right * error_right + speed_D_right * dError_right;
 
     // ROS_INFO_STREAM("Publishing effort: " << effort_right);
-    ROS_INFO_STREAM("left: " << effort_left << " right: " << effort_right);
+    //ROS_INFO_STREAM("left: " << effort_left << " right: " << effort_right);
     std_msgs::Float64 left_wheel_message;
     std_msgs::Float64 right_wheel_message;
-    left_wheel_message.data = effort_left;
-    right_wheel_message.data = effort_right;
+    if(speed_set_point_left == 0) {
+      effort_left = 0.0;
+      left_wheel_message.data = 0.0;
+    } else {
+      left_wheel_message.data = effort_left;
+    }
+    if(speed_set_point_right == 0) {
+      effort_right = 0;
+      right_wheel_message.data = 0.0;
+    } else {
+      right_wheel_message.data = effort_right;
+    }
 
     leftWheelEffortPublisher.publish(left_wheel_message);
     rightWheelEffortPublisher.publish(right_wheel_message);
     igvc_msgs::velocity_pair speed_measured;
     speed_measured.left_velocity = speed_measured_left;
     speed_measured.right_velocity = speed_measured_right;
-    now = std::chrono::system_clock::now();
-    std::chrono::duration<double> duration = now - prev;
-    speed_measured.duration = duration.count();
+    now = ros::Time::now();
+    ros::Duration duration = now - prev;
+    speed_measured.duration = duration.toSec();
     speed_measured.header.stamp = ros::Time::now();
     wheelSpeedPublisher.publish(speed_measured);
     rate.sleep();

@@ -37,3 +37,4 @@ install(DIRECTORY config/
 
 add_subdirectory(nodes/control)
 add_subdirectory(nodes/scan_to_pointcloud)
+add_subdirectory(nodes/ground_truth)
