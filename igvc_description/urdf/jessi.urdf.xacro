@@ -305,6 +305,22 @@
     <material>Gazebo/Grey</material>
   </gazebo>
 
+  <link name="base_footprint">
+    <xacro:null_link/>
+  </link>
+  <gazebo reference="base_link">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <joint name="base_link_to_base_footprint" type="fixed">
+    <parent link="base_link"/>
+    <child link="base_footprint"/>
+    <origin xyz="0.0 0.0 -${drive_tire_diameter / 2}" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+
+
+
   <gazebo reference="body">
     <material>Gazebo/Grey</material>
     <mu1>0.2</mu1>
