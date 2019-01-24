@@ -104,7 +104,7 @@ public:
     @param[in] s Node for which to check validity
     @return whether or not the node is valid
     */
-    bool isValidNode(Node s);
+    bool isValidNode(const Node& s);
     /**
     Determines whether or not a (continuous) position is valid. A position is
     considered valid if it lies within the graph. This method is useful for any-
@@ -114,13 +114,13 @@ public:
     @param[in] p position on the graph
     @return whether or not the position is valid
     */
-    bool isValidPosition(std::tuple<float,float> p);
+    bool isValidPosition(const std::tuple<float,float>& p);
     /**
     Determines whether or not a cell is valid based off of its index. As with
     the Node, the only condition that would render a node invalid is if it is
     out of bounds
     */
-    bool isValidCell(std::tuple<int,int> ind);
+    bool isValidCell(const std::tuple<int,int>& ind);
     /**
     Determines whether or not s_prime is a diagonal neighbor to s under the
     assumption that s_prime is a neighbor to begin with.
@@ -130,7 +130,7 @@ public:
 
     @return whether or not s_prime is diagonal to s
     */
-    bool isDiagonal(Node s, Node s_prime);
+    bool isDiagonal(const Node& s, const Node& s_prime);
     /**
     Determines whether a continuous positon p_prime is "diagonal" to p. Note that
     diagonal in this case simply means that position p_prime does not lie vertical
@@ -148,7 +148,7 @@ public:
     @return vector containing the 8 neighbors of node s. When there is no neighbord
             (as is the case on corners or along edges), a null value is returned
     */
-    std::vector<Node> nbrs(Node s, bool include_invalid = false);
+    std::vector<Node> nbrs(const Node& s, bool include_invalid = false);
     /**
     Returns first counter-clockwise neighbor of node s and a neighbor node
     s', starting at s'.
@@ -178,7 +178,7 @@ public:
     omitted. The backpointer of a node s, therefore, is the most clockwise
     node in the consecutive neighbor pair (the first index of each pair).
     */
-    std::vector<std::tuple<Node, Node>> connbrs(Node s);
+    std::vector<std::tuple<Node, Node>> connbrs(const Node& s);
     /**
     Returns traversal cost of node s and a diagonal node s'. If cell or any of its
     surrounding CSpace is occupied, infinity is returned. If not occupied,
@@ -189,7 +189,7 @@ public:
 
     @return diagonal traversal cost
     */
-    float getC(Node s, Node s_prime);
+    float getC(const Node& s, const Node& s_prime);
     /**
     Returns traversal cost of node s and s', a non-diaginal (vertical or
     horizontal) neighbor of s. Cost taken to be the maximum cost of
@@ -201,7 +201,7 @@ public:
 
     @return edge traversal cost
     */
-    float getB(Node s, Node s_prime);
+    float getB(const Node& s, const Node& s_prime);
     /**
     Gets cost of traversing the grid cell while taking configuration space
     into account
@@ -209,7 +209,7 @@ public:
     @param[in] ind index of cell to calculate cspace-corrected cost for
     @return cost of traversing grid cell with cspace
     */
-    float getValWithCSpace(std::tuple<int,int> ind);
+    float getValWithCSpace(const std::tuple<int,int>& ind);
     /**
     Gets nodes affected by updated cell value while taking into account CSpace
 
@@ -224,7 +224,7 @@ public:
     @param[in] s_prime neighbor of s
     @return cost of traversing from s to s_prime
     */
-    float getTraversalCost(Node s, Node s_prime);
+    float getTraversalCost(const Node& s, const Node& s_prime);
     /**
     Get cost of traversing from one continuous position on the graph p to another
     continuous position p_prime
@@ -232,14 +232,14 @@ public:
     @param[in] p_prime another continuous position on the graph
     @return cost of traversing from p to p_prime
     */
-    float getContinuousTraversalCost(std::tuple<float,float> p, std::tuple<float,float> p_prime);
+    float getContinuousTraversalCost(const std::tuple<float,float>& p, const std::tuple<float,float>& p_prime);
     /**
     Gets minimum traversal cost from a node s to any neighboring node.
 
     @param[in] s Node to get minimum traversal cost for
     @return minimum traversal cost
     */
-    float getMinTraversalCost(Node s);
+    float getMinTraversalCost(const Node& s);
     /**
     Calculates euclidian distance between the start node 'Start' and the
     specified node s. This will be used as the focussing heuristic.
@@ -247,7 +247,7 @@ public:
     @param[in] s node to calculate euclidian distance to
     @return euclidian distance between the start node and node s
     */
-    float euclidian_heuristic(Node s);
+    float euclidian_heuristic(const Node& s);
     /**
     Same as above method but takes index of Node to calculate euclidian distance
     from start for.
@@ -255,7 +255,7 @@ public:
     @param[in] ind (x,y) coordinates of node
     @return euclidian distance to node from current start position
     */
-    float euclidian_heuristic(std::tuple<int,int> ind);
+    float euclidian_heuristic(const std::tuple<int,int>& ind);
     /**
     Gets Nodes around a cell whose occupancy value has changed while taking configuration
     space into account.
@@ -263,7 +263,7 @@ public:
     @param[in] cellInd index of cell whose val has changed
     @return list of nodes who might be affected by changed cell value
     */
-    std::vector<Node> getNodesAroundCellWithCSpace(std::tuple<int,int> cellInd);
+    std::vector<Node> getNodesAroundCellWithCSpace(const std::tuple<int,int>& cellInd);
 
 
 

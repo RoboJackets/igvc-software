@@ -87,7 +87,7 @@ void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
     }
 }
 
-bool Graph::isValidNode(Node s)
+bool Graph::isValidNode(const Node& s)
 {
     int x,y;
     std::tie(x,y) = s.getIndex();
@@ -95,7 +95,7 @@ bool Graph::isValidNode(Node s)
     return (x<=length) && (y<=width) && (x>=0) && (y>=0);
 }
 
-bool Graph::isValidPosition(std::tuple<float,float> p)
+bool Graph::isValidPosition(const std::tuple<float,float>& p)
 {
     float x,y;
     std::tie(x,y) = p;
@@ -104,14 +104,14 @@ bool Graph::isValidPosition(std::tuple<float,float> p)
             && (x>=0.0f) && (y>=0.0f);
 }
 
-bool Graph::isValidCell(std::tuple<int,int> ind)
+bool Graph::isValidCell(const std::tuple<int,int>& ind)
 {
     int x,y;
     std::tie(x,y) = ind;
     return (x<length) && (y<width) && (x>=0) && (y>=0);
 }
 
-bool Graph::isDiagonal(Node s, Node s_prime)
+bool Graph::isDiagonal(const Node& s, const Node& s_prime)
 {
     int x1, y1;
     std::tie(x1,y1) = s.getIndex();
@@ -135,7 +135,7 @@ bool Graph::isDiagonalContinuous(const std::tuple<float,float>& p, const std::tu
     return (std::get<0>(p) != std::get<0>(p_prime)) && (std::get<1>(p) != std::get<1>(p_prime));
 }
 
-std::vector<Node> Graph::nbrs(Node s, bool include_invalid)
+std::vector<Node> Graph::nbrs(const Node& s, bool include_invalid)
 {
     std::vector<Node> neighbors;
     int x,y;
@@ -292,7 +292,7 @@ Node Graph::cknbr(Node s, Node s_prime)
         return Node(false);
 }
 
-std::vector<std::tuple<Node, Node>> Graph::connbrs(Node s)
+std::vector<std::tuple<Node, Node>> Graph::connbrs(const Node& s)
 {
     // get neighbors of current node, including invalid nodes
     std::vector<Node> neighbors = nbrs(s, true);
@@ -314,7 +314,7 @@ std::vector<std::tuple<Node, Node>> Graph::connbrs(Node s)
     return connbrs;
 }
 
-float Graph::getC(Node s, Node s_prime)
+float Graph::getC(const Node& s, const Node& s_prime)
 {
     // index of cell between s and s_prime. s and s_prime assumed to be
     // diagonal neighbors
@@ -352,10 +352,10 @@ float Graph::getC(Node s, Node s_prime)
 
     // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
     cellVal = getValWithCSpace(cellInd);
-    return (cellVal > 150) ? std::numeric_limits<float>::infinity() : (TRAVERSAL_COST + (cellVal/255.0f)); // #TODO get rid of magic number
+    return (cellVal > 150) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST; // #TODO get rid of magic number
 }
 
-float Graph::getB(Node s, Node s_prime)
+float Graph::getB(const Node& s, const Node& s_prime)
 {
     // each edge has 2 neighboring cells
     std::tuple<int,int> cellInd1;
@@ -397,10 +397,10 @@ float Graph::getB(Node s, Node s_prime)
 
     // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
     maxCellVal = std::min(getValWithCSpace(cellInd1), getValWithCSpace(cellInd2));
-    return (maxCellVal > 150) ? std::numeric_limits<float>::infinity() : (TRAVERSAL_COST + (maxCellVal/255.0f));
+    return (maxCellVal > 150) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST;
 }
 
-float Graph::getValWithCSpace(std::tuple<int,int> ind)
+float Graph::getValWithCSpace(const std::tuple<int,int>& ind)
 {
     // invalid cells have infinite travel cost
     if (!isValidCell(ind))
@@ -424,7 +424,7 @@ float Graph::getValWithCSpace(std::tuple<int,int> ind)
     return static_cast<float>(max_val);
 }
 
-float Graph::getTraversalCost(Node s, Node s_prime)
+float Graph::getTraversalCost(const Node& s, const Node& s_prime)
 {
     if (isDiagonal(s, s_prime))
         return getC(s, s_prime) * DIAGONAL_DISTANCE;
@@ -432,7 +432,7 @@ float Graph::getTraversalCost(Node s, Node s_prime)
         return getB(s, s_prime) * EDGE_DISTANCE;
 }
 
-float Graph::getContinuousTraversalCost(std::tuple<float,float> p, std::tuple<float,float> p_prime)
+float Graph::getContinuousTraversalCost(const std::tuple<float,float>& p, const std::tuple<float,float>& p_prime)
 {
     float x,y;
     std::tie(x,y) = p;
@@ -456,7 +456,7 @@ float Graph::getContinuousTraversalCost(std::tuple<float,float> p, std::tuple<fl
     return isDiagonal(s,s_prime) ? getC(s, s_prime) : getB(s, s_prime);
 }
 
-float Graph::getMinTraversalCost(Node s)
+float Graph::getMinTraversalCost(const Node& s)
 {
     float min_cost = std::numeric_limits<float>::infinity();
     for (Node nbr : this->nbrs(s))
@@ -464,12 +464,12 @@ float Graph::getMinTraversalCost(Node s)
     return min_cost;
 }
 
-float Graph::euclidian_heuristic(Node s)
+float Graph::euclidian_heuristic(const Node& s)
 {
     return this->euclidian_heuristic(s.getIndex());
 }
 
-float Graph::euclidian_heuristic(std::tuple<int,int> ind)
+float Graph::euclidian_heuristic(const std::tuple<int,int>& ind)
 {
     std::tuple<float,float> start_f = Start.getIndex();
     std::tuple<float,float> s_f = ind;
@@ -477,7 +477,7 @@ float Graph::euclidian_heuristic(std::tuple<int,int> ind)
     return igvc::get_distance(start_f, s_f);
 }
 
-std::vector<Node> Graph::getNodesAroundCellWithCSpace(std::tuple<int,int> cellInd)
+std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int,int>& cellInd)
 {
     int x,y;
     std::tie(x,y) = cellInd;
