@@ -1,7 +1,13 @@
 particle_filter:
-  num_particles: 64
+  num_particles: 32
   resample_threshold: 0.8   #From 0 to 1
   covariance_coefficient: 0.8
+  variance:
+    x: 0.1 # X veloctiy in robot's frame
+    y: 0.01 # Y velocty in robot's frame (AKA should be zero, but idk)
+    yaw: 0.05
+profile: false
+voxel_grid_size: 0.1
 visualization:
   hue: #0 to 360
     start: 257.0
@@ -26,7 +32,7 @@ debug: true
 lidar_topic: "/scan/pointcloud"
 fused_topic: "/odometry/filtered"
 odometry_frame: "/odom"
-base_frame: "/base_footprint"
+base_frame: "/base_link"
 lidar_frame: "/lidar"
 parent_frame: "/odom"
 child_frame: "/particle_filter"

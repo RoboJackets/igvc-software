@@ -14,6 +14,9 @@ Octomapper::Octomapper(ros::NodeHandle pNh) {
   igvc::getParam(pNh, "sensor_model/min", m_thresh_min);
   igvc::getParam(pNh, "sensor_model/max", m_thresh_max);
   igvc::getParam(pNh, "sensor_model/max_range", m_max_range);
+  igvc::getParam(pNh, "sensor_model/occupied_coeff", m_sensor_model_occ_coeff);
+  igvc::getParam(pNh, "sensor_model/free_coeff", m_sensor_model_free_coeff);
+  igvc::param(pNh, "sensor_model/algorithm_number", m_sensor_model, 1);
   igvc::getParam(pNh, "ground_filter/iterations", m_ransac_iterations);
   igvc::getParam(pNh, "ground_filter/distance_threshold", m_ransac_distance_threshold);
   igvc::getParam(pNh, "ground_filter/eps_angle", m_ransac_eps_angle);
@@ -191,7 +194,7 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cl
 
   if (raw_pc.size() < 50) {
     // Hacky algorithm to detect ground
-    ROS_ERROR_STREAM("Pointcloud while filtering too small, skipping" << raw_pc.size());
+    ROS_ERROR_STREAM("Pointcloud while filtering too small, skipping " << raw_pc.size());
     nonground = raw_pc;
   } else {
     // Plane detection for ground removal
@@ -212,50 +215,42 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cl
     PCL_point_cloud::Ptr cloud_filtered = raw_pc.makeShared();
     // Create filtering object
     pcl::ExtractIndices<pcl::PointXYZ> extract;
-    bool ground_plane_found = false;
 
     seg.setInputCloud(cloud_filtered);
     seg.segment(*inliers, *coefficients);
     if (inliers->indices.empty()) {
       ROS_INFO("PCL segmentation did not find a plane.");
     } else {
-      if (std::abs(coefficients->values.at(3)) < m_ransac_distance_threshold) {
-        ROS_DEBUG("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
-                  cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
-                  coefficients->values.at(2), coefficients->values.at(3));
-        extract.setInputCloud(cloud_filtered);
-        extract.setIndices(inliers);
-        extract.setNegative(false);
-        extract.filter(ground);
+//        ROS_INFO("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
+//                  cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
+//                  coefficients->values.at(2), coefficients->values.at(3));
+      extract.setInputCloud(cloud_filtered);
+      extract.setIndices(inliers);
+      extract.setNegative(false);
+      extract.filter(ground);
 
-        // remove ground points from full pointcloud
-        if (inliers->indices.size() != cloud_filtered->size()) {
-          extract.setNegative(true);
-          PCL_point_cloud out;
-          extract.filter(out);
-          nonground += out;
-          *cloud_filtered = out;
-        }
-        ground_plane_found = true;
-      } else {
-        ROS_INFO("Horizontal plane (not ground) found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
-                 cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
-                 coefficients->values.at(2), coefficients->values.at(3));
+      // remove ground points from full pointcloud
+      if (inliers->indices.size() != cloud_filtered->size()) {
+        extract.setNegative(true);
+        PCL_point_cloud out;
+        extract.filter(out);
+        nonground += out;
+        *cloud_filtered = out;
       }
     }
     //    ROS_INFO_STREAM("Cloud_filtered Points: " << cloud_filtered->size());
     //    ROS_INFO_STREAM("ground points: " << ground.size());
     //    ROS_INFO_STREAM("nonground points: " << nonground.size());
-    if (!ground_plane_found) {
-      pcl::PassThrough<pcl::PointXYZ> second_pass;
-      second_pass.setFilterFieldName("z");
-      second_pass.setFilterLimits(-m_ground_filter_plane_dist, m_ground_filter_plane_dist);
-      second_pass.setInputCloud(cloud_filtered);
-      second_pass.filter(ground);
-
-      second_pass.setFilterLimitsNegative(true);
-      second_pass.filter(nonground);
-    }
+//    if (!ground_plane_found) {
+//      pcl::PassThrough<pcl::PointXYZ> second_pass;
+//      second_pass.setFilterFieldName("z");
+//      second_pass.setFilterLimits(-m_ground_filter_plane_dist, m_ground_filter_plane_dist);
+//      second_pass.setInputCloud(cloud_filtered);
+//      second_pass.filter(ground);
+//
+//      second_pass.setFilterLimitsNegative(true);
+//      second_pass.filter(nonground);
+//    }
   }
 }
 
@@ -278,17 +273,46 @@ float Octomapper::sensor_model(const pc_map_pair &pair, const octomap::KeySet &f
                                const octomap::KeySet &occupied_cells) const {
   float total = 1; // So the total is greater than 0
   // TODO: OPENMP?
-  for (const auto &free_cell : free_cells) {
-    octomap::OcTreeNode *leaf = pair.octree->search(free_cell);
-    if (leaf) {
-      // Can check sign bit using bit operators, but need to benchmark
-      total += leaf->getLogOdds() < 0 ? leaf->getLogOdds() * m_sensor_empty_coeff * m_prob_miss_logodds : leaf->getLogOdds() * m_penalty * m_prob_miss_logodds;
+  if (m_sensor_model == 0) {
+    for (const auto &free_cell : free_cells) {
+      octomap::OcTreeNode *leaf = pair.octree->search(free_cell);
+      if (leaf) {
+        // Can check sign bit using bit operators, but need to benchmark
+        total += leaf->getLogOdds() < 0 ? leaf->getLogOdds() * m_sensor_empty_coeff * m_prob_miss_logodds : leaf->getLogOdds() * m_penalty * m_prob_miss_logodds;
+      }
     }
-  }
-  for (const auto &occupied_cell : occupied_cells) {
-    octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
-    if (leaf) {
-      total += leaf->getLogOdds() > 0 ? leaf->getLogOdds() * m_prob_hit_logodds : leaf->getLogOdds() * m_penalty * m_prob_hit_logodds;
+    for (const auto &occupied_cell : occupied_cells) {
+      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
+      if (leaf) {
+        total += leaf->getLogOdds() > 0 ? leaf->getLogOdds() * m_prob_hit_logodds : leaf->getLogOdds() * m_penalty * m_prob_hit_logodds;
+      }
+    }
+  } else if (m_sensor_model == 1) {
+    for (const auto &free_cell : free_cells)
+    {
+      octomap::OcTreeNode *leaf = pair.octree->search(free_cell);
+      if (leaf) {
+        // Can check sign bit using bit operators, but need to benchmark
+        float prob = from_logodds(leaf->getLogOdds());
+        total += m_sensor_model_free_coeff * (prob * m_prob_miss + (1-prob) * (1-m_prob_miss));
+      }
+    }
+    for (const auto &occupied_cell : occupied_cells)
+    {
+      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
+      if (leaf) {
+        float prob = from_logodds(leaf->getLogOdds());
+        total += m_sensor_model_occ_coeff * (prob * m_prob_hit + (1-prob) * (1-m_prob_hit));
+      }
+    }
+  } else if (m_sensor_model == 2) {
+    for (const auto &occupied_cell : occupied_cells)
+    {
+      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
+      if (leaf) {
+        float prob = from_logodds(leaf->getLogOdds());
+        total += m_sensor_model_occ_coeff * (prob * m_prob_hit);
+      }
     }
   }
   return total;

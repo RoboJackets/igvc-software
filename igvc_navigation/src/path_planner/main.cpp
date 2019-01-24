@@ -150,7 +150,10 @@ int main(int argc, char** argv)
     planning_mutex.lock();
     Path<SearchLocation, SearchMove> path;
     search_problem.DistanceToGoal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
+    ros::Time begin = ros::Time::now();
     path = GraphSearch::AStar(search_problem, expanded_callback, maxIter);
+    double elapsed = (ros::Time::now() - begin).toSec();
+    ROS_INFO_STREAM("Path found in " << elapsed << "s.");
     nav_msgs::Path path_msg;
     // TODO timestamp why
     path_msg.header.stamp = ros::Time::now();

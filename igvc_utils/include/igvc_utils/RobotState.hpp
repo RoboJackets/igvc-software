@@ -54,6 +54,13 @@ public:
   double quat_z() const;
   double quat_w() const;
 
+  void set_x(double x);
+  void set_y(double y);
+  void set_z(double z);
+  void set_roll(double roll);
+  void set_pitch(double pitch);
+  void set_yaw(double yaw);
+
   // set state using an odometry msg
   void setState(const nav_msgs::Odometry::ConstPtr &msg)
   {
@@ -183,6 +190,26 @@ inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
 {
   out << "(" << state.x() << ", " << state.y() << ", " << state.yaw() << ")";
   return out;
+}
+
+inline void RobotState::set_x(double x) { transform.setOrigin(tf::Vector3(x, y(), z())); }
+inline void RobotState::set_y(double y) { transform.setOrigin(tf::Vector3(x(), y, z())); }
+inline void RobotState::set_z(double z) { transform.setOrigin(tf::Vector3(x(), y(), z)); }
+inline void RobotState::set_roll(double roll) {
+  tf::Matrix3x3 t = transform.getBasis();
+  t.setRPY(roll, pitch(), yaw());
+  transform.setBasis(t);
+}
+inline void RobotState::set_pitch(double pitch) {
+  tf::Matrix3x3 t = transform.getBasis();
+  t.setRPY(roll(), pitch, yaw());
+  transform.setBasis(t);
+}
+
+inline void RobotState::set_yaw(double yaw) {
+  tf::Matrix3x3 t = transform.getBasis();
+  t.setRPY(roll(), pitch(), yaw);
+  transform.setBasis(t);
 }
 
 #endif  // ROBOTSTATE_H

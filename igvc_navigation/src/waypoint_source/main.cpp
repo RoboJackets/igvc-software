@@ -81,6 +81,7 @@ void loadWaypointsFile(std::string path, std::vector<geometry_msgs::PointStamped
       geometry_msgs::PointStamped p;
 
       UTM(lat, lon, &(p.point.x), &(p.point.y));
+      ROS_INFO_STREAM("(" << lat << ", " << lon << ") --> (" << p.point.x << ", " << p.point.y << ")");
 
       waypoints.push_back(p);
     }

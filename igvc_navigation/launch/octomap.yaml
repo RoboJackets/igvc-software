@@ -1,17 +1,22 @@
 octree:
-  resolution: 0.2
+  resolution: 0.1
   lazy_evaluation: false
 sensor_model:
-  hit: 0.9
-  miss: 0.1
-  min: 0.01
-  max: 0.99
+  hit: 0.8
+  miss: 0.4
+  min: 0.03
+  max: 0.97
   max_range: 60
   mismatch_penalty: 100
   empty_coeff: 0.01
+  occupied_coeff: 1
+  free_coeff: 1
+filter:
+  min_distance: 1
+  max_distance: 40
 ground_filter:
-  iterations: 100
-  distance_threshold: 0.15
+  iterations: 200
+  distance_threshold: 0.05
   eps_angle: 0.15
   plane_distance: 0.04
 map:

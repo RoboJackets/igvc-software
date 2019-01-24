@@ -9,7 +9,9 @@ Particle_filter::Particle_filter(const ros::NodeHandle &pNh) : pNh(pNh), m_octom
   float resample_threshold;
   igvc::getParam(pNh, "particle_filter/num_particles", m_num_particles);
   igvc::getParam(pNh, "particle_filter/resample_threshold", resample_threshold);
-  igvc::getParam(pNh, "particle_filter/covariance_coefficient", m_cov_coeff);
+  igvc::getParam(pNh, "particle_filter/variance/x", m_variance_x);
+  igvc::getParam(pNh, "particle_filter/variance/y", m_variance_y);
+  igvc::getParam(pNh, "particle_filter/variance/yaw", m_variance_yaw);
   igvc::getParam(pNh, "visualization/hue/start", m_viz_hue_start);
   igvc::getParam(pNh, "visualization/hue/end", m_viz_hue_end);
   igvc::getParam(pNh, "visualization/saturation/start", m_viz_sat_start);
@@ -82,18 +84,15 @@ void Particle_filter::initialize_particles(const tf::Transform &pose) {
 //  fuckOcc.publish(debug_pcl2);
 //}
 
-void Particle_filter::update(const tf::Transform &diff, const boost::array<double, 36> &covariance,
+void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::TwistWithCovariance& twist, const ros::Duration delta_t,
                              const pcl::PointCloud<pcl::PointXYZ> &pc, const tf::Transform &lidar_to_base) {
   // Create noise distribution from covariance to sample from
-  boost::array<double, 36> cov_copy(covariance);
-  Eigen::Map<Eigen::Matrix<double, 6, 6>> eigen_cov(cov_copy.data());
 //  for (int i = 0; i < 6; ++i) {
 //    ROS_INFO_STREAM(covariance[6 * i] << ", " << covariance[6 * i + 1] << ", " << covariance[6 * i + 2] << ", "
 //                                      << covariance[6 * i + 3] << ", " << covariance[6 * i + 4] << ", "
 //                                      << covariance[6 * i + 5] << ", ");
 //  }
-  Normal_random_variable uncertainty{eigen_cov};
-
+//  static Normal_random_variable uncertainty{m_variance_x, m_variance_y, m_variance_yaw};
 
   // Separate pc to ground and nonground
   pcl::PointCloud<pcl::PointXYZ> ground, nonground;
@@ -101,18 +100,26 @@ void Particle_filter::update(const tf::Transform &diff, const boost::array<doubl
 
   float highest_weight = 0;
   size_t highest_weight_idx = 0;
-  float lowest_weight = 1.0e10;
-  size_t lowest_weight_idx = 0;
+  float weight_sum = 0;
   // For each particle in particles
 //  ROS_INFO_STREAM("1");
   static tf::TransformBroadcaster br;
+//  ROS_INFO_STREAM("(" << twist.twist.linear.x << ", " << twist.twist.linear.y << ", " << twist.twist.linear.z << "), dt: " << delta_t.toSec());
+//  ROS_INFO_STREAM("("<<(delta_t.toSec() * twist.twist.linear.x) << ", " << delta_t.toSec() * twist.twist.linear.y << ", " << delta_t.toSec() * twist.twist.linear.z << ")");
+//  ROS_INFO_STREAM("transform: " << diff.getOrigin().x() << ", " <<  diff.getOrigin().y() << ", " <<  diff.getOrigin().z() << ")");
   for (size_t i = 0; i < m_particles.size(); ++i) {
     // TODO: Add Scanmatching
     // TODO: Add CUDA or OpenMP?
     // Sample new particle from old using pose and covariance
 //    ROS_INFO_STREAM("diff: " << diff.getOrigin().x() << ", " << diff.getOrigin().y() << ", " << diff.getOrigin().z());
-    m_particles[i].state *= diff;
-    m_particles[i].state += m_cov_coeff * uncertainty();
+    double noisy_x = twist.twist.linear.x + gauss(m_variance_x);
+    double noisy_y = twist.twist.linear.y + gauss(m_variance_y);
+    double cur_yaw = m_particles[i].state.yaw();
+    double new_x = noisy_x * cos(cur_yaw) - noisy_y * sin(cur_yaw);
+    double new_y = noisy_x * sin(cur_yaw) + noisy_y * cos(cur_yaw);
+    m_particles[i].state.set_x(m_particles[i].state.x() + delta_t.toSec() * new_x);
+    m_particles[i].state.set_y(m_particles[i].state.y() + delta_t.toSec() * new_y);
+    m_particles[i].state.set_yaw(m_particles[i].state.yaw() + delta_t.toSec() * (twist.twist.angular.z + gauss(m_variance_yaw)));
 //    ROS_INFO_STREAM("2");
 
     // Transform particles from base_frame to odom_frame
@@ -153,26 +160,20 @@ void Particle_filter::update(const tf::Transform &diff, const boost::array<doubl
 
     // Calculate weight using sensor model
     m_particles[i].weight = m_octomapper.sensor_model(m_particles[i].pair, free, occupied);
+    weight_sum += m_particles[i].weight;
 //    ROS_INFO_STREAM("Weight of " << i << " : " << m_particles[i].weight);
     // Look for highest weight particle
     if (m_particles[i].weight > highest_weight) {
       highest_weight = m_particles[i].weight;
       highest_weight_idx = i;
-    } else if (m_particles[i].weight < lowest_weight) {
-      lowest_weight = m_particles[i].weight;
-      lowest_weight_idx = i;
     }
 
     // Update map
     m_octomapper.insert_scan(m_particles[i].pair, free, occupied);
   }
-  ROS_INFO_STREAM(lowest_weight << " -> " << highest_weight);
   // Move weights to >= 0
-  highest_weight -= lowest_weight;
-  float weight_sum = 0;
   for (Particle& p : m_particles)
   {
-    p.weight -= lowest_weight;
     weight_sum += p.weight;
   }
   // Move octomap and weight of particle to best_particle
@@ -196,7 +197,7 @@ void Particle_filter::update(const tf::Transform &diff, const boost::array<doubl
     }
     resample_particles();
   } else {
-    ROS_INFO_STREAM("N_eff: " << inverse_n_eff << " / " << m_inverse_resample_threshold);
+    ROS_INFO_STREAM("N_eff: " << 1/inverse_n_eff << " / " << 1/m_inverse_resample_threshold);
   }
 
   // Update map of best particle for use
@@ -288,5 +289,12 @@ void Particle_filter::map_weight_to_rgb(float weight, double *r, double *g, doub
   double l = map_range(0, m_total_weight, m_viz_light_start, m_viz_light_end, weight);
   l = l > m_viz_light_max ? l - m_viz_light_max : l;
   hsluv2rgb(h, s, l, r, g, b);
+}
+
+double Particle_filter::gauss(double variance) {
+  static std::mt19937 gen{ std::random_device{}() };
+  std::normal_distribution<> dist(0, variance);
+
+  return dist(gen);
 }
 

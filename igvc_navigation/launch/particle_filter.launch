@@ -3,7 +3,7 @@
     This file launches the particle_filter node which performs robot localization
     -->
 <launch>
-    <node pkg="igvc_navigation" type="particle_filter" name="particle_filter" output="screen">
+    <node pkg="igvc_navigation" type="particle_filter" name="particle_filter" output="screen" >
         <rosparam command="load" file="$(find igvc_navigation)/launch/particle_filter.yaml"/>
         <rosparam command="load" file="$(find igvc_navigation)/launch/octomap.yaml"/>
     </node>

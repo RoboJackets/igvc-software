@@ -57,9 +57,14 @@ private:
   void compute_voxels(const octomap::OcTree& tree, const octomap::Pointcloud& scan, const octomap::Pointcloud& ground,
                       const octomap::point3d& origin, octomap::KeySet& free_cells,
                       octomap::KeySet& occupied_cells);
-  float to_logodds(float p)
+  inline float to_logodds(float p) const
   {
     return log(p / (1 - p));
+  }
+
+  inline float from_logodds(float logodd) const
+  {
+    return (1 - 1/(1 + exp(logodd)));
   }
 
   ros::NodeHandle pNh;
@@ -69,11 +74,13 @@ private:
   double m_prob_miss;
   double m_prob_hit_logodds;
   double m_prob_miss_logodds;
+  double m_sensor_model_occ_coeff, m_sensor_model_free_coeff;
   double m_penalty;
   double m_sensor_empty_coeff;
   double m_thresh_min;
   double m_thresh_max;
   double m_max_range;
+  int m_sensor_model = 1;
   int m_ransac_iterations;
   double m_ransac_distance_threshold;
   double m_ransac_eps_angle;

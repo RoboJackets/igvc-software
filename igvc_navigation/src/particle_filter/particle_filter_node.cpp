@@ -5,6 +5,7 @@
 
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
+#include <pcl/filters/voxel_grid.h>
 
 #include <boost/circular_buffer.hpp>
 
@@ -17,20 +18,42 @@
 #include <tf/transform_broadcaster.h>
 
 #include <gperftools/profiler.h>
+#include <geometry_msgs/TwistWithCovariance.h>
 
 class ParticleFilterNode {
 public:
-  ParticleFilterNode(double transform_max_wait_time, double update_time_thresh, double start_x, double start_y,
-                     double start_z, double pc_buf_size, double pose_buf_size, bool debug)
-      : m_debug(debug), m_update_time_thresh(update_time_thresh), m_start_x(start_x), m_start_y(start_y),
-        m_start_z(start_z), m_pc_buf(pc_buf_size), m_pose_buf(pose_buf_size),
-        m_lidar_transform(nullptr) {
+
+  ParticleFilterNode(const ros::NodeHandle &pNh) : m_particle_filter{
+      std::unique_ptr<Particle_filter>(new Particle_filter(pNh))}, m_lidar_transform{nullptr},
+                                                   m_last_time{ros::Time::now()}, m_tf_listener{} {
+    int pc_buf_size, pose_buf_size;
+    igvc::getParam(pNh, "update_time_threshold", m_update_time_thresh);
+    igvc::getParam(pNh, "start_x", m_start_x);
+    igvc::getParam(pNh, "start_y", m_start_y);
+    igvc::getParam(pNh, "start_z", m_start_z);
+    igvc::getParam(pNh, "particle_filter_buffer_size", pc_buf_size);
+    igvc::getParam(pNh, "pose_buffer_size", pose_buf_size);
+    igvc::param(pNh, "debug", m_debug, false);
+    igvc::param(pNh, "profile", m_profile, false);
+    igvc::getParam(pNh, "lidar_topic", m_lidar_topic);
+    igvc::getParam(pNh, "fused_topic", m_fused_topic);
+    igvc::getParam(pNh, "odometry_frame", m_odom_frame);
+    igvc::getParam(pNh, "base_frame", m_base_frame);
+    igvc::getParam(pNh, "lidar_frame", m_lidar_frame);
+    igvc::getParam(pNh, "parent_frame", m_parent_frame);
+    igvc::getParam(pNh, "child_frame", m_child_frame);
+    igvc::getParam(pNh, "voxel_grid_size", m_voxel_grid_size);
+    igvc::getParam(pNh, "filter/min_distance", m_filter_min);
+    igvc::getParam(pNh, "filter/max_distance", m_filter_max);
+    m_pc_buf = boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr>(pc_buf_size);
+    m_pose_buf = boost::circular_buffer<nav_msgs::OdometryConstPtr>(pose_buf_size);
   }
 
   void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc);
 
   void pose_callback(const nav_msgs::OdometryConstPtr &pose);
 
+  bool m_profile = false;
   tf::TransformListener m_tf_listener;
   std::unique_ptr<Particle_filter> m_particle_filter;
   ros::Publisher m_map_pub;
@@ -44,14 +67,17 @@ private:
 
   void update(int pose_idx, int pc_idx, const ros::Time &stamp);
 
-  void publish(const ros::Time &stamp, const tf::Transform& odom_to_base);
+  void publish(const ros::Time &stamp);
 
   void get_lidar_transform();
 
-  bool m_debug;
+  bool m_debug{};
   bool m_initialised = false;
-  double m_update_time_thresh, m_start_x, m_start_y, m_start_z;
+  double m_voxel_grid_size{};
+  double m_update_time_thresh{}, m_start_x{}, m_start_y{}, m_start_z{};
   std::shared_ptr<tf::Stamped<tf::Pose>> m_last_pose;
+  double m_filter_min{}, m_filter_max{};
+  ros::Time m_last_time;
   cv_bridge::CvImage m_img_bridge;
   boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr> m_pc_buf;
   boost::circular_buffer<nav_msgs::OdometryConstPtr> m_pose_buf;
@@ -80,7 +106,9 @@ void ParticleFilterNode::pose_callback(const nav_msgs::OdometryConstPtr &pose) {
  * Compares m_pose_buf and m_pc_buf; Will update with every lidar, but needs to match the correct pose with it
  */
 void ParticleFilterNode::check_update() {
-  ProfilerStart("particle_filter");
+  if (m_profile) {
+    ProfilerStart("particle_filter");
+  }
 //  ROS_INFO_STREAM("pc buf size: " << m_pc_buf.size() << " pose buf size: " << m_pose_buf.size());
   // Needs both buffers to have at least one element
   if (m_pc_buf.empty() || m_pose_buf.empty()) {
@@ -93,6 +121,7 @@ void ParticleFilterNode::check_update() {
   // If pose stamp > pc_stamp, then update, since the difference will only get larger,
   // and don't want to dump lidar msgs ?? Do we??
   for (size_t i = 0; i < m_pose_buf.size(); ++i) {
+    ROS_INFO_STREAM(i << " - " << (pc_stamp - m_pose_buf[i]->header.stamp));
     if (pc_stamp - m_pose_buf[i]->header.stamp < ros::Duration(m_update_time_thresh)) {
       update(i, 0, pc_stamp);
       return;
@@ -101,7 +130,9 @@ void ParticleFilterNode::check_update() {
       return;
     }
   }
-  ProfilerStop();
+  if (m_profile) {
+    ProfilerStop();
+  }
 }
 
 /**
@@ -115,14 +146,13 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
   tf::poseMsgToTF(m_pose_buf[pose_idx]->pose.pose, cur_pose);
 
   // On first run, initialize particles with the pose
-  if (!m_initialised)
-  {
+  if (!m_initialised) {
     m_particle_filter->initialize_particles(cur_pose);
     m_last_pose = std::make_shared<tf::Stamped<tf::Pose>>(cur_pose);
     m_initialised = true;
+    ROS_INFO("Initializing particle filter");
   }
 
-  // Get pose difference
   tf::Transform diff = m_last_pose->inverseTimes(cur_pose);
   diff.setRotation(diff.getRotation().normalize());
 
@@ -131,30 +161,37 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
   get_lidar_transform();
 
   // TODO: Make new node to filter pc instead of doing it here
-  pcl::PointCloud<pcl::PointXYZ>::Ptr small(new pcl::PointCloud<pcl::PointXYZ>);
-  float radius = 40;
-  float distanceFromSphereCenterPoint;
-  bool pointIsWithinSphere;
-  for (const auto& point_i : *m_pc_buf[pc_idx]) {
-    distanceFromSphereCenterPoint = point_i.x * point_i.x +
-        point_i.y * point_i.y +
-        point_i.z * point_i.z;
-    pointIsWithinSphere = distanceFromSphereCenterPoint <= radius;
-    if (pointIsWithinSphere) {
-      small->push_back(point_i);
+  pcl::PointCloud<pcl::PointXYZ> filtered_pcl;
+  pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
+//  ROS_INFO_STREAM("Filtered size (0): " << m_pc_buf[pc_idx]->size() << " with leaf size " << m_voxel_grid_size);
+  voxel_grid.setInputCloud(m_pc_buf[pc_idx]);
+  voxel_grid.setLeafSize(m_voxel_grid_size, m_voxel_grid_size, m_voxel_grid_size);
+  voxel_grid.filter(filtered_pcl);
+
+  float distance;
+  pcl::PointCloud<pcl::PointXYZ> filtered_2;
+//  ROS_INFO_STREAM("Filtered size (1): " << filtered_pcl.size());
+  for (const auto& point : filtered_pcl)
+  {
+    distance = point.x * point.x + point.y * point.y + point.z * point.z;
+    if (distance > m_filter_min && distance < m_filter_max) {
+      filtered_2.push_back(point);
     }
   }
+//  ROS_INFO_STREAM("Filtered size (2): " << filtered_2.size());
 
   // Transform cloud to base frame
   pcl::PointCloud<pcl::PointXYZ> transformed_pc;
-  pcl_ros::transformPointCloud(*small, transformed_pc, *m_lidar_transform);
+//  pcl_ros::transformPointCloud(filtered, transformed_pc, *m_lidar_transform);
+  pcl_ros::transformPointCloud(filtered_2, transformed_pc, *m_lidar_transform);
 
   //TODO: Do I need to subtract covariances?
-  m_particle_filter->update(diff, m_pose_buf[pose_idx]->pose.covariance, transformed_pc, *m_lidar_transform);
-//  ROS_INFO("5");
+  geometry_msgs::TwistWithCovariance twist = m_pose_buf[pose_idx]->twist;
+  m_particle_filter->update(diff, m_pose_buf[pose_idx]->twist, stamp - m_last_time, transformed_pc, *m_lidar_transform);
+  // TODO: Why is stamp - m_last_time = 0?
 
   // Publish newest iteration of particle filter
-  publish(stamp, cur_pose);
+  publish(stamp);
 
   // Delete buffer till index
   m_pose_buf.erase_begin(static_cast<unsigned long>(pose_idx + 1));
@@ -162,11 +199,12 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
 
   // Update last pose
   *m_last_pose = cur_pose;
+  m_last_time = stamp;
 
 //  ROS_INFO("Done with update in particle_filter_node");
 }
 
-void ParticleFilterNode::publish(const ros::Time &stamp, const tf::Transform& odom_to_base) {
+void ParticleFilterNode::publish(const ros::Time &stamp) {
   // Publish map form best particle
   igvc_msgs::map message;    // >> message to be sent
   sensor_msgs::Image image;  // >> image in the message
@@ -192,13 +230,13 @@ void ParticleFilterNode::publish(const ros::Time &stamp, const tf::Transform& od
 
   // Publish tf transform
   static tf::TransformBroadcaster br;
-  br.sendTransform(tf::StampedTransform(m_particle_filter->m_best_particle.state.transform, stamp, m_parent_frame, m_child_frame));
+  br.sendTransform(
+      tf::StampedTransform(m_particle_filter->m_best_particle.state.transform, stamp, m_parent_frame, m_child_frame));
 
-  if (m_debug)
-  {
+  if (m_debug) {
     uint64 pc_stamp;
     pcl_conversions::toPCL(stamp, pc_stamp);
-    pcl::PointCloud<pcl::PointXYZRGB> debug_pcl=
+    pcl::PointCloud<pcl::PointXYZRGB> debug_pcl =
         pcl::PointCloud<pcl::PointXYZRGB>();
     for (int i = 0; i < m_particle_filter->length_x(); i++) {
       for (int j = 0; j < m_particle_filter->width_y(); j++) {
@@ -252,31 +290,8 @@ int main(int argc, char **argv) {
 
   signal(SIGINT, node_cleanup);
 
-  double transform_max_wait_time, update_time_threshold;
-  double start_x, start_y, start_z;
-  double pc_buf_size, pose_buf_size;
-  bool debug;
-  igvc::getParam(pNh, "transform_max_wait_time", transform_max_wait_time);
-  igvc::getParam(pNh, "update_time_threshold", update_time_threshold);
-  igvc::getParam(pNh, "start_x", start_x);
-  igvc::getParam(pNh, "start_y", start_y);
-  igvc::getParam(pNh, "start_z", start_z);
-  igvc::getParam(pNh, "particle_filter_buffer_size", pc_buf_size);
-  igvc::getParam(pNh, "pose_buffer_size", pose_buf_size);
-  igvc::param(pNh, "debug", debug, false);
-
   pf_node = std::unique_ptr<ParticleFilterNode>(
-      new ParticleFilterNode(transform_max_wait_time, update_time_threshold, start_x, start_y, start_z, pc_buf_size,
-                             pose_buf_size, debug));
-  igvc::getParam(pNh, "lidar_topic", pf_node->m_lidar_topic);
-  igvc::getParam(pNh, "fused_topic", pf_node->m_fused_topic);
-  igvc::getParam(pNh, "odometry_frame", pf_node->m_odom_frame);
-  igvc::getParam(pNh, "base_frame", pf_node->m_base_frame);
-  igvc::getParam(pNh, "lidar_frame", pf_node->m_lidar_frame);
-  igvc::getParam(pNh, "parent_frame", pf_node->m_parent_frame);
-  igvc::getParam(pNh, "child_frame", pf_node->m_child_frame);
-
-  pf_node->m_particle_filter = std::unique_ptr<Particle_filter>(new Particle_filter(pNh));
+      new ParticleFilterNode(pNh));
 
   ros::Subscriber pc_sub = nh.subscribe(pf_node->m_lidar_topic, 1, &ParticleFilterNode::pc_callback, pf_node.get());
   ros::Subscriber pose_sub = nh.subscribe(pf_node->m_fused_topic, 1, &ParticleFilterNode::pose_callback, pf_node.get());
