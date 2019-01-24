@@ -312,14 +312,12 @@
     <material>Gazebo/Grey</material>
   </gazebo>
 
-  <joint name="base_link_to_base_footprint" type="fixed">
-    <parent link="base_link"/>
-    <child link="base_footprint"/>
-    <origin xyz="0.0 0.0 -${drive_tire_diameter / 2}" rpy="0 0 0"/>
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0.0 0.0 ${drive_tire_diameter / 2}" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
-
-
 
   <gazebo reference="body">
     <material>Gazebo/Grey</material>
@@ -330,7 +328,7 @@
   <!-- TODO parameterize -->
   <!-- collision range = min sensing distance -->
   <!-- gpu does gpu acceleration -->
-  <VLP-16 parent="base_link" name="lidar" topic="/scan/pointcloud" hz="10" samples="1875" gpu="false">
+  <VLP-16 parent="base_link" name="lidar" topic="/scan/pointcloud" hz="10" samples="500" gpu="false">
     <origin xyz="${lidar_forward} 0.0 ${lidar_height}" rpy="0 ${lidar_pitch} 0" />
   </VLP-16>
 
@@ -447,7 +445,7 @@
     <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>200.0</updateRate>
-      <bodyName>base_link</bodyName>
+      <bodyName>base_footprint</bodyName>
       <topicName>ground_truth/state_raw</topicName>
       <gaussianNoise>0.00</gaussianNoise>
       <frameName>world</frameName>

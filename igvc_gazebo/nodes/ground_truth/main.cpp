@@ -13,7 +13,6 @@ nav_msgs::Odometry og_pose;
 
 void state_estimate_callback(const nav_msgs::Odometry::ConstPtr& msg) {
   std::lock_guard<std::mutex> planning_lock(mutex);
-  ROS_INFO_STREAM("callback");
   // finds and publishes diff
   nav_msgs::Odometry result;
   result.header = msg->header;
@@ -51,18 +50,36 @@ void state_estimate_callback(const nav_msgs::Odometry::ConstPtr& msg) {
 
 void ground_truth_callback(const nav_msgs::Odometry::ConstPtr& msg) {
   std::lock_guard<std::mutex> planning_lock(mutex);
-  nav_msgs::Odometry result;
-  result.pose.pose.position.x = msg->pose.pose.position.x - og_pose.pose.pose.position.x;
-  result.pose.pose.position.y = msg->pose.pose.position.y - og_pose.pose.pose.position.y;
-  result.twist = msg->twist;
-  result.header = msg->header;
-  result.child_frame_id = "base_link";
-  result.header.frame_id = "odom";
-
-  ground_truth_pub.publish(result);
-  result = prev_gt;
-  if(og_pose.header.stamp.toSec() < 2.0) {
+  if(msg->header.stamp.toSec() < 0.5) {
     og_pose.pose = msg->pose;
+    og_pose.pose.pose.position.x = -msg->pose.pose.position.y;
+    og_pose.pose.pose.position.y = msg->pose.pose.position.x;
+  } else {
+
+    nav_msgs::Odometry result;
+    result.pose = msg->pose;
+    // applying a transform here
+    result.pose.pose.position.x = (-msg->pose.pose.position.y) - og_pose.pose.pose.position.x;
+    result.pose.pose.position.y = msg->pose.pose.position.x - og_pose.pose.pose.position.y;
+    result.twist = msg->twist;
+    result.twist.twist.linear.x = -msg->twist.twist.linear.y;
+    result.twist.twist.linear.y = msg->twist.twist.linear.x;
+    result.header = msg->header;
+    result.child_frame_id = "base_footprint";
+    result.header.frame_id = "odom";
+
+
+    tf::Quaternion quat(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y,
+                        msg->pose.pose.orientation.x, msg->pose.pose.orientation.y);
+    quat *= tf::createQuaternionFromRPY(0, 0, M_PI / 2);
+
+    result.pose.pose.orientation.x = quat.x();
+    result.pose.pose.orientation.y = quat.y();
+    result.pose.pose.orientation.z = quat.z();
+    result.pose.pose.orientation.w = quat.w();
+
+    ground_truth_pub.publish(result);
+    result = prev_gt;
   }
 }
 
