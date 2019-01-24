@@ -72,8 +72,8 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
             else
             {
                 // travel along diagonal to point along edge
-                float toComp = f / sqrtf(std::pow(c,2.0f) - std::pow(f,2.0f));
                 x = d_p1;
+                float toComp = f / sqrtf(std::pow(c,2.0f) - std::pow(f,2.0f));
                 y = std::min(toComp, d_n);
                 v_s =  c * sqrtf(std::pow(x,2.0f) + std::pow(y,2.0f)) + (f * (d_n - y)) + g_p2;
             }
@@ -141,6 +141,9 @@ Key FieldDPlanner::calculateKey(const Node& s)
 {
     // obtain g-values and rhs-values for node s
     float cost_so_far = std::min(getG(s),getRHS(s));
+    // calculate the key to order the node in the PQ with. Note that K_M is the
+    // key modifier, a value which corrects for the distance tracveled by the robot
+    // since the search began (source: D* Lite)
     return Key(cost_so_far + graph.euclidian_heuristic(s) + graph.K_M, cost_so_far);
 }
 

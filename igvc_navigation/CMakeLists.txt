@@ -179,5 +179,3 @@ add_subdirectory(src/waypoint_source)
 add_subdirectory(src/wheel_odometer)
 add_subdirectory(src/d_lite_planner)
 add_subdirectory(src/field_d_planner)
-
-add_subdirectory(src/field_d_iters/field_d_planner_2)

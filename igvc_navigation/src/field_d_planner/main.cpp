@@ -40,6 +40,7 @@ double maximum_distance; // maximum distance to goal node before warning message
 double CSpace; // configuration space
 double goal_range; // distance from goal at which a node is considered the goal
 double rateTime; // path planning/replanning rate
+bool follow_old_path; // follow the previously generated path if no optimal path currently exists
 
 bool initialize_search = true; // set to true if the search problem must be initialized
 bool initialize_graph = true; // set to true if the graph must be initialized
@@ -158,6 +159,7 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, "rate", rateTime);
   igvc::getParam(pNh, "goal_range", goal_range);
   igvc::getParam(pNh, "publish_expanded", publish_expanded);
+  igvc::getParam(pNh, "follow_old_path", follow_old_path);
 
   planner.graph.setCSpace(static_cast<float>(CSpace));
   planner.GOAL_DIST = static_cast<float>(goal_range);
@@ -176,40 +178,42 @@ int main(int argc, char** argv)
   {
       ros::spinOnce(); // handle subscriber callbacks
 
-      // don't plan unless the map has been initialized and there's a goal node
+      // don't plan unless the map has been initialized and a goal node has been set
       if (initialize_graph || !initial_goal_set)
           continue;
+      else
+          planner.graph.updateGraph(map);
 
       if (initialize_search)
-      {
-           planner.initialize();
-           initialize_search = false;
-      }
+          planner.initialize();
 
       if (goal_changed)
       {
           ROS_INFO_STREAM("New Goal Received. Initializing Search...");
-          planner.reinitialize();
+          planner.reinitialize(); // re-initialize the search if the goal node moves
           initialize_search = true;
           goal_changed = false;
       }
 
-      // update the underlying graph with new edge costs
-      planner.graph.updateGraph(map);
-      // update nodes with changed edge costs
       numNodesUpdated = planner.updateNodesAroundUpdatedCells();
-      if (numNodesUpdated > 0) ROS_INFO_STREAM(numNodesUpdated << " nodes updated");
 
-      // compute the shortest path by expanding inconsistent nodes
-      ros::Time begin = ros::Time::now();
-      numNodesExpanded = planner.computeShortestPath();
-      double elapsed = (ros::Time::now() - begin).toSec();
-      if (numNodesExpanded > 0) ROS_INFO_STREAM(numNodesExpanded << " nodes expanded in " << elapsed << "s.");
+      if (numNodesUpdated > 0)
+        ROS_INFO_STREAM(numNodesUpdated << " nodes updated");
+
+      // only update the graph if nodes have been updated
+      if ((numNodesUpdated > 0) || initialize_search)
+      {
+          ros::Time begin = ros::Time::now();
+          numNodesExpanded = planner.computeShortestPath();
+          double elapsed = (ros::Time::now() - begin).toSec();
+          ROS_INFO_STREAM(numNodesExpanded << " nodes expanded in " << elapsed << "s.");
+          if (initialize_search) initialize_search = false;
+      }
 
       if (publish_expanded)
         expanded_callback(planner.getExplored());
 
-      planner.constructOptimalPath(); // construct the optimal path for traversal
+      planner.constructOptimalPath();
 
       nav_msgs::Path path_msg;
       path_msg.header.stamp = ros::Time::now();
@@ -225,7 +229,9 @@ int main(int argc, char** argv)
           path_msg.poses.push_back(pose);
       }
 
-      path_pub.publish(path_msg);
+      if (path_msg.poses.size() > 0 || !follow_old_path)
+        path_pub.publish(path_msg);
+
       rate.sleep();
   }
 
