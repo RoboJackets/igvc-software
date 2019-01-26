@@ -121,13 +121,13 @@ void ParticleFilterNode::check_update() {
   // If pose stamp > pc_stamp, then update, since the difference will only get larger,
   // and don't want to dump lidar msgs ?? Do we??
   for (size_t i = 0; i < m_pose_buf.size(); ++i) {
-    ROS_INFO_STREAM(i << " - " << (pc_stamp - m_pose_buf[i]->header.stamp));
+//    ROS_INFO_STREAM(i << " - " << (pc_stamp - m_pose_buf[i]->header.stamp).toSec());
     if (pc_stamp - m_pose_buf[i]->header.stamp < ros::Duration(m_update_time_thresh)) {
       update(i, 0, pc_stamp);
-      return;
+      break;
     } else if (m_pose_buf[i]->header.stamp > pc_stamp) {
-      update(i, 0, m_pose_buf[i]->header.stamp);
-      return;
+      update(i, 0, pc_stamp);
+      break;
     }
   }
   if (m_profile) {
@@ -149,6 +149,7 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
   if (!m_initialised) {
     m_particle_filter->initialize_particles(cur_pose);
     m_last_pose = std::make_shared<tf::Stamped<tf::Pose>>(cur_pose);
+    m_last_time = stamp;
     m_initialised = true;
     ROS_INFO("Initializing particle filter");
   }
@@ -209,7 +210,7 @@ void ParticleFilterNode::publish(const ros::Time &stamp) {
   igvc_msgs::map message;    // >> message to be sent
   sensor_msgs::Image image;  // >> image in the message
   m_img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8,
-                                    *m_particle_filter->m_best_particle.pair.map);
+                                    *m_particle_filter->m_particles[m_particle_filter->m_best_idx].pair.map);
   m_img_bridge.toImageMsg(image);  // from cv_bridge to sensor_msgs::Image
 
   // Setup message
@@ -219,9 +220,9 @@ void ParticleFilterNode::publish(const ros::Time &stamp) {
   message.length = m_particle_filter->length_x();
   message.width = m_particle_filter->width_y();
   message.resolution = resolution;
-  message.orientation = m_particle_filter->m_best_particle.state.yaw();
-  message.x = std::round(m_particle_filter->m_best_particle.state.x() / resolution) + m_particle_filter->start_x();
-  message.y = std::round(m_particle_filter->m_best_particle.state.y() / resolution) + m_particle_filter->start_y();
+  message.orientation = m_particle_filter->m_particles[m_particle_filter->m_best_idx].state.yaw();
+  message.x = std::round(m_particle_filter->m_particles[m_particle_filter->m_best_idx].state.x() / resolution) + m_particle_filter->start_x();
+  message.y = std::round(m_particle_filter->m_particles[m_particle_filter->m_best_idx].state.y() / resolution) + m_particle_filter->start_y();
   message.x_initial = m_particle_filter->start_x();
   message.y_initial = m_particle_filter->start_y();
 
@@ -231,7 +232,7 @@ void ParticleFilterNode::publish(const ros::Time &stamp) {
   // Publish tf transform
   static tf::TransformBroadcaster br;
   br.sendTransform(
-      tf::StampedTransform(m_particle_filter->m_best_particle.state.transform, stamp, m_parent_frame, m_child_frame));
+      tf::StampedTransform(m_particle_filter->m_particles[m_particle_filter->m_best_idx].state.transform, stamp, m_parent_frame, m_child_frame));
 
   if (m_debug) {
     uint64 pc_stamp;
@@ -241,7 +242,7 @@ void ParticleFilterNode::publish(const ros::Time &stamp) {
     for (int i = 0; i < m_particle_filter->length_x(); i++) {
       for (int j = 0; j < m_particle_filter->width_y(); j++) {
         pcl::PointXYZRGB p;
-        uchar prob = m_particle_filter->m_best_particle.pair.map->at<uchar>(i, j);
+        uchar prob = m_particle_filter->m_particles[m_particle_filter->m_best_idx].pair.map->at<uchar>(i, j);
         if (prob > 127) {
           p = pcl::PointXYZRGB();
           p.x = (i - m_particle_filter->length_x() / 2) * resolution; // TODO: Changes these to use start_x

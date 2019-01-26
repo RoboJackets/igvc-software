@@ -17,6 +17,11 @@ struct Particle
   RobotState state;
   pc_map_pair pair;
   float weight{0};
+  Particle(const Particle& p) : state{p.state}, pair{}, weight(p.weight) {
+    pair.octree = std::unique_ptr<octomap::OcTree>(new octomap::OcTree(*p.pair.octree));
+    pair.map = nullptr;
+  }
+  Particle() : state{}, pair{}, weight{0} {}
 };
 
 class Particle_filter
@@ -31,7 +36,8 @@ public:
   int start_x() { return m_octomapper.start_x(); }
   int start_y() { return m_octomapper.start_y(); }
   double resolution() { return m_octomapper.resolution(); }
-  Particle m_best_particle;
+  int m_best_idx;
+  std::vector<Particle> m_particles;
 
 private:
   void resample_particles();
@@ -56,7 +62,7 @@ private:
   ros::Publisher m_particle_pub;
   ros::Publisher m_ground_pub;
   ros::Publisher m_nonground_pub;
+  ros::Publisher m_num_eff_particles_pub;
   Octomapper m_octomapper;
-  std::vector<Particle> m_particles;
 };
 #endif  // PROJECT_PARTICLE_FILTER_H

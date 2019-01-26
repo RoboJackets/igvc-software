@@ -27,8 +27,8 @@
 
 struct pc_map_pair
 {
-  boost::shared_ptr<octomap::OcTree> octree;
-  boost::shared_ptr<cv::Mat> map;
+  std::unique_ptr<octomap::OcTree> octree;
+  std::unique_ptr<cv::Mat> map;
 };
 
 class Octomapper
@@ -40,7 +40,7 @@ public:
   void create_octree(pc_map_pair& pair) const;
   void insert_scan(pc_map_pair& pc_map_pair, octomap::KeySet& free_cells, octomap::KeySet& occupied_cells) const;
   void get_updated_map(pc_map_pair& pc_map_pair) const;
-  void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground) const;
+  void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground, const pcl::ModelCoefficientsPtr& coefficients) const;
   void separate_occupied(octomap::KeySet& free_cells, octomap::KeySet& occupied_cells, const tf::Point& sensor_pos_tf,
                          const pc_map_pair& pair, const pcl::PointCloud<pcl::PointXYZ>& ground,
                          const pcl::PointCloud<pcl::PointXYZ>& nonground);
@@ -93,6 +93,7 @@ private:
   int m_map_start_y;
   int m_map_encoding;
   float m_odds_sum_default;
+  ros::Publisher m_octo_viz_pub;
   std::vector<octomap::KeyRay> m_keyrays;
 
   // std::unique_ptr<tf::MessageFilter<PCL_point_cloud>> msg_filter;

@@ -4,8 +4,8 @@ particle_filter:
   covariance_coefficient: 0.8
   variance:
     x: 0.1 # X veloctiy in robot's frame
-    y: 0.01 # Y velocty in robot's frame (AKA should be zero, but idk)
-    yaw: 0.05
+    y: 0.0000001 # Y velocty in robot's frame (AKA should be zero, but idk)
+    yaw: 0.03
 profile: false
 voxel_grid_size: 0.1
 visualization:
@@ -19,7 +19,7 @@ visualization:
     start: 70
     end: 60
 transform_max_wait_time: 1 # Seconds I think?
-update_time_threshold: 0.1
+update_time_threshold: 0.2
 start_x: 100
 start_y: 100
 start_z: 0

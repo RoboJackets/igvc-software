@@ -1,7 +1,11 @@
 #include <pcl_ros/transforms.h>
 #include "particle_filter.h"
 #include <tf/transform_broadcaster.h>
+#include <pcl/ModelCoefficients.h>
+#include <pcl/filters/project_inliers.h>
 #include <octomap_ros/conversions.h>
+#include <std_msgs/Float64.h>
+#include <csignal>
 
 Particle_filter::Particle_filter(const ros::NodeHandle &pNh) : pNh(pNh), m_octomapper(pNh) {
   ros::NodeHandle nh; // Can I do this or do I need to pass it in?
@@ -27,6 +31,7 @@ Particle_filter::Particle_filter(const ros::NodeHandle &pNh) : pNh(pNh), m_octom
     m_particle_pub = nh.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 1);
     m_ground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/particle_filter/ground_debug", 1);
     m_nonground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/particle_filter/nonground_debug", 1);
+    m_num_eff_particles_pub = nh.advertise<std_msgs::Float64>("/particle_filter/num_effective_particles", 1);
 
     if (m_viz_hue_start > m_viz_hue_end) {
       m_viz_hue_end += m_viz_hue_max;
@@ -41,7 +46,7 @@ void Particle_filter::initialize_particles(const tf::Transform &pose) {
     Particle p;
     p.state.transform = pose;
     m_octomapper.create_octree(p.pair);
-    m_particles.emplace_back(p);
+    m_particles.emplace_back(std::move(p));
   }
 }
 
@@ -95,10 +100,21 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
 //  static Normal_random_variable uncertainty{m_variance_x, m_variance_y, m_variance_yaw};
 
   // Separate pc to ground and nonground
-  pcl::PointCloud<pcl::PointXYZ> ground, nonground;
-  m_octomapper.filter_ground_plane(pc, ground, nonground);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr ground = boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+  pcl::PointCloud<pcl::PointXYZ>::Ptr nonground = boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+  pcl::PointCloud<pcl::PointXYZ>::Ptr nonground_projected = boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
+  pcl::ModelCoefficients::Ptr coefficients = boost::make_shared<pcl::ModelCoefficients>();
+  m_octomapper.filter_ground_plane(pc, *ground, *nonground, coefficients);
+
+  // Project nonground particles on the ground
+  pcl::ProjectInliers<pcl::PointXYZ> proj;
+  proj.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
+  proj.setInputCloud(nonground);
+  proj.setModelCoefficients(coefficients);
+  proj.filter(*nonground_projected);
 
   float highest_weight = 0;
+  float lowest_weight = 0;
   size_t highest_weight_idx = 0;
   float weight_sum = 0;
   // For each particle in particles
@@ -107,6 +123,7 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
 //  ROS_INFO_STREAM("(" << twist.twist.linear.x << ", " << twist.twist.linear.y << ", " << twist.twist.linear.z << "), dt: " << delta_t.toSec());
 //  ROS_INFO_STREAM("("<<(delta_t.toSec() * twist.twist.linear.x) << ", " << delta_t.toSec() * twist.twist.linear.y << ", " << delta_t.toSec() * twist.twist.linear.z << ")");
 //  ROS_INFO_STREAM("transform: " << diff.getOrigin().x() << ", " <<  diff.getOrigin().y() << ", " <<  diff.getOrigin().z() << ")");
+//  ROS_INFO_STREAM("Delta t: " << delta_t.toSec());
   for (size_t i = 0; i < m_particles.size(); ++i) {
     // TODO: Add Scanmatching
     // TODO: Add CUDA or OpenMP?
@@ -130,8 +147,8 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
     // Transform ground and nonground from base_frame to odom_frame
     // TODO: Is transform faster or plane detection faster? Do I move the ground filtering into the for loop?
     pcl::PointCloud<pcl::PointXYZ> transformed_ground, transformed_nonground;
-    pcl_ros::transformPointCloud(ground, transformed_ground, m_particles[i].state.transform);
-    pcl_ros::transformPointCloud(nonground, transformed_nonground, m_particles[i].state.transform);
+    pcl_ros::transformPointCloud(*ground, transformed_ground, m_particles[i].state.transform);
+    pcl_ros::transformPointCloud(*nonground_projected, transformed_nonground, m_particles[i].state.transform);
 //    ROS_INFO_STREAM("4");
     transformed_ground.header.frame_id = "/odom";
     transformed_pc.header.frame_id = "/odom";
@@ -145,6 +162,7 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
 
     octomap::KeySet free, occupied;
     tf::Transform odom_to_lidar = m_particles[i].state.transform * lidar_to_base;
+    odom_to_lidar.setOrigin(tf::Vector3(odom_to_lidar.getOrigin().x(), odom_to_lidar.getOrigin().y(), 0));
 
     m_octomapper.separate_occupied(free, occupied, odom_to_lidar.getOrigin(), m_particles[i].pair, transformed_ground,
                                    transformed_nonground);
@@ -158,29 +176,29 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
 //    m_particles[i].pair.octree->insertPointCloud(nonground_octo, origin, -1, false);
     // =======================END OF DEBUG========================================================
 
-    // Calculate weight using sensor model
-    m_particles[i].weight = m_octomapper.sensor_model(m_particles[i].pair, free, occupied);
-    weight_sum += m_particles[i].weight;
+    if (transformed_nonground.size() > 0)
+    {
+      // Calculate weight using sensor model
+      m_particles[i].weight = m_octomapper.sensor_model(m_particles[i].pair, free, occupied);
 //    ROS_INFO_STREAM("Weight of " << i << " : " << m_particles[i].weight);
-    // Look for highest weight particle
-    if (m_particles[i].weight > highest_weight) {
-      highest_weight = m_particles[i].weight;
-      highest_weight_idx = i;
+      // Look for lowest weight particle to fix negative weights
+    }
+    if (m_particles[i].weight < lowest_weight) {
+      lowest_weight = m_particles[i].weight;
     }
 
     // Update map
     m_octomapper.insert_scan(m_particles[i].pair, free, occupied);
   }
-  // Move weights to >= 0
-  for (Particle& p : m_particles)
+  // Fix negative weights
+  for (Particle &p : m_particles)
   {
+    p.weight -= lowest_weight;
+    if (p.weight > highest_weight) {
+      highest_weight = p.weight;
+    }
     weight_sum += p.weight;
   }
-  // Move octomap and weight of particle to best_particle
-  m_best_particle.state = m_particles[highest_weight_idx].state;
-  m_best_particle.pair.octree = m_particles[highest_weight_idx].pair.octree;
-  m_best_particle.pair.map = m_particles[highest_weight_idx].pair.map;
-  m_best_particle.weight = m_particles[highest_weight_idx].weight;
 
   // Move sum of weights to m_total_weights
   m_total_weight = weight_sum;
@@ -197,11 +215,26 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
     }
     resample_particles();
   } else {
-    ROS_INFO_STREAM("N_eff: " << 1/inverse_n_eff << " / " << 1/m_inverse_resample_threshold);
+    ROS_INFO_STREAM("N_eff: " << 1/(m_num_particles*inverse_n_eff) << " / " << 1/(m_num_particles*m_inverse_resample_threshold));
+  }
+
+  for (int i = 0; i < m_particles.size(); ++i)
+  {
+    if (m_particles[i].weight == highest_weight)
+    {
+      m_best_idx = i;
+    }
+  }
+  // Publish effective particles if debug
+  if (m_debug)
+  {
+    std_msgs::Float64 num;
+    num.data = 1/(m_num_particles*inverse_n_eff);
+    m_num_eff_particles_pub.publish(num);
   }
 
   // Update map of best particle for use
-  m_octomapper.get_updated_map(m_best_particle.pair);
+  m_octomapper.get_updated_map(m_particles[m_best_idx].pair);
 
   // Debug publish all particles
   if (m_debug) {
@@ -236,6 +269,9 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
         marker.color.r = 1.0;
         marker.color.g = 0;
         marker.color.b = 0;
+        marker.scale.x = 0.4;
+        marker.scale.y = 0.02;
+        marker.scale.z = 0.02;
       }
       marker.id = i++;
 
@@ -270,7 +306,15 @@ void Particle_filter::resample_particles() {
       index++;
     }
     // Found cum_weights[index] >= stating_pointer + i * pointer_width, add that point to the array
-    sampled_particles.emplace_back(m_particles[index]);
+    Particle p{};
+    p.weight = m_particles[index].weight;
+    p.state = m_particles[index].state;
+    p.pair = pc_map_pair{};
+    p.pair.octree = std::unique_ptr<octomap::OcTree>(new octomap::OcTree(*m_particles[index].pair.octree));
+//    octomap::OcTreeNode root = octomap::OcTreeNode(*m_particles[index].pair.octree->getRoot());
+//    ROS_INFO_STREAM(m_particles[index].pair.octree->getRoot()->hasChildren() << " == " << root.hasChildren());
+//    *p.pair.octree->getRoot() = root;
+    sampled_particles.emplace_back(std::move(p));
   }
   // Return sampled array
   m_particles.swap(sampled_particles);

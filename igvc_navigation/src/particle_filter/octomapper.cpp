@@ -2,9 +2,12 @@
 
 #include <octomap/octomap.h>
 #include <octomap_ros/conversions.h>
+#include <visualization_msgs/MarkerArray.h>
 
 // TODO: How to convert OcTree to occupancy grid?
 Octomapper::Octomapper(ros::NodeHandle pNh) {
+  ros::NodeHandle nh;
+
   igvc::getParam(pNh, "octree/resolution", m_octree_resolution);
   igvc::getParam(pNh, "octree/lazy_evaluation", m_lazy_eval);
   igvc::getParam(pNh, "sensor_model/hit", m_prob_hit);
@@ -28,6 +31,7 @@ Octomapper::Octomapper(ros::NodeHandle pNh) {
   igvc::getParam(pNh, "map/log_odds_default", m_odds_sum_default);
   std::string map_encoding;
   igvc::getParam(pNh, "map/encoding", map_encoding);
+  m_octo_viz_pub = nh.advertise<visualization_msgs::MarkerArray>("/octomapper/best_particle", 1);
 
   if (map_encoding == "CV_8UC1") {
     m_map_encoding = CV_8UC1;
@@ -57,7 +61,7 @@ Octomapper::Octomapper(ros::NodeHandle pNh) {
 }
 
 void Octomapper::create_octree(pc_map_pair &pair) const {
-  pair.octree = boost::make_shared<octomap::OcTree>(m_octree_resolution);
+  pair.octree = std::unique_ptr<octomap::OcTree>(new octomap::OcTree(m_octree_resolution));
   pair.octree->setProbHit(m_prob_hit);
   pair.octree->setProbMiss(m_prob_miss);
   pair.octree->setClampingThresMin(m_thresh_min);
@@ -130,6 +134,14 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
     ROS_ERROR_STREAM("Could not create padded max OcTree key at " << maxPt);
   }
 
+
+  visualization_msgs::MarkerArray marker_arr;
+  visualization_msgs::Marker marker;
+  marker.type = visualization_msgs::Marker::CUBE;
+  int i = 0;
+  marker.color.a = 0.6;
+  marker.header.frame_id = "/odom";
+  marker.header.stamp = ros::Time::now();
   //  ROS_INFO_STREAM("Min: " << minPt << ", Max: " << maxPt);
   //  ROS_INFO_STREAM("MinKey: " << key_to_string(minKey) << ", Max: " << key_to_string(maxKey));
   std::vector<std::vector<float>> odds_sum(m_map_length_grid,
@@ -146,6 +158,20 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
       //      ROS_INFO_STREAM("Sum: (" << x << ", " << y << ")");
       if (x < m_map_length / m_octree_resolution && y < m_map_width / m_octree_resolution) {
         odds_sum[x][y] += it->getLogOdds();
+
+        if (it->getOccupancy() > 0.7) {
+          marker.scale.x = m_octree_resolution;
+          marker.scale.y = m_octree_resolution;
+          marker.scale.z = m_octree_resolution;
+          marker.pose.position.x = it.getX();
+          marker.pose.position.y = it.getY();
+          marker.pose.position.z = it.getZ();
+          marker.color.r = it->getOccupancy();
+          marker.color.g = it->getOccupancy();
+          marker.color.b = it->getOccupancy();
+          marker.id = i++;
+          marker_arr.markers.emplace_back(marker);
+        }
       } else {
         ROS_ERROR_STREAM("Point outside!");
       }
@@ -161,8 +187,22 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
           odds_sum[x + dx][y + dy] += it->getLogOdds();  // TODO: Which direction do I add??
         }
       }
+      if (it->getOccupancy() > 0.7) {
+        marker.scale.x = m_octree_resolution * grid_num;
+        marker.scale.y = m_octree_resolution * grid_num;
+        marker.scale.z = m_octree_resolution * grid_num;
+        marker.pose.position.x = (it.getX() + grid_num/2 * m_octree_resolution);
+        marker.pose.position.y = (it.getY() + grid_num/2 * m_octree_resolution);
+        marker.pose.position.z = (it.getZ() + grid_num/2 * m_octree_resolution);
+        marker.color.r = it->getOccupancy();
+        marker.color.g = it->getOccupancy();
+        marker.color.b = it->getOccupancy();
+        marker.id = i++;
+        marker_arr.markers.emplace_back(marker);
+      }
     }
   }
+  m_octo_viz_pub.publish(marker_arr);
 
   // Transfer from log odds to normal probability
   for (int i = 0; i < m_map_length / m_octree_resolution; i++) {
@@ -173,7 +213,7 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
 }
 
 void Octomapper::create_map(pc_map_pair &pair) const {
-  pair.map = boost::make_shared<cv::Mat>(m_map_length_grid, m_map_width_grid, m_map_encoding, 127);
+  pair.map = std::unique_ptr<cv::Mat>(new cv::Mat(m_map_length_grid, m_map_width_grid, m_map_encoding, 127));
 }
 
 void Octomapper::insert_scan(struct pc_map_pair &pc_map_pair, octomap::KeySet &free_cells,
@@ -187,7 +227,7 @@ void Octomapper::insert_scan(struct pc_map_pair &pc_map_pair, octomap::KeySet &f
 }
 
 void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cloud &ground,
-                                     PCL_point_cloud &nonground) const {
+                                     PCL_point_cloud &nonground, const pcl::ModelCoefficientsPtr& coefficients) const {
   //  ROS_INFO_STREAM("Filtering Ground with " << raw_pc.size() << " points");
   ground.header = raw_pc.header;
   nonground.header = raw_pc.header;
@@ -198,7 +238,6 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cl
     nonground = raw_pc;
   } else {
     // Plane detection for ground removal
-    pcl::ModelCoefficientsPtr coefficients(new pcl::ModelCoefficients);
     pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
 
     // create the segmentation object
@@ -271,7 +310,7 @@ void Octomapper::separate_occupied(octomap::KeySet &free_cells, octomap::KeySet 
 
 float Octomapper::sensor_model(const pc_map_pair &pair, const octomap::KeySet &free_cells,
                                const octomap::KeySet &occupied_cells) const {
-  float total = 1; // So the total is greater than 0
+  float total = 0;
   // TODO: OPENMP?
   if (m_sensor_model == 0) {
     for (const auto &free_cell : free_cells) {
@@ -310,8 +349,21 @@ float Octomapper::sensor_model(const pc_map_pair &pair, const octomap::KeySet &f
     {
       octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
       if (leaf) {
-        float prob = from_logodds(leaf->getLogOdds());
-        total += m_sensor_model_occ_coeff * (prob * m_prob_hit);
+        total += leaf->getLogOdds();
+      }
+    }
+    total = from_logodds(total);
+  } else if (m_sensor_model == 3) {
+    for (const auto &occupied_cell : occupied_cells)
+    {
+      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
+      if (leaf) {
+        if (leaf->getLogOdds() > 0)
+        {
+          total += leaf->getLogOdds();
+        } else {
+          total += leaf->getLogOdds() * m_penalty;
+        }
       }
     }
   }
@@ -327,16 +379,16 @@ void Octomapper::compute_voxels(const octomap::OcTree &tree, const octomap::Poin
 #pragma omp parallel
   {
     // Project all nonground
-    #pragma omp for
+#pragma omp for
     for (int i = 0; i < scan.size(); ++i) {
       const octomap::point3d &p = scan[i];
       unsigned threadIdx = 0;
-      #ifdef _OPENMP
+#ifdef _OPENMP
       threadIdx = omp_get_thread_num();
-      #endif
+#endif
       octomap::KeyRay *keyray = &(m_keyrays.at(threadIdx));
       if (tree.computeRayKeys(origin, p, *keyray)) {
-        #pragma omp critical
+#pragma omp critical
         {
           free_cells.insert(keyray->begin(), keyray->end());
           octomap::OcTreeKey key;
