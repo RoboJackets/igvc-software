@@ -11,7 +11,7 @@ sensor_model:
   empty_coeff: 0.000001
   occupied_coeff: 1
   free_coeff: 1
-  algorithm_number: 3
+  algorithm_number: 4
 filter:
   min_distance: 2
   max_distance: 40

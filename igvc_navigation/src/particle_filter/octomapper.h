@@ -46,6 +46,15 @@ public:
                          const pcl::PointCloud<pcl::PointXYZ>& nonground);
   float sensor_model(const pc_map_pair& pair, const octomap::KeySet& free_cells,
                      const octomap::KeySet& occupied_cells) const;
+  inline float to_logodds(float p) const
+  {
+    return log(p / (1 - p));
+  }
+
+  inline float from_logodds(float logodd) const
+  {
+    return (1 - 1/(1 + exp(logodd)));
+  }
   int length_x() { return m_map_length_grid; }
   int width_y() { return m_map_width_grid; }
   int start_x() { return m_map_start_x; }
@@ -57,15 +66,6 @@ private:
   void compute_voxels(const octomap::OcTree& tree, const octomap::Pointcloud& scan, const octomap::Pointcloud& ground,
                       const octomap::point3d& origin, octomap::KeySet& free_cells,
                       octomap::KeySet& occupied_cells);
-  inline float to_logodds(float p) const
-  {
-    return log(p / (1 - p));
-  }
-
-  inline float from_logodds(float logodd) const
-  {
-    return (1 - 1/(1 + exp(logodd)));
-  }
 
   ros::NodeHandle pNh;
   double m_octree_resolution;

@@ -366,6 +366,15 @@ float Octomapper::sensor_model(const pc_map_pair &pair, const octomap::KeySet &f
         }
       }
     }
+  } else if (m_sensor_model == 4) {
+    for (const auto &occupied_cell : occupied_cells)
+    {
+      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
+      if (leaf) {
+        total += leaf->getLogOdds();
+      }
+    }
+    total = from_logodds(total);
   }
   return total;
 }

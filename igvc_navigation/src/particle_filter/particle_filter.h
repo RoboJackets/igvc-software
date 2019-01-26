@@ -21,7 +21,7 @@ struct Particle
     pair.octree = std::unique_ptr<octomap::OcTree>(new octomap::OcTree(*p.pair.octree));
     pair.map = nullptr;
   }
-  Particle() : state{}, pair{}, weight{0} {}
+  Particle() : state{}, pair{}, weight{1} {}
 };
 
 class Particle_filter

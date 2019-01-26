@@ -1,12 +1,12 @@
 particle_filter:
-  num_particles: 32
-  resample_threshold: 0.8   #From 0 to 1
+  num_particles: 64
+  resample_threshold: 0.50   #From 0 to 1
   covariance_coefficient: 0.8
   variance:
     x: 0.1 # X veloctiy in robot's frame
     y: 0.0000001 # Y velocty in robot's frame (AKA should be zero, but idk)
-    yaw: 0.03
-profile: false
+    yaw: 0.04
+profile: true
 voxel_grid_size: 0.1
 visualization:
   hue: #0 to 360
