@@ -27,8 +27,8 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
     if (i == 0)
     {
       geometry_msgs::PoseStamped start;
-      start.pose.position.x = this->cur_pos.x;
-      start.pose.position.y = this->cur_pos.y;
+      start.pose.position.x = this->cur_pos.x();
+      start.pose.position.y = this->cur_pos.y();
       trajectory.poses.push_back(start);
 
       vel.left_velocity = action[0] - action[1] * axle_length / 2;
@@ -45,8 +45,8 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
     }
 
     geometry_msgs::PoseStamped pose;
-    pose.pose.position.x = this->cur_pos.x;
-    pose.pose.position.y = this->cur_pos.y;
+    pose.pose.position.x = this->cur_pos.x();
+    pose.pose.position.y = this->cur_pos.y();
     trajectory.poses.push_back(pose);
   }
 }
@@ -155,8 +155,8 @@ void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path, unsigned in
 
 void SmoothControl::getLineOfSightAndHeading()
 {
-  double slope_x = target.x - cur_pos.x;
-  double slope_y = target.y - cur_pos.y;
+  double slope_x = target.x() - cur_pos.x();
+  double slope_y = target.y() - cur_pos.y();
 
   // line of sight
   Eigen::Vector3d los(slope_x, slope_y, 0);
@@ -164,7 +164,7 @@ void SmoothControl::getLineOfSightAndHeading()
   this->los_ << los;
 
   // get current robot heading in vector format
-  Eigen::Vector3d heading(std::cos(this->cur_pos.yaw), std::sin(this->cur_pos.yaw), 0);
+  Eigen::Vector3d heading(std::cos(this->cur_pos.yaw()), std::sin(this->cur_pos.yaw()), 0);
   this->heading_ << heading;
 }
 
@@ -226,7 +226,7 @@ unsigned int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
 
   double temp = \
       cur_pos.distTo(path->poses[path_index].pose.position.x,
-                                       path->poses[path_index].pose.position.y);
+                     path->poses[path_index].pose.position.y);
 
   while (path_index < path->poses.size() && temp <= closest)
   {
@@ -237,7 +237,7 @@ unsigned int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
     path_index++;
     temp = \
         cur_pos.distTo(path->poses[path_index].pose.position.x,
-                                         path->poses[path_index].pose.position.y);
+                       path->poses[path_index].pose.position.y);
   }
 
   return path_index;
