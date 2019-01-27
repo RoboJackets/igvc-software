@@ -33,7 +33,7 @@ Octomapper::Octomapper(ros::NodeHandle pNh) {
   igvc::getParam(pNh, "map/encoding", map_encoding);
   m_octo_viz_pub = nh.advertise<visualization_msgs::MarkerArray>("/octomapper/best_particle", 1);
 
-  if (map_encoding == "CV_8UC1") {
+  if (map_encoding=="CV_8UC1") {
     m_map_encoding = CV_8UC1;
   } else {
     m_map_encoding = CV_8UC1;
@@ -43,14 +43,14 @@ Octomapper::Octomapper(ros::NodeHandle pNh) {
   m_prob_miss_logodds = to_logodds(static_cast<float>(m_prob_miss));
 
   // TODO: replace all length/resolution with length_grid
-  m_map_length_grid = static_cast<int>(m_map_length / m_octree_resolution);
-  m_map_width_grid = static_cast<int>(m_map_width / m_octree_resolution);
+  m_map_length_grid = static_cast<int>(m_map_length/m_octree_resolution);
+  m_map_width_grid = static_cast<int>(m_map_width/m_octree_resolution);
 
 #ifdef _OPENMP
 #pragma omp parallel
 #pragma omp critical
   {
-    if (omp_get_thread_num() == 0) {
+    if (omp_get_thread_num()==0) {
       ROS_INFO_STREAM("OMP threads: " << omp_get_num_threads());
       m_keyrays.resize(omp_get_num_threads());
     }
@@ -67,8 +67,8 @@ void Octomapper::create_octree(pc_map_pair &pair) const {
   pair.octree->setClampingThresMin(m_thresh_min);
   pair.octree->setClampingThresMax(m_thresh_max);
   pair.octree->enableChangeDetection(true);
-  octomap::point3d min(static_cast<float>(-m_map_length / 2.0), static_cast<float>(-m_map_width / 2.0), -1);
-  octomap::point3d max(static_cast<float>(m_map_length / 2.0), static_cast<float>(m_map_width / 2.0), -1);
+  octomap::point3d min(static_cast<float>(-m_map_length/2.0), static_cast<float>(-m_map_width/2.0), -1);
+  octomap::point3d max(static_cast<float>(m_map_length/2.0), static_cast<float>(m_map_width/2.0), -1);
   pair.octree->setBBXMin(min);
   pair.octree->setBBXMax(max);
 }
@@ -80,11 +80,11 @@ void PCL_to_Octomap(const pcl::PointCloud<pcl::PointXYZ> &pcl, octomap::Pointclo
 }
 
 uchar toCharProb(float p) {
-  return static_cast<uchar>(p * 255);
+  return static_cast<uchar>(p*255);
 }
 
 float fromLogOdds(float log_odds) {
-  return 1 - (1 / (1 + exp(log_odds)));
+  return 1 - (1/(1 + exp(log_odds)));
 }
 
 std::string key_to_string(octomap::OcTreeKey key) {
@@ -94,7 +94,7 @@ std::string key_to_string(octomap::OcTreeKey key) {
 }
 
 void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
-  if (pc_map_pair.map == nullptr) {
+  if (pc_map_pair.map==nullptr) {
     create_map(pc_map_pair);
   }
   // TODO: Think about how to serialize / deserialize efficiently maybe?
@@ -118,10 +118,10 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
 
   octomap::OcTreeKey minKey = pc_map_pair.octree->coordToKey(minPt);
   octomap::OcTreeKey maxKey = pc_map_pair.octree->coordToKey(maxPt);
-  minX = std::min(minX, -0.5 * m_map_length);
-  maxX = std::max(maxX, 0.5 * m_map_length);
-  minY = std::min(minY, -0.5 * m_map_width);
-  maxY = std::max(maxY, 0.5 * m_map_width);
+  minX = std::min(minX, -0.5*m_map_length);
+  maxX = std::max(maxX, 0.5*m_map_length);
+  minY = std::min(minY, -0.5*m_map_width);
+  maxY = std::max(maxY, 0.5*m_map_width);
   minPt = octomap::point3d(minX, minY, minZ);
   maxPt = octomap::point3d(maxX, maxY, maxZ);
 
@@ -133,7 +133,6 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
   if (!pc_map_pair.octree->coordToKeyChecked(maxPt, static_cast<unsigned int>(depth), padded_max_key)) {
     ROS_ERROR_STREAM("Could not create padded max OcTree key at " << maxPt);
   }
-
 
   visualization_msgs::MarkerArray marker_arr;
   visualization_msgs::Marker marker;
@@ -147,16 +146,16 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
   std::vector<std::vector<float>> odds_sum(m_map_length_grid,
                                            std::vector<float>(m_map_width_grid,
                                                               m_odds_sum_default));  // TODO: Are these the right
-  for (octomap::OcTree::iterator it = pc_map_pair.octree->begin(), end = pc_map_pair.octree->end(); it != end; ++it) {
+  for (octomap::OcTree::iterator it = pc_map_pair.octree->begin(), end = pc_map_pair.octree->end(); it!=end; ++it) {
     // If this is a leaf at max depth, then only update that node
-    if (it.getDepth() == pc_map_pair.octree->getTreeDepth()) {
+    if (it.getDepth()==pc_map_pair.octree->getTreeDepth()) {
       //      ROS_INFO_STREAM("it.getKey(): " << key_to_string(it.getKey()) << "  coords: (" << it.getX() << ", " <<
       //      it.getY() << ", " << it.getZ() << ")"); ROS_INFO_STREAM("Resolution: " << m_octree_resolution << "  pad: "
       //      << m_map_length/2);
-      int x = (m_map_length / 2 + it.getX()) / m_octree_resolution;
-      int y = (m_map_width / 2 + it.getY()) / m_octree_resolution;
+      int x = (m_map_length/2 + it.getX())/m_octree_resolution;
+      int y = (m_map_width/2 + it.getY())/m_octree_resolution;
       //      ROS_INFO_STREAM("Sum: (" << x << ", " << y << ")");
-      if (x < m_map_length / m_octree_resolution && y < m_map_width / m_octree_resolution) {
+      if (x < m_map_length/m_octree_resolution && y < m_map_width/m_octree_resolution) {
         odds_sum[x][y] += it->getLogOdds();
 
         if (it->getOccupancy() > 0.7) {
@@ -179,8 +178,8 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
       // This isn't a leaf at max depth. Time to iterate
       int grid_num = 1 << (pc_map_pair.octree->getTreeDepth() - it.getDepth());
       octomap::OcTreeKey minKey = it.getIndexKey();
-      int x = static_cast<int>((m_map_length / 2 + it.getX()) / m_octree_resolution);
-      int y = static_cast<int>((m_map_width / 2 + it.getY()) / m_octree_resolution);
+      int x = static_cast<int>((m_map_length/2 + it.getX())/m_octree_resolution);
+      int y = static_cast<int>((m_map_width/2 + it.getY())/m_octree_resolution);
       //      ROS_INFO("We did it?");
       for (int dx = 0; dx < grid_num; dx++) {
         for (int dy = 0; dy < grid_num; dy++) {
@@ -188,12 +187,12 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
         }
       }
       if (it->getOccupancy() > 0.7) {
-        marker.scale.x = m_octree_resolution * grid_num;
-        marker.scale.y = m_octree_resolution * grid_num;
-        marker.scale.z = m_octree_resolution * grid_num;
-        marker.pose.position.x = (it.getX() + grid_num/2 * m_octree_resolution);
-        marker.pose.position.y = (it.getY() + grid_num/2 * m_octree_resolution);
-        marker.pose.position.z = (it.getZ() + grid_num/2 * m_octree_resolution);
+        marker.scale.x = m_octree_resolution*grid_num;
+        marker.scale.y = m_octree_resolution*grid_num;
+        marker.scale.z = m_octree_resolution*grid_num;
+        marker.pose.position.x = (it.getX() + grid_num/2*m_octree_resolution);
+        marker.pose.position.y = (it.getY() + grid_num/2*m_octree_resolution);
+        marker.pose.position.z = (it.getZ() + grid_num/2*m_octree_resolution);
         marker.color.r = it->getOccupancy();
         marker.color.g = it->getOccupancy();
         marker.color.b = it->getOccupancy();
@@ -205,8 +204,8 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
   m_octo_viz_pub.publish(marker_arr);
 
   // Transfer from log odds to normal probability
-  for (int i = 0; i < m_map_length / m_octree_resolution; i++) {
-    for (int j = 0; j < m_map_width / m_octree_resolution; j++) {
+  for (int i = 0; i < m_map_length/m_octree_resolution; i++) {
+    for (int j = 0; j < m_map_width/m_octree_resolution; j++) {
       pc_map_pair.map->at<uchar>(i, j) = toCharProb(fromLogOdds(odds_sum[i][j]));
     }
   }
@@ -227,7 +226,7 @@ void Octomapper::insert_scan(struct pc_map_pair &pc_map_pair, octomap::KeySet &f
 }
 
 void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cloud &ground,
-                                     PCL_point_cloud &nonground, const pcl::ModelCoefficientsPtr& coefficients) const {
+                                     PCL_point_cloud &nonground, const pcl::ModelCoefficientsPtr &coefficients) const {
   //  ROS_INFO_STREAM("Filtering Ground with " << raw_pc.size() << " points");
   ground.header = raw_pc.header;
   nonground.header = raw_pc.header;
@@ -269,7 +268,7 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cl
       extract.filter(ground);
 
       // remove ground points from full pointcloud
-      if (inliers->indices.size() != cloud_filtered->size()) {
+      if (inliers->indices.size()!=cloud_filtered->size()) {
         extract.setNegative(true);
         PCL_point_cloud out;
         extract.filter(out);
@@ -308,75 +307,98 @@ void Octomapper::separate_occupied(octomap::KeySet &free_cells, octomap::KeySet 
   compute_voxels(*pair.octree, nonground_octo, ground_octo, origin, free_cells, occupied_cells);
 }
 
+// TODO: Remove free cells
 float Octomapper::sensor_model(const pc_map_pair &pair, const octomap::KeySet &free_cells,
                                const octomap::KeySet &occupied_cells) const {
   float total = 0;
   // TODO: OPENMP?
-  if (m_sensor_model == 0) {
-    for (const auto &free_cell : free_cells) {
-      octomap::OcTreeNode *leaf = pair.octree->search(free_cell);
-      if (leaf) {
-        // Can check sign bit using bit operators, but need to benchmark
-        total += leaf->getLogOdds() < 0 ? leaf->getLogOdds() * m_sensor_empty_coeff * m_prob_miss_logodds : leaf->getLogOdds() * m_penalty * m_prob_miss_logodds;
-      }
+//  if (m_sensor_model == 0) {
+//    for (const auto &free_cell : free_cells) {
+//      octomap::OcTreeNode *leaf = pair.octree->search(free_cell);
+//      if (leaf) {
+//        // Can check sign bit using bit operators, but need to benchmark
+//        total += leaf->getLogOdds() < 0 ? leaf->getLogOdds() * m_sensor_empty_coeff * m_prob_miss_logodds : leaf->getLogOdds() * m_penalty * m_prob_miss_logodds;
+//      }
+//    }
+//    for (const auto &occupied_cell : occupied_cells) {
+//      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
+//      if (leaf) {
+//        total += leaf->getLogOdds() > 0 ? leaf->getLogOdds() * m_prob_hit_logodds : leaf->getLogOdds() * m_penalty * m_prob_hit_logodds;
+//      }
+//    }
+//  } else if (m_sensor_model == 1) {
+//    for (const auto &free_cell : free_cells)
+//    {
+//      octomap::OcTreeNode *leaf = pair.octree->search(free_cell);
+//      if (leaf) {
+//        // Can check sign bit using bit operators, but need to benchmark
+//        float prob = from_logodds(leaf->getLogOdds());
+//        total += m_sensor_model_free_coeff * (prob * m_prob_miss + (1-prob) * (1-m_prob_miss));
+//      }
+//    }
+//    for (const auto &occupied_cell : occupied_cells)
+//    {
+//      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
+//      if (leaf) {
+//        float prob = from_logodds(leaf->getLogOdds());
+//        total += m_sensor_model_occ_coeff * (prob * m_prob_hit + (1-prob) * (1-m_prob_hit));
+//      }
+//    }
+//  } else if (m_sensor_model == 2) {
+//    for (const auto &occupied_cell : occupied_cells)
+//    {
+//      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
+//      if (leaf) {
+//        total += leaf->getLogOdds();
+//      }
+//    }
+//    total = from_logodds(total);
+//  } else if (m_sensor_model == 3) {
+//    for (const auto &occupied_cell : occupied_cells)
+//    {
+//      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
+//      if (leaf) {
+//        if (leaf->getLogOdds() > 0)
+//        {
+//          total += leaf->getLogOdds();
+//        } else {
+//          total += leaf->getLogOdds() * m_penalty;
+//        }
+//      }
+//    }
+//  } else if (m_sensor_model == 4) {
+  for (const auto &occupied_cell : occupied_cells) {
+    octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
+    if (leaf) {
+      total += leaf->getLogOdds();
     }
-    for (const auto &occupied_cell : occupied_cells) {
-      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
-      if (leaf) {
-        total += leaf->getLogOdds() > 0 ? leaf->getLogOdds() * m_prob_hit_logodds : leaf->getLogOdds() * m_penalty * m_prob_hit_logodds;
-      }
-    }
-  } else if (m_sensor_model == 1) {
-    for (const auto &free_cell : free_cells)
-    {
-      octomap::OcTreeNode *leaf = pair.octree->search(free_cell);
-      if (leaf) {
-        // Can check sign bit using bit operators, but need to benchmark
-        float prob = from_logodds(leaf->getLogOdds());
-        total += m_sensor_model_free_coeff * (prob * m_prob_miss + (1-prob) * (1-m_prob_miss));
-      }
-    }
-    for (const auto &occupied_cell : occupied_cells)
-    {
-      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
-      if (leaf) {
-        float prob = from_logodds(leaf->getLogOdds());
-        total += m_sensor_model_occ_coeff * (prob * m_prob_hit + (1-prob) * (1-m_prob_hit));
-      }
-    }
-  } else if (m_sensor_model == 2) {
-    for (const auto &occupied_cell : occupied_cells)
-    {
-      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
-      if (leaf) {
-        total += leaf->getLogOdds();
-      }
-    }
-    total = from_logodds(total);
-  } else if (m_sensor_model == 3) {
-    for (const auto &occupied_cell : occupied_cells)
-    {
-      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
-      if (leaf) {
-        if (leaf->getLogOdds() > 0)
-        {
-          total += leaf->getLogOdds();
-        } else {
-          total += leaf->getLogOdds() * m_penalty;
-        }
-      }
-    }
-  } else if (m_sensor_model == 4) {
-    for (const auto &occupied_cell : occupied_cells)
-    {
-      octomap::OcTreeNode *leaf = pair.octree->search(occupied_cell);
-      if (leaf) {
-        total += leaf->getLogOdds();
-      }
-    }
-    total = from_logodds(total);
   }
+  total = from_logodds(total);
+//  }
   return total;
+}
+
+void Octomapper::compute_occupied(const octomap::OcTree &tree, const pcl::PointCloud<pcl::PointXYZ> &pc,
+                                  const tf::Transform &lidar_pos, octomap::KeySet &occupied_cells) {
+  octomap::point3d origin;
+  octomap::Pointcloud scan;
+#ifdef _OPENMP
+  omp_set_num_threads(m_keyrays.size());
+#endif
+#pragma omp parallel
+  {
+    // Project all nonground
+#pragma omp for
+    for (int i = 0; i < scan.size(); ++i) {
+      const octomap::point3d &p = scan[i];
+      unsigned threadIdx = 0;
+      octomap::OcTreeKey key;
+      if (tree.coordToKeyChecked(p, key)) {
+#pragma omp critical
+        occupied_cells.insert(key);
+      }
+    }
+  }
 }
 
 void Octomapper::compute_voxels(const octomap::OcTree &tree, const octomap::Pointcloud &scan,
@@ -419,8 +441,8 @@ void Octomapper::compute_voxels(const octomap::OcTree &tree, const octomap::Poin
   }
 
   // Remove from free if in occupied
-  for (octomap::KeySet::iterator it = free_cells.begin(), end = free_cells.end(); it != end;) {
-    if (occupied_cells.find(*it) != occupied_cells.end()) {
+  for (octomap::KeySet::iterator it = free_cells.begin(), end = free_cells.end(); it!=end;) {
+    if (occupied_cells.find(*it)!=occupied_cells.end()) {
       it = free_cells.erase(it);
     } else {
       ++it;

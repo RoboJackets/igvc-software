@@ -48,7 +48,6 @@ public:
     igvc::getParam(pNh, "icp/match_history_length", icp_match_history_length);
     m_pc_buf = boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr>(pc_buf_size);
     m_pose_buf = boost::circular_buffer<nav_msgs::OdometryConstPtr>(pose_buf_size);
-    m_icp_buf = boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr>(icp_match_history_length);
   }
 
   void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc);
@@ -189,12 +188,9 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
 //  pcl_ros::transformPointCloud(filtered, transformed_pc, *m_lidar_transform);
   pcl_ros::transformPointCloud(filtered_2, *transformed_pc, *m_lidar_transform);
 
-  // Push to icp buffer
-  m_icp_buf.push_back(transformed_pc);
-
   //TODO: Do I need to subtract covariances?
   geometry_msgs::TwistWithCovariance twist = m_pose_buf[pose_idx]->twist;
-  m_particle_filter->update(diff, m_pose_buf[pose_idx]->twist, stamp - m_last_time, transformed_pc, *m_lidar_transform);
+  m_particle_filter->update(diff, m_pose_buf[pose_idx]->twist, stamp - m_last_time, *transformed_pc, *m_lidar_transform);
   // TODO: Why is stamp - m_last_time = 0?
 
   // Publish newest iteration of particle filter

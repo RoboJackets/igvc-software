@@ -6,8 +6,22 @@ particle_filter:
     x: 0.1 # X veloctiy in robot's frame
     y: 0.0000001 # Y velocty in robot's frame (AKA should be zero, but idk)
     yaw: 0.04
-profile: true
+profile: false
 voxel_grid_size: 0.1
+scanmatcher:
+  use_guess: true
+  point_threshold: 0.5
+  variance:
+    x: 0.001
+    y: 0.001
+    yaw: 0.001
+  icp:
+    iterations: 50
+    RANSAC_outlier_rejection_threshold: 0.001
+    max_correspondence_distance: 0.1
+    transformation_epsilon: 0.00001
+icp:
+  match_history_length: 1
 visualization:
   hue: #0 to 360
     start: 257.0

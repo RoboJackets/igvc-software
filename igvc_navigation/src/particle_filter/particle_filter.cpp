@@ -109,20 +109,17 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
   pcl::ModelCoefficients::Ptr coefficients = boost::make_shared<pcl::ModelCoefficients>();
   m_octomapper.filter_ground_plane(pc, *ground, *nonground, coefficients);
 
+  ground->header.frame_id = "/base_link";
+  nonground->header.frame_id = "/base_link";
+  m_ground_pub.publish(*ground);
+  m_nonground_pub.publish(*nonground);
+
   // Project nonground particles on the ground
 //  pcl::ProjectInliers<pcl::PointXYZ> proj;
 //  proj.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
 //  proj.setInputCloud(nonground);
 //  proj.setModelCoefficients(coefficients);
 //  proj.filter(*nonground_projected);
-  for (auto& p : nonground->points)
-  {
-    p.z = 0;
-  }
-  for (auto& p : ground->points)
-  {
-    p.z = 0;
-  }
 
   double fitness = -1;
   tf::Transform scanmatch_motion_model;
@@ -134,12 +131,31 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
     tf::Matrix3x3 rot;
     rot.setRPY(0, 0, twist.twist.angular.z * delta_t.toSec());
     guess.setBasis(rot);
+    nonground->header.frame_id = "/base_link";
     fitness = m_scanmatcher.scanmatch(nonground, scanmatch_transform, guess);
     if (fitness != -1)
     {
       scanmatch_motion_model = scanmatch_transform;
     }
+    double x = scanmatch_transform.getOrigin().getX();
+    double y = scanmatch_transform.getOrigin().getY();
+    scanmatch_transform.setOrigin(tf::Vector3(x, y, 0));
+    double r,p,yaw;
+    tf::Matrix3x3 rota = scanmatch_transform.getBasis();
+    rota.getRPY(r,p,yaw);
+    ROS_INFO_STREAM("Fitness: " << fitness << "\t\t Transform: (" << x << ", " << y << ", " << yaw << ")");
+    scanmatch_transform.getBasis().setRPY(0,0,yaw);
   }
+
+  for (auto& p : nonground->points)
+  {
+    p.z = 0;
+  }
+  for (auto& p : ground->points)
+  {
+    p.z = 0;
+  }
+
   float highest_weight = 0;
   float lowest_weight = 0;
   size_t highest_weight_idx = 0;
@@ -158,8 +174,8 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
     // TODO: Add CUDA or OpenMP?
     // Sample new particle from old using pose and covariance
 //    ROS_INFO_STREAM("diff: " << diff.getOrigin().x() << ", " << diff.getOrigin().y() << ", " << diff.getOrigin().z());
+    double noisy_x, noisy_y, noisy_yaw;
     if (fitness == -1) {
-      double noisy_x, noisy_y, noisy_yaw;
       if (iterations < 10) {
         noisy_x = twist.twist.linear.x;
         noisy_y = twist.twist.linear.y;
@@ -176,10 +192,18 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
       m_particles[i].state.set_y(m_particles[i].state.y() + delta_t.toSec() * new_y);
       m_particles[i].state.set_yaw(m_particles[i].state.yaw() + delta_t.toSec() * noisy_yaw);
     } else {
-      m_particles[i].state.transform *= scanmatch_motion_model;
-      m_particles[i].state.set_x(m_particles[i].state.x() + gauss(m_scanmatch_variance_x));
-      m_particles[i].state.set_y(m_particles[i].state.y() + gauss(m_scanmatch_variance_y));
-      m_particles[i].state.set_yaw(m_particles[i].state.yaw() + gauss(m_scanmatch_variance_yaw));
+//      m_particles[i].state.transform *= scanmatch_motion_model;
+      noisy_x = scanmatch_motion_model.getOrigin().getX() + gauss(m_scanmatch_variance_x);
+      noisy_y = scanmatch_motion_model.getOrigin().getY() + gauss(m_scanmatch_variance_y);
+      double r,p,dyaw;
+      scanmatch_motion_model.getBasis().getRPY(r, p, dyaw);
+      noisy_yaw = dyaw + gauss(m_scanmatch_variance_yaw);
+      double cur_yaw = m_particles[i].state.yaw();
+      double new_x = noisy_x * cos(cur_yaw) - noisy_y * sin(cur_yaw);
+      double new_y = noisy_x * sin(cur_yaw) + noisy_y * cos(cur_yaw);
+      m_particles[i].state.set_x(m_particles[i].state.x() + new_x);
+      m_particles[i].state.set_y(m_particles[i].state.y() + new_y);
+      m_particles[i].state.set_yaw(m_particles[i].state.yaw() + noisy_yaw);
     }
 
     // Transform particles from base_frame to odom_frame
@@ -238,12 +262,12 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
     // Update map
     m_octomapper.insert_scan(m_particles[i].pair, free, occupied);
   }
-  std::stringbuf str;
-  std::ostream stream(&str);
-  for (Particle &p : m_particles) {
-    stream << p.weight << ", ";
-  }
-  ROS_INFO_STREAM(str.str());
+//  std::stringbuf str;
+//  std::ostream stream(&str);
+//  for (Particle &p : m_particles) {
+//    stream << p.weight << ", ";
+//  }
+//  ROS_INFO_STREAM(str.str());
   if (weight_sum == 0)
   {
     ROS_ERROR_STREAM("Weights somehow became 0. Resetting all to 1");
@@ -258,7 +282,6 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
     float inverse_n_eff = 0;
     float squared_weight_sum = weight_sum * weight_sum;
     for (Particle &p : m_particles) {
-      stream << p.weight << ", ";
       inverse_n_eff += (p.weight * p.weight) / squared_weight_sum;
     }
     // if Neff < thresh then resample
