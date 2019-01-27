@@ -1,3 +1,5 @@
+// This node reads and publishes IMU data from the FSM-9 IMU.
+
 #include <freespace/freespace.h>
 #include <freespace/freespace_util.h>
 #include <geometry_msgs/Vector3.h>
@@ -9,22 +11,12 @@
 #include <Eigen/Dense>
 #include <vector>
 
-int main(int argc, char** argv)
+/** A function for initializing a single FSM-9 IMU. This function sets up the IMU
+  * such that it returns expected measurements (ex. linear acceleration, angular velocity, etc.).
+  * \param ids an array for storing the identified IMU device ID.
+  */ 
+int initializeIMU(FreespaceDeviceId* ids)
 {
-  ros::init(argc, argv, "imu");
-
-  ros::NodeHandle nh;
-  ros::NodeHandle pNh("~");
-
-  double yaw_offset;
-  pNh.param("yaw_offset", yaw_offset, 0.0);
-
-  ros::Publisher imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1000);
-
-  ros::Publisher raw_mag_pub = nh.advertise<geometry_msgs::Vector3>("/mag_raw", 1000);
-  ros::Publisher raw_yaw_pub = nh.advertise<std_msgs::Float64>("/raw_yaw", 1);
-  ros::Publisher raw_imu_pub = nh.advertise<sensor_msgs::Imu>("/imu_raw_accel", 1000);
-
   int ret = freespace_init();
   if (ret != FREESPACE_SUCCESS)
   {
@@ -32,9 +24,9 @@ int main(int argc, char** argv)
     return 0;
   }
 
-  FreespaceDeviceId ids[5];
+  // Initialize freespace device (we expect only 1).
   int num_found = 0;
-  ret = freespace_getDeviceList(ids, 5, &num_found);
+  ret = freespace_getDeviceList(ids, 1, &num_found);
   if (num_found <= 0)
   {
     ROS_ERROR_STREAM("failed to connect to IMU found no devices");
@@ -46,9 +38,8 @@ int main(int argc, char** argv)
   if (ret != FREESPACE_SUCCESS)
   {
     ROS_ERROR_STREAM("failure to connect to device " << ret);
+    return 0;
   }
-
-  int seq = 0;  // sequence of published messgaes - should be monatomicly increasing
 
   freespace_message request;
   request.messageType = FREESPACE_MESSAGE_DATAMODECONTROLV2REQUEST;
@@ -71,32 +62,58 @@ int main(int argc, char** argv)
     ROS_ERROR_STREAM("failed to send message");
   }
 
+  return ret;
+}
+
+int main(int argc, char** argv)
+{
+  ros::init(argc, argv, "imu");
+
+  ros::NodeHandle nh;
+  ros::NodeHandle pNh("~");
+
+  // Get matrix to correct IMU orientation.
+  std::vector<double> imu_orientation_correction;
+  nh.getParam("imu_orientation_correction", imu_orientation_correction);
+
+  // Get threshold value for triggering a warning when the deviation between the filtered
+  // heading and magnetometer heading becomes too large.
+  double heading_dev_thresh_deg;
+  nh.getParam("heading_dev_thresh_deg", heading_dev_thresh_deg);
+
+  // There should be 9 elements (3x3 matrix).
+  if (imu_orientation_correction.size() != 9) {
+    ROS_ERROR_STREAM("IMU orientation correction matrix does not have 9 elements (3x3).");
+    return 0;
+  }
+
+  // Populate an Eigen matrix.
+  Eigen::Matrix3d correction_mat(imu_orientation_correction.data());
+
+  // Publish imu data without gravity for EKF localization.
+  ros::Publisher imu_pub = nh.advertise<sensor_msgs::Imu>("/imu", 1000);
+
+  // Publish imu data with gravity for factor graph implementation.
+  ros::Publisher imu_raw_pub = nh.advertise<sensor_msgs::Imu>("/imu_raw", 1000);
+
+  // sequence of published messages - should be monotonically increasing.
+  int seq = 0;
+
+  // Initialize IMU.
+  FreespaceDeviceId ids[1];
+  int ret = initializeIMU(ids);
+  if (ret != FREESPACE_SUCCESS) {
+    return 0;
+  }
+
+  // Variable to store data that is read from the IMU.
   freespace_message response;
-  ret = freespace_readMessage(ids[0], &response, 1000);
-  if (ret != FREESPACE_SUCCESS)
-  {
-    if (ret == FREESPACE_ERROR_TIMEOUT)
-    {
-      ROS_ERROR_STREAM("failed to read IMU TIMEOUT");
-    }
-    else
-    {
-      ROS_ERROR_STREAM("failed to read IMU" << ret);
-    }
-  }
-  if (response.messageType == FREESPACE_MESSAGE_DATAMODECONTROLV2RESPONSE)
-  {
-    ROS_INFO_STREAM("got response" << response.dataModeControlV2Response.modeActual);
-  }
-  else
-  {
-    ROS_ERROR_STREAM("got invalid type " << response.messageType);
-  }
 
   while (ros::ok())
   {
     ros::spinOnce();
 
+    // Read the IMU message every loop. Timeout after 1000 milliseconds.
     ret = freespace_readMessage(ids[0], &response, 1000);
     if (ret != FREESPACE_SUCCESS)
     {
@@ -115,21 +132,27 @@ int main(int argc, char** argv)
       ROS_ERROR_STREAM("error got unknown message type " << response.messageType);
     }
 
+    // Get accelerometer measurements.
     MultiAxisSensor accel_msg;
     MultiAxisSensor accel_raw_msg;
 
     ret = freespace_util_getAccNoGravity(&response.motionEngineOutput, &accel_msg);
+    if (ret != FREESPACE_SUCCESS)
+    {
+      ROS_ERROR_STREAM("failed to read acceleration no gravity." << ret);
+    }
+
     ret = freespace_util_getAcceleration(&response.motionEngineOutput, &accel_raw_msg);
     if (ret != FREESPACE_SUCCESS)
     {
-      ROS_ERROR_STREAM("failed to read acceleration " << ret);
+      ROS_ERROR_STREAM("failed to read acceleration." << ret);
     }
-    Eigen::Vector3d accel_vec(-accel_msg.x, accel_msg.y, accel_msg.z);
-    Eigen::Vector3d accel_raw_vec(-accel_raw_msg.x, accel_raw_msg.y, accel_raw_msg.z);
-    Eigen::Matrix3d T;
-    T << cos(-M_PI / 2), -sin(-M_PI / 2), 0, sin(-M_PI / 2), cos(-M_PI / 2), 0, 0, 0, 1;
-    Eigen::Vector3d rotated_accel = T * accel_vec;
-    Eigen::Vector3d rotated_raw_accel = T * accel_raw_vec;
+
+    Eigen::Vector3d accel_raw_vec(accel_raw_msg.x, accel_raw_msg.y, accel_raw_msg.z);
+    accel_raw_vec = correction_mat * accel_raw_vec;
+
+    Eigen::Vector3d accel_vec(accel_msg.x, accel_msg.y, accel_msg.z);
+    accel_vec = correction_mat * accel_vec;
 
     MultiAxisSensor orientation_msg;
     ret = freespace_util_getAngPos(&response.motionEngineOutput, &orientation_msg);
@@ -137,106 +160,108 @@ int main(int argc, char** argv)
     {
       ROS_ERROR_STREAM("failed to read angular position " << ret);
     }
+    tf::Quaternion quaternion_raw(orientation_msg.x, orientation_msg.y, orientation_msg.z, orientation_msg.w);
+    double roll, pitch, yaw;
+    tf::Matrix3x3(quaternion_raw).getRPY(roll, pitch, yaw);
+    ROS_INFO("Filtered heading: %f", yaw);
 
+    // Get gyroscope measurements.
     MultiAxisSensor angular_vel_msg;
     ret = freespace_util_getAngularVelocity(&response.motionEngineOutput, &angular_vel_msg);
     if (ret != FREESPACE_SUCCESS)
     {
       ROS_ERROR_STREAM("failed to read angular velocity " << ret);
     }
-    Eigen::Matrix3d Tz;
-    Eigen::Matrix3d Tx;
-    Eigen::Matrix3d Ty;
-    Eigen::Matrix3d Tt;
-    double rollT, pitchT, yawT;
-    rollT = 0;
-    pitchT = 0;
-    yawT = 0;
-    Tz << cos(rollT), -sin(rollT), 0, sin(rollT), cos(rollT), 0, 0, 0, 1;
-    Ty << cos(pitchT), 0, sin(pitchT), 0, 1, 0, -sin(pitchT), 0, cos(pitchT);
-    Tx << 1, 0, 0, 0, cos(yawT), -sin(yawT), 0, sin(yawT), cos(yawT);
-    Tt = Ty;
-    Eigen::Vector3d angular_vel_vec(angular_vel_msg.x, angular_vel_msg.y, -angular_vel_msg.z);
-    Eigen::Vector3d rotated_angular_vel = angular_vel_vec;
 
+    Eigen::Vector3d angular_vel_vec(angular_vel_msg.x, angular_vel_msg.y, angular_vel_msg.z);
+    angular_vel_vec = correction_mat * angular_vel_vec;
+
+    // Get magnetometer measurement and convert to heading.
     MultiAxisSensor magnetometer_msg;
     ret = freespace_util_getMagnetometer(&response.motionEngineOutput, &magnetometer_msg);
     if (ret != FREESPACE_SUCCESS)
     {
-      ROS_ERROR_STREAM("failed to read raw magnetometer velocity " << ret);
+      ROS_ERROR_STREAM("failed to read raw magnetometer values" << ret);
     }
 
-    // declare the message to be published
+    // Calculate heading with magnetometer reading.
+    double yaw_mag = atan2(magnetometer_msg.y, magnetometer_msg.x);
+    ROS_INFO("Magnetometer heading: %f", yaw_mag);
+
+    if (fabs(yaw - yaw_mag) > heading_dev_thresh_deg * M_PI / 180.0) {
+      ROS_WARN("Magnetometer heading and filtered yaw measurement disagree by > %f degrees.", heading_dev_thresh_deg);
+    }
+
+    // Publish sensor messages with corrected transformation.
     sensor_msgs::Imu msg;
     msg.header.frame_id = "imu";
     msg.header.stamp = ros::Time::now();
     msg.header.seq = seq++;
 
-    msg.linear_acceleration.x = rotated_accel[0];
-    msg.linear_acceleration.y = rotated_accel[1];
-    msg.linear_acceleration.z = rotated_accel[2];
-    msg.linear_acceleration_covariance = { 0.01, 1e-6, 1e-6, 1e-6, 0.01, 1e-6, 1e-6, 1e-6, 0.01 };
+    // TODO: Tune values, parameterize.
+    msg.linear_acceleration.x = accel_vec[0];
+    msg.linear_acceleration.y = accel_vec[1];
+    msg.linear_acceleration.z = accel_vec[2];
+    msg.linear_acceleration_covariance = { 0.01, 1e-6, 1e-6,
+                                           1e-6, 0.01, 1e-6,
+                                           1e-6, 1e-6, 0.01 };
 
-    msg.angular_velocity.x = rotated_angular_vel[0];
-    msg.angular_velocity.y = rotated_angular_vel[1];
-    msg.angular_velocity.z = rotated_angular_vel[2];
-    msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
+    msg.angular_velocity.x = angular_vel_vec[0];
+    msg.angular_velocity.y = angular_vel_vec[1];
+    msg.angular_velocity.z = angular_vel_vec[2];
+    msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6,
+                                        1e-6, 0.02, 1e-6,
+                                        1e-6, 1e-6, 0.02 };
 
-    tf::Quaternion pre_rotated(orientation_msg.x, orientation_msg.y, orientation_msg.z, orientation_msg.w);
 
-    double roll, pitch, yaw;
-    tf::Matrix3x3(pre_rotated).getRPY(roll, pitch, yaw);
-    ROS_INFO_STREAM("prerotated " << roll << " " << pitch << " " << yaw);
-    tf::Quaternion rotated = tf::createQuaternionFromRPY(3.14159 / 2, 0, 0) * pre_rotated;
-    rotated = rotated.normalize();
-
-    tf::Matrix3x3(rotated).getRPY(roll, pitch, yaw);
-    ROS_INFO_STREAM("rotated = " << roll << " " << pitch << " " << yaw);
-    tf::Matrix3x3(pre_rotated).getRPY(roll, pitch, yaw);
-    yaw = -yaw;
     geometry_msgs::Quaternion orientation;
-    orientation.x = rotated.x();
-    orientation.y = rotated.y();
-    orientation.z = rotated.z();
-    orientation.w = rotated.w();
+    //orientation.x = quaternion_raw.x();
+    //orientation.y = quaternion_raw.y();
+    //orientation.z = quaternion_raw.z();
+    //orientation.w = quaternion_raw.w();
+    // This assumes flat ground and uses magnetometer for absolute heading.
+    // TODO: This assumption may not hold when we switch to 3D lidar, and stop using flat ground assumption
+    tf::Quaternion quaternion_mag;
+    quaternion_mag.setRPY(0,0,yaw_mag);
+    orientation.x = quaternion_mag.x();
+    orientation.y = quaternion_mag.y();
+    orientation.z = quaternion_mag.z();
+    orientation.w = quaternion_mag.w();
 
+    // TODO: Tune and parameterize.
     msg.orientation = orientation;
-    msg.orientation_covariance = { 0.0025, 1E-6, 1E-6, 1E-6, 0.0025, 1E-6, 1E-6, 1E-6, 0.0025 };
+    msg.orientation_covariance = { 0.0025, 1e-6, 1e-6,
+                                   1e-6, 0.0025, 1e-6,
+                                   1e-6, 1e-6, 0.0025 };
 
     imu_pub.publish(msg);
 
+    // Publish raw sensor messages.
     sensor_msgs::Imu msg_raw;
     msg_raw.header.frame_id = "imu";
     msg_raw.header.stamp = msg.header.stamp;
     msg_raw.header.seq = seq;
 
-    msg_raw.linear_acceleration.x = rotated_raw_accel[0];
-    msg_raw.linear_acceleration.y = rotated_raw_accel[1];
-    msg_raw.linear_acceleration.z = rotated_raw_accel[2];
-    msg_raw.linear_acceleration_covariance = { 0.005, 1e-6, 1e-6, 1e-6, 0.005, 1e-6, 1e-6, 1e-6, 0.005 };
+    msg_raw.linear_acceleration.x = accel_raw_vec[0];
+    msg_raw.linear_acceleration.y = accel_raw_vec[1];
+    msg_raw.linear_acceleration.z = accel_raw_vec[2];
+    msg_raw.linear_acceleration_covariance = { 0.005, 1e-6, 1e-6,
+                                               1e-6, 0.005, 1e-6,
+                                               1e-6, 1e-6, 0.005 };
 
-    msg_raw.angular_velocity.x = rotated_angular_vel[0];
-    msg_raw.angular_velocity.y = rotated_angular_vel[1];
-    msg_raw.angular_velocity.z = rotated_angular_vel[2];
-    msg_raw.angular_velocity_covariance = { 0.02, 1e-6, 1e-6, 1e-6, 0.02, 1e-6, 1e-6, 1e-6, 0.02 };
-
-    tf::Quaternion pre_rotated_raw(orientation_msg.x, orientation_msg.y, orientation_msg.z, orientation_msg.w);
-    tf::Quaternion rotation_raw = tf::createQuaternionFromRPY(0, 0, 0);
-
-    tf::Matrix3x3(pre_rotated).getRPY(roll, pitch, yaw);
-
-    tf::Quaternion rotated_raw = rotation_raw * pre_rotated;
-
-    geometry_msgs::Quaternion orientation_raw;
-    orientation_raw.x = rotated_raw.x();
-    orientation_raw.y = rotated_raw.y();
-    orientation_raw.z = rotated_raw.z();
-    orientation_raw.w = rotated_raw.w();
+    msg_raw.angular_velocity.x = angular_vel_vec[0];
+    msg_raw.angular_velocity.y = angular_vel_vec[1];
+    msg_raw.angular_velocity.z = angular_vel_vec[2];
+    msg_raw.angular_velocity_covariance = { 0.02, 1e-6, 1e-6,
+                                            1e-6, 0.02, 1e-6,
+                                            1e-6, 1e-6, 0.02 };
 
     msg_raw.orientation = orientation;
-    msg_raw.orientation_covariance = { 0.0025, 1e-6, 1e-6, 1e-6, 0.0025, 1e-6, 1e-6, 1e-6, 0.0025 };
+    msg_raw.orientation_covariance = { 0.0025, 1e-6, 1e-6,
+                                       1e-6, 0.0025, 1e-6,
+                                       1e-6, 1e-6, 0.0025 };
 
-    raw_imu_pub.publish(msg_raw);
+    imu_raw_pub.publish(msg_raw);
   }
   return 0;
 }
