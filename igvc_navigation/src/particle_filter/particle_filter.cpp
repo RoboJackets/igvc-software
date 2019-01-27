@@ -1,13 +1,11 @@
 #include <pcl_ros/transforms.h>
 #include "particle_filter.h"
 #include <tf/transform_broadcaster.h>
-#include <pcl/ModelCoefficients.h>
-#include <pcl/filters/project_inliers.h>
 #include <octomap_ros/conversions.h>
 #include <std_msgs/Float64.h>
 #include <csignal>
 
-Particle_filter::Particle_filter(const ros::NodeHandle &pNh) : pNh(pNh), m_octomapper(pNh) {
+Particle_filter::Particle_filter(const ros::NodeHandle &pNh) : pNh{pNh}, m_octomapper{pNh}, m_scanmatcher{pNh} {
   ros::NodeHandle nh; // Can I do this or do I need to pass it in?
 
   float resample_threshold;
@@ -16,6 +14,10 @@ Particle_filter::Particle_filter(const ros::NodeHandle &pNh) : pNh(pNh), m_octom
   igvc::getParam(pNh, "particle_filter/variance/x", m_variance_x);
   igvc::getParam(pNh, "particle_filter/variance/y", m_variance_y);
   igvc::getParam(pNh, "particle_filter/variance/yaw", m_variance_yaw);
+  igvc::getParam(pNh, "scanmatcher/point_threshold", m_scanmatch_point_thresh);
+  igvc::getParam(pNh, "scanmatcher/variance/x", m_scanmatch_variance_x);
+  igvc::getParam(pNh, "scanmatcher/variance/y", m_scanmatch_variance_y);
+  igvc::getParam(pNh, "scanmatcher/variance/yaw", m_scanmatch_variance_yaw);
   igvc::getParam(pNh, "visualization/hue/start", m_viz_hue_start);
   igvc::getParam(pNh, "visualization/hue/end", m_viz_hue_end);
   igvc::getParam(pNh, "visualization/saturation/start", m_viz_sat_start);
@@ -122,6 +124,22 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
     p.z = 0;
   }
 
+  double fitness = -1;
+  tf::Transform scanmatch_motion_model;
+  if (nonground->size() >= m_scanmatch_point_thresh)
+  {
+    tf::Transform scanmatch_transform;
+    tf::Transform guess;
+    guess.setOrigin(tf::Vector3(twist.twist.linear.x * delta_t.toSec(), twist.twist.linear.y * delta_t.toSec(), 0));
+    tf::Matrix3x3 rot;
+    rot.setRPY(0, 0, twist.twist.angular.z * delta_t.toSec());
+    guess.setBasis(rot);
+    fitness = m_scanmatcher.scanmatch(nonground, scanmatch_transform, guess);
+    if (fitness != -1)
+    {
+      scanmatch_motion_model = scanmatch_transform;
+    }
+  }
   float highest_weight = 0;
   float lowest_weight = 0;
   size_t highest_weight_idx = 0;
@@ -140,24 +158,29 @@ void Particle_filter::update(const tf::Transform& diff, const geometry_msgs::Twi
     // TODO: Add CUDA or OpenMP?
     // Sample new particle from old using pose and covariance
 //    ROS_INFO_STREAM("diff: " << diff.getOrigin().x() << ", " << diff.getOrigin().y() << ", " << diff.getOrigin().z());
-    double noisy_x, noisy_y, noisy_yaw;
-    if (iterations < 10)
-    {
-      noisy_x = twist.twist.linear.x;
-      noisy_y = twist.twist.linear.y;
-      noisy_yaw = twist.twist.angular.z;
+    if (fitness == -1) {
+      double noisy_x, noisy_y, noisy_yaw;
+      if (iterations < 10) {
+        noisy_x = twist.twist.linear.x;
+        noisy_y = twist.twist.linear.y;
+        noisy_yaw = twist.twist.angular.z;
+      } else {
+        noisy_x = twist.twist.linear.x + gauss(m_variance_x);
+        noisy_y = twist.twist.linear.y + gauss(m_variance_y);
+        noisy_yaw = twist.twist.angular.z + gauss(m_variance_yaw);
+      }
+      double cur_yaw = m_particles[i].state.yaw();
+      double new_x = noisy_x * cos(cur_yaw) - noisy_y * sin(cur_yaw);
+      double new_y = noisy_x * sin(cur_yaw) + noisy_y * cos(cur_yaw);
+      m_particles[i].state.set_x(m_particles[i].state.x() + delta_t.toSec() * new_x);
+      m_particles[i].state.set_y(m_particles[i].state.y() + delta_t.toSec() * new_y);
+      m_particles[i].state.set_yaw(m_particles[i].state.yaw() + delta_t.toSec() * noisy_yaw);
     } else {
-      noisy_x = twist.twist.linear.x + gauss(m_variance_x);
-      noisy_y = twist.twist.linear.y + gauss(m_variance_y);
-      noisy_yaw = twist.twist.angular.z + gauss(m_variance_yaw);
+      m_particles[i].state.transform *= scanmatch_motion_model;
+      m_particles[i].state.set_x(m_particles[i].state.x() + gauss(m_scanmatch_variance_x));
+      m_particles[i].state.set_y(m_particles[i].state.y() + gauss(m_scanmatch_variance_y));
+      m_particles[i].state.set_yaw(m_particles[i].state.yaw() + gauss(m_scanmatch_variance_yaw));
     }
-    double cur_yaw = m_particles[i].state.yaw();
-    double new_x = noisy_x * cos(cur_yaw) - noisy_y * sin(cur_yaw);
-    double new_y = noisy_x * sin(cur_yaw) + noisy_y * cos(cur_yaw);
-    m_particles[i].state.set_x(m_particles[i].state.x() + delta_t.toSec() * new_x);
-    m_particles[i].state.set_y(m_particles[i].state.y() + delta_t.toSec() * new_y);
-    m_particles[i].state.set_yaw(m_particles[i].state.yaw() + delta_t.toSec() * noisy_yaw);
-//    ROS_INFO_STREAM("2");
 
     // Transform particles from base_frame to odom_frame
     pcl::PointCloud<pcl::PointXYZ> transformed_pc;

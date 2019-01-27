@@ -19,6 +19,7 @@ add_executable(particle_filter
   particle_filter_node.cpp
   octomapper.cpp octomapper.h
   particle_filter.h particle_filter.cpp
+  scanmatcher.cpp scanmatcher.h
   ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/hsluv.h
   ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/hsluv.c)
 add_dependencies(particle_filter igvc_msgs_gencpp)

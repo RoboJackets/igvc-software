@@ -26,7 +26,7 @@ public:
   ParticleFilterNode(const ros::NodeHandle &pNh) : m_particle_filter{
       std::unique_ptr<Particle_filter>(new Particle_filter(pNh))}, m_lidar_transform{nullptr},
                                                    m_last_time{ros::Time::now()}, m_tf_listener{} {
-    int pc_buf_size, pose_buf_size;
+    int pc_buf_size, pose_buf_size, icp_match_history_length;
     igvc::getParam(pNh, "update_time_threshold", m_update_time_thresh);
     igvc::getParam(pNh, "start_x", m_start_x);
     igvc::getParam(pNh, "start_y", m_start_y);
@@ -45,8 +45,10 @@ public:
     igvc::getParam(pNh, "voxel_grid_size", m_voxel_grid_size);
     igvc::getParam(pNh, "filter/min_distance", m_filter_min);
     igvc::getParam(pNh, "filter/max_distance", m_filter_max);
+    igvc::getParam(pNh, "icp/match_history_length", icp_match_history_length);
     m_pc_buf = boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr>(pc_buf_size);
     m_pose_buf = boost::circular_buffer<nav_msgs::OdometryConstPtr>(pose_buf_size);
+    m_icp_buf = boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr>(icp_match_history_length);
   }
 
   void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc);
@@ -80,6 +82,7 @@ private:
   ros::Time m_last_time;
   cv_bridge::CvImage m_img_bridge;
   boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr> m_pc_buf;
+  boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr> m_icp_buf;
   boost::circular_buffer<nav_msgs::OdometryConstPtr> m_pose_buf;
   boost::shared_ptr<tf::StampedTransform> m_lidar_transform;
 };
@@ -182,9 +185,12 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
 //  ROS_INFO_STREAM("Filtered size (2): " << filtered_2.size());
 
   // Transform cloud to base frame
-  pcl::PointCloud<pcl::PointXYZ> transformed_pc;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_pc = boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>();
 //  pcl_ros::transformPointCloud(filtered, transformed_pc, *m_lidar_transform);
-  pcl_ros::transformPointCloud(filtered_2, transformed_pc, *m_lidar_transform);
+  pcl_ros::transformPointCloud(filtered_2, *transformed_pc, *m_lidar_transform);
+
+  // Push to icp buffer
+  m_icp_buf.push_back(transformed_pc);
 
   //TODO: Do I need to subtract covariances?
   geometry_msgs::TwistWithCovariance twist = m_pose_buf[pose_idx]->twist;

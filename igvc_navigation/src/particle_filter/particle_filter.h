@@ -11,6 +11,7 @@
 
 #include <random>
 #include "octomapper.h"
+#include "scanmatcher.h"
 
 struct Particle
 {
@@ -47,12 +48,14 @@ private:
 
   bool m_debug;
   int m_num_particles{};
+  int m_scanmatch_point_thresh;
   float m_inverse_resample_threshold;
   float m_total_weight;
   double m_viz_hue_start, m_viz_hue_end;
   double m_viz_sat_start, m_viz_sat_end;
   double m_viz_light_start, m_viz_light_end;
   double m_variance_x, m_variance_y, m_variance_yaw;
+  double m_scanmatch_variance_x, m_scanmatch_variance_y, m_scanmatch_variance_yaw;
 
   static constexpr double m_viz_hue_max = 360;
   static constexpr double m_viz_sat_max = 100;
@@ -64,5 +67,6 @@ private:
   ros::Publisher m_nonground_pub;
   ros::Publisher m_num_eff_particles_pub;
   Octomapper m_octomapper;
+  Scanmatcher m_scanmatcher;
 };
 #endif  // PROJECT_PARTICLE_FILTER_H
