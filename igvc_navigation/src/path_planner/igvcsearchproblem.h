@@ -1,9 +1,11 @@
 #ifndef IGVCSEARCHPROBLEM_H
 #define IGVCSEARCHPROBLEM_H
 
+#include <cv_bridge/cv_bridge.h>
 #include <math.h>
 #include <pcl/octree/octree_search.h>
 #include <functional>
+#include <opencv2/core/core.hpp>
 #include <vector>
 #include "GraphSearch.hpp"
 #include "searchlocation.h"
@@ -12,67 +14,54 @@
 class IGVCSearchProblem : public SearchProblem<SearchLocation, SearchMove>
 {
 public:
-  pcl::PointCloud<pcl::PointXYZ>::Ptr Map;
-  pcl::octree::OctreePointCloudSearch<pcl::PointXYZ>::Ptr Octree;
+  // make sure these follow style
+  cv_bridge::CvImageConstPtr Map;
   SearchLocation Start;
   SearchLocation Goal;
-  double Threshold;
-  double Speed;
-  double TurningSpeed;
-  std::function<double(double, double)> DeltaT;
-  double Baseline;
+  double Resolution;
+  double CSpace;
   double GoalThreshold;
+  double ProbabilityThreshold;
   bool PointTurnsEnabled;
   bool ReverseEnabled;
-  double MinimumOmega;
-  double MaximumOmega;
-  double DeltaOmega;
-  double MaxObstacleDeltaT;
-  double Alpha;
-  double Beta;
-  double BoundingDistance;
+  // TODO distance to goal from start
+  double DistanceToGoal;
+  double MaxJumpSize;
+  double ThetaFilter;
+  double MaxThetaChange;
+  double ThetaChangeWindow;
+  double HeuristicInflation;
+  double MaximumDistance;
 
   SearchLocation getStartState()
   {
     return Start;
   }
-  std::list<SearchMove> getActions(SearchLocation state, SearchLocation robot_position);
 
-  SearchLocation getResult(SearchLocation state, SearchMove action);
+  std::list<SearchMove> getActions(const SearchLocation& state);
 
-  bool isGoal(SearchLocation state)
+  SearchLocation getResult(const SearchLocation& state, const SearchMove& action);
+
+  bool isGoal(const SearchLocation& state)
   {
-    return state.distTo(Goal) < GoalThreshold || state.distTo(Start) > 10;
+    // TODO consider options
+    return state.distTo(Goal, Resolution) < GoalThreshold || state.distTo(Start, Resolution) > MaximumDistance;
   }
 
-  double getStepCost(SearchLocation, SearchMove action)
+  double getStepCost(const SearchLocation& location, const SearchMove& action)
   {
-    double pathLength = 0;
-    if (action.W <= 1e-10)
-    {
-      pathLength = action.V * action.DeltaT;
-    }
-    else
-    {
-      double R = abs(action.V) / abs(action.W);
-      double theta = abs(action.W) * action.DeltaT;
-      pathLength = R * theta;
-    }
-    if (action.distToObs < 10)
-    {
-      /*cerr << action.distToObs << endl;
-      cerr << Alpha*exp((Threshold-action.distToObs)*Beta)+1 << endl;
-      cerr << "----------" << endl;*/
-    }
-    return pathLength * (Alpha * exp((Threshold - action.distToObs) * Beta) + 1);
+    SearchLocation result;
+    result.X = location.X + action.X;
+    result.Y = location.Y + action.Y;
+    return result.distTo(location, Resolution);
   }
 
-  double getHeuristicCost(SearchLocation state)
+  double getHeuristicCost(const SearchLocation& state)
   {
-    return state.distTo(Goal);
+    return state.distTo(Goal, Resolution) * HeuristicInflation;
   }
 
-  bool isActionValid(SearchMove& move, SearchLocation start_state);
+  bool isActionValid(const SearchMove& move, const SearchLocation& start_state);
 };
 
 #endif  // IGVCSEARCHPROBLEM_H

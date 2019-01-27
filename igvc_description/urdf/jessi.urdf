@@ -160,10 +160,12 @@
   <gazebo reference="usb_cam_center">
     <sensor name="center_camera" type="camera">
         <camera>
-          <horizontal_fov>1.2290609</horizontal_fov>
+          <!-- <horizontal_fov>1.2290609</horizontal_fov> -->
+          <horizontal_fov>2.239</horizontal_fov>
+          <vertical_fov>1.995</vertical_fov>
           <image>
-            <width>1920</width>
-            <height>1080</height>
+            <width>640</width>
+            <height>512</height>
           </image>
           <clip>
             <near>0.1</near>
