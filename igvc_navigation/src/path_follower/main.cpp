@@ -66,7 +66,10 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   RobotState cur_pos(msg);
 
   double goal_dist = cur_pos.distTo(waypoint->point.x, waypoint->point.y);
-  ROS_INFO_STREAM("Distance to waypoint: " << goal_dist << "(m.)");
+  if (debug)
+  {
+    ROS_INFO_STREAM("Distance to waypoint: " << goal_dist << "(m.)");
+  }
 
   ros::Time time = msg->header.stamp;
   igvc_msgs::velocity_pair vel;  // immediate velocity command
@@ -104,8 +107,8 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     geometry_msgs::PointStamped target_point;
     target_point.header.frame_id = "/odom";
     target_point.header.stamp = time;
-    target_point.point.x = target.x;
-    target_point.point.y = target.y;
+    target_point.point.x = target.x();
+    target_point.point.y = target.y();
     target_pub.publish(target_point);
 
     if (debug)
