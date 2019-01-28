@@ -47,6 +47,7 @@ private:
   void create_map(pc_map_pair& pair) const;
 
   ros::NodeHandle pNh;
+  bool m_use_ground_filter;
   double m_octree_resolution;
   double m_prob_hit;
   double m_prob_miss;
