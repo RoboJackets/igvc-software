@@ -44,6 +44,9 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #include <limits>
 #include <cmath>
 #include <assert.h>
+// TODO: REMOVE
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 
 class FieldDPlanner
 {
@@ -114,12 +117,6 @@ public:
     to 0. Inserts goal node into priority queue to initialize graph search problem.
     */
     void initialize();
-    /**
-    Clears the previous search's contents and re-initializes the search problem.
-    Clears the Node cache (umap), the priority queue, and all cell updates that
-    occured in the previous timestep.
-    */
-    void reinitialize();
     /**
     Updates a node's standing in the graph search problem. Update dependant upon
     the node's g value and rhs value relative to each other.
