@@ -40,16 +40,18 @@ public:
   void create_octree(pc_map_pair& pair) const;
   void insert_scan(pc_map_pair& pc_map_pair, octomap::KeySet& free_cells, octomap::KeySet& occupied_cells) const;
   void get_updated_map(pc_map_pair& pc_map_pair) const;
-  void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground, const pcl::ModelCoefficientsPtr& coefficients) const;
+  void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground,
+                           const pcl::ModelCoefficientsPtr& coefficients) const;
   void separate_occupied(octomap::KeySet& free_cells, octomap::KeySet& occupied_cells, const tf::Point& sensor_pos_tf,
                          const pc_map_pair& pair, const pcl::PointCloud<pcl::PointXYZ>& ground,
                          const pcl::PointCloud<pcl::PointXYZ>& nonground);
   void compute_occupied(const octomap::OcTree &tree, const pcl::PointCloud<pcl::PointXYZ> &pc,
-                                    const tf::Transform &lidar_pos, octomap::KeySet &occupied_cells) const;
+                                    octomap::KeySet &occupied_cells) const;
   float sensor_model(const pc_map_pair& pair, const octomap::KeySet& free_cells,
                      const octomap::KeySet& occupied_cells) const;
   float sensor_model(const octomap::OcTree& octree, const octomap::KeySet& occupied_cells) const;
   double get_score(const octomap::OcTree& octree, const PCL_point_cloud& pc, const tf::Transform& pos) const;
+  void set_lidar_to_base(const tf::Transform& lidar_to_base);
 
   inline float to_logodds(float p) const
   {
@@ -58,22 +60,37 @@ public:
 
   inline float from_logodds(float logodd) const
   {
-    return (1 - 1/(1 + exp(logodd)));
+    return (1 - 1 / (1 + exp(logodd)));
   }
-  int length_x() { return m_map_length_grid; }
-  int width_y() { return m_map_width_grid; }
-  int start_x() { return m_map_start_x; }
-  int start_y() { return m_map_start_y; }
-  double resolution() { return m_octree_resolution; } // TODO: Different resolution for octree / map?
+  inline int length_x()
+  {
+    return m_map_length_grid;
+  }
+  inline int width_y()
+  {
+    return m_map_width_grid;
+  }
+  inline int start_x()
+  {
+    return m_map_start_x;
+  }
+  inline int start_y()
+  {
+    return m_map_start_y;
+  }
+  inline double resolution()
+  {
+    return m_octree_resolution;
+  }  // TODO: Different resolution for octree / map?
 
 private:
   void create_map(pc_map_pair& pair) const;
   void compute_voxels(const octomap::OcTree& tree, const octomap::Pointcloud& scan, const octomap::Pointcloud& ground,
-                      const octomap::point3d& origin, octomap::KeySet& free_cells,
-                      octomap::KeySet& occupied_cells);
+                      const octomap::point3d& origin, octomap::KeySet& free_cells, octomap::KeySet& occupied_cells);
 
   ros::NodeHandle pNh;
   double m_octree_resolution;
+  bool m_is_3d;
   bool m_lazy_eval;
   double m_prob_hit;
   double m_prob_miss;
@@ -90,14 +107,15 @@ private:
   double m_ransac_distance_threshold;
   double m_ransac_eps_angle;
   float m_ground_filter_plane_dist;
-  int m_map_length; // In m, not grid units
-  int m_map_width; // Actual grid cells = length / resolution
+  int m_map_length;  // In m, not grid units
+  int m_map_width;   // Actual grid cells = length / resolution
   int m_map_length_grid;
   int m_map_width_grid;
-  int m_map_start_x; // In m, not grid units
+  int m_map_start_x;  // In m, not grid units
   int m_map_start_y;
   int m_map_encoding;
   float m_odds_sum_default;
+  std::unique_ptr<tf::Transform> m_lidar_to_base{};
   ros::Publisher m_octo_viz_pub;
   std::vector<octomap::KeyRay> m_keyrays;
 

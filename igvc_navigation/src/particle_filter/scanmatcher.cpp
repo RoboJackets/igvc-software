@@ -10,7 +10,7 @@ struct Scored_move
 };
 
 Scanmatcher::Scanmatcher(const ros::NodeHandle &pNh, const Octomapper &octomapper)
-  : m_last_cloud(nullptr), m_octomapper(octomapper)
+  : m_last_cloud{ nullptr }, m_octomapper{ octomapper }
 {
   ros::NodeHandle nh;
   igvc::getParam(pNh, "scanmatcher/use_guess", m_use_guess);
@@ -51,6 +51,7 @@ double Scanmatcher::scanmatch(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr inp
       m_last_cloud = boost::make_shared<pcl::PointCloud<pcl::PointXYZ>>(*input);
       return -1;
     }
+
     fitness_score = icp.getFitnessScore();
     pcl::PointCloud<pcl::PointXYZ> transformed_cloud;
     pcl::transformPointCloud(*m_last_cloud, transformed_cloud, icp.getFinalTransformation());
@@ -69,19 +70,22 @@ double Scanmatcher::scanmatch(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr inp
   return fitness_score;
 }
 
+double Scanmatcher::icp(tf::Transform &optimized_transform, const pc_map_pair &pair, const tf::Transform &guess,
+                        const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud) const
+{
+}
+
 double Scanmatcher::optimize(tf::Transform &optimized_transform, const pc_map_pair &pair, const tf::Transform &guess,
-                             const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud,
-                             const tf::Transform &lidar_pos) const
+                             const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud) const
 {
   double best_score = -1;
   RobotState current_pose{ guess };
   std::vector<Scored_move> move_list;
   move_list.reserve(64);
-  Scored_move sm = { RobotState{guess}, 0, 0 };
+  Scored_move sm = { RobotState{ guess }, 0, 0 };
 
   octomap::KeySet occupied;
-  m_octomapper.compute_occupied(*pair.octree, *cloud, lidar_pos, occupied);
-  double current_score = m_octomapper.sensor_model(pair, occupied, occupied);
+  double current_score = m_octomapper.get_score(*pair.octree, *cloud, guess);
   sm.score = current_score;
 
   move_list.emplace_back(sm);

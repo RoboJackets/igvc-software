@@ -177,7 +177,7 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
   for (const auto& point : filtered_pcl)
   {
     distance = point.x * point.x + point.y * point.y + point.z * point.z;
-    if (distance > m_filter_min && distance < m_filter_max) {
+    if (distance > m_filter_min && distance < m_filter_max*m_filter_max) {
       filtered_2.push_back(point);
     }
   }

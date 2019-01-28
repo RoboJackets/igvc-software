@@ -47,6 +47,8 @@ private:
   inline double gauss(double variance);
 
   bool m_debug;
+  bool m_use_scanmatch;
+  bool m_is_3d;
   int m_num_particles{};
   int m_scanmatch_point_thresh;
   float m_inverse_resample_threshold;

@@ -1,3 +1,4 @@
+is_3d: false
 particle_filter:
   num_particles: 64
   resample_threshold: 0.50   #From 0 to 1
@@ -5,10 +6,11 @@ particle_filter:
   variance:
     x: 0.1 # X veloctiy in robot's frame
     y: 0.0000001 # Y velocty in robot's frame (AKA should be zero, but idk)
-    yaw: 0.04
-profile: false
+    yaw: 0.06
+profile: true
 voxel_grid_size: 0.1
 scanmatcher:
+  enable: false
   use_guess: true
   point_threshold: 0.5
   variance:
@@ -20,6 +22,10 @@ scanmatcher:
     RANSAC_outlier_rejection_threshold: 0.001
     max_correspondence_distance: 0.1
     transformation_epsilon: 0.00001
+  optimizer:
+    angular_delta_start: 1
+    linear_delta_start: 1
+    max_refinements: 32
 icp:
   match_history_length: 1
 visualization:
