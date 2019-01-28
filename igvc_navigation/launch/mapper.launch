@@ -9,13 +9,16 @@
             <param name="occupancy_grid_resolution" type="double" value="0.2" />
             <param name="occupancy_grid_threshold" type="int" value="178" />
             <!-- Set decay_period to 0 to disable decay -->
-            <param name="decay_period" type="double" value="60" />
+            <param name="decay_period" type="double" value=".001" />
             <param name="transform_max_wait_time" type="double" value="0.5" />
             <param name="start_X" type="double" value="100"/>
             <param name="start_Y" type="double" value="100"/>
             <param name="increment_step" type="int" value="125"/>
             <param name="debug" type="bool" value="true"/>
     </node>
+
+    <!-- Waypoints -->
+    <include file="$(find igvc_navigation)/launch/waypoint_source.launch"/>
 
     <arg name="plot_rviz" default="false"/>
 

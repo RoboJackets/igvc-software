@@ -185,6 +185,7 @@ int main(int argc, char** argv)
     }
 
     // Calculate heading with magnetometer reading.
+    //double yaw_mag = atan2(magnetometer_msg.y, magnetometer_msg.x)+3.0*M_PI/4;
     double yaw_mag = atan2(magnetometer_msg.y, magnetometer_msg.x);
     ROS_INFO("Magnetometer heading: %f", yaw_mag);
 
