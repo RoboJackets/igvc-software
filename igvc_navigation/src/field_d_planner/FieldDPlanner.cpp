@@ -65,12 +65,14 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
     {
         // infinite traversal cost, cells likely occupied
         v_s = std::numeric_limits<float>::infinity();
+        // x : [0] y : [0]
     }
     else if (g_p1 <= g_p2)
     {
         // cheapest to travel directly to nearest neighbor (non-diagonal)
+        // x : [d_p1] y: [0]
         x = d_p1;
-        v_s =  (std::min(c,b) * x) + g_p1;
+        v_s = (std::min(c,b) * x) + g_p1;
     }
     else
     {
@@ -81,6 +83,7 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
             if (c <= f)
             {
                 // cheapest to go directly to diagonal cell
+                // x : [d_p1] y : [d_n]
                 x = d_p1;
                 y = d_n;
                 v_s = (c * d_p2) + g_p2;
@@ -88,10 +91,11 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
             else
             {
                 // travel diagonally to point along edge
+                // x : [d_p1] y : [0, d_n]
                 x = d_p1;
                 float toComp = f / sqrtf((c*c) - (f*f));
                 y = std::min(toComp, d_n);
-                v_s =  c * sqrtf((d_p1 * d_p1) + (y*y)) + (f * (d_n - y)) + g_p2;
+                v_s =  c * sqrtf((x*x) + (y*y)) + (f * (d_n - y)) + g_p2;
             }
         }
         else
@@ -99,6 +103,7 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
             if (c <= b)
             {
                 // cheapest to go directly to diagonal cell
+                // x: [d_p1] y : [d_n]
                 x = d_p1;
                 y = d_n;
                 v_s = (c * d_p2) + g_p2;
@@ -106,9 +111,11 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
             else
             {
                 // travel along edge then to s2
+                // x : [0, d_p1] y : [-1]
                 float toComp = b / sqrtf((c*c) - (b*b));
                 x = d_p1 - std::min(toComp, 1.0f);
-                v_s =  c * sqrtf((d_n * d_n) + ((d_p1 - x) * (d_p1 - x))) + (b * x) + g_p2;
+                v_s =  c * sqrtf((d_n*d_n) + ((d_p1-x) * (d_p1-x))) + (b*x) + g_p2;
+                y = -1.0f;
             }
         }
     }
@@ -167,28 +174,33 @@ Key FieldDPlanner::calculateKey(const Node& s)
 
 void FieldDPlanner::initialize()
 {
+    this->graph.K_M = 0.0f;
     umap.clear();
     PQ.clear();
     graph.updatedCells.clear();
 
     insert_or_assign(graph.Start, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
     insert_or_assign(graph.Goal, std::numeric_limits<float>::infinity(), 0.0f);
-    PQ.insert(graph.Goal, calculateKey(graph.Goal));
+    PQ.insert(graph.Goal, this->calculateKey(graph.Goal));
 }
 
 void FieldDPlanner::updateNode(const Node& s)
 {
     // s never visited before, add to unordered map with g(s) = rhs(s) = inf
     if (umap.find(s) == umap.end())
+    {
         insert_or_assign(s,
                          std::numeric_limits<float>::infinity(),
                          std::numeric_limits<float>::infinity());
-
-    /**
-    looks for a node in the priority queue and removes it if found
-    same as calling: if PQ.contains(s) PQ.remove(s);
-    */
-    PQ.remove(s);
+    }
+    else
+    {
+        /**
+        looks for a node in the priority queue and removes it if found
+        same as calling: if PQ.contains(s) PQ.remove(s);
+        */
+        PQ.remove(s);
+    }
 
     // update rhs value of Node s
     if (s != graph.Goal)
@@ -210,10 +222,10 @@ void FieldDPlanner::updateNode(const Node& s)
 
 int FieldDPlanner::computeShortestPath()
 {
-    // if the start node is occupied, return immediately. By definition, a path
-    // does not exist if the start node is occupied.
-    if (graph.getMinTraversalCost(graph.Start) == std::numeric_limits<float>::infinity())
-        return 0;
+    // // if the start node is occupied, return immediately. By definition, a path
+    // // does not exist if the start node is occupied.
+    // if (graph.getMinTraversalCost(graph.Start) == std::numeric_limits<float>::infinity())
+    //     return 0;
 
     int numNodesExpanded = 0;
 
@@ -400,7 +412,7 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<f
     positions.insert(positions.begin(), std::make_tuple(p_x + x, p_y + y));
 
     // CASE 1 (2/2): travel along x(2/2) then cut to s2(2/2)
-    if ((x > 0.0f) && (x < 1.0f) &&  (y == 0.0f))
+    if ((x > 0.0f) && (x < 1.0f) && (y == -1.0f))
         positions.push_back(std::make_tuple(p2_x, p2_y));
 
     return std::make_pair(positions, cost);
