@@ -40,20 +40,13 @@ int start_x;  // start x location
 int start_y;  // start y location
 int length_y;
 int width_x;
-uchar occupancy_grid_threshold;
-int increment_step;
 bool debug;
+double radius;
 RobotState state;
 RobotState state2;
 
 std::unique_ptr<Octomapper> octomapper;
 pc_map_pair pc_map_pair;
-
-std::tuple<double, double> rotate(double x, double y) {
-  double newX = x * cos(state.yaw()) - y * sin(state.yaw());
-  double newY = x * sin(state.yaw()) + y * cos(state.yaw());
-  return (std::make_tuple(newX, newY));
-}
 
 /**
  * Updates <code>RobotState state</code> with the latest tf transform using the timestamp of the message passed in
@@ -127,14 +120,14 @@ void publish(const cv::Mat &map, uint64_t stamp) {
     // ROS_INFO_STREAM("\nThe robot is located at " << state);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
         boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
-    for (int i = 0; i < width_x; i++) {
-      for (int j = 0; j < length_y; j++) {
+    for (int i = 0; i < width_x/resolution; i++) {
+      for (int j = 0; j < length_y/resolution; j++) {
         pcl::PointXYZRGB p;
         uchar prob = map.at<uchar>(i, j);
         if (prob > 127) {
           p = pcl::PointXYZRGB();
-          p.x = (i - width_x / 2) * resolution;
-          p.y = (j - length_y / 2) * resolution;
+          p.x = (i * resolution) - (width_x / 2);
+          p.y = (j * resolution) - (length_y / 2);
           p.r = 0;
           p.g = static_cast<uint8_t>((prob - 127) * 2);
           p.b = 0;
@@ -142,8 +135,8 @@ void publish(const cv::Mat &map, uint64_t stamp) {
           //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
         } else if (prob < 127) {
           p = pcl::PointXYZRGB();
-          p.x = (i - width_x / 2) * resolution;
-          p.y = (j - length_y / 2) * resolution;
+          p.x = (i * resolution) - (width_x / 2);
+          p.y = (j * resolution) - (length_y / 2);
           p.r = 0;
           p.g = 0;
           p.b = static_cast<uint8_t>((127 - prob) * 2);
@@ -164,12 +157,11 @@ void publish(const cv::Mat &map, uint64_t stamp) {
 void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
   // Pass through filter to only keep ones closest to us
   pcl::PointCloud<pcl::PointXYZ>::Ptr small(new pcl::PointCloud<pcl::PointXYZ>);
-  float radius = 30;
   float distanceFromSphereCenterPoint;
   bool pointIsWithinSphere;
   for (int point_i = 0; point_i < pc->size(); ++point_i) {
     distanceFromSphereCenterPoint = pc->at(point_i).x * pc->at(point_i).x + pc->at(point_i).y * pc->at(point_i).y + pc->at(point_i).z * pc->at(point_i).z;
-    pointIsWithinSphere = distanceFromSphereCenterPoint <= radius;
+    pointIsWithinSphere = distanceFromSphereCenterPoint <= radius*radius*radius;
     if (pointIsWithinSphere) {
       small->push_back(pc->at(point_i));
     }
@@ -202,17 +194,17 @@ void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
   pcl::PointCloud<pcl::PointXYZ> nonground;
 
   //  pcl::transformPointCloud(*transformed, *transformed2, transform_to_odom);
-  octomapper->filter_ground_plane(*transformed, ground, nonground);
-
-  ground.header.frame_id = "/odom";
-  transformed->header.frame_id = "/odom";
-  nonground.header.frame_id = "/odom";
-  ground.header.stamp = pc->header.stamp;
-  transformed->header.stamp = pc->header.stamp;
-  nonground.header.stamp = pc->header.stamp;
-
-  nonground_pub.publish(nonground);
-  ground_pub.publish(ground);
+//  octomapper->filter_ground_plane(*transformed, ground, nonground);
+//
+//  ground.header.frame_id = "/odom";
+//  transformed->header.frame_id = "/odom";
+//  nonground.header.frame_id = "/odom";
+//  ground.header.stamp = pc->header.stamp;
+//  transformed->header.stamp = pc->header.stamp;
+//  nonground.header.stamp = pc->header.stamp;
+//
+//  nonground_pub.publish(nonground);
+//  ground_pub.publish(ground);
 
   visualization_msgs::Marker points;
   points.header.frame_id = "/odom";
@@ -262,35 +254,17 @@ int main(int argc, char **argv) {
   std::list<ros::Subscriber> subs;
   tf_listener = std::unique_ptr<tf::TransformListener>(new tf::TransformListener());
 
-  double cont_start_x;
-  double cont_start_y;
-  double decay_period;
-  int cont_occupancy_grid_threshold;
-
   octomapper = std::unique_ptr<Octomapper>(new Octomapper(pNh));
   octomapper->create_octree(pc_map_pair);
 
   // assumes all params inputted in meters
-  igvc::getParam(pNh, "topics", topics);
-  igvc::getParam(pNh, "occupancy_grid_length", length_y);
-  igvc::getParam(pNh, "occupancy_grid_width", width_x);
-  igvc::getParam(pNh, "occupancy_grid_resolution", resolution);
-  igvc::getParam(pNh, "start_X", cont_start_x);
-  igvc::getParam(pNh, "start_Y", cont_start_y);
+  igvc::getParam(pNh, "octree/resolution", resolution);
+  igvc::getParam(pNh, "map/length", length_y);
+  igvc::getParam(pNh, "map/width", width_x);
   igvc::getParam(pNh, "debug", debug);
-  igvc::getParam(pNh, "occupancy_grid_threshold", cont_occupancy_grid_threshold);
-  igvc::getParam(pNh, "decay_period", decay_period);
-  igvc::getParam(pNh, "transform_max_wait_time", transform_max_wait_time);
-  igvc::getParam(pNh, "increment_step", increment_step);
+  igvc::getParam(pNh, "sensor_model/max_range", radius);
 
   // convert from meters to grid
-  length_y = static_cast<int>(std::round(length_y / resolution));
-  width_x = static_cast<int>(std::round(width_x / resolution));
-  start_x = static_cast<int>(std::round(cont_start_x / resolution));
-  start_y = static_cast<int>(std::round(cont_start_y / resolution));
-  occupancy_grid_threshold = static_cast<uchar>(cont_occupancy_grid_threshold);
-  ROS_INFO_STREAM("cv::Mat length: " << length_y << "  width: " << width_x << "  resolution: " << resolution);
-
   ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>("/scan/pointcloud", 1, &pc_callback);
 
   published_map = std::unique_ptr<cv::Mat>(new cv::Mat(length_y, width_x, CV_8UC1));

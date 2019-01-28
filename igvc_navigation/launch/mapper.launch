@@ -1,6 +1,4 @@
 <launch>
-    <include file="$(find igvc_navigation)/launch/localization.launch" />
-
     <!-- Map Node -->
     <node name="mapper" pkg="igvc_navigation" type="mapper" output="screen">
             <param name="topics" type="string" value="/scan/pointcloud /semantic_segmentation_cloud"/>
@@ -15,6 +13,7 @@
             <param name="start_Y" type="double" value="100"/>
             <param name="increment_step" type="int" value="125"/>
             <param name="debug" type="bool" value="true"/>
+            <rosparam command="load" file="$(find igvc_navigation)/launch/octomap.yaml"/>
     </node>
 
     <arg name="plot_rviz" default="false"/>
