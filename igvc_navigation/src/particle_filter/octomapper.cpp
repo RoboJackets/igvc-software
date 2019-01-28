@@ -1,4 +1,6 @@
 #include "octomapper.h"
+#include "../mapper/octomapper.h"
+
 
 #include <octomap/octomap.h>
 #include <octomap_ros/conversions.h>
@@ -215,6 +217,13 @@ void Octomapper::create_map(pc_map_pair &pair) const {
   pair.map = std::unique_ptr<cv::Mat>(new cv::Mat(m_map_length_grid, m_map_width_grid, m_map_encoding, 127));
 }
 
+double Octomapper::get_score(const octomap::OcTree& octree, const pcl::PointCloud<pcl::PointXYZ>& pc, const tf::Transform& pos) const
+{
+  octomap::KeySet occupied;
+  compute_occupied(octree, pc, m_base_to_lidar*pos, occupied);
+  return sensor_model(octree, occupied);
+}
+
 void Octomapper::insert_scan(struct pc_map_pair &pc_map_pair, octomap::KeySet &free_cells,
                              octomap::KeySet &occupied_cells) const {
   for (const auto &free_cell : free_cells) {
@@ -378,8 +387,20 @@ float Octomapper::sensor_model(const pc_map_pair &pair, const octomap::KeySet &f
   return total;
 }
 
+float Octomapper::sensor_model(const octomap::OcTree &octree, const octomap::KeySet &occupied_cells) const {
+  float total = 0;
+  for (const auto &occupied_cell : occupied_cells) {
+    octomap::OcTreeNode *leaf = octree.search(occupied_cell);
+    if (leaf) {
+      total += leaf->getLogOdds();
+    }
+  }
+  total = from_logodds(total);
+  return total;
+}
+
 void Octomapper::compute_occupied(const octomap::OcTree &tree, const pcl::PointCloud<pcl::PointXYZ> &pc,
-                                  const tf::Transform &lidar_pos, octomap::KeySet &occupied_cells) {
+                                  const tf::Transform &lidar_pos, octomap::KeySet &occupied_cells) const {
   octomap::point3d origin;
   octomap::Pointcloud scan;
 #ifdef _OPENMP

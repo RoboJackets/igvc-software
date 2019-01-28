@@ -61,6 +61,10 @@ public:
   void set_pitch(double pitch);
   void set_yaw(double yaw);
 
+  void forward(double delta_x);
+  void left(double delta_y);
+  void turn_ccw(double theta);
+
   // set state using an odometry msg
   void setState(const nav_msgs::Odometry::ConstPtr &msg)
   {
@@ -210,6 +214,21 @@ inline void RobotState::set_yaw(double yaw) {
   tf::Matrix3x3 t = transform.getBasis();
   t.setRPY(roll(), pitch(), yaw);
   transform.setBasis(t);
+}
+
+inline void RobotState::forward(double delta_x)
+{
+  set_x(x() + delta_x);
+}
+
+inline void RobotState::left(double delta_y)
+{
+  set_y(y() + delta_y);
+}
+
+inline void RobotState::turn_ccw(double theta)
+{
+  set_yaw(yaw() + theta);
 }
 
 #endif  // ROBOTSTATE_H

@@ -45,9 +45,12 @@ public:
                          const pc_map_pair& pair, const pcl::PointCloud<pcl::PointXYZ>& ground,
                          const pcl::PointCloud<pcl::PointXYZ>& nonground);
   void compute_occupied(const octomap::OcTree &tree, const pcl::PointCloud<pcl::PointXYZ> &pc,
-                                    const tf::Transform &lidar_pos, octomap::KeySet &occupied_cells);
+                                    const tf::Transform &lidar_pos, octomap::KeySet &occupied_cells) const;
   float sensor_model(const pc_map_pair& pair, const octomap::KeySet& free_cells,
                      const octomap::KeySet& occupied_cells) const;
+  float sensor_model(const octomap::OcTree& octree, const octomap::KeySet& occupied_cells) const;
+  double get_score(const octomap::OcTree& octree, const PCL_point_cloud& pc, const tf::Transform& pos) const;
+
   inline float to_logodds(float p) const
   {
     return log(p / (1 - p));
