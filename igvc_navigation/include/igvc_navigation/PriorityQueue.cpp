@@ -26,7 +26,6 @@ bool PriorityQueue::remove(Node n)
 
     pq.erase(it);
     return true;
-
 }
 
 void PriorityQueue::pop()

@@ -119,7 +119,7 @@ void updateOccupancyGrid(const pcl::PointCloud<pcl::PointXYZ>::Ptr &transformed)
       offMapCount++;
     }
   }
-  if (offMapCount > 0)
+  if (debug && (offMapCount > 0))
   {
     ROS_WARN_STREAM(offMapCount << " points were off the map");
   }

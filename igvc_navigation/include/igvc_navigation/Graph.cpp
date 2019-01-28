@@ -34,27 +34,22 @@ void Graph::initializeGraph(const igvc_msgs::mapConstPtr& msg)
 void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
 {
     // Update the start position and K_M
-    std::tuple<float,float> newStart = std::make_tuple(static_cast<float>(msg->x), static_cast<float>(msg->y));
-    std::tuple<float,float> oldStart = std::make_tuple(static_cast<float>(std::get<0>(this->Start.getIndex())), \
-                                                       static_cast<float>(std::get<1>(this->Start.getIndex())));
+    std::tuple<float,float> newStart = std::make_tuple(msg->x, msg->y);
+    std::tuple<float,float> oldStart = this->Start.getIndex();
 
     // update the key modifier value to account for the robot's new pos
     this->K_M += igvc::get_distance(oldStart, newStart);
-    this->Start.setIndex(std::make_tuple(static_cast<int>(msg->x), static_cast<int>(msg->y)));
+    this->Start.setIndex(static_cast<std::tuple<int,int>>(newStart));
 
     this->updatedCells.clear(); // clear the vector of cells that need updating
 
-    // get the most recently observed map (occupancy grid)
+    // get the most recently observed occupancy grid
     cv_bridge::CvImagePtr currMap = cv_bridge::toCvCopy(msg->image, "mono8");
 
-    if (std::equal(Map->image.begin<uchar>(), Map->image.end<uchar>(), \
+    // gather the cells that need updating if the new map differs
+    if (!std::equal(Map->image.begin<uchar>(), Map->image.end<uchar>(), \
                 currMap->image.begin<uchar>()))
     {
-        return; // no cells to update
-    }
-    else
-    {
-        // current and previous occupancy grid differ
         auto start_it = Map->image.begin<uchar>();
 
         auto it_new = currMap->image.begin<uchar>();
@@ -76,7 +71,6 @@ void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
                 int row = pos/(this->width);
                 int col = pos%(this->width);
                 this->updatedCells.push_back(std::make_tuple(row,col));
-
                 // update the value of Map with the value of the new map
                 *it_map = curr_val;
             }
@@ -127,12 +121,7 @@ bool Graph::isDiagonal(const Node& s, const Node& s_prime)
 
 bool Graph::isDiagonalContinuous(const std::tuple<float,float>& p, const std::tuple<float,float>& p_prime)
 {
-    float x,y;
-    std::tie(x,y) = p;
-    float x_prime, y_prime;
-    std::tie(x_prime, y_prime) = p_prime;
-
-    return (std::get<0>(p) != std::get<0>(p_prime)) && (std::get<1>(p) != std::get<1>(p_prime));
+    return ((std::get<0>(p) != std::get<0>(p_prime)) && (std::get<1>(p) != std::get<1>(p_prime)));
 }
 
 std::vector<Node> Graph::nbrs(const Node& s, bool include_invalid)
@@ -302,7 +291,7 @@ std::vector<std::tuple<Node, Node>> Graph::connbrs(const Node& s)
     for (size_t i = 0; i < neighbors.size() - 1; i++)
     {
         assert(!isDiagonal(neighbors[i],neighbors[i+1]));
-        // if both nodes valid, make a tuple and put it at the front of the list
+        // if both connbrs valid, make a tuple and put it in the list
         if (isValidNode(neighbors[i]) && isValidNode(neighbors[i+1]))
             connbrs.push_back(std::make_tuple(neighbors[i],neighbors[i+1]));
     }
@@ -396,7 +385,7 @@ float Graph::getB(const Node& s, const Node& s_prime)
     }
 
     // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
-    maxCellVal = std::min(getValWithCSpace(cellInd1), getValWithCSpace(cellInd2));
+    maxCellVal = std::max(getValWithCSpace(cellInd1), getValWithCSpace(cellInd2));
     return (maxCellVal > 150) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST;
 }
 
@@ -444,6 +433,7 @@ float Graph::getContinuousTraversalCost(const std::tuple<float,float>& p, const 
                            static_cast<int>(roundf(y))));
 
     // get relative distance between p_prime and p. Note: ceil0 is biased away from 0
+    // i.e. ceil0(-0.35) = -1.00
     float x_diff = igvc::ceil0(x_prime - x);
     float y_diff = igvc::ceil0(y_prime - y);
 
@@ -453,7 +443,7 @@ float Graph::getContinuousTraversalCost(const std::tuple<float,float>& p, const 
     Node s_prime(std::make_tuple(static_cast<int>(roundf(x) + x_diff),
                                  static_cast<int>(roundf(y) + y_diff)));
 
-    return isDiagonal(s,s_prime) ? getC(s, s_prime) : getB(s, s_prime);
+    return (isDiagonal(s,s_prime) ? getC(s, s_prime) : getB(s, s_prime));
 }
 
 float Graph::getMinTraversalCost(const Node& s)
@@ -471,10 +461,10 @@ float Graph::euclidian_heuristic(const Node& s)
 
 float Graph::euclidian_heuristic(const std::tuple<int,int>& ind)
 {
-    std::tuple<float,float> start_f = Start.getIndex();
-    std::tuple<float,float> s_f = ind;
+    std::tuple<float,float> start = Start.getIndex();
+    std::tuple<float,float> s = ind;
 
-    return igvc::get_distance(start_f, s_f);
+    return igvc::get_distance(start, s);
 }
 
 std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int,int>& cellInd)
@@ -482,7 +472,7 @@ std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int,int>&
     int x,y;
     std::tie(x,y) = cellInd;
 
-    int sep = (CSpace/Resolution) + 1; // number of cells on all sides that constitute C-space
+    int sep = static_cast<int>(CSpace/Resolution) + 1; // number of cells on all sides that constitute C-space
 
     std::vector<Node> toUpdate;
 
