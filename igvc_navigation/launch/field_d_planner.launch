@@ -42,7 +42,4 @@
         <param name="k2" type="double" value="5"/>
         <param name="debug" type="bool" value="false"/>
     </node>
-
-
-
 </launch>

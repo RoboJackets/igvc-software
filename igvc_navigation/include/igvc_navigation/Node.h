@@ -112,8 +112,8 @@ public:
     bool valid = true;
 
 private:
-    float x;
-    float y;
+    int x;
+    int y;
 
     std::tuple<int,int> ind;
     std::tuple<int,int> bptr;
