@@ -39,6 +39,7 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #include "igvc_navigation/PriorityQueue.h"
 
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 #include <limits>

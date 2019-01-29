@@ -11,34 +11,20 @@ Node::Node(int x, int y)
     this->y = y;
     this->ind = std::make_tuple(x,y);
 }
+Node::Node(std::tuple<int,int> ind) : Node(std::get<0>(ind), std::get<1>(ind)) { }
 
-Node::Node(std::tuple<int,int> ind)
-{
-    int x,y;
-    std::tie(x,y) = ind;
-    this->x = x;
-    this->y = y;
-    this->ind = std::make_tuple(x,y);
-}
-
-Node::~Node()
-{
-
-}
-
-void Node::setIndex(std::tuple<int,int> ind)
-{
-    this->x = std::get<0>(ind);
-    this->y = std::get<1>(ind);
-
-    this->ind = std::make_tuple(this->x, this->y);
-}
+Node::~Node() { }
 
 void Node::setIndex(int x, int y)
 {
     this->x = x;
     this->y = y;
     this->ind = std::make_tuple(this->x, this->y);
+}
+
+void Node::setIndex(std::tuple<int,int> ind)
+{
+    this->setIndex(std::get<0>(ind), std::get<1>(ind));
 }
 
 std::tuple<int,int> Node::getIndex() const

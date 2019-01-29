@@ -266,17 +266,24 @@ int FieldDPlanner::computeShortestPath()
 int FieldDPlanner::updateNodesAroundUpdatedCells()
 {
     int numNodesUpdated = 0;
+    int nodeCount = 0;
+
+    std::unordered_set<Node> toUpdate;
 
     for (std::tuple<int,int> cellUpdate : graph.updatedCells)
     {
-        for (Node n : graph.getNodesAroundCellWithCSpace(cellUpdate))
-        {
-            if (umap.find(n) == umap.end()) // node hasn't been explored yet. Leave alone
-                continue;
+      std::vector<Node> updates = graph.getNodesAroundCellWithCSpace(cellUpdate);
+      nodeCount += updates.size();
+      toUpdate.insert(updates.begin(), updates.end());
+    }
 
-            updateNode(n);
-            numNodesUpdated++;
-        }
+    for (Node n :toUpdate)
+    {
+        if (umap.find(n) == umap.end()) // node hasn't been explored yet. Leave alone
+            continue;
+
+        updateNode(n);
+        numNodesUpdated++;
     }
 
     return numNodesUpdated;
