@@ -170,7 +170,7 @@ int main(int argc, char** argv)
   expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded", 1);
   expanded_cloud.header.frame_id = "odom";
 
-  int numNodesUpdated, numNodesExpanded;
+  int numNodesUpdated = 0, numNodesExpanded = 0;
   ros::Rate rate(rateTime); // path update rate
 
   while (ros::ok())
@@ -180,8 +180,6 @@ int main(int argc, char** argv)
       // don't plan unless the map has been initialized and a goal node has been set
       if (initialize_graph || !initial_goal_set)
           continue;
-      else
-          planner.graph.updateGraph(map);
 
       if (initialize_search)
           planner.initialize();
@@ -194,11 +192,6 @@ int main(int argc, char** argv)
           continue;
       }
 
-      numNodesUpdated = planner.updateNodesAroundUpdatedCells();
-
-      if (numNodesUpdated > 0)
-        ROS_INFO_STREAM(numNodesUpdated << " nodes updated");
-
       // only update the graph if nodes have been updated
       if ((numNodesUpdated > 0) || initialize_search)
       {
@@ -209,10 +202,15 @@ int main(int argc, char** argv)
           if (initialize_search) initialize_search = false;
       }
 
+      planner.constructOptimalPath();
+
+      // gather cells with updated edge costs and update affected nodes
+      planner.graph.updateGraph(map);
+      numNodesUpdated = planner.updateNodesAroundUpdatedCells();
+      if (numNodesUpdated > 0) { ROS_INFO_STREAM(numNodesUpdated << " nodes updated"); }
+
       if (publish_expanded)
         expanded_callback(planner.getExplored());
-
-      planner.constructOptimalPath();
 
       nav_msgs::Path path_msg;
       path_msg.header.stamp = ros::Time::now();

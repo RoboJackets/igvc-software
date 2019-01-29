@@ -472,19 +472,19 @@ std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int,int>&
     int x,y;
     std::tie(x,y) = cellInd;
 
-    int sep = static_cast<int>(CSpace/Resolution) + 1; // number of cells on all sides that constitute C-space
+    int sep = static_cast<int>(CSpace/Resolution); // number of cells on all sides that constitute C-space
 
-    std::vector<Node> toUpdate;
+    std::vector<Node> cellNodes;
 
-    for (int new_x = x - sep; new_x <= x + sep; new_x++)
+    for (int new_x = x - sep; new_x <= x + sep + 1; new_x++)
     {
-        for (int new_y = y - sep; new_y <= y + sep; new_y++)
+        for (int new_y = y - sep; new_y <= y + sep + 1; new_y++)
         {
-            Node updatedNode = Node(new_x, new_y);
-            if (isValidNode(updatedNode))
-                toUpdate.push_back(updatedNode);
+            Node cellNode = Node(new_x, new_y);
+            if (isValidNode(cellNode))
+                cellNodes.push_back(cellNode);
         }
     }
 
-    return toUpdate;
+    return cellNodes;
 }
