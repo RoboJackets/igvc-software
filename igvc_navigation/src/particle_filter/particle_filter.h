@@ -68,6 +68,7 @@ private:
   ros::Publisher m_particle_pub;
   ros::Publisher m_ground_pub;
   ros::Publisher m_nonground_pub;
+  ros::Publisher m_scanmatched_pub;
   ros::Publisher m_num_eff_particles_pub;
   Octomapper m_octomapper;
   Scanmatcher m_scanmatcher;

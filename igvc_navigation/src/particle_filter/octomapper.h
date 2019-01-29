@@ -114,9 +114,12 @@ private:
   int m_map_start_x;  // In m, not grid units
   int m_map_start_y;
   int m_map_encoding;
+  int m_kernel_size;
+  double m_gaussian_sigma;
   float m_odds_sum_default;
   std::unique_ptr<tf::Transform> m_lidar_to_base{};
   ros::Publisher m_octo_viz_pub;
+  ros::Publisher fuck;
   std::vector<octomap::KeyRay> m_keyrays;
 
   // std::unique_ptr<tf::MessageFilter<PCL_point_cloud>> msg_filter;

@@ -39,6 +39,7 @@ Particle_filter::Particle_filter(const ros::NodeHandle &pNh)
     m_particle_pub = nh.advertise<visualization_msgs::MarkerArray>("visualization_marker_array", 1);
     m_ground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/particle_filter/ground_debug", 1);
     m_nonground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/particle_filter/nonground_debug", 1);
+    m_scanmatched_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/particle_filter/scanmatched_nonground", 1);
     m_num_eff_particles_pub = nh.advertise<std_msgs::Float64>("/particle_filter/num_effective_particles", 1);
 
     if (m_viz_hue_start > m_viz_hue_end)
@@ -141,31 +142,6 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
   //  proj.setModelCoefficients(coefficients);
   //  proj.filter(*nonground_projected);
 
-  double fitness = -1;
-  tf::Transform scanmatch_motion_model;
-  if (nonground->size() >= m_scanmatch_point_thresh && m_use_scanmatch)
-  {
-    tf::Transform scanmatch_transform;
-    tf::Transform guess;
-    guess.setOrigin(tf::Vector3(twist.twist.linear.x * delta_t.toSec(), twist.twist.linear.y * delta_t.toSec(), 0));
-    tf::Matrix3x3 rot;
-    rot.setRPY(0, 0, twist.twist.angular.z * delta_t.toSec());
-    guess.setBasis(rot);
-    nonground->header.frame_id = "/base_link";
-    fitness = m_scanmatcher.scanmatch(nonground, scanmatch_transform, guess);
-    if (fitness != -1)
-    {
-      scanmatch_motion_model = scanmatch_transform;
-    }
-    double x = scanmatch_transform.getOrigin().getX();
-    double y = scanmatch_transform.getOrigin().getY();
-    scanmatch_transform.setOrigin(tf::Vector3(x, y, 0));
-    double r, p, yaw;
-    tf::Matrix3x3 rota = scanmatch_transform.getBasis();
-    rota.getRPY(r, p, yaw);
-    ROS_INFO_STREAM("Fitness: " << fitness << "\t\t Transform: (" << x << ", " << y << ", " << yaw << ")");
-    scanmatch_transform.getBasis().setRPY(0, 0, yaw);
-  }
 
   for (auto &p : nonground->points)
   {
@@ -191,15 +167,50 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
   //  diff.getOrigin().z() << ")"); ROS_INFO_STREAM("Delta t: " << delta_t.toSec());
   static int iterations = -1;
   iterations++;
-#pragma omp parallel
-#pragma omp for
+//#pragma omp parallel
+//#pragma omp for
   for (size_t i = 0; i < m_particles.size(); ++i)
   {
-    // TODO: Add Scanmatching
-    // TODO: Add CUDA or OpenMP?
-    // Sample new particle from old using pose and covariance
-    //    ROS_INFO_STREAM("diff: " << diff.getOrigin().x() << ", " << diff.getOrigin().y() << ", " <<
-    //    diff.getOrigin().z());
+    pcl::PointCloud<pcl::PointXYZ> transformed_ground, transformed_nonground;
+    if (m_is_3d)
+    {
+      pcl_ros::transformPointCloud(*ground, transformed_ground, m_particles[i].state.transform);
+    }
+    pcl_ros::transformPointCloud(*nonground, transformed_nonground, m_particles[i].state.transform);
+
+    double fitness = -1;
+    tf::Transform scanmatch_motion_model;
+    if (nonground->size() >= m_scanmatch_point_thresh && m_use_scanmatch && iterations >= 10)
+    {
+      tf::Transform scanmatch_transform;
+      RobotState guess;
+      double cur_yaw = m_particles[i].state.yaw();
+      double new_x = twist.twist.linear.x * cos(cur_yaw) - twist.twist.linear.y * sin(cur_yaw);
+      double new_y = twist.twist.linear.x * sin(cur_yaw) + twist.twist.linear.y * cos(cur_yaw);
+      guess.set_x(m_particles[i].state.x() + delta_t.toSec() * new_x);
+      guess.set_y(m_particles[i].state.y() + delta_t.toSec() * new_y);
+      guess.set_yaw(m_particles[i].state.yaw() + delta_t.toSec() * twist.twist.angular.z);
+      nonground->header.frame_id = "/base_link";
+//    fitness = m_scanmatcher.scanmatch(nonground, scanmatch_transform, guess);
+      fitness = m_scanmatcher.optimize(scanmatch_transform, m_particles[i].pair, guess.transform, *nonground);
+      if (fitness != -1)
+      {
+        scanmatch_motion_model = scanmatch_transform;
+        pcl::PointCloud<pcl::PointXYZ> fuck;
+        pcl_ros::transformPointCloud(*nonground, fuck, scanmatch_motion_model);
+        fuck.header.frame_id = "/odom";
+        m_scanmatched_pub.publish(fuck);
+      }
+      double x = scanmatch_transform.getOrigin().getX();
+      double y = scanmatch_transform.getOrigin().getY();
+      scanmatch_transform.setOrigin(tf::Vector3(x, y, 0));
+      double r, p, yaw;
+      tf::Matrix3x3 rota = scanmatch_transform.getBasis();
+      rota.getRPY(r, p, yaw);
+//      ROS_INFO_STREAM("Fitness: " << fitness << "\t\t Transform: (" << x << ", " << y << ", " << yaw << ")");
+      scanmatch_transform.getBasis().setRPY(0, 0, yaw);
+    }
+
     double noisy_x, noisy_y, noisy_yaw;
     // If scanmatching failed or not using scanmatching, then use EKF output
     Particle particle{};
@@ -218,7 +229,7 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
         noisy_y = twist.twist.linear.y + gauss(m_variance_y);
         noisy_yaw = twist.twist.angular.z + gauss(m_variance_yaw);
       }
-      double cur_yaw = m_particles[i].state.yaw();
+      double cur_yaw = m_particles[i].state.yaw() + delta_t.toSec() * noisy_yaw;
       double new_x = noisy_x * cos(cur_yaw) - noisy_y * sin(cur_yaw);
       double new_y = noisy_x * sin(cur_yaw) + noisy_y * cos(cur_yaw);
       particle.state.set_x(m_particles[i].state.x() + delta_t.toSec() * new_x);
@@ -227,18 +238,10 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
     }
     else
     {
-      //      m_particles[i].state.transform *= scanmatch_motion_model;
-      noisy_x = scanmatch_motion_model.getOrigin().getX() + gauss(m_scanmatch_variance_x);
-      noisy_y = scanmatch_motion_model.getOrigin().getY() + gauss(m_scanmatch_variance_y);
-      double r, p, dyaw;
-      scanmatch_motion_model.getBasis().getRPY(r, p, dyaw);
-      noisy_yaw = dyaw + gauss(m_scanmatch_variance_yaw);
-      double cur_yaw = m_particles[i].state.yaw();
-      double new_x = noisy_x * cos(cur_yaw) - noisy_y * sin(cur_yaw);
-      double new_y = noisy_x * sin(cur_yaw) + noisy_y * cos(cur_yaw);
-      particle.state.set_x(m_particles[i].state.x() + new_x);
-      particle.state.set_y(m_particles[i].state.y() + new_y);
-      particle.state.set_yaw(m_particles[i].state.yaw() + noisy_yaw);
+      particle.state.transform = scanmatch_motion_model;
+      particle.state.set_x(particle.state.x() + gauss(m_scanmatch_variance_x));
+      particle.state.set_y(particle.state.y() + gauss(m_scanmatch_variance_y));
+      particle.state.set_yaw(particle.state.yaw() + gauss(m_scanmatch_variance_yaw));
     }
 
     // Transform particles from base_frame to odom_frame
@@ -248,12 +251,6 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
 
     // Transform ground and nonground from base_frame to odom_frame
     // TODO: Is transform faster or plane detection faster? Do I move the ground filtering into the for loop?
-    pcl::PointCloud<pcl::PointXYZ> transformed_ground, transformed_nonground;
-    if (m_is_3d)
-    {
-      pcl_ros::transformPointCloud(*ground, transformed_ground, particle.state.transform);
-    }
-    pcl_ros::transformPointCloud(*nonground, transformed_nonground, particle.state.transform);
     //    ROS_INFO_STREAM("4");
     //    transformed_ground.header.frame_id = "/odom";
     //    transformed_pc.header.frame_id = "/odom";
@@ -289,19 +286,19 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
     {
       // Calculate weight using sensor model
       particle.weight *= m_octomapper.sensor_model(m_particles[i].pair, free, occupied);
-#pragma omp atomic update
+//#pragma omp atomic update
       weight_sum += particle.weight;
       //    ROS_INFO_STREAM("Weight of " << i << " : " << m_particles[i].weight);
       // Update map
       if (particle.weight > highest_weight)
       {
-#pragma omp atomic write
+//#pragma omp atomic write
         highest_weight = particle.weight;
       }
       m_octomapper.insert_scan(m_particles[i].pair, free, occupied);
-#pragma omp atomic write
+//#pragma omp atomic write
       m_particles[i].weight = particle.weight;
-#pragma omp critical(update_state)
+//#pragma omp critical(update_state)
       m_particles[i].state = std::move(particle.state);
     }
   }
@@ -328,9 +325,11 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
     // calculate Neff
     float inverse_n_eff = 0;
     float squared_weight_sum = weight_sum * weight_sum;
+    highest_weight /= weight_sum;
     for (Particle &p : m_particles)
     {
       inverse_n_eff += (p.weight * p.weight) / squared_weight_sum;
+      p.weight /= weight_sum; // Make sure that particle weights don't keep getting smaller
     }
     // if Neff < thresh then resample
     if (inverse_n_eff > m_inverse_resample_threshold)

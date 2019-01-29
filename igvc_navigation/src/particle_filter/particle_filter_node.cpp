@@ -42,7 +42,8 @@ public:
     igvc::getParam(pNh, "lidar_frame", m_lidar_frame);
     igvc::getParam(pNh, "parent_frame", m_parent_frame);
     igvc::getParam(pNh, "child_frame", m_child_frame);
-    igvc::getParam(pNh, "voxel_grid_size", m_voxel_grid_size);
+    igvc::getParam(pNh, "filtering/voxel_grid_size", m_voxel_grid_size);
+    igvc::getParam(pNh, "filtering/voxel_filter_enabled", m_voxel_filter_enabled);
     igvc::getParam(pNh, "filter/min_distance", m_filter_min);
     igvc::getParam(pNh, "filter/max_distance", m_filter_max);
     igvc::getParam(pNh, "icp/match_history_length", icp_match_history_length);
@@ -74,6 +75,7 @@ private:
 
   bool m_debug{};
   bool m_initialised = false;
+  bool m_voxel_filter_enabled;
   double m_voxel_grid_size{};
   double m_update_time_thresh{}, m_start_x{}, m_start_y{}, m_start_z{};
   std::shared_ptr<tf::Stamped<tf::Pose>> m_last_pose;
@@ -81,7 +83,6 @@ private:
   ros::Time m_last_time;
   cv_bridge::CvImage m_img_bridge;
   boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr> m_pc_buf;
-  boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr> m_icp_buf;
   boost::circular_buffer<nav_msgs::OdometryConstPtr> m_pose_buf;
   boost::shared_ptr<tf::StampedTransform> m_lidar_transform;
 };
@@ -163,13 +164,18 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
   // Get static transform from lidar frame to base frame
   get_lidar_transform();
 
-  // TODO: Make new node to filter pc instead of doing it here
-  pcl::PointCloud<pcl::PointXYZ> filtered_pcl;
-  pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
+  pcl::PointCloud<pcl::PointXYZ> filtered_pcl{};
+  if (m_voxel_filter_enabled)
+  {
+    // TODO: Make new node to filter pc instead of doing it here
+    pcl::VoxelGrid<pcl::PointXYZ> voxel_grid;
 //  ROS_INFO_STREAM("Filtered size (0): " << m_pc_buf[pc_idx]->size() << " with leaf size " << m_voxel_grid_size);
-  voxel_grid.setInputCloud(m_pc_buf[pc_idx]);
-  voxel_grid.setLeafSize(m_voxel_grid_size, m_voxel_grid_size, m_voxel_grid_size);
-  voxel_grid.filter(filtered_pcl);
+    voxel_grid.setInputCloud(m_pc_buf[pc_idx]);
+    voxel_grid.setLeafSize(m_voxel_grid_size, m_voxel_grid_size, m_voxel_grid_size);
+    voxel_grid.filter(filtered_pcl);
+  } else {
+    filtered_pcl = *m_pc_buf[pc_idx];
+  }
 
   float distance;
   pcl::PointCloud<pcl::PointXYZ> filtered_2;

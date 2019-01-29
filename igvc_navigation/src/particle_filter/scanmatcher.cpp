@@ -1,6 +1,7 @@
 #include "scanmatcher.h"
 #include <pcl/common/transforms.h>
 #include <igvc_utils/RobotState.hpp>
+#include <tf/transform_broadcaster.h>
 
 struct Scored_move
 {
@@ -76,7 +77,7 @@ double Scanmatcher::icp(tf::Transform &optimized_transform, const pc_map_pair &p
 }
 
 double Scanmatcher::optimize(tf::Transform &optimized_transform, const pc_map_pair &pair, const tf::Transform &guess,
-                             const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud) const
+                             const pcl::PointCloud<pcl::PointXYZ> &cloud) const
 {
   double best_score = -1;
   RobotState current_pose{ guess };
@@ -85,7 +86,9 @@ double Scanmatcher::optimize(tf::Transform &optimized_transform, const pc_map_pa
   Scored_move sm = { RobotState{ guess }, 0, 0 };
 
   octomap::KeySet occupied;
-  double current_score = m_octomapper.get_score(*pair.octree, *cloud, guess);
+  double current_score = m_octomapper.get_score(*pair.octree, cloud, guess);
+//  ROS_INFO_STREAM("Starting score: " << current_score << ", starting pose: " << current_pose);
+//  ros::Duration(0.2).sleep();
   sm.score = current_score;
 
   move_list.emplace_back(sm);
@@ -104,8 +107,10 @@ double Scanmatcher::optimize(tf::Transform &optimized_transform, const pc_map_pa
     Done
   };
   RobotState best_local_pose{ current_pose };
+  static tf::TransformBroadcaster br;
   do
   {
+//    ROS_INFO_STREAM("best score: " << best_score << ", current score:" << current_score << ", best pose: " << current_pose);
     if (best_score >= current_score)
     {
       refinements++;
@@ -122,9 +127,11 @@ double Scanmatcher::optimize(tf::Transform &optimized_transform, const pc_map_pa
       {
         case Forward:
           local_pose.forward(l_delta);
+//          ROS_INFO_STREAM("fwd: " << local_pose);
           move = Back;
           break;
         case Back:
+//          ROS_INFO_STREAM("back: " << local_pose);
           local_pose.forward(-l_delta);
           move = Left;
           break;
@@ -137,10 +144,12 @@ double Scanmatcher::optimize(tf::Transform &optimized_transform, const pc_map_pa
           move = CCW;
           break;
         case CCW:
+//          ROS_INFO_STREAM("ccw: " << local_pose);
           local_pose.turn_ccw(a_delta);
           move = CW;
           break;
         case CW:
+//          ROS_INFO_STREAM("cw: " << local_pose);
           local_pose.turn_ccw(-a_delta);
           move = Done;
           break;
@@ -148,19 +157,30 @@ double Scanmatcher::optimize(tf::Transform &optimized_transform, const pc_map_pa
         default:;
       }
       // TODO: odo_gain?
-      double local_score = m_octomapper.get_score(*pair.octree, *cloud, local_pose.transform);
+      double local_score = m_octomapper.get_score(*pair.octree, cloud, local_pose.transform);
+//      ros::Duration(0.1).sleep();
       iterations++;
       if (local_score > current_score)
       {
-        local_score = current_score;
-        best_local_pose = current_pose;
+        current_score = local_score;
+        best_local_pose = local_pose;
       }
       sm.score = local_score;
       sm.likelihood = local_score;  // TODO: What is likelihood?
       sm.pose = local_pose;
       move_list.emplace_back(sm);
     } while (move != Done);
+//    br.sendTransform(
+//        tf::StampedTransform(best_local_pose.transform, ros::Time::now(), "/odom", "/scanmatch"));
+//  ROS_INFO_STREAM(current_score << " --> (" << best_local_pose.transform.getOrigin().x() << ", "
+//                             << best_local_pose.transform.getOrigin().y() << ")");
     current_pose = best_local_pose;
   } while (current_score > best_score || refinements < m_max_refinements);
   optimized_transform = best_local_pose.transform;
+  double r, p, y;
+  optimized_transform.getBasis().getRPY(r, p, y);
+//  ROS_INFO_STREAM(best_score << " --> (" << optimized_transform.getOrigin().x() << ", "
+//                             << optimized_transform.getOrigin().y() << ", " << y << ") in " << iterations
+//                             << " iterations with " << refinements << " refinements");
+  return best_score;
 }

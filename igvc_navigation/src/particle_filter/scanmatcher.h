@@ -24,7 +24,7 @@ public:
   double icp(tf::Transform &optimized_transform, const pc_map_pair &pair, const tf::Transform &guess,
              const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud) const;
   double optimize(tf::Transform &optimized_transform, const pc_map_pair &pair, const tf::Transform &guess,
-                  const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &cloud) const;
+                  const pcl::PointCloud<pcl::PointXYZ>& cloud) const;
 
 private:
   bool m_use_guess = false;

@@ -21,12 +21,14 @@ public:
 
   friend std::ostream &operator<<(std::ostream &out, const RobotState &state);
 
-  RobotState() : transform{}, stamp{} {};
+  RobotState() : transform{tf::Transform::getIdentity()}, stamp{} {};
 
   explicit RobotState(const nav_msgs::Odometry::ConstPtr &msg)
   {
     setState(msg);
   }
+
+  RobotState(const RobotState& other) : transform{other.transform} {}
 
   explicit RobotState(double x, double y, double yaw)
   {
@@ -41,7 +43,7 @@ public:
   {
   }
 
-  explicit RobotState(const tf::Transform& transform) : transform(transform) { }
+  RobotState(const tf::Transform& transform) : transform{transform} { }
 
   double x() const;
   double y() const;

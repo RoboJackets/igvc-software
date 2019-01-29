@@ -4,6 +4,7 @@
 #include <octomap/octomap.h>
 #include <octomap_ros/conversions.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <pcl_ros/transforms.h>
 
 // TODO: How to convert OcTree to occupancy grid?
 Octomapper::Octomapper(ros::NodeHandle pNh)
@@ -23,6 +24,8 @@ Octomapper::Octomapper(ros::NodeHandle pNh)
   igvc::getParam(pNh, "sensor_model/occupied_coeff", m_sensor_model_occ_coeff);
   igvc::getParam(pNh, "sensor_model/free_coeff", m_sensor_model_free_coeff);
   igvc::param(pNh, "sensor_model/algorithm_number", m_sensor_model, 1);
+  igvc::getParam(pNh, "scanmatcher/optimizer/kernel_size", m_kernel_size);
+  igvc::getParam(pNh, "scanmatcher/optimizer/gaussian_sigma", m_gaussian_sigma);
   igvc::getParam(pNh, "ground_filter/iterations", m_ransac_iterations);
   igvc::getParam(pNh, "ground_filter/distance_threshold", m_ransac_distance_threshold);
   igvc::getParam(pNh, "ground_filter/eps_angle", m_ransac_eps_angle);
@@ -35,6 +38,7 @@ Octomapper::Octomapper(ros::NodeHandle pNh)
   std::string map_encoding;
   igvc::getParam(pNh, "map/encoding", map_encoding);
   m_octo_viz_pub = nh.advertise<visualization_msgs::MarkerArray>("/octomapper/best_particle", 1);
+  fuck = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/octomapper/fuck", 1);
 
   if (map_encoding == "CV_8UC1")
   {
@@ -171,7 +175,7 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
       int x = (m_map_length / 2 + it.getX()) / m_octree_resolution;
       int y = (m_map_width / 2 + it.getY()) / m_octree_resolution;
       //      ROS_INFO_STREAM("Sum: (" << x << ", " << y << ")");
-      if (x < m_map_length / m_octree_resolution && y < m_map_width / m_octree_resolution)
+      if (x >= 0 && x < m_map_length_grid && y >= 0 && y < m_map_width_grid)
       {
         odds_sum[x][y] += it->getLogOdds();
 
@@ -243,12 +247,53 @@ void Octomapper::create_map(pc_map_pair &pair) const
   pair.map = std::unique_ptr<cv::Mat>(new cv::Mat(m_map_length_grid, m_map_width_grid, m_map_encoding, 127));
 }
 
+// double Octomapper::get_score(const octomap::OcTree &octree, const pcl::PointCloud<pcl::PointXYZ> &pc,
+//                             const tf::Transform &pos) const
+//{
+//  octomap::KeySet occupied;
+//  compute_occupied(octree, pc, occupied);  // TODO: Change this to take into account free cells in the middle as well?
+////  ROS_INFO_STREAM("Occupied size: " << occupied.size() << ", pc size: " << pc.size());
+//  return sensor_model(octree, occupied);
+//}
+
 double Octomapper::get_score(const octomap::OcTree &octree, const pcl::PointCloud<pcl::PointXYZ> &pc,
                              const tf::Transform &pos) const
 {
-  octomap::KeySet occupied;
-  compute_occupied(octree, pc, occupied);  // TODO: Change this to take into account free cells in the middle as well?
-  return sensor_model(octree, occupied);
+  pcl::PointCloud<pcl::PointXYZ> transformed_pc;
+  pcl_ros::transformPointCloud(pc, transformed_pc, pos);
+  transformed_pc.header.frame_id = "odom";
+//  fuck.publish(transformed_pc);
+  octomap::Pointcloud scan;
+  PCL_to_Octomap(transformed_pc, scan);
+#ifdef _OPENMP
+  omp_set_num_threads(m_keyrays.size());
+#endif
+// Project all nonground
+double total = 0;
+#pragma omp parallel for
+  for (int i = 0; i < scan.size(); ++i)
+  {
+    const octomap::point3d &center = scan[i];
+    for (int x = -m_kernel_size; x < m_kernel_size; ++x)
+    {
+      for (int y = -m_kernel_size; y < m_kernel_size; ++y)
+      {
+        const octomap::point3d p{center.x() + x, center.y() + y, center.z()};
+        octomap::OcTreeKey key;
+        if (octree.coordToKeyChecked(p, key))
+        {
+          octomap::OcTreeNode *leaf = octree.search(key);
+          if (leaf)
+          {
+            double upd = leaf->getOccupancy() * exp(-1*(x*x + y*y)/m_gaussian_sigma);
+#pragma omp atomic
+            total += upd;
+          }
+        }
+      }
+    }
+  }
+  return total;
 }
 
 void Octomapper::insert_scan(struct pc_map_pair &pc_map_pair, octomap::KeySet &free_cells,
@@ -453,6 +498,7 @@ void Octomapper::compute_occupied(const octomap::OcTree &tree, const pcl::PointC
                                   octomap::KeySet &occupied_cells) const
 {
   octomap::Pointcloud scan;
+  PCL_to_Octomap(pc, scan);
 #ifdef _OPENMP
   omp_set_num_threads(m_keyrays.size());
 #endif
