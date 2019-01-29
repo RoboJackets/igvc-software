@@ -53,6 +53,7 @@ private:
   int m_scanmatch_point_thresh;
   float m_inverse_resample_threshold;
   float m_total_weight;
+  double m_thresh_still;
   double m_viz_hue_start, m_viz_hue_end;
   double m_viz_sat_start, m_viz_sat_end;
   double m_viz_light_start, m_viz_light_end;

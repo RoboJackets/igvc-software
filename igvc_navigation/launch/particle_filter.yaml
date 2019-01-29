@@ -3,11 +3,12 @@ particle_filter:
   num_particles: 64
   resample_threshold: 0.50   #From 0 to 1
   covariance_coefficient: 0.8
+  still_threshold: 0.01
   variance:
     x: 0.1 # X veloctiy in robot's frame
     y: 0.0000001 # Y velocty in robot's frame (AKA should be zero, but idk)
     yaw: 0.06
-profile: true
+profile: false
 voxel_grid_size: 0.1
 scanmatcher:
   enable: false

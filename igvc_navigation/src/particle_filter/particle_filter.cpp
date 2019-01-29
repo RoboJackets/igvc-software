@@ -17,6 +17,7 @@ Particle_filter::Particle_filter(const ros::NodeHandle &pNh)
   igvc::getParam(pNh, "particle_filter/variance/x", m_variance_x);
   igvc::getParam(pNh, "particle_filter/variance/y", m_variance_y);
   igvc::getParam(pNh, "particle_filter/variance/yaw", m_variance_yaw);
+  igvc::getParam(pNh, "particle_filter/still_threshold", m_thresh_still);
   igvc::getParam(pNh, "scanmatcher/enable", m_use_scanmatch);
   igvc::getParam(pNh, "scanmatcher/point_threshold", m_scanmatch_point_thresh);
   igvc::getParam(pNh, "scanmatcher/variance/x", m_scanmatch_variance_x);
@@ -179,8 +180,6 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
   }
 
   float highest_weight = 0;
-  float lowest_weight = 0;
-  size_t highest_weight_idx = 0;
   double weight_sum = 0;
   // For each particle in particles
   //  ROS_INFO_STREAM("1");
@@ -192,6 +191,8 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
   //  diff.getOrigin().z() << ")"); ROS_INFO_STREAM("Delta t: " << delta_t.toSec());
   static int iterations = -1;
   iterations++;
+#pragma omp parallel
+#pragma omp for
   for (size_t i = 0; i < m_particles.size(); ++i)
   {
     // TODO: Add Scanmatching
@@ -201,13 +202,15 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
     //    diff.getOrigin().z());
     double noisy_x, noisy_y, noisy_yaw;
     // If scanmatching failed or not using scanmatching, then use EKF output
+    Particle particle{};
     if (fitness == -1)
     {
-      if (iterations < 10)
+      if (iterations < 10 ||
+          (fabs(twist.twist.linear.x) < m_thresh_still && fabs(twist.twist.linear.y) < m_thresh_still && fabs(twist.twist.angular.z) < m_thresh_still))
       {
-        noisy_x = twist.twist.linear.x;
-        noisy_y = twist.twist.linear.y;
-        noisy_yaw = twist.twist.angular.z;
+        noisy_x = 0;
+        noisy_y = 0;
+        noisy_yaw = 0;
       }
       else
       {
@@ -218,9 +221,9 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
       double cur_yaw = m_particles[i].state.yaw();
       double new_x = noisy_x * cos(cur_yaw) - noisy_y * sin(cur_yaw);
       double new_y = noisy_x * sin(cur_yaw) + noisy_y * cos(cur_yaw);
-      m_particles[i].state.set_x(m_particles[i].state.x() + delta_t.toSec() * new_x);
-      m_particles[i].state.set_y(m_particles[i].state.y() + delta_t.toSec() * new_y);
-      m_particles[i].state.set_yaw(m_particles[i].state.yaw() + delta_t.toSec() * noisy_yaw);
+      particle.state.set_x(m_particles[i].state.x() + delta_t.toSec() * new_x);
+      particle.state.set_y(m_particles[i].state.y() + delta_t.toSec() * new_y);
+      particle.state.set_yaw(m_particles[i].state.yaw() + delta_t.toSec() * noisy_yaw);
     }
     else
     {
@@ -233,24 +236,24 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
       double cur_yaw = m_particles[i].state.yaw();
       double new_x = noisy_x * cos(cur_yaw) - noisy_y * sin(cur_yaw);
       double new_y = noisy_x * sin(cur_yaw) + noisy_y * cos(cur_yaw);
-      m_particles[i].state.set_x(m_particles[i].state.x() + new_x);
-      m_particles[i].state.set_y(m_particles[i].state.y() + new_y);
-      m_particles[i].state.set_yaw(m_particles[i].state.yaw() + noisy_yaw);
+      particle.state.set_x(m_particles[i].state.x() + new_x);
+      particle.state.set_y(m_particles[i].state.y() + new_y);
+      particle.state.set_yaw(m_particles[i].state.yaw() + noisy_yaw);
     }
 
     // Transform particles from base_frame to odom_frame
     pcl::PointCloud<pcl::PointXYZ> transformed_pc;
-    pcl_ros::transformPointCloud(pc, transformed_pc, m_particles[i].state.transform);  // TODO: Inverse?
-                                                                                       //    ROS_INFO_STREAM("3");
+    pcl_ros::transformPointCloud(pc, transformed_pc, particle.state.transform);  // TODO: Inverse?
+                                                                                 //    ROS_INFO_STREAM("3");
 
     // Transform ground and nonground from base_frame to odom_frame
     // TODO: Is transform faster or plane detection faster? Do I move the ground filtering into the for loop?
     pcl::PointCloud<pcl::PointXYZ> transformed_ground, transformed_nonground;
     if (m_is_3d)
     {
-      pcl_ros::transformPointCloud(*ground, transformed_ground, m_particles[i].state.transform);
+      pcl_ros::transformPointCloud(*ground, transformed_ground, particle.state.transform);
     }
-    pcl_ros::transformPointCloud(*nonground, transformed_nonground, m_particles[i].state.transform);
+    pcl_ros::transformPointCloud(*nonground, transformed_nonground, particle.state.transform);
     //    ROS_INFO_STREAM("4");
     //    transformed_ground.header.frame_id = "/odom";
     //    transformed_pc.header.frame_id = "/odom";
@@ -263,7 +266,7 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
     //    m_nonground_pub.publish(transformed_nonground);
 
     octomap::KeySet free, occupied;
-    tf::Transform odom_to_lidar = m_particles[i].state.transform * lidar_to_base;
+    tf::Transform odom_to_lidar = particle.state.transform * lidar_to_base;
     odom_to_lidar.setOrigin(tf::Vector3(odom_to_lidar.getOrigin().x(), odom_to_lidar.getOrigin().y(), 0));
     tf::Matrix3x3 rot = odom_to_lidar.getBasis();
     double r, p, y;
@@ -285,18 +288,22 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
     if (transformed_nonground.size() > 0)
     {
       // Calculate weight using sensor model
-      m_particles[i].weight *= m_octomapper.sensor_model(m_particles[i].pair, free, occupied);
-      weight_sum += m_particles[i].weight;
-      if (m_particles[i].weight > highest_weight)
-      {
-        highest_weight = m_particles[i].weight;
-      }
+      particle.weight *= m_octomapper.sensor_model(m_particles[i].pair, free, occupied);
+#pragma omp atomic update
+      weight_sum += particle.weight;
       //    ROS_INFO_STREAM("Weight of " << i << " : " << m_particles[i].weight);
-      // Look for lowest weight particle to fix negative weights
+      // Update map
+      if (particle.weight > highest_weight)
+      {
+#pragma omp atomic write
+        highest_weight = particle.weight;
+      }
+      m_octomapper.insert_scan(m_particles[i].pair, free, occupied);
+#pragma omp atomic write
+      m_particles[i].weight = particle.weight;
+#pragma omp critical(update_state)
+      m_particles[i].state = std::move(particle.state);
     }
-
-    // Update map
-    m_octomapper.insert_scan(m_particles[i].pair, free, occupied);
   }
   //  std::stringbuf str;
   //  std::ostream stream(&str);
@@ -312,6 +319,7 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
       p.weight = 1;
     }
     weight_sum = m_particles.size();
+    highest_weight = 1;
   }
   if (nonground->size() > 0)
   {

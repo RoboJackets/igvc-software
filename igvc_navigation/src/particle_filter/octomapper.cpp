@@ -130,8 +130,6 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
   octomap::point3d maxPt(maxX, maxY, maxZ);
   //  ROS_INFO_STREAM("Min: " << minPt << ", Max: " << maxPt);
 
-  octomap::OcTreeKey minKey = pc_map_pair.octree->coordToKey(minPt);
-  octomap::OcTreeKey maxKey = pc_map_pair.octree->coordToKey(maxPt);
   minX = std::min(minX, -0.5 * m_map_length);
   maxX = std::max(maxX, 0.5 * m_map_length);
   minY = std::min(minY, -0.5 * m_map_width);
@@ -458,20 +456,16 @@ void Octomapper::compute_occupied(const octomap::OcTree &tree, const pcl::PointC
 #ifdef _OPENMP
   omp_set_num_threads(m_keyrays.size());
 #endif
-#pragma omp parallel
+  // Project all nonground
+#pragma omp parallel for
+  for (int i = 0; i < scan.size(); ++i)
   {
-    // Project all nonground
-#pragma omp for
-    for (int i = 0; i < scan.size(); ++i)
+    const octomap::point3d &p = scan[i];
+    octomap::OcTreeKey key;
+    if (tree.coordToKeyChecked(p, key))
     {
-      const octomap::point3d &p = scan[i];
-      unsigned threadIdx = 0;
-      octomap::OcTreeKey key;
-      if (tree.coordToKeyChecked(p, key))
-      {
-#pragma omp critical
-        occupied_cells.insert(key);
-      }
+#pragma omp critical(occupied_cells)
+      occupied_cells.insert(key);
     }
   }
 }
@@ -480,32 +474,26 @@ void Octomapper::compute_voxels(const octomap::OcTree &tree, const octomap::Poin
                                 const octomap::Pointcloud &ground, const octomap::point3d &origin,
                                 octomap::KeySet &free_cells, octomap::KeySet &occupied_cells)
 {
-#ifdef _OPENMP
-  omp_set_num_threads(m_keyrays.size());
-#endif
-#pragma omp parallel
+  // Project all nonground
+#pragma omp parallel for
+  for (int i = 0; i < scan.size(); ++i)
   {
-    // Project all nonground
-#pragma omp for
-    for (int i = 0; i < scan.size(); ++i)
-    {
-      const octomap::point3d &p = scan[i];
-      unsigned threadIdx = 0;
+    const octomap::point3d &p = scan[i];
+    int threadIdx = 0;
 #ifdef _OPENMP
-      threadIdx = omp_get_thread_num();
+    threadIdx = omp_get_thread_num();
 #endif
-      octomap::KeyRay *keyray = &(m_keyrays.at(threadIdx));
-      if (tree.computeRayKeys(origin, p, *keyray))
+    octomap::KeyRay *keyray = &(m_keyrays.at(static_cast<unsigned long>(threadIdx)));
+    if (tree.computeRayKeys(origin, p, *keyray))
+    {
+#pragma omp critical(compute_voxels)
+      free_cells.insert(keyray->begin(), keyray->end());
+
+      octomap::OcTreeKey key;
+      if (tree.coordToKeyChecked(p, key))
       {
-#pragma omp critical
-        {
-          free_cells.insert(keyray->begin(), keyray->end());
-          octomap::OcTreeKey key;
-          if (tree.coordToKeyChecked(p, key))
-          {
-            occupied_cells.insert(key);
-          }
-        }
+#pragma omp critical(compute_voxels)
+        occupied_cells.insert(key);
       }
     }
   }

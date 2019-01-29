@@ -21,7 +21,7 @@ public:
 
   friend std::ostream &operator<<(std::ostream &out, const RobotState &state);
 
-  RobotState() = default;
+  RobotState() : transform{}, stamp{} {};
 
   explicit RobotState(const nav_msgs::Odometry::ConstPtr &msg)
   {
