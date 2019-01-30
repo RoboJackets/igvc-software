@@ -167,8 +167,7 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
   //  diff.getOrigin().z() << ")"); ROS_INFO_STREAM("Delta t: " << delta_t.toSec());
   static int iterations = -1;
   iterations++;
-//#pragma omp parallel
-//#pragma omp for
+//#pragma omp parallel for reduction(+:weight_sum)
   for (size_t i = 0; i < m_particles.size(); ++i)
   {
     pcl::PointCloud<pcl::PointXYZ> transformed_ground, transformed_nonground;
@@ -286,7 +285,6 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
     {
       // Calculate weight using sensor model
       particle.weight *= m_octomapper.sensor_model(m_particles[i].pair, free, occupied);
-//#pragma omp atomic update
       weight_sum += particle.weight;
       //    ROS_INFO_STREAM("Weight of " << i << " : " << m_particles[i].weight);
       // Update map
@@ -308,18 +306,18 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
   //    stream << p.weight << ", ";
   //  }
   //  ROS_INFO_STREAM(str.str());
-  if (weight_sum == 0)
-  {
-    ROS_ERROR_STREAM("Weights somehow became 0. Resetting all to 1");
-    for (Particle &p : m_particles)
-    {
-      p.weight = 1;
-    }
-    weight_sum = m_particles.size();
-    highest_weight = 1;
-  }
   if (nonground->size() > 0)
   {
+    if (weight_sum == 0)
+    {
+      ROS_ERROR_STREAM("Weights somehow became 0. Resetting all to 1");
+      for (Particle &p : m_particles)
+      {
+        p.weight = 1;
+      }
+      weight_sum = m_particles.size();
+      highest_weight = 1;
+    }
     // Move sum of weights to m_total_weights
     m_total_weight = weight_sum;
     // calculate Neff

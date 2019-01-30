@@ -56,6 +56,18 @@ Octomapper::Octomapper(ros::NodeHandle pNh)
   m_map_length_grid = static_cast<int>(m_map_length / m_octree_resolution);
   m_map_width_grid = static_cast<int>(m_map_width / m_octree_resolution);
 
+  // Calcualte lut
+  m_exp_lut.reserve(4*m_kernel_size * m_kernel_size);
+  for ( int i = -m_kernel_size; i < m_kernel_size; ++i)
+  {
+    for (int j = -m_kernel_size; j < m_kernel_size; ++j)
+    {
+      int index = i + m_kernel_size + 2 * m_kernel_size * (m_kernel_size + j);
+      m_exp_lut[index] = exp(-1 * (i*i + j*j)/m_gaussian_sigma);
+    }
+  }
+
+
 #ifdef _OPENMP
 #pragma omp parallel
 #pragma omp critical
@@ -256,6 +268,7 @@ void Octomapper::create_map(pc_map_pair &pair) const
 //  return sensor_model(octree, occupied);
 //}
 
+
 double Octomapper::get_score(const octomap::OcTree &octree, const pcl::PointCloud<pcl::PointXYZ> &pc,
                              const tf::Transform &pos) const
 {
@@ -265,28 +278,23 @@ double Octomapper::get_score(const octomap::OcTree &octree, const pcl::PointClou
 //  fuck.publish(transformed_pc);
   octomap::Pointcloud scan;
   PCL_to_Octomap(transformed_pc, scan);
-#ifdef _OPENMP
-  omp_set_num_threads(m_keyrays.size());
-#endif
 // Project all nonground
 double total = 0;
-#pragma omp parallel for
+#pragma omp parallel for collapse(3) reduction(+:total)
   for (int i = 0; i < scan.size(); ++i)
   {
-    const octomap::point3d &center = scan[i];
     for (int x = -m_kernel_size; x < m_kernel_size; ++x)
     {
       for (int y = -m_kernel_size; y < m_kernel_size; ++y)
       {
-        const octomap::point3d p{center.x() + x, center.y() + y, center.z()};
+        const octomap::point3d p{scan[i].x() + x, scan[i].y() + y, scan[i].z()};
         octomap::OcTreeKey key;
         if (octree.coordToKeyChecked(p, key))
         {
           octomap::OcTreeNode *leaf = octree.search(key);
           if (leaf)
           {
-            double upd = leaf->getOccupancy() * exp(-1*(x*x + y*y)/m_gaussian_sigma);
-#pragma omp atomic
+            double upd = leaf->getOccupancy() * m_exp_lut[x+m_kernel_size+2*m_kernel_size*(y+m_kernel_size)];
             total += upd;
           }
         }

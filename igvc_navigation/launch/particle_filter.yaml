@@ -1,6 +1,6 @@
 is_3d: false
 particle_filter:
-  num_particles: 1
+  num_particles: 16
   resample_threshold: 0.50   #From 0 to 1
   covariance_coefficient: 0.0
   still_threshold: 0.01
@@ -11,26 +11,26 @@ particle_filter:
 profile: false
 filtering:
   voxel_grid_size: 0.1
-  voxel_filter_enabled: false
+  voxel_filter_enabled: true
 scanmatcher:
   enable: true
   use_guess: true
   point_threshold: 0.5
   variance:
-    x: 0.001
-    y: 0.001
-    yaw: 0.001
+    x: 0.01
+    y: 0.01
+    yaw: 0.01
   icp:
     iterations: 50
     RANSAC_outlier_rejection_threshold: 0.001
     max_correspondence_distance: 0.1
     transformation_epsilon: 0.00001
   optimizer:
-    angular_delta_start: 0.39
-    linear_delta_start: 0.5
-    max_refinements: 32
-    kernel_size: 5
-    gaussian_sigma: 1
+    angular_delta_start: 0.5
+    linear_delta_start: 0.25
+    max_refinements: 16
+    kernel_size: 4
+    gaussian_sigma: 0.1
 icp:
   match_history_length: 1
 visualization:

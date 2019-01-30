@@ -4,8 +4,10 @@
     -->
 <launch>
     <arg name="gdb" default="false"/>
+    <arg name="scalasca" default="false"/>
     <arg name="launch-prefix" value="gdb -ex run --args" if="$(arg gdb)"/>
-    <arg name="launch-prefix" default="" unless="$(arg gdb)"/>
+    <arg name="launch-prefix" value="scalasca -analyze" if="$(arg scalasca)"/>
+    <arg name="launch-prefix" default="" if="$(eval gdb == False and scalasca == False)"/>
     <node pkg="igvc_navigation" type="particle_filter" name="particle_filter" output="screen" launch-prefix="$(arg launch-prefix)">
         <rosparam command="load" file="$(find igvc_navigation)/launch/particle_filter.yaml"/>
         <rosparam command="load" file="$(find igvc_navigation)/launch/octomap.yaml"/>

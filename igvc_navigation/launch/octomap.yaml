@@ -3,7 +3,7 @@ octree:
   lazy_evaluation: false
 sensor_model:
   hit: 0.8
-  miss: 0.4
+  miss: 0.45
   min: 0.03
   max: 0.97
   max_range: 60

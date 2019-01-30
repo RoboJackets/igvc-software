@@ -49,6 +49,9 @@ public:
     igvc::getParam(pNh, "icp/match_history_length", icp_match_history_length);
     m_pc_buf = boost::circular_buffer<pcl::PointCloud<pcl::PointXYZ>::ConstPtr>(pc_buf_size);
     m_pose_buf = boost::circular_buffer<nav_msgs::OdometryConstPtr>(pose_buf_size);
+    if (m_profile) {
+      ProfilerStart("particle_filter");
+    }
   }
 
   void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc);
@@ -90,6 +93,9 @@ private:
 std::unique_ptr<ParticleFilterNode> pf_node;
 
 void node_cleanup(int sig) {
+  if (pf_node->m_profile) {
+    ProfilerStop();
+  }
   pf_node->m_particle_filter.reset();
   pf_node.reset();
   ros::shutdown();
@@ -109,9 +115,6 @@ void ParticleFilterNode::pose_callback(const nav_msgs::OdometryConstPtr &pose) {
  * Compares m_pose_buf and m_pc_buf; Will update with every lidar, but needs to match the correct pose with it
  */
 void ParticleFilterNode::check_update() {
-  if (m_profile) {
-    ProfilerStart("particle_filter");
-  }
 //  ROS_INFO_STREAM("pc buf size: " << m_pc_buf.size() << " pose buf size: " << m_pose_buf.size());
   // Needs both buffers to have at least one element
   if (m_pc_buf.empty() || m_pose_buf.empty()) {
@@ -132,9 +135,6 @@ void ParticleFilterNode::check_update() {
       update(i, 0, pc_stamp);
       break;
     }
-  }
-  if (m_profile) {
-    ProfilerStop();
   }
 }
 

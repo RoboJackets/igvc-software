@@ -117,6 +117,7 @@ private:
   int m_kernel_size;
   double m_gaussian_sigma;
   float m_odds_sum_default;
+  std::vector<double> m_exp_lut;
   std::unique_ptr<tf::Transform> m_lidar_to_base{};
   ros::Publisher m_octo_viz_pub;
   ros::Publisher fuck;
