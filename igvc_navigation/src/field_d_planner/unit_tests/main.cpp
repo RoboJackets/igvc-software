@@ -202,10 +202,8 @@ int main(int argc, char** argv)
       std::tuple<int,int> goal = std::make_tuple(goal_x, goal_y);
       planner.graph.setGoal(goal);
 
-
       if (initialize_search)
           planner.initialize();
-
 
       if (goal_changed)
       {
@@ -213,12 +211,6 @@ int main(int argc, char** argv)
           goal_changed = false;
           continue;
       }
-
-
-      numNodesUpdated = planner.updateNodesAroundUpdatedCells();
-
-      if (numNodesUpdated > 0)
-        ROS_INFO_STREAM(numNodesUpdated << " nodes updated");
 
       // only update the graph if nodes have been updated
       if ((numNodesUpdated > 0) || initialize_search)
@@ -234,6 +226,9 @@ int main(int argc, char** argv)
         expanded_callback(planner.getExplored());
 
       planner.constructOptimalPath();
+
+      numNodesUpdated = planner.updateNodesAroundUpdatedCells();
+      if (numNodesUpdated > 0) { ROS_INFO_STREAM(numNodesUpdated << " nodes updated"); }
 
       nav_msgs::Path path_msg;
       path_msg.header.stamp = ros::Time::now();
