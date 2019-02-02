@@ -2,7 +2,7 @@
 #include <ros/ros.h>
 #include <sys/sysinfo.h>
 #include <igvc_utils/NodeUtils.hpp>
-#include "cpu_usage.h"
+#include "cpu_usage.hpp"
 
 ros::Publisher stats_pub;
 struct sysinfo sys_info;
