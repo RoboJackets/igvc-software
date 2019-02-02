@@ -1,3 +1,8 @@
+/**
+ * Gets information about cpu usage from /proc/stat
+ * Modified from
+ * https://github.com/vivaladav/BitsOfBytes/blob/master/cpp-program-to-get-cpu-usage-from-command-line-in-linux/main.cpp
+ */
 #include <chrono>
 #include <fstream>
 #include <iostream>
