@@ -1,6 +1,6 @@
 is_3d: false
 particle_filter:
-  num_particles: 16
+  num_particles: 32
   resample_threshold: 0.50   #From 0 to 1
   covariance_coefficient: 0.0
   still_threshold: 0.01
@@ -17,9 +17,9 @@ scanmatcher:
   use_guess: true
   point_threshold: 0.5
   variance:
-    x: 0.01
-    y: 0.01
-    yaw: 0.01
+    x: 0.001
+    y: 0.001
+    yaw: 0.001
   icp:
     iterations: 50
     RANSAC_outlier_rejection_threshold: 0.001
@@ -29,8 +29,8 @@ scanmatcher:
     angular_delta_start: 0.5
     linear_delta_start: 0.25
     max_refinements: 16
-    kernel_size: 4
-    gaussian_sigma: 0.1
+    kernel_size: 5
+    gaussian_sigma: 0.3
 icp:
   match_history_length: 1
 visualization:
@@ -45,8 +45,8 @@ visualization:
     end: 60
 transform_max_wait_time: 1 # Seconds I think?
 update_time_threshold: 0.2
-start_x: 100
-start_y: 100
+start_x: 75
+start_y: 75
 start_z: 0
 
 particle_filter_buffer_size: 64
@@ -59,5 +59,5 @@ fused_topic: "/odometry/filtered"
 odometry_frame: "/odom"
 base_frame: "/base_link"
 lidar_frame: "/lidar"
-parent_frame: "/odom"
-child_frame: "/particle_filter"
+parent_frame: "/map"
+child_frame: "/odom"

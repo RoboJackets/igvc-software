@@ -72,7 +72,7 @@ private:
 
   void update(int pose_idx, int pc_idx, const ros::Time &stamp);
 
-  void publish(const ros::Time &stamp);
+  void publish(const ros::Time &stamp, const tf::Stamped<tf::Pose> cur_pose);
 
   void get_lidar_transform();
 
@@ -195,12 +195,11 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
   pcl_ros::transformPointCloud(filtered_2, *transformed_pc, *m_lidar_transform);
 
   //TODO: Do I need to subtract covariances?
-  geometry_msgs::TwistWithCovariance twist = m_pose_buf[pose_idx]->twist;
   m_particle_filter->update(diff, m_pose_buf[pose_idx]->twist, stamp - m_last_time, *transformed_pc, *m_lidar_transform);
   // TODO: Why is stamp - m_last_time = 0?
 
   // Publish newest iteration of particle filter
-  publish(stamp);
+  publish(stamp, cur_pose);
 
   // Delete buffer till index
   m_pose_buf.erase_begin(static_cast<unsigned long>(pose_idx + 1));
@@ -213,7 +212,7 @@ void ParticleFilterNode::update(int pose_idx, int pc_idx, const ros::Time &stamp
 //  ROS_INFO("Done with update in particle_filter_node");
 }
 
-void ParticleFilterNode::publish(const ros::Time &stamp) {
+void ParticleFilterNode::publish(const ros::Time &stamp, const tf::Stamped<tf::Pose> cur_pose) {
   // Publish map form best particle
   igvc_msgs::map message;    // >> message to be sent
   sensor_msgs::Image image;  // >> image in the message
@@ -223,7 +222,7 @@ void ParticleFilterNode::publish(const ros::Time &stamp) {
 
   // Setup message
   double resolution = m_particle_filter->resolution();
-  message.header.frame_id = "/odom";
+  message.header.frame_id = "/map";
   message.image = image;
   message.length = m_particle_filter->length_x();
   message.width = m_particle_filter->width_y();
@@ -238,9 +237,10 @@ void ParticleFilterNode::publish(const ros::Time &stamp) {
   m_map_pub.publish(message);
 
   // Publish tf transform
+  tf::Transform map_transform = m_particle_filter->m_particles[m_particle_filter->m_best_idx].state.transform * cur_pose.inverse();
   static tf::TransformBroadcaster br;
   br.sendTransform(
-      tf::StampedTransform(m_particle_filter->m_particles[m_particle_filter->m_best_idx].state.transform, stamp, m_parent_frame, m_child_frame));
+      tf::StampedTransform(map_transform, stamp, m_parent_frame, m_child_frame));
 
   if (m_debug) {
     uint64 pc_stamp;
@@ -271,9 +271,10 @@ void ParticleFilterNode::publish(const ros::Time &stamp) {
         // Set x y coordinates as the center of the grid cell.
       }
     }
-    debug_pcl.header.frame_id = "/odom";
+    debug_pcl.header.frame_id = "/map";
     debug_pcl.header.stamp = pc_stamp;
 //    ROS_INFO_STREAM("Size: " << fromOcuGrid->points.size() << " / " << (width_x * length_y));
+    pcl_ros::transformPointCloud(debug_pcl, debug_pcl, cur_pose * m_particle_filter->m_particles[m_particle_filter->m_best_idx].state.transform);
     m_map_pcl_debug_pub.publish(debug_pcl);
   }
 }

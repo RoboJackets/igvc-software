@@ -183,12 +183,13 @@ void Particle_filter::update(const tf::Transform &diff, const geometry_msgs::Twi
     {
       tf::Transform scanmatch_transform;
       RobotState guess;
-      double cur_yaw = m_particles[i].state.yaw();
-      double new_x = twist.twist.linear.x * cos(cur_yaw) - twist.twist.linear.y * sin(cur_yaw);
-      double new_y = twist.twist.linear.x * sin(cur_yaw) + twist.twist.linear.y * cos(cur_yaw);
-      guess.set_x(m_particles[i].state.x() + delta_t.toSec() * new_x);
-      guess.set_y(m_particles[i].state.y() + delta_t.toSec() * new_y);
-      guess.set_yaw(m_particles[i].state.yaw() + delta_t.toSec() * twist.twist.angular.z);
+//      double cur_yaw = m_particles[i].state.yaw();
+//      double new_x = twist.twist.linear.x * cos(cur_yaw) - twist.twist.linear.y * sin(cur_yaw);
+//      double new_y = twist.twist.linear.x * sin(cur_yaw) + twist.twist.linear.y * cos(cur_yaw);
+//      guess.set_x(m_particles[i].state.x() + delta_t.toSec() * new_x);
+//      guess.set_y(m_particles[i].state.y() + delta_t.toSec() * new_y);
+//      guess.set_yaw(m_particles[i].state.yaw() + delta_t.toSec() * twist.twist.angular.z);
+      guess.transform = m_particles[i].state.transform * diff;
       nonground->header.frame_id = "/base_link";
 //    fitness = m_scanmatcher.scanmatch(nonground, scanmatch_transform, guess);
       fitness = m_scanmatcher.optimize(scanmatch_transform, m_particles[i].pair, guess.transform, *nonground);

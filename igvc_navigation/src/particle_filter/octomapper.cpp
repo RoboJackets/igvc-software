@@ -482,7 +482,7 @@ float Octomapper::sensor_model(const pc_map_pair &pair, const octomap::KeySet &f
       total += leaf->getLogOdds();
     }
   }
-  total = from_logodds(total);
+  total = from_logodds(total)*0.999f + 0.001f;
   //  }
   return total;
 }
