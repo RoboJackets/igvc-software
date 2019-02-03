@@ -223,7 +223,7 @@ int main(int argc, char** argv)
     // This assumes flat ground and uses magnetometer for absolute heading.
     // TODO: This assumption may not hold when we switch to 3D lidar, and stop using flat ground assumption
     tf::Quaternion quaternion_mag;
-    quaternion_mag.setRPY(0,0,yaw_mag);
+    quaternion_mag.setRPY(0,0,yaw_mag + M_PI_2);
     orientation.x = quaternion_mag.x();
     orientation.y = quaternion_mag.y();
     orientation.z = quaternion_mag.z();
