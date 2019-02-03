@@ -57,13 +57,13 @@ public:
     float Resolution; // grid resolution
     float CSpace; // configuration space
 
-    float DIAGONAL_DISTANCE = (float) sqrt(2.0f);
+    float DIAGONAL_DISTANCE = sqrtf(2.0f);
     float EDGE_DISTANCE = 1.0f;
     float TRAVERSAL_COST = 1.0f;
 
     // k_m, as defined in the D* lite paper, keeps track of the robot's movement
-    // in the grid space and increased new node's key vaues by k_m as to maintain
-    // lower bounds
+    // in the grid space. Serves to increase each new node's key value by k_m as
+    // to maintain lower bounds in the priority queue
     float K_M = 0;
 
     /**

@@ -61,7 +61,7 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
     // path cost of node s
     float v_s;
 
-    if (std::min(c,b) == std::numeric_limits<float>::infinity())
+    if (std::max(c,b) == std::numeric_limits<float>::infinity())
     {
         // infinite traversal cost, cells likely occupied
         v_s = std::numeric_limits<float>::infinity();
@@ -163,7 +163,7 @@ Key FieldDPlanner::calculateKey(const Node& s)
     // calculate the key to order the node in the PQ with. Note that K_M is the
     // key modifier, a value which corrects for the distance traveled by the robot
     // since the search began (source: D* Lite)
-    return Key(cost_so_far + graph.euclidian_heuristic(s) + graph.K_M, cost_so_far);
+    return Key(std::roundf(cost_so_far + graph.euclidian_heuristic(s.getIndex()) + graph.K_M), std::roundf(cost_so_far));
 }
 
 void FieldDPlanner::initialize()

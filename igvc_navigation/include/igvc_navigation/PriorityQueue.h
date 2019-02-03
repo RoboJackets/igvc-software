@@ -182,7 +182,6 @@ public:
     */
     std::string str() const; // O(n)
 
-
 private:
 
     /**
