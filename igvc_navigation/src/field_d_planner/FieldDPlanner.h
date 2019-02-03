@@ -149,8 +149,22 @@ public:
     Constructs the optimal path through the search space by greedily moving to
     the next position (or vertex) that minimizes the linearly interpolated
     path cost calculation. Constructed paths populate the `path` attribute
+
+    @param[in] lookahead_dist number of future cell traversals to recurisively
+            analyze before moving to next position
     */
-    void constructOptimalPath();
+    void constructOptimalPath(int lookahead_dist);
+    /**
+    Helper method for path reconstruction process. Finds the next path position(s)
+    when planning from a vertex or an edge position on the graph given the current
+    position p and its consecutive neighbors p_a, p_b.
+
+    @param[in] p edge on graph to plan from
+    @param[in] p_a consecutive neighbor of p
+    @param[in] p_b consecutive neighbor of p
+    @return vector containing the next positions(s) and movement cost
+    */
+    path_additions computeOptimalCellTraversal(const std::tuple<float,float>& p, const std::tuple<float,float>& p_a, const std::tuple<float,float>& p_b);
     /**
     Helper method for path reconstruction process. Finds the next path position(s)
     when planning from a vertex or an edge position on the graph.
@@ -158,7 +172,7 @@ public:
     @param[in] p edge on graph to plan from
     @return vector containing the next positions(s) and movement cost
     */
-    path_additions getPathAdditions(const std::tuple<float,float>& p);
+    path_additions getPathAdditions(const std::tuple<float,float>& p, int lookahead_dist);
     /**
     Gets consecutive neighbor pairs of an edge node. An edge node is defines as a
     node that does not lie a vertex but instead lies along some conitnuous position
