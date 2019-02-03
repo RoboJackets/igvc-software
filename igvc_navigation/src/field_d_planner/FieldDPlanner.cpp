@@ -273,7 +273,7 @@ int FieldDPlanner::updateNodesAroundUpdatedCells()
     return numNodesUpdated;
 }
 
-void FieldDPlanner::constructOptimalPath()
+void FieldDPlanner::constructOptimalPath(int lookahead_dist)
 {
     path.clear();
 
@@ -289,7 +289,7 @@ void FieldDPlanner::constructOptimalPath()
     do
     {
         // move one step and calculate the optimal path additions (min 1, max 2)
-        pa = getPathAdditions(curr_pos);
+        pa = getPathAdditions(curr_pos, lookahead_dist);
         // append new positions to the end of path
         path.insert(path.end(), pa.first.begin(), pa.first.end());
         min_cost = pa.second;
@@ -302,77 +302,31 @@ void FieldDPlanner::constructOptimalPath()
         path.clear();
 }
 
-FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<float,float>& p)
+FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const std::tuple<float,float>& p,
+                                                                         const std::tuple<float,float>& p_a,
+                                                                         const std::tuple<float,float>& p_b)
 {
     std::vector<std::tuple<float,float>> positions; // positions to add to path
 
-    float cost = std::numeric_limits<float>::infinity();
+    float cost;
     float x,y;
     std::tuple<float,float> p1,p2; // p1 - nearest neighbor; p2 - diagonal
 
-    // temp variables
-    float temp_cost, temp_x, temp_y;
+    std::tie(cost, x, y) = this->computeCost(p, p_a, p_b);
 
-    if (isVertex(p)) // planning from vertex
-    {
-        // node to search from
-        Node s(static_cast<std::tuple<int,int>>(p));
-        Node s_a, s_b; // temp nodes
-        for (std::tuple<Node, Node> connbr : graph.connbrs(s))
-        {
-            std::tie(s_a, s_b) = connbr;
-
-            // continue if either connbr was never visited before
-            if ((umap.find(s_a) == umap.end()) || (umap.find(s_b) == umap.end()))
-                continue;
-
-            std::tie(temp_cost, temp_x, temp_y) = this->computeCost(s, s_a, s_b);
-
-            if (temp_cost < cost)
-            {
-                cost = temp_cost;
-                x = temp_x;
-                y = temp_y;
-                if (graph.isDiagonal(s, s_a))
-                    std::tie(p1,p2) = std::make_tuple(static_cast<std::tuple<float,float>>(s_b.getIndex()),
-                                                      static_cast<std::tuple<float,float>>(s_a.getIndex()));
-                else
-                    std::tie(p1,p2) = std::make_tuple(static_cast<std::tuple<float,float>>(s_a.getIndex()),
-                                                      static_cast<std::tuple<float,float>>(s_b.getIndex()));
-
-            }
-        }
-    }
-    else
-    {
-        std::tuple<float,float> p_a,p_b; // temp positions
-        for (std::pair<std::tuple<float,float>,std::tuple<float,float>> connbr : getEdgeConnbrs(p))
-        {
-            std::tie(p_a, p_b) = connbr;
-            std::tie(temp_cost, temp_x, temp_y) = this->computeCost(p, p_a, p_b);
-
-            if (temp_cost < cost)
-            {
-                cost = temp_cost;
-                x = temp_x;
-                y = temp_y;
-                if ((std::get<0>(p_a) != std::get<0>(p)) && (std::get<1>(p_a) != std::get<1>(p))) // p_b is nearest neighbor
-                    std::tie(p1,p2) = std::make_tuple(p_b,p_a);
-                else // p_a is nearest neighbor
-                    std::tie(p1,p2) = std::make_tuple(p_a,p_b);
-            }
-        }
-    }
-
+    if (graph.isDiagonalContinuous(p, p_a)) // p_b is nearest neighbor
+        std::tie(p1,p2) = std::make_tuple(p_b,p_a);
+    else // p_a is nearest neighbor
+        std::tie(p1,p2) = std::make_tuple(p_a,p_b);
 
     // CASE 0: no valid path found (infinite cost/no consecutive neighbors)
     if (cost == std::numeric_limits<float>::infinity())
         return std::make_pair(positions, cost);
 
     // calculate the multiplier for the positions to be added to the path. This
-    // step is required because x and y calculations are peformed independently of
-    // the consecutive neighbors used to obtain these values. As such, x_multiplier
-    // and y_multiplier account for this.
+    // step is required because x and y calculations are peformed independent of
+    // the orientation of the consecutive neighbors used to obtain these values.
+    // As such, x_multiplier and y_multiplier account for this.
     float p_x, p_y;
     std::tie(p_x, p_y) = p;
     float p1_x, p1_y;
@@ -382,6 +336,10 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<f
 
     float x_multiplier,y_multiplier;
     bool flip = false; // path additions must be flipped to account for relative orientation
+
+    // CASE 1(2/2): travel along x(2/2) then cut to s2(2/2)
+    if (y == -1.0f)
+        positions.push_back(std::make_tuple(p2_x, p2_y));
 
     if (p1_x != p_x) // nearest neighbor lies to left or right of s
     {
@@ -406,11 +364,64 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<f
     y *= y_multiplier;
     positions.insert(positions.begin(), std::make_tuple(p_x + x, p_y + y));
 
-    // CASE 1 (2/2): travel along x(2/2) then cut to s2(2/2)
-    if ((x > 0.0f) && (x < 1.0f) && (y == -1.0f))
-        positions.push_back(std::make_tuple(p2_x, p2_y));
-
     return std::make_pair(positions, cost);
+}
+
+FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<float,float>& p, int lookahead_dist)
+{
+
+    float min_cost = std::numeric_limits<float>::infinity();
+    path_additions min_pa;
+
+    path_additions temp_pa;
+    float lookahead_cost;
+
+    if (isVertex(p)) // planning from vertex
+    {
+        // node to search from
+        Node s(static_cast<std::tuple<int,int>>(p));
+        Node s_a, s_b; // temp nodes
+        for (std::tuple<Node, Node> connbr : graph.connbrs(s))
+        {
+            std::tie(s_a, s_b) = connbr;
+
+            temp_pa = computeOptimalCellTraversal(p, s_a.getIndex(), s_b.getIndex());
+            if ((lookahead_dist <= 0) || temp_pa.first.empty()) {
+                lookahead_cost = temp_pa.second;
+            }
+            else {
+                lookahead_cost = getPathAdditions(temp_pa.first.back(), lookahead_dist - 1).second;
+            }
+
+            if (lookahead_cost < min_cost) {
+                min_cost = lookahead_cost;
+                min_pa = temp_pa;
+            }
+        }
+    }
+    else
+    {
+        std::tuple<float,float> p_a,p_b; // temp positions
+        for (std::pair<std::tuple<float,float>,std::tuple<float,float>> connbr : getEdgeConnbrs(p))
+        {
+            std::tie(p_a, p_b) = connbr;
+
+            temp_pa = computeOptimalCellTraversal(p, p_a, p_b);
+            if ((lookahead_dist <= 0) || temp_pa.first.empty()) {
+                lookahead_cost = temp_pa.second;
+            }
+            else {
+                lookahead_cost = getPathAdditions(temp_pa.first.back(), lookahead_dist - 1).second;
+            }
+
+            if (lookahead_cost < min_cost) {
+                min_cost = lookahead_cost;
+                min_pa = temp_pa;
+            }
+        }
+    }
+
+    return min_pa;
 }
 
 std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> FieldDPlanner::getEdgeConnbrs(const std::tuple<float,float>& p)

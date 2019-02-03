@@ -41,6 +41,7 @@ double CSpace; // configuration space
 double goal_range; // distance from goal at which a node is considered the goal
 double rateTime; // path planning/replanning rate
 bool follow_old_path; // follow the previously generated path if no optimal path currently exists
+int lookahead_dist; // number of cell traversals to look ahead at when decising next position along path
 
 // path planner logic
 bool initialize_search = true; // set to true if the search problem must be initialized
@@ -162,6 +163,7 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, "goal_range", goal_range);
   igvc::getParam(pNh, "publish_expanded", publish_expanded);
   igvc::getParam(pNh, "follow_old_path", follow_old_path);
+  igvc::getParam(pNh, "lookahead_dist", lookahead_dist);
 
   planner.graph.setCSpace(static_cast<float>(CSpace));
   planner.GOAL_DIST = static_cast<float>(goal_range);
@@ -202,7 +204,7 @@ int main(int argc, char** argv)
           if (initialize_search) initialize_search = false;
       }
 
-      planner.constructOptimalPath();
+      planner.constructOptimalPath(lookahead_dist);
 
       // gather cells with updated edge costs and update affected nodes
       planner.graph.updateGraph(map);
