@@ -107,6 +107,12 @@ void checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &
     }
   }
 }
+
+/**
+ * Publishes the given map at the given stamp
+ * @param map map to be published
+ * @param stamp pcl stamp of the timestamp to be used
+ */
 void publish(const cv::Mat &map, uint64_t stamp) {
   igvc_msgs::map message;    // >> message to be sent
   sensor_msgs::Image image;  // >> image in the message
@@ -154,15 +160,17 @@ void publish(const cv::Mat &map, uint64_t stamp) {
   }
 }
 
+/**
+ * Callback for pointcloud. Filters the lidar scan, then inserts it into the octree.
+ * @param pc lidar scan
+ */
 void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
   // Pass through filter to only keep ones closest to us
   pcl::PointCloud<pcl::PointXYZ>::Ptr small(new pcl::PointCloud<pcl::PointXYZ>);
-  float distanceFromSphereCenterPoint;
-  bool pointIsWithinSphere;
+  float dist;
   for (int point_i = 0; point_i < pc->size(); ++point_i) {
-    distanceFromSphereCenterPoint = pc->at(point_i).x * pc->at(point_i).x + pc->at(point_i).y * pc->at(point_i).y + pc->at(point_i).z * pc->at(point_i).z;
-    pointIsWithinSphere = distanceFromSphereCenterPoint <= radius*radius*radius;
-    if (pointIsWithinSphere) {
+    dist = pc->at(point_i).x * pc->at(point_i).x + pc->at(point_i).y * pc->at(point_i).y + pc->at(point_i).z * pc->at(point_i).z;
+    if (dist <= radius*radius*radius) {
       small->push_back(pc->at(point_i));
     }
   }
@@ -234,6 +242,10 @@ void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
   publish(*(pc_map_pair.map), pc->header.stamp);
 }
 
+/**
+ * Cleanup method to release resouces held
+ * @param sig
+ */
 void node_cleanup(int sig)
 {
   published_map.reset();
