@@ -209,8 +209,8 @@ int FieldDPlanner::computeShortestPath()
 {
     // // if the start node is occupied, return immediately. By definition, a path
     // // does not exist if the start node is occupied.
-    // if (graph.getMinTraversalCost(graph.Start) == std::numeric_limits<float>::infinity())
-    //     return 0;
+    if (graph.getMinTraversalCost(graph.Start) == std::numeric_limits<float>::infinity())
+        return 0;
 
     int numNodesExpanded = 0;
     while((PQ.topKey() < calculateKey(graph.Start)) || (std::fabs(getRHS(graph.Start) - getG(graph.Start)) > 1e-5))
