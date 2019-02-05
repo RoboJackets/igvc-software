@@ -163,7 +163,7 @@ Key FieldDPlanner::calculateKey(const Node& s)
     // calculate the key to order the node in the PQ with. Note that K_M is the
     // key modifier, a value which corrects for the distance traveled by the robot
     // since the search began (source: D* Lite)
-    return Key(std::roundf(cost_so_far + graph.euclidian_heuristic(s.getIndex()) + graph.K_M), std::roundf(cost_so_far));
+    return Key(std::floor(cost_so_far + graph.euclidian_heuristic(s.getIndex()) + graph.K_M), std::floor(cost_so_far));
 }
 
 void FieldDPlanner::initialize()
@@ -432,36 +432,16 @@ std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> FieldDPl
     float x,y;
     std::tie(x,y) = p;
 
-    float horizontal_dist_pos, horizontal_dist_neg; // positive and negative distances in the horizontal direction
-    float vertical_dist_pos, vertical_dist_neg; // positive and negative distances in the vertical direction
-
-    if (y != floorf(y)) // p lies on an edge along the y axis
-    {
-        horizontal_dist_pos = 1.0f;
-        horizontal_dist_neg = -1.0f;
-        vertical_dist_pos = igvc::get_distance(p,std::make_tuple(x, ceilf(y)));
-        vertical_dist_neg = -igvc::get_distance(p,std::make_tuple(x, floorf(y)));
-    }
-    else // p lies on an edge along the x axis
-    {
-        horizontal_dist_pos = igvc::get_distance(p,std::make_tuple(ceilf(x), y));
-        horizontal_dist_neg = -igvc::get_distance(p,std::make_tuple(floorf(x), y));
-        vertical_dist_pos = 1.0f;
-        vertical_dist_neg = -1.0f;
-    }
-
     // there are 8 consecutive neighbors for an edge node.
-    neighbors.push_back(std::make_tuple(x + horizontal_dist_pos, y)); // right
-    neighbors.push_back(std::make_tuple(x + horizontal_dist_pos, y + vertical_dist_pos)); // top right
-    neighbors.push_back(std::make_tuple(x, y + vertical_dist_pos)); // top
-    neighbors.push_back(std::make_tuple(x + horizontal_dist_neg, y + vertical_dist_pos)); // top left
-    neighbors.push_back(std::make_tuple(x + horizontal_dist_neg, y)); // left
-    neighbors.push_back(std::make_tuple(x + horizontal_dist_neg, y + vertical_dist_neg)); // bottom left
-    neighbors.push_back(std::make_tuple(x, y + vertical_dist_neg)); // bottom
-    neighbors.push_back(std::make_tuple(x + horizontal_dist_pos, y + vertical_dist_neg)); // bottom right
+    neighbors.push_back(std::make_tuple(x + 1.0f, y)); // right
+    neighbors.push_back(std::make_tuple(x + 1.0f, y + 1.0f)); // top right
+    neighbors.push_back(std::make_tuple(x, y + 1.0f)); // top
+    neighbors.push_back(std::make_tuple(x - 1.0f, y + 1.0f)); // top left
+    neighbors.push_back(std::make_tuple(x - 1.0f, y)); // left
+    neighbors.push_back(std::make_tuple(x - 1.0f, y - 1.0f)); // bottom left
+    neighbors.push_back(std::make_tuple(x, y - 1.0f)); // bottom
+    neighbors.push_back(std::make_tuple(x + 1.0f, y - 1.0f)); // bottom right
 
-    std::tuple<float,float> sp;
-    std::tuple<float,float> spp;
     // first 7 connbrs
     for (size_t i = 0; i < neighbors.size() - 1; i++)
     {
