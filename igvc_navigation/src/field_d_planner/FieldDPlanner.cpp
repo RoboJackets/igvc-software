@@ -34,13 +34,6 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
     float g_p1 = getEdgePositionCost(p1); // path cost of nearest neighbor
     float g_p2 = getEdgePositionCost(p2); // path cost of diagonal neighbor
 
-    float d_p1 = igvc::get_distance(p,p1); // distance to nearest neighbor
-    assert(d_p1 > 0.0f);
-    float d_p2 = igvc::get_distance(p,p2); // distance to diagonal
-    assert(d_p2 > 0.0f);
-    float d_n  = igvc::get_distance(p1,p2); // distance between consecutive neighbors (edge length)
-    assert(d_n > 0.0f);
-
     // traversal cost of position p and a diagonal position p2
     // in units of (cost/distance)
     float c = graph.getContinuousTraversalCost(p, p2);
@@ -69,8 +62,8 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
     else if (g_p1 <= g_p2)
     {
         // cheapest to travel directly to nearest neighbor (non-diagonal)
-        x = d_p1;
-        v_s = (std::min(c,b) * x) + g_p1;
+        x = 1.0f;
+        v_s = std::min(c,b) + g_p1;
     }
     else
     {
@@ -81,17 +74,17 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
             if (c <= f)
             {
                 // cheapest to go directly to diagonal cell
-                x = d_p1;
-                y = d_n;
-                v_s = (c * d_p2) + g_p2;
+                x = 1.0f;
+                y = 1.0f;
+                v_s = (c * sqrtf(2.0f)) + g_p2;
             }
             else
             {
                 // travel diagonally to point along edge
-                x = d_p1;
+                x = 1.0f;
                 float toComp = f / sqrtf((c*c) - (f*f));
-                y = std::min(toComp, d_n);
-                v_s =  c * sqrtf((x*x) + (y*y)) + (f * (d_n - y)) + g_p2;
+                y = std::min(toComp, 1.0f);
+                v_s =  c * sqrtf(1.0f + (y*y)) + (f * (1.0f - y)) + g_p2;
             }
         }
         else
@@ -99,16 +92,16 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
             if (c <= b)
             {
                 // cheapest to go directly to diagonal cell
-                x = d_p1;
-                y = d_n;
-                v_s = (c * d_p2) + g_p2;
+                x = 1.0f;
+                y = 1.0f;
+                v_s = (c * sqrtf(2.0f)) + g_p2;
             }
             else
             {
                 // travel along edge then to s2
                 float toComp = b / sqrtf((c*c) - (b*b));
-                x = d_p1 - std::min(toComp, 1.0f);
-                v_s =  c * sqrtf((d_n*d_n) + ((d_p1-x) * (d_p1-x))) + (b*x) + g_p2;
+                x = 1.0f - std::min(toComp, 1.0f);
+                v_s =  c * sqrtf(1.0f + ((1.0f-x) * (1.0f-x))) + (b*x) + g_p2;
                 y = -1.0f;
             }
         }
@@ -134,9 +127,7 @@ float FieldDPlanner::getEdgePositionCost(const std::tuple<float,float>& p)
         float d_a = igvc::get_distance(p,p_a); // distance to first neighbor
         float d_b = igvc::get_distance(p,p_b); // distance to second neighbor
 
-        // normalize distances so they sum to 1
-        d_a = d_a / (d_a + d_b);
-        d_b = d_b / (d_a + d_b);
+        assert ((d_a + d_b) == 1.0f);
 
         float g_a = getG(Node(static_cast<std::tuple<int,int>>(p_a))); // path cost of p_a
         float g_b = getG(Node(static_cast<std::tuple<int,int>>(p_b))); // path cost of p_b
