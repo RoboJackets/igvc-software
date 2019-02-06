@@ -174,16 +174,6 @@ public:
     */
     path_additions getPathAdditions(const std::tuple<float,float>& p, int lookahead_dist);
     /**
-    Gets consecutive neighbor pairs of an edge node. An edge node is defines as a
-    node that does not lie a vertex but instead lies along some conitnuous position
-    along an edge. Edge nodes are also referred to as 'positions' throughout
-    this code.
-
-    @param[in] p position to get connbrs for
-    @param[out] output vector of connbrs pairs
-    */
-    std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> getEdgeConnbrs(const std::tuple<float,float>& p);
-    /**
     Checks whether a specified node is within range of the goal node. This 'range'
     is specified by the GOAL_RANGE instance variable.
 

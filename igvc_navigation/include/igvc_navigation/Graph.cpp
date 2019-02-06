@@ -173,6 +173,38 @@ std::vector<Node> Graph::nbrs(const Node& s, bool include_invalid)
     return neighbors;
 }
 
+std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> Graph::nbrsContinuous(const std::tuple<float,float>& p)
+{
+    std::vector<std::tuple<float,float>> neighbors;
+    std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> connbrs;
+
+    float x,y;
+    std::tie(x,y) = p;
+
+    // there are 8 consecutive neighbors for an edge node.
+    neighbors.push_back(std::make_tuple(x + 1.0f, y)); // right
+    neighbors.push_back(std::make_tuple(x + 1.0f, y + 1.0f)); // top right
+    neighbors.push_back(std::make_tuple(x, y + 1.0f)); // top
+    neighbors.push_back(std::make_tuple(x - 1.0f, y + 1.0f)); // top left
+    neighbors.push_back(std::make_tuple(x - 1.0f, y)); // left
+    neighbors.push_back(std::make_tuple(x - 1.0f, y - 1.0f)); // bottom left
+    neighbors.push_back(std::make_tuple(x, y - 1.0f)); // bottom
+    neighbors.push_back(std::make_tuple(x + 1.0f, y - 1.0f)); // bottom right
+
+    // first 7 connbrs
+    for (size_t i = 0; i < neighbors.size() - 1; i++)
+    {
+        if (isValidPosition(neighbors[i]) && isValidPosition(neighbors[i+1]))
+            connbrs.push_back(std::make_pair(neighbors[i],neighbors[i+1]));
+    }
+
+    // last connbrs pair [s8->s1]
+    if (isValidPosition(neighbors[neighbors.size() - 1]) && isValidPosition(neighbors[0]))
+        connbrs.push_back(std::make_pair(neighbors[neighbors.size() - 1],neighbors[0]));
+
+    return connbrs;
+}
+
 Node Graph::ccknbr(Node s, Node s_prime)
 {
     int x,y;
