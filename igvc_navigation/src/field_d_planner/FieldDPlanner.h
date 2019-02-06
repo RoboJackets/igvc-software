@@ -32,7 +32,7 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #ifndef FIELDDPLANNER_H
 #define FIELDDPLANNER_H
 
-// #define NDEBUG # TODO: uncomment for production
+#define NDEBUG // uncomment for production
 
 #include "igvc_navigation/Graph.h"
 #include "igvc_navigation/Node.h"
