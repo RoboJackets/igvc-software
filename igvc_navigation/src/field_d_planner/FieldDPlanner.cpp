@@ -403,7 +403,7 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<f
     else
     {
         std::tuple<float,float> p_a,p_b; // temp positions
-        for (std::pair<std::tuple<float,float>,std::tuple<float,float>> connbr : getEdgeConnbrs(p))
+        for (std::pair<std::tuple<float,float>,std::tuple<float,float>> connbr : graph.nbrsContinuous(p))
         {
             std::tie(p_a, p_b) = connbr;
 
@@ -423,38 +423,6 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<f
     }
 
     return min_pa;
-}
-
-std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> FieldDPlanner::getEdgeConnbrs(const std::tuple<float,float>& p)
-{
-    std::vector<std::tuple<float,float>> neighbors;
-    std::vector<std::pair<std::tuple<float,float>,std::tuple<float,float>>> connbrs;
-
-    float x,y;
-    std::tie(x,y) = p;
-
-    // there are 8 consecutive neighbors for an edge node.
-    neighbors.push_back(std::make_tuple(x + 1.0f, y)); // right
-    neighbors.push_back(std::make_tuple(x + 1.0f, y + 1.0f)); // top right
-    neighbors.push_back(std::make_tuple(x, y + 1.0f)); // top
-    neighbors.push_back(std::make_tuple(x - 1.0f, y + 1.0f)); // top left
-    neighbors.push_back(std::make_tuple(x - 1.0f, y)); // left
-    neighbors.push_back(std::make_tuple(x - 1.0f, y - 1.0f)); // bottom left
-    neighbors.push_back(std::make_tuple(x, y - 1.0f)); // bottom
-    neighbors.push_back(std::make_tuple(x + 1.0f, y - 1.0f)); // bottom right
-
-    // first 7 connbrs
-    for (size_t i = 0; i < neighbors.size() - 1; i++)
-    {
-        if (graph.isValidPosition(neighbors[i]) && graph.isValidPosition(neighbors[i+1]))
-            connbrs.push_back(std::make_pair(neighbors[i],neighbors[i+1]));
-    }
-
-    // last connbrs pair [s8->s1]
-    if (graph.isValidPosition(neighbors[neighbors.size() - 1]) && graph.isValidPosition(neighbors[0]))
-        connbrs.push_back(std::make_pair(neighbors[neighbors.size() - 1],neighbors[0]));
-
-    return connbrs;
 }
 
 bool FieldDPlanner::isWithinRangeOfGoal(const std::tuple<float,float>& p)
