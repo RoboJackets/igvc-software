@@ -11,6 +11,7 @@ Octomapper::Octomapper(ros::NodeHandle pNh) {
   igvc::getParam(pNh, "sensor_model/min", m_thresh_min);
   igvc::getParam(pNh, "sensor_model/max", m_thresh_max);
   igvc::getParam(pNh, "sensor_model/max_range", m_max_range);
+  igvc::getParam(pNh, "map_floor_threshold", m_floor_thresh);
   igvc::getParam(pNh, "ground_filter/enable", m_use_ground_filter);
   igvc::getParam(pNh, "ground_filter/iterations", m_ransac_iterations);
   igvc::getParam(pNh, "ground_filter/distance_threshold", m_ransac_distance_threshold);
@@ -84,8 +85,6 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
   octomap::point3d maxPt(maxX, maxY, maxZ);
 //  ROS_INFO_STREAM("Min: " << minPt << ", Max: " << maxPt);
 
-  octomap::OcTreeKey minKey = pc_map_pair.octree->coordToKey(minPt);
-  octomap::OcTreeKey maxKey = pc_map_pair.octree->coordToKey(maxPt);
   minX = std::min(minX, -0.5 * m_map_length);
   maxX = std::max(maxX, 0.5 * m_map_length);
   minY = std::min(minY, -0.5 * m_map_width);
@@ -120,7 +119,6 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
     } else {
       // This isn't a leaf at max depth. Time to iterate
       int grid_num = 1 << (pc_map_pair.octree->getTreeDepth() - it.getDepth());
-      octomap::OcTreeKey minKey = it.getIndexKey();
       int x = (m_map_length / 2 + it.getX()) / m_octree_resolution;
       int y = (m_map_width / 2 + it.getY()) / m_octree_resolution;
 //      ROS_INFO("We did it?");
@@ -140,6 +138,10 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const {
   for (int i = 0; i < m_map_length / m_octree_resolution; i++) {
     for (int j = 0; j < m_map_width / m_octree_resolution; j++) {
       pc_map_pair.map->at<uchar>(i, j) = toCharProb(fromLogOdds(odds_sum[i][j]));
+      if (pc_map_pair.map->at<uchar>(i, j) < m_floor_thresh)
+      {
+        pc_map_pair.map->at<uchar>(i, j) = 0;
+      }
     }
   }
 }
