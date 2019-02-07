@@ -18,8 +18,6 @@ Date Created: December 16, 2018
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#define NDEBUG // uncomment for production
-
 #include "igvc_utils/NodeUtils.hpp"
 #include "Node.h"
 

@@ -4,6 +4,8 @@ Solves for an optimal path using the Field D* incremental search algorithm.
 Field D* implementation details can be found in FieldDPlanner.h
 */
 
+#define NDEBUG // uncomment for production -- don't enforce assertions
+
 #include <nav_msgs/Path.h>
 #include <igvc_msgs/map.h>
 #include <std_msgs/Int32.h>
