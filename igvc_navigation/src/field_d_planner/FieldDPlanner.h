@@ -32,8 +32,6 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #ifndef FIELDDPLANNER_H
 #define FIELDDPLANNER_H
 
-#define NDEBUG // uncomment for production
-
 #include "igvc_navigation/Graph.h"
 #include "igvc_navigation/Node.h"
 #include "igvc_navigation/PriorityQueue.h"
@@ -45,9 +43,6 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #include <limits>
 #include <cmath>
 #include <assert.h>
-// TODO: REMOVE
-#include <thread>         // std::this_thread::sleep_for
-#include <chrono>         // std::chrono::seconds
 
 class FieldDPlanner
 {

@@ -1,7 +1,6 @@
 #include "FieldDPlanner.h"
 
 FieldDPlanner::FieldDPlanner() {}
-
 FieldDPlanner::~FieldDPlanner() {}
 
 std::tuple<float,float,float> FieldDPlanner::computeCost(const Node& s, const Node& s_a, const Node& s_b)
@@ -34,11 +33,11 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
     float g_p1 = getEdgePositionCost(p1); // path cost of nearest neighbor
     float g_p2 = getEdgePositionCost(p2); // path cost of diagonal neighbor
 
-    float d_p1 = igvc::get_distance(p,p1); // distance to nearest neighbor
+    float d_p1 = 1.0f; // distance to nearest neighbor
     assert(d_p1 > 0.0f);
-    float d_p2 = igvc::get_distance(p,p2); // distance to diagonal
+    float d_p2 = sqrtf(2); // distance to diagonal
     assert(d_p2 > 0.0f);
-    float d_n  = igvc::get_distance(p1,p2); // distance between consecutive neighbors (edge length)
+    float d_n  = 1.0f; // distance between consecutive neighbors (edge length)
     assert(d_n > 0.0f);
 
     // traversal cost of position p and a diagonal position p2
@@ -47,12 +46,6 @@ std::tuple<float,float,float> FieldDPlanner::computeCost(const std::tuple<float,
     // traversal cost of position p and p1, a non-diaginal neighbor of p
     // in units of (cost/distance)
     float b = graph.getContinuousTraversalCost(p,p1);
-
-    // this is literally D* Lite
-    // if (((b * d_p1) + g_p1) < ((c * d_p2) + g_p2))
-    //     return std::make_tuple((b * d_p1) + g_p1, 1, 0);
-    // else
-    //     return std::make_tuple((c * d_p2) + g_p2, 1, 1);
 
     // travel distances
     float x = 0.0f;
@@ -158,7 +151,7 @@ Key FieldDPlanner::calculateKey(const Node& s)
 {
     // obtain g-values and rhs-values for node s
     float cost_so_far = std::min(getG(s),getRHS(s));
-    // calculate the key to order the node in the PQ with. Note that K_M is the
+    // calculate the key to order the node in the PQ with. K_M is the
     // key modifier, a value which corrects for the distance traveled by the robot
     // since the search began (source: D* Lite)
     return Key(std::floor(cost_so_far + graph.euclidian_heuristic(s.getIndex()) + graph.K_M), std::floor(cost_so_far));
@@ -181,9 +174,7 @@ void FieldDPlanner::updateNode(const Node& s)
     // s never visited before, add to unordered map with g(s) = rhs(s) = inf
     if (umap.find(s) == umap.end())
     {
-        insert_or_assign(s,
-                         std::numeric_limits<float>::infinity(),
-                         std::numeric_limits<float>::infinity());
+        insert_or_assign(s, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
     }
     else
     {
@@ -197,12 +188,9 @@ void FieldDPlanner::updateNode(const Node& s)
     // update rhs value of Node s
     if (s != graph.Goal)
     {
-        float minRHS = std::numeric_limits<float>::infinity(), tempRHS = std::numeric_limits<float>::infinity();
+        float minRHS = std::numeric_limits<float>::infinity();
         for (std::tuple<Node,Node> connbr : graph.connbrs(s))
-        {
-            std::tie(tempRHS, std::ignore, std::ignore) = this->computeCost(s, std::get<0>(connbr), std::get<1>(connbr));
-            minRHS = std::min(minRHS,tempRHS);
-        }
+            minRHS = std::min(minRHS,std::get<0>(this->computeCost(s, std::get<0>(connbr), std::get<1>(connbr))));
 
         insert_or_assign(s, getG(s), minRHS);
     }
@@ -214,8 +202,7 @@ void FieldDPlanner::updateNode(const Node& s)
 
 int FieldDPlanner::computeShortestPath()
 {
-    // // if the start node is occupied, return immediately. By definition, a path
-    // // does not exist if the start node is occupied.
+    // if the start node is occupied, return immediately. No path exists
     if (graph.getMinTraversalCost(graph.Start) == std::numeric_limits<float>::infinity())
         return 0;
 
@@ -229,17 +216,17 @@ int FieldDPlanner::computeShortestPath()
         if (getG(topNode) > getRHS(topNode))
         {
             // locally overconsistent case. This node is now more favorable.
-            // make node locally consistent by setting g = rhs
+            // make node locally consistent by setting g = rhs and propagate
+            // changes to neighboring nodes
             insert_or_assign(topNode, getRHS(topNode), getRHS(topNode));
-            // propagate changes to neighboring nodes
             for (Node nbr : graph.nbrs(topNode)) updateNode(nbr);
         }
         else
         {
-            // locally underconsistent case. This node is now less favorable
-            // than it was before. Make node locally consistent or overconsistent by setting g = inf
+            // locally underconsistent case. This node is now less favorable.
+            // make node locally consistent or overconsistent by setting g = inf
+            // and propagate changes to {neighbors} U {topNode}
             insert_or_assign(topNode, std::numeric_limits<float>::infinity(), getRHS(topNode));
-            // propagate changes to neighbors and to topNode
             for (Node nbr : graph.nbrs(topNode)) updateNode(nbr);
             updateNode(topNode);
         }
@@ -249,26 +236,22 @@ int FieldDPlanner::computeShortestPath()
 
 int FieldDPlanner::updateNodesAroundUpdatedCells()
 {
-    int numNodesUpdated = 0;
-
     std::unordered_set<Node> toUpdate;
-
+    std::vector<Node> updates;
+    // construct a set of all updated nodes
     for (std::tuple<int,int> cellUpdate : graph.updatedCells)
     {
-      std::vector<Node> updates = graph.getNodesAroundCellWithCSpace(cellUpdate);
+      updates = graph.getNodesAroundCellWithCSpace(cellUpdate);
       toUpdate.insert(updates.begin(), updates.end());
     }
 
     for (Node n : toUpdate)
     {
-        if (umap.find(n) == umap.end()) // node hasn't been explored yet. Leave alone
-            continue;
-
-        updateNode(n);
-        numNodesUpdated++;
+        if (umap.find(n) != umap.end()) // Only update explored nodes
+            updateNode(n);
     }
 
-    return numNodesUpdated;
+    return toUpdate.size();
 }
 
 void FieldDPlanner::constructOptimalPath(int lookahead_dist)
@@ -281,14 +264,11 @@ void FieldDPlanner::constructOptimalPath(int lookahead_dist)
     float min_cost;
     path_additions pa;
 
-    int MAX_STEPS = 1000;
-    int curr_step = 0;
-
+    int curr_step = 0, MAX_STEPS = 1000; // kill the path constructor after MAX_STEPS steps
     do
     {
         // move one step and calculate the optimal path additions (min 1, max 2)
         pa = getPathAdditions(curr_pos, lookahead_dist);
-        // append new positions to the end of path
         path.insert(path.end(), pa.first.begin(), pa.first.end());
         min_cost = pa.second;
         curr_pos = path.back();
@@ -305,17 +285,21 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
                                                                          const std::tuple<float,float>& p_b)
 {
     std::vector<std::tuple<float,float>> positions; // positions to add to path
-
+    std::tuple<float,float> p1,p2; // p1 - nearest neighbor; p2 - diagonal
     float cost;
     float x,y;
-    std::tuple<float,float> p1,p2; // p1 - nearest neighbor; p2 - diagonal
-
     std::tie(cost, x, y) = this->computeCost(p, p_a, p_b);
 
     if (graph.isDiagonalContinuous(p, p_a)) // p_b is nearest neighbor
-        std::tie(p1,p2) = std::make_tuple(p_b,p_a);
+    {
+        p1 = p_b;
+        p2 = p_a;
+    }
     else // p_a is nearest neighbor
-        std::tie(p1,p2) = std::make_tuple(p_a,p_b);
+    {
+        p1 = p_a;
+        p2 = p_b;
+    }
 
     // CASE 0: no valid path found (infinite cost/no consecutive neighbors)
     if (cost == std::numeric_limits<float>::infinity())
@@ -333,7 +317,6 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
     std::tie(p2_x, p2_y) = p2;
 
     float x_multiplier,y_multiplier;
-    bool flip = false; // path additions must be flipped to account for relative orientation
 
     // CASE 1(2/2): travel along x(2/2) then cut to s2(2/2)
     if (y < 0.0f)
@@ -349,7 +332,7 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
     }
     else // nearest neighbor lies above or below s
     {
-        flip = true;
+        std::tie(x,y) = std::make_tuple(y,x); // path additions must be flipped to account for relative orientation
         y_multiplier = (p1_y > p_y) ? 1.0f : -1.0f;
         x_multiplier = (p2_x > p_x) ? 1.0f : -1.0f;
     }
@@ -358,9 +341,6 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
     // CASE 2: travel directly to diagonal node (s2)
     // CASE 3: travel to nearest node
     // CASE 4: travel to point along edge
-    if (flip)
-        std::tie(x,y) = std::make_tuple(y,x);
-
     x *= x_multiplier;
     y *= y_multiplier;
     positions.insert(positions.begin(), std::make_tuple(p_x + x, p_y + y));
@@ -377,74 +357,35 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<f
     path_additions temp_pa;
     float lookahead_cost;
 
-    if (isVertex(p)) // planning from vertex
+    std::tuple<float,float> p_a,p_b; // temp positions
+    for (std::pair<std::tuple<float,float>,std::tuple<float,float>> connbr : graph.nbrsContinuous(p))
     {
-        // node to search from
-        Node s(static_cast<std::tuple<int,int>>(p));
-        Node s_a, s_b; // temp nodes
-        for (std::tuple<Node, Node> connbr : graph.connbrs(s))
-        {
-            std::tie(s_a, s_b) = connbr;
+        //look ahead `lookahead_dist` planning steps into the future for best action
+        std::tie(p_a, p_b) = connbr;
+        temp_pa = computeOptimalCellTraversal(p, p_a, p_b);
+        if ((lookahead_dist <= 0) || temp_pa.first.empty())
+            lookahead_cost = temp_pa.second;
+        else
+            lookahead_cost = getPathAdditions(temp_pa.first.back(), lookahead_dist - 1).second;
 
-            temp_pa = computeOptimalCellTraversal(p, s_a.getIndex(), s_b.getIndex());
-            if ((lookahead_dist <= 0) || temp_pa.first.empty()) {
-                lookahead_cost = temp_pa.second;
-            }
-            else {
-                lookahead_cost = getPathAdditions(temp_pa.first.back(), lookahead_dist - 1).second;
-            }
-
-            if (lookahead_cost < min_cost) {
-                min_cost = lookahead_cost;
-                min_pa = temp_pa;
-            }
+        if (lookahead_cost < min_cost) {
+            min_cost = lookahead_cost;
+            min_pa = temp_pa;
         }
     }
-    else
-    {
-        std::tuple<float,float> p_a,p_b; // temp positions
-        for (std::pair<std::tuple<float,float>,std::tuple<float,float>> connbr : graph.nbrsContinuous(p))
-        {
-            std::tie(p_a, p_b) = connbr;
-
-            temp_pa = computeOptimalCellTraversal(p, p_a, p_b);
-            if ((lookahead_dist <= 0) || temp_pa.first.empty()) {
-                lookahead_cost = temp_pa.second;
-            }
-            else {
-                lookahead_cost = getPathAdditions(temp_pa.first.back(), lookahead_dist - 1).second;
-            }
-
-            if (lookahead_cost < min_cost) {
-                min_cost = lookahead_cost;
-                min_pa = temp_pa;
-            }
-        }
-    }
-
     return min_pa;
 }
 
 bool FieldDPlanner::isWithinRangeOfGoal(const std::tuple<float,float>& p)
 {
-    float goal_x, goal_y;
-    std::tie(goal_x, goal_y) = graph.Goal.getIndex();
-
-    float x, y;
-    std::tie(x,y) = p;
-    // calculate number of nodes that lie within the goal distance
-    float sep = GOAL_DIST/graph.Resolution;
-
-    bool satisfies_x_bounds = (x >= (goal_x - sep)) && (x <= (goal_x + sep));
-    bool satisfies_y_bounds = (y >= (goal_y - sep)) && (y <= (goal_y + sep));
-
-    return satisfies_x_bounds && satisfies_y_bounds;
+    float distanceToGoal = igvc::get_distance(p, static_cast<std::tuple<float,float>>(graph.Goal.getIndex()));
+    float goalRadius = GOAL_DIST/graph.Resolution;
+    return distanceToGoal <= goalRadius;
 }
 
 void FieldDPlanner::insert_or_assign(Node s, float g, float rhs)
 {
-    // re-assigns value of node in unordered map or inserts new entry if
-    // node not found
+    // re-assigns value of node in unordered map or inserts new entry
     if (umap.find(s) != umap.end())
         umap.erase(s);
 
@@ -475,9 +416,7 @@ std::vector<std::tuple<int,int>> FieldDPlanner::getExplored()
 {
     std::vector<std::tuple<int,int>> explored;
     for (std::pair<Node, std::tuple<float,float>> e : umap)
-    {
         explored.push_back(e.first.getIndex());
-    }
 
     return explored;
 }
