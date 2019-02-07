@@ -54,6 +54,7 @@ private:
   double m_thresh_min;
   double m_thresh_max;
   double m_max_range;
+  double m_floor_thresh;
   int m_ransac_iterations;
   double m_ransac_distance_threshold;
   double m_ransac_eps_angle;
