@@ -63,7 +63,7 @@ void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
     tf_listener->lookupTransform("/odom", "/lidar", messageTimeStamp, transform2);
     state2.setState(transform2);
   } else {
-    ROS_ERROR("Failed to get transform from /base_link to /odom in time, using newest transforms");
+    ROS_DEBUG("Failed to get transform from /base_link to /odom in time, using newest transforms");
     tf_listener->lookupTransform("/odom", "/base_link", ros::Time(0), transform);
     state.setState(transform);
     tf_listener->lookupTransform("/odom", "/lidar", ros::Time(0), transform2);
