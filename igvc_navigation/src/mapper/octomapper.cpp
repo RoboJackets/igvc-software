@@ -88,34 +88,6 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
   //}
 
   // Traverse entire tree
-  double minX, minY, minZ, maxX, maxY, maxZ;
-  pc_map_pair.octree->getMetricMin(minX, minY, minZ);
-  pc_map_pair.octree->getMetricMax(maxX, maxY, maxZ);
-
-  octomap::point3d minPt(minX, minY, minZ);
-  octomap::point3d maxPt(maxX, maxY, maxZ);
-  //  ROS_INFO_STREAM("Min: " << minPt << ", Max: " << maxPt);
-
-  minX = std::min(minX, -0.5 * m_map_length);
-  maxX = std::max(maxX, 0.5 * m_map_length);
-  minY = std::min(minY, -0.5 * m_map_width);
-  maxY = std::max(maxY, 0.5 * m_map_width);
-  minPt = octomap::point3d(minX, minY, minZ);
-  maxPt = octomap::point3d(maxX, maxY, maxZ);
-
-  octomap::OcTreeKey padded_min_key, padded_max_key;
-  int depth = pc_map_pair.octree->getTreeDepth();
-  if (!pc_map_pair.octree->coordToKeyChecked(minPt, depth, padded_min_key))
-  {
-    ROS_ERROR_STREAM("Could not create padded min OcTree key at " << minPt);
-  }
-  if (!pc_map_pair.octree->coordToKeyChecked(maxPt, depth, padded_max_key))
-  {
-    ROS_ERROR_STREAM("Could not create padded max OcTree key at " << maxPt);
-  }
-
-  //  ROS_INFO_STREAM("Min: " << minPt << ", Max: " << maxPt);
-  //  ROS_INFO_STREAM("MinKey: " << key_to_string(minKey) << ", Max: " << key_to_string(maxKey));
   std::vector<std::vector<float>> odds_sum(m_map_length / m_octree_resolution,
                                            std::vector<float>(m_map_width / m_octree_resolution,
                                                               m_odds_sum_default));  // TODO: Are these the right
