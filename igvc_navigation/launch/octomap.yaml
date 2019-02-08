@@ -1,5 +1,5 @@
 octree:
-  resolution: 0.1
+  resolution: 0.2
   lazy_evaluation: false
 sensor_model:
   hit: 0.8

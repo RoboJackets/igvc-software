@@ -62,6 +62,12 @@ void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
     state.setState(transform);
     tf_listener->lookupTransform("/odom", "/lidar", messageTimeStamp, transform2);
     state2.setState(transform2);
+  } else {
+    ROS_ERROR("Failed to get transform from /base_link to /odom in time, using newest transforms");
+    tf_listener->lookupTransform("/odom", "/base_link", ros::Time(0), transform);
+    state.setState(transform);
+    tf_listener->lookupTransform("/odom", "/lidar", ros::Time(0), transform2);
+    state2.setState(transform2);
   }
 }
 
@@ -78,13 +84,14 @@ void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t p
   pcl_conversions::fromPCL(pcl_stamp, message.header.stamp);
   message.header.frame_id = "/odom";
   message.image = image;
-  message.length = length_y;
-  message.width = width_x;
+  message.length = length_y / resolution;
+  message.width = width_x / resolution;
   message.resolution = resolution;
-  message.orientation = state.yaw(); message.x = std::round(state.x() / resolution) + start_x;
-  message.y = std::round(state.y() / resolution) + start_y;
-  message.x_initial = start_x;
-  message.y_initial = start_y;
+  message.orientation = state.yaw();
+  message.x = std::round(state.x() / resolution) + start_x/resolution;
+  message.y = std::round(state.y() / resolution) + start_y/resolution;
+  message.x_initial = start_x / resolution;
+  message.y_initial = start_y / resolution;
 }
 
 /**
@@ -92,20 +99,23 @@ void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t p
  * @param msg
  * @param topic
  */
-void checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic) {
+bool checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic) {
   if (transforms.find(topic) == transforms.end()) {
     // Wait for transform between frame_id (ex. /scan/pointcloud) and base_footprint.
     ros::Time messageTimeStamp;
     pcl_conversions::fromPCL(msg->header.stamp, messageTimeStamp);
+    ROS_INFO_STREAM("Getting transform for " << topic << " from " << msg->header.frame_id << " to /base_footprint \n");
     if (tf_listener->waitForTransform("/base_footprint", msg->header.frame_id, messageTimeStamp, ros::Duration(3.0))) {
-      ROS_INFO_STREAM("\n\ngetting transform for " << topic << "\n\n");
       tf::StampedTransform transform;
       tf_listener->lookupTransform("/base_footprint", msg->header.frame_id, messageTimeStamp, transform);
       transforms.insert(std::pair<std::string, tf::StampedTransform>(topic, transform));
+      ROS_INFO_STREAM("Found transform!");
     } else {
-      ROS_ERROR_STREAM("\n\nfailed to find transform using empty transform\n\n");
+      ROS_ERROR_STREAM("Failed to find transform using empty transform");
+      return false;
     }
   }
+  return true;
 }
 
 /**
@@ -180,7 +190,12 @@ void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
   // Check if static transform already exists for this topic.
-  checkExistsStaticTransform(pc, "/scan/pointcloud");
+  if (!checkExistsStaticTransform(pc, "/scan/pointcloud"))
+  {
+    ROS_ERROR("Sleeping 2 seconds then trying again...");
+    ros::Duration(2).sleep();
+    return;
+  }
 
   // Lookup transform form Ros Localization for position
   getOdomTransform(pc);
@@ -188,31 +203,6 @@ void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
   // Apply transformation from lidar to base_link aka robot pose
   pcl_ros::transformPointCloud(*small, *transformed, transforms.at("/scan/pointcloud"));
   pcl_ros::transformPointCloud(*transformed, *transformed, state.transform);
-
-  //  Eigen::Affine3f transform_to_odom = Eigen::Affine3f::Identity();
-  //  // TODO: Is this backward?
-  //  transform_to_odom.rotate(Eigen::AngleAxisf(state.yaw(), Eigen::Vector3f::UnitZ()));
-  //  Eigen::Affine3d transform_to_odom;
-  //  tf::transformTFToEigen(state.transform.inverse(), transform_to_odom);
-
-  //  ROS_INFO_STREAM("State.transform: " << state.transform.getOrigin().x() << ", " << state.transform.getOrigin().y() << ", " << state.transform.getOrigin().z());
-  //  ROS_INFO_STREAM("State.transform: " << temp.getOrigin().x() << ", " << temp.getOrigin().y() << ", " << temp.getOrigin().z());
-
-  pcl::PointCloud<pcl::PointXYZ> ground;
-  pcl::PointCloud<pcl::PointXYZ> nonground;
-
-  //  pcl::transformPointCloud(*transformed, *transformed2, transform_to_odom);
-//  octomapper->filter_ground_plane(*transformed, ground, nonground);
-//
-//  ground.header.frame_id = "/odom";
-//  transformed->header.frame_id = "/odom";
-//  nonground.header.frame_id = "/odom";
-//  ground.header.stamp = pc->header.stamp;
-//  transformed->header.stamp = pc->header.stamp;
-//  nonground.header.stamp = pc->header.stamp;
-//
-//  nonground_pub.publish(nonground);
-//  ground_pub.publish(ground);
 
   visualization_msgs::Marker points;
   points.header.frame_id = "/odom";
@@ -273,6 +263,8 @@ int main(int argc, char **argv) {
   igvc::getParam(pNh, "octree/resolution", resolution);
   igvc::getParam(pNh, "map/length", length_y);
   igvc::getParam(pNh, "map/width", width_x);
+  igvc::getParam(pNh, "map/start_x", start_x);
+  igvc::getParam(pNh, "map/start_y", start_y);
   igvc::getParam(pNh, "debug", debug);
   igvc::getParam(pNh, "sensor_model/max_range", radius);
 
