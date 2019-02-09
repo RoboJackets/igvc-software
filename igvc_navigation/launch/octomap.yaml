@@ -24,12 +24,14 @@ ground_filter:
 map:
   # In units of meters, not cells
   # width of grid = width / resolution
-  length_x: 200
-  width_y: 200
   length: 200
   width: 200
   start_x: 100
   start_y: 100
   encoding: "CV_8UC1"
   log_odds_default: 0
+node:
+  lidar_topic: "/scan/pointcloud"
+  transform_max_wait_time: 0.5
+  debug: true
 map_floor_threshold: 0.5
