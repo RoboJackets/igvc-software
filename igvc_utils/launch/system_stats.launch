@@ -1,0 +1,5 @@
+<launch>
+    <node name="system_stats" pkg="igvc_utils" type="system_stats" output="screen">
+        <param name="publish_frequency" type="double" value="10" />
+    </node>
+</launch>
