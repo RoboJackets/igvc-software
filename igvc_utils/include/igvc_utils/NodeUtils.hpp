@@ -30,7 +30,7 @@ void getParam(const ros::NodeHandle &pNh, const std::string &param_name, T &para
 /**
 Calculates euclidian distance between two points
 */
-template<typename T>
+template <typename T>
 inline T get_distance(T x1, T y1, T x2, T y2)
 {
   return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
@@ -40,25 +40,25 @@ inline T get_distance(T x1, T y1, T x2, T y2)
 Calculates euclidian distance between two points, taking tuples for each
 (x,y) point as argument
 */
-template<typename T>
-inline T get_distance(const std::tuple<T,T>& p1, const std::tuple<T,T>& p2)
+template <typename T>
+inline T get_distance(const std::tuple<T, T> &p1, const std::tuple<T, T> &p2)
 {
-    T x1,y1;
-    std::tie(x1,y1) = p1;
+  T x1, y1;
+  std::tie(x1, y1) = p1;
 
-    T x2,y2;
-    std::tie(x2, y2) = p2;
+  T x2, y2;
+  std::tie(x2, y2) = p2;
 
-    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+  return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
 }
 
 // symmetric round up
 // Bias: away from zero
 template <typename T>
-T ceil0( const T& value )
+T ceil0(const T &value)
 {
-    T result = std::ceil( std::fabs( value ) );
-    return (value < 0.0) ? -result : result;
+  T result = std::ceil(std::fabs(value));
+  return (value < 0.0) ? -result : result;
 }
 
 /**
