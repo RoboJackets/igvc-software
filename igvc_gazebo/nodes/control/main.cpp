@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <chrono>
 
+#include <igvc_utils/NodeUtils.hpp>
+
 double speed_set_point_left = 0.0;
 double speed_set_point_right = 0.0;
 double speed_measured_left = 0.0;
@@ -75,12 +77,12 @@ int main(int argc, char **argv)
   leftWheelShockPublisher.publish(shock_set_point);
 
   double rate_var;
-  pNh.param("speed_P_left", speed_P_left, 5.0);
-  pNh.param("speed_P_right", speed_P_right, 5.0);
-  pNh.param("speed_D_left", speed_D_left, 1.0);
-  pNh.param("speed_D_right", speed_D_right, 1.0);
-  pNh.param("wheel_radius", wheel_radius, 0.3);
-  pNh.param("rate", rate_var, 60.0);
+  igvc::param(pNh, "speed_P_left", speed_P_left, 5.0);
+  igvc::param(pNh, "speed_P_right", speed_P_right, 5.0);
+  igvc::param(pNh, "speed_D_left", speed_D_left, 1.0);
+  igvc::param(pNh, "speed_D_right", speed_D_right, 1.0);
+  igvc::param(pNh, "wheel_radius", wheel_radius, 0.3);
+  igvc::param(pNh, "rate", rate_var, 60.0);
 
   // Publish that the robot is enabled
   ros::Publisher enabled_pub = handle.advertise<std_msgs::Bool>("/robot_enabled", 1, /* latch = */ true);

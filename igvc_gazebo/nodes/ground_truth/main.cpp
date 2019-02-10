@@ -6,7 +6,9 @@
 #include <tf/transform_datatypes.h>
 #include <igvc_utils/NodeUtils.hpp>
 
-ros::Publisher ground_truth_pub, diff_pub, angle_diff_pub;
+ros::Publisher ground_truth_pub;
+ros::Publisher diff_pub;
+ros::Publisher angle_diff_pub;
 std::mutex mutex;
 nav_msgs::Odometry prev_gt;
 nav_msgs::Odometry og_pose;
