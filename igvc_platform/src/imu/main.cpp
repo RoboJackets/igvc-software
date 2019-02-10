@@ -1,14 +1,15 @@
 // This node reads and publishes IMU data from the FSM-9 IMU.
 
+#include <Eigen/Dense>
 #include <freespace/freespace.h>
 #include <freespace/freespace_util.h>
 #include <geometry_msgs/Vector3.h>
+#include <igvc_utils/NodeUtils.hpp>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
 #include <std_msgs/Float64.h>
 #include <tf/transform_datatypes.h>
-#include <Eigen/Dense>
 #include <vector>
 
 /** A function for initializing a single FSM-9 IMU. This function sets up the IMU
@@ -74,12 +75,16 @@ int main(int argc, char** argv)
 
   // Get matrix to correct IMU orientation.
   std::vector<double> imu_orientation_correction;
-  nh.getParam("imu_orientation_correction", imu_orientation_correction);
+  igvc::getParam(nh, "imu_orientation_correction", imu_orientation_correction);
 
   // Get threshold value for triggering a warning when the deviation between the filtered
   // heading and magnetometer heading becomes too large.
   double heading_dev_thresh_deg;
-  nh.getParam("heading_dev_thresh_deg", heading_dev_thresh_deg);
+  igvc::getParam(nh, "heading_dev_thresh_deg", heading_dev_thresh_deg);
+
+  // Get yaw offset for making yaw relative to East.
+  double yaw_offset;
+  igvc::getParam(nh, "yaw_offset", yaw_offset);
 
   // There should be 9 elements (3x3 matrix).
   if (imu_orientation_correction.size() != 9) {
@@ -129,7 +134,7 @@ int main(int argc, char** argv)
 
     if (response.messageType != FREESPACE_MESSAGE_MOTIONENGINEOUTPUT)
     {
-      ROS_ERROR_STREAM("error got unknown message type " << response.messageType);
+      ROS_ERROR_STREAM("IMU error: got unknown message type " << response.messageType);
     }
 
     // Get accelerometer measurements.
@@ -163,7 +168,7 @@ int main(int argc, char** argv)
     tf::Quaternion quaternion_raw(orientation_msg.x, orientation_msg.y, orientation_msg.z, orientation_msg.w);
     double roll, pitch, yaw;
     tf::Matrix3x3(quaternion_raw).getRPY(roll, pitch, yaw);
-    ROS_INFO("Filtered heading: %f", yaw);
+    yaw += yaw_offset;
 
     // Get gyroscope measurements.
     MultiAxisSensor angular_vel_msg;
@@ -185,10 +190,10 @@ int main(int argc, char** argv)
     }
 
     // Calculate heading with magnetometer reading.
-    double yaw_mag = atan2(magnetometer_msg.y, magnetometer_msg.x);
-    ROS_INFO("Magnetometer heading: %f", yaw_mag);
+    double yaw_mag = atan2(magnetometer_msg.y, magnetometer_msg.x) + yaw_offset;
 
-    if (fabs(yaw - yaw_mag) > heading_dev_thresh_deg * M_PI / 180.0) {
+    if (fabs(yaw - yaw_mag) > heading_dev_thresh_deg * M_PI / 180.0)
+    {
       ROS_WARN("Magnetometer heading and filtered yaw measurement disagree by > %f degrees.", heading_dev_thresh_deg);
     }
 
@@ -214,15 +219,12 @@ int main(int argc, char** argv)
                                         1e-6, 1e-6, 0.02 };
 
 
-    geometry_msgs::Quaternion orientation;
-    //orientation.x = quaternion_raw.x();
-    //orientation.y = quaternion_raw.y();
-    //orientation.z = quaternion_raw.z();
-    //orientation.w = quaternion_raw.w();
     // This assumes flat ground and uses magnetometer for absolute heading.
     // TODO: This assumption may not hold when we switch to 3D lidar, and stop using flat ground assumption
     tf::Quaternion quaternion_mag;
     quaternion_mag.setRPY(0,0,yaw_mag);
+
+    geometry_msgs::Quaternion orientation;
     orientation.x = quaternion_mag.x();
     orientation.y = quaternion_mag.y();
     orientation.z = quaternion_mag.z();
