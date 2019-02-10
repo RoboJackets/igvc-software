@@ -5,6 +5,8 @@
   <arg name="world_name" default="$(find igvc_description)/urdf/worlds/qualification.world"/>
   <arg name="cmd_timeout" default="0.5"/>
   <arg name="track" default="0"/>
+  <!-- accelerate lidar with GPU -->
+  <arg name="gpu" default="false"/>
 
   <!-- Vehicle pose -->
   <arg name="x" value="-30"/>
@@ -28,11 +30,6 @@
     <arg name="debug" value="false"/>
   </include>
 
-  <!-- convert laser scan to point cloud for LIDAR -->
-  <!--<node name="scan_to_pointcloud" pkg="igvc_gazebo" type="scan_to_pointcloud" output="screen" >
-    <param name="min_dist" value="0.1"/>
-    <param name="neighbor_dist" value="0.2"/>
-  </node>-->
   <include file="$(find igvc_description)/launch/spawn_jaymii.launch">
       <arg name="x" value="$(arg x)"/>
       <arg name="y" value="$(arg y)"/>
@@ -40,6 +37,9 @@
       <arg name="roll" value="$(arg roll)"/>
       <arg name="pitch" value="$(arg pitch)"/>
       <arg name="yaw" value="$(arg yaw)"/>
+
+      <!-- accelerate lidar with GPU -->
+      <arg name="gpu" value="$(arg gpu)"/>
   </include>
   <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
 

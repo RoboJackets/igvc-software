@@ -9,9 +9,11 @@
   <arg name="roll" default="0.0"/>
   <arg name="pitch" default="0.0"/>
   <arg name="yaw" default="0"/>
+  <!-- accelerate lidar with GPU -->
+  <arg name="gpu" default="false"/>
   <!-- Spawn the vehicle. -->
 
-  <param name="robot_description" command="$(find xacro)/xacro $(find igvc_description)/urdf/jessi.urdf.xacro" />
+  <param name="robot_description" command="$(find xacro)/xacro $(find igvc_description)/urdf/jessi.urdf.xacro gpu:=$(arg gpu)" />
 
   <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
         args="-param robot_description

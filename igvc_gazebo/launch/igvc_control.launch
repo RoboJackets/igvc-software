@@ -10,6 +10,7 @@
     args="$(find igvc_gazebo)/config/igvc_joint_control.yaml"/>
 
   <node name="igvc_control" pkg="igvc_gazebo" type="control">
+      <!-- PID values for wheel speed -->
       <param name="speed_P_left" value="0.5"/>
       <param name="speed_P_right" value="0.5"/>
       <param name="speed_D_left" value="3.0"/>
