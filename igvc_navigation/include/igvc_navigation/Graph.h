@@ -27,10 +27,10 @@ Date Created: December 16, 2018
 #include <cv_bridge/cv_bridge.h>
 #include <cmath>
 #include <limits>
+#include <queue>
 #include <tuple>
 #include <utility>
 #include <vector>
-#include <queue>
 
 class Graph
 {
@@ -70,7 +70,6 @@ public:
   */
   Graph();
   ~Graph();
-
 
   /**
   Sets a value for the graph's configuration space

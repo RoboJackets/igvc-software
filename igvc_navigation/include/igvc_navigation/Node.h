@@ -91,7 +91,7 @@ public:
   @param[in] ind the index to get the distance to
   @return the distance to the provided position
   */
-  float distTo(std::tuple<float,float> position);
+  float distTo(std::tuple<float, float> position);
   /**
   equals operator for Node.
 
