@@ -497,22 +497,38 @@ float Graph::euclidian_heuristic(const std::tuple<int, int>& ind)
 
 std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int, int>& cellInd)
 {
-  int x, y;
-  std::tie(x, y) = cellInd;
+  std::queue<Node> openList; // nodes to evaluate
+  std::unordered_set<Node> closedSet; // evaluated nodes
+  std::vector<Node> cellNodes; // nodes that require update
 
-  int sep = static_cast<int>(CSpace / Resolution);  // number of cells on all sides that constitute C-space
+  Node startNode(cellInd);
 
-  std::vector<Node> cellNodes;
+  openList.push(startNode);
+  closedSet.insert(startNode);
+  cellNodes.push_back(startNode);
 
-  for (int new_x = x - sep; new_x <= x + sep + 1; new_x++)
+  int separationDist = static_cast<int>(CSpace / Resolution);  // number of cells on all sides that constitute C-space
+
+  while(!openList.empty())
   {
-    for (int new_y = y - sep; new_y <= y + sep + 1; new_y++)
-    {
-      Node cellNode = Node(new_x, new_y);
-      if (isValidNode(cellNode))
-        cellNodes.push_back(cellNode);
-    }
-  }
+      Node currNode = openList.front();
+      openList.pop();
 
+      for (Node n : this->nbrs(currNode))
+      {
+          // node already considered
+          if (closedSet.find(n) != closedSet.end())
+              continue;
+          else
+              closedSet.insert(n);
+
+          // node is within the configuration space
+          if (startNode.distTo(static_cast<std::tuple<float,float>>(n.getIndex())) < separationDist)
+          {
+              openList.push(n);
+              cellNodes.push_back(n);
+          }
+      }
+  }
   return cellNodes;
 }

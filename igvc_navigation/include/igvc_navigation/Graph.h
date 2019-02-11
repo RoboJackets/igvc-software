@@ -30,6 +30,7 @@ Date Created: December 16, 2018
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <queue>
 
 class Graph
 {
@@ -69,6 +70,7 @@ public:
   */
   Graph();
   ~Graph();
+
 
   /**
   Sets a value for the graph's configuration space
