@@ -296,7 +296,7 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
                                                                          const std::tuple<float, float>& p_b)
 {
   std::vector<std::tuple<float, float>> positions;  // positions to add to path
-  std::tuple<float, float> p1, p2;                  // p1 - nearest neighbor; p2 - diagonal
+  std::tuple<float, float> p1, p2; // p1 - nearest neighbor; p2 - diagonal
   float cost;
   float x, y;
   std::tie(cost, x, y) = this->computeCost(p, p_a, p_b);
@@ -327,8 +327,6 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
   float p2_x, p2_y;
   std::tie(p2_x, p2_y) = p2;
 
-  float x_multiplier, y_multiplier;
-
   // CASE 1(2/2): travel along x(2/2) then cut to s2(2/2)
   if (y < 0.0f)
   {
@@ -338,22 +336,20 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
 
   if (p1_x != p_x)  // nearest neighbor lies to left or right of s
   {
-    x_multiplier = (p1_x > p_x) ? 1.0f : -1.0f;
-    y_multiplier = (p2_y > p_y) ? 1.0f : -1.0f;
+    x *= (p1_x > p_x) ? 1.0f : -1.0f;
+    y *= (p2_y > p_y) ? 1.0f : -1.0f;
   }
   else  // nearest neighbor lies above or below s
   {
     std::tie(x, y) = std::make_tuple(y, x);  // path additions must be flipped to account for relative orientation
-    y_multiplier = (p1_y > p_y) ? 1.0f : -1.0f;
-    x_multiplier = (p2_x > p_x) ? 1.0f : -1.0f;
+    y *= (p1_y > p_y) ? 1.0f : -1.0f;
+    x *= (p2_x > p_x) ? 1.0f : -1.0f;
   }
 
   // CASE 1(1/2): travel along x(1/2) then cut to s2(2/2)
   // CASE 2: travel directly to diagonal node (s2)
   // CASE 3: travel to nearest node
   // CASE 4: travel to point along edge
-  x *= x_multiplier;
-  y *= y_multiplier;
   positions.insert(positions.begin(), std::make_tuple(p_x + x, p_y + y));
 
   return std::make_pair(positions, cost);
