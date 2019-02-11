@@ -509,7 +509,7 @@ std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int, int>
 
   int separationDist = static_cast<int>(ceil(CSpace / Resolution));  // number of cells on all sides that constitute C-space
 
-  // perform a simple breadth-first search to look for nodes around C_space
+  // perform a simple breadth-first search to radially look for nodes around C_space
   while (!openList.empty())
   {
     Node currNode = openList.front();
@@ -527,7 +527,7 @@ std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int, int>
       if (startNode.distTo(static_cast<std::tuple<float, float>>(n.getIndex())) < separationDist)
       {
         openList.push(n);
-        cellNodes.push_back(n);
+        cellNodes.push_back(std::move(n));
       }
     }
   }
