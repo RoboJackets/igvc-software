@@ -5,11 +5,11 @@
 <!-- rviz -->
 <!-- get topic usb_cam_center/image_raw and usb_cam_center/detected -->
 <!-- make sure they match -->
-<!-- catkin_make from ~/catkin_ws
+<!-- catkin_make from ~/catkin_ws-->
 
 <launch>
 
-  <node name="sim_color_detect" pkg="igvc_gazebo" type="sim_color_detector">
+  <node name="sim_color_detector" pkg="igvc_gazebo" type="sim_color_detector">
       <param name="topic_name" value="usb_cam_center/image_raw"/>
   </node>
 
