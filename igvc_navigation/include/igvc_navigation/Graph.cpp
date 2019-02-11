@@ -497,9 +497,9 @@ float Graph::euclidian_heuristic(const std::tuple<int, int>& ind)
 
 std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int, int>& cellInd)
 {
-  std::queue<Node> openList; // nodes to evaluate
-  std::unordered_set<Node> closedSet; // evaluated nodes
-  std::vector<Node> cellNodes; // nodes that require update
+  std::queue<Node> openList;           // nodes to evaluate
+  std::unordered_set<Node> closedSet;  // evaluated nodes
+  std::vector<Node> cellNodes;         // nodes that require update
 
   Node startNode(cellInd);
 
@@ -509,26 +509,26 @@ std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int, int>
 
   int separationDist = static_cast<int>(CSpace / Resolution);  // number of cells on all sides that constitute C-space
 
-  while(!openList.empty())
+  while (!openList.empty())
   {
-      Node currNode = openList.front();
-      openList.pop();
+    Node currNode = openList.front();
+    openList.pop();
 
-      for (Node n : this->nbrs(currNode))
+    for (Node n : this->nbrs(currNode))
+    {
+      // node already considered
+      if (closedSet.find(n) != closedSet.end())
+        continue;
+      else
+        closedSet.insert(n);
+
+      // node is within the configuration space
+      if (startNode.distTo(static_cast<std::tuple<float, float>>(n.getIndex())) < separationDist)
       {
-          // node already considered
-          if (closedSet.find(n) != closedSet.end())
-              continue;
-          else
-              closedSet.insert(n);
-
-          // node is within the configuration space
-          if (startNode.distTo(static_cast<std::tuple<float,float>>(n.getIndex())) < separationDist)
-          {
-              openList.push(n);
-              cellNodes.push_back(n);
-          }
+        openList.push(n);
+        cellNodes.push_back(n);
       }
+    }
   }
   return cellNodes;
 }
