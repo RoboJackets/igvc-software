@@ -131,42 +131,42 @@ std::vector<Node> Graph::nbrs(const Node& s, bool include_invalid)
   // right
   Node r(x + 1, y);
   if (include_invalid || isValidNode(r))
-    neighbors.push_back(r);
+    neighbors.push_back(std::move(r));
 
   // top right
   Node tr(x + 1, y + 1);
   if (include_invalid || isValidNode(tr))
-    neighbors.push_back(tr);
+    neighbors.push_back(std::move(tr));
 
   // above
   Node t(x, y + 1);
   if (include_invalid || isValidNode(t))
-    neighbors.push_back(t);
+    neighbors.push_back(std::move(t));
 
   // top left
   Node tl(x - 1, y + 1);
   if (include_invalid || isValidNode(tl))
-    neighbors.push_back(tl);
+    neighbors.push_back(std::move(tl));
 
   // left
   Node l(x - 1, y);
   if (include_invalid || isValidNode(l))
-    neighbors.push_back(l);
+    neighbors.push_back(std::move(l));
 
   // bottom left
   Node bl(x - 1, y - 1);
   if (include_invalid || isValidNode(bl))
-    neighbors.push_back(bl);
+    neighbors.push_back(std::move(bl));
 
   // bottom
   Node b(x, y - 1);
   if (include_invalid || isValidNode(b))
-    neighbors.push_back(b);
+    neighbors.push_back(std::move(b));
 
   // bottom right
   Node br(x + 1, y - 1);
   if (include_invalid || isValidNode(br))
-    neighbors.push_back(br);
+    neighbors.push_back(std::move(br));
 
   return neighbors;
 }
@@ -507,8 +507,9 @@ std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int, int>
   closedSet.insert(startNode);
   cellNodes.push_back(startNode);
 
-  int separationDist = static_cast<int>(CSpace / Resolution);  // number of cells on all sides that constitute C-space
+  int separationDist = static_cast<int>(ceil(CSpace / Resolution));  // number of cells on all sides that constitute C-space
 
+  // perform a simple breadth-first search to look for nodes around C_space
   while (!openList.empty())
   {
     Node currNode = openList.front();
