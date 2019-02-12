@@ -6,7 +6,7 @@ defaults: &image
   - image: robojackets/igvc-baseimage:latest
 
 defaults: &install_deps
-  run: rosdep install -iy --from-paths ./src
+  run: apt-get update && rosdep update && rosdep install -iy --from-paths ./src
 
 defaults: &save_src_cache
   save_cache:
