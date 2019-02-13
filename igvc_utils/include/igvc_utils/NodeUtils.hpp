@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <Eigen/Dense>
 #include <tuple>
+#include <cmath>
 
 namespace igvc
 {
@@ -33,7 +34,7 @@ Calculates euclidian distance between two points
 template<typename T>
 inline T get_distance(T x1, T y1, T x2, T y2)
 {
-  return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+  return std::hypot(x2 - x1, y2 - y1);
 }
 
 /**
@@ -43,13 +44,7 @@ Calculates euclidian distance between two points, taking tuples for each
 template<typename T>
 inline T get_distance(const std::tuple<T,T>& p1, const std::tuple<T,T>& p2)
 {
-    T x1,y1;
-    std::tie(x1,y1) = p1;
-
-    T x2,y2;
-    std::tie(x2, y2) = p2;
-
-    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+    return igvc::get_distance(std::get<0>(p1), std::get<1>(p1), std::get<0>(p2), std::get<1>(p2));
 }
 
 // symmetric round up
