@@ -49,27 +49,27 @@ public:
   std::vector<std::tuple<int, int>> updatedCells;
 
   // dimensions of the occupancy grid (number of cells)
-  int length;
-  int width;
+  int Length;
+  int Width;
 
   float Resolution;  // grid resolution
-  float CSpace;      // configuration space
+  float ConfigurationSpace;      // configuration space
 
-  float DIAGONAL_DISTANCE = sqrtf(2.0f);
-  float EDGE_DISTANCE = 1.0f;
-  float TRAVERSAL_COST = 1.0f;
+  float DiagonalDistance = sqrtf(2.0f);
+  float EdgeDistance = 1.0f;
+  float TraversalCost = 1.0f;
 
   // k_m, as defined in the D* lite paper, keeps track of the robot's movement
   // in the grid space. Serves to increase each new node's key value by k_m as
   // to maintain lower bounds in the priority queue
-  float K_M = 0;
+  float KeyModifier = 0;
 
   /**
   Sets a value for the graph's configuration space
 
-  @param[in] CSpace a value for the configuration space
+  @param[in] ConfigurationSpace a value for the configuration space
   */
-  void setCSpace(float CSpace);
+  void setConfigurationSpace(float ConfigurationSpace);
   /**
   Sets the goal node for the Field D* search problem
 
@@ -148,7 +148,7 @@ public:
   @param[in] s_prime a node neighboring this object node.
   @return the first counter-clockwise neighbor node  of s and s'
   */
-  Node ccknbr(Node s, Node s_prime);
+  Node counterClockwiseNeighbor(Node s, Node s_prime);
   /**
   Returns first clockwise neighbor of node s and a neighbor node
   s', starting at s'.
@@ -156,13 +156,13 @@ public:
   @param[in] s_prime a node neighboring this object node.
   @return the first clockwise neighbor node  of s and s'
   */
-  Node cknbr(Node s, Node s_prime);
+  Node clockwiseNeighbor(Node s, Node s_prime);
   /**
   Returns a vector of consecutive neighbor tuples. A pair of consecutive
   neighbors is defined as two neighbors of s that are joined along an edge.
   By convention, consecutive neighbords will be returned in a clockwise order.
 
-  *s4   *s3   *s2 => In this case connbrs(s) = {(s1,s2),(s2,s3),(s3,s4),
+  *s4   *s3   *s2 => In this case consecutiveNeighbors(s) = {(s1,s2),(s2,s3),(s3,s4),
   *s5   *s    *s1                               (s4,s5),(s5,s6),(s6,s7),
   *s6   *s7   *s8                               (s7,s8),(s8,s1)}
 
@@ -170,11 +170,11 @@ public:
   omitted. The backpointer of a node s, therefore, is the most clockwise
   node in the consecutive neighbor pair (the first index of each pair).
   */
-  std::vector<std::tuple<Node, Node>> connbrs(const Node& s);
+  std::vector<std::tuple<Node, Node>> consecutiveNeighbors(const Node& s);
   /**
   Returns traversal cost of node s and a diagonal node s'. If cell or any of its
-  surrounding CSpace is occupied, infinity is returned. If not occupied,
-  TRAVERSAL_COST is returned, which is in units of (cost/distance).
+  surrounding ConfigurationSpace is occupied, infinity is returned. If not occupied,
+  TraversalCost is returned, which is in units of (cost/distance).
 
   @param[in] s reference node
   @param[in] s_prime diagonal node
@@ -185,7 +185,7 @@ public:
   /**
   Returns traversal cost of node s and s', a non-diaginal (vertical or
   horizontal) neighbor of s. Cost taken to be the maximum cost of
-  two cells neighboring the edge. If not occupied, TRAVERSAL_COST is returned,
+  two cells neighboring the edge. If not occupied, TraversalCost is returned,
    which is in units of (cost/distance).
 
   @param[in] s reference node
@@ -198,17 +198,17 @@ public:
   Gets cost of traversing the grid cell while taking configuration space
   into account
 
-  @param[in] ind index of cell to calculate cspace-corrected cost for
-  @return cost of traversing grid cell with cspace
+  @param[in] ind index of cell to calculate ConfigurationSpace-corrected cost for
+  @return cost of traversing grid cell with ConfigurationSpace
   */
-  float getValWithCSpace(const std::tuple<int, int>& ind);
+  float getValWithConfigurationSpace(const std::tuple<int, int>& ind);
   /**
-  Gets nodes affected by updated cell value while taking into account CSpace
+  Gets nodes affected by updated cell value while taking into account ConfigurationSpace
 
   @return list of reference nodes whose values may have been affected by
   the updated cell cost
   */
-  std::vector<Node> getUpdatedCellNodesWithCSpace();
+  std::vector<Node> getUpdatedCellNodesWithConfigurationSpace();
   /**
   Get cost of traversing from a Node s to a neighboring node s_prime
 
@@ -239,7 +239,7 @@ public:
   @param[in] s node to calculate euclidian distance to
   @return euclidian distance between the start node and node s
   */
-  float euclidian_heuristic(const Node& s);
+  float euclidianHeuristic(const Node& s);
   /**
   Same as above method but takes index of Node to calculate euclidian distance
   from start for.
@@ -247,7 +247,7 @@ public:
   @param[in] ind (x,y) coordinates of node
   @return euclidian distance to node from current start position
   */
-  float euclidian_heuristic(const std::tuple<int, int>& ind);
+  float euclidianHeuristic(const std::tuple<int, int>& ind);
   /**
   Gets Nodes around a cell whose occupancy value has changed while taking configuration
   space into account.
@@ -255,7 +255,7 @@ public:
   @param[in] cellInd index of cell whose val has changed
   @return list of nodes who might be affected by changed cell value
   */
-  std::vector<Node> getNodesAroundCellWithCSpace(const std::tuple<int, int>& cellInd);
+  std::vector<Node> getNodesAroundCellWithConfigurationSpace(const std::tuple<int, int>& cellInd);
 };
 
 #endif  // GRAPHSEARCH_H

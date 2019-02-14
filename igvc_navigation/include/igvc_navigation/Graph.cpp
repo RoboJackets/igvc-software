@@ -1,8 +1,8 @@
 #include "Graph.h"
 
-void Graph::setCSpace(float CSpace)
+void Graph::setConfigurationSpace(float ConfigurationSpace)
 {
-  this->CSpace = CSpace;
+  this->ConfigurationSpace = ConfigurationSpace;
 }
 
 void Graph::setGoal(std::tuple<int, int> Goal)
@@ -13,11 +13,11 @@ void Graph::setGoal(std::tuple<int, int> Goal)
 void Graph::initializeGraph(const igvc_msgs::mapConstPtr& msg)
 {
   this->updatedCells.clear();
-  this->length = msg->length;
-  this->width = msg->width;
+  this->Length = msg->length;
+  this->Width = msg->width;
   this->Resolution = msg->resolution;
   this->Start.setIndex(msg->x, msg->y);
-  this->K_M = 0;  // reset the key modifuer
+  this->KeyModifier = 0;  // reset the key modifuer
 
   // set the current map equal to the input message's map
   Map = cv_bridge::toCvCopy(msg->image, "mono8");
@@ -25,12 +25,12 @@ void Graph::initializeGraph(const igvc_msgs::mapConstPtr& msg)
 
 void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
 {
-  // Update the start position and K_M
+  // Update the start position and KeyModifier
   std::tuple<float, float> newStart = std::make_tuple(msg->x, msg->y);
   std::tuple<float, float> oldStart = this->Start.getIndex();
 
   // update the key modifier value to account for the robot's new pos
-  this->K_M += igvc::get_distance(oldStart, newStart);
+  this->KeyModifier += igvc::get_distance(oldStart, newStart);
   this->Start.setIndex(static_cast<std::tuple<int, int>>(newStart));
 
   this->updatedCells.clear();  // clear the vector of cells that need updating
@@ -59,8 +59,8 @@ void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
       if (curr_val != map_val)
       {
         int pos = it_map - start_it;
-        int row = pos / (this->width);
-        int col = pos % (this->width);
+        int row = pos / (this->Width);
+        int col = pos % (this->Width);
         this->updatedCells.push_back(std::make_tuple(row, col));
         // update the value of Map with the value of the new map
         *it_map = curr_val;
@@ -77,7 +77,7 @@ bool Graph::isValidNode(const Node& s)
   int x, y;
   std::tie(x, y) = s.getIndex();
   // with [x,y] indexing
-  return (x <= length) && (y <= width) && (x >= 0) && (y >= 0);
+  return (x <= Length) && (y <= Width) && (x >= 0) && (y >= 0);
 }
 
 bool Graph::isValidPosition(const std::tuple<float, float>& p)
@@ -85,14 +85,14 @@ bool Graph::isValidPosition(const std::tuple<float, float>& p)
   float x, y;
   std::tie(x, y) = p;
   // with [row,col] indexing
-  return (x <= static_cast<float>(length)) && (y <= static_cast<float>(width)) && (x >= 0.0f) && (y >= 0.0f);
+  return (x <= static_cast<float>(Length)) && (y <= static_cast<float>(Width)) && (x >= 0.0f) && (y >= 0.0f);
 }
 
 bool Graph::isValidCell(const std::tuple<int, int>& ind)
 {
   int x, y;
   std::tie(x, y) = ind;
-  return (x < length) && (y < width) && (x >= 0) && (y >= 0);
+  return (x < Length) && (y < Width) && (x >= 0) && (y >= 0);
 }
 
 bool Graph::isDiagonal(const Node& s, const Node& s_prime)
@@ -138,7 +138,7 @@ std::vector<Node> Graph::nbrs(const Node& s, bool include_invalid)
   return neighbors;
 }
 
-Node Graph::ccknbr(Node s, Node s_prime)
+Node Graph::counterClockwiseNeighbor(Node s, Node s_prime)
 {
   int x, y;
   std::tie(x, y) = s.getIndex();
@@ -149,50 +149,50 @@ Node Graph::ccknbr(Node s, Node s_prime)
   int x_diff = x_prime - x;
   int y_diff = y_prime - y;
 
-  Node ccknbr;  // counter-clockwise neighbor
+  Node counterClockwiseNeighbor;  // counter-clockwise neighbor
 
   if (x_diff == 1 && y_diff == 0)
   {
-    ccknbr.setIndex(x + 1, y + 1);
+    counterClockwiseNeighbor.setIndex(x + 1, y + 1);
   }
   else if (x_diff == 1 && y_diff == 1)
   {
-    ccknbr.setIndex(x, y + 1);
+    counterClockwiseNeighbor.setIndex(x, y + 1);
   }
   else if (x_diff == 0 && y_diff == 1)
   {
-    ccknbr.setIndex(x - 1, y + 1);
+    counterClockwiseNeighbor.setIndex(x - 1, y + 1);
   }
   else if (x_diff == -1 && y_diff == 1)
   {
-    ccknbr.setIndex(x - 1, y);
+    counterClockwiseNeighbor.setIndex(x - 1, y);
   }
   else if (x_diff == -1 && y_diff == 0)
   {
-    ccknbr.setIndex(x - 1, y - 1);
+    counterClockwiseNeighbor.setIndex(x - 1, y - 1);
   }
   else if (x_diff == -1 && y_diff == -1)
   {
-    ccknbr.setIndex(x, y - 1);
+    counterClockwiseNeighbor.setIndex(x, y - 1);
   }
   else if (x_diff == 0 && y_diff == -1)
   {
-    ccknbr.setIndex(x + 1, y - 1);
+    counterClockwiseNeighbor.setIndex(x + 1, y - 1);
   }
   else if (x_diff == 1 && y_diff == -1)
   {
-    ccknbr.setIndex(x + 1, y);
+    counterClockwiseNeighbor.setIndex(x + 1, y);
   }
 
   // if counter-clockwise neighbor node is valid (within bounds), then return
   // it. Otherwise, return a node with validity set to false.
-  if (isValidNode(ccknbr))
-    return ccknbr;
+  if (isValidNode(counterClockwiseNeighbor))
+    return counterClockwiseNeighbor;
   else
     return Node(false);
 }
 
-Node Graph::cknbr(Node s, Node s_prime)
+Node Graph::clockwiseNeighbor(Node s, Node s_prime)
 {
   int x, y;
   std::tie(x, y) = s.getIndex();
@@ -203,69 +203,69 @@ Node Graph::cknbr(Node s, Node s_prime)
   int x_diff = x_prime - x;
   int y_diff = y_prime - y;
 
-  Node cknbr;  // clockwise neighbor
+  Node clockwiseNeighbor;  // clockwise neighbor
 
   if (x_diff == 1 && y_diff == 0)
   {
-    cknbr.setIndex(x + 1, y - 1);
+    clockwiseNeighbor.setIndex(x + 1, y - 1);
   }
   else if (x_diff == 1 && y_diff == 1)
   {
-    cknbr.setIndex(x + 1, y);
+    clockwiseNeighbor.setIndex(x + 1, y);
   }
   else if (x_diff == 0 && y_diff == 1)
   {
-    cknbr.setIndex(x + 1, y + 1);
+    clockwiseNeighbor.setIndex(x + 1, y + 1);
   }
   else if (x_diff == -1 && y_diff == 1)
   {
-    cknbr.setIndex(x, y + 1);
+    clockwiseNeighbor.setIndex(x, y + 1);
   }
   else if (x_diff == -1 && y_diff == 0)
   {
-    cknbr.setIndex(x - 1, y + 1);
+    clockwiseNeighbor.setIndex(x - 1, y + 1);
   }
   else if (x_diff == -1 && y_diff == -1)
   {
-    cknbr.setIndex(x - 1, y);
+    clockwiseNeighbor.setIndex(x - 1, y);
   }
   else if (x_diff == 0 && y_diff == -1)
   {
-    cknbr.setIndex(x - 1, y - 1);
+    clockwiseNeighbor.setIndex(x - 1, y - 1);
   }
   else if (x_diff == 1 && y_diff == -1)
   {
-    cknbr.setIndex(x, y - 1);
+    clockwiseNeighbor.setIndex(x, y - 1);
   }
 
   // if clockwise neighbor node is valid (within bounds), then return
   // it. Otherwise, return a node with validity set to false.
-  if (isValidNode(cknbr))
-    return cknbr;
+  if (isValidNode(clockwiseNeighbor))
+    return clockwiseNeighbor;
   else
     return Node(false);
 }
 
-std::vector<std::tuple<Node, Node>> Graph::connbrs(const Node& s)
+std::vector<std::tuple<Node, Node>> Graph::consecutiveNeighbors(const Node& s)
 {
   // get neighbors of current node, including invalid nodes
   std::vector<Node> neighbors = nbrs(s, true);
-  std::vector<std::tuple<Node, Node>> connbrs;
+  std::vector<std::tuple<Node, Node>> consecutiveNeighbors;
 
   // first 7 consecutive neighbor pairs
   for (size_t i = 0; i < neighbors.size() - 1; i++)
   {
     assert(!isDiagonal(neighbors[i], neighbors[i + 1]));
-    // if both connbrs valid, make a tuple and put it in the list
+    // if both consecutiveNeighbors valid, make a tuple and put it in the list
     if (isValidNode(neighbors[i]) && isValidNode(neighbors[i + 1]))
-      connbrs.push_back(std::make_tuple(neighbors[i], neighbors[i + 1]));
+      consecutiveNeighbors.push_back(std::make_tuple(neighbors[i], neighbors[i + 1]));
   }
 
   // last consecutive neighbor pair [s8->s1]
   if (isValidNode(neighbors[neighbors.size() - 1]) && isValidNode(neighbors[0]))
-    connbrs.push_back(std::make_tuple(neighbors[neighbors.size() - 1], neighbors[0]));
+    consecutiveNeighbors.push_back(std::make_tuple(neighbors[neighbors.size() - 1], neighbors[0]));
 
-  return connbrs;
+  return consecutiveNeighbors;
 }
 
 float Graph::getC(const Node& s, const Node& s_prime)
@@ -305,8 +305,8 @@ float Graph::getC(const Node& s, const Node& s_prime)
   }
 
   // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
-  cellVal = getValWithCSpace(cellInd);
-  return (cellVal > 150) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST;  // #TODO get rid of magic number
+  cellVal = getValWithConfigurationSpace(cellInd);
+  return (cellVal > 150) ? std::numeric_limits<float>::infinity() : TraversalCost;  // #TODO get rid of magic number
 }
 
 float Graph::getB(const Node& s, const Node& s_prime)
@@ -350,11 +350,11 @@ float Graph::getB(const Node& s, const Node& s_prime)
   }
 
   // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
-  maxCellVal = std::max(getValWithCSpace(cellInd1), getValWithCSpace(cellInd2));
-  return (maxCellVal > 150) ? std::numeric_limits<float>::infinity() : TRAVERSAL_COST;
+  maxCellVal = std::max(getValWithConfigurationSpace(cellInd1), getValWithConfigurationSpace(cellInd2));
+  return (maxCellVal > 150) ? std::numeric_limits<float>::infinity() : TraversalCost;
 }
 
-float Graph::getValWithCSpace(const std::tuple<int, int>& ind)
+float Graph::getValWithConfigurationSpace(const std::tuple<int, int>& ind)
 {
   // invalid cells have infinite travel cost
   if (!isValidCell(ind))
@@ -363,9 +363,9 @@ float Graph::getValWithCSpace(const std::tuple<int, int>& ind)
   int x, y;
   std::tie(x, y) = ind;
 
-  int sep = CSpace / Resolution + 1;  // number of cells accounted for with CSpace
+  int sep = ConfigurationSpace / Resolution + 1;  // number of cells accounted for with ConfigurationSpace
 
-  // get a slice around the cell (ind) with the desired cspace
+  // get a slice around the cell (ind) with the desired ConfigurationSpace
   cv::Mat subsection = Map->image(cv::Range(std::max(x - sep, 0), std::min(x + sep + 1, Map->image.size().height)),
                                   cv::Range(std::max(y - sep, 0), std::min(y + sep + 1, Map->image.size().width)));
 
@@ -380,9 +380,9 @@ float Graph::getValWithCSpace(const std::tuple<int, int>& ind)
 float Graph::getTraversalCost(const Node& s, const Node& s_prime)
 {
   if (isDiagonal(s, s_prime))
-    return getC(s, s_prime) * DIAGONAL_DISTANCE;
+    return getC(s, s_prime) * DiagonalDistance;
   else
-    return getB(s, s_prime) * EDGE_DISTANCE;
+    return getB(s, s_prime) * EdgeDistance;
 }
 
 float Graph::getContinuousTraversalCost(const std::tuple<float, float>& p, const std::tuple<float, float>& p_prime)
@@ -416,12 +416,12 @@ float Graph::getMinTraversalCost(const Node& s)
   return min_cost;
 }
 
-float Graph::euclidian_heuristic(const Node& s)
+float Graph::euclidianHeuristic(const Node& s)
 {
-  return this->euclidian_heuristic(s.getIndex());
+  return this->euclidianHeuristic(s.getIndex());
 }
 
-float Graph::euclidian_heuristic(const std::tuple<int, int>& ind)
+float Graph::euclidianHeuristic(const std::tuple<int, int>& ind)
 {
   std::tuple<float, float> start = Start.getIndex();
   std::tuple<float, float> s = ind;
@@ -429,12 +429,12 @@ float Graph::euclidian_heuristic(const std::tuple<int, int>& ind)
   return igvc::get_distance(start, s);
 }
 
-std::vector<Node> Graph::getNodesAroundCellWithCSpace(const std::tuple<int, int>& cellInd)
+std::vector<Node> Graph::getNodesAroundCellWithConfigurationSpace(const std::tuple<int, int>& cellInd)
 {
   int x, y;
   std::tie(x, y) = cellInd;
 
-  int sep = static_cast<int>(CSpace / Resolution);  // number of cells on all sides that constitute C-space
+  int sep = static_cast<int>(ConfigurationSpace / Resolution);  // number of cells on all sides that constitute C-space
 
   std::vector<Node> cellNodes;
 

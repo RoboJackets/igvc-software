@@ -1,35 +1,40 @@
 #include "DLitePlanner.h"
 
+void DLitePlanner::setGoalDistance(float goalDist)
+{
+    this->GoalDist = goalDist;
+}
+
 Key DLitePlanner::calculateKey(Node s)
 {
   // obtain g-values and rhs-values for node s
   float g = getG(s);
   float rhs = getRHS(s);
-  return Key(std::min(g, rhs) + graph.euclidian_heuristic(s) + graph.K_M, std::min(g, rhs));
+  return Key(std::min(g, rhs) + NodeGrid.euclidianHeuristic(s) + NodeGrid.KeyModifier, std::min(g, rhs));
 }
 
-void DLitePlanner::initialize()
+void DLitePlanner::initializeSearch()
 {
-  umap.insert(std::make_pair(
-      graph.Start, std::make_tuple(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity())));
-  umap.insert(std::make_pair(graph.Goal, std::make_tuple(std::numeric_limits<float>::infinity(), 0)));
+  unorderedMap.insert(std::make_pair(
+      NodeGrid.Start, std::make_tuple(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity())));
+  unorderedMap.insert(std::make_pair(NodeGrid.Goal, std::make_tuple(std::numeric_limits<float>::infinity(), 0)));
 
-  PQ.insert(graph.Goal, calculateKey(graph.Goal));
+  PQ.insert(NodeGrid.Goal, calculateKey(NodeGrid.Goal));
 }
 
-void DLitePlanner::reinitialize()
+void DLitePlanner::reInitializeSearch()
 {
-  umap.clear();
+  unorderedMap.clear();
   PQ.clear();
-  graph.updatedCells.clear();
+  NodeGrid.updatedCells.clear();
 
-  this->initialize();
+  this->initializeSearch();
 }
 
 void DLitePlanner::updateNode(Node s)
 {
-  if (umap.find(s) == umap.end())  // s never visited before, add to unordered map
-    umap.insert(std::make_pair(
+  if (unorderedMap.find(s) == unorderedMap.end())  // s never visited before, add to unordered map
+    unorderedMap.insert(std::make_pair(
         s, std::make_tuple(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity())));
 
   /**
@@ -39,19 +44,19 @@ void DLitePlanner::updateNode(Node s)
   PQ.remove(s);
 
   // update rhs value of Node s
-  if (s != graph.Goal)
+  if (s != NodeGrid.Goal)
   {
     float minRHS = std::numeric_limits<float>::infinity();
-    for (Node succ : graph.nbrs(s))
+    for (Node succ : NodeGrid.nbrs(s))
     {
-      if (umap.find(succ) == umap.end())  // node never visited before, add to unordered map
-        umap.insert(std::make_pair(
+      if (unorderedMap.find(succ) == unorderedMap.end())  // node never visited before, add to unordered map
+        unorderedMap.insert(std::make_pair(
             succ, std::make_tuple(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity())));
 
-      minRHS = std::min(minRHS, graph.getTraversalCost(s, succ) + getG(succ));
+      minRHS = std::min(minRHS, NodeGrid.getTraversalCost(s, succ) + getG(succ));
     }
 
-    insert_or_assign(s, getG(s), minRHS);
+    insertOrAssign(s, getG(s), minRHS);
   }
 
   // insert node into priority queue if it is locally inconsistent
@@ -63,12 +68,12 @@ int DLitePlanner::computeShortestPath()
 {
   // if the start node is occupied, return immediately. By definition, a path
   // does not exist if the start node is occupied.
-  if (graph.getMinTraversalCost(graph.Start) == std::numeric_limits<float>::infinity())
+  if (NodeGrid.getMinTraversalCost(NodeGrid.Start) == std::numeric_limits<float>::infinity())
     return 0;
 
   int numNodesExpanded = 0;
 
-  while ((PQ.topKey() < calculateKey(graph.Start)) || (getRHS(graph.Start) != getG(graph.Start)))
+  while ((PQ.topKey() < calculateKey(NodeGrid.Start)) || (getRHS(NodeGrid.Start) != getG(NodeGrid.Start)))
   {
     Node topNode = PQ.topNode();
     Key topKey = PQ.topKey();
@@ -83,9 +88,9 @@ int DLitePlanner::computeShortestPath()
     {
       // locally overconsistent case. This node is now more favorable.
       // make node locally consistent by setting g = rhs
-      insert_or_assign(topNode, getRHS(topNode), getRHS(topNode));  // update node's standing in unordered map
+      insertOrAssign(topNode, getRHS(topNode), getRHS(topNode));  // update node's standing in unordered map
       // propagate changes to neighboring nodes
-      for (Node nbr : graph.nbrs(topNode))
+      for (Node nbr : NodeGrid.nbrs(topNode))
         updateNode(nbr);
     }
     else
@@ -94,10 +99,10 @@ int DLitePlanner::computeShortestPath()
       // than it was before
 
       // make node locally consistent or overconsistent by setting g = inf
-      insert_or_assign(topNode, std::numeric_limits<float>::infinity(), getRHS(topNode));
+      insertOrAssign(topNode, std::numeric_limits<float>::infinity(), getRHS(topNode));
 
       // propagate changes to neighbors and to topNode
-      std::vector<Node> toPropagate = graph.nbrs(topNode);
+      std::vector<Node> toPropagate = NodeGrid.nbrs(topNode);
       toPropagate.push_back(topNode);
 
       for (Node n : toPropagate)
@@ -112,11 +117,11 @@ int DLitePlanner::updateNodesAroundUpdatedCells()
 {
   int numNodesUpdated = 0;
 
-  for (std::tuple<int, int> cellUpdate : graph.updatedCells)
+  for (std::tuple<int, int> cellUpdate : NodeGrid.updatedCells)
   {
-    for (Node n : graph.getNodesAroundCellWithCSpace(cellUpdate))
+    for (Node n : NodeGrid.getNodesAroundCellWithConfigurationSpace(cellUpdate))
     {
-      if (umap.find(n) == umap.end())  // node hasn't been explored yet. Leave alone
+      if (unorderedMap.find(n) == unorderedMap.end())  // node hasn't been explored yet. Leave alone
         continue;
 
       updateNode(n);
@@ -129,10 +134,10 @@ int DLitePlanner::updateNodesAroundUpdatedCells()
 
 void DLitePlanner::constructOptimalPath()
 {
-  path.clear();
+  Path.clear();
   std::vector<std::tuple<int, int>>::iterator start_it;
 
-  Node currNode = graph.Start;
+  Node currNode = NodeGrid.Start;
 
   float minCost;
   float tempCost;
@@ -144,16 +149,16 @@ void DLitePlanner::constructOptimalPath()
   // an empty path is returned.
   do
   {
-    start_it = path.begin();
-    path.insert(start_it, currNode.getIndex());
+    start_it = Path.begin();
+    Path.insert(start_it, currNode.getIndex());
 
     minCost = std::numeric_limits<float>::infinity();
-    for (Node nbr : graph.nbrs(currNode))
+    for (Node nbr : NodeGrid.nbrs(currNode))
     {
-      if (umap.find(nbr) == umap.end())  // node has not been explored yet
+      if (unorderedMap.find(nbr) == unorderedMap.end())  // node has not been explored yet
         continue;
 
-      tempCost = graph.getTraversalCost(currNode, nbr) + getG(nbr);
+      tempCost = NodeGrid.getTraversalCost(currNode, nbr) + getG(nbr);
       if (tempCost <= minCost)
       {
         minCost = tempCost;
@@ -166,28 +171,28 @@ void DLitePlanner::constructOptimalPath()
 
   // no valid path found. Return empty path
   if (minCost == std::numeric_limits<float>::infinity())
-    path.clear();
+    Path.clear();
 }
 
-void DLitePlanner::insert_or_assign(Node s, float g, float rhs)
+void DLitePlanner::insertOrAssign(Node s, float g, float rhs)
 {
   // re-assigns value of node in unordered map or inserts new entry if
   // node not found
-  if (umap.find(s) != umap.end())
-    umap.erase(s);
+  if (unorderedMap.find(s) != unorderedMap.end())
+    unorderedMap.erase(s);
 
-  umap.insert(std::make_pair(s, std::make_tuple(g, rhs)));
+  unorderedMap.insert(std::make_pair(s, std::make_tuple(g, rhs)));
 }
 
 bool DLitePlanner::isWithinRangeOfGoal(Node s)
 {
   int goal_x, goal_y;
-  std::tie(goal_x, goal_y) = graph.Goal.getIndex();
+  std::tie(goal_x, goal_y) = NodeGrid.Goal.getIndex();
 
   int x, y;
   std::tie(x, y) = s.getIndex();
 
-  int sep = static_cast<int>(GOAL_DIST / graph.Resolution);
+  int sep = static_cast<int>(GoalDist / NodeGrid.Resolution);
 
   bool satisfiesXBounds = (x >= (goal_x - sep)) && (x <= (goal_x + sep));
   bool satisfiesYBounds = (y >= (goal_y - sep)) && (y <= (goal_y + sep));
@@ -199,8 +204,8 @@ float DLitePlanner::getG(Node s)
 {
   // return g value if node has been looked at before (is in unordered map)
   // otherwise, return infinity
-  if (umap.find(s) != umap.end())
-    return std::get<0>(umap.at(s));
+  if (unorderedMap.find(s) != unorderedMap.end())
+    return std::get<0>(unorderedMap.at(s));
   else
     return std::numeric_limits<float>::infinity();
 }
@@ -209,8 +214,8 @@ float DLitePlanner::getRHS(Node s)
 {
   // return rhs value if node has been looked at before (is in unordered map)
   // otherwise, return infinity
-  if (umap.find(s) != umap.end())
-    return std::get<1>(umap.at(s));
+  if (unorderedMap.find(s) != unorderedMap.end())
+    return std::get<1>(unorderedMap.at(s));
   else
     return std::numeric_limits<float>::infinity();
 }
@@ -218,7 +223,7 @@ float DLitePlanner::getRHS(Node s)
 std::vector<std::tuple<int, int>> DLitePlanner::getExplored()
 {
   std::vector<std::tuple<int, int>> explored;
-  for (std::pair<Node, std::tuple<float, float>> e : umap)
+  for (std::pair<Node, std::tuple<float, float>> e : unorderedMap)
   {
     explored.push_back(e.first.getIndex());
   }

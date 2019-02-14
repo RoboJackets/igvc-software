@@ -37,7 +37,7 @@ DLitePlanner dlite;          // D* Lite path planner
 int x_initial, y_initial;    // Index for initial x and y location in search space
 
 double maximum_distance;  // maximum distance to goal node before warning messages spit out
-double CSpace;            // configuration space
+double ConfigurationSpace;            // configuration space
 double goal_range;        // distance from goal at which a node is considered the goal
 double rateTime;          // path planning/replanning rate
 bool follow_old_path;     // follow the previously generated path if no optimal path currently exists
@@ -101,7 +101,7 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
   {
     x_initial = static_cast<int>(msg->x_initial);  // initial x coord of graph search problem
     y_initial = static_cast<int>(msg->y_initial);  // initial y coord of graph search problem
-    dlite.graph.initializeGraph(msg);
+    dlite.NodeGrid.initializeGraph(msg);
     initialize_graph = false;
   }
 }
@@ -115,17 +115,17 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
   std::lock_guard<std::mutex> lock(planning_mutex);
 
   int goal_x, goal_y;
-  goal_x = static_cast<int>(std::round(msg->point.x / dlite.graph.Resolution)) + x_initial;
-  goal_y = static_cast<int>(std::round(msg->point.y / dlite.graph.Resolution)) + y_initial;
+  goal_x = static_cast<int>(std::round(msg->point.x / dlite.NodeGrid.Resolution)) + x_initial;
+  goal_y = static_cast<int>(std::round(msg->point.y / dlite.NodeGrid.Resolution)) + y_initial;
 
   std::tuple<int, int> newGoal = std::make_tuple(goal_x, goal_y);
 
-  if (dlite.graph.Goal.getIndex() != newGoal)
+  if (dlite.NodeGrid.Goal.getIndex() != newGoal)
     goal_changed = true;  // re-initialize graph search problem
 
-  dlite.graph.setGoal(newGoal);
+  dlite.NodeGrid.setGoal(newGoal);
 
-  float distance_to_goal = dlite.graph.euclidian_heuristic(newGoal) * dlite.graph.Resolution;
+  float distance_to_goal = dlite.NodeGrid.euclidianHeuristic(newGoal) * dlite.NodeGrid.Resolution;
 
   ROS_INFO_STREAM((goal_changed ? "New" : "Same") << " waypoint received. Search Problem Goal = " << goal_x << ", "
                                                   << goal_y << ". Distance: " << distance_to_goal << "m.");
@@ -153,15 +153,15 @@ int main(int argc, char** argv)
   // publish path for path_follower
   path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 
-  igvc::getParam(pNh, "c_space", CSpace);
+  igvc::getParam(pNh, "c_space", ConfigurationSpace);
   igvc::getParam(pNh, "maximum_distance", maximum_distance);
   igvc::getParam(pNh, "rate", rateTime);
   igvc::getParam(pNh, "goal_range", goal_range);
   igvc::getParam(pNh, "publish_expanded", publish_expanded);
   igvc::getParam(pNh, "follow_old_path", follow_old_path);
 
-  dlite.graph.setCSpace(static_cast<float>(CSpace));
-  dlite.GOAL_DIST = static_cast<float>(goal_range);
+  dlite.NodeGrid.setConfigurationSpace(static_cast<float>(ConfigurationSpace));
+  dlite.setGoalDistance(static_cast<float>(goal_range));
 
   // publish a 2D pointcloud of expanded nodes for visualization
   expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded", 1);
@@ -181,19 +181,19 @@ int main(int argc, char** argv)
     if (initialize_graph)
       continue;
     else
-      dlite.graph.updateGraph(map);
+      dlite.NodeGrid.updateGraph(map);
 
     // don't plan unless a goal node has been set
     if (!initial_goal_set)
       continue;
 
     if (initialize_search)
-      dlite.initialize();
+      dlite.initializeSearch();
 
     if (goal_changed)
     {
       ROS_INFO_STREAM("New Goal Received. Initializing Search...");
-      dlite.reinitialize();
+      dlite.reInitializeSearch();
       initialize_search = true;
       goal_changed = false;
     }
@@ -223,14 +223,14 @@ int main(int argc, char** argv)
     path_msg.header.stamp = ros::Time::now();
     path_msg.header.frame_id = "odom";
 
-    for (std::tuple<float, float> point : dlite.path)
+    for (std::tuple<float, float> point : dlite.Path)
     {
       auto it = path_msg.poses.begin();
       geometry_msgs::PoseStamped pose;
       pose.header.stamp = path_msg.header.stamp;
       pose.header.frame_id = path_msg.header.frame_id;
-      pose.pose.position.x = (std::get<0>(point) - x_initial) * dlite.graph.Resolution;
-      pose.pose.position.y = (std::get<1>(point) - y_initial) * dlite.graph.Resolution;
+      pose.pose.position.x = (std::get<0>(point) - x_initial) * dlite.NodeGrid.Resolution;
+      pose.pose.position.y = (std::get<1>(point) - y_initial) * dlite.NodeGrid.Resolution;
       path_msg.poses.insert(it, pose);
     }
 

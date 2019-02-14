@@ -47,18 +47,26 @@ class DLitePlanner
 public:
   // Graph contains methods to deal with Node(s) as well as updated occupancy
   // grid cells
-  Graph graph;
+  Graph NodeGrid;
 
-  std::vector<std::tuple<int, int>> path;
+  std::vector<std::tuple<int, int>> Path;
 
-  float GOAL_DIST = 0.95f;
+  float GoalDist;
+
+  /**
+  Sets value for GoalDist, the minumum value from the goal node a node must
+  be before the search is considered complete.
+
+  @param[in] goalDist the minimum distance from the goal
+  */
+  void setGoalDistance(float goalDist);
 
   /**
   Calculate the key for a node S.
 
   key defined as <f1(s), f2(s)>
   where...
-  f1(s) = min(g(s), rhs(s)) + h(s_start, s) + K_M
+  f1(s) = min(g(s), rhs(s)) + h(s_start, s) + KeyModifier
   f2(s)min(g(s), rhs(s))
 
   @param[in] s Node to calculate key for
@@ -70,13 +78,13 @@ public:
   node equal to infinity. For goal node, sets g value to infinity and rhs value
   to 0. Inserts goal node into priority queue to initialize graph search problem.
   */
-  void initialize();
+  void initializeSearch();
   /**
   Clears the previous search's contents and re-initializes the search problem.
-  Clears the Node cache (umap), the priority queue, and all cell updates that
+  Clears the Node cache (unorderedMap), the priority queue, and all cell updates that
   occured in the previous timestep.
   */
-  void reinitialize();
+  void reInitializeSearch();
   /**
   Updates a node's standing in the graph search problem. Update dependant upon
   the node's g value and rhs value relative to each other.
@@ -117,7 +125,7 @@ public:
   @param[in] g g value for entry
   @param[in] rhs rhs value for entry
   */
-  void insert_or_assign(Node s, float g, float rhs);
+  void insertOrAssign(Node s, float g, float rhs);
   /**
   Checks whether a specified node is within range of the goal node. This 'range'
   is specified by the GOAL_RANGE instance variable.
@@ -150,7 +158,7 @@ public:
 
 private:
   // hashed map contains all nodes and <g,rhs> values in search
-  std::unordered_map<Node, std::tuple<float, float>> umap;
+  std::unordered_map<Node, std::tuple<float, float>> unorderedMap;
   // priority queue contains all locally inconsistent nodes whose values
   // need updating
   PriorityQueue PQ;
