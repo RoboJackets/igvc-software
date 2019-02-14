@@ -8,6 +8,7 @@
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
 #include <std_msgs/Float64.h>
 #include <tf/transform_datatypes.h>
 #include <vector>
@@ -100,6 +101,9 @@ int main(int argc, char** argv)
 
   // Publish imu data with gravity for factor graph implementation.
   ros::Publisher imu_raw_pub = nh.advertise<sensor_msgs::Imu>("/imu_raw", 1000);
+
+  // Publish imu data with gravity for factor graph implementation.
+  ros::Publisher mag_field_pub = nh.advertise<sensor_msgs::MagneticField>("/imu/mag", 1000);
 
   // sequence of published messages - should be monotonically increasing.
   int seq = 0;
@@ -264,6 +268,12 @@ int main(int argc, char** argv)
                                        1e-6, 1e-6, 0.0025 };
 
     imu_raw_pub.publish(msg_raw);
+
+    sensor_msgs::MagneticField mag{};
+    mag.magnetic_field.x = magnetometer_msg.x;
+    mag.magnetic_field.y = magnetometer_msg.y;
+    mag.magnetic_field.z = magnetometer_msg.z;
+    mag_field_pub.publish(mag);
   }
   return 0;
 }
