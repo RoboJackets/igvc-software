@@ -52,8 +52,7 @@ inline T get_distance(const std::tuple<T,T>& p1, const std::tuple<T,T>& p2)
 template <typename T>
 T ceil0( const T& value )
 {
-    T result = std::ceil( std::fabs( value ) );
-    return (value < 0.0) ? -result : result;
+    return (value < 0.0) ? std::floor(value) : std::ceil(value);
 }
 
 /**
