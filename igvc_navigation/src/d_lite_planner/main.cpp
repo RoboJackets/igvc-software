@@ -26,34 +26,30 @@ D* Lite implementation details can be found in DLitePlanner.h
 
 std::mutex planning_mutex;
 
-ros::Publisher path_pub;
-
-bool publish_expanded;  // publish a pointcloud of nodes expanded in the search
-pcl::PointCloud<pcl::PointXYZRGB> expanded_cloud;
-ros::Publisher expanded_pub;
-
 igvc_msgs::mapConstPtr map;  // Most up-to-date map
 DLitePlanner dlite;          // D* Lite path planner
 int x_initial, y_initial;    // Index for initial x and y location in search space
 
 double maximum_distance;  // maximum distance to goal node before warning messages spit out
-double ConfigurationSpace;            // configuration space
-double goal_range;        // distance from goal at which a node is considered the goal
-double rateTime;          // path planning/replanning rate
-bool follow_old_path;     // follow the previously generated path if no optimal path currently exists
 
-bool initialize_search = true;  // set to true if the search problem must be initialized
 bool initialize_graph = true;   // set to true if the graph must be initialized
-
 bool initial_goal_set = false;  // true if the first goal has been set
 bool goal_changed = false;      // the goal node changed and the graph must be re-initialized
 
 //-------------------------- Helper Methods ----------------------------//
 
-/*
- * publishes the nodes that have been expanded for visualization
- */
-void expanded_callback(const std::vector<std::tuple<int, int>>& inds)
+/**
+Publish expanded nodes for visualization purposes. This is not a subscriber
+callback.
+
+@param[in] inds the indices of Nodes that have been expanded in the graph search
+@param[in] expanded_cloud the PCL pointcloud which expanded node indices
+        should be stored in
+@param[in] the publishes with which to publish the PCL pointcloud of expanded nodes
+*/
+void publish_expanded_set(const std::vector<std::tuple<int, int>>& inds,
+                          pcl::PointCloud<pcl::PointXYZRGB>& expanded_cloud,
+                          ros::Publisher& expanded_pub)
 {
   expanded_cloud.clear();
   expanded_cloud.header.frame_id = "odom";
@@ -88,9 +84,11 @@ void expanded_callback(const std::vector<std::tuple<int, int>>& inds)
 //--------------------------- ROS Callbacks ----------------------------//
 
 /**
-    Set the current map to be used by the D* Lite search problem. The initial
-    map is used to perform the first search through the occupancy grid (equivalent
-    to A*). All maps thereafter are used to update edge costs for the search problem.
+Set the current map to be used by the D* Lite search problem. The initial
+map is used to perform the first search through the occupancy grid (equivalent
+to A*). All maps thereafter are used to update edge costs for the search problem.
+
+@param[in] msg the message received on the "/map" topic
 */
 void map_callback(const igvc_msgs::mapConstPtr& msg)
 {
@@ -107,8 +105,10 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
 }
 
 /**
-    Assigns a valid goal to the graph search problem. Goal index obtained by
-    converting from the /map frame goal coordinate to the graph index.
+Assigns a valid goal to the graph search problem. Goal index obtained by
+converting from the /map frame goal coordinate to the graph index.
+
+@param[in] msg the message received on the "/waypoint" topic
 */
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
@@ -118,14 +118,14 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
   goal_x = static_cast<int>(std::round(msg->point.x / dlite.NodeGrid.Resolution)) + x_initial;
   goal_y = static_cast<int>(std::round(msg->point.y / dlite.NodeGrid.Resolution)) + y_initial;
 
-  std::tuple<int, int> newGoal = std::make_tuple(goal_x, goal_y);
+  std::tuple<int, int> new_goal = std::make_tuple(goal_x, goal_y);
 
-  if (dlite.NodeGrid.Goal.getIndex() != newGoal)
+  if (dlite.NodeGrid.Goal.getIndex() != new_goal)
     goal_changed = true;  // re-initialize graph search problem
 
-  dlite.NodeGrid.setGoal(newGoal);
+  dlite.NodeGrid.setGoal(new_goal);
 
-  float distance_to_goal = dlite.NodeGrid.euclidianHeuristic(newGoal) * dlite.NodeGrid.Resolution;
+  float distance_to_goal = dlite.NodeGrid.euclidianHeuristic(new_goal) * dlite.NodeGrid.Resolution;
 
   ROS_INFO_STREAM((goal_changed ? "New" : "Same") << " waypoint received. Search Problem Goal = " << goal_x << ", "
                                                   << goal_y << ". Distance: " << distance_to_goal << "m.");
@@ -150,17 +150,27 @@ int main(int argc, char** argv)
   ros::Subscriber map_sub = nh.subscribe("/map", 1, map_callback);
   ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
 
-  // publish path for path_follower
-  path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
+  // publish a pointcloud of nodes expanded in the search
+  bool publish_expanded;
+  pcl::PointCloud<pcl::PointXYZRGB> expanded_cloud;
+  ros::Publisher expanded_pub;
 
-  igvc::getParam(pNh, "c_space", ConfigurationSpace);
+  double configuration_space; // configuration space
+  double goal_range; // distance from goal at which a node is considered the goal
+  double rate_time; // path planning/replanning rate
+  bool follow_old_path; // follow the previously generated path if no optimal path currently exists
+
+  // publish path for path_follower
+  ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
+
+  igvc::getParam(pNh, "c_space", configuration_space);
   igvc::getParam(pNh, "maximum_distance", maximum_distance);
-  igvc::getParam(pNh, "rate", rateTime);
+  igvc::getParam(pNh, "rate", rate_time);
   igvc::getParam(pNh, "goal_range", goal_range);
   igvc::getParam(pNh, "publish_expanded", publish_expanded);
   igvc::getParam(pNh, "follow_old_path", follow_old_path);
 
-  dlite.NodeGrid.setConfigurationSpace(static_cast<float>(ConfigurationSpace));
+  dlite.NodeGrid.setConfigurationSpace(static_cast<float>(configuration_space));
   dlite.setGoalDistance(static_cast<float>(goal_range));
 
   // publish a 2D pointcloud of expanded nodes for visualization
@@ -168,10 +178,12 @@ int main(int argc, char** argv)
   expanded_cloud.header.frame_id = "odom";
   // expanded_size_pub = nh.advertise<std_msgs::Int32>("/expanded_size", 1);
 
-  int numNodesUpdated;
-  int numNodesExpanded;
+  int num_nodes_updated;
+  int num_nodes_expanded;
 
-  ros::Rate rate(rateTime);
+  ros::Rate rate(rate_time);
+
+  bool initialize_search = true;  // set to true if the search problem must be initialized
 
   while (ros::ok())
   {
@@ -198,24 +210,24 @@ int main(int argc, char** argv)
       goal_changed = false;
     }
 
-    numNodesUpdated = dlite.updateNodesAroundUpdatedCells();
+    num_nodes_updated = dlite.updateNodesAroundUpdatedCells();
 
-    if (numNodesUpdated > 0)
-      ROS_INFO_STREAM(numNodesUpdated << " nodes updated");
+    if (num_nodes_updated > 0)
+      ROS_INFO_STREAM(num_nodes_updated << " nodes updated");
 
-    if ((numNodesUpdated > 0) || initialize_search)
+    if ((num_nodes_updated > 0) || initialize_search)
     {
       ros::Time begin = ros::Time::now();
-      numNodesExpanded = dlite.computeShortestPath();
+      num_nodes_expanded = dlite.computeShortestPath();
 
       double elapsed = (ros::Time::now() - begin).toSec();
-      ROS_INFO_STREAM(numNodesExpanded << " nodes expanded in " << elapsed << "s.");
+      ROS_INFO_STREAM(num_nodes_expanded << " nodes expanded in " << elapsed << "s.");
       if (initialize_search)
         initialize_search = false;
     }
 
     if (publish_expanded)
-      expanded_callback(dlite.getExplored());
+      publish_expanded_set(dlite.getExplored(), expanded_cloud, expanded_pub);
 
     dlite.constructOptimalPath();
 
