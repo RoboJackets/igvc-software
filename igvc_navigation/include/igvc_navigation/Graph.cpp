@@ -61,7 +61,7 @@ void Graph::updateGraph(igvc_msgs::mapConstPtr& msg)
         int pos = it_map - start_it;
         int row = pos / (this->Width);
         int col = pos % (this->Width);
-        this->updatedCells.push_back(std::make_tuple(row, col));
+        this->updatedCells.push_back(Cell(row, col));
         // update the value of Map with the value of the new map
         *it_map = curr_val;
       }
@@ -429,18 +429,15 @@ float Graph::euclidianHeuristic(const std::tuple<int, int>& ind)
   return igvc::get_distance(start, s);
 }
 
-std::vector<Node> Graph::getNodesAroundCellWithConfigurationSpace(const std::tuple<int, int>& cellInd)
+std::vector<Node> Graph::getNodesAroundCellWithConfigurationSpace(const Cell& cell)
 {
-  int x, y;
-  std::tie(x, y) = cellInd;
-
   int sep = static_cast<int>(ConfigurationSpace / Resolution);  // number of cells on all sides that constitute C-space
 
   std::vector<Node> cellNodes;
 
-  for (int new_x = x - sep; new_x <= x + sep + 1; new_x++)
+  for (int new_x = cell.x - sep; new_x <= cell.x + sep + 1; new_x++)
   {
-    for (int new_y = y - sep; new_y <= y + sep + 1; new_y++)
+    for (int new_y = cell.y - sep; new_y <= cell.y + sep + 1; new_y++)
     {
       Node cellNode = Node(new_x, new_y);
       if (isValidNode(cellNode))

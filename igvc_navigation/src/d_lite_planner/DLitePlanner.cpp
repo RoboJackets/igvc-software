@@ -117,7 +117,7 @@ int DLitePlanner::updateNodesAroundUpdatedCells()
 {
   int numNodesUpdated = 0;
 
-  for (std::tuple<int, int> cellUpdate : NodeGrid.updatedCells)
+  for (Cell cellUpdate : NodeGrid.updatedCells)
   {
     for (Node n : NodeGrid.getNodesAroundCellWithConfigurationSpace(cellUpdate))
     {

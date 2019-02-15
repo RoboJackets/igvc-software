@@ -112,6 +112,11 @@ struct Key
   {
     return (this->f1 == other.f1) && (this->f2 == other.f2);
   }
+
+  bool operator!=(const Key& other) const
+  {
+    return !(*this==other); 
+  }
 };
 
 class PriorityQueue
