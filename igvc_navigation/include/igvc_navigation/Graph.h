@@ -31,6 +31,46 @@ Date Created: December 16, 2018
 #include <utility>
 #include <vector>
 
+/**
+A cell represents a grid in the graph. Each cell object contains fields <x,y>
+which denote the cell's location on the graph.
+*/
+struct Cell
+{
+    int x;
+    int y;
+
+    Cell(int x, int y)
+    {
+        this->x = x;
+        this->y = y;
+    }
+
+    Cell(std::tuple<int,int> cell) : Cell(std::get<0>(cell), std::get<1>(cell))
+     {
+     }
+
+     // overloaded assignment operator
+     Cell& operator=(const Cell& other)
+     {
+       this->x = other.x;
+       this->y = other.y;
+
+       return *this;
+     }
+
+     // Cells equal if their corresponding indices are equal
+     bool operator==(const Cell& other) const
+     {
+       return (this->x == other.x) && (this->y == other.y);
+     }
+
+     bool operator!=(const Cell& other) const
+     {
+       return !(*this==other);
+     }
+};
+
 class Graph
 {
 public:
@@ -46,7 +86,7 @@ public:
   // Updated cell information is used to update nodes that lie on the 4 corners of
   // each updated cell. This is reset each time updateGraph is called. Each element
   // is composed of an <x,y> tuple representing the cell.
-  std::vector<std::tuple<int, int>> updatedCells;
+  std::vector<Cell> updatedCells;
 
   // dimensions of the occupancy grid (number of cells)
   int Length;
@@ -255,7 +295,7 @@ public:
   @param[in] cellInd index of cell whose val has changed
   @return list of nodes who might be affected by changed cell value
   */
-  std::vector<Node> getNodesAroundCellWithConfigurationSpace(const std::tuple<int, int>& cellInd);
+  std::vector<Node> getNodesAroundCellWithConfigurationSpace(const Cell& cell);
 };
 
 #endif  // GRAPHSEARCH_H
