@@ -74,11 +74,7 @@ struct Cell
 class Graph
 {
 public:
-  /**
-  Prev map is the occupancy grid one timestep ago, it's used to check for changes in the
-  the occupancy grid. Map is the current, most up-to-date occupancy grid.
-  */
-  cv_bridge::CvImagePtr Map;
+  cv_bridge::CvImagePtr Map; //Map is the current, most up-to-date occupancy grid.
 
   Node Start;  // start node in the search problem
   Node Goal;   // goal node in the search problem
@@ -88,7 +84,7 @@ public:
   // is composed of an <x,y> tuple representing the cell.
   std::vector<Cell> updatedCells;
 
-  // dimensions of the occupancy grid (number of cells)
+  // Dimensions of the occupancy grid (number of cells)
   int Length;
   int Width;
 
