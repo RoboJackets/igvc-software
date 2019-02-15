@@ -2,7 +2,7 @@
 
 void DLitePlanner::setGoalDistance(float goalDist)
 {
-    this->GoalDist = goalDist;
+  this->GoalDist = goalDist;
 }
 
 Key DLitePlanner::calculateKey(Node s)

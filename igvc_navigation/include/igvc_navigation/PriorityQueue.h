@@ -115,7 +115,7 @@ struct Key
 
   bool operator!=(const Key& other) const
   {
-    return !(*this==other); 
+    return !(*this == other);
   }
 };
 

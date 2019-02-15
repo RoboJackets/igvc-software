@@ -37,44 +37,44 @@ which denote the cell's location on the graph.
 */
 struct Cell
 {
-    int x;
-    int y;
+  int x;
+  int y;
 
-    Cell(int x, int y)
-    {
-        this->x = x;
-        this->y = y;
-    }
+  Cell(int x, int y)
+  {
+    this->x = x;
+    this->y = y;
+  }
 
-    Cell(std::tuple<int,int> cell) : Cell(std::get<0>(cell), std::get<1>(cell))
-     {
-     }
+  Cell(std::tuple<int, int> cell) : Cell(std::get<0>(cell), std::get<1>(cell))
+  {
+  }
 
-     // overloaded assignment operator
-     Cell& operator=(const Cell& other)
-     {
-       this->x = other.x;
-       this->y = other.y;
+  // overloaded assignment operator
+  Cell& operator=(const Cell& other)
+  {
+    this->x = other.x;
+    this->y = other.y;
 
-       return *this;
-     }
+    return *this;
+  }
 
-     // Cells equal if their corresponding indices are equal
-     bool operator==(const Cell& other) const
-     {
-       return (this->x == other.x) && (this->y == other.y);
-     }
+  // Cells equal if their corresponding indices are equal
+  bool operator==(const Cell& other) const
+  {
+    return (this->x == other.x) && (this->y == other.y);
+  }
 
-     bool operator!=(const Cell& other) const
-     {
-       return !(*this==other);
-     }
+  bool operator!=(const Cell& other) const
+  {
+    return !(*this == other);
+  }
 };
 
 class Graph
 {
 public:
-  cv_bridge::CvImagePtr Map; //Map is the current, most up-to-date occupancy grid.
+  cv_bridge::CvImagePtr Map;  // Map is the current, most up-to-date occupancy grid.
 
   Node Start;  // start node in the search problem
   Node Goal;   // goal node in the search problem
@@ -88,8 +88,8 @@ public:
   int Length;
   int Width;
 
-  float Resolution;  // grid resolution
-  float ConfigurationSpace;      // configuration space
+  float Resolution;          // grid resolution
+  float ConfigurationSpace;  // configuration space
 
   float DiagonalDistance = sqrtf(2.0f);
   float EdgeDistance = 1.0f;

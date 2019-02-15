@@ -1,7 +1,12 @@
 /**
-Solves for an optimal path using the D* Lite incremental search algorithm.
+Solves for an optimal path using the D* Lite incremental path
+planning algorithm.
 
 D* Lite implementation details can be found in DLitePlanner.h
+Graph implementation details can be found in Graph.h
+
+Author: Alejandro Escontrela <aescontrela3@gatech.edu>
+Date Created: December 22nd, 2018
 */
 
 #include <geometry_msgs/PoseStamped.h>
@@ -48,8 +53,7 @@ callback.
 @param[in] the publishes with which to publish the PCL pointcloud of expanded nodes
 */
 void publish_expanded_set(const std::vector<std::tuple<int, int>>& inds,
-                          pcl::PointCloud<pcl::PointXYZRGB>& expanded_cloud,
-                          ros::Publisher& expanded_pub)
+                          pcl::PointCloud<pcl::PointXYZRGB>& expanded_cloud, ros::Publisher& expanded_pub)
 {
   expanded_cloud.clear();
   expanded_cloud.header.frame_id = "odom";
@@ -92,6 +96,7 @@ to A*). All maps thereafter are used to update edge costs for the search problem
 */
 void map_callback(const igvc_msgs::mapConstPtr& msg)
 {
+  // take control of the mutex while control is in the current scope
   std::lock_guard<std::mutex> planning_lock(planning_mutex);
   map = msg;  // update current map
 
@@ -112,6 +117,7 @@ converting from the /map frame goal coordinate to the graph index.
 */
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
+  // take control of the mutex while control is in the current scope
   std::lock_guard<std::mutex> lock(planning_mutex);
 
   int goal_x, goal_y;
@@ -155,10 +161,10 @@ int main(int argc, char** argv)
   pcl::PointCloud<pcl::PointXYZRGB> expanded_cloud;
   ros::Publisher expanded_pub;
 
-  double configuration_space; // configuration space
-  double goal_range; // distance from goal at which a node is considered the goal
-  double rate_time; // path planning/replanning rate
-  bool follow_old_path; // follow the previously generated path if no optimal path currently exists
+  double configuration_space;  // configuration space
+  double goal_range;           // distance from goal at which a node is considered the goal
+  double rate_time;            // path planning/replanning rate
+  bool follow_old_path;        // follow the previously generated path if no optimal path currently exists
 
   // publish path for path_follower
   ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
