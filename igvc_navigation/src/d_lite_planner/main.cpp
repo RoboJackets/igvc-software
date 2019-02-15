@@ -159,7 +159,8 @@ int main(int argc, char** argv)
   // publish a pointcloud of nodes expanded in the search
   bool publish_expanded;
   pcl::PointCloud<pcl::PointXYZRGB> expanded_cloud;
-  ros::Publisher expanded_pub;
+  ros::Publisher expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded", 1);
+  expanded_cloud.header.frame_id = "odom";
 
   double configuration_space;  // configuration space
   double goal_range;           // distance from goal at which a node is considered the goal
@@ -178,11 +179,6 @@ int main(int argc, char** argv)
 
   dlite.NodeGrid.setConfigurationSpace(static_cast<float>(configuration_space));
   dlite.setGoalDistance(static_cast<float>(goal_range));
-
-  // publish a 2D pointcloud of expanded nodes for visualization
-  expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded", 1);
-  expanded_cloud.header.frame_id = "odom";
-  // expanded_size_pub = nh.advertise<std_msgs::Int32>("/expanded_size", 1);
 
   int num_nodes_updated;
   int num_nodes_expanded;
