@@ -21,7 +21,7 @@ Date Created: December 16, 2018
 #include "Node.h"
 #include "igvc_utils/NodeUtils.hpp"
 
-#include <igvc_msgs/map.h>
+#include "igvc_msgs/map.h"
 
 #include <cv_bridge/cv_bridge.h>
 #include <cassert>
