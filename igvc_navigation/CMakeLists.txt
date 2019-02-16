@@ -172,6 +172,17 @@ if(CATKIN_ENABLE_TESTING)
     #add_subdirectory(src/tests)
 endif()
 
+# include GraphSearch header files
+include_directories(GraphSearch/include)
+# create GraphSearch library
+add_library(
+    GraphSearch STATIC
+    GraphSearch/src/Node.cpp
+    GraphSearch/src/Graph.cpp
+    GraphSearch/src/PriorityQueue.cpp
+)
+# link OpenCV and cv_bridge to GraphSearch library
+target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
 add_subdirectory(src/mapper)
 add_subdirectory(src/path_follower)

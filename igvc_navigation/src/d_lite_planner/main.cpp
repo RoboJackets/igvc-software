@@ -27,7 +27,7 @@ Date Created: December 22nd, 2018
 #include <tuple>
 #include <vector>
 #include "DLitePlanner.h"
-#include "igvc_navigation/Graph.h"
+#include "Graph.h"
 
 std::mutex planning_mutex;
 
@@ -179,11 +179,10 @@ int main(int argc, char** argv)
 
   dlite.NodeGrid.setConfigurationSpace(static_cast<float>(configuration_space));
   dlite.setGoalDistance(static_cast<float>(goal_range));
+  ros::Rate rate(rate_time);
 
   int num_nodes_updated;
   int num_nodes_expanded;
-
-  ros::Rate rate(rate_time);
 
   bool initialize_search = true;  // set to true if the search problem must be initialized
 

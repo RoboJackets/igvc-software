@@ -143,6 +143,9 @@ void DLitePlanner::constructOptimalPath()
   float tempCost;
   Node tempNode;
 
+  int maxSteps = static_cast<int>(500.00f / (this->NodeGrid.Resolution));
+  int currSteps = 0;
+
   // greedily move from one node to the next, selecting the node s' that
   // minimizes: g(s') + c(s,s')
   // if no valid neighbor nodes can be traveled to (all have cost inf), then
@@ -166,11 +169,13 @@ void DLitePlanner::constructOptimalPath()
       }
     }
     currNode = tempNode;
+    currSteps += 1;
 
-  } while (!isWithinRangeOfGoal(currNode) && (minCost != std::numeric_limits<float>::infinity()));
+  } while (!isWithinRangeOfGoal(currNode) && (minCost != std::numeric_limits<float>::infinity()) &&
+           (currSteps < maxSteps));
 
   // no valid path found. Return empty path
-  if (minCost == std::numeric_limits<float>::infinity())
+  if ((minCost == std::numeric_limits<float>::infinity()) || (currSteps >= maxSteps))
     Path.clear();
 }
 
