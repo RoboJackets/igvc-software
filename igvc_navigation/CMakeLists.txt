@@ -181,6 +181,7 @@ add_library(
     GraphSearch/src/Graph.cpp
     GraphSearch/src/PriorityQueue.cpp
 )
+add_dependencies(GraphSearch igvc_msgs_gencpp)
 # link OpenCV and cv_bridge to GraphSearch library
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
