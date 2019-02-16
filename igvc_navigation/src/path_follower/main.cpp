@@ -105,7 +105,6 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     target_pub.publish(target_point);
 
     ROS_DEBUG_STREAM("Distance to target: " << cur_pos.distTo(target) << "(m.)");
-
   }
 
   // make sure maximum velocity not exceeded
