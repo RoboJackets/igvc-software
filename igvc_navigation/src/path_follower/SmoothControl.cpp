@@ -104,7 +104,7 @@ void SmoothControl::getAction(Eigen::Vector3d& result)
   igvc::fit_to_polar(theta);
 
   // calculate the radius of curvature, K
-  double d = cur_pos.distTo(target); // euclidian distance to target
+  double d = cur_pos.distTo(target);  // euclidian distance to target
   double K = k2 * (delta - atan(-k1 * theta));
   K += (1 + (k1 / (1 + pow(k1 * theta, 2)))) * sin(delta);
   K /= -d;
@@ -215,18 +215,15 @@ void SmoothControl::getTargetPosition(nav_msgs::PathConstPtr path, unsigned int 
   }
 
   // load target position and arbitrary angle into the motion target vector
-  this->target.setState(Eigen::Vector3d{tar_x, tar_y, 0});
+  this->target.setState(Eigen::Vector3d{ tar_x, tar_y, 0 });
 }
 
 unsigned int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
 {
   unsigned int path_index = 0;
-  double closest = \
-      cur_pos.distTo(path->poses[0].pose.position.x, path->poses[0].pose.position.y);
+  double closest = cur_pos.distTo(path->poses[0].pose.position.x, path->poses[0].pose.position.y);
 
-  double temp = \
-      cur_pos.distTo(path->poses[path_index].pose.position.x,
-                                       path->poses[path_index].pose.position.y);
+  double temp = cur_pos.distTo(path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y);
 
   while (path_index < path->poses.size() && temp <= closest)
   {
@@ -235,9 +232,7 @@ unsigned int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
       closest = temp;
     }
     path_index++;
-    temp = \
-        cur_pos.distTo(path->poses[path_index].pose.position.x,
-                                         path->poses[path_index].pose.position.y);
+    temp = cur_pos.distTo(path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y);
   }
 
   return path_index;
