@@ -3,8 +3,8 @@
 
 #include <ros/ros.h>
 #include <Eigen/Dense>
-#include <tuple>
 #include <cmath>
+#include <tuple>
 
 namespace igvc
 {
@@ -38,7 +38,7 @@ Calculates euclidian distance between two points
 @param[in] y2 y value of second point
 @return the euclidian distance between both points
 */
-template<typename T>
+template <typename T>
 inline T get_distance(T x1, T y1, T x2, T y2)
 {
   return std::hypot(x2 - x1, y2 - y1);
@@ -53,10 +53,10 @@ Calculates euclidian distance between two points, taking tuples for each
 @param[in] p2 the second point
 @return the euclidian distance between both points
 */
-template<typename T>
-inline T get_distance(const std::tuple<T,T>& p1, const std::tuple<T,T>& p2)
+template <typename T>
+inline T get_distance(const std::tuple<T, T> &p1, const std::tuple<T, T> &p2)
 {
-    return igvc::get_distance(std::get<0>(p1), std::get<1>(p1), std::get<0>(p2), std::get<1>(p2));
+  return igvc::get_distance(std::get<0>(p1), std::get<1>(p1), std::get<0>(p2), std::get<1>(p2));
 }
 
 /**
@@ -68,9 +68,9 @@ Bias: away from zero
 @return the value rounded away from zero
 */
 template <typename T>
-T ceil0( const T& value )
+T ceil0(const T &value)
 {
-    return (value < 0.0) ? std::floor(value) : std::ceil(value);
+  return (value < 0.0) ? std::floor(value) : std::ceil(value);
 }
 
 /**
