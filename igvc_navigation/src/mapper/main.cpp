@@ -21,7 +21,9 @@
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 #include "octomapper.h"
+#include <unordered_set>
 
+using radians = double;
 class Mapper
 {
 public:
@@ -33,6 +35,9 @@ private:
   void setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp);
   bool checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic);
   bool getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg);
+  int discretize(radians angle) const;
+  void get_empty_points(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& empty_pc);
+  void filter_points_behind(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& filtered_pc);
 
   cv_bridge::CvImage m_img_bridge;
 
@@ -54,6 +59,12 @@ private:
   int m_width_y;   // width (m)
   bool m_debug;
   double m_radius;  // Radius to filter lidar points // TODO: Refactor to a new node
+  double m_lidar_miss_cast_distance;
+  double m_filter_distance;
+  radians m_filter_angle;
+  radians m_lidar_start_angle;
+  radians m_lidar_end_angle;
+  radians m_angular_resolution;
   std::string m_lidar_topic;
   RobotState m_state;          // Odom -> Base_link
   RobotState m_odom_to_lidar;  // Odom -> Lidar
@@ -74,6 +85,12 @@ Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf:
   igvc::getParam(pNh, "map/start_y", m_start_y);
   igvc::getParam(pNh, "node/debug", m_debug);
   igvc::getParam(pNh, "sensor_model/max_range", m_radius);
+  igvc::getParam(pNh, "sensor_model/angular_resolution", m_angular_resolution);
+  igvc::getParam(pNh, "sensor_model/lidar_miss_cast_distance", m_lidar_miss_cast_distance);
+  igvc::getParam(pNh, "sensor_model/lidar_angle_start", m_lidar_start_angle);
+  igvc::getParam(pNh, "sensor_model/lidar_angle_end", m_lidar_end_angle);
+  igvc::getParam(pNh, "filter/filter_angle", m_filter_angle);
+  igvc::getParam(pNh, "filter/distance", m_filter_distance);
   igvc::getParam(pNh, "node/lidar_topic", m_lidar_topic);
 
   m_octomapper = std::unique_ptr<Octomapper>(new Octomapper(pNh));
@@ -107,10 +124,11 @@ bool Mapper::getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &ms
   tf::StampedTransform transform2;
   ros::Time messageTimeStamp;
   pcl_conversions::fromPCL(msg->header.stamp, messageTimeStamp);
+  static ros::Duration wait_time = ros::Duration(m_transform_max_wait_time);
   try
   {
     if (m_tf_listener->waitForTransform("/odom", "/base_link", messageTimeStamp,
-                                        ros::Duration(m_transform_max_wait_time)))
+                                        wait_time))
     {
       m_tf_listener->lookupTransform("/odom", "/base_link", messageTimeStamp, transform);
       m_state.setState(transform);
@@ -131,6 +149,11 @@ bool Mapper::getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &ms
   catch (const tf::TransformException &ex)
   {
     ROS_ERROR("%s", ex.what());
+    return false;
+  }
+  catch(std::runtime_error& ex)
+  {
+    ROS_ERROR("Runtime Exception at getOdomTransform: [%s]", ex.what());
     return false;
   }
 }
@@ -202,40 +225,108 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
 
   setMessageMetadata(message, image, stamp);
   m_map_pub.publish(message);
-  if (m_debug)
-  {
+  if (m_debug) {
     m_debug_pub.publish(image);
     // ROS_INFO_STREAM("\nThe robot is located at " << state);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid = boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
-    for (int i = 0; i < m_length_x / m_resolution; i++)
-    {
-      for (int j = 0; j < m_width_y / m_resolution; j++)
-      {
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
+        boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
+    for (int i = 0; i < m_width_y/m_resolution; i++) {
+      for (int j = 0; j < m_length_x/m_resolution; j++) {
         pcl::PointXYZRGB p;
         uchar prob = map.at<uchar>(i, j);
-        p = pcl::PointXYZRGB();
-        p.x = (i * m_resolution) - (m_width_y / 2);
-        p.y = (j * m_resolution) - (m_length_x / 2);
-        if (prob > 127)
-        {
+        if (prob > 127) {
+          p = pcl::PointXYZRGB();
+          p.x = static_cast<float>((i * m_resolution) - (m_width_y / 2));
+          p.y = static_cast<float>((j * m_resolution) - (m_length_x / 2));
           p.r = 0;
           p.g = static_cast<uint8_t>((prob - 127) * 2);
           p.b = 0;
           fromOcuGrid->points.push_back(p);
-        }
-        else if (prob < 127)
-        {
+          //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
+        } else if (prob < 127) {
           p = pcl::PointXYZRGB();
+          p.x = static_cast<float>((i * m_resolution) - (m_width_y / 2));
+          p.y = static_cast<float>((j * m_resolution) - (m_length_x / 2));
           p.r = 0;
           p.g = 0;
           p.b = static_cast<uint8_t>((127 - prob) * 2);
           fromOcuGrid->points.push_back(p);
+          //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
+        } else if (prob == 127) {
         }
+        // Set x y coordinates as the center of the grid cell.
       }
     }
     fromOcuGrid->header.frame_id = "/odom";
     fromOcuGrid->header.stamp = stamp;
+    //    ROS_INFO_STREAM("Size: " << fromOcuGrid->points.size() << " / " << (width_x * length_y));
     m_debug_pcl_pub.publish(fromOcuGrid);
+  }
+}
+
+/**
+ * Discretizes angle to ints according to the angular resolution of the lidar
+ * @param angle
+ * @return
+ */
+inline int Mapper::discretize(radians angle) const
+{
+  static double coeff = 1 / m_angular_resolution;
+  return static_cast<int>(std::round(coeff * angle));
+}
+
+/**
+ * Returns a pcl::PointCloud of points which have not been detected by the lidar scan, according to the angular resolution
+ * @param pc lidar scan
+ * @param empty_pc points that are found to be free
+ */
+void Mapper::get_empty_points(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& empty_pc)
+{
+  // Iterate over pointcloud, insert discretized angles into set
+  std::unordered_set<int> discretized_angles{};
+  for (size_t i = 0; i < pc.size(); ++i)
+  {
+    double angle = atan2(pc.at(i).y, pc.at(i).x);
+    discretized_angles.emplace(discretize(angle));
+  }
+
+  // For each angle, if it's not in the set (empty), put it into a pointcloud
+  static double coeff = 1 / m_angular_resolution;
+  // From Robot's frame. Need to rotate angle to world frame
+  for (int i = static_cast<int>(m_lidar_start_angle * coeff); i < m_lidar_end_angle * coeff; i++)
+  {
+    if (discretized_angles.find(i) == discretized_angles.end())
+    {
+      double angle = i * m_angular_resolution;
+      pcl::PointXYZ point{ static_cast<float>(m_lidar_miss_cast_distance * cos(angle)), static_cast<float>(m_lidar_miss_cast_distance * sin(angle)),
+                           0 };
+      empty_pc.points.emplace_back(point);
+    }
+  }
+}
+
+/**
+ * Filters points behind the robot
+ * @param pc
+ * @param filtered_pc
+ */
+void Mapper::filter_points_behind(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& filtered_pc)
+{
+  static double start_angle = - M_PI + m_filter_angle/2;
+  static double end_angle = M_PI - m_filter_angle/2;
+  static double squared_distance = m_filter_distance * m_filter_distance;
+  // Iterate over pointcloud, insert discretized angles into set
+  for (size_t i = 0; i < pc.size(); ++i)
+  {
+    double angle = atan2(pc.at(i).y, pc.at(i).x);
+    if ((-M_PI <= angle && angle < start_angle) || (end_angle < angle && angle <= M_PI ))
+    {
+      if (pc.at(i).x * pc.at(i).x + pc.at(i).y * pc.at(i).y > squared_distance) {
+        filtered_pc.points.emplace_back(pc.at(i));
+      }
+    } else {
+      filtered_pc.points.emplace_back(pc.at(i));
+    }
   }
 }
 
@@ -245,19 +336,6 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
  */
 void Mapper::pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
 {
-  // Pass through filter to only keep ones closest to us
-  pcl::PointCloud<pcl::PointXYZ>::Ptr small(new pcl::PointCloud<pcl::PointXYZ>);
-  float dist;
-  for (int point_i = 0; point_i < pc->size(); ++point_i)
-  {
-    dist = pc->at(point_i).x * pc->at(point_i).x + pc->at(point_i).y * pc->at(point_i).y +
-           pc->at(point_i).z * pc->at(point_i).z;
-    if (dist <= m_radius * m_radius * m_radius)
-    {
-      small->push_back(pc->at(point_i));
-    }
-  }
-
   // make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
@@ -278,29 +356,21 @@ void Mapper::pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
     return;
   }
 
+  pcl::PointCloud<pcl::PointXYZ> empty_pc{};
+  pcl::PointCloud<pcl::PointXYZ> filtered_pc{};
+  get_empty_points(*pc, empty_pc);
+  filter_points_behind(*pc, filtered_pc);
+
+  filtered_pc.header = pc->header;
+  m_ground_pub.publish(filtered_pc);
+
   // Apply transformation from lidar to base_link aka robot pose
-  pcl_ros::transformPointCloud(*small, *transformed, m_transforms.at(m_lidar_topic));
+  pcl_ros::transformPointCloud(filtered_pc, *transformed, m_transforms.at(m_lidar_topic));
   pcl_ros::transformPointCloud(*transformed, *transformed, m_state.transform);
+  pcl_ros::transformPointCloud(empty_pc, empty_pc, m_transforms.at(m_lidar_topic));
+  pcl_ros::transformPointCloud(empty_pc, empty_pc, m_state.transform);
 
-  visualization_msgs::Marker points;
-  points.header.frame_id = "/odom";
-  points.header.stamp = ros::Time::now();
-  points.pose.position.x = m_odom_to_lidar.transform.getOrigin().getX();
-  points.pose.position.y = m_odom_to_lidar.transform.getOrigin().getY();
-  points.pose.position.z = m_odom_to_lidar.transform.getOrigin().getZ();
-
-  points.action = visualization_msgs::Marker::ADD;
-  points.id = 0;
-  points.type = visualization_msgs::Marker::CUBE;
-  points.scale.x = 0.05;
-  points.scale.y = 0.05;
-  points.scale.z = 0.05;
-  points.color.g = 1.0f;
-  points.color.a = 1.0;
-
-  m_sensor_pub.publish(points);
-
-  m_octomapper->insert_scan(m_odom_to_lidar.transform.getOrigin(), m_pc_map_pair, *transformed);
+  m_octomapper->insert_scan(m_odom_to_lidar.transform.getOrigin(), m_pc_map_pair, *transformed, empty_pc);
 
   // Publish map
   m_octomapper->get_updated_map(m_pc_map_pair);

@@ -2,13 +2,17 @@
 
 #include <octomap/octomap.h>
 #include <octomap_ros/conversions.h>
+#include <omp.h>
+#include <unordered_set>
 
+using radians = double;
 // TODO: How to convert OcTree to occupancy grid?
 Octomapper::Octomapper(ros::NodeHandle pNh)
 {
   igvc::getParam(pNh, "octree/resolution", m_octree_resolution);
   igvc::getParam(pNh, "sensor_model/hit", m_prob_hit);
   igvc::getParam(pNh, "sensor_model/miss", m_prob_miss);
+  igvc::getParam(pNh, "sensor_model/miss_empty", m_prob_miss_empty);
   igvc::getParam(pNh, "sensor_model/min", m_thresh_min);
   igvc::getParam(pNh, "sensor_model/max", m_thresh_max);
   igvc::getParam(pNh, "sensor_model/max_range", m_max_range);
@@ -77,15 +81,6 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
   {
     create_map(pc_map_pair);
   }
-  // TODO: Think about how to serialize / deserialize efficiently maybe?
-  // for (auto it = pc_map_pair.octree->changedKeysBegin(); it != pc_map_pair.octree->changedKeysEnd(); ++it)
-  //{
-  //  // TODO: Do we want the lowest depth here?
-  //  octomap::OcTreeNode* node = pc_map_pair.octree->search(it->first, 0);
-  //  auto coord = pc_map_pair.octree->keyToCoord(it->first);
-  //  int x = coord.x() * m_octree_resolution;
-  //  int y = coord.y() * m_octree_resolution;
-  //}
 
   // Traverse entire tree
   std::vector<std::vector<float>> odds_sum(m_map_length / m_octree_resolution,
@@ -137,10 +132,6 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
     for (int j = 0; j < m_map_width / m_octree_resolution; j++)
     {
       pc_map_pair.map->at<uchar>(i, j) = toCharProb(fromLogOdds(odds_sum[i][j]));
-      if (pc_map_pair.map->at<uchar>(i, j) < m_floor_thresh)
-      {
-        pc_map_pair.map->at<uchar>(i, j) = 0;
-      }
     }
   }
 }
@@ -152,16 +143,9 @@ void Octomapper::create_map(pc_map_pair &pair) const
   pair.map = boost::make_shared<cv::Mat>(length, width, m_map_encoding, 127);
 }
 
-void Octomapper::insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair &pc_map_pair,
-                             const Octomapper::PCL_point_cloud &raw_pc) const
+void Octomapper::insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair,
+                 const PCL_point_cloud& raw_pc, const pcl::PointCloud<pcl::PointXYZ>& empty_pc) const
 {
-  //  ROS_INFO("Inserting scan");
-  //  ROS_INFO_STREAM(
-  //      "Sensor position: " << sensor_pos_tf.x() << ", " << sensor_pos_tf.y() << ", " << sensor_pos_tf.z() << ")");
-  //  ROS_INFO_STREAM("Arbitrary cloud point" << raw_pc.at(0));
-
-  pcl::PointCloud<pcl::PointXYZ> within_range;
-  //  filter_range(raw_pc, within_range);
   pcl::PointCloud<pcl::PointXYZ> ground;
   pcl::PointCloud<pcl::PointXYZ> nonground;
   if (m_use_ground_filter)
@@ -172,17 +156,19 @@ void Octomapper::insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair 
   {
     nonground = std::move(raw_pc);
   }
+
   //  ROS_INFO("Filtered Ground");
   octomap::point3d sensor_pos = octomap::pointTfToOctomap(sensor_pos_tf);
 
   // Convert from PCL_point_cloud to octomap point cloud
   octomap::Pointcloud octo_cloud;
   PCL_to_Octomap(nonground, octo_cloud);
-  //  ROS_INFO("Inserting pointcloud");
-  //  ROS_INFO_STREAM("Num points: " << octo_cloud.size());
-  // TODO: Do we need to discretize to speed up? Probably not, since non occupied is so small
-  //  ROS_INFO_STREAM("Sensor pos: (" << sensor_pos.x() << ", " << sensor_pos.y() << ")");
+  octomap::Pointcloud octo_cloud_free;
+  PCL_to_Octomap(empty_pc, octo_cloud_free);
+
+  // Insert occupied into octree
   pc_map_pair.octree->insertPointCloud(octo_cloud, sensor_pos, m_max_range, false, false);
+  insert_free(octo_cloud_free, sensor_pos, pc_map_pair, false);
 
   if (m_use_ground_filter)
   {
@@ -222,6 +208,34 @@ void Octomapper::insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair 
   }
   //  ROS_INFO("Done with inserting ground");
   // TODO: When to generate occupancy grid?
+}
+
+void Octomapper::insert_free(const octomap::Pointcloud &scan, octomap::point3d origin, pc_map_pair &pair,
+                             bool lazy_eval) const
+{
+  octomap::KeySet free_cells{};
+  pair.octree->setProbMiss(m_prob_miss_empty);
+
+//  omp_set_num_threads(m_openmp_threads);
+//#pragma omp parallel for schedule(guided)
+  for (int i = 0; i < (int)scan.size(); ++i)
+  {
+    octomap::KeyRay keyray;
+    const octomap::point3d &p = scan[i];
+    if (pair.octree->computeRayKeys(origin, p, keyray))
+    {
+//#pragma omp critical(free_insert)
+      {
+        free_cells.insert(keyray.begin(), keyray.end());
+      }
+    }
+  }
+
+  for (auto it = free_cells.begin(); it != free_cells.end(); ++it)
+  {
+    pair.octree->updateNode(*it, false, lazy_eval);
+  }
+  pair.octree->setProbMiss(m_prob_miss);
 }
 
 void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cloud &ground,
