@@ -11,4 +11,8 @@
 
         <!-- Threshold to trigger warning for deviation between filtered heading and magnetometer heading -->
         <param name="heading_dev_thresh_deg" type="double" value="10" />
+
+        <rosparam param="linear_accel_cov">[0.0001, 0.0001, 0.0001]</rosparam>
+        <rosparam param="angular_velocity_cov">[0.0001, 0.0001, 0.0001]</rosparam>
+        <rosparam param="orientation_cov">[0.0001, 0.0001, 0.2]</rosparam>
 </launch>

@@ -63,6 +63,11 @@ IMU::IMU() : seq{ 0 }
   // Get matrix to correct IMU orientation.
   igvc::getParam(nh, "imu_orientation_correction", m_orientation_transform);
 
+  igvc::getParam(nh, "linear_accel_cov", m_linear_accel_cov);
+  igvc::getParam(nh, "angular_velocity_cov", m_angular_vel_cov);
+  igvc::getParam(nh, "orientation_cov", m_orientation_cov);
+
+
   // Get threshold value for triggering a warning when the deviation between the filtered
   // heading and magnetometer heading becomes too large.
   igvc::getParam(nh, "heading_dev_thresh_deg", m_heading_deviation_threshold);
@@ -158,7 +163,7 @@ int IMU::read_imu(IMUMessage &imu_message) const
   }
 
   return_code = freespace_util_getAcceleration(&response.motionEngineOutput, &imu_message.accel_raw_msg);
-  if (return_code == FREESPACE_SUCCESS)
+  if (return_code != FREESPACE_SUCCESS)
   {
     ROS_ERROR_STREAM("failed to read acceleration." << return_code);
     return EXIT_FAILURE;
@@ -211,81 +216,6 @@ void IMU::publish_imu_data(const IMUMessage &imu_message) const
 
   // Calculate heading with magnetometer reading.
   double yaw_mag = atan2(imu_message.magnetometer_msg.y, imu_message.magnetometer_msg.x) + m_yaw_offset;
-
-    // Publish sensor messages with corrected transformation.
-    sensor_msgs::Imu msg;
-    msg.header.frame_id = "imu";
-    msg.header.stamp = ros::Time::now();
-    msg.header.seq = seq++;
-
-    // TODO: Tune values, parameterize.
-    msg.linear_acceleration.x = accel_vec[0];
-    msg.linear_acceleration.y = accel_vec[1];
-    msg.linear_acceleration.z = accel_vec[2];
-    msg.linear_acceleration_covariance = { 0.01, 1e-6, 1e-6,
-                                           1e-6, 0.01, 1e-6,
-                                           1e-6, 1e-6, 0.01 };
-
-    msg.angular_velocity.x = angular_vel_vec[0];
-    msg.angular_velocity.y = angular_vel_vec[1];
-    msg.angular_velocity.z = angular_vel_vec[2];
-    msg.angular_velocity_covariance = { 0.02, 1e-6, 1e-6,
-                                        1e-6, 0.02, 1e-6,
-                                        1e-6, 1e-6, 0.02 };
-
-
-    // This assumes flat ground and uses magnetometer for absolute heading.
-    // TODO: This assumption may not hold when we switch to 3D lidar, and stop using flat ground assumption
-    tf::Quaternion quaternion_mag;
-    quaternion_mag.setRPY(0,0,yaw_mag);
-
-    geometry_msgs::Quaternion orientation;
-
-    orientation.x = quaternion_mag.x();
-    orientation.y = quaternion_mag.y();
-    orientation.z = quaternion_mag.z();
-    orientation.w = quaternion_mag.w();
-
-    // TODO: Tune and parameterize.
-    msg.orientation = orientation;
-    msg.orientation_covariance = { 0.0025, 1e-6, 1e-6,
-                                   1e-6, 0.0025, 1e-6,
-                                   1e-6, 1e-6, 0.0025 };
-
-    imu_pub.publish(msg);
-
-    // Publish raw sensor messages.
-    sensor_msgs::Imu msg_raw;
-    msg_raw.header.frame_id = "imu";
-    msg_raw.header.stamp = msg.header.stamp;
-    msg_raw.header.seq = seq;
-
-    msg_raw.linear_acceleration.x = accel_raw_vec[0];
-    msg_raw.linear_acceleration.y = accel_raw_vec[1];
-    msg_raw.linear_acceleration.z = accel_raw_vec[2];
-    msg_raw.linear_acceleration_covariance = { 0.005, 1e-6, 1e-6,
-                                               1e-6, 0.005, 1e-6,
-                                               1e-6, 1e-6, 0.005 };
-
-    msg_raw.angular_velocity.x = angular_vel_vec[0];
-    msg_raw.angular_velocity.y = angular_vel_vec[1];
-    msg_raw.angular_velocity.z = angular_vel_vec[2];
-    msg_raw.angular_velocity_covariance = { 0.02, 1e-6, 1e-6,
-                                            1e-6, 0.02, 1e-6,
-                                            1e-6, 1e-6, 0.02 };
-
-    msg_raw.orientation = orientation;
-    msg_raw.orientation_covariance = { 0.0025, 1e-6, 1e-6,
-                                       1e-6, 0.0025, 1e-6,
-                                       1e-6, 1e-6, 0.0025 };
-
-    imu_raw_pub.publish(msg_raw);
-
-    sensor_msgs::MagneticField mag{};
-    mag.magnetic_field.x = magnetometer_msg.x;
-    mag.magnetic_field.y = magnetometer_msg.y;
-    mag.magnetic_field.z = magnetometer_msg.z;
-    mag_field_pub.publish(mag);
 
   if (fabs(yaw - yaw_mag) > m_heading_deviation_threshold * M_PI / 180.0)
   {

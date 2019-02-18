@@ -1,12 +1,12 @@
 octree:
-  resolution: 0.1
+  resolution: .1
   lazy_evaluation: false
 sensor_model:
   hit: 0.8
   miss: 0.4
   min: 0.03
   max: 0.97
-  max_range: 30
+  max_range: 100
   mismatch_penalty: 5
   empty_coeff: 0.000001
   occupied_coeff: 1
