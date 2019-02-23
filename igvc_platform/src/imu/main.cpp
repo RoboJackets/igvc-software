@@ -232,16 +232,16 @@ void IMU::publish_imu_data(const IMUMessage &imu_message) const
   msg.linear_acceleration.x = accel_vec[0];
   msg.linear_acceleration.y = accel_vec[1];
   msg.linear_acceleration.z = accel_vec[2];
-  msg.linear_acceleration_covariance = { m_linear_accel_cov[0], 1e-6, 1e-6,
-                                         1e-6, m_linear_accel_cov[1], 1e-6,
-                                         1e-6, 1e-6, m_linear_accel_cov[2]};
+  msg.linear_acceleration_covariance = { .1, 0,   0,
+                 0,   .1, 0,
+                 0,   0,   .1};
 
   msg.angular_velocity.x = angular_vel_vec[0];
   msg.angular_velocity.y = angular_vel_vec[1];
   msg.angular_velocity.z = angular_vel_vec[2];
-  msg.angular_velocity_covariance = { m_angular_vel_cov[0], 1e-6, 1e-6,
-                                      1e-6, m_angular_vel_cov[1], 1e-6,
-                                      1e-6, 1e-6, m_angular_vel_cov[2]};
+  msg.angular_velocity_covariance = { .1, 0,  0,
+                 0,  .1, 0,
+                 0,  0,  .07};
 
   tf::Quaternion quaternion_mag;
   quaternion_mag.setRPY(0, 0, yaw_mag);
@@ -254,9 +254,9 @@ void IMU::publish_imu_data(const IMUMessage &imu_message) const
 
   // TODO: Tune and parameterize.
   msg.orientation = orientation;
-  msg.orientation_covariance = { m_orientation_cov[0], 1e-6, 1e-6,
-                                 1e-6, m_orientation_cov[1], 1e-6,
-                                 1e-6, 1e-6, m_orientation_cov[2]};
+  msg.orientation_covariance = {.1, 0,  0,
+                0,  .1, 0,
+                0,  0,  .1};
 
   m_imu_no_gravity_pub.publish(msg);
 

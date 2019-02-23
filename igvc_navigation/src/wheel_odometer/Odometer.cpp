@@ -65,9 +65,12 @@ void Odometer::enc_callback(const igvc_msgs::velocity_pair& msg)
   // The orientation parameters use a fixed-axis representation.
   // In order, the parameters are:
   // (x, y, z, rotation about X axis, rotation about Y axis, rotation about Z axis)
-  odom.twist.covariance = { 0.02, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 0.25, 1e-4, 1e-4, 1e-4, 1e-4,
-                            1e-4, 1e-4, 1e6,  1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e6,  1e-4, 1e-4,
-                            1e-4, 1e-4, 1e-4, 1e-4, 1e6,  1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 1e-4, 0.62 };
+  odom.twist.covariance = {.1,  0,   0,   0,   0,   0,
+                            0,   .1,  0,   0,   0,   0,
+                            0,   0,   .1,  0,   0,   0,
+                            0,   0,   0,   .1,  0,   0,
+                            0,   0,   0,   0,   .1,  0,
+                            0,   0,   0,   0,   0,   1.4 };
   // the position covariance takes same form as twist covariance above
   // this grows without bounds as error accumulates - disregard exact reading with high variance
   odom.pose.covariance = { 0.01, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 1e-6, 0.01, 1e-6, 1e-6, 1e-6, 1e-6,
