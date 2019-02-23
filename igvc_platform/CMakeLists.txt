@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   pcl_ros
   igvc_utils
+  serial
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -173,6 +174,7 @@ endif()
 
 
 add_subdirectory(src/imu)
+add_subdirectory(src/imu_legacy)
 add_subdirectory(src/joystick_driver)
 add_subdirectory(src/motor_controller)
 #add_subdirectory(src/system_stats)
