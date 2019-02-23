@@ -35,9 +35,12 @@ map:
   start_y: 100
   encoding: "CV_8UC1"
   log_odds_default: 0
-node:
+topics:
 #  lidar_topic: "/scan/pointcloud"
-  lidar_topic: "/scan/pointcloud"
+  lidar: "/scan/pointcloud"
+  line_segmentation: "/segmentation"
+  projected_line_pc: "/projected_line_pc"
   transform_max_wait_time: 1
+node:
   debug: true
 map_floor_threshold: 0.5
