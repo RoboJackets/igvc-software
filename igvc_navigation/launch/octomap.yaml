@@ -18,8 +18,8 @@ filter:
   filter_angle: 2
   distance: 3
 blur:
-  kernel_size: 5
-  std_dev: 5
+  kernel_size: 17
+  std_dev: 11
 ground_filter:
   enable: false
   iterations: 200
