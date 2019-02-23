@@ -30,19 +30,23 @@ public:
   {
     actions.push_back(action);
   }
-  void addStateActionRev(StateType state, ActionType action) {
+  void addStateActionRev(StateType state, ActionType action)
+  {
     states.push_front(state);
     actions.push_front(action);
   }
-  void addStateActionPair(StateType state, ActionType action, double cost) {
+  void addStateActionPair(StateType state, ActionType action, double cost)
+  {
     pathCost += cost;
     states.push_back(state);
     actions.push_back(action);
   }
-  double getPathCost() const {
+  double getPathCost() const
+  {
     return pathCost;
   }
-  void setPathCost(double pathCost) {
+  void setPathCost(double pathCost)
+  {
     this->pathCost = pathCost;
   }
 
