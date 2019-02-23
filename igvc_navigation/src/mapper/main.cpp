@@ -20,6 +20,7 @@
 #include <igvc_utils/RobotState.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc.hpp>
 #include "octomapper.h"
 #include <unordered_set>
 
@@ -31,19 +32,22 @@ public:
 
 private:
   void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc);
-  void publish(const cv::Mat &map, uint64_t stamp);
+  void publish(const cv::Mat &map, const cv::Mat &blurred, uint64_t stamp);
   void setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp);
   bool checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic);
   bool getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg);
   int discretize(radians angle) const;
   void get_empty_points(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& empty_pc);
   void filter_points_behind(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& filtered_pc);
+  void blur(cv::Mat& blurred_map);
 
   cv_bridge::CvImage m_img_bridge;
 
   ros::Publisher m_map_pub;                                  // Publishes map
+  ros::Publisher m_blurred_pub;                              // Publishes blurred map
   ros::Publisher m_debug_pub;                                // Debug version of above
   ros::Publisher m_debug_pcl_pub;                            // Publishes map as individual PCL points
+  ros::Publisher m_debug_blurred_pc;                         // Publishes blurred map as individual PCL points
   ros::Publisher m_ground_pub;                               // Publishes ground points
   ros::Publisher m_nonground_pub;                            // Publishes non ground points
   ros::Publisher m_sensor_pub;                               // Publishes lidar position
@@ -57,10 +61,12 @@ private:
   int m_start_y;   // start y (m)
   int m_length_x;  // length (m)
   int m_width_y;   // width (m)
+  int m_kernel_size;
   bool m_debug;
   double m_radius;  // Radius to filter lidar points // TODO: Refactor to a new node
   double m_lidar_miss_cast_distance;
   double m_filter_distance;
+  double m_blur_std_dev;
   radians m_filter_angle;
   radians m_lidar_start_angle;
   radians m_lidar_end_angle;
@@ -91,6 +97,8 @@ Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf:
   igvc::getParam(pNh, "sensor_model/lidar_angle_end", m_lidar_end_angle);
   igvc::getParam(pNh, "filter/filter_angle", m_filter_angle);
   igvc::getParam(pNh, "filter/distance", m_filter_distance);
+  igvc::getParam(pNh, "blur/kernel_size", m_kernel_size);
+  igvc::getParam(pNh, "blur/std_dev", m_blur_std_dev);
   igvc::getParam(pNh, "node/lidar_topic", m_lidar_topic);
 
   m_octomapper = std::unique_ptr<Octomapper>(new Octomapper(pNh));
@@ -101,6 +109,7 @@ Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf:
   m_published_map = std::unique_ptr<cv::Mat>(new cv::Mat(m_length_x, m_width_y, CV_8UC1));
 
   m_map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
+  m_blurred_pub = nh.advertise<igvc_msgs::map>("/map/blurred", 1);
 
   if (m_debug)
   {
@@ -216,15 +225,21 @@ bool Mapper::checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::Co
  * @param[in] map map to be published
  * @param[in] stamp pcl stamp of the timestamp to be used
  */
-void Mapper::publish(const cv::Mat &map, uint64_t stamp)
+void Mapper::publish(const cv::Mat &map, const cv::Mat &blurred_map, uint64_t stamp)
 {
-  igvc_msgs::map message;    // >> message to be sent
-  sensor_msgs::Image image;  // >> image in the message
+  igvc_msgs::map message;
+  igvc_msgs::map blurred_message;
+  sensor_msgs::Image image;
+  sensor_msgs::Image blurred_image;
   m_img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, map);
-  m_img_bridge.toImageMsg(image);  // from cv_bridge to sensor_msgs::Image
+  const cv_bridge::CvImage &blurred_img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, map);
+  m_img_bridge.toImageMsg(image);
+  blurred_img_bridge.toImageMsg(blurred_image);
 
   setMessageMetadata(message, image, stamp);
+  setMessageMetadata(blurred_message, image, stamp);
   m_map_pub.publish(message);
+  m_blurred_pub.publish(blurred_message);
   if (m_debug) {
     m_debug_pub.publish(image);
     // ROS_INFO_STREAM("\nThe robot is located at " << state);
@@ -262,6 +277,39 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
     //    ROS_INFO_STREAM("Size: " << fromOcuGrid->points.size() << " / " << (width_x * length_y));
     m_debug_pcl_pub.publish(fromOcuGrid);
   }
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr blurredPC =
+      boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
+  for (int i = 0; i < m_width_y/m_resolution; i++) {
+    for (int j = 0; j < m_length_x/m_resolution; j++) {
+      pcl::PointXYZRGB p;
+      uchar prob = blurred_map.at<uchar>(i, j);
+      if (prob > 127) {
+        p = pcl::PointXYZRGB();
+        p.x = static_cast<float>((i * m_resolution) - (m_width_y / 2));
+        p.y = static_cast<float>((j * m_resolution) - (m_length_x / 2));
+        p.r = 0;
+        p.g = static_cast<uint8_t>((prob - 127) * 2);
+        p.b = 0;
+        blurredPC->points.push_back(p);
+        //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
+      } else if (prob < 127) {
+        p = pcl::PointXYZRGB();
+        p.x = static_cast<float>((i * m_resolution) - (m_width_y / 2));
+        p.y = static_cast<float>((j * m_resolution) - (m_length_x / 2));
+        p.r = 0;
+        p.g = 0;
+        p.b = static_cast<uint8_t>((127 - prob) * 2);
+        blurredPC->points.push_back(p);
+        //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
+      } else if (prob == 127) {
+      }
+      // Set x y coordinates as the center of the grid cell.
+    }
+  }
+  blurredPC->header.frame_id = "/odom";
+  blurredPC->header.stamp = stamp;
+  //    ROS_INFO_STREAM("Size: " << fromOcuGrid->points.size() << " / " << (width_x * length_y));
+  m_debug_blurred_pc.publish(blurredPC);
 }
 
 /**
@@ -372,9 +420,22 @@ void Mapper::pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
 
   m_octomapper->insert_scan(m_odom_to_lidar.transform.getOrigin(), m_pc_map_pair, *transformed, empty_pc);
 
-  // Publish map
+  // Get updated map from octomapper
   m_octomapper->get_updated_map(m_pc_map_pair);
-  publish(*(m_pc_map_pair.map), pc->header.stamp);
+
+  // Blur map (Test?) for pathfinding
+  cv::Mat blurred = m_pc_map_pair.map->clone();
+  blur(blurred);
+  publish(*(m_pc_map_pair.map), blurred, pc->header.stamp);
+}
+
+/**
+ * Applied a gaussian blur with a kernel size of m_kernel_size
+ * @param[in/out] blurred_map The map to be blurred
+ */
+void Mapper::blur(cv::Mat &blurred_map)
+{
+  cv::GaussianBlur(blurred_map, blurred_map, cv::Size(m_kernel_size, m_kernel_size), m_blur_std_dev, m_blur_std_dev);
 }
 
 int main(int argc, char **argv)
