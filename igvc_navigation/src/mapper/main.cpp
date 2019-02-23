@@ -115,6 +115,7 @@ Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf:
   {
     m_debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
     m_debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
+    m_debug_blurred_pc = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl/blurred", 1);
     m_ground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/ground_pcl", 1);
     m_nonground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/nonground_pcl", 1);
     m_sensor_pub = nh.advertise<visualization_msgs::Marker>("/sensor_pos", 1);
@@ -157,11 +158,13 @@ bool Mapper::getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &ms
   }
   catch (const tf::TransformException &ex)
   {
+    ROS_ERROR("tf Transform error");
     ROS_ERROR("%s", ex.what());
     return false;
   }
   catch(std::runtime_error& ex)
   {
+    ROS_ERROR("runtime error");
     ROS_ERROR("Runtime Exception at getOdomTransform: [%s]", ex.what());
     return false;
   }
@@ -435,7 +438,10 @@ void Mapper::pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
  */
 void Mapper::blur(cv::Mat &blurred_map)
 {
-  cv::GaussianBlur(blurred_map, blurred_map, cv::Size(m_kernel_size, m_kernel_size), m_blur_std_dev, m_blur_std_dev);
+  cv::Mat original = blurred_map.clone();
+//  cv::GaussianBlur(blurred_map, blurred_map, cv::Size(m_kernel_size, m_kernel_size), m_blur_std_dev, m_blur_std_dev);
+  cv::blur(blurred_map, blurred_map, cv::Size(m_kernel_size, m_kernel_size));
+  cv::max(original, blurred_map, blurred_map);
 }
 
 int main(int argc, char **argv)
