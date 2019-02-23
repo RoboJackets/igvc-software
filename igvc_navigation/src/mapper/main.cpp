@@ -23,6 +23,7 @@
 #include <opencv2/imgproc.hpp>
 #include "octomapper.h"
 #include <unordered_set>
+#include <sensor_msgs/ImageInfo.h>
 
 using radians = double;
 class Mapper
@@ -31,7 +32,11 @@ public:
   Mapper();
 
 private:
+  // Callbacks
   void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc);
+  void line_map_callback(const sensor_msgs::ImageConstPtr& camera_info);
+  void projected_line_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc);
+
   void publish(const cv::Mat &map, const cv::Mat &blurred, uint64_t stamp);
   void setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp);
   bool checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic);
@@ -72,6 +77,8 @@ private:
   radians m_lidar_end_angle;
   radians m_angular_resolution;
   std::string m_lidar_topic;
+  std::string m_line_topic;
+  std::string m_projected_line_topic;
   RobotState m_state;          // Odom -> Base_link
   RobotState m_odom_to_lidar;  // Odom -> Lidar
 
@@ -89,22 +96,31 @@ Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf:
   igvc::getParam(pNh, "map/width", m_width_y);
   igvc::getParam(pNh, "map/start_x", m_start_x);
   igvc::getParam(pNh, "map/start_y", m_start_y);
-  igvc::getParam(pNh, "node/debug", m_debug);
+
   igvc::getParam(pNh, "sensor_model/max_range", m_radius);
   igvc::getParam(pNh, "sensor_model/angular_resolution", m_angular_resolution);
   igvc::getParam(pNh, "sensor_model/lidar_miss_cast_distance", m_lidar_miss_cast_distance);
   igvc::getParam(pNh, "sensor_model/lidar_angle_start", m_lidar_start_angle);
   igvc::getParam(pNh, "sensor_model/lidar_angle_end", m_lidar_end_angle);
+
   igvc::getParam(pNh, "filter/filter_angle", m_filter_angle);
   igvc::getParam(pNh, "filter/distance", m_filter_distance);
+
   igvc::getParam(pNh, "blur/kernel_size", m_kernel_size);
   igvc::getParam(pNh, "blur/std_dev", m_blur_std_dev);
-  igvc::getParam(pNh, "node/lidar_topic", m_lidar_topic);
+
+  igvc::getParam(pNh, "topics/lidar", m_lidar_topic);
+  igvc::getParam(pNh, "topics/line_segmentation", m_line_topic);
+  igvc::getParam(pNh, "topics/projected_line_pc", m_projected_line_topic);
+
+  igvc::getParam(pNh, "node/debug", m_debug);
 
   m_octomapper = std::unique_ptr<Octomapper>(new Octomapper(pNh));
   m_octomapper->create_octree(m_pc_map_pair);
 
   ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(m_lidar_topic, 1, &Mapper::pc_callback, this);
+  ros::Subscriber line_map_sub = nh.subscribe<sensor_msgs::Image>(m_line_topic, 1, &Mapper::line_map_callback, this);
+  ros::Subscriber projected_line_map_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(m_projected_line_topic, 1, &Mapper::projected_line_callback, this);
 
   m_published_map = std::unique_ptr<cv::Mat>(new cv::Mat(m_length_x, m_width_y, CV_8UC1));
 
@@ -442,6 +458,30 @@ void Mapper::blur(cv::Mat &blurred_map)
 //  cv::GaussianBlur(blurred_map, blurred_map, cv::Size(m_kernel_size, m_kernel_size), m_blur_std_dev, m_blur_std_dev);
   cv::blur(blurred_map, blurred_map, cv::Size(m_kernel_size, m_kernel_size));
   cv::max(original, blurred_map, blurred_map);
+}
+
+/**
+ * Callback for the neural network segmented image.
+ * @param camera_info
+ */
+void Mapper::line_map_callback(const sensor_msgs::ImageConstPtr &camera_info)
+{
+  // Convert to OpenCV
+  // Gaussian blur
+  // Invert ?
+  // Threshold
+  // Project to ground (Parameters)
+  // Insert into octree
+  // Publish
+}
+
+/**
+ * Callback for the line projetced onto lidar point cloud. Directly insert it into the line octomap
+ * @param pc
+ */
+void Mapper::projected_line_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc)
+{
+
 }
 
 int main(int argc, char **argv)
