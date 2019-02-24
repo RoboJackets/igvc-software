@@ -49,17 +49,22 @@ class FieldDPlanner
 public:
   // Graph contains methods to deal with Node(s) as well as updated occupancy
   // grid cells
-  Graph graph;
+  Graph NodeGrid;
 
-  std::vector<std::tuple<float, float>> path;
+  std::vector<std::tuple<float, float>> Path;
 
   // path additions made by one step of constructOptimalPath()
   typedef std::pair<std::vector<std::tuple<float, float>>, float> path_additions;
 
-  float GOAL_DIST = 0.95f;
+  float GoalDist;
 
-  FieldDPlanner();
-  ~FieldDPlanner();
+  /**
+  Sets value for GoalDist, the minumum value from the goal node a node must
+  be before the search is considered complete.
+
+  @param[in] goalDist the minimum distance from the goal
+  */
+  void setGoalDistance(float goalDist);
 
   /**
   Compute the linearly interpolated path cost of three neighboring positions p,
@@ -113,7 +118,7 @@ public:
   node equal to infinity. For goal node, sets g value to infinity and rhs value
   to 0. Inserts goal node into priority queue to initialize graph search problem.
   */
-  void initialize();
+  void initializeSearch();
   /**
   Updates a node's standing in the graph search problem. Update dependant upon
   the node's g value and rhs value relative to each other.

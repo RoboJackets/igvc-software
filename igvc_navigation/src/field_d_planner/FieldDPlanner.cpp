@@ -1,10 +1,8 @@
 #include "FieldDPlanner.h"
 
-FieldDPlanner::FieldDPlanner()
+void FieldDPlanner::setGoalDistance(float goalDist)
 {
-}
-FieldDPlanner::~FieldDPlanner()
-{
+  this->GoalDist = goalDist;
 }
 
 std::tuple<float, float, float> FieldDPlanner::computeCost(const Node& s, const Node& s_a, const Node& s_b)
@@ -21,7 +19,7 @@ std::tuple<float, float, float> FieldDPlanner::computeCost(const std::tuple<floa
   std::tuple<float, float> p1;  // nearest neighbor
   std::tuple<float, float> p2;  // diagonal neighbor
 
-  if (graph.isDiagonalContinuous(p, p_a))
+  if (NodeGrid.isDiagonalContinuous(p, p_a))
   {
     p1 = p_b;
     p2 = p_a;
@@ -48,10 +46,10 @@ std::tuple<float, float, float> FieldDPlanner::computeCost(const std::tuple<floa
 
   // traversal cost of position p and a diagonal position p2
   // in units of (cost/distance)
-  float c = graph.getContinuousTraversalCost(p, p2);
+  float c = NodeGrid.getContinuousTraversalCost(p, p2);
   // traversal cost of position p and p1, a non-diaginal neighbor of p
   // in units of (cost/distance)
-  float b = graph.getContinuousTraversalCost(p, p1);
+  float b = NodeGrid.getContinuousTraversalCost(p, p1);
 
   // travel distances
   float x = 0.0f;
@@ -148,7 +146,7 @@ bool FieldDPlanner::isVertex(const std::tuple<float, float>& p)
   std::tie(x, y) = p;
 
   bool is_vertex = (ceilf(x) == x) && (ceilf(y) == y);
-  bool satisfies_bounds = (x >= 0) && (x <= graph.length) && (y >= 0) && (y <= graph.width);
+  bool satisfies_bounds = (x >= 0) && (x <= NodeGrid.length) && (y >= 0) && (y <= NodeGrid.width);
 
   return is_vertex && satisfies_bounds;
 }
@@ -160,19 +158,19 @@ Key FieldDPlanner::calculateKey(const Node& s)
   // calculate the key to order the node in the PQ with. K_M is the
   // key modifier, a value which corrects for the distance traveled by the robot
   // since the search began (source: D* Lite)
-  return Key(std::floor(cost_so_far + graph.euclidian_heuristic(s.getIndex()) + graph.K_M), std::floor(cost_so_far));
+  return Key(std::floor(cost_so_far + NodeGrid.euclidian_heuristic(s.getIndex()) + NodeGrid.K_M), std::floor(cost_so_far));
 }
 
-void FieldDPlanner::initialize()
+void FieldDPlanner::initializeSearch()
 {
-  this->graph.K_M = 0.0f;
+  this->NodeGrid.K_M = 0.0f;
   umap.clear();
   PQ.clear();
-  graph.updatedCells.clear();
+  NodeGrid.updatedCells.clear();
 
-  insert_or_assign(graph.Start, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
-  insert_or_assign(graph.Goal, std::numeric_limits<float>::infinity(), 0.0f);
-  PQ.insert(graph.Goal, this->calculateKey(graph.Goal));
+  insert_or_assign(NodeGrid.Start, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+  insert_or_assign(NodeGrid.Goal, std::numeric_limits<float>::infinity(), 0.0f);
+  PQ.insert(NodeGrid.Goal, this->calculateKey(NodeGrid.Goal));
 }
 
 void FieldDPlanner::updateNode(const Node& s)
@@ -192,10 +190,10 @@ void FieldDPlanner::updateNode(const Node& s)
   }
 
   // update rhs value of Node s
-  if (s != graph.Goal)
+  if (s != NodeGrid.Goal)
   {
     float minRHS = std::numeric_limits<float>::infinity();
-    for (std::tuple<Node, Node> connbr : graph.connbrs(s))
+    for (std::tuple<Node, Node> connbr : NodeGrid.connbrs(s))
       minRHS = std::min(minRHS, std::get<0>(this->computeCost(s, std::get<0>(connbr), std::get<1>(connbr))));
 
     insert_or_assign(s, getG(s), minRHS);
@@ -211,11 +209,11 @@ void FieldDPlanner::updateNode(const Node& s)
 int FieldDPlanner::computeShortestPath()
 {
   // if the start node is occupied, return immediately. No path exists
-  if (graph.getMinTraversalCost(graph.Start) == std::numeric_limits<float>::infinity())
+  if (NodeGrid.getMinTraversalCost(NodeGrid.Start) == std::numeric_limits<float>::infinity())
     return 0;
 
   int numNodesExpanded = 0;
-  while ((PQ.topKey() < calculateKey(graph.Start)) || (std::fabs(getRHS(graph.Start) - getG(graph.Start)) > 1e-5))
+  while ((PQ.topKey() < calculateKey(NodeGrid.Start)) || (std::fabs(getRHS(NodeGrid.Start) - getG(NodeGrid.Start)) > 1e-5))
   {
     Node topNode = PQ.topNode();
     PQ.pop();
@@ -227,7 +225,7 @@ int FieldDPlanner::computeShortestPath()
       // make node locally consistent by setting g = rhs and propagate
       // changes to neighboring nodes
       insert_or_assign(topNode, getRHS(topNode), getRHS(topNode));
-      for (Node nbr : graph.nbrs(topNode))
+      for (Node nbr : NodeGrid.nbrs(topNode))
         updateNode(nbr);
     }
     else
@@ -236,7 +234,7 @@ int FieldDPlanner::computeShortestPath()
       // make node locally consistent or overconsistent by setting g = inf
       // and propagate changes to {neighbors} U {topNode}
       insert_or_assign(topNode, std::numeric_limits<float>::infinity(), getRHS(topNode));
-      for (Node nbr : graph.nbrs(topNode))
+      for (Node nbr : NodeGrid.nbrs(topNode))
         updateNode(nbr);
       updateNode(topNode);
     }
@@ -249,9 +247,9 @@ int FieldDPlanner::updateNodesAroundUpdatedCells()
   std::unordered_set<Node> toUpdate;
   std::vector<Node> updates;
   // construct a set of all updated nodes
-  for (std::tuple<int, int> cellUpdate : graph.updatedCells)
+  for (std::tuple<int, int> cellUpdate : NodeGrid.updatedCells)
   {
-    updates = graph.getNodesAroundCellWithCSpace(cellUpdate);
+    updates = NodeGrid.getNodesAroundCellWithCSpace(cellUpdate);
     toUpdate.insert(updates.begin(), updates.end());
   }
 
@@ -266,29 +264,29 @@ int FieldDPlanner::updateNodesAroundUpdatedCells()
 
 void FieldDPlanner::constructOptimalPath(int lookahead_dist)
 {
-  path.clear();
+  Path.clear();
 
-  std::tuple<float, float> curr_pos = graph.Start.getIndex();
-  path.push_back(curr_pos);
+  std::tuple<float, float> curr_pos = NodeGrid.Start.getIndex();
+  Path.push_back(curr_pos);
 
   float min_cost;
   path_additions pa;
 
-  int curr_step = 0, MAX_STEPS = 1000;  // kill the path constructor after MAX_STEPS steps
+  int curr_step = 0, MAX_STEPS = 1000;  // kill the Path constructor after MAX_STEPS steps
   do
   {
-    // move one step and calculate the optimal path additions (min 1, max 2)
+    // move one step and calculate the optimal Path additions (min 1, max 2)
     pa = getPathAdditions(curr_pos, lookahead_dist);
-    path.insert(path.end(), pa.first.begin(), pa.first.end());
+    Path.insert(Path.end(), pa.first.begin(), pa.first.end());
     min_cost = pa.second;
-    curr_pos = path.back();
+    curr_pos = Path.back();
     curr_step += 1;
   } while (!isWithinRangeOfGoal(curr_pos) && (min_cost != std::numeric_limits<float>::infinity()) &&
            (curr_step < MAX_STEPS));
 
   // no valid path found. Set path to empty
   if ((min_cost == std::numeric_limits<float>::infinity()) || !(curr_step < MAX_STEPS))
-    path.clear();
+    Path.clear();
 }
 
 FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const std::tuple<float, float>& p,
@@ -301,7 +299,7 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
   float x, y;
   std::tie(cost, x, y) = this->computeCost(p, p_a, p_b);
 
-  if (graph.isDiagonalContinuous(p, p_a))  // p_b is nearest neighbor
+  if (NodeGrid.isDiagonalContinuous(p, p_a))  // p_b is nearest neighbor
   {
     p1 = p_b;
     p2 = p_a;
@@ -364,7 +362,7 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<f
   float lookahead_cost;
 
   std::tuple<float, float> p_a, p_b;  // temp positions
-  for (std::pair<std::tuple<float, float>, std::tuple<float, float>> connbr : graph.nbrsContinuous(p))
+  for (std::pair<std::tuple<float, float>, std::tuple<float, float>> connbr : NodeGrid.nbrsContinuous(p))
   {
     // look ahead `lookahead_dist` planning steps into the future for best action
     std::tie(p_a, p_b) = connbr;
@@ -385,8 +383,8 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<f
 
 bool FieldDPlanner::isWithinRangeOfGoal(const std::tuple<float, float>& p)
 {
-  float distanceToGoal = igvc::get_distance(p, static_cast<std::tuple<float, float>>(graph.Goal.getIndex()));
-  float goalRadius = GOAL_DIST / graph.Resolution;
+  float distanceToGoal = igvc::get_distance(p, static_cast<std::tuple<float, float>>(NodeGrid.Goal.getIndex()));
+  float goalRadius = GoalDist / NodeGrid.Resolution;
   return distanceToGoal <= goalRadius;
 }
 
