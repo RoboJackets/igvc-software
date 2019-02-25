@@ -161,11 +161,11 @@ int main(int argc, char** argv)
   // publish path for path_follower
   ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 
-  double configuration_space; // configuration space
-  double goal_range;          // distance from goal at which a node is considered the goal
+  double configuration_space;  // configuration space
+  double goal_range;           // distance from goal at which a node is considered the goal
   double rate_time;            // path planning/replanning rate
-  bool follow_old_path;       // follow the previously generated path if no optimal path currently exists
-  int lookahead_dist;         // number of cell traversals to look ahead at when decising next position along path
+  bool follow_old_path;        // follow the previously generated path if no optimal path currently exists
+  int lookahead_dist;          // number of cell traversals to look ahead at when decising next position along path
 
   igvc::getParam(pNh, "c_space", configuration_space);
   igvc::getParam(pNh, "maximum_distance", maximum_distance);

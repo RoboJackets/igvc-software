@@ -158,7 +158,8 @@ Key FieldDPlanner::calculateKey(const Node& s)
   // calculate the key to order the node in the PQ with. K_M is the
   // key modifier, a value which corrects for the distance traveled by the robot
   // since the search began (source: D* Lite)
-  return Key(std::floor(cost_so_far + NodeGrid.euclidian_heuristic(s.getIndex()) + NodeGrid.K_M), std::floor(cost_so_far));
+  return Key(std::floor(cost_so_far + NodeGrid.euclidian_heuristic(s.getIndex()) + NodeGrid.K_M),
+             std::floor(cost_so_far));
 }
 
 void FieldDPlanner::initializeSearch()
@@ -213,7 +214,8 @@ int FieldDPlanner::computeShortestPath()
     return 0;
 
   int numNodesExpanded = 0;
-  while ((PQ.topKey() < calculateKey(NodeGrid.Start)) || (std::fabs(getRHS(NodeGrid.Start) - getG(NodeGrid.Start)) > 1e-5))
+  while ((PQ.topKey() < calculateKey(NodeGrid.Start)) ||
+         (std::fabs(getRHS(NodeGrid.Start) - getG(NodeGrid.Start)) > 1e-5))
   {
     Node topNode = PQ.topNode();
     PQ.pop();
@@ -294,7 +296,7 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
                                                                          const std::tuple<float, float>& p_b)
 {
   std::vector<std::tuple<float, float>> positions;  // positions to add to path
-  std::tuple<float, float> p1, p2; // p1 - nearest neighbor; p2 - diagonal
+  std::tuple<float, float> p1, p2;                  // p1 - nearest neighbor; p2 - diagonal
   float cost;
   float x, y;
   std::tie(cost, x, y) = this->computeCost(p, p_a, p_b);
