@@ -58,6 +58,9 @@ private:
   ros::NodeHandle yostlab_nh_;
   ros::NodeHandle yostlab_priv_nh_;
   ros::Publisher imu_pub_;
+  // Constants
+  const double GRAVITY = 9.80665;
+
   //! Orientation Commands
   static constexpr auto GET_TARED_ORIENTATION_AS_QUATERNION        = ":0\n";
   static constexpr auto GET_TARED_ORIENTATION_AS_EULER_ANGLES      = ":1\n";
