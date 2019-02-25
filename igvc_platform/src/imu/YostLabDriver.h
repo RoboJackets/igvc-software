@@ -138,7 +138,7 @@ private:
   static constexpr auto SET_AXIS_DIRECTIONS_BOTTOM_IMU = ":116,3\n";
   static constexpr auto SET_GYRO_RANGE = ":125,1\n";
   static constexpr auto COMMIT_SETTINGS=":225\n";
-  static constexpr auto SET_FILTER_MODE_IMU=":123,0\n";
+  static constexpr auto SET_FILTER_MODE_IMU=":123,1\n";
   //! Calibration Commands
   static constexpr auto BEGIN_GYRO_AUTO_CALIB       = ":165\n";
   static constexpr auto SET_CALIB_MODE_BIAS         = ":169,0\n";
