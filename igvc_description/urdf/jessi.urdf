@@ -290,7 +290,7 @@
   <joint name="base_footprint_to_imu" type="fixed">
     <parent link="base_footprint"/>
     <child link="imu"/>
-    <origin xyz=" 0 0 .2032" rpy="0 0 0"/>
+    <origin xyz="=0.0549656 0 0.2032254" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
 
