@@ -22,7 +22,7 @@
     <include file="$(find igvc_platform)/launch/lidar.launch" />
 
     <!-- IMU -->
-    <include file="$(find igvc_platform)/launch/imu.launch" />
+    <include file="$(find igvc_platform)/launch/imu_bottom.launch" />
 
     <!-- System Stats -->
     <include file="$(find igvc_utils)/launch/system_stats.launch" />
