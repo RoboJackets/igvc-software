@@ -174,7 +174,7 @@ void YostLabDriver::run()
       {
         line_num_ = 0;
         imu_msg_.header.stamp    = ros::Time::now();
-        imu_msg_.header.frame_id = "imu_link";
+        imu_msg_.header.frame_id = "imu";
 
         // Correct angular velocity.
         Eigen::Vector3d angular_vel_raw(parsed_val_[4], parsed_val_[5], parsed_val_[6]);
@@ -182,7 +182,7 @@ void YostLabDriver::run()
 
         // Correct linear acceleration.
         Eigen::Vector3d linear_accel_raw(parsed_val_[7], parsed_val_[8], parsed_val_[9]);
-        Eigen::Vector3d linear_accel_corrected = correction_mat * linear_accel_raw;
+        Eigen::Vector3d linear_accel_corrected = GRAVITY * correction_mat * linear_accel_raw;
 
         imu_msg_.orientation.x = parsed_val_[0];
         imu_msg_.orientation.y = parsed_val_[1];

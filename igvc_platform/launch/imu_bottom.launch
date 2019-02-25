@@ -5,6 +5,5 @@
         <rosparam param="imu_orientation_correction">[0, 1, 0,
                                                 1, 0, 0,
                                                 0, 0, -1]</rosparam>
-        <remap from="imu" to="imu/bottom" />
     </node>
 </launch>
