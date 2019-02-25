@@ -115,7 +115,7 @@
 
   <gazebo reference="lidar">
     <sensor type="ray" name="lidar">
-      <visualize>true</visualize>
+      <visualize>false</visualize>
       <update_rate>10</update_rate>
       <ray>
         <!-- Use gaussian noise -->
