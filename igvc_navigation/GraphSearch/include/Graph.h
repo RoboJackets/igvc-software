@@ -251,13 +251,6 @@ public:
   */
   float getValWithConfigurationSpace(const std::tuple<int, int>& ind);
   /**
-  Gets nodes affected by updated cell value while taking into account ConfigurationSpace
-
-  @return list of reference nodes whose values may have been affected by
-  the updated cell cost
-  */
-  std::vector<Node> getUpdatedCellNodesWithConfigurationSpace();
-  /**
   Get cost of traversing from a Node s to a neighboring node s_prime
 
   @param[in] s node to get traversal cost through

@@ -120,20 +120,45 @@ std::vector<Node> Graph::nbrs(const Node& s, bool include_invalid)
   int x, y;
   std::tie(x, y) = s.getIndex();
 
-  for (auto dx = -1; dx <= 1; dx++)
-  {
-    for (auto dy = -1; dy <= 1; dy++)
-    {
-      if (dy != 0 || dx != 0)
-      {
-        Node n(x + dx, y + dy);
-        if (include_invalid || isValidNode(n))
-        {
-          neighbors.push_back(std::move(n));
-        }
-      }
-    }
-  }
+  // right
+  Node r(x + 1, y);
+  if (include_invalid || isValidNode(r))
+    neighbors.push_back(std::move(r));
+
+  // top right
+  Node tr(x + 1, y + 1);
+  if (include_invalid || isValidNode(tr))
+    neighbors.push_back(std::move(tr));
+
+  // above
+  Node t(x, y + 1);
+  if (include_invalid || isValidNode(t))
+    neighbors.push_back(std::move(t));
+
+  // top left
+  Node tl(x - 1, y + 1);
+  if (include_invalid || isValidNode(tl))
+    neighbors.push_back(std::move(tl));
+
+  // left
+  Node l(x - 1, y);
+  if (include_invalid || isValidNode(l))
+    neighbors.push_back(std::move(l));
+
+  // bottom left
+  Node bl(x - 1, y - 1);
+  if (include_invalid || isValidNode(bl))
+    neighbors.push_back(std::move(bl));
+
+  // bottom
+  Node b(x, y - 1);
+  if (include_invalid || isValidNode(b))
+    neighbors.push_back(std::move(b));
+
+  // bottom right
+  Node br(x + 1, y - 1);
+  if (include_invalid || isValidNode(br))
+    neighbors.push_back(std::move(br));
 
   return neighbors;
 }

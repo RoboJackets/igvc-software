@@ -25,7 +25,7 @@ Date Created: January 23rd, 2018
 #include <tuple>
 #include <vector>
 #include "FieldDPlanner.h"
-#include "igvc_navigation/Graph.h"
+#include "Graph.h"
 
 std::mutex planning_mutex;
 
@@ -127,7 +127,7 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 
   planner.NodeGrid.setGoal(newGoal);
 
-  float distance_to_goal = planner.NodeGrid.euclidian_heuristic(newGoal) * planner.NodeGrid.Resolution;
+  float distance_to_goal = planner.NodeGrid.euclidianHeuristic(newGoal) * planner.NodeGrid.Resolution;
 
   ROS_INFO_STREAM((goal_changed ? "New" : "Same") << " waypoint received. Search Problem Goal = " << goal_x << ", "
                                                   << goal_y << ". Distance: " << distance_to_goal << "m.");
@@ -175,7 +175,7 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, "follow_old_path", follow_old_path);
   igvc::getParam(pNh, "lookahead_dist", lookahead_dist);
 
-  planner.NodeGrid.setCSpace(static_cast<float>(configuration_space));
+  planner.NodeGrid.setConfigurationSpace(static_cast<float>(configuration_space));
   planner.setGoalDistance(static_cast<float>(goal_range));
 
   int num_nodes_updated = 0;
