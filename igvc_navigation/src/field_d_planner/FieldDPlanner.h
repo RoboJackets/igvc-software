@@ -32,9 +32,9 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #ifndef FIELDDPLANNER_H
 #define FIELDDPLANNER_H
 
-#include "igvc_navigation/Graph.h"
-#include "igvc_navigation/Node.h"
-#include "igvc_navigation/PriorityQueue.h"
+#include "Graph.h"
+#include "Node.h"
+#include "PriorityQueue.h"
 
 #include <assert.h>
 #include <cmath>

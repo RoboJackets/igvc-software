@@ -146,7 +146,7 @@ bool FieldDPlanner::isVertex(const std::tuple<float, float>& p)
   std::tie(x, y) = p;
 
   bool is_vertex = (ceilf(x) == x) && (ceilf(y) == y);
-  bool satisfies_bounds = (x >= 0) && (x <= NodeGrid.length) && (y >= 0) && (y <= NodeGrid.width);
+  bool satisfies_bounds = (x >= 0) && (x <= NodeGrid.Width) && (y >= 0) && (y <= NodeGrid.Width);
 
   return is_vertex && satisfies_bounds;
 }
@@ -155,16 +155,16 @@ Key FieldDPlanner::calculateKey(const Node& s)
 {
   // obtain g-values and rhs-values for node s
   float cost_so_far = std::min(getG(s), getRHS(s));
-  // calculate the key to order the node in the PQ with. K_M is the
+  // calculate the key to order the node in the PQ with. KeyModifier is the
   // key modifier, a value which corrects for the distance traveled by the robot
   // since the search began (source: D* Lite)
-  return Key(std::floor(cost_so_far + NodeGrid.euclidian_heuristic(s.getIndex()) + NodeGrid.K_M),
+  return Key(std::floor(cost_so_far + NodeGrid.euclidianHeuristic(s.getIndex()) + NodeGrid.KeyModifier),
              std::floor(cost_so_far));
 }
 
 void FieldDPlanner::initializeSearch()
 {
-  this->NodeGrid.K_M = 0.0f;
+  this->NodeGrid.KeyModifier = 0.0f;
   umap.clear();
   PQ.clear();
   NodeGrid.updatedCells.clear();
@@ -194,7 +194,7 @@ void FieldDPlanner::updateNode(const Node& s)
   if (s != NodeGrid.Goal)
   {
     float minRHS = std::numeric_limits<float>::infinity();
-    for (std::tuple<Node, Node> connbr : NodeGrid.connbrs(s))
+    for (std::tuple<Node, Node> connbr : NodeGrid.consecutiveNeighbors(s))
       minRHS = std::min(minRHS, std::get<0>(this->computeCost(s, std::get<0>(connbr), std::get<1>(connbr))));
 
     insert_or_assign(s, getG(s), minRHS);
@@ -249,9 +249,9 @@ int FieldDPlanner::updateNodesAroundUpdatedCells()
   std::unordered_set<Node> toUpdate;
   std::vector<Node> updates;
   // construct a set of all updated nodes
-  for (std::tuple<int, int> cellUpdate : NodeGrid.updatedCells)
+  for (Cell cell : NodeGrid.updatedCells)
   {
-    updates = NodeGrid.getNodesAroundCellWithCSpace(cellUpdate);
+    updates = NodeGrid.getNodesAroundCellWithConfigurationSpace(cell);
     toUpdate.insert(updates.begin(), updates.end());
   }
 
