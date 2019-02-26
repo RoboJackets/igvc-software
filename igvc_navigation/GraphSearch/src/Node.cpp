@@ -46,6 +46,11 @@ std::tuple<int, int> Node::getBptr() const
   return this->bptr;
 }
 
+float Node::distTo(std::tuple<float, float> position)
+{
+  return igvc::get_distance(static_cast<std::tuple<float, float>>(this->getIndex()), position);
+}
+
 bool Node::operator==(const Node& other) const
 {
   return this->getIndex() == other.getIndex();

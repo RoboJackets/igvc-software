@@ -120,22 +120,80 @@ std::vector<Node> Graph::nbrs(const Node& s, bool include_invalid)
   int x, y;
   std::tie(x, y) = s.getIndex();
 
-  for (auto dx = -1; dx <= 1; dx++)
-  {
-    for (auto dy = -1; dy <= 1; dy++)
-    {
-      if (dy != 0 || dx != 0)
-      {
-        Node n(x + dx, y + dy);
-        if (include_invalid || isValidNode(n))
-        {
-          neighbors.push_back(std::move(n));
-        }
-      }
-    }
-  }
+  // right
+  Node r(x + 1, y);
+  if (include_invalid || isValidNode(r))
+    neighbors.push_back(std::move(r));
+
+  // top right
+  Node tr(x + 1, y + 1);
+  if (include_invalid || isValidNode(tr))
+    neighbors.push_back(std::move(tr));
+
+  // above
+  Node t(x, y + 1);
+  if (include_invalid || isValidNode(t))
+    neighbors.push_back(std::move(t));
+
+  // top left
+  Node tl(x - 1, y + 1);
+  if (include_invalid || isValidNode(tl))
+    neighbors.push_back(std::move(tl));
+
+  // left
+  Node l(x - 1, y);
+  if (include_invalid || isValidNode(l))
+    neighbors.push_back(std::move(l));
+
+  // bottom left
+  Node bl(x - 1, y - 1);
+  if (include_invalid || isValidNode(bl))
+    neighbors.push_back(std::move(bl));
+
+  // bottom
+  Node b(x, y - 1);
+  if (include_invalid || isValidNode(b))
+    neighbors.push_back(std::move(b));
+
+  // bottom right
+  Node br(x + 1, y - 1);
+  if (include_invalid || isValidNode(br))
+    neighbors.push_back(std::move(br));
 
   return neighbors;
+}
+
+std::vector<std::pair<std::tuple<float, float>, std::tuple<float, float>>>
+Graph::nbrsContinuous(const std::tuple<float, float>& p)
+{
+  std::vector<std::tuple<float, float>> neighbors;
+  std::vector<std::pair<std::tuple<float, float>, std::tuple<float, float>>> connbrs;
+
+  float x, y;
+  std::tie(x, y) = p;
+
+  // there are 8 consecutive neighbors for an edge node.
+  neighbors.push_back(std::make_tuple(x + 1.0f, y));         // right
+  neighbors.push_back(std::make_tuple(x + 1.0f, y + 1.0f));  // top right
+  neighbors.push_back(std::make_tuple(x, y + 1.0f));         // top
+  neighbors.push_back(std::make_tuple(x - 1.0f, y + 1.0f));  // top left
+  neighbors.push_back(std::make_tuple(x - 1.0f, y));         // left
+  neighbors.push_back(std::make_tuple(x - 1.0f, y - 1.0f));  // bottom left
+  neighbors.push_back(std::make_tuple(x, y - 1.0f));         // bottom
+  neighbors.push_back(std::make_tuple(x + 1.0f, y - 1.0f));  // bottom right
+
+  // first 7 connbrs
+  for (size_t i = 0; i < neighbors.size() - 1; i++)
+  {
+    if (isValidPosition(neighbors[i]) && isValidPosition(neighbors[i + 1]))
+      connbrs.push_back(std::make_pair(neighbors[i], neighbors[i + 1]));
+  }
+
+  // last connbrs pair [s8->s1]
+  if (isValidPosition(neighbors[neighbors.size() - 1]) && isValidPosition(neighbors[0]))
+    connbrs.push_back(std::make_pair(neighbors[neighbors.size() - 1], neighbors[0]));
+
+  return connbrs;
 }
 
 Node Graph::counterClockwiseNeighbor(Node s, Node s_prime)
@@ -431,19 +489,39 @@ float Graph::euclidianHeuristic(const std::tuple<int, int>& ind)
 
 std::vector<Node> Graph::getNodesAroundCellWithConfigurationSpace(const Cell& cell)
 {
-  int sep = static_cast<int>(ConfigurationSpace / Resolution);  // number of cells on all sides that constitute C-space
+  std::queue<Node> openList;           // nodes to evaluate
+  std::unordered_set<Node> closedSet;  // evaluated nodes
+  std::vector<Node> cellNodes;         // nodes that require update
 
-  std::vector<Node> cellNodes;
+  Node startNode(cell.x, cell.y);
 
-  for (int new_x = cell.x - sep; new_x <= cell.x + sep + 1; new_x++)
+  openList.push(startNode);
+  closedSet.insert(startNode);
+  cellNodes.push_back(startNode);
+  // number of cells on all sides that constitute C-space
+  int separationDist = static_cast<int>(ceil(ConfigurationSpace / Resolution));
+
+  // perform a simple breadth-first search to radially look for nodes around C_space
+  while (!openList.empty())
   {
-    for (int new_y = cell.y - sep; new_y <= cell.y + sep + 1; new_y++)
+    Node currNode = openList.front();
+    openList.pop();
+
+    for (Node n : this->nbrs(currNode))
     {
-      Node cellNode = Node(new_x, new_y);
-      if (isValidNode(cellNode))
-        cellNodes.push_back(cellNode);
+      // node already considered
+      if (closedSet.find(n) != closedSet.end())
+        continue;
+      else
+        closedSet.insert(n);
+
+      // node is within the configuration space
+      if (startNode.distTo(static_cast<std::tuple<float, float>>(n.getIndex())) < separationDist)
+      {
+        openList.push(n);
+        cellNodes.push_back(std::move(n));
+      }
     }
   }
-
   return cellNodes;
 }

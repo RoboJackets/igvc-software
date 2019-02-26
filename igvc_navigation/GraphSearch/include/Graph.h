@@ -27,6 +27,7 @@ Date Created: December 16, 2018
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include <queue>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -178,6 +179,17 @@ public:
   */
   std::vector<Node> nbrs(const Node& s, bool include_invalid = false);
   /**
+  Gets consecutive neighbor pairs of an edge node. An edge node is defines as a
+  node that does not lie a vertex but instead lies along some conitnuous position
+  along an edge. Edge nodes are also referred to as 'positions' throughout
+  this code.
+
+  @param[in] p position to get connbrs for
+  @param[out] output vector of connbrs pairs
+  */
+  std::vector<std::pair<std::tuple<float, float>, std::tuple<float, float>>>
+  nbrsContinuous(const std::tuple<float, float>& p);
+  /**
   Returns first counter-clockwise neighbor of node s and a neighbor node
   s', starting at s'.
 
@@ -238,13 +250,6 @@ public:
   @return cost of traversing grid cell with ConfigurationSpace
   */
   float getValWithConfigurationSpace(const std::tuple<int, int>& ind);
-  /**
-  Gets nodes affected by updated cell value while taking into account ConfigurationSpace
-
-  @return list of reference nodes whose values may have been affected by
-  the updated cell cost
-  */
-  std::vector<Node> getUpdatedCellNodesWithConfigurationSpace();
   /**
   Get cost of traversing from a Node s to a neighboring node s_prime
 
