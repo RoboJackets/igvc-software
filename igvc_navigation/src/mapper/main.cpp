@@ -10,58 +10,163 @@
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+#include <signal.h>
 #include <stdlib.h>
+#include <tf/transform_datatypes.h>
+#include <tf_conversions/tf_eigen.h>
+#include <visualization_msgs/Marker.h>
 #include <Eigen/Core>
 #include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/RobotState.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
-#include <tf/transform_datatypes.h>
-#include <tf_conversions/tf_eigen.h>
+#include <opencv2/imgproc.hpp>
 #include "octomapper.h"
-#include <visualization_msgs/Marker.h>
-#include <signal.h>
+#include <unordered_set>
 
-cv_bridge::CvImage img_bridge;
+using radians = double;
+class Mapper
+{
+public:
+  Mapper();
 
-ros::Publisher map_pub;                  // Publishes map
-ros::Publisher debug_pub;                // Debug version of above
-ros::Publisher debug_pcl_pub;            // Publishes map as individual PCL points
-ros::Publisher ground_pub;            // Publishes map as individual PCL points
-ros::Publisher nonground_pub;            // Publishes map as individual PCL points
-ros::Publisher sensor_pub;            // Publishes map as individual PCL points
-std::unique_ptr<cv::Mat> published_map;  // matrix will be publishing
-std::map<std::string, tf::StampedTransform> transforms;
-std::unique_ptr<tf::TransformListener> tf_listener;
+private:
+  void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc);
+  void publish(const cv::Mat &map, const cv::Mat &blurred, uint64_t stamp);
+  void setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp);
+  bool checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic);
+  bool getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg);
+  int discretize(radians angle) const;
+  void get_empty_points(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& empty_pc);
+  void filter_points_behind(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& filtered_pc);
+  void blur(cv::Mat& blurred_map);
 
-double resolution;
-double transform_max_wait_time;
-int start_x;  // start x location
-int start_y;  // start y location
-int length_y;
-int width_x;
-bool debug;
-double radius;
-RobotState state;
-RobotState state2;
+  cv_bridge::CvImage m_img_bridge;
 
-std::unique_ptr<Octomapper> octomapper;
-pc_map_pair pc_map_pair;
+  ros::Publisher m_map_pub;                                  // Publishes map
+  ros::Publisher m_blurred_pub;                              // Publishes blurred map
+  ros::Publisher m_debug_pub;                                // Debug version of above
+  ros::Publisher m_debug_pcl_pub;                            // Publishes map as individual PCL points
+  ros::Publisher m_debug_blurred_pc;                         // Publishes blurred map as individual PCL points
+  ros::Publisher m_ground_pub;                               // Publishes ground points
+  ros::Publisher m_nonground_pub;                            // Publishes non ground points
+  ros::Publisher m_sensor_pub;                               // Publishes lidar position
+  std::unique_ptr<cv::Mat> m_published_map;                  // Matrix will be publishing
+  std::map<std::string, tf::StampedTransform> m_transforms;  // Map of static transforms TODO: Refactor this
+  std::unique_ptr<tf::TransformListener> m_tf_listener;      // TF Listener
+
+  double m_resolution;
+  double m_transform_max_wait_time;
+  int m_start_x;   // start x (m)
+  int m_start_y;   // start y (m)
+  int m_length_x;  // length (m)
+  int m_width_y;   // width (m)
+  int m_kernel_size;
+  bool m_debug;
+  double m_radius;  // Radius to filter lidar points // TODO: Refactor to a new node
+  double m_lidar_miss_cast_distance;
+  double m_filter_distance;
+  double m_blur_std_dev;
+  radians m_filter_angle;
+  radians m_lidar_start_angle;
+  radians m_lidar_end_angle;
+  radians m_angular_resolution;
+  std::string m_lidar_topic;
+  RobotState m_state;          // Odom -> Base_link
+  RobotState m_odom_to_lidar;  // Odom -> Lidar
+
+  std::unique_ptr<Octomapper> m_octomapper;
+  pc_map_pair m_pc_map_pair;  // Struct storing both the octomap and the cv::Mat map
+};
+
+Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf::TransformListener()) }
+{
+  ros::NodeHandle nh;
+  ros::NodeHandle pNh("~");
+
+  igvc::getParam(pNh, "octree/resolution", m_resolution);
+  igvc::getParam(pNh, "map/length", m_length_x);
+  igvc::getParam(pNh, "map/width", m_width_y);
+  igvc::getParam(pNh, "map/start_x", m_start_x);
+  igvc::getParam(pNh, "map/start_y", m_start_y);
+  igvc::getParam(pNh, "node/debug", m_debug);
+  igvc::getParam(pNh, "sensor_model/max_range", m_radius);
+  igvc::getParam(pNh, "sensor_model/angular_resolution", m_angular_resolution);
+  igvc::getParam(pNh, "sensor_model/lidar_miss_cast_distance", m_lidar_miss_cast_distance);
+  igvc::getParam(pNh, "sensor_model/lidar_angle_start", m_lidar_start_angle);
+  igvc::getParam(pNh, "sensor_model/lidar_angle_end", m_lidar_end_angle);
+  igvc::getParam(pNh, "filter/filter_angle", m_filter_angle);
+  igvc::getParam(pNh, "filter/distance", m_filter_distance);
+  igvc::getParam(pNh, "blur/kernel_size", m_kernel_size);
+  igvc::getParam(pNh, "blur/std_dev", m_blur_std_dev);
+  igvc::getParam(pNh, "node/lidar_topic", m_lidar_topic);
+
+  m_octomapper = std::unique_ptr<Octomapper>(new Octomapper(pNh));
+  m_octomapper->create_octree(m_pc_map_pair);
+
+  ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(m_lidar_topic, 1, &Mapper::pc_callback, this);
+
+  m_published_map = std::unique_ptr<cv::Mat>(new cv::Mat(m_length_x, m_width_y, CV_8UC1));
+
+  m_map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
+  m_blurred_pub = nh.advertise<igvc_msgs::map>("/map/blurred", 1);
+
+  if (m_debug)
+  {
+    m_debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
+    m_debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
+    m_debug_blurred_pc = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl/blurred", 1);
+    m_ground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/ground_pcl", 1);
+    m_nonground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/nonground_pcl", 1);
+    m_sensor_pub = nh.advertise<visualization_msgs::Marker>("/sensor_pos", 1);
+  }
+
+  ros::spin();
+}
 
 /**
  * Updates <code>RobotState state</code> with the latest tf transform using the timestamp of the message passed in
- * @param msg <code>pcl::PointCloud</code> message with the timestamp used for looking up the tf transform
+ * @param[in] msg <code>pcl::PointCloud</code> message with the timestamp used for looking up the tf transform
  */
-void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
+bool Mapper::getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
+{
   tf::StampedTransform transform;
   tf::StampedTransform transform2;
   ros::Time messageTimeStamp;
   pcl_conversions::fromPCL(msg->header.stamp, messageTimeStamp);
-  if (tf_listener->waitForTransform("/odom", "/base_link", messageTimeStamp, ros::Duration(transform_max_wait_time))) {
-    tf_listener->lookupTransform("/odom", "/base_link", messageTimeStamp, transform);
-    state.setState(transform);
-    tf_listener->lookupTransform("/odom", "/lidar", messageTimeStamp, transform2);
-    state2.setState(transform2);
+  static ros::Duration wait_time = ros::Duration(m_transform_max_wait_time);
+  try
+  {
+    if (m_tf_listener->waitForTransform("/odom", "/base_link", messageTimeStamp,
+                                        wait_time))
+    {
+      m_tf_listener->lookupTransform("/odom", "/base_link", messageTimeStamp, transform);
+      m_state.setState(transform);
+      m_tf_listener->lookupTransform("/odom", "/lidar", messageTimeStamp, transform2);
+      m_odom_to_lidar.setState(transform2);
+      return true;
+    }
+    else
+    {
+      ROS_DEBUG("Failed to get transform from /base_link to /odom in time, using newest transforms");
+      m_tf_listener->lookupTransform("/odom", "/base_link", ros::Time(0), transform);
+      m_state.setState(transform);
+      m_tf_listener->lookupTransform("/odom", "/lidar", ros::Time(0), transform2);
+      m_odom_to_lidar.setState(transform2);
+      return true;
+    }
+  }
+  catch (const tf::TransformException &ex)
+  {
+    ROS_ERROR("tf Transform error");
+    ROS_ERROR("%s", ex.what());
+    return false;
+  }
+  catch(std::runtime_error& ex)
+  {
+    ROS_ERROR("runtime error");
+    ROS_ERROR("Runtime Exception at getOdomTransform: [%s]", ex.what());
+    return false;
   }
 }
 
@@ -69,71 +174,88 @@ void getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg) {
 /**
  * Populates <code>igvc_msgs::map message</code> with information from <code>sensor_msgs::Image</code> and the
  * timestamp from <code>pcl_stamp</code>
- * @param message message to be filled out
- * @param image image containing map data to be put into <code>message</code>
- * @param pcl_stamp time stamp from the pcl to be used for <code>message</code>
+ * @param[out] message message to be filled out
+ * @param[in] image image containing map data to be put into <code>message</code>
+ * @param[in] pcl_stamp time stamp from the pcl to be used for <code>message</code>
  */
-void setMsgValues(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp) {
+void Mapper::setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp)
+{
   pcl_conversions::fromPCL(pcl_stamp, image.header.stamp);
   pcl_conversions::fromPCL(pcl_stamp, message.header.stamp);
   message.header.frame_id = "/odom";
   message.image = image;
-  message.length = length_y;
-  message.width = width_x;
-  message.resolution = resolution;
-  message.orientation = state.yaw(); message.x = std::round(state.x() / resolution) + start_x;
-  message.y = std::round(state.y() / resolution) + start_y;
-  message.x_initial = start_x;
-  message.y_initial = start_y;
+  message.length = m_length_x / m_resolution;
+  message.width = m_width_y / m_resolution;
+  message.resolution = m_resolution;
+  message.orientation = m_state.yaw();
+  message.x = std::round(m_state.x() / m_resolution) + m_start_x / m_resolution;
+  message.y = std::round(m_state.y() / m_resolution) + m_start_y / m_resolution;
+  message.x_initial = m_start_x / m_resolution;
+  message.y_initial = m_start_y / m_resolution;
 }
 
 /**
  * Checks if transform from base_footprint to msg.header.frame_id exists
- * @param msg
- * @param topic
+ * @param[in] msg
+ * @param[in] topic Topic to check for
  */
-void checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic) {
-  if (transforms.find(topic) == transforms.end()) {
+bool Mapper::checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic)
+{
+  if (m_transforms.find(topic) == m_transforms.end())
+  {
     // Wait for transform between frame_id (ex. /scan/pointcloud) and base_footprint.
     ros::Time messageTimeStamp;
     pcl_conversions::fromPCL(msg->header.stamp, messageTimeStamp);
-    if (tf_listener->waitForTransform("/base_footprint", msg->header.frame_id, messageTimeStamp, ros::Duration(3.0))) {
-      ROS_INFO_STREAM("\n\ngetting transform for " << topic << "\n\n");
+    ROS_INFO_STREAM("Getting transform for " << topic << " from " << msg->header.frame_id << " to /base_footprint \n");
+    if (m_tf_listener->waitForTransform("/base_footprint", msg->header.frame_id, messageTimeStamp, ros::Duration(3.0)))
+    {
       tf::StampedTransform transform;
-      tf_listener->lookupTransform("/base_footprint", msg->header.frame_id, messageTimeStamp, transform);
-      transforms.insert(std::pair<std::string, tf::StampedTransform>(topic, transform));
-    } else {
-      ROS_ERROR_STREAM("\n\nfailed to find transform using empty transform\n\n");
+      m_tf_listener->lookupTransform("/base_footprint", msg->header.frame_id, messageTimeStamp, transform);
+      m_transforms.insert(std::pair<std::string, tf::StampedTransform>(topic, transform));
+      ROS_INFO_STREAM("Found static transform from " << msg->header.frame_id << " to /base_footprint");
+    }
+    else
+    {
+      ROS_ERROR_STREAM("Failed to find transform using empty transform");
+      return false;
     }
   }
+  return true;
 }
 
 /**
  * Publishes the given map at the given stamp
- * @param map map to be published
- * @param stamp pcl stamp of the timestamp to be used
+ * @param[in] map map to be published
+ * @param[in] stamp pcl stamp of the timestamp to be used
  */
-void publish(const cv::Mat &map, uint64_t stamp) {
-  igvc_msgs::map message;    // >> message to be sent
-  sensor_msgs::Image image;  // >> image in the message
-  img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, map);
-  img_bridge.toImageMsg(image);  // from cv_bridge to sensor_msgs::Image
+void Mapper::publish(const cv::Mat &map, const cv::Mat &blurred_map, uint64_t stamp)
+{
+  igvc_msgs::map message;
+  igvc_msgs::map blurred_message;
+  sensor_msgs::Image image;
+  sensor_msgs::Image blurred_image;
+  m_img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, map);
+  const cv_bridge::CvImage &blurred_img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, map);
+  m_img_bridge.toImageMsg(image);
+  blurred_img_bridge.toImageMsg(blurred_image);
 
-  setMsgValues(message, image, stamp);
-  map_pub.publish(message);
-  if (debug) {
-    debug_pub.publish(image);
+  setMessageMetadata(message, image, stamp);
+  setMessageMetadata(blurred_message, image, stamp);
+  m_map_pub.publish(message);
+  m_blurred_pub.publish(blurred_message);
+  if (m_debug) {
+    m_debug_pub.publish(image);
     // ROS_INFO_STREAM("\nThe robot is located at " << state);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid =
         boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
-    for (int i = 0; i < width_x/resolution; i++) {
-      for (int j = 0; j < length_y/resolution; j++) {
+    for (int i = 0; i < m_width_y/m_resolution; i++) {
+      for (int j = 0; j < m_length_x/m_resolution; j++) {
         pcl::PointXYZRGB p;
         uchar prob = map.at<uchar>(i, j);
         if (prob > 127) {
           p = pcl::PointXYZRGB();
-          p.x = (i * resolution) - (width_x / 2);
-          p.y = (j * resolution) - (length_y / 2);
+          p.x = static_cast<float>((i * m_resolution) - (m_width_y / 2));
+          p.y = static_cast<float>((j * m_resolution) - (m_length_x / 2));
           p.r = 0;
           p.g = static_cast<uint8_t>((prob - 127) * 2);
           p.b = 0;
@@ -141,8 +263,8 @@ void publish(const cv::Mat &map, uint64_t stamp) {
           //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
         } else if (prob < 127) {
           p = pcl::PointXYZRGB();
-          p.x = (i * resolution) - (width_x / 2);
-          p.y = (j * resolution) - (length_y / 2);
+          p.x = static_cast<float>((i * m_resolution) - (m_width_y / 2));
+          p.y = static_cast<float>((j * m_resolution) - (m_length_x / 2));
           p.r = 0;
           p.g = 0;
           p.b = static_cast<uint8_t>((127 - prob) * 2);
@@ -156,140 +278,174 @@ void publish(const cv::Mat &map, uint64_t stamp) {
     fromOcuGrid->header.frame_id = "/odom";
     fromOcuGrid->header.stamp = stamp;
     //    ROS_INFO_STREAM("Size: " << fromOcuGrid->points.size() << " / " << (width_x * length_y));
-    debug_pcl_pub.publish(fromOcuGrid);
+    m_debug_pcl_pub.publish(fromOcuGrid);
+  }
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr blurredPC =
+      boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
+  for (int i = 0; i < m_width_y/m_resolution; i++) {
+    for (int j = 0; j < m_length_x/m_resolution; j++) {
+      pcl::PointXYZRGB p;
+      uchar prob = blurred_map.at<uchar>(i, j);
+      if (prob > 127) {
+        p = pcl::PointXYZRGB();
+        p.x = static_cast<float>((i * m_resolution) - (m_width_y / 2));
+        p.y = static_cast<float>((j * m_resolution) - (m_length_x / 2));
+        p.r = 0;
+        p.g = static_cast<uint8_t>((prob - 127) * 2);
+        p.b = 0;
+        blurredPC->points.push_back(p);
+        //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
+      } else if (prob < 127) {
+        p = pcl::PointXYZRGB();
+        p.x = static_cast<float>((i * m_resolution) - (m_width_y / 2));
+        p.y = static_cast<float>((j * m_resolution) - (m_length_x / 2));
+        p.r = 0;
+        p.g = 0;
+        p.b = static_cast<uint8_t>((127 - prob) * 2);
+        blurredPC->points.push_back(p);
+        //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
+      } else if (prob == 127) {
+      }
+      // Set x y coordinates as the center of the grid cell.
+    }
+  }
+  blurredPC->header.frame_id = "/odom";
+  blurredPC->header.stamp = stamp;
+  //    ROS_INFO_STREAM("Size: " << fromOcuGrid->points.size() << " / " << (width_x * length_y));
+  m_debug_blurred_pc.publish(blurredPC);
+}
+
+/**
+ * Discretizes angle to ints according to the angular resolution of the lidar
+ * @param angle
+ * @return
+ */
+inline int Mapper::discretize(radians angle) const
+{
+  static double coeff = 1 / m_angular_resolution;
+  return static_cast<int>(std::round(coeff * angle));
+}
+
+/**
+ * Returns a pcl::PointCloud of points which have not been detected by the lidar scan, according to the angular resolution
+ * @param pc lidar scan
+ * @param empty_pc points that are found to be free
+ */
+void Mapper::get_empty_points(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& empty_pc)
+{
+  // Iterate over pointcloud, insert discretized angles into set
+  std::unordered_set<int> discretized_angles{};
+  for (size_t i = 0; i < pc.size(); ++i)
+  {
+    double angle = atan2(pc.at(i).y, pc.at(i).x);
+    discretized_angles.emplace(discretize(angle));
+  }
+
+  // For each angle, if it's not in the set (empty), put it into a pointcloud
+  static double coeff = 1 / m_angular_resolution;
+  // From Robot's frame. Need to rotate angle to world frame
+  for (int i = static_cast<int>(m_lidar_start_angle * coeff); i < m_lidar_end_angle * coeff; i++)
+  {
+    if (discretized_angles.find(i) == discretized_angles.end())
+    {
+      double angle = i * m_angular_resolution;
+      pcl::PointXYZ point{ static_cast<float>(m_lidar_miss_cast_distance * cos(angle)), static_cast<float>(m_lidar_miss_cast_distance * sin(angle)),
+                           0 };
+      empty_pc.points.emplace_back(point);
+    }
+  }
+}
+
+/**
+ * Filters points behind the robot
+ * @param pc
+ * @param filtered_pc
+ */
+void Mapper::filter_points_behind(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& filtered_pc)
+{
+  static double start_angle = - M_PI + m_filter_angle/2;
+  static double end_angle = M_PI - m_filter_angle/2;
+  static double squared_distance = m_filter_distance * m_filter_distance;
+  // Iterate over pointcloud, insert discretized angles into set
+  for (size_t i = 0; i < pc.size(); ++i)
+  {
+    double angle = atan2(pc.at(i).y, pc.at(i).x);
+    if ((-M_PI <= angle && angle < start_angle) || (end_angle < angle && angle <= M_PI ))
+    {
+      if (pc.at(i).x * pc.at(i).x + pc.at(i).y * pc.at(i).y > squared_distance) {
+        filtered_pc.points.emplace_back(pc.at(i));
+      }
+    } else {
+      filtered_pc.points.emplace_back(pc.at(i));
+    }
   }
 }
 
 /**
  * Callback for pointcloud. Filters the lidar scan, then inserts it into the octree.
- * @param pc lidar scan
+ * @param[in] pc Lidar scan
  */
-void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc) {
-  // Pass through filter to only keep ones closest to us
-  pcl::PointCloud<pcl::PointXYZ>::Ptr small(new pcl::PointCloud<pcl::PointXYZ>);
-  float dist;
-  for (int point_i = 0; point_i < pc->size(); ++point_i) {
-    dist = pc->at(point_i).x * pc->at(point_i).x + pc->at(point_i).y * pc->at(point_i).y + pc->at(point_i).z * pc->at(point_i).z;
-    if (dist <= radius*radius*radius) {
-      small->push_back(pc->at(point_i));
-    }
-  }
-  //  ROS_INFO("Got Pointcloud");
+void Mapper::pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
+{
   // make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
   // Check if static transform already exists for this topic.
-  checkExistsStaticTransform(pc, "/scan/pointcloud");
+  if (!checkExistsStaticTransform(pc, "/scan/pointcloud"))
+  {
+    ROS_ERROR("Sleeping 2 seconds then trying again...");
+    ros::Duration(2).sleep();
+    return;
+  }
 
   // Lookup transform form Ros Localization for position
-  getOdomTransform(pc);
+  if (!getOdomTransform(pc))
+  {
+    ROS_ERROR("Sleeping 2 seconds then trying again...");
+    ros::Duration(2).sleep();
+    return;
+  }
+
+  pcl::PointCloud<pcl::PointXYZ> empty_pc{};
+  pcl::PointCloud<pcl::PointXYZ> filtered_pc{};
+  get_empty_points(*pc, empty_pc);
+  filter_points_behind(*pc, filtered_pc);
+
+  filtered_pc.header = pc->header;
+  m_ground_pub.publish(filtered_pc);
 
   // Apply transformation from lidar to base_link aka robot pose
-  pcl_ros::transformPointCloud(*small, *transformed, transforms.at("/scan/pointcloud"));
-  pcl_ros::transformPointCloud(*transformed, *transformed, state.transform);
+  pcl_ros::transformPointCloud(filtered_pc, *transformed, m_transforms.at(m_lidar_topic));
+  pcl_ros::transformPointCloud(*transformed, *transformed, m_state.transform);
+  pcl_ros::transformPointCloud(empty_pc, empty_pc, m_transforms.at(m_lidar_topic));
+  pcl_ros::transformPointCloud(empty_pc, empty_pc, m_state.transform);
 
-  //  Eigen::Affine3f transform_to_odom = Eigen::Affine3f::Identity();
-  //  // TODO: Is this backward?
-  //  transform_to_odom.rotate(Eigen::AngleAxisf(state.yaw(), Eigen::Vector3f::UnitZ()));
-  //  Eigen::Affine3d transform_to_odom;
-  //  tf::transformTFToEigen(state.transform.inverse(), transform_to_odom);
+  m_octomapper->insert_scan(m_odom_to_lidar.transform.getOrigin(), m_pc_map_pair, *transformed, empty_pc);
 
-  //  ROS_INFO_STREAM("State.transform: " << state.transform.getOrigin().x() << ", " << state.transform.getOrigin().y() << ", " << state.transform.getOrigin().z());
-  //  ROS_INFO_STREAM("State.transform: " << temp.getOrigin().x() << ", " << temp.getOrigin().y() << ", " << temp.getOrigin().z());
+  // Get updated map from octomapper
+  m_octomapper->get_updated_map(m_pc_map_pair);
 
-  pcl::PointCloud<pcl::PointXYZ> ground;
-  pcl::PointCloud<pcl::PointXYZ> nonground;
-
-  //  pcl::transformPointCloud(*transformed, *transformed2, transform_to_odom);
-//  octomapper->filter_ground_plane(*transformed, ground, nonground);
-//
-//  ground.header.frame_id = "/odom";
-//  transformed->header.frame_id = "/odom";
-//  nonground.header.frame_id = "/odom";
-//  ground.header.stamp = pc->header.stamp;
-//  transformed->header.stamp = pc->header.stamp;
-//  nonground.header.stamp = pc->header.stamp;
-//
-//  nonground_pub.publish(nonground);
-//  ground_pub.publish(ground);
-
-  visualization_msgs::Marker points;
-  points.header.frame_id = "/odom";
-  points.header.stamp = ros::Time::now();
-  points.pose.position.x = state2.transform.getOrigin().getX();
-  points.pose.position.y = state2.transform.getOrigin().getY();
-  points.pose.position.z = state2.transform.getOrigin().getZ();
-
-  points.action = visualization_msgs::Marker::ADD;
-  points.id = 0;
-  points.type = visualization_msgs::Marker::CUBE;
-  points.scale.x = 0.05;
-  points.scale.y = 0.05;
-  points.scale.z = 0.05;
-  points.color.g = 1.0f;
-  points.color.a = 1.0;
-
-  sensor_pub.publish(points);
-
-  octomapper->insert_scan(state2.transform.getOrigin(), pc_map_pair, *transformed);
-
-  //  ROS_INFO("Publishing");
-  // Publish map
-  //  ROS_INFO_STREAM("octomap tree size1: " << pc_map_pair.octree->getNumLeafNodes());
-  octomapper->get_updated_map(pc_map_pair);
-  //  ROS_INFO_STREAM("octomap tree size2: " << pc_map_pair.octree->getNumLeafNodes());
-  publish(*(pc_map_pair.map), pc->header.stamp);
+  // Blur map (Test?) for pathfinding
+  cv::Mat blurred = m_pc_map_pair.map->clone();
+  blur(blurred);
+  publish(*(m_pc_map_pair.map), blurred, pc->header.stamp);
 }
 
 /**
- * Cleanup method to release resouces held
- * @param sig
+ * Applied a gaussian blur with a kernel size of m_kernel_size
+ * @param[in/out] blurred_map The map to be blurred
  */
-void node_cleanup(int sig)
+void Mapper::blur(cv::Mat &blurred_map)
 {
-  published_map.reset();
-  published_map.reset();
-  octomapper.reset();
-  tf_listener.reset();
-  ros::shutdown();
+  cv::Mat original = blurred_map.clone();
+//  cv::GaussianBlur(blurred_map, blurred_map, cv::Size(m_kernel_size, m_kernel_size), m_blur_std_dev, m_blur_std_dev);
+  cv::blur(blurred_map, blurred_map, cv::Size(m_kernel_size, m_kernel_size));
+  cv::max(original, blurred_map, blurred_map);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   ros::init(argc, argv, "mapper");
-  ros::NodeHandle nh;
-  ros::NodeHandle pNh("~");
-  std::string topics;
-
-  signal(SIGINT, node_cleanup);
-
-  std::list<ros::Subscriber> subs;
-  tf_listener = std::unique_ptr<tf::TransformListener>(new tf::TransformListener());
-
-  octomapper = std::unique_ptr<Octomapper>(new Octomapper(pNh));
-  octomapper->create_octree(pc_map_pair);
-
-  // assumes all params inputted in meters
-  igvc::getParam(pNh, "octree/resolution", resolution);
-  igvc::getParam(pNh, "map/length", length_y);
-  igvc::getParam(pNh, "map/width", width_x);
-  igvc::getParam(pNh, "debug", debug);
-  igvc::getParam(pNh, "sensor_model/max_range", radius);
-
-  // convert from meters to grid
-  ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>("/scan/pointcloud", 1, &pc_callback);
-
-  published_map = std::unique_ptr<cv::Mat>(new cv::Mat(length_y, width_x, CV_8UC1));
-
-  map_pub = nh.advertise<igvc_msgs::map>("/map", 1);
-
-  if (debug) {
-    debug_pub = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
-    debug_pcl_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
-    ground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/ground_pcl", 1);
-    nonground_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/nonground_pcl", 1);
-    sensor_pub = nh.advertise<visualization_msgs::Marker>("/sensor_pos", 1);
-  }
-
-  ros::spin();
+  Mapper mapper;
 }
