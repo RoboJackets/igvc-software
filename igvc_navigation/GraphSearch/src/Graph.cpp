@@ -489,39 +489,39 @@ float Graph::euclidianHeuristic(const std::tuple<int, int>& ind)
 
 std::vector<Node> Graph::getNodesAroundCellWithConfigurationSpace(const Cell& cell)
 {
-    std::queue<Node> openList;           // nodes to evaluate
-    std::unordered_set<Node> closedSet;  // evaluated nodes
-    std::vector<Node> cellNodes;         // nodes that require update
+  std::queue<Node> openList;           // nodes to evaluate
+  std::unordered_set<Node> closedSet;  // evaluated nodes
+  std::vector<Node> cellNodes;         // nodes that require update
 
-    Node startNode(cell.x, cell.y);
+  Node startNode(cell.x, cell.y);
 
-    openList.push(startNode);
-    closedSet.insert(startNode);
-    cellNodes.push_back(startNode);
-    // number of cells on all sides that constitute C-space
-    int separationDist = static_cast<int>(ceil(ConfigurationSpace / Resolution));
+  openList.push(startNode);
+  closedSet.insert(startNode);
+  cellNodes.push_back(startNode);
+  // number of cells on all sides that constitute C-space
+  int separationDist = static_cast<int>(ceil(ConfigurationSpace / Resolution));
 
-    // perform a simple breadth-first search to radially look for nodes around C_space
-    while (!openList.empty())
+  // perform a simple breadth-first search to radially look for nodes around C_space
+  while (!openList.empty())
+  {
+    Node currNode = openList.front();
+    openList.pop();
+
+    for (Node n : this->nbrs(currNode))
     {
-      Node currNode = openList.front();
-      openList.pop();
+      // node already considered
+      if (closedSet.find(n) != closedSet.end())
+        continue;
+      else
+        closedSet.insert(n);
 
-      for (Node n : this->nbrs(currNode))
+      // node is within the configuration space
+      if (startNode.distTo(static_cast<std::tuple<float, float>>(n.getIndex())) < separationDist)
       {
-        // node already considered
-        if (closedSet.find(n) != closedSet.end())
-          continue;
-        else
-          closedSet.insert(n);
-
-        // node is within the configuration space
-        if (startNode.distTo(static_cast<std::tuple<float, float>>(n.getIndex())) < separationDist)
-        {
-          openList.push(n);
-          cellNodes.push_back(std::move(n));
-        }
+        openList.push(n);
+        cellNodes.push_back(std::move(n));
       }
     }
+  }
   return cellNodes;
 }
