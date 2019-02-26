@@ -1,13 +1,19 @@
 /**
-D* lite path planner implementation.
+Field D* Incremental Path Planner Implementation
 
-D* lite is an incremental search algorithm that keeps track of data from previous
+Field D* is an incremental search algorithm that keeps track of data from previous
 searches to speed up replanning. The first search through the grid space is
 equivalent to A*, with nodes in the priority queue ordered by a path cost estimate:
-    f(s) = g(s) + h(s_start, s)
+
+    f(s) = g(s) + h(s_start, s) + key_modifier
 
 When the graph is updated with new sensor information and the path needs replanning,
 comparatively few nodes need expanding to re-calculate the optimal path.
+
+Unlike D* Lite, the Field D* Path Planning algorithm is an "any-angle path planner",
+meaning it can compute global paths that are not restricted to a specific heading
+increment. As such, The Field D* path planning algorithm can generate smooth paths
+around obstacles and to the goal node.
 
 The FIELDDPLANNER interfaces with the Graph object to calculate the optimal
 path through the occupancy grid in an eight-connected grid space. This means
@@ -17,12 +23,8 @@ Author: Alejandro Escontrela <aescontrela3@gatech.edu>
 Date Created: December 22nd, 2018
 
 Sources:
-D* Lite [Sven Koenig, Maxim Likhachev]
-http://idm-lab.org/bib/abstracts/papers/aaai02b.pdf
-
-Optimal and Efficient Path Planning for Unknown and Dynamic Environments  (D*)
-[Anthony Stentz]
-https://pdfs.semanticscholar.org/77e9/b970024bc5da2b726491823f7d617a303811.pdf
+Field D* [Dave Ferguson, Anthony Stentz]
+https://pdfs.semanticscholar.org/58f3/bc8c12ee8df30b3e9564fdd071e729408653.pdf
 
 MIT Advanced Lecture 1: Incremental Path Planning
 [MIT OCW]
