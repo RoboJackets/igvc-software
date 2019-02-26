@@ -27,10 +27,10 @@ Date Created: December 16, 2018
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include <queue>
 #include <tuple>
 #include <utility>
 #include <vector>
-#include <queue>
 
 /**
 A cell represents a grid in the graph. Each cell object contains fields <x,y>
