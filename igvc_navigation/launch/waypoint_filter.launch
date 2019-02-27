@@ -1,0 +1,6 @@
+<launch>
+    <node name="waypoint_filter" pkg="igvc_navigation" type="waypoint_filter" output="screen">
+        <param name="input_topic" type="string" value="/waypoint_unfiltered"/>
+        <param name="distance_threshold" type="double" value="1"/>
+    </node>
+</launch>
