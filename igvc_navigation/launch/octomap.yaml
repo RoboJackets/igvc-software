@@ -4,7 +4,7 @@ octree:
 sensor_model:
   hit: 0.8
   miss: 0.3
-  miss_empty: 0.49
+  miss_empty: 0.3
   min: 0.03
   max: 0.97
   max_range: 50
