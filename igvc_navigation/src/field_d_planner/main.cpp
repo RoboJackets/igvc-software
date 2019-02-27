@@ -119,15 +119,16 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
   int goal_x, goal_y;
   goal_x = static_cast<int>(std::round(msg->point.x / planner.NodeGrid.Resolution)) + x_initial;
   goal_y = static_cast<int>(std::round(msg->point.y / planner.NodeGrid.Resolution)) + y_initial;
-  std::tuple<int, int> newGoal = std::make_tuple(goal_x, goal_y);
+
+  std::tuple<int, int> new_goal = std::make_tuple(goal_x, goal_y);
 
   // re-initialize graph search problem if goal has changed
-  if (planner.NodeGrid.Goal.getIndex() != newGoal)
+  if (planner.NodeGrid.Goal.getIndex() != new_goal)
     goal_changed = true;
 
-  planner.NodeGrid.setGoal(newGoal);
+  planner.NodeGrid.setGoal(new_goal);
 
-  float distance_to_goal = planner.NodeGrid.euclidianHeuristic(newGoal) * planner.NodeGrid.Resolution;
+  float distance_to_goal = planner.NodeGrid.euclidianHeuristic(new_goal) * planner.NodeGrid.Resolution;
 
   ROS_INFO_STREAM((goal_changed ? "New" : "Same") << " waypoint received. Search Problem Goal = " << goal_x << ", "
                                                   << goal_y << ". Distance: " << distance_to_goal << "m.");
@@ -135,8 +136,8 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
   if (distance_to_goal > maximum_distance)
     ROS_WARN_STREAM("Planning to waypoint more than " << maximum_distance
                                                       << "m. away - distance = " << distance_to_goal);
-
-  initial_goal_set = true;
+  else
+    initial_goal_set = true;
 }
 
 //----------------------------- main ----------------------------------//
@@ -153,19 +154,19 @@ int main(int argc, char** argv)
   ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
 
   // publish a 2D pointcloud of expanded nodes for visualization
-  bool publish_expanded;  // publish a pointcloud of nodes expanded in the search
+  bool publish_expanded;
   pcl::PointCloud<pcl::PointXYZRGB> expanded_cloud;
   ros::Publisher expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded", 1);
   expanded_cloud.header.frame_id = "odom";
-
-  // publish path for path_follower
-  ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 
   double configuration_space;  // configuration space
   double goal_range;           // distance from goal at which a node is considered the goal
   double rate_time;            // path planning/replanning rate
   bool follow_old_path;        // follow the previously generated path if no optimal path currently exists
   int lookahead_dist;          // number of cell traversals to look ahead at when decising next position along path
+
+  // publish path for path_follower
+  ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 
   igvc::getParam(pNh, "c_space", configuration_space);
   igvc::getParam(pNh, "maximum_distance", maximum_distance);
@@ -178,10 +179,10 @@ int main(int argc, char** argv)
   planner.NodeGrid.setConfigurationSpace(static_cast<float>(configuration_space));
   planner.setGoalDistance(static_cast<float>(goal_range));
 
+  ros::Rate rate(rate_time);  // path update rate
+
   int num_nodes_updated = 0;
   int num_nodes_expanded = 0;
-
-  ros::Rate rate(rate_time);  // path update rate
 
   bool initialize_search = true;  // set to true if the search problem must be initialized
 
@@ -190,7 +191,13 @@ int main(int argc, char** argv)
     ros::spinOnce();  // handle subscriber callbacks
 
     // don't plan unless the map has been initialized and a goal node has been set
-    if (initialize_graph || !initial_goal_set)
+    if (initialize_graph)
+      continue;
+    else
+      planner.NodeGrid.updateGraph(map);
+
+    // don't plan unless a goal node has been set
+    if (!initial_goal_set)
       continue;
 
     if (initialize_search)
@@ -204,11 +211,18 @@ int main(int argc, char** argv)
       continue;
     }
 
+    // gather cells with updated edge costs and update affected nodes
+    num_nodes_updated = planner.updateNodesAroundUpdatedCells();
+
+    if (num_nodes_updated > 0)
+      ROS_INFO_STREAM(num_nodes_updated << " nodes updated");
+
     // only update the graph if nodes have been updated
     if ((num_nodes_updated > 0) || initialize_search)
     {
       ros::Time begin = ros::Time::now();
       num_nodes_expanded = planner.computeShortestPath();
+
       double elapsed = (ros::Time::now() - begin).toSec();
       ROS_INFO_STREAM(num_nodes_expanded << " nodes expanded in " << elapsed << "s.");
       if (initialize_search)
@@ -216,14 +230,6 @@ int main(int argc, char** argv)
     }
 
     planner.constructOptimalPath(lookahead_dist);
-
-    // gather cells with updated edge costs and update affected nodes
-    planner.NodeGrid.updateGraph(map);
-    num_nodes_updated = planner.updateNodesAroundUpdatedCells();
-    if (num_nodes_updated > 0)
-    {
-      ROS_INFO_STREAM(num_nodes_updated << " nodes updated");
-    }
 
     if (publish_expanded)
       publish_expanded_set(planner.getExplored(), expanded_cloud, expanded_pub);

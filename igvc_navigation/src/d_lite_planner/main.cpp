@@ -32,7 +32,7 @@ Date Created: December 22nd, 2018
 std::mutex planning_mutex;
 
 igvc_msgs::mapConstPtr map;  // Most up-to-date map
-DLitePlanner dlite;          // D* Lite path planner
+DLitePlanner planner;        // D* Lite path planner
 int x_initial, y_initial;    // Index for initial x and y location in search space
 
 double maximum_distance;  // maximum distance to goal node before warning messages spit out
@@ -66,7 +66,7 @@ void publish_expanded_set(const std::vector<std::tuple<int, int>>& inds,
     p.y = static_cast<float>(std::get<1>(ind) - y_initial) * map->resolution;
     p.z = -0.05f;
 
-    if (dlite.getG(Node(std::get<0>(ind), std::get<1>(ind))) == std::numeric_limits<float>::infinity())
+    if (planner.getG(Node(std::get<0>(ind), std::get<1>(ind))) == std::numeric_limits<float>::infinity())
     {
       uint8_t r = 255, g = 0, b = 0;  // Example: Red color
       uint32_t rgb = ((uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b);
@@ -104,7 +104,7 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
   {
     x_initial = static_cast<int>(msg->x_initial);  // initial x coord of graph search problem
     y_initial = static_cast<int>(msg->y_initial);  // initial y coord of graph search problem
-    dlite.NodeGrid.initializeGraph(msg);
+    planner.NodeGrid.initializeGraph(msg);
     initialize_graph = false;
   }
 }
@@ -121,17 +121,17 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
   std::lock_guard<std::mutex> lock(planning_mutex);
 
   int goal_x, goal_y;
-  goal_x = static_cast<int>(std::round(msg->point.x / dlite.NodeGrid.Resolution)) + x_initial;
-  goal_y = static_cast<int>(std::round(msg->point.y / dlite.NodeGrid.Resolution)) + y_initial;
+  goal_x = static_cast<int>(std::round(msg->point.x / planner.NodeGrid.Resolution)) + x_initial;
+  goal_y = static_cast<int>(std::round(msg->point.y / planner.NodeGrid.Resolution)) + y_initial;
 
   std::tuple<int, int> new_goal = std::make_tuple(goal_x, goal_y);
 
-  if (dlite.NodeGrid.Goal.getIndex() != new_goal)
+  if (planner.NodeGrid.Goal.getIndex() != new_goal)
     goal_changed = true;  // re-initialize graph search problem
 
-  dlite.NodeGrid.setGoal(new_goal);
+  planner.NodeGrid.setGoal(new_goal);
 
-  float distance_to_goal = dlite.NodeGrid.euclidianHeuristic(new_goal) * dlite.NodeGrid.Resolution;
+  float distance_to_goal = planner.NodeGrid.euclidianHeuristic(new_goal) * planner.NodeGrid.Resolution;
 
   ROS_INFO_STREAM((goal_changed ? "New" : "Same") << " waypoint received. Search Problem Goal = " << goal_x << ", "
                                                   << goal_y << ". Distance: " << distance_to_goal << "m.");
@@ -177,8 +177,8 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, "publish_expanded", publish_expanded);
   igvc::getParam(pNh, "follow_old_path", follow_old_path);
 
-  dlite.NodeGrid.setConfigurationSpace(static_cast<float>(configuration_space));
-  dlite.setGoalDistance(static_cast<float>(goal_range));
+  planner.NodeGrid.setConfigurationSpace(static_cast<float>(configuration_space));
+  planner.setGoalDistance(static_cast<float>(goal_range));
   ros::Rate rate(rate_time);
 
   int num_nodes_updated;
@@ -194,24 +194,24 @@ int main(int argc, char** argv)
     if (initialize_graph)
       continue;
     else
-      dlite.NodeGrid.updateGraph(map);
+      planner.NodeGrid.updateGraph(map);
 
     // don't plan unless a goal node has been set
     if (!initial_goal_set)
       continue;
 
     if (initialize_search)
-      dlite.initializeSearch();
+      planner.initializeSearch();
 
     if (goal_changed)
     {
       ROS_INFO_STREAM("New Goal Received. Initializing Search...");
-      dlite.reInitializeSearch();
+      planner.reInitializeSearch();
       initialize_search = true;
       goal_changed = false;
     }
 
-    num_nodes_updated = dlite.updateNodesAroundUpdatedCells();
+    num_nodes_updated = planner.updateNodesAroundUpdatedCells();
 
     if (num_nodes_updated > 0)
       ROS_INFO_STREAM(num_nodes_updated << " nodes updated");
@@ -219,7 +219,7 @@ int main(int argc, char** argv)
     if ((num_nodes_updated > 0) || initialize_search)
     {
       ros::Time begin = ros::Time::now();
-      num_nodes_expanded = dlite.computeShortestPath();
+      num_nodes_expanded = planner.computeShortestPath();
 
       double elapsed = (ros::Time::now() - begin).toSec();
       ROS_INFO_STREAM(num_nodes_expanded << " nodes expanded in " << elapsed << "s.");
@@ -228,22 +228,22 @@ int main(int argc, char** argv)
     }
 
     if (publish_expanded)
-      publish_expanded_set(dlite.getExplored(), expanded_cloud, expanded_pub);
+      publish_expanded_set(planner.getExplored(), expanded_cloud, expanded_pub);
 
-    dlite.constructOptimalPath();
+    planner.constructOptimalPath();
 
     nav_msgs::Path path_msg;
     path_msg.header.stamp = ros::Time::now();
     path_msg.header.frame_id = "odom";
 
-    for (std::tuple<float, float> point : dlite.Path)
+    for (std::tuple<float, float> point : planner.Path)
     {
       auto it = path_msg.poses.begin();
       geometry_msgs::PoseStamped pose;
       pose.header.stamp = path_msg.header.stamp;
       pose.header.frame_id = path_msg.header.frame_id;
-      pose.pose.position.x = (std::get<0>(point) - x_initial) * dlite.NodeGrid.Resolution;
-      pose.pose.position.y = (std::get<1>(point) - y_initial) * dlite.NodeGrid.Resolution;
+      pose.pose.position.x = (std::get<0>(point) - x_initial) * planner.NodeGrid.Resolution;
+      pose.pose.position.y = (std::get<1>(point) - y_initial) * planner.NodeGrid.Resolution;
       path_msg.poses.insert(it, pose);
     }
 
