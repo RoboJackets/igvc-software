@@ -3,8 +3,8 @@
     <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" >
         <param name="SERIAL_PORT" type="string" value="/dev/ttyACM0" />
         <rosparam param="imu_orientation_correction">[0, 1, 0,
-                                                -1, 0, 0,
-                                                0, 0, 1]</rosparam>
+                                                     -1, 0, 0,
+                                                      0, 0, 1]</rosparam>
         <remap from="imu" to="imu/top" />
     </node>
 </launch>

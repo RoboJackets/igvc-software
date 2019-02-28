@@ -134,7 +134,7 @@ const std::string YostLabDriver::getMIMode()
 //! Run the serial sync
 void YostLabDriver::run()
 {
-  this->SerialWriteString(SET_AXIS_DIRECTIONS_TOP_IMU);
+  this->SerialWriteString(SET_AXIS_DIRECTIONS_IMU);
   this->startGyroCalibration();
   this->getSoftwareVersion();
   this->getAxisDirection();
@@ -223,4 +223,3 @@ void YostLabDriver::run()
     ros::spinOnce();
   }
 }
-
