@@ -134,8 +134,7 @@ private:
   static constexpr auto BEGIN_MI_MODE_FIELD_CALIBRATION = ":114\n";
   static constexpr auto SET_AXIS_DIRECTIONS_ENU     = ":116,8\n";
   static constexpr auto SET_AXIS_DIRECTIONS_DEFAULT = ":116,000\n";
-  static constexpr auto SET_AXIS_DIRECTIONS_TOP_IMU = ":116,001\n";
-  static constexpr auto SET_AXIS_DIRECTIONS_BOTTOM_IMU = ":116,3\n";
+  static constexpr auto SET_AXIS_DIRECTIONS_IMU = ":116,001\n";
   static constexpr auto SET_GYRO_RANGE = ":125,1\n";
   static constexpr auto COMMIT_SETTINGS=":225\n";
   static constexpr auto SET_FILTER_MODE_IMU=":123,1\n";
@@ -151,4 +150,3 @@ private:
   //! logger space
   static constexpr auto logger = "[ YostImuDriver ] ";
 }; // YostLabDriver
-
