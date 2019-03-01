@@ -158,8 +158,8 @@ Key FieldDPlanner::calculateKey(const Node& s)
   // calculate the key to order the node in the PQ with. KeyModifier is the
   // key modifier, a value which corrects for the distance traveled by the robot
   // since the search began (source: D* Lite)
-  return Key(std::floor(cost_so_far + NodeGrid.euclidianHeuristic(s.getIndex()) + NodeGrid.KeyModifier),
-             std::floor(cost_so_far));
+  return Key(std::round(cost_so_far + NodeGrid.euclidianHeuristic(s.getIndex()) + NodeGrid.KeyModifier),
+             std::round(cost_so_far));
 }
 
 void FieldDPlanner::initializeSearch()
