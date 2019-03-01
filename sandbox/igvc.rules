@@ -1,4 +1,4 @@
-SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{bcdDevice}=="0100", SYMLINK+="igvc_lidar", GROUP="plugdev"
+SUBSYSTEM=="tty", DRIVER=="", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="igvc_lidar", GROUP="plugdev"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001",ATTRS{serial}=="A105BMON", SYMLINK+="igvc_imu"
 KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0825", ATTRS{bcdDevice}=="0012", ATTRS{serial}=="21AD0B10", SYMLINK+="igvc_usb_cam_right"
 KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0825", ATTRS{bcdDevice}=="0012", ATTRS{serial}=="DA101B10", SYMLINK+="igvc_usb_cam_left"
