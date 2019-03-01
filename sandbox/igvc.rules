@@ -6,5 +6,6 @@ KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", ATTRS{bcdDe
 SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303",ATTRS{bcdDevice}=="0400", SYMLINK+="igvc_gps"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1f00", ATTRS{idProduct}=="2012",ATTRS{bcdDevice}=="0100", SYMLINK+="igvc_motor_board"
 KERNEL=="js?", ATTRS{name}=="Logitech Gamepad F710", SYMLINK+="igvc_joystick"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="2476", ATTRS{idProduct}=="1010",ATTRS{bcdDevice}=="1000", SYMLINK+="imu_bottom"
+SUBSYSTEM=="tty", ATTRS{product}=="USB3.0 Hub", SYMLINK+="imu_bottom"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a40", SYMLINK+="imu_top"
 SUBSYSTEM=="usb", ATTR{idVendor}=="1d5a", MODE="0666"
