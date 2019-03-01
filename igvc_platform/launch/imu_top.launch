@@ -1,10 +1,10 @@
 <launch>
     <!-- Top IMU -->
     <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" >
-        <param name="SERIAL_PORT" type="string" value="/dev/ttyACM0" />
+        <param name="SERIAL_PORT" type="string" value="/dev/imu_top" />
         <rosparam param="imu_orientation_correction">[0, 1, 0,
                                                      -1, 0, 0,
                                                       0, 0, 1]</rosparam>
-        <remap from="imu" to="imu/top" />
+        <remap from="imu" to="magnetometer" />
     </node>
 </launch>

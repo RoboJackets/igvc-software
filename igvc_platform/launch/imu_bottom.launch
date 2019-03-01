@@ -1,7 +1,7 @@
 <launch>
     <!-- Top IMU -->
-    <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" >
-        <param name="SERIAL_PORT" type="string" value="/dev/ttyACM0" />
+    <node pkg="igvc_platform" name="imu_bottom" type="imu" output="screen" >
+        <param name="SERIAL_PORT" type="string" value="/dev/imu_bottom" />
         <rosparam param="imu_orientation_correction">[0, 1, 0,
                                                       1, 0, 0,
                                                       0, 0, -1]</rosparam>
