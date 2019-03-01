@@ -214,8 +214,9 @@ int FieldDPlanner::computeShortestPath()
     return 0;
 
   int numNodesExpanded = 0;
-  while ((PQ.topKey() < calculateKey(NodeGrid.Start)) ||
-         (std::fabs(getRHS(NodeGrid.Start) - getG(NodeGrid.Start)) > 1e-5))
+  while (((PQ.topKey() < calculateKey(NodeGrid.Start)) ||
+          (std::fabs(getRHS(NodeGrid.Start) - getG(NodeGrid.Start)) > 1e-5)) &&
+         (PQ.size() > 0))
   {
     Node topNode = PQ.topNode();
     PQ.pop();

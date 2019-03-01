@@ -73,7 +73,8 @@ int DLitePlanner::computeShortestPath()
 
   int numNodesExpanded = 0;
 
-  while ((PQ.topKey() < calculateKey(NodeGrid.Start)) || (getRHS(NodeGrid.Start) != getG(NodeGrid.Start)))
+  while (((PQ.topKey() < calculateKey(NodeGrid.Start)) || (getRHS(NodeGrid.Start) != getG(NodeGrid.Start))) &&
+         (PQ.size() > 0))
   {
     Node topNode = PQ.topNode();
     Key topKey = PQ.topKey();
