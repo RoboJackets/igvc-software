@@ -1,16 +1,9 @@
 <?xml version="1.0"?>
 
-<!-- roslaunch igvc_gazebo qualification.launch -->
-<!-- roslaunch igvc_gazebo sim_detector.launch -->
-<!-- rviz -->
-<!-- get topic usb_cam_center/image_raw and usb_cam_center/detected -->
-<!-- make sure they match -->
-<!-- catkin_make from ~/catkin_ws-->
-
 <launch>
 
   <node name="sim_color_detector" pkg="igvc_gazebo" type="sim_color_detector">
-      <param name="topic_name" value="usb_cam_center/image_raw"/>
+      <param name="topic_name" value="center_cam/image_raw"/>
   </node>
 
 </launch>
