@@ -33,6 +33,61 @@ Date Created: December 16, 2018
 #include <vector>
 
 /**
+A Position represents any discrete or continuous point in the Graph space. A
+Position differs from a Node in that it is not restricted to lying on a vertex, but
+can also lie along an edge. As such, a position is represented by two floats <x,y>
+that represent the position's x & y coordinates in the Graph.
+*/
+struct Position
+{
+    float x;
+    float y;
+
+    Node castToNode() const
+    {
+      return Node(static_cast<int>(this->x), static_cast<int>(this->y));
+    }
+
+    Position()
+    {
+    }
+
+    Position(float x, float y)
+    {
+      this->x = x;
+      this->y = y;
+    }
+
+    Position(std::tuple<float, float> position) : Position(std::get<0>(position), std::get<1>(position))
+    {
+    }
+
+    Position(Node n) : Position(static_cast<std::tuple<float,float>>(n.getIndex()))
+    {
+    }
+
+    // overloaded assignment operator
+    Position& operator=(const Position& other)
+    {
+      this->x = other.x;
+      this->y = other.y;
+
+      return *this;
+    }
+
+    // Cells equal if their corresponding indices are equal
+    bool operator==(const Position& other) const
+    {
+      return (this->x == other.x) && (this->y == other.y);
+    }
+
+    bool operator!=(const Position& other) const
+    {
+      return !(*this == other);
+    }
+};
+
+/**
 A cell represents a grid in the graph. Each cell object contains fields <x,y>
 which denote the cell's location on the graph.
 */
@@ -143,7 +198,7 @@ public:
   @param[in] p position on the graph
   @return whether or not the position is valid
   */
-  bool isValidPosition(const std::tuple<float, float>& p);
+  bool isValidPosition(const Position& p);
   /**
   Determines whether or not a cell is valid based off of its index. As with
   the Node, the only condition that would render a node invalid is if it is
@@ -169,7 +224,7 @@ public:
   @param[in] p_prime position to check for diagonality
   @return whether or not p_prime is diagonal to p
   */
-  bool isDiagonalContinuous(const std::tuple<float, float>& p, const std::tuple<float, float>& p_prime);
+  bool isDiagonalContinuous(const Position& p, const Position& p_prime);
   /**
   Returns neighbors of node s on an eight-grid layout. That is, on average,
   each node s has 8 neighbors.
@@ -187,8 +242,8 @@ public:
   @param[in] p position to get connbrs for
   @param[out] output vector of connbrs pairs
   */
-  std::vector<std::pair<std::tuple<float, float>, std::tuple<float, float>>>
-  nbrsContinuous(const std::tuple<float, float>& p);
+  std::vector<std::pair<Position, Position>>
+  nbrsContinuous(const Position& p);
   /**
   Returns first counter-clockwise neighbor of node s and a neighbor node
   s', starting at s'.
@@ -265,7 +320,7 @@ public:
   @param[in] p_prime another continuous position on the graph
   @return cost of traversing from p to p_prime
   */
-  float getContinuousTraversalCost(const std::tuple<float, float>& p, const std::tuple<float, float>& p_prime);
+  float getContinuousTraversalCost(const Position& p, const Position& p_prime);
   /**
   Gets minimum traversal cost from a node s to any neighboring node.
 
