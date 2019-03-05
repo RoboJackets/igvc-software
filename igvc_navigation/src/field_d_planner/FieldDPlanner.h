@@ -13,11 +13,11 @@ comparatively few nodes need expanding to re-calculate the optimal path.
 Unlike D* Lite, the Field D* Path Planning algorithm is an "any-angle path planner",
 meaning it can compute global paths that are not restricted to a specific heading
 increment. As such, The Field D* path planning algorithm can generate smooth paths
-around obstacles and to the goal node.
+around high-cost regions of the cost map.
 
-The FIELDDPLANNER interfaces with the Graph object to calculate the optimal
+FieldDPlanner interfaces with the Graph object to calculate the optimal
 path through the occupancy grid in an eight-connected grid space. This means
-that each node has 8 neighbors and can only travel to those eight neighbors.
+that each node has 8 neighbors.
 
 Author: Alejandro Escontrela <aescontrela3@gatech.edu>
 Date Created: December 22nd, 2018
@@ -45,6 +45,35 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+/**
+The CostComputation struct contains the linearly interpolated path cost as
+computed by the computeCost method. Additionally, it stores the resulting x and
+y traversal distances calculated during the traversal cost computation.
+*/
+struct CostComputation
+{
+    float x;
+    float y;
+    float cost;
+
+    CostComputation(float x, float y, float cost)
+    {
+      this->x = x;
+      this->y = y;
+      this->cost = cost;
+    }
+
+    // overloaded assignment operator
+    CostComputation& operator=(const CostComputation& other)
+    {
+      this->x = other.x;
+      this->y = other.y;
+      this->cost = other.cost;
+
+      return *this;
+    }
+};
 
 class FieldDPlanner
 {
@@ -80,9 +109,9 @@ public:
   @return a tuple containing the path cost of p and resulting (x,y) traversal distances
           (relative to p_a and p_b) of the path cost calculation
   */
-  std::tuple<float, float, float> computeCost(const std::tuple<float, float>& p, const std::tuple<float, float>& p_a,
+  CostComputation computeCost(const std::tuple<float, float>& p, const std::tuple<float, float>& p_a,
                                               const std::tuple<float, float>& p_b);
-  std::tuple<float, float, float> computeCost(const Node& s, const Node& s_a, const Node& s_b);
+  CostComputation computeCost(const Node& s, const Node& s_a, const Node& s_b);
   /**
   Returns true if position p is a valid vertex on the graph. A position is a
   valid vertex if both of its cartesian coordinates are integers and it lies within

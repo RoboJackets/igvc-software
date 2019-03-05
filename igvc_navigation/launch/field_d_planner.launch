@@ -12,7 +12,7 @@
         <!-- Distance at which a node is considered a valid goal -->
         <param name="goal_range" type="double" value="0.3"/>
         <!-- Robot configuration space -->
-        <param name="c_space" type="double" value="0.3"/>
+        <param name="c_space" type="double" value="0.4"/>
         <!-- Path calculation rate -->
         <param name="rate" type="double" value="10"/>
         <!-- Max distance to a goal node -->

@@ -5,14 +5,14 @@ void FieldDPlanner::setGoalDistance(float goalDist)
   this->GoalDist = goalDist;
 }
 
-std::tuple<float, float, float> FieldDPlanner::computeCost(const Node& s, const Node& s_a, const Node& s_b)
+CostComputation FieldDPlanner::computeCost(const Node& s, const Node& s_a, const Node& s_b)
 {
   return this->computeCost(static_cast<std::tuple<float, float>>(s.getIndex()),
                            static_cast<std::tuple<float, float>>(s_a.getIndex()),
                            static_cast<std::tuple<float, float>>(s_b.getIndex()));
 }
 
-std::tuple<float, float, float> FieldDPlanner::computeCost(const std::tuple<float, float>& p,
+CostComputation FieldDPlanner::computeCost(const std::tuple<float, float>& p,
                                                            const std::tuple<float, float>& p_a,
                                                            const std::tuple<float, float>& p_b)
 {
@@ -111,7 +111,7 @@ std::tuple<float, float, float> FieldDPlanner::computeCost(const std::tuple<floa
     }
   }
 
-  return std::make_tuple(v_s, x, y);
+  return CostComputation(x, y, v_s);
 }
 
 float FieldDPlanner::getEdgePositionCost(const std::tuple<float, float>& p)
@@ -195,7 +195,7 @@ void FieldDPlanner::updateNode(const Node& s)
   {
     float minRHS = std::numeric_limits<float>::infinity();
     for (std::tuple<Node, Node> connbr : NodeGrid.consecutiveNeighbors(s))
-      minRHS = std::min(minRHS, std::get<0>(this->computeCost(s, std::get<0>(connbr), std::get<1>(connbr))));
+      minRHS = std::min(minRHS, this->computeCost(s, std::get<0>(connbr), std::get<1>(connbr)).cost);
 
     insert_or_assign(s, getG(s), minRHS);
   }
@@ -297,10 +297,8 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
                                                                          const std::tuple<float, float>& p_b)
 {
   std::vector<std::tuple<float, float>> positions;  // positions to add to path
-  std::tuple<float, float> p1, p2;                  // p1 - nearest neighbor; p2 - diagonal
-  float cost;
-  float x, y;
-  std::tie(cost, x, y) = this->computeCost(p, p_a, p_b);
+  std::tuple<float, float> p1, p2; // p1 - nearest neighbor; p2 - diagonal
+  CostComputation traversalComputation = this->computeCost(p, p_a, p_b);
 
   if (NodeGrid.isDiagonalContinuous(p, p_a))  // p_b is nearest neighbor
   {
@@ -314,8 +312,8 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
   }
 
   // CASE 0: no valid path found (infinite cost/no consecutive neighbors)
-  if (cost == std::numeric_limits<float>::infinity())
-    return std::make_pair(positions, cost);
+  if (traversalComputation.cost == std::numeric_limits<float>::infinity())
+    return std::make_pair(positions, traversalComputation.cost);
 
   // calculate the multiplier for the positions to be added to the path. This
   // step is required because x and y calculations are peformed independent of
@@ -329,31 +327,31 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const s
   std::tie(p2_x, p2_y) = p2;
 
   // CASE 1(2/2): travel along x(2/2) then cut to s2(2/2)
-  if (y < 0.0f)
+  if (traversalComputation.y < 0.0f)
   {
     positions.push_back(std::make_tuple(p2_x, p2_y));
-    y = 0.0f;
+    traversalComputation.y = 0.0f;
   }
 
   if (p1_x != p_x)  // nearest neighbor lies to left or right of s
   {
-    x *= (p1_x > p_x) ? 1.0f : -1.0f;
-    y *= (p2_y > p_y) ? 1.0f : -1.0f;
+    traversalComputation.x *= (p1_x > p_x) ? 1.0f : -1.0f;
+    traversalComputation.y *= (p2_y > p_y) ? 1.0f : -1.0f;
   }
   else  // nearest neighbor lies above or below s
   {
-    std::tie(x, y) = std::make_tuple(y, x);  // path additions must be flipped to account for relative orientation
-    y *= (p1_y > p_y) ? 1.0f : -1.0f;
-    x *= (p2_x > p_x) ? 1.0f : -1.0f;
+    std::tie(traversalComputation.x, traversalComputation.y) = std::make_tuple(traversalComputation.y, traversalComputation.x);  // path additions must be flipped to account for relative orientation
+    traversalComputation.y *= (p1_y > p_y) ? 1.0f : -1.0f;
+    traversalComputation.x *= (p2_x > p_x) ? 1.0f : -1.0f;
   }
 
   // CASE 1(1/2): travel along x(1/2) then cut to s2(2/2)
   // CASE 2: travel directly to diagonal node (s2)
   // CASE 3: travel to nearest node
   // CASE 4: travel to point along edge
-  positions.insert(positions.begin(), std::make_tuple(p_x + x, p_y + y));
+  positions.insert(positions.begin(), std::make_tuple(p_x + traversalComputation.x, p_y + traversalComputation.y));
 
-  return std::make_pair(positions, cost);
+  return std::make_pair(positions, traversalComputation.cost);
 }
 
 FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const std::tuple<float, float>& p, int lookahead_dist)
