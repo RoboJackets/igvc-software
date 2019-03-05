@@ -1,5 +1,11 @@
 #include "Graph.h"
 
+void Graph::setOccupancyThreshold(float OccupancyThreshold)
+{
+    this->OccupancyThreshold = OccupancyThreshold;
+    this->OccupancyThresholdUChar = OccupancyThreshold * 255.0f;
+}
+
 void Graph::setConfigurationSpace(float ConfigurationSpace)
 {
   this->ConfigurationSpace = ConfigurationSpace;
@@ -359,7 +365,7 @@ float Graph::getC(const Node& s, const Node& s_prime)
 
   // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
   cellVal = getValWithConfigurationSpace(cellInd);
-  return (cellVal > 150) ? std::numeric_limits<float>::infinity() : TraversalCost;  // #TODO get rid of magic number
+  return (cellVal > OccupancyThresholdUChar) ? std::numeric_limits<float>::infinity() :( TraversalCost + (cellVal / 255.0f));
 }
 
 float Graph::getB(const Node& s, const Node& s_prime)
@@ -404,7 +410,7 @@ float Graph::getB(const Node& s, const Node& s_prime)
 
   // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
   maxCellVal = std::max(getValWithConfigurationSpace(cellInd1), getValWithConfigurationSpace(cellInd2));
-  return (maxCellVal > 150) ? std::numeric_limits<float>::infinity() : TraversalCost;
+  return (maxCellVal > OccupancyThresholdUChar) ? std::numeric_limits<float>::infinity() :( TraversalCost + (maxCellVal / 255.0f));
 }
 
 float Graph::getValWithConfigurationSpace(const std::tuple<int, int>& ind)

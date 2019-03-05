@@ -156,6 +156,19 @@ public:
   // to maintain lower bounds in the priority queue
   float KeyModifier = 0;
 
+  float OccupancyThreshold = 0.7f;
+
+  /**
+  Sets a value for the cell's occupancy threshold. This floating point,
+  in the range [0,1], dictates the maximum occupancy probability a cell may have
+  before it is considered to have infinite traversal cost.
+
+
+  @param[in] OccupancyThreshold maximum occupancy probability a cell may have before it
+        is considered to have infinite traversal cost.
+  */
+  void setOccupancyThreshold(float OccupancyThreshold);
+
   /**
   Sets a value for the graph's configuration space
 
@@ -352,6 +365,9 @@ public:
   @return list of nodes who might be affected by changed cell value
   */
   std::vector<Node> getNodesAroundCellWithConfigurationSpace(const Cell& cell);
+
+private:
+    float OccupancyThresholdUChar = 178.5f;
 };
 
 #endif  // GRAPHSEARCH_H

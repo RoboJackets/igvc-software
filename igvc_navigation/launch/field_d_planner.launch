@@ -25,6 +25,9 @@
         <!-- number of future cell traversals to recurisively
         analyze before moving to next position -->
         <param name="lookahead_dist" type="int" value="0"/>
+        <!-- maximum occupancy probability of a cell before it is considered
+        to have an infinite traversal cost -->
+        <param name="occupancy_threshold" type="double" value="0.7"/>
     </node>
 
     <!-- Follower -->
