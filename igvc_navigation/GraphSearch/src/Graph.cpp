@@ -80,12 +80,10 @@ bool Graph::isValidNode(const Node& s)
   return (x <= Length) && (y <= Width) && (x >= 0) && (y >= 0);
 }
 
-bool Graph::isValidPosition(const std::tuple<float, float>& p)
+bool Graph::isValidPosition(const Position& p)
 {
-  float x, y;
-  std::tie(x, y) = p;
-  // with [row,col] indexing
-  return (x <= static_cast<float>(Length)) && (y <= static_cast<float>(Width)) && (x >= 0.0f) && (y >= 0.0f);
+  // with [x,y] indexing
+  return (p.x <= static_cast<float>(Length)) && (p.y <= static_cast<float>(Width)) && (p.x >= 0.0f) && (p.y >= 0.0f);
 }
 
 bool Graph::isValidCell(const std::tuple<int, int>& ind)
@@ -109,9 +107,9 @@ bool Graph::isDiagonal(const Node& s, const Node& s_prime)
   return (x_diff == 1) && (y_diff == 1);
 }
 
-bool Graph::isDiagonalContinuous(const std::tuple<float, float>& p, const std::tuple<float, float>& p_prime)
+bool Graph::isDiagonalContinuous(const Position& p, const Position& p_prime)
 {
-  return ((std::get<0>(p) != std::get<0>(p_prime)) && (std::get<1>(p) != std::get<1>(p_prime)));
+  return ((p.x != p_prime.x) && (p.y != p_prime.y));
 }
 
 std::vector<Node> Graph::nbrs(const Node& s, bool include_invalid)
@@ -163,24 +161,21 @@ std::vector<Node> Graph::nbrs(const Node& s, bool include_invalid)
   return neighbors;
 }
 
-std::vector<std::pair<std::tuple<float, float>, std::tuple<float, float>>>
-Graph::nbrsContinuous(const std::tuple<float, float>& p)
+std::vector<std::pair<Position, Position>>
+Graph::nbrsContinuous(const Position& p)
 {
-  std::vector<std::tuple<float, float>> neighbors;
-  std::vector<std::pair<std::tuple<float, float>, std::tuple<float, float>>> connbrs;
-
-  float x, y;
-  std::tie(x, y) = p;
+  std::vector<Position> neighbors;
+  std::vector<std::pair<Position, Position>> connbrs;
 
   // there are 8 consecutive neighbors for an edge node.
-  neighbors.push_back(std::make_tuple(x + 1.0f, y));         // right
-  neighbors.push_back(std::make_tuple(x + 1.0f, y + 1.0f));  // top right
-  neighbors.push_back(std::make_tuple(x, y + 1.0f));         // top
-  neighbors.push_back(std::make_tuple(x - 1.0f, y + 1.0f));  // top left
-  neighbors.push_back(std::make_tuple(x - 1.0f, y));         // left
-  neighbors.push_back(std::make_tuple(x - 1.0f, y - 1.0f));  // bottom left
-  neighbors.push_back(std::make_tuple(x, y - 1.0f));         // bottom
-  neighbors.push_back(std::make_tuple(x + 1.0f, y - 1.0f));  // bottom right
+  neighbors.push_back(std::make_tuple(p.x + 1.0f, p.y));         // right
+  neighbors.push_back(std::make_tuple(p.x + 1.0f, p.y + 1.0f));  // top right
+  neighbors.push_back(std::make_tuple(p.x, p.y + 1.0f));         // top
+  neighbors.push_back(std::make_tuple(p.x - 1.0f, p.y + 1.0f));  // top left
+  neighbors.push_back(std::make_tuple(p.x - 1.0f, p.y));         // left
+  neighbors.push_back(std::make_tuple(p.x - 1.0f, p.y - 1.0f));  // bottom left
+  neighbors.push_back(std::make_tuple(p.x, p.y - 1.0f));         // bottom
+  neighbors.push_back(std::make_tuple(p.x + 1.0f, p.y - 1.0f));  // bottom right
 
   // first 7 connbrs
   for (size_t i = 0; i < neighbors.size() - 1; i++)
@@ -443,25 +438,20 @@ float Graph::getTraversalCost(const Node& s, const Node& s_prime)
     return getB(s, s_prime) * EdgeDistance;
 }
 
-float Graph::getContinuousTraversalCost(const std::tuple<float, float>& p, const std::tuple<float, float>& p_prime)
+float Graph::getContinuousTraversalCost(const Position& p, const Position& p_prime)
 {
-  float x, y;
-  std::tie(x, y) = p;
-  float x_prime, y_prime;
-  std::tie(x_prime, y_prime) = p_prime;
-
   // round p to get a reference node
-  Node s(std::make_tuple(static_cast<int>(roundf(x)), static_cast<int>(roundf(y))));
+  Node s(std::make_tuple(static_cast<int>(roundf(p.x)), static_cast<int>(roundf(p.y))));
 
   // get relative distance between p_prime and p. Note: ceil0 is biased away from 0
   // i.e. ceil0(-0.35) = -1.00
-  float x_diff = igvc::ceil0(x_prime - x);
-  float y_diff = igvc::ceil0(y_prime - y);
+  float x_diff = igvc::ceil0(p_prime.x - p.x);
+  float y_diff = igvc::ceil0(p_prime.y - p.y);
 
   assert((x_diff != 0) || (y_diff != 0));
   assert((std::fabs(x_diff) <= 1) && (std::fabs(y_diff) <= 1));
 
-  Node s_prime(std::make_tuple(static_cast<int>(roundf(x) + x_diff), static_cast<int>(roundf(y) + y_diff)));
+  Node s_prime(std::make_tuple(static_cast<int>(roundf(p.x) + x_diff), static_cast<int>(roundf(p.y) + y_diff)));
 
   return (isDiagonal(s, s_prime) ? getC(s, s_prime) : getB(s, s_prime));
 }

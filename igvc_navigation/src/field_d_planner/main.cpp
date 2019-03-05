@@ -243,13 +243,13 @@ int main(int argc, char** argv)
     path_msg.header.stamp = ros::Time::now();
     path_msg.header.frame_id = "odom";
 
-    for (std::tuple<float, float> point : planner.Path)
+    for (Position pos : planner.Path)
     {
       geometry_msgs::PoseStamped pose;
       pose.header.stamp = path_msg.header.stamp;
       pose.header.frame_id = path_msg.header.frame_id;
-      pose.pose.position.x = (std::get<0>(point) - x_initial) * planner.NodeGrid.Resolution;
-      pose.pose.position.y = (std::get<1>(point) - y_initial) * planner.NodeGrid.Resolution;
+      pose.pose.position.x = (pos.x - x_initial) * planner.NodeGrid.Resolution;
+      pose.pose.position.y = (pos.y - y_initial) * planner.NodeGrid.Resolution;
       path_msg.poses.push_back(pose);
     }
 
