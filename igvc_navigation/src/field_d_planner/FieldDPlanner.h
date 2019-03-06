@@ -13,11 +13,11 @@ comparatively few nodes need expanding to re-calculate the optimal path.
 Unlike D* Lite, the Field D* Path Planning algorithm is an "any-angle path planner",
 meaning it can compute global paths that are not restricted to a specific heading
 increment. As such, The Field D* path planning algorithm can generate smooth paths
-around obstacles and to the goal node.
+around high-cost regions of the cost map.
 
-The FIELDDPLANNER interfaces with the Graph object to calculate the optimal
+FieldDPlanner interfaces with the Graph object to calculate the optimal
 path through the occupancy grid in an eight-connected grid space. This means
-that each node has 8 neighbors and can only travel to those eight neighbors.
+that each node has 8 neighbors.
 
 Author: Alejandro Escontrela <aescontrela3@gatech.edu>
 Date Created: December 22nd, 2018
@@ -46,6 +46,35 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #include <utility>
 #include <vector>
 
+/**
+The CostComputation struct contains the linearly interpolated path cost as
+computed by the computeCost method. Additionally, it stores the resulting x and
+y traversal distances calculated during the traversal cost computation.
+*/
+struct CostComputation
+{
+    float x;
+    float y;
+    float cost;
+
+    CostComputation(float x, float y, float cost)
+    {
+      this->x = x;
+      this->y = y;
+      this->cost = cost;
+    }
+
+    // overloaded assignment operator
+    CostComputation& operator=(const CostComputation& other)
+    {
+      this->x = other.x;
+      this->y = other.y;
+      this->cost = other.cost;
+
+      return *this;
+    }
+};
+
 class FieldDPlanner
 {
 public:
@@ -53,10 +82,10 @@ public:
   // grid cells
   Graph NodeGrid;
 
-  std::vector<std::tuple<float, float>> Path;
+  std::vector<Position> Path;
 
   // path additions made by one step of constructOptimalPath()
-  typedef std::pair<std::vector<std::tuple<float, float>>, float> path_additions;
+  typedef std::pair<std::vector<Position>, float> path_additions;
 
   float GoalDist;
 
@@ -80,9 +109,9 @@ public:
   @return a tuple containing the path cost of p and resulting (x,y) traversal distances
           (relative to p_a and p_b) of the path cost calculation
   */
-  std::tuple<float, float, float> computeCost(const std::tuple<float, float>& p, const std::tuple<float, float>& p_a,
-                                              const std::tuple<float, float>& p_b);
-  std::tuple<float, float, float> computeCost(const Node& s, const Node& s_a, const Node& s_b);
+  CostComputation computeCost(const Position& p, const Position& p_a,
+                                              const Position& p_b);
+  CostComputation computeCost(const Node& s, const Node& s_a, const Node& s_b);
   /**
   Returns true if position p is a valid vertex on the graph. A position is a
   valid vertex if both of its cartesian coordinates are integers and it lies within
@@ -91,7 +120,7 @@ public:
   @param[in] p position to assess
   @return whether or not p is a vertex
   */
-  bool isVertex(const std::tuple<float, float>& p);
+  bool isVertex(const Position& p);
   /**
   Returns the linearly interpolated path cost of a lying along an edge. Such an edge
   node is characterized by having one of its cartesian coordinate values a float.
@@ -101,7 +130,7 @@ public:
   @param[in] p positon on the graph to obtain path cost for
   @return path cost of continuous position
   */
-  float getEdgePositionCost(const std::tuple<float, float>& p);
+  float getEdgePositionCost(const Position& p);
 
   /**
   Calculate the key for a node S.
@@ -167,8 +196,8 @@ public:
   @param[in] p_b consecutive neighbor of p
   @return vector containing the next positions(s) and movement cost
   */
-  path_additions computeOptimalCellTraversal(const std::tuple<float, float>& p, const std::tuple<float, float>& p_a,
-                                             const std::tuple<float, float>& p_b);
+  path_additions computeOptimalCellTraversal(const Position& p, const Position& p_a,
+                                             const Position& p_b);
   /**
   Helper method for path reconstruction process. Finds the next path position(s)
   when planning from a vertex or an edge position on the graph.
@@ -176,7 +205,7 @@ public:
   @param[in] p edge on graph to plan from
   @return vector containing the next positions(s) and movement cost
   */
-  path_additions getPathAdditions(const std::tuple<float, float>& p, int lookahead_dist);
+  path_additions getPathAdditions(const Position& p, int lookahead_dist);
   /**
   Checks whether a specified node is within range of the goal node. This 'range'
   is specified by the GOAL_RANGE instance variable.
@@ -184,7 +213,7 @@ public:
   @param[in] s Node to check
   @return whether or not node s is within range of the goal
   */
-  bool isWithinRangeOfGoal(const std::tuple<float, float>& p);
+  bool isWithinRangeOfGoal(const Position& p);
   /**
   Tries to insert an entry into the unordered map. If an entry for that key
   (Node) already exists, overrides the value with specified g and rhs vals.

@@ -164,12 +164,12 @@ int main(int argc, char** argv)
   ros::Publisher expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded", 1);
   expanded_cloud.header.frame_id = "odom";
 
-  double configuration_space;  // configuration space
-  double goal_range;           // distance from goal at which a node is considered the goal
-  double rate_time;            // path planning/replanning rate
-  bool follow_old_path;        // follow the previously generated path if no optimal path currently exists
-  int lookahead_dist;          // number of cell traversals to look ahead at when decising next position along path
-
+  double configuration_space; // configuration space
+  double goal_range; // distance from goal at which a node is considered the goal
+  double rate_time; // path planning/replanning rate
+  bool follow_old_path; // follow the previously generated path if no optimal path currently exists
+  int lookahead_dist; // number of cell traversals to look ahead at when decising next position along path
+  float occupancy_threshold; // maximum occupancy probability before a cell is considered to have infinite traversal cost
   // publish path for path_follower
   ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 
@@ -180,8 +180,10 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, "publish_expanded", publish_expanded);
   igvc::getParam(pNh, "follow_old_path", follow_old_path);
   igvc::getParam(pNh, "lookahead_dist", lookahead_dist);
+  igvc::getParam(pNh, "occupancy_threshold", occupancy_threshold);
 
   planner.NodeGrid.setConfigurationSpace(static_cast<float>(configuration_space));
+  planner.NodeGrid.setOccupancyThreshold(static_cast<float>(occupancy_threshold));
   planner.setGoalDistance(static_cast<float>(goal_range));
 
   ros::Rate rate(rate_time);  // path update rate
@@ -243,13 +245,13 @@ int main(int argc, char** argv)
     path_msg.header.stamp = ros::Time::now();
     path_msg.header.frame_id = "odom";
 
-    for (std::tuple<float, float> point : planner.Path)
+    for (Position pos : planner.Path)
     {
       geometry_msgs::PoseStamped pose;
       pose.header.stamp = path_msg.header.stamp;
       pose.header.frame_id = path_msg.header.frame_id;
-      pose.pose.position.x = (std::get<0>(point) - x_initial) * planner.NodeGrid.Resolution;
-      pose.pose.position.y = (std::get<1>(point) - y_initial) * planner.NodeGrid.Resolution;
+      pose.pose.position.x = (pos.x - x_initial) * planner.NodeGrid.Resolution;
+      pose.pose.position.y = (pos.y - y_initial) * planner.NodeGrid.Resolution;
       path_msg.poses.push_back(pose);
     }
 
