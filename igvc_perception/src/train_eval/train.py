@@ -41,7 +41,7 @@ parser.add_argument('--weight_decay', type=float, default=0.0,
 
 # Other configuration.
 parser.add_argument('--save_model', action='store_true', default=False,
-                    help='Save pytorch model after every epoch.')
+                    help='Save pytorch model.')
 parser.add_argument('--save_interval', type=int, default=1,
                     help='Save pytorch model after <save_interval> epochs.')
 parser.add_argument('--load_model', type=str, default=None,

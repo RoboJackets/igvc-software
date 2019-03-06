@@ -1,0 +1,16 @@
+<!-- vision.launch -->
+<!--
+    This file launches a vision node that uses a CNN to detect
+    lines and potholes.
+    -->
+<launch>
+    <node name="cnn_legacy" pkg="igvc_perception" type="cnn_legacy.py" output="screen" />
+
+    <param name="/image_topic" value="/usb_cam_center/image_raw" />
+    <param name="/image_resize_width" value="300" />
+    <param name="/image_resize_height" value="225" />
+
+    <param name="/model_path" value="$(find igvc_perception)/../sandbox/models/model.pb" />
+    <param name="/force_cpu" value="false" />
+
+</launch>
