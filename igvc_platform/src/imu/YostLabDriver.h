@@ -52,6 +52,8 @@ public:
   //!
   void setMIMode(bool on);
 private:
+  // whether or not to tare the imu orientation
+  bool tare_;
   //! IMU orientation correction.
   std::vector<double> imu_orientation_correction_;
   //! Node Handlers
