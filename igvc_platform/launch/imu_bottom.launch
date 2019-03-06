@@ -1,7 +1,10 @@
 <launch>
-    <!-- Top IMU -->
+    <arg name="tare" default="false"/>
+
+    <!-- Bottom IMU -->
     <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" >
         <param name="SERIAL_PORT" type="string" value="/dev/ttyACM0" />
+        <param name="tare" type="bool" value="$(arg tare)"/>
         <rosparam param="imu_orientation_correction">[0, 1, 0,
                                                       1, 0, 0,
                                                       0, 0, -1]</rosparam>
