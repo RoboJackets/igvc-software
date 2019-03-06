@@ -12,6 +12,7 @@ YostLabDriver::YostLabDriver(ros::NodeHandle& nh_, ros::NodeHandle& priv_nh_):
   this->SerialConnect();
   this->imu_pub_ = this->yostlab_nh_.advertise<sensor_msgs::Imu>("/imu", 10);
   this->yostlab_priv_nh_.param("imu_orientation_correction", imu_orientation_correction_, {1,0,0,0,1,0,0,0,1});
+  this->yostlab_priv_nh_.param("tare", tare_, false);
 }
 
 
@@ -134,6 +135,7 @@ const std::string YostLabDriver::getMIMode()
 //! Run the serial sync
 void YostLabDriver::run()
 {
+
   this->SerialWriteString(SET_AXIS_DIRECTIONS_IMU);
   this->startGyroCalibration();
   this->getSoftwareVersion();
@@ -142,8 +144,14 @@ void YostLabDriver::run()
   this->getCalibMode();
   this->getMIMode();
   this->SerialWriteString(SET_STREAMING_SLOTS_QUATERNION_CORRECTED_GYRO_ACCELERATION_LINEAR);
-  this->SerialWriteString(TARE_WITH_CURRENT_ORIENTATION);
-  this->SerialWriteString(TARE_WITH_CURRENT_QUATERNION);
+  if (this->tare_)
+  {
+    ROS_WARN_STREAM("Taring IMU with current orientation... Ensure that the robot is pointed eastward.");
+    // this->SerialWriteString(TARE_WITH_CURRENT_QUATERNION);
+    this->SerialWriteString(TARE_WITH_CURRENT_ORIENTATION);
+    ROS_DEBUG_STREAM("Tare Complete.");
+
+  }
   this->SerialWriteString(SET_STREAMING_TIMING_5_MS);
   this->SerialWriteString(START_STREAMING);
   this->SerialWriteString(COMMIT_SETTINGS);
