@@ -265,7 +265,7 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
 {
   // Combine line and lidar maps, then blur them
   cv::Mat blurred_map = m_pc_map_pair.map->clone();
-  cv::add(blurred_map, blurred_map, *m_camera_map_pair.map);
+  cv::addWeighted(blurred_map, 0.5, *m_camera_map_pair.map, 0.5, 0, blurred_map);
   blur(blurred_map);
 
   igvc_msgs::map message;
