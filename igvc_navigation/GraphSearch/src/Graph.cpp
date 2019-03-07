@@ -2,8 +2,8 @@
 
 void Graph::setOccupancyThreshold(float OccupancyThreshold)
 {
-    this->OccupancyThreshold = OccupancyThreshold;
-    this->OccupancyThresholdUChar = OccupancyThreshold * 255.0f;
+  this->OccupancyThreshold = OccupancyThreshold;
+  this->OccupancyThresholdUChar = OccupancyThreshold * 255.0f;
 }
 
 void Graph::setConfigurationSpace(float ConfigurationSpace)
@@ -167,8 +167,7 @@ std::vector<Node> Graph::nbrs(const Node& s, bool include_invalid)
   return neighbors;
 }
 
-std::vector<std::pair<Position, Position>>
-Graph::nbrsContinuous(const Position& p)
+std::vector<std::pair<Position, Position>> Graph::nbrsContinuous(const Position& p)
 {
   std::vector<Position> neighbors;
   std::vector<std::pair<Position, Position>> connbrs;
@@ -365,7 +364,8 @@ float Graph::getC(const Node& s, const Node& s_prime)
 
   // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
   cellVal = getValWithConfigurationSpace(cellInd);
-  return (cellVal > OccupancyThresholdUChar) ? std::numeric_limits<float>::infinity() :( TraversalCost + (cellVal / 255.0f));
+  return (cellVal > OccupancyThresholdUChar) ? std::numeric_limits<float>::infinity() :
+                                               (TraversalCost + (cellVal / 255.0f));
 }
 
 float Graph::getB(const Node& s, const Node& s_prime)
@@ -410,7 +410,8 @@ float Graph::getB(const Node& s, const Node& s_prime)
 
   // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
   maxCellVal = std::max(getValWithConfigurationSpace(cellInd1), getValWithConfigurationSpace(cellInd2));
-  return (maxCellVal > OccupancyThresholdUChar) ? std::numeric_limits<float>::infinity() :( TraversalCost + (maxCellVal / 255.0f));
+  return (maxCellVal > OccupancyThresholdUChar) ? std::numeric_limits<float>::infinity() :
+                                                  (TraversalCost + (maxCellVal / 255.0f));
 }
 
 float Graph::getValWithConfigurationSpace(const std::tuple<int, int>& ind)
