@@ -7,14 +7,10 @@ void FieldDPlanner::setGoalDistance(float goalDist)
 
 CostComputation FieldDPlanner::computeCost(const Node& s, const Node& s_a, const Node& s_b)
 {
-  return this->computeCost(Position(s),
-                           Position(s_a),
-                           Position(s_b));
+  return this->computeCost(Position(s), Position(s_a), Position(s_b));
 }
 
-CostComputation FieldDPlanner::computeCost(const Position& p,
-                                           const Position& p_a,
-                                           const Position& p_b)
+CostComputation FieldDPlanner::computeCost(const Position& p, const Position& p_a, const Position& p_b)
 {
   Position p1;  // nearest neighbor
   Position p2;  // diagonal neighbor
@@ -120,8 +116,7 @@ float FieldDPlanner::getEdgePositionCost(const Position& p)
     return getG(p.castToNode());
   else
   {
-
-    Position p_a(ceilf(p.x), ceilf(p.y)); // get position of first neighbor
+    Position p_a(ceilf(p.x), ceilf(p.y));    // get position of first neighbor
     Position p_b(floorf(p.x), floorf(p.y));  // get position of second neighbor
 
     assert(p_a != p_b);
@@ -140,7 +135,6 @@ float FieldDPlanner::getEdgePositionCost(const Position& p)
 
 bool FieldDPlanner::isVertex(const Position& p)
 {
-
   bool is_vertex = (ceilf(p.x) == p.x) && (ceilf(p.y) == p.y);
   bool satisfies_bounds = (p.x >= 0) && (p.x <= NodeGrid.Width) && (p.y >= 0) && (p.y <= NodeGrid.Width);
 
@@ -288,12 +282,11 @@ void FieldDPlanner::constructOptimalPath(int lookahead_dist)
     Path.clear();
 }
 
-FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const Position& p,
-                                                                         const Position& p_a,
+FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const Position& p, const Position& p_a,
                                                                          const Position& p_b)
 {
   std::vector<Position> positions;  // positions to add to path
-  Position p1, p2; // p1 - nearest neighbor; p2 - diagonal
+  Position p1, p2;                  // p1 - nearest neighbor; p2 - diagonal
   CostComputation traversalComputation = this->computeCost(p, p_a, p_b);
 
   if (NodeGrid.isDiagonalContinuous(p, p_a))  // p_b is nearest neighbor
@@ -330,7 +323,9 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const P
   }
   else  // nearest neighbor lies above or below s
   {
-    std::tie(traversalComputation.x, traversalComputation.y) = std::make_tuple(traversalComputation.y, traversalComputation.x);  // path additions must be flipped to account for relative orientation
+    std::tie(traversalComputation.x, traversalComputation.y) =
+        std::make_tuple(traversalComputation.y,
+                        traversalComputation.x);  // path additions must be flipped to account for relative orientation
     traversalComputation.y *= (p1.y > p.y) ? 1.0f : -1.0f;
     traversalComputation.x *= (p2.x > p.x) ? 1.0f : -1.0f;
   }
@@ -374,7 +369,8 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const Position& p,
 
 bool FieldDPlanner::isWithinRangeOfGoal(const Position& p)
 {
-  float distanceToGoal = igvc::get_distance(std::make_tuple(p.x, p.y), static_cast<std::tuple<float, float>>(NodeGrid.Goal.getIndex()));
+  float distanceToGoal =
+      igvc::get_distance(std::make_tuple(p.x, p.y), static_cast<std::tuple<float, float>>(NodeGrid.Goal.getIndex()));
   float goalRadius = GoalDist / NodeGrid.Resolution;
   return distanceToGoal <= goalRadius;
 }

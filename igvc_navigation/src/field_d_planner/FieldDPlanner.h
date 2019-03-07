@@ -53,26 +53,26 @@ y traversal distances calculated during the traversal cost computation.
 */
 struct CostComputation
 {
-    float x;
-    float y;
-    float cost;
+  float x;
+  float y;
+  float cost;
 
-    CostComputation(float x, float y, float cost)
-    {
-      this->x = x;
-      this->y = y;
-      this->cost = cost;
-    }
+  CostComputation(float x, float y, float cost)
+  {
+    this->x = x;
+    this->y = y;
+    this->cost = cost;
+  }
 
-    // overloaded assignment operator
-    CostComputation& operator=(const CostComputation& other)
-    {
-      this->x = other.x;
-      this->y = other.y;
-      this->cost = other.cost;
+  // overloaded assignment operator
+  CostComputation& operator=(const CostComputation& other)
+  {
+    this->x = other.x;
+    this->y = other.y;
+    this->cost = other.cost;
 
-      return *this;
-    }
+    return *this;
+  }
 };
 
 class FieldDPlanner
@@ -109,8 +109,7 @@ public:
   @return a tuple containing the path cost of p and resulting (x,y) traversal distances
           (relative to p_a and p_b) of the path cost calculation
   */
-  CostComputation computeCost(const Position& p, const Position& p_a,
-                                              const Position& p_b);
+  CostComputation computeCost(const Position& p, const Position& p_a, const Position& p_b);
   CostComputation computeCost(const Node& s, const Node& s_a, const Node& s_b);
   /**
   Returns true if position p is a valid vertex on the graph. A position is a
@@ -196,8 +195,7 @@ public:
   @param[in] p_b consecutive neighbor of p
   @return vector containing the next positions(s) and movement cost
   */
-  path_additions computeOptimalCellTraversal(const Position& p, const Position& p_a,
-                                             const Position& p_b);
+  path_additions computeOptimalCellTraversal(const Position& p, const Position& p_a, const Position& p_b);
   /**
   Helper method for path reconstruction process. Finds the next path position(s)
   when planning from a vertex or an edge position on the graph.
