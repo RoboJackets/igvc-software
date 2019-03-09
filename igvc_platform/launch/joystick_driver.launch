@@ -11,5 +11,33 @@
     <node name="joy_node" pkg="joy" type="joy_node" output="screen" respawn="false">
         <param name="dev" type="str" value="/dev/input/js0"/>
     </node>
-    <node name="joystick_driver" pkg="igvc_platform" type="joystick_driver" output="screen" respawn="false" />
+    <node name="joystick_driver" pkg="igvc_platform" type="joystick_driver" output="screen" respawn="false">
+        <param name="smooth_control/k1" type="double" value="1.0"/>
+        <param name="smooth_control/k2" type="double" value="10.0"/>
+        <param name="smooth_control/axle_length" type="double" value="0.52"/>
+        <param name="smooth_control/max_w" type="double" value="8.0"/>
+        <param name="smooth_control/camera_move_rate" type="double" value="1.57"/>
+
+        <param name="tank_controls/velocity" type="double" value="1.0"/>
+
+        <param name="direction_velocity_control/pivot_limit" type="double" value="0.15" />
+
+        <param name="limits/velocity" type="double" value="1"/>
+        <param name="controller/left_axis/horizontal" type="int" value="0"/>
+        <param name="controller/left_axis/horizontal_invert" type="bool" value="true"/>
+
+        <param name="controller/left_axis/vertical" type="int" value="1"/>
+        <param name="controller/left_axis/vertical_invert" type="bool" value="false"/>
+
+        <param name="controller/right_axis/horizontal" type="int" value="3"/>
+        <param name="controller/right_axis/horizontal_invert" type="bool" value="true"/>
+
+        <param name="controller/right_axis/vertical" type="int" value="4"/>
+        <param name="controller/right_axis/vertical_invert" type="bool" value="false"/>
+
+        <param name="topics/imu" type="string" value="/imu"/>
+
+        <param name="period" type="double" value="0.001"/>
+
+    </node>
 </launch>
