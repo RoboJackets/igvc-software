@@ -32,6 +32,8 @@ Date Created: December 16, 2018
 #include <utility>
 #include <vector>
 
+#define NDEBUG
+
 /**
 A Position represents any discrete or continuous point in the Graph space. A
 Position differs from a Node in that it is not restricted to lying on a vertex, but

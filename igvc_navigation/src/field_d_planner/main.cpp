@@ -27,6 +27,8 @@ Date Created: January 23rd, 2018
 #include "FieldDPlanner.h"
 #include "Graph.h"
 
+#define NDEBUG
+
 std::mutex planning_mutex;
 
 igvc_msgs::mapConstPtr map;  // Most up-to-date map
