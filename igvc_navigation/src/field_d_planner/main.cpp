@@ -27,6 +27,8 @@ Date Created: January 23rd, 2018
 #include "FieldDPlanner.h"
 #include "Graph.h"
 
+#define NDEBUG
+
 std::mutex planning_mutex;
 
 igvc_msgs::mapConstPtr map;  // Most up-to-date map
@@ -164,12 +166,13 @@ int main(int argc, char** argv)
   ros::Publisher expanded_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded", 1);
   expanded_cloud.header.frame_id = "odom";
 
-  double configuration_space; // configuration space
-  double goal_range; // distance from goal at which a node is considered the goal
-  double rate_time; // path planning/replanning rate
-  bool follow_old_path; // follow the previously generated path if no optimal path currently exists
-  int lookahead_dist; // number of cell traversals to look ahead at when decising next position along path
-  float occupancy_threshold; // maximum occupancy probability before a cell is considered to have infinite traversal cost
+  double configuration_space;  // configuration space
+  double goal_range;           // distance from goal at which a node is considered the goal
+  double rate_time;            // path planning/replanning rate
+  bool follow_old_path;        // follow the previously generated path if no optimal path currently exists
+  int lookahead_dist;          // number of cell traversals to look ahead at when decising next position along path
+  float occupancy_threshold;   // maximum occupancy probability before a cell is considered to have infinite traversal
+                               // cost
   // publish path for path_follower
   ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 

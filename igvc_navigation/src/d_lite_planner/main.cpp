@@ -171,7 +171,8 @@ int main(int argc, char** argv)
   double goal_range;           // distance from goal at which a node is considered the goal
   double rate_time;            // path planning/replanning rate
   bool follow_old_path;        // follow the previously generated path if no optimal path currently exists
-  float occupancy_threshold; // maximum occupancy probability before a cell is considered to have infinite traversal cost
+  float occupancy_threshold;   // maximum occupancy probability before a cell is considered to have infinite traversal
+                               // cost
 
   // publish path for path_follower
   ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/path", 1);

@@ -32,6 +32,8 @@ Date Created: December 16, 2018
 #include <utility>
 #include <vector>
 
+#define NDEBUG
+
 /**
 A Position represents any discrete or continuous point in the Graph space. A
 Position differs from a Node in that it is not restricted to lying on a vertex, but
@@ -40,51 +42,51 @@ that represent the position's x & y coordinates in the Graph.
 */
 struct Position
 {
-    float x;
-    float y;
+  float x;
+  float y;
 
-    Node castToNode() const
-    {
-      return Node(static_cast<int>(this->x), static_cast<int>(this->y));
-    }
+  Node castToNode() const
+  {
+    return Node(static_cast<int>(this->x), static_cast<int>(this->y));
+  }
 
-    Position()
-    {
-    }
+  Position()
+  {
+  }
 
-    Position(float x, float y)
-    {
-      this->x = x;
-      this->y = y;
-    }
+  Position(float x, float y)
+  {
+    this->x = x;
+    this->y = y;
+  }
 
-    Position(std::tuple<float, float> position) : Position(std::get<0>(position), std::get<1>(position))
-    {
-    }
+  Position(std::tuple<float, float> position) : Position(std::get<0>(position), std::get<1>(position))
+  {
+  }
 
-    Position(Node n) : Position(static_cast<std::tuple<float,float>>(n.getIndex()))
-    {
-    }
+  Position(Node n) : Position(static_cast<std::tuple<float, float>>(n.getIndex()))
+  {
+  }
 
-    // overloaded assignment operator
-    Position& operator=(const Position& other)
-    {
-      this->x = other.x;
-      this->y = other.y;
+  // overloaded assignment operator
+  Position& operator=(const Position& other)
+  {
+    this->x = other.x;
+    this->y = other.y;
 
-      return *this;
-    }
+    return *this;
+  }
 
-    // Cells equal if their corresponding indices are equal
-    bool operator==(const Position& other) const
-    {
-      return (this->x == other.x) && (this->y == other.y);
-    }
+  // Cells equal if their corresponding indices are equal
+  bool operator==(const Position& other) const
+  {
+    return (this->x == other.x) && (this->y == other.y);
+  }
 
-    bool operator!=(const Position& other) const
-    {
-      return !(*this == other);
-    }
+  bool operator!=(const Position& other) const
+  {
+    return !(*this == other);
+  }
 };
 
 /**
@@ -255,8 +257,7 @@ public:
   @param[in] p position to get connbrs for
   @param[out] output vector of connbrs pairs
   */
-  std::vector<std::pair<Position, Position>>
-  nbrsContinuous(const Position& p);
+  std::vector<std::pair<Position, Position>> nbrsContinuous(const Position& p);
   /**
   Returns first counter-clockwise neighbor of node s and a neighbor node
   s', starting at s'.
@@ -367,7 +368,7 @@ public:
   std::vector<Node> getNodesAroundCellWithConfigurationSpace(const Cell& cell);
 
 private:
-    float OccupancyThresholdUChar = 178.5f;
+  float OccupancyThresholdUChar = 178.5f;
 };
 
 #endif  // GRAPHSEARCH_H
