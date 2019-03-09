@@ -147,10 +147,13 @@ void YostLabDriver::run()
   if (this->tare_)
   {
     ROS_WARN_STREAM("Taring IMU with current orientation... Ensure that the robot is pointed eastward.");
-    // this->SerialWriteString(TARE_WITH_CURRENT_QUATERNION);
+    this->SerialWriteString(GET_TARED_ORIENTATION_AS_AXIS_ANGLE);
     this->SerialWriteString(TARE_WITH_CURRENT_ORIENTATION);
     ROS_DEBUG_STREAM("Tare Complete.");
-
+  }
+  else
+  {
+    this->SerialWriteString(SET_REFERENCE_VECTOR_MODE);
   }
   this->SerialWriteString(SET_STREAMING_TIMING_5_MS);
   this->SerialWriteString(START_STREAMING);

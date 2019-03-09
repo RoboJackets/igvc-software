@@ -131,6 +131,7 @@ private:
   static constexpr auto OFFSET_WITH_CURRENT_ORIENTATION  = ":19\n";
   static constexpr auto TARE_WITH_CURRENT_ORIENTATION    = ":96\n";
   static constexpr auto TARE_WITH_CURRENT_QUATERNION     = ":97\n";
+  static constexpr auto SET_REFERENCE_VECTOR_MODE     = ":105,2\n";
   static constexpr auto SET_MI_MODE_ENABLED = ":112,1\n";
   static constexpr auto SET_MI_MODE_DISABLED = ":112,0\n";
   static constexpr auto BEGIN_MI_MODE_FIELD_CALIBRATION = ":114\n";
