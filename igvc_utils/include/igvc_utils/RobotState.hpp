@@ -87,7 +87,7 @@ public:
     tf::Matrix3x3 rot = transform.getBasis();
     double r, p, y;
     rot.getRPY(r, p, y);
-    rot.setEulerYPR(r, p, pose[2]);
+    rot.setEulerYPR(pose[2], p, r);
     transform.setBasis(rot);
   }
 

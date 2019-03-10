@@ -143,8 +143,8 @@ void Octomapper::create_map(pc_map_pair &pair) const
   pair.map = boost::make_shared<cv::Mat>(length, width, m_map_encoding, 127);
 }
 
-void Octomapper::insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair,
-                 const PCL_point_cloud& raw_pc, const pcl::PointCloud<pcl::PointXYZ>& empty_pc) const
+void Octomapper::insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair &pc_map_pair,
+                             const PCL_point_cloud &raw_pc, const pcl::PointCloud<pcl::PointXYZ> &empty_pc) const
 {
   pcl::PointCloud<pcl::PointXYZ> ground;
   pcl::PointCloud<pcl::PointXYZ> nonground;
@@ -216,15 +216,15 @@ void Octomapper::insert_free(const octomap::Pointcloud &scan, octomap::point3d o
   octomap::KeySet free_cells{};
   pair.octree->setProbMiss(m_prob_miss_empty);
 
-//  omp_set_num_threads(m_openmp_threads);
-//#pragma omp parallel for schedule(guided)
+  //  omp_set_num_threads(m_openmp_threads);
+  //#pragma omp parallel for schedule(guided)
   for (int i = 0; i < (int)scan.size(); ++i)
   {
     octomap::KeyRay keyray;
     const octomap::point3d &p = scan[i];
     if (pair.octree->computeRayKeys(origin, p, keyray))
     {
-//#pragma omp critical(free_insert)
+      //#pragma omp critical(free_insert)
       {
         free_cells.insert(keyray.begin(), keyray.end());
       }
@@ -314,5 +314,45 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cl
       second_pass.setFilterLimitsNegative(true);
       second_pass.filter(nonground);
     }
+  }
+}
+
+/**
+ * Inserts a pointcloud representing the projection of the lines detected from the NN onto the lidar scan.
+ * @param projection_map_pair Pair consisting of the octree for camera projections and the map
+ * @param raw_pc pointcloud from projecting the lines onto the lidar scan
+ */
+void Octomapper::insert_camera_projection(struct pc_map_pair &projection_map_pair,
+                                          const pcl::PointCloud<pcl::PointXYZ> &raw_pc) const
+{
+  // Project to z=0 plane
+  pcl::PointCloud<pcl::PointXYZ> projected{};
+  for (auto point : raw_pc.points)
+  {
+    projected.points.emplace_back(pcl::PointXYZ(point.x, point.y, 0));
+  }
+
+  // Convert from PCL_point_cloud to octomap point cloud
+  octomap::Pointcloud octo_cloud;
+  PCL_to_Octomap(projected, octo_cloud);
+
+  // Insert occupied into octree
+  // TODO: OpenMP?
+  octomap::KeySet occupied_cells{};
+
+  for (int i = 0; i < (int)octo_cloud.size(); ++i)
+  {
+    const octomap::point3d &p = octo_cloud[i];
+    octomap::OcTreeKey key;
+    if (projection_map_pair.octree->coordToKeyChecked(p, key))
+    {
+      occupied_cells.insert(key);
+    }
+  }
+
+  // Insert KeySet into octree
+  for (octomap::KeySet::iterator it = occupied_cells.begin(); it != occupied_cells.end(); ++it)
+  {
+    projection_map_pair.octree->updateNode(*it, true, false);  // lazy_eval = false
   }
 }
