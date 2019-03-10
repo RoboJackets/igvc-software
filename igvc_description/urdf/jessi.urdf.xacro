@@ -2,15 +2,21 @@
 
 <robot name="igvc_platform" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <!-- include other xacro files to use their macros -->
   <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro"/>
+
+  <!-- passed in parameters -->
+  <xacro:arg name="gpu" default="false" />
 
   <!-- constants -->
   <xacro:property name="M_PI" value="3.1415926535897931" />
 
+  <xacro:property name="chassis_mass" value="20" />
+
   <!-- wheels -->
   <xacro:property name="drive_tire_diameter" value="0.305"/>
   <xacro:property name="drive_tire_width" value="0.0762"/>
-  <!-- TODO -->
+  <!-- TODO set proper mass values -->
   <xacro:property name="drive_wheel_mass" value="5.0"/>
 
   <xacro:property name="wheelbase" value="0.714333"/>
@@ -20,39 +26,36 @@
   <xacro:property name="drive_wheel_vel_limit" value="20"/>
 
   <!-- drive shock params-->
-  <xacro:property name="drive_wheel_travel" value="0.0"/>
-  <xacro:property name="drive_shock_eff_limit" value="5.0"/>
-  <xacro:property name="drive_shock_vel_limit" value="5.0"/>
+  <!-- how far the drive wheel shock can move (m)-->
+  <xacro:property name="drive_wheel_travel" value="0.1"/>
+  <xacro:property name="drive_shock_eff_limit" value="500.0"/>
+  <xacro:property name="drive_shock_vel_limit" value="0.1"/>
 
   <!-- casters -->
   <xacro:property name="caster_radius" value="0.1016"/>
-  <!-- TODO -->
   <xacro:property name="caster_mass" value="1.0"/>
-  <xacro:property name="caster_forward" value="0.612978"/>
-
-  <!-- caster shock params -->
-  <xacro:property name="caster_wheel_travel" value="0.5"/>
-  <xacro:property name="caster_shock_eff_limit" value="200.0"/>
-  <xacro:property name="caster_shock_vel_limit" value="280"/>
+  <xacro:property name="caster_x" value="0.612978"/>
 
   <!-- camera params -->
   <xacro:property name="camera_y" value="0.0"/>
   <xacro:property name="camera_x" value="0.216371"/>
   <xacro:property name="camera_pitch" value="0.0"/>
-  <xacro:property name="camera_height" value="1.354330"/>
+  <xacro:property name="camera_z" value="1.354330"/>
 
   <!-- lidar params -->
-  <xacro:property name="lidar_pitch" value="0.0"/>
-  <xacro:property name="lidar_forward" value="0.680364"/>
-  <xacro:property name="lidar_height" value="0.237121"/>
+  <xacro:property name="lidar_pitch" value="0.174533"/>
+  <xacro:property name="lidar_x" value="0.680364"/>
+  <xacro:property name="lidar_z" value="0.237121"/>
+  <xacro:property name="lidar_hz" value="10"/>
+  <xacro:property name="lidar_samples" value="500"/>
 
   <!-- gps -->
-  <xacro:property name="gps_height" value="1.354330"/>
+  <xacro:property name="gps_z" value="1.354330"/>
   <xacro:property name="gps_y" value="0.198120"/>
   <xacro:property name="gps_x" value="0.216371"/>
 
   <!-- imu -->
-  <xacro:property name="imu_height" value="1.354330"/>
+  <xacro:property name="imu_z" value="1.354330"/>
   <xacro:property name="imu_y" value="-0.198120"/>
   <xacro:property name="imu_x" value="0.216371"/>
 
@@ -81,19 +84,22 @@
       <axis xyz="0 0 -1"/>
       <limit lower="${-drive_wheel_travel / 2}" upper="${drive_wheel_travel / 2}"
              effort="${drive_shock_eff_limit}" velocity="${drive_shock_vel_limit}"/>
-      <!-- TODO -->
-      <dynamics damping="100" friction="0.0001"
-                spring_stiffness="3152" spring_reference="0.08"/>
+      <!-- TODO tune for actual shocks -->
+      <!-- damping = viscous dampening coeff -->
+      <!-- friction, physical static friction -->
+      <!-- spring stiffness = spring constant N/m-->
+      <dynamics damping="100" friction="1.0"
+                spring_stiffness="113832.44275" spring_reference="0.08"/>
     </joint>
     <transmission name="${lr_prefix}_drive_shock_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="${lr_prefix}_drive_shock">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       </joint>
       <actuator name="${lr_prefix}_drive_shock_act">
         <!-- This hardwareInterface element exists for compatibility
              with ROS Hydro. -->
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
         <!-- TODO parameterize to make consistent PID values work -->
         <mechanicalReduction>1</mechanicalReduction>
       </actuator>
@@ -239,17 +245,17 @@
   </link>
 
   <joint name="base_link_to_center_cam" type="fixed">
-      <origin xyz="${camera_x} ${camera_y} ${camera_height}" rpy="0 ${camera_pitch} 0" />
+      <origin xyz="${camera_x} ${camera_y} ${camera_z}" rpy="0 ${camera_pitch} 0" />
       <parent link="base_link"/>
       <child link="center_cam"/>
   </joint>
 
   <!-- the optical joint is in the correct frame for transforms -->
-  <link name="optical_center_cam"/>
+  <link name="center_cam_optical"/>
 
-  <joint name="optical_center_cam_joint" type="fixed">
+  <joint name="center_cam_optical_joint" type="fixed">
       <parent link="center_cam"/>
-      <child link="optical_center_cam"/>
+      <child link="center_cam_optical"/>
       <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
 
@@ -284,7 +290,7 @@
               <cameraName>center_cam</cameraName>
               <imageTopicName>image_raw</imageTopicName>
               <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-              <frameName>optical_center_cam</frameName>
+              <frameName>center_cam_optical</frameName>
               <hackBaseline>0.0</hackBaseline>
               <distortionK1>0.0</distortionK1>
               <distortionK2>0.0</distortionK2>
@@ -304,35 +310,50 @@
     <material>Gazebo/Grey</material>
   </gazebo>
 
+  <link name="base_footprint">
+    <xacro:null_link/>
+  </link>
+  <gazebo reference="base_footprint">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0.0 0.0 ${drive_tire_diameter / 2}" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+
   <gazebo reference="body">
     <material>Gazebo/Grey</material>
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
   </gazebo>
 
-  <!-- TODO parameterize -->
   <!-- collision range = min sensing distance -->
   <!-- gpu does gpu acceleration -->
-  <VLP-16 parent="base_link" name="lidar" topic="/scan/pointcloud" hz="10" samples="1875" gpu="false">
-    <origin xyz="${lidar_forward} 0.0 ${lidar_height}" rpy="0 ${lidar_pitch} 0" />
+  <VLP-16 parent="base_link" name="lidar" topic="/scan/pointcloud" hz="${lidar_hz}" samples="${lidar_samples}"
+          gpu="$(arg gpu)">
+    <origin xyz="${lidar_x} 0.0 ${lidar_z}" rpy="0 ${lidar_pitch} 0" />
   </VLP-16>
 
   <xacro:wheel lr_prefix="left" lr_reflect="1" tire_diameter="${drive_tire_diameter}"
-               wheel_mass="2.0" axle_eff_limit="10" wheel_width="${drive_tire_width}"/>
+               wheel_mass="${drive_wheel_mass}" axle_eff_limit="${drive_wheel_eff_limit}" wheel_width="${drive_tire_width}"/>
   <xacro:wheel lr_prefix="right" lr_reflect="-1" tire_diameter="${drive_tire_diameter}"
-               wheel_mass="2.0" axle_eff_limit="10" wheel_width="${drive_tire_width}"/>
+               wheel_mass="${drive_wheel_mass}" axle_eff_limit="${drive_wheel_eff_limit}" wheel_width="${drive_tire_width}"/>
 
-  <xacro:caster ball_radius="${caster_radius}" ball_mass="1.0"
-                tire_diameter="${drive_tire_diameter}" x="${caster_forward}" y="0"/>
+  <xacro:caster ball_radius="${caster_radius}" ball_mass="${caster_mass}"
+                tire_diameter="${drive_tire_diameter}" x="${caster_x}" y="0"/>
 
 
   <link name="body">
       <inertial>
-          <mass value="20" />
+          <mass value="${chassis_mass}" />
           <origin xyz="0 0 0" rpy="0 0 0"/>
-          <inertia  ixx="${2 / 5 * 20 * 1 ** 2}" ixy="0.0" ixz="0.0"
-                    iyy="${2 / 5 * 20 * 1 ** 2}" iyz="0.0"
-                    izz="${2 / 5 * 20 * 1 ** 2}" />
+          <!-- approximate the intertial matrix as a sphere -->
+          <inertia  ixx="${2 / 5 * chassis_mass * 1 ** 2}" ixy="0.0" ixz="0.0"
+                    iyy="${2 / 5 * chassis_mass * 1 ** 2}" iyz="0.0"
+                    izz="${2 / 5 * chassis_mass * 1 ** 2}" />
       </inertial>
       <visual>
           <geometry>
@@ -367,7 +388,7 @@
   <joint name="base_link_to_imu" type="fixed">
     <parent link="base_link"/>
     <child link="imu"/>
-    <origin xyz="${imu_x} ${imu_y} ${imu_height}" rpy="0 0 0"/>
+    <origin xyz="${imu_x} ${imu_y} ${imu_z}" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
 
@@ -381,7 +402,7 @@
   </link>
 
   <joint name="base_link_to_gps" type="fixed">
-    <origin xyz="${gps_x} ${gps_y} ${gps_height}" rpy="0 0 0" /> <!-- -1.5708 -->
+    <origin xyz="${gps_x} ${gps_y} ${gps_z}" rpy="0 0 0" />
     <parent link="base_link"/>
     <child link="gps"/>
   </joint>
@@ -409,7 +430,7 @@
       <headingDrift>0.0 0.0 0.0</headingDrift>
       <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
       <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
-      <yawOffset>1.5707963</yawOffset>
+      <!--<yawOffset>1.5707963</yawOffset>-->
     </plugin>
 
     <plugin filename="libhector_gazebo_ros_gps.so" name="gps">
@@ -430,7 +451,7 @@
     <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>200.0</updateRate>
-      <bodyName>base_link</bodyName>
+      <bodyName>base_footprint</bodyName>
       <topicName>ground_truth/state_raw</topicName>
       <gaussianNoise>0.00</gaussianNoise>
       <frameName>world</frameName>

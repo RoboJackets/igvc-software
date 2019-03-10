@@ -1,117 +1,190 @@
 #include "igvcsearchproblem.h"
 #include <math.h>
 
-SearchLocation robot_position;
 
-bool IGVCSearchProblem::isActionValid(SearchMove& move, SearchLocation start_state)
+// TODO update to include orientation when calculting CSpace
+// TODO what if I jump over an obstacle
+bool IGVCSearchProblem::isActionValid(const SearchMove& move, const SearchLocation& start_state)
 {
-  auto deltat = move.DeltaT;
-  double current = 0.0;
-  if (sqrt(pow(start_state.x - robot_position.x, 2) + pow(start_state.y - robot_position.y, 2)) > BoundingDistance)
+  SearchLocation result = getResult(start_state, move);
+  if (std::abs(result.ThetaChange) > MaxThetaChange)
   {
-    return true;
+    return false;
   }
-  while (current < (deltat + MaxObstacleDeltaT))
+  double x = start_state.X + move.X;
+  double y = start_state.Y + move.Y;
+  if (x < 0 || y < 0 || x >= Map->image.size().width || y >= Map->image.size().height)
   {
-    current = current > deltat ? deltat : (current + MaxObstacleDeltaT);
-    move.DeltaT = current;
-    SearchLocation result = getResult(start_state, move);
-    double offsetToCenter = 0.33;
-    pcl::PointXYZ searchPoint(result.x + offsetToCenter * cos(result.theta),
-                              result.y + offsetToCenter * sin(result.theta), 0);
-    std::vector<int> pointIdxRadiusSearch;
-    std::vector<float> pointRadiusSquaredDistance;
-    int neighborsCount = Octree->nearestKSearch(searchPoint, 1, pointIdxRadiusSearch, pointRadiusSquaredDistance);
-    if (neighborsCount > 0)
-    {
-      float distance = sqrt(pointRadiusSquaredDistance[0]);
-      if (distance < move.distToObs)
-      {
-        move.distToObs = distance;
-      }
-      if (move.distToObs <= Threshold)
-      {
-        return false;
-      }
-    }
+    return false;
+  }
+  double min_val;
+  double max_val;
+  double sep = CSpace / Resolution;
+
+  // TODO how does this function worik
+  // implicit cast, TODO check a thing we want to do
+  cv::Mat subsection =
+      Map->image(cv::Range(max(x - sep, 0.0), min(static_cast<int>(std::round(x + sep)) + 1, Map->image.size().height)),
+                 cv::Range(max(y - sep, 0.0), min(static_cast<int>(std::round(y + sep)) + 1, Map->image.size().width)));
+  cv::minMaxLoc(subsection, &min_val, &max_val);
+  if (max_val > ProbabilityThreshold * 255)
+  {
+    return false;
   }
   return true;
 }
 
-std::list<SearchMove> IGVCSearchProblem::getActions(SearchLocation state, SearchLocation local_robot_position)
+std::list<SearchMove> IGVCSearchProblem::getActions(const SearchLocation& state)
 {
   std::list<SearchMove> acts;
-  robot_position = local_robot_position;
-  auto deltat = DeltaT(state.distTo(Start), state.distTo(Goal));
-  double delta = DeltaOmega;
-  double Wmin = MinimumOmega;
-  double Wmax = MaximumOmega;
-  for (double W = Wmin; W <= Wmax; W += delta)
+  double theta = state.Theta;
+  // TODO this should not be needed
+  double thetaThreshold = 0.1;
+  // TODO is this an issue
+  double jump_size = (DistanceToGoal - state.distTo(Goal, Resolution)) / DistanceToGoal;
+  if (jump_size > 0.5)
   {
-    SearchMove move(Speed, W, deltat);
-    if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
-    {
-      acts.push_back(move);
-    }
+    jump_size = 1 - jump_size;
   }
-  if (ReverseEnabled && acts.size() == 0)
+  int dist = max(std::round(jump_size * MaxJumpSize), 1.0);
+  if (abs(theta) < thetaThreshold)
   {
-    for (double W = Wmin; W <= Wmax; W += delta)
-    {
-      SearchMove move = SearchMove(-Speed, W, deltat);
-      if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
-      {
-        acts.push_back(move);
-      }
-    }
+    acts.push_back(SearchMove(dist, dist));
+    acts.push_back(SearchMove(dist, 0));
+    acts.push_back(SearchMove(dist, -dist));
   }
-  if (PointTurnsEnabled)
+  else if (abs(theta - M_PI / 4) < thetaThreshold)
   {
-    SearchMove move(0, TurningSpeed, deltat);
-    if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
-    {
-      acts.push_back(move);
-    }
-    move = SearchMove(0, -TurningSpeed, deltat);
-    if (Octree->getTreeDepth() == 0 || isActionValid(move, state))
-    {
-      acts.push_back(move);
-    }
+    acts.push_back(SearchMove(0, dist));
+    acts.push_back(SearchMove(dist, dist));
+    acts.push_back(SearchMove(dist, 0));
   }
-  return acts;
-}
-
-SearchLocation IGVCSearchProblem::getResult(SearchLocation state, SearchMove action)
-{
-  SearchLocation result;
-  if (abs(action.W) > 1e-10)
+  else if (abs(theta - M_PI / 2) < thetaThreshold)
   {
-    double w = action.W;
-    double R = action.V / action.W;
-    double ICCx = state.x - (R * sin(state.theta));
-    double ICCy = state.y - (R * cos(state.theta));
-    using namespace Eigen;
-    Matrix3d T;
-    double wdt = w * action.DeltaT;
-    T << cos(wdt), sin(wdt), 0, -sin(wdt), cos(wdt), 0, 0, 0, 1;
-    Vector3d a(state.x - ICCx, state.y - ICCy, state.theta);
-    Vector3d b = T * a;
-    Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
-    // Vector3d b(ICCx, ICCy, wdt);
-    // Vector3d c = T * a + b;
-    result.x = c[0];
-    result.y = c[1];
-    result.theta = c[2];
-    while (result.theta < 0)
-      result.theta += 2 * M_PI;
-    while (result.theta > 2 * M_PI)
-      result.theta -= 2 * M_PI;
+    acts.push_back(SearchMove(-dist, dist));
+    acts.push_back(SearchMove(0, dist));
+    acts.push_back(SearchMove(dist, dist));
+  }
+  else if (abs(theta - 3 * M_PI / 4) < thetaThreshold)
+  {
+    acts.push_back(SearchMove(-dist, 0));
+    acts.push_back(SearchMove(-dist, dist));
+    acts.push_back(SearchMove(0, dist));
+  }
+  else if (abs(abs(theta) - M_PI) < thetaThreshold)
+  {
+    acts.push_back(SearchMove(-dist, -dist));
+    acts.push_back(SearchMove(-dist, 0));
+    acts.push_back(SearchMove(-dist, dist));
+  }
+  else if (abs(theta + 3 * M_PI / 4) < thetaThreshold)
+  {
+    acts.push_back(SearchMove(0, -dist));
+    acts.push_back(SearchMove(-dist, -dist));
+    acts.push_back(SearchMove(-dist, 0));
+  }
+  else if (abs(theta + M_PI / 2) < thetaThreshold)
+  {
+    acts.push_back(SearchMove(dist, -dist));
+    acts.push_back(SearchMove(0, -dist));
+    acts.push_back(SearchMove(-dist, -dist));
+  }
+  else if (abs(theta + M_PI / 4) < thetaThreshold)
+  {
+    acts.push_back(SearchMove(dist, 0));
+    acts.push_back(SearchMove(dist, -dist));
+    acts.push_back(SearchMove(0, -dist));
   }
   else
   {
-    result.theta = state.theta;
-    result.x = state.x + (cos(-result.theta) * action.V * action.DeltaT);
-    result.y = state.y + (sin(-result.theta) * action.V * action.DeltaT);
+    // TODO handle error
+    //std::cerr << "\n\n\n\n\nfail" << theta << "\n\n\n\n\n" << std::endl;
   }
+  acts.remove_if([this, state](SearchMove m) { return !isActionValid(m, state); });
+  return acts;
+}
+
+SearchLocation IGVCSearchProblem::getResult(const SearchLocation& state, const SearchMove& action)
+{
+  SearchLocation result;
+  result.X = state.X;
+  result.Y = state.Y;
+  result.X += action.X;
+  result.Y += action.Y;
+  result.cost = state.cost + getStepCost(state, action);
+  if (action.X > 0 && action.Y == 0)
+  {
+    result.Theta = 0;
+  }
+  else if (action.X > 0 && action.Y > 0)
+  {
+    result.Theta = M_PI / 4;
+  }
+  else if (action.X == 0 && action.Y > 0)
+  {
+    result.Theta = M_PI / 2;
+  }
+  else if (action.X < 0 && action.Y > 0)
+  {
+    result.Theta = 3 * M_PI / 4;
+  }
+  else if (action.X < 0 && action.Y == 0)
+  {
+    result.Theta = M_PI;
+  }
+  else if (action.X < 0 && action.Y < 0)
+  {
+    result.Theta = -3 * M_PI / 4;
+  }
+  else if (action.X == 0 && action.Y < 0)
+  {
+    result.Theta = -M_PI / 2;
+  }
+  else if (action.X > 0 && action.Y < 0)
+  {
+    result.Theta = -M_PI / 4;
+  }
+  else
+  {
+    // TODO handle case
+    //std::cerr << "\n\n\n\n\nfail" << action << "\n\n\n\n\n" << std::endl;
+  }
+  result.PrevTheta.resize(ThetaChangeWindow);
+  double thetaDiff;
+  if (std::abs(state.Theta - M_PI) < 0.1)
+  {
+    thetaDiff = result.Theta > 0 ? result.Theta - M_PI : result.Theta + M_PI;
+  }
+  else if (std::abs(result.Theta - M_PI) < 0.1)
+  {
+    thetaDiff = state.Theta > 0 ? M_PI - state.Theta : -M_PI - state.Theta;
+  }
+  else if (state.Theta < 0 && result.Theta > 0)
+  {
+    thetaDiff = state.Theta + M_PI - result.Theta;
+  }
+  else if (state.Theta > 0 && result.Theta < 0)
+  {
+    thetaDiff = result.Theta + M_PI - state.Theta;
+  }
+  else
+  {
+    thetaDiff = result.Theta - state.Theta;
+  }
+  if (state.PrevTheta.size() < ThetaChangeWindow)
+  {
+    std::copy(state.PrevTheta.begin(), state.PrevTheta.end(), result.PrevTheta.begin());
+    result.ThetaChange = state.ThetaChange + thetaDiff;
+    result.PrevTheta.push_back(thetaDiff);
+  }
+  else
+  {
+    double theta = state.PrevTheta.front();
+    // copy without the first element
+    std::copy(++state.PrevTheta.begin(), state.PrevTheta.end(), result.PrevTheta.begin());
+    result.ThetaChange = state.ThetaChange - theta + thetaDiff;
+    result.PrevTheta.push_back(thetaDiff);
+  }
+
   return result;
 }

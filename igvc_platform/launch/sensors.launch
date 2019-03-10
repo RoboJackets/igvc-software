@@ -24,4 +24,7 @@
     <!-- IMU -->
     <include file="$(find igvc_platform)/launch/imu.launch" />
 
+    <!-- System Stats -->
+    <include file="$(find igvc_utils)/launch/system_stats.launch" />
+
 </launch>

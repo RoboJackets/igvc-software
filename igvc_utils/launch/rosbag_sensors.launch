@@ -1,9 +1,0 @@
-<!-- rosbag.launch -->
-<!--
-    This file will launch the rosbag recorder and will log all topics
-    excluding some of the duplicate image_transport topics.
-    -->
-<launch>
-    <node pkg="rosbag" type="record" name="record" output="screen"
-    args="/battery /encoders /fix /pc2 /scan/pointcloud /imu /joint_states /lights /motors /robot_enabled /tf /tf_static /usb_cam_center/camera_info /usb_cam_center/image_raw/compressed /vel /waypoint /time_reference" />
-</launch>

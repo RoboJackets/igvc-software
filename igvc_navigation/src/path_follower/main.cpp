@@ -1,5 +1,7 @@
 #define _USE_MATH_DEFINES
 
+#include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <igvc_msgs/velocity_pair.h>
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
@@ -7,6 +9,7 @@
 #include <tf/transform_datatypes.h>
 #include <Eigen/Dense>
 #include <cmath>
+#include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/RobotState.hpp>
 #include <iostream>
 #include "SmoothControl.h"
@@ -16,22 +19,32 @@ ros::Publisher target_pub;
 ros::Publisher trajectory_pub;
 
 nav_msgs::PathConstPtr path;
+geometry_msgs::PointStampedConstPtr waypoint;
 
-double lookahead_dist, maximum_vel;
+double stop_dist, maximum_vel;
+
+bool debug;
 
 SmoothControl controller;
 
 void path_callback(const nav_msgs::PathConstPtr& msg)
 {
-  ROS_INFO("Follower got path");
+  if (debug)
+  {
+    ROS_INFO_STREAM("Follower got path. Size: " << msg->poses.size());
+  }
   path = msg;
 }
 
-double get_distance(double x1, double y1, double x2, double y2)
+void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
-  return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+  waypoint = msg;
 }
 
+/**
+Constructs a new trajectory to follow using the current path msg and publishes
+the first velocity command from this trajectory.
+*/
 void position_callback(const nav_msgs::OdometryConstPtr& msg)
 {
   if (path.get() == nullptr)
@@ -48,108 +61,70 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     path.reset();
     return;
   }
-  RobotState state(msg);
 
-  RobotState target;
-  geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
-  double path_index = 0;
-  double closest =
-      std::abs(get_distance(state.x, state.y, path->poses[0].pose.position.x, path->poses[0].pose.position.y));
-  double temp = std::abs(
-      get_distance(state.x, state.y, path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y));
-  while (path_index < path->poses.size() && temp <= closest)
-  {
-    if (temp < closest)
-    {
-      closest = temp;
-    }
-    path_index++;
-    temp = std::abs(get_distance(state.x, state.y, path->poses[path_index].pose.position.x,
-                                 path->poses[path_index].pose.position.y));
-  }
+  // Current pose
+  RobotState cur_pos(msg);
 
-  if (get_distance(state.x, state.y, end.x, end.y) > lookahead_dist)
-  {
-    double distance = 0;
-    bool cont = true;
-    while (cont && path_index < path->poses.size() - 1)
-    {
-      geometry_msgs::Point point1, point2;
-      point1 = path->poses[path_index].pose.position;
-      point2 = path->poses[path_index + 1].pose.position;
-      double increment = get_distance(point1.x, point1.y, point2.x, point2.y);
-      if (distance + increment > lookahead_dist)
-      {
-        cont = false;
-        Eigen::Vector3d first(point1.x, point1.y, 0);
-        Eigen::Vector3d second(point2.x, point2.y, 0);
-        Eigen::Vector3d slope = second - first;
-        // ROS_INFO_STREAM("first = " << first[0] << ", " << first[1]);
-        // ROS_INFO_STREAM("slope = " << slope[0] << ", " << slope[1]);
-        // ROS_INFO_STREAM("look = " << lookahead_dist << " dista = " << distance);
-        // ROS_INFO_STREAM("increment = " << increment << " look - dist = " << (distance - lookahead_dist) + increment);
-        slope /= increment;
-        slope *= (distance - lookahead_dist) + increment;
-        // ROS_INFO_STREAM("slope2 = " << slope[0] << ", " << slope[1]);
-        slope += first;
-        target.x = slope[0];
-        target.y = slope[1];
-      }
-      else
-      {
-        path_index++;
-        distance += increment;
-      }
-    }
-  }
-  else
-  {
-    target.x = end.x;
-    target.y = end.y;
-  }
+  double goal_dist = cur_pos.distTo(waypoint->point.x, waypoint->point.y);
+  ROS_INFO_STREAM("Distance to waypoint: " << goal_dist << "(m.)");
 
-  double yDiff = target.x - state.y;
-  double xDiff = target.y - state.x;
-
-  if (xDiff == 0)
-  {
-    target.yaw = yDiff > 0 ? M_PI : -M_PI;
-  }
-  else
-  {
-    target.yaw = atan2((yDiff), (xDiff));
-  }
-
-  ros::Time time = ros::Time::now();
-
-  geometry_msgs::PointStamped target_point;
-  target_point.header.frame_id = "/odom";
-  target_point.header.stamp = time;
-  target_point.point.x = target.x;
-  target_point.point.y = target.y;
-  target_pub.publish(target_point);
-
-  igvc_msgs::velocity_pair vel;
+  ros::Time time = msg->header.stamp;
+  igvc_msgs::velocity_pair vel;  // immediate velocity command
   vel.header.stamp = time;
 
-  nav_msgs::Path trajectory_msg;
-  trajectory_msg.header.stamp = ros::Time::now();
-  trajectory_msg.header.frame_id = "/odom";
-
-  controller.getTrajectory(vel, trajectory_msg, state.getVector3d(), target.getVector3d());
-
-  ROS_INFO_STREAM("distance = " << get_distance(target.x, target.y, state.x, state.y));
-
-  if (vel.right_velocity > maximum_vel || vel.left_velocity > maximum_vel)
+  if (goal_dist <= stop_dist)
   {
-    ROS_ERROR_STREAM("Large velocity output stopping " << vel.right_velocity << ", " << vel.left_velocity);
+    /**
+    Stop when the robot is a set distance away from the waypoint
+    */
+    ROS_INFO_STREAM(">>>WAYPOINT REACHED...STOPPING<<<");
+    vel.right_velocity = 0;
+    vel.left_velocity = 0;
+    // make path null to stop planning until path generated
+    // for new waypoint
+    path = nullptr;
+  }
+  else
+  {
+    /**
+    Obtain smooth control law from the controller. This includes a smooth
+    trajectory for visualization purposes and an immediate velocity command.
+    */
+    nav_msgs::Path trajectory_msg;
+    trajectory_msg.header.stamp = time;
+    trajectory_msg.header.frame_id = "/odom";
+
+    controller.cur_pos = cur_pos;
+    controller.getTrajectory(vel, path, trajectory_msg, cur_pos);
+    // publish trajectory
+    trajectory_pub.publish(trajectory_msg);
+
+    // publish target position
+    RobotState target = controller.target;
+    geometry_msgs::PointStamped target_point;
+    target_point.header.frame_id = "/odom";
+    target_point.header.stamp = time;
+    target_point.point.x = target.x;
+    target_point.point.y = target.y;
+    target_pub.publish(target_point);
+
+    if (debug)
+    {
+      ROS_INFO_STREAM("Distance to target: " << cur_pos.distTo(target) << "(m.)");
+    }
+  }
+
+  // make sure maximum velocity not exceeded
+  if (std::max(std::abs(vel.right_velocity), std::abs(vel.left_velocity)) > maximum_vel)
+  {
+    ROS_ERROR_STREAM("Maximum velocity exceeded. Right: " << vel.right_velocity << "(m/s), Left: " << vel.left_velocity
+                                                          << "(m/s), Max: " << maximum_vel
+                                                          << "(m/s) ... Stopping robot...");
     vel.right_velocity = 0;
     vel.left_velocity = 0;
   }
-  // ROS_INFO_STREAM("target " << target.x << " " << target.y << "\n");
 
-  cmd_pub.publish(vel);
-  trajectory_pub.publish(trajectory_msg);
+  cmd_pub.publish(vel);  // pub velocity command
 }
 
 int main(int argc, char** argv)
@@ -159,22 +134,25 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  pNh.param(std::string("target_v"), controller.v, 1.0);
-  pNh.param(std::string("axle_length"), controller.axle_length, 0.52);
-  pNh.param(std::string("k1"), controller.k1, 1.0);
-  pNh.param(std::string("k2"), controller.k2, 3.0);
-  pNh.param(std::string("roll_out_time"), controller.rollOutTime, 2.0);
-  pNh.param(std::string("lookahead_dist"), lookahead_dist, 2.0);
-  pNh.param(std::string("maximum_vel"), maximum_vel, 1.6);
+  // load controller parameters
+  igvc::param(pNh, "target_v", controller.v, 1.0);
+  igvc::param(pNh, "axle_length", controller.axle_length, 0.52);
+  igvc::param(pNh, "k1", controller.k1, 1.0);
+  igvc::param(pNh, "k2", controller.k2, 3.0);
+  igvc::param(pNh, "granularity", controller.granularity, 2.0);
+  igvc::param(pNh, "lookahead_dist", controller.lookahead_dist, 2.0);
+
+  // load global parameters
+  igvc::param(pNh, "maximum_vel", maximum_vel, 1.6);
+  igvc::param(pNh, "stop_dist", stop_dist, 0.9);
+  igvc::param(pNh, "debug", debug, true);
 
   ros::Subscriber path_sub = nh.subscribe("/path", 1, path_callback);
-
   ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, position_callback);
+  ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
 
   cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
-
   target_pub = nh.advertise<geometry_msgs::PointStamped>("/target_point", 1);
-
   trajectory_pub = nh.advertise<nav_msgs::Path>("/trajectory", 1);
 
   ros::spin();

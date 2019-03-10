@@ -7,18 +7,16 @@
   left_wheel_effort_controller:
     type: effort_controllers/JointEffortController
     joint: left_axle
-    pid: {p: 100.0, i: 0.01, d: 10.0}
   right_wheel_effort_controller:
     type: effort_controllers/JointEffortController
     joint: right_axle
-    pid: {p: 100.0, i: 0.01, d: 10.0}
 
   # shock controllers ----------------------------------------
   left_wheel_shock_controller:
     joint: left_drive_shock
     type: effort_controllers/JointPositionController
-    pid: {p: 3152.28303, i: 0.0, d: 20}
+    pid: {p: 10000, i: 0.0, d: 20}
   right_wheel_shock_controller:
     joint: right_drive_shock
     type: effort_controllers/JointPositionController
-    pid: {p: 3152.28303, i: 0.0, d: 20}
+    pid: {p: 10000, i: 0.0, d: 20}
