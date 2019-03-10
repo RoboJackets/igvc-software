@@ -11,6 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
   igvc_msgs
 )
 
+find_package(Eigen3 REQUIRED)
+include_directories(${EIGEN3_INCLUDE_DIR})
+
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 set(CMAKE_CXX_FLAGS "-g -std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
@@ -95,10 +98,11 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
-  include
 )
+
 ## Declare a cpp library
 # add_library(igvc
 #   src/${PROJECT_NAME}/igvc.cpp
@@ -164,3 +168,4 @@ include_directories(
 add_subdirectory(src/pid_tester)
 add_subdirectory(src/serial)
 add_subdirectory(src/speed_compare)
+add_subdirectory(src/system_stats)

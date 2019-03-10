@@ -10,11 +10,17 @@
 #include <string>
 #include "conversion.h"
 
+#include <igvc_utils/NodeUtils.hpp>
+
 ros::Publisher waypoint_pub;
 std::vector<geometry_msgs::PointStamped> waypoints;
 geometry_msgs::PointStamped current_waypoint;
 geometry_msgs::Point map_origin;
 std::mutex current_mutex;
+
+std::string global_link;
+std::string robot_link;
+double goal_threshold;
 
 double dmsToDec(std::string dms)
 {
@@ -35,6 +41,11 @@ double dmsToDec(std::string dms)
   return degrees;
 }
 
+/**
+ * Parses waypoints text file
+ * # denotes a line to ignore
+ * Assumes a series of lat,lon pairs
+ */
 void loadWaypointsFile(std::string path, std::vector<geometry_msgs::PointStamped>& waypoints)
 {
   if (path.empty())
@@ -58,6 +69,7 @@ void loadWaypointsFile(std::string path, std::vector<geometry_msgs::PointStamped
   {
     getline(file, line);
 
+    // ignore any line starting with a #
     if (!line.empty() && line[0] != '#')
     {
       std::vector<std::string> tokens = split(line, ',');
@@ -89,11 +101,9 @@ void loadWaypointsFile(std::string path, std::vector<geometry_msgs::PointStamped
   }
 }
 
-double distanceBetweenPoints(const geometry_msgs::Point& p1, const geometry_msgs::Point& p2)
-{
-  return sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
-}
-
+/**
+ * Advances to the next waypoint if the current one has been reached within goal_threshold
+ */
 void positionCallback(const nav_msgs::OdometryConstPtr& msg)
 {
   std::lock_guard<std::mutex> lock(current_mutex);
@@ -101,18 +111,21 @@ void positionCallback(const nav_msgs::OdometryConstPtr& msg)
   cur.point.x -= map_origin.x;
   cur.point.y -= map_origin.y;
 
-  if (distanceBetweenPoints(msg->pose.pose.position, cur.point) < 1.0)
+  if (igvc::get_distance(msg->pose.pose.position.x, msg->pose.pose.position.y, cur.point.x, cur.point.y) < goal_threshold)
   {
     // advance to next waypoint.
     current_waypoint = waypoints.front();
     if (waypoints.size() > 1)
     {
       waypoints.erase(waypoints.begin());
-      std::cerr << "Waypoint Source moving to next" << std::endl;
+      ROS_INFO("Waypoint Source moving to next");
     }
   }
 }
 
+/**
+ * Uses current GPS position and most recent localization to project the waypoint into the global map frame
+ */
 void originCallback(const sensor_msgs::NavSatFixConstPtr& msg)
 {
   std::lock_guard<std::mutex> lock(current_mutex);
@@ -120,14 +133,16 @@ void originCallback(const sensor_msgs::NavSatFixConstPtr& msg)
   tf::StampedTransform transform;
   geometry_msgs::Point position;
   UTM(msg->latitude, msg->longitude, &(position.x), &(position.y));
-  if (tf_listener.waitForTransform("/odom", "/base_footprint", ros::Time(0), ros::Duration(3.0)))
+  if (tf_listener.waitForTransform(global_link, robot_link, ros::Time(0), ros::Duration(3.0)))
   {
-    tf_listener.lookupTransform("/odom", "/base_footprint", ros::Time(0), transform);
+    tf_listener.lookupTransform(global_link, robot_link, ros::Time(0), transform);
     geometry_msgs::TransformStamped result;
     tf::transformStampedTFToMsg(transform, result);
     position.x -= result.transform.translation.x;
     position.y -= result.transform.translation.y;
     map_origin = position;
+  } else {
+    ROS_ERROR_STREAM("cannot find transform from " << global_link << " to " << robot_link << " in waypoint file");
   }
 }
 
@@ -136,20 +151,26 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "waypoint_source");
 
   ros::NodeHandle nh;
-  ros::NodeHandle nhp("~");
+  ros::NodeHandle pNh("~");
 
-  ROS_INFO_STREAM("Has param: " << nhp.hasParam("file"));
-
+  double pub_rate;
   std::string path;
-  nhp.getParam("file", path);
+  std::string localization_topic, gps_topic;
+  igvc::getParam(pNh, "file", path);
+  igvc::param(pNh, "rate", pub_rate, 1.0);
+  igvc::param(pNh, "goal_threshold", goal_threshold, 1.0);
+  igvc::param(pNh, "global_link", global_link, std::string("/odom"));
+  igvc::param(pNh, "robot_link", robot_link, std::string("/base_footprint"));
+  igvc::param(pNh, "localization_topic", localization_topic, std::string("/odometry/filtered"));
+  igvc::param(pNh, "gps_topic", gps_topic, std::string("/gps/filtered"));
 
   ROS_INFO_STREAM("Loading waypoints from " << path);
 
   waypoint_pub = nh.advertise<geometry_msgs::PointStamped>("/waypoint", 1);
 
-  ros::Subscriber odom_sub = nh.subscribe("/odometry/filtered", 1, positionCallback);
+  ros::Subscriber odom_sub = nh.subscribe(localization_topic, 1, positionCallback);
 
-  ros::Subscriber origin_sub = nh.subscribe("/gps/filtered", 1, originCallback);
+  ros::Subscriber origin_sub = nh.subscribe(gps_topic, 1, originCallback);
 
   loadWaypointsFile(path, waypoints);
 
@@ -157,7 +178,7 @@ int main(int argc, char** argv)
   {
     ROS_INFO_STREAM(waypoints.size() << " waypoints found.");
     current_waypoint = waypoints.front();
-    ros::Rate rate(1);  // 1 Hz
+    ros::Rate rate(pub_rate);  // 1 Hz
     while (ros::ok())
     {
       {
@@ -168,9 +189,6 @@ int main(int argc, char** argv)
         waypoint_for_pub.header.frame_id = "odom";
         waypoint_for_pub.point.x -= map_origin.x;
         waypoint_for_pub.point.y -= map_origin.y;
-        // double temp = -waypoint_for_pub.point.x;
-        // waypoint_for_pub.point.x = waypoint_for_pub.point.y;
-        // waypoint_for_pub.point.y = temp;
         waypoint_pub.publish(waypoint_for_pub);
       }
 

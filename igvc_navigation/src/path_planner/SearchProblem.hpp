@@ -12,6 +12,7 @@ class Path
 private:
   std::list<StateType> states;
   std::list<ActionType> actions;
+  double pathCost;
 
 public:
   Path()
@@ -19,6 +20,7 @@ public:
   }
   Path(const Path<StateType, ActionType>& p) : states(p.states), actions(p.actions)
   {
+    pathCost = p.pathCost;
   }
   void addState(StateType state)
   {
@@ -28,6 +30,22 @@ public:
   {
     actions.push_back(action);
   }
+  void addStateActionRev(StateType state, ActionType action) {
+    states.push_front(state);
+    actions.push_front(action);
+  }
+  void addStateActionPair(StateType state, ActionType action, double cost) {
+    pathCost += cost;
+    states.push_back(state);
+    actions.push_back(action);
+  }
+  double getPathCost() const {
+    return pathCost;
+  }
+  void setPathCost(double pathCost) {
+    this->pathCost = pathCost;
+  }
+
   void setState(StateType state, int index)
   {
     if (index < 0 || index >= states.size())
@@ -86,10 +104,10 @@ class SearchProblem
 {
 public:
   virtual StateType getStartState() = 0;
-  virtual std::list<ActionType> getActions(StateType state, StateType robot_position) = 0;
-  virtual StateType getResult(StateType state, ActionType action) = 0;
-  virtual bool isGoal(StateType tate) = 0;
-  virtual double getStepCost(StateType state, ActionType action)
+  virtual std::list<ActionType> getActions(const StateType& state) = 0;
+  virtual StateType getResult(const StateType& state, const ActionType& action) = 0;
+  virtual bool isGoal(const StateType& state) = 0;
+  virtual double getStepCost(const StateType& state, const ActionType& action)
   {
     (void)state;
     (void)action;
@@ -102,14 +120,7 @@ public:
   }
   double getPathCost(Path<StateType, ActionType>* path)
   {
-    double cost = 0;
-
-    for (int i = 0; i < path->getNumberOfSteps(); i++)
-    {
-      cost += getStepCost(path->getState(i), path->getAction(i));
-    }
-
-    return cost;
+    return path->getPathCost();
   }
 };
 
