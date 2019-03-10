@@ -313,7 +313,7 @@
   <link name="base_footprint">
     <xacro:null_link/>
   </link>
-  <gazebo reference="base_link">
+  <gazebo reference="base_footprint">
     <material>Gazebo/Grey</material>
   </gazebo>
 
@@ -430,7 +430,7 @@
       <headingDrift>0.0 0.0 0.0</headingDrift>
       <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
       <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
-      <yawOffset>1.5707963</yawOffset>
+      <!--<yawOffset>1.5707963</yawOffset>-->
     </plugin>
 
     <plugin filename="libhector_gazebo_ros_gps.so" name="gps">

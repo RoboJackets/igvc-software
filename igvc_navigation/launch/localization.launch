@@ -25,7 +25,7 @@
       <!-- sets altitude to 0 -->
       <param name="zero_altitude" value="true"/>
 
-      <!-- broadcasts the transform world_fram->utm -->
+      <!-- broadcasts the transform world_frame->utm -->
       <param name="broadcast_utm_transform" value="true"/>
 
       <!-- publishes the lat and long of the robot position -->
