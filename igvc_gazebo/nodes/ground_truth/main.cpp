@@ -20,23 +20,24 @@ void odom_callback(const nav_msgs::Odometry::ConstPtr& msg) {
 void ground_truth_callback(const nav_msgs::Odometry::ConstPtr& msg) {
 
   std::lock_guard<std::mutex> truth_lock(mutex);
+  // get the starting location as the origin
   if(msg->header.stamp.toSec() < 0.5) {
     og_pose.pose = msg->pose;
-    og_pose.pose.pose.position.x = msg->pose.pose.position.x;
-    og_pose.pose.pose.position.y = msg->pose.pose.position.y;
+    og_pose.pose.pose.position.x = -msg->pose.pose.position.y;
+    og_pose.pose.pose.position.y = msg->pose.pose.position.x;
   } else {
     nav_msgs::Odometry result;
     result.pose = msg->pose;
 
     // rotate position into world frame
-    result.pose.pose.position.x = msg->pose.pose.position.x - og_pose.pose.pose.position.x;
-    result.pose.pose.position.y = msg->pose.pose.position.y - og_pose.pose.pose.position.y;
+    result.pose.pose.position.x = (-msg->pose.pose.position.y) - og_pose.pose.pose.position.x;
+    result.pose.pose.position.y = msg->pose.pose.position.x - og_pose.pose.pose.position.y;
 
 
     // rotate velocity into world frame
     result.twist = msg->twist;
-    result.twist.twist.linear.x = -msg->twist.twist.linear.x;
-    result.twist.twist.linear.y = msg->twist.twist.linear.y;
+    result.twist.twist.linear.x = -msg->twist.twist.linear.y;
+    result.twist.twist.linear.y = msg->twist.twist.linear.x;
 
     result.header = msg->header;
     result.child_frame_id = "/base_footprint";
@@ -44,7 +45,7 @@ void ground_truth_callback(const nav_msgs::Odometry::ConstPtr& msg) {
 
     tf::Quaternion quat(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y,
                         msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
-    //quat *= tf::createQuaternionFromRPY(0, 0, 0);
+   quat *= tf::createQuaternionFromRPY(0, 0, 1.57);
 
     result.pose.pose.orientation.x = quat.x();
     result.pose.pose.orientation.y = quat.y();
@@ -54,7 +55,8 @@ void ground_truth_callback(const nav_msgs::Odometry::ConstPtr& msg) {
     // publish odom message
     ground_truth_pub.publish(result);
 
-    // publish transform for tf
+    // publish transform for tf if there has not been a update from the localization node in the last second
+    // since it also publishes the same transform
     if(std::abs(msg->header.stamp.toSec() - last_estimate.toSec()) > 1.0) {
       static tf::TransformBroadcaster br;
       tf::Transform transform;
