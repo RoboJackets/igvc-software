@@ -43,4 +43,5 @@ topics:
   transform_max_wait_time: 1
 node:
   debug: true
+  use_lines: false
 map_floor_threshold: 0.5
