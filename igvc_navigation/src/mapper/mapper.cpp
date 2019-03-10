@@ -1,99 +1,35 @@
 // Subscribes to Point Cloud Data, updates the occupancy grid, then publishes the data.
 
-#include <cv_bridge/cv_bridge.h>
-#include <igvc_msgs/map.h>
 #include <math.h>
-#include <nav_msgs/Odometry.h>
-#include <pcl/point_cloud.h>
-#include <pcl_ros/point_cloud.h>
+
 #include <pcl_ros/transforms.h>
-#include <ros/publisher.h>
+
 #include <ros/ros.h>
+
+#include <igvc_msgs/map.h>
+#include <nav_msgs/Odometry.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
+
 #include <signal.h>
 #include <stdlib.h>
+
 #include <tf/transform_datatypes.h>
 #include <tf_conversions/tf_eigen.h>
+
 #include <visualization_msgs/Marker.h>
 #include <Eigen/Core>
 #include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/RobotState.hpp>
+
+#include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
+
 #include <unordered_set>
 #include "octomapper.h"
-
-using radians = double;
-class Mapper
-{
-public:
-  Mapper();
-
-private:
-  // Callbacks
-  void pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc);
-  void line_map_callback(const sensor_msgs::ImageConstPtr &segmented);
-  void projected_line_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc);
-
-  void publish(const cv::Mat &map, uint64_t stamp);
-  void setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp);
-  bool checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic);
-  bool getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg);
-  int discretize(radians angle) const;
-  void get_empty_points(const pcl::PointCloud<pcl::PointXYZ> &pc, pcl::PointCloud<pcl::PointXYZ> &empty_pc);
-  void filter_points_behind(const pcl::PointCloud<pcl::PointXYZ> &pc, pcl::PointCloud<pcl::PointXYZ> &filtered_pc);
-  void blur(cv::Mat &blurred_map);
-
-  cv_bridge::CvImage m_img_bridge;
-
-  ros::Publisher m_map_pub;                                  // Publishes map
-  ros::Publisher m_blurred_pub;                              // Publishes blurred map
-  ros::Publisher m_debug_pub;                                // Debug version of above
-  ros::Publisher m_debug_pcl_pub;                            // Publishes map as individual PCL points
-  ros::Publisher m_debug_blurred_pc;                         // Publishes blurred map as individual PCL points
-  ros::Publisher m_ground_pub;                               // Publishes ground points
-  ros::Publisher m_nonground_pub;                            // Publishes non ground points
-  ros::Publisher m_sensor_pub;                               // Publishes lidar position
-  std::unique_ptr<cv::Mat> m_published_map;                  // Matrix will be publishing
-  std::map<std::string, tf::StampedTransform> m_transforms;  // Map of static transforms TODO: Refactor this
-  std::unique_ptr<tf::TransformListener> m_tf_listener;      // TF Listener
-
-  bool m_use_lines;
-  double m_resolution;
-  double m_transform_max_wait_time;
-  int m_start_x;   // start x (m)
-  int m_start_y;   // start y (m)
-  int m_length_x;  // length (m)
-  int m_width_y;   // width (m)
-  int m_kernel_size;
-  int m_segmented_kernel;
-  int m_segmented_sigma;
-  int m_segmented_threshold;
-
-  bool m_debug;
-  double m_radius;  // Radius to filter lidar points // TODO: Refactor to a new node
-  double m_lidar_miss_cast_distance;
-  double m_filter_distance;
-  double m_blur_std_dev;
-  radians m_filter_angle;
-  radians m_lidar_start_angle;
-  radians m_lidar_end_angle;
-  radians m_angular_resolution;
-  std::string m_lidar_topic;
-  std::string m_line_topic;
-  std::string m_projected_line_topic;
-  RobotState m_state;                      // Odom -> Base_link
-  RobotState m_odom_to_lidar;              // Odom -> Lidar
-  RobotState m_odom_to_camera_projection;  // Odom -> Camera Projection
-
-  sensor_msgs::CameraInfo camera_info;
-
-  std::unique_ptr<Octomapper> m_octomapper;
-  pc_map_pair m_pc_map_pair;      // Struct storing both the octomap for the lidar and the cv::Mat map
-  pc_map_pair m_camera_map_pair;  // Struct storing both the octomap for the camera projections and the cv::Mat map
-};
+#include "mapper.h"
 
 Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf::TransformListener()) }
 {
@@ -133,7 +69,8 @@ Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf:
   m_octomapper->create_octree(m_pc_map_pair);
 
   ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(m_lidar_topic, 1, &Mapper::pc_callback, this);
-  if (m_use_lines) {
+  if (m_use_lines)
+  {
     m_octomapper->create_octree(m_camera_map_pair);
     ros::Subscriber line_map_sub = nh.subscribe<sensor_msgs::Image>(m_line_topic, 1, &Mapper::line_map_callback, this);
     ros::Subscriber projected_line_map_sub =
@@ -269,7 +206,8 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
 {
   // Combine line and lidar maps, then blur them
   cv::Mat blurred_map = m_pc_map_pair.map->clone();
-  if (m_use_lines) {
+  if (m_use_lines)
+  {
     cv::max(blurred_map, *m_camera_map_pair.map, blurred_map);
   }
   blur(blurred_map);
@@ -291,54 +229,20 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
   if (m_debug)
   {
     m_debug_pub.publish(image);
-    // ROS_INFO_STREAM("\nThe robot is located at " << state);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fromOcuGrid = boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
-    for (int i = 0; i < m_width_y / m_resolution; i++)
-    {
-      for (int j = 0; j < m_length_x / m_resolution; j++)
-      {
-        pcl::PointXYZRGB p;
-        uchar prob = map.at<uchar>(i, j);
-        if (prob > 127)
-        {
-          p = pcl::PointXYZRGB();
-          p.x = static_cast<float>((i * m_resolution) - (m_width_y / 2.0));
-          p.y = static_cast<float>((j * m_resolution) - (m_length_x / 2.0));
-          p.r = 0;
-          p.g = static_cast<uint8_t>((prob - 127) * 2);
-          p.b = 0;
-          fromOcuGrid->points.push_back(p);
-          //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
-        }
-        else if (prob < 127)
-        {
-          p = pcl::PointXYZRGB();
-          p.x = static_cast<float>((i * m_resolution) - (m_width_y / 2.0));
-          p.y = static_cast<float>((j * m_resolution) - (m_length_x / 2.0));
-          p.r = 0;
-          p.g = 0;
-          p.b = static_cast<uint8_t>((127 - prob) * 2);
-          fromOcuGrid->points.push_back(p);
-          //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
-        }
-        else if (prob == 127)
-        {
-        }
-        // Set x y coordinates as the center of the grid cell.
-      }
-    }
-    fromOcuGrid->header.frame_id = "/odom";
-    fromOcuGrid->header.stamp = stamp;
-    //    ROS_INFO_STREAM("Size: " << fromOcuGrid->points.size() << " / " << (width_x * length_y));
-    m_debug_pcl_pub.publish(fromOcuGrid);
+    publish_as_pcl(m_debug_pcl_pub, map, "/odom", stamp);
+    publish_as_pcl(m_debug_blurred_pc, blurred_map, "/odom", stamp);
   }
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr blurredPC = boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
+}
+
+void Mapper::publish_as_pcl(const ros::Publisher &pub, const cv::Mat &mat, std::string frame_id, uint64_t stamp)
+{
+  pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud = boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
   for (int i = 0; i < m_width_y / m_resolution; i++)
   {
     for (int j = 0; j < m_length_x / m_resolution; j++)
     {
       pcl::PointXYZRGB p;
-      uchar prob = blurred_map.at<uchar>(i, j);
+      uchar prob = mat.at<uchar>(i, j);
       if (prob > 127)
       {
         p = pcl::PointXYZRGB();
@@ -347,8 +251,7 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
         p.r = 0;
         p.g = static_cast<uint8_t>((prob - 127) * 2);
         p.b = 0;
-        blurredPC->points.push_back(p);
-        //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
+        pointcloud->points.push_back(p);
       }
       else if (prob < 127)
       {
@@ -358,19 +261,18 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
         p.r = 0;
         p.g = 0;
         p.b = static_cast<uint8_t>((127 - prob) * 2);
-        blurredPC->points.push_back(p);
-        //          ROS_INFO_STREAM("(" << i << ", " << j << ") -> (" << p.x << ", " << p.y << ")");
+        pointcloud->points.push_back(p);
       }
-      else if (prob == 127)
+      else
       {
+        // Do nothing if p=0.5
       }
-      // Set x y coordinates as the center of the grid cell.
     }
   }
-  blurredPC->header.frame_id = "/odom";
-  blurredPC->header.stamp = stamp;
+  pointcloud->header.frame_id = frame_id;
+  pointcloud->header.stamp = stamp;
   //    ROS_INFO_STREAM("Size: " << fromOcuGrid->points.size() << " / " << (width_x * length_y));
-  m_debug_blurred_pc.publish(blurredPC);
+  pub.publish(pointcloud);
 }
 
 /**
@@ -488,9 +390,6 @@ void Mapper::pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
   // Get updated map from octomapper
   m_octomapper->get_updated_map(m_pc_map_pair);
 
-  // Blur map (Test?) for pathfinding
-  cv::Mat blurred = m_pc_map_pair.map->clone();
-  blur(blurred);
   publish(*(m_pc_map_pair.map), pc->header.stamp);
 }
 
