@@ -1,3 +1,11 @@
+/*
+ * Node responsible for (color) detecting the lines and barrels in the Gazebo
+ * simulator. Receives the raw image and publishes two different B&W images
+ * (one for line detection, one for barrel detection) that each highlight
+ * their respective features in white. Integrated with a ros::Timer to publish at
+ * a specified rate.
+ */
+
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -29,10 +37,10 @@ void handle_image_lines(const sensor_msgs::ImageConstPtr& msg) {
     return;
   }
 
-  frame = cv_ptr->image;
-  cv::Mat output(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));
+  frame = cv_ptr->image; // Input image
+  cv::Mat output(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0)); // Ouput image (B&W)
 
-  // Set color ranges (8 bit BGR) for line detection
+  // Set color ranges (8 bit BGR) for line detection -> looking for purple
   const int min_b = 120;
   const int max_b = 140;
   const int min_g = 0;
@@ -80,8 +88,8 @@ void handle_image_barrels(const sensor_msgs::ImageConstPtr& msg) {
     return;
   }
 
-  frame = cv_ptr->image;
-  cv::Mat output(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));
+  frame = cv_ptr->image; // Input image
+  cv::Mat output(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0)); // Ouput image (B&W)
 
   // Set color ranges (8 bit BGR) for barrel detection
   // Detects the black base of the barrel
