@@ -60,6 +60,7 @@ private:
   std::map<std::string, tf::StampedTransform> m_transforms;  // Map of static transforms TODO: Refactor this
   std::unique_ptr<tf::TransformListener> m_tf_listener;      // TF Listener
 
+  bool m_use_lines;
   double m_resolution;
   double m_transform_max_wait_time;
   int m_start_x;   // start x (m)
@@ -126,15 +127,18 @@ Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf:
   igvc::getParam(pNh, "segmented/threshold", m_segmented_threshold);
 
   igvc::getParam(pNh, "node/debug", m_debug);
+  igvc::getParam(pNh, "node/use_lines", m_use_lines);
 
   m_octomapper = std::unique_ptr<Octomapper>(new Octomapper(pNh));
   m_octomapper->create_octree(m_pc_map_pair);
-  m_octomapper->create_octree(m_camera_map_pair);
 
   ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(m_lidar_topic, 1, &Mapper::pc_callback, this);
-  ros::Subscriber line_map_sub = nh.subscribe<sensor_msgs::Image>(m_line_topic, 1, &Mapper::line_map_callback, this);
-  ros::Subscriber projected_line_map_sub =
-      nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(m_projected_line_topic, 1, &Mapper::projected_line_callback, this);
+  if (m_use_lines) {
+    m_octomapper->create_octree(m_camera_map_pair);
+    ros::Subscriber line_map_sub = nh.subscribe<sensor_msgs::Image>(m_line_topic, 1, &Mapper::line_map_callback, this);
+    ros::Subscriber projected_line_map_sub =
+        nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(m_projected_line_topic, 1, &Mapper::projected_line_callback, this);
+  }
 
   m_published_map = std::unique_ptr<cv::Mat>(new cv::Mat(m_length_x, m_width_y, CV_8UC1));
 
@@ -265,7 +269,9 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
 {
   // Combine line and lidar maps, then blur them
   cv::Mat blurred_map = m_pc_map_pair.map->clone();
-  cv::addWeighted(blurred_map, 0.5, *m_camera_map_pair.map, 0.5, 0, blurred_map);
+  if (m_use_lines) {
+    cv::max(blurred_map, *m_camera_map_pair.map, blurred_map);
+  }
   blur(blurred_map);
 
   igvc_msgs::map message;
