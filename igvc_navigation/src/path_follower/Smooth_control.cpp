@@ -1,80 +1,83 @@
-#include "SmoothControl.h"
+#include "Smooth_control.h"
 
-void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathConstPtr path,
-                                  nav_msgs::Path& trajectory, RobotState cur_pos)
+void Smooth_control::get_trajectory(igvc_msgs::velocity_pair &vel, nav_msgs::PathConstPtr path,
+                                    nav_msgs::Path &trajectory, RobotState state, RobotState& target)
 {
-  this->cur_pos = cur_pos;
-  this->init_pos_ = cur_pos;
+  RobotState start_state = state;
 
   unsigned int path_index;
-  path_index = getClosestPosition(path);
-  getTargetPosition(path, path_index);
-  getLineOfSightAndHeading();
-  getEgocentricAngles(path, path_index);
+  Eigen::Vector3d los;
+  Eigen::Vector3d heading;
+
+  path_index = get_closest_position(path, state);
+  target.setState(get_target_position(path, path_index, state));
+  get_los_and_heading(los, heading, state, target);
+  Egocentric_angles angles = get_egocentric_angles(path, path_index, los, heading);
 
   // distance to target
-  double tar_dist = this->cur_pos.distTo(this->target);
+  double tar_dist = state.distTo(target);
   // calculate timestep
   double est_time = tar_dist / v;
   double dt = est_time / granularity;
 
   for (int i = 0; i < granularity; i++)
   {
-    Eigen::Vector3d action;
-    getAction(action);
-    action[2] = dt;
+    Action action = get_action(angles.delta, angles.theta, state, target);
+    action.dt = dt;
 
     if (i == 0)
     {
       geometry_msgs::PoseStamped start;
-      start.pose.position.x = this->cur_pos.x;
-      start.pose.position.y = this->cur_pos.y;
+      start.pose.position.x = state.x;
+      start.pose.position.y = state.y;
       trajectory.poses.push_back(start);
 
-      vel.left_velocity = action[0] - action[1] * axle_length / 2;
-      vel.right_velocity = action[0] + action[1] * axle_length / 2;
+      vel.left_velocity = action.v - action.w * axle_length / 2;
+      vel.right_velocity = action.v + action.w * axle_length / 2;
     }
 
-    getResult(path, action);
+    get_result(path, action, state);
+
+    // update delta and theta
+    path_index = get_closest_position(path, state);
+    get_los_and_heading(los, heading, state, target);
+    get_egocentric_angles(path, path_index, los, heading);
 
     // don't visualize trajectory past the motion target
-    double dist_from_start = this->cur_pos.distTo(this->init_pos_);
+    double dist_from_start = start_state.distTo(state);
     if (dist_from_start > tar_dist)
     {
       return;
     }
 
     geometry_msgs::PoseStamped pose;
-    pose.pose.position.x = this->cur_pos.x;
-    pose.pose.position.y = this->cur_pos.y;
+    pose.pose.position.x = state.x;
+    pose.pose.position.y = state.y;
     trajectory.poses.push_back(pose);
   }
 }
 
-void SmoothControl::getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d action)
+void Smooth_control::get_result(const nav_msgs::PathConstPtr& path, const Action& action, RobotState& state)
 {
-  double v = action[0];
-  double w = action[1];
-  double dt = action[2];
+  double v = action.v;
+  double w = action.w;
+  double dt = action.dt;
 
   // pose after applying action to current pose
   Eigen::Vector3d resultant_pose;
-
-  Eigen::Vector3d cur_pos;
-  cur_pos = this->cur_pos.getVector3d();
 
   if (std::abs(w) > 1e-10)
   {
     // calculate instantaneous center of curvature (ICC = [ICCx, ICCy])
     double R = v / w;
-    double ICCx = cur_pos[0] - (R * sin(cur_pos[2]));
-    double ICCy = cur_pos[1] + (R * cos(cur_pos[2]));
+    double ICCx = state.x - (R * sin(state.yaw));
+    double ICCy = state.y + (R * cos(state.yaw));
 
     using namespace Eigen;
     Matrix3d T;
     double wdt = w * dt;
     T << cos(wdt), -sin(wdt), 0, sin(wdt), cos(wdt), 0, 0, 0, 1;
-    Vector3d a(cur_pos[0] - ICCx, cur_pos[1] - ICCy, cur_pos[2]);
+    Vector3d a(state.x - ICCx, state.y - ICCy, state.yaw);
     Vector3d b = T * a;
     Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
     igvc::fit_to_polar(c[2]);
@@ -83,44 +86,37 @@ void SmoothControl::getResult(nav_msgs::PathConstPtr path, Eigen::Vector3d actio
   }
   else
   {
-    resultant_pose << cur_pos[0] + (cos(cur_pos[2]) * v * dt), cur_pos[1] + (sin(cur_pos[2]) * v * dt), cur_pos[2];
+    resultant_pose << state.x + (cos(state.yaw * v * dt)), state.y + (sin(state.yaw) * v * dt), state.yaw;
   }
 
-  this->cur_pos.setState(resultant_pose);
+  state.setState(resultant_pose);
 
-  // update delta and theta
-  unsigned int path_index = getClosestPosition(path);
-  getLineOfSightAndHeading();
-  getEgocentricAngles(path, path_index);
 }
 
-void SmoothControl::getAction(Eigen::Vector3d& result)
+Action Smooth_control::get_action(double delta, double theta, const RobotState& state, const RobotState& target)
 {
   // get egocentric polar coordinates for delta and theta
-  double delta = delta_, theta = theta_;
 
   // adjust both angles to lie between -PI and PI
   igvc::fit_to_polar(delta);
   igvc::fit_to_polar(theta);
 
   // calculate the radius of curvature, K
-  double d = cur_pos.distTo(target);  // euclidian distance to target
+  double d = state.distTo(target);  // euclidian distance to target
   double K = k2 * (delta - atan(-k1 * theta));
   K += (1 + (k1 / (1 + pow(k1 * theta, 2)))) * sin(delta);
   K /= -d;
 
   // calculate angular velocity using radius of curvature and target velocity
   double w = K * v;
-  result[0] = v;
-  result[1] = w;
+  return Action{v, w, 0};
 }
 
-void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path, unsigned int path_index)
+Egocentric_angles Smooth_control::get_egocentric_angles(const nav_msgs::PathConstPtr& path, unsigned int path_index, const Eigen::Vector3d& los, const Eigen::Vector3d& heading)
 {
   // get egocentric polar angle of los relative to heading
   double delta;
-  igvc::compute_angle(delta, los_, heading_);
-  this->delta_ = delta;
+  igvc::compute_angle(delta, los, heading);
 
   // get i and j components of target orientation vector (res_orientation)
   double distance = 0;
@@ -145,37 +141,34 @@ void SmoothControl::getEgocentricAngles(nav_msgs::PathConstPtr path, unsigned in
 
   Eigen::Vector3d tar_orientation(pose_x, pose_y, 0);  // target orientation
   tar_orientation.normalize();
-  this->tar_orientation_ << tar_orientation;
 
   // get egocentric polar angle of los relative to target orientation
   double theta;
-  igvc::compute_angle(theta, los_, tar_orientation_);
-  this->theta_ = theta;
+  igvc::compute_angle(theta, los, tar_orientation);
+  return Egocentric_angles {delta, theta};
 }
 
-void SmoothControl::getLineOfSightAndHeading()
+void Smooth_control::get_los_and_heading(Eigen::Vector3d& los, Eigen::Vector3d& heading, const RobotState& state, const RobotState& target)
 {
-  double slope_x = target.x - cur_pos.x;
-  double slope_y = target.y - cur_pos.y;
+  double slope_x = target.x - state.x;
+  double slope_y = target.y - state.y;
 
   // line of sight
-  Eigen::Vector3d los(slope_x, slope_y, 0);
+  los << slope_x, slope_y, 0;
   los.normalize();
-  this->los_ << los;
 
   // get current robot heading in vector format
-  Eigen::Vector3d heading(std::cos(this->cur_pos.yaw), std::sin(this->cur_pos.yaw), 0);
-  this->heading_ << heading;
+  heading << std::cos(state.yaw), std::sin(state.yaw), 0;
 }
 
-void SmoothControl::getTargetPosition(nav_msgs::PathConstPtr path, unsigned int path_index)
+Eigen::Vector3d Smooth_control::get_target_position(const nav_msgs::PathConstPtr& path, unsigned int path_index, const RobotState& state)
 {
   // target position
-  float tar_x, tar_y;
+  double tar_x, tar_y;
 
   geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
 
-  if (cur_pos.distTo(end.x, end.y) > lookahead_dist)
+  if (state.distTo(end.x, end.y) > lookahead_dist)
   {
     double distance = 0;
     bool cont = true;
@@ -215,15 +208,15 @@ void SmoothControl::getTargetPosition(nav_msgs::PathConstPtr path, unsigned int 
   }
 
   // load target position and arbitrary angle into the motion target vector
-  this->target.setState(Eigen::Vector3d{ tar_x, tar_y, 0 });
+  return Eigen::Vector3d{ tar_x, tar_y, 0 };
 }
 
-unsigned int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
+unsigned int Smooth_control::get_closest_position(const nav_msgs::PathConstPtr& path, const RobotState& state)
 {
   unsigned int path_index = 0;
-  double closest = cur_pos.distTo(path->poses[0].pose.position.x, path->poses[0].pose.position.y);
+  double closest = state.distTo(path->poses[0].pose.position.x, path->poses[0].pose.position.y);
 
-  double temp = cur_pos.distTo(path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y);
+  double temp = state.distTo(path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y);
 
   while (path_index < path->poses.size() && temp <= closest)
   {
@@ -232,7 +225,7 @@ unsigned int SmoothControl::getClosestPosition(nav_msgs::PathConstPtr path)
       closest = temp;
     }
     path_index++;
-    temp = cur_pos.distTo(path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y);
+    temp = state.distTo(path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y);
   }
 
   return path_index;
