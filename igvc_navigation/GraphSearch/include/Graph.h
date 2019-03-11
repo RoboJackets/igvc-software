@@ -15,6 +15,8 @@ Author: Alejandro Escontrela <aescontrela3@gatech.edu>
 Date Created: December 16, 2018
 */
 
+#define NDEBUG
+
 #ifndef GRAPH_H
 #define GRAPH_H
 
@@ -31,8 +33,6 @@ Date Created: December 16, 2018
 #include <tuple>
 #include <utility>
 #include <vector>
-
-#define NDEBUG
 
 /**
 A Position represents any discrete or continuous point in the Graph space. A
