@@ -12,7 +12,7 @@
 #include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/RobotState.hpp>
 #include <iostream>
-#include "SmoothControl.h"
+#include "Smooth_control.h"
 
 ros::Publisher cmd_pub;
 ros::Publisher target_pub;
@@ -23,7 +23,7 @@ geometry_msgs::PointStampedConstPtr waypoint;
 
 double stop_dist, maximum_vel;
 
-SmoothControl controller;
+Smooth_control controller;
 
 void path_callback(const nav_msgs::PathConstPtr& msg)
 {
@@ -90,13 +90,12 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     trajectory_msg.header.stamp = time;
     trajectory_msg.header.frame_id = "/odom";
 
-    controller.cur_pos = cur_pos;
-    controller.getTrajectory(vel, path, trajectory_msg, cur_pos);
+    RobotState target;
+    controller.get_trajectory(vel, path, trajectory_msg, cur_pos, target);
     // publish trajectory
     trajectory_pub.publish(trajectory_msg);
 
     // publish target position
-    RobotState target = controller.target;
     geometry_msgs::PointStamped target_point;
     target_point.header.frame_id = "/odom";
     target_point.header.stamp = time;
