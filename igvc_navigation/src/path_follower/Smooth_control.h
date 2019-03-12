@@ -35,22 +35,18 @@ struct Egocentric_angles
 class Smooth_control
 {
 public:
-  double k1{}, k2{};
-  double axle_length{};
-  double granularity{};
-  double v{};
-  double lookahead_dist{};
 
+  Smooth_control(double k1, double k2, double axle_length, double granularity, double target_velocity, double m_lookahead_dist);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
-   * using the prodecure described in 'A Smooth Control Law for Graceful Motion of
+   * using the procedure described in 'A Smooth Control Law for Graceful Motion of
    * Differential Wheeled Mobile Robots in 2D Environment'. A radius of curvature is
    * generated and then combined with a target velocity to produce a control law for
    * the angular velocity of the robot (steering).
    *
    * @param[in] vel velocity_pair message to store command in
    * @param[in] path path to generate smooth control law for
-   * @param[in] trajectory msg to store visualization trajectory in
+   * @param[out] trajectory msg to store visualization trajectory in
    * @param[in] cur_pos current position of the robot
    * @param[out] target the target pose the controller is planning for
    */
@@ -58,12 +54,20 @@ public:
                       RobotState cur_pos, RobotState& target);
 
 private:
+  double m_k1, m_k2;
+  double m_axle_length;
+  double m_granularity;
+  double m_target_velocity;
+  double m_lookahead_dist;
 
   /**
-  Computes the radius of curvature to obtain a new angular velocity value.
-
-  @param[in] result vector to store velocity and angular velocity in
-  */
+   * Computes the radius of curvature to obtain a new angular velocity value.
+   * @param[in] delta angle between current robot heading and line of sight
+   * @param[in] theta angle betweeen line of sight and target heading
+   * @param[in] state current state of the robot
+   * @param[in] target target state of the robot
+   * @return A control command for the next iteration
+   */
   Action get_action(double delta, double theta, const RobotState &state, const RobotState &target);
 
   /**
@@ -80,21 +84,23 @@ private:
    * @param[in] action Trajectory action to visualize
    * @param[in/out] state The state to use for state propopgation
    */
-  void get_result(const nav_msgs::PathConstPtr &path, const Action &action, RobotState &state);
+  void propogate_state(const nav_msgs::PathConstPtr& path, const Action& action, RobotState& state);
 
   /**
-  Find the index of the closest point on the path relative to the current position.
-
-  @param[in] path path to get closest position from
+   * Find the index of the closest point on the path relative to the current position.
+   *
+   * @param[in] path path to get closest position from
   */
   unsigned int get_closest_position(const nav_msgs::PathConstPtr& path, const RobotState& state);
 
   /**
-  Find the furthest point along trajectory that isn't further than the
-  lookahead distance. This is the target position.
-
-  @param[in] path path to get target position from
-  @param[in] path_index index of closest position along the path relative to current position
+   * Find the furthest point along trajectory that isn't further than the
+   * lookahead distance. This is the target position.
+   *
+   * @param[in] path path to get target position from
+   * @param[in] path_index index of closest position along the path relative to current position
+   * @param[in] state current state of the robot
+   * @return the target position
   */
   Eigen::Vector3d get_target_position(const nav_msgs::PathConstPtr &path, unsigned int path_index,
                                       const RobotState &state);
@@ -104,16 +110,21 @@ private:
    * well as the current robot heading in vector format
    * @param[out] los line of sight
    * @param[out] heading current robot heading
+   * @param[in] state current state of the robot
+   * @param[in] target current target that the robot is pathing to
    */
   void get_los_and_heading(Eigen::Vector3d &los, Eigen::Vector3d &heading, const RobotState &state, const RobotState& target);
 
   /**
-  Calculates egocentric polar angles for smooth control law calculations:
-      - delta, the angle between the line of sight and the current robot heading.
-      - theta, the angle between the line of sight and the target heading
-
-  @param[in] path Graph search generate path to use when calculating angles
-  @param[in] path_index index of closest position in the path
+   * Calculates egocentric polar angles for smooth control law calculations:
+   *     - delta, the angle between the line of sight and the current robot heading.
+   *     - theta, the angle between the line of sight and the target heading
+   *
+   * @param[in] path Graph search generate path to use when calculating angles
+   * @param[in] path_index index of closest position in the path
+   * @param[in] los line of sight
+   * @param[in] heading current robot heading
+   * @return a struct containing delta and theta
   */
   Egocentric_angles get_egocentric_angles(const nav_msgs::PathConstPtr &path, unsigned int path_index,
                                           const Eigen::Vector3d &los, const Eigen::Vector3d &heading);

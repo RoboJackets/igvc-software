@@ -1,37 +1,63 @@
 #define _USE_MATH_DEFINES
 
+#include <cmath>
+#include <iostream>
+#include <Eigen/Dense>
+
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <igvc_msgs/velocity_pair.h>
 #include <nav_msgs/Odometry.h>
-#include <nav_msgs/Path.h>
-#include <ros/ros.h>
+
 #include <tf/transform_datatypes.h>
-#include <Eigen/Dense>
-#include <cmath>
+
 #include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/RobotState.hpp>
-#include <iostream>
-#include "Smooth_control.h"
 
-ros::Publisher cmd_pub;
-ros::Publisher target_pub;
-ros::Publisher trajectory_pub;
+#include "Path_follower.h"
 
-nav_msgs::PathConstPtr path;
-geometry_msgs::PointStampedConstPtr waypoint;
 
-double stop_dist, maximum_vel;
+Path_follower::Path_follower() {
+  ros::NodeHandle nh;
+  ros::NodeHandle pNh("~");
 
-Smooth_control controller;
+  // load controller parameters
+  double target_velocity;
+  double axle_length;
+  double k1;
+  double k2;
+  double granularity;
+  double lookahead_dist;
+  igvc::param(pNh, "target_v", target_velocity, 1.0);
+  igvc::param(pNh, "axle_length", axle_length, 0.52);
+  igvc::param(pNh, "k1", k1, 1.0);
+  igvc::param(pNh, "k2", k2, 3.0);
+  igvc::param(pNh, "granularity", granularity, 2.0);
+  igvc::param(pNh, "lookahead_dist", lookahead_dist, 2.0);
+  controller = std::unique_ptr<Smooth_control>(new Smooth_control{k1, k2, axle_length, granularity, target_velocity, lookahead_dist});
 
-void path_callback(const nav_msgs::PathConstPtr& msg)
+  // load global parameters
+  igvc::param(pNh, "maximum_vel", maximum_vel, 1.6);
+  igvc::param(pNh, "stop_dist", stop_dist, 0.9);
+
+  ros::Subscriber path_sub = nh.subscribe("/path", 1, &Path_follower::path_callback, this);
+  ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, &Path_follower::position_callback, this);
+  ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, &Path_follower::waypoint_callback, this);
+
+  cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
+  target_pub = nh.advertise<geometry_msgs::PointStamped>("/target_point", 1);
+  trajectory_pub = nh.advertise<nav_msgs::Path>("/trajectory", 1);
+
+  ros::spin();
+}
+
+void Path_follower::path_callback(const nav_msgs::PathConstPtr& msg)
 {
   ROS_DEBUG_STREAM("Follower got path. Size: " << msg->poses.size());
   path = msg;
 }
 
-void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
+void Path_follower::waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
   waypoint = msg;
 }
@@ -40,7 +66,7 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 Constructs a new trajectory to follow using the current path msg and publishes
 the first velocity command from this trajectory.
 */
-void position_callback(const nav_msgs::OdometryConstPtr& msg)
+void Path_follower::position_callback(const nav_msgs::OdometryConstPtr& msg)
 {
   if (path.get() == nullptr)
   {
@@ -91,7 +117,7 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     trajectory_msg.header.frame_id = "/odom";
 
     RobotState target;
-    controller.get_trajectory(vel, path, trajectory_msg, cur_pos, target);
+    controller->get_trajectory(vel, path, trajectory_msg, cur_pos, target);
     // publish trajectory
     trajectory_pub.publish(trajectory_msg);
 
@@ -109,7 +135,7 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   // make sure maximum velocity not exceeded
   if (std::max(std::abs(vel.right_velocity), std::abs(vel.left_velocity)) > maximum_vel)
   {
-    ROS_ERROR_STREAM("Maximum velocity exceeded. Right: " << vel.right_velocity << "(m/s), Left: " << vel.left_velocity
+    ROS_ERROR_STREAM_THROTTLE(5, "Maximum velocity exceeded. Right: " << vel.right_velocity << "(m/s), Left: " << vel.left_velocity
                                                           << "(m/s), Max: " << maximum_vel
                                                           << "(m/s) ... Stopping robot...");
     vel.right_velocity = 0;
@@ -122,31 +148,6 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "path_follower");
-
-  ros::NodeHandle nh;
-  ros::NodeHandle pNh("~");
-
-  // load controller parameters
-  igvc::param(pNh, "target_v", controller.v, 1.0);
-  igvc::param(pNh, "axle_length", controller.axle_length, 0.52);
-  igvc::param(pNh, "k1", controller.k1, 1.0);
-  igvc::param(pNh, "k2", controller.k2, 3.0);
-  igvc::param(pNh, "granularity", controller.granularity, 2.0);
-  igvc::param(pNh, "lookahead_dist", controller.lookahead_dist, 2.0);
-
-  // load global parameters
-  igvc::param(pNh, "maximum_vel", maximum_vel, 1.6);
-  igvc::param(pNh, "stop_dist", stop_dist, 0.9);
-
-  ros::Subscriber path_sub = nh.subscribe("/path", 1, path_callback);
-  ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, position_callback);
-  ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, waypoint_callback);
-
-  cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
-  target_pub = nh.advertise<geometry_msgs::PointStamped>("/target_point", 1);
-  trajectory_pub = nh.advertise<nav_msgs::Path>("/trajectory", 1);
-
-  ros::spin();
-
+  Path_follower path_follower;
   return 0;
 }
