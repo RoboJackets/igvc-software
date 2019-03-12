@@ -1,8 +1,8 @@
 #define _USE_MATH_DEFINES
 
+#include <Eigen/Dense>
 #include <cmath>
 #include <iostream>
-#include <Eigen/Dense>
 
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -16,8 +16,8 @@
 
 #include "Path_follower.h"
 
-
-Path_follower::Path_follower() {
+Path_follower::Path_follower()
+{
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
@@ -34,7 +34,8 @@ Path_follower::Path_follower() {
   igvc::param(pNh, "k2", k2, 3.0);
   igvc::param(pNh, "granularity", granularity, 2.0);
   igvc::param(pNh, "lookahead_dist", lookahead_dist, 2.0);
-  controller = std::unique_ptr<Smooth_control>(new Smooth_control{k1, k2, axle_length, granularity, target_velocity, lookahead_dist});
+  controller = std::unique_ptr<Smooth_control>(
+      new Smooth_control{ k1, k2, axle_length, granularity, target_velocity, lookahead_dist });
 
   // load global parameters
   igvc::param(pNh, "maximum_vel", maximum_vel, 1.6);
@@ -135,9 +136,9 @@ void Path_follower::position_callback(const nav_msgs::OdometryConstPtr& msg)
   // make sure maximum velocity not exceeded
   if (std::max(std::abs(vel.right_velocity), std::abs(vel.left_velocity)) > maximum_vel)
   {
-    ROS_ERROR_STREAM_THROTTLE(5, "Maximum velocity exceeded. Right: " << vel.right_velocity << "(m/s), Left: " << vel.left_velocity
-                                                          << "(m/s), Max: " << maximum_vel
-                                                          << "(m/s) ... Stopping robot...");
+    ROS_ERROR_STREAM_THROTTLE(5, "Maximum velocity exceeded. Right: "
+                                     << vel.right_velocity << "(m/s), Left: " << vel.left_velocity
+                                     << "(m/s), Max: " << maximum_vel << "(m/s) ... Stopping robot...");
     vel.right_velocity = 0;
     vel.left_velocity = 0;
   }

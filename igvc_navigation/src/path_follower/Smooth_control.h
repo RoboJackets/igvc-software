@@ -35,8 +35,8 @@ struct Egocentric_angles
 class Smooth_control
 {
 public:
-
-  Smooth_control(double k1, double k2, double axle_length, double granularity, double target_velocity, double m_lookahead_dist);
+  Smooth_control(double k1, double k2, double axle_length, double granularity, double target_velocity,
+                 double m_lookahead_dist);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
    * using the procedure described in 'A Smooth Control Law for Graceful Motion of
@@ -51,7 +51,7 @@ public:
    * @param[out] target the target pose the controller is planning for
    */
   void get_trajectory(igvc_msgs::velocity_pair &vel, nav_msgs::PathConstPtr path, nav_msgs::Path &trajectory,
-                      RobotState cur_pos, RobotState& target);
+                      RobotState cur_pos, RobotState &target);
 
 private:
   double m_k1, m_k2;
@@ -84,14 +84,14 @@ private:
    * @param[in] action Trajectory action to visualize
    * @param[in/out] state The state to use for state propopgation
    */
-  void propogate_state(const nav_msgs::PathConstPtr& path, const Action& action, RobotState& state);
+  void propogate_state(const nav_msgs::PathConstPtr &path, const Action &action, RobotState &state);
 
   /**
    * Find the index of the closest point on the path relative to the current position.
    *
    * @param[in] path path to get closest position from
-  */
-  unsigned int get_closest_position(const nav_msgs::PathConstPtr& path, const RobotState& state);
+   */
+  unsigned int get_closest_position(const nav_msgs::PathConstPtr &path, const RobotState &state);
 
   /**
    * Find the furthest point along trajectory that isn't further than the
@@ -101,7 +101,7 @@ private:
    * @param[in] path_index index of closest position along the path relative to current position
    * @param[in] state current state of the robot
    * @return the target position
-  */
+   */
   Eigen::Vector3d get_target_position(const nav_msgs::PathConstPtr &path, unsigned int path_index,
                                       const RobotState &state);
 
@@ -113,7 +113,8 @@ private:
    * @param[in] state current state of the robot
    * @param[in] target current target that the robot is pathing to
    */
-  void get_los_and_heading(Eigen::Vector3d &los, Eigen::Vector3d &heading, const RobotState &state, const RobotState& target);
+  void get_los_and_heading(Eigen::Vector3d &los, Eigen::Vector3d &heading, const RobotState &state,
+                           const RobotState &target);
 
   /**
    * Calculates egocentric polar angles for smooth control law calculations:
@@ -125,7 +126,7 @@ private:
    * @param[in] los line of sight
    * @param[in] heading current robot heading
    * @return a struct containing delta and theta
-  */
+   */
   Egocentric_angles get_egocentric_angles(const nav_msgs::PathConstPtr &path, unsigned int path_index,
                                           const Eigen::Vector3d &los, const Eigen::Vector3d &heading);
 };
