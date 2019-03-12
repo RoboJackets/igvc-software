@@ -6,9 +6,11 @@
 
 #include "Smooth_control.h"
 
-class Path_follower {
+class Path_follower
+{
 public:
   Path_follower();
+
 private:
   void path_callback(const nav_msgs::PathConstPtr& msg);
   void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg);
@@ -26,4 +28,4 @@ private:
 
   std::unique_ptr<Smooth_control> controller;
 };
-#endif //PROJECT_PATH_FOLLOWER_H
+#endif  // PROJECT_PATH_FOLLOWER_H
