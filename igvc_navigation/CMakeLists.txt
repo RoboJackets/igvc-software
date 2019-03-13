@@ -105,6 +105,11 @@ catkin_package(
 ## Build ##
 ###########
 
+# set default build type
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
