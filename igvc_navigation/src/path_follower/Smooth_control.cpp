@@ -187,14 +187,12 @@ Eigen::Vector3d Smooth_control::get_target_position(const nav_msgs::PathConstPtr
         cont = false;
         Eigen::Vector3d first(point1.x, point1.y, 0);
         Eigen::Vector3d second(point2.x, point2.y, 0);
-        Eigen::Vector3d slope = second - first;
+        Eigen::Vector3d slope = (second - first) / increment;
 
-        slope /= increment;
-        slope *= (distance - m_lookahead_dist) + increment;
+        slope *= (m_lookahead_dist - distance);
 
-        slope += first;
-        tar_x = slope[0];
-        tar_y = slope[1];
+        tar_x = first[0] + slope[0];
+        tar_y = first[1] + slope[1];
       }
       else
       {
