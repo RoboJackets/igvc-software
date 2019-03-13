@@ -18,6 +18,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <igvc_msgs/map.h>
+#include <image_geometry/pinhole_camera_model.h>
 #include <igvc_utils/NodeUtils.hpp>
 
 #include <cv_bridge/cv_bridge.h>
@@ -30,6 +31,28 @@ struct pc_map_pair
   boost::shared_ptr<cv::Mat> map;
 };
 
+/**
+ * Struct representing the coefficients of the plane Ax + By + Cz + D = 0
+ */
+struct Ground_plane
+{
+  float a;
+  float b;
+  float c;
+  float d;
+  bool is_defined;
+
+public:
+  void set(const std::vector<float>& coeff)
+  {
+    a = coeff.at(0);
+    b = coeff.at(1);
+    c = coeff.at(2);
+    d = coeff.at(3);
+    is_defined = true;
+  }
+};
+
 class Octomapper
 {
   using radians = double;
@@ -40,15 +63,21 @@ public:
   explicit Octomapper(ros::NodeHandle pNh);
   void create_octree(pc_map_pair& pair) const;
   void insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair, const PCL_point_cloud& raw_pc,
-                   const pcl::PointCloud<pcl::PointXYZ>& empty_pc) const;
+                   const pcl::PointCloud<pcl::PointXYZ>& empty_pc);
   void insert_camera_projection(struct pc_map_pair& pc_map_pair, const PCL_point_cloud& raw_pc) const;
+  void insert_camera_free(struct pc_map_pair &projection_map_pair, const cv::Mat &image,
+      const image_geometry::PinholeCameraModel &model,
+      const tf::Transform &camera_to_world) const;
   void get_updated_map(struct pc_map_pair& pc_map_pair) const;
-  void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground) const;
+  void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground);
 
 private:
   void filter_range(const pcl::PointCloud<pcl::PointXYZ>& raw_pc, pcl::PointCloud<pcl::PointXYZ>& within_range) const;
   void create_map(pc_map_pair& pair) const;
   void insert_free(const octomap::Pointcloud& scan, octomap::point3d origin, pc_map_pair& pair, bool lazy_eval) const;
+  void project_to_plane(pcl::PointCloud<pcl::PointXYZ>& projected_pc, const Ground_plane& m_ground_projection,
+                        const cv::Mat& image, const image_geometry::PinholeCameraModel& model,
+                        const tf::Transform& camera_to_world) const;
   inline int discretize(radians angle) const;
 
   ros::NodeHandle pNh;
@@ -61,6 +90,14 @@ private:
   double m_thresh_max;
   double m_max_range;
   double m_floor_thresh;
+
+  // Camera free space blurring
+  int m_segmented_kernel;
+  int m_segmented_sigma;
+  int m_segmented_threshold;
+
+  Ground_plane m_ground_projection;
+  Ground_plane m_default_projection;
 
   int m_ransac_iterations;
   int m_openmp_threads;

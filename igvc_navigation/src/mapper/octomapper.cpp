@@ -6,8 +6,7 @@
 #include <unordered_set>
 
 using radians = double;
-// TODO: How to convert OcTree to occupancy grid?
-Octomapper::Octomapper(ros::NodeHandle pNh)
+Octomapper::Octomapper(ros::NodeHandle pNh) : m_default_projection{ 0, 0, 1, 0 }  // Default plane is z = 0
 {
   igvc::getParam(pNh, "octree/resolution", m_octree_resolution);
   igvc::getParam(pNh, "sensor_model/hit", m_prob_hit);
@@ -45,8 +44,8 @@ void Octomapper::create_octree(pc_map_pair &pair) const
   pair.octree->setClampingThresMin(m_thresh_min);
   pair.octree->setClampingThresMax(m_thresh_max);
   pair.octree->enableChangeDetection(true);
-  octomap::point3d min(-m_map_length / 2, -m_map_width / 2, -1);
-  octomap::point3d max(m_map_length / 2, m_map_width / 2, -1);
+  octomap::point3d min(-m_map_length / 2.0, -m_map_width / 2.0, -1);
+  octomap::point3d max(m_map_length / 2.0, m_map_width / 2.0, -1);
   pair.octree->setBBXMin(min);
   pair.octree->setBBXMax(max);
 }
@@ -83,16 +82,17 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
   }
 
   // Traverse entire tree
-  std::vector<std::vector<float>> odds_sum(m_map_length / m_octree_resolution,
-                                           std::vector<float>(m_map_width / m_octree_resolution,
-                                                              m_odds_sum_default));  // TODO: Are these the right
+  std::vector<std::vector<float>> odds_sum(
+      static_cast<unsigned long>(m_map_length / m_octree_resolution),
+      std::vector<float>(static_cast<unsigned long>(m_map_width / m_octree_resolution),
+                         m_odds_sum_default));  // TODO: Are these the right
   for (octomap::OcTree::iterator it = pc_map_pair.octree->begin(), end = pc_map_pair.octree->end(); it != end; ++it)
   {
     // If this is a leaf at max depth, then only update that node
     if (it.getDepth() == pc_map_pair.octree->getTreeDepth())
     {
-      int x = (m_map_length / 2 + it.getX()) / m_octree_resolution;
-      int y = (m_map_width / 2 + it.getY()) / m_octree_resolution;
+      int x = static_cast<int>((m_map_length / 2 + it.getX()) / m_octree_resolution);
+      int y = static_cast<int>((m_map_width / 2 + it.getY()) / m_octree_resolution);
       if (x < m_map_length / m_octree_resolution && y < m_map_width / m_octree_resolution)
       {
         odds_sum[x][y] += it->getLogOdds();
@@ -106,8 +106,8 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
     {
       // This isn't a leaf at max depth. Time to iterate
       int grid_num = 1 << (pc_map_pair.octree->getTreeDepth() - it.getDepth());
-      int x = (m_map_length / 2 + it.getX()) / m_octree_resolution;
-      int y = (m_map_width / 2 + it.getY()) / m_octree_resolution;
+      int x = static_cast<int>((m_map_length / 2 + it.getX()) / m_octree_resolution);
+      int y = static_cast<int>((m_map_width / 2 + it.getY()) / m_octree_resolution);
       //      ROS_INFO("We did it?");
       for (int dx = 0; dx < grid_num; dx++)
       {
@@ -138,13 +138,13 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
 
 void Octomapper::create_map(pc_map_pair &pair) const
 {
-  int length = m_map_length / m_octree_resolution;
-  int width = m_map_width / m_octree_resolution;
+  int length = static_cast<int>(m_map_length / m_octree_resolution);
+  int width = static_cast<int>(m_map_width / m_octree_resolution);
   pair.map = boost::make_shared<cv::Mat>(length, width, m_map_encoding, 127);
 }
 
 void Octomapper::insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair &pc_map_pair,
-                             const PCL_point_cloud &raw_pc, const pcl::PointCloud<pcl::PointXYZ> &empty_pc) const
+                             const PCL_point_cloud &raw_pc, const pcl::PointCloud<pcl::PointXYZ> &empty_pc)
 {
   pcl::PointCloud<pcl::PointXYZ> ground;
   pcl::PointCloud<pcl::PointXYZ> nonground;
@@ -154,7 +154,7 @@ void Octomapper::insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair 
   }
   else
   {
-    nonground = std::move(raw_pc);
+    nonground = raw_pc;
   }
 
   //  ROS_INFO("Filtered Ground");
@@ -176,9 +176,9 @@ void Octomapper::insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair 
     octomap::KeyRay key_ray;
     octomap::OcTreeKey end_key;
 
-    for (auto it = ground.begin(); it != ground.end(); ++it)
+    for (auto &it : ground)
     {
-      octomap::point3d point(it->x, it->y, it->z);
+      octomap::point3d point(it.x, it.y, it.z);
 
       // If outside max range, set to max range in same direction
       if ((m_max_range > 0.0) && ((point - sensor_pos).norm() > m_max_range))
@@ -207,7 +207,6 @@ void Octomapper::insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair 
     }
   }
   //  ROS_INFO("Done with inserting ground");
-  // TODO: When to generate occupancy grid?
 }
 
 void Octomapper::insert_free(const octomap::Pointcloud &scan, octomap::point3d origin, pc_map_pair &pair,
@@ -231,15 +230,14 @@ void Octomapper::insert_free(const octomap::Pointcloud &scan, octomap::point3d o
     }
   }
 
-  for (auto it = free_cells.begin(); it != free_cells.end(); ++it)
+  for (const auto &free_cell : free_cells)
   {
-    pair.octree->updateNode(*it, false, lazy_eval);
+    pair.octree->updateNode(free_cell, false, lazy_eval);
   }
   pair.octree->setProbMiss(m_prob_miss);
 }
 
-void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cloud &ground,
-                                     PCL_point_cloud &nonground) const
+void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cloud &ground, PCL_point_cloud &nonground)
 {
   //  ROS_INFO_STREAM("Filtering Ground with " << raw_pc.size() << " points");
   ground.header = raw_pc.header;
@@ -284,6 +282,7 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cl
       ROS_DEBUG("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
                 cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
                 coefficients->values.at(2), coefficients->values.at(3));
+      m_ground_projection.set(coefficients->values);
       extract.setInputCloud(cloud_filtered);
       extract.setIndices(inliers);
       extract.setNegative(false);
@@ -314,6 +313,34 @@ void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cl
       second_pass.setFilterLimitsNegative(true);
       second_pass.filter(nonground);
     }
+  }
+}
+
+void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, const cv::Mat &image,
+                                    const image_geometry::PinholeCameraModel &model,
+                                    const tf::Transform &camera_to_world) const
+{
+  // Gaussian blur
+  cv::GaussianBlur(image, image, cv::Size(m_segmented_kernel, m_segmented_kernel), m_segmented_sigma,
+                   m_segmented_sigma);
+
+  // Threshold
+  cv::threshold(image, image, m_segmented_threshold, UCHAR_MAX, cv::THRESH_BINARY);
+
+  pcl::PointCloud<pcl::PointXYZ> projected_pc;
+  // If use ground_filter, ie. 3D lidar, then use the coeffs from the last RANSAC. Else, just yolo using current state.
+  if (m_use_ground_filter)
+  {
+    // Check if projection exists
+    if (!m_ground_projection.is_defined)
+    {
+      return;
+    }
+    project_to_plane(projected_pc, m_ground_projection, image, model, camera_to_world);
+  }
+  else
+  {
+    project_to_plane(projected_pc, m_default_projection, image, model, camera_to_world);
   }
 }
 
@@ -351,8 +378,57 @@ void Octomapper::insert_camera_projection(struct pc_map_pair &projection_map_pai
   }
 
   // Insert KeySet into octree
-  for (octomap::KeySet::iterator it = occupied_cells.begin(); it != occupied_cells.end(); ++it)
+  for (const auto &occupied_cell : occupied_cells)
   {
-    projection_map_pair.octree->updateNode(*it, true, false);  // lazy_eval = false
+    projection_map_pair.octree->updateNode(occupied_cell, true, false);  // lazy_eval = false
+  }
+}
+
+/**
+ * Projects all black pixels (0, 0, 0) in the image to the ground plane and inserts them into the pointcloud
+ * @param[out] projected_pc the pointcloud that holds all projected points
+ * @param[in] m_ground_projection the coefficients of the ground plane
+ * @param[in] image the image to project from
+ * @param[in] model the camera model to be used for projection
+ */
+void Octomapper::project_to_plane(pcl::PointCloud<pcl::PointXYZ> &projected_pc, const Ground_plane &m_ground_projection,
+                                  const cv::Mat &image, const image_geometry::PinholeCameraModel &model,
+                                  const tf::Transform &camera_to_world) const
+{
+  int nRows = image.rows;
+  int nCols = image.cols;
+
+  if (image.isContinuous())
+  {
+    nCols *= nRows;
+    nRows = 1;
+  }
+
+  int i, j;
+  const uchar *p;
+  for (i = 0; i < nRows; ++i)
+  {
+    p = image.ptr<uchar>(i);
+    for (j = 0; j < nCols; ++j)
+    {
+      // If it's a white pixel => free space, then project
+      if (p[j] == 0)
+      {
+        cv::Point3d ray = model.projectPixelTo3dRay(cv::Point2d(i, j));
+        tf::Point reoriented_ray{ ray.z, -ray.x, -ray.y };  // cv::Point3d defined with z forward, x right, y down
+        tf::Point transformed_ray = camera_to_world * reoriented_ray; // Transform ray to odom frame
+        double a = m_ground_projection.a;
+        double b = m_ground_projection.a;
+        double c = m_ground_projection.a;
+        // [a b c]^T dot (camera + ray*t) = 0, solve for t
+        double t = (camera_to_world.getOrigin().dot(tf::Vector3{ a, b, c }) - m_ground_projection.d) /
+                   transformed_ray.dot(tf::Vector3{ a, b, c });
+        // projected_point = camera + ray*t
+        tf::Point projected_point = camera_to_world.getOrigin() + transformed_ray * t;
+        projected_pc.points.emplace_back(pcl::PointXYZ(static_cast<float>(projected_point.x()),
+                                                       static_cast<float>(projected_point.y()),
+                                                       static_cast<float>(projected_point.z())));
+      }
+    }
   }
 }
