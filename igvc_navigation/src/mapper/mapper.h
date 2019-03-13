@@ -35,7 +35,7 @@ private:
 
   void blur(cv::Mat &blurred_map);
 
-  void publish_as_pcl(const ros::Publisher &pub, const cv::Mat &mat, std::string frame_id, uint64_t stamp);
+  void publish_as_pcl(const ros::Publisher &pub, const cv::Mat &mat, const std::string& frame_id, uint64_t stamp);
 
   cv_bridge::CvImage m_img_bridge;
 
@@ -59,9 +59,6 @@ private:
   int m_length_x;  // length (m)
   int m_width_y;   // width (m)
   int m_kernel_size;
-  int m_segmented_kernel;
-  int m_segmented_sigma;
-  int m_segmented_threshold;
 
   bool m_debug;
   double m_radius;  // Radius to filter lidar points // TODO: Refactor to a new node
