@@ -15,8 +15,6 @@ Author: Alejandro Escontrela <aescontrela3@gatech.edu>
 Date Created: December 16, 2018
 */
 
-#define NDEBUG
-
 #ifndef GRAPH_H
 #define GRAPH_H
 
