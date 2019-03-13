@@ -46,7 +46,7 @@ class IGVCDataset(data.Dataset):
 
         # TODO: Make annotation grayscale so we don't need this hardcoded layer.
         try:
-            img = cv2.imread(img_path)[:,:,2]
+            img = cv2.imread(img_path)
         except:
             pdb.set_trace()
         target = cv2.imread(target_path)[:,:,2]

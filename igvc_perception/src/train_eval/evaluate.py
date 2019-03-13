@@ -12,6 +12,8 @@ import torch
 from torch.autograd import Variable
 from torchvision import transforms
 
+from models.model import UNet
+
 
 parser = argparse.ArgumentParser(description='IGVC segmentation of lines.')
 parser.add_argument('--load_model', type=str, default=None,
@@ -29,10 +31,12 @@ transform = transforms.Compose([
             ])
 if __name__ == '__main__':
     args = parser.parse_args()
-    model = torch.load(args.load_model)
     img_dir = args.img_dir
     im_size = args.im_size
     anno_dir = args.anno_dir
+
+    model = UNet([3,im_size[0],im_size[1]], 3)
+    model.load_state_dict(torch.load(args.load_model))
 
     img_names = np.sort(os.listdir(img_dir))
     if anno_dir:
@@ -52,8 +56,6 @@ if __name__ == '__main__':
         img_name = img_names[i]
         print('Evaluating %s' % img_name)
         img = cv2.imread(os.path.join(img_dir,img_name))
-        if img.shape[2] == 3:
-            img = img[:,:,0]
         img = cv2.resize(img, (im_size[0],im_size[1]))
 
         # Get inference time.

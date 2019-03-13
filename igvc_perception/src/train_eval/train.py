@@ -26,7 +26,7 @@ parser.add_argument('--batch_size', type=int, default=1,
                     help='input batch size for training.')
 parser.add_argument('--epochs', type=int, default=5,
                     help='number of epochs to train')
-parser.add_argument('--im_size', type=int, nargs=3, default=[1,400,400],
+parser.add_argument('--im_size', type=int, nargs=3, default=[3,400,400],
                     help='image dimensions for training.')
 parser.add_argument('--kernel_size', type=int, default=3,
                     help='size of convolution kernels/filters.')
@@ -211,7 +211,7 @@ else:
         if (epoch % args.save_interval == 0 and args.save_model):
             save_path = os.path.join(backup_dir, 'IGVCModel' + '_' + str(epoch) + '.pt')
             print('Saving model: %s' % save_path)
-            torch.save(model, save_path)
+            torch.save(model.state_dict(), save_path)
         metrics_path = os.path.join(backup_dir, 'metrics.npy')
         np.save(metrics_path, metrics)
 
