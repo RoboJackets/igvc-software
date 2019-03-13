@@ -53,14 +53,10 @@ Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf:
 
   igvc::getParam(pNh, "blur/kernel_size", m_kernel_size);
   igvc::getParam(pNh, "blur/std_dev", m_blur_std_dev);
-  igvc::getParam(pNh, "blur/segmented_kernel_size", m_segmented_kernel);
-  igvc::getParam(pNh, "blur/segmented_sigma", m_segmented_sigma);
 
   igvc::getParam(pNh, "topics/lidar", m_lidar_topic);
   igvc::getParam(pNh, "topics/line_segmentation", m_line_topic);
   igvc::getParam(pNh, "topics/projected_line_pc", m_projected_line_topic);
-
-  igvc::getParam(pNh, "segmented/threshold", m_segmented_threshold);
 
   igvc::getParam(pNh, "node/debug", m_debug);
   igvc::getParam(pNh, "node/use_lines", m_use_lines);
@@ -234,7 +230,7 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
   }
 }
 
-void Mapper::publish_as_pcl(const ros::Publisher &pub, const cv::Mat &mat, std::string frame_id, uint64_t stamp)
+void Mapper::publish_as_pcl(const ros::Publisher &pub, const cv::Mat &mat, const std::string& frame_id, uint64_t stamp)
 {
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud = boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
   for (int i = 0; i < m_width_y / m_resolution; i++)
@@ -415,13 +411,7 @@ void Mapper::line_map_callback(const sensor_msgs::ImageConstPtr &segmented)
   // Convert to OpenCV
   cv_bridge::CvImagePtr segmented_ptr = cv_bridge::toCvCopy(segmented, "mono8");
 
-  // Gaussian blur
-  cv::GaussianBlur(segmented_ptr->image, segmented_ptr->image, cv::Size(m_segmented_kernel, m_segmented_kernel),
-                   m_segmented_sigma, m_segmented_sigma);
-  segmented_ptr->image = segmented_ptr->image * (m_segmented_kernel * m_segmented_kernel);
-
-  // Threshold
-  cv::threshold(segmented_ptr->image, segmented_ptr->image, m_segmented_threshold, UCHAR_MAX, cv::THRESH_BINARY);
+  cv::Mat i = segmented_ptr->image;
 
   // Project to ground (Parameters)
 
