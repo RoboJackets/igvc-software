@@ -15,8 +15,8 @@ double speed_measured_right = 0.0;
 double speed_last_error_left = 0.0;
 double speed_last_error_right = 0.0;
 double effort_right, effort_left;
+double wheel_radius;
 
-double speed_P_left, speed_P_right, speed_D_left, speed_D_right, wheel_radius;
 
 void speedCallback(const igvc_msgs::velocity_pair::ConstPtr &msg)
 {
@@ -76,6 +76,7 @@ int main(int argc, char **argv)
   rightWheelShockPublisher.publish(shock_set_point);
   leftWheelShockPublisher.publish(shock_set_point);
 
+  double speed_P_left, speed_P_right, speed_D_left, speed_D_right;
   double rate_var;
   igvc::param(pNh, "speed_P_left", speed_P_left, 5.0);
   igvc::param(pNh, "speed_P_right", speed_P_right, 5.0);
