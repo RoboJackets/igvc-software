@@ -7,8 +7,8 @@ center, like in A*, D*, or D*lite).
 
 The Graph object provides an interface for the occupancy grid, as well as nodes.
 To facilitate the search problem, the graph operates under a unit-cell assumption,
-meaning that each cell has side lengths of 1m. The `Resolution` parameter specifies
-the conversion between the unit cell and the actual cell dimensions. i.e. if Resolution
+meaning that each cell has side lengths of 1m. The `resolution_` field specifies
+the conversion between the unit cell and the actual cell dimensions. i.e. if resolution_
 is 0.2 then each cell actually has side dimensions of 0.2m.
 
 Author: Alejandro Escontrela <aescontrela3@gatech.edu>
@@ -45,7 +45,7 @@ struct Position
 
   Node castToNode() const
   {
-    return Node(static_cast<int>(this->x), static_cast<int>(this->y));
+    return Node(static_cast<int>(roundf(this->x)), static_cast<int>(roundf(this->y)));
   }
 
   Position()
@@ -130,33 +130,35 @@ struct Cell
 class Graph
 {
 public:
-  cv_bridge::CvImagePtr Map;  // Map is the current, most up-to-date occupancy grid.
+  cv_bridge::CvImagePtr map_;  // Map is the current, most up-to-date occupancy grid.
 
-  Node Start;  // start node in the search problem
-  Node Goal;   // goal node in the search problem
+  Node start_;  // start node in the search problem
+  Node goal_;   // goal node in the search problem
 
   // Updated cell information is used to update nodes that lie on the 4 corners of
   // each updated cell. This is reset each time updateGraph is called. Each element
   // is composed of an <x,y> tuple representing the cell.
-  std::vector<Cell> updatedCells;
+  std::vector<Cell> updated_cells_;
 
   // Dimensions of the occupancy grid (number of cells)
-  int Length;
-  int Width;
+  int length_;
+  int width_;
 
-  float Resolution;          // grid resolution
-  float ConfigurationSpace;  // configuration space
+  float resolution_;           // grid resolution
+  float configuration_space_;  // configuration space
 
-  float DiagonalDistance = sqrtf(2.0f);
-  float EdgeDistance = 1.0f;
-  float TraversalCost = 1.0f;
+  // constants
+  float DIAGONAL_DISTANCE = sqrtf(2.0f);
+  float EDGE_DISTANCE = 1.0f;
+  float TRAVERSAL_COST = 1.0f;
 
   // k_m, as defined in the D* lite paper, keeps track of the robot's movement
   // in the grid space. Serves to increase each new node's key value by k_m as
   // to maintain lower bounds in the priority queue
-  float KeyModifier = 0;
+  float key_modifier_ = 0;
 
-  float OccupancyThreshold = 0.7f;
+  // max occupancy probability before a cell is considered occupied and has infinite traversal cost
+  float occupancy_threshold_ = 0.7f;
 
   /**
   Sets a value for the cell's occupancy threshold. This floating point,
@@ -164,23 +166,24 @@ public:
   before it is considered to have infinite traversal cost.
 
 
-  @param[in] OccupancyThreshold maximum occupancy probability a cell may have before it
+  @param[in] occupancy_threshold maximum occupancy probability a cell may have before it
         is considered to have infinite traversal cost.
   */
-  void setOccupancyThreshold(float OccupancyThreshold);
+  void setOccupancyThreshold(float occupancy_threshold);
 
   /**
   Sets a value for the graph's configuration space
 
-  @param[in] ConfigurationSpace a value for the configuration space
+  @param[in] configuration_space a value for the configuration space
   */
-  void setConfigurationSpace(float ConfigurationSpace);
+  void setConfigurationSpace(float configuration_space);
   /**
   Sets the goal node for the Field D* search problem
 
-  @param[in] std::tuple containing x,y index of goal
+  @param[in] goal the goal of the search problem
   */
-  void setGoal(std::tuple<int, int> Goal);
+  void setGoal(std::tuple<int, int> goal);
+  void setGoal(Node goal);
   /**
   Loads the parameters for the occupancy grid
 
@@ -288,8 +291,8 @@ public:
   std::vector<std::tuple<Node, Node>> consecutiveNeighbors(const Node& s);
   /**
   Returns traversal cost of node s and a diagonal node s'. If cell or any of its
-  surrounding ConfigurationSpace is occupied, infinity is returned. If not occupied,
-  TraversalCost is returned, which is in units of (cost/distance).
+  surrounding configuration_space_ is occupied, infinity is returned. If not occupied,
+  TRAVERSAL_COST is returned, which is in units of (cost/distance).
 
   @param[in] s reference node
   @param[in] s_prime diagonal node
@@ -300,7 +303,7 @@ public:
   /**
   Returns traversal cost of node s and s', a non-diaginal (vertical or
   horizontal) neighbor of s. Cost taken to be the maximum cost of
-  two cells neighboring the edge. If not occupied, TraversalCost is returned,
+  two cells neighboring the edge. If not occupied, TRAVERSAL_COST is returned,
    which is in units of (cost/distance).
 
   @param[in] s reference node
@@ -313,8 +316,8 @@ public:
   Gets cost of traversing the grid cell while taking configuration space
   into account
 
-  @param[in] ind index of cell to calculate ConfigurationSpace-corrected cost for
-  @return cost of traversing grid cell with ConfigurationSpace
+  @param[in] ind index of cell to calculate configuration_space_-corrected cost for
+  @return cost of traversing grid cell with configuration_space_
   */
   float getValWithConfigurationSpace(const std::tuple<int, int>& ind);
   /**
@@ -341,7 +344,7 @@ public:
   */
   float getMinTraversalCost(const Node& s);
   /**
-  Calculates euclidian distance between the start node 'Start' and the
+  Calculates euclidian distance between the start node 'start_' and the
   specified node s. This will be used as the focussing heuristic.
 
   @param[in] s node to calculate euclidian distance to
@@ -366,7 +369,7 @@ public:
   std::vector<Node> getNodesAroundCellWithConfigurationSpace(const Cell& cell);
 
 private:
-  float OccupancyThresholdUChar = 178.5f;
+  float occupancy_threshold_uchar_ = 178.5f;
 };
 
 #endif  // GRAPHSEARCH_H
