@@ -110,8 +110,11 @@ bool Mapper::getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &ms
       m_state.setState(transform);
       m_tf_listener->lookupTransform("/odom", "/lidar", messageTimeStamp, transform2);
       m_odom_to_lidar.setState(transform2);
-      m_tf_listener->lookupTransform("/odom", m_projected_line_topic, messageTimeStamp, transform2);
-      m_odom_to_camera_projection.setState(transform2);
+      if (m_use_lines)
+      {
+        m_tf_listener->lookupTransform("/odom", m_projected_line_topic, messageTimeStamp, transform2);
+        m_odom_to_camera_projection.setState(transform2);
+      }
       return true;
     }
     else
@@ -121,8 +124,11 @@ bool Mapper::getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &ms
       m_state.setState(transform);
       m_tf_listener->lookupTransform("/odom", "/lidar", ros::Time(0), transform2);
       m_odom_to_lidar.setState(transform2);
-      m_tf_listener->lookupTransform("/odom", m_projected_line_topic, ros::Time(0), transform2);
-      m_odom_to_camera_projection.setState(transform2);
+      if (m_use_lines)
+      {
+        m_tf_listener->lookupTransform("/odom", m_projected_line_topic, ros::Time(0), transform2);
+        m_odom_to_camera_projection.setState(transform2);
+      }
       return true;
     }
   }
@@ -214,7 +220,7 @@ void Mapper::publish(const cv::Mat &map, uint64_t stamp)
   sensor_msgs::Image blurred_image;
   m_img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, map);
   const cv_bridge::CvImage &blurred_img_bridge =
-      cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, map);
+          cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, map);
   m_img_bridge.toImageMsg(image);
   blurred_img_bridge.toImageMsg(blurred_image);
 
