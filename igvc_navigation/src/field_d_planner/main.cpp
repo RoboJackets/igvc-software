@@ -101,7 +101,7 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
     // initial x and y coordinates of the graph search problem
     x_initial = static_cast<int>(map->x_initial);
     y_initial = static_cast<int>(map->y_initial);
-    planner.NodeGrid.initializeGraph(map);
+    planner.node_grid_.initializeGraph(map);
     initialize_graph = false;
   }
 }
@@ -117,21 +117,22 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
   std::lock_guard<std::mutex> lock(planning_mutex);
 
   int goal_x, goal_y;
-  goal_x = static_cast<int>(std::round(msg->point.x / planner.NodeGrid.Resolution)) + x_initial;
-  goal_y = static_cast<int>(std::round(msg->point.y / planner.NodeGrid.Resolution)) + y_initial;
+  goal_x = static_cast<int>(std::round(msg->point.x / planner.node_grid_.resolution_)) + x_initial;
+  goal_y = static_cast<int>(std::round(msg->point.y / planner.node_grid_.resolution_)) + y_initial;
 
-  std::tuple<int, int> new_goal = std::make_tuple(goal_x, goal_y);
+  Node new_goal(goal_x, goal_y);
 
   // re-initialize graph search problem if goal has changed
-  if (planner.NodeGrid.Goal.getIndex() != new_goal)
+  if (planner.node_grid_.goal_ != new_goal)
     goal_changed = true;
 
-  planner.NodeGrid.setGoal(new_goal);
+  planner.node_grid_.setGoal(new_goal);
 
-  float distance_to_goal = planner.NodeGrid.euclidianHeuristic(new_goal) * planner.NodeGrid.Resolution;
+  float distance_to_goal = planner.node_grid_.euclidianHeuristic(new_goal) * planner.node_grid_.resolution_;
 
-  ROS_INFO_STREAM((goal_changed ? "New" : "Same") << " waypoint received. Search Problem Goal = " << goal_x << ", "
-                                                  << goal_y << ". Distance: " << distance_to_goal << "m.");
+  ROS_INFO_STREAM((goal_changed ? "New" : "Same")
+                  << " waypoint received. Search Problem Goal = " << planner.node_grid_.goal_
+                  << ". Distance: " << distance_to_goal << "m.");
 
   if (distance_to_goal > maximum_distance)
   {
@@ -183,8 +184,8 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, "lookahead_dist", lookahead_dist);
   igvc::getParam(pNh, "occupancy_threshold", occupancy_threshold);
 
-  planner.NodeGrid.setConfigurationSpace(static_cast<float>(configuration_space));
-  planner.NodeGrid.setOccupancyThreshold(static_cast<float>(occupancy_threshold));
+  planner.node_grid_.setConfigurationSpace(static_cast<float>(configuration_space));
+  planner.node_grid_.setOccupancyThreshold(static_cast<float>(occupancy_threshold));
   planner.setGoalDistance(static_cast<float>(goal_range));
 
   ros::Rate rate(rate_time);  // path update rate
@@ -202,7 +203,7 @@ int main(int argc, char** argv)
     if (initialize_graph)
       continue;
     else
-      planner.NodeGrid.updateGraph(map);
+      planner.node_grid_.updateGraph(map);
 
     // don't plan unless a goal node has been set
     if (!initial_goal_set)
@@ -221,9 +222,7 @@ int main(int argc, char** argv)
 
     // gather cells with updated edge costs and update affected nodes
     num_nodes_updated = planner.updateNodesAroundUpdatedCells();
-
-    if (num_nodes_updated > 0)
-      ROS_DEBUG_STREAM(num_nodes_updated << " nodes updated");
+    ROS_INFO_STREAM_COND(num_nodes_updated > 0, num_nodes_updated << " nodes updated");
 
     // only update the graph if nodes have been updated
     if ((num_nodes_updated > 0) || initialize_search)
@@ -232,7 +231,9 @@ int main(int argc, char** argv)
       num_nodes_expanded = planner.computeShortestPath();
 
       double elapsed = (ros::Time::now() - begin).toSec();
-      ROS_DEBUG_STREAM(num_nodes_expanded << " nodes expanded in " << elapsed << "s.");
+
+      ROS_INFO_STREAM_COND(num_nodes_expanded > 0, num_nodes_expanded << " nodes expanded in " << elapsed << "s.");
+
       if (initialize_search)
         initialize_search = false;
     }
@@ -246,13 +247,13 @@ int main(int argc, char** argv)
     path_msg.header.stamp = ros::Time::now();
     path_msg.header.frame_id = "odom";
 
-    for (Position pos : planner.Path)
+    for (Position pos : planner.path_)
     {
       geometry_msgs::PoseStamped pose;
       pose.header.stamp = path_msg.header.stamp;
       pose.header.frame_id = path_msg.header.frame_id;
-      pose.pose.position.x = (pos.x - x_initial) * planner.NodeGrid.Resolution;
-      pose.pose.position.y = (pos.y - y_initial) * planner.NodeGrid.Resolution;
+      pose.pose.position.x = (pos.x - x_initial) * planner.node_grid_.resolution_;
+      pose.pose.position.y = (pos.y - y_initial) * planner.node_grid_.resolution_;
       path_msg.poses.push_back(pose);
     }
 

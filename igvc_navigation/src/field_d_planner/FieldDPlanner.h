@@ -80,22 +80,22 @@ class FieldDPlanner
 public:
   // Graph contains methods to deal with Node(s) as well as updated occupancy
   // grid cells
-  Graph NodeGrid;
+  Graph node_grid_;
 
-  std::vector<Position> Path;
+  std::vector<Position> path_;
 
   // path additions made by one step of constructOptimalPath()
   typedef std::pair<std::vector<Position>, float> path_additions;
 
-  float GoalDist;
+  float goal_dist_;
 
   /**
-  Sets value for GoalDist, the minumum value from the goal node a node must
+  Sets value for goal_dist_, the minumum value from the goal node a node must
   be before the search is considered complete.
 
   @param[in] goalDist the minimum distance from the goal
   */
-  void setGoalDistance(float goalDist);
+  void setGoalDistance(float goal_dist);
 
   /**
   Compute the linearly interpolated path cost of three neighboring positions p,
@@ -245,10 +245,10 @@ public:
 
 private:
   // hashed map contains all nodes and <g,rhs> values in search
-  std::unordered_map<Node, std::tuple<float, float>> ExpandedMap;
+  std::unordered_map<Node, std::tuple<float, float>> expanded_map_;
   // priority queue contains all locally inconsistent nodes whose values
   // need updating
-  PriorityQueue PriorityQ;
+  PriorityQueue priority_queue_;
 };
 
 #endif
