@@ -188,7 +188,7 @@ public:
   /**
   Represents a string representation of the priority queue:
 
-  for each state in pq:
+  for each state in pq_:
       stream << [x,y,f: f-val,g: g-val] << std::endl
 
   @return string representation of priority queue
@@ -214,7 +214,7 @@ private:
     return elem1.second <= elem2.second;
   };
 
-  std::set<std::pair<Node, Key>, Comparator> pq;
+  std::set<std::pair<Node, Key>, Comparator> pq_;
 };
 
 std::ostream& operator<<(std::ostream& stream, const PriorityQueue& pq);

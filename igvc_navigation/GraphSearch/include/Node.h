@@ -120,11 +120,11 @@ public:
   bool valid = true;
 
 private:
-  int x;
-  int y;
+  int x_;
+  int y_;
 
-  std::tuple<int, int> ind;
-  std::tuple<int, int> bptr;
+  std::tuple<int, int> ind_;
+  std::tuple<int, int> bptr_;
 };
 
 // ostream operator for Node
