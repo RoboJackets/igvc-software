@@ -245,10 +245,10 @@ public:
 
 private:
   // hashed map contains all nodes and <g,rhs> values in search
-  std::unordered_map<Node, std::tuple<float, float>> umap;
+  std::unordered_map<Node, std::tuple<float, float>> ExpandedMap;
   // priority queue contains all locally inconsistent nodes whose values
   // need updating
-  PriorityQueue PQ;
+  PriorityQueue PriorityQ;
 };
 
 #endif

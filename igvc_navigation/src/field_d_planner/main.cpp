@@ -135,7 +135,7 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 
   if (distance_to_goal > maximum_distance)
   {
-    ROS_WARN_STREAM("Planning to waypoint more than " << maximum_distance
+    ROS_WARN_STREAM_THROTTLE(3, "Planning to waypoint more than " << maximum_distance
                                                       << "m. away - distance = " << distance_to_goal);
     initial_goal_set = false;
   }
@@ -223,7 +223,7 @@ int main(int argc, char** argv)
     num_nodes_updated = planner.updateNodesAroundUpdatedCells();
 
     if (num_nodes_updated > 0)
-      ROS_INFO_STREAM(num_nodes_updated << " nodes updated");
+      ROS_DEBUG_STREAM(num_nodes_updated << " nodes updated");
 
     // only update the graph if nodes have been updated
     if ((num_nodes_updated > 0) || initialize_search)
@@ -232,7 +232,7 @@ int main(int argc, char** argv)
       num_nodes_expanded = planner.computeShortestPath();
 
       double elapsed = (ros::Time::now() - begin).toSec();
-      ROS_INFO_STREAM(num_nodes_expanded << " nodes expanded in " << elapsed << "s.");
+      ROS_DEBUG_STREAM(num_nodes_expanded << " nodes expanded in " << elapsed << "s.");
       if (initialize_search)
         initialize_search = false;
     }

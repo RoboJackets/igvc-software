@@ -179,6 +179,13 @@ public:
   int size();  // O(1)
 
   /**
+  Checks if the priority queue has no elements
+
+  @return bool indicating whether or not the priority queue is empty
+  */
+  bool empty();
+
+  /**
   Represents a string representation of the priority queue:
 
   for each state in pq:

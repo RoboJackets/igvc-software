@@ -145,7 +145,7 @@ Key FieldDPlanner::calculateKey(const Node& s)
 {
   // obtain g-values and rhs-values for node s
   float cost_so_far = std::min(getG(s), getRHS(s));
-  // calculate the key to order the node in the PQ with. KeyModifier is the
+  // calculate the key to order the node in the PriorityQ with. KeyModifier is the
   // key modifier, a value which corrects for the distance traveled by the robot
   // since the search began (source: D* Lite)
   return Key(std::round(cost_so_far + NodeGrid.euclidianHeuristic(s.getIndex()) + NodeGrid.KeyModifier),
@@ -155,19 +155,19 @@ Key FieldDPlanner::calculateKey(const Node& s)
 void FieldDPlanner::initializeSearch()
 {
   this->NodeGrid.KeyModifier = 0.0f;
-  umap.clear();
-  PQ.clear();
+  ExpandedMap.clear();
+  PriorityQ.clear();
   NodeGrid.updatedCells.clear();
 
   insert_or_assign(NodeGrid.Start, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
   insert_or_assign(NodeGrid.Goal, std::numeric_limits<float>::infinity(), 0.0f);
-  PQ.insert(NodeGrid.Goal, this->calculateKey(NodeGrid.Goal));
+  PriorityQ.insert(NodeGrid.Goal, this->calculateKey(NodeGrid.Goal));
 }
 
 void FieldDPlanner::updateNode(const Node& s)
 {
   // s never visited before, add to unordered map with g(s) = rhs(s) = inf
-  if (umap.find(s) == umap.end())
+  if (ExpandedMap.find(s) == ExpandedMap.end())
   {
     insert_or_assign(s, std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
   }
@@ -175,9 +175,9 @@ void FieldDPlanner::updateNode(const Node& s)
   {
     /**
     looks for a node in the priority queue and removes it if found
-    same as calling: if PQ.contains(s) PQ.remove(s);
+    same as calling: if PriorityQ.contains(s) PriorityQ.remove(s);
     */
-    PQ.remove(s);
+    PriorityQ.remove(s);
   }
 
   // update rhs value of Node s
@@ -193,7 +193,7 @@ void FieldDPlanner::updateNode(const Node& s)
   // insert node into priority queue if it is locally inconsistent
   if (getG(s) != getRHS(s))
   {
-    PQ.insert(s, calculateKey(s));
+    PriorityQ.insert(s, calculateKey(s));
   }
 }
 
@@ -204,12 +204,12 @@ int FieldDPlanner::computeShortestPath()
     return 0;
 
   int numNodesExpanded = 0;
-  while (((PQ.topKey() < calculateKey(NodeGrid.Start)) ||
+  while (((PriorityQ.topKey() < calculateKey(NodeGrid.Start)) ||
           (std::fabs(getRHS(NodeGrid.Start) - getG(NodeGrid.Start)) > 1e-5)) &&
-         (PQ.size() > 0))
+         (!PriorityQ.empty()))
   {
-    Node topNode = PQ.topNode();
-    PQ.pop();
+    Node topNode = PriorityQ.topNode();
+    PriorityQ.pop();
     numNodesExpanded++;
 
     if (getG(topNode) > getRHS(topNode))
@@ -248,7 +248,7 @@ int FieldDPlanner::updateNodesAroundUpdatedCells()
 
   for (Node n : toUpdate)
   {
-    if (umap.find(n) != umap.end())  // Only update explored nodes
+    if (ExpandedMap.find(n) != ExpandedMap.end())  // Only update explored nodes
       updateNode(n);
   }
 
@@ -378,18 +378,18 @@ bool FieldDPlanner::isWithinRangeOfGoal(const Position& p)
 void FieldDPlanner::insert_or_assign(Node s, float g, float rhs)
 {
   // re-assigns value of node in unordered map or inserts new entry
-  if (umap.find(s) != umap.end())
-    umap.erase(s);
+  if (ExpandedMap.find(s) != ExpandedMap.end())
+    ExpandedMap.erase(s);
 
-  umap.insert(std::make_pair(s, std::make_tuple(g, rhs)));
+  ExpandedMap.insert(std::make_pair(s, std::make_tuple(g, rhs)));
 }
 
 float FieldDPlanner::getG(const Node& s)
 {
   // return g value if node has been looked at before (is in unordered map)
   // otherwise, return infinity
-  if (umap.find(s) != umap.end())
-    return std::get<0>(umap.at(s));
+  if (ExpandedMap.find(s) != ExpandedMap.end())
+    return std::get<0>(ExpandedMap.at(s));
   else
     return std::numeric_limits<float>::infinity();
 }
@@ -398,8 +398,8 @@ float FieldDPlanner::getRHS(const Node& s)
 {
   // return rhs value if node has been looked at before (is in unordered map)
   // otherwise, return infinity
-  if (umap.find(s) != umap.end())
-    return std::get<1>(umap.at(s));
+  if (ExpandedMap.find(s) != ExpandedMap.end())
+    return std::get<1>(ExpandedMap.at(s));
   else
     return std::numeric_limits<float>::infinity();
 }
@@ -407,7 +407,7 @@ float FieldDPlanner::getRHS(const Node& s)
 std::vector<std::tuple<int, int>> FieldDPlanner::getExplored()
 {
   std::vector<std::tuple<int, int>> explored;
-  for (std::pair<Node, std::tuple<float, float>> e : umap)
+  for (std::pair<Node, std::tuple<float, float>> e : ExpandedMap)
     explored.push_back(e.first.getIndex());
 
   return explored;
