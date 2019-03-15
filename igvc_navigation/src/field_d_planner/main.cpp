@@ -136,7 +136,7 @@ void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
   if (distance_to_goal > maximum_distance)
   {
     ROS_WARN_STREAM_THROTTLE(3, "Planning to waypoint more than " << maximum_distance
-                                                      << "m. away - distance = " << distance_to_goal);
+                                                                  << "m. away - distance = " << distance_to_goal);
     initial_goal_set = false;
   }
   else
