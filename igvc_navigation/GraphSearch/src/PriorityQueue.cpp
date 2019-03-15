@@ -55,6 +55,11 @@ int PriorityQueue::size()
   return pq.size();
 }
 
+bool PriorityQueue::empty()
+{
+  return pq.empty();
+}
+
 std::string PriorityQueue::str() const
 {
   std::stringstream ss;
