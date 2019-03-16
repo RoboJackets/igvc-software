@@ -58,6 +58,9 @@ Mapper::Mapper() : m_tf_listener{ std::unique_ptr<tf::TransformListener>(new tf:
   igvc::getParam(pNh, "topics/projected_line_pc", m_projected_line_topic);
   igvc::getParam(pNh, "topics/camera_info", m_camera_info_topic);
 
+  igvc::getParam(pNh, "cameras/resize_width", m_resize_width);
+  igvc::getParam(pNh, "cameras/resize_height", m_resize_height);
+
   igvc::getParam(pNh, "node/debug", m_debug);
   igvc::getParam(pNh, "node/use_lines", m_use_lines);
 
@@ -474,7 +477,9 @@ void Mapper::blur(cv::Mat &blurred_map)
  */
 void Mapper::line_map_callback(const sensor_msgs::ImageConstPtr &segmented)
 {
-  return;
+  if (!m_camera_model_initialized) {
+    return;
+  }
   m_camera_frame = "optical_cam_center";
   // Check if static transform already exists for this topic.
   if (!checkExistsStaticTransform("optical_cam_center", segmented->header.stamp, m_projected_line_topic))
@@ -497,8 +502,12 @@ void Mapper::line_map_callback(const sensor_msgs::ImageConstPtr &segmented)
   cv::Mat image = segmented_ptr->image;
 
   // Insert into octree
-  m_octomapper->insert_camera_free(m_camera_map_pair, image, m_camera_model, m_transforms.at(m_projected_line_topic));
-  // Publish
+  m_octomapper->insert_camera_free(m_camera_map_pair, image, m_camera_model, m_state.transform * m_transforms.at(m_projected_line_topic));
+
+  // Get updated map from octomapper
+  m_octomapper->get_updated_map(m_camera_map_pair);
+
+  publish(pcl_conversions::toPCL(segmented->header.stamp));
 }
 
 /**
@@ -527,7 +536,7 @@ void Mapper::projected_line_callback(const pcl::PointCloud<pcl::PointXYZ>::Const
   transformed.header.frame_id = "odom";
   m_random_pub.publish(transformed);
 
-  m_octomapper->insert_camera_projection(m_camera_map_pair, transformed);
+  m_octomapper->insert_camera_projection(m_camera_map_pair, transformed, true);
   //
   //  // Get updated map from octomapper
   m_octomapper->get_updated_map(m_camera_map_pair);
@@ -536,7 +545,66 @@ void Mapper::projected_line_callback(const pcl::PointCloud<pcl::PointXYZ>::Const
 }
 
 void Mapper::camera_info_callback(const sensor_msgs::CameraInfoConstPtr &camera_info) {
-  m_camera_model.fromCameraInfo(camera_info);
+  if (!m_camera_model_initialized)
+  {
+    sensor_msgs::CameraInfo changed_camera_info = *camera_info;
+    changed_camera_info.D = camera_info->D;
+    changed_camera_info.distortion_model = camera_info->distortion_model;
+    changed_camera_info.R = camera_info->R;
+    changed_camera_info.roi = camera_info->roi;
+    changed_camera_info.binning_x = camera_info->binning_x;
+    changed_camera_info.binning_y = camera_info->binning_y;
+
+
+//    waf = float(resize_width) / camera_info.width
+    double waf = static_cast<double>(m_resize_width) /static_cast<double>(camera_info->width);
+    ROS_INFO_STREAM("waf: (" << waf << ") " << m_resize_width << " / " << camera_info->width);
+//    haf = float(resize_height) / camera_info.height
+    double haf = static_cast<double>(m_resize_height) / static_cast<double>(camera_info->height);
+    ROS_INFO_STREAM("haf: (" << haf << ") " << m_resize_height << " / " << camera_info->height);
+//    camera_info.height = resize_height
+    changed_camera_info.height = m_resize_height;
+//    camera_info.width = resize_width
+    changed_camera_info.width = m_resize_width;
+//    K = camera_info.K
+//    camera_info.K = (K[0]*waf,         0.,  K[2]*waf,
+//        0.,  K[4]*haf,  K[5]*haf,
+//        0.,        0.,         1.)
+    ROS_INFO("(K) Before: \n");
+    for (auto x : camera_info->K) {
+      ROS_INFO("%.2f ", x);
+    }
+    ROS_INFO("\n");
+    changed_camera_info.K = {{camera_info->K[0]*waf, 0, camera_info->K[2]*waf,
+                              0, camera_info->K[4]*haf, camera_info->K[5]*haf,
+                              0, 0, 1}};
+    ROS_INFO("After: \n");
+    for (auto x : changed_camera_info.K) {
+      ROS_INFO("%.2f ", x);
+    }
+    ROS_INFO("\n");
+//
+//    P = camera_info.P
+//    camera_info.P = (P[0]*waf,        0.,  P[2]*waf,  0.,
+//        0.,  P[5]*haf,  P[6]*haf,  0.,
+//        0.,        0.,        1.,  0.)
+    ROS_INFO("(P) Before: \n");
+    for (auto x : camera_info->P) {
+      ROS_INFO("%.2f ", x);
+    }
+    ROS_INFO("\n");
+    changed_camera_info.P = {{camera_info->P[0]*waf, 0, camera_info->P[2]*waf, 0,
+                                 0, camera_info->P[5]*haf, camera_info->P[6]*haf, 0,
+                                 0, 0, 1, 0}};
+    ROS_INFO("(P) After: \n");
+    for (auto x : changed_camera_info.P) {
+      ROS_INFO("%.2f ", x);
+    }
+    ROS_INFO("\n");
+    m_camera_model.fromCameraInfo(changed_camera_info);
+
+    m_camera_model_initialized = true;
+  }
 }
 
 int main(int argc, char **argv)
