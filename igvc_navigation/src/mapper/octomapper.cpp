@@ -327,7 +327,6 @@ void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, con
                                     const image_geometry::PinholeCameraModel &model,
                                     const tf::Transform &camera_to_world) const
 {
-  ROS_INFO_STREAM_THROTTLE(1, "in insert_camera_free");;
   // Gaussian blur
   cv::GaussianBlur(image, image, cv::Size(m_segmented_kernel, m_segmented_kernel), m_segmented_sigma,
                    m_segmented_sigma);
@@ -353,7 +352,6 @@ void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, con
   projected_pc.header.stamp = pcl_conversions::toPCL(ros::Time::now());
   projected_pc.header.frame_id = "odom";
 
-  ROS_INFO_THROTTLE(0.5, "final: (%.2f, %.2f, %.2f)", projected_pc.points[0].x, projected_pc.points[0].y, projected_pc.points[0].z);
   insert_camera_projection(projection_map_pair, projected_pc, false);
   m_debug_pub.publish(projected_pc);
 }
