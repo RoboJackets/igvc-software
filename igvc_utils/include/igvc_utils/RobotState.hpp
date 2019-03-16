@@ -59,6 +59,14 @@ public:
     return { x, y, yaw };
   }
 
+  geometry_msgs::Quaternion quat() const
+  {
+    tf::Quaternion quat = tf::createQuaternionFromYaw(yaw);
+    geometry_msgs::Quaternion quat_msg;
+    tf::quaternionTFToMsg(quat, quat_msg);
+    return quat_msg;
+  }
+
   bool operator==(const RobotState &other)
   {
     return std::tie(x, y, roll, pitch, yaw) == std::tie(other.x, other.y, other.roll, other.pitch, other.yaw);
@@ -77,16 +85,26 @@ public:
   returns the euclidian distance from the current robot position to another
   RobotState
   */
-  double distTo(RobotState other) const
-  {
-    return igvc::get_distance(this->x, this->y, other.x, other.y);
-  }
+  template <class T>
+  double distTo(T other) const;
 };
 
 inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
 {
   out << "(" << state.x << ", " << state.y << ", " << state.yaw << ")";
   return out;
+}
+
+template <>
+inline double RobotState::distTo(RobotState other) const
+{
+  return igvc::get_distance(this->x, this->y, other.x, other.y);
+}
+
+template <>
+inline double RobotState::distTo(geometry_msgs::Point other) const
+{
+  return igvc::get_distance(this->x, this->y, other.x, other.y);
 }
 
 #endif  // ROBOTSTATE_H
