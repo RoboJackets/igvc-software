@@ -45,7 +45,7 @@
         <!-- Smooth Control Parameters -->
         <param name="target_v" type="double" value="0.4"/>
         <param name="k1" type="double" value="1.8"/>
-        <param name="k2" type="double" value="3"/>
+        <param name="k2" type="double" value="1.4"/>
         <param name="debug" type="bool" value="false"/>
     </node>
 </launch>
