@@ -109,6 +109,8 @@ private:
   int m_map_encoding;
   float m_odds_sum_default;
 
+  ros::Publisher m_debug_pub;
+
   // std::unique_ptr<tf::MessageFilter<PCL_point_cloud>> msg_filter;
 };
 

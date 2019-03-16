@@ -21,6 +21,11 @@ Octomapper::Octomapper(ros::NodeHandle pNh) : m_default_projection{ 0, 0, 1, 0 }
   igvc::getParam(pNh, "ground_filter/distance_threshold", m_ransac_distance_threshold);
   igvc::getParam(pNh, "ground_filter/eps_angle", m_ransac_eps_angle);
   igvc::getParam(pNh, "ground_filter/plane_distance", m_ground_filter_plane_dist);
+
+  igvc::getParam(pNh, "segmented_free_space/kernel_size", m_segmented_kernel);
+  igvc::getParam(pNh, "segmented_free_space/std_dev", m_segmented_sigma);
+  igvc::getParam(pNh, "segmented_free_space/threshold", m_segmented_threshold);
+
   igvc::getParam(pNh, "map/length", m_map_length);
   igvc::getParam(pNh, "map/width", m_map_width);
   igvc::getParam(pNh, "map/log_odds_default", m_odds_sum_default);
@@ -34,6 +39,8 @@ Octomapper::Octomapper(ros::NodeHandle pNh) : m_default_projection{ 0, 0, 1, 0 }
   {
     m_map_encoding = CV_8UC1;
   }
+
+//  m_debug_pub = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/octomapper/projection", 1);
 }
 
 void Octomapper::create_octree(pc_map_pair &pair) const
@@ -320,6 +327,7 @@ void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, con
                                     const image_geometry::PinholeCameraModel &model,
                                     const tf::Transform &camera_to_world) const
 {
+  ROS_INFO_STREAM_THROTTLE(1, "in insert_camera_free");;
   // Gaussian blur
   cv::GaussianBlur(image, image, cv::Size(m_segmented_kernel, m_segmented_kernel), m_segmented_sigma,
                    m_segmented_sigma);
@@ -327,6 +335,7 @@ void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, con
   // Threshold
   cv::threshold(image, image, m_segmented_threshold, UCHAR_MAX, cv::THRESH_BINARY);
 
+  return;
   pcl::PointCloud<pcl::PointXYZ> projected_pc;
   // If use ground_filter, ie. 3D lidar, then use the coeffs from the last RANSAC. Else, just yolo using current state.
   if (m_use_ground_filter)
@@ -342,6 +351,9 @@ void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, con
   {
     project_to_plane(projected_pc, m_default_projection, image, model, camera_to_world);
   }
+  projected_pc.header.stamp = pcl_conversions::toPCL(ros::Time::now());
+  projected_pc.header.frame_id = "odom";
+  m_debug_pub.publish(projected_pc);
 }
 
 /**
