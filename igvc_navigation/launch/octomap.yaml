@@ -50,4 +50,7 @@ topics:
 node:
   debug: true
   use_lines: true
+cameras:
+  resize_width: 400
+  resize_height: 400
 map_floor_threshold: 0.5

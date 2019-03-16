@@ -56,6 +56,7 @@ private:
   std::unique_ptr<tf::TransformListener> m_tf_listener;      // TF Listener
 
   bool m_use_lines;
+  bool m_camera_model_initialized{false};
   double m_resolution;
   double m_transform_max_wait_time;
   int m_start_x;   // start x (m)
@@ -69,6 +70,10 @@ private:
   double m_lidar_miss_cast_distance;
   double m_filter_distance;
   double m_blur_std_dev;
+
+  int m_resize_width;
+  int m_resize_height;
+
   radians m_filter_angle;
   radians m_lidar_start_angle;
   radians m_lidar_end_angle;
