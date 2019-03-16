@@ -35,13 +35,19 @@ map:
   start_y: 100
   encoding: "CV_8UC1"
   log_odds_default: 0
+segmented_free_space:
+  kernel_size: 3
+  std_dev: 3
+  threshold: 127 #0 - 255
 topics:
 #  lidar_topic: "/scan/pointcloud"
   lidar: "/scan/pointcloud"
-  line_segmentation: "/segmentation"
-  projected_line_pc: "/projected_line_pc"
+  line_segmentation: "/semantic_segmentation"
+  #projected_line_pc: "/projected_line_pc"
+  projected_line_pc: "/semantic_segmentation_cloud"
+  camera_info: "/usb_cam_center/camera_info"
   transform_max_wait_time: 1
 node:
   debug: true
-  use_lines: false
+  use_lines: true
 map_floor_threshold: 0.5
