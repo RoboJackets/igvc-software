@@ -405,6 +405,7 @@ void Octomapper::insert_camera_projection(struct pc_map_pair &projection_map_pai
  * @param[in] image the image to project from
  * @param[in] model the camera model to be used for projection
  */
+// TODO: Precompute all the projectPixelTo3dRay stuff
 void Octomapper::project_to_plane(pcl::PointCloud<pcl::PointXYZ> &projected_pc, const Ground_plane &m_ground_projection,
                                   const cv::Mat &image, const image_geometry::PinholeCameraModel &model,
                                   const tf::Transform &camera_to_world) const

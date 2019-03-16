@@ -246,8 +246,6 @@ bool Mapper::checkExistsStaticTransform(const std::string& frame_id, uint64 time
  */
 void Mapper::publish(uint64_t stamp)
 {
-  publish_as_pcl(m_debug_blurred_pc, *m_camera_map_pair.map, "/odom", stamp);
-  return;
   // Combine line and lidar maps, then blur them
   cv::Mat blurred_map;
   if (m_pc_map_pair.map)
@@ -268,8 +266,6 @@ void Mapper::publish(uint64_t stamp)
     }
     blur(blurred_map);
   }
-  publish_as_pcl(m_debug_blurred_pc, blurred_map, "/odom", stamp);
-  return;
 
   igvc_msgs::map message;
   igvc_msgs::map blurred_message;
@@ -288,14 +284,14 @@ void Mapper::publish(uint64_t stamp)
 
   setMessageMetadata(blurred_message, image, stamp);
   m_blurred_pub.publish(blurred_message);
-  //  if (m_debug)
-  //  {
-  //    m_debug_pub.publish(image);
-  //    if (m_pc_map_pair.map) {
-  //      publish_as_pcl(m_debug_pcl_pub, *m_pc_map_pair.map, "/odom", stamp);
-  //    }
-  //    publish_as_pcl(m_debug_blurred_pc, blurred_map, "/odom", stamp);
-  //  }
+    if (m_debug)
+    {
+      m_debug_pub.publish(image);
+      if (m_pc_map_pair.map) {
+        publish_as_pcl(m_debug_pcl_pub, *m_pc_map_pair.map, "/odom", stamp);
+      }
+      publish_as_pcl(m_debug_blurred_pc, blurred_map, "/odom", stamp);
+    }
 }
 
 void Mapper::publish_as_pcl(const ros::Publisher &pub, const cv::Mat &mat, const std::string &frame_id, uint64_t stamp)
@@ -415,7 +411,6 @@ void Mapper::filter_points_behind(const pcl::PointCloud<pcl::PointXYZ> &pc, pcl:
  */
 void Mapper::pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
 {
-  return;
   // make transformed clouds
   pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
