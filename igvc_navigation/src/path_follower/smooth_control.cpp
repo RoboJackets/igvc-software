@@ -43,7 +43,6 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathC
 
     propogateState(action, state);
 
-
     geometry_msgs::PoseStamped pose;
     pose.pose.position.x = state.x;
     pose.pose.position.y = state.y;
