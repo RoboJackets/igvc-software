@@ -24,6 +24,8 @@ double battery_alpha = 0.9;
 double min_battery_voltage;
 double battery_avg;
 
+double log_period_; // Period for logging messages
+
 double p_l, p_r, d_l, d_r, i_l, i_r; // PID Values
 
 /**
@@ -165,6 +167,7 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, std::string("d_r"), d_r);
   igvc::getParam(pNh, std::string("i_r"), i_r);
   igvc::getParam(pNh, std::string("i_l"), i_l);
+  igvc::param(pNh, "log_period", log_period_, 5.0);
 
   EthernetSocket sock(ip_addr, tcpport);
 
@@ -258,7 +261,7 @@ int main(int argc, char** argv)
 
       if (battery_avg < min_battery_voltage)
       {
-        ROS_ERROR_STREAM("Battery voltage dangerously low:"
+        ROS_ERROR_STREAM_THROTTLE(log_period_, "Battery voltage dangerously low:"
                          << "\n\tCurr. Voltage: " << battery_avg
                          << "\n\tMin. Voltage: " << min_battery_voltage);
       }
@@ -275,7 +278,7 @@ int main(int argc, char** argv)
       enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.dt_sec);
       enc_pub.publish(enc_msg);
 
-      ROS_INFO_STREAM("Rate: " << response.dt_sec << "s.");
+      ROS_INFO_STREAM_THROTTLE(log_period_, "Rate: " << response.dt_sec << "s.");
 
       ros::spinOnce();
       rate.sleep();
