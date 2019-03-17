@@ -31,7 +31,7 @@ struct Action
 class SmoothControl
 {
 public:
-  SmoothControl(double k1, double k2, double axle_length, double granularity, double target_velocity,
+  SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
                 double m_lookahead_dist, double simulation_horizon);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
@@ -40,22 +40,24 @@ public:
    * generated and then combined with a target velocity to produce a control law for
    * the angular velocity of the robot (steering).
    *
-   * @param[in] vel velocity_pair message to store command in
+   * @param[out] vel velocity_pair message to store command in
    * @param[in] path path to generate smooth control law for
    * @param[out] trajectory msg to store visualization trajectory in
    * @param[in] cur_pos current position of the robot
    * @param[out] target the target pose the controller is planning for
    */
-  void getTrajectory(igvc_msgs::velocity_pair& vel, nav_msgs::PathConstPtr path, nav_msgs::Path& trajectory,
+  void getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs::PathConstPtr& path, nav_msgs::Path& trajectory,
                      const RobotState& cur_pos, RobotState& target);
 
 private:
   double k1_, k2_;
   double axle_length_;
-  double granularity_;
+  double simulation_frequency_;
   double target_velocity_;
   double lookahead_dist_;
   double simulation_horizon_;
+  ros::Publisher target_pub_;
+  ros::Publisher closest_point_pub_;
 
   /**
    * Computes the radius of curvature to obtain a new angular velocity value.
@@ -85,8 +87,7 @@ private:
    *
    * @param[in] path path to get closest position from
    */
-  unsigned int getClosestPosition(const nav_msgs::PathConstPtr& path, const RobotState& state,
-                                  unsigned int start_index = 0);
+  unsigned int getClosestPosition(const nav_msgs::PathConstPtr& path, const RobotState& state) const;
 
   /**
    * Find the furthest point along trajectory which is lookahead_dist_ away from the current position, interpolating
