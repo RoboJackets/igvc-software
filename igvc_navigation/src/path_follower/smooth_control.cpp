@@ -156,10 +156,6 @@ RobotState SmoothControl::getTargetPosition(const nav_msgs::PathConstPtr& path, 
       tar_x = first[0] + slope[0];
       tar_y = first[1] + slope[1];
       tar_yaw = tf::getYaw(path->poses[path_index].pose.orientation);
-      if (tar_yaw == 0)
-      {
-        ROS_ERROR("WHYYYYY");
-      }
       return RobotState{ tar_x, tar_y, tar_yaw };
     }
     distance += increment;
@@ -206,5 +202,5 @@ SmoothControl::SmoothControl(double k1, double k2, double axle_length, double si
 {
   ros::NodeHandle pNh{ "~" };
   target_pub_ = pNh.advertise<nav_msgs::Path>("smooth_control/target", 1);
-  closest_point_pub_ = pNh.advertise<nav_msgs::Path>("smooth_control/why2", 1);
+  closest_point_pub_ = pNh.advertise<nav_msgs::Path>("smooth_control/closest_point", 1);
 }
