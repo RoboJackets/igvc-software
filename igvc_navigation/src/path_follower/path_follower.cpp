@@ -81,13 +81,9 @@ the first velocity command from this trajectory.
 */
 void PathFollower::positionCallback(const nav_msgs::OdometryConstPtr& msg)
 {
-  if (path_.get() == nullptr)
+  if (path_.get() == nullptr || path_->poses.empty() || path_->poses.size() < 2)
   {
-    return;
-  }
-  if (path_->poses.empty() || path_->poses.size() < 2)
-  {
-    ROS_INFO("Path empty.");
+    ROS_INFO_THROTTLE(1, "Path empty.");
     igvc_msgs::velocity_pair vel;
     vel.left_velocity = 0.;
     vel.right_velocity = 0.;
