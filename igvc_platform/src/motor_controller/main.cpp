@@ -272,7 +272,7 @@ int main(int argc, char** argv)
       enc_msg.left_velocity = response.speed_l;
       enc_msg.right_velocity = response.speed_r;
       enc_msg.duration = response.dt_sec;
-      enc_msg.header.stamp = ros::Time::now();
+      enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.dt_sec);
       enc_pub.publish(enc_msg);
 
       ROS_INFO_STREAM("Rate: " << response.dt_sec << "s.");
