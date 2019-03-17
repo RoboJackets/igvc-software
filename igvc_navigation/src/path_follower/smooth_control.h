@@ -12,10 +12,12 @@ https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 
 #define _USE_MATH_DEFINES
 
-#include <igvc_msgs/velocity_pair.h>
-#include <nav_msgs/Path.h>
-#include <Eigen/Dense>
 #include <cmath>
+#include <Eigen/Dense>
+
+#include <nav_msgs/Path.h>
+
+#include <igvc_msgs/velocity_pair.h>
 #include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/RobotState.hpp>
 
@@ -24,12 +26,6 @@ struct Action
   double v;
   double w;
   double dt;
-};
-
-struct Egocentric_angles
-{
-  double delta;
-  double theta;
 };
 
 class SmoothControl
@@ -63,17 +59,15 @@ private:
 
   /**
    * Computes the radius of curvature to obtain a new angular velocity value.
-   * @param[in] delta angle between current robot heading and line of sight
-   * @param[in] theta angle betweeen line of sight and target heading
    * @param[in] state current state of the robot
    * @param[in] target target state of the robot
    * @return A control command for the next iteration
    */
-  Action getAction(double delta, double theta, const RobotState& state, const RobotState& target);
+  Action getAction(const RobotState& state, const RobotState& target);
 
   /**
-   * Estimates the resultant pose given the current velocity and angular velocity
-   * command for visualization purposes. Additionally, updates the egocentric polar
+   * Propogates the current state given the current velocity and angular velocity
+   * command for visualization purposes.
    * angles [delta, theta].
    *
    * Makes extensive use of differential drive odometry equations to calculate resultant
@@ -82,7 +76,7 @@ private:
    * Source: http://www8.cs.umu.se/kurser/5DV122/HT13/material/Hellstrom-ForwardKinematics.pdf
    *
    * @param[in] action Trajectory action to visualize
-   * @param[in/out] state The state to use for state propopgation
+   * @param[in/out] state The state to use for state propogation
    */
   void propogateState(const Action& action, RobotState& state);
 
@@ -95,41 +89,16 @@ private:
                                   unsigned int start_index = 0);
 
   /**
-   * Find the furthest point along trajectory that isn't further than the
-   * lookahead distance. This is the target position.
+   * Find the furthest point along trajectory which is lookahead_dist_ away from the current position, interpolating
+   * between points, which is the target position.
    *
    * @param[in] path path to get target position from
    * @param[in] path_index index of closest position along the path relative to current position
    * @param[in] state current state of the robot
    * @return the target position
    */
-  Eigen::Vector3d getTargetPosition(const nav_msgs::PathConstPtr& path, unsigned int path_index,
-                                    const RobotState& state);
-
-  /**
-   * Calculate the line of sight (los) from the robot to the target position as
-   * well as the current robot heading in vector format
-   * @param[out] los line of sight
-   * @param[out] heading current robot heading
-   * @param[in] state current state of the robot
-   * @param[in] target current target that the robot is pathing to
-   */
-  void getLOSandHeading(Eigen::Vector3d& los, Eigen::Vector3d& heading, const RobotState& state,
-                        const RobotState& target);
-
-  /**
-   * Calculates egocentric polar angles for smooth control law calculations:
-   *     - delta, the angle between the line of sight and the current robot heading.
-   *     - theta, the angle between the line of sight and the target heading
-   *
-   * @param[in] path Graph search generate path to use when calculating angles
-   * @param[in] path_index index of closest position in the path
-   * @param[in] los line of sight
-   * @param[in] heading current robot heading
-   * @return a struct containing delta and theta
-   */
-  Egocentric_angles getEgocentricAngles(const nav_msgs::PathConstPtr& path, unsigned int path_index,
-                                        const Eigen::Vector3d& los, const Eigen::Vector3d& heading);
+  RobotState getTargetPosition(const nav_msgs::PathConstPtr& path, unsigned int path_index,
+                                    const RobotState& state) const;
 
   /**
    * Converts velocity and angular velocity to left and right wheel velocities
