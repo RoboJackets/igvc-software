@@ -24,7 +24,9 @@ public:
     setState(msg);
   }
 
-  explicit RobotState(double x, double y, double yaw) : x{ x}, y{ y }, yaw{ yaw } {}
+  explicit RobotState(double x, double y, double yaw) : x{ x }, y{ y }, yaw{ yaw }
+  {
+  }
 
   explicit RobotState(const Eigen::Vector3d &pose) : x{ pose[0] }, y{ pose[1] }, yaw{ pose[2] }
   {

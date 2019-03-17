@@ -33,7 +33,6 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs:
 
     simulation_target = getTargetPosition(path, path_index, state);
 
-
     // Calculate control using Control Law
     Action action = getAction(state, simulation_target);
     action.dt = dt.toSec();
@@ -182,7 +181,7 @@ unsigned int SmoothControl::getClosestPosition(const nav_msgs::PathConstPtr& pat
     {
       closest = cur_dist;
     }
-    else // Derivative < 0, found maximum
+    else  // Derivative < 0, found maximum
     {
       return path_index;
     }

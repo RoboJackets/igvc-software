@@ -12,8 +12,8 @@ https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 
 #define _USE_MATH_DEFINES
 
-#include <cmath>
 #include <Eigen/Dense>
+#include <cmath>
 
 #include <nav_msgs/Path.h>
 
@@ -99,7 +99,7 @@ private:
    * @return the target position
    */
   RobotState getTargetPosition(const nav_msgs::PathConstPtr& path, unsigned int path_index,
-                                    const RobotState& state) const;
+                               const RobotState& state) const;
 
   /**
    * Converts velocity and angular velocity to left and right wheel velocities

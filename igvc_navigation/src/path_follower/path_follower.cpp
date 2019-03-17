@@ -41,11 +41,12 @@ PathFollower::PathFollower()
   igvc::param(pNh, "simulation_horizon", simulation_horizon, 5.0);
   if (simulation_frequency <= 0)
   {
-    ROS_WARN_STREAM("Simulation frequency (currently " << simulation_frequency << ") should be greater than 0. Setting to 1 for now.");
+    ROS_WARN_STREAM("Simulation frequency (currently " << simulation_frequency
+                                                       << ") should be greater than 0. Setting to 1 for now.");
     simulation_frequency = 1;
   }
-  controller_ = std::unique_ptr<SmoothControl>(
-      new SmoothControl{ k1, k2, axle_length, simulation_frequency, target_velocity, lookahead_dist, simulation_horizon });
+  controller_ = std::unique_ptr<SmoothControl>(new SmoothControl{
+      k1, k2, axle_length, simulation_frequency, target_velocity, lookahead_dist, simulation_horizon });
 
   // load global parameters
   igvc::getParam(pNh, "maximum_vel", maximum_vel_);
