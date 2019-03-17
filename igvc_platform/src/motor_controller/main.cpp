@@ -278,7 +278,7 @@ int main(int argc, char** argv)
       enc_msg.header.stamp = ros::Time::now();
       enc_pub.publish(enc_msg);
 
-      ROS_INFO_STREAM_THROTTLE(log_period_, "Rate: " << response.dt_sec << "s.");
+      ROS_INFO_STREAM_THROTTLE(log_period_, "Rate: " << 1/response.dt_sec << "hz.");
 
       ros::spinOnce();
       rate.sleep();
