@@ -15,6 +15,7 @@ private:
   void pathCallback(const nav_msgs::PathConstPtr& msg);
   void waypointCallback(const geometry_msgs::PointStampedConstPtr& msg);
   void positionCallback(const nav_msgs::OdometryConstPtr& msg);
+  nav_msgs::PathConstPtr getPatchedPath(const nav_msgs::PathConstPtr& msg) const;
 
   ros::Publisher cmd_pub_;
   ros::Publisher target_pub_;

@@ -65,7 +65,9 @@ PathFollower::PathFollower()
 void PathFollower::pathCallback(const nav_msgs::PathConstPtr& msg)
 {
   ROS_DEBUG_STREAM("Follower got path. Size: " << msg->poses.size());
-  path_ = msg;
+  //  path_ = msg;
+  // TODO: Remove patch when motion planning correctly incorporates heading
+  path_ = getPatchedPath(msg);
 }
 
 void PathFollower::waypointCallback(const geometry_msgs::PointStampedConstPtr& msg)
@@ -154,6 +156,21 @@ void PathFollower::positionCallback(const nav_msgs::OdometryConstPtr& msg)
   }
 
   cmd_pub_.publish(vel);  // pub velocity command
+}
+
+nav_msgs::PathConstPtr PathFollower::getPatchedPath(const nav_msgs::PathConstPtr& msg) const
+{
+  nav_msgs::PathPtr new_path = boost::make_shared<nav_msgs::Path>(*msg);
+  int num_poses = new_path->poses.size();
+  for (int i = 0; i < num_poses; i++)
+  {
+    double delta_x = new_path->poses[i + 1].pose.position.x - new_path->poses[i].pose.position.x;
+    double delta_y = new_path->poses[i + 1].pose.position.y - new_path->poses[i].pose.position.y;
+    double heading = atan2(delta_y, delta_x);
+    new_path->poses[i].pose.orientation = tf::createQuaternionMsgFromYaw(heading);
+  }
+  new_path->poses.back().pose.orientation = new_path->poses[num_poses - 2].pose.orientation;
+  return new_path;
 }
 
 int main(int argc, char** argv)
