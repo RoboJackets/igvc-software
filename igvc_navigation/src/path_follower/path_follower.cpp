@@ -29,23 +29,23 @@ PathFollower::PathFollower()
   double axle_length;
   double k1;
   double k2;
-  double granularity;
+  double simulation_frequency;
   double lookahead_dist;
   seconds simulation_horizon;
   igvc::param(pNh, "target_v", target_velocity, 1.0);
   igvc::param(pNh, "axle_length", axle_length, 0.52);
   igvc::param(pNh, "k1", k1, 1.0);
   igvc::param(pNh, "k2", k2, 3.0);
-  igvc::param(pNh, "granularity", granularity, 100.0);
+  igvc::param(pNh, "simulation_frequency", simulation_frequency, 100.0);
   igvc::param(pNh, "lookahead_dist", lookahead_dist, 2.0);
   igvc::param(pNh, "simulation_horizon", simulation_horizon, 5.0);
-  if (granularity < 1)
+  if (simulation_frequency <= 0)
   {
-    ROS_WARN_STREAM("Granularity (currently " << granularity << ") should be larger than 1. Setting to 1 for now.");
-    granularity = 1;
+    ROS_WARN_STREAM("Simulation frequency (currently " << simulation_frequency << ") should be greater than 0. Setting to 1 for now.");
+    simulation_frequency = 1;
   }
   controller_ = std::unique_ptr<SmoothControl>(
-      new SmoothControl{ k1, k2, axle_length, granularity, target_velocity, lookahead_dist, simulation_horizon });
+      new SmoothControl{ k1, k2, axle_length, simulation_frequency, target_velocity, lookahead_dist, simulation_horizon });
 
   // load global parameters
   igvc::getParam(pNh, "maximum_vel", maximum_vel_);
@@ -161,7 +161,7 @@ void PathFollower::positionCallback(const nav_msgs::OdometryConstPtr& msg)
 nav_msgs::PathConstPtr PathFollower::getPatchedPath(const nav_msgs::PathConstPtr& msg) const
 {
   nav_msgs::PathPtr new_path = boost::make_shared<nav_msgs::Path>(*msg);
-  int num_poses = new_path->poses.size();
+  size_t num_poses = new_path->poses.size();
   for (int i = 0; i < num_poses; i++)
   {
     double delta_x = new_path->poses[i + 1].pose.position.x - new_path->poses[i].pose.position.x;

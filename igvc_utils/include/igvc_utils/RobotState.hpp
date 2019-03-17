@@ -63,10 +63,7 @@ public:
 
   geometry_msgs::Quaternion quat() const
   {
-    tf::Quaternion quat = tf::createQuaternionFromYaw(yaw);
-    geometry_msgs::Quaternion quat_msg;
-    tf::quaternionTFToMsg(quat, quat_msg);
-    return quat_msg;
+    return tf::createQuaternionMsgFromYaw(yaw);
   }
 
   bool operator==(const RobotState &other)
