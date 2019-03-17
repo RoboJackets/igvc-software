@@ -23,16 +23,11 @@ geometry_msgs::PointStampedConstPtr waypoint;
 
 double stop_dist, maximum_vel;
 
-bool debug;
-
 SmoothControl controller;
 
 void path_callback(const nav_msgs::PathConstPtr& msg)
 {
-  if (debug)
-  {
-    ROS_INFO_STREAM("Follower got path. Size: " << msg->poses.size());
-  }
+  ROS_DEBUG_STREAM("Follower got path. Size: " << msg->poses.size());
   path = msg;
 }
 
@@ -66,7 +61,8 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
   RobotState cur_pos(msg);
 
   double goal_dist = cur_pos.distTo(waypoint->point.x, waypoint->point.y);
-  ROS_INFO_STREAM("Distance to waypoint: " << goal_dist << "(m.)");
+
+  ROS_DEBUG_STREAM("Distance to waypoint: " << goal_dist << "(m.)");
 
   ros::Time time = msg->header.stamp;
   igvc_msgs::velocity_pair vel;  // immediate velocity command
@@ -108,10 +104,7 @@ void position_callback(const nav_msgs::OdometryConstPtr& msg)
     target_point.point.y = target.y;
     target_pub.publish(target_point);
 
-    if (debug)
-    {
-      ROS_INFO_STREAM("Distance to target: " << cur_pos.distTo(target) << "(m.)");
-    }
+    ROS_DEBUG_STREAM("Distance to target: " << cur_pos.distTo(target) << "(m.)");
   }
 
   // make sure maximum velocity not exceeded
@@ -145,7 +138,6 @@ int main(int argc, char** argv)
   // load global parameters
   igvc::param(pNh, "maximum_vel", maximum_vel, 1.6);
   igvc::param(pNh, "stop_dist", stop_dist, 0.9);
-  igvc::param(pNh, "debug", debug, true);
 
   ros::Subscriber path_sub = nh.subscribe("/path", 1, path_callback);
   ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, position_callback);

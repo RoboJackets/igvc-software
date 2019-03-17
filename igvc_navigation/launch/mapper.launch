@@ -6,7 +6,7 @@
             <param name="topics" type="string" value="/scan/pointcloud /semantic_segmentation_cloud"/>
             <param name="occupancy_grid_length" type="int" value="200" />
             <param name="occupancy_grid_width" type="int" value="200" />
-            <param name="occupancy_grid_resolution" type="double" value="0.2" />
+            <param name="occupancy_grid_resolution" type="double" value=".2" />
             <param name="occupancy_grid_threshold" type="int" value="178" />
             <!-- Set decay_period to 0 to disable decay -->
             <param name="decay_period" type="double" value="60" />
