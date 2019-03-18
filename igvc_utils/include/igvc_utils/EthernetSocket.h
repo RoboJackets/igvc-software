@@ -51,7 +51,7 @@ public:
 
   @return a char array of the characters read
   */
-  size_t readMessage(unsigned char (&buffer) [256]);
+  size_t readMessage(unsigned char (&buffer)[256]);
 
   /**
   Getter for IP address
