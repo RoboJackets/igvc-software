@@ -51,5 +51,4 @@
     <arg name="ring" value="$(arg laserscan_ring)"/>
     <arg name="resolution" value="$(arg laserscan_resolution)"/>
   </include>
-
 </launch>
