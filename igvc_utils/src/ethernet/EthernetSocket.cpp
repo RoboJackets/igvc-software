@@ -29,14 +29,14 @@ void EthernetSocket::sendMessage(char* message, size_t len)
   boost::asio::write(*sock_, boost::asio::buffer(message, len), error);
 }
 
-size_t EthernetSocket::readMessage(unsigned char (&buffer) [256])
+size_t EthernetSocket::readMessage(unsigned char (&buffer)[256])
 {
   // read data from TCP connection
   boost::system::error_code error;
 
   size_t len = sock_->read_some(boost::asio::buffer(buffer, sizeof(buffer) - 1), error);
 
-  if (error == boost::asio::error::eof) // connection closed by server
+  if (error == boost::asio::error::eof)  // connection closed by server
     len = 0;
   else if (error)
     throw boost::system::system_error(error);
