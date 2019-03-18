@@ -51,7 +51,7 @@ public:
 
   @return a char array of the characters read
   */
-  size_t readMessage(unsigned char (&buffer) [256]);
+  size_t readMessage(unsigned char (&buffer)[256]);
 
   /**
   Getter for IP address
@@ -75,8 +75,8 @@ public:
   std::string getBoostVersion();
 
 private:
-  boost::asio::io_service io_service;                  // provides core io functionality
-  std::unique_ptr<boost::asio::ip::tcp::socket> sock;  // tcp connection socket
+  boost::asio::io_service io_service_;                  // provides core io functionality
+  std::unique_ptr<boost::asio::ip::tcp::socket> sock_;  // tcp connection socket
 };
 
 #endif
