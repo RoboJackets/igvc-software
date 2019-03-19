@@ -228,6 +228,13 @@ void MotorController::recieveResponse()
     ros::shutdown();
   }
 
+  publishResponse(response);
+
+  ROS_INFO_STREAM_THROTTLE(log_period_, "Rate: " << 1 / response.dt_sec << "hz.");
+}
+
+void MotorController::publishResponse(const ResponseMessage& response)
+{
   /* update the exponentially weighted moving voltage average and publish */
   std_msgs::Float64 battery_msg;
   battery_avg_ = (battery_alpha_ * battery_avg_) + ((1 - battery_alpha_) * response.voltage);
@@ -252,8 +259,6 @@ void MotorController::recieveResponse()
   enc_msg.duration = response.dt_sec;
   enc_msg.header.stamp = ros::Time::now() - ros::Duration(response.dt_sec);
   enc_pub_.publish(enc_msg);
-
-  ROS_INFO_STREAM_THROTTLE(log_period_, "Rate: " << 1 / response.dt_sec << "hz.");
 }
 
 int main(int argc, char** argv)
