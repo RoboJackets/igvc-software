@@ -30,7 +30,6 @@ ros::Publisher expanded_size_pub;
 
 IGVCSearchProblem search_problem;
 
-
 std::mutex planning_mutex;
 
 bool received_waypoint = false;
@@ -65,18 +64,18 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
  * Upates the waypoint position
  */
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
-{ // TODO we should not be able to plan outside out grid
+{  // TODO we should not be able to plan outside out grid
   std::lock_guard<std::mutex> lock(planning_mutex);
   search_problem.Goal.X = std::round(msg->point.x / search_problem.Resolution) + initial_x;
   search_problem.Goal.Y = std::round(msg->point.y / search_problem.Resolution) + initial_y;
   ROS_INFO_STREAM("Waypoint received. grid cell = " << search_problem.Goal.X << ", " << search_problem.Goal.Y);
   double distance_to_goal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
-  if(distance_to_goal > 100) {
+  if (distance_to_goal > 100)
+  {
     ROS_WARN_STREAM("Planning to waypoint more than 100 meters away: distance = " << distance_to_goal);
   }
   received_waypoint = true;
 }
-
 
 /*
  * NOT A ROS CALLBACK
@@ -143,20 +142,24 @@ int main(int argc, char** argv)
     ros::spinOnce();
 
     // do not plan if you do not have a waypoint
-    if (!received_waypoint) {
+    if (!received_waypoint)
+    {
       continue;
     }
 
     planning_mutex.lock();
     Path<SearchLocation, SearchMove> path;
     search_problem.DistanceToGoal = search_problem.Start.distTo(search_problem.Goal, search_problem.Resolution);
+    ros::Time begin = ros::Time::now();
     path = GraphSearch::AStar(search_problem, expanded_callback, maxIter);
+    double elapsed = (ros::Time::now() - begin).toSec();
+    ROS_INFO_STREAM("Path found in " << elapsed << "s.");
     nav_msgs::Path path_msg;
     // TODO timestamp why
     path_msg.header.stamp = ros::Time::now();
     path_msg.header.frame_id = "odom";
     for (auto loc : *(path.getStates()))
-      {// publish path with theta for cool viz
+    {  // publish path with theta for cool viz
       geometry_msgs::PoseStamped pose;
       pose.header.stamp = path_msg.header.stamp;
       pose.header.frame_id = path_msg.header.frame_id;
