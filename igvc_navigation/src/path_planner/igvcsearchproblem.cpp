@@ -1,7 +1,6 @@
 #include "igvcsearchproblem.h"
 #include <math.h>
 
-
 // TODO update to include orientation when calculting CSpace
 // TODO what if I jump over an obstacle
 bool IGVCSearchProblem::isActionValid(const SearchMove& move, const SearchLocation& start_state)
@@ -98,7 +97,7 @@ std::list<SearchMove> IGVCSearchProblem::getActions(const SearchLocation& state)
   else
   {
     // TODO handle error
-    //std::cerr << "\n\n\n\n\nfail" << theta << "\n\n\n\n\n" << std::endl;
+    // std::cerr << "\n\n\n\n\nfail" << theta << "\n\n\n\n\n" << std::endl;
   }
   acts.remove_if([this, state](SearchMove m) { return !isActionValid(m, state); });
   return acts;
@@ -147,7 +146,7 @@ SearchLocation IGVCSearchProblem::getResult(const SearchLocation& state, const S
   else
   {
     // TODO handle case
-    //std::cerr << "\n\n\n\n\nfail" << action << "\n\n\n\n\n" << std::endl;
+    // std::cerr << "\n\n\n\n\nfail" << action << "\n\n\n\n\n" << std::endl;
   }
   result.PrevTheta.resize(ThetaChangeWindow);
   double thetaDiff;

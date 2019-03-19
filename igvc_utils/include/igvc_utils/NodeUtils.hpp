@@ -3,6 +3,8 @@
 
 #include <ros/ros.h>
 #include <Eigen/Dense>
+#include <cmath>
+#include <tuple>
 
 namespace igvc
 {
@@ -28,10 +30,47 @@ void getParam(const ros::NodeHandle &pNh, const std::string &param_name, T &para
 
 /**
 Calculates euclidian distance between two points
+
+@tparam T the data type of the input points to calculate the euclidian distance for
+@param[in] x1 x value of first point
+@param[in] y1 y value of first point
+@param[in] x2 x value of second point
+@param[in] y2 y value of second point
+@return the euclidian distance between both points
 */
-inline double get_distance(double x1, double y1, double x2, double y2)
+template <typename T>
+inline T get_distance(T x1, T y1, T x2, T y2)
 {
-  return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
+  return std::hypot(x2 - x1, y2 - y1);
+}
+
+/**
+Calculates euclidian distance between two points, taking tuples for each
+(x,y) point as arguments
+
+@tparam T the data type contained within each input tuple
+@param[in] p1 the first point
+@param[in] p2 the second point
+@return the euclidian distance between both points
+*/
+template <typename T>
+inline T get_distance(const std::tuple<T, T> &p1, const std::tuple<T, T> &p2)
+{
+  return igvc::get_distance(std::get<0>(p1), std::get<1>(p1), std::get<0>(p2), std::get<1>(p2));
+}
+
+/**
+symmetric round up
+Bias: away from zero
+
+@tparam T the data type to round up
+@param[in] the value to round up
+@return the value rounded away from zero
+*/
+template <typename T>
+T ceil0(const T &value)
+{
+  return (value < 0.0) ? std::floor(value) : std::ceil(value);
 }
 
 /**
@@ -51,6 +90,10 @@ Computes the egocentric polar angle of vec2 wrt vec1 in 2D, that is:
   - counter-clockwise: positive
 
 source: https://stackoverflow.com/questions/14066933/direct-way-of-computing-clockwise-angle-between-2-vectors
+
+@param[in] angle the double variable to assign the computed angle to
+@param[in] vec2 the vector the angle is computed with respect to
+@param[in] vec1 the reference vector
 */
 inline void compute_angle(double &angle, Eigen::Vector3d vec2, Eigen::Vector3d vec1)
 {

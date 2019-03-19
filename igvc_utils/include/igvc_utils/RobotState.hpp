@@ -1,6 +1,5 @@
 #ifndef ROBOTSTATE_H
 #define ROBOTSTATE_H
-#pragma once
 
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
@@ -96,6 +95,13 @@ public:
     return { x(), y(), yaw() };
   }
 
+  geometry_msgs::Quaternion quat() const
+  {
+    geometry_msgs::Quaternion quat;
+    tf::quaternionTFToMsg(transform.getRotation(), quat);
+    return quat;
+  }
+
   bool operator==(const RobotState &other)
   {
     return transform == other.transform;
@@ -138,11 +144,19 @@ public:
   returns the euclidian distance from the current robot position to another
   RobotState
   */
-  double distTo(RobotState other) const
-  {
-    return igvc::get_distance(this->x(), this->y(), other.x(), other.y());
-  }
+  template <class T>
+  double distTo(T other) const;
 };
+
+template <>
+inline double RobotState::distTo(RobotState other) const {
+  return igvc::get_distance(this->x(), this->y(), other.x(), other.y());
+}
+
+template <>
+inline double RobotState::distTo(geometry_msgs::Point other) const {
+  return igvc::get_distance(this->x(), this->y(), other.x, other.y);
+}
 
 inline double RobotState::x() const
 {
