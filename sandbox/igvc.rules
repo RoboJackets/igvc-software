@@ -5,4 +5,7 @@ KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0825", ATTRS{bcdDe
 KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", ATTRS{bcdDevice}=="0011", ATTRS{serial}=="6E5D96EF", SYMLINK+="igvc_usb_cam_center"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303",ATTRS{bcdDevice}=="0400", SYMLINK+="igvc_gps"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1f00", ATTRS{idProduct}=="2012",ATTRS{bcdDevice}=="0100", SYMLINK+="igvc_motor_board"
+
+KERNEL=="js?", ATTRS{name}=="Logitech Gamepad F710", SYMLINK+="igvc_joystick"
+
 SUBSYSTEM=="usb", ATTR{idVendor}=="1d5a", MODE="0666"

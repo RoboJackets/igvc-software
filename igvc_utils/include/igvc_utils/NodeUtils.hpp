@@ -29,6 +29,15 @@ void getParam(const ros::NodeHandle &pNh, const std::string &param_name, T &para
 }
 
 /**
+make_unique method for when using versions of c++ < 14
+*/
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args &&... args)
+{
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}
+
+/**
 Calculates euclidian distance between two points
 
 @tparam T the data type of the input points to calculate the euclidian distance for
