@@ -1,5 +1,191 @@
 #include "FieldDPlanner.h"
 
+FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
+{
+  ros::NodeHandle pNh("~");
+
+  // subscribe to map for occupancy grid and waypoint for goal node
+  map_sub_ = nh_.subscribe("/map", 1, &FieldDPlanner::map_callback, this);
+  waypoint_sub_ = nh_.subscribe("/waypoint", 1, &FieldDPlanner::waypoint_callback, this);
+
+  // publish a 2D pointcloud of expanded nodes for visualization
+  pcl::PointCloud<pcl::PointXYZRGB> expanded_cloud;
+  expanded_pub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded", 1);
+  expanded_cloud.header.frame_id = "odom";
+
+  // publish path for path_follower
+  path_pub_ = nh_.advertise<nav_msgs::Path>("/path", 1);
+
+  igvc::getParam(pNh, "c_space", configuration_space_);
+  igvc::getParam(pNh, "maximum_distance", maximum_distance_);
+  igvc::getParam(pNh, "rate", rate_);
+  igvc::getParam(pNh, "goal_range", goal_range_);
+  igvc::getParam(pNh, "publish_expanded", publish_expanded_);
+  igvc::getParam(pNh, "follow_old_path", follow_old_path_);
+  igvc::getParam(pNh, "lookahead_dist", lookahead_dist_);
+  igvc::getParam(pNh, "occupancy_threshold", occupancy_threshold_);
+
+  node_grid_.setConfigurationSpace(static_cast<float>(configuration_space_));
+  node_grid_.setOccupancyThreshold(static_cast<float>(occupancy_threshold_));
+  setGoalDistance(static_cast<float>(goal_range_));
+
+  ros::Rate rate(rate_);  // path update rate
+
+  int num_nodes_updated = 0;
+  int num_nodes_expanded = 0;
+
+  bool initialize_search = true;  // set to true if the search problem must be initialized
+
+  while (ros::ok())
+  {
+    ros::spinOnce();  // handle subscriber callbacks
+
+    // don't plan unless the map has been initialized and a goal node has been set
+    if (initialize_graph_)
+      continue;
+    else
+      node_grid_.updateGraph(map_);
+
+    // don't plan unless a goal node has been set
+    if (!initial_goal_set_)
+      continue;
+
+    if (initialize_search)
+      initializeSearch();
+
+    if (goal_changed_)
+    {
+      ROS_INFO_STREAM("New Goal Received. Initializing Search...");
+      initialize_search = true;
+      goal_changed_ = false;
+      continue;
+    }
+
+    // gather cells with updated edge costs and update affected nodes
+    num_nodes_updated = updateNodesAroundUpdatedCells();
+    ROS_INFO_STREAM_COND(num_nodes_updated > 0, num_nodes_updated << " nodes updated");
+
+    // only update the graph if nodes have been updated
+    if ((num_nodes_updated > 0) || initialize_search)
+    {
+      ros::Time begin = ros::Time::now();
+      num_nodes_expanded = computeShortestPath();
+
+      double elapsed = (ros::Time::now() - begin).toSec();
+
+      ROS_INFO_STREAM_COND(num_nodes_expanded > 0, num_nodes_expanded << " nodes expanded in " << elapsed << "s.");
+
+      if (initialize_search)
+        initialize_search = false;
+    }
+
+    constructOptimalPath();
+
+    if (publish_expanded_)
+      publish_expanded_set(getExplored(), expanded_cloud);
+
+    nav_msgs::Path path_msg;
+    path_msg.header.stamp = ros::Time::now();
+    path_msg.header.frame_id = "odom";
+
+    for (Position pos : path_)
+    {
+      geometry_msgs::PoseStamped pose;
+      pose.header.stamp = path_msg.header.stamp;
+      pose.header.frame_id = path_msg.header.frame_id;
+      pose.pose.position.x = (pos.x - x_initial_) * node_grid_.resolution_;
+      pose.pose.position.y = (pos.y - y_initial_) * node_grid_.resolution_;
+      path_msg.poses.push_back(pose);
+    }
+
+    if (path_msg.poses.size() > 0 || !follow_old_path_)
+      path_pub_.publish(path_msg);
+
+    rate.sleep();
+  }
+}
+
+//-------------------------- Helper Methods ----------------------------//
+
+void FieldDPlanner::publish_expanded_set(const std::vector<std::tuple<int, int>>& inds,
+                                         pcl::PointCloud<pcl::PointXYZRGB>& expanded_cloud)
+{
+  expanded_cloud.clear();
+  expanded_cloud.header.frame_id = "odom";
+
+  for (std::tuple<int, int> ind : inds)
+  {
+    pcl::PointXYZRGB p;
+
+    p.x = static_cast<float>(std::get<0>(ind) - x_initial_) * map_->resolution;
+    p.y = static_cast<float>(std::get<1>(ind) - y_initial_) * map_->resolution;
+    p.z = -0.05f;
+
+    // set the node color to red if its g-value is inf. Otherwise blue.
+    if (getG(Node(ind)) == std::numeric_limits<float>::infinity())
+    {
+      uint8_t r = 255, g = 0, b = 0;
+      uint32_t rgb = ((uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b);
+      p.rgb = *reinterpret_cast<float*>(&rgb);
+    }
+    else
+    {
+      uint8_t r = 0, g = 125, b = 125;
+      uint32_t rgb = ((uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b);
+      p.rgb = *reinterpret_cast<float*>(&rgb);
+    }
+
+    expanded_cloud.points.push_back(p);
+  }
+
+  expanded_pub_.publish(expanded_cloud);
+}
+
+void FieldDPlanner::map_callback(const igvc_msgs::mapConstPtr& msg)
+{
+  map_ = msg;  // update current map
+
+  if (initialize_graph_)
+  {
+    // initial x and y coordinates of the graph search problem
+    x_initial_ = static_cast<int>(map_->x_initial);
+    y_initial_ = static_cast<int>(map_->y_initial);
+    node_grid_.initializeGraph(map_);
+    initialize_graph_ = false;
+  }
+}
+
+void FieldDPlanner::waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
+{
+  int goal_x, goal_y;
+  goal_x = static_cast<int>(std::round(msg->point.x / node_grid_.resolution_)) + x_initial_;
+  goal_y = static_cast<int>(std::round(msg->point.y / node_grid_.resolution_)) + y_initial_;
+
+  Node new_goal(goal_x, goal_y);
+
+  // re-initialize graph search problem if goal has changed
+  if (node_grid_.goal_ != new_goal)
+    goal_changed_ = true;
+
+  node_grid_.setGoal(new_goal);
+
+  float distance_to_goal = node_grid_.euclidianHeuristic(new_goal) * node_grid_.resolution_;
+
+  ROS_INFO_STREAM((goal_changed_ ? "New" : "Same") << " waypoint received. Search Problem Goal = " << node_grid_.goal_
+                                                   << ". Distance: " << distance_to_goal << "m.");
+
+  if (distance_to_goal > maximum_distance_)
+  {
+    ROS_WARN_STREAM_THROTTLE(3, "Planning to waypoint more than " << maximum_distance_
+                                                                  << "m. away - distance = " << distance_to_goal);
+    initial_goal_set_ = false;
+  }
+  else
+  {
+    initial_goal_set_ = true;
+  }
+}
+
 void FieldDPlanner::setGoalDistance(float goal_dist)
 {
   this->goal_dist_ = goal_dist;
@@ -255,7 +441,7 @@ int FieldDPlanner::updateNodesAroundUpdatedCells()
   return to_update.size();
 }
 
-void FieldDPlanner::constructOptimalPath(int lookahead_dist)
+void FieldDPlanner::constructOptimalPath()
 {
   path_.clear();
 
@@ -271,7 +457,7 @@ void FieldDPlanner::constructOptimalPath(int lookahead_dist)
   do
   {
     // move one step and calculate the optimal path additions (min 1, max 2)
-    pa = getPathAdditions(curr_pos, lookahead_dist);
+    pa = getPathAdditions(curr_pos, lookahead_dist_);
     path_.insert(path_.end(), pa.first.begin(), pa.first.end());
     min_cost = pa.second;
     curr_pos = path_.back();
@@ -341,7 +527,7 @@ FieldDPlanner::path_additions FieldDPlanner::computeOptimalCellTraversal(const P
   return std::make_pair(positions, traversal_computation.cost);
 }
 
-FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const Position& p, int lookahead_dist)
+FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const Position& p, int lookahead_dist_remaining)
 {
   float min_cost = std::numeric_limits<float>::infinity();
   path_additions min_pa;
@@ -352,13 +538,13 @@ FieldDPlanner::path_additions FieldDPlanner::getPathAdditions(const Position& p,
   Position p_a, p_b;  // temp positions
   for (std::pair<Position, Position> connbr : node_grid_.nbrsContinuous(p))
   {
-    // look ahead `lookahead_dist` planning steps into the future for best action
+    // look ahead `lookahead_dist_remaining` planning steps into the future for best action
     std::tie(p_a, p_b) = connbr;
     temp_pa = computeOptimalCellTraversal(p, p_a, p_b);
-    if ((lookahead_dist <= 0) || temp_pa.first.empty())
+    if ((lookahead_dist_remaining <= 0) || temp_pa.first.empty())
       lookahead_cost = temp_pa.second;
     else
-      lookahead_cost = getPathAdditions(temp_pa.first.back(), lookahead_dist - 1).second;
+      lookahead_cost = getPathAdditions(temp_pa.first.back(), lookahead_dist_remaining - 1).second;
 
     if (lookahead_cost < min_cost)
     {
