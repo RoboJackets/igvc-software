@@ -61,4 +61,13 @@ private:
   encoder information
   */
   void recieveResponse();
+  /**
+  Publishes robot status recieved from the mbed to the following topics:
+    - /encoders
+    - /robot_enabled
+    - /battery
+
+  @param[in] response the response message recieved from the mbed
+  */
+  void publishResponse(const ResponseMessage& response);
 };
