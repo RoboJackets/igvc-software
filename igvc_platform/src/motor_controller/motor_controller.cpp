@@ -35,8 +35,6 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   ROS_INFO_STREAM("Successfully Connected to TCP Host:"
                   << "\n\tIP: " << (*sock_).getIP() << "\n\tPort: " << (*sock_).getPort());
 
-  // alpha value for voltage exponentially weighted moving average
-  // approximate # of timesteps average taken over = 1 / (1-alpha)
   igvc::getParam(pNh, std::string("battery_alpha"), battery_alpha_);
   igvc::getParam(pNh, std::string("min_battery_voltage"), min_battery_voltage_);
 
@@ -52,6 +50,7 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 
   igvc::param(pNh, "log_period", log_period_, 5.0);
 
+  // communication frequency
   igvc::getParam(pNh, std::string("frequency"), frequency_);
   ros::Rate rate(frequency_);
 
@@ -231,7 +230,7 @@ void MotorController::recieveResponse()
 
   /* update the exponentially weighted moving voltage average and publish */
   std_msgs::Float64 battery_msg;
-  battery_avg_ = battery_alpha_ * battery_avg_ + (1 - battery_alpha_) * response.voltage;
+  battery_avg_ = (battery_alpha_ * battery_avg_) + ((1 - battery_alpha_) * response.voltage);
   battery_msg.data = battery_avg_;
   battery_pub_.publish(battery_msg);
 
