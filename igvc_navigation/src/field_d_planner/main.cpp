@@ -27,8 +27,6 @@ Date Created: January 23rd, 2018
 #include "FieldDPlanner.h"
 #include "Graph.h"
 
-std::mutex planning_mutex;
-
 igvc_msgs::mapConstPtr map;  // Most up-to-date map
 FieldDPlanner planner;       // Field D* path planner
 int x_initial, y_initial;    // Index for initial x and y location in search space
@@ -93,7 +91,6 @@ void publish_expanded_set(const std::vector<std::tuple<int, int>>& inds,
 */
 void map_callback(const igvc_msgs::mapConstPtr& msg)
 {
-  std::lock_guard<std::mutex> planning_lock(planning_mutex);
   map = msg;  // update current map
 
   if (initialize_graph)
@@ -114,8 +111,6 @@ void map_callback(const igvc_msgs::mapConstPtr& msg)
 */
 void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg)
 {
-  std::lock_guard<std::mutex> lock(planning_mutex);
-
   int goal_x, goal_y;
   goal_x = static_cast<int>(std::round(msg->point.x / planner.node_grid_.resolution_)) + x_initial;
   goal_y = static_cast<int>(std::round(msg->point.y / planner.node_grid_.resolution_)) + y_initial;
