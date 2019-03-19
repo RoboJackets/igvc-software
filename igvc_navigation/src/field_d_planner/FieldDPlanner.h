@@ -34,17 +34,32 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #ifndef FIELDDPLANNER_H
 #define FIELDDPLANNER_H
 
-#include "Graph.h"
-#include "Node.h"
-#include "PriorityQueue.h"
-
 #include <assert.h>
 #include <cmath>
 #include <limits>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+#include "Graph.h"
+#include "Node.h"
+#include "PriorityQueue.h"
+
+// For Node functionality
+#include <geometry_msgs/PoseStamped.h>
+#include <igvc_msgs/map.h>
+#include <nav_msgs/Path.h>
+#include <sensor_msgs/Image.h>
+#include <std_msgs/Int32.h>
+
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_ros/point_cloud.h>
+#include <ros/ros.h>
+#include <tf/transform_datatypes.h>
+#include <igvc_utils/NodeUtils.hpp>
 
 /**
 The CostComputation struct contains the linearly interpolated path cost as
@@ -78,6 +93,62 @@ struct CostComputation
 class FieldDPlanner
 {
 public:
+  // ---------- Node functionality ----------- //
+  FieldDPlanner(ros::NodeHandle* nodehandle);
+  ros::NodeHandle nh_;
+
+  // subscribers
+  ros::Subscriber map_sub_;
+  ros::Subscriber waypoint_sub_;
+  // publishers
+  ros::Publisher expanded_pub_;
+  ros::Publisher path_pub_;
+
+  // launch parameters
+  double maximum_distance_;     // maximum distance to goal node before warning messages spit out
+  bool publish_expanded_;       // publish an expanded pointcloud
+  double configuration_space_;  // configuration space
+  double goal_range_;           // distance from goal at which a node is considered the goal
+  double rate_;                 // path planning/replanning rate
+  bool follow_old_path_;        // follow the previously generated path if no optimal path currently exists
+  int lookahead_dist_;          // number of cell traversals to look ahead at when decising next position along path
+  float occupancy_threshold_;   // maximum occupancy probability before a cell is considered to have infinite traversal
+                                // cost
+
+  igvc_msgs::mapConstPtr map_;  // Most up-to-date map
+  int x_initial_, y_initial_;   // Index for initial x and y location in search space
+
+  bool initialize_graph_ = true;   // set to true if the graph must be initialized
+  bool initial_goal_set_ = false;  // true if the first goal has been set
+  bool goal_changed_ = false;      // true if the goal changed and the graph must be re-initialized
+  /**
+  Publish expanded nodes for visualization purposes. This is not a subscriber
+  callback.
+
+  @param[in] inds the indices of Nodes that have been expanded in the graph search
+  @param[in] expanded_cloud the PCL pointcloud which expanded node indices
+          should be stored in
+  @param[in] the publishes with which to publish the PCL pointcloud of expanded nodes
+  */
+  void publish_expanded_set(const std::vector<std::tuple<int, int>>& inds,
+                            pcl::PointCloud<pcl::PointXYZRGB>& expanded_cloud);
+  /**
+      Set the current map to be used by the D* Lite search problem. The initial
+      map is used to perform the first search through the occupancy grid (equivalent
+      to A*). All maps thereafter are used to update edge costs for the search problem.
+      @param[in] msg the map recieved on the "/map" topic
+  */
+  void map_callback(const igvc_msgs::mapConstPtr& msg);
+  /**
+    Assigns a valid goal to the graph search problem. Goal index obtained by
+    converting from the /map frame goal coordinate to the graph index.
+
+    @param[in] msg the message received on the "/waypoint" topic
+  */
+  void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg);
+
+  // ---------- Path Planner Logic ----------- //
+
   // Graph contains methods to deal with Node(s) as well as updated occupancy
   // grid cells
   Graph node_grid_;
@@ -180,11 +251,8 @@ public:
   Constructs the optimal path through the search space by greedily moving to
   the next position (or vertex) that minimizes the linearly interpolated
   path cost calculation. Constructed paths populate the `path` attribute
-
-  @param[in] lookahead_dist number of future cell traversals to recurisively
-          analyze before moving to next position
   */
-  void constructOptimalPath(int lookahead_dist);
+  void constructOptimalPath();
   /**
   Helper method for path reconstruction process. Finds the next path position(s)
   when planning from a vertex or an edge position on the graph given the current
@@ -203,7 +271,7 @@ public:
   @param[in] p edge on graph to plan from
   @return vector containing the next positions(s) and movement cost
   */
-  path_additions getPathAdditions(const Position& p, int lookahead_dist);
+  path_additions getPathAdditions(const Position& p, int lookahead_dist_remaining);
   /**
   Checks whether a specified node is within range of the goal node. This 'range'
   is specified by the GOAL_RANGE instance variable.
