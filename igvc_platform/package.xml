@@ -48,6 +48,7 @@
   <build_depend>pluginlib</build_depend>
   <build_depend>class_loader</build_depend>
   <build_depend>image_geometry</build_depend>
+  <build_depend>igvc_utils</build_depend>
 
   <!-- Run dependencies -->
   <run_depend>roscpp</run_depend>
