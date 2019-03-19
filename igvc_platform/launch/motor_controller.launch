@@ -12,5 +12,8 @@
           <param name="log_period" type="double" value="5.0"/>
           <param name="min_battery_voltage" type="double" value="23.5"/>
           <param name="frequency" type="double" value="20.0"/>
+          <!-- alpha value for voltage exponentially weighted moving average
+               approximate # of timesteps average taken over = 1 / (1-alpha) -->
+          <param name="battery_alpha" type="double" value="0.9"/>
     </node>
 </launch>
