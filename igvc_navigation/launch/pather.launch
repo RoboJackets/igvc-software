@@ -24,13 +24,15 @@
 
     <!-- Follower -->
     <node name="path_follower" pkg="igvc_navigation" type="path_follower" output="screen" >
-        <!-- Maxmimum velocity allowed before stopping motors -->
+        <!-- Maxmimum wheel velocity allowed before stopping motors -->
         <param name="maximum_vel" type="double" value="2"/>
         <param name="axle_length" type="double" value="0.52"/>
         <!-- Distance along the path to generate smooth control law for  -->
         <param name="lookahead_dist" type="double" value="1.3"/>
-        <!-- granularity with which to visualize planned trajectories -->
-        <param name="granularity" type="int" value="100"/>
+        <!-- Frequency (hz) at which simulation is done -->
+        <param name="simulation_frequency" type="double" value="10.0"/>
+        <!-- How many seconds in the future should be simulated-->
+        <param name="simulation_horizon" type="double" value="5.0"/>
         <!-- How far away robot should be from the waypoint before it stops -->
         <param name="stop_dist" type="double" value="0.7"/>
         <!-- Smooth Control Parameters -->
