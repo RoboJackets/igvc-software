@@ -273,7 +273,7 @@ void Mapper::publish(uint64_t stamp)
   sensor_msgs::Image blurred_image;
   if (m_pc_map_pair.map)
   {
-    m_img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, *m_pc_map_pair.map);
+    m_img_bridge = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, blurred_map);
     m_img_bridge.toImageMsg(image);
     setMessageMetadata(message, image, stamp);
     m_map_pub.publish(message);
