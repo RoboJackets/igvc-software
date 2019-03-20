@@ -43,11 +43,9 @@ FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
     // don't plan unless the map has been initialized and a goal node has been set
     if (initialize_graph_)
       continue;
-    else
-      node_grid_.updateGraph(map_);
 
     // don't plan unless a goal node has been set
-    if (!initial_goal_set_)
+    if (!goal_set_)
       continue;
 
     if (initialize_search)
@@ -82,7 +80,7 @@ FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
     constructOptimalPath();
 
     if (publish_expanded_)
-      publish_expanded_set(getExplored(), expanded_cloud);
+      publish_expanded_set(expanded_cloud);
 
     nav_msgs::Path path_msg;
     path_msg.header.stamp = ros::Time::now();
@@ -105,34 +103,41 @@ FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   }
 }
 
-//-------------------------- Helper Methods ----------------------------//
-
-void FieldDPlanner::publish_expanded_set(const std::vector<std::tuple<int, int>>& inds,
-                                         pcl::PointCloud<pcl::PointXYZRGB>& expanded_cloud)
+void FieldDPlanner::publish_expanded_set(pcl::PointCloud<pcl::PointXYZRGB>& expanded_cloud)
 {
   expanded_cloud.clear();
   expanded_cloud.header.frame_id = "odom";
 
-  for (std::tuple<int, int> ind : inds)
+  float max_g = -std::numeric_limits<float>::infinity();
+
+  for (std::pair<Node, std::tuple<float, float>> e : expanded_map_)
+  {
+    // ignore infinite g-values when getting the max value
+    if (std::get<0>(e.second) == std::numeric_limits<float>::infinity())
+      continue;
+    max_g = std::max(max_g, std::get<0>(e.second));
+  }
+
+  for (std::pair<Node, std::tuple<float, float>> e : expanded_map_)
   {
     pcl::PointXYZRGB p;
 
-    p.x = static_cast<float>(std::get<0>(ind) - x_initial_) * map_->resolution;
-    p.y = static_cast<float>(std::get<1>(ind) - y_initial_) * map_->resolution;
+    p.x = static_cast<float>(std::get<0>(e.first.getIndex()) - x_initial_) * map_->resolution;
+    p.y = static_cast<float>(std::get<1>(e.first.getIndex()) - y_initial_) * map_->resolution;
     p.z = -0.05f;
 
-    // set the node color to red if its g-value is inf. Otherwise blue.
-    if (getG(Node(ind)) == std::numeric_limits<float>::infinity())
+    // set the node color to red if its g-value is inf. Otherwise scale.
+    if (std::get<0>(e.second) == std::numeric_limits<float>::infinity())
     {
-      uint8_t r = 255, g = 0, b = 0;
-      uint32_t rgb = ((uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b);
-      p.rgb = *reinterpret_cast<float*>(&rgb);
+      p.r = 255;
+      p.g = 0;
+      p.b = 0;
     }
     else
     {
-      uint8_t r = 0, g = 125, b = 125;
-      uint32_t rgb = ((uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b);
-      p.rgb = *reinterpret_cast<float*>(&rgb);
+      p.r = 0;
+      p.g = 125;
+      p.b = static_cast<uint8_t>((std::get<0>(e.second) / max_g) * 255.0f);
     }
 
     expanded_cloud.points.push_back(p);
@@ -152,6 +157,10 @@ void FieldDPlanner::map_callback(const igvc_msgs::mapConstPtr& msg)
     y_initial_ = static_cast<int>(map_->y_initial);
     node_grid_.initializeGraph(map_);
     initialize_graph_ = false;
+  }
+  else
+  {
+    node_grid_.updateGraph(map_);
   }
 }
 
@@ -178,11 +187,16 @@ void FieldDPlanner::waypoint_callback(const geometry_msgs::PointStampedConstPtr&
   {
     ROS_WARN_STREAM_THROTTLE(3, "Planning to waypoint more than " << maximum_distance_
                                                                   << "m. away - distance = " << distance_to_goal);
-    initial_goal_set_ = false;
+    goal_set_ = false;
+  }
+  else if (distance_to_goal < goal_range_)
+  {
+    ROS_INFO_STREAM_THROTTLE(3, "Waiting for new waypoint...");
+    goal_set_ = false;
   }
   else
   {
-    initial_goal_set_ = true;
+    goal_set_ = true;
   }
 }
 
@@ -590,13 +604,4 @@ float FieldDPlanner::getRHS(const Node& s)
     return std::get<1>(expanded_map_.at(s));
   else
     return std::numeric_limits<float>::infinity();
-}
-
-std::vector<std::tuple<int, int>> FieldDPlanner::getExplored()
-{
-  std::vector<std::tuple<int, int>> explored;
-  for (std::pair<Node, std::tuple<float, float>> e : expanded_map_)
-    explored.push_back(e.first.getIndex());
-
-  return explored;
 }
