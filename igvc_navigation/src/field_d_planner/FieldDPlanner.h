@@ -102,6 +102,8 @@ public:
   ros::Subscriber waypoint_sub_;
   // publishers
   ros::Publisher expanded_pub_;
+  ros::Publisher nodes_expanded_pub_;
+  ros::Publisher nodes_updated_pub_;
   ros::Publisher path_pub_;
 
   // launch parameters

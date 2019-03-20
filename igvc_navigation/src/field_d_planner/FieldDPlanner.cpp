@@ -10,7 +10,9 @@ FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 
   // publish a 2D pointcloud of expanded nodes for visualization
   pcl::PointCloud<pcl::PointXYZRGB> expanded_cloud;
-  expanded_pub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded", 1);
+  expanded_pub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/expanded/pointcloud", 1);
+  nodes_expanded_pub_ = nh_.advertise<std_msgs::Int32>("/expanded/num_nodes_expanded", 1);
+  nodes_updated_pub_ = nh_.advertise<std_msgs::Int32>("/expanded/num_nodes_updated", 1);
   expanded_cloud.header.frame_id = "odom";
 
   // publish path for path_follower
@@ -76,11 +78,22 @@ FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
       if (initialize_search)
         initialize_search = false;
     }
+    else
+    {
+      num_nodes_expanded = 0;
+    }
 
     constructOptimalPath();
 
     if (publish_expanded_)
       publish_expanded_set(expanded_cloud);
+
+    // publish number of nodes expanded/updated
+    std_msgs::Int32 expanded_stats;
+    expanded_stats.data = num_nodes_expanded;
+    nodes_expanded_pub_.publish(expanded_stats);
+    expanded_stats.data = num_nodes_updated;
+    nodes_updated_pub_.publish(expanded_stats);
 
     nav_msgs::Path path_msg;
     path_msg.header.stamp = ros::Time::now();
@@ -106,7 +119,6 @@ FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 void FieldDPlanner::publish_expanded_set(pcl::PointCloud<pcl::PointXYZRGB>& expanded_cloud)
 {
   expanded_cloud.clear();
-  expanded_cloud.header.frame_id = "odom";
 
   float max_g = -std::numeric_limits<float>::infinity();
 
@@ -139,7 +151,6 @@ void FieldDPlanner::publish_expanded_set(pcl::PointCloud<pcl::PointXYZRGB>& expa
       p.g = 125;
       p.b = static_cast<uint8_t>((std::get<0>(e.second) / max_g) * 255.0f);
     }
-
     expanded_cloud.points.push_back(p);
   }
 
@@ -337,7 +348,6 @@ bool FieldDPlanner::isVertex(const Position& p)
 {
   bool is_vertex = (ceilf(p.x) == p.x) && (ceilf(p.y) == p.y);
   bool satisfies_bounds = (p.x >= 0) && (p.x <= node_grid_.length_) && (p.y >= 0) && (p.y <= node_grid_.width_);
-
   return is_vertex && satisfies_bounds;
 }
 
