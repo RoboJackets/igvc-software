@@ -416,7 +416,7 @@ void Mapper::pc_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
       pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
 
   // Check if static transform already exists for this topic.
-  if (!checkExistsStaticTransform(pc->header.frame_id, pc->header.stamp, "/scan/pointcloud"))
+  if (!checkExistsStaticTransform(pc->header.frame_id, pc->header.stamp, m_lidar_topic))
   {
     ROS_ERROR("Couldn't find static transform for pointcloud. Sleeping 2 seconds then trying again...");
     ros::Duration(2).sleep();
