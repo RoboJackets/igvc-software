@@ -118,9 +118,9 @@ public:
   igvc_msgs::mapConstPtr map_;  // Most up-to-date map
   int x_initial_, y_initial_;   // Index for initial x and y location in search space
 
-  bool initialize_graph_ = true;   // set to true if the graph must be initialized
-  bool initial_goal_set_ = false;  // true if the first goal has been set
-  bool goal_changed_ = false;      // true if the goal changed and the graph must be re-initialized
+  bool initialize_graph_ = true;  // set to true if the graph must be initialized
+  bool goal_set_ = false;         // true if the goal has been set
+  bool goal_changed_ = false;     // true if the goal changed and the graph must be re-initialized
   /**
   Publish expanded nodes for visualization purposes. This is not a subscriber
   callback.
@@ -130,8 +130,7 @@ public:
           should be stored in
   @param[in] the publishes with which to publish the PCL pointcloud of expanded nodes
   */
-  void publish_expanded_set(const std::vector<std::tuple<int, int>>& inds,
-                            pcl::PointCloud<pcl::PointXYZRGB>& expanded_cloud);
+  void publish_expanded_set(pcl::PointCloud<pcl::PointXYZRGB>& expanded_cloud);
   /**
       Set the current map to be used by the D* Lite search problem. The initial
       map is used to perform the first search through the occupancy grid (equivalent
@@ -303,13 +302,6 @@ public:
   @return rhs-value
   */
   float getRHS(const Node& s);
-  /**
-  Returns list of indices of expanded nodes, that is, the indices of the
-  nodes contained in the unordered map.
-
-  @return vector of nodes in the unordered map
-  */
-  std::vector<std::tuple<int, int>> getExplored();
 
 private:
   // hashed map contains all nodes and <g,rhs> values in search
