@@ -148,6 +148,8 @@ public:
   */
   void waypoint_callback(const geometry_msgs::PointStampedConstPtr& msg);
 
+  void publish_path();
+
   // ---------- Path Planner Logic ----------- //
 
   // Graph contains methods to deal with Node(s) as well as updated occupancy

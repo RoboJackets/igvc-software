@@ -95,22 +95,7 @@ FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
     expanded_stats.data = num_nodes_updated;
     nodes_updated_pub_.publish(expanded_stats);
 
-    nav_msgs::Path path_msg;
-    path_msg.header.stamp = ros::Time::now();
-    path_msg.header.frame_id = "odom";
-
-    for (Position pos : path_)
-    {
-      geometry_msgs::PoseStamped pose;
-      pose.header.stamp = path_msg.header.stamp;
-      pose.header.frame_id = path_msg.header.frame_id;
-      pose.pose.position.x = (pos.x - x_initial_) * node_grid_.resolution_;
-      pose.pose.position.y = (pos.y - y_initial_) * node_grid_.resolution_;
-      path_msg.poses.push_back(pose);
-    }
-
-    if (path_msg.poses.size() > 0 || !follow_old_path_)
-      path_pub_.publish(path_msg);
+    publish_path();
 
     rate.sleep();
   }
@@ -208,6 +193,43 @@ void FieldDPlanner::waypoint_callback(const geometry_msgs::PointStampedConstPtr&
   else
   {
     goal_set_ = true;
+  }
+}
+
+void FieldDPlanner::publish_path()
+{
+
+  nav_msgs::Path path_msg;
+  path_msg.header.stamp = ros::Time::now();
+  path_msg.header.frame_id = "odom";
+
+  size_t num_poses = path_.size();
+
+  if (num_poses > 1 || !follow_old_path_)
+  {
+
+    for (size_t i = 0; i < num_poses; i++)
+    {
+      geometry_msgs::PoseStamped pose;
+      pose.header.stamp = path_msg.header.stamp;
+      pose.header.frame_id = path_msg.header.frame_id;
+
+      // calculate the position in the "/odom" frame
+      pose.pose.position.x = (path_[i].x - x_initial_) * node_grid_.resolution_;
+      pose.pose.position.y = (path_[i].y - y_initial_) * node_grid_.resolution_;
+
+      // calculate the orientation
+      double delta_x = ((path_[i+1].x - x_initial_) * node_grid_.resolution_) - pose.pose.position.x;
+      double delta_y = ((path_[i+1].y - y_initial_) * node_grid_.resolution_) - pose.pose.position.y;
+      double heading = atan2(delta_y, delta_x);
+      pose.pose.orientation = tf::createQuaternionMsgFromYaw(heading);
+
+      path_msg.poses.push_back(pose);
+    }
+
+    path_msg.poses.back().pose.orientation = path_msg.poses[num_poses - 2].pose.orientation;
+
+    path_pub_.publish(path_msg);
   }
 }
 
