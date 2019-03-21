@@ -65,9 +65,8 @@ public:
   void insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair, const PCL_point_cloud& raw_pc,
                    const pcl::PointCloud<pcl::PointXYZ>& empty_pc);
   void insert_camera_projection(struct pc_map_pair& pc_map_pair, const PCL_point_cloud& raw_pc, bool occupied) const;
-  void insert_camera_free(struct pc_map_pair &projection_map_pair, const cv::Mat &image,
-      const image_geometry::PinholeCameraModel &model,
-      const tf::Transform &camera_to_world) const;
+  void insert_camera_free(struct pc_map_pair& projection_map_pair, const cv::Mat& image,
+                          const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world) const;
   void get_updated_map(struct pc_map_pair& pc_map_pair) const;
   void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground);
 
