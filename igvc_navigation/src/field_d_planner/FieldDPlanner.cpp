@@ -198,7 +198,6 @@ void FieldDPlanner::waypoint_callback(const geometry_msgs::PointStampedConstPtr&
 
 void FieldDPlanner::publish_path()
 {
-
   nav_msgs::Path path_msg;
   path_msg.header.stamp = ros::Time::now();
   path_msg.header.frame_id = "odom";
@@ -207,7 +206,6 @@ void FieldDPlanner::publish_path()
 
   if (num_poses > 1 || !follow_old_path_)
   {
-
     for (size_t i = 0; i < num_poses; i++)
     {
       geometry_msgs::PoseStamped pose;
@@ -219,8 +217,8 @@ void FieldDPlanner::publish_path()
       pose.pose.position.y = (path_[i].y - y_initial_) * node_grid_.resolution_;
 
       // calculate the orientation
-      double delta_x = ((path_[i+1].x - x_initial_) * node_grid_.resolution_) - pose.pose.position.x;
-      double delta_y = ((path_[i+1].y - y_initial_) * node_grid_.resolution_) - pose.pose.position.y;
+      double delta_x = ((path_[i + 1].x - x_initial_) * node_grid_.resolution_) - pose.pose.position.x;
+      double delta_y = ((path_[i + 1].y - y_initial_) * node_grid_.resolution_) - pose.pose.position.y;
       double heading = atan2(delta_y, delta_x);
       pose.pose.orientation = tf::createQuaternionMsgFromYaw(heading);
 
