@@ -421,28 +421,32 @@ void Octomapper::project_to_plane(pcl::PointCloud<pcl::PointXYZ> &projected_pc, 
       // If it's a white pixel => free space, then project
       if (p[j] == 0)
       {
-//        ROS_INFO("(%d, %d)", i, j);
+        //        ROS_INFO("(%d, %d)", i, j);
         cv::Point2d pixel_point(j, i);
         double t1 = j - model.cx() - model.Tx();
         double t2 = i - model.cy() - model.Ty();
-//        ROS_INFO_THROTTLE(0.1, "=====For (%d, %d)======", j, i);
-//        ROS_INFO_THROTTLE(0.1, "(t1, t2) = (%.2f, %.2f)\n", t1, t2);
-//        ROS_INFO_THROTTLE(0.1, "(fx(), fy()) = (%.2f, %.2f)\n", model.fx(), model.fy());
+        //        ROS_INFO_THROTTLE(0.1, "=====For (%d, %d)======", j, i);
+        //        ROS_INFO_THROTTLE(0.1, "(t1, t2) = (%.2f, %.2f)\n", t1, t2);
+        //        ROS_INFO_THROTTLE(0.1, "(fx(), fy()) = (%.2f, %.2f)\n", model.fx(), model.fy());
         cv::Point3d ray = model.projectPixelTo3dRay(pixel_point);
-//        ROS_INFO_STREAM_THROTTLE(0.1, "ray: (" << ray.x << ", " << ray.y << ", " << ray.z << ")");
+        //        ROS_INFO_STREAM_THROTTLE(0.1, "ray: (" << ray.x << ", " << ray.y << ", " << ray.z << ")");
         tf::Point reoriented_ray{ ray.x, ray.y, ray.z };  // cv::Point3d defined with z forward, x right, y down
-//        ROS_INFO_STREAM_THROTTLE(0.1, "reoriented_ray: (" << reoriented_ray.x() << ", " << reoriented_ray.y() << ", " << reoriented_ray.z() << ")");
-        tf::Point transformed_ray = camera_to_world.getBasis() * reoriented_ray; // Transform ray to odom frame
-//        ROS_INFO_STREAM_THROTTLE(0.1, "transformed_ray: (" << transformed_ray.x() << ", " << transformed_ray.y() << ", " << transformed_ray.z() << ")");
-//        double scale = -camera_to_world.getOrigin().z() / transformed_ray.z();
-//        tf::Point projected_point = scale * transformed_ray + camera_to_world.getOrigin();
+        //        ROS_INFO_STREAM_THROTTLE(0.1, "reoriented_ray: (" << reoriented_ray.x() << ", " << reoriented_ray.y()
+        //        << ", " << reoriented_ray.z() << ")");
+        tf::Point transformed_ray = camera_to_world.getBasis() * reoriented_ray;  // Transform ray to odom frame
+        //        ROS_INFO_STREAM_THROTTLE(0.1, "transformed_ray: (" << transformed_ray.x() << ", " <<
+        //        transformed_ray.y() << ", " << transformed_ray.z() << ")"); double scale =
+        //        -camera_to_world.getOrigin().z() / transformed_ray.z(); tf::Point projected_point = scale *
+        //        transformed_ray + camera_to_world.getOrigin();
         double a = m_ground_projection.a;
         double b = m_ground_projection.b;
         double c = m_ground_projection.c;
         double d = m_ground_projection.d;
-//        ROS_INFO_THROTTLE(1, "%.2f x + %.2f y + %.2f z + %.2f = 0", m_ground_projection.a, m_ground_projection.b, m_ground_projection.c, m_ground_projection.d);
+        //        ROS_INFO_THROTTLE(1, "%.2f x + %.2f y + %.2f z + %.2f = 0", m_ground_projection.a,
+        //        m_ground_projection.b, m_ground_projection.c, m_ground_projection.d);
         // [a b c]^T dot (P0 - (camera + ray*t)) = 0, solve for t
-        double t = ((tf::Vector3{0, 0, d/c} - camera_to_world.getOrigin()).dot(tf::Vector3{a, b, c}))/(transformed_ray.dot(tf::Vector3{a, b, c}));
+        double t = ((tf::Vector3{ 0, 0, d / c } - camera_to_world.getOrigin()).dot(tf::Vector3{ a, b, c })) /
+                   (transformed_ray.dot(tf::Vector3{ a, b, c }));
         // projected_point = camera + ray*t
         tf::Point projected_point = camera_to_world.getOrigin() + transformed_ray * t;
         projected_pc.points.emplace_back(pcl::PointXYZ(static_cast<float>(projected_point.x()),
