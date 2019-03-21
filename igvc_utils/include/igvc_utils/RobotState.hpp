@@ -36,11 +36,13 @@ public:
   }
 
   explicit RobotState(const tf::StampedTransform &stamped_transform, ros::Time stamp)
-      : transform(stamped_transform), stamp(stamp)
+    : transform(stamped_transform), stamp(stamp)
   {
   }
 
-  explicit RobotState(const tf::Transform& transform) : transform(transform) { }
+  explicit RobotState(const tf::Transform &transform) : transform(transform)
+  {
+  }
 
   double x() const;
   double y() const;
@@ -112,7 +114,7 @@ public:
     transform *= other;
   }
 
-  RobotState operator*(const RobotState& other) const
+  RobotState operator*(const RobotState &other) const
   {
     RobotState combined(transform * other.transform);
     return combined;
@@ -149,12 +151,14 @@ public:
 };
 
 template <>
-inline double RobotState::distTo(RobotState other) const {
+inline double RobotState::distTo(RobotState other) const
+{
   return igvc::get_distance(this->x(), this->y(), other.x(), other.y());
 }
 
 template <>
-inline double RobotState::distTo(geometry_msgs::Point other) const {
+inline double RobotState::distTo(geometry_msgs::Point other) const
+{
   return igvc::get_distance(this->x(), this->y(), other.x, other.y);
 }
 
@@ -194,11 +198,22 @@ inline double RobotState::yaw() const
   return y;
 }
 
-inline double RobotState::quat_x() const { return transform.getRotation().x(); }
-inline double RobotState::quat_y() const { return transform.getRotation().y(); }
-inline double RobotState::quat_z() const { return transform.getRotation().z(); }
-inline double RobotState::quat_w() const { return transform.getRotation().w(); }
-
+inline double RobotState::quat_x() const
+{
+  return transform.getRotation().x();
+}
+inline double RobotState::quat_y() const
+{
+  return transform.getRotation().y();
+}
+inline double RobotState::quat_z() const
+{
+  return transform.getRotation().z();
+}
+inline double RobotState::quat_w() const
+{
+  return transform.getRotation().w();
+}
 
 inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
 {
@@ -206,21 +221,33 @@ inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
   return out;
 }
 
-inline void RobotState::set_x(double x) { transform.setOrigin(tf::Vector3(x, y(), z())); }
-inline void RobotState::set_y(double y) { transform.setOrigin(tf::Vector3(x(), y, z())); }
-inline void RobotState::set_z(double z) { transform.setOrigin(tf::Vector3(x(), y(), z)); }
-inline void RobotState::set_roll(double roll) {
+inline void RobotState::set_x(double x)
+{
+  transform.setOrigin(tf::Vector3(x, y(), z()));
+}
+inline void RobotState::set_y(double y)
+{
+  transform.setOrigin(tf::Vector3(x(), y, z()));
+}
+inline void RobotState::set_z(double z)
+{
+  transform.setOrigin(tf::Vector3(x(), y(), z));
+}
+inline void RobotState::set_roll(double roll)
+{
   tf::Matrix3x3 t = transform.getBasis();
   t.setRPY(roll, pitch(), yaw());
   transform.setBasis(t);
 }
-inline void RobotState::set_pitch(double pitch) {
+inline void RobotState::set_pitch(double pitch)
+{
   tf::Matrix3x3 t = transform.getBasis();
   t.setRPY(roll(), pitch, yaw());
   transform.setBasis(t);
 }
 
-inline void RobotState::set_yaw(double yaw) {
+inline void RobotState::set_yaw(double yaw)
+{
   tf::Matrix3x3 t = transform.getBasis();
   t.setRPY(roll(), pitch(), yaw);
   transform.setBasis(t);
