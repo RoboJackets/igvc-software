@@ -1,10 +1,11 @@
 #include "smooth_control.h"
+#include <algorithm>
 
 void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs::PathConstPtr& path,
                                   nav_msgs::Path& trajectory, const RobotState& start_pos, RobotState& target)
 {
   RobotState state = start_pos;
-  RobotState simulation_target;
+  std::optional<RobotState> simulation_target = target_;
   unsigned int path_index = 0;
 
   ros::Time time = path->header.stamp;
@@ -29,17 +30,22 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs:
   for (int i = 0; i < simulation_horizon_ * simulation_frequency_ && path_index < path->poses.size() - 1; i++)
   {
     // Get target
-    path_index = getClosestPosition(path, state);
+    simulation_target = getTargetPosition(path, state, simulation_target);
 
-    simulation_target = getTargetPosition(path, path_index, state);
+    if (!simulation_target)
+    {
+      ROS_ERROR("Smooth Control: Somehow simulation_target is undefined. Breaking...");
+      return;
+    }
 
     // Calculate control using Control Law
-    Action action = getAction(state, simulation_target);
+    Action action = getAction(state, *simulation_target);
     action.dt = dt.toSec();
 
     if (i == 0)
     {
-      target = simulation_target;
+      target_ = *simulation_target;
+      target = *simulation_target;
       getWheelVelocities(vel, action);
     }
 
@@ -54,9 +60,9 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs:
     pose.pose.orientation = path->poses[path_index].pose.orientation;
     closest_point_path.poses.emplace_back(pose);
 
-    pose.pose.position.x = simulation_target.x;
-    pose.pose.position.y = simulation_target.y;
-    pose.pose.orientation = simulation_target.quat();
+    pose.pose.position.x = simulation_target->x;
+    pose.pose.position.y = simulation_target->y;
+    pose.pose.orientation = simulation_target->quat();
     targets_path.poses.emplace_back(pose);
 
     pose.pose.position.x = state.x;
@@ -126,23 +132,60 @@ Action SmoothControl::getAction(const RobotState& state, const RobotState& targe
   return Action{ target_velocity_, w, 0 };
 }
 
-RobotState SmoothControl::getTargetPosition(const nav_msgs::PathConstPtr& path, unsigned int path_index,
-                                            const RobotState& state) const
+RobotState SmoothControl::getTargetPosition(const nav_msgs::PathConstPtr& path, const RobotState& state,
+                                            const std::optional<RobotState>& target) const
 {
-  // target position
-  double tar_x;
-  double tar_y;
-  double tar_yaw = 1.57;
+  // If already have a target, find the closest point along the current path to the current target
+  // If the closest point is too far,then break and find a new target
+  if (target && !reachedTarget(state, *target))
+  {
+    std::optional<RobotState> newTarget = findTargetOnPath(path, *target);
+    if (newTarget && distAlongPath(path, state, *newTarget) < lookahead_dist_)
+    {
+      return *newTarget;
+    }
+  }
+  return acquireNewTarget(path, state);
+}
 
+void SmoothControl::getWheelVelocities(igvc_msgs::velocity_pair& vel_msg, const Action& action) const
+{
+  vel_msg.left_velocity = action.v - action.w * axle_length_ / 2;
+  vel_msg.right_velocity = action.v + action.w * axle_length_ / 2;
+}
+
+SmoothControl::SmoothControl(double k1, double k2, double axle_length, double simulation_frequency,
+                             double target_velocity, double lookahead_dist, double simulation_horizon,
+                             double target_reached_distance, double target_move_threshold)
+  : k1_{ k1 }
+  , k2_{ k2 }
+  , axle_length_{ axle_length }
+  , simulation_frequency_{ simulation_frequency }
+  , target_velocity_{ target_velocity }
+  , lookahead_dist_{ lookahead_dist }
+  , simulation_horizon_{ simulation_horizon }
+  , target_reached_distance_{ target_reached_distance }
+  , target_move_threshold_{ target_move_threshold }
+{
+  ros::NodeHandle pNh{ "~" };
+  target_pub_ = pNh.advertise<nav_msgs::Path>("smooth_control/target", 1);
+  closest_point_pub_ = pNh.advertise<nav_msgs::Path>("smooth_control/closest_point", 1);
+}
+
+RobotState SmoothControl::acquireNewTarget(const nav_msgs::PathConstPtr& path, const RobotState& state) const
+{
   geometry_msgs::Point end = path->poses[path->poses.size() - 1].pose.position;
+
+  // target position
+  RobotState newTarget{ end.x, end.y, tf::getYaw(path->poses[path->poses.size() - 2].pose.orientation) };
 
   double distance = 0;
 
-  for (; path_index < path->poses.size() - 1; path_index++)
+  for (int i = 0; i < path->poses.size() - 1; i++)
   {
     geometry_msgs::Point point1, point2;
-    point1 = path->poses[path_index].pose.position;
-    point2 = path->poses[path_index + 1].pose.position;
+    point1 = path->poses[i].pose.position;
+    point2 = path->poses[i + 1].pose.position;
     double increment = igvc::get_distance(point1.x, point1.y, point2.x, point2.y);
 
     if (distance + increment > lookahead_dist_)
@@ -153,54 +196,52 @@ RobotState SmoothControl::getTargetPosition(const nav_msgs::PathConstPtr& path, 
 
       slope *= (lookahead_dist_ - distance);
 
-      tar_x = first[0] + slope[0];
-      tar_y = first[1] + slope[1];
-      tar_yaw = tf::getYaw(path->poses[path_index].pose.orientation);
-      return RobotState{ tar_x, tar_y, tar_yaw };
+      newTarget.x = first[0] + slope[0];
+      newTarget.y = first[1] + slope[1];
+      newTarget.yaw = tf::getYaw(path->poses[i].pose.orientation);
+      return newTarget;
     }
     distance += increment;
   }
-  tar_x = end.x;
-  tar_y = end.y;
 
-  return RobotState{ tar_x, tar_y, tf::getYaw(path->poses[path->poses.size() - 2].pose.orientation) };
+  return newTarget;
 }
 
-unsigned int SmoothControl::getClosestPosition(const nav_msgs::PathConstPtr& path, const RobotState& state) const
+std::optional<RobotState> SmoothControl::findTargetOnPath(const nav_msgs::PathConstPtr& path,
+                                                          const RobotState& target) const
 {
-  double closest = state.distTo(path->poses[0].pose.position.x, path->poses[0].pose.position.y);
-
-  for (unsigned int path_index = 0; path_index < path->poses.size(); path_index++)
+  auto closest = std::min_element(path->poses.begin(), path->poses.end(),
+                                  [&target](geometry_msgs::PoseStamped lhs, geometry_msgs::PoseStamped rhs) {
+                                    return target.distTo(lhs.pose.position) < target.distTo(rhs.pose.position);
+                                  });
+  if (target.distTo(closest->pose.position) < target_move_threshold_)
   {
-    double cur_dist = state.distTo(path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y);
-    if (cur_dist <= closest)
+    return RobotState{ closest->pose.position.x, closest->pose.position.y, tf::getYaw(closest->pose.orientation) };
+  }
+  return std::nullopt;
+}
+
+double SmoothControl::distAlongPath(const nav_msgs::PathConstPtr& path, const RobotState& state,
+                                    const RobotState& target) const
+{
+  double distance = 0;
+
+  for (int i = 0; i < path->poses.size() - 1; i++)
+  {
+    geometry_msgs::Point point1, point2;
+    point1 = path->poses[i].pose.position;
+    point2 = path->poses[i + 1].pose.position;
+    distance += igvc::get_distance(point1.x, point1.y, point2.x, point2.y);
+
+    if (point2.x == target.x && point2.y == target.y)
     {
-      closest = cur_dist;
-    }
-    else  // Derivative < 0, found maximum
-    {
-      return path_index;
+      return distance;
     }
   }
+  return -1;
 }
 
-void SmoothControl::getWheelVelocities(igvc_msgs::velocity_pair& vel_msg, const Action& action) const
+bool SmoothControl::reachedTarget(const RobotState& state, const RobotState& target) const
 {
-  vel_msg.left_velocity = action.v - action.w * axle_length_ / 2;
-  vel_msg.right_velocity = action.v + action.w * axle_length_ / 2;
-}
-
-SmoothControl::SmoothControl(double k1, double k2, double axle_length, double simulation_frequency,
-                             double target_velocity, double lookahead_dist, double simulation_horizon)
-  : k1_{ k1 }
-  , k2_{ k2 }
-  , axle_length_{ axle_length }
-  , simulation_frequency_{ simulation_frequency }
-  , target_velocity_{ target_velocity }
-  , lookahead_dist_{ lookahead_dist }
-  , simulation_horizon_{ simulation_horizon }
-{
-  ros::NodeHandle pNh{ "~" };
-  target_pub_ = pNh.advertise<nav_msgs::Path>("smooth_control/target", 1);
-  closest_point_pub_ = pNh.advertise<nav_msgs::Path>("smooth_control/closest_point", 1);
+  return state.distTo(target) < target_reached_distance_;
 }

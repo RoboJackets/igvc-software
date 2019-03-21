@@ -14,6 +14,7 @@ https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 
 #include <Eigen/Dense>
 #include <cmath>
+#include <optional>
 
 #include <nav_msgs/Path.h>
 
@@ -32,7 +33,7 @@ class SmoothControl
 {
 public:
   SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
-                double m_lookahead_dist, double simulation_horizon);
+                double m_lookahead_dist, double simulation_horizon, double target_reached_distance, double target_move_threshold);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
    * using the procedure described in 'A Smooth Control Law for Graceful Motion of
@@ -56,8 +57,11 @@ private:
   double target_velocity_;
   double lookahead_dist_;
   double simulation_horizon_;
+  double target_reached_distance_;
+  double target_move_threshold_;
   ros::Publisher target_pub_;
   ros::Publisher closest_point_pub_;
+  std::optional<RobotState> target_;
 
   /**
    * Computes the radius of curvature to obtain a new angular velocity value.
@@ -83,11 +87,12 @@ private:
   void propogateState(const Action& action, RobotState& state);
 
   /**
-   * Find the index of the closest point on the path relative to the current position.
-   *
-   * @param[in] path path to get closest position from
+   * Returns if we have reached the target, given the current state and the target
+   * @param state state to check for
+   * @param target target to check for
+   * @return whether or not we have reached the target
    */
-  unsigned int getClosestPosition(const nav_msgs::PathConstPtr& path, const RobotState& state) const;
+  bool reachedTarget(const RobotState& state, const RobotState& target) const;
 
   /**
    * Find the furthest point along trajectory which is lookahead_dist_ away from the current position, interpolating
@@ -98,8 +103,33 @@ private:
    * @param[in] state current state of the robot
    * @return the target position
    */
-  RobotState getTargetPosition(const nav_msgs::PathConstPtr& path, unsigned int path_index,
-                               const RobotState& state) const;
+  RobotState getTargetPosition(const nav_msgs::PathConstPtr& path, const RobotState& state,
+                                              const std::optional<RobotState>& target) const;
+
+  /**
+   * Acquires a new target which is lookahead_dist_ away from the current position, interpolating between points
+   * on the path
+   * @param path path from which to find a target position
+   * @param state current state of the robot
+   * @return the newly acquired target position
+   */
+  RobotState acquireNewTarget(const nav_msgs::PathConstPtr& path, const RobotState& state) const;
+
+  /**
+   * Finds the point closest to the old target on the current path. If the distance is greater
+   * than new_target_threshold_, std::nullopt is returned.
+   * @return the found target if within the threshold, or std::nullopt
+   */
+  std::optional<RobotState> findTargetOnPath(const nav_msgs::PathConstPtr& path, const RobotState& target) const;
+
+  /**
+   * Finds the distance along the path provided from the current state to the target state
+   * @param path the path to calculate the distance along
+   * @param state the current state
+   * @param target the target state
+   * @return the distance from the current state to the target state along the given path
+   */
+  double distAlongPath(const nav_msgs::PathConstPtr& path, const RobotState& state, const RobotState& target) const;
 
   /**
    * Converts velocity and angular velocity to left and right wheel velocities
