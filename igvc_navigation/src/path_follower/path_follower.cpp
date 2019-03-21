@@ -46,7 +46,7 @@ PathFollower::PathFollower()
       k1, k2, axle_length, simulation_frequency, target_velocity, lookahead_dist, simulation_horizon });
 
   // load global parameters
-  igvc::getParam(pNh, "maximum_vel", maximum_vel_);
+  igvc::getParam(pNh, "maximum_vel", maximum_vel_, Assertion::POSITIVE);
   igvc::param(pNh, "stop_dist", stop_dist_, 0.9, Assertion::POSITIVE);
 
   ros::Subscriber path_sub = nh.subscribe("/path", 1, &PathFollower::pathCallback, this);
