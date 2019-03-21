@@ -1,14 +1,15 @@
 #ifndef PROJECT_MAPPER_H
 #define PROJECT_MAPPER_H
 
-#include <ros/publisher.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
+#include <ros/publisher.h>
 #include "octomapper.h"
 
 class Mapper
 {
-using radians = double;
+  using radians = double;
+
 public:
   Mapper();
 
@@ -27,7 +28,7 @@ private:
   void setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp);
 
   template <class T>
-  bool checkExistsStaticTransform(const std::string& frame_id, T timestamp, const std::string &topic);
+  bool checkExistsStaticTransform(const std::string &frame_id, T timestamp, const std::string &topic);
 
   template <class T>
   bool get_odom_transform(const T stamp);
@@ -40,7 +41,7 @@ private:
 
   void blur(cv::Mat &blurred_map);
 
-  void publish_as_pcl(const ros::Publisher &pub, const cv::Mat &mat, const std::string& frame_id, uint64_t stamp);
+  void publish_as_pcl(const ros::Publisher &pub, const cv::Mat &mat, const std::string &frame_id, uint64_t stamp);
 
   cv_bridge::CvImage m_img_bridge;
 
@@ -56,7 +57,7 @@ private:
   std::unique_ptr<tf::TransformListener> m_tf_listener;      // TF Listener
 
   bool m_use_lines;
-  bool m_camera_model_initialized{false};
+  bool m_camera_model_initialized{ false };
   double m_resolution;
   double m_transform_max_wait_time;
   int m_start_x;   // start x (m)
@@ -93,4 +94,4 @@ private:
   pc_map_pair m_pc_map_pair;      // Struct storing both the octomap for the lidar and the cv::Mat map
   pc_map_pair m_camera_map_pair;  // Struct storing both the octomap for the camera projections and the cv::Mat map
 };
-#endif //PROJECT_MAPPER_H
+#endif  // PROJECT_MAPPER_H
