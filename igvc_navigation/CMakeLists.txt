@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   igvc_utils
   octomap_ros
   octomap_msgs
+  tf_conversions
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
