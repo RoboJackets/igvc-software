@@ -2,7 +2,7 @@
 <!-- Usage: "roslaunch igvc_platform camera.launch camera:=[left,right,center]" -->
 <launch>
 	<arg name="camera" default="center" />
-	
+
 	<group if="$(eval 'center' in arg('camera'))">
 		<node name="usb_cam_center" pkg="usb_cam" type="usb_cam_node">
 		    <param name="path" type="string" value="file://$(find igvc_platform)/../../../"/>
@@ -37,5 +37,5 @@
 	</group>
 
 
-	
+
 </launch>

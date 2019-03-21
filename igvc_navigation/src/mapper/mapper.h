@@ -4,6 +4,7 @@
 #include <ros/publisher.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
+#include "octomapper.h"
 
 class Mapper
 {
@@ -19,13 +20,17 @@ private:
 
   void projected_line_callback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc);
 
-  void publish(const cv::Mat &map, uint64_t stamp);
+  void camera_info_callback(const sensor_msgs::CameraInfoConstPtr &camera_info);
+
+  void publish(uint64_t stamp);
 
   void setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp);
 
-  bool checkExistsStaticTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg, const std::string &topic);
+  template <class T>
+  bool checkExistsStaticTransform(const std::string& frame_id, T timestamp, const std::string &topic);
 
-  bool getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg);
+  template <class T>
+  bool get_odom_transform(const T stamp);
 
   int discretize(radians angle) const;
 
@@ -46,12 +51,12 @@ private:
   ros::Publisher m_debug_blurred_pc;                         // Publishes blurred map as individual PCL points
   ros::Publisher m_ground_pub;                               // Publishes ground points
   ros::Publisher m_nonground_pub;                            // Publishes non ground points
-  ros::Publisher m_sensor_pub;                               // Publishes lidar position
-  std::unique_ptr<cv::Mat> m_published_map;                  // Matrix will be publishing
+  ros::Publisher m_random_pub;                               // Publisher for debugging pointcloud related things
   std::map<std::string, tf::StampedTransform> m_transforms;  // Map of static transforms TODO: Refactor this
   std::unique_ptr<tf::TransformListener> m_tf_listener;      // TF Listener
 
   bool m_use_lines;
+  bool m_camera_model_initialized{false};
   double m_resolution;
   double m_transform_max_wait_time;
   int m_start_x;   // start x (m)
@@ -65,18 +70,24 @@ private:
   double m_lidar_miss_cast_distance;
   double m_filter_distance;
   double m_blur_std_dev;
+
+  int m_resize_width;
+  int m_resize_height;
+
   radians m_filter_angle;
   radians m_lidar_start_angle;
   radians m_lidar_end_angle;
   radians m_angular_resolution;
   std::string m_lidar_topic;
   std::string m_line_topic;
+  std::string m_camera_frame;
   std::string m_projected_line_topic;
+  std::string m_camera_info_topic;
   RobotState m_state;                      // Odom -> Base_link
   RobotState m_odom_to_lidar;              // Odom -> Lidar
   RobotState m_odom_to_camera_projection;  // Odom -> Camera Projection
 
-  sensor_msgs::CameraInfo camera_info;
+  image_geometry::PinholeCameraModel m_camera_model;
 
   std::unique_ptr<Octomapper> m_octomapper;
   pc_map_pair m_pc_map_pair;      // Struct storing both the octomap for the lidar and the cv::Mat map

@@ -64,7 +64,7 @@ public:
   void create_octree(pc_map_pair& pair) const;
   void insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair, const PCL_point_cloud& raw_pc,
                    const pcl::PointCloud<pcl::PointXYZ>& empty_pc);
-  void insert_camera_projection(struct pc_map_pair& pc_map_pair, const PCL_point_cloud& raw_pc) const;
+  void insert_camera_projection(struct pc_map_pair& pc_map_pair, const PCL_point_cloud& raw_pc, bool occupied) const;
   void insert_camera_free(struct pc_map_pair &projection_map_pair, const cv::Mat &image,
       const image_geometry::PinholeCameraModel &model,
       const tf::Transform &camera_to_world) const;
@@ -108,6 +108,8 @@ private:
   int m_map_width;
   int m_map_encoding;
   float m_odds_sum_default;
+
+  ros::Publisher m_debug_pub;
 
   // std::unique_ptr<tf::MessageFilter<PCL_point_cloud>> msg_filter;
 };

@@ -21,6 +21,11 @@ Octomapper::Octomapper(ros::NodeHandle pNh) : m_default_projection{ 0, 0, 1, 0 }
   igvc::getParam(pNh, "ground_filter/distance_threshold", m_ransac_distance_threshold);
   igvc::getParam(pNh, "ground_filter/eps_angle", m_ransac_eps_angle);
   igvc::getParam(pNh, "ground_filter/plane_distance", m_ground_filter_plane_dist);
+
+  igvc::getParam(pNh, "segmented_free_space/kernel_size", m_segmented_kernel);
+  igvc::getParam(pNh, "segmented_free_space/std_dev", m_segmented_sigma);
+  igvc::getParam(pNh, "segmented_free_space/threshold", m_segmented_threshold);
+
   igvc::getParam(pNh, "map/length", m_map_length);
   igvc::getParam(pNh, "map/width", m_map_width);
   igvc::getParam(pNh, "map/log_odds_default", m_odds_sum_default);
@@ -34,6 +39,8 @@ Octomapper::Octomapper(ros::NodeHandle pNh) : m_default_projection{ 0, 0, 1, 0 }
   {
     m_map_encoding = CV_8UC1;
   }
+
+  m_debug_pub = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/octomapper/projection", 1);
 }
 
 void Octomapper::create_octree(pc_map_pair &pair) const
@@ -342,6 +349,11 @@ void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, con
   {
     project_to_plane(projected_pc, m_default_projection, image, model, camera_to_world);
   }
+  projected_pc.header.stamp = pcl_conversions::toPCL(ros::Time::now());
+  projected_pc.header.frame_id = "odom";
+
+  insert_camera_projection(projection_map_pair, projected_pc, false);
+  m_debug_pub.publish(projected_pc);
 }
 
 /**
@@ -350,7 +362,7 @@ void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, con
  * @param raw_pc pointcloud from projecting the lines onto the lidar scan
  */
 void Octomapper::insert_camera_projection(struct pc_map_pair &projection_map_pair,
-                                          const pcl::PointCloud<pcl::PointXYZ> &raw_pc) const
+                                          const pcl::PointCloud<pcl::PointXYZ> &raw_pc, bool occupied) const
 {
   // Project to z=0 plane
   pcl::PointCloud<pcl::PointXYZ> projected{};
@@ -380,7 +392,7 @@ void Octomapper::insert_camera_projection(struct pc_map_pair &projection_map_pai
   // Insert KeySet into octree
   for (const auto &occupied_cell : occupied_cells)
   {
-    projection_map_pair.octree->updateNode(occupied_cell, true, false);  // lazy_eval = false
+    projection_map_pair.octree->updateNode(occupied_cell, occupied, false);  // lazy_eval = false
   }
 }
 
@@ -391,18 +403,13 @@ void Octomapper::insert_camera_projection(struct pc_map_pair &projection_map_pai
  * @param[in] image the image to project from
  * @param[in] model the camera model to be used for projection
  */
+// TODO: Precompute all the projectPixelTo3dRay stuff
 void Octomapper::project_to_plane(pcl::PointCloud<pcl::PointXYZ> &projected_pc, const Ground_plane &m_ground_projection,
                                   const cv::Mat &image, const image_geometry::PinholeCameraModel &model,
                                   const tf::Transform &camera_to_world) const
 {
   int nRows = image.rows;
   int nCols = image.cols;
-
-  if (image.isContinuous())
-  {
-    nCols *= nRows;
-    nRows = 1;
-  }
 
   int i, j;
   const uchar *p;
@@ -414,15 +421,28 @@ void Octomapper::project_to_plane(pcl::PointCloud<pcl::PointXYZ> &projected_pc, 
       // If it's a white pixel => free space, then project
       if (p[j] == 0)
       {
-        cv::Point3d ray = model.projectPixelTo3dRay(cv::Point2d(i, j));
-        tf::Point reoriented_ray{ ray.z, -ray.x, -ray.y };  // cv::Point3d defined with z forward, x right, y down
-        tf::Point transformed_ray = camera_to_world * reoriented_ray; // Transform ray to odom frame
+//        ROS_INFO("(%d, %d)", i, j);
+        cv::Point2d pixel_point(j, i);
+        double t1 = j - model.cx() - model.Tx();
+        double t2 = i - model.cy() - model.Ty();
+//        ROS_INFO_THROTTLE(0.1, "=====For (%d, %d)======", j, i);
+//        ROS_INFO_THROTTLE(0.1, "(t1, t2) = (%.2f, %.2f)\n", t1, t2);
+//        ROS_INFO_THROTTLE(0.1, "(fx(), fy()) = (%.2f, %.2f)\n", model.fx(), model.fy());
+        cv::Point3d ray = model.projectPixelTo3dRay(pixel_point);
+//        ROS_INFO_STREAM_THROTTLE(0.1, "ray: (" << ray.x << ", " << ray.y << ", " << ray.z << ")");
+        tf::Point reoriented_ray{ ray.x, ray.y, ray.z };  // cv::Point3d defined with z forward, x right, y down
+//        ROS_INFO_STREAM_THROTTLE(0.1, "reoriented_ray: (" << reoriented_ray.x() << ", " << reoriented_ray.y() << ", " << reoriented_ray.z() << ")");
+        tf::Point transformed_ray = camera_to_world.getBasis() * reoriented_ray; // Transform ray to odom frame
+//        ROS_INFO_STREAM_THROTTLE(0.1, "transformed_ray: (" << transformed_ray.x() << ", " << transformed_ray.y() << ", " << transformed_ray.z() << ")");
+//        double scale = -camera_to_world.getOrigin().z() / transformed_ray.z();
+//        tf::Point projected_point = scale * transformed_ray + camera_to_world.getOrigin();
         double a = m_ground_projection.a;
-        double b = m_ground_projection.a;
-        double c = m_ground_projection.a;
-        // [a b c]^T dot (camera + ray*t) = 0, solve for t
-        double t = (camera_to_world.getOrigin().dot(tf::Vector3{ a, b, c }) - m_ground_projection.d) /
-                   transformed_ray.dot(tf::Vector3{ a, b, c });
+        double b = m_ground_projection.b;
+        double c = m_ground_projection.c;
+        double d = m_ground_projection.d;
+//        ROS_INFO_THROTTLE(1, "%.2f x + %.2f y + %.2f z + %.2f = 0", m_ground_projection.a, m_ground_projection.b, m_ground_projection.c, m_ground_projection.d);
+        // [a b c]^T dot (P0 - (camera + ray*t)) = 0, solve for t
+        double t = ((tf::Vector3{0, 0, d/c} - camera_to_world.getOrigin()).dot(tf::Vector3{a, b, c}))/(transformed_ray.dot(tf::Vector3{a, b, c}));
         // projected_point = camera + ray*t
         tf::Point projected_point = camera_to_world.getOrigin() + transformed_ray * t;
         projected_pc.points.emplace_back(pcl::PointXYZ(static_cast<float>(projected_point.x()),
