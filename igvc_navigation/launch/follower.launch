@@ -13,6 +13,9 @@
         <param name="simulation_horizon" type="double" value="5.0"/>
         <param name="target_reached_distance" type="double" value="0.1"/>
         <param name="target_move_threshold" type="double" value="0.1"/>
+
+        <param name="loop_hz" type="double" value="20.0"/>
+
         <!-- How far away robot should be from the waypoint before it stops -->
         <param name="stop_dist" type="double" value="0.7"/>
         <!-- Smooth Control Parameters -->

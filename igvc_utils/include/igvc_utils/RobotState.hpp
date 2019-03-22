@@ -5,6 +5,13 @@
 #include <tf/transform_datatypes.h>
 #include <Eigen/Dense>
 #include <igvc_utils/NodeUtils.hpp>
+#include <igvc_msgs/velocity_pair.h>
+
+struct wheel_velocity
+{
+  double left;
+  double right;
+};
 
 class RobotState
 {
@@ -14,6 +21,7 @@ public:
   double roll{ 0 };
   double pitch{ 0 };
   double yaw{ 0 };
+  wheel_velocity velocity{};
 
   friend std::ostream &operator<<(std::ostream &out, const RobotState &state);
 
@@ -47,6 +55,18 @@ public:
     tf::Quaternion quaternion;
     tf::quaternionMsgToTF(msg->pose.pose.orientation, quaternion);
     tf::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
+  }
+
+  void setVelocity(const igvc_msgs::velocity_pairConstPtr& msg)
+  {
+    velocity.left = msg->left_velocity;
+    velocity.right = msg->right_velocity;
+  }
+
+  void setVelocity(const igvc_msgs::velocity_pair& msg)
+  {
+    velocity.left = msg.left_velocity;
+    velocity.right = msg.right_velocity;
   }
 
   // set state via a transform

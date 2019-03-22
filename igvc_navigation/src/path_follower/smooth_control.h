@@ -34,7 +34,7 @@ class SmoothControl
 public:
   SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
                 double m_lookahead_dist, double simulation_horizon, double target_reached_distance,
-                double target_move_threshold);
+                double target_move_threshold, double acceleration_limit);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
    * using the procedure described in 'A Smooth Control Law for Graceful Motion of
@@ -60,17 +60,19 @@ private:
   double simulation_horizon_;
   double target_reached_distance_;
   double target_move_threshold_;
+  double acceleration_limit_;
   ros::Publisher target_pub_;
   ros::Publisher closest_point_pub_;
   std::optional<RobotState> target_;
 
   /**
-   * Computes the radius of curvature to obtain a new angular velocity value.
+   * Computes the control command to be executed for the next dt seconds
    * @param[in] state current state of the robot
    * @param[in] target target state of the robot
+   * @param[in] dt the duration for which the generated command will be executed for
    * @return A control command for the next iteration
    */
-  Action getAction(const RobotState& state, const RobotState& target);
+  Action getAction(const RobotState& state, const RobotState& target, const ros::Duration& dt);
 
   /**
    * Propogates the current state given the current velocity and angular velocity
@@ -140,6 +142,23 @@ private:
    * @return the index of the path which is closest to the state.
    */
   size_t getClosestIndex(const nav_msgs::PathConstPtr& path, const RobotState& state) const;
+
+  /**
+   * Calculates the velocity to go at for the next dt that stays within the acceleration limits
+   * @param[in] state current state, which includes current velocity
+   * @param[in] curvature curvature of path to follow
+   * @param[in] dt timestep to generate control for
+   * @return an Action that follows the curvature and stays within the acceleration limits
+   */
+  Action motionProfile(const RobotState& state, double curvature, const ros::Duration& dt) const;
+
+  /**
+   * Returns an action given the target left and right wheel velocities
+   * @param left left wheel velocity
+   * @param right right wheel velocity
+   * @return the action that would result from the given left and right wheel velocities
+   */
+  Action toAction(double left, double right) const;
 
   /**
    * Converts velocity and angular velocity to left and right wheel velocities
