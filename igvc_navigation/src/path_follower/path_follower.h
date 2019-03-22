@@ -20,6 +20,7 @@ private:
   ros::Publisher cmd_pub_;
   ros::Publisher target_pub_;
   ros::Publisher trajectory_pub_;
+  ros::Publisher smoothed_pub_;
 
   nav_msgs::PathConstPtr path_;
   geometry_msgs::PointStampedConstPtr waypoint_;

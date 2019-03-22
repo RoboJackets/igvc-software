@@ -64,6 +64,7 @@ PathFollower::PathFollower()
   cmd_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
   target_pub_ = nh.advertise<geometry_msgs::PointStamped>("/target_point", 1);
   trajectory_pub_ = nh.advertise<nav_msgs::Path>("/trajectory", 1);
+  smoothed_pub_ = nh.advertise<nav_msgs::Path>("/smoothed", 1);
 
   ros::spin();
 }
@@ -74,6 +75,7 @@ void PathFollower::pathCallback(const nav_msgs::PathConstPtr& msg)
   //  path_ = msg;
   // TODO: Remove patch when motion planning correctly incorporates heading
   path_ = getPatchedPath(msg);
+  smoothed_pub_.publish(path_);
 }
 
 void PathFollower::waypointCallback(const geometry_msgs::PointStampedConstPtr& msg)
@@ -162,17 +164,43 @@ void PathFollower::positionCallback(const nav_msgs::OdometryConstPtr& msg)
 
 nav_msgs::PathConstPtr PathFollower::getPatchedPath(const nav_msgs::PathConstPtr& msg) const
 {
-  nav_msgs::PathPtr new_path = boost::make_shared<nav_msgs::Path>(*msg);
-  size_t num_poses = new_path->poses.size();
-  for (int i = 0; i < num_poses; i++)
+  // Patch heading into each point
+  nav_msgs::Path new_path = *msg;
+  size_t num_poses = new_path.poses.size();
+  for (size_t i = 0; i < num_poses; i++)
   {
-    double delta_x = new_path->poses[i + 1].pose.position.x - new_path->poses[i].pose.position.x;
-    double delta_y = new_path->poses[i + 1].pose.position.y - new_path->poses[i].pose.position.y;
+    double delta_x = new_path.poses[i + 1].pose.position.x - new_path.poses[i].pose.position.x;
+    double delta_y = new_path.poses[i + 1].pose.position.y - new_path.poses[i].pose.position.y;
     double heading = atan2(delta_y, delta_x);
-    new_path->poses[i].pose.orientation = tf::createQuaternionMsgFromYaw(heading);
+    new_path.poses[i].pose.orientation = tf::createQuaternionMsgFromYaw(heading);
   }
-  new_path->poses.back().pose.orientation = new_path->poses[num_poses - 2].pose.orientation;
-  return new_path;
+  new_path.poses.back().pose.orientation = new_path.poses[num_poses - 2].pose.orientation;
+
+  // Get points between each point to smooth it out
+  nav_msgs::PathPtr smoothed_path = boost::make_shared<nav_msgs::Path>();
+  smoothed_path->poses.emplace_back(new_path.poses.front());
+  for (size_t i = 0; i < num_poses - 1; i++)
+  {
+    double mid_x = (new_path.poses[i].pose.position.x + new_path.poses[i + 1].pose.position.x) / 2;
+    double mid_y = (new_path.poses[i].pose.position.y + new_path.poses[i + 1].pose.position.y) / 2;
+    geometry_msgs::PoseStamped pose;
+    pose.pose.position.x = mid_x;
+    pose.pose.position.y = mid_y;
+    smoothed_path->poses.emplace_back(pose);
+  }
+  smoothed_path->poses.emplace_back(new_path.poses.back());
+
+  // Patch heading
+  for (size_t i = 0; i < smoothed_path->poses.size(); i++)
+  {
+    double delta_x = smoothed_path->poses[i + 1].pose.position.x - smoothed_path->poses[i].pose.position.x;
+    double delta_y = smoothed_path->poses[i + 1].pose.position.y - smoothed_path->poses[i].pose.position.y;
+    double heading = atan2(delta_y, delta_x);
+    smoothed_path->poses[i].pose.orientation = tf::createQuaternionMsgFromYaw(heading);
+  }
+  smoothed_path->poses.back().pose.orientation = smoothed_path->poses[num_poses - 2].pose.orientation;
+  smoothed_path->header = msg->header;
+  return smoothed_path;
 }
 
 int main(int argc, char** argv)
