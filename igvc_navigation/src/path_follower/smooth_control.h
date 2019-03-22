@@ -96,8 +96,7 @@ private:
   bool reachedTarget(const RobotState& state, const RobotState& target) const;
 
   /**
-   * Find the furthest point along trajectory which is lookahead_dist_ away from the current position, interpolating
-   * between points, which is the target position.
+   * Find the furthest point along trajectory which is at least lookahead_dist_ away from the current position.
    *
    * @param[in] path path to get target position from
    * @param[in] path_index index of closest position along the path relative to current position

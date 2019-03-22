@@ -24,8 +24,7 @@ public:
     setState(msg);
   }
 
-  explicit RobotState(const geometry_msgs::PoseStamped &msg)
-    : x{ msg.pose.position.x }, y{ msg.pose.position.y }
+  explicit RobotState(const geometry_msgs::PoseStamped &msg) : x{ msg.pose.position.x }, y{ msg.pose.position.y }
   {
     tf::Quaternion quaternion;
     tf::quaternionMsgToTF(msg.pose.orientation, quaternion);
