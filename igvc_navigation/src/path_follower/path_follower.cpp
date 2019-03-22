@@ -41,7 +41,7 @@ PathFollower::PathFollower()
   igvc::param(pNh, "simulation_frequency", simulation_frequency, 100.0);
   igvc::param(pNh, "lookahead_dist", lookahead_dist, 2.0);
   igvc::param(pNh, "simulation_horizon", simulation_horizon, 5.0);
-  igvc::param(pNh, "target_reached_distance", target_reached_distance, 0.5);
+  igvc::param(pNh, "target_reached_distance", target_reached_distance, 0.05);
   igvc::param(pNh, "target_move_threshold", target_move_threshold, 0.05);
   if (simulation_frequency <= 0)
   {

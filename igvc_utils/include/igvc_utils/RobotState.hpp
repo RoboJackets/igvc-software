@@ -24,6 +24,14 @@ public:
     setState(msg);
   }
 
+  explicit RobotState(const geometry_msgs::PoseStamped &msg)
+    : x{ msg.pose.position.x }, y{ msg.pose.position.y }
+  {
+    tf::Quaternion quaternion;
+    tf::quaternionMsgToTF(msg.pose.orientation, quaternion);
+    tf::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
+  }
+
   explicit RobotState(double x, double y, double yaw) : x{ x }, y{ y }, yaw{ yaw }
   {
   }

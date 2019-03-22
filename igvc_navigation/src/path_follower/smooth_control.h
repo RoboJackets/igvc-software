@@ -104,7 +104,7 @@ private:
    * @return the target position
    */
   RobotState getTargetPosition(const nav_msgs::PathConstPtr& path, const RobotState& state,
-                                              const std::optional<RobotState>& target) const;
+                                              const std::optional<RobotState>& target, size_t path_index) const;
 
   /**
    * Acquires a new target which is lookahead_dist_ away from the current position, interpolating between points
@@ -113,14 +113,14 @@ private:
    * @param state current state of the robot
    * @return the newly acquired target position
    */
-  RobotState acquireNewTarget(const nav_msgs::PathConstPtr& path, const RobotState& state) const;
+  RobotState acquireNewTarget(const nav_msgs::PathConstPtr& path, const RobotState& state, size_t state_index) const;
 
   /**
    * Finds the point closest to the old target on the current path. If the distance is greater
    * than new_target_threshold_, std::nullopt is returned.
    * @return the found target if within the threshold, or std::nullopt
    */
-  std::optional<RobotState> findTargetOnPath(const nav_msgs::PathConstPtr& path, const RobotState& target) const;
+  size_t findTargetOnPath(const nav_msgs::PathConstPtr& path, const RobotState& target) const;
 
   /**
    * Finds the distance along the path provided from the current state to the target state
@@ -129,7 +129,9 @@ private:
    * @param target the target state
    * @return the distance from the current state to the target state along the given path
    */
-  double distAlongPath(const nav_msgs::PathConstPtr& path, const RobotState& state, const RobotState& target) const;
+  double distAlongPath(const nav_msgs::PathConstPtr& path, size_t path_index, size_t target_index) const;
+
+  size_t getClosestIndex(const nav_msgs::PathConstPtr& path, const RobotState& state) const;
 
   /**
    * Converts velocity and angular velocity to left and right wheel velocities
