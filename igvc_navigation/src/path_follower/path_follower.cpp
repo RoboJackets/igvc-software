@@ -74,6 +74,7 @@ PathFollower::PathFollower()
 
   std::thread trajectory_thread(&PathFollower::trajectoryLoop, this, loop_hz);
   ros::spin();
+  trajectory_thread.join();
 }
 
 void PathFollower::pathCallback(const nav_msgs::PathConstPtr& msg)
