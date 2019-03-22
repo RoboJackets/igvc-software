@@ -33,7 +33,8 @@ class SmoothControl
 {
 public:
   SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
-                double m_lookahead_dist, double simulation_horizon, double target_reached_distance, double target_move_threshold);
+                double m_lookahead_dist, double simulation_horizon, double target_reached_distance,
+                double target_move_threshold);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
    * using the procedure described in 'A Smooth Control Law for Graceful Motion of
@@ -101,16 +102,18 @@ private:
    * @param[in] path path to get target position from
    * @param[in] path_index index of closest position along the path relative to current position
    * @param[in] state current state of the robot
+   * @param[in] path_index the index of the closest point on the path to the current state
    * @return the target position
    */
   RobotState getTargetPosition(const nav_msgs::PathConstPtr& path, const RobotState& state,
-                                              const std::optional<RobotState>& target, size_t path_index) const;
+                               const std::optional<RobotState>& target, size_t path_index) const;
 
   /**
    * Acquires a new target which is lookahead_dist_ away from the current position, interpolating between points
    * on the path
-   * @param path path from which to find a target position
-   * @param state current state of the robot
+   * @param[in] path path from which to find a target position
+   * @param[in] state current state of the robot
+   * @param[in] state_index the index of the closest point on the path to the current state
    * @return the newly acquired target position
    */
   RobotState acquireNewTarget(const nav_msgs::PathConstPtr& path, const RobotState& state, size_t state_index) const;
@@ -131,6 +134,12 @@ private:
    */
   double distAlongPath(const nav_msgs::PathConstPtr& path, size_t path_index, size_t target_index) const;
 
+  /**
+   * Returns the closest point on the path to the given state
+   * @param path path to find closest point on
+   * @param state state to find closest point on path for
+   * @return the index of the path which is closest to the state.
+   */
   size_t getClosestIndex(const nav_msgs::PathConstPtr& path, const RobotState& state) const;
 
   /**
