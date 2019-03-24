@@ -36,6 +36,8 @@ PathFollower::PathFollower()
   double target_move_threshold;
   double acceleration_threshold;
   double loop_hz;
+  double beta;
+  double lambda;
   seconds simulation_horizon;
   igvc::param(pNh, "target_v", target_velocity, 1.0);
   igvc::param(pNh, "axle_length", axle_length, 0.52);
@@ -47,6 +49,8 @@ PathFollower::PathFollower()
   igvc::param(pNh, "target_reached_distance", target_reached_distance, 0.05);
   igvc::param(pNh, "target_move_threshold", target_move_threshold, 0.05);
   igvc::param(pNh, "acceleration_threshold", acceleration_threshold, 1.0);
+  igvc::param(pNh, "beta", beta, 0.4);
+  igvc::param(pNh, "lambda", lambda, 2.0);
   igvc::param(pNh, "loop_hz", loop_hz, 20.0);
   if (simulation_frequency <= 0)
   {
@@ -56,7 +60,7 @@ PathFollower::PathFollower()
   }
   controller_ = std::unique_ptr<SmoothControl>(
       new SmoothControl{ k1, k2, axle_length, simulation_frequency, target_velocity, lookahead_dist, simulation_horizon,
-                         target_reached_distance, target_move_threshold, acceleration_threshold });
+                         target_reached_distance, target_move_threshold, acceleration_threshold, beta, lambda });
 
   // load global parameters
   igvc::getParam(pNh, "maximum_vel", maximum_vel_);
@@ -74,6 +78,7 @@ PathFollower::PathFollower()
 
   std::thread trajectory_thread(&PathFollower::trajectoryLoop, this, loop_hz);
   ros::spin();
+  ROS_INFO("Shutting down...");
   trajectory_thread.join();
 }
 
@@ -82,6 +87,7 @@ void PathFollower::pathCallback(const nav_msgs::PathConstPtr& msg)
   ROS_DEBUG_STREAM("Follower got path. Size: " << msg->poses.size());
   //  path_ = msg;
   // TODO: Remove patch when motion planning correctly incorporates heading
+  std::lock_guard<std::mutex> guard(path_mutex_);
   path_ = getPatchedPath(msg);
   smoothed_pub_.publish(path_);
 }
@@ -158,6 +164,8 @@ void PathFollower::trajectoryLoop(double loop_hz)
   ros::Rate rate(loop_hz);
   while (ros::ok())
   {
+    if (waypoint_.get() == nullptr)
+      continue;
     if (path_.get() == nullptr || path_->poses.empty() || path_->poses.size() < 2)
     {
       ROS_INFO_THROTTLE(1, "Path empty.");
@@ -189,7 +197,9 @@ void PathFollower::trajectoryLoop(double loop_hz)
         trajectory_msg.header.frame_id = "/odom";
 
         RobotState target;
+        std::unique_lock<std::mutex> guard(path_mutex_);
         controller_->getTrajectory(vel, path_, trajectory_msg, state_, target);
+        guard.unlock();
 
         trajectory_pub_.publish(trajectory_msg);
 

@@ -33,15 +33,18 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs:
     path_index = getClosestIndex(path, state);
     simulation_target = getTargetPosition(path, state, simulation_target, path_index);
 
+    ROS_INFO_STREAM(i << "(" << path_index << ") --> " << getClosestIndex(path, *simulation_target));
+
     // Calculate control using Control Law
     Action action = getAction(state, *simulation_target, dt);  // TODO: Change this dt from simulation dt to real dt
+    //    ROS_INFO_STREAM("Action: " << action.velocity.v_start << " -> " << action.velocity.v_stop);
     action.dt = dt.toSec();
 
     if (i == 0)
     {
       target_ = *simulation_target;
       target = *simulation_target;
-      getWheelVelocities(vel, action);
+      getWheelVelocities(vel, action.w, action.velocity.average());
     }
 
     propogateState(action, state);
@@ -72,7 +75,7 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs:
 
 void SmoothControl::propogateState(const Action& action, RobotState& state)
 {
-  double v = action.v;
+  double v = action.velocity.average();
   double w = action.w;
   double dt = action.dt;
 
@@ -99,13 +102,13 @@ void SmoothControl::propogateState(const Action& action, RobotState& state)
   }
   else
   {
-    resultant_pose << state.x + (cos(state.yaw * v * dt)), state.y + (sin(state.yaw) * v * dt), state.yaw;
+    resultant_pose << state.x + (cos(state.yaw) * v * dt), state.y + (sin(state.yaw) * v * dt), state.yaw;
   }
 
   state.setState(resultant_pose);
 
   igvc_msgs::velocity_pair wheel_velocity;
-  getWheelVelocities(wheel_velocity, action);
+  getWheelVelocities(wheel_velocity, action.w, action.velocity.v_stop);
   state.setVelocity(wheel_velocity);
 }
 
@@ -156,7 +159,7 @@ RobotState SmoothControl::getTargetPosition(const nav_msgs::PathConstPtr& path, 
 
 SmoothControl::SmoothControl(double k1, double k2, double axle_length, double simulation_frequency,
                              double target_velocity, double lookahead_dist, double simulation_horizon,
-                             double target_reached_distance, double target_move_threshold, double acceleration_limit)
+                             double target_reached_distance, double target_move_threshold, double acceleration_limit, double beta, double lambda)
   : k1_{ k1 }
   , k2_{ k2 }
   , axle_length_{ axle_length }
@@ -167,6 +170,8 @@ SmoothControl::SmoothControl(double k1, double k2, double axle_length, double si
   , target_reached_distance_{ target_reached_distance }
   , target_move_threshold_{ target_move_threshold }
   , acceleration_limit_{ acceleration_limit }
+  , beta_{ beta }
+  , lambda_{ lambda }
 {
   ros::NodeHandle pNh{ "~" };
   target_pub_ = pNh.advertise<nav_msgs::Path>("smooth_control/target", 1);
@@ -253,49 +258,61 @@ size_t SmoothControl::getClosestIndex(const nav_msgs::PathConstPtr& path, const 
 
 Action SmoothControl::motionProfile(const RobotState& state, double K, const ros::Duration& dt) const
 {
+  // Calculate velocity as function of curvature
+  double v = target_velocity_ / (1 + beta_ * std::pow(std::abs(K), lambda_));
+//  ROS_INFO_STREAM("K: " << K << ", v: " << target_velocity_ << " -> " << v);
   // Get wheel velocities for the requested state
-  double w = K * target_velocity_;
-  Action target_action{ target_velocity_, w, 0 };
+  double w = K * v;
   igvc_msgs::velocity_pair wheel_velocity;
-  getWheelVelocities(wheel_velocity, target_action);
+  getWheelVelocities(wheel_velocity, w, v);
+  //  return toAction({ state.velocity.left, wheel_velocity.left_velocity}, { state.velocity.right,
+  //  wheel_velocity.right_velocity });
+
+  //  ROS_INFO_STREAM("w: " << w << ", K: " << K << ", w/v: " << w/target_velocity_);
 
   // Check out which wants greater acceleration, and cap it to acceleration_limit_
   double left_acceleration = (wheel_velocity.left_velocity - state.velocity.left) / dt.toSec();
   double right_acceleration = (wheel_velocity.right_velocity - state.velocity.right) / dt.toSec();
   double capped_left;
   double capped_right;
-  if (std::abs(left_acceleration) > std::abs(right_acceleration))
+  if (std::abs(left_acceleration) > std::abs(right_acceleration) && std::abs(left_acceleration) > acceleration_limit_)
   {
     double actual_acceleration_left = std::copysign(acceleration_limit_, left_acceleration);
-    capped_left = state.velocity.left + (dt.toSec() / 2) * actual_acceleration_left;
-    capped_right =
-        state.velocity.right + (dt.toSec() / 2) *
-                                   (actual_acceleration_left / left_acceleration) *
-                                   right_acceleration;
-
+    double actual_acceleration_right =
+        std::copysign((actual_acceleration_left / left_acceleration) * right_acceleration, right_acceleration);
+    capped_left = state.velocity.left + dt.toSec() * actual_acceleration_left;
+    capped_right = state.velocity.right + dt.toSec() * actual_acceleration_right;
+  }
+  else if (std::abs(right_acceleration) > std::abs(left_acceleration) &&
+           std::abs(right_acceleration) > acceleration_limit_)
+  {
+    double actual_acceleration_right = std::copysign(acceleration_limit_, right_acceleration);
+    double actual_acceleration_left =
+        std::copysign((actual_acceleration_right / right_acceleration) * left_acceleration, left_acceleration);
+    capped_right = state.velocity.right + dt.toSec() * actual_acceleration_right;
+    capped_left = state.velocity.left + dt.toSec() * actual_acceleration_left;
   }
   else
   {
-    double actual_acceleration_right = std::copysign(acceleration_limit_, right_acceleration);
-    capped_right = state.velocity.right + (dt.toSec() / 2) * actual_acceleration_right;
-    capped_left =
-        state.velocity.left + (dt.toSec() / 2) *
-            (actual_acceleration_right / right_acceleration) *
-            left_acceleration;
+    capped_left = wheel_velocity.left_velocity;
+    capped_right = wheel_velocity.right_velocity;
   }
-  return toAction(capped_left, capped_right);
+  return toAction({ state.velocity.left, capped_left }, { state.velocity.right, capped_right });
 }
 
-void SmoothControl::getWheelVelocities(igvc_msgs::velocity_pair& vel_msg, const Action& action) const
+void SmoothControl::getWheelVelocities(igvc_msgs::velocity_pair& vel_msg, double w, double v) const
 {
-  vel_msg.left_velocity = action.v - action.w * axle_length_ / 2;
-  vel_msg.right_velocity = action.v + action.w * axle_length_ / 2;
+  vel_msg.left_velocity = v - w * axle_length_ / 2;
+  vel_msg.right_velocity = v + w * axle_length_ / 2;
 }
 
-Action SmoothControl::toAction(double left, double right) const
+Action SmoothControl::toAction(VelocityProfile left, VelocityProfile right) const
 {
+  //  ROS_INFO_STREAM(left.v_start << " -> " << left.v_stop << ", " << right.v_start << " -> " << right.v_stop);
   Action action{};
-  action.w = (right - left) / axle_length_;
-  action.v = (right + left) / 2;
+  action.w = (right.average() - left.average()) / axle_length_;
+  //  ROS_INFO_STREAM("new K: " << action.w / ((left.average() + right.average())/2));
+  action.velocity.v_start = (left.v_start + right.v_start) / 2;
+  action.velocity.v_stop = (left.v_stop + right.v_stop) / 2;
   return action;
 }

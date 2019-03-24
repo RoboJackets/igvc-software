@@ -34,6 +34,7 @@ private:
   double stop_dist_{};
   double maximum_vel_{};
   std::mutex state_mutex_;
+  std::mutex path_mutex_;
 
   std::unique_ptr<SmoothControl> controller_;
 };

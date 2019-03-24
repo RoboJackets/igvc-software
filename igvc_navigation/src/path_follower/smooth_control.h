@@ -22,9 +22,19 @@ https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 #include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/RobotState.hpp>
 
+struct VelocityProfile
+{
+  double v_start;
+  double v_stop;
+
+  double average() const {
+    return (v_start + v_stop) / 2;
+  }
+};
+
 struct Action
 {
-  double v;
+  VelocityProfile velocity;
   double w;
   double dt;
 };
@@ -34,7 +44,7 @@ class SmoothControl
 public:
   SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
                 double m_lookahead_dist, double simulation_horizon, double target_reached_distance,
-                double target_move_threshold, double acceleration_limit);
+                double target_move_threshold, double acceleration_limit, double beta, double lambda);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
    * using the procedure described in 'A Smooth Control Law for Graceful Motion of
@@ -61,6 +71,8 @@ private:
   double target_reached_distance_;
   double target_move_threshold_;
   double acceleration_limit_;
+  double beta_;
+  double lambda_;
   ros::Publisher target_pub_;
   ros::Publisher closest_point_pub_;
   std::optional<RobotState> target_;
@@ -158,14 +170,14 @@ private:
    * @param right right wheel velocity
    * @return the action that would result from the given left and right wheel velocities
    */
-  Action toAction(double left, double right) const;
+  Action toAction(VelocityProfile left, VelocityProfile right) const;
 
   /**
    * Converts velocity and angular velocity to left and right wheel velocities
    * @param[in] vel_msg message to store wheel velocities in
    * @param[in/out] action Action to convert from
    */
-  void getWheelVelocities(igvc_msgs::velocity_pair& vel_msg, const Action& action) const;
+  void getWheelVelocities(igvc_msgs::velocity_pair& vel_msg, double w, double v) const;
 };
 
 #endif

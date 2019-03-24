@@ -119,7 +119,7 @@ public:
 
 inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
 {
-  out << "(" << state.x << ", " << state.y << ", " << state.yaw << ")";
+  out << "(" << state.x << ", " << state.y << ", " << state.yaw << ")\tv = (" << state.velocity.left << ", " << state.velocity.right << ")";
   return out;
 }
 
