@@ -159,7 +159,8 @@ RobotState SmoothControl::getTargetPosition(const nav_msgs::PathConstPtr& path, 
 
 SmoothControl::SmoothControl(double k1, double k2, double axle_length, double simulation_frequency,
                              double target_velocity, double lookahead_dist, double simulation_horizon,
-                             double target_reached_distance, double target_move_threshold, double acceleration_limit, double beta, double lambda)
+                             double target_reached_distance, double target_move_threshold, double acceleration_limit,
+                             double beta, double lambda)
   : k1_{ k1 }
   , k2_{ k2 }
   , axle_length_{ axle_length }
@@ -260,7 +261,7 @@ Action SmoothControl::motionProfile(const RobotState& state, double K, const ros
 {
   // Calculate velocity as function of curvature
   double v = target_velocity_ / (1 + beta_ * std::pow(std::abs(K), lambda_));
-//  ROS_INFO_STREAM("K: " << K << ", v: " << target_velocity_ << " -> " << v);
+  //  ROS_INFO_STREAM("K: " << K << ", v: " << target_velocity_ << " -> " << v);
   // Get wheel velocities for the requested state
   double w = K * v;
   igvc_msgs::velocity_pair wheel_velocity;

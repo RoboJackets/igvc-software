@@ -27,7 +27,8 @@ struct VelocityProfile
   double v_start;
   double v_stop;
 
-  double average() const {
+  double average() const
+  {
     return (v_start + v_stop) / 2;
   }
 };

@@ -1,11 +1,11 @@
 #ifndef ROBOTSTATE_H
 #define ROBOTSTATE_H
 
+#include <igvc_msgs/velocity_pair.h>
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
 #include <Eigen/Dense>
 #include <igvc_utils/NodeUtils.hpp>
-#include <igvc_msgs/velocity_pair.h>
 
 struct wheel_velocity
 {
@@ -57,13 +57,13 @@ public:
     tf::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
   }
 
-  void setVelocity(const igvc_msgs::velocity_pairConstPtr& msg)
+  void setVelocity(const igvc_msgs::velocity_pairConstPtr &msg)
   {
     velocity.left = msg->left_velocity;
     velocity.right = msg->right_velocity;
   }
 
-  void setVelocity(const igvc_msgs::velocity_pair& msg)
+  void setVelocity(const igvc_msgs::velocity_pair &msg)
   {
     velocity.left = msg.left_velocity;
     velocity.right = msg.right_velocity;
@@ -119,7 +119,8 @@ public:
 
 inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
 {
-  out << "(" << state.x << ", " << state.y << ", " << state.yaw << ")\tv = (" << state.velocity.left << ", " << state.velocity.right << ")";
+  out << "(" << state.x << ", " << state.y << ", " << state.yaw << ")\tv = (" << state.velocity.left << ", "
+      << state.velocity.right << ")";
   return out;
 }
 
