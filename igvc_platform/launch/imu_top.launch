@@ -2,12 +2,12 @@
     <!-- Whether or not to tare the orientation using the current orientation.
     If set to true, the current orientation will be set as the reference heading (0 deg)
     and all orientation readings will be gathered relative to this orientation. -->
-    <arg name="tare" default="false"/>
+    <arg name="commit_settings" default="true"/>
 
     <!-- Top IMU -->
     <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" >
         <param name="SERIAL_PORT" type="string" value="/dev/ttyACM0" />
-        <param name="tare" type="bool" value="$(arg tare)"/>
+        <param name="commit_settings" type="bool" value="$(arg commit_settings)"/>
         <rosparam param="imu_orientation_correction">[0, 1, 0,
                                                      -1, 0, 0,
                                                       0, 0, 1]</rosparam>
