@@ -5,8 +5,9 @@ YostLabDriver::YostLabDriver(ros::NodeHandle& nh_, ros::NodeHandle& priv_nh_)
 {
   this->SerialConnect();
   this->imu_pub_ = this->yostlab_nh_.advertise<sensor_msgs::Imu>("/imu", 10);
-  igvc::getParam(this->yostlab_priv_nh_, "imu_orientation_correction", imu_orientation_correction_);
-  igvc::getParam(this->yostlab_priv_nh_, "commit_settings", commit_settings_);
+  // use identity matrix as default orientation correction
+  igvc::param(this->yostlab_priv_nh_, "imu_orientation_correction", this->imu_orientation_correction_,
+              std::vector<double>{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
 }
 
 //! Destructor
@@ -123,42 +124,28 @@ const std::string YostLabDriver::getMIMode()
 //! Run the serial sync
 void YostLabDriver::run()
 {
-
   // Performs auto-gyroscope calibration. Sensor should remain still while samples are taken.
   this->startGyroCalibration();
 
-  // commit settings to the imu's non-volatile memory
-  if (this->commit_settings_)
-  {
-    ROS_INFO_STREAM("COMMITING SETTINGS");
-    // this->SerialWriteString(RESTORE_FACTORY_SETTINGS);
-    this->SerialWriteString(SET_AXIS_DIRECTIONS);
-    // this->SerialWriteString(SET_GYRO_ENABLED);
-    // this->SerialWriteString(SET_ACCELEROMETER_ENABLED);
-    // this->SerialWriteString(SET_COMPASS_ENABLED);
-    this->SerialWriteString(SET_CALIB_MODE_SCALE_BIAS);
-    this->SerialWriteString(SET_REFERENCE_VECTOR_MODE);
-    // this->SerialWriteString(SET_FILTER_MODE);
-    // this->SerialWriteString(SET_RUNNING_AVERAGE_MODE);
-    // this->SerialWriteString(SET_RUNNING_AVERAGE_PERCENT);
-    this->SerialWriteString(SET_STREAMING_SLOTS);
-    this->SerialWriteString(TARE_WITH_CURRENT_ORIENTATION);
-    // this->SerialWriteString(TARE_WITH_CURRENT_QUATERNION);
-  }
+  // print/debug statements
+  this->getSoftwareVersion();
+  this->getAxisDirection();
+  this->getEulerDecomp();
+  this->getCalibMode();
+  this->getMIMode();
 
+  /*
+  Slot #1: untared orientation as quaternion [4x float]
+  Slot #2: corrected gyroscope vector [3x float]
+  Slot #3: corrected acceleration vector [3x float]
+  Slot #4: sensor temp in ºF
+  Slot #[4-8]: No Command
+  */
+  this->SerialWriteString(SET_STREAMING_SLOTS);
 
-  // start streaming!
+  // commit settinga and start streaming!
   this->SerialWriteString(SET_STREAMING_TIMING_5_MS);
   this->SerialWriteString(START_STREAMING);
-
-  // print/debug statements
-  // this->getSoftwareVersion();
-  // this->getAxisDirection();
-  // this->getEulerDecomp();
-  // this->getCalibMode();
-  // this->getMIMode();
-
-  this->SerialWriteString(COMMIT_SETTINGS);
 
   ros::Rate loop_rate(20);  // 20Hz
 
@@ -166,8 +153,9 @@ void YostLabDriver::run()
   sensor_msgs::Imu imu_msg_;
   std::vector<double> parsed_val_;
 
-  // IMU orientation correction matrix
+  // orientation correction matrices in 3x3 row-major format and quaternion
   Eigen::Matrix<double, 3, 3, Eigen::RowMajor> correction_mat(imu_orientation_correction_.data());
+  Eigen::Quaternion<double> correction_mat_quat(correction_mat);
 
   while (ros::ok())
   {
@@ -191,43 +179,44 @@ void YostLabDriver::run()
         imu_msg_.header.stamp = ros::Time::now();
         imu_msg_.header.frame_id = "imu";
 
+        // construct quaternion with (w,x,y,z) then apply orientation using Eigen's overloaded * operator.
+        Eigen::Quaternion<double> q(parsed_val_[3], parsed_val_[0], parsed_val_[1], parsed_val_[2]);
+        q = correction_mat_quat * q;
+
         // Filtered orientation estimate
-        imu_msg_.orientation.x = parsed_val_[0];
-        imu_msg_.orientation.y = parsed_val_[1];
-        imu_msg_.orientation.z = parsed_val_[2];
-        imu_msg_.orientation.w = parsed_val_[3];
+        imu_msg_.orientation.x = q.x();
+        imu_msg_.orientation.y = q.y();
+        imu_msg_.orientation.z = q.z();
+        imu_msg_.orientation.w = q.w();
         imu_msg_.orientation_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .1 };
 
         // Corrected angular velocity.
         Eigen::Vector3d angular_vel_raw(parsed_val_[4], parsed_val_[5], parsed_val_[6]);
-        Eigen::Vector3d angular_vel_corrected = correction_mat * angular_vel_raw;
+        angular_vel_raw = correction_mat * angular_vel_raw;
 
         // Corrected linear acceleration.
         Eigen::Vector3d linear_accel_raw(parsed_val_[7], parsed_val_[8], parsed_val_[9]);
-        Eigen::Vector3d linear_accel_corrected = GRAVITY * correction_mat * linear_accel_raw;
+        linear_accel_raw = correction_mat * linear_accel_raw * GRAVITY;
 
-        imu_msg_.angular_velocity.x = angular_vel_corrected[0];
-        imu_msg_.angular_velocity.y = angular_vel_corrected[1];
-        imu_msg_.angular_velocity.z = angular_vel_corrected[2];
+        imu_msg_.angular_velocity.x = angular_vel_raw[0];
+        imu_msg_.angular_velocity.y = angular_vel_raw[1];
+        imu_msg_.angular_velocity.z = angular_vel_raw[2];
         imu_msg_.angular_velocity_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .07 };
 
-        imu_msg_.linear_acceleration.x = linear_accel_corrected[0];
-        imu_msg_.linear_acceleration.y = linear_accel_corrected[1];
-        imu_msg_.linear_acceleration.z = linear_accel_corrected[2];
+        imu_msg_.linear_acceleration.x = linear_accel_raw[0];
+        imu_msg_.linear_acceleration.y = linear_accel_raw[1];
+        imu_msg_.linear_acceleration.z = linear_accel_raw[2];
         imu_msg_.linear_acceleration_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .1 };
 
         double sensor_temp = parsed_val_[10];
 
         parsed_val_.clear();
         this->imu_pub_.publish(imu_msg_);
-        tf::Quaternion q(imu_msg_.orientation.x, imu_msg_.orientation.y, imu_msg_.orientation.z,
-                         imu_msg_.orientation.w);
 
-        tf::Matrix3x3 m(q);
         double roll, pitch, yaw;
-        m.getRPY(roll, pitch, yaw);
+        tf::Matrix3x3(tf::Quaternion(q.x(), q.y(), q.z(), q.w())).getRPY(roll, pitch, yaw);
 
-        ROS_INFO_THROTTLE(1.0, "[ YostLabImuDriver ] roll: %f, pitch: %f, yaw: %f -- IMU Temp: %f ", roll, pitch, yaw,
+        ROS_INFO_THROTTLE(1.0, "[YostLabImuDriver] R: %f, P: %f, Y: %f -- IMU Temp: %f F ", roll, pitch, yaw,
                           sensor_temp);
       }
     }

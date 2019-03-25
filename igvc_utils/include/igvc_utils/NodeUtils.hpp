@@ -14,7 +14,7 @@ void param(const ros::NodeHandle &pNh, const std::string &param_name, T &param_v
   if (!pNh.param(param_name, param_val, default_val))
   {
     ROS_ERROR_STREAM("Missing parameter " << param_name << " from " << pNh.getNamespace()
-                                          << ". Continuing with default values " << default_val);
+                                          << ". Continuing with default values.");
   }
 }
 
