@@ -70,7 +70,6 @@ private:
   // Constants
   const double GRAVITY = 9.80665;
 
-  // Custom Settings
   static constexpr auto SET_GYRO_ENABLED = ":107,1\n";           // enable gyroscope readings as inputs to
                                                                  // the orientation estimation
   static constexpr auto SET_ACCELEROMETER_ENABLED = ":108,1\n";  // enable accelerometer readings as inputs
@@ -88,15 +87,15 @@ private:
       ":117,0.45,0.45,0.40,0.45\n";  // sets what percentage of running average to use on a
                                      // component sensor
 
-  static constexpr auto SET_OVERSAMPLE_RATE = "106:25,25,5\n";  // sets the number of times to sample each
-                                                                 // component sensor for each iteration of the filter.
+  static constexpr auto SET_OVERSAMPLE_RATE = "106:100,100,25\n";  // sets the number of times to sample each
+                                                                   // component sensor for each iteration of the filter.
   /*
   Slot #1: untared orientation as quaternion [4x float]
   Slot #2: corrected gyroscope vector [3x float]
   Slot #3: corrected acceleration vector [3x float]
   Slot #[4-8]: No Command
   */
-  static constexpr auto SET_STREAMING_SLOTS = ":80,0,38,39,44,255,255,255,255\n";
+  static constexpr auto SET_STREAMING_SLOTS = ":80,6,38,39,44,255,255,255,255\n";
 
   static constexpr auto BEGIN_GYRO_AUTO_CALIB = ":165\n";  // Performs auto-gyroscope calibration. Sensor should
                                                            // remain still while samples are taken.
