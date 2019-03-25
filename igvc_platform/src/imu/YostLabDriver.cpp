@@ -179,15 +179,14 @@ void YostLabDriver::run()
         imu_msg_.header.stamp = ros::Time::now();
         imu_msg_.header.frame_id = "imu";
 
-        // construct quaternion with (w,x,y,z) then apply orientation using Eigen's overloaded * operator.
-        Eigen::Quaternion<double> q(parsed_val_[3], parsed_val_[0], parsed_val_[1], parsed_val_[2]);
-        q = correction_mat_quat * q;
+        // construct quaternion with (x,y,z,w)
+        tf::Quaternion q(parsed_val_[0], parsed_val_[1], parsed_val_[2], parsed_val_[3]);
 
         // Filtered orientation estimate
-        imu_msg_.orientation.x = q.x();
-        imu_msg_.orientation.y = q.y();
-        imu_msg_.orientation.z = q.z();
-        imu_msg_.orientation.w = q.w();
+        imu_msg_.orientation.x = q[0];
+        imu_msg_.orientation.y = q[1];
+        imu_msg_.orientation.z = q[2];
+        imu_msg_.orientation.w = q[3];
         imu_msg_.orientation_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .1 };
 
         // Corrected angular velocity.
@@ -214,7 +213,7 @@ void YostLabDriver::run()
         this->imu_pub_.publish(imu_msg_);
 
         double roll, pitch, yaw;
-        tf::Matrix3x3(tf::Quaternion(q.x(), q.y(), q.z(), q.w())).getRPY(roll, pitch, yaw);
+        tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
 
         ROS_INFO_THROTTLE(1.0, "[YostLabImuDriver] R: %f, P: %f, Y: %f -- IMU Temp: %f F ", roll, pitch, yaw,
                           sensor_temp);
