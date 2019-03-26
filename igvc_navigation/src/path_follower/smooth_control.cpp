@@ -31,12 +31,14 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs:
   {
     // Get target
     path_index = getClosestIndex(path, state);
-    simulation_target = getTargetPosition(path, state, simulation_target, path_index);
+    RobotState second_target;
+    std::tie(simulation_target, second_target) = getTargetPosition(path, state, simulation_target, path_index);
 
-    ROS_INFO_STREAM(i << "(" << path_index << ") --> " << getClosestIndex(path, *simulation_target));
+    //    ROS_INFO_STREAM(i << "(" << path_index << ") --> " << getClosestIndex(path, *simulation_target));
 
     // Calculate control using Control Law
-    Action action = getAction(state, *simulation_target, dt);  // TODO: Change this dt from simulation dt to real dt
+    Action action =
+        getAction(state, *simulation_target, second_target, dt);  // TODO: Change this dt from simulation dt to real dt
     //    ROS_INFO_STREAM("Action: " << action.velocity.v_start << " -> " << action.velocity.v_stop);
     action.dt = dt.toSec();
 
@@ -112,7 +114,16 @@ void SmoothControl::propogateState(const Action& action, RobotState& state)
   state.setVelocity(wheel_velocity);
 }
 
-Action SmoothControl::getAction(const RobotState& state, const RobotState& target, const ros::Duration& dt)
+Action SmoothControl::getAction(const RobotState& state, const RobotState& target, const RobotState& second_target,
+                                const ros::Duration& dt) const
+{
+  double K_first = getCurvature(state, target);
+  double K_second = getCurvature(state, second_target);
+  double distance = state.distTo(target);
+  return motionProfile(state, distance, K_first, K_second, dt);
+}
+
+double SmoothControl::getCurvature(const RobotState& state, const RobotState& target) const
 {
   double line_of_sight = atan2(target.y - state.y, target.x - state.x);
 
@@ -128,12 +139,13 @@ Action SmoothControl::getAction(const RobotState& state, const RobotState& targe
   double K = k2_ * (delta - atan(-k1_ * theta));
   K += (1 + (k1_ / (1 + pow(k1_ * theta, 2)))) * sin(delta);
   K /= -d;
-
-  return motionProfile(state, K, dt);
+  return K;
 }
 
-RobotState SmoothControl::getTargetPosition(const nav_msgs::PathConstPtr& path, const RobotState& state,
-                                            const std::optional<RobotState>& target, size_t path_index) const
+std::pair<RobotState, RobotState> SmoothControl::getTargetPosition(const nav_msgs::PathConstPtr& path,
+                                                                   const RobotState& state,
+                                                                   const std::optional<RobotState>& target,
+                                                                   size_t path_index) const
 {
   // If already have a target, find the closest point along the current path to the current target
   // If the closest point is too far,then break and find a new target
@@ -150,17 +162,22 @@ RobotState SmoothControl::getTargetPosition(const nav_msgs::PathConstPtr& path, 
       if (target_index != 0 && target_index >= path_index && target_dist_target_next < state_dist_target_next &&
           distAlongPath(path, path_index, target_index) < lookahead_dist_)
       {
-        return newTarget;
+        RobotState first_target = newTarget;
+        RobotState second_target = acquireNewTarget(path, first_target, target_index);
+        return { first_target, second_target };
       }
     }
   }
-  return acquireNewTarget(path, state, path_index);
+  RobotState first_target = acquireNewTarget(path, state, path_index);
+  size_t first_target_index = findTargetOnPath(path, first_target);
+  RobotState second_target = acquireNewTarget(path, first_target, first_target_index);
+  return { first_target, second_target };
 }
 
 SmoothControl::SmoothControl(double k1, double k2, double axle_length, double simulation_frequency,
                              double target_velocity, double lookahead_dist, double simulation_horizon,
                              double target_reached_distance, double target_move_threshold, double acceleration_limit,
-                             double beta, double lambda)
+                             double beta, double lambda, double transition_distance)
   : k1_{ k1 }
   , k2_{ k2 }
   , axle_length_{ axle_length }
@@ -173,6 +190,7 @@ SmoothControl::SmoothControl(double k1, double k2, double axle_length, double si
   , acceleration_limit_{ acceleration_limit }
   , beta_{ beta }
   , lambda_{ lambda }
+  , transition_distance_{ transition_distance }
 {
   ros::NodeHandle pNh{ "~" };
   target_pub_ = pNh.advertise<nav_msgs::Path>("smooth_control/target", 1);
@@ -257,8 +275,21 @@ size_t SmoothControl::getClosestIndex(const nav_msgs::PathConstPtr& path, const 
   return static_cast<size_t>(closest - path->poses.begin());
 }
 
-Action SmoothControl::motionProfile(const RobotState& state, double K, const ros::Duration& dt) const
+Action SmoothControl::motionProfile(const RobotState& state, double distance, double K1, double K2,
+                                    const ros::Duration& dt) const
 {
+  // Check if we are in the "transition zone" from the first target to the second, and should begin blending K1 and K2
+  double K;
+  if (distance < transition_distance_)
+  {
+    double blending_factor = (transition_distance_ - distance) / transition_distance_;
+    K = blending_factor * K1 + (1 - blending_factor) * K2;
+  }
+  else
+  {  // Otherwise,
+    K = K1;
+  }
+
   // Calculate velocity as function of curvature
   double v = target_velocity_ / (1 + beta_ * std::pow(std::abs(K), lambda_));
   //  ROS_INFO_STREAM("K: " << K << ", v: " << target_velocity_ << " -> " << v);

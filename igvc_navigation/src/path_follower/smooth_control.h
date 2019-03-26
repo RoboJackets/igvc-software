@@ -45,7 +45,7 @@ class SmoothControl
 public:
   SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
                 double m_lookahead_dist, double simulation_horizon, double target_reached_distance,
-                double target_move_threshold, double acceleration_limit, double beta, double lambda);
+                double target_move_threshold, double acceleration_limit, double beta, double lambda, double transition_distance);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
    * using the procedure described in 'A Smooth Control Law for Graceful Motion of
@@ -74,6 +74,7 @@ private:
   double acceleration_limit_;
   double beta_;
   double lambda_;
+  double transition_distance_;
   ros::Publisher target_pub_;
   ros::Publisher closest_point_pub_;
   std::optional<RobotState> target_;
@@ -82,10 +83,20 @@ private:
    * Computes the control command to be executed for the next dt seconds
    * @param[in] state current state of the robot
    * @param[in] target target state of the robot
+   * @param[in] second_target the target state after the next target
    * @param[in] dt the duration for which the generated command will be executed for
    * @return A control command for the next iteration
    */
-  Action getAction(const RobotState& state, const RobotState& target, const ros::Duration& dt);
+  Action getAction(const RobotState& state, const RobotState& target, const RobotState& second_target,
+                   const ros::Duration& dt) const;
+
+  /**
+   * Returns the curvature of the path from the current state to the target
+   * @param state starting state
+   * @param target target state
+   * @return intantaneous curvature of the path from state to target
+   */
+  double getCurvature(const RobotState& state, const RobotState& target) const;
 
   /**
    * Propogates the current state given the current velocity and angular velocity
@@ -117,10 +128,10 @@ private:
    * @param[in] path_index index of closest position along the path relative to current position
    * @param[in] state current state of the robot
    * @param[in] path_index the index of the closest point on the path to the current state
-   * @return the target position
+   * @return the positions of the first and second targets.
    */
-  RobotState getTargetPosition(const nav_msgs::PathConstPtr& path, const RobotState& state,
-                               const std::optional<RobotState>& target, size_t path_index) const;
+  std::pair<RobotState, RobotState> getTargetPosition(const nav_msgs::PathConstPtr& path, const RobotState& state,
+                                                      const std::optional<RobotState>& target, size_t path_index) const;
 
   /**
    * Acquires a new target which is lookahead_dist_ away from the current position, interpolating between points
@@ -159,11 +170,12 @@ private:
   /**
    * Calculates the velocity to go at for the next dt that stays within the acceleration limits
    * @param[in] state current state, which includes current velocity
-   * @param[in] curvature curvature of path to follow
+   * @param[in] k1 curvature of path to follow to the current target
+   * @param[in] k2 curvature of path to follow to the next target
    * @param[in] dt timestep to generate control for
    * @return an Action that follows the curvature and stays within the acceleration limits
    */
-  Action motionProfile(const RobotState& state, double curvature, const ros::Duration& dt) const;
+  Action motionProfile(const RobotState& state, double distance, double K1, double K2, const ros::Duration& dt) const;
 
   /**
    * Returns an action given the target left and right wheel velocities

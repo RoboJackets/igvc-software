@@ -42,7 +42,7 @@
     <inertial>
       <origin xyz="0 0 0" />
       <mass value="30.0" />
-      <inertia  ixx="0.994968" ixy="-0.100194"  ixz="0.0"  iyy="0.994968"  iyz="0.0"  izz="-1.0" />
+      <inertia  ixx="0.094969" ixy="-0.100194"  ixz="0.0"  iyy="0.094968"  iyz="0.0"  izz="-0.1" />
     </inertial>
     <visual>
       <geometry>
@@ -66,7 +66,7 @@
     <inertial>
       <origin xyz="0 0 0" />
       <mass value="30.0" />
-      <inertia  ixx="0.994968" ixy="-0.100194"  ixz="0.0"  iyy="0.994968"  iyz="0.0"  izz="-1.0" />
+      <inertia  ixx="0.094968" ixy="-0.100194"  ixz="0.0"  iyy="0.094968"  iyz="0.0"  izz="-0.1" />
     </inertial>
     <visual>
       <geometry>
@@ -91,7 +91,7 @@
       <mass value="30.0" />
       <origin xyz="0 0 0" />
       <mass value="1.0" />
-      <inertia  ixx="10.0" ixy="-0.0000004"  ixz="0.1"  iyy="0.0"  iyz="-0.0000004"  izz="0.0" />
+      <inertia  ixx="1.0" ixy="-0.0000004"  ixz="0.1"  iyy="0.0"  iyz="-0.0000004"  izz="0.0" />
     </inertial>
     <visual>
       <geometry>

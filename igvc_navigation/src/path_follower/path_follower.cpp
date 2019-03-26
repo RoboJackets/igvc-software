@@ -38,6 +38,7 @@ PathFollower::PathFollower()
   double loop_hz;
   double beta;
   double lambda;
+  double blending_distance;
   seconds simulation_horizon;
   igvc::param(pNh, "target_v", target_velocity, 1.0);
   igvc::param(pNh, "axle_length", axle_length, 0.52);
@@ -51,6 +52,7 @@ PathFollower::PathFollower()
   igvc::param(pNh, "acceleration_threshold", acceleration_threshold, 1.0);
   igvc::param(pNh, "beta", beta, 0.4);
   igvc::param(pNh, "lambda", lambda, 2.0);
+  igvc::param(pNh, "blending_distance", blending_distance, 1.0);
   igvc::param(pNh, "loop_hz", loop_hz, 20.0);
   if (simulation_frequency <= 0)
   {
@@ -60,7 +62,7 @@ PathFollower::PathFollower()
   }
   controller_ = std::unique_ptr<SmoothControl>(
       new SmoothControl{ k1, k2, axle_length, simulation_frequency, target_velocity, lookahead_dist, simulation_horizon,
-                         target_reached_distance, target_move_threshold, acceleration_threshold, beta, lambda });
+                         target_reached_distance, target_move_threshold, acceleration_threshold, beta, lambda, blending_distance });
 
   // load global parameters
   igvc::getParam(pNh, "maximum_vel", maximum_vel_);
