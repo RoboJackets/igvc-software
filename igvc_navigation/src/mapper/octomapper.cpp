@@ -157,7 +157,7 @@ void Octomapper::insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair 
   pcl::PointCloud<pcl::PointXYZ> nonground;
   if (m_use_ground_filter)
   {
-    filter_ground_plane(raw_pc, ground, nonground);
+    filterGroundPlane(raw_pc, ground, nonground);
   }
   else
   {
@@ -244,85 +244,6 @@ void Octomapper::insert_free(const octomap::Pointcloud &scan, octomap::point3d o
   pair.octree->setProbMiss(m_prob_miss);
 }
 
-void Octomapper::filter_ground_plane(const PCL_point_cloud &raw_pc, PCL_point_cloud &ground, PCL_point_cloud &nonground)
-{
-  //  ROS_INFO_STREAM("Filtering Ground with " << raw_pc.size() << " points");
-  ground.header = raw_pc.header;
-  nonground.header = raw_pc.header;
-
-  if (raw_pc.size() < 50)
-  {
-    // Hacky algorithm to detect ground
-    ROS_ERROR_STREAM("Pointcloud while filtering too small, skipping" << raw_pc.size());
-    nonground = raw_pc;
-  }
-  else
-  {
-    // Plane detection for ground removal
-    pcl::ModelCoefficientsPtr coefficients(new pcl::ModelCoefficients);
-    pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
-
-    // create the segmentation object
-    pcl::SACSegmentation<pcl::PointXYZ> seg;
-    seg.setOptimizeCoefficients(true);
-
-    seg.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
-    seg.setMethodType(pcl::SAC_RANSAC);
-    seg.setMaxIterations(m_ransac_iterations);  // TODO: How many iterations
-    seg.setDistanceThreshold(m_ransac_distance_threshold);
-    seg.setAxis(Eigen::Vector3f(0, 0, 1));
-    seg.setEpsAngle(m_ransac_eps_angle);
-
-    PCL_point_cloud::Ptr cloud_filtered = raw_pc.makeShared();
-    // Create filtering object
-    pcl::ExtractIndices<pcl::PointXYZ> extract;
-    bool ground_plane_found = false;
-
-    seg.setInputCloud(cloud_filtered);
-    seg.segment(*inliers, *coefficients);
-    if (inliers->indices.empty())
-    {
-      ROS_INFO("PCL segmentation did not find a plane.");
-    }
-    else
-    {
-      ROS_DEBUG("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
-                cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
-                coefficients->values.at(2), coefficients->values.at(3));
-      m_ground_projection.set(coefficients->values);
-      extract.setInputCloud(cloud_filtered);
-      extract.setIndices(inliers);
-      extract.setNegative(false);
-      extract.filter(ground);
-
-      // remove ground points from full pointcloud
-      if (inliers->indices.size() != cloud_filtered->size())
-      {
-        extract.setNegative(true);
-        PCL_point_cloud out;
-        extract.filter(out);
-        nonground += out;
-        *cloud_filtered = out;
-      }
-      ground_plane_found = true;
-    }
-    //    ROS_INFO_STREAM("Cloud_filtered Points: " << cloud_filtered->size());
-    //    ROS_INFO_STREAM("ground points: " << ground.size());
-    //    ROS_INFO_STREAM("nonground points: " << nonground.size());
-    if (!ground_plane_found)
-    {
-      pcl::PassThrough<pcl::PointXYZ> second_pass;
-      second_pass.setFilterFieldName("z");
-      second_pass.setFilterLimits(-m_ground_filter_plane_dist, m_ground_filter_plane_dist);
-      second_pass.setInputCloud(cloud_filtered);
-      second_pass.filter(ground);
-
-      second_pass.setFilterLimitsNegative(true);
-      second_pass.filter(nonground);
-    }
-  }
-}
-
 void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, const cv::Mat &image,
                                     const image_geometry::PinholeCameraModel &model,
                                     const tf::Transform &camera_to_world) const
@@ -343,16 +264,16 @@ void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, con
     {
       return;
     }
-    project_to_plane(projected_pc, m_ground_projection, image, model, camera_to_world);
+    projectToPlane(projected_pc, m_ground_projection, image, model, camera_to_world);
   }
   else
   {
-    project_to_plane(projected_pc, m_default_projection, image, model, camera_to_world);
+    projectToPlane(projected_pc, m_default_projection, image, model, camera_to_world);
   }
   projected_pc.header.stamp = pcl_conversions::toPCL(ros::Time::now());
   projected_pc.header.frame_id = "odom";
 
-  insert_camera_projection(projection_map_pair, projected_pc, false);
+  insertCameraProjection(projection_map_pair, projected_pc, false);
   m_debug_pub.publish(projected_pc);
 }
 
@@ -361,8 +282,8 @@ void Octomapper::insert_camera_free(struct pc_map_pair &projection_map_pair, con
  * @param projection_map_pair Pair consisting of the octree for camera projections and the map
  * @param raw_pc pointcloud from projecting the lines onto the lidar scan
  */
-void Octomapper::insert_camera_projection(struct pc_map_pair &projection_map_pair,
-                                          const pcl::PointCloud<pcl::PointXYZ> &raw_pc, bool occupied) const
+void Octomapper::insertCameraProjection(struct pc_map_pair &projection_map_pair,
+                                        const pcl::PointCloud<pcl::PointXYZ> &raw_pc, bool occupied) const
 {
   // Project to z=0 plane
   pcl::PointCloud<pcl::PointXYZ> projected{};
@@ -396,63 +317,82 @@ void Octomapper::insert_camera_projection(struct pc_map_pair &projection_map_pai
   }
 }
 
-/**
- * Projects all black pixels (0, 0, 0) in the image to the ground plane and inserts them into the pointcloud
- * @param[out] projected_pc the pointcloud that holds all projected points
- * @param[in] m_ground_projection the coefficients of the ground plane
- * @param[in] image the image to project from
- * @param[in] model the camera model to be used for projection
- */
-// TODO: Precompute all the projectPixelTo3dRay stuff
-void Octomapper::project_to_plane(pcl::PointCloud<pcl::PointXYZ> &projected_pc, const Ground_plane &m_ground_projection,
-                                  const cv::Mat &image, const image_geometry::PinholeCameraModel &model,
-                                  const tf::Transform &camera_to_world) const
+void Octomapper::insertScan(const tf::Point &sensor_pos, struct pc_map_pair &pair, const PointCloud &pc,
+                            ProbabilityModel model) const
 {
-  int nRows = image.rows;
-  int nCols = image.cols;
+  double old_prob_hit = pair.octree->getProbHit();
+  double old_prob_miss = pair.octree->getProbMiss();
 
-  int i, j;
-  const uchar *p;
-  for (i = 0; i < nRows; ++i)
+  pair.octree->setProbHit(model.prob_hit);
+  pair.octree->setProbMiss(model.prob_miss);
+
+  octomap::point3d sensor = octomap::pointTfToOctomap(sensor_pos);
+  octomap::Pointcloud octo_cloud;
+  PCL_to_Octomap(pc, octo_cloud);
+  pair.octree->insertPointCloud(octo_cloud, sensor, m_max_range, false, false);
+
+  pair.octree->setProbHit(old_prob_hit);
+  pair.octree->setProbMiss(old_prob_miss);
+}
+
+void Octomapper::insertRays(const tf::Point &sensor_pos, struct pc_map_pair &pair, const PointCloud &pc, bool occupied,
+                            ProbabilityModel model) const
+{
+  double old_prob_hit = pair.octree->getProbHit();
+  double old_prob_miss = pair.octree->getProbMiss();
+
+  pair.octree->setProbHit(model.prob_hit);
+  pair.octree->setProbMiss(model.prob_miss);
+
+  octomap::point3d sensor = octomap::pointTfToOctomap(sensor_pos);
+  octomap::Pointcloud scan;
+  PCL_to_Octomap(pc, scan);
+
+  octomap::KeySet keyset{};
+
+  for (int i = 0; i < (int)scan.size(); ++i)
   {
-    p = image.ptr<uchar>(i);
-    for (j = 0; j < nCols; ++j)
+    octomap::KeyRay keyray;
+    const octomap::point3d &p = scan[i];
+    if (pair.octree->computeRayKeys(sensor, p, keyray))
     {
-      // If it's a white pixel => free space, then project
-      if (p[j] == 0)
       {
-        //        ROS_INFO("(%d, %d)", i, j);
-        cv::Point2d pixel_point(j, i);
-        double t1 = j - model.cx() - model.Tx();
-        double t2 = i - model.cy() - model.Ty();
-        //        ROS_INFO_THROTTLE(0.1, "=====For (%d, %d)======", j, i);
-        //        ROS_INFO_THROTTLE(0.1, "(t1, t2) = (%.2f, %.2f)\n", t1, t2);
-        //        ROS_INFO_THROTTLE(0.1, "(fx(), fy()) = (%.2f, %.2f)\n", model.fx(), model.fy());
-        cv::Point3d ray = model.projectPixelTo3dRay(pixel_point);
-        //        ROS_INFO_STREAM_THROTTLE(0.1, "ray: (" << ray.x << ", " << ray.y << ", " << ray.z << ")");
-        tf::Point reoriented_ray{ ray.x, ray.y, ray.z };  // cv::Point3d defined with z forward, x right, y down
-        //        ROS_INFO_STREAM_THROTTLE(0.1, "reoriented_ray: (" << reoriented_ray.x() << ", " << reoriented_ray.y()
-        //        << ", " << reoriented_ray.z() << ")");
-        tf::Point transformed_ray = camera_to_world.getBasis() * reoriented_ray;  // Transform ray to odom frame
-        //        ROS_INFO_STREAM_THROTTLE(0.1, "transformed_ray: (" << transformed_ray.x() << ", " <<
-        //        transformed_ray.y() << ", " << transformed_ray.z() << ")"); double scale =
-        //        -camera_to_world.getOrigin().z() / transformed_ray.z(); tf::Point projected_point = scale *
-        //        transformed_ray + camera_to_world.getOrigin();
-        double a = m_ground_projection.a;
-        double b = m_ground_projection.b;
-        double c = m_ground_projection.c;
-        double d = m_ground_projection.d;
-        //        ROS_INFO_THROTTLE(1, "%.2f x + %.2f y + %.2f z + %.2f = 0", m_ground_projection.a,
-        //        m_ground_projection.b, m_ground_projection.c, m_ground_projection.d);
-        // [a b c]^T dot (P0 - (camera + ray*t)) = 0, solve for t
-        double t = ((tf::Vector3{ 0, 0, d / c } - camera_to_world.getOrigin()).dot(tf::Vector3{ a, b, c })) /
-                   (transformed_ray.dot(tf::Vector3{ a, b, c }));
-        // projected_point = camera + ray*t
-        tf::Point projected_point = camera_to_world.getOrigin() + transformed_ray * t;
-        projected_pc.points.emplace_back(pcl::PointXYZ(static_cast<float>(projected_point.x()),
-                                                       static_cast<float>(projected_point.y()),
-                                                       static_cast<float>(projected_point.z())));
+        keyset.insert(keyray.begin(), keyray.end());
       }
     }
   }
+
+  for (const auto &key : keyset)
+  {
+    pair.octree->updateNode(key, occupied, false);
+  }
+
+  pair.octree->setProbHit(old_prob_hit);
+  pair.octree->setProbMiss(old_prob_miss);
+}
+
+void Octomapper::insertPoints(struct pc_map_pair &pair, const PointCloud &pc, bool occupied,
+                              ProbabilityModel model) const
+{
+  double old_prob_hit = pair.octree->getProbHit();
+  double old_prob_miss = pair.octree->getProbMiss();
+
+  pair.octree->setProbHit(model.prob_hit);
+  pair.octree->setProbMiss(model.prob_miss);
+
+  octomap::Pointcloud octo_cloud;
+  PCL_to_Octomap(pc, octo_cloud);
+  octomap::KeySet keyset{};
+
+  for (int i = 0; i < (int)octo_cloud.size(); ++i)
+  {
+    const octomap::point3d &p = octo_cloud[i];
+    octomap::OcTreeKey key;
+    if (pair.octree->coordToKeyChecked(p, key))
+    {
+      pair.octree->updateNode(key, occupied, false);  // lazy_eval = false
+    }
+  }
+  pair.octree->setProbHit(old_prob_hit);
+  pair.octree->setProbMiss(old_prob_miss);
 }

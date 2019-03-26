@@ -28,7 +28,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 find_package(PCL REQUIRED filters)
 find_package(octomap REQUIRED)
 
-set(CMAKE_CXX_FLAGS "-g -std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-g -std=c++17 -Wall ${CMAKE_CXX_FLAGS}")
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
