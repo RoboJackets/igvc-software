@@ -61,9 +61,14 @@ public:
 private:
   // whether or not to commit the imu settings
   bool commit_settings_;
-  //! IMU orientation correction.
+
+  // IMU orientation correction.
   std::vector<double> imu_orientation_correction_;
-  //! Node Handlers
+
+  // frame id
+  std::string frame_id_;
+
+  // Node Handlers
   ros::NodeHandle yostlab_priv_nh_;
   ros::NodeHandle yostlab_nh_;
   ros::Publisher imu_pub_;
