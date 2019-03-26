@@ -264,9 +264,9 @@ CostComputation FieldDPlanner::computeCost(const Position& p, const Position& p_
   float g_p1 = getEdgePositionCost(p1);  // path cost of nearest neighbor
   float g_p2 = getEdgePositionCost(p2);  // path cost of diagonal neighbor
 
-  float d_p1 = 1.0f;  // distance to nearest neighbor
+  float d_p1 = 1.0f;      // distance to nearest neighbor
   float d_p2 = sqrtf(2);  // distance to diagonal
-  float d_n = 1.0f;  // distance between consecutive neighbors (edge length)
+  float d_n = 1.0f;       // distance between consecutive neighbors (edge length)
 
   // traversal cost of position p and a diagonal position p2
   // in units of (cost/distance)
