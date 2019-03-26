@@ -18,6 +18,7 @@ Date: Dec. 15th, 2018
 #include <limits>
 #include <tuple>
 #include <unordered_set>
+#include "igvc_utils/NodeUtils.hpp"
 
 class Node
 {
@@ -79,6 +80,13 @@ public:
   */
   void setBptr(std::tuple<int, int> bptr);
   /**
+  Get the distance from the current Node to a provided position
+
+  @param[in] ind the index to get the distance to
+  @return the distance to the provided position
+  */
+  float distTo(std::tuple<float, float> position);
+  /**
   Gets the backpointer of the current state s
 
   @return index of backpointer of current state
@@ -112,11 +120,11 @@ public:
   bool valid = true;
 
 private:
-  int x;
-  int y;
+  int x_;
+  int y_;
 
-  std::tuple<int, int> ind;
-  std::tuple<int, int> bptr;
+  std::tuple<int, int> ind_;
+  std::tuple<int, int> bptr_;
 };
 
 // ostream operator for Node

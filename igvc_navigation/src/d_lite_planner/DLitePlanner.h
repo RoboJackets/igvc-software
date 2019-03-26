@@ -47,11 +47,11 @@ class DLitePlanner
 public:
   // Graph contains methods to deal with Node(s) as well as updated occupancy
   // grid cells
-  Graph NodeGrid;
+  Graph node_grid_;
 
-  std::vector<std::tuple<int, int>> Path;
+  std::vector<std::tuple<int, int>> path_;
 
-  float GoalDist;
+  float goal_dist_;
 
   /**
   Sets value for GoalDist, the minumum value from the goal node a node must
@@ -59,7 +59,7 @@ public:
 
   @param[in] goalDist the minimum distance from the goal
   */
-  void setGoalDistance(float goalDist);
+  void setGoalDistance(float goal_dist);
 
   /**
   Calculate the key for a node S.
@@ -81,7 +81,7 @@ public:
   void initializeSearch();
   /**
   Clears the previous search's contents and re-initializes the search problem.
-  Clears the Node cache (unorderedMap), the priority queue, and all cell updates that
+  Clears the Node cache (expanded_map_), the priority queue, and all cell updates that
   occured in the previous timestep.
   */
   void reInitializeSearch();
@@ -158,10 +158,10 @@ public:
 
 private:
   // hashed map contains all nodes and <g,rhs> values in search
-  std::unordered_map<Node, std::tuple<float, float>> unorderedMap;
+  std::unordered_map<Node, std::tuple<float, float>> expanded_map_;
   // priority queue contains all locally inconsistent nodes whose values
   // need updating
-  PriorityQueue PQ;
+  PriorityQueue priority_queue_;
 };
 
 #endif
