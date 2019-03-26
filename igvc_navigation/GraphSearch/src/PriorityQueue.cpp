@@ -1,32 +1,32 @@
 #include "PriorityQueue.h"
 
-PriorityQueue::PriorityQueue() : pq(compFunctor)
+PriorityQueue::PriorityQueue() : pq_(compFunctor)
 {
 }
 
 bool PriorityQueue::contains(Node n)
 {
-  return this->find(n) != pq.end();
+  return this->find(n) != pq_.end();
 }
 
 void PriorityQueue::insert(Node n, Key k)
 {
-  pq.insert(std::make_pair(n, k));
+  pq_.insert(std::make_pair(n, k));
 }
 
 void PriorityQueue::clear()
 {
-  pq.clear();
+  pq_.clear();
 }
 
 bool PriorityQueue::remove(Node n)
 {
   auto it = this->find(n);
 
-  if (it == pq.end())  // no such item exists
+  if (it == pq_.end())  // no such item exists
     return false;
 
-  pq.erase(it);
+  pq_.erase(it);
   return true;
 }
 
@@ -35,36 +35,41 @@ void PriorityQueue::pop()
   if (this->size() <= 0)
     return;
 
-  pq.erase(pq.begin());
+  pq_.erase(pq_.begin());
 }
 
 Key PriorityQueue::topKey()
 {
-  std::pair<Node, Key> e = *(pq.begin());
+  std::pair<Node, Key> e = *(pq_.begin());
   return e.second;
 }
 
 Node PriorityQueue::topNode()
 {
-  std::pair<Node, Key> e = *(pq.begin());
+  std::pair<Node, Key> e = *(pq_.begin());
   return e.first;
 }
 
 int PriorityQueue::size()
 {
-  return pq.size();
+  return pq_.size();
+}
+
+bool PriorityQueue::empty()
+{
+  return pq_.empty();
 }
 
 std::string PriorityQueue::str() const
 {
   std::stringstream ss;
   ss << "{";
-  for (auto it = pq.begin(); it != pq.end(); it++)
+  for (auto it = pq_.begin(); it != pq_.end(); it++)
   {
     ss << "<" << it->first << ", " << it->second << ">";
 
     // add commas and new lines responsibly
-    if ((it != pq.end()) && (std::next(it) != pq.end()))
+    if ((it != pq_.end()) && (std::next(it) != pq_.end()))
       ss << ",\n";
   }
   ss << "}";
@@ -75,7 +80,7 @@ std::string PriorityQueue::str() const
 std::set<std::pair<Node, Key>>::iterator PriorityQueue::find(Node n)
 {
   std::set<std::pair<Node, Key>>::iterator it = std::find_if(
-      pq.begin(), pq.end(), [n](std::pair<Node, Key> const& e) { return e.first.getIndex() == n.getIndex(); });
+      pq_.begin(), pq_.end(), [n](std::pair<Node, Key> const& e) { return e.first.getIndex() == n.getIndex(); });
 
   return it;
 }
