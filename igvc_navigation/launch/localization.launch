@@ -38,7 +38,7 @@
       <param name="use_odometry_yaw" value="false"/>
 
       <!-- input remapping -->
-      <remap from="/imu/data" to="/imu"/>
+      <remap from="/imu/data" to="/magnetometer"/>
       <remap from="/gps/fix" to="/fix"/>
 
       <!-- can do output remapping also -->
