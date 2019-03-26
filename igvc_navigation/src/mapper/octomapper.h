@@ -31,6 +31,12 @@ struct pc_map_pair
   boost::shared_ptr<cv::Mat> map;
 };
 
+struct ProbabilityModel
+{
+  double prob_miss;
+  double prob_hit;
+};
+
 /**
  * Struct representing the coefficients of the plane Ax + By + Cz + D = 0
  */
@@ -53,9 +59,11 @@ public:
   }
 };
 
+using radians = double;
+using PointCloud = pcl::PointCloud<pcl::PointXYZ>;
+
 class Octomapper
 {
-  using radians = double;
 
 public:
   using PCL_point_cloud = pcl::PointCloud<pcl::PointXYZ>;
@@ -64,20 +72,18 @@ public:
   void create_octree(pc_map_pair& pair) const;
   void insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair, const PCL_point_cloud& raw_pc,
                    const pcl::PointCloud<pcl::PointXYZ>& empty_pc);
-  void insert_camera_projection(struct pc_map_pair& pc_map_pair, const PCL_point_cloud& raw_pc, bool occupied) const;
+  void insertCameraProjection(struct pc_map_pair& projection_map_pair, const PCL_point_cloud& raw_pc, bool occupied) const;
   void insert_camera_free(struct pc_map_pair& projection_map_pair, const cv::Mat& image,
                           const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world) const;
   void get_updated_map(struct pc_map_pair& pc_map_pair) const;
-  void filter_ground_plane(const PCL_point_cloud& pc, PCL_point_cloud& ground, PCL_point_cloud& nonground);
+
+  void insertScan(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, ProbabilityModel model) const;
+  void insertRays(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, bool occupied, ProbabilityModel model) const;
+  void insertPoints(struct pc_map_pair& pair, const PointCloud& pc, bool occupied, ProbabilityModel model) const;
 
 private:
-  void filter_range(const pcl::PointCloud<pcl::PointXYZ>& raw_pc, pcl::PointCloud<pcl::PointXYZ>& within_range) const;
   void create_map(pc_map_pair& pair) const;
   void insert_free(const octomap::Pointcloud& scan, octomap::point3d origin, pc_map_pair& pair, bool lazy_eval) const;
-  void project_to_plane(pcl::PointCloud<pcl::PointXYZ>& projected_pc, const Ground_plane& m_ground_projection,
-                        const cv::Mat& image, const image_geometry::PinholeCameraModel& model,
-                        const tf::Transform& camera_to_world) const;
-  inline int discretize(radians angle) const;
 
   ros::NodeHandle pNh;
   bool m_use_ground_filter;

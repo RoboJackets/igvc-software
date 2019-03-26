@@ -1,5 +1,13 @@
 #include <unordered_set>
 
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/segmentation/sac_segmentation.h>
+
+#include <tf/transform_datatypes.h>
+
 #include "map_utils.h"
 
 namespace MapUtils
@@ -32,6 +40,90 @@ void filterPointsBehind(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointClou
       filtered_pc.points.emplace_back(i);
     }
   }
+}
+
+std::optional<GroundPlane> filterGroundPlane(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground,
+                                             GroundFilterOptions options)
+{
+  ground.header = raw_pc.header;
+  nonground.header = raw_pc.header;
+
+  std::optional<GroundPlane> ground_plane = ransacFilter(raw_pc, ground, nonground, options.ransac_options);
+  if (ground_plane)
+  {
+    return ground_plane;
+  }
+  else
+  {
+    fallbackFilter(raw_pc, ground, nonground, options.fallback_options);
+    return std::nullopt;
+  }
+}
+
+std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground,
+                                        RANSACOptions options)
+{
+  // Plane detection for ground removal
+  pcl::ModelCoefficientsPtr coefficients(new pcl::ModelCoefficients);
+  pcl::PointIndices::Ptr inliers(new pcl::PointIndices);
+
+  // create the segmentation object
+  pcl::SACSegmentation<pcl::PointXYZ> seg;
+  seg.setOptimizeCoefficients(true);
+
+  seg.setModelType(pcl::SACMODEL_PERPENDICULAR_PLANE);
+  seg.setMethodType(pcl::SAC_RANSAC);
+  seg.setMaxIterations(options.iterations);
+  seg.setDistanceThreshold(options.distance_threshold);
+  seg.setAxis(Eigen::Vector3f(0, 0, 1));
+  seg.setEpsAngle(options.distance_threshold);
+
+  PointCloud::Ptr cloud_filtered = raw_pc.makeShared();
+
+  // Create filtering object
+  pcl::ExtractIndices<pcl::PointXYZ> extract;
+
+  seg.setInputCloud(cloud_filtered);
+  seg.segment(*inliers, *coefficients);
+
+  if (inliers->indices.empty())
+  {
+    return std::nullopt;
+  }
+  else
+  {
+    ROS_DEBUG("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
+              cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
+              coefficients->values.at(2), coefficients->values.at(3));
+    extract.setInputCloud(cloud_filtered);
+    extract.setIndices(inliers);
+    extract.setNegative(false);
+    extract.filter(ground);
+
+    // remove ground points from full pointcloud
+    if (inliers->indices.size() != cloud_filtered->size())
+    {
+      extract.setNegative(true);
+      PointCloud out;
+      extract.filter(out);
+      nonground += out;
+      *cloud_filtered = out;
+    }
+
+    return GroundPlane{ coefficients->values.at(0), coefficients->values.at(1), coefficients->values.at(2),
+                        coefficients->values.at(3) };
+  }
+}
+
+void fallbackFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground, FallbackOptions options)
+{
+  pcl::PassThrough<pcl::PointXYZ> fallback;
+  fallback.setFilterFieldName("z");
+  fallback.setFilterLimits(-options.plane_distance, options.plane_distance);
+  fallback.filter(ground);
+
+  fallback.setFilterLimitsNegative(true);
+  fallback.filter(nonground);
 }
 
 void blur(cv::Mat& blurred_map, double kernel_size)
@@ -67,4 +159,41 @@ void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pc
   }
 }
 
+void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, const cv::Mat& image,
+                    const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world)
+{
+  int nRows = image.rows;
+  int nCols = image.cols;
+
+  int i, j;
+  const uchar *p;
+  for (i = 0; i < nRows; ++i)
+  {
+    p = image.ptr<uchar>(i);
+    for (j = 0; j < nCols; ++j)
+    {
+      // If it's a white pixel => free space, then project
+      if (p[j] == 0)
+      {
+        cv::Point2d pixel_point(j, i);
+
+        cv::Point3d ray = model.projectPixelTo3dRay(pixel_point);
+        tf::Point reoriented_ray{ ray.x, ray.y, ray.z };  // cv::Point3d defined with z forward, x right, y down
+        tf::Point transformed_ray = camera_to_world.getBasis() * reoriented_ray;  // Transform ray to odom frame
+        double a = ground_plane.a;
+        double b = ground_plane.b;
+        double c = ground_plane.c;
+        double d = ground_plane.d;
+
+        double t = ((tf::Vector3{ 0, 0, d / c } - camera_to_world.getOrigin()).dot(tf::Vector3{ a, b, c })) /
+            (transformed_ray.dot(tf::Vector3{ a, b, c }));
+
+        tf::Point projected_point = camera_to_world.getOrigin() + transformed_ray * t;
+        projected_pc.points.emplace_back(pcl::PointXYZ(static_cast<float>(projected_point.x()),
+            static_cast<float>(projected_point.y()),
+            static_cast<float>(projected_point.z())));
+      }
+    }
+  }
+}
 }  // namespace MapUtils

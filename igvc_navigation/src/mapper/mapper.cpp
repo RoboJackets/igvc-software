@@ -365,7 +365,6 @@ void Mapper::pcCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
     return;
   }
 
-
   pcl::PointCloud<pcl::PointXYZ> empty_pc{};
   pcl::PointCloud<pcl::PointXYZ> filtered_pc{};
   MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
@@ -453,7 +452,7 @@ void Mapper::projctedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr
   transformed.header.frame_id = "odom";
   random_pub_.publish(transformed);
 
-  octomapper_->insert_camera_projection(camera_map_pair_, transformed, true);
+  octomapper_->insertCameraProjection(camera_map_pair_, transformed, true);
   //
   //  // Get updated map from octomapper
   octomapper_->get_updated_map(camera_map_pair_);
