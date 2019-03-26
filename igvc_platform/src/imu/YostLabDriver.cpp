@@ -8,6 +8,7 @@ YostLabDriver::YostLabDriver(ros::NodeHandle& nh_, ros::NodeHandle& priv_nh_)
   // use identity matrix as default orientation correction
   igvc::param(this->yostlab_priv_nh_, "imu_orientation_correction", this->imu_orientation_correction_,
               std::vector<double>{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
+  igvc::getParam(this->yostlab_priv_nh_, "frame_id", this->frame_id_);
 }
 
 //! Destructor
@@ -177,7 +178,7 @@ void YostLabDriver::run()
       {
         line_num_ = 0;
         imu_msg_.header.stamp = ros::Time::now();
-        imu_msg_.header.frame_id = "imu";
+        imu_msg_.header.frame_id = frame_id_;
 
         // construct quaternion with (x,y,z,w)
         tf::Quaternion q(parsed_val_[0], parsed_val_[1], parsed_val_[2], parsed_val_[3]);
