@@ -190,11 +190,14 @@ add_dependencies(GraphSearch igvc_msgs_gencpp)
 # link OpenCV and cv_bridge to GraphSearch library
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
-add_subdirectory(src/mapper)
-add_subdirectory(src/path_follower)
-add_subdirectory(src/path_planner)
 #add_subdirectory(src/state_estimator)
+
 add_subdirectory(src/waypoint_source)
 add_subdirectory(src/wheel_odometer)
+
+add_subdirectory(src/mapper)
+
+add_subdirectory(src/path_follower)
+
 add_subdirectory(src/d_lite_planner)
 add_subdirectory(src/field_d_planner)
