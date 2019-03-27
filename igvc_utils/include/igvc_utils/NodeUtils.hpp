@@ -18,38 +18,41 @@ enum class Assertion
 };
 
 template <class T>
-inline void warn_with_message(const std::string &node_namespace, const std::string &variable_name, const T& variable)
+inline void warn_with_message(const std::string &node_namespace, const std::string &variable_name, const T &variable)
 {
   ROS_WARN_STREAM("[" << node_namespace << "] Missing parameter " << variable_name
                       << ". Continuing with default values " << variable);
 }
 
 template <class T>
-inline void warn_with_message(const std::string &node_namespace, const std::string &variable_name, const std::vector<T>& variable)
+inline void warn_with_message(const std::string &node_namespace, const std::string &variable_name,
+                              const std::vector<T> &variable)
 {
   std::ostringstream ss;
   ss << "[" << node_namespace << "] Missing parameter " << variable_name << ". Continuing with default values [";
   std::transform(std::begin(variable), std::prev(std::end(variable)), std::ostream_iterator<T>(ss, ", "),
-      [](const std::string& str) { return str.size(); });
+                 [](const std::string &str) { return str.size(); });
   ss << "].";
   ROS_WARN_STREAM(ss.str());
 }
 
 template <class T>
-inline void fail_with_message(const std::string &node_namespace, const std::string &variable_name, const T& variable, const std::string &message)
+inline void fail_with_message(const std::string &node_namespace, const std::string &variable_name, const T &variable,
+                              const std::string &message)
 {
-  ROS_ERROR_STREAM("[" << node_namespace << "] " << variable_name << " (" << variable
-                       << ") should be " << message << " Exiting...");
+  ROS_ERROR_STREAM("[" << node_namespace << "] " << variable_name << " (" << variable << ") should be " << message
+                       << " Exiting...");
   ros::shutdown();
 }
 
 template <class T>
-inline void fail_with_message(const std::string &node_namespace, const std::string &variable_name, const T& element, const std::vector<T>& variable, const std::string &message)
+inline void fail_with_message(const std::string &node_namespace, const std::string &variable_name, const T &element,
+                              const std::vector<T> &variable, const std::string &message)
 {
   std::ostringstream ss;
   ss << "[" << node_namespace << "] " << variable_name << " ([";
   std::transform(std::begin(variable), std::prev(std::end(variable)), std::ostream_iterator<T>(ss, ", "),
-      [](const std::string& str) { return str.size(); });
+                 [](const std::string &str) { return str.size(); });
   ss << "]) includes element " << element << " which should be " << message << " Exiting...";
   ROS_WARN_STREAM(ss.str());
   ros::shutdown();
@@ -113,7 +116,8 @@ inline void assert_positive(const std::string &node_namespace, const T &variable
 }
 
 template <class T>
-inline void assert_positive(const std::string &node_namespace, const std::vector<T> &variable, const std::string &variable_name)
+inline void assert_positive(const std::string &node_namespace, const std::vector<T> &variable,
+                            const std::string &variable_name)
 {
   for (auto element : variable)
   {
@@ -127,17 +131,20 @@ inline void assert_positive(const std::string &node_namespace, const std::vector
 template <class T>
 inline void assert_negative(const std::string &node_namespace, const T &variable, const std::string &variable_name)
 {
-  if (!(variable < 0)) {
+  if (!(variable < 0))
+  {
     fail_with_message(node_namespace, variable_name, variable, "less than 0.");
   }
 }
 
 template <class T>
-inline void assert_negative(const std::string &node_namespace, const std::vector<T> &variable, const std::string &variable_name)
+inline void assert_negative(const std::string &node_namespace, const std::vector<T> &variable,
+                            const std::string &variable_name)
 {
   for (auto element : variable)
   {
-    if (!(element < 0)) {
+    if (!(element < 0))
+    {
       fail_with_message(node_namespace, variable_name, element, variable, "less than 0.");
     }
   }
@@ -175,8 +182,7 @@ void param(const ros::NodeHandle &pNh, const std::string &param_name, T &param_v
 }
 
 template <class T>
-void getParam(const ros::NodeHandle &pNh, const std::string &param_name, T &param_val,
-              Assertion assertion)
+void getParam(const ros::NodeHandle &pNh, const std::string &param_name, T &param_val, Assertion assertion)
 {
   if (!pNh.getParam(param_name, param_val))
   {
