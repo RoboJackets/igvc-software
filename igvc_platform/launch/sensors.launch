@@ -13,9 +13,9 @@
     <!-- GPS -->
     <include file="$(find igvc_platform)/launch/gps.launch" />
 
-    <!-- CAMERA -->
+    <!-- LEFT, MIDDLE, & RIGHT CAMERAS (Logitech C920) -->
     <include file="$(find igvc_platform)/launch/camera.launch">
-        <arg name="camera" value="center" />
+        <arg name="camera" value="[left,center,right]" />
     </include>
 
     <!-- LIDAR -->
