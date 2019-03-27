@@ -4,7 +4,7 @@
     fuses all movement data (wheel odometry, IMU,
     GPS) into one filtered model for increased
     accuracy of all the constituent parts.
-    -->
+-->
 <launch>
 
     <include file="$(find igvc_navigation)/launch/wheel_odometry.launch" />
@@ -22,10 +22,13 @@
       <!-- this assumes we are in a planar environment -->
       <param name="two_d_mode" value="false"/>
 
+      <!-- Most IMU's report 0 as facing north. REP103 expects 0 when facing east. This param corrects for that -->
+     <param name="yaw_offset" value="1.5707963"/>
+
       <!-- sets altitude to 0 -->
       <param name="zero_altitude" value="true"/>
 
-      <!-- broadcasts the transform world_fram->utm -->
+      <!-- broadcast the transform between the UTM grid and the frame of the input odometry data -->
       <param name="broadcast_utm_transform" value="true"/>
 
       <!-- publishes the lat and long of the robot position -->
@@ -35,11 +38,10 @@
       <param name="use_odometry_yaw" value="false"/>
 
       <!-- input remapping -->
-      <remap from="/imu/data" to="/imu"/>
+      <remap from="/imu/data" to="/magnetometer"/>
       <remap from="/gps/fix" to="/fix"/>
 
       <!-- can do output remapping also -->
-
     </node>
 
     <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se">
@@ -56,25 +58,25 @@
                X velocity, Y velocity, Z velocity,
                roll velocity, pitch velocity, yaw velocity,
                X acceleration, Y acceleration, Z acceleration -->
-      <rosparam param="odom0_config">[false,  false, false,
-                               false, false, false,
-                               false, false, false,
-                               false, false, false,
-                               false, false, false]</rosparam>
+      <rosparam param="odom0_config">[false, false, false,
+                                      false, false, false,
+                                      true, true, false,
+                                      false, false, false,
+                                      false, false, false]</rosparam>
 
       <!-- IMU -->
       <param name="imu0" value="/imu"/>
       <!-- fused parameters same as above -->
       <rosparam param="imu0_config">[false, false, false,
-                                 false, false, true,
-                                 false, false, false,
-                                 false,  false,  true,
-                                 false,  false,  true]</rosparam>
+                                     false, false, false,
+                                     false, false, false,
+                                     false,  false, true,
+                                     true,  false,  false]</rosparam>
       <param name="imu0_differential" value="false"/>
-      <param name="imu0_remove_gravitational_acceleration" value="false" />
+      <param name="imu0_remove_gravitational_acceleration" value="true" />
       <param name="publish_acceleration" value="true" />
 
-      <!-- gps from above navstat_transform -->
+      <!-- gps from nmea_navsat_transform -->
       <param name="odom1" value="/odometry/gps"/>
       <!-- fused parameters same as above -->
       <rosparam param="odom1_config">[true, true, false,
@@ -83,6 +85,43 @@
                                false, false, false,
                                false, false, false]</rosparam>
       <param name="odom1_differential" value="false"/>
+
+      <rosparam param="process_noise_covariance">
+        [.6,   0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+         0,    .6,   0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+         0,    0,    .1,   0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+         0,    0,    0,    .1,   0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+         0,    0,    0,    0,    .1,   0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+         0,    0,    0,    0,    0,    .3,   0,     0,     0,    0,    0,    0,    0,    0,    0,
+         0,    0,    0,    0,    0,    0,    .1,    0,     0,    0,    0,    0,    0,    0,    0,
+         0,    0,    0,    0,    0,    0,    0,     .1,    0,    0,    0,    0,    0,    0,    0,
+         0,    0,    0,    0,    0,    0,    0,     0,    .1,    0,    0,    0,    0,    0,    0,
+         0,    0,    0,    0,    0,    0,    0,     0,     0,   .1,    0,    0,    0,    0,    0,
+         0,    0,    0,    0,    0,    0,    0,     0,     0,    0,   .1,    0,    0,    0,    0,
+         0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,   .5,    0,    0,    0,
+         0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,   .1,    0,    0,
+         0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,   .1,    0,
+         0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    .1]
+      </rosparam>
+      <rosparam param="initial_estimate_covariance">
+        [1,    0,    0,      0,      0,      0,    0,      0,      0,     0,     0,     0,     0,     0,     0,
+         0,    1,    0,      0,      0,      0,    0,      0,      0,     0,     0,     0,     0,     0,     0,
+         0,    0,    1e-6,   0,      0,      0,    0,      0,      0,     0,     0,     0,     0,     0,     0,
+         0,    0,    0,      1e-6,   0,      0,    0,      0,      0,     0,     0,     0,     0,     0,     0,
+         0,    0,    0,      0,      1e-6,   0,    0,      0,      0,     0,     0,     0,     0,     0,     0,
+         0,    0,    0,      0,      0,      5,    0,      0,      0,     0,     0,     0,     0,     0,     0,
+         0,    0,    0,      0,      0,      0,    1e-6,   0,      0,     0,     0,     0,     0,     0,     0,
+         0,    0,    0,      0,      0,      0,    0,      1e-6,   0,     0,     0,     0,     0,     0,     0,
+         0,    0,    0,      0,      0,      0,    0,      0,      1e-6,  0,     0,     0,     0,     0,     0,
+         0,    0,    0,      0,      0,      0,    0,      0,      0,     1e-6,  0,     0,     0,     0,     0,
+         0,    0,    0,      0,      0,      0,    0,      0,      0,     0,     1e-6,  0,     0,     0,     0,
+         0,    0,    0,      0,      0,      0,    0,      0,      0,     0,     0,     1,     0,     0,     0,
+         0,    0,    0,      0,      0,      0,    0,      0,      0,     0,     0,     0,     1e-6,  0,     0,
+         0,    0,    0,      0,      0,      0,    0,      0,      0,     0,     0,     0,     0,     1e-6,  0,
+         0,    0,    0,      0,      0,      0,    0,      0,      0,     0,     0,     0,     0,     0,     1e-6]
+      </rosparam>
+
+
     </node>
 
 </launch>
