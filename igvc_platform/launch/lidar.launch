@@ -1,13 +1,18 @@
 <!-- lidar.launch -->
 <launch>
     <!-- Lidar Node -->
-    <node name="sweep_node"	pkg="sweep_ros"  type="sweep_node" output="screen">
-      <param name="serial_port"         type="string" value="/dev/igvc_lidar"/>
-      <param name="serial_baudrate"     type="int"    value="115200"/>
-      <param name="frame_id"            type="string" value="lidar"/>
-      <param name="rotation_speed"    type="int" value="3"/>
-      <param name="sample_rate"    type="int" value="1000"/>
-      <param name="distance_threshold"    type="double" value="50"/>
+    <node name="rplidarNode"              pkg="rplidar_ros"  type="rplidarNode" output="screen">
+        <param name="serial_port"         type="string" value="/dev/igvc_lidar"/>
+        <param name="serial_baudrate"     type="int"    value="256000"/><!--A3 -->
+        <param name="frame_id"            type="string" value="/lidar"/>
+        <param name="inverted"            type="bool"   value="false"/>
+        <param name="angle_compensate"    type="bool"   value="true"/>
+        <param name="scan_mode"           type="string" value="Boost"/>
+    </node>
+    <node name="scan_to_pointcloud" pkg="igvc_gazebo" type="scan_to_pointcloud" output="screen" >
+        <param name="min_dist"      value="0.1"/>
+        <param name="neighbor_dist" value="0.2"/>
+        <param name="offset"        value="2.35619449019"/>
     </node>
     <include file="$(find igvc_perception)/launch/filter_lidar.launch" />
 </launch>
