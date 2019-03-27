@@ -17,6 +17,44 @@ enum class Assertion
   NEGATIVE
 };
 
+template <class T>
+inline void warn_with_message(const std::string &node_namespace, const std::string &variable_name, const T& variable)
+{
+  ROS_WARN_STREAM("[" << node_namespace << "] Missing parameter " << variable_name
+                      << ". Continuing with default values " << variable);
+}
+
+template <class T>
+inline void warn_with_message(const std::string &node_namespace, const std::string &variable_name, const std::vector<T>& variable)
+{
+  std::ostringstream ss;
+  ss << "[" << node_namespace << "] Missing parameter " << variable_name << ". Continuing with default values [";
+  std::transform(std::begin(variable), std::prev(std::end(variable)), std::ostream_iterator<T>(ss, ", "),
+      [](const std::string& str) { return str.size(); });
+  ss << "].";
+  ROS_WARN_STREAM(ss.str());
+}
+
+template <class T>
+inline void fail_with_message(const std::string &node_namespace, const std::string &variable_name, const T& variable, const std::string &message)
+{
+  ROS_ERROR_STREAM("[" << node_namespace << "] " << variable_name << " (" << variable
+                       << ") should be " << message << " Exiting...");
+  ros::shutdown();
+}
+
+template <class T>
+inline void fail_with_message(const std::string &node_namespace, const std::string &variable_name, const T& element, const std::vector<T>& variable, const std::string &message)
+{
+  std::ostringstream ss;
+  ss << "[" << node_namespace << "] " << variable_name << " ([";
+  std::transform(std::begin(variable), std::prev(std::end(variable)), std::ostream_iterator<T>(ss, ", "),
+      [](const std::string& str) { return str.size(); });
+  ss << "]) includes element " << element << " which should be " << message << " Exiting...";
+  ROS_WARN_STREAM(ss.str());
+  ros::shutdown();
+}
+
 template <class T, typename... Ts>
 inline void assert_with_default(const std::string &node_namespace, T &variable, bool condition, T &&default_value,
                                 const std::string &message, Ts... ts)
@@ -66,19 +104,43 @@ inline void check_assertion_with_default(Assertion assertion, const std::string 
 }
 
 template <class T>
-inline void assert_positive(const std::string &node_namespace, T &variable, const std::string &variable_name)
+inline void assert_positive(const std::string &node_namespace, const T &variable, const std::string &variable_name)
 {
-  ROS_ERROR_STREAM("[" << node_namespace << "] " << variable_name << " (currently " << variable
-                       << ") should be greater than 0. Exiting...");
-  ros::shutdown();
+  if (!(variable > 0))
+  {
+    fail_with_message(node_namespace, variable_name, variable, "greater than 0.");
+  }
 }
 
 template <class T>
-inline void assert_negative(const std::string &node_namespace, T &variable, const std::string &variable_name)
+inline void assert_positive(const std::string &node_namespace, const std::vector<T> &variable, const std::string &variable_name)
 {
-  ROS_ERROR_STREAM("[" << node_namespace << "] " << variable_name << " (currently " << variable
-                       << ") should be less than 0. Exiting...");
-  ros::shutdown();
+  for (auto element : variable)
+  {
+    if (!(element > 0))
+    {
+      fail_with_message(node_namespace, variable_name, element, variable, "greater than 0.");
+    }
+  }
+}
+
+template <class T>
+inline void assert_negative(const std::string &node_namespace, const T &variable, const std::string &variable_name)
+{
+  if (!(variable < 0)) {
+    fail_with_message(node_namespace, variable_name, variable, "less than 0.");
+  }
+}
+
+template <class T>
+inline void assert_negative(const std::string &node_namespace, const std::vector<T> &variable, const std::string &variable_name)
+{
+  for (auto element : variable)
+  {
+    if (!(element < 0)) {
+      fail_with_message(node_namespace, variable_name, element, variable, "less than 0.");
+    }
+  }
 }
 
 template <class T>
@@ -104,8 +166,7 @@ void param(const ros::NodeHandle &pNh, const std::string &param_name, T &param_v
 {
   if (!pNh.param(param_name, param_val, default_val))
   {
-    ROS_WARN_STREAM("[" << pNh.getNamespace() << "] Missing parameter " << param_name
-                        << ". Continuing with default values " << default_val);
+    warn_with_message(pNh.getNamespace(), param_name, default_val);
   }
   else
   {
@@ -115,7 +176,7 @@ void param(const ros::NodeHandle &pNh, const std::string &param_name, T &param_v
 
 template <class T>
 void getParam(const ros::NodeHandle &pNh, const std::string &param_name, T &param_val,
-              Assertion assertion = Assertion::NONE)
+              Assertion assertion)
 {
   if (!pNh.getParam(param_name, param_val))
   {
@@ -125,6 +186,16 @@ void getParam(const ros::NodeHandle &pNh, const std::string &param_name, T &para
   else
   {
     check_assertion(assertion, pNh.getNamespace(), param_val, param_name);
+  }
+}
+
+template <class T>
+void getParam(const ros::NodeHandle &pNh, const std::string &param_name, T &param_val)
+{
+  if (!pNh.getParam(param_name, param_val))
+  {
+    ROS_ERROR_STREAM("[" << pNh.getNamespace() << "] Missing parameter " << param_name << ". Exiting...");
+    ros::shutdown();
   }
 }
 
