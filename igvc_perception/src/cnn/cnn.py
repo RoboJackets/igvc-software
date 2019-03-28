@@ -60,19 +60,13 @@ class CNN():
         self.world_point_arrays = {}
         self.subscribers = []
 
-        self.cam_frame_names = {'usb_cam_center': '/optical_cam_center',
-                                'usb_cam_left': '/optical_cam_left',
-                                'usb_cam_right': '/optical_cam_right'}
-
-
         for camera_name in camera_names:
-            print('Setting up %s.' % camera_name)
+            rospy.loginfo('Setting up %s.' % camera_name)
 
             try:
                 camera_info = rospy.wait_for_message('/%s/camera_info' % camera_name, CameraInfo, timeout=5)
             except(rospy.ROSException), e:
-                print "Camera info for %s not available." % camera_name
-                print e
+                rospy.logerr('Camera info for %s not available.' % camera_name)
                 exit()
 
             # width and height adjust factors.
@@ -95,12 +89,12 @@ class CNN():
 
             self.camera_models[camera_name] = PinholeCameraModel()
             self.camera_models[camera_name].fromCameraInfo(camera_info)
-            print camera_info
+            rospy.loginfo(camera_info)
 
             # Get transform between camera and base_footprint.
             transform_listener = ros_tf.TransformListener()
 
-            cam_frame_name = self.cam_frame_names[camera_name]
+            cam_frame_name = camera_name.replace('usb_cam', '/optical_cam')
             transform_listener.waitForTransform('/base_footprint', cam_frame_name, rospy.Time(0), rospy.Duration(5.0))
             cam_transform_translation, cam_transform_rotation = transform_listener.lookupTransform('/base_footprint', cam_frame_name, rospy.Time(0))
             self.cam_transform_rotation_matrices[camera_name] = ros_tf.transformations.quaternion_matrix(cam_transform_rotation)[:-1,:-1]
@@ -111,13 +105,16 @@ class CNN():
             # Create a mapping between image pixels and world coordinates (flat plane assumption).
             self.init_point_cloud_array(camera_name)
 
-            # Use the same callback for every camera.
-            self.subscribers.append(rospy.Subscriber('/%s/image_raw/compressed' % camera_name, CompressedImage, functools.partial(self.image_cb, camera_name), queue_size=1, buff_size=10**8))
             print('Finished setting up %s.' % camera_name)
 
         self.im_publisher = rospy.Publisher(publisher_topic, ImMsg, queue_size=1)
         self.cloud_publisher = rospy.Publisher("/semantic_segmentation_cloud", PointCloud2, queue_size=1)
-        print('Line detector is running.')
+
+        # Initialize subscibers at the end so that callbacks are not active until this stage.
+        for camera_name in camera_names:
+            # Use the same callback for every camera.
+            self.subscribers.append(rospy.Subscriber('/%s/image_raw/compressed' % camera_name, CompressedImage, functools.partial(self.image_cb, camera_name), queue_size=1, buff_size=10**8))
+        rospy.loginfo('Line detector is running.')
 
     # This function projects image pixels into world coordinates using a flat plane assumption.
     def init_point_cloud_array(self, camera_name):
@@ -204,4 +201,4 @@ if __name__ == '__main__':
     try:
         rospy.spin()
     except KeyboardInterrupt:
-        print("Shutting down")
+        rospy.logerr("Shutting down")
