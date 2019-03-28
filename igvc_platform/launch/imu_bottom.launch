@@ -1,0 +1,12 @@
+<launch>
+
+    <!-- Bottom IMU -->
+    <node pkg="igvc_platform" name="imu_bottom" type="imu" output="screen" >
+        <param name="SERIAL_PORT" type="string" value="/dev/imu_bottom" />
+        <param name="frame_id" type="string" value="imu"/>
+        <!-- π/2 rad. rotation about the x axis -->
+        <rosparam param="imu_orientation_correction">[1,  0, 0,
+                                                      0, -1, 0,
+                                                      0,  0, -1]</rosparam>
+    </node>
+</launch>
