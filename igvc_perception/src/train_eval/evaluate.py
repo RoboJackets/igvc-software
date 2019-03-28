@@ -117,8 +117,13 @@ if __name__ == '__main__':
             recalls.append(avg_recalls[key])
             precisions.append(avg_precisions[key])
 
+        # Compute f1 score at 0.5 threshold.
+        f1_50 = 2 * avg_precisions[0.5] * avg_recalls[0.5] / (avg_precisions[0.5] + avg_recalls[0.5])
+
         print('Average inference time: %f' % np.mean(inference_times))
         print('Accuracy: %f' % avg_accuracy)
+        print('F1 score at 0.5 threshold: %f' % f1_50)
+
         fig = plt.figure()
         plt.plot(precisions, recalls)
         plt.title('Precision recall curve of IGVC line segmentation.')

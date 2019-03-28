@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# U-Net paper https://arxiv.org/abs/1505.04597
 class UNet(nn.Module):
 
     def __init__(self, im_size, kernel_size):
