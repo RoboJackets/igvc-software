@@ -1,0 +1,12 @@
+<launch>
+    <!-- Whether or not to tare the orientation using the current orientation.
+    If set to true, the current orientation will be set as the reference heading (0 deg)
+    and all orientation readings will be gathered relative to this orientation. -->
+
+    <!-- Top IMU -->
+    <node pkg="igvc_platform" name="imu_top" type="imu" output="screen" >
+        <param name="SERIAL_PORT" type="string" value="/dev/imu_top" />
+        <param name="frame_id" type="string" value="magnetometer"/>
+        <remap from="imu" to="magnetometer" />
+    </node>
+</launch>
