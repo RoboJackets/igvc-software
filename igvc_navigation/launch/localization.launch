@@ -30,7 +30,6 @@
 
       <!-- broadcast the transform between the UTM grid and the frame of the input odometry data -->
       <param name="broadcast_utm_transform" value="true"/>
-      <param name="broadcast_utm_transform_as_parent_frame" value="true"/>
 
       <!-- publishes the lat and long of the robot position -->
       <param name="publish_filtered_gps" value="true"/>
