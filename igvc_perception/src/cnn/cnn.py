@@ -59,6 +59,8 @@ class CNN():
         self.cam_transform_translations = {}
         self.world_point_arrays = {}
         self.subscribers = []
+        self.im_publishers = {}
+        self.cloud_publishers = {}
 
         for camera_name in camera_names:
             rospy.loginfo('Setting up %s.' % camera_name)
@@ -105,10 +107,13 @@ class CNN():
             # Create a mapping between image pixels and world coordinates (flat plane assumption).
             self.init_point_cloud_array(camera_name)
 
+            # Create image and pointcloud publishers.
+            self.im_publishers[camera_name] = rospy.Publisher('%s/%s' % (publisher_topic, camera_name), ImMsg, queue_size=1)
+            self.cloud_publishers[camera_name] = rospy.Publisher('%s/%s' % ("/semantic_segmentation_cloud", camera_name), PointCloud2, queue_size=1)
+
             print('Finished setting up %s.' % camera_name)
 
-        self.im_publisher = rospy.Publisher(publisher_topic, ImMsg, queue_size=1)
-        self.cloud_publisher = rospy.Publisher("/semantic_segmentation_cloud", PointCloud2, queue_size=1)
+        
 
         # Initialize subscibers at the end so that callbacks are not active until this stage.
         for camera_name in camera_names:
@@ -162,7 +167,7 @@ class CNN():
         cv_output = cv2.cvtColor(im_threshold, cv2.COLOR_GRAY2BGR)
         msg_out = self.bridge.cv2_to_imgmsg(cv_output, 'bgr8')
         msg_out.header.stamp = data.header.stamp
-        self.im_publisher.publish(msg_out)
+        self.im_publishers[camera_name].publish(msg_out)
 
         # Publish pointcloud.
         cloud_msg = PointCloud2()
@@ -179,7 +184,7 @@ class CNN():
         cloud_msg.row_step = 3 * len(world_points)
         cloud_msg.data = world_points.tostring()
 
-        self.cloud_publisher.publish(cloud_msg)
+        self.cloud_publishers[camera_name].publish(cloud_msg)
 
         end = timer()
         #print end - start
