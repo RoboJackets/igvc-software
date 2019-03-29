@@ -139,6 +139,15 @@ void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, c
  * @param[in] kernel_size The kernel size to be applied
  */
 void blur(cv::Mat& blurred_map, double kernel_size);
+
+/**
+ * Scales the intrinsics in camera_info to a resized dimension width and height
+ * @param camera_info
+ * @param width
+ * @param height
+ * @return
+ */
+sensor_msgs::CameraInfoConstPtr scaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height);
 };  // namespace MapUtils
 
 #endif  // PROJECT_MAP_FILTERS_H
