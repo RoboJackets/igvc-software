@@ -43,16 +43,6 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "map/start_x", start_x_);
   igvc::getParam(pNh, "map/start_y", start_y_);
 
-  igvc::getParam(pNh, "sensor_model/max_range", radius_);
-  igvc::getParam(pNh, "sensor_model/angular_resolution", angular_resolution_);
-
-  igvc::getParam(pNh, "sensor_model/lidar_miss_cast_distance", empty_filter_options_.miss_cast_distance);
-  igvc::getParam(pNh, "sensor_model/lidar_angle_start", empty_filter_options_.start_angle);
-  igvc::getParam(pNh, "sensor_model/lidar_angle_end", empty_filter_options_.end_angle);
-
-  igvc::getParam(pNh, "filter/filter_angle", behind_filter_options_.angle);
-  igvc::getParam(pNh, "filter/distance", behind_filter_options_.distance);
-
   igvc::getParam(pNh, "blur/kernel_size", kernel_size_);
   igvc::getParam(pNh, "blur/std_dev", blur_std_dev_);
 
@@ -67,16 +57,15 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "node/debug", debug_);
   igvc::getParam(pNh, "node/use_lines", use_lines_);
 
-  octomapper_ = std::unique_ptr<Octomapper>(new Octomapper(pNh));
-  octomapper_->create_octree(pc_map_pair_);
+  mapper_ = std::make_unique<Mapper>(pNh);
 
   ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(lidar_topic_, 1, &ROSMapper::pcCallback, this);
   ros::Subscriber line_map_sub;
   ros::Subscriber projected_line_map_sub;
   ros::Subscriber camera_info_sub;
+
   if (use_lines_)
   {
-    octomapper_->create_octree(camera_map_pair_);
     ROS_INFO_STREAM("Subscribing to " << line_topic_ << " for image and " << projected_line_topic_
                                       << " for projected pointclouds");
     line_map_sub = nh.subscribe<sensor_msgs::Image>(line_topic_, 1, &ROSMapper::segmentedImageCallback, this);
@@ -88,16 +77,11 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   //  published_map_ = std::unique_ptr<cv::Mat>(new cv::Mat(length_x_, width_y_, CV_8UC1));
 
   map_pub_ = nh.advertise<igvc_msgs::map>("/map", 1);
-  blurred_pub_ = nh.advertise<igvc_msgs::map>("/map/blurred", 1);
 
   if (debug_)
   {
-    debug_pub_ = nh.advertise<sensor_msgs::Image>("/map_debug", 1);
     debug_pcl_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
     debug_blurred_pc_ = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl/blurred", 1);
-    ground_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/ground_pcl", 1);
-    nonground_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/nonground_pcl", 1);
-    random_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/debug", 1);
   }
 
   ros::spin();
@@ -111,11 +95,6 @@ template <>
 bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
 // bool ROSMapper::getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
 {
-  if (use_lines_ && camera_frame_.empty())
-  {
-    ROS_INFO_STREAM(camera_frame_ << " has .size() == 0. Return false.");
-    return false;
-  }
   tf::StampedTransform transform;
   static ros::Duration wait_time = ros::Duration(transform_max_wait_time_);
   try
@@ -124,13 +103,6 @@ bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
     {
       tf_listener_->lookupTransform("/odom", "/base_link", message_timestamp, transform);
       state_.setState(transform);
-      tf_listener_->lookupTransform("/odom", "/lidar", message_timestamp, transform);
-      odom_to_lidar_.setState(transform);
-      if (use_lines_)
-      {
-        tf_listener_->lookupTransform("/odom", camera_frame_, message_timestamp, transform);
-        odom_to_camera_projection_.setState(transform);
-      }
       return true;
     }
     else
@@ -139,12 +111,6 @@ bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
       tf_listener_->lookupTransform("/odom", "/base_link", ros::Time(0), transform);
       state_.setState(transform);
       tf_listener_->lookupTransform("/odom", "/lidar", ros::Time(0), transform);
-      odom_to_lidar_.setState(transform);
-      if (use_lines_)
-      {
-        tf_listener_->lookupTransform("/odom", camera_frame_, ros::Time(0), transform);
-        odom_to_camera_projection_.setState(transform);
-      }
       return true;
     }
   }
@@ -270,7 +236,6 @@ void ROSMapper::publish(uint64_t stamp)
 
   if (debug_)
   {
-    debug_pub_.publish(image);
     if (pc_map_pair_.map)
     {
       publishAsPCL(debug_pcl_pub_, *pc_map_pair_.map, "/odom", stamp);
@@ -321,10 +286,6 @@ void ROSMapper::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, cons
  */
 void ROSMapper::pcCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
 {
-  // make transformed clouds
-  pcl::PointCloud<pcl::PointXYZ>::Ptr transformed =
-      pcl::PointCloud<pcl::PointXYZ>::Ptr(new pcl::PointCloud<pcl::PointXYZ>());
-
   // Check if static transform already exists for this topic.
   if (!checkExistsStaticTransform(pc->header.frame_id, pc->header.stamp, lidar_topic_))
   {
@@ -341,24 +302,7 @@ void ROSMapper::pcCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
     return;
   }
 
-  pcl::PointCloud<pcl::PointXYZ> empty_pc{};
-  pcl::PointCloud<pcl::PointXYZ> filtered_pc{};
-  MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
-  MapUtils::filterPointsBehind(*pc, filtered_pc, behind_filter_options_);
-
-  filtered_pc.header = pc->header;
-  ground_pub_.publish(filtered_pc);
-
-  // Apply transformation from lidar to base_link aka robot pose
-  pcl_ros::transformPointCloud(filtered_pc, *transformed, transforms_.at(lidar_topic_));
-  pcl_ros::transformPointCloud(*transformed, *transformed, state_.transform);
-  pcl_ros::transformPointCloud(empty_pc, empty_pc, transforms_.at(lidar_topic_));
-  pcl_ros::transformPointCloud(empty_pc, empty_pc, state_.transform);
-
-  octomapper_->insert_scan(odom_to_lidar_.transform.getOrigin(), pc_map_pair_, *transformed, empty_pc);
-
-  // Get updated map from octomapper
-  octomapper_->get_updated_map(pc_map_pair_);
+  mapper_->insertLidarScan(pc, state_.transform * transforms_.at(lidar_topic_));
 
   publish(pc->header.stamp);
 }
@@ -393,12 +337,7 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
 
   cv::Mat image = segmented_ptr->image;
 
-  // Insert into octree
-  octomapper_->insert_camera_free(camera_map_pair_, image, camera_model_,
-                                   state_.transform * transforms_.at(projected_line_topic_));
-
-  // Get updated map from octomapper
-  octomapper_->get_updated_map(camera_map_pair_);
+  mapper_->insertSegmentedImage(image, state_.transform * transforms_.at(projected_line_topic_));
 
   publish(pcl_conversions::toPCL(segmented->header.stamp));
 }
@@ -414,21 +353,7 @@ void ROSMapper::projctedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::Const
   {
     return;
   }
-
-  // Transformed
-  pcl::PointCloud<pcl::PointXYZ> transformed{};
-
-  // Apply transformation from camera to base_link aka robot pose
-  pcl_ros::transformPointCloud(*pc, transformed, state_.transform);
-  transformed.header.stamp = pc->header.stamp;
-  transformed.header.frame_id = "odom";
-  random_pub_.publish(transformed);
-
-  octomapper_->insertCameraProjection(camera_map_pair_, transformed, true);
-  //
-  //  // Get updated map from octomapper
-  octomapper_->get_updated_map(camera_map_pair_);
-
+  mapper_->insertCameraProjection(pc, state_.transform);
   publish(pc->header.stamp);
 }
 
@@ -436,8 +361,10 @@ void ROSMapper::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr &camera
 {
   if (!camera_model_initialized_)
   {
+    image_geometry::PinholeCameraModel camera_model;
     sensor_msgs::CameraInfoConstPtr changed_camera_info = MapUtils::scaleCameraInfo(camera_info, resize_width_, resize_height_);
-    camera_model_.fromCameraInfo(changed_camera_info);
+    camera_model.fromCameraInfo(changed_camera_info);
+    mapper_->setProjectionModel(std::move(camera_model));
 
     camera_model_initialized_ = true;
   }

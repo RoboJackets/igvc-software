@@ -4,7 +4,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
-#include "octomapper.h"
+#include "mapper.h"
 
 
 class ROSMapper
@@ -39,19 +39,13 @@ private:
   cv_bridge::CvImage img_bridge_;
 
   ros::Publisher map_pub_;                                  // Publishes map
-  ros::Publisher blurred_pub_;                              // Publishes blurred map
-  ros::Publisher debug_pub_;                                // Debug version of above
-  ros::Publisher debug_pcl_pub_;                            // Publishes map as individual PCL points
+  ros::Publisher debug_pcl_pub_;                            // Publishes blumap as individual PCL points
   ros::Publisher debug_blurred_pc_;                         // Publishes blurred map as individual PCL points
-  ros::Publisher ground_pub_;                               // Publishes ground points
-  ros::Publisher nonground_pub_;                            // Publishes non ground points
-  ros::Publisher random_pub_;                               // Publisher for debugging pointcloud related things
-  std::map<std::string, tf::StampedTransform> transforms_;  // Map of static transforms TODO: Refactor this
+  std::map<std::string, tf::StampedTransform> transforms_;  // Map of static transforms
   std::unique_ptr<tf::TransformListener> tf_listener_;      // TF Listener
 
   bool use_lines_;
   bool camera_model_initialized_{ false };
-  double resolution_;
   double transform_max_wait_time_;
   int start_x_;   // start x (m)
   int start_y_;   // start y (m)
@@ -60,33 +54,23 @@ private:
   int kernel_size_;
 
   bool debug_;
-  double radius_;  // Radius to filter lidar points // TODO: Refactor to a new node
-  double lidar_miss_cast_distance_;
-  double filter_distance_;
   double blur_std_dev_;
+
+  double resolution_; // Map Resolution
 
   int resize_width_;
   int resize_height_;
 
-  EmptyFilterOptions empty_filter_options_{};
-  BehindFilterOptions behind_filter_options_{};
-
-  radians filter_angle_;
-  radians lidar_start_angle_;
-  radians lidar_end_angle_;
-  radians angular_resolution_;
   std::string lidar_topic_;
   std::string line_topic_;
   std::string camera_frame_;
   std::string projected_line_topic_;
   std::string camera_info_topic_;
   RobotState state_;                      // Odom -> Base_link
-  RobotState odom_to_lidar_;              // Odom -> Lidar
-  RobotState odom_to_camera_projection_;  // Odom -> Camera Projection
 
   image_geometry::PinholeCameraModel camera_model_;
 
-  std::unique_ptr<Octomapper> octomapper_;
+  std::unique_ptr<Mapper> mapper_;
   pc_map_pair pc_map_pair_;      // Struct storing both the octomap for the lidar and the cv::Mat map
   pc_map_pair camera_map_pair_;  // Struct storing both the octomap for the camera projections and the cv::Mat map
 };
