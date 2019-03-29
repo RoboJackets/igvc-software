@@ -166,7 +166,7 @@ void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, c
   int nCols = image.cols;
 
   int i, j;
-  const uchar *p;
+  const uchar* p;
   for (i = 0; i < nRows; ++i)
   {
     p = image.ptr<uchar>(i);
@@ -186,14 +186,38 @@ void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, c
         double d = ground_plane.d;
 
         double t = ((tf::Vector3{ 0, 0, d / c } - camera_to_world.getOrigin()).dot(tf::Vector3{ a, b, c })) /
-            (transformed_ray.dot(tf::Vector3{ a, b, c }));
+                   (transformed_ray.dot(tf::Vector3{ a, b, c }));
 
         tf::Point projected_point = camera_to_world.getOrigin() + transformed_ray * t;
         projected_pc.points.emplace_back(pcl::PointXYZ(static_cast<float>(projected_point.x()),
-            static_cast<float>(projected_point.y()),
-            static_cast<float>(projected_point.z())));
+                                                       static_cast<float>(projected_point.y()),
+                                                       static_cast<float>(projected_point.z())));
       }
     }
   }
+}
+
+sensor_msgs::CameraInfoConstPtr scaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width,
+                                                double height)
+{
+  sensor_msgs::CameraInfoPtr changed_camera_info = boost::make_shared<sensor_msgs::CameraInfo>(*camera_info);
+  changed_camera_info->D = camera_info->D;
+  changed_camera_info->distortion_model = camera_info->distortion_model;
+  changed_camera_info->R = camera_info->R;
+  changed_camera_info->roi = camera_info->roi;
+  changed_camera_info->binning_x = camera_info->binning_x;
+  changed_camera_info->binning_y = camera_info->binning_y;
+
+  double waf = static_cast<double>(width) / static_cast<double>(camera_info->width);
+  double haf = static_cast<double>(height) / static_cast<double>(camera_info->height);
+
+  changed_camera_info->width = static_cast<unsigned int>(width);
+  changed_camera_info->height = static_cast<unsigned int>(height);
+
+  changed_camera_info->K = { { camera_info->K[0] * waf, 0, camera_info->K[2] * waf, 0, camera_info->K[4] * haf,
+                               camera_info->K[5] * haf, 0, 0, 1 } };
+  changed_camera_info->P = { { camera_info->P[0] * waf, 0, camera_info->P[2] * waf, 0, 0, camera_info->P[5] * haf,
+                               camera_info->P[6] * haf, 0, 0, 0, 1, 0 } };
+  return changed_camera_info;
 }
 }  // namespace MapUtils
