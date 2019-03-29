@@ -1,6 +1,7 @@
 #ifndef NODEUTILS_HPP
 #define NODEUTILS_HPP
 
+#include <geometry_msgs/PointStamped.h>
 #include <ros/ros.h>
 #include <Eigen/Dense>
 #include <cmath>
@@ -51,6 +52,19 @@ template <typename T>
 inline T get_distance(T x1, T y1, T x2, T y2)
 {
   return std::hypot(x2 - x1, y2 - y1);
+}
+
+/**
+Calculates euclidian distance between two points
+
+@tparam T the data type of the input points to calculate the euclidian distance for
+@param[in] p1 the <x,y> coords of the first point
+@param[in] p2 the <x,y> coords of the second point
+@return the euclidian distance between both points
+*/
+inline double get_distance(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2)
+{
+  return igvc::get_distance(p1.x, p1.y, p2.x, p2.y);
 }
 
 /**

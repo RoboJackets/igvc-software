@@ -3,6 +3,6 @@
 <launch>
 
     <node name="waypoint_source" pkg="igvc_navigation" type="waypoint_source" output="screen" >
-        <param name="file" value="$(find igvc_navigation)/../sandbox/waypoints.csv" />
+        <param name="file" value="$(find igvc_navigation)/../sandbox/waypoints/waypoints.csv" />
     </node>
 </launch>
