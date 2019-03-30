@@ -60,6 +60,12 @@ std::optional<GroundPlane> filterGroundPlane(const PointCloud& raw_pc, PointClou
   }
 }
 
+void projectTo2D(PointCloud& projected_pc) {
+  for (auto& point : projected_pc.points) {
+    point.z = 0;
+  }
+}
+
 std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground,
                                         RANSACOptions options)
 {

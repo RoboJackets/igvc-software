@@ -134,6 +134,12 @@ void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, c
                     const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world);
 
 /**
+ * Projects all points in projected_pc to z=0
+ * @param projected_pc the pointcloud to project to z=0
+ */
+void projectTo2D(PointCloud& projected_pc);
+
+/**
  * Applied a gaussian blur with a kernel size of kernel_size
  * @param[in/out] blurred_map The map to be blurred
  * @param[in] kernel_size The kernel size to be applied
