@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   igvc_msgs
+  geometry_msgs
 )
 
 find_package(Eigen3 REQUIRED)
