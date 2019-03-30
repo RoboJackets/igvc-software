@@ -4,6 +4,7 @@ WaypointSource::WaypointSource(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 {
   ros::NodeHandle pNh("~");
 
+  igvc::param(pNh, "waypoint_threshold", waypoint_threshold_, 1.0);
   igvc::getParam(pNh, "file", path_);
   load_waypoints_file();
 
@@ -54,8 +55,8 @@ void WaypointSource::position_callback(const nav_msgs::OdometryConstPtr& msg)
   // UTM to odom
   tf_listener_.transformPoint("odom", ros::Time(0), waypoints_.front(), "odom", current_waypoint_odom);
 
-  // move to the next waypoint in the list if we're < 1m away from the waypoint
-  if (igvc::get_distance(msg->pose.pose.position, current_waypoint_odom.point) < 1.0)
+  // move to the next waypoint in the list if we're < waypoint_threshold_ m. away from the waypoint
+  if (igvc::get_distance(msg->pose.pose.position, current_waypoint_odom.point) < waypoint_threshold_)
   {
     // advance to next waypoint.
     if (waypoints_.size() > 1)

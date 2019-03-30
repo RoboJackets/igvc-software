@@ -3,6 +3,9 @@
 <launch>
 
     <node name="waypoint_source" pkg="igvc_navigation" type="waypoint_source" output="screen" >
-        <param name="file" value="$(find igvc_navigation)/../sandbox/waypoints/waypoints.csv" />
+        <!-- file to load waypoints from -->
+        <param name="file" value="$(find igvc_navigation)/../sandbox/waypoints/parking_lot_loop.csv" />
+        <!-- minimum distance in meters before a waypoint is considered reached -->
+        <param name="waypoint_threshold" type="double" value="5.0" />
     </node>
 </launch>
