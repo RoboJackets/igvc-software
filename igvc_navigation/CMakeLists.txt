@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   pcl_ros
   igvc_utils
+  robot_localization
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
