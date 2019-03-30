@@ -25,6 +25,8 @@
 #include <opencv2/core/eigen.hpp>
 #include <opencv2/opencv.hpp>
 
+#include "map_utils.h"
+
 struct pc_map_pair
 {
   boost::shared_ptr<octomap::OcTree> octree;
@@ -70,11 +72,13 @@ public:
 
   explicit Octomapper(ros::NodeHandle pNh);
   void create_octree(pc_map_pair& pair) const;
-  void insert_scan(const tf::Point& sensor_pos_tf, struct pc_map_pair& pc_map_pair, const PCL_point_cloud& raw_pc,
-                   const pcl::PointCloud<pcl::PointXYZ>& empty_pc);
-  void insertCameraProjection(struct pc_map_pair& projection_map_pair, const PCL_point_cloud& raw_pc, bool occupied) const;
-  void insert_camera_free(struct pc_map_pair& projection_map_pair, const cv::Mat& image,
-                          const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world) const;
+//  void insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair &pc_map_pair,
+//      const PCL_point_cloud &raw_pc, const pcl::PointCloud<pcl::PointXYZ> &empty_pc,
+//      const GroundFilterOptions &ground_filter_options,
+//      const ProbabilityModel &probability_model, GroundPlane &ground_plane);
+//  void insertCameraProjection(struct pc_map_pair& projection_map_pair, const PCL_point_cloud& raw_pc, bool occupied) const;
+//  void insert_camera_free(struct pc_map_pair& projection_map_pair, const cv::Mat& image,
+//                          const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world) const;
   void get_updated_map(struct pc_map_pair& pc_map_pair) const;
 
   void insertScan(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, ProbabilityModel model) const;

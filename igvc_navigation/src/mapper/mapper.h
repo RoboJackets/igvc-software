@@ -7,6 +7,20 @@
 #include "octomapper.h"
 #include "map_utils.h"
 
+struct BlurFilterOptions {
+  int kernel;
+  double sigma;
+};
+
+struct ThresholdFilterOptions {
+  double threshold;
+};
+
+struct ProcessImageOptions {
+  BlurFilterOptions blur;
+  ThresholdFilterOptions threshold;
+};
+
 class Mapper {
   using radians = double;
 public:
@@ -14,12 +28,18 @@ public:
 
   void insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_lidar);
   void insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_base);
-  void insertSegmentedImage(const cv::Mat& image, const tf::Transform& odom_to_camera);
+  void insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_camera);
 
   void setProjectionModel(const image_geometry::PinholeCameraModel&& camera_model_);
 
   std::shared_ptr<cv::Mat> getMap();
 private:
+  /**
+   * Performs filtering on the free space of an image
+   * @param[in/out] image the image to be filtered
+   */
+  void processImageFreeSpace(cv::Mat& image) const;
+
   std::unique_ptr<Octomapper> octomapper_;
   pc_map_pair pc_map_pair_;      // Struct storing both the octomap for the lidar and the cv::Mat map
   pc_map_pair camera_map_pair_;  // Struct storing both the octomap for the camera projections and the cv::Mat map
@@ -28,9 +48,16 @@ private:
 
   EmptyFilterOptions empty_filter_options_{};
   BehindFilterOptions behind_filter_options_{};
+  ProcessImageOptions process_image_options_{};
 
-  ros::Publisher camera_projection_pub;                              // Publishes blurred map
+  ros::Publisher camera_projection_pub_;                              // Publishes blurred map
 
+  ProbabilityModel lidar_probability_model_{};
+  ProbabilityModel camera_probability_model_{};
+  GroundFilterOptions ground_filter_options_{};
+  GroundPlane ground_plane_{};
+
+  bool use_ground_filter_;
   bool camera_model_initialized_;
   radians angular_resolution_;
 
