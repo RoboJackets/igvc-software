@@ -31,6 +31,7 @@ private:
 
   // launch params
   std::string path_;  // file to load waypoints from
+  double waypoint_threshold_; // minimum distance in meters before a waypoint is considered reached
 
   // pubs
   ros::Publisher waypoint_pub_;
