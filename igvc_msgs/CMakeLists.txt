@@ -19,6 +19,8 @@ add_message_files(
   system_stats.msg
   map.msg
   igvc_path.msg
+  trajectory_point.msg
+  trajectory.msg
 )
 
 # Generate added messages and services with any dependencies listed here
