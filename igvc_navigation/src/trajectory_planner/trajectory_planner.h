@@ -7,10 +7,10 @@
 
 #include "smooth_control.h"
 
-class PathFollower
+class TrajectoryPlanner
 {
 public:
-  PathFollower();
+  TrajectoryPlanner();
 
 private:
   void pathCallback(const nav_msgs::PathConstPtr& msg);

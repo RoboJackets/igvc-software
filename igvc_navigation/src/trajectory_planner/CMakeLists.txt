@@ -1,0 +1,4 @@
+add_executable(trajectory_follower trajectory_planner.cpp smooth_control.cpp trajectory_planner.h)
+add_dependencies(trajectory_follower igvc_msgs_gencpp)
+target_link_libraries(trajectory_follower ${catkin_LIBRARIES})
+

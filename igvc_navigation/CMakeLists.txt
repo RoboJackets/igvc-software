@@ -186,7 +186,7 @@ add_dependencies(GraphSearch igvc_msgs_gencpp)
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
 add_subdirectory(src/mapper)
-add_subdirectory(src/path_follower)
+add_subdirectory(src/trajectory_planner)
 add_subdirectory(src/path_planner)
 #add_subdirectory(src/state_estimator)
 add_subdirectory(src/waypoint_source)

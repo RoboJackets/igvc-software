@@ -1,5 +1,3 @@
-#define _USE_MATH_DEFINES
-
 #include <Eigen/Dense>
 #include <cmath>
 #include <iostream>
@@ -16,9 +14,9 @@
 #include <igvc_utils/RobotState.hpp>
 #include <thread>
 
-#include "path_follower.h"
+#include "trajectory_planner.h"
 
-PathFollower::PathFollower()
+TrajectoryPlanner::TrajectoryPlanner()
 {
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
@@ -68,23 +66,23 @@ PathFollower::PathFollower()
   igvc::getParam(pNh, "maximum_vel", maximum_vel_);
   igvc::param(pNh, "stop_dist", stop_dist_, 0.9);
 
-  ros::Subscriber path_sub = nh.subscribe("/path", 1, &PathFollower::pathCallback, this);
-  ros::Subscriber encoder_sub = nh.subscribe("/encoders", 1, &PathFollower::encoderCallback, this);
-  ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, &PathFollower::positionCallback, this);
-  ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, &PathFollower::waypointCallback, this);
+  ros::Subscriber path_sub = nh.subscribe("/path", 1, &TrajectoryPlanner::pathCallback, this);
+  ros::Subscriber encoder_sub = nh.subscribe("/encoders", 1, &TrajectoryPlanner::encoderCallback, this);
+  ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, &TrajectoryPlanner::positionCallback, this);
+  ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, &TrajectoryPlanner::waypointCallback, this);
 
   cmd_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
   target_pub_ = nh.advertise<geometry_msgs::PointStamped>("/target_point", 1);
   trajectory_pub_ = nh.advertise<nav_msgs::Path>("/trajectory", 1);
   smoothed_pub_ = nh.advertise<nav_msgs::Path>("/smoothed", 1);
 
-  std::thread trajectory_thread(&PathFollower::trajectoryLoop, this, loop_hz);
+  std::thread trajectory_thread(&TrajectoryPlanner::trajectoryLoop, this, loop_hz);
   ros::spin();
   ROS_INFO("Shutting down...");
   trajectory_thread.join();
 }
 
-void PathFollower::pathCallback(const nav_msgs::PathConstPtr& msg)
+void TrajectoryPlanner::pathCallback(const nav_msgs::PathConstPtr& msg)
 {
   ROS_DEBUG_STREAM("Follower got path. Size: " << msg->poses.size());
   //  path_ = msg;
@@ -94,7 +92,7 @@ void PathFollower::pathCallback(const nav_msgs::PathConstPtr& msg)
   smoothed_pub_.publish(path_);
 }
 
-void PathFollower::waypointCallback(const geometry_msgs::PointStampedConstPtr& msg)
+void TrajectoryPlanner::waypointCallback(const geometry_msgs::PointStampedConstPtr& msg)
 {
   waypoint_ = msg;
 }
@@ -103,14 +101,14 @@ void PathFollower::waypointCallback(const geometry_msgs::PointStampedConstPtr& m
 Constructs a new trajectory to follow using the current path msg and publishes
 the first velocity command from this trajectory.
 */
-void PathFollower::positionCallback(const nav_msgs::OdometryConstPtr& msg)
+void TrajectoryPlanner::positionCallback(const nav_msgs::OdometryConstPtr& msg)
 {
   std::lock_guard<std::mutex> guard(state_mutex_);
   state_.setState(msg);
   last_time_ = msg->header.stamp;
 }
 
-nav_msgs::PathConstPtr PathFollower::getPatchedPath(const nav_msgs::PathConstPtr& msg) const
+nav_msgs::PathConstPtr TrajectoryPlanner::getPatchedPath(const nav_msgs::PathConstPtr& msg) const
 {
   // Patch heading into each point
   nav_msgs::Path new_path = *msg;
@@ -151,7 +149,7 @@ nav_msgs::PathConstPtr PathFollower::getPatchedPath(const nav_msgs::PathConstPtr
   return smoothed_path;
 }
 
-void PathFollower::encoderCallback(const igvc_msgs::velocity_pairConstPtr& msg)
+void TrajectoryPlanner::encoderCallback(const igvc_msgs::velocity_pairConstPtr& msg)
 {
   std::lock_guard<std::mutex> guard(state_mutex_);
   state_.setVelocity(msg);
@@ -161,7 +159,7 @@ void PathFollower::encoderCallback(const igvc_msgs::velocity_pairConstPtr& msg)
 /**
  * Thread that generates the trajectories using the SmoothController
  */
-void PathFollower::trajectoryLoop(double loop_hz)
+void TrajectoryPlanner::trajectoryLoop(double loop_hz)
 {
   ros::Rate rate(loop_hz);
   while (ros::ok())
@@ -235,7 +233,7 @@ void PathFollower::trajectoryLoop(double loop_hz)
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "path_follower");
-  PathFollower path_follower;
+  ros::init(argc, argv, "trajectory_planner");
+  TrajectoryPlanner path_follower;
   return 0;
 }
