@@ -22,6 +22,55 @@ sensor_msgs::Image outmsg_lines;
 sensor_msgs::Image outmsg_barrels;
 
 /*
+ * Holds all the ranges for a color being detected in the simulator;
+ * done for improved readability
+ */
+struct Color {
+
+  Color(int min_b, int max_b, int min_g, int max_g, int min_r, int max_r) {
+    _min_b = min_b;
+    _max_b = max_b;
+    _min_g = min_g;
+    _max_g = max_g;
+    _min_r = min_r;
+    _max_r = max_r;
+  }
+
+  int _min_b;
+  int _max_b;
+  int _min_g;
+  int _max_g;
+  int _min_r;
+  int _max_r;
+};
+
+const Color PURPLE = Color(120, 140, 0, 20, 70, 85);
+const Color ORANGE = Color(0, 255, 0, 160, 240, 255);
+const Color WHITE = Color(230, 255, 230, 255, 230, 255);
+const Color BLACK = Color(0, 45, 0, 45, 0, 45);
+
+/*
+ * For readability and conciseness, compares the color of the pixel with the desired color.
+ * Returns true if the pixel_color is in the bounds for B, G, and R; returns false otherwise
+ */
+bool color_check(cv::Vec3b pixel_color, Color desired_color)
+{
+  int b_value = int(pixel_color.val[0]);
+  int g_value = int(pixel_color.val[1]);
+  int r_value = int(pixel_color.val[2]);
+
+  if (b_value >= desired_color._min_b && b_value <= desired_color._max_b) {
+    if (g_value >= desired_color._min_g && g_value <= desired_color._max_g) {
+      if (r_value >= desired_color._min_r && r_value <= desired_color._max_r) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/*
  * Responsible for detecting the lines (currently set to a purple color) and
  * illuminating them as white (and setting all other pixels to black).
  */
@@ -40,14 +89,6 @@ void handle_image_lines(const sensor_msgs::ImageConstPtr& msg) {
   frame = cv_ptr->image; // Input image
   cv::Mat output(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0)); // Ouput image (B&W)
 
-  // Set color ranges (8 bit BGR) for line detection -> looking for purple
-  const int min_b = 120;
-  const int max_b = 140;
-  const int min_g = 0;
-  const int max_g = 20;
-  const int min_r = 70;
-  const int max_r = 85;
-
   const int white_color = 255;
   const int black_color = 0;
 
@@ -56,7 +97,7 @@ void handle_image_lines(const sensor_msgs::ImageConstPtr& msg) {
 
       cv::Vec3b color = frame.at<cv::Vec3b>(cv::Point(columnCount,rowCount));
 
-      if (int(color.val[0]) > min_b && int(color.val[0]) < max_b && int(color.val[1]) >= min_g && int(color.val[1]) < max_g && int(color.val[2]) > min_r && int(color.val[2]) < max_r) {
+      if (color_check(color, PURPLE)) {
         output.at<uchar>(cv::Point(columnCount, rowCount)) = white_color;
       } else {
         output.at<uchar>(cv::Point(columnCount, rowCount)) = black_color;
@@ -91,21 +132,6 @@ void handle_image_barrels(const sensor_msgs::ImageConstPtr& msg) {
   frame = cv_ptr->image; // Input image
   cv::Mat output(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0)); // Ouput image (B&W)
 
-  // Set color ranges (8 bit BGR) for barrel detection
-  // Detects the black base of the barrel
-  const int max_b_obstacle_black = 45;
-  const int max_g_obstacle_black = 45;
-  const int max_r_obstacle_black = 45;
-
-  // Detects the orange parts of the barrel
-  const int max_g_obstacle_orange = 160;
-  const int min_r_obstacle_orange = 240;
-
-  // Detects the white parts of the barrel
-  const int min_b_obstacle_white = 230;
-  const int min_g_obstacle_white = 230;
-  const int min_r_obstacle_white = 230;
-
   const int white_color = 255;
   const int black_color = 0;
 
@@ -114,11 +140,11 @@ void handle_image_barrels(const sensor_msgs::ImageConstPtr& msg) {
 
       cv::Vec3b color = frame.at<cv::Vec3b>(cv::Point(columnCount,rowCount));
 
-      if (int(color.val[0]) < max_b_obstacle_black && int(color.val[1]) < max_g_obstacle_black && int(color.val[2]) < max_r_obstacle_black) {
+      if (color_check(color, BLACK)) {
         output.at<uchar>(cv::Point(columnCount, rowCount)) = white_color;
-      } else if (int(color.val[1]) < max_g_obstacle_orange && int(color.val[2]) > min_r_obstacle_orange) {
+      } else if (color_check(color, ORANGE)) {
         output.at<uchar>(cv::Point(columnCount, rowCount)) = white_color;
-      } else if (int(color.val[0]) > min_b_obstacle_white && int(color.val[1]) > min_g_obstacle_white && int(color.val[2]) > min_r_obstacle_white) {
+      } else if (color_check(color, WHITE)) {
         output.at<uchar>(cv::Point(columnCount, rowCount)) = white_color;
       } else {
         output.at<uchar>(cv::Point(columnCount, rowCount)) = black_color;
@@ -182,7 +208,10 @@ int main(int argc, char** argv) {
   ros::NodeHandle nh;
 
   // Will call publish to update the published topics -> Set the publishing rate here
-  ros::Timer timer = nh.createTimer(ros::Duration(1.0/30), publish);
+  
+  const int rate = atoi(argv[1]); // This is the rate for how often it should publish as an argument from command line
+
+  ros::Timer timer = nh.createTimer(ros::Duration(1.0/rate), publish);
 
   ros::spin();
 
