@@ -25,7 +25,7 @@ FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   igvc::getParam(pNh, "publish_expanded", publish_expanded_);
   igvc::getParam(pNh, "follow_old_path", follow_old_path_);
   igvc::getParam(pNh, "lookahead_dist", lookahead_dist_);
-  igvc::getParam(pNh, "occupancy_threshold", occupancy_threshold_, [](float x){ return x > 0.0 && x < 1.0;});
+  igvc::getParam(pNh, "occupancy_threshold", occupancy_threshold_, [](float x) { return x > 0.0 && x < 1.0; });
 
   node_grid_.setConfigurationSpace(static_cast<float>(configuration_space_));
   node_grid_.setOccupancyThreshold(static_cast<float>(occupancy_threshold_));
