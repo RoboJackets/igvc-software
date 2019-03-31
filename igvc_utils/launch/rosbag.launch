@@ -7,5 +7,5 @@
     -->
 <launch>
     <node pkg="rosbag" type="record" name="record" output="screen"
-          args="-a -x '(.*)image(.*)*' -e '(.*)/image_raw/compressed' -o $(env HOME)/data/$(env CHASSIS_NAME)_$(env LOCATION)" />
+          args="-a -x '(.*)image(.*)*' usb_cam_center/image_raw/compressed usb_cam_left/image_raw/compressed usb_cam_right/image_raw/compressed -o $(env HOME)/data/$(env CHASSIS_NAME)_$(env LOCATION)" />
 </launch>
