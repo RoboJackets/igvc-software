@@ -20,12 +20,12 @@ enum class Assertion
 };
 
 template <class T>
-inline std::string to_string(const std::vector<T>& v)
+inline std::string to_string(const std::vector<T> &v)
 {
   std::stringstream ss;
-  for(size_t i = 0; i < v.size(); ++i)
+  for (size_t i = 0; i < v.size(); ++i)
   {
-    if(i != 0)
+    if (i != 0)
       ss << ",";
     ss << v[i];
   }
@@ -89,7 +89,8 @@ inline void assert_with_default(const std::string &node_namespace, std::vector<T
   {
     if (!lambda(element))
     {
-      ROS_WARN_STREAM(message << element << condition_string << " Setting to default value [" << to_string(default_value) << "].");
+      ROS_WARN_STREAM(message << element << condition_string << " Setting to default value ["
+                              << to_string(default_value) << "].");
       variable = default_value;
     }
   }
@@ -112,8 +113,8 @@ inline void assert_positive_with_default(const std::string &node_namespace, std:
   std::ostringstream ss;
   ss << "[" << node_namespace << "] " << variable_name << " ([";
   ss << to_string(variable) << "]) includes element ";
-  assert_with_default(node_namespace, variable, [](T x) { return x > 0; }, std::forward<std::vector<T>>(default_value), ss.str(),
-                      " greater than 0.");
+  assert_with_default(node_namespace, variable, [](T x) { return x > 0; }, std::forward<std::vector<T>>(default_value),
+                      ss.str(), " greater than 0.");
 }
 
 template <class T>
@@ -133,8 +134,8 @@ inline void assert_negative_with_default(const std::string &node_namespace, std:
   std::ostringstream ss;
   ss << "[" << node_namespace << "] " << variable_name << " ([";
   ss << to_string(variable) << "]) includes element ";
-  assert_with_default(node_namespace, variable, [](T x) { return x < 0; }, std::forward<std::vector<T>>(default_value), ss.str(),
-                      " less than 0.");
+  assert_with_default(node_namespace, variable, [](T x) { return x < 0; }, std::forward<std::vector<T>>(default_value),
+                      ss.str(), " less than 0.");
 }
 
 template <class T>
@@ -217,9 +218,10 @@ inline void check_assertion(Assertion assertion, const std::string &node_namespa
 
 template <class T, class AssertionFunction>
 inline void check_assertion(AssertionFunction assertion, const std::string &node_namespace, T &variable,
-    const std::string &variable_name)
+                            const std::string &variable_name)
 {
-  if (!assertion(variable)) {
+  if (!assertion(variable))
+  {
     fail_with_message(node_namespace, variable_name, variable, "able to pass the assertion.");
   }
 }
