@@ -83,7 +83,8 @@ backup_dir = cfg_params['backup']
 
 if args.load_model is not None:
     print('Loading model from %s.' % args.load_model)
-    model = torch.load(args.load_model)
+    model = models.model.UNet(args.im_size, args.kernel_size)
+    model.load_state_dict(torch.load(args.load_model))
 elif args.test:
     print('Missing model file for evaluating test set.')
     exit()
@@ -174,7 +175,6 @@ def evaluate(split, verbose=False, n_batches=None):
     n_examples = 0
     if split == 'val':
         loader = val_loader
-        #loader = train_loader
     elif split == 'test':
         loader = test_loader
     for batch_i, batch in enumerate(loader):
