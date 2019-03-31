@@ -351,9 +351,12 @@ Adjust angle to lie within the polar range [-PI, PI]
 inline void fit_to_polar(double &angle)
 {
   angle = std::fmod(angle, 2 * M_PI);
-  if (angle > M_PI) {
+  if (angle > M_PI)
+  {
     angle -= 2 * M_PI;
-  } else if (angle < -M_PI) {
+  }
+  else if (angle < -M_PI)
+  {
     angle += 2 * M_PI;
   }
 }
