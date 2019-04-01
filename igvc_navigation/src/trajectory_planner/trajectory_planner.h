@@ -3,7 +3,8 @@
 
 #include <nav_msgs/Path.h>
 #include <ros/ros.h>
-#include <mutex>
+
+#include <igvc_utils/robot_state.h>
 
 #include "smooth_control.h"
 
@@ -17,7 +18,17 @@ private:
   void waypointCallback(const geometry_msgs::PointStampedConstPtr& msg);
   void positionCallback(const nav_msgs::OdometryConstPtr& msg);
   void encoderCallback(const igvc_msgs::velocity_pairConstPtr& msg);
-  void trajectoryLoop(double loop_hz);
+  void updateTrajectory();
+
+  void publishTrajectory(const igvc_msgs::trajectoryConstPtr& trajectory);
+
+  /**
+   * Returns
+   * @return
+   */
+  std::optional<igvc_msgs::trajectoryPtr> getSmoothPath();
+
+  void publishTarget(const RobotState& target);
   nav_msgs::PathConstPtr getPatchedPath(const nav_msgs::PathConstPtr& msg) const;
 
   ros::Publisher cmd_pub_;
@@ -33,8 +44,6 @@ private:
 
   double stop_dist_{};
   double maximum_vel_{};
-  std::mutex state_mutex_;
-  std::mutex path_mutex_;
 
   std::unique_ptr<SmoothControl> controller_;
 };

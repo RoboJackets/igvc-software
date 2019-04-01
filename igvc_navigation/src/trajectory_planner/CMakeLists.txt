@@ -1,4 +1,4 @@
-add_executable(trajectory_planner trajectory_planner.cpp smooth_control.cpp trajectory_planner.h)
+add_executable(trajectory_planner trajectory_planner.cpp smooth_control.cpp motion_profiler.cpp motion_profiler.h)
 add_dependencies(trajectory_planner igvc_msgs_gencpp)
-target_link_libraries(trajectory_planner ${catkin_LIBRARIES})
+target_link_libraries(trajectory_planner ${catkin_LIBRARIES} igvc_state)
 

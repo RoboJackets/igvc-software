@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Follower -->
+    <node name="path_follower" pkg="igvc_navigation" type="path_follower" output="screen">
+        <rosparam>
+            axle_length: 0.52
+            smooth_control:
+                k1: 1.8
+                k2: 5
+
+            path_generation:
+                simulation_frequency: 20.0
+                simulation_horizon: 10.0
+                velocity: 1.0
+
+            target_selection:
+                lookahead_dist: 0.04
+                reached_distance: 0.1
+                move_threshold: 0.1
+
+            curvature_blending:
+                blending_distance: 1.0
+        </rosparam>
+        <!-- How far away robot should be from the waypoint before it stops -->
+        <param name="stop_dist" type="double" value="0.7"/>
+        <!-- Smooth Control Parameters -->
+        <param name="target_v" type="double" value="1.0"/>
+        <param name="k1" type="double" value="1.8"/>
+        <param name="k2" type="double" value="5"/>
+        <param name="debug" type="bool" value="true"/>
+    </node>
+</launch>

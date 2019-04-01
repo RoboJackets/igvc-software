@@ -18,22 +18,47 @@ https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 
 #include <nav_msgs/Path.h>
 
-#include <igvc_msgs/velocity_pair.h>
+#include <igvc_msgs/trajectory.h>
 #include <igvc_utils/NodeUtils.hpp>
-#include <igvc_utils/RobotState.hpp>
+#include <igvc_utils/robot_state.h>
 
-struct Action
+struct SmoothControlOptions
 {
-  double w;
-  double dt;
+  double k1;
+  double k2;
+};
+
+struct PathGenerationOptions
+{
+  double simulation_horizon;
+  double simulation_frequency;
+  double simulation_velocity;
+
+  int getNumSamples() const {
+    return static_cast<int>(simulation_horizon * simulation_frequency);
+  }
+};
+
+struct TargetSelectionOptions
+{
+  double lookahead_dist;
+  double target_reached_distance;
+  double target_move_threshold;
+};
+
+struct CurvatureBlendingOptions
+{
+  double blending_distance;
 };
 
 class SmoothControl
 {
 public:
-  SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
-                double m_lookahead_dist, double simulation_horizon, double target_reached_distance,
-                double target_move_threshold, double acceleration_limit, double transition_distance);
+//  SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
+//                double lookahead_dist, double simulation_horizon, double target_reached_distance,
+//                double target_move_threshold, double transition_distance);
+  SmoothControl(SmoothControlOptions smooth_control_options, PathGenerationOptions path_generation_options,
+                TargetSelectionOptions target_selection_options, CurvatureBlendingOptions curvature_blending_options, double axle_length);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
    * using the procedure described in 'A Smooth Control Law for Graceful Motion of
@@ -41,26 +66,21 @@ public:
    * generated and then combined with a target velocity to produce a control law for
    * the angular velocity of the robot (steering).
    *
-   * @param[out] vel velocity_pair message to store command in
    * @param[in] path path to generate smooth control law for
    * @param[out] trajectory msg to store visualization trajectory in
    * @param[in] start_pos current position of the robot
    * @param[out] target the target pose the controller is planning for
    */
-  void getPath(igvc_msgs::velocity_pair &vel, const nav_msgs::PathConstPtr &path, nav_msgs::Path &trajectory,
-               const RobotState &start_pos, RobotState &target);
+  void getPath(const nav_msgs::PathConstPtr& path, const igvc_msgs::trajectoryPtr& trajectory_ptr,
+               const RobotState& start_pos);
 
 private:
-  double k1_, k2_;
+  SmoothControlOptions smooth_control_options_;
+  PathGenerationOptions path_generation_options_;
+  TargetSelectionOptions target_selection_options_;
+  CurvatureBlendingOptions curvature_blending_options_;
   double axle_length_;
-  double simulation_frequency_;
-  double target_velocity_;
-  double lookahead_dist_;
-  double simulation_horizon_;
-  double target_reached_distance_;
-  double target_move_threshold_;
-  double acceleration_limit_;
-  double transition_distance_;
+
   ros::Publisher target_pub_;
   ros::Publisher closest_point_pub_;
   std::optional<RobotState> target_;
@@ -73,8 +93,7 @@ private:
    * @param[in] dt the duration for which the generated command will be executed for
    * @return A control command for the next iteration
    */
-  Action getAction(const RobotState& state, const RobotState& target, const RobotState& second_target,
-                   const ros::Duration& dt) const;
+  RobotControl getControl(const RobotState& state, const RobotState& target, const RobotState& second_target) const;
 
   /**
    * Returns the curvature of the path from the current state to the target
@@ -83,21 +102,6 @@ private:
    * @return intantaneous curvature of the path from state to target
    */
   double getCurvature(const RobotState& state, const RobotState& target) const;
-
-  /**
-   * Propogates the current state given the current velocity and angular velocity
-   * command for visualization purposes.
-   * angles [delta, theta].
-   *
-   * Makes extensive use of differential drive odometry equations to calculate resultant
-   * pose.
-   *
-   * Source: http://www8.cs.umu.se/kurser/5DV122/HT13/material/Hellstrom-ForwardKinematics.pdf
-   *
-   * @param[in] action Trajectory action to visualize
-   * @param[in/out] state The state to use for state propogation
-   */
-  void propogateState(const Action& action, RobotState& state);
 
   /**
    * Returns if we have reached the target, given the current state and the target
@@ -153,29 +157,14 @@ private:
   size_t getClosestIndex(const nav_msgs::PathConstPtr& path, const RobotState& state) const;
 
   /**
-   * Calculates the velocity to go at for the next dt that stays within the acceleration limits
+   * Calculates the curvature by blending the curvature by pathing to the current target and the curvature
+   * by pathing to the next target, and taking a weighted sum based on distance.
    * @param[in] state current state, which includes current velocity
    * @param[in] k1 curvature of path to follow to the current target
    * @param[in] k2 curvature of path to follow to the next target
-   * @param[in] dt timestep to generate control for
-   * @return an Action that follows the curvature and stays within the acceleration limits
+   * @return the blended curvature
    */
-  Action motionProfile(const RobotState& state, double distance, double K1, double K2, const ros::Duration& dt) const;
-
-  /**
-   * Returns an action given the target left and right wheel velocities
-   * @param left left wheel velocity
-   * @param right right wheel velocity
-   * @return the action that would result from the given left and right wheel velocities
-   */
-  Action toAction(VelocityProfile left, VelocityProfile right) const;
-
-  /**
-   * Converts velocity and angular velocity to left and right wheel velocities
-   * @param[in] vel_msg message to store wheel velocities in
-   * @param[in/out] action Action to convert from
-   */
-  void getWheelVelocities(igvc_msgs::velocity_pair& vel_msg, double w, double v) const;
+  double blendCurvature(double distance, double K1, double K2) const;
 };
 
 #endif

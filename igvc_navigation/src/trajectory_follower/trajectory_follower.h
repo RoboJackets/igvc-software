@@ -10,6 +10,7 @@
 
 #include <igvc_msgs/trajectory.h>
 #include <igvc_msgs/trajectory_point.h>
+#include <igvc_utils/robot_control.h>
 
 class TrajectoryFollower {
  public:

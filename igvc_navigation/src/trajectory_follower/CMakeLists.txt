@@ -1,4 +1,4 @@
 add_executable(trajectory_follower trajectory_follower.cpp)
 add_dependencies(trajectory_follower igvc_msgs_gencpp)
-target_link_libraries(trajectory_follower ${catkin_LIBRARIES})
+target_link_libraries(trajectory_follower ${catkin_LIBRARIES} igvc_state)
 

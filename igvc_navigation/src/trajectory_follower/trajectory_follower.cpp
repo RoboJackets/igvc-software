@@ -5,10 +5,9 @@
 #include <iostream>
 
 #include <igvc_utils/NodeUtils.hpp>
-#include <igvc_utils/RobotState.hpp>
-#include <igvc_utils/RobotControl.hpp>
 #include <thread>
 
+#include <igvc_utils/robot_control.h>
 #include "trajectory_follower.h"
 
 TrajectoryFollower::TrajectoryFollower()
@@ -65,6 +64,7 @@ RobotControl TrajectoryFollower::getControl()
       return RobotControl::fromKV(curvature, velocity, axle_length_);
     }
   }
+  return RobotControl::fromKV(trajectory_->trajectory.back().curvature, trajectory_->trajectory.back().velocity, axle_length_);
 }
 
 int main(int argc, char** argv)
