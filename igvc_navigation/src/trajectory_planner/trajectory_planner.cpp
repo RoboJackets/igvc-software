@@ -158,6 +158,19 @@ void TrajectoryPlanner::encoderCallback(const igvc_msgs::velocity_pairConstPtr& 
 
 /**
  * Thread that generates the trajectories using the SmoothController
+ * Generate Path:
+ * getClosestIndex
+ * get closest & second closest target
+ * get action from current position based on target using curvature blending
+ * propogate state
+ * add to path
+ *
+ * Three pass:
+ * 1: v = min(v, thing)
+ * 2: forward pass
+ * 3: backward pass
+ *
+ * publish trajectory
  */
 void TrajectoryPlanner::trajectoryLoop(double loop_hz)
 {
@@ -198,7 +211,7 @@ void TrajectoryPlanner::trajectoryLoop(double loop_hz)
 
         RobotState target;
         std::unique_lock<std::mutex> guard(path_mutex_);
-        controller_->getTrajectory(vel, path_, trajectory_msg, state_, target);
+        controller_->getPath(vel, path_, trajectory_msg, state_, target);
         guard.unlock();
 
         trajectory_pub_.publish(trajectory_msg);

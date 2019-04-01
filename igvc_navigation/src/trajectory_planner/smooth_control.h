@@ -22,20 +22,8 @@ https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 #include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/RobotState.hpp>
 
-struct VelocityProfile
-{
-  double v_start;
-  double v_stop;
-
-  double average() const
-  {
-    return (v_start + v_stop) / 2;
-  }
-};
-
 struct Action
 {
-  VelocityProfile velocity;
   double w;
   double dt;
 };
@@ -45,7 +33,7 @@ class SmoothControl
 public:
   SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
                 double m_lookahead_dist, double simulation_horizon, double target_reached_distance,
-                double target_move_threshold, double acceleration_limit, double beta, double lambda, double transition_distance);
+                double target_move_threshold, double acceleration_limit, double transition_distance);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
    * using the procedure described in 'A Smooth Control Law for Graceful Motion of
@@ -56,11 +44,11 @@ public:
    * @param[out] vel velocity_pair message to store command in
    * @param[in] path path to generate smooth control law for
    * @param[out] trajectory msg to store visualization trajectory in
-   * @param[in] cur_pos current position of the robot
+   * @param[in] start_pos current position of the robot
    * @param[out] target the target pose the controller is planning for
    */
-  void getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs::PathConstPtr& path, nav_msgs::Path& trajectory,
-                     const RobotState& cur_pos, RobotState& target);
+  void getPath(igvc_msgs::velocity_pair &vel, const nav_msgs::PathConstPtr &path, nav_msgs::Path &trajectory,
+               const RobotState &start_pos, RobotState &target);
 
 private:
   double k1_, k2_;
@@ -72,8 +60,6 @@ private:
   double target_reached_distance_;
   double target_move_threshold_;
   double acceleration_limit_;
-  double beta_;
-  double lambda_;
   double transition_distance_;
   ros::Publisher target_pub_;
   ros::Publisher closest_point_pub_;
@@ -134,8 +120,7 @@ private:
                                                       const std::optional<RobotState>& target, size_t path_index) const;
 
   /**
-   * Acquires a new target which is lookahead_dist_ away from the current position, interpolating between points
-   * on the path
+   * Acquires a new target which is at least lookahead_dist_ away from the current position
    * @param[in] path path from which to find a target position
    * @param[in] state current state of the robot
    * @param[in] state_index the index of the closest point on the path to the current state

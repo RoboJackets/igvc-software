@@ -1,8 +1,8 @@
 #include "smooth_control.h"
 #include <algorithm>
 
-void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs::PathConstPtr& path,
-                                  nav_msgs::Path& trajectory, const RobotState& start_pos, RobotState& target)
+void SmoothControl::getPath(igvc_msgs::velocity_pair &vel, const nav_msgs::PathConstPtr &path,
+                            nav_msgs::Path &trajectory, const RobotState &start_pos, RobotState &target)
 {
   RobotState state = start_pos;
   std::optional<RobotState> simulation_target = target_;
@@ -290,11 +290,7 @@ Action SmoothControl::motionProfile(const RobotState& state, double distance, do
     K = K1;
   }
 
-  // Calculate velocity as function of curvature
-  double v = target_velocity_ / (1 + beta_ * std::pow(std::abs(K), lambda_));
-  //  ROS_INFO_STREAM("K: " << K << ", v: " << target_velocity_ << " -> " << v);
-  // Get wheel velocities for the requested state
-  double w = K * v;
+  double w = K * target_velocity_;
   igvc_msgs::velocity_pair wheel_velocity;
   getWheelVelocities(wheel_velocity, w, v);
   //  return toAction({ state.velocity.left, wheel_velocity.left_velocity}, { state.velocity.right,
