@@ -1,3 +1,3 @@
 Header header
 igvc_msgs/trajectory_point[] trajectory
-float64 trajectory_resolution
+float64 time_resolution
