@@ -7,6 +7,14 @@
         <param name="frame_id"            type="string" value="/lidar"/>
         <param name="inverted"            type="bool"   value="false"/>
         <param name="angle_compensate"    type="bool"   value="true"/>
+        <!--
+            scan_mode dictates the RPLIDAR A3's sample rate
+
+            Scan Modes:
+                "Boost" => 8000 samples
+                "Sensitivity" => 4000 samples
+                "Express" => 2000 samples
+        -->
         <param name="scan_mode"           type="string" value="Boost"/>
     </node>
     <node name="scan_to_pointcloud" pkg="igvc_gazebo" type="scan_to_pointcloud" output="screen" >
