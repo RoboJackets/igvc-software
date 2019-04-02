@@ -3,6 +3,8 @@
 
 <!-- Default velodyne IP Address: http://192.168.1.201/ -->
 
+<!-- ROS Velodyne vlp-16 tutorial: http://wiki.ros.org/velodyne/Tutorials/Getting%20Started%20with%20the%20Velodyne%20VLP16-->
+
 <launch>
 
   <!-- declare arguments with default values -->
