@@ -7,5 +7,4 @@ add_executable(motor_controller
 
 add_dependencies(motor_controller igvc_msgs_gencpp)
 
-target_link_libraries(motor_controller ${catkin_LIBRARIES} SerialPort)
 target_link_libraries(motor_controller ${catkin_LIBRARIES} EthernetSocket)

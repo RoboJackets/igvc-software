@@ -168,6 +168,5 @@ include_directories(
 
 add_subdirectory(src/pid_tester)
 add_subdirectory(src/ethernet)
-add_subdirectory(src/serial)
 add_subdirectory(src/speed_compare)
 add_subdirectory(src/system_stats)
