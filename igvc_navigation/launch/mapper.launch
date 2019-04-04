@@ -1,6 +1,6 @@
 <launch>
     <!-- Map Node -->
-    <node name="mapper" pkg="igvc_navigation" type="mapper" output="screen" >
+    <node name="mapper" pkg="igvc_navigation" type="mapper" output="screen">
             <rosparam command="load" file="$(find igvc_navigation)/launch/octomap.yaml"/>
     </node>
 

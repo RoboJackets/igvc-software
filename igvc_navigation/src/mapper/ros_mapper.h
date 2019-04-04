@@ -71,7 +71,5 @@ private:
   image_geometry::PinholeCameraModel camera_model_;
 
   std::unique_ptr<Mapper> mapper_;
-  pc_map_pair pc_map_pair_;      // Struct storing both the octomap for the lidar and the cv::Mat map
-  pc_map_pair camera_map_pair_;  // Struct storing both the octomap for the camera projections and the cv::Mat map
 };
 #endif  // PROJECT_MAPPER_H
