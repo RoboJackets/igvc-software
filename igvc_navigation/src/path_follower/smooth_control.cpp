@@ -169,19 +169,18 @@ RobotState SmoothControl::getTargetPosition(const nav_msgs::PathConstPtr& path, 
 unsigned int SmoothControl::getClosestPosition(const nav_msgs::PathConstPtr& path, const RobotState& state) const
 {
   double closest = state.distTo(path->poses[0].pose.position.x, path->poses[0].pose.position.y);
+  size_t closest_index = 0;
 
-  for (unsigned int path_index = 0; path_index < path->poses.size(); path_index++)
+  for (size_t path_index = 0; path_index < path->poses.size(); path_index++)
   {
     double cur_dist = state.distTo(path->poses[path_index].pose.position.x, path->poses[path_index].pose.position.y);
     if (cur_dist <= closest)
     {
       closest = cur_dist;
-    }
-    else  // Derivative < 0, found maximum
-    {
-      return path_index;
+      closest_index = path_index;
     }
   }
+  return closest_index;
 }
 
 void SmoothControl::getWheelVelocities(igvc_msgs::velocity_pair& vel_msg, const Action& action) const
