@@ -37,14 +37,11 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  igvc::getParam(pNh, "octree/resolution", resolution_);
   igvc::getParam(pNh, "map/length", length_x_);
   igvc::getParam(pNh, "map/width", width_y_);
   igvc::getParam(pNh, "map/start_x", start_x_);
   igvc::getParam(pNh, "map/start_y", start_y_);
-
-  igvc::getParam(pNh, "blur/kernel_size", kernel_size_);
-  igvc::getParam(pNh, "blur/std_dev", blur_std_dev_);
+  igvc::getParam(pNh, "octree/resolution", resolution_);
 
   igvc::getParam(pNh, "topics/lidar", lidar_topic_);
   igvc::getParam(pNh, "topics/line_segmentation", line_topic_);
@@ -210,37 +207,27 @@ bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, uint64 t
  */
 void ROSMapper::publish(uint64_t stamp)
 {
-  // Combine line and lidar maps, then blur them
-  cv::Mat blurred_map;
-  if (pc_map_pair_.map)
-  {
-    blurred_map = pc_map_pair_.map->clone();
+  ROS_INFO_STREAM_THROTTLE(1, "trying to get map");
+  std::optional<cv::Mat> map = mapper_->getMap();
+  ROS_INFO_STREAM_THROTTLE(1, "got map");
+  if (!map) {
+    ROS_WARN_STREAM_THROTTLE(1, "Couldn't get a map");
   }
-  else
-  {
-    blurred_map = cv::Mat(camera_map_pair_.map->size().height, camera_map_pair_.map->size().width, CV_8UC1, 127);
-  }
-  if (use_lines_)
-  {
-    cv::max(blurred_map, *camera_map_pair_.map, blurred_map);
-  }
-  MapUtils::blur(blurred_map, kernel_size_);
-
   igvc_msgs::map message;
   sensor_msgs::Image image;
 
-  img_bridge_ = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, blurred_map);
+  img_bridge_ = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, *map);
   img_bridge_.toImageMsg(image);
+
+  ROS_INFO_STREAM_THROTTLE(1, "converted image");
   setMessageMetadata(message, image, stamp);
+  ROS_INFO_STREAM_THROTTLE(1, "set metadata");
   map_pub_.publish(message);
+  ROS_INFO_STREAM_THROTTLE(1, "published");
 
   if (debug_)
   {
-    if (pc_map_pair_.map)
-    {
-      publishAsPCL(debug_pcl_pub_, *pc_map_pair_.map, "/odom", stamp);
-    }
-    publishAsPCL(debug_blurred_pc_, blurred_map, "/odom", stamp);
+      publishAsPCL(debug_pcl_pub_, *map, "/odom", stamp);
   }
 }
 
@@ -251,6 +238,9 @@ void ROSMapper::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, cons
   {
     for (int j = 0; j < length_x_ / resolution_; j++)
     {
+      if (i > mat.rows || j > mat.cols) {
+//        ROS_ERROR_STREAM("i: " << i << ", j: " << j);
+      }
       pcl::PointXYZRGB p;
       uchar prob = mat.at<uchar>(i, j);
       if (prob > 127)

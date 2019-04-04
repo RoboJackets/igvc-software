@@ -21,10 +21,14 @@ struct ProcessImageOptions {
   ThresholdFilterOptions threshold;
 };
 
+struct CombinedMapOptions {
+  BlurFilterOptions blur;
+};
+
 class Mapper {
   using radians = double;
 public:
-  Mapper(const ros::NodeHandle& pNh);
+  Mapper(ros::NodeHandle& pNh);
 
   void insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_lidar);
   void insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_base);
@@ -32,7 +36,7 @@ public:
 
   void setProjectionModel(const image_geometry::PinholeCameraModel&& camera_model_);
 
-  std::shared_ptr<cv::Mat> getMap();
+  std::optional<cv::Mat> getMap();
 private:
   /**
    * Performs filtering on the free space of an image
@@ -49,8 +53,9 @@ private:
   EmptyFilterOptions empty_filter_options_{};
   BehindFilterOptions behind_filter_options_{};
   ProcessImageOptions process_image_options_{};
+  CombinedMapOptions combined_map_options_{};
 
-  ros::Publisher camera_projection_pub_;                              // Publishes blurred map
+  ros::Publisher camera_projection_pub_;
 
   ProbabilityModel lidar_probability_model_{};
   ProbabilityModel camera_probability_model_{};
@@ -59,10 +64,12 @@ private:
 
   bool use_ground_filter_;
   bool camera_model_initialized_;
+  bool use_lines_;
   radians angular_resolution_;
 
   double resolution_; // Map Resolution
   double radius_;  // Radius to filter lidar points
+  double combined_blur_kernel_size_;
 
 };
 

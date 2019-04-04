@@ -82,7 +82,7 @@ std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& gr
   seg.setMaxIterations(options.iterations);
   seg.setDistanceThreshold(options.distance_threshold);
   seg.setAxis(Eigen::Vector3f(0, 0, 1));
-  seg.setEpsAngle(options.distance_threshold);
+  seg.setEpsAngle(options.eps_angle);
 
   PointCloud::Ptr cloud_filtered = raw_pc.makeShared();
 
