@@ -52,6 +52,7 @@
   <build_depend>rplidar_ros</build_depend>
   <build_depend>usb_cam</build_depend>
   <build_depend>velodyne</build_depend>
+  <build_depend>serial</build_depend>
 
   <!-- Run dependencies -->
   <run_depend>roscpp</run_depend>
@@ -68,6 +69,7 @@
   <run_depend>rplidar_ros</run_depend>
   <run_depend>usb_cam</run_depend>
   <run_depend>velodyne</run_depend>
+  <run_depend>serial</run_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
