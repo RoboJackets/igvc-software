@@ -1,15 +1,18 @@
 #include <laser_geometry/laser_geometry.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
+#include <pcl_ros/transforms.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
+#include <tf/transform_datatypes.h>
 #include <igvc_utils/NodeUtils.hpp>
 
 ros::Publisher _pointcloud_pub;
 laser_geometry::LaserProjection projection;
 
 double min_dist, neighbor_dist;
+double offset;
 
 void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
@@ -42,7 +45,13 @@ void scanCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
   cloud.header.frame_id = "/lidar";
 
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_for_pub(new pcl::PointCloud<pcl::PointXYZ>());
+
   fromROSMsg(cloud, *cloud_for_pub);
+  tf::Quaternion quaternion_mag;
+  quaternion_mag.setRPY(0, 0, offset);
+  tf::Transform trans;
+  trans.setRotation(quaternion_mag);
+  pcl_ros::transformPointCloud(*cloud_for_pub, *cloud_for_pub, trans);
   _pointcloud_pub.publish(*cloud_for_pub);
 }
 
@@ -54,6 +63,7 @@ int main(int argc, char** argv)
 
   igvc::getParam(pNh, "min_dist", min_dist);
   igvc::getParam(pNh, "neighbor_dist", neighbor_dist);
+  igvc::getParam(pNh, "offset", offset);
 
   ros::NodeHandle nh;
 
