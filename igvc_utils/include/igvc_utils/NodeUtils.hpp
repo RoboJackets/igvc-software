@@ -1,6 +1,7 @@
 #ifndef NODEUTILS_HPP
 #define NODEUTILS_HPP
 
+#include <geometry_msgs/PointStamped.h>
 #include <ros/ros.h>
 #include <Eigen/Dense>
 #include <cmath>
@@ -14,7 +15,7 @@ void param(const ros::NodeHandle &pNh, const std::string &param_name, T &param_v
   if (!pNh.param(param_name, param_val, default_val))
   {
     ROS_ERROR_STREAM("Missing parameter " << param_name << " from " << pNh.getNamespace()
-                                          << ". Continuing with default values " << default_val);
+                                          << ". Continuing with default values.");
   }
 }
 
@@ -26,6 +27,15 @@ void getParam(const ros::NodeHandle &pNh, const std::string &param_name, T &para
     ROS_ERROR_STREAM("Missing parameter " << param_name << " from " << pNh.getNamespace() << "... exiting");
     ros::shutdown();
   }
+}
+
+/**
+make_unique method for when using versions of c++ < 14
+*/
+template <typename T, typename... Args>
+std::unique_ptr<T> make_unique(Args &&... args)
+{
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
 }
 
 /**
@@ -42,6 +52,19 @@ template <typename T>
 inline T get_distance(T x1, T y1, T x2, T y2)
 {
   return std::hypot(x2 - x1, y2 - y1);
+}
+
+/**
+Calculates euclidian distance between two points
+
+@tparam T the data type of the input points to calculate the euclidian distance for
+@param[in] p1 the <x,y> coords of the first point
+@param[in] p2 the <x,y> coords of the second point
+@return the euclidian distance between both points
+*/
+inline double get_distance(const geometry_msgs::Point &p1, const geometry_msgs::Point &p2)
+{
+  return igvc::get_distance(p1.x, p1.y, p2.x, p2.y);
 }
 
 /**
@@ -78,10 +101,15 @@ Adjust angle to lie within the polar range [-PI, PI]
 */
 inline void fit_to_polar(double &angle)
 {
-  while (angle > M_PI)
+  angle = std::fmod(angle, 2 * M_PI);
+  if (angle > M_PI)
+  {
     angle -= 2 * M_PI;
-  while (angle < -M_PI)
+  }
+  else if (angle < -M_PI)
+  {
     angle += 2 * M_PI;
+  }
 }
 
 /**
