@@ -6,7 +6,6 @@
 #include <ros/publisher.h>
 #include "mapper.h"
 
-
 class ROSMapper
 {
   using radians = double;
@@ -26,10 +25,10 @@ private:
 
   void publish(uint64_t stamp);
 
-  void setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp);
+  void setMessageMetadata(igvc_msgs::map& message, sensor_msgs::Image& image, uint64_t pcl_stamp);
 
   template <class T>
-  bool checkExistsStaticTransform(const std::string &frame_id, T timestamp, const std::string &topic);
+  bool checkExistsStaticTransform(const std::string& frame_id, T timestamp, const std::string& topic);
 
   template <class T>
   bool getOdomTransform(const T stamp);
@@ -51,24 +50,19 @@ private:
   int start_y_;   // start y (m)
   int length_x_;  // length (m)
   int width_y_;   // width (m)
-  int kernel_size_;
 
   bool debug_;
-  double blur_std_dev_;
 
-  double resolution_; // Map Resolution
+  double resolution_;  // Map Resolution
 
   int resize_width_;
   int resize_height_;
 
   std::string lidar_topic_;
   std::string line_topic_;
-  std::string camera_frame_;
   std::string projected_line_topic_;
   std::string camera_info_topic_;
-  RobotState state_;                      // Odom -> Base_link
-
-  image_geometry::PinholeCameraModel camera_model_;
+  RobotState state_;  // Odom -> Base_link
 
   std::unique_ptr<Mapper> mapper_;
 };

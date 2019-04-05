@@ -14,6 +14,7 @@
 #include <image_geometry/pinhole_camera_model.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
+#include <tf/transform_datatypes.h>
 
 struct EmptyFilterOptions
 {

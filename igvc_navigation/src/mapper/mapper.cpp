@@ -1,8 +1,8 @@
-#include <pcl_ros/transforms.h>
 #include "mapper.h"
+#include <pcl_ros/transforms.h>
 #include "map_utils.h"
 
-Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{0, 0, 1, 0}
+Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
 {
   igvc::getParam(pNh, "sensor_model/max_range", radius_);
   igvc::getParam(pNh, "sensor_model/angular_resolution", angular_resolution_);
@@ -22,9 +22,11 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{0, 0, 1, 0}
   igvc::getParam(pNh, "filters/ground_filter/enable", use_ground_filter_);
   igvc::getParam(pNh, "filters/ground_filter/ransac/iterations", ground_filter_options_.ransac_options.iterations);
   igvc::getParam(pNh, "filters/ground_filter/ransac/iterations", ground_filter_options_.ransac_options.iterations);
-  igvc::getParam(pNh, "filters/ground_filter/ransac/distance_threshold", ground_filter_options_.ransac_options.distance_threshold);
+  igvc::getParam(pNh, "filters/ground_filter/ransac/distance_threshold",
+                 ground_filter_options_.ransac_options.distance_threshold);
   igvc::getParam(pNh, "filters/ground_filter/ransac/eps_angle", ground_filter_options_.ransac_options.eps_angle);
-  igvc::getParam(pNh, "filters/ground_filter/fallback/plane_distance", ground_filter_options_.fallback_options.plane_distance);
+  igvc::getParam(pNh, "filters/ground_filter/fallback/plane_distance",
+                 ground_filter_options_.fallback_options.plane_distance);
 
   igvc::getParam(pNh, "filters/empty/start_angle", empty_filter_options_.start_angle);
   igvc::getParam(pNh, "filters/empty/end_angle", empty_filter_options_.end_angle);
@@ -63,9 +65,9 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
   pcl_ros::transformPointCloud(filtered_pc, filtered_pc, odom_to_lidar);
   pcl_ros::transformPointCloud(empty_pc, empty_pc, odom_to_lidar);
 
-//  filtered_pc.header.stamp = pc->header.stamp;
-//  filtered_pc.header.frame_id = "/odom";
-//  camera_projection_pub_.publish(filtered_pc);
+  //  filtered_pc.header.stamp = pc->header.stamp;
+  //  filtered_pc.header.frame_id = "/odom";
+  //  camera_projection_pub_.publish(filtered_pc);
 
   if (use_ground_filter_)
   {
@@ -82,9 +84,11 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
   }
   else
   {
-    octomapper_->insertScan(odom_to_lidar.getOrigin(), pc_map_pair_, filtered_pc, lidar_scan_probability_model_, radius_);
+    octomapper_->insertScan(odom_to_lidar.getOrigin(), pc_map_pair_, filtered_pc, lidar_scan_probability_model_,
+                            radius_);
   }
-  octomapper_->insertRays(odom_to_lidar.getOrigin(), pc_map_pair_, empty_pc, false, lidar_free_space_probability_model_);
+  octomapper_->insertRays(odom_to_lidar.getOrigin(), pc_map_pair_, empty_pc, false,
+                          lidar_free_space_probability_model_);
 
   octomapper_->get_updated_map(pc_map_pair_);
 }
@@ -106,15 +110,19 @@ void Mapper::insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstP
   octomapper_->get_updated_map(camera_map_pair_);
 }
 
-void Mapper::insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_base, const tf::Transform& base_to_camera, const ros::Time& stamp)
+void Mapper::insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_base,
+                                  const tf::Transform& base_to_camera, const ros::Time& stamp)
 {
   PointCloud projected_pc;
-//  processImageFreeSpace(image);
+  //  processImageFreeSpace(image);
 
-  if (!camera_model_initialized_ && !use_ground_filter_) {
+  if (!camera_model_initialized_ && !use_ground_filter_)
+  {
     ROS_WARN_STREAM_THROTTLE(1, "camera model not initialized or not using ground filter");
     return;
-  } else {
+  }
+  else
+  {
     MapUtils::projectToPlane(projected_pc, ground_plane_, image, camera_model_, base_to_camera);
   }
 
@@ -141,7 +149,8 @@ void Mapper::processImageFreeSpace(cv::Mat& image) const
 
 std::optional<cv::Mat> Mapper::getMap()
 {
-  if (!pc_map_pair_.map) {
+  if (!pc_map_pair_.map)
+  {
     ROS_WARN_STREAM_THROTTLE(1, "pc_map_pair is null...");
     return std::nullopt;
   }
@@ -149,13 +158,16 @@ std::optional<cv::Mat> Mapper::getMap()
   cv::Mat blurred_map;
   if (use_lines_)
   {
-    if (!camera_map_pair_.map) {
+    if (!camera_map_pair_.map)
+    {
       ROS_WARN_STREAM_THROTTLE(1, "camera_map_pair is null...");
       return std::nullopt;
     }
     blurred_map = pc_map_pair_.map->clone();
     cv::max(blurred_map, *camera_map_pair_.map, blurred_map);
-  } else {
+  }
+  else
+  {
     blurred_map = pc_map_pair_.map->clone();
   }
   MapUtils::blur(blurred_map, combined_map_options_.blur.kernel);

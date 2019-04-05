@@ -53,6 +53,7 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
 
   igvc::getParam(pNh, "node/debug", debug_);
   igvc::getParam(pNh, "node/use_lines", use_lines_);
+  igvc::param(pNh, "node/transform_max_wait_time", transform_max_wait_time_, 3.0);
 
   mapper_ = std::make_unique<Mapper>(pNh);
 
@@ -68,7 +69,8 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
     line_map_sub = nh.subscribe<sensor_msgs::Image>(line_topic_, 1, &ROSMapper::segmentedImageCallback, this);
     projected_line_map_sub =
         nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(projected_line_topic_, 1, &ROSMapper::projctedLineCallback, this);
-    camera_info_sub = nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_, 1, &ROSMapper::cameraInfoCallback, this);
+    camera_info_sub =
+        nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_, 1, &ROSMapper::cameraInfoCallback, this);
   }
 
   //  published_map_ = std::unique_ptr<cv::Mat>(new cv::Mat(length_x_, width_y_, CV_8UC1));
@@ -96,18 +98,17 @@ bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
   static ros::Duration wait_time = ros::Duration(transform_max_wait_time_);
   try
   {
-    if (tf_listener_->waitForTransform("/odom", "/base_link", message_timestamp, wait_time))
+    if (tf_listener_->waitForTransform("/odom", "/base_footprint", message_timestamp, wait_time))
     {
-      tf_listener_->lookupTransform("/odom", "/base_link", message_timestamp, transform);
+      tf_listener_->lookupTransform("/odom", "/base_footprint", message_timestamp, transform);
       state_.setState(transform);
       return true;
     }
     else
     {
-      ROS_DEBUG("Failed to get transform from /base_link to /odom in time, using newest transforms");
-      tf_listener_->lookupTransform("/odom", "/base_link", ros::Time(0), transform);
+      ROS_DEBUG("Failed to get transform from /base_footprint to /odom in time, using newest transforms");
+      tf_listener_->lookupTransform("/odom", "/base_footprint", ros::Time(0), transform);
       state_.setState(transform);
-      tf_listener_->lookupTransform("/odom", "/lidar", ros::Time(0), transform);
       return true;
     }
   }
@@ -165,7 +166,7 @@ void ROSMapper::setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &
 
 template <>
 bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, ros::Time message_timestamp,
-                                        const std::string &topic)
+                                           const std::string &topic)
 {
   if (transforms_.find(topic) == transforms_.end())
   {
@@ -180,7 +181,8 @@ bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, ros::Tim
     }
     else
     {
-      ROS_ERROR_STREAM("Failed to find transform for " << topic << " from " << frame_id << " to /base_footprint using empty transform");
+      ROS_ERROR_STREAM("Failed to find transform for " << topic << " from " << frame_id
+                                                       << " to /base_footprint using empty transform");
       return false;
     }
   }
@@ -208,7 +210,8 @@ bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, uint64 t
 void ROSMapper::publish(uint64_t stamp)
 {
   std::optional<cv::Mat> map = mapper_->getMap();
-  if (!map) {
+  if (!map)
+  {
     ROS_WARN_STREAM_THROTTLE(1, "Couldn't get a map");
     return;
   }
@@ -223,7 +226,7 @@ void ROSMapper::publish(uint64_t stamp)
 
   if (debug_)
   {
-      publishAsPCL(debug_pcl_pub_, *map, "/odom", stamp);
+    publishAsPCL(debug_pcl_pub_, *map, "/odom", stamp);
   }
 }
 
@@ -234,8 +237,9 @@ void ROSMapper::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, cons
   {
     for (int j = 0; j < length_x_ / resolution_; j++)
     {
-      if (i > mat.rows || j > mat.cols) {
-//        ROS_ERROR_STREAM("i: " << i << ", j: " << j);
+      if (i > mat.rows || j > mat.cols)
+      {
+        //        ROS_ERROR_STREAM("i: " << i << ", j: " << j);
       }
       pcl::PointXYZRGB p;
       uchar prob = mat.at<uchar>(i, j);
@@ -323,8 +327,9 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
 
   cv::Mat image = segmented_ptr->image;
 
-  mapper_->insertSegmentedImage(image, state_.transform, transforms_.at(projected_line_topic_), segmented->header.stamp);
-//  mapper_->insertSegmentedImage(image, lazy_);
+  mapper_->insertSegmentedImage(image, state_.transform, transforms_.at(projected_line_topic_),
+                                segmented->header.stamp);
+  //  mapper_->insertSegmentedImage(image, lazy_);
 
   publish(pcl_conversions::toPCL(segmented->header.stamp));
 }
@@ -349,7 +354,8 @@ void ROSMapper::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr &camera
   if (!camera_model_initialized_)
   {
     image_geometry::PinholeCameraModel camera_model;
-    sensor_msgs::CameraInfoConstPtr changed_camera_info = MapUtils::scaleCameraInfo(camera_info, resize_width_, resize_height_);
+    sensor_msgs::CameraInfoConstPtr changed_camera_info =
+        MapUtils::scaleCameraInfo(camera_info, resize_width_, resize_height_);
     camera_model.fromCameraInfo(changed_camera_info);
     mapper_->setProjectionModel(camera_model);
 

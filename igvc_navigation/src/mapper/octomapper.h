@@ -39,6 +39,35 @@ struct ProbabilityModel
   double prob_hit;
 };
 
+struct OcTreeOptions
+{
+  double resolution;
+  double max;
+  double min;
+};
+
+/**
+ * Struct representing options for the map.
+ * Length and Width are both in m, not grid cells.
+ */
+struct MapOptions
+{
+  double length;
+  double width;
+  double default_logodds;
+  double resolution;
+
+  double lengthGrid() const
+  {
+    return length / resolution;
+  }
+
+  double widthGrid() const
+  {
+    return width / resolution;
+  }
+};
+
 /**
  * Struct representing the coefficients of the plane Ax + By + Cz + D = 0
  */
@@ -66,59 +95,37 @@ using PointCloud = pcl::PointCloud<pcl::PointXYZ>;
 
 class Octomapper
 {
-
 public:
   using PCL_point_cloud = pcl::PointCloud<pcl::PointXYZ>;
 
   explicit Octomapper(ros::NodeHandle pNh);
   void create_octree(pc_map_pair& pair) const;
-//  void insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair &pc_map_pair,
-//      const PCL_point_cloud &raw_pc, const pcl::PointCloud<pcl::PointXYZ> &empty_pc,
-//      const GroundFilterOptions &ground_filter_options,
-//      const ProbabilityModel &probability_model, GroundPlane &ground_plane);
-//  void insertCameraProjection(struct pc_map_pair& projection_map_pair, const PCL_point_cloud& raw_pc, bool occupied) const;
-//  void insert_camera_free(struct pc_map_pair& projection_map_pair, const cv::Mat& image,
-//                          const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world) const;
+  //  void insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair &pc_map_pair,
+  //      const PCL_point_cloud &raw_pc, const pcl::PointCloud<pcl::PointXYZ> &empty_pc,
+  //      const GroundFilterOptions &ground_filter_options,
+  //      const ProbabilityModel &probability_model, GroundPlane &ground_plane);
+  //  void insertCameraProjection(struct pc_map_pair& projection_map_pair, const PCL_point_cloud& raw_pc, bool occupied)
+  //  const; void insert_camera_free(struct pc_map_pair& projection_map_pair, const cv::Mat& image,
+  //                          const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world)
+  //                          const;
   void get_updated_map(struct pc_map_pair& pc_map_pair) const;
 
-  void insertScan(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, ProbabilityModel model, double range) const;
-  void insertRays(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, bool occupied, ProbabilityModel model) const;
+  void insertScan(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, ProbabilityModel model,
+                  double range) const;
+  void insertRays(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, bool occupied,
+                  ProbabilityModel model) const;
   void insertPoints(struct pc_map_pair& pair, const PointCloud& pc, bool occupied, ProbabilityModel model) const;
 
 private:
   void create_map(pc_map_pair& pair) const;
   void insert_free(const octomap::Pointcloud& scan, octomap::point3d origin, pc_map_pair& pair, bool lazy_eval) const;
+  std::pair<int, int> toMapCoordinates(double x, double y) const;
 
   ros::NodeHandle pNh;
-  bool m_use_ground_filter;
-  double m_octree_resolution;
-  double m_prob_hit;
-  double m_prob_miss;
-  double m_prob_miss_empty;
-  double m_thresh_min;
-  double m_thresh_max;
-  double m_max_range;
-  double m_floor_thresh;
+  OcTreeOptions octree_options_;
+  MapOptions map_options_;
 
-  // Camera free space blurring
-  int m_segmented_kernel;
-  int m_segmented_sigma;
-  int m_segmented_threshold;
-
-  Ground_plane m_ground_projection;
-  Ground_plane m_default_projection;
-
-  int m_ransac_iterations;
-  int m_openmp_threads;
-  double m_ransac_distance_threshold;
-  double m_ransac_eps_angle;
-  float m_ground_filter_plane_dist;
-  int m_map_length;
-  int m_map_width;
-  int m_map_encoding;
-  float m_odds_sum_default;
-
-  ros::Publisher m_debug_pub;
+  int map_encoding_;
 
   // std::unique_ptr<tf::MessageFilter<PCL_point_cloud>> msg_filter;
 };
