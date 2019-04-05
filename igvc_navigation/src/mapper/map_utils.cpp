@@ -191,9 +191,11 @@ void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, c
         double c = ground_plane.c;
         double d = ground_plane.d;
 
+        // [a b c]^T dot (P0 - (camera + ray*t)) = 0, solve for t
         double t = ((tf::Vector3{ 0, 0, d / c } - camera_to_world.getOrigin()).dot(tf::Vector3{ a, b, c })) /
                    (transformed_ray.dot(tf::Vector3{ a, b, c }));
 
+        // projected_point = camera + ray*t
         tf::Point projected_point = camera_to_world.getOrigin() + transformed_ray * t;
         projected_pc.points.emplace_back(pcl::PointXYZ(static_cast<float>(projected_point.x()),
                                                        static_cast<float>(projected_point.y()),

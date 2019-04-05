@@ -32,9 +32,9 @@ public:
 
   void insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_lidar);
   void insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_base);
-  void insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_camera);
+  void insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_base, const tf::Transform& base_to_camera, const ros::Time& stamp);
 
-  void setProjectionModel(const image_geometry::PinholeCameraModel&& camera_model_);
+  void setProjectionModel(image_geometry::PinholeCameraModel camera_model_);
 
   std::optional<cv::Mat> getMap();
 private:
@@ -56,11 +56,16 @@ private:
   CombinedMapOptions combined_map_options_{};
 
   ros::Publisher camera_projection_pub_;
+  ros::Publisher camera_projection_pub2_;
+  ros::Publisher camera_line_pub_;
 
-  ProbabilityModel lidar_probability_model_{};
+  ProbabilityModel lidar_scan_probability_model_{};
+  ProbabilityModel lidar_ground_probability_model_{};
+  ProbabilityModel lidar_free_space_probability_model_{};
+
   ProbabilityModel camera_probability_model_{};
   GroundFilterOptions ground_filter_options_{};
-  GroundPlane ground_plane_{};
+  GroundPlane ground_plane_;
 
   bool use_ground_filter_;
   bool camera_model_initialized_;

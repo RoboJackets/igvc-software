@@ -120,7 +120,6 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
       pc_map_pair.map->at<uchar>(i, j) = toCharProb(fromLogOdds(odds_sum[i][j]));
     }
   }
-  ROS_INFO("Got updated map in octomapper!");
 }
 
 void Octomapper::create_map(pc_map_pair &pair) const
@@ -131,7 +130,7 @@ void Octomapper::create_map(pc_map_pair &pair) const
 }
 
 void Octomapper::insertScan(const tf::Point &sensor_pos, struct pc_map_pair &pair, const PointCloud &pc,
-                            ProbabilityModel model) const
+                            ProbabilityModel model, double range) const
 {
   double old_prob_hit = pair.octree->getProbHit();
   double old_prob_miss = pair.octree->getProbMiss();
@@ -142,7 +141,7 @@ void Octomapper::insertScan(const tf::Point &sensor_pos, struct pc_map_pair &pai
   octomap::point3d sensor = octomap::pointTfToOctomap(sensor_pos);
   octomap::Pointcloud octo_cloud;
   PCL_to_Octomap(pc, octo_cloud);
-  pair.octree->insertPointCloud(octo_cloud, sensor, m_max_range, false, false);
+  pair.octree->insertPointCloud(octo_cloud, sensor, range, false, false);
 
   pair.octree->setProbHit(old_prob_hit);
   pair.octree->setProbMiss(old_prob_miss);

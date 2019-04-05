@@ -81,7 +81,7 @@ public:
 //                          const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world) const;
   void get_updated_map(struct pc_map_pair& pc_map_pair) const;
 
-  void insertScan(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, ProbabilityModel model) const;
+  void insertScan(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, ProbabilityModel model, double range) const;
   void insertRays(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, bool occupied, ProbabilityModel model) const;
   void insertPoints(struct pc_map_pair& pair, const PointCloud& pc, bool occupied, ProbabilityModel model) const;
 
