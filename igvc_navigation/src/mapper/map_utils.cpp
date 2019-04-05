@@ -6,7 +6,6 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 
-
 #include "map_utils.h"
 
 namespace MapUtils
