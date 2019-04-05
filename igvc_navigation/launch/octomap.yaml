@@ -5,14 +5,21 @@ octree:
       max: 1.0
       min: 0.0
 probability_model:
-    lidar_scan:
-        prob_miss: 0.3
-        prob_hit: 0.9
+    lidar:
+        scan:
+          prob_miss: 0.3
+          prob_hit: 0.9
+        ground:
+          prob_miss: 0.4
+          prob_hit: 0.6 # Not used
+        free_space:
+          prob_miss: 0.2
+          prob_hit: 0.6 # Not used
     camera:
         prob_miss: 0.4
         prob_hit: 0.9
 sensor_model:
-    max_range: 50
+    max_range: 3
     angular_resolution: 0.01
 filters:
     behind:
@@ -31,6 +38,7 @@ filters:
         blur:
             kernel: 3
     ground_filter:
+        enable: false
         ransac:
             iterations: 200
             distance_threshold: 0.05
@@ -60,7 +68,7 @@ topics:
   transform_max_wait_time: 1
 node:
   debug: true
-  use_lines: false
+  use_lines: true
 cameras:
   resize_width: 400
   resize_height: 400

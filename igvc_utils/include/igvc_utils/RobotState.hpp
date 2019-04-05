@@ -70,9 +70,15 @@ public:
   }
 
   // set state via a transform
-  void setState(const tf::StampedTransform &transform)
+  void setState(const tf::Transform &newTransform)
   {
-    this->transform = transform;
+    this->transform = newTransform;
+  }
+
+  void setState(const tf::StampedTransform &newTransform)
+  {
+    this->transform.setOrigin(newTransform.getOrigin());
+    this->transform.setRotation(newTransform.getRotation());
   }
 
   // set state via a 3D Eigen vector

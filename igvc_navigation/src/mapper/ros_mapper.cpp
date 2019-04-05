@@ -207,11 +207,10 @@ bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, uint64 t
  */
 void ROSMapper::publish(uint64_t stamp)
 {
-  ROS_INFO_STREAM_THROTTLE(1, "trying to get map");
   std::optional<cv::Mat> map = mapper_->getMap();
-  ROS_INFO_STREAM_THROTTLE(1, "got map");
   if (!map) {
     ROS_WARN_STREAM_THROTTLE(1, "Couldn't get a map");
+    return;
   }
   igvc_msgs::map message;
   sensor_msgs::Image image;
@@ -219,11 +218,8 @@ void ROSMapper::publish(uint64_t stamp)
   img_bridge_ = cv_bridge::CvImage(message.header, sensor_msgs::image_encodings::MONO8, *map);
   img_bridge_.toImageMsg(image);
 
-  ROS_INFO_STREAM_THROTTLE(1, "converted image");
   setMessageMetadata(message, image, stamp);
-  ROS_INFO_STREAM_THROTTLE(1, "set metadata");
   map_pub_.publish(message);
-  ROS_INFO_STREAM_THROTTLE(1, "published");
 
   if (debug_)
   {
@@ -308,7 +304,7 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
     return;
   }
   // Check if static transform already exists for this topic.
-  if (!checkExistsStaticTransform("optical_cacenter_", segmented->header.stamp, projected_line_topic_))
+  if (!checkExistsStaticTransform("optical_cam_center", segmented->header.stamp, projected_line_topic_))
   {
     ROS_ERROR("Finding static transform failed. Sleeping 2 seconds then trying again...");
     ros::Duration(2).sleep();
@@ -327,7 +323,8 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
 
   cv::Mat image = segmented_ptr->image;
 
-  mapper_->insertSegmentedImage(image, state_.transform * transforms_.at(projected_line_topic_));
+  mapper_->insertSegmentedImage(image, state_.transform, transforms_.at(projected_line_topic_), segmented->header.stamp);
+//  mapper_->insertSegmentedImage(image, lazy_);
 
   publish(pcl_conversions::toPCL(segmented->header.stamp));
 }
@@ -354,7 +351,7 @@ void ROSMapper::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr &camera
     image_geometry::PinholeCameraModel camera_model;
     sensor_msgs::CameraInfoConstPtr changed_camera_info = MapUtils::scaleCameraInfo(camera_info, resize_width_, resize_height_);
     camera_model.fromCameraInfo(changed_camera_info);
-    mapper_->setProjectionModel(std::move(camera_model));
+    mapper_->setProjectionModel(camera_model);
 
     camera_model_initialized_ = true;
   }
