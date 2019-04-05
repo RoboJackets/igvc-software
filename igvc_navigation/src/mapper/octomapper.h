@@ -100,20 +100,45 @@ public:
 
   explicit Octomapper(ros::NodeHandle pNh);
   void create_octree(pc_map_pair& pair) const;
-  //  void insert_scan(const tf::Point &sensor_pos_tf, struct pc_map_pair &pc_map_pair,
-  //      const PCL_point_cloud &raw_pc, const pcl::PointCloud<pcl::PointXYZ> &empty_pc,
-  //      const GroundFilterOptions &ground_filter_options,
-  //      const ProbabilityModel &probability_model, GroundPlane &ground_plane);
-  //  void insertCameraProjection(struct pc_map_pair& projection_map_pair, const PCL_point_cloud& raw_pc, bool occupied)
-  //  const; void insert_camera_free(struct pc_map_pair& projection_map_pair, const cv::Mat& image,
-  //                          const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world)
-  //                          const;
+
+  /**
+   * Updates the map to obtain the most updated version from the octree
+   * @param pc_map_pair
+   */
   void get_updated_map(struct pc_map_pair& pc_map_pair) const;
 
+  /**
+   * Inserts a lidar scan into the given pc_map_pair. This means that the points themselves are marked as occupied,
+   * while the rays from the sensor_pos to the points are marked unoccupied.
+   * @param sensor_pos
+   * @param pair
+   * @param pc
+   * @param model
+   * @param range
+   */
   void insertScan(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, ProbabilityModel model,
                   double range) const;
+
+  /**
+   * Inserts a ray into the given pc_map_pair, where the rays from the sensor_pos to the points are marked as either
+   * occupied or not occupied, depending on the passed in variable
+   * @param sensor_pos
+   * @param pair
+   * @param pc
+   * @param occupied
+   * @param model
+   */
   void insertRays(const tf::Point& sensor_pos, struct pc_map_pair& pair, const PointCloud& pc, bool occupied,
                   ProbabilityModel model) const;
+
+  /**
+   * Inserts the passed in points to the given pc_map_pair, where the points are either occupied or not depending
+   * on the variable passed in
+   * @param pair
+   * @param pc
+   * @param occupied
+   * @param model
+   */
   void insertPoints(struct pc_map_pair& pair, const PointCloud& pc, bool occupied, ProbabilityModel model) const;
 
 private:

@@ -36,13 +36,41 @@ class Mapper
 public:
   Mapper(ros::NodeHandle& pNh);
 
+  /**
+   * Inserts a lidar scan into the map.
+   * @param pc
+   * @param odom_to_lidar
+   */
   void insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_lidar);
+
+  /**
+   * Inserts a pointcloud containing the projection of lines.
+   * @param pc
+   * @param odom_to_base
+   */
   void insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_base);
+
+  /**
+   * Projects the empty space in the passed in image and inserts it into the map.
+   * @param image
+   * @param odom_to_base
+   * @param base_to_camera
+   * @param stamp
+   */
   void insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_base, const tf::Transform& base_to_camera,
                             const ros::Time& stamp);
 
+  /**
+   * Sets the parameters for the image_geometry::PinholeCameraModel used for projection.
+   * @param camera_model_
+   */
   void setProjectionModel(image_geometry::PinholeCameraModel camera_model_);
 
+  /**
+   * Returns the current map, or std::nullopt if no data has been receieved yet.ction Tool_External Tools_clang-format
+   *
+   * @return
+   */
   std::optional<cv::Mat> getMap();
 
 private:
