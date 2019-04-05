@@ -27,12 +27,28 @@ private:
 
   void setMessageMetadata(igvc_msgs::map& message, sensor_msgs::Image& image, uint64_t pcl_stamp);
 
+  /**
+   * Checks that there is an existing static transform from base_footprint to frame_id. If there isn't,
+   * find the given transform using the timestamp provided.
+   * @tparam T
+   * @param frame_id
+   * @param timestamp
+   * @param topic
+   * @return
+   */
   template <class T>
   bool checkExistsStaticTransform(const std::string& frame_id, T timestamp, const std::string& topic);
 
   template <class T>
   bool getOdomTransform(const T stamp);
 
+  /**
+   * Publishes the passed in cv::Mat as a pointcloud on the given publisher
+   * @param pub
+   * @param mat
+   * @param frame_id
+   * @param stamp
+   */
   void publishAsPCL(const ros::Publisher& pub, const cv::Mat& mat, const std::string& frame_id, uint64_t stamp);
 
   cv_bridge::CvImage img_bridge_;

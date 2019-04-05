@@ -154,7 +154,8 @@ void blur(cv::Mat& blurred_map, double kernel_size);
  * @param height
  * @return
  */
-sensor_msgs::CameraInfoConstPtr scaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width, double height);
-};  // namespace MapUtils
+sensor_msgs::CameraInfoConstPtr scaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width,
+                                                double height);
+}  // namespace MapUtils
 
 #endif  // PROJECT_MAP_FILTERS_H
