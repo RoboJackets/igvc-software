@@ -4,39 +4,47 @@
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
-#include "octomapper.h"
 #include "map_utils.h"
+#include "octomapper.h"
 
-struct BlurFilterOptions {
+struct BlurFilterOptions
+{
   int kernel;
   double sigma;
 };
 
-struct ThresholdFilterOptions {
+struct ThresholdFilterOptions
+{
   double threshold;
 };
 
-struct ProcessImageOptions {
+struct ProcessImageOptions
+{
   BlurFilterOptions blur;
   ThresholdFilterOptions threshold;
 };
 
-struct CombinedMapOptions {
+struct CombinedMapOptions
+{
   BlurFilterOptions blur;
 };
 
-class Mapper {
+class Mapper
+{
   using radians = double;
+
 public:
   Mapper(ros::NodeHandle& pNh);
 
   void insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_lidar);
   void insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_base);
-  void insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_base, const tf::Transform& base_to_camera, const ros::Time& stamp);
+  void insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_base, const tf::Transform& base_to_camera,
+                            const ros::Time& stamp);
 
   void setProjectionModel(image_geometry::PinholeCameraModel camera_model_);
 
   std::optional<cv::Mat> getMap();
+
 private:
   /**
    * Performs filtering on the free space of an image
@@ -72,10 +80,9 @@ private:
   bool use_lines_;
   radians angular_resolution_;
 
-  double resolution_; // Map Resolution
-  double radius_;  // Radius to filter lidar points
+  double resolution_;  // Map Resolution
+  double radius_;      // Radius to filter lidar points
   double combined_blur_kernel_size_;
-
 };
 
-#endif //SRC_MAPPER_H
+#endif  // SRC_MAPPER_H

@@ -7,38 +7,40 @@
 #include "octomapper.h"
 
 using radians = double;
-Octomapper::Octomapper(ros::NodeHandle pNh) : m_default_projection{ 0, 0, 1, 0 }  // Default plane is z = 0
+Octomapper::Octomapper(ros::NodeHandle pNh)
 {
-  igvc::getParam(pNh, "octree/resolution", m_octree_resolution);
+  igvc::getParam(pNh, "octree/resolution", octree_options_.resolution);
 
-  igvc::getParam(pNh, "octree/clamping/max", m_thresh_max);
-  igvc::getParam(pNh, "octree/clamping/min", m_thresh_min);
+  igvc::getParam(pNh, "octree/clamping/max", octree_options_.max);
+  igvc::getParam(pNh, "octree/clamping/min", octree_options_.min);
 
-  igvc::getParam(pNh, "map/length", m_map_length);
-  igvc::getParam(pNh, "map/width", m_map_width);
-  igvc::getParam(pNh, "map/log_odds_default", m_odds_sum_default);
+  igvc::getParam(pNh, "map/length", map_options_.length);
+  igvc::getParam(pNh, "map/width", map_options_.width);
+  igvc::getParam(pNh, "map/log_odds_default", map_options_.default_logodds);
   std::string map_encoding;
   igvc::getParam(pNh, "map/encoding", map_encoding);
+
+  map_options_.resolution = octree_options_.resolution;
+
+  // If we wanted more precision
   if (map_encoding == "CV_8UC1")
   {
-    m_map_encoding = CV_8UC1;
+    map_encoding_ = CV_8UC1;
   }
   else
   {
-    m_map_encoding = CV_8UC1;
+    map_encoding_ = CV_8UC1;
   }
-
-  m_debug_pub = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/octomapper/projection", 1);
 }
 
 void Octomapper::create_octree(pc_map_pair &pair) const
 {
-  pair.octree = boost::make_shared<octomap::OcTree>(m_octree_resolution);
-  pair.octree->setClampingThresMin(m_thresh_min);
-  pair.octree->setClampingThresMax(m_thresh_max);
+  pair.octree = boost::make_shared<octomap::OcTree>(octree_options_.resolution);
+  pair.octree->setClampingThresMin(octree_options_.min);
+  pair.octree->setClampingThresMax(octree_options_.max);
   pair.octree->enableChangeDetection(true);
-  octomap::point3d min(-m_map_length / 2.0, -m_map_width / 2.0, -1);
-  octomap::point3d max(m_map_length / 2.0, m_map_width / 2.0, -1);
+  octomap::point3d min(-map_options_.length / 2.0, -map_options_.width / 2.0, -1);
+  octomap::point3d max(map_options_.length / 2.0, map_options_.width / 2.0, -1);
   pair.octree->setBBXMin(min);
   pair.octree->setBBXMax(max);
 }
@@ -60,6 +62,13 @@ float fromLogOdds(float log_odds)
   return 1 - (1 / (1 + exp(log_odds)));
 }
 
+std::pair<int, int> Octomapper::toMapCoordinates(double x, double y) const
+{
+  int x_map = static_cast<int>((map_options_.length / 2.0 + x) / octree_options_.resolution);
+  int y_map = static_cast<int>((map_options_.width / 2.0 + y) / octree_options_.resolution);
+  return std::make_pair(x_map, y_map);
+}
+
 void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
 {
   if (pc_map_pair.map == nullptr)
@@ -69,17 +78,15 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
 
   // Traverse entire tree
   std::vector<std::vector<float>> odds_sum(
-      static_cast<unsigned long>(m_map_length / m_octree_resolution),
-      std::vector<float>(static_cast<unsigned long>(m_map_width / m_octree_resolution),
-                         m_odds_sum_default));  // TODO: Are these the right
+      static_cast<unsigned long>(map_options_.lengthGrid()),
+      std::vector<float>(static_cast<unsigned long>(map_options_.widthGrid()), octree_options_.resolution));
   for (octomap::OcTree::iterator it = pc_map_pair.octree->begin(), end = pc_map_pair.octree->end(); it != end; ++it)
   {
     // If this is a leaf at max depth, then only update that node
     if (it.getDepth() == pc_map_pair.octree->getTreeDepth())
     {
-      int x = static_cast<int>((m_map_length / 2 + it.getX()) / m_octree_resolution);
-      int y = static_cast<int>((m_map_width / 2 + it.getY()) / m_octree_resolution);
-      if (x < m_map_length / m_octree_resolution && y < m_map_width / m_octree_resolution)
+      auto [x, y] = toMapCoordinates(it.getX(), it.getY());
+      if (x < map_options_.lengthGrid() && y < map_options_.widthGrid())
       {
         odds_sum[x][y] += it->getLogOdds();
       }
@@ -92,14 +99,13 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
     {
       // This isn't a leaf at max depth. Time to iterate
       int grid_num = 1 << (pc_map_pair.octree->getTreeDepth() - it.getDepth());
-      int x = static_cast<int>((m_map_length / 2 + it.getX()) / m_octree_resolution);
-      int y = static_cast<int>((m_map_width / 2 + it.getY()) / m_octree_resolution);
+      auto [x, y] = toMapCoordinates(it.getX(), it.getY());
       //      ROS_INFO("We did it?");
       for (int dx = 0; dx < grid_num; dx++)
       {
         for (int dy = 0; dy < grid_num; dy++)
         {
-          if (x < m_map_length / m_octree_resolution && y < m_map_width / m_octree_resolution)
+          if (x < map_options_.lengthGrid() && y < map_options_.widthGrid())
           {
             odds_sum[x + dx][y + dy] += it->getLogOdds();
           }
@@ -113,9 +119,9 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
   }
 
   // Transfer from log odds to normal probability
-  for (int i = 0; i < m_map_length / m_octree_resolution; i++)
+  for (int i = 0; i < map_options_.lengthGrid(); i++)
   {
-    for (int j = 0; j < m_map_width / m_octree_resolution; j++)
+    for (int j = 0; j < map_options_.widthGrid(); j++)
     {
       pc_map_pair.map->at<uchar>(i, j) = toCharProb(fromLogOdds(odds_sum[i][j]));
     }
@@ -124,9 +130,9 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
 
 void Octomapper::create_map(pc_map_pair &pair) const
 {
-  int length = static_cast<int>(m_map_length / m_octree_resolution);
-  int width = static_cast<int>(m_map_width / m_octree_resolution);
-  pair.map = boost::make_shared<cv::Mat>(length, width, m_map_encoding, 127);
+  int length = static_cast<int>(map_options_.lengthGrid());
+  int width = static_cast<int>(map_options_.widthGrid());
+  pair.map = boost::make_shared<cv::Mat>(length, width, map_encoding_, 127);
 }
 
 void Octomapper::insertScan(const tf::Point &sensor_pos, struct pc_map_pair &pair, const PointCloud &pc,
@@ -162,10 +168,9 @@ void Octomapper::insertRays(const tf::Point &sensor_pos, struct pc_map_pair &pai
 
   octomap::KeySet keyset{};
 
-  for (int i = 0; i < (int)scan.size(); ++i)
+  for (const auto &p : scan)
   {
     octomap::KeyRay keyray;
-    const octomap::point3d &p = scan[i];
     if (pair.octree->computeRayKeys(sensor, p, keyray))
     {
       {
@@ -196,9 +201,8 @@ void Octomapper::insertPoints(struct pc_map_pair &pair, const PointCloud &pc, bo
   PCL_to_Octomap(pc, octo_cloud);
   octomap::KeySet keyset{};
 
-  for (int i = 0; i < (int)octo_cloud.size(); ++i)
+  for (const auto &p : octo_cloud)
   {
-    const octomap::point3d &p = octo_cloud[i];
     octomap::OcTreeKey key;
     if (pair.octree->coordToKeyChecked(p, key))
     {

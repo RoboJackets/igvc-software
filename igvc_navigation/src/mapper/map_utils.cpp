@@ -6,7 +6,6 @@
 #include <pcl/sample_consensus/model_types.h>
 #include <pcl/segmentation/sac_segmentation.h>
 
-#include <tf/transform_datatypes.h>
 
 #include "map_utils.h"
 
@@ -60,8 +59,10 @@ std::optional<GroundPlane> filterGroundPlane(const PointCloud& raw_pc, PointClou
   }
 }
 
-void projectTo2D(PointCloud& projected_pc) {
-  for (auto& point : projected_pc.points) {
+void projectTo2D(PointCloud& projected_pc)
+{
+  for (auto& point : projected_pc.points)
+  {
     point.z = 0;
   }
 }
@@ -178,7 +179,7 @@ void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, c
     p = image.ptr<uchar>(i);
     for (j = 0; j < nCols; ++j)
     {
-      // If it's a white pixel => free space, then project
+      // If it's a black pixel => free space, then project
       if (p[j] == 0)
       {
         cv::Point2d pixel_point(j, i);
