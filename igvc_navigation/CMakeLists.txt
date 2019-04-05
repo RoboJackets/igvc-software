@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   octomap_ros
   octomap_msgs
   tf_conversions
+  robot_localization
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -106,6 +107,11 @@ catkin_package(
 ## Build ##
 ###########
 
+# set default build type
+IF(NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
@@ -189,10 +195,12 @@ add_dependencies(GraphSearch igvc_msgs_gencpp)
 # link OpenCV and cv_bridge to GraphSearch library
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 
-add_subdirectory(src/mapper)
-add_subdirectory(src/path_follower)
-add_subdirectory(src/path_planner)
-#add_subdirectory(src/state_estimator)
 add_subdirectory(src/waypoint_source)
 add_subdirectory(src/wheel_odometer)
+
+add_subdirectory(src/mapper)
+
+add_subdirectory(src/path_follower)
+
 add_subdirectory(src/d_lite_planner)
+add_subdirectory(src/field_d_planner)

@@ -79,7 +79,7 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
   // Traverse entire tree
   std::vector<std::vector<float>> odds_sum(
       static_cast<unsigned long>(map_options_.lengthGrid()),
-      std::vector<float>(static_cast<unsigned long>(map_options_.widthGrid()), octree_options_.resolution));
+      std::vector<float>(static_cast<unsigned long>(map_options_.widthGrid()), map_options_.default_logodds));
   for (octomap::OcTree::iterator it = pc_map_pair.octree->begin(), end = pc_map_pair.octree->end(); it != end; ++it)
   {
     // If this is a leaf at max depth, then only update that node
