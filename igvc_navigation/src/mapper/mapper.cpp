@@ -51,7 +51,8 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
 
   camera_line_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_lines", 1);
   camera_projection_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection", 1);
-  camera_projection_pub2_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection2", 1);
+  filtered_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/filtered_pc", 1);
+  empty_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/empty_pc", 1);
 }
 
 void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_lidar)
@@ -65,9 +66,13 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
   pcl_ros::transformPointCloud(filtered_pc, filtered_pc, odom_to_lidar);
   pcl_ros::transformPointCloud(empty_pc, empty_pc, odom_to_lidar);
 
-  //  filtered_pc.header.stamp = pc->header.stamp;
-  //  filtered_pc.header.frame_id = "/odom";
-  //  camera_projection_pub_.publish(filtered_pc);
+  filtered_pc.header.stamp = pc->header.stamp;
+  filtered_pc.header.frame_id = "/odom";
+  filtered_pc_pub_.publish(filtered_pc);
+
+  empty_pc.header.stamp = pc->header.stamp;
+  empty_pc.header.frame_id = "/odom";
+  empty_pc_pub_.publish(empty_pc);
 
   if (use_ground_filter_)
   {
@@ -126,9 +131,6 @@ void Mapper::insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_b
     MapUtils::projectToPlane(projected_pc, ground_plane_, image, camera_model_, base_to_camera);
   }
 
-  projected_pc.header.stamp = pcl_conversions::toPCL(stamp);
-  projected_pc.header.frame_id = "/base_footprint";
-  camera_projection_pub2_.publish(projected_pc);
   pcl_ros::transformPointCloud(projected_pc, projected_pc, odom_to_base);
 
   projected_pc.header.stamp = pcl_conversions::toPCL(stamp);
