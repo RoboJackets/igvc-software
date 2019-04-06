@@ -92,7 +92,8 @@ private:
   CombinedMapOptions combined_map_options_{};
 
   ros::Publisher camera_projection_pub_;
-  ros::Publisher camera_projection_pub2_;
+  ros::Publisher filtered_pc_pub_;
+  ros::Publisher empty_pc_pub_;
   ros::Publisher camera_line_pub_;
 
   ProbabilityModel lidar_scan_probability_model_{};
