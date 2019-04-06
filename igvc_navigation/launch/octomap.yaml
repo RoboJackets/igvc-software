@@ -4,24 +4,23 @@ octree:
   clamping:
       max: 1.0
       min: 0.0
-# P(Hit | x) where x is either miss or hit. So prob_miss: 0.2 means that I'm 20% confident a miss is a hit,
-# ie. I'm 80% confident a miss is a miss.
+# P(x | x) where x is either miss or hit. So prob_miss: 0.2 means that I'm 20% confident a miss is a miss
 probability_model:
     lidar:
         scan:
-          prob_miss: 0.2
+          prob_miss: 0.8
           prob_hit: 0.9
         ground:
-          prob_miss: 0.4
+          prob_miss: 0.6
           prob_hit: 0.6 # Not used
         free_space:
-          prob_miss: 0.48
+          prob_miss: 0.52
           prob_hit: 0.6 # Not used
     camera:
         prob_miss: 0.45
         prob_hit: 0.9
 sensor_model:
-    max_range: 50
+    max_range: 20
     angular_resolution: 0.01
 filters:
     behind:

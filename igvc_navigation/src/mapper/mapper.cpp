@@ -45,6 +45,8 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
 
   igvc::getParam(pNh, "node/use_lines", use_lines_);
 
+  invertMissProbabilities();
+
   octomapper_ = std::make_unique<Octomapper>(pNh);
   octomapper_->create_octree(pc_map_pair_);
   octomapper_->create_octree(camera_map_pair_);
@@ -181,4 +183,15 @@ void Mapper::setProjectionModel(image_geometry::PinholeCameraModel camera_model)
   camera_model_ = camera_model;
   camera_model_initialized_ = true;
   ROS_INFO_STREAM_THROTTLE(1, "Projection Model set!");
+}
+
+/**
+ * Invert prob_miss of probability models so that configuration in the yaml is more intuitive
+ */
+void Mapper::invertMissProbabilities()
+{
+  lidar_free_space_probability_model_.prob_miss = 1.0 - lidar_free_space_probability_model_.prob_miss;
+  lidar_scan_probability_model_.prob_miss = 1.0 - lidar_scan_probability_model_.prob_miss;
+  lidar_ground_probability_model_.prob_miss = 1.0 - lidar_ground_probability_model_.prob_miss;
+  camera_probability_model_.prob_miss = 1.0 - camera_probability_model_.prob_miss;
 }
