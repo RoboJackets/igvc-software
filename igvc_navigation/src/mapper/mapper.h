@@ -1,3 +1,11 @@
+/**
+ * Class that performs the mapping, taking in pointclouds and camera data, and calling the respective methods
+ * in Octomapper that actually stores the map information. Also processes the obtained information with a
+ * variety of filters to improve mapping accuracy.
+ *
+ * Author: Oswin So <oswinso@gatech.edu>
+ * Date Created: March 24 2019
+ */
 #ifndef SRC_MAPPER_H
 #define SRC_MAPPER_H
 
@@ -39,9 +47,9 @@ public:
   /**
    * Inserts a lidar scan into the map.
    * @param pc
-   * @param odom_to_lidar
+   * @param lidar_to_odom
    */
-  void insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_lidar);
+  void insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& lidar_to_odom);
 
   /**
    * Inserts a pointcloud containing the projection of lines.

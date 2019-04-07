@@ -68,7 +68,7 @@ using PointCloud = pcl::PointCloud<pcl::PointXYZ>;
  * Discretizes angle to ints according to the angular resolution of the lidar
  * @param[in] angle the undescritized angle
  * @param[in] angular_resolution the angular resolution to discretize with
- * @return
+ * @return the index of the angle in increments of angular_resolution
  */
 int discretize(radians angle, double angular_resolution);
 

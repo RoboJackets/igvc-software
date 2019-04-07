@@ -1,3 +1,9 @@
+/**
+ * Class that interfaces with ROS publisher and subscribers, passing information to Mapper to be mapped.
+ *
+ * Author: Oswin So <oswinso@gatech.edu>
+ * Date Created: March 24 2019
+ */
 #ifndef PROJECT_MAPPER_H
 #define PROJECT_MAPPER_H
 
@@ -14,31 +20,61 @@ public:
   ROSMapper();
 
 private:
-  // Callbacks
+  /**
+   * Callback for pointcloud. Inserted into the map as a lidar scan.
+   * @param[in] pc Lidar scan
+   */
   void pcCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc);
 
+  /**
+   * Callback for the neural network segmented image. Projected, then inserted as points.
+   * @param segmented the segmented image
+   */
   void segmentedImageCallback(const sensor_msgs::ImageConstPtr& segmented);
 
-  void projctedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc);
+  /**
+   * Callback for the line projetced onto lidar point cloud. Directly inserted as points.
+   * @param pc the pointcloud from the projection of the segmented image onto lidar data.
+   */
+  void projectedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc);
 
+  /**
+   * Callback for the cameraInfo used for projection, modified for a resized camera image.
+   * @param camera_info CameraInfo used for projection.
+   */
   void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info);
 
+/**
+ * Publishes the given map at the given stamp
+ * @param[in] stamp timestamp to be used for the publishing
+ */
   void publish(uint64_t stamp);
 
+  /**
+   * Populates <code>igvc_msgs::map message</code> with information from <code>sensor_msgs::Image</code> and the
+   * timestamp from <code>pcl_stamp</code>
+   * @param[out] message message to be filled out
+   * @param[in] image image containing map data to be put into <code>message</code>
+   * @param[in] pcl_stamp time stamp from the pcl to be used for <code>message</code>
+   */
   void setMessageMetadata(igvc_msgs::map& message, sensor_msgs::Image& image, uint64_t pcl_stamp);
 
   /**
    * Checks that there is an existing static transform from base_footprint to frame_id. If there isn't,
    * find the given transform using the timestamp provided.
-   * @tparam T
-   * @param frame_id
-   * @param timestamp
-   * @param topic
-   * @return
+   * @tparam T timestamp type, either ros::Time or uint64
+   * @param frame_id frame_id to check for
+   * @param timestamp the time to check for
+   * @param topic the key to be used to store the static transform
+   * @return true if a static transform was found, false otherwise.
    */
   template <class T>
   bool checkExistsStaticTransform(const std::string& frame_id, T timestamp, const std::string& topic);
 
+  /**
+   * Updates <code>RobotState state</code> with the latest tf transform using the timestamp of the message passed in
+   * @param[in] msg <code>pcl::PointCloud</code> message with the timestamp used for looking up the tf transform
+   */
   template <class T>
   bool getOdomTransform(const T stamp);
 
