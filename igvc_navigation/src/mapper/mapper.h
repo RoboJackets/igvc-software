@@ -106,6 +106,9 @@ private:
   ros::Publisher camera_projection_pub_;
   ros::Publisher filtered_pc_pub_;
   ros::Publisher empty_pc_pub_;
+  ros::Publisher ground_pub_;
+  ros::Publisher nonground_pub_;
+  ros::Publisher nonground_projected_pub_;
   ros::Publisher camera_line_pub_;
 
   ProbabilityModel lidar_scan_probability_model_{};
@@ -119,6 +122,7 @@ private:
   bool use_ground_filter_;
   bool camera_model_initialized_;
   bool use_lines_;
+  bool debug_;
   radians angular_resolution_;
 
   double resolution_;  // Map Resolution

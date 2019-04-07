@@ -142,12 +142,15 @@ void blur(cv::Mat& blurred_map, double kernel_size)
 void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& empty_pc,
                     double angular_resolution, EmptyFilterOptions options)
 {
-  // Iterate over pointcloud, insert discretized angles into set
+  // Iterate over pointcloud, insert discretized angles into set if within max range
   std::unordered_set<int> discretized_angles{};
   for (auto i : pc)
   {
-    double angle = atan2(i.y, i.x);
-    discretized_angles.emplace(MapUtils::discretize(angle, angular_resolution));
+    if (withinRange(i, options.max_range))
+    {
+      double angle = atan2(i.y, i.x);
+      discretized_angles.emplace(MapUtils::discretize(angle, angular_resolution));
+    }
   }
 
   // For each angle, if it's not in the set (empty), put it into a pointcloud.
@@ -227,5 +230,16 @@ sensor_msgs::CameraInfoConstPtr scaleCameraInfo(const sensor_msgs::CameraInfoCon
   changed_camera_info->P = { { camera_info->P[0] * waf, 0, camera_info->P[2] * waf, 0, 0, camera_info->P[5] * haf,
                                camera_info->P[6] * haf, 0, 0, 0, 1, 0 } };
   return changed_camera_info;
+}
+
+void debugPublishPointCloud(const ros::Publisher& publisher, pcl::PointCloud<pcl::PointXYZ>& pointcloud,
+                            const uint64 stamp, std::string&& frame, bool debug)
+{
+  if (debug)
+  {
+    pointcloud.header.stamp = stamp;
+    pointcloud.header.frame_id = frame;
+    publisher.publish(pointcloud);
+  }
 }
 }  // namespace MapUtils
