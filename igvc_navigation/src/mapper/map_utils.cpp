@@ -19,14 +19,14 @@ inline int discretize(radians angle, double angular_resolution)
 void filterPointsBehind(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& filtered_pc,
                         BehindFilterOptions options)
 {
-  static double start_angle = -M_PI + options.angle / 2;
-  static double end_angle = M_PI - options.angle / 2;
+  static double end_angle = -M_PI + options.angle / 2;
+  static double start_angle = M_PI - options.angle / 2;
   static double squared_distance = options.distance * options.distance;
   // Iterate over pointcloud, insert discretized angles into set
   for (auto i : pc)
   {
     double angle = atan2(i.y, i.x);
-    if ((-M_PI <= angle && angle < start_angle) || (end_angle < angle && angle <= M_PI))
+    if ((-M_PI <= angle && angle < end_angle) || (start_angle < angle && angle <= M_PI))
     {
       if (i.x * i.x + i.y * i.y > squared_distance)
       {
