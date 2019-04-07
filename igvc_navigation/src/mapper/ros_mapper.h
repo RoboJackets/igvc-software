@@ -62,10 +62,10 @@ private:
   /**
    * Checks that there is an existing static transform from base_footprint to frame_id. If there isn't,
    * find the given transform using the timestamp provided.
-   * @tparam T timestamp type, either ros::Time or uint64
-   * @param frame_id frame_id to check for
-   * @param timestamp the time to check for
-   * @param topic the key to be used to store the static transform
+   * @tparam[in] T timestamp type, either ros::Time or uint64
+   * @param[in] frame_id frame_id to check for
+   * @param[in] timestamp the time to check for
+   * @param[in] topic the key to be used to store the static transform
    * @return true if a static transform was found, false otherwise.
    */
   template <class T>
@@ -80,10 +80,10 @@ private:
 
   /**
    * Publishes the passed in cv::Mat as a pointcloud on the given publisher
-   * @param pub
-   * @param mat
-   * @param frame_id
-   * @param stamp
+   * @param[in] pub publisher to use
+   * @param[in] mat the map to use
+   * @param[in] frame_id the frame to use
+   * @param[in] stamp the stamp to use
    */
   void publishAsPCL(const ros::Publisher& pub, const cv::Mat& mat, const std::string& frame_id, uint64_t stamp);
 
@@ -91,29 +91,29 @@ private:
 
   ros::Publisher map_pub_;                                  // Publishes map
   ros::Publisher debug_pcl_pub_;                            // Publishes blumap as individual PCL points
-  ros::Publisher debug_blurred_pc_;                         // Publishes blurred map as individual PCL points
   std::map<std::string, tf::StampedTransform> transforms_;  // Map of static transforms
   std::unique_ptr<tf::TransformListener> tf_listener_;      // TF Listener
 
-  bool use_lines_;
+  bool use_lines_{};
   bool camera_model_initialized_{ false };
-  double transform_max_wait_time_;
-  int start_x_;   // start x (m)
-  int start_y_;   // start y (m)
-  int length_x_;  // length (m)
-  int width_y_;   // width (m)
+  double transform_max_wait_time_{};
+  int start_x_{};   // start x (m)
+  int start_y_{};   // start y (m)
+  int length_x_{};  // length (m)
+  int width_y_{};   // width (m)
 
-  bool debug_;
+  bool debug_{};
 
-  double resolution_;  // Map Resolution
+  double resolution_{};  // Map Resolution
 
-  int resize_width_;
-  int resize_height_;
+  int resize_width_{};
+  int resize_height_{};
 
   std::string lidar_topic_;
   std::string line_topic_;
   std::string projected_line_topic_;
   std::string camera_info_topic_;
+  std::string camera_frame_;
   RobotState state_;  // Odom -> Base_link
 
   std::unique_ptr<Mapper> mapper_;

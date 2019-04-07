@@ -46,38 +46,37 @@ public:
 
   /**
    * Inserts a lidar scan into the map.
-   * @param pc
-   * @param lidar_to_odom
+   * @param[in] pc pointcloud to be inserted
+   * @param[in] lidar_to_odom transformation to transform from lidar frame to odom frame
    */
   void insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& lidar_to_odom);
 
   /**
    * Inserts a pointcloud containing the projection of lines.
-   * @param pc
-   * @param odom_to_base
+   * @param[in] pc pointcloud to be inserted
+   * @param[in] base_to_odom transformation to transform from base frame to odom frame
    */
-  void insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_base);
+  void insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& base_to_odom);
 
   /**
    * Projects the empty space in the passed in image and inserts it into the map.
-   * @param image
-   * @param odom_to_base
-   * @param base_to_camera
-   * @param stamp
+   * @param[in] image image to project.
+   * @param[in] base_to_odom transformation to transform from base frame to odom frame
+   * @param[in] camera_to_base transformation to transform from camera frame to odom frame
+   * @param[in] stamp timestamp to be used for debug publishing
    */
-  void insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_base, const tf::Transform& base_to_camera,
+  void insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_odom, const tf::Transform& camera_to_base,
                             const ros::Time& stamp);
 
   /**
    * Sets the parameters for the image_geometry::PinholeCameraModel used for projection.
-   * @param camera_model_
+   * @param[in] camera_model camera model used for projection
    */
-  void setProjectionModel(image_geometry::PinholeCameraModel camera_model_);
+  void setProjectionModel(const image_geometry::PinholeCameraModel& camera_model);
 
   /**
    * Returns the current map, or std::nullopt if no data has been receieved yet.ction Tool_External Tools_clang-format
-   *
-   * @return
+   * @return std::optional of the map as a cv::Mat
    */
   std::optional<cv::Mat> getMap();
 
@@ -88,6 +87,9 @@ private:
    */
   void processImageFreeSpace(cv::Mat& image) const;
 
+  /**
+   * Inverts probabilities for the ProbabilityModels so that miss_probability is more intuitive.
+   */
   void invertMissProbabilities();
 
   std::unique_ptr<Octomapper> octomapper_;

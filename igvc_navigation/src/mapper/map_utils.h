@@ -112,7 +112,7 @@ std::optional<GroundPlane> filterGroundPlane(const PointCloud& raw_pc, PointClou
  * std::nullopt
  */
 std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground,
-      const RANSACOptions& options);
+                                        const RANSACOptions& options);
 
 /**
  * Filters the ground plane using the z coordinate
@@ -121,7 +121,8 @@ std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& gr
  * @param[out] nonground filtered pointcloud without the ground
  * @param[in] options options for the filter
  */
-void fallbackFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground, const FallbackOptions& options);
+void fallbackFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground,
+                    const FallbackOptions& options);
 
 /**
  * Projects all black pixels (0, 0, 0) in the image to the ground plane and inserts them into the pointcloud
