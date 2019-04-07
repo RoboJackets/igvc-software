@@ -147,7 +147,7 @@ void Octomapper::insertScan(const tf::Point &sensor_pos, struct pc_map_pair &pai
   sensor.z() = 0;
   octomap::Pointcloud octo_cloud;
   PCL_to_Octomap(pc, octo_cloud);
-  pair.octree->insertPointCloud(octo_cloud, sensor, range, false, false); // No discretize, no lazy eval
+  pair.octree->insertPointCloud(octo_cloud, sensor, range, false, false);  // No discretize, no lazy eval
 
   pair.octree->setProbHit(old_prob_hit);
   pair.octree->setProbMiss(old_prob_miss);
