@@ -46,5 +46,6 @@ private:
   double maximum_vel_{};
 
   std::unique_ptr<SmoothControl> controller_;
+  std::unique_ptr<MotionProfiler> motion_profiler_;
 };
 #endif  // PROJECT_PATH_FOLLOWER_H

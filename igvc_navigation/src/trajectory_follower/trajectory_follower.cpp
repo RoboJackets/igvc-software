@@ -52,7 +52,7 @@ void TrajectoryFollower::followTrajectory()
 RobotControl TrajectoryFollower::getControl()
 {
   ros::Time current_time = ros::Time::now();
-  for (size_t i = 0; i < trajectory_->trajectory.size() - 1; i++)
+  for (size_t i = 0; i < trajectory_->trajectory.size() - 2; i++)
   {
     ros::Time last_time = trajectory_->trajectory[i].header.stamp;
     ros::Time next_time = trajectory_->trajectory[i + 1].header.stamp;

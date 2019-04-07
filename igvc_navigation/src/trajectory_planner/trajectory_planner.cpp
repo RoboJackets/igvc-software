@@ -27,6 +27,11 @@ TrajectoryPlanner::TrajectoryPlanner()
   TargetSelectionOptions target_selection_options{};
   CurvatureBlendingOptions curvature_blending_options{};
 
+  WheelConstraint wheel_constraints{};
+  RobotConstraint robot_constraints{};
+  MotionProfilerOptions motion_profiler_options{};
+  double target_velocity;
+
   igvc::param(pNh, "axle_length", axle_length, 0.52);
 
   igvc::param(pNh, "smooth_control/k1", smooth_control_options.k1, 1.0);
@@ -42,15 +47,24 @@ TrajectoryPlanner::TrajectoryPlanner()
 
   igvc::param(pNh, "curvature_blending/blending_distance", curvature_blending_options.blending_distance, 1.0);
 
+  igvc::param(pNh, "wheel_constraints/velocity", wheel_constraints.velocity, 3.0);
+  igvc::param(pNh, "wheel_constraints/acceleration", wheel_constraints.velocity, 5.0);
+  igvc::param(pNh, "robot_constraints/velocity", wheel_constraints.velocity, 2.0);
+  igvc::param(pNh, "robot_constraints/acceleration", wheel_constraints.velocity, 5.0);
+
+  igvc::param(pNh, "motion_profiler/beta", motion_profiler_options.beta, 2.0);
+  igvc::param(pNh, "motion_profiler/lambda", motion_profiler_options.lambda, 1.0);
+
   if (path_generation_options.simulation_frequency <= 0)
   {
     ROS_WARN_STREAM("Simulation frequency (currently " << path_generation_options.simulation_frequency
                                                        << ") should be greater than 0. Setting to 1 for now.");
     path_generation_options.simulation_frequency = 1;
   }
-  controller_ = std::unique_ptr<SmoothControl>(new SmoothControl{ smooth_control_options, path_generation_options,
-                                                                  target_selection_options, curvature_blending_options,
-                                                                  axle_length });
+  controller_ = igvc::make_unique<SmoothControl>(smooth_control_options, path_generation_options,
+                                                 target_selection_options, curvature_blending_options, axle_length);
+  motion_profiler_ = igvc::make_unique<MotionProfiler>(axle_length, wheel_constraints, robot_constraints,
+                                                       motion_profiler_options, target_velocity);
 
   // load global parameters
   igvc::getParam(pNh, "maximum_vel", maximum_vel_);
@@ -135,7 +149,7 @@ void TrajectoryPlanner::updateTrajectory()
 
   if (trajectory && trajectory.value().get() != nullptr)
   {
-    motion_profiler::profileTrajectory(*trajectory);
+    motion_profiler_->profileTrajectory(*trajectory);
     publishTrajectory(*trajectory);
   }
 }

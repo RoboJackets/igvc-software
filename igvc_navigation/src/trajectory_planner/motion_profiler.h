@@ -3,8 +3,6 @@
 
 #include <igvc_msgs/trajectory.h>
 
-namespace motion_profiler
-{
 struct WheelConstraint
 {
   double velocity;
@@ -17,14 +15,30 @@ struct RobotConstraint
   double acceleration;
 };
 
-/**
- * Performs motion profiling on the passed in trajectory, doing a constrained optimization on acceleration
- * @param trajectory_ptr
- */
-void profileTrajectory(igvc_msgs::trajectoryPtr trajectory_ptr, const WheelConstraint& wheel_constraint,
-                       const RobotConstraint& robot_constraint, double axle_length);
+struct MotionProfilerOptions
+{
+  double beta;
+  double lambda;
+};
 
-double calculateSlope(double curvature, double axle_length);
-}  // namespace motion_profiler
+class MotionProfiler
+{
+public:
+  MotionProfiler(double axle_length, const WheelConstraint& wheel_constraint, const RobotConstraint& robot_constraint,
+                 const MotionProfilerOptions& motion_profiler_options, double target_velocity);
+
+  /**
+   * Performs motion profiling on the passed in trajectory, doing a constrained optimization on acceleration
+   * @param trajectory_ptr the trajectory to perform motion profiling on
+   */
+  void profileTrajectory(const igvc_msgs::trajectoryPtr& trajectory_ptr);
+private:
+  WheelConstraint wheel_constraint_;
+  RobotConstraint robot_constraint_;
+  MotionProfilerOptions motion_profiler_options_;
+
+  double axle_length_;
+  double target_velocity_;
+};
 
 #endif  // SRC_MOTION_PROFILER_H

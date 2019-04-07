@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+
+<!-- map.launch -->
+<launch>
+    <!-- Planner -->
+    <node name="trajectory_planner" pkg="igvc_navigation" type="trajectory_planner" output="screen" >
+        <param name="axle_length" value="0.52"/>
+
+        <param name="smooth_control/k1" value="1.0"/>
+        <param name="smooth_control/k2" value="3.0"/>
+
+        <param name="path_generation/simulation_frequency" value="100.0"/>
+        <param name="path_generation/simulation_horizon" value="5.0"/>
+
+        <param name="target_selection/lookahead_dist" value="2.0"/>
+        <param name="target_selection/reached_distance" value="0.05"/>
+        <param name="target_selection/move_threshold" value="0.05"/>
+
+        <param name="curvature_blending/blending_distance" value="1.0"/>
+
+        <param name="robot_constraints/velocity" value="2.0"/>
+        <param name="robot_constraints/acceleration" value="5.0"/>
+
+        <param name="wheel_constraints/velocity" value="3.0"/>
+        <param name="wheel_constraints/acceleration" value="5.0"/>
+
+        <param name="motion_profiler/beta" value="2.0"/>
+        <param name="motion_profiler/lambda" value="1.0"/>
+    </node>
+
+    <node name="trajectory_follower" pkg="igvc_navigation" type="trajectory_follower" output="screen" >
+        <param name="topics/path" value="/trajectory"/>
+        <param name="axle_length" value="0.52"/>
+        <param name="loop_hz" value="25.0"/>
+    </node>
+
+</launch>
