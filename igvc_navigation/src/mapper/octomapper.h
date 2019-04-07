@@ -1,3 +1,11 @@
+/**
+ * Class that interfaces with OctoMap for efficient storage of 2D and 3D geometrical data. Contains convenience methods
+ * for insertion of lidar scans, rays and points. Also provides a method to convert back from the OctoMap to a 2d array
+ * in the form of a cv::Mat.
+ *
+ * Author: Oswin So <oswinso@gatech.edu>
+ * Date Created: March 24 2019
+ */
 #ifndef PROJECT_OCTOMAPPER_H
 #define PROJECT_OCTOMAPPER_H
 

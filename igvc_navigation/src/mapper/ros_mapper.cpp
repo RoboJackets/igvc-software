@@ -68,7 +68,7 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
                                       << " for projected pointclouds");
     line_map_sub = nh.subscribe<sensor_msgs::Image>(line_topic_, 1, &ROSMapper::segmentedImageCallback, this);
     projected_line_map_sub =
-        nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(projected_line_topic_, 1, &ROSMapper::projctedLineCallback, this);
+        nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(projected_line_topic_, 1, &ROSMapper::projectedLineCallback, this);
     camera_info_sub =
         nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_, 1, &ROSMapper::cameraInfoCallback, this);
   }
@@ -86,13 +86,8 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   ros::spin();
 }
 
-/**
- * Updates <code>RobotState state</code> with the latest tf transform using the timestamp of the message passed in
- * @param[in] msg <code>pcl::PointCloud</code> message with the timestamp used for looking up the tf transform
- */
 template <>
 bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
-// bool ROSMapper::getOdomTransform(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &msg)
 {
   tf::StampedTransform transform;
   static ros::Duration wait_time = ros::Duration(transform_max_wait_time_);
@@ -134,14 +129,6 @@ bool ROSMapper::getOdomTransform(const uint64 timestamp)
   return getOdomTransform(message_timestamp);
 }
 
-// Populates igvc_msgs::map message with information from sensor_msgs::Image and the timestamp from pcl_stamp
-/**
- * Populates <code>igvc_msgs::map message</code> with information from <code>sensor_msgs::Image</code> and the
- * timestamp from <code>pcl_stamp</code>
- * @param[out] message message to be filled out
- * @param[in] image image containing map data to be put into <code>message</code>
- * @param[in] pcl_stamp time stamp from the pcl to be used for <code>message</code>
- */
 void ROSMapper::setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &image, uint64_t pcl_stamp)
 {
   pcl_conversions::fromPCL(pcl_stamp, image.header.stamp);
@@ -158,12 +145,6 @@ void ROSMapper::setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &
   message.y_initial = static_cast<unsigned int>(start_y_ / resolution_);
 }
 
-/**
- * Checks if transform from base_footprint to msg.header.frame_id exists
- * @param[in] msg
- * @param[in] topic Topic to check for
- */
-
 template <>
 bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, ros::Time message_timestamp,
                                            const std::string &topic)
@@ -172,7 +153,8 @@ bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, ros::Tim
   {
     // Wait for transform between frame_id (ex. /scan/pointcloud) and base_footprint.
     ROS_INFO_STREAM("Getting transform for " << topic << " from " << frame_id << " to /base_footprint \n");
-    if (tf_listener_->waitForTransform("/base_footprint", frame_id, message_timestamp, ros::Duration(3.0)))
+    if (tf_listener_->waitForTransform("/base_footprint", frame_id, message_timestamp,
+                                       ros::Duration(transform_max_wait_time_)))
     {
       tf::StampedTransform transform;
       tf_listener_->lookupTransform("/base_footprint", frame_id, message_timestamp, transform);
@@ -202,11 +184,6 @@ bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, uint64 t
   return true;
 }
 
-/**
- * Publishes the given map at the given stamp
- * @param[in] map map to be published
- * @param[in] stamp pcl stamp of the timestamp to be used
- */
 void ROSMapper::publish(uint64_t stamp)
 {
   std::optional<cv::Mat> map = mapper_->getMap();
@@ -270,10 +247,6 @@ void ROSMapper::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, cons
   pub.publish(pointcloud);
 }
 
-/**
- * Callback for pointcloud. Filters the lidar scan, then inserts it into the octree.
- * @param[in] pc Lidar scan
- */
 void ROSMapper::pcCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
 {
   // Check if static transform already exists for this topic.
@@ -297,10 +270,6 @@ void ROSMapper::pcCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
   publish(pc->header.stamp);
 }
 
-/**
- * Callback for the neural network segmented image.
- * @param camera_info
- */
 void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segmented)
 {
   if (!camera_model_initialized_)
@@ -334,11 +303,7 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
   publish(pcl_conversions::toPCL(segmented->header.stamp));
 }
 
-/**
- * Callback for the line projetced onto lidar point cloud. Directly insert it into the line octomap
- * @param pc
- */
-void ROSMapper::projctedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
+void ROSMapper::projectedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc)
 {
   // Lookup transform form Ros Localization for position
   if (!getOdomTransform(pc->header.stamp))

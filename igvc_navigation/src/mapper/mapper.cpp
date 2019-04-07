@@ -57,7 +57,7 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   empty_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/empty_pc", 1);
 }
 
-void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& odom_to_lidar)
+void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& lidar_to_odom)
 {
   pcl::PointCloud<pcl::PointXYZ> empty_pc{};
   pcl::PointCloud<pcl::PointXYZ> filtered_pc{};
@@ -65,8 +65,8 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
   MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
   MapUtils::filterPointsBehind(*pc, filtered_pc, behind_filter_options_);
 
-  pcl_ros::transformPointCloud(filtered_pc, filtered_pc, odom_to_lidar);
-  pcl_ros::transformPointCloud(empty_pc, empty_pc, odom_to_lidar);
+  pcl_ros::transformPointCloud(filtered_pc, filtered_pc, lidar_to_odom);
+  pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
 
   filtered_pc.header.stamp = pc->header.stamp;
   filtered_pc.header.frame_id = "/odom";
@@ -86,15 +86,15 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
     {
       ground_plane_ = *opt_ground_plane;
     }
-    octomapper_->insertScan(odom_to_lidar.getOrigin(), pc_map_pair_, nonground, lidar_scan_probability_model_, radius_);
-    octomapper_->insertRays(odom_to_lidar.getOrigin(), pc_map_pair_, ground, false, lidar_ground_probability_model_);
+    octomapper_->insertScan(lidar_to_odom.getOrigin(), pc_map_pair_, nonground, lidar_scan_probability_model_, radius_);
+    octomapper_->insertRays(lidar_to_odom.getOrigin(), pc_map_pair_, ground, false, lidar_ground_probability_model_);
   }
   else
   {
-    octomapper_->insertScan(odom_to_lidar.getOrigin(), pc_map_pair_, filtered_pc, lidar_scan_probability_model_,
+    octomapper_->insertScan(lidar_to_odom.getOrigin(), pc_map_pair_, filtered_pc, lidar_scan_probability_model_,
                             radius_);
   }
-  octomapper_->insertRays(odom_to_lidar.getOrigin(), pc_map_pair_, empty_pc, false,
+  octomapper_->insertRays(lidar_to_odom.getOrigin(), pc_map_pair_, empty_pc, false,
                           lidar_free_space_probability_model_);
 
   octomapper_->get_updated_map(pc_map_pair_);
@@ -121,7 +121,7 @@ void Mapper::insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_b
                                   const tf::Transform& base_to_camera, const ros::Time& stamp)
 {
   PointCloud projected_pc;
-  //  processImageFreeSpace(image);
+  processImageFreeSpace(image);
 
   if (!camera_model_initialized_ && !use_ground_filter_)
   {
