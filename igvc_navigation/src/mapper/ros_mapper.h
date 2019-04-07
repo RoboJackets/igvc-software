@@ -44,10 +44,10 @@ private:
    */
   void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info);
 
-/**
- * Publishes the given map at the given stamp
- * @param[in] stamp timestamp to be used for the publishing
- */
+  /**
+   * Publishes the given map at the given stamp
+   * @param[in] stamp timestamp to be used for the publishing
+   */
   void publish(uint64_t stamp);
 
   /**
