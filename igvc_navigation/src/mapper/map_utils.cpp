@@ -67,7 +67,7 @@ void projectTo2D(PointCloud& projected_pc)
 }
 
 std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground,
-    const RANSACOptions& options)
+                                        const RANSACOptions& options)
 {
   // Plane detection for ground removal
   pcl::ModelCoefficientsPtr coefficients(new pcl::ModelCoefficients);
@@ -152,7 +152,8 @@ void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pc
 
   // For each angle, if it's not in the set (empty), put it into a pointcloud.
   // From Robot's frame. Need to rotate angle to world frame
-  for (int i = discretize(options.start_angle, angular_resolution); i < discretize(options.end_angle, angular_resolution); i++)
+  for (int i = discretize(options.start_angle, angular_resolution);
+       i < discretize(options.end_angle, angular_resolution); i++)
   {
     if (discretized_angles.find(i) == discretized_angles.end())
     {

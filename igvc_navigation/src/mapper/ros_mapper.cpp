@@ -47,6 +47,7 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "topics/line_segmentation", line_topic_);
   igvc::getParam(pNh, "topics/projected_line_pc", projected_line_topic_);
   igvc::getParam(pNh, "topics/camera_info", camera_info_topic_);
+  igvc::param(pNh, "frames/camera", camera_frame_, std::string{"optical_cam_center"});
 
   igvc::getParam(pNh, "cameras/resize_width", resize_width_);
   igvc::getParam(pNh, "cameras/resize_height", resize_height_);
@@ -73,14 +74,11 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
         nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_, 1, &ROSMapper::cameraInfoCallback, this);
   }
 
-  //  published_map_ = std::unique_ptr<cv::Mat>(new cv::Mat(length_x_, width_y_, CV_8UC1));
-
   map_pub_ = nh.advertise<igvc_msgs::map>("/map", 1);
 
   if (debug_)
   {
     debug_pcl_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
-    debug_blurred_pc_ = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl/blurred", 1);
   }
 
   ros::spin();
@@ -214,17 +212,12 @@ void ROSMapper::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, cons
   {
     for (int j = 0; j < length_x_ / resolution_; j++)
     {
-      if (i > mat.rows || j > mat.cols)
-      {
-        //        ROS_ERROR_STREAM("i: " << i << ", j: " << j);
-      }
-      pcl::PointXYZRGB p;
+      pcl::PointXYZRGB p{};
+      p.x = static_cast<float>((i * resolution_) - (width_y_ / 2.0));
+      p.y = static_cast<float>((j * resolution_) - (length_x_ / 2.0));
       uchar prob = mat.at<uchar>(i, j);
       if (prob > 127)
       {
-        p = pcl::PointXYZRGB();
-        p.x = static_cast<float>((i * resolution_) - (width_y_ / 2.0));
-        p.y = static_cast<float>((j * resolution_) - (length_x_ / 2.0));
         p.r = 0;
         p.g = static_cast<uint8_t>((prob - 127) * 2);
         p.b = 0;
@@ -232,9 +225,6 @@ void ROSMapper::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, cons
       }
       else if (prob < 127)
       {
-        p = pcl::PointXYZRGB();
-        p.x = static_cast<float>((i * resolution_) - (width_y_ / 2.0));
-        p.y = static_cast<float>((j * resolution_) - (length_x_ / 2.0));
         p.r = 0;
         p.g = 0;
         p.b = static_cast<uint8_t>((127 - prob) * 2);
@@ -249,7 +239,6 @@ void ROSMapper::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, cons
 
 void ROSMapper::pcCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
 {
-  // Check if static transform already exists for this topic.
   if (!checkExistsStaticTransform(pc->header.frame_id, pc->header.stamp, lidar_topic_))
   {
     ROS_ERROR("Couldn't find static transform for pointcloud. Sleeping 2 seconds then trying again...");
@@ -257,7 +246,6 @@ void ROSMapper::pcCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
     return;
   }
 
-  // Lookup transform form Ros Localization for position
   if (!getOdomTransform(pc->header.stamp))
   {
     ROS_ERROR("Couldn't find odometry transform in pcCallback. Sleeping 2 seconds then trying again...");
@@ -276,38 +264,32 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
   {
     return;
   }
-  // Check if static transform already exists for this topic.
-  if (!checkExistsStaticTransform("optical_cam_center", segmented->header.stamp, projected_line_topic_))
+  if (!checkExistsStaticTransform(camera_frame_, segmented->header.stamp, projected_line_topic_))
   {
-    ROS_ERROR("Finding static transform failed. Sleeping 2 seconds then trying again...");
-    ros::Duration(2).sleep();
+    ROS_ERROR_STREAM_THROTTLE(2, "Finding static transform to " << camera_frame_ << "failed. Trying again...");
     return;
   }
 
-  // Lookup transform form Ros Localization for position
   if (!getOdomTransform(segmented->header.stamp))
   {
-    ROS_ERROR("Finding odometry transform failed. Sleeping 2 seconds then trying again...");
-    ros::Duration(2).sleep();
+    ROS_ERROR_STREAM_THROTTLE(2, "Finding odometry transform failed. Trying again...");
     return;
   }
   // Convert to OpenCV
   cv_bridge::CvImagePtr segmented_ptr = cv_bridge::toCvCopy(segmented, "mono8");
-
   cv::Mat image = segmented_ptr->image;
 
-  mapper_->insertSegmentedImage(image, state_.transform, transforms_.at(projected_line_topic_),
+  mapper_->insertSegmentedImage(std::move(image), state_.transform, transforms_.at(projected_line_topic_),
                                 segmented->header.stamp);
-  //  mapper_->insertSegmentedImage(image, lazy_);
 
   publish(pcl_conversions::toPCL(segmented->header.stamp));
 }
 
-void ROSMapper::projectedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc)
+void ROSMapper::projectedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
 {
-  // Lookup transform form Ros Localization for position
   if (!getOdomTransform(pc->header.stamp))
   {
+    ROS_ERROR_STREAM_THROTTLE(2, "Finding odometry transform failed. Trying again...");
     return;
   }
   mapper_->insertCameraProjection(pc, state_.transform);

@@ -101,11 +101,11 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
 }
 
 void Mapper::insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
-                                    const tf::Transform& odom_to_base)
+                                    const tf::Transform& base_to_odom)
 {
   pcl::PointCloud<pcl::PointXYZ> transformed{};
 
-  pcl_ros::transformPointCloud(*pc, transformed, odom_to_base);
+  pcl_ros::transformPointCloud(*pc, transformed, base_to_odom);
   transformed.header.stamp = pc->header.stamp;
   transformed.header.frame_id = "odom";
   camera_line_pub_.publish(transformed);
@@ -117,8 +117,8 @@ void Mapper::insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstP
   octomapper_->get_updated_map(camera_map_pair_);
 }
 
-void Mapper::insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_base,
-                                  const tf::Transform& base_to_camera, const ros::Time& stamp)
+void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_odom,
+                                  const tf::Transform& camera_to_base, const ros::Time& stamp)
 {
   PointCloud projected_pc;
   processImageFreeSpace(image);
@@ -130,10 +130,10 @@ void Mapper::insertSegmentedImage(cv::Mat& image, const tf::Transform& odom_to_b
   }
   else
   {
-    MapUtils::projectToPlane(projected_pc, ground_plane_, image, camera_model_, base_to_camera);
+    MapUtils::projectToPlane(projected_pc, ground_plane_, image, camera_model_, camera_to_base);
   }
 
-  pcl_ros::transformPointCloud(projected_pc, projected_pc, odom_to_base);
+  pcl_ros::transformPointCloud(projected_pc, projected_pc, base_to_odom);
 
   projected_pc.header.stamp = pcl_conversions::toPCL(stamp);
   projected_pc.header.frame_id = "/odom";
@@ -178,7 +178,7 @@ std::optional<cv::Mat> Mapper::getMap()
   return blurred_map;
 }
 
-void Mapper::setProjectionModel(image_geometry::PinholeCameraModel camera_model)
+void Mapper::setProjectionModel(const image_geometry::PinholeCameraModel& camera_model)
 {
   camera_model_ = camera_model;
   camera_model_initialized_ = true;
