@@ -52,6 +52,7 @@ TrajectoryPlanner::TrajectoryPlanner()
   igvc::param(pNh, "robot_constraints/velocity", wheel_constraints.velocity, 2.0);
   igvc::param(pNh, "robot_constraints/acceleration", wheel_constraints.velocity, 5.0);
 
+  igvc::param(pNh, "motion_profiler/target_velocity", target_velocity, 1.0);
   igvc::param(pNh, "motion_profiler/beta", motion_profiler_options.beta, 2.0);
   igvc::param(pNh, "motion_profiler/lambda", motion_profiler_options.lambda, 1.0);
 

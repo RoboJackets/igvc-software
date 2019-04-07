@@ -44,6 +44,7 @@
   <build_depend>pcl_conversions</build_depend>
   <build_depend>pcl_ros</build_depend>
   <build_depend>roslib</build_depend>
+  <build_depend>robot_localization</build_depend>
   <build_depend>pluginlib</build_depend>
   <build_depend>class_loader</build_depend>
   <build_depend>image_geometry</build_depend>

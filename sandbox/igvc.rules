@@ -1,9 +1,14 @@
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", ATTRS{bcdDevice}=="1000", SYMLINK+="igvc_lidar", GROUP="plugdev", MODE="0666"
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001",ATTRS{serial}=="A105BMON", SYMLINK+="igvc_imu"
-KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0825", ATTRS{bcdDevice}=="0012", ATTRS{serial}=="21AD0B10", SYMLINK+="igvc_usb_cam_right"
-KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="0825", ATTRS{bcdDevice}=="0012", ATTRS{serial}=="DA101B10", SYMLINK+="igvc_usb_cam_left"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{bcdDevice}=="0100", SYMLINK+="igvc_lidar", GROUP="plugdev"
+
+SUBSYSTEM=="tty", ATTRS{product}=="USB3.0 Hub", SYMLINK+="imu_bottom"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a40", SYMLINK+="imu_top"
+
+KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", ATTRS{bcdDevice}=="0011", ATTRS{serial}=="F6CB206F", SYMLINK+="igvc_usb_cam_right"
+KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", ATTRS{bcdDevice}=="0011", ATTRS{serial}=="EBD81F4F", SYMLINK+="igvc_usb_cam_left"
 KERNEL=="video?", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="082d", ATTRS{bcdDevice}=="0011", ATTRS{serial}=="6E5D96EF", SYMLINK+="igvc_usb_cam_center"
+
 SUBSYSTEM=="tty", ATTRS{idVendor}=="067b", ATTRS{idProduct}=="2303",ATTRS{bcdDevice}=="0400", SYMLINK+="igvc_gps"
+
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1f00", ATTRS{idProduct}=="2012",ATTRS{bcdDevice}=="0100", SYMLINK+="igvc_motor_board"
 
 KERNEL=="js?", ATTRS{name}=="Logitech Gamepad F710", SYMLINK+="igvc_joystick"

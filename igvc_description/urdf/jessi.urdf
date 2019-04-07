@@ -209,6 +209,14 @@
     </visual>
   </link>
 
+  <link name="magnetometer">
+    <visual>
+      <geometry>
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+    </visual>
+  </link>
+
   <link name="gps">
     <visual>
       <geometry>
@@ -240,6 +248,27 @@
       <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
       <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
       <yawOffset>1.5707963</yawOffset>
+    </plugin>
+
+    <plugin filename="libhector_gazebo_ros_imu.so" name="magnetometer">
+      <serviceName>/magnetometer/calibrate</serviceName>
+      <updateRate>200.0</updateRate>
+      <bodyName>magnetometer</bodyName>
+      <frameId>magnetometer</frameId>
+      <topicName>/magnetometer</topicName>
+      <rpyOffset>0 0 0</rpyOffset>
+      <xyzOffset>0 0 0</xyzOffset>
+      <gaussianNoise>0.00000001</gaussianNoise>
+      <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
+      <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
+      <accelGaussianNoise>0.00000001 0.00000001 0.00000001</accelGaussianNoise>
+      <rateDrift>0.0 0.0 0.0</rateDrift>
+      <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
+      <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
+      <headingDrift>0.0 0.0 0.0</headingDrift>
+      <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
+      <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
+      <yawOffset>0</yawOffset>
     </plugin>
 
     <plugin filename="libhector_gazebo_ros_gps.so" name="gps">
@@ -290,7 +319,14 @@
   <joint name="base_footprint_to_imu" type="fixed">
     <parent link="base_footprint"/>
     <child link="imu"/>
-    <origin xyz=" 0.279 -0.05 1.445" rpy="0 0 0"/>
+    <origin xyz=" 0.054991 0 0.2032254" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+
+  <joint name="base_footprint_to_magnetometer" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="magnetometer"/>
+    <origin xyz="-0.07112 0 1.23698" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
 

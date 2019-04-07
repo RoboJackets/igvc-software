@@ -153,9 +153,9 @@ void MotorController::setPID()
       ros::shutdown();
     }
 
-    valid_values = (static_cast<double>(response.p_l) == p_l_) && (static_cast<double>(response.p_r) == p_r_) &&
-                   (static_cast<double>(response.i_l) == i_l_) && (static_cast<double>(response.i_r) == i_r_) &&
-                   (static_cast<double>(response.d_l) == d_l_) && (static_cast<double>(response.d_r) == d_r_);
+    valid_values = (response.p_l == static_cast<float>(p_l_)) && (response.p_r == static_cast<float>(p_r_)) &&
+                   (response.i_l == static_cast<float>(i_l_)) && (response.i_r == static_cast<float>(i_r_)) &&
+                   (response.d_l == static_cast<float>(d_l_)) && (response.d_r == static_cast<float>(d_r_));
 
     rate.sleep();
   }
