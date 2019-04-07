@@ -28,14 +28,17 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   igvc::getParam(pNh, "filters/ground_filter/fallback/plane_distance",
                  ground_filter_options_.fallback_options.plane_distance);
 
+  igvc::param(pNh, "filters/empty/enabled", empty_filter_options_.enabled, false);
   igvc::getParam(pNh, "filters/empty/start_angle", empty_filter_options_.start_angle);
   igvc::getParam(pNh, "filters/empty/end_angle", empty_filter_options_.end_angle);
   igvc::getParam(pNh, "filters/empty/miss_cast_distance", empty_filter_options_.miss_cast_distance);
+  igvc::getParam(pNh, "filters/empty/max_range", empty_filter_options_.max_range);
 
   igvc::getParam(pNh, "filters/empty_image/blur/kernel", process_image_options_.blur.kernel);
   igvc::getParam(pNh, "filters/empty_image/blur/sigma", process_image_options_.blur.sigma);
   igvc::getParam(pNh, "filters/empty_image/threshold", process_image_options_.threshold.threshold);
 
+  igvc::param(pNh, "filters/behind/enabled", behind_filter_options_.enabled, false);
   igvc::getParam(pNh, "filters/behind/filter_angle", behind_filter_options_.angle);
   igvc::getParam(pNh, "filters/behind/distance", behind_filter_options_.distance);
 
@@ -44,6 +47,7 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   igvc::getParam(pNh, "octree/resolution", resolution_);
 
   igvc::getParam(pNh, "node/use_lines", use_lines_);
+  igvc::getParam(pNh, "node/debug", debug_);
 
   invertMissProbabilities();
 
@@ -55,6 +59,9 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   camera_projection_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection", 1);
   filtered_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/filtered_pc", 1);
   empty_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/empty_pc", 1);
+  ground_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/ground", 1);
+  nonground_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/nonground", 1);
+  nonground_projected_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/nonground_projected", 1);
 }
 
 void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& lidar_to_odom)
@@ -62,19 +69,16 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
   pcl::PointCloud<pcl::PointXYZ> empty_pc{};
   pcl::PointCloud<pcl::PointXYZ> filtered_pc{};
 
-  MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
-  MapUtils::filterPointsBehind(*pc, filtered_pc, behind_filter_options_);
+  if (behind_filter_options_.enabled)
+  {
+    MapUtils::filterPointsBehind(*pc, filtered_pc, behind_filter_options_);
+  }
+  else
+  {
+    filtered_pc = *pc;
+  }
 
   pcl_ros::transformPointCloud(filtered_pc, filtered_pc, lidar_to_odom);
-  pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
-
-  filtered_pc.header.stamp = pc->header.stamp;
-  filtered_pc.header.frame_id = "/odom";
-  filtered_pc_pub_.publish(filtered_pc);
-
-  empty_pc.header.stamp = pc->header.stamp;
-  empty_pc.header.frame_id = "/odom";
-  empty_pc_pub_.publish(empty_pc);
 
   if (use_ground_filter_)
   {
@@ -86,13 +90,35 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
     {
       ground_plane_ = *opt_ground_plane;
     }
+
+    MapUtils::debugPublishPointCloud(nonground_pub_, nonground, pc->header.stamp, "/odom", debug_);
+    MapUtils::debugPublishPointCloud(ground_pub_, ground, pc->header.stamp, "/odom", debug_);
+
+    MapUtils::projectTo2D(nonground);
+    MapUtils::debugPublishPointCloud(nonground_projected_pub_, nonground, pc->header.stamp, "/odom", debug_);
+
+    // Transform to lidar, filter empty, then transform back
+    if (empty_filter_options_.enabled)
+    {
+      pcl::PointCloud<pcl::PointXYZ> nonground_lidar;
+      pcl_ros::transformPointCloud(nonground, nonground_lidar, lidar_to_odom.inverse());
+
+      MapUtils::getEmptyPoints(nonground_lidar, empty_pc, angular_resolution_, empty_filter_options_);
+      pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
+
+      MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, pc->header.stamp, "/odom", debug_);
+    }
+
     octomapper_->insertScan(lidar_to_odom.getOrigin(), pc_map_pair_, nonground, lidar_scan_probability_model_, radius_);
-    octomapper_->insertRays(lidar_to_odom.getOrigin(), pc_map_pair_, ground, false, lidar_ground_probability_model_);
   }
   else
   {
+    MapUtils::projectTo2D(filtered_pc);
     octomapper_->insertScan(lidar_to_odom.getOrigin(), pc_map_pair_, filtered_pc, lidar_scan_probability_model_,
                             radius_);
+
+    MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
+    pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
   }
   octomapper_->insertRays(lidar_to_odom.getOrigin(), pc_map_pair_, empty_pc, false,
                           lidar_free_space_probability_model_);
@@ -106,9 +132,7 @@ void Mapper::insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstP
   pcl::PointCloud<pcl::PointXYZ> transformed{};
 
   pcl_ros::transformPointCloud(*pc, transformed, base_to_odom);
-  transformed.header.stamp = pc->header.stamp;
-  transformed.header.frame_id = "odom";
-  camera_line_pub_.publish(transformed);
+  MapUtils::debugPublishPointCloud(camera_line_pub_, transformed, pc->header.stamp, "/odom", debug_);
 
   MapUtils::projectTo2D(transformed);
 
@@ -134,10 +158,8 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
   }
 
   pcl_ros::transformPointCloud(projected_pc, projected_pc, base_to_odom);
-
-  projected_pc.header.stamp = pcl_conversions::toPCL(stamp);
-  projected_pc.header.frame_id = "/odom";
-  camera_projection_pub_.publish(projected_pc);
+  MapUtils::debugPublishPointCloud(camera_projection_pub_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
+                                   debug_);
 
   octomapper_->insertPoints(camera_map_pair_, projected_pc, false, camera_probability_model_);
 

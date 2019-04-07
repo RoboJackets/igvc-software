@@ -92,15 +92,14 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
       }
       else
       {
-        ROS_ERROR_STREAM("Point outside!");
+        ROS_ERROR_STREAM_THROTTLE_NAMED(10, "Point Outside", "Point outside!");
       }
     }
     else
     {
       // This isn't a leaf at max depth. Time to iterate
-      int grid_num = 1 << (pc_map_pair.octree->getTreeDepth() - it.getDepth());
+      int grid_num = 1u << (pc_map_pair.octree->getTreeDepth() - it.getDepth());
       auto [x, y] = toMapCoordinates(it.getX(), it.getY());
-      //      ROS_INFO("We did it?");
       for (int dx = 0; dx < grid_num; dx++)
       {
         for (int dy = 0; dy < grid_num; dy++)
@@ -111,7 +110,7 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
           }
           else
           {
-            ROS_ERROR_STREAM("Point outside!");
+            ROS_ERROR_STREAM_THROTTLE_NAMED(10, "Point Outside", "Point outside!");
           }
         }
       }
@@ -145,9 +144,10 @@ void Octomapper::insertScan(const tf::Point &sensor_pos, struct pc_map_pair &pai
   pair.octree->setProbMiss(model.prob_miss);
 
   octomap::point3d sensor = octomap::pointTfToOctomap(sensor_pos);
+  sensor.z() = 0;
   octomap::Pointcloud octo_cloud;
   PCL_to_Octomap(pc, octo_cloud);
-  pair.octree->insertPointCloud(octo_cloud, sensor, range, false, false);
+  pair.octree->insertPointCloud(octo_cloud, sensor, range, false, false); // No discretize, no lazy eval
 
   pair.octree->setProbHit(old_prob_hit);
   pair.octree->setProbMiss(old_prob_miss);
@@ -163,6 +163,7 @@ void Octomapper::insertRays(const tf::Point &sensor_pos, struct pc_map_pair &pai
   pair.octree->setProbMiss(model.prob_miss);
 
   octomap::point3d sensor = octomap::pointTfToOctomap(sensor_pos);
+  sensor.z() = 0;
   octomap::Pointcloud scan;
   PCL_to_Octomap(pc, scan);
 

@@ -20,15 +20,18 @@ struct EmptyFilterOptions
 {
   using radians = double;
 
+  bool enabled;
   radians start_angle;
   radians end_angle;
   double miss_cast_distance;
+  double max_range;
 };
 
 struct BehindFilterOptions
 {
   using radians = double;
 
+  bool enabled;
   radians angle;
   double distance;
 };
@@ -157,6 +160,16 @@ void blur(cv::Mat& blurred_map, double kernel_size);
  */
 sensor_msgs::CameraInfoConstPtr scaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width,
                                                 double height);
+
+inline bool withinRange(const pcl::PointXYZ& point, double range);
+
+void debugPublishPointCloud(const ros::Publisher& publisher, pcl::PointCloud<pcl::PointXYZ>& pointcloud,
+                            const uint64 stamp, std::string&& frame, bool debug);
 }  // namespace MapUtils
+
+inline bool MapUtils::withinRange(const pcl::PointXYZ& point, double range)
+{
+  return std::hypot(point.x, point.y, point.z) <= range;
+}
 
 #endif  // PROJECT_MAP_FILTERS_H
