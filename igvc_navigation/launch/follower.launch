@@ -3,7 +3,7 @@
 <!-- map.launch -->
 <launch>
     <!-- Planner -->
-    <node name="trajectory_planner" pkg="igvc_navigation" type="trajectory_planner" output="screen" >
+    <node name="trajectory_planner" pkg="igvc_navigation" type="trajectory_planner" output="screen" launch-prefix="gdb -ex run --args">
         <param name="axle_length" value="0.52"/>
 
         <param name="smooth_control/k1" value="1.0"/>
@@ -11,6 +11,7 @@
 
         <param name="path_generation/simulation_frequency" value="100.0"/>
         <param name="path_generation/simulation_horizon" value="5.0"/>
+        <param name="path_generation/velocity" value="0.5"/>
 
         <param name="target_selection/lookahead_dist" value="2.0"/>
         <param name="target_selection/reached_distance" value="0.05"/>

@@ -17,9 +17,9 @@ TrajectoryFollower::TrajectoryFollower()
 
   igvc::getParam(pNh, "topics/path", path_topic_);
   igvc::param(pNh, "loop_hz", loop_hz_, 25.0);
-  igvc::param(pNh, "axle_length_", axle_length_, 0.48);
+  igvc::param(pNh, "axle_length", axle_length_, 0.48);
 
-  ros::Subscriber path_sub = nh.subscribe("/path", 1, &TrajectoryFollower::trajectoryCallback, this);
+  ros::Subscriber path_sub = nh.subscribe(path_topic_, 1, &TrajectoryFollower::trajectoryCallback, this);
   control_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
   std::thread trajectory_thread(&TrajectoryFollower::trajectoryFollowLoop, this);
 
@@ -38,7 +38,9 @@ void TrajectoryFollower::trajectoryFollowLoop()
   ros::Rate rate(loop_hz_);
   while (ros::ok())
   {
-    followTrajectory();
+    if (trajectory_.get()) {
+      followTrajectory();
+    }
     rate.sleep();
   }
 }

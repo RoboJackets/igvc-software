@@ -26,8 +26,8 @@ void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajector
     double velocity = target_velocity_ / (1 + beta * std::pow(std::abs(trajectory_point.curvature), lambda));
 
     // Constraint checking and limiting
-    if (std::abs(velocity) > robot_constraint_.velocity) {
-      velocity = std::copysign(robot_constraint_.velocity, velocity);
+    if (velocity > robot_constraint_.velocity) {
+      velocity = robot_constraint_.velocity;
     }
 
     trajectory_point.velocity = velocity;
@@ -35,14 +35,23 @@ void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajector
     // Caclulate time to next point
     if (i != trajectory_ptr->trajectory.size() - 1)
     {
-      double R = 1/trajectory_point.curvature;
-      double current_yaw = tf::getYaw(trajectory_point.pose.orientation);
-      double next_yaw = tf::getYaw(trajectory_ptr->trajectory[i+1].pose.orientation);
+      double distance;
+      if (std::abs(trajectory_point.curvature) > 1e-8) {
+        double R = 1/trajectory_point.curvature;
+        double current_yaw = tf::getYaw(trajectory_point.pose.orientation);
+        double next_yaw = tf::getYaw(trajectory_ptr->trajectory[i+1].pose.orientation);
 
-      double d_theta = std::abs(next_yaw - current_yaw);
-      double arclength = d_theta * R;
+        double d_theta = std::abs(next_yaw - current_yaw);
+        distance = d_theta * R;
 
-      ros::Duration move_duration = ros::Duration(arclength / trajectory_point.velocity);
+        ROS_INFO_STREAM("arclength: " << distance << ", velocity: " << velocity << ", duration: " << distance / trajectory_point.velocity);
+
+      } else {
+        double dx = trajectory_point.pose.position.x - trajectory_ptr->trajectory[i+1].pose.position.x;
+        double dy = trajectory_point.pose.position.y - trajectory_ptr->trajectory[i+1].pose.position.y;
+        distance = std::hypot(dx, dy);
+      }
+      ros::Duration move_duration = ros::Duration(distance / trajectory_point.velocity);
 
       trajectory_ptr->trajectory[i+1].header.stamp = trajectory_point.header.stamp + move_duration;
     }

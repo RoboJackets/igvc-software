@@ -68,7 +68,6 @@ TrajectoryPlanner::TrajectoryPlanner()
                                                        motion_profiler_options, target_velocity);
 
   // load global parameters
-  igvc::getParam(pNh, "maximum_vel", maximum_vel_);
   igvc::param(pNh, "stop_dist", stop_dist_, 0.9);
 
   ros::Subscriber path_sub = nh.subscribe("/path", 1, &TrajectoryPlanner::pathCallback, this);
@@ -78,7 +77,7 @@ TrajectoryPlanner::TrajectoryPlanner()
 
   cmd_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
   target_pub_ = nh.advertise<geometry_msgs::PointStamped>("/target_point", 1);
-  trajectory_pub_ = nh.advertise<nav_msgs::Path>("/trajectory", 1);
+  trajectory_pub_ = nh.advertise<igvc_msgs::trajectory>("/trajectory", 1);
   smoothed_pub_ = nh.advertise<nav_msgs::Path>("/smoothed", 1);
 
   ros::spin();
@@ -172,7 +171,7 @@ std::optional<igvc_msgs::trajectoryPtr> TrajectoryPlanner::getSmoothPath()
 
   ROS_DEBUG_STREAM_THROTTLE(1, "Distance to waypoint: " << goal_dist << "(m.)");
 
-  igvc_msgs::trajectoryPtr trajectory;
+  igvc_msgs::trajectoryPtr trajectory = boost::make_shared<igvc_msgs::trajectory>();
 
   RobotState target;
   controller_->getPath(path_, trajectory, state_);
