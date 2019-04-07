@@ -92,10 +92,10 @@ void filterPointsBehind(const PointCloud& pc, PointCloud& filtered_pc, BehindFil
 
 /**
  * Filters the ground plane by trying RANSAC first, then resorting to a z-coordinate based fallback filter.
- * @param raw_pc the unfiltered pointcloud
- * @param ground pointcloud representing the ground
- * @param nonground filtered pointcloud without the ground
- * @param options options for the filter
+ * @param[in] raw_pc the unfiltered pointcloud
+ * @param[out] ground pointcloud representing the ground
+ * @param[out] nonground filtered pointcloud without the ground
+ * @param[in] options options for the filter
  * @return a std::optional containing the coefficients of the detected ground plane if RANSAC is used, otherwise
  * std::nullopt
  */
@@ -104,24 +104,24 @@ std::optional<GroundPlane> filterGroundPlane(const PointCloud& raw_pc, PointClou
 
 /**
  * Attempts to filter the ground plane using RANSAC.
- * @param raw_pc the unfiltered pointcloud
- * @param ground pointcloud representing the ground
- * @param nonground filtered pointcloud without the ground
- * @param options options for the filter
+ * @param[in] raw_pc the unfiltered pointcloud
+ * @param[out] ground pointcloud representing the ground
+ * @param[out] nonground filtered pointcloud without the ground
+ * @param[in] options options for the filter
  * @return a std::optional containing the coefficients of the detected ground plane if RANSAC is used, otherwise
  * std::nullopt
  */
 std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground,
-                                        RANSACOptions options);
+      const RANSACOptions& options);
 
 /**
  * Filters the ground plane using the z coordinate
- * @param raw_pc the unfiltered pointcloud
- * @param ground pointcloud representing the ground
- * @param nonground filtered pointcloud without the ground
- * @param options options for the filter
+ * @param[in] raw_pc the unfiltered pointcloud
+ * @param[out] ground pointcloud representing the ground
+ * @param[out] nonground filtered pointcloud without the ground
+ * @param[in] options options for the filter
  */
-void fallbackFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground, FallbackOptions options);
+void fallbackFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground, const FallbackOptions& options);
 
 /**
  * Projects all black pixels (0, 0, 0) in the image to the ground plane and inserts them into the pointcloud
@@ -136,7 +136,7 @@ void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, c
 
 /**
  * Projects all points in projected_pc to z=0
- * @param projected_pc the pointcloud to project to z=0
+ * @param[in/out] projected_pc the pointcloud to project to z=0
  */
 void projectTo2D(PointCloud& projected_pc);
 
@@ -149,10 +149,10 @@ void blur(cv::Mat& blurred_map, double kernel_size);
 
 /**
  * Scales the intrinsics in camera_info to a resized dimension width and height
- * @param camera_info
- * @param width
- * @param height
- * @return
+ * @param camera_info original CameraInfo
+ * @param width scaled width
+ * @param height scaled height
+ * @return the CameraInfo with scaled intrinsics
  */
 sensor_msgs::CameraInfoConstPtr scaleCameraInfo(const sensor_msgs::CameraInfoConstPtr& camera_info, double width,
                                                 double height);

@@ -1,9 +1,8 @@
 octree:
-  resolution: 0.2
-  lazy_evaluation: false
+  resolution: 0.2 # width & length of each grid cell in m
   clamping:
-      max: 1.0
-      min: 0.0
+      max: 1.0 # Value of octree considered 100% occupied stable
+      min: 0.0 # Value of octree considered 0% occupied stable
 # P(x | x) where x is either miss or hit. So prob_miss: 0.2 means that I'm 20% confident a miss is a miss
 probability_model:
     lidar:
@@ -27,7 +26,7 @@ filters:
         filter_angle: 2
         distance: 3
     empty:
-        start_angle: -0.5
+        start_angle: -0.5 #Radians
         end_angle: 0.5
         miss_cast_distance: 15
     empty_image:
@@ -45,7 +44,7 @@ filters:
             distance_threshold: 0.05
             eps_angle: 0.15
         fallback:
-            plane_distance: 0.04
+            plane_distance: 0.04 # +-m from z=0
 map:
   # In units of meters, not cells
   # width of grid = width / resolution
@@ -69,5 +68,5 @@ node:
   use_lines: false
   transform_max_wait_time: 1
 cameras:
-  resize_width: 400
+  resize_width: 400 # pixels
   resize_height: 400
