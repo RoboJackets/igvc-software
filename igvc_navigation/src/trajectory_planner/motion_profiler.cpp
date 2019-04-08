@@ -24,6 +24,7 @@ void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajector
     double beta = motion_profiler_options_.beta;
     double lambda = motion_profiler_options_.lambda;
     double velocity = target_velocity_ / (1 + beta * std::pow(std::abs(trajectory_point.curvature), lambda));
+    ROS_INFO_STREAM("target: " << target_velocity_ << ", velocity: " << velocity);
 
     // Constraint checking and limiting
     if (velocity > robot_constraint_.velocity) {
@@ -41,8 +42,8 @@ void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajector
         double current_yaw = tf::getYaw(trajectory_point.pose.orientation);
         double next_yaw = tf::getYaw(trajectory_ptr->trajectory[i+1].pose.orientation);
 
-        double d_theta = std::abs(next_yaw - current_yaw);
-        distance = d_theta * R;
+        double d_theta = next_yaw - current_yaw;
+        distance = std::abs(d_theta * R);
 
         ROS_INFO_STREAM("arclength: " << distance << ", velocity: " << velocity << ", duration: " << distance / trajectory_point.velocity);
 
@@ -50,7 +51,11 @@ void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajector
         double dx = trajectory_point.pose.position.x - trajectory_ptr->trajectory[i+1].pose.position.x;
         double dy = trajectory_point.pose.position.y - trajectory_ptr->trajectory[i+1].pose.position.y;
         distance = std::hypot(dx, dy);
+        ROS_INFO_STREAM("hypot: " << distance);
+        ROS_INFO_STREAM("duration: " << distance / trajectory_point.velocity);
       }
+      ROS_INFO_STREAM("velocity: " << trajectory_point.velocity);
+      trajectory_point.velocity = 0.8;
       ros::Duration move_duration = ros::Duration(distance / trajectory_point.velocity);
 
       trajectory_ptr->trajectory[i+1].header.stamp = trajectory_point.header.stamp + move_duration;
