@@ -79,7 +79,8 @@ inline void assertNegativeWithDefault(const std::string& node_namespace, std::ve
 
 template <class T, class AssertionFunction>
 inline void checkAssertionWithDefault(AssertionFunction assertion, const std::string& node_namespace, T& variable,
-    T&& default_value, const std::string& variable_name, const std::string& error_message = "doesn't pass the assertion");
+                                      T&& default_value, const std::string& variable_name,
+                                      const std::string& error_message = "doesn't pass the assertion");
 template <class T>
 inline void checkAssertionWithDefault(Assertion assertion, const std::string& node_namespace, T& variable,
                                       T&& default_value, const std::string& variable_name);
@@ -101,7 +102,8 @@ inline void checkAssertion(Assertion assertion, const std::string& node_namespac
                            const std::string& variable_name);
 template <class T, class AssertionFunction>
 inline void checkAssertion(AssertionFunction assertion, const std::string& node_namespace, T& variable,
-                           const std::string& variable_name, const std::string& error_message = "should pass the assertion.");
+                           const std::string& variable_name,
+                           const std::string& error_message = "should pass the assertion.");
 
 /**
  * Wrapper function for NodeHandle::param that shows a warning if the parameter isn't found and the default value is
@@ -115,7 +117,7 @@ inline void checkAssertion(AssertionFunction assertion, const std::string& node_
  */
 template <class T, class AssertionFunction>
 void param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
-    AssertionFunction assertion);
+           AssertionFunction assertion);
 
 template <class T>
 void param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
@@ -123,7 +125,7 @@ void param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_v
 
 template <class T, class AssertionFunction>
 void paramHelper(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
-    AssertionFunction assertion);
+                 AssertionFunction assertion);
 
 /**
  * Wrapper function for NodeHandle::getParam that shows an error message if the parameter isn't found and allows for
@@ -267,14 +269,14 @@ void igvc::param(const ros::NodeHandle& pNh, const std::string& param_name, T& p
 
 template <class T, class AssertionFunction>
 void igvc::param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
-    AssertionFunction assertion)
+                 AssertionFunction assertion)
 {
   paramHelper(pNh, param_name, param_val, std::forward<T>(default_val), assertion);
 }
 
 template <class T, class AssertionFunction>
 void igvc::paramHelper(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
-    AssertionFunction assertion)
+                       AssertionFunction assertion)
 {
   if (!pNh.param(param_name, param_val, default_val))
   {
@@ -321,7 +323,8 @@ void igvc::getParam(const ros::NodeHandle& pNh, const std::string& param_name, T
 // Assertion method implementations
 template <class T, class AssertionFunction>
 inline void igvc::checkAssertionWithDefault(AssertionFunction assertion, const std::string& node_namespace, T& variable,
-    T&& default_value, const std::string& variable_name, const std::string& error_message)
+                                            T&& default_value, const std::string& variable_name,
+                                            const std::string& error_message)
 {
   if (!assertion(variable))
   {
