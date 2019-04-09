@@ -1,6 +1,8 @@
 #ifndef NODEUTILS_HPP
 #define NODEUTILS_HPP
 
+#include <type_traits>
+
 #include <geometry_msgs/PointStamped.h>
 #include <ros/ros.h>
 #include <string.h>
@@ -22,6 +24,22 @@ enum class Assertion
 template <class T>
 inline std::string toString(const std::vector<T>& v);
 
+template <bool B, typename T = void>
+using disable_if = std::enable_if<!B, T>;
+
+template <bool B, class T = void>
+using enable_if_t = typename std::enable_if<B, T>::type;
+
+template <typename T>
+struct is_vector : public std::false_type
+{
+};
+
+template <typename T, typename A>
+struct is_vector<std::vector<T, A>> : public std::true_type
+{
+};
+
 template <class T>
 inline void warnWithMessage(const std::string& node_namespace, const std::string& variable_name, const T& variable);
 template <class T>
@@ -40,6 +58,9 @@ template <class T>
 inline void failWithMessage(const std::string& node_namespace, const std::string& variable_name, const T& variable,
                             const std::string& message);
 template <class T>
+inline void failWithMessage(const std::string& node_namespace, const std::string& variable_name,
+                            const std::vector<T>& variable, const std::string& message);
+template <class T>
 inline void failWithMessage(const std::string& node_namespace, const std::string& variable_name, const T& element,
                             const std::vector<T>& variable, const std::string& message);
 
@@ -55,35 +76,41 @@ inline void failWithMessage(const std::string& node_namespace, const std::string
  * @param message
  * @param ts
  */
-template <class T, typename... Ts>
-inline void assertWithDefault(const std::string& node_namespace, T& variable, bool condition, T&& default_value,
+template <class T, class U, typename... Ts>
+inline void assertWithDefault(const std::string& node_namespace, T& variable, bool condition, U&& default_value,
                               const std::string& message, Ts... ts);
-template <class T>
+template <class T, class U>
 inline void assertWithDefault(const std::string& node_namespace, std::vector<T>& variable,
-                              std::function<bool(T)> lambda, std::vector<T>&& default_value, const std::string& message,
-                              const std::string& condition_string);
+                              std::function<bool(T&&)> lambda, std::vector<U>&& default_value,
+                              const std::string& message, const std::string& condition_string);
 
-template <class T>
-inline void assertPositiveWithDefault(const std::string& node_namespace, T& variable, T&& default_value,
+template <class T, class U>
+inline void assertPositiveWithDefault(const std::string& node_namespace, T& variable, U&& default_value,
                                       const std::string& variable_name);
-template <class T>
+template <class T, class U>
 inline void assertPositiveWithDefault(const std::string& node_namespace, std::vector<T>& variable,
-                                      std::vector<T>&& default_value, const std::string& variable_name);
+                                      std::vector<U>&& default_value, const std::string& variable_name);
 
-template <class T>
-inline void assertNegativeWithDefault(const std::string& node_namespace, T& variable, T&& default_value,
+template <class T, class U>
+inline void assertNegativeWithDefault(const std::string& node_namespace, T& variable, U&& default_value,
                                       const std::string& variable_name);
-template <typename T>
+template <class T, class U>
 inline void assertNegativeWithDefault(const std::string& node_namespace, std::vector<T>& variable,
-                                      std::vector<T>&& default_value, const std::string& variable_name);
+                                      std::vector<U>&& default_value, const std::string& variable_name);
 
-template <class T, class AssertionFunction>
+template <class T, class U, class AssertionFunction, typename disable_if<is_vector<T>::value, T>::type* = nullptr>
 inline void checkAssertionWithDefault(AssertionFunction assertion, const std::string& node_namespace, T& variable,
-                                      T&& default_value, const std::string& variable_name,
+                                      U&& default_value, const std::string& variable_name,
                                       const std::string& error_message = "doesn't pass the assertion");
-template <class T>
+
+template <class T, class U, class AssertionFunction, typename std::enable_if<is_vector<T>::value, T>::type* = nullptr>
+inline void checkAssertionWithDefault(AssertionFunction assertion, const std::string& node_namespace, T& variable,
+                                      U&& default_value, const std::string& variable_name,
+                                      const std::string& error_message = "doesn't pass the assertion");
+
+template <class T, class U>
 inline void checkAssertionWithDefault(Assertion assertion, const std::string& node_namespace, T& variable,
-                                      T&& default_value, const std::string& variable_name);
+                                      U&& default_value, const std::string& variable_name);
 
 template <class T>
 inline void assertPositive(const std::string& node_namespace, const T& variable, const std::string& variable_name);
@@ -97,13 +124,23 @@ template <class T>
 inline void assertNegative(const std::string& node_namespace, const std::vector<T>& variable,
                            const std::string& variable_name);
 
-template <class T>
-inline void checkAssertion(Assertion assertion, const std::string& node_namespace, T& variable,
-                           const std::string& variable_name);
 template <class T, class AssertionFunction>
+inline void checkAssertionVector(AssertionFunction assertion, const std::string& node_namespace,
+                                 std::vector<T>& variable, const std::string& variable_name,
+                                 const std::string& error_message);
+
+template <class T, class AssertionFunction, typename disable_if<is_vector<T>::value, T>::type* = nullptr>
 inline void checkAssertion(AssertionFunction assertion, const std::string& node_namespace, T& variable,
                            const std::string& variable_name,
                            const std::string& error_message = "should pass the assertion.");
+
+template <class T, class AssertionFunction, typename std::enable_if<is_vector<T>::value, T>::type* = nullptr>
+inline void checkAssertion(AssertionFunction assertion, const std::string& node_namespace, T& variable,
+                           const std::string& variable_name,
+                           const std::string& error_message = "should pass the assertion.");
+template <class T>
+inline void checkAssertion(Assertion assertion, const std::string& node_namespace, T& variable,
+                           const std::string& variable_name);
 
 /**
  * Wrapper function for NodeHandle::param that shows a warning if the parameter isn't found and the default value is
@@ -115,16 +152,16 @@ inline void checkAssertion(AssertionFunction assertion, const std::string& node_
  * @param param_val
  * @param assertion
  */
-template <class T, class AssertionFunction>
-void param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
+template <class T, class U, class AssertionFunction>
+void param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, U&& default_val,
            AssertionFunction assertion);
 
-template <class T>
-void param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
+template <class T, class U>
+void param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, U&& default_val,
            Assertion assertion = Assertion::NONE);
 
-template <class T, class AssertionFunction>
-void paramHelper(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
+template <class T, class U, class AssertionFunction>
+void paramHelper(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, U&& default_val,
                  AssertionFunction assertion);
 
 /**
@@ -264,22 +301,22 @@ inline void compute_angle(double& angle, Eigen::Vector3d vec2, Eigen::Vector3d v
 
 }  // namespace igvc
 
-template <class T>
-void igvc::param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
+template <class T, class U>
+void igvc::param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, U&& default_val,
                  Assertion assertion)
 {
   paramHelper(pNh, param_name, param_val, std::forward<T>(default_val), assertion);
 }
 
-template <class T, class AssertionFunction>
-void igvc::param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
+template <class T, class U, class AssertionFunction>
+void igvc::param(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, U&& default_val,
                  AssertionFunction assertion)
 {
   paramHelper(pNh, param_name, param_val, std::forward<T>(default_val), assertion);
 }
 
-template <class T, class AssertionFunction>
-void igvc::paramHelper(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, T&& default_val,
+template <class T, class U, class AssertionFunction>
+void igvc::paramHelper(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, U&& default_val,
                        AssertionFunction assertion)
 {
   if (!pNh.param(param_name, param_val, default_val))
@@ -332,9 +369,30 @@ void igvc::getParam(const ros::NodeHandle& pNh, const std::string& param_name, T
 }
 
 // Assertion method implementations
-template <class T, class AssertionFunction>
+template <class T, class U, class AssertionFunction, typename std::enable_if<igvc::is_vector<T>::value, T>::type*>
 inline void igvc::checkAssertionWithDefault(AssertionFunction assertion, const std::string& node_namespace, T& variable,
-                                            T&& default_value, const std::string& variable_name,
+                                            U&& default_value, const std::string& variable_name,
+                                            const std::string& error_message)
+{
+  bool found_nonmatching = false;
+  for (const auto& element : variable)
+  {
+    if (!assertion(element))
+    {
+      found_nonmatching = true;
+      break;
+    }
+  }
+  if (found_nonmatching)
+  {
+    variable = default_value;
+    checkAssertionVector(assertion, node_namespace, variable, variable_name, error_message);
+  }
+}
+
+template <class T, class U, class AssertionFunction, typename igvc::disable_if<igvc::is_vector<T>::value, T>::type*>
+inline void igvc::checkAssertionWithDefault(AssertionFunction assertion, const std::string& node_namespace, T& variable,
+                                            U&& default_value, const std::string& variable_name,
                                             const std::string& error_message)
 {
   if (!assertion(variable))
@@ -347,24 +405,34 @@ inline void igvc::checkAssertionWithDefault(AssertionFunction assertion, const s
     variable = default_value;
   }
 }
-template <class T>
+template <class T, class U>
 inline void igvc::checkAssertionWithDefault(Assertion assertion, const std::string& node_namespace, T& variable,
-                                            T&& default_value, const std::string& variable_name)
+                                            U&& default_value, const std::string& variable_name)
 {
   switch (assertion)
   {
     case Assertion::POSITIVE:
-      assertPositive(node_namespace, default_value, "default value for " + variable_name);
       assertPositiveWithDefault(node_namespace, variable, std::forward<T>(default_value), variable_name);
+      assertPositive(node_namespace, variable, "default value for " + variable_name);
       break;
     case Assertion::NEGATIVE:
-      assertNegative(node_namespace, default_value, "default value for " + variable_name);
       assertNegativeWithDefault(node_namespace, variable, std::forward<T>(default_value), variable_name);
+      assertNegative(node_namespace, variable, "default value for " + variable_name);
       break;
     case Assertion::NONE:
       break;
   }
-  variable = default_value;
+}
+
+template <>
+inline void igvc::checkAssertionWithDefault(Assertion assertion, const std::string& node_namespace,
+                                            std::string& variable, std::string&& default_value,
+                                            const std::string& variable_name)
+{
+  if (assertion != Assertion::NONE)
+  {
+    ROS_WARN_STREAM("igvc::Assertion cannot be used for std::string");
+  }
 }
 
 template <class T>
@@ -384,7 +452,17 @@ inline void igvc::checkAssertion(Assertion assertion, const std::string& node_na
   }
 }
 
-template <class T, class AssertionFunction>
+template <>
+inline void igvc::checkAssertion(Assertion assertion, const std::string& node_namespace, std::string& variable,
+                                 const std::string& variable_name)
+{
+  if (assertion != Assertion::NONE)
+  {
+    ROS_WARN_STREAM("igvc::Assertion cannot be used for std::string");
+  }
+}
+
+template <class T, class AssertionFunction, typename igvc::disable_if<igvc::is_vector<T>::value, T>::type*>
 inline void igvc::checkAssertion(AssertionFunction assertion, const std::string& node_namespace, T& variable,
                                  const std::string& variable_name, const std::string& error_message)
 {
@@ -394,12 +472,33 @@ inline void igvc::checkAssertion(AssertionFunction assertion, const std::string&
   }
 }
 
-template <class T>
+template <class T, class AssertionFunction, typename std::enable_if<igvc::is_vector<T>::value, T>::type*>
+inline void igvc::checkAssertion(AssertionFunction assertion, const std::string& node_namespace, T& variable,
+                                 const std::string& variable_name, const std::string& error_message)
+{
+  checkAssertionVector(assertion, node_namespace, variable, variable_name, error_message);
+}
+
+template <class T, class AssertionFunction>
+inline void igvc::checkAssertionVector(AssertionFunction assertion, const std::string& node_namespace,
+                                       std::vector<T>& variable, const std::string& variable_name,
+                                       const std::string& error_message)
+{
+  for (const T& element : variable)
+  {
+    if (!assertion(element))
+    {
+      failWithMessage(node_namespace, variable_name, element, variable, error_message);
+    }
+  }
+}
+
+template <class T, class U>
 inline void igvc::assertWithDefault(const std::string& node_namespace, std::vector<T>& variable,
-                                    std::function<bool(T)> lambda, std::vector<T>&& default_value,
+                                    std::function<bool(T&&)> lambda, std::vector<U>&& default_value,
                                     const std::string& message, const std::string& condition_string)
 {
-  for (T element : variable)
+  for (const T& element : variable)
   {
     if (!lambda(element))
     {
@@ -438,6 +537,15 @@ inline void igvc::failWithMessage(const std::string& node_namespace, const std::
 }
 
 template <class T>
+inline void igvc::failWithMessage(const std::string& node_namespace, const std::string& variable_name,
+                                  const std::vector<T>& variable, const std::string& message)
+{
+  ROS_ERROR_STREAM("[" << node_namespace << "] " << variable_name << " (" << toString(variable) << ") should be "
+                       << message << " Exiting...");
+  ros::shutdown();
+}
+
+template <class T>
 inline void igvc::failWithMessage(const std::string& node_namespace, const std::string& variable_name, const T& element,
                                   const std::vector<T>& variable, const std::string& message)
 {
@@ -448,8 +556,8 @@ inline void igvc::failWithMessage(const std::string& node_namespace, const std::
   ros::shutdown();
 }
 
-template <class T, typename... Ts>
-inline void igvc::assertWithDefault(const std::string& node_namespace, T& variable, bool condition, T&& default_value,
+template <class T, class U, typename... Ts>
+inline void igvc::assertWithDefault(const std::string& node_namespace, T& variable, bool condition, U&& default_value,
                                     const std::string& message, Ts... ts)
 {
   if (!condition)
@@ -459,8 +567,8 @@ inline void igvc::assertWithDefault(const std::string& node_namespace, T& variab
   }
 }
 
-template <class T>
-inline void igvc::assertPositiveWithDefault(const std::string& node_namespace, T& variable, T&& default_value,
+template <class T, class U>
+inline void igvc::assertPositiveWithDefault(const std::string& node_namespace, T& variable, U&& default_value,
                                             const std::string& variable_name)
 {
   std::ostringstream message;
@@ -469,9 +577,9 @@ inline void igvc::assertPositiveWithDefault(const std::string& node_namespace, T
   assertWithDefault(node_namespace, variable, variable > 0, std::forward<T>(default_value), message.str());
 }
 
-template <class T>
+template <class T, class U>
 inline void igvc::assertPositiveWithDefault(const std::string& node_namespace, std::vector<T>& variable,
-                                            std::vector<T>&& default_value, const std::string& variable_name)
+                                            std::vector<U>&& default_value, const std::string& variable_name)
 {
   std::ostringstream ss;
   ss << "[" << node_namespace << "] " << variable_name << " ([";
@@ -480,8 +588,8 @@ inline void igvc::assertPositiveWithDefault(const std::string& node_namespace, s
                     ss.str(), " greater than 0.");
 }
 
-template <class T>
-inline void igvc::assertNegativeWithDefault(const std::string& node_namespace, T& variable, T&& default_value,
+template <class T, class U>
+inline void igvc::assertNegativeWithDefault(const std::string& node_namespace, T& variable, U&& default_value,
                                             const std::string& variable_name)
 {
   std::ostringstream message;
@@ -490,9 +598,9 @@ inline void igvc::assertNegativeWithDefault(const std::string& node_namespace, T
   assertWithDefault(node_namespace, variable, variable < 0, std::forward<T>(default_value), message.str());
 }
 
-template <typename T>
+template <class T, class U>
 inline void igvc::assertNegativeWithDefault(const std::string& node_namespace, std::vector<T>& variable,
-                                            std::vector<T>&& default_value, const std::string& variable_name)
+                                            std::vector<U>&& default_value, const std::string& variable_name)
 {
   std::ostringstream ss;
   ss << "[" << node_namespace << "] " << variable_name << " ([";
@@ -514,7 +622,7 @@ template <class T>
 inline void igvc::assertPositive(const std::string& node_namespace, const std::vector<T>& variable,
                                  const std::string& variable_name)
 {
-  for (auto element : variable)
+  for (const T& element : variable)
   {
     if (!(element > 0))
     {
@@ -527,7 +635,7 @@ template <class T>
 inline void igvc::assertNegative(const std::string& node_namespace, const std::vector<T>& variable,
                                  const std::string& variable_name)
 {
-  for (auto element : variable)
+  for (const T& element : variable)
   {
     if (!(element < 0))
     {
