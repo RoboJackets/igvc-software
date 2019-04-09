@@ -41,10 +41,11 @@ struct is_vector<std::vector<T, A>> : public std::true_type
 };
 
 template <class T>
-inline void warnWithMessage(const std::string& node_namespace, const std::string& variable_name, const T& variable);
+inline void warnWithMessage(const std::string& node_namespace, const std::string& variable_name, const T& variable,
+                            const std::string& message);
 template <class T>
 inline void warnWithMessage(const std::string& node_namespace, const std::string& variable_name,
-                            const std::vector<T>& variable);
+                            const std::vector<T>& variable, const std::string& message);
 
 /**
  * Prints an error to the console with a given message, then does ros::shutdown.
@@ -321,7 +322,7 @@ void igvc::paramHelper(const ros::NodeHandle& pNh, const std::string& param_name
 {
   if (!pNh.param(param_name, param_val, default_val))
   {
-    warnWithMessage(pNh.getNamespace(), param_name, default_val);
+    warnWithMessage(pNh.getNamespace(), param_name, default_val, " is not set");
     checkAssertion(assertion, pNh.getNamespace(), param_val, param_name);
   }
   else
@@ -379,6 +380,7 @@ inline void igvc::checkAssertionWithDefault(AssertionFunction assertion, const s
   {
     if (!assertion(element))
     {
+      warnWithMessage(node_namespace, variable_name, default_value, error_message);
       found_nonmatching = true;
       break;
     }
@@ -397,7 +399,7 @@ inline void igvc::checkAssertionWithDefault(AssertionFunction assertion, const s
 {
   if (!assertion(variable))
   {
-    warnWithMessage(node_namespace, variable_name, default_value);
+    warnWithMessage(node_namespace, variable_name, default_value, error_message);
     if (!assertion(default_value))
     {
       failWithMessage(node_namespace, "default value for " + variable_name, variable, error_message);
@@ -511,18 +513,18 @@ inline void igvc::assertWithDefault(const std::string& node_namespace, std::vect
 
 template <class T>
 inline void igvc::warnWithMessage(const std::string& node_namespace, const std::string& variable_name,
-                                  const T& variable)
+                                  const T& variable, const std::string& message)
 {
-  ROS_WARN_STREAM("[" << node_namespace << "] Missing parameter " << variable_name
-                      << ". Continuing with default values " << variable);
+  ROS_WARN_STREAM("[" << node_namespace << "] " << variable_name << message << ". Continuing with default values "
+                      << variable);
 }
 
 template <class T>
 inline void igvc::warnWithMessage(const std::string& node_namespace, const std::string& variable_name,
-                                  const std::vector<T>& variable)
+                                  const std::vector<T>& variable, const std::string& message)
 {
   std::ostringstream ss;
-  ss << "[" << node_namespace << "] Missing parameter " << variable_name << ". Continuing with default values [";
+  ss << "[" << node_namespace << "]" << variable_name << message << ". Continuing with default values [";
   ss << toString(variable) << "].";
   ROS_WARN_STREAM(ss.str());
 }
