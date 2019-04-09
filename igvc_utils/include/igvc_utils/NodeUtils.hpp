@@ -156,6 +156,10 @@ void getParam(const ros::NodeHandle& pNh, const std::string& param_name, T& para
 template <class T>
 void getParam(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val);
 
+template <class T, class AssertionFunction>
+void getParamHelper(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val,
+                    AssertionFunction assertion);
+
 /**
 make_unique method for when using versions of c++ < 14
 */
@@ -292,12 +296,19 @@ void igvc::paramHelper(const ros::NodeHandle& pNh, const std::string& param_name
 template <class T>
 void igvc::getParam(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val, Assertion assertion)
 {
-  getParam(pNh, param_name, param_val, assertion);
+  getParamHelper(pNh, param_name, param_val, assertion);
 }
 
 template <class T, class AssertionFunction>
 void igvc::getParam(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val,
                     AssertionFunction assertion)
+{
+  getParamHelper(pNh, param_name, param_val, assertion);
+}
+
+template <class T, class AssertionFunction>
+void igvc::getParamHelper(const ros::NodeHandle& pNh, const std::string& param_name, T& param_val,
+                          AssertionFunction assertion)
 {
   if (!pNh.getParam(param_name, param_val))
   {
@@ -353,6 +364,7 @@ inline void igvc::checkAssertionWithDefault(Assertion assertion, const std::stri
     case Assertion::NONE:
       break;
   }
+  variable = default_value;
 }
 
 template <class T>
