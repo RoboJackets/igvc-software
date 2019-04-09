@@ -198,7 +198,7 @@ TEST_F(TestAssertions, getParamCanAssertTrueUsingLambda)
   int param;
   int set_param = -1;
   handle_.setParam(parameter1, set_param);
-  igvc::getParam(handle_, parameter1, param, [](const int& x){ return x < -0.5; });
+  igvc::getParam(handle_, parameter1, param, [](const int& x) { return x < -0.5; });
   EXPECT_EQ(param, set_param);
   EXPECT_FALSE(ros::isShuttingDown());
 }
@@ -207,7 +207,7 @@ TEST_F(TestAssertions, getParamCanAssertFalseUsingLambda)
   std::string param;
   std::string set_param = "The cake";
   handle_.setParam(parameter1, set_param);
-  igvc::getParam(handle_, parameter1, param, [](const std::string& x){ return x == "is a lie"; });
+  igvc::getParam(handle_, parameter1, param, [](const std::string& x) { return x == "is a lie"; });
   EXPECT_TRUE(ros::isShuttingDown());
 }
 TEST_F(TestAssertions, getParamCanAssertTrueUsingLambdaVector)
@@ -215,7 +215,7 @@ TEST_F(TestAssertions, getParamCanAssertTrueUsingLambdaVector)
   std::vector<double> param;
   std::vector<double> set_param{ 0.3, -0.1, 0.4, 0.1, 0.5 };
   handle_.setParam(parameter3, set_param);
-  igvc::getParam(handle_, parameter3, param, [](const double& x){ return -1 <= x && x <= 1;});
+  igvc::getParam(handle_, parameter3, param, [](const double& x) { return -1 <= x && x <= 1; });
   EXPECT_EQ(param.size(), set_param.size());
   for (size_t i = 0; i < set_param.size(); i++)
   {
@@ -228,7 +228,7 @@ TEST_F(TestAssertions, getParamCanAssertFalseUsingLambdaVector)
   std::vector<double> param;
   std::vector<double> set_param{ 0.3, -1.1, 0.4, 0.1, 0.5 };
   handle_.setParam(parameter3, set_param);
-  igvc::getParam(handle_, parameter3, param, [](const double& x){ return -1 <= x && x <= 1;});
+  igvc::getParam(handle_, parameter3, param, [](const double& x) { return -1 <= x && x <= 1; });
   EXPECT_TRUE(ros::isShuttingDown());
 }
 
@@ -298,6 +298,12 @@ TEST_F(TestAssertions, paramCanAssertFalseUsingIGVCAssertionNegativeInt)
   igvc::param(handle_, parameter1, param, 2, igvc::Assertion::NEGATIVE);
   EXPECT_TRUE(ros::isShuttingDown());
 }
+TEST_F(TestAssertions, paramCanAssertFalseUsingIGVCAssertionNegativeDefault)
+{
+  double param;
+  igvc::param(handle_, parameter1, param, 1.0, igvc::Assertion::NEGATIVE);
+  EXPECT_TRUE(ros::isShuttingDown());
+}
 
 // =========== param lambdas ===========
 
@@ -306,7 +312,7 @@ TEST_F(TestAssertions, paramCanAssertTrueUsingLambda)
   double param;
   double set_param = 1.5;
   handle_.setParam(parameter1, set_param);
-  igvc::param(handle_, parameter1, param, 3, [](const double& x){ return x <= 2; });
+  igvc::param(handle_, parameter1, param, 3, [](const double& x) { return x <= 2; });
   EXPECT_DOUBLE_EQ(param, set_param);
   EXPECT_FALSE(ros::isShuttingDown());
 }
@@ -315,13 +321,13 @@ TEST_F(TestAssertions, paramCanAssertFalseUsingLambda)
   double param;
   double set_param = 3;
   handle_.setParam(parameter1, set_param);
-  igvc::param(handle_, parameter1, param, 4, [](const double& x){ return x <= 2; });
+  igvc::param(handle_, parameter1, param, 4, [](const double& x) { return x <= 2; });
   EXPECT_TRUE(ros::isShuttingDown());
 }
 TEST_F(TestAssertions, paramCanAssertTrueUsingLambdaDefault)
 {
   double param;
-  igvc::param(handle_, parameter1, param, 0, [](const double& x){ return x <= 2; });
+  igvc::param(handle_, parameter1, param, 0, [](const double& x) { return x <= 2; });
   EXPECT_DOUBLE_EQ(param, param);
   EXPECT_FALSE(ros::isShuttingDown());
 }
@@ -329,7 +335,7 @@ TEST_F(TestAssertions, paramCanAssertTrueUsingLambdaDefaultVector)
 {
   std::vector<double> param;
   std::vector<double> set_param{ 0.3, -0.1, 0.4, 0.1, 0.5 };
-  igvc::param(handle_, parameter3, param, set_param, [](const double& x){ return -1 <= x && x <= 1;});
+  igvc::param(handle_, parameter3, param, set_param, [](const double& x) { return -1 <= x && x <= 1; });
   EXPECT_EQ(param.size(), set_param.size());
   for (size_t i = 0; i < set_param.size(); i++)
   {
