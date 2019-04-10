@@ -1,24 +1,24 @@
 // Subscribes to Point Cloud Data, updates the occupancy grid, then publishes the data.
 
-#include <stdlib.h>
-#include <Eigen/Core>
 #include <math.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
+#include <stdlib.h>
+#include <Eigen/Core>
 
 #include <cv_bridge/cv_bridge.h>
-#include <opencv2/core/eigen.hpp>
-#include <opencv2/opencv.hpp>
+#include <nav_msgs/Odometry.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
-#include <nav_msgs/Odometry.h>
-#include <tf/transform_datatypes.h>
 #include <sensor_msgs/Image.h>
+#include <tf/transform_datatypes.h>
+#include <opencv2/core/eigen.hpp>
+#include <opencv2/opencv.hpp>
 
 #include <igvc_msgs/map.h>
-#include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/robot_state.h>
+#include <igvc_utils/NodeUtils.hpp>
 
 cv_bridge::CvImage img_bridge;
 
