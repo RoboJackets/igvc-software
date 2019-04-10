@@ -95,7 +95,8 @@ inline double RobotState::distTo(geometry_msgs::Point other) const
   return igvc::get_distance(this->x, this->y, other.x, other.y);
 }
 
-inline double RobotState::linearVelocity() const {
+inline double RobotState::linearVelocity() const
+{
   return (velocity.left + velocity.right) / 2;
 }
 
