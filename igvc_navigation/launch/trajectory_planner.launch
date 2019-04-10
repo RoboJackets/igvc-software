@@ -1,32 +1,30 @@
 <?xml version="1.0"?>
 <launch>
-    <!-- Follower -->
-    <node name="path_follower" pkg="igvc_navigation" type="path_follower" output="screen">
-        <rosparam>
-            axle_length: 0.52
-            smooth_control:
-                k1: 1.8
-                k2: 5
+    <!-- Planner -->
+    <node name="trajectory_planner" pkg="igvc_navigation" type="trajectory_planner" output="screen" launch-prefix="gdb -ex run --args">
+        <param name="axle_length" value="0.52"/>
 
-            path_generation:
-                simulation_frequency: 20.0
-                simulation_horizon: 10.0
-                velocity: 1.0
+        <param name="smooth_control/k1" value="1.0"/>
+        <param name="smooth_control/k2" value="7.0"/>
 
-            target_selection:
-                lookahead_dist: 0.04
-                reached_distance: 0.1
-                move_threshold: 0.1
+        <param name="path_generation/simulation_frequency" value="100.0"/>
+        <param name="path_generation/simulation_horizon" value="5.0"/>
+        <param name="path_generation/velocity" value="0.5"/>
 
-            curvature_blending:
-                blending_distance: 1.0
-        </rosparam>
-        <!-- How far away robot should be from the waypoint before it stops -->
-        <param name="stop_dist" type="double" value="0.7"/>
-        <!-- Smooth Control Parameters -->
-        <param name="target_v" type="double" value="1.0"/>
-        <param name="k1" type="double" value="1.8"/>
-        <param name="k2" type="double" value="5"/>
-        <param name="debug" type="bool" value="true"/>
+        <param name="target_selection/lookahead_dist" value="0.5"/>
+        <param name="target_selection/reached_distance" value="0.05"/>
+        <param name="target_selection/move_threshold" value="0.2"/>
+
+        <param name="curvature_blending/blending_distance" value="1.0"/>
+
+        <param name="robot_constraints/velocity" value="2.0"/>
+        <param name="robot_constraints/acceleration" value="5.0"/>
+
+        <param name="wheel_constraints/velocity" value="3.0"/>
+        <param name="wheel_constraints/acceleration" value="5.0"/>
+
+        <param name="motion_profiler/target_velocity" value="1.0"/>
+        <param name="motion_profiler/beta" value="0.005"/>
+        <param name="motion_profiler/lambda" value="3.0"/>
     </node>
 </launch>

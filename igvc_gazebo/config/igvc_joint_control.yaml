@@ -7,8 +7,8 @@
   left_wheel_effort_controller:
     type: effort_controllers/JointEffortController
     joint: axle_to_left_wheel
-    pid: {p: 10000.0, i: 0.1, d: 100.0}
+    pid: {p: 100.0, i: 0.01, d: 10.0}
   right_wheel_effort_controller:
     type: effort_controllers/JointEffortController
     joint: axle_to_right_wheel
-    pid: {p: 10000.0, i: 0.1, d: 100.0}
+    pid: {p: 100.0, i: 0.01, d: 10.0}
