@@ -15,6 +15,8 @@ class RobotControl
   double right_{};
   double axle_length_{};
 
+  friend std::ostream & operator << (std::ostream &out, const RobotControl &robot_control);
+
   igvc_msgs::velocity_pair toMessage(ros::Time stamp) const;
   CurvatureVelocity toKV(double axle_length = -1) const;
 

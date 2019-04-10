@@ -24,14 +24,7 @@ void SmoothControl::getPath(const nav_msgs::PathConstPtr& path, const igvc_msgs:
   size_t path_index = 0;
 
   ros::Time time = path->header.stamp;
-
-  // Store starting position in trajectory
-  igvc_msgs::trajectory_point start;
-  start.pose.position.x = start_pos.x;
-  start.pose.position.y = start_pos.y;
-  start.pose.orientation = start_pos.quat();
-  start.header.stamp = time;
-  trajectory_ptr->trajectory.emplace_back(start);
+  trajectory_ptr->header.stamp = path->header.stamp;
 
   // Calculate timesteps
   static ros::Duration dt = ros::Duration(1 / path_generation_options_.simulation_frequency);
@@ -102,7 +95,6 @@ std::pair<RobotState, RobotState> SmoothControl::getTargetPosition(const nav_msg
   // If the closest point is too far,then break and find a new target
   if (target)
   {
-    // If we haven't reached the target
     if (!reachedTarget(state, *target))
     {
       size_t target_index = findTargetOnPath(path, *target);
@@ -115,7 +107,7 @@ std::pair<RobotState, RobotState> SmoothControl::getTargetPosition(const nav_msg
       {
         RobotState first_target = newTarget;
         RobotState second_target = acquireNewTarget(path, first_target, target_index);
-        return { first_target, second_target };
+        return { *target, second_target };
       }
     }
   }

@@ -33,6 +33,7 @@ TrajectoryPlanner::TrajectoryPlanner()
   double target_velocity;
 
   igvc::param(pNh, "axle_length", axle_length, 0.52);
+  igvc::param(pNh, "node/loop_hz", loop_hz_, 20.0);
 
   igvc::param(pNh, "smooth_control/k1", smooth_control_options.k1, 1.0);
   igvc::param(pNh, "smooth_control/k2", smooth_control_options.k2, 3.0);
@@ -48,9 +49,9 @@ TrajectoryPlanner::TrajectoryPlanner()
   igvc::param(pNh, "curvature_blending/blending_distance", curvature_blending_options.blending_distance, 1.0);
 
   igvc::param(pNh, "wheel_constraints/velocity", wheel_constraints.velocity, 3.0);
-  igvc::param(pNh, "wheel_constraints/acceleration", wheel_constraints.velocity, 5.0);
+  igvc::param(pNh, "wheel_constraints/acceleration", wheel_constraints.acceleration, 5.0);
   igvc::param(pNh, "robot_constraints/velocity", robot_constraints.velocity, 2.0);
-  igvc::param(pNh, "robot_constraints/acceleration", robot_constraints.velocity, 5.0);
+  igvc::param(pNh, "robot_constraints/acceleration", robot_constraints.acceleration, 5.0);
 
   igvc::param(pNh, "motion_profiler/target_velocity", target_velocity, 1.0);
   igvc::param(pNh, "motion_profiler/beta", motion_profiler_options.beta, 2.0);
@@ -79,16 +80,22 @@ TrajectoryPlanner::TrajectoryPlanner()
   target_pub_ = nh.advertise<geometry_msgs::PointStamped>("/target_point", 1);
   trajectory_pub_ = nh.advertise<igvc_msgs::trajectory>("/trajectory", 1);
   smoothed_pub_ = nh.advertise<nav_msgs::Path>("/smoothed", 1);
+  debug_pub_ = nh.advertise<nav_msgs::Path>("/trajectory_planner/debug", 1);
+
+  std::thread trajectory_plan_thread(&TrajectoryPlanner::updateTrajectory, this);
 
   ros::spin();
+  ROS_INFO("Shutting down...");
+  trajectory_plan_thread.join();
 }
 
 void TrajectoryPlanner::pathCallback(const nav_msgs::PathConstPtr& msg)
 {
   ROS_DEBUG_STREAM("Follower got path. Size: " << msg->poses.size());
-  path_ = getPatchedPath(msg);
-  updateTrajectory();
-  smoothed_pub_.publish(path_);
+  nav_msgs::PathConstPtr path = getPatchedPath(msg);
+  smoothed_pub_.publish(path);
+  std::lock_guard<std::mutex> path_mutex(path_mutex_);
+  path_ = path;
 }
 
 void TrajectoryPlanner::waypointCallback(const geometry_msgs::PointStampedConstPtr& msg)
@@ -104,7 +111,6 @@ void TrajectoryPlanner::positionCallback(const nav_msgs::OdometryConstPtr& msg)
 {
   state_.setState(msg);
   last_time_ = msg->header.stamp;
-  updateTrajectory();
 }
 
 nav_msgs::PathConstPtr TrajectoryPlanner::getPatchedPath(const nav_msgs::PathConstPtr& msg) const
@@ -138,19 +144,24 @@ nav_msgs::PathConstPtr TrajectoryPlanner::getPatchedPath(const nav_msgs::PathCon
 
 void TrajectoryPlanner::encoderCallback(const igvc_msgs::velocity_pairConstPtr& msg)
 {
+  std::lock_guard<std::mutex> state_lock(state_mutex_);
   state_.setVelocity(msg);
   last_time_ = msg->header.stamp;
-  updateTrajectory();
 }
 
 void TrajectoryPlanner::updateTrajectory()
 {
-  std::optional<igvc_msgs::trajectoryPtr> trajectory = getSmoothPath();
-
-  if (trajectory && trajectory.value().get() != nullptr)
+  ros::Rate rate(loop_hz_);
+  while (ros::ok())
   {
-    motion_profiler_->profileTrajectory(*trajectory);
-    publishTrajectory(*trajectory);
+    std::optional<igvc_msgs::trajectoryPtr> trajectory = getSmoothPath();
+
+    if (trajectory && trajectory.value().get() != nullptr)
+    {
+      publishDebug(*trajectory);
+      motion_profiler_->profileTrajectory(*trajectory, state_);
+      publishTrajectory(*trajectory);
+    }
   }
 }
 
@@ -173,27 +184,34 @@ std::optional<igvc_msgs::trajectoryPtr> TrajectoryPlanner::getSmoothPath()
 
   igvc_msgs::trajectoryPtr trajectory = boost::make_shared<igvc_msgs::trajectory>();
 
-  RobotState target;
+  std::lock_guard<std::mutex> state_lock(state_mutex_);
+  std::lock_guard<std::mutex> path_lock(path_mutex_);
   controller_->getPath(path_, trajectory, state_);
-
-  publishTarget(target);
-  ROS_DEBUG_STREAM_THROTTLE(1, "Distance to target: " << state_.distTo(target) << " (m)");
   return trajectory;
-}
-
-void TrajectoryPlanner::publishTarget(const RobotState& target)
-{
-  geometry_msgs::PointStamped target_point;
-  target_point.header.frame_id = "/odom";
-  target_point.header.stamp = last_time_;
-  target_point.point.x = target.x;
-  target_point.point.y = target.y;
-  target_pub_.publish(target_point);
 }
 
 void TrajectoryPlanner::publishTrajectory(const igvc_msgs::trajectoryConstPtr& trajectory)
 {
   trajectory_pub_.publish(trajectory);
+}
+
+void TrajectoryPlanner::publishDebug(const igvc_msgs::trajectoryConstPtr& trajectory)
+{
+  igvc_msgs::trajectory_point point = trajectory->trajectory.front();
+  nav_msgs::Path path;
+  for (const auto& point : trajectory->trajectory)
+  {
+    geometry_msgs::PoseStamped pose;
+    pose.pose = point.pose;
+    pose.header.stamp = point.header.stamp;
+    pose.header.frame_id = "/odom";
+
+    path.poses.emplace_back(pose);
+  }
+
+  path.header.stamp = trajectory->header.stamp;
+  path.header.frame_id = "/odom";
+  debug_pub_.publish(path);
 }
 
 int main(int argc, char** argv)

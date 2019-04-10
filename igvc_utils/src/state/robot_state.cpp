@@ -80,6 +80,7 @@ igvc_msgs::trajectory_point RobotState::toTrajectoryPoint(ros::Time stamp, const
                                                           double axle_length) const
 {
   igvc_msgs::trajectory_point point;
+  point.header.stamp = stamp;
   point.pose.position.x = x;
   point.pose.position.y = y;
   point.pose.orientation = tf::createQuaternionMsgFromYaw(yaw);

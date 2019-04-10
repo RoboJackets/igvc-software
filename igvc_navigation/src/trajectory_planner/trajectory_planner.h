@@ -1,6 +1,8 @@
 #ifndef PROJECT_PATH_FOLLOWER_H
 #define PROJECT_PATH_FOLLOWER_H
 
+#include <mutex>
+
 #include <nav_msgs/Path.h>
 #include <ros/ros.h>
 
@@ -21,20 +23,21 @@ private:
   void updateTrajectory();
 
   void publishTrajectory(const igvc_msgs::trajectoryConstPtr& trajectory);
+  void publishDebug(const igvc_msgs::trajectoryConstPtr& trajectory);
 
   /**
-   * Returns
-   * @return
+   * Returns the smoothed path from SmoothControl
+   * @return a trajectory, if there exists a path and a waypoint
    */
   std::optional<igvc_msgs::trajectoryPtr> getSmoothPath();
 
-  void publishTarget(const RobotState& target);
   nav_msgs::PathConstPtr getPatchedPath(const nav_msgs::PathConstPtr& msg) const;
 
   ros::Publisher cmd_pub_;
   ros::Publisher target_pub_;
   ros::Publisher trajectory_pub_;
   ros::Publisher smoothed_pub_;
+  ros::Publisher debug_pub_;
 
   nav_msgs::PathConstPtr path_;
   geometry_msgs::PointStampedConstPtr waypoint_;
@@ -42,8 +45,12 @@ private:
   RobotState state_;
   ros::Time last_time_;
 
+  double loop_hz_{};
   double stop_dist_{};
   double maximum_vel_{};
+
+  std::mutex path_mutex_;
+  std::mutex state_mutex_;
 
   std::unique_ptr<SmoothControl> controller_;
   std::unique_ptr<MotionProfiler> motion_profiler_;

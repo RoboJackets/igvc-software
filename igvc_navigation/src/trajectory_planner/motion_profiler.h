@@ -2,6 +2,7 @@
 #define SRC_MOTION_PROFILER_H
 
 #include <igvc_msgs/trajectory.h>
+#include <igvc_utils/robot_state.h>
 
 struct WheelConstraint
 {
@@ -31,7 +32,7 @@ public:
    * Performs motion profiling on the passed in trajectory, doing a constrained optimization on acceleration
    * @param trajectory_ptr the trajectory to perform motion profiling on
    */
-  void profileTrajectory(const igvc_msgs::trajectoryPtr& trajectory_ptr);
+  void profileTrajectory(const igvc_msgs::trajectoryPtr& trajectory_ptr, const RobotState& state);
 private:
   WheelConstraint wheel_constraint_;
   RobotConstraint robot_constraint_;

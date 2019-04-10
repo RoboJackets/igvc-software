@@ -11,10 +11,11 @@ igvc_msgs::velocity_pair RobotControl::toMessage(ros::Time stamp) const
 
 CurvatureVelocity RobotControl::toKV(double axle_length) const
 {
-  if (axle_length == -1) {
+  if (axle_length == -1)
+  {
     axle_length = axle_length_;
   }
-  return {(right_ - left_) / axle_length, (right_ + left_)/2};
+  return { (right_ - left_) / axle_length, (right_ + left_) / 2 };
 }
 
 RobotControl RobotControl::fromKV(double curvature, double velocity, double axle_length)
@@ -22,7 +23,11 @@ RobotControl RobotControl::fromKV(double curvature, double velocity, double axle
   double w = curvature * velocity;
   double v_r = velocity + w * axle_length / 2;
   double v_l = velocity - w * axle_length / 2;
-  return {v_l, v_r, axle_length};
+  return { v_l, v_r, axle_length };
 }
 
-
+std::ostream &operator<<(std::ostream &out, const RobotControl &robot_control)
+{
+  out << "(" << robot_control.left_ << ", " << robot_control.right_ << ")";
+  return out;
+}

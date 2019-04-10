@@ -12,7 +12,7 @@ MotionProfiler::MotionProfiler(double axle_length, const WheelConstraint& wheel_
 {
 }
 
-void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajectory_ptr)
+void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajectory_ptr, const RobotState& state)
 {
   // For now, a simple "motion profile" where velocity is a function of curvature. ie. as curvature increases,
   // velocity decreases.
@@ -24,41 +24,62 @@ void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajector
     double beta = motion_profiler_options_.beta;
     double lambda = motion_profiler_options_.lambda;
     double velocity = target_velocity_ / (1 + beta * std::pow(std::abs(trajectory_point.curvature), lambda));
-    ROS_INFO_STREAM("target: " << target_velocity_ << ", velocity: " << velocity);
 
     // Constraint checking and limiting
-    if (velocity > robot_constraint_.velocity) {
+    if (velocity > robot_constraint_.velocity)
+    {
       velocity = robot_constraint_.velocity;
     }
 
-    trajectory_point.velocity = velocity;
+    if (i == 0)
+    {
+      trajectory_point.velocity = state.linearVelocity();
+    }
+    else
+    {
+      trajectory_point.velocity = velocity;
+    }
 
     // Caclulate time to next point
-    if (i != trajectory_ptr->trajectory.size() - 1)
+    if (i < trajectory_ptr->trajectory.size() - 1)
     {
       double distance;
-      if (std::abs(trajectory_point.curvature) > 1e-8) {
-        double R = 1/trajectory_point.curvature;
+      if (std::abs(trajectory_point.curvature) > 1e-8)
+      {
+        double R = 1 / trajectory_point.curvature;
         double current_yaw = tf::getYaw(trajectory_point.pose.orientation);
-        double next_yaw = tf::getYaw(trajectory_ptr->trajectory[i+1].pose.orientation);
+        double next_yaw = tf::getYaw(trajectory_ptr->trajectory[i + 1].pose.orientation);
 
         double d_theta = next_yaw - current_yaw;
         distance = std::abs(d_theta * R);
-
-        ROS_INFO_STREAM("arclength: " << distance << ", velocity: " << velocity << ", duration: " << distance / trajectory_point.velocity);
-
-      } else {
-        double dx = trajectory_point.pose.position.x - trajectory_ptr->trajectory[i+1].pose.position.x;
-        double dy = trajectory_point.pose.position.y - trajectory_ptr->trajectory[i+1].pose.position.y;
-        distance = std::hypot(dx, dy);
-        ROS_INFO_STREAM("hypot: " << distance);
-        ROS_INFO_STREAM("duration: " << distance / trajectory_point.velocity);
       }
-      ROS_INFO_STREAM("velocity: " << trajectory_point.velocity);
-      trajectory_point.velocity = 0.8;
+      else
+      {
+        // Limit acceleration on straight lines
+        double dx = trajectory_point.pose.position.x - trajectory_ptr->trajectory[i + 1].pose.position.x;
+        double dy = trajectory_point.pose.position.y - trajectory_ptr->trajectory[i + 1].pose.position.y;
+        distance = std::hypot(dx, dy);
+      }
+      if (i > 0 && std::abs(trajectory_point.curvature) < 1e-3)
+      {
+        double dv;
+        dv = trajectory_point.velocity - trajectory_ptr->trajectory[i - 1].velocity;
+        double dt;
+        dt = (trajectory_point.header.stamp - trajectory_ptr->trajectory[i - 1].header.stamp).toSec();
+        if (std::abs(dv / dt) > robot_constraint_.acceleration)
+        {
+          double capped_velocity =
+              trajectory_ptr->trajectory[i - 1].velocity + std::copysign(robot_constraint_.acceleration, dv) * dt;
+          ROS_WARN_STREAM_THROTTLE(1, "K: " << trajectory_point.curvature << "Desired a: " << (dv / dt)
+                                            << ", limiting to " << robot_constraint_.acceleration
+                                            << ", desired velocity: " << trajectory_point.velocity << ", capping to "
+                                            << capped_velocity);
+          trajectory_point.velocity = capped_velocity;
+        }
+      }
       ros::Duration move_duration = ros::Duration(distance / trajectory_point.velocity);
 
-      trajectory_ptr->trajectory[i+1].header.stamp = trajectory_point.header.stamp + move_duration;
+      trajectory_ptr->trajectory[i + 1].header.stamp = trajectory_point.header.stamp + move_duration;
     }
   }
 }

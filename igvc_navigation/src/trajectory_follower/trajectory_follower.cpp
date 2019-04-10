@@ -30,7 +30,7 @@ TrajectoryFollower::TrajectoryFollower()
 
 void TrajectoryFollower::trajectoryCallback(igvc_msgs::trajectoryConstPtr trajectory)
 {
-  trajectory_ = std::move(trajectory);
+  trajectory_ = trajectory;
 }
 
 void TrajectoryFollower::trajectoryFollowLoop()
@@ -60,9 +60,16 @@ RobotControl TrajectoryFollower::getControl()
     ros::Time next_time = trajectory_->trajectory[i + 1].header.stamp;
     if (last_time < current_time && current_time < next_time)
     {
+      igvc_msgs::trajectory_point last = trajectory_->trajectory[i];
+      igvc_msgs::trajectory_point next = trajectory_->trajectory[i + 1];
+
       double ratio = (current_time - last_time).toSec() / (next_time - last_time).toSec();
-      double curvature = (1 - ratio) * trajectory_->trajectory[i].curvature + ratio * trajectory_->trajectory[i + 1].curvature;
-      double velocity = (1 - ratio) * trajectory_->trajectory[i].velocity + ratio * trajectory_->trajectory[i + 1].velocity;
+
+      double curvature = (1 - ratio) * last.curvature + ratio * next.curvature;
+      double velocity = (1 - ratio) * last.velocity + ratio * next.velocity;
+
+//      ROS_INFO_STREAM("Interpolating from (" << last.curvature << ", " << last.velocity << ") to (" << next.curvature << ", " << next.velocity << ")");
+//      ROS_INFO_STREAM("\tResult: " << RobotControl::fromKV(curvature, velocity, axle_length_));
       return RobotControl::fromKV(curvature, velocity, axle_length_);
     }
   }
