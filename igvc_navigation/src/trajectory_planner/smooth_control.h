@@ -19,8 +19,8 @@ https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 #include <nav_msgs/Path.h>
 
 #include <igvc_msgs/trajectory.h>
-#include <igvc_utils/NodeUtils.hpp>
 #include <igvc_utils/robot_state.h>
+#include <igvc_utils/NodeUtils.hpp>
 
 struct SmoothControlOptions
 {
@@ -34,7 +34,8 @@ struct PathGenerationOptions
   double simulation_frequency;
   double simulation_velocity;
 
-  int getNumSamples() const {
+  int getNumSamples() const
+  {
     return static_cast<int>(simulation_horizon * simulation_frequency);
   }
 };
@@ -54,11 +55,12 @@ struct CurvatureBlendingOptions
 class SmoothControl
 {
 public:
-//  SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
-//                double lookahead_dist, double simulation_horizon, double target_reached_distance,
-//                double target_move_threshold, double transition_distance);
+  //  SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
+  //                double lookahead_dist, double simulation_horizon, double target_reached_distance,
+  //                double target_move_threshold, double transition_distance);
   SmoothControl(SmoothControlOptions smooth_control_options, PathGenerationOptions path_generation_options,
-                TargetSelectionOptions target_selection_options, CurvatureBlendingOptions curvature_blending_options, double axle_length);
+                TargetSelectionOptions target_selection_options, CurvatureBlendingOptions curvature_blending_options,
+                double axle_length);
   /**
    * Generate an immediate velocity command and visualize a smooth control trajectory
    * using the procedure described in 'A Smooth Control Law for Graceful Motion of
