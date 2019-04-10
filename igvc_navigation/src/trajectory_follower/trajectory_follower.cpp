@@ -38,7 +38,8 @@ void TrajectoryFollower::trajectoryFollowLoop()
   ros::Rate rate(loop_hz_);
   while (ros::ok())
   {
-    if (trajectory_.get()) {
+    if (trajectory_.get())
+    {
       followTrajectory();
     }
     rate.sleep();
@@ -68,12 +69,14 @@ RobotControl TrajectoryFollower::getControl()
       double curvature = (1 - ratio) * last.curvature + ratio * next.curvature;
       double velocity = (1 - ratio) * last.velocity + ratio * next.velocity;
 
-//      ROS_INFO_STREAM("Interpolating from (" << last.curvature << ", " << last.velocity << ") to (" << next.curvature << ", " << next.velocity << ")");
-//      ROS_INFO_STREAM("\tResult: " << RobotControl::fromKV(curvature, velocity, axle_length_));
+      //      ROS_INFO_STREAM("Interpolating from (" << last.curvature << ", " << last.velocity << ") to (" <<
+      //      next.curvature << ", " << next.velocity << ")"); ROS_INFO_STREAM("\tResult: " <<
+      //      RobotControl::fromKV(curvature, velocity, axle_length_));
       return RobotControl::fromKV(curvature, velocity, axle_length_);
     }
   }
-  return RobotControl::fromKV(trajectory_->trajectory.back().curvature, trajectory_->trajectory.back().velocity, axle_length_);
+  return RobotControl::fromKV(trajectory_->trajectory.back().curvature, trajectory_->trajectory.back().velocity,
+                              axle_length_);
 }
 
 int main(int argc, char** argv)

@@ -33,6 +33,7 @@ public:
    * @param trajectory_ptr the trajectory to perform motion profiling on
    */
   void profileTrajectory(const igvc_msgs::trajectoryPtr& trajectory_ptr, const RobotState& state);
+
 private:
   WheelConstraint wheel_constraint_;
   RobotConstraint robot_constraint_;
