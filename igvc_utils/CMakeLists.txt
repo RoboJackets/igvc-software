@@ -160,10 +160,10 @@ include_directories(
 ## Testing ##
 #############
 
-#if(CATKIN_ENABLE_TESTING)
-#    find_package(rostest REQUIRED)
-#    add_subdirectory(src/tests)
-#endif()
+if(CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+    add_subdirectory(src/tests)
+endif()
 
 
 add_subdirectory(src/pid_tester)
