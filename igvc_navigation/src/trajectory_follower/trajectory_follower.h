@@ -12,10 +12,12 @@
 #include <igvc_msgs/trajectory_point.h>
 #include <igvc_utils/robot_control.h>
 
-class TrajectoryFollower {
- public:
+class TrajectoryFollower
+{
+public:
   TrajectoryFollower();
- private:
+
+private:
   igvc_msgs::trajectoryConstPtr trajectory_;
   ros::Publisher control_pub_;
 
@@ -42,4 +44,4 @@ class TrajectoryFollower {
   void trajectoryFollowLoop();
 };
 
-#endif //SRC_TRAJECTORY_FOLLOWER_H
+#endif  // SRC_TRAJECTORY_FOLLOWER_H
