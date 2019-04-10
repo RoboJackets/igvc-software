@@ -128,4 +128,3 @@ bool RobotState::operator==(const RobotState &other)
 {
   return std::tie(x, y, roll, pitch, yaw) == std::tie(other.x, other.y, other.roll, other.pitch, other.yaw);
 }
-
