@@ -51,7 +51,7 @@ TEST_F(TestJoystickDriver, FullForward)
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
-  const igvc_msgs::velocity_pair::ConstPtr& response =
+  const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
 
   EXPECT_TRUE(response.get() != nullptr);
@@ -66,7 +66,7 @@ TEST_F(TestJoystickDriver, FullReverse)
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
-  const igvc_msgs::velocity_pair::ConstPtr& response =
+  const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
 
   EXPECT_TRUE(response.get() != nullptr);
@@ -81,7 +81,7 @@ TEST_F(TestJoystickDriver, SpinRight)
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
-  const igvc_msgs::velocity_pair::ConstPtr& response =
+  const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
 
   EXPECT_TRUE(response.get() != nullptr);
@@ -96,7 +96,7 @@ TEST_F(TestJoystickDriver, SpinLeft)
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
-  const igvc_msgs::velocity_pair::ConstPtr& response =
+  const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
 
   EXPECT_TRUE(response.get() != nullptr);
@@ -111,7 +111,7 @@ TEST_F(TestJoystickDriver, HalfSpeedForward)
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
-  const igvc_msgs::velocity_pair::ConstPtr& response =
+  const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(1));
 
   EXPECT_TRUE(response.get() != nullptr);

@@ -1,4 +1,4 @@
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6015", ATTRS{bcdDevice}=="1000", SYMLINK+="igvc_lidar", GROUP="plugdev", MODE="0666"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{bcdDevice}=="0100", SYMLINK+="igvc_lidar", GROUP="plugdev"
 
 SUBSYSTEM=="tty", ATTRS{product}=="USB3.0 Hub", SYMLINK+="imu_bottom"
 SUBSYSTEM=="tty", ATTRS{idVendor}=="1a40", SYMLINK+="imu_top"
