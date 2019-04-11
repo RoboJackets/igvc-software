@@ -44,9 +44,17 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "octree/resolution", resolution_);
 
   igvc::getParam(pNh, "topics/lidar", lidar_topic_);
-  igvc::getParam(pNh, "topics/line_segmentation", line_topic_);
+
+  igvc::getParam(pNh, "topics/line_segmentation/left", line_topic_left_);
+  igvc::getParam(pNh, "topics/line_segmentation/center", line_topic_center_);
+  igvc::getParam(pNh, "topics/line_segmentation/right", line_topic_right_);
+
   igvc::getParam(pNh, "topics/projected_line_pc", projected_line_topic_);
-  igvc::getParam(pNh, "topics/camera_info", camera_info_topic_);
+
+  igvc::getParam(pNh, "topics/camera_info/left", camera_info_topic_left_);
+  igvc::getParam(pNh, "topics/camera_info/center", camera_info_topic_center_);
+  igvc::getParam(pNh, "topics/camera_info/right", camera_info_topic_right_);
+
   igvc::param(pNh, "frames/camera", camera_frame_, std::string{ "optical_cam_center" });
 
   igvc::getParam(pNh, "cameras/resize_width", resize_width_);
@@ -59,19 +67,31 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   mapper_ = std::make_unique<Mapper>(pNh);
 
   ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(lidar_topic_, 1, &ROSMapper::pcCallback, this);
-  ros::Subscriber line_map_sub;
   ros::Subscriber projected_line_map_sub;
-  ros::Subscriber camera_info_sub;
 
   if (use_lines_)
   {
-    ROS_INFO_STREAM("Subscribing to " << line_topic_ << " for image and " << projected_line_topic_
-                                      << " for projected pointclouds");
-    line_map_sub = nh.subscribe<sensor_msgs::Image>(line_topic_, 1, &ROSMapper::segmentedImageCallback, this);
+    line_map_subs_.emplace(std::make_pair(
+        Camera::left, nh.subscribe<sensor_msgs::Image>(line_topic_left_, 1, boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::left))));
+    line_map_subs_.emplace(std::make_pair(
+      Camera::center, nh.subscribe<sensor_msgs::Image>(line_topic_center_, 1, boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::center))));
+    line_map_subs_.emplace(std::make_pair(
+      Camera::right, nh.subscribe<sensor_msgs::Image>(line_topic_right_, 1, boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::right))));
+
     projected_line_map_sub =
         nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(projected_line_topic_, 1, &ROSMapper::projectedLineCallback, this);
-    camera_info_sub =
-        nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_, 1, &ROSMapper::cameraInfoCallback, this);
+    camera_infos_.emplace(std::make_pair(
+        Camera::left,
+        nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_left_, 1,
+                                              boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::left))));
+    camera_infos_.emplace(std::make_pair(
+        Camera::center,
+        nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_center_, 1,
+                                              boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::center))));
+    camera_infos_.emplace(std::make_pair(
+        Camera::right,
+        nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_right_, 1,
+                                              boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::right))));
   }
 
   map_pub_ = nh.advertise<igvc_msgs::map>("/map", 1);
@@ -258,9 +278,9 @@ void ROSMapper::pcCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
   publish(pc->header.stamp);
 }
 
-void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segmented)
+void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segmented, Camera camera)
 {
-  if (!camera_model_initialized_)
+  if (camera_infos_.find(camera) != camera_infos_.end())
   {
     return;
   }
@@ -280,7 +300,7 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
   cv::Mat image = segmented_ptr->image;
 
   mapper_->insertSegmentedImage(std::move(image), state_.transform, transforms_.at(projected_line_topic_),
-                                segmented->header.stamp);
+                                segmented->header.stamp, camera);
 
   publish(pcl_conversions::toPCL(segmented->header.stamp));
 }
@@ -296,18 +316,15 @@ void ROSMapper::projectedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::Cons
   publish(pc->header.stamp);
 }
 
-void ROSMapper::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr &camera_info)
+void ROSMapper::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr &camera_info, Camera camera)
 {
-  if (!camera_model_initialized_)
-  {
-    image_geometry::PinholeCameraModel camera_model;
-    sensor_msgs::CameraInfoConstPtr changed_camera_info =
-        MapUtils::scaleCameraInfo(camera_info, resize_width_, resize_height_);
-    camera_model.fromCameraInfo(changed_camera_info);
-    mapper_->setProjectionModel(camera_model);
+  image_geometry::PinholeCameraModel camera_model;
+  sensor_msgs::CameraInfoConstPtr changed_camera_info =
+      MapUtils::scaleCameraInfo(camera_info, resize_width_, resize_height_);
+  camera_model.fromCameraInfo(changed_camera_info);
+  mapper_->setProjectionModel(camera_model);
 
-    camera_model_initialized_ = true;
-  }
+  camera_infos_.erase(camera);
 }
 
 int main(int argc, char **argv)

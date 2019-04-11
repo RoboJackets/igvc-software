@@ -147,20 +147,20 @@ void Mapper::insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstP
 }
 
 void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_odom,
-                                  const tf::Transform& camera_to_base, const ros::Time& stamp)
+                                  const tf::Transform& camera_to_base, const ros::Time& stamp, Camera camera)
 {
-  PointCloud projected_pc;
-  processImageFreeSpace(image);
-
-  if (!camera_model_initialized_ && !use_ground_filter_)
+  if (camera_model_map_.find(camera) == camera_model_map_.end() && !camera_model_initialized_ && !use_ground_filter_)
   {
     ROS_WARN_STREAM_THROTTLE(1, "camera model not initialized or not using ground filter");
     return;
   }
-  else
-  {
-    MapUtils::projectToPlane(projected_pc, ground_plane_, image, camera_model_, camera_to_base);
-  }
+
+  PointCloud projected_pc;
+  processImageFreeSpace(image);
+
+  image_geometry::PinholeCameraModel model = camera_model_map_.at(camera);
+
+  MapUtils::projectToPlane(projected_pc, ground_plane_, image, model, camera_to_base);
 
   pcl_ros::transformPointCloud(projected_pc, projected_pc, base_to_odom);
   MapUtils::debugPublishPointCloud(camera_projection_pub_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",

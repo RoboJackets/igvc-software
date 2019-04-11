@@ -37,6 +37,13 @@ struct CombinedMapOptions
   BlurFilterOptions blur;
 };
 
+enum class Camera: int
+{
+  left,
+  center,
+  right
+};
+
 class Mapper
 {
   using radians = double;
@@ -66,7 +73,7 @@ public:
    * @param[in] stamp timestamp to be used for debug publishing
    */
   void insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_odom, const tf::Transform& camera_to_base,
-                            const ros::Time& stamp);
+                            const ros::Time& stamp, Camera camera);
 
   /**
    * Sets the parameters for the image_geometry::PinholeCameraModel used for projection.
@@ -96,7 +103,7 @@ private:
   pc_map_pair pc_map_pair_;      // Struct storing both the octomap for the lidar and the cv::Mat map
   pc_map_pair camera_map_pair_;  // Struct storing both the octomap for the camera projections and the cv::Mat map
 
-  image_geometry::PinholeCameraModel camera_model_;
+  std::unordered_map<Camera, image_geometry::PinholeCameraModel> camera_model_map_;
 
   EmptyFilterOptions empty_filter_options_{};
   BehindFilterOptions behind_filter_options_{};

@@ -29,8 +29,9 @@ private:
   /**
    * Callback for the neural network segmented image. Projected, then inserted as points.
    * @param segmented the segmented image
+   * @param camera which Mapper::Camera
    */
-  void segmentedImageCallback(const sensor_msgs::ImageConstPtr& segmented);
+  void segmentedImageCallback(const sensor_msgs::ImageConstPtr& segmented, Camera camera);
 
   /**
    * Callback for the line projetced onto lidar point cloud. Directly inserted as points.
@@ -42,7 +43,7 @@ private:
    * Callback for the cameraInfo used for projection, modified for a resized camera image.
    * @param camera_info CameraInfo used for projection.
    */
-  void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info);
+  void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& camera_info, Camera camera);
 
   /**
    * Publishes the given map at the given stamp
@@ -94,8 +95,10 @@ private:
   std::map<std::string, tf::StampedTransform> transforms_;  // Map of static transforms
   std::unique_ptr<tf::TransformListener> tf_listener_;      // TF Listener
 
+  std::unordered_map<Camera, ros::Subscriber> camera_infos_;
+  std::unordered_map<Camera, ros::Subscriber> line_map_subs_;
+
   bool use_lines_{};
-  bool camera_model_initialized_{ false };
   double transform_max_wait_time_{};
   int start_x_{};   // start x (m)
   int start_y_{};   // start y (m)
@@ -110,9 +113,17 @@ private:
   int resize_height_{};
 
   std::string lidar_topic_;
-  std::string line_topic_;
+
+  std::string line_topic_left_;
+  std::string line_topic_center_;
+  std::string line_topic_right_;
+
   std::string projected_line_topic_;
-  std::string camera_info_topic_;
+
+  std::string camera_info_topic_left_;
+  std::string camera_info_topic_center_;
+  std::string camera_info_topic_right_;
+
   std::string camera_frame_;
   RobotState state_;  // Odom -> Base_link
 

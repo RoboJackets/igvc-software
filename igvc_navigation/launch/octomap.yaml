@@ -61,9 +61,15 @@ segmented_free_space:
     threshold: 127 #0 - 255
 topics:
     lidar: "/velodyne_points"
-    line_segmentation: "/semantic_segmentation/center_cam"
-    projected_line_pc: "/semantic_segmentation_cloud/center_cam"
-    camera_info: "/center_cam/camera_info"
+    line_segmentation:
+        left: "/semantic_segmentation/left_cam"
+        center: "/semantic_segmentation/center_cam"
+        right: "/semantic_segmentation/right_cam"
+    projected_line_pc: "/semantic_segmentation_cloud"
+    camera_info:
+        left: "/usb_cam_center/camera_info"
+        center: "/usb_cam_left/camera_info"
+        right: "/usb_cam_right/camera_info"
 frames:
     camera: "/center_cam_optical"
 node:
