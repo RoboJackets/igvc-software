@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.13.0)
 project(igvc_navigation)
 
 ## Find catkin macros and libraries
@@ -119,7 +119,24 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
   include
+  /usr/local/cuda/include
 )
+
+##########
+## Cuda ##
+##########
+
+include(CheckLanguage)
+check_language(CUDA)
+if (CMAKE_CUDA_COMPILER)
+    include_directories(/usr/local/cuda/include)
+    message(STATUS "Found CUDA, will compile using it.")
+    enable_language(CUDA)
+    SET(CUDA_NVCC_FLAGS "-arch=sm_61" CACHE STRING "nvcc flags" FORCE)
+    set(CUDA_VERBOSE_BUILD ON CACHE BOOL "nvcc verbose" FORCE)
+    set(LIB_TYPE STATIC)
+    add_subdirectory(src/trajectory_controller)
+endif()
 
 ## Declare a cpp library
 # add_library(igvc

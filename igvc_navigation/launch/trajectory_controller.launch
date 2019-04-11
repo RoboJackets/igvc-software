@@ -1,0 +1,5 @@
+<launch>
+    <node name="trajectory_controller" pkg="igvc_navigation" type="trajectory_controller" output="screen">
+        <param name="" value=""/>
+    </node>
+</launch>
