@@ -322,7 +322,7 @@ void ROSMapper::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr &camera
   sensor_msgs::CameraInfoConstPtr changed_camera_info =
       MapUtils::scaleCameraInfo(camera_info, resize_width_, resize_height_);
   camera_model.fromCameraInfo(changed_camera_info);
-  mapper_->setProjectionModel(camera_model);
+  mapper_->setProjectionModel(camera_model, camera);
 
   camera_infos_.erase(camera);
 }
