@@ -79,7 +79,7 @@ public:
    * Sets the parameters for the image_geometry::PinholeCameraModel used for projection.
    * @param[in] camera_model camera model used for projection
    */
-  void setProjectionModel(const image_geometry::PinholeCameraModel& camera_model);
+  void setProjectionModel(const image_geometry::PinholeCameraModel& camera_model, Camera camera);
 
   /**
    * Returns the current map, or std::nullopt if no data has been receieved yet.ction Tool_External Tools_clang-format

@@ -205,11 +205,10 @@ std::optional<cv::Mat> Mapper::getMap()
   return blurred_map;
 }
 
-void Mapper::setProjectionModel(const image_geometry::PinholeCameraModel& camera_model)
+void Mapper::setProjectionModel(const image_geometry::PinholeCameraModel& camera_model, Camera camera)
 {
-  camera_model_ = camera_model;
-  camera_model_initialized_ = true;
-  ROS_INFO_STREAM_THROTTLE(1, "Projection Model set!");
+  camera_model_map_.insert(std::make_pair(camera, camera_model));
+  ROS_INFO_STREAM_THROTTLE(1, "Projection Model set for camera " << static_cast<int>(camera));
 }
 
 /**
