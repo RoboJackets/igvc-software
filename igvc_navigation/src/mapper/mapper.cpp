@@ -117,8 +117,13 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
     octomapper_->insertScan(lidar_to_odom.getOrigin(), pc_map_pair_, filtered_pc, lidar_scan_probability_model_,
                             radius_);
 
-    MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
-    pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
+    if (empty_filter_options_.enabled) {
+      MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
+      pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
+
+      MapUtils::projectTo2D(empty_pc);
+      MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, pc->header.stamp, "/odom", debug_);
+    }
   }
   octomapper_->insertRays(lidar_to_odom.getOrigin(), pc_map_pair_, empty_pc, false,
                           lidar_free_space_probability_model_);
