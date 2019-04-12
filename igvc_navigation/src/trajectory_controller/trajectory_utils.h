@@ -20,7 +20,6 @@ struct Node
 {
   int row;
   int col;
-  int weight;
 
   friend std::ostream& operator<<(std::ostream& out, const Node& node);
 };
@@ -31,9 +30,13 @@ struct Node
  */
 struct CompareNode
 {
+  cv::Mat weights_;
+public:
+  CompareNode(cv::Mat weights) : weights_{ weights } { }
+
   inline bool operator()(const Node& lhs, const Node& rhs) const
   {
-    return lhs.weight > rhs.weight;
+    return weights_.at<uchar>(lhs.row, lhs.col) > weights_.at<uchar>(rhs.row, rhs.col);
   }
 };
 
@@ -57,6 +60,8 @@ cv::Mat getSignedDistanceField(const nav_msgs::Path& path, int path_start, int p
 std::vector<Node> getNodesBetweenWaypoints(const Node& start, const Node& end);
 
 std::vector<Node> getAdjacentNodes(const Node& node, int grid_rows, int grid_cols);
+
+void updateWeightsFromNeighbours(const Node& node, cv::Mat field, uchar traversal_cost);
 
 template <class T>
 inline int toGrid(T coord, T grid_resolution)
