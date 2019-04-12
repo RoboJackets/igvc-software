@@ -1,0 +1,78 @@
+octree:
+    resolution: 0.2 # width & length of each grid cell in m
+    clamping:
+        max: 0.95 # Value of octree considered 100% occupied stable
+        min: 0.05 # Value of octree considered 0% occupied stable
+# P(x | x) where x is either miss or hit. So prob_miss: 0.2 means that I'm 20% confident a miss is a miss
+probability_model:
+    lidar:
+        scan:
+            prob_miss: 0.51
+            prob_hit: 0.9
+        ground:
+            prob_miss: 0.6
+            prob_hit: 0.6 # Not used
+        free_space:
+            prob_miss: 0.52
+            prob_hit: 0.6 # Not used
+    camera:
+        prob_miss: 0.45
+        prob_hit: 0.9
+sensor_model:
+    max_range: 15
+    angular_resolution: 0.01
+filters:
+    behind:
+        enabled: true
+        filter_angle: 2
+        distance: 3
+    empty:
+        enabled: true
+        start_angle: -0.5 #Radians
+        end_angle: 0.5
+        miss_cast_distance: 15
+        max_range: 15
+    empty_image:
+        blur:
+            kernel: 17
+            sigma: 11
+        threshold: 0.5
+    combined_map:
+        blur:
+            kernel: 3
+    ground_filter:
+        enable: false
+        ransac:
+            iterations: 200
+            distance_threshold: 0.5
+            eps_angle: 0.5
+        fallback:
+            plane_distance: 0.04 # +-m from z=0
+map:
+    # In units of meters, not cells
+    # width of grid = width / resolution
+    length: 200
+    width: 200
+    start_x: 100
+    start_y: 100
+    encoding: "CV_8UC1"
+    log_odds_default: 0
+segmented_free_space:
+    kernel_size: 3
+    std_dev: 3
+    threshold: 127 #0 - 255
+topics:
+    lidar: "/scan/pointcloud"
+    line_segmentation: "/semantic_segmentation"
+    projected_line_pc: "/semantic_segmentation_cloud"
+    camera_info: "/usb_cam_center/camera_info"
+frames:
+    camera: "/optical_cam_center"
+node:
+    debug: true
+    use_lines: false
+    transform_max_wait_time: 1
+cameras:
+    resize_width: 400 # pixels
+    resize_height: 400
+
