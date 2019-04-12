@@ -55,7 +55,6 @@ map:
     width: 200
     start_x: 100
     start_y: 100
-    encoding: "CV_8UC1"
     log_odds_default: 0
 segmented_free_space:
     kernel_size: 3

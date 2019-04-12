@@ -62,6 +62,8 @@ struct MapOptions
 {
   double length;
   double width;
+  double start_x;
+  double start_y;
   double default_logodds;
   double resolution;
 
