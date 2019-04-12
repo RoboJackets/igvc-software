@@ -17,23 +17,23 @@ __global__ void kernel(int n, float *x, float *y) {
 }
 
 void cudamain() {
-
-  dev_array
-
-  curandGenerator_t curand_generator;
-  curandCreateGenerator(&curand_generator, CURAND_RNG_PSEUDO_MTGP32);
-  curandSetPseudoRandomGeneratorSeed(curand_generator, 1234ULL);
-  curandGenerateNormal(curand_generator, d)
-
-
-  kernel <<<1,256>>>(N, x, y);
-
-  cudaDeviceSynchronize();
-
-  for (int i = 0; i < 10; i++) {
-    std::cout << "x: " << x[i] << ", y: " << y[i] << std::endl;
-  }
-
-  cudaFree(x);
-  cudaFree(y);
+//
+//  dev_array
+//
+//  curandGenerator_t curand_generator;
+//  curandCreateGenerator(&curand_generator, CURAND_RNG_PSEUDO_MTGP32);
+//  curandSetPseudoRandomGeneratorSeed(curand_generator, 1234ULL);
+//  curandGenerateNormal(curand_generator, d)
+//
+//
+//  kernel <<<1,256>>>(N, x, y);
+//
+//  cudaDeviceSynchronize();
+//
+//  for (int i = 0; i < 10; i++) {
+//    std::cout << "x: " << x[i] << ", y: " << y[i] << std::endl;
+//  }
+//
+//  cudaFree(x);
+//  cudaFree(y);
 }
