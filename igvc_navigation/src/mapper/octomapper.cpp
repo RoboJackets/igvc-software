@@ -16,21 +16,14 @@ Octomapper::Octomapper(ros::NodeHandle pNh)
 
   igvc::getParam(pNh, "map/length", map_options_.length);
   igvc::getParam(pNh, "map/width", map_options_.width);
+  igvc::getParam(pNh, "map/start_x", map_options_.start_x);
+  igvc::getParam(pNh, "map/start_y", map_options_.start_y);
   igvc::getParam(pNh, "map/log_odds_default", map_options_.default_logodds);
   std::string map_encoding;
-  igvc::getParam(pNh, "map/encoding", map_encoding);
 
   map_options_.resolution = octree_options_.resolution;
 
-  // If we wanted more precision
-  if (map_encoding == "CV_8UC1")
-  {
-    map_encoding_ = CV_8UC1;
-  }
-  else
-  {
-    map_encoding_ = CV_8UC1;
-  }
+  map_encoding_ = CV_8UC1;
 }
 
 void Octomapper::create_octree(pc_map_pair &pair) const
@@ -64,8 +57,8 @@ float fromLogOdds(float log_odds)
 
 std::pair<int, int> Octomapper::toMapCoordinates(double x, double y) const
 {
-  int x_map = static_cast<int>((map_options_.length / 2.0 + x) / octree_options_.resolution);
-  int y_map = static_cast<int>((map_options_.width / 2.0 + y) / octree_options_.resolution);
+  int x_map = static_cast<int>((map_options_.start_x + x) / octree_options_.resolution);
+  int y_map = static_cast<int>((map_options_.start_y + y) / octree_options_.resolution);
   return std::make_pair(x_map, y_map);
 }
 
