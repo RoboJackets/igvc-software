@@ -117,7 +117,8 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
     octomapper_->insertScan(lidar_to_odom.getOrigin(), pc_map_pair_, filtered_pc, lidar_scan_probability_model_,
                             radius_);
 
-    if (empty_filter_options_.enabled) {
+    if (empty_filter_options_.enabled)
+    {
       MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
       pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
 
