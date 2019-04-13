@@ -207,7 +207,7 @@ add_library(
     GraphSearch/src/Node.cpp
     GraphSearch/src/Graph.cpp
     GraphSearch/src/PriorityQueue.cpp
-)
+    include/igvc_navigation/fast_sweep.h)
 add_dependencies(GraphSearch igvc_msgs_gencpp)
 # link OpenCV and cv_bridge to GraphSearch library
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
@@ -221,3 +221,4 @@ add_subdirectory(src/path_follower)
 
 add_subdirectory(src/d_lite_planner)
 add_subdirectory(src/field_d_planner)
+add_subdirectory(src/fast_sweep)

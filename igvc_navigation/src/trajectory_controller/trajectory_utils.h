@@ -36,7 +36,7 @@ public:
 
   inline bool operator()(const Node& lhs, const Node& rhs) const
   {
-    return weights_.at<uchar>(lhs.row, lhs.col) > weights_.at<uchar>(rhs.row, rhs.col);
+    return weights_.at<float>(lhs.row, lhs.col) > weights_.at<float>(rhs.row, rhs.col);
   }
 };
 
@@ -61,7 +61,7 @@ std::vector<Node> getNodesBetweenWaypoints(const Node& start, const Node& end);
 
 std::vector<Node> getAdjacentNodes(const Node& node, int grid_rows, int grid_cols);
 
-void updateWeightsFromNeighbours(const Node& node, cv::Mat field, uchar traversal_cost);
+void updateWeightsFromNeighbours(const Node& node, cv::Mat field, float traversal_cost);
 
 template <class T>
 inline int toGrid(T coord, T grid_resolution)
