@@ -1,5 +1,8 @@
-add_rostest_gtest(TestMapper test/test_mapper.test test_mapper.cpp)
-target_link_libraries(TestMapper ${catkin_LIBRARIES})
+#add_rostest_gtest(TestMapper test/test_mapper.test test_mapper.cpp)
+#target_link_libraries(TestMapper ${catkin_LIBRARIES})
+
+catkin_add_gtest(TestFastSweep test_fast_sweep.cpp)
+target_link_libraries(TestFastSweep FastSweep)
 
 #add_rostest_gtest(TestPathPlanner test/test_path_planner.test test_path_planner.cpp)
 #target_link_libraries(TestPathPlanner ${catkin_LIBRARIES})
