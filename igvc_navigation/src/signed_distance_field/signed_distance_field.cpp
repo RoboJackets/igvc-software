@@ -13,26 +13,34 @@ SignedDistanceFieldOptions::SignedDistanceFieldOptions(int rows, int cols, doubl
   }
 }
 
-cv::Mat getSignedDistanceField(const nav_msgs::Path& path, int path_start, int path_end,
+std::unique_ptr<cv::Mat> getSignedDistanceField(const nav_msgs::Path& path, int path_start, int path_end,
                                const SignedDistanceFieldOptions& options, const cv::Mat& traversal_costs,
                                fast_sweep::FastSweep& solver)
 {
-  cv::Mat field(options.grid_rows, options.grid_cols, CV_32F, cvScalar(std::numeric_limits<float>::max()));
   std::vector<fast_sweep::Node> gamma_points;  // TODO: Reserve?
-  for (int i = 0; i < path.poses.size() - 1; i++)
-  {
-    double start_x = path.poses[i].pose.position.x;
-    double start_y = path.poses[i].pose.position.y;
-    double end_x = path.poses[i + 1].pose.position.x;
-    double end_y = path.poses[i + 1].pose.position.y;
+  if (path_start - path_end > 0){
+    for (int i = 0; i < path.poses.size() - 1; i++)
+    {
+      double start_x = path.poses[i].pose.position.x;
+      double start_y = path.poses[i].pose.position.y;
+      double end_x = path.poses[i + 1].pose.position.x;
+      double end_y = path.poses[i + 1].pose.position.y;
 
-    std::vector<fast_sweep::Node> line =
-        getNodesBetweenWaypoints(toNode(start_x, start_y, options), toNode(end_x, end_y, options));
-    gamma_points.insert(gamma_points.end(), line.begin(), line.end());
+      std::vector<fast_sweep::Node> line =
+          getNodesBetweenWaypoints(toNode(start_x, start_y, options), toNode(end_x, end_y, options));
+      gamma_points.insert(gamma_points.end(), line.begin(), line.end());
+    }
+  } else if (path_start - path_end == 0){
+    double x = path.poses.front().pose.position.x;
+    double y = path.poses.front().pose.position.y;
+    gamma_points.emplace_back(toNode(x, y, options));
   }
-
+  std::cout << "Gamma_points: " << std::endl;
+  for (const auto& point : gamma_points) {
+    std::cout << point << std::endl;
+  }
+  std::cout << std::endl;
   std::vector<float> solution = solver.solveEikonal(gamma_points, toVector<float>(traversal_costs));
-
   return toMat(solution, options.grid_rows);
 }
 

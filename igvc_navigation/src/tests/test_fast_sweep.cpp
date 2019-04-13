@@ -11,7 +11,6 @@ TEST(FastSweepTest, constructor)
   float resolution = 1;
 
   fast_sweep::FastSweep solver(rows, cols, resolution);
-  EXPECT_NO_THROW();
 }
 
 TEST(FastSweepTest, empty)
@@ -24,7 +23,6 @@ TEST(FastSweepTest, empty)
 
   std::vector<float> costs(rows * cols, 1.0f);
   std::vector<float> solution = solver.solveEikonal({}, costs);
-  EXPECT_NO_THROW();
   ASSERT_EQ(solution.size(), static_cast<size_t>(rows * cols));
   for (const auto& cell : solution) {
     EXPECT_FLOAT_EQ(cell, std::numeric_limits<float>::max());
@@ -45,7 +43,6 @@ TEST(FastSweepTest, simple3x3)
   };
 
   std::vector<float> solution = solver.solveEikonal(gammas, costs);
-  EXPECT_NO_THROW();
   ASSERT_EQ(solution.size(), static_cast<size_t>(rows * cols));
   float in_between = (2+sqrt(2.0f))/2.0f;
   std::vector<float> expected = {
@@ -72,7 +69,6 @@ TEST(FastSweepTest, twoGamma3x3)
   };
 
   std::vector<float> solution = solver.solveEikonal(gammas, costs);
-  EXPECT_NO_THROW();
   ASSERT_EQ(solution.size(), static_cast<size_t>(rows * cols));
   float in_between = (2+sqrt(2.0f))/2.0f;
   std::vector<float> expected = {
@@ -99,7 +95,6 @@ TEST(FastSweepTest, simple11x11)
   };
 
   std::vector<float> solution = solver.solveEikonal(gammas, costs);
-  EXPECT_NO_THROW();
   ASSERT_EQ(solution.size(), static_cast<size_t>(rows * cols));
   // Symmetry
   for (int i = 0; i < 5; i++) {
@@ -129,7 +124,6 @@ TEST(FastSweepTest, resolutionSimple3x3)
   };
 
   std::vector<float> solution = solver.solveEikonal(gammas, costs);
-  EXPECT_NO_THROW();
   ASSERT_EQ(solution.size(), static_cast<size_t>(rows * cols));
   float in_between = (1+sqrt(0.5f))/2.0f;
   std::vector<float> expected = {

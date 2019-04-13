@@ -25,10 +25,13 @@ public:
  * waypoints from path_start_idx to path_end_idx
  * @param path path to calculate signedDistanceField for.
  * @param options options for creating the signedDistanceField
+ * @param traversal_costs the traversal costs used (ie. obstacles)
+ * @param solver the solver to be used to get the SignedDistanceField
  * @return the created signedDistanceField
  */
-cv::Mat getSignedDistanceField(const nav_msgs::Path& path, int path_start, int path_end,
-                               SignedDistanceFieldOptions options, cv::Mat traversal_costs);
+std::unique_ptr<cv::Mat> getSignedDistanceField(const nav_msgs::Path& path, int path_start, int path_end,
+                               const SignedDistanceFieldOptions& options, const cv::Mat& traversal_costs,
+                               fast_sweep::FastSweep& solver);
 
 /**
  * Returns a vector of Nodes between start (inclusive) and end (exclusive) using Bressenham's line algorithm,
@@ -62,26 +65,33 @@ template <class T>
 std::vector<T> toVector(const cv::Mat& mat);
 
 template <class T>
-cv::Mat toMat(const std::vector<T>& vec, int rows);
+std::unique_ptr<cv::Mat> toMat(const std::vector<T>& vec, int rows);
 }  // namespace signed_distance_field
 
 template <class T>
 std::vector<T> signed_distance_field::toVector(const cv::Mat& mat)
 {
   std::vector<T> vec;
-  if (mat.isContinuous()) {
+  if (mat.isContinuous())
+  {
     vec.assign((T*)mat.datastart, (T*)mat.dataend);
-  } else {
-    for (int i = 0; i < mat.rows; ++i) {
-      vec.insert(vec.end(), mat.ptr<T>(i), mat.ptr<T>(i)+mat.cols);
+  }
+  else
+  {
+    for (int i = 0; i < mat.rows; ++i)
+    {
+      vec.insert(vec.end(), mat.ptr<T>(i), mat.ptr<T>(i) + mat.cols);
     }
   }
   return vec;
 }
 
 template <class T>
-cv::Mat signed_distance_field::toMat(const std::vector<T>& vec, int rows) {
-  return cv::Mat{vec}.reshape(0, rows);
+std::unique_ptr<cv::Mat> signed_distance_field::toMat(const std::vector<T>& vec, int rows)
+{
+  std::unique_ptr<cv::Mat> mat = std::make_unique<cv::Mat>(vec, true);
+  *mat = mat->reshape(0, rows);
+  return mat;
 }
 
 #endif  // SRC_TRAJECTORY_UTILS_H
