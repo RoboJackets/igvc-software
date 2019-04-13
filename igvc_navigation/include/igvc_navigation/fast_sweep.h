@@ -51,7 +51,7 @@ struct SweepIterator
   explicit SweepIterator(Sweep sweep);
 
 public:
-  SweepIterator();
+  explicit SweepIterator();
 
   // Forward iterator requirements
   const Node& operator*() const;
@@ -96,18 +96,7 @@ private:
   std::vector<float> grid_;
   std::vector<float> costs_;
 };
+std::ostream& operator<<(std::ostream& os, const Node& node);
+std::ostream& operator<<(std::ostream& os, const Sweep& sweep);
+}
 #endif  // SRC_FAST_SWEEP_H
-
-std::ostream& operator<<(std::ostream& os, const Node& node)
-{
-  os << "(" << node.x << ", " << node.y << ")";
-  return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const Sweep& sweep)
-{
-  os << "Start: " << sweep.start_node << ", direction: (" << sweep.dx << ", " << sweep.dy
-     << "), iterations: " << sweep.iterations;
-  return os;
-}
-}

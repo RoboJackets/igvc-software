@@ -4,7 +4,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 #include "ros_trajectory_controller.h"
-#include "trajectory_utils.h"
+#include <igvc_navigation/signed_distance_field.h>
 
 ROSTrajectoryController::ROSTrajectoryController()
 {
@@ -27,24 +27,24 @@ ROSTrajectoryController::ROSTrajectoryController()
 
 void ROSTrajectoryController::testSignedDistanceField()
 {
-  SignedDistanceFieldOptions options = {
-    .grid_rows = 10, .grid_cols = 10, .cv_type = CV_32F, .grid_x = 5, .grid_y = 5, .max_iterations = 50000
-  };
-
-  nav_msgs::Path path;
-  geometry_msgs::PoseStamped pose;
-  pose.pose.position.x = 0;
-  pose.pose.position.y = 0;
-  path.poses.emplace_back(pose);
-  pose.pose.position.x = 5;
-  pose.pose.position.y = 5;
-  path.poses.emplace_back(pose);
-
-  cv::Mat traversal_costs(options.grid_rows, options.grid_cols, options.cv_type, cvScalar(0.001f));
-  ROS_INFO_STREAM("traversal: \n" << traversal_costs);
-  cv::Mat distanceField = trajectory_utils::getSignedDistanceField(path, 0, 1, options, traversal_costs, 1.0);
-
-  publishAsPCL(trajectory_pub_, distanceField, 1.0, "/odom", pcl_conversions::toPCL(ros::Time::now()));
+//  SignedDistanceFieldOptions options = {
+//    .grid_rows = 10, .grid_cols = 10, .cv_type = CV_32F, .grid_x = 5, .grid_y = 5, .max_iterations = 50000
+//  };
+//
+//  nav_msgs::Path path;
+//  geometry_msgs::PoseStamped pose;
+//  pose.pose.position.x = 0;
+//  pose.pose.position.y = 0;
+//  path.poses.emplace_back(pose);
+//  pose.pose.position.x = 5;
+//  pose.pose.position.y = 5;
+//  path.poses.emplace_back(pose);
+//
+//  cv::Mat traversal_costs(options.grid_rows, options.grid_cols, options.cv_type, cvScalar(0.001f));
+//  ROS_INFO_STREAM("traversal: \n" << traversal_costs);
+//  cv::Mat distanceField = signed_distance_field::getSignedDistanceField(path, 0, 1, options, traversal_costs, 1.0);
+//
+//  publishAsPCL(trajectory_pub_, distanceField, 1.0, "/odom", pcl_conversions::toPCL(ros::Time::now()));
 }
 
 void ROSTrajectoryController::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, double resolution, const std::string &frame_id,

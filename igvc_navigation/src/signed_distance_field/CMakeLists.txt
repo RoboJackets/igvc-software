@@ -1,0 +1,3 @@
+add_library(SignedDistanceField signed_distance_field.cpp)
+add_dependencies(SignedDistanceField igvc_msgs_gencpp FastSweep)
+target_link_libraries(SignedDistanceField ${catkin_LIBRARIES} FastSweep)

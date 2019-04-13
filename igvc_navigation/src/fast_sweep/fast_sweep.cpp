@@ -259,7 +259,7 @@ SweepIterator Sweep::begin()
 
 SweepIterator Sweep::end()
 {
-  return {};
+  return SweepIterator{};
 }
 
 SweepIterator::SweepIterator(Sweep sweep) : sweep_{ sweep }
@@ -303,4 +303,17 @@ bool SweepIterator::operator==(const SweepIterator& rhs) const
 bool SweepIterator::operator!=(const SweepIterator& rhs) const
 {
   return sweep_.iterations != rhs.sweep_.iterations;
+}
+
+std::ostream& fast_sweep::operator<<(std::ostream& os, const Sweep& sweep)
+{
+  os << "Start: " << sweep.start_node << ", direction: (" << sweep.dx << ", " << sweep.dy
+     << "), iterations: " << sweep.iterations;
+  return os;
+}
+
+std::ostream& fast_sweep::operator<<(std::ostream& os, const Node& node)
+{
+  os << "(" << node.x << ", " << node.y << ")";
+  return os;
 }

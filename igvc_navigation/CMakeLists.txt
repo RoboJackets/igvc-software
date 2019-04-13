@@ -221,4 +221,6 @@ add_subdirectory(src/path_follower)
 
 add_subdirectory(src/d_lite_planner)
 add_subdirectory(src/field_d_planner)
+
 add_subdirectory(src/fast_sweep)
+add_subdirectory(src/signed_distance_field)
