@@ -24,13 +24,13 @@ ROSTrajectoryController::ROSTrajectoryController()
 
   trajectory_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZI>>(topic_trajectory, 1);
 
-  //  ros::Rate rate(30);
-  //  while (ros::ok())
-  //  {
-  //    testSignedDistanceField();
-  //    rate.sleep();
-  //  }
   TrajectoryController trajectory_controller;
+  ros::Rate rate(0.2);
+  while (ros::ok())
+  {
+    std::unique_ptr<cv::Mat> field = trajectory_controller.test();
+    publishAsPCL(trajectory_pub_, *field, 1.0, "/odom", pcl_conversions::toPCL(ros::Time::now()));
+  }
 }
 
 void ROSTrajectoryController::testSignedDistanceField()

@@ -13,8 +13,11 @@ float SignedDistanceFieldCost::getCost(const RobotState& state, const Controls& 
   float cost = 0.0f;
 
   cost += coeffs_.acceleration * (std::abs(controls[0]) + std::abs(controls[1]));
-  cost += coeffs_.velocity * state.velocity();
-  cost += coeffs_.path * getSDFValue(state);
+  cost += coeffs_.velocity * (1/state.velocity());
+  cost += coeffs_.path * getSDFValue(state) * getSDFValue(state);
+  if (state.velocity() < 0) {
+    cost = std::numeric_limits<float>::max();
+  }
   return cost;
 }
 

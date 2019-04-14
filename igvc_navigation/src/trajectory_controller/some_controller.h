@@ -30,6 +30,7 @@ struct Particle
 public:
   void initialize(const typename Model::StateType& initial_state);
   typename Model::StateType getState() const;
+  float getWeight() const;
   template <class M>
   friend std::ostream& operator<<(std::ostream& out, const Particle<M>& particle);
 };
@@ -51,10 +52,15 @@ typename Model::StateType Particle<Model>::getState() const
 }
 
 template <class Model>
+float Particle<Model>::getWeight() const {
+  return 1 / cum_cost_.back();
+}
+
+template <class Model>
 struct OptimizationResult
 {
     std::vector<Particle<Model>> particles;
-    std::vector<typename Model::Controls> optimal_controls;
+    Particle<Model> best_particle;
 };
 
 template <class Model, class CostFunction>
@@ -70,6 +76,7 @@ public:
   OptimizationResult<Model> optimize(const State& starting_state);
 
 private:
+  void resampleParticles();
   void initializeParticles(const State& starting_state);
   Controls sampleControls() const;
 
@@ -126,22 +133,15 @@ OptimizationResult<Model> SomeController<Model, CostFunction>::optimize(const St
       particle.cum_cost_.emplace_back(particle.cum_cost_.back() + cost);
       particle.controls_vec_.emplace_back(controls);
       particle.state_vec_.emplace_back(new_state);
-
-      std::cout << "i: " << i << ", controls: (" << controls[0] << ", " << controls[1] << "), start: " << state
-                << ", end: " << new_state << ", cost: " << cost << std::endl;
     }
-  }
-
-  for (const Particle<Model>& particle : particles_)
-  {
-    std::cout << particle << std::endl;
+    resampleParticles();
   }
 
   Particle<Model>& optimal_particle =
       *std::min_element(particles_.begin(), particles_.end(), [](const Particle<Model>& p1, const Particle<Model>& p2) {
         return p1.cum_cost_.back() < p2.cum_cost_.back();
       });
-  return {particles_, optimal_particle.controls_vec_};
+  return {particles_, optimal_particle};
 }
 
 template <class Model, class CostFunction>
@@ -163,6 +163,33 @@ void SomeController<Model, CostFunction>::initializeParticles(const State& start
   {
     particle.initialize(starting_state);
   }
+}
+
+template <class Model, class CostFunction>
+void SomeController<Model, CostFunction>::resampleParticles()
+{
+  std::vector<float> cum_weights;
+  cum_weights.reserve(static_cast<unsigned long>(num_samples_));
+  cum_weights.emplace_back(particles_.front().getWeight());
+  for (int i = 1; i < num_samples_; i++) {
+    cum_weights.emplace_back(cum_weights.back() + particles_[i].getWeight());
+  }
+  float pointer_width = cum_weights.back() / num_samples_;
+  std::uniform_real_distribution<float> unif(0, pointer_width);
+  float starting_pointer = unif(mt_);
+
+  std::vector<Particle<Model>> sampled_particles;
+  sampled_particles.reserve(static_cast<unsigned long>(num_samples_));
+  for (int i = 0; i < num_samples_; i++)
+  {
+    int index = 0;
+    while (cum_weights[index] < starting_pointer + i * pointer_width)
+    {
+      index++;
+    }
+    sampled_particles.emplace_back(particles_[index]);
+  }
+  particles_ = std::move(sampled_particles);
 }
 
 template <class Model>

@@ -1,5 +1,6 @@
 <launch>
-    <node name="trajectory_controller" pkg="igvc_navigation" type="trajectory_controller" output="screen">
+    <node name="trajectory_controller" pkg="igvc_navigation" type="trajectory_controller" output="screen" launch-prefix="
+gdb -ex run --args">
         <param name="topics/trajectory" value="trajectory"/>
     </node>
 </launch>
