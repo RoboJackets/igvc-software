@@ -58,6 +58,11 @@ std::vector<typename Model::Controls> SomeController<Model, CostFunction>::optim
   {
     std::cout << i << std::endl;
   }
+  std::array<Bound, Model::control_dims> bounds = model_->getBounds();
+  for (const Bound& bound : bounds)
+  {
+    std::cout << "lower: " << bound.lower << ", upper: " << bound.upper << std::endl;
+  }
   return std::vector<Controls>();
 }
 

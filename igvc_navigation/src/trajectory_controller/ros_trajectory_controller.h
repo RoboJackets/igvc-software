@@ -3,6 +3,8 @@
 #include <ros/ros.h>
 #include <opencv2/core/mat.hpp>
 
+namespace ros_trajectory_controller
+{
 class ROSTrajectoryController
 {
 public:
@@ -15,5 +17,6 @@ private:
 
   ros::Publisher trajectory_pub_;
 };
+}  // namespace ros_trajectory_controller
 
 #endif  // SRC_ROS_TRAJECTORY_CONTROLLER_H

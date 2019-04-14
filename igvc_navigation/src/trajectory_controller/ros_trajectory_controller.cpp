@@ -1,13 +1,17 @@
 #include <igvc_utils/NodeUtils.hpp>
 
+#include <igvc_navigation/signed_distance_field.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
 #include "ros_trajectory_controller.h"
-#include <igvc_navigation/signed_distance_field.h>
+#include "trajectory_controller.h"
 
+namespace ros_trajectory_controller
+{
 using signed_distance_field::SignedDistanceField;
 using signed_distance_field::SignedDistanceFieldOptions;
+using trajectory_controller::TrajectoryController;
 
 ROSTrajectoryController::ROSTrajectoryController()
 {
@@ -20,12 +24,13 @@ ROSTrajectoryController::ROSTrajectoryController()
 
   trajectory_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZI>>(topic_trajectory, 1);
 
-  ros::Rate rate(30);
-  while (ros::ok())
-  {
-    testSignedDistanceField();
-    rate.sleep();
-  }
+  //  ros::Rate rate(30);
+  //  while (ros::ok())
+  //  {
+  //    testSignedDistanceField();
+  //    rate.sleep();
+  //  }
+  TrajectoryController trajectory_controller;
 }
 
 void ROSTrajectoryController::testSignedDistanceField()
@@ -36,8 +41,8 @@ void ROSTrajectoryController::testSignedDistanceField()
   float y = 50.0;
   float resolution = 1.0;
 
-  SignedDistanceFieldOptions options{rows, cols, x, y, resolution};
-  SignedDistanceField field{options};
+  SignedDistanceFieldOptions options{ rows, cols, x, y, resolution };
+  SignedDistanceField field{ options };
 
   nav_msgs::Path path;
   geometry_msgs::PoseStamped pose;
@@ -56,12 +61,12 @@ void ROSTrajectoryController::testSignedDistanceField()
 
   std::unique_ptr<cv::Mat> solution = field.toMat();
 
-//  solver.printGrid();
+  //  solver.printGrid();
   publishAsPCL(trajectory_pub_, *solution, 1.0, "/odom", pcl_conversions::toPCL(ros::Time::now()));
 }
 
-void ROSTrajectoryController::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, double resolution, const std::string &frame_id,
-                                           uint64_t stamp)
+void ROSTrajectoryController::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, double resolution,
+                                           const std::string &frame_id, uint64_t stamp)
 {
   pcl::PointCloud<pcl::PointXYZI>::Ptr pointcloud = boost::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
   for (int i = 0; i < mat.cols; i++)
@@ -79,3 +84,4 @@ void ROSTrajectoryController::publishAsPCL(const ros::Publisher &pub, const cv::
   pointcloud->header.stamp = stamp;
   pub.publish(pointcloud);
 }
+}  // namespace ros_trajectory_controller
