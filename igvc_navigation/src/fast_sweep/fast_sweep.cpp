@@ -20,7 +20,6 @@ const std::vector<float> FastSweep::solveEikonal(const std::vector<Node>& gamma_
 
   // 1.2: Set gamma points to 0
   setupGamma(gamma_points);
-//  printGrid();
 
   // 1.3: Setup costs
   costs_ = costs;

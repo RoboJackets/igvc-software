@@ -74,9 +74,9 @@ inline fast_sweep::Node SignedDistanceField::toNode(T x, T y) const
 {
   int half_width = (options_.grid_cols - 1) / 2;
   int half_height = (options_.grid_rows - 1) / 2;
-  int node_x = static_cast<int>(std::round((x - options_.grid_x + half_width) / options_.grid_resolution));
-  int node_y = static_cast<int>(std::round(((options_.grid_y - y) + half_height) /
-                                           options_.grid_resolution));  // Flip, since Node has y increasing downwards
+  int node_x = static_cast<int>(std::round((x - options_.grid_x) / options_.grid_resolution + half_width));
+  int node_y = static_cast<int>(std::round((options_.grid_y - y) /
+                                           options_.grid_resolution + half_height));  // Flip, since Node has y increasing downwards
   return { node_x, node_y };
 }
 

@@ -135,6 +135,28 @@ TEST_F(SignedDistanceFieldTest, rectangle)
   }
 }
 
+TEST_F(SignedDistanceFieldTest, simpleResolution)
+{
+  SetUp(11, 11, 0.0, 0.0, 0.1);
+
+  nav_msgs::Path path;
+  geometry_msgs::PoseStamped pose;
+  pose.pose.position.x = -0.2;
+  pose.pose.position.y = 0.3;
+  path.poses.emplace_back(pose);
+
+  cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
+
+  signed_distance_field->calculate(path, 0, 0, traversal_costs);
+  std::unique_ptr<cv::Mat> solution = signed_distance_field->toMat();
+  ASSERT_NE(signed_distance_field.get(), nullptr);
+  ASSERT_EQ(solution->cols, cols_);
+  ASSERT_EQ(solution->rows, rows_);
+
+  // 0 is placed at the correct position
+  EXPECT_FLOAT_EQ(solution->at<float>(2, 3), 0);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
