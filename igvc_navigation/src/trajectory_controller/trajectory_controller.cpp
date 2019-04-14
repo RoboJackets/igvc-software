@@ -26,14 +26,26 @@ TrajectoryController::TrajectoryController() {
   float resolution = 1.0f;
   SignedDistanceFieldOptions sdf_options{rows, cols, x, y, resolution};
   std::shared_ptr<SignedDistanceField> signed_distance_field = std::make_shared<SignedDistanceField>(sdf_options);
-  SDFCostCoefficients options {1.0, 1.0, 1.0};
+  SDFCostCoefficients options {1.0, -1.0, 5.0};
 
   std::shared_ptr<Cost> cost_function = std::make_shared<Cost>(options, signed_distance_field);
   float timestep = 1.0f;
   float horizon = 10.0f;
-  int samples = 10;
+  int samples = 2;
   SomeController<Model, Cost> controller(model, cost_function, timestep, horizon, samples);
   RobotState state{};
-  std::vector<Model::Controls> controls = controller.optimize(state);
+
+  nav_msgs::Path path;
+  geometry_msgs::PoseStamped pose;
+  pose.pose.position.x = 0;
+  pose.pose.position.y = 0;
+  path.poses.emplace_back(pose);
+  pose.pose.position.x = 3;
+  pose.pose.position.y = 0;
+  path.poses.emplace_back(pose);
+  cv::Mat traversal_costs(rows, cols, CV_32F, 1.0f);
+  signed_distance_field->calculate(path, 0, 1, traversal_costs);
+
+  OptimizationResult<Model> result = controller.optimize(state);
 }
 }

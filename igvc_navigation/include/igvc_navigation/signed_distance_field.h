@@ -12,8 +12,8 @@ struct SignedDistanceFieldOptions
 {
   int grid_rows;  // in cells, centered
   int grid_cols;  // in cells, centered
-  float grid_x;  // in m
-  float grid_y;  // in m
+  float grid_x;   // in m
+  float grid_y;   // in m
   float grid_resolution;
 
 public:
@@ -74,8 +74,9 @@ inline fast_sweep::Node SignedDistanceField::toNode(T x, T y) const
 {
   int half_width = (options_.grid_cols - 1) / 2;
   int half_height = (options_.grid_rows - 1) / 2;
-  int node_x = x - options_.grid_x + half_width;
-  int node_y = (options_.grid_y - y) + half_height;  // Flip, since Node has y increasing downwards
+  int node_x = static_cast<int>(std::round((x - options_.grid_x + half_width) / options_.grid_resolution));
+  int node_y = static_cast<int>(std::round(((options_.grid_y - y) + half_height) /
+                                           options_.grid_resolution));  // Flip, since Node has y increasing downwards
   return { node_x, node_y };
 }
 

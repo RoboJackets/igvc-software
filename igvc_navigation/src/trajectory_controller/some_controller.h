@@ -25,11 +25,13 @@ struct Particle
 {
   std::vector<typename Model::Controls> controls_vec_{};
   std::vector<typename Model::StateType> state_vec_{};
-  float cum_cost_{ 0.0f };
+  std::vector<float> cum_cost_{ 0.0f };
 
 public:
   void initialize(const typename Model::StateType& initial_state);
   typename Model::StateType getState() const;
+  template <class M>
+  friend std::ostream& operator<<(std::ostream& out, const Particle<M>& particle);
 };
 
 template <class Model>
@@ -37,8 +39,9 @@ void Particle<Model>::initialize(const typename Model::StateType& initial_state)
 {
   controls_vec_.clear();
   state_vec_.clear();
-  cum_cost_ = 0;
+  cum_cost_.clear();
   state_vec_.emplace_back(initial_state);
+  cum_cost_.emplace_back(0.0f);
 }
 
 template <class Model>
@@ -46,6 +49,13 @@ typename Model::StateType Particle<Model>::getState() const
 {
   return state_vec_.back();
 }
+
+template <class Model>
+struct OptimizationResult
+{
+    std::vector<Particle<Model>> particles;
+    std::vector<typename Model::Controls> optimal_controls;
+};
 
 template <class Model, class CostFunction>
 class SomeController
@@ -57,7 +67,7 @@ public:
 
   SomeController(std::shared_ptr<Model> model, std::shared_ptr<CostFunction> cost_function, float timestep,
                  float horizon, int num_samples);
-  std::vector<Controls> optimize(const State& starting_state);
+  OptimizationResult<Model> optimize(const State& starting_state);
 
 private:
   void initializeParticles(const State& starting_state);
@@ -100,7 +110,7 @@ SomeController<Model, CostFunction>::SomeController(std::shared_ptr<Model> model
 }
 
 template <class Model, class CostFunction>
-std::vector<typename Model::Controls> SomeController<Model, CostFunction>::optimize(const State& starting_state)
+OptimizationResult<Model> SomeController<Model, CostFunction>::optimize(const State& starting_state)
 {
   initializeParticles(starting_state);
 
@@ -113,17 +123,25 @@ std::vector<typename Model::Controls> SomeController<Model, CostFunction>::optim
       State new_state = model_->doPropogateState(state, controls, timestep_);
       float cost = cost_function_->cost(new_state, controls);
 
-      particle.cum_cost_ += cost;
+      particle.cum_cost_.emplace_back(particle.cum_cost_.back() + cost);
       particle.controls_vec_.emplace_back(controls);
       particle.state_vec_.emplace_back(new_state);
+
+      std::cout << "i: " << i << ", controls: (" << controls[0] << ", " << controls[1] << "), start: " << state
+                << ", end: " << new_state << ", cost: " << cost << std::endl;
     }
+  }
+
+  for (const Particle<Model>& particle : particles_)
+  {
+    std::cout << particle << std::endl;
   }
 
   Particle<Model>& optimal_particle =
       *std::min_element(particles_.begin(), particles_.end(), [](const Particle<Model>& p1, const Particle<Model>& p2) {
-        return p1.cum_cost_ < p2.cum_cost_;
+        return p1.cum_cost_.back() < p2.cum_cost_.back();
       });
-  return optimal_particle.controls_vec_;
+  return {particles_, optimal_particle.controls_vec_};
 }
 
 template <class Model, class CostFunction>
@@ -145,6 +163,22 @@ void SomeController<Model, CostFunction>::initializeParticles(const State& start
   {
     particle.initialize(starting_state);
   }
+}
+
+template <class Model>
+std::ostream& operator<<(std::ostream& out, const Particle<Model>& particle)
+{
+  out << std::setprecision(3) << "State" << "\t\t" << "Control" << "\t\t" << "Cost" << std::endl;
+  for (int i = 0; i < particle.controls_vec_.size(); i++)
+  {
+    out << std::setprecision(3) << particle.state_vec_[i + 1]
+        << "\t\t" << "[";
+    std::copy(particle.controls_vec_[i].begin(), particle.controls_vec_[i].end(),
+              std::ostream_iterator<float>(out, ", "));
+    out << "]" << "\t\t" << particle.cum_cost_[i + 1] << std::endl;
+  }
+  out << std::endl;
+  return out;
 }
 
 }  // namespace some_controller

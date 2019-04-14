@@ -162,6 +162,12 @@ public:
   double distTo(T other) const;
 };
 
+inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
+{
+  out << "(xy: (" << state.x() << ", " << state.y() << "), yaw: " << state.yaw() << ", v: (" << state.wheel_velocity_.left << ", " << state.wheel_velocity_.right << ") )";
+  return out;
+}
+
 template <>
 inline double RobotState::distTo(RobotState other) const
 {

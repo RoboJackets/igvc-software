@@ -14,8 +14,10 @@ RobotState differential_drive_model::DifferentialDriveModel::propogateState(Robo
   state.wheel_velocity_.left += controls[0] * dt;
   state.wheel_velocity_.right += controls[1] * dt;
 
+  std::cout << "  {" << state.wheel_velocity_.left << ", " << state.wheel_velocity_.right << "}  ";
+
   float left = state.wheel_velocity_.left;
-  float right = state.wheel_velocity_.left;
+  float right = state.wheel_velocity_.right;
 
   float k = (right - left) / axle_length_;
   float v = (right + left) / 2;
@@ -44,6 +46,7 @@ RobotState differential_drive_model::DifferentialDriveModel::propogateState(Robo
   }
   else
   {
+    std::cout << "LINEw("<<w<<")";
     state.x = state.x + cos(state.yaw) * v * dt;
     state.y = state.y + cos(state.yaw) * v * dt;
   }
