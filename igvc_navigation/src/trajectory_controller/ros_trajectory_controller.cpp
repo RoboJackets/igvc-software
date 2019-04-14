@@ -6,6 +6,9 @@
 #include "ros_trajectory_controller.h"
 #include <igvc_navigation/signed_distance_field.h>
 
+using signed_distance_field::SignedDistanceField;
+using signed_distance_field::SignedDistanceFieldOptions;
+
 ROSTrajectoryController::ROSTrajectoryController()
 {
   ros::NodeHandle nh;
@@ -29,13 +32,12 @@ void ROSTrajectoryController::testSignedDistanceField()
 {
   int rows = 101;
   int cols = 101;
-  double x = 50.0;
-  double y = 50.0;
+  float x = 50.0;
+  float y = 50.0;
   float resolution = 1.0;
 
-  signed_distance_field::SignedDistanceFieldOptions options{rows, cols, x, y, resolution};
-
-  fast_sweep::FastSweep solver{rows, cols, resolution};
+  SignedDistanceFieldOptions options{rows, cols, x, y, resolution};
+  SignedDistanceField field{options};
 
   nav_msgs::Path path;
   geometry_msgs::PoseStamped pose;
@@ -50,8 +52,9 @@ void ROSTrajectoryController::testSignedDistanceField()
   path.poses.emplace_back(pose);
 
   cv::Mat traversal_costs(options.grid_rows, options.grid_cols, CV_32F, 1.0f);
+  field.calculate(path, 0, 2, traversal_costs);
 
-  std::unique_ptr<cv::Mat> solution = signed_distance_field::getSignedDistanceField(path, 0, 1, options, traversal_costs, solver);
+  std::unique_ptr<cv::Mat> solution = field.toMat();
 
 //  solver.printGrid();
   publishAsPCL(trajectory_pub_, *solution, 1.0, "/odom", pcl_conversions::toPCL(ros::Time::now()));

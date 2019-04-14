@@ -12,64 +12,74 @@ struct SignedDistanceFieldOptions
 {
   int grid_rows;  // in cells, centered
   int grid_cols;  // in cells, centered
-  double grid_x;  // in m
-  double grid_y;  // in m
-  double grid_resolution;
+  float grid_x;  // in m
+  float grid_y;  // in m
+  float grid_resolution;
 
 public:
-  SignedDistanceFieldOptions(int rows, int cols, double x, double y, double resolution);
+  SignedDistanceFieldOptions(int rows, int cols, float x, float y, float resolution);
 };
 
-/*
- * Calculates the signedDistanceField for the path passed in, creating a grid of size grid_width, grid_height for
- * waypoints from path_start_idx to path_end_idx
- * @param path path to calculate signedDistanceField for.
- * @param options options for creating the signedDistanceField
- * @param traversal_costs the traversal costs used (ie. obstacles)
- * @param solver the solver to be used to get the SignedDistanceField
- * @return the created signedDistanceField
- */
-std::unique_ptr<cv::Mat> getSignedDistanceField(const nav_msgs::Path& path, int path_start, int path_end,
-                               const SignedDistanceFieldOptions& options, const cv::Mat& traversal_costs,
-                               fast_sweep::FastSweep& solver);
-
-/**
- * Returns a vector of Nodes between start (inclusive) and end (exclusive) using Bressenham's line algorithm,
- * with weights initialized to 0.
- * @param start start node
- * @param end end node
- * @return vector of nodes between start and end exclusive.
- */
-std::vector<fast_sweep::Node> getNodesBetweenWaypoints(const fast_sweep::Node& start, const fast_sweep::Node& end);
-
-/**
- * Converts from coordinates in odom to a Node given grid start_x, start_y and resolution, passed through the options.
- * In node coordinates, (0, 0) correponds to the top left, with rows and columns growing to the bottom right.
- * @tparam T
- * @param x x coord in odom
- * @param y y coord in odom
- * @param options options used for signedDistanceField
- * @return Node representing the same coordinates
- */
-template <class T>
-inline fast_sweep::Node toNode(T x, T y, SignedDistanceFieldOptions options)
+class SignedDistanceField
 {
-  int half_width = (options.grid_cols - 1) / 2;
-  int half_height = (options.grid_rows - 1) / 2;
-  int node_x = x - options.grid_x + half_width;
-  int node_y = (options.grid_y - y) + half_height;  // Flip, since Node has y increasing downwards
+public:
+  SignedDistanceField(const SignedDistanceFieldOptions& options);
+  std::optional<float> getValue(float x, float y);
+  /*
+   * Calculates the signedDistanceField for the path passed in, creating a grid of size grid_width, grid_height for
+   * waypoints from path_start_idx to path_end_idx
+   * @param path path to calculate signedDistanceField for.
+   * @param options options for creating the signedDistanceField
+   * @param traversal_costs the traversal costs used (ie. obstacles)
+   * @param solver the solver to be used to get the SignedDistanceField
+   * @return the created signedDistanceField
+   */
+  void calculate(const nav_msgs::Path& path, size_t path_start, size_t path_end, const cv::Mat& traversal_costs);
+
+  /**
+   * Returns a vector of Nodes between start (inclusive) and end (exclusive) using Bressenham's line algorithm,
+   * with weights initialized to 0.
+   * @param start start node
+   * @param end end node
+   * @return vector of nodes between start and end exclusive.
+   */
+  std::vector<fast_sweep::Node> getNodesBetweenWaypoints(const fast_sweep::Node& start, const fast_sweep::Node& end);
+
+  /**
+   * Converts from coordinates in odom to a Node given grid start_x, start_y and resolution, passed through the options.
+   * In node coordinates, (0, 0) correponds to the top left, with rows and columns growing to the bottom right.
+   * @tparam T
+   * @param x x coord in odom
+   * @param y y coord in odom
+   * @param options options used for signedDistanceField
+   * @return Node representing the same coordinates
+   */
+  template <class T>
+  inline fast_sweep::Node toNode(T x, T y) const;
+
+  template <class T>
+  std::vector<T> toVector(const cv::Mat& mat);
+
+  std::unique_ptr<cv::Mat> toMat() const;
+
+private:
+  std::vector<float> field_;
+  SignedDistanceFieldOptions options_;
+  fast_sweep::FastSweep solver_;
+};
+
+template <class T>
+inline fast_sweep::Node SignedDistanceField::toNode(T x, T y) const
+{
+  int half_width = (options_.grid_cols - 1) / 2;
+  int half_height = (options_.grid_rows - 1) / 2;
+  int node_x = x - options_.grid_x + half_width;
+  int node_y = (options_.grid_y - y) + half_height;  // Flip, since Node has y increasing downwards
   return { node_x, node_y };
 }
 
 template <class T>
-std::vector<T> toVector(const cv::Mat& mat);
-
-template <class T>
-std::unique_ptr<cv::Mat> toMat(const std::vector<T>& vec, int rows);
-}  // namespace signed_distance_field
-
-template <class T>
-std::vector<T> signed_distance_field::toVector(const cv::Mat& mat)
+std::vector<T> SignedDistanceField::toVector(const cv::Mat& mat)
 {
   std::vector<T> vec;
   if (mat.isContinuous())
@@ -86,12 +96,6 @@ std::vector<T> signed_distance_field::toVector(const cv::Mat& mat)
   return vec;
 }
 
-template <class T>
-std::unique_ptr<cv::Mat> signed_distance_field::toMat(const std::vector<T>& vec, int rows)
-{
-  std::unique_ptr<cv::Mat> mat = std::make_unique<cv::Mat>(vec, true);
-  *mat = mat->reshape(0, rows);
-  return mat;
-}
+}  // namespace signed_distance_field
 
 #endif  // SRC_TRAJECTORY_UTILS_H

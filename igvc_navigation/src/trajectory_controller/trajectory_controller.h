@@ -11,7 +11,6 @@ class TrajectoryController {
 public:
   TrajectoryController();
 private:
-  Derived& derived();
 };
 
 #endif //SRC_TRAJECTORY_CONTROLLER_H

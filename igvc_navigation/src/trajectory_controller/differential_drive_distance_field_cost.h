@@ -27,6 +27,8 @@ public:
   explicit SignedDistanceFieldCost(const SDFCoefficients& coeffs);
   float getCost(const RobotState& state, const Controls& controls);
 private:
+  float getSDFValue(const RobotState& state);
+
   SDFCoefficients coeffs_;
 };
 }  // namespace differential_drive_signed_distance_field_cost

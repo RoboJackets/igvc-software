@@ -5,18 +5,19 @@
 class SignedDistanceFieldTest : public ::testing::Test {
 protected:
   void SetUp(int rows, int cols, double start_x, double start_y, double resolution) {
-    solver = std::make_unique<fast_sweep::FastSweep>(rows, cols, resolution);
     options = std::make_unique<signed_distance_field::SignedDistanceFieldOptions>(rows, cols, start_x, start_y, resolution);
+    signed_distance_field = std::make_unique<signed_distance_field::SignedDistanceField>(*options);
 
     rows_ = rows;
     cols_ = cols;
     start_x_ = start_x;
     start_y_ = start_y;
     resolution_ = resolution;
+
   }
 
-  std::unique_ptr<fast_sweep::FastSweep> solver;
   std::unique_ptr<signed_distance_field::SignedDistanceFieldOptions> options;
+  std::unique_ptr<signed_distance_field::SignedDistanceField> signed_distance_field;
   int rows_;
   int cols_;
   double start_x_;
@@ -36,8 +37,9 @@ TEST_F(SignedDistanceFieldTest, simple)
 
   cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
 
-  std::unique_ptr<cv::Mat> solution = signed_distance_field::getSignedDistanceField(path, 0, 0, *options, traversal_costs, *solver);
-  ASSERT_NE(solution.get(), nullptr);
+  signed_distance_field->calculate(path, 0, 0, traversal_costs);
+  std::unique_ptr<cv::Mat> solution = signed_distance_field->toMat();
+  ASSERT_NE(signed_distance_field.get(), nullptr);
   ASSERT_EQ(solution->cols, cols_);
   ASSERT_EQ(solution->rows, rows_);
 
@@ -68,7 +70,8 @@ TEST_F(SignedDistanceFieldTest, line)
 
   cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
 
-  std::unique_ptr<cv::Mat> solution = signed_distance_field::getSignedDistanceField(path, 0, 1, *options, traversal_costs, *solver);
+  signed_distance_field->calculate(path, 0, 1, traversal_costs);
+  std::unique_ptr<cv::Mat> solution = signed_distance_field->toMat();
   ASSERT_NE(solution.get(), nullptr);
   ASSERT_EQ(solution->cols, cols_);
   ASSERT_EQ(solution->rows, rows_);
@@ -114,7 +117,8 @@ TEST_F(SignedDistanceFieldTest, rectangle)
 
   cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
 
-  std::unique_ptr<cv::Mat> solution = signed_distance_field::getSignedDistanceField(path, 0, 1, *options, traversal_costs, *solver);
+  signed_distance_field->calculate(path, 0, 4, traversal_costs);
+  std::unique_ptr<cv::Mat> solution = signed_distance_field->toMat();
   ASSERT_NE(solution.get(), nullptr);
   ASSERT_EQ(solution->cols, cols_);
   ASSERT_EQ(solution->rows, rows_);

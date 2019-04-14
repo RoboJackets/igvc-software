@@ -77,14 +77,14 @@ public:
    */
   const std::vector<float> solveEikonal(const std::vector<Node>& gamma_points, const std::vector<float>& costs);
   void printGrid() const;
-
-private:
-  void resetGrid();
-  void setupGamma(const std::vector<Node>& gamma_points);
   float& getCell(const Node& node);
   const float getCell(const Node& node) const;
   const float getCost(const Node& node) const;
   int getIndex(const Node& node) const;
+
+private:
+  void resetGrid();
+  void setupGamma(const std::vector<Node>& gamma_points);
   float getEikonal(const Node& node) const;
 
   std::vector<Sweep> getSweeps() const;
