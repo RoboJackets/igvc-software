@@ -73,7 +73,7 @@ State Model<State, ControlDims, Derived>::propogateState(State state, const Cont
 template <class State, int ControlDims, class Derived>
 State Model<State, ControlDims, Derived>::doPropogateState(State state, const Controls& controls, float dt)
 {
-  return derived().propogateState();
+  return derived().propogateState(state, controls, dt);
 }
 
 template <class State, int ControlDims, class Derived>

@@ -33,6 +33,7 @@ TrajectoryController::TrajectoryController() {
   float horizon = 10.0f;
   int samples = 10;
   SomeController<Model, Cost> controller(model, cost_function, timestep, horizon, samples);
-  std::vector<Model::Controls> controls = controller.optimize();
+  RobotState state{};
+  std::vector<Model::Controls> controls = controller.optimize(state);
 }
 }

@@ -31,7 +31,7 @@ private:
 template<class State, int ControlDims, class Derived>
 float CostFunction<State, ControlDims, Derived>::cost(const State& state, const Controls& controls)
 {
-  return derived().getCost();
+  return derived().getCost(state, controls);
 }
 
   template<class State, int ControlDims, class Derived>
