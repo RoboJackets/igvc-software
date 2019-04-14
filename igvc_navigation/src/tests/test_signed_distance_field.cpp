@@ -2,13 +2,31 @@
 
 #include <igvc_navigation/signed_distance_field.h>
 
-TEST(SignedDistanceField, simple)
+class SignedDistanceFieldTest : public ::testing::Test {
+protected:
+  void SetUp(int rows, int cols, double start_x, double start_y, double resolution) {
+    solver = std::make_unique<fast_sweep::FastSweep>(rows, cols, resolution);
+    options = std::make_unique<signed_distance_field::SignedDistanceFieldOptions>(rows, cols, start_x, start_y, resolution);
+
+    rows_ = rows;
+    cols_ = cols;
+    start_x_ = start_x;
+    start_y_ = start_y;
+    resolution_ = resolution;
+  }
+
+  std::unique_ptr<fast_sweep::FastSweep> solver;
+  std::unique_ptr<signed_distance_field::SignedDistanceFieldOptions> options;
+  int rows_;
+  int cols_;
+  double start_x_;
+  double start_y_;
+  double resolution_;
+};
+
+TEST_F(SignedDistanceFieldTest, simple)
 {
-  int rows = 3;
-  int cols = 3;
-  double start_x = 0;
-  double start_y = 0;
-  double resolution = 1.0;
+  SetUp(3, 3, 0.0, 0.0, 1.0);
 
   nav_msgs::Path path;
   geometry_msgs::PoseStamped pose;
@@ -16,16 +34,12 @@ TEST(SignedDistanceField, simple)
   pose.pose.position.y = 0;
   path.poses.emplace_back(pose);
 
-  signed_distance_field::SignedDistanceFieldOptions options{ rows, cols, start_x, start_y, resolution };
+  cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
 
-  cv::Mat traversal_costs(rows, cols, CV_32F, 1.0f);
-
-  fast_sweep::FastSweep solver(rows, cols, resolution);
-
-  std::unique_ptr<cv::Mat> solution = signed_distance_field::getSignedDistanceField(path, 0, 0, options, traversal_costs, solver);
+  std::unique_ptr<cv::Mat> solution = signed_distance_field::getSignedDistanceField(path, 0, 0, *options, traversal_costs, *solver);
   ASSERT_NE(solution.get(), nullptr);
-  ASSERT_EQ(solution->cols, cols);
-  ASSERT_EQ(solution->rows, rows);
+  ASSERT_EQ(solution->cols, cols_);
+  ASSERT_EQ(solution->rows, rows_);
 
 
   float in_between = (2+sqrt(2.0f))/2.0f;
@@ -36,6 +50,84 @@ TEST(SignedDistanceField, simple)
   };
   for (int i = 0; i < expected.size(); i++) {
     EXPECT_FLOAT_EQ(expected[i], solution->at<float>(i));
+  }
+}
+
+TEST_F(SignedDistanceFieldTest, line)
+{
+  SetUp(5, 5, 0.0, 0.0, 1.0);
+
+  nav_msgs::Path path;
+  geometry_msgs::PoseStamped pose;
+  pose.pose.position.x = 0;
+  pose.pose.position.y = 0;
+  path.poses.emplace_back(pose);
+  pose.pose.position.x = 2;
+  pose.pose.position.y = 2;
+  path.poses.emplace_back(pose);
+
+  cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
+
+  std::unique_ptr<cv::Mat> solution = signed_distance_field::getSignedDistanceField(path, 0, 1, *options, traversal_costs, *solver);
+  ASSERT_NE(solution.get(), nullptr);
+  ASSERT_EQ(solution->cols, cols_);
+  ASSERT_EQ(solution->rows, rows_);
+
+  // Check zeros are correct
+  std::vector<std::pair<int, int>> zeros = {
+      {2, 2}, {1, 3}, {0, 4}
+  };
+
+  for (const auto& [r, c] : zeros) {
+    EXPECT_FLOAT_EQ(solution->at<float>(r, c), 0.0);
+  }
+
+  // Check that all numbers are below 10
+  for (int i = 0; i < rows_; i++) {
+    for (int j = 0; j < cols_; j++) {
+      EXPECT_TRUE(solution->at<float>(j, i) < 10.0f);
+    }
+  }
+}
+
+TEST_F(SignedDistanceFieldTest, rectangle)
+{
+  SetUp(5, 5, 0.0, 0.0, 1.0);
+
+  nav_msgs::Path path;
+  geometry_msgs::PoseStamped pose;
+  pose.pose.position.x = -2;
+  pose.pose.position.y = -2;
+  path.poses.emplace_back(pose);
+  pose.pose.position.x = -2;
+  pose.pose.position.y = 2;
+  path.poses.emplace_back(pose);
+  pose.pose.position.x = 2;
+  pose.pose.position.y = 2;
+  path.poses.emplace_back(pose);
+  pose.pose.position.x = 2;
+  pose.pose.position.y = -2;
+  path.poses.emplace_back(pose);
+  pose.pose.position.x = -2;
+  pose.pose.position.y = -2;
+  path.poses.emplace_back(pose);
+
+  cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
+
+  std::unique_ptr<cv::Mat> solution = signed_distance_field::getSignedDistanceField(path, 0, 1, *options, traversal_costs, *solver);
+  ASSERT_NE(solution.get(), nullptr);
+  ASSERT_EQ(solution->cols, cols_);
+  ASSERT_EQ(solution->rows, rows_);
+
+  std::vector<float> expected = {
+      0.0000e+00, 0.0000e+00,  0.0000e+00,  0.0000e+00,  0.0000e+00,
+      0.0000e+00, 7.0711e-01,  9.6593e-01,  7.0711e-01,  0.0000e+00,
+      0.0000e+00, 9.6593e-01,  1.6730e+00,  9.6593e-01,  0.0000e+00,
+      0.0000e+00, 7.0711e-01,  9.6593e-01,  7.0711e-01,  0.0000e+00,
+      0.0000e+00, 0.0000e+00,  0.0000e+00,  0.0000e+00,  0.0000e+00,
+  };
+  for (int i = 0; i < expected.size(); i++) {
+    EXPECT_TRUE(std::fabs(expected[i] - solution->at<float>(i)) < 1e-3);
   }
 }
 

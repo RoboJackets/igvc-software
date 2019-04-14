@@ -76,6 +76,7 @@ public:
    * @param gamma_points vector of Nodes that represent a gamma point
    */
   const std::vector<float> solveEikonal(const std::vector<Node>& gamma_points, const std::vector<float>& costs);
+  void printGrid() const;
 
 private:
   void resetGrid();
@@ -85,7 +86,6 @@ private:
   const float getCost(const Node& node) const;
   int getIndex(const Node& node) const;
   float getEikonal(const Node& node) const;
-  void printGrid() const;
 
   std::vector<Sweep> getSweeps() const;
   void doSweeps(const std::vector<Sweep>& sweeps);

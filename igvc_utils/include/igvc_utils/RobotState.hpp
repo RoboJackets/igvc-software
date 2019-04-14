@@ -6,11 +6,18 @@
 #include <Eigen/Dense>
 #include <igvc_utils/NodeUtils.hpp>
 
+struct WheelVelocity
+{
+  double left;
+  double right;
+};
+
 class RobotState
 {
 public:
   tf::Transform transform;
   ros::Time stamp{ 0 };
+  WheelVelocity wheel_velocity_;
 
   friend std::ostream &operator<<(std::ostream &out, const RobotState &state);
 
@@ -140,6 +147,11 @@ public:
   double distTo(double x2, double y2) const
   {
     return igvc::get_distance(this->x(), this->y(), x2, y2);
+  }
+
+  double velocity() const
+  {
+    return (wheel_velocity_.left + wheel_velocity_.right) / 2;
   }
 
   /**

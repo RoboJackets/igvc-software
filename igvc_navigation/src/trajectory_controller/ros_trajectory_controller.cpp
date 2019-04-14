@@ -18,33 +18,43 @@ ROSTrajectoryController::ROSTrajectoryController()
   trajectory_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZI>>(topic_trajectory, 1);
 
   ros::Rate rate(30);
-//  while (ros::ok())
-//  {
+  while (ros::ok())
+  {
     testSignedDistanceField();
-//    rate.sleep();
-//  }
+    rate.sleep();
+  }
 }
 
 void ROSTrajectoryController::testSignedDistanceField()
 {
-//  SignedDistanceFieldOptions options = {
-//    .grid_rows = 10, .grid_cols = 10, .cv_type = CV_32F, .grid_x = 5, .grid_y = 5, .max_iterations = 50000
-//  };
-//
-//  nav_msgs::Path path;
-//  geometry_msgs::PoseStamped pose;
-//  pose.pose.position.x = 0;
-//  pose.pose.position.y = 0;
-//  path.poses.emplace_back(pose);
-//  pose.pose.position.x = 5;
-//  pose.pose.position.y = 5;
-//  path.poses.emplace_back(pose);
-//
-//  cv::Mat traversal_costs(options.grid_rows, options.grid_cols, options.cv_type, cvScalar(0.001f));
-//  ROS_INFO_STREAM("traversal: \n" << traversal_costs);
-//  cv::Mat distanceField = signed_distance_field::getSignedDistanceField(path, 0, 1, options, traversal_costs, 1.0);
-//
-//  publishAsPCL(trajectory_pub_, distanceField, 1.0, "/odom", pcl_conversions::toPCL(ros::Time::now()));
+  int rows = 101;
+  int cols = 101;
+  double x = 50.0;
+  double y = 50.0;
+  float resolution = 1.0;
+
+  signed_distance_field::SignedDistanceFieldOptions options{rows, cols, x, y, resolution};
+
+  fast_sweep::FastSweep solver{rows, cols, resolution};
+
+  nav_msgs::Path path;
+  geometry_msgs::PoseStamped pose;
+  pose.pose.position.x = 0;
+  pose.pose.position.y = 0;
+  path.poses.emplace_back(pose);
+  pose.pose.position.x = 50;
+  pose.pose.position.y = 50;
+  path.poses.emplace_back(pose);
+  pose.pose.position.x = 0;
+  pose.pose.position.y = 100;
+  path.poses.emplace_back(pose);
+
+  cv::Mat traversal_costs(options.grid_rows, options.grid_cols, CV_32F, 1.0f);
+
+  std::unique_ptr<cv::Mat> solution = signed_distance_field::getSignedDistanceField(path, 0, 1, options, traversal_costs, solver);
+
+//  solver.printGrid();
+  publishAsPCL(trajectory_pub_, *solution, 1.0, "/odom", pcl_conversions::toPCL(ros::Time::now()));
 }
 
 void ROSTrajectoryController::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, double resolution, const std::string &frame_id,

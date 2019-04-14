@@ -18,7 +18,7 @@ std::unique_ptr<cv::Mat> getSignedDistanceField(const nav_msgs::Path& path, int 
                                fast_sweep::FastSweep& solver)
 {
   std::vector<fast_sweep::Node> gamma_points;  // TODO: Reserve?
-  if (path_start - path_end > 0){
+  if (path_end - path_start > 0){
     for (int i = 0; i < path.poses.size() - 1; i++)
     {
       double start_x = path.poses[i].pose.position.x;
@@ -26,8 +26,11 @@ std::unique_ptr<cv::Mat> getSignedDistanceField(const nav_msgs::Path& path, int 
       double end_x = path.poses[i + 1].pose.position.x;
       double end_y = path.poses[i + 1].pose.position.y;
 
+      fast_sweep::Node start = toNode(start_x, start_y, options);
+      fast_sweep::Node end = toNode(end_x, end_y, options);
+
       std::vector<fast_sweep::Node> line =
-          getNodesBetweenWaypoints(toNode(start_x, start_y, options), toNode(end_x, end_y, options));
+          getNodesBetweenWaypoints(start, end);
       gamma_points.insert(gamma_points.end(), line.begin(), line.end());
     }
   } else if (path_start - path_end == 0){
@@ -35,30 +38,53 @@ std::unique_ptr<cv::Mat> getSignedDistanceField(const nav_msgs::Path& path, int 
     double y = path.poses.front().pose.position.y;
     gamma_points.emplace_back(toNode(x, y, options));
   }
-  std::cout << "Gamma_points: " << std::endl;
-  for (const auto& point : gamma_points) {
-    std::cout << point << std::endl;
-  }
-  std::cout << std::endl;
   std::vector<float> solution = solver.solveEikonal(gamma_points, toVector<float>(traversal_costs));
   return toMat(solution, options.grid_rows);
 }
 
 std::vector<fast_sweep::Node> getNodesBetweenWaypoints(const fast_sweep::Node& start, const fast_sweep::Node& end)
 {
+  int x1 = start.x;
+  int y1 = start.y;
+  int x2 = end.x;
+  int y2 = end.y;
+
   std::vector<fast_sweep::Node> out;
 
-  int m_new = 2 * (end.y - start.y);
-  int slope_error_new = m_new - (end.x - start.x);
-  for (int x = start.x, y = start.y; x <= end.x; x++)
+  const bool steep = std::abs(y2 - y1) > std::abs(x2 - x1);
+  if (steep)
   {
-    out.emplace_back(fast_sweep::Node{ x, y });
-    slope_error_new += m_new;
+    std::swap(x1, y1);
+    std::swap(x2, y2);
+  }
+  if (x1 > x2)
+  {
+    std::swap(x1, x2);
+    std::swap(y1, y2);
+  }
 
-    if (slope_error_new >= 0)
+  const float dx = x2 - x1;
+  const float dy = std::abs(y2 - y1);
+
+  float error = dx / 2.0f;
+  const int ystep = (y1 < y2) ? 1 : -1;
+  int y = y1;
+
+  for (int x = x1; x <= x2; x++)
+  {
+    if (steep)
     {
-      y++;
-      slope_error_new -= 2 * (end.x - start.x);
+      out.emplace_back(fast_sweep::Node{ y, x });
+    }
+    else
+    {
+      out.emplace_back(fast_sweep::Node{ x, y });
+    }
+    error -= dy;
+    if (error < 0)
+    {
+      y += ystep;
+      error += dx;
     }
   }
   return out;
