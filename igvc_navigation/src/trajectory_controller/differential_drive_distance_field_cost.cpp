@@ -2,8 +2,10 @@
 
 using namespace sdf_cost;
 
-SignedDistanceFieldCost::SignedDistanceFieldCost(const SDFCoefficients& coeffs) : coeffs_{ coeffs } {
-
+SignedDistanceFieldCost::SignedDistanceFieldCost(const SDFCostCoefficients& coeffs,
+                                                 std::shared_ptr<SignedDistanceField> signed_distance_field)
+  : coeffs_{ coeffs }, signed_distance_field_{ std::move(signed_distance_field) }
+{
 }
 
 float SignedDistanceFieldCost::getCost(const RobotState& state, const Controls& controls)
@@ -16,6 +18,12 @@ float SignedDistanceFieldCost::getCost(const RobotState& state, const Controls& 
   return cost;
 }
 
-float SignedDistanceFieldCost::getSDFValue(const RobotState& state) {
-  return 0.0f;
+float SignedDistanceFieldCost::getSDFValue(const RobotState& state)
+{
+  std::optional<float> value = signed_distance_field_->getValue(state.x, state.y);
+  if (value) {
+    return *value;
+  } else {
+    return 0.0f;
+  }
 }

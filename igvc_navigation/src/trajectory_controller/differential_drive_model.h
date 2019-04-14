@@ -10,7 +10,7 @@
 #include "model.h"
 #include <igvc_utils/RobotState.hpp>
 
-using namespace trajectory_controller;
+using namespace some_controller;
 
 namespace differential_drive_model {
   constexpr int ControlDims = 2;

@@ -7,10 +7,15 @@
 #ifndef SRC_TRAJECTORY_CONTROLLER_H
 #define SRC_TRAJECTORY_CONTROLLER_H
 
-class TrajectoryController {
+namespace trajectory_controller
+{
+class TrajectoryController
+{
 public:
   TrajectoryController();
+
 private:
 };
+}  // namespace trajectory_controller
 
-#endif //SRC_TRAJECTORY_CONTROLLER_H
+#endif  // SRC_TRAJECTORY_CONTROLLER_H

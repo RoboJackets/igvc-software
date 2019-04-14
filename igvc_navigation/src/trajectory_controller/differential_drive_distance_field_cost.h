@@ -8,13 +8,15 @@
 #define SRC_DIFFERENTIAL_DRIVE_DISTANCE_FIELD_COST_H
 
 #include <igvc_utils/RobotState.hpp>
+#include <igvc_navigation/signed_distance_field.h>
 #include "cost_function.h"
 
-using namespace trajectory_controller;
+using namespace some_controller;
+using signed_distance_field::SignedDistanceField;
 
 namespace sdf_cost
 {
-struct SDFCoefficients {
+struct SDFCostCoefficients {
   float acceleration;
   float velocity;
   float path;
@@ -24,12 +26,13 @@ class SignedDistanceFieldCost
   : public CostFunction<RobotState, ControlDims, SignedDistanceFieldCost>
 {
 public:
-  explicit SignedDistanceFieldCost(const SDFCoefficients& coeffs);
+  explicit SignedDistanceFieldCost(const SDFCostCoefficients& coeffs, std::shared_ptr<SignedDistanceField> signed_distance_field);
   float getCost(const RobotState& state, const Controls& controls);
 private:
   float getSDFValue(const RobotState& state);
 
-  SDFCoefficients coeffs_;
+  SDFCostCoefficients coeffs_;
+  std::shared_ptr<SignedDistanceField> signed_distance_field_;
 };
 }  // namespace differential_drive_signed_distance_field_cost
 

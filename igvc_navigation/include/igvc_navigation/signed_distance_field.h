@@ -23,7 +23,8 @@ public:
 class SignedDistanceField
 {
 public:
-  SignedDistanceField(const SignedDistanceFieldOptions& options);
+  explicit SignedDistanceField(const SignedDistanceFieldOptions& options);
+
   std::optional<float> getValue(float x, float y);
   /*
    * Calculates the signedDistanceField for the path passed in, creating a grid of size grid_width, grid_height for
