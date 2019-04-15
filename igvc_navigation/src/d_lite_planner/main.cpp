@@ -68,15 +68,15 @@ void publish_expanded_set(const std::vector<std::tuple<int, int>>& inds,
 
     if (planner.getG(Node(std::get<0>(ind), std::get<1>(ind))) == std::numeric_limits<float>::infinity())
     {
-      uint8_t r = 255, g = 0, b = 0;  // Example: Red color
-      uint32_t rgb = ((uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b);
-      p.rgb = *reinterpret_cast<float*>(&rgb);
+      p.r = 255;
+      p.g = 0;
+      p.b = 0;
     }
     else
     {
-      uint8_t r = 0, g = 125, b = 125;  // Example: Red color
-      uint32_t rgb = ((uint32_t)r << 16 | (uint32_t)g << 8 | (uint32_t)b);
-      p.rgb = *reinterpret_cast<float*>(&rgb);
+      p.r = 0;
+      p.g = 125;
+      p.b = 125;
     }
 
     expanded_cloud.points.push_back(p);

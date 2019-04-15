@@ -49,3 +49,6 @@
 
 #CNN models
 /sandbox/models/
+
+#pyc
+*.pyc
