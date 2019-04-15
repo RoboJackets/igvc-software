@@ -4,8 +4,8 @@
 
 namespace signed_distance_field
 {
-SignedDistanceFieldOptions::SignedDistanceFieldOptions(float width, float height, float x, float y, float resolution)
-  : width_{ width }, height_{ height }, x_{ x }, y_{ y }, resolution_{ resolution }
+SignedDistanceFieldOptions::SignedDistanceFieldOptions(float width, float height, float resolution)
+  : width_{ width }, height_{ height }, resolution_{ resolution }
 {
   rows_ = static_cast<int>(height / resolution);
   cols_ = static_cast<int>(width / resolution);
@@ -118,5 +118,16 @@ std::unique_ptr<cv::Mat> SignedDistanceField::toMat() const
   std::unique_ptr<cv::Mat> mat = std::make_unique<cv::Mat>(field_, true);
   *mat = mat->reshape(0, options_.rows_);
   return mat;
+}
+
+void SignedDistanceField::setCenter(float x, float y)
+{
+  x_ = x;
+  y_ = y;
+}
+
+bool SignedDistanceField::isValidNode(float x, float y)
+{
+  return toNode(x, y).isValid(options_.rows_, options_.cols_);
 }
 }  // namespace signed_distance_field

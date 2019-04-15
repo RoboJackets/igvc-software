@@ -14,12 +14,10 @@ struct SignedDistanceFieldOptions
   int cols_;  // in cells, centered
   float width_;    // in m, cols
   float height_;   // in m, rows
-  float x_;   // in m
-  float y_;   // in m
   float resolution_;
 
 public:
-  SignedDistanceFieldOptions(float width, float height, float x, float y, float resolution);
+  SignedDistanceFieldOptions(float width, float height, float resolution);
 };
 
 class SignedDistanceField
@@ -38,6 +36,21 @@ public:
    * @return the created signedDistanceField
    */
   void calculate(const nav_msgs::Path& path, size_t path_start, size_t path_end, const cv::Mat& traversal_costs);
+
+  /**
+   * Sets the center of the grid.
+   * @param x x coordinate in odom frame in m
+   * @param y y coordinate in odom frame in m
+   */
+  void setCenter(float x, float y);
+
+  /**
+   * Returns whether a given point would be a valid node or not
+   * @param x x cooridnate in odom frame in m
+   * @param y y coordinate in odom frame in m
+   * @return if the coordinates lies within the field
+   */
+  bool isValidNode(float x, float y);
 
   /**
    * Returns a vector of Nodes between start (inclusive) and end (exclusive) using Bressenham's line algorithm,
@@ -68,6 +81,9 @@ public:
 private:
   std::vector<float> field_;
   SignedDistanceFieldOptions options_;
+  float x_; // in m
+  float y_; // in m
+
   fast_sweep::FastSweep solver_;
 };
 
@@ -76,8 +92,8 @@ inline fast_sweep::Node SignedDistanceField::toNode(T x, T y) const
 {
   int half_width = (options_.cols_ - 1) / 2;
   int half_height = (options_.rows_ - 1) / 2;
-  int node_x = static_cast<int>(std::round((x - options_.x_) / options_.resolution_ + half_width));
-  int node_y = static_cast<int>(std::round((options_.y_ - y) /
+  int node_x = static_cast<int>(std::round((x - x_) / options_.resolution_ + half_width));
+  int node_y = static_cast<int>(std::round((y_ - y) /
                                            options_.resolution_ + half_height));  // Flip, since Node has y increasing downwards
   return { node_x, node_y };
 }

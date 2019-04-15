@@ -13,11 +13,17 @@
 using namespace some_controller;
 
 namespace differential_drive_model {
+  struct DifferentialDriveOptions
+  {
+    Bound acceleration_bound;
+    float axle_length;
+  };
+
   constexpr int ControlDims = 2;
 
   class DifferentialDriveModel : public Model<RobotState, ControlDims, DifferentialDriveModel> {
   public:
-    explicit DifferentialDriveModel(Bound acceleration_bound, float axle_length);
+    explicit DifferentialDriveModel(const DifferentialDriveOptions& options);
     std::array<Bound, ControlDims> getBounds();
     RobotState propogateState(RobotState state, const Controls& controls, float dt);
   private:

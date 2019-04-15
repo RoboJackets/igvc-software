@@ -1,0 +1,27 @@
+topics:
+    path: "/path"
+    odometry: "/odometry/filtered"
+    motors: "/motors"
+    debug:
+        rollout: "/trajectory_controller/rollout"
+        signed_distance_field: "/trajectory_controller/signed_distance_field"
+signed_distance_field:
+    width: 20
+    height: 20
+    resolution: 0.1
+controller:
+    timestep: 0.1
+    horizon: 5.0
+    samples: 5000
+cost_function:
+    max_velocity: 2.0
+    coefficients:
+        path: 100.0
+        velocity: 10.0
+        acceleration: 1.0
+        angular_acceleration: 1.0
+model:
+    acceleration_bound: 4.0
+    axle_length: 0.48
+node:
+    debug: true

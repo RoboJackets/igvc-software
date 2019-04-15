@@ -51,7 +51,7 @@ RobotState differential_drive_model::DifferentialDriveModel::propogateState(Robo
   return state;
 }
 
-DifferentialDriveModel::DifferentialDriveModel(Bound acceleration_bound, float axle_length)
-  : acceleration_bound_{ acceleration_bound }, axle_length_{ axle_length }
+DifferentialDriveModel::DifferentialDriveModel(const DifferentialDriveOptions& options)
+  : acceleration_bound_{ options.acceleration_bound }, axle_length_{ options.axle_length }
 {
 }

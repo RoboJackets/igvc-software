@@ -23,12 +23,18 @@ struct SDFCostCoefficients
   float velocity;
   float path;
 };
+
+struct SDFCostOptions
+{
+  SDFCostCoefficients coefficients;
+  float velocity_limit;
+};
+
 constexpr int ControlDims = 2;
 class SignedDistanceFieldCost : public CostFunction<RobotState, ControlDims, SignedDistanceFieldCost>
 {
 public:
-  explicit SignedDistanceFieldCost(const SDFCostCoefficients& coeffs,
-                                   std::shared_ptr<SignedDistanceField> signed_distance_field, float velocity_limit);
+  explicit SignedDistanceFieldCost(std::shared_ptr<SignedDistanceField> signed_distance_field, const SDFCostOptions& options);
   float getCost(const RobotState& state, const Controls& controls);
 
 private:

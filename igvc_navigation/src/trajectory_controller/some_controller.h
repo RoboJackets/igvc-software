@@ -57,15 +57,26 @@ typename Model::StateType Particle<Model>::getState() const
 }
 
 template <class Model>
-float Particle<Model>::getWeight() const {
+float Particle<Model>::getWeight() const
+{
   return 1 / cum_cost_.back();
 }
 
 template <class Model>
 struct OptimizationResult
 {
-    std::vector<Particle<Model>> particles;
-    Particle<Model> best_particle;
+  std::vector<Particle<Model>> particles;
+  int best_particle;
+
+public:
+  OptimizationResult(std::vector<Particle<Model>>&& moved_particles, int best_index) noexcept;
+};
+
+struct SomeControllerOptions
+{
+  float timestep;
+  float horizon;
+  int num_samples;
 };
 
 template <class Model, class CostFunction>
@@ -76,9 +87,9 @@ public:
   using State = typename Model::StateType;
   constexpr static const int control_dims = Model::control_dims;
 
-  SomeController(std::shared_ptr<Model> model, std::shared_ptr<CostFunction> cost_function, float timestep,
-                 float horizon, int num_samples);
-  OptimizationResult<Model> optimize(const State& starting_state);
+  SomeController(std::shared_ptr<Model> model, std::shared_ptr<CostFunction> cost_function,
+                 const SomeControllerOptions& options);
+  std::unique_ptr<OptimizationResult<Model>> optimize(const State& starting_state);
 
 private:
   void resampleParticles();
@@ -101,17 +112,17 @@ private:
 
 template <class Model, class CostFunction>
 SomeController<Model, CostFunction>::SomeController(std::shared_ptr<Model> model,
-                                                    std::shared_ptr<CostFunction> cost_function, float timestep,
-                                                    float horizon, int num_samples)
+                                                    std::shared_ptr<CostFunction> cost_function,
+                                                    const SomeControllerOptions& options)
   : model_{ model }
   , cost_function_{ cost_function }
-  , timestep_{ timestep }
-  , horizon_{ horizon }
-  , iterations_{ static_cast<int>(std::round(horizon / timestep)) }
-  , num_samples_{ num_samples }
+  , timestep_{ options.timestep }
+  , horizon_{ options.horizon }
+  , iterations_{ static_cast<int>(std::round(options.horizon / options.timestep)) }
+  , num_samples_{ options.num_samples }
   , rd_{}
   , mt_{ rd_() }
-  , particles_(num_samples, Particle<Model>{})
+  , particles_(options.num_samples, Particle<Model>{})
 {
   std::array<Bound, control_dims> bounds = model_->getBounds();
   for (int i = 0; i < control_dims; i++)
@@ -121,8 +132,14 @@ SomeController<Model, CostFunction>::SomeController(std::shared_ptr<Model> model
   }
 }
 
+template <class T>
+OptimizationResult<T>::OptimizationResult(std::vector<Particle<T>>&& moved_particles, int best_index) noexcept
+  : particles(std::move(moved_particles)), best_particle{ best_index }
+{
+}
+
 template <class Model, class CostFunction>
-OptimizationResult<Model> SomeController<Model, CostFunction>::optimize(const State& starting_state)
+std::unique_ptr<OptimizationResult<Model>> SomeController<Model, CostFunction>::optimize(const State& starting_state)
 {
   initializeParticles(starting_state);
 
@@ -141,11 +158,12 @@ OptimizationResult<Model> SomeController<Model, CostFunction>::optimize(const St
     }
     resampleParticles();
   }
-  Particle<Model>& optimal_particle =
-      *std::min_element(particles_.begin(), particles_.end(), [](const Particle<Model>& p1, const Particle<Model>& p2) {
+  auto optimal_particle =
+      std::min_element(particles_.begin(), particles_.end(), [](const Particle<Model>& p1, const Particle<Model>& p2) {
         return p1.cum_cost_.back() < p2.cum_cost_.back();
       });
-  return {particles_, optimal_particle};
+  int idx = optimal_particle - particles_.begin();
+  return std::make_unique<OptimizationResult<Model>>(std::move(particles_), idx);
 }
 
 template <class Model, class CostFunction>
@@ -175,7 +193,8 @@ void SomeController<Model, CostFunction>::resampleParticles()
   std::vector<float> cum_weights;
   cum_weights.reserve(static_cast<unsigned long>(num_samples_));
   cum_weights.emplace_back(particles_.front().getWeight());
-  for (int i = 1; i < num_samples_; i++) {
+  for (int i = 1; i < num_samples_; i++)
+  {
     cum_weights.emplace_back(cum_weights.back() + particles_[i].getWeight());
   }
   float pointer_width = cum_weights.back() / num_samples_;
@@ -199,14 +218,19 @@ void SomeController<Model, CostFunction>::resampleParticles()
 template <class Model>
 std::ostream& operator<<(std::ostream& out, const Particle<Model>& particle)
 {
-  out << std::setprecision(3) << "State" << "\t\t" << "Control" << "\t\t" << "Cost" << std::endl;
+  out << std::setprecision(3) << "State"
+      << "\t\t"
+      << "Control"
+      << "\t\t"
+      << "Cost" << std::endl;
   for (size_t i = 0; i < particle.controls_vec_.size(); i++)
   {
-    out << std::setprecision(3) << particle.state_vec_[i + 1]
-        << "\t\t" << "[";
+    out << std::setprecision(3) << particle.state_vec_[i + 1] << "\t\t"
+        << "[";
     std::copy(particle.controls_vec_[i].begin(), particle.controls_vec_[i].end(),
               std::ostream_iterator<float>(out, ", "));
-    out << "]" << "\t\t" << particle.cum_cost_[i + 1] << std::endl;
+    out << "]"
+        << "\t\t" << particle.cum_cost_[i + 1] << std::endl;
   }
   out << std::endl;
   return out;
