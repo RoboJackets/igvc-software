@@ -15,6 +15,9 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   pcl_ros
   igvc_utils
+  octomap_ros
+  octomap_msgs
+  tf_conversions
   robot_localization
 )
 
@@ -24,8 +27,9 @@ find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 find_package(PCL REQUIRED filters)
+find_package(octomap REQUIRED)
 
-set(CMAKE_CXX_FLAGS "-g -std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-g -std=c++17 -Wall ${CMAKE_CXX_FLAGS}")
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -190,8 +194,6 @@ add_library(
 add_dependencies(GraphSearch igvc_msgs_gencpp)
 # link OpenCV and cv_bridge to GraphSearch library
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
-
-#add_subdirectory(src/state_estimator)
 
 add_subdirectory(src/waypoint_source)
 add_subdirectory(src/wheel_odometer)
