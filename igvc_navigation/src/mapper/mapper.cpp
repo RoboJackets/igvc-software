@@ -11,10 +11,8 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   igvc::getParam(pNh, "probability_model/lidar/scan/prob_hit", lidar_scan_probability_model_.prob_hit);
 
   igvc::getParam(pNh, "probability_model/lidar/ground/prob_miss", lidar_ground_probability_model_.prob_miss);
-  igvc::getParam(pNh, "probability_model/lidar/ground/prob_hit", lidar_ground_probability_model_.prob_hit);
 
   igvc::getParam(pNh, "probability_model/lidar/free_space/prob_miss", lidar_free_space_probability_model_.prob_miss);
-  igvc::getParam(pNh, "probability_model/lidar/free_space/prob_hit", lidar_free_space_probability_model_.prob_hit);
 
   igvc::getParam(pNh, "probability_model/camera/prob_miss", camera_probability_model_.prob_miss);
   igvc::getParam(pNh, "probability_model/camera/prob_hit", camera_probability_model_.prob_hit);
