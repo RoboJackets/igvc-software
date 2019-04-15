@@ -132,8 +132,7 @@ void PathFollower::positionCallback(const nav_msgs::OdometryConstPtr& msg)
     geometry_msgs::PointStamped target_point;
     target_point.header.frame_id = "/odom";
     target_point.header.stamp = time;
-    target_point.point.x = target.x;
-    target_point.point.y = target.y;
+    tf::pointTFToMsg(target.transform.getOrigin(), target_point.point);
     target_pub_.publish(target_point);
 
     ROS_DEBUG_STREAM("Distance to target: " << cur_pos.distTo(target) << "(m.)");
