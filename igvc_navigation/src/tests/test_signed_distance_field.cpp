@@ -4,12 +4,12 @@
 
 class SignedDistanceFieldTest : public ::testing::Test {
 protected:
-  void SetUp(int rows, int cols, double start_x, double start_y, double resolution) {
-    options = std::make_unique<signed_distance_field::SignedDistanceFieldOptions>(rows, cols, start_x, start_y, resolution);
+  void SetUp(float width, float height, double start_x, double start_y, double resolution) {
+    options = std::make_unique<signed_distance_field::SignedDistanceFieldOptions>(width, height, start_x, start_y, resolution);
     signed_distance_field = std::make_unique<signed_distance_field::SignedDistanceField>(*options);
 
-    rows_ = rows;
-    cols_ = cols;
+    width_ = width;
+    height_ = height;
     start_x_ = start_x;
     start_y_ = start_y;
     resolution_ = resolution;
@@ -18,8 +18,8 @@ protected:
 
   std::unique_ptr<signed_distance_field::SignedDistanceFieldOptions> options;
   std::unique_ptr<signed_distance_field::SignedDistanceField> signed_distance_field;
-  int rows_;
-  int cols_;
+  double width_;
+  double height_;
   double start_x_;
   double start_y_;
   double resolution_;
@@ -35,13 +35,13 @@ TEST_F(SignedDistanceFieldTest, simple)
   pose.pose.position.y = 0;
   path.poses.emplace_back(pose);
 
-  cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
+  cv::Mat traversal_costs(options->rows_, options->cols_, CV_32F, 1.0f);
 
   signed_distance_field->calculate(path, 0, 0, traversal_costs);
   std::unique_ptr<cv::Mat> solution = signed_distance_field->toMat();
   ASSERT_NE(signed_distance_field.get(), nullptr);
-  ASSERT_EQ(solution->cols, cols_);
-  ASSERT_EQ(solution->rows, rows_);
+  ASSERT_EQ(solution->cols, options->cols_);
+  ASSERT_EQ(solution->rows, options->rows_);
 
 
   float in_between = (2+sqrt(2.0f))/2.0f;
@@ -68,13 +68,13 @@ TEST_F(SignedDistanceFieldTest, line)
   pose.pose.position.y = 2;
   path.poses.emplace_back(pose);
 
-  cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
+  cv::Mat traversal_costs(options->rows_, options->cols_, CV_32F, 1.0f);
 
   signed_distance_field->calculate(path, 0, 1, traversal_costs);
   std::unique_ptr<cv::Mat> solution = signed_distance_field->toMat();
   ASSERT_NE(solution.get(), nullptr);
-  ASSERT_EQ(solution->cols, cols_);
-  ASSERT_EQ(solution->rows, rows_);
+  ASSERT_EQ(solution->cols, options->cols_);
+  ASSERT_EQ(solution->rows, options->rows_);
 
   // Check zeros are correct
   std::vector<std::pair<int, int>> zeros = {
@@ -86,8 +86,8 @@ TEST_F(SignedDistanceFieldTest, line)
   }
 
   // Check that all numbers are below 10
-  for (int i = 0; i < rows_; i++) {
-    for (int j = 0; j < cols_; j++) {
+  for (int i = 0; i < options->rows_; i++) {
+    for (int j = 0; j < options->cols_; j++) {
       EXPECT_TRUE(solution->at<float>(j, i) < 10.0f);
     }
   }
@@ -115,13 +115,13 @@ TEST_F(SignedDistanceFieldTest, rectangle)
   pose.pose.position.y = -2;
   path.poses.emplace_back(pose);
 
-  cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
+  cv::Mat traversal_costs(options->rows_, options->cols_, CV_32F, 1.0f);
 
   signed_distance_field->calculate(path, 0, 4, traversal_costs);
   std::unique_ptr<cv::Mat> solution = signed_distance_field->toMat();
   ASSERT_NE(solution.get(), nullptr);
-  ASSERT_EQ(solution->cols, cols_);
-  ASSERT_EQ(solution->rows, rows_);
+  ASSERT_EQ(solution->cols, options->cols_);
+  ASSERT_EQ(solution->rows, options->rows_);
 
   std::vector<float> expected = {
       0.0000e+00, 0.0000e+00,  0.0000e+00,  0.0000e+00,  0.0000e+00,
@@ -137,7 +137,7 @@ TEST_F(SignedDistanceFieldTest, rectangle)
 
 TEST_F(SignedDistanceFieldTest, simpleResolution)
 {
-  SetUp(11, 11, 0.0, 0.0, 0.1);
+  SetUp(1, 1, 0.0, 0.0, 0.1);
 
   nav_msgs::Path path;
   geometry_msgs::PoseStamped pose;
@@ -145,13 +145,13 @@ TEST_F(SignedDistanceFieldTest, simpleResolution)
   pose.pose.position.y = 0.3;
   path.poses.emplace_back(pose);
 
-  cv::Mat traversal_costs(rows_, cols_, CV_32F, 1.0f);
+  cv::Mat traversal_costs(options->rows_, options->cols_, CV_32F, 1.0f);
 
   signed_distance_field->calculate(path, 0, 0, traversal_costs);
   std::unique_ptr<cv::Mat> solution = signed_distance_field->toMat();
   ASSERT_NE(signed_distance_field.get(), nullptr);
-  ASSERT_EQ(solution->cols, cols_);
-  ASSERT_EQ(solution->rows, rows_);
+  ASSERT_EQ(solution->cols, options->cols_);
+  ASSERT_EQ(solution->rows, options->rows_);
 
   // 0 is placed at the correct position
   EXPECT_FLOAT_EQ(solution->at<float>(2, 3), 0);

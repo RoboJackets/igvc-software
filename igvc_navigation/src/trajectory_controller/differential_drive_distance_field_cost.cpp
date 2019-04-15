@@ -3,8 +3,8 @@
 using namespace sdf_cost;
 
 SignedDistanceFieldCost::SignedDistanceFieldCost(const SDFCostCoefficients& coeffs,
-                                                 std::shared_ptr<SignedDistanceField> signed_distance_field)
-  : coeffs_{ coeffs }, signed_distance_field_{ std::move(signed_distance_field) }
+                                                 std::shared_ptr<SignedDistanceField> signed_distance_field, float velocity_limit)
+  : coeffs_{ coeffs }, signed_distance_field_{ std::move(signed_distance_field) }, velocity_limit_{ velocity_limit }
 {
 }
 
@@ -18,6 +18,12 @@ float SignedDistanceFieldCost::getCost(const RobotState& state, const Controls& 
   if (state.velocity() < 0) {
     cost = std::numeric_limits<float>::max();
   }
+  if (state.velocity() > velocity_limit_) {
+    cost = std::numeric_limits<float>::max();
+  }
+  // Penalize turning
+  cost += coeffs_.angular_acceleration * std::abs(controls[0] - controls[1]);
+
   return cost;
 }
 

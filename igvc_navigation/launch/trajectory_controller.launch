@@ -1,6 +1,17 @@
 <launch>
-    <node name="trajectory_controller" pkg="igvc_navigation" type="trajectory_controller" output="screen" launch-prefix="
-gdb -ex run --args">
+    <node name="trajectory_controller" pkg="igvc_navigation" type="trajectory_controller" output="screen" >
         <param name="topics/trajectory" value="trajectory"/>
+        <rosparam>
+            signed_distance_field:
+                width: 20
+                height: 20
+                resolution: 0.1
+            controller:
+                timestep: 0.1
+                horizon: 5.0
+                samples: 5000
+            cost_function:
+                max_velocity: 2.0
+        </rosparam>
     </node>
 </launch>

@@ -10,14 +10,16 @@ namespace signed_distance_field
 {
 struct SignedDistanceFieldOptions
 {
-  int grid_rows;  // in cells, centered
-  int grid_cols;  // in cells, centered
-  float grid_x;   // in m
-  float grid_y;   // in m
-  float grid_resolution;
+  int rows_;  // in cells, centered
+  int cols_;  // in cells, centered
+  float width_;    // in m, cols
+  float height_;   // in m, rows
+  float x_;   // in m
+  float y_;   // in m
+  float resolution_;
 
 public:
-  SignedDistanceFieldOptions(int rows, int cols, float x, float y, float resolution);
+  SignedDistanceFieldOptions(float width, float height, float x, float y, float resolution);
 };
 
 class SignedDistanceField
@@ -72,11 +74,11 @@ private:
 template <class T>
 inline fast_sweep::Node SignedDistanceField::toNode(T x, T y) const
 {
-  int half_width = (options_.grid_cols - 1) / 2;
-  int half_height = (options_.grid_rows - 1) / 2;
-  int node_x = static_cast<int>(std::round((x - options_.grid_x) / options_.grid_resolution + half_width));
-  int node_y = static_cast<int>(std::round((options_.grid_y - y) /
-                                           options_.grid_resolution + half_height));  // Flip, since Node has y increasing downwards
+  int half_width = (options_.cols_ - 1) / 2;
+  int half_height = (options_.rows_ - 1) / 2;
+  int node_x = static_cast<int>(std::round((x - options_.x_) / options_.resolution_ + half_width));
+  int node_y = static_cast<int>(std::round((options_.y_ - y) /
+                                           options_.resolution_ + half_height));  // Flip, since Node has y increasing downwards
   return { node_x, node_y };
 }
 

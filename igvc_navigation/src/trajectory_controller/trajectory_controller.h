@@ -32,7 +32,8 @@ using Controls = Model::Controls;
 class TrajectoryController
 {
 public:
-  TrajectoryController();
+  TrajectoryController(const SignedDistanceFieldOptions& sdf_options, float timestep, float horizon, int samples,
+                       float max_velocity);
   std::unique_ptr<cv::Mat> test();
 
 private:
@@ -40,6 +41,15 @@ private:
                                                 float b, float a);
   void visualizeRollout(const OptimizationResult<Model>& optimization_result) const;
   ros::Publisher rollout_pub_;
+
+  SignedDistanceFieldOptions sdf_options_;
+
+  float timestep_;
+  float horizon_;
+
+  int samples_;
+
+  float max_velocity_;
 };
 }  // namespace trajectory_controller
 

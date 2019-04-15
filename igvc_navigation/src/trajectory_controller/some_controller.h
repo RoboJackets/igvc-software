@@ -23,12 +23,12 @@ namespace some_controller
 template <class Model>
 struct Particle
 {
-  std::vector<typename Model::Controls> controls_vec_{};
-  std::vector<typename Model::StateType> state_vec_{};
-  std::vector<float> cum_cost_{ 0.0f };
+  std::vector<typename Model::Controls> controls_vec_;
+  std::vector<typename Model::StateType> state_vec_;
+  std::vector<float> cum_cost_;
 
 public:
-  void initialize(const typename Model::StateType& initial_state);
+  void initialize(const typename Model::StateType& initial_state, int iterations);
   typename Model::StateType getState() const;
   float getWeight() const;
   template <class M>
@@ -36,11 +36,16 @@ public:
 };
 
 template <class Model>
-void Particle<Model>::initialize(const typename Model::StateType& initial_state)
+void Particle<Model>::initialize(const typename Model::StateType& initial_state, int iterations)
 {
   controls_vec_.clear();
   state_vec_.clear();
   cum_cost_.clear();
+
+  state_vec_.reserve(iterations + 1);
+  cum_cost_.reserve(iterations + 1);
+  state_vec_.reserve(iterations);
+
   state_vec_.emplace_back(initial_state);
   cum_cost_.emplace_back(0.0f);
 }
@@ -131,12 +136,11 @@ OptimizationResult<Model> SomeController<Model, CostFunction>::optimize(const St
       float cost = cost_function_->cost(new_state, controls);
 
       particle.cum_cost_.emplace_back(particle.cum_cost_.back() + cost);
-      particle.controls_vec_.emplace_back(controls);
-      particle.state_vec_.emplace_back(new_state);
+      particle.controls_vec_.emplace_back(std::move(controls));
+      particle.state_vec_.emplace_back(std::move(new_state));
     }
     resampleParticles();
   }
-
   Particle<Model>& optimal_particle =
       *std::min_element(particles_.begin(), particles_.end(), [](const Particle<Model>& p1, const Particle<Model>& p2) {
         return p1.cum_cost_.back() < p2.cum_cost_.back();
@@ -161,7 +165,7 @@ void SomeController<Model, CostFunction>::initializeParticles(const State& start
 {
   for (Particle<Model>& particle : particles_)
   {
-    particle.initialize(starting_state);
+    particle.initialize(starting_state, iterations_);
   }
 }
 
@@ -196,7 +200,7 @@ template <class Model>
 std::ostream& operator<<(std::ostream& out, const Particle<Model>& particle)
 {
   out << std::setprecision(3) << "State" << "\t\t" << "Control" << "\t\t" << "Cost" << std::endl;
-  for (int i = 0; i < particle.controls_vec_.size(); i++)
+  for (size_t i = 0; i < particle.controls_vec_.size(); i++)
   {
     out << std::setprecision(3) << particle.state_vec_[i + 1]
         << "\t\t" << "[";

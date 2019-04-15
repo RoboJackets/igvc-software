@@ -4,12 +4,18 @@
 
 namespace signed_distance_field
 {
-SignedDistanceFieldOptions::SignedDistanceFieldOptions(int rows, int cols, float x, float y, float resolution)
-  : grid_rows{ rows }, grid_cols{ cols }, grid_x{ x }, grid_y{ y }, grid_resolution{ resolution }
+SignedDistanceFieldOptions::SignedDistanceFieldOptions(float width, float height, float x, float y, float resolution)
+  : width_{ width }, height_{ height }, x_{ x }, y_{ y }, resolution_{ resolution }
 {
-  if (grid_rows % 2 == 0 || grid_cols % 2 == 0)
+  rows_ = static_cast<int>(height / resolution);
+  cols_ = static_cast<int>(width / resolution);
+  if (rows_ % 2 == 0)
   {
-    ROS_ERROR_THROTTLE_NAMED(1, "SignedDistanceFieldOptions_dimensionsMustBeOdd", "Grid dimensions must be odd");
+    rows_++;
+  }
+  if (cols_ % 2 == 0)
+  {
+    cols_++;
   }
 }
 
@@ -93,14 +99,14 @@ std::vector<fast_sweep::Node> SignedDistanceField::getNodesBetweenWaypoints(cons
 }
 
 SignedDistanceField::SignedDistanceField(const SignedDistanceFieldOptions& options)
-  : options_{ options }, solver_{ options.grid_rows, options.grid_cols, options.grid_resolution }
+  : options_{ options }, solver_{ options.rows_, options.cols_, options.resolution_ }
 {
 }
 
 std::optional<float> SignedDistanceField::getValue(float x, float y)
 {
   fast_sweep::Node node = toNode(x, y);
-  if (node.isValid(options_.grid_rows, options_.grid_cols))
+  if (node.isValid(options_.rows_, options_.cols_))
   {
     return solver_.getCell(node);
   }
@@ -110,7 +116,7 @@ std::optional<float> SignedDistanceField::getValue(float x, float y)
 std::unique_ptr<cv::Mat> SignedDistanceField::toMat() const
 {
   std::unique_ptr<cv::Mat> mat = std::make_unique<cv::Mat>(field_, true);
-  *mat = mat->reshape(0, options_.grid_rows);
+  *mat = mat->reshape(0, options_.rows_);
   return mat;
 }
 }  // namespace signed_distance_field
