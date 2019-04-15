@@ -11,8 +11,6 @@ TrajectoryController::TrajectoryController(const SignedDistanceFieldOptions& sdf
   , samples_{ samples }
   , max_velocity_{ max_velocity }
 {
-  ros::NodeHandle nh;
-  rollout_pub_ = nh.advertise<visualization_msgs::MarkerArray>("/some_controller/rollout", 1);
 }
 
 std::unique_ptr<cv::Mat> TrajectoryController::test()
