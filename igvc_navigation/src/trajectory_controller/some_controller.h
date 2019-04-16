@@ -20,16 +20,16 @@
 
 namespace some_controller
 {
-template <class Model>
+template <class ModelImpl>
 struct Particle
 {
-  std::vector<typename Model::Controls> controls_vec_;
-  std::vector<typename Model::StateType> state_vec_;
+  std::vector<typename ModelImpl::Controls> controls_vec_;
+  std::vector<typename ModelImpl::StateType> state_vec_;
   std::vector<float> cum_cost_;
 
 public:
-  void initialize(const typename Model::StateType& initial_state, int iterations);
-  typename Model::StateType getState() const;
+  void initialize(const typename ModelImpl::StateType& initial_state, int iterations);
+  typename ModelImpl::StateType getState() const;
   float getWeight() const;
   template <class M>
   friend std::ostream& operator<<(std::ostream& out, const Particle<M>& particle);
@@ -50,8 +50,8 @@ void Particle<Model>::initialize(const typename Model::StateType& initial_state,
   cum_cost_.emplace_back(0.0f);
 }
 
-template <class Model>
-typename Model::StateType Particle<Model>::getState() const
+template <class ModelImpl>
+typename ModelImpl::StateType Particle<ModelImpl>::getState() const
 {
   return state_vec_.back();
 }
@@ -62,14 +62,14 @@ float Particle<Model>::getWeight() const
   return 1 / cum_cost_.back();
 }
 
-template <class Model>
+template <class ModelImpl>
 struct OptimizationResult
 {
-  std::vector<Particle<Model>> particles;
+  std::vector<Particle<ModelImpl>> particles;
   int best_particle;
 
 public:
-  OptimizationResult(std::vector<Particle<Model>>&& moved_particles, int best_index) noexcept;
+  OptimizationResult(std::vector<Particle<ModelImpl>>&& moved_particles, int best_index) noexcept;
 };
 
 struct SomeControllerOptions
@@ -79,25 +79,29 @@ struct SomeControllerOptions
   int num_samples;
 };
 
-template <class Model, class CostFunction>
+// TODO: Change the Model and CostFunction to DerivedModel, DerivedCostFunction, and use the actual Model CRTP thing
+template <class ModelImpl, class CostFunctionImpl>
 class SomeController
 {
 public:
-  using Controls = typename Model::Controls;
-  using State = typename Model::StateType;
-  constexpr static const int control_dims = Model::control_dims;
+  using Controls = typename ModelImpl::Controls;
+  using State = typename ModelImpl::StateType;
+  constexpr static const int control_dims = ModelImpl::control_dims;
+  using CRTPModel = Model<State, control_dims, ModelImpl>;
+  using CRTPCostFunction = CostFunction<State, control_dims, CostFunctionImpl>;
 
-  SomeController(std::shared_ptr<Model> model, std::shared_ptr<CostFunction> cost_function,
+  SomeController(std::shared_ptr<Model<State, control_dims, ModelImpl>> model,
+                 std::shared_ptr<CostFunction<State, control_dims, CostFunctionImpl>> cost_function,
                  const SomeControllerOptions& options);
-  std::unique_ptr<OptimizationResult<Model>> optimize(const State& starting_state);
+  std::unique_ptr<OptimizationResult<ModelImpl>> optimize(const State& starting_state);
 
 private:
   void resampleParticles();
   void initializeParticles(const State& starting_state);
   Controls sampleControls() const;
 
-  std::shared_ptr<Model> model_;
-  std::shared_ptr<CostFunction> cost_function_;
+  std::shared_ptr<Model<State, control_dims, ModelImpl>> model_;
+  std::shared_ptr<CostFunction<State, control_dims, CostFunctionImpl>> cost_function_;
   float timestep_;
   float horizon_;
   int iterations_;
@@ -107,13 +111,14 @@ private:
   mutable std::mt19937 mt_;
   std::array<std::uniform_real_distribution<float>, control_dims> distributions_;
 
-  std::vector<Particle<Model>> particles_;
+  std::vector<Particle<ModelImpl>> particles_;
 };
 
-template <class Model, class CostFunction>
-SomeController<Model, CostFunction>::SomeController(std::shared_ptr<Model> model,
-                                                    std::shared_ptr<CostFunction> cost_function,
-                                                    const SomeControllerOptions& options)
+template <class ModelImpl, class CostFunctionImpl>
+SomeController<ModelImpl, CostFunctionImpl>::SomeController(
+    std::shared_ptr<Model<State, control_dims, ModelImpl>> model,
+    std::shared_ptr<CostFunction<State, control_dims, CostFunctionImpl>> cost_function,
+    const SomeControllerOptions& options)
   : model_{ model }
   , cost_function_{ cost_function }
   , timestep_{ options.timestep }
@@ -122,7 +127,7 @@ SomeController<Model, CostFunction>::SomeController(std::shared_ptr<Model> model
   , num_samples_{ options.num_samples }
   , rd_{}
   , mt_{ rd_() }
-  , particles_(options.num_samples, Particle<Model>{})
+  , particles_(options.num_samples, Particle<ModelImpl>{})
 {
   std::array<Bound, control_dims> bounds = model_->getBounds();
   for (int i = 0; i < control_dims; i++)
@@ -138,14 +143,15 @@ OptimizationResult<T>::OptimizationResult(std::vector<Particle<T>>&& moved_parti
 {
 }
 
-template <class Model, class CostFunction>
-std::unique_ptr<OptimizationResult<Model>> SomeController<Model, CostFunction>::optimize(const State& starting_state)
+template <class ModelImpl, class CostFunctionImpl>
+std::unique_ptr<OptimizationResult<ModelImpl>>
+SomeController<ModelImpl, CostFunctionImpl>::optimize(const State& starting_state)
 {
   initializeParticles(starting_state);
 
   for (int i = 0; i < iterations_; i++)
   {
-    for (Particle<Model>& particle : particles_)
+    for (Particle<ModelImpl>& particle : particles_)
     {
       Controls controls = sampleControls();
       State state = particle.getState();
@@ -158,16 +164,16 @@ std::unique_ptr<OptimizationResult<Model>> SomeController<Model, CostFunction>::
     }
     resampleParticles();
   }
-  auto optimal_particle =
-      std::min_element(particles_.begin(), particles_.end(), [](const Particle<Model>& p1, const Particle<Model>& p2) {
-        return p1.cum_cost_.back() < p2.cum_cost_.back();
-      });
+  auto optimal_particle = std::min_element(particles_.begin(), particles_.end(),
+                                           [](const Particle<ModelImpl>& p1, const Particle<ModelImpl>& p2) {
+                                             return p1.cum_cost_.back() < p2.cum_cost_.back();
+                                           });
   int idx = optimal_particle - particles_.begin();
-  return std::make_unique<OptimizationResult<Model>>(std::move(particles_), idx);
+  return std::make_unique<OptimizationResult<ModelImpl>>(std::move(particles_), idx);
 }
 
-template <class Model, class CostFunction>
-typename Model::Controls SomeController<Model, CostFunction>::sampleControls() const
+template <class ModelImpl, class CostFunctionImpl>
+typename ModelImpl::Controls SomeController<ModelImpl, CostFunctionImpl>::sampleControls() const
 {
   Controls controls;
   for (int i = 0; i < control_dims; i++)
@@ -178,17 +184,17 @@ typename Model::Controls SomeController<Model, CostFunction>::sampleControls() c
   return controls;
 }
 
-template <class Model, class CostFunction>
-void SomeController<Model, CostFunction>::initializeParticles(const State& starting_state)
+template <class ModelImpl, class CostFunctionImpl>
+void SomeController<ModelImpl, CostFunctionImpl>::initializeParticles(const State& starting_state)
 {
-  for (Particle<Model>& particle : particles_)
+  for (Particle<ModelImpl>& particle : particles_)
   {
     particle.initialize(starting_state, iterations_);
   }
 }
 
-template <class Model, class CostFunction>
-void SomeController<Model, CostFunction>::resampleParticles()
+template <class ModelImpl, class CostFunctionImpl>
+void SomeController<ModelImpl, CostFunctionImpl>::resampleParticles()
 {
   std::vector<float> cum_weights;
   cum_weights.reserve(static_cast<unsigned long>(num_samples_));
@@ -201,7 +207,7 @@ void SomeController<Model, CostFunction>::resampleParticles()
   std::uniform_real_distribution<float> unif(0, pointer_width);
   float starting_pointer = unif(mt_);
 
-  std::vector<Particle<Model>> sampled_particles;
+  std::vector<Particle<ModelImpl>> sampled_particles;
   sampled_particles.reserve(static_cast<unsigned long>(num_samples_));
   for (int i = 0; i < num_samples_; i++)
   {
@@ -215,8 +221,8 @@ void SomeController<Model, CostFunction>::resampleParticles()
   particles_ = std::move(sampled_particles);
 }
 
-template <class Model>
-std::ostream& operator<<(std::ostream& out, const Particle<Model>& particle)
+template <class ModelImpl>
+std::ostream& operator<<(std::ostream& out, const Particle<ModelImpl>& particle)
 {
   out << std::setprecision(3) << "State"
       << "\t\t"
