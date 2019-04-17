@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   laser_geometry
   pcl_ros
   igvc_utils
+  robot_localization
 )
 
 include_directories(
