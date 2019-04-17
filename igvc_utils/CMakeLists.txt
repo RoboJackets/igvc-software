@@ -17,7 +17,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-set(CMAKE_CXX_FLAGS "-g -std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-g -std=c++17 -Wall ${CMAKE_CXX_FLAGS}")
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -160,14 +160,13 @@ include_directories(
 ## Testing ##
 #############
 
-#if(CATKIN_ENABLE_TESTING)
-#    find_package(rostest REQUIRED)
-#    add_subdirectory(src/tests)
-#endif()
+if(CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+    add_subdirectory(src/tests)
+endif()
 
 
 add_subdirectory(src/pid_tester)
 add_subdirectory(src/ethernet)
-add_subdirectory(src/serial)
 add_subdirectory(src/speed_compare)
 add_subdirectory(src/system_stats)

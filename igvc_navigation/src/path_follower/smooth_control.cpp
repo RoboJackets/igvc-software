@@ -11,9 +11,8 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs:
 
   // Store starting position in trajectory
   geometry_msgs::PoseStamped start;
-  start.pose.position.x = start_pos.x;
-  start.pose.position.y = start_pos.y;
-  start.pose.orientation = start_pos.quat();
+  tf::pointTFToMsg(start_pos.transform.getOrigin(), start.pose.position);
+  tf::quaternionTFToMsg(start_pos.transform.getRotation(), start.pose.orientation);
   start.header.stamp = time;
   trajectory.poses.emplace_back(start);
 
@@ -54,13 +53,12 @@ void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs:
     pose.pose.orientation = path->poses[path_index].pose.orientation;
     closest_point_path.poses.emplace_back(pose);
 
-    pose.pose.position.x = simulation_target.x;
-    pose.pose.position.y = simulation_target.y;
-    pose.pose.orientation = simulation_target.quat();
+    tf::pointTFToMsg(simulation_target.transform.getOrigin(), pose.pose.position);
+    tf::quaternionTFToMsg(simulation_target.transform.getRotation(), pose.pose.orientation);
     targets_path.poses.emplace_back(pose);
 
-    pose.pose.position.x = state.x;
-    pose.pose.position.y = state.y;
+    pose.pose.position.x = state.x();
+    pose.pose.position.y = state.y();
     pose.pose.orientation = state.quat();
     pose.header.stamp = start.header.stamp;
     trajectory.poses.emplace_back(pose);
@@ -82,14 +80,14 @@ void SmoothControl::propogateState(const Action& action, RobotState& state)
   {
     // calculate instantaneous center of curvature (ICC = [ICCx, ICCy])
     double R = v / w;
-    double ICCx = state.x - (R * sin(state.yaw));
-    double ICCy = state.y + (R * cos(state.yaw));
+    double ICCx = state.x() - (R * sin(state.yaw()));
+    double ICCy = state.y() + (R * cos(state.yaw()));
 
     using namespace Eigen;
     Matrix3d T;
     double wdt = w * dt;
     T << cos(wdt), -sin(wdt), 0, sin(wdt), cos(wdt), 0, 0, 0, 1;
-    Vector3d a(state.x - ICCx, state.y - ICCy, state.yaw);
+    Vector3d a(state.x() - ICCx, state.y() - ICCy, state.yaw());
     Vector3d b = T * a;
     Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
     igvc::fit_to_polar(c[2]);
@@ -98,7 +96,7 @@ void SmoothControl::propogateState(const Action& action, RobotState& state)
   }
   else
   {
-    resultant_pose << state.x + (cos(state.yaw * v * dt)), state.y + (sin(state.yaw) * v * dt), state.yaw;
+    resultant_pose << state.x() + (cos(state.yaw() * v * dt)), state.y() + (sin(state.yaw()) * v * dt), state.yaw();
   }
 
   state.setState(resultant_pose);
@@ -106,10 +104,10 @@ void SmoothControl::propogateState(const Action& action, RobotState& state)
 
 Action SmoothControl::getAction(const RobotState& state, const RobotState& target)
 {
-  double line_of_sight = atan2(target.y - state.y, target.x - state.x);
+  double line_of_sight = atan2(target.y() - state.y(), target.x() - state.x());
 
-  double delta = state.yaw - line_of_sight;
-  double theta = target.yaw - line_of_sight;
+  double delta = state.yaw() - line_of_sight;
+  double theta = target.yaw() - line_of_sight;
 
   // adjust both angles to lie between -PI and PI
   igvc::fit_to_polar(delta);
