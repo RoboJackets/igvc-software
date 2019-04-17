@@ -28,6 +28,7 @@
   <build_depend>joint_state_controller</build_depend>
   <build_depend>effort_controllers</build_depend>
   <build_depend>velodyne_gazebo_plugins</build_depend>
+  <build_depend>robot_localization</build_depend>
   <run_depend>joint_state_publisher</run_depend>
   <run_depend>robot_state_publisher</run_depend>
   <run_depend>roscpp</run_depend>
@@ -44,4 +45,5 @@
   <run_depend>roslib</run_depend>
   <run_depend>gazebo_ros</run_depend>
   <run_depend>velodyne_gazebo_plugins</run_depend>
+  <run_depend>robot_localization</run_depend>
 </package>

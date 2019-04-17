@@ -1,5 +1,5 @@
 <launch>
-    <include file="$(find igvc_navigation)/launch/localization.launch" />
+    <!--<include file="$(find igvc_navigation)/launch/localization.launch" />-->
 
     <!-- Map Node -->
     <node name="mapper" pkg="igvc_navigation" type="mapper" output="screen">
