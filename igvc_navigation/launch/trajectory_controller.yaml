@@ -10,21 +10,33 @@ signed_distance_field:
     width: 20
     height: 20
     resolution: 0.1
+    traversal_cost: 20.0
+    path_cost: 4.0
+    use_path_cost: true
 controller:
     timestep: 0.1
     horizon: 5.0
-    samples: 5000
+    samples: 10000
+    resample_threshold: 0.8
+    use_weighted: false
 cost_function:
-    max_velocity: 0.2
+    max_velocity: 1.0
     coefficients:
-        path: 10000.0
+        path: 50000.0
         velocity: 10.0
         acceleration: 2.0
         angular_acceleration: 2.0
+        angular_velocity: 1000.0
 model:
     acceleration_bound:
         upper: 5.0
         lower: -5.0
     axle_length: 0.48
+visualization:
+    sampled_width: 0.0005
+    weighted_width: 0.01
 node:
     debug: true
+debug:
+    starting_yaw: 0.5
+    cos_scaling: 5.0

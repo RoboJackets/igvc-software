@@ -13,7 +13,7 @@ TrajectoryController::TrajectoryController(const SignedDistanceFieldOptions& sdf
   , some_controller_options_{ some_controller_options }
   , differential_drive_options_{ differential_drive_options }
   , sdf_cost_options_{ sdf_cost_options }
-  , traversal_costs_{ std::make_unique<cv::Mat>(sdf_options_.rows_, sdf_options_.cols_, CV_32F, 1.0f) }
+  , traversal_costs_{ std::make_unique<cv::Mat>(sdf_options_.rows_, sdf_options_.cols_, CV_32F, sdf_options_.traversal_cost_) }
   , signed_distance_field_{ std::make_shared<SignedDistanceField>(sdf_options_) }
   , model_{ std::make_shared<Model>(differential_drive_options_) }
   , cost_function_{ std::make_shared<Cost>(signed_distance_field_, sdf_cost_options_) }
@@ -26,17 +26,19 @@ std::unique_ptr<ControllerResult> TrajectoryController::getControls(const nav_ms
 {
   signed_distance_field_->setCenter(state.x, state.y);
   const auto [start_idx, end_idx] = getPathIndices(path, state);
+  // TODO: Change this to have the gamma point be the point at the end of the path, an the traversal costs to have
+  // little cost along the path and high cost everywhere else
   signed_distance_field_->calculate(*path, start_idx, end_idx, *traversal_costs_);
 
   std::unique_ptr<OptimizationResult<Model>> optimization_result = controller_->optimize(state);
 
   igvc_msgs::velocity_pair controls;
-  RobotState lmao = optimization_result->particles[optimization_result->best_particle].state_vec_[5];
+  RobotState lmao = optimization_result->weighted_particle.state_vec_[5];
   controls.left_velocity = lmao.wheel_velocity_.left;
   controls.right_velocity = lmao.wheel_velocity_.right;
 
-  double v = (controls.left_velocity + controls.right_velocity) / 2;
-  double w = (controls.right_velocity - controls.left_velocity) / 0.48;
+//  double v = (controls.left_velocity + controls.right_velocity) / 2;
+//  double w = (controls.right_velocity - controls.left_velocity) / 0.48;
 //  ROS_INFO_STREAM("k: " << w/v);
 
   std::unique_ptr<cv::Mat> sdf_mat = signed_distance_field_->toMat();

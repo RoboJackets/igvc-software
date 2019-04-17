@@ -15,9 +15,12 @@ struct SignedDistanceFieldOptions
   float width_;    // in m, cols
   float height_;   // in m, rows
   float resolution_;
+  float traversal_cost_;
+  float path_cost_;
+  bool use_path_cost_;
 
 public:
-  SignedDistanceFieldOptions(float width, float height, float resolution);
+  SignedDistanceFieldOptions(float width, float height, float resolution, float traversal_cost, float path_cost, bool use_path_cost);
 };
 
 class SignedDistanceField
@@ -35,7 +38,7 @@ public:
    * @param solver the solver to be used to get the SignedDistanceField
    * @return the created signedDistanceField
    */
-  void calculate(const nav_msgs::Path& path, size_t path_start, size_t path_end, const cv::Mat& traversal_costs);
+  void calculate(const nav_msgs::Path& path, size_t path_start, size_t path_end, cv::Mat& traversal_costs);
 
   /**
    * Sets the center of the grid.

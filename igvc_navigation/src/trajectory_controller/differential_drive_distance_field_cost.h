@@ -20,6 +20,7 @@ struct SDFCostCoefficients
 {
   float acceleration;
   float angular_acceleration;
+  float angular_velocity;
   float velocity;
   float path;
 };

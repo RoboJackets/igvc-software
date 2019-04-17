@@ -66,10 +66,10 @@ template <class ModelImpl>
 struct OptimizationResult
 {
   std::vector<Particle<ModelImpl>> particles;
-  int best_particle;
+  Particle<ModelImpl> weighted_particle;
 
 public:
-  OptimizationResult(std::vector<Particle<ModelImpl>>&& moved_particles, int best_index) noexcept;
+  OptimizationResult(std::vector<Particle<ModelImpl>>&& moved_particles, Particle<ModelImpl>&& moved_weighted) noexcept;
 };
 
 struct SomeControllerOptions
@@ -77,9 +77,10 @@ struct SomeControllerOptions
   float timestep;
   float horizon;
   int num_samples;
+  float resample_threshold;
+  bool use_weighted;
 };
 
-// TODO: Change the Model and CostFunction to DerivedModel, DerivedCostFunction, and use the actual Model CRTP thing
 template <class ModelImpl, class CostFunctionImpl>
 class SomeController
 {
@@ -97,7 +98,11 @@ public:
 
 private:
   void resampleParticles();
+  float effectiveParticles();
   void initializeParticles(const State& starting_state);
+  std::vector<Controls> getWeightedPath();
+  Particle<ModelImpl> simulateWithWeightedControls(const State& initial_state,
+                                                   const std::vector<Controls>& controls) const;
   Controls sampleControls() const;
 
   std::shared_ptr<Model<State, control_dims, ModelImpl>> model_;
@@ -106,6 +111,8 @@ private:
   float horizon_;
   int iterations_;
   int num_samples_;
+  float resample_threshold_;
+  bool use_weighted_;
 
   std::random_device rd_;
   mutable std::mt19937 mt_;
@@ -125,11 +132,13 @@ SomeController<ModelImpl, CostFunctionImpl>::SomeController(
   , horizon_{ options.horizon }
   , iterations_{ static_cast<int>(std::round(options.horizon / options.timestep)) }
   , num_samples_{ options.num_samples }
+  , resample_threshold_{ options.resample_threshold }
+  , use_weighted_{ options.use_weighted }
   , rd_{}
   , mt_{ rd_() }
   , particles_(options.num_samples, Particle<ModelImpl>{})
 {
-    ROS_INFO_STREAM("Constructor called! particles_.size(): " << particles_.size());
+  ROS_INFO_STREAM("Constructor called! particles_.size(): " << particles_.size());
   std::array<Bound, control_dims> bounds = model_->bounds();
   for (int i = 0; i < control_dims; i++)
   {
@@ -140,8 +149,9 @@ SomeController<ModelImpl, CostFunctionImpl>::SomeController(
 }
 
 template <class T>
-OptimizationResult<T>::OptimizationResult(std::vector<Particle<T>>&& moved_particles, int best_index) noexcept
-  : particles(std::move(moved_particles)), best_particle{ best_index }
+OptimizationResult<T>::OptimizationResult(std::vector<Particle<T>>&& moved_particles,
+                                          Particle<T>&& moved_weighted) noexcept
+  : particles(std::move(moved_particles)), weighted_particle(std::move(moved_weighted))
 {
 }
 
@@ -164,14 +174,89 @@ SomeController<ModelImpl, CostFunctionImpl>::optimize(const State& starting_stat
       particle.controls_vec_.emplace_back(std::move(controls));
       particle.state_vec_.emplace_back(std::move(new_state));
     }
-    resampleParticles();
+    if (effectiveParticles() < resample_threshold_) {
+      resampleParticles();
+    }
   }
-  auto optimal_particle = std::min_element(particles_.begin(), particles_.end(),
-                                           [](const Particle<ModelImpl>& p1, const Particle<ModelImpl>& p2) {
-                                             return p1.cum_cost_.back() < p2.cum_cost_.back();
-                                           });
-  int idx = optimal_particle - particles_.begin();
-  return std::make_unique<OptimizationResult<ModelImpl>>(std::move(particles_), idx);
+
+  Particle<ModelImpl> best;
+  if (use_weighted_) {
+    std::vector<Controls> weighted_controls = getWeightedPath();
+    best = simulateWithWeightedControls(starting_state, weighted_controls);
+  } else {
+    auto optimal_particle = std::min_element(particles_.begin(), particles_.end(),
+      [](const Particle<ModelImpl>& p1, const Particle<ModelImpl>& p2) {
+        return p1.cum_cost_.back() < p2.cum_cost_.back();
+      });
+    std::vector<Controls> optimal_controls = optimal_particle->controls_vec_;
+    best = simulateWithWeightedControls(starting_state, optimal_controls);
+  }
+  return std::make_unique<OptimizationResult<ModelImpl>>(std::move(particles_), std::move(best));
+}
+
+template <class ModelImpl, class CostFunctionImpl>
+float SomeController<ModelImpl, CostFunctionImpl>::effectiveParticles() {
+  float sum = 0;
+  float test = 0;
+  float squared_normalized_sum = 0;
+  for (const Particle<ModelImpl>& particle : particles_) {
+    sum += particle.getWeight();
+  }
+  for (const Particle<ModelImpl>& particle : particles_) {
+    test += (particle.getWeight()) / sum;
+  }
+  for (const Particle<ModelImpl>& particle : particles_) {
+    squared_normalized_sum += (particle.getWeight() * particle.getWeight()) / (sum * sum);
+  }
+  return 1 / (squared_normalized_sum * num_samples_);
+}
+
+
+template <class ModelImpl, class CostFunctionImpl>
+Particle<ModelImpl> SomeController<ModelImpl, CostFunctionImpl>::simulateWithWeightedControls(
+    const State& initial_state, const std::vector<Controls>& controls) const
+{
+  Particle<ModelImpl> particle{};
+  particle.initialize(initial_state, iterations_);
+
+  particle.controls_vec_ = controls;
+  for (const Controls& control : controls)
+  {
+    State state = particle.getState();
+    State new_state = model_->doPropogateState(state, control, timestep_);
+    float cost = cost_function_->cost(new_state, control);
+    particle.cum_cost_.emplace_back(particle.cum_cost_.back() + cost);
+    particle.state_vec_.emplace_back(std::move(new_state));
+  }
+  return particle;
+}
+
+template <class ModelImpl, class CostFunctionImpl>
+std::vector<typename ModelImpl::Controls> SomeController<ModelImpl, CostFunctionImpl>::getWeightedPath()
+{
+  std::vector<Controls> weighted_controls(iterations_, Controls{});
+  float cum_weight = 0;
+  for (const Particle<ModelImpl>& particle : particles_)
+  {
+    float weight = particle.getWeight();
+    cum_weight += weight;
+    for (int i = 0; i < iterations_; i++)
+    {
+      for (int j = 0; j < control_dims; j++)
+      {
+        weighted_controls[i][j] += weight * particle.controls_vec_[i][j];
+      }
+    }
+  }
+
+  for (Controls& control : weighted_controls)
+  {
+    for (float& ind_control : control)
+    {
+      ind_control = ind_control / cum_weight;
+    }
+  }
+  return weighted_controls;
 }
 
 template <class ModelImpl, class CostFunctionImpl>

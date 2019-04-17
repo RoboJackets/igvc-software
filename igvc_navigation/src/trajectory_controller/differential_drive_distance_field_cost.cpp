@@ -27,6 +27,7 @@ float SignedDistanceFieldCost::getCost(const RobotState& state, const Controls& 
   }
   // Penalize turning
   cost += coeffs_.angular_acceleration * std::abs(controls[0] - controls[1]);
+  cost += coeffs_.angular_velocity * std::abs(state.wheel_velocity_.right - state.wheel_velocity_.left);
 
   return cost;
 }
@@ -36,7 +37,6 @@ float SignedDistanceFieldCost::getSDFValue(const RobotState& state)
   std::optional<float> value = signed_distance_field_->getValue(state.x, state.y);
   if (value)
   {
-    ROS_INFO_STREAM_THROTTLE(0.1, "value: " << *value);
     return *value;
   }
   else

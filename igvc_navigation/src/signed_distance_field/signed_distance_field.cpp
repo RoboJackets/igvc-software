@@ -4,8 +4,14 @@
 
 namespace signed_distance_field
 {
-SignedDistanceFieldOptions::SignedDistanceFieldOptions(float width, float height, float resolution)
-  : width_{ width }, height_{ height }, resolution_{ resolution }
+SignedDistanceFieldOptions::SignedDistanceFieldOptions(float width, float height, float resolution,
+                                                       float traversal_cost, float path_cost, bool use_path_cost)
+  : width_{ width }
+  , height_{ height }
+  , resolution_{ resolution }
+  , traversal_cost_{ traversal_cost }
+  , path_cost_{ path_cost }
+  , use_path_cost_{ use_path_cost }
 {
   rows_ = static_cast<int>(height / resolution);
   cols_ = static_cast<int>(width / resolution);
@@ -20,7 +26,7 @@ SignedDistanceFieldOptions::SignedDistanceFieldOptions(float width, float height
 }
 
 void SignedDistanceField::calculate(const nav_msgs::Path& path, size_t path_start, size_t path_end,
-                                    const cv::Mat& traversal_costs)
+                                    cv::Mat& traversal_costs)
 {
   std::vector<fast_sweep::Node> gamma_points;  // TODO: Reserve?
   if (path_end - path_start > 0)
@@ -36,7 +42,23 @@ void SignedDistanceField::calculate(const nav_msgs::Path& path, size_t path_star
       fast_sweep::Node end = toNode(end_x, end_y);
 
       std::vector<fast_sweep::Node> line = getNodesBetweenWaypoints(start, end);
-      gamma_points.insert(gamma_points.end(), line.begin(), line.end());
+      if (options_.use_path_cost_)
+      {
+        for (const fast_sweep::Node& node : line)
+        {
+          traversal_costs.at<float>(node.y, node.x) = options_.path_cost_;
+        }
+      }
+      else
+      {
+        gamma_points.insert(gamma_points.end(), line.begin(), line.end());
+      }
+    }
+    if (options_.use_path_cost_)
+    {
+      geometry_msgs::Pose last_pose = path.poses[path_end].pose;
+      fast_sweep::Node end = toNode(last_pose.position.x, last_pose.position.y);
+      gamma_points.emplace_back(end);
     }
   }
   else if (path_start - path_end == 0)
