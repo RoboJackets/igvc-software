@@ -26,13 +26,13 @@ ROSTrajectoryController::ROSTrajectoryController() : nh{}, pNh{ "~" }, state_{ s
   initController();
   initMiscParams();
 
-  //    ros::spin();
-  ros::Rate rate(1);
-  while (ros::ok())
-  {
-    testController(starting_yaw, cos_scaling);
-    rate.sleep();
-  }
+  ros::spin();
+  //  ros::Rate rate(1);
+  //  while (ros::ok())
+  //  {
+  //    testController(starting_yaw, cos_scaling);
+  //    rate.sleep();
+  //  }
 }
 
 void ROSTrajectoryController::testController(float starting_yaw, float cos_scaling)
@@ -143,8 +143,7 @@ void ROSTrajectoryController::initController()
   igvc::getParam(pNh, "cost_function/coefficients/acceleration", sdf_cost_options.coefficients.acceleration);
   igvc::getParam(pNh, "cost_function/coefficients/angular_acceleration",
                  sdf_cost_options.coefficients.angular_acceleration);
-  igvc::getParam(pNh, "cost_function/coefficients/angular_velocity",
-    sdf_cost_options.coefficients.angular_velocity);
+  igvc::getParam(pNh, "cost_function/coefficients/angular_velocity", sdf_cost_options.coefficients.angular_velocity);
 
   igvc::getParam(pNh, "model/acceleration_bound/lower", differential_drive_options.acceleration_bound.lower);
   igvc::getParam(pNh, "model/acceleration_bound/upper", differential_drive_options.acceleration_bound.upper);
@@ -234,9 +233,9 @@ void ROSTrajectoryController::visualizeRollout(const std::unique_ptr<Optimizatio
   {
     //    ROS_INFO_STREAM("optimal particle cost: " << optimal_particle->cum_cost_.back() << ", particle weight: " <<
     //    particle.getWeight() << ", max_weight: " << max_weight << ", ratio: " << particle.getWeight() / max_weight);
-    marker_array.markers.emplace_back(toLineStrip(particle.state_vec_, id++, sampled_width_,
-                                                  1.0f - particle.getWeight() / max_weight,
-                                                  particle.getWeight() / max_weight, 0.0f, particle.getWeight() / max_weight, stamp));
+    marker_array.markers.emplace_back(
+        toLineStrip(particle.state_vec_, id++, sampled_width_, 1.0f - particle.getWeight() / max_weight,
+                    particle.getWeight() / max_weight, 0.0f, particle.getWeight() / max_weight, stamp));
   }
   Particle<Model> best_particle = optimization_result->weighted_particle;
   marker_array.markers.emplace_back(

@@ -16,7 +16,7 @@ signed_distance_field:
 controller:
     timestep: 0.1
     horizon: 5.0
-    samples: 10000
+    samples: 1000
     resample_threshold: 0.8
     use_weighted: false
 cost_function:
