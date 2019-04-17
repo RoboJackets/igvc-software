@@ -21,14 +21,36 @@ ROSTrajectoryController::ROSTrajectoryController() : nh{}, pNh{ "~" }, state_{ s
   initSubscribeAndPublish();
   initController();
 
-  ros::Rate rate(0.2);
+  //    ros::spin();
+  ros::Rate rate(1);
   while (ros::ok())
   {
-    //    std::unique_ptr<cv::Mat> field = trajectory_controller.test();
-    //    publishAsPCL(signed_distance_field_pub_, *field, resolution, "/odom",
-    //    pcl_conversions::toPCL(ros::Time::now()));
+    testController();
     rate.sleep();
   }
+}
+
+void ROSTrajectoryController::testController()
+{
+  RobotState state{};
+  state.wheel_velocity_.left = 0.1;
+  state.wheel_velocity_.right = 0.1;
+
+  nav_msgs::PathPtr path = boost::make_shared<nav_msgs::Path>();
+  geometry_msgs::PoseStamped pose;
+  pose.pose.position.x = 0;
+  pose.pose.position.y = 0;
+  path->poses.emplace_back(pose);
+  pose.pose.position.x = 5;
+  pose.pose.position.y = 0;
+  path->poses.emplace_back(pose);
+  pose.pose.position.x = 5;
+  pose.pose.position.y = 5;
+  path->poses.emplace_back(pose);
+  std::unique_ptr<ControllerResult> result = controller_->getControls(path, state);
+  publishAsPCL(debug_signed_distance_field_pub_, *result->signed_distance_field, sdf_options_->resolution_, "/odom",
+               pcl_conversions::toPCL(ros::Time::now()));
+  visualizeRollout(result->optimization_result, ros::Time::now());
 }
 
 void ROSTrajectoryController::publishAsPCL(const ros::Publisher& pub, const cv::Mat& mat, double resolution,
@@ -40,9 +62,9 @@ void ROSTrajectoryController::publishAsPCL(const ros::Publisher& pub, const cv::
     for (int j = 0; j < mat.rows; j++)
     {
       pcl::PointXYZI p{};
-      p.x = static_cast<float>((i - (mat.cols / 2.0)) * resolution);
-      p.y = static_cast<float>(((mat.rows / 2.0) - j) * resolution);
-      p.intensity = cos(mat.at<float>(j, i));
+      p.x = static_cast<float>((i - (mat.cols / 2.0)) * resolution) + state_->x;
+      p.y = static_cast<float>(((mat.rows / 2.0) - j) * resolution) + state_->y;
+      p.intensity = mat.at<float>(j, i);
       pointcloud->points.push_back(p);
     }
   }
@@ -55,16 +77,19 @@ void ROSTrajectoryController::initSubscribeAndPublish()
 {
   std::string topic_path;
   std::string topic_odometry;
+  std::string topic_wheel_odometry;
   std::string topic_motors;
 
   igvc::getParam(pNh, "topics/path", topic_path);
   igvc::getParam(pNh, "topics/odometry", topic_odometry);
+  igvc::getParam(pNh, "topics/wheel_odometry", topic_wheel_odometry);
   igvc::getParam(pNh, "topics/motors", topic_motors);
 
   motor_pub_ = nh.advertise<igvc_msgs::velocity_pair>(topic_motors, 1);
 
   path_sub_ = nh.subscribe(topic_path, 1, &ROSTrajectoryController::pathCallback, this);
   odom_sub_ = nh.subscribe(topic_odometry, 1, &ROSTrajectoryController::odomCallback, this);
+  wheel_odom_sub_ = nh.subscribe(topic_wheel_odometry, 1, &ROSTrajectoryController::wheelOdomCallback, this);
 
   if (debug_)
   {
@@ -122,8 +147,28 @@ void ROSTrajectoryController::pathCallback(const nav_msgs::PathConstPtr& path)
 
 void ROSTrajectoryController::odomCallback(const nav_msgs::OdometryConstPtr& odom)
 {
-  state_ = RobotState(odom);
+  if (!state_)
+  {
+    state_ = RobotState(odom);
+  }
+  else
+  {
+    state_->setState(odom);
+  }
   getControls(odom->header.stamp);
+}
+
+void ROSTrajectoryController::wheelOdomCallback(const igvc_msgs::velocity_pair& velocity_pair)
+{
+  if (!state_)
+  {
+    state_ = RobotState(velocity_pair);
+  }
+  else
+  {
+    state_->setState(velocity_pair);
+  }
+  getControls(velocity_pair.header.stamp);
 }
 
 void ROSTrajectoryController::getControls(const ros::Time& stamp)
@@ -145,19 +190,38 @@ void ROSTrajectoryController::getControls(const ros::Time& stamp)
     visualizeRollout(controller_results->optimization_result, stamp);
     visualizeSignedDistanceField(controller_results->signed_distance_field, stamp);
   }
+
+  executeControls(controller_results->controls, stamp);
+}
+
+void ROSTrajectoryController::executeControls(igvc_msgs::velocity_pair controls, const ros::Time& stamp)
+{
+  controls.header.stamp = stamp;
+  motor_pub_.publish(controls);
 }
 
 void ROSTrajectoryController::visualizeRollout(const std::unique_ptr<OptimizationResult<Model>>& optimization_result,
                                                const ros::Time& stamp) const
 {
+  std::vector<Particle<Model>> particles = optimization_result->particles;
+  auto optimal_particle =
+      std::min_element(particles.begin(), particles.end(), [](const Particle<Model>& p1, const Particle<Model>& p2) {
+        return p1.cum_cost_.back() < p2.cum_cost_.back();
+      });
+
+  float max_weight = optimal_particle->getWeight();
+
   int id = 0;
   visualization_msgs::MarkerArray marker_array;
   for (const Particle<Model>& particle : optimization_result->particles)
   {
-    marker_array.markers.emplace_back(toLineStrip(particle.state_vec_, id++, 0.001f, 0.97f, 0.43f, 0.48f, 0.8f, stamp));
+    //    ROS_INFO_STREAM("optimal particle cost: " << optimal_particle->cum_cost_.back() << ", particle weight: " <<
+    //    particle.getWeight() << ", max_weight: " << max_weight << ", ratio: " << particle.getWeight() / max_weight);
+    marker_array.markers.emplace_back(toLineStrip(particle.state_vec_, id++, 0.001f, 1.0f - particle.getWeight() / max_weight,
+                                                  particle.getWeight() / max_weight, 0.0f, 0.8f, stamp));
   }
   Particle<Model> best_particle = optimization_result->particles[optimization_result->best_particle];
-  marker_array.markers.emplace_back(toLineStrip(best_particle.state_vec_, id++, 0.01f, 1.0f, 1.0f, 1.0f, 0.8f, stamp));
+  marker_array.markers.emplace_back(toLineStrip(best_particle.state_vec_, id++, 0.001f, 1.0f, 1.0f, 1.0f, 0.8f, stamp));
   debug_rollout_pub_.publish(marker_array);
 }
 

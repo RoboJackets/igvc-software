@@ -36,6 +36,11 @@ private:
   void getControls(const ros::Time& stamp);
   void pathCallback(const nav_msgs::PathConstPtr& path);
   void odomCallback(const nav_msgs::OdometryConstPtr& odom);
+  void wheelOdomCallback(const igvc_msgs::velocity_pair& velocity_pair);
+
+  void executeControls(igvc_msgs::velocity_pair controls, const ros::Time& stamp);
+
+  void testController();
 
   bool debug_;
 
@@ -49,6 +54,7 @@ private:
 
   ros::Subscriber path_sub_;
   ros::Subscriber odom_sub_;
+  ros::Subscriber wheel_odom_sub_;
 
   std::unique_ptr<SignedDistanceFieldOptions> sdf_options_;
   std::unique_ptr<TrajectoryController> controller_;

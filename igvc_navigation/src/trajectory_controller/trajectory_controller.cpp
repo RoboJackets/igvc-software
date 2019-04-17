@@ -1,5 +1,7 @@
-#include "trajectory_controller.h"
+#include <utility>
+
 #include <visualization_msgs/MarkerArray.h>
+#include "trajectory_controller.h"
 
 namespace trajectory_controller
 {
@@ -27,12 +29,20 @@ std::unique_ptr<ControllerResult> TrajectoryController::getControls(const nav_ms
   signed_distance_field_->calculate(*path, start_idx, end_idx, *traversal_costs_);
 
   std::unique_ptr<OptimizationResult<Model>> optimization_result = controller_->optimize(state);
-  std::unique_ptr<cv::Mat> sdf_mat;
-  std::unique_ptr<ControllerResult> controller_result = std::make_unique<ControllerResult>(std::move(optimization_result), std::move(sdf_mat));
-//  controller_result->signed_distance_field = std::move(sdf_mat);
-//  controller_result->optimization_result = std::move(optimization_result);
+
+  igvc_msgs::velocity_pair controls;
+  RobotState lmao = optimization_result->particles[optimization_result->best_particle].state_vec_[5];
+  controls.left_velocity = lmao.wheel_velocity_.left;
+  controls.right_velocity = lmao.wheel_velocity_.right;
+
+  double v = (controls.left_velocity + controls.right_velocity) / 2;
+  double w = (controls.right_velocity - controls.left_velocity) / 0.48;
+//  ROS_INFO_STREAM("k: " << w/v);
+
+  std::unique_ptr<cv::Mat> sdf_mat = signed_distance_field_->toMat();
+  std::unique_ptr<ControllerResult> controller_result =
+      std::make_unique<ControllerResult>(std::move(optimization_result), std::move(sdf_mat), std::move(controls));
   return controller_result;
-//  return std::make_unique<ControllerResult>(std::move(optimization_result), std::move(sdf_mat));
 }
 
 std::pair<int, int> TrajectoryController::getPathIndices(const nav_msgs::PathConstPtr& path,
@@ -73,8 +83,10 @@ std::pair<int, int> TrajectoryController::getPathIndices(const nav_msgs::PathCon
 }
 
 ControllerResult::ControllerResult(std::unique_ptr<OptimizationResult<Model>> optimization_res,
-                                   std::unique_ptr<cv::Mat> sdf)
-  : optimization_result{ std::move(optimization_res) }, signed_distance_field{ std::move(sdf) }
+                                   std::unique_ptr<cv::Mat> sdf, igvc_msgs::velocity_pair controls)
+  : optimization_result{ std::move(optimization_res) }
+  , signed_distance_field{ std::move(sdf) }
+  , controls{ std::move(controls) }
 {
 }
 }  // namespace trajectory_controller

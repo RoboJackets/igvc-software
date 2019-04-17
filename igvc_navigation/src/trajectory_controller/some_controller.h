@@ -129,11 +129,13 @@ SomeController<ModelImpl, CostFunctionImpl>::SomeController(
   , mt_{ rd_() }
   , particles_(options.num_samples, Particle<ModelImpl>{})
 {
-  std::array<Bound, control_dims> bounds = model_->getBounds();
+    ROS_INFO_STREAM("Constructor called! particles_.size(): " << particles_.size());
+  std::array<Bound, control_dims> bounds = model_->bounds();
   for (int i = 0; i < control_dims; i++)
   {
     Bound bound = bounds[i];
     distributions_[i] = std::uniform_real_distribution<float>(bound.lower, bound.upper);
+    ROS_INFO_STREAM("min: " << distributions_[i].min() << ", max: " << distributions_[i].max());
   }
 }
 
@@ -187,6 +189,7 @@ typename ModelImpl::Controls SomeController<ModelImpl, CostFunctionImpl>::sample
 template <class ModelImpl, class CostFunctionImpl>
 void SomeController<ModelImpl, CostFunctionImpl>::initializeParticles(const State& starting_state)
 {
+  particles_ = std::vector<Particle<ModelImpl>>(num_samples_, Particle<ModelImpl>{});
   for (Particle<ModelImpl>& particle : particles_)
   {
     particle.initialize(starting_state, iterations_);

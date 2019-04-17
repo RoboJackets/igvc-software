@@ -9,6 +9,7 @@
 
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
+#include <igvc_msgs/velocity_pair.h>
 
 #include "differential_drive_distance_field_cost.h"
 #include "differential_drive_model.h"
@@ -35,9 +36,10 @@ struct ControllerResult
 {
   std::unique_ptr<OptimizationResult<Model>> optimization_result;
   std::unique_ptr<cv::Mat> signed_distance_field;
+  igvc_msgs::velocity_pair controls;
 
 public:
-  ControllerResult(std::unique_ptr<OptimizationResult<Model>> optimization_res, std::unique_ptr<cv::Mat> sdf);
+  ControllerResult(std::unique_ptr<OptimizationResult<Model>> optimization_res, std::unique_ptr<cv::Mat> sdf, igvc_msgs::velocity_pair controls);
 };
 
 class TrajectoryController

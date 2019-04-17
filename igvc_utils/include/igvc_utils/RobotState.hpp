@@ -5,11 +5,12 @@
 #include <tf/transform_datatypes.h>
 #include <Eigen/Dense>
 #include <igvc_utils/NodeUtils.hpp>
+#include <igvc_msgs/velocity_pair.h>
 
 struct WheelVelocity
 {
-  double left;
-  double right;
+  double left{};
+  double right{};
 };
 
 class RobotState
@@ -34,6 +35,11 @@ public:
     tf::Matrix3x3 rot;
     rot.setRPY(0, 0, yaw);
     transform.setBasis(rot);
+  }
+
+  explicit RobotState(const igvc_msgs::velocity_pair &msg)
+  {
+    setState(msg);
   }
 
   explicit RobotState(const tf::StampedTransform &stamped_transform, ros::Time stamp)
@@ -74,6 +80,13 @@ public:
     tf::quaternionMsgToTF(msg->pose.pose.orientation, quaternion);
     transform.setRotation(quaternion);
     transform.setOrigin(tf::Vector3(x, y, z));
+  }
+
+  // set state via wheel odom
+  void setState(const igvc_msgs::velocity_pair &velocity_pair)
+  {
+    wheel_velocity_.left = velocity_pair.left_velocity;
+    wheel_velocity_.right = velocity_pair.right_velocity;
   }
 
   // set state via a transform

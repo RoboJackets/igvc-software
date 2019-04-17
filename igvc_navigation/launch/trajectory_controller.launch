@@ -1,5 +1,5 @@
 <launch>
-    <node name="trajectory_controller" pkg="igvc_navigation" type="trajectory_controller" output="screen" >
+    <node name="trajectory_controller" pkg="igvc_navigation" type="trajectory_controller" output="screen">
         <rosparam command="load" file="$(find igvc_navigation)/launch/trajectory_controller.yaml"/>
     </node>
 </launch>
