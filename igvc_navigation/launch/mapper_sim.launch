@@ -1,9 +1,8 @@
 <launch>
-    <!--<include file="$(find igvc_navigation)/launch/localization.launch" />-->
-
     <!-- Map Node -->
     <node name="mapper" pkg="igvc_navigation" type="mapper" output="screen">
-            <rosparam command="load" file="$(find igvc_navigation)/launch/octomap.yaml"/>
+<!--        <rosparam command="load" file="$(find igvc_navigation)/launch/octomap.yaml"/>-->
+        <rosparam command="load" file="$(find igvc_navigation)/launch/octomap_sim.yaml"/>
     </node>
 
     <arg name="plot_rviz" default="false"/>
