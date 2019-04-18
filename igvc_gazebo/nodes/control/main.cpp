@@ -14,7 +14,6 @@ double speed_measured_left = 0.0;
 double speed_measured_right = 0.0;
 double wheel_radius;
 
-
 void speedCallback(const igvc_msgs::velocity_pair::ConstPtr &msg)
 {
   if (msg->left_velocity == msg->left_velocity)
@@ -64,9 +63,9 @@ int main(int argc, char **argv)
   ros::Publisher wheel_speed_publisher = handle.advertise<igvc_msgs::velocity_pair>("/encoders", 1);
 
   ros::Publisher right_wheel_shock_publisher =
-    handle.advertise<std_msgs::Float64>("right_wheel_shock_controller/command", 1, true);
+      handle.advertise<std_msgs::Float64>("right_wheel_shock_controller/command", 1, true);
   ros::Publisher left_wheel_shock_publisher =
-    handle.advertise<std_msgs::Float64>("left_wheel_shock_controller/command", 1, true);
+      handle.advertise<std_msgs::Float64>("left_wheel_shock_controller/command", 1, true);
 
   std_msgs::Float64 shock_set_point;
   shock_set_point.data = 0.0;
@@ -121,8 +120,8 @@ int main(int argc, char **argv)
     speed_left_error_accum += error_left;
     speed_last_error_left = error_left;
 
-    //ROS_INFO_STREAM("error left = " << error_left);
-    //ROS_INFO_STREAM("effort_left = " << effort_left);
+    // ROS_INFO_STREAM("error left = " << error_left);
+    // ROS_INFO_STREAM("effort_left = " << effort_left);
 
     effort_left += speed_P_left * error_left + speed_D_left * dError_left + speed_I_left * speed_left_error_accum;
 
@@ -131,13 +130,14 @@ int main(int argc, char **argv)
     speed_right_error_accum += error_right;
     speed_last_error_right = error_right;
 
-    effort_right += speed_P_right * error_right + speed_D_right * dError_right + speed_I_right * speed_right_error_accum;
+    effort_right +=
+        speed_P_right * error_right + speed_D_right * dError_right + speed_I_right * speed_right_error_accum;
 
     effort_right = std::min(max_effort, std::max(-max_effort, effort_right));
     effort_left = std::min(max_effort, std::max(-max_effort, effort_left));
 
     // ROS_INFO_STREAM("Publishing effort: " << effort_right);
-    //ROS_INFO_STREAM("left: " << effort_left << " right: " << effort_right);
+    // ROS_INFO_STREAM("left: " << effort_left << " right: " << effort_right);
     std_msgs::Float64 left_wheel_message;
     std_msgs::Float64 right_wheel_message;
 
@@ -157,7 +157,6 @@ int main(int argc, char **argv)
       right_wheel_message.data = effort_right;
     }
     */
-
 
     left_wheel_effort_publisher.publish(left_wheel_message);
     right_wheel_effort_publisher.publish(right_wheel_message);
