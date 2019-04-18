@@ -36,11 +36,25 @@
   <xacro:property name="caster_mass" value="1.0"/>
   <xacro:property name="caster_x" value="0.612978"/>
 
-  <!-- camera params -->
-  <xacro:property name="camera_y" value="0.0"/>
-  <xacro:property name="camera_x" value="0.216371"/>
-  <xacro:property name="camera_pitch" value="0.0"/>
-  <xacro:property name="camera_z" value="1.354330"/>
+  <!-- center camera params -->
+  <xacro:property name="center_camera_y" value="0.0"/>
+  <xacro:property name="center_camera_x" value="0.216371"/>
+  <xacro:property name="center_camera_pitch" value="0.0"/>
+  <xacro:property name="center_camera_z" value="1.354330"/>
+
+  <!-- right camera params -->
+  <xacro:property name="right_camera_y" value="0.3"/>
+  <xacro:property name="right_camera_x" value="0.216371"/>
+  <xacro:property name="right_camera_pitch" value="0.0"/>
+  <xacro:property name="right_camera_yaw" value="0.0"/>
+  <xacro:property name="right_camera_z" value="1.354330"/>
+
+  <!-- left camera params -->
+  <xacro:property name="left_camera_y" value="-0.3"/>
+  <xacro:property name="left_camera_x" value="0.216371"/>
+  <xacro:property name="left_camera_pitch" value="0.0"/>
+  <xacro:property name="left_camera_yaw" value="0.0"/>
+  <xacro:property name="left_camera_z" value="1.354330"/>
 
   <!-- lidar params -->
   <xacro:property name="lidar_pitch" value="0.174533"/>
@@ -54,10 +68,16 @@
   <xacro:property name="gps_y" value="0.198120"/>
   <xacro:property name="gps_x" value="0.216371"/>
 
-  <!-- imu -->
+  <!-- imu bottom -->
   <xacro:property name="imu_z" value="1.354330"/>
   <xacro:property name="imu_y" value="-0.198120"/>
   <xacro:property name="imu_x" value="0.216371"/>
+
+  <!-- imu top -->
+  <xacro:property name="magnetometer_z" value="1.354330"/>
+  <xacro:property name="magnetometer_y" value="-0.198120"/>
+  <xacro:property name="magnetometer_x" value="0.216371"/>
+
 
   <!-- gives small geometry so it show up in rviz -->
   <xacro:macro name="null_link">
@@ -245,7 +265,7 @@
   </link>
 
   <joint name="base_link_to_center_cam" type="fixed">
-      <origin xyz="${camera_x} ${camera_y} ${camera_z}" rpy="0 ${camera_pitch} 0" />
+      <origin xyz="${center_camera_x} ${center_camera_y} ${center_camera_z}" rpy="0 ${center_camera_pitch} 0" />
       <parent link="base_link"/>
       <child link="center_cam"/>
   </joint>
@@ -291,6 +311,136 @@
               <imageTopicName>image_raw</imageTopicName>
               <cameraInfoTopicName>camera_info</cameraInfoTopicName>
               <frameName>center_cam_optical</frameName>
+              <hackBaseline>0.0</hackBaseline>
+              <distortionK1>0.0</distortionK1>
+              <distortionK2>0.0</distortionK2>
+              <distortionK3>0.0</distortionK3>
+              <distortionT1>0.0</distortionT1>
+              <distortionT2>0.0</distortionT2>
+          </plugin>
+      </sensor>
+  </gazebo>
+
+  <link name="right_cam">
+      <visual>
+          <geometry>
+              <box size="0.1 0.1 0.1"/>
+          </geometry>
+      </visual>
+  </link>
+
+  <joint name="base_link_to_right_cam" type="fixed">
+      <origin xyz="${right_camera_x} ${right_camera_y} ${right_camera_z}" rpy="0 ${right_camera_pitch} ${right_camera_yaw}" />
+      <parent link="base_link"/>
+      <child link="right_cam"/>
+  </joint>
+
+  <!-- the optical joint is in the correct frame for transforms -->
+  <link name="right_cam_optical"/>
+
+  <joint name="right_cam_optical_joint" type="fixed">
+      <parent link="right_cam"/>
+      <child link="right_cam_optical"/>
+      <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+  </joint>
+
+  <gazebo reference="right_cam">
+      <sensor name="right_cam_sensor" type="camera">
+          <camera>
+              <horizontal_fov>1.2290609</horizontal_fov>
+              <image>
+                <width>1920</width>
+                <height>1080</height>
+              </image>
+              <clip>
+                <near>0.1</near>
+                <far>100</far>
+              </clip>
+              <!--
+                  <distortion>
+                  <k1>-0.25</k1>
+                  <k2>0.12</k2>
+                  <k3>0.0</k3>
+                  <p1>-0.00028</p1>
+                  <p2>-0.00005</p2>
+                  <center>0.5 0.5</center>
+                  </distortion>
+              -->
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>30</updateRate>
+              <cameraName>right_cam</cameraName>
+              <imageTopicName>image_raw</imageTopicName>
+              <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+              <frameName>right_cam_optical</frameName>
+              <hackBaseline>0.0</hackBaseline>
+              <distortionK1>0.0</distortionK1>
+              <distortionK2>0.0</distortionK2>
+              <distortionK3>0.0</distortionK3>
+              <distortionT1>0.0</distortionT1>
+              <distortionT2>0.0</distortionT2>
+          </plugin>
+      </sensor>
+  </gazebo>
+
+  <link name="left_cam">
+      <visual>
+          <geometry>
+              <box size="0.1 0.1 0.1"/>
+          </geometry>
+      </visual>
+  </link>
+
+  <joint name="base_link_to_left_cam" type="fixed">
+      <origin xyz="${left_camera_x} ${left_camera_y} ${left_camera_z}" rpy="0 ${left_camera_pitch} ${left_camera_yaw}" />
+      <parent link="base_link"/>
+      <child link="left_cam"/>
+  </joint>
+
+  <!-- the optical joint is in the correct frame for transforms -->
+  <link name="left_cam_optical"/>
+
+  <joint name="left_cam_optical_joint" type="fixed">
+      <parent link="left_cam"/>
+      <child link="left_cam_optical"/>
+      <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
+  </joint>
+
+  <gazebo reference="left_cam">
+      <sensor name="left_cam_sensor" type="camera">
+          <camera>
+              <horizontal_fov>1.2290609</horizontal_fov>
+              <image>
+                <width>1920</width>
+                <height>1080</height>
+              </image>
+              <clip>
+                <near>0.1</near>
+                <far>100</far>
+              </clip>
+              <!--
+                  <distortion>
+                  <k1>-0.25</k1>
+                  <k2>0.12</k2>
+                  <k3>0.0</k3>
+                  <p1>-0.00028</p1>
+                  <p2>-0.00005</p2>
+                  <center>0.5 0.5</center>
+                  </distortion>
+              -->
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+              <alwaysOn>true</alwaysOn>
+              <updateRate>30</updateRate>
+              <cameraName>left_cam</cameraName>
+              <imageTopicName>image_raw</imageTopicName>
+              <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+              <frameName>left_cam_optical</frameName>
               <hackBaseline>0.0</hackBaseline>
               <distortionK1>0.0</distortionK1>
               <distortionK2>0.0</distortionK2>
@@ -376,6 +526,22 @@
 
 
 
+  <link name="magnetometer">
+    <visual>
+      <geometry>
+        <!-- TODO dimensions -->
+        <box size="0.1 0.1 0.1"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <joint name="base_link_to_magnetometer" type="fixed">
+    <parent link="base_link"/>
+    <child link="magnetometer"/>
+    <origin xyz="${magnetometer_x} ${magnetometer_y} ${magnetometer_z}" rpy="0 0 0"/>
+    <axis xyz="0 0 0"/>
+  </joint>
+
   <link name="imu">
     <visual>
       <geometry>
@@ -391,6 +557,7 @@
     <origin xyz="${imu_x} ${imu_y} ${imu_z}" rpy="0 0 0"/>
     <axis xyz="0 0 0"/>
   </joint>
+
 
   <link name="gps">
     <visual>
@@ -432,6 +599,28 @@
       <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
       <yawOffset>1.5707963</yawOffset>
     </plugin>
+
+    <plugin filename="libhector_gazebo_ros_imu.so" name="imu">
+      <serviceName>/magnetometer/calibrate</serviceName>
+      <updateRate>200.0</updateRate>
+      <bodyName>magnetometer</bodyName>
+      <frameId>magnetometer</frameId>
+      <topicName>/magnetometer</topicName>
+      <rpyOffset>0 0 0</rpyOffset>
+      <xyzOffset>0 0 0</xyzOffset>
+      <gaussianNoise>0.00000001</gaussianNoise>
+      <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
+      <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
+      <accelGaussianNoise>0.00000001 0.00000001 0.00000001</accelGaussianNoise>
+      <rateDrift>0.0 0.0 0.0</rateDrift>
+      <rateDriftFrequency>0.0 0.0 0.0</rateDriftFrequency>
+      <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
+      <headingDrift>0.0 0.0 0.0</headingDrift>
+      <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
+      <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
+      <yawOffset>1.5707963</yawOffset>
+    </plugin>
+
 
     <plugin filename="libhector_gazebo_ros_gps.so" name="gps">
       <updateRate>20.0</updateRate>
