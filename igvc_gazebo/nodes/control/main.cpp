@@ -91,9 +91,9 @@ int main(int argc, char **argv)
   enabled_msg.data = true;
   enabled_pub.publish(enabled_msg);
 
-  auto speedSub = handle.subscribe("/motors", 1, speedCallback);
+  ros::Subscriber speed_sub = handle.subscribe("/motors", 1, speedCallback);
 
-  auto stateSub = handle.subscribe("/joint_states", 1, jointStateCallback);
+  ros::Subscriber state_sub = handle.subscribe("/joint_states", 1, jointStateCallback);
 
   ros::Time prev, now;
   prev = ros::Time::now();
@@ -115,8 +115,8 @@ int main(int argc, char **argv)
     double dt = cur_time.toSec() - prev_time.toSec();
     prev_time = cur_time;
 
-    auto error_left = speed_set_point_left - speed_measured_left;
-    auto dError_left = (error_left - speed_last_error_left) / dt;
+    double error_left = speed_set_point_left - speed_measured_left;
+    double dError_left = (error_left - speed_last_error_left) / dt;
     speed_left_error_accum += error_left;
     speed_last_error_left = error_left;
 
@@ -125,8 +125,8 @@ int main(int argc, char **argv)
 
     effort_left += speed_P_left * error_left + speed_D_left * dError_left + speed_I_left * speed_left_error_accum;
 
-    auto error_right = speed_set_point_right - speed_measured_right;
-    auto dError_right = (error_right - speed_last_error_right) / dt;
+    double error_right = speed_set_point_right - speed_measured_right;
+    double dError_right = (error_right - speed_last_error_right) / dt;
     speed_right_error_accum += error_right;
     speed_last_error_right = error_right;
 
