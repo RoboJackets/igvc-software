@@ -57,21 +57,21 @@ int main(int argc, char **argv)
   ros::NodeHandle handle;
   ros::NodeHandle pNh("~");
 
-  ros::Publisher leftWheelEffortPublisher =
+  ros::Publisher left_wheel_effort_publisher =
       handle.advertise<std_msgs::Float64>("/left_wheel_effort_controller/command", 1);
-  ros::Publisher rightWheelEffortPublisher =
+  ros::Publisher right_wheel_effort_publisher =
       handle.advertise<std_msgs::Float64>("/right_wheel_effort_controller/command", 1);
-  ros::Publisher wheelSpeedPublisher = handle.advertise<igvc_msgs::velocity_pair>("/encoders", 1);
+  ros::Publisher wheel_speed_publisher = handle.advertise<igvc_msgs::velocity_pair>("/encoders", 1);
 
-  ros::Publisher rightWheelShockPublisher =
+  ros::Publisher right_wheel_shock_publisher =
     handle.advertise<std_msgs::Float64>("right_wheel_shock_controller/command", 1, true);
-  ros::Publisher leftWheelShockPublisher =
+  ros::Publisher left_wheel_shock_publisher =
     handle.advertise<std_msgs::Float64>("left_wheel_shock_controller/command", 1, true);
 
   std_msgs::Float64 shock_set_point;
   shock_set_point.data = 0.0;
-  rightWheelShockPublisher.publish(shock_set_point);
-  leftWheelShockPublisher.publish(shock_set_point);
+  right_wheel_shock_publisher.publish(shock_set_point);
+  left_wheel_shock_publisher.publish(shock_set_point);
 
   double speed_P_left, speed_P_right, speed_D_left, speed_D_right, speed_I_left, speed_I_right;
   double rate_var;
@@ -159,8 +159,8 @@ int main(int argc, char **argv)
     */
 
 
-    leftWheelEffortPublisher.publish(left_wheel_message);
-    rightWheelEffortPublisher.publish(right_wheel_message);
+    left_wheel_effort_publisher.publish(left_wheel_message);
+    right_wheel_effort_publisher.publish(right_wheel_message);
     igvc_msgs::velocity_pair speed_measured;
     speed_measured.left_velocity = speed_measured_left;
     speed_measured.right_velocity = speed_measured_right;
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
     ros::Duration duration = now - prev;
     speed_measured.duration = duration.toSec();
     speed_measured.header.stamp = ros::Time::now();
-    wheelSpeedPublisher.publish(speed_measured);
+    wheel_speed_publisher.publish(speed_measured);
     rate.sleep();
     prev = now;
   }

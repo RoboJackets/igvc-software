@@ -13,11 +13,11 @@ ros::Publisher g_ground_truth_pub;
 nav_msgs::Odometry g_og_pose;
 ros::Time g_last_estimate;
 
-void odom_callback(const nav_msgs::Odometry::ConstPtr& msg) {
+void odomCallback(const nav_msgs::Odometry::ConstPtr& msg) {
   g_last_estimate = msg->header.stamp;
 }
 
-void ground_truth_callback(const nav_msgs::Odometry::ConstPtr& msg) {
+void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg) {
   // get the starting location as the origin
   if(g_og_pose.header.stamp.toSec() == 0) {
     g_og_pose.pose = msg->pose;
@@ -77,9 +77,9 @@ int main(int argc, char** argv) {
   igvc::param(pNh, "latitude", latitude, 33.774497);
 
   ros::Subscriber ground_truth = nh.subscribe<nav_msgs::Odometry>(ground_truth_topic, 10,
-                                                         ground_truth_callback);
+                                                         groundTruthCallback);
 
-  ros::Subscriber estimate_sub = nh.subscribe<nav_msgs::Odometry>("/odometry/filtered", 1, odom_callback);
+  ros::Subscriber estimate_sub = nh.subscribe<nav_msgs::Odometry>("/odometry/filtered", 1, odomCallback);
   g_ground_truth_pub = nh.advertise<nav_msgs::Odometry>(pub_topic, 1);
 
   double utm_x, utm_y;
