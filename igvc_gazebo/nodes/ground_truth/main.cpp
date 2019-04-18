@@ -8,56 +8,48 @@
 #include <igvc_utils/NodeUtils.hpp>
 #include <robot_localization/navsat_conversions.h>
 
-ros::Publisher ground_truth_pub;
-std::mutex mutex;
-nav_msgs::Odometry og_pose;
-ros::Time last_estimate;
+ros::Publisher g_ground_truth_pub;
+// TODO make this a minimal object
+nav_msgs::Odometry g_og_pose;
+ros::Time g_last_estimate;
 
 void odom_callback(const nav_msgs::Odometry::ConstPtr& msg) {
-  last_estimate = msg->header.stamp;
+  g_last_estimate = msg->header.stamp;
 }
 
 void ground_truth_callback(const nav_msgs::Odometry::ConstPtr& msg) {
-
-  std::lock_guard<std::mutex> truth_lock(mutex);
   // get the starting location as the origin
-  if(msg->header.stamp.toSec() < 0.5) {
-    og_pose.pose = msg->pose;
-    og_pose.pose.pose.position.x = -msg->pose.pose.position.y;
-    og_pose.pose.pose.position.y = msg->pose.pose.position.x;
+  if(g_og_pose.header.stamp.toSec() == 0) {
+    g_og_pose.pose = msg->pose;
+    g_og_pose.header = msg->header;
+    g_og_pose.pose.pose.position.x = msg->pose.pose.position.x;
+    g_og_pose.pose.pose.position.y = msg->pose.pose.position.y;
+    ROS_INFO_STREAM("setting g_og_pose to " << g_og_pose.pose.pose.position.x << ", "
+                    << g_og_pose.pose.pose.position.y);
   } else {
     nav_msgs::Odometry result;
     result.pose = msg->pose;
 
-    // rotate position into world frame
-    result.pose.pose.position.x = (-msg->pose.pose.position.y) - og_pose.pose.pose.position.x;
-    result.pose.pose.position.y = msg->pose.pose.position.x - og_pose.pose.pose.position.y;
+    // use the initial location as an offset (makes the starting location 0, 0)
+    result.pose.pose.position.x = msg->pose.pose.position.x - g_og_pose.pose.pose.position.x;
+    result.pose.pose.position.y = msg->pose.pose.position.y - g_og_pose.pose.pose.position.y;
 
-
-    // rotate velocity into world frame
     result.twist = msg->twist;
-    result.twist.twist.linear.x = -msg->twist.twist.linear.y;
-    result.twist.twist.linear.y = msg->twist.twist.linear.x;
 
+    // set up the correct header
     result.header = msg->header;
     result.child_frame_id = "/base_footprint";
     result.header.frame_id = "/odom";
 
     tf::Quaternion quat(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y,
                         msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
-    quat *= tf::createQuaternionFromRPY(0, 0, 1.57);
-
-    result.pose.pose.orientation.x = quat.x();
-    result.pose.pose.orientation.y = quat.y();
-    result.pose.pose.orientation.z = quat.z();
-    result.pose.pose.orientation.w = quat.w();
 
     // publish odom message
-    ground_truth_pub.publish(result);
+    g_ground_truth_pub.publish(result);
 
     // publish transform for tf if there has not been a update from the localization node in the last second
     // since it also publishes the same transform
-    if(std::abs(msg->header.stamp.toSec() - last_estimate.toSec()) > 1.0) {
+    if(std::abs(msg->header.stamp.toSec() - g_last_estimate.toSec()) > 1.0) {
       static tf::TransformBroadcaster br;
       tf::Transform transform;
       transform.setOrigin( tf::Vector3(result.pose.pose.position.x, result.pose.pose.position.y, result.pose.pose.position.z) );
@@ -88,17 +80,17 @@ int main(int argc, char** argv) {
                                                          ground_truth_callback);
 
   ros::Subscriber estimate_sub = nh.subscribe<nav_msgs::Odometry>("/odometry/filtered", 1, odom_callback);
-  ground_truth_pub = nh.advertise<nav_msgs::Odometry>(pub_topic, 1);
+  g_ground_truth_pub = nh.advertise<nav_msgs::Odometry>(pub_topic, 1);
 
   double utm_x, utm_y;
   RobotLocalization::NavsatConversions::UTM(latitude, longitude, &utm_x, &utm_y);
 
   tf::Transform utm_to_odom;
-  utm_to_odom.setOrigin( tf::Vector3(utm_x, utm_y, 0.0) );
+  utm_to_odom.setOrigin( tf::Vector3(utm_x - g_og_pose.pose.pose.position.x, utm_y - g_og_pose.pose.pose.position.y, 0.0) );
   utm_to_odom.setRotation( tf::Quaternion(0.0, 0.0, 0.0, 1.0) );
   tf::TransformBroadcaster br;
 
-  ros::Rate rate(1);
+  ros::Rate rate(20);
   while(ros::ok()) {
     br.sendTransform(tf::StampedTransform(utm_to_odom, ros::Time::now(), "utm", "odom"));
     ros::spinOnce();
