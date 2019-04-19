@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   laser_geometry
   pcl_ros
   igvc_utils
+  robot_localization
 )
 
 include_directories(
@@ -37,3 +38,4 @@ install(DIRECTORY config/
 
 add_subdirectory(nodes/control)
 add_subdirectory(nodes/scan_to_pointcloud)
+add_subdirectory(nodes/ground_truth)
