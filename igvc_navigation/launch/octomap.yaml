@@ -35,7 +35,8 @@ filters:
         blur:
             kernel: 17
             sigma: 11
-        threshold: 0.5
+        threshold: 0.9
+        dilation_size: 40
     combined_map: # Blur amount when combining the line and lidar map
         blur:
             kernel: 3
@@ -67,11 +68,14 @@ topics:
         right: "/semantic_segmentation/right_cam"
     projected_line_pc: "/semantic_segmentation_cloud"
     camera_info:
-        left: "/usb_cam_center/camera_info"
-        center: "/usb_cam_left/camera_info"
-        right: "/usb_cam_right/camera_info"
+        left: "/left_cam/camera_info"
+        center: "/center_cam/camera_info"
+        right: "/right_cam/camera_info"
 frames:
-    camera: "/center_cam_optical"
+    camera:
+      left: "/left_cam_optical"
+      center: "/center_cam_optical"
+      right: "/right_cam_optical"
 node:
     debug: true
     use_lines: true

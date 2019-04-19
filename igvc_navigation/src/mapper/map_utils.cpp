@@ -189,6 +189,14 @@ void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, c
         cv::Point3d ray = model.projectPixelTo3dRay(pixel_point);
         tf::Point reoriented_ray{ ray.x, ray.y, ray.z };  // cv::Point3d defined with z forward, x right, y down
         tf::Point transformed_ray = camera_to_world.getBasis() * reoriented_ray;  // Transform ray to odom frame
+
+        // If camera sees horizon, then ray of z > 0 means that it's the sky. projecting that to the plane would
+        // result in it being behinds us...
+        if (transformed_ray.z() > 0)
+        {
+          continue;
+        }
+
         double a = ground_plane.a;
         double b = ground_plane.b;
         double c = ground_plane.c;

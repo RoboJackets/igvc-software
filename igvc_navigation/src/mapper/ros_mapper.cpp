@@ -55,7 +55,9 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "topics/camera_info/center", camera_info_topic_center_);
   igvc::getParam(pNh, "topics/camera_info/right", camera_info_topic_right_);
 
-  igvc::param(pNh, "frames/camera", camera_frame_, std::string{ "optical_cam_center" });
+  igvc::getParam(pNh, "frames/camera/left", camera_frame_left_);
+  igvc::getParam(pNh, "frames/camera/center", camera_frame_center_);
+  igvc::getParam(pNh, "frames/camera/right", camera_frame_right_);
 
   igvc::getParam(pNh, "cameras/resize_width", resize_width_);
   igvc::getParam(pNh, "cameras/resize_height", resize_height_);
@@ -72,11 +74,17 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   if (use_lines_)
   {
     line_map_subs_.emplace(std::make_pair(
-        Camera::left, nh.subscribe<sensor_msgs::Image>(line_topic_left_, 1, boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::left))));
+        Camera::left,
+        nh.subscribe<sensor_msgs::Image>(line_topic_left_, 1,
+                                         boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::left))));
     line_map_subs_.emplace(std::make_pair(
-      Camera::center, nh.subscribe<sensor_msgs::Image>(line_topic_center_, 1, boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::center))));
+        Camera::center,
+        nh.subscribe<sensor_msgs::Image>(line_topic_center_, 1,
+                                         boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::center))));
     line_map_subs_.emplace(std::make_pair(
-      Camera::right, nh.subscribe<sensor_msgs::Image>(line_topic_right_, 1, boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::right))));
+        Camera::right,
+        nh.subscribe<sensor_msgs::Image>(line_topic_right_, 1,
+                                         boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::right))));
 
     projected_line_map_sub =
         nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(projected_line_topic_, 1, &ROSMapper::projectedLineCallback, this);
@@ -100,6 +108,8 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   {
     debug_pcl_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
   }
+
+  ROS_INFO("Mapper started!");
 
   ros::spin();
 }
@@ -282,11 +292,38 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
 {
   if (camera_infos_.find(camera) != camera_infos_.end())
   {
+    ROS_INFO_STREAM_THROTTLE(1, "camera info for " << static_cast<int>(camera) << " still not found...");
     return;
   }
-  if (!checkExistsStaticTransform(camera_frame_, segmented->header.stamp, projected_line_topic_))
+  std::string frame;
+  switch (camera)
   {
-    ROS_ERROR_STREAM_THROTTLE(2, "Finding static transform to " << camera_frame_ << "failed. Trying again...");
+    case Camera::left:
+      frame = camera_frame_left_;
+      break;
+    case Camera::center:
+      frame = camera_frame_center_;
+      break;
+    case Camera::right:
+      frame = camera_frame_right_;
+      break;
+  }
+  std::string topic;
+  switch (camera)
+  {
+    case Camera::left:
+      topic = line_topic_left_;
+      break;
+    case Camera::center:
+      topic = line_topic_center_;
+      break;
+    case Camera::right:
+      topic = line_topic_right_;
+      break;
+  }
+  if (!checkExistsStaticTransform(frame, segmented->header.stamp, topic))
+  {
+    ROS_ERROR_STREAM_THROTTLE(2, "Finding static transform to " << frame << "failed. Trying again...");
     return;
   }
 
@@ -299,8 +336,8 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
   cv_bridge::CvImagePtr segmented_ptr = cv_bridge::toCvCopy(segmented, "mono8");
   cv::Mat image = segmented_ptr->image;
 
-  mapper_->insertSegmentedImage(std::move(image), state_.transform, transforms_.at(projected_line_topic_),
-                                segmented->header.stamp, camera);
+  mapper_->insertSegmentedImage(std::move(image), state_.transform, transforms_.at(topic), segmented->header.stamp,
+                                camera);
 
   publish(pcl_conversions::toPCL(segmented->header.stamp));
 }
