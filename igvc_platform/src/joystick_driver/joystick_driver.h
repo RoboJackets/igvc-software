@@ -6,9 +6,9 @@
 #include <igvc_msgs/velocity_pair.h>
 #include <sensor_msgs/Imu.h>
 
-enum Control_style { direction_velocity_control, smooth_control, tank_control };
+enum ControlStyle { direction_velocity_control, smooth_control, tank_control };
 
-struct Smooth_control_config {
+struct SmoothControlConfig {
   double k1;
   double k2;
   double axle_length;
@@ -20,20 +20,26 @@ struct Smooth_control_config {
   double camera_move_rate;
 };
 
-struct Tank_control_config {
+struct TankControlConfig {
   double max_velocity;
   double velocity_increment;
   double velocity;
 };
 
-struct Direction_velocity_config {
+struct AccelerationLimits {
+  double left_max_accel;
+  double right_max_accel;
+  double tangent_max_accel;
+};
+
+struct DirectionVelocityConfig {
   double pivot_limit;
   double max_velocity;
   double velocity_increment;
   double velocity;
 };
 
-struct Joy_map {
+struct JoyMap {
   int a = 0;
   int b = 1;
   int x = 2;
@@ -54,32 +60,39 @@ class joystick_Driver {
  public:
   joystick_Driver();
  private:
-  ros::Publisher cmd_pub;
-  double max_velocity;
-  double control_loop_period;
-  Smooth_control_config smooth_control_config;
-  Tank_control_config tank_control_config;
-  Direction_velocity_config direction_velocity_config;
-  Joy_map joy_map;
-  Control_style control_style;
-  sensor_msgs::JoyConstPtr joystick;
-  sensor_msgs::ImuConstPtr imu;
-  bool a_clicked = false;
-  bool rb_clicked = false;
-  bool lb_clicked = false;
+  ros::Publisher cmd_pub_;
 
-  igvc_msgs::velocity_pair motor_cmd;
+  double max_velocity_;
+  double control_loop_period_;
 
-  void joystick_callback(const sensor_msgs::JoyConstPtr &joystick);
-  void imu_callback(const sensor_msgs::ImuConstPtr &imu);
-  void curses_loop();
-  void control_loop(const ros::TimerEvent&);
-  void process_axes(const sensor_msgs::JoyConstPtr &joystick);
-  void handle_tank_control(const sensor_msgs::JoyConstPtr &joystick);
-  void handle_smooth_control(const sensor_msgs::JoyConstPtr &joystick);
-  void handle_direction_velocity_control(const sensor_msgs::JoyConstPtr &joystick);
-  double get_yaw(const sensor_msgs::ImuConstPtr& imu);
-  void signal_handler();
+  SmoothControlConfig smooth_control_config_;
+  TankControlConfig tank_control_config_;
+  DirectionVelocityConfig direction_velocity_config_;
+  AccelerationLimits acceleration_limits_;
+  JoyMap joy_map_;
+  ControlStyle control_style_;
+
+  sensor_msgs::JoyConstPtr joystick_;
+  sensor_msgs::ImuConstPtr imu_;
+  bool a_clicked_ = false;
+  bool rb_clicked_ = false;
+  bool lb_clicked_ = false;
+
+  igvc_msgs::velocity_pair motor_cmd_;
+
+  void joystickCallback(const sensor_msgs::JoyConstPtr &joystick);
+  void imuCallback(const sensor_msgs::ImuConstPtr &imu);
+  void cursesLoop();
+  void controlLoop(const ros::TimerEvent &);
+  void processAxes(const sensor_msgs::JoyConstPtr &joystick);
+
+  void handleTankControl(const sensor_msgs::JoyConstPtr &joystick);
+  void handleSmoothControl(const sensor_msgs::JoyConstPtr &joystick);
+  void handleDirectionVelocityControl(const sensor_msgs::JoyConstPtr &joystick);
+
+  double getYaw(const sensor_msgs::ImuConstPtr &imu);
+
+  void signalHandler();
 };
 
 #endif //PROJECT_JOYSTICK_DRIVER_H

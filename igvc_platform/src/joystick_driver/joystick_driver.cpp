@@ -13,60 +13,60 @@ volatile std::sig_atomic_t quit;
 double left_x, left_y, right_x, right_y;
 
 joystick_Driver::joystick_Driver()
-  : max_velocity{}
-  , smooth_control_config{}
-  , tank_control_config{ 0, 0.001 }
-  , direction_velocity_config{ 0.32, 1, 0.001, 0 }
-  , joy_map{}
-  , control_style{ Control_style::direction_velocity_control }
-  , motor_cmd{}
+  : max_velocity_{}
+  , smooth_control_config_{}
+  , tank_control_config_{ 0, 0.001 }
+  , direction_velocity_config_{ 0.32, 1, 0.001, 0 }
+  , joy_map_{}
+  , control_style_{ ControlStyle::direction_velocity_control }
+  , motor_cmd_{}
 {
   sigset_t sig;
   sigemptyset(&sig);
   sigaddset(&sig, SIGINT);
   sigprocmask(SIG_BLOCK, &sig, nullptr);
 
-  std::thread GUI_thread(&joystick_Driver::curses_loop, this);
-  std::thread signal_handler(&joystick_Driver::signal_handler, this);
+  std::thread GUI_thread(&joystick_Driver::cursesLoop, this);
+  std::thread signal_handler(&joystick_Driver::signalHandler, this);
 
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  cmd_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
+  cmd_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
 
-  ros::Subscriber joy_sub = nh.subscribe("/joy", 1, &joystick_Driver::joystick_callback, this);
+  ros::Subscriber joy_sub = nh.subscribe("/joy", 1, &joystick_Driver::joystickCallback, this);
 
-  igvc::param(pNh, "smooth_control/k1", smooth_control_config.k1, 1.0);
-  igvc::param(pNh, "smooth_control/k2", smooth_control_config.k2, 10.0);
-  igvc::param(pNh, "smooth_control/max_w", smooth_control_config.max_w, 2.0);
-  igvc::param(pNh, "smooth_control/axle_length", smooth_control_config.axle_length, 0.52);
-  igvc::param(pNh, "smooth_control/camera_move_rate", smooth_control_config.camera_move_rate, 1.57);
+  igvc::param(pNh, "smooth_control/k1", smooth_control_config_.k1, 1.0);
+  igvc::param(pNh, "smooth_control/k2", smooth_control_config_.k2, 10.0);
+  igvc::param(pNh, "smooth_control/max_w", smooth_control_config_.max_w, 2.0);
+  igvc::param(pNh, "smooth_control/axle_length", smooth_control_config_.axle_length, 0.52);
+  igvc::param(pNh, "smooth_control/camera_move_rate", smooth_control_config_.camera_move_rate, 1.57);
 
-  igvc::param(pNh, "tank_controls/velocity", tank_control_config.max_velocity, 1.0);
-  igvc::param(pNh, "direction_velocity_control/pivot_limit", direction_velocity_config.pivot_limit, 0.32);
-  igvc::param(pNh, "limits/velocity", max_velocity, 1.0);
-  igvc::param(pNh, "controller/left_axis/horizontal", joy_map.left_axis_x, 0);
-  igvc::param(pNh, "controller/left_axis/horizontal_invert", joy_map.left_axis_x_invert, true);
+  igvc::param(pNh, "tank_controls/velocity", tank_control_config_.max_velocity, 1.0);
+  igvc::param(pNh, "direction_velocity_control/pivot_limit", direction_velocity_config_.pivot_limit, 0.32);
+  igvc::param(pNh, "limits/velocity", max_velocity_, 1.0);
+  igvc::param(pNh, "controller/left_axis/horizontal", joy_map_.left_axis_x, 0);
+  igvc::param(pNh, "controller/left_axis/horizontal_invert", joy_map_.left_axis_x_invert, true);
 
-  igvc::param(pNh, "controller/left_axis/vertical", joy_map.left_axis_y, 1);
-  igvc::param(pNh, "controller/left_axis/vertical_invert", joy_map.left_axis_y_invert, false);
+  igvc::param(pNh, "controller/left_axis/vertical", joy_map_.left_axis_y, 1);
+  igvc::param(pNh, "controller/left_axis/vertical_invert", joy_map_.left_axis_y_invert, false);
 
-  igvc::param(pNh, "controller/right_axis/horizontal", joy_map.right_axis_x, 3);
-  igvc::param(pNh, "controller/right_axis/horizontal_invert", joy_map.right_axis_x_invert, true);
+  igvc::param(pNh, "controller/right_axis/horizontal", joy_map_.right_axis_x, 3);
+  igvc::param(pNh, "controller/right_axis/horizontal_invert", joy_map_.right_axis_x_invert, true);
 
-  igvc::param(pNh, "controller/right_axis/vertical", joy_map.right_axis_y, 4);
-  igvc::param(pNh, "controller/right_axis/vertical_invert", joy_map.right_axis_y_invert, false);
-  igvc::param(pNh, "period", control_loop_period, 0.001);
+  igvc::param(pNh, "controller/right_axis/vertical", joy_map_.right_axis_y, 4);
+  igvc::param(pNh, "controller/right_axis/vertical_invert", joy_map_.right_axis_y_invert, false);
+  igvc::param(pNh, "period", control_loop_period_, 0.001);
 
   std::string imu_topic;
   igvc::param(pNh, "topics/imu", imu_topic, std::string{ "/imu" });
 
   // 10 is the sentinel value for uninitialized
-  smooth_control_config.camera = 10;
+  smooth_control_config_.camera = 10;
 
-  ros::Subscriber imu_sub = nh.subscribe(imu_topic, 1, &joystick_Driver::imu_callback, this);
+  ros::Subscriber imu_sub = nh.subscribe(imu_topic, 1, &joystick_Driver::imuCallback, this);
 
-  ros::Timer control_loop = nh.createTimer(ros::Duration(control_loop_period), &joystick_Driver::control_loop, this);
+  ros::Timer control_loop = nh.createTimer(ros::Duration(control_loop_period_), &joystick_Driver::controlLoop, this);
 
   while (ros::ok())
   {
@@ -81,7 +81,7 @@ joystick_Driver::joystick_Driver()
   }
 }
 
-void joystick_Driver::curses_loop()
+void joystick_Driver::cursesLoop()
 {
   std::this_thread::sleep_for(std::chrono::seconds(1));
   ROS_INFO("Starting ncurses GUI...");
@@ -99,40 +99,40 @@ void joystick_Driver::curses_loop()
   while (true)
   {
     erase();
-    mvprintw(1, 0, "Left: %.4f", motor_cmd.left_velocity);
-    mvprintw(1, 16, "Right: %.4f", motor_cmd.right_velocity);
-    if (control_style == Control_style::direction_velocity_control)
+    mvprintw(1, 0, "Left: %.4f", motor_cmd_.left_velocity);
+    mvprintw(1, 16, "Right: %.4f", motor_cmd_.right_velocity);
+    if (control_style_ == ControlStyle::direction_velocity_control)
     {
       attron(COLOR_PAIR(1));
       mvprintw(0, 0, "Control Scheme:\t%s (Press A to change)", "Direction Velocity Control");
       attroff(COLOR_PAIR(1));
-      mvprintw(2, 0, "Max velocity:\t%.4f", direction_velocity_config.max_velocity);
-      mvprintw(3, 0, "Current velocity:\t%.4f", direction_velocity_config.velocity);
+      mvprintw(2, 0, "Max velocity:\t%.4f", direction_velocity_config_.max_velocity);
+      mvprintw(3, 0, "Current velocity:\t%.4f", direction_velocity_config_.velocity);
     }
-    else if (control_style == Control_style::tank_control)
+    else if (control_style_ == ControlStyle::tank_control)
     {
       attron(COLOR_PAIR(2));
       mvprintw(0, 0, "Control Scheme:\t%s (Press A to change)", "Tank Control");
       attroff(COLOR_PAIR(2));
-      mvprintw(2, 0, "Max velocity:\t%.4f", tank_control_config.max_velocity);
-      mvprintw(3, 0, "Current velocity:\t%.4f", tank_control_config.velocity);
+      mvprintw(2, 0, "Max velocity:\t%.4f", tank_control_config_.max_velocity);
+      mvprintw(3, 0, "Current velocity:\t%.4f", tank_control_config_.velocity);
     }
-    else if (control_style == Control_style::smooth_control)
+    else if (control_style_ == ControlStyle::smooth_control)
     {
       attron(COLOR_PAIR(3));
       mvprintw(0, 0, "Control Scheme:\t%s (Press A to change)", "Smooth Control");
       attroff(COLOR_PAIR(3));
-      mvprintw(2, 0, "w:\t%.4f", smooth_control_config.w);
-      mvprintw(3, 0, "Current velocity:\t%.4f", smooth_control_config.velocity);
+      mvprintw(2, 0, "w:\t%.4f", smooth_control_config_.w);
+      mvprintw(3, 0, "Current velocity:\t%.4f", smooth_control_config_.velocity);
 
-      double y = get_yaw(imu);
+      double y = getYaw(imu_);
       mvprintw(5, 0, "yaw: %.4f", y);
-      mvprintw(6, 0, "camera: %.4f", smooth_control_config.camera);
-      mvprintw(7, 0, "delta: %.4f", smooth_control_config.delta);
+      mvprintw(6, 0, "camera: %.4f", smooth_control_config_.camera);
+      mvprintw(7, 0, "delta: %.4f", smooth_control_config_.delta);
     }
-    if (joystick != nullptr)
+    if (joystick_ != nullptr)
     {
-      mvprintw(4, 0, "Joystick L_Y:\t%.4f", joystick->axes[joy_map.left_axis_y]);
+      mvprintw(4, 0, "Joystick L_Y:\t%.4f", joystick_->axes[joy_map_.left_axis_y]);
     }
     refresh();
     if (quit)
@@ -143,101 +143,101 @@ void joystick_Driver::curses_loop()
   }
 }
 
-void joystick_Driver::control_loop(const ros::TimerEvent&)
+void joystick_Driver::controlLoop(const ros::TimerEvent &)
 {
-  if (joystick == nullptr)
+  if (joystick_ == nullptr)
   {
     return;
   }
-  if (control_style == Control_style::direction_velocity_control)
+  if (control_style_ == ControlStyle::direction_velocity_control)
   {
-    handle_direction_velocity_control(joystick);
+    handleDirectionVelocityControl(joystick_);
   }
-  else if (control_style == Control_style::tank_control)
+  else if (control_style_ == ControlStyle::tank_control)
   {
-    handle_tank_control(joystick);
+    handleTankControl(joystick_);
   }
-  else if (control_style == Control_style::smooth_control)
+  else if (control_style_ == ControlStyle::smooth_control)
   {
-    handle_smooth_control(joystick);
+    handleSmoothControl(joystick_);
   }
   // Toggle control mode
-  if (joystick->buttons[joy_map.a])
+  if (joystick_->buttons[joy_map_.a])
   {
-    a_clicked = true;
+    a_clicked_ = true;
   }
-  if (a_clicked && !joystick->buttons[joy_map.a])
+  if (a_clicked_ && !joystick_->buttons[joy_map_.a])
   {
-    if (control_style == Control_style::direction_velocity_control)
+    if (control_style_ == ControlStyle::direction_velocity_control)
     {
-      control_style = Control_style::smooth_control;
+      control_style_ = ControlStyle::smooth_control;
     }
-    else if (control_style == Control_style::smooth_control)
+    else if (control_style_ == ControlStyle::smooth_control)
     {
-      control_style = Control_style::tank_control;
+      control_style_ = ControlStyle::tank_control;
     }
-    else if (control_style == Control_style::tank_control)
+    else if (control_style_ == ControlStyle::tank_control)
     {
-      control_style = Control_style::direction_velocity_control;
+      control_style_ = ControlStyle::direction_velocity_control;
     }
-    a_clicked = false;
+    a_clicked_ = false;
   }
-  cmd_pub.publish(motor_cmd);
+  cmd_pub_.publish(motor_cmd_);
 }
 
-void joystick_Driver::joystick_callback(const sensor_msgs::JoyConstPtr& msg)
+void joystick_Driver::joystickCallback(const sensor_msgs::JoyConstPtr &joystick)
 {
-  joystick = msg;
+  joystick_ = joystick;
 }
 
-void joystick_Driver::imu_callback(const sensor_msgs::ImuConstPtr& msg)
+void joystick_Driver::imuCallback(const sensor_msgs::ImuConstPtr &imu)
 {
-  imu = msg;
+  imu_ = imu;
 }
 
-void joystick_Driver::process_axes(const sensor_msgs::JoyConstPtr& joystick)
+void joystick_Driver::processAxes(const sensor_msgs::JoyConstPtr &joystick)
 {
-  left_y = joystick->axes[joy_map.left_axis_y];
-  left_x = joystick->axes[joy_map.left_axis_x];
-  right_y = joystick->axes[joy_map.right_axis_y];
-  right_x = joystick->axes[joy_map.right_axis_x];
+  left_y = joystick->axes[joy_map_.left_axis_y];
+  left_x = joystick->axes[joy_map_.left_axis_x];
+  right_y = joystick->axes[joy_map_.right_axis_y];
+  right_x = joystick->axes[joy_map_.right_axis_x];
 
-  if (joy_map.left_axis_x_invert)
+  if (joy_map_.left_axis_x_invert)
   {
     left_x *= -1;
   }
-  if (joy_map.left_axis_y_invert)
+  if (joy_map_.left_axis_y_invert)
   {
     left_y *= -1;
   }
-  if (joy_map.right_axis_x_invert)
+  if (joy_map_.right_axis_x_invert)
   {
     right_x *= -1;
   }
-  if (joy_map.right_axis_y_invert)
+  if (joy_map_.right_axis_y_invert)
   {
     right_y *= -1;
   }
 }
 
-void joystick_Driver::handle_direction_velocity_control(const sensor_msgs::JoyConstPtr& joystick)
+void joystick_Driver::handleDirectionVelocityControl(const sensor_msgs::JoyConstPtr &joystick)
 {
-  process_axes(joystick);
-  if (joystick->buttons[joy_map.rb])
+  processAxes(joystick);
+  if (joystick->buttons[joy_map_.rb])
   {
-    direction_velocity_config.max_velocity += direction_velocity_config.velocity_increment;
+    direction_velocity_config_.max_velocity += direction_velocity_config_.velocity_increment;
   }
-  if (joystick->buttons[joy_map.lb])
+  if (joystick->buttons[joy_map_.lb])
   {
-    direction_velocity_config.max_velocity -= direction_velocity_config.velocity_increment;
+    direction_velocity_config_.max_velocity -= direction_velocity_config_.velocity_increment;
   }
-  if (direction_velocity_config.max_velocity > max_velocity)
+  if (direction_velocity_config_.max_velocity > max_velocity_)
   {
-    direction_velocity_config.max_velocity = max_velocity;
+    direction_velocity_config_.max_velocity = max_velocity_;
   }
-  if (direction_velocity_config.max_velocity <= 0)
+  if (direction_velocity_config_.max_velocity <= 0)
   {
-    tank_control_config.max_velocity = 0;
+    tank_control_config_.max_velocity = 0;
   }
 
   double left;
@@ -260,89 +260,89 @@ void joystick_Driver::handle_direction_velocity_control(const sensor_msgs::JoyCo
 
   // Calculate pivot amount
   double pivot_speed = (left_x + right_x);
-  double pivot_limit = direction_velocity_config.pivot_limit;
+  double pivot_limit = direction_velocity_config_.pivot_limit;
   double pivot_scale = fabs(exp_left_y) > pivot_limit ? 0 : (1 - fabs(exp_left_y) / pivot_limit);
 
   // Calculate final mix of drive and pivot
   left = (1 - pivot_scale) * left + pivot_scale * pivot_speed;
   right = (1 - pivot_scale) * right + pivot_scale * -pivot_speed;
 
-  left *= direction_velocity_config.max_velocity;
-  right *= direction_velocity_config.max_velocity;
+  left *= direction_velocity_config_.max_velocity;
+  right *= direction_velocity_config_.max_velocity;
 
-  direction_velocity_config.velocity = (left + right) / 2;
+  direction_velocity_config_.velocity = (left + right) / 2;
 
-  motor_cmd = igvc_msgs::velocity_pair{};
-  motor_cmd.header.stamp = ros::Time::now();
-  motor_cmd.left_velocity = left;
-  motor_cmd.right_velocity = right;
+  motor_cmd_ = igvc_msgs::velocity_pair{};
+  motor_cmd_.header.stamp = ros::Time::now();
+  motor_cmd_.left_velocity = left;
+  motor_cmd_.right_velocity = right;
 }
 
-void joystick_Driver::handle_tank_control(const sensor_msgs::JoyConstPtr& joystick)
+void joystick_Driver::handleTankControl(const sensor_msgs::JoyConstPtr &joystick)
 {
-  if (joystick->buttons[joy_map.rb])
+  if (joystick->buttons[joy_map_.rb])
   {
-    tank_control_config.max_velocity += tank_control_config.velocity_increment;
+    tank_control_config_.max_velocity += tank_control_config_.velocity_increment;
   }
-  if (joystick->buttons[joy_map.lb])
+  if (joystick->buttons[joy_map_.lb])
   {
-    tank_control_config.max_velocity -= tank_control_config.velocity_increment;
+    tank_control_config_.max_velocity -= tank_control_config_.velocity_increment;
   }
-  if (tank_control_config.max_velocity > max_velocity)
+  if (tank_control_config_.max_velocity > max_velocity_)
   {
-    tank_control_config.max_velocity = max_velocity;
+    tank_control_config_.max_velocity = max_velocity_;
   }
-  if (tank_control_config.max_velocity <= 0)
+  if (tank_control_config_.max_velocity <= 0)
   {
-    tank_control_config.max_velocity = 0;
+    tank_control_config_.max_velocity = 0;
   }
 
-  double left = joystick->axes[joy_map.left_axis_y] * tank_control_config.max_velocity;
-  double right = joystick->axes[joy_map.right_axis_y] * tank_control_config.max_velocity;
+  double left = joystick->axes[joy_map_.left_axis_y] * tank_control_config_.max_velocity;
+  double right = joystick->axes[joy_map_.right_axis_y] * tank_control_config_.max_velocity;
 
-  tank_control_config.velocity = std::hypot(left, right);
+  tank_control_config_.velocity = std::hypot(left, right);
 
-  motor_cmd = igvc_msgs::velocity_pair{};
-  motor_cmd.header.stamp = ros::Time::now();
-  motor_cmd.left_velocity = left;
-  motor_cmd.right_velocity = right;
+  motor_cmd_ = igvc_msgs::velocity_pair{};
+  motor_cmd_.header.stamp = ros::Time::now();
+  motor_cmd_.left_velocity = left;
+  motor_cmd_.right_velocity = right;
 }
 
-void joystick_Driver::handle_smooth_control(const sensor_msgs::JoyConstPtr& joystick)
+void joystick_Driver::handleSmoothControl(const sensor_msgs::JoyConstPtr &joystick)
 {
-  process_axes(joystick);
+  processAxes(joystick);
 
-  if (imu == nullptr) {
+  if (imu_ == nullptr) {
     return;
   }
 
-  if (smooth_control_config.camera == 10) {
-    smooth_control_config.camera = get_yaw(imu);
+  if (smooth_control_config_.camera == 10) {
+    smooth_control_config_.camera = getYaw(imu_);
   }
 
   // 90 degree anticlockwise turn
-  if (!rb_clicked && joystick->buttons[joy_map.rb]) {
-    rb_clicked = true;
-    smooth_control_config.camera -= M_PI_2;
+  if (!rb_clicked_ && joystick->buttons[joy_map_.rb]) {
+    rb_clicked_ = true;
+    smooth_control_config_.camera -= M_PI_2;
   }
-  rb_clicked = joystick->buttons[joy_map.rb];
+  rb_clicked_ = joystick->buttons[joy_map_.rb];
   // 90 degree clockwise turn
-  if (!lb_clicked && joystick->buttons[joy_map.lb]) {
-    lb_clicked = true;
-    smooth_control_config.camera += M_PI_2;
+  if (!lb_clicked_ && joystick->buttons[joy_map_.lb]) {
+    lb_clicked_ = true;
+    smooth_control_config_.camera += M_PI_2;
   }
-  lb_clicked = joystick->buttons[joy_map.lb];
+  lb_clicked_ = joystick->buttons[joy_map_.lb];
 
   // Center camera
-  if (joystick->buttons[joy_map.b]) {
-    smooth_control_config.camera = get_yaw(imu);
+  if (joystick->buttons[joy_map_.b]) {
+    smooth_control_config_.camera = getYaw(imu_);
   }
 
   // Move camera
   double camera_turn = right_x * right_x * right_x;
-  double camera_turn_amount = camera_turn * smooth_control_config.camera_move_rate * control_loop_period;
-  smooth_control_config.camera -= camera_turn_amount; // Left hand to right hand
-  igvc::fit_to_polar(smooth_control_config.camera);
+  double camera_turn_amount = camera_turn * smooth_control_config_.camera_move_rate * control_loop_period_;
+  smooth_control_config_.camera -= camera_turn_amount; // Left hand to right hand
+  igvc::fit_to_polar(smooth_control_config_.camera);
 
   // Sensitivity curve ^.^
   double expo_left_x = left_x * left_x * left_x;
@@ -350,34 +350,34 @@ void joystick_Driver::handle_smooth_control(const sensor_msgs::JoyConstPtr& joys
   double velocity = std::hypot(expo_left_x, expo_left_y);
   double delta = -atan2(left_y, left_x);
   delta += M_PI_2;
-  delta -= smooth_control_config.camera;
+  delta -= smooth_control_config_.camera;
 
-  delta += get_yaw(imu);
+  delta += getYaw(imu_);
 
   igvc::fit_to_polar(delta);
 
-  double w = -velocity * smooth_control_config.k2 * delta + (1 + smooth_control_config.k1) * sin(delta);
+  double w = -velocity * smooth_control_config_.k2 * delta + (1 + smooth_control_config_.k1) * sin(delta);
   if (velocity < 0.1)
   {
     w = 0;
   }
-  w = std::min(w, smooth_control_config.max_w);
-  w = std::max(w, -smooth_control_config.max_w);
-  double v_left = (2 * velocity - w * smooth_control_config.axle_length) / 2;
-  double v_right = (2 * velocity + w * smooth_control_config.axle_length) / 2;
+  w = std::min(w, smooth_control_config_.max_w);
+  w = std::max(w, -smooth_control_config_.max_w);
+  double v_left = (2 * velocity - w * smooth_control_config_.axle_length) / 2;
+  double v_right = (2 * velocity + w * smooth_control_config_.axle_length) / 2;
 
   //  double max = max(fabs(v_left), fabs(v_right));
 
-  smooth_control_config.delta = delta;
-  smooth_control_config.w = w;
-  smooth_control_config.velocity = velocity;
-  motor_cmd = igvc_msgs::velocity_pair{};
-  motor_cmd.header.stamp = ros::Time::now();
-  motor_cmd.left_velocity = v_left;
-  motor_cmd.right_velocity = v_right;
+  smooth_control_config_.delta = delta;
+  smooth_control_config_.w = w;
+  smooth_control_config_.velocity = velocity;
+  motor_cmd_ = igvc_msgs::velocity_pair{};
+  motor_cmd_.header.stamp = ros::Time::now();
+  motor_cmd_.left_velocity = v_left;
+  motor_cmd_.right_velocity = v_right;
 }
 
-void joystick_Driver::signal_handler()
+void joystick_Driver::signalHandler()
 {
   sigset_t sig;
   sigemptyset(&sig);
@@ -388,7 +388,7 @@ void joystick_Driver::signal_handler()
   quit = 1;
 }
 
-double joystick_Driver::get_yaw(const sensor_msgs::ImuConstPtr& imu) {
+double joystick_Driver::getYaw(const sensor_msgs::ImuConstPtr &imu) {
   tf::Quaternion quat{ imu->orientation.x, imu->orientation.y, imu->orientation.z, imu->orientation.w };
   double r, p, y;
   tf::Matrix3x3(quat).getRPY(r, p, y);
