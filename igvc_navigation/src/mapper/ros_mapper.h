@@ -107,6 +107,10 @@ private:
 
   bool debug_{};
 
+  bool enable_left_cam_;
+  bool enable_center_cam_;
+  bool enable_right_cam_;
+
   double resolution_{};  // Map Resolution
 
   int resize_width_{};
