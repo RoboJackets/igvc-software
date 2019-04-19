@@ -79,7 +79,7 @@ frames:
 node:
     debug: true
     use_lines: true
-    cameras:
+    camera:
         left:
             enable: true
         center:

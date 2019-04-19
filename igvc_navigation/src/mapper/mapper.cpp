@@ -169,6 +169,7 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
   MapUtils::projectToPlane(projected_pc, ground_plane_, image, model, camera_to_base);
 
   pcl_ros::transformPointCloud(projected_pc, projected_pc, base_to_odom);
+  MapUtils::projectTo2D(projected_pc);
   if (static_cast<int>(camera) == 0)
   {
     MapUtils::debugPublishPointCloud(camera_projection_pub_l_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
