@@ -103,6 +103,7 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
 
       MapUtils::getEmptyPoints(nonground_lidar, empty_pc, angular_resolution_, empty_filter_options_);
       pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
+      MapUtils::projectTo2D(empty_pc);
 
       MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, pc->header.stamp, "/odom", debug_);
     }
