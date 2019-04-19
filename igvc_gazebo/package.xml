@@ -27,6 +27,8 @@
   <build_depend>gazebo_ros</build_depend>
   <build_depend>joint_state_controller</build_depend>
   <build_depend>effort_controllers</build_depend>
+  <build_depend>velodyne_gazebo_plugins</build_depend>
+  <build_depend>robot_localization</build_depend>
   <build_depend>ros_control</build_depend>
   <build_depend>gazebo_ros_pkgs</build_depend>
 
@@ -46,6 +48,8 @@
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>roslib</run_depend>
   <run_depend>gazebo_ros</run_depend>
+  <run_depend>velodyne_gazebo_plugins</run_depend>
+  <run_depend>robot_localization</run_depend>
   <run_depend>ros_control</run_depend>
   <run_depend>gazebo_ros_pkgs</run_depend>
 </package>
