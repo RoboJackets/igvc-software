@@ -18,6 +18,7 @@ struct SmoothControlConfig {
   double delta;
   double camera;
   double camera_move_rate;
+  bool camera_initialized;
 };
 
 struct TankControlConfig {
@@ -27,8 +28,7 @@ struct TankControlConfig {
 };
 
 struct AccelerationLimits {
-  double left_max_accel;
-  double right_max_accel;
+  double wheel_max_accel;
   double tangent_max_accel;
 };
 
@@ -37,6 +37,13 @@ struct DirectionVelocityConfig {
   double max_velocity;
   double velocity_increment;
   double velocity;
+};
+
+struct Axes {
+  double left_x;
+  double left_y;
+  double right_x;
+  double right_y;
 };
 
 struct JoyMap {
@@ -56,9 +63,9 @@ struct JoyMap {
   bool right_axis_y_invert;
 };
 
-class joystick_Driver {
+class JoystickDriver {
  public:
-  joystick_Driver();
+  JoystickDriver();
  private:
   ros::Publisher cmd_pub_;
 
@@ -72,6 +79,8 @@ class joystick_Driver {
   JoyMap joy_map_;
   ControlStyle control_style_;
 
+  Axes axes_;
+
   sensor_msgs::JoyConstPtr joystick_;
   sensor_msgs::ImuConstPtr imu_;
   bool a_clicked_ = false;
@@ -79,6 +88,9 @@ class joystick_Driver {
   bool lb_clicked_ = false;
 
   igvc_msgs::velocity_pair motor_cmd_;
+  igvc_msgs::velocity_pair last_motor_cmd_;
+
+  ros::Time last_time_;
 
   void joystickCallback(const sensor_msgs::JoyConstPtr &joystick);
   void imuCallback(const sensor_msgs::ImuConstPtr &imu);
@@ -86,11 +98,19 @@ class joystick_Driver {
   void controlLoop(const ros::TimerEvent &);
   void processAxes(const sensor_msgs::JoyConstPtr &joystick);
 
+  void boundAcceleration();
+  void boundTangentAcceleration(double tangent_acceleration, const ros::Duration& dt);
+  void boundLeftAcceleration(double left_acceleration, const ros::Duration& dt);
+  void boundRightAcceleration(double right_acceleration, const ros::Duration& dt);
+
   void handleTankControl(const sensor_msgs::JoyConstPtr &joystick);
   void handleSmoothControl(const sensor_msgs::JoyConstPtr &joystick);
   void handleDirectionVelocityControl(const sensor_msgs::JoyConstPtr &joystick);
 
-  double getYaw(const sensor_msgs::ImuConstPtr &imu);
+  double getVelocity(const igvc_msgs::velocity_pair& command) const;
+  double getW(const igvc_msgs::velocity_pair& command) const;
+  double getK(const igvc_msgs::velocity_pair& command) const;
+  double getYaw(const sensor_msgs::ImuConstPtr &imu) const;
 
   void signalHandler();
 };
