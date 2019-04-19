@@ -7,30 +7,32 @@ topics:
         rollout: "/trajectory_controller/rollout"
         signed_distance_field: "/trajectory_controller/signed_distance_field"
 signed_distance_field:
-    width: 20
-    height: 20
+    width: 50
+    height: 50
     resolution: 0.1
     traversal_cost: 20.0
     path_cost: 4.0
     use_path_cost: true
 controller:
-    timestep: 0.1
+    timestep: 0.5
     horizon: 5.0
     samples: 1000
     resample_threshold: 0.8
     use_weighted: false
+    std_dev: 0.1
+    last_state_coeff: 20
 cost_function:
-    max_velocity: 1.0
+    max_velocity: 0.5
     coefficients:
-        path: 50000.0
-        velocity: 10.0
-        acceleration: 2.0
-        angular_acceleration: 2.0
-        angular_velocity: 1000.0
+        path: 50.0
+        velocity: 0.0
+        acceleration: 0.0
+        angular_acceleration: 0.0
+        angular_velocity: 0.0
 model:
     acceleration_bound:
-        upper: 5.0
-        lower: -5.0
+        upper: 3.0
+        lower: -3.0
     axle_length: 0.48
 visualization:
     sampled_width: 0.0005
@@ -40,3 +42,4 @@ node:
 debug:
     starting_yaw: 0.5
     cos_scaling: 5.0
+    test_mode: false

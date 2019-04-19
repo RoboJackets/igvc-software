@@ -33,7 +33,7 @@ std::unique_ptr<ControllerResult> TrajectoryController::getControls(const nav_ms
   std::unique_ptr<OptimizationResult<Model>> optimization_result = controller_->optimize(state);
 
   igvc_msgs::velocity_pair controls;
-  RobotState lmao = optimization_result->weighted_particle.state_vec_[5];
+  RobotState lmao = optimization_result->weighted_particle.state_vec_[11];
   controls.left_velocity = lmao.wheel_velocity_.left;
   controls.right_velocity = lmao.wheel_velocity_.right;
 

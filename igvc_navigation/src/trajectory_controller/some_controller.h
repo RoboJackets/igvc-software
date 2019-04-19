@@ -59,7 +59,7 @@ typename ModelImpl::StateType Particle<ModelImpl>::getState() const
 template <class Model>
 float Particle<Model>::getWeight() const
 {
-  return 1 / cum_cost_.back();
+  return 1 / (cum_cost_.back() * cum_cost_.back());
 }
 
 template <class ModelImpl>
@@ -78,7 +78,9 @@ struct SomeControllerOptions
   float horizon;
   int num_samples;
   float resample_threshold;
+  float std_dev;
   bool use_weighted;
+  float last_state_coeff;
 };
 
 template <class ModelImpl, class CostFunctionImpl>
@@ -104,6 +106,7 @@ private:
   Particle<ModelImpl> simulateWithWeightedControls(const State& initial_state,
                                                    const std::vector<Controls>& controls) const;
   Controls sampleControls() const;
+  void setControls(const std::vector<Controls>& controls);
 
   std::shared_ptr<Model<State, control_dims, ModelImpl>> model_;
   std::shared_ptr<CostFunction<State, control_dims, CostFunctionImpl>> cost_function_;
@@ -113,10 +116,12 @@ private:
   int num_samples_;
   float resample_threshold_;
   bool use_weighted_;
+  float std_dev_;
+  float last_state_coeff_;
 
   std::random_device rd_;
   mutable std::mt19937 mt_;
-  std::array<std::uniform_real_distribution<float>, control_dims> distributions_;
+  std::array<std::normal_distribution<float>, control_dims> distributions_;
 
   std::vector<Particle<ModelImpl>> particles_;
 };
@@ -130,20 +135,22 @@ SomeController<ModelImpl, CostFunctionImpl>::SomeController(
   , cost_function_{ cost_function }
   , timestep_{ options.timestep }
   , horizon_{ options.horizon }
-  , iterations_{ static_cast<int>(std::round(options.horizon / options.timestep)) }
+  , iterations_{ static_cast<int>(std::round(options.horizon / options.timestep)) * 10 }
   , num_samples_{ options.num_samples }
   , resample_threshold_{ options.resample_threshold }
   , use_weighted_{ options.use_weighted }
   , rd_{}
   , mt_{ rd_() }
   , particles_(options.num_samples, Particle<ModelImpl>{})
+  , std_dev_(options.std_dev)
+  , last_state_coeff_(options.last_state_coeff)
 {
   ROS_INFO_STREAM("Constructor called! particles_.size(): " << particles_.size());
   std::array<Bound, control_dims> bounds = model_->bounds();
   for (int i = 0; i < control_dims; i++)
   {
     Bound bound = bounds[i];
-    distributions_[i] = std::uniform_real_distribution<float>(bound.lower, bound.upper);
+    distributions_[i] = std::normal_distribution<float>(0.0f, std_dev_);
     ROS_INFO_STREAM("min: " << distributions_[i].min() << ", max: " << distributions_[i].max());
   }
 }
@@ -161,22 +168,36 @@ SomeController<ModelImpl, CostFunctionImpl>::optimize(const State& starting_stat
 {
   initializeParticles(starting_state);
 
-  for (int i = 0; i < iterations_; i++)
+  for (int i = 0; i < iterations_ / 10; i++)
   {
     for (Particle<ModelImpl>& particle : particles_)
     {
+      setControls(particle.controls_vec_);
       Controls controls = sampleControls();
-      State state = particle.getState();
-      State new_state = model_->doPropogateState(state, controls, timestep_);
-      float cost = cost_function_->cost(new_state, controls);
 
-      particle.cum_cost_.emplace_back(particle.cum_cost_.back() + cost);
-      particle.controls_vec_.emplace_back(std::move(controls));
-      particle.state_vec_.emplace_back(std::move(new_state));
+      for (int j = 0; j < 10; j++) {
+        State state = particle.getState();
+        State new_state = model_->doPropogateState(state, controls, timestep_ / 10);
+        float cost = cost_function_->cost(new_state, controls);
+
+        particle.cum_cost_.emplace_back(particle.cum_cost_.back() + cost);
+        particle.controls_vec_.emplace_back(std::move(controls));
+        particle.state_vec_.emplace_back(std::move(new_state));
+      }
     }
     if (effectiveParticles() < resample_threshold_) {
+      ROS_INFO_STREAM("YES resampling! effective particles: " << effectiveParticles());
       resampleParticles();
+    } else {
+      ROS_INFO_STREAM("NO resampling! effective particles: " << effectiveParticles());
     }
+  }
+  for (Particle<ModelImpl>& particle : particles_)
+  {
+    State state = particle.getState();
+    float cost = cost_function_->cost(state, particle.controls_vec_.back());
+
+    particle.cum_cost_.back() = particle.cum_cost_[particle.cum_cost_.size() - 1] + last_state_coeff_ * cost;
   }
 
   Particle<ModelImpl> best;
@@ -197,16 +218,16 @@ SomeController<ModelImpl, CostFunctionImpl>::optimize(const State& starting_stat
 template <class ModelImpl, class CostFunctionImpl>
 float SomeController<ModelImpl, CostFunctionImpl>::effectiveParticles() {
   float sum = 0;
-  float test = 0;
   float squared_normalized_sum = 0;
+  auto worst_particle =
+    std::min_element(particles_.begin(), particles_.end(), [](const Particle<ModelImpl>& p1, const Particle<ModelImpl>& p2) {
+      return p1.cum_cost_.back() > p2.cum_cost_.back();
+    });
   for (const Particle<ModelImpl>& particle : particles_) {
-    sum += particle.getWeight();
+    sum += particle.getWeight() - worst_particle->getWeight();
   }
   for (const Particle<ModelImpl>& particle : particles_) {
-    test += (particle.getWeight()) / sum;
-  }
-  for (const Particle<ModelImpl>& particle : particles_) {
-    squared_normalized_sum += (particle.getWeight() * particle.getWeight()) / (sum * sum);
+    squared_normalized_sum += ((particle.getWeight() - worst_particle->getWeight()) * (particle.getWeight() - worst_particle->getWeight())) / (sum * sum);
   }
   return 1 / (squared_normalized_sum * num_samples_);
 }
@@ -223,7 +244,7 @@ Particle<ModelImpl> SomeController<ModelImpl, CostFunctionImpl>::simulateWithWei
   for (const Controls& control : controls)
   {
     State state = particle.getState();
-    State new_state = model_->doPropogateState(state, control, timestep_);
+    State new_state = model_->doPropogateState(state, control, timestep_ / 10);
     float cost = cost_function_->cost(new_state, control);
     particle.cum_cost_.emplace_back(particle.cum_cost_.back() + cost);
     particle.state_vec_.emplace_back(std::move(new_state));
@@ -265,10 +286,24 @@ typename ModelImpl::Controls SomeController<ModelImpl, CostFunctionImpl>::sample
   Controls controls;
   for (int i = 0; i < control_dims; i++)
   {
-    std::uniform_real_distribution distribution = distributions_[i];
+    std::normal_distribution distribution = distributions_[i];
     controls[i] = distribution(mt_);
   }
   return controls;
+}
+
+template <class ModelImpl, class CostFunctionImpl>
+void SomeController<ModelImpl, CostFunctionImpl>::setControls(const std::vector<typename ModelImpl::Controls>& controls)
+{
+  if (!controls.empty()) {
+    for (int i = 0; i < control_dims; i++) {
+      distributions_[i] = std::normal_distribution<float>(controls.back()[i], std_dev_);
+    }
+  } else {
+    for (int i = 0; i < control_dims; i++) {
+      distributions_[i] = std::normal_distribution<float>(0, std_dev_);
+    }
+  }
 }
 
 template <class ModelImpl, class CostFunctionImpl>
@@ -286,10 +321,14 @@ void SomeController<ModelImpl, CostFunctionImpl>::resampleParticles()
 {
   std::vector<float> cum_weights;
   cum_weights.reserve(static_cast<unsigned long>(num_samples_));
-  cum_weights.emplace_back(particles_.front().getWeight());
+  auto worst_particle =
+    std::min_element(particles_.begin(), particles_.end(), [](const Particle<ModelImpl>& p1, const Particle<ModelImpl>& p2) {
+      return p1.cum_cost_.back() > p2.cum_cost_.back();
+    });
+  cum_weights.emplace_back(particles_.front().getWeight() - worst_particle->getWeight());
   for (int i = 1; i < num_samples_; i++)
   {
-    cum_weights.emplace_back(cum_weights.back() + particles_[i].getWeight());
+    cum_weights.emplace_back(cum_weights.back() + particles_[i].getWeight() - worst_particle->getWeight());
   }
   float pointer_width = cum_weights.back() / num_samples_;
   std::uniform_real_distribution<float> unif(0, pointer_width);

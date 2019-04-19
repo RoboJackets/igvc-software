@@ -24,7 +24,7 @@ private:
   void initController();
   void initMiscParams();
   void publishAsPCL(const ros::Publisher& pub, const cv::Mat& mat, double resolution, const std::string& frame_id,
-                    uint64_t stamp, float cos_scaling = 1.0) const;
+                    uint64_t stamp) const;
 
   void visualizeRollout(const std::unique_ptr<OptimizationResult<Model>>& optimization_result,
                         const ros::Time& stamp) const;
@@ -41,12 +41,14 @@ private:
 
   void executeControls(igvc_msgs::velocity_pair controls, const ros::Time& stamp);
 
-  void testController(float starting_yaw, float cos_scaling);
+  void testController(float starting_yaw);
 
   bool debug_;
 
   double sampled_width_;
   double weighted_width_;
+
+  double cos_scaling_;
 
   ros::NodeHandle nh;
   ros::NodeHandle pNh;

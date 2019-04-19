@@ -18,49 +18,64 @@ using trajectory_controller::ControllerResult;
 ROSTrajectoryController::ROSTrajectoryController() : nh{}, pNh{ "~" }, state_{ std::nullopt }
 {
   float starting_yaw;
-  float cos_scaling;
+  bool test_mode;
+
   igvc::param(pNh, "node/debug", debug_, true);
   igvc::getParam(pNh, "debug/starting_yaw", starting_yaw);
-  igvc::getParam(pNh, "debug/cos_scaling", cos_scaling);
+  igvc::getParam(pNh, "debug/cos_scaling", cos_scaling_);
+  igvc::param(pNh, "debug/test_mode", test_mode, false);
   initSubscribeAndPublish();
   initController();
   initMiscParams();
 
-  ros::spin();
-  //  ros::Rate rate(1);
-  //  while (ros::ok())
-  //  {
-  //    testController(starting_yaw, cos_scaling);
-  //    rate.sleep();
-  //  }
+  if (test_mode) {
+    ros::Rate rate(1);
+    while (ros::ok())
+    {
+      testController(starting_yaw);
+      rate.sleep();
+      ROS_INFO_STREAM("finished rate.sleep");
+    }
+  } else {
+    ros::spin();
+  }
 }
 
-void ROSTrajectoryController::testController(float starting_yaw, float cos_scaling)
+void ROSTrajectoryController::testController(float starting_yaw)
 {
-  RobotState state{};
-  state.yaw = starting_yaw;
-  state.wheel_velocity_.left = 0.5;
-  state.wheel_velocity_.right = 0.5;
+  ROS_INFO_STREAM("testController called!");
+  state_ = RobotState{};
+
+  std::random_device rd;  //Will be used to obtain a seed for the random number engine
+  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+  std::uniform_int_distribution<> dis(-20, 20);
+  state_->x = 5 + dis(gen);
+  state_->y = 10 + dis(gen);
+  state_->yaw = starting_yaw;
+  state_->wheel_velocity_.left = 0.5;
+  state_->wheel_velocity_.right = 0.5;
 
   nav_msgs::PathPtr path = boost::make_shared<nav_msgs::Path>();
   geometry_msgs::PoseStamped pose;
-  pose.pose.position.x = 0;
-  pose.pose.position.y = 0;
-  path->poses.emplace_back(pose);
   pose.pose.position.x = 5;
-  pose.pose.position.y = 0;
+  pose.pose.position.y = 10;
   path->poses.emplace_back(pose);
-  pose.pose.position.x = 5;
-  pose.pose.position.y = 5;
+  pose.pose.position.x = 10;
+  pose.pose.position.y = 10;
   path->poses.emplace_back(pose);
-  std::unique_ptr<ControllerResult> result = controller_->getControls(path, state);
+//  pose.pose.position.x = 10;
+//  pose.pose.position.y = 15;
+//  path->poses.emplace_back(pose);
+  ROS_INFO_STREAM("state_: " << *state_);
+  std::unique_ptr<ControllerResult> result = controller_->getControls(path, *state_);
   publishAsPCL(debug_signed_distance_field_pub_, *result->signed_distance_field, sdf_options_->resolution_, "/odom",
-               pcl_conversions::toPCL(ros::Time::now()), cos_scaling);
+               pcl_conversions::toPCL(ros::Time::now()));
   visualizeRollout(result->optimization_result, ros::Time::now());
+  ROS_INFO_STREAM("testController finished!");
 }
 
 void ROSTrajectoryController::publishAsPCL(const ros::Publisher& pub, const cv::Mat& mat, double resolution,
-                                           const std::string& frame_id, uint64_t stamp, float cos_scaling) const
+                                           const std::string& frame_id, uint64_t stamp) const
 {
   pcl::PointCloud<pcl::PointXYZI>::Ptr pointcloud = boost::make_shared<pcl::PointCloud<pcl::PointXYZI>>();
   for (int i = 0; i < mat.cols; i++)
@@ -70,7 +85,7 @@ void ROSTrajectoryController::publishAsPCL(const ros::Publisher& pub, const cv::
       pcl::PointXYZI p{};
       p.x = static_cast<float>((i - (mat.cols / 2.0)) * resolution) + state_->x;
       p.y = static_cast<float>(((mat.rows / 2.0) - j) * resolution) + state_->y;
-      p.intensity = cos(mat.at<float>(j, i) / cos_scaling);
+      p.intensity = cos(mat.at<float>(j, i) / cos_scaling_);
       pointcloud->points.push_back(p);
     }
   }
@@ -136,6 +151,8 @@ void ROSTrajectoryController::initController()
   igvc::getParam(pNh, "controller/samples", some_controller_options.num_samples);
   igvc::getParam(pNh, "controller/resample_threshold", some_controller_options.resample_threshold);
   igvc::getParam(pNh, "controller/use_weighted", some_controller_options.use_weighted);
+  igvc::getParam(pNh, "controller/std_dev", some_controller_options.std_dev);
+  igvc::getParam(pNh, "controller/last_state_coeff", some_controller_options.last_state_coeff);
 
   igvc::getParam(pNh, "cost_function/max_velocity", sdf_cost_options.velocity_limit);
   igvc::getParam(pNh, "cost_function/coefficients/path", sdf_cost_options.coefficients.path);
@@ -224,18 +241,24 @@ void ROSTrajectoryController::visualizeRollout(const std::unique_ptr<Optimizatio
       std::min_element(particles.begin(), particles.end(), [](const Particle<Model>& p1, const Particle<Model>& p2) {
         return p1.cum_cost_.back() < p2.cum_cost_.back();
       });
+  auto worst_particle =
+    std::min_element(particles.begin(), particles.end(), [](const Particle<Model>& p1, const Particle<Model>& p2) {
+      return p1.cum_cost_.back() > p2.cum_cost_.back();
+    });
 
   float max_weight = optimal_particle->getWeight();
+  float min_weight = worst_particle->getWeight();
+  max_weight -= min_weight;
 
   int id = 0;
   visualization_msgs::MarkerArray marker_array;
   for (const Particle<Model>& particle : optimization_result->particles)
   {
-    //    ROS_INFO_STREAM("optimal particle cost: " << optimal_particle->cum_cost_.back() << ", particle weight: " <<
-    //    particle.getWeight() << ", max_weight: " << max_weight << ", ratio: " << particle.getWeight() / max_weight);
+        ROS_INFO_STREAM_THROTTLE(1, "optimal particle cost: " << optimal_particle->cum_cost_.back() << ", particle weight: " <<
+        particle.getWeight() << ", max_weight: " << max_weight << ", ratio: " << particle.getWeight() / max_weight);
     marker_array.markers.emplace_back(
-        toLineStrip(particle.state_vec_, id++, sampled_width_, 1.0f - particle.getWeight() / max_weight,
-                    particle.getWeight() / max_weight, 0.0f, particle.getWeight() / max_weight, stamp));
+        toLineStrip(particle.state_vec_, id++, sampled_width_, 1.0f - (particle.getWeight() - min_weight) / max_weight,
+          (particle.getWeight() - min_weight) / max_weight, 0.0f, 0.8f, stamp));
   }
   Particle<Model> best_particle = optimization_result->weighted_particle;
   marker_array.markers.emplace_back(

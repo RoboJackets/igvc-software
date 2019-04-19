@@ -133,6 +133,7 @@ std::optional<float> SignedDistanceField::getValue(float x, float y)
   fast_sweep::Node node = toNode(x, y);
   if (node.isValid(options_.rows_, options_.cols_))
   {
+    ROS_INFO_STREAM_THROTTLE(1, "Converting from (" << x << ", " << y << ") to " << node);
     return solver_.getCell(node);
   }
   return std::nullopt;

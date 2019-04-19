@@ -11,8 +11,14 @@ RobotState differential_drive_model::DifferentialDriveModel::propogateState(Robo
                                                                             const Model::Controls& controls, float dt)
 {
   // TODO: Change to trapezoidal rule
+  bool before = isnan(state.velocity());
   state.wheel_velocity_.left += controls[0] * dt;
   state.wheel_velocity_.right += controls[1] * dt;
+
+  if (!before && isnan(state.velocity())) {
+    ROS_ERROR_STREAM_THROTTLE(0.2, "WTF? left: " << state.wheel_velocity_.left << ", right: " << state.wheel_velocity_.right);
+    ROS_ERROR_STREAM_THROTTLE(0.2, "controls: (" << controls[0] << ", " << controls[1] << "), dt: " << dt);
+  }
 
   float left = state.wheel_velocity_.left;
   float right = state.wheel_velocity_.right;
