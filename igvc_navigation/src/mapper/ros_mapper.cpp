@@ -59,8 +59,8 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "frames/camera/center", camera_frame_center_);
   igvc::getParam(pNh, "frames/camera/right", camera_frame_right_);
   igvc::getParam(pNh, "node/camera/left/enable", enable_left_cam_);
-  igvc::getParam(pNh, "node/camera/center/enable", enable_right_cam_);
-  igvc::getParam(pNh, "node/camera/right/enable", enable_center_cam_);
+  igvc::getParam(pNh, "node/camera/center/enable", enable_center_cam_);
+  igvc::getParam(pNh, "node/camera/right/enable", enable_right_cam_);
 
   igvc::getParam(pNh, "cameras/resize_width", resize_width_);
   igvc::getParam(pNh, "cameras/resize_height", resize_height_);
