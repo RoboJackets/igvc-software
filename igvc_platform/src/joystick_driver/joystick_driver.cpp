@@ -5,9 +5,9 @@
 #include <thread>
 
 #include <tf/LinearMath/Matrix3x3.h>
+#include <tf/transform_datatypes.h>
 #include <csignal>
 #include <igvc_utils/NodeUtils.hpp>
-#include <tf/transform_datatypes.h>
 
 volatile std::sig_atomic_t quit;
 
@@ -44,6 +44,11 @@ JoystickDriver::JoystickDriver()
   igvc::param(pNh, "tank_controls/velocity", tank_control_config_.max_velocity, 1.0);
   igvc::param(pNh, "direction_velocity_control/pivot_limit", direction_velocity_config_.pivot_limit, 0.32);
   igvc::param(pNh, "limits/velocity", max_velocity_, 1.0);
+
+  igvc::param(pNh, "limits/acceleration/wheel", acceleration_limits_.wheel_max_accel, 5.0);
+  igvc::param(pNh, "limits/acceleration/tangent", acceleration_limits_.tangent_max_accel, 3.00);
+  igvc::param(pNh, "limits/acceleration/enable", acceleration_limits_.enable, false);
+
   igvc::param(pNh, "controller/left_axis/horizontal", joy_map_.left_axis_x, 0);
   igvc::param(pNh, "controller/left_axis/horizontal_invert", joy_map_.left_axis_x_invert, true);
 
@@ -166,7 +171,7 @@ void JoystickDriver::controlLoop(const ros::TimerEvent &)
   {
     if (control_style_ == ControlStyle::direction_velocity_control)
     {
-//      control_style_ = ControlStyle::smooth_control;
+      //      control_style_ = ControlStyle::smooth_control;
       control_style_ = ControlStyle::tank_control;
     }
     else if (control_style_ == ControlStyle::smooth_control)
@@ -179,7 +184,10 @@ void JoystickDriver::controlLoop(const ros::TimerEvent &)
     }
     a_clicked_ = false;
   }
-  boundAcceleration();
+  if (acceleration_limits_.enable)
+  {
+    boundAcceleration();
+  }
 
   last_time_ = ros::Time::now();
   last_motor_cmd_ = motor_cmd_;
@@ -190,27 +198,37 @@ void JoystickDriver::controlLoop(const ros::TimerEvent &)
 void JoystickDriver::boundAcceleration()
 {
   ros::Duration dt = motor_cmd_.header.stamp - last_time_;
+  if (dt.toSec() == 0)
+  {
+    dt = ros::Duration(0.001);
+  }
 
   double dv = getVelocity(motor_cmd_) - getVelocity(last_motor_cmd_);
 
   double a = dv / dt.toSec();
-
-  if (std::abs(a) > std::abs(acceleration_limits_.tangent_max_accel)) {
-    boundTangentAcceleration(copysign(acceleration_limits_.tangent_max_accel, a), dt);
+  if (std::abs(a) > std::abs(acceleration_limits_.tangent_max_accel))
+  {
+    boundTangentAcceleration(a, dt);
   }
 
-  double d_lv = motor_cmd_.left_velocity - last_motor_cmd_.left_velocity;
-  double a_l = d_lv / dt.toSec();
-
-  double d_rv = motor_cmd_.right_velocity - last_motor_cmd_.right_velocity;
-  double a_r = d_rv / dt.toSec();
-
-  if (std::abs(a_l) > std::abs(a_r) && std::abs(a_l) > std::abs(acceleration_limits_.wheel_max_accel)) {
-    boundLeftAcceleration(copysign(a_l, acceleration_limits_.wheel_max_accel), dt);
-  }
-  if (std::abs(a_r) > std::abs(a_l) && std::abs(a_r) > std::abs(acceleration_limits_.wheel_max_accel)) {
-    boundRightAcceleration(copysign(a_r, acceleration_limits_.wheel_max_accel), dt);
-  }
+  //  double d_lv = motor_cmd_.left_velocity - last_motor_cmd_.left_velocity;
+  //  double a_l = d_lv / dt.toSec();
+  //
+  //  double d_rv = motor_cmd_.right_velocity - last_motor_cmd_.right_velocity;
+  //  double a_r = d_rv / dt.toSec();
+  //
+  //  double k = getK(motor_cmd_);
+  //  if (k > 0) {
+  //    if (std::abs(a_r) > std::abs(a_l) && std::abs(a_r) > std::abs(acceleration_limits_.wheel_max_accel))
+  //    {
+  //      boundRightAcceleration(copysign(acceleration_limits_.wheel_max_accel, a_r), dt);
+  //    }
+  //  } else {
+  //    if (std::abs(a_l) > std::abs(a_r) && std::abs(a_l) > std::abs(acceleration_limits_.wheel_max_accel))
+  //    {
+  //      boundLeftAcceleration(copysign(acceleration_limits_.wheel_max_accel, a_l), dt);
+  //    }
+  //  }
 }
 
 void JoystickDriver::joystickCallback(const sensor_msgs::JoyConstPtr &joystick)
@@ -427,19 +445,34 @@ double JoystickDriver::getYaw(const sensor_msgs::ImuConstPtr &imu) const
   return tf::getYaw(quat);
 }
 
-void JoystickDriver::boundTangentAcceleration(double tangent_acceleration, const ros::Duration& dt) {
+void JoystickDriver::boundTangentAcceleration(double tangent_acceleration, const ros::Duration &dt)
+{
+  double bound_a = copysign(acceleration_limits_.tangent_max_accel, tangent_acceleration);
   double k = getK(motor_cmd_);
-  double v = getVelocity(motor_cmd_) + tangent_acceleration * dt.toSec();
-  double w = k * v;
+  double v = getVelocity(last_motor_cmd_) + bound_a * dt.toSec();
 
-  double v_l = v + w * smooth_control_config_.axle_length / 2;
-  double v_r = v - w * smooth_control_config_.axle_length / 2;
-
-  motor_cmd_.left_velocity = v_l;
-  motor_cmd_.right_velocity = v_r;
+  double v_l;
+  double v_r;
+  bool stopping = std::abs(motor_cmd_.left_velocity) < 0.15 && std::abs(motor_cmd_.right_velocity) < 0.15;
+  bool large_a = std::abs(tangent_acceleration) > 50.0f;
+  if (std::abs(k) < 1e-2 || isinf(k) || isnan(k) || stopping || large_a)
+  {
+    v_l = v;
+    v_r = v;
+    motor_cmd_.left_velocity = v_l;
+    motor_cmd_.right_velocity = v_r;
+  }
+  //  else
+  //  {
+  //    double w = k * v;
+  //
+  //    v_l = v + w * smooth_control_config_.axle_length / 2;
+  //    v_r = v - w * smooth_control_config_.axle_length / 2;
+  //  }
 }
 
-void JoystickDriver::boundLeftAcceleration(double left_acceleration, const ros::Duration &dt) {
+void JoystickDriver::boundLeftAcceleration(double left_acceleration, const ros::Duration &dt)
+{
   double k = getK(motor_cmd_);
   double v_l = motor_cmd_.left_velocity + left_acceleration * dt.toSec();
 
@@ -449,28 +482,31 @@ void JoystickDriver::boundLeftAcceleration(double left_acceleration, const ros::
   motor_cmd_.right_velocity = v_r;
 }
 
-void JoystickDriver::boundRightAcceleration(double right_acceleration, const ros::Duration &dt) {
+void JoystickDriver::boundRightAcceleration(double right_acceleration, const ros::Duration &dt)
+{
   double k = getK(motor_cmd_);
   double v_r = motor_cmd_.right_velocity + right_acceleration * dt.toSec();
 
-  double v_l =  (smooth_control_config_.axle_length * k - 2) / (-2 - smooth_control_config_.axle_length * k) * v_r;
+  double v_l = (smooth_control_config_.axle_length * k - 2) / (-2 - smooth_control_config_.axle_length * k) * v_r;
 
   motor_cmd_.left_velocity = v_l;
   motor_cmd_.right_velocity = v_r;
 }
 
-
-double JoystickDriver::getK(const igvc_msgs::velocity_pair& motor_cmd) const {
+double JoystickDriver::getK(const igvc_msgs::velocity_pair &motor_cmd) const
+{
   double v = getVelocity(motor_cmd);
   double w = getW(motor_cmd);
   return w / v;
 }
-double JoystickDriver::getVelocity(const igvc_msgs::velocity_pair &command) const {
+double JoystickDriver::getVelocity(const igvc_msgs::velocity_pair &command) const
+{
   return (command.left_velocity + command.right_velocity) / 2;
 }
 
-double JoystickDriver::getW(const igvc_msgs::velocity_pair &command) const {
-  return (command.right_velocity + command.left_velocity) / smooth_control_config_.axle_length;
+double JoystickDriver::getW(const igvc_msgs::velocity_pair &command) const
+{
+  return (command.right_velocity - command.left_velocity) / smooth_control_config_.axle_length;
 }
 
 int main(int argc, char **argv)

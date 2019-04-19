@@ -1,14 +1,20 @@
 #ifndef PROJECT_JOYSTICK_DRIVER_H
 #define PROJECT_JOYSTICK_DRIVER_H
 
-#include <ros/ros.h>
-#include <sensor_msgs/Joy.h>
 #include <igvc_msgs/velocity_pair.h>
+#include <ros/ros.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/Joy.h>
 
-enum ControlStyle { direction_velocity_control, smooth_control, tank_control };
+enum ControlStyle
+{
+  direction_velocity_control,
+  smooth_control,
+  tank_control
+};
 
-struct SmoothControlConfig {
+struct SmoothControlConfig
+{
   double k1;
   double k2;
   double axle_length;
@@ -21,32 +27,38 @@ struct SmoothControlConfig {
   bool camera_initialized;
 };
 
-struct TankControlConfig {
+struct TankControlConfig
+{
   double max_velocity;
   double velocity_increment;
   double velocity;
 };
 
-struct AccelerationLimits {
+struct AccelerationLimits
+{
   double wheel_max_accel;
   double tangent_max_accel;
+  bool enable;
 };
 
-struct DirectionVelocityConfig {
+struct DirectionVelocityConfig
+{
   double pivot_limit;
   double max_velocity;
   double velocity_increment;
   double velocity;
 };
 
-struct Axes {
+struct Axes
+{
   double left_x;
   double left_y;
   double right_x;
   double right_y;
 };
 
-struct JoyMap {
+struct JoyMap
+{
   int a = 0;
   int b = 1;
   int x = 2;
@@ -63,10 +75,12 @@ struct JoyMap {
   bool right_axis_y_invert;
 };
 
-class JoystickDriver {
- public:
+class JoystickDriver
+{
+public:
   JoystickDriver();
- private:
+
+private:
   ros::Publisher cmd_pub_;
 
   double max_velocity_;
@@ -99,20 +113,20 @@ class JoystickDriver {
   void processAxes(const sensor_msgs::JoyConstPtr &joystick);
 
   void boundAcceleration();
-  void boundTangentAcceleration(double tangent_acceleration, const ros::Duration& dt);
-  void boundLeftAcceleration(double left_acceleration, const ros::Duration& dt);
-  void boundRightAcceleration(double right_acceleration, const ros::Duration& dt);
+  void boundTangentAcceleration(double tangent_acceleration, const ros::Duration &dt);
+  void boundLeftAcceleration(double left_acceleration, const ros::Duration &dt);
+  void boundRightAcceleration(double right_acceleration, const ros::Duration &dt);
 
   void handleTankControl(const sensor_msgs::JoyConstPtr &joystick);
   void handleSmoothControl(const sensor_msgs::JoyConstPtr &joystick);
   void handleDirectionVelocityControl(const sensor_msgs::JoyConstPtr &joystick);
 
-  double getVelocity(const igvc_msgs::velocity_pair& command) const;
-  double getW(const igvc_msgs::velocity_pair& command) const;
-  double getK(const igvc_msgs::velocity_pair& command) const;
+  double getVelocity(const igvc_msgs::velocity_pair &command) const;
+  double getW(const igvc_msgs::velocity_pair &command) const;
+  double getK(const igvc_msgs::velocity_pair &command) const;
   double getYaw(const sensor_msgs::ImuConstPtr &imu) const;
 
   void signalHandler();
 };
 
-#endif //PROJECT_JOYSTICK_DRIVER_H
+#endif  // PROJECT_JOYSTICK_DRIVER_H
