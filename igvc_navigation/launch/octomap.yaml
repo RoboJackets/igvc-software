@@ -73,12 +73,19 @@ topics:
         right: "/right_cam/camera_info"
 frames:
     camera:
-      left: "/left_cam_optical"
-      center: "/center_cam_optical"
-      right: "/right_cam_optical"
+        left: "/left_cam_optical"
+        center: "/center_cam_optical"
+        right: "/right_cam_optical"
 node:
     debug: true
     use_lines: true
+    cameras:
+        left:
+            enable: true
+        center:
+            enable: true
+        right:
+            enable: true
     transform_max_wait_time: 1
 cameras:
     resize_width: 400 # pixels

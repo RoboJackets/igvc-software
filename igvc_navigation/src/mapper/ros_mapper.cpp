@@ -58,6 +58,9 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "frames/camera/left", camera_frame_left_);
   igvc::getParam(pNh, "frames/camera/center", camera_frame_center_);
   igvc::getParam(pNh, "frames/camera/right", camera_frame_right_);
+  igvc::getParam(pNh, "node/camera/left/enable", enable_left_cam_);
+  igvc::getParam(pNh, "node/camera/center/enable", enable_right_cam_);
+  igvc::getParam(pNh, "node/camera/right/enable", enable_center_cam_);
 
   igvc::getParam(pNh, "cameras/resize_width", resize_width_);
   igvc::getParam(pNh, "cameras/resize_height", resize_height_);
@@ -73,33 +76,41 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
 
   if (use_lines_)
   {
-    line_map_subs_.emplace(std::make_pair(
-        Camera::left,
-        nh.subscribe<sensor_msgs::Image>(line_topic_left_, 1,
-                                         boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::left))));
-    line_map_subs_.emplace(std::make_pair(
-        Camera::center,
-        nh.subscribe<sensor_msgs::Image>(line_topic_center_, 1,
-                                         boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::center))));
-    line_map_subs_.emplace(std::make_pair(
-        Camera::right,
-        nh.subscribe<sensor_msgs::Image>(line_topic_right_, 1,
-                                         boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::right))));
-
+    if (enable_left_cam_)
+    {
+      line_map_subs_.emplace(std::make_pair(
+          Camera::left,
+          nh.subscribe<sensor_msgs::Image>(line_topic_left_, 1,
+                                           boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::left))));
+      camera_infos_.emplace(std::make_pair(
+          Camera::left,
+          nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_left_, 1,
+                                                boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::left))));
+    }
+    if (enable_center_cam_)
+    {
+      line_map_subs_.emplace(std::make_pair(
+          Camera::center,
+          nh.subscribe<sensor_msgs::Image>(line_topic_center_, 1,
+                                           boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::center))));
+      camera_infos_.emplace(
+          std::make_pair(Camera::center, nh.subscribe<sensor_msgs::CameraInfo>(
+                                             camera_info_topic_center_, 1,
+                                             boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::center))));
+    }
+    if (enable_right_cam_)
+    {
+      line_map_subs_.emplace(std::make_pair(
+          Camera::right,
+          nh.subscribe<sensor_msgs::Image>(line_topic_right_, 1,
+                                           boost::bind(&ROSMapper::segmentedImageCallback, this, _1, Camera::right))));
+      camera_infos_.emplace(std::make_pair(
+          Camera::right,
+          nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_right_, 1,
+                                                boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::right))));
+    }
     projected_line_map_sub =
         nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(projected_line_topic_, 1, &ROSMapper::projectedLineCallback, this);
-    camera_infos_.emplace(std::make_pair(
-        Camera::left,
-        nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_left_, 1,
-                                              boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::left))));
-    camera_infos_.emplace(std::make_pair(
-        Camera::center,
-        nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_center_, 1,
-                                              boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::center))));
-    camera_infos_.emplace(std::make_pair(
-        Camera::right,
-        nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_right_, 1,
-                                              boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::right))));
   }
 
   map_pub_ = nh.advertise<igvc_msgs::map>("/map", 1);
