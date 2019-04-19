@@ -34,46 +34,47 @@
   <!-- casters -->
   <xacro:property name="caster_radius" value="0.1016"/>
   <xacro:property name="caster_mass" value="1.0"/>
+  <!-- how far forward from base_link it is -->
   <xacro:property name="caster_x" value="0.612978"/>
 
-  <!-- center camera params -->
+  <!-- center camera params, relative to the magnetometer -->
   <xacro:property name="center_camera_y" value="0.0"/>
   <xacro:property name="center_camera_x" value="0.216371"/>
   <xacro:property name="center_camera_pitch" value="0.0"/>
   <xacro:property name="center_camera_z" value="1.354330"/>
 
-  <!-- right camera params -->
+  <!-- right camera params, relative to the magnetometer -->
   <xacro:property name="right_camera_y" value="0.3"/>
   <xacro:property name="right_camera_x" value="0.216371"/>
   <xacro:property name="right_camera_pitch" value="0.0"/>
   <xacro:property name="right_camera_yaw" value="0.0"/>
   <xacro:property name="right_camera_z" value="1.354330"/>
 
-  <!-- left camera params -->
+  <!-- left camera params, relative to the magnetometer -->
   <xacro:property name="left_camera_y" value="-0.3"/>
   <xacro:property name="left_camera_x" value="0.216371"/>
   <xacro:property name="left_camera_pitch" value="0.0"/>
   <xacro:property name="left_camera_yaw" value="0.0"/>
   <xacro:property name="left_camera_z" value="1.354330"/>
 
-  <!-- lidar params -->
+  <!-- lidar params relative to base_link-->
   <xacro:property name="lidar_pitch" value="0.174533"/>
   <xacro:property name="lidar_x" value="0.680364"/>
   <xacro:property name="lidar_z" value="0.237121"/>
   <xacro:property name="lidar_hz" value="10"/>
   <xacro:property name="lidar_samples" value="500"/>
 
-  <!-- gps -->
+  <!-- gps, relative to base_link -->
   <xacro:property name="gps_z" value="1.354330"/>
   <xacro:property name="gps_y" value="0.198120"/>
   <xacro:property name="gps_x" value="0.216371"/>
 
-  <!-- imu bottom -->
+  <!-- imu bottom, relative to base_link -->
   <xacro:property name="imu_z" value="1.354330"/>
   <xacro:property name="imu_y" value="-0.198120"/>
   <xacro:property name="imu_x" value="0.216371"/>
 
-  <!-- imu top -->
+  <!-- imu top, relative to base_link -->
   <xacro:property name="magnetometer_z" value="1.354330"/>
   <xacro:property name="magnetometer_y" value="-0.198120"/>
   <xacro:property name="magnetometer_x" value="0.216371"/>
@@ -264,9 +265,9 @@
       </visual>
   </link>
 
-  <joint name="base_link_to_center_cam" type="fixed">
+  <joint name="magnetometer_to_center_cam" type="fixed">
       <origin xyz="${center_camera_x} ${center_camera_y} ${center_camera_z}" rpy="0 ${center_camera_pitch} 0" />
-      <parent link="base_link"/>
+      <parent link="magnetometer"/>
       <child link="center_cam"/>
   </joint>
 
@@ -282,6 +283,7 @@
   <gazebo reference="center_cam">
       <sensor name="center_cam_sensor" type="camera">
           <camera>
+              <!-- hov in radians -->
               <horizontal_fov>1.2290609</horizontal_fov>
               <image>
                 <width>1920</width>
@@ -329,9 +331,9 @@
       </visual>
   </link>
 
-  <joint name="base_link_to_right_cam" type="fixed">
+  <joint name="magnetometer_to_right_cam" type="fixed">
       <origin xyz="${right_camera_x} ${right_camera_y} ${right_camera_z}" rpy="0 ${right_camera_pitch} ${right_camera_yaw}" />
-      <parent link="base_link"/>
+      <parent link="magnetometer"/>
       <child link="right_cam"/>
   </joint>
 
@@ -347,6 +349,7 @@
   <gazebo reference="right_cam">
       <sensor name="right_cam_sensor" type="camera">
           <camera>
+              <!-- hov in radians -->
               <horizontal_fov>1.2290609</horizontal_fov>
               <image>
                 <width>1920</width>
@@ -394,9 +397,9 @@
       </visual>
   </link>
 
-  <joint name="base_link_to_left_cam" type="fixed">
+  <joint name="magnetometer_to_left_cam" type="fixed">
       <origin xyz="${left_camera_x} ${left_camera_y} ${left_camera_z}" rpy="0 ${left_camera_pitch} ${left_camera_yaw}" />
-      <parent link="base_link"/>
+      <parent link="magnetometer"/>
       <child link="left_cam"/>
   </joint>
 
@@ -412,6 +415,7 @@
   <gazebo reference="left_cam">
       <sensor name="left_cam_sensor" type="camera">
           <camera>
+              <!-- hov in radians -->
               <horizontal_fov>1.2290609</horizontal_fov>
               <image>
                 <width>1920</width>
