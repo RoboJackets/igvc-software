@@ -35,6 +35,7 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   igvc::getParam(pNh, "filters/empty_image/blur/kernel", process_image_options_.blur.kernel);
   igvc::getParam(pNh, "filters/empty_image/blur/sigma", process_image_options_.blur.sigma);
   igvc::getParam(pNh, "filters/empty_image/threshold", process_image_options_.threshold.threshold);
+  igvc::getParam(pNh, "filters/empty_image/dilation_size", process_image_options_.dilation_size);
 
   igvc::param(pNh, "filters/behind/enabled", behind_filter_options_.enabled, false);
   igvc::getParam(pNh, "filters/behind/filter_angle", behind_filter_options_.angle);
@@ -54,7 +55,12 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   octomapper_->create_octree(camera_map_pair_);
 
   camera_line_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_lines", 1);
-  camera_projection_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection", 1);
+
+  camera_projection_pub_l_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_l", 1);
+  camera_projection_pub_c_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_c", 1);
+  camera_projection_pub_r_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_r", 1);
+
+  process_image_pub_ = pNh.advertise<sensor_msgs::Image>("/mapper/free_space_image", 1);
   filtered_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/filtered_pc", 1);
   empty_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/empty_pc", 1);
   ground_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/ground", 1);
@@ -163,8 +169,25 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
   MapUtils::projectToPlane(projected_pc, ground_plane_, image, model, camera_to_base);
 
   pcl_ros::transformPointCloud(projected_pc, projected_pc, base_to_odom);
-  MapUtils::debugPublishPointCloud(camera_projection_pub_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
-                                   debug_);
+  if (static_cast<int>(camera) == 0)
+  {
+    MapUtils::debugPublishPointCloud(camera_projection_pub_l_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
+                                     debug_);
+    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", image).toImageMsg();
+    msg->header.stamp = ros::Time::now();
+    msg->header.frame_id = "/left_cam_optical";
+    process_image_pub_.publish(msg);
+  }
+  else if (static_cast<int>(camera) == 1)
+  {
+    MapUtils::debugPublishPointCloud(camera_projection_pub_c_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
+                                     debug_);
+  }
+  else
+  {
+    MapUtils::debugPublishPointCloud(camera_projection_pub_r_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
+                                     debug_);
+  }
 
   octomapper_->insertPoints(camera_map_pair_, projected_pc, false, camera_probability_model_);
 
@@ -176,6 +199,11 @@ void Mapper::processImageFreeSpace(cv::Mat& image) const
   cv::GaussianBlur(image, image, cv::Size(process_image_options_.blur.kernel, process_image_options_.blur.kernel),
                    process_image_options_.blur.sigma, process_image_options_.blur.sigma);
   cv::threshold(image, image, process_image_options_.threshold.threshold, UCHAR_MAX, cv::THRESH_BINARY);
+  cv::Mat element = cv::getStructuringElement(
+      cv::MORPH_RECT,
+      cv::Size(2 * process_image_options_.dilation_size + 1, 2 * process_image_options_.dilation_size + 1),
+      cv::Point(process_image_options_.dilation_size, process_image_options_.dilation_size));
+  cv::dilate(image, image, element);
 }
 
 std::optional<cv::Mat> Mapper::getMap()

@@ -30,6 +30,7 @@ struct ProcessImageOptions
 {
   BlurFilterOptions blur;
   ThresholdFilterOptions threshold;
+  int dilation_size;
 };
 
 struct CombinedMapOptions
@@ -37,7 +38,7 @@ struct CombinedMapOptions
   BlurFilterOptions blur;
 };
 
-enum class Camera: int
+enum class Camera : int
 {
   left,
   center,
@@ -110,7 +111,11 @@ private:
   ProcessImageOptions process_image_options_{};
   CombinedMapOptions combined_map_options_{};
 
-  ros::Publisher camera_projection_pub_;
+  ros::Publisher camera_projection_pub_l_;
+  ros::Publisher camera_projection_pub_c_;
+  ros::Publisher camera_projection_pub_r_;
+
+  ros::Publisher process_image_pub_;
   ros::Publisher filtered_pc_pub_;
   ros::Publisher empty_pc_pub_;
   ros::Publisher ground_pub_;

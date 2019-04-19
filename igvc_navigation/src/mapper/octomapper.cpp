@@ -79,13 +79,13 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
     if (it.getDepth() == pc_map_pair.octree->getTreeDepth())
     {
       auto [x, y] = toMapCoordinates(it.getX(), it.getY());
-      if (x < map_options_.lengthGrid() && y < map_options_.widthGrid())
+      if (x >= 0 && x < map_options_.lengthGrid() && y >= 0 && y < map_options_.widthGrid())
       {
         odds_sum[x][y] += it->getLogOdds();
       }
       else
       {
-        ROS_ERROR_STREAM_THROTTLE_NAMED(10, "Point Outside", "Point outside!");
+        ROS_ERROR_STREAM_THROTTLE_NAMED(10, "Point Outside", "Point outside! (" << x << ", " << y << ")");
       }
     }
     else
@@ -97,7 +97,7 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
       {
         for (int dy = 0; dy < grid_num; dy++)
         {
-          if (x < map_options_.lengthGrid() && y < map_options_.widthGrid())
+          if (x + dx >= 0 && x + dx < map_options_.lengthGrid() && y + dy >= 0 && y + dy < map_options_.widthGrid())
           {
             odds_sum[x + dx][y + dy] += it->getLogOdds();
           }

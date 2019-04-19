@@ -124,7 +124,9 @@ private:
   std::string camera_info_topic_center_;
   std::string camera_info_topic_right_;
 
-  std::string camera_frame_;
+  std::string camera_frame_left_;
+  std::string camera_frame_center_;
+  std::string camera_frame_right_;
   RobotState state_;  // Odom -> Base_link
 
   std::unique_ptr<Mapper> mapper_;
