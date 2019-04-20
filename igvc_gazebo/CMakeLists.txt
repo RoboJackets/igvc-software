@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
   igvc_utils
   cv_bridge
   image_transport
+  robot_localization
 )
 
 include_directories(
