@@ -28,7 +28,7 @@ protected:
     {
       ros::spinOnce();
     }
-    ros::Duration wait_duration{2.0};
+    ros::Duration wait_duration{ 2.0 };
     sensor_msgs::Joy joy_msg;
     joy_msg.axes = { 0, 0.0, 0, 0, 0.0 };
     joy_msg.buttons = { 0, 0, 0, 0 };
@@ -75,7 +75,7 @@ TEST_F(TestJoystickDriver, FullReverse)
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
-  ros::Duration wait_duration{0.1};
+  ros::Duration wait_duration{ 0.1 };
   wait_duration.sleep();
 
   const igvc_msgs::velocity_pair::ConstPtr response =
@@ -96,7 +96,7 @@ TEST_F(TestJoystickDriver, SpinRight)
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
-  ros::Duration wait_duration{0.5};
+  ros::Duration wait_duration{ 0.5 };
   wait_duration.sleep();
 
   const igvc_msgs::velocity_pair::ConstPtr response =
@@ -114,7 +114,7 @@ TEST_F(TestJoystickDriver, SpinLeft)
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
-  ros::Duration wait_duration{0.5};
+  ros::Duration wait_duration{ 0.5 };
   wait_duration.sleep();
 
   const igvc_msgs::velocity_pair::ConstPtr response =
