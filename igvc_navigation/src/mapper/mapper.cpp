@@ -56,11 +56,10 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
 
   camera_line_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_lines", 1);
 
-  camera_projection_pub_l_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_l", 1);
-  camera_projection_pub_c_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_c", 1);
-  camera_projection_pub_r_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_r", 1);
+  camera_projection_pub_left_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_left", 1);
+  camera_projection_pub_center_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_center", 1);
+  camera_projection_pub_right_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_right", 1);
 
-  process_image_pub_ = pNh.advertise<sensor_msgs::Image>("/mapper/free_space_image", 1);
   filtered_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/filtered_pc", 1);
   empty_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/empty_pc", 1);
   ground_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/ground", 1);
@@ -172,21 +171,17 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
   MapUtils::projectTo2D(projected_pc);
   if (static_cast<int>(camera) == 0)
   {
-    MapUtils::debugPublishPointCloud(camera_projection_pub_l_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
+    MapUtils::debugPublishPointCloud(camera_projection_pub_left_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
                                      debug_);
-    sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", image).toImageMsg();
-    msg->header.stamp = ros::Time::now();
-    msg->header.frame_id = "/left_cam_optical";
-    process_image_pub_.publish(msg);
   }
   else if (static_cast<int>(camera) == 1)
   {
-    MapUtils::debugPublishPointCloud(camera_projection_pub_c_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
-                                     debug_);
+    MapUtils::debugPublishPointCloud(camera_projection_pub_center_, projected_pc, pcl_conversions::toPCL(stamp),
+                                     "/odom", debug_);
   }
   else
   {
-    MapUtils::debugPublishPointCloud(camera_projection_pub_r_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
+    MapUtils::debugPublishPointCloud(camera_projection_pub_right_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
                                      debug_);
   }
 
