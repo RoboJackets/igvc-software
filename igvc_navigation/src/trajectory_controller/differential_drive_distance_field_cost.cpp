@@ -37,11 +37,11 @@ float SignedDistanceFieldCost::getCost(const RobotState& state, const Controls& 
 
   if (state.velocity() < 0)
   {
-    cost = std::numeric_limits<float>::infinity();
+    cost = 1e10;
   }
   if (state.velocity() > velocity_limit_)
   {
-    cost = std::numeric_limits<float>::infinity();
+    cost = 1e10;
   }
 
   return cost;
@@ -49,7 +49,7 @@ float SignedDistanceFieldCost::getCost(const RobotState& state, const Controls& 
 
 float SignedDistanceFieldCost::getSDFValue(const RobotState& state)
 {
-  std::optional<float> value = signed_distance_field_->getValue(state.x, state.y);
+  std::optional<float> value = signed_distance_field_->getValue(state.x(), state.y());
   if (value)
   {
     return *value;

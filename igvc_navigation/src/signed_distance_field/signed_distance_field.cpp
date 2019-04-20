@@ -29,7 +29,8 @@ void SignedDistanceField::calculate(const nav_msgs::Path& path, size_t path_star
                                     cv::Mat& traversal_costs)
 {
   if (options_.use_path_cost_) {
-    traversal_costs.setTo(options_.traversal_cost_);
+//    traversal_costs.setTo(options_.traversal_cost_);
+    traversal_costs = cv::Scalar(options_.traversal_cost_);
   }
   std::vector<fast_sweep::Node> gamma_points;  // TODO: Reserve?
   if (path_end - path_start > 0)

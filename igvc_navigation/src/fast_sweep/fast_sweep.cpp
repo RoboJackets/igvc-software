@@ -34,6 +34,9 @@ const std::vector<float> FastSweep::solveEikonal(const std::vector<Node>& gamma_
 
   // Iterate over bands
   doSweeps(sweeps);
+  doSweeps(sweeps);
+  doSweeps(sweeps);
+  doSweeps(sweeps);
 //  printGrid();
 //  std::cout << std::endl << "Second time lmao why" << std::endl;
 //  doSweeps(sweeps);

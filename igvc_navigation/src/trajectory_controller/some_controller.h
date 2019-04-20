@@ -186,10 +186,10 @@ SomeController<ModelImpl, CostFunctionImpl>::optimize(const State& starting_stat
       }
     }
     if (effectiveParticles() < resample_threshold_) {
-      ROS_INFO_STREAM("YES resampling! effective particles: " << effectiveParticles());
+//      ROS_INFO_STREAM("YES resampling! effective particles: " << effectiveParticles());
       resampleParticles();
     } else {
-      ROS_INFO_STREAM("NO resampling! effective particles: " << effectiveParticles());
+//      ROS_INFO_STREAM("NO resampling! effective particles: " << effectiveParticles());
     }
   }
   for (Particle<ModelImpl>& particle : particles_)

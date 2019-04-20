@@ -13,12 +13,12 @@ probability_model:
         ground:
             prob_miss: 0.6
         free_space: # Rays that are not detected by the lidar to have occupied points along them
-            prob_miss: 0.52
+            prob_miss: 0.51
     camera:
         prob_miss: 0.45
         prob_hit: 0.9
 sensor_model:
-    max_range: 5
+    max_range: 20
     angular_resolution: 0.01
 filters:
     behind: # Filters points in a "filter_angle" cone behind the robot

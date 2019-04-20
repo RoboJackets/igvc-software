@@ -24,7 +24,7 @@ TrajectoryController::TrajectoryController(const SignedDistanceFieldOptions& sdf
 std::unique_ptr<ControllerResult> TrajectoryController::getControls(const nav_msgs::PathConstPtr& path,
                                                                     const RobotState& state)
 {
-  signed_distance_field_->setCenter(state.x, state.y);
+  signed_distance_field_->setCenter(state.x(), state.y());
   const auto [start_idx, end_idx] = getPathIndices(path, state);
   // TODO: Change this to have the gamma point be the point at the end of the path, an the traversal costs to have
   // little cost along the path and high cost everywhere else
@@ -43,7 +43,7 @@ std::unique_ptr<ControllerResult> TrajectoryController::getControls(const nav_ms
 
   std::unique_ptr<cv::Mat> sdf_mat = signed_distance_field_->toMat();
   std::unique_ptr<ControllerResult> controller_result =
-      std::make_unique<ControllerResult>(std::move(optimization_result), std::move(sdf_mat), std::move(controls));
+      std::make_unique<ControllerResult>(std::move(optimization_result), std::make_unique<cv::Mat>(sdf_mat->clone()), std::move(controls));
   return controller_result;
 }
 

@@ -1,11 +1,11 @@
 #ifndef ROBOTSTATE_H
 #define ROBOTSTATE_H
 
+#include <igvc_msgs/velocity_pair.h>
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
 #include <Eigen/Dense>
 #include <igvc_utils/NodeUtils.hpp>
-#include <igvc_msgs/velocity_pair.h>
 
 struct WheelVelocity
 {
@@ -177,7 +177,8 @@ public:
 
 inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
 {
-  out << "(xy: (" << state.x() << ", " << state.y() << "), yaw: " << state.yaw() << ", v: (" << state.wheel_velocity_.left << ", " << state.wheel_velocity_.right << ") )";
+  out << "(xy: (" << state.x() << ", " << state.y() << "), yaw: " << state.yaw() << ", v: ("
+      << state.wheel_velocity_.left << ", " << state.wheel_velocity_.right << ") )";
   return out;
 }
 
@@ -244,12 +245,6 @@ inline double RobotState::quat_z() const
 inline double RobotState::quat_w() const
 {
   return transform.getRotation().w();
-}
-
-inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
-{
-  out << "(" << state.x() << ", " << state.y() << ", " << state.yaw() << ")";
-  return out;
 }
 
 inline void RobotState::set_x(double x)

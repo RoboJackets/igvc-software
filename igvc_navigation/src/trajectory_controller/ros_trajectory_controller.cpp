@@ -49,9 +49,9 @@ void ROSTrajectoryController::testController(float starting_yaw)
   std::random_device rd;  //Will be used to obtain a seed for the random number engine
   std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
   std::uniform_int_distribution<> dis(-20, 20);
-  state_->x = 5 + dis(gen);
-  state_->y = 10 + dis(gen);
-  state_->yaw = starting_yaw;
+  state_->set_x(5 + dis(gen));
+  state_->set_y(10 + dis(gen));
+  state_->set_yaw(starting_yaw);
   state_->wheel_velocity_.left = 0.5;
   state_->wheel_velocity_.right = 0.5;
 
@@ -83,8 +83,8 @@ void ROSTrajectoryController::publishAsPCL(const ros::Publisher& pub, const cv::
     for (int j = 0; j < mat.rows; j++)
     {
       pcl::PointXYZI p{};
-      p.x = static_cast<float>((i - (mat.cols / 2.0)) * resolution) + state_->x;
-      p.y = static_cast<float>(((mat.rows / 2.0) - j) * resolution) + state_->y;
+      p.x = static_cast<float>((i - (mat.cols / 2.0)) * resolution) + state_->x();
+      p.y = static_cast<float>(((mat.rows / 2.0) - j) * resolution) + state_->y();
       p.intensity = cos(mat.at<float>(j, i) / cos_scaling_);
       pointcloud->points.push_back(p);
     }
@@ -294,8 +294,8 @@ visualization_msgs::Marker ROSTrajectoryController::toLineStrip(const std::vecto
   for (const State& state : states)
   {
     geometry_msgs::Point point;
-    point.x = state.x;
-    point.y = state.y;
+    point.x = state.x();
+    point.y = state.y();
     marker.points.emplace_back(point);
   }
   return marker;
