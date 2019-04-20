@@ -3,7 +3,7 @@
 <launch>
 
   <node name="sim_color_detector" pkg="igvc_gazebo" type="sim_color_detector" args="$(arg my_args)">
-      <param name="topic_name" value="center_cam/image_raw"/>
+      <param name="image_topic" value="/center_cam/image_raw"/>
   </node>
 
 </launch>

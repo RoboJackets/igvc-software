@@ -188,7 +188,9 @@ int main(int argc, char** argv) {
   
   igvc::param(pNh_lines, "image_topic", topic_name_lines, std::string("/center_cam/image_raw"));
 
-  img_pub_lines = nh_lines.advertise<sensor_msgs::Image>("/usb_cam_center/detected_lines", 1);
+  std::string name_for_topic_lines = topic_name_lines + "/detected_lines";
+
+  img_pub_lines = nh_lines.advertise<sensor_msgs::Image>(name_for_topic_lines, 1);
 
   ros::Subscriber img_sub_lines = nh_lines.subscribe(topic_name_lines, 1, handle_image_lines);
 
@@ -201,7 +203,9 @@ int main(int argc, char** argv) {
   
   igvc::param(pNh_barrels, "image_topic", topic_name_barrels, std::string("/center_cam/image_raw"));
 
-  img_pub_barrels = nh_barrels.advertise<sensor_msgs::Image>("/usb_cam_center/detected_barrels", 1);
+  std::string name_for_topic_barrels = topic_name_barrels + "/detected_barrels";
+
+  img_pub_barrels = nh_barrels.advertise<sensor_msgs::Image>(name_for_topic_barrels, 1);
 
   ros::Subscriber img_sub_barrels = nh_barrels.subscribe(topic_name_barrels, 1, handle_image_barrels);
 
