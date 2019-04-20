@@ -28,6 +28,12 @@ protected:
     {
       ros::spinOnce();
     }
+    ros::Duration wait_duration{2.0};
+    sensor_msgs::Joy joy_msg;
+    joy_msg.axes = { 0, 0.0, 0, 0, 0.0 };
+    joy_msg.buttons = { 0, 0, 0, 0 };
+    mock_joy_pub.publish(joy_msg);
+    wait_duration.sleep();
   }
 
   virtual void TearDown()
@@ -47,7 +53,7 @@ protected:
 TEST_F(TestJoystickDriver, FullForward)
 {
   sensor_msgs::Joy joy_msg;
-  joy_msg.axes = { 0, 1.0, 0, 0, 1.0 };
+  joy_msg.axes = { 0, 1.0, 0, 0, 0.0 };
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
@@ -55,8 +61,11 @@ TEST_F(TestJoystickDriver, FullForward)
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(10));
 
   EXPECT_TRUE(response.get() != nullptr);
-  EXPECT_EQ(response->left_velocity, 1.0);
-  EXPECT_EQ(response->right_velocity, 1.0);
+  EXPECT_LT(response->left_velocity, 1.0);
+  EXPECT_LT(response->right_velocity, 1.0);
+  EXPECT_GT(response->left_velocity, 0.0);
+  EXPECT_GT(response->right_velocity, 0.0);
+  EXPECT_FLOAT_EQ(response->left_velocity, response->right_velocity);
 }
 
 TEST_F(TestJoystickDriver, FullReverse)
@@ -66,62 +75,61 @@ TEST_F(TestJoystickDriver, FullReverse)
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
+  ros::Duration wait_duration{0.1};
+  wait_duration.sleep();
+
   const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(10));
 
   EXPECT_TRUE(response.get() != nullptr);
-  EXPECT_EQ(response->left_velocity, -1.0);
-  EXPECT_EQ(response->right_velocity, -1.0);
+  EXPECT_GT(response->left_velocity, -1.0);
+  EXPECT_GT(response->right_velocity, -1.0);
+  EXPECT_LT(response->left_velocity, 0.0);
+  EXPECT_LT(response->right_velocity, 0.0);
+  EXPECT_FLOAT_EQ(response->left_velocity, response->right_velocity);
 }
 
 TEST_F(TestJoystickDriver, SpinRight)
 {
   sensor_msgs::Joy joy_msg;
-  joy_msg.axes = { 0, 1.0, 0, 0, -1.0 };
+  joy_msg.axes = { -1.0, 0.0, 0, 0, 0.0 };
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
+
+  ros::Duration wait_duration{0.5};
+  wait_duration.sleep();
 
   const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(10));
 
   EXPECT_TRUE(response.get() != nullptr);
-  EXPECT_EQ(response->left_velocity, 1.0);
-  EXPECT_EQ(response->right_velocity, -1.0);
+  EXPECT_GT(response->left_velocity, 0.0);
+  EXPECT_LT(response->right_velocity, 0.0);
 }
 
 TEST_F(TestJoystickDriver, SpinLeft)
 {
   sensor_msgs::Joy joy_msg;
-  joy_msg.axes = { 0, -1.0, 0, 0, 1.0 };
+  joy_msg.axes = { 1.0, 0.0, 0, 0, 0.0 };
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
+
+  ros::Duration wait_duration{0.5};
+  wait_duration.sleep();
 
   const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(10));
 
   EXPECT_TRUE(response.get() != nullptr);
-  EXPECT_EQ(response->left_velocity, -1.0);
-  EXPECT_EQ(response->right_velocity, 1.0);
-}
-
-TEST_F(TestJoystickDriver, HalfSpeedForward)
-{
-  sensor_msgs::Joy joy_msg;
-  joy_msg.axes = { 0, 0.5, 0, 0, 0.5 };
-  joy_msg.buttons = { 0, 0, 0, 0 };
-  mock_joy_pub.publish(joy_msg);
-
-  const igvc_msgs::velocity_pair::ConstPtr response =
-      ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(10));
-
-  EXPECT_TRUE(response.get() != nullptr);
-  EXPECT_EQ(response->left_velocity, 0.5);
-  EXPECT_EQ(response->right_velocity, 0.5);
+  EXPECT_LT(response->left_velocity, 0.0);
+  EXPECT_GT(response->right_velocity, 0.0);
 }
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "test_joystick_driver");
+  ros::start();
+
   testing::InitGoogleTest(&argc, argv);
 
   ros::AsyncSpinner spinner(1);
