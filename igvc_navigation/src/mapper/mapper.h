@@ -111,11 +111,10 @@ private:
   ProcessImageOptions process_image_options_{};
   CombinedMapOptions combined_map_options_{};
 
-  ros::Publisher camera_projection_pub_l_;
-  ros::Publisher camera_projection_pub_c_;
-  ros::Publisher camera_projection_pub_r_;
+  ros::Publisher camera_projection_pub_left_;
+  ros::Publisher camera_projection_pub_center_;
+  ros::Publisher camera_projection_pub_right_;
 
-  ros::Publisher process_image_pub_;
   ros::Publisher filtered_pc_pub_;
   ros::Publisher empty_pc_pub_;
   ros::Publisher ground_pub_;
