@@ -13,7 +13,11 @@
   <arg name="gpu" default="false"/>
   <!-- Spawn the vehicle. -->
 
-  <param name="robot_description" command="$(find xacro)/xacro $(find igvc_description)/urdf/jessi.urdf.xacro gpu:=$(arg gpu)" />
+  <param name="robot_description" command="$(find xacro)/xacro $(find igvc_description)/urdf/jessii.urdf.xacro gpu:=$(arg gpu)" />
+
+
+  <!-- uncomment below line to change to using the old robot -->
+  <!--<param name="robot_description" command="cat $(find igvc_description)/urdf/jessi.urdf" />-->
 
   <node name="spawn_platform" pkg="gazebo_ros" type="spawn_model"
         args="-param robot_description
