@@ -1,0 +1,3 @@
+motor_model:
+    k: 1.0
+    internal_resistance: 1.0

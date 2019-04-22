@@ -3,7 +3,7 @@ project(igvc_gazebo)
 find_package(catkin REQUIRED)
 
 
-set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
 catkin_package()
 
@@ -36,6 +36,7 @@ install(DIRECTORY config/
    FILES_MATCHING PATTERN "*.yaml"
 )
 
-add_subdirectory(nodes/control)
-add_subdirectory(nodes/scan_to_pointcloud)
-add_subdirectory(nodes/ground_truth)
+add_subdirectory(src/control)
+add_subdirectory(src/scan_to_pointcloud)
+add_subdirectory(src/ground_truth)
+add_subdirectory(src/dc_motor_model)
