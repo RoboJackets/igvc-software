@@ -60,7 +60,8 @@ void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajector
         double dy = trajectory_point.pose.position.y - trajectory_ptr->trajectory[i + 1].pose.position.y;
         distance = std::hypot(dx, dy);
       }
-      if (i > 0 && std::abs(trajectory_point.curvature) < 1e-3)
+
+      if (i > 0 && std::abs(trajectory_point.curvature) < 1e-8)
       {
         double dv;
         dv = trajectory_point.velocity - trajectory_ptr->trajectory[i - 1].velocity;
@@ -70,14 +71,14 @@ void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajector
         {
           double capped_velocity =
               trajectory_ptr->trajectory[i - 1].velocity + std::copysign(robot_constraint_.acceleration, dv) * dt;
-          ROS_WARN_STREAM_THROTTLE(1, "K: " << trajectory_point.curvature << "Desired a: " << (dv / dt)
+          ROS_WARN_STREAM_THROTTLE(1, "K: " << trajectory_point.curvature << ". Desired a: " << (dv / dt)
                                             << ", limiting to " << robot_constraint_.acceleration
                                             << ", desired velocity: " << trajectory_point.velocity << ", capping to "
                                             << capped_velocity);
           trajectory_point.velocity = capped_velocity;
         }
       }
-      ros::Duration move_duration = ros::Duration(distance / trajectory_point.velocity);
+      ros::Duration move_duration = ros::Duration(distance / std::abs(trajectory_point.velocity));
 
       trajectory_ptr->trajectory[i + 1].header.stamp = trajectory_point.header.stamp + move_duration;
     }
