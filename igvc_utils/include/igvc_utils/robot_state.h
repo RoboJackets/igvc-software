@@ -18,11 +18,7 @@ struct wheel_velocity
 class RobotState
 {
 public:
-  double x{ 0 };
-  double y{ 0 };
-  double roll{ 0 };
-  double pitch{ 0 };
-  double yaw{ 0 };
+  tf::Transform transform{};
   wheel_velocity velocity{};
 
   friend std::ostream &operator<<(std::ostream &out, const RobotState &state);
@@ -33,6 +29,24 @@ public:
   explicit RobotState(const geometry_msgs::PoseStamped &msg);
   explicit RobotState(double x, double y, double yaw);
   explicit RobotState(const Eigen::Vector3d &pose);
+
+  double x() const;
+  double y() const;
+  double z() const;
+  double roll() const;
+  double pitch() const;
+  double yaw() const;
+  double quat_x() const;
+  double quat_y() const;
+  double quat_z() const;
+  double quat_w() const;
+
+  void set_x(double x);
+  void set_y(double y);
+  void set_z(double z);
+  void set_roll(double roll);
+  void set_pitch(double pitch);
+  void set_yaw(double yaw);
 
   void setVelocity(const igvc_msgs::velocity_pairConstPtr &msg);
   void setVelocity(const igvc_msgs::velocity_pair &msg);
@@ -45,7 +59,7 @@ public:
 
   geometry_msgs::Quaternion quat() const;
 
-  geometry_msgs::PoseStamped toPose(ros::Time stamp = ros::Time::now()) const;
+  geometry_msgs::Pose toPose() const;
 
   igvc_msgs::trajectory_point toTrajectoryPoint(ros::Time stamp, const RobotControl &control, double axle_length) const;
 
@@ -66,33 +80,33 @@ public:
    */
   double distTo(double x2, double y2) const;
 
-  double distTo(RobotState other) const;
+  double distTo(const RobotState &other) const;
 
-  double distTo(geometry_msgs::Point other) const;
+  double distTo(const geometry_msgs::Point &other) const;
 
   double linearVelocity() const;
 };
 
 inline std::ostream &operator<<(std::ostream &out, const RobotState &state)
 {
-  out << "(" << state.x << ", " << state.y << ", " << state.yaw << ")\tv = (" << state.velocity.left << ", "
+  out << "(" << state.x() << ", " << state.y() << ", " << state.yaw() << ")\tv = (" << state.velocity.left << ", "
       << state.velocity.right << ")";
   return out;
 }
 
 inline double RobotState::distTo(double x2, double y2) const
 {
-  return igvc::get_distance(this->x, this->y, x2, y2);
+  return std::hypot(this->x() - x2, this->y() - y2);
 }
 
-inline double RobotState::distTo(RobotState other) const
+inline double RobotState::distTo(const RobotState &other) const
 {
-  return igvc::get_distance(this->x, this->y, other.x, other.y);
+  return distTo(other.x(), other.y());
 }
 
-inline double RobotState::distTo(geometry_msgs::Point other) const
+inline double RobotState::distTo(const geometry_msgs::Point &other) const
 {
-  return igvc::get_distance(this->x, this->y, other.x, other.y);
+  return distTo(other.x, other.y);
 }
 
 inline double RobotState::linearVelocity() const

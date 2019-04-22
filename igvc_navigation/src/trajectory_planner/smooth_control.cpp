@@ -49,7 +49,11 @@ void SmoothControl::getPath(const nav_msgs::PathConstPtr& path, const igvc_msgs:
     pose_stamped.header = path->header;
     pose_stamped.pose = path->poses[path_index].pose;
     closest_point_path.poses.emplace_back(pose_stamped);
-    targets_path.poses.emplace_back(simulation_target->toPose());
+
+    geometry_msgs::PoseStamped target{};
+    target.pose = simulation_target->toPose();
+    target.header.stamp = time;
+    targets_path.poses.emplace_back(target);
 
     trajectory_ptr->trajectory.emplace_back(state.toTrajectoryPoint(time, control, axle_length_));
   }
@@ -69,10 +73,10 @@ RobotControl SmoothControl::getControl(const RobotState& state, const RobotState
 
 double SmoothControl::getCurvature(const RobotState& state, const RobotState& target) const
 {
-  double line_of_sight = atan2(target.y - state.y, target.x - state.x);
+  double line_of_sight = atan2(target.y() - state.y(), target.x() - state.x());
 
-  double delta = state.yaw - line_of_sight;
-  double theta = target.yaw - line_of_sight;
+  double delta = state.yaw() - line_of_sight;
+  double theta = target.yaw() - line_of_sight;
 
   // adjust both angles to lie between -PI and PI
   igvc::fit_to_polar(delta);
@@ -136,9 +140,9 @@ RobotState SmoothControl::acquireNewTarget(const nav_msgs::PathConstPtr& path, c
 
     if (distance + increment > target_selection_options_.lookahead_dist)
     {
-      newTarget.x = point2.x;
-      newTarget.y = point2.y;
-      newTarget.yaw = tf::getYaw(path->poses[i + 1].pose.orientation);
+      newTarget.set_x(point2.x);
+      newTarget.set_y(point2.y);
+      newTarget.set_yaw(tf::getYaw(path->poses[i + 1].pose.orientation));
       return newTarget;
     }
     distance += increment;

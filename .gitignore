@@ -49,3 +49,8 @@
 
 #CNN models
 /sandbox/models/
+
+#generated textures
+/igvc_gazebo/scripts/gen
+#pyc
+*.pyc

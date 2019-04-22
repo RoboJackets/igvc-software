@@ -5,28 +5,111 @@ RobotState::RobotState(const nav_msgs::Odometry::ConstPtr &msg)
   setState(msg);
 }
 
-RobotState::RobotState(const geometry_msgs::PoseStamped &msg) : x{ msg.pose.position.x }, y{ msg.pose.position.y }
+RobotState::RobotState(const geometry_msgs::PoseStamped &msg)
 {
-  tf::Quaternion quaternion;
-  tf::quaternionMsgToTF(msg.pose.orientation, quaternion);
-  tf::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
+  tf::poseMsgToTF(msg.pose, transform);
 }
 
-RobotState::RobotState(double x, double y, double yaw) : x{ x }, y{ y }, yaw{ yaw }
+RobotState::RobotState(double x, double y, double yaw)
 {
+  set_x(x);
+  set_y(y);
+  set_yaw(yaw);
 }
 
-RobotState::RobotState(const Eigen::Vector3d &pose) : x{ pose[0] }, y{ pose[1] }, yaw{ pose[2] }
+RobotState::RobotState(const Eigen::Vector3d &pose)
 {
+  setState(pose);
+}
+
+double RobotState::x() const
+{
+  return transform.getOrigin().x();
+}
+
+double RobotState::y() const
+{
+  return transform.getOrigin().y();
+}
+
+double RobotState::z() const
+{
+  return transform.getOrigin().z();
+}
+
+double RobotState::roll() const
+{
+  double r, p, y;
+  transform.getBasis().getRPY(r, p, y);
+  return r;
+}
+
+double RobotState::pitch() const
+{
+  double r, p, y;
+  transform.getBasis().getRPY(r, p, y);
+  return p;
+}
+
+double RobotState::yaw() const
+{
+  double r, p, y;
+  transform.getBasis().getRPY(r, p, y);
+  return y;
+}
+
+double RobotState::quat_x() const
+{
+  return transform.getRotation().x();
+}
+double RobotState::quat_y() const
+{
+  return transform.getRotation().y();
+}
+double RobotState::quat_z() const
+{
+  return transform.getRotation().z();
+}
+double RobotState::quat_w() const
+{
+  return transform.getRotation().w();
+}
+
+void RobotState::set_x(double x)
+{
+  transform.setOrigin(tf::Vector3(x, y(), z()));
+}
+void RobotState::set_y(double y)
+{
+  transform.setOrigin(tf::Vector3(x(), y, z()));
+}
+void RobotState::set_z(double z)
+{
+  transform.setOrigin(tf::Vector3(x(), y(), z));
+}
+void RobotState::set_roll(double roll)
+{
+  tf::Matrix3x3 t = transform.getBasis();
+  t.setRPY(roll, pitch(), yaw());
+  transform.setBasis(t);
+}
+void RobotState::set_pitch(double pitch)
+{
+  tf::Matrix3x3 t = transform.getBasis();
+  t.setRPY(roll(), pitch, yaw());
+  transform.setBasis(t);
+}
+
+void RobotState::set_yaw(double yaw)
+{
+  tf::Matrix3x3 t = transform.getBasis();
+  t.setRPY(roll(), pitch(), yaw);
+  transform.setBasis(t);
 }
 
 void RobotState::setState(const nav_msgs::Odometry::ConstPtr &msg)
 {
-  x = msg->pose.pose.position.x;
-  y = msg->pose.pose.position.y;
-  tf::Quaternion quaternion;
-  tf::quaternionMsgToTF(msg->pose.pose.orientation, quaternion);
-  tf::Matrix3x3(quaternion).getRPY(roll, pitch, yaw);
+  tf::poseMsgToTF(msg->pose.pose, transform);
 }
 
 void RobotState::setVelocity(const igvc_msgs::velocity_pairConstPtr &msg)
@@ -42,38 +125,36 @@ void RobotState::setVelocity(const igvc_msgs::velocity_pair &msg)
 }
 
 // set state via a transform
-void RobotState::setState(const tf::StampedTransform &transform)
+void RobotState::setState(const tf::StampedTransform &stamped_transform)
 {
-  x = transform.getOrigin().x();
-  y = transform.getOrigin().y();
-  tf::Matrix3x3(transform.getRotation()).getRPY(roll, pitch, yaw);
+  transform = tf::Transform(stamped_transform);
 }
 
 // set state via a 3D Eigen vector
 void RobotState::setState(const Eigen::Vector3d &pose)
 {
-  x = pose[0];
-  y = pose[1];
-  yaw = pose[2];
+  set_x(pose[0]);
+  set_y(pose[1]);
+  set_yaw(pose[2]);
 }
 
 Eigen::Vector3d RobotState::getVector3d() const
 {
-  return { x, y, yaw };
+  return { x(), y(), yaw() };
 }
 
 geometry_msgs::Quaternion RobotState::quat() const
 {
-  return tf::createQuaternionMsgFromYaw(yaw);
+  geometry_msgs::Quaternion quat;
+  tf::quaternionTFToMsg(transform.getRotation(), quat);
+  return quat;
 }
 
-geometry_msgs::PoseStamped RobotState::toPose(ros::Time stamp) const
+geometry_msgs::Pose RobotState::toPose() const
 {
-  geometry_msgs::PoseStamped pose_stamped;
-  pose_stamped.pose.position.x = x;
-  pose_stamped.pose.position.y = y;
-  pose_stamped.pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
-  return pose_stamped;
+  geometry_msgs::Pose pose;
+  tf::poseTFToMsg(transform, pose);
+  return pose;
 }
 
 igvc_msgs::trajectory_point RobotState::toTrajectoryPoint(ros::Time stamp, const RobotControl &control,
@@ -81,9 +162,8 @@ igvc_msgs::trajectory_point RobotState::toTrajectoryPoint(ros::Time stamp, const
 {
   igvc_msgs::trajectory_point point;
   point.header.stamp = stamp;
-  point.pose.position.x = x;
-  point.pose.position.y = y;
-  point.pose.orientation = tf::createQuaternionMsgFromYaw(yaw);
+  point.pose = toPose();
+
   const auto [k, v] = control.toKV(axle_length);
   point.curvature = k;
   point.velocity = v;
@@ -99,26 +179,25 @@ void RobotState::propogateState(const RobotControl &robot_control, double dt)
   {
     // calculate instantaneous center of curvature (ICC = [ICCx, ICCy])
     double R = v / w;
-    double ICCx = x - (R * sin(yaw));
-    double ICCy = y + (R * cos(yaw));
+    double ICCx = x() - (R * sin(yaw()));
+    double ICCy = y() + (R * cos(yaw()));
 
     using namespace Eigen;
     Matrix3d T;
     double wdt = w * dt;
     T << cos(wdt), -sin(wdt), 0, sin(wdt), cos(wdt), 0, 0, 0, 1;
-    Vector3d a(x - ICCx, y - ICCy, yaw);
+    Vector3d a(x() - ICCx, y() - ICCy, yaw());
     Vector3d b = T * a;
     Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
 
-    x = c[0];
-    y = c[1];
-    yaw = c[2];
-    igvc::fit_to_polar(yaw);
+    set_x(c[0]);
+    set_y(c[1]);
+    set_yaw(c[2]);
   }
   else
   {
-    x = x + cos(yaw) * v * dt;
-    y = y + cos(yaw) * v * dt;
+    set_x(x() + cos(yaw()) * v * dt);
+    set_y(y() + cos(yaw()) * v * dt);
   }
   velocity.left = robot_control.left_;
   velocity.right = robot_control.right_;
@@ -126,5 +205,5 @@ void RobotState::propogateState(const RobotControl &robot_control, double dt)
 
 bool RobotState::operator==(const RobotState &other)
 {
-  return std::tie(x, y, roll, pitch, yaw) == std::tie(other.x, other.y, other.roll, other.pitch, other.yaw);
+  return transform == other.transform;
 }
