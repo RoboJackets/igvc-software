@@ -29,6 +29,7 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   igvc::param(pNh, "filters/empty/enabled", empty_filter_options_.enabled, false);
   igvc::getParam(pNh, "filters/empty/start_angle", empty_filter_options_.start_angle);
   igvc::getParam(pNh, "filters/empty/end_angle", empty_filter_options_.end_angle);
+  igvc::getParam(pNh, "filters/empty/ray_start_distance", empty_filter_options_.ray_start_distance);
   igvc::getParam(pNh, "filters/empty/miss_cast_distance", empty_filter_options_.miss_cast_distance);
   igvc::getParam(pNh, "filters/empty/max_range", empty_filter_options_.max_range);
 
@@ -84,7 +85,7 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
 
 void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& lidar_to_odom)
 {
-  pcl::PointCloud<pcl::PointXYZ> empty_pc{};
+  std::vector<Ray> empty_rays;
   pcl::PointCloud<pcl::PointXYZ> filtered_pc{};
 
   if (behind_filter_options_.enabled)
@@ -123,9 +124,7 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
       pcl::PointCloud<pcl::PointXYZ> nonground_lidar;
       pcl_ros::transformPointCloud(nonground, nonground_lidar, lidar_to_odom.inverse());
 
-      MapUtils::getEmptyPoints(nonground_lidar, empty_pc, angular_resolution_, empty_filter_options_);
-      pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
-      MapUtils::projectTo2D(empty_pc);
+      empty_rays = getTransformedEmptyRays(nonground_lidar, lidar_to_odom);
 
       MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, pc->header.stamp, "/odom",
                                        debug_pub_filtered_pointclouds);
@@ -141,16 +140,16 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
 
     if (empty_filter_options_.enabled)
     {
-      MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
-      pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
-
-      MapUtils::projectTo2D(empty_pc);
-      MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, pc->header.stamp, "/odom",
-                                       debug_pub_filtered_pointclouds);
+//      MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
+//      pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
+//
+//      MapUtils::projectTo2D(empty_pc);
+//      MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, pc->header.stamp, "/odom",
+//                                       debug_pub_filtered_pointclouds);
+      empty_rays = getTransformedEmptyRays(*pc, lidar_to_odom);
     }
   }
-  octomapper_->insertRays(lidar_to_odom.getOrigin(), pc_map_pair_, empty_pc, false,
-                          lidar_free_space_probability_model_);
+  octomapper_->insertRaysWithStartPoint(pc_map_pair_, empty_rays, false, lidar_free_space_probability_model_);
 
   octomapper_->get_updated_map(pc_map_pair_);
 }
@@ -219,6 +218,33 @@ void Mapper::processImageFreeSpace(cv::Mat& image) const
       cv::Size(2 * process_image_options_.dilation_size + 1, 2 * process_image_options_.dilation_size + 1),
       cv::Point(process_image_options_.dilation_size, process_image_options_.dilation_size));
   cv::dilate(image, image, kernel);
+}
+
+std::vector<Ray> Mapper::getTransformedEmptyRays(const PointCloud& nonground, const tf::Transform& lidar_to_odom)
+{
+  std::vector<Ray> empty_rays;
+  MapUtils::getEmptyPoints(nonground, empty_rays, angular_resolution_, empty_filter_options_);
+
+  std::for_each(empty_rays.begin(), empty_rays.end(), [&](Ray& ray) {
+    tf::Vector3 tf_start = lidar_to_odom * tf::Vector3{ ray.start.x, ray.start.y, ray.start.z };
+    ray.start.x = tf_start.x();
+    ray.start.y = tf_start.y();
+    ray.start.z = 0;
+
+    tf::Vector3 tf_end = lidar_to_odom * tf::Vector3{ ray.end.x, ray.end.y, ray.end.z };
+    ray.end.x = tf_end.x();
+    ray.end.y = tf_end.y();
+    ray.end.z = 0;
+  });
+
+  PointCloud empty_pc{};
+  std::for_each(empty_rays.begin(), empty_rays.end(), [&](Ray& ray) {
+    empty_pc.points.emplace_back(pcl::PointXYZ{ ray.end.x, ray.end.y, ray.end.z });
+  });
+
+  MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, nonground.header.stamp, "/odom", debug_);
+
+  return empty_rays;
 }
 
 std::optional<cv::Mat> Mapper::getMap()

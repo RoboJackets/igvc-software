@@ -29,6 +29,7 @@ filters:
         enabled: true
         start_angle: -0.5 #Radians
         end_angle: 0.5
+        ray_start_distance: 1
         miss_cast_distance: 5
         max_range: 5
     empty_image: # Blur and threshold for determining which points in the segmented image are empty space

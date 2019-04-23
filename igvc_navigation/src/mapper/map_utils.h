@@ -23,6 +23,7 @@ struct EmptyFilterOptions
   bool enabled;
   radians start_angle;
   radians end_angle;
+  double ray_start_distance;
   double miss_cast_distance;
   double max_range;
 };
@@ -62,6 +63,8 @@ struct GroundPlane
   double d;
 };
 
+class Ray;
+
 namespace MapUtils
 {
 using radians = double;
@@ -83,7 +86,8 @@ int discretize(radians angle, double angular_resolution);
  * @param[in] angular_resolution angular resolution to use in filter
  * @param[in] options Parameters to use for the filter
  */
-void getEmptyPoints(const PointCloud& pc, PointCloud& empty_pc, double angular_resolution, EmptyFilterOptions options);
+void getEmptyPoints(const PointCloud& pc, std::vector<Ray>& empty_rays, double angular_resolution,
+                    EmptyFilterOptions options);
 
 /**
  * Filters points behind the robot
