@@ -9,7 +9,7 @@
 <launch>
     <!-- Joystick node -->
     <node name="joy_node" pkg="joy" type="joy_node" output="screen" respawn="false">
-        <param name="dev" type="str" value="/dev/igvc_joystick"/>
+        <param name="dev" type="str" value="/dev/input/js0"/>
     </node>
     <node name="joystick_driver" pkg="igvc_platform" type="joystick_driver" output="screen" respawn="false" />
 </launch>
