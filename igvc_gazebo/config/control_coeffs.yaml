@@ -1,0 +1,16 @@
+pid:
+    left_motor:
+        Kp: 150.0
+        Kd: 20.0
+        Ki: 150.0
+    right_motor:
+        Kp: 150.0
+        Kd: 20.0
+        Ki: 150.0
+    low_pass_alpha: 0.75
+    integral_clamp: 2
+feedforward:
+    left_motor:
+        Kv: 150
+    right_motor:
+        Kv: 150

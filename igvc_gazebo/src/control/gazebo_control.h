@@ -24,7 +24,7 @@ public:
   GazeboControl();
 
 private:
-  void controlLoop();
+  void controlLoop(const ros::TimerEvent &timer_event);
   void motorCallback(const igvc_msgs::velocity_pair::ConstPtr &msg);
   void encoderCallback(const igvc_msgs::velocity_pair::ConstPtr &msg);
   std::pair<double, double> getControls(double dt);

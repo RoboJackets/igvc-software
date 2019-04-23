@@ -63,6 +63,9 @@ void DCMotorModel::getParams()
 
   igvc::getParam(pNh_, "motor_model/k", motor_model_params_.k);
   igvc::getParam(pNh_, "motor_model/internal_resistance", motor_model_params_.internal_resistance);
+
+  ROS_INFO_STREAM("effort: " << effort_topic_);
+  ROS_INFO_STREAM("joint_name: " << joint_name_);
 }
 
 int main(int argc, char **argv)

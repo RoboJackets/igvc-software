@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<launch>
+  <node name="motor_model_left" pkg="igvc_gazebo" type="dc_motor_model" output="screen">
+    <rosparam file="$(find igvc_gazebo)/config/motor_model.yaml" command="load"/>
+    <param name="node/loop_rate" value="100.0"/>
+    <param name="topics/effort" value="/left_wheel_effort_controller/command"/>
+    <param name="topics/voltage" value="/voltage/left"/>
+    <param name="topics/joint_state" value="/joint_states"/>
+    <param name="joint_name" value="left_axle"/>
+  </node>
+  <node name="motor_model_right" pkg="igvc_gazebo" type="dc_motor_model" output="screen">
+    <rosparam file="$(find igvc_gazebo)/config/motor_model.yaml" command="load"/>
+    <param name="node/loop_rate" value="100.0"/>
+    <param name="topics/effort" value="/right_wheel_effort_controller/command"/>
+    <param name="topics/voltage" value="/voltage/right"/>
+    <param name="topics/joint_state" value="/joint_states"/>
+    <param name="joint_name" value="right_axle"/>
+  </node>
+</launch>

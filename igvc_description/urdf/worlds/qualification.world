@@ -150,5 +150,9 @@
       <name>construction_barrel_25</name> <!-- THE NAME MUST BE UNIQUE-->
       <pose>-10 -20 0 0 -0 0</pose>
     </include>
+    <physics type="ode">
+      <max_step_size>0.00025</max_step_size>
+      <real_time_update_rate>2000</real_time_update_rate>
+    </physics>
   </world>
 </sdf>

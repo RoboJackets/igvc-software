@@ -7,38 +7,18 @@
 
   <!-- load controllers -->
   <node name="controller_spawner" pkg="controller_manager" type="spawner"
-    args="$(find igvc_gazebo)/config/igvc_joint_control.yaml"/>
-
-  <!-- Load motor models for left and right motors -->
-  <node name="motor_model_left" pkg="igvc_gazebo" type="dc_motor_model" output="screen">
-      <rosparam file="$(find igvc_gazebo)/config/motor_model.yaml" command="load" />
-      <param name="node/loop_rate" value="100.0" />
-      <param name="topics/effort" value="/left_wheel_effort_controller/command" />
-      <param name="topics/voltage" value="/voltage/left" />
-      <param name="topics/joint_state" value="/join_states" />
-      <param name="joint_name" value="left_axle" />
-  </node>
-
-  <node name="motor_model_right" pkg="igvc_gazebo" type="dc_motor_model" output="screen">
-      <rosparam file="$(find igvc_gazebo)/config/motor_model.yaml" command="load" />
-      <param name="node/loop_rate" value="100.0" />
-      <param name="topics/effort" value="/right_wheel_effort_controller/command" />
-      <param name="topics/voltage" value="/voltage/right" />
-      <param name="topics/joint_state" value="/join_states" />
-      <param name="joint_name" value="right_axle" />
-  </node>
+        args="$(find igvc_gazebo)/config/igvc_joint_control.yaml"/>
 
   <!-- Controller -->
   <node name="igvc_control" pkg="igvc_gazebo" type="control" output="screen">
-      <param name="speed_P_left" value="0.2"/>
-      <param name="speed_P_right" value="0.2"/>
-      <param name="speed_D_left" value="0.1"/>
-      <param name="speed_D_right" value="0.1"/>
-      <param name="speed_I_left" value="0.000"/>
-      <param name="speed_I_right" value="0.000"/>
-      <param name="wheel_radius" value="0.3429"/>
-      <param name="max_effort" value="1.0"/>
-      <param name="rate" value="60.0"/>
+    <rosparam file="$(find igvc_gazebo)/config/control_coeffs.yaml" command="load"/>
+    <param name="topics/motors" value="/motors"/>
+    <param name="topics/encoders" value="/encoders"/>
+    <param name="topics/voltage/left" value="/voltage/left"/>
+    <param name="topics/voltage/right" value="/voltage/right"/>
+    <param name="max_voltage" value="63.0"/>
+    <param name="rate" value="60.0"/>
+
   </node>
 
 </launch>

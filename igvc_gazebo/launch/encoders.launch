@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<launch>
+  <!-- Encoders -->
+  <node name="encoders" pkg="igvc_gazebo" type="encoders" output="screen">
+    <param name="node/loop_rate" value="200.0" />
+    <param name="wheel_radius" value="0.3429"/>
+
+    <param name="topics/encoders" value="/encoders" />
+    <param name="topics/joint_state" value="/joint_states" />
+
+    <param name="left_joint" value="left_axle" />
+    <param name="right_joint" value="right_axle" />
+  </node>
+</launch>
