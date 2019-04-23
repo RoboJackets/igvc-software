@@ -63,7 +63,7 @@ TEST_F(TestJoystickDriver, FullForward)
   const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(10));
 
-  EXPECT_TRUE(response.get() != nullptr);
+  ASSERT_TRUE(response.get() != nullptr);
   EXPECT_LT(response->left_velocity, 1.0);
   EXPECT_LT(response->right_velocity, 1.0);
   EXPECT_GT(response->left_velocity, 0.0);
@@ -105,7 +105,7 @@ TEST_F(TestJoystickDriver, SpinRight)
   const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(10));
 
-  ASSERT_TRUE(response != nullptr && response.get() != nullptr);
+  ASSERT_TRUE(response.get() != nullptr);
   EXPECT_GT(response->left_velocity, 0.0);
   EXPECT_LT(response->right_velocity, 0.0);
 }
@@ -123,7 +123,7 @@ TEST_F(TestJoystickDriver, SpinLeft)
   const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(10));
 
-  ASSERT_TRUE(response != nullptr && response.get() != nullptr);
+  ASSERT_TRUE(response.get() != nullptr);
   EXPECT_LT(response->left_velocity, 0.0);
   EXPECT_GT(response->right_velocity, 0.0);
 }
