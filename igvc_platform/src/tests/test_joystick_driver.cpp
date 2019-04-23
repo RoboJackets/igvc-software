@@ -57,6 +57,9 @@ TEST_F(TestJoystickDriver, FullForward)
   joy_msg.buttons = { 0, 0, 0, 0 };
   mock_joy_pub.publish(joy_msg);
 
+  ros::Duration wait_duration{ 0.1 };
+  wait_duration.sleep();
+
   const igvc_msgs::velocity_pair::ConstPtr response =
       ros::topic::waitForMessage<igvc_msgs::velocity_pair>(motor_sub.getTopic(), ros::Duration(10));
 
