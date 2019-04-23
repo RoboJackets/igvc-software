@@ -18,7 +18,7 @@ probability_model:
         prob_miss: 0.45
         prob_hit: 0.9
 sensor_model:
-    max_range: 5
+    max_range: 15
     angular_resolution: 0.01
 filters:
     behind: # Filters points in a "filter_angle" cone behind the robot
@@ -29,8 +29,8 @@ filters:
         enabled: true
         start_angle: -0.5 #Radians
         end_angle: 0.5
-        miss_cast_distance: 5
-        max_range: 5
+        miss_cast_distance: 15
+        max_range: 15
     empty_image: # Blur and threshold for determining which points in the segmented image are empty space
         blur:
             kernel: 17

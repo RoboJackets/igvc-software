@@ -14,7 +14,7 @@
         <!-- Robot configuration space -->
         <param name="c_space" type="double" value="0.4"/>
         <!-- Path calculation rate -->
-        <param name="rate" type="double" value="10"/>
+        <param name="rate" type="double" value="0.25"/>
         <!-- Max distance to a goal node -->
         <param name="maximum_distance" type="double" value="100.0"/>
         <!-- Publish a pointcloud of search nodes on the /expanded topic -->

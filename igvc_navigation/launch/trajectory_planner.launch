@@ -17,14 +17,14 @@
 
         <param name="curvature_blending/blending_distance" value="1.0"/>
 
-        <param name="robot_constraints/velocity" value="2.0"/>
+        <param name="robot_constraints/velocity" value="1.6"/>
         <param name="robot_constraints/acceleration" value="10.0"/>
 
         <param name="wheel_constraints/velocity" value="3.0"/>
-        <param name="wheel_constraints/acceleration" value="10.0"/>
+        <param name="wheel_constraints/acceleration" value="7.0"/>
 
         <param name="motion_profiler/target_velocity" value="1.0"/>
-        <param name="motion_profiler/beta" value="0.005"/>
-        <param name="motion_profiler/lambda" value="3.0"/>
+        <param name="motion_profiler/beta" value="0.14"/>
+        <param name="motion_profiler/lambda" value="1.4"/>
     </node>
 </launch>

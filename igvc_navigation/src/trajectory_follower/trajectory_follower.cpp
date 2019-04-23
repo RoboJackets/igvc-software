@@ -31,6 +31,7 @@ TrajectoryFollower::TrajectoryFollower()
 void TrajectoryFollower::trajectoryCallback(igvc_msgs::trajectoryConstPtr trajectory)
 {
   trajectory_ = trajectory;
+  time_delta_ = ros::Time::now() - trajectory->trajectory.front().header.stamp;
 }
 
 void TrajectoryFollower::trajectoryFollowLoop()
@@ -54,7 +55,7 @@ void TrajectoryFollower::followTrajectory()
 
 RobotControl TrajectoryFollower::getControl()
 {
-  ros::Time current_time = ros::Time::now();
+  ros::Time current_time = ros::Time::now() - time_delta_;
   for (size_t i = 0; i < trajectory_->trajectory.size() - 2; i++)
   {
     ros::Time last_time = trajectory_->trajectory[i].header.stamp;

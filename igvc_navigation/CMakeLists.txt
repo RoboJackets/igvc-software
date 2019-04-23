@@ -200,6 +200,8 @@ add_subdirectory(src/wheel_odometer)
 
 add_subdirectory(src/mapper)
 
+add_subdirectory(src/path_follower)
+
 add_subdirectory(src/trajectory_follower)
 add_subdirectory(src/trajectory_planner)
 
