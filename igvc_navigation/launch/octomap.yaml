@@ -15,7 +15,7 @@ probability_model:
         free_space: # Rays that are not detected by the lidar to have occupied points along them
             prob_miss: 0.52
     camera:
-        prob_miss: 0.45
+        prob_miss: 0.51
         prob_hit: 0.9
 sensor_model:
     max_range: 15
