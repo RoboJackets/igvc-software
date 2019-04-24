@@ -18,6 +18,7 @@ TrajectoryFollower::TrajectoryFollower()
   igvc::getParam(pNh, "topics/path", path_topic_);
   igvc::param(pNh, "loop_hz", loop_hz_, 25.0);
   igvc::param(pNh, "axle_length", axle_length_, 0.48);
+  igvc::param(pNh, "motor_loop_hz", motor_loop_hz_, 25.0);
 
   ros::Subscriber path_sub = nh.subscribe(path_topic_, 1, &TrajectoryFollower::trajectoryCallback, this);
   control_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
@@ -55,7 +56,7 @@ void TrajectoryFollower::followTrajectory()
 
 RobotControl TrajectoryFollower::getControl()
 {
-  ros::Time current_time = ros::Time::now() - time_delta_;
+  ros::Time current_time = ros::Time::now() - time_delta_ + ros::Duration(1 / motor_loop_hz_);
   for (size_t i = 0; i < trajectory_->trajectory.size() - 2; i++)
   {
     ros::Time last_time = trajectory_->trajectory[i].header.stamp;

@@ -7,6 +7,7 @@
         <param name="topics/path" value="/trajectory"/>
         <param name="axle_length" value="0.52"/>
         <param name="loop_hz" value="25.0"/>
+        <param name="motor_loop_hz" value="25.0"/>
     </node>
 
 </launch>

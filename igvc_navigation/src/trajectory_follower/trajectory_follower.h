@@ -24,6 +24,7 @@ private:
   std::string path_topic_{};
   double loop_hz_{};
   double axle_length_{};
+  double motor_loop_hz_{};
   ros::Duration time_delta_{};
 
   void trajectoryCallback(igvc_msgs::trajectoryConstPtr trajectory);
