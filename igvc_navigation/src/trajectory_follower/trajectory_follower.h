@@ -27,6 +27,7 @@ private:
   double loop_hz_{};
   double axle_length_{};
   double motor_loop_hz_{};
+  double min_velocity_{};
   ros::Duration time_delta_{};
 
   std::mutex trajectory_mutex_;

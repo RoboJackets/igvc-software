@@ -19,6 +19,7 @@ TrajectoryFollower::TrajectoryFollower()
   igvc::param(pNh, "loop_hz", loop_hz_, 25.0);
   igvc::param(pNh, "axle_length", axle_length_, 0.48);
   igvc::param(pNh, "motor_loop_hz", motor_loop_hz_, 25.0);
+  igvc::param(pNh, "min_velocity", min_velocity_, 0.1);
 
   ros::Subscriber path_sub = nh.subscribe(path_topic_, 1, &TrajectoryFollower::trajectoryCallback, this);
   control_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
@@ -52,6 +53,17 @@ void TrajectoryFollower::trajectoryFollowLoop()
 void TrajectoryFollower::followTrajectory()
 {
   RobotControl control = getControl();
+
+  if (control.left_ != 0 && control.right_ != 0)
+  {
+    // If trying to execute some motion that is too small for the motors to actually move
+    if (std::abs(control.left_) < 1e-3 && std::abs(control.right_) < 1e-3)
+    {
+      control.left_ = std::copysign(min_velocity_, control.left_);
+      control.right_ = std::copysign(min_velocity_, control.right_);
+    }
+  }
+
   control_pub_.publish(control.toMessage(ros::Time::now()));
 }
 
@@ -59,8 +71,9 @@ RobotControl TrajectoryFollower::getControl()
 {
   std::lock_guard<std::mutex> trajectory_lock(trajectory_mutex_);
 
-  if (trajectory_->trajectory.size() < 3) {
-    return {0.0, 0.0, axle_length_};
+  if (trajectory_->trajectory.size() < 3)
+  {
+    return { 0.0, 0.0, axle_length_ };
   }
 
   ros::Time current_time = ros::Time::now() - time_delta_ + ros::Duration(1 / motor_loop_hz_);
