@@ -151,8 +151,8 @@
       <pose>-10 -20 0 0 -0 0</pose>
     </include>
     <physics type="ode">
-      <max_step_size>0.00025</max_step_size>
-      <real_time_update_rate>5000</real_time_update_rate>
+      <max_step_size>0.0005</max_step_size>
+      <real_time_update_rate>2000</real_time_update_rate>
     </physics>
   </world>
 </sdf>
