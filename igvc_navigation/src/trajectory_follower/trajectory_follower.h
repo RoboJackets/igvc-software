@@ -8,6 +8,8 @@
 #ifndef SRC_TRAJECTORY_FOLLOWER_H
 #define SRC_TRAJECTORY_FOLLOWER_H
 
+#include <mutex>
+
 #include <igvc_msgs/trajectory.h>
 #include <igvc_msgs/trajectory_point.h>
 #include <igvc_utils/robot_control.h>
@@ -26,6 +28,8 @@ private:
   double axle_length_{};
   double motor_loop_hz_{};
   ros::Duration time_delta_{};
+
+  std::mutex trajectory_mutex_;
 
   void trajectoryCallback(igvc_msgs::trajectoryConstPtr trajectory);
 

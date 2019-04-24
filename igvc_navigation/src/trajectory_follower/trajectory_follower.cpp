@@ -31,6 +31,7 @@ TrajectoryFollower::TrajectoryFollower()
 
 void TrajectoryFollower::trajectoryCallback(igvc_msgs::trajectoryConstPtr trajectory)
 {
+  std::lock_guard<std::mutex> trajectory_lock(trajectory_mutex_);
   trajectory_ = trajectory;
   time_delta_ = ros::Time::now() - trajectory->trajectory.front().header.stamp;
 }
@@ -56,6 +57,12 @@ void TrajectoryFollower::followTrajectory()
 
 RobotControl TrajectoryFollower::getControl()
 {
+  std::lock_guard<std::mutex> trajectory_lock(trajectory_mutex_);
+
+  if (trajectory_->trajectory.empty()) {
+    return {0.0, 0.0, axle_length_};
+  }
+
   ros::Time current_time = ros::Time::now() - time_delta_ + ros::Duration(1 / motor_loop_hz_);
   for (size_t i = 0; i < trajectory_->trajectory.size() - 2; i++)
   {
