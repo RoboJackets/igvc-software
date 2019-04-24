@@ -3,8 +3,7 @@
 <!-- map.launch -->
 <launch>
 
-    <node name="trajectory_follower" pkg="igvc_navigation" type="trajectory_follower" output="screen" launch-prefix="gdb -ex run --args">
-<!--    <node name="trajectory_follower" pkg="igvc_navigation" type="trajectory_follower" output="screen" >-->
+    <node name="trajectory_follower" pkg="igvc_navigation" type="trajectory_follower" output="screen" >
         <param name="topics/path" value="/trajectory"/>
         <param name="axle_length" value="0.52"/>
         <param name="loop_hz" value="25.0"/>

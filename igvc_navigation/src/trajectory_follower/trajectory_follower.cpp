@@ -59,7 +59,7 @@ RobotControl TrajectoryFollower::getControl()
 {
   std::lock_guard<std::mutex> trajectory_lock(trajectory_mutex_);
 
-  if (trajectory_->trajectory.empty()) {
+  if (trajectory_->trajectory.size() < 3) {
     return {0.0, 0.0, axle_length_};
   }
 
