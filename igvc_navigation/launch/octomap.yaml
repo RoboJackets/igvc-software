@@ -47,6 +47,9 @@ filters:
             eps_angle: 0.5
         fallback:
             plane_distance: 0.04 # +-m from z=0
+    remove_occupied:
+        enable: true
+        kernel_size: 50
 map:
     # In units of meters, not cells
     # width of grid = width / resolution

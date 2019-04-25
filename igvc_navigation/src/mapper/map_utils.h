@@ -54,6 +54,12 @@ struct GroundFilterOptions
   FallbackOptions fallback_options;
 };
 
+struct RemoveOccupiedOptions
+{
+  bool enable;
+  double kernel_size;
+};
+
 struct GroundPlane
 {
   double a;
@@ -90,7 +96,6 @@ void getEmptyPoints(const PointCloud& pc, PointCloud& empty_pc, double angular_r
  * @param[in] pc lidar scan
  * @param[out] filtered_pc filtered pointcloud
  */
-
 void filterPointsBehind(const PointCloud& pc, PointCloud& filtered_pc, BehindFilterOptions options);
 
 /**
@@ -126,6 +131,10 @@ std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& gr
  */
 void fallbackFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground,
                     const FallbackOptions& options);
+
+void removeOccupiedFromImage(cv::Mat& image, const PointCloud& last_scan,
+                             const image_geometry::PinholeCameraModel& camera_model,
+                             const tf::Transform& camera_to_odom, const RemoveOccupiedOptions& options);
 
 /**
  * Projects all black pixels (0, 0, 0) in the image to the ground plane and inserts them into the pointcloud
@@ -165,6 +174,7 @@ inline bool withinRange(const pcl::PointXYZ& point, double range);
 
 void debugPublishPointCloud(const ros::Publisher& publisher, pcl::PointCloud<pcl::PointXYZ>& pointcloud,
                             const uint64 stamp, std::string&& frame, bool debug);
+void debugPublishImage(const ros::Publisher& publisher, const cv::Mat& image, const ros::Time stamp, bool debug);
 }  // namespace MapUtils
 
 inline bool MapUtils::withinRange(const pcl::PointXYZ& point, double range)

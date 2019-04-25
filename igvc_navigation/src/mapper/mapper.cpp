@@ -36,6 +36,9 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   igvc::getParam(pNh, "filters/empty_image/blur/sigma", process_image_options_.blur.sigma);
   igvc::getParam(pNh, "filters/empty_image/threshold", process_image_options_.threshold.threshold);
 
+  igvc::getParam(pNh, "filters/remove_occupied/enable", remove_occupied_options_.enable);
+  igvc::getParam(pNh, "filters/remove_occupied/kernel_size", remove_occupied_options_.kernel_size);
+
   igvc::param(pNh, "filters/behind/enabled", behind_filter_options_.enabled, false);
   igvc::getParam(pNh, "filters/behind/filter_angle", behind_filter_options_.angle);
   igvc::getParam(pNh, "filters/behind/distance", behind_filter_options_.distance);
@@ -60,6 +63,8 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   ground_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/ground", 1);
   nonground_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/nonground", 1);
   nonground_projected_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/nonground_projected", 1);
+
+  lidared_image_pub_ = pNh.advertise<sensor_msgs::Image>("/mapper/lidared_image", 1);
 }
 
 void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, const tf::Transform& lidar_to_odom)
@@ -109,6 +114,7 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
     }
 
     octomapper_->insertScan(lidar_to_odom.getOrigin(), pc_map_pair_, nonground, lidar_scan_probability_model_, radius_);
+    last_scan_ = nonground;
   }
   else
   {
@@ -124,6 +130,7 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
       MapUtils::projectTo2D(empty_pc);
       MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, pc->header.stamp, "/odom", debug_);
     }
+    last_scan_ = filtered_pc;
   }
   octomapper_->insertRays(lidar_to_odom.getOrigin(), pc_map_pair_, empty_pc, false,
                           lidar_free_space_probability_model_);
@@ -159,7 +166,13 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
   }
   else
   {
+    if (!last_scan_.points.empty() && remove_occupied_options_.enable)
+    {
+      MapUtils::removeOccupiedFromImage(image, last_scan_, camera_model_, base_to_odom * camera_to_base,
+                                        remove_occupied_options_);
+    }
     MapUtils::projectToPlane(projected_pc, ground_plane_, image, camera_model_, camera_to_base);
+    MapUtils::debugPublishImage(lidared_image_pub_, image, stamp, debug_);
   }
 
   pcl_ros::transformPointCloud(projected_pc, projected_pc, base_to_odom);

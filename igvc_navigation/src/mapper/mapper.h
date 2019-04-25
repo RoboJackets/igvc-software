@@ -102,6 +102,7 @@ private:
   BehindFilterOptions behind_filter_options_{};
   ProcessImageOptions process_image_options_{};
   CombinedMapOptions combined_map_options_{};
+  RemoveOccupiedOptions remove_occupied_options_{};
 
   ros::Publisher camera_projection_pub_;
   ros::Publisher filtered_pc_pub_;
@@ -110,6 +111,7 @@ private:
   ros::Publisher nonground_pub_;
   ros::Publisher nonground_projected_pub_;
   ros::Publisher camera_line_pub_;
+  ros::Publisher lidared_image_pub_;
 
   ProbabilityModel lidar_scan_probability_model_{};
   ProbabilityModel lidar_ground_probability_model_{};
@@ -118,6 +120,8 @@ private:
   ProbabilityModel camera_probability_model_{};
   GroundFilterOptions ground_filter_options_{};
   GroundPlane ground_plane_;
+
+  PointCloud last_scan_{};
 
   bool use_ground_filter_;
   bool camera_model_initialized_;

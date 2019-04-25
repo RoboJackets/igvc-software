@@ -1,5 +1,6 @@
 #include <unordered_set>
 
+#include <cv_bridge/cv_bridge.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/passthrough.h>
 #include <pcl/sample_consensus/method_types.h>
@@ -168,6 +169,54 @@ void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pc
   }
 }
 
+void removeOccupiedFromImage(cv::Mat& image, const PointCloud& last_scan,
+                             const image_geometry::PinholeCameraModel& camera_model,
+                             const tf::Transform& camera_to_odom, const RemoveOccupiedOptions& options)
+{
+  tf::Transform odom_to_camera = camera_to_odom.inverse();
+  cv::Rect image_rect = cv::Rect{ 0, 0, image.size().width, image.size().height };
+
+  cv::Mat projected_image(image.size().height, image.size().width, image.type(), static_cast<uchar>(0));
+
+  std::vector<cv::Point2d> projected_points;
+  projected_points.reserve(100);
+
+  // Transform pointcloud to image frame, add if inside image
+  for (const auto& point : last_scan.points)
+  {
+    tf::Vector3 transformed = odom_to_camera * tf::Vector3{ point.x, point.y, 0 };
+    cv::Point3d cv_point{ transformed.x(), transformed.y(), transformed.z() };
+    cv::Point2d projected_point = camera_model.project3dToPixel(cv_point);
+    if (projected_point.inside(image_rect))
+    {
+      projected_points.emplace_back(projected_point);
+      for (int i = 0; i < 10; i++)
+      {
+        tf::Vector3 transformed_heights = odom_to_camera * tf::Vector3{ point.x, point.y, i * 0.1 };
+        cv::Point3d cv_point_heights{ transformed_heights.x(), transformed_heights.y(), transformed_heights.z() };
+        cv::Point2d projected_point_heights = camera_model.project3dToPixel(cv_point_heights);
+        if (projected_point_heights.inside(image_rect))
+        {
+          projected_points.emplace_back(projected_point_heights);
+        }
+      }
+    }
+  }
+
+  // Set all pixels that are lidar points white so it isn't free space
+  for (const auto& cv_point : projected_points)
+  {
+    projected_image.at<uchar>(static_cast<int>(std::round(cv_point.y)), static_cast<int>(std::round(cv_point.x))) =
+        static_cast<uchar>(255);
+  }
+
+  // Do closing to make join up the dots
+  cv::Mat kernel =
+      cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2 * options.kernel_size + 1, 2 * options.kernel_size + 1));
+  cv::morphologyEx(projected_image, projected_image, cv::MORPH_CLOSE, kernel);
+  cv::max(projected_image, image, image);
+}
+
 void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, const cv::Mat& image,
                     const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world)
 {
@@ -240,6 +289,18 @@ void debugPublishPointCloud(const ros::Publisher& publisher, pcl::PointCloud<pcl
     pointcloud.header.stamp = stamp;
     pointcloud.header.frame_id = frame;
     publisher.publish(pointcloud);
+  }
+}
+void debugPublishImage(const ros::Publisher& publisher, const cv::Mat& image, const ros::Time stamp, bool debug)
+{
+  if (debug)
+  {
+    cv_bridge::CvImage bridge_image;
+    bridge_image.image = image;
+    sensor_msgs::ImagePtr out = bridge_image.toImageMsg();
+    out->encoding = "mono8";
+    out->header.stamp = stamp;
+    publisher.publish(out);
   }
 }
 }  // namespace MapUtils
