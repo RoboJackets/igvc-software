@@ -16,8 +16,8 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/opencv.hpp>
 
-#include <vector>
 #include <map>
+#include <vector>
 
 // map of camera name to line and barrel publishers
 std::map<std::string, std::vector<ros::Publisher>> pubs;
@@ -75,7 +75,6 @@ bool color_check(cv::Vec3b pixel_color, Color desired_color)
   return false;
 }
 
-
 /**
 Recieves an input image and publishes two segmented images: one for lines and
 another for barrels
@@ -83,7 +82,7 @@ another for barrels
 void handle_image(const sensor_msgs::ImageConstPtr& msg, std::string camera_name)
 {
   cv_bridge::CvImagePtr cv_ptr;
-  cv::Mat frame; // Input image
+  cv::Mat frame;  // Input image
 
   try
   {
@@ -96,7 +95,7 @@ void handle_image(const sensor_msgs::ImageConstPtr& msg, std::string camera_name
     return;
   }
 
-  cv::Mat output_lines(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));  // Ouput image lines (B&W)
+  cv::Mat output_lines(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));    // Ouput image lines (B&W)
   cv::Mat output_barrels(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));  // Ouput image barrels (B&W)
 
   const int white_color = 255;
@@ -178,21 +177,16 @@ int main(int argc, char** argv)
   for (std::string camera_name : camera_names)
   {
     // subscribe to raw camera image
-    ros::Subscriber cam_sub = nh.subscribe<sensor_msgs::Image>(camera_name + "/image_raw", 1,
-        boost::bind(handle_image, _1, camera_name));
+    ros::Subscriber cam_sub =
+        nh.subscribe<sensor_msgs::Image>(camera_name + "/image_raw", 1, boost::bind(handle_image, _1, camera_name));
     subs.push_back(cam_sub);
 
     // publish line and barrel segmentation
     ros::Publisher line_pub = nh.advertise<sensor_msgs::Image>(camera_name + line_topic, 1);
     ros::Publisher barrel_pub = nh.advertise<sensor_msgs::Image>(camera_name + barrel_topic, 1);
-    std::vector<ros::Publisher> camera_pubs = {line_pub, barrel_pub};
+    std::vector<ros::Publisher> camera_pubs = { line_pub, barrel_pub };
 
-    pubs.insert(
-      std::pair<std::string, std::vector<ros::Publisher>>(
-        camera_name,
-        camera_pubs
-      )
-    );
+    pubs.insert(std::pair<std::string, std::vector<ros::Publisher>>(camera_name, camera_pubs));
   }
 
   double rate;
