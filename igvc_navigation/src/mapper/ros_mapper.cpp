@@ -49,7 +49,9 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "topics/line_segmentation/center", line_topic_center_);
   igvc::getParam(pNh, "topics/line_segmentation/right", line_topic_right_);
 
-  igvc::getParam(pNh, "topics/projected_line_pc", projected_line_topic_);
+  igvc::getParam(pNh, "topics/projected_line_pc/left", projected_line_topic_left_);
+  igvc::getParam(pNh, "topics/projected_line_pc/center", projected_line_topic_center_);
+  igvc::getParam(pNh, "topics/projected_line_pc/right", projected_line_topic_right_);
 
   igvc::getParam(pNh, "topics/camera_info/left", camera_info_topic_left_);
   igvc::getParam(pNh, "topics/camera_info/center", camera_info_topic_center_);
@@ -58,6 +60,7 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "frames/camera/left", camera_frame_left_);
   igvc::getParam(pNh, "frames/camera/center", camera_frame_center_);
   igvc::getParam(pNh, "frames/camera/right", camera_frame_right_);
+
   igvc::getParam(pNh, "node/camera/left/enable", enable_left_cam_);
   igvc::getParam(pNh, "node/camera/center/enable", enable_center_cam_);
   igvc::getParam(pNh, "node/camera/right/enable", enable_right_cam_);
@@ -86,6 +89,10 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
           Camera::left,
           nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_left_, 1,
                                                 boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::left))));
+      projected_line_subs_.emplace(
+          std::make_pair(Camera::left, nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(
+                                           projected_line_topic_left_, 1,
+                                           boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::left))));
     }
     if (enable_center_cam_)
     {
@@ -97,6 +104,10 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
           std::make_pair(Camera::center, nh.subscribe<sensor_msgs::CameraInfo>(
                                              camera_info_topic_center_, 1,
                                              boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::center))));
+      projected_line_subs_.emplace(std::make_pair(
+          Camera::center, nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(
+                              projected_line_topic_center_, 1,
+                              boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::center))));
     }
     if (enable_right_cam_)
     {
@@ -108,9 +119,11 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
           Camera::right,
           nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_right_, 1,
                                                 boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::right))));
+      projected_line_subs_.emplace(
+          std::make_pair(Camera::right, nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(
+                                            projected_line_topic_right_, 1,
+                                            boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::right))));
     }
-    projected_line_map_sub =
-        nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(projected_line_topic_, 1, &ROSMapper::projectedLineCallback, this);
   }
 
   map_pub_ = nh.advertise<igvc_msgs::map>("/map", 1);
@@ -353,7 +366,7 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
   publish(pcl_conversions::toPCL(segmented->header.stamp));
 }
 
-void ROSMapper::projectedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc)
+void ROSMapper::projectedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr &pc, Camera camera)
 {
   if (!getOdomTransform(pc->header.stamp))
   {

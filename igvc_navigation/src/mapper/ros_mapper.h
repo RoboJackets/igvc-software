@@ -36,8 +36,9 @@ private:
   /**
    * Callback for the line projetced onto lidar point cloud. Directly inserted as points.
    * @param pc the pointcloud from the projection of the segmented image onto lidar data.
+   * @param camera the camera from which this pointcloud comes from
    */
-  void projectedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc);
+  void projectedLineCallback(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc, Camera camera);
 
   /**
    * Callback for the cameraInfo used for projection, modified for a resized camera image.
@@ -97,6 +98,7 @@ private:
 
   std::unordered_map<Camera, ros::Subscriber> camera_infos_;
   std::unordered_map<Camera, ros::Subscriber> line_map_subs_;
+  std::unordered_map<Camera, ros::Subscriber> projected_line_subs_;
 
   bool use_lines_{};
   double transform_max_wait_time_{};
@@ -122,7 +124,9 @@ private:
   std::string line_topic_center_;
   std::string line_topic_right_;
 
-  std::string projected_line_topic_;
+  std::string projected_line_topic_left_;
+  std::string projected_line_topic_center_;
+  std::string projected_line_topic_right_;
 
   std::string camera_info_topic_left_;
   std::string camera_info_topic_center_;
