@@ -1,3 +1,9 @@
+/**
+ * A class which performs "motion profiling" for now,
+ * implementing the algorithm described in
+ * "A Smooth Control Law for Graceful Motion of Differential Wheeled Mobile Robots in 2D Environment"
+ * https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
+ */
 #ifndef SRC_MOTION_PROFILER_H
 #define SRC_MOTION_PROFILER_H
 
@@ -18,7 +24,7 @@ struct RobotConstraint
 
 struct MotionProfilerOptions
 {
-  double beta;
+  double beta;  // Both are taken from the paper.
   double lambda;
 };
 
@@ -33,6 +39,22 @@ public:
    * @param trajectory_ptr the trajectory to perform motion profiling on
    */
   void profileTrajectory(const igvc_msgs::trajectoryPtr& trajectory_ptr, const RobotState& state);
+
+  /**
+   * Caps linear acceleration between the last and current trajectory_point by changing the current
+   * trajectory_point's velocity, if the curvature of the control last executed is small enough
+   * that it can be approximated by a straight line
+   * @param last
+   * @param cur
+   */
+  void capLinearAcceleration(const igvc_msgs::trajectory_point& last, igvc_msgs::trajectory_point& cur) const;
+
+  /**
+   * Calculates the velocity using the function described in the paper, where velocity is a function of curvature
+   * @param curvature
+   * @return
+   */
+  double calculateVelocity(double curvature) const;
 
 private:
   WheelConstraint wheel_constraint_;

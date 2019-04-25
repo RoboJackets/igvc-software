@@ -23,7 +23,6 @@ void SmoothControl::getPath(const nav_msgs::PathConstPtr& path, const igvc_msgs:
   std::optional<RobotState> simulation_target = target_;
   size_t path_index = 0;
 
-  ros::Time time = path->header.stamp;
   trajectory_ptr->header.stamp = path->header.stamp;
 
   // Calculate timesteps
@@ -35,7 +34,7 @@ void SmoothControl::getPath(const nav_msgs::PathConstPtr& path, const igvc_msgs:
 
   closest_point_path.header = path->header;
   targets_path.header = path->header;
-  for (int i = 0; i < path_generation_options_.getNumSamples() && path_index < path->poses.size() - 1; i++, time += dt)
+  for (int i = 0; i < path_generation_options_.getNumSamples() && path_index < path->poses.size() - 1; i++)
   {
     // Get target
     path_index = getClosestIndex(path, state);
@@ -43,12 +42,14 @@ void SmoothControl::getPath(const nav_msgs::PathConstPtr& path, const igvc_msgs:
     std::tie(simulation_target, second_target) = getTargetPosition(path, state, simulation_target, path_index);
 
     RobotControl control = getControl(state, *simulation_target, second_target);
-    state.propogateState(control, dt.toSec());
+    state.propagateState(control, dt.toSec());
 
     geometry_msgs::PoseStamped pose_stamped;
     pose_stamped.header = path->header;
     pose_stamped.pose = path->poses[path_index].pose;
     closest_point_path.poses.emplace_back(pose_stamped);
+
+    ros::Time time = path->header.stamp + dt * i;
 
     geometry_msgs::PoseStamped target{};
     target.pose = simulation_target->toPose();
@@ -83,10 +84,11 @@ double SmoothControl::getCurvature(const RobotState& state, const RobotState& ta
   igvc::fit_to_polar(theta);
 
   // calculate the radius of curvature, K
-  double d = state.distTo(target);  // euclidian distance to target
-  double K = smooth_control_options_.k2 * (delta - atan(-smooth_control_options_.k1 * theta));
-  K += (1 + (smooth_control_options_.k1 / (1 + pow(smooth_control_options_.k1 * theta, 2)))) * sin(delta);
-  K /= -d;
+  const auto [k1, k2] = smooth_control_options_;
+
+  double r = state.distTo(target);
+  double K = (k2 * (delta - atan(-k1 * theta)) + (1 + (k1 / (1 + pow(k1 * theta, 2)))) * sin(delta)) / -r;
+
   return K;
 }
 
@@ -101,23 +103,30 @@ std::pair<RobotState, RobotState> SmoothControl::getTargetPosition(const nav_msg
   {
     if (!reachedTarget(state, *target))
     {
-      size_t target_index = findTargetOnPath(path, *target);
-      RobotState newTarget{ path->poses[target_index] };
-      // If the target is found, and the target isn't behind us, and the target is closer to target + 1 than we are
-      double state_dist_target_next = state.distTo(path->poses[target_index + 1].pose.position);
-      double target_dist_target_next = target->distTo(path->poses[target_index + 1].pose.position);
-      if (target_index != 0 && target_index >= path_index && target_dist_target_next < state_dist_target_next &&
-          distAlongPath(path, path_index, target_index) < target_selection_options_.lookahead_dist)
+      std::optional<size_t> target_index = findTargetOnPath(path, *target);
+      if (target_index && *target_index >= path_index)
       {
-        RobotState first_target = newTarget;
-        RobotState second_target = acquireNewTarget(path, first_target, target_index);
-        return { *target, second_target };
+        RobotState newTarget{ path->poses[*target_index] };
+
+        double state_dist_target_next = state.distTo(path->poses[*target_index + 1].pose.position);
+        double target_dist_target_next = target->distTo(path->poses[*target_index + 1].pose.position);
+
+        bool target_closer_to_next_target = target_dist_target_next < state_dist_target_next;
+        bool target_within_lookahead_dist =
+            distAlongPath(path, path_index, *target_index) < target_selection_options_.lookahead_dist;
+
+        if (target_closer_to_next_target && target_within_lookahead_dist)
+        {
+          const RobotState& first_target = newTarget;
+          RobotState second_target = acquireNewTarget(path, first_target, *target_index);
+          return { *target, second_target };
+        }
       }
     }
   }
   RobotState first_target = acquireNewTarget(path, state, path_index);
-  size_t first_target_index = findTargetOnPath(path, first_target);
-  RobotState second_target = acquireNewTarget(path, first_target, first_target_index);
+  std::optional<size_t> first_target_index = findTargetOnPath(path, first_target);
+  RobotState second_target = acquireNewTarget(path, first_target, first_target_index.value_or(0));
   return { first_target, second_target };
 }
 
@@ -151,7 +160,8 @@ RobotState SmoothControl::acquireNewTarget(const nav_msgs::PathConstPtr& path, c
   return newTarget;
 }
 
-size_t SmoothControl::findTargetOnPath(const nav_msgs::PathConstPtr& path, const RobotState& target) const
+std::optional<size_t> SmoothControl::findTargetOnPath(const nav_msgs::PathConstPtr& path,
+                                                      const RobotState& target) const
 {
   auto closest = std::min_element(path->poses.begin(), path->poses.end(),
                                   [&target](geometry_msgs::PoseStamped lhs, geometry_msgs::PoseStamped rhs) {
@@ -162,7 +172,7 @@ size_t SmoothControl::findTargetOnPath(const nav_msgs::PathConstPtr& path, const
     return static_cast<size_t>(closest - path->poses.begin());
   }
   ROS_WARN_THROTTLE(1, "Target moved more than target_move_threshold");
-  return 0;
+  return std::nullopt;
 }
 
 double SmoothControl::distAlongPath(const nav_msgs::PathConstPtr& path, size_t path_index, size_t target_index) const

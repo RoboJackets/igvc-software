@@ -68,7 +68,9 @@ public:
    * @param robot_control controls to be applied.
    * @param dt duration the controls are applied.
    */
-  void propogateState(const RobotControl &robot_control, double dt);
+  void propagateState(const RobotControl &robot_control, double dt);
+
+  std::pair<double, double> getICC(const RobotControl &robot_control) const;
 
   bool operator==(const RobotState &other);
 
@@ -85,6 +87,16 @@ public:
   double distTo(const geometry_msgs::Point &other) const;
 
   double linearVelocity() const;
+
+  /**
+   * Returns the arc length between trajectory_points a and b, given that b was the result of
+   * applying a.velocity with curvature a.curvature. If curavture is small, this is approximated
+   * as a straight line. Otherwise, this distance is calculated as an arc with radius 1/a.curvature
+   * @param a
+   * @param b
+   * @return
+   */
+  static double getArcLength(const igvc_msgs::trajectory_point &a, const igvc_msgs::trajectory_point &b);
 };
 
 inline std::ostream &operator<<(std::ostream &out, const RobotState &state)

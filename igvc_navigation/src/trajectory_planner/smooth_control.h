@@ -55,9 +55,6 @@ struct CurvatureBlendingOptions
 class SmoothControl
 {
 public:
-  //  SmoothControl(double k1, double k2, double axle_length, double simulation_frequency, double target_velocity,
-  //                double lookahead_dist, double simulation_horizon, double target_reached_distance,
-  //                double target_move_threshold, double transition_distance);
   SmoothControl(SmoothControlOptions smooth_control_options, PathGenerationOptions path_generation_options,
                 TargetSelectionOptions target_selection_options, CurvatureBlendingOptions curvature_blending_options,
                 double axle_length);
@@ -137,16 +134,18 @@ private:
   /**
    * Finds the point closest to the old target on the current path. If the distance is greater
    * than new_target_threshold_, std::nullopt is returned.
-   * @return the found target if within the threshold, or std::nullopt
+   * @param path
+   * @param target
+   * @return the index of the closest point, std::nullopt otherwise
    */
-  size_t findTargetOnPath(const nav_msgs::PathConstPtr& path, const RobotState& target) const;
+  std::optional<size_t> findTargetOnPath(const nav_msgs::PathConstPtr& path, const RobotState& target) const;
 
   /**
    * Finds the distance along the path provided from the current state to the target state
    * @param path the path to calculate the distance along
-   * @param state the current state
-   * @param target the target state
-   * @return the distance from the current state to the target state along the given path
+   * @param path_index the index of the current state
+   * @param target_index the index of the target state
+   * @return the arc length from the current state to the target state
    */
   double distAlongPath(const nav_msgs::PathConstPtr& path, size_t path_index, size_t target_index) const;
 

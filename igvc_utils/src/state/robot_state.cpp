@@ -170,25 +170,22 @@ igvc_msgs::trajectory_point RobotState::toTrajectoryPoint(ros::Time stamp, const
   return point;
 }
 
-void RobotState::propogateState(const RobotControl &robot_control, double dt)
+void RobotState::propagateState(const RobotControl &robot_control, double dt)
 {
   auto [k, v] = robot_control.toKV();
   double w = k * v;
 
   if (std::abs(w) > 1e-10)
   {
-    // calculate instantaneous center of curvature (ICC = [ICCx, ICCy])
-    double R = v / w;
-    double ICCx = x() - (R * sin(yaw()));
-    double ICCy = y() + (R * cos(yaw()));
+    auto [ICC_x, ICC_y] = getICC(robot_control);
 
     using namespace Eigen;
     Matrix3d T;
     double wdt = w * dt;
     T << cos(wdt), -sin(wdt), 0, sin(wdt), cos(wdt), 0, 0, 0, 1;
-    Vector3d a(x() - ICCx, y() - ICCy, yaw());
+    Vector3d a(x() - ICC_x, y() - ICC_y, yaw());
     Vector3d b = T * a;
-    Vector3d c = b + Vector3d(ICCx, ICCy, wdt);
+    Vector3d c = b + Vector3d(ICC_x, ICC_y, wdt);
 
     set_x(c[0]);
     set_y(c[1]);
@@ -203,7 +200,37 @@ void RobotState::propogateState(const RobotControl &robot_control, double dt)
   velocity.right = robot_control.right_;
 }
 
+std::pair<double, double> RobotState::getICC(const RobotControl &robot_control) const
+{
+  auto [k, v] = robot_control.toKV();
+  double w = k * v;
+  double R = v / w;
+  double ICC_x = x() - (R * sin(yaw()));
+  double ICC_y = y() + (R * cos(yaw()));
+
+  return std::make_pair(ICC_x, ICC_y);
+}
+
 bool RobotState::operator==(const RobotState &other)
 {
   return transform == other.transform;
+}
+
+double RobotState::getArcLength(const igvc_msgs::trajectory_point &a, const igvc_msgs::trajectory_point &b)
+{
+  if (std::abs(a.curvature) > 1e-8)
+  {
+    double R = 1 / a.curvature;
+    double current_yaw = tf::getYaw(a.pose.orientation);
+    double next_yaw = tf::getYaw(b.pose.orientation);
+
+    double d_theta = next_yaw - current_yaw;
+    return std::abs(d_theta * R);
+  }
+  else
+  {
+    double dx = a.pose.position.x - b.pose.position.x;
+    double dy = a.pose.position.y - b.pose.position.y;
+    return std::hypot(dx, dy);
+  }
 }
