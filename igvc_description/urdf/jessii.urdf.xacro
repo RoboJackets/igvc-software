@@ -23,7 +23,7 @@
 
   <!-- wheel acuator limits -->
   <xacro:property name="drive_wheel_eff_limit" value="8"/>
-  <xacro:property name="drive_wheel_vel_limit" value="20"/>
+  <xacro:property name="drive_wheel_vel_limit" value="10"/>
 
   <!-- drive shock params-->
   <!-- how far the drive wheel shock can move (m)-->
