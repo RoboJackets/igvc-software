@@ -66,4 +66,7 @@
     <param name="ground_truth_pub_topic" value="/ground_truth"/>
   </node>
 
+  <!-- Publish segmented camera images -->
+  <include file="$(find igvc_gazebo)/launch/sim_detector.launch" />
+
 </launch>

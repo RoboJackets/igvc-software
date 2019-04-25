@@ -5,7 +5,7 @@
 
     <node name="cnn" pkg="igvc_perception" type="cnn.py" output="screen" />
 
-    <rosparam param="camera_names">["center_cam"]</rosparam>
+    <rosparam param="camera_names">["center_cam", "left_cam", "right_cam"]</rosparam>
 
     <!-- These sizes must match the model input dimensions. -->
     <param name="image_resize_width" value="400" />
@@ -22,8 +22,8 @@
     <param name="output_segmentation_topic" value="/semantic_segmentation" />
 
     <!-- Use a pre-existic segmented image such as an output segmentation from a different node.
-         If true, the "segmented_image_topics" rosparam must be set -->
+         If true, the "segmented_image_topics" rosparam must be set with one topic for each camera -->
     <param name="use_preexisting_segmentation" value="true"/>
-    <rosparam param="segmented_image_topics">["/center_cam/image_raw/detected_lines"]</rosparam>
+    <rosparam param="segmented_image_topics">["/center_cam/detected_lines", "/left_cam/detected_lines", "/right_cam/detected_lines"]</rosparam>
 
 </launch>
