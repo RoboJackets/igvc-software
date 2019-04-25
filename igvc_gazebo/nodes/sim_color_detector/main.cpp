@@ -19,8 +19,10 @@
 #include <map>
 #include <vector>
 
+typedef cv::Point3_<uint8_t> Pixel;
+
 // map of camera name to line and barrel publishers
-std::map<std::string, std::vector<ros::Publisher>> pubs;
+std::map<std::string, std::vector<ros::Publisher>> g_pubs;
 
 /*
  * Holds all the ranges for a color being detected in the simulator;
@@ -55,11 +57,11 @@ const Color BLACK = Color(0, 45, 0, 45, 0, 45);
  * For readability and conciseness, compares the color of the pixel with the desired color.
  * Returns true if the pixel_color is in the bounds for B, G, and R; returns false otherwise
  */
-bool color_check(cv::Vec3b pixel_color, Color desired_color)
+bool color_check(const Pixel* pixel, Color desired_color)
 {
-  int b_value = int(pixel_color.val[0]);
-  int g_value = int(pixel_color.val[1]);
-  int r_value = int(pixel_color.val[2]);
+  int b_value = static_cast<int>(pixel->x);
+  int g_value = static_cast<int>(pixel->y);
+  int r_value = static_cast<int>(pixel->z);
 
   if (b_value >= desired_color._min_b && b_value <= desired_color._max_b)
   {
@@ -79,7 +81,7 @@ bool color_check(cv::Vec3b pixel_color, Color desired_color)
 Recieves an input image and publishes two segmented images: one for lines and
 another for barrels
 */
-void handle_image(const sensor_msgs::ImageConstPtr& msg, std::string camera_name)
+void handleImage(const sensor_msgs::ImageConstPtr& msg, std::string camera_name)
 {
   cv_bridge::CvImagePtr cv_ptr;
   cv::Mat frame;  // Input image
@@ -101,39 +103,26 @@ void handle_image(const sensor_msgs::ImageConstPtr& msg, std::string camera_name
   const int white_color = 255;
   const int black_color = 0;
 
-  // segment lines
-  for (int rowCount = 0; rowCount < frame.rows; ++rowCount)
+  // segment lines and barrels
+  for (int r = 0; r < frame.rows; ++r)
   {
-    for (int columnCount = 0; columnCount < frame.cols; ++columnCount)
+    int c = 0;
+    Pixel* ptr = frame.ptr<Pixel>(r, 0);
+    const Pixel* ptr_end = ptr + frame.cols;
+
+    for (; ptr != ptr_end; ++ptr, c++)
     {
-      cv::Vec3b color = frame.at<cv::Vec3b>(cv::Point(columnCount, rowCount));
-
-      if (color_check(color, PURPLE))
-      {
-        output_lines.at<uchar>(cv::Point(columnCount, rowCount)) = white_color;
-      }
+      // segment lines
+      if (color_check(ptr, PURPLE))
+        output_lines.at<uchar>(cv::Point(c, r)) = white_color;
       else
-      {
-        output_lines.at<uchar>(cv::Point(columnCount, rowCount)) = black_color;
-      }
-    }
-  }
+        output_lines.at<uchar>(cv::Point(c, r)) = black_color;
 
-  // segment barrels
-  for (int rowCount = 0; rowCount < frame.rows; ++rowCount)
-  {
-    for (int columnCount = 0; columnCount < frame.cols; ++columnCount)
-    {
-      cv::Vec3b color = frame.at<cv::Vec3b>(cv::Point(columnCount, rowCount));
-
-      if (color_check(color, BLACK) || color_check(color, ORANGE) || color_check(color, WHITE))
-      {
-        output_barrels.at<uchar>(cv::Point(columnCount, rowCount)) = white_color;
-      }
+      // segment barrels
+      if (color_check(ptr, BLACK) || color_check(ptr, ORANGE) || color_check(ptr, WHITE))
+        output_barrels.at<uchar>(cv::Point(c, r)) = white_color;
       else
-      {
-        output_barrels.at<uchar>(cv::Point(columnCount, rowCount)) = black_color;
-      }
+        output_barrels.at<uchar>(cv::Point(c, r)) = black_color;
     }
   }
 
@@ -144,12 +133,12 @@ void handle_image(const sensor_msgs::ImageConstPtr& msg, std::string camera_name
   // publish line segmentation
   cv_ptr->image = output_lines;
   cv_ptr->toImageMsg(outmsg);
-  pubs.find(camera_name)->second.at(0).publish(outmsg);
+  g_pubs.find(camera_name)->second.at(0).publish(outmsg);
 
   // publish barrel segmentation
   cv_ptr->image = output_barrels;
   cv_ptr->toImageMsg(outmsg);
-  pubs.find(camera_name)->second.at(1).publish(outmsg);
+  g_pubs.find(camera_name)->second.at(1).publish(outmsg);
 }
 
 /*
@@ -178,7 +167,7 @@ int main(int argc, char** argv)
   {
     // subscribe to raw camera image
     ros::Subscriber cam_sub =
-        nh.subscribe<sensor_msgs::Image>(camera_name + "/image_raw", 1, boost::bind(handle_image, _1, camera_name));
+        nh.subscribe<sensor_msgs::Image>(camera_name + "/image_raw", 1, boost::bind(handleImage, _1, camera_name));
     subs.push_back(cam_sub);
 
     // publish line and barrel segmentation
@@ -186,17 +175,12 @@ int main(int argc, char** argv)
     ros::Publisher barrel_pub = nh.advertise<sensor_msgs::Image>(camera_name + barrel_topic, 1);
     std::vector<ros::Publisher> camera_pubs = { line_pub, barrel_pub };
 
-    pubs.insert(std::pair<std::string, std::vector<ros::Publisher>>(camera_name, camera_pubs));
+    g_pubs.insert(std::pair<std::string, std::vector<ros::Publisher>>(camera_name, camera_pubs));
   }
-
-  double rate;
-  igvc::param(pNh, "rate", rate, 10);
-  ros::Rate loop_rate(rate);
 
   while (ros::ok())
   {
     ros::spinOnce();
-    loop_rate.sleep();
   }
 
   return 0;
