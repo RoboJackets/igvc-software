@@ -170,9 +170,9 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
     {
       MapUtils::removeOccupiedFromImage(image, last_scan_, camera_model_, base_to_odom * camera_to_base,
                                         remove_occupied_options_);
+      MapUtils::debugPublishImage(lidared_image_pub_, image, stamp, debug_);
     }
     MapUtils::projectToPlane(projected_pc, ground_plane_, image, camera_model_, camera_to_base);
-    MapUtils::debugPublishImage(lidared_image_pub_, image, stamp, debug_);
   }
 
   pcl_ros::transformPointCloud(projected_pc, projected_pc, base_to_odom);
