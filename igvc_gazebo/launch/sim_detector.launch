@@ -3,9 +3,6 @@
 <launch>
 
   <node name="sim_color_detector" pkg="igvc_gazebo" type="sim_color_detector">
-      <!-- rate at which to publish image segmentations -->
-      <param name="rate" value="10" />
-
       <!-- names of cameras to subscribe to -->
       <rosparam param="camera_names">["/center_cam", "/left_cam", "/right_cam"]</rosparam>
 
