@@ -19,6 +19,10 @@
     <!-- Threshold to determine if a network prediction is a line (values between 0 and 1) -->
     <param name="line_thresh" value="0.5" />
 
+    <param name="output_segmentation_topic" value="/semantic_segmentation" />
+
+    <!-- Use a pre-existic segmented image such as an output segmentation from a different node.
+         If true, the "segmented_image_topics" rosparam must be set -->
     <param name="use_preexisting_segmentation" value="true"/>
     <rosparam param="segmented_image_topics">["/center_cam/image_raw/detected_lines"]</rosparam>
 
