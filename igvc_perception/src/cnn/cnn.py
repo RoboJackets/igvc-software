@@ -245,7 +245,7 @@ if __name__ == '__main__':
     rospy.init_node('cnn')
 
     # Read ros params.
-    use_preexisting_segmentation = rospy.get_param('use_preexisting_segmentation')
+    use_preexisting_segmentation = rospy.get_param('use_preexisting_segmentation', False)
 
     camera_names = rospy.get_param('camera_names')
     image_resize_width = rospy.get_param('image_resize_width')
@@ -271,14 +271,6 @@ if __name__ == '__main__':
                           model_filename = model_path,
                           force_cpu = force_cpu,
                           line_thresh = line_thresh)
-
-
-    # if not use_preexisting_segmentation:
-    #     CNN(camera_names, '/semantic_segmentation', model_path, image_resize_width,
-    #         image_resize_height, force_cpu, line_thresh)
-    # else:
-    #     PinholeModel(camera_names, segmented_image_topics, '/semantic_segmentation', model_path, image_resize_width,
-    #         image_resize_height, force_cpu, line_thresh)
 
     try:
         rospy.spin()
