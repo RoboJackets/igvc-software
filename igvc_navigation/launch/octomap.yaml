@@ -15,7 +15,7 @@ probability_model:
         free_space: # Rays that are not detected by the lidar to have occupied points along them
             prob_miss: 0.52
     camera:
-        prob_miss: 0.45
+        prob_miss: 0.51
         prob_hit: 0.9
 sensor_model:
     max_range: 5
@@ -61,14 +61,14 @@ segmented_free_space:
     threshold: 127 #0 - 255
 topics:
     lidar: "/velodyne_points"
-    line_segmentation: "/semantic_segmentation"
-    projected_line_pc: "/semantic_segmentation_cloud"
-    camera_info: "/usb_cam_center/camera_info"
+    line_segmentation: "/semantic_segmentation/center_cam"
+    projected_line_pc: "/semantic_segmentation_cloud/center_cam"
+    camera_info: "/center_cam/camera_info"
 frames:
-    camera: "/optical_cam_center"
+    camera: "/center_cam_optical"
 node:
     debug: true
-    use_lines: false
+    use_lines: true
     transform_max_wait_time: 1
 cameras:
     resize_width: 400 # pixels
