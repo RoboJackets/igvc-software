@@ -2,8 +2,7 @@
  * Node responsible for (color) detecting the lines and barrels in the Gazebo
  * simulator. Receives the raw image and publishes two different B&W images
  * (one for line detection, one for barrel detection) that each highlight
- * their respective features in white. Integrated with a ros::Timer to publish at
- * a specified rate.
+ * their respective features in white.
  */
 
 #include <cv_bridge/cv_bridge.h>
@@ -19,7 +18,7 @@
 #include <map>
 #include <vector>
 
-typedef cv::Point3_<uint8_t> Pixel;
+using Pixel = cv::Point3_<uint8_t>;
 
 // map of camera name to line and barrel publishers
 std::map<std::string, std::vector<ros::Publisher>> g_pubs;
@@ -133,12 +132,12 @@ void handleImage(const sensor_msgs::ImageConstPtr& msg, std::string camera_name)
   // publish line segmentation
   cv_ptr->image = output_lines;
   cv_ptr->toImageMsg(outmsg);
-  g_pubs.find(camera_name)->second.at(0).publish(outmsg);
+  g_pubs.at(camera_name).at(0).publish(outmsg);
 
   // publish barrel segmentation
   cv_ptr->image = output_barrels;
   cv_ptr->toImageMsg(outmsg);
-  g_pubs.find(camera_name)->second.at(1).publish(outmsg);
+  g_pubs.at(camera_name).at(1).publish(outmsg);
 }
 
 /*
@@ -175,7 +174,7 @@ int main(int argc, char** argv)
     ros::Publisher barrel_pub = nh.advertise<sensor_msgs::Image>(camera_name + barrel_topic, 1);
     std::vector<ros::Publisher> camera_pubs = { line_pub, barrel_pub };
 
-    g_pubs.insert(std::pair<std::string, std::vector<ros::Publisher>>(camera_name, camera_pubs));
+    g_pubs.insert(std::make_pair(camera_name, camera_pubs));
   }
 
   while (ros::ok())
