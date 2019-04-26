@@ -44,8 +44,8 @@ std::string g_lidar_topic;
 void findNearestNeighbors(pcl::PointXY point, const std::vector<pcl::KdTreeFLANN<pcl::PointXY>> &kdtree_list,
                           pcl::PointXY &nearest1, pcl::PointXY &nearest2)
 {
-  float nearest_1_dist = FLT_MAX;
-  float nearest_2_dist = FLT_MAX;
+  float nearest_1_dist = std::numeric_limits<float>::max();
+  float nearest_2_dist = std::numeric_limits<float>::max();
   for (const auto &kdtree : kdtree_list)
   {
     if (kdtree.getInputCloud() != nullptr)
@@ -254,6 +254,36 @@ void getTransforms()
     ROS_ERROR_STREAM("\n\nfailed to find lidar to base footprint transform\n\n");
   }
 }
+/**
+ * Resize the pinhole camera model with the given resize_width and resize_height;
+ */
+void resizeCameraModel()
+{
+  sensor_msgs::CameraInfo new_g_cam_info(*g_cam_info);
+  float waf = float(g_resize_width) / g_cam_info->width;
+  float haf = float(g_resize_height) / g_cam_info->height;
+  new_g_cam_info.height = g_resize_height;
+  new_g_cam_info.width = g_resize_width;
+  boost::array<double, 9> new_K = {
+    g_cam_info->K[0] * waf, 0., g_cam_info->K[2] * waf, 0., g_cam_info->K[4] * haf, g_cam_info->K[5] * haf, 0., 0., 1.
+  };
+  boost::array<double, 12> new_P = { g_cam_info->P[0] * waf,
+                                      0.,
+                                      g_cam_info->P[2] * waf,
+                                      0.,
+                                      0.,
+                                      g_cam_info->P[5] * haf,
+                                      g_cam_info->P[6] * haf,
+                                      0.,
+                                      0.,
+                                      0.,
+                                      1.,
+                                      0. };
+  new_g_cam_info.K = new_K;
+  new_g_cam_info.P = new_P;
+  g_cam_model = image_geometry::PinholeCameraModel();
+  g_cam_model.fromCameraInfo(new_g_cam_info);
+}
 
 void imageCallback(const sensor_msgs::ImageConstPtr &msg)
 {
@@ -302,33 +332,7 @@ int main(int argc, char **argv)
   g_cam_info = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("center_cam/camera_info", ros::Duration(5));
   if (g_cam_info.get() != nullptr)
   {
-    sensor_msgs::CameraInfo new_g_cam_info(*g_cam_info);
-    // Set up pinhole camera model with optionally modified width and height
-    float waf = float(g_resize_width) / g_cam_info->width;
-    float haf = float(g_resize_height) / g_cam_info->height;
-    new_g_cam_info.height = g_resize_height;
-    new_g_cam_info.width = g_resize_width;
-    boost::array<double, 9> new_K = {
-      g_cam_info->K[0] * waf, 0., g_cam_info->K[2] * waf, 0., g_cam_info->K[4] * haf, g_cam_info->K[5] * haf, 0., 0., 1.
-    };
-
-    boost::array<double, 12> new_P = { g_cam_info->P[0] * waf,
-                                       0.,
-                                       g_cam_info->P[2] * waf,
-                                       0.,
-                                       0.,
-                                       g_cam_info->P[5] * haf,
-                                       g_cam_info->P[6] * haf,
-                                       0.,
-                                       0.,
-                                       0.,
-                                       1.,
-                                       0. };
-    new_g_cam_info.K = new_K;
-    new_g_cam_info.P = new_P;
-    g_cam_model = image_geometry::PinholeCameraModel();
-    g_cam_model.fromCameraInfo(new_g_cam_info);
-
+    resizeCameraModel();
     getTransforms();
   }
   else
