@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-
-<launch>
-  <node name="white_image" pkg="igvc_perception" type="white_image" output="screen" />
-</launch>
