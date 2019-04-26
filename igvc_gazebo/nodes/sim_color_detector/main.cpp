@@ -2,8 +2,7 @@
  * Node responsible for (color) detecting the lines and barrels in the Gazebo
  * simulator. Receives the raw image and publishes two different B&W images
  * (one for line detection, one for barrel detection) that each highlight
- * their respective features in white. Integrated with a ros::Timer to publish at
- * a specified rate.
+ * their respective features in white.
  */
 
 #include <cv_bridge/cv_bridge.h>
@@ -16,10 +15,13 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/opencv.hpp>
 
-ros::Publisher img_pub_lines;
-ros::Publisher img_pub_barrels;
-sensor_msgs::Image outmsg_lines;
-sensor_msgs::Image outmsg_barrels;
+#include <map>
+#include <vector>
+
+using Pixel = cv::Point3_<uint8_t>;
+
+// map of camera name to line and barrel publishers
+std::map<std::string, std::vector<ros::Publisher>> g_pubs;
 
 /*
  * Holds all the ranges for a color being detected in the simulator;
@@ -54,11 +56,11 @@ const Color BLACK = Color(0, 45, 0, 45, 0, 45);
  * For readability and conciseness, compares the color of the pixel with the desired color.
  * Returns true if the pixel_color is in the bounds for B, G, and R; returns false otherwise
  */
-bool color_check(cv::Vec3b pixel_color, Color desired_color)
+bool color_check(const Pixel* pixel, Color desired_color)
 {
-  int b_value = int(pixel_color.val[0]);
-  int g_value = int(pixel_color.val[1]);
-  int r_value = int(pixel_color.val[2]);
+  int b_value = static_cast<int>(pixel->x);
+  int g_value = static_cast<int>(pixel->y);
+  int r_value = static_cast<int>(pixel->z);
 
   if (b_value >= desired_color._min_b && b_value <= desired_color._max_b)
   {
@@ -74,18 +76,19 @@ bool color_check(cv::Vec3b pixel_color, Color desired_color)
   return false;
 }
 
-/*
- * Responsible for detecting the lines (currently set to a purple color) and
- * illuminating them as white (and setting all other pixels to black).
- */
-void handle_image_lines(const sensor_msgs::ImageConstPtr& msg)
+/**
+Recieves an input image and publishes two segmented images: one for lines and
+another for barrels
+*/
+void handleImage(const sensor_msgs::ImageConstPtr& msg, std::string camera_name)
 {
   cv_bridge::CvImagePtr cv_ptr;
-  cv::Mat frame;
+  cv::Mat frame;  // Input image
 
   try
   {
     cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
+    frame = cv_bridge::toCvCopy(msg, "bgr8")->image;
   }
   catch (cv_bridge::Exception& e)
   {
@@ -93,104 +96,48 @@ void handle_image_lines(const sensor_msgs::ImageConstPtr& msg)
     return;
   }
 
-  frame = cv_ptr->image;                                                // Input image
-  cv::Mat output(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));  // Ouput image (B&W)
+  cv::Mat output_lines(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));    // Ouput image lines (B&W)
+  cv::Mat output_barrels(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));  // Ouput image barrels (B&W)
 
   const int white_color = 255;
   const int black_color = 0;
 
-  for (int rowCount = 0; rowCount < frame.rows; ++rowCount)
+  // segment lines and barrels
+  for (int r = 0; r < frame.rows; ++r)
   {
-    for (int columnCount = 0; columnCount < frame.cols; ++columnCount)
-    {
-      cv::Vec3b color = frame.at<cv::Vec3b>(cv::Point(columnCount, rowCount));
+    int c = 0;
+    Pixel* ptr = frame.ptr<Pixel>(r, 0);
+    const Pixel* ptr_end = ptr + frame.cols;
 
-      if (color_check(color, PURPLE))
-      {
-        output.at<uchar>(cv::Point(columnCount, rowCount)) = white_color;
-      }
+    for (; ptr != ptr_end; ++ptr, c++)
+    {
+      // segment lines
+      if (color_check(ptr, PURPLE))
+        output_lines.at<uchar>(cv::Point(c, r)) = white_color;
       else
-      {
-        output.at<uchar>(cv::Point(columnCount, rowCount)) = black_color;
-      }
+        output_lines.at<uchar>(cv::Point(c, r)) = black_color;
+
+      // segment barrels
+      if (color_check(ptr, BLACK) || color_check(ptr, ORANGE) || color_check(ptr, WHITE))
+        output_barrels.at<uchar>(cv::Point(c, r)) = white_color;
+      else
+        output_barrels.at<uchar>(cv::Point(c, r)) = black_color;
     }
   }
 
   sensor_msgs::Image outmsg;
   outmsg.header = msg->header;
-  cv_ptr->image = output;
   cv_ptr->encoding = "mono8";
+
+  // publish line segmentation
+  cv_ptr->image = output_lines;
   cv_ptr->toImageMsg(outmsg);
-  outmsg_lines = outmsg;
-}
+  g_pubs.at(camera_name).at(0).publish(outmsg);
 
-/*
- * Responsible for detecting the barrels (white and orange components) and
- * illuminating them as white (and setting all other pixels to black).
- */
-void handle_image_barrels(const sensor_msgs::ImageConstPtr& msg)
-{
-  cv_bridge::CvImagePtr cv_ptr;
-  cv::Mat frame;
-
-  try
-  {
-    cv_ptr = cv_bridge::toCvCopy(msg, "bgr8");
-  }
-  catch (cv_bridge::Exception& e)
-  {
-    ROS_ERROR("CV-Bridge error: %s", e.what());
-    return;
-  }
-
-  frame = cv_ptr->image;                                                // Input image
-  cv::Mat output(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));  // Ouput image (B&W)
-
-  const int white_color = 255;
-  const int black_color = 0;
-
-  for (int rowCount = 0; rowCount < frame.rows; ++rowCount)
-  {
-    for (int columnCount = 0; columnCount < frame.cols; ++columnCount)
-    {
-      cv::Vec3b color = frame.at<cv::Vec3b>(cv::Point(columnCount, rowCount));
-
-      if (color_check(color, BLACK))
-      {
-        output.at<uchar>(cv::Point(columnCount, rowCount)) = white_color;
-      }
-      else if (color_check(color, ORANGE))
-      {
-        output.at<uchar>(cv::Point(columnCount, rowCount)) = white_color;
-      }
-      else if (color_check(color, WHITE))
-      {
-        output.at<uchar>(cv::Point(columnCount, rowCount)) = white_color;
-      }
-      else
-      {
-        output.at<uchar>(cv::Point(columnCount, rowCount)) = black_color;
-      }
-    }
-  }
-
-  sensor_msgs::Image outmsg;
-  outmsg.header = msg->header;
-  cv_ptr->image = output;
-  cv_ptr->encoding = "mono8";
+  // publish barrel segmentation
+  cv_ptr->image = output_barrels;
   cv_ptr->toImageMsg(outmsg);
-  outmsg_barrels = outmsg;
-}
-
-/*
- * Takes the most recent messages from the handle_image_lines and
- * handle_image_barrels functions and publishes them once triggered
- * by a a ros::Timer
- */
-void publish(const ros::TimerEvent&)
-{
-  img_pub_barrels.publish(outmsg_barrels);
-  img_pub_lines.publish(outmsg_lines);
+  g_pubs.at(camera_name).at(1).publish(outmsg);
 }
 
 /*
@@ -200,46 +147,40 @@ void publish(const ros::TimerEvent&)
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "sim_color_detector");
-
-  // LINES
-
-  ros::NodeHandle nh_lines;
-  ros::NodeHandle pNh_lines("~");
-
-  std::string topic_name_lines;
-
-  igvc::param(pNh_lines, "image_topic", topic_name_lines, std::string("/center_cam/image_raw"));
-
-  std::string name_for_topic_lines = topic_name_lines + "/detected_lines";
-
-  img_pub_lines = nh_lines.advertise<sensor_msgs::Image>(name_for_topic_lines, 1);
-
-  ros::Subscriber img_sub_lines = nh_lines.subscribe(topic_name_lines, 1, handle_image_lines);
-
-  // BARRELS
-
-  ros::NodeHandle nh_barrels;
-  ros::NodeHandle pNh_barrels("~");
-
-  std::string topic_name_barrels;
-
-  igvc::param(pNh_barrels, "image_topic", topic_name_barrels, std::string("/center_cam/image_raw"));
-
-  std::string name_for_topic_barrels = topic_name_barrels + "/detected_barrels";
-
-  img_pub_barrels = nh_barrels.advertise<sensor_msgs::Image>(name_for_topic_barrels, 1);
-
-  ros::Subscriber img_sub_barrels = nh_barrels.subscribe(topic_name_barrels, 1, handle_image_barrels);
-
   ros::NodeHandle nh;
+  ros::NodeHandle pNh("~");
 
-  // Will call publish to update the published topics -> Set the publishing rate here
+  // cameras to obtain images from
+  std::vector<std::string> camera_names;
+  igvc::getParam(pNh, "camera_names", camera_names);
 
-  const int rate = atoi(argv[1]);  // This is the rate for how often it should publish as an argument from command line
+  // output topics
+  std::string line_topic;
+  igvc::getParam(pNh, "line_topic", line_topic);
+  std::string barrel_topic;
+  igvc::getParam(pNh, "barrel_topic", barrel_topic);
 
-  ros::Timer timer = nh.createTimer(ros::Duration(1.0 / rate), publish);
+  // insert subscribers and publishers
+  std::vector<ros::Subscriber> subs;
+  for (std::string camera_name : camera_names)
+  {
+    // subscribe to raw camera image
+    ros::Subscriber cam_sub =
+        nh.subscribe<sensor_msgs::Image>(camera_name + "/image_raw", 1, boost::bind(handleImage, _1, camera_name));
+    subs.push_back(cam_sub);
 
-  ros::spin();
+    // publish line and barrel segmentation
+    ros::Publisher line_pub = nh.advertise<sensor_msgs::Image>(camera_name + line_topic, 1);
+    ros::Publisher barrel_pub = nh.advertise<sensor_msgs::Image>(camera_name + barrel_topic, 1);
+    std::vector<ros::Publisher> camera_pubs = { line_pub, barrel_pub };
+
+    g_pubs.insert(std::make_pair(camera_name, camera_pubs));
+  }
+
+  while (ros::ok())
+  {
+    ros::spinOnce();
+  }
 
   return 0;
 }
