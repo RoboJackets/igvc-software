@@ -1,0 +1,42 @@
+<!--
+    navsat_transform_node instance
+-->
+<launch>
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="true" output="screen">
+
+      <param name="frequency" value="30"/>
+
+      <!-- delay time could be useful but defaults to 0 -->
+      <param name="delay" value="0"/>
+
+      <!-- location-specific magnetic_declination.
+        Magnetic Declination Calculator: https://www.ngdc.noaa.gov/geomag/calculators/magcalc.shtml
+      -->
+      <param name="magnetic_declination_radians" value="0"/>
+
+      <!-- Most IMU's report 0 as facing north. REP103 expects 0 when facing east. This param corrects for that -->
+      <param name="yaw_offset" value="1.5707963"/>
+
+      <!-- sets altitude to 0 -->
+      <param name="zero_altitude" value="true"/>
+
+      <!-- broadcasts the transform world_fram->utm -->
+      <param name="broadcast_utm_transform" value="true"/>
+
+      <!-- publishes the lat and long of the robot position -->
+      <param name="publish_filtered_gps" value="true"/>
+
+      <!-- if true uses yaw angle from the input odom source -->
+      <param name="use_odometry_yaw" value="false"/>
+
+      <!-- we aren't specifying the global frame origin by hand -->
+      <param name="wait_for_datum" value="false" />
+
+      <!-- input remapping -->
+      <remap from="/odometry/filtered" to="/odometry/filtered_map" /> <!-- provides abolute (earth-referenced) heading -->
+      <remap from="/gps/fix" to="/fix" /> <!-- provides raw gps coordinates -->
+
+      <!-- can do output remapping also -->
+
+    </node>
+</launch>

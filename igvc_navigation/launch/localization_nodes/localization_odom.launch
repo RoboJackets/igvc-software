@@ -1,0 +1,98 @@
+<!--
+    This localization instance fuses continuous sources of odometry to provide a
+    continuous pose estimate in the odometry frame. This instance does not fuse
+    global pose data. The result is a transform from odom to the base_link_frame
+    that varies continuously.
+
+    *order of fused parameters:
+        [X,               Y,               Z,
+         roll,            pitch,           yaw,
+         X velocity,      Y velocity,      Z velocity,
+         roll velocity,   pitch velocity,  yaw velocity,
+         X acceleration,  Y acceleration,  Z acceleration]
+-->
+
+<launch>
+    <node name="ekf_odom" pkg="robot_localization" type="ekf_localization_node" clear_params="true">
+        <param name="frequency" value="30"/>
+        <param name="two_d_mode" value="true"/>
+
+        <param name="map_frame" value="map" />
+        <param name="odom_frame" value="odom" />
+        <param name="base_link_frame" value="base_link" />
+        <param name="world_frame" value="odom" />
+
+        <!-- continuous odometry sources -->
+        <param name="odom0" value="/wheel_odometry"/>
+        <param name="imu0" value="/imu"/>
+
+        <!-- what we're fusing from these sources - see "order of fused parameters above"-->
+        <rosparam param="odom0_config">[false, false, false,
+                                        false, false, false,
+                                        false, false, false,
+                                        false, false, false,
+                                        false, false, false]</rosparam>
+
+        <rosparam param="imu0_config">[false, false, false,
+                                       false, false, true,
+                                       false, false, false,
+                                       false, false, true,
+                                       true,  false, false]</rosparam>
+
+        <param name="odom0_differential" value="false"/>
+        <param name="imu0_differential" value="false"/>
+
+        <param name="odom0_relative" value="false" />
+        <param name="imu0_relative" value="false" />
+
+        <param name="imu0_remove_gravitational_acceleration" value="true" />
+
+        <!-- publish diagnostic messages to the /diagnostics topic -->
+        <param name="print_diagnostics" value="true" />
+
+        <!-- Useful if our frequency parameter is much lower than our sensor frequency -->
+        <param name="odom0_queue_size" value="10" />
+        <param name="imu0_queue_size" value="10" />
+
+        <param name="debug" value="false" />
+        <param name="debug_out_file" value="debug_ekf_localization_odom.txt" />
+
+        <!-- hand-tuned -->
+        <rosparam param="process_noise_covariance">
+          [.6,   0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+           0,    .6,   0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+           0,    0,    .1,   0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    .1,   0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    .1,   0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    .3,   0,     0,     0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    .1,    0,     0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,     .1,    0,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,     0,    .1,    0,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,     0,     0,   .1,    0,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,   .1,    0,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,   .5,    0,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,   .1,    0,    0,
+           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,   .1,    0,
+           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    .1]
+        </rosparam>
+
+        <!-- set initial estimate covariance for things we're measuring high -->
+        <rosparam param="initial_estimate_covariance">
+          [1e-9,    0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
+           0,       1e-9, 0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
+           0,       0,    1e-9,   0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
+           0,       0,    0,      1e-9,   0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
+           0,       0,    0,      0,      1e-9,   0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
+           0,       0,    0,      0,      0,      1,  0,      0,      0,     0,     0,     0,     0,     0,     0,
+           0,       0,    0,      0,      0,      0,     1e-9,   0,      0,     0,     0,     0,     0,     0,     0,
+           0,       0,    0,      0,      0,      0,     0,      1e-9,   0,     0,     0,     0,     0,     0,     0,
+           0,       0,    0,      0,      0,      0,     0,      0,      1e-9,  0,     0,     0,     0,     0,     0,
+           0,       0,    0,      0,      0,      0,     0,      0,      0,     1e-9,  0,     0,     0,     0,     0,
+           0,       0,    0,      0,      0,      0,     0,      0,      0,     0,     1e-9,  0,     0,     0,     0,
+           0,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     1,     0,     0,     0,
+           0,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     1,     0,     0,
+           0,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     1e-9,  0,
+           0,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     1e-9]
+        </rosparam>
+    </node>
+</launch>
