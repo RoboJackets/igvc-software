@@ -174,4 +174,4 @@ endif ()
 
 
 add_subdirectory(src/filter_lidar)
-add_subdirectory(src/white_image)
+add_subdirectory(src/projection)
