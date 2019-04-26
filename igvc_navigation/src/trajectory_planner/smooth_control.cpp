@@ -42,7 +42,7 @@ void SmoothControl::getPath(const nav_msgs::PathConstPtr& path, const igvc_msgs:
     std::tie(simulation_target, second_target) = getTargetPosition(path, state, simulation_target, path_index);
 
     RobotControl control = getControl(state, *simulation_target, second_target);
-    state.propagateState(control, dt.toSec());
+    state.propagateState(control, axle_length_, dt.toSec());
 
     geometry_msgs::PoseStamped pose_stamped;
     pose_stamped.header = path->header;

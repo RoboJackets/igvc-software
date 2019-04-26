@@ -73,7 +73,7 @@ RobotControl TrajectoryFollower::getControl()
 
   if (trajectory_->trajectory.size() < 3)
   {
-    return { 0.0, 0.0, axle_length_ };
+    return { 0.0, 0.0 };
   }
 
   ros::Time current_time = ros::Time::now() - time_delta_ + ros::Duration(1 / motor_loop_hz_);

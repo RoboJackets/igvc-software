@@ -66,11 +66,12 @@ public:
   /**
    * Propogates the current state according to controls robot_control for time dt
    * @param robot_control controls to be applied.
+   * @param axle_length the axle_length of the robot
    * @param dt duration the controls are applied.
    */
-  void propagateState(const RobotControl &robot_control, double dt);
+  void propagateState(const RobotControl &robot_control, double axle_length, double dt);
 
-  std::pair<double, double> getICC(const RobotControl &robot_control) const;
+  std::pair<double, double> getICC(const RobotControl &robot_control, double axle_length) const;
 
   bool operator==(const RobotState &other);
 

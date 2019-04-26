@@ -14,15 +14,14 @@ class RobotControl
 public:
   double left_{};
   double right_{};
-  double axle_length_{};
 
   friend std::ostream &operator<<(std::ostream &out, const RobotControl &robot_control);
 
   igvc_msgs::velocity_pair toMessage(ros::Time stamp) const;
-  CurvatureVelocity toKV(const std::optional<double>& axle_length = std::nullopt) const;
+  CurvatureVelocity toKV(double axle_length) const;
 
   double linearVelocity() const;
-  double angularVelocity(const std::optional<double>& axle_length = std::nullopt) const;
+  double angularVelocity(double axle_length) const;
 
   static RobotControl fromKV(double curvature, double velocity, double axle_length);
 };

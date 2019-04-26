@@ -170,14 +170,14 @@ igvc_msgs::trajectory_point RobotState::toTrajectoryPoint(ros::Time stamp, const
   return point;
 }
 
-void RobotState::propagateState(const RobotControl &robot_control, double dt)
+void RobotState::propagateState(const RobotControl &robot_control, double axle_length, double dt)
 {
-  auto [k, v] = robot_control.toKV();
+  auto [k, v] = robot_control.toKV(axle_length);
   double w = k * v;
 
   if (std::abs(w) > 1e-10)
   {
-    auto [ICC_x, ICC_y] = getICC(robot_control);
+    auto [ICC_x, ICC_y] = getICC(robot_control, axle_length);
 
     using namespace Eigen;
     Matrix3d T;
@@ -200,9 +200,9 @@ void RobotState::propagateState(const RobotControl &robot_control, double dt)
   velocity.right = robot_control.right_;
 }
 
-std::pair<double, double> RobotState::getICC(const RobotControl &robot_control) const
+std::pair<double, double> RobotState::getICC(const RobotControl &robot_control, double axle_length) const
 {
-  auto [k, v] = robot_control.toKV();
+  auto [k, v] = robot_control.toKV(axle_length);
   double w = k * v;
   double R = v / w;
   double ICC_x = x() - (R * sin(yaw()));
