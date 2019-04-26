@@ -37,6 +37,9 @@
 */.idea/
 /.idea/
 
+#VSCode
+.vscode
+
 # CMake
 */cmake-build-*/
 
