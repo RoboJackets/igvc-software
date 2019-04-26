@@ -268,17 +268,17 @@ void resizeCameraModel()
     g_cam_info->K[0] * waf, 0., g_cam_info->K[2] * waf, 0., g_cam_info->K[4] * haf, g_cam_info->K[5] * haf, 0., 0., 1.
   };
   boost::array<double, 12> new_P = { g_cam_info->P[0] * waf,
-                                      0.,
-                                      g_cam_info->P[2] * waf,
-                                      0.,
-                                      0.,
-                                      g_cam_info->P[5] * haf,
-                                      g_cam_info->P[6] * haf,
-                                      0.,
-                                      0.,
-                                      0.,
-                                      1.,
-                                      0. };
+                                     0.,
+                                     g_cam_info->P[2] * waf,
+                                     0.,
+                                     0.,
+                                     g_cam_info->P[5] * haf,
+                                     g_cam_info->P[6] * haf,
+                                     0.,
+                                     0.,
+                                     0.,
+                                     1.,
+                                     0. };
   new_g_cam_info.K = new_K;
   new_g_cam_info.P = new_P;
   g_cam_model = image_geometry::PinholeCameraModel();
