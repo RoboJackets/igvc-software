@@ -41,7 +41,7 @@
                                         false, false, false]</rosparam>
 
         <rosparam param="imu0_config">[false, false, false,
-                                       false, false, true,
+                                       false, false, false,
                                        false, false, false,
                                        false, false, true,
                                        true,  false, false]</rosparam>
@@ -87,8 +87,8 @@
 
         <!-- set initial estimate covariance for things we're measuring high -->
         <rosparam param="initial_estimate_covariance">
-          [1,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-           0,       1,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
+          [1e-9,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
+           0,       1e-9,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
            0,       0,    1e-9,   0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
            0,       0,    0,      1e-9,   0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
            0,       0,    0,      0,      1e-9,   0,     0,      0,      0,     0,     0,     0,     0,     0,     0,

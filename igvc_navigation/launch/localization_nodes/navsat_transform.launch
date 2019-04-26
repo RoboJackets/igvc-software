@@ -34,6 +34,7 @@
 
       <!-- input remapping -->
       <remap from="/odometry/filtered" to="/odometry/filtered_map" /> <!-- provides abolute (earth-referenced) heading -->
+      <remap from="/imu/data" to="/magnetometer"/>
       <remap from="/gps/fix" to="/fix" /> <!-- provides raw gps coordinates -->
 
       <!-- can do output remapping also -->

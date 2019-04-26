@@ -61,11 +61,6 @@
 
   <include file="$(find igvc_gazebo)/launch/igvc_control.launch" />
 
-  <node name="ground_truth_republisher" pkg="igvc_gazebo" type="ground_truth_republisher" output="screen">
-    <param name="ground_truth_sub_topic" value="/ground_truth/state_raw"/>
-    <param name="ground_truth_pub_topic" value="/ground_truth"/>
-  </node>
-
   <!-- Publish segmented camera images -->
   <include file="$(find igvc_gazebo)/launch/sim_detector.launch" />
 

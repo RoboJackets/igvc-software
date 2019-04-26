@@ -9,7 +9,8 @@
 <launch>
     <include file="$(find igvc_navigation)/launch/wheel_odometry.launch" />
 
+    <include file="$(find igvc_navigation)/launch/localization_nodes/localization_map.launch" />
     <include file="$(find igvc_navigation)/launch/localization_nodes/navsat_transform.launch" />
     <include file="$(find igvc_navigation)/launch/localization_nodes/localization_odom.launch" />
-    <include file="$(find igvc_navigation)/launch/localization_nodes/localization_map.launch" />
+
 </launch>
