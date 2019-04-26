@@ -16,20 +16,20 @@
  * Publishes to a pointcloud topic, line_pointcloud, containing all 3d points that are part of a line.
  */
 
-image_geometry::PinholeCameraModel cam_model;
-tf::StampedTransform transform_lidar_to_cam;
-tf::StampedTransform transform_cam_to_base;
-tf::StampedTransform transform_lidar_to_base;
-ros::Publisher _line_pointcloud_pub;
-ros::Subscriber image_sub;
-ros::Subscriber lidar_pointcloud_sub;
-sensor_msgs::CameraInfo::ConstPtr cam_info;
-cv::Mat cv_img;
-int resize_width;
-int resize_height;
-std::string line_topic;
-std::string pointcloud_topic;
-std::string lidar_topic;
+image_geometry::PinholeCameraModel g_cam_model;
+tf::StampedTransform g_transform_lidar_to_cam;
+tf::StampedTransform g_transform_cam_to_base;
+tf::StampedTransform g_transform_lidar_to_base;
+ros::Publisher g_line_pointcloud_pub;
+ros::Subscriber g_image_sub;
+ros::Subscriber g_lidar_pointcloud_sub;
+sensor_msgs::CameraInfo::ConstPtr g_cam_info;
+cv::Mat g_cv_img;
+int g_resize_width;
+int g_resize_height;
+std::string g_line_topic;
+std::string g_pointcloud_topic;
+std::string g_lidar_topic;
 
 /**
  * Finds the two nearest neighbors to the input point, constraining the nearest neighbors
@@ -41,26 +41,26 @@ std::string lidar_topic;
  * @param nearest2 the out parameter for the second nearest pixel from a different channel
  */
 
-void find_nearest_neighbors(pcl::PointXY point, const std::vector<pcl::KdTreeFLANN<pcl::PointXY>> &kdtree_list,
-                            pcl::PointXY &nearest1, pcl::PointXY &nearest2)
+void findNearestNeighbors(pcl::PointXY point, const std::vector<pcl::KdTreeFLANN<pcl::PointXY>> &kdtree_list,
+                          pcl::PointXY &nearest1, pcl::PointXY &nearest2)
 {
-  float nearest1Dist = FLT_MAX;
-  float nearest2Dist = FLT_MAX;
-  for (auto kdtree : kdtree_list)
+  float nearest_1_dist = FLT_MAX;
+  float nearest_2_dist = FLT_MAX;
+  for (const auto &kdtree : kdtree_list)
   {
     if (kdtree.getInputCloud() != nullptr)
     {
       std::vector<int> pointIdxNKNSearch(1);
       std::vector<float> pointNKNSquaredDistance(1);
       kdtree.nearestKSearch(point, 1, pointIdxNKNSearch, pointNKNSquaredDistance);
-      if (pointNKNSquaredDistance[0] < nearest1Dist)
+      if (pointNKNSquaredDistance[0] < nearest_1_dist)
       {
-        nearest1Dist = pointNKNSquaredDistance[0];
+        nearest_1_dist = pointNKNSquaredDistance[0];
         nearest1 = kdtree.getInputCloud()->points[pointIdxNKNSearch[0]];
       }
-      else if (pointNKNSquaredDistance[0] < nearest2Dist)
+      else if (pointNKNSquaredDistance[0] < nearest_2_dist)
       {
-        nearest2Dist = pointNKNSquaredDistance[0];
+        nearest_2_dist = pointNKNSquaredDistance[0];
         nearest2 = kdtree.getInputCloud()->points[pointIdxNKNSearch[0]];
       }
     }
@@ -79,8 +79,8 @@ void find_nearest_neighbors(pcl::PointXY point, const std::vector<pcl::KdTreeFLA
  * @return Interpolated z value for point
  */
 
-double interpolate_z(pcl::PointXY nearest1, pcl::PointXY nearest2, cv::Point2d point,
-                     const std::vector<std::vector<pcl::PointXYZ>> &xyz_img)
+double interpolateZ(pcl::PointXY nearest1, pcl::PointXY nearest2, cv::Point2d point,
+                    const std::vector<std::vector<pcl::PointXYZ>> &xyz_img)
 {
   cv::Point2d p0 = cv::Point2d(nearest1.x, nearest1.y);
   cv::Point2d p1 = cv::Point2d(nearest2.x, nearest2.y);
@@ -95,6 +95,28 @@ double interpolate_z(pcl::PointXY nearest1, pcl::PointXY nearest2, cv::Point2d p
 }
 
 /**
+ * Given a pixel, project it into 3D space onto the plane z=inter_z.
+ *
+ * @param inter_z Value of z for plane
+ * @param point Pixel location in xyz_img
+ * @param cv_point Pixel used to calculate projection onto plane
+ * @param xyz_img The 2D array that correlates each pixel to an x,y,z point
+ */
+
+void projectPixelToPlane(double inter_z, pcl::PointXY point, cv::Point2d cv_point,
+                         std::vector<std::vector<pcl::PointXYZ>> &xyz_img)
+{
+  cv::Point3d cv_proj_ray = g_cam_model.projectPixelTo3dRay(cv_point);
+  tf::Vector3 proj_ray = tf::Vector3(cv_proj_ray.x, cv_proj_ray.y, cv_proj_ray.z);
+  tf::Matrix3x3 rotate_matrix = g_transform_cam_to_base.getBasis();
+  tf::Vector3 translation = g_transform_cam_to_base.getOrigin();
+  tf::Vector3 trans_ray = rotate_matrix * proj_ray;
+  double scale = (inter_z - translation.getZ()) / (trans_ray.getZ());
+  xyz_img[point.y][point.x].x = trans_ray.getX() * scale + translation.getX();
+  xyz_img[point.y][point.x].y = trans_ray.getY() * scale + translation.getY();
+}
+
+/**
  * Performs nearest neighbor interpolation for the z value of a specific pixel. Then uses
  * a pinhole camera model to get a ray for each pixel. The intersection of the ray and the plane
  * of the interpolated z is then used to figure out the x and y coordinates.
@@ -103,8 +125,8 @@ double interpolate_z(pcl::PointXY nearest1, pcl::PointXY nearest2, cv::Point2d p
  * @param mapped A list of pixels that have already been mapped to x,y,z points
  * @param cloud_list A list of pointers to point clouds, one for each lidar channel
  */
-void image_interpolation(std::vector<std::vector<pcl::PointXYZ>> &xyz_img, std::vector<cv::Point2d> mapped,
-                         std::vector<pcl::PointCloud<pcl::PointXY>::Ptr> cloud_list)
+void imageInterpolation(std::vector<std::vector<pcl::PointXYZ>> &xyz_img, std::vector<cv::Point2d> mapped,
+                        std::vector<pcl::PointCloud<pcl::PointXY>::Ptr> cloud_list)
 {
   // KDtree for each lidar channel
   std::vector<pcl::KdTreeFLANN<pcl::PointXY>> kdtree_list(16);
@@ -122,87 +144,146 @@ void image_interpolation(std::vector<std::vector<pcl::PointXYZ>> &xyz_img, std::
   {
     for (unsigned int c = 0; c < xyz_img[0].size(); c++)
     {
-      if (cv_img.at<uint8_t>(r, c) == 255 &&
+      if (g_cv_img.at<uint8_t>(r, c) == 255 &&
           !(std::find(mapped.begin(), mapped.end(), cv::Point2d(c, r)) != mapped.end()))
       {
-        pcl::PointXY point = { (float)c, (float)r };
+        pcl::PointXY point = { static_cast<float>(c), static_cast<float>(r) };
         pcl::PointXY nearest1 = point;
         pcl::PointXY nearest2 = point;
-        find_nearest_neighbors(point, kdtree_list, nearest1, nearest2);
+        findNearestNeighbors(point, kdtree_list, nearest1, nearest2);
 
         cv::Point2d cv_point = cv::Point2d(c, r);
-        double inter_z = interpolate_z(nearest1, nearest2, cv_point, xyz_img);
+        double inter_z = interpolateZ(nearest1, nearest2, cv_point, xyz_img);
         xyz_img[point.y][point.x].z = inter_z;
 
-        // Find ray, and intersection of ray at z = inter_z to determine x and y.
-
-        cv::Point3d cv_proj_ray = cam_model.projectPixelTo3dRay(cv_point);
-        tf::Vector3 proj_ray = tf::Vector3(cv_proj_ray.x, cv_proj_ray.y, cv_proj_ray.z);
-        tf::Matrix3x3 rotate_matrix = transform_cam_to_base.getBasis();
-        tf::Vector3 translation = transform_cam_to_base.getOrigin();
-        tf::Vector3 trans_ray = rotate_matrix * proj_ray;
-        double scale = (inter_z - translation.getZ()) / (trans_ray.getZ());
-        xyz_img[point.y][point.x].x = trans_ray.getX() * scale + translation.getX();
-        xyz_img[point.y][point.x].y = trans_ray.getY() * scale + translation.getY();
+        projectPixelToPlane(inter_z, point, cv_point, xyz_img);
       }
     }
   }
 }
 
-void image_callback(const sensor_msgs::ImageConstPtr &msg)
+/**
+ * Checks if a given point is in the FOV of the camera. If so the points is transformed to base footprint and the
+ * mapping of lidar point to pixel is added. The lidar point is then added to a pointcloud of all other points in its
+ * ring in the FOV.
+ *
+ * @param point The given lidar point
+ * @param mapped A list of points that have been mapped to pixels in the FOV
+ * @param kdtree_cloud_list A list of pointclouds, one for each ring
+ * @param xyz_img The 2D array that correlates each pixel to an x,y,z point
+ */
+
+void checkPointInFOV(velodyne_pointcloud::PointXYZIR point, std::vector<cv::Point2d> &mapped,
+                     std::vector<pcl::PointCloud<pcl::PointXY>::Ptr> &kdtree_cloud_list,
+                     std::vector<std::vector<pcl::PointXYZ>> &xyz_img)
 {
-  cv::Mat original_img = cv_bridge::toCvCopy(msg, "mono8")->image;
-  cv::resize(original_img, cv_img, cv::Size(resize_width, resize_height), 0, 0);
+  tf::Vector3 lidar_point = tf::Vector3(point.x, point.y, point.z);
+  tf::Matrix3x3 rotate_matrix = g_transform_cam_to_base.getBasis();
+  tf::Vector3 translation = g_transform_lidar_to_cam.getOrigin();
+  tf::Vector3 transformed_point = rotate_matrix * lidar_point + translation;
+  cv::Point3d cv_point = cv::Point3d(transformed_point.getX(), transformed_point.getY(), transformed_point.getZ());
+  cv::Point2d pixel = g_cam_model.project3dToPixel(cv_point);
+  if (pixel.x >= 0 && pixel.x < g_cv_img.cols && pixel.y >= 0 && pixel.y < g_cv_img.rows)
+  {
+    mapped.emplace_back(pixel);
+    int pixel_y = pixel.y;
+    int pixel_x = pixel.x;
+    tf::Matrix3x3 rotate_to_base = g_transform_lidar_to_base.getBasis();
+    tf::Vector3 translate_to_base = g_transform_lidar_to_base.getOrigin();
+    tf::Vector3 base_lidar_point = rotate_to_base * lidar_point + translate_to_base;
+    xyz_img[pixel_y][pixel_x] =
+        pcl::PointXYZ(base_lidar_point.getX(), base_lidar_point.getY(), base_lidar_point.getZ());
+    pcl::PointXY pcl_point = { static_cast<float>(pixel_x), static_cast<float>(pixel_y) };
+    kdtree_cloud_list[point.ring]->push_back(pcl_point);
+  }
 }
 
-void lidar_pointcloud_callback(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr &msg)
+/**
+ * Looks through the global cv_img and adds the lidar point corresponding to any pixels that are lines to a pointcloud.
+ *
+ * @param line_cloud The output pointcloud
+ * @param xyz_img The 2D array that correlates each pixel to an x,y,z point
+ */
+
+void addLinesToPointcloud(pcl::PointCloud<pcl::PointXYZ> &line_cloud,
+                          const std::vector<std::vector<pcl::PointXYZ>> &xyz_img)
 {
-  std::vector<cv::Point2d> mapped;
-  std::vector<pcl::PointCloud<pcl::PointXY>::Ptr> kdtree_cloud_list(16);
-  for (int i = 0; i < 16; i++)
-  {
-    kdtree_cloud_list[i] = std::unique_ptr<pcl::PointCloud<pcl::PointXY>>(new pcl::PointCloud<pcl::PointXY>);
-  }
-  std::vector<std::vector<pcl::PointXYZ>> xyz_img(cv_img.rows, std::vector<pcl::PointXYZ>(cv_img.cols));
-  pcl::PointCloud<pcl::PointXYZ> line_cloud;
-  // Calculate which lidar points are in the fov of the camera
-  for (auto point = msg->points.begin(); point != msg->points.end(); point++)
-  {
-    tf::Vector3 lidar_point = tf::Vector3(point->x, point->y, point->z);
-    tf::Matrix3x3 rotate_matrix = transform_cam_to_base.getBasis();
-    tf::Vector3 translation = transform_lidar_to_cam.getOrigin();
-    tf::Vector3 transformed_point = rotate_matrix * lidar_point + translation;
-    cv::Point3d cv_point = cv::Point3d(transformed_point.getX(), transformed_point.getY(), transformed_point.getZ());
-    cv::Point2d pixel = cam_model.project3dToPixel(cv_point);
-    if (pixel.x >= 0 && pixel.x < cv_img.cols && pixel.y >= 0 && pixel.y < cv_img.rows)
-    {
-      mapped.push_back(pixel);
-      int pixel_y = pixel.y;
-      int pixel_x = pixel.x;
-      tf::Matrix3x3 rotate_to_base = transform_lidar_to_base.getBasis();
-      tf::Vector3 translate_to_base = transform_lidar_to_base.getOrigin();
-      tf::Vector3 base_lidar_point = rotate_to_base * lidar_point + translate_to_base;
-      xyz_img[pixel_y][pixel_x] =
-          pcl::PointXYZ(base_lidar_point.getX(), base_lidar_point.getY(), base_lidar_point.getZ());
-      pcl::PointXY pcl_point = { (float)pixel_x, (float)pixel_y };
-      kdtree_cloud_list[point->ring]->push_back(pcl_point);
-    }
-  }
-  image_interpolation(xyz_img, mapped, kdtree_cloud_list);
   for (unsigned int r = 0; r < xyz_img.size(); r++)
   {
     std::vector<pcl::PointXYZ> row = xyz_img[r];
     for (unsigned int c = 0; c < row.size(); c++)
     {
-      if (cv_img.at<uint8_t>(r, c) == 255)
+      if (g_cv_img.at<uint8_t>(r, c) == 255)
       {
         pcl::PointXYZ point = row[c];
         line_cloud.push_back(point);
       }
     }
   }
+}
+
+/**
+ * Get transforms needed for camera projections between the camera and lidar and to eventually make everything in base
+ * footprint.
+ */
+void getTransforms()
+{
+  tf::TransformListener tf_listener;
+  if (tf_listener.waitForTransform("/center_cam_optical", "/lidar", ros::Time(0), ros::Duration(3.0)))
+  {
+    tf_listener.lookupTransform("/center_cam_optical", "/lidar", ros::Time(0), g_transform_lidar_to_cam);
+  }
+  else
+  {
+    ROS_ERROR_STREAM("\n\nfailed to find lidar to camera transform\n\n");
+  }
+  if (tf_listener.waitForTransform("/base_footprint", "/center_cam_optical", ros::Time(0), ros::Duration(3.0)))
+  {
+    tf_listener.lookupTransform("/base_footprint", "/center_cam_optical", ros::Time(0), g_transform_cam_to_base);
+  }
+  else
+  {
+    ROS_ERROR_STREAM("\n\nfailed to find camera to base footprint transform\n\n");
+  }
+  if (tf_listener.waitForTransform("/base_footprint", "/lidar", ros::Time(0), ros::Duration(3.0)))
+  {
+    tf_listener.lookupTransform("/base_footprint", "/lidar", ros::Time(0), g_transform_lidar_to_base);
+  }
+  else
+  {
+    ROS_ERROR_STREAM("\n\nfailed to find lidar to base footprint transform\n\n");
+  }
+}
+
+void imageCallback(const sensor_msgs::ImageConstPtr &msg)
+{
+  cv::Mat original_img = cv_bridge::toCvCopy(msg, "mono8")->image;
+  cv::resize(original_img, g_cv_img, cv::Size(g_resize_width, g_resize_height), 0, 0);
+}
+
+void lidarPointcloudCallback(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr &msg)
+{
+  if (!g_cv_img.rows)
+  {
+    ROS_INFO_STREAM("Waiting for segmented image \n");
+    return;
+  }
+  std::vector<cv::Point2d> mapped;
+  std::vector<pcl::PointCloud<pcl::PointXY>::Ptr> kdtree_cloud_list(16);
+  for (int i = 0; i < 16; i++)
+  {
+    kdtree_cloud_list[i] = std::unique_ptr<pcl::PointCloud<pcl::PointXY>>(new pcl::PointCloud<pcl::PointXY>);
+  }
+  std::vector<std::vector<pcl::PointXYZ>> xyz_img(g_cv_img.rows, std::vector<pcl::PointXYZ>(g_cv_img.cols));
+  pcl::PointCloud<pcl::PointXYZ> line_cloud;
+  for (const auto &point : msg->points)
+  {
+    checkPointInFOV(point, mapped, kdtree_cloud_list, xyz_img);
+  }
+  imageInterpolation(xyz_img, mapped, kdtree_cloud_list);
+  addLinesToPointcloud(line_cloud, xyz_img);
   line_cloud.header.frame_id = "base_footprint";
-  _line_pointcloud_pub.publish(line_cloud);
+  g_line_pointcloud_pub.publish(line_cloud);
 }
 
 int main(int argc, char **argv)
@@ -212,65 +293,50 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
   ros::NodeHandle pNh("~");
 
-  igvc::getParam(pNh, "resize_width", resize_width);
-  igvc::getParam(pNh, "resize_height", resize_height);
-  igvc::getParam(pNh, "line_topic", line_topic);
-  igvc::getParam(pNh, "pointcloud_topic", pointcloud_topic);
-  igvc::getParam(pNh, "lidar_topic", lidar_topic);
+  igvc::getParam(pNh, "resize_width", g_resize_width);
+  igvc::getParam(pNh, "resize_height", g_resize_height);
+  igvc::getParam(pNh, "line_topic", g_line_topic);
+  igvc::getParam(pNh, "pointcloud_topic", g_pointcloud_topic);
+  igvc::getParam(pNh, "lidar_topic", g_lidar_topic);
 
-  cam_info = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("center_cam/camera_info", ros::Duration(5));
-  if (cam_info.get() != nullptr)
+  g_cam_info = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("center_cam/camera_info", ros::Duration(5));
+  if (g_cam_info.get() != nullptr)
   {
-    sensor_msgs::CameraInfo new_cam_info(*cam_info);
+    sensor_msgs::CameraInfo new_g_cam_info(*g_cam_info);
     // Set up pinhole camera model with optionally modified width and height
-    float waf = float(resize_width) / cam_info->width;
-    float haf = float(resize_height) / cam_info->height;
-    new_cam_info.height = resize_height;
-    new_cam_info.width = resize_width;
-    boost::array<double, 9> new_K = {cam_info->K[0] * waf,  0.,                   cam_info->K[2] * waf,
-                                      0.,                   cam_info->K[4] * haf, cam_info->K[5] * haf,
-                                      0.,                   0.,                   1.};
+    float waf = float(g_resize_width) / g_cam_info->width;
+    float haf = float(g_resize_height) / g_cam_info->height;
+    new_g_cam_info.height = g_resize_height;
+    new_g_cam_info.width = g_resize_width;
+    boost::array<double, 9> new_K = {
+      g_cam_info->K[0] * waf, 0., g_cam_info->K[2] * waf, 0., g_cam_info->K[4] * haf, g_cam_info->K[5] * haf, 0., 0., 1.
+    };
 
-    boost::array<double, 12> new_P = {cam_info->P[0] * waf, 0.,                   cam_info->P[2] * waf, 0.,
-                                      0.,                   cam_info->P[5] * haf, cam_info->P[6] * haf, 0.,
-                                      0.,                   0.,                   1.,                   0.};
-    new_cam_info.K = new_K;
-    new_cam_info.P = new_P;
-    cam_model = image_geometry::PinholeCameraModel();
-    cam_model.fromCameraInfo(new_cam_info);
+    boost::array<double, 12> new_P = { g_cam_info->P[0] * waf,
+                                       0.,
+                                       g_cam_info->P[2] * waf,
+                                       0.,
+                                       0.,
+                                       g_cam_info->P[5] * haf,
+                                       g_cam_info->P[6] * haf,
+                                       0.,
+                                       0.,
+                                       0.,
+                                       1.,
+                                       0. };
+    new_g_cam_info.K = new_K;
+    new_g_cam_info.P = new_P;
+    g_cam_model = image_geometry::PinholeCameraModel();
+    g_cam_model.fromCameraInfo(new_g_cam_info);
 
-    tf::TransformListener tf_listener;
-    if (tf_listener.waitForTransform("/center_cam_optical", "/lidar", ros::Time(0), ros::Duration(3.0)))
-    {
-      tf_listener.lookupTransform("/center_cam_optical", "/lidar", ros::Time(0), transform_lidar_to_cam);
-    }
-    else
-    {
-      ROS_ERROR_STREAM("\n\nfailed to find lidar to camera transform\n\n");
-    }
-    if (tf_listener.waitForTransform("/base_footprint", "/center_cam_optical", ros::Time(0), ros::Duration(3.0)))
-    {
-      tf_listener.lookupTransform("/base_footprint", "/center_cam_optical", ros::Time(0), transform_cam_to_base);
-    }
-    else
-    {
-      ROS_ERROR_STREAM("\n\nfailed to find camera to base footprint transform\n\n");
-    }
-    if (tf_listener.waitForTransform("/base_footprint", "/lidar", ros::Time(0), ros::Duration(3.0)))
-    {
-      tf_listener.lookupTransform("/base_footprint", "/lidar", ros::Time(0), transform_lidar_to_base);
-    }
-    else
-    {
-      ROS_ERROR_STREAM("\n\nfailed to find lidar to base footprint transform\n\n");
-    }
+    getTransforms();
   }
   else
   {
     ROS_ERROR_STREAM("\n\nfailed to find camera info\n\n");
   }
-  image_sub = n.subscribe(line_topic, 1, image_callback);
-  lidar_pointcloud_sub = n.subscribe(lidar_topic, 1, lidar_pointcloud_callback);
-  _line_pointcloud_pub = n.advertise<pcl::PointCloud<pcl::PointXYZ>>(pointcloud_topic, 1);
+  g_image_sub = n.subscribe(g_line_topic, 1, imageCallback);
+  g_lidar_pointcloud_sub = n.subscribe(g_lidar_topic, 1, lidarPointcloudCallback);
+  g_line_pointcloud_pub = n.advertise<pcl::PointCloud<pcl::PointXYZ>>(g_pointcloud_topic, 1);
   ros::spin();
 }
