@@ -35,6 +35,7 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   igvc::getParam(pNh, "filters/empty_image/blur/kernel", process_image_options_.blur.kernel);
   igvc::getParam(pNh, "filters/empty_image/blur/sigma", process_image_options_.blur.sigma);
   igvc::getParam(pNh, "filters/empty_image/threshold", process_image_options_.threshold.threshold);
+  igvc::getParam(pNh, "filters/empty_image/dilation_size", process_image_options_.dilation_size);
 
   igvc::param(pNh, "filters/behind/enabled", behind_filter_options_.enabled, false);
   igvc::getParam(pNh, "filters/behind/filter_angle", behind_filter_options_.angle);
@@ -54,7 +55,11 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   octomapper_->create_octree(camera_map_pair_);
 
   camera_line_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_lines", 1);
-  camera_projection_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection", 1);
+
+  camera_projection_pub_left_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_left", 1);
+  camera_projection_pub_center_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_center", 1);
+  camera_projection_pub_right_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/camera_projection_right", 1);
+
   filtered_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/filtered_pc", 1);
   empty_pc_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/empty_pc", 1);
   ground_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/ground", 1);
@@ -147,24 +152,38 @@ void Mapper::insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstP
 }
 
 void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_odom,
-                                  const tf::Transform& camera_to_base, const ros::Time& stamp)
+                                  const tf::Transform& camera_to_base, const ros::Time& stamp, Camera camera)
 {
-  PointCloud projected_pc;
-  processImageFreeSpace(image);
-
-  if (!camera_model_initialized_ && !use_ground_filter_)
+  if (camera_model_map_.find(camera) == camera_model_map_.end() && !camera_model_initialized_ && !use_ground_filter_)
   {
     ROS_WARN_STREAM_THROTTLE(1, "camera model not initialized or not using ground filter");
     return;
   }
-  else
-  {
-    MapUtils::projectToPlane(projected_pc, ground_plane_, image, camera_model_, camera_to_base);
-  }
+
+  PointCloud projected_pc;
+  processImageFreeSpace(image);
+
+  image_geometry::PinholeCameraModel model = camera_model_map_.at(camera);
+
+  MapUtils::projectToPlane(projected_pc, ground_plane_, image, model, camera_to_base);
 
   pcl_ros::transformPointCloud(projected_pc, projected_pc, base_to_odom);
-  MapUtils::debugPublishPointCloud(camera_projection_pub_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
-                                   debug_);
+  MapUtils::projectTo2D(projected_pc);
+  if (static_cast<int>(camera) == 0)
+  {
+    MapUtils::debugPublishPointCloud(camera_projection_pub_left_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
+                                     debug_);
+  }
+  else if (static_cast<int>(camera) == 1)
+  {
+    MapUtils::debugPublishPointCloud(camera_projection_pub_center_, projected_pc, pcl_conversions::toPCL(stamp),
+                                     "/odom", debug_);
+  }
+  else
+  {
+    MapUtils::debugPublishPointCloud(camera_projection_pub_right_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
+                                     debug_);
+  }
 
   octomapper_->insertPoints(camera_map_pair_, projected_pc, false, camera_probability_model_);
 
@@ -176,6 +195,11 @@ void Mapper::processImageFreeSpace(cv::Mat& image) const
   cv::GaussianBlur(image, image, cv::Size(process_image_options_.blur.kernel, process_image_options_.blur.kernel),
                    process_image_options_.blur.sigma, process_image_options_.blur.sigma);
   cv::threshold(image, image, process_image_options_.threshold.threshold, UCHAR_MAX, cv::THRESH_BINARY);
+  cv::Mat kernel = cv::getStructuringElement(
+      cv::MORPH_RECT,
+      cv::Size(2 * process_image_options_.dilation_size + 1, 2 * process_image_options_.dilation_size + 1),
+      cv::Point(process_image_options_.dilation_size, process_image_options_.dilation_size));
+  cv::dilate(image, image, kernel);
 }
 
 std::optional<cv::Mat> Mapper::getMap()
@@ -205,11 +229,10 @@ std::optional<cv::Mat> Mapper::getMap()
   return blurred_map;
 }
 
-void Mapper::setProjectionModel(const image_geometry::PinholeCameraModel& camera_model)
+void Mapper::setProjectionModel(const image_geometry::PinholeCameraModel& camera_model, Camera camera)
 {
-  camera_model_ = camera_model;
-  camera_model_initialized_ = true;
-  ROS_INFO_STREAM_THROTTLE(1, "Projection Model set!");
+  camera_model_map_.insert(std::make_pair(camera, camera_model));
+  ROS_INFO_STREAM_THROTTLE(1, "Projection Model set for camera " << static_cast<int>(camera));
 }
 
 /**
