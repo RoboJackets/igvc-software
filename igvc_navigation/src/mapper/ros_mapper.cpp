@@ -319,6 +319,12 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
     ROS_INFO_STREAM_THROTTLE(1, "camera info for " << static_cast<int>(camera) << " still not found...");
     return;
   }
+  if (segmented->width != resize_width_ || segmented->height != resize_height_)
+  {
+    ROS_ERROR_STREAM_THROTTLE(5, "Segmented image dimensions ("
+                                     << segmented->width << ", " << segmented->height << ") differ from params: ("
+                                     << resize_width_ << ", " << resize_height_ << "). Projection will be incorrect.");
+  }
   std::string frame;
   switch (camera)
   {

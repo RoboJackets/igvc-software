@@ -195,11 +195,11 @@ void Mapper::processImageFreeSpace(cv::Mat& image) const
   cv::GaussianBlur(image, image, cv::Size(process_image_options_.blur.kernel, process_image_options_.blur.kernel),
                    process_image_options_.blur.sigma, process_image_options_.blur.sigma);
   cv::threshold(image, image, process_image_options_.threshold.threshold, UCHAR_MAX, cv::THRESH_BINARY);
-  cv::Mat element = cv::getStructuringElement(
+  cv::Mat kernel = cv::getStructuringElement(
       cv::MORPH_RECT,
       cv::Size(2 * process_image_options_.dilation_size + 1, 2 * process_image_options_.dilation_size + 1),
       cv::Point(process_image_options_.dilation_size, process_image_options_.dilation_size));
-  cv::dilate(image, image, element);
+  cv::dilate(image, image, kernel);
 }
 
 std::optional<cv::Mat> Mapper::getMap()
