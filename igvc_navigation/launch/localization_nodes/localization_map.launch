@@ -30,21 +30,21 @@
         <!-- what we're fusing from these sources - see "order of fused parameters above"-->
         <rosparam param="odom0_config">[false, false, false,
                                         false, false, false,
-                                        false, false, false,
+                                        true, true, false,
                                         false, false, false,
                                         false, false, false]</rosparam>
 
-        <rosparam param="odom1_config">[true,  true,  false,
-                                        false, false, false,
-                                        false, false, false,
-                                        false, false, false,
-                                        false, false, false]</rosparam>
+         <rosparam param="odom1_config">[true, true, false,
+                                         false, false, false,
+                                         false, false, false,
+                                         false, false, false,
+                                         false, false, false]</rosparam>
 
         <rosparam param="imu0_config">[false, false, false,
                                        false, false, false,
                                        false, false, false,
-                                       false, false, true,
-                                       true,  false, false]</rosparam>
+                                       false,  false, true,
+                                       true,  false,  false]</rosparam>
 
         <param name="odom0_differential" value="false"/>
         <param name="odom1_differential" value="false"/>
@@ -54,56 +54,51 @@
         <param name="odom1_relative" value="false" />
         <param name="imu0_relative" value="false" />
 
-        <param name="imu0_remove_gravitational_acceleration" value="true" />
+        <param name="imu0_remove_gravitational_acceleration" value="false" />
 
         <!-- publish diagnostic messages to the /diagnostics topic -->
         <param name="print_diagnostics" value="true" />
-
-        <!-- Useful if our frequency parameter is much lower than our sensor frequency -->
-        <param name="odom0_queue_size" value="10" />
-        <param name="imu0_queue_size" value="10" />
 
         <param name="debug" value="false" />
         <param name="debug_out_file" value="debug_ekf_localization_odom.txt" />
 
         <!-- hand-tuned -->
         <rosparam param="process_noise_covariance">
-          [.6,   0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-           0,    .6,   0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-           0,    0,    .1,   0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-           0,    0,    0,    .1,   0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-           0,    0,    0,    0,    .1,   0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
-           0,    0,    0,    0,    0,    .3,   0,     0,     0,    0,    0,    0,    0,    0,    0,
-           0,    0,    0,    0,    0,    0,    .1,    0,     0,    0,    0,    0,    0,    0,    0,
-           0,    0,    0,    0,    0,    0,    0,     .1,    0,    0,    0,    0,    0,    0,    0,
-           0,    0,    0,    0,    0,    0,    0,     0,    .1,    0,    0,    0,    0,    0,    0,
-           0,    0,    0,    0,    0,    0,    0,     0,     0,   .1,    0,    0,    0,    0,    0,
-           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,   .1,    0,    0,    0,    0,
-           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,   .5,    0,    0,    0,
-           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,   .1,    0,    0,
-           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,   .1,    0,
-           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    .1]
+           [.6,   0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    .6,   0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    .1,   0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    .1,   0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    .1,   0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    .3,   0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    .1,    0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     .1,    0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,    .1,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,   .1,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,   .1,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,   .5,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,   .1,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,   .1,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    .1]
         </rosparam>
 
         <!-- set initial estimate covariance for things we're measuring high -->
         <rosparam param="initial_estimate_covariance">
-          [1e-9,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-           0,       1e-9,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-           0,       0,    1e-9,   0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-           0,       0,    0,      1e-9,   0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-           0,       0,    0,      0,      1e-9,   0,     0,      0,      0,     0,     0,     0,     0,     0,     0,
-           0,       0,    0,      0,      0,      1,  0,      0,      0,     0,     0,     0,     0,     0,     0,
-           0,       0,    0,      0,      0,      0,     1e-9,   0,      0,     0,     0,     0,     0,     0,     0,
-           0,       0,    0,      0,      0,      0,     0,      1e-9,   0,     0,     0,     0,     0,     0,     0,
-           0,       0,    0,      0,      0,      0,     0,      0,      1e-9,  0,     0,     0,     0,     0,     0,
-           0,       0,    0,      0,      0,      0,     0,      0,      0,     1e-9,  0,     0,     0,     0,     0,
-           0,       0,    0,      0,      0,      0,     0,      0,      0,     0,     1e-9,  0,     0,     0,     0,
-           0,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     1,     0,     0,     0,
-           0,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     1,     0,     0,
-           0,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     1e-9,  0,
-           0,       0,    0,      0,      0,      0,     0,      0,      0,     0,     0,     0,     0,     0,     1e-9]
+           [1,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    1,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    1e-6,   0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    1e-6,   0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    1e-6,   0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    5,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    1e-6,    0,     0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     1e-6,    0,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,    1e-6,    0,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,   1e-6,    0,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,   1e-6,    0,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    1,    0,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,   1e-6,    0,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,   1e-6,    0,
+            0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    1e-6]
         </rosparam>
-
         <remap from="/odometry/filtered" to="/odometry/filtered_map" />
     </node>
 </launch>

@@ -152,6 +152,7 @@ void YostLabDriver::run()
 
   int line_num_ = 0;
   sensor_msgs::Imu imu_msg_;
+  imu_msg_.header.seq=0;
   std::vector<double> parsed_val_;
 
   // orientation correction matrices in 3x3 row-major format and quaternion
@@ -178,6 +179,7 @@ void YostLabDriver::run()
       {
         line_num_ = 0;
         imu_msg_.header.stamp = ros::Time::now();
+        imu_msg_.header.seq++;
         imu_msg_.header.frame_id = frame_id_;
 
         // construct quaternion with (x,y,z,w)

@@ -14,13 +14,16 @@
       -->
       <param name="magnetic_declination_radians" value="0"/>
 
+      
+
       <!-- Most IMU's report 0 as facing north. REP103 expects 0 when facing east. This param corrects for that -->
-      <param name="yaw_offset" value="1.5707963"/>
+      <!-- TODO: uncomment after testing -->
+      <!-- <param name="yaw_offset" value="1.5707963"/> -->
 
       <!-- sets altitude to 0 -->
       <param name="zero_altitude" value="true"/>
 
-      <!-- broadcasts the transform world_fram->utm -->
+      <!-- broadcasts the transform world_frame->utm -->
       <param name="broadcast_utm_transform" value="true"/>
 
       <!-- publishes the lat and long of the robot position -->
@@ -33,11 +36,10 @@
       <param name="wait_for_datum" value="false" />
 
       <!-- input remapping -->
-      <remap from="/odometry/filtered" to="/odometry/filtered_map" /> <!-- provides abolute (earth-referenced) heading -->
-      <remap from="/imu/data" to="/magnetometer"/>
+      <remap from="/odometry/filtered" to="/odometry/filtered_map" />
+      <remap from="/imu/data" to="/magnetometer"/> <!-- provides abolute (earth-referenced) heading -->
       <remap from="/gps/fix" to="/fix" /> <!-- provides raw gps coordinates -->
 
       <!-- can do output remapping also -->
-
     </node>
 </launch>

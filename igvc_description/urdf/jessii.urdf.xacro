@@ -17,7 +17,7 @@
   <xacro:property name="drive_tire_diameter" value="0.305"/>
   <xacro:property name="drive_tire_width" value="0.0762"/>
   <!-- TODO set proper mass values -->
-  <xacro:property name="drive_wheel_mass" value="5.0"/>
+  <xacro:property name="drive_wheel_mass" value="3.62874"/>
 
   <xacro:property name="wheelbase" value="0.714333"/>
 
@@ -608,7 +608,7 @@
       <serviceName>/magnetometer/calibrate</serviceName>
       <updateRate>200.0</updateRate>
       <bodyName>magnetometer</bodyName>
-      <frameId>magnetometer</frameId>
+      <frameId>imu</frameId>
       <topicName>/magnetometer</topicName>
       <rpyOffset>0 0 0</rpyOffset>
       <xyzOffset>0 0 0</xyzOffset>
