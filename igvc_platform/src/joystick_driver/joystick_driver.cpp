@@ -163,11 +163,11 @@ void JoystickDriver::controlLoop(const ros::TimerEvent &)
     handleSmoothControl(joystick_);
   }
   // Toggle control mode
-  if (joystick_->buttons[joy_map_.a])
+  if (joystick_->buttons[joy_map_.a_button])
   {
     a_clicked_ = true;
   }
-  if (a_clicked_ && !joystick_->buttons[joy_map_.a])
+  if (a_clicked_ && !joystick_->buttons[joy_map_.a_button])
   {
     if (control_style_ == ControlStyle::direction_velocity_control)
     {
@@ -269,11 +269,11 @@ void JoystickDriver::processAxes(const sensor_msgs::JoyConstPtr &joystick)
 void JoystickDriver::handleDirectionVelocityControl(const sensor_msgs::JoyConstPtr &joystick)
 {
   processAxes(joystick);
-  if (joystick->buttons[joy_map_.rb])
+  if (joystick->buttons[joy_map_.rb_button])
   {
     direction_velocity_config_.max_velocity += direction_velocity_config_.velocity_increment;
   }
-  if (joystick->buttons[joy_map_.lb])
+  if (joystick->buttons[joy_map_.lb_button])
   {
     direction_velocity_config_.max_velocity -= direction_velocity_config_.velocity_increment;
   }
@@ -326,11 +326,11 @@ void JoystickDriver::handleDirectionVelocityControl(const sensor_msgs::JoyConstP
 
 void JoystickDriver::handleTankControl(const sensor_msgs::JoyConstPtr &joystick)
 {
-  if (joystick->buttons[joy_map_.rb])
+  if (joystick->buttons[joy_map_.rb_button])
   {
     tank_control_config_.max_velocity += tank_control_config_.velocity_increment;
   }
-  if (joystick->buttons[joy_map_.lb])
+  if (joystick->buttons[joy_map_.lb_button])
   {
     tank_control_config_.max_velocity -= tank_control_config_.velocity_increment;
   }
@@ -369,22 +369,22 @@ void JoystickDriver::handleSmoothControl(const sensor_msgs::JoyConstPtr &joystic
   }
 
   // 90 degree anticlockwise turn
-  if (!rb_clicked_ && joystick->buttons[joy_map_.rb])
+  if (!rb_clicked_ && joystick->buttons[joy_map_.rb_button])
   {
     rb_clicked_ = true;
     smooth_control_config_.camera -= M_PI_2;
   }
-  rb_clicked_ = joystick->buttons[joy_map_.rb];
+  rb_clicked_ = joystick->buttons[joy_map_.rb_button];
   // 90 degree clockwise turn
-  if (!lb_clicked_ && joystick->buttons[joy_map_.lb])
+  if (!lb_clicked_ && joystick->buttons[joy_map_.lb_button])
   {
     lb_clicked_ = true;
     smooth_control_config_.camera += M_PI_2;
   }
-  lb_clicked_ = joystick->buttons[joy_map_.lb];
+  lb_clicked_ = joystick->buttons[joy_map_.lb_button];
 
   // Center camera
-  if (joystick->buttons[joy_map_.b])
+  if (joystick->buttons[joy_map_.b_button])
   {
     smooth_control_config_.camera = getYaw(imu_);
   }
