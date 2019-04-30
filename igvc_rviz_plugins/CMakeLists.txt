@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.9.0)
 project(igvc_rviz_plugins)
 
-SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD 17)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -9,7 +9,23 @@ find_package(catkin REQUIRED COMPONENTS
   igvc_msgs
 )
 
-find_package(Qt5Widgets REQUIRED)
+set(CMAKE_AUTOMOC ON)
+
+if(rviz_QT_VERSION VERSION_LESS "5")
+    message(STATUS "Using Qt4 based on the rviz_QT_VERSION: ${rviz_QT_VERSION}")
+    find_package(Qt4 ${rviz_QT_VERSION} EXACT REQUIRED QtCore QtGui)
+    ## pull in all required include dirs, define QT_LIBRARIES, etc.
+    include(${QT_USE_FILE})
+else()
+    message(STATUS "Using Qt5 based on the rviz_QT_VERSION: ${rviz_QT_VERSION}")
+    find_package(Qt5 ${rviz_QT_VERSION} EXACT REQUIRED Core Widgets)
+    ## make target_link_libraries(${QT_LIBRARIES}) pull in all required dependencies
+    set(QT_LIBRARIES Qt5::Widgets)
+endif()
+add_definitions(-DQT_NO_KEYWORDS)
+
+find_package(Boost REQUIRED COMPONENTS container)
+
 
 ###################################
 ## catkin specific configuration ##
@@ -24,47 +40,30 @@ catkin_package(
 ## Build ##
 ###########
 
-
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
 
-set (rviz_plugins_SRCS
-        src/igvc_rviz_plugins/bat_panel.cpp
-        src/igvc_rviz_plugins/eStop_panel.cpp
-        src/igvc_rviz_plugins/example_panel.cpp
-        src/igvc_rviz_plugins/launch_panel.cpp
-        src/igvc_rviz_plugins/my_thread.cpp
-        src/igvc_rviz_plugins/node_panel.cpp
-        src/igvc_rviz_plugins/num_button.cpp
-        src/igvc_rviz_plugins/sensor_panel.cpp
-        src/igvc_rviz_plugins/speedometer.cpp
-        src/igvc_rviz_plugins/speed_panel.cpp
-        src/igvc_rviz_plugins/time_panel.cpp
-        src/igvc_rviz_plugins/waypoint_panel.cpp
-)
+link_directories(${catkin_LIBRARY_DIRS})
 
-set (rviz_plugins_HDRS
-        include/igvc_rviz_plugins/bat_panel.h
-        include/igvc_rviz_plugins/eStop_panel.h
-        include/igvc_rviz_plugins/example_panel.h
-        include/igvc_rviz_plugins/launch_panel.h
-        include/igvc_rviz_plugins/my_thread.h
-        include/igvc_rviz_plugins/node_panel.h
-        include/igvc_rviz_plugins/num_button.h
-        include/igvc_rviz_plugins/sensor_panel.h
-        include/igvc_rviz_plugins/speedometer.h
-        include/igvc_rviz_plugins/speed_panel.h
-        include/igvc_rviz_plugins/time_panel.h
-        include/igvc_rviz_plugins/waypoint_panel.h
-)
+#add_subdirectory(src/imu_viz)
 
-qt5_wrap_cpp(rviz_plugins_MOCS ${rviz_plugins_HDRS})
+set(SRC_FILES
+    src/imu_viz/imu_display.cpp
+    src/imu_viz/imu_visual.cpp
+    include/imu_viz/imu_display.h
+    include/imu_viz/imu_visual.h
+    )
 
-add_library(${PROJECT_NAME} ${rviz_plugins_SRCS} ${rviz_plugins_MOCS})
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} Qt5::Widgets)
+add_library(${PROJECT_NAME} ${SRC_FILES})
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+#
+#add_library(${PROJECT_NAME} ${rviz_plugins_SRCS} ${rviz_plugins_MOCS})
+#target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} Qt5::Widgets)
+#add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

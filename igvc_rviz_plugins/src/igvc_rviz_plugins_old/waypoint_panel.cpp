@@ -1,6 +1,6 @@
 #define _USE_MATH_DEFINES
 
-#include <igvc_rviz_plugins/waypoint_panel.h>
+#include <igvc_rviz_plugins_old/waypoint_panel.h>
 #include <pluginlib/class_list_macros.h>
 #include <tf/LinearMath/Matrix3x3.h>
 #include <QVBoxLayout>
@@ -53,6 +53,6 @@ void WaypointPanel::robot_position_callback(const nav_msgs::OdometryConstPtr &ms
 
   label->setText(text.c_str());
 }
-}  // namespace igvc_rviz_plugins
+}  // namespace igvc_rviz_plugins_old
 
 PLUGINLIB_EXPORT_CLASS(igvc_rviz_plugins::WaypointPanel, rviz::Panel)
