@@ -57,7 +57,8 @@ struct Axes
   double right_y;
 };
 
-struct JoyMap {
+struct JoyMap
+{
   int a_button = 0;
   int b_button = 1;
   int x_button = 2;
