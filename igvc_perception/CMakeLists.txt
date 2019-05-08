@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   laser_geometry
   tf
   pcl_ros
+  igvc_utils
 )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -167,9 +168,10 @@ include_directories(
 #############
 
 if(CATKIN_ENABLE_TESTING)
-    find_package(rostest REQUIRED)
-    add_subdirectory(src/tests)
-endif()
+  find_package(rostest REQUIRED)
+  add_subdirectory(src/tests)
+endif ()
 
 
 add_subdirectory(src/filter_lidar)
+add_subdirectory(src/projection)

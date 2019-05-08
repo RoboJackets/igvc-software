@@ -37,6 +37,12 @@
 */.idea/
 /.idea/
 
+#VSCode
+.vscode
+
+# CMake
+*/cmake-build-*/
+
 #Camera Calibration
 /sandbox/camera_pose_estimation/CMakeFiles
 /sandbox/camera_pose_estimation/CMakeCache.txt
@@ -46,3 +52,8 @@
 
 #CNN models
 /sandbox/models/
+
+#generated textures
+/igvc_gazebo/scripts/gen
+#pyc
+*.pyc

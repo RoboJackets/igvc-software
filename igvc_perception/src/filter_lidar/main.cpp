@@ -2,6 +2,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
+#include <igvc_utils/NodeUtils.hpp>
 
 ros::Publisher _pointcloud_pub;
 
@@ -36,12 +37,12 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  pNh.getParam("x_offset", x_offset);
-  pNh.getParam("y_offset", y_offset);
-  pNh.getParam("x_size", x_size);
-  pNh.getParam("y_size", y_size);
-  pNh.getParam("max_dist", max_dist);
-  pNh.getParam("back_buffer", back_buffer);
+  igvc::getParam(pNh, "x_offset", x_offset);
+  igvc::getParam(pNh, "y_offset", y_offset);
+  igvc::getParam(pNh, "x_size", x_size);
+  igvc::getParam(pNh, "y_size", y_size);
+  igvc::getParam(pNh, "max_dist", max_dist);
+  igvc::getParam(pNh, "back_buffer", back_buffer);
 
   _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/scan/pointcloud", 1);
 
