@@ -9,6 +9,7 @@ catkin_package()
 
 find_package(Eigen3 REQUIRED)
 find_package(PCL REQUIRED filters)
+find_package(OpenCV REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   roscpp
@@ -16,6 +17,10 @@ find_package(catkin REQUIRED COMPONENTS
   igvc_msgs
   laser_geometry
   pcl_ros
+  igvc_utils
+  cv_bridge
+  image_transport
+  robot_localization
 )
 
 include_directories(
@@ -36,3 +41,5 @@ install(DIRECTORY config/
 
 add_subdirectory(nodes/control)
 add_subdirectory(nodes/scan_to_pointcloud)
+add_subdirectory(nodes/ground_truth)
+add_subdirectory(nodes/sim_color_detector)

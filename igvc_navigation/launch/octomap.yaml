@@ -1,0 +1,95 @@
+octree:
+    resolution: 0.2 # width & length of each grid cell in m
+    clamping:
+        max: 0.95 # Value of octree considered 100% occupied stable
+        min: 0.05 # Value of octree considered 0% occupied stable
+# P(m | z) where m and z are either miss or hit, with m denoting that the grid in the map is occupied / not occupied, and z
+# denoting that the sensor registered a hit / miss. So prob_miss: 0.2 means that I'm 20% confident a miss is a miss
+probability_model:
+    lidar:
+        scan: # Hit: points registered by the lidar scan, Miss: ray between the lidar and the hit points
+            prob_miss: 0.55
+            prob_hit: 0.9
+        ground:
+            prob_miss: 0.6
+        free_space: # Rays that are not detected by the lidar to have occupied points along them
+            prob_miss: 0.52
+    camera:
+        prob_miss: 0.5001
+        prob_hit: 0.9
+sensor_model:
+    max_range: 5
+    angular_resolution: 0.01
+filters:
+    behind: # Filters points in a "filter_angle" cone behind the robot
+        enabled: true
+        filter_angle: 2
+        distance: 3
+    empty: # Filters rays in a start_angle -> end_angle cone in front of the robot if not picked up by the lidar
+        enabled: true
+        start_angle: -0.5 #Radians
+        end_angle: 0.5
+        miss_cast_distance: 5
+        max_range: 5
+    empty_image: # Blur and threshold for determining which points in the segmented image are empty space
+        blur:
+            kernel: 17
+            sigma: 11
+        threshold: 0.9
+        dilation_size: 250
+    combined_map: # Blur amount when combining the line and lidar map
+        blur:
+            kernel: 3
+    ground_filter:
+        enable: true
+        ransac:
+            iterations: 400
+            distance_threshold: 0.1
+            eps_angle: 0.5
+        fallback:
+            plane_distance: 0.04 # +-m from z=0
+map:
+    # In units of meters, not cells
+    # width of grid = width / resolution
+    length: 200
+    width: 200
+    start_x: 100
+    start_y: 100
+    log_odds_default: 0
+segmented_free_space:
+    kernel_size: 3
+    std_dev: 3
+    threshold: 127 #0 - 255
+topics:
+    lidar: "/velodyne_points"
+    line_segmentation:
+        left: "/left_cam/detected_lines"
+        center: "/center_cam/detected_lines"
+        right: "/right_cam/detected_lines"
+    projected_line_pc:
+        left: "/semantic_segmentation_cloud/left_cam"
+        center: "/semantic_segmentation_cloud/center_cam"
+        right: "/semantic_segmentation_cloud/right_cam"
+    camera_info:
+        left: "/left_cam/camera_info"
+        center: "/center_cam/camera_info"
+        right: "/right_cam/camera_info"
+frames:
+    camera:
+        left: "/left_cam_optical"
+        center: "/center_cam_optical"
+        right: "/right_cam_optical"
+node:
+    debug: true
+    use_lines: true
+    camera:
+        left:
+            enable: true
+        center:
+            enable: true
+        right:
+            enable: true
+    transform_max_wait_time: 1
+cameras:
+    resize_width: 400 # pixels
+    resize_height: 400

@@ -1,0 +1,14 @@
+<launch>
+    <!-- Map Node -->
+    <node name="mapper" pkg="igvc_navigation" type="mapper" output="screen">
+<!--        <rosparam command="load" file="$(find igvc_navigation)/launch/octomap.yaml"/>-->
+        <rosparam command="load" file="$(find igvc_navigation)/launch/octomap_sim.yaml"/>
+    </node>
+
+    <arg name="plot_rviz" default="false"/>
+
+    <group if="$(arg plot_rviz)">
+        <node name="jessii_rviz" pkg="rviz" type="rviz" args="-d $(find igvc_rviz_plugins)/configs/jessii_conf.rviz"/>
+    </group>
+
+</launch>
