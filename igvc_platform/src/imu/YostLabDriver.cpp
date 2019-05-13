@@ -8,6 +8,7 @@ YostLabDriver::YostLabDriver(ros::NodeHandle& nh_, ros::NodeHandle& priv_nh_)
   // use identity matrix as default orientation correction
   igvc::param(this->yostlab_priv_nh_, "imu_orientation_correction", this->imu_orientation_correction_,
               std::vector<double>{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
+  igvc::param(yostlab_priv_nh_, "orientation_rotation", orientation_rotation_, 0.0);
   igvc::getParam(this->yostlab_priv_nh_, "frame_id", this->frame_id_);
 }
 
@@ -184,13 +185,13 @@ void YostLabDriver::run()
         imu_msg_.header.frame_id = frame_id_;
 
         // construct quaternion with (x,y,z,w)
-        tf::Quaternion q(parsed_val_[0], parsed_val_[1], parsed_val_[2], parsed_val_[3]);
+        tf::Quaternion quat{ parsed_val_[0], parsed_val_[1], parsed_val_[2], parsed_val_[3] };
+
+        tf::Quaternion rot = tf::createQuaternionFromYaw(orientation_rotation_);
+        quat = rot * quat;
 
         // Filtered orientation estimate
-        imu_msg_.orientation.x = q[0];
-        imu_msg_.orientation.y = q[1];
-        imu_msg_.orientation.z = q[2];
-        imu_msg_.orientation.w = q[3];
+        tf::quaternionTFToMsg(quat, imu_msg_.orientation);
         imu_msg_.orientation_covariance = { .1, 0, 0, 0, .1, 0, 0, 0, .1 };
 
         // Corrected angular velocity.
@@ -217,7 +218,7 @@ void YostLabDriver::run()
         this->imu_pub_.publish(imu_msg_);
 
         double roll, pitch, yaw;
-        tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
+        tf::Matrix3x3(quat).getRPY(roll, pitch, yaw);
 
         ROS_INFO_THROTTLE(1.0, "[YostLabImuDriver] R: %f, P: %f, Y: %f -- IMU Temp: %f F ", roll, pitch, yaw,
                           sensor_temp);
