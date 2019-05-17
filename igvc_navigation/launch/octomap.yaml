@@ -80,7 +80,14 @@ frames:
         center: "/center_cam_optical"
         right: "/right_cam_optical"
 node:
-    debug: true
+    debug:
+        publish:
+            map_debug_pcl: true
+            cameras:
+                lines: false
+                projections: false
+            filtered_pointclouds: false
+
     use_lines: true
     camera:
         left:
