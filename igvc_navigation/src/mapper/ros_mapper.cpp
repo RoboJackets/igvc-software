@@ -68,7 +68,7 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "cameras/resize_width", resize_width_);
   igvc::getParam(pNh, "cameras/resize_height", resize_height_);
 
-  igvc::getParam(pNh, "node/debug", debug_);
+  igvc::getParam(pNh, "node/debug/publish/map_debug_pcl", debug_pub_map_pcl);
   igvc::getParam(pNh, "node/use_lines", use_lines_);
   igvc::param(pNh, "node/transform_max_wait_time", transform_max_wait_time_, 3.0);
 
@@ -128,9 +128,9 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
 
   map_pub_ = nh.advertise<igvc_msgs::map>("/map", 1);
 
-  if (debug_)
+  if (debug_pub_map_pcl)
   {
-    debug_pcl_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
+    debug_pcl_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/mapper/debug/pcl", 1);
   }
 
   ROS_INFO("Mapper started!");
@@ -253,13 +253,14 @@ void ROSMapper::publish(uint64_t stamp)
   setMessageMetadata(message, image, stamp);
   map_pub_.publish(message);
 
-  if (debug_)
+  if (debug_pub_map_pcl)
   {
-    publishAsPCL(debug_pcl_pub_, *map, "/odom", stamp);
+    publishMapDebugPC(debug_pcl_pub_, *map, "/odom", stamp);
   }
 }
 
-void ROSMapper::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, const std::string &frame_id, uint64_t stamp)
+void ROSMapper::publishMapDebugPC(const ros::Publisher &pub, const cv::Mat &mat, const std::string &frame_id,
+                                  uint64_t stamp)
 {
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud = boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
   for (int i = 0; i < width_y_ / resolution_; i++)

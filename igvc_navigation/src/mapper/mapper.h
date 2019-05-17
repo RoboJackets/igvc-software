@@ -133,7 +133,11 @@ private:
   bool use_ground_filter_;
   bool camera_model_initialized_;
   bool use_lines_;
-  bool debug_;
+
+  bool debug_pub_camera_lines;
+  bool debug_pub_camera_projections;
+  bool debug_pub_filtered_pointclouds;
+
   radians angular_resolution_;
 
   double resolution_;  // Map Resolution

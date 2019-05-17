@@ -87,7 +87,7 @@ private:
    * @param[in] frame_id the frame to use
    * @param[in] stamp the stamp to use
    */
-  void publishAsPCL(const ros::Publisher& pub, const cv::Mat& mat, const std::string& frame_id, uint64_t stamp);
+  void publishMapDebugPC(const ros::Publisher& pub, const cv::Mat& mat, const std::string& frame_id, uint64_t stamp);
 
   cv_bridge::CvImage img_bridge_;
 
@@ -107,7 +107,7 @@ private:
   int length_x_{};  // length (m)
   int width_y_{};   // width (m)
 
-  bool debug_{};
+  bool debug_pub_map_pcl{};
 
   bool enable_left_cam_;
   bool enable_center_cam_;
