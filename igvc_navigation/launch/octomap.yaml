@@ -33,10 +33,10 @@ filters:
         max_range: 5
     empty_image: # Blur and threshold for determining which points in the segmented image are empty space
         blur:
-            kernel: 17
-            sigma: 11
+            kernel: 7
+            sigma: 3
         threshold: 0.9
-        dilation_size: 250
+        dilation_size: 10
     combined_map: # Blur amount when combining the line and lidar map
         blur:
             kernel: 3
@@ -63,17 +63,17 @@ segmented_free_space:
 topics:
     lidar: "/velodyne_points"
     line_segmentation:
-        left: "/left_cam/detected_lines"
-        center: "/center_cam/detected_lines"
-        right: "/right_cam/detected_lines"
+        left: "/semantic_segmentation/usb_cam_left"
+        center: "/semantic_segmentation/usb_cam_center"
+        right: "/semantic_segmentation/usb_cam_right"
     projected_line_pc:
-        left: "/semantic_segmentation_cloud/left_cam"
-        center: "/semantic_segmentation_cloud/center_cam"
-        right: "/semantic_segmentation_cloud/right_cam"
+        left: "/semantic_segmentation_cloud/usm_cam_left"
+        center: "/semantic_segmentation_cloud/usb_cam_center"
+        right: "/semantic_segmentation_cloud/usb_cam_right"
     camera_info:
-        left: "/left_cam/camera_info"
-        center: "/center_cam/camera_info"
-        right: "/right_cam/camera_info"
+        left: "/usb_cam_left/camera_info"
+        center: "/usb_cam_center/camera_info"
+        right: "/usb_cam_right/camera_info"
 frames:
     camera:
         left: "/left_cam_optical"
