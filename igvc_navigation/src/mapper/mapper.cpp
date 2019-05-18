@@ -187,6 +187,7 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
   if (!use_passed_in_pointcloud)
   {
     MapUtils::projectToPlane(projected_occupied_pc, ground_plane_, image, model, camera_to_base, true);
+    pcl_ros::transformPointCloud(projected_occupied_pc, projected_occupied_pc, base_to_odom);
   }
 
   processImageFreeSpace(image);
@@ -196,8 +197,8 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
   MapUtils::projectTo2D(projected_empty_pc);
   if (static_cast<int>(camera) == 0)
   {
-    MapUtils::debugPublishPointCloud(camera_projection_pub_left_, projected_empty_pc, pcl_conversions::toPCL(stamp), "/odom",
-                                     debug_pub_camera_projections);
+    MapUtils::debugPublishPointCloud(camera_projection_pub_left_, projected_empty_pc, pcl_conversions::toPCL(stamp),
+                                     "/odom", debug_pub_camera_projections);
   }
   else if (static_cast<int>(camera) == 1)
   {
@@ -206,8 +207,8 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
   }
   else
   {
-    MapUtils::debugPublishPointCloud(camera_projection_pub_right_, projected_empty_pc, pcl_conversions::toPCL(stamp), "/odom",
-                                     debug_pub_camera_projections);
+    MapUtils::debugPublishPointCloud(camera_projection_pub_right_, projected_empty_pc, pcl_conversions::toPCL(stamp),
+                                     "/odom", debug_pub_camera_projections);
   }
   octomapper_->insertPoints(camera_map_pair_, projected_empty_pc, false, camera_probability_model_);
 
