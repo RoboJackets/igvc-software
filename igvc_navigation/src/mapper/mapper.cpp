@@ -171,7 +171,8 @@ void Mapper::insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstP
 }
 
 void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_odom,
-                                  const tf::Transform& camera_to_base, const ros::Time& stamp, Camera camera)
+                                  const tf::Transform& camera_to_base, const ros::Time& stamp, Camera camera,
+                                  bool use_passed_in_pointcloud)
 {
   if (camera_model_map_.find(camera) == camera_model_map_.end() && !camera_model_initialized_ && !use_ground_filter_)
   {
@@ -179,32 +180,41 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
     return;
   }
 
-  PointCloud projected_pc;
-  processImageFreeSpace(image);
+  PointCloud projected_empty_pc;
+  PointCloud projected_occupied_pc;
 
   image_geometry::PinholeCameraModel model = camera_model_map_.at(camera);
+  if (!use_passed_in_pointcloud)
+  {
+    MapUtils::projectToPlane(projected_occupied_pc, ground_plane_, image, model, camera_to_base, true);
+  }
 
-  MapUtils::projectToPlane(projected_pc, ground_plane_, image, model, camera_to_base);
+  processImageFreeSpace(image);
+  MapUtils::projectToPlane(projected_empty_pc, ground_plane_, image, model, camera_to_base, false);
 
-  pcl_ros::transformPointCloud(projected_pc, projected_pc, base_to_odom);
-  MapUtils::projectTo2D(projected_pc);
+  pcl_ros::transformPointCloud(projected_empty_pc, projected_empty_pc, base_to_odom);
+  MapUtils::projectTo2D(projected_empty_pc);
   if (static_cast<int>(camera) == 0)
   {
-    MapUtils::debugPublishPointCloud(camera_projection_pub_left_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
+    MapUtils::debugPublishPointCloud(camera_projection_pub_left_, projected_empty_pc, pcl_conversions::toPCL(stamp), "/odom",
                                      debug_pub_camera_projections);
   }
   else if (static_cast<int>(camera) == 1)
   {
-    MapUtils::debugPublishPointCloud(camera_projection_pub_center_, projected_pc, pcl_conversions::toPCL(stamp),
+    MapUtils::debugPublishPointCloud(camera_projection_pub_center_, projected_empty_pc, pcl_conversions::toPCL(stamp),
                                      "/odom", debug_pub_camera_projections);
   }
   else
   {
-    MapUtils::debugPublishPointCloud(camera_projection_pub_right_, projected_pc, pcl_conversions::toPCL(stamp), "/odom",
+    MapUtils::debugPublishPointCloud(camera_projection_pub_right_, projected_empty_pc, pcl_conversions::toPCL(stamp), "/odom",
                                      debug_pub_camera_projections);
   }
+  octomapper_->insertPoints(camera_map_pair_, projected_empty_pc, false, camera_probability_model_);
 
-  octomapper_->insertPoints(camera_map_pair_, projected_pc, false, camera_probability_model_);
+  if (!use_passed_in_pointcloud)
+  {
+    octomapper_->insertPoints(camera_map_pair_, projected_occupied_pc, true, camera_probability_model_);
+  }
 
   octomapper_->get_updated_map(camera_map_pair_);
 }

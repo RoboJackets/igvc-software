@@ -90,6 +90,7 @@ node:
 
     use_lines: true
     camera:
+        use_passed_in_pointcloud: false
         left:
             enable: true
         center:
