@@ -1,5 +1,5 @@
 <launch>
   <node name="quat_to_rpy" pkg="topic_tools" type="transform"
-     args="/imu /rpy geometry_msgs/Vector3 'tf.transformations.euler_from_quaternion([m.orientation.x, m.orientation.y, m.orientation.z, m.orientation.w])' --import tf" />
+     args="/magnetometer /rpy geometry_msgs/Vector3 'tf.transformations.euler_from_quaternion([m.orientation.x, m.orientation.y, m.orientation.z, m.orientation.w])' --import tf" />
 
 </launch>

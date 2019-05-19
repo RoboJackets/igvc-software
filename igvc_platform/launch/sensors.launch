@@ -19,7 +19,7 @@
     </include>
 
     <!-- LIDAR -->
-    <include file="$(find igvc_platform)/launch/lidar.launch" />
+    <include file="$(find igvc_platform)/launch/velodyne_lidar.launch" />
 
     <!-- Bottom IMU -->
     <include file="$(find igvc_platform)/launch/imu_bottom.launch" />
