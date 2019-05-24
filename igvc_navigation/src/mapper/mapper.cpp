@@ -137,12 +137,12 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
 
     if (empty_filter_options_.enabled)
     {
-//      MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
-//      pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
-//
-//      MapUtils::projectTo2D(empty_pc);
-//      MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, pc->header.stamp, "/odom",
-//                                       debug_pub_filtered_pointclouds);
+      //      MapUtils::getEmptyPoints(*pc, empty_pc, angular_resolution_, empty_filter_options_);
+      //      pcl_ros::transformPointCloud(empty_pc, empty_pc, lidar_to_odom);
+      //
+      //      MapUtils::projectTo2D(empty_pc);
+      //      MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, pc->header.stamp, "/odom",
+      //                                       debug_pub_filtered_pointclouds);
       empty_rays = getTransformedEmptyRays(*pc, lidar_to_odom);
     }
   }
@@ -234,14 +234,15 @@ std::vector<Ray> Mapper::getTransformedEmptyRays(const PointCloud& nonground, co
     ray.end.z = 0;
   });
 
-  if (debug_pub_filtered_pointclouds)\
+  if (debug_pub_filtered_pointclouds)
   {
     PointCloud empty_pc{};
     std::for_each(empty_rays.begin(), empty_rays.end(), [&](Ray& ray) {
       empty_pc.points.emplace_back(pcl::PointXYZ{ ray.end.x, ray.end.y, ray.end.z });
     });
 
-    MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, nonground.header.stamp, "/odom", debug_pub_filtered_pointclouds);
+    MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, nonground.header.stamp, "/odom",
+                                     debug_pub_filtered_pointclouds);
   }
   return empty_rays;
 }
