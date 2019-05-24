@@ -125,9 +125,6 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
       pcl_ros::transformPointCloud(nonground, nonground_lidar, lidar_to_odom.inverse());
 
       empty_rays = getTransformedEmptyRays(nonground_lidar, lidar_to_odom);
-
-      MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, pc->header.stamp, "/odom",
-                                       debug_pub_filtered_pointclouds);
     }
 
     octomapper_->insertScan(lidar_to_odom.getOrigin(), pc_map_pair_, nonground, lidar_scan_probability_model_, radius_);
@@ -237,13 +234,15 @@ std::vector<Ray> Mapper::getTransformedEmptyRays(const PointCloud& nonground, co
     ray.end.z = 0;
   });
 
-  PointCloud empty_pc{};
-  std::for_each(empty_rays.begin(), empty_rays.end(), [&](Ray& ray) {
-    empty_pc.points.emplace_back(pcl::PointXYZ{ ray.end.x, ray.end.y, ray.end.z });
-  });
+  if (debug_pub_filtered_pointclouds)\
+  {
+    PointCloud empty_pc{};
+    std::for_each(empty_rays.begin(), empty_rays.end(), [&](Ray& ray) {
+      empty_pc.points.emplace_back(pcl::PointXYZ{ ray.end.x, ray.end.y, ray.end.z });
+    });
 
-  MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, nonground.header.stamp, "/odom", debug_);
-
+    MapUtils::debugPublishPointCloud(empty_pc_pub_, empty_pc, nonground.header.stamp, "/odom", debug_pub_filtered_pointclouds);
+  }
   return empty_rays;
 }
 

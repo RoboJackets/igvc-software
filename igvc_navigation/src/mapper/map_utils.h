@@ -79,10 +79,10 @@ using PointCloud = pcl::PointCloud<pcl::PointXYZ>;
 int discretize(radians angle, double angular_resolution);
 
 /**
- * Returns a pcl::PointCloud of points which have not been detected by the lidar scan, according to the angular
+ * Returns a std::vector of Rays which have not been detected by the lidar scan, according to the angular
  * resolution
  * @param[in] pc lidar scan
- * @param[out] empty_pc points that are found to be free
+ * @param[out] empty_rays points that are found to be free
  * @param[in] angular_resolution angular resolution to use in filter
  * @param[in] options Parameters to use for the filter
  */
