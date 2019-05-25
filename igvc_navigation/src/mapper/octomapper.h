@@ -168,6 +168,15 @@ public:
    */
   void insertPoints(struct pc_map_pair& pair, const PointCloud& pc, bool occupied, ProbabilityModel model) const;
 
+  /**
+   * Inserts the passed in occupied and free points to the given pc_map_pair
+   * @param pair
+   * @param occupied_pc
+   * @param free_pc
+   * @param model
+   */
+  void insertPoints(struct pc_map_pair& pair, const PointCloud& occupied_pc, const PointCloud& free_pc, ProbabilityModel model) const;
+
 private:
   void create_map(pc_map_pair& pair) const;
   void insert_free(const octomap::Pointcloud& scan, octomap::point3d origin, pc_map_pair& pair, bool lazy_eval) const;

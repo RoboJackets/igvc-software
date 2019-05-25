@@ -206,11 +206,14 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
     MapUtils::debugPublishPointCloud(camera_projection_pub_right_, projected_empty_pc, pcl_conversions::toPCL(stamp),
                                      "/odom", debug_pub_camera_projections);
   }
-  octomapper_->insertPoints(camera_map_pair_, projected_empty_pc, false, camera_probability_model_);
-
-  if (!use_passed_in_pointcloud)
+  if (use_passed_in_pointcloud)
   {
-    octomapper_->insertPoints(camera_map_pair_, projected_occupied_pc, true, camera_probability_model_);
+    octomapper_->insertPoints(camera_map_pair_, projected_empty_pc, false, camera_probability_model_);
+
+  }
+  else
+  {
+    octomapper_->insertPoints(camera_map_pair_, projected_occupied_pc, projected_empty_pc, camera_probability_model_);
   }
 
   octomapper_->get_updated_map(camera_map_pair_);
