@@ -209,7 +209,6 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
   if (use_passed_in_pointcloud)
   {
     octomapper_->insertPoints(camera_map_pair_, projected_empty_pc, false, camera_probability_model_);
-
   }
   else
   {

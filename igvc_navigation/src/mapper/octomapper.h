@@ -175,7 +175,8 @@ public:
    * @param free_pc
    * @param model
    */
-  void insertPoints(struct pc_map_pair& pair, const PointCloud& occupied_pc, const PointCloud& free_pc, ProbabilityModel model) const;
+  void insertPoints(struct pc_map_pair& pair, const PointCloud& occupied_pc, const PointCloud& free_pc,
+                    ProbabilityModel model) const;
 
 private:
   void create_map(pc_map_pair& pair) const;

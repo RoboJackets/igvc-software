@@ -281,19 +281,25 @@ void Octomapper::insertPoints(struct pc_map_pair &pair, const PointCloud &occupi
   }
 
   // Remove all free from occupied keyset
-  for(auto it = free_keyset.begin(), end=free_keyset.end(); it!= end; ){
-    if (occupied_keyset.find(*it) != occupied_keyset.end()){
+  for (auto it = free_keyset.begin(), end = free_keyset.end(); it != end;)
+  {
+    if (occupied_keyset.find(*it) != occupied_keyset.end())
+    {
       it = free_keyset.erase(it);
-    } else {
+    }
+    else
+    {
       ++it;
     }
   }
 
   // Insert
-  for (auto it = free_keyset.begin(); it != free_keyset.end(); ++it) {
+  for (auto it = free_keyset.begin(); it != free_keyset.end(); ++it)
+  {
     pair.octree->updateNode(*it, false, false);
   }
-  for (auto it = occupied_keyset.begin(); it != occupied_keyset.end(); ++it) {
+  for (auto it = occupied_keyset.begin(); it != occupied_keyset.end(); ++it)
+  {
     pair.octree->updateNode(*it, true, false);
   }
 
