@@ -47,6 +47,8 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   igvc::getParam(pNh, std::string("d_r"), d_r_);
   igvc::getParam(pNh, std::string("i_r"), i_r_);
   igvc::getParam(pNh, std::string("i_l"), i_l_);
+  igvc::getParam(pNh, "kv_l", kv_l_);
+  igvc::getParam(pNh, "kv_r", kv_r_);
 
   igvc::param(pNh, "log_period", log_period_, 5.0);
 
@@ -76,7 +78,7 @@ void MotorController::setPID()
   ros::Rate rate(frequency_);
   ROS_INFO_STREAM("Setting PID Values:"
                   << "\n\t P => L: " << p_l_ << " R: " << p_r_ << "\n\t D => L: " << d_l_ << " R: " << d_r_
-                  << "\n\t I => L: " << i_l_ << " R: " << i_r_);
+                  << "\n\t I => L: " << i_l_ << " R: " << i_r_ << "\n\t Kv => L: " << kv_l_ << " R: " << kv_r_);
 
   bool valid_values = false;  // pid values have been set correctly
 
@@ -98,6 +100,8 @@ void MotorController::setPID()
   request.has_i_r = true;
   request.has_d_l = true;
   request.has_d_r = true;
+  request.has_kv_l = true;
+  request.has_kv_r = true;
 
   /* fill in the message fields */
   request.p_l = static_cast<float>(p_l_);
@@ -106,6 +110,8 @@ void MotorController::setPID()
   request.i_r = static_cast<float>(i_r_);
   request.d_l = static_cast<float>(d_l_);
   request.d_r = static_cast<float>(d_r_);
+  request.kv_l = static_cast<float>(kv_l_);
+  request.kv_r = static_cast<float>(kv_r_);
 
   /* encode the protobuffer */
   status = pb_encode(&ostream, RequestMessage_fields, &request);
@@ -155,7 +161,8 @@ void MotorController::setPID()
 
     valid_values = (response.p_l == static_cast<float>(p_l_)) && (response.p_r == static_cast<float>(p_r_)) &&
                    (response.i_l == static_cast<float>(i_l_)) && (response.i_r == static_cast<float>(i_r_)) &&
-                   (response.d_l == static_cast<float>(d_l_)) && (response.d_r == static_cast<float>(d_r_));
+                   (response.d_l == static_cast<float>(d_l_)) && (response.d_r == static_cast<float>(d_r_)) &&
+                   (response.kv_l == static_cast<float>(kv_l_)) && (response.kv_r == static_cast<float>(kv_r_));
 
     rate.sleep();
   }

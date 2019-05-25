@@ -18,6 +18,7 @@ private:
 
   igvc_msgs::velocity_pair current_motor_command_;  // desired motor velocities
   double p_l_, p_r_, d_l_, d_r_, i_l_, i_r_;        // PID Values
+  double kv_l_, kv_r_;
 
   // launch parameters
   std::string ip_addr_;         // server ip address

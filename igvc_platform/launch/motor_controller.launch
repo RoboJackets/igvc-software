@@ -3,15 +3,17 @@
     <node name="motor_controller" pkg="igvc_platform" type="motor_controller" output="screen">
           <param name="ip_addr" type="str" value="192.168.1.20"/>
           <param name="port" type="int" value="7"/>
-          <param name="p_l" type="double" value="30.1"/>
-          <param name="p_r" type="double" value="30.1"/>
+          <param name="p_l" type="double" value="40.0"/>
+          <param name="p_r" type="double" value="40.0"/>
           <param name="d_l" type="double" value="0.0"/>
           <param name="d_r" type="double" value="0.0"/>
-          <param name="i_r" type="double" value="10.0"/>
-          <param name="i_l" type="double" value="10.0"/>
+          <param name="i_r" type="double" value="150.0"/>
+          <param name="i_l" type="double" value="150.0"/>
+          <param name="kv_l" value="32.0"/>
+          <param name="kv_r" value="32.0"/>
           <param name="log_period" type="double" value="5.0"/>
           <param name="min_battery_voltage" type="double" value="23.5"/>
-          <param name="frequency" type="double" value="20.0"/>
+          <param name="frequency" type="double" value="50.0"/>
           <!-- alpha value for voltage exponentially weighted moving average
                approximate # of timesteps average taken over = 1 / (1-alpha) -->
           <param name="battery_alpha" type="double" value="0.9"/>
