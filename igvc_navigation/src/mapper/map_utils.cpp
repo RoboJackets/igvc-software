@@ -7,6 +7,7 @@
 #include <pcl/segmentation/sac_segmentation.h>
 
 #include "map_utils.h"
+#include "octomapper.h"
 
 namespace MapUtils
 {
@@ -139,9 +140,13 @@ void blur(cv::Mat& blurred_map, double kernel_size)
   cv::max(original, blurred_map, blurred_map);
 }
 
-void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& empty_pc,
-                    double angular_resolution, EmptyFilterOptions options)
+void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, std::vector<Ray>& empty_rays, double angular_resolution,
+                    EmptyFilterOptions options)
 {
+  int discretized_start = discretize(options.start_angle, angular_resolution);
+  int discretized_end = discretize(options.end_angle, angular_resolution);
+  empty_rays.reserve(discretized_end - discretized_start + 1);
+
   // Iterate over pointcloud, insert discretized angles into set if within max range
   std::unordered_set<int> discretized_angles{};
   for (auto i : pc)
@@ -155,15 +160,17 @@ void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pc
 
   // For each angle, if it's not in the set (empty), put it into a pointcloud.
   // From Robot's frame. Need to rotate angle to world frame
-  for (int i = discretize(options.start_angle, angular_resolution);
-       i < discretize(options.end_angle, angular_resolution); i++)
+  for (int i = discretized_start; i < discretized_end; i++)
   {
     if (discretized_angles.find(i) == discretized_angles.end())
     {
       double angle = i * angular_resolution;
-      pcl::PointXYZ point{ static_cast<float>(options.miss_cast_distance * cos(angle)),
-                           static_cast<float>(options.miss_cast_distance * sin(angle)), 0 };
-      empty_pc.points.emplace_back(point);
+      pcl::PointXYZ ray_start{ static_cast<float>(options.ray_start_distance * cos(angle)),
+                               static_cast<float>(options.ray_start_distance * sin(angle)), 0 };
+
+      pcl::PointXYZ ray_end{ static_cast<float>(options.miss_cast_distance * cos(angle)),
+                             static_cast<float>(options.miss_cast_distance * sin(angle)), 0 };
+      empty_rays.emplace_back(Ray{ ray_start, ray_end });
     }
   }
 }
