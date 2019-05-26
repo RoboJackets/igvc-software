@@ -19,7 +19,7 @@ TrajectoryFollower::TrajectoryFollower()
   igvc::param(pNh, "loop_hz", loop_hz_, 25.0);
   igvc::param(pNh, "axle_length", axle_length_, 0.48);
   igvc::param(pNh, "motor_loop_hz", motor_loop_hz_, 25.0);
-  igvc::param(pNh, "min_velocity", min_velocity_, 0.1);
+  igvc::param(pNh, "min_velocity", min_velocity_, 0.2);
 
   ros::Subscriber path_sub = nh.subscribe(path_topic_, 1, &TrajectoryFollower::trajectoryCallback, this);
   control_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
@@ -57,7 +57,7 @@ void TrajectoryFollower::followTrajectory()
   if (control.left_ != 0 && control.right_ != 0)
   {
     // If trying to execute some motion that is too small for the motors to actually move
-    if (std::abs(control.left_) < 1e-3 && std::abs(control.right_) < 1e-3)
+    if (std::abs(control.left_) < min_velocity_ && std::abs(control.right_) < min_velocity_)
     {
       control.left_ = std::copysign(min_velocity_, control.left_);
       control.right_ = std::copysign(min_velocity_, control.right_);

@@ -11,8 +11,8 @@
         <param name="path_generation/simulation_horizon" value="5.0"/>
         <param name="path_generation/velocity" value="0.5"/>
 
-        <param name="target_selection/lookahead_dist" value="0.5"/>
-        <param name="target_selection/reached_distance" value="0.05"/>
+        <param name="target_selection/lookahead_dist" value="1.0"/>
+        <param name="target_selection/reached_distance" value="0.2"/>
         <param name="target_selection/move_threshold" value="0.2"/>
 
         <param name="curvature_blending/blending_distance" value="1.0"/>
@@ -26,5 +26,7 @@
         <param name="motion_profiler/target_velocity" value="1.0"/>
         <param name="motion_profiler/beta" value="0.14"/>
         <param name="motion_profiler/lambda" value="1.4"/>
+
+        <param name="min_velocity" value="0.2" />
     </node>
 </launch>
