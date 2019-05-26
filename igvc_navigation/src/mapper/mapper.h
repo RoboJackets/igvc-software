@@ -74,7 +74,7 @@ public:
    * @param[in] stamp timestamp to be used for debug publishing
    */
   void insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_odom, const tf::Transform& camera_to_base,
-                            const ros::Time& stamp, Camera camera);
+                            const ros::Time& stamp, Camera camera, bool use_passed_in_pointcloud);
 
   /**
    * Sets the parameters for the image_geometry::PinholeCameraModel used for projection.

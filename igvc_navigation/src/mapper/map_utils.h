@@ -138,9 +138,11 @@ void fallbackFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& no
  * @param[in] image the image to project from
  * @param[in] model the camera model to be used for projection
  * @param[in] camera_to_world the tf::Transform from the camera to the world
+ * @param[in] is_line whether to project the lines or the empty_space
  */
 void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, const cv::Mat& image,
-                    const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world);
+                    const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world,
+                    bool is_line);
 
 /**
  * Projects all points in projected_pc to z=0
