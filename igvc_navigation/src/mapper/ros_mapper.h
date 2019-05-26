@@ -113,6 +113,8 @@ private:
   bool enable_center_cam_;
   bool enable_right_cam_;
 
+  bool use_passed_in_pointcloud_;
+
   double resolution_{};  // Map Resolution
 
   int resize_width_{};

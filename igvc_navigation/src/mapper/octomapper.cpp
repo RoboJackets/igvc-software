@@ -244,3 +244,65 @@ void Octomapper::insertPoints(struct pc_map_pair &pair, const PointCloud &pc, bo
   pair.octree->setProbHit(old_prob_hit);
   pair.octree->setProbMiss(old_prob_miss);
 }
+
+void Octomapper::insertPoints(struct pc_map_pair &pair, const PointCloud &occupied_pc, const PointCloud &free_pc,
+                              ProbabilityModel model) const
+{
+  double old_prob_hit = pair.octree->getProbHit();
+  double old_prob_miss = pair.octree->getProbMiss();
+
+  pair.octree->setProbHit(model.prob_hit);
+  pair.octree->setProbMiss(model.prob_miss);
+
+  octomap::Pointcloud octo_occupied;
+  PCL_to_Octomap(occupied_pc, octo_occupied);
+  octomap::KeySet occupied_keyset{};
+
+  for (const auto &p : octo_occupied)
+  {
+    octomap::OcTreeKey key;
+    if (pair.octree->coordToKeyChecked(p, key))
+    {
+      occupied_keyset.insert(key);
+    }
+  }
+
+  octomap::Pointcloud octo_free;
+  PCL_to_Octomap(free_pc, octo_free);
+  octomap::KeySet free_keyset{};
+
+  for (const auto &p : octo_free)
+  {
+    octomap::OcTreeKey key;
+    if (pair.octree->coordToKeyChecked(p, key))
+    {
+      free_keyset.insert(key);
+    }
+  }
+
+  // Remove all free from occupied keyset
+  for (auto it = free_keyset.begin(), end = free_keyset.end(); it != end;)
+  {
+    if (occupied_keyset.find(*it) != occupied_keyset.end())
+    {
+      it = free_keyset.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+
+  // Insert
+  for (auto it = free_keyset.begin(); it != free_keyset.end(); ++it)
+  {
+    pair.octree->updateNode(*it, false, false);
+  }
+  for (auto it = occupied_keyset.begin(); it != occupied_keyset.end(); ++it)
+  {
+    pair.octree->updateNode(*it, true, false);
+  }
+
+  pair.octree->setProbHit(old_prob_hit);
+  pair.octree->setProbMiss(old_prob_miss);
+}
