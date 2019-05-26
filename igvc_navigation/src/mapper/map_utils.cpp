@@ -176,10 +176,12 @@ void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, std::vector<Ray>& 
 }
 
 void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, const cv::Mat& image,
-                    const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world)
+                    const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world, bool is_line)
 {
   int nRows = image.rows;
   int nCols = image.cols;
+
+  uchar match = is_line ? 255u : 0u;
 
   int i, j;
   const uchar* p;
@@ -189,7 +191,7 @@ void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, c
     for (j = 0; j < nCols; ++j)
     {
       // If it's a black pixel => free space, then project
-      if (p[j] == 0)
+      if (p[j] == match)
       {
         cv::Point2d pixel_point(j, i);
 
