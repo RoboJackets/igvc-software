@@ -3,12 +3,14 @@
 
 MotionProfiler::MotionProfiler(double axle_length, const WheelConstraint& wheel_constraint,
                                const RobotConstraint& robot_constraint,
-                               const MotionProfilerOptions& motion_profiler_options, double target_velocity)
+                               const MotionProfilerOptions& motion_profiler_options, double target_velocity,
+                               double linear_acceleration_curvature_threshold_)
   : wheel_constraint_{ wheel_constraint }
   , robot_constraint_{ robot_constraint }
   , motion_profiler_options_{ motion_profiler_options }
   , axle_length_{ axle_length }
   , target_velocity_{ target_velocity }
+  , linear_acceleration_curvature_threshold_{ linear_acceleration_curvature_threshold_ }
 {
 }
 
@@ -57,7 +59,7 @@ void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajector
 void MotionProfiler::capLinearAcceleration(const igvc_msgs::trajectory_point& last,
                                            igvc_msgs::trajectory_point& cur) const
 {
-  if (std::abs(last.curvature) < 1e-8)
+  if (std::abs(last.curvature) < linear_acceleration_curvature_threshold_)
   {
     double dv = cur.velocity - last.velocity;
     double dt = (cur.header.stamp - last.header.stamp).toSec();

@@ -57,16 +57,20 @@ TrajectoryPlanner::TrajectoryPlanner()
   igvc::param(pNh, "motion_profiler/beta", motion_profiler_options.beta, 2.0);
   igvc::param(pNh, "motion_profiler/lambda", motion_profiler_options.lambda, 1.0);
 
+  double linear_acceleration_curvature_threshold;
+  igvc::param(pNh, "linear_velocity_curvature_threshold", linear_acceleration_curvature_threshold, 1e-2);
+
   if (path_generation_options.simulation_frequency <= 0)
   {
     ROS_WARN_STREAM("Simulation frequency (currently " << path_generation_options.simulation_frequency
                                                        << ") should be greater than 0. Setting to 1 for now.");
     path_generation_options.simulation_frequency = 1;
   }
-  controller_ = igvc::make_unique<SmoothControl>(smooth_control_options, path_generation_options,
-                                                 target_selection_options, curvature_blending_options, axle_length);
-  motion_profiler_ = igvc::make_unique<MotionProfiler>(axle_length, wheel_constraints, robot_constraints,
-                                                       motion_profiler_options, target_velocity);
+  controller_ = std::make_unique<SmoothControl>(smooth_control_options, path_generation_options,
+                                                target_selection_options, curvature_blending_options, axle_length);
+  motion_profiler_ =
+      std::make_unique<MotionProfiler>(axle_length, wheel_constraints, robot_constraints, motion_profiler_options,
+                                       target_velocity, linear_acceleration_curvature_threshold);
 
   // load global parameters
   igvc::param(pNh, "stop_dist", stop_dist_, 0.9);

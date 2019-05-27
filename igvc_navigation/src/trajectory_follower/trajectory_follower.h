@@ -46,6 +46,14 @@ private:
   RobotControl getControl();
 
   /**
+   * Ensures that velocities sent to the motor are above the deadband minimum_velocity, otherwise
+   * the motor just refuses to move, and may result in the motor oscillating between 0 and some nonzero velocity
+   * very quickly
+   * @param control
+   */
+  void ensureAboveDeadband(RobotControl& control);
+
+  /**
    * Main loop for the trajectory following. Finds current time, interpolates curvature and velocity between points.
    */
   void trajectoryFollowLoop();

@@ -8,6 +8,8 @@
         <param name="axle_length" value="0.52"/>
         <param name="loop_hz" value="25.0"/>
         <param name="motor_loop_hz" value="25.0"/>
+
+        <param name="min_velocity" value="0.2" />
     </node>
 
 </launch>

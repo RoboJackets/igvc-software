@@ -53,16 +53,7 @@ void TrajectoryFollower::trajectoryFollowLoop()
 void TrajectoryFollower::followTrajectory()
 {
   RobotControl control = getControl();
-
-  if (control.left_ != 0 && control.right_ != 0)
-  {
-    // If trying to execute some motion that is too small for the motors to actually move
-    if (std::abs(control.left_) < min_velocity_ && std::abs(control.right_) < min_velocity_)
-    {
-      control.left_ = std::copysign(min_velocity_, control.left_);
-      control.right_ = std::copysign(min_velocity_, control.right_);
-    }
-  }
+  ensureAboveDeadband(control);
 
   control_pub_.publish(control.toMessage(ros::Time::now()));
 }
@@ -99,6 +90,19 @@ RobotControl TrajectoryFollower::getControl()
   }
   return RobotControl::fromKV(trajectory_->trajectory.back().curvature, trajectory_->trajectory.back().velocity,
                               axle_length_);
+}
+
+void TrajectoryFollower::ensureAboveDeadband(RobotControl& control)
+{
+  if (control.left_ != 0 || control.right_ != 0)
+  {
+    if (std::abs(control.left_) < min_velocity_ || std::abs(control.right_) < min_velocity_)
+    {
+      auto [k, v] = control.toKV(axle_length_);
+      v = min_velocity_ - std::abs(0.5 * k * axle_length_);
+      control = RobotControl::fromKV(k, v, axle_length_);
+    }
+  }
 }
 
 int main(int argc, char** argv)

@@ -32,7 +32,8 @@ class MotionProfiler
 {
 public:
   MotionProfiler(double axle_length, const WheelConstraint& wheel_constraint, const RobotConstraint& robot_constraint,
-                 const MotionProfilerOptions& motion_profiler_options, double target_velocity);
+                 const MotionProfilerOptions& motion_profiler_options, double target_velocity,
+                 double linear_acceleration_curvature_threshold_);
 
   /**
    * Performs motion profiling on the passed in trajectory, doing a constrained optimization on acceleration
@@ -63,6 +64,7 @@ private:
 
   double axle_length_;
   double target_velocity_;
+  double linear_acceleration_curvature_threshold_;
 };
 
 #endif  // SRC_MOTION_PROFILER_H
