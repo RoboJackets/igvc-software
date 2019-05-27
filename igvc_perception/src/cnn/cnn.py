@@ -104,7 +104,7 @@ class SegmentationModel(object):
             transform_listener = ros_tf.TransformListener()
             print(camera_name)
 
-            cam_frame_name = camera_name + "_optical"
+            cam_frame_name = camera_name.replace("usb_cam_", "") + "_cam_optical"
             transform_listener.waitForTransform('/base_footprint', cam_frame_name, rospy.Time(0), rospy.Duration(5.0))
             cam_transform_translation, cam_transform_rotation = transform_listener.lookupTransform('/base_footprint', cam_frame_name, rospy.Time(0))
             self.cam_transform_rotation_matrices[camera_name] = ros_tf.transformations.quaternion_matrix(cam_transform_rotation)[:-1,:-1]
