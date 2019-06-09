@@ -3,7 +3,7 @@
 
 <launch>
 
-    <node name="cnn" pkg="igvc_perception" type="cnn.py" output="screen" />
+    <node name="cnn_right" pkg="igvc_perception" type="cnn.py" output="screen" />
 
     <rosparam param="camera_names">["usb_cam_right"]</rosparam>
 
