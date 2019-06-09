@@ -11,9 +11,6 @@
     <param name="image_resize_width" value="400" />
     <param name="image_resize_height" value="400" />
 
-    <!-- Use cpu instead of GPU (will run very slowly). -->
-    <param name="force_cpu" value="false" />
-
     <!-- Use a pre-existic segmented image such as an output segmentation from a different node.
          If true, the "segmented_image_topics" rosparam must be set with one topic for each camera -->
     <rosparam param="segmented_image_topics">["/left_cam/detected_lines"]</rosparam>
