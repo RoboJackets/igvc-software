@@ -63,6 +63,18 @@ struct GroundPlane
   double d;
 };
 
+struct RemoveBarrelOptions
+{
+  int low_h;
+  int high_h;
+  int low_s;
+  int high_s;
+  int low_v;
+  int high_v;
+  int kernel_width;
+  int kernel_height;
+};
+
 class Ray;
 
 namespace MapUtils
@@ -171,6 +183,11 @@ inline bool withinRange(const pcl::PointXYZ& point, double range);
 
 void debugPublishPointCloud(const ros::Publisher& publisher, pcl::PointCloud<pcl::PointXYZ>& pointcloud,
                             const uint64 stamp, std::string&& frame, bool debug);
+void debugPublishImage(const ros::Publisher& publisher, const cv::Mat& image, const ros::Time stamp, bool debug);
+
+void removeBarrels(cv::Mat& image, RemoveBarrelOptions options);
+void filterBarrels(cv::Mat& image, cv::Mat& mask);
+
 }  // namespace MapUtils
 
 inline bool MapUtils::withinRange(const pcl::PointXYZ& point, double range)
