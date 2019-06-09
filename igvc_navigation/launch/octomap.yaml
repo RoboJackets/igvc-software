@@ -49,7 +49,7 @@ filters:
             plane_distance: 0.04 # +-m from z=0
     remove_occupied:
         enable: true
-        kernel_size: 50
+        kernel_size: 70
 map:
     # In units of meters, not cells
     # width of grid = width / resolution

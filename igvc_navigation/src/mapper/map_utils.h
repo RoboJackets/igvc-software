@@ -57,7 +57,7 @@ struct GroundFilterOptions
 struct RemoveOccupiedOptions
 {
   bool enable;
-  double kernel_size;
+  int kernel_size;
 };
 
 struct GroundPlane

@@ -179,27 +179,27 @@ void removeOccupiedFromImage(cv::Mat& image, const PointCloud& last_scan,
   cv::Mat projected_image(image.size().height, image.size().width, image.type(), static_cast<uchar>(0));
 
   std::vector<cv::Point2d> projected_points;
-  projected_points.reserve(100);
+  projected_points.reserve(last_scan.points.size());
 
   // Transform pointcloud to image frame, add if inside image
   for (const auto& point : last_scan.points)
   {
-    tf::Vector3 transformed = odom_to_camera * tf::Vector3{ point.x, point.y, 0 };
+    tf::Vector3 transformed = odom_to_camera * tf::Vector3{ point.x, point.y, point.z };
     cv::Point3d cv_point{ transformed.x(), transformed.y(), transformed.z() };
     cv::Point2d projected_point = camera_model.project3dToPixel(cv_point);
     if (projected_point.inside(image_rect))
     {
       projected_points.emplace_back(projected_point);
-      for (int i = 0; i < 10; i++)
-      {
-        tf::Vector3 transformed_heights = odom_to_camera * tf::Vector3{ point.x, point.y, i * 0.1 };
-        cv::Point3d cv_point_heights{ transformed_heights.x(), transformed_heights.y(), transformed_heights.z() };
-        cv::Point2d projected_point_heights = camera_model.project3dToPixel(cv_point_heights);
-        if (projected_point_heights.inside(image_rect))
-        {
-          projected_points.emplace_back(projected_point_heights);
-        }
-      }
+      //      for (int i = 0; i < 10; i++)
+      //      {
+      //        tf::Vector3 transformed_heights = odom_to_camera * tf::Vector3{ point.x, point.y, i * 0.1 };
+      //        cv::Point3d cv_point_heights{ transformed_heights.x(), transformed_heights.y(), transformed_heights.z()
+      //        }; cv::Point2d projected_point_heights = camera_model.project3dToPixel(cv_point_heights); if
+      //        (projected_point_heights.inside(image_rect))
+      //        {
+      //          projected_points.emplace_back(projected_point_heights);
+      //        }
+      //      }
     }
   }
 
