@@ -28,5 +28,6 @@
         <param name="motion_profiler/lambda" value="1.4"/>
 
         <param name="linear_acceleration_curavture_threshold" value="1" />
+        <param name="end_distance_threshold" value="0.1" />
     </node>
 </launch>

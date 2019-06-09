@@ -17,9 +17,15 @@ SmoothControl::SmoothControl(SmoothControlOptions smooth_control_options, PathGe
 }
 
 void SmoothControl::getPath(const nav_msgs::PathConstPtr& path, const igvc_msgs::trajectoryPtr& trajectory_ptr,
-                            const RobotState& start_pos)
+                            const RobotState& start_pos, double end_dist_threshold)
 {
   RobotState state = start_pos;
+
+  if (state.distTo(path->poses.back().pose.position.x, path->poses.back().pose.position.y) < end_dist_threshold)
+  {
+    return;
+  }
+
   std::optional<RobotState> simulation_target = target_;
   size_t path_index = 0;
 

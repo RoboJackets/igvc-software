@@ -71,7 +71,7 @@ public:
    * @param[out] target the target pose the controller is planning for
    */
   void getPath(const nav_msgs::PathConstPtr& path, const igvc_msgs::trajectoryPtr& trajectory_ptr,
-               const RobotState& start_pos);
+               const RobotState& start_pos, double end_dist_threshold);
 
 private:
   SmoothControlOptions smooth_control_options_;
