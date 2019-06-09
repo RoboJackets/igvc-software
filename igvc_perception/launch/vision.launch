@@ -3,7 +3,7 @@
 
 <launch>
 
-    <param name="model_path" value="$(find igvc_perception)/../sandbox/models/IGVCModel_120.pt" />
+    <param name="model_path" value="$(find igvc_perception)/../sandbox/models/Yosuke/IGVCModel_220.pt" />
     <param name="use_preexisting_segmentation" value="false"/>
 
     <param name="output_segmentation_topic" value="/semantic_segmentation" />
