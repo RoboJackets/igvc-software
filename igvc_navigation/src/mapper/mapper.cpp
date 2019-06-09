@@ -197,9 +197,9 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
     pcl_ros::transformPointCloud(projected_occupied_pc, projected_occupied_pc, base_to_odom);
   }
 
-  MapUtils::filterBarrels(image, center_barrels_mask_);
   if (static_cast<int>(camera) == 1)
   {
+    MapUtils::filterBarrels(image, center_barrels_mask_);
     MapUtils::debugPublishImage(filtered_img_pub_, image, stamp, true);
   }
 
