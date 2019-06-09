@@ -247,13 +247,13 @@ if __name__ == '__main__':
     # Read ros params.
     use_preexisting_segmentation = rospy.get_param('use_preexisting_segmentation', False)
 
-    camera_names = rospy.get_param('camera_names')
-    image_resize_width = rospy.get_param('image_resize_width')
-    image_resize_height = rospy.get_param('image_resize_height')
+    camera_names = rospy.get_param('~camera_names')
+    image_resize_width = rospy.get_param('~image_resize_width')
+    image_resize_height = rospy.get_param('~image_resize_height')
     output_segmentation_topic = rospy.get_param('output_segmentation_topic')
 
     if use_preexisting_segmentation:
-        segmented_image_topics = rospy.get_param('segmented_image_topics')
+        segmented_image_topics = rospy.get_param('~segmented_image_topics')
         SegmentationModel(camera_names,
                           output_segmentation_topic,
                           image_resize_width, image_resize_height,
