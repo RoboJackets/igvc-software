@@ -207,3 +207,5 @@ add_subdirectory(src/trajectory_planner)
 
 add_subdirectory(src/d_lite_planner)
 add_subdirectory(src/field_d_planner)
+
+add_subdirectory(src/back_circle)

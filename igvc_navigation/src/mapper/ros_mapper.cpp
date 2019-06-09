@@ -137,6 +137,8 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
     }
   }
 
+  back_circle_sub_ = nh.subscribe("/back_circle", 1, &ROSMapper::backCircleCallback, this);
+
   map_pub_ = nh.advertise<igvc_msgs::map>("/map", 1);
 
   if (debug_pub_map_pcl)
@@ -148,6 +150,14 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
 
   ros::spin();
 }
+
+void ROSMapper::backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg) {
+  // do the tf tree
+  //getOdomTransform(msg->header.stamp);
+  mapper_->insertBackCircle(msg, state_.transform);
+}
+
+
 
 template <>
 bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
