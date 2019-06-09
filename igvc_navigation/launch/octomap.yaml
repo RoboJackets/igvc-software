@@ -49,6 +49,19 @@ filters:
             eps_angle: 0.5
         fallback:
             plane_distance: 0.04 # +-m from z=0
+    remove_barrels:
+        low:
+            h: 0
+            s: 20
+            v: 0
+        high:
+            h: 20
+            s: 255
+            v: 255
+        kernel_size:
+            width: 1
+            height: 10
+
 map:
     # In units of meters, not cells
     # width of grid = width / resolution
@@ -75,6 +88,7 @@ topics:
         left: "/usb_cam_left/camera_info"
         center: "/usb_cam_center/camera_info"
         right: "/usb_cam_right/camera_info"
+    camera_center: "/usb_cam_center/image_raw/compressed"
 frames:
     camera:
         left: "/left_cam_optical"
@@ -85,9 +99,9 @@ node:
         publish:
             map_debug_pcl: true
             cameras:
-                lines: false
-                projections: false
-            filtered_pointclouds: false
+                lines: true
+                projections: true
+            filtered_pointclouds: true
 
     use_lines: true
     camera:

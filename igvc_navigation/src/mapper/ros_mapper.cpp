@@ -29,6 +29,8 @@
 
 #include <cv_bridge/cv_bridge.h>
 
+#include <image_transport/image_transport.h>
+
 #include "map_utils.h"
 #include "ros_mapper.h"
 
@@ -70,6 +72,8 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "cameras/resize_width", resize_width_);
   igvc::getParam(pNh, "cameras/resize_height", resize_height_);
 
+  igvc::getParam(pNh, "topics/camera_center", center_camera_topic_);
+
   igvc::getParam(pNh, "node/debug/publish/map_debug_pcl", debug_pub_map_pcl);
   igvc::getParam(pNh, "node/use_lines", use_lines_);
   igvc::param(pNh, "node/transform_max_wait_time", transform_max_wait_time_, 3.0);
@@ -78,6 +82,7 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
 
   ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(lidar_topic_, 1, &ROSMapper::pcCallback, this);
   ros::Subscriber projected_line_map_sub;
+  ros::Subscriber center_cam_pub;
 
   if (use_lines_)
   {
@@ -135,6 +140,7 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
                                boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::right))));
       }
     }
+    center_cam_pub = nh.subscribe(center_camera_topic_, 1, &ROSMapper::centerCamCallback, this);
   }
 
   map_pub_ = nh.advertise<igvc_msgs::map>("/map", 1);
@@ -147,6 +153,13 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   ROS_INFO("Mapper started!");
 
   ros::spin();
+}
+
+void ROSMapper::centerCamCallback(const sensor_msgs::CompressedImageConstPtr &image)
+{
+  auto cv_img = cv_bridge::toCvCopy(image, "bgr8")->image;
+  cv::resize(cv_img, cv_img, cv::Size(resize_width_, resize_height_));
+  mapper_->setCenterImage(cv_img);
 }
 
 template <>
