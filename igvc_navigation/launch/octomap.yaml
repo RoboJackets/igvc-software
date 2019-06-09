@@ -16,7 +16,7 @@ probability_model:
             prob_miss: 0.52
     camera:
         prob_miss: 0.7
-        prob_hit: 0.75
+        prob_hit: 0.85
 sensor_model:
     max_range: 5
     angular_resolution: 0.01

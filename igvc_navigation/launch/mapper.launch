@@ -14,7 +14,7 @@
 
     <node name="back_circle" pkg="igvc_navigation" type="back_circle">
         <param name="width" type="double" value="10"/>
-        <param name="length" type="double" value="5"/>
+        <param name="length" type="double" value="2.5"/>
         <param name="grid_size" type="double" value="0.2"/>
         <param name="thickness" type="double" value="1"/>
         <param name="offset" type="double" value="5"/>

@@ -187,12 +187,12 @@ void MotorController::sendRequest()
   request.has_speed_l = true;
   request.has_speed_r = true;
 
-  double dt = (ros::Time::now() - last_motors_message_).toSec();
+  /*double dt = (ros::Time::now() - last_motors_message_).toSec();
   if(dt > watchdog_delay_) {
     current_motor_command_.left_velocity = 0.0;
     current_motor_command_.right_velocity = 0.0;
     ROS_ERROR_STREAM_THROTTLE(1, "TIMEOUT on motor controller, too large a difference between current time and last motor: " << dt);
-  }
+  }*/
 
   /* fill in the message fields */
   request.speed_l = static_cast<float>(current_motor_command_.left_velocity);

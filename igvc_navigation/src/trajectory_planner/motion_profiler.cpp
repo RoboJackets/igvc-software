@@ -53,6 +53,7 @@ void MotionProfiler::profileTrajectory(const igvc_msgs::trajectoryPtr& trajector
 
       trajectory_point.header.stamp = last_point.header.stamp + move_duration;
     }
+    
   }
 }
 
