@@ -48,6 +48,7 @@ private:
   double loop_hz_{};
   double stop_dist_{};
   double maximum_vel_{};
+  double end_distance_threshold{};
 
   std::mutex path_mutex_;
   std::mutex state_mutex_;
