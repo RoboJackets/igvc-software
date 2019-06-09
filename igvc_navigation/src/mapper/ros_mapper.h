@@ -92,6 +92,8 @@ private:
   //  void centerCamCallback(const sensor_msgs::ImageConstPtr& image);
   void centerCamCallback(const sensor_msgs::CompressedImageConstPtr& image);
 
+  void backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg);
+
   cv_bridge::CvImage img_bridge_;
 
   ros::Publisher map_pub_;                                  // Publishes map
@@ -102,6 +104,7 @@ private:
   std::unordered_map<Camera, ros::Subscriber> camera_infos_;
   std::unordered_map<Camera, ros::Subscriber> line_map_subs_;
   std::unordered_map<Camera, ros::Subscriber> projected_line_subs_;
+  ros::Subscriber back_circle_sub_;
 
   bool use_lines_{};
   double transform_max_wait_time_{};

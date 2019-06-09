@@ -15,6 +15,10 @@ public:
 
 private:
   ros::NodeHandle nh_;
+  ros::Time last_motors_message_;
+
+  //seconds to wait before stopping if no new motors command comes in
+  double watchdog_delay_;
 
   igvc_msgs::velocity_pair current_motor_command_;  // desired motor velocities
   double p_l_, p_r_, d_l_, d_r_, i_l_, i_r_;        // PID Values

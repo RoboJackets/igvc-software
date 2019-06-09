@@ -90,6 +90,8 @@ public:
 
   void setCenterImage(cv::Mat& image);
 
+  void insertBackCircle(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg, tf::Transform transform);
+
 private:
   /**
    * Performs filtering on the free space of an image

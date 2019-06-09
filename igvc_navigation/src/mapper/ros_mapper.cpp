@@ -143,6 +143,8 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
     center_cam_pub = nh.subscribe(center_camera_topic_, 1, &ROSMapper::centerCamCallback, this);
   }
 
+  back_circle_sub_ = nh.subscribe("/back_circle", 1, &ROSMapper::backCircleCallback, this);
+
   map_pub_ = nh.advertise<igvc_msgs::map>("/map", 1);
 
   if (debug_pub_map_pcl)
@@ -161,6 +163,14 @@ void ROSMapper::centerCamCallback(const sensor_msgs::CompressedImageConstPtr &im
   cv::resize(cv_img, cv_img, cv::Size(resize_width_, resize_height_));
   mapper_->setCenterImage(cv_img);
 }
+
+void ROSMapper::backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg) {
+  // do the tf tree
+  //getOdomTransform(msg->header.stamp);
+  mapper_->insertBackCircle(msg, state_.transform);
+}
+
+
 
 template <>
 bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
