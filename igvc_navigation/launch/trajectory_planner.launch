@@ -23,7 +23,7 @@
         <param name="wheel_constraints/velocity" value="3.0"/>
         <param name="wheel_constraints/acceleration" value="7.0"/>
 
-        <param name="motion_profiler/target_velocity" value="1.0"/>
+        <param name="motion_profiler/target_velocity" value="0.8"/>
         <param name="motion_profiler/beta" value="0.14"/>
         <param name="motion_profiler/lambda" value="1.4"/>
 

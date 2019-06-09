@@ -10,7 +10,7 @@
     <!-- Planner -->
     <node name="path_planner" pkg="igvc_navigation" type="field_d_planner" output="screen" >
         <!-- Distance at which a node is considered a valid goal -->
-        <param name="goal_range" type="double" value="0.3"/>
+        <param name="goal_range" type="double" value="0.1"/>
         <!-- Robot configuration space -->
         <param name="c_space" type="double" value="0.2"/>
         <!-- Path calculation rate -->

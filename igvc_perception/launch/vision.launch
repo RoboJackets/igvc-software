@@ -28,7 +28,7 @@
     <!-- <param name="image_resize_width" value="400" /> -->
     <!-- <param name="image_resize_height" value="400" /> -->
 
-    <!-- <param name="model_path" value="$(find igvc_perception)/../sandbox/models/IGVCModel_120.pt" /> -->
+    <param name="model_path" value="$(find igvc_perception)/../sandbox/models/Yosuke/IGVCModel_220.pt" />
 
     <!-- Use cpu instead of GPU (will run very slowly). -->
     <!-- <param name="force_cpu" value="false" /> -->

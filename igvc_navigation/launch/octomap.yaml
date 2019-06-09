@@ -8,15 +8,15 @@ octree:
 probability_model:
     lidar:
         scan: # Hit: points registered by the lidar scan, Miss: ray between the lidar and the hit points
-            prob_miss: 0.55
-            prob_hit: 0.9
+            prob_miss: 0.6
+            prob_hit: 0.8
         ground:
             prob_miss: 0.6
         free_space: # Rays that are not detected by the lidar to have occupied points along them
             prob_miss: 0.52
     camera:
-        prob_miss: 0.5001
-        prob_hit: 0.9
+        prob_miss: 0.7
+        prob_hit: 0.75
 sensor_model:
     max_range: 5
     angular_resolution: 0.01
@@ -45,8 +45,8 @@ filters:
         enable: true
         ransac:
             iterations: 400
-            distance_threshold: 0.1
-            eps_angle: 0.5
+            distance_threshold: 0.4
+            eps_angle: 0.2
         fallback:
             plane_distance: 0.04 # +-m from z=0
 map:
@@ -85,9 +85,9 @@ node:
         publish:
             map_debug_pcl: true
             cameras:
-                lines: false
-                projections: false
-            filtered_pointclouds: false
+                lines: true
+                projections: true
+            filtered_pointclouds: true
 
     use_lines: true
     camera:

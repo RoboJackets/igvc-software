@@ -10,4 +10,5 @@
         <param name="orientation_rotation" value="1.109" />
         <remap from="imu" to="magnetometer" />
     </node>
+    <include file="$(find igvc_platform)/launch/quaternion_to_rpy.launch" />
 </launch>
