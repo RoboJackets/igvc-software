@@ -12,4 +12,8 @@
         <node name="jessii_rviz" pkg="rviz" type="rviz" args="-d $(find igvc_rviz_plugins)/configs/jessii_conf.rviz"/>
     </group>
 
+    <node name="back_circle" pkg="igvc_navigation" type="back_circle">
+        
+    </node>
+
 </launch>
