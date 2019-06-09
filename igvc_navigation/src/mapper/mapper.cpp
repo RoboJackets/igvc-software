@@ -44,6 +44,15 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
 
   igvc::getParam(pNh, "filters/combined_map/blur/kernel", combined_map_options_.blur.kernel);
 
+  igvc::getParam(pNh, "filters/remove_barrels/low/h", remove_barrel_options_.low_h);
+  igvc::getParam(pNh, "filters/remove_barrels/low/s", remove_barrel_options_.low_s);
+  igvc::getParam(pNh, "filters/remove_barrels/low/v", remove_barrel_options_.low_v);
+  igvc::getParam(pNh, "filters/remove_barrels/high/h", remove_barrel_options_.high_h);
+  igvc::getParam(pNh, "filters/remove_barrels/high/s", remove_barrel_options_.high_s);
+  igvc::getParam(pNh, "filters/remove_barrels/high/v", remove_barrel_options_.high_v);
+  igvc::getParam(pNh, "filters/remove_barrels/kernel_size/width", remove_barrel_options_.kernel_width);
+  igvc::getParam(pNh, "filters/remove_barrels/kernel_size/height", remove_barrel_options_.kernel_height);
+
   igvc::getParam(pNh, "octree/resolution", resolution_);
 
   igvc::getParam(pNh, "node/use_lines", use_lines_);
@@ -80,6 +89,8 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
     ground_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/debug/ground", 1);
     nonground_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/debug/nonground", 1);
     nonground_projected_pub_ = pNh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/mapper/debug/nonground_projected", 1);
+    filtered_img_pub_ = pNh.advertise<sensor_msgs::Image>("/mapper/filtered_image", 1);
+    removed_barrels_pub_ = pNh.advertise<sensor_msgs::Image>("/mapper/removed_barrels", 1);
   }
 }
 
@@ -184,6 +195,12 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
   {
     MapUtils::projectToPlane(projected_occupied_pc, ground_plane_, image, model, camera_to_base, true);
     pcl_ros::transformPointCloud(projected_occupied_pc, projected_occupied_pc, base_to_odom);
+  }
+
+  if (static_cast<int>(camera) == 1)
+  {
+    MapUtils::filterBarrels(image, center_barrels_mask_);
+    MapUtils::debugPublishImage(filtered_img_pub_, image, stamp, true);
   }
 
   processImageFreeSpace(image);
@@ -310,4 +327,11 @@ void Mapper::insertBackCircle(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg, tf:
   pcl_ros::transformPointCloud(*msg, *msg, transform);
   //struct, cloud, true, model
   octomapper_->insertPoints(pc_map_pair_, *msg, true, lidar_scan_probability_model_);
+}
+
+void Mapper::setCenterImage(cv::Mat& image)
+{
+  MapUtils::removeBarrels(image, remove_barrel_options_);
+  center_barrels_mask_ = image;
+  MapUtils::debugPublishImage(removed_barrels_pub_, image, ros::Time::now(), true);
 }

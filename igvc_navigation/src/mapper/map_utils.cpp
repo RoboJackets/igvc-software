@@ -259,4 +259,38 @@ void debugPublishPointCloud(const ros::Publisher& publisher, pcl::PointCloud<pcl
     publisher.publish(pointcloud);
   }
 }
+
+void removeBarrels(cv::Mat& image, RemoveBarrelOptions options)
+{
+  cv::cvtColor(image, image, CV_BGR2HSV);
+  cv::inRange(image, cv::Scalar(options.low_h, options.low_s, options.low_v),
+              cv::Scalar(options.high_h, options.high_s, options.high_v), image);
+
+  cv::Mat kernel =
+      cv::getStructuringElement(cv::MORPH_RECT, cv::Size(2 * options.kernel_width + 1, 2 * options.kernel_height + 1),
+                                cv::Point(options.kernel_width, options.kernel_height));
+
+  cv::morphologyEx(image, image, cv::MORPH_CLOSE, kernel);
+}
+
+void filterBarrels(cv::Mat& image, cv::Mat& mask)
+{
+  if (mask.data != nullptr)
+  {
+    cv::bitwise_or(image, mask, image);
+  }
+}
+
+void debugPublishImage(const ros::Publisher& publisher, const cv::Mat& image, const ros::Time stamp, bool debug)
+{
+  if (debug)
+  {
+    cv_bridge::CvImage bridge_image;
+    bridge_image.image = image;
+    sensor_msgs::ImagePtr out = bridge_image.toImageMsg();
+    out->encoding = "mono8";
+    out->header.stamp = stamp;
+    publisher.publish(out);
+  }
+}
 }  // namespace MapUtils

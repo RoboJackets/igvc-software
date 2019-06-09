@@ -88,6 +88,8 @@ public:
    */
   std::optional<cv::Mat> getMap();
 
+  void setCenterImage(cv::Mat& image);
+
   void insertBackCircle(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg, tf::Transform transform);
 
 private:
@@ -125,6 +127,8 @@ private:
   ros::Publisher nonground_pub_;
   ros::Publisher nonground_projected_pub_;
   ros::Publisher camera_line_pub_;
+  ros::Publisher filtered_img_pub_;
+  ros::Publisher removed_barrels_pub_;
 
   ProbabilityModel lidar_scan_probability_model_{};
   ProbabilityModel lidar_ground_probability_model_{};
@@ -133,6 +137,8 @@ private:
   ProbabilityModel camera_probability_model_{};
   GroundFilterOptions ground_filter_options_{};
   GroundPlane ground_plane_;
+
+  RemoveBarrelOptions remove_barrel_options_{};
 
   bool use_ground_filter_;
   bool camera_model_initialized_;
@@ -147,6 +153,8 @@ private:
   double resolution_;  // Map Resolution
   double radius_;      // Radius to filter lidar points
   double combined_blur_kernel_size_;
+
+  cv::Mat center_barrels_mask_;
 };
 
 #endif  // SRC_MAPPER_H
