@@ -50,6 +50,8 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   igvc::getParam(pNh, "kv_l", kv_l_);
   igvc::getParam(pNh, "kv_r", kv_r_);
 
+  igvc::getParam(pNh, "watchdog_delay", watchdog_delay_);
+
   igvc::param(pNh, "log_period", log_period_, 5.0);
 
   // communication frequency
@@ -71,6 +73,7 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 void MotorController::cmdCallback(const igvc_msgs::velocity_pair::ConstPtr& msg)
 {
   current_motor_command_ = *msg;
+  last_motors_message_ = ros::Time::now();
 }
 
 void MotorController::setPID()
@@ -183,6 +186,13 @@ void MotorController::sendRequest()
   /* indicate that speed fields will contain values */
   request.has_speed_l = true;
   request.has_speed_r = true;
+
+  double dt = (ros::Time::now() - last_motors_message_).toSec();
+  if(dt > watchdog_delay_) {
+    current_motor_command_.left_velocity = 0.0;
+    current_motor_command_.right_velocity = 0.0;
+    ROS_ERROR_STREAM_THROTTLE(1, "TIMEOUT on motor controller, too large a difference between current time and last motor: " << dt);
+  }
 
   /* fill in the message fields */
   request.speed_l = static_cast<float>(current_motor_command_.left_velocity);

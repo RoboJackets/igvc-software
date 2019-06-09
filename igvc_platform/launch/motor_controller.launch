@@ -11,6 +11,7 @@
           <param name="i_l" type="double" value="150.0"/>
           <param name="kv_l" value="32.0"/>
           <param name="kv_r" value="32.0"/>
+          <param name="watchdog_delay" value="1.0"/>
           <param name="log_period" type="double" value="5.0"/>
           <param name="min_battery_voltage" type="double" value="23.5"/>
           <param name="frequency" type="double" value="50.0"/>
