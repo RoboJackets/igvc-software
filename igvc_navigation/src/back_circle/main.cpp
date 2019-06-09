@@ -7,17 +7,30 @@
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
+#include <igvc_utils/NodeUtils.hpp>
 
 int main(int argc, char** argv) {
   ros::init(argc, argv, "back_circle");
 
+  ros::NodeHandle pNh("~");
+
+  double width, length, grid_size, thickness, offset;
+  // parameters
+  igvc::getParam(pNh, std::string("width"), width);
+  igvc::getParam(pNh, std::string("length"), length);
+  igvc::getParam(pNh, std::string("grid_size"), grid_size);
+  igvc::getParam(pNh, std::string("thickness"), thickness);
+  igvc::getParam(pNh, std::string("offset"), offset);
+
+
   using namespace cv;
 
   //size = 0.2 * i
-  double meters = 10;
-  int img_size = static_cast<int>(meters / 0.2);
+  double meters = (length + width) * 2;
+  int img_size = static_cast<int>(std::round(meters / grid_size));
   Mat img(img_size, img_size, CV_8U, Scalar::all(0));
-  ellipse(img, Point(img_size/2, img_size/2), Size(5/ 0.2, 5/0.2), 0, 90, 270, Scalar(255), 1 / 0.2);
+  ellipse(img, Point(img_size/2, img_size/2), Size(width/ grid_size, length/grid_size), 0, 90, 270, Scalar(255),
+          static_cast<int>(std::round(thickness / grid_size)));
   ros::NodeHandle nh;
   ros::Publisher pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/back_circle", 1);
 
@@ -30,7 +43,7 @@ int main(int argc, char** argv) {
     for (int j = 0; j < img.cols; j++) {
       // You can now access the pixel value with cv::Vec3b
       if(img.at<uchar>(i, j) == 255) {
-        back_circle.push_back(pcl::PointXYZ((j - img_size/2) * 0.2, (i - img_size/2) * 0.2, 0));
+        back_circle.push_back(pcl::PointXYZ((j - img_size/2) * grid_size + offset, (i - img_size/2) * grid_size, 0));
       }
     }
   }
