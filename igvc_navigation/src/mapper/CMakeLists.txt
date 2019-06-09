@@ -6,4 +6,4 @@ endif ()
 add_executable(
     mapper ros_mapper.cpp octomapper.cpp octomapper.h ros_mapper.h map_utils.cpp map_utils.h mapper.cpp mapper.h)
 add_dependencies(mapper igvc_msgs_gencpp)
-target_link_libraries(mapper ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES} ${OCTOMAP_LIBRARIES})
+target_link_libraries(mapper ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES} igvc_state)

@@ -23,9 +23,9 @@
 #include <tf/transform_datatypes.h>
 #include <tf_conversions/tf_eigen.h>
 
+#include <igvc_utils/robot_state.h>
 #include <visualization_msgs/Marker.h>
 #include <igvc_utils/NodeUtils.hpp>
-#include <igvc_utils/RobotState.hpp>
 
 #include <cv_bridge/cv_bridge.h>
 

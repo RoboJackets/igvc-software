@@ -14,7 +14,7 @@
         <!-- Robot configuration space -->
         <param name="c_space" type="double" value="0.4"/>
         <!-- Path calculation rate -->
-        <param name="rate" type="double" value="10"/>
+        <param name="rate" type="double" value="1"/>
         <!-- Max distance to a goal node -->
         <param name="maximum_distance" type="double" value="100.0"/>
         <!-- Publish a pointcloud of search nodes on the /expanded topic -->
@@ -28,24 +28,5 @@
         <!-- maximum occupancy probability of a cell before it is considered
         to have an infinite traversal cost -->
         <param name="occupancy_threshold" type="double" value="0.7"/>
-    </node>
-
-    <!-- Follower -->
-    <node name="path_follower" pkg="igvc_navigation" type="path_follower" output="screen" >
-        <!-- Maxmimum velocity allowed before stopping motors -->
-        <param name="maximum_vel" type="double" value="2.0"/>
-        <!-- Distance between the wheels. Used in differential drive odometry equations -->
-        <param name="axle_length" type="double" value="0.52"/>
-        <!-- Distance along the path to generate smooth control law for  -->
-        <param name="lookahead_dist" type="double" value="1.3"/>
-        <!-- granularity with which to visualize planned trajectories -->
-        <param name="granularity" type="int" value="100"/>
-        <!-- How far away robot should be from the waypoint before it stops -->
-        <param name="stop_dist" type="double" value="0.85"/>
-        <!-- Smooth Control Parameters -->
-        <param name="target_v" type="double" value="0.4"/>
-        <param name="k1" type="double" value="1.8"/>
-        <param name="k2" type="double" value="5"/>
-        <param name="debug" type="bool" value="false"/>
     </node>
 </launch>
