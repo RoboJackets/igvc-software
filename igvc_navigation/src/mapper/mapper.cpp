@@ -326,7 +326,7 @@ void Mapper::insertBackCircle(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg, tf:
   pcl::PointCloud<pcl::PointXYZ> cloud = *msg;
   pcl_ros::transformPointCloud(*msg, *msg, transform);
   //struct, cloud, true, model
-  octomapper_->insertPoints(pc_map_pair_, *msg, true, lidar_scan_probability_model_);
+  octomapper_->insertPoints(camera_map_pair_, *msg, true, lidar_scan_probability_model_);
 }
 
 void Mapper::setCenterImage(cv::Mat& image)
