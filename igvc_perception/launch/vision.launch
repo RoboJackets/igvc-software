@@ -14,11 +14,17 @@
     <!-- Use cpu instead of GPU (will run very slowly). -->
     <param name="force_cpu" value="false" />
 
-    <include file="$(find igvc_perception)/launch/cameras/left.launch"/>
+    <include file="$(find igvc_perception)/launch/cameras/left.launch">
+        <arg name="camera" value="[left]" />
+    </include>
 
-    <include file="$(find igvc_perception)/launch/cameras/right.launch"/>
+    <include file="$(find igvc_perception)/launch/cameras/right.launch">
+        <arg name="camera" value="[right]" />
+    </include>
 
-    <include file="$(find igvc_perception)/launch/cameras/center.launch"/>
+    <include file="$(find igvc_perception)/launch/cameras/center.launch">
+        <arg name="camera" value="[center]" />
+    </include>
 
     <!-- <node name="cnn" pkg="igvc_perception" type="cnn.py" output="screen" /> -->
 
