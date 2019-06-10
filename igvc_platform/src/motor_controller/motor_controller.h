@@ -17,7 +17,7 @@ private:
   ros::NodeHandle nh_;
   ros::Time last_motors_message_;
 
-  // seconds to wait before stopping if no new motors command comes in
+  //seconds to wait before stopping if no new motors command comes in
   double watchdog_delay_;
 
   igvc_msgs::velocity_pair current_motor_command_;  // desired motor velocities

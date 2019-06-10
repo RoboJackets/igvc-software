@@ -321,11 +321,11 @@ void Mapper::invertMissProbabilities()
   camera_probability_model_.prob_miss = 1.0 - camera_probability_model_.prob_miss;
 }
 
-void Mapper::insertBackCircle(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg, tf::Transform transform)
-{
+
+void Mapper::insertBackCircle(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg, tf::Transform transform) {
   pcl::PointCloud<pcl::PointXYZ> cloud = *msg;
   pcl_ros::transformPointCloud(*msg, *msg, transform);
-  // struct, cloud, true, model
+  //struct, cloud, true, model
   octomapper_->insertPoints(camera_map_pair_, *msg, true, lidar_scan_probability_model_);
 }
 

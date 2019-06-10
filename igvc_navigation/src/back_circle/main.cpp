@@ -1,15 +1,15 @@
 
 
+
+#include <opencv2/core/mat.hpp>
+#include <cv.hpp>
+#include <ros/ros.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
-#include <ros/ros.h>
-#include <cv.hpp>
 #include <igvc_utils/NodeUtils.hpp>
-#include <opencv2/core/mat.hpp>
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   ros::init(argc, argv, "back_circle");
 
   ros::NodeHandle pNh("~");
@@ -22,13 +22,14 @@ int main(int argc, char** argv)
   igvc::getParam(pNh, std::string("thickness"), thickness);
   igvc::getParam(pNh, std::string("offset"), offset);
 
+
   using namespace cv;
 
-  // size = 0.2 * i
+  //size = 0.2 * i
   double meters = (length + width) * 2;
   int img_size = static_cast<int>(std::round(meters / grid_size));
   Mat img(img_size, img_size, CV_8U, Scalar::all(0));
-  ellipse(img, Point(img_size / 2, img_size / 2), Size(width / grid_size, length / grid_size), 0, 90, 270, Scalar(255),
+  ellipse(img, Point(img_size/2, img_size/2), Size(width/ grid_size, length/grid_size), 0, 90, 270, Scalar(255),
           static_cast<int>(std::round(thickness / grid_size)));
   ros::NodeHandle nh;
   ros::Publisher pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ>>("/back_circle", 1);
@@ -37,15 +38,12 @@ int main(int argc, char** argv)
   back_circle.header.stamp = ros::Time::now().toSec();
   back_circle.header.frame_id = "/base_footprint";
 
-  for (int i = 0; i < img.rows; i++)
-  {
-    for (int j = 0; j < img.cols; j++)
-    {
+
+  for(int i=0; i<img.rows; i++) {
+    for (int j = 0; j < img.cols; j++) {
       // You can now access the pixel value with cv::Vec3b
-      if (img.at<uchar>(i, j) == 255)
-      {
-        back_circle.push_back(
-            pcl::PointXYZ((j - img_size / 2) * grid_size + offset, (i - img_size / 2) * grid_size, 0));
+      if(img.at<uchar>(i, j) == 255) {
+        back_circle.push_back(pcl::PointXYZ((j - img_size/2) * grid_size + offset, (i - img_size/2) * grid_size, 0));
       }
     }
   }
@@ -55,12 +53,12 @@ int main(int argc, char** argv)
   sleep.sleep();
   int counter = 0;
   ros::Rate slow(10);
-  while (ros::ok() && counter < 10)
-  {
+  while(ros::ok() && counter < 10) {
     pub.publish(back_circle);
     counter++;
     slow.sleep();
   }
+
 
   return 0;
 }
