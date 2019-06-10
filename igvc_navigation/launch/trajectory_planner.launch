@@ -3,6 +3,7 @@
     <!-- Planner -->
     <node name="trajectory_planner" pkg="igvc_navigation" type="trajectory_planner" output="screen">
         <param name="axle_length" value="0.52"/>
+        <param name="path_timeout" value="3.0"/>
 
         <param name="smooth_control/k1" value="1.0"/>
         <param name="smooth_control/k2" value="7.0"/>
