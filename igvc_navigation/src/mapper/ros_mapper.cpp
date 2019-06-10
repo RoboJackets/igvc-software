@@ -164,13 +164,12 @@ void ROSMapper::centerCamCallback(const sensor_msgs::CompressedImageConstPtr &im
   mapper_->setCenterImage(cv_img);
 }
 
-void ROSMapper::backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg) {
+void ROSMapper::backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg)
+{
   // do the tf tree
-  //getOdomTransform(msg->header.stamp);
+  // getOdomTransform(msg->header.stamp);
   mapper_->insertBackCircle(msg, state_.transform);
 }
-
-
 
 template <>
 bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
