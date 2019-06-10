@@ -57,6 +57,8 @@ TrajectoryPlanner::TrajectoryPlanner()
   igvc::param(pNh, "motion_profiler/beta", motion_profiler_options.beta, 2.0);
   igvc::param(pNh, "motion_profiler/lambda", motion_profiler_options.lambda, 1.0);
 
+  igvc::getParam(pNh, "end_distance_threshold", end_distance_threshold);
+
   double linear_acceleration_curvature_threshold;
   igvc::param(pNh, "linear_velocity_curvature_threshold", linear_acceleration_curvature_threshold, 1e-2);
 
@@ -190,7 +192,7 @@ std::optional<igvc_msgs::trajectoryPtr> TrajectoryPlanner::getSmoothPath()
 
   std::lock_guard<std::mutex> state_lock(state_mutex_);
   std::lock_guard<std::mutex> path_lock(path_mutex_);
-  controller_->getPath(path_, trajectory, state_);
+  controller_->getPath(path_, trajectory, state_, end_distance_threshold);
   return trajectory;
 }
 

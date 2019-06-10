@@ -46,6 +46,13 @@ void TrajectoryFollower::trajectoryFollowLoop()
     {
       followTrajectory();
     }
+    else
+    {
+      igvc_msgs::velocity_pair pair;
+      pair.left_velocity = 0.0;
+      pair.right_velocity = 0.0;
+      control_pub_.publish(pair);
+    }
     rate.sleep();
   }
 }
