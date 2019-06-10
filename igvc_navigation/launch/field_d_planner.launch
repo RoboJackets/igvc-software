@@ -28,5 +28,7 @@
         <!-- maximum occupancy probability of a cell before it is considered
         to have an infinite traversal cost -->
         <param name="occupancy_threshold" type="double" value="0.7"/>
+        <!-- constant multipler applied to crossing a valid node -->
+        <param name="probability_penalty" type="double" value="5.0"/>
     </node>
 </launch>

@@ -369,8 +369,8 @@ float Graph::getC(const Node& s, const Node& s_prime)
 
   // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
   cell_val = getValWithConfigurationSpace(cell_ind);
-  return (cell_val > occupancy_threshold_uchar_) ? std::numeric_limits<float>::infinity() :
-                                                   (TRAVERSAL_COST + (cell_val / 255.0f));
+  return (cell_val > occupancy_threshold_uchar_) ? 1e6 :
+                                                   (TRAVERSAL_COST + probabilistic_penalty * (cell_val / 255.0f));
 }
 
 float Graph::getB(const Node& s, const Node& s_prime)
@@ -415,8 +415,8 @@ float Graph::getB(const Node& s, const Node& s_prime)
 
   // return inf cost if cell is occupied, otherwise return constant traversal cost (1)
   max_cell_val = std::max(getValWithConfigurationSpace(cell_ind_1), getValWithConfigurationSpace(cell_ind_2));
-  return (max_cell_val > occupancy_threshold_uchar_) ? std::numeric_limits<float>::infinity() :
-                                                       (TRAVERSAL_COST + (max_cell_val / 255.0f));
+  return (max_cell_val > occupancy_threshold_uchar_) ? 1e6 :
+                                                       (TRAVERSAL_COST + probabilistic_penalty * (max_cell_val / 255.0f));
 }
 
 float Graph::getValWithConfigurationSpace(const std::tuple<int, int>& ind)
