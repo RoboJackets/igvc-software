@@ -191,7 +191,8 @@ void MotorController::sendRequest()
   if(dt > watchdog_delay_) {
     current_motor_command_.left_velocity = 0.0;
     current_motor_command_.right_velocity = 0.0;
-    ROS_ERROR_STREAM_THROTTLE(1, "TIMEOUT on motor controller, too large a difference between current time and last motor: " << dt);
+    ROS_ERROR_STREAM_THROTTLE(1, "TIMEOUT on motor controller, too large a difference between current time and last
+  motor: " << dt);
   }*/
 
   /* fill in the message fields */
