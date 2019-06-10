@@ -151,7 +151,6 @@ public:
   float DIAGONAL_DISTANCE = sqrtf(2.0f);
   float EDGE_DISTANCE = 1.0f;
   float TRAVERSAL_COST = 1.0f;
-  float probabilistic_penalty = 3.0f;
 
   // k_m, as defined in the D* lite paper, keeps track of the robot's movement
   // in the grid space. Serves to increase each new node's key value by k_m as
