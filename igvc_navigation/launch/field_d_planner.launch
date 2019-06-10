@@ -12,7 +12,7 @@
         <!-- Distance at which a node is considered a valid goal -->
         <param name="goal_range" type="double" value="0.1"/>
         <!-- Robot configuration space -->
-        <param name="c_space" type="double" value="0.2"/>
+        <param name="c_space" type="double" value="0.4"/>
         <!-- Path calculation rate -->
         <param name="rate" type="double" value="1"/>
         <!-- Max distance to a goal node -->
@@ -27,8 +27,8 @@
         <param name="lookahead_dist" type="int" value="0"/>
         <!-- maximum occupancy probability of a cell before it is considered
         to have an infinite traversal cost -->
-        <param name="occupancy_threshold" type="double" value="0.7"/>
+        <param name="occupancy_threshold" type="double" value="0.85"/>
         <!-- constant multipler applied to crossing a valid node -->
-        <param name="probability_penalty" type="double" value="5.0"/>
+        <param name="probability_penalty" type="double" value="1.0"/>
     </node>
 </launch>
