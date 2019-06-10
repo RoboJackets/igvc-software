@@ -98,9 +98,24 @@ void TrajectoryFollower::ensureAboveDeadband(RobotControl& control)
   {
     if (std::abs(control.left_) < min_velocity_ || std::abs(control.right_) < min_velocity_)
     {
-      auto [k, v] = control.toKV(axle_length_);
-      v = min_velocity_ - std::abs(0.5 * k * axle_length_);
-      control = RobotControl::fromKV(k, v, axle_length_);
+      // If different signs
+      if ((control.left_ < 0 && control.right_ > 0) || (control.left_ > 0 && control.right_ < 0))
+      {
+        if (control.left_ < control.right_)
+        {
+          control.left_ = std::copysign(min_velocity_, control.left_);
+        }
+        else
+        {
+          control.right_ = std::copysign(min_velocity_, control.right_);
+        }
+      }
+      else
+      {
+        auto [k, v] = control.toKV(axle_length_);
+        v = (2 * min_velocity_) / (2 - k * axle_length_);
+        control = RobotControl::fromKV(k, v, axle_length_);
+      }
     }
   }
 }
