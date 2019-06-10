@@ -44,6 +44,8 @@ private:
 
   RobotState state_;
   ros::Time last_time_;
+  ros::Time last_path_time_;
+  double path_timeout_;
 
   double loop_hz_{};
   double stop_dist_{};

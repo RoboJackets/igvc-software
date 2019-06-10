@@ -33,6 +33,7 @@ TrajectoryPlanner::TrajectoryPlanner()
   double target_velocity;
 
   igvc::param(pNh, "axle_length", axle_length, 0.52);
+  igvc::param(pNh, "path_timeout", path_timeout_, 3.0);
   igvc::param(pNh, "node/loop_hz", loop_hz_, 20.0);
 
   igvc::param(pNh, "smooth_control/k1", smooth_control_options.k1, 1.0);
@@ -102,6 +103,7 @@ void TrajectoryPlanner::pathCallback(const nav_msgs::PathConstPtr& msg)
   smoothed_pub_.publish(path);
   std::lock_guard<std::mutex> path_mutex(path_mutex_);
   path_ = path;
+  last_path_time_ = ros::Time::now();
 }
 
 void TrajectoryPlanner::waypointCallback(const geometry_msgs::PointStampedConstPtr& msg)
@@ -161,6 +163,13 @@ void TrajectoryPlanner::updateTrajectory()
   while (ros::ok())
   {
     std::optional<igvc_msgs::trajectoryPtr> trajectory = getSmoothPath();
+    if((ros::Time::now() - last_path_time_).toSec() > path_timeout_) {
+      ROS_INFO_STREAM_THROTTLE(1, "TIMEOUT ON TRAJ PLANNER " << (ros::Time::now() - last_path_time_).toSec());
+      igvc_msgs::trajectoryPtr empty_traj = boost::make_shared<igvc_msgs::trajectory>();
+      empty_traj->header.stamp = ros::Time::now();
+      empty_traj->header.frame_id = "/odom";
+      publishTrajectory(empty_traj);
+    }
 
     if (trajectory && trajectory.value().get() != nullptr)
     {
