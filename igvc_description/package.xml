@@ -24,6 +24,7 @@
   <exec_depend>joy</exec_depend>
   <exec_depend>rviz</exec_depend>
   <exec_depend>velodyne_simulator</exec_depend>
+  <exec_depend>velodyne_description</exec_depend>
 
   <export>
     <gazebo_ros gazebo_model_path="${prefix}/urdf/models"/>

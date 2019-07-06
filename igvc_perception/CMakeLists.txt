@@ -20,6 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
     tf
     pcl_ros
     igvc_utils
+    velodyne_pointcloud
     )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
