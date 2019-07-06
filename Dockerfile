@@ -15,4 +15,4 @@ RUN mkdir -p src
 COPY . ./src/igvc-software
 
 # Install all ROS dependencies that can automatically be installed
-RUN /bin/bash -c "rosdep install -iy --from-paths ./src"
+RUN /bin/bash -c "rosdep install -iy --from-paths ./src --skip-keys='python-pytorch-pip' && pip install --no-cache-dir torch torchvision"
