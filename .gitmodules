@@ -1,3 +1,0 @@
-[submodule "external/usb_cam"]
-	path = external/usb_cam
-	url = https://github.com/bosch-ros-pkg/usb_cam.git
