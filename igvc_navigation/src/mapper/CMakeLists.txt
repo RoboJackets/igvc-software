@@ -1,9 +1,16 @@
-find_package(OpenMP)
-if (OpenMP_FOUND)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif ()
 add_executable(
     mapper ros_mapper.cpp octomapper.cpp octomapper.h ros_mapper.h map_utils.cpp map_utils.h mapper.cpp mapper.h)
-add_dependencies(mapper igvc_msgs_gencpp)
-target_link_libraries(mapper ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES} igvc_state)
+add_dependencies(mapper ${catkin_EXPORTED_TARGETS})
+target_link_libraries(mapper ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${Boost_LIBRARIES})
+
+find_package(OpenMP)
+if (OpenMP_FOUND)
+    target_link_libraries(mapper ${OpenMP_CXX_LIBRARIES})
+endif ()
+
+install(
+    TARGETS mapper
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

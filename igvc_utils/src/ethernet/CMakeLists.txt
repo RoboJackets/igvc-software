@@ -1,2 +1,9 @@
 add_library(EthernetSocket EthernetSocket.cpp)
 target_link_libraries(EthernetSocket ${Boost_LIBRARIES})
+
+install(
+    TARGETS EthernetSocket
+    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

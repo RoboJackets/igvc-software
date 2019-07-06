@@ -1,30 +1,31 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(igvc_perception)
 
+include(../igvc.cmake)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-  igvc_msgs
-  image_geometry
-  image_transport
-  cv_bridge
-  camera_info_manager
-  laser_geometry
-  tf
-  pcl_ros
-  igvc_utils
-)
+    roscpp
+    rospy
+    std_msgs
+    igvc_msgs
+    image_geometry
+    image_transport
+    cv_bridge
+    pcl_conversions
+    camera_info_manager
+    laser_geometry
+    tf
+    pcl_ros
+    igvc_utils
+    )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED filters)
-
-set(CMAKE_CXX_FLAGS "-g -std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -92,10 +93,7 @@ catkin_python_setup()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES igvc
-#  CATKIN_DEPENDS roscpp std_msgs
-#  DEPENDS system_lib
+    CATKIN_DEPENDS std_msgs igvc_msgs
 )
 
 ###########
@@ -106,9 +104,8 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  ${catkin_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS}
-  include
+    ${catkin_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -121,7 +118,6 @@ include_directories(
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(igvc_node igvc_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(igvc_node
@@ -167,11 +163,12 @@ include_directories(
 ## Testing ##
 #############
 
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_subdirectory(src/tests)
+if (CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+    add_subdirectory(src/tests)
 endif ()
 
 
 add_subdirectory(src/filter_lidar)
 add_subdirectory(src/projection)
+
