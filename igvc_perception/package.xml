@@ -60,7 +60,7 @@
   <run_depend>robot_localization</run_depend>
   <run_depend>pluginlib</run_depend>
   <run_depend>laser_geometry</run_depend>
-  <run_depend>python-tensorflow-pip</run_depend>
+  <run_depend>python-pytorch-pip</run_depend>
 
   <!-- Builds from source -->
   <run_depend>gps_common</run_depend>

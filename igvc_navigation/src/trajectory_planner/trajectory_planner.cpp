@@ -163,7 +163,8 @@ void TrajectoryPlanner::updateTrajectory()
   while (ros::ok())
   {
     std::optional<igvc_msgs::trajectoryPtr> trajectory = getSmoothPath();
-    if((ros::Time::now() - last_path_time_).toSec() > path_timeout_) {
+    if ((ros::Time::now() - last_path_time_).toSec() > path_timeout_)
+    {
       ROS_INFO_STREAM_THROTTLE(1, "TIMEOUT ON TRAJ PLANNER " << (ros::Time::now() - last_path_time_).toSec());
       igvc_msgs::trajectoryPtr empty_traj = boost::make_shared<igvc_msgs::trajectory>();
       empty_traj->header.stamp = ros::Time::now();
