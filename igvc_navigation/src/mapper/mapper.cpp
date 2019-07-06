@@ -197,11 +197,11 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
     pcl_ros::transformPointCloud(projected_occupied_pc, projected_occupied_pc, base_to_odom);
   }
 
-//  if (static_cast<int>(camera) == 1)
-//  {
-//    MapUtils::filterBarrels(image, center_barrels_mask_);
-//    MapUtils::debugPublishImage(filtered_img_pub_, image, stamp, true);
-//  }
+  //  if (static_cast<int>(camera) == 1)
+  //  {
+  //    MapUtils::filterBarrels(image, center_barrels_mask_);
+  //    MapUtils::debugPublishImage(filtered_img_pub_, image, stamp, true);
+  //  }
 
   processImageFreeSpace(image);
   MapUtils::projectToPlane(projected_empty_pc, ground_plane_, image, model, camera_to_base, false);
