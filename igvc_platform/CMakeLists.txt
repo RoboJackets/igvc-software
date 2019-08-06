@@ -1,30 +1,29 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(igvc_platform)
 
+include(../igvc.cmake)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-  igvc_msgs
-  image_geometry
-  image_transport
-  cv_bridge
-  camera_info_manager
-  tf
-  pcl_ros
-  igvc_utils
-  serial
-)
+    roscpp
+    rospy
+    std_msgs
+    igvc_msgs
+    image_geometry
+    cv_bridge
+    tf
+    usb_cam
+    pcl_ros
+    igvc_utils
+    serial
+    )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED filters)
-
-set(CMAKE_CXX_FLAGS "-g -std=c++11 -Wall ${CMAKE_CXX_FLAGS}")
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -92,10 +91,8 @@ catkin_python_setup()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
-#  LIBRARIES igvc
-#  CATKIN_DEPENDS roscpp std_msgs
-#  DEPENDS system_lib
+    INCLUDE_DIRS include
+    CATKIN_DEPENDS std_msgs igvc_msgs
 )
 
 ###########
@@ -106,10 +103,9 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
-  include
-  ${catkin_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS}
-  ${igvc_utils_INCLUDE_DIRS}
+    include
+    ${catkin_INCLUDE_DIRS}
+    ${PCL_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -122,7 +118,6 @@ include_directories(
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(igvc_node igvc_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(igvc_node
@@ -150,12 +145,11 @@ include_directories(
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h")
-#   PATTERN ".svn" EXCLUDE
-# )
+# Mark cpp header files for installation
+install(DIRECTORY include
+ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+ FILES_MATCHING PATTERN "*.h"
+)
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
@@ -168,10 +162,10 @@ include_directories(
 ## Testing ##
 #############
 
-if(CATKIN_ENABLE_TESTING)
+if (CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
     add_subdirectory(src/tests)
-endif()
+endif ()
 
 
 add_subdirectory(src/imu)
