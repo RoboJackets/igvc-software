@@ -45,6 +45,6 @@ set(SOURCE_FILES
   ${MOC_FILES})
 
 add_library(${PROJECT_NAME} ${SOURCE_FILES})
-add_dependencies(${PROJECT_NAME} igvc_msgs_gencpp)
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} ${Qt5Core_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Widgets_LIBRARIES} ${OGRE_LIBRARY_DIRS})
