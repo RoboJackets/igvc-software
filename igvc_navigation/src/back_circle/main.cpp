@@ -1,5 +1,4 @@
-
-
+#include <parameter_assertions/assertions.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
@@ -16,11 +15,15 @@ int main(int argc, char** argv)
 
   double width, length, grid_size, thickness, offset;
   // parameters
-  igvc::getParam(pNh, std::string("width"), width);
-  igvc::getParam(pNh, std::string("length"), length);
-  igvc::getParam(pNh, std::string("grid_size"), grid_size);
-  igvc::getParam(pNh, std::string("thickness"), thickness);
-  igvc::getParam(pNh, std::string("offset"), offset);
+
+  using namespace assertions;
+  Asserter asserter;
+
+  asserter.getParam(pNh, std::string("width"), width);
+  asserter.getParam(pNh, std::string("length"), length);
+  asserter.getParam(pNh, std::string("grid_size"), grid_size);
+  asserter.getParam(pNh, std::string("thickness"), thickness);
+  asserter.getParam(pNh, std::string("offset"), offset);
 
   using namespace cv;
 

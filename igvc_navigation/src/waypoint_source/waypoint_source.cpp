@@ -1,11 +1,15 @@
 #include "waypoint_source.h"
+#include <parameter_assertions/assertions.h>
 
 WaypointSource::WaypointSource(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 {
   ros::NodeHandle pNh("~");
 
-  igvc::param(pNh, "waypoint_threshold", waypoint_threshold_, 1.0);
-  igvc::getParam(pNh, "file", path_);
+  using namespace assertions;
+  Asserter asserter;
+
+  asserter.param(pNh, "waypoint_threshold", waypoint_threshold_, 1.0);
+  asserter.getParam(pNh, "file", path_);
   load_waypoints_file();
 
   waypoint_pub_ = nh_.advertise<geometry_msgs::PointStamped>("/waypoint", 1);

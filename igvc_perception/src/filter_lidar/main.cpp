@@ -1,3 +1,4 @@
+#include <parameter_assertions/assertions.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
@@ -37,12 +38,15 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  igvc::getParam(pNh, "x_offset", x_offset);
-  igvc::getParam(pNh, "y_offset", y_offset);
-  igvc::getParam(pNh, "x_size", x_size);
-  igvc::getParam(pNh, "y_size", y_size);
-  igvc::getParam(pNh, "max_dist", max_dist);
-  igvc::getParam(pNh, "back_buffer", back_buffer);
+  using namespace assertions;
+  Asserter asserter;
+
+  asserter.getParam(pNh, "x_offset", x_offset);
+  asserter.getParam(pNh, "y_offset", y_offset);
+  asserter.getParam(pNh, "x_size", x_size);
+  asserter.getParam(pNh, "y_size", y_size);
+  asserter.getParam(pNh, "max_dist", max_dist);
+  asserter.getParam(pNh, "back_buffer", back_buffer);
 
   _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/scan/pointcloud", 1);
 

@@ -1,4 +1,5 @@
 #include <laser_geometry/laser_geometry.h>
+#include <parameter_assertions/assertions.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
@@ -61,9 +62,12 @@ int main(int argc, char** argv)
 
   ros::NodeHandle pNh("~");
 
-  igvc::getParam(pNh, "min_dist", min_dist);
-  igvc::getParam(pNh, "neighbor_dist", neighbor_dist);
-  igvc::getParam(pNh, "offset", offset);
+  using namespace assertions;
+  Asserter asserter;
+
+  asserter.getParam(pNh, "min_dist", min_dist);
+  asserter.getParam(pNh, "neighbor_dist", neighbor_dist);
+  asserter.getParam(pNh, "offset", offset);
 
   ros::NodeHandle nh;
 

@@ -1,5 +1,6 @@
 #include <geometry_msgs/Vector3.h>
 #include <nav_msgs/Odometry.h>
+#include <parameter_assertions/assertions.h>
 #include <robot_localization/navsat_conversions.h>
 #include <ros/ros.h>
 #include <tf/transform_broadcaster.h>
@@ -106,12 +107,16 @@ int main(int argc, char** argv)
   ros::NodeHandle pNh("~");
 
   std::string ground_truth_topic, estimate_topic, pub_topic, diff_topic;
-  igvc::param(pNh, "ground_truth_sub_topic", ground_truth_topic, std::string("/ground_truth/state_raw"));
-  igvc::param(pNh, "ground_truth_pub_topic", pub_topic, std::string("/ground_truth"));
+
+  using namespace assertions;
+  Asserter asserter;
+
+  asserter.param(pNh, "ground_truth_sub_topic", ground_truth_topic, std::string("/ground_truth/state_raw"));
+  asserter.param(pNh, "ground_truth_pub_topic", pub_topic, std::string("/ground_truth"));
 
   double longitude, latitude;
-  igvc::param(pNh, "longitude", longitude, -84.405001);
-  igvc::param(pNh, "latitude", latitude, 33.774497);
+  asserter.param(pNh, "longitude", longitude, -84.405001);
+  asserter.param(pNh, "latitude", latitude, 33.774497);
 
   ros::Subscriber ground_truth = nh.subscribe<nav_msgs::Odometry>(ground_truth_topic, 10, groundTruthCallback);
 

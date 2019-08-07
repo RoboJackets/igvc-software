@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   igvc_msgs
   geometry_msgs
+  parameter_assertions
 )
 
 find_package(Eigen3 REQUIRED)
@@ -156,12 +157,6 @@ install(DIRECTORY include
 #############
 ## Testing ##
 #############
-
-if(CATKIN_ENABLE_TESTING)
-    find_package(rostest REQUIRED)
-    add_subdirectory(src/tests)
-endif()
-
 
 add_subdirectory(src/pid_tester)
 add_subdirectory(src/ethernet)

@@ -15,6 +15,7 @@ Date Created: December 22nd, 2018
 #include <sensor_msgs/Image.h>
 #include <std_msgs/Int32.h>
 
+#include <parameter_assertions/assertions.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
@@ -177,13 +178,16 @@ int main(int argc, char** argv)
   // publish path for path_follower
   ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 
-  igvc::getParam(pNh, "c_space", configuration_space);
-  igvc::getParam(pNh, "maximum_distance", maximum_distance);
-  igvc::getParam(pNh, "rate", rate_time);
-  igvc::getParam(pNh, "goal_range", goal_range);
-  igvc::getParam(pNh, "publish_expanded", publish_expanded);
-  igvc::getParam(pNh, "follow_old_path", follow_old_path);
-  igvc::getParam(pNh, "occupancy_threshold", occupancy_threshold);
+  using namespace assertions;
+  Asserter asserter;
+
+  asserter.getParam(pNh, "c_space", configuration_space);
+  asserter.getParam(pNh, "maximum_distance", maximum_distance);
+  asserter.getParam(pNh, "rate", rate_time);
+  asserter.getParam(pNh, "goal_range", goal_range);
+  asserter.getParam(pNh, "publish_expanded", publish_expanded);
+  asserter.getParam(pNh, "follow_old_path", follow_old_path);
+  asserter.getParam(pNh, "occupancy_threshold", occupancy_threshold);
 
   planner.node_grid_.setConfigurationSpace(static_cast<float>(configuration_space));
   planner.node_grid_.setOccupancyThreshold(static_cast<float>(occupancy_threshold));
