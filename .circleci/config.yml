@@ -94,7 +94,6 @@ jobs:
     - <<: *load_src_cache
     - checkout:
         path: ~/catkin_ws/src/igvc-software
-    - <<: *checkout_submodules
     - <<: *save_src_cache
     - run: |
         apt-get update -y
