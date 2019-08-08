@@ -54,6 +54,9 @@ defaults: &load_workspace
   attach_workspace:
     at: ~/catkin_ws
 
+checkout_submodules: &checkout_submodules
+  run: git submodule sync && git submodule update --init
+
 version: 2
 jobs:
   compile:
@@ -63,6 +66,7 @@ jobs:
     - <<: *load_src_cache
     - checkout:
         path: ~/catkin_ws/src/igvc-software
+    - <<: *checkout_submodules
     - <<: *save_src_cache
     - <<: *install_deps
     - <<: *load_compile_cache
@@ -76,6 +80,7 @@ jobs:
     - <<: *load_src_cache
     - checkout:
         path: ~/catkin_ws/src/igvc-software
+    - <<: *checkout_submodules
     - <<: *save_src_cache
     - <<: *install_deps
     - <<: *load_workspace
@@ -89,6 +94,7 @@ jobs:
     - <<: *load_src_cache
     - checkout:
         path: ~/catkin_ws/src/igvc-software
+    - <<: *checkout_submodules
     - <<: *save_src_cache
     - run: |
         apt-get update -y
