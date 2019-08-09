@@ -52,12 +52,9 @@ int main(int argc, char** argv)
   std::string imu_quaternion = "imu";
   std::string odom_quaternion = "odometry";
 
-  using namespace assertions;
-  Asserter asserter;
-
-  asserter.getParam(pNh, "topics/quaternion", quaternion_topic);
-  asserter.getParam(pNh, "topics/rpy", rpy_topic);
-  asserter.param(pNh, "message_type", message_type, imu_quaternion);
+  assertions::getParam(pNh, "topics/quaternion", quaternion_topic);
+  assertions::getParam(pNh, "topics/rpy", rpy_topic);
+  assertions::param(pNh, "message_type", message_type, imu_quaternion);
 
   g_rpy_pub = nh.advertise<geometry_msgs::Vector3Stamped>(rpy_topic, 1);
 

@@ -77,18 +77,15 @@ int main(int argc, char **argv)
   double rate_var;
   double max_effort = 0.0;
 
-  using namespace assertions;
-  Asserter asserter;
-
-  asserter.param(pNh, "speed_P_left", speed_P_left, 5.0);
-  asserter.param(pNh, "speed_P_right", speed_P_right, 5.0);
-  asserter.param(pNh, "speed_D_left", speed_D_left, 1.0);
-  asserter.param(pNh, "speed_D_right", speed_D_right, 1.0);
-  asserter.param(pNh, "speed_I_left", speed_I_left, 0.0);
-  asserter.param(pNh, "speed_I_right", speed_I_right, 0.0);
-  asserter.param(pNh, "wheel_radius", wheel_radius, 0.3);
-  asserter.param(pNh, "max_effort", max_effort, 4.0);
-  asserter.param(pNh, "rate", rate_var, 60.0);
+  assertions::param(pNh, "speed_P_left", speed_P_left, 5.0);
+  assertions::param(pNh, "speed_P_right", speed_P_right, 5.0);
+  assertions::param(pNh, "speed_D_left", speed_D_left, 1.0);
+  assertions::param(pNh, "speed_D_right", speed_D_right, 1.0);
+  assertions::param(pNh, "speed_I_left", speed_I_left, 0.0);
+  assertions::param(pNh, "speed_I_right", speed_I_right, 0.0);
+  assertions::param(pNh, "wheel_radius", wheel_radius, 0.3);
+  assertions::param(pNh, "max_effort", max_effort, 4.0);
+  assertions::param(pNh, "rate", rate_var, 60.0);
 
   // Publish that the robot is enabled
   ros::Publisher enabled_pub = handle.advertise<std_msgs::Bool>("/robot_enabled", 1, /* latch = */ true);

@@ -40,47 +40,44 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  using namespace assertions;
-  Asserter asserter;
+  assertions::getParam(pNh, "map/length", length_x_);
+  assertions::getParam(pNh, "map/width", width_y_);
+  assertions::getParam(pNh, "map/start_x", start_x_);
+  assertions::getParam(pNh, "map/start_y", start_y_);
+  assertions::getParam(pNh, "octree/resolution", resolution_);
 
-  asserter.getParam(pNh, "map/length", length_x_);
-  asserter.getParam(pNh, "map/width", width_y_);
-  asserter.getParam(pNh, "map/start_x", start_x_);
-  asserter.getParam(pNh, "map/start_y", start_y_);
-  asserter.getParam(pNh, "octree/resolution", resolution_);
+  assertions::getParam(pNh, "topics/lidar", lidar_topic_);
 
-  asserter.getParam(pNh, "topics/lidar", lidar_topic_);
+  assertions::getParam(pNh, "topics/line_segmentation/left", line_topic_left_);
+  assertions::getParam(pNh, "topics/line_segmentation/center", line_topic_center_);
+  assertions::getParam(pNh, "topics/line_segmentation/right", line_topic_right_);
 
-  asserter.getParam(pNh, "topics/line_segmentation/left", line_topic_left_);
-  asserter.getParam(pNh, "topics/line_segmentation/center", line_topic_center_);
-  asserter.getParam(pNh, "topics/line_segmentation/right", line_topic_right_);
+  assertions::getParam(pNh, "topics/projected_line_pc/left", projected_line_topic_left_);
+  assertions::getParam(pNh, "topics/projected_line_pc/center", projected_line_topic_center_);
+  assertions::getParam(pNh, "topics/projected_line_pc/right", projected_line_topic_right_);
 
-  asserter.getParam(pNh, "topics/projected_line_pc/left", projected_line_topic_left_);
-  asserter.getParam(pNh, "topics/projected_line_pc/center", projected_line_topic_center_);
-  asserter.getParam(pNh, "topics/projected_line_pc/right", projected_line_topic_right_);
+  assertions::getParam(pNh, "topics/camera_info/left", camera_info_topic_left_);
+  assertions::getParam(pNh, "topics/camera_info/center", camera_info_topic_center_);
+  assertions::getParam(pNh, "topics/camera_info/right", camera_info_topic_right_);
 
-  asserter.getParam(pNh, "topics/camera_info/left", camera_info_topic_left_);
-  asserter.getParam(pNh, "topics/camera_info/center", camera_info_topic_center_);
-  asserter.getParam(pNh, "topics/camera_info/right", camera_info_topic_right_);
+  assertions::getParam(pNh, "frames/camera/left", camera_frame_left_);
+  assertions::getParam(pNh, "frames/camera/center", camera_frame_center_);
+  assertions::getParam(pNh, "frames/camera/right", camera_frame_right_);
 
-  asserter.getParam(pNh, "frames/camera/left", camera_frame_left_);
-  asserter.getParam(pNh, "frames/camera/center", camera_frame_center_);
-  asserter.getParam(pNh, "frames/camera/right", camera_frame_right_);
+  assertions::getParam(pNh, "node/camera/left/enable", enable_left_cam_);
+  assertions::getParam(pNh, "node/camera/center/enable", enable_center_cam_);
+  assertions::getParam(pNh, "node/camera/right/enable", enable_right_cam_);
 
-  asserter.getParam(pNh, "node/camera/left/enable", enable_left_cam_);
-  asserter.getParam(pNh, "node/camera/center/enable", enable_center_cam_);
-  asserter.getParam(pNh, "node/camera/right/enable", enable_right_cam_);
+  assertions::getParam(pNh, "node/camera/use_passed_in_pointcloud", use_passed_in_pointcloud_);
 
-  asserter.getParam(pNh, "node/camera/use_passed_in_pointcloud", use_passed_in_pointcloud_);
+  assertions::getParam(pNh, "cameras/resize_width", resize_width_);
+  assertions::getParam(pNh, "cameras/resize_height", resize_height_);
 
-  asserter.getParam(pNh, "cameras/resize_width", resize_width_);
-  asserter.getParam(pNh, "cameras/resize_height", resize_height_);
+  assertions::getParam(pNh, "topics/camera_center", center_camera_topic_);
 
-  asserter.getParam(pNh, "topics/camera_center", center_camera_topic_);
-
-  asserter.getParam(pNh, "node/debug/publish/map_debug_pcl", debug_pub_map_pcl);
-  asserter.getParam(pNh, "node/use_lines", use_lines_);
-  asserter.param(pNh, "node/transform_max_wait_time", transform_max_wait_time_, 3.0);
+  assertions::getParam(pNh, "node/debug/publish/map_debug_pcl", debug_pub_map_pcl);
+  assertions::getParam(pNh, "node/use_lines", use_lines_);
+  assertions::param(pNh, "node/transform_max_wait_time", transform_max_wait_time_, 3.0);
 
   mapper_ = std::make_unique<Mapper>(pNh);
 

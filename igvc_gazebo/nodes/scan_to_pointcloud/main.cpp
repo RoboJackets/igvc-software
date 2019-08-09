@@ -62,12 +62,9 @@ int main(int argc, char** argv)
 
   ros::NodeHandle pNh("~");
 
-  using namespace assertions;
-  Asserter asserter;
-
-  asserter.getParam(pNh, "min_dist", min_dist);
-  asserter.getParam(pNh, "neighbor_dist", neighbor_dist);
-  asserter.getParam(pNh, "offset", offset);
+  assertions::getParam(pNh, "min_dist", min_dist);
+  assertions::getParam(pNh, "neighbor_dist", neighbor_dist);
+  assertions::getParam(pNh, "offset", offset);
 
   ros::NodeHandle nh;
 

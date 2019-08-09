@@ -10,19 +10,16 @@
 using radians = double;
 Octomapper::Octomapper(ros::NodeHandle pNh)
 {
-  using namespace assertions;
-  Asserter asserter;
+  assertions::getParam(pNh, "octree/resolution", octree_options_.resolution);
 
-  asserter.getParam(pNh, "octree/resolution", octree_options_.resolution);
+  assertions::getParam(pNh, "octree/clamping/max", octree_options_.max);
+  assertions::getParam(pNh, "octree/clamping/min", octree_options_.min);
 
-  asserter.getParam(pNh, "octree/clamping/max", octree_options_.max);
-  asserter.getParam(pNh, "octree/clamping/min", octree_options_.min);
-
-  asserter.getParam(pNh, "map/length", map_options_.length);
-  asserter.getParam(pNh, "map/width", map_options_.width);
-  asserter.getParam(pNh, "map/start_x", map_options_.start_x);
-  asserter.getParam(pNh, "map/start_y", map_options_.start_y);
-  asserter.getParam(pNh, "map/log_odds_default", map_options_.default_logodds);
+  assertions::getParam(pNh, "map/length", map_options_.length);
+  assertions::getParam(pNh, "map/width", map_options_.width);
+  assertions::getParam(pNh, "map/start_x", map_options_.start_x);
+  assertions::getParam(pNh, "map/start_y", map_options_.start_y);
+  assertions::getParam(pNh, "map/log_odds_default", map_options_.default_logodds);
   std::string map_encoding;
 
   map_options_.resolution = octree_options_.resolution;

@@ -38,15 +38,12 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  using namespace assertions;
-  Asserter asserter;
-
-  asserter.getParam(pNh, "x_offset", x_offset);
-  asserter.getParam(pNh, "y_offset", y_offset);
-  asserter.getParam(pNh, "x_size", x_size);
-  asserter.getParam(pNh, "y_size", y_size);
-  asserter.getParam(pNh, "max_dist", max_dist);
-  asserter.getParam(pNh, "back_buffer", back_buffer);
+  assertions::getParam(pNh, "x_offset", x_offset);
+  assertions::getParam(pNh, "y_offset", y_offset);
+  assertions::getParam(pNh, "x_size", x_size);
+  assertions::getParam(pNh, "y_size", y_size);
+  assertions::getParam(pNh, "max_dist", max_dist);
+  assertions::getParam(pNh, "back_buffer", back_buffer);
 
   _pointcloud_pub = nh.advertise<pcl::PointCloud<pcl::PointXYZ> >("/scan/pointcloud", 1);
 

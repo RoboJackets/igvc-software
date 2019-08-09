@@ -178,16 +178,13 @@ int main(int argc, char** argv)
   // publish path for path_follower
   ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/path", 1);
 
-  using namespace assertions;
-  Asserter asserter;
-
-  asserter.getParam(pNh, "c_space", configuration_space);
-  asserter.getParam(pNh, "maximum_distance", maximum_distance);
-  asserter.getParam(pNh, "rate", rate_time);
-  asserter.getParam(pNh, "goal_range", goal_range);
-  asserter.getParam(pNh, "publish_expanded", publish_expanded);
-  asserter.getParam(pNh, "follow_old_path", follow_old_path);
-  asserter.getParam(pNh, "occupancy_threshold", occupancy_threshold);
+  assertions::getParam(pNh, "c_space", configuration_space);
+  assertions::getParam(pNh, "maximum_distance", maximum_distance);
+  assertions::getParam(pNh, "rate", rate_time);
+  assertions::getParam(pNh, "goal_range", goal_range);
+  assertions::getParam(pNh, "publish_expanded", publish_expanded);
+  assertions::getParam(pNh, "follow_old_path", follow_old_path);
+  assertions::getParam(pNh, "occupancy_threshold", occupancy_threshold);
 
   planner.node_grid_.setConfigurationSpace(static_cast<float>(configuration_space));
   planner.node_grid_.setOccupancyThreshold(static_cast<float>(occupancy_threshold));

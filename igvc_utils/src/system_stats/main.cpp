@@ -62,9 +62,7 @@ int main(int argc, char** argv)
 
   double frequency;
 
-  using namespace assertions;
-  Asserter asserter;
-  asserter.param(pNh, "publish_frequency", frequency, 10.0);
+  assertions::param(pNh, "publish_frequency", frequency, 10.0);
 
   ros::Rate rate(frequency);
 

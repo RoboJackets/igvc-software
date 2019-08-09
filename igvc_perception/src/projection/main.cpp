@@ -324,14 +324,11 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
   ros::NodeHandle pNh("~");
 
-  using namespace assertions;
-  Asserter asserter;
-
-  asserter.getParam(pNh, "resize_width", g_resize_width);
-  asserter.getParam(pNh, "resize_height", g_resize_height);
-  asserter.getParam(pNh, "line_topic", g_line_topic);
-  asserter.getParam(pNh, "pointcloud_topic", g_pointcloud_topic);
-  asserter.getParam(pNh, "lidar_topic", g_lidar_topic);
+  assertions::getParam(pNh, "resize_width", g_resize_width);
+  assertions::getParam(pNh, "resize_height", g_resize_height);
+  assertions::getParam(pNh, "line_topic", g_line_topic);
+  assertions::getParam(pNh, "pointcloud_topic", g_pointcloud_topic);
+  assertions::getParam(pNh, "lidar_topic", g_lidar_topic);
 
   g_cam_info = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("center_cam/camera_info", ros::Duration(5));
   if (g_cam_info.get() != nullptr)

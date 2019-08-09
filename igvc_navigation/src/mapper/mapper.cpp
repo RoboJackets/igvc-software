@@ -5,65 +5,65 @@
 
 Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
 {
-  using namespace assertions;
-  Asserter asserter;
+  assertions::getParam(pNh, "sensor_model/max_range", radius_);
+  assertions::getParam(pNh, "sensor_model/angular_resolution", angular_resolution_);
 
-  asserter.getParam(pNh, "sensor_model/max_range", radius_);
-  asserter.getParam(pNh, "sensor_model/angular_resolution", angular_resolution_);
+  assertions::getParam(pNh, "probability_model/lidar/scan/prob_miss", lidar_scan_probability_model_.prob_miss);
+  assertions::getParam(pNh, "probability_model/lidar/scan/prob_hit", lidar_scan_probability_model_.prob_hit);
 
-  asserter.getParam(pNh, "probability_model/lidar/scan/prob_miss", lidar_scan_probability_model_.prob_miss);
-  asserter.getParam(pNh, "probability_model/lidar/scan/prob_hit", lidar_scan_probability_model_.prob_hit);
+  assertions::getParam(pNh, "probability_model/lidar/ground/prob_miss", lidar_ground_probability_model_.prob_miss);
 
-  asserter.getParam(pNh, "probability_model/lidar/ground/prob_miss", lidar_ground_probability_model_.prob_miss);
+  assertions::getParam(pNh, "probability_model/lidar/free_space/prob_miss",
+                       lidar_free_space_probability_model_.prob_miss);
 
-  asserter.getParam(pNh, "probability_model/lidar/free_space/prob_miss", lidar_free_space_probability_model_.prob_miss);
+  assertions::getParam(pNh, "probability_model/camera/prob_miss", camera_probability_model_.prob_miss);
+  assertions::getParam(pNh, "probability_model/camera/prob_hit", camera_probability_model_.prob_hit);
 
-  asserter.getParam(pNh, "probability_model/camera/prob_miss", camera_probability_model_.prob_miss);
-  asserter.getParam(pNh, "probability_model/camera/prob_hit", camera_probability_model_.prob_hit);
+  assertions::getParam(pNh, "filters/ground_filter/enable", use_ground_filter_);
+  assertions::getParam(pNh, "filters/ground_filter/ransac/iterations",
+                       ground_filter_options_.ransac_options.iterations);
+  assertions::getParam(pNh, "filters/ground_filter/ransac/iterations",
+                       ground_filter_options_.ransac_options.iterations);
+  assertions::getParam(pNh, "filters/ground_filter/ransac/distance_threshold",
+                       ground_filter_options_.ransac_options.distance_threshold);
+  assertions::getParam(pNh, "filters/ground_filter/ransac/eps_angle", ground_filter_options_.ransac_options.eps_angle);
+  assertions::getParam(pNh, "filters/ground_filter/fallback/plane_distance",
+                       ground_filter_options_.fallback_options.plane_distance);
 
-  asserter.getParam(pNh, "filters/ground_filter/enable", use_ground_filter_);
-  asserter.getParam(pNh, "filters/ground_filter/ransac/iterations", ground_filter_options_.ransac_options.iterations);
-  asserter.getParam(pNh, "filters/ground_filter/ransac/iterations", ground_filter_options_.ransac_options.iterations);
-  asserter.getParam(pNh, "filters/ground_filter/ransac/distance_threshold",
-                    ground_filter_options_.ransac_options.distance_threshold);
-  asserter.getParam(pNh, "filters/ground_filter/ransac/eps_angle", ground_filter_options_.ransac_options.eps_angle);
-  asserter.getParam(pNh, "filters/ground_filter/fallback/plane_distance",
-                    ground_filter_options_.fallback_options.plane_distance);
+  assertions::param(pNh, "filters/empty/enabled", empty_filter_options_.enabled, false);
+  assertions::getParam(pNh, "filters/empty/start_angle", empty_filter_options_.start_angle);
+  assertions::getParam(pNh, "filters/empty/end_angle", empty_filter_options_.end_angle);
+  assertions::getParam(pNh, "filters/empty/ray_start_distance", empty_filter_options_.ray_start_distance);
+  assertions::getParam(pNh, "filters/empty/miss_cast_distance", empty_filter_options_.miss_cast_distance);
+  assertions::getParam(pNh, "filters/empty/max_range", empty_filter_options_.max_range);
 
-  asserter.param(pNh, "filters/empty/enabled", empty_filter_options_.enabled, false);
-  asserter.getParam(pNh, "filters/empty/start_angle", empty_filter_options_.start_angle);
-  asserter.getParam(pNh, "filters/empty/end_angle", empty_filter_options_.end_angle);
-  asserter.getParam(pNh, "filters/empty/ray_start_distance", empty_filter_options_.ray_start_distance);
-  asserter.getParam(pNh, "filters/empty/miss_cast_distance", empty_filter_options_.miss_cast_distance);
-  asserter.getParam(pNh, "filters/empty/max_range", empty_filter_options_.max_range);
+  assertions::getParam(pNh, "filters/empty_image/blur/kernel", process_image_options_.blur.kernel);
+  assertions::getParam(pNh, "filters/empty_image/blur/sigma", process_image_options_.blur.sigma);
+  assertions::getParam(pNh, "filters/empty_image/threshold", process_image_options_.threshold.threshold);
+  assertions::getParam(pNh, "filters/empty_image/dilation_size", process_image_options_.dilation_size);
 
-  asserter.getParam(pNh, "filters/empty_image/blur/kernel", process_image_options_.blur.kernel);
-  asserter.getParam(pNh, "filters/empty_image/blur/sigma", process_image_options_.blur.sigma);
-  asserter.getParam(pNh, "filters/empty_image/threshold", process_image_options_.threshold.threshold);
-  asserter.getParam(pNh, "filters/empty_image/dilation_size", process_image_options_.dilation_size);
+  assertions::param(pNh, "filters/behind/enabled", behind_filter_options_.enabled, false);
+  assertions::getParam(pNh, "filters/behind/filter_angle", behind_filter_options_.angle);
+  assertions::getParam(pNh, "filters/behind/distance", behind_filter_options_.distance);
 
-  asserter.param(pNh, "filters/behind/enabled", behind_filter_options_.enabled, false);
-  asserter.getParam(pNh, "filters/behind/filter_angle", behind_filter_options_.angle);
-  asserter.getParam(pNh, "filters/behind/distance", behind_filter_options_.distance);
+  assertions::getParam(pNh, "filters/combined_map/blur/kernel", combined_map_options_.blur.kernel);
 
-  asserter.getParam(pNh, "filters/combined_map/blur/kernel", combined_map_options_.blur.kernel);
+  assertions::getParam(pNh, "filters/remove_barrels/low/h", remove_barrel_options_.low_h);
+  assertions::getParam(pNh, "filters/remove_barrels/low/s", remove_barrel_options_.low_s);
+  assertions::getParam(pNh, "filters/remove_barrels/low/v", remove_barrel_options_.low_v);
+  assertions::getParam(pNh, "filters/remove_barrels/high/h", remove_barrel_options_.high_h);
+  assertions::getParam(pNh, "filters/remove_barrels/high/s", remove_barrel_options_.high_s);
+  assertions::getParam(pNh, "filters/remove_barrels/high/v", remove_barrel_options_.high_v);
+  assertions::getParam(pNh, "filters/remove_barrels/kernel_size/width", remove_barrel_options_.kernel_width);
+  assertions::getParam(pNh, "filters/remove_barrels/kernel_size/height", remove_barrel_options_.kernel_height);
 
-  asserter.getParam(pNh, "filters/remove_barrels/low/h", remove_barrel_options_.low_h);
-  asserter.getParam(pNh, "filters/remove_barrels/low/s", remove_barrel_options_.low_s);
-  asserter.getParam(pNh, "filters/remove_barrels/low/v", remove_barrel_options_.low_v);
-  asserter.getParam(pNh, "filters/remove_barrels/high/h", remove_barrel_options_.high_h);
-  asserter.getParam(pNh, "filters/remove_barrels/high/s", remove_barrel_options_.high_s);
-  asserter.getParam(pNh, "filters/remove_barrels/high/v", remove_barrel_options_.high_v);
-  asserter.getParam(pNh, "filters/remove_barrels/kernel_size/width", remove_barrel_options_.kernel_width);
-  asserter.getParam(pNh, "filters/remove_barrels/kernel_size/height", remove_barrel_options_.kernel_height);
+  assertions::getParam(pNh, "octree/resolution", resolution_);
 
-  asserter.getParam(pNh, "octree/resolution", resolution_);
+  assertions::getParam(pNh, "node/use_lines", use_lines_);
 
-  asserter.getParam(pNh, "node/use_lines", use_lines_);
-
-  asserter.getParam(pNh, "node/debug/publish/cameras/lines", debug_pub_camera_lines);
-  asserter.getParam(pNh, "node/debug/publish/cameras/projections", debug_pub_camera_projections);
-  asserter.getParam(pNh, "node/debug/publish/filtered_pointclouds", debug_pub_filtered_pointclouds);
+  assertions::getParam(pNh, "node/debug/publish/cameras/lines", debug_pub_camera_lines);
+  assertions::getParam(pNh, "node/debug/publish/cameras/projections", debug_pub_camera_projections);
+  assertions::getParam(pNh, "node/debug/publish/filtered_pointclouds", debug_pub_filtered_pointclouds);
 
   invertMissProbabilities();
 

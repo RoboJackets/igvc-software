@@ -108,15 +108,12 @@ int main(int argc, char** argv)
 
   std::string ground_truth_topic, estimate_topic, pub_topic, diff_topic;
 
-  using namespace assertions;
-  Asserter asserter;
-
-  asserter.param(pNh, "ground_truth_sub_topic", ground_truth_topic, std::string("/ground_truth/state_raw"));
-  asserter.param(pNh, "ground_truth_pub_topic", pub_topic, std::string("/ground_truth"));
+  assertions::param(pNh, "ground_truth_sub_topic", ground_truth_topic, std::string("/ground_truth/state_raw"));
+  assertions::param(pNh, "ground_truth_pub_topic", pub_topic, std::string("/ground_truth"));
 
   double longitude, latitude;
-  asserter.param(pNh, "longitude", longitude, -84.405001);
-  asserter.param(pNh, "latitude", latitude, 33.774497);
+  assertions::param(pNh, "longitude", longitude, -84.405001);
+  assertions::param(pNh, "latitude", latitude, 33.774497);
 
   ros::Subscriber ground_truth = nh.subscribe<nav_msgs::Odometry>(ground_truth_topic, 10, groundTruthCallback);
 

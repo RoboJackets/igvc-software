@@ -7,13 +7,11 @@ YostLabDriver::YostLabDriver(ros::NodeHandle& nh_, ros::NodeHandle& priv_nh_)
   this->SerialConnect();
   this->imu_pub_ = this->yostlab_nh_.advertise<sensor_msgs::Imu>("/imu", 10);
   // use identity matrix as default orientation correction
-  using namespace assertions;
-  Asserter asserter;
 
-  asserter.param(this->yostlab_priv_nh_, "imu_orientation_correction", this->imu_orientation_correction_,
-                 std::vector<double>{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
-  asserter.param(yostlab_priv_nh_, "orientation_rotation", orientation_rotation_, 0.0);
-  asserter.getParam(this->yostlab_priv_nh_, "frame_id", this->frame_id_);
+  assertions::param(this->yostlab_priv_nh_, "imu_orientation_correction", this->imu_orientation_correction_,
+                    std::vector<double>{ 1, 0, 0, 0, 1, 0, 0, 0, 1 });
+  assertions::param(yostlab_priv_nh_, "orientation_rotation", orientation_rotation_, 0.0);
+  assertions::getParam(this->yostlab_priv_nh_, "frame_id", this->frame_id_);
 }
 
 //! Destructor

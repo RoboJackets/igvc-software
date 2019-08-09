@@ -16,14 +16,11 @@ int main(int argc, char** argv)
   double width, length, grid_size, thickness, offset;
   // parameters
 
-  using namespace assertions;
-  Asserter asserter;
-
-  asserter.getParam(pNh, std::string("width"), width);
-  asserter.getParam(pNh, std::string("length"), length);
-  asserter.getParam(pNh, std::string("grid_size"), grid_size);
-  asserter.getParam(pNh, std::string("thickness"), thickness);
-  asserter.getParam(pNh, std::string("offset"), offset);
+  assertions::getParam(pNh, std::string("width"), width);
+  assertions::getParam(pNh, std::string("length"), length);
+  assertions::getParam(pNh, std::string("grid_size"), grid_size);
+  assertions::getParam(pNh, std::string("thickness"), thickness);
+  assertions::getParam(pNh, std::string("offset"), offset);
 
   using namespace cv;
 

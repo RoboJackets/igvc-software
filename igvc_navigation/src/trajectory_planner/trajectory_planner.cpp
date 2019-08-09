@@ -32,39 +32,36 @@ TrajectoryPlanner::TrajectoryPlanner()
   MotionProfilerOptions motion_profiler_options{};
   double target_velocity;
 
-  using namespace assertions;
-  Asserter asserter;
+  assertions::param(pNh, "axle_length", axle_length, 0.52);
+  assertions::param(pNh, "path_timeout", path_timeout_, 3.0);
+  assertions::param(pNh, "node/loop_hz", loop_hz_, 20.0);
 
-  asserter.param(pNh, "axle_length", axle_length, 0.52);
-  asserter.param(pNh, "path_timeout", path_timeout_, 3.0);
-  asserter.param(pNh, "node/loop_hz", loop_hz_, 20.0);
+  assertions::param(pNh, "smooth_control/k1", smooth_control_options.k1, 1.0);
+  assertions::param(pNh, "smooth_control/k2", smooth_control_options.k2, 3.0);
 
-  asserter.param(pNh, "smooth_control/k1", smooth_control_options.k1, 1.0);
-  asserter.param(pNh, "smooth_control/k2", smooth_control_options.k2, 3.0);
+  assertions::param(pNh, "path_generation/simulation_frequency", path_generation_options.simulation_frequency, 100.0);
+  assertions::param(pNh, "path_generation/simulation_horizon", path_generation_options.simulation_horizon, 5.0);
+  assertions::param(pNh, "path_generation/velocity", path_generation_options.simulation_velocity, 1.0);
 
-  asserter.param(pNh, "path_generation/simulation_frequency", path_generation_options.simulation_frequency, 100.0);
-  asserter.param(pNh, "path_generation/simulation_horizon", path_generation_options.simulation_horizon, 5.0);
-  asserter.param(pNh, "path_generation/velocity", path_generation_options.simulation_velocity, 1.0);
+  assertions::param(pNh, "target_selection/lookahead_dist", target_selection_options.lookahead_dist, 2.0);
+  assertions::param(pNh, "target_selection/reached_distance", target_selection_options.target_reached_distance, 0.05);
+  assertions::param(pNh, "target_selection/move_threshold", target_selection_options.target_move_threshold, 0.05);
 
-  asserter.param(pNh, "target_selection/lookahead_dist", target_selection_options.lookahead_dist, 2.0);
-  asserter.param(pNh, "target_selection/reached_distance", target_selection_options.target_reached_distance, 0.05);
-  asserter.param(pNh, "target_selection/move_threshold", target_selection_options.target_move_threshold, 0.05);
+  assertions::param(pNh, "curvature_blending/blending_distance", curvature_blending_options.blending_distance, 1.0);
 
-  asserter.param(pNh, "curvature_blending/blending_distance", curvature_blending_options.blending_distance, 1.0);
+  assertions::param(pNh, "wheel_constraints/velocity", wheel_constraints.velocity, 3.0);
+  assertions::param(pNh, "wheel_constraints/acceleration", wheel_constraints.acceleration, 5.0);
+  assertions::param(pNh, "robot_constraints/velocity", robot_constraints.velocity, 2.0);
+  assertions::param(pNh, "robot_constraints/acceleration", robot_constraints.acceleration, 5.0);
 
-  asserter.param(pNh, "wheel_constraints/velocity", wheel_constraints.velocity, 3.0);
-  asserter.param(pNh, "wheel_constraints/acceleration", wheel_constraints.acceleration, 5.0);
-  asserter.param(pNh, "robot_constraints/velocity", robot_constraints.velocity, 2.0);
-  asserter.param(pNh, "robot_constraints/acceleration", robot_constraints.acceleration, 5.0);
+  assertions::param(pNh, "motion_profiler/target_velocity", target_velocity, 1.0);
+  assertions::param(pNh, "motion_profiler/beta", motion_profiler_options.beta, 2.0);
+  assertions::param(pNh, "motion_profiler/lambda", motion_profiler_options.lambda, 1.0);
 
-  asserter.param(pNh, "motion_profiler/target_velocity", target_velocity, 1.0);
-  asserter.param(pNh, "motion_profiler/beta", motion_profiler_options.beta, 2.0);
-  asserter.param(pNh, "motion_profiler/lambda", motion_profiler_options.lambda, 1.0);
-
-  asserter.getParam(pNh, "end_distance_threshold", end_distance_threshold);
+  assertions::getParam(pNh, "end_distance_threshold", end_distance_threshold);
 
   double linear_acceleration_curvature_threshold;
-  asserter.param(pNh, "linear_velocity_curvature_threshold", linear_acceleration_curvature_threshold, 1e-2);
+  assertions::param(pNh, "linear_velocity_curvature_threshold", linear_acceleration_curvature_threshold, 1e-2);
 
   if (path_generation_options.simulation_frequency <= 0)
   {
@@ -79,7 +76,7 @@ TrajectoryPlanner::TrajectoryPlanner()
                                        target_velocity, linear_acceleration_curvature_threshold);
 
   // load global parameters
-  asserter.param(pNh, "stop_dist", stop_dist_, 0.9);
+  assertions::param(pNh, "stop_dist", stop_dist_, 0.9);
 
   ros::Subscriber path_sub = nh.subscribe("/path", 1, &TrajectoryPlanner::pathCallback, this);
   ros::Subscriber encoder_sub = nh.subscribe("/encoders", 1, &TrajectoryPlanner::encoderCallback, this);

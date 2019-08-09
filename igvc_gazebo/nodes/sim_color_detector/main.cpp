@@ -151,18 +151,15 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  using namespace assertions;
-  Asserter asserter;
-
   // cameras to obtain images from
   std::vector<std::string> camera_names;
-  asserter.getParam(pNh, "camera_names", camera_names);
+  assertions::getParam(pNh, "camera_names", camera_names);
 
   // output topics
   std::string line_topic;
-  asserter.getParam(pNh, "line_topic", line_topic);
+  assertions::getParam(pNh, "line_topic", line_topic);
   std::string barrel_topic;
-  asserter.getParam(pNh, "barrel_topic", barrel_topic);
+  assertions::getParam(pNh, "barrel_topic", barrel_topic);
 
   // insert subscribers and publishers
   std::vector<ros::Subscriber> subs;

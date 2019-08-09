@@ -17,13 +17,11 @@ TrajectoryFollower::TrajectoryFollower()
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  using namespace assertions;
-  Asserter asserter;
-  asserter.getParam(pNh, "topics/path", path_topic_);
-  asserter.param(pNh, "loop_hz", loop_hz_, 25.0);
-  asserter.param(pNh, "axle_length", axle_length_, 0.48);
-  asserter.param(pNh, "motor_loop_hz", motor_loop_hz_, 25.0);
-  asserter.param(pNh, "min_velocity", min_velocity_, 0.2);
+  assertions::getParam(pNh, "topics/path", path_topic_);
+  assertions::param(pNh, "loop_hz", loop_hz_, 25.0);
+  assertions::param(pNh, "axle_length", axle_length_, 0.48);
+  assertions::param(pNh, "motor_loop_hz", motor_loop_hz_, 25.0);
+  assertions::param(pNh, "min_velocity", min_velocity_, 0.2);
 
   ros::Subscriber path_sub = nh.subscribe(path_topic_, 1, &TrajectoryFollower::trajectoryCallback, this);
   control_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
