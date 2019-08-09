@@ -12,8 +12,8 @@
 
 #include <tf/transform_datatypes.h>
 
+#include <igvc_utils/robot_state.h>
 #include <igvc_utils/NodeUtils.hpp>
-#include <igvc_utils/RobotState.hpp>
 
 #include "path_follower.h"
 
@@ -155,7 +155,7 @@ nav_msgs::PathConstPtr PathFollower::getPatchedPath(const nav_msgs::PathConstPtr
 {
   nav_msgs::PathPtr new_path = boost::make_shared<nav_msgs::Path>(*msg);
   size_t num_poses = new_path->poses.size();
-  for (int i = 0; i < num_poses; i++)
+  for (size_t i = 0; i < num_poses; i++)
   {
     double delta_x = new_path->poses[i + 1].pose.position.x - new_path->poses[i].pose.position.x;
     double delta_y = new_path->poses[i + 1].pose.position.y - new_path->poses[i].pose.position.y;

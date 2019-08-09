@@ -45,6 +45,11 @@ void PCL_to_Octomap(const pcl::PointCloud<pcl::PointXYZ> &pcl, octomap::Pointclo
   octomap::pointCloud2ToOctomap(pc2, octo);
 }
 
+octomap::point3d PCL_to_OctomapPoint(const pcl::PointXYZ &pcl)
+{
+  return { pcl.x, pcl.y, pcl.z };
+}
+
 uchar toCharProb(float p)
 {
   return static_cast<uchar>(p * 255);
@@ -146,7 +151,7 @@ void Octomapper::insertScan(const tf::Point &sensor_pos, struct pc_map_pair &pai
   pair.octree->setProbMiss(old_prob_miss);
 }
 
-void Octomapper::insertRays(const tf::Point &sensor_pos, struct pc_map_pair &pair, const PointCloud &pc, bool occupied,
+void Octomapper::insertRays(const tf::Point &sensor_pos, pc_map_pair &pair, const PointCloud &pc, bool occupied,
                             ProbabilityModel model) const
 {
   double old_prob_hit = pair.octree->getProbHit();
@@ -166,6 +171,39 @@ void Octomapper::insertRays(const tf::Point &sensor_pos, struct pc_map_pair &pai
   {
     octomap::KeyRay keyray;
     if (pair.octree->computeRayKeys(sensor, p, keyray))
+    {
+      {
+        keyset.insert(keyray.begin(), keyray.end());
+      }
+    }
+  }
+
+  for (const auto &key : keyset)
+  {
+    pair.octree->updateNode(key, occupied, false);
+  }
+
+  pair.octree->setProbHit(old_prob_hit);
+  pair.octree->setProbMiss(old_prob_miss);
+}
+
+void Octomapper::insertRaysWithStartPoint(pc_map_pair &pair, const std::vector<Ray> &pc_rays, bool occupied,
+                                          ProbabilityModel model) const
+{
+  // TODO(Oswin): Change this to RAII like thing
+  double old_prob_hit = pair.octree->getProbHit();
+  double old_prob_miss = pair.octree->getProbMiss();
+  pair.octree->setProbHit(model.prob_hit);
+  pair.octree->setProbMiss(model.prob_miss);
+
+  octomap::KeySet keyset{};
+
+  for (const Ray &ray : pc_rays)
+  {
+    octomap::point3d start = PCL_to_OctomapPoint(ray.start);
+    octomap::point3d end = PCL_to_OctomapPoint(ray.end);
+    octomap::KeyRay keyray;
+    if (pair.octree->computeRayKeys(start, end, keyray))
     {
       {
         keyset.insert(keyray.begin(), keyray.end());
@@ -203,6 +241,68 @@ void Octomapper::insertPoints(struct pc_map_pair &pair, const PointCloud &pc, bo
       pair.octree->updateNode(key, occupied, false);  // lazy_eval = false
     }
   }
+  pair.octree->setProbHit(old_prob_hit);
+  pair.octree->setProbMiss(old_prob_miss);
+}
+
+void Octomapper::insertPoints(struct pc_map_pair &pair, const PointCloud &occupied_pc, const PointCloud &free_pc,
+                              ProbabilityModel model) const
+{
+  double old_prob_hit = pair.octree->getProbHit();
+  double old_prob_miss = pair.octree->getProbMiss();
+
+  pair.octree->setProbHit(model.prob_hit);
+  pair.octree->setProbMiss(model.prob_miss);
+
+  octomap::Pointcloud octo_occupied;
+  PCL_to_Octomap(occupied_pc, octo_occupied);
+  octomap::KeySet occupied_keyset{};
+
+  for (const auto &p : octo_occupied)
+  {
+    octomap::OcTreeKey key;
+    if (pair.octree->coordToKeyChecked(p, key))
+    {
+      occupied_keyset.insert(key);
+    }
+  }
+
+  octomap::Pointcloud octo_free;
+  PCL_to_Octomap(free_pc, octo_free);
+  octomap::KeySet free_keyset{};
+
+  for (const auto &p : octo_free)
+  {
+    octomap::OcTreeKey key;
+    if (pair.octree->coordToKeyChecked(p, key))
+    {
+      free_keyset.insert(key);
+    }
+  }
+
+  // Remove all free from occupied keyset
+  for (auto it = free_keyset.begin(), end = free_keyset.end(); it != end;)
+  {
+    if (occupied_keyset.find(*it) != occupied_keyset.end())
+    {
+      it = free_keyset.erase(it);
+    }
+    else
+    {
+      ++it;
+    }
+  }
+
+  // Insert
+  for (auto it = free_keyset.begin(); it != free_keyset.end(); ++it)
+  {
+    pair.octree->updateNode(*it, false, false);
+  }
+  for (auto it = occupied_keyset.begin(); it != occupied_keyset.end(); ++it)
+  {
+    pair.octree->updateNode(*it, true, false);
+  }
+
   pair.octree->setProbHit(old_prob_hit);
   pair.octree->setProbMiss(old_prob_miss);
 }

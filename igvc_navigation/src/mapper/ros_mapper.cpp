@@ -23,11 +23,13 @@
 #include <tf/transform_datatypes.h>
 #include <tf_conversions/tf_eigen.h>
 
+#include <igvc_utils/robot_state.h>
 #include <visualization_msgs/Marker.h>
 #include <igvc_utils/NodeUtils.hpp>
-#include <igvc_utils/RobotState.hpp>
 
 #include <cv_bridge/cv_bridge.h>
+
+#include <image_transport/image_transport.h>
 
 #include "map_utils.h"
 #include "ros_mapper.h"
@@ -65,10 +67,14 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   igvc::getParam(pNh, "node/camera/center/enable", enable_center_cam_);
   igvc::getParam(pNh, "node/camera/right/enable", enable_right_cam_);
 
+  igvc::getParam(pNh, "node/camera/use_passed_in_pointcloud", use_passed_in_pointcloud_);
+
   igvc::getParam(pNh, "cameras/resize_width", resize_width_);
   igvc::getParam(pNh, "cameras/resize_height", resize_height_);
 
-  igvc::getParam(pNh, "node/debug", debug_);
+  igvc::getParam(pNh, "topics/camera_center", center_camera_topic_);
+
+  igvc::getParam(pNh, "node/debug/publish/map_debug_pcl", debug_pub_map_pcl);
   igvc::getParam(pNh, "node/use_lines", use_lines_);
   igvc::param(pNh, "node/transform_max_wait_time", transform_max_wait_time_, 3.0);
 
@@ -76,6 +82,7 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
 
   ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(lidar_topic_, 1, &ROSMapper::pcCallback, this);
   ros::Subscriber projected_line_map_sub;
+  ros::Subscriber center_cam_pub;
 
   if (use_lines_)
   {
@@ -89,10 +96,13 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
           Camera::left,
           nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_left_, 1,
                                                 boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::left))));
-      projected_line_subs_.emplace(
-          std::make_pair(Camera::left, nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(
-                                           projected_line_topic_left_, 1,
-                                           boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::left))));
+      if (use_passed_in_pointcloud_)
+      {
+        projected_line_subs_.emplace(
+            std::make_pair(Camera::left, nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(
+                                             projected_line_topic_left_, 1,
+                                             boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::left))));
+      }
     }
     if (enable_center_cam_)
     {
@@ -104,10 +114,13 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
           std::make_pair(Camera::center, nh.subscribe<sensor_msgs::CameraInfo>(
                                              camera_info_topic_center_, 1,
                                              boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::center))));
-      projected_line_subs_.emplace(std::make_pair(
-          Camera::center, nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(
-                              projected_line_topic_center_, 1,
-                              boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::center))));
+      if (use_passed_in_pointcloud_)
+      {
+        projected_line_subs_.emplace(std::make_pair(
+            Camera::center, nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(
+                                projected_line_topic_center_, 1,
+                                boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::center))));
+      }
     }
     if (enable_right_cam_)
     {
@@ -119,23 +132,43 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
           Camera::right,
           nh.subscribe<sensor_msgs::CameraInfo>(camera_info_topic_right_, 1,
                                                 boost::bind(&ROSMapper::cameraInfoCallback, this, _1, Camera::right))));
-      projected_line_subs_.emplace(
-          std::make_pair(Camera::right, nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(
-                                            projected_line_topic_right_, 1,
-                                            boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::right))));
+      if (use_passed_in_pointcloud_)
+      {
+        projected_line_subs_.emplace(std::make_pair(
+            Camera::right, nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(
+                               projected_line_topic_right_, 1,
+                               boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::right))));
+      }
     }
+    center_cam_pub = nh.subscribe(center_camera_topic_, 1, &ROSMapper::centerCamCallback, this);
   }
+
+  back_circle_sub_ = nh.subscribe("/back_circle", 1, &ROSMapper::backCircleCallback, this);
 
   map_pub_ = nh.advertise<igvc_msgs::map>("/map", 1);
 
-  if (debug_)
+  if (debug_pub_map_pcl)
   {
-    debug_pcl_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/map_debug_pcl", 1);
+    debug_pcl_pub_ = nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/mapper/debug/pcl", 1);
   }
 
   ROS_INFO("Mapper started!");
 
   ros::spin();
+}
+
+void ROSMapper::centerCamCallback(const sensor_msgs::CompressedImageConstPtr &image)
+{
+  auto cv_img = cv_bridge::toCvCopy(image, "bgr8")->image;
+  cv::resize(cv_img, cv_img, cv::Size(resize_width_, resize_height_));
+  mapper_->setCenterImage(cv_img);
+}
+
+void ROSMapper::backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg)
+{
+  // do the tf tree
+  // getOdomTransform(msg->header.stamp);
+  mapper_->insertBackCircle(msg, state_.transform);
 }
 
 template <>
@@ -253,13 +286,14 @@ void ROSMapper::publish(uint64_t stamp)
   setMessageMetadata(message, image, stamp);
   map_pub_.publish(message);
 
-  if (debug_)
+  if (debug_pub_map_pcl)
   {
-    publishAsPCL(debug_pcl_pub_, *map, "/odom", stamp);
+    publishMapDebugPC(debug_pcl_pub_, *map, "/odom", stamp);
   }
 }
 
-void ROSMapper::publishAsPCL(const ros::Publisher &pub, const cv::Mat &mat, const std::string &frame_id, uint64_t stamp)
+void ROSMapper::publishMapDebugPC(const ros::Publisher &pub, const cv::Mat &mat, const std::string &frame_id,
+                                  uint64_t stamp)
 {
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointcloud = boost::make_shared<pcl::PointCloud<pcl::PointXYZRGB>>();
   for (int i = 0; i < width_y_ / resolution_; i++)
@@ -367,7 +401,7 @@ void ROSMapper::segmentedImageCallback(const sensor_msgs::ImageConstPtr &segment
   cv::Mat image = segmented_ptr->image;
 
   mapper_->insertSegmentedImage(std::move(image), state_.transform, transforms_.at(topic), segmented->header.stamp,
-                                camera);
+                                camera, use_passed_in_pointcloud_);
 
   publish(pcl_conversions::toPCL(segmented->header.stamp));
 }

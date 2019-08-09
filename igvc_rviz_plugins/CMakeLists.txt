@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9.0)
 project(igvc_rviz_plugins)
 
-SET(CMAKE_CXX_STANDARD 17)
+include(../igvc.cmake)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -32,7 +32,7 @@ find_package(Boost REQUIRED COMPONENTS container)
 ###################################
 
 catkin_package(
-  LIBRARIES ${PROJECT_NAME}
+#  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS roscpp rviz igvc_msgs
 )
 

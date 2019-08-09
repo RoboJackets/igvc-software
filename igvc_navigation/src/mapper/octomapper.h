@@ -54,6 +54,12 @@ struct OcTreeOptions
   double min;
 };
 
+struct Ray
+{
+  pcl::PointXYZ start;
+  pcl::PointXYZ end;
+};
+
 /**
  * Struct representing options for the map.
  * Length and Width are both in m, not grid cells.
@@ -142,6 +148,17 @@ public:
                   ProbabilityModel model) const;
 
   /**
+   * Inserts a ray into the given pc_map_pair, where each ray has a start and end position, with the points in the ray
+   * marked as either occupied or not occupied, and the probabilities used depending on the ProbabilityModel passed in
+   * @param pair
+   * @param pc_rays
+   * @param occupied
+   * @param model
+   */
+  void insertRaysWithStartPoint(pc_map_pair& pair, const std::vector<Ray>& pc_rays, bool occupied,
+                                ProbabilityModel model) const;
+
+  /**
    * Inserts the passed in points to the given pc_map_pair, where the points are either occupied or not depending
    * on the variable passed in
    * @param pair
@@ -150,6 +167,16 @@ public:
    * @param model
    */
   void insertPoints(struct pc_map_pair& pair, const PointCloud& pc, bool occupied, ProbabilityModel model) const;
+
+  /**
+   * Inserts the passed in occupied and free points to the given pc_map_pair
+   * @param pair
+   * @param occupied_pc
+   * @param free_pc
+   * @param model
+   */
+  void insertPoints(struct pc_map_pair& pair, const PointCloud& occupied_pc, const PointCloud& free_pc,
+                    ProbabilityModel model) const;
 
 private:
   void create_map(pc_map_pair& pair) const;

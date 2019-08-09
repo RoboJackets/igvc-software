@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(igvc_utils)
 
+include(../igvc.cmake)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -16,8 +18,6 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-set(CMAKE_CXX_FLAGS "-g -std=c++17 -Wall ${CMAKE_CXX_FLAGS}")
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -86,8 +86,8 @@ catkin_python_setup()
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
-#  LIBRARIES igvc
-#  CATKIN_DEPENDS roscpp std_msgs
+  LIBRARIES igvc_state EthernetSocket
+  CATKIN_DEPENDS roscpp std_msgs geometry_msgs igvc_msgs
 #  DEPENDS system_lib
 )
 
@@ -114,7 +114,6 @@ include_directories(
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-# add_dependencies(igvc_node igvc_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(igvc_node
@@ -142,12 +141,10 @@ include_directories(
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h")
-#   PATTERN ".svn" EXCLUDE
-# )
+# Mark cpp header files for installation
+install(DIRECTORY include
+ DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+ FILES_MATCHING PATTERN "*.h")
 
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 # install(FILES
@@ -171,3 +168,4 @@ add_subdirectory(src/ethernet)
 add_subdirectory(src/speed_compare)
 add_subdirectory(src/system_stats)
 add_subdirectory(src/quaternion_to_rpy)
+add_subdirectory(src/state)

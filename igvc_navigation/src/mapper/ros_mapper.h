@@ -87,7 +87,12 @@ private:
    * @param[in] frame_id the frame to use
    * @param[in] stamp the stamp to use
    */
-  void publishAsPCL(const ros::Publisher& pub, const cv::Mat& mat, const std::string& frame_id, uint64_t stamp);
+  void publishMapDebugPC(const ros::Publisher& pub, const cv::Mat& mat, const std::string& frame_id, uint64_t stamp);
+
+  //  void centerCamCallback(const sensor_msgs::ImageConstPtr& image);
+  void centerCamCallback(const sensor_msgs::CompressedImageConstPtr& image);
+
+  void backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg);
 
   cv_bridge::CvImage img_bridge_;
 
@@ -99,6 +104,7 @@ private:
   std::unordered_map<Camera, ros::Subscriber> camera_infos_;
   std::unordered_map<Camera, ros::Subscriber> line_map_subs_;
   std::unordered_map<Camera, ros::Subscriber> projected_line_subs_;
+  ros::Subscriber back_circle_sub_;
 
   bool use_lines_{};
   double transform_max_wait_time_{};
@@ -107,11 +113,13 @@ private:
   int length_x_{};  // length (m)
   int width_y_{};   // width (m)
 
-  bool debug_{};
+  bool debug_pub_map_pcl{};
 
   bool enable_left_cam_;
   bool enable_center_cam_;
   bool enable_right_cam_;
+
+  bool use_passed_in_pointcloud_;
 
   double resolution_{};  // Map Resolution
 
@@ -131,6 +139,8 @@ private:
   std::string camera_info_topic_left_;
   std::string camera_info_topic_center_;
   std::string camera_info_topic_right_;
+
+  std::string center_camera_topic_;
 
   std::string camera_frame_left_;
   std::string camera_frame_center_;

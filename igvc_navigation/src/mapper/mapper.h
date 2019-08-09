@@ -74,7 +74,7 @@ public:
    * @param[in] stamp timestamp to be used for debug publishing
    */
   void insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_odom, const tf::Transform& camera_to_base,
-                            const ros::Time& stamp, Camera camera);
+                            const ros::Time& stamp, Camera camera, bool use_passed_in_pointcloud);
 
   /**
    * Sets the parameters for the image_geometry::PinholeCameraModel used for projection.
@@ -88,6 +88,10 @@ public:
    */
   std::optional<cv::Mat> getMap();
 
+  void setCenterImage(cv::Mat& image);
+
+  void insertBackCircle(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg, tf::Transform transform);
+
 private:
   /**
    * Performs filtering on the free space of an image
@@ -99,6 +103,8 @@ private:
    * Inverts probabilities for the ProbabilityModels so that miss_probability is more intuitive.
    */
   void invertMissProbabilities();
+
+  std::vector<Ray> getTransformedEmptyRays(const PointCloud& nonground, const tf::Transform& lidar_to_odom);
 
   std::unique_ptr<Octomapper> octomapper_;
   pc_map_pair pc_map_pair_;      // Struct storing both the octomap for the lidar and the cv::Mat map
@@ -121,6 +127,8 @@ private:
   ros::Publisher nonground_pub_;
   ros::Publisher nonground_projected_pub_;
   ros::Publisher camera_line_pub_;
+  ros::Publisher filtered_img_pub_;
+  ros::Publisher removed_barrels_pub_;
 
   ProbabilityModel lidar_scan_probability_model_{};
   ProbabilityModel lidar_ground_probability_model_{};
@@ -130,15 +138,23 @@ private:
   GroundFilterOptions ground_filter_options_{};
   GroundPlane ground_plane_;
 
+  RemoveBarrelOptions remove_barrel_options_{};
+
   bool use_ground_filter_;
   bool camera_model_initialized_;
   bool use_lines_;
-  bool debug_;
+
+  bool debug_pub_camera_lines;
+  bool debug_pub_camera_projections;
+  bool debug_pub_filtered_pointclouds;
+
   radians angular_resolution_;
 
   double resolution_;  // Map Resolution
   double radius_;      // Radius to filter lidar points
   double combined_blur_kernel_size_;
+
+  cv::Mat center_barrels_mask_;
 };
 
 #endif  // SRC_MAPPER_H

@@ -7,6 +7,7 @@
 #include <pcl/segmentation/sac_segmentation.h>
 
 #include "map_utils.h"
+#include "octomapper.h"
 
 namespace MapUtils
 {
@@ -139,9 +140,13 @@ void blur(cv::Mat& blurred_map, double kernel_size)
   cv::max(original, blurred_map, blurred_map);
 }
 
-void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pcl::PointXYZ>& empty_pc,
-                    double angular_resolution, EmptyFilterOptions options)
+void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, std::vector<Ray>& empty_rays, double angular_resolution,
+                    EmptyFilterOptions options)
 {
+  int discretized_start = discretize(options.start_angle, angular_resolution);
+  int discretized_end = discretize(options.end_angle, angular_resolution);
+  empty_rays.reserve(discretized_end - discretized_start + 1);
+
   // Iterate over pointcloud, insert discretized angles into set if within max range
   std::unordered_set<int> discretized_angles{};
   for (auto i : pc)
@@ -155,24 +160,28 @@ void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, pcl::PointCloud<pc
 
   // For each angle, if it's not in the set (empty), put it into a pointcloud.
   // From Robot's frame. Need to rotate angle to world frame
-  for (int i = discretize(options.start_angle, angular_resolution);
-       i < discretize(options.end_angle, angular_resolution); i++)
+  for (int i = discretized_start; i < discretized_end; i++)
   {
     if (discretized_angles.find(i) == discretized_angles.end())
     {
       double angle = i * angular_resolution;
-      pcl::PointXYZ point{ static_cast<float>(options.miss_cast_distance * cos(angle)),
-                           static_cast<float>(options.miss_cast_distance * sin(angle)), 0 };
-      empty_pc.points.emplace_back(point);
+      pcl::PointXYZ ray_start{ static_cast<float>(options.ray_start_distance * cos(angle)),
+                               static_cast<float>(options.ray_start_distance * sin(angle)), 0 };
+
+      pcl::PointXYZ ray_end{ static_cast<float>(options.miss_cast_distance * cos(angle)),
+                             static_cast<float>(options.miss_cast_distance * sin(angle)), 0 };
+      empty_rays.emplace_back(Ray{ ray_start, ray_end });
     }
   }
 }
 
 void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, const cv::Mat& image,
-                    const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world)
+                    const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world, bool is_line)
 {
   int nRows = image.rows;
   int nCols = image.cols;
+
+  uchar match = is_line ? 255u : 0u;
 
   int i, j;
   const uchar* p;
@@ -182,7 +191,7 @@ void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, c
     for (j = 0; j < nCols; ++j)
     {
       // If it's a black pixel => free space, then project
-      if (p[j] == 0)
+      if (p[j] == match)
       {
         cv::Point2d pixel_point(j, i);
 
@@ -248,6 +257,40 @@ void debugPublishPointCloud(const ros::Publisher& publisher, pcl::PointCloud<pcl
     pointcloud.header.stamp = stamp;
     pointcloud.header.frame_id = frame;
     publisher.publish(pointcloud);
+  }
+}
+
+void removeBarrels(cv::Mat& image, RemoveBarrelOptions options)
+{
+  cv::cvtColor(image, image, CV_BGR2HSV);
+  cv::inRange(image, cv::Scalar(options.low_h, options.low_s, options.low_v),
+              cv::Scalar(options.high_h, options.high_s, options.high_v), image);
+
+  cv::Mat kernel =
+      cv::getStructuringElement(cv::MORPH_RECT, cv::Size(2 * options.kernel_width + 1, 2 * options.kernel_height + 1),
+                                cv::Point(options.kernel_width, options.kernel_height));
+
+  cv::morphologyEx(image, image, cv::MORPH_CLOSE, kernel);
+}
+
+void filterBarrels(cv::Mat& image, cv::Mat& mask)
+{
+  if (mask.data != nullptr)
+  {
+    cv::bitwise_or(image, mask, image);
+  }
+}
+
+void debugPublishImage(const ros::Publisher& publisher, const cv::Mat& image, const ros::Time stamp, bool debug)
+{
+  if (debug)
+  {
+    cv_bridge::CvImage bridge_image;
+    bridge_image.image = image;
+    sensor_msgs::ImagePtr out = bridge_image.toImageMsg();
+    out->encoding = "mono8";
+    out->header.stamp = stamp;
+    publisher.publish(out);
   }
 }
 }  // namespace MapUtils

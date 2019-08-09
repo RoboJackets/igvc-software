@@ -5,25 +5,25 @@
 
     <node name="cnn" pkg="igvc_perception" type="cnn.py" output="screen" />
 
-    <rosparam param="camera_names">["center_cam", "left_cam", "right_cam"]</rosparam>
+    <rosparam param="camera_names">["usb_cam_center", "usb_cam_left", "usb_cam_right"]</rosparam>
 
     <!-- These sizes must match the model input dimensions. -->
     <param name="image_resize_width" value="400" />
     <param name="image_resize_height" value="400" />
 
-    <param name="model_path" value="$(find igvc_perception)/../sandbox/models/IGVCModel_120.pt" />
+    <param name="model_path" value="$(find igvc_perception)/../sandbox/models/YS/IGVCModel_135.pt" />
 
     <!-- Use cpu instead of GPU (will run very slowly). -->
     <param name="force_cpu" value="false" />
 
     <!-- Threshold to determine if a network prediction is a line (values between 0 and 1) -->
-    <param name="line_thresh" value="0.5" />
+    <param name="line_thresh" value="0.95" />
 
     <param name="output_segmentation_topic" value="/semantic_segmentation" />
 
     <!-- Use a pre-existic segmented image such as an output segmentation from a different node.
          If true, the "segmented_image_topics" rosparam must be set with one topic for each camera -->
-    <param name="use_preexisting_segmentation" value="true"/>
+    <param name="use_preexisting_segmentation" value="false"/>
     <rosparam param="segmented_image_topics">["/center_cam/detected_lines", "/left_cam/detected_lines", "/right_cam/detected_lines"]</rosparam>
 
 </launch>

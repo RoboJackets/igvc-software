@@ -34,6 +34,7 @@ void joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
   igvc_msgs::velocity_pair cmd;
   cmd.left_velocity = msg->axes[leftJoyAxis] * maxVel * (leftInverted ? -1.0 : 1.0);
   cmd.right_velocity = msg->axes[rightJoyAxis] * maxVel * (rightInverted ? -1.0 : 1.0);
+  cmd.header.stamp = ros::Time::now();
 
   cmd_pub.publish(cmd);
 }
