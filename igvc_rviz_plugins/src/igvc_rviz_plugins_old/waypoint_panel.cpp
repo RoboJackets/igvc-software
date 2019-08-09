@@ -53,6 +53,6 @@ void WaypointPanel::robot_position_callback(const nav_msgs::OdometryConstPtr &ms
 
   label->setText(text.c_str());
 }
-}  // namespace igvc_rviz_plugins_old
+}  // namespace igvc_rviz_plugins
 
 PLUGINLIB_EXPORT_CLASS(igvc_rviz_plugins::WaypointPanel, rviz::Panel)

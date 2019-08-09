@@ -41,7 +41,7 @@ void ExamplePanel::speed_callback(const igvc_msgs::velocity_pairConstPtr &msg, Q
 // void ExamplePanel::paintEvent(QPaintEvent *event)  {
 //
 //}
-}  // namespace igvc_rviz_plugins_old
+}  // namespace igvc_rviz_plugins
 
 /*
  * IMPORTANT! This macro must be filled out correctly for your panel class.

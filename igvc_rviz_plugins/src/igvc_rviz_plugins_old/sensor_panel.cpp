@@ -103,7 +103,7 @@ void sensor_panel::reset_labels()
     }
   }
 }
-}  // namespace igvc_rviz_plugins_old
+}  // namespace igvc_rviz_plugins
 
 /*
  * IMPORTANT! This macro must be filled out correctly for your panel class.
