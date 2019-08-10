@@ -9,22 +9,7 @@
 enum ControlStyle
 {
   direction_velocity_control,
-  smooth_control,
   tank_control
-};
-
-struct SmoothControlConfig
-{
-  double k1;
-  double k2;
-  double axle_length;
-  double velocity;
-  double w;
-  double max_w;
-  double delta;
-  double camera;
-  double camera_move_rate;
-  bool camera_initialized;
 };
 
 struct TankControlConfig
@@ -84,22 +69,18 @@ private:
   ros::Publisher cmd_pub_;
 
   double max_velocity_;
-  double control_loop_period_;
+  double control_loop_period_{};
 
-  SmoothControlConfig smooth_control_config_;
   TankControlConfig tank_control_config_;
   DirectionVelocityConfig direction_velocity_config_;
-  AccelerationLimits acceleration_limits_;
+  AccelerationLimits acceleration_limits_{};
   JoyMap joy_map_;
   ControlStyle control_style_;
 
-  Axes axes_;
+  Axes axes_{};
 
   sensor_msgs::JoyConstPtr joystick_;
-  sensor_msgs::ImuConstPtr imu_;
   bool a_clicked_ = false;
-  bool rb_clicked_ = false;
-  bool lb_clicked_ = false;
 
   igvc_msgs::velocity_pair motor_cmd_;
   igvc_msgs::velocity_pair last_motor_cmd_;
@@ -114,17 +95,11 @@ private:
 
   void boundAcceleration();
   void boundTangentAcceleration(double tangent_acceleration, const ros::Duration &dt);
-  void boundLeftAcceleration(double left_acceleration, const ros::Duration &dt);
-  void boundRightAcceleration(double right_acceleration, const ros::Duration &dt);
 
   void handleTankControl(const sensor_msgs::JoyConstPtr &joystick);
-  void handleSmoothControl(const sensor_msgs::JoyConstPtr &joystick);
   void handleDirectionVelocityControl(const sensor_msgs::JoyConstPtr &joystick);
 
-  double getVelocity(const igvc_msgs::velocity_pair &command) const;
-  double getW(const igvc_msgs::velocity_pair &command) const;
-  double getK(const igvc_msgs::velocity_pair &command) const;
-  double getYaw(const sensor_msgs::ImuConstPtr &imu) const;
+  [[nodiscard]] double getVelocity(const igvc_msgs::velocity_pair &command) const;
 
   void signalHandler();
 };
