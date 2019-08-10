@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+
+<!-- map.launch -->
+<launch>
+
+    <node name="trajectory_follower" pkg="igvc_navigation" type="trajectory_follower" output="screen" >
+        <param name="topics/path" value="/trajectory"/>
+        <param name="axle_length" value="0.52"/>
+        <param name="loop_hz" value="25.0"/>
+        <param name="motor_loop_hz" value="25.0"/>
+
+        <param name="min_velocity" value="0.2" />
+    </node>
+
+</launch>

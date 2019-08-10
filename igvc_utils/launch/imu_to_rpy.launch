@@ -1,0 +1,13 @@
+<launch>
+  <node pkg="igvc_utils" type="quaternion_to_rpy" name="imu_top_to_rpy" respawn="true" output="screen">
+    <param name="topics/quaternion" value="/magnetometer"/>
+    <param name="topics/rpy" value="/magnetometer_rpy"/>
+    <param name="message_type" value="imu"/>
+  </node>
+
+  <node pkg="igvc_utils" type="quaternion_to_rpy" name="imu_bottom_to_rpy" respawn="true" output="screen">
+    <param name="topics/quaternion" value="/imu"/>
+    <param name="topics/rpy" value="/imu_rpy"/>
+    <param name="message_type" value="imu"/>
+  </node>
+</launch>

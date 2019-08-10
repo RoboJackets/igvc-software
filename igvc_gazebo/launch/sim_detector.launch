@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node name="sim_color_detector" pkg="igvc_gazebo" type="sim_color_detector">
+      <!-- names of cameras to subscribe to -->
+      <rosparam param="camera_names">["/center_cam", "/left_cam", "/right_cam"]</rosparam>
+
+      <!-- names of output segmentation topics. Published in the namespace of the corresponding camera -->
+      <param name="line_topic" value="/detected_lines" />
+      <param name="barrel_topic" value="/detected_barrels" />
+  </node>
+
+</launch>

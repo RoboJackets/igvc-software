@@ -30,11 +30,19 @@ struct ProcessImageOptions
 {
   BlurFilterOptions blur;
   ThresholdFilterOptions threshold;
+  int dilation_size;
 };
 
 struct CombinedMapOptions
 {
   BlurFilterOptions blur;
+};
+
+enum class Camera : int
+{
+  left,
+  center,
+  right
 };
 
 class Mapper
@@ -66,19 +74,23 @@ public:
    * @param[in] stamp timestamp to be used for debug publishing
    */
   void insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_odom, const tf::Transform& camera_to_base,
-                            const ros::Time& stamp);
+                            const ros::Time& stamp, Camera camera, bool use_passed_in_pointcloud);
 
   /**
    * Sets the parameters for the image_geometry::PinholeCameraModel used for projection.
    * @param[in] camera_model camera model used for projection
    */
-  void setProjectionModel(const image_geometry::PinholeCameraModel& camera_model);
+  void setProjectionModel(const image_geometry::PinholeCameraModel& camera_model, Camera camera);
 
   /**
    * Returns the current map, or std::nullopt if no data has been receieved yet.ction Tool_External Tools_clang-format
    * @return std::optional of the map as a cv::Mat
    */
   std::optional<cv::Mat> getMap();
+
+  void setCenterImage(cv::Mat& image);
+
+  void insertBackCircle(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg, tf::Transform transform);
 
 private:
   /**
@@ -92,24 +104,31 @@ private:
    */
   void invertMissProbabilities();
 
+  std::vector<Ray> getTransformedEmptyRays(const PointCloud& nonground, const tf::Transform& lidar_to_odom);
+
   std::unique_ptr<Octomapper> octomapper_;
   pc_map_pair pc_map_pair_;      // Struct storing both the octomap for the lidar and the cv::Mat map
   pc_map_pair camera_map_pair_;  // Struct storing both the octomap for the camera projections and the cv::Mat map
 
-  image_geometry::PinholeCameraModel camera_model_;
+  std::unordered_map<Camera, image_geometry::PinholeCameraModel> camera_model_map_;
 
   EmptyFilterOptions empty_filter_options_{};
   BehindFilterOptions behind_filter_options_{};
   ProcessImageOptions process_image_options_{};
   CombinedMapOptions combined_map_options_{};
 
-  ros::Publisher camera_projection_pub_;
+  ros::Publisher camera_projection_pub_left_;
+  ros::Publisher camera_projection_pub_center_;
+  ros::Publisher camera_projection_pub_right_;
+
   ros::Publisher filtered_pc_pub_;
   ros::Publisher empty_pc_pub_;
   ros::Publisher ground_pub_;
   ros::Publisher nonground_pub_;
   ros::Publisher nonground_projected_pub_;
   ros::Publisher camera_line_pub_;
+  ros::Publisher filtered_img_pub_;
+  ros::Publisher removed_barrels_pub_;
 
   ProbabilityModel lidar_scan_probability_model_{};
   ProbabilityModel lidar_ground_probability_model_{};
@@ -119,15 +138,23 @@ private:
   GroundFilterOptions ground_filter_options_{};
   GroundPlane ground_plane_;
 
+  RemoveBarrelOptions remove_barrel_options_{};
+
   bool use_ground_filter_;
   bool camera_model_initialized_;
   bool use_lines_;
-  bool debug_;
+
+  bool debug_pub_camera_lines;
+  bool debug_pub_camera_projections;
+  bool debug_pub_filtered_pointclouds;
+
   radians angular_resolution_;
 
   double resolution_;  // Map Resolution
   double radius_;      // Radius to filter lidar points
   double combined_blur_kernel_size_;
+
+  cv::Mat center_barrels_mask_;
 };
 
 #endif  // SRC_MAPPER_H

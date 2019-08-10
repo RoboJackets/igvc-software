@@ -23,7 +23,7 @@
 
   <!-- wheel acuator limits -->
   <xacro:property name="drive_wheel_eff_limit" value="8"/>
-  <xacro:property name="drive_wheel_vel_limit" value="20"/>
+  <xacro:property name="drive_wheel_vel_limit" value="10"/>
 
   <!-- drive shock params-->
   <!-- how far the drive wheel shock can move (m)-->
@@ -40,7 +40,7 @@
   <!-- center camera params, relative to the magnetometer -->
   <xacro:property name="center_camera_y" value="0.0"/>
   <xacro:property name="center_camera_x" value="0.0"/>
-  <xacro:property name="center_camera_pitch" value="0.0"/>
+  <xacro:property name="center_camera_pitch" value="0.418879"/>
   <xacro:property name="center_camera_z" value="0.043942"/>
 
   <!-- right camera params, relative to the magnetometer -->

@@ -8,15 +8,15 @@ octree:
 probability_model:
     lidar:
         scan: # Hit: points registered by the lidar scan, Miss: ray between the lidar and the hit points
-            prob_miss: 0.55
-            prob_hit: 0.9
+            prob_miss: 0.9
+            prob_hit: 0.1
         ground:
             prob_miss: 0.6
         free_space: # Rays that are not detected by the lidar to have occupied points along them
-            prob_miss: 0.52
+            prob_miss: 0.9
     camera:
-        prob_miss: 0.45
-        prob_hit: 0.9
+        prob_miss: 0.7
+        prob_hit: 0.7
 sensor_model:
     max_range: 5
     angular_resolution: 0.01
@@ -29,24 +29,39 @@ filters:
         enabled: true
         start_angle: -0.5 #Radians
         end_angle: 0.5
+        ray_start_distance: 1
         miss_cast_distance: 5
         max_range: 5
     empty_image: # Blur and threshold for determining which points in the segmented image are empty space
         blur:
-            kernel: 17
-            sigma: 11
-        threshold: 0.5
+            kernel: 7
+            sigma: 3
+        threshold: 0.9
+        dilation_size: 10
     combined_map: # Blur amount when combining the line and lidar map
         blur:
             kernel: 3
     ground_filter:
         enable: true
         ransac:
-            iterations: 200
-            distance_threshold: 0.5
-            eps_angle: 0.5
+            iterations: 400
+            distance_threshold: 0.4
+            eps_angle: 0.2
         fallback:
             plane_distance: 0.04 # +-m from z=0
+    remove_barrels:
+        low:
+            h: 0
+            s: 20
+            v: 0
+        high:
+            h: 20
+            s: 255
+            v: 255
+        kernel_size:
+            width: 1
+            height: 10
+
 map:
     # In units of meters, not cells
     # width of grid = width / resolution
@@ -61,14 +76,42 @@ segmented_free_space:
     threshold: 127 #0 - 255
 topics:
     lidar: "/velodyne_points"
-    line_segmentation: "/semantic_segmentation"
-    projected_line_pc: "/semantic_segmentation_cloud"
-    camera_info: "/usb_cam_center/camera_info"
+    line_segmentation:
+        left: "/semantic_segmentation/usb_cam_left"
+        center: "/semantic_segmentation/usb_cam_center"
+        right: "/semantic_segmentation/usb_cam_right"
+    projected_line_pc:
+        left: "/semantic_segmentation_cloud/usm_cam_left"
+        center: "/semantic_segmentation_cloud/usb_cam_center"
+        right: "/semantic_segmentation_cloud/usb_cam_right"
+    camera_info:
+        left: "/usb_cam_left/camera_info"
+        center: "/usb_cam_center/camera_info"
+        right: "/usb_cam_right/camera_info"
+    camera_center: "/usb_cam_center/image_raw/compressed"
 frames:
-    camera: "/optical_cam_center"
+    camera:
+        left: "/left_cam_optical"
+        center: "/center_cam_optical"
+        right: "/right_cam_optical"
 node:
-    debug: true
-    use_lines: false
+    debug:
+        publish:
+            map_debug_pcl: true
+            cameras:
+                lines: true
+                projections: true
+            filtered_pointclouds: true
+
+    use_lines: true
+    camera:
+        use_passed_in_pointcloud: false
+        left:
+            enable: true
+        center:
+            enable: true
+        right:
+            enable: true
     transform_max_wait_time: 1
 cameras:
     resize_width: 400 # pixels

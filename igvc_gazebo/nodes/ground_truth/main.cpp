@@ -68,6 +68,36 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
   }
 }
 
+void utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm)
+{
+  static tf::TransformBroadcaster br;
+  static tf::TransformListener tf_listener;
+  tf::StampedTransform transform;
+  static bool enabled = true;
+
+  if (enabled)
+  {
+    bool found = true;
+    try
+    {
+      tf_listener.lookupTransform("utm", "odom", ros::Time(0), transform);
+    }
+    catch (const tf::TransformException& ex)
+    {
+      found = false;
+    }
+
+    if (found && transform.getRotation() != odom_to_utm.getRotation() &&
+        transform.getOrigin() != odom_to_utm.getOrigin())
+    {
+      ROS_WARN_STREAM("Anther odom -> utm tf broadcast detected. Disabling ground_truth odom -> utm tf broadcast.");
+      enabled = false;
+      return;
+    }
+    br.sendTransform(tf::StampedTransform(odom_to_utm, ros::Time(0), "odom", "utm"));
+  }
+}
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "ground_truth_republisher");
@@ -95,14 +125,7 @@ int main(int argc, char** argv)
   utm_to_odom.setOrigin(
       tf::Vector3(utm_x - g_og_pose.pose.pose.position.x, utm_y - g_og_pose.pose.pose.position.y, 0.0));
   utm_to_odom.setRotation(tf::Quaternion(0.0, 0.0, 0.0, 1.0));
-  tf::TransformBroadcaster br;
 
-  ros::Rate rate(20);
-  while (ros::ok())
-  {
-    br.sendTransform(tf::StampedTransform(utm_to_odom, ros::Time::now(), "utm", "odom"));
-    ros::spinOnce();
-    rate.sleep();
-  }
+  ros::Timer utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(utm_callback, _1, utm_to_odom.inverse()));
   ros::spin();
 }

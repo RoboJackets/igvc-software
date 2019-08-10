@@ -65,6 +65,8 @@ private:
   // IMU orientation correction.
   std::vector<double> imu_orientation_correction_;
 
+  double orientation_rotation_;
+
   // frame id
   std::string frame_id_;
 
