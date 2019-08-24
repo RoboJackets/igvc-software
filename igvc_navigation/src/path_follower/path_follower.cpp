@@ -13,11 +13,9 @@
 #include <tf/transform_datatypes.h>
 
 #include <igvc_utils/robot_state.h>
-#include <igvc_utils/NodeUtils.hpp>
+#include <parameter_assertions/assertions.h>
 
 #include "path_follower.h"
-
-using igvc::Assertion;
 
 PathFollower::PathFollower()
 {
@@ -34,20 +32,21 @@ PathFollower::PathFollower()
   double simulation_frequency;
   double lookahead_dist;
   seconds simulation_horizon;
-  igvc::param(pNh, "target_v", target_velocity, 1.0, Assertion::POSITIVE);
-  igvc::param(pNh, "axle_length", axle_length, 0.52, Assertion::POSITIVE);
-  igvc::param(pNh, "k1", k1, 1.0);
-  igvc::param(pNh, "k2", k2, 3.0);
-  igvc::param(pNh, "simulation_frequency", simulation_frequency, 100.0, Assertion::POSITIVE);
-  igvc::param(pNh, "lookahead_dist", lookahead_dist, 2.0, Assertion::POSITIVE);
-  igvc::param(pNh, "simulation_horizon", simulation_horizon, 5.0, Assertion::POSITIVE);
+
+  assertions::param(pNh, "target_v", target_velocity, 1.0);
+  assertions::param(pNh, "axle_length", axle_length, 0.52);
+  assertions::param(pNh, "k1", k1, 1.0);
+  assertions::param(pNh, "k2", k2, 3.0);
+  assertions::param(pNh, "simulation_frequency", simulation_frequency, 100.0);
+  assertions::param(pNh, "lookahead_dist", lookahead_dist, 2.0);
+  assertions::param(pNh, "simulation_horizon", simulation_horizon, 5.0);
 
   controller_ = std::unique_ptr<SmoothControl>(new SmoothControl{
       k1, k2, axle_length, simulation_frequency, target_velocity, lookahead_dist, simulation_horizon });
 
   // load global parameters
-  igvc::getParam(pNh, "maximum_vel", maximum_vel_, Assertion::POSITIVE);
-  igvc::param(pNh, "stop_dist", stop_dist_, 0.9, Assertion::POSITIVE);
+  assertions::getParam(pNh, "maximum_vel", maximum_vel_, { assertions::NumberAssertionType::POSITIVE });
+  assertions::param(pNh, "stop_dist", stop_dist_, 0.9);
 
   ros::Subscriber path_sub = nh.subscribe("/path", 1, &PathFollower::pathCallback, this);
   ros::Subscriber pose_sub = nh.subscribe("/odometry/filtered", 1, &PathFollower::positionCallback, this);

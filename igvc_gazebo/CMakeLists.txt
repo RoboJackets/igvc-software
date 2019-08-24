@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
     cv_bridge
     image_transport
     robot_localization
+    parameter_assertions
     )
 
 catkin_package(

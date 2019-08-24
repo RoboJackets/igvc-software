@@ -1,6 +1,7 @@
 #include "smooth_control.h"
 #include <igvc_utils/robot_state.h>
 #include <algorithm>
+#include <igvc_utils/NodeUtils.hpp>
 
 SmoothControl::SmoothControl(SmoothControlOptions smooth_control_options, PathGenerationOptions path_generation_options,
                              TargetSelectionOptions target_selection_options,

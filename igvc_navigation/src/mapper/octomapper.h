@@ -27,7 +27,6 @@
 
 #include <igvc_msgs/map.h>
 #include <image_geometry/pinhole_camera_model.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/core/eigen.hpp>

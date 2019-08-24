@@ -1,0 +1,3 @@
+[submodule "external/rj-ros-common"]
+	path = external/rj-ros-common
+	url = https://github.com/RoboJackets/rj-ros-common

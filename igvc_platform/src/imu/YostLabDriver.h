@@ -6,8 +6,6 @@
 #include <tf/tf.h>
 #include <Eigen/Dense>
 
-#include <igvc_utils/NodeUtils.hpp>
-
 // This is the  basic ros-based device driver of IMU
 class YostLabDriver : SerialInterface
 {

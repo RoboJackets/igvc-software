@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
              octomap_ros
              tf_conversions
              robot_localization
+             parameter_assertions
              )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)

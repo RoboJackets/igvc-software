@@ -1,4 +1,6 @@
 #include "FieldDPlanner.h"
+#include <parameter_assertions/assertions.h>
+#include <igvc_utils/NodeUtils.hpp>
 
 FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 {
@@ -18,14 +20,14 @@ FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   // publish path for path_follower
   path_pub_ = nh_.advertise<nav_msgs::Path>("/path", 1);
 
-  igvc::getParam(pNh, "c_space", configuration_space_);
-  igvc::getParam(pNh, "maximum_distance", maximum_distance_);
-  igvc::getParam(pNh, "rate", rate_);
-  igvc::getParam(pNh, "goal_range", goal_range_);
-  igvc::getParam(pNh, "publish_expanded", publish_expanded_);
-  igvc::getParam(pNh, "follow_old_path", follow_old_path_);
-  igvc::getParam(pNh, "lookahead_dist", lookahead_dist_);
-  igvc::getParam(pNh, "occupancy_threshold", occupancy_threshold_, [](float x) { return x > 0.0 && x < 1.0; });
+  assertions::getParam(pNh, "c_space", configuration_space_);
+  assertions::getParam(pNh, "maximum_distance", maximum_distance_);
+  assertions::getParam(pNh, "rate", rate_);
+  assertions::getParam(pNh, "goal_range", goal_range_);
+  assertions::getParam(pNh, "publish_expanded", publish_expanded_);
+  assertions::getParam(pNh, "follow_old_path", follow_old_path_);
+  assertions::getParam(pNh, "lookahead_dist", lookahead_dist_);
+  assertions::getParam(pNh, "occupancy_threshold", occupancy_threshold_);
 
   node_grid_.setConfigurationSpace(static_cast<float>(configuration_space_));
   node_grid_.setOccupancyThreshold(static_cast<float>(occupancy_threshold_));

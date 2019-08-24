@@ -6,7 +6,6 @@
 #include <nav_msgs/Odometry.h>
 #include <tf/transform_datatypes.h>
 #include <Eigen/Dense>
-#include <igvc_utils/NodeUtils.hpp>
 #include "robot_control.h"
 
 struct wheel_velocity

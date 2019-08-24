@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
     pcl_ros
     igvc_utils
     velodyne_pointcloud
+    parameter_assertions
     )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)

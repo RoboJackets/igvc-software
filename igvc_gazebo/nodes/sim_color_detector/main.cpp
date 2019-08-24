@@ -10,11 +10,11 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <fstream>
-#include <igvc_utils/NodeUtils.hpp>
 #include <iostream>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/opencv.hpp>
 
+#include <parameter_assertions/assertions.h>
 #include <map>
 #include <vector>
 
@@ -152,13 +152,13 @@ int main(int argc, char** argv)
 
   // cameras to obtain images from
   std::vector<std::string> camera_names;
-  igvc::getParam(pNh, "camera_names", camera_names);
+  assertions::getParam(pNh, "camera_names", camera_names);
 
   // output topics
   std::string line_topic;
-  igvc::getParam(pNh, "line_topic", line_topic);
+  assertions::getParam(pNh, "line_topic", line_topic);
   std::string barrel_topic;
-  igvc::getParam(pNh, "barrel_topic", barrel_topic);
+  assertions::getParam(pNh, "barrel_topic", barrel_topic);
 
   // insert subscribers and publishers
   std::vector<ros::Subscriber> subs;

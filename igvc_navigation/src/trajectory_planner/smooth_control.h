@@ -17,10 +17,10 @@ https://web.eecs.umich.edu/~kuipers/papers/Park-icra-11.pdf
 #include <optional>
 
 #include <nav_msgs/Path.h>
+#include <ros/ros.h>
 
 #include <igvc_msgs/trajectory.h>
 #include <igvc_utils/robot_state.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 struct SmoothControlOptions
 {
