@@ -59,7 +59,6 @@ https://ocw.mit.edu/courses/aeronautics-and-astronautics/16-412j-cognitive-robot
 #include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <tf/transform_datatypes.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 /**
 The CostComputation struct contains the linearly interpolated path cost as

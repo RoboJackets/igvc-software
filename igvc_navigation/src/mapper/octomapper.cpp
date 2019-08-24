@@ -3,22 +3,23 @@
 
 #include <octomap/octomap.h>
 #include <octomap_ros/conversions.h>
+#include <parameter_assertions/assertions.h>
 
 #include "octomapper.h"
 
 using radians = double;
 Octomapper::Octomapper(ros::NodeHandle pNh)
 {
-  igvc::getParam(pNh, "octree/resolution", octree_options_.resolution);
+  assertions::getParam(pNh, "octree/resolution", octree_options_.resolution);
 
-  igvc::getParam(pNh, "octree/clamping/max", octree_options_.max);
-  igvc::getParam(pNh, "octree/clamping/min", octree_options_.min);
+  assertions::getParam(pNh, "octree/clamping/max", octree_options_.max);
+  assertions::getParam(pNh, "octree/clamping/min", octree_options_.min);
 
-  igvc::getParam(pNh, "map/length", map_options_.length);
-  igvc::getParam(pNh, "map/width", map_options_.width);
-  igvc::getParam(pNh, "map/start_x", map_options_.start_x);
-  igvc::getParam(pNh, "map/start_y", map_options_.start_y);
-  igvc::getParam(pNh, "map/log_odds_default", map_options_.default_logodds);
+  assertions::getParam(pNh, "map/length", map_options_.length);
+  assertions::getParam(pNh, "map/width", map_options_.width);
+  assertions::getParam(pNh, "map/start_x", map_options_.start_x);
+  assertions::getParam(pNh, "map/start_y", map_options_.start_y);
+  assertions::getParam(pNh, "map/log_odds_default", map_options_.default_logodds);
   std::string map_encoding;
 
   map_options_.resolution = octree_options_.resolution;

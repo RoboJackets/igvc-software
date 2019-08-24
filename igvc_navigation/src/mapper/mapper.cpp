@@ -1,65 +1,69 @@
 #include "mapper.h"
+#include <parameter_assertions/assertions.h>
 #include <pcl_ros/transforms.h>
 #include "map_utils.h"
 
 Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
 {
-  igvc::getParam(pNh, "sensor_model/max_range", radius_);
-  igvc::getParam(pNh, "sensor_model/angular_resolution", angular_resolution_);
+  assertions::getParam(pNh, "sensor_model/max_range", radius_);
+  assertions::getParam(pNh, "sensor_model/angular_resolution", angular_resolution_);
 
-  igvc::getParam(pNh, "probability_model/lidar/scan/prob_miss", lidar_scan_probability_model_.prob_miss);
-  igvc::getParam(pNh, "probability_model/lidar/scan/prob_hit", lidar_scan_probability_model_.prob_hit);
+  assertions::getParam(pNh, "probability_model/lidar/scan/prob_miss", lidar_scan_probability_model_.prob_miss);
+  assertions::getParam(pNh, "probability_model/lidar/scan/prob_hit", lidar_scan_probability_model_.prob_hit);
 
-  igvc::getParam(pNh, "probability_model/lidar/ground/prob_miss", lidar_ground_probability_model_.prob_miss);
+  assertions::getParam(pNh, "probability_model/lidar/ground/prob_miss", lidar_ground_probability_model_.prob_miss);
 
-  igvc::getParam(pNh, "probability_model/lidar/free_space/prob_miss", lidar_free_space_probability_model_.prob_miss);
+  assertions::getParam(pNh, "probability_model/lidar/free_space/prob_miss",
+                       lidar_free_space_probability_model_.prob_miss);
 
-  igvc::getParam(pNh, "probability_model/camera/prob_miss", camera_probability_model_.prob_miss);
-  igvc::getParam(pNh, "probability_model/camera/prob_hit", camera_probability_model_.prob_hit);
+  assertions::getParam(pNh, "probability_model/camera/prob_miss", camera_probability_model_.prob_miss);
+  assertions::getParam(pNh, "probability_model/camera/prob_hit", camera_probability_model_.prob_hit);
 
-  igvc::getParam(pNh, "filters/ground_filter/enable", use_ground_filter_);
-  igvc::getParam(pNh, "filters/ground_filter/ransac/iterations", ground_filter_options_.ransac_options.iterations);
-  igvc::getParam(pNh, "filters/ground_filter/ransac/iterations", ground_filter_options_.ransac_options.iterations);
-  igvc::getParam(pNh, "filters/ground_filter/ransac/distance_threshold",
-                 ground_filter_options_.ransac_options.distance_threshold);
-  igvc::getParam(pNh, "filters/ground_filter/ransac/eps_angle", ground_filter_options_.ransac_options.eps_angle);
-  igvc::getParam(pNh, "filters/ground_filter/fallback/plane_distance",
-                 ground_filter_options_.fallback_options.plane_distance);
+  assertions::getParam(pNh, "filters/ground_filter/enable", use_ground_filter_);
+  assertions::getParam(pNh, "filters/ground_filter/ransac/iterations",
+                       ground_filter_options_.ransac_options.iterations);
+  assertions::getParam(pNh, "filters/ground_filter/ransac/iterations",
+                       ground_filter_options_.ransac_options.iterations);
+  assertions::getParam(pNh, "filters/ground_filter/ransac/distance_threshold",
+                       ground_filter_options_.ransac_options.distance_threshold);
+  assertions::getParam(pNh, "filters/ground_filter/ransac/eps_angle", ground_filter_options_.ransac_options.eps_angle);
+  assertions::getParam(pNh, "filters/ground_filter/fallback/plane_distance",
+                       ground_filter_options_.fallback_options.plane_distance);
 
-  igvc::param(pNh, "filters/empty/enabled", empty_filter_options_.enabled, false);
-  igvc::getParam(pNh, "filters/empty/start_angle", empty_filter_options_.start_angle);
-  igvc::getParam(pNh, "filters/empty/end_angle", empty_filter_options_.end_angle);
-  igvc::getParam(pNh, "filters/empty/ray_start_distance", empty_filter_options_.ray_start_distance);
-  igvc::getParam(pNh, "filters/empty/miss_cast_distance", empty_filter_options_.miss_cast_distance);
-  igvc::getParam(pNh, "filters/empty/max_range", empty_filter_options_.max_range);
+  assertions::param(pNh, "filters/empty/enabled", empty_filter_options_.enabled, false);
+  assertions::getParam(pNh, "filters/empty/start_angle", empty_filter_options_.start_angle);
+  assertions::getParam(pNh, "filters/empty/end_angle", empty_filter_options_.end_angle);
+  assertions::getParam(pNh, "filters/empty/ray_start_distance", empty_filter_options_.ray_start_distance);
+  assertions::getParam(pNh, "filters/empty/miss_cast_distance", empty_filter_options_.miss_cast_distance);
+  assertions::getParam(pNh, "filters/empty/max_range", empty_filter_options_.max_range);
 
-  igvc::getParam(pNh, "filters/empty_image/blur/kernel", process_image_options_.blur.kernel);
-  igvc::getParam(pNh, "filters/empty_image/blur/sigma", process_image_options_.blur.sigma);
-  igvc::getParam(pNh, "filters/empty_image/threshold", process_image_options_.threshold.threshold);
-  igvc::getParam(pNh, "filters/empty_image/dilation_size", process_image_options_.dilation_size);
+  assertions::getParam(pNh, "filters/empty_image/blur/kernel", process_image_options_.blur.kernel);
+  assertions::getParam(pNh, "filters/empty_image/blur/sigma", process_image_options_.blur.sigma);
+  assertions::getParam(pNh, "filters/empty_image/threshold", process_image_options_.threshold.threshold);
+  assertions::getParam(pNh, "filters/empty_image/dilation_size", process_image_options_.dilation_size);
 
-  igvc::param(pNh, "filters/behind/enabled", behind_filter_options_.enabled, false);
-  igvc::getParam(pNh, "filters/behind/filter_angle", behind_filter_options_.angle);
-  igvc::getParam(pNh, "filters/behind/distance", behind_filter_options_.distance);
+  assertions::param(pNh, "filters/behind/enabled", behind_filter_options_.enabled, false);
+  assertions::getParam(pNh, "filters/behind/filter_angle", behind_filter_options_.angle);
+  assertions::getParam(pNh, "filters/behind/distance", behind_filter_options_.distance);
 
-  igvc::getParam(pNh, "filters/combined_map/blur/kernel", combined_map_options_.blur.kernel);
+  assertions::getParam(pNh, "filters/combined_map/blur/kernel", combined_map_options_.blur.kernel);
 
-  igvc::getParam(pNh, "filters/remove_barrels/low/h", remove_barrel_options_.low_h);
-  igvc::getParam(pNh, "filters/remove_barrels/low/s", remove_barrel_options_.low_s);
-  igvc::getParam(pNh, "filters/remove_barrels/low/v", remove_barrel_options_.low_v);
-  igvc::getParam(pNh, "filters/remove_barrels/high/h", remove_barrel_options_.high_h);
-  igvc::getParam(pNh, "filters/remove_barrels/high/s", remove_barrel_options_.high_s);
-  igvc::getParam(pNh, "filters/remove_barrels/high/v", remove_barrel_options_.high_v);
-  igvc::getParam(pNh, "filters/remove_barrels/kernel_size/width", remove_barrel_options_.kernel_width);
-  igvc::getParam(pNh, "filters/remove_barrels/kernel_size/height", remove_barrel_options_.kernel_height);
+  assertions::getParam(pNh, "filters/remove_barrels/low/h", remove_barrel_options_.low_h);
+  assertions::getParam(pNh, "filters/remove_barrels/low/s", remove_barrel_options_.low_s);
+  assertions::getParam(pNh, "filters/remove_barrels/low/v", remove_barrel_options_.low_v);
+  assertions::getParam(pNh, "filters/remove_barrels/high/h", remove_barrel_options_.high_h);
+  assertions::getParam(pNh, "filters/remove_barrels/high/s", remove_barrel_options_.high_s);
+  assertions::getParam(pNh, "filters/remove_barrels/high/v", remove_barrel_options_.high_v);
+  assertions::getParam(pNh, "filters/remove_barrels/kernel_size/width", remove_barrel_options_.kernel_width);
+  assertions::getParam(pNh, "filters/remove_barrels/kernel_size/height", remove_barrel_options_.kernel_height);
 
-  igvc::getParam(pNh, "octree/resolution", resolution_);
+  assertions::getParam(pNh, "octree/resolution", resolution_);
 
-  igvc::getParam(pNh, "node/use_lines", use_lines_);
+  assertions::getParam(pNh, "node/use_lines", use_lines_);
 
-  igvc::getParam(pNh, "node/debug/publish/cameras/lines", debug_pub_camera_lines);
-  igvc::getParam(pNh, "node/debug/publish/cameras/projections", debug_pub_camera_projections);
-  igvc::getParam(pNh, "node/debug/publish/filtered_pointclouds", debug_pub_filtered_pointclouds);
+  assertions::getParam(pNh, "node/debug/publish/cameras/lines", debug_pub_camera_lines);
+  assertions::getParam(pNh, "node/debug/publish/cameras/projections", debug_pub_camera_projections);
+  assertions::getParam(pNh, "node/debug/publish/filtered_pointclouds", debug_pub_filtered_pointclouds);
 
   invertMissProbabilities();
 

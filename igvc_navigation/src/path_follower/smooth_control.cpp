@@ -1,4 +1,5 @@
 #include "smooth_control.h"
+#include <igvc_utils/NodeUtils.hpp>
 
 void SmoothControl::getTrajectory(igvc_msgs::velocity_pair& vel, const nav_msgs::PathConstPtr& path,
                                   nav_msgs::Path& trajectory, const RobotState& start_pos, RobotState& target)

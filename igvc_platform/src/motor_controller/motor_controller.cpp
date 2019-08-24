@@ -1,7 +1,7 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float64.h>
 
-#include <igvc_utils/NodeUtils.hpp>
+#include <parameter_assertions/assertions.h>
 
 // nanopb header files for protobuffer encoding/decoding
 #include <igvc_platform/nanopb/pb_common.h>
@@ -25,37 +25,37 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
   battery_pub_ = nh_.advertise<std_msgs::Float64>("/battery", 1);
 
   // get server ip address and port number from the launch file
-  igvc::getParam(pNh, std::string("ip_addr"), ip_addr_);
-  igvc::getParam(pNh, std::string("port"), tcpport_);
+  assertions::getParam(pNh, std::string("ip_addr"), ip_addr_);
+  assertions::getParam(pNh, std::string("port"), tcpport_);
 
   ROS_INFO_STREAM("Connecting to server:"
                   << "\n\tIP: " << ip_addr_ << "\n\tPort: " << std::to_string(tcpport_));
-  sock_ = igvc::make_unique<EthernetSocket>(ip_addr_, tcpport_);
+  sock_ = std::make_unique<EthernetSocket>(ip_addr_, tcpport_);
   ROS_INFO_STREAM("Using Boost " << (*sock_).getBoostVersion());
   ROS_INFO_STREAM("Successfully Connected to TCP Host:"
                   << "\n\tIP: " << (*sock_).getIP() << "\n\tPort: " << (*sock_).getPort());
 
-  igvc::getParam(pNh, std::string("battery_alpha"), battery_alpha_);
-  igvc::getParam(pNh, std::string("min_battery_voltage"), min_battery_voltage_);
+  assertions::getParam(pNh, std::string("battery_alpha"), battery_alpha_);
+  assertions::getParam(pNh, std::string("min_battery_voltage"), min_battery_voltage_);
 
   battery_avg_ = min_battery_voltage_;
 
   // PID variables
-  igvc::getParam(pNh, std::string("p_l"), p_l_);
-  igvc::getParam(pNh, std::string("p_r"), p_r_);
-  igvc::getParam(pNh, std::string("d_l"), d_l_);
-  igvc::getParam(pNh, std::string("d_r"), d_r_);
-  igvc::getParam(pNh, std::string("i_r"), i_r_);
-  igvc::getParam(pNh, std::string("i_l"), i_l_);
-  igvc::getParam(pNh, "kv_l", kv_l_);
-  igvc::getParam(pNh, "kv_r", kv_r_);
+  assertions::getParam(pNh, std::string("p_l"), p_l_);
+  assertions::getParam(pNh, std::string("p_r"), p_r_);
+  assertions::getParam(pNh, std::string("d_l"), d_l_);
+  assertions::getParam(pNh, std::string("d_r"), d_r_);
+  assertions::getParam(pNh, std::string("i_r"), i_r_);
+  assertions::getParam(pNh, std::string("i_l"), i_l_);
+  assertions::getParam(pNh, "kv_l", kv_l_);
+  assertions::getParam(pNh, "kv_r", kv_r_);
 
-  igvc::getParam(pNh, "watchdog_delay", watchdog_delay_);
+  assertions::getParam(pNh, "watchdog_delay", watchdog_delay_);
 
-  igvc::param(pNh, "log_period", log_period_, 5.0);
+  assertions::param(pNh, "log_period", log_period_, 5.0);
 
   // communication frequency
-  igvc::getParam(pNh, std::string("frequency"), frequency_);
+  assertions::getParam(pNh, std::string("frequency"), frequency_);
   ros::Rate rate(frequency_);
 
   setPID();  // Set PID Values on mbed

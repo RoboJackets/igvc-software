@@ -4,10 +4,11 @@
 #include <cmath>
 #include <iostream>
 
-#include <igvc_utils/NodeUtils.hpp>
 #include <thread>
 
 #include <igvc_utils/robot_control.h>
+#include <parameter_assertions/assertions.h>
+
 #include "trajectory_follower.h"
 
 TrajectoryFollower::TrajectoryFollower()
@@ -15,11 +16,11 @@ TrajectoryFollower::TrajectoryFollower()
   ros::NodeHandle nh;
   ros::NodeHandle pNh("~");
 
-  igvc::getParam(pNh, "topics/path", path_topic_);
-  igvc::param(pNh, "loop_hz", loop_hz_, 25.0);
-  igvc::param(pNh, "axle_length", axle_length_, 0.48);
-  igvc::param(pNh, "motor_loop_hz", motor_loop_hz_, 25.0);
-  igvc::param(pNh, "min_velocity", min_velocity_, 0.2);
+  assertions::getParam(pNh, "topics/path", path_topic_);
+  assertions::param(pNh, "loop_hz", loop_hz_, 25.0);
+  assertions::param(pNh, "axle_length", axle_length_, 0.48);
+  assertions::param(pNh, "motor_loop_hz", motor_loop_hz_, 25.0);
+  assertions::param(pNh, "min_velocity", min_velocity_, 0.2);
 
   ros::Subscriber path_sub = nh.subscribe(path_topic_, 1, &TrajectoryFollower::trajectoryCallback, this);
   control_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);

@@ -1,11 +1,9 @@
-
-
+#include <parameter_assertions/assertions.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <cv.hpp>
-#include <igvc_utils/NodeUtils.hpp>
 #include <opencv2/core/mat.hpp>
 
 int main(int argc, char** argv)
@@ -16,11 +14,12 @@ int main(int argc, char** argv)
 
   double width, length, grid_size, thickness, offset;
   // parameters
-  igvc::getParam(pNh, std::string("width"), width);
-  igvc::getParam(pNh, std::string("length"), length);
-  igvc::getParam(pNh, std::string("grid_size"), grid_size);
-  igvc::getParam(pNh, std::string("thickness"), thickness);
-  igvc::getParam(pNh, std::string("offset"), offset);
+
+  assertions::getParam(pNh, std::string("width"), width);
+  assertions::getParam(pNh, std::string("length"), length);
+  assertions::getParam(pNh, std::string("grid_size"), grid_size);
+  assertions::getParam(pNh, std::string("thickness"), thickness);
+  assertions::getParam(pNh, std::string("offset"), offset);
 
   using namespace cv;
 

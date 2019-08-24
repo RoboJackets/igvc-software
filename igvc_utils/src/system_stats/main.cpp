@@ -1,7 +1,7 @@
 #include <igvc_msgs/system_stats.h>
+#include <parameter_assertions/assertions.h>
 #include <ros/ros.h>
 #include <sys/sysinfo.h>
-#include <igvc_utils/NodeUtils.hpp>
 #include "cpu_usage.hpp"
 
 ros::Publisher stats_pub;
@@ -60,7 +60,8 @@ int main(int argc, char** argv)
   stats_pub = nh.advertise<igvc_msgs::system_stats>("system_stats", 10);
 
   double frequency;
-  igvc::param(pNh, "publish_frequency", frequency, 10.0);
+
+  assertions::param(pNh, "publish_frequency", frequency, 10.0);
 
   ros::Rate rate(frequency);
 

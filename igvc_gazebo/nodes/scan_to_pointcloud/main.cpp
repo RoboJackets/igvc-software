@@ -1,4 +1,5 @@
 #include <laser_geometry/laser_geometry.h>
+#include <parameter_assertions/assertions.h>
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_ros/transforms.h>
@@ -6,7 +7,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf/transform_datatypes.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 ros::Publisher _pointcloud_pub;
 laser_geometry::LaserProjection projection;
@@ -61,9 +61,9 @@ int main(int argc, char** argv)
 
   ros::NodeHandle pNh("~");
 
-  igvc::getParam(pNh, "min_dist", min_dist);
-  igvc::getParam(pNh, "neighbor_dist", neighbor_dist);
-  igvc::getParam(pNh, "offset", offset);
+  assertions::getParam(pNh, "min_dist", min_dist);
+  assertions::getParam(pNh, "neighbor_dist", neighbor_dist);
+  assertions::getParam(pNh, "offset", offset);
 
   ros::NodeHandle nh;
 

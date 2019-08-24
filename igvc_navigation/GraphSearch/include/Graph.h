@@ -19,7 +19,6 @@ Date Created: December 16, 2018
 #define GRAPH_H
 
 #include "Node.h"
-#include "igvc_utils/NodeUtils.hpp"
 
 #include "igvc_msgs/map.h"
 

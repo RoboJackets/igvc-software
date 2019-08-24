@@ -1,4 +1,5 @@
 #include "Graph.h"
+#include <igvc_utils/NodeUtils.hpp>
 
 void Graph::setOccupancyThreshold(float occupancy_threshold)
 {

@@ -11,7 +11,6 @@
 
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
-#include <igvc_utils/NodeUtils.hpp>
 #include <memory>
 #include <sstream>
 #include <string>

@@ -4,8 +4,8 @@
 #include <nav_msgs/Odometry.h>
 #include <sensor_msgs/Imu.h>
 
+#include <parameter_assertions/assertions.h>
 #include <tf/transform_datatypes.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 ros::Publisher g_rpy_pub;
 
@@ -51,9 +51,9 @@ int main(int argc, char** argv)
   std::string imu_quaternion = "imu";
   std::string odom_quaternion = "odometry";
 
-  igvc::getParam(pNh, "topics/quaternion", quaternion_topic);
-  igvc::getParam(pNh, "topics/rpy", rpy_topic);
-  igvc::param(pNh, "message_type", message_type, imu_quaternion);
+  assertions::getParam(pNh, "topics/quaternion", quaternion_topic);
+  assertions::getParam(pNh, "topics/rpy", rpy_topic);
+  assertions::param(pNh, "message_type", message_type, imu_quaternion);
 
   g_rpy_pub = nh.advertise<geometry_msgs::Vector3Stamped>(rpy_topic, 1);
 
