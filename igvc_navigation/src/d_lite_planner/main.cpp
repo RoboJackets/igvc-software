@@ -21,7 +21,6 @@ Date Created: December 22nd, 2018
 #include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <tf/transform_datatypes.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 #include <limits>
 #include <mutex>

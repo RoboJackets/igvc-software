@@ -25,7 +25,6 @@
 
 #include <igvc_utils/robot_state.h>
 #include <visualization_msgs/Marker.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 #include <cv_bridge/cv_bridge.h>
 

@@ -2,7 +2,6 @@
 #include <std_msgs/Float64.h>
 
 #include <parameter_assertions/assertions.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 // nanopb header files for protobuffer encoding/decoding
 #include <igvc_platform/nanopb/pb_common.h>
@@ -31,7 +30,7 @@ MotorController::MotorController(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 
   ROS_INFO_STREAM("Connecting to server:"
                   << "\n\tIP: " << ip_addr_ << "\n\tPort: " << std::to_string(tcpport_));
-  sock_ = igvc::make_unique<EthernetSocket>(ip_addr_, tcpport_);
+  sock_ = std::make_unique<EthernetSocket>(ip_addr_, tcpport_);
   ROS_INFO_STREAM("Using Boost " << (*sock_).getBoostVersion());
   ROS_INFO_STREAM("Successfully Connected to TCP Host:"
                   << "\n\tIP: " << (*sock_).getIP() << "\n\tPort: " << (*sock_).getPort());

@@ -10,7 +10,6 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <fstream>
-#include <igvc_utils/NodeUtils.hpp>
 #include <iostream>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/opencv.hpp>

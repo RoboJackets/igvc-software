@@ -1,5 +1,6 @@
 #include "FieldDPlanner.h"
 #include <parameter_assertions/assertions.h>
+#include <igvc_utils/NodeUtils.hpp>
 
 FieldDPlanner::FieldDPlanner(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 {

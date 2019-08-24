@@ -18,7 +18,6 @@ Date: Dec. 15th, 2018
 #include <limits>
 #include <tuple>
 #include <unordered_set>
-#include "igvc_utils/NodeUtils.hpp"
 
 class Node
 {

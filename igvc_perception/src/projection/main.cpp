@@ -9,7 +9,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <tf/transform_listener.h>
-#include <igvc_utils/NodeUtils.hpp>
 #include "velodyne_pointcloud/point_types.h"
 
 /**

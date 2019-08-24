@@ -7,7 +7,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf/transform_datatypes.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 ros::Publisher _pointcloud_pub;
 laser_geometry::LaserProjection projection;

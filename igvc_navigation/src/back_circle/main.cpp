@@ -4,7 +4,6 @@
 #include <ros/publisher.h>
 #include <ros/ros.h>
 #include <cv.hpp>
-#include <igvc_utils/NodeUtils.hpp>
 #include <opencv2/core/mat.hpp>
 
 int main(int argc, char** argv)

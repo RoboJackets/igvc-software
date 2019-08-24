@@ -7,8 +7,6 @@
 #include <algorithm>
 #include <chrono>
 
-#include <igvc_utils/NodeUtils.hpp>
-
 double speed_set_point_left = 0.0;
 double speed_set_point_right = 0.0;
 double speed_measured_left = 0.0;

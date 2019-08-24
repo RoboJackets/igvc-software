@@ -2,7 +2,6 @@
 #include <parameter_assertions/assertions.h>
 #include <ros/ros.h>
 #include <sys/sysinfo.h>
-#include <igvc_utils/NodeUtils.hpp>
 #include "cpu_usage.hpp"
 
 ros::Publisher stats_pub;

@@ -10,7 +10,6 @@
 #include <string>
 
 #include <igvc_utils/StringUtils.hpp>
-#include "igvc_utils/NodeUtils.hpp"
 
 class WaypointSource
 {

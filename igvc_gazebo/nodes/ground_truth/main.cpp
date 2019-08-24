@@ -6,7 +6,6 @@
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_datatypes.h>
 #include <tf/transform_listener.h>
-#include <igvc_utils/NodeUtils.hpp>
 #include <mutex>
 
 ros::Publisher g_ground_truth_pub;

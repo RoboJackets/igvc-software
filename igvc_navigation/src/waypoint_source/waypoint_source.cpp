@@ -1,5 +1,6 @@
 #include "waypoint_source.h"
 #include <parameter_assertions/assertions.h>
+#include <igvc_utils/NodeUtils.hpp>
 
 WaypointSource::WaypointSource(ros::NodeHandle* nodehandle) : nh_(*nodehandle)
 {

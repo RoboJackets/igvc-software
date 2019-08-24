@@ -3,7 +3,6 @@
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
 #include <ros/ros.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 ros::Publisher _pointcloud_pub;
 

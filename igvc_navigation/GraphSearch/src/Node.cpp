@@ -1,4 +1,5 @@
 #include "Node.h"
+#include <igvc_utils/NodeUtils.hpp>
 
 Node::Node(bool valid)
 {

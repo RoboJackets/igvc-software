@@ -6,7 +6,6 @@
 
 #include <parameter_assertions/assertions.h>
 #include <tf/transform_datatypes.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 ros::Publisher g_rpy_pub;
 

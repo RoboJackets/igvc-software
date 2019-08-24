@@ -4,7 +4,6 @@
 #include <cmath>
 #include <iostream>
 
-#include <igvc_utils/NodeUtils.hpp>
 #include <thread>
 
 #include <igvc_utils/robot_control.h>

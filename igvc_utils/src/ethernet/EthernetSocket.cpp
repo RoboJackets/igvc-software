@@ -12,7 +12,7 @@ EthernetSocket::EthernetSocket(std::string ip_addr, int port)
 
   // look through endpoints and hit socket's connect() member function until
   // a successful TCP connection is established
-  this->sock_ = igvc::make_unique<tcp::socket>(io_service_);
+  this->sock_ = std::make_unique<tcp::socket>(io_service_);
   boost::asio::connect(*sock_, endpoint_iterator);
 }
 

@@ -14,7 +14,6 @@
 
 #include <igvc_utils/robot_state.h>
 #include <parameter_assertions/assertions.h>
-#include <igvc_utils/NodeUtils.hpp>
 
 #include "path_follower.h"
 
