@@ -25,6 +25,8 @@ The repo is comprised of multiple ROS packages and one sandbox folder for miscel
     *A collection of utility nodes and classes*
  * **sandbox**
     *Miscellaneous resources, including the models used by the neural network, udev rules, and waypoints files*
+ * **documents**
+    *Research and design documents.*
 
 ## Building Documentation
 Documentation for our code can be generated via the rosdoc_lite tool.
