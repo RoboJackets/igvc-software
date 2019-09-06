@@ -1,0 +1,18 @@
+<launch>
+    <!-- Localization -->
+    <include file="$(find igvc_navigation)/launch/localization.launch" />
+
+    <!-- Launch mapping (simulation version) -->
+    <include file="$(find igvc_navigation)/launch/mapper_sim.launch" />
+
+    <!-- Launch Field D* Global Planner -->
+    <include file="$(find igvc_navigation)/launch/field_d_planner.launch">
+        <arg name="simulation" value="true" />
+    </include>
+
+    <!-- Launch trajectory planner -->
+    <include file="$(find igvc_navigation)/launch/trajectory_planner.launch" />
+
+    <!-- Launch trajectory follower -->
+    <include file="$(find igvc_navigation)/launch/follower.launch" />
+</launch>
