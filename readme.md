@@ -31,7 +31,7 @@ The repo is comprised of multiple ROS packages and one sandbox folder for miscel
     *Research and design documents.*
     
 ## Building Code
- For a installationo guide for ROS, check out the
+ For a installation guide for ROS, check out the
  [installation guide on the RoboJackets wiki](https://wiki.robojackets.org/IGVC_Software_Installation_Instructions).
  
 1. Clone the repository (with the git submodules) into the src directory of a catkin workspace:
