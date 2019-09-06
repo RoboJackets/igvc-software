@@ -16,3 +16,7 @@ Fixes #{{ github issue }}
 3. Make the thing do the thing
 
 Expectation: The thing which does the thing does the thing
+
+# Self Checklist
+- [ ] I have formatted my code using `make format`
+- [ ] I have tested that the new behaviour works 
