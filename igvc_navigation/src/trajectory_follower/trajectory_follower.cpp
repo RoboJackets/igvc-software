@@ -34,6 +34,11 @@ TrajectoryFollower::TrajectoryFollower()
 void TrajectoryFollower::trajectoryCallback(igvc_msgs::trajectoryConstPtr trajectory)
 {
   std::lock_guard<std::mutex> trajectory_lock(trajectory_mutex_);
+  if (trajectory->trajectory.empty())
+  {
+    return;
+  }
+
   trajectory_ = trajectory;
   time_delta_ = ros::Time::now() - trajectory->trajectory.front().header.stamp;
 }
