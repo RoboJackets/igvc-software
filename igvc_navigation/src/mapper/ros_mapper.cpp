@@ -427,9 +427,3 @@ void ROSMapper::cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr &camera
 
   camera_infos_.erase(camera);
 }
-
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "mapper");
-  ROSMapper mapper;
-}

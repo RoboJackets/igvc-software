@@ -7,6 +7,7 @@
 #ifndef PROJECT_MAPPER_H
 #define PROJECT_MAPPER_H
 
+#include <igvc_utils/robot_state.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>

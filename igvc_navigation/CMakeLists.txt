@@ -22,7 +22,10 @@ find_package(catkin REQUIRED COMPONENTS
              tf_conversions
              robot_localization
              parameter_assertions
-             )
+             costmap_2d
+             dynamic_reconfigure
+             igvc_utils
+    )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
@@ -169,6 +172,7 @@ include_directories(
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
+install( DIRECTORY config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} )
 
 #############
 ## Testing ##

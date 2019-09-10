@@ -1,0 +1,9 @@
+global_costmap:
+    global_frame: odom
+    plugins:
+        - {name: wrapper_layer,     type: "wrapper_layer::WrapperLayer"}
+    publish_frequency: 1.0
+    robot_radius: 1.0
+    width: 200
+    height: 200
+    resolution: 0.2

@@ -1,0 +1,6 @@
+<library path="lib/libwrapper_layer">
+  <class type="wrapper_layer::WrapperLayer" base_class_type="costmap_2d::Layer">
+    <description>Wrapper layer that just wraps the current mapper. See
+      https://github.com/RoboJackets/igvc-software/issues/485</description>
+  </class>
+</library>
