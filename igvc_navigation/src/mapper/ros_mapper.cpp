@@ -153,8 +153,6 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
   }
 
   ROS_INFO("Mapper started!");
-
-  ros::spin();
 }
 
 void ROSMapper::centerCamCallback(const sensor_msgs::CompressedImageConstPtr &image)
