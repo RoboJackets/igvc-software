@@ -1,4 +1,5 @@
 #include "wrapper_layer.h"
+#include <parameter_assertions/assertions.h>
 #include <pluginlib/class_list_macros.h>
 
 PLUGINLIB_EXPORT_CLASS(wrapper_layer::WrapperLayer, costmap_2d::Layer)
@@ -7,6 +8,10 @@ namespace wrapper_layer
 {
 WrapperLayer::WrapperLayer() : mapper_{}
 {
+  ros::NodeHandle private_nh{ "~" };
+  double threshold_double;
+  assertions::getParam(private_nh, "lethal_threshold", threshold_double);
+  occupied_threshold_ = static_cast<uchar>(std::round(255.0 / threshold_double));
 }
 
 void WrapperLayer::onInitialize()
@@ -40,32 +45,18 @@ void WrapperLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, in
 
   unsigned char* master = master_grid.getCharMap();
 
-  for (int i = 0; i < 255; i++)
-  {
-    master[2 * i] = static_cast<uchar>(i);
-    master[2 * i + 1] = static_cast<uchar>(i);
-  }
-
-  unsigned int mx, my;
-  master_grid.worldToMap(0.0, 0.0, mx, my);
-  unsigned int index = master_grid.getIndex(mx, my);
-  //  ROS_INFO("W(0.0, 0.0) -> M(%d, %d)", mx, my);
-  master[index - 1] = 255u;
-  master[index] = 255u;
-  master[index + 1] = 255u;
-
-  int nRows = mapper_.width_y_ / mapper_.resolution_;
-  int nCols = mapper_.length_x_ / mapper_.resolution_;
+  int rows = map->rows;
+  int cols = map->cols;
 
   pcl::PointCloud<pcl::PointXYZ> pointcloud;
 
-  for (int i = 0; i < nRows; ++i)
+  for (int i = 0; i < rows; ++i)
   {
-    uchar* p = map->ptr<uchar>(i);
-    for (int j = 0; j < nCols; ++j)
+    auto* p = map->ptr<uchar>(i);
+    for (int j = 0; j < cols; ++j)
     {
       auto idx = master_grid.getIndex(i, j);
-      if (p[j] > 200u)
+      if (p[j] > occupied_threshold_)
       {
         master[idx] = costmap_2d::LETHAL_OBSTACLE;
       }

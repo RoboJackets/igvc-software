@@ -23,6 +23,7 @@ public:
 
 private:
   ROSMapper mapper_;
+  uchar occupied_threshold_;
 };
 }  // namespace wrapper_layer
 
