@@ -1,4 +1,5 @@
 local_costmap:
+    plugins: []
     global_frame: odom
     update_frequency: 5.0
     rolling_window: true
