@@ -42,8 +42,8 @@ void WrapperLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, in
 
   for (int i = 0; i < 255; i++)
   {
-    master[2*i] = static_cast<uchar>(i);
-    master[2*i+1] = static_cast<uchar>(i);
+    master[2 * i] = static_cast<uchar>(i);
+    master[2 * i + 1] = static_cast<uchar>(i);
   }
 
   unsigned int mx, my;
