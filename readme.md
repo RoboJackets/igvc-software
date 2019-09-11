@@ -48,6 +48,16 @@ The repo is comprised of multiple ROS packages and one sandbox folder for miscel
     ```bash
    source devel/setup.bash
     ```
+   
+## Common Errors
+- `Could not find a package configuration file provided by "parameter_assertions" with any of the following names:`
+    - `parameter_assertions` comes from a git submodule. Initialize the submodules by doing
+    `git submodule update --init --recursive`
+- `Could not find a package configuration file provided by "XXXX" with any of the following names:"`
+    - Make sure you have ran `rosdep install --from-paths src --ignore-src` in the `catkin_ws` folder already
+    - If you still get this error after installing all dependencies, then that means that we forgot to include
+    that package in our dependencies list.
+    [File an issue](https://github.com/RoboJackets/igvc-software/issues) with the error message.
 
 
 ## Running Gazebo
