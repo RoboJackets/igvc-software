@@ -80,9 +80,7 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
 
   mapper_ = std::make_unique<Mapper>(pNh);
 
-  ros::Subscriber pcl_sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(lidar_topic_, 1, &ROSMapper::pcCallback, this);
-  ros::Subscriber projected_line_map_sub;
-  ros::Subscriber center_cam_pub;
+  pcl_sub_ = nh.subscribe<pcl::PointCloud<pcl::PointXYZ>>(lidar_topic_, 1, &ROSMapper::pcCallback, this);
 
   if (use_lines_)
   {
@@ -140,7 +138,7 @@ ROSMapper::ROSMapper() : tf_listener_{ std::unique_ptr<tf::TransformListener>(ne
                                boost::bind(&ROSMapper::projectedLineCallback, this, _1, Camera::right))));
       }
     }
-    center_cam_pub = nh.subscribe(center_camera_topic_, 1, &ROSMapper::centerCamCallback, this);
+    center_cam_sub_ = nh.subscribe(center_camera_topic_, 1, &ROSMapper::centerCamCallback, this);
   }
 
   back_circle_sub_ = nh.subscribe("/back_circle", 1, &ROSMapper::backCircleCallback, this);
