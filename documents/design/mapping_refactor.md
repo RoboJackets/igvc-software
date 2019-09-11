@@ -42,16 +42,23 @@ with `teb_local_planner` through the use `costmap2d` layers
 
 ### Pointcloud filtering
 To remove the responsibilities of filtering the pointcloud from the mapper, a
-[nodelet](http://wiki.ros.org/nodelet)
+node / [nodelet](http://wiki.ros.org/nodelet)
 `pointcloud_filter` will be created that (for now) performs all the filtering that
 the current mapper does such filtering for distance and extracting empty space, which then
 publishes that information to make the mapper's functionality more single responsibility.
 For now, a flat ground plane will be assumed, since there is [an issue for a better
 barrel segmentation algorithm](https://github.com/RoboJackets/igvc-software/issues/474).
 
+### Line projection
+A node / [nodelet](http://wiki.ros.org/nodelet) will be created that performs all the image manipulations that
+the old mapper was doing, specifically:
+- Filtering out barrels so that we don't mark barrels as free space
+- Projecting lines and free space to a ground plane / using Joshua's algorithm
+- Publishing an image (that is now top down instead of from the camera's POV) for the mapper to directly use
+
 ### `OccupancyGridLayer`
 A `OccupancyGridLayer` class that extends the `costmap_2d::CostmapLayer` will be created
-in order to introduce occupancy grid mapping functionalities as a base class that the barrel
+in order to introduce occupancy grid mapping functionality as a base class that the barrel
 and line layers can extend off of to reduce duplicate code.
 
 This base class should implement methods to:
@@ -71,7 +78,7 @@ of individual barrels (x, y, θ) as it will lead to a cleaner map.
 ### `LineLayer`
 A `LineLayer` class that extends the `OccupancyGridLayer` will be created.
 This layer will have the responsibilities of:
-- Subscribing to the output of the segmented image projection node.
+- Subscribing to the output of the segmented image projection node
 - Calling the `OccupancyGridLayer` methods to insert lines and non lines
 
 ## Overall Scope
