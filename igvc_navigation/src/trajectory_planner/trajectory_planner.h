@@ -22,6 +22,7 @@ private:
   void encoderCallback(const igvc_msgs::velocity_pairConstPtr& msg);
   void updateTrajectory();
 
+  void publishStop();
   void publishTrajectory(const igvc_msgs::trajectoryConstPtr& trajectory);
   void publishDebug(const igvc_msgs::trajectoryConstPtr& trajectory);
 
