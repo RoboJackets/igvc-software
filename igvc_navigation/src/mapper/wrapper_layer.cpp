@@ -36,12 +36,11 @@ void WrapperLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, in
     return;
   }
 
-  bool assumptions = master_grid.getSizeInMetersX() == mapper_.length_x_ &&
-                     master_grid.getSizeInMetersY() == mapper_.width_y_ &&
-                     master_grid.getResolution() == mapper_.resolution_ &&
-                     static_cast<int>(master_grid.getSizeInCellsX()) == map->rows &&
-                     static_cast<int>(master_grid.getSizeInCellsY()) == map->cols;
-  assert(assumptions);
+  ROS_ASSERT(master_grid.getSizeInMetersX() == mapper_.length_x_);
+  ROS_ASSERT(master_grid.getSizeInMetersY() == mapper_.width_y_);
+  ROS_ASSERT(master_grid.getResolution() == mapper_.resolution_);
+  ROS_ASSERT(static_cast<int>(master_grid.getSizeInCellsX()) == map->rows);
+  ROS_ASSERT(static_cast<int>(master_grid.getSizeInCellsY()) == map->cols);
 
   unsigned char* master = master_grid.getCharMap();
 
@@ -62,7 +61,7 @@ void WrapperLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, in
       }
       else
       {
-        master[idx] = costmap_2d::FREE_SPACE;
+        master[idx] = p[j];
       }
     }
   }
