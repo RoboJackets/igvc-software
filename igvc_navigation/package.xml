@@ -67,6 +67,7 @@
   <exec_depend>dwa_local_planner</exec_depend>
   <exec_depend>global_planner</exec_depend>
   <exec_depend>clear_costmap_recovery</exec_depend>
+  <exec_depend>move_base_flex</exec_depend>
 
   <test_depend>rostest</test_depend>
 
