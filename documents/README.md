@@ -5,4 +5,4 @@ This folder contains research and design documents for the repo.
 Currently we have none.
 
 ## Design Docs
-Currently we have none.
+* [Mapping refactor](design/mapping.md)
