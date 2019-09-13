@@ -1,0 +1,3 @@
+controllers:
+    - name: 'dwa'
+      type: 'dwa_local_planner/DWAPlannerROS'

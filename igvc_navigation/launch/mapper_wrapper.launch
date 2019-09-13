@@ -1,0 +1,15 @@
+<launch>
+    <!-- Move Base Flex -->
+    <node pkg="mbf_costmap_nav" type="mbf_costmap_nav" respawn="false" name="move_base_flex" output="screen">libsimple_layer
+        <param name="tf_timeout" value="1.5"/>
+        <param name="planner_max_retries" value="3"/>
+        <rosparam file="$(find igvc_navigation)/config/planners.yaml" command="load" />
+        <rosparam file="$(find igvc_navigation)/config/controllers.yaml" command="load" />
+        <rosparam file="$(find igvc_navigation)/config/recovery_behaviors.yaml" command="load" />
+        <rosparam file="$(find igvc_navigation)/config/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find igvc_navigation)/config/local_costmap_params.yaml" command="load" />
+
+        <!-- Mapper config -->
+        <rosparam file="$(find igvc_navigation)/config/octomap_sim.yaml" command="load" />
+    </node>
+</launch>
