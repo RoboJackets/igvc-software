@@ -3,7 +3,7 @@
     <include file="$(find igvc_navigation)/launch/localization.launch" />
 
     <!-- Launch mapping (simulation version) -->
-    <include file="$(find igvc_navigation)/launch/mapper_sim.launch" />
+    <include file="$(find igvc_navigation)/launch/mapper_wrapper.launch" />
 
     <!-- Launch Field D* Global Planner -->
     <include file="$(find igvc_navigation)/launch/field_d_planner.launch">

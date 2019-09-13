@@ -1,0 +1,3 @@
+planners:
+    - name: 'GlobalPlanner'
+      type: 'global_planner/GlobalPlanner'

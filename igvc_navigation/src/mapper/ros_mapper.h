@@ -7,6 +7,7 @@
 #ifndef PROJECT_MAPPER_H
 #define PROJECT_MAPPER_H
 
+#include <igvc_utils/robot_state.h>
 #include <pcl/point_cloud.h>
 #include <pcl_ros/point_cloud.h>
 #include <ros/publisher.h>
@@ -105,6 +106,8 @@ private:
   std::unordered_map<Camera, ros::Subscriber> line_map_subs_;
   std::unordered_map<Camera, ros::Subscriber> projected_line_subs_;
   ros::Subscriber back_circle_sub_;
+  ros::Subscriber pcl_sub_;
+  ros::Subscriber center_cam_sub_;
 
   bool use_lines_{};
   double transform_max_wait_time_{};
