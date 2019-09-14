@@ -11,5 +11,6 @@
 
         <!-- Mapper config -->
         <rosparam file="$(find igvc_navigation)/config/octomap_sim.yaml" command="load" />
+        <param name="lethal_threshold" value="0.8" /> <!-- threshold for LETHAL_OBSTACLE (0.0 - 1.0) -->
     </node>
 </launch>
