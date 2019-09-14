@@ -177,10 +177,5 @@ int main(int argc, char** argv)
     g_pubs.insert(std::make_pair(camera_name, camera_pubs));
   }
 
-  while (ros::ok())
-  {
-    ros::spinOnce();
-  }
-
-  return 0;
+  ros::spin();
 }
