@@ -20,7 +20,6 @@ class ROSMapper
 public:
   ROSMapper();
 
-private:
   /**
    * Callback for pointcloud. Inserted into the map as a lidar scan.
    * @param[in] pc Lidar scan

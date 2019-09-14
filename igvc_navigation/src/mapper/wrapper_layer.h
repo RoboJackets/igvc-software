@@ -5,6 +5,7 @@
 #include <costmap_2d/layer.h>
 #include <costmap_2d/layered_costmap.h>
 #include <ros/ros.h>
+#include <mutex>
 
 #include "ros_mapper.h"
 
@@ -22,6 +23,7 @@ public:
 
 private:
   ROSMapper mapper_;
+  uchar occupied_threshold_;
 };
 }  // namespace wrapper_layer
 
