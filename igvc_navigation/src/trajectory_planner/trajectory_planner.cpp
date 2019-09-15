@@ -175,14 +175,12 @@ void TrajectoryPlanner::updateTrajectory()
     if (!trajectory || trajectory.value().get() == nullptr || trajectory.value()->trajectory.empty())
     {
       publishStop();
+      continue;
     }
 
-    if (trajectory && trajectory.value().get() != nullptr)
-    {
-      publishDebug(*trajectory);
-      motion_profiler_->profileTrajectory(*trajectory, state_);
-      publishTrajectory(*trajectory);
-    }
+    publishDebug(*trajectory);
+    motion_profiler_->profileTrajectory(*trajectory, state_);
+    publishTrajectory(*trajectory);
   }
 }
 
