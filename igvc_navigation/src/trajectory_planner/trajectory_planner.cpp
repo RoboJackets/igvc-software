@@ -172,13 +172,27 @@ void TrajectoryPlanner::updateTrajectory()
       publishTrajectory(empty_traj);
     }
 
-    if (trajectory && trajectory.value().get() != nullptr)
+    if (!trajectory || trajectory.value().get() == nullptr || trajectory.value()->trajectory.empty())
     {
-      publishDebug(*trajectory);
-      motion_profiler_->profileTrajectory(*trajectory, state_);
-      publishTrajectory(*trajectory);
+      publishStop();
+      continue;
     }
+
+    publishDebug(*trajectory);
+    motion_profiler_->profileTrajectory(*trajectory, state_);
+    publishTrajectory(*trajectory);
   }
+}
+
+void TrajectoryPlanner::publishStop()
+{
+  igvc_msgs::trajectory trajectory;
+  igvc_msgs::trajectory_point trajectory_point;
+  trajectory_point.velocity = 0.0;
+  trajectory_point.curvature = 0.0;
+  trajectory.trajectory.emplace_back(trajectory_point);
+
+  trajectory_pub_.publish(trajectory);
 }
 
 std::optional<igvc_msgs::trajectoryPtr> TrajectoryPlanner::getSmoothPath()
