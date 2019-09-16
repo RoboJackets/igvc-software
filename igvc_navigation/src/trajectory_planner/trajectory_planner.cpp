@@ -177,12 +177,18 @@ void TrajectoryPlanner::updateTrajectory()
       publishStop();
     }
 
+<<<<<<< HEAD
     if (trajectory && trajectory.value().get() != nullptr)
     {
       publishDebug(*trajectory);
       motion_profiler_->profileTrajectory(*trajectory, state_);
       publishTrajectory(*trajectory);
     }
+=======
+    publishDebug(*trajectory);
+    motion_profiler_->profileTrajectory(*trajectory, state_);
+    publishTrajectory(*trajectory);
+>>>>>>> Rebased with new master branch
     rate.sleep();
   }
 }
