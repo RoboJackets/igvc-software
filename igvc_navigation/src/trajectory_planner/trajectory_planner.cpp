@@ -181,6 +181,7 @@ void TrajectoryPlanner::updateTrajectory()
     publishDebug(*trajectory);
     motion_profiler_->profileTrajectory(*trajectory, state_);
     publishTrajectory(*trajectory);
+    rate.sleep();
   }
 }
 
