@@ -11,7 +11,7 @@ WrapperLayer::WrapperLayer() : mapper_{}
   ros::NodeHandle private_nh{ "~" };
   double threshold_double;
   assertions::getParam(private_nh, "lethal_threshold", threshold_double);
-  occupied_threshold_ = static_cast<uchar>(std::round(255.0 / threshold_double));
+  occupied_threshold_ = static_cast<uchar>(std::round(255.0 * threshold_double));
 }
 
 void WrapperLayer::onInitialize()
@@ -61,7 +61,7 @@ void WrapperLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, in
       }
       else
       {
-        master[idx] = p[j];
+        master[idx] = costmap_2d::FREE_SPACE;
       }
     }
   }
