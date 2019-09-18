@@ -272,11 +272,11 @@
   </joint>
 
   <!-- the optical joint is in the correct frame for transforms -->
-  <link name="center_cam_optical"/>
+  <link name="cam/center_optical"/>
 
-  <joint name="center_cam_optical_joint" type="fixed">
+  <joint name="cam/center_optical_joint" type="fixed">
       <parent link="center_cam"/>
-      <child link="center_cam_optical"/>
+      <child link="cam/center_optical"/>
       <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
 
@@ -309,10 +309,10 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
               <alwaysOn>true</alwaysOn>
               <updateRate>30</updateRate>
-              <cameraName>center_cam</cameraName>
+              <cameraName>cam/center</cameraName>
               <imageTopicName>image_raw</imageTopicName>
               <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-              <frameName>center_cam_optical</frameName>
+              <frameName>cam/center_optical</frameName>
               <hackBaseline>0.0</hackBaseline>
               <distortionK1>0.0</distortionK1>
               <distortionK2>0.0</distortionK2>
@@ -338,11 +338,11 @@
   </joint>
 
   <!-- the optical joint is in the correct frame for transforms -->
-  <link name="right_cam_optical"/>
+  <link name="cam/right_optical"/>
 
-  <joint name="right_cam_optical_joint" type="fixed">
+  <joint name="cam/right_optical_joint" type="fixed">
       <parent link="right_cam"/>
-      <child link="right_cam_optical"/>
+      <child link="cam/right_optical"/>
       <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
 
@@ -375,10 +375,10 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
               <alwaysOn>true</alwaysOn>
               <updateRate>30</updateRate>
-              <cameraName>right_cam</cameraName>
+              <cameraName>cam/right</cameraName>
               <imageTopicName>image_raw</imageTopicName>
               <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-              <frameName>right_cam_optical</frameName>
+              <frameName>cam/right_optical</frameName>
               <hackBaseline>0.0</hackBaseline>
               <distortionK1>0.0</distortionK1>
               <distortionK2>0.0</distortionK2>
@@ -404,11 +404,11 @@
   </joint>
 
   <!-- the optical joint is in the correct frame for transforms -->
-  <link name="left_cam_optical"/>
+  <link name="cam/left_optical"/>
 
-  <joint name="left_cam_optical_joint" type="fixed">
+  <joint name="cam/left_optical_joint" type="fixed">
       <parent link="left_cam"/>
-      <child link="left_cam_optical"/>
+      <child link="cam/left_optical"/>
       <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
 
@@ -441,10 +441,10 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
               <alwaysOn>true</alwaysOn>
               <updateRate>30</updateRate>
-              <cameraName>left_cam</cameraName>
+              <cameraName>cam/left</cameraName>
               <imageTopicName>image_raw</imageTopicName>
               <cameraInfoTopicName>camera_info</cameraInfoTopicName>
-              <frameName>left_cam_optical</frameName>
+              <frameName>cam/left_optical</frameName>
               <hackBaseline>0.0</hackBaseline>
               <distortionK1>0.0</distortionK1>
               <distortionK2>0.0</distortionK2>

@@ -77,23 +77,23 @@ segmented_free_space:
 topics:
     lidar: "/velodyne_points"
     line_segmentation:
-        left: "/semantic_segmentation/usb_cam_left"
-        center: "/semantic_segmentation/usb_cam_center"
-        right: "/semantic_segmentation/usb_cam_right"
+        left: "/cam/left/semantic_segmentation"
+        center: "/cam/center/semantic_segmentation"
+        right: "/cam/right/semantic_segmentation"
     projected_line_pc:
-        left: "/semantic_segmentation_cloud/usm_cam_left"
-        center: "/semantic_segmentation_cloud/usb_cam_center"
-        right: "/semantic_segmentation_cloud/usb_cam_right"
+        left: "/cam/left/semantic_segmentation_cloud"
+        center: "/cam/center/semantic_segmentation_cloud"
+        right: "/cam/right/semantic_segmentation_cloud"
     camera_info:
-        left: "/usb_cam_left/camera_info"
-        center: "/usb_cam_center/camera_info"
-        right: "/usb_cam_right/camera_info"
-    camera_center: "/usb_cam_center/image_raw/compressed"
+        left: "/cam/left/camera_info"
+        center: "/cam/center/camera_info"
+        right: "/cam/right/camera_info"
+    camera_center: "/cam/center/image_raw/compressed"
 frames:
     camera:
-        left: "/left_cam_optical"
-        center: "/center_cam_optical"
-        right: "/right_cam_optical"
+        left: "/cam/left_optical"
+        center: "/cam/center_optical"
+        right: "/cam/right_optical"
 node:
     debug:
         publish:

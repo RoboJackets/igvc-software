@@ -4,8 +4,8 @@
   <node name="projection" pkg="igvc_perception" type="projection" output="screen">
     <param name="resize_width" type="int" value="640" />
     <param name="resize_height" type="int" value="480" />
-    <param name="line_topic" type="string" value="/center_cam/detected_lines" />
-    <param name="pointcloud_topic" type="string" value="/line_pointcloud" />
+    <param name="line_topic" type="string" value="/cam/center/semantic_segmentation" />
+    <param name="pointcloud_topic" type="string" value="/cam/center/semantic_segmentation_cloud" />
     <param name="lidar_topic" type="string" value="/velodyne_points" />
   </node>
 </launch>
