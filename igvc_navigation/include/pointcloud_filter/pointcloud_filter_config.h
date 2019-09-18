@@ -9,8 +9,6 @@ namespace pointcloud_filter
 {
 struct PointcloudFilterConfig
 {
-  BackFilterConfig back_filter_config_;
-
   PointcloudFilterConfig() = default;
   explicit PointcloudFilterConfig(const ros::NodeHandle& nh);
 };

@@ -4,15 +4,15 @@
 #include <ros/ros.h>
 
 #include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include <pointcloud_filter/back_filter/back_filter_config.h>
+#include <velodyne_pointcloud/point_types.h>
 
 namespace pointcloud_filter
 {
 class BackFilter
 {
 public:
-  using PointCloud = pcl::PointCloud<pcl::PointXYZ>;
+  using PointCloud = pcl::PointCloud<velodyne_pointcloud::PointXYZIR>;
   explicit BackFilter(const BackFilterConfig& config);
 
   void filter(PointCloud& pointcloud) const;
