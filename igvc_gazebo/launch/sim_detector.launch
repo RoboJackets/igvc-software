@@ -2,12 +2,17 @@
 
 <launch>
 
-  <node name="sim_color_detector" pkg="igvc_gazebo" type="sim_color_detector">
+  <node name="sim_color_detector" pkg="igvc_gazebo" type="sim_color_detector" output="screen">
       <!-- names of cameras to subscribe to -->
-      <rosparam param="camera_names">["/center_cam", "/left_cam", "/right_cam"]</rosparam>
+      <rosparam param="camera_names">["/cam/center", "/cam/left", "/cam/right"]</rosparam>
+      <rosparam param="semantic_topic_prefix">["/cam/center", "/cam/left", "/cam/right"]</rosparam>
+      <rosparam param="semantic_topic_suffix">["", "", ""]</rosparam>
+
+      <param name="output_image/width" value="400" />
+      <param name="output_image/height" value="400" />
 
       <!-- names of output segmentation topics. Published in the namespace of the corresponding camera -->
-      <param name="line_topic" value="/detected_lines" />
+      <param name="line_topic" value="/semantic_segmentation" />
       <param name="barrel_topic" value="/detected_barrels" />
   </node>
 

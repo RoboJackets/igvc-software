@@ -229,17 +229,17 @@ void addLinesToPointcloud(pcl::PointCloud<pcl::PointXYZ> &line_cloud,
 void getTransforms()
 {
   tf::TransformListener tf_listener;
-  if (tf_listener.waitForTransform("/center_cam_optical", "/lidar", ros::Time(0), ros::Duration(3.0)))
+  if (tf_listener.waitForTransform("/cam/center_optical", "/lidar", ros::Time(0), ros::Duration(3.0)))
   {
-    tf_listener.lookupTransform("/center_cam_optical", "/lidar", ros::Time(0), g_transform_lidar_to_cam);
+    tf_listener.lookupTransform("/cam/center_optical", "/lidar", ros::Time(0), g_transform_lidar_to_cam);
   }
   else
   {
     ROS_ERROR_STREAM("\n\nfailed to find lidar to camera transform\n\n");
   }
-  if (tf_listener.waitForTransform("/base_footprint", "/center_cam_optical", ros::Time(0), ros::Duration(3.0)))
+  if (tf_listener.waitForTransform("/base_footprint", "/cam/center_optical", ros::Time(0), ros::Duration(3.0)))
   {
-    tf_listener.lookupTransform("/base_footprint", "/center_cam_optical", ros::Time(0), g_transform_cam_to_base);
+    tf_listener.lookupTransform("/base_footprint", "/cam/center_optical", ros::Time(0), g_transform_cam_to_base);
   }
   else
   {
@@ -329,7 +329,7 @@ int main(int argc, char **argv)
   assertions::getParam(pNh, "pointcloud_topic", g_pointcloud_topic);
   assertions::getParam(pNh, "lidar_topic", g_lidar_topic);
 
-  g_cam_info = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("center_cam/camera_info", ros::Duration(5));
+  g_cam_info = ros::topic::waitForMessage<sensor_msgs::CameraInfo>("cam/center/camera_info", ros::Duration(5));
   if (g_cam_info.get() != nullptr)
   {
     resizeCameraModel();
