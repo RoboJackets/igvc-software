@@ -21,6 +21,11 @@ add_library(wrapper_layer wrapper_layer.h wrapper_layer.cpp)
 add_dependencies(wrapper_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(wrapper_layer ${catkin_LIBRARIES} mapper_lib)
 
+# Final part of refactor:
+add_library(lidar_layer lidar_layer.cpp lidar_layer.h)
+add_dependencies(lidar_layer ${catkin_EXPORTED_TARGETS})
+target_link_libraries(lidar_layer ${catkin_LIBRARIES})
+
 find_package(OpenMP)
 if (OpenMP_FOUND)
     target_link_libraries(mapper ${OpenMP_CXX_LIBRARIES})

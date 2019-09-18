@@ -25,6 +25,15 @@ find_package(catkin REQUIRED COMPONENTS
              costmap_2d
              dynamic_reconfigure
              igvc_utils
+             grid_map_core
+             grid_map_ros
+             grid_map_cv
+             grid_map_filters
+             grid_map_loader
+             grid_map_msgs
+             grid_map_octomap
+             grid_map_rviz_plugin
+             grid_map_visualization
     )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -190,7 +199,8 @@ add_library(
     GraphSearch STATIC
     GraphSearch/src/Node.cpp
     GraphSearch/src/Graph.cpp
-    GraphSearch/src/PriorityQueue.cpp)
+    GraphSearch/src/PriorityQueue.cpp
+)
 add_dependencies(GraphSearch ${catkin_EXPORTED_TARGETS})
 # link OpenCV and cv_bridge to GraphSearch library
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
