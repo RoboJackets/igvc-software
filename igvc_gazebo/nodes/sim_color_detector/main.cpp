@@ -23,6 +23,9 @@ using Pixel = cv::Point3_<uint8_t>;
 // map of camera name to line and barrel publishers
 std::map<std::string, std::vector<ros::Publisher>> g_pubs;
 
+// Output size of the image
+cv::Size g_output_size;
+
 /*
  * Holds all the ranges for a color being detected in the simulator;
  * done for improved readability
@@ -96,6 +99,8 @@ void handleImage(const sensor_msgs::ImageConstPtr& msg, std::string camera_name)
     return;
   }
 
+  cv::resize(frame, frame, g_output_size, 0, 0, cv::INTER_AREA);
+
   cv::Mat output_lines(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));    // Ouput image lines (B&W)
   cv::Mat output_barrels(frame.rows, frame.cols, CV_8UC1, cv::Scalar::all(0));  // Ouput image barrels (B&W)
 
@@ -154,6 +159,14 @@ int main(int argc, char** argv)
   std::vector<std::string> camera_names;
   assertions::getParam(pNh, "camera_names", camera_names);
 
+  std::vector<std::string> semantic_prefixes;
+  assertions::getParam(pNh, "semantic_topic_prefix", semantic_prefixes);
+  std::vector<std::string> semantic_suffixes;
+  assertions::getParam(pNh, "semantic_topic_suffix", semantic_suffixes);
+
+  assertions::getParam(pNh, "output_image/width", g_output_size.width);
+  assertions::getParam(pNh, "output_image/height", g_output_size.height);
+
   // output topics
   std::string line_topic;
   assertions::getParam(pNh, "line_topic", line_topic);
@@ -162,15 +175,24 @@ int main(int argc, char** argv)
 
   // insert subscribers and publishers
   std::vector<ros::Subscriber> subs;
-  for (std::string camera_name : camera_names)
+  for (size_t i = 0; i < camera_names.size(); i++)
   {
+    auto camera_name = camera_names[i];
+    auto prefix = semantic_prefixes[i];
+    auto suffix = semantic_suffixes[i];
+
+    std::string semantic_topic = prefix + line_topic;
+    semantic_topic.append(suffix);
+
+    ROS_INFO_STREAM("Topic: " << semantic_topic);
+
     // subscribe to raw camera image
     ros::Subscriber cam_sub =
         nh.subscribe<sensor_msgs::Image>(camera_name + "/image_raw", 1, boost::bind(handleImage, _1, camera_name));
     subs.push_back(cam_sub);
 
     // publish line and barrel segmentation
-    ros::Publisher line_pub = nh.advertise<sensor_msgs::Image>(camera_name + line_topic, 1);
+    ros::Publisher line_pub = nh.advertise<sensor_msgs::Image>(semantic_topic, 1);
     ros::Publisher barrel_pub = nh.advertise<sensor_msgs::Image>(camera_name + barrel_topic, 1);
     std::vector<ros::Publisher> camera_pubs = { line_pub, barrel_pub };
 
