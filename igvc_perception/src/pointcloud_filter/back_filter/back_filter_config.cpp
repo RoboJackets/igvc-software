@@ -7,7 +7,7 @@ BackFilterConfig::BackFilterConfig(const ros::NodeHandle &nh)
 {
   ros::NodeHandle child_nh{ nh, "back_filter" };
 
-  assertions::getParam(nh, "start_angle", start_angle);
-  assertions::getParam(nh, "end_angle", end_angle);
+  assertions::getParam(child_nh, "start_angle", start_angle);
+  assertions::getParam(child_nh, "end_angle", end_angle);
 }
 }  // namespace pointcloud_filter

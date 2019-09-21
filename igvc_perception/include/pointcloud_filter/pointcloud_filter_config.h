@@ -11,6 +11,11 @@ struct PointcloudFilterConfig
 {
   PointcloudFilterConfig() = default;
   explicit PointcloudFilterConfig(const ros::NodeHandle& nh);
+
+  std::string topic_input;
+  std::string topic_transformed;
+  std::string topic_occupied;
+  std::string topic_free;
 };
 }  // namespace pointcloud_filter
 

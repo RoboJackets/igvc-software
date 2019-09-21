@@ -7,8 +7,8 @@ namespace pointcloud_filter
 {
 struct BackFilterConfig
 {
-  double start_angle;
-  double end_angle;
+  double start_angle = 0.0;
+  double end_angle = 0.0;
 
   BackFilterConfig() = default;
   BackFilterConfig(const ros::NodeHandle& nh);

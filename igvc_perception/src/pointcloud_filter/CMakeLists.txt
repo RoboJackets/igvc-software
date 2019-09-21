@@ -1,4 +1,16 @@
-add_library(pointcloud_filter_lib pointcloud_filter.cpp pointcloud_filter_config.cpp back_filter/back_filter_config.cpp back_filter/back_filter.cpp)
+add_library(pointcloud_filter_lib STATIC
+    pointcloud_filter.cpp
+    pointcloud_filter_config.cpp
+    bundle.cpp
+    back_filter/back_filter_config.cpp
+    back_filter/back_filter.cpp
+    radius_filter/radius_filter_config.cpp
+    radius_filter/radius_filter.cpp
+    ground_filter/ground_filter.cpp
+    ground_filter/ground_filter_config.cpp
+    tf_transform_filter/tf_transform_filter.cpp
+    tf_transform_filter/tf_transform_filter_config.cpp
+    )
 add_dependencies(pointcloud_filter_lib ${catkin_EXPORTED_TARGETS})
 target_link_libraries(pointcloud_filter_lib ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 

@@ -190,8 +190,7 @@ add_library(
     GraphSearch STATIC
     GraphSearch/src/Node.cpp
     GraphSearch/src/Graph.cpp
-    GraphSearch/src/PriorityQueue.cpp
-    include/pointcloud_filter/back_filter/back_filter_config.h include/pointcloud_filter/back_filter/back_filter.h)
+    GraphSearch/src/PriorityQueue.cpp)
 add_dependencies(GraphSearch ${catkin_EXPORTED_TARGETS})
 # link OpenCV and cv_bridge to GraphSearch library
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
@@ -210,4 +209,3 @@ add_subdirectory(src/d_lite_planner)
 add_subdirectory(src/field_d_planner)
 
 add_subdirectory(src/back_circle)
-add_subdirectory(src/pointcloud_filter)
