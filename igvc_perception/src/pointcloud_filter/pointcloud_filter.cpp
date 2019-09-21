@@ -14,10 +14,13 @@ PointcloudFilter::PointcloudFilter(const ros::NodeHandle& nh, const ros::NodeHan
   : nh_{ nh }
   , private_nh_{ private_nh, "pointcloud_filter" }
   , config_{ private_nh_ }
+  , buffer_{}
+  , listener_{ buffer_ }
   , back_filter_{ private_nh_ }
   , radius_filter_{ private_nh_ }
-  , tf_transform_filter_{ private_nh_ }
+  , tf_transform_filter_{ &buffer_ }
   , ground_filter_{ private_nh_ }
+  , raycast_filter_{ private_nh_ }
 {
   setupPubSub();
 }
@@ -39,14 +42,22 @@ void PointcloudFilter::pointcloudCallback(const PointCloud::ConstPtr& raw_pointc
 
   back_filter_.filter(bundle);
 
-  tf_transform_filter_.filter(bundle);
+  std::string base_frame = config_.base_frame;
+  std::string lidar_frame = raw_pointcloud->header.frame_id;
+  ros::Duration timeout{ config_.timeout_duration };
 
-  bundle.occupied_pointcloud->header = bundle.pointcloud->header;
-  bundle.free_pointcloud->header = bundle.pointcloud->header;
+  tf_transform_filter_.transform(*bundle.pointcloud, *bundle.pointcloud, base_frame, timeout);
 
   ground_filter_.filter(bundle);
 
+  tf_transform_filter_.transform(*bundle.occupied_pointcloud, *bundle.occupied_pointcloud, lidar_frame, timeout);
+  raycast_filter_.filter(bundle);
+  tf_transform_filter_.transform(*bundle.occupied_pointcloud, *bundle.occupied_pointcloud, base_frame, timeout);
+
+  bundle.free_pointcloud->header.frame_id = base_frame;
+
   transformed_pointcloud_pub_.publish(bundle.pointcloud);
   occupied_pointcloud_pub_.publish(bundle.occupied_pointcloud);
+  free_pointcloud_pub_.publish(bundle.free_pointcloud);
 }
 }  // namespace pointcloud_filter

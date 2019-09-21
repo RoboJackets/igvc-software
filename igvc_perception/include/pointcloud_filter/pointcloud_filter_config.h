@@ -16,6 +16,10 @@ struct PointcloudFilterConfig
   std::string topic_transformed;
   std::string topic_occupied;
   std::string topic_free;
+
+  std::string base_frame;
+
+  double timeout_duration;
 };
 }  // namespace pointcloud_filter
 

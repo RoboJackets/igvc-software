@@ -22,6 +22,7 @@ void GroundFilter::filter(pointcloud_filter::Bundle& bundle)
       filtered_pc.points.emplace_back(point);
     }
   }
+  bundle.occupied_pointcloud->header = bundle.pointcloud->header;
   bundle.occupied_pointcloud->points = std::move(filtered_pc.points);
 }
 }  // namespace pointcloud_filter

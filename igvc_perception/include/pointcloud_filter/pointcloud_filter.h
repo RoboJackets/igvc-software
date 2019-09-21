@@ -8,6 +8,7 @@
 #include <pointcloud_filter/ground_filter/ground_filter.h>
 #include <pointcloud_filter/pointcloud_filter_config.h>
 #include <pointcloud_filter/radius_filter/radius_filter.h>
+#include <pointcloud_filter/raycast_filter/raycast_filter.h>
 #include <pointcloud_filter/tf_transform_filter/tf_transform_filter.h>
 
 namespace pointcloud_filter
@@ -24,18 +25,20 @@ private:
   ros::NodeHandle private_nh_;
   PointcloudFilterConfig config_;
 
+  tf2_ros::Buffer buffer_;
+  tf2_ros::TransformListener listener_;
+
   BackFilter back_filter_;
   RadiusFilter radius_filter_;
   TFTransformFilter tf_transform_filter_;
   GroundFilter ground_filter_;
+  RaycastFilter raycast_filter_;
 
   ros::Subscriber raw_pointcloud_sub_;
 
   ros::Publisher transformed_pointcloud_pub_;
   ros::Publisher occupied_pointcloud_pub_;
   ros::Publisher free_pointcloud_pub_;
-
-  tf::TransformListener listener_;
 
   void setupPubSub();
   void pointcloudCallback(const PointCloud::ConstPtr& raw_pointcloud);

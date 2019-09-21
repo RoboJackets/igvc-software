@@ -12,6 +12,11 @@ pointcloud_filter:
     ground_filter:
         height_min: 0.4
         height_max: 1.2
-    tf_transform_filter:
-        target_frame: "base_footprint"
-        timeout: 0.5
+    raycast_filter:
+        end_distance: 10
+        angular_resolution: 0.01
+        start_angle: -2.0
+        end_angle: 2.0
+    frames:
+        base_footprint: "base_footprint"
+    timeout_duration: 0.5

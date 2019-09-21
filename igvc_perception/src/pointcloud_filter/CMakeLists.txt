@@ -9,7 +9,8 @@ add_library(pointcloud_filter_lib STATIC
     ground_filter/ground_filter.cpp
     ground_filter/ground_filter_config.cpp
     tf_transform_filter/tf_transform_filter.cpp
-    tf_transform_filter/tf_transform_filter_config.cpp
+    raycast_filter/raycast_filter_config.cpp
+    raycast_filter/raycast_filter.cpp
     )
 add_dependencies(pointcloud_filter_lib ${catkin_EXPORTED_TARGETS})
 target_link_libraries(pointcloud_filter_lib ${catkin_LIBRARIES} ${PCL_LIBRARIES})

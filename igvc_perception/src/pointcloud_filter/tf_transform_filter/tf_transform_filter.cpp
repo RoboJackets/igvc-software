@@ -4,32 +4,49 @@
 
 namespace pointcloud_filter
 {
-TFTransformFilter::TFTransformFilter(const ros::NodeHandle &nh)
-  : config_{ nh }, buffer_{}, transform_listener_{ buffer_ }
+TFTransformFilter::TFTransformFilter(tf2_ros::Buffer* buffer) : buffer_{ buffer }
 {
 }
 
-void TFTransformFilter::filter(pointcloud_filter::Bundle &bundle)
+void TFTransformFilter::transform(const PointCloud& from, PointCloud& to, const std::string& target_frame,
+                                  const ros::Duration& timeout)
 {
-  const auto &source_frame = bundle.pointcloud->header.frame_id;
-  const auto &target_frame = config_.target_frame;
-  ros::Time message_time = pcl_conversions::fromPCL(bundle.pointcloud->header.stamp);
-  ros::Duration timeout{ config_.timeout };
+  if (&from != &to)
+  {
+    to.clear();
+    to.reserve(from.size());
+  }
+
+  const auto& source_frame = from.header.frame_id;
+  ros::Time message_time = pcl_conversions::fromPCL(from.header.stamp);
 
   geometry_msgs::TransformStamped transform_msg =
-      buffer_.lookupTransform(target_frame, source_frame, message_time, timeout);
+      buffer_->lookupTransform(target_frame, source_frame, message_time, timeout);
   Eigen::Isometry3f transform = tf2::transformToEigen(transform_msg).cast<float>();
 
-  for (auto &point : *bundle.pointcloud)
+  for (size_t i = 0; i < from.size(); i++)
   {
+    auto& point = from.points[i];
     Eigen::Vector3f eigen_point{ point.x, point.y, point.z };
     eigen_point = transform * eigen_point;
 
-    point.x = eigen_point(0);
-    point.y = eigen_point(1);
-    point.z = eigen_point(2);
+    if (&from == &to)
+    {
+      auto& to_point = to.points[i];
+      to_point.x = eigen_point(0);
+      to_point.y = eigen_point(1);
+      to_point.z = eigen_point(2);
+    }
+    else
+    {
+      velodyne_pointcloud::PointXYZIR new_point{ point };
+      new_point.x = eigen_point(0);
+      new_point.y = eigen_point(1);
+      new_point.z = eigen_point(2);
+      to.points.emplace_back(new_point);
+    }
   }
 
-  bundle.pointcloud->header.frame_id = target_frame;
+  to.header.frame_id = target_frame;
 }
 }  // namespace pointcloud_filter

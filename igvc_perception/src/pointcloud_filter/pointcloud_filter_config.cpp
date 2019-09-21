@@ -9,5 +9,9 @@ PointcloudFilterConfig::PointcloudFilterConfig(const ros::NodeHandle &nh)
   assertions::getParam(nh, "topic/transformed", topic_transformed);
   assertions::getParam(nh, "topic/occupied", topic_occupied);
   assertions::getParam(nh, "topic/free", topic_free);
+
+  assertions::getParam(nh, "frames/base_footprint", base_frame);
+
+  assertions::getParam(nh, "timeout_duration", timeout_duration);
 }
 }  // namespace pointcloud_filter

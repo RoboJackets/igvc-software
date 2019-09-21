@@ -7,25 +7,21 @@
 #include <velodyne_pointcloud/point_types.h>
 
 #include <pointcloud_filter/filter.h>
-#include <pointcloud_filter/tf_transform_filter/tf_transform_filter_config.h>
 #include <tf2_ros/transform_listener.h>
 
 namespace pointcloud_filter
 {
-class TFTransformFilter : Filter
+class TFTransformFilter
 {
 public:
   using PointCloud = pcl::PointCloud<velodyne_pointcloud::PointXYZIR>;
 
-  explicit TFTransformFilter(const ros::NodeHandle& nh);
+  explicit TFTransformFilter(tf2_ros::Buffer* buffer_);
 
-  void filter(Bundle& bundle) override;
+  void transform(const PointCloud& from, PointCloud& to, const std::string& target_frame, const ros::Duration& timeout);
 
 private:
-  TFTransformFilterConfig config_{};
-
-  tf2_ros::Buffer buffer_;
-  tf2_ros::TransformListener transform_listener_;
+  tf2_ros::Buffer* buffer_;
 };
 }  // namespace pointcloud_filter
 
