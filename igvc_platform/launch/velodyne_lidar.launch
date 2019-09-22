@@ -23,6 +23,7 @@
   <arg name="cut_angle" default="-0.01" />
   <arg name="laserscan_ring" default="-1" />
   <arg name="laserscan_resolution" default="0.007" />
+  <arg name="organize_cloud" default="true"/>
 
   <!-- start nodelet manager and driver nodelets -->
   <include file="$(find velodyne_driver)/launch/nodelet_manager.launch">
@@ -37,6 +38,7 @@
     <arg name="repeat_delay" value="$(arg repeat_delay)"/>
     <arg name="rpm" value="$(arg rpm)"/>
     <arg name="cut_angle" value="$(arg cut_angle)"/>
+    <arg name="organize_cloud" value="$(arg organize_cloud)"/>
   </include>
 
   <!-- start cloud nodelet -->
