@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
              roscpp
              rospy
              std_msgs
+             mbf_msgs
              igvc_msgs
              image_geometry
              image_transport
@@ -210,3 +211,5 @@ add_subdirectory(src/d_lite_planner)
 add_subdirectory(src/field_d_planner)
 
 add_subdirectory(src/back_circle)
+
+add_subdirectory(src/action_server)

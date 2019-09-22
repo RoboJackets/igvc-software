@@ -48,9 +48,11 @@
   <depend>std_msgs</depend>
   <depend>costmap_2d</depend>
   <depend>dynamic_reconfigure</depend>
+  <depend>actionlib</depend>
+  <depend>mbf_msgs</depend>
 
   <build_depend>cv_bridge</build_depend>
-  <build_depend>pcl_ros</build_depend>
+  <build_depend>pcl_ros</build_depend>a
   <build_depend>tf_conversions</build_depend>
   <build_depend>igvc_utils</build_depend>
   <build_depend>octomap</build_depend>
@@ -64,7 +66,7 @@
   <exec_depend>nmea_navsat_driver</exec_depend>
   <exec_depend>gps_common</exec_depend>
   <exec_depend>pluginlib</exec_depend>
-  <exec_depend>dwa_local_planner</exec_depend>
+  <exec_depend>teb_local_planner</exec_depend>
   <exec_depend>global_planner</exec_depend>
   <exec_depend>clear_costmap_recovery</exec_depend>
   <exec_depend>move_base_flex</exec_depend>
