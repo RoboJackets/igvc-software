@@ -1,9 +1,6 @@
 [submodule "external/rj-ros-common"]
 	path = external/rj-ros-common
 	url = https://github.com/RoboJackets/rj-ros-common
-[submodule "velodyne"]
-	path = velodyne
-	url = https://github.com/ros-drivers/velodyne.git
 [submodule "external/velodyne"]
 	path = external/velodyne
 	url = https://github.com/ros-drivers/velodyne.git
