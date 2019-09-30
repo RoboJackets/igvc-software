@@ -190,8 +190,7 @@ add_library(
     GraphSearch STATIC
     GraphSearch/src/Node.cpp
     GraphSearch/src/Graph.cpp
-    GraphSearch/src/PriorityQueue.cpp
-)
+    GraphSearch/src/PriorityQueue.cpp)
 add_dependencies(GraphSearch ${catkin_EXPORTED_TARGETS})
 # link OpenCV and cv_bridge to GraphSearch library
 target_link_libraries(GraphSearch ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
