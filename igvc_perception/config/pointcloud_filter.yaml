@@ -1,0 +1,22 @@
+pointcloud_filter:
+    topic:
+        input: "velodyne_points"
+        transformed: "lidar/transformed"
+        occupied: "lidar/occupied"
+        free: "lidar/free"
+    back_filter:
+        start_angle: -2.0
+        end_angle: 2.0
+    radius_filter:
+        radius_squared: 100
+    ground_filter:
+        height_min: 0.4
+        height_max: 1.2
+    raycast_filter:
+        end_distance: 10
+        angular_resolution: 0.01
+        start_angle: -2.0
+        end_angle: 2.0
+    frames:
+        base_footprint: "base_footprint"
+    timeout_duration: 0.5
