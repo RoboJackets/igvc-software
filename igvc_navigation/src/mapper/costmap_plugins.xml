@@ -1,6 +1,15 @@
-<library path="lib/libwrapper_layer">
-  <class type="wrapper_layer::WrapperLayer" base_class_type="costmap_2d::Layer">
-    <description>Wrapper layer that just wraps the current mapper. See
-      https://github.com/RoboJackets/igvc-software/issues/485</description>
-  </class>
-</library>
+<class_libraries>
+  <library path="lib/libwrapper_layer">
+    <class type="wrapper_layer::WrapperLayer" base_class_type="costmap_2d::Layer">
+      <description>Wrapper layer that just wraps the current mapper. See
+        https://github.com/RoboJackets/igvc-software/issues/485</description>
+    </class>
+  </library>
+  <library path="lib/liblidar_layer">
+    <class type="lidar_layer::LidarLayer" base_class_type="costmap_2d::Layer">
+      <description>
+        Lidar layer that performs occupancy grid mapping, using gridmap as the backing data structure.
+      </description>
+    </class>
+  </library>
+</class_libraries>

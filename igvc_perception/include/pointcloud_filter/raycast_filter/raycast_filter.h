@@ -19,7 +19,7 @@ public:
   void filter(Bundle& bundle) override;
 
 private:
-  RaycastFilterConfig config_{};
+  RaycastFilterConfig config_;
 
   int discretize(double angle) const;
 };

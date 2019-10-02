@@ -22,7 +22,11 @@ add_dependencies(wrapper_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(wrapper_layer ${catkin_LIBRARIES} mapper_lib)
 
 # Final part of refactor:
-add_library(lidar_layer lidar_layer.cpp lidar_layer.h)
+add_library(lidar_layer
+    lidar_layer.cpp lidar_layer.h
+    lidar_layer_config.cpp lidar_layer_config.h
+    map_config.cpp map_config.h
+    lidar_config.cpp lidar_config.h eigen_hash.h)
 add_dependencies(lidar_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lidar_layer ${catkin_LIBRARIES})
 
@@ -32,7 +36,7 @@ if (OpenMP_FOUND)
 endif ()
 
 install(
-    TARGETS mapper
+    TARGETS mapper wrapper_layer lidar_layer
     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

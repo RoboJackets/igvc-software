@@ -52,9 +52,6 @@ void PointcloudFilter::pointcloudCallback(const PointCloud::ConstPtr& raw_pointc
 
   tf_transform_filter_.transform(*bundle.occupied_pointcloud, *bundle.occupied_pointcloud, lidar_frame, timeout);
   raycast_filter_.filter(bundle);
-  tf_transform_filter_.transform(*bundle.occupied_pointcloud, *bundle.occupied_pointcloud, base_frame, timeout);
-
-  bundle.free_pointcloud->header.frame_id = base_frame;
 
   transformed_pointcloud_pub_.publish(bundle.pointcloud);
   occupied_pointcloud_pub_.publish(bundle.occupied_pointcloud);
