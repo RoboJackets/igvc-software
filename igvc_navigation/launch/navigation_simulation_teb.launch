@@ -10,9 +10,9 @@
         <arg name="simulation" value="true" />
     </include>
 
-    <!-- Launch trajectory planner -->
-    <include file="$(find igvc_navigation)/launch/trajectory_planner.launch" />
+    <!-- Launch action server -->
+    <include file="$(find igvc_navigation)/launch/action_server.launch" />
 
-    <!-- Launch trajectory follower -->
-    <include file="$(find igvc_navigation)/launch/follower.launch" />
+    <!-- Launch differential drive controller -->
+    <include file="$(find igvc_navigation)/launch/differential_drive.launch" />
 </launch>

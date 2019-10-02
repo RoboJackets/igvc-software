@@ -1,6 +1,6 @@
 /**
  * Class for publishing move base actions for move_base_flex.
- * Currently, it only takes values from Rviz's /move_base_simple/goal topic.
+ * Currently, it takes values from Rviz's /move_base_simple/goal topic and the /waypoint topic.
  *
  * Author: Tan Gemicioglu <tangem1@hotmail.com>
  */
@@ -10,6 +10,7 @@
 
 #include <mbf_msgs/MoveBaseAction.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/PointStamped.h>
 #include <actionlib/client/simple_action_client.h>
 
 typedef actionlib::SimpleActionClient<mbf_msgs::MoveBaseAction> MoveBaseClient;
@@ -21,7 +22,8 @@ public:
 private:
   MoveBaseClient client = MoveBaseClient("move_base_flex/move_base", true);
 
-  void actionCallback(geometry_msgs::PoseStamped pose);
+  void actionCallbackPose(geometry_msgs::PoseStamped pose);
+  void actionCallbackPoint(geometry_msgs::PointStamped point);
 };
 
 #endif  // ACTIONSERVER_H

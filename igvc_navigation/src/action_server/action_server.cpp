@@ -10,17 +10,28 @@ ActionServer::ActionServer() {
     ROS_INFO("Waiting for the move_base action server to come up");
   }
 
-  ros::Subscriber rviz_sub = nh.subscribe("/move_base_simple/goal",1,&ActionServer::actionCallback,this);
+  ros::Subscriber rviz_sub = nh.subscribe("/move_base_simple/goal",1,&ActionServer::actionCallbackPose,this);
+  ros::Subscriber waypoint_sub = nh.subscribe("/waypoint",1,&ActionServer::actionCallbackPoint, this);
 
   ros::spin();
 }
 
-void ActionServer::actionCallback(geometry_msgs::PoseStamped pose) {
+void ActionServer::actionCallbackPose(geometry_msgs::PoseStamped pose) {
   mbf_msgs::MoveBaseGoal goal;
 
   goal.target_pose = pose;
 
-  ROS_INFO("Sending goal");
+  ROS_INFO("Sending goal from rviz");
+  client.sendGoal(goal);
+}
+
+void ActionServer::actionCallbackPoint(geometry_msgs::PointStamped point) {
+  mbf_msgs::MoveBaseGoal goal;
+
+  goal.target_pose.header = point.header;
+  goal.target_pose.pose.position = point.point;
+
+  ROS_INFO("Sending goal from waypoint");
   client.sendGoal(goal);
 }
 
