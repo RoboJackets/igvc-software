@@ -70,14 +70,16 @@ private:
 
   inline void markScanMiss(const grid_map::Index& index)
   {
-    (*layer_)(index[0], index[1]) += config_.lidar.scan_miss;
+    (*layer_)(index[0], index[1]) =
+        std::max((*layer_)(index[0], index[1]) + config_.lidar.scan_miss, config_.map.min_occupancy);
   }
 
   void markScanHit(const grid_map::Index& index, const grid_map::Position& point, const grid_map::Position& lidar_pos);
 
   inline void markFreeMiss(const grid_map::Index& index)
   {
-    (*layer_)(index[0], index[1]) += config_.lidar.free_miss;
+    (*layer_)(index[0], index[1]) =
+        std::max((*layer_)(index[0], index[1]) + config_.lidar.free_miss, config_.map.min_occupancy);
   }
 };
 }  // namespace lidar_layer

@@ -22,13 +22,15 @@ lidar_layer:
         length_x: 200
         length_y: 200
         occupied_threshold: 0.5
+        max_occupancy: 0.99
+        min_occupancy: 0.01
         debug:
             map_topic: "/mapper/debug/gridmap"
     lidar:
         occupied_topic: "/lidar/occupied"
         free_topic: "/lidar/free"
         sensor_model:
-            scan_hit: 0.9
+            scan_hit: 0.7
             scan_miss: 0.8
             free_miss: 0.7
-            hit_exponential_coeff: 0.0
+            hit_exponential_coeff: 0.05

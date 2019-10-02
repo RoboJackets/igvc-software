@@ -14,6 +14,9 @@ public:
   double length_x;
   double length_y;
 
+  double max_occupancy;
+  double min_occupancy;
+
   std::string frame_id;
 
   double occupied_threshold;

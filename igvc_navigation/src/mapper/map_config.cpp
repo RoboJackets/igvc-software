@@ -14,7 +14,11 @@ MapConfig::MapConfig(const ros::NodeHandle &parent_nh)
 
   assertions::getParam(nh, "frame_id", frame_id);
   assertions::getParam(nh, "occupied_threshold", occupied_threshold);
-  //  occupied_threshold = probability_utils::toLogOdds(occupied_threshold);
+
+  assertions::getParam(nh, "max_occupancy", max_occupancy);
+  max_occupancy = probability_utils::toLogOdds(max_occupancy);
+  assertions::getParam(nh, "min_occupancy", min_occupancy);
+  min_occupancy = probability_utils::toLogOdds(min_occupancy);
 
   assertions::getParam(nh, "debug/map_topic", debug.map_topic);
 }

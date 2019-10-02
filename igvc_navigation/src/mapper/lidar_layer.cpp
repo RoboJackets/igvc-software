@@ -236,7 +236,7 @@ void LidarLayer::markScanHit(const grid_map::Index &index, const grid_map::Posit
   const auto coeff = config_.lidar.hit_exponential_coeff;
   const double probability = std::exp(-coeff * distance) * config_.lidar.scan_hit;
 
-  (*layer_)(index[0], index[1]) += static_cast<float>(probability_utils::toLogOdds(probability));
+  (*layer_)(index[0], index[1]) = std::min((*layer_)(index[0], index[1]) + probability, config_.map.max_occupancy);
 }
 
 void LidarLayer::updateMapTimestamp(const ros::Time &stamp)

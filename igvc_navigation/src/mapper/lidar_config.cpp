@@ -13,7 +13,7 @@ LidarConfig::LidarConfig(const ros::NodeHandle& parent_nh)
   assertions::getParam(nh, "free_topic", free_topic);
 
   assertions::getParam(nh, "sensor_model/scan_hit", scan_hit);
-  // no log odds since conversion is done during markScanHit since its a function of distance
+  scan_hit = probability_utils::toLogOdds(scan_hit);
 
   assertions::getParam(nh, "sensor_model/scan_miss", scan_miss);
   scan_miss = probability_utils::toLogOdds(1.0 - scan_miss);  // It's a miss, so 1 - hit
