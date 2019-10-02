@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<!-- map.launch -->
+<launch>
+
+    <node name="differential_drive" pkg="igvc_navigation" type="differential_drive" output="screen" >
+        <param name="axle_length" value="0.52"/>
+    </node>
+
+</launch>
