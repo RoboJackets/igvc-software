@@ -1,0 +1,13 @@
+TebLocalPlannerROS:
+
+  odom_topic: odom
+  map_frame: /odom
+
+  max_vel_x: 1.0
+  max_vel_x_backwards: 0.3
+  max_vel_theta: 0.6
+
+  acc_lim_x: 3.0
+  acc_lim_theta: 1.0
+
+  feasibility_check_no_poses: 0

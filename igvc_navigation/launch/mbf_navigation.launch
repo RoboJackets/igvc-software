@@ -10,7 +10,7 @@
         <param name="map_frame" value="odom" />
         <rosparam file="$(find igvc_navigation)/config/global_costmap_params.yaml" command="load" />
         <rosparam file="$(find igvc_navigation)/config/local_costmap_params.yaml" command="load" />
-        <rosparam file="$(find igvc_navigation)/config/base_local_planner_params.yaml" command="load" />
+        <rosparam file="$(find igvc_navigation)/config/teb_local_planner_params.yaml" command="load" />
         <rosparam file="$(find igvc_navigation)/config/planners.yaml" command="load" />
         <rosparam file="$(find igvc_navigation)/config/controllers.yaml" command="load" />
         <rosparam file="$(find igvc_navigation)/config/recovery_behaviors.yaml" command="load" />
