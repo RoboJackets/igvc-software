@@ -77,17 +77,17 @@ segmented_free_space:
 topics:
     lidar: "/velodyne_points"
     line_segmentation:
-        left: "/cam/left/semantic_segmentation"
-        center: "/cam/center/semantic_segmentation"
-        right: "/cam/right/semantic_segmentation"
+        left: "/cam/left/segmented/image"
+        center: "/cam/center/segmented/image"
+        right: "/cam/right/segmented/image"
     projected_line_pc:
         left: "/cam/left/semantic_segmentation_cloud"
         center: "/cam/center/semantic_segmentation_cloud"
         right: "/cam/right/semantic_segmentation_cloud"
     camera_info:
-        left: "/cam/left/camera_info"
-        center: "/cam/center/camera_info"
-        right: "/cam/right/camera_info"
+        left: "/cam/left/segmented/camera_info"
+        center: "/cam/center/segmented/camera_info"
+        right: "/cam/right/segmented/camera_info"
     camera_center: "/cam/center/image_raw/compressed"
 frames:
     camera:
