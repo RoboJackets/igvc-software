@@ -30,6 +30,14 @@ add_library(lidar_layer
 add_dependencies(lidar_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(lidar_layer ${catkin_LIBRARIES})
 
+add_library(line_layer
+    line_layer.cpp line_layer.h
+    line_layer_config.cpp line_layer_config.h
+    map_config.cpp map_config.h
+    camera_config.cpp camera_config.h)
+add_dependencies(line_layer ${catkin_EXPORTED_TARGETS})
+target_link_libraries(line_layer ${catkin_LIBRARIES})
+
 find_package(OpenMP)
 if (OpenMP_FOUND)
     target_link_libraries(mapper ${OpenMP_CXX_LIBRARIES})

@@ -2,6 +2,7 @@ local_costmap:
     global_frame: odom
     plugins:
         - {name: lidar_layer,     type: "lidar_layer::LidarLayer"}
+        - {name: line_layer,     type: "line_layer::LineLayer"}
         - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
     publish_frequency: 5.0
     robot_radius: 1.0
@@ -34,3 +35,20 @@ lidar_layer:
             scan_miss: 0.8
             free_miss: 0.7
             hit_exponential_coeff: 0.05
+line_layer:
+    map:
+        frame_id: "odom"
+        resolution: 0.2
+        length_x: 200
+        length_y: 200
+        occupied_threshold: 0.5
+        max_occupancy: 0.99
+        min_occupancy: 0.01
+        debug:
+            map_topic: "/mapper/debug/gridmap"
+    /cam/center:
+        topics:
+            raw_image_ns: "/raw"
+            raw_image: "/image"
+            segmented_image_ns: "/segmented"
+            segmented_image: "/image"

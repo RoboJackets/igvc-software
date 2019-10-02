@@ -3,7 +3,7 @@
 
 #include <ros/ros.h>
 
-namespace lidar_layer
+namespace map
 {
 class MapConfig
 {
@@ -26,6 +26,6 @@ public:
     std::string map_topic;
   } debug;
 };
-}  // namespace lidar_layer
+}  // namespace map
 
 #endif  // SRC_MAP_CONFIG_H
