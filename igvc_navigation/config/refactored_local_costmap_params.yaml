@@ -3,7 +3,6 @@ local_costmap:
     plugins:
         - {name: lidar_layer,     type: "lidar_layer::LidarLayer"}
         - {name: line_layer,     type: "line_layer::LineLayer"}
-        - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
     publish_frequency: 5.0
     robot_radius: 1.0
     width: 200
@@ -26,7 +25,7 @@ lidar_layer:
         max_occupancy: 0.99
         min_occupancy: 0.01
         debug:
-            map_topic: "/mapper/debug/gridmap"
+            map_topic: "/mapper/debug/lidar/gridmap"
     lidar:
         occupied_topic: "/lidar/occupied"
         free_topic: "/lidar/free"
@@ -45,10 +44,19 @@ line_layer:
         max_occupancy: 0.99
         min_occupancy: 0.01
         debug:
-            map_topic: "/mapper/debug/gridmap"
+            map_topic: "/mapper/debug/lines/gridmap"
     /cam/center:
         topics:
             raw_image_ns: "/raw"
             raw_image: "/image"
             segmented_image_ns: "/segmented"
             segmented_image: "/image"
+        probabilities:
+            miss: 0.7
+            hit: 0.7
+            miss_exponential_coeff: 0.05
+            hit_exponential_coeff: 0.05
+        debug:
+            line_topic: "/line_layer/debug/line"
+            nonline_topic: "/line_layer/debug/nonline"
+        max_distance: 10

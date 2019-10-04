@@ -13,6 +13,13 @@ public:
 
   std::string base_topic;
 
+  double max_distance;
+
+  double miss_exponential_coeff;
+  double miss;
+  double hit_exponential_coeff;
+  double hit;
+
   struct
   {
     std::string raw_image_ns;
@@ -20,6 +27,12 @@ public:
     std::string segmented_image_ns;
     std::string segmented_image;
   } topics;
+
+  struct
+  {
+    std::string line_topic;
+    std::string nonline_topic;
+  } debug;
 };
 }  // namespace line_layer
 
