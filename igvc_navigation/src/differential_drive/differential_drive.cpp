@@ -12,8 +12,6 @@ DifferentialDrive::DifferentialDrive()
   assertions::param(pNh, "max_vel", max_vel_, 3.0);
   ros::Subscriber mbf_twist = nh.subscribe("/cmd_vel", 1, &DifferentialDrive::twistToVelocity, this);
   vel_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
-
-  ros::spin();
 }
 
 void DifferentialDrive::twistToVelocity(geometry_msgs::Twist twist)
@@ -41,4 +39,5 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "differential_drive");
   DifferentialDrive differential_drive;
+  ros::spin();
 }

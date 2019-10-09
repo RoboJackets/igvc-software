@@ -13,7 +13,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <mbf_msgs/MoveBaseAction.h>
 
-typedef actionlib::SimpleActionClient<mbf_msgs::MoveBaseAction> MoveBaseClient;
+using MoveBaseClient = actionlib::SimpleActionClient<mbf_msgs::MoveBaseAction>;
 
 class ActionServer
 {

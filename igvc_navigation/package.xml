@@ -52,7 +52,7 @@
   <depend>mbf_msgs</depend>
 
   <build_depend>cv_bridge</build_depend>
-  <build_depend>pcl_ros</build_depend>a
+  <build_depend>pcl_ros</build_depend>
   <build_depend>tf_conversions</build_depend>
   <build_depend>igvc_utils</build_depend>
   <build_depend>octomap</build_depend>
