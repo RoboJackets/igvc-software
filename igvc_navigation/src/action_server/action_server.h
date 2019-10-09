@@ -8,14 +8,15 @@
 #ifndef ACTIONSERVER_H
 #define ACTIONSERVER_H
 
-#include <mbf_msgs/MoveBaseAction.h>
-#include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/PointStamped.h>
 #include <actionlib/client/simple_action_client.h>
+#include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <mbf_msgs/MoveBaseAction.h>
 
 typedef actionlib::SimpleActionClient<mbf_msgs::MoveBaseAction> MoveBaseClient;
 
-class ActionServer {
+class ActionServer
+{
 public:
   ActionServer();
 

@@ -7,10 +7,11 @@
 #ifndef DIFFERENTIALDRIVE_H
 #define DIFFERENTIALDRIVE_H
 
-#include <igvc_msgs/velocity_pair.h>
 #include <geometry_msgs/Twist.h>
+#include <igvc_msgs/velocity_pair.h>
 
-class DifferentialDrive {
+class DifferentialDrive
+{
 public:
   DifferentialDrive();
 
