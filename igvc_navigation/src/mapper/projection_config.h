@@ -7,7 +7,7 @@ namespace line_layer
 {
 class ProjectionConfig
 {
- public:
+public:
   ProjectionConfig(const ros::NodeHandle& parent_nh, double resolution);
 
   double length_x;
@@ -20,4 +20,4 @@ class ProjectionConfig
 };
 }  // namespace line_layer
 
-#endif //SRC_PROJECTION_CONFIG_H
+#endif  // SRC_PROJECTION_CONFIG_H

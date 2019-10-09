@@ -8,7 +8,6 @@
 #include <opencv2/videoio.hpp>
 #include <unordered_set>
 #include "camera_config.h"
-#include "projection_config.h"
 
 PLUGINLIB_EXPORT_CLASS(line_layer::LineLayer, costmap_2d::Layer)
 
@@ -26,6 +25,8 @@ LineLayer::LineLayer()
   initPubSub();
   costmap_2d_ = { static_cast<unsigned int>(map_.getSize()[0]), static_cast<unsigned int>(map_.getSize()[1]),
                   map_.getResolution(), map_.getPosition()[0], map_.getPosition()[1] };
+  pinhole_models_ = std::vector<image_geometry::PinholeCameraModel>(config_.cameras.size());
+  cached_rays_ = std::vector<std::vector<Eigen::Vector3d>>(config_.cameras.size());
 }
 
 void LineLayer::initGridmap()
@@ -46,7 +47,7 @@ void LineLayer::initPubSub()
   gridmap_pub_ = nh_.advertise<grid_map_msgs::GridMap>(config_.map.debug.map_topic, 1);
   for (size_t i = 0; i < config_.cameras.size(); i++)
   {
-    const auto& camera = config_.cameras[i];
+    const auto &camera = config_.cameras[i];
     debug_publishers_.emplace_back(
         DebugPublishers{ nh_.advertise<pcl::PointCloud<pcl::PointXYZ>>(camera.debug.line_topic, 1),
                          nh_.advertise<pcl::PointCloud<pcl::PointXYZ>>(camera.debug.nonline_topic, 1) });
@@ -66,7 +67,7 @@ void LineLayer::initPubSub()
 
     synchronizers_.emplace_back(std::make_unique<RawSegmentedSynchronizer>(
         *camera_subscribers_.back().raw_image_sub, *camera_subscribers_.back().raw_info_sub,
-        *camera_subscribers_.back().segmented_image_sub, *camera_subscribers_.back().segmented_info_sub, 10 ));
+        *camera_subscribers_.back().segmented_image_sub, *camera_subscribers_.back().segmented_info_sub, 10));
     synchronizers_.back()->registerCallback(boost::bind(&LineLayer::imageSyncedCallback, this, _1, _2, _3, _4, i));
   }
 }
@@ -111,17 +112,20 @@ void LineLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int /*min_i*/, i
 void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
                                     const sensor_msgs::CameraInfoConstPtr &raw_info,
                                     const sensor_msgs::ImageConstPtr &segmented_image,
-                                    const sensor_msgs::CameraInfoConstPtr &segmented_info,
-                                    size_t camera_index)
+                                    const sensor_msgs::CameraInfoConstPtr &segmented_info, size_t camera_index)
 {
-  ensurePinholeModelInitialized(*segmented_info);
+  ensurePinholeModelInitialized(*segmented_info, camera_index);
+  if (cached_rays_[camera_index].empty())
+  {
+    calculateCachedRays(*segmented_info, camera_index);
+  }
 
   geometry_msgs::TransformStamped camera_to_odom =
       getTransformToCamera(raw_image->header.frame_id, raw_image->header.stamp);
 
   cv::Mat segmented_mat = convertToMat(segmented_image);
 
-  projectImage(segmented_mat, camera_to_odom);
+  projectImage(segmented_mat, camera_to_odom, camera_index);
   cleanupProjections();
   insertProjectionsIntoMap(camera_to_odom, config_.cameras[camera_index]);
 
@@ -129,12 +133,31 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
   debugPublishPC(debug_publishers_[camera_index].debug_nonline_pub_, freespace_buffer_, camera_to_odom);
 }
 
-void LineLayer::ensurePinholeModelInitialized(const sensor_msgs::CameraInfo &segmented_info)
+void LineLayer::ensurePinholeModelInitialized(const sensor_msgs::CameraInfo &segmented_info, size_t camera_index)
 {
-  if (!model_initialized_)
+  if (!pinhole_models_[camera_index].initialized())
   {
-    pinhole_model_.fromCameraInfo(segmented_info);
-    model_initialized_ = true;
+    pinhole_models_[camera_index].fromCameraInfo(segmented_info);
+  }
+}
+
+void LineLayer::calculateCachedRays(const sensor_msgs::CameraInfo &info, size_t camera_index)
+{
+  std::vector<Eigen::Vector3d> &rays = cached_rays_[camera_index];
+  const int rows = info.height;
+  const int cols = info.width;
+  rays.reserve(rows * cols);
+
+  for (int i = 0; i < rows; i++)
+  {
+    for (int j = 0; j < cols; j++)
+    {
+      // TODO: Mask using barrels
+      cv::Point2d pixel_point(j, i);
+      cv::Point3d ray = pinhole_models_[camera_index].projectPixelTo3dRay(pixel_point);
+      Eigen::Vector3d eigen_ray{ ray.x, ray.y, ray.z };
+      rays.emplace_back(eigen_ray);
+    }
   }
 }
 
@@ -158,7 +181,8 @@ cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image) const
   return cv_bridge_image->image;
 }
 
-void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::TransformStamped &camera_to_odom)
+void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::TransformStamped &camera_to_odom,
+                             size_t camera_idx)
 {
   line_buffer_.setTo(cv::Scalar(0.0));
   freespace_buffer_.setTo(cv::Scalar(0.0));
@@ -181,10 +205,8 @@ void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::
     for (int j = 0; j < cols; j++)
     {
       // TODO: Mask using barrels
-      cv::Point2d pixel_point(j, i);
-      cv::Point3d ray = pinhole_model_.projectPixelTo3dRay(pixel_point);
-      Eigen::Vector3d eigen_ray{ ray.x, ray.y, ray.z };
-      eigen_ray = rotation * eigen_ray;
+      const int ray_idx = i * cols + j;
+      Eigen::Vector3d eigen_ray = rotation * cached_rays_[camera_idx][ray_idx];
 
       double scale = -translation[2] / eigen_ray[2];
       Eigen::Vector3f projected_point = (scale * eigen_ray + translation).cast<float>();
@@ -223,7 +245,7 @@ grid_map::Index LineLayer::calculateBufferIndex(const Eigen::Vector3f &point, co
   return { buffer_x, buffer_y };
 }
 
-void LineLayer::markEmpty(const grid_map::Index &index, double distance, double angle, const CameraConfig& config)
+void LineLayer::markEmpty(const grid_map::Index &index, double distance, double angle, const CameraConfig &config)
 {
   const auto distance_coeff = config.miss_exponential_coeff;
   const auto angle_coeff = config.miss_angle_exponential_coeff;
@@ -232,7 +254,7 @@ void LineLayer::markEmpty(const grid_map::Index &index, double distance, double 
   (*layer_)(index[0], index[1]) = std::max((*layer_)(index[0], index[1]) + probability, config_.map.min_occupancy);
 }
 
-void LineLayer::markHit(const grid_map::Index &index, double distance, const CameraConfig& config)
+void LineLayer::markHit(const grid_map::Index &index, double distance, const CameraConfig &config)
 {
   const auto coeff = config.hit_exponential_coeff;
   const double probability = std::exp(-coeff * distance) * config.hit;
@@ -301,7 +323,8 @@ void LineLayer::cleanupProjections()
   }
 }
 
-void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &camera_to_odom, const CameraConfig& config)
+void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &camera_to_odom,
+                                         const CameraConfig &config)
 {
   grid_map::Index camera_index;  // Center of line_buffer_ and freespace_buffer_
   const float camera_x = camera_to_odom.transform.translation.x;

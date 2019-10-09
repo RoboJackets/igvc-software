@@ -78,12 +78,12 @@ private:
   cv::Mat freespace_buffer_;  // cv::Mat centered at current position for use as a "buffer" for freespace
   cv::Mat not_lines_;         // not line_buffer_
 
-  image_geometry::PinholeCameraModel pinhole_model_;
-
-  bool model_initialized_ = false;
+  std::vector<image_geometry::PinholeCameraModel> pinhole_models_;
+  std::vector<std::vector<Eigen::Vector3d>> cached_rays_;
 
   ros::Publisher gridmap_pub_;
-  struct DebugPublishers {
+  struct DebugPublishers
+  {
     ros::Publisher debug_line_pub_;
     ros::Publisher debug_nonline_pub_;
   };
@@ -110,11 +110,14 @@ private:
                            const sensor_msgs::ImageConstPtr& segmented_image,
                            const sensor_msgs::CameraInfoConstPtr& segmented_info, size_t camera_index);
 
-  void ensurePinholeModelInitialized(const sensor_msgs::CameraInfo& segmented_info);
+  void ensurePinholeModelInitialized(const sensor_msgs::CameraInfo& segmented_info, size_t camera_index);
+  void calculateCachedRays(const sensor_msgs::CameraInfo& info, size_t camera_index);
+
   geometry_msgs::TransformStamped getTransformToCamera(const std::string& frame, const ros::Time& stamp) const;
   cv::Mat convertToMat(const sensor_msgs::ImageConstPtr& image) const;
 
-  void projectImage(const cv::Mat& segmented_mat, const geometry_msgs::TransformStamped& camera_to_odom);
+  void projectImage(const cv::Mat& segmented_mat, const geometry_msgs::TransformStamped& camera_to_odom,
+                    size_t camera_idx);
   void cleanupProjections();
   void insertProjectionsIntoMap(const geometry_msgs::TransformStamped& camera_to_odom, const CameraConfig& config);
 

@@ -1,11 +1,11 @@
-#include <parameter_assertions/assertions.h>
 #include "projection_config.h"
+#include <parameter_assertions/assertions.h>
 
 namespace line_layer
 {
 ProjectionConfig::ProjectionConfig(const ros::NodeHandle &parent_nh, double resolution)
 {
-  ros::NodeHandle nh{ parent_nh, "projection"};
+  ros::NodeHandle nh{ parent_nh, "projection" };
 
   assertions::getParam(nh, "length_x", length_x);
   assertions::getParam(nh, "length_y", length_y);
