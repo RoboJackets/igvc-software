@@ -4,7 +4,7 @@
         <param name="tf_timeout" value="1.5"/>
         <param name="planner_max_retries" value="3"/>
         <param name="controller_frequency" value="5.0" />
-        <param name="controller_patience" value="3.0" />
+        <param name="controller_patience" value="1.0" />
         <param name="robot_frame" value="base_link" />
         <param name="global_frame" value="odom" />
         <param name="map_frame" value="odom" />

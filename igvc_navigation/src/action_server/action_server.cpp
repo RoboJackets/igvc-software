@@ -1,4 +1,6 @@
 #include <ros/ros.h>
+#include <tf/LinearMath/Quaternion.h>
+#include <tf/transform_datatypes.h>
 
 #include "action_server.h"
 
@@ -31,8 +33,14 @@ void ActionServer::actionCallbackPoint(geometry_msgs::PointStamped point) {
   goal.target_pose.header = point.header;
   goal.target_pose.pose.position = point.point;
 
+  tf::Quaternion quat_tf;
+  geometry_msgs::Quaternion quat_msg;
+  quat_tf.setRPY(0,0,1);
+  tf::quaternionTFToMsg(quat_tf, quat_msg);
+  goal.target_pose.pose.orientation = quat_msg;
+
   ROS_INFO("Sending goal from waypoint");
-  client.sendGoal(goal);
+  client.sendGoalAndWait(goal);
 }
 
 int main(int argc, char** argv) {
