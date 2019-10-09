@@ -1,3 +1,3 @@
 controllers:
-    - name: 'dwa'
-      type: 'dwa_local_planner/DWAPlannerROS'
+    - name: 'TebLocalPlannerROS'
+      type: 'teb_local_planner/TebLocalPlannerROS'
