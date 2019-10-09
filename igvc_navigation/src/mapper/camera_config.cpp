@@ -13,8 +13,6 @@ CameraConfig::CameraConfig(const ros::NodeHandle& parent_nh, const std::string& 
   assertions::getParam(nh, "topics/segmented_image_ns", topics.segmented_image_ns);
   assertions::getParam(nh, "topics/segmented_image", topics.segmented_image);
 
-  assertions::getParam(nh, "max_distance", max_distance);
-
   assertions::getParam(nh, "probabilities/miss", miss);
   miss = probability_utils::toLogOdds(1.0 - miss);  // It's a miss, so 1 - hit
   assertions::getParam(nh, "probabilities/hit", hit);

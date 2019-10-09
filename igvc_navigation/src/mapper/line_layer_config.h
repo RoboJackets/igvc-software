@@ -16,7 +16,7 @@ public:
   ros::NodeHandle nh;
 
   map::MapConfig map;
-  CameraConfig center;
+  std::vector<CameraConfig> cameras;
   ProjectionConfig projection;
 };
 }  // namespace line_layer

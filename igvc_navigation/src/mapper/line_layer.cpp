@@ -44,30 +44,31 @@ void LineLayer::initGridmap()
 void LineLayer::initPubSub()
 {
   gridmap_pub_ = nh_.advertise<grid_map_msgs::GridMap>(config_.map.debug.map_topic, 1);
-  debug_line_pub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ>>(config_.center.debug.line_topic, 1);
-  debug_line_cv_pub_ = nh_.advertise<sensor_msgs::Image>("line_layer/debug/line_cv", 1);
-  debug_nonline_pub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ>>(config_.center.debug.nonline_topic, 1);
-  debug_nonline_cv_pub_ = nh_.advertise<sensor_msgs::Image>("line_layer/debug/nonline_cv", 1);
+  for (size_t i = 0; i < config_.cameras.size(); i++)
+  {
+    const auto& camera = config_.cameras[i];
+    debug_publishers_.emplace_back(
+        DebugPublishers{ nh_.advertise<pcl::PointCloud<pcl::PointXYZ>>(camera.debug.line_topic, 1),
+                         nh_.advertise<pcl::PointCloud<pcl::PointXYZ>>(camera.debug.nonline_topic, 1) });
 
-  const auto &camera_config = config_.center;
-  const auto &base_topic = camera_config.base_topic;
-  std::string raw_image_topic = base_topic + camera_config.topics.raw_image_ns + camera_config.topics.raw_image;
-  std::string raw_info_topic = base_topic + camera_config.topics.raw_image_ns + "/camera_info";
-  std::string segmented_image_topic =
-      base_topic + camera_config.topics.segmented_image_ns + camera_config.topics.segmented_image;
-  std::string segmented_info_topic = base_topic + camera_config.topics.segmented_image_ns + "/camera_info";
+    const auto &base_topic = camera.base_topic;
+    std::string raw_image_topic = base_topic + camera.topics.raw_image_ns + camera.topics.raw_image;
+    std::string raw_info_topic = base_topic + camera.topics.raw_image_ns + "/camera_info";
+    std::string segmented_image_topic = base_topic + camera.topics.segmented_image_ns + camera.topics.segmented_image;
+    std::string segmented_info_topic = base_topic + camera.topics.segmented_image_ns + "/camera_info";
 
-  center_subscribers_ = {
-    std::make_unique<ImageSubscriber>(nh_, raw_image_topic, 1),
-    std::make_unique<CameraInfoSubscriber>(nh_, raw_info_topic, 1),
-    std::make_unique<ImageSubscriber>(nh_, segmented_image_topic, 1),
-    std::make_unique<CameraInfoSubscriber>(nh_, segmented_info_topic, 1),
-  };
+    camera_subscribers_.emplace_back(CameraSubscribers{
+        std::make_unique<ImageSubscriber>(nh_, raw_image_topic, 1),
+        std::make_unique<CameraInfoSubscriber>(nh_, raw_info_topic, 1),
+        std::make_unique<ImageSubscriber>(nh_, segmented_image_topic, 1),
+        std::make_unique<CameraInfoSubscriber>(nh_, segmented_info_topic, 1),
+    });
 
-  center_synchronizer_ = std::make_unique<RawSegmentedSynchronizer>(
-      *center_subscribers_.raw_image_sub, *center_subscribers_.raw_info_sub, *center_subscribers_.segmented_image_sub,
-      *center_subscribers_.segmented_info_sub, 10);
-  center_synchronizer_->registerCallback(boost::bind(&LineLayer::imageSyncedCallback, this, _1, _2, _3, _4));
+    synchronizers_.emplace_back(std::make_unique<RawSegmentedSynchronizer>(
+        *camera_subscribers_.back().raw_image_sub, *camera_subscribers_.back().raw_info_sub,
+        *camera_subscribers_.back().segmented_image_sub, *camera_subscribers_.back().segmented_info_sub, 10 ));
+    synchronizers_.back()->registerCallback(boost::bind(&LineLayer::imageSyncedCallback, this, _1, _2, _3, _4, i));
+  }
 }
 
 void LineLayer::onInitialize()
@@ -110,7 +111,8 @@ void LineLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int /*min_i*/, i
 void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
                                     const sensor_msgs::CameraInfoConstPtr &raw_info,
                                     const sensor_msgs::ImageConstPtr &segmented_image,
-                                    const sensor_msgs::CameraInfoConstPtr &segmented_info)
+                                    const sensor_msgs::CameraInfoConstPtr &segmented_info,
+                                    size_t camera_index)
 {
   ensurePinholeModelInitialized(*segmented_info);
 
@@ -121,35 +123,10 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
 
   projectImage(segmented_mat, camera_to_odom);
   cleanupProjections();
-  insertProjectionsIntoMap(camera_to_odom);
+  insertProjectionsIntoMap(camera_to_odom, config_.cameras[camera_index]);
 
-  //  boundRadius(line, camera_to_odom.transform);
-  //  boundRadius(nonline, camera_to_odom.transform);
-  //
-  //  insertProjectedPointclouds(line, nonline, camera_to_odom.transform);
-  //
-  //  line.header.frame_id = "odom";
-  //  line.header.stamp = pcl_conversions::toPCL(raw_image->header.stamp);
-  //  nonline.header.frame_id = "odom";
-  //  nonline.header.stamp = line.header.stamp;
-  //
-  cv_bridge::CvImage line_msg;
-  cv_bridge::CvImage nonline_msg;
-  line_msg.encoding = sensor_msgs::image_encodings::TYPE_8UC1;
-  nonline_msg.encoding = sensor_msgs::image_encodings::TYPE_8UC1;
-  line_msg.image = line_buffer_;
-  nonline_msg.image = freespace_buffer_;
-
-  debug_line_cv_pub_.publish(line_msg);
-  debug_nonline_cv_pub_.publish(nonline_msg);
-
-  debugPublishPC(debug_line_pub_, line_buffer_, camera_to_odom);
-  debugPublishPC(debug_nonline_pub_, freespace_buffer_, camera_to_odom);
-  //  debug_line_pub_.publish(line);
-  //  debug_nonline_pub_.publish(nonline);
-
-  //  ROS_INFO_STREAM("Got synced callback! raw: (" << raw_info->width << ", " << raw_info->height << "), segmented: "
-  //                                                << segmented_info->width << ", (" << segmented_info->height << ")");
+  debugPublishPC(debug_publishers_[camera_index].debug_line_pub_, line_buffer_, camera_to_odom);
+  debugPublishPC(debug_publishers_[camera_index].debug_nonline_pub_, freespace_buffer_, camera_to_odom);
 }
 
 void LineLayer::ensurePinholeModelInitialized(const sensor_msgs::CameraInfo &segmented_info)
@@ -246,19 +223,19 @@ grid_map::Index LineLayer::calculateBufferIndex(const Eigen::Vector3f &point, co
   return { buffer_x, buffer_y };
 }
 
-void LineLayer::markEmpty(const grid_map::Index &index, double distance, double angle)
+void LineLayer::markEmpty(const grid_map::Index &index, double distance, double angle, const CameraConfig& config)
 {
-  const auto distance_coeff = config_.center.miss_exponential_coeff;
-  const auto angle_coeff = config_.center.miss_angle_exponential_coeff;
-  const double probability = std::exp(-distance_coeff * distance - angle_coeff * std::abs(angle)) * config_.center.miss;
+  const auto distance_coeff = config.miss_exponential_coeff;
+  const auto angle_coeff = config.miss_angle_exponential_coeff;
+  const double probability = std::exp(-distance_coeff * distance - angle_coeff * std::abs(angle)) * config.miss;
 
   (*layer_)(index[0], index[1]) = std::max((*layer_)(index[0], index[1]) + probability, config_.map.min_occupancy);
 }
 
-void LineLayer::markHit(const grid_map::Index &index, double distance)
+void LineLayer::markHit(const grid_map::Index &index, double distance, const CameraConfig& config)
 {
-  const auto coeff = config_.center.hit_exponential_coeff;
-  const double probability = std::exp(-coeff * distance) * config_.center.hit;
+  const auto coeff = config.hit_exponential_coeff;
+  const double probability = std::exp(-coeff * distance) * config.hit;
 
   (*layer_)(index[0], index[1]) = std::min((*layer_)(index[0], index[1]) + probability, config_.map.max_occupancy);
 }
@@ -324,7 +301,7 @@ void LineLayer::cleanupProjections()
   }
 }
 
-void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &camera_to_odom)
+void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &camera_to_odom, const CameraConfig& config)
 {
   grid_map::Index camera_index;  // Center of line_buffer_ and freespace_buffer_
   const float camera_x = camera_to_odom.transform.translation.x;
@@ -353,7 +330,7 @@ void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &
         const auto dx = position[0] - camera_x;
         const auto dy = position[1] - camera_y;
         double distance = dx * dx + dy * dy;
-        markHit(map_index, distance);
+        markHit(map_index, distance, config);
       }
     }
   }
@@ -373,7 +350,7 @@ void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &
         const auto dy = position[1] - camera_y;
         const double distance = dx * dx + dy * dy;
         const double angle = angles::normalize_angle(camera_heading - std::atan2(dy, dx));
-        markEmpty(map_index, distance, angle);
+        markEmpty(map_index, distance, angle, config);
       }
     }
   }

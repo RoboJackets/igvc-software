@@ -13,8 +13,6 @@ public:
 
   std::string base_topic;
 
-  double max_distance;
-
   double miss_exponential_coeff;
   double miss_angle_exponential_coeff;
   double miss;

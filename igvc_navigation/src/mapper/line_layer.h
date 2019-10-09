@@ -83,10 +83,11 @@ private:
   bool model_initialized_ = false;
 
   ros::Publisher gridmap_pub_;
-  ros::Publisher debug_line_pub_;
-  ros::Publisher debug_nonline_pub_;
-  ros::Publisher debug_line_cv_pub_;
-  ros::Publisher debug_nonline_cv_pub_;
+  struct DebugPublishers {
+    ros::Publisher debug_line_pub_;
+    ros::Publisher debug_nonline_pub_;
+  };
+  std::vector<DebugPublishers> debug_publishers_;
 
   struct CameraSubscribers
   {
@@ -96,10 +97,9 @@ private:
     std::unique_ptr<CameraInfoSubscriber> segmented_info_sub;
   };
 
-  CameraSubscribers center_subscribers_;
+  std::vector<CameraSubscribers> camera_subscribers_;
 
-  //  std::unordered_set<grid_map::Index> last_occupied_cells_{};
-  std::unique_ptr<RawSegmentedSynchronizer> center_synchronizer_{};
+  std::vector<std::unique_ptr<RawSegmentedSynchronizer>> synchronizers_;
 
   costmap_2d::Costmap2D costmap_2d_{};
 
@@ -108,7 +108,7 @@ private:
 
   void imageSyncedCallback(const sensor_msgs::ImageConstPtr& raw_image, const sensor_msgs::CameraInfoConstPtr& raw_info,
                            const sensor_msgs::ImageConstPtr& segmented_image,
-                           const sensor_msgs::CameraInfoConstPtr& segmented_info);
+                           const sensor_msgs::CameraInfoConstPtr& segmented_info, size_t camera_index);
 
   void ensurePinholeModelInitialized(const sensor_msgs::CameraInfo& segmented_info);
   geometry_msgs::TransformStamped getTransformToCamera(const std::string& frame, const ros::Time& stamp) const;
@@ -116,7 +116,7 @@ private:
 
   void projectImage(const cv::Mat& segmented_mat, const geometry_msgs::TransformStamped& camera_to_odom);
   void cleanupProjections();
-  void insertProjectionsIntoMap(const geometry_msgs::TransformStamped& camera_to_odom);
+  void insertProjectionsIntoMap(const geometry_msgs::TransformStamped& camera_to_odom, const CameraConfig& config);
 
   grid_map::Index calculateBufferIndex(const Eigen::Vector3f& point, const grid_map::Index& camera_index) const;
 
@@ -126,8 +126,8 @@ private:
   void transferToCostmap();
   void debugPublishMap();
 
-  void markEmpty(const grid_map::Index& index, double distance, double angle);
-  void markHit(const grid_map::Index& index, double distance);
+  void markEmpty(const grid_map::Index& index, double distance, double angle, const CameraConfig& config);
+  void markHit(const grid_map::Index& index, double distance, const CameraConfig& config);
 };
 }  // namespace line_layer
 

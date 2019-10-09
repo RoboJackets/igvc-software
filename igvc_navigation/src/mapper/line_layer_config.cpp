@@ -3,7 +3,10 @@
 namespace line_layer
 {
 LineLayerConfig::LineLayerConfig(const ros::NodeHandle &parent_nh)
-  : nh{ parent_nh, "line_layer" }, map{ nh }, center{ nh, "/cam/center" }, projection{ nh, map.resolution }
+  : nh{ parent_nh, "line_layer" }
+  , map{ nh }
+  , cameras{ { nh, "/cam/center" }, { nh, "/cam/left" }, { nh, "/cam/right" } }
+  , projection{ nh, map.resolution }
 {
 }
 }  // namespace line_layer
