@@ -74,6 +74,9 @@ private:
   grid_map::GridMap map_;
   grid_map::Matrix* layer_{};
   LineLayerConfig config_;
+  cv::Mat line_buffer_;       // cv::Mat centered at current position for use as a "buffer" for lines
+  cv::Mat freespace_buffer_;  // cv::Mat centered at current position for use as a "buffer" for freespace
+  cv::Mat not_lines_;         // not line_buffer_
 
   image_geometry::PinholeCameraModel pinhole_model_;
 
@@ -82,6 +85,8 @@ private:
   ros::Publisher gridmap_pub_;
   ros::Publisher debug_line_pub_;
   ros::Publisher debug_nonline_pub_;
+  ros::Publisher debug_line_cv_pub_;
+  ros::Publisher debug_nonline_cv_pub_;
 
   struct CameraSubscribers
   {
@@ -109,20 +114,20 @@ private:
   geometry_msgs::TransformStamped getTransformToCamera(const std::string& frame, const ros::Time& stamp) const;
   cv::Mat convertToMat(const sensor_msgs::ImageConstPtr& image) const;
 
-  ProjectionResult projectImage(const cv::Mat& segmented_mat,
-                                const geometry_msgs::TransformStamped& camera_to_odom) const;
+  void projectImage(const cv::Mat& segmented_mat, const geometry_msgs::TransformStamped& camera_to_odom);
+  void cleanupProjections();
+  void insertProjectionsIntoMap(const geometry_msgs::TransformStamped& camera_to_odom);
+
+  grid_map::Index calculateBufferIndex(const Eigen::Vector3f& point, const grid_map::Index& camera_index) const;
+
+  void debugPublishPC(ros::Publisher& pub, const cv::Mat& mat, geometry_msgs::TransformStamped& camera_to_odom);
 
   void updateProbabilityLayer();
   void transferToCostmap();
   void debugPublishMap();
 
-  void insertProjectedPointclouds(const PointCloud& line, const PointCloud& nonline,
-                                  const geometry_msgs::Transform& camera_pos);
-
-  void markEmpty(const grid_map::Index& index, double distance);
+  void markEmpty(const grid_map::Index& index, double distance, double angle);
   void markHit(const grid_map::Index& index, double distance);
-
-  void boundRadius(PointCloud& pc, const geometry_msgs::Transform& camera_pos) const;
 };
 }  // namespace line_layer
 

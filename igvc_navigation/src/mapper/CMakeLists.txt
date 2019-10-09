@@ -34,7 +34,8 @@ add_library(line_layer
     line_layer.cpp line_layer.h
     line_layer_config.cpp line_layer_config.h
     map_config.cpp map_config.h
-    camera_config.cpp camera_config.h)
+    camera_config.cpp camera_config.h
+    projection_config.cpp projection_config.h)
 add_dependencies(line_layer ${catkin_EXPORTED_TARGETS})
 target_link_libraries(line_layer ${catkin_LIBRARIES})
 

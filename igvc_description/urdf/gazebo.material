@@ -27,18 +27,13 @@ material Gazebo/Texture_qualification
   {
     pass
     {
-      ambient 0.1 0.1 0.1 0.1
-      diffuse 0.8 0.8 0.8 1.0
-      specular 0.01 0.01 0.01 1.0 2.0
-
       texture_unit
       {
-        colour_op_ex source1 src_manual src_current .3 0 .5
-        filtering trilinear
-        scale .01 .01
+        colour_op_ex source1 src_manual src_current .9 0 .8
       }
       texture_unit
       {
+        mipmap_bias -4
         texture textures/qualification_course.png
         colour_op alpha_blend
       }

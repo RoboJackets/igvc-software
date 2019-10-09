@@ -20,6 +20,7 @@ CameraConfig::CameraConfig(const ros::NodeHandle& parent_nh, const std::string& 
   assertions::getParam(nh, "probabilities/hit", hit);
   hit = probability_utils::toLogOdds(hit);
   assertions::getParam(nh, "probabilities/miss_exponential_coeff", miss_exponential_coeff);
+  assertions::getParam(nh, "probabilities/miss_angle_exponential_coeff", miss_angle_exponential_coeff);
   assertions::getParam(nh, "probabilities/hit_exponential_coeff", hit_exponential_coeff);
 
   assertions::getParam(nh, "debug/line_topic", debug.line_topic);

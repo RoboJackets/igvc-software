@@ -1,16 +1,26 @@
 #include "line_layer.h"
+#include <angles/angles.h>
 #include <cv_bridge/cv_bridge.h>
 #include <mapper/probability_utils.h>
 #include <pluginlib/class_list_macros.h>
+#include <tf2/utils.h>
 #include <tf2_eigen/tf2_eigen.h>
+#include <opencv2/videoio.hpp>
 #include <unordered_set>
 #include "camera_config.h"
+#include "projection_config.h"
 
 PLUGINLIB_EXPORT_CLASS(line_layer::LineLayer, costmap_2d::Layer)
 
 namespace line_layer
 {
-LineLayer::LineLayer() : private_nh_{ "~" }, map_{ { logodds_layer, probability_layer } }, config_{ private_nh_ }
+LineLayer::LineLayer()
+  : private_nh_{ "~" }
+  , map_{ { logodds_layer, probability_layer } }
+  , config_{ private_nh_ }
+  , line_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
+  , freespace_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
+  , not_lines_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
 {
   initGridmap();
   initPubSub();
@@ -35,7 +45,9 @@ void LineLayer::initPubSub()
 {
   gridmap_pub_ = nh_.advertise<grid_map_msgs::GridMap>(config_.map.debug.map_topic, 1);
   debug_line_pub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ>>(config_.center.debug.line_topic, 1);
+  debug_line_cv_pub_ = nh_.advertise<sensor_msgs::Image>("line_layer/debug/line_cv", 1);
   debug_nonline_pub_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ>>(config_.center.debug.nonline_topic, 1);
+  debug_nonline_cv_pub_ = nh_.advertise<sensor_msgs::Image>("line_layer/debug/nonline_cv", 1);
 
   const auto &camera_config = config_.center;
   const auto &base_topic = camera_config.base_topic;
@@ -107,20 +119,34 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
 
   cv::Mat segmented_mat = convertToMat(segmented_image);
 
-  auto [line, nonline] = projectImage(segmented_mat, camera_to_odom);
+  projectImage(segmented_mat, camera_to_odom);
+  cleanupProjections();
+  insertProjectionsIntoMap(camera_to_odom);
 
-  boundRadius(line, camera_to_odom.transform);
-  boundRadius(nonline, camera_to_odom.transform);
+  //  boundRadius(line, camera_to_odom.transform);
+  //  boundRadius(nonline, camera_to_odom.transform);
+  //
+  //  insertProjectedPointclouds(line, nonline, camera_to_odom.transform);
+  //
+  //  line.header.frame_id = "odom";
+  //  line.header.stamp = pcl_conversions::toPCL(raw_image->header.stamp);
+  //  nonline.header.frame_id = "odom";
+  //  nonline.header.stamp = line.header.stamp;
+  //
+  cv_bridge::CvImage line_msg;
+  cv_bridge::CvImage nonline_msg;
+  line_msg.encoding = sensor_msgs::image_encodings::TYPE_8UC1;
+  nonline_msg.encoding = sensor_msgs::image_encodings::TYPE_8UC1;
+  line_msg.image = line_buffer_;
+  nonline_msg.image = freespace_buffer_;
 
-  insertProjectedPointclouds(line, nonline, camera_to_odom.transform);
+  debug_line_cv_pub_.publish(line_msg);
+  debug_nonline_cv_pub_.publish(nonline_msg);
 
-  line.header.frame_id = "odom";
-  line.header.stamp = pcl_conversions::toPCL(raw_image->header.stamp);
-  nonline.header.frame_id = "odom";
-  nonline.header.stamp = line.header.stamp;
-
-  debug_line_pub_.publish(line);
-  debug_nonline_pub_.publish(nonline);
+  debugPublishPC(debug_line_pub_, line_buffer_, camera_to_odom);
+  debugPublishPC(debug_nonline_pub_, freespace_buffer_, camera_to_odom);
+  //  debug_line_pub_.publish(line);
+  //  debug_nonline_pub_.publish(nonline);
 
   //  ROS_INFO_STREAM("Got synced callback! raw: (" << raw_info->width << ", " << raw_info->height << "), segmented: "
   //                                                << segmented_info->width << ", (" << segmented_info->height << ")");
@@ -155,11 +181,11 @@ cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image) const
   return cv_bridge_image->image;
 }
 
-LineLayer::ProjectionResult LineLayer::projectImage(const cv::Mat &segmented_mat,
-                                                    const geometry_msgs::TransformStamped &camera_to_odom) const
+void LineLayer::projectImage(const cv::Mat &segmented_mat, const geometry_msgs::TransformStamped &camera_to_odom)
 {
-  PointCloud line;
-  PointCloud nonline;
+  line_buffer_.setTo(cv::Scalar(0.0));
+  freespace_buffer_.setTo(cv::Scalar(0.0));
+  cv::Rect buffer_rect({}, line_buffer_.size());
 
   int rows = segmented_mat.rows;
   int cols = segmented_mat.cols;
@@ -168,6 +194,9 @@ LineLayer::ProjectionResult LineLayer::projectImage(const cv::Mat &segmented_mat
   const auto &translate_vector = camera_to_odom.transform.translation;
   Eigen::Vector3d translation{ translate_vector.x, translate_vector.y, translate_vector.z };
   tf2::convert(camera_to_odom.transform.rotation, rotation);
+
+  grid_map::Index camera_index;  // Center of line_buffer_ and freespace_buffer_
+  map_.getIndex({ translate_vector.x, translate_vector.y }, camera_index);
 
   for (int i = 0; i < rows; i++)
   {
@@ -184,74 +213,44 @@ LineLayer::ProjectionResult LineLayer::projectImage(const cv::Mat &segmented_mat
       Eigen::Vector3f projected_point = (scale * eigen_ray + translation).cast<float>();
 
       bool is_line = row_ptr[j] == 255u;
-      if (is_line)
+      grid_map::Index buffer_index = calculateBufferIndex(projected_point, camera_index);
+      if (buffer_rect.contains({ buffer_index[0], buffer_index[1] }))
       {
-        line.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(), projected_point.z()));
+        if (is_line)
+        {
+          line_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = 255u;
+          //        line.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
+          //        projected_point.z()));
+        }
+        else
+        {
+          freespace_buffer_.at<uchar>(buffer_index[0], buffer_index[1]) = 255u;
+          //        nonline.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(),
+          //        projected_point.z()));
+        }
       }
-      else
-      {
-        nonline.points.emplace_back(pcl::PointXYZ(projected_point.x(), projected_point.y(), projected_point.z()));
-      }
     }
-  }
-
-  return { line, nonline };
-}
-
-void LineLayer::insertProjectedPointclouds(const LineLayer::PointCloud &line, const LineLayer::PointCloud &nonline,
-                                           const geometry_msgs::Transform &camera_pos)
-{
-  std::unordered_set<IndexDistPair, index_dist_pair_hash, index_dist_pair_equal> nonline_indices;
-  nonline_indices.reserve(nonline.size());
-
-  for (const auto &point : nonline)
-  {
-    const grid_map::Position position{ point.x, point.y };
-    if (!map_.isInside(position))
-    {
-      continue;
-    }
-    const double dx = camera_pos.translation.x - point.x;
-    const double dy = camera_pos.translation.y - point.y;
-    const double dz = camera_pos.translation.z - point.z;
-
-    const double distance = std::hypot(dx, dy, dz);
-
-    grid_map::Index index;
-    map_.getIndex(position, index);
-    IndexDistPair pair{ index, distance };
-    nonline_indices.emplace(pair);
-  }
-
-  for (const auto &point : line)
-  {
-    const grid_map::Position position{ point.x, point.y };
-    if (!map_.isInside(position))
-    {
-      continue;
-    }
-    const double dx = camera_pos.translation.x - point.x;
-    const double dy = camera_pos.translation.y - point.y;
-    const double dz = camera_pos.translation.z - point.z;
-
-    const double distance = std::hypot(dx, dy, dz);
-
-    grid_map::Index index;
-    map_.getIndex(position, index);
-    nonline_indices.erase({ index, 0.0 });
-    markHit(index, distance);
-  }
-
-  for (const auto &pair : nonline_indices)
-  {
-    markEmpty(pair.index, pair.distance);
   }
 }
 
-void LineLayer::markEmpty(const grid_map::Index &index, double distance)
+grid_map::Index LineLayer::calculateBufferIndex(const Eigen::Vector3f &point, const grid_map::Index &camera_index) const
 {
-  const auto coeff = config_.center.miss_exponential_coeff;
-  const double probability = std::exp(-coeff * distance) * config_.center.miss;
+  grid_map::Index point_index;
+  map_.getIndex({ point[0], point[1] }, point_index);
+
+  int center_x = config_.projection.size_x / 2;
+  int center_y = config_.projection.size_y / 2;
+  int buffer_x = point_index[0] - camera_index[0] + center_x - 1;
+  int buffer_y = point_index[1] - camera_index[1] + center_y - 1;
+
+  return { buffer_x, buffer_y };
+}
+
+void LineLayer::markEmpty(const grid_map::Index &index, double distance, double angle)
+{
+  const auto distance_coeff = config_.center.miss_exponential_coeff;
+  const auto angle_coeff = config_.center.miss_angle_exponential_coeff;
+  const double probability = std::exp(-distance_coeff * distance - angle_coeff * std::abs(angle)) * config_.center.miss;
 
   (*layer_)(index[0], index[1]) = std::max((*layer_)(index[0], index[1]) + probability, config_.map.min_occupancy);
 }
@@ -271,10 +270,6 @@ void LineLayer::updateProbabilityLayer()
 
 void LineLayer::transferToCostmap()
 {
-  ROS_ASSERT(map_.getSize()[0] == static_cast<int>(costmap_2d_.getSizeInCellsX()));
-  ROS_ASSERT(map_.getSize()[1] == static_cast<int>(costmap_2d_.getSizeInCellsY()));
-  ROS_ASSERT(map_.getResolution() == costmap_2d_.getResolution());
-
   size_t num_cells = map_.getSize().prod();
 
   uchar *char_map = costmap_2d_.getCharMap();
@@ -308,23 +303,119 @@ void LineLayer::debugPublishMap()
   gridmap_pub_.publish(message);
 }
 
-void LineLayer::boundRadius(PointCloud &pc, const geometry_msgs::Transform &camera_pos) const
+void LineLayer::cleanupProjections()
 {
-  PointCloud bounded_pc;
-  bounded_pc.points.reserve(pc.size());
-  for (const auto &point : pc)
+  // Close lines
   {
-    double dx = point.x - camera_pos.translation.x;
-    double dy = point.y - camera_pos.translation.y;
-    double dz = point.z - camera_pos.translation.z;
-    double distance = std::hypot(dx, dy, dz);
-    if (distance <= config_.center.max_distance)
+    const auto size = config_.projection.line_closing_kernel_size;
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(2 * size + 1, 2 * size + 1));
+    cv::morphologyEx(line_buffer_, line_buffer_, cv::MORPH_CLOSE, kernel);
+  }
+  // Close freespace
+  {
+    const auto size = config_.projection.freespace_closing_kernel_size;
+    cv::Mat kernel = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(2 * size + 1, 2 * size + 1));
+    cv::morphologyEx(freespace_buffer_, freespace_buffer_, cv::MORPH_CLOSE, kernel);
+  }
+  // Remove lines from freespace
+  {
+    cv::bitwise_not(line_buffer_, not_lines_);
+    cv::bitwise_and(freespace_buffer_, not_lines_, freespace_buffer_);
+  }
+}
+
+void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &camera_to_odom)
+{
+  grid_map::Index camera_index;  // Center of line_buffer_ and freespace_buffer_
+  const float camera_x = camera_to_odom.transform.translation.x;
+  const float camera_y = camera_to_odom.transform.translation.y;
+  const double camera_heading =
+      tf2::getYaw(camera_to_odom.transform.rotation) + M_PI / 2.0;  // For some reason this is off by pi/2
+  map_.getIndex({ camera_x, camera_y }, camera_index);
+
+  const int center_x = config_.projection.size_x / 2;
+  const int center_y = config_.projection.size_y / 2;
+
+  const int rows = line_buffer_.rows;
+  const int cols = line_buffer_.cols;
+  for (int i = 0; i < rows; i++)
+  {
+    const auto *row_ptr = line_buffer_.ptr<uchar>(i);
+    for (int j = 0; j < cols; j++)
     {
-      bounded_pc.points.emplace_back(point);
+      if (row_ptr[j] == 255u)
+      {
+        const int map_x = camera_index[0] - center_x + 1 + i;
+        const int map_y = camera_index[1] - center_y + 1 + j;
+        grid_map::Index map_index{ map_x, map_y };
+        grid_map::Position position;
+        map_.getPosition(map_index, position);
+        const auto dx = position[0] - camera_x;
+        const auto dy = position[1] - camera_y;
+        double distance = dx * dx + dy * dy;
+        markHit(map_index, distance);
+      }
+    }
+  }
+  for (int i = 0; i < rows; i++)
+  {
+    const auto *row_ptr = freespace_buffer_.ptr<uchar>(i);
+    for (int j = 0; j < cols; j++)
+    {
+      if (row_ptr[j] == 255u)
+      {
+        const int map_x = camera_index[0] - center_x + 1 + i;
+        const int map_y = camera_index[1] - center_y + 1 + j;
+        grid_map::Index map_index{ map_x, map_y };
+        grid_map::Position position;
+        map_.getPosition(map_index, position);
+        const auto dx = position[0] - camera_x;
+        const auto dy = position[1] - camera_y;
+        const double distance = dx * dx + dy * dy;
+        const double angle = angles::normalize_angle(camera_heading - std::atan2(dy, dx));
+        markEmpty(map_index, distance, angle);
+      }
+    }
+  }
+}
+
+void LineLayer::debugPublishPC(ros::Publisher &pub, const cv::Mat &mat, geometry_msgs::TransformStamped &camera_to_odom)
+{
+  PointCloud pointcloud;
+  pointcloud.header.stamp = pcl_conversions::toPCL(ros::Time::now());
+  pointcloud.header.frame_id = config_.map.frame_id;
+
+  const int rows = mat.rows;
+  const int cols = mat.cols;
+
+  const int center_x = rows / 2;
+  const int center_y = cols / 2;
+
+  const float camera_x = camera_to_odom.transform.translation.x;
+  const float camera_y = camera_to_odom.transform.translation.y;
+  grid_map::Index camera_index;
+  map_.getIndex({ camera_x, camera_y }, camera_index);
+  grid_map::Position camera_pos;
+  map_.getPosition(camera_index, camera_pos);
+
+  for (int i = 0; i < rows; i++)
+  {
+    const auto *row_ptr = mat.ptr<uchar>(i);
+    for (int j = 0; j < cols; j++)
+    {
+      if (row_ptr[j] == 255u)
+      {
+        float dx = config_.map.resolution * (i - center_x + 1);
+        float dy = config_.map.resolution * (j - center_y + 1);
+        float cell_x = camera_pos[0] - dx;
+        float cell_y = camera_pos[1] - dy;
+        pcl::PointXYZ pcl_point{ cell_x, cell_y, 0.0 };
+        pointcloud.points.emplace_back(pcl_point);
+      }
     }
   }
 
-  pc.points.swap(bounded_pc.points);
+  pub.publish(pointcloud);
 }
 
 }  // namespace line_layer

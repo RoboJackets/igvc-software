@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include "camera_config.h"
 #include "map_config.h"
+#include "projection_config.h"
 
 namespace line_layer
 {
@@ -16,6 +17,7 @@ public:
 
   map::MapConfig map;
   CameraConfig center;
+  ProjectionConfig projection;
 };
 }  // namespace line_layer
 

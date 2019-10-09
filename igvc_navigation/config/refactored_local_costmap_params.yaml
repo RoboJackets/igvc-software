@@ -12,13 +12,13 @@ local_costmap:
     track_unknown_space: true
     static_map: false
     rolling_window: false
-    resolution: 0.2
+    resolution: 0.1
     inflation:
         inflation_radius: 0.35
 lidar_layer:
     map:
         frame_id: "odom"
-        resolution: 0.2
+        resolution: 0.1
         length_x: 200
         length_y: 200
         occupied_threshold: 0.5
@@ -30,14 +30,14 @@ lidar_layer:
         occupied_topic: "/lidar/occupied"
         free_topic: "/lidar/free"
         sensor_model:
-            scan_hit: 0.7
+            scan_hit: 0.9
             scan_miss: 0.8
             free_miss: 0.7
-            hit_exponential_coeff: 0.05
+            hit_exponential_coeff: 0.01
 line_layer:
     map:
         frame_id: "odom"
-        resolution: 0.2
+        resolution: 0.1
         length_x: 200
         length_y: 200
         occupied_threshold: 0.5
@@ -55,8 +55,13 @@ line_layer:
             miss: 0.7
             hit: 0.7
             miss_exponential_coeff: 0.05
+            miss_angle_exponential_coeff: 5
             hit_exponential_coeff: 0.05
         debug:
             line_topic: "/line_layer/debug/line"
             nonline_topic: "/line_layer/debug/nonline"
-        max_distance: 10
+    projection:
+        length_x: 30
+        length_y: 30
+        line_closing_kernel_size: 5
+        freespace_closing_kernel_size: 5

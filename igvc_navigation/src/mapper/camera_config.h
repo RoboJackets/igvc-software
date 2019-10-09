@@ -16,6 +16,7 @@ public:
   double max_distance;
 
   double miss_exponential_coeff;
+  double miss_angle_exponential_coeff;
   double miss;
   double hit_exponential_coeff;
   double hit;

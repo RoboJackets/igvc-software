@@ -70,5 +70,4 @@
 
   <!-- Publish segmented camera images -->
   <include file="$(find igvc_gazebo)/launch/sim_detector.launch" />
-
 </launch>

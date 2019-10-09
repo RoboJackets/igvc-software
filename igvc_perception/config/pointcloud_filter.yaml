@@ -8,13 +8,13 @@ pointcloud_filter:
         start_angle: -2.0
         end_angle: 2.0
     radius_filter:
-        radius_squared: 100
+        radius_squared: 225
     ground_filter:
         height_min: 0.4
         height_max: 1.2
     raycast_filter:
         min_range: 2.0
-        end_distance: 10
+        end_distance: 15
         angular_resolution: 0.02
         start_angle: -2.0
         end_angle: 2.0
