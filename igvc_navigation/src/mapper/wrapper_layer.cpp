@@ -32,6 +32,7 @@ void WrapperLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, in
   std::optional<cv::Mat> map = mapper_.mapper_->getMap();
   if (!map)
   {
+    current_ = false;
     ROS_WARN_STREAM_THROTTLE(1, "Couldn't get a map");
     return;
   }
@@ -65,6 +66,7 @@ void WrapperLayer::updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, in
       }
     }
   }
+  current_ = true;
 }
 
 }  // namespace wrapper_layer
