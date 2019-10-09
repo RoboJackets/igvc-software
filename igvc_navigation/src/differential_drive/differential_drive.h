@@ -17,6 +17,7 @@ public:
 private:
   ros::Publisher vel_pub_;
   double axle_length_{};
+  double max_vel_{};
 
   void twistToVelocity(geometry_msgs::Twist twist);
 };
