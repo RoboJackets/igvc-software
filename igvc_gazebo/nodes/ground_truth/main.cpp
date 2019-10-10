@@ -80,7 +80,7 @@ void utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm
     bool found = true;
     try
     {
-      tf_listener.lookupTransform("utm", "odom", ros::Time(0), transform);
+      tf_listener.lookupTransform("odom", "utm", ros::Time(0), transform);
     }
     catch (const tf::TransformException& ex)
     {
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
   tf::Transform utm_to_odom;
   utm_to_odom.setOrigin(
       tf::Vector3(utm_x - g_og_pose.pose.pose.position.x, utm_y - g_og_pose.pose.pose.position.y, 0.0));
-  utm_to_odom.setRotation(tf::Quaternion(0.0, 0.0, 0.0, 1.0));
+  utm_to_odom.setRotation(tf::createQuaternionFromYaw(M_PI));
 
   ros::Timer utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(utm_callback, _1, utm_to_odom.inverse()));
   ros::spin();
