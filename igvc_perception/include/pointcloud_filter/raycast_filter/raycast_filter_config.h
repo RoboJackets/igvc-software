@@ -11,9 +11,9 @@ struct RaycastFilterConfig
   double angular_resolution = 0.0;
   double start_angle = 0.0;
   double end_angle = 0.0;
+  double min_range = 0.0;
 
-  RaycastFilterConfig() = default;
-  RaycastFilterConfig(const ros::NodeHandle& nh);
+  explicit RaycastFilterConfig(const ros::NodeHandle& nh);
 };
 }  // namespace pointcloud_filter
 
