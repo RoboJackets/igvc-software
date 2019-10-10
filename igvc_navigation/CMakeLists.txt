@@ -121,7 +121,7 @@ catkin_package(
 # set default build type
 IF (NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE Release)
-    add_compile_options(-march=nativeh)
+    add_compile_options(-march=native)
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
 ## Specify additional locations of header files
