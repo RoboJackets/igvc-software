@@ -1,0 +1,36 @@
+local_costmap:
+    global_frame: odom
+    plugins:
+        - {name: lidar_layer,     type: "lidar_layer::LidarLayer"}
+        - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
+    publish_frequency: 5.0
+    robot_radius: 1.0
+    width: 200
+    height: 200
+    origin_x: -100
+    origin_y: -100
+    track_unknown_space: true
+    static_map: false
+    rolling_window: false
+    resolution: 0.2
+    inflation:
+        inflation_radius: 0.35
+lidar_layer:
+    map:
+        frame_id: "odom"
+        resolution: 0.2
+        length_x: 200
+        length_y: 200
+        occupied_threshold: 0.5
+        max_occupancy: 0.99
+        min_occupancy: 0.01
+        debug:
+            map_topic: "/mapper/debug/gridmap"
+    lidar:
+        occupied_topic: "/lidar/occupied"
+        free_topic: "/lidar/free"
+        sensor_model:
+            scan_hit: 0.7
+            scan_miss: 0.8
+            free_miss: 0.7
+            hit_exponential_coeff: 0.05
