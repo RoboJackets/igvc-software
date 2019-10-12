@@ -424,16 +424,16 @@ void LineLayer::debugPublishPC(ros::Publisher &pub, const cv::Mat &mat, geometry
 void LineLayer::initCostTranslationTable()
 {
   cost_translation_table_.resize(256);
-  cost_translation_table_[0] = 0;  // NO obstacle
-  cost_translation_table_[253] = 99;  // INSCRIBED obstacle
+  cost_translation_table_[0] = 0;      // NO obstacle
+  cost_translation_table_[253] = 99;   // INSCRIBED obstacle
   cost_translation_table_[254] = 100;  // LETHAL obstacle
-  cost_translation_table_[255] = -1;  // UNKNOWN
+  cost_translation_table_[255] = -1;   // UNKNOWN
 
   // regular cost values scale the range 1 to 252 (inclusive) to fit
   // into 1 to 98 (inclusive).
   for (int i = 1; i < 253; i++)
   {
-    cost_translation_table_[ i ] = char(1 + (97 * (i - 1)) / 251);
+    cost_translation_table_[i] = char(1 + (97 * (i - 1)) / 251);
   }
 }
 
@@ -464,10 +464,10 @@ void LineLayer::publishCostmap()
 
   msg->data.resize(msg->info.width * msg->info.height);
 
-  unsigned char* data = costmap_2d_.getCharMap();
+  unsigned char *data = costmap_2d_.getCharMap();
   for (size_t i = 0; i < msg->data.size(); i++)
   {
-    msg->data[i] = cost_translation_table_[ data[ i ]];
+    msg->data[i] = cost_translation_table_[data[i]];
   }
 
   costmap_pub_.publish(msg);

@@ -10,9 +10,9 @@
 #include <sensor_msgs/Image.h>
 
 #include <costmap_2d/GenericPluginConfig.h>
+#include <costmap_2d/costmap_2d_publisher.h>
 #include <costmap_2d/layer.h>
 #include <costmap_2d/layered_costmap.h>
-#include <costmap_2d/costmap_2d_publisher.h>
 
 #include <pcl_ros/point_cloud.h>
 #include <grid_map_ros/grid_map_ros.hpp>
