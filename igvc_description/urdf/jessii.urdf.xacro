@@ -160,12 +160,12 @@
     <link name="${lr_prefix}_wheel">
       <visual>
         <geometry>
-          <mesh filename="model://urdf/meshes/Wheel.dae"/>
+          <mesh filename="package://igvc_description/urdf/meshes/Wheel.dae"/>
         </geometry>
       </visual>
       <collision>
         <geometry>
-          <mesh filename="model://urdf/meshes/Wheel.dae"/>
+          <mesh filename="package://igvc_description/urdf/meshes/Wheel.dae"/>
         </geometry>
         <max_contacts>10</max_contacts>
         <surface>
@@ -224,7 +224,7 @@
       </collision>
     </link>
 
-    <joint name="base_link_to_caster" type="floating">
+    <joint name="base_link_to_caster" type="fixed">
       <parent link="base_link"/>
       <child link="caster"/>
       <origin xyz="${x} ${y} ${ball_radius - tire_diameter / 2}" rpy="0 0 0"/>
@@ -511,12 +511,12 @@
       </inertial>
       <visual>
           <geometry>
-              <mesh filename="model://urdf/meshes/jessi_simple.dae"/>
+              <mesh filename="package://igvc_description/urdf/meshes/jessi_simple.dae"/>
           </geometry>
       </visual>
       <collision>
           <geometry>
-              <mesh filename="model://urdf/meshes/jessi_simple.dae"/>
+              <mesh filename="package://igvc_description/urdf/meshes/jessi_simple.dae"/>
           </geometry>
       </collision>
   </link>
