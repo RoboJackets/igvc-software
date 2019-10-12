@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+
+<launch>
+  <node name="ground_segment" pkg="igvc_perception" type="ground_segment" output="screen">
+    <param name="ground_topic" type="string" value="/ground" />
+    <param name="nonground_topic" type="string" value="/nonground" />
+    <param name="velodyne_topic" type="string" value="/velodyne_points" />
+    <param name="num_segments" type="int" value="12" />
+  </node>
+</launch>
