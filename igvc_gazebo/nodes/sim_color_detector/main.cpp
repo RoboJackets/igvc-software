@@ -59,6 +59,30 @@ sensor_msgs::CameraInfo scaleCameraInfo(const sensor_msgs::CameraInfo& camera_in
   return changed_camera_info;
 }
 
+sensor_msgs::CameraInfo scaleCameraInfo(const sensor_msgs::CameraInfo& camera_info, int width, int height)
+{
+  sensor_msgs::CameraInfo changed_camera_info = camera_info;
+  changed_camera_info.D = camera_info.D;
+  changed_camera_info.distortion_model = camera_info.distortion_model;
+  changed_camera_info.R = camera_info.R;
+  changed_camera_info.roi = camera_info.roi;
+  changed_camera_info.binning_x = camera_info.binning_x;
+  changed_camera_info.binning_y = camera_info.binning_y;
+
+  double w_ratio = static_cast<double>(width) / static_cast<double>(camera_info.width);
+  double h_ratio = static_cast<double>(height) / static_cast<double>(camera_info.height);
+
+  changed_camera_info.width = static_cast<unsigned int>(width);
+  changed_camera_info.height = static_cast<unsigned int>(height);
+
+  changed_camera_info.K = { { camera_info.K[0] * w_ratio, 0, camera_info.K[2] * w_ratio, 0, camera_info.K[4] * h_ratio,
+                              camera_info.K[5] * h_ratio, 0, 0, 1 } };
+  changed_camera_info.P = { { camera_info.P[0] * w_ratio, 0, camera_info.P[2] * w_ratio, 0, 0,
+                              camera_info.P[5] * h_ratio, camera_info.P[6] * h_ratio, 0, 0, 0, 1, 0 } };
+
+  return changed_camera_info;
+}
+
 /**
 Recieves an input image and publishes two segmented images: one for lines and
 another for barrels
@@ -166,8 +190,6 @@ int main(int argc, char** argv)
 
     // publish line and barrel segmentation
     image_transport::CameraPublisher cam_pub = image_transport.advertiseCamera(semantic_topic, 1);
-    ROS_INFO_STREAM("info topic for camera " << camera_name << ": " << cam_pub.getInfoTopic());
-    ROS_INFO_STREAM("image topic for camera " << camera_name << ": " << cam_pub.getTopic());
     ros::Publisher barrel_pub = nh.advertise<sensor_msgs::Image>(camera_name + barrel_topic, 1);
     LineBarrelPair pubs = { cam_pub, barrel_pub };
 
