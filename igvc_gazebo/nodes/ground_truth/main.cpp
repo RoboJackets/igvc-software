@@ -46,8 +46,10 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     result.child_frame_id = "/base_footprint";
     result.header.frame_id = "/odom";
 
-    tf::Quaternion quat(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z,
-                        msg->pose.pose.orientation.w);
+    tf::Quaternion quat;
+    tf::Vector3 pos;
+    tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
+    tf::pointMsgToTF(result.pose.pose.position, pos);
 
     // publish odom message
     g_ground_truth_pub.publish(result);
@@ -57,10 +59,7 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     if (std::abs(msg->header.stamp.toSec() - g_last_estimate.toSec()) > 1.0)
     {
       static tf::TransformBroadcaster br;
-      tf::Transform transform;
-      transform.setOrigin(
-          tf::Vector3(result.pose.pose.position.x, result.pose.pose.position.y, result.pose.pose.position.z));
-      transform.setRotation(quat);
+      tf::Transform transform{quat, pos};
       br.sendTransform(tf::StampedTransform(transform, msg->header.stamp, "odom", "base_footprint"));
 
       tf::Transform utm_to_odom;

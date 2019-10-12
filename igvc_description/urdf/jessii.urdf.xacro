@@ -589,8 +589,7 @@
       <bodyName>imu</bodyName>
       <frameId>imu</frameId>
       <topicName>/imu</topicName>
-      <rpyOffset>0 0 0</rpyOffset>
-      <xyzOffset>0 0 0</xyzOffset>
+      <rpyOffsets>0 0 0</rpyOffsets>
       <gaussianNoise>0.00000001</gaussianNoise>
       <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
       <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
@@ -601,7 +600,7 @@
       <headingDrift>0.0 0.0 0.0</headingDrift>
       <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
       <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
-      <yawOffset>0.0</yawOffset>
+      <yawOffset>1.57079632679</yawOffset>
     </plugin>
 
     <plugin filename="libhector_gazebo_ros_imu.so" name="imu">
@@ -610,8 +609,7 @@
       <bodyName>magnetometer</bodyName>
       <frameId>magnetometer</frameId>
       <topicName>/magnetometer</topicName>
-      <rpyOffset>0 0 0</rpyOffset>
-      <xyzOffset>0 0 0</xyzOffset>
+      <rpyOffsets>0 0 0</rpyOffsets>
       <gaussianNoise>0.00000001</gaussianNoise>
       <accelDrift>0.00000001 0.00000001 0.00000001</accelDrift>
       <accelDriftFrequency>0.00000001 0.00000001 0.00000001</accelDriftFrequency>
@@ -622,7 +620,7 @@
       <headingDrift>0.0 0.0 0.0</headingDrift>
       <headingDriftFrequency>0.0 0.0 0.0</headingDriftFrequency>
       <headingGaussianNoise>0.0 0.0 0.0</headingGaussianNoise>
-      <yawOffset>0.0</yawOffset>
+      <yawOffset>1.57079632679</yawOffset>
     </plugin>
 
 
