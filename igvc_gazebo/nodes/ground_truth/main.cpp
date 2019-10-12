@@ -59,7 +59,7 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     if (std::abs(msg->header.stamp.toSec() - g_last_estimate.toSec()) > 1.0)
     {
       static tf::TransformBroadcaster br;
-      tf::Transform transform{quat, pos};
+      tf::Transform transform{ quat, pos };
       br.sendTransform(tf::StampedTransform(transform, msg->header.stamp, "odom", "base_footprint"));
 
       tf::Transform utm_to_odom;
