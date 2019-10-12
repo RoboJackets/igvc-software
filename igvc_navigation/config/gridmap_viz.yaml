@@ -1,4 +1,4 @@
-grid_map_topic: /mapper/debug/gridmap
+grid_map_topic: /mapper/debug/lines/gridmap
 grid_map_visualizations:
     - name: occupancy_grid
       type: occupancy_grid

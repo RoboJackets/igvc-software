@@ -14,7 +14,7 @@ public:
 
   ros::NodeHandle nh;
 
-  MapConfig map;
+  map::MapConfig map;
   LidarConfig lidar;
 };
 }  // namespace lidar_layer
