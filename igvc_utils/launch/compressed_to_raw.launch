@@ -1,0 +1,10 @@
+
+<!-- converts compressed image to raw iamge -->
+
+<launch>
+    <arg name="topic_name" default="/usb_cam_center/image_raw"/>
+
+    <group ns="$(arg topic_name)">
+        <node name="compressed_to_raw" type="republish" pkg="image_transport" output="screen" args="compressed in:=$(arg topic_name) raw out:=$(arg topic_name)" />
+    </group>
+</launch>
