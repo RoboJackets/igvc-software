@@ -2,7 +2,7 @@
 #include <mapper/probability_utils.h>
 #include <parameter_assertions/assertions.h>
 
-namespace lidar_layer
+namespace map
 {
 MapConfig::MapConfig(const ros::NodeHandle &parent_nh)
 {
@@ -22,4 +22,4 @@ MapConfig::MapConfig(const ros::NodeHandle &parent_nh)
 
   assertions::getParam(nh, "debug/map_topic", debug.map_topic);
 }
-}  // namespace lidar_layer
+}  // namespace map

@@ -10,5 +10,6 @@
         <rosparam file="$(find igvc_navigation)/config/refactored_local_costmap_params.yaml" command="load" />
     </node>
 
+    <!-- pointcloud filter -->
     <include file="$(find igvc_perception)/launch/pointcloud_filter.launch" />
 </launch>

@@ -12,4 +12,11 @@
       </description>
     </class>
   </library>
+  <library path="lib/libline_layer">
+    <class type="line_layer::LineLayer" base_class_type="costmap_2d::Layer">
+      <description>
+        Line layer that performs occupancy grid mapping, using gridmap as the backing data structure.
+      </description>
+    </class>
+  </library>
 </class_libraries>
