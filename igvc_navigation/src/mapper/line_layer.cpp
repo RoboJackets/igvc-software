@@ -45,6 +45,8 @@ void LineLayer::initGridmap()
 void LineLayer::initPubSub()
 {
   gridmap_pub_ = nh_.advertise<grid_map_msgs::GridMap>(config_.map.debug.map_topic, 1);
+  costmap_pub_ = nh_.advertise<nav_msgs::OccupancyGrid>(config_.map.costmap_topic, 1);
+
   for (size_t i = 0; i < config_.cameras.size(); i++)
   {
     const auto &camera = config_.cameras[i];
@@ -92,6 +94,7 @@ void LineLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int /*min_i*/, i
   updateProbabilityLayer();
   transferToCostmap();
   debugPublishMap();
+  publishCostmap();
 
   assert(costmap_2d_.getSizeInCellsX() == master_grid.getSizeInCellsX());
   assert(costmap_2d_.getSizeInCellsY() == master_grid.getSizeInCellsY());
@@ -416,6 +419,58 @@ void LineLayer::debugPublishPC(ros::Publisher &pub, const cv::Mat &mat, geometry
   }
 
   pub.publish(pointcloud);
+}
+
+void LineLayer::initCostTranslationTable()
+{
+  cost_translation_table_.resize(256);
+  cost_translation_table_[0] = 0;  // NO obstacle
+  cost_translation_table_[253] = 99;  // INSCRIBED obstacle
+  cost_translation_table_[254] = 100;  // LETHAL obstacle
+  cost_translation_table_[255] = -1;  // UNKNOWN
+
+  // regular cost values scale the range 1 to 252 (inclusive) to fit
+  // into 1 to 98 (inclusive).
+  for (int i = 1; i < 253; i++)
+  {
+    cost_translation_table_[ i ] = char(1 + (97 * (i - 1)) / 251);
+  }
+}
+
+void LineLayer::publishCostmap()
+{
+  if (cost_translation_table_.empty())
+  {
+    initCostTranslationTable();
+  }
+
+  nav_msgs::OccupancyGridPtr msg = boost::make_shared<nav_msgs::OccupancyGrid>();
+
+  boost::unique_lock<costmap_2d::Costmap2D::mutex_t> lock(*(costmap_2d_.getMutex()));
+  double resolution = costmap_2d_.getResolution();
+
+  msg->header.frame_id = config_.map.frame_id;
+  msg->header.stamp = ros::Time::now();
+  msg->info.resolution = resolution;
+
+  msg->info.width = costmap_2d_.getSizeInCellsX();
+  msg->info.height = costmap_2d_.getSizeInCellsY();
+
+  grid_map::Position position = map_.getPosition() - 0.5 * map_.getLength().matrix();
+  msg->info.origin.position.x = position.x();
+  msg->info.origin.position.y = position.y();
+  msg->info.origin.position.z = 0.0;
+  msg->info.origin.orientation.w = 1.0;
+
+  msg->data.resize(msg->info.width * msg->info.height);
+
+  unsigned char* data = costmap_2d_.getCharMap();
+  for (size_t i = 0; i < msg->data.size(); i++)
+  {
+    msg->data[i] = cost_translation_table_[ data[ i ]];
+  }
+
+  costmap_pub_.publish(msg);
 }
 
 }  // namespace line_layer

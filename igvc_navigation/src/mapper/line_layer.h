@@ -12,6 +12,7 @@
 #include <costmap_2d/GenericPluginConfig.h>
 #include <costmap_2d/layer.h>
 #include <costmap_2d/layered_costmap.h>
+#include <costmap_2d/costmap_2d_publisher.h>
 
 #include <pcl_ros/point_cloud.h>
 #include <grid_map_ros/grid_map_ros.hpp>
@@ -82,6 +83,8 @@ private:
   std::vector<std::vector<Eigen::Vector3d>> cached_rays_;
 
   ros::Publisher gridmap_pub_;
+  ros::Publisher costmap_pub_;
+  std::vector<int8_t> cost_translation_table_;
   struct DebugPublishers
   {
     ros::Publisher debug_line_pub_;
@@ -128,6 +131,8 @@ private:
   void updateProbabilityLayer();
   void transferToCostmap();
   void debugPublishMap();
+  void publishCostmap();
+  void initCostTranslationTable();
 
   void markEmpty(const grid_map::Index& index, double distance, double angle, const CameraConfig& config);
   void markHit(const grid_map::Index& index, double distance, const CameraConfig& config);
