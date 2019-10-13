@@ -19,8 +19,8 @@ class ActionServer
 {
 public:
   ActionServer();
-  ros::Subscriber rviz_sub;
-  ros::Subscriber waypoint_sub;
+  ros::Subscriber rviz_sub_;
+  ros::Subscriber waypoint_sub_;
 
 private:
   MoveBaseClient client = MoveBaseClient("move_base_flex/move_base", true);
