@@ -166,8 +166,6 @@ int main(int argc, char** argv)
 
     // publish line and barrel segmentation
     image_transport::CameraPublisher cam_pub = image_transport.advertiseCamera(semantic_topic, 1);
-    ROS_INFO_STREAM("info topic for camera " << camera_name << ": " << cam_pub.getInfoTopic());
-    ROS_INFO_STREAM("image topic for camera " << camera_name << ": " << cam_pub.getTopic());
     ros::Publisher barrel_pub = nh.advertise<sensor_msgs::Image>(camera_name + barrel_topic, 1);
     LineBarrelPair pubs = { cam_pub, barrel_pub };
 
