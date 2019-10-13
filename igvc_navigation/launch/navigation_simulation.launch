@@ -2,17 +2,15 @@
     <!-- Localization -->
     <include file="$(find igvc_navigation)/launch/localization.launch" />
 
-    <!-- Launch mapping (simulation version) -->
+    <!-- Launch navigation (simulation version) -->
     <include file="$(find igvc_navigation)/launch/mbf_navigation.launch" />
 
-    <!-- Launch Field D* Global Planner -->
-    <include file="$(find igvc_navigation)/launch/field_d_planner.launch">
-        <arg name="simulation" value="true" />
-    </include>
+    <!-- Launch action server -->
+    <include file="$(find igvc_navigation)/launch/action_server.launch" />
 
-    <!-- Launch trajectory planner -->
-    <include file="$(find igvc_navigation)/launch/trajectory_planner.launch" />
+    <!-- Launch differential drive controller -->
+    <include file="$(find igvc_navigation)/launch/differential_drive.launch" />
 
-    <!-- Launch trajectory follower -->
-    <include file="$(find igvc_navigation)/launch/follower.launch" />
+    <!-- pointcloud filter -->
+    <include file="$(find igvc_perception)/launch/pointcloud_filter.launch" />
 </launch>

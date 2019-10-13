@@ -2,8 +2,8 @@ global_costmap:
     global_frame: odom
     robot_base_frame: base_link
     plugins:
-        - {name: wrapper_layer,     type: "wrapper_layer::WrapperLayer"}
-        - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
+        - {name: static_map,       type: "costmap_2d::StaticLayer"}
+        - {name: inflation_layer,       type: "costmap_2d::InflationLayer"}
     publish_frequency: 5.0
     footprint: [[0.4,0.4],[-0.4,0.4],[-0.4,-0.4],[0.4,-0.4]]
     width: 200
@@ -12,8 +12,10 @@ global_costmap:
     origin_y: -100
     track_unknown_space: true
     unknown_cost_value: 30
-    static_map: false
     rolling_window: false
-    resolution: 0.2
-    inflation:
-        inflation_radius: 0.35
+    resolution: 0.1
+    static_map:
+        map_topic: "/move_base_flex/local_costmap/costmap"
+        subscribe_to_updates: true
+    inflation_layer:
+        inflation_radius: 5.0

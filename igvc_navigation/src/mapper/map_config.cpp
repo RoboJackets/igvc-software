@@ -13,6 +13,9 @@ MapConfig::MapConfig(const ros::NodeHandle &parent_nh)
   assertions::getParam(nh, "length_y", length_y);
 
   assertions::getParam(nh, "frame_id", frame_id);
+
+  costmap_topic = assertions::param(nh, "costmap_topic", std::string(""));
+
   assertions::getParam(nh, "occupied_threshold", occupied_threshold);
 
   assertions::getParam(nh, "max_occupancy", max_occupancy);

@@ -2,6 +2,7 @@
     <!-- Move Base Flex -->
     <node pkg="mbf_costmap_nav" type="mbf_costmap_nav" respawn="false" name="move_base_flex" output="screen">libsimple_layer
         <param name="tf_timeout" value="1.5"/>
+        <param name="planner_frequency" value="2.0"/>
         <param name="planner_max_retries" value="3"/>
         <param name="controller_frequency" value="5.0" />
         <param name="controller_patience" value="1.0" />
@@ -14,9 +15,5 @@
         <rosparam file="$(find igvc_navigation)/config/planners.yaml" command="load" />
         <rosparam file="$(find igvc_navigation)/config/controllers.yaml" command="load" />
         <rosparam file="$(find igvc_navigation)/config/recovery_behaviors.yaml" command="load" />
-
-        <!-- Mapper config -->
-        <rosparam file="$(find igvc_navigation)/config/octomap_sim.yaml" command="load" />
-        <param name="lethal_threshold" value="0.8" /> <!-- threshold for LETHAL_OBSTACLE (0.0 - 1.0) -->
     </node>
 </launch>

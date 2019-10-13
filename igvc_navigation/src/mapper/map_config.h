@@ -18,6 +18,7 @@ public:
   double min_occupancy;
 
   std::string frame_id;
+  std::string costmap_topic;
 
   double occupied_threshold;
 

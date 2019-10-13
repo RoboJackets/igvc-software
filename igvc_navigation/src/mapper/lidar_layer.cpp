@@ -118,6 +118,7 @@ void LidarLayer::transferToCostmap()
 
 void LidarLayer::occupiedCallback(const sensor_msgs::PointCloud2ConstPtr &occupied_pc)
 {
+  current_ = true;
   const auto [cloud, transform] = getCloudAndTransform(occupied_pc);
   insertScan(cloud, transform);
   updateMapTimestamp(occupied_pc->header.stamp);
@@ -125,6 +126,7 @@ void LidarLayer::occupiedCallback(const sensor_msgs::PointCloud2ConstPtr &occupi
 
 void LidarLayer::freeCallback(const sensor_msgs::PointCloud2ConstPtr &free_pc)
 {
+  current_ = true;
   const auto [cloud, transform] = getCloudAndTransform(free_pc);
   insertFreeSpace(cloud, transform);
   updateMapTimestamp(free_pc->header.stamp);
