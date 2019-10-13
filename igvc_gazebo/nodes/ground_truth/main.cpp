@@ -46,8 +46,10 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     result.child_frame_id = "/base_footprint";
     result.header.frame_id = "/odom";
 
-    tf::Quaternion quat(msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z,
-                        msg->pose.pose.orientation.w);
+    tf::Quaternion quat;
+    tf::Vector3 pos;
+    tf::quaternionMsgToTF(msg->pose.pose.orientation, quat);
+    tf::pointMsgToTF(result.pose.pose.position, pos);
 
     // publish odom message
     g_ground_truth_pub.publish(result);
@@ -57,10 +59,7 @@ void groundTruthCallback(const nav_msgs::Odometry::ConstPtr& msg)
     if (std::abs(msg->header.stamp.toSec() - g_last_estimate.toSec()) > 1.0)
     {
       static tf::TransformBroadcaster br;
-      tf::Transform transform;
-      transform.setOrigin(
-          tf::Vector3(result.pose.pose.position.x, result.pose.pose.position.y, result.pose.pose.position.z));
-      transform.setRotation(quat);
+      tf::Transform transform{ quat, pos };
       br.sendTransform(tf::StampedTransform(transform, msg->header.stamp, "odom", "base_footprint"));
 
       tf::Transform utm_to_odom;
@@ -80,7 +79,7 @@ void utm_callback(const ros::TimerEvent& event, const tf::Transform& odom_to_utm
     bool found = true;
     try
     {
-      tf_listener.lookupTransform("utm", "odom", ros::Time(0), transform);
+      tf_listener.lookupTransform("odom", "utm", ros::Time(0), transform);
     }
     catch (const tf::TransformException& ex)
     {
@@ -125,7 +124,7 @@ int main(int argc, char** argv)
   tf::Transform utm_to_odom;
   utm_to_odom.setOrigin(
       tf::Vector3(utm_x - g_og_pose.pose.pose.position.x, utm_y - g_og_pose.pose.pose.position.y, 0.0));
-  utm_to_odom.setRotation(tf::Quaternion(0.0, 0.0, 0.0, 1.0));
+  utm_to_odom.setRotation(tf::createQuaternionFromYaw(M_PI));
 
   ros::Timer utm_timer = nh.createTimer(ros::Duration(1.0), boost::bind(utm_callback, _1, utm_to_odom.inverse()));
   ros::spin();
