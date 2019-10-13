@@ -45,7 +45,6 @@ line_layer:
         min_occupancy: 0.01
         debug:
             map_topic: "/mapper/debug/lines/gridmap"
-        costmap_topic: "/line_layer/costmap"
     /cam/center:
         topics:
             raw_image_ns: "/raw"
