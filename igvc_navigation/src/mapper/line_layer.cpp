@@ -117,6 +117,7 @@ void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
                                     const sensor_msgs::ImageConstPtr &segmented_image,
                                     const sensor_msgs::CameraInfoConstPtr &segmented_info, size_t camera_index)
 {
+  current_ = true;
   ensurePinholeModelInitialized(*segmented_info, camera_index);
   if (cached_rays_[camera_index].empty())
   {
