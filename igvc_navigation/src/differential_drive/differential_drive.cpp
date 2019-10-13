@@ -10,7 +10,7 @@ DifferentialDrive::DifferentialDrive()
 
   assertions::param(pNh, "axle_length", axle_length_, 0.48);
   assertions::param(pNh, "max_vel", max_vel_, 3.0);
-  ros::Subscriber mbf_twist = nh.subscribe("/cmd_vel", 1, &DifferentialDrive::twistToVelocity, this);
+  mbf_twist_ = nh.subscribe("/cmd_vel", 1, &DifferentialDrive::twistToVelocity, this);
   vel_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
 }
 

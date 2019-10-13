@@ -2,7 +2,7 @@
     <!-- Localization -->
     <include file="$(find igvc_navigation)/launch/localization.launch" />
 
-    <!-- Launch mapping (simulation version) -->
+    <!-- Launch navigation (simulation version) -->
     <include file="$(find igvc_navigation)/launch/mbf_navigation.launch" />
 
     <!-- Launch Field D* Global Planner -->
