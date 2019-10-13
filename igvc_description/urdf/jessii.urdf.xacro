@@ -257,7 +257,7 @@
   </xacro:macro>
 
 
-  <link name="center_cam">
+  <link name="cam/center">
       <visual>
           <geometry>
               <box size="0.1 0.1 0.1"/>
@@ -268,19 +268,19 @@
   <joint name="magnetometer_to_center_cam" type="fixed">
       <origin xyz="${center_camera_x} ${center_camera_y} ${center_camera_z}" rpy="0 ${center_camera_pitch} 0" />
       <parent link="magnetometer"/>
-      <child link="center_cam"/>
+      <child link="cam/center"/>
   </joint>
 
   <!-- the optical joint is in the correct frame for transforms -->
   <link name="cam/center_optical"/>
 
   <joint name="cam/center_optical_joint" type="fixed">
-      <parent link="center_cam"/>
+      <parent link="cam/center"/>
       <child link="cam/center_optical"/>
       <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
 
-  <gazebo reference="center_cam">
+  <gazebo reference="cam/center">
       <sensor name="center_cam_sensor" type="camera">
           <camera>
               <!-- hov in radians -->
@@ -309,8 +309,8 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
               <alwaysOn>true</alwaysOn>
               <updateRate>30</updateRate>
-              <cameraName>cam/center</cameraName>
-              <imageTopicName>image_raw</imageTopicName>
+              <cameraName>cam/center/raw</cameraName>
+              <imageTopicName>image</imageTopicName>
               <cameraInfoTopicName>camera_info</cameraInfoTopicName>
               <frameName>cam/center_optical</frameName>
               <hackBaseline>0.0</hackBaseline>
@@ -323,7 +323,7 @@
       </sensor>
   </gazebo>
 
-  <link name="right_cam">
+  <link name="cam/right">
       <visual>
           <geometry>
               <box size="0.1 0.1 0.1"/>
@@ -334,19 +334,19 @@
   <joint name="magnetometer_to_right_cam" type="fixed">
       <origin xyz="${right_camera_x} ${right_camera_y} ${right_camera_z}" rpy="0 ${right_camera_pitch} ${right_camera_yaw}" />
       <parent link="magnetometer"/>
-      <child link="right_cam"/>
+      <child link="cam/right"/>
   </joint>
 
   <!-- the optical joint is in the correct frame for transforms -->
   <link name="cam/right_optical"/>
 
   <joint name="cam/right_optical_joint" type="fixed">
-      <parent link="right_cam"/>
+      <parent link="cam/right"/>
       <child link="cam/right_optical"/>
       <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
 
-  <gazebo reference="right_cam">
+  <gazebo reference="cam/right">
       <sensor name="right_cam_sensor" type="camera">
           <camera>
               <!-- hov in radians -->
@@ -375,8 +375,8 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
               <alwaysOn>true</alwaysOn>
               <updateRate>30</updateRate>
-              <cameraName>cam/right</cameraName>
-              <imageTopicName>image_raw</imageTopicName>
+              <cameraName>cam/right/raw</cameraName>
+              <imageTopicName>image</imageTopicName>
               <cameraInfoTopicName>camera_info</cameraInfoTopicName>
               <frameName>cam/right_optical</frameName>
               <hackBaseline>0.0</hackBaseline>
@@ -389,7 +389,7 @@
       </sensor>
   </gazebo>
 
-  <link name="left_cam">
+  <link name="cam/left">
       <visual>
           <geometry>
               <box size="0.1 0.1 0.1"/>
@@ -400,19 +400,19 @@
   <joint name="magnetometer_to_left_cam" type="fixed">
       <origin xyz="${left_camera_x} ${left_camera_y} ${left_camera_z}" rpy="0 ${left_camera_pitch} ${left_camera_yaw}" />
       <parent link="magnetometer"/>
-      <child link="left_cam"/>
+      <child link="cam/left"/>
   </joint>
 
   <!-- the optical joint is in the correct frame for transforms -->
   <link name="cam/left_optical"/>
 
   <joint name="cam/left_optical_joint" type="fixed">
-      <parent link="left_cam"/>
+      <parent link="cam/left"/>
       <child link="cam/left_optical"/>
       <origin xyz="0 0 0" rpy="-1.5708 0 -1.5708"/>
   </joint>
 
-  <gazebo reference="left_cam">
+  <gazebo reference="cam/left">
       <sensor name="left_cam_sensor" type="camera">
           <camera>
               <!-- hov in radians -->
@@ -441,8 +441,8 @@
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
               <alwaysOn>true</alwaysOn>
               <updateRate>30</updateRate>
-              <cameraName>cam/left</cameraName>
-              <imageTopicName>image_raw</imageTopicName>
+              <cameraName>cam/left/raw</cameraName>
+              <imageTopicName>image</imageTopicName>
               <cameraInfoTopicName>camera_info</cameraInfoTopicName>
               <frameName>cam/left_optical</frameName>
               <hackBaseline>0.0</hackBaseline>

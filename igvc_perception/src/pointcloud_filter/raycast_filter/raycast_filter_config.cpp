@@ -9,6 +9,7 @@ RaycastFilterConfig::RaycastFilterConfig(const ros::NodeHandle &nh)
 
   assertions::getParam(child_nh, "end_distance", end_distance);
   assertions::getParam(child_nh, "angular_resolution", angular_resolution);
+  assertions::getParam(child_nh, "min_range", min_range);
   assertions::getParam(child_nh, "start_angle", start_angle);
   assertions::getParam(child_nh, "end_angle", end_angle);
 }

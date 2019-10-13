@@ -11,6 +11,7 @@ void RaycastFilter::filter(pointcloud_filter::Bundle& bundle)
 {
   // Precondition: bundle.occupied_pointcloud has lidar frame
 
+  const auto& min_range = config_.min_range;
   const auto& end_distance = config_.end_distance;
   const auto& start_angle = config_.start_angle;
   const auto& end_angle = config_.end_angle;
@@ -35,10 +36,18 @@ void RaycastFilter::filter(pointcloud_filter::Bundle& bundle)
     if (discretized_angles.find(i) == discretized_angles.end())
     {
       double angle = i * angular_resolution;
-      auto x = static_cast<float>(end_distance * cos(angle));
-      auto y = static_cast<float>(end_distance * sin(angle));
-      velodyne_pointcloud::PointXYZIR raycasted_point{ { { x, y, 0.0, 0.0 } }, 0.0, 0 };
-      bundle.free_pointcloud->points.emplace_back(raycasted_point);
+      {
+        auto x = static_cast<float>(min_range * cos(angle));
+        auto y = static_cast<float>(min_range * sin(angle));
+        velodyne_pointcloud::PointXYZIR min_range_point{ { { x, y, 0.0, 0.0 } }, 0.0, 0 };
+        bundle.free_pointcloud->points.emplace_back(min_range_point);
+      }
+      {
+        auto x = static_cast<float>(end_distance * cos(angle));
+        auto y = static_cast<float>(end_distance * sin(angle));
+        velodyne_pointcloud::PointXYZIR raycasted_point{ { { x, y, 0.0, 0.0 } }, 0.0, 0 };
+        bundle.free_pointcloud->points.emplace_back(raycasted_point);
+      }
     }
   }
 

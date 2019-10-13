@@ -20,8 +20,15 @@ void TFTransformFilter::transform(const PointCloud& from, PointCloud& to, const 
   const auto& source_frame = from.header.frame_id;
   ros::Time message_time = pcl_conversions::fromPCL(from.header.stamp);
 
-  geometry_msgs::TransformStamped transform_msg =
-      buffer_->lookupTransform(target_frame, source_frame, message_time, timeout);
+  geometry_msgs::TransformStamped transform_msg;
+  if (buffer_->canTransform(target_frame, source_frame, message_time, timeout))
+  {
+    transform_msg = buffer_->lookupTransform(target_frame, source_frame, message_time, timeout);
+  }
+  else
+  {
+    transform_msg = buffer_->lookupTransform(target_frame, source_frame, ros::Time(0), timeout);
+  }
   Eigen::Isometry3f transform = tf2::transformToEigen(transform_msg).cast<float>();
 
   for (size_t i = 0; i < from.size(); i++)

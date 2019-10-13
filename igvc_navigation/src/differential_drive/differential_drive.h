@@ -14,6 +14,7 @@ class DifferentialDrive
 {
 public:
   DifferentialDrive();
+  ros::Subscriber mbf_twist_;
 
 private:
   ros::Publisher vel_pub_;
