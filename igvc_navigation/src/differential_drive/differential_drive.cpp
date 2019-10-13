@@ -10,8 +10,8 @@ DifferentialDrive::DifferentialDrive()
 
   assertions::param(pNh, "axle_length", axle_length_, 0.48);
   assertions::param(pNh, "max_vel", max_vel_, 3.0);
-  ros::Subscriber mbf_twist = nh.subscribe("/cmd_vel", 1, &DifferentialDrive::twistToVelocity, this);
-  vel_pub_ = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
+  mbf_twist = nh.subscribe("/cmd_vel", 1, &DifferentialDrive::twistToVelocity, this);
+  vel_pub = nh.advertise<igvc_msgs::velocity_pair>("/motors", 1);
 }
 
 void DifferentialDrive::twistToVelocity(geometry_msgs::Twist twist)
@@ -33,7 +33,7 @@ void DifferentialDrive::twistToVelocity(geometry_msgs::Twist twist)
   vel_msg.left_velocity = vel_left;
   vel_msg.duration = 0.02;
   vel_msg.header.stamp = ros::Time::now();
-  vel_pub_.publish(vel_msg);
+  vel_pub.publish(vel_msg);
 }
 int main(int argc, char** argv)
 {

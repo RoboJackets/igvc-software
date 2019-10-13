@@ -13,8 +13,8 @@ ActionServer::ActionServer()
     ROS_INFO("Waiting for the move_base action server to come up");
   }
 
-  ros::Subscriber rviz_sub = nh.subscribe("/move_base_simple/goal", 1, &ActionServer::actionCallbackPose, this);
-  ros::Subscriber waypoint_sub = nh.subscribe("/waypoint", 1, &ActionServer::actionCallbackPoint, this);
+  rviz_sub = nh.subscribe("/move_base_simple/goal", 1, &ActionServer::actionCallbackPose, this);
+  waypoint_sub = nh.subscribe("/waypoint", 1, &ActionServer::actionCallbackPoint, this);
 }
 
 void ActionServer::actionCallbackPose(geometry_msgs::PoseStamped pose)

@@ -14,9 +14,10 @@ class DifferentialDrive
 {
 public:
   DifferentialDrive();
+  ros::Subscriber mbf_twist;
 
 private:
-  ros::Publisher vel_pub_;
+  ros::Publisher vel_pub;
   double axle_length_{};
   double max_vel_{};
 
