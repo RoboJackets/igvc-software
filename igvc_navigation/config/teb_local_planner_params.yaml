@@ -10,7 +10,7 @@ TebLocalPlannerROS:
   max_samples: 500
   global_plan_overwrite_orientation: True
   allow_init_with_backwards_motion: False
-  max_global_plan_lookahead_dist: 3.0
+  max_global_plan_lookahead_dist: 5.0
   global_plan_viapoint_sep: -1
   global_plan_prune_distance: 1
   exact_arc_length: False
@@ -33,13 +33,13 @@ TebLocalPlannerROS:
   # GoalTolerance
 
   xy_goal_tolerance: 0.2
-  yaw_goal_tolerance: 0.1
+  yaw_goal_tolerance: 1.57
   free_goal_vel: False
   complete_global_plan: True
 
     # Obstacles
 
-  min_obstacle_dist: 1.0 # This value must also include our robot radius, since footprint_model is set to "point".
+  min_obstacle_dist: 0.7 # This value must also include our robot radius, since footprint_model is set to "point".
   inflation_dist: 0.0
   include_costmap_obstacles: True
   costmap_obstacles_behind_robot_dist: 1.5
@@ -48,9 +48,15 @@ TebLocalPlannerROS:
   dynamic_obstacle_inflation_dist: 0.0
   include_dynamic_obstacles: False
 
-  costmap_converter_plugin: ""
+  costmap_converter_plugin: "costmap_converter::CostmapToPolygonsDBSMCCH"
   costmap_converter_spin_thread: True
-  costmap_converter_rate: 5
+  costmap_converter_rate: 2
+
+  costmap_converter/CostmapToPolygonsDBSMCCH:
+      cluster_max_distance: 0.4
+      cluster_min_pts: 3
+      cluster_max_pts: 30
+      convex_hull_min_pt_separation: 0.1
 
     # Optimization
 
@@ -73,14 +79,14 @@ TebLocalPlannerROS:
   weight_inflation: 0.2
   weight_dynamic_obstacle: 10
   weight_dynamic_obstacle_inflation: 0.2
-  weight_viapoint: 1
+  weight_viapoint: 0.0001
   weight_adapt_factor: 2
 
   # Homotopy Class Planner
 
   enable_homotopy_class_planning: False
 #  enable_multithreading: True
-#  max_number_classes: 4
+#  max_number_classes: 2
 #  selection_cost_hysteresis: 1.0
 #  selection_prefer_initial_plan: 0.9
 #  selection_obst_cost_scale: 100.0

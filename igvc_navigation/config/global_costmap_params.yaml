@@ -3,6 +3,7 @@ global_costmap:
     robot_base_frame: base_link
     plugins:
         - {name: static_map,       type: "costmap_2d::StaticLayer"}
+        - {name: inflation_layer,       type: "costmap_2d::InflationLayer"}
     publish_frequency: 5.0
     footprint: [[0.4,0.4],[-0.4,0.4],[-0.4,-0.4],[0.4,-0.4]]
     width: 200
@@ -14,4 +15,7 @@ global_costmap:
     rolling_window: false
     resolution: 0.1
     static_map:
-        map_topic: "/line_layer/costmap"
+        map_topic: "/move_base_flex/local_costmap/costmap"
+        subscribe_to_updates: true
+    inflation_layer:
+        inflation_radius: 5.0
