@@ -17,11 +17,12 @@
 #include <grid_map_ros/grid_map_ros.hpp>
 
 #include "eigen_hash.h"
+#include "gridmap_layer.h"
 #include "line_layer_config.h"
 
 namespace line_layer
 {
-class LineLayer : public costmap_2d::Layer
+class LineLayer : public gridmap_layer::GridmapLayer
 {
 public:
   using RawSegmentedSynchronizer = message_filters::TimeSynchronizer<sensor_msgs::Image, sensor_msgs::CameraInfo,
@@ -31,8 +32,6 @@ public:
   LineLayer();
 
   void onInitialize() override;
-  void updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y, double* max_x,
-                    double* max_y) override;
   void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j) override;
 
   struct ProjectionResult
@@ -71,7 +70,6 @@ private:
   static constexpr auto probability_layer = "probability";
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
-  grid_map::GridMap map_;
   grid_map::Matrix* layer_{};
   LineLayerConfig config_;
   cv::Mat line_buffer_;       // cv::Mat centered at current position for use as a "buffer" for lines

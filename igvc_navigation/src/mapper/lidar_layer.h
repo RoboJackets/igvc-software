@@ -11,19 +11,18 @@
 #include <grid_map_ros/grid_map_ros.hpp>
 
 #include "eigen_hash.h"
+#include "gridmap_layer.h"
 #include "lidar_layer_config.h"
 
 namespace lidar_layer
 {
-class LidarLayer : public costmap_2d::Layer
+class LidarLayer : public gridmap_layer::GridmapLayer
 {
 public:
   using PointCloud = pcl::PointCloud<pcl::PointXYZ>;
   LidarLayer();
 
   void onInitialize() override;
-  void updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y, double* max_x,
-                    double* max_y) override;
   void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j) override;
 
 private:
@@ -31,7 +30,6 @@ private:
   static constexpr auto probability_layer = "probability";
   ros::NodeHandle nh_;
   ros::NodeHandle private_nh_;
-  grid_map::GridMap map_;
   grid_map::Matrix* layer_{};
   LidarLayerConfig config_;
 
