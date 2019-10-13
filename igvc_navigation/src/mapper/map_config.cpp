@@ -21,5 +21,6 @@ MapConfig::MapConfig(const ros::NodeHandle &parent_nh)
   min_occupancy = probability_utils::toLogOdds(min_occupancy);
 
   assertions::getParam(nh, "debug/map_topic", debug.map_topic);
+  assertions::getParam(nh, "debug/enabled", debug.enabled);
 }
 }  // namespace map

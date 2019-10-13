@@ -9,7 +9,7 @@ local_costmap:
     height: 200
     origin_x: -100
     origin_y: -100
-    track_unknown_space: true
+    track_unknown_space: false
     static_map: false
     rolling_window: false
     resolution: 0.1
@@ -26,6 +26,7 @@ lidar_layer:
         min_occupancy: 0.01
         debug:
             map_topic: "/mapper/debug/lidar/gridmap"
+            enabled: false
     lidar:
         occupied_topic: "/lidar/occupied"
         free_topic: "/lidar/free"
@@ -45,6 +46,7 @@ line_layer:
         min_occupancy: 0.01
         debug:
             map_topic: "/mapper/debug/lines/gridmap"
+            enabled: false
     /cam/center:
         topics:
             raw_image_ns: "/raw"

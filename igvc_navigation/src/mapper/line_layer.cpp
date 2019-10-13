@@ -8,14 +8,15 @@
 #include <opencv2/videoio.hpp>
 #include <unordered_set>
 #include "camera_config.h"
+#include "map_config.h"
 
 PLUGINLIB_EXPORT_CLASS(line_layer::LineLayer, costmap_2d::Layer)
 
 namespace line_layer
 {
 LineLayer::LineLayer()
-  : private_nh_{ "~" }
-  , map_{ { logodds_layer, probability_layer } }
+  : GridmapLayer({ logodds_layer, probability_layer })
+  , private_nh_{ "~" }
   , config_{ private_nh_ }
   , line_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
   , freespace_buffer_{ config_.projection.size_x, config_.projection.size_y, CV_8U }
@@ -44,7 +45,11 @@ void LineLayer::initGridmap()
 
 void LineLayer::initPubSub()
 {
-  gridmap_pub_ = nh_.advertise<grid_map_msgs::GridMap>(config_.map.debug.map_topic, 1);
+  if (config_.map.debug.enabled)
+  {
+    gridmap_pub_ = nh_.advertise<grid_map_msgs::GridMap>(config_.map.debug.map_topic, 1);
+  }
+
   for (size_t i = 0; i < config_.cameras.size(); i++)
   {
     const auto &camera = config_.cameras[i];
@@ -76,39 +81,36 @@ void LineLayer::onInitialize()
 {
 }
 
-void LineLayer::updateBounds(double robot_x, double robot_y, double robot_yaw, double *min_x, double *min_y,
-                             double *max_x, double *max_y)
+void LineLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int min_i, int min_j, int max_i, int max_j)
 {
-  // TODO: Change this to only the points that have been updated
-  *min_x = map_.getPosition()[0] - map_.getLength()[0] / 2;
-  *max_x = map_.getPosition()[0] + map_.getLength()[0] / 2;
-  *min_y = map_.getPosition()[1] - map_.getLength()[1] / 2;
-  *max_y = map_.getPosition()[1] + map_.getLength()[1] / 2;
-}
-
-void LineLayer::updateCosts(costmap_2d::Costmap2D &master_grid, int /*min_i*/, int /*min_j*/, int /*max_i*/,
-                            int /*max_j*/)
-{
-  updateProbabilityLayer();
   transferToCostmap();
-  debugPublishMap();
-
-  assert(costmap_2d_.getSizeInCellsX() == master_grid.getSizeInCellsX());
-  assert(costmap_2d_.getSizeInCellsY() == master_grid.getSizeInCellsY());
-
-  size_t num_cells = costmap_2d_.getSizeInCellsX() * costmap_2d_.getSizeInCellsY();
+  if (config_.map.debug.enabled)
+  {
+    updateProbabilityLayer();
+  }
+  if (config_.map.debug.enabled)
+  {
+    debugPublishMap();
+  }
+  resetDirty();
 
   uchar *master_array = master_grid.getCharMap();
   uchar *line_array = costmap_2d_.getCharMap();
-  for (size_t i = 0; i < num_cells; i++)
+  unsigned int span = master_grid.getSizeInCellsX();
+
+  for (int j = min_j; j < max_j; j++)
   {
-    uchar old_cost = master_array[i];
-    if (old_cost == costmap_2d::NO_INFORMATION || old_cost < line_array[i])
+    unsigned int it = j * span + min_i;
+    for (int i = min_i; i < max_i; i++)
     {
-      master_array[i] = line_array[i];
+      unsigned char old_cost = master_array[it];
+      if (old_cost == costmap_2d::NO_INFORMATION || old_cost < line_array[it])
+        master_array[it] = line_array[it];
+      it++;
     }
   }
 }
+
 void LineLayer::imageSyncedCallback(const sensor_msgs::ImageConstPtr &raw_image,
                                     const sensor_msgs::CameraInfoConstPtr &raw_info,
                                     const sensor_msgs::ImageConstPtr &segmented_image,
@@ -264,7 +266,16 @@ void LineLayer::markHit(const grid_map::Index &index, double distance, const Cam
 
 void LineLayer::updateProbabilityLayer()
 {
-  map_.get(probability_layer) = layer_->unaryExpr(&probability_utils::fromLogOdds<float>);
+  auto optional_it = getDirtyIterator();
+  if (!optional_it)
+  {
+    return;
+  }
+
+  for (auto it = *optional_it; !it.isPastEnd(); ++it)
+  {
+    map_.at(probability_layer, *it) = probability_utils::fromLogOdds((*layer_)((*it)[0], (*it)[1]));
+  }
 }
 
 void LineLayer::transferToCostmap()
@@ -273,24 +284,27 @@ void LineLayer::transferToCostmap()
 
   uchar *char_map = costmap_2d_.getCharMap();
 
-  const grid_map::Matrix &prob_layer = map_.get(probability_layer);
+  auto optional_it = getDirtyIterator();
 
-  for (grid_map::GridMapIterator it{ map_ }; !it.isPastEnd(); ++it)
+  if (!optional_it)
   {
-    float probability = prob_layer((*it)(0), (*it)(1));
+    return;
+  }
 
-    uchar costmap_value;
+  for (auto it = *optional_it; !it.isPastEnd(); ++it)
+  {
+    const auto &log_odds = (*layer_)((*it)[0], (*it)[1]);
+    float probability = probability_utils::fromLogOdds(log_odds);
+    size_t linear_index = grid_map::getLinearIndexFromIndex(*it, map_.getSize(), false);
+
     if (probability > config_.map.occupied_threshold)
     {
-      costmap_value = costmap_2d::LETHAL_OBSTACLE;
+      char_map[num_cells - linear_index - 1] = costmap_2d::LETHAL_OBSTACLE;
     }
     else
     {
-      costmap_value = costmap_2d::FREE_SPACE;
+      char_map[num_cells - linear_index - 1] = costmap_2d::FREE_SPACE;
     }
-    size_t index = grid_map::getLinearIndexFromIndex(it.getUnwrappedIndex(), map_.getSize(), false);
-    // Reverse cell order because of different conventions between occupancy grid and grid map.
-    char_map[num_cells - index - 1] = costmap_value;
   }
 }
 
@@ -298,7 +312,8 @@ void LineLayer::debugPublishMap()
 {
   map_.setTimestamp(ros::Time::now().toNSec());
   grid_map_msgs::GridMap message;
-  grid_map::GridMapRosConverter::toMessage(map_, message);
+  std::vector<std::string> layers{ probability_layer };
+  grid_map::GridMapRosConverter::toMessage(map_, layers, message);
   gridmap_pub_.publish(message);
 }
 
@@ -348,6 +363,9 @@ void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &
         const int map_x = camera_index[0] - center_x + 1 + i;
         const int map_y = camera_index[1] - center_y + 1 + j;
         grid_map::Index map_index{ map_x, map_y };
+
+        touch(map_index);
+
         grid_map::Position position;
         map_.getPosition(map_index, position);
         const auto dx = position[0] - camera_x;
@@ -367,6 +385,9 @@ void LineLayer::insertProjectionsIntoMap(const geometry_msgs::TransformStamped &
         const int map_x = camera_index[0] - center_x + 1 + i;
         const int map_y = camera_index[1] - center_y + 1 + j;
         grid_map::Index map_index{ map_x, map_y };
+
+        touch(map_index);
+
         grid_map::Position position;
         map_.getPosition(map_index, position);
         const auto dx = position[0] - camera_x;
@@ -405,10 +426,11 @@ void LineLayer::debugPublishPC(ros::Publisher &pub, const cv::Mat &mat, geometry
     {
       if (row_ptr[j] == 255u)
       {
-        float dx = config_.map.resolution * (i - center_x + 1);
-        float dy = config_.map.resolution * (j - center_y + 1);
-        float cell_x = camera_pos[0] - dx;
-        float cell_y = camera_pos[1] - dy;
+        auto dx = static_cast<float>(config_.map.resolution * (i - center_x + 1));
+        auto dy = static_cast<float>(config_.map.resolution * (j - center_y + 1));
+        auto cell_x = static_cast<float>(camera_pos[0] - dx);
+        auto cell_y = static_cast<float>(camera_pos[1] - dy);
+
         pcl::PointXYZ pcl_point{ cell_x, cell_y, 0.0 };
         pointcloud.points.emplace_back(pcl_point);
       }

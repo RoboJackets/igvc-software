@@ -24,6 +24,7 @@ public:
   struct
   {
     std::string map_topic;
+    bool enabled;
   } debug;
 };
 }  // namespace map
