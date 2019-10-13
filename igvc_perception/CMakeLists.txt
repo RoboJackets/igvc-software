@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
     camera_info_manager
     laser_geometry
     tf
+    tf2
     pcl_ros
     igvc_utils
     velodyne_pointcloud
@@ -27,7 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 find_package(OpenCV REQUIRED)
-find_package(PCL REQUIRED filters)
+find_package(PCL REQUIRED filters visualization features)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -102,10 +103,17 @@ catkin_package(
 ## Build ##
 ###########
 
+# set default build type
+IF (NOT CMAKE_BUILD_TYPE)
+    SET(CMAKE_BUILD_TYPE Release)
+    add_compile_options(-march=native)
+ENDIF (NOT CMAKE_BUILD_TYPE)
+
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+    include
     ${catkin_INCLUDE_DIRS}
     ${PCL_INCLUDE_DIRS}
 )
@@ -170,7 +178,7 @@ if (CATKIN_ENABLE_TESTING)
     add_subdirectory(src/tests)
 endif ()
 
-
 add_subdirectory(src/filter_lidar)
 add_subdirectory(src/projection)
+add_subdirectory(src/pointcloud_filter)
 

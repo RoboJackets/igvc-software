@@ -26,6 +26,15 @@ find_package(catkin REQUIRED COMPONENTS
              costmap_2d
              dynamic_reconfigure
              igvc_utils
+             grid_map_core
+             grid_map_ros
+             grid_map_cv
+             grid_map_filters
+             grid_map_loader
+             grid_map_msgs
+             grid_map_octomap
+             grid_map_rviz_plugin
+             grid_map_visualization
     )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -111,7 +120,8 @@ catkin_package(
 
 # set default build type
 IF (NOT CMAKE_BUILD_TYPE)
-    SET(CMAKE_BUILD_TYPE RelWithDebInfo)
+    SET(CMAKE_BUILD_TYPE Release)
+    add_compile_options(-march=native)
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
 ## Specify additional locations of header files
