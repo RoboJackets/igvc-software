@@ -5,12 +5,14 @@ tidied_files_path=".circleci/utils/tidied_files.txt"
 
 
 # For pretty printing
-red=$(tput setaf 1)
-green=$(tput setaf 2)
-bold=$(tput bold)
-rs=$(tput sgr0)
-error="$red$bold"
-success="$green"
+if [[ $- == *i* ]]; then
+  red=$(tput setaf 1)
+  green=$(tput setaf 2)
+  bold=$(tput bold)
+  rs=$(tput sgr0)
+  error="$red$bold"
+  success="$green"
+fi
 
 echo "${bold}Starting clang-tidy script...${rs}"
 
@@ -67,8 +69,8 @@ echo "${bold}Running run-clang-tidy.py...${rs}"
 ./.circleci/utils/run-clang-tidy.py -quiet -j $num_cores $fix_errors -p ../../build/ $regex
 if [[ $? -eq 0 ]]; then
   echo "${success}No errors!${rs}"
-  exit 1
+  exit 0
 else
   echo "${error}Errors found! Pass -fix to have clang-tidy try to fix them for you${rs}"
-  exit 0
+  exit 1
 fi
