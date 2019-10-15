@@ -113,7 +113,7 @@ class Octomapper
 public:
   using PCL_point_cloud = pcl::PointCloud<pcl::PointXYZ>;
 
-  explicit Octomapper(ros::NodeHandle pNh);
+  explicit Octomapper(const ros::NodeHandle& pNh);
   void create_octree(pc_map_pair& pair) const;
 
   /**

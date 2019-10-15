@@ -70,7 +70,7 @@ jobs:
     - <<: *save_src_cache
     - <<: *install_deps
     - <<: *load_compile_cache
-    - run: source /opt/ros/melodic/setup.sh && catkin_make -j2
+    - run: source /opt/ros/melodic/setup.sh && catkin_make -j2 -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
     - <<: *save_compile_cache
     - <<: *save_workspace
   test:
@@ -109,6 +109,18 @@ jobs:
             exit 1
           fi
         done
+  clang-tidy:
+    working_directory: ~/catkin_ws/src/igvc-software
+    <<: *image
+    steps:
+      - <<: *load_src_cache
+      - checkout:
+          path: ~/catkin_ws/src/igvc-software
+      - <<: *save_src_cache
+      - run: |
+          apt-get update -y
+          apt-get install -y clang-tidy clang-tools
+          ./circleci/utils/tidy.sh
 
 workflows:
   version: 2

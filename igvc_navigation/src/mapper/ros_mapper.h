@@ -92,7 +92,7 @@ public:
   //  void centerCamCallback(const sensor_msgs::ImageConstPtr& image);
   void centerCamCallback(const sensor_msgs::CompressedImageConstPtr& image);
 
-  void backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr msg);
+  void backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr& msg);
 
   cv_bridge::CvImage img_bridge_;
 

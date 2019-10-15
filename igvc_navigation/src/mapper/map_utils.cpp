@@ -52,11 +52,11 @@ std::optional<GroundPlane> filterGroundPlane(const PointCloud& raw_pc, PointClou
   {
     return ground_plane;
   }
-  else
-  {
+  
+  
     fallbackFilter(raw_pc, ground, nonground, options.fallback_options);
     return std::nullopt;
-  }
+  
 }
 
 void projectTo2D(PointCloud& projected_pc)
@@ -97,8 +97,8 @@ std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& gr
   {
     return std::nullopt;
   }
-  else
-  {
+  
+  
     ROS_DEBUG("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
               cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
               coefficients->values.at(2), coefficients->values.at(3));
@@ -119,7 +119,7 @@ std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& gr
 
     return GroundPlane{ coefficients->values.at(0), coefficients->values.at(1), coefficients->values.at(2),
                         coefficients->values.at(3) };
-  }
+  
 }
 
 void fallbackFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground, const FallbackOptions& options)
@@ -178,17 +178,17 @@ void getEmptyPoints(const pcl::PointCloud<pcl::PointXYZ>& pc, std::vector<Ray>& 
 void projectToPlane(PointCloud& projected_pc, const GroundPlane& ground_plane, const cv::Mat& image,
                     const image_geometry::PinholeCameraModel& model, const tf::Transform& camera_to_world, bool is_line)
 {
-  int nRows = image.rows;
-  int nCols = image.cols;
+  int n_rows = image.rows;
+  int n_cols = image.cols;
 
   uchar match = is_line ? 255u : 0u;
 
   int i, j;
   const uchar* p;
-  for (i = 0; i < nRows; ++i)
+  for (i = 0; i < n_rows; ++i)
   {
     p = image.ptr<uchar>(i);
-    for (j = 0; j < nCols; ++j)
+    for (j = 0; j < n_cols; ++j)
     {
       // If it's a black pixel => free space, then project
       if (p[j] == match)

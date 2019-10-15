@@ -8,7 +8,7 @@
 #include "octomapper.h"
 
 using radians = double;
-Octomapper::Octomapper(ros::NodeHandle pNh)
+Octomapper::Octomapper(const ros::NodeHandle& pNh)
 {
   assertions::getParam(pNh, "octree/resolution", octree_options_.resolution);
 
@@ -27,7 +27,7 @@ Octomapper::Octomapper(ros::NodeHandle pNh)
   map_encoding_ = CV_8UC1;
 }
 
-void Octomapper::create_octree(pc_map_pair &pair) const
+void Octomapper::createOctree(pc_map_pair &pair) const
 {
   pair.octree = boost::make_shared<octomap::OcTree>(octree_options_.resolution);
   pair.octree->setClampingThresMin(octree_options_.min);
@@ -68,7 +68,7 @@ std::pair<int, int> Octomapper::toMapCoordinates(double x, double y) const
   return std::make_pair(x_map, y_map);
 }
 
-void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
+void Octomapper::getUpdatedMap(struct pc_map_pair &pc_map_pair) const
 {
   if (pc_map_pair.map == nullptr)
   {
@@ -126,7 +126,7 @@ void Octomapper::get_updated_map(struct pc_map_pair &pc_map_pair) const
   }
 }
 
-void Octomapper::create_map(pc_map_pair &pair) const
+void Octomapper::createMap(pc_map_pair &pair) const
 {
   int length = static_cast<int>(map_options_.lengthGrid());
   int width = static_cast<int>(map_options_.widthGrid());
@@ -295,13 +295,13 @@ void Octomapper::insertPoints(struct pc_map_pair &pair, const PointCloud &occupi
   }
 
   // Insert
-  for (auto it = free_keyset.begin(); it != free_keyset.end(); ++it)
+  for (const auto & it : free_keyset)
   {
-    pair.octree->updateNode(*it, false, false);
+    pair.octree->updateNode(it, false, false);
   }
-  for (auto it = occupied_keyset.begin(); it != occupied_keyset.end(); ++it)
+  for (const auto & it : occupied_keyset)
   {
-    pair.octree->updateNode(*it, true, false);
+    pair.octree->updateNode(it, true, false);
   }
 
   pair.octree->setProbHit(old_prob_hit);

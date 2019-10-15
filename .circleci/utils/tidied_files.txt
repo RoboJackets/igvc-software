@@ -1,0 +1,6 @@
+src/mapper
+octomapper\.cpp ros_mapper\.cpp map_utils\.cpp mapper\.cpp mapper_node\.cpp
+
+First line is include regex (space separated)
+Second line is ignore regex (space separated)
+Other lines are ignored
