@@ -2,18 +2,11 @@
 Checks:          '-*,
                   performance-*,
                   llvm-namespace-comment,
-                  modernize-redundant-void-arg,
-                  modernize-use-nullptr,
-                  modernize-use-default,
-                  modernize-use-override,
-                  modernize-loop-convert,
-                  readability-named-parameter,
-                  readability-redundant-smartptr-get,
-                  readability-redundant-string-cstr,
-                  readability-simplify-boolean-expr,
-                  readability-container-size-empty,
-                  readability-identifier-naming,
+                  modernize-*,
+                  readability-*,
+                  -clang-diagnostic-unused-command-line-argument,
                   '
+WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
 CheckOptions:
@@ -38,13 +31,9 @@ CheckOptions:
       value:           lower_case
     - key:             readability-identifier-naming.ClassMemberSuffix
       value:           '_'
-    # const static or global variables are UPPER_CASE
-    - key:             readability-identifier-naming.EnumConstantCase
-      value:           UPPER_CASE
-    - key:             readability-identifier-naming.StaticConstantCase
-      value:           UPPER_CASE
-    - key:             readability-identifier-naming.ClassConstantCase
-      value:           UPPER_CASE
+    # gobal variables are g_lower_case
     - key:             readability-identifier-naming.GlobalVariableCase
-      value:           UPPER_CASE
+      value:           lower_case
+    - key:             readability-identifier-naming.GlobalVariablePrefix
+      value:           'g_'
 ...
