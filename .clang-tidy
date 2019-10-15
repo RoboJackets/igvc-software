@@ -7,7 +7,7 @@ Checks:          '-*,
                   -clang-diagnostic-unused-command-line-argument,
                   '
 WarningsAsErrors: '*'
-HeaderFilterRegex: '((?!.*(external)))(igvc)'
+HeaderFilterRegex: 'src/igvc-software/igvc_(navigation)\.h'
 AnalyzeTemporaryDtors: false
 CheckOptions:
     - key:             llvm-namespace-comment.ShortNamespaceLines
@@ -16,22 +16,28 @@ CheckOptions:
       value:           '2'
     - key:             readability-braces-around-statements.ShortStatementLines
       value:           '2'
-    # type names
+    # Type names are CamelCase
     - key:             readability-identifier-naming.ClassCase
       value:           CamelCase
     - key:             readability-identifier-naming.EnumCase
       value:           CamelCase
     - key:             readability-identifier-naming.UnionCase
       value:           CamelCase
-    # method names
+    # Method names are camelBack
     - key:             readability-identifier-naming.MethodCase
       value:           camelBack
-    # variable names
+    # Variable names snake_case
     - key:             readability-identifier-naming.VariableCase
       value:           lower_case
+    # Member variables are snake_case_
     - key:             readability-identifier-naming.ClassMemberSuffix
       value:           '_'
-    # gobal variables are g_lower_case
+    # Except for constexpr
+    - key:             readability-identifier-naming.ConstexprVariableCase
+      value:           lower_case
+    - key:             readability-identifier-naming.ConstexprVariableSuffix
+      value:           ''
+    # Gobal variables are g_lower_case
     - key:             readability-identifier-naming.GlobalVariableCase
       value:           lower_case
     - key:             readability-identifier-naming.GlobalVariablePrefix

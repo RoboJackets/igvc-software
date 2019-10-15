@@ -5,13 +5,18 @@ tidied_files_path=".circleci/utils/tidied_files.txt"
 
 
 # For pretty printing
-if [[ $- == *i* ]]; then
-  red=$(tput setaf 1)
-  green=$(tput setaf 2)
-  bold=$(tput bold)
-  rs=$(tput sgr0)
-  error="$red$bold"
-  success="$green"
+if test -t 1; then
+    # see if it supports colors...
+    ncolors=$(tput colors)
+
+    if test -n "$ncolors" && test $ncolors -ge 8; then
+      red=$(tput setaf 1)
+      green=$(tput setaf 2)
+      bold=$(tput bold)
+      rs=$(tput sgr0)
+      error="$red$bold"
+      success="$green"
+    fi
 fi
 
 echo "${bold}Starting clang-tidy script...${rs}"
