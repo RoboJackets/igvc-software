@@ -133,3 +133,6 @@ workflows:
     - test:
         requires:
         - compile
+    - clang-tidy:
+        requires:
+        - compile
