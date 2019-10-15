@@ -117,10 +117,12 @@ jobs:
       - checkout:
           path: ~/catkin_ws/src/igvc-software
       - <<: *save_src_cache
+      - <<: *install_deps
+      - <<: *load_workspace
       - run: |
           apt-get update -y
           apt-get install -y clang-tidy clang-tools
-          ./circleci/utils/tidy.sh
+          ./.circleci/utils/tidy.sh
 
 workflows:
   version: 2
