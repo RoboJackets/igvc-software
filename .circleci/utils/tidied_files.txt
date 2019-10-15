@@ -1,5 +1,5 @@
 src/mapper
-mapper/octomapper mapper/ros_mapper mapper/map_utils mapper/mapper mapper/mapper_node
+external
 
 First line is include regex (space separated)
 Second line is ignore regex (space separated)
