@@ -6,7 +6,7 @@ defaults: &image
   - image: robojackets/igvc-baseimage:latest
 
 defaults: &install_deps
-  run: apt-get update && rosdep update && rosdep install -iy --from-paths ~/catkin_ws/src
+  run: apt-get update && rosdep update && rosdep install -iy --from-paths ./src
 
 defaults: &save_src_cache
   save_cache:
@@ -111,18 +111,20 @@ jobs:
         done
   clang-tidy:
     working_directory: ~/catkin_ws/src/igvc-software
+    <<: *dir
     <<: *image
     steps:
       - <<: *load_src_cache
       - checkout:
           path: ~/catkin_ws/src/igvc-software
+      - <<: *checkout_submodules
       - <<: *save_src_cache
-      - <<: *load_workspace
       - <<: *install_deps
+      - <<: *load_workspace
       - run: |
           apt-get update -y
           apt-get install -y clang-tidy clang-tools
-          ./.circleci/utils/tidy.sh
+          cd src/igvc-software && ./.circleci/utils/tidy.sh
 
 workflows:
   version: 2
