@@ -1,5 +1,5 @@
 src/mapper
-octomapper\.cpp ros_mapper\.cpp map_utils\.cpp mapper\.cpp mapper_node\.cpp
+mapper/octomapper mapper/ros_mapper mapper/map_utils mapper/mapper mapper/mapper_node
 
 First line is include regex (space separated)
 Second line is ignore regex (space separated)

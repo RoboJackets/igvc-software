@@ -7,7 +7,7 @@ Checks:          '-*,
                   -clang-diagnostic-unused-command-line-argument,
                   '
 WarningsAsErrors: '*'
-HeaderFilterRegex: ''
+HeaderFilterRegex: '((?!.*(external)))(igvc)'
 AnalyzeTemporaryDtors: false
 CheckOptions:
     - key:             llvm-namespace-comment.ShortNamespaceLines

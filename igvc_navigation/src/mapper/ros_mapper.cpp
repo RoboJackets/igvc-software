@@ -161,7 +161,7 @@ void ROSMapper::centerCamCallback(const sensor_msgs::CompressedImageConstPtr &im
   mapper_->setCenterImage(cv_img);
 }
 
-void ROSMapper::backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr& msg)
+void ROSMapper::backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr &msg)
 {
   // do the tf tree
   // getOdomTransform(msg->header.stamp);
@@ -181,13 +181,11 @@ bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
       state_.setState(transform);
       return true;
     }
-    
-    
-      ROS_DEBUG("Failed to get transform from /base_footprint to /odom in time, using newest transforms");
-      tf_listener_->lookupTransform("/odom", "/base_footprint", ros::Time(0), transform);
-      state_.setState(transform);
-      return true;
-    
+
+    ROS_DEBUG("Failed to get transform from /base_footprint to /odom in time, using newest transforms");
+    tf_listener_->lookupTransform("/odom", "/base_footprint", ros::Time(0), transform);
+    state_.setState(transform);
+    return true;
   }
   catch (const tf::TransformException &ex)
   {

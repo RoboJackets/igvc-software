@@ -52,11 +52,9 @@ std::optional<GroundPlane> filterGroundPlane(const PointCloud& raw_pc, PointClou
   {
     return ground_plane;
   }
-  
-  
-    fallbackFilter(raw_pc, ground, nonground, options.fallback_options);
-    return std::nullopt;
-  
+
+  fallbackFilter(raw_pc, ground, nonground, options.fallback_options);
+  return std::nullopt;
 }
 
 void projectTo2D(PointCloud& projected_pc)
@@ -97,29 +95,27 @@ std::optional<GroundPlane> ransacFilter(const PointCloud& raw_pc, PointCloud& gr
   {
     return std::nullopt;
   }
-  
-  
-    ROS_DEBUG("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(),
-              cloud_filtered->size(), coefficients->values.at(0), coefficients->values.at(1),
-              coefficients->values.at(2), coefficients->values.at(3));
-    extract.setInputCloud(cloud_filtered);
-    extract.setIndices(inliers);
-    extract.setNegative(false);
-    extract.filter(ground);
 
-    // remove ground points from full pointcloud
-    if (inliers->indices.size() != cloud_filtered->size())
-    {
-      extract.setNegative(true);
-      PointCloud out;
-      extract.filter(out);
-      nonground += out;
-      *cloud_filtered = out;
-    }
+  ROS_DEBUG("Ground plane found: %zu/%zu inliers. Coeff: %f %f %f %f", inliers->indices.size(), cloud_filtered->size(),
+            coefficients->values.at(0), coefficients->values.at(1), coefficients->values.at(2),
+            coefficients->values.at(3));
+  extract.setInputCloud(cloud_filtered);
+  extract.setIndices(inliers);
+  extract.setNegative(false);
+  extract.filter(ground);
 
-    return GroundPlane{ coefficients->values.at(0), coefficients->values.at(1), coefficients->values.at(2),
-                        coefficients->values.at(3) };
-  
+  // remove ground points from full pointcloud
+  if (inliers->indices.size() != cloud_filtered->size())
+  {
+    extract.setNegative(true);
+    PointCloud out;
+    extract.filter(out);
+    nonground += out;
+    *cloud_filtered = out;
+  }
+
+  return GroundPlane{ coefficients->values.at(0), coefficients->values.at(1), coefficients->values.at(2),
+                      coefficients->values.at(3) };
 }
 
 void fallbackFilter(const PointCloud& raw_pc, PointCloud& ground, PointCloud& nonground, const FallbackOptions& options)

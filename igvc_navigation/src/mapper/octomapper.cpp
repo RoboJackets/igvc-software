@@ -8,7 +8,7 @@
 #include "octomapper.h"
 
 using radians = double;
-Octomapper::Octomapper(const ros::NodeHandle& pNh)
+Octomapper::Octomapper(const ros::NodeHandle &pNh)
 {
   assertions::getParam(pNh, "octree/resolution", octree_options_.resolution);
 
@@ -72,7 +72,7 @@ void Octomapper::getUpdatedMap(struct pc_map_pair &pc_map_pair) const
 {
   if (pc_map_pair.map == nullptr)
   {
-    create_map(pc_map_pair);
+    createMap(pc_map_pair);
   }
 
   // Traverse entire tree
@@ -295,11 +295,11 @@ void Octomapper::insertPoints(struct pc_map_pair &pair, const PointCloud &occupi
   }
 
   // Insert
-  for (const auto & it : free_keyset)
+  for (const auto &it : free_keyset)
   {
     pair.octree->updateNode(it, false, false);
   }
-  for (const auto & it : occupied_keyset)
+  for (const auto &it : occupied_keyset)
   {
     pair.octree->updateNode(it, true, false);
   }

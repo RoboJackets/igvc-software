@@ -24,7 +24,7 @@ protected:
 
   grid_map::Index dirty_min_idx_;
   grid_map::Index dirty_max_idx_;
-  grid_map::GridMap map_;
+  grid_map::GridMap map_{};
 };
 }  // namespace gridmap_layer
 

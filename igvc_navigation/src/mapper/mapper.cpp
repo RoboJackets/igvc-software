@@ -68,8 +68,8 @@ Mapper::Mapper(ros::NodeHandle& pNh) : ground_plane_{ 0, 0, 1, 0 }
   invertMissProbabilities();
 
   octomapper_ = std::make_unique<Octomapper>(pNh);
-  octomapper_->create_octree(pc_map_pair_);
-  octomapper_->create_octree(camera_map_pair_);
+  octomapper_->createOctree(pc_map_pair_);
+  octomapper_->createOctree(camera_map_pair_);
 
   if (debug_pub_camera_lines)
   {
@@ -163,7 +163,7 @@ void Mapper::insertLidarScan(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
   }
   octomapper_->insertRaysWithStartPoint(pc_map_pair_, empty_rays, false, lidar_free_space_probability_model_);
 
-  octomapper_->get_updated_map(pc_map_pair_);
+  octomapper_->getUpdatedMap(pc_map_pair_);
 }
 
 void Mapper::insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstPtr& pc,
@@ -178,7 +178,7 @@ void Mapper::insertCameraProjection(const pcl::PointCloud<pcl::PointXYZ>::ConstP
 
   octomapper_->insertPoints(camera_map_pair_, transformed, true, camera_probability_model_);
 
-  octomapper_->get_updated_map(camera_map_pair_);
+  octomapper_->getUpdatedMap(camera_map_pair_);
 }
 
 void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_odom,
@@ -236,7 +236,7 @@ void Mapper::insertSegmentedImage(cv::Mat&& image, const tf::Transform& base_to_
     octomapper_->insertPoints(camera_map_pair_, projected_occupied_pc, projected_empty_pc, camera_probability_model_);
   }
 
-  octomapper_->get_updated_map(camera_map_pair_);
+  octomapper_->getUpdatedMap(camera_map_pair_);
 }
 
 void Mapper::processImageFreeSpace(cv::Mat& image) const

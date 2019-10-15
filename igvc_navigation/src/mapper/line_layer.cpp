@@ -168,16 +168,14 @@ void LineLayer::calculateCachedRays(const sensor_msgs::CameraInfo &info, size_t 
 
 geometry_msgs::TransformStamped LineLayer::getTransformToCamera(const std::string &frame, const ros::Time &stamp) const
 {
-  if (tf_->canTransform("odom", frame, stamp, ros::Duration{ 1 }))
-  {
-    return tf_->lookupTransform("odom", frame, stamp, ros::Duration{ 1 });
-  }
-  else
+  if (!tf_->canTransform("odom", frame, stamp, ros::Duration{ 1 }))
   {
     ROS_WARN_STREAM_THROTTLE(1.0, "Failed to find transform from frame 'odom' to frame 'base_footprint' within "
                                   "timeout. Using latest transform...");
     return tf_->lookupTransform("odom", frame, ros::Time{ 0 }, ros::Duration{ 1 });
   }
+
+  return tf_->lookupTransform("odom", frame, stamp, ros::Duration{ 1 });
 }
 
 cv::Mat LineLayer::convertToMat(const sensor_msgs::ImageConstPtr &image) const

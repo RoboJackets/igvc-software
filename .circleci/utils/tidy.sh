@@ -64,7 +64,11 @@ fi
 
 # Run run-clang-tidy
 echo "${bold}Running run-clang-tidy.py...${rs}"
-echo $regex
-set -o xtrace
 ./.circleci/utils/run-clang-tidy.py -quiet -j $num_cores $fix_errors -p ../../build/ $regex
-echo "${bold}Done!${rs}"
+if [[ $? -eq 0 ]]; then
+  echo "${success}No errors!${rs}"
+  exit 1
+else
+  echo "${error}Errors found! Pass -fix to have clang-tidy try to fix them for you${rs}"
+  exit 0
+fi
