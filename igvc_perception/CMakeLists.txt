@@ -177,7 +177,7 @@ if (CATKIN_ENABLE_TESTING)
     find_package(rostest REQUIRED)
     add_subdirectory(src/tests)
 endif ()
-
+add_subdirectory(src/slam)
 add_subdirectory(src/filter_lidar)
 add_subdirectory(src/projection)
 add_subdirectory(src/pointcloud_filter)
