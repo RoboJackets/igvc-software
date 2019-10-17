@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<sdf version="1.5">
+  <model name='construction_barrel'>
+    <link name='link'>
+      <gravity>1</gravity>
+      <inertial>
+        <mass>500</mass>
+        <inertia>
+          <ixx>51.2096</ixx>
+          <iyy>51.2096</iyy>
+          <izz>25</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>model://barrel/meshes/barrel.dae</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+        <max_contacts>10</max_contacts>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <bounce/>
+          <friction>
+            <torsional>
+              <ode/>
+            </torsional>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>model://barrel/meshes/barrel.dae</uri>
+            <scale>1 1 1</scale>
+          </mesh>
+        </geometry>
+      </visual>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+    </link>
+  </model>
+</sdf>
