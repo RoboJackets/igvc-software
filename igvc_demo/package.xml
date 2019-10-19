@@ -38,7 +38,10 @@
 
   <depend>roscpp</depend>
   <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>igvc_msgs</depend>
   <depend>tf</depend>
+  <depend>joy</depend>
 
   <!-- Run dependencies -->
 </package>

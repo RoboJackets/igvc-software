@@ -9,6 +9,9 @@ include(../igvc.cmake)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     rospy
+    std_msgs
+    igvc_msgs
+    tf
     )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -158,3 +161,4 @@ install( DIRECTORY config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} )
 #    #add_subdirectory(src/tests)
 #endif ()
 
+add_subdirectory(src/joystick_controller)
