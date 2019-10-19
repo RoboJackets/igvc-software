@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>igvc_demo</name>
+  <version>0.0.0</version>
+  <description>Demo exclusive code for RoboJackets IGVC team</description>
+
+  <maintainer email="oswinso@gmail.com">Oswin So</maintainer>
+  <maintainer email="jgibson37@gatech.edu">Tan Gemicioglu</maintainer>
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+  <license>MIT</license>
+
+
+  <url type="website">http://www.robojackets.org</url>
+  <url type="website">http://www.github.com/robojackets/igvc-software</url>
+  <url type="website">http://robojackets.github.io/igvc-software</url>
+
+  <author email="oswinso@gmail.com">Oswin So</author>
+  <author email="chaussee.al@gmail.com">Tan Gemicioglu</author>
+
+
+  <!-- The *_depend tags are used to specify dependencies -->
+  <!-- Dependencies can be catkin packages or system dependencies -->
+  <!-- Examples: -->
+  <!-- Use build_depend for packages you need at compile time: -->
+  <!--   <build_depend>message_generation</build_depend> -->
+  <!-- Use buildtool_depend for build tool packages: -->
+  <!--   <buildtool_depend>catkin</buildtool_depend> -->
+  <!-- Use run_depend for packages you need at runtime: -->
+  <!--   <exec_depend>message_runtime</exec_depend> -->
+  <!-- Use test_depend for packages you need only for testing: -->
+  <!--   <test_depend>gtest</test_depend> -->
+
+  <!-- Build dependencies -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>tf</depend>
+
+  <!-- Run dependencies -->
+</package>
