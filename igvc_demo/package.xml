@@ -5,7 +5,7 @@
   <description>Demo exclusive code for RoboJackets IGVC team</description>
 
   <maintainer email="oswinso@gmail.com">Oswin So</maintainer>
-  <maintainer email="jgibson37@gatech.edu">Tan Gemicioglu</maintainer>
+  <maintainer email="placeholder@gmail.com">Tan Gemicioglu</maintainer>
 
   <!-- One license tag required, multiple allowed, one license per tag -->
   <!-- Commonly used license strings: -->
@@ -18,7 +18,7 @@
   <url type="website">http://robojackets.github.io/igvc-software</url>
 
   <author email="oswinso@gmail.com">Oswin So</author>
-  <author email="chaussee.al@gmail.com">Tan Gemicioglu</author>
+  <author email="placeholder@gmail.com">Tan Gemicioglu</author>
 
 
   <!-- The *_depend tags are used to specify dependencies -->

@@ -9,6 +9,8 @@ include(../igvc.cmake)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     rospy
+    parameter_assertions
+    igvc_msgs
     )
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
@@ -158,3 +160,5 @@ install( DIRECTORY config DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION} )
 #    #add_subdirectory(src/tests)
 #endif ()
 
+add_subdirectory(src/pi_odometry)
+add_subdirectory(src/pi_motor_controller)
