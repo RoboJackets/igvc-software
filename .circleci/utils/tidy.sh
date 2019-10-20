@@ -71,7 +71,7 @@ fi
 
 # Run run-clang-tidy
 echo "${bold}Running run-clang-tidy.py...${rs}"
-./.circleci/utils/run-clang-tidy.py -quiet -j $num_cores $fix_errors -p ../../build/ $regex
+./.circleci/utils/run-clang-tidy.py -clang-tidy-binary clang-tidy-6.0 -quiet -j $num_cores $fix_errors -p ../../build/ $regex
 if [[ $? -eq 0 ]]; then
   echo "${success}No errors!${rs}"
   exit 0

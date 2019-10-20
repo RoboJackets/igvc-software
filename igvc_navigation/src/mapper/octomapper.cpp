@@ -63,8 +63,8 @@ float fromLogOdds(float log_odds)
 
 std::pair<int, int> Octomapper::toMapCoordinates(double x, double y) const
 {
-  int x_map = static_cast<int>((map_options_.start_x + x) / octree_options_.resolution);
-  int y_map = static_cast<int>((map_options_.start_y + y) / octree_options_.resolution);
+  auto x_map = static_cast<int>((map_options_.start_x + x) / octree_options_.resolution);
+  auto y_map = static_cast<int>((map_options_.start_y + y) / octree_options_.resolution);
   return std::make_pair(x_map, y_map);
 }
 
@@ -128,8 +128,8 @@ void Octomapper::getUpdatedMap(struct pc_map_pair &pc_map_pair) const
 
 void Octomapper::createMap(pc_map_pair &pair) const
 {
-  int length = static_cast<int>(map_options_.lengthGrid());
-  int width = static_cast<int>(map_options_.widthGrid());
+  auto length = static_cast<int>(map_options_.lengthGrid());
+  auto width = static_cast<int>(map_options_.widthGrid());
   pair.map = boost::make_shared<cv::Mat>(length, width, map_encoding_, 127);
 }
 

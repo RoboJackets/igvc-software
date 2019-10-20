@@ -169,15 +169,15 @@ void ROSMapper::backCircleCallback(const pcl::PointCloud<pcl::PointXYZ>::Ptr &ms
 }
 
 template <>
-bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
+bool ROSMapper::getOdomTransform(const ros::Time stamp)
 {
   tf::StampedTransform transform;
   static ros::Duration wait_time = ros::Duration(transform_max_wait_time_);
   try
   {
-    if (tf_listener_->waitForTransform("/odom", "/base_footprint", message_timestamp, wait_time))
+    if (tf_listener_->waitForTransform("/odom", "/base_footprint", stamp, wait_time))
     {
-      tf_listener_->lookupTransform("/odom", "/base_footprint", message_timestamp, transform);
+      tf_listener_->lookupTransform("/odom", "/base_footprint", stamp, transform);
       state_.setState(transform);
       return true;
     }
@@ -202,10 +202,10 @@ bool ROSMapper::getOdomTransform(const ros::Time message_timestamp)
 }
 
 template <>
-bool ROSMapper::getOdomTransform(const uint64 timestamp)
+bool ROSMapper::getOdomTransform(const uint64 stamp)
 {
   ros::Time message_timestamp;
-  pcl_conversions::fromPCL(timestamp, message_timestamp);
+  pcl_conversions::fromPCL(stamp, message_timestamp);
   return getOdomTransform(message_timestamp);
 }
 
@@ -226,18 +226,18 @@ void ROSMapper::setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &
 }
 
 template <>
-bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, ros::Time message_timestamp,
+bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, ros::Time stamp,
                                            const std::string &topic)
 {
   if (transforms_.find(topic) == transforms_.end())
   {
     // Wait for transform between frame_id (ex. /scan/pointcloud) and base_footprint.
     ROS_INFO_STREAM("Getting transform for " << topic << " from " << frame_id << " to /base_footprint \n");
-    if (tf_listener_->waitForTransform("/base_footprint", frame_id, message_timestamp,
+    if (tf_listener_->waitForTransform("/base_footprint", frame_id, stamp,
                                        ros::Duration(transform_max_wait_time_)))
     {
       tf::StampedTransform transform;
-      tf_listener_->lookupTransform("/base_footprint", frame_id, message_timestamp, transform);
+      tf_listener_->lookupTransform("/base_footprint", frame_id, stamp, transform);
       transforms_.insert(std::pair<std::string, tf::StampedTransform>(topic, transform));
       ROS_INFO_STREAM("Found static transform from " << frame_id << " to /base_footprint");
     }
@@ -252,13 +252,13 @@ bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, ros::Tim
 }
 
 template <>
-bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, uint64 timestamp, const std::string &topic)
+bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, uint64 stamp, const std::string &topic)
 {
   if (transforms_.find(topic) == transforms_.end())
   {
     // Wait for transform between frame_id (ex. /scan/pointcloud) and base_footprint.
     ros::Time message_timestamp;
-    pcl_conversions::fromPCL(timestamp, message_timestamp);
+    pcl_conversions::fromPCL(stamp, message_timestamp);
     return checkExistsStaticTransform(frame_id, message_timestamp, topic);
   }
   return true;
