@@ -20,7 +20,7 @@ except:
 def drive_motors(left: float, right: float):
     if kit:
         kit.motor1.throttle = left
-        kit.motor2.throttle = right
+        kit.motor3.throttle = right
 
 
 def main():
