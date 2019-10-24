@@ -26,6 +26,13 @@ def drive_motors(left: float, right: float):
 def main():
     pygame.display.init()
     pygame.joystick.init()
+
+    if pygame.joystick.get_count() == 0:
+        print("Waiting for joystick to get connected")
+        while pygame.joystick.get_count() == 0:
+            time.sleep(0.5)
+            pygame.event.pump()
+
     joystick = pygame.joystick.Joystick(0)
     joystick.init()
 
