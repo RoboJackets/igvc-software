@@ -226,15 +226,13 @@ void ROSMapper::setMessageMetadata(igvc_msgs::map &message, sensor_msgs::Image &
 }
 
 template <>
-bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, ros::Time stamp,
-                                           const std::string &topic)
+bool ROSMapper::checkExistsStaticTransform(const std::string &frame_id, ros::Time stamp, const std::string &topic)
 {
   if (transforms_.find(topic) == transforms_.end())
   {
     // Wait for transform between frame_id (ex. /scan/pointcloud) and base_footprint.
     ROS_INFO_STREAM("Getting transform for " << topic << " from " << frame_id << " to /base_footprint \n");
-    if (tf_listener_->waitForTransform("/base_footprint", frame_id, stamp,
-                                       ros::Duration(transform_max_wait_time_)))
+    if (tf_listener_->waitForTransform("/base_footprint", frame_id, stamp, ros::Duration(transform_max_wait_time_)))
     {
       tf::StampedTransform transform;
       tf_listener_->lookupTransform("/base_footprint", frame_id, stamp, transform);
