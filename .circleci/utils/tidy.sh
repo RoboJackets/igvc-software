@@ -106,7 +106,7 @@ parallel -m clang-tidy-8 -p $build_dir ${fix_errors} {} ::: "${modified_filepath
 
 output_dir=$build_dir/test-results/clang-tidy
 mkdir -p $output_dir
-cat "$build_dir/clang-tidy-output" | ./.circleci/utils/clang-tidy-to-junit.py "$(pwd)" >"$output_dir/clang-tidy.xml"
+cat "$build_dir/clang-tidy-output" | ./.circleci/utils/clang-tidy-to-junit.py "$(pwd)" >"$output_dir/results.xml"
 
 if [ -s "$build_dir/clang-tidy-output" ]; then
   echo "clang-tidy detected errors!"
