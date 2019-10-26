@@ -123,7 +123,7 @@ jobs:
       - <<: *load_workspace
       - run: |
           apt-get update -y
-          apt-get install -y clang-tidy clang-tools
+          apt-get install -y clang-tidy clang-tools parallel
           cd src/igvc-software && ./.circleci/utils/tidy.sh
       - store_test_results:
           path: ./build/clang-tidy-results
