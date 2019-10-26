@@ -35,7 +35,7 @@ class ClangTidyConverter:
     def print_junit_file(self, output_file):
         # Write the header.
         output_file.write("""<?xml version="1.0" encoding="UTF-8" ?>
-<testsuites id="1" name="Clang-Tidy" tests="{error_count}" errors="{error_count}" failures="0" time="0">""".format(error_count=len(self.errors)))
+<testsuites>""".format(error_count=len(self.errors)))
 
         sorted_errors = sorted(self.errors, key=lambda x: x.file)
 
