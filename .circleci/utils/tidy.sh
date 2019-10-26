@@ -104,6 +104,7 @@ parallel -m clang-tidy-8 -p $build_dir {} ::: "${modified_filepaths[@]}" | tee "
 # | Convert result to JUnit XML |
 # ===============================
 
+mkdir $build_dir/clang-tidy-results
 cat "$build_dir/clang-tidy-output" | ./.circleci/utils/clang-tidy-to-junit.py "$(pwd)" >"$build_dir/clang-tidy-results/clang-tidy.xml"
 
 if [ -s "$build_dir/clang-tidy-output" ]; then
