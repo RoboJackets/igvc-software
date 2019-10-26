@@ -126,7 +126,7 @@ jobs:
           apt-get install -y clang-tidy-8 clang-tools-8 parallel
           cd src/igvc-software && ./.circleci/utils/tidy.sh
       - store_test_results:
-          path: ./build/tidy-results
+          path: ./build/test-results
 
 workflows:
   version: 2
