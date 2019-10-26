@@ -127,9 +127,6 @@ jobs:
           cd src/igvc-software && ./.circleci/utils/tidy.sh
       - store_test_results:
           path: build/test-results
-      - store_artifacts:
-          path: build/test-results
-          destination: test_results
 workflows:
   version: 2
   format:
