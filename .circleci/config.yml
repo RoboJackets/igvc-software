@@ -125,6 +125,8 @@ jobs:
           apt-get update -y
           apt-get install -y clang-tidy clang-tools
           cd src/igvc-software && ./.circleci/utils/tidy.sh
+      - store_test_results:
+          path: ./build/clang-tidy-results/clang-tidy.xml
 
 workflows:
   version: 2

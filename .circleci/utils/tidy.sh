@@ -79,7 +79,13 @@ do
 
 # `git diff-tree` outputs all the files that differ between the different commits.
 # By specifying `--diff-filter=d`, it doesn't report deleted files.
-done < <(git diff-tree --no-commit-id --diff-filter=d --name-only -r "$base" HEAD)
+# Also get list of modified files so you don't need to commit
+done < <(git diff-tree --no-commit-id --diff-filter=d --name-only -r "$base" HEAD && git ls-files -m)
+
+# =====================
+# | Remove duplicates |
+# =====================
+modified_filepaths=($(echo "${modified_filepaths[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 
 # =========================
 # | Run with GNU parallel |
@@ -92,13 +98,17 @@ done < <(git diff-tree --no-commit-id --diff-filter=d --name-only -r "$base" HEA
 # `| tee` specifies that we would like the output of clang-tidy to go to `stdout` and also to capture it in
 # `$build_dir/clang-tidy-output` for later processing.
 build_dir="../../build/"
-parallel -m clang-tidy-8 -p $build_dir -fix -fix-errors {} ::: "${modified_filepaths[@]}" | tee "$build_dir/clang-tidy-output"
-
-echo "STATUS CODE: $?"
+parallel -m clang-tidy-8 -p $build_dir {} ::: "${modified_filepaths[@]}" | tee "$build_dir/clang-tidy-output"
 
 # ===============================
 # | Convert result to JUnit XML |
 # ===============================
 
-cat "$build_dir/clang-tidy-output" | ./.circleci/utils/clang-tidy-to-junit.py "$(pwd)" >"$build_dir/junit.xml"
+cat "$build_dir/clang-tidy-output" | ./.circleci/utils/clang-tidy-to-junit.py "$(pwd)" >"$build_dir/clang-tidy-results/clang-tidy.xml"
 
+if [ -s "$build_dir/clang-tidy-output" ]; then
+  echo "clang-tidy detected errors!"
+  exit 1
+fi
+
+exit 0
